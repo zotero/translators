@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-05-11 00:55:12"
+	"lastUpdated": "2022-07-31 16:14:21"
 }
 
 function detectWeb(doc, url) {
@@ -20,13 +20,14 @@ function detectWeb(doc, url) {
 }
 
 function getDocId(url) {
-	var m = url.match(/\bDocID=([^&#]+)/);
+	var m = url.match(/\bDocID=([^&#]+)/i);
 	if (!m) return;
 	return m[1];
 }
 
 async function doWeb(doc, url) {
 	var docID = getDocId(url);
+	Z.debug(`doWeb: ${docID}`);
 	await scrape([docID], function(item) {
 		if (!item.url) {
 			// Maybe we shouldn't. Looks more like a catalog.
@@ -54,6 +55,7 @@ async function scrape(docIDs, itemDoneHandler) {
 	await requestDocument('https://www.airitilibrary.com/Publication/MetaExport?' + tokenParams);
 
 	var bibTeXUrl = buildQuery(docIDs);
+	Z.debug('bibTeXUrl: ' + bibTeXUrl);
 	ZU.doGet(bibTeXUrl, function(text) {
 		var translator = Zotero.loadTranslator("import");
 		// BibTeX
@@ -465,6 +467,59 @@ var testCases = [
 					},
 					{
 						"tag": "Lacrimal Pump"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.airitilibrary.com/Publication/alDetailedMesh?docid=P20200813001-202112-202112200001-202112200001-473-478",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Thinking on the Construction of Model Party Branch in Colleges and Universities",
+				"creators": [
+					{
+						"firstName": "Bingxin",
+						"lastName": "Lan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Huan",
+						"lastName": "Hu",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-12",
+				"DOI": "10.6981/FEM.202112_2(12).0063",
+				"ISSN": "2692-7608",
+				"abstractNote": "The Party branch is the Party's basic organization, the basic unit of the Party organization to carry out its work, the Party's fighting fortress in the basic social organizations, and the foundation of all the Party's work and combat effectiveness. Party building work is an effective way for schools to consolidate ideological and political work and an important starting point for carrying out ideological and political education. The construction of grass-roots Party branches is the top priority of the Party building work in colleges and universities, it is necessary to strengthen political guidance and enhance Party member education; strictly grasp standard procedures, do a good job in Party member management, strictly regulate Party discipline, strengthen Party member supervision, focus on central work, extensively organize teachers and students, choose advanced models, focus on propagation work; gather the joint efforts of teachers and students, promote collaborative education; strengthen the sense of purpose, connect and serve teachers and students, and solidly promote the creation of model Party branches, give full play to the leading and exemplary role, educate people for the Party and cultivate talents for the country.",
+				"issue": "12",
+				"itemID": "AL:P20200813001-202112-202112200001-202112200001-473-478",
+				"language": "zh",
+				"libraryCatalog": "Airiti",
+				"pages": "473-478",
+				"publicationTitle": "Frontiers in Economics and Management",
+				"url": "https://www.airitilibrary.com/Publication/alDetailedMesh?docid=P20200813001-202112-202112200001-202112200001-473-478",
+				"volume": "2",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Colleges and Universities"
+					},
+					{
+						"tag": "Model"
+					},
+					{
+						"tag": "Party Branch"
 					}
 				],
 				"notes": [],
