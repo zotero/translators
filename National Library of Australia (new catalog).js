@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-08-01 05:49:00"
+	"lastUpdated": "2022-08-02 21:35:50"
 }
 
 /*
@@ -115,9 +115,9 @@ function scrapeMarc(text) {
 		record.importBinary(text);
 		var item = new Zotero.Item();
 		// If there is a url for the digitised item add it
-		var url = record.getFieldSubfields("856");
-		if (url && url.length > 0 && url[0].u && url[0].z && url[0].z.startsWith("National Library of Australia digitised item")) {
-			item.url = url[0].u;
+		var [url] = record.getFieldSubfields("856");
+		if (url && url.u && url.z && url.z.startsWith("National Library of Australia digitised item")) {
+			item.url = url.u;
 		}
 		record.translate(item);
 		item.complete();
