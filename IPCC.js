@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-26 17:10:46"
+	"lastUpdated": "2022-08-03 16:25:32"
 }
 
 /*
@@ -175,27 +175,8 @@ function wg2Chapter(slug, itemTemplate) {
 	});
 }
 
-function addSupplementaryMaterial(chapters) {
-	let supplementaryMaterials = {};
-	
-	for (let [label, item] of Object.entries(chapters)) {
-		if (item.itemType != 'bookSection'
-			|| /summary|annex/i.test(item.title)) continue;
-		
-		supplementaryMaterials[label + ' - Supplementary Material'] = Object.assign(new Zotero.Item('bookSection'), item, {
-			title: item.title + ' - Supplementary Material',
-			attachments: item.attachments.map(a => Object.assign({}, a, {
-				url: a.url.replace('.pdf', '_Supplementary_Material.pdf')
-			})),
-			url: 'https://www.ipcc.ch/'
-		});
-	}
-	
-	return Object.assign({}, chapters, supplementaryMaterials);
-}
-
 let citations = {
-	'/report/ar6/wg1/': addSupplementaryMaterial({
+	'/report/ar6/wg1/': {
 		'Full Report': Object.assign(new Zotero.Item('book'), {
 			// yes, it's a report, but it's published like a book
 			title: 'Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report of the Intergovernmental Panel on Climate Change',
@@ -224,62 +205,62 @@ let citations = {
 			abstractNote: 'The Technical Summary (TS) is designed to bridge between the comprehensive assessment of the Working Group I Chapters and its Summary for Policymakers (SPM). It is primarily built from the Executive Summaries of the individual chapters and atlas and provides a synthesis of key findings based on multiple lines of evidence.',
 			creators: report6Wg1TechSummaryAuthors
 		}),
-		'Chapter 1: Framing, context, methods': wg1Chapter('Chapter_01', {
+		'Chapter 1: Framing, context, methods': wg1Chapter('Chapter01', {
 			title: 'Framing, context, and methods',
 			pages: '147-286',
 			creators: report6Wg1Ch1Authors
 		}),
-		'Chapter 2: Changing state of the climate system': wg1Chapter('Chapter_02', {
+		'Chapter 2: Changing state of the climate system': wg1Chapter('Chapter02', {
 			title: 'Changing state of the climate system',
 			pages: '287-422',
 			creators: report6Wg1Ch2Authors
 		}),
-		'Chapter 3: Human influence on the climate system': wg1Chapter('Chapter_03', {
+		'Chapter 3: Human influence on the climate system': wg1Chapter('Chapter03', {
 			title: 'Human influence on the climate system',
 			pages: '423-552',
 			creators: report6Wg1Ch3Authors
 		}),
-		'Chapter 4: Future global climate: scenario-based projections and near-term information': wg1Chapter('Chapter_04', {
+		'Chapter 4: Future global climate: scenario-based projections and near-term information': wg1Chapter('Chapter04', {
 			title: 'Future global climate: scenario-based projections and near-term information',
 			pages: '553-672',
 			creators: report6Wg1Ch4Authors
 		}),
-		'Chapter 5: Global carbon and other biogeochemical cycles and feedbacks': wg1Chapter('Chapter_05', {
+		'Chapter 5: Global carbon and other biogeochemical cycles and feedbacks': wg1Chapter('Chapter05', {
 			title: 'Global carbon and other biogeochemical cycles and feedbacks',
 			pages: '673-816',
 			creators: report6Wg1Ch5Authors
 		}),
-		'Chapter 6: Short-lived climate forcers': wg1Chapter('Chapter_06', {
+		'Chapter 6: Short-lived climate forcers': wg1Chapter('Chapter06', {
 			title: 'Short-lived climate forcers',
 			pages: '817-922',
 			creators: report6Wg1Ch6Authors
 		}),
-		'Chapter 7: The Earth\'s energy budget, climate feedbacks, and climate sensitivity': wg1Chapter('Chapter_07', {
+		'Chapter 7: The Earth\'s energy budget, climate feedbacks, and climate sensitivity': wg1Chapter('Chapter07', {
 			title: 'The Earth\'s energy budget, climate feedbacks, and climate sensitivity',
 			pages: '923-1054',
 			creators: report6Wg1Ch7Authors
 		}),
-		'Chapter 8: Water cycle changes': wg1Chapter('Chapter_08', {
+		'Chapter 8: Water cycle changes': wg1Chapter('Chapter08', {
 			title: 'Water cycle changes',
 			pages: '1055-1210',
 			creators: report6Wg1Ch8Authors
 		}),
-		'Chapter 9: Ocean, cryosphere, and sea level change': wg1Chapter('Chapter_09', {
+		'Chapter 9: Ocean, cryosphere, and sea level change': wg1Chapter('Chapter09', {
 			title: 'Ocean, cryosphere, and sea level change',
 			pages: '1211-1362',
 			creators: report6Wg1Ch9Authors
 		}),
-		'Chapter 10: Linking global to regional climate change': wg1Chapter('Chapter_10', {
+		'Chapter 10: Linking global to regional climate change': wg1Chapter('Chapter10', {
 			title: 'Linking global to regional climate change',
 			pages: '1363-1512',
 			creators: report6Wg1Ch10Authors
 		}),
-		'Chapter 11: Weather and climate extreme events in a changing climate': wg1Chapter('Chapter_11', {
+		'Chapter 11: Weather and climate extreme events in a changing climate': wg1Chapter('Chapter11', {
 			title: 'Weather and climate extreme events in a changing climate',
 			pages: '1513-1766',
 			creators: report6Wg1Ch11Authors
 		}),
-		'Chapter 12: Climate change information for regional impact and for risk assessment': wg1Chapter('Chapter_12', {
+		'Chapter 12: Climate change information for regional impact and for risk assessment': wg1Chapter('Chapter12', {
 			title: 'Climate change information for regional impact and for risk assessment',
 			pages: '1767-1926',
 			creators: report6Wg1Ch12Authors
@@ -290,7 +271,7 @@ let citations = {
 			creators: report6Wg1AtlasAuthors,
 			url: 'https://interactive-atlas.ipcc.ch/'
 		}),
-		'Annex I Observational Products': wg1Chapter('Annex_I', {
+		'Annex I Observational Products': wg1Chapter('AnnexI', {
 			title: 'Annex I: Observational products',
 			pages: '2061-2086',
 			// the IPCC's recommended citations call annex authors "editors,"
@@ -298,7 +279,7 @@ let citations = {
 			// in the citation, separately from the book editors
 			creators: [ZU.cleanAuthor('Blair Trewin', 'author')]
 		}),
-		'Annex II Models': wg1Chapter('Annex_II', {
+		'Annex II Models': wg1Chapter('AnnexII', {
 			title: 'Annex II: Models',
 			pages: '2087-2138',
 			creators: [
@@ -306,7 +287,7 @@ let citations = {
 				ZU.cleanAuthor('Anne-Marie Treguier', 'author')
 			]
 		}),
-		'Annex III Radiative Forcing': wg1Chapter('Annex_III', {
+		'Annex III Radiative Forcing': wg1Chapter('AnnexIII', {
 			title: 'Annex III: Tables of historical and projected well-mixed greenhouse gas mixing ratios and effective radiative forcing of all climate forcers',
 			pages: '2139-2152',
 			creators: [
@@ -315,7 +296,7 @@ let citations = {
 				ZU.cleanAuthor('Chris Smith', 'author')
 			]
 		}),
-		'Annex IV Modes of Variability': wg1Chapter('Annex_IV', {
+		'Annex IV Modes of Variability': wg1Chapter('AnnexIV', {
 			title: 'Annex IV: Modes of variability',
 			pages: '2153-2192',
 			creators: [
@@ -324,7 +305,7 @@ let citations = {
 				ZU.cleanAuthor('Yu Kosaka', 'author')
 			]
 		}),
-		'Annex V Monsoons': wg1Chapter('Annex_V', {
+		'Annex V Monsoons': wg1Chapter('AnnexV', {
 			title: 'Annex V: Monsoons',
 			pages: '2193-2204',
 			creators: [
@@ -332,7 +313,7 @@ let citations = {
 				ZU.cleanAuthor('Andrew Turner', 'author')
 			]
 		}),
-		'Annex VI Climatic Impact-Driver and Extreme Indices': wg1Chapter('Annex_VI', {
+		'Annex VI Climatic Impact-Driver and Extreme Indices': wg1Chapter('AnnexVI', {
 			title: 'Annex VI: Climatic impact-driver and extreme indices',
 			pages: '2205-2214',
 			creators: [
@@ -342,7 +323,7 @@ let citations = {
 				ZU.cleanAuthor('Robert Vautard', 'author')
 			]
 		}),
-		'Annex VII Glossary': wg1Chapter('Annex_VII', {
+		'Annex VII Glossary': wg1Chapter('AnnexVII', {
 			title: 'Annex VII: Glossary',
 			pages: '2215-2256',
 			creators: [
@@ -356,19 +337,19 @@ let citations = {
 				ZU.cleanAuthor('Sergey Semenov', 'author')
 			]
 		}),
-		'Annex VIII Acronyms': wg1Chapter('Annex_VIII', {
+		'Annex VIII Acronyms': wg1Chapter('AnnexVIII', {
 			title: 'Annex VIII: Acronyms',
 			pages: '2257-2266'
 		}),
-		'Annex IX': wg1Chapter('Annex_IX', {
+		'Annex IX': wg1Chapter('AnnexIX', {
 			title: 'Annex IX: Contributors to the IPCC Working Group I Sixth Assessment Report',
 			pages: '2267-2286',
 		}),
-		'Annex X': wg1Chapter('Annex_X', {
+		'Annex X': wg1Chapter('AnnexX', {
 			title: 'Annex X: Expert Reviewers of the IPCC Working Group I Sixth Assessment Report',
 			pages: '2287-2338',
 		}),
-	}),
+	},
 	'/report/ar6/wg2/': {
 		'Full Report': Object.assign(new Zotero.Item('book'), {
 			title: 'Climate Change 2022: Impacts, Adaptation and Vulnerability. Contribution of Working Group II to the Sixth Assessment Report of the Intergovernmental Panel on Climate Change.',
@@ -486,7 +467,13 @@ function detectWeb(doc, _url) {
 
 function doWeb(doc, _url) {
 	let chapters = getCitations(doc);
-	Zotero.selectItems(chapters, function (items) {
+	// We can't pass in chapters as is - if selectItems() finds that the values
+	// are objects with title fields, it'll use those titles instead of the keys
+	let input = {};
+	for (let chapter in chapters) {
+		input[chapter] = chapter;
+	}
+	Zotero.selectItems(input, function (items) {
 		if (items) {
 			for (let key of Object.keys(items)) {
 				chapters[key].complete();
