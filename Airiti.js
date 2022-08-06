@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-31 16:14:21"
+	"lastUpdated": "2022-07-31 16:18:23"
 }
 
 function detectWeb(doc, url) {
@@ -27,7 +27,6 @@ function getDocId(url) {
 
 async function doWeb(doc, url) {
 	var docID = getDocId(url);
-	Z.debug(`doWeb: ${docID}`);
 	await scrape([docID], function(item) {
 		if (!item.url) {
 			// Maybe we shouldn't. Looks more like a catalog.
@@ -55,7 +54,6 @@ async function scrape(docIDs, itemDoneHandler) {
 	await requestDocument('https://www.airitilibrary.com/Publication/MetaExport?' + tokenParams);
 
 	var bibTeXUrl = buildQuery(docIDs);
-	Z.debug('bibTeXUrl: ' + bibTeXUrl);
 	ZU.doGet(bibTeXUrl, function(text) {
 		var translator = Zotero.loadTranslator("import");
 		// BibTeX
@@ -167,6 +165,7 @@ function followDOI(doi) {
 		await scrape([docID]);
 	});
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
