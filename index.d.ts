@@ -154,7 +154,7 @@ declare namespace Zotero {
 
 		type HTTPRequestParameters<T extends HTTPResponseType> = {
 			method?: string = "GET",
-			requestHeaders?: Record<string, string>,
+			headers?: Record<string, string>,
 			body?: string,
 			responseCharset?: string,
 			responseType?: T = "text"
