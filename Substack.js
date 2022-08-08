@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-14 03:54:37"
+	"lastUpdated": "2022-08-08 15:57:25"
 }
 
 /*
@@ -79,7 +79,14 @@ function scrape(doc, url) {
 	item.title = json.headline;
 	item.abstractNote = json.description;
 	item.date = ZU.strToISO(json.dateModified || json.datePublished);
-	item.creators.push(ZU.cleanAuthor(json.author.name, 'author'));
+	if (Array.isArray(json.author)) {
+		for (let author of json.author) {
+			item.creators.push(ZU.cleanAuthor(author.name, 'author'));
+		}
+	}
+	else if (json.author && json.author.name) {
+		item.creators.push(ZU.cleanAuthor(json.author.name, 'author'));
+	}
 	item.blogTitle = json.publisher.name;
 	item.url = url.replace(/[#?].*$/, '');
 	item.attachments.push({
@@ -144,7 +151,7 @@ var testCases = [
 					}
 				],
 				"date": "2021-06-09",
-				"abstractNote": "#81: a chic AC unit, planet-saving shampoo bars, and a core-strengthening rocking chair",
+				"abstractNote": "#81: a sleek AC unit, planet-saving shampoo bars, and a core-strengthening rocking chair",
 				"blogTitle": "Worn In, Worn Out",
 				"url": "https://worninwornout.substack.com/p/get-a-move-on",
 				"websiteType": "Substack newsletter",
