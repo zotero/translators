@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-26 20:06:21"
+	"lastUpdated": "2022-08-09 14:40:56"
 }
 
 /*
@@ -112,11 +112,12 @@ const scrapeMARC = (doc, url) => {
 			}
 		};
 
+		// if there's a 502 field, it should be a thesis
+		const isDissertation = marc => fieldExists('502', marc);
+
 		// correct errors in identifying dissertations, maps,
 		// manuscripts, and films
 		const fixItemType = (item) => {
-			// if there's a 502 field, it should be a thesis
-			const isDissertation = marc => fieldExists('502', marc);
 			// if the record type is 'p', it's a manuscript
 			const isManuscript = marc => marc.substring(6, 7) == 'p';
 			// if the item type is film, it's a film
@@ -143,10 +144,37 @@ const scrapeMARC = (doc, url) => {
 			}
 		};
 
+		// relocate 264|b of a dissertation to the 'archive'
+		// Zotero field
+		const archivePublisher = (item) => {
+			const publisher = lookupSubfields('264', 'b', marc);
+			if (isDissertation(marc) && publisher.length === 1) {
+				item.archive = publisher[0];
+			}
+		};
+
+		// make 710|a field into the publisher of a dissertation
+		const makeUniversityPublisher = (item) => {
+			// does 710|e say 'degree granting institution.'?
+			const degreeGranting = lookupSubfields('710', 'e', marc);
+			let isDG = false;
+			if (degreeGranting.length === 1) {
+				isDG = degreeGranting[0] == 'degree granting institution.';
+			}
+			// is there a 710|a MARC field?
+			const university = lookupSubfields('710', 'a', marc);
+			// if both conditions hold, 710|a becomes the publisher
+			if (isDissertation(marc) && isDG && university.length === 1) {
+				item.publisher = university[0];
+			}
+		};
+
 		// perform the fixes
 		addUrl(item);
 		fixItemType(item);
 		updateCN(item);
+		archivePublisher(item);
+		makeUniversityPublisher(item);
 	};
 	
 	// this part is based on the Finna translator code
@@ -312,44 +340,6 @@ var testCases = [
 					},
 					{
 						"note": "Italy, or, \"Say it like you eat it,\" or, 36 tales about the pursuit of pleasure -- India, or, \"Congratulations to meet you,\" or, 36 tales about the pursuit of devotion -- Indonesia, or, \"Even in my underpants, I feel different,\" or, 36 tales about the pursuit of balance"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://catalog.lib.uchicago.edu/vufind/Record/10773190",
-		"items": [
-			{
-				"itemType": "thesis",
-				"title": "Characterizing kinds: A semantics for generic sentences",
-				"creators": [
-					{
-						"firstName": "Matthew",
-						"lastName": "Teichman",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "University of Chicago",
-						"creatorType": "contributor",
-						"fieldMode": true
-					}
-				],
-				"date": "2015",
-				"abstractNote": "In this text, I argue that generic statements---statements of the form Fs are G, such as 'Bears are furry'---are particular statements about kinds, rather than general statements about individual objects. Although statements of this form intuitively seem like generalizations, I claim that in this case, appearances are deceptive. First, I present new linguistic evidence which raises problems for the standard quantificational theory of generic sentences, according to which generic sentences contain a hidden, unpronounced quantifier. Though the simple kind theory has served as a standard alternative to quantificational approaches in the literature on generics since Carlson (1977), it also has a more sophisticated cousin, which has largely been ignored. I develop an extension of the sophisticated kind theory and show how it can neatly account for these phenomena while sidestepping the standard objections to the simple kind theory. At a broader level, I would like to claim that if a kind theory provides the best explanation for the truth conditions of these sentences in English, then it tells us something interesting about English speakers: namely, that in virtue of their speaking English, they implicitly presuppose an ontology with kinds as possible objects. In this way, I suggest, the search for the best semantic theory of generic sentences has the potential to lead us towards a new, philosophically valuable conception of kindhood",
-				"libraryCatalog": "UChicago VuFind",
-				"numPages": "1",
-				"place": "Ann Arbor",
-				"shortTitle": "Characterizing kinds",
-				"university": "ProQuest Dissertations & Theses",
-				"url": "https://catalog.lib.uchicago.edu/vufind/Record/10773190",
-				"attachments": [],
-				"tags": [],
-				"notes": [
-					{
-						"note": "Advisors: Jason Bridges; Christopher Kennedy Committee members: Frank Veltman; Malte Willer"
 					}
 				],
 				"seeAlso": []
@@ -822,6 +812,95 @@ var testCases = [
 		"type": "web",
 		"url": "https://catalog.lib.uchicago.edu/vufind/Search/Results?lookfor=andre+gide&type=AllFields",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://catalog.lib.uchicago.edu/vufind/Record/10773190",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "Characterizing kinds: A semantics for generic sentences",
+				"creators": [
+					{
+						"firstName": "Matthew",
+						"lastName": "Teichman",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "University of Chicago",
+						"creatorType": "contributor",
+						"fieldMode": true
+					}
+				],
+				"date": "2015",
+				"abstractNote": "In this text, I argue that generic statements---statements of the form Fs are G, such as 'Bears are furry'---are particular statements about kinds, rather than general statements about individual objects. Although statements of this form intuitively seem like generalizations, I claim that in this case, appearances are deceptive. First, I present new linguistic evidence which raises problems for the standard quantificational theory of generic sentences, according to which generic sentences contain a hidden, unpronounced quantifier. Though the simple kind theory has served as a standard alternative to quantificational approaches in the literature on generics since Carlson (1977), it also has a more sophisticated cousin, which has largely been ignored. I develop an extension of the sophisticated kind theory and show how it can neatly account for these phenomena while sidestepping the standard objections to the simple kind theory. At a broader level, I would like to claim that if a kind theory provides the best explanation for the truth conditions of these sentences in English, then it tells us something interesting about English speakers: namely, that in virtue of their speaking English, they implicitly presuppose an ontology with kinds as possible objects. In this way, I suggest, the search for the best semantic theory of generic sentences has the potential to lead us towards a new, philosophically valuable conception of kindhood",
+				"archive": "ProQuest Dissertations & Theses,",
+				"libraryCatalog": "UChicago VuFind",
+				"numPages": "1",
+				"place": "Ann Arbor",
+				"shortTitle": "Characterizing kinds",
+				"university": "University of Chicago.",
+				"url": "https://catalog.lib.uchicago.edu/vufind/Record/10773190",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "Advisors: Jason Bridges; Christopher Kennedy Committee members: Frank Veltman; Malte Willer"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://catalog.lib.uchicago.edu/vufind/Record/7143200",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "Modern ethical skepticism",
+				"creators": [
+					{
+						"firstName": "Zed",
+						"lastName": "Adams",
+						"creatorType": "author"
+					}
+				],
+				"date": "2008",
+				"callNumber": "BJ2999 Adams",
+				"extra": "OCLC: 232302765",
+				"libraryCatalog": "UChicago VuFind",
+				"numPages": "212",
+				"url": "https://catalog.lib.uchicago.edu/vufind/Record/7143200",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "1900-1999"
+					},
+					{
+						"tag": "20th century"
+					},
+					{
+						"tag": "Ethics, Modern"
+					},
+					{
+						"tag": "Ethics, Modern"
+					},
+					{
+						"tag": "Values"
+					},
+					{
+						"tag": "Values"
+					}
+				],
+				"notes": [
+					{
+						"note": "Thesis (Ph. D.)--University of Chicago, Dept. of Philosophy, June 2008"
+					}
+				],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
