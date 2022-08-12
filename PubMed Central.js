@@ -71,7 +71,7 @@ function doWeb(doc, url) {
 				+ '|//div[@class="format-menu"]//a[contains(@href,".pdf")]'
 				+ '|//aside[@id="jr-alt-p"]/div/a[contains(@href,".pdf")]'
 				+ '|//li[contains(@class, "pdf-link")]/a');
-		// Z.debug(pdf); 
+		// Z.debug(pdf);
 		// if we're looking at a pdf, just use the current url
 		if (!pdf && url.search(/\/pdf\/.+.pdf/) != -1) {
 			pdf = url;
