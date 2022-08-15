@@ -41,25 +41,25 @@
 
 function detectImport() {
 	var maxChars = 1048576; // 1MB
-	
+
 	var inComment = false;
 	var block = "";
 	var buffer = "";
 	var chr = "";
 	var charsRead = 0;
-	
+
 	var re = /^\s*@[a-zA-Z]+[\(\{]/;
 	while ((buffer = Zotero.read(4096)) && charsRead < maxChars) {
 		Zotero.debug("Scanning " + buffer.length + " characters for BibTeX");
 		charsRead += buffer.length;
 		for (var i=0; i<buffer.length; i++) {
 			chr = buffer[i];
-			
+
 			if (inComment && chr != "\r" && chr != "\n") {
 				continue;
 			}
 			inComment = false;
-			
+
 			if (chr == "%") {
 				// read until next newline
 				block = "";
@@ -72,7 +72,7 @@ function detectImport() {
 				if (re.test(block)) {
 					return true;
 				}
-				
+
 				block = "";
 			} else if (!" \n\r\t".includes(chr)) {
 				block += chr;
@@ -122,7 +122,7 @@ var extraIdentifiers = {
 	zmnumber: 'Zbl',
 	pmid: 'PMID',
 	pmcid: 'PMCID'
-	
+
 	//Mostly from Wikipedia citation templates
 	//asin - Amazon ID
 	//bibcode/refcode - used in astronomy, but haven't seen any Bib(La)TeX examples
@@ -143,7 +143,7 @@ for (var field in extraIdentifiers) {
 // Import only. Exported by BibLaTeX
 var eprintIds = {
 	// eprinttype: Zotero label
-	
+
 	// From BibLaTeX manual
 	'arxiv': 'arXiv', // Sorry, but no support for eprintclass yet
 	'jstor': 'JSTOR',
@@ -177,7 +177,7 @@ function extraFieldsToString(extra) {
 			str += '\n' + extra[i].raw;
 		}
 	}
-	
+
 	return str.substr(1);
 }
 
@@ -293,7 +293,7 @@ function setKeywordDelimRe( val, flags ) {
 		flags = val.slice(val.lastIndexOf('/')+1);
 		val = val.slice(1, val.lastIndexOf('/'));
 	}
-	
+
 	keywordDelimRe = new RegExp(val, flags);
 }
 
@@ -313,7 +313,7 @@ function processField(item, field, value, rawValue) {
 		if (!item.title) item.title = '';
 		item.title = item.title.trim();
 		value = value.trim();
-		
+
 		if (!/[-–—:!?.;]$/.test(item.title)
 			&& !/^[-–—:.;¡¿]/.test(value)
 		) {
@@ -321,7 +321,7 @@ function processField(item, field, value, rawValue) {
 		} else if (item.title.length) {
 			item.title += ' ';
 		}
-		
+
 		item.title += value;
 	} else if (field == "journal") {
 		if (item.publicationTitle) {
@@ -342,7 +342,7 @@ function processField(item, field, value, rawValue) {
 			var name = names[i];
 			// skip empty names
 			if (!name) continue;
-			
+
 			// Names in BibTeX can have three commas
 			var pieces = splitUnprotected(name, /\s*,\s*/g);
 			var creator = {};
@@ -387,7 +387,7 @@ function processField(item, field, value, rawValue) {
 		} else {
 			value += " ";
 		}
-		
+
 		if (item.date) {
 			if (value.includes(item.date)) {
 				// value contains year and more
@@ -438,7 +438,7 @@ function processField(item, field, value, rawValue) {
 				item._extraFields.push({field: 'Published', value: value});
 			}
 		}
-	
+
 	}
 	//accept lastchecked or urldate for access date. These should never both occur.
 	//If they do we don't know which is better so we might as well just take the second one
@@ -470,24 +470,24 @@ function processField(item, field, value, rawValue) {
 				start = i+1;
 			}
 		}
-		
+
 		attachment = parseFilePathRecord(rawValue.slice(start));
 		if (attachment) item.attachments.push(attachment);
 	} else if (field == "eprint" || field == "eprinttype") {
 		// Support for IDs exported by BibLaTeX
 		if (field == 'eprint') item._eprint = value;
 		else item._eprinttype = value;
-		
+
 		var eprint = item._eprint;
 		var eprinttype = item._eprinttype;
 		// If we don't have both yet, continue
 		if (!eprint || !eprinttype) return;
-		
+
 		var label = eprintIds[eprinttype.trim().toLowerCase()];
 		if (!label) return;
-		
+
 		item._extraFields.push({field: label, value: eprint.trim()});
-		
+
 		delete item._eprinttype;
 		delete item._eprint;
 	} else if (extraIdentifiers[field]) {
@@ -506,7 +506,7 @@ function splitUnprotected(str, delim) {
 	delim.lastIndex = 0; // In case we're reusing a regexp
 	var nextPossibleSplit = delim.exec(str);
 	if (!nextPossibleSplit) return [str];
-	
+
 	var parts = [], open = 0, nextPartStart = 0;
 	for (var i=0; i<str.length; i++) {
 		if (i>nextPossibleSplit.index) {
@@ -517,26 +517,26 @@ function splitUnprotected(str, delim) {
 				return parts;
 			}
 		}
-		
+
 		if (str[i] == '\\') {
 			// Skip next character
 			i++;
 			continue;
 		}
-		
+
 		if (str[i] == '{') {
 			open++;
 			continue;
 		}
-		
+
 		if (str[i] == '}') {
 			open--;
 			if (open < 0) open = 0; // Shouldn't happen, but...
 			continue;
 		}
-		
+
 		if (open) continue;
-		
+
 		if (i == nextPossibleSplit.index) {
 			parts.push(str.substring(nextPartStart, i));
 			i += nextPossibleSplit[0].length - 1; // We can jump past the split delim
@@ -548,12 +548,12 @@ function splitUnprotected(str, delim) {
 			}
 		}
 	}
-	
+
 	// I don't think we should ever get here*, but just to be safe
 	// *we should always be returning from the for loop
 	var last = str.substr(nextPartStart).trim();
 	if (last) parts.push(last);
-	
+
 	return parts;
 }
 
@@ -569,14 +569,14 @@ function parseFilePathRecord(record) {
 			start = i+1;
 		}
 	}
-	
+
 	fields.push(decodeFilePathComponent(record.slice(start)));
-	
+
 	if (fields.length != 3 && fields.length != 1) {
 		Zotero.debug("Unknown file path record format: " + record);
 		return;
 	}
-	
+
 	var attachment = {};
 	if (fields.length == 3) {
 		attachment.title = fields[0].trim() || 'Attachment';
@@ -589,10 +589,10 @@ function parseFilePathRecord(record) {
 		attachment.title = 'Attachment';
 		attachment.path = fields[0];
 	}
-	
+
 	attachment.path = attachment.path.trim();
 	if (!attachment.path) return;
-	
+
 	return attachment;
 }
 
@@ -608,13 +608,13 @@ function getFieldValue(read) {
 				nextAsLiteral = false;
 				continue;
 			}
-			
+
 			if (read == "\\") {
 				value += read;
 				nextAsLiteral = true;
 				continue;
 			}
-			
+
 			if (read == "{") {
 				openBraces++;
 				value += "{";
@@ -629,7 +629,7 @@ function getFieldValue(read) {
 				value += read;
 			}
 		}
-		
+
 	} else if (read == '"') {
 		var openBraces = 0;
 		while (read = Zotero.read(1)) {
@@ -652,7 +652,7 @@ function getFieldValue(read) {
 
 function unescapeBibTeX(value) {
 	if (value.length < 2) return value;
-	
+
 	// replace accented characters (yucky slow)
 	value = value.replace(/{?(\\[`"'^~=]){?\\?([A-Za-z])}/g, "{$1$2}");
 	// normalize some special characters, e.g. caron \v{c} -> {\v c}
@@ -672,13 +672,13 @@ function unescapeBibTeX(value) {
 			value = value.replace(mapped, unicode);
 		}
 	}
-	
+
 	// kill braces
 	value = value.replace(/([^\\])[{}]+/g, "$1");
 	if (value[0] == "{") {
 		value = value.substr(1);
 	}
-	
+
 	// chop off backslashes
 	value = value.replace(/([^\\])\\([#$%&~_^\\{}])/g, "$1$2");
 	value = value.replace(/([^\\])\\([#$%&~_^\\{}])/g, "$1$2");
@@ -690,17 +690,17 @@ function unescapeBibTeX(value) {
 	}
 	value = value.replace(/\\\\/g, "\\");
 	value = value.replace(/\s+/g, " ");
-	
+
 	// Unescape HTML entities coming from web translators
 	if (Zotero.parentTranslator && value.includes('&')) {
 		value = value.replace(/&#?\w+;/g, function(entity) {
 			var char = ZU.unescapeHTML(entity);
 			if (char == entity) char = ZU.unescapeHTML(entity.toLowerCase()); // Sometimes case can be incorrect and entities are case-sensitive
-			
+
 			return char;
 		});
 	}
-	
+
 	return value;
 }
 
@@ -859,21 +859,21 @@ function beginRecord(type, closeChar) {
 		var item = new Zotero.Item(zoteroType);
 		item._extraFields = [];
 	}
-	
+
 	// For theses write the thesisType determined by the BibTeX type.
 	if (type == "mastersthesis" && item) item.type = "Master's Thesis";
 	if (type == "phdthesis" && item) item.type = "PhD Thesis";
 
 	var field = "";
-	
+
 	// by setting dontRead to true, we can skip a read on the next iteration
 	// of this loop. this is useful after we read past the end of a string.
 	var dontRead = false;
-	
+
 	var value, rawValue;
 	while (dontRead || (read = Zotero.read(1))) {
 		dontRead = false;
-		
+
 		// the equal sign indicate the start of the value
 		// which will be handled in the following part
 		// possible formats are:
@@ -893,25 +893,25 @@ function beginRecord(type, closeChar) {
 				while (" \n\r\t".includes(read)) {
 					read = Zotero.read(1);
 				}
-				
+
 				if (keyRe.test(read)) {
 					// read numeric data here, since we might get an end bracket
 					// that we should care about
 					value = "";
 					value += read;
-					
+
 					// character is a number or part of a string name
 					while ((read = Zotero.read(1)) && /[a-zA-Z0-9\-:_]/.test(read)) {
 						value += read;
 					}
-					
+
 					// don't read the next char; instead, process the character
 					// we already read past the end of the string
 					dontRead = true;
-					
+
 					// see if there's a defined string
 					if (strings[value.toLowerCase()]) value = strings[value.toLowerCase()];
-					
+
 					// rawValue has to be set for some fields to process
 					// thus, in this case, we set it equal to value
 					rawValue = value;
@@ -919,19 +919,19 @@ function beginRecord(type, closeChar) {
 					rawValue = getFieldValue(read);
 					value = unescapeBibTeX(rawValue);
 				}
-				
+
 				valueArray.push(value);
 				rawValueArray.push(rawValue);
-				
+
 				while (" \n\r\t".includes(read)) {
 					read = Zotero.read(1);
 				}
-			
+
 			} while (read === "#");
-			
+
 			value = valueArray.join('');
 			rawValue = rawValueArray.join('');
-			
+
 			if (item) {
 				processField(item, field.toLowerCase(), value, rawValue);
 			} else if (type == "string") {
@@ -959,10 +959,10 @@ function beginRecord(type, closeChar) {
 					}
 					delete item.backupLocation;
 				}
-				
+
 				item.extra = extraFieldsToString(item._extraFields);
 				delete item._extraFields;
-				
+
 				if (!item.publisher && item.backupPublisher){
 					item.publisher=item.backupPublisher;
 					delete item.backupPublisher;
@@ -998,11 +998,11 @@ function doImport() {
 function readString(resolve, reject) {
 	var read = "";
 	var type = false;
-	
+
 	var next = function () {
 		readString(resolve, reject);
 	};
-	
+
 	try {
 		while (read = Zotero.read(1)) {
 			if (read == "@") {
@@ -1039,7 +1039,7 @@ function readString(resolve, reject) {
 		reject(e);
 		return;
 	}
-	
+
 	resolve();
 }
 
@@ -1055,7 +1055,7 @@ function writeField(field, value, isMacro) {
 	if (!isMacro && !(field == "url" || field == "doi" || field == "file" || field == "lccn" )) {
 		// I hope these are all the escape characters!
 		value = escapeSpecialCharacters(value);
-		
+
 		if (caseProtectedFields.includes(field)) {
 			value = ZU.XRegExp.replace(value, protectCapsRE, "$1{$2$3}"); // only $2 or $3 will have a value, not both
 		}
@@ -1132,7 +1132,7 @@ var vphantomRe = /\\vphantom{\\}}((?:.(?!\\vphantom{\\}}))*)\\vphantom{\\{}/g;
 function escapeSpecialCharacters(str) {
 	var newStr = str.replace(/[|\<\>\~\^\\\{\}]/g, function(c) { return alwaysMap[c]; })
 		.replace(/([\#\$\%\&\_])/g, "\\$1");
-	
+
 	// We escape each brace in the text by making sure that it has a counterpart,
 	// but sometimes this is overkill if the brace already has a counterpart in
 	// the text.
@@ -1145,7 +1145,7 @@ function escapeSpecialCharacters(str) {
 			vphantomRe.lastIndex = 0; // Start over, because the previous replacement could have created a new pair
 		}
 	}
-	
+
 	return newStr;
 }
 
@@ -1241,9 +1241,9 @@ function buildCiteKey (item, extraFields, citekeys) {
 		const citationKey = extraFields.findIndex(field => field.field && field.value && field.field.toLowerCase() === 'citation key');
 		if (citationKey >= 0) return extraFields.splice(citationKey, 1)[0].value;
 	}
-	
+
   	if (item.citationKey) return item.citationKey;
-	
+
 	var basekey = "";
 	var counter = 0;
 	var citeKeyFormatRemaining = citeKeyFormat;
@@ -1317,11 +1317,11 @@ function doExport() {
 				+ "|^([\\p{Letter}\\d]+\\p{Uppercase_Letter}[\\p{Letter}\\d]*)" // Initial word with capital in non-initial position
 			, 'g');
 	}
-	
+
 	//Zotero.write("% BibTeX export generated by Zotero "+Zotero.Utilities.getVersion());
 	// to make sure the BOM gets ignored
 	Zotero.write("\n");
-	
+
 	var first = true;
 	var citekeys = new Object();
 	var item;
@@ -1349,15 +1349,15 @@ function doExport() {
 		}
 
 		if (!type) type = "misc";
-		
+
 		// create a unique citation key
 		var extraFields = item.extra ? parseExtraFields(item.extra) : null;
 		var citekey = buildCiteKey(item, extraFields, citekeys);
-		
+
 		// write citation key
 		Zotero.write((first ? "" : "\n\n") + "@"+type+"{"+citekey);
 		first = false;
-		
+
 		for (var field in fieldMap) {
 			if (item[fieldMap[field]]) {
 				writeField(field, item[fieldMap[field]]);
@@ -1367,12 +1367,12 @@ function doExport() {
 		if (item.reportNumber || item.issue || item.seriesNumber || item.patentNumber) {
 			writeField("number", item.reportNumber || item.issue || item.seriesNumber|| item.patentNumber);
 		}
-		
+
 		if (item.accessDate){
 			var accessYMD = item.accessDate.replace(/\s*\d+:\d+:\d+/, "");
 			writeField("urldate", accessYMD);
 		}
-		
+
 		if (item.publicationTitle) {
 			if (item.itemType == "bookSection" || item.itemType == "conferencePaper") {
 				writeField("booktitle", item.publicationTitle);
@@ -1382,7 +1382,7 @@ function doExport() {
 				writeField("journal", item.publicationTitle);
 			}
 		}
-		
+
 		if (item.publisher) {
 			if (item.itemType == "thesis") {
 				writeField("school", item.publisher);
@@ -1392,7 +1392,7 @@ function doExport() {
 				writeField("publisher", item.publisher);
 			}
 		}
-		
+
 		if (item.creators && item.creators.length) {
 			// split creators into subcategories
 			var author = "";
@@ -1411,9 +1411,9 @@ function doExport() {
 				} else {
 					creatorString = creator.lastName;
 				}
-				
+
 				creatorString = escapeSpecialCharacters(creatorString);
-				
+
 				if (creator.fieldMode == true) { // fieldMode true, assume corporate author
 					creatorString = "{" + creatorString + "}";
 				} else {
@@ -1430,7 +1430,7 @@ function doExport() {
 					collaborator += " and "+creatorString;
 				}
 			}
-			
+
 			if (author) {
 				writeField("author", "{" + author.substr(5) + "}", true);
 			}
@@ -1444,7 +1444,7 @@ function doExport() {
 				writeField("collaborator",  "{" + collaborator.substr(5) + "}", true);
 			}
 		}
-		
+
 		if (item.date) {
 			var date = Zotero.Utilities.strToDate(item.date);
 			// need to use non-localized abbreviation
@@ -1455,7 +1455,7 @@ function doExport() {
 				writeField("year", date.year);
 			}
 		}
-		
+
 		if (extraFields) {
 			// Export identifiers
 			for (var i=0; i<extraFields.length; i++) {
@@ -1471,7 +1471,7 @@ function doExport() {
 			var extra = extraFieldsToString(extraFields); // Make sure we join exactly with what we split
 			if (extra) writeField("note", extra);
 		}
-		
+
 		if (item.tags && item.tags.length) {
 			var tagString = "";
 			for (var i in item.tags) {
@@ -1480,19 +1480,19 @@ function doExport() {
 			}
 			writeField("keywords", tagString.substr(2));
 		}
-		
+
 		if (item.pages) {
 			writeField("pages", item.pages.replace(/[-\u2012-\u2015\u2053]+/g,"--"));
 		}
-		
+
 		// Commented out, because we don't want a books number of pages in the BibTeX "pages" field for books.
 		//if (item.numPages) {
 		//	writeField("pages", item.numPages);
 		//}
-		
+
 		/* We'll prefer url over howpublished see
 		https://forums.zotero.org/discussion/24554/bibtex-doubled-url/#Comment_157802
-		
+
 		if (item.itemType == "webpage") {
 			writeField("howpublished", item.url);
 		}*/
@@ -1502,10 +1502,10 @@ function doExport() {
 				writeField("annote", Zotero.Utilities.unescapeHTML(note["note"]));
 			}
 		}
-		
+
 		if (item.attachments) {
 			var attachmentString = "";
-			
+
 			for (var i in item.attachments) {
 				var attachment = item.attachments[i];
 				// Unfortunately, it looks like \{ in file field breaks BibTeX (0.99d)
@@ -1513,26 +1513,26 @@ function doExport() {
 				// it doesn't make it into this field at all
 				var title = cleanFilePath(attachment.title),
 					path = null;
-				
+
 				if (Zotero.getOption("exportFileData") && attachment.saveFile) {
 					path = cleanFilePath(attachment.defaultPath);
 					attachment.saveFile(path, true);
 				} else if (attachment.localPath) {
 					path = cleanFilePath(attachment.localPath);
 				}
-				
+
 				if (path) {
 					attachmentString += ";" + encodeFilePathComponent(title)
 						+ ":" + encodeFilePathComponent(path)
 						+ ":" + encodeFilePathComponent(attachment.mimeType);
 				}
 			}
-			
+
 			if (attachmentString) {
 				writeField("file", attachmentString.substr(1));
 			}
 		}
-		
+
 		Zotero.write("\n}");
 	}
 }
@@ -2577,7 +2577,7 @@ var reversemappingTable = {
 	"{\\textasciicircum}"             : "\u02C6", // MODIFIER LETTER CIRCUMFLEX ACCENT
 	//    "\\~{}"                           : "\u02DC", // SMALL TILDE
 	"{\\textacutedbl}"                : "\u02DD", // DOUBLE ACUTE ACCENT
-	
+
 	//Greek Letters Courtesy of Spartanroc
 	"$\\Gamma$" : "\u0393", // GREEK Gamma
 	"$\\Delta$" : "\u0394", // GREEK Delta
@@ -2685,11 +2685,11 @@ var reversemappingTable = {
 	"{\\textnumero}"                  : "\u2116", // NUMERO SIGN
 	"{\\textcircledP}"                : "\u2117", // SOUND RECORDING COPYRIGHT
 	"{\\textservicemark}"             : "\u2120", // SERVICE MARK
-	"{TEL}"                           : "\u2121", // TELEPHONE SIGN
+	//"{TEL}"                           : "\u2121", // TELEPHONE SIGN
 	"{\\texttrademark}"               : "\u2122", // TRADE MARK SIGN
 	"{\\textohm}"                     : "\u2126", // OHM SIGN
 	"{\\textestimated}"               : "\u212E", // ESTIMATED SYMBOL
-	
+
 	/*" 1/3"                            : "\u2153", // VULGAR FRACTION ONE THIRD
 	" 2/3"                            : "\u2154", // VULGAR FRACTION TWO THIRDS
 	" 1/5"                            : "\u2155", // VULGAR FRACTION ONE FIFTH
@@ -2703,7 +2703,7 @@ var reversemappingTable = {
 	" 5/8"                            : "\u215D", // VULGAR FRACTION FIVE EIGHTHS
 	" 7/8"                            : "\u215E", // VULGAR FRACTION SEVEN EIGHTHS
 	" 1/"                             : "\u215F", // FRACTION NUMERATOR ONE */
-	
+
 	"{\\textleftarrow}"               : "\u2190", // LEFTWARDS ARROW
 	"{\\textuparrow}"                 : "\u2191", // UPWARDS ARROW
 	"{\\textrightarrow}"              : "\u2192", // RIGHTWARDS ARROW
@@ -2713,7 +2713,7 @@ var reversemappingTable = {
 	"=>"                              : "\u21D2", // RIGHTWARDS DOUBLE ARROW
 	"<=>"                             : "\u21D4", // LEFT RIGHT DOUBLE ARROW */
 	"$\\infty$"                       : "\u221E", // INFINITY
-	
+
 	/*"||"                              : "\u2225", // PARALLEL TO
 	"/="                              : "\u2260", // NOT EQUAL TO
 	"<="                              : "\u2264", // LESS-THAN OR EQUAL TO
@@ -2730,7 +2730,7 @@ var reversemappingTable = {
 	"|="                              : "\u22A7", // MODELS
 	"|="                              : "\u22A8", // TRUE
 	"||-"                             : "\u22A9", // FORCES */
-	
+
 	"$\\#$"                           : "\u22D5", // EQUAL AND PARALLEL TO
 	//"<<<"                             : "\u22D8", // VERY MUCH LESS-THAN
 	//">>>"                             : "\u22D9", // VERY MUCH GREATER-THAN
