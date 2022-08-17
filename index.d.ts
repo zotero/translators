@@ -116,11 +116,13 @@ declare namespace Zotero {
 			urlRe?: RegExp,
 			rejectRe?: RegExp
 		): { [link: string]: string };
+		/** @deprecated use `requestDocument()` */
 		function processDocuments(
 			urls: string | string[],
 			processor: (doc: Document) => any,
 			noCompleteOnError?: boolean
 		): void;
+		/** @deprecated use `request()`, `requestText()`, `requestJSON()`, or `requestDocument()` */
 		function doGet(
 			urls: string | string[],
 			processor?: (text: string) => void,
@@ -129,6 +131,7 @@ declare namespace Zotero {
 			requestHeaders?: { [header: string]: string },
 			successCodes?: number[]
 		): boolean;
+		/** @deprecated use `request()`, `requestText()`, `requestJSON()`, or `requestDocument()` */
 		function doPost(
 			url: string,
 			body: string,
