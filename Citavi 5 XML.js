@@ -346,12 +346,18 @@ function importCategories(doc) {
 	var categories = ZU.xpath(doc, '//Categories/Category');
 	// typo CategoryCatgories was fixed in Citavi 6
 	var hierarchy = ZU.xpath(doc, '//CategoryCatgories/OnetoN|//CategoryCategories/OnetoN');
-	var numbering = { "00000000-0000-0000-0000-000000000000": "$" };
 	// we will have fixed prefix "$." for all collections (see below),
 	// such that only the substring starting form index 2 is relevant.
+	var numbering = { "00000000-0000-0000-0000-000000000000": "$" };
+
+	const parentMap = new Map();
+
 	for (let i = 0, n = hierarchy.length; i < n; i++) {
 		var categoryLists = hierarchy[i].textContent.split(";");
 		var referencePoint = categoryLists[0];
+
+		parentMap.set(categoryLists[0], categoryLists.slice(1));
+
 		if (!numbering[referencePoint]) {
 			// in some cases the ordering of these relations is different
 			Z.debug("Warning: Reference point for categorization hierarchy not yet found");
@@ -362,7 +368,9 @@ function importCategories(doc) {
 			numbering[categoryLists[j]] = numbering[referencePoint] + "." + j;
 		}
 	}
-	var collectionList = [];
+
+	// Create a collection for each category
+	const collectionsMap = new Map();
 	for (let i = 0, n = categories.length; i < n; i++) {
 		var collection = new Zotero.Collection();
 		collection.id = ZU.xpathText(categories[i], './@id');
@@ -373,14 +381,42 @@ function importCategories(doc) {
 		}
 		collection.type = 'collection';
 		collection.children = [];
+
+		// Assign items to collections
 		var referenceCategories = ZU.xpath(doc, '//ReferenceCategories/OnetoN[contains(text(), "' + collection.id + '")]');
 		for (let j = 0; j < referenceCategories.length; j++) {
 			var refid = referenceCategories[j].textContent.split(';')[0];
 			collection.children.push({ type: 'item', id: refid });
 		}
-		collectionList.push(collection);
+		collectionsMap.set(collection.id, collection);
+	}
+
+	const addedChildIDs = [];
+
+	// Recreate collections hierarchy
+	for (const [parentID, childIDs] of parentMap.entries()) {
+		if (!collectionsMap.has(parentID)) {
+			continue;
+		}
+		const parentCollection = collectionsMap.get(parentID);
+
+		childIDs.forEach(childID => {
+			if (collectionsMap.has(childID)) {
+				parentCollection.children.push(collectionsMap.get(childID));
+				addedChildIDs.push(childID);
+			}
+		});
+	}
+
+	// skip collections that were successfuly assigned to a parent
+	for (const childID of addedChildIDs) {
+		collectionsMap.delete(childID);
+	}
+
+	for (const collection of collectionsMap.values()) {
 		collection.complete();
 	}
+
 }
 
 async function doImport() {
