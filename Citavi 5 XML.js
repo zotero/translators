@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2022-08-16 21:47:00"
+	"lastUpdated": "2022-08-18 00:27:00"
 }
 
 /*
@@ -45,6 +45,7 @@ TEST DATA can be found here:
  - Larger project (1221 KB): https://gist.github.com/zuphilip/76ce89ebbdac0386507b36cff3fd499a
  - Other project (1,11 MB): https://gist.github.com/anonymous/10fc363b6d79dae897e296a4327aa707
  - Citavi 6 project (935 KB): https://gist.github.com/zuphilip/00a4ec6df58ac24b68366e32531bae4b
+ - Nested categories: (34 KB): https://gist.github.com/tnajdek/b2375e52b48c7bf82f9f592b4f2122f5
 */
 
 function detectImport() {
@@ -339,46 +340,34 @@ async function importTasks(tasks) {
 	}
 }
 
+function addHierarchyNumberRecursive(collections, level = null) {
+	let index = 1;
+	for (const collection of collections) {
+		const hierarchyNumber = level === null ? `${index++}` : `${level}.${index++}`;
+		collection.name = `${hierarchyNumber} ${collection.name}`;
+		addHierarchyNumberRecursive(
+			collection.children.filter(c => c instanceof Zotero.Collection), hierarchyNumber
+		)
+	}
+}
+
 function importCategories(doc) {
-	// Categories will be mapped to collections where the name contains
-	// also the hierarchy number which we first calculate from the
-	// CategoryCategories list.
 	var categories = ZU.xpath(doc, '//Categories/Category');
 	// typo CategoryCatgories was fixed in Citavi 6
 	var hierarchy = ZU.xpath(doc, '//CategoryCatgories/OnetoN|//CategoryCategories/OnetoN');
-	// we will have fixed prefix "$." for all collections (see below),
-	// such that only the substring starting form index 2 is relevant.
-	var numbering = { "00000000-0000-0000-0000-000000000000": "$" };
 
 	const parentMap = new Map();
-
 	for (let i = 0, n = hierarchy.length; i < n; i++) {
 		var categoryLists = hierarchy[i].textContent.split(";");
-		var referencePoint = categoryLists[0];
-
 		parentMap.set(categoryLists[0], categoryLists.slice(1));
-
-		if (!numbering[referencePoint]) {
-			// in some cases the ordering of these relations is different
-			Z.debug("Warning: Reference point for categorization hierarchy not yet found");
-			Z.debug(categoryLists.toString());
-			continue;
-		}
-		for (let j = 1; j < categoryLists.length; j++) {
-			numbering[categoryLists[j]] = numbering[referencePoint] + "." + j;
-		}
 	}
 
-	// Create a collection for each category
+	// Create a Zotero collection for each Citavi category
 	const collectionsMap = new Map();
 	for (let i = 0, n = categories.length; i < n; i++) {
 		var collection = new Zotero.Collection();
 		collection.id = ZU.xpathText(categories[i], './@id');
 		collection.name = ZU.xpathText(categories[i], './Name');
-		if (numbering[collection.id]) {
-			// add the hierarchy number whenever possible
-			collection.name = numbering[collection.id].substr(2) + ' ' + collection.name;
-		}
 		collection.type = 'collection';
 		collection.children = [];
 
@@ -412,6 +401,10 @@ function importCategories(doc) {
 	for (const childID of addedChildIDs) {
 		collectionsMap.delete(childID);
 	}
+
+	// add hierarchy number to a collection name (e.g. 1 for first root
+	// collection and 1.1, 1.2 etc. for subcollections)
+	addHierarchyNumberRecursive(collectionsMap.values());
 
 	for (const collection of collectionsMap.values()) {
 		collection.complete();
