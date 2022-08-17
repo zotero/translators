@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-08-09 14:40:56"
+	"lastUpdated": "2022-08-17 20:16:09"
 }
 
 /*
@@ -165,7 +165,8 @@ const scrapeMARC = (doc, url) => {
 			const university = lookupSubfields('710', 'a', marc);
 			// if both conditions hold, 710|a becomes the publisher
 			if (isDissertation(marc) && isDG && university.length === 1) {
-				item.publisher = university[0];
+				// strip possible trailing period from the MARC field
+				item.publisher = university[0].replace(/([a-z])\.\s*$/, '$1');
 			}
 		};
 
@@ -839,7 +840,7 @@ var testCases = [
 				"numPages": "1",
 				"place": "Ann Arbor",
 				"shortTitle": "Characterizing kinds",
-				"university": "University of Chicago.",
+				"university": "University of Chicago",
 				"url": "https://catalog.lib.uchicago.edu/vufind/Record/10773190",
 				"attachments": [],
 				"tags": [],
