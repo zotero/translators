@@ -50,47 +50,47 @@ TEST DATA can be found here:
 
 function detectImport() {
 	var text = Zotero.read(1000);
-	return text.indexOf("<CitaviExchangeData") != -1;
+	return text.includes("<CitaviExchangeData");
 }
 
 // This maps the Citavi types to the Zotero types.
 // https://www.citavi.com/sub/manual5/en/referencetypeselectiondialog.html
 var typeMapping = {
-	ArchiveMaterial : "manuscript", //Archivgut
-	AudioBook : "book", //Hörbuch
-	AudioOrVideoDocument : "document", //Ton- oder Filmdokument
-	Book : "book", //Buch (Monographie)
-	BookEdited : "book", //Buch (Sammelwerk)
-	Broadcast : "tvBroadcast", //Radio- oder Fernsehsendung
-	CollectedWorks : "book", //Schriften eines Autors
-	ComputerProgram : "computerProgram", //Software
-	ConferenceProceedings : "book", //Tagungsband
-	Contribution : "bookSection", //Beitrag in ...
-	ContributionInLegalCommentary : "bookSection", //Beitrag in Gesetzeskommentar
-	CourtDecision : "case", //Gerichtsentscheid
-	File : "manuscript", //Akte
-	InternetDocument : "webpage", //Internetdokument
-	InterviewMaterial : "interview", //Interviewmaterial
-	JournalArticle : "journalArticle", //Zeitschriftenaufsatz
-	Lecture : "presentation", //Vortrag
-	LegalCommentary : "book", //Gesetzeskommentar
-	Manuscript : "manuscript", //Manuskript
-	Map : "map", //Geographische Karte
-	Movie : "videoRecording", //Spielfilm
-	MusicTrack : "audioRecording", //Musiktitel in ...
-	MusicAlbum : "audioRecording", //Musikwerk / Musikalbum
-	NewsAgencyReport : "report", //Agenturmeldung
-	NewspaperArticle : "newspaperArticle", //Zeitungsartikel
-	Patent : "patent", //Patentschrift
-	PersonalCommunication : "email", //Persönliche Mitteilung
-	PressRelease : "report", //Pressemitteilung
-	RadioPlay : "podcast", //Hörspiel
-	SpecialIssue : "book", //Sonderheft, Beiheft
-	Standard : "report", //Norm
-	StatuteOrRegulation : "statute", //Gesetz / Verordnung
-	Thesis : "thesis", //Hochschulschrift
-	Unknown : "document", //Unklarer Dokumententyp
-	UnpublishedWork : "report" //Graue Literatur / Bericht / Report
+	ArchiveMaterial: "manuscript", // Archivgut
+	AudioBook: "book", // Hörbuch
+	AudioOrVideoDocument: "document", // Ton- oder Filmdokument
+	Book: "book", // Buch (Monographie)
+	BookEdited: "book", // Buch (Sammelwerk)
+	Broadcast: "tvBroadcast", // Radio- oder Fernsehsendung
+	CollectedWorks: "book", // Schriften eines Autors
+	ComputerProgram: "computerProgram", // Software
+	ConferenceProceedings: "book", // Tagungsband
+	Contribution: "bookSection", // Beitrag in ...
+	ContributionInLegalCommentary: "bookSection", // Beitrag in Gesetzeskommentar
+	CourtDecision: "case", // Gerichtsentscheid
+	File: "manuscript", // Akte
+	InternetDocument: "webpage", // Internetdokument
+	InterviewMaterial: "interview", // Interviewmaterial
+	JournalArticle: "journalArticle", // Zeitschriftenaufsatz
+	Lecture: "presentation", // Vortrag
+	LegalCommentary: "book", // Gesetzeskommentar
+	Manuscript: "manuscript", // Manuskript
+	Map: "map", // Geographische Karte
+	Movie: "videoRecording", // Spielfilm
+	MusicTrack: "audioRecording", // Musiktitel in ...
+	MusicAlbum: "audioRecording", // Musikwerk / Musikalbum
+	NewsAgencyReport: "report", // Agenturmeldung
+	NewspaperArticle: "newspaperArticle", // Zeitungsartikel
+	Patent: "patent", // Patentschrift
+	PersonalCommunication: "email", // Persönliche Mitteilung
+	PressRelease: "report", // Pressemitteilung
+	RadioPlay: "podcast", // Hörspiel
+	SpecialIssue: "book", // Sonderheft, Beiheft
+	Standard: "report", // Norm
+	StatuteOrRegulation: "statute", // Gesetz / Verordnung
+	Thesis: "thesis", // Hochschulschrift
+	Unknown: "document", // Unklarer Dokumententyp
+	UnpublishedWork: "report" // Graue Literatur / Bericht / Report
 };
 
 async function importItems({ references, doc, citaviVersion, rememberTags, itemIdList, unfinishedReferences, progress }) {
@@ -225,9 +225,11 @@ async function importItems({ references, doc, citaviVersion, rememberTags, itemI
 			if (address) {
 				if (addressType == "Doi" && !item.DOI) {
 					item.DOI = address;
-				} else if (addressType == "PubMedId" && ((item.extra && !item.extra.includes("PMID")) || !item.extra)) {
+				}
+				else if (addressType == "PubMedId" && ((item.extra && !item.extra.includes("PMID")) || !item.extra)) {
 					addExtraLine(item, "PMID", address);
-				} else {
+				}
+				else {
 					// distinguish between local paths and internet addresses
 					// (maybe also encoded in AddressInfo subfield?)
 					item.attachments.push(
@@ -348,7 +350,7 @@ function addHierarchyNumberRecursive(collections, level = null) {
 		collection.name = `${hierarchyNumber} ${collection.name}`;
 		addHierarchyNumberRecursive(
 			collection.children.filter(c => c instanceof Zotero.Collection), hierarchyNumber
-		)
+		);
 	}
 }
 
@@ -389,7 +391,7 @@ function importCategories({ categories, doc, progress }) {
 		}
 		const parentCollection = collectionsMap.get(parentID);
 
-		childIDs.forEach(childID => {
+		childIDs.forEach((childID) => {
 			if (collectionsMap.has(childID)) {
 				parentCollection.children.push(collectionsMap.get(childID));
 				addedChildIDs.push(childID);
@@ -410,7 +412,6 @@ function importCategories({ categories, doc, progress }) {
 		collection.complete();
 		Z.setProgress(++progress.current / progress.total * 100);
 	}
-
 }
 
 async function doImport() {
@@ -425,7 +426,7 @@ async function doImport() {
 		var id = ZU.xpathText(groups[i], './@id');
 		var name = ZU.xpathText(groups[i], './Name');
 		var referenceGroups = ZU.xpath(doc, `//ReferenceGroups/OnetoN[contains(text(), "${id}")]|//KnowledgeItemGroups/OnetoN[contains(text(), "${id}")]`);
-		for (var j = 0; j<referenceGroups.length; j++) {
+		for (var j = 0; j < referenceGroups.length; j++) {
 			var refid = referenceGroups[j].textContent.split(';')[0];
 			if (rememberTags[refid]) {
 				rememberTags[refid].push(name);
@@ -512,7 +513,3 @@ function extractPages(multilineText) {
 	}
 	return '';
 }
-
-/** BEGIN TEST CASES **/
-var testCases = [];
-/** END TEST CASES **/
