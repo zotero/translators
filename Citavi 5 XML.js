@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2022-08-18 00:27:00"
+	"lastUpdated": "2022-08-18 11:23:00"
 }
 
 /*
@@ -93,8 +93,7 @@ var typeMapping = {
 	UnpublishedWork : "report" //Graue Literatur / Bericht / Report
 };
 
-async function importItem(data) {
-	const { references, doc, citaviVersion, rememberTags, itemIdList, unfinishedReferences } = data;
+async function importItems({ references, doc, citaviVersion, rememberTags, itemIdList, unfinishedReferences, progress }) {
 	for (var i = 0, n = references.length; i < n; i++) {
 		var type = ZU.xpathText(references[i], 'ReferenceType');
 		let item;
@@ -277,14 +276,14 @@ async function importItem(data) {
 		}
 		else {
 			await item.complete(); // eslint-disable-line no-await-in-loop
+			Z.setProgress(++progress.current / progress.total * 100);
 		}
 	}
 }
 
 // For unfinished references we add additional data from the
 // container item and save the relation between them as well.
-async function importUnfinished(data) {
-	const { doc, itemIdList, unfinishedReferences } = data;
+async function importUnfinished({ doc, itemIdList, progress, unfinishedReferences }) {
 	for (var i = 0; i < unfinishedReferences.length; i++) {
 		var item = unfinishedReferences[i];
 		var containerString = ZU.xpathText(doc, `//ReferenceReferences/OnetoN[contains(text(), "${item.itemID}")]`);
@@ -314,11 +313,12 @@ async function importUnfinished(data) {
 			item.seeAlso.push(containerItem.itemID);
 		}
 		await item.complete(); // eslint-disable-line no-await-in-loop
+		Z.setProgress(++progress.current / progress.total * 100);
 	}
 }
 
 // Task items will be mapped to new standalone note
-async function importTasks(tasks) {
+async function importTasks({ tasks, progress }) {
 	for (var i = 0, n = tasks.length; i < n; i++) {
 		let item = new Zotero.Item("note");
 		var dueDate = ZU.xpathText(tasks[i], './DueDate');
@@ -337,6 +337,7 @@ async function importTasks(tasks) {
 
 		item.tags.push("#todo");
 		await item.complete(); // eslint-disable-line no-await-in-loop
+		Z.setProgress(++progress.current / progress.total * 100);
 	}
 }
 
@@ -351,8 +352,7 @@ function addHierarchyNumberRecursive(collections, level = null) {
 	}
 }
 
-function importCategories(doc) {
-	var categories = ZU.xpath(doc, '//Categories/Category');
+function importCategories({ categories, doc, progress }) {
 	// typo CategoryCatgories was fixed in Citavi 6
 	var hierarchy = ZU.xpath(doc, '//CategoryCatgories/OnetoN|//CategoryCategories/OnetoN');
 
@@ -408,6 +408,7 @@ function importCategories(doc) {
 
 	for (const collection of collectionsMap.values()) {
 		collection.complete();
+		Z.setProgress(++progress.current / progress.total * 100);
 	}
 
 }
@@ -435,16 +436,22 @@ async function doImport() {
 		}
 	}
 	var tasks = ZU.xpath(doc, '//TaskItems/TaskItem');
+	var categories = ZU.xpath(doc, '//Categories/Category');
 
 	// Main information for each reference.
 	var references = ZU.xpath(doc, '//References/Reference');
 	var unfinishedReferences = [];
 	var itemIdList = {};
 
-	await importItem({ references, doc, citaviVersion, rememberTags, itemIdList, unfinishedReferences });
-	await importUnfinished({ doc, itemIdList, unfinishedReferences });
-	await importTasks(tasks);
-	importCategories(doc);
+	// Because Zotero may also import annotations, we only move progress within 0-50% range, hence `totalProgress * 2`
+	// https://github.com/zotero/zotero/blob/6ca854a018e8bfe4251fbf42610276c441b5d943/chrome/content/zotero/import/citavi.js#L28
+	const totalProgress = references.length + tasks.length + categories.length;
+	const progress = { total: totalProgress * 2, current: 0 };
+
+	await importItems({ references, doc, citaviVersion, rememberTags, itemIdList, progress, unfinishedReferences });
+	await importUnfinished({ doc, itemIdList, unfinishedReferences, progress });
+	await importTasks({ tasks, progress });
+	importCategories({ categories, doc, progress });
 }
 
 function attachName(doc, ids) {
