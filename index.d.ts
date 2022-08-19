@@ -1526,6 +1526,8 @@ declare namespace Zotero {
 	): Zotero.Translate<SearchTranslator>;
 	function done(returnValue: string | false): void;
 	function debug(str: string, level?: 1 | 2 | 3 | 4 | 5): void;
+	function read(length?: number): any;
+	function getXML(): any;
 
 	const isBookmarklet: boolean;
 	const isConnector: boolean;
