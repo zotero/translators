@@ -37,7 +37,6 @@
 
 
 async function detectWeb(doc, url) {
-	
 	if (doc.getElementsByClassName('story').length) {
 		return 'newspaperArticle';
 	}
@@ -80,40 +79,40 @@ async function doWeb(doc, url) {
 
 async function scrape(doc, url = doc.location.href) {
 	var item = new Zotero.Item("newspaperArticle");
-		let authors = doc.getElementsByClassName('s-aut__n');
-		// Most authors in El Comercio appear to have two last names, one first name;
-		for (let author of authors) {
-			author = author.textContent;
-			let authorName = author.match(/^(.+?)\s(.+)$/);
-			if (!authorName || author == 'Redacción EC' || author.includes("Agencia")) {
-				item.creators.push({ lastName: author, creatorType: "author", fieldMode: 1 });
-			}
-			else {
-				let firstName = authorName[1];
-				let lastName = authorName[2];
-				item.creators.push({ firstName: firstName, lastName: lastName, creatorType: "author" });
-			}
+	let authors = doc.getElementsByClassName('s-aut__n');
+	// Most authors in El Comercio appear to have two last names, one first name;
+	for (let author of authors) {
+		author = author.textContent;
+		let authorName = author.match(/^(.+?)\s(.+)$/);
+		if (!authorName || author == 'Redacción EC' || author.includes("Agencia")) {
+			item.creators.push({ lastName: author, creatorType: "author", fieldMode: 1 });
 		}
-		
-		let tags = attr('meta[name="keywords"]', 'content');
-		tags = tags.split(/\s*,\s*/);
-		for (let tag of tags) {
-			item.tags.push(tag);
+		else {
+			let firstName = authorName[1];
+			let lastName = authorName[2];
+			item.creators.push({ firstName: firstName, lastName: lastName, creatorType: "author" });
 		}
-		item.attachments.push({document: doc, title: "Article Snapshot"})
-
-		item.title = text('h1', doc);
-		item.date = ZU.strToISO(attr('meta[property="article:published_time"]', 'content'));
-		item.url = url;
-		item.abstractNote = attr('meta[name="DC.description"]', 'content', doc);
+	}
 		
-		item.language = "es-PE";
-		item.ISSN = "1605-3052";
-		item.place = "Lima";
-		item.publicationTitle = "El Comercio";
+	let tags = attr('meta[name="keywords"]', 'content');
+	tags = tags.split(/\s*,\s*/);
+	for (let tag of tags) {
+		item.tags.push(tag);
+	}
+	item.attachments.push({ document: doc, title: "Article Snapshot" });
 
-		// item.section = 'News';
-		item.complete();
+	item.title = text('h1', doc);
+	item.date = ZU.strToISO(attr('meta[property="article:published_time"]', 'content'));
+	item.url = url;
+	item.abstractNote = attr('meta[name="DC.description"]', 'content', doc);
+		
+	item.language = "es-PE";
+	item.ISSN = "1605-3052";
+	item.place = "Lima";
+	item.publicationTitle = "El Comercio";
+
+	// item.section = 'News';
+	item.complete();
 }
 
 /** BEGIN TEST CASES **/
