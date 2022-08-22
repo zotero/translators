@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-08-21 18:53:47"
+	"lastUpdated": "2022-08-22 17:04:04"
 }
 
 /*
@@ -105,6 +105,7 @@ function scrape(doc, url) {
 			type = "3";
 		}
 	}
+	let chapterTitle = text(doc, '.chapter-title-without-label');
 	var risURL = "/Citation/Download?resourceId=" + id + "&resourceType=" + type + "&citationFormat=0";
 	// Z.debug(risURL);
 
@@ -125,7 +126,9 @@ function scrape(doc, url) {
 				// with a single page number (4).
 				item.pages = item.pages.trim().replace(/^([^-]+)-\1$/, '$1');
 			}
-			
+			if (item.itemType == "bookSection" && chapterTitle) {
+				item.title = chapterTitle;
+			}
 			if (pdfURL) {
 				item.attachments.push({
 					url: pdfURL,
@@ -651,7 +654,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
-				"title": "1Statistical inference with probabilistic graphical models",
+				"title": "Statistical inference with probabilistic graphical models",
 				"creators": [
 					{
 						"lastName": "Shah",
