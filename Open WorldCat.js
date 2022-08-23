@@ -174,7 +174,7 @@ function scrapeRecord(records) {
 		if (record.doi) {
 			let translate = Z.loadTranslator('search');
 			translate.setSearch({ DOI: record.doi });
-			translate.setTranslator('b28d0d42-8549-4c6d-83fc-8382874a5cb9');
+			translate.setTranslator('b28d0d42-8549-4c6d-83fc-8382874a5cb9'); // DOI Content Negotiation
 			translate.translate();
 			continue;
 		}
