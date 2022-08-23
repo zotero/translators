@@ -2,14 +2,14 @@
 	"translatorID": "3dcbb947-f7e3-4bbd-a4e5-717f3701d624",
 	"label": "HeinOnline",
 	"creator": "Frank Bennett",
-	"target": "^https?://(www\\.)?heinonline\\.org/HOL/(LuceneSearch|Page|IFLPMetaData)\\?",
+	"target": "^https?://(www\\.)?heinonline\\.org/HOL/(LuceneSearch|Page|IFLPMetaData|AuthorProfile)\\?",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2021-06-02 19:00:15"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2022-08-23 02:00:49"
 }
 
 /*
@@ -173,7 +173,7 @@ function scrapePage(doc, url) {
 function detectWeb(doc, url) {
 	var COinS = getXPathStr("title", doc, '//span[contains(@class, "Z3988")]');
 	var RIS = getXPathStr("href", doc, '//form[@id="pagepicker"]//a[contains(@href, "PrintRequest")][1]');
-	if (url.includes("/LuceneSearch?")) {
+	if (url.includes("/LuceneSearch?") || url.includes("/AuthorProfile?")) {
 		if (getSearchResults(doc)) {
 			return "multiple";
 		}
@@ -270,6 +270,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://heinonline.org/HOL/AuthorProfile?action=edit&search_name=de%20Silva%20de%20Alwis%2C%20Rangita&collection=journals",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
