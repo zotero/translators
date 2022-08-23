@@ -2,14 +2,14 @@
 	"translatorID": "3bae3a55-f021-4b59-8a14-43701f336adf",
 	"label": "Silverchair",
 	"creator": "Sebastian Karcher",
-	"target": "/(article|fullarticle|advance-article|advance-article-abstract|article-abstract|book)(/|\\.aspx)|search-results?|\\/issue(/|s\\.aspx|$)",
+	"target": "/(article|fullarticle|advance-article|advance-article-abstract|article-abstract|book|edited-volume)(/|\\.aspx)|search-results?|\\/issue(/|s\\.aspx|$)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 280,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-08-22 17:04:04"
+	"lastUpdated": "2022-08-23 13:00:08"
 }
 
 /*
@@ -797,6 +797,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://academic.oup.com/edited-volume/28005",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
