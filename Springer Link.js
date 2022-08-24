@@ -9,8 +9,34 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
+<<<<<<< HEAD
 	"lastUpdated": "2020-09-08 02:04:42"
+=======
+<<<<<<< HEAD
+	"lastUpdated": "2021-09-09 07:22:40"
+=======
+	"lastUpdated": "2020-09-08 02:04:42"
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
+>>>>>>> 5f00c4ca8b31ceb7f9f4e847436a453442ebbcb6
 }
+
+/*
+   SpringerLink Translator
+   Copyright (C) 2020 Aurimas Vinckevicius and Sebastian Karcher
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 function detectWeb(doc, url) {
 	var action = url.match(/^https?:\/\/[^/]+\/([^/?#]+)/);
@@ -471,8 +497,38 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
+<<<<<<< HEAD
 				"tags": [],
 				"notes": [],
+=======
+<<<<<<< HEAD
+				"tags": [
+					{
+						"tag": "Analytical solutions"
+					},
+					{
+						"tag": "Coastal aquifers"
+					},
+					{
+						"tag": "Elastic storage"
+					},
+					{
+						"tag": "Submarine outlet-capping"
+					},
+					{
+						"tag": "Tidal loading efficiency"
+					}
+				],
+				"notes": [
+					{
+						"note": "abs:Résumé Cet article considère les fluctuations piézométriques dues à la marée dans un aquifère côtier captif simple s’étendant à une certaine distance sous la mer. Son exutoire sous-marin est recouvert par un dépôt silteux de propriétés différentes de celles de l’aquifère. Récemment, Li et autres (2007) ont donné une représentation analytique d’un tel système tenant compte de l’effet d’emmagasinement élastique du réservoir sous le toit à l’exutoire. Cet article présente une solution analytique qui généralise le modèle en introduisant l’emmagasinement élastique à l’exutoire. Il démontre que si la couveture à l’exutoire est assez épaisse en direction, l’emmagasinement élastique a un effet amplificateur important sur la fluctuation piézométrique due à la marée. Ignorer cet emmagasinement élastique conduirait à des erreurs importantes sur le rapport entre la hauteur piézométrique réelle et la hauteur telle qu’elle ressort des caractéristiques de l’aquifère. Le modèle montre donc l’effet de l’emmagasinement élastique sur la fluctuation du niveau de l’aquifère. Il indique les seuils en dessous desquels l’effet de cet emmagasinement élastique sur la fluctuation de l’aquifère induite par la marée est négligeable. Li, H.L., Li, G.Y., Chen, J.M., Boufadel, M.C. (2007) Tide-induced head fluctuations in a confined aquifer with sediment covering its outlet at the sea floor. [Fluctuations du niveau piézométrique induites par la marée dans un aquifère captif à décharge sous-marine.] Water Resour. Res 43, doi:10.1029/2005WR004724"
+					}
+				],
+=======
+				"tags": [],
+				"notes": [],
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
+>>>>>>> 5f00c4ca8b31ceb7f9f4e847436a453442ebbcb6
 				"seeAlso": []
 			}
 		]
@@ -553,8 +609,361 @@ var testCases = [
 	},
 	{
 		"type": "web",
+<<<<<<< HEAD
 		"url": "https://link.springer.com/journal/10344/volumes-and-issues/66-5",
 		"items": "multiple"
+=======
+<<<<<<< HEAD
+		"url": "https://link.springer.com/journal/11562/14/1",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/article/10.1007/s11562-019-00443-w",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Who pioneered Islamic banking in Malaysia? The background of the pioneers of Bank Islam Malaysia Berhad",
+				"creators": [
+					{
+						"lastName": "Kitamura",
+						"firstName": "Hideki",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020-04-01",
+				"DOI": "10.1007/s11562-019-00443-w",
+				"ISSN": "1872-0226",
+				"abstractNote": "This study investigates the background of the pioneers of Bank Islam Malaysia Berhad (BIMB) and their perception of Islamic banking to explore the influence that their background had on the practices of BIMB, which have been criticized for being too similar to those of conventional banking. Accordingly, this study opts to explore this topic using interviews with the pioneers, complemented by archival research. Results of the research into the pioneers’ background and their perception of Islamic banking show that most came from a conventional banking background as part of the strong network of the founder of the bank, Abdul Halim Ismail. Furthermore, to fulfill the government’s expectations, they intended to make conventional banking Islamically acceptable rather than simply implementing the profit-and-loss sharing envisaged as ideal by Islamic economists, so they could provide modern banking facilities to economically underrepresented Malay Muslims. The findings reaffirm the significance of the intermediary role of practitioners, their background and philosophy in the development of products and services. In addition, the findings suggest the need for a reevaluation of the research of social scientists exploring whether Islamic banking offers an alternative to conventional global banking, as the pioneers of BIMB did not deny the value of conventional banking, but rather sought to learn from conventional banking to provide competitive banking products in a workable Islamic way.",
+				"issue": "1",
+				"journalAbbreviation": "Cont Islam",
+				"language": "en",
+				"libraryCatalog": "Springer Link",
+				"pages": "75-93",
+				"publicationTitle": "Contemporary Islam",
+				"shortTitle": "Who pioneered Islamic banking in Malaysia?",
+				"url": "https://doi.org/10.1007/s11562-019-00443-w",
+				"volume": "14",
+				"attachments": [
+					{
+						"title": "Springer Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Bank Islam Malaysia Berhad"
+					},
+					{
+						"tag": "Economic anthropology/sociology"
+					},
+					{
+						"tag": "Islamic banking"
+					},
+					{
+						"tag": "Malaysia"
+					}
+				],
+				"notes": [
+					{
+						"note": "orcid:0000-0001-6700-731X | Hideki Kitamura"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/article/10.1007/s00481-019-00556-z",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Ist unerfüllter Kinderwunsch ein Leiden? – Der Leidensbegriff im Kontext der Kinderwunschtherapie",
+				"creators": [
+					{
+						"lastName": "Westermann",
+						"firstName": "Anna Maria",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Alkatout",
+						"firstName": "Ibrahim",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020-06-01",
+				"DOI": "10.1007/s00481-019-00556-z",
+				"ISSN": "1437-1618",
+				"abstractNote": "Der Begriff Leiden ist in der Medizin und in der Bioethik bisher kaum reflektiert und dahingehend in normativer Hinsicht wenig bestimmt. Dennoch bildet das Leiden an einer Unfruchtbarkeit den Ausgangspunkt für die medizintechnischen Interventionen der assistierten reproduktionsmedizinischen Behandlung. Dabei wird implizit angenommen, dass der unerfüllte Kinderwunsch ein Leiden ist. Ob der unerfüllte Kinderwunsch allerdings ein Leiden darstellt, ist bisher nicht eindeutig geklärt worden.Ziel dieses Beitrages ist es, die Annahme, dass es sich beim unerfüllten Kinderwunsch um ein Leiden handelt, zu überprüfen. Anhand der Darstellung einiger gängiger Leidenskonzeptionen werden Merkmale von Leiden herausgearbeitet, die als treffende Grundannahmen für eine Leidensbestimmung gelten können. Es wird sich zeigen, dass der unerfüllte Kinderwunsch, entsprechend der Leidenskonzeptionen, als ein Leiden angesehen werden sollte, und ihm somit ein normativer Stellenwert zukommt. In einem weiteren Schritt ist zu klären, ob das Leiden an einem unerfüllten Kinderwunsch als ein Rechtfertigungsgrund für reproduktionsmedizinische Interventionen gelten kann. Dafür wird zum einen der Stellenwert von Leiden, als eine anthropologische Grundbedingung, im Zusammenhang mit dem Leidenslinderungsauftrag der Medizin diskutiert. Zum anderen werden die Risiken der reproduktionsmedizinischen Therapien sowie deren Bedeutung als Gesundheitsressourcen erörtert. Dabei wird deutlich, dass Leiden an einem unerfüllten Kinderwunsch immer ein psychosomatischer Komplex ist. Nur unter Berücksichtigung der psychoexistenziellen Dimension des Leidens ergibt sich eine Legitimation für eine angemessene somatische Intervention.",
+				"issue": "2",
+				"journalAbbreviation": "Ethik Med",
+				"language": "de",
+				"libraryCatalog": "Springer Link",
+				"pages": "125-139",
+				"publicationTitle": "Ethik in der Medizin",
+				"shortTitle": "Ist unerfüllter Kinderwunsch ein Leiden?",
+				"url": "https://doi.org/10.1007/s00481-019-00556-z",
+				"volume": "32",
+				"attachments": [
+					{
+						"title": "Springer Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Infertility"
+					},
+					{
+						"tag": "Kinderwunschbehandlung"
+					},
+					{
+						"tag": "Leiden"
+					},
+					{
+						"tag": "Leidenslinderung"
+					},
+					{
+						"tag": "Relief of suffering"
+					},
+					{
+						"tag": "Reproductive medicine"
+					},
+					{
+						"tag": "Reproduktionsmedizin"
+					},
+					{
+						"tag": "Suffering"
+					},
+					{
+						"tag": "Unerfüllter Kinderwunsch"
+					},
+					{
+						"tag": "Unfulfilled desire to have children"
+					}
+				],
+				"notes": [
+					"LF:",
+					{
+						"note": "abs:Definition of the problem: In medicine and bioethics, the term “suffering” is not clearly defined from a normative point of view. Nevertheless, suffering due to infertility is the starting point for medical interventions in assisted reproductive medicine. This implies that the unfulfilled desire to have children is a form of suffering, but the validity of this statement has not yet been clarified. Arguments: Based on descriptions of some common concepts, certain characteristics of suffering are identified. We discuss the significance of suffering as an anthropological condition in connection with the mission of medicine to alleviate human suffering. Furthermore, the risks of reproductive treatment and their significance for health are addressed. Conclusion: We conclude that the unfulfilled desire to have children is a form of suffering, and therefore has a normative value. The legitimacy of appropriate somatic intervention can only be established by taking the psycho-existential dimension of suffering into account."
+					},
+					{
+						"note": "orcid:0000-0002-7194-6034 | Ibrahim Alkatout M.D., PhD, M.A., MaHM"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/article/10.1007/s11153-020-09772-w",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Fitting prepositional gratitude to god is metaphysically impossible",
+				"creators": [
+					{
+						"lastName": "Hunt",
+						"firstName": "Marcus William",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-04-01",
+				"DOI": "10.1007/s11153-020-09772-w",
+				"ISSN": "1572-8684",
+				"abstractNote": "It is argued that God cannot be a fitting target of prepositional gratitude. The first premise is that if someone cannot be benefited, then they cannot be a fitting target of prepositional gratitude. The second premise is that God cannot be benefited. Concerning the first premise, it is argued that a necessary component of prepositional gratitude is the desire to benefit one’s benefactor. Then it is argued that such a desire is fitting only if one’s benefactor can in fact be benefited. Concerning the second premise, it is noted that classical theism widely attributes blessedness to God. It is argued that if God is blessed then God necessarily has as much well-being as it is possible for God to have, and hence God cannot be benefited. Also noted are some ways in which God’s blessedness is compatible with less orthodox ideas about God’s passibility. The argument is then defended against eight objections.",
+				"issue": "2",
+				"journalAbbreviation": "Int J Philos Relig",
+				"language": "en",
+				"libraryCatalog": "Springer Link",
+				"pages": "153-170",
+				"publicationTitle": "International Journal for Philosophy of Religion",
+				"url": "https://doi.org/10.1007/s11153-020-09772-w",
+				"volume": "89",
+				"attachments": [
+					{
+						"title": "Springer Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Blessedness"
+					},
+					{
+						"tag": "Classical theism"
+					},
+					{
+						"tag": "Fittingness"
+					},
+					{
+						"tag": "Gratitude"
+					},
+					{
+						"tag": "Philosophy of the emotions"
+					}
+				],
+				"notes": [
+					{
+						"note": "orcid:0000-0001-6858-1903 | Marcus William Hunt"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/article/10.1007/s11153-021-09790-2",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "After Pascal’s Wager: on religious belief, regulated and rationally held",
+				"creators": [
+					{
+						"lastName": "Warman",
+						"firstName": "Jack",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Efird",
+						"firstName": "David",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-08-01",
+				"DOI": "10.1007/s11153-021-09790-2",
+				"ISSN": "1572-8684",
+				"abstractNote": "In Pascal’s famous wager, he claims that the seeking non-believer can induce genuine religious belief in herself by joining a religious community and taking part in its rituals. This form of belief regulation is epistemologically puzzling: can we form beliefs in this way, and could such beliefs be rationally held? In the first half of the paper, we explain how the regimen could allow the seeking non-believer to regulate her religious beliefs by intervening on her evidence and epistemic standards. In the second half of the paper, we argue that regulated religious beliefs can be rationally held.",
+				"issue": "1",
+				"journalAbbreviation": "Int J Philos Relig",
+				"language": "en",
+				"libraryCatalog": "Springer Link",
+				"pages": "61-78",
+				"publicationTitle": "International Journal for Philosophy of Religion",
+				"shortTitle": "After Pascal’s Wager",
+				"url": "https://doi.org/10.1007/s11153-021-09790-2",
+				"volume": "90",
+				"attachments": [
+					{
+						"title": "Springer Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "orcid:0000-0001-6447-4158 | Jack Warman"
+					},
+					{
+						"note": "orcid:0000-0001-5935-1938 | David Efird"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/article/10.1007/s00481-021-00606-5",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Intensivpflege in Zeiten der COVID-19 Pandemie: Zur Frage des Verhältnisses von Fürsorge und Selbstsorge",
+				"creators": [
+					{
+						"lastName": "Kuhn",
+						"firstName": "Eva",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Seidlein",
+						"firstName": "Anna-Henrikje",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-03-01",
+				"DOI": "10.1007/s00481-021-00606-5",
+				"ISSN": "1437-1618",
+				"abstractNote": "Die COVID-19 Pandemie stellt eine beträchtliche Herausforderung für die Kapazität und Funktionalität der Intensivversorgung dar. Dies betrifft nicht nur Ressourcen, sondern vor allem auch die körperlichen und psychischen Grenzen von Pflegefachpersonen. Der Frage, wie sich Fürsorge und Selbstsorge von Pflegefachpersonen auf Intensivstationen im Rahmen der COVID-19 Pandemie zueinander verhalten, wurde bislang im öffentlichen und wissenschaftlichen Diskurs keine Aufmerksamkeit geschenkt. Der vorliegende Beitrag reflektiert dieses Verhältnis mit Hilfe des Ethikkodex des International Council of Nurses, unter besonderer Berücksichtigung der Prinzipienethik und der Care-Ethik nach Joan Tronto und zeigt einen Korridor ethisch vertretbarer Pflege auf.Die Arbeit leistet damit einen wichtigen Beitrag zu einer differenzierten ethischen Betrachtung der Rechte und Verantwortlichkeiten von Pflegefachpersonen als moralischen Akteuren innerhalb des Pandemiegeschehens in Deutschland. Damit schafft er eine erste Voraussetzung für einen breiten gesellschaftlichen und politischen Diskurs, der über die Pandemie hinaus dringend notwendig ist, um die Situation der Pflegefachpersonen und der Gepflegten nachhaltig zu verbessern.",
+				"issue": "1",
+				"journalAbbreviation": "Ethik Med",
+				"language": "de",
+				"libraryCatalog": "Springer Link",
+				"pages": "51-70",
+				"publicationTitle": "Ethik in der Medizin",
+				"shortTitle": "Intensivpflege in Zeiten der COVID-19 Pandemie",
+				"url": "https://doi.org/10.1007/s00481-021-00606-5",
+				"volume": "33",
+				"attachments": [
+					{
+						"title": "Springer Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "COVID-19"
+					},
+					{
+						"tag": "Care"
+					},
+					{
+						"tag": "Care Ethik"
+					},
+					{
+						"tag": "Care ethics"
+					},
+					{
+						"tag": "Code of ethics"
+					},
+					{
+						"tag": "Ethikkodex"
+					},
+					{
+						"tag": "Fürsorge"
+					},
+					{
+						"tag": "Intensive care nursing"
+					},
+					{
+						"tag": "Intensivpflege"
+					},
+					{
+						"tag": "Pandemic"
+					},
+					{
+						"tag": "Pandemie"
+					},
+					{
+						"tag": "Selbstsorge"
+					},
+					{
+						"tag": "Self-care"
+					}
+				],
+				"notes": [
+					"LF:",
+					{
+						"note": "abs:Definition of the problem: The COVID-19 pandemic poses a considerable challenge to the capacity and functionality of intensive care. This concerns not only resources but, above all, the physical and psychological boundaries of nursing professionals. The question of how care for others and self-care of nurses in intensive care units are related to each other in the context of the COVID-19 pandemic has not been addressed in public and scientific discourse so far. Arguments: The present contribution reflects this relationship with reference to the Code of Ethics of the International Council of Nurses, particularly considering principlism and the Care Ethics according to Joan Tronto. As a result, it shows a corridor of ethically justifiable care with several borders, above all: (1) self-care must not be given up completely for the benefit of care for others, and (2) a categorical subordination of care for others to self-care is ethically not justifiable. Conclusion: The article makes an important contribution to a differentiated ethical consideration of the rights and responsibilities of intensive care nurses as moral actors within the pandemic in Germany. It, thus, provides a first starting point for a broad social and political discourse which is urgently needed not only during but also after the pandemic in order to improve the situation of intensive care nurses and those who are cared for."
+					},
+					{
+						"note": "orcid:0000-0002-8337-9639 | Eva Kuhn Mag.theol., B.A."
+					},
+					{
+						"note": "orcid:0000-0002-7690-567X | Anna-Henrikje Seidlein M.Sc., B.A."
+					}
+				],
+				"seeAlso": []
+			}
+		]
+=======
+		"url": "https://link.springer.com/journal/10344/volumes-and-issues/66-5",
+		"items": "multiple"
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
+>>>>>>> 5f00c4ca8b31ceb7f9f4e847436a453442ebbcb6
 	}
 ]
 /** END TEST CASES **/

@@ -9,7 +9,15 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
+<<<<<<< HEAD
 	"lastUpdated": "2021-05-18 20:04:42"
+=======
+<<<<<<< HEAD
+	"lastUpdated": "2021-06-23 16:41:28"
+=======
+	"lastUpdated": "2020-12-15 03:03:06"
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
+>>>>>>> 5f00c4ca8b31ceb7f9f4e847436a453442ebbcb6
 }
 
 /*
@@ -102,6 +110,26 @@ function scrape(doc) {
 			let abstract = ZU.xpathText(doc, '//div[@class="abstract"][1]/p');
 			if (!abstract) abstract = ZU.xpathText(doc, '//div[@class="description"][1]');
 			if (!abstract) abstract = ZU.xpathText(doc, '//div[contains(@class, "card_summary") and contains(@class, "no_border")]');
+<<<<<<< HEAD
+			let tags = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "kwd-group", " " ))]//p');
+=======
+<<<<<<< HEAD
+>>>>>>> 5f00c4ca8b31ceb7f9f4e847436a453442ebbcb6
+			if (abstract) {
+				item.abstractNote = abstract.replace(/^,*\s*Abstract[:,]*/, "").replace(/show (less|more)$/, "").replace(/,\s*$/, "");
+			}
+			if (tags) {
+				item.tags = tags.split(",");
+			}
+<<<<<<< HEAD
+=======
+			//ubtue: add tag "Book Review"
+			let dcType = ZU.xpathText(doc, '//span[@class="Review"] | //meta[@name="citation_article_type"]/@content');
+			if (dcType && dcType.match(/Review/i)) {
+				item.tags.push("Book Review");
+			}
+			
+=======
 			let tags = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "kwd-group", " " ))]//p');
 			if (abstract) {
 				item.abstractNote = abstract.replace(/^,*\s*Abstract[:,]*/, "").replace(/show (less|more)$/, "").replace(/,\s*$/, "");
@@ -109,6 +137,8 @@ function scrape(doc) {
 			if (tags) {
 				item.tags = tags.split(",");
 			}
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
+>>>>>>> 5f00c4ca8b31ceb7f9f4e847436a453442ebbcb6
 			item.notes = [];
 			
 			let cards = doc.querySelectorAll('.card');
@@ -410,12 +440,58 @@ var testCases = [
 					},
 					{
 						"tag": "Nostra Aetate"
+<<<<<<< HEAD
 					}
 				],
 				"notes": [],
 				"seeAlso": []
 			}
 		]
+<<<<<<< HEAD
+=======
+	},
+	{
+		"type": "web",
+		"url": "https://muse.jhu.edu/issue/44583",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://muse.jhu.edu/article/795002",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Climate Change and the Art of Devotion: Geoaesthetics in the Land of Krishna, 1550–1850 by Sugata Ray (review)",
+				"creators": [
+					{
+						"lastName": "Barbato",
+						"firstName": "Melanie",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021",
+				"DOI": "10.1353/cro.2021.0019",
+				"ISSN": "1939-3881",
+				"issue": "2",
+				"libraryCatalog": "Project MUSE",
+				"pages": "222-225",
+				"publicationTitle": "CrossCurrents",
+				"shortTitle": "Climate Change and the Art of Devotion",
+				"url": "https://muse.jhu.edu/article/795002",
+				"volume": "71",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Book Review"
+=======
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+>>>>>>> 5f00c4ca8b31ceb7f9f4e847436a453442ebbcb6
 	}
 ]
 /** END TEST CASES **/

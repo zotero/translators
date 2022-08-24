@@ -866,6 +866,6 @@ function doExport() {
 			}
 		}
 
-		Zotero.write("\n}");
+		Zotero.write(",\n}");
 	}
 }
