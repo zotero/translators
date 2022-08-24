@@ -1,21 +1,21 @@
 {
 	"translatorID": "1e1e35be-6264-45a0-ad2e-7212040eb984",
-	"label": "APA PsycNET",
+	"label": "APA PsycNet",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://psycnet\\.apa\\.org/",
+	"target": "^https?://(psycnet|doi)\\.apa\\.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-09-21 07:34:07"
+	"lastUpdated": "2022-06-16 23:23:51"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017 Philipp Zumstein
+	Copyright © 2017-2021 Philipp Zumstein
 	
 	This file is part of Zotero.
 
@@ -46,33 +46,16 @@
 // to avoid some automatic download detection.
 
 
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
-
 function detectWeb(doc, url) {
-	// the dection will only work if the page is load completely,
-	// thus we have to hardcode some test cases
-	if (url.includes('://psycnet.apa.org/record/1992-98221-010')) return "bookSection";
-	if (url.includes('://psycnet.apa.org/record/2004-16329-000')) return "book";
-	if (url.includes('://psycnet.apa.org/buy/2004-16329-002')) return "bookSection";
-	if (url.includes('://psycnet.apa.org/buy/2010-19350-001')) return "journalArticle";
-	if (url.includes('://psycnet.apa.org/record/2010-09295-002')) return "bookSection";
-	
-	// normal cases
-	// It seems that the url sometimes changes after Zotero has inspected it,
-	// which leads to the wrong Zotero icon. However, saving will still do the
-	// correct action. Reload the page might also solve some edge cases.
-	if (url.includes('/PsycBOOKS/')) {
-		return "book";
-	}
 	if (url.includes('/search/display?')
 			|| url.includes('/record/')
 			|| url.includes('/fulltext/')
 			|| url.includes('/buy/')
 			|| url.includes('/doiLanding?doi=')) {
 		if (doc.getElementById('bookchapterstoc')) {
+			return "book";
+		}
+		else if (attr(doc, 'meta[property="og:type"]', 'content') == 'Chapter') {
 			return "bookSection";
 		}
 		else {
@@ -128,19 +111,19 @@ function scrape(doc, url) {
 	}
 	
 	var productCode;
-	var db = doc.getElementById('database');
+	var db = doc.getElementById('database') || doc.querySelector('doi-landing .meta span');
 	if (db) {
-		db = db.parentNode.textContent;
-		if (db.includes('PsycARTICLES')) {
+		db = db.parentNode.textContent.toLowerCase();
+		if (db.includes('psycarticles')) {
 			productCode = 'PA';
 		}
-		else if (db.includes('PsycBOOKS')) {
+		else if (db.includes('psycbooks')) {
 			productCode = 'PB';
 		}
-		else if (db.includes('PsycINFO')) {
+		else if (db.includes('psycinfo')) {
 			productCode = 'PI';
 		}
-		else if (db.includes('PsycEXTRA')) {
+		else if (db.includes('psycextra')) {
 			productCode = 'PE';
 		}
 	}
@@ -149,7 +132,13 @@ function scrape(doc, url) {
 		productCode = 'PI';
 	}
 	
-	var postData = '{"api":"record.exportRISFile","params":{"UIDList":[{"UID":"' + uid + '","ProductCode":"' + productCode + '"}],"exportType":"zotero"}}';
+	var postData = JSON.stringify({
+		api: "record.exportRISFile",
+		params: {
+			UIDList: [{UID: uid, ProductCode: productCode}],
+			exportType: "zotero"
+		}
+	});
 	var headers = {
 		'Content-Type': 'application/json',
 		Referer: url
@@ -196,6 +185,7 @@ function processRIS(text, doc) {
 		if (item.bookTitle) item.bookTitle = cleanTitle(item.bookTitle);
 		if (item.series) item.series = cleanTitle(item.series);
 		if (item.place) item.place = item.place.replace(/\s+/g, ' ');
+		if (item.ISSN) item.ISSN = ZU.cleanISSN(item.ISSN);
 		for (var i = 0; i < item.tags.length; i++) {
 			item.tags[i] = item.tags[i].replace(/^\*/, '');
 		}
@@ -228,6 +218,14 @@ function getIds(doc, url) {
 	// try to extract uid from the url
 	if (url.includes('/record/')) {
 		let m = url.match(/\/record\/([\d-]*)/);
+		if (m && m[1]) {
+			return m[1];
+		}
+	}
+
+	// DOI landing pages include a link to the /record/ page
+	if (url.includes('/doiLanding') && doc.querySelector('.title > a')) {
+		let m = attr(doc, '.title > a', 'href').match(/\/record\/([\d-]*)/);
 		if (m && m[1]) {
 			return m[1];
 		}

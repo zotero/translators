@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2020-06-26 20:49:31"
+	"lastUpdated": "2021-06-17 17:49:14"
 }
 
 /*
@@ -72,6 +72,8 @@ var n = {
 	og: "http://ogp.me/ns#",				// Used for Facebook's OpenGraph Protocol
 	article: "http://ogp.me/ns/article#",
 	book: "http://ogp.me/ns/book#",
+	music: "http://ogp.me/ns/music#",
+	video: "http://ogp.me/ns/video#",
 	so: "http://schema.org/",
 	codemeta: "https://codemeta.github.io/terms/"
 };
@@ -1214,9 +1216,9 @@ function importItem(newItem, node) {
 	/** CUSTOM ITEM TYPE  -- Currently only Dataset **/
 	if (type && (type.toLowerCase() == "dataset" || type.toLowerCase() == "datacatalog")) {
 		if (newItem.extra) {
-			newItem.extra += "\ntype: dataset";
+			newItem.extra += "\nType: dataset";
 		}
-		else newItem.extra = "type: dataset";
+		else newItem.extra = "Type: dataset";
 	}
 
 

@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2020-11-11 21:49:51"
+	"lastUpdated": "2022-02-02 19:34:22"
 }
 
 /*
@@ -50,21 +50,26 @@ function doImport() {
 		p: 'http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib',
 		sear: 'http://www.exlibrisgroup.com/xsd/jaguar/search'
 	};
-	
+
 	var item = new Zotero.Item();
 	var itemType = ZU.xpathText(doc, '//p:display/p:type', ns) || ZU.xpathText(doc, '//p:facets/p:rsrctype', ns) || ZU.xpathText(doc, '//p:search/p:rsrctype', ns);
 	if (!itemType) {
 		throw new Error('Could not locate item type');
 	}
-	
+
 	switch (itemType.toLowerCase()) {
 		case 'book':
+		case 'buch':
 		case 'ebook':
 		case 'pbook':
+		case 'print_book':
 		case 'books':
 		case 'score':
 		case 'journal':		// as long as we don't have a periodical item type;
 			item.itemType = "book";
+			break;
+		case 'book_chapter':
+			item.itemType = "bookSection";
 			break;
 		case 'audio':
 		case 'sound_recording':
@@ -121,7 +126,7 @@ function doImport() {
 				}
 			}
 	}
-	
+
 	item.title = ZU.xpathText(doc, '//p:display/p:title', ns);
 	if (item.title) {
 		item.title = ZU.unescapeHTML(item.title);
@@ -134,7 +139,7 @@ function doImport() {
 		creators = contributors;
 		contributors = [];
 	}
-	
+
 	// //addata/au is great because it lists authors in last, first format,
 	// but it can also have a bunch of junk. We'll use it to help split authors
 	var splitGuidance = {};
@@ -157,7 +162,7 @@ function doImport() {
 	var publisher = ZU.xpathText(doc, '//p:addata/p:pub', ns);
 	if (!publisher) publisher = ZU.xpathText(doc, '//p:display/p:publisher', ns);
 	if (publisher) {
-		publisher = publisher.replace(/,\s*c?\d+|[()[\]]|(\.\s*)?/g, "");
+		publisher = publisher.replace(/,\s*c?\d+|[()[\]]/g, "");
 		item.publisher = publisher.replace(/^\s*"|,?"\s*$/g, '');
 		var pubplace = ZU.unescapeHTML(publisher).split(" : ");
 
@@ -192,15 +197,15 @@ function doImport() {
 			item.date = m[0];
 		}
 	}
-	
+
 	// the three letter ISO codes that should be in the language field work well:
 	item.language = ZU.xpathText(doc, '(//p:display/p:language|//p:facets/p:language)[1]', ns);
-	
+
 	var pages = ZU.xpathText(doc, '//p:display/p:format', ns);
 	if (item.itemType == 'book' && pages && pages.search(/\d/) != -1) {
 		item.numPages = extractNumPages(pages);
 	}
-	
+
 	item.series = ZU.xpathText(doc, '(//p:addata/p:seriestitle)[1]', ns);
 	if (item.series) {
 		let m = item.series.match(/^(.*);\s*(\d+)/);
@@ -215,11 +220,11 @@ function doImport() {
 	if (isbn) {
 		item.ISBN = ZU.cleanISBN(isbn);
 	}
-	
+
 	if (issn) {
 		item.ISSN = ZU.cleanISSN(issn);
 	}
-	
+
 	// Try this if we can't find an isbn/issn in addata
 	// The identifier field is supposed to have standardized format, but
 	// the super-tolerant idCheck should be better than a regex.
@@ -231,7 +236,7 @@ function doImport() {
 	}
 
 	item.edition = ZU.xpathText(doc, '//p:display/p:edition', ns);
-	
+
 	var subjects = ZU.xpath(doc, '//p:display/p:subject', ns);
 	if (!subjects.length) {
 		subjects = ZU.xpath(doc, '//p:search/p:subject', ns);
@@ -240,19 +245,23 @@ function doImport() {
 	for (let i = 0, n = subjects.length; i < n; i++) {
 		let tagChain = ZU.trimInternal(subjects[i].textContent);
 		// Split chain of tags, e.g. "Deutschland / Gerichtsverhandlung / Schallaufzeichnung / Bildaufzeichnung"
-		for (let tag of tagChain.split(/ (?:\/|--) /)) {
+		for (let tag of tagChain.split(/ (?:\/|--|;) /)) {
 			item.tags.push(tag);
 		}
 	}
-	
+
 	item.abstractNote = ZU.xpathText(doc, '//p:display/p:description', ns)
 		|| ZU.xpathText(doc, '//p:addata/p:abstract', ns);
 	if (item.abstractNote) item.abstractNote = ZU.unescapeHTML(item.abstractNote);
-	
+
 	item.DOI = ZU.xpathText(doc, '//p:addata/p:doi', ns);
 	item.issue = ZU.xpathText(doc, '//p:addata/p:issue', ns);
 	item.volume = ZU.xpathText(doc, '//p:addata/p:volume', ns);
 	item.publicationTitle = ZU.xpathText(doc, '//p:addata/p:jtitle', ns);
+
+	if (item.itemType != 'book') {
+		item.bookTitle = ZU.xpathText(doc, '//p:addata/p:btitle', ns);
+	}
 
 	var startPage = ZU.xpathText(doc, '//p:addata/p:spage', ns);
 	var endPage = ZU.xpathText(doc, '//p:addata/p:epage', ns);
@@ -276,7 +285,7 @@ function doImport() {
 	else if (endPage) {
 		item.pages = endPage;
 	}
-	
+
 	// these are actual local full text links (e.g. to google-scanned books)
 	// e.g http://solo.bodleian.ox.ac.uk/OXVU1:LSCOP_OX:oxfaleph013370702
 	var URL = ZU.xpathText(doc, '//p:links/p:linktorsrc', ns);
@@ -350,12 +359,15 @@ function stripAuthor(str) {
 	str = str.replace(/^(.*)\$\$Q(.*)$/, "$2");
 	return str
 		// Remove year
-		.replace(/\s*,?\s*\(?\d{4}-?(\d{4})?\)?/g, '')
-		// Remove things like (illustrator). TODO: use this to assign creator type?
-		.replace(/\s*,?\s*[[(][^()]*[\])]$/, '')
+		.replace(/\s*,?\s*\(?\d{4}-?(\d{4}|\.{3})?\)?/g, '')
+		// Remove creator type like (illustrator)
+		.replace(/(\s*,?\s*[[(][^()]*[\])])+$/, '')
 		// The full "continuous" name uses no separators, which need be removed
 		// cf. "Luc, Jean André : de (1727-1817)"
-		.replace(/\s*:\s+/, " ");
+		.replace(/\s*:\s+/, " ")
+		// National Library of Russia adds metadata at the end of the author name,
+		// prefixed by 'NLR10::'. Remove it.
+		.replace(/\bNLR10::.*/, '');
 }
 
 function fetchCreators(item, creators, type, splitGuidance) {
@@ -368,11 +380,12 @@ function fetchCreators(item, creators, type, splitGuidance) {
 				type,
 				true
 			);
+
 			if (!c.firstName) {
 				delete c.firstName;
 				c.fieldMode = 1;
 			}
-			
+
 			item.creators.push(c);
 		}
 	}
@@ -443,10 +456,10 @@ var testCases = [
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "Chemistry"
+						"tag": "Water"
 					},
 					{
-						"tag": "Water"
+						"tag": "Chemistry"
 					}
 				],
 				"notes": [],
@@ -600,6 +613,159 @@ var testCases = [
 						"tag": "Öffentlichkeitsgrundsatz"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<record xmlns=\"http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib\" xmlns:sear=\"http://www.exlibrisgroup.com/xsd/jaguar/search\">\n  <control>\n    <sourcerecordid>21150834900003766</sourcerecordid>\n    <sourceid>01CTW_CC_ALMA</sourceid>\n    <recordid>01CTW_CC_ALMA21150834900003766</recordid>\n    <originalsourceid>01CTW_CC</originalsourceid>\n    <sourceformat>MARC21</sourceformat>\n    <sourcesystem>Alma</sourcesystem>\n    <almaid>01CTW_CC/21150834900003766</almaid>\n    <almaid>01CTW_CC:21150834900003766</almaid>\n  </control>\n  <display>\n    <type>print_book</type>\n    <title>The sea</title>\n    <creator>John Crompton 1893-1972</creator>\n    <publisher>New York, NY : Nick Lyons Books</publisher>\n    <creationdate>1988</creationdate>\n    <format>x, 233, [1] p. ; 21 cm..</format>\n    <identifier>$$CISBN$$V0941130835 (pbk.) :</identifier>\n    <subject>Marine biology</subject>\n    <language>eng</language>\n    <source>01CTW_CC_ALMA</source>\n    <availlibrary>$$I01CTW_CC$$L01CTW_CC_CCSHAIN$$1CC - Main Book Collection (call numbers A-G level 2; H-Z level 3)$$2(QH91 C76 1988)$$Savailable$$X01CTW_CC$$YCCSHAIN$$ZCSTACKS$$P1</availlibrary>\n    <notes>Bibliography: p. [234].</notes>\n    <lds01>992232803503766</lds01>\n    <lds02>01CTW_CC_ALMA21150834900003766</lds02>\n    <lds03>Reprint. Originally published: New York : Doubleday, 1957. With new introd.</lds03>\n    <lds03>Includes index.</lds03>\n    <lds03>Armington Social Values Collection.</lds03>\n    <lds07>Committed to retain for Eastern Academic Scholars' Trust</lds07>\n    <availinstitution>$$I01CTW_CC$$Savailable</availinstitution>\n    <availpnx>available</availpnx>\n  </display>\n  <links>\n    <thumbnail>$$Tamazon_thumb</thumbnail>\n    <thumbnail>$$Tgoogle_thumb</thumbnail>\n    <linktouc>$$Tworldcat_isbn$$Eworldcat</linktouc>\n    <uri>$$Aisbn$$V0941130835$$U(uri) http://www.isbnsearch.org/isbn/0941130835</uri>\n    <uri>$$Aoclc_nr$$V(OCoLC)ocm17412356$$U(uri) http://www.worldcat.org/oclc/17412356</uri>\n    <uri>$$Acreatorcontrib$$VCrompton, John$$U(uri) http://id.loc.gov/authorities/names/n85809864$$U(uri) http://viaf.org/viaf/sourceID/LC|n85809864</uri>\n    <uri>$$Asubject$$VMarine biology$$U(uri) http://id.loc.gov/authorities/subjects/sh85081138</uri>\n  </links>\n  <search>\n    <creatorcontrib>John,  Crompton  1893-1972.</creatorcontrib>\n    <creatorcontrib>John Battersby Crompton,  Lamburn  1893-</creatorcontrib>\n    <creatorcontrib>Crompton, J</creatorcontrib>\n    <creatorcontrib>Lamburn, J</creatorcontrib>\n    <creatorcontrib>John Crompton ; with 24 drawings by Denys Ovenden ; [introduction by Robert F. Jones].</creatorcontrib>\n    <title>The sea /</title>\n    <subject>Marine biology.</subject>\n    <subject>Biological oceanography</subject>\n    <subject>Ocean biology</subject>\n    <subject>Oceanic biology</subject>\n    <subject>Sea biology</subject>\n    <general>Nick Lyons Books,</general>\n    <general>Reprint. Originally published: New York : Doubleday, 1957. With new introd.</general>\n    <general>Includes index.</general>\n    <general>Armington Social Values Collection.</general>\n    <sourceid>01CTW_CC_ALMA</sourceid>\n    <recordid>01CTW_CC_ALMA21150834900003766</recordid>\n    <isbn>0941130835</isbn>\n    <rsrctype>print_book</rsrctype>\n    <creationdate>1988</creationdate>\n    <creationdate>1957</creationdate>\n    <startdate>19880101</startdate>\n    <enddate>19881231</enddate>\n    <addsrcrecordid>992232803503766</addsrcrecordid>\n    <searchscope>01CTW_CC_ALMA</searchscope>\n    <searchscope>01CTW_CC</searchscope>\n    <searchscope>CC_CC_P</searchscope>\n    <searchscope>CC_WU_P</searchscope>\n    <searchscope>CC_TC_P</searchscope>\n    <scope>01CTW_CC_ALMA</scope>\n    <scope>01CTW_CC</scope>\n    <scope>CC_CC_P</scope>\n    <scope>CC_WU_P</scope>\n    <scope>CC_TC_P</scope>\n    <lsr02>(OCoLC)ocm17412356</lsr02>\n    <lsr02>(CtNlC)223280-conndb-Voyager</lsr02>\n  </search>\n  <sort>\n    <title>sea /</title>\n    <creationdate>1988</creationdate>\n    <author>Crompton, John, 1893-1972.</author>\n  </sort>\n  <facets>\n    <language>eng</language>\n    <creationdate>1988</creationdate>\n    <topic>Marine biology</topic>\n    <toplevel>available</toplevel>\n    <prefilter>print_books</prefilter>\n    <rsrctype>print_books</rsrctype>\n    <creatorcontrib>Crompton, John</creatorcontrib>\n    <library>01CTW_CC_CCSHAIN</library>\n    <atoz>S</atoz>\n    <lfc01>CC - Main Book Collection (call numbers A-G level 2; H-Z level 3)</lfc01>\n    <lfc03>CC - Main Book Collection (call numbers A-G level 2; H-Z level 3)</lfc03>\n    <lfc02>01CTW_CC</lfc02>\n    <classificationlcc>Q - Science.–Natural history (General)–General Including nature conservation, geographical distribution</classificationlcc>\n    <newrecords>20170628_481</newrecords>\n    <frbrgroupid>1168449273</frbrgroupid>\n    <frbrtype>6</frbrtype>\n  </facets>\n  <dedup>\n    <t>99</t>\n    <c1>88000538</c1>\n    <c2>0941130835</c2>\n    <c3>sea</c3>\n    <c4>1988</c4>\n    <c5>992232803503766</c5>\n    <f1>88000538</f1>\n    <f3>0941130835</f3>\n    <f5>sea</f5>\n    <f6>1988</f6>\n    <f7>sea</f7>\n    <f8>nyu</f8>\n    <f9>x, 233, [1] p. ;</f9>\n    <f10>nick lyons books</f10>\n    <f11>crompton john 1893 1972</f11>\n    <f20>992232803503766</f20>\n  </dedup>\n  <frbr>\n    <t>99</t>\n    <k1>$$K01CTW_CC_ALMA21150834900003766$$AA</k1>\n    <k3>$$Ksea$$AT</k3>\n  </frbr>\n  <delivery>\n    <institution>01CTW_CC</institution>\n    <delcategory>Alma-P</delcategory>\n  </delivery>\n  <enrichment>\n    <classificationlcc>QH91</classificationlcc>\n  </enrichment>\n  <ranking>\n    <booster1>1</booster1>\n    <booster2>1</booster2>\n  </ranking>\n  <addata>\n    <aulast>Crompton</aulast>\n    <aufirst>John,</aufirst>\n    <au>Crompton, John</au>\n    <btitle>The sea</btitle>\n    <date>1988</date>\n    <risdate>1988</risdate>\n    <isbn>0941130835</isbn>\n    <format>book</format>\n    <genre>unknown</genre>\n    <ristype>BOOK</ristype>\n    <notes>Bibliography: p. [234].</notes>\n    <cop>New York, NY</cop>\n    <pub>Nick Lyons Books</pub>\n    <mis1>21150834900003766</mis1>\n    <oclcid>17412356</oclcid>\n    <lccn>88000538</lccn>\n  </addata>\n  <browse>\n    <author>$$DCrompton, John, 1893-1972$$ECrompton, John, 1893-1972$$I41-LIBRARY_OF_CONGRESS-n 85809864$$PY</author>\n    <author>$$Dnna Lamburn, John Battersby Crompton, 1893-$$Enna Lamburn, John Battersby Crompton, 1893-$$I41-LIBRARY_OF_CONGRESS-n 85809864$$PN</author>\n    <title>$$DThe sea$$Esea</title>\n    <subject>$$DMarine biology$$EMarine biology$$TLCSH$$I41-LIBRARY_OF_CONGRESS-sh 85081138$$PY</subject>\n    <subject>$$DBiological oceanography$$EBiological oceanography$$TLCSH$$I41-LIBRARY_OF_CONGRESS-sh 85081138$$PN</subject>\n    <subject>$$DOcean biology$$EOcean biology$$TLCSH$$I41-LIBRARY_OF_CONGRESS-sh 85081138$$PN</subject>\n    <subject>$$DOceanic biology$$EOceanic biology$$TLCSH$$I41-LIBRARY_OF_CONGRESS-sh 85081138$$PN</subject>\n    <subject>$$DSea biology$$ESea biology$$TLCSH$$I41-LIBRARY_OF_CONGRESS-sh 85081138$$PN</subject>\n    <callnumber>$$I01CTW_CC$$DQH91 C76 1988$$E0qh   0009176000.   19880 $$T0</callnumber>\n    <institution>01CTW_CC</institution>\n  </browse>\n</record>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "The sea",
+				"creators": [
+					{
+						"firstName": "John",
+						"lastName": "Crompton",
+						"creatorType": "author"
+					}
+				],
+				"date": "1988",
+				"ISBN": "0941130835",
+				"callNumber": "QH91 C76 1988",
+				"language": "eng",
+				"numPages": "1",
+				"place": "New York, NY",
+				"publisher": "Nick Lyons Books",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Marine biology"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<record xmlns=\"http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib\">\n  <control>\n    <sourceid>springer</sourceid>\n    <recordid>cdi_springer_books_10_1007_978_3_030_63396_7_25</recordid>\n    <sourceformat>XML</sourceformat>\n    <sourcesystem>Other</sourcesystem>\n    <sourcerecordid>springer_books_10_1007_978_3_030_63396_7_25</sourcerecordid>\n    <originalsourceid>FETCH-LOGICAL-s1418-315a6625e206432bee12b281c3f312135a36281cc7330c5908f38a100fa2a693</originalsourceid>\n    <addsrcrecordid>eNpFkM1OwzAQhM2fRCl9Aw5-AcPaGzsJtyripygIJHq3Nq6DAk1c2by_cAuC02hnpNHOx9iVhGsJUN7UZSVQAIIwiLURpVX6iF1gdg5GfcxmsjJaSNTm5D_QcPoXFNU5W6T0AQCqUKgLOWNPb8ENtOXPfjMQX407cl88THzpaOPHwfFXH_sQR5qcv-WtTylMKSvFyW94H8PIGxp9DGG6ZGc9bZNf_Oqcre_v1s2jaF8eVs2yFUkWMq-QmoxR2iswBarOe6k6VUmHPUqV3yc0-9OViOB0DVWPFWUIPSkyNc6Z-qlNuzhM7z7aLoTPZCXYPSmbSVm0eb49gLF7UvgNXsVVHQ</addsrcrecordid>\n    <sourcetype>Publisher</sourcetype>\n    <isCDI>true</isCDI>\n    <recordtype>book_chapter</recordtype>\n  </control>\n  <display>\n    <type>book_chapter</type>\n    <title>Social Media Impact on Academic Performance: Lessons Learned from Cameroon</title>\n    <source>Springer Books</source>\n    <source>Springer Computer Science eBooks 2020 English/International</source>\n    <creator>Kuika Watat, Josue ; Jonathan, Gideon Mekonnen ; Ntsafack Dongmo, Frank Wilson ; Zine El Abidine, Nour El Houda</creator>\n    <creatorcontrib>Kuika Watat, Josue ; Jonathan, Gideon Mekonnen ; Ntsafack Dongmo, Frank Wilson ; Zine El Abidine, Nour El Houda</creatorcontrib>\n    <description>The continuously improving Internet penetration in the continent, coupled with the increasing number of smartphone users in Africa has been considered as the reasons for the adoption of social media among students and other adolescents. Even though this development has been recognizing in the literature, only a few studies have investigated the acceptance, use, and retention of social media for academic purposes. However, findings of prior studies suggest that the use of social media has an influence on academic performance. To address the lack of knowledge on the adoption of social media among students, this study aims to explore the factors that are related to students’ acceptance and use of social media. We attempt to extend the Technology Acceptance Model by integrating relational engagement, Perceived Satisfaction, as well as the Perspective of the Use of Social Media in Education. The proposed theoretical model was evaluated using quantitative data collected from 460 students in Cameroon. We applied PLS-SEM technique to test the hypotheses and the theoretical model. Implications of the findings, as well as future research directions, are presented.</description>\n    <identifier>ISSN: 1865-1348</identifier>\n    <identifier>ISBN: 3030633950</identifier>\n    <identifier>ISBN: 9783030633950</identifier>\n    <identifier>EISSN: 1865-1356</identifier>\n    <identifier>EISBN: 3030633969</identifier>\n    <identifier>EISBN: 9783030633967</identifier>\n    <identifier>DOI: 10.1007/978-3-030-63396-7_25</identifier>\n    <language>eng</language>\n    <publisher>Cham: Springer International Publishing</publisher>\n    <subject>Academic performance ; Africa ; Relational commitment ; Social media ; TAM</subject>\n    <ispartof>Information Systems, 2020-11-21, p.370-379</ispartof>\n    <rights>Springer Nature Switzerland AG 2020</rights>\n    <orcidid>0000-0003-4673-3800 ; 0000-0001-6360-7641</orcidid>\n    <relation>Lecture Notes in Business Information Processing</relation>\n  </display>\n  <links>\n    <openurl>$$Topenurl_article</openurl>\n    <openurlfulltext>$$Topenurlfull_article</openurlfulltext>\n    <thumbnail>$$Usyndetics_thumb_exl</thumbnail>\n    <linktopdf>$$Uhttps://link.springer.com/content/pdf/10.1007/978-3-030-63396-7_25$$EPDF$$P50$$Gspringer$$H</linktopdf>\n    <linktohtml>$$Uhttps://link.springer.com/10.1007/978-3-030-63396-7_25$$EHTML$$P50$$Gspringer$$H</linktohtml>\n  </links>\n  <search>\n    <creatorcontrib>Kuika Watat, Josue</creatorcontrib>\n    <creatorcontrib>Jonathan, Gideon Mekonnen</creatorcontrib>\n    <creatorcontrib>Ntsafack Dongmo, Frank Wilson</creatorcontrib>\n    <creatorcontrib>Zine El Abidine, Nour El Houda</creatorcontrib>\n    <title>Social Media Impact on Academic Performance: Lessons Learned from Cameroon</title>\n    <title>Information Systems</title>\n    <description>The continuously improving Internet penetration in the continent, coupled with the increasing number of smartphone users in Africa has been considered as the reasons for the adoption of social media among students and other adolescents. Even though this development has been recognizing in the literature, only a few studies have investigated the acceptance, use, and retention of social media for academic purposes. However, findings of prior studies suggest that the use of social media has an influence on academic performance. To address the lack of knowledge on the adoption of social media among students, this study aims to explore the factors that are related to students’ acceptance and use of social media. We attempt to extend the Technology Acceptance Model by integrating relational engagement, Perceived Satisfaction, as well as the Perspective of the Use of Social Media in Education. The proposed theoretical model was evaluated using quantitative data collected from 460 students in Cameroon. We applied PLS-SEM technique to test the hypotheses and the theoretical model. Implications of the findings, as well as future research directions, are presented.</description>\n    <subject>Academic performance</subject>\n    <subject>Africa</subject>\n    <subject>Relational commitment</subject>\n    <subject>Social media</subject>\n    <subject>TAM</subject>\n    <issn>1865-1348</issn>\n    <issn>1865-1356</issn>\n    <isbn>3030633950</isbn>\n    <isbn>9783030633950</isbn>\n    <isbn>3030633969</isbn>\n    <isbn>9783030633967</isbn>\n    <fulltext>true</fulltext>\n    <rsrctype>book_chapter</rsrctype>\n    <creationdate>2020</creationdate>\n    <recordtype>book_chapter</recordtype>\n    <sourceid/>\n    <recordid>eNpFkM1OwzAQhM2fRCl9Aw5-AcPaGzsJtyripygIJHq3Nq6DAk1c2by_cAuC02hnpNHOx9iVhGsJUN7UZSVQAIIwiLURpVX6iF1gdg5GfcxmsjJaSNTm5D_QcPoXFNU5W6T0AQCqUKgLOWNPb8ENtOXPfjMQX407cl88THzpaOPHwfFXH_sQR5qcv-WtTylMKSvFyW94H8PIGxp9DGG6ZGc9bZNf_Oqcre_v1s2jaF8eVs2yFUkWMq-QmoxR2iswBarOe6k6VUmHPUqV3yc0-9OViOB0DVWPFWUIPSkyNc6Z-qlNuzhM7z7aLoTPZCXYPSmbSVm0eb49gLF7UvgNXsVVHQ</recordid>\n    <startdate>20201121</startdate>\n    <enddate>20201121</enddate>\n    <creator>Kuika Watat, Josue</creator>\n    <creator>Jonathan, Gideon Mekonnen</creator>\n    <creator>Ntsafack Dongmo, Frank Wilson</creator>\n    <creator>Zine El Abidine, Nour El Houda</creator>\n    <general>Springer International Publishing</general>\n    <scope/>\n    <orcidid>https://orcid.org/0000-0003-4673-3800</orcidid>\n    <orcidid>https://orcid.org/0000-0001-6360-7641</orcidid>\n  </search>\n  <sort>\n    <creationdate>20201121</creationdate>\n    <title>Social Media Impact on Academic Performance: Lessons Learned from Cameroon</title>\n    <author>Kuika Watat, Josue ; Jonathan, Gideon Mekonnen ; Ntsafack Dongmo, Frank Wilson ; Zine El Abidine, Nour El Houda</author>\n  </sort>\n  <facets>\n    <frbrtype>5</frbrtype>\n    <frbrgroupid>cdi_FETCH-LOGICAL-s1418-315a6625e206432bee12b281c3f312135a36281cc7330c5908f38a100fa2a693</frbrgroupid>\n    <rsrctype>book_chapters</rsrctype>\n    <prefilter>book_chapters</prefilter>\n    <language>eng</language>\n    <creationdate>2020</creationdate>\n    <topic>Academic performance</topic>\n    <topic>Africa</topic>\n    <topic>Relational commitment</topic>\n    <topic>Social media</topic>\n    <topic>TAM</topic>\n    <toplevel>online_resources</toplevel>\n    <creatorcontrib>Kuika Watat, Josue</creatorcontrib>\n    <creatorcontrib>Jonathan, Gideon Mekonnen</creatorcontrib>\n    <creatorcontrib>Ntsafack Dongmo, Frank Wilson</creatorcontrib>\n    <creatorcontrib>Zine El Abidine, Nour El Houda</creatorcontrib>\n    <jtitle>Information Systems</jtitle>\n  </facets>\n  <delivery>\n    <delcategory>Remote Search Resource</delcategory>\n    <fulltext>fulltext</fulltext>\n  </delivery>\n  <addata>\n    <au>Kuika Watat, Josue</au>\n    <au>Jonathan, Gideon Mekonnen</au>\n    <au>Ntsafack Dongmo, Frank Wilson</au>\n    <au>Zine El Abidine, Nour El Houda</au>\n    <format>book</format>\n    <genre>bookitem</genre>\n    <ristype>GEN</ristype>\n    <atitle>Social Media Impact on Academic Performance: Lessons Learned from Cameroon</atitle>\n    <btitle>Information Systems</btitle>\n    <seriestitle>Lecture Notes in Business Information Processing</seriestitle>\n    <date>2020-11-21</date>\n    <risdate>2020</risdate>\n    <spage>370</spage>\n    <epage>379</epage>\n    <pages>370-379</pages>\n    <issn>1865-1348</issn>\n    <eissn>1865-1356</eissn>\n    <isbn>3030633950</isbn>\n    <isbn>9783030633950</isbn>\n    <eisbn>3030633969</eisbn>\n    <eisbn>9783030633967</eisbn>\n    <abstract>The continuously improving Internet penetration in the continent, coupled with the increasing number of smartphone users in Africa has been considered as the reasons for the adoption of social media among students and other adolescents. Even though this development has been recognizing in the literature, only a few studies have investigated the acceptance, use, and retention of social media for academic purposes. However, findings of prior studies suggest that the use of social media has an influence on academic performance. To address the lack of knowledge on the adoption of social media among students, this study aims to explore the factors that are related to students’ acceptance and use of social media. We attempt to extend the Technology Acceptance Model by integrating relational engagement, Perceived Satisfaction, as well as the Perspective of the Use of Social Media in Education. The proposed theoretical model was evaluated using quantitative data collected from 460 students in Cameroon. We applied PLS-SEM technique to test the hypotheses and the theoretical model. Implications of the findings, as well as future research directions, are presented.</abstract>\n    <cop>Cham</cop>\n    <pub>Springer International Publishing</pub>\n    <doi>10.1007/978-3-030-63396-7_25</doi>\n    <orcidid>https://orcid.org/0000-0003-4673-3800</orcidid>\n    <orcidid>https://orcid.org/0000-0001-6360-7641</orcidid>\n  </addata>\n</record>",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Social Media Impact on Academic Performance: Lessons Learned from Cameroon",
+				"creators": [
+					{
+						"firstName": "Josue",
+						"lastName": "Kuika Watat",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Gideon Mekonnen",
+						"lastName": "Jonathan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Frank Wilson",
+						"lastName": "Ntsafack Dongmo",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nour El Houda",
+						"lastName": "Zine El Abidine",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020",
+				"ISBN": "3030633950",
+				"abstractNote": "The continuously improving Internet penetration in the continent, coupled with the increasing number of smartphone users in Africa has been considered as the reasons for the adoption of social media among students and other adolescents. Even though this development has been recognizing in the literature, only a few studies have investigated the acceptance, use, and retention of social media for academic purposes. However, findings of prior studies suggest that the use of social media has an influence on academic performance. To address the lack of knowledge on the adoption of social media among students, this study aims to explore the factors that are related to students’ acceptance and use of social media. We attempt to extend the Technology Acceptance Model by integrating relational engagement, Perceived Satisfaction, as well as the Perspective of the Use of Social Media in Education. The proposed theoretical model was evaluated using quantitative data collected from 460 students in Cameroon. We applied PLS-SEM technique to test the hypotheses and the theoretical model. Implications of the findings, as well as future research directions, are presented.",
+				"bookTitle": "Information Systems",
+				"language": "eng",
+				"pages": "370–379",
+				"place": "Cham",
+				"publisher": "Springer International Publishing",
+				"series": "Lecture Notes in Business Information Processing",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Academic performance"
+					},
+					{
+						"tag": "Africa"
+					},
+					{
+						"tag": "Relational commitment"
+					},
+					{
+						"tag": "Social media"
+					},
+					{
+						"tag": "TAM"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><record xmlns=\"http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib\" xmlns:sear=\"http://www.exlibrisgroup.com/xsd/jaguar/search\"><delivery><availabilityLinks>detailsgetit1</availabilityLinks><displayLocation>true</displayLocation><recordOwner>49KOBV_FUB</recordOwner><physicalServiceId>null</physicalServiceId><sharedDigitalCandidates>null</sharedDigitalCandidates><link><displayLabel>thumbnail</displayLabel><linkURL>https://proxy-eu.hosted.exlibrisgroup.com/exl_rewrite/books.google.com/books?bibkeys=ISBN:9781784744069,OCLC:,LCCN:&amp;jscmd=viewapi&amp;callback=updateGBSCover</linkURL><linkType>thumbnail</linkType><id>:_0</id></link><availability>unavailable</availability><additionalLocations>false</additionalLocations><digitalAuxiliaryMode>false</digitalAuxiliaryMode><holding><matchForHoldings><holdingRecord>852##b</holdingRecord><matchOn>MainLocation</matchOn></matchForHoldings><subLocationCode>EB/1</subLocationCode><volumeFilter>null</volumeFilter><ilsApiId>9959861162102883</ilsApiId><callNumberType>8</callNumberType><libraryCode>920</libraryCode><yearFilter>null</yearFilter><boundWith>false</boundWith><stackMapUrl>http://infosystem.philbib.de?sig={call_number}</stackMapUrl><isValidUser>true</isValidUser><mainLocation>Philologische Bibliothek</mainLocation><callNumber/><adaptorid>ALMA_01</adaptorid><organization>49KOBV_FUB</organization><holdingURL>OVP</holdingURL><availabilityStatus>unavailable</availabilityStatus><id>_:0</id><subLocation>Ebene 1</subLocation><holdId>221106260200002883</holdId><holKey>HoldingResultKey [mid=221106260200002883, libraryId=398792270002883, locationCode=EB/1, callNumber=null]</holKey><singleUnavailableItemProcessType>null</singleUnavailableItemProcessType><relatedTitle>null</relatedTitle></holding><bestlocation><matchForHoldings><holdingRecord>852##b</holdingRecord><matchOn>MainLocation</matchOn></matchForHoldings><subLocationCode>EB/1</subLocationCode><volumeFilter>null</volumeFilter><ilsApiId>9959861162102883</ilsApiId><callNumberType>8</callNumberType><libraryCode>920</libraryCode><yearFilter>null</yearFilter><boundWith>false</boundWith><stackMapUrl>http://infosystem.philbib.de?sig={call_number}</stackMapUrl><isValidUser>true</isValidUser><mainLocation>Philologische Bibliothek</mainLocation><callNumber/><adaptorid>ALMA_01</adaptorid><organization>49KOBV_FUB</organization><holdingURL>OVP</holdingURL><availabilityStatus>unavailable</availabilityStatus><id>_:0</id><subLocation>Ebene 1</subLocation><holdId>221106260200002883</holdId><holKey>HoldingResultKey [mid=221106260200002883, libraryId=398792270002883, locationCode=EB/1, callNumber=null]</holKey><singleUnavailableItemProcessType>null</singleUnavailableItemProcessType><relatedTitle>null</relatedTitle></bestlocation><electronicServices>null</electronicServices><feDisplayOtherLocations>false</feDisplayOtherLocations><hasD>null</hasD><hideResourceSharing>false</hideResourceSharing><hasFilteredServices>null</hasFilteredServices><physicalItemTextCodes>null</physicalItemTextCodes><quickAccessService>null</quickAccessService><recordInstitutionCode>null</recordInstitutionCode><displayedAvailability>null</displayedAvailability><deliveryCategory>Alma-P</deliveryCategory><serviceMode>ovp</serviceMode><filteredByGroupServices>null</filteredByGroupServices><GetIt1><links><isLinktoOnline>false</isLinktoOnline><displayText>null</displayText><inst4opac>49KOBV_FUB</inst4opac><getItTabText>service_getit</getItTabText><adaptorid>ALMA_01</adaptorid><ilsApiId>9959861162102883</ilsApiId><link>OVP</link><id>_:0</id></links><category>Alma-P</category></GetIt1></delivery><search><creationdate>2021</creationdate><creator>Galgut, Damon 1963-</creator><sort_journal_title>&lt;&lt;The&gt;&gt; promise /</sort_journal_title><sort_title>&lt;&lt;The&gt;&gt; promise / Damon Galgut.</sort_title><sort_creationdate_full>2021</sort_creationdate_full><subject>Fiktionale Darstellung</subject><subject>South Africa / Fiction</subject><isbn>9781473584464</isbn><isbn>1473584469</isbn><isbn>1784744077</isbn><isbn>9781784744076</isbn><isbn>1784744069</isbn><isbn>9781784744069</isbn><local_fields>969 BV047362611</local_fields><local_fields>942 05</local_fields><local_fields>940 RDA-Aufnahme</local_fields><description>&quot;The Promise charts the crash and burn of a white South African family, living on a farm outside Pretoria. The Swarts are gathering for Ma&apos;s funeral. The younger generation, Anton and Amor, detest everything the family stand for - not least the failed promise to the Black woman who has worked for them her whole life. After years of service, Salome was promised her own house, her own land ... yet somehow, as each decade passes, that promise remains unfulfilled.&quot; Klappentext</description><language>eng</language><title>&lt;&lt;The&gt;&gt; promise /</title><startdate>2021</startdate><general>Chatto &amp; Windus,</general><rtype>books</rtype><contributor>Damon Galgut.</contributor><genre>Fiktionale Darstellung</genre><journal_title>&lt;&lt;The&gt;&gt; promise /</journal_title><facet_creatorcontrib>Galgut, Damon</facet_creatorcontrib><sort_author>Galgut, Damon 1963-</sort_author><sort_creationdate>2021</sort_creationdate></search><display><identifier>$$C&lt;b&gt;ISBN&lt;/b&gt;$$V978-1-784-74406-9;$$C&lt;b&gt;ISBN&lt;/b&gt;$$V978-1-784-74407-6</identifier><lds05>&lt;b&gt;DDC: &lt;/b&gt;&lt;a href=&quot;search?query=lds05,exact,823.92%2CAND&amp;tab=FUB&amp;search_scope=FUB&amp;vid=49KOBV_FUB%3AFUB&amp;mode=advanced&quot; class=&quot;arrow-link ddc_arrow-link&quot;&gt;823.92&lt;/a&gt;</lds05><lds05>&lt;b&gt;RVK: &lt;/b&gt;&lt;a href=&quot;search?query=lds05,exact,HP 9999%2CAND&amp;tab=FUB&amp;search_scope=FUB&amp;vid=49KOBV_FUB%3AFUB&amp;mode=advanced&quot; class=&quot;arrow-link rvk_arrow-link&quot;&gt;HP 9999&lt;/a&gt;</lds05><creationdate>2021.</creationdate><creator>Galgut, Damon [Verf.]$$QGalgut, Damon</creator><subject>South Africa / Fiction</subject><format>293 Seiten.</format><description>&quot;The Promise charts the crash and burn of a white South African family, living on a farm outside Pretoria. The Swarts are gathering for Ma&apos;s funeral. The younger generation, Anton and Amor, detest everything the family stand for - not least the failed promise to the Black woman who has worked for them her whole life. After years of service, Salome was promised her own house, her own land ... yet somehow, as each decade passes, that promise remains unfulfilled.&quot; Klappentext</description><description>Cover: &quot;Shortlisted The 2021 Booker Prize&quot;</description><language>eng</language><source>Alma</source><type>Buch</type><title>The promise / Damon Galgut.</title><version>0</version><mms>9959861162102883</mms><publisher>London : Chatto &amp; Windus</publisher><place>London :</place><lds01>BV047362611</lds01><lds12>&lt;b&gt;DDC: &lt;/b&gt;&lt;a href=&quot;search?query=lds05,exact,823.92%2CAND&amp;tab=CHA&amp;search_scope=CHA&amp;vid=49KOBV_FUB%3ACHA&amp;mode=advanced&quot; class=&quot;arrow-link&quot;&gt;823.92&lt;/a&gt;</lds12><lds12>&lt;b&gt;RVK: &lt;/b&gt;&lt;a href=&quot;search?query=lds05,exact,HP 9999%2CAND&amp;tab=CHA&amp;search_scope=CHA&amp;vid=49KOBV_FUB%3ACHA&amp;mode=advanced&quot; class=&quot;arrow-link&quot;&gt;HP 9999&lt;/a&gt;</lds12><lds04>Fiktionale Darstellung</lds04></display><control><recordid>alma9959861162102883</recordid><sourceid>alma</sourceid><score>3.0</score><originalsourceid>BV047362611</originalsourceid><sourceformat>MARC21</sourceformat><sourcerecordid>9959861162102883</sourcerecordid><sourcesystem>BVB</sourcesystem><isDedup>false</isDedup></control><addata><date>2021</date><date>2021.</date><aulast>Galgut</aulast><cop>London</cop><isbn>978-1-784-74406-9</isbn><isbn>978-1-784-74407-6</isbn><isbn>9781473584464</isbn><format>book</format><ristype>BOOK</ristype><oclcid>bv47362611</oclcid><oclcid>(xx-xxund)kxp1762351226</oclcid><oclcid>(de-604)bv047362611</oclcid><abstract>&quot;The Promise charts the crash and burn of a white South African family, living on a farm outside Pretoria. The Swarts are gathering for Ma&apos;s funeral. The younger generation, Anton and Amor, detest everything the family stand for - not least the failed promise to the Black woman who has worked for them her whole life. After years of service, Salome was promised her own house, her own land ... yet somehow, as each decade passes, that promise remains unfulfilled.&quot; Klappentext</abstract><auinit>D</auinit><aufirst>Damon</aufirst><au>Galgut, Damon</au><genre>book</genre><btitle>The promise</btitle><pub>Chatto &amp; Windus</pub></addata><sort><creationdate>2021</creationdate><author>Galgut, Damon 1963-</author><title>&lt;&lt;The&gt;&gt; promise / Damon Galgut.</title></sort></record>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "The promise / Damon Galgut.",
+				"creators": [
+					{
+						"firstName": "Damon",
+						"lastName": "Galgut",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021",
+				"ISBN": "9781784744069",
+				"abstractNote": "\"The Promise charts the crash and burn of a white South African family, living on a farm outside Pretoria. The Swarts are gathering for Ma's funeral. The younger generation, Anton and Amor, detest everything the family stand for - not least the failed promise to the Black woman who has worked for them her whole life. After years of service, Salome was promised her own house, her own land ... yet somehow, as each decade passes, that promise remains unfulfilled.\" Klappentext, Cover: \"Shortlisted The 2021 Booker Prize\"",
+				"language": "eng",
+				"place": "London",
+				"publisher": "Chatto & Windus",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Fiction"
+					},
+					{
+						"tag": "South Africa"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<record xmlns=\"http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib\" xmlns:sear=\"http://www.exlibrisgroup.com/xsd/jaguar/search\">\n  <control>\n    <sourcerecordid>005204170</sourcerecordid>\n    <sourceid>07NLR_LMS</sourceid>\n    <recordid>07NLR_LMS005204170</recordid>\n    <originalsourceid>NLR01</originalsourceid>\n    <ilsapiid>NLR01005204170</ilsapiid>\n    <sourceformat>UNIMARC</sourceformat>\n    <sourcesystem>Aleph</sourcesystem>\n  </control>\n  <display>\n    <type>book</type>\n    <title>Плавающий город : С рис.</title>\n    <creator>Верн, Жюль (1828-1905) NLR10::RU\\NLR\\AUTH\\773453</creator>\n    <publisher>Санкт-Петербург : С.В. Звонарев, 1872</publisher>\n    <creationdate>1872</creationdate>\n    <format>[2], 212, [2], 42 с., [14] л. ил. : ил. ; 22 см.</format>\n    <language>rus</language>\n    <source>07NLR_LMS</source>\n    <availlibrary>$$I07NLR$$L07NLR_RFS$$2(18.104.6.29 )$$Savailable$$31$$40$$5N$$60$$XNLR50$$YRFS</availlibrary>\n    <unititle>Восхождение на Монблан</unititle>\n    <lds02>18.104.6.29</lds02>\n    <lds05>Санкт-Петербург</lds05>\n    <lds06>[2], 212, [2], 42 с., [14] л. ил.</lds06>\n    <lds07>Верн Ж. Плавающий город : С рис / [Соч.] Жюля Верна ; Пер. под ред. Марка Вовчка [псевд.] С прил. Восхождение на Монблан Поля Верна Пер. Марка Вовчка [псевд.]. - Санкт-Петербург : С.В. Звонарев, 1872. - [2], 212, [2], 42 с., [14] л. ил. : ил. ; 22 см.</lds07>\n    <lds08>[Соч.] Жюля Верна ; Пер. под ред. Марка Вовчка [псевд.] С прил. Восхождение на Монблан Поля Верна Пер. Марка Вовчка [псевд.]</lds08>\n    <lds15>NLR01 005204170</lds15>\n    <lds30>Вовчок, Марко (1834-1907) -- Редактор NLR10::RU\\NLR\\AUTH\\7716710</lds30>\n    <availinstitution>$$I07NLR$$Savailable</availinstitution>\n    <availpnx>available</availpnx>\n  </display>\n  <links>\n    <openurl>$$Topenurl_journal</openurl>\n    <backlink>$$Taleph_backlink$$DOPAC</backlink>\n    <linktoholdings>$$Taleph_holdings</linktoholdings>\n    <lln03>$$Tcatalogue_error$$Ecatalogueerror</lln03>\n    <lln05>$$Trecord_view_format$$Erecordviewformat</lln05>\n    <lln06>$$Tdownload_iso2709$$Edownloadiso2709</lln06>\n    <lln04>$$Tscan_request$$Escanrequest</lln04>\n  </links>\n  <search>\n    <creatorcontrib>Верн, Жюль (1828-1905) NLR10::RU\\NLR\\AUTH\\773453</creatorcontrib>\n    <creatorcontrib>Верн Ж. Г. 1828-1905 Жюль Габриэль</creatorcontrib>\n    <creatorcontrib>Вовчок М. 1834-1907 Марк</creatorcontrib>\n    <creatorcontrib>Вовчек М. 1834-1907 Марко</creatorcontrib>\n    <creatorcontrib>Маркович М. А. 1834-1907 Мария Александровна</creatorcontrib>\n    <creatorcontrib>Вилинская М. А. 1834-1907 Мария Александровна</creatorcontrib>\n    <creatorcontrib>Марко Вовчок 1834-1907</creatorcontrib>\n    <creatorcontrib>Вилинская-Маркович М. А. 1834-1907 Мария Александровна</creatorcontrib>\n    <creatorcontrib>Верн Ж. 1828-1905 Жюль</creatorcontrib>\n    <title>Плавающий город С рис.</title>\n    <general>rus</general>\n    <general>С.В. Звонарев</general>\n    <sourceid>07NLR_LMS</sourceid>\n    <recordid>07NLR_LMS005204170</recordid>\n    <rsrctype>book</rsrctype>\n    <creationdate>1872</creationdate>\n    <startdate>18720101</startdate>\n    <enddate>18721231</enddate>\n    <addtitle>Плавающий город С рис.</addtitle>\n    <addtitle>Восхождение на Монблан</addtitle>\n    <searchscope>07NLR_LMS</searchscope>\n    <searchscope>MAIN_07NLR</searchscope>\n    <searchscope>07NLR</searchscope>\n    <scope>07NLR_LMS</scope>\n    <scope>MAIN_07NLR</scope>\n    <scope>07NLR</scope>\n    <lsr01>Санкт-Петербург</lsr01>\n    <lsr02>С.В. Звонарев</lsr02>\n    <lsr06>18.104.6.29</lsr06>\n    <lsr07>1872</lsr07>\n    <lsr13>[Соч.] Жюля Верна; Пер. под ред. Марка Вовчка [псевд.] С прил. Восхождение на Монблан Поля Верна Пер. Марка Вовчка [псевд.]</lsr13>\n    <lsr19>Вовчок М. 1834-1907 Марко</lsr19>\n    <lsr19>Верн П. Поль</lsr19>\n    <lsr20>rus</lsr20>\n    <lsr20>русский</lsr20>\n    <lsr23>Верн, Жюль (1828-1905) NLR10::RU\\NLR\\AUTH\\773453</lsr23>\n    <lsr23>Верн Ж. Г. 1828-1905 Жюль Габриэль</lsr23>\n    <lsr23>Вовчок М. 1834-1907 Марк</lsr23>\n    <lsr23>Вовчек М. 1834-1907 Марко</lsr23>\n    <lsr23>Маркович М. А. 1834-1907 Мария Александровна</lsr23>\n    <lsr23>Вилинская М. А. 1834-1907 Мария Александровна</lsr23>\n    <lsr23>Марко Вовчок 1834-1907</lsr23>\n    <lsr23>Вилинская-Маркович М. А. 1834-1907 Мария Александровна</lsr23>\n    <lsr23>Верн Ж. 1828-1905 Жюль</lsr23>\n    <lsr23>Вовчок М. 1834-1907 Марко</lsr23>\n    <lsr23>Верн П. Поль</lsr23>\n    <lsr24>Верн, Жюль (1828-1905) NLR10::RU\\NLR\\AUTH\\773453</lsr24>\n    <lsr24>Верн Ж. Г. 1828-1905 Жюль Габриэль</lsr24>\n    <lsr24>Вовчок М. 1834-1907 Марк</lsr24>\n    <lsr24>Вовчек М. 1834-1907 Марко</lsr24>\n    <lsr24>Маркович М. А. 1834-1907 Мария Александровна</lsr24>\n    <lsr24>Вилинская М. А. 1834-1907 Мария Александровна</lsr24>\n    <lsr24>Марко Вовчок 1834-1907</lsr24>\n    <lsr24>Вилинская-Маркович М. А. 1834-1907 Мария Александровна</lsr24>\n    <lsr24>Верн Ж. 1828-1905 Жюль</lsr24>\n    <lsr24>Вовчок М. 1834-1907 Марко</lsr24>\n    <lsr24>Верн П. Поль</lsr24>\n    <lsr24>Плавающий город С рис.</lsr24>\n    <lsr24>Восхождение на Монблан</lsr24>\n    <lsr24>book</lsr24>\n    <lsr24>1872</lsr24>\n    <lsr24>07NLR_LMS005204170</lsr24>\n    <lsr24>Санкт-Петербург</lsr24>\n    <lsr24>С.В. Звонарев</lsr24>\n    <lsr24>18.104.6.29</lsr24>\n    <lsr24>[Соч.] Жюля Верна; Пер. под ред. Марка Вовчка [псевд.] С прил. Восхождение на Монблан Поля Верна Пер. Марка Вовчка [псевд.]</lsr24>\n    <lsr24>07NLR_LMS</lsr24>\n    <lsr24>MAIN_07NLR</lsr24>\n    <lsr24>07NLR</lsr24>\n    <lsr24>rus</lsr24>\n    <lsr24>русский</lsr24>\n    <lsr24>французский</lsr24>\n    <lsr24>Вовчок, Марко (1834-1907) -- Редактор NLR10::RU\\NLR\\AUTH\\7716710</lsr24>\n    <lsr26>французский</lsr26>\n    <lsr30>Вовчок, Марко (1834-1907) -- Редактор NLR10::RU\\NLR\\AUTH\\7716710</lsr30>\n    <lsr30>Вовчок М. 1834-1907 Марко</lsr30>\n    <lsr30>Верн П. Поль</lsr30>\n  </search>\n  <sort>\n    <title>Плавающий город : С рис.</title>\n    <creationdate>1872</creationdate>\n    <author>Верн Ж. 1828-1905 Жюль</author>\n    <lso02>aafcaebha</lso02>\n    <lso04>18720000</lso04>\n    <lso06>18720000</lso06>\n  </sort>\n  <facets>\n    <language>rus</language>\n    <creationdate>1872</creationdate>\n    <collection>07NLR_RFS</collection>\n    <toplevel>available</toplevel>\n    <toplevel>physical_item</toplevel>\n    <prefilter>books</prefilter>\n    <rsrctype>books</rsrctype>\n    <creatorcontrib>Верн, Ж (1828-1905)</creatorcontrib>\n    <lfc03>С.В. Звонарев</lfc03>\n    <newrecords>20150408_190</newrecords>\n    <frbrgroupid>7542839</frbrgroupid>\n    <frbrtype>6</frbrtype>\n  </facets>\n  <frbr>\n    <t>99</t>\n    <k1>$$Kверн ж 1828 1905$$AA</k1>\n    <k3>$$Kплавающий город с рис$$AT</k3>\n  </frbr>\n  <delivery>\n    <institution>07NLR</institution>\n    <delcategory>Physical Item</delcategory>\n  </delivery>\n  <ranking>\n    <booster1>1</booster1>\n    <booster2>1</booster2>\n  </ranking>\n  <addata>\n    <aulast>Верн</aulast>\n    <aulast>Вовчок</aulast>\n    <aufirst>Ж.</aufirst>\n    <au>Верн Ж. 1828-1905</au>\n    <addau>Вовчок М. 1834-1907</addau>\n    <addau>Верн П</addau>\n    <btitle>Плавающий город С рис.</btitle>\n    <addtitle>Восхождение на Монблан</addtitle>\n    <date>1872</date>\n    <risdate>1872</risdate>\n    <format>book</format>\n    <genre>book</genre>\n    <ristype>BOOK</ristype>\n    <cop>Санкт-Петербург</cop>\n    <pub>С.В. Звонарев</pub>\n  </addata>\n  <browse>\n    <author>$$DВерн, Ж.  (Жюль )  (1828-1905 )$$EВерн Ж. 1828-1905 Жюль</author>\n    <author>$$DВовчок, М.  (Марко )  (1834-1907 )$$EВовчок М. 1834-1907 Марко</author>\n    <author>$$DВерн, П.  (Поль )$$EВерн П. Поль</author>\n    <title>$$DПлавающий город : С рис.$$EПлавающий город С рис.</title>\n    <title>$$DВосхождение на Монблан$$EВосхождение на Монблан</title>\n    <callnumber>$$I07NLR$$D18.104.6.29$$E18.104.6.29</callnumber>\n    <institution>07NLR</institution>\n  </browse>\n</record>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Плавающий город: С рис.",
+				"creators": [
+					{
+						"firstName": "Жюль",
+						"lastName": "Верн",
+						"creatorType": "author"
+					}
+				],
+				"date": "1872",
+				"callNumber": "18.104.6.29",
+				"language": "rus",
+				"place": "Санкт-Петербург",
+				"publisher": "С.В. Звонарев",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}

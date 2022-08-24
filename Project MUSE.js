@@ -10,6 +10,7 @@
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
 <<<<<<< HEAD
+<<<<<<< HEAD
 	"lastUpdated": "2021-05-18 20:04:42"
 =======
 <<<<<<< HEAD
@@ -18,6 +19,9 @@
 	"lastUpdated": "2020-12-15 03:03:06"
 >>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
 >>>>>>> 5f00c4ca8b31ceb7f9f4e847436a453442ebbcb6
+=======
+	"lastUpdated": "2021-05-18 20:04:42"
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 }
 
 /*

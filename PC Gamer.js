@@ -1,21 +1,21 @@
 {
 	"translatorID": "274284a8-fc91-4f54-be77-bfcb7f9c3d6f",
 	"label": "PC Gamer",
-	"creator": "czar",
-	"target": "^https?://(www\\.)?pcgamer\\.com",
+	"creator": "czar, Bao Trinh",
+	"target": "^https?://(www\\.)?pcgamer\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-07 03:30:20"
+	"lastUpdated": "2021-08-15 21:10:04"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2018 czar
+	Copyright © 2018-2021 czar, Bao Trinh
 	http://en.wikipedia.org/wiki/User_talk:Czar
 	
 	This file is part of Zotero.
@@ -36,38 +36,51 @@
 	***** END LICENSE BLOCK *****
 */
 
-
-function detectWeb(doc, url) {
-	var isBlogPost = ZU.xpath(doc,'//*[@id="main"]/article');
-	if (isBlogPost.length) {
-		return "blogPost";
-	} else if (getSearchResults(doc, true)) {
-		return "multiple";
-	}
+function getLinkedData(doc) {
+	const linkedData = [...doc.querySelectorAll('script[type="application/ld+json"]')]
+		.map(x => JSON.parse(x.innerText))
+		.find(x => ("@type" in x && !(["BreadcrumbList"].includes(x["@type"]))));
+	return linkedData;
 }
 
+function detectWeb(doc) {
+	const linkedData = getLinkedData(doc);
+	const pageType = linkedData ? linkedData["@type"] : null;
+	switch (pageType) {
+		case "Article":
+		case "Product":
+			return "magazineArticle";
+		case "NewsArticle":
+			return "newspaperArticle";
+		case "WebPage":
+		default:
+			if (getSearchResults(doc, true)) {
+				return "multiple";
+			}
+			break;
+	}
+
+	return false;
+}
 
 function scrape(doc, url) {
 	var translator = Zotero.loadTranslator('web');
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48'); // embedded metadata
 	translator.setDocument(doc);
-	
-	translator.setHandler('itemDone', function (obj, item) { // correct bad metadata in here
-		item.itemType = "blogPost";
-		item.publicationTitle = "PC Gamer";
-		item.language = "en-US";
-		item.creators = []; // reset bad author metadata
-		var authorMetadata = doc.querySelectorAll('a[rel="author"]');
-		for (let author of authorMetadata) {
-			item.creators.push(ZU.cleanAuthor(author.text, "author"));
+
+	translator.setHandler('itemDone', function (obj, item) {
+		const linkedData = getLinkedData(doc);
+		if (linkedData && linkedData.publisher.name) item.publicationTitle = linkedData.publisher.name;
+
+		for (const tag of doc.querySelectorAll('*#articleTag .tag a')) {
+			item.tags.push(tag.textContent);
 		}
+
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function(trans) {
-		trans.addCustomFields({ // pull from meta tags in here
-			'pub_date': 'date'
-		});
+	translator.getTranslatorObject(function (trans) {
+		trans.itemType = detectWeb(doc, url);
 		trans.doWeb(doc, url);
 	});
 }
@@ -76,11 +89,10 @@ function scrape(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('div#content > div.mainCarousel span.article-name, div.listingResults h3');
-	var links = doc.querySelectorAll('div#content > div.mainCarousel div.feature-block-item-wrapper > a:first-of-type, div.listingResults div.listingResult > a:first-of-type');
-	for (let i=0; i<rows.length; i++) {
-		let href = links[i].href;
-		let title = ZU.trimInternal(rows[i].textContent);
+	var rows = doc.querySelectorAll('a.article-link');
+	for (const row of rows) {
+		const href = row.href;
+		const title = ZU.trimInternal(text(row, '.article-name'));
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -91,24 +103,24 @@ function getSearchResults(doc, checkOnly) {
 
 
 function doWeb(doc, url) {
-	switch (detectWeb(doc, url)) {
-		case "multiple":
-			Zotero.selectItems(getSearchResults(doc, false), function (items) {
-				if (!items) {
-					return true;
-				}
-				var articles = [];
-				for (var i in items) {
-					articles.push(i);
-				}
-				ZU.processDocuments(articles, scrape);
-			});
-			break;
-		case "blogPost":
-			scrape(doc, url);
-			break;
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), (items) => {
+			if (!items) {
+				return true;
+			}
+			const articles = [];
+			for (const i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+			return true;
+		});
+	}
+	else {
+		scrape(doc, url);
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -116,7 +128,7 @@ var testCases = [
 		"url": "https://www.pcgamer.com/the-voice-behind-symmetra-on-working-with-blizzard-overwatch-dream-couples-and-dd/",
 		"items": [
 			{
-				"itemType": "blogPost",
+				"itemType": "magazineArticle",
 				"title": "The voice behind Symmetra on working with Blizzard, Overwatch dream couples, and D&D",
 				"creators": [
 					{
@@ -125,17 +137,35 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2017-02-09T22:22:41+00:00",
+				"date": "2017-02-09T22:22:41.390Z",
 				"abstractNote": "Anjali Bhimani is a self-proclaimed Chaotic Good who thinks Soldier: 76 and Ana are secretly hooking up.",
-				"blogTitle": "PC Gamer",
-				"language": "en-US",
+				"language": "en",
+				"libraryCatalog": "www.pcgamer.com",
+				"publicationTitle": "PC Gamer",
 				"url": "https://www.pcgamer.com/the-voice-behind-symmetra-on-working-with-blizzard-overwatch-dream-couples-and-dd/",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Best of"
+					},
+					{
+						"tag": "FPS"
+					},
+					{
+						"tag": "Interviews"
+					},
+					{
+						"tag": "Overwatch"
+					},
+					{
+						"tag": "Pro"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -148,39 +178,106 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.pcgamer.com/best-skyrim-mods/",
+		"url": "https://www.pcgamer.com/the-9-best-digital-card-games-that-arent-hearthstone/",
 		"items": [
 			{
-				"itemType": "blogPost",
-				"title": "The best Skyrim mods",
+				"itemType": "magazineArticle",
+				"title": "These 9 card games are better than Hearthstone",
 				"creators": [
 					{
-						"firstName": "Christopher",
-						"lastName": "Livingston",
-						"creatorType": "author"
-					},
-					{
 						"firstName": "Tom",
-						"lastName": "Hatfield",
+						"lastName": "Marks",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Diana",
-						"lastName": "Papiz",
+						"firstName": "Jody",
+						"lastName": "Macgregor",
 						"creatorType": "author"
 					}
 				],
-				"date": "2018-02-01T20:52:00+00:00",
-				"abstractNote": "We've collected over 100 of our favorite mods for Bethesda's fantasy RPG.",
-				"blogTitle": "PC Gamer",
-				"language": "en-US",
-				"url": "https://www.pcgamer.com/best-skyrim-mods/",
+				"date": "2020-12-13T06:05:20Z",
+				"abstractNote": "From Gwent to Faeria, there are plenty of great multiplayer card games on PC.",
+				"language": "en",
+				"libraryCatalog": "www.pcgamer.com",
+				"publicationTitle": "PC Gamer",
+				"url": "https://www.pcgamer.com/the-9-best-digital-card-games-that-arent-hearthstone/",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Best of"
+					},
+					{
+						"tag": "Card Game"
+					},
+					{
+						"tag": "Faeria"
+					},
+					{
+						"tag": "Gwent"
+					},
+					{
+						"tag": "Hearthstone"
+					},
+					{
+						"tag": "Kards"
+					},
+					{
+						"tag": "Magic: The Gathering Arena"
+					},
+					{
+						"tag": "The Elder Scrolls: Legends"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.pcgamer.com/it-turns-out-the-fcc-drastically-overstated-us-broadband-deployment-after-all/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "It turns out the FCC ‘drastically overstated’ US broadband deployment after all",
+				"creators": [
+					{
+						"firstName": "Paul",
+						"lastName": "Lilly",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019-05-02T17:01:15Z",
+				"abstractNote": "Ajit Pai isn't sweating it, though.",
+				"language": "en",
+				"libraryCatalog": "www.pcgamer.com",
+				"publicationTitle": "PC Gamer",
+				"url": "https://www.pcgamer.com/it-turns-out-the-fcc-drastically-overstated-us-broadband-deployment-after-all/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Ajit Pai"
+					},
+					{
+						"tag": "FCC"
+					},
+					{
+						"tag": "Hardware"
+					},
+					{
+						"tag": "broadband"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -189,6 +286,16 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.pcgamer.com/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.pcgamer.com/author/paul-lilly/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.pcgamer.com/indie/",
 		"items": "multiple"
 	}
 ]

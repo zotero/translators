@@ -2,14 +2,14 @@
 	"translatorID": "276cb34c-6861-4de7-a11d-c2e46fb8af28",
 	"label": "Semantic Scholar",
 	"creator": "Guy Aglionby",
-	"target": "^https?://(www\\.semanticscholar\\.org/paper/.+|pdfs\\.semanticscholar\\.org/)",
+	"target": "^https?://(www\\.semanticscholar\\.org/(paper/.+|search\\?)|pdfs\\.semanticscholar\\.org/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-02-05 15:02:05"
+	"lastUpdated": "2022-08-08 18:14:55"
 }
 
 /*
@@ -42,14 +42,44 @@ var bibtex2zoteroTypeMap = {
 	article: "journalArticle"
 };
 
-function detectWeb(doc) {
+function detectWeb(doc, url) {
+	if (getSearchResults(doc, true)) {
+		return 'multiple';
+	}
+	else if (url.includes('semanticscholar.org/search?') && doc.querySelector('#app')) {
+		Z.monitorDOMChanges(
+			doc.querySelector('#app'),
+			{ childList: true, subtree: true }
+		);
+		return false;
+	}
 	let citation = ZU.xpathText(doc, '//pre[@class="bibtex-citation"]');
 	let type = citation.split('{')[0].replace('@', '');
 	return bibtex2zoteroTypeMap[type];
 }
 
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('.result-page .cl-paper-row > a');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
 function doWeb(doc, url) {
-	if (url.includes('pdfs.semanticscholar.org')) {
+	if (detectWeb(doc) == 'multiple') {
+		Zotero.selectItems(getSearchResults(doc, false), (items) => {
+			if (items) ZU.processDocuments(Object.keys(items), parseDocument);
+		});
+	}
+	else if (url.includes('pdfs.semanticscholar.org')) {
 		let urlComponents = url.split('/');
 		let paperId = urlComponents[3] + urlComponents[4].replace('.pdf', '');
 		const API_URL = 'https://api.semanticscholar.org/';

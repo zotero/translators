@@ -2,14 +2,18 @@
 	"translatorID": "dac476e4-401d-430a-8571-a97c31c3b65e",
 	"label": "Taylor and Francis+NEJM",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://(www\\.)?(tandfonline\\.com|nejm\\.org)",
+	"target": "^https?://(www\\.)?(tandfonline\\.com|nejm\\.org)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
+<<<<<<< HEAD
 	"lastUpdated": "2021-10-12 17:18:10"
+=======
+	"lastUpdated": "2022-07-19 15:27:10"
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 }
 
 /*
@@ -38,22 +42,27 @@
 function detectWeb(doc, url) {
 	if (url.match(/\/doi\/(abs|full|figure)\/10\./)) {
 		return "journalArticle";
-	} else if ((url.indexOf('/action/doSearch?')>-1 || url.indexOf('/toc/')>-1) && getSearchResults(doc, true)) {
+	}
+	else if ((url.includes('/action/doSearch?') || url.includes('/toc/')) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	//multiples in search results:
+	// multiples in search results:
 	var rows = ZU.xpath(doc, '//article[contains(@class, "searchResultItem")]//a[contains(@href, "/doi/") and contains(@class, "ref")]');
-	if (rows.length==0) {
-		//multiples in toc view:
+	if (rows.length == 0) {
+		// multiples in toc view:
 		rows = ZU.xpath(doc, '//div[contains(@class, "articleLink") or contains(@class, "art_title")]/a[contains(@href, "/doi/") and contains(@class, "ref")]');
+		if (!rows.length) {
+			rows = doc.querySelectorAll('.o-results li > a[href*="/doi/"]');
+		}
 	}
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -69,15 +78,12 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
+			ZU.processDocuments(Object.keys(items), scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -89,24 +95,31 @@ function scrape(doc, url) {
 
 	var baseUrl = url.match(/https?:\/\/[^/]+/)[0];
 	var postUrl = baseUrl + '/action/downloadCitation';
+<<<<<<< HEAD
 	var postBody = 'downloadFileName=citation&' +
 					'direct=true&' +
 					'include=abs&' +
 					'doi=';
+=======
+	var postBody = 	'downloadFileName=citation&'
+					+ 'direct=true&'
+					+ 'include=abs&'
+					+ 'doi=';
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 	var risFormat = '&format=ris';
 	var bibtexFormat = '&format=bibtex';
 
-	ZU.doPost(postUrl, postBody + doi + bibtexFormat, function(text) {
+	ZU.doPost(postUrl, postBody + doi + bibtexFormat, function (text) {
 		var translator = Zotero.loadTranslator("import");
 		// Use BibTeX translator
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 		translator.setString(text);
-		translator.setHandler("itemDone", function(obj, item) {
+		translator.setHandler("itemDone", function (obj, item) {
 			// BibTeX content can have HTML entities (e.g. &amp;) in various fields
 			// We'll just try to unescape the most likely fields to contain these entities
 			// Note that RIS data is not always correct, so we avoid using it
 			var unescapeFields = ['title', 'publicationTitle', 'abstractNote'];
-			for (var i=0; i<unescapeFields.length; i++) {
+			for (var i = 0; i < unescapeFields.length; i++) {
 				if (item[unescapeFields[i]]) {
 					item[unescapeFields[i]] = ZU.unescapeHTML(item[unescapeFields[i]]);
 				}
@@ -114,9 +127,9 @@ function scrape(doc, url) {
 
 			item.bookTitle = item.publicationTitle;
 
-			//unfortunately, bibtex is missing some data
-			//publisher, ISSN/ISBN
-			ZU.doPost(postUrl, postBody + doi + risFormat, function(text) {
+			// unfortunately, bibtex is missing some data
+			// publisher, ISSN/ISBN
+			ZU.doPost(postUrl, postBody + doi + risFormat, function (text) {
 				// Y1 is online publication date
 				if (/^DA\s+-\s+/m.test(text)) {
 					text = text.replace(/^Y1(\s+-.*)/gm, '');
@@ -125,20 +138,21 @@ function scrape(doc, url) {
 				let dcType = ZU.xpathText(doc, '//meta[@name="dc.Type"]/@content');
 				if (dcType && dcType.match(/book\s?-?review/gi)) item.tags.push("Book Review");
 				
-				risTrans = Zotero.loadTranslator("import");
+				var risTrans = Zotero.loadTranslator("import");
 				risTrans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 				risTrans.setString(text);
-				risTrans.setHandler("itemDone", function(obj, risItem) {
-					if (!item.title) item.title = "<no title>";	//RIS title can be even worse, it actually says "null"
+				risTrans.setHandler("itemDone", function (obj, risItem) {
+					if (!item.title) item.title = "<no title>";	// RIS title can be even worse, it actually says "null"
 					if (risItem.date) item.date = risItem.date; // More complete
 					item.publisher = risItem.publisher;
 					item.ISSN = risItem.ISSN;
 					item.ISBN = risItem.ISBN;
-					//clean up abstract removing Abstract:, Summary: or Abstract Summary:
+					// clean up abstract removing Abstract:, Summary: or Abstract Summary:
 					if (item.abstractNote) item.abstractNote = item.abstractNote.replace(/^(Abstract)?\s*(Summary)?:?\s*/i, "");
 					if (item.title.toUpperCase() == item.title) {
 						item.title = ZU.capitalizeTitle(item.title, true);
 					}
+<<<<<<< HEAD
 					//ubtue:adding subtitle
 					let subtitle = ZU.xpathText(doc, '//*[@class="NLM_subtitle"]');
 					if (subtitle && subtitle.length) item.title += ': ' + subtitle;
@@ -146,6 +160,9 @@ function scrape(doc, url) {
 					//e.g. corporate bodies "Bill Gaventa and National Collaborative on Faith and Disability, with" https://doi.org/10.1080/23312521.2020.1743223
 					//or title like "Rev." https://www.tandfonline.com/doi/full/10.1080/23312521.2020.1738627
 					item.creators = risItem.creators;
+=======
+					if (risItem.creators) item.creators = risItem.creators;
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 					finalizeItem(item, doc, doi, baseUrl);
 				});
 				risTrans.translate();
@@ -165,10 +182,15 @@ function addArticleNumber (doc, item) {
 function finalizeItem(item, doc, doi, baseUrl) {
 	var pdfurl = baseUrl + '/doi/pdf/';
 	var absurl = baseUrl + '/doi/abs/';
+<<<<<<< HEAD
 
 	//add keywords
+=======
+	
+	// add keywords
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 	var keywords = ZU.xpath(doc, '//div[contains(@class, "abstractKeywords")]//a');
-	for (var i=0; i<keywords.length; i++) {
+	for (var i = 0; i < keywords.length; i++) {
 		item.tags.push(keywords[i].textContent);
 	}
 
@@ -180,6 +202,7 @@ function finalizeItem(item, doc, doi, baseUrl) {
 			item.tags.push("Book Reviews");
 	}
 	
+<<<<<<< HEAD
 	// numbering issues with slash, e.g. in case of  double issue "1-2" > "1/2"
 	if (item.issue) item.issue = item.issue.replace('-', '/');
 	
@@ -201,6 +224,15 @@ function finalizeItem(item, doc, doi, baseUrl) {
 	let AccessIconLocation = doc.querySelector('.accessIconLocation[alt]');
 	if (AccessIconLocation && AccessIconLocation.alt.match(/open\s+access/gi)) item.notes.push('LF:');
 	addArticleNumber(doc, item);
+=======
+	// add attachments
+	item.attachments = [{
+		title: 'Full Text PDF',
+		url: pdfurl + doi,
+		mimeType: 'application/pdf'
+	}];
+
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 	item.complete();
 }
 
@@ -254,12 +286,36 @@ var testCases = [
 						"tag": "informality"
 					},
 					{
+<<<<<<< HEAD
 						"tag": "labor costs"
 					},
 					{
 						"tag": "training"
 					}
 				],
+=======
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Peru"
+					},
+					{
+						"tag": "employment"
+					},
+					{
+						"tag": "informality"
+					},
+					{
+						"tag": "labor costs"
+					},
+					{
+						"tag": "training"
+					}
+				],
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 				"notes": [],
 				"seeAlso": []
 			}
@@ -317,12 +373,36 @@ var testCases = [
 						"tag": "informality"
 					},
 					{
+<<<<<<< HEAD
 						"tag": "labor costs"
 					},
 					{
 						"tag": "training"
 					}
 				],
+=======
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Peru"
+					},
+					{
+						"tag": "employment"
+					},
+					{
+						"tag": "informality"
+					},
+					{
+						"tag": "labor costs"
+					},
+					{
+						"tag": "training"
+					}
+				],
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 				"notes": [],
 				"seeAlso": []
 			}
@@ -361,10 +441,20 @@ var testCases = [
 				"attachments": [],
 				"tags": [
 					{
+<<<<<<< HEAD
+=======
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 						"tag": "D12"
 					},
 					{
 						"tag": "D81"
+<<<<<<< HEAD
 					},
 					{
 						"tag": "M31"
@@ -380,6 +470,80 @@ var testCases = [
 					},
 					{
 						"tag": "willingness to pay"
+=======
+					},
+					{
+						"tag": "M31"
+					},
+					{
+						"tag": "adjustment mechanism"
+					},
+					{
+						"tag": "contigent valuation method"
+					},
+					{
+						"tag": "purchase decisions"
+					},
+					{
+						"tag": "willingness to pay"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.nejm.org/toc/nejm/medical-journal",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.nejm.org/doi/full/10.1056/NEJMp1207920",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Cutting Family Planning in Texas",
+				"creators": [
+					{
+						"lastName": "White",
+						"firstName": "Kari",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Grossman",
+						"firstName": "Daniel",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Hopkins",
+						"firstName": "Kristine",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Potter",
+						"firstName": "Joseph E.",
+						"creatorType": "author"
+					}
+				],
+				"date": "September 27, 2012",
+				"DOI": "10.1056/NEJMp1207920",
+				"ISSN": "0028-4793",
+				"abstractNote": "Four fundamental principles drive public funding for family planning. First, unintended pregnancy is associated with negative health consequences, including reduced use of prenatal care, lower breast-feeding rates, and poor maternal and neonatal outcomes.1,2 Second, governments realize substantial cost savings by investing in family planning, which reduces the rate of unintended pregnancies and the costs of prenatal, delivery, postpartum, and infant care.3 Third, all Americans have the right to choose the timing and number of their children. And fourth, family planning enables women to attain their educational and career goals and families to provide for their children. These principles led . . .",
+				"extra": "PMID: 23013071",
+				"issue": "13",
+				"itemID": "doi:10.1056/NEJMp1207920",
+				"libraryCatalog": "Taylor and Francis+NEJM",
+				"pages": "1179-1181",
+				"publicationTitle": "New England Journal of Medicine",
+				"url": "https://doi.org/10.1056/NEJMp1207920",
+				"volume": "367",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 					}
 				],
 				"notes": [],
@@ -424,12 +588,36 @@ var testCases = [
 						"tag": "High-speed transport systems; "
 					},
 					{
+<<<<<<< HEAD
 						"tag": "Interest groups "
 					},
 					{
 						"tag": "Multicriteria analysis; "
 					}
 				],
+=======
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Entropy method; "
+					},
+					{
+						"tag": "Europe; "
+					},
+					{
+						"tag": "High-speed transport systems; "
+					},
+					{
+						"tag": "Interest groups "
+					},
+					{
+						"tag": "Multicriteria analysis; "
+					}
+				],
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 				"notes": [],
 				"seeAlso": []
 			}
@@ -473,6 +661,7 @@ var testCases = [
 				"attachments": [],
 				"tags": [
 					{
+<<<<<<< HEAD
 						"tag": "CO2 diffusion"
 					},
 					{
@@ -485,6 +674,26 @@ var testCases = [
 						"tag": "concentration dependence"
 					}
 				],
+=======
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "CO2 diffusion"
+					},
+					{
+						"tag": "CO2 evolution"
+					},
+					{
+						"tag": "CO2 sorption"
+					},
+					{
+						"tag": "concentration dependence"
+					}
+				],
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 				"notes": [],
 				"seeAlso": []
 			}
@@ -560,6 +769,7 @@ var testCases = [
 				"attachments": [],
 				"tags": [
 					{
+<<<<<<< HEAD
 						"tag": "Book Review"
 					},
 					{
@@ -740,6 +950,14 @@ var testCases = [
 					},
 					"LF:"
 				],
+=======
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 				"seeAlso": []
 			}
 		]

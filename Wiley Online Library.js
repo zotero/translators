@@ -10,6 +10,7 @@
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
 <<<<<<< HEAD
+<<<<<<< HEAD
 	"lastUpdated": "2021-10-12 18:02:11"
 =======
 <<<<<<< HEAD
@@ -18,6 +19,9 @@
 	"lastUpdated": "2020-09-08 01:32:51"
 >>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
 >>>>>>> 5f00c4ca8b31ceb7f9f4e847436a453442ebbcb6
+=======
+	"lastUpdated": "2021-10-12 18:02:11"
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 }
 
 /*
@@ -39,12 +43,15 @@
  */
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 // attr()/text() v2
 // eslint-disable-next-line
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
 
 >>>>>>> 5f00c4ca8b31ceb7f9f4e847436a453442ebbcb6
+=======
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 
 function fixCase(authorName) {
 	if (typeof authorName != 'string') return authorName;
@@ -133,10 +140,14 @@ function scrapeBook(doc, url) {
 				break;
 			case 'doi':
 <<<<<<< HEAD
+<<<<<<< HEAD
 				newItem.DOI = ZU.cleanDOI(match[2]);
 =======
 				newItem.DOI = match[2];
 >>>>>>> 5f00c4ca8b31ceb7f9f4e847436a453442ebbcb6
+=======
+				newItem.DOI = ZU.cleanDOI(match[2]);
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 				break;
 			case 'book series':
 				newItem.series = match[2];
@@ -216,10 +227,14 @@ function scrapeEM(doc, url) {
 		// set correct print publication date
 		if (date) item.date = date;
 <<<<<<< HEAD
+<<<<<<< HEAD
 		
 =======
 
 >>>>>>> 5f00c4ca8b31ceb7f9f4e847436a453442ebbcb6
+=======
+		
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 		// remove pdf attachments
 		for (let i = 0, n = item.attachments.length; i < n; i++) {
 			if (item.attachments[i].mimeType == 'application/pdf') {
@@ -297,6 +312,7 @@ function scrapeBibTeX(doc, url) {
 	let postUrl;
 	if (doc.location.host.endsWith('.onlinelibrary.wiley.com')) {
 		postUrl = 'https://onlinelibrary.wiley.com/action/downloadCitation';
+<<<<<<< HEAD
 	}
 <<<<<<< HEAD
 	else {
@@ -331,10 +347,16 @@ function scrapeBibTeX(doc, url) {
 =======
 		var re = /^\s*@[a-zA-Z]+[\(\{]/;
 =======
+=======
+	}
+	else {
+		postUrl = '/action/downloadCitation';
+	}
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 	var body = 'direct=direct'
 				+ '&doi=' + encodeURIComponent(doi)
 				+ '&downloadFileName=pericles_14619563AxA'
-				+ '&format=bibtex' // '&format=ris' +
+				+ '&format=bibtex'
 				+ '&include=abs'
 				+ '&submit=Download';
 
@@ -367,15 +389,6 @@ function scrapeBibTeX(doc, url) {
 			for (var i=0, n=item.creators.length; i<n; i++) {
 =======
 		translator.setHandler('itemDone', function (obj, item) {
-			// BibTeX throws the last names and first names together
-			// Therefore, we prefer creators names from EM (if available)
-			var authors = doc.querySelectorAll('meta[name="citation_author"]');
-			if (authors && authors.length > 0) {
-				item.creators = [];
-				for (let i = 0; i < authors.length; i++) {
-					item.creators.push(ZU.cleanAuthor(authors[i].content, 'author'));
-				}
-			}
 			// fix author case
 			for (let i = 0, n = item.creators.length; i < n; i++) {
 >>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
@@ -494,6 +507,9 @@ function scrapeBibTeX(doc, url) {
 					'//meta[@name="citation_fulltext_html_url"][1]/@content')
 				|| url;
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 			
 			if (item.DOI) {
 				item.DOI = ZU.cleanDOI(item.DOI);
@@ -502,8 +518,11 @@ function scrapeBibTeX(doc, url) {
 			if (item.itemID) {
 				item.itemID = 'doi:' + ZU.cleanDOI(item.itemID);
 			}
+<<<<<<< HEAD
 =======
 >>>>>>> 5f00c4ca8b31ceb7f9f4e847436a453442ebbcb6
+=======
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 
 			// bookTitle
 			if (!item.bookTitle) {

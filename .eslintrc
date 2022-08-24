@@ -16,7 +16,14 @@
 		"DOMParser": "readonly",
 		"XPathResult": "readonly",
 		"XMLSerializer": "readonly",
-		"atob": "readonly"
+		"attr": "readonly",
+		"innerText": "readonly",
+		"text": "readonly",
+		"atob": "readonly",
+		"request": "readonly",
+		"requestText": "readonly",
+		"requestJSON": "readonly",
+		"requestDocument": "readonly"
 	},
 	"rules": {
 		"no-unused-vars": [

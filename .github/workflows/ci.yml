@@ -14,17 +14,17 @@ jobs:
       # and get more history on the current branch so we can find the branch point
       - run: git fetch origin master:master --depth=1
         if: github.ref != 'refs/heads/master'
-      - run: git fetch --update-shallow --depth=25 origin $(git rev-list HEAD)
+      - run: git fetch --update-shallow --depth=100 origin $(git rev-list HEAD)
       
       - name: Install Node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
-          node-version: 14
+          node-version: 17
       
       # Local via act
       - name: Install packages for act
         if: env.ACT == 'true'
-        run: apt update && apt install -y xvfb git
+        run: apt update && apt install -y xvfb git rsync
       
       - name: Get current connector hash
         id: get-connector-hash
@@ -45,17 +45,19 @@ jobs:
       #- name: Debugging with tmate
       #  uses: mxschmitt/action-tmate@v3.1
       
-      - name: Lint
-        run: ./lint.sh
-        working-directory: .ci
-      
-      - name: Check deleted.txt
-        run: ./checkDeletedTxt.sh
-        working-directory: .ci
-      
       - name: Test pull request
         if: github.event_name == 'pull_request'
         env:
           BROWSER_EXECUTABLE: /home/runner/work/translators/translators/.ci/pull-request-check/xvfb-run-chrome
         run: ./check-pull-request.sh
         working-directory: .ci/pull-request-check
+      
+      - name: Check deleted.txt
+        run: ./checkDeletedTxt.sh
+        working-directory: .ci
+        if: ${{ success() || failure() }}
+      
+      - name: Lint
+        run: ./lint.sh
+        working-directory: .ci
+        if: ${{ success() || failure() }}

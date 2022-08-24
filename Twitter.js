@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-01-09 18:02:12"
+	"lastUpdated": "2022-02-01 20:17:45"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	Twitter Translator
-	Copyright © 2020 Bo An, Dan Stillman
+	Copyright © 2020-2021 Bo An, Dan Stillman
 	
 	This file is part of Zotero.
 	
@@ -36,13 +36,12 @@
    	***** END LICENSE BLOCK *****
 */
 
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
-function detectWeb(doc, _url) {
-	if (_url.includes('/status/')) {
-		return "blogPost";
+let titleRe = /^(?:\(\d+\) )?(.+) .* Twitter: .([\S\s]+). \/ Twitter/;
+
+function detectWeb(doc, url) {
+	if (url.includes('/status/')) {
+		return "forumPost";
 	}
 	return false;
 }
@@ -62,7 +61,7 @@ function unshortenURLs(doc, str) {
 
 function unshortenURL(doc, tCoURL) {
 	var a = doc.querySelector('a[href*="' + tCoURL + '"]');
-	return (a ? a.title : false) || tCoURL;
+	return (a ? a.textContent.replace(/…$/, '') : false) || tCoURL;
 }
 
 function extractURLs(doc, str) {
@@ -76,18 +75,30 @@ function extractURLs(doc, str) {
 	return urls;
 }
 
+// Find the link to the permalink (e.g., "8h")
+function findPermalinkLink(doc, canonicalURL) {
+	let path = canonicalURL.match(/https?:\/\/[^/]+(.+)/)[1];
+	return doc.querySelector(`a[href="${path}" i]`);
+}
+
 function doWeb(doc, url) {
 	scrape(doc, url);
 }
 
 function scrape(doc, url) {
-	var item = new Zotero.Item("blogPost");
+	var item = new Zotero.Item("forumPost");
 
-	var canonicalURL = url.match(/^([^?#]+)/)[1];
-	var originalTitle = text(doc, 'title');
+	var canonicalURL = doc.querySelector('link[rel="canonical"]').href;
+	// For unclear reasons, in some cases the URL doesn't have capitalization
+	// but rel="canonical" does, and in other cases it's the other way around,
+	// so if rel="canonical" doesn't have any caps, use the URL
+	if (!/[A-Z]/.test(canonicalURL)) {
+		canonicalURL = url.match(/^([^?#]+)/)[1];
+	}
+	var originalTitle = doc.title;
 	var unshortenedTitle = ZU.unescapeHTML(unshortenURLs(doc, originalTitle));
 	// Extract tweet from "[optional count] [Display Name] on Twitter: “[tweet]”"
-	var matches = unshortenedTitle.match(/^(?:\(\d+\) )?(.+) .* Twitter: .([\S\s]+). \/ Twitter/);
+	var matches = unshortenedTitle.match(titleRe);
 	var [, author, tweet] = matches;
 	
 	// Title is tweet with newlines removed
@@ -96,8 +107,22 @@ function scrape(doc, url) {
 	// Don't set short title when tweet contains colon
 	item.shortTitle = false;
 	
+	// Identify the tweet block by looking for the client link (e.g, "Tweetbot")
+	var articleEl;
 	var clientLink = doc.querySelector('a[href*="source-labels"]');
-	var articleEl = clientLink.closest('article');
+	if (clientLink) {
+		articleEl = clientLink.closest('article');
+	}
+	// If client link not found, use permalink
+	//
+	// This is the case on share URLs such as
+	// https://twitter.com/aerospacecorp/status/1391160460150382598?s=27,
+	// but that doesn't serve content to the test runner for some reason, so
+	// we don't have a test for it.
+	else {
+		let a = findPermalinkLink(doc, canonicalURL);
+		articleEl = a.closest('article');
+	}
 	var tweetSelector = 'article[role="article"]';
 	
 	// If the title is modified (e.g., because we stripped newlines), add the
@@ -121,9 +146,9 @@ function scrape(doc, url) {
 	}
 
 	item.language = attr(articleEl, 'div[lang]', 'lang');
-			
+	
 	item.creators.push({
-		lastName: author,
+		lastName: `${author} [@${canonicalURL.split('/')[3]}]`,
 		fieldMode: 1,
 		creatorType: 'author'
 	});
@@ -136,6 +161,19 @@ function scrape(doc, url) {
 		let str = span.textContent;
 		if (!str.includes(dotSep)) {
 			// Z.debug("Date separator not found")
+			
+			// Share URLs don't show the date, so use the <time> in the
+			// permalink link
+			//
+			// E.g., https://twitter.com/aerospacecorp/status/1391160460150382598?s=27
+			let a = findPermalinkLink(doc, canonicalURL);
+			if (a) {
+				let time = a.querySelector('time');
+				if (time) {
+					let dt = time.getAttribute('datetime');
+					item.date = dt.replace(/:\d\d\.000/, '');
+				}
+			}
 			continue;
 		}
 		let [time, date] = str.split(dotSep);
@@ -158,9 +196,8 @@ function scrape(doc, url) {
 		}
 	}
 	
-	var urlParts = canonicalURL.split('/');
-	item.blogTitle = '@' + urlParts[3];
-	item.websiteType = "Tweet";
+	item.forumTitle = "Twitter";
+	item.postType = "Tweet";
 	item.url = canonicalURL;
 	
 	/*
@@ -231,20 +268,20 @@ var testCases = [
 		"defer": true,
 		"items": [
 			{
-				"itemType": "blogPost",
-				"title": "Zotero 3.0 beta is now available with duplicate detection and tons more. Runs outside Firefox with Chrome or Safari! http://www.zotero.org/blog/announcing-zotero-3-0-beta-release/",
+				"itemType": "forumPost",
+				"title": "Zotero 3.0 beta is now available with duplicate detection and tons more. Runs outside Firefox with Chrome or Safari! http://zotero.org/blog/announcing-zotero-3-0-beta-release/",
 				"creators": [
 					{
-						"lastName": "Zotero",
+						"lastName": "Zotero [@zotero]",
 						"fieldMode": 1,
 						"creatorType": "author"
 					}
 				],
 				"date": "2011-08-22T11:52Z",
-				"blogTitle": "@zotero",
+				"forumTitle": "Twitter",
 				"language": "en",
+				"postType": "Tweet",
 				"url": "https://twitter.com/zotero/status/105608278976905216",
-				"websiteType": "Tweet",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -257,11 +294,7 @@ var testCases = [
 					}
 				],
 				"tags": [],
-				"notes": [
-					{
-						"note": "<p>“Zotero 3.0 beta is now available with duplicate detection and tons more. Runs outside Firefox with Chrome or Safari!&nbsp; http://www.zotero.org/blog/announcing-zotero-3-0-beta-release/”</p>"
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
@@ -272,20 +305,20 @@ var testCases = [
 		"defer": true,
 		"items": [
 			{
-				"itemType": "blogPost",
+				"itemType": "forumPost",
 				"title": "Zotero, Mendeley, EndNote. You have a lot of choices for managing your research. Here’s why we think you should choose Zotero. https://t.co/Qu2g5cGBGu",
 				"creators": [
 					{
-						"lastName": "Zotero",
+						"lastName": "Zotero [@zotero]",
 						"fieldMode": 1,
 						"creatorType": "author"
 					}
 				],
 				"date": "2018-09-05T18:30Z",
-				"blogTitle": "@zotero",
+				"forumTitle": "Twitter",
 				"language": "en",
+				"postType": "Tweet",
 				"url": "https://twitter.com/zotero/status/1037407737154596864",
-				"websiteType": "Tweet",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -309,20 +342,20 @@ var testCases = [
 		"defer": true,
 		"items": [
 			{
-				"itemType": "blogPost",
+				"itemType": "forumPost",
 				"title": "You don’t have to send students to a site that will spam them with ads or try to charge them money just to build a bibliography. Instead, tell them about ZoteroBib, the free, open-source, privacy-protecting bibliography generator from Zotero. https://zbib.org",
 				"creators": [
 					{
-						"lastName": "Zotero",
+						"lastName": "Zotero [@zotero]",
 						"fieldMode": 1,
 						"creatorType": "author"
 					}
 				],
 				"date": "2019-03-12T21:30Z",
-				"blogTitle": "@zotero",
+				"forumTitle": "Twitter",
 				"language": "en",
+				"postType": "Tweet",
 				"url": "https://twitter.com/zotero/status/1105581965405757440",
-				"websiteType": "Tweet",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -346,20 +379,20 @@ var testCases = [
 		"defer": true,
 		"items": [
 			{
-				"itemType": "blogPost",
+				"itemType": "forumPost",
 				"title": "Es ist 21:00 Uhr.",
 				"creators": [
 					{
-						"lastName": "Zeitansage",
+						"lastName": "Zeitansage [@DieZeitansage]",
 						"fieldMode": 1,
 						"creatorType": "author"
 					}
 				],
 				"date": "2018-01-31T20:00Z",
-				"blogTitle": "@DieZeitansage",
+				"forumTitle": "Twitter",
 				"language": "de",
+				"postType": "Tweet",
 				"url": "https://twitter.com/DieZeitansage/status/958792005034930176",
-				"websiteType": "Tweet",
 				"attachments": [
 					{
 						"title": "Snapshot",

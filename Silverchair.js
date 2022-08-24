@@ -2,20 +2,20 @@
 	"translatorID": "3bae3a55-f021-4b59-8a14-43701f336adf",
 	"label": "Silverchair",
 	"creator": "Sebastian Karcher",
-	"target": "/(article|advance-article|advance-article-abstract|article-abstract)/|search-results?|\\/issue(/|$)",
+	"target": "/(article|fullarticle|advance-article|advance-article-abstract|article-abstract|book|edited-volume)(/|\\.aspx)|search-results?|\\/issue(/|s\\.aspx|$)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 280,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-06 20:02:14"
+	"lastUpdated": "2022-08-23 13:00:08"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2020 Sebastian Karcher
+	Copyright © 2020-2022 Sebastian Karcher and Abe Jellinek
 	
 	This file is part of Zotero.
 
@@ -35,15 +35,18 @@
 	***** END LICENSE BLOCK *****
 */
 
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
 
 function detectWeb(doc, url) {
-	let articleRegex = /\/(article|advance-article|advance-article-abstract|article-abstract)\//;
-	if (articleRegex.test(url) && getArticleId(doc)) {
-		return "journalArticle";
+	let articleRegex = /\/(article|fullarticle|advance-article|advance-article-abstract|article-abstract|chapter|chapter-abstract)(\/|\.aspx)/;
+	if (articleRegex.test(url)) {
+		if (getArticleId(doc)) {
+			if (url.includes("/chapter/") || url.includes("/chapter-abstract/")) {
+				return "bookSection";
+			}
+			else {
+				return "journalArticle";
+			}
+		}
 	}
 	else if (getSearchResults(doc, true)) {
 		return "multiple";
@@ -55,7 +58,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	// First one is issue, 2nd one search results
-	var rows = doc.querySelectorAll('#ArticleList h5.item-title>a, #searchResultsPage .al-title a[href*="/article"]');
+	var rows = doc.querySelectorAll('#ArticleList h5.item-title>a, .al-title a[href*="article"], .al-article-items > .customLink > a[href*="article"], a[class="tocLink"]');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -74,7 +77,7 @@ function doWeb(doc, url) {
 		});
 	}
 	else {
-		scrape(doc);
+		scrape(doc, url);
 	}
 }
 
@@ -83,26 +86,49 @@ function getArticleId(doc) {
 	if (!id) {
 		id = attr(doc, 'a[data-article-id]', 'data-article-id');
 	}
+	if (!id) {
+		id = attr(doc, '[data-resource-id]', 'data-resource-id');
+	}
+	// Z.debug(id)
 	return id;
 }
 
-function scrape(doc) {
+function scrape(doc, url) {
 	let id = getArticleId(doc);
 	let type = attr(doc, '.citation-download-wrap input[name="resourceType"]', "value");
+	// Z.debug(type)
 	if (!type) {
-		type = "3";
+		if (detectWeb(doc, url) == "bookSection") {
+			type = "5";
+		}
+		else {
+			type = "3";
+		}
 	}
+	let chapterTitle = text(doc, '.chapter-title-without-label');
 	var risURL = "/Citation/Download?resourceId=" + id + "&resourceType=" + type + "&citationFormat=0";
 	// Z.debug(risURL);
 
 	var pdfURL = attr(doc, 'a.article-pdfLink', 'href');
 	// Z.debug("pdfURL: " + pdfURL);
 	ZU.doGet(risURL, function (text) {
+		if (text.includes('We are sorry, but we are experiencing unusual traffic at this time.')) {
+			throw new Error('Rate-limited');
+		}
+		
 		// Z.debug(text);
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
+			if (item.pages) {
+				// if item.pages only spans one page (4-4), replace the range
+				// with a single page number (4).
+				item.pages = item.pages.trim().replace(/^([^-]+)-\1$/, '$1');
+			}
+			if (item.itemType == "bookSection" && chapterTitle) {
+				item.title = chapterTitle;
+			}
 			if (pdfURL) {
 				item.attachments.push({
 					url: pdfURL,
@@ -396,6 +422,385 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://ashpublications.org/hematology/issue/2019/1",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://jamanetwork.com/journals/jama/fullarticle/2645104",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Clinicopathological Evaluation of Chronic Traumatic Encephalopathy in Players of American Football",
+				"creators": [
+					{
+						"lastName": "Mez",
+						"firstName": "Jesse",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Daneshvar",
+						"firstName": "Daniel H.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kiernan",
+						"firstName": "Patrick T.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Abdolmohammadi",
+						"firstName": "Bobak",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Alvarez",
+						"firstName": "Victor E.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Huber",
+						"firstName": "Bertrand R.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Alosco",
+						"firstName": "Michael L.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Solomon",
+						"firstName": "Todd M.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Nowinski",
+						"firstName": "Christopher J.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "McHale",
+						"firstName": "Lisa",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Cormier",
+						"firstName": "Kerry A.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kubilus",
+						"firstName": "Caroline A.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Martin",
+						"firstName": "Brett M.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Murphy",
+						"firstName": "Lauren",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Baugh",
+						"firstName": "Christine M.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Montenigro",
+						"firstName": "Phillip H.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Chaisson",
+						"firstName": "Christine E.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Tripodis",
+						"firstName": "Yorghos",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kowall",
+						"firstName": "Neil W.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Weuve",
+						"firstName": "Jennifer",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "McClean",
+						"firstName": "Michael D.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Cantu",
+						"firstName": "Robert C.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Goldstein",
+						"firstName": "Lee E.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Katz",
+						"firstName": "Douglas I.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Stern",
+						"firstName": "Robert A.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Stein",
+						"firstName": "Thor D.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "McKee",
+						"firstName": "Ann C.",
+						"creatorType": "author"
+					}
+				],
+				"date": "2017-07-25",
+				"DOI": "10.1001/jama.2017.8334",
+				"ISSN": "0098-7484",
+				"abstractNote": "Players of American football may be at increased risk of long-term neurological conditions, particularly chronic traumatic encephalopathy (CTE).To determine the neuropathological and clinical features of deceased football players with CTE.Case series of 202 football players whose brains were donated for research. Neuropathological evaluations and retrospective telephone clinical assessments (including head trauma history) with informants were performed blinded. Online questionnaires ascertained athletic and military history.Participation in American football at any level of play.Neuropathological diagnoses of neurodegenerative diseases, including CTE, based on defined diagnostic criteria; CTE neuropathological severity (stages I to IV or dichotomized into mild [stages I and II] and severe [stages III and IV]); informant-reported athletic history and, for players who died in 2014 or later, clinical presentation, including behavior, mood, and cognitive symptoms and dementia.Among 202 deceased former football players (median age at death, 66 years [interquartile range, 47-76 years]), CTE was neuropathologically diagnosed in 177 players (87%; median age at death, 67 years [interquartile range, 52-77 years]; mean years of football participation, 15.1 [SD, 5.2]), including 0 of 2 pre–high school, 3 of 14 high school (21%), 48 of 53 college (91%), 9 of 14 semiprofessional (64%), 7 of 8 Canadian Football League (88%), and 110 of 111 National Football League (99%) players. Neuropathological severity of CTE was distributed across the highest level of play, with all 3 former high school players having mild pathology and the majority of former college (27 [56%]), semiprofessional (5 [56%]), and professional (101 [86%]) players having severe pathology. Among 27 participants with mild CTE pathology, 26 (96%) had behavioral or mood symptoms or both, 23 (85%) had cognitive symptoms, and 9 (33%) had signs of dementia. Among 84 participants with severe CTE pathology, 75 (89%) had behavioral or mood symptoms or both, 80 (95%) had cognitive symptoms, and 71 (85%) had signs of dementia.In a convenience sample of deceased football players who donated their brains for research, a high proportion had neuropathological evidence of CTE, suggesting that CTE may be related to prior participation in football.",
+				"issue": "4",
+				"journalAbbreviation": "JAMA",
+				"libraryCatalog": "Silverchair",
+				"pages": "360-370",
+				"publicationTitle": "JAMA",
+				"url": "https://doi.org/10.1001/jama.2017.8334",
+				"volume": "318",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://pubs.geoscienceworld.org/georef/search-results?page=1&q=test&SearchSourceType=1",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://jov.arvojournals.org/article.aspx?articleid=2503433",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Testing models of peripheral encoding using metamerism in an oddity paradigm",
+				"creators": [
+					{
+						"lastName": "Wallis",
+						"firstName": "Thomas S. A.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bethge",
+						"firstName": "Matthias",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wichmann",
+						"firstName": "Felix A.",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016-03-11",
+				"DOI": "10.1167/16.2.4",
+				"ISSN": "1534-7362",
+				"abstractNote": "Most of the visual field is peripheral, and the periphery encodes visual input with less fidelity compared to the fovea. What information is encoded, and what is lost in the visual periphery? A systematic way to answer this question is to determine how sensitive the visual system is to different kinds of lossy image changes compared to the unmodified natural scene. If modified images are indiscriminable from the original scene, then the information discarded by the modification is not important for perception under the experimental conditions used. We measured the detectability of modifications of natural image structure using a temporal three-alternative oddity task, in which observers compared modified images to original natural scenes. We consider two lossy image transformations, Gaussian blur and Portilla and Simoncelli texture synthesis. Although our paradigm demonstrates metamerism (physically different images that appear the same) under some conditions, in general we find that humans can be capable of impressive sensitivity to deviations from natural appearance. The representations we examine here do not preserve all the information necessary to match the appearance of natural scenes in the periphery.",
+				"issue": "2",
+				"journalAbbreviation": "Journal of Vision",
+				"libraryCatalog": "Silverchair",
+				"pages": "4",
+				"publicationTitle": "Journal of Vision",
+				"url": "https://doi.org/10.1167/16.2.4",
+				"volume": "16",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://jov.arvojournals.org/issues.aspx?issueid=934904&journalid=178#issueid=934904",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://academic.oup.com/book/26783/chapter/195715678",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Statistical inference with probabilistic graphical models",
+				"creators": [
+					{
+						"lastName": "Shah",
+						"firstName": "Devavrat",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Krzakala",
+						"firstName": "Florent",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Ricci-Tersenghi",
+						"firstName": "Federico",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Zdeborova",
+						"firstName": "Lenka",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Zecchina",
+						"firstName": "Riccardo",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Tramel",
+						"firstName": "Eric W.",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Cugliandolo",
+						"firstName": "Leticia F.",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2015-12-01",
+				"ISBN": "9780198743736",
+				"abstractNote": "This chapter introduces graphical models as a powerful tool to derive efficient algorithms for inference problems. When dealing with complex interdependent variables, inference problems may become of huge complexity. In this context, the structure of the variables is of great interest. In this chapter, directed and undirected graphical models are first defined, before some crucial results are stated, such as the Hammersley–Clifford theorem of Markov random fields and the junction tree property aimed at finding groupings under which a graphical model becomes a tree. Taking advantage of the structure of the variables, belief propagation is then described, including two particular instances: the sum–product and max–sum algorithms. In the final section, the learning problem is addressed in three different contexts: parameter learning, graphical model learning, and latent graphical model learning.",
+				"bookTitle": "Statistical Physics, Optimization, Inference, and Message-Passing Algorithms: Lecture Notes of the Les Houches School of Physics: Special Issue, October 2013",
+				"extra": "DOI: 10.1093/acprof:oso/9780198743736.003.0001",
+				"libraryCatalog": "Silverchair",
+				"pages": "0",
+				"publisher": "Oxford University Press",
+				"url": "https://doi.org/10.1093/acprof:oso/9780198743736.003.0001",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://academic.oup.com/book/26783",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://pubs.geoscienceworld.org/books/book/2212/chapter-abstract/123622472/Understanding-subsurface-fluvial-architecture-from?redirectedFrom=fulltext",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Understanding subsurface fluvial architecture from a combination of geological well test models and well test data",
+				"creators": [
+					{
+						"lastName": "Corbett",
+						"firstName": "Patrick William Michael",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Duarte",
+						"firstName": "Gleyden Lucila Benítez",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Corbett",
+						"firstName": "P. W. M.",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Owen",
+						"firstName": "A.",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Hartley",
+						"firstName": "A. J.",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Pla-Pueyo",
+						"firstName": "S.",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Barreto",
+						"firstName": "D.",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Hackney",
+						"firstName": "C.",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Kape",
+						"firstName": "S. J.",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2019-12-02",
+				"ISBN": "9781786204318",
+				"abstractNote": "Two decades of geological modelling have resulted in the ability to study single-well geological models at a sufficiently high resolution to generate synthetic well test responses from numerical simulations in realistic geological models covering a range of fluvial styles. These 3D subsurface models are useful in aiding our understanding and mapping of the geological variation (as quantified by porosity and permeability contrasts) in the near-wellbore region. The building and analysis of these models enables many workflow steps, from matching well test data to improving history-matching. Well testing also has a key potential role in reservoir characterization for an improved understanding of the near-wellbore subsurface architecture in fluvial systems. Developing an understanding of well test responses from simple through increasingly more complex geological scenarios leads to a realistic, real-life challenge: a well test in a small fluvial reservoir. The geological well testing approach explained here, through a recent fluvial case study in South America, is considered to be useful in improving our understanding of reservoir performance. This approach should lead to more geologically and petrophysically consistent models, and to geologically assisted models that are both more correct and quicker to match to history, and thus, ultimately, to more useful reservoir models. It also allows the testing of a more complex geological model through the well test response.",
+				"bookTitle": "River to Reservoir: Geoscience to Engineering",
+				"extra": "DOI: 10.1144/SP488.7",
+				"libraryCatalog": "Silverchair",
+				"pages": "0",
+				"publisher": "Geological Society of London",
+				"url": "https://doi.org/10.1144/SP488.7",
+				"volume": "488",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://academic.oup.com/edited-volume/28005",
 		"items": "multiple"
 	}
 ]

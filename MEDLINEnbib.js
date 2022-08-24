@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2020-12-27 04:34:53"
+	"lastUpdated": "2022-02-21 17:06:30"
 }
 
 /*
@@ -146,6 +146,14 @@ function processTag(item, tag, value) {
 	else if (tag == "DP") {
 		item.date = value;
 	}
+	// Save link to attached link
+	else if (tag == "LID") {
+		// Pubmed adds all sorts of different IDs in here, so make sure these are URLs
+		if (value.startsWith("http")) {
+			item.attachments.push({ url: value, title: "Catalog Link", snapshot: false });
+		// If the value is tagged as a PII, we can use this as a page number if we have not previously managed to extract one
+		} else if (value.includes("[pii]")) item.pagesBackup = value.replace(/\s*\[pii\]/, "");
+	}
 	else if (tag == "MH" || tag == "OT") {
 		item.tags.push(value);
 	}
@@ -230,7 +238,9 @@ function finalizeItem(item) {
 		if (fullPageRange) {
 			item.pages = fullPageRange;
 		}
-	}
+	// If there is not an explicitly defined page range, try and use the value extracted from the LID field
+	} else if (item.pagesBackup) item.pages = item.pagesBackup;
+	delete item.pagesBackup;
 	// check for and remove duplicate ISSNs
 	if (item.ISSN && item.ISSN.includes(" ")) {
 		let ISSN = item.ISSN.split(/\s/);
@@ -713,7 +723,12 @@ var testCases = [
 				"pages": "12-24",
 				"publicationTitle": "Journal of Applied Testing Technology",
 				"volume": "21",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Catalog Link",
+						"snapshot": false
+					}
+				],
 				"tags": [
 					{
 						"tag": "Adaptive Testing"
@@ -764,7 +779,12 @@ var testCases = [
 				"language": "English",
 				"publicationTitle": "Language Testing in Asia",
 				"volume": "9",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Catalog Link",
+						"snapshot": false
+					}
+				],
 				"tags": [
 					{
 						"tag": "College Students"
@@ -832,7 +852,12 @@ var testCases = [
 				"date": "2019",
 				"abstractNote": "As test preparation becomes widely accessible through different delivery systems, large-scale studies of test preparation efficacy that involve a variety of test preparation activities become more important to understanding the value and impact of test preparation activities on both the ACT and SAT. In this paper, the authors examine the impact of participating in test preparation prior to retaking the ACT test. The study focused on addressing three questions: (1) Using a pretest-posttest design, do students who participate in test preparation have larger score gains relative to students who did not participate in test preparation; does the test preparation effect depend on students' pretest scores?; (2) Among students who participated in test preparation, is the number of hours spent participating in each of 10 test preparation activities related to retest scores?; and (3) Among students who participated in test preparation, do their own beliefs that they might have been ill-prepared to take the test, regardless of the test preparation activities they engaged in, impact retest scores? The study findings showed that test preparation improved students' retest scores, and this effect did not differ depending on students' first ACT score. Among specific test prep activities, only the number of hours using a private tutor resulted in increased score gains above the overall effect of test prep. Students who reported feeling inadequately prepared for the second test had ACT Composite scores that were lower than those students who felt adequately prepared.",
 				"publicationTitle": "ACT, Inc.",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Catalog Link",
+						"snapshot": false
+					}
+				],
 				"tags": [
 					{
 						"tag": "Achievement Gains"
@@ -857,6 +882,81 @@ var testCases = [
 					},
 					{
 						"tag": "Tutoring"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "PMID- 35128459\nOWN - NLM\nSTAT- PubMed-not-MEDLINE\nLR  - 20220208\nIS  - 2641-9157 (Electronic)\nIS  - 2641-9157 (Linking)\nVI  - 4\nIP  - 1\nDP  - 2021\nTI  - Slow Burns: A Qualitative Study of Burn Pit and Toxic Exposures Among Military \n      Veterans Serving in Afghanistan, Iraq and Throughout the Middle East.\nLID - 1042 [pii]\nAB  - During deployment to the Persian Gulf War and Southwest Asia theatre of operations, \n      Veterans often experienced various hazards, foremost being open-air burn pits and \n      oil well fires. While over 23 presumptive conditions (ranging from brain cancer, \n      interstitial lung disease, and lymphomas to sleep/mood disorders, depression, and \n      cognitive impairment) have been studied in connection with their military-related \n      exposures, there is a paucity of qualitative research on this topic. This is \n      especially true in the context of explanatory models and health belief systems, \n      vis-à-vis underlying social and cultural factors. The current paper provides a \n      balanced conceptual framework (summarizing causal virtues and shortcomings) about \n      the challenges that Veterans encounter when seeking medical care, screening \n      assessments and subsequent treatments.\nFAU - Bith-Melander, Pollie\nAU  - Bith-Melander P\nAD  - Department of Social Work, California State University, Stanislaus, Turlock, CA, \n      USA.\nFAU - Ratliff, Jack\nAU  - Ratliff J\nAD  - Department of Medical-Surgical Oncology, James A Haley Veterans Affairs Hospital, \n      Tampa, FL, USA.\nAD  - Military Exposures Team, HunterSeven Foundation, Providence, RI, USA.\nFAU - Poisson, Chelsey\nAU  - Poisson C\nAD  - Military Exposures Team, HunterSeven Foundation, Providence, RI, USA.\nFAU - Jindal, Charulata\nAU  - Jindal C\nAD  - Harvard Medical School, Harvard University, Boston, USA.\nFAU - Ming Choi, Yuk\nAU  - Ming Choi Y\nAD  - Signify Health, Dallas, TX, 75244, USA.\nFAU - Efird, Jimmy T\nAU  - Efird JT\nAD  - Cooperative Studies Program Epidemiology Center, Health Services Research and \n      Development, DVAHCS, Durham, USA.\nLA  - eng\nPT  - Journal Article\nDEP - 20211227\nTA  - Ann Psychiatry Clin Neurosci\nJT  - Annals of psychiatry and clinical neuroscience\nJID - 9918334788106676\nPMC - PMC8816568\nMID - NIHMS1773706\nOTO - NOTNLM\nOT  - Burn pits\nOT  - Deployment anthropology\nOT  - Explanatory models\nOT  - Military exposures\nOT  - Oil well fires\nOT  - Qualitative analysis\nEDAT- 2022/02/08 06:00\nMHDA- 2022/02/08 06:01\nCRDT- 2022/02/07 05:37\nPHST- 2022/02/07 05:37 [entrez]\nPHST- 2022/02/08 06:00 [pubmed]\nPHST- 2022/02/08 06:01 [medline]\nAID - 1042 [pii]\nPST - ppublish\nSO  - Ann Psychiatry Clin Neurosci. 2021;4(1):1042. Epub 2021 Dec 27.\n",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Slow Burns: A Qualitative Study of Burn Pit and Toxic Exposures Among Military Veterans Serving in Afghanistan, Iraq and Throughout the Middle East.",
+				"creators": [
+					{
+						"firstName": "Pollie",
+						"lastName": "Bith-Melander",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jack",
+						"lastName": "Ratliff",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Chelsey",
+						"lastName": "Poisson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Charulata",
+						"lastName": "Jindal",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yuk",
+						"lastName": "Ming Choi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jimmy T.",
+						"lastName": "Efird",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021",
+				"ISSN": "2641-9157",
+				"abstractNote": "During deployment to the Persian Gulf War and Southwest Asia theatre of operations, Veterans often experienced various hazards, foremost being open-air burn pits and  oil well fires. While over 23 presumptive conditions (ranging from brain cancer,  interstitial lung disease, and lymphomas to sleep/mood disorders, depression, and  cognitive impairment) have been studied in connection with their military-related  exposures, there is a paucity of qualitative research on this topic. This is  especially true in the context of explanatory models and health belief systems,  vis-à-vis underlying social and cultural factors. The current paper provides a  balanced conceptual framework (summarizing causal virtues and shortcomings) about  the challenges that Veterans encounter when seeking medical care, screening  assessments and subsequent treatments.",
+				"extra": "PMID: 35128459 \nPMCID: PMC8816568",
+				"issue": "1",
+				"journalAbbreviation": "Ann Psychiatry Clin Neurosci",
+				"language": "eng",
+				"pages": "1042",
+				"publicationTitle": "Annals of psychiatry and clinical neuroscience",
+				"volume": "4",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Burn pits"
+					},
+					{
+						"tag": "Deployment anthropology"
+					},
+					{
+						"tag": "Explanatory models"
+					},
+					{
+						"tag": "Military exposures"
+					},
+					{
+						"tag": "Oil well fires"
+					},
+					{
+						"tag": "Qualitative analysis"
 					}
 				],
 				"notes": [],

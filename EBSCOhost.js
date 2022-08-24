@@ -9,7 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
+<<<<<<< HEAD
 	"lastUpdated": "2021-03-17 12:39:23"
+=======
+	"lastUpdated": "2021-10-11 01:07:25"
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 }
 
 /*
@@ -43,8 +47,12 @@ function detectWeb(doc, url) {
 		return "multiple";
 	}
 
+<<<<<<< HEAD
 	var persistentLink = doc.getElementsByClassName("permalink-link");
 	if (persistentLink.length && persistentLink[0].nodeName.toUpperCase() == 'A') {
+=======
+	if (doc.querySelector("a.permalink-link")) {
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 		return "journalArticle";
 	}
 	else if (ZU.xpathText(doc, '//section[@class="record-header"]/h2')) {
@@ -83,6 +91,28 @@ function downloadFunction(text, url, prefs) {
 	// hopefully EBCSOhost doesn't use this for anything useful
 	text = text.replace(/^M3\s\s?-.*/gm, '');
 	
+<<<<<<< HEAD
+=======
+	// we'll save this for later, in case we have to throw away a subtitle
+	// from the RIS
+	let subtitle;
+	
+	// EBSCOhost uses nonstandard tags to represent journal titles on some items
+	// no /g flag so we don't create duplicate tags
+	let journalRe = /^(JO|JF|J1)/m;
+	if (journalRe.test(text)) {
+		let subtitleRe = /^T2\s\s?-\s?(.*)/m;
+		let subtitleMatch = text.match(subtitleRe);
+		if (subtitleMatch) {
+			// if there's already something in T2, store it and erase it from the RIS
+			subtitle = subtitleMatch[1];
+			text = text.replace(subtitleRe, '');
+		}
+		
+		text = text.replace(journalRe, 'T2');
+	}
+	
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 	// Let's try to keep season info
 	// Y1  - 1993///Winter93
 	// Y1  - 2009///Spring2009
@@ -109,6 +139,10 @@ function downloadFunction(text, url, prefs) {
 			
 			if (item.title.toUpperCase() == item.title) {
 				item.title = ZU.capitalizeTitle(item.title, true);
+			}
+			
+			if (subtitle) {
+				item.title += `: ${subtitle}`;
 			}
 		}
 
@@ -210,6 +244,14 @@ function downloadFunction(text, url, prefs) {
 
 				ZU.processDocuments(pdf,
 					function (pdfDoc) {
+<<<<<<< HEAD
+=======
+						if (!isCorrectViewerPage(pdfDoc)) {
+							Z.debug('PDF viewer page doesn\'t appear to be serving the correct PDF. Skipping PDF attachment.');
+							return;
+						}
+						
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 						var realpdf = findPdfUrl(pdfDoc);
 						if (realpdf) {
 							item.attachments.push({
@@ -346,6 +388,24 @@ function urlToArgs(url) {
 	}
 
 	return args;
+<<<<<<< HEAD
+=======
+}
+
+// given a PDF viewer document, returns whether it appears to be displaying
+// the correct PDF corresponding to the requested item. EBSCO sometimes returns
+// the PDF for a previously viewed item when the current item doesn't have an
+// associated PDF, but it won't serve metadata on the PDF viewer page in these
+// cases.
+function isCorrectViewerPage(pdfDoc) {
+	let citationAmplitude = attr(pdfDoc, 'a[name="citation"][data-amplitude]', 'data-amplitude');
+	if (!citationAmplitude || !citationAmplitude.startsWith('{')) {
+		Z.debug('PDF viewer page structure has changed - assuming PDF is correct');
+		return true;
+	}
+	
+	return !!JSON.parse(citationAmplitude).result_index;
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 }
 
 // given a pdfviewer page, extracts the PDF url
@@ -408,10 +468,17 @@ function btoa(input) {
 		enc4 = chr3 & 63;
 		if (isNaN(chr2)) {
 			enc3 = enc4 = 64;
+<<<<<<< HEAD
 		}
 		else if (isNaN(chr3)) {
 			enc4 = 64;
 		}
+=======
+		}
+		else if (isNaN(chr3)) {
+			enc4 = 64;
+		}
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 		output = output
 				+ base64KeyStr.charAt(enc1) + base64KeyStr.charAt(enc2)
 				+ base64KeyStr.charAt(enc3) + base64KeyStr.charAt(enc4);
@@ -549,3 +616,9 @@ function doDelivery(doc, itemInfo) {
 	});
 }
 
+<<<<<<< HEAD
+=======
+/** BEGIN TEST CASES **/
+var testCases = []
+/** END TEST CASES **/
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467

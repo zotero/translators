@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-08-26 04:08:13"
+	"lastUpdated": "2021-12-27 20:32:49"
 }
 
 /* Based on the SIRSI translator by Simon Kornblith and Michael Berkowitz,
@@ -17,6 +17,16 @@
    Includes code for Spanish version, e.g. PUCP: http://biblioteca.pucp.edu.pe/ (no permalink)
    and UChile www.catalogo.uchile.cl
  */
+
+/*
+	AJ 12/2021: Replaced blocking selectItems() calls with two-arg equivalent.
+	The logic of this translator is difficult to follow, but everything still works
+	on my end.
+
+	Working instances I can find:
+	- http://75.149.101.133/uhtbin/cgisirsi/
+	- https://cat.libraries.psu.edu/uhtbin/cgisirsi/
+*/
 
 function detectWeb(doc, url) {
 	if (doc.evaluate('//div[@class="columns_container"]/div[contains(@class, "left_column")]/div[@class="content_container"]/div[@class="content"]/form[@id="hitlist"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
@@ -189,6 +199,54 @@ function scrape(doc, url) {
 
 
 function doWeb(doc, url) {
+	function finalize() {
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+		translator.getTranslatorObject(function(marc) {
+			Zotero.Utilities.loadDocument(newUri + '?marks=' + recNumbers.join(",") + '&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type=', function (doc) {
+				var pre = doc.getElementsByTagName("pre");
+				var text = pre[0].textContent;
+				var documents = text.split("*** DOCUMENT BOUNDARY ***");
+				for (var j = 1; j < documents.length; j++) {
+					var uri = newUri + "?marks=" + recNumbers[j] + "&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type=";
+					var lines = documents[j].split("\n");
+					var record = new marc.record();
+					var tag, content;
+					var ind = "";
+					for (var i = 0; i < lines.length; i++) {
+						var line = lines[i];
+						if (line[0] == "." && line.substr(4, 2) == ". ") {
+							if (tag) {
+								content = content.replace(/\|([a-z])/g, marc.subfieldDelimiter + "$1");
+								record.addField(tag, ind, content);
+							}
+						} else {
+							content += " " + line.substr(6);
+							continue;
+						}
+						tag = line.substr(1, 3);
+						if (tag[0] != "0" || tag[1] != "0") {
+							ind = line.substr(6, 2);
+							content = line.substr(8);
+						} else {
+							content = line.substr(7);
+							if (tag == "000") {
+								tag = undefined;
+								record.leader = "00000" + content;
+								Zotero.debug("the leader is: " + record.leader);
+							}
+						}
+					} //end FOR
+					var newItem = new Zotero.Item();
+					record.translate(newItem);
+
+					newItem.libraryCatalog = "Library Catalog";
+
+					newItem.complete();
+				} //end FOR
+			});
+		});
+	}
 
 	var sirsiNew = true; //toggle between SIRSI -2003 and SIRSI 2003+
 	//Adapted to catch the hitlist page of Rice Catalog
@@ -237,26 +295,22 @@ function doWeb(doc, url) {
 					availableItems[input.name] = text.trim();
 				}
 			} //END while
-			var items = Zotero.selectItems(availableItems);
-			if (!items) {
-				return true;
-			}
+			Zotero.selectItems(availableItems, function (items) {
+				if (!items) {
+					return true;
+				}
 
-			var hostRe = new RegExp("^http(?:s)?://[^/]+");
-			var m = hostRe.exec(doc.location.href);
-			Zotero.debug("href: " + doc.location.href);
-			var hitlist = doc.forms.namedItem("hitlist");
-			var baseUrl = m[0] + hitlist.getAttribute("action") + "?first_hit=" + hitlist.elements.namedItem("first_hit").value + "&last_hit=" + hitlist.elements.namedItem("last_hit").value;
-			var alexandria = new Array();
-			for (var i in items) {
-				alexandria.push(baseUrl + "&" + i + "=Details");
-			}
-			Zotero.Utilities.processDocuments(alexandria, function (doc) {
-				scrape(doc)
-			}, function () {
-				Zotero.done()
-			}, null);
-			Zotero.wait();
+				var hostRe = new RegExp("^http(?:s)?://[^/]+");
+				var m = hostRe.exec(doc.location.href);
+				Zotero.debug("href: " + doc.location.href);
+				var hitlist = doc.forms.namedItem("hitlist");
+				var baseUrl = m[0] + hitlist.getAttribute("action") + "?first_hit=" + hitlist.elements.namedItem("first_hit").value + "&last_hit=" + hitlist.elements.namedItem("last_hit").value;
+				var alexandria = new Array();
+				for (var i in items) {
+					alexandria.push(baseUrl + "&" + i + "=Details");
+				}
+				Zotero.Utilities.processDocuments(alexandria, scrape);
+			});
 		} //END if not scrape(doc)
 	} else { //executes Simon's SIRSI -2003 translator code
 		Zotero.debug("Running SIRSI -2003 code");
@@ -281,13 +335,17 @@ function doWeb(doc, url) {
 					items[checkbox.name] = Zotero.Utilities.trimInternal(title);
 				}
 			} while (elmt = elmts.iterateNext());
-			items = Zotero.selectItems(items);
-			if (!items) {
-				return true;
-			}
-			for (var i in items) {
-				recNumbers.push(i);
-			}
+			Zotero.selectItems(items, function (items) {
+				if (!items) {
+					return true;
+				}
+
+				for (var i in items) {
+					recNumbers.push(i);
+				}
+
+				finalize();
+			});
 		} else { // Normal page
 			// this regex will fail about 1/100,000,000 tries
 			var uriRegexp = /^((.*?)\/([0-9]+?))\//;
@@ -302,54 +360,10 @@ function doWeb(doc, url) {
 				}
 			}
 		}
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
-		translator.getTranslatorObject(function(marc) {
-			Zotero.Utilities.loadDocument(newUri + '?marks=' + recNumbers.join(",") + '&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type=', function (doc) {
-				var pre = doc.getElementsByTagName("pre");
-				var text = pre[0].textContent;
-				var documents = text.split("*** DOCUMENT BOUNDARY ***");
-				for (var j = 1; j < documents.length; j++) {
-					var uri = newUri + "?marks=" + recNumbers[j] + "&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type=";
-					var lines = documents[j].split("\n");
-					var record = new marc.record();
-					var tag, content;
-					var ind = "";
-					for (var i = 0; i < lines.length; i++) {
-						var line = lines[i];
-						if (line[0] == "." && line.substr(4, 2) == ". ") {
-							if (tag) {
-								content = content.replace(/\|([a-z])/g, marc.subfieldDelimiter + "$1");
-								record.addField(tag, ind, content);
-							}
-						} else {
-							content += " " + line.substr(6);
-							continue;
-						}
-						tag = line.substr(1, 3);
-						if (tag[0] != "0" || tag[1] != "0") {
-							ind = line.substr(6, 2);
-							content = line.substr(8);
-						} else {
-							content = line.substr(7);
-							if (tag == "000") {
-								tag = undefined;
-								record.leader = "00000" + content;
-								Zotero.debug("the leader is: " + record.leader);
-							}
-						}
-					} //end FOR
-					var newItem = new Zotero.Item();
-					record.translate(newItem);
-	
-					newItem.libraryCatalog = "Library Catalog";
-	
-					newItem.complete();
-				} //end FOR
-			});
-		});
+		finalize();
 	} //END while
 } //END scrape function
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{

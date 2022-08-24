@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-03-09 12:23:02"
+	"lastUpdated": "2021-12-27 20:43:34"
 }
 
 /*
@@ -54,62 +54,59 @@ var metaTags = {
 };
 
 function doWeb(doc, url) {
-	var articles = [];
 	if (detectWeb(doc, url) == "multiple") {
 		var items = Zotero.Utilities.getItemArray(doc, doc, /sic_\d+|tel-\d+/);
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
+		Zotero.selectItems(items, function (items) {
+			if (!items) return;
+			ZU.processDocuments(Object.keys(items), scrape);
+		});
 	}
 	else {
-		articles = [url];
+		scrape(doc);
 	}
-	Zotero.Utilities.processDocuments(articles, function (doc) {
-		var xpath = '//meta[@name]';
-		var data = {};
-		var metas = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
-		var meta;
+}
 
+function scrape(doc) {
+	var xpath = '//meta[@name]';
+	var data = {};
+	var metas = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
+	var meta;
+
+	meta = metas.iterateNext();
+	while (meta) {
+		if (data[meta.name]) {
+			data[meta.name] = data[meta.name] + ";" + meta.content;
+		}
+		else {
+			data[meta.name] = meta.content;
+		}
 		meta = metas.iterateNext();
-		while (meta) {
-			if (data[meta.name]) {
-				data[meta.name] = data[meta.name] + ";" + meta.content;
-			}
-			else {
-				data[meta.name] = meta.content;
-			}
-			meta = metas.iterateNext();
-		}
+	}
 
-		var item = new Zotero.Item("journalArticle");
-		for (var tag in metaTags) {
-			if (tag == "DC.creator") {
-				var authors = data['DC.creator'].split(";");
-				for (var i = 0; i < authors.length; i++) {
-					var aut = authors[i];
-					aut = aut.replace(/^([^,]+),\s+(.*)$/, "$2 $1");
-					item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
-				}
-			}
-			else {
-				item[metaTags[tag]] = data[tag];
+	var item = new Zotero.Item("journalArticle");
+	for (var tag in metaTags) {
+		if (tag == "DC.creator") {
+			var authors = data['DC.creator'].split(";");
+			for (var i = 0; i < authors.length; i++) {
+				var aut = authors[i];
+				aut = aut.replace(/^([^,]+),\s+(.*)$/, "$2 $1");
+				item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
 			}
 		}
-		
-		var pdfurl = data.citation_pdf_url;
-		
-		if (pdfurl) {
-			item.attachments = [
-				{ url: item.url, title: "AOSIC Snapshot", mimeType: "text/html" },
-				{ url: pdfurl, title: "AOSIC Full Text PDF", mimeType: "application/pdf" }
-			];
+		else {
+			item[metaTags[tag]] = data[tag];
 		}
-		item.complete();
-	}, function () {
-		Zotero.done();
-	});
-	Zotero.wait();
+	}
+	
+	var pdfurl = data.citation_pdf_url;
+	
+	if (pdfurl) {
+		item.attachments = [
+			{ url: item.url, title: "AOSIC Snapshot", mimeType: "text/html" },
+			{ url: pdfurl, title: "AOSIC Full Text PDF", mimeType: "application/pdf" }
+		];
+	}
+	item.complete();
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{

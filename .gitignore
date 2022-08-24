@@ -1,2 +1,3 @@
 node_modules
 .ci/pull-request-check/connectors
+.DS_Store

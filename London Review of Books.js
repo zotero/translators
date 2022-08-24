@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2020-05-09 22:08:11"
+	"lastUpdated": "2021-09-21 16:56:33"
 }
 
 /*
@@ -34,11 +34,6 @@
 
 	***** END LICENSE BLOCK *****
 */
-
-
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 
 function detectWeb(doc, url) {
@@ -98,9 +93,13 @@ function scrape(doc, url) {
 		let reviewedSubTitle = text('.article-reviewed-item-subtitle');
 		if (reviewedTitle) {
 			if (reviewedSubTitle) {
-				reviewedTitle += reviewedSubTitle;
+				reviewedTitle += ' ' + reviewedSubTitle;
 			}
 			item.extra = "reviewed-title: " + reviewedTitle;
+		}
+		
+		for (let reviewedAuthor of doc.querySelectorAll('.article-reviewed-item .by a')) {
+			item.creators.push(ZU.cleanAuthor(reviewedAuthor.textContent, 'reviewedAuthor'));
 		}
 		
 		item.complete();
@@ -126,17 +125,22 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "magazineArticle",
-				"title": "Attempts to Escape the Logic of Capitalism",
+				"title": "Attempts to Escape the Logic of Capitalism",
 				"creators": [
 					{
 						"firstName": "Slavoj",
 						"lastName": "Žižek",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "John",
+						"lastName": "Keane",
+						"creatorType": "reviewedAuthor"
 					}
 				],
 				"date": "1999-10-28 00:00:00",
 				"ISSN": "0260-9592",
-				"extra": "reviewed-title: Václav Havel: A Political Tragedy in Six Acts",
+				"extra": "reviewed-title: Václav Havel: A Political Tragedy in Six Acts",
 				"issue": "21",
 				"language": "en",
 				"libraryCatalog": "www.lrb.co.uk",
@@ -145,7 +149,8 @@ var testCases = [
 				"volume": "21",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -187,12 +192,22 @@ var testCases = [
 						"firstName": "Jonathan",
 						"lastName": "Rée",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Brian",
+						"lastName": "McGuinness",
+						"creatorType": "reviewedAuthor"
+					},
+					{
+						"firstName": "Peter",
+						"lastName": "Winslow",
+						"creatorType": "reviewedAuthor"
 					}
 				],
 				"date": "2019-11-19 14:58:10",
 				"ISSN": "0260-9592",
 				"abstractNote": "Wittgenstein wasn’t particularly impress­ed by Bertrand Russell’s adoration. If his philosoph­ical capacities were...",
-				"extra": "reviewed-title: Wittgenstein’s Family Letters: Corresponding with Ludwig",
+				"extra": "reviewed-title: Wittgenstein’s Family Letters: Corresponding with Ludwig",
 				"issue": "22",
 				"language": "en",
 				"libraryCatalog": "www.lrb.co.uk",
@@ -201,7 +216,8 @@ var testCases = [
 				"volume": "41",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -216,6 +232,54 @@ var testCases = [
 					},
 					{
 						"tag": "Wittgenstein"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://lrb.co.uk/the-paper/v43/n18/anthony-grafton/fake-it-till-you-make-it",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "Fake it till you make it",
+				"creators": [
+					{
+						"firstName": "Anthony",
+						"lastName": "Grafton",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Dennis",
+						"lastName": "Duncan",
+						"creatorType": "reviewedAuthor"
+					}
+				],
+				"date": "2021-09-23 00:00:00",
+				"ISSN": "0260-9592",
+				"abstractNote": "The index gave its users formidable power to find and quote adages and examples, narratives and poems, scriptural and...",
+				"extra": "reviewed-title: Index, A History of the",
+				"issue": "18",
+				"language": "en",
+				"libraryCatalog": "lrb.co.uk",
+				"publicationTitle": "London Review of Books",
+				"url": "https://lrb.co.uk/the-paper/v43/n18/anthony-grafton/fake-it-till-you-make-it",
+				"volume": "43",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "History of ideas"
+					},
+					{
+						"tag": "Literature & Criticism"
 					}
 				],
 				"notes": [],

@@ -10,10 +10,14 @@
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
 <<<<<<< HEAD
+<<<<<<< HEAD
 	"lastUpdated": "2021-07-02 13:37:43"
 =======
 	"lastUpdated": "2020-05-17 15:09:25"
 >>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
+=======
+	"lastUpdated": "2021-10-09 00:36:31"
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 }
 
 /*
@@ -40,6 +44,10 @@
 */
 
 function detectWeb(doc, url) {
+	// if one of these strings is in the URL, we're almost definitely on a listing
+	// page and should immediately return "multiple" if the page contains any
+	// results. the checks below (particularly url.includes('/books/')) might
+	// falsely return true and lead to an incorrect detection if we continue.
 	let multiples = /\/search\?|\/listing\?|\/issue\//;
 	if (multiples.test(url) && getSearchResults(doc, true)) {
 		return "multiple";
@@ -53,6 +61,13 @@ function detectWeb(doc, url) {
 		}
 		else return "book";
 	}
+	
+	// now let's check for multiples again, just to be sure. this handles some
+	// rare listing page URLs that might not be included in the multiples
+	// regex above.
+	if (getSearchResults(doc, true)) {
+		return "multiple";
+	}
 
 	return false;
 }
@@ -60,12 +75,12 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc,
-		'//li[@class="title"]//a[contains(@href, "/article/") or contains(@href, "/product/") or contains(@href, "/books/")]'
+	var rows = doc.querySelectorAll(
+		'li.title a[href*="/article/"], li.title a[href*="/product/"], li.title a[href*="/books/"]'
 	);
-	for (var i = 0; i < rows.length; i++) {
-		var href = rows[i].href;
-		var title = ZU.trimInternal(rows[i].textContent);
+	for (let row of rows) {
+		var href = row.href;
+		var title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -175,6 +190,9 @@ function scrape(doc, url) {
 			}
 			item.title = ZU.unescapeHTML(item.title);
 			item.libraryCatalog = "Cambridge University Press";
+			if (item.date.includes("undefined")) {
+				item.date = attr('meta[name="citation_online_date"]', "content");
+			}
 			item.complete();
 		});
 >>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
@@ -439,11 +457,16 @@ var testCases = [
 					},
 					{
 <<<<<<< HEAD
+<<<<<<< HEAD
 						"title": "Snapshot",
 						"mimeType": "text/html"
 =======
 						"title": "Snapshot"
 >>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
+=======
+						"title": "Snapshot",
+						"mimeType": "text/html"
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 					}
 				],
 				"tags": [],
@@ -570,7 +593,8 @@ var testCases = [
 				"url": "https://www.cambridge.org/core/books/conservation-research-policy-and-practice/22AB241C45F182E40FC7F13637485D7E",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -583,7 +607,20 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.cambridge.org/core/what-we-publish/books/listing?sort=canonical.date%3Adesc&aggs%5BonlyShowAvailable%5D%5Bfilters%5D=true&aggs%5BproductTypes%5D%5Bfilters%5D=BOOK%2CELEMENT&searchWithinIds=0C5182F27A492FDC81EDF8D3C53266B5",
 		"items": "multiple"
+<<<<<<< HEAD
 >>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
+=======
+	},
+	{
+		"type": "web",
+		"url": "https://www.cambridge.org/core/journals/ajs-review/firstview",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.cambridge.org/core/journals/ajs-review/latest-issue",
+		"items": "multiple"
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 	}
 ]
 /** END TEST CASES **/
