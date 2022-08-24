@@ -171,7 +171,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "<h1>Bibliography</h1><p>Feldman, Fred, <em>Pleasure and the Good Life: Concerning the Nature, Varieties, and Plausibility of Hedonism</em>, Oxford University Press, 2004, 221pp, $35.00 (hbk), ISBN	019926516X.</p>"
+						"note": "<h1>Bibliography</h1><p>Feldman, Fred, <em>Pleasure and the Good Life: Concerning the Nature, Varieties, and Plausibility of Hedonism</em>, Oxford University Press, 2004, 221pp, $35.00 (hbk), ISBN 019926516X.</p>"
 					}
 				],
 				"seeAlso": []

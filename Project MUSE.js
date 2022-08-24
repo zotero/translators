@@ -9,7 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
+<<<<<<< HEAD
 	"lastUpdated": "2021-06-23 16:41:28"
+=======
+	"lastUpdated": "2020-12-15 03:03:06"
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
 }
 
 /*
@@ -102,6 +106,7 @@ function scrape(doc) {
 			let abstract = ZU.xpathText(doc, '//div[@class="abstract"][1]/p');
 			if (!abstract) abstract = ZU.xpathText(doc, '//div[@class="description"][1]');
 			if (!abstract) abstract = ZU.xpathText(doc, '//div[contains(@class, "card_summary") and contains(@class, "no_border")]');
+<<<<<<< HEAD
 			if (abstract) {
 				item.abstractNote = abstract.replace(/^,*\s*Abstract[:,]*/, "").replace(/show (less|more)$/, "").replace(/,\s*$/, "");
 			}
@@ -115,6 +120,15 @@ function scrape(doc) {
 				item.tags.push("Book Review");
 			}
 			
+=======
+			let tags = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "kwd-group", " " ))]//p');
+			if (abstract) {
+				item.abstractNote = abstract.replace(/^,*\s*Abstract[:,]*/, "").replace(/show (less|more)$/, "").replace(/,\s*$/, "");
+			}
+			if (tags) {
+				item.tags = tags.split(",");
+			}
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
 			item.notes = [];
 			item.complete();
 		});
@@ -310,6 +324,7 @@ var testCases = [
 					},
 					{
 						"tag": "Nostra Aetate"
+<<<<<<< HEAD
 					}
 				],
 				"notes": [],
@@ -350,6 +365,8 @@ var testCases = [
 				"tags": [
 					{
 						"tag": "Book Review"
+=======
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
 					}
 				],
 				"notes": [],

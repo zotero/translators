@@ -7,7 +7,7 @@
 		"@zotero"
 	],
 	"parserOptions": {
-		"ecmaVersion": 7
+		"ecmaVersion": 2017
 	},
 	"globals": {
 		"Zotero": "readonly",

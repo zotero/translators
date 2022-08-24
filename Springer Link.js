@@ -9,8 +9,30 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
+<<<<<<< HEAD
 	"lastUpdated": "2021-09-09 07:22:40"
+=======
+	"lastUpdated": "2020-09-08 02:04:42"
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
 }
+
+/*
+   SpringerLink Translator
+   Copyright (C) 2020 Aurimas Vinckevicius and Sebastian Karcher
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 function detectWeb(doc, url) {
 	var action = url.match(/^https?:\/\/[^/]+\/([^/?#]+)/);
@@ -57,6 +79,10 @@ function getResultList(doc) {
 	if (!results.length) {
 		results = ZU.xpath(doc, '//div[@class="toc"]/ol//li[contains(@class,"toc-item")]/p[@class="title"]/a');
 	}
+	// https://link.springer.com/journal/10344/volumes-and-issues/66-5
+	if (!results.length) {
+		results = ZU.xpath(doc, '//li[@class="c-list-group__item"]//h3/a');
+	}
 	return results;
 }
 
@@ -69,7 +95,7 @@ function doWeb(doc, url) {
 			items[list[i].href] = list[i].textContent;
 		}
 		Zotero.selectItems(items, function (selectedItems) {
-			if (!selectedItems) return true;
+			if (!selectedItems) return;
 			for (let i in selectedItems) {
 				ZU.processDocuments(i, scrape);
 			}
@@ -540,6 +566,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
+<<<<<<< HEAD
 				"tags": [
 					{
 						"tag": "Analytical solutions"
@@ -562,6 +589,10 @@ var testCases = [
 						"note": "abs:Résumé Cet article considère les fluctuations piézométriques dues à la marée dans un aquifère côtier captif simple s’étendant à une certaine distance sous la mer. Son exutoire sous-marin est recouvert par un dépôt silteux de propriétés différentes de celles de l’aquifère. Récemment, Li et autres (2007) ont donné une représentation analytique d’un tel système tenant compte de l’effet d’emmagasinement élastique du réservoir sous le toit à l’exutoire. Cet article présente une solution analytique qui généralise le modèle en introduisant l’emmagasinement élastique à l’exutoire. Il démontre que si la couveture à l’exutoire est assez épaisse en direction, l’emmagasinement élastique a un effet amplificateur important sur la fluctuation piézométrique due à la marée. Ignorer cet emmagasinement élastique conduirait à des erreurs importantes sur le rapport entre la hauteur piézométrique réelle et la hauteur telle qu’elle ressort des caractéristiques de l’aquifère. Le modèle montre donc l’effet de l’emmagasinement élastique sur la fluctuation du niveau de l’aquifère. Il indique les seuils en dessous desquels l’effet de cet emmagasinement élastique sur la fluctuation de l’aquifère induite par la marée est négligeable. Li, H.L., Li, G.Y., Chen, J.M., Boufadel, M.C. (2007) Tide-induced head fluctuations in a confined aquifer with sediment covering its outlet at the sea floor. [Fluctuations du niveau piézométrique induites par la marée dans un aquifère captif à décharge sous-marine.] Water Resour. Res 43, doi:10.1029/2005WR004724"
 					}
 				],
+=======
+				"tags": [],
+				"notes": [],
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
 				"seeAlso": []
 			}
 		]
@@ -642,6 +673,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
+<<<<<<< HEAD
 		"url": "https://link.springer.com/journal/11562/14/1",
 		"items": "multiple"
 	},
@@ -987,6 +1019,10 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+=======
+		"url": "https://link.springer.com/journal/10344/volumes-and-issues/66-5",
+		"items": "multiple"
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
 	}
 ]
 /** END TEST CASES **/

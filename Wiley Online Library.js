@@ -9,7 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
+<<<<<<< HEAD
 	"lastUpdated": "2021-09-20 17:30:48"
+=======
+	"lastUpdated": "2020-09-08 01:32:51"
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
 }
 
 /*
@@ -31,13 +35,20 @@
  */
 
 // attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+// eslint-disable-next-line
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
+
 
 function fixCase(authorName) {
 	if (typeof authorName != 'string') return authorName;
 
+<<<<<<< HEAD
 	if (authorName.toUpperCase() == authorName ||
 		authorName.toLowerCase() == authorName) {
+=======
+	if (authorName.toUpperCase() == authorName
+		|| authorName.toLowerCase() == authorName) {
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
 		return ZU.capitalizeTitle(authorName, true);
 	}
 
@@ -45,22 +56,27 @@ function fixCase(authorName) {
 }
 
 function addCreators(item, creatorType, creators) {
-	if ( typeof(creators) == 'string' ) {
+	if (typeof (creators) == 'string') {
 		creators = [creators];
-	} else if ( !(creators instanceof Array) ) {
+	}
+	else if (!(creators instanceof Array)) {
 		return;
 	}
 
-	for (var i=0, n=creators.length; i<n; i++) {
+	for (var i = 0, n = creators.length; i < n; i++) {
 		item.creators.push(ZU.cleanAuthor(fixCase(creators[i]), creatorType, false));
 	}
 }
 
 function getAuthorName(text) {
-	//lower case words at the end of a name are probably not part of a name
-	text = text.replace(/(\s+[a-z]+)+\s*$/,'');
+	// lower case words at the end of a name are probably not part of a name
+	text = text.replace(/(\s+[a-z]+)+\s*$/, '');
 
+<<<<<<< HEAD
 	text = text.replace(/(^|[\s,])(PhD|MA|Prof|Dr)\b(\.?|(?=\s|$))/gi,'');	//remove salutations
+=======
+	text = text.replace(/(^|[\s,])(PhD|MA|Prof|Dr)(\.?|(?=\s|$))/gi, '');	// remove salutations
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
 
 	return fixCase(text.trim());
 }
@@ -90,7 +106,7 @@ function addArticleNumber (doc, item) {
 
 function scrapeBook(doc, url) {
 	var title = doc.getElementById('productTitle');
-	if ( !title ) return false;
+	if (!title) return;
 
 	var newItem = new Zotero.Item('book');
 	newItem.title = ZU.capitalizeTitle(title.textContent, true);
@@ -99,34 +115,34 @@ function scrapeBook(doc, url) {
 	var dataRe = /^(.+?):\s*(.+?)\s*$/;
 	var match;
 	var isbn = [];
-	for ( var i=0, n=data.length; i<n; i++) {
+	for (var i = 0, n = data.length; i < n; i++) {
 		match = dataRe.exec(data[i].textContent);
 		if (!match) continue;
 
 		switch (match[1].trim().toLowerCase()) {
-		case 'author(s)':
-			addCreators(newItem, 'author', match[2].split(', '));
-			break;
-		case 'series editor(s)':
-			addCreators(newItem, 'seriesEditor', match[2].split(', '));
-			break;
-		case 'editor(s)':
-			addCreators(newItem, 'editor', match[2].split(', '));
-			break;
-		case 'published online':
-			var date = ZU.strToDate(match[2]);
-			date.part = null;
-			newItem.date = ZU.formatDate(date);
-			break;
-		case 'print isbn':
-		case 'online isbn':
-			isbn.push(match[2]);
-			break;
-		case 'doi':
-			newItem.DOI = match[2];
-			break;
-		case 'book series':
-			newItem.series = match[2];
+			case 'author(s)':
+				addCreators(newItem, 'author', match[2].split(', '));
+				break;
+			case 'series editor(s)':
+				addCreators(newItem, 'seriesEditor', match[2].split(', '));
+				break;
+			case 'editor(s)':
+				addCreators(newItem, 'editor', match[2].split(', '));
+				break;
+			case 'published online':
+				var date = ZU.strToDate(match[2]);
+				date.part = null;
+				newItem.date = ZU.formatDate(date);
+				break;
+			case 'print isbn':
+			case 'online isbn':
+				isbn.push(match[2]);
+				break;
+			case 'doi':
+				newItem.DOI = match[2];
+				break;
+			case 'book series':
+				newItem.series = match[2];
 		}
 	}
 
@@ -137,7 +153,8 @@ function scrapeBook(doc, url) {
 		ZU.xpathText(doc, [
 			'//div[@id="homepageContent"]',
 			'/h6[normalize-space(text())="About The Product"]',
-			'/following-sibling::p'].join(''), null, "\n") || "");
+			'/following-sibling::p'
+		].join(''), null, "\n") || "");
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
 
 	newItem.complete();
@@ -146,45 +163,50 @@ function scrapeBook(doc, url) {
 function scrapeEM(doc, url) {
 	var itemType = detectWeb(doc, url);
 
+<<<<<<< HEAD
 	//fetch print publication date
+=======
+	// fetch print publication date
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
 	var date = ZU.xpathText(doc, '//meta[@name="citation_date"]/@content');
 	if (!date) {
 		date = ZU.xpathText(doc, '//span[@class="epub-date" and preceding-sibling::span[@class="epub-state" and contains(text(), "First published:")]]/text()');
 	}
 
-	//remove duplicate meta tags
+	// remove duplicate meta tags
 	var metas = ZU.xpath(doc,
 		'//head/link[@media="screen,print"]/following-sibling::meta');
-	for (var i=0, n=metas.length; i<n; i++) {
+	for (var i = 0, n = metas.length; i < n; i++) {
 		metas[i].parentNode.removeChild(metas[i]);
 	}
 	var translator = Zotero.loadTranslator('web');
-	//use Embedded Metadata
+	// use Embedded Metadata
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
-	translator.setHandler('itemDone', function(obj, item) {
-		if ( itemType == 'bookSection' ) {
-			//add authors if we didn't get them from embedded metadata
+	translator.setHandler('itemDone', function (obj, item) {
+		if (itemType == 'bookSection') {
+			// add authors if we didn't get them from embedded metadata
 			if (!item.creators.length) {
 				var authors = ZU.xpath(doc, '//ol[@id="authors"]/li/node()[1]');
-				for (var i=0, n=authors.length; i<n; i++) {
+				for (let i = 0, n = authors.length; i < n; i++) {
 					item.creators.push(
-						ZU.cleanAuthor( getAuthorName(authors[i].textContent), 'author',false) );
+						ZU.cleanAuthor(getAuthorName(authors[i].textContent), 'author', false));
 				}
 			}
 
-			//editors
+			// editors
 			var editors = ZU.xpath(doc, '//ol[@id="editors"]/li/node()[1]');
-			for (var i=0, n=editors.length; i<n; i++) {
+			for (let i = 0, n = editors.length; i < n; i++) {
 				item.creators.push(
-					ZU.cleanAuthor( getAuthorName(editors[i].textContent), 'editor',false) );
+					ZU.cleanAuthor(getAuthorName(editors[i].textContent), 'editor', false));
 			}
 
 			item.rights = ZU.xpathText(doc, '//p[@id="copyright"]');
 
-			//this is not great for summary, but will do for now
+			// this is not great for summary, but will do for now
 			item.abstractNote = ZU.xpathText(doc, '//div[@id="abstract"]/div[@class="para"]//p', null, "\n");
-		} else {
+		}
+		else {
 			var keywords = ZU.xpathText(doc, '//meta[@name="citation_keywords"]/@content');
 			if (keywords) {
 				item.tags = keywords.split(', ');
@@ -193,17 +215,18 @@ function scrapeEM(doc, url) {
 			item.abstractNote = ZU.xpathText(doc, '//div[@id="abstract"]/div[@class="para"]', null, "\n");
 		}
 
-		//set correct print publication date
+		// set correct print publication date
 		if (date) item.date = date;
 
-		//remove pdf attachments
-		for (var i=0, n=item.attachments.length; i<n; i++) {
+		// remove pdf attachments
+		for (let i = 0, n = item.attachments.length; i < n; i++) {
 			if (item.attachments[i].mimeType == 'application/pdf') {
-				item.attachments.splice(i,1);
+				item.attachments.splice(i, 1);
 				i--;
 				n--;
 			}
 		}
+<<<<<<< HEAD
 		item.complete();
 	});
 
@@ -214,6 +237,23 @@ function scrapeEM(doc, url) {
 	item.complete();
 
 	translator.getTranslatorObject(function(em) {
+=======
+
+		var pdfURL = attr(doc, 'meta[name="citation_pdf_url"]', "content");
+		if (pdfURL) {
+			pdfURL = pdfURL.replace('/pdf/', '/pdfdirect/');
+			Z.debug("PDF URL: " + pdfURL);
+			item.attachments.push({
+				url: pdfURL,
+				title: 'Full Text PDF',
+				mimeType: 'application/pdf'
+			});
+		}
+		item.complete();
+	});
+
+	translator.getTranslatorObject(function (em) {
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
 		em.itemType = itemType;
 		em.doWeb(doc, url);
 	});
@@ -239,6 +279,7 @@ function scrapeBibTeX(doc, url) {
 		host = 'onlinelibrary.wiley.com';
 	}
 	var postUrl = `https://${host}/action/downloadCitation`;
+<<<<<<< HEAD
 	var body = 'direct=direct' +
 				'&doi=' + encodeURIComponent(doi) +
 				'&downloadFileName=pericles_14619563AxA' +
@@ -252,37 +293,74 @@ function scrapeBibTeX(doc, url) {
 		//Z.debug(text);
 
 		var re = /^\s*@[a-zA-Z]+[\(\{]/;
+=======
+	var body = 'direct=direct'
+				+ '&doi=' + encodeURIComponent(doi)
+				+ '&downloadFileName=pericles_14619563AxA'
+				+ '&format=bibtex' // '&format=ris' +
+				+ '&include=abs'
+				+ '&submit=Download';
+
+	ZU.doPost(postUrl, body, function (text) {
+		// Replace uncommon dash (hex e2 80 90)
+		text = text.replace(/‐/g, '-').trim();
+		// Z.debug(text);
+
+		var re = /^\s*@[a-zA-Z]+[({]/;
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
 		if (text.startsWith('<') || !re.test(text)) {
 			throw new Error("Error retrieving BibTeX");
 		}
 
 		var translator = Zotero.loadTranslator('import');
-		//use BibTeX translator
+		// use BibTeX translator
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 		translator.setString(text);
 
+<<<<<<< HEAD
 		translator.setHandler('itemDone', function(obj, item) {
 			
 			//fix author case
 			for (var i=0, n=item.creators.length; i<n; i++) {
+=======
+		translator.setHandler('itemDone', function (obj, item) {
+			// BibTeX throws the last names and first names together
+			// Therefore, we prefer creators names from EM (if available)
+			var authors = doc.querySelectorAll('meta[name="citation_author"]');
+			if (authors && authors.length > 0) {
+				item.creators = [];
+				for (let i = 0; i < authors.length; i++) {
+					item.creators.push(ZU.cleanAuthor(authors[i].content, 'author'));
+				}
+			}
+			// fix author case
+			for (let i = 0, n = item.creators.length; i < n; i++) {
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
 				item.creators[i].firstName = fixCase(item.creators[i].firstName);
 				item.creators[i].lastName = fixCase(item.creators[i].lastName);
 			}
 
+<<<<<<< HEAD
 			//delete nonsense author Null, Null
 			if (item.creators.length && item.creators[item.creators.length-1].lastName == "Null"
 				&& item.creators[item.creators.length-1].firstName == "Null"
+=======
+			// delete nonsense author Null, Null
+			if (item.creators.length && item.creators[item.creators.length - 1].lastName == "Null"
+				&& item.creators[item.creators.length - 1].firstName == "Null"
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
 			) {
 				item.creators = item.creators.slice(0, -1);
 			}
 
-			//editors
+			// editors
 			var editors = ZU.xpath(doc, '//ol[@id="editors"]/li/node()[1]');
-			for (var i=0, n=editors.length; i<n; i++) {
+			for (let i = 0, n = editors.length; i < n; i++) {
 				item.creators.push(
-					ZU.cleanAuthor( getAuthorName(editors[i].textContent), 'editor',false) );
+					ZU.cleanAuthor(getAuthorName(editors[i].textContent), 'editor', false));
 			}
 
+<<<<<<< HEAD
 			//title
 			if (item.title && item.title.toUpperCase() == item.title) {
 				item.title = ZU.capitalizeTitle(item.title, true);
@@ -299,6 +377,17 @@ function scrapeBibTeX(doc, url) {
 			}
 
 			//date in the cochraine library RIS is wrong
+=======
+			// title
+			if (item.title && item.title.toUpperCase() == item.title) {
+				item.title = ZU.capitalizeTitle(item.title, true);
+			}
+
+			if (!item.date) {
+				item.date = ZU.xpathText(doc, '//meta[@name="citation_publication_date"]/@content');
+			}
+			// date in the cochraine library RIS is wrong
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
 			if (ZU.xpathText(doc, '//meta[@name="citation_book_title"]/@content') == "The Cochrane Library") {
 				item.date = ZU.xpathText(doc, '//meta[@name="citation_online_date"]/@content');
 			}
@@ -310,7 +399,11 @@ function scrapeBibTeX(doc, url) {
 				item.ISSN = ZU.xpathText(doc, '//meta[@name="citation_issn"]/@content');
 			}
 
+<<<<<<< HEAD
 			//tags
+=======
+			// tags
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
 			if (!item.tags.length) {
 				var keywords = ZU.xpathText(doc,
 					'//meta[@name="citation_keywords"][1]/@content');
@@ -319,41 +412,49 @@ function scrapeBibTeX(doc, url) {
 				}
 			}
 
+<<<<<<< HEAD
 			//abstract should not start with "Abstract"
+=======
+			// abstract should not start with "Abstract"
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
 			if (item.abstractNote) {
 				item.abstractNote = item.abstractNote.replace(/^(Abstract|Summary) /i, '');
 			}
 
-			//url in bibtex is invalid
-			item.url =
-				ZU.xpathText(doc,
-					'//meta[@name="citation_summary_html_url"][1]/@content') ||
-				ZU.xpathText(doc,
-					'//meta[@name="citation_abstract_html_url"][1]/@content') ||
-				ZU.xpathText(doc,
-					'//meta[@name="citation_fulltext_html_url"][1]/@content') ||
-				url;
+			// url in bibtex is invalid
+			item.url
+				= ZU.xpathText(doc,
+					'//meta[@name="citation_summary_html_url"][1]/@content')
+				|| ZU.xpathText(doc,
+					'//meta[@name="citation_abstract_html_url"][1]/@content')
+				|| ZU.xpathText(doc,
+					'//meta[@name="citation_fulltext_html_url"][1]/@content')
+				|| url;
 
-			//bookTitle
+			// bookTitle
 			if (!item.bookTitle) {
-				item.bookTitle = item.publicationTitle ||
-					ZU.xpathText(doc,
+				item.bookTitle = item.publicationTitle
+					|| ZU.xpathText(doc,
 						'//meta[@name="citation_book_title"][1]/@content');
 			}
 
-			//language
+			// language
 			if (!item.language) {
 				item.language = ZU.xpathText(doc,
 					'//meta[@name="citation_language"][1]/@content');
 			}
 
-			//rights
+			// rights
 			item.rights = ZU.xpathText(doc,
 				'//p[@class="copyright" or @id="copyright"]');
 
+<<<<<<< HEAD
 			addArticleNumber(doc, item);
 			addPages(doc, item);
 			//attachments
+=======
+			// attachments
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
 			item.attachments = [{
 				title: 'Snapshot',
 				document: doc,
@@ -387,6 +488,7 @@ function scrapeBibTeX(doc, url) {
 	});
 }
 
+<<<<<<< HEAD
 //ubtue:tag an article as open access
 function addFreeAccessTag(doc, item) {
 	let tagEntry = ZU.xpathText(doc, '//div[@class="doi-access"]');
@@ -411,9 +513,12 @@ function getORCID(doc, item) {
 
 	
 function scrapeCochraneTrial(doc, url){
+=======
+function scrapeCochraneTrial(doc) {
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
 	Z.debug("Scraping Cochrane External Sources");
 	var item = new Zotero.Item('journalArticle');
-	//Z.debug(ZU.xpathText(doc, '//meta/@content'))
+	// Z.debug(ZU.xpathText(doc, '//meta/@content'))
 	item.title = ZU.xpathText(doc, '//meta[@name="Article-title"]/@content');
 	item.publicationTitle = ZU.xpathText(doc, '//meta[@name="source"]/@content');
 	item.abstractNote = ZU.xpathText(doc, '//meta[@name="abstract"]/@content');
@@ -427,17 +532,22 @@ function scrapeCochraneTrial(doc, url){
 	item.rights = ZU.xpathText(doc, '//meta[@name="Copyright"]/@content');
 	var tags = ZU.xpathText(doc, '//meta[@name="cochraneGroupCode"]/@content');
 	if (tags) tags = tags.split(/\s*;\s*/);
-	for (var i in tags){
+	for (var i in tags) {
 		item.tags.push(tags[i]);
 	}
-	item.attachments.push({document: doc, title: "Cochrane Snapshot", mimType: "text/html"});
+	item.attachments.push({ document: doc, title: "Cochrane Snapshot", mimType: "text/html" });
 	var authors = ZU.xpathText(doc, '//meta[@name="orderedAuthors"]/@content');
 	if (!authors) authors = ZU.xpathText(doc, '//meta[@name="Author"]/@content');
 
 	authors = authors.split(/\s*,\s*/);
 
+<<<<<<< HEAD
 	for (var i=0; i<authors.length; i++){
 		//authors are in the forms Smith AS
+=======
+	for (let i = 0; i < authors.length; i++) {
+		// authors are in the forms Smith AS
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
 		var authormatch = authors[i].match(/(.+?)\s+([A-Z]+(\s[A-Z])?)\s*$/);
 		if (authormatch) {
 			item.creators.push({
@@ -445,7 +555,8 @@ function scrapeCochraneTrial(doc, url){
 				firstName: authormatch[2],
 				creatorType: "author"
 			});
-		} else {
+		}
+		else {
 			item.creators.push({
 				lastName: authors[i],
 				fieldMode: 1,
@@ -468,13 +579,15 @@ function getAuthorNameShortReview(doc) {
 }
 
 function scrape(doc, url) {
-	var itemType = detectWeb(doc,url);
+	var itemType = detectWeb(doc, url);
 
 	if (itemType == 'book') {
 		scrapeBook(doc, url);
-	} else if (/\/o\/cochrane\/(clcentral|cldare|clcmr|clhta|cleed|clabout)/.test(url)) {
-		scrapeCochraneTrial(doc, url);
-	} else {
+	}
+	else if (/\/o\/cochrane\/(clcentral|cldare|clcmr|clhta|cleed|clabout)/.test(url)) {
+		scrapeCochraneTrial(doc);
+	}
+	else {
 		scrapeBibTeX(doc, url);
 	}
 }
@@ -483,7 +596,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('.table-of-content a.issue-item__title, .item__body h2 a');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -496,27 +609,38 @@ function getSearchResults(doc, checkOnly) {
 
 
 function detectWeb(doc, url) {
-	//monitor for site changes on Cochrane
+	// monitor for site changes on Cochrane
 	if (doc.getElementsByClassName('cochraneSearchForm').length && doc.getElementById('searchResultOuter')) {
 		Zotero.monitorDOMChanges(doc.getElementById('searchResultOuter'));
 	}
 
+<<<<<<< HEAD
 	if (url.includes('/toc') ||
 		url.includes('/results') ||
 		url.includes('/doSearch') ||
 		url.includes('/mainSearch?')
+=======
+	if (url.includes('/toc')
+		|| url.includes('/results')
+		|| url.includes('/doSearch')
+		|| url.includes('/mainSearch?')
+>>>>>>> 9589c8efeb2c378a4d6854f36930e09909e648a8
 	) {
 		if (getSearchResults(doc, true)) return 'multiple';
-	} else if (url.includes('/book/')) {
-		//if the book has more than one chapter, scrape chapters
+	}
+	else if (url.includes('/book/')) {
+		// if the book has more than one chapter, scrape chapters
 		if (getSearchResults(doc, true)) return 'multiple';
-		//otherwise, import book
-		return 'book'; //does this exist?
-	} else if (ZU.xpath(doc, '//meta[@name="citation_book_title"]').length ) {
+		// otherwise, import book
+		return 'book'; // does this exist?
+	}
+	else if (ZU.xpath(doc, '//meta[@name="citation_book_title"]').length) {
 		return 'bookSection';
-	} else {
+	}
+	else {
 		return 'journalArticle';
 	}
+	return false;
 }
 
 
@@ -525,11 +649,11 @@ function doWeb(doc, url) {
 	if (type == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
-				//for Cochrane trials - get the frame with the actual data
+				// for Cochrane trials - get the frame with the actual data
 				if (i.includes("frame.html")) i = i.replace(/frame\.html$/, "sect0.html");
 				articles.push(i);
 			}
@@ -537,18 +661,16 @@ function doWeb(doc, url) {
 		});
 	}
 	// Single article
-	else {
-		// /pdf/, /epdf/, or /pdfdirect/
-		if (/\/e?pdf(direct)?\//.test(url)) {
-			url = url.replace(/\/e?pdf(direct)?\//,'/');
-			Zotero.debug("Redirecting to abstract page: "+url);
-			ZU.processDocuments(url, function(doc, url) {
-				scrape(doc, url);
-			});
-		}
-		else {
+	// /pdf/, /epdf/, or /pdfdirect/
+	else if (/\/e?pdf(direct)?\//.test(url)) {
+		url = url.replace(/\/e?pdf(direct)?\//, '/');
+		Zotero.debug("Redirecting to abstract page: " + url);
+		ZU.processDocuments(url, function (doc, url) {
 			scrape(doc, url);
-		}
+		});
+	}
+	else {
+		scrape(doc, url);
 	}
 }
 /** BEGIN TEST CASES **/
