@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-13 08:27:02"
+	"lastUpdated": "2021-07-05 17:15:19"
 }
 
 /*
@@ -36,21 +36,7 @@
 */
 
 
-/* 
-   Test cases for new interface does not work within Scaffold
-   Thus, one has to test them outside.
-   
-   Another test case:
-   https://patents.google.com/patent/US20090197681A1/en?q=networks&q=G06Q30%2f02
- 
-*/
-
-
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
-
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	// The subtree changes from multiple search results to a single result
 	// when clicking on one entry or back to the search results, and thus
 	// we have to monitor this.
@@ -60,9 +46,11 @@ function detectWeb(doc, url) {
 	if (ZU.xpathText(doc, '//search-app/search-results')) {
 		return "multiple";
 	}
-	if (ZU.xpathText(doc, '//search-app/search-result')) {
+	if (ZU.xpathText(doc, '//search-app/search-result')
+		|| doc.querySelector('meta[name^="citation_patent_"]')) {
 		return "patent";
 	}
+	return false;
 }
 
 
@@ -70,32 +58,33 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var urlParts = url.split('/?');
 		var jsonUrl = urlParts[0] + '/xhr/query?url=' + encodeURIComponent(urlParts[1]);
-		//Z.debug(jsonUrl);
-		ZU.doGet(jsonUrl, function(text) {
+		// Z.debug(jsonUrl);
+		ZU.doGet(jsonUrl, function (text) {
 			var json = JSON.parse(text);
 			var results = json.results.cluster[0].result;
 			var selectResults = {};
-			for (let i=0; i<results.length; i++) {
+			for (let i = 0; i < results.length; i++) {
 				selectResults[i] = ZU.cleanTags(results[i].patent.title);
 			}
-			Zotero.selectItems(selectResults, function(items) {
-				if (!items) return true;
+			Zotero.selectItems(selectResults, function (items) {
+				if (!items) return;
 				for (var i in items) {
 					let resultUrl = urlParts[0] + '/patent/' + results[i].patent.publication_number;
 					scrapeJson(results[i].patent, resultUrl);
 				}
 			});
 		});
-	} else {
+	}
+	else {
 		// Some old urls miss the language part, which we have to add before
 		// calling other urls.
-		var includeLanguageCode = url.match(/\/patent\/[^\/\?#]+\/[a-z][a-z]\b/);
+		var includeLanguageCode = url.match(/\/patent\/[^/?#]+\/[a-z][a-z]\b/);
 		if (!includeLanguageCode) {
-			url = url.replace(/(\/patent\/[^\/\?#]+)\b/, "$1/en");
+			url = url.replace(/(\/patent\/[^/?#]+)\b/, "$1/en");
 		}
 		var xhrUrl = url.replace('/patent/', '/xhr/result?id=patent/');
-		ZU.doGet(xhrUrl, function(text) {
-			//Z.debug(text);
+		ZU.doGet(xhrUrl, function (text) {
+			// Z.debug(text);
 			var parser = new DOMParser();
 			var doc = parser.parseFromString(text, "text/html");
 			scrape(doc, url);
@@ -106,19 +95,20 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var metadata = doc.querySelectorAll('*[itemprop]');
 	var json = {};
-	for (let i=0; i<metadata.length; i++) {
+	for (let i = 0; i < metadata.length; i++) {
 		let label = metadata[i].getAttribute('itemprop');
 		// We stop before going into the publications, related entries etc.
-		if (label=='description' || label=='pubs') break;
+		if (label == 'description' || label == 'pubs') break;
 		let value = microdataValue(metadata[i], true);
 		if (label && value) {
-			if (metadata[i].getAttribute('repeat')==='') {
+			if (metadata[i].getAttribute('repeat') === '') {
 				if (!json[label]) json[label] = [];
 				json[label].push(value);
-			} else {
+			}
+			else if (!json[label]) {
 				// don't overwrite values
-				if (!json[label]) json[label] = value;
-				//else Z.debug(label)
+				json[label] = value;
+				// else Z.debug(label)
 			}
 		}
 	}
@@ -130,7 +120,7 @@ function microdataValue(propertyNode, firstCall) {
 	if (propertyNode.hasAttribute("itemscope") && firstCall) {
 		var metadata = propertyNode.querySelectorAll('*[itemprop]');
 		var innerJson = {};
-		for (let i=0; i<metadata.length; i++) {
+		for (let i = 0; i < metadata.length; i++) {
 			let label = metadata[i].getAttribute('itemprop');
 			let value = microdataValue(metadata[i], false);
 			innerJson[label] = value;
@@ -140,7 +130,6 @@ function microdataValue(propertyNode, firstCall) {
 	switch (propertyNode.tagName.toLowerCase()) {
 		case "meta":
 			return propertyNode.getAttribute("content");
-			break;
 		case "audio":
 		case "embed":
 		case "iframe":
@@ -149,27 +138,22 @@ function microdataValue(propertyNode, firstCall) {
 		case "track":
 		case "video":
 			return propertyNode.getAttribute("src");
-			break;
 		case "a":
 		case "area":
 		case "link":
 			return propertyNode.getAttribute("href");
-			break;
 		case "object":
 			return propertyNode.getAttribute("data");
-			break;
 		case "data":
 		case "meter":
 			return propertyNode.getAttribute("value");
-			break;
 		case "time":
 			return propertyNode.getAttribute("datetime");
-			break;
-		case "span"://non-standard, but can occur
+		case "span":// non-standard, but can occur
 			if (propertyNode.childNodes.length > 1 && propertyNode.getAttribute("content")) {
 				return propertyNode.getAttribute("content");
-				break;
 			}
+			return propertyNode.textContent;
 		default:
 			return propertyNode.textContent;
 	}
@@ -177,12 +161,12 @@ function microdataValue(propertyNode, firstCall) {
 
 
 function scrapeJson(json, url, doc) {
-	//Z.debug(json);
+	// Z.debug(json);
 	var item = new Zotero.Item('patent');
 	item.title = ZU.cleanTags(json.title).replace(/\.\s*$/, '');
 	if (json.inventor) {
 		if (typeof json.inventor === 'string') json.inventor = [json.inventor];
-		for (let i=0; i<json.inventor.length; i++) {
+		for (let i = 0; i < json.inventor.length; i++) {
 			item.creators.push(ZU.cleanAuthor(json.inventor[i], 'inventor'));
 		}
 	}
@@ -191,19 +175,20 @@ function scrapeJson(json, url, doc) {
 	item.patentNumber = json.publicationNumber || json.publication_number;
 	if (json.assigneeOriginal && !(typeof json.assigneeOriginal === 'string')) {
 		item.assignee = json.assigneeOriginal.join(', '); // or assigneeCurrent
-	} else {
+	}
+	else {
 		item.assignee = json.assigneeOriginal || json.assignee;
 	}
-	item.applicationNumber = json.applicationNumber;
+	item.applicationNumber = (json.applicationNumber || '').replace(/[/,]/g, '');
 	// This status is sometimes not what would be expected
-	//if (json.legalStatusIfi) item.legalStatus = json.legalStatusIfi.status;
+	// if (json.legalStatusIfi) item.legalStatus = json.legalStatusIfi.status;
 	item.country = json.countryCode;
 	if (item.country) item.issuingAuthority = getPatentOffice(item.country);
 	item.language = json.primaryLanguage;
 	
 	// Keywords
 	if (json.priorArtKeywords) {
-		for (let i=0; i<json.priorArtKeywords.length; i++) {
+		for (let i = 0; i < json.priorArtKeywords.length; i++) {
 			item.tags.push(json.priorArtKeywords[i]);
 		}
 	}
@@ -211,35 +196,36 @@ function scrapeJson(json, url, doc) {
 	// Abstract
 	if (json.abstract) {
 		item.abstractNote = json.abstract.content;
-	} else if (doc) {
+	}
+	else if (doc) {
 		item.abstractNote = attr(doc, 'meta[name="description"]', 'content');
 	}
 	
 	// Classifications
 	if (json.cpcs) {
 		var classifications = [];
-		for (let i=0; i<json.cpcs.length; i++) {
+		for (let i = 0; i < json.cpcs.length; i++) {
 			if (json.cpcs[i].Leaf && !json.cpcs[i].cpcs) {
 				classifications.push(json.cpcs[i].Code + ': ' + json.cpcs[i].Description);
 			}
 		}
-		if (classifications.length>0) {
-			item.notes.push({note: "<h2>Classifications</h2>\n" + classifications.join("<br/>\n")});
+		if (classifications.length > 0) {
+			item.notes.push({ note: "<h2>Classifications</h2>\n" + classifications.join("<br/>\n") });
 		}
 	}
 	
 	item.url = url;
 	let pdfurl = json.pdfLink || json.pdf;
 	if (pdfurl) {
-		//Relative links don't resolve correctly in all cases. Let's make sure we're getting this all from 
-		//the right place on the google API
+		// Relative links don't resolve correctly in all cases. Let's make sure we're getting this all from
+		// the right place on the google API
 		if (!pdfurl.includes("https://")) {
 			pdfurl = "https://patentimages.storage.googleapis.com/" + pdfurl;
 		}
-		//Z.debug(pdfurl);
+		// Z.debug(pdfurl);
 		item.attachments.push({
 			url: pdfurl,
-			title: "Fulltext PDF",
+			title: "Full Text PDF",
 			mimeType: "application/pdf"
 		});
 	}
@@ -249,19 +235,24 @@ function scrapeJson(json, url, doc) {
 
 
 function getPatentOffice(number) {
-	//get the PatentOffice from the first two letters of the patentNumber
+	// get the PatentOffice from the first two letters of the patentNumber
 	var country;
 	if (number.indexOf('EP') === 0) {
 		country = 'European Union';
-	} else if (number.indexOf('US') === 0) {
+	}
+	else if (number.indexOf('US') === 0) {
 		country = 'United States';
-	} else if (number.indexOf('WO') === 0) {
+	}
+	else if (number.indexOf('WO') === 0) {
 		country = 'World Intellectual Property Organization';
-	} else if (number.indexOf('CN') === 0) {
+	}
+	else if (number.indexOf('CN') === 0) {
 		country = 'China';
-	} else if (number.indexOf('CA') === 0) {
+	}
+	else if (number.indexOf('CA') === 0) {
 		country = 'Canada';
-	} else if (number.indexOf('DE') === 0) {
+	}
+	else if (number.indexOf('DE') === 0) {
 		country = 'Germany';
 	}
 	return country;
@@ -272,6 +263,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://patents.google.com/?q=book&oq=book",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
@@ -280,15 +272,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "patent",
-				"url": "https://patents.google.com/patent/US1065211/en",
-				"accessDate": "2018-02-25 20:11:54",
-				"assignee": "William T Brook",
-				"patentNumber": "US1065211A",
-				"issueDate": "1913-06-17",
-				"country": "US",
 				"title": "Bottle-stopper",
-				"issuingAuthority": "United States",
-				"filingDate": "1912-08-03 1912-08-03",
 				"creators": [
 					{
 						"firstName": "William T.",
@@ -296,9 +280,17 @@ var testCases = [
 						"creatorType": "inventor"
 					}
 				],
+				"issueDate": "1913-06-17",
+				"applicationNumber": "US71306412A",
+				"assignee": "William T Brook",
+				"country": "US",
+				"filingDate": "1912-08-03",
+				"issuingAuthority": "United States",
+				"patentNumber": "US1065211A",
+				"url": "https://patents.google.com/patent/US1065211/en",
 				"attachments": [
 					{
-						"title": "Fulltext PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -334,15 +326,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "patent",
-				"url": "https://patents.google.com/patent/US1120656/en",
-				"accessDate": "2018-02-25 20:19:00",
-				"assignee": "Hunt Specialty Mfg Company",
-				"patentNumber": "US1120656A",
-				"issueDate": "1914-12-08",
-				"country": "US",
 				"title": "Push-pin",
-				"issuingAuthority": "United States",
-				"filingDate": "1914-01-14 1914-01-14",
 				"creators": [
 					{
 						"firstName": "Jonathan A.",
@@ -350,21 +334,29 @@ var testCases = [
 						"creatorType": "inventor"
 					}
 				],
+				"issueDate": "1914-12-08",
+				"applicationNumber": "US81214214A",
+				"assignee": "HUNT SPECIALTY Manufacturing Co",
+				"country": "US",
+				"filingDate": "1914-01-14",
+				"issuingAuthority": "United States",
+				"patentNumber": "US1120656A",
+				"url": "https://patents.google.com/patent/US1120656/en",
 				"attachments": [
 					{
-						"title": "Fulltext PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
 					{
-						"tag": "end"
-					},
-					{
-						"tag": "fig"
+						"tag": "extending"
 					},
 					{
 						"tag": "head"
+					},
+					{
+						"tag": "hollow"
 					},
 					{
 						"tag": "pin"
@@ -388,17 +380,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "patent",
-				"url": "https://patents.google.com/patent/US7123498/en",
-				"accessDate": "2018-02-25 20:23:20",
-				"assignee": "International Business Machines Corp",
-				"patentNumber": "US7123498B2",
-				"issueDate": "2006-10-17",
-				"language": "en",
-				"country": "US",
-				"applicationNumber": "US10964352",
 				"title": "Non-volatile memory device",
-				"issuingAuthority": "United States",
-				"filingDate": "2004-10-12 2004-10-12",
 				"creators": [
 					{
 						"firstName": "Hisatada",
@@ -431,35 +413,39 @@ var testCases = [
 						"creatorType": "inventor"
 					}
 				],
+				"issueDate": "2006-10-17",
+				"applicationNumber": "US10964352",
+				"assignee": "International Business Machines Corp",
+				"country": "US",
+				"filingDate": "2004-10-12",
+				"issuingAuthority": "United States",
+				"language": "en",
+				"patentNumber": "US7123498B2",
+				"url": "https://patents.google.com/patent/US7123498/en",
 				"attachments": [
 					{
-						"title": "Fulltext PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
 					{
+						"tag": "magneto resistive"
+					},
+					{
 						"tag": "memory"
 					},
 					{
-						"tag": "bit"
+						"tag": "memory cells"
 					},
 					{
-						"tag": "cell"
+						"tag": "mtj"
 					},
 					{
-						"tag": "line"
-					},
-					{
-						"tag": "resistive"
+						"tag": "parallel"
 					}
 				],
-				"notes": [
-					{
-						"note": "<h2>Classifications</h2>\nG11C11/16: Digital stores characterised by the use of particular electric or magnetic storage elements; Storage elements therefor using magnetic elements using elements in which the storage effect is based on magnetic spin effect"
-					}
-				],
-				"abstractNote": "MRAM has read word lines WLR and write word line WLW extending in the y direction, write/read bit line BLW/R and write bit line BLW extending in the x direction, and the memory cells MC disposed at the points of the intersection of these lines. The memory MC includes sub-cells SC1 and SC2. The sub-cell SC1 includes magneto resistive elements MTJ1 and MTJ2 and a selection transistor Tr1, and the sub-cell SC2 includes magneto resistive elements MTJ3 and MTJ4 and a selection transistor Tr2. The magneto resistive elements MTJ1 and MTJ2 are connected in parallel, and the magneto resistive elements MTJ3 and MTJ4 are also connected in parallel. Further, the sub-cells SC1 and SC2 are connected in series between the write/read bit line BLW/R and the ground.",
+				"notes": [],
 				"seeAlso": []
 			}
 		]
@@ -470,16 +456,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "patent",
-				"url": "https://patents.google.com/patent/US4390992/en",
-				"accessDate": "2018-02-25 20:26:31",
-				"assignee": "US Department of Energy",
-				"patentNumber": "US4390992A",
-				"issueDate": "1983-06-28",
-				"country": "US",
-				"applicationNumber": "US06284151",
 				"title": "Plasma channel optical pumping device and method",
-				"issuingAuthority": "United States",
-				"filingDate": "1981-07-17 1981-07-17",
 				"creators": [
 					{
 						"firstName": "O'Dean P.",
@@ -487,35 +464,38 @@ var testCases = [
 						"creatorType": "inventor"
 					}
 				],
+				"issueDate": "1983-06-28",
+				"applicationNumber": "US06284151",
+				"assignee": "US Department of Energy",
+				"country": "US",
+				"filingDate": "1981-07-17",
+				"issuingAuthority": "United States",
+				"patentNumber": "US4390992A",
+				"url": "https://patents.google.com/patent/US4390992/en#v=onepage&q&f=false",
 				"attachments": [
 					{
-						"title": "Fulltext PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
 					{
-						"tag": "energy"
+						"tag": "electrodes"
+					},
+					{
+						"tag": "gaseous"
 					},
 					{
 						"tag": "laser"
 					},
 					{
-						"tag": "lasing"
-					},
-					{
-						"tag": "medium"
+						"tag": "lasing medium"
 					},
 					{
 						"tag": "sub"
 					}
 				],
-				"notes": [
-					{
-						"note": "<h2>Classifications</h2>\nH01S3/091: Processes or apparatus for excitation, e.g. pumping using optical pumping"
-					}
-				],
-				"abstractNote": "A device and method for optically pumping a gaseous laser using blackbody radiation produced by a plasma channel which is formed from an electrical discharge between two electrodes spaced at opposite longitudinal ends of the laser. A preionization device which can comprise a laser or electron beam accelerator produces a preionization beam which is sufficient to cause an electrical discharge between the electrodes to initiate the plasma channel along the preionization path. The optical pumping energy is supplied by a high voltage power supply rather than by the preionization beam. High output optical intensities are produced by the laser due to the high temperature blackbody radiation produced by the plasma channel, in the same manner as an exploding wire type laser. However, unlike the exploding wire type laser, the disclosed invention can be operated in a repetitive manner by utilizing a repetitive pulsed preionization device.",
+				"notes": [],
 				"seeAlso": []
 			}
 		]
@@ -523,6 +503,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://patents.google.com/?q=ordinateur&oq=ordinateur",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
@@ -531,17 +512,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "patent",
-				"url": "https://patents.google.com/patent/EP1808414A1/fr?oq=water",
-				"accessDate": "2018-02-25 20:45:06",
-				"assignee": "Michel Billon",
-				"patentNumber": "EP1808414A1",
-				"issueDate": "2007-07-18",
-				"language": "fr",
-				"country": "EP",
-				"applicationNumber": "EP20060447010",
 				"title": "Installation pour le recyclage d'eaux sanitaires",
-				"issuingAuthority": "European Union",
-				"filingDate": "2006-01-16 2006-01-16",
 				"creators": [
 					{
 						"firstName": "Michel",
@@ -549,18 +520,27 @@ var testCases = [
 						"creatorType": "inventor"
 					}
 				],
+				"issueDate": "2007-07-18",
+				"applicationNumber": "EP06447010A",
+				"assignee": "Michel Billon",
+				"country": "EP",
+				"filingDate": "2006-01-16",
+				"issuingAuthority": "European Union",
+				"language": "fr",
+				"patentNumber": "EP1808414A1",
+				"url": "https://patents.google.com/patent/EP1808414A1/fr?oq=water",
 				"attachments": [
 					{
-						"title": "Fulltext PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
 					{
-						"tag": "bowl"
+						"tag": "filter"
 					},
 					{
-						"tag": "comprises"
+						"tag": "installation"
 					},
 					{
 						"tag": "tank"
@@ -574,7 +554,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "<h2>Classifications</h2>\nE03D5/003: Grey water flushing systems<br/>\nE03B1/04: Methods or layout of installations for water supply for domestic or like local supply<br/>\nE03B1/042: Details thereof, e.g. valves or pumps<br/>\nE03D5/006: Constructional details of cisterns for using greywater<br/>\nC02F2103/002: Grey water, e.g. from clothes washers, showers or dishwashers<br/>\nC02F2209/005: Processes using a programmable logic controller [PLC]<br/>\nC02F2209/42: Liquid level<br/>\nE03B2001/045: Greywater supply systems using household water<br/>\nE03B2001/047: Greywater supply systems using rainwater<br/>\nY02A20/108: <br/>\nY02A20/148: <br/>\nY02A20/304:"
+						"note": "<h2>Classifications</h2>\nE03D5/003: Grey water flushing systems<br/>\nE03B1/04: Methods or layout of installations for water supply for domestic or like local supply<br/>\nE03B1/042: Details thereof, e.g. valves or pumps<br/>\nE03D5/006: Constructional details of cisterns for using greywater<br/>\nC02F2103/002: Grey water, e.g. from clothes washers, showers or dishwashers<br/>\nC02F2209/005: Processes using a programmable logic controller [PLC]<br/>\nC02F2209/42: Liquid level<br/>\nE03B2001/045: Greywater supply systems using household water<br/>\nE03B2001/047: Greywater supply systems using rainwater<br/>\nY02A20/108: Rainwater harvesting<br/>\nY02A20/148: Water conservation; Efficient water supply; Efficient water use using grey water using household water from wash basins or showers<br/>\nY02A20/30: Relating to industrial water supply, e.g. used for cooling"
 					}
 				],
 				"seeAlso": []
@@ -587,17 +567,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "patent",
-				"url": "https://patents.google.com/patent/EP0011951A1/en?oq=water",
-				"accessDate": "2018-02-25 20:50:40",
-				"assignee": "Merck Sharp & Dohme Corp",
-				"patentNumber": "EP0011951A1",
-				"issueDate": "1980-06-11",
-				"language": "en",
-				"country": "EP",
-				"applicationNumber": "EP19790302482",
 				"title": "Cold-water soluble tamarind gum, process for its preparation and its application in sizing textile warp",
-				"issuingAuthority": "European Union",
-				"filingDate": "1979-11-06 1979-11-06",
 				"creators": [
 					{
 						"firstName": "Joseph S.",
@@ -605,9 +575,18 @@ var testCases = [
 						"creatorType": "inventor"
 					}
 				],
+				"issueDate": "1980-06-11",
+				"applicationNumber": "EP79302482A",
+				"assignee": "Merck and Co Inc",
+				"country": "EP",
+				"filingDate": "1979-11-06",
+				"issuingAuthority": "European Union",
+				"language": "en",
+				"patentNumber": "EP0011951A1",
+				"url": "https://patents.google.com/patent/EP0011951A1/en?oq=water",
 				"attachments": [
 					{
-						"title": "Fulltext PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -616,10 +595,10 @@ var testCases = [
 						"tag": "cold"
 					},
 					{
-						"tag": "cwstg"
+						"tag": "soluble"
 					},
 					{
-						"tag": "tamarind"
+						"tag": "tamarind gum"
 					},
 					{
 						"tag": "tkp"
@@ -643,16 +622,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "patent",
-				"url": "https://patents.google.com/patent/US4748058/en",
-				"accessDate": "2018-02-25 20:53:33",
-				"assignee": "Craig Jr Chester L",
-				"patentNumber": "US4748058A",
-				"issueDate": "1988-05-31",
-				"country": "US",
-				"applicationNumber": "US07013056",
 				"title": "Artificial tree",
-				"issuingAuthority": "United States",
-				"filingDate": "1987-02-10 1987-02-10",
 				"creators": [
 					{
 						"firstName": "Chester L. Craig",
@@ -660,27 +630,36 @@ var testCases = [
 						"creatorType": "inventor"
 					}
 				],
+				"issueDate": "1988-05-31",
+				"abstractNote": "An artificial tree assembly, and a tree constructed therefrom, are provided. The assembly comprises a collapsible three-piece pole; a base member formed by the bottom of a box for storing the tree assembly and including a pole support member secured thereto for supporting the pole; and a plurality of limb sections and interconnecting garlands. The limb-sections each comprise a central ring portion and a plurality of limb members extending radially outwardly from the central ring portions. The ring portions of the limb sections are stacked, when not in use, on the pole support member and are disposed, in use, along the length of pole in spaced relationship therealong. The garlands interconnect the limb portions so that as the ring portions are lifted, from the top, from the stacked positions thereof on the pole support member and slid along the pole, the garlands between adjacent limb section are tensioned, in turn, and thus serve to lift the next adjacent limb section until the tree is fully erected.",
+				"applicationNumber": "US07013056",
+				"assignee": "Craig Jr Chester L",
+				"country": "US",
+				"filingDate": "1987-02-10",
+				"issuingAuthority": "United States",
+				"patentNumber": "US4748058A",
+				"url": "https://patents.google.com/patent/US4748058/en",
 				"attachments": [
 					{
-						"title": "Fulltext PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
 					{
+						"tag": "artificial"
+					},
+					{
+						"tag": "garlands"
+					},
+					{
 						"tag": "limb"
 					},
 					{
+						"tag": "members"
+					},
+					{
 						"tag": "pole"
-					},
-					{
-						"tag": "ring"
-					},
-					{
-						"tag": "support"
-					},
-					{
-						"tag": "tree"
 					}
 				],
 				"notes": [
@@ -688,7 +667,6 @@ var testCases = [
 						"note": "<h2>Classifications</h2>\nA47G33/06: Artificial Christmas trees"
 					}
 				],
-				"abstractNote": "An artificial tree assembly, and a tree constructed therefrom, are provided. The assembly comprises a collapsible three-piece pole; a base member formed by the bottom of a box for storing the tree assembly and including a pole support member secured thereto for supporting the pole; and a plurality of limb sections and interconnecting garlands. The limb-sections each comprise a central ring portion and a plurality of limb members extending radially outwardly from the central ring portions. The ring portions of the limb sections are stacked, when not in use, on the pole support member and are disposed, in use, along the length of pole in spaced relationship therealong. The garlands interconnect the limb portions so that as the ring portions are lifted, from the top, from the stacked positions thereof on the pole support member and slid along the pole, the garlands between adjacent limb section are tensioned, in turn, and thus serve to lift the next adjacent limb section until the tree is fully erected.",
 				"seeAlso": []
 			}
 		]
@@ -699,17 +677,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "patent",
-				"url": "https://patents.google.com/patent/US5979603/en?oq=tree",
-				"accessDate": "2018-02-25 20:55:32",
-				"assignee": "Summit Specialties Inc",
-				"patentNumber": "US5979603A",
-				"issueDate": "1999-11-09",
-				"language": "en",
-				"country": "US",
-				"applicationNumber": "US08369434",
 				"title": "Portable tree stand having fiber composite platform",
-				"issuingAuthority": "United States",
-				"filingDate": "1995-01-06 1995-01-06",
 				"creators": [
 					{
 						"firstName": "Ronald R.",
@@ -717,34 +685,38 @@ var testCases = [
 						"creatorType": "inventor"
 					}
 				],
+				"issueDate": "1999-11-09",
+				"applicationNumber": "US08369434",
+				"assignee": "Summit Specialties Inc",
+				"country": "US",
+				"filingDate": "1995-01-06",
+				"issuingAuthority": "United States",
+				"patentNumber": "US5979603A",
+				"url": "https://patents.google.com/patent/US5979603/en?oq=tree",
 				"attachments": [
 					{
-						"title": "Fulltext PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
 					{
-						"tag": "fig"
-					},
-					{
-						"tag": "fiber"
-					},
-					{
 						"tag": "fibers"
 					},
 					{
-						"tag": "foam"
+						"tag": "lightweight"
 					},
 					{
-						"tag": "mold"
-					}
-				],
-				"notes": [
+						"tag": "pair"
+					},
 					{
-						"note": "<h2>Classifications</h2>\nA01M31/02: Shooting stands<br/>\nA45F3/26: Hanging seats"
+						"tag": "reinforcing fibers"
+					},
+					{
+						"tag": "tree"
 					}
 				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
@@ -755,15 +727,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "patent",
-				"url": "https://patents.google.com/patent/US2970959/en",
-				"accessDate": "2018-02-25 20:57:47",
-				"assignee": "Pan American Petroleum Corp",
-				"patentNumber": "US2970959A",
-				"issueDate": "1961-02-07",
-				"country": "US",
 				"title": "Composition and method for inhibiting scale",
-				"issuingAuthority": "United States",
-				"filingDate": "1958-06-17 1958-06-17",
 				"creators": [
 					{
 						"firstName": "Loyd W.",
@@ -771,27 +735,35 @@ var testCases = [
 						"creatorType": "inventor"
 					}
 				],
+				"issueDate": "1961-02-07",
+				"applicationNumber": "US742486A",
+				"assignee": "Pan American Petroleum Corp",
+				"country": "US",
+				"filingDate": "1958-06-17",
+				"issuingAuthority": "United States",
+				"patentNumber": "US2970959A",
+				"url": "https://patents.google.com/patent/US2970959/en",
 				"attachments": [
 					{
-						"title": "Google Patents PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
 					{
-						"tag": "water"
-					},
-					{
 						"tag": "cmc"
 					},
 					{
-						"tag": "per"
+						"tag": "pellet"
 					},
 					{
 						"tag": "scale"
 					},
 					{
 						"tag": "sodium"
+					},
+					{
+						"tag": "water"
 					}
 				],
 				"notes": [
@@ -809,16 +781,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "patent",
-				"url": "https://patents.google.com/patent/US6239091/en",
-				"accessDate": "2018-02-25 21:01:35",
-				"assignee": "Lever Brothers Co",
-				"patentNumber": "US6239091B1",
-				"issueDate": "2001-05-29",
-				"country": "US",
-				"applicationNumber": "US09075548",
 				"title": "Machine dishwashing compositions with a polymer having cationic monomer units",
-				"issuingAuthority": "United States",
-				"filingDate": "1998-05-11 1998-05-11",
 				"creators": [
 					{
 						"firstName": "Alla",
@@ -836,19 +799,21 @@ var testCases = [
 						"creatorType": "inventor"
 					}
 				],
+				"issueDate": "2001-05-29",
+				"applicationNumber": "US09075548",
+				"assignee": "Lever Brothers Co",
+				"country": "US",
+				"filingDate": "1998-05-11",
+				"issuingAuthority": "United States",
+				"patentNumber": "US6239091B1",
+				"url": "https://patents.google.com/patent/US6239091/en",
 				"attachments": [
 					{
-						"title": "Google Patents PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
-					{
-						"tag": "water"
-					},
-					{
-						"tag": "invention"
-					},
 					{
 						"tag": "acid"
 					},
@@ -856,15 +821,16 @@ var testCases = [
 						"tag": "alkyl"
 					},
 					{
-						"tag": "preferably"
-					}
-				],
-				"notes": [
+						"tag": "cationic"
+					},
 					{
-						"note": "<h2>Classifications</h2>\nC11D3/3796: Amphoteric polymers; Zwitterionic polymers<br/>\nC11D3/0073: Anticorrosion compositions<br/>\nC11D3/3719: Polyamides; Polyimides<br/>\nC11D3/3723: Polyamines, polyalkyleneimines<br/>\nC11D3/3769: (Co)polymerised monomers containing nitrogen, e.g. carbonamides, nitriles, amines<br/>\nC11D3/3776: Heterocyclic compounds, e.g. lactam<br/>\nC23F11/173: Macromolecular compounds"
+						"tag": "polymer"
+					},
+					{
+						"tag": "radical"
 					}
 				],
-				"abstractNote": "A detergent or rinse aid composition which reduces spotting and filming on glassware cleaned in an automatic dishwashing machine is described. The composition contains an effective amount of a water soluble cationic or amphoteric polymer having at least one monomer unit having a cationic charge over a portion of the pH range of about 2 to about 11 in the wash or rinse cycle.",
+				"notes": [],
 				"seeAlso": []
 			}
 		]
@@ -875,17 +841,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "patent",
-				"url": "https://patents.google.com/patent/US20110172136/en",
-				"accessDate": "2018-02-25 21:04:06",
-				"assignee": "Rhodia Operations Sas",
-				"patentNumber": "US20110172136A1",
-				"issueDate": "2011-07-14",
-				"language": "en",
-				"country": "US",
-				"applicationNumber": "US13071376",
 				"title": "Detergent composition with hydrophilizing soil-release agent and methods for using same",
-				"issuingAuthority": "United States",
-				"filingDate": "2011-03-24 2011-03-24",
 				"creators": [
 					{
 						"firstName": "Tobias Johannes",
@@ -903,9 +859,19 @@ var testCases = [
 						"creatorType": "inventor"
 					}
 				],
+				"issueDate": "2011-07-14",
+				"abstractNote": "Laundry detergent compositions that provide soil release benefits to all fabric comprising an organophosphorus soil release agents and optional non-cotton secondary soil release agents. The present invention further relates to a method for providing soil release benefits to cotton fabric by contacting cotton articles with a water soluble and/or dispersible organophosphorus material. The contacting can be during washing or by pretreating by applying the composition directly to stains or by presoaking the clothing in the composition prior to washing. The present invention further relates to providing soil release benefits to all fabric in the laundry wash load in the presence of a bleaching agent.",
+				"applicationNumber": "US13071376",
+				"assignee": "Rhodia Operations SAS",
+				"country": "US",
+				"filingDate": "2011-03-24",
+				"issuingAuthority": "United States",
+				"language": "en",
+				"patentNumber": "US20110172136A1",
+				"url": "https://patents.google.com/patent/US20110172136/en",
 				"attachments": [
 					{
-						"title": "Google Patents PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -914,16 +880,16 @@ var testCases = [
 						"tag": "alkyl"
 					},
 					{
-						"tag": "cotton"
+						"tag": "alkyleneoxy"
 					},
 					{
-						"tag": "group"
+						"tag": "composition"
 					},
 					{
-						"tag": "oil"
+						"tag": "organophosphorus"
 					},
 					{
-						"tag": "soil"
+						"tag": "poly"
 					}
 				],
 				"notes": [
@@ -931,7 +897,60 @@ var testCases = [
 						"note": "<h2>Classifications</h2>\nC11D3/0036: Soil deposition preventing compositions; Antiredeposition agents<br/>\nC11D1/342: Phosphonates; Phosphinates; Phosphonites<br/>\nC11D1/345: Phosphates; Phosphites<br/>\nC11D11/0017: \"Soft\" surfaces, e.g. textiles<br/>\nC11D3/361: Phosphonates, phosphinates, phosphonites<br/>\nC11D3/362: Phosphates, phosphites<br/>\nC11D3/3784: (Co)polymerised monomers containing phosphorus"
 					}
 				],
-				"abstractNote": "Laundry detergent compositions that provide soil release benefits to all fabric comprising an organophosphorus soil release agents and optional non-cotton secondary soil release agents. The present invention further relates to a method for providing soil release benefits to cotton fabric by contacting cotton articles with a water soluble and/or dispersible organophosphorus material. The contacting can be during washing or by pretreating by applying the composition directly to stains or by presoaking the clothing in the composition prior to washing. The present invention further relates to providing soil release benefits to all fabric in the laundry wash load in the presence of a bleaching agent.",
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://patents.google.com/patent/US3625104A/en",
+		"items": [
+			{
+				"itemType": "patent",
+				"title": "Water key for brass wind musical instruments",
+				"creators": [
+					{
+						"firstName": "Raymond A.",
+						"lastName": "Amado",
+						"creatorType": "inventor"
+					}
+				],
+				"issueDate": "1971-12-07",
+				"abstractNote": "A FLUID RELEASE VALVE FOR BRASS WIND INSTRUMENTS (CORNETS, TRUMPETS, TROMBONES AND THE LIKE) COMMONLY KNOWN AS A WATER KEY BUT DISTINCT AND DIFFERENT FROM TTHE CONVENTIONAL PIVOTED LEVER-TYPE WATER KEY. IT COMPRISES A VALVE BODY EMBODYING A CYLINDER AND AN ENCLOSED SPRING-LOADED PISTON WHICH RECIPROCATES IN THE CYLINDER AND WHICH SIMULTANEOUSLY OPENS AND CLOSES DIAMETRICALLY OPPOSITE FLUID INLET AND DISCHARGE PORTS AND HAS A PUSH-BUTTON-TYPE FINGER-PIECE AT A READILY ACCESSIBLE END OF THE VALVE BODY.",
+				"assignee": "Raymond A Amado",
+				"country": "US",
+				"filingDate": "1970-05-12",
+				"issuingAuthority": "United States",
+				"patentNumber": "US3625104A",
+				"url": "https://patents.google.com/patent/US3625104A/en",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "piston"
+					},
+					{
+						"tag": "port"
+					},
+					{
+						"tag": "sleeve"
+					},
+					{
+						"tag": "valve"
+					},
+					{
+						"tag": "water key"
+					}
+				],
+				"notes": [
+					{
+						"note": "<h2>Classifications</h2>\nG10D7/10: Lip-reed wind instruments, i.e. using the vibration of the musician's lips, e.g. cornets, trumpets, trombones or French horns"
+					}
+				],
 				"seeAlso": []
 			}
 		]

@@ -9,11 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-10-06 21:42:54"
+	"lastUpdated": "2022-01-18 08:20:23"
 }
 
 function detectWeb(doc, url) {
-	if (doc.defaultView !== doc.defaultView.top) return false;
+	if (doc.defaultView !== null && doc.defaultView !== doc.defaultView.top) return false;
 	
 	if (/[?&]arnumber=(\d+)/i.test(url) || /\/document\/\d+/i.test(url)) {
 		var firstBreadcrumb = ZU.xpathText(doc, '(//div[contains(@class, "breadcrumbs")]//a)[1]');
@@ -192,7 +192,11 @@ function scrape(doc, url) {
 				ZU.doGet(pdf, function (src) {
 					// Either the PDF is embedded in the page, or (e.g. for iOS)
 					// the page has a redirect to the full-page PDF
-					var m = /<i?frame src="([^"]+\.pdf\b[^"]*)"|<meta HTTP-EQUIV="REFRESH" content="0; url=([^\s"]+\.pdf\b[^\s"]*)"/.exec(src);
+					//
+					// As of 3/2020, embedded PDFs via a web-based proxy are
+					// being served as getPDF.jsp, so support that in addition
+					// to direct .pdf URLs.
+					var m = /<i?frame src="([^"]+\.pdf\b[^"]*|[^"]+\/getPDF\.jsp\b[^"]*)"|<meta HTTP-EQUIV="REFRESH" content="0; url=([^\s"]+\.pdf\b[^\s"]*)"/.exec(src);
 					var pdfUrl = m && (m[1] || m[2]);
 					if (pdfUrl) {
 						item.attachments.unshift({

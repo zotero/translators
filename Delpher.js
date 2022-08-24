@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-05-21 03:21:00"
+	"lastUpdated": "2022-01-20 14:35:30"
 }
 
 /*
@@ -37,29 +37,31 @@
 
 
 function detectWeb(doc, url) {
-	if (url.indexOf('view')>-1) {
-		if (url.indexOf('boeken')>-1) {
+	if (url.includes('/view')) {
+		if (url.includes('/boeken/')) {
 			return "book";
 		}
-		if (url.indexOf('tijdschriften')>-1) {
+		if (url.includes('/tijdschriften/')) {
 			return "journalArticle";
 		}
-		if (url.indexOf('kranten')>-1) {
+		if (url.includes('/kranten/')) {
 			return "newspaperArticle";
 		}
-		if (url.indexOf('radiobulletins')>-1) {
+		if (url.includes('/radiobulletins/')) {
 			return "radioBroadcast";
 		}
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//main[contains(@class, "searchresults")]/article//a[h2[contains(@class, "title")] and starts-with(@href, "/")]');
-	for (var i=0; i<rows.length; i++) {
+	var rows = ZU.xpath(doc, '//article//a[contains(@class, "search-result__link") and starts-with(@href, "/")]');
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -74,64 +76,85 @@ function getSearchResults(doc, checkOnly) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
 
 function scrape(doc, url) {
 	var item = new Zotero.Item(detectWeb(doc, url));
-	var details = ZU.xpath(doc, '//div[contains(@class, "bkt-mvc-detailsAction") and contains(@class, "side-bar-block")]');
+	var details = ZU.xpath(doc, '(//dl[contains(@class, "metadata__details-description-list")])[1]');
 
-	item.title = ZU.xpathText(details, './/dd[@data-testing-id="search-result__title"]');
-	item.numPages = ZU.xpathText(details, './/dd[@data-testing-id="search-result__extent"]');
+	var title = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Titel" or normalize-space(text())="Kop")]/following-sibling::dd[1]');
+	
+	if (!title) {
+		title = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Krantentitel")]/following-sibling::dd[1]');
+	}
+	item.title = title;
+	item.numPages = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and normalize-space(text())="Omvang"]/following-sibling::dd[1]');
 
-	var date = ZU.xpathText(details, './/dd[@data-testing-id="search-result__date"]');
+	var date = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Publicatiedatum" or normalize-space(text())="Datum")]/following-sibling::dd[1]');
+	if (!date) {
+		date = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Jaar van uitgave")]/following-sibling::dd[1]');
+	}
 
 	if (date && date.length > 4) {
-		item.date = date.replace(/(\d{2})\-(\d{2})-(\d{4})/, "$3-$2-$1");
+		item.date = date.replace(/(\d{2})-(\d{2})-(\d{4})/, "$3-$2-$1");
 	}
 	else item.date = date;
 
 
-	item.publicationTitle = 	item.issue = ZU.xpathText(details, './/dd[@data-testing-id="search-result__papertitle"]');
-	item.libraryCatalog = ZU.xpathText(details, './/dd[@data-testing-id="search-result__source"]');
+	item.publicationTitle = 	item.issue = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Krantentitel")]/following-sibling::dd[1]/a');
+	item.libraryCatalog = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and normalize-space(text())="Herkomst"]/following-sibling::dd[1]/a');
 	if (!item.libraryCatalog) item.libraryCatalog = "Delpher";
-	item.publisher = ZU.xpathText(details, './/dd[@data-testing-id="search-result__publisher"]/a');
-	item.callNumber = ZU.xpathText(details, './/dd[@data-testing-id="search-result__signature"]');
-	var language = ZU.xpathText(details, './/dd[@data-testing-id="search-result__language"]');
+	item.publisher = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Drukker/Uitgever" or normalize-space(text())="Uitgever")]/following-sibling::dd[1]/a');
+	item.callNumber = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="PPN")]/following-sibling::dd[1]/a');
+	var language = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Taal")]/following-sibling::dd[1]/a');
 	if (language) item.language = ZU.trimInternal(language);
-	item.volume = ZU.xpathText(details, './/dd[@data-testing-id="search-result__volume"]');
-	item.issue = ZU.xpathText(details, './/dd[@data-testing-id="search-result__issuenumber"]');
-	item.edition = ZU.xpathText(details, './/dd[@data-testing-id="search-result__edition"]');
-	item.place = ZU.xpathText(details, './/dd[@data-testing-id="search-result__spatialCreation"]');
+	// item.volume = ZU.xpathText(details, './/dd[@data-testing-id="search-result__volume"]');
+	item.issue = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Aflevering")]/following-sibling::dd[1]/a');
+	item.edition = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Editie")]/following-sibling::dd[1]/a');
+	item.place = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Plaats van uitgave")]/following-sibling::dd[1]/a');
 
 
-	var tags = ZU.xpath(details, './/dd[@data-testing-id="search-result__subject"]/a');
+	var tags = ZU.xpath(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Onderwerp")]/following-sibling::dd/a');
 
-	for (var i = 0; i<tags.length; i++) {
+	for (var i = 0; i < tags.length; i++) {
 		item.tags.push(tags[i].textContent);
 	}
 
-	var authors = ZU.xpath(details, './/dd[@data-testing-id="search-result__creator"]/a');
-	for (var i = 0; i<authors.length; i++) {
-		item.creators.push(ZU.cleanAuthor(authors[i].textContent, "author", true));
+	var authors = ZU.xpath(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Auteur" or normalize-space(text())="Coauteur") ]/following-sibling::dd[1]');
+	for (var j = 0; j < authors.length; j++) {
+		item.creators.push(ZU.cleanAuthor(authors[j].textContent, "author", true));
 	}
 
-	item.url = ZU.xpathText(doc, '(//input[contains(@class, "persistent-id")])[1]/@value');
+	item.url = ZU.xpathText(doc, '(//input[contains(@class,"object-view-menu__share-links-details-input")])[last()]/@value');
 	item.attachments.push({
 		title: "Snapshot",
 		document: doc
 	});
+	
+	var pdflink = ZU.xpathText(doc, './/a[contains(@class,"object-view-menu__downloads-link") and (normalize-space(text())="pdf")]/@href');
+	if (pdflink) {
+		item.attachments.push({
+			title: "Full Text PDF",
+			mimeType: "application/pdf",
+			url: pdflink
+		});
+	}
+	
+  
+	var jpglink = ZU.xpathText(doc, './/a[contains(@class,"object-view-menu__downloads-link") and (normalize-space(text())="jpg")]/@href');
+	if (jpglink) {
+		item.attachments.push({
+			title: "Image",
+			mimeType: "image/jpeg",
+			url: jpglink
+		});
+	}
 
 	item.complete();
 }
@@ -140,12 +163,12 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://boeken.delpher.nl/nl/results/index?query=buurman&coll=boeken&maxperpage=10&identifier=ddd%3A010565868%3Ampeg21%3Aa0181&",
+		"url": "https://www.delpher.nl/nl/boeken/results?query=buurman&coll=boeken",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.delpher.nl/nl/boeken/view/index?query=buurman&coll=boeken&identifier=dpo%3A2390%3Ampeg21%3A0012&page=1&maxperpage=10",
+		"url": "https://www.delpher.nl/nl/boeken/view?identifier=dpo:2390:mpeg21:0003&query=Philippe+en+Georgette&page=1&coll=boeken&rowid=1",
 		"items": [
 			{
 				"itemType": "book",
@@ -163,20 +186,38 @@ var testCases = [
 					}
 				],
 				"date": "1796",
-				"callNumber": "1089 C 52:1",
-				"language": "Nederlands , Vlaams , néerlandais",
+				"language": "Nederlands",
 				"libraryCatalog": "Leiden, Universiteitsbibliotheek",
 				"numPages": "72",
-				"publisher": "Helders, Jan Amsterdam, 1779-1798, Mars, Abraham Amsterdam, 1783-1802",
-				"url": "http://resolver.kb.nl/resolve?urn=dpo:2390:mpeg21",
+				"publisher": "Helders, Jan Amsterdam, 1779-1798",
+				"url": "https://resolver.kb.nl/resolve?urn=dpo:2390:mpeg21:0003",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Image",
+						"mimeType": "image/jpeg"
 					}
 				],
 				"tags": [
-					"Drama",
-					"French language and literature"
+					{
+						"tag": "Drama"
+					},
+					{
+						"tag": "French language and literature"
+					},
+					{
+						"tag": "Leiden, Universiteitsbibliotheek"
+					},
+					{
+						"tag": "STCN"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -185,31 +226,41 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://tijdschriften.delpher.nl/nl/results/index?query=buurman&coll=dts&page=1&maxperpage=10",
+		"url": "https://www.delpher.nl/nl/tijdschriften/results?query=buurman&page=1&coll=dts",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://kranten.delpher.nl/nl/results/index?coll=ddd&query=buurman",
+		"url": "https://www.delpher.nl/nl/kranten/results?query=buurman&coll=ddd",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.delpher.nl/nl/kranten/view/index?query=buurman&coll=ddd&identifier=ddd%3A110578678%3Ampeg21%3Aa0106&page=1&maxperpage=10",
+		"url": "https://www.delpher.nl/nl/kranten/view?query=Spaansche+Buurman&coll=ddd&identifier=ddd:110578678:mpeg21:a0106&resultsidentifier=ddd:110578678:mpeg21:a0106&rowid=1",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
 				"title": "Spaansche buurman.",
 				"creators": [],
 				"date": "1941-02-01",
+				"callNumber": "832675288",
 				"edition": "Avond",
-				"libraryCatalog": "KB C 98",
+				"libraryCatalog": "Delpher",
 				"place": "Amsterdam",
 				"publicationTitle": "De Telegraaf",
-				"url": "http://resolver.kb.nl/resolve?urn=ddd:110578678",
+				"url": "https://resolver.kb.nl/resolve?urn=ddd:110578678:mpeg21:a0106",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Image",
+						"mimeType": "image/jpeg"
 					}
 				],
 				"tags": [],
@@ -220,24 +271,28 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://radiobulletins.delpher.nl/nl/results/index?query=buurman&coll=anp&maxperpage=10&identifier=dts%3A2978028%3Ampeg21%3A0001&",
+		"url": "https://www.delpher.nl/nl/radiobulletins/results?query=buurman&coll=anp",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.delpher.nl/nl/radiobulletins/view/index?query=buurman&coll=anp&identifier=anp%3A1950%3A02%3A20%3A19%3Ampeg21&page=1&maxperpage=10",
+		"url": "https://www.delpher.nl/nl/radiobulletins/view?coll=anp&page=2&facets%5Bperiode%5D%5B%5D=3%7C1950-1959%7C1950%7Cfebruari%7C20%7C&identifier=anp:1950:02:20:19:mpeg21&resultsidentifier=anp:1950:02:20:19:mpeg21&rowid=2",
 		"items": [
 			{
 				"itemType": "radioBroadcast",
 				"title": "ANP Nieuwsbericht - 20-02-1950 - 19",
 				"creators": [],
 				"date": "1950-02-20",
-				"language": "Nederlands",
 				"libraryCatalog": "Delpher",
-				"url": "http://resolver.kb.nl/resolve?urn=anp:1950:02:20:19",
+				"url": "https://resolver.kb.nl/resolve?urn=anp:1950:02:20:19",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Image",
+						"mimeType": "image/jpeg"
 					}
 				],
 				"tags": [],
@@ -248,20 +303,28 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.delpher.nl/nl/tijdschriften/view/index?query=buurman&coll=dts&identifier=dts%3A2738036%3Ampeg21%3A0012&page=1&maxperpage=10#info",
+		"url": "https://www.delpher.nl/nl/tijdschriften/view/index?query=buurman&coll=dts&identifier=dts%3A2738036%3Ampeg21%3A0012&page=1&maxperpage=10#info",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Nieuwsblad voor den boekhandel jrg 91, 1924, no 35, 02-05-1924",
 				"creators": [],
 				"date": "1924-05-02",
-				"issue": "35",
-				"language": "Nederlands",
-				"libraryCatalog": "Koninklijke Bibliotheek: LHO AW.A 06b NIE",
-				"url": "http://resolver.kb.nl/resolve?urn=dts:2738036:mpeg21",
+				"callNumber": "830637982",
+				"libraryCatalog": "Koninklijke Bibliotheek",
+				"url": "https://resolver.kb.nl/resolve?urn=dts:2738036:mpeg21:0012",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Image",
+						"mimeType": "image/jpeg"
 					}
 				],
 				"tags": [],
@@ -272,7 +335,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.delpher.nl/nl/boeken/view?coll=boeken&identifier=MMKB02:100006852",
+		"url": "https://www.delpher.nl/nl/boeken/view?coll=boeken&identifier=MMKB02:100006852",
 		"items": [
 			{
 				"itemType": "book",
@@ -290,26 +353,56 @@ var testCases = [
 					}
 				],
 				"date": "[192-?]",
-				"callNumber": "BJ 50012 [1]",
 				"language": "Nederlands",
 				"libraryCatalog": "Koninklijke Bibliotheek",
 				"numPages": "95 p., [6] bl. pl",
-				"publisher": "Alkmaar : Gebr. Kluitman",
-				"url": "http://resolver.kb.nl/resolve?urn=MMKB02:100006852",
+				"publisher": "Gebr. Kluitman",
+				"url": "https://resolver.kb.nl/resolve?urn=MMKB02:100006852:00009",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Image",
+						"mimeType": "image/jpeg"
 					}
 				],
 				"tags": [
-					"1505",
-					"1505 bed",
-					"Achttiende eeuw",
-					"Digitale versies",
-					"Historische verhalen",
-					"Napoleontische oorlogen",
-					"Negentiende eeuw",
-					"Oorlogsverhalen"
+					{
+						"tag": "1505 bed"
+					},
+					{
+						"tag": "1505 bed Opvoeding en onderwijs; [Kinderlectuur] → Kinderlectuur → Kinderboeken → Nederlands"
+					},
+					{
+						"tag": "Achttiende eeuw"
+					},
+					{
+						"tag": "Historische verhalen"
+					},
+					{
+						"tag": "Kinderboek"
+					},
+					{
+						"tag": "Koninklijke Bibliotheek"
+					},
+					{
+						"tag": "Napoleontische oorlogen"
+					},
+					{
+						"tag": "Negentiende eeuw"
+					},
+					{
+						"tag": "OPC"
+					},
+					{
+						"tag": "Oorlogsverhalen"
+					}
 				],
 				"notes": [],
 				"seeAlso": []

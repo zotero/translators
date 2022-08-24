@@ -131,15 +131,13 @@ function doWeb(doc, url) {
 
 			items[next_title.href] = next_title.textContent;
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
-	} else {
-		articles = [url];
+		Zotero.selectItems(items, function (items) {
+			ZU.processDocuments(Object.keys(items), scrape);
+		});
 	}
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-	Zotero.wait();
+	else {
+		scrape(doc, url);
+	}
 }
 
 /** BEGIN TEST CASES **/

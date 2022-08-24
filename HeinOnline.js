@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2019-10-26 13:45:08"
+	"lastUpdated": "2021-06-02 19:00:15"
 }
 
 /*
@@ -35,10 +35,6 @@
 	** Utilities **
 	***************
 */
-
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
 
 // Get any search results from current page
 // Used in detectWeb() and doWeb()
@@ -134,17 +130,25 @@ function scrapePage(doc, url) {
 			if (pdfPageURL) {
 				pdfPageURL = docParams.base + pdfPageURL;
 				// Z.debug(pdfPageURL)
-				ZU.doGet(pdfPageURL, function (pdfPage) {
+				ZU.processDocuments(pdfPageURL, function (pdfDoc) {
 					// Call to pdfPageURL prepares PDF for download via META refresh URL
 					var pdfURL = null;
-					var m = pdfPage.match(/<META.*URL="([^"]+)/);
+					var m = pdfDoc.querySelector('meta[http-equiv="Refresh"]');
 					// Z.debug(pdfPage)
 					// Z.debug(m)
 					if (m) {
-						pdfURL = docParams.base + m[1];
+						var refreshURL;
+						var parts = m.getAttribute('content').split(/;\s*url=/);
+						if (parts.length === 2) {
+							refreshURL = parts[1].trim().replace(/^'(.+)'/, '$1');
+						}
+						else {
+							refreshURL = m.getAttribute('url');
+						}
+						pdfURL = docParams.base + refreshURL;
 					}
 					translateRIS(ris, pdfURL);
-				}, null);
+				});
 			}
 			else {
 				translateRIS(ris);

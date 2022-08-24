@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-06-11 10:25:18"
+	"lastUpdated": "2022-05-31 01:20:34"
 }
 
 /*
@@ -43,11 +43,11 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.includes('/search/catalog') && getSearchResults(doc, true)) {
+	if (url.includes('/search/') && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	else if (url.includes('/catalog/')) {
-		var format = ZU.xpathText(doc, '//span[@class="pub_title" and contains(., "Format")]/following-sibling::span[@class="pub_desc"]');
+		var format = getFormat(doc);
 		// Z.debug(format);
 		switch (format) {
 			case "Sound Recordings":
@@ -72,6 +72,10 @@ function detectWeb(doc, url) {
 		}
 	}
 	return false;
+}
+
+function getFormat(doc) {
+	return text(doc, '.type');
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -117,6 +121,11 @@ function scrape(doc, url) {
 		text = text.replace(/^(AU\s+-.*), \d\d\d\d-(\d\d\d\d)?$/m, "$1");
 		// music scores should be treated as book
 		text = text.replace('TY  - MUSIC', 'TY  - BOOK');
+		if (getFormat(doc) && getFormat(doc).includes('Book')) {
+			// fix for an odd RIS issue in one of the tests - a book is tagged
+			// as a presentation
+			text = text.replace('TY  - SLIDE', 'TY  - BOOK');
+		}
 		// Z.debug(text);
 
 		var translator = Zotero.loadTranslator("import");
@@ -165,7 +174,7 @@ var testCases = [
 					}
 				],
 				"date": "2011",
-				"callNumber": "PN171.F56 P83 2011",
+				"callNumber": "025.30285 P961z",
 				"libraryCatalog": "University of Wisconsin-Madison Libraries Catalog",
 				"numPages": "159",
 				"place": "Chicago",
@@ -185,7 +194,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://search.library.wisc.edu/catalog/9912334246702121",
+		"url": "https://search.library.wisc.edu/catalog/9912283572402121",
 		"items": [
 			{
 				"itemType": "book",
@@ -198,18 +207,18 @@ var testCases = [
 					}
 				],
 				"date": "2016",
-				"callNumber": "Y 1.1/7: 114-178",
+				"callNumber": "Y 1.1/7:114-178",
 				"libraryCatalog": "University of Wisconsin-Madison Libraries Catalog",
 				"numPages": "38",
 				"place": "Washington",
 				"publisher": "U.S. Government Publishing Office",
 				"shortTitle": "Fiscal year 2017 budget amendments",
-				"url": "https://search.library.wisc.edu/catalog/9912334246702121",
+				"url": "https://search.library.wisc.edu/catalog/9912283572402121",
 				"attachments": [],
 				"tags": [],
 				"notes": [
 					{
-						"note": "<p>Shipping list no.: 2017-0006-M.;&quot;November 14, 2016.&quot;;&quot;Referred to the Committee on Appropriations.&quot;;Microfiche. [Washington, D.C.] : U.S. Government Printing Office, [2017] 1 microfiche : negative.</p>"
+						"note": "<p>Shipping list no.: 2017-0071-P.;&quot;November 14, 2016.&quot;;&quot;Referred to the Committee on Appropriations.&quot;</p>"
 					}
 				],
 				"seeAlso": []
@@ -240,7 +249,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "<p>For clarinet, horn, bassoon, violin, viola, violoncello, and double bass.;Compact disc.;Duration: 42:10.;Program notes by Paolo Petazzi in Italian and English ([14] p. : ill.) inserted in container.;Forms part of: Curtiss Blake Collection.</p>"
+						"note": "<p>For clarinet, horn, bassoon, violin, viola, violoncello, and double bass.;Compact disc.;Duration: 42:10.;Program notes by Paolo Petazzi in Italian and English ([14] p. : ill.) inserted in container.;Forms part of: Curtiss Blake Collection.;Recorded June 11-13, 1988, at the Villa Litta Modigliani, Milan.</p>"
 					}
 				],
 				"seeAlso": []

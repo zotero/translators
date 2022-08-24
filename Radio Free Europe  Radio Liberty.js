@@ -1,23 +1,22 @@
 {
 	"translatorID": "b1c90b99-2e1a-4374-a03b-92e45f1afc55",
 	"label": "Radio Free Europe / Radio Liberty",
-	"creator": "Avram Lyon",
-	"target": "^https?://(www\\.rferl\\.org/|www\\.azatliq\\.org/|www\\.azattyq\\.org/|rus\\.azattyq\\.org/|da\\.azadiradio\\.org/|pa\\.azadiradio\\.org/|www\\.azattyk\\.org/|www\\.ozodi\\.org/|www\\.ozodlik\\.org/|www\\.evropaelire\\.org/|www\\.slobodnaevropa\\.org/|www\\.makdenes\\.org/|www\\.iraqhurr\\.org/|www\\.radiofarda\\.com/|www\\.azatutyun\\.am/|www\\.azadliq\\.org/|www\\.svaboda\\.org/|www\\.svoboda\\.org/|www\\.tavisupleba\\.org/|www\\.azathabar\\.com/|www\\.svobodanews\\.ru/|www\\.europalibera\\.org/|www\\.radiosvoboda\\.org/)",
+	"creator": "Avram Lyon and Abe Jellinek",
+	"target": "^https?://((www|gandhara)\\.rferl\\.org/|www\\.azatliq\\.org/|www\\.azattyq\\.org/|rus\\.azattyq\\.org/|da\\.azadiradio\\.com/|pa\\.azadiradio\\.com/|www\\.azattyk\\.org/|www\\.ozodi\\.org/|www\\.ozodlik\\.org/|www\\.evropaelire\\.org/|www\\.slobodnaevropa\\.org/|www\\.makdenes\\.org/|www\\.iraqhurr\\.org/|www\\.radiofarda\\.com/|www\\.azatutyun\\.am/|www\\.azadliq\\.org/|www\\.svaboda\\.org/|www\\.svoboda\\.org/|www\\.tavisupleba\\.org/|www\\.azathabar\\.com/|www\\.svobodanews\\.ru/|(romania|moldova)\\.europalibera\\.org/|www\\.radiosvoboda\\.org/)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-04-04 10:15:37"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2021-09-02 00:12:35"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Radio Liberty Translator
-	Copyright © 2009-2011 Avram Lyon, ajlyon@gmail.com
-
+	Copyright © 2011-2021 Avram Lyon and Abe Jellinek
+	
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -39,7 +38,7 @@
 
 /*
  This translator works on articles posted on the websites of Radio Free Europe / Radio Liberty.
- It imports the basic metadata the site provides, from normal article pages and from search 
+ It imports the basic metadata the site provides, from normal article pages and from search
  result pages.
 
  The translator tries to work on all of the languages of RFE/RL; they should all work.
@@ -49,8 +48,9 @@
 	Tatar/Bashkir:	http://www.azatliq.org/
 	Kazakh:		http://www.azattyq.org/	(Kazakh)
 			http://rus.azattyq.org/	(Russian)
-	Afghan:		http://da.azadiradio.org/ (Dari)
-			http://pa.azadiradio.org/ (Pashto)
+	Afghan:		http://da.azadiradio.com/ (Dari)
+			http://pa.azadiradio.com/ (Pashto)
+			https://gandhara.rferl.org (English)
 	Kirghiz:	http://www.azattyk.org/
 	Tajik:		http://www.ozodi.org/
 	Uzbek:		http://www.ozodlik.org/
@@ -70,236 +70,637 @@
 	Ukrainian:	http://www.radiosvoboda.org/
  
  This translator does not yet attempt to work with the video files that Radio Liberty
- hosts and produces; work with them must be left for a future revision.
-
- It does try to save linked audio files for stories-- still nothing
- for video content.
+ hosts and produces; EM covers those.
 
  Another future improvement would be the facility to import from the front page and subject
  pages. This is not yet possible.
-
- Some of the services use non-standard ways of marking authorship, for example, the Pashto edition
- places the author at the bottom of the article, but there is no clear way to scrape that
- information and the translator does not load it.
 */
 
-var item;
-function detectWeb(doc, url){
-	if (url.match(/\/content\/|\/archive\/news|\/archive\/ru_news_zone/)) {
-		// The translator uses this type because RFE/RL generally has a place of publication
-		// and a Section; both are specific to newspaperArticle.
+function detectWeb(doc, _url) {
+	if (doc.body.classList.contains('pg-article')) {
 		return "newspaperArticle";
-	} else if (url.match(/\/search\/\?k=.+/)){
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
-function doWeb(doc, url){
-	
-	var articles = new Array();
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('.media-block');
+	for (let row of rows) {
+		let link = row.querySelector('.media-block__content > a');
+		if (!link || row.querySelector('.ico-video')) continue; // exclude videos
+		
+		let href = link.href;
+		let title = ZU.trimInternal(link.textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		var results = doc.evaluate('//div[@class="searchResultItem"]', doc, null, XPathResult.ANY_TYPE, null);
-		var items = new Array();
-		var result;
-		while (result = results.iterateNext()) {
-			var link = doc.evaluate('./a[@class="resultLink"]', result, null, XPathResult.ANY_TYPE, null).iterateNext();
-			var title = link.textContent;
-			var url = link.href;
-			items[url] = title;
-		}
-		Zotero.selectItems(items, function (items) {
-			if (!items) {
-				return true;
-			}
-			for (var i in items) {
-				articles.push(i);
-			}
-			Zotero.Utilities.processDocuments(articles, scrape);	
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
-	
-function scrape(doc, url){
-		item = new Zotero.Item("newspaperArticle");
-		item.title = Zotero.Utilities.trimInternal(
-			doc.evaluate('//h1', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent
-		);
-		
-		var author = doc.evaluate('//div[@id="article"]//div[@class="author"]', doc, null, XPathResult.ANY_TYPE, null);
-		if ((author = author.iterateNext()) !== null) {
-			author = author.textContent;
-			// Sometimes we have "By Author"
-			if (author.substr(0, 3).toLowerCase() == "by ") {
-				author = author.substr(3);
-			}
-			var cleaned = Zotero.Utilities.cleanAuthor(author, "author");
-			// If we have only one name, set the author to one-name mode
-			if (cleaned.firstName == "") {
-				cleaned["fieldMode"] = true;
-			} else {
-				// We can check for all lower-case and capitalize if necessary
-				// All-uppercase is handled by cleanAuthor
-				cleaned.firstName = (cleaned.firstName == cleaned.firstName.toLowerCase()) ?
-					Zotero.Utilities.capitalizeTitle(cleaned.firstName, true) : cleaned.firstName;
-				cleaned.lastName = (cleaned.lastName == cleaned.lastName.toLowerCase()) ?
-					Zotero.Utilities.capitalizeTitle(cleaned.lastName, true) : cleaned.lastName;
-			}
-			item.creators.push(cleaned);
-		}
-		// The section should _always_ be present
-		item.section = ZU.xpathText(doc, '//div[@id="article" or contains(@class, "middle_content")]/h2');
-
-		// This exposes a limitation of Zotero's date handling; the Afghan services
-		// use the Hijri calendar, and mixed sorting looks funny-- I'd like to be able
-		// to mark such dates to be handled appropriately
-		var date = doc.evaluate('//div[@id="article"]//p[@class="article_date"]', doc, null, XPathResult.ANY_TYPE, null);
-		if ((date = date.iterateNext()) !== null) {
-			// sometimes not present
-			item.date = Zotero.Utilities.trimInternal(date.textContent);
-		}
-
-		// We can also try to derive the location-- if the byline can be parsed
-		// Here, we assume that the byline uses all-caps for the location
-		// TODO Use more general all-caps character class, since this excludes special
-		// 	characters that may occur in city names.
-		//	This all-caps class is borrowed from utilities.js and augmented by
-		//	the basic Cyrillic capital letters.
-		var textnode = doc.evaluate('//div[@id="article"]//div[@class="zoomMe"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-		if (textnode) {
-			var text = textnode.textContent;
-			hits = text.match(/([A-ZА-Я \u0400-\u042f]+) \((.*)\) --/);
-			if (!hits) {
-				hits = text.match(/([A-ZА-Я \u0400-\u042f]+) --/);
-			}
-			if (hits) {
-				var place = Zotero.Utilities.capitalizeTitle(hits[1], true);
-				item.place = place;
-				// We add the wire service as an author; it would be nice to have a field for it
-				item.creators.push({lastName : hits[2], creatorType:"author", fieldMode:true});
-			}
-		}
-
-		item.url = url;
-		item.publicationTitle = doc.evaluate('//h2[@id="header_logo_anchor" or @id="header_logo"]//span', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.trim();
-
-		// Language map:
-		var map = {
-			"www.rferl.org" : "English",
-			"www.azatliq.org" : "Tatar/Bashkir",
-			"www.azattyq.org" : "Kazakh",
-			"rus.azattyq.org" : "Russian",
-			"da.azadiradio.org" : "Dari",
-			"pa.azadiradio.org" : "Pashto",
-			"www.azattyk.org" : "Kirghiz",
-			"www.ozodi.org" : "Tajik",
-			"www.ozodlik.org" : "Uzbek",
-			"www.evropaelire.org" : "Albanian",
-			"www.slobodnaevropa.org" : "Bosnian/Montenegrin/Serbian",
-			"www.makdenes.org" : "Macedonian",
-			"www.iraqhurr.org" : "Iraqi Arabic",
-			"www.radiofarda.com" : "Farsi",
-			"www.azatutyun.am" : "Armenian",
-			"www.azadliq.org" : "Azerbaijani",
-			"www.svaboda.org" : "Belarussian",
-			"www.tavisupleba.org" : "Georgian",
-			"www.azathabar.com" : "Turkmen",
-			"www.svobodanews.ru" : "Russian",
-			"www.svoboda.org"	 : "Russian",
-			"www.europalibera.org" : "Romanian",
-			"www.radiosvoboda.org" : "Ukrainian"
-		}
-		domain = doc.location.href.match(/https?:\/\/([^/]+)/);
-		item.language = map[domain[1]];
-
-		/* The printable version doesn't save nicely, unfortunately.
-		// Make printable URL for better saving
-		var printurl = url.replace(/(.*)\/.*\/(.*\.html)/,"$1/articleprintview/$2");
-		item.attachments.push({url:printurl, title:"RFE/RL Snapshot", mimeType:"text/html"});
-		*/
-		item.attachments.push({url:url, title: (item.publicationTitle + " Snapshot"), mimeType:"text/html"});
-
-		var listenLink = doc.evaluate('//li[@class="listenlink"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-		if (listenLink) {
-				Zotero.Utilities.doGet(listenLink.href, addAudio, null);
-		} else item.complete();
-
-	}
 }
 
-function addAudio(text) {
-	// http://realaudio.rferl.org/TB/2011/03/29/20110329-183936-TB-clip.mp3
-	var audio = text.match(/https?:\/\/(realaudio|audioarchive)\.rferl\.org[^"]*\.mp3/);
-	if (audio) item.attachments.push({url:audio[0], mimeType:"application/octet-stream", title:"RFE/RL Audio"})
-	item.complete();
+function scrape(doc, url) {
+	var translator = Zotero.loadTranslator('web');
+	// Embedded Metadata
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	translator.setDocument(doc);
+	
+	translator.setHandler('itemDone', function (obj, item) {
+		let json = JSON.parse(text(doc, 'script[type="application/ld+json"]'));
+		if (json.author) {
+			let clean = authors => authors
+				.filter(author => author.name && !author.name.startsWith('RFE/RL'))
+				.map(author => ZU.cleanAuthor(ZU.capitalizeName(author.name), 'author'));
+			item.creators = clean(
+				Array.isArray(json.author)
+					? json.author
+					: [json.author]);
+		}
+		
+		item.date = json.dateModified || json.datePublished;
+		item.section = ZU.unescapeHTML(json.articleSection);
+		
+		if (item.publicationTitle == 'RadioFreeEurope/RadioLiberty') {
+			item.publicationTitle = 'Radio Free Europe/Radio Liberty';
+		}
+		
+		if (item.abstractNote) {
+			item.abstractNote = ZU.unescapeHTML(item.abstractNote);
+		}
+		
+		item.complete();
+	});
+
+	translator.getTranslatorObject(function (trans) {
+		trans.itemType = "newspaperArticle";
+		trans.doWeb(doc, url);
+	});
 }
 
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.azatliq.org/content/article/24281041.html",
+		"url": "https://www.azatliq.org/a/24281041.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Татар яшьләре татарлыкны сакларга тырыша",
 				"creators": [
 					{
-						"firstName": "Гүзәл",
-						"lastName": "Мәхмүтова",
+						"firstName": "гүзәл",
+						"lastName": "мәхмүтова",
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2011-07-29 21:16:41Z",
+				"abstractNote": "Бу көннәрдә “Идел” җәйләвендә XXI Татар яшьләре көннәре үтә. Яшьләр вакытларын төрле чараларда катнашып үткәрә.",
+				"language": "tt",
+				"libraryCatalog": "www.azatliq.org",
+				"publicationTitle": "Азатлык Радиосы",
+				"section": "татарстан",
+				"url": "https://www.azatliq.org/a/24281041.html",
 				"attachments": [
 					{
-						"url": false,
-						"title": " Азатлык Радиосы  Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
-					},
-					{
-						"url": false,
-						"mimeType": "application/octet-stream",
-						"title": "RFE/RL Audio"
 					}
 				],
-				"title": "Татар яшьләре татарлыкны сакларга тырыша",
-				"section": "татарстан",
-				"date": "29.07.2011",
-				"url": "http://www.azatliq.org/content/article/24281041.html",
-				"publicationTitle": "Азатлык Радиосы",
-				"language": "Tatar/Bashkir",
-				"libraryCatalog": "Radio Free Europe / Radio Liberty"
+				"tags": [
+					{
+						"tag": "татарстан"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.svoboda.org/content/news/24382010.html",
+		"url": "https://www.svoboda.org/a/24382010.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Партия \"Яблоко\" перевела свою предвыборную программу на 18 языков",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2011-11-05 02:52:48Z",
+				"abstractNote": "Партия \"Яблоко\" в День народного единства, который в пятницу отмечался в России, представила свою программу на предстоящих выборах в Госдуму на 18 языках.\nПредседатель \"Яблока\" Сергей Митрохин назвал интернет-презентацию документа \"Россия требует перемен!\" ответом на \"Русские марши\". \"Мы...",
+				"language": "ru",
+				"libraryCatalog": "www.svoboda.org",
+				"publicationTitle": "Радио Свобода",
+				"section": "Новости",
+				"url": "https://www.svoboda.org/a/24382010.html",
 				"attachments": [
 					{
-						"title": "Радио Свобода Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Партия \"Яблоко\" перевела свою предвыборную программу на 18 языков",
-				"section": "Новости",
-				"date": "Опубликовано 05.11.2011 06:49",
-				"url": "http://www.svoboda.org/content/news/24382010.html",
-				"publicationTitle": "Радио Свобода",
-				"language": "Russian",
-				"libraryCatalog": "Radio Free Europe / Radio Liberty",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [
+					{
+						"tag": "Главные разделы"
+					},
+					{
+						"tag": "Новости"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.rferl.org/a/kyrgyzstan-webcam-sex-workers-blackmail/31371806.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "The Sinister Side Of Kyrgyzstan's Online Sex Industry",
+				"creators": [
+					{
+						"firstName": "Ulanbek",
+						"lastName": "Asanaliev",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ray",
+						"lastName": "Furlong",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Carl",
+						"lastName": "Schreck",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-07-27 11:14:58Z",
+				"abstractNote": "An RFE/RL investigation reveals how young Kyrgyz women trying to make ends meet as online sex workers are subject to abuse, blackmail, and even rape.",
+				"language": "en",
+				"libraryCatalog": "www.rferl.org",
+				"publicationTitle": "Radio Free Europe/Radio Liberty",
+				"section": "Kyrgyzstan",
+				"url": "https://www.rferl.org/a/kyrgyzstan-webcam-sex-workers-blackmail/31371806.html",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Features"
+					},
+					{
+						"tag": "Kyrgyzstan"
+					},
+					{
+						"tag": "Picks"
+					},
+					{
+						"tag": "Watchdog"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.rferl.org/a/uzbek-corruption-covid-president/31330444.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Companies Linked To Uzbek Government Won Major COVID Construction Contracts",
+				"creators": [],
+				"date": "2021-07-01 08:17:00Z",
+				"abstractNote": "Construction contracts for two major COVID-19 medical facilities near Tashkent went to companies linked to the Uzbek president’s inner circle and the capital city’s mayor, according to an RFE/RL investigation.",
+				"language": "en",
+				"libraryCatalog": "www.rferl.org",
+				"publicationTitle": "Radio Free Europe/Radio Liberty",
+				"section": "Uzbekistan",
+				"url": "https://www.rferl.org/a/uzbek-corruption-covid-president/31330444.html",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "News"
+					},
+					{
+						"tag": "Picks"
+					},
+					{
+						"tag": "The Coronavirus Crisis"
+					},
+					{
+						"tag": "Uzbekistan"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.azattyq.org/a/toqayev-address-to-the-nation/31438870.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Тоқаевтың \"дұрыс жолы\", \"уақыт созу\" және \"алтыншы мәселеге айналған\" саяси реформа",
+				"creators": [
+					{
+						"firstName": "Асылхан",
+						"lastName": "МАМАШҰЛЫ",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-09-01 16:45:29Z",
+				"abstractNote": "Қазақстан президенті Қасым-Жомарт Тоқаев халыққа жолдауында экономика, денсаулық, білім, өңірлік саясат, еңбек нарығы және саяси жаңғыру туралы айтты. Мәжілістің бірлескен отырысында әдеттегідей орысша-қазақша араластыра оқыған жолдауында президент Қазақстанның саяси жаңғыру мен адам құқықтары...",
+				"language": "kk",
+				"libraryCatalog": "www.azattyq.org",
+				"publicationTitle": "Азаттық радиосы",
+				"section": "ҚАЗАҚСТАН",
+				"url": "https://www.azattyq.org/a/toqayev-address-to-the-nation/31438870.html",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "БАС ТАҚЫРЫПТАР"
+					},
+					{
+						"tag": "ЖАЛПЫ АРХИВ"
+					},
+					{
+						"tag": "Президент жолдауы"
+					},
+					{
+						"tag": "Тоқаев саяси реформа"
+					},
+					{
+						"tag": "тоқаев адам құқықтары"
+					},
+					{
+						"tag": "тоқаев жолдау"
+					},
+					{
+						"tag": "тоқаев парламент"
+					},
+					{
+						"tag": "ҚАЗАҚСТАН"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://gandhara.rferl.org/a/taliban-interview-female-journalist/31437308.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Plans Ruined, Dreams Shattered: Female Journalist In Kabul Deals With New Reality",
+				"creators": [
+					{
+						"firstName": "Farangis",
+						"lastName": "Najibullah",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-08-31 17:07:14Z",
+				"abstractNote": "Very few women in Kabul dare to return to their jobs these days after the Taliban told them to stay home \"for now\" for their own security. RFE/RL spoke to a young journalist -- one of a handful of women who continues to work despite the risks amid the chaos in the Afghan capital.",
+				"language": "en",
+				"libraryCatalog": "gandhara.rferl.org",
+				"publicationTitle": "RFE/RL",
+				"section": "Afghanistan",
+				"shortTitle": "Plans Ruined, Dreams Shattered",
+				"url": "https://gandhara.rferl.org/a/taliban-interview-female-journalist/31437308.html",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Afghanistan"
+					},
+					{
+						"tag": "Features"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.azattyk.org/a/kumtor-karieri-centerranyn-kooptonuusu-kyrgyz-taraptyn-jooby/31438681.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Кумтөр карьериндеги абал: \"Центерранын\" кооптонуусу, бийликтин жообу",
+				"creators": [
+					{
+						"firstName": "Токтосун",
+						"lastName": "Шамбетов",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-09-01 14:50:49Z",
+				"abstractNote": "Кумтөр боюнча кыргыз бийлиги менен соттошуп жаткан канадалык \"Центерра\" компаниясы алтын кендеги карьерде топтолгон суунун деңгээли көтөрүлүп жатканын, анын кесепетине кооптонуусун билдирди.\n\"Центерранын тынчсыздануусу\"\nКанадалык \"Центерра Голд\" компаниясы Кумтөр кенинин карьеринде топтолгон...",
+				"language": "ky",
+				"libraryCatalog": "www.azattyk.org",
+				"publicationTitle": "Азаттык Υналгысы",
+				"section": "Саясат",
+				"shortTitle": "Кумтөр карьериндеги абал",
+				"url": "https://www.azattyk.org/a/kumtor-karieri-centerranyn-kooptonuusu-kyrgyz-taraptyn-jooby/31438681.html",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Дүйнө"
+					},
+					{
+						"tag": "Коопсуздук"
+					},
+					{
+						"tag": "Кумтөр"
+					},
+					{
+						"tag": "Кыргызстан"
+					},
+					{
+						"tag": "Макалалар архиви"
+					},
+					{
+						"tag": "Саясат"
+					},
+					{
+						"tag": "Центерра"
+					},
+					{
+						"tag": "карьер"
+					},
+					{
+						"tag": "кендеги карьер"
+					},
+					{
+						"tag": "кыргызстан"
+					},
+					{
+						"tag": "суу"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.ozodi.org/a/31439085.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Шурӯи таҳсил дар мактабҳои Тоҷикистон бо нигаронӣ аз бемории ҳамагир. ВИДЕО",
+				"creators": [
+					{
+						"firstName": "Алишер",
+						"lastName": "Зарифӣ",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Шаҳлои",
+						"lastName": "Абдуллоҳ",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-09-01 17:17:54Z",
+				"abstractNote": "Намояндагони Созмони Ҷаҳонии Тандурустӣ ва ЮНИСЕФ аз кишварҳо хостаанд, ки ҳама чораҳои зарурӣ, аз ҷумла эм кардани муаллимонро биандешанд, то бо вуҷуди паҳншавии навъи \"делта\"-и коронавирус дари мактабҳо кушода бимонанд.",
+				"language": "tg",
+				"libraryCatalog": "www.ozodi.org",
+				"publicationTitle": "Радиои Озодӣ",
+				"section": "Ҷомeа",
+				"url": "https://www.ozodi.org/a/31439085.html",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Матолиби навтарин"
+					},
+					{
+						"tag": "Тоҷикистон"
+					},
+					{
+						"tag": "Ҷомeа"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.evropaelire.org/a/profesionistes--kabul--shqetesohen-te-ardhmen/31435595.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Profesionistët e rinj në Kabul shqetësohen për të ardhmen e tyre",
+				"creators": [
+					{
+						"firstName": "Farangis",
+						"lastName": "Najibullah",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-09-01 18:42:59Z",
+				"language": "sq",
+				"libraryCatalog": "www.evropaelire.org",
+				"publicationTitle": "Radio Evropa e Lirë",
+				"section": "Nga këndi ynë",
+				"url": "https://www.evropaelire.org/a/profesionistes--kabul--shqetesohen-te-ardhmen/31435595.html",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Afganistani"
+					},
+					{
+						"tag": "Botë"
+					},
+					{
+						"tag": "Nga këndi ynë"
+					},
+					{
+						"tag": "afganet"
+					},
+					{
+						"tag": "kufizimet e lirise"
+					},
+					{
+						"tag": "profesionistet"
+					},
+					{
+						"tag": "regjimi taliban"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.slobodnaevropa.org/a/uragan-ida-klimatske-promjene-infrastruktura-sad/31437255.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "'Oko kuća je močvara, u njoj aligatori': Jugoistok Amerike poslije uragana Ida",
+				"creators": [],
+				"date": "2021-09-01 11:17:06Z",
+				"language": "sh",
+				"libraryCatalog": "www.slobodnaevropa.org",
+				"publicationTitle": "Radio Slobodna Evropa",
+				"section": "Dnevno@RSE",
+				"shortTitle": "'Oko kuća je močvara, u njoj aligatori'",
+				"url": "https://www.slobodnaevropa.org/a/uragan-ida-klimatske-promjene-infrastruktura-sad/31437255.html",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Aktuelno"
+					},
+					{
+						"tag": "Dnevno@RSE"
+					},
+					{
+						"tag": "Luizijana"
+					},
+					{
+						"tag": "Nju Orleans"
+					},
+					{
+						"tag": "Svijet"
+					},
+					{
+						"tag": "Uragan Isa"
+					},
+					{
+						"tag": "infrastruktura"
+					},
+					{
+						"tag": "joe biden"
+					},
+					{
+						"tag": "klimatske promjene"
+					},
+					{
+						"tag": "sad"
+					},
+					{
+						"tag": "uragan katrina"
+					},
+					{
+						"tag": "vanredna situacija"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.azathabar.com/a/31438312.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "COVID-19 hadysalary gürelýän mahaly, mekdeplerde ýokary synp okuwçylaryň dynç alyşlary uzaldyldy",
+				"creators": [
+					{
+						"firstName": "Azatlyk",
+						"lastName": "Radiosy",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-09-01 14:56:50Z",
+				"abstractNote": "Türkmenistanda COVID-19 hadysalary ozal görlüp-eşidilmedik derejede gürelýän, ýurduň ýokary okuw jaýlarynda sapaklar bölekleýin onlaýn tertibe geçirilen mahaly, orta mekdepleriň ýokary synp okuwçylarynyň dynç alyş möhleti uzaldyldy. Bu ýagdaýlar barada Azatlyk Radiosynyň habarçylary paýtagt...",
+				"language": "tk",
+				"libraryCatalog": "www.azathabar.com",
+				"publicationTitle": "Azatlyk Radiosy",
+				"section": "Türkmenistan",
+				"url": "https://www.azathabar.com/a/31438312.html",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Türkmenistan"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.radiosvoboda.org/s?k=%D0%97%D0%B5%D0%BB%D0%B5%D0%BD%D1%81%D1%8C%D0%BA%D0%B8%D0%B9&tab=all&pi=1&r=any&pp=10",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.rferl.org/s?k=afghanistan&tab=all&pi=1&r=any&pp=10",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

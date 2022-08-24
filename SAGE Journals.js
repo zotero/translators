@@ -9,7 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
+<<<<<<< HEAD
 	"lastUpdated": "2021-11-19 16:13:02"
+=======
+	"lastUpdated": "2020-12-06 18:57:06"
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 }
 
 /*
@@ -37,7 +41,12 @@
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 function detectWeb(doc, url) {
+<<<<<<< HEAD
 	if (url.includes('/abs/10.') || url.includes('/full/10.') || url.includes('/pdf/10.') || url.includes('/doi/10.')) {
+=======
+	let articleMatch = /(abs|full|pdf|doi)\/10\./;
+	if (articleMatch.test(url)) {
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 		return "journalArticle";
 	}
 	else if (getSearchResults(doc, true)) {
@@ -49,7 +58,11 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
+<<<<<<< HEAD
 	let rows = ZU.xpath(doc, '//span[contains(@class, "art_title")]/a[contains(@href, "/doi/full/10.") or contains(@href, "/doi/abs/10.") or contains(@href, "/doi/pdf/10.")][1] | //a[contains(concat( " ", @class, " " ), concat( " ", "ref", " " )) and contains(concat( " ", @class, " " ), concat( " ", "nowrap", " " ))] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-Title", " " ))]');
+=======
+	var rows = ZU.xpath(doc, '//*[contains(@class, "art_title")]/a[contains(@href, "/doi/full/10.") or contains(@href, "/doi/abs/10.") or contains(@href, "/doi/pdf/10.")][1]');
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent.replace(/Citation|ePub.*|Abstract/, ''));
@@ -90,9 +103,15 @@ function scrape(doc, url) {
 	}
 	var post = "doi=" + encodeURIComponent(doi) + "&include=abs&format=ris&direct=false&submit=Download+Citation";
 	var pdfurl = "//" + doc.location.host + "/doi/pdf/" + doi;
+<<<<<<< HEAD
 	var articleType = ZU.xpath(doc, '//span[@class="ArticleType"]/span');
 	//Z.debug(pdfurl);
 	//Z.debug(post);
+=======
+	var tags = doc.querySelectorAll('div.abstractKeywords a');
+	// Z.debug(pdfurl);
+	// Z.debug(post);
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 	ZU.doPost(risURL, post, function (text) {
 		//The publication date is saved in DA and the date first
 		//appeared online is in Y1. Thus, we want to prefer DA over T1
@@ -161,6 +180,7 @@ function scrape(doc, url) {
 			if (abstract) {
 				item.abstractNote = abstract;
 			}
+<<<<<<< HEAD
 			if (otherabstract) {
 				item.notes.push({note: "abs:" + otherabstract.replace(/^Résumé/, '')});
 			} else {
@@ -196,6 +216,13 @@ function scrape(doc, url) {
 			// numbering issues with slash, e.g. in case of  double issue "1-2" > "1/2"
 			if (item.issue) item.issue = item.issue.replace('-', '/');
 
+=======
+			
+			
+			for (let tag of tags) {
+				item.tags.push(tag.textContent);
+			}
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 			// Workaround while Sage hopefully fixes RIS for authors
 			for (let i = 0; i < item.creators.length; i++) {
 				if (!item.creators[i].firstName) {
@@ -368,13 +395,18 @@ var testCases = [
 	},
 	{
 		"type": "web",
+<<<<<<< HEAD
 		"url": "https://journals.sagepub.com/doi/full/10.1177/0969733020929062",
+=======
+		"url": "https://journals.sagepub.com/doi/full/10.1177/0954408914525387",
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Nurses’ refusals of patient involvement in their own palliative care",
 				"creators": [
 					{
+<<<<<<< HEAD
 						"lastName": "Glasdam",
 						"firstName": "Stinne",
 						"creatorType": "author"
@@ -387,6 +419,10 @@ var testCases = [
 					{
 						"lastName": "Boelsbjerg",
 						"firstName": "Hanne Bess",
+=======
+						"lastName": "Berry",
+						"firstName": "RJ",
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 						"creatorType": "author"
 					}
 				],
@@ -430,6 +466,7 @@ var testCases = [
 						"note": "<p>doi: 10.1177/0969733020929062</p>"
 					},
 					{
+<<<<<<< HEAD
 						"note": "orcid:0000-0002-0893-3054 | Glasdam, Stinne"
 					},
 					{
@@ -456,6 +493,15 @@ var testCases = [
 					{
 						"lastName": "Park",
 						"firstName": "Hyunjoon",
+=======
+						"lastName": "Bradley",
+						"firstName": "MSA",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "McGregor",
+						"firstName": "RG",
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 						"creatorType": "author"
 					}
 				],
@@ -464,7 +510,11 @@ var testCases = [
 				"ISSN": "0037-7686",
 				"abstractNote": "The sociology of religion has not systematically explored the emerging roles of religion in the whole process of the transition to adulthood, especially in the changing contexts of delayed and complicated transitions to adulthood. Seeking to bridge the two different fields of sociology, we identify four directions of research: (1) a multidimensional approach that identifies the different dimensions of religion with varying degrees of relationship to young adults’ lives; (2) a close attention to racial/ethnic variation in the roles of religion for the transition to adulthood; (3) an open inquiry into the changing importance of religion for young adults in a rapidly shifting neoliberal global economy; and (4) the detrimental effects of religion in the transition to adulthood. We call for more research on the increasingly complex relationship between religion and the transition to adulthood.",
 				"issue": "3",
+<<<<<<< HEAD
 				"journalAbbreviation": "Social Compass",
+=======
+				"journalAbbreviation": "Proceedings of the Institution of Mechanical Engineers, Part E: Journal of Process Mechanical Engineering",
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 				"language": "en",
 				"libraryCatalog": "SAGE Journals",
 				"pages": "428-443",
@@ -480,6 +530,7 @@ var testCases = [
 				],
 				"tags": [
 					{
+<<<<<<< HEAD
 						"tag": " minority"
 					},
 					{
@@ -578,6 +629,30 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<p>doi: 10.1177/0146107920958985</p>"
+=======
+						"tag": "BCR limestone powder (CRM-116)"
+					},
+					{
+						"tag": "Brookfield powder flow tester"
+					},
+					{
+						"tag": "Jenike shear cell"
+					},
+					{
+						"tag": "Schulze ring shear tester"
+					},
+					{
+						"tag": "Shear cell"
+					},
+					{
+						"tag": "characterizing powder flowability"
+					},
+					{
+						"tag": "flow function"
+					},
+					{
+						"tag": "reproducibility"
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 					}
 				],
 				"seeAlso": []
@@ -649,13 +724,18 @@ var testCases = [
 	},
 	{
 		"type": "web",
+<<<<<<< HEAD
 		"url": "https://journals.sagepub.com/doi/full/10.1177/0084672420926259",
+=======
+		"url": "https://journals.sagepub.com/doi/full/10.1177/1541204015581389",
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Which psychology(ies) serves us best? Research perspectives on the psycho-cultural interface in the psychology of religion(s)",
 				"creators": [
 					{
+<<<<<<< HEAD
 						"lastName": "Anczyk",
 						"firstName": "Adam",
 						"creatorType": "author"
@@ -682,6 +762,34 @@ var testCases = [
 				"abstractNote": "The article concentrates on answering the main question to be addressed, as stated in its title: which psychology(ies) serves us best? In order to achieve this goal, we pursue possible answers in history of psychology of religion and its interdisciplinary relationships with its sister disciplines, anthropology of religion and religious studies, resulting with sketching a typology of the main attitudes towards conceptualising psycho-cultural interface, prevalent among psychologists: the Universalist, the Absolutist and the Relativist stances. Next chosen examples from the field of applied psychology are presented, as the role of the cultural factor within the history of Diagnostic and Statistical Manual of Mental Disorders’ (DSM) development is discussed alongside presenting research on the phenomenon of ‘hearing voices’, in order to show the marked way for the future – the importance of including the cultural factor in psychological research on religion.",
 				"issue": "3",
 				"journalAbbreviation": "Archive for the Psychology of Religion",
+=======
+						"lastName": "Petkovsek",
+						"firstName": "Melissa A.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Boutwell",
+						"firstName": "Brian B.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Barnes",
+						"firstName": "J. C.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Beaver",
+						"firstName": "Kevin M.",
+						"creatorType": "author"
+					}
+				],
+				"date": "October 1, 2016",
+				"DOI": "10.1177/1541204015581389",
+				"ISSN": "1541-2040",
+				"abstractNote": "Moffitt’s taxonomy remains an influential theoretical framework within criminology. Despite much empirical scrutiny, comparatively less time has been spent testing the snares component of Moffitt’s work. Specifically, are there factors that might engender continued criminal involvement for individuals otherwise likely to desist? The current study tested whether gang membership increased the odds of contact with the justice system for each of the offender groups specified in Moffitt’s original developmental taxonomy. Our findings provided little evidence that gang membership increased the odds of either adolescence-limited or life-course persistent offenders being processed through the criminal justice system. Moving forward, scholars may wish to shift attention to alternative variables—beyond gang membership—when testing the snares hypothesis.",
+				"issue": "4",
+				"journalAbbreviation": "Youth Violence and Juvenile Justice",
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 				"language": "en",
 				"libraryCatalog": "SAGE Journals",
 				"pages": "295-316",
@@ -720,18 +828,32 @@ var testCases = [
 						"note": "<p>doi: 10.1177/0084672420926259</p>"
 					},
 					{
+<<<<<<< HEAD
 						"note": "orcid:0000-0001-6906-3104 | Anczyk, Adam"
 					},
 					{
 						"note": "orcid:0000-0003-2751-3204 | Grzymała-Moszczyńska, Halina"
 					}
 				],
+=======
+						"tag": "delinquency"
+					},
+					{
+						"tag": "gang membership"
+					},
+					{
+						"tag": "snares"
+					}
+				],
+				"notes": [],
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
+<<<<<<< HEAD
 		"url": "https://journals.sagepub.com/doi/10.1177/15423050211028189",
 		"items": [
 			{
@@ -756,6 +878,32 @@ var testCases = [
 				"shortTitle": "Mitchell, Kenneth R., All Our Losses, All Our Griefs",
 				"url": "https://doi.org/10.1177/15423050211028189",
 				"volume": "75",
+=======
+		"url": "https://journals.sagepub.com/doi/10.1177/0263276404046059",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The ‘System’ of Automobility",
+				"creators": [
+					{
+						"lastName": "Urry",
+						"firstName": "John",
+						"creatorType": "author"
+					}
+				],
+				"date": "October 1, 2004",
+				"DOI": "10.1177/0263276404046059",
+				"ISSN": "0263-2764",
+				"abstractNote": "This article is concerned with how to conceptualize and theorize the nature of the ‘car system’ that is a particularly key, if surprisingly neglected, element in ‘globalization’. The article deploys the notion of systems as self-reproducing or autopoietic. This notion is used to understand the origins of the 20th-century car system and especially how its awesome pattern of path dependency was established and exerted a particularly powerful and self-expanding pattern of domination across the globe. The article further considers whether and how the 20th-century car system may be transcended. It elaborates a number of small changes that are now occurring in various test sites, factories, ITC sites, cities and societies. The article briefly considers whether these small changes may in their contingent ordering end this current car system. The article assesses whether such a new system could emerge well before the end of this century, whether in other words some small changes now may produce the very large effect of a new post-car system that would have great implications for urban life, for mobility and for limiting projected climate change.",
+				"issue": "4-5",
+				"journalAbbreviation": "Theory, Culture & Society",
+				"language": "en",
+				"libraryCatalog": "SAGE Journals",
+				"pages": "25-39",
+				"publicationTitle": "Theory, Culture & Society",
+				"url": "https://doi.org/10.1177/0263276404046059",
+				"volume": "21",
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 				"attachments": [
 					{
 						"title": "SAGE PDF Full Text",
@@ -764,6 +912,7 @@ var testCases = [
 				],
 				"tags": [
 					{
+<<<<<<< HEAD
 						"tag": "Book Review"
 					}
 				],
@@ -773,6 +922,21 @@ var testCases = [
 					},
 					{
 						"note": "orcid:0000-0002-5423-3796 | Brand, Emi Alisa Johnson"
+=======
+						"tag": "automobility"
+					},
+					{
+						"tag": "path dependence"
+					},
+					{
+						"tag": "technology"
+					},
+					{
+						"tag": "time-space"
+					},
+					{
+						"tag": "tipping point"
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 					}
 				],
 				"seeAlso": []

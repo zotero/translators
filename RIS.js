@@ -17,7 +17,11 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
+<<<<<<< HEAD
 	"lastUpdated": "2021-07-09 05:32:22"
+=======
+	"lastUpdated": "2022-07-14 15:44:17"
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 }
 
 function detectImport() {
@@ -255,7 +259,8 @@ var fieldMap = {
 		reporter:["case"],
 		issuingAuthority:["patent"]
 	},
-	A3: {
+		A3: {
+			"creators/contributor":["thesis"],
 		"creators/cosponsor":["bill"],
 		"creators/producer":["film", "tvBroadcast", "videoRecording", "radioBroadcast"],
 		"creators/editor":["book"],
@@ -1626,17 +1631,21 @@ function dateRIStoZotero(risDate, zField) {
 							+ pad(d.getUTCSeconds(), 2)
 					: '');
 	} else {
-		//adjust month (it's 0 based)
-		if (date[1]) {
-			date[1] = parseInt(date[1], 10);
-			if (date[1]) date[1]--;
+		let [year, month, day] = date;
+		let dateString = "";
+		if (date.length === 0) {
+			return dateString;
 		}
-
-		return ZU.formatDate({
-				'year': date[0],
-				'month': date[1],
-				'day': date[2]
-			});
+		else {
+			dateString = year.padStart(4, '0');
+			if (month) {
+				dateString += "-" + month.padStart(2, '0');
+				if (day) {
+					dateString += "-" + day.padStart(2, '0');
+				}
+			}
+			return dateString;
+		}
 	}
 }
 
@@ -2035,6 +2044,7 @@ var exports = {
 	"options": exportedOptions
 }
 
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -2079,12 +2089,24 @@ var testCases = [
 				"volume": "85",
 				"attachments": [],
 				"tags": [
-					"blood-brain barrier",
-					"cortical contusion",
-					"head trauma",
-					"hippocampus",
-					"horseradish peroxidase",
-					"rat"
+					{
+						"tag": "blood-brain barrier"
+					},
+					{
+						"tag": "cortical contusion"
+					},
+					{
+						"tag": "head trauma"
+					},
+					{
+						"tag": "hippocampus"
+					},
+					{
+						"tag": "horseradish peroxidase"
+					},
+					{
+						"tag": "rat"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -2110,7 +2132,7 @@ var testCases = [
 						"creatorType": "inventor"
 					}
 				],
-				"issueDate": "February 27, 1990",
+				"issueDate": "1990-02-27",
 				"abstractNote": "A method is disclosed for detecting the presence of HTLV III infected cells in a medium. The method comprises contacting the medium with monoclonal antibodies against an antigen produced as a result of the infection and detecting the binding of the antibodies to the antigen. The antigen may be a gene product of the HTLV III virus or may be bound to such gene product. On the other hand the antigen may not be a viral gene product but may be produced as a result of the infection and may further be bound to a lymphocyte. The medium may be a human body fluid or a culture medium. A particular embodiment of the present method involves a method for determining the presence of a AIDS virus in a person. The method comprises combining a sample of a body fluid from the person with a monoclonal antibody that binds to an antigen produced as a result of the infection and detecting the binding of the monoclonal antibody to the antigen. The presence of the binding indicates the presence of a AIDS virus infection. Also disclosed are novel monoclonal antibodies, noval compositions of matter, and novel diagnostic kits",
 				"applicationNumber": "G01N 33/569 G01N 33/577",
 				"assignee": "4,629,783",
@@ -2119,10 +2141,18 @@ var testCases = [
 				"place": "OR",
 				"attachments": [],
 				"tags": [
-					"AIDS",
-					"antigens",
-					"infection",
-					"virus"
+					{
+						"tag": "AIDS"
+					},
+					{
+						"tag": "antigens"
+					},
+					{
+						"tag": "infection"
+					},
+					{
+						"tag": "virus"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -2160,9 +2190,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2212,9 +2248,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2250,9 +2292,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2298,9 +2346,15 @@ var testCases = [
 				"videoRecordingFormat": "Format",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2337,9 +2391,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2375,9 +2435,15 @@ var testCases = [
 				"websiteType": "Type of Medium",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2439,9 +2505,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2504,9 +2576,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2537,13 +2615,18 @@ var testCases = [
 				"language": "Language",
 				"reporter": "Reporter",
 				"reporterVolume": "Reporter Volume",
-				"shortTitle": "Abbreviated Case Name",
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2591,9 +2674,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2627,9 +2716,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2681,9 +2776,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2718,12 +2819,17 @@ var testCases = [
 				"seriesTitle": "Series Title",
 				"shortTitle": "Short Title",
 				"url": "URL",
-				"version": "Version",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2770,9 +2876,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2834,9 +2946,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2880,9 +2998,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2939,9 +3063,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2993,9 +3123,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3039,9 +3175,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3096,9 +3238,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3160,9 +3308,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3218,9 +3372,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3259,9 +3419,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3295,9 +3461,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3344,9 +3516,15 @@ var testCases = [
 				"videoRecordingFormat": "Format",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3401,9 +3579,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3449,9 +3633,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3494,9 +3684,15 @@ var testCases = [
 				"volume": "Amount Requested",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3528,9 +3724,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3608,9 +3810,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3653,9 +3861,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3697,9 +3911,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3739,9 +3959,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3796,9 +4022,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3838,9 +4070,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3877,9 +4115,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3918,9 +4162,15 @@ var testCases = [
 				"videoRecordingFormat": "Format/Length",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3967,9 +4217,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4013,9 +4269,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4060,9 +4322,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4117,9 +4385,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4181,9 +4455,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4222,9 +4502,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4250,13 +4536,18 @@ var testCases = [
 				"publicLawNumber": "Public Law Number",
 				"section": "Sections",
 				"session": "Session",
-				"shortTitle": "Short Title",
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4272,6 +4563,11 @@ var testCases = [
 				"itemType": "thesis",
 				"title": "Title",
 				"creators": [
+					{
+						"lastName": "Advisor",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
 					{
 						"lastName": "Name1",
 						"firstName": "Author",
@@ -4299,9 +4595,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4347,9 +4649,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4385,9 +4693,15 @@ var testCases = [
 				"websiteType": "Type of Medium",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4450,7 +4764,6 @@ var testCases = [
 				"abstractNote": "Optimal integration of next-generation sequencing into mainstream research requires re-evaluation of how problems can be reasonably overcome and what questions can be asked. .... The random sequencing-based approach to identify microsatellites was rapid, cost-effective and identified thousands of useful microsatellite loci in a previously unstudied species.",
 				"issue": "9999",
 				"publicationTitle": "Molecular Ecology Resources",
-				"shortTitle": "Rapid identification of thousands of copperhead snake (Agkistrodon contortrix) microsatellite loci from modest amounts of 454 shotgun genome sequence",
 				"url": "http://dx.doi.org/10.1111/j.1755-0998.2009.02750.x",
 				"volume": "9999",
 				"attachments": [
@@ -4483,7 +4796,7 @@ var testCases = [
 	},
 	{
 		"type": "import",
-		"input": "TY  - BILL\nN1  - Record ID: 10\nA1  - Author Name, Author2 Name2\nTI  - Act Name\nRP  - Reprint Status, Date\nCY  - Code\nPY  - Date of Code\nY2  - Date\nVL  - Bill/Res Number\nSP  - Section(s)\nN1  - Histroy: History\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - ART\nN1  - Record ID: 20\nA1  - Author Name, Author2 Name2\nN1  - Artist Role: Artist Role\nT1  - Title/Subject\nM1  - Medium\nN1  - Connective Phrase: Connective Phrase\nN1  - Author, Monographic: Monographic Author\nN1  - Author Role: Author Role\nN1  - Title Monographic: Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nY1  - Date of Publication\nN1  - Location in Work: Location in Work\nN1  - Size: Size\nN1  - Series Title: Series Title\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - ADVS\nN1  - Record ID: 30\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nT1  - Analytic Title\nM3  - Medium Designator\nN1  - Connective Phrase: Connective Phrase\nN1  - Author, Monographic: Monographic Author\nN1  - Author Role: Monographic Author Role\nN1  - Title Monographic: Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nIS  - Volume ID\nN1  - Location in Work: Location in Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nN1  - Series Editor: Series Editor\nN1  - Series Editor Role: Series Editor Role\nN1  - Series Title: Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Series Issue ID: Series Issue ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CHAP\nN1  - Record ID: 40\nA1  - Author Name, Author2 Name2\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Monographic Author\nN1  - Author Role: Author Role\nT2  - Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Volume ID: Volume ID\nN1  - Issue ID: Issue ID\nSP  - Page(s)\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nN1  - Series Title: Series Title\nN1  - Series Volume ID: Series Volume Identification\nN1  - Series Issue ID: Series Issue Identification\nN1  - Connective PhraseConnective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CHAP\nN1  - Record ID: 50\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Monographic Author\nN1  - Author Role: Author Role\nT2  - Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nN1  - Volume ID: Volume ID\nN1  - Issue ID: Issue ID\nSP  - Page(s)\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - ABST\nN1  - Record ID: 180\nA1  - Author Name, Author2 Name2\nT1  - Title\nJF  - Journal Title\nRP  - Reprint Status, Date\nY1  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nAD  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - BOOK\nN1  - Record ID: 190\nA1  - Monographic Author\nT1  - Monographic Title\nRP  - Reprint Status, Date\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - BOOK\nN1  - Record ID: 200\nA1  - Monographic Author\nN1  - Author Role: Author Role\nT1  - Monographic Title\nN1  - Translated Title: Translated Title\nRP  - Reprint Status, Date\nVL  - Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Original Pub Date: Original Pub Date\nIS  - Volume ID\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CASE\nN1  - Record Number: 210\nA1  - Counsel\nT1  - Case Name\nT2  - Case Name (Abbrev)\nRP  - Reprint Status, Date\nCY  - Reporter\nPB  - Court\nPY  - Date Field\nY2  - Date Decided\nN1  - First Page: First Page\nVL  - Reporter Number\nSP  - Page(s)\nT3  - History\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - COMP\nN1  - Record Number: 220\nT1  - Program Title\nN1  - Computer Program: Computer Program\nN1  - Connective Phrase: Connective Phrase\nA1  - Author/Programmer\nN1  - Author Role: Author Role\nN1  - Title: Title\nRP  - Reprint Status, Date\nIS  - Version\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nN1  - Report Identification: Report ID\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CONF\nN1  - Record Number: 230\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nN1  - Author Affiliation, Ana.: Author Affiliation\nT1  - Paper/Section Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Editor/Compiler\nN1  - Editor/Compiler Role: Editor/Compiler Role\nN1  - Proceedings Title: Proceedings Title\nY2  - Date of Meeting\nN1  - Place of Meeting: Place of Meeting\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nVL  - Volume ID\nSP  - Location in Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nAV  - Address/Availability\nUR  - Location/URL\nN1  - ISBN: ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - DATA\nN1  - Record Number: 240\nT1  - Analytic Title\nN1  - Medium (Data File): Medium (Data File)\nN1  - Connective Phrase: Connective Phrase\nA2  - Editor/Compiler\nN1  - Editor/Compiler Role: Editor/Compiler Role\nN1  - Title, Monographic: Monographic Title\nRP  - Reprint Status, Date\nIS  - Version\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nSP  - Location in Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - THES\nN1  - Record Number: 250\nA1  - Author Name, Author2 Name2\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nRP  - Reprint Status, Date\nN1  - Place of Publication: Place of Publication\nPB  - University\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nSP  - Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - ELEC\nN1  - Record Number: 260\nA1  - Author Name, Author2 Name2\nT1  - Title\nM1  - Medium\nJO  - Source\nRP  - Reprint Status, Date\nIS  - Edition\nPB  - Publisher Name\nPY  - Last Update\nY2  - Access Date\nN1  - Volume ID: Volume ID\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - ICOMM\nN1  - Record Number: 270\nA1  - Author Name, Author2 Name2\nN1  - Author E-mail: Author E-mail\nN1  - Author Affiliation: Author Affiliation\nT1  - Subject\nA2  - Recipient\nN1  - Recipient E-mail: Recipient E-mail\nRP  - Reprint Status, Date\nPY  - Date of Message\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - GEN\nN1  - Record Number: 280\nA1  - Author Name, Author2 Name2\nT1  - Analytic Title\nA2  - Monographic Author\nT2  - Monographic Title\nJO  - Journal Title\nRP  - Reprint Status, Date\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nY2  - Date of Copyright\nVL  - Volume ID\nIS  - Issue ID\nSP  - Location in Work\nA3  - Series Editor\nT3  - Series Title\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - HEAR\nN1  - Record Number: 290\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nN1  - Author Affiliation: Author Affiliation\nT1  - Title\nN1  - Medium Designator: Medium Designator\nRP  - Reprint Status, Date\nCY  - Committee\nPB  - Subcommittee\nPY  - Hearing Date\nY2  - Date\nVL  - Bill Number\nN1  - Issue ID: Issue ID\nN1  - Location in Work: Location/URL\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - MGZN\nN1  - Record Number: 300\nA1  - Author Name, Author2 Name2\nT1  - Article Title\nJO  - Magazine Title\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Copyright Date: Date of Copyright\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - INPR\nN1  - Record Number: 310\nA1  - Author Name, Author2 Name2\nT1  - Title\nJO  - Journal Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nN1  - Volume ID: Volume ID\nN1  - Page(s): Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - JOUR\nN1  - Record Number: 320\nA1  - Author Name, Author2 Name2\nT1  - Article Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nJF  - Journal Title\nN1  - Translated Title: Translated Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nN1  - Language: Language\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - JOUR\nN1  - Record Number: 330\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nN1  - Author Affiliation: Author Affiliation\nT1  - Article Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nN1  - Author, Monographic: Monographic Author\nN1  - Author Role: Author Role\nJF  - Journal Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - CODEN: CODEN\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - JOUR\nN1  - Record Number: 340\nA1  - Author Name, Author2 Name2\nT1  - Analytic Title\nJF  - Journal Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - JFULL\nN1  - Record Number: 350\nN1  - Editor: Editor\nJF  - Journal Title\nRP  - Reprint Status, Date\nN1  - Medium Designator: Medium Designator\nN1  - Edition: Edition\nN1  - Place of Publication: Place of Publication\nN1  - Publisher Name: Publisher Name\nPY  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Frequency of Publication: Frequency of Publication\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - CODEN: CODEN\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - PCOMM\nN1  - Record Number: 360\nA1  - Author Name, Author2 Name2\nN1  - Author Affiliation: Author Affiliation\nN1  - Medium Designator: Medium Designator\nA2  - Recipient\nRP  - Reprint Status, Date\nN1  - Place of Publication: Place of Publication\nPY  - Date of Letter\nN1  - Extent of Letter: Extent of Letter\nN1  - Packaging Method: Packaging Method\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - SER\nN1  - Record Number: 370\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nT3  - Collection Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nSP  - Location of Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Document Type: Document Type\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - MAP\nN1  - Record Number: 380\nT1  - Map Title\nM2  - Map Type\nA1  - Cartographer\nN1  - Cartographer Role: Cartographer Role\nRP  - Reprint Status, Date\nM1  - Area\nN1  - Medium Designator: Medium Designator\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nY2  - Date of Copyright\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nN1  - Scale: Scale\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Series Issue ID: Series Issue ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - SER\nN1  - Record Number: 390\nA1  - Monographic Author\nN1  - Author Role: Author Role\nT1  - Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - MUSIC\nN1  - Record Number: 400\nA1  - Composer\nN1  - Composer Role: Composer Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Editor/Compiler\nN1  - Editor/Compiler Role: Editor/Compiler Role\nN1  - Title, Monographic: Monographic Title\nRP  - Reprint Status, Date\nN1  - Medium Designator: Medium Designator\nVL  - Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Copyright Date: Copyright Date\nIS  - Volume ID\nN1  - Report Identification: Report ID\nN1  - Plate Number: Plate Number\nN1  - Location in Work: Location in Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Series Issue ID: Series Issue ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - MPCT\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Producer: Producer\nN1  - Producer Role: Producer Role\nRP  - Reprint Status, Date\nA1  - Director\nN1  - Director Role: Director Role\nCY  - Place of Publication\nU5  - Distributor\nPY  - Date of Publication\nM2  - Timing\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nT3  - Series Title\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - NEWS\nN1  - Record Number: 420\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nJO  - Newspaper Name\nRP  - Reprint Status, Date\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nM2  - Section\nN1  - Column Number: Column Number\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - PAT\nN1  - Record Number: 430\nA1  - Inventor Name\nN1  - Address: Address\nT1  - Patent Title\nA2  - Assignee\nN1  - Title, Short Form: Title, Short Form\nN1  - Title, Long Form: Title, Long Form\nN1  - Abstract Journal Date: Abstract Journal Date\nCY  - Country\nM3  - Document Type\nIS  - Patent Number\nN1  - Abstract Journal Title: Abstract Journal Title\nPY  - Date of Patent Issue\nVL  - Application No./Date\nN1  - Abstract Journal Volume: Abstract Journal Volume\nN1  - Abstract Journal Issue: Abstract Journal Issue\nSP  - Abstract Journal Page(s)\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Language: Language\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nM2  - Class Code, National\nM1  - Class Code, International\nN1  - Related Document No.: Related Document Number\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Registry Number: Registry Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - RPRT\nN1  - Record Number: 440\nA1  - Author Name, Author2 Name2\nN1  - Author Role, Analytic: Author Role\nN1  - Author Affiliation: Author Affiliation\nN1  - Section Title: Section Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Monographic Author\nN1  - Author Role: Author Role\nT1  - Report Title\nRP  - Reprint Status, Date\nN1  - Edition: Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nVL  - Report ID\nSP  - Extent of Work\nN1  - Packaging Method: Packaging Method\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Series Issue ID: Series Issue ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - CODEN: CODEN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - SOUND\nN1  - Record Number: 450\nA1  - Composer\nN1  - Composer Role: Composer Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nN1  - Editor/Compiler: Editor/Compiler\nN1  - Editor/Compiler Role: Editor/Compiler Role\nN1  - Recording Title: Recording Title\nRP  - Reprint Status, Date\nN1  - Edition: Edition\nA2  - Performer\nN1  - Performer Role: Performer Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Copyright Date: Date of Copyright\nN1  - Acquisition Number: Acquisition Number\nN1  - Matrix Number: Matrix Number\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nN1  - Reproduction Ratio: Reproduction Ratio\nT3  - Series Title\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - STAT\nN1  - Record Number: 460\nA1  - Author Name, Author2 Name2\nT1  - Statute Title\nRP  - Reprint Status, Date\nCY  - Code\nPY  - Date of Publication\nY2  - Date\nVL  - Title/Code Number\nSP  - Section(s)\nT3  - History\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CTLG\nN1  - Record Number: 470\nA1  - Author Name, Author2 Name2\nT1  - Catalog Title\nN1  - Medium Designator: Medium Designator\nRP  - Reprint Status, Date\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nIS  - Catalog Number\nN1  - Issue Identification: Issue ID\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - UNBILL\nN1  - Record Number: 480\nA1  - Author Name, Author2 Name2\nT1  - Act Title\nRP  - Reprint Status, Date\nCY  - Code\nPY  - Date of Code\nY2  - Date\nVL  - Bill/Res Number\nT3  - History\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - UNPB\nN1  - Record Number: 490\nA1  - Author Name, Author2 Name2\nT1  - Title\nA2  - Editor(s)\nRP  - Reprint Status, Date\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - VIDEO\nN1  - Record Number: 500\nA1  - Author Name, Author2 Name2\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Producer: Producer\nN1  - Producer Role: Producer Role\nRP  - Reprint Status, Date\nN1  - Director: Director\nN1  - Director Role: Director Role\nCY  - Place of Publication\nPB  - Distributor\nPY  - Date of Publication\nM2  - Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nT3  - Series Title\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - ELEC\nN1  - Record Number: 510\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nN1  - Author Affiliation: Author Affiliation\nT1  - Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nY2  - Date of Access\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n",
+		"input": "TY  - BILL\nN1  - Record ID: 10\nA1  - Author Name, Author2 Name2\nTI  - Act Name\nRP  - Reprint Status, Date\nCY  - Code\nPY  - Date of Code\nY2  - Date\nVL  - Bill/Res Number\nSP  - Section(s)\nN1  - Histroy: History\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - ART\nN1  - Record ID: 20\nA1  - Author Name, Author2 Name2\nN1  - Artist Role: Artist Role\nT1  - Title/Subject\nM1  - Medium\nN1  - Connective Phrase: Connective Phrase\nN1  - Author, Monographic: Monographic Author\nN1  - Author Role: Author Role\nN1  - Title Monographic: Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nY1  - Date of Publication\nN1  - Location in Work: Location in Work\nN1  - Size: Size\nN1  - Series Title: Series Title\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - ADVS\nN1  - Record ID: 30\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nT1  - Analytic Title\nM3  - Medium Designator\nN1  - Connective Phrase: Connective Phrase\nN1  - Author, Monographic: Monographic Author\nN1  - Author Role: Monographic Author Role\nN1  - Title Monographic: Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nIS  - Volume ID\nN1  - Location in Work: Location in Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nN1  - Series Editor: Series Editor\nN1  - Series Editor Role: Series Editor Role\nN1  - Series Title: Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Series Issue ID: Series Issue ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CHAP\nN1  - Record ID: 40\nA1  - Author Name, Author2 Name2\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Monographic Author\nN1  - Author Role: Author Role\nT2  - Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Volume ID: Volume ID\nN1  - Issue ID: Issue ID\nSP  - Page(s)\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nN1  - Series Title: Series Title\nN1  - Series Volume ID: Series Volume Identification\nN1  - Series Issue ID: Series Issue Identification\nN1  - Connective PhraseConnective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CHAP\nN1  - Record ID: 50\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Monographic Author\nN1  - Author Role: Author Role\nT2  - Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nN1  - Volume ID: Volume ID\nN1  - Issue ID: Issue ID\nSP  - Page(s)\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - ABST\nN1  - Record ID: 180\nA1  - Author Name, Author2 Name2\nT1  - Title\nJF  - Journal Title\nRP  - Reprint Status, Date\nY1  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nAD  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - BOOK\nN1  - Record ID: 190\nA1  - Monographic Author\nT1  - Monographic Title\nRP  - Reprint Status, Date\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - BOOK\nN1  - Record ID: 200\nA1  - Monographic Author\nN1  - Author Role: Author Role\nT1  - Monographic Title\nN1  - Translated Title: Translated Title\nRP  - Reprint Status, Date\nVL  - Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Original Pub Date: Original Pub Date\nIS  - Volume ID\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CASE\nN1  - Record Number: 210\nA1  - Counsel\nT1  - Case Name\nT2  - Case Name (Abbrev)\nRP  - Reprint Status, Date\nCY  - Reporter\nPB  - Court\nPY  - Date Field\nY2  - Date Decided\nN1  - First Page: First Page\nVL  - Reporter Number\nSP  - Page(s)\nT3  - History\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - COMP\nN1  - Record Number: 220\nT1  - Program Title\nN1  - Computer Program: Computer Program\nN1  - Connective Phrase: Connective Phrase\nA1  - Author/Programmer\nN1  - Author Role: Author Role\nN1  - Title: Title\nRP  - Reprint Status, Date\nIS  - Version\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nN1  - Report Identification: Report ID\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CONF\nN1  - Record Number: 230\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nN1  - Author Affiliation, Ana.: Author Affiliation\nT1  - Paper/Section Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Editor/Compiler\nN1  - Editor/Compiler Role: Editor/Compiler Role\nN1  - Proceedings Title: Proceedings Title\nY2  - Date of Meeting\nN1  - Place of Meeting: Place of Meeting\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nVL  - Volume ID\nSP  - Location in Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nAV  - Address/Availability\nUR  - Location/URL\nN1  - ISBN: ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - DATA\nN1  - Record Number: 240\nT1  - Analytic Title\nN1  - Medium (Data File): Medium (Data File)\nN1  - Connective Phrase: Connective Phrase\nA2  - Editor/Compiler\nN1  - Editor/Compiler Role: Editor/Compiler Role\nN1  - Title, Monographic: Monographic Title\nRP  - Reprint Status, Date\nIS  - Version\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nSP  - Location in Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - THES\nN1  - Record Number: 250\nA1  - Author Name, Author2 Name2\nA3  - Supervisor surname, Supervisor name\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nRP  - Reprint Status, Date\nN1  - Place of Publication: Place of Publication\nPB  - University\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nSP  - Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - ELEC\nN1  - Record Number: 260\nA1  - Author Name, Author2 Name2\nT1  - Title\nM1  - Medium\nJO  - Source\nRP  - Reprint Status, Date\nIS  - Edition\nPB  - Publisher Name\nPY  - Last Update\nY2  - Access Date\nN1  - Volume ID: Volume ID\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - ICOMM\nN1  - Record Number: 270\nA1  - Author Name, Author2 Name2\nN1  - Author E-mail: Author E-mail\nN1  - Author Affiliation: Author Affiliation\nT1  - Subject\nA2  - Recipient\nN1  - Recipient E-mail: Recipient E-mail\nRP  - Reprint Status, Date\nPY  - Date of Message\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - GEN\nN1  - Record Number: 280\nA1  - Author Name, Author2 Name2\nT1  - Analytic Title\nA2  - Monographic Author\nT2  - Monographic Title\nJO  - Journal Title\nRP  - Reprint Status, Date\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nY2  - Date of Copyright\nVL  - Volume ID\nIS  - Issue ID\nSP  - Location in Work\nA3  - Series Editor\nT3  - Series Title\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - HEAR\nN1  - Record Number: 290\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nN1  - Author Affiliation: Author Affiliation\nT1  - Title\nN1  - Medium Designator: Medium Designator\nRP  - Reprint Status, Date\nCY  - Committee\nPB  - Subcommittee\nPY  - Hearing Date\nY2  - Date\nVL  - Bill Number\nN1  - Issue ID: Issue ID\nN1  - Location in Work: Location/URL\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - MGZN\nN1  - Record Number: 300\nA1  - Author Name, Author2 Name2\nT1  - Article Title\nJO  - Magazine Title\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Copyright Date: Date of Copyright\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - INPR\nN1  - Record Number: 310\nA1  - Author Name, Author2 Name2\nT1  - Title\nJO  - Journal Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nN1  - Volume ID: Volume ID\nN1  - Page(s): Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - JOUR\nN1  - Record Number: 320\nA1  - Author Name, Author2 Name2\nT1  - Article Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nJF  - Journal Title\nN1  - Translated Title: Translated Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nN1  - Language: Language\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - JOUR\nN1  - Record Number: 330\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nN1  - Author Affiliation: Author Affiliation\nT1  - Article Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nN1  - Author, Monographic: Monographic Author\nN1  - Author Role: Author Role\nJF  - Journal Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - CODEN: CODEN\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - JOUR\nN1  - Record Number: 340\nA1  - Author Name, Author2 Name2\nT1  - Analytic Title\nJF  - Journal Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - JFULL\nN1  - Record Number: 350\nN1  - Editor: Editor\nJF  - Journal Title\nRP  - Reprint Status, Date\nN1  - Medium Designator: Medium Designator\nN1  - Edition: Edition\nN1  - Place of Publication: Place of Publication\nN1  - Publisher Name: Publisher Name\nPY  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Frequency of Publication: Frequency of Publication\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - CODEN: CODEN\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - PCOMM\nN1  - Record Number: 360\nA1  - Author Name, Author2 Name2\nN1  - Author Affiliation: Author Affiliation\nN1  - Medium Designator: Medium Designator\nA2  - Recipient\nRP  - Reprint Status, Date\nN1  - Place of Publication: Place of Publication\nPY  - Date of Letter\nN1  - Extent of Letter: Extent of Letter\nN1  - Packaging Method: Packaging Method\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - SER\nN1  - Record Number: 370\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nT3  - Collection Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nSP  - Location of Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Document Type: Document Type\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - MAP\nN1  - Record Number: 380\nT1  - Map Title\nM2  - Map Type\nA1  - Cartographer\nN1  - Cartographer Role: Cartographer Role\nRP  - Reprint Status, Date\nM1  - Area\nN1  - Medium Designator: Medium Designator\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nY2  - Date of Copyright\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nN1  - Scale: Scale\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Series Issue ID: Series Issue ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - SER\nN1  - Record Number: 390\nA1  - Monographic Author\nN1  - Author Role: Author Role\nT1  - Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - MUSIC\nN1  - Record Number: 400\nA1  - Composer\nN1  - Composer Role: Composer Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Editor/Compiler\nN1  - Editor/Compiler Role: Editor/Compiler Role\nN1  - Title, Monographic: Monographic Title\nRP  - Reprint Status, Date\nN1  - Medium Designator: Medium Designator\nVL  - Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Copyright Date: Copyright Date\nIS  - Volume ID\nN1  - Report Identification: Report ID\nN1  - Plate Number: Plate Number\nN1  - Location in Work: Location in Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Series Issue ID: Series Issue ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - MPCT\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Producer: Producer\nN1  - Producer Role: Producer Role\nRP  - Reprint Status, Date\nA1  - Director\nN1  - Director Role: Director Role\nCY  - Place of Publication\nU5  - Distributor\nPY  - Date of Publication\nM2  - Timing\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nT3  - Series Title\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - NEWS\nN1  - Record Number: 420\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nJO  - Newspaper Name\nRP  - Reprint Status, Date\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nM2  - Section\nN1  - Column Number: Column Number\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - PAT\nN1  - Record Number: 430\nA1  - Inventor Name\nN1  - Address: Address\nT1  - Patent Title\nA2  - Assignee\nN1  - Title, Short Form: Title, Short Form\nN1  - Title, Long Form: Title, Long Form\nN1  - Abstract Journal Date: Abstract Journal Date\nCY  - Country\nM3  - Document Type\nIS  - Patent Number\nN1  - Abstract Journal Title: Abstract Journal Title\nPY  - Date of Patent Issue\nVL  - Application No./Date\nN1  - Abstract Journal Volume: Abstract Journal Volume\nN1  - Abstract Journal Issue: Abstract Journal Issue\nSP  - Abstract Journal Page(s)\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Language: Language\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nM2  - Class Code, National\nM1  - Class Code, International\nN1  - Related Document No.: Related Document Number\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Registry Number: Registry Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - RPRT\nN1  - Record Number: 440\nA1  - Author Name, Author2 Name2\nN1  - Author Role, Analytic: Author Role\nN1  - Author Affiliation: Author Affiliation\nN1  - Section Title: Section Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Monographic Author\nN1  - Author Role: Author Role\nT1  - Report Title\nRP  - Reprint Status, Date\nN1  - Edition: Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nVL  - Report ID\nSP  - Extent of Work\nN1  - Packaging Method: Packaging Method\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Series Issue ID: Series Issue ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - CODEN: CODEN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - SOUND\nN1  - Record Number: 450\nA1  - Composer\nN1  - Composer Role: Composer Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nN1  - Editor/Compiler: Editor/Compiler\nN1  - Editor/Compiler Role: Editor/Compiler Role\nN1  - Recording Title: Recording Title\nRP  - Reprint Status, Date\nN1  - Edition: Edition\nA2  - Performer\nN1  - Performer Role: Performer Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Copyright Date: Date of Copyright\nN1  - Acquisition Number: Acquisition Number\nN1  - Matrix Number: Matrix Number\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nN1  - Reproduction Ratio: Reproduction Ratio\nT3  - Series Title\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - STAT\nN1  - Record Number: 460\nA1  - Author Name, Author2 Name2\nT1  - Statute Title\nRP  - Reprint Status, Date\nCY  - Code\nPY  - Date of Publication\nY2  - Date\nVL  - Title/Code Number\nSP  - Section(s)\nT3  - History\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CTLG\nN1  - Record Number: 470\nA1  - Author Name, Author2 Name2\nT1  - Catalog Title\nN1  - Medium Designator: Medium Designator\nRP  - Reprint Status, Date\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nIS  - Catalog Number\nN1  - Issue Identification: Issue ID\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - UNBILL\nN1  - Record Number: 480\nA1  - Author Name, Author2 Name2\nT1  - Act Title\nRP  - Reprint Status, Date\nCY  - Code\nPY  - Date of Code\nY2  - Date\nVL  - Bill/Res Number\nT3  - History\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - UNPB\nN1  - Record Number: 490\nA1  - Author Name, Author2 Name2\nT1  - Title\nA2  - Editor(s)\nRP  - Reprint Status, Date\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - VIDEO\nN1  - Record Number: 500\nA1  - Author Name, Author2 Name2\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Producer: Producer\nN1  - Producer Role: Producer Role\nRP  - Reprint Status, Date\nN1  - Director: Director\nN1  - Director Role: Director Role\nCY  - Place of Publication\nPB  - Distributor\nPY  - Date of Publication\nM2  - Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nT3  - Series Title\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - ELEC\nN1  - Record Number: 510\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nN1  - Author Affiliation: Author Affiliation\nT1  - Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nY2  - Date of Access\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n",
 		"items": [
 			{
 				"itemType": "bill",
@@ -4504,8 +4817,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -4533,8 +4850,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -4587,8 +4908,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -4677,8 +5002,12 @@ var testCases = [
 				"volume": "Volume ID",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -4749,8 +5078,12 @@ var testCases = [
 				"volume": "Volume ID",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -4809,8 +5142,12 @@ var testCases = [
 				"volume": "Volume ID",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -4839,8 +5176,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -4883,8 +5224,12 @@ var testCases = [
 				"volume": "Volume ID",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -4932,8 +5277,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -4963,11 +5312,14 @@ var testCases = [
 				"company": "Publisher Name",
 				"place": "Place of Publication",
 				"url": "Location/URL",
-				"version": "Version",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5037,8 +5389,12 @@ var testCases = [
 				"volume": "Volume ID",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5098,8 +5454,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5140,6 +5500,11 @@ var testCases = [
 						"lastName": "Author Name",
 						"firstName": "Author2 Name2",
 						"creatorType": "author"
+					},
+					{
+						"lastName": "Supervisor surname",
+						"firstName": "Supervisor name",
+						"creatorType": "contributor"
 					}
 				],
 				"date": "0000 Date",
@@ -5152,8 +5517,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5190,8 +5559,12 @@ var testCases = [
 				"websiteTitle": "Source",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5223,8 +5596,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5271,8 +5648,12 @@ var testCases = [
 				"volume": "Volume ID",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5298,8 +5679,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5341,8 +5726,12 @@ var testCases = [
 				"volume": "Volume ID",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5371,8 +5760,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5407,8 +5800,12 @@ var testCases = [
 				"volume": "Volume ID",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5456,8 +5853,12 @@ var testCases = [
 				"volume": "Volume ID",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5506,8 +5907,12 @@ var testCases = [
 				"volume": "Volume ID",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5531,8 +5936,12 @@ var testCases = [
 				"volume": "Volume ID",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5580,8 +5989,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5624,8 +6037,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5676,8 +6093,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5731,8 +6152,12 @@ var testCases = [
 				"volume": "Edition",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5771,8 +6196,12 @@ var testCases = [
 				"volume": "Edition",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5850,8 +6279,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5902,8 +6335,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5945,8 +6382,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -6016,8 +6457,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -6088,8 +6533,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -6157,8 +6606,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -6186,8 +6639,12 @@ var testCases = [
 				"volume": "Edition",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -6226,8 +6683,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -6258,8 +6719,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -6292,8 +6757,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -6341,8 +6810,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -6378,7 +6851,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "June 1, 2014",
+				"date": "2014-06-01",
 				"DOI": "10.3109/07434618.2014.906498",
 				"ISSN": "0743-4618",
 				"issue": "2",
@@ -6431,9 +6904,15 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Constitutional law",
-					"Finanzkrise / Eigentum / Haftung / Ordnungspolitik / Aufsatzsammlung / Online-Publikation",
-					"Law"
+					{
+						"tag": "Constitutional law"
+					},
+					{
+						"tag": "Finanzkrise / Eigentum / Haftung / Ordnungspolitik / Aufsatzsammlung / Online-Publikation"
+					},
+					{
+						"tag": "Law"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -6448,7 +6927,11 @@ var testCases = [
 				"itemType": "journalArticle",
 				"title": "Deprecated tag test",
 				"creators": [],
+<<<<<<< HEAD
 				"date": "January 1, 1950",
+=======
+				"date": "1950-01-01",
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 				"attachments": [],
 				"tags": [],
 				"notes": [
@@ -6499,6 +6982,84 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+<<<<<<< HEAD
+=======
+	},
+	{
+		"type": "import",
+		"input": "TY  - JOUR\r\nTI  - Using focus groups to adapt ethnically appropriate, information-seeking and recruitment messages for a prostate cancer screening program for men at high risk\r\nT2  - Journal of the National Medical Association\r\nVL  - 100\r\nIS  - 6\r\nSP  - 674\r\nEP  - 682\r\nPY  - 2008\r\nDO  - 10.1016/S0027-9684(15)31340-7\r\nAU  - Bryan, C.J.\r\nAU  - Wetmore-Arkader, L.\r\nAU  - Calvano, T.\r\nAU  - Deatrick, J.A.\r\nAU  - Giri, V.N.\r\nAU  - Bruner, D.W.\r\nN1  - Cited By :10\r\nN1  - Export Date: 13 July 2022\r\nER  - \r\n\r\nTY  - JOUR\r\nT2  - Prostate Cancer Mortality Statistics 2015\r\nPY  - 0000\r\nN1  - Cited By :1\r\nN1  - Export Date: 13 July 2022\r\nER  - \r\n\r\n",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Using focus groups to adapt ethnically appropriate, information-seeking and recruitment messages for a prostate cancer screening program for men at high risk",
+				"creators": [
+					{
+						"lastName": "Bryan",
+						"firstName": "C.J.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wetmore-Arkader",
+						"firstName": "L.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Calvano",
+						"firstName": "T.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Deatrick",
+						"firstName": "J.A.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Giri",
+						"firstName": "V.N.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bruner",
+						"firstName": "D.W.",
+						"creatorType": "author"
+					}
+				],
+				"date": "2008",
+				"DOI": "10.1016/S0027-9684(15)31340-7",
+				"issue": "6",
+				"pages": "674-682",
+				"publicationTitle": "Journal of the National Medical Association",
+				"volume": "100",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>Cited By :10</p>"
+					},
+					{
+						"note": "<p>Export Date: 13 July 2022</p>"
+					}
+				],
+				"seeAlso": []
+			},
+			{
+				"itemType": "journalArticle",
+				"creators": [],
+				"publicationTitle": "Prostate Cancer Mortality Statistics 2015",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>Cited By :1</p>"
+					},
+					{
+						"note": "<p>Export Date: 13 July 2022</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 	}
 ]
 /** END TEST CASES **/

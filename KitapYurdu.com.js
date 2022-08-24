@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-09-16 08:49:18"
+	"lastUpdated": "2022-02-08 18:18:10"
 }
 
 /*
@@ -35,18 +35,20 @@
 
 
 function detectWeb(doc, url) {
-	if (url.indexOf('/kitap/')>-1||url.indexOf('product_id')>-1) {
+	if (url.includes('/kitap/') || url.includes('product_id')) {
 		return 'book';
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//a[contains(@href, "/kitap/")]|//a[contains(@href, "product_id")]');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -61,16 +63,10 @@ function getSearchResults(doc, checkOnly) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -79,49 +75,47 @@ function doWeb(doc, url) {
 /*
 remove titles from creators
 */
-
-function cleanCreatorTitles(str){
+function cleanCreatorTitles(str) {
 	return str.replace(/Prof.|Doç.|Yrd.|Dr.|Arş.|Öğr.|Gör.|Çevirmen:|Editor:|Derleyici:/g, '');
 }
 
-function scrape(doc, url) {
+function localeCapitalizeTitle(name) {
+	return name
+		.split(/\s+/)
+		.map(part => part[0] + part.slice(1).toLocaleLowerCase('tr'))
+		.join(' ');
+}
+
+function scrape(doc, _url) {
 	var item = new Zotero.Item("book");
+	let json = JSON.parse(text(doc, 'body script[type="application/ld+json"]'));
 	
-	var title = doc.querySelector('[class=product-heading]');
-	if (title) {
-		item.title = ZU.trimInternal(title.textContent);
-	}
+	item.title = ZU.unescapeHTML(json.name);
 	
-	var authors = doc.querySelector('[class=manufacturers]');
-	if (authors) {
-		authors = ZU.trimInternal(authors.textContent);
-		authors = authors.split(',');
-		
-			for (var i=0; i<authors.length; i++) {
-				var creator = cleanCreatorTitles(authors[i]);
-				item.creators.push(ZU.cleanAuthor(creator, "author"));
-			}
-			
+	var authors = doc.querySelectorAll('.pr_producers__manufacturer .pr_producers__link');
+	for (var i = 0; i < authors.length; i++) {
+		var creator = cleanCreatorTitles(authors[i].textContent);
+		item.creators.push(ZU.cleanAuthor(creator, "author"));
 	}
 
 	
 	var translators = ZU.xpath(doc, '//tr[contains(., "Çevirmen")]');
-	for (var i=0; i<translators.length; i++) {
-		var creator = cleanCreatorTitles(translators[i].textContent);
+	for (let i = 0; i < translators.length; i++) {
+		let creator = cleanCreatorTitles(translators[i].textContent);
 		item.creators.push(ZU.cleanAuthor(creator, "translator"));
 	}
 	
 	var editors = ZU.xpath(doc, '//tr[contains(., "Editor")]|//tr[contains(., "Derleyici")]');
-	for (var i=0; i<editors.length; i++) {
-		var creator = cleanCreatorTitles(editors[i].textContent);
+	for (let i = 0; i < editors.length; i++) {
+		let creator = cleanCreatorTitles(editors[i].textContent);
 		item.creators.push(ZU.cleanAuthor(creator, "editor"));
 	}
 	
 	var edition = doc.querySelector('[itemprop=bookEdition]');
-	if (edition){
+	if (edition) {
 		edition = ZU.trimInternal(edition.textContent);
-		//don't add first edition:
-		if (edition.split('.')[0] != "1") {				
+		// don't add first edition:
+		if (edition.split('.')[0] != "1") {
 			item.edition = edition.split('.')[0];
 		}
 	}
@@ -131,44 +125,32 @@ function scrape(doc, url) {
 		switch (language.trim()) {
 			case "İNGİLİZCE":
 				item.language = "en";
+				break;
 			default:
 				item.language = "tr";
 		}
 	}
 	
-	var publisher = doc.querySelector('[itemprop=publisher]');
-	if (publisher){
-		publisher = ZU.trimInternal(publisher.textContent);
+	var publisher = json.publisher.name;
+	if (publisher) {
+		publisher = ZU.trimInternal(publisher);
 		if (item.language == "tr") {
-			var words = publisher.split(' ');
-			for (var i=0; i<words.length; i++) {
-				words[i] = words[i][0] + words[i].substr(1).replace(/I/g, 'ı').replace(/İ/g, 'i').toLowerCase();
-			}
-			item.publisher = words.join(' ');
-		} else {
+			item.publisher = localeCapitalizeTitle(publisher);
+		}
+		else {
 			item.publisher = ZU.capitalizeTitle(publisher, true);
 		}
 	}
 	
-	var date = doc.querySelector('[itemprop=datePublished]');
-	if (date){
-		item.date = ZU.trimInternal(date.textContent);
+	for (let tr of doc.querySelectorAll('.attributes tr')) {
+		if (text(tr, 'td', 0).startsWith('Yayın Tarihi')) {
+			item.date = ZU.strToISO(text(tr, 'td', 1));
+		}
 	}
 	
-	var isbn = doc.querySelector('[itemprop=isbn]');
-	if (isbn){
-		item.ISBN = ZU.trimInternal(isbn.textContent);
-	}
-	
-	var numPages = doc.querySelector('[itemprop=numberOfPages]');
-	if (numPages){
-		item.numPages = ZU.trimInternal(numPages.textContent);
-	}
-	
-	var abstractNote = doc.querySelector('[id=description_text]');
-	if (abstractNote){
-		item.abstractNote = ZU.trimInternal(abstractNote.textContent);
-	}
+	item.ISBN = json.isbn;
+	item.numPages = json.numberOfPages;
+	item.abstractNote = ZU.unescapeHTML(json.description);
 	
 	item.attachments.push({
 		title: "Snapshot",
@@ -182,7 +164,7 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.kitapyurdu.com/kitap/makroekonomi/139156.html",
+		"url": "https://www.kitapyurdu.com/kitap/makroekonomi/139156.html",
 		"items": [
 			{
 				"itemType": "book",
@@ -199,16 +181,17 @@ var testCases = [
 						"creatorType": "translator"
 					}
 				],
-				"date": "2009-10-30",
+				"date": "2018-03-31",
 				"ISBN": "9786054160389",
-				"abstractNote": "Gregory Mankiw’in Makroekonomi kitabı tüm dünya da ders kitabı olarak geniş kabul görmüştür. Kitap bugüne kadar altı baskı yaparken, başta Almanca, Fransızca, İtalyanca, İspanyolca, Çince, Rusça, Japonca ve Portekizce olmak üzere 16 dile çevrilmiştir. Elinizde tuttuğunuz Türkçe çeviride altıncı baskıdan yapılmıştır. Mankiw’in makroekonomi kitabını bu kadar önemli kılan nokta kitabın öğrenci ve öğretici dostu olmasıdır. Kitap makroekonomideki son gelişmeleri teorik olarak anlatırken ekonomideki gerçekleşmelere ilişkin verdiği örneklerle de teorik bilginin ayakları üzerine basmasını sağlamaktadır.Kitapta konular anlatıldıktan sonra her bölümün sonuna özet, anahtar kelimeler ile problemler ve uygulama soruları koyulmuştur. Kitaba sahip olan öğrenciler Eflatun Yayınevi’nin web sayfasına kayıt olup kitaptaki kodu girdiklerinde süresiz olarak kitaptaki sorular için istedikleri yardımı mail yoluyla alabileceklerdir. Böylece öğrenci, çalıştığı konular üzerinde kendisini interaktif hale getirmiş olacaktır.",
+				"abstractNote": "Gregory Mankiw’in Makroekonomi kitabı tüm dünya da ders kitabı olarak geniş kabul görmüştür. Kitap bugüne kadar altı baskı yaparken, başta Almanca, Fransızca, İtalyanca, İspanyolca, Çince, Rusça, Japonca ve Portekizce olmak üzere 16 dile çevrilmiştir. Elinizde tuttuğunuz Türkçe çeviride altıncı baskıdan yapılmıştır. Mankiw’in makroekonomi kitabını bu kadar önemli kılan nokta kitabın öğrenci ve öğretici dostu olmasıdır. Kitap makroekonomideki son gelişmeleri teorik olarak anlatırken ekonomideki gerçekleşmelere ilişkin verdiği örneklerle de teorik bilginin ayakları üzerine basmasını sağlamaktadır. Kitapta konular anlatıldıktan sonra her bölümün sonuna özet, anahtar kelimeler ile problemler ve uygulama soruları koyulmuştur. Kitaba sahip olan öğrenciler Eflatun Yayınevi’nin web sayfasına kayıt olup kitaptaki kodu girdiklerinde süresiz olarak kitaptaki sorular için istedikleri yardımı mail yoluyla alabileceklerdir. Böylece öğrenci, çalıştığı konular üzerinde kendisini interaktif hale getirmiş olacaktır.",
 				"language": "tr",
 				"libraryCatalog": "KitapYurdu.com",
 				"numPages": "688",
 				"publisher": "Efil Yayınevi",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -219,7 +202,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.kitapyurdu.com/kitap/temel-ekonometri/22831.html",
+		"url": "https://www.kitapyurdu.com/kitap/temel-ekonometri/22831.html",
 		"items": [
 			{
 				"itemType": "book",
@@ -247,15 +230,16 @@ var testCases = [
 					}
 				],
 				"date": "2014-10-21",
-				"abstractNote": "Temel Ekonometri’nin ilk baskısı otuz üç yıl önce yapılmıştı. Ekonometrinin hem kuramında hem uygulamasında önemli gelişmeler oldu. Her bir yeni basımında önemli gelişmeler kitaba yansımış ve kitap dünyanın bir çok üniversitesinde ders kitabı olarak kullanılmıştır.Bu kadar uzun ömürlü olan kitap iktisat ve finansman öğrencilerinin yanı sıra siyaset, kamu yönetimi, uluslararası ilişkiler, eğitim, tarım ve sağlık bilimlerinde de yaygın kullanılmaktadır.Yazar Gujarati’nin kitabın önsözünde yazdığı gibi: “Yıllar boyunca ekonometrinin, yeni başlayanlara, matris cebiri, yüksek matematik, giriş düzeyinin ötesinde istatistik kullanmadan, sezgisel ve anlaşılır biçimde öğretilebileceğini ilişkin olan kesin inancımı hiç değişmemiştir. Bazı konular özünde tekniktir. Böyle durumlarda ya uygun bir ek koydum ya da okuyucuyu ilgili kaynaklara yönlendirdim. O zaman bile teknik malzemeyi okuyucunun sezgisel anlayışını sağlayacak biçimde basitleştirmeye çalıştım. “Yeni basımda öğrenciler kitabın, konuları geliştirilmiş, somut örnekli yeni basımını çok yararlı bulacaktır. Bu basımda kitapta kullanılan gerçek verilerin konuyla ilgili ve güncel olmasına özen gösterilmiştir. Kitaba on beş yeni açıklayıcı örnekle otuzdan fazla bölüm sonu alıştırması eklenmiştir. Ayrıca daha önceki basımda yirmi beşe yakın örnek ve yirmiden çok alıştırmanın da verileri güncellenmiştir.Beşinci basımın çevirisinde kitapta Damodar Gujarati ile yeni ortak yazar Dawn Porter, ekonometrinin temellerini güncel araştırmalarla harmanladılar. Öğrencilere yönelik olarak da kitaptaki örneklerde kullanılan veri setleri bütün olarak Excel formatında hazırlanmıştır.Kitabın ilk bölümünde klasik modelin varsayımlarının genişletilmesini ele alıyor ve ardından çoklu doğrusallık, küçük örneklem, değişen varyans, ardışık bağımlılık, geleneksel ve almaşık ekonometrik modellemeler konularını beş bölümde inceleniyor. Daha sonra kitapta, gölge değişkenlerle regresyon, gölge bağımlı değişkenle regresyon, DOM, LOgit, Probit, Tobit modelleri, dinamik ekonometri modelleri, ardışık bağlanımlı ve gecikmesi dağıtılmış modeller anlatılıyor. Diğer bölümlerde eşanlı denklem modelleri konusu, zaman serileri ekonometrisi ele alınıyor. Durağanlık, birim kökler, eşbütünleşim konularının yanı sıra ABBHO ve VAB modelleriyle kestrim açıklanıyor.Ekonometri, özellikle de son yirmi-otuz yıldır bilgisayardaki kapasite ve hız artışlarıyla birlikte, hızlı bir gelişme gösteren, dolayısıyla sürekli yeni terimler doğuran bir bilim dalıdır. Bu nedenle çeviride, bu terimlerin Türkçe karşılıklarının kullanılmasına özen gösterilmiş ve olası bir karışıklığı önlemek için de, kitabın sonundaki Konu Dizini'nde her terimin hem Türkçe, hem İngilizce karşılıkları verilmiştir.İçindekiler;• Tek Denklemli Bağlamın (Regresyon) Modelleri• Bağlanım (Regresyon) Çözümlemesinin Niteliği• İki Değişkenli Bağlanım (Regresyon) Çözümlemesi: Bazı Temel Bilgiler• İki Değişkenli Bağlanım (Regresyon) Modeli: Tahmin Sorunu• Klasik Normal Doğrusal Bağlanım (Regresyon) Modeli (KNDBM)• İki Değişkenli Bağlanım (Regresyon)- Aralık Tahmini ve Önsav Sınaması• İki Değişkenli Doğrusal Bağlanım (Regresyon) Modelinin Uzantıları• Çoklu Bağlanım (Regresyon) Çözümlemesi: Tahmin Sorunu• Çoklu Bağlanım Çözümlemesi: Çıkarsama Sorunu• Yapay Değişkenlerle Bağlanım (Regresyon) Modelleri• Klasik Modelin Varsayımlarının Gevşetilmesi• Çoklu Doğrusallık: Açıklayıcı Değişkenler İlişkiliyse Ne Olur?• Değişen Varyans: Hata Varyansı Sabit Değilse Ne Olur?• Ardışık İlişki: Hata Terimleri İlişkiliyse Ne Olur?• Ekonometrik Modelleme: Model Kurma, Tanı Koyma Sınamaları",
-				"edition": "5",
+				"ISBN": "9789750406171",
+				"abstractNote": "Temel Ekonometri’nin ilk baskısı otuz üç yıl önce yapılmıştı. Ekonometrinin hem kuramında hem uygulamasında önemli gelişmeler oldu. Her bir yeni basımında önemli gelişmeler kitaba yansımış ve kitap dünyanın bir çok üniversitesinde ders kitabı olarak kullanılmıştır. Bu kadar uzun ömürlü olan kitap iktisat ve finansman öğrencilerinin yanı sıra siyaset, kamu yönetimi, uluslararası ilişkiler, eğitim, tarım ve sağlık bilimlerinde de yaygın kullanılmaktadır. Yazar Gujarati’nin kitabın önsözünde yazdığı gibi: “Yıllar boyunca ekonometrinin, yeni başlayanlara, matris cebiri, yüksek matematik, giriş düzeyinin ötesinde istatistik kullanmadan, sezgisel ve anlaşılır biçimde öğretilebileceğini ilişkin olan kesin inancımı hiç değişmemiştir. Bazı konular özünde tekniktir. Böyle durumlarda ya uygun bir ek koydum ya da okuyucuyu ilgili kaynaklara yönlendirdim. O zaman bile teknik malzemeyi okuyucunun sezgisel anlayışını sağlayacak biçimde basitleştirmeye çalıştım. “ Yeni basımda öğrenciler kitabın, konuları geliştirilmiş, somut örnekli yeni basımını çok yararlı bulacaktır. Bu basımda kitapta kullanılan gerçek verilerin konuyla ilgili ve güncel olmasına özen gösterilmiştir. Kitaba on beş yeni açıklayıcı örnekle otuzdan fazla bölüm sonu alıştırması eklenmiştir. Ayrıca daha önceki basımda yirmi beşe yakın örnek ve yirmiden çok alıştırmanın da verileri güncellenmiştir. Beşinci basımın çevirisinde kitapta Damodar Gujarati ile yeni ortak yazar Dawn Porter, ekonometrinin temellerini güncel araştırmalarla harmanladılar. Öğrencilere yönelik olarak da kitaptaki örneklerde kullanılan veri setleri bütün olarak Excel formatında hazırlanmıştır. Kitabın ilk bölümünde klasik modelin varsayımlarının genişletilmesini ele alıyor ve ardından çoklu doğrusallık, küçük örneklem, değişen varyans, ardışık bağımlılık, geleneksel ve almaşık ekonometrik modellemeler konularını beş bölümde inceleniyor. Daha sonra kitapta, gölge değişkenlerle regresyon, gölge bağımlı değişkenle regresyon, DOM, LOgit, Probit, Tobit modelleri, dinamik ekonometri modelleri, ardışık bağlanımlı ve gecikmesi dağıtılmış modeller anlatılıyor. Diğer bölümlerde eşanlı denklem modelleri konusu, zaman serileri ekonometrisi ele alınıyor. Durağanlık, birim kökler, eşbütünleşim konularının yanı sıra ABBHO ve VAB modelleriyle kestrim açıklanıyor. Ekonometri, özellikle de son yirmi-otuz yıldır bilgisayardaki kapasite ve hız artışlarıyla birlikte, hızlı bir gelişme gösteren, dolayısıyla sürekli yeni terimler doğuran bir bilim dalıdır. Bu nedenle çeviride, bu terimlerin Türkçe karşılıklarının kullanılmasına özen gösterilmiş ve olası bir karışıklığı önlemek için de, kitabın sonundaki Konu Dizini'nde her terimin hem Türkçe, hem İngilizce karşılıkları verilmiştir. İçindekiler; • Tek Denklemli Bağlamın (Regresyon) Modelleri • Bağlanım (Regresyon) Çözümlemesinin Niteliği • İki Değişkenli Bağlanım (Regresyon) Çözümlemesi: Bazı Temel Bilgiler • İki Değişkenli Bağlanım (Regresyon) Modeli: Tahmin Sorunu • Klasik Normal Doğrusal Bağlanım (Regresyon) Modeli (KNDBM) • İki Değişkenli Bağlanım (Regresyon)- Aralık Tahmini ve Önsav Sınaması • İki Değişkenli Doğrusal Bağlanım (Regresyon) Modelinin Uzantıları • Çoklu Bağlanım (Regresyon) Çözümlemesi: Tahmin Sorunu • Çoklu Bağlanım Çözümlemesi: Çıkarsama Sorunu • Yapay Değişkenlerle Bağlanım (Regresyon) Modelleri • Klasik Modelin Varsayımlarının Gevşetilmesi • Çoklu Doğrusallık: Açıklayıcı Değişkenler İlişkiliyse Ne Olur? • Değişen Varyans: Hata Varyansı Sabit Değilse Ne Olur? • Ardışık İlişki: Hata Terimleri İlişkiliyse Ne Olur? • Ekonometrik Modelleme: Model Kurma, Tanı Koyma Sınamaları",
 				"language": "tr",
 				"libraryCatalog": "KitapYurdu.com",
 				"numPages": "972",
 				"publisher": "Literatür - Ders Kitapları",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -266,7 +250,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.kitapyurdu.com/kitap/iktisadi-krizler-ve-turkiye-ekonomisi/375871.html",
+		"url": "https://www.kitapyurdu.com/kitap/iktisadi-krizler-ve-turkiye-ekonomisi/375871.html",
 		"items": [
 			{
 				"itemType": "book",
@@ -274,7 +258,7 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "",
-						"lastName": "Kollektif",
+						"lastName": "Kolektif",
 						"creatorType": "author"
 					},
 					{
@@ -299,10 +283,11 @@ var testCases = [
 				"language": "tr",
 				"libraryCatalog": "KitapYurdu.com",
 				"numPages": "661",
-				"publisher": "Orion Kitabevi",
+				"publisher": "Orion Kitabevi Akademik Kitaplar",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -313,7 +298,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.kitapyurdu.com/kitap/ekonomi-politikasi--teori-ve-turkiye-uygulamasi/59581.html",
+		"url": "https://www.kitapyurdu.com/kitap/ekonomi-politikasi--teori-ve-turkiye-uygulamasi/59581.html",
 		"items": [
 			{
 				"itemType": "book",
@@ -330,16 +315,55 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2013-11-26",
-				"abstractNote": "İlk olarak 2002’de yayımlanan Ekonomi Politikası, bugüne kadar defalarca basıldı. Kitap, üniversitelerde ders kitabı olarak okutuldu, çeşitli mesleklere giriş sınavlarında temel soru kitapları arasında yer aldı. Yalnızca bir ders kitabı olmakla kalmadı, aynı zamanda ekonomi öğrenmek ve izlemek isteyenlerin de elkitabı haline geldi.Bu kez kitap, güncel gelişmeleri de kapsayacak biçimde yenidenyazıldı.Kitap, bu yapısıyla ekonomi ve işletme öğrencileri için olduğu kadar ekonomi konularını merak edenler için de vazgeçilmez bir başvuru kitabı olma özelliği taşıyor.",
-				"edition": "18",
+				"date": "2020-02-18",
+				"ISBN": "9789751415851",
+				"abstractNote": "İlk olarak 2002’de yayımlanan Ekonomi Politikası, bugüne kadar defalarca basıldı. Kitap, üniversitelerde ders kitabı olarak okutuldu, çeşitli mesleklere giriş sınavlarında temel soru kitapları arasında yer aldı. Yalnızca bir ders kitabı olmakla kalmadı, aynı zamanda ekonomi öğrenmek ve izlemek isteyenlerin de elkitabı haline geldi. Bu kez kitap, güncel gelişmeleri de kapsayacak biçimde yeniden yazıldı. Kitap, bu yapısıyla ekonomi ve işletme öğrencileri için olduğu kadar ekonomi konularını merak edenler için de vazgeçilmez bir başvuru kitabı olma özelliği taşıyor.",
 				"language": "tr",
 				"libraryCatalog": "KitapYurdu.com",
 				"numPages": "344",
 				"publisher": "Remzi Kitabevi",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.kitapyurdu.com/kitap/dinler-sosyolojisi/420519.html",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Dinler Sosyolojisi",
+				"creators": [
+					{
+						"firstName": "Jean Paul",
+						"lastName": "Willaime",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ramazan",
+						"lastName": "Adıbelli",
+						"creatorType": "translator"
+					}
+				],
+				"date": "2017-03-04",
+				"ISBN": "9786059460132",
+				"abstractNote": "Dinler sosyolojisi, dinin toplumsal tezahürlerini ve bunların tarihsel gelişimini ele alır. Modern toplumu araştıran ilk sosyologlar, dini fenomenleri de incelemek zorunda kalmıştı. Ancak dini evren üzerine yöneltilen sosyolojik bakış o dönemden beri birçok kez değişti ve zenginleşti. Weber ve Durkheim’dan itibaren süregelen yaklaşımlarla birlikte en güncel sorunları da işleyen bu eser, dinlerin toplumsal olgular olduğunu ve bu olguları analiz etmenin toplumu ve gelişimini anlamada temel önem taşıdığını gösterir.",
+				"language": "tr",
+				"libraryCatalog": "KitapYurdu.com",
+				"numPages": "136",
+				"publisher": "Pinhan Yayıncılık",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],

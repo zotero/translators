@@ -1,21 +1,21 @@
 {
 	"translatorID": "cd587058-6125-4b33-a876-8c6aae48b5e8",
 	"label": "WHO",
-	"creator": "Mario Trojan, Philipp Zumstein",
-	"target": "^http://apps\\.who\\.int/iris/",
+	"creator": "Mario Trojan, Philipp Zumstein, and Abe Jellinek",
+	"target": "^https?://apps\\.who\\.int/iris/",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 96,
 	"inRepository": true,
-	"translatorType": 4,
+	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-09-02 14:34:27"
+	"lastUpdated": "2021-08-10 16:40:28"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2018 Mario Trojan
+	Copyright © 2018-2021 Mario Trojan and Abe Jellinek
 
 	This file is part of Zotero.
 
@@ -36,15 +36,10 @@
 */
 
 
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}
-function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
-
 function detectWeb(doc, url) {
 	if (url.includes("/handle/") && text(doc, 'div.item-summary-view-metadata')) {
 		var type = attr(doc, 'meta[name="DC.type"]', 'content');
-		//Z.debug(type);
+		// Z.debug(type);
 		if (type && type.includes("articles")) {
 			return "journalArticle";
 		}
@@ -52,9 +47,11 @@ function detectWeb(doc, url) {
 			return "book";
 		}
 		return "report";
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
@@ -63,9 +60,9 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 
 	var rows = doc.querySelectorAll('h4.artifact-title>a');
-	for (let i=0; i<rows.length; i++) {
-		let href = rows[i].href;
-		var title = rows[i].textContent;
+	for (let row of rows) {
+		let href = row.href;
+		var title = row.textContent;
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -80,7 +77,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -88,7 +85,8 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -118,9 +116,9 @@ function scrape(doc, url) {
 		var firstAuthor = attr(doc, 'meta[name="DC.creator"]', 'content');
 		if (firstAuthor && !firstAuthor.includes(',')) {
 			item.creators[0] = {
-				"lastName": firstAuthor,
-				"creatorType": "author",
-				"fieldMode": true
+				lastName: firstAuthor,
+				creatorType: "author",
+				fieldMode: 1
 			};
 		}
 		
@@ -132,7 +130,6 @@ function scrape(doc, url) {
 			if (numPages) {
 				if (ZU.fieldIsValidForType("numPages", item.itemType)) {
 					item.numPages = numPages[1];
-
 				}
 				else if (!item.extra) {
 					item.extra = "number-of-pages: " + numPages[1];
@@ -148,12 +145,51 @@ function scrape(doc, url) {
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.itemType = type;
 		trans.doWeb(doc, url);
 	});
 }
 
+function detectSearch(item) {
+	return item.ISBN && (ZU.cleanISBN(item.ISBN) || '').startsWith('978924');
+}
+
+function doSearch(item) {
+	let ISBN = ZU.cleanISBN(item.ISBN);
+	let url = `https://apps.who.int/iris/discover/export?format=refman&list=discover&rpp=10&etal=0&query=${ISBN}&group_by=none&page=1`;
+	ZU.doGet(url, function (risText) {
+		if (!risText) return;
+
+		risText = risText.replace(/^SE(\s*-\s*[0-9]+).*$/m, 'SP$1');
+
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7"); // RIS
+		translator.setString(risText);
+		translator.setHandler("itemDone", function (obj, item) {
+			item.libraryCatalog = 'WHO IRIS';
+			item.archive = '';
+			
+			if (item.url) {
+				ZU.processDocuments(item.url, function (recordDoc) {
+					let pdfURL = attr(recordDoc, 'meta[name="citation_pdf_url"]', 'content');
+					if (pdfURL) {
+						item.attachments.push({
+							title: 'Full Text PDF',
+							mimeType: 'application/pdf',
+							url: pdfURL
+						});
+					}
+					item.complete();
+				});
+			}
+			else {
+				item.complete();
+			}
+		});
+		translator.translate();
+	});
+}
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -176,16 +212,16 @@ var testCases = [
 				"institution": "World Health Organization",
 				"language": "en",
 				"libraryCatalog": "apps.who.int",
-				"place": "Geneva",
 				"reportNumber": "WHO/CDS/CSR/GAR/2003.11",
-				"url": "http://apps.who.int/iris/handle/10665/70863",
+				"url": "https://apps.who.int/iris/handle/10665/70863",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -193,13 +229,10 @@ var testCases = [
 						"tag": "Communicable Diseases and their Control"
 					},
 					{
-						"tag": "Disease outbreaks"
+						"tag": "Disease Outbreaks"
 					},
 					{
-						"tag": "Epidemiologic surveillance"
-					},
-					{
-						"tag": "Severe acute respiratory syndrome"
+						"tag": "Severe Acute Respiratory Syndrome"
 					}
 				],
 				"notes": [],
@@ -268,7 +301,7 @@ var testCases = [
 				"publicationTitle": "Bulletin of the World Health Organization",
 				"rights": "http://creativecommons.org/licenses/by/3.0/igo/legalcode",
 				"shortTitle": "Providing oxygen to children in hospitals",
-				"url": "http://apps.who.int/iris/handle/10665/272081",
+				"url": "https://apps.who.int/iris/handle/10665/272081",
 				"volume": "95",
 				"attachments": [
 					{
@@ -276,7 +309,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					},
 					{
 						"title": "PubMed entry",
@@ -316,14 +350,15 @@ var testCases = [
 				"publisher": "Всемирная организация здравоохранения",
 				"rights": "CC BY-NC-SA 3.0 IGO",
 				"shortTitle": "Сборник руководящих принципов и стандартов ВОЗ",
-				"url": "http://apps.who.int/iris/handle/10665/273678",
+				"url": "https://apps.who.int/iris/handle/10665/273678",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -359,13 +394,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://apps.who.int/iris/handle/10665/165097",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "http://apps.who.int/iris/discover?query=acupuncture",
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/

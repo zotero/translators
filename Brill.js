@@ -2,14 +2,22 @@
 	"translatorID": "6d087de8-f858-4ac5-9fbd-2bf2b35ee41a",
 	"label": "Brill",
 	"creator": "Abe Jellinek",
+<<<<<<< HEAD
 	"target": "^https?://(www\\.|referenceworks\\.)?brill(online)?\\.com/",
+=======
+	"target": "^https?://(www\\.|referenceworks\\.|bibliographies\\.)?brill(online)?\\.com/",
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
+<<<<<<< HEAD
 	"lastUpdated": "2021-08-13 05:52:18"
+=======
+	"lastUpdated": "2021-10-21 04:55:10"
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 }
 
 /*
@@ -48,6 +56,13 @@ function detectWeb(doc, url) {
 			return 'book';
 		}
 	}
+<<<<<<< HEAD
+=======
+	else if (url.includes('bibliographies.brillonline.com/entries/')
+		&& doc.querySelector('#export-form')) {
+		return 'journalArticle';
+	}
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
@@ -81,6 +96,14 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
+<<<<<<< HEAD
+=======
+	if (url.includes('bibliographies.brillonline.com/entries/')) {
+		scrapeBibliography(doc, url);
+		return;
+	}
+	
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 	if (doc.querySelector('body > meta')) {
 		// Brill's HTML is structured incorrectly, and it causes some parsers
 		// to interpret the <meta> tags as being in the body, which breaks EM.
@@ -136,6 +159,34 @@ function scrape(doc, url) {
 	});
 }
 
+<<<<<<< HEAD
+=======
+function scrapeBibliography(doc, url) {
+	let params = new URLSearchParams({
+		entryId: attr(doc, 'input[name="entryId"]', 'value'),
+		dest: attr(doc, 'input[name="dest"]', 'value')
+	}).toString();
+	
+	ZU.doPost('/export/exportRis', params, function (ris) {
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7"); // RIS
+		translator.setString(ris);
+		translator.setHandler("itemDone", function (obj, item) {
+			if (item.journalAbbreviation == item.publicationTitle) {
+				delete item.journalAbbreviation;
+			}
+			
+			if (item.url) {
+				item.url = item.url.replace(':443', '');
+			}
+			
+			item.complete();
+		});
+		translator.translate();
+	});
+}
+
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -369,6 +420,60 @@ var testCases = [
 		"type": "web",
 		"url": "https://referenceworks.brillonline.com/browse/encyclopaedia-iranica-online/alpha/e",
 		"items": "multiple"
+<<<<<<< HEAD
+=======
+	},
+	{
+		"type": "web",
+		"url": "https://bibliographies.brillonline.com/entries/bibliography-of-slavic-linguistics/perspektive-proucavanja-alhamijado-pismenosti-projekt-transkripcije-i-transliteracije-alhamijado-tekstova-lb900000427509?s.num=0&s.f.s2_parent=s.f.book.bibliography-of-slavic-linguistics&s.keywords=%22Abjad%22",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Perspektive proučavanja alhamijado pismenosti : projekt transkripcije i transliteracije alhamijado tekstova",
+				"creators": [
+					{
+						"lastName": "Kalajdžija",
+						"firstName": "Alen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2014",
+				"language": "English",
+				"libraryCatalog": "Brill",
+				"pages": "421-430",
+				"publicationTitle": "Prilozi za orijentalnu filologiju = Contributions to Oriental Philology = Revue de Philologie Orientale",
+				"shortTitle": "Perspektive proučavanja alhamijado pismenosti",
+				"url": "https://bibliographies.brillonline.com/entries/bibliography-of-slavic-linguistics/perspektive-proucavanja-alhamijado-pismenosti-projekt-transkripcije-i-transliteracije-alhamijado-tekstova-lb900000427509",
+				"volume": "64",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Abjad"
+					},
+					{
+						"tag": "Script, orthography"
+					},
+					{
+						"tag": "Serbo-Croatian (Serbian, Croatian, Bosnian)"
+					},
+					{
+						"tag": "Transliteration"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>E. ab.</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://bibliographies.brillonline.com/search?s.num=0&s.f.s2_parent=s.f.book.bibliography-of-slavic-linguistics&s.keywords=%22Abjad%22",
+		"items": "multiple"
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 	}
 ]
 /** END TEST CASES **/

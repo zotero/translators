@@ -9,12 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-06-10 23:10:24"
+	"lastUpdated": "2021-07-12 18:01:40"
 }
 
 /*
-	Ubiquiy Press Translator
-	Copyright (C) 2015 Sebastian Karcher
+	Copyright (C) 2015-2021 Sebastian Karcher and Abe Jellinek
 
 	This file is part of Zotero.
 
@@ -32,11 +31,8 @@
 	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
 */
 function detectWeb(doc, _url) {
-	var ubiquitytest = doc.getElementsByClassName("press-logo");
-	// this doesn't work always, so we're only using it on single items.
-	// if the translator doesn't detect there, we still get good EM import
-	// For multiples we check getSearchResults
-	if (ubiquitytest[0] && ubiquitytest[0].href.includes("http://www.ubiquitypress.com")) {
+	var ubiquityTest = doc.querySelector('link[href*="/static/css/journal.css"]');
+	if (ubiquityTest) {
 		if (ZU.xpathText(doc, '//meta[@name="citation_journal_title"]/@content')) {
 			return "journalArticle";
 		}
@@ -124,6 +120,7 @@ var testCases = [
 				"issue": "1",
 				"language": "en",
 				"libraryCatalog": "journal.eahn.org",
+				"pages": "Art. 2",
 				"publicationTitle": "Architectural Histories",
 				"rights": "Authors who publish with this journal agree to the following terms:    Authors retain copyright and grant the journal right of first publication with the work simultaneously licensed under a  Creative Commons Attribution License  that allows others to share the work with an acknowledgement of the work's authorship and initial publication in this journal.  Authors are able to enter into separate, additional contractual arrangements for the non-exclusive distribution of the journal's published version of the work (e.g., post it to an institutional repository or publish it in a book), with an acknowledgement of its initial publication in this journal.  Authors are permitted and encouraged to post their work online (e.g., in institutional repositories or on their website) prior to and during the submission process, as it can lead to productive exchanges, as well as earlier and greater citation of published work (See  The Effect of Open Access ).  All third-party images reproduced on this journal are shared under Educational Fair Use. For more information on  Educational Fair Use , please see  this useful checklist prepared by Columbia University Libraries .   All copyright  of third-party content posted here for research purposes belongs to its original owners.  Unless otherwise stated all references to characters and comic art presented on this journal are ©, ® or ™ of their respective owners. No challenge to any owner’s rights is intended or should be inferred.",
 				"shortTitle": "Handymen, Hippies and Healing",
@@ -135,14 +132,23 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"Ant Farm",
-					"DIY",
-					"DIY architecture",
-					"Paolo Soleri"
+					{
+						"tag": "Ant Farm"
+					},
+					{
+						"tag": "DIY"
+					},
+					{
+						"tag": "DIY architecture"
+					},
+					{
+						"tag": "Paolo Soleri"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -153,6 +159,70 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.pediatricneurologybriefs.com/51/volume/29/issue/7/",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://journal.digitalmedievalist.org/articles/10.16995/dm.81/",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Querying Variants: Boccaccio’s ‘Commedia’ and Data-Models",
+				"creators": [
+					{
+						"firstName": "Sonia",
+						"lastName": "Tempestini",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Elena",
+						"lastName": "Spadini",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019-09-20",
+				"DOI": "10.16995/dm.81",
+				"ISSN": "1715-0736",
+				"abstractNote": "This paper presents the methodology and the results of an analytical study of the three witnesses of Dante’s Commedia copied by Giovanni Boccaccio, focusing on the importance of their digital accessibility. These extraordinary materials allow us to further our knowledge of Boccaccio’s cultural trajectory as a scribe and as an author, and could be useful for the study of the textual tradition of Dante’s Commedia. In the first section of the paper, the manuscripts and their role in previous scholarship are introduced. A thorough analysis of a choice of variants is then offered, applying specific categories for organizing the varia lectio. This taxonomy shows how fundamental it is to combine the methodological tools for studying copies (as usual in medieval philology) and those for studying author’s manuscripts (as usual in modern philology) in dealing with the three manuscripts of Boccaccio’s Commedia: in fact, the comparative analysis of the three manuscripts has much to reveal not only of their genetic relationship but also of Boccaccio’s editorial practices. Furthermore, the analytic categories inform the computational model behind the web application ‘La Commedia di Boccaccio’, &lt;http://boccacciocommedia.unil.ch/&gt; created for accessing and querying the variants. The model, implemented in a relational database, allows for the systematic management of different features of textual variations, distinguishing readings and their relationships, without setting a base text. The paper closes on a view to repurposing the model for handling other textual transmissions, working at the intersection between textual criticism and information technology.",
+				"issue": "1",
+				"language": "en",
+				"libraryCatalog": "journal.digitalmedievalist.org",
+				"pages": "1",
+				"publicationTitle": "Digital Medievalist",
+				"rights": "Authors who publish with this journal agree to the following terms:    Authors retain copyright and grant the journal right of first publication with the work simultaneously licensed under a  Creative Commons Attribution License  that allows others to share the work with an acknowledgement of the work's authorship and initial publication in this journal.  Authors are able to enter into separate, additional contractual arrangements for the non-exclusive distribution of the journal's published version of the work (e.g., post it to an institutional repository or publish it in a book), with an acknowledgement of its initial publication in this journal.  Authors are permitted and encouraged to post their work online (e.g., in institutional repositories or on their website) prior to and during the submission process, as it can lead to productive exchanges, as well as earlier and greater citation of published work (See  The Effect of Open Access ).  All third-party images reproduced on this journal are shared under Educational Fair Use. For more information on  Educational Fair Use , please see  this useful checklist prepared by Columbia University Libraries .   All copyright  of third-party content posted here for research purposes belongs to its original owners.  Unless otherwise stated all references to characters and comic art presented on this journal are ©, ® or ™ of their respective owners. No challenge to any owner’s rights is intended or should be inferred.",
+				"shortTitle": "Querying Variants",
+				"url": "http://journal.digitalmedievalist.org//articles/10.16995/dm.81/",
+				"volume": "12",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Italian literature"
+					},
+					{
+						"tag": "data model"
+					},
+					{
+						"tag": "database"
+					},
+					{
+						"tag": "digital philology"
+					},
+					{
+						"tag": "textual variation"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

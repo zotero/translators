@@ -2,14 +2,22 @@
 	"translatorID": "19cef926-c5b6-42e2-a91c-6f2722f8b36d",
 	"label": "Central and Eastern European Online Library Journals",
 	"creator": "Timotheus Kim",
+<<<<<<< HEAD
 	"target": "^https://www\\.ceeol\\.com/search",
+=======
+	"target": "^https?://www\\.ceeol\\.com/search",
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
+<<<<<<< HEAD
 	"lastUpdated": "2021-09-07 08:34:00"
+=======
+	"lastUpdated": "2021-09-22 20:12:37"
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 }
 
 /*
@@ -44,7 +52,11 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
+<<<<<<< HEAD
 	var rows = doc.querySelectorAll('a[href*="/search/article-detail?"]');
+=======
+	var rows = doc.querySelectorAll('.description a, .article-details > h3 > a');
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -302,6 +314,15 @@ var testCases = [
 		"url": "https://www.ceeol.com/search/journal-detail?id=1266",
 		"defer": true,
 		"items": "multiple"
+<<<<<<< HEAD
+=======
+	},
+	{
+		"type": "web",
+		"url": "https://www.ceeol.com/search/journal-detail?id=761",
+		"defer": true,
+		"items": "multiple"
+>>>>>>> f5e2d3d022c2c9586c651208e299837eda137467
 	}
 ]
 /** END TEST CASES **/

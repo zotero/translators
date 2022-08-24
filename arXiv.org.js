@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 12,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2019-10-22 05:31:06"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2022-05-12 01:25:32"
 }
 
 /*
@@ -47,18 +47,25 @@ function doSearch(item) {
 
 
 var version;
-// this variable will be set in doWeb and
+var arxivDOI;
+// these variables will be set in doWeb and
 // can be used then afterwards in the parseXML
 
 
 function detectWeb(doc, url) {
 	var searchRe = /^https?:\/\/(?:([^.]+\.))?(?:arxiv\.org|xxx\.lanl\.gov)\/(?:find|list|catchup)/;
-	
+	var relatedDOI = text(doc, '.doi>a');
 	if (searchRe.test(url)) {
 		return "multiple";
 	}
-	else {
+	else if (relatedDOI) {
 		return "journalArticle";
+	}
+	else if (ZU.fieldIsValidForType('title', 'preprint')) {
+		return "preprint";
+	}
+	else {
+		return "report";
 	}
 }
 
@@ -119,6 +126,7 @@ function doWeb(doc, url) {
 		if (versionMatch) {
 			version = versionMatch[1];
 		}
+		arxivDOI = text(doc, '.arxivdoi>a');
 		var p = url.indexOf("/pdf/");
 		if (p > -1) {
 			id = url.substring(p + 5, url.length - 4);
@@ -145,8 +153,17 @@ function parseXML(text) {
 		xsi: 'http://www.w3.org/2001/XMLSchema-instance',
 		n: 'http://www.openarchives.org/OAI/2.0/' // Default
 	};
-	var newItem = new Zotero.Item("journalArticle");
-	
+	var hasPreprint;
+	if (ZU.fieldIsValidForType('title', 'preprint')) {
+		hasPreprint = true;
+	}
+	var newItem;
+	if (hasPreprint) {
+		newItem = new Zotero.Item("preprint");
+	}
+	else {
+		newItem = new Zotero.Item("report");
+	}
 	var xml = (new DOMParser()).parseFromString(text, "text/xml");
 	var dcMeta = ZU.xpath(xml, '//n:GetRecord/n:record/n:metadata/oai_dc:dc', ns)[0];
 
@@ -200,17 +217,13 @@ function parseXML(text) {
 	if (articleField) articleField = "[" + articleField.replace(/^.+?:/, "") + "]";
 	
 	if (articleID && articleID.includes("/")) {
-		newItem.publicationTitle = "arXiv:" + articleID;
+		newItem.extra = "arXiv:" + articleID;
 	}
 	else {
-		newItem.publicationTitle = "arXiv:" + articleID + " " + articleField;
+		newItem.extra = "arXiv:" + articleID + " " + articleField;
 	}
 	
-	newItem.extra = 'arXiv: ' + articleID;
-	if (version) {
-		newItem.extra += '\nversion: ' + version;
-	}
-	
+
 	var pdfUrl = "https://arxiv.org/pdf/" + articleID + (version ? "v" + version : "") + ".pdf";
 	newItem.attachments.push({
 		title: "arXiv Fulltext PDF",
@@ -233,6 +246,7 @@ function parseXML(text) {
 		translate.setSearch(item);
 		translate.setHandler("itemDone", function (obj, item) {
 			// Z.debug(item)
+			newItem.itemType = item.itemType;
 			newItem.volume = item.volume;
 			newItem.issue = item.issue;
 			newItem.pages = item.pages;
@@ -251,6 +265,17 @@ function parseXML(text) {
 		translate.translate();
 	}
 	else {
+		newItem.publisher = "arXiv";
+		newItem.number = "arXiv:" + articleID;
+		if (version) {
+			newItem.extra += '\nversion: ' + version;
+		}
+		if (arxivDOI) newItem.DOI = ZU.cleanDOI(arxivDOI);
+		// only for Zotero versions without preprint
+		if (!hasPreprint) {
+			newItem.extra += '\ntype: article';
+		}
+		else newItem.archiveID = "arXiv:" + articleID;
 		newItem.complete();
 	}
 }
@@ -311,7 +336,7 @@ var testCases = [
 				"DOI": "10.1111/j.1365-2966.2011.19851.x",
 				"ISSN": "00358711",
 				"abstractNote": "The upcoming generation of cosmic microwave background (CMB) experiments face a major challenge in detecting the weak cosmic B-mode signature predicted as a product of primordial gravitational waves. To achieve the required sensitivity these experiments must have impressive control of systematic effects and detailed understanding of the foreground emission that will influence the signal. In this paper, we present templates of the intensity and polarisation of emission from one of the main Galactic foregrounds, interstellar dust. These are produced using a model which includes a 3D description of the Galactic magnetic field, examining both large and small scales. We also include in the model the details of the dust density, grain alignment and the intrinsic polarisation of the emission from an individual grain. We present here Stokes parameter template maps at 150GHz and provide an on-line repository (http://www.imperial.ac.uk/people/c.contaldi/fgpol) for these and additional maps at frequencies that will be targeted by upcoming experiments such as EBEX, Spider and SPTpol.",
-				"extra": "arXiv: 1107.4612",
+				"extra": "arXiv:1107.4612 [astro-ph]",
 				"issue": "2",
 				"libraryCatalog": "arXiv.org",
 				"pages": "1795-1803",
@@ -413,7 +438,7 @@ var testCases = [
 				"DOI": "10.1086/507935",
 				"ISSN": "0004-637X, 1538-4357",
 				"abstractNote": "We present optical $WBVR$ and infrared $JHKL$ photometric observations of the Be binary system $\\delta$ Sco, obtained in 2000--2005, mid-infrared (10 and $18 \\mu$m) photometry and optical ($\\lambda\\lambda$ 3200--10500 \\AA) spectropolarimetry obtained in 2001. Our optical photometry confirms the results of much more frequent visual monitoring of $\\delta$ Sco. In 2005, we detected a significant decrease in the object's brightness, both in optical and near-infrared brightness, which is associated with a continuous rise in the hydrogen line strenghts. We discuss possible causes for this phenomenon, which is difficult to explain in view of current models of Be star disks. The 2001 spectral energy distribution and polarization are succesfully modeled with a three-dimensional non-LTE Monte Carlo code which produces a self-consistent determination of the hydrogen level populations, electron temperature, and gas density for hot star disks. Our disk model is hydrostatically supported in the vertical direction and radially controlled by viscosity. Such a disk model has, essentially, only two free parameters, viz., the equatorial mass loss rate and the disk outer radius. We find that the primary companion is surrounded by a small (7 $R_\\star$), geometrically-thin disk, which is highly non-isothermal and fully ionized. Our model requires an average equatorial mass loss rate of $1.5\\times 10^{-9} M_{\\sun}$ yr$^{-1}$.",
-				"extra": "arXiv: astro-ph/0603274",
+				"extra": "arXiv:astro-ph/0603274",
 				"issue": "2",
 				"journalAbbreviation": "ApJ",
 				"libraryCatalog": "arXiv.org",
@@ -473,7 +498,7 @@ var testCases = [
 				"DOI": "10.1086/672573",
 				"ISSN": "00046280, 15383873",
 				"abstractNote": "We have designed, constructed, and tested an InGaAs near-infrared camera to explore whether low-cost detectors can make small (<1 m) telescopes capable of precise (<1 mmag) infrared photometry of relatively bright targets. The camera is constructed around the 640x512 pixel APS640C sensor built by FLIR Electro-Optical Components. We designed custom analog-to-digital electronics for maximum stability and minimum noise. The InGaAs dark current halves with every 7 deg C of cooling, and we reduce it to 840 e-/s/pixel (with a pixel-to-pixel variation of +/-200 e-/s/pixel) by cooling the array to -20 deg C. Beyond this point, glow from the readout dominates. The single-sample read noise of 149 e- is reduced to 54 e- through up-the-ramp sampling. Laboratory testing with a star field generated by a lenslet array shows that 2-star differential photometry is possible to a precision of 631 +/-205 ppm (0.68 mmag) hr^-0.5 at a flux of 2.4E4 e-/s. Employing three comparison stars and de-correlating reference signals further improves the precision to 483 +/-161 ppm (0.52 mmag) hr^-0.5. Photometric observations of HD80606 and HD80607 (J=7.7 and 7.8) in the Y band shows that differential photometry to a precision of 415 ppm (0.45 mmag) hr^-0.5 is achieved with an effective telescope aperture of 0.25 m. Next-generation InGaAs detectors should indeed enable Poisson-limited photometry of brighter dwarfs with particular advantage for late-M and L types. In addition, one might acquire near-infrared photometry simultaneously with optical photometry or radial velocity measurements to maximize the return of exoplanet searches with small telescopes.",
-				"extra": "arXiv: 1307.1469",
+				"extra": "arXiv:1307.1469 [astro-ph]",
 				"issue": "931",
 				"journalAbbreviation": "Publications of the Astronomical Society of the Pacific",
 				"libraryCatalog": "arXiv.org",
@@ -498,64 +523,6 @@ var testCases = [
 					{
 						"tag": "Astrophysics - Instrumentation and Methods for Astrophysics"
 					}
-				],
-				"notes": [
-					{
-						"note": "Comment: Accepted to PASP"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://xxx.lanl.gov/abs/1307.1469",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Precision of a Low-Cost InGaAs Detector for Near Infrared Photometry",
-				"creators": [
-					{
-						"firstName": "Peter W.",
-						"lastName": "Sullivan",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Bryce",
-						"lastName": "Croll",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Robert A.",
-						"lastName": "Simcoe",
-						"creatorType": "author"
-					}
-				],
-				"date": "09/2013",
-				"DOI": "10.1086/672573",
-				"ISSN": "00046280, 15383873",
-				"abstractNote": "We have designed, constructed, and tested an InGaAs near-infrared camera to explore whether low-cost detectors can make small (<1 m) telescopes capable of precise (<1 mmag) infrared photometry of relatively bright targets. The camera is constructed around the 640x512 pixel APS640C sensor built by FLIR Electro-Optical Components. We designed custom analog-to-digital electronics for maximum stability and minimum noise. The InGaAs dark current halves with every 7 deg C of cooling, and we reduce it to 840 e-/s/pixel (with a pixel-to-pixel variation of +/-200 e-/s/pixel) by cooling the array to -20 deg C. Beyond this point, glow from the readout dominates. The single-sample read noise of 149 e- is reduced to 54 e- through up-the-ramp sampling. Laboratory testing with a star field generated by a lenslet array shows that 2-star differential photometry is possible to a precision of 631 +/-205 ppm (0.68 mmag) hr^-0.5 at a flux of 2.4E4 e-/s. Employing three comparison stars and de-correlating reference signals further improves the precision to 483 +/-161 ppm (0.52 mmag) hr^-0.5. Photometric observations of HD80606 and HD80607 (J=7.7 and 7.8) in the Y band shows that differential photometry to a precision of 415 ppm (0.45 mmag) hr^-0.5 is achieved with an effective telescope aperture of 0.25 m. Next-generation InGaAs detectors should indeed enable Poisson-limited photometry of brighter dwarfs with particular advantage for late-M and L types. In addition, one might acquire near-infrared photometry simultaneously with optical photometry or radial velocity measurements to maximize the return of exoplanet searches with small telescopes.",
-				"extra": "arXiv: 1307.1469",
-				"issue": "931",
-				"libraryCatalog": "arXiv.org",
-				"pages": "1021-1030",
-				"publicationTitle": "Publications of the Astronomical Society of the Pacific",
-				"url": "http://arxiv.org/abs/1307.1469",
-				"volume": "125",
-				"attachments": [
-					{
-						"title": "arXiv:1307.1469 PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "arXiv.org Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [
-					"Astrophysics - Earth and Planetary Astrophysics",
-					"Astrophysics - Instrumentation and Methods for Astrophysics"
 				],
 				"notes": [
 					{
@@ -624,7 +591,7 @@ var testCases = [
 		"url": "https://arxiv.org/abs/1810.04805v1",
 		"items": [
 			{
-				"itemType": "journalArticle",
+				"itemType": "preprint",
 				"title": "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
 				"creators": [
 					{
@@ -650,9 +617,10 @@ var testCases = [
 				],
 				"date": "2018-10-10",
 				"abstractNote": "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful. It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE score to 80.5% (7.7% point absolute improvement), MultiNLI accuracy to 86.7% (4.6% absolute improvement), SQuAD v1.1 question answering Test F1 to 93.2 (1.5 point absolute improvement) and SQuAD v2.0 Test F1 to 83.1 (5.1 point absolute improvement).",
-				"extra": "arXiv: 1810.04805\nversion: 1",
+				"archiveID": "arXiv:1810.04805",
+				"extra": "arXiv:1810.04805 [cs]\nversion: 1",
 				"libraryCatalog": "arXiv.org",
-				"publicationTitle": "arXiv:1810.04805 [cs]",
+				"repository": "arXiv",
 				"shortTitle": "BERT",
 				"url": "http://arxiv.org/abs/1810.04805",
 				"attachments": [
@@ -680,7 +648,7 @@ var testCases = [
 		"url": "https://arxiv.org/abs/1810.04805v2",
 		"items": [
 			{
-				"itemType": "journalArticle",
+				"itemType": "preprint",
 				"title": "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
 				"creators": [
 					{
@@ -706,9 +674,10 @@ var testCases = [
 				],
 				"date": "2019-05-24",
 				"abstractNote": "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful. It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE score to 80.5% (7.7% point absolute improvement), MultiNLI accuracy to 86.7% (4.6% absolute improvement), SQuAD v1.1 question answering Test F1 to 93.2 (1.5 point absolute improvement) and SQuAD v2.0 Test F1 to 83.1 (5.1 point absolute improvement).",
-				"extra": "arXiv: 1810.04805\nversion: 2",
+				"archiveID": "arXiv:1810.04805",
+				"extra": "arXiv:1810.04805 [cs]\nversion: 2",
 				"libraryCatalog": "arXiv.org",
-				"publicationTitle": "arXiv:1810.04805 [cs]",
+				"repository": "arXiv",
 				"shortTitle": "BERT",
 				"url": "http://arxiv.org/abs/1810.04805",
 				"attachments": [
@@ -727,6 +696,88 @@ var testCases = [
 					}
 				],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://arxiv.org/abs/2201.00738",
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "Single Phonon Detection for Dark Matter via Quantum Evaporation and Sensing of $^3$Helium",
+				"creators": [
+					{
+						"firstName": "S. A.",
+						"lastName": "Lyon",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kyle",
+						"lastName": "Castoria",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ethan",
+						"lastName": "Kleinbaum",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Zhihao",
+						"lastName": "Qin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Arun",
+						"lastName": "Persaud",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Thomas",
+						"lastName": "Schenkel",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kathryn",
+						"lastName": "Zurek",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022-01-07",
+				"DOI": "10.48550/arXiv.2201.00738",
+				"abstractNote": "Dark matter is five times more abundant than ordinary visible matter in our Universe. While laboratory searches hunting for dark matter have traditionally focused on the electroweak scale, theories of low mass hidden sectors motivate new detection techniques. Extending these searches to lower mass ranges, well below 1 GeV/c$^2$, poses new challenges as rare interactions with standard model matter transfer progressively less energy to electrons and nuclei in detectors. Here, we propose an approach based on phonon-assisted quantum evaporation combined with quantum sensors for detection of desorption events via tracking of spin coherence. The intent of our proposed dark matter sensors is to extend the parameter space to energy transfers in rare interactions to as low as a few meV for detection of dark matter particles in the keV/c$^2$ mass range.",
+				"archiveID": "arXiv:2201.00738",
+				"extra": "arXiv:2201.00738 [cond-mat, physics:hep-ex, physics:quant-ph]",
+				"libraryCatalog": "arXiv.org",
+				"repository": "arXiv",
+				"url": "http://arxiv.org/abs/2201.00738",
+				"attachments": [
+					{
+						"title": "arXiv Fulltext PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "arXiv.org Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Condensed Matter - Mesoscale and Nanoscale Physics"
+					},
+					{
+						"tag": "High Energy Physics - Experiment"
+					},
+					{
+						"tag": "Quantum Physics"
+					}
+				],
+				"notes": [
+					{
+						"note": "Comment: 7 pages, 4 figures. Fixed typos in address"
+					}
+				],
 				"seeAlso": []
 			}
 		]
