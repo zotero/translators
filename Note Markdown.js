@@ -14,7 +14,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2022-04-29 11:00:00"
+	"lastUpdated": "2022-08-25 10:00:00"
 }
 
 /*
@@ -1412,7 +1412,7 @@ turndownService.use(turndownPluginGfm.gfm);
 
 // https://github.com/mixmark-io/turndown#overriding-turndownserviceprototypeescape
 let escapes = [
-	[/\\/g, '\\\\'],
+	// [/\\/g, '\\\\'],
 	[/\*/g, '\\*'],
 	[/^-/g, '\\-'],
 	[/^\+ /g, '\\+ '],
@@ -1469,10 +1469,31 @@ function convert(doc) {
 	});
 
 	// Turndown wants pre content inside additional code block
-	doc.querySelectorAll('pre').forEach(function (pre) {
+	doc.querySelectorAll('pre:not(.math)').forEach(function (pre) {
 		let code = doc.createElement('code');
 		code.append(...pre.childNodes);
 		pre.append(code);
+	});
+
+	doc.querySelectorAll('p').forEach((p) => {
+		let style = p.getAttribute('style');
+		if (style) {
+			let match = style.match(/padding-(left|right): ([0-9]+)px/);
+			if (match) {
+				let px = parseInt(match[2]);
+				if (px > 0 && px % 40 === 0) {
+					let level = px / 40;
+					let spaces = '';
+					for (let i = 0; i < level; i++) {
+						spaces += '\u00A0\u00A0\u00A0\u00A0';
+					}
+					p.insertBefore(doc.createTextNode(spaces), p.firstChild);
+					p.querySelectorAll('br').forEach((br) => {
+						br.parentNode.insertBefore(doc.createTextNode(spaces), br.nextSibling);
+					});
+				}
+			}
+		}
 	});
 	
 	// Insert a PDF link for highlight and image annotation nodes
