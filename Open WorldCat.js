@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-08-23 18:22:07"
+	"lastUpdated": "2022-08-28 21:54:51"
 }
 
 /*
@@ -101,11 +101,18 @@ const RECORD_MAPPING = {
 			else {
 				creatorType = ZU.getCreatorsForType(item.itemType)[0];
 			}
-			item.creators.push({
+			let creator = {
 				firstName: contrib.firstName && contrib.firstName.text,
 				lastName: contrib.secondName && contrib.secondName.text,
 				creatorType
-			});
+			};
+			// If only firstName field, set as single-field name
+			if (creator.firstName && !creator.lastName) {
+				creator.lastName = creator.firstName;
+				delete creator.firstName;
+				creator.fieldMode = 1;
+			}
+			item.creators.push(creator);
 		}
 	}
 };
@@ -994,6 +1001,67 @@ var testCases = [
 				"publisher": "Palazzo Editions Ltd",
 				"attachments": [],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.worldcat.org/fr/title/960449363",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "غرفة واحدة لا تكفي: رواية",
+				"creators": [
+					{
+						"lastName": "سلطان العميمي.",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "عميمي، سلطان علي بن بخيت، 1974-",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2016",
+				"ISBN": "9786140214255",
+				"edition": "al-Ṭabʻah al-thāniyah",
+				"extra": "OCLC: 960449363",
+				"language": "ara",
+				"libraryCatalog": "Open WorldCat",
+				"numPages": "212",
+				"place": "Bayrūt, al-Jazāʼir al-ʻĀṣimah",
+				"publisher": "منشورات ضفاف ؛ منشورات الاختلاف،",
+				"shortTitle": "غرفة واحدة لا تكفي",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "2000-2099"
+					},
+					{
+						"tag": "Arabic fiction"
+					},
+					{
+						"tag": "Arabic fiction 21st century"
+					},
+					{
+						"tag": "Fiction"
+					},
+					{
+						"tag": "Novels"
+					},
+					{
+						"tag": "Roman arabe 21e siècle"
+					},
+					{
+						"tag": "Romans"
+					},
+					{
+						"tag": "novels"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
