@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-08-28 21:54:51"
+	"lastUpdated": "2022-08-29 21:17:34"
 }
 
 /*
@@ -167,12 +167,17 @@ async function doWeb(doc, url) {
 		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
-function scrape(doc, url = doc.location.href) {
+async function scrape(doc, url = doc.location.href) {
 	let record = JSON.parse(text(doc, '#__NEXT_DATA__')).props.pageProps.record;
+	if (!url.includes('/' + record.oclcNumber)) {
+		Zotero.debug('__NEXT_DATA__ is stale; requesting page again');
+		doc = await requestDocument(url + '#dont-reuse-the-same-document');
+		record = JSON.parse(text(doc, '#__NEXT_DATA__')).props.pageProps.record;
+	}
 	scrapeRecord([record]);
 }
 
