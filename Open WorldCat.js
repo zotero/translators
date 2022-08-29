@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-08-29 21:17:34"
+	"lastUpdated": "2022-08-29 22:09:00"
 }
 
 /*
@@ -175,7 +175,7 @@ async function scrape(doc, url = doc.location.href) {
 	let record = JSON.parse(text(doc, '#__NEXT_DATA__')).props.pageProps.record;
 	if (!url.includes('/' + record.oclcNumber)) {
 		Zotero.debug('__NEXT_DATA__ is stale; requesting page again');
-		doc = await requestDocument(url + '#dont-reuse-the-same-document');
+		doc = await requestDocument(url);
 		record = JSON.parse(text(doc, '#__NEXT_DATA__')).props.pageProps.record;
 	}
 	scrapeRecord([record]);
