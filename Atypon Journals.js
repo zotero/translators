@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-05-10 18:26:02"
+	"lastUpdated": "2022-09-07 15:44:55"
 }
 
 /*
@@ -188,13 +188,24 @@ function getSearchResults(doc, checkOnly, extras) {
 // Keep this in line with target regexp
 var replURLRegExp = /\/doi\/((?:abs|abstract|full|figure|ref|citedby|book)\/)?/;
 
+// Regex matching sites that load PDFs in an embedded reader
+const NEED_BYPASS_EMBEDDED_READER = /^https?:\/\/www\.embopress\.org\//;
+
 function buildPdfUrl(url, root) {
 	if (!replURLRegExp.test(url)) return false; // The whole thing is probably going to fail anyway
 	
 	var pdfPaths = ['/doi/pdf/', '/doi/epdf', '/doi/pdfplus/'];
 	for (let i = 0; i < pdfPaths.length; i++) {
 		if (ZU.xpath(root, './/a[contains(@href, "' + pdfPaths[i] + '")]').length) {
-			return url.replace(replURLRegExp, pdfPaths[i]);
+			let pdfURL = url.replace(replURLRegExp, pdfPaths[i]);
+			if (NEED_BYPASS_EMBEDDED_READER.test(url)) {
+				Zotero.debug('Modifying PDF URL to avoid embedded reader page');
+				pdfURL = pdfURL.replace(/\/e?pdf\//, '/pdfdirect/')
+					+ (pdfURL.includes('?') ? '&' : '?')
+					+ 'download=true';
+				Zotero.debug(pdfURL);
+			}
+			return pdfURL;
 		}
 	}
 	
@@ -312,7 +323,7 @@ function scrape(doc, url, extras) {
 					item.itemType = 'conferencePaper';
 				}
 				
-				if (doc.querySelector('div.contributors')) {
+				if (doc.querySelector('div.contributors [property="author"] a:first-child')) {
 					// the HTML is better, so we'll use that.
 					item.creators = [];
 					let contributors = doc.querySelector('div.contributors');
