@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-09-07 15:44:55"
+	"lastUpdated": "2022-09-08 21:30:29"
 }
 
 /*
@@ -194,7 +194,7 @@ const NEED_BYPASS_EMBEDDED_READER = /^https?:\/\/www\.embopress\.org\//;
 function buildPdfUrl(url, root) {
 	if (!replURLRegExp.test(url)) return false; // The whole thing is probably going to fail anyway
 	
-	var pdfPaths = ['/doi/pdf/', '/doi/epdf', '/doi/pdfplus/'];
+	var pdfPaths = ['/doi/pdf/', '/doi/epdf/', '/doi/pdfplus/'];
 	for (let i = 0; i < pdfPaths.length; i++) {
 		if (ZU.xpath(root, './/a[contains(@href, "' + pdfPaths[i] + '")]').length) {
 			let pdfURL = url.replace(replURLRegExp, pdfPaths[i]);
@@ -1123,6 +1123,67 @@ var testCases = [
 				"publicationTitle": "Science Advances",
 				"url": "https://www.science.org/doi/10.1126/sciadv.abj8030",
 				"volume": "8",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.embopress.org/doi/abs/10.1002/j.1460-2075.1996.tb00576.x",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The Saccharomyces cerevisiae zinc finger proteins Msn2p and Msn4p are required for transcriptional induction through the stress response element (STRE).",
+				"creators": [
+					{
+						"lastName": "Martínez-Pastor",
+						"firstName": "M. T.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Marchler",
+						"firstName": "G.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Schüller",
+						"firstName": "C.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Marchler-Bauer",
+						"firstName": "A.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Ruis",
+						"firstName": "H.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Estruch",
+						"firstName": "F.",
+						"creatorType": "author"
+					}
+				],
+				"date": "1996-05",
+				"DOI": "10.1002/j.1460-2075.1996.tb00576.x",
+				"ISSN": "0261-4189",
+				"abstractNote": "The MSN2 and MSN4 genes encode homologous and functionally redundant Cys2His2 zinc finger proteins. A disruption of both MSN2 and MSN4 genes results in a higher sensitivity to different stresses, including carbon source starvation, heat shock and severe osmotic and oxidative stresses. We show that MSN2 and MSN4 are required for activation of several yeast genes such as CTT1, DDR2 and HSP12, whose induction is mediated through stress-response elements (STREs). Msn2p and Msn4p are important factors for the stress-induced activation of STRE dependent promoters and bind specifically to STRE-containing oligonucleotides. Our results suggest that MSN2 and MSN4 encode a DNA-binding component of the stress responsive system and it is likely that they act as positive transcription factors.",
+				"issue": "9",
+				"libraryCatalog": "embopress.org (Atypon)",
+				"pages": "2227-2235",
+				"publicationTitle": "The EMBO Journal",
+				"url": "https://www.embopress.org/doi/abs/10.1002/j.1460-2075.1996.tb00576.x",
+				"volume": "15",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
