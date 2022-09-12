@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-02 09:46:09"
+	"lastUpdated": "2022-09-12 06:20:42"
 }
 
 /*
@@ -100,16 +100,50 @@ function doWeb(doc, url) {
 	}
 }
 
+/* 
+ * Convert full court names to standard abbreviations.
+ * If the name of the court is in the map, return the abbreviation
+ * else return the original full name (i.e. leave it unchanged)
+ * FIXME: Find a full set of these.
+*/
+function abbrevCourt(fullname) {
+	var courtMap = new Map();
+	courtMap.set('Federal Court of Australia', 'FCA');
+	courtMap.set('High Court of Australia', 'HCA');
+	courtMap.set('Family Court of Australia', 'FamCA');
+	courtMap.set('Australian Information Commissioner', 'AICmr');
+
+	var abbrev = courtMap.get(fullname);
+	if (abbrev === undefined) {
+		abbrev = fullname;
+	}
+	return abbrev;
+}
+
+/*
+ * Adjust some jurisdiction abbreviations
+ */
+function abbrevJurisdiction(fullname) {
+	var jMap = new Map();
+	jMap.set('Commonwealth', 'Cth');
+	jMap.set('CTH', 'Cth');
+
+	var abbrev = jMap.get(fullname);
+	if (abbrev === undefined) {
+		abbrev = fullname;
+	}
+	return abbrev;
+}
 
 function scrape(doc, url) {
 	var type = detectWeb(doc, url);
 	var newItem = new Zotero.Item(type);
-	var jurisdiction = text(doc, 'li.ribbon-jurisdiction>a>span');
+	var jurisdiction = abbrevJurisdiction(text(doc, 'li.ribbon-jurisdiction>a>span'));
 	if (jurisdiction) {
-		newItem.extra = "jurisdiction: " + jurisdiction;
+		// newItem.extra = "jurisdiction: " + jurisdiction;
+		newItem.Code = jurisdiction;
 	}
 	var citation = text(doc, 'li.ribbon-citation>a>span');
-	
 	
 	if (text(doc, '#ribbon')) {
 		if (type == "case") {
@@ -124,7 +158,7 @@ function scrape(doc, url) {
 			} else {
 				newItem.dateDecided = text(doc, 'li.ribbon-year>a>span');
 			}
-			newItem.court = text(doc, 'li.ribbon-database>a>span');
+			newItem.court = abbrevCourt(text(doc, 'li.ribbon-database>a>span'));
 			if (citation) {
 				var lastNumber = citation.match(/(\d+)$/);
 				if (lastNumber) {
@@ -191,9 +225,9 @@ var testCases = [
 				"caseName": "C & M",
 				"creators": [],
 				"dateDecided": "2006-01-20",
-				"court": "Family Court of Australia",
+				"court": "FamCA",
 				"docketNumber": "212",
-				"extra": "jurisdiction: Commonwealth",
+				"Code": "Cth",
 				"url": "http://www7.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/FamCA/2006/212.html",
 				"attachments": [
 					{
@@ -216,9 +250,9 @@ var testCases = [
 				"caseName": "Yeo, in the matter of AES Services (Aust) Pty Ltd (ACN 111 306 543) (Administrators Appointed)",
 				"creators": [],
 				"dateDecided": "2010-01-05",
-				"court": "Federal Court of Australia",
+				"court": "FCA",
 				"docketNumber": "1",
-				"extra": "jurisdiction: Commonwealth",
+				"Code": "Cth",
 				"url": "http://www8.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/FCA/2010/1.html",
 				"attachments": [
 					{
@@ -270,9 +304,9 @@ var testCases = [
 				"caseName": "'NM' and Department of Human Services (Freedom of information)",
 				"creators": [],
 				"dateDecided": "2017-12-08",
-				"court": "Australian Information Commissioner",
+				"court": "AICmr",
 				"docketNumber": "134",
-				"extra": "jurisdiction: Commonwealth",
+				"Code": "Cth",
 				"url": "http://www8.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/AICmr/2017/134.html",
 				"attachments": [
 					{
@@ -294,7 +328,7 @@ var testCases = [
 				"itemType": "statute",
 				"nameOfAct": "Freedom of Information Act 1982",
 				"creators": [],
-				"extra": "jurisdiction: Commonwealth",
+				"Code": "Cth",
 				"section": "24AB",
 				"url": "http://www8.austlii.edu.au/cgi-bin/viewdoc/au/legis/cth/consol_act/foia1982222/s24ab.html",
 				"attachments": [
@@ -317,7 +351,7 @@ var testCases = [
 				"itemType": "statute",
 				"nameOfAct": "Freedom of Information Act 1982",
 				"creators": [],
-				"extra": "jurisdiction: CTH",
+				"Code": "Cth",
 				"url": "http://www8.austlii.edu.au/cgi-bin/viewdb/au/legis/cth/consol_act/foia1982222/",
 				"attachments": [
 					{
@@ -382,7 +416,7 @@ var testCases = [
 				"dateDecided": "2017-03-10",
 				"court": "AICmr",
 				"docketNumber": "20",
-				"url": "http://www8.austlii.edu.au/cgi-bin/sinodisp/au/cases/cth/AICmr/2017/20.html",
+				"url": "http://www8.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/AICmr/2017/20.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
