@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-09-12 12:09:14"
+	"lastUpdated": "2022-09-12 13:05:47"
 }
 
 /*
@@ -37,7 +37,7 @@
 
 
 // attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+// function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 
 function detectWeb(doc, url) {
@@ -61,6 +61,7 @@ function detectWeb(doc, url) {
 	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
@@ -68,7 +69,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('#page-main ul>li>a');
-	for (let i=0; i<rows.length; i++) {
+	for (let i = 0; i < rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -93,10 +94,13 @@ function doWeb(doc, url) {
 				articles.push(i);
 			}
 			ZU.processDocuments(articles, scrape);
-		});
+			return true;
+		}
+		);
 	} else {
 		scrape(doc, url);
 	}
+	return false;
 }
 
 /*
@@ -156,8 +160,8 @@ function capitalizeWithPunctuation(string) {
 	var words = string.split(actNameDelimRegex);
 
 	var newString = "";
-	var lastWordIndex = words.length-1;
-	for (var i=0; i<=lastWordIndex; i++) {
+	var lastWordIndex = words.length - 1;
+	for (var i = 0; i <= lastWordIndex; i++) {
 		if (actNameDelimRegex.test(words[i])) {
 			newString += words[i];
 		} else {
@@ -188,15 +192,17 @@ function scrape(doc, url) {
 		newItem.code = jurisdiction;
 	}
 	var citation = text(doc, 'li.ribbon-citation>a>span');
+	var voliss;
+	var m;
 
 	if (text(doc, '#ribbon')) {
 		if (type == "case") {
-			var voliss = text(doc, 'head>title');
+			voliss = text(doc, 'head>title');
 			// e.g. C & M [2006] FamCA 212 (20 January 2006)
 			newItem.caseName = voliss.replace(/\s?\[.*$/, '');
 			newItem.title = newItem.caseName;
 
-			var lastParenthesis = voliss.match(/\(([^\)]*)\)$/);
+			var lastParenthesis = voliss.match(/\(([^)]*)\)$/);
 			if (lastParenthesis) {
 				newItem.dateDecided = ZU.strToISO(lastParenthesis[1]);
 			} else {
@@ -221,11 +227,11 @@ function scrape(doc, url) {
 		}
 		if (type == "journalArticle") {
 			var title = text(doc, 'title');
-			var m = title.match(/(.*) --- "([^"]*)"/);
+			m = title.match(/(.*) --- "([^"]*)"/);
 			if (m) {
 				newItem.title = m[2];
 				var authors = m[1].split(';');
-				for (let i=0; i<authors.length; i++) {
+				for (let i = 0; i < authors.length; i++) {
 					newItem.creators.push(ZU.cleanAuthor(authors[i], 'author', authors[i].includes(',')));
 				}
 			} else {
@@ -235,14 +241,14 @@ function scrape(doc, url) {
 			newItem.date = text(doc, 'li.ribbon-year>a>span');
 		}
 	} else {
-		var voliss = text(doc, 'head>title');
+		voliss = text(doc, 'head>title');
 		// e.g. C & M [2006] FamCA 212 (20 January 2006)
-		var m = voliss.match(/^([^[]*)\[(\d+)\](.*)\(([^\)]*)\)$/);
+		m = voliss.match(/^([^[]*)\[(\d+)\](.*)\(([^)]*)\)$/);
 		if (m) {
 			newItem.title = m[1];
 			newItem.dateDecided = ZU.strToISO(m[4]);
 			var courtNumber = m[3].trim().split(' ');
-			if (courtNumber.length>=2) {
+			if (courtNumber.length >= 2) {
 				newItem.court = courtNumber[0];
 				newItem.docketNumber = courtNumber[1].replace(/[^\w]*$/, '');
 			}
@@ -255,7 +261,7 @@ function scrape(doc, url) {
 	newItem.attachments = [{
 		document: doc,
 		title: "Snapshot",
-		mimeType:"text/html"
+		mimeType: "text/html"
 	}];
 	newItem.complete();
 }
