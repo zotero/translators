@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-09-12 06:20:42"
+	"lastUpdated": "2022-09-12 12:09:14"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2018 Justin Warren, Philipp Zumstein
-	
+
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -42,8 +42,7 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 
 function detectWeb(doc, url) {
 	var classes = attr(doc, 'body', 'class');
-	// Z.debug(classes);
-	
+
 	if (classes.includes('case')) {
 		return "case";
 	}
@@ -100,11 +99,13 @@ function doWeb(doc, url) {
 	}
 }
 
-/* 
+/*
  * Convert full court names to standard abbreviations.
  * If the name of the court is in the map, return the abbreviation
  * else return the original full name (i.e. leave it unchanged)
- * FIXME: Find a full set of these.
+ * The Australian Guide to Legal Citation covers this in Rule 2.2.3
+ * legal Reports in Appendix A, but I've not been able to locate
+ * a copy with the appendix intact yet.
 */
 function abbrevCourt(fullname) {
 	var courtMap = new Map();
@@ -127,6 +128,17 @@ function abbrevJurisdiction(fullname) {
 	var jMap = new Map();
 	jMap.set('Commonwealth', 'Cth');
 	jMap.set('CTH', 'Cth');
+	jMap.set('Australian Capital Territory', 'ACT');
+	jMap.set('New South Wales', 'NSW');
+	jMap.set('Northern Territory', 'NT');
+	jMap.set('Queensland', 'Qld');
+	jMap.set('QLD', 'Qld');
+	jMap.set('South Australia', 'SA');
+	jMap.set('Tasmania', 'Tas');
+	jMap.set('TAS', 'Tas');
+	jMap.set('Victoria', 'Vic');
+	jMap.set('VIC', 'Vic');
+	jMap.set('Western Australia', 'WA');
 
 	var abbrev = jMap.get(fullname);
 	if (abbrev === undefined) {
@@ -135,23 +147,55 @@ function abbrevJurisdiction(fullname) {
 	return abbrev;
 }
 
+/*
+ * ZU.capitalizeTitle doesn't cope with Act Names (With Parenthetical Names) Acts
+ * so we give it a bit of help.
+ */
+function capitalizeWithPunctuation(string) {
+	const actNameDelimRegex = /( \(|\) )/;
+	var words = string.split(actNameDelimRegex);
+
+	var newString = "";
+	var lastWordIndex = words.length-1;
+	for (var i=0; i<=lastWordIndex; i++) {
+		if (actNameDelimRegex.test(words[i])) {
+			newString += words[i];
+		} else {
+			newString += ZU.capitalizeTitle(words[i].toLowerCase(), true);
+		}
+	}
+	Zotero.debug(newString);
+	return newString;
+}
+
+/*
+ * AustLII includes the date on the end of all Acts
+ */
+function parseActName(nameOfAct) {
+	// Split at the last space before the year
+	const parsed = nameOfAct.split(/\s(\d{4})/);
+	// Zotero.debug(parsed);
+	let actName = parsed[0], actYear = parsed[1];
+	actName = capitalizeWithPunctuation(actName);
+	return { actName, actYear };
+}
+
 function scrape(doc, url) {
 	var type = detectWeb(doc, url);
 	var newItem = new Zotero.Item(type);
 	var jurisdiction = abbrevJurisdiction(text(doc, 'li.ribbon-jurisdiction>a>span'));
 	if (jurisdiction) {
-		// newItem.extra = "jurisdiction: " + jurisdiction;
-		newItem.Code = jurisdiction;
+		newItem.code = jurisdiction;
 	}
 	var citation = text(doc, 'li.ribbon-citation>a>span');
-	
+
 	if (text(doc, '#ribbon')) {
 		if (type == "case") {
 			var voliss = text(doc, 'head>title');
 			// e.g. C & M [2006] FamCA 212 (20 January 2006)
 			newItem.caseName = voliss.replace(/\s?\[.*$/, '');
 			newItem.title = newItem.caseName;
-			
+
 			var lastParenthesis = voliss.match(/\(([^\)]*)\)$/);
 			if (lastParenthesis) {
 				newItem.dateDecided = ZU.strToISO(lastParenthesis[1]);
@@ -167,8 +211,10 @@ function scrape(doc, url) {
 			}
 		}
 		if (type == "statute") {
-			// title
-			newItem.nameOfAct = citation.trim();
+			// All AustLII Act titles end in the year the Act was passed
+			const actInfo = parseActName(citation);
+			newItem.nameOfAct = actInfo.actName;
+			newItem.dateEnacted = actInfo.actYear;
 			// section
 			newItem.section = text(doc, 'li.ribbon-subject>a>span');
 			if (newItem.section) newItem.section = newItem.section.replace(/^SECT /, '');
@@ -204,7 +250,7 @@ function scrape(doc, url) {
 			newItem.title = voliss;
 		}
 	}
-	
+
 	newItem.url = url;
 	newItem.attachments = [{
 		document: doc,
@@ -225,9 +271,9 @@ var testCases = [
 				"caseName": "C & M",
 				"creators": [],
 				"dateDecided": "2006-01-20",
+				"code": "Cth",
 				"court": "FamCA",
 				"docketNumber": "212",
-				"Code": "Cth",
 				"url": "http://www7.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/FamCA/2006/212.html",
 				"attachments": [
 					{
@@ -250,9 +296,9 @@ var testCases = [
 				"caseName": "Yeo, in the matter of AES Services (Aust) Pty Ltd (ACN 111 306 543) (Administrators Appointed)",
 				"creators": [],
 				"dateDecided": "2010-01-05",
+				"code": "Cth",
 				"court": "FCA",
 				"docketNumber": "1",
-				"Code": "Cth",
 				"url": "http://www8.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/FCA/2010/1.html",
 				"attachments": [
 					{
@@ -304,9 +350,9 @@ var testCases = [
 				"caseName": "'NM' and Department of Human Services (Freedom of information)",
 				"creators": [],
 				"dateDecided": "2017-12-08",
+				"code": "Cth",
 				"court": "AICmr",
 				"docketNumber": "134",
-				"Code": "Cth",
 				"url": "http://www8.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/AICmr/2017/134.html",
 				"attachments": [
 					{
@@ -326,9 +372,10 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "statute",
-				"nameOfAct": "Freedom of Information Act 1982",
+				"nameOfAct": "Freedom of Information Act",
 				"creators": [],
-				"Code": "Cth",
+				"dateEnacted": "1982",
+				"code": "Cth",
 				"section": "24AB",
 				"url": "http://www8.austlii.edu.au/cgi-bin/viewdoc/au/legis/cth/consol_act/foia1982222/s24ab.html",
 				"attachments": [
@@ -349,10 +396,57 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "statute",
-				"nameOfAct": "Freedom of Information Act 1982",
+				"nameOfAct": "Freedom of Information Act",
 				"creators": [],
-				"Code": "Cth",
+				"dateEnacted": "1982",
+				"code": "Cth",
 				"url": "http://www8.austlii.edu.au/cgi-bin/viewdb/au/legis/cth/consol_act/foia1982222/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.austlii.edu.au/cgi-bin/viewdb/au/legis/cth/consol_act/antsasta1999402/",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "A New Tax System (Goods and Services Tax) Act",
+				"creators": [],
+				"dateEnacted": "1999",
+				"code": "Cth",
+				"url": "https://www.austlii.edu.au/cgi-bin/viewdb/au/legis/cth/consol_act/antsasta1999402/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.austlii.edu.au/cgi-bin/viewdb/au/legis/cth/consol_act/caca2010265/",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Competition and Consumer Act",
+				"creators": [],
+				"dateEnacted": "2010",
+				"code": "Cth",
+				"url": "https://www.austlii.edu.au/cgi-bin/viewdb/au/legis/cth/consol_act/caca2010265/",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -417,6 +511,75 @@ var testCases = [
 				"court": "AICmr",
 				"docketNumber": "20",
 				"url": "http://www8.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/AICmr/2017/20.html",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.austlii.edu.au/cgi-bin/viewdb/au/legis/qld/consol_act/pla1974179/",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Property Law Act",
+				"creators": [],
+				"dateEnacted": "1974",
+				"code": "Qld",
+				"url": "https://www.austlii.edu.au/cgi-bin/viewdb/au/legis/qld/consol_act/pla1974179/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.austlii.edu.au/cgi-bin/viewdb/au/legis/vic/consol_act/ca195882/",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Crimes Act",
+				"creators": [],
+				"dateEnacted": "1958",
+				"code": "Vic",
+				"url": "https://www.austlii.edu.au/cgi-bin/viewdb/au/legis/vic/consol_act/ca195882/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.austlii.edu.au/cgi-bin/viewdb/au/legis/nsw/consol_act/leara2002451/",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Law Enforcement (Powers and Responsibilities) Act",
+				"creators": [],
+				"dateEnacted": "2002",
+				"code": "NSW",
+				"url": "https://www.austlii.edu.au/cgi-bin/viewdb/au/legis/nsw/consol_act/leara2002451/",
 				"attachments": [
 					{
 						"title": "Snapshot",
