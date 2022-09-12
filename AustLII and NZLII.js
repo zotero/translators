@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-09-12 13:05:47"
+	"lastUpdated": "2022-09-12 13:08:10"
 }
 
 /*
@@ -34,11 +34,6 @@
 
 	***** END LICENSE BLOCK *****
 */
-
-
-// attr()/text() v2
-// function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
 
 function detectWeb(doc, url) {
 	var classes = attr(doc, 'body', 'class');
@@ -97,7 +92,8 @@ function doWeb(doc, url) {
 			return true;
 		}
 		);
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 	return false;
@@ -164,7 +160,8 @@ function capitalizeWithPunctuation(string) {
 	for (var i = 0; i <= lastWordIndex; i++) {
 		if (actNameDelimRegex.test(words[i])) {
 			newString += words[i];
-		} else {
+		}
+		else {
 			newString += ZU.capitalizeTitle(words[i].toLowerCase(), true);
 		}
 	}
@@ -205,7 +202,8 @@ function scrape(doc, url) {
 			var lastParenthesis = voliss.match(/\(([^)]*)\)$/);
 			if (lastParenthesis) {
 				newItem.dateDecided = ZU.strToISO(lastParenthesis[1]);
-			} else {
+			}
+			else {
 				newItem.dateDecided = text(doc, 'li.ribbon-year>a>span');
 			}
 			newItem.court = abbrevCourt(text(doc, 'li.ribbon-database>a>span'));
@@ -234,13 +232,15 @@ function scrape(doc, url) {
 				for (let i = 0; i < authors.length; i++) {
 					newItem.creators.push(ZU.cleanAuthor(authors[i], 'author', authors[i].includes(',')));
 				}
-			} else {
+			}
+			else {
 				newItem.title = title;
 			}
 			newItem.publicationTitle = text(doc, 'li.ribbon-database>a>span');
 			newItem.date = text(doc, 'li.ribbon-year>a>span');
 		}
-	} else {
+	}
+	else {
 		voliss = text(doc, 'head>title');
 		// e.g. C & M [2006] FamCA 212 (20 January 2006)
 		m = voliss.match(/^([^[]*)\[(\d+)\](.*)\(([^)]*)\)$/);
@@ -252,7 +252,8 @@ function scrape(doc, url) {
 				newItem.court = courtNumber[0];
 				newItem.docketNumber = courtNumber[1].replace(/[^\w]*$/, '');
 			}
-		} else {
+		}
+		else {
 			newItem.title = voliss;
 		}
 	}
