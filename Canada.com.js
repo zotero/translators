@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:52:08"
+	"lastUpdated": "2021-12-28 04:34:11"
 }
 
 function detectWeb(doc, url) {
@@ -152,16 +152,15 @@ function doWeb(doc, url) {
 		
 		
 		
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
+		Zotero.selectItems(items, function (items) {
+			ZU.processDocuments(Object.keys(items), scrape);
+		});
 	} else {
-		articles = [url];
+		scrape(doc, url);
 	}
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-	Zotero.wait();
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",

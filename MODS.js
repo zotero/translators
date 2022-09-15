@@ -1,7 +1,7 @@
 {
 	"translatorID": "0e2235e7-babf-413c-9acf-f27cce5f059c",
 	"label": "MODS",
-	"creator": "Simon Kornblith and Richard Karnesky",
+	"creator": "Simon Kornblith, Richard Karnesky, and Abe Jellinek",
 	"target": "xml",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
@@ -14,287 +14,328 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-12-25 13:29:42"
+	"lastUpdated": "2021-07-14 23:47:43"
 }
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2019-2021 Simon Kornblith, Richard Karnesky, and Abe Jellinek
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
 
 var fromMarcGenre = {
 //		"abstract or summary":XXX,
 //		"abstract":XXX,
 //		"summary":XXX,
-	"art reproduction":"artwork",
-	"article":"journalArticle",
-	"autobiography":"book",
-	"bibliography":"book",
-	"biography":"book",
-	"book":"book",
-//		"calendar":XXX,
-//		"catalog":XXX,
-	"chart":"artwork",
-	"comic or graphic novel":"book",
-	"comic":"book",
-	"graphic novel":"book",
-	"comic strip":"artwork",
-	"conference publication":"conferencePaper",
-//		"database":XXX,
-	"dictionary":"dictionaryEntry",
-	"diorama":"artwork",
-//		"directory":XXX,
-	"drama":"book",
-	"encyclopedia":"encyclopediaArticle",
-//		"essay":XXX,
-	"festschrift":"book",
-	"fiction":"book",
-//		"filmography":XXX,
-	"filmstrip":"videoRecording",
-//		"findingaid":XXX,
-//		"flash card":XXX,
-	"folktale":"book",
-//		"font":XXX,
-//		"game":XXX,
-	"government publication":"book",
-	"graphic":"artwork",
-	"globe":"map",
-	"handbook":"book",
-	"history":"book",
-	"hymnal":"book",
-	"humor,satire":"book",
-	"humor":"book",
-	"satire":"book",
-//		"index":XXX,
-//		"instruction":XXX,
-//		"interview":XXX,
-//		"issue":XXX,
-	"journal":"journalArticle",
-	"kit":"artwork",
-//		"language instruction":XXX,
-	"law report or digest":"journalArticle",
-	"law report":"journalArticle",
-	"digest":"journalArticle",
-	"law digest":"journalArticle",
-	"legal article":"journalArticle",
-	"legal case and case notes":"case",
-	"legal case":"case",
-	"case notes":"case",
-	"legislation":"statute",
-	"loose-leaf":"manuscript",
-	"map":"map",
-	"memoir":"book",
-	"microscope slide":"artwork",
-	"model":"artwork",
-//		"multivolume monograph":XXX,
-	"novel":"book",
-//		"numeric data":XXX,
-//		"offprint":XXX,
-	"online system or service":"webpage",
-	"online system":"webpage",
-	"service":"webpage",
-	"online service":"webpage",
-	"patent":"patent",
-	"periodical":"journalArticle",
-	"picture":"artwork",
-//		"poetry":XXX,
-//		"programmed text":XXX,
-	"realia":"artwork",
-//		"rehearsal":XXX,
-//		"remote sensing image":XXX,
-//		"reporting":XXX,
-//		"review":XXX,
-	"script":"book",
-//		"series":XXX,
-//		"short story":XXX,
-	"slide":"artwork",
-	"sound":"audioRecording",
-	"speech":"audioRecording",
-	"standard or specification":"report",
-	"standard":"report",
-//		"specification":XXX,
-//		"statistics":XXX,
-//		"survey of literature":XXX,
-	"technical report":"report",
-	"newspaper":"newspaperArticle",
-	"theses":"thesis",
-	"thesis":"thesis",
-//		"toy":XXX,
-	"transparency":"artwork",
-//		"treaty":XXX,
-	"videorecording":"videoRecording",
-	"letter":"letter",
-	"motion picture":"film",
-	"art original":"artwork",
-	"web site":"webpage",
-	"yearbook":"book"
+	"art reproduction": "artwork",
+	article: "journalArticle",
+	autobiography: "book",
+	bibliography: "book",
+	biography: "book",
+	book: "book",
+	//		"calendar":XXX,
+	//		"catalog":XXX,
+	chart: "artwork",
+	"comic or graphic novel": "book",
+	comic: "book",
+	"graphic novel": "book",
+	"comic strip": "artwork",
+	"conference publication": "conferencePaper",
+	//		"database":XXX,
+	dictionary: "dictionaryEntry",
+	diorama: "artwork",
+	//		"directory":XXX,
+	drama: "book",
+	encyclopedia: "encyclopediaArticle",
+	//		"essay":XXX,
+	festschrift: "book",
+	fiction: "book",
+	//		"filmography":XXX,
+	filmstrip: "videoRecording",
+	//		"findingaid":XXX,
+	//		"flash card":XXX,
+	folktale: "book",
+	//		"font":XXX,
+	//		"game":XXX,
+	graphic: "artwork",
+	globe: "map",
+	handbook: "book",
+	history: "book",
+	hymnal: "book",
+	"humor,satire": "book",
+	humor: "book",
+	satire: "book",
+	//		"index":XXX,
+	//		"instruction":XXX,
+	//		"interview":XXX,
+	//		"issue":XXX,
+	journal: "journalArticle",
+	kit: "artwork",
+	//		"language instruction":XXX,
+	"law report or digest": "journalArticle",
+	"law report": "journalArticle",
+	digest: "journalArticle",
+	"law digest": "journalArticle",
+	"legal article": "journalArticle",
+	"legal case and case notes": "case",
+	"legal case": "case",
+	"case notes": "case",
+	legislation: "statute",
+	"loose-leaf": "manuscript",
+	map: "map",
+	memoir: "book",
+	"microscope slide": "artwork",
+	model: "artwork",
+	//		"multivolume monograph":XXX,
+	novel: "book",
+	//		"numeric data":XXX,
+	//		"offprint":XXX,
+	"online system or service": "webpage",
+	"online system": "webpage",
+	service: "webpage",
+	"online service": "webpage",
+	patent: "patent",
+	periodical: "journalArticle",
+	picture: "artwork",
+	//		"poetry":XXX,
+	//		"programmed text":XXX,
+	realia: "artwork",
+	//		"rehearsal":XXX,
+	//		"remote sensing image":XXX,
+	//		"reporting":XXX,
+	//		"review":XXX,
+	script: "book",
+	//		"series":XXX,
+	//		"short story":XXX,
+	slide: "artwork",
+	sound: "audioRecording",
+	speech: "audioRecording",
+	"standard or specification": "report",
+	standard: "report",
+	//		"specification":XXX,
+	//		"statistics":XXX,
+	//		"survey of literature":XXX,
+	"technical report": "report",
+	newspaper: "newspaperArticle",
+	theses: "thesis",
+	thesis: "thesis",
+	//		"toy":XXX,
+	transparency: "artwork",
+	//		"treaty":XXX,
+	videorecording: "videoRecording",
+	letter: "letter",
+	"motion picture": "film",
+	"art original": "artwork",
+	"web site": "webpage",
+	yearbook: "book"
 };
 
 var toMarcGenre = {
-	"artwork":"art original",
-	"audioRecording":"sound",
-	"bill":"legislation",
-	"blogPost":"web site",
-	"book":"book",
-	"bookSection":"book",
-	"case":"legal case and case notes",
-	//"computerProgram":XXX,
-	"conferencePaper":"conference publication",
-	"dictionaryEntry":"dictionary",
-	//"document":XXX,
-	"email":"letter",
-	"encyclopediaArticle":"encyclopedia",
-	"film":"motion picture",
-	"forumPost":"web site",
-	//"hearing":XXX,
-	"instantMessage":"letter",
-	"interview":"interview",
-	"journalArticle":"journal",
-	"letter":"letter",
-	"magazineArticle":"periodical",
-	//"manuscript":XXX,
-	"map":"map",
-	"newspaperArticle":"newspaper",
-	"patent":"patent",
-	"podcast":"speech",
-	//"presentation":XXX,
-	"radioBroadcast":"sound",
-	"report":"technical report",
-	"statute":"legislation",
-	"thesis":"thesis",
-	//"tvBroadcast":XXX,
-	"videoRecording":"videorecording",
-	"webpage":"web site"
+	artwork: "art original",
+	audioRecording: "sound",
+	bill: "legislation",
+	blogPost: "web site",
+	book: "book",
+	bookSection: "book",
+	case: "legal case and case notes",
+	// "computerProgram":XXX,
+	conferencePaper: "conference publication",
+	dictionaryEntry: "dictionary",
+	// "document":XXX,
+	email: "letter",
+	encyclopediaArticle: "encyclopedia",
+	film: "motion picture",
+	forumPost: "web site",
+	hearing: "government publication",
+	instantMessage: "letter",
+	interview: "interview",
+	journalArticle: "journal",
+	letter: "letter",
+	magazineArticle: "periodical",
+	// "manuscript":XXX,
+	map: "map",
+	newspaperArticle: "newspaper",
+	patent: "patent",
+	podcast: "speech",
+	// "presentation":XXX,
+	radioBroadcast: "sound",
+	report: "technical report",
+	statute: "legislation",
+	thesis: "thesis",
+	// "tvBroadcast":XXX,
+	videoRecording: "videorecording",
+	webpage: "web site"
 };
 
 var dctGenres = {
-	//"collection":XXX,
-	//"dataset":XXX,
-	//"event":XXX,
-	"image":"artwork",
-	"interactiveresource":"webpage",
-	//"model":XXX,
-	"movingimage":"videoRecording",
-	//"physical object":XXX,
-	//"place":XXX,
-	//"resource":XXX,
-	//"service":XXX,
-	"software":"computerProgram",
-	"sound":"audioRecording",
-	"stillimage":"artwork"
-	//"text":XXX
+	// "collection":XXX,
+	// "dataset":XXX,
+	// "event":XXX,
+	image: "artwork",
+	interactiveresource: "webpage",
+	// "model":XXX,
+	movingimage: "videoRecording",
+	// "physical object":XXX,
+	// "place":XXX,
+	// "resource":XXX,
+	// "service":XXX,
+	software: "computerProgram",
+	sound: "audioRecording",
+	stillimage: "artwork"
+	// "text":XXX
 };
 
 var fromTypeOfResource = {
-	//"text":XXX,
-	"cartographic":"map",
-	//"notated music":XXX,
-	"sound recording-musical":"audioRecording",
-	"sound recording-nonmusical":"audioRecording",
-	"sound recording":"audioRecording",
-	"still image":"artwork",
-	"moving image":"videoRecording",
-	//"three dimensional object":XXX,
-	"software, multimedia":"computerProgram"
+	// "text":XXX,
+	cartographic: "map",
+	// "notated music":XXX,
+	"sound recording-musical": "audioRecording",
+	"sound recording-nonmusical": "audioRecording",
+	"sound recording": "audioRecording",
+	"still image": "artwork",
+	"moving image": "videoRecording",
+	// "three dimensional object":XXX,
+	"software, multimedia": "computerProgram"
 };
 
 var toTypeOfResource = {
-	"artwork":"still image",
-	"audioRecording":"sound recording",
-	"bill":"text",
-	"blogPost":"software, multimedia",
-	"book":"text",
-	"bookSection":"text",
-	"case":"text",
-	"computerProgram":"software, multimedia",
-	"conferencePaper":"text",
-	"dictionaryEntry":"text",
-	"document":"text",
-	"email":"text",
-	"encyclopediaArticle":"text",
-	"film":"moving image",
-	"forumPost":"text",
-	"hearing":"text",
-	"instantMessage":"text",
-	"interview":"text",
-	"journalArticle":"text",
-	"letter":"text",
-	"magazineArticle":"text",
-	"manuscript":"text",
-	"map":"cartographic",
-	"newspaperArticle":"text",
-	"patent":"text",
-	"podcast":"sound recording-nonmusical",
-	"presentation":"mixed material",
-	"radioBroadcast":"sound recording-nonmusical",
-	"report":"text",
-	"statute":"text",
-	"thesis":"text",
-	"tvBroadcast":"moving image",
-	"videoRecording":"moving image",
-	"webpage":"software, multimedia"
+	artwork: "still image",
+	audioRecording: "sound recording",
+	bill: "text",
+	blogPost: "software, multimedia",
+	book: "text",
+	bookSection: "text",
+	case: "text",
+	computerProgram: "software, multimedia",
+	conferencePaper: "text",
+	dictionaryEntry: "text",
+	document: "text",
+	email: "text",
+	encyclopediaArticle: "text",
+	film: "moving image",
+	forumPost: "text",
+	hearing: "text",
+	instantMessage: "text",
+	interview: "text",
+	journalArticle: "text",
+	letter: "text",
+	magazineArticle: "text",
+	manuscript: "text",
+	map: "cartographic",
+	newspaperArticle: "text",
+	patent: "text",
+	podcast: "sound recording-nonmusical",
+	presentation: "mixed material",
+	radioBroadcast: "sound recording-nonmusical",
+	report: "text",
+	statute: "text",
+	thesis: "text",
+	tvBroadcast: "moving image",
+	videoRecording: "moving image",
+	webpage: "software, multimedia"
 };
 
 var modsTypeRegex = {
-//	'artwork': 
+//	'artwork':
 //	'audioRecording': /\bmusic/i,
-//	'bill': 
-	'blogPost': /\bblog/i,
-//	'book': 
-//	'bookSection': 
-//	'case': 
-//	'computerProgram': 
-//	'conferencePaper': 
-//	'dictionaryEntry': 
-//	'email': 
-//	'encyclopediaArticle': 
-//	'film': 
-//	'forumPost': 
-//	'hearing': 
-//	'instantMessage': 
-//	'interview': 
-	'journalArticle': /journal\s*article/i,
-//	'letter': 
-	'magazineArticle': /magazine\s*article/i,
-//	'manuscript': 
-//	'map': 
-	'newspaperArticle': /newspaper\*article/i
-//	'patent': 
-//	'podcast': 
-//	'presentation': 
-//	'radioBroadcast': 
-//	'report': 
-//	'statute': 
-//	'thesis': 
-//	'tvBroadcast': 
-//	'videoRecording': 
-//	'webpage': 
+//	'bill':
+	blogPost: /\bblog/i,
+	//	'book':
+	//	'bookSection':
+	//	'case':
+	//	'computerProgram':
+	//	'conferencePaper':
+	//	'dictionaryEntry':
+	//	'email':
+	//	'encyclopediaArticle':
+	//	'film':
+	//	'forumPost':
+	//	'hearing':
+	//	'instantMessage':
+	//	'interview':
+	journalArticle: /journal\s*article/i,
+	//	'letter':
+	magazineArticle: /magazine\s*article/i,
+	//	'manuscript':
+	//	'map':
+	newspaperArticle: /newspaper\*article/i
+//	'patent':
+//	'podcast':
+//	'presentation':
+//	'radioBroadcast':
+//	'report':
+//	'statute':
+//	'thesis':
+//	'tvBroadcast':
+//	'videoRecording':
+//	'webpage':
 };
 
 var modsInternetMediaTypes = {
-	//a ton of types listed at http://www.iana.org/assignments/media-types/index.html
+	// a ton of types listed at http://www.iana.org/assignments/media-types/index.html
 	'text/html': 'webpage'
 };
 
 var marcRelators = {
-	"aut":"author",
-	"edt":"editor",
-	"ctb":"contributor",
-	"pbd":"seriesEditor",
-	"trl":"translator"
+	aut: "author",
+	edt: "editor",
+	ctb: "contributor",
+	pbd: "seriesEditor",
+	trl: "translator",
+	cmp: "composer",
+	lyr: "wordsBy",
+	prf: "performer",
+	cre: "author",
+	rcp: "recipient"
 };
 
 // Item types that are part of a larger work
-var partialItemTypes = ["blogPost", "bookSection", "conferencePaper", "dictionaryEntry",
-	"encyclopediaArticle", "forumPost", "journalArticle", "magazineArticle",
-	"newspaperArticle", "webpage"];
+var partialItemTypes = ["blogPost",
+	"bookSection",
+	"conferencePaper",
+	"dictionaryEntry",
+	"encyclopediaArticle",
+	"forumPost",
+	"journalArticle",
+	"magazineArticle",
+	"newspaperArticle",
+	"webpage"];
 
 // Namespace array for using ZU.xpath
 var ns = "http://www.loc.gov/mods/v3",
-	xns = {"m":ns};
+	xns = { m: ns };
 
 function detectImport() {
-	var doc = Zotero.getXML().documentElement;
+	let doc;
+	try {
+		doc = Zotero.getXML().documentElement;
+	}
+	catch (err) {
+		// most likely just not XML
+		return false;
+	}
+
 	if (!doc) {
 		return false;
 	}
-	return doc.namespaceURI === "http://www.loc.gov/mods/v3" && (doc.tagName === "modsCollection" || doc.tagName === "mods");
+	return doc.namespaceURI === "http://www.loc.gov/mods/v3" && (doc.tagName.endsWith("modsCollection") || doc.tagName.endsWith("mods"));
 }
 
 /**
@@ -312,7 +353,7 @@ function mapProperty(parentElement, elementName, property, attributes) {
 	var doc = parentElement.ownerDocument,
 		newElement = doc.createElementNS(ns, elementName);
 	if (attributes) {
-		for (var i in attributes) {
+		for (let i in attributes) {
 			newElement.setAttribute(i, attributes[i]);
 		}
 	}
@@ -327,12 +368,13 @@ function doExport() {
 	var doc = parser.parseFromString('<modsCollection xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-2.xsd" />', 'application/xml');
 	
 	var item;
-	while (item = Zotero.nextItem()) {
+	let titleInfo;
+	while (item = Zotero.nextItem()) { // eslint-disable-line no-cond-assign
 		// Don't export notes or standalone attachments
 		if (item.itemType === "note" || item.itemType === "attachment") continue;
 		
 		var mods = doc.createElementNS(ns, "mods"),
-			isPartialItem = partialItemTypes.indexOf(item.itemType) !== -1,
+			isPartialItem = partialItemTypes.includes(item.itemType),
 			recordInfo = doc.createElementNS(ns, "recordInfo"),
 			host = doc.createElementNS(ns, "relatedItem"),
 			series = doc.createElementNS(ns, "relatedItem"),
@@ -342,13 +384,13 @@ function doExport() {
 		
 		// XML tag titleInfo; object field title
 		if (item.title) {
-			var titleInfo = doc.createElementNS(ns, "titleInfo");
+			titleInfo = doc.createElementNS(ns, "titleInfo");
 			mapProperty(titleInfo, "title", item.title);
 			mods.appendChild(titleInfo);
 		}
 		
 		if (item.shortTitle) {
-			var titleInfo = doc.createElementNS(ns, "titleInfo");
+			titleInfo = doc.createElementNS(ns, "titleInfo");
 			titleInfo.setAttribute("type", "abbreviated");
 			mapProperty(titleInfo, "title", item.shortTitle);
 			mods.appendChild(titleInfo);
@@ -356,58 +398,77 @@ function doExport() {
 		
 		// XML tag typeOfResource/genre; object field type
 		mapProperty(mods, "typeOfResource", toTypeOfResource[item.itemType]);
-		mapProperty(mods, "genre", item.itemType, {"authority":"local"});
-		mapProperty(topOrHost, "genre", toMarcGenre[item.itemType], {"authority":"marcgt"});
+		mapProperty(mods, "genre", item.itemType, { authority: "local" });
+		mapProperty(topOrHost, "genre", toMarcGenre[item.itemType], { authority: "marcgt" });
 		
 		// XML tag genre; object field thesisType, type
 		if (item.thesisType) {
 			mapProperty(mods, "genre", item.thesisType);
-		} else if (item.type) {
+		}
+		else if (item.type) {
 			mapProperty(mods, "genre", item.type);
 		}
 		
 		// XML tag name; object field creators
-		for (var j=0; j<item.creators.length; j++) {
+		for (let j = 0; j < item.creators.length; j++) {
 			var creator = item.creators[j],
 				roleTerm = "";
 			if (creator.creatorType == "author") {
-				roleTerm = "aut";
-			} else if (creator.creatorType == "editor") {
+				roleTerm = item.itemType == "letter" ? "cre" : "aut";
+			}
+			else if (creator.creatorType == "editor") {
 				roleTerm = "edt";
-			} else if (creator.creatorType == "translator") {
+			}
+			else if (creator.creatorType == "translator") {
 				roleTerm = "trl";
-			} else if (creator.creatorType == "seriesEditor") {
+			}
+			else if (creator.creatorType == "seriesEditor") {
 				roleTerm = "pbd";
-			} else {
+			}
+			else if (creator.creatorType == "composer") {
+				roleTerm = "cmp";
+			}
+			else if (creator.creatorType == "wordsBy") {
+				roleTerm = "lyr";
+			}
+			else if (creator.creatorType == "performer") {
+				roleTerm = "prf";
+			}
+			else if (creator.creatorType == "recipient") {
+				roleTerm = "rcp";
+			}
+
+			else {
 				roleTerm = "ctb";
 			}
 
-			var name = doc.createElementNS(ns, "name"), namePart;
+			const name = doc.createElementNS(ns, "name");
 			
 			if (creator.fieldMode == 1) {
 				name.setAttribute("type", "corporate");
 				
 				mapProperty(name, "namePart", creator.lastName);
-			} else {
+			}
+			else {
 				name.setAttribute("type", "personal");
 				
-				mapProperty(name, "namePart", creator.lastName, {"type":"family"});
-				mapProperty(name, "namePart", creator.firstName, {"type":"given"});
+				mapProperty(name, "namePart", creator.lastName, { type: "family" });
+				mapProperty(name, "namePart", creator.firstName, { type: "given" });
 			}
 			
 			var role = doc.createElementNS(ns, "role");
 			mapProperty(role, "roleTerm", roleTerm,
-				{"type":"code", "authority":"marcrelator"});
+				{ type: "code", authority: "marcrelator" });
 			name.appendChild(role);
 			
-			var creatorParent = creator.creatorType === "seriesEditor" ? series
-				: creator.creatorType === "editor" ? topOrHost
-				: mods;
+			var creatorParent = (creator.creatorType === "seriesEditor")
+				? series
+				: ((creator.creatorType === "editor") ? topOrHost : mods);
 			creatorParent.appendChild(name);
 		}
 		
 		// XML tag recordInfo.recordOrigin; used to store our generator note
-		//mods.recordInfo.recordOrigin = "Zotero for Firefox "+Zotero.Utilities.getVersion();
+		// mods.recordInfo.recordOrigin = "Zotero for Firefox "+Zotero.Utilities.getVersion();
 		
 		/** FIELDS ON NEARLY EVERYTHING BUT NOT A PART OF THE CORE **/
 		
@@ -423,9 +484,9 @@ function doExport() {
 		
 		// XML tag detail; object field volume
 		const details = ["volume", "issue", "section"];
-		for (var i=0; i<details.length; i++) {
+		for (let i = 0; i < details.length; i++) {
 			if (item[details[i]] || item[details[i]] === 0) {
-				var detail = doc.createElementNS(ns, "detail"),
+				const detail = doc.createElementNS(ns, "detail"),
 					number = doc.createElementNS(ns, "number");
 				detail.setAttribute("type", details[i]);
 				number.appendChild(doc.createTextNode(item[details[i]]));
@@ -436,11 +497,17 @@ function doExport() {
 		
 		// XML tag detail; object field pages
 		if (item.pages) {
-			var range = Zotero.Utilities.getPageRange(item.pages),
-				extent = doc.createElementNS(ns, "extent");
+			var extent = doc.createElementNS(ns, "extent");
 			extent.setAttribute("unit", "pages");
-			mapProperty(extent, "start", range[0]);
-			mapProperty(extent, "end", range[1]);
+			if (item.pages.search(/^\d+[-–]\d+$/) != -1) {
+				var range = ZU.getPageRange(item.pages);
+				mapProperty(extent, "start", range[0]);
+				mapProperty(extent, "end", range[1]);
+			}
+			else {
+				extent.setAttribute("unit", "pages");
+				mapProperty(extent, "list", item.pages);
+			}
 			part.appendChild(extent);
 		}
 		
@@ -450,7 +517,7 @@ function doExport() {
 			topOrHost.appendChild(part);
 		}
 		
-		var originInfo = doc.createElementNS(ns, "originInfo")
+		var originInfo = doc.createElementNS(ns, "originInfo");
 		
 		// XML tag originInfo; object fields edition, place, publisher, year, date
 		mapProperty(originInfo, "edition", item.edition);
@@ -464,26 +531,30 @@ function doExport() {
 		}
 		if (item.publisher) {
 			mapProperty(originInfo, "publisher", item.publisher);
-		} else if (item.distributor) {
+		}
+		else if (item.distributor) {
 			mapProperty(originInfo, "distributor", item.publisher);
 		}
 		if (item.date) {
-			if (["book", "bookSection"].indexOf(item.itemType) !== -1) {
+			let dateType;
+			if (["book", "bookSection"].includes(item.itemType)) {
 				// Assume year is copyright date
-				var dateType = "copyrightDate";
-			} else if (["journalArticle", "magazineArticle", "newspaperArticle"].indexOf(item.itemType) !== -1) {
+				dateType = "copyrightDate";
+			}
+			else if (["journalArticle", "magazineArticle", "newspaperArticle"].includes(item.itemType)) {
 				// Assume date is date issued
-				var dateType = "dateIssued";
-			} else {
+				dateType = "dateIssued";
+			}
+			else {
 				// Assume date is date created
-				var dateType = "dateCreated";
+				dateType = "dateCreated";
 			}
 			mapProperty(originInfo, dateType, item.date);
 		}
 
 		if (item.numPages) {
 			var physicalDescription = doc.createElementNS(ns, "physicalDescription");
-			mapProperty(physicalDescription, "extent", item.numPages+" p.");
+			mapProperty(physicalDescription, "extent", item.numPages + " p.");
 			mods.appendChild(physicalDescription);
 		}
 
@@ -491,14 +562,17 @@ function doExport() {
 			// eXist Solutions points out that these types are more often
 			// continuing than not & will use this internally.
 			// Perhaps comment this out in the main distribution, though.
-			if (["journalArticle", "magazineArticle", "newspaperArticle"].indexOf(item.itemType) !== -1) {
+			if (["journalArticle", "magazineArticle", "newspaperArticle"].includes(item.itemType)) {
 				mapProperty(originInfo, "issuance", "continuing");
 			}
-			else if (["bookSection", "conferencePaper", "dictionaryEntry",
-					"encyclopediaArticle"].indexOf(item.itemType) !== -1) {
+			else if (["bookSection",
+				"conferencePaper",
+				"dictionaryEntry",
+				"encyclopediaArticle"].includes(item.itemType)) {
 				mapProperty(originInfo, "issuance", "monographic");
 			}
-		} else {
+		}
+		else {
 			// eXist Solutions points out that most types are more often
 			// monographic than not & will use this internally.
 			// Perhaps comment this out in the main distribution, though.
@@ -511,27 +585,27 @@ function doExport() {
 		}
 		
 		// XML tag identifier; object fields ISBN, ISSN
-		mapProperty(topOrHost, "identifier", item.ISBN, {"type":"isbn"});
-		mapProperty(topOrHost, "identifier", item.ISSN, {"type":"issn"});
-		mapProperty(mods, "identifier", item.DOI, {"type":"doi"});
+		mapProperty(topOrHost, "identifier", item.ISBN, { type: "isbn" });
+		mapProperty(topOrHost, "identifier", item.ISSN, { type: "issn" });
+		mapProperty(mods, "identifier", item.DOI, { type: "doi" });
 		
 		// XML tag relatedItem.name; object field conferenceName
 		if (item.conferenceName) {
-			var name = doc.createElementNS(ns, "name");
+			const name = doc.createElementNS(ns, "name");
 			name.setAttribute("type", "conference");
 			mapProperty(name, "namePart", item.conferenceName);
 		}
 		
 		// XML tag relatedItem.titleInfo; object field publication
 		if (item.publicationTitle) {
-			var titleInfo = doc.createElementNS(ns, "titleInfo");
+			titleInfo = doc.createElementNS(ns, "titleInfo");
 			mapProperty(titleInfo, "title", item.publicationTitle);
 			host.appendChild(titleInfo);
 		}
 		
 		// XML tag relatedItem.titleInfo; object field journalAbbreviation
 		if (item.journalAbbreviation) {
-			var titleInfo = doc.createElementNS(ns, "titleInfo");
+			titleInfo = doc.createElementNS(ns, "titleInfo");
 			titleInfo.setAttribute("type", "abbreviated");
 			mapProperty(titleInfo, "title", item.journalAbbreviation);
 			host.appendChild(titleInfo);
@@ -542,15 +616,15 @@ function doExport() {
 
 		// XML tag location.url; object field url
 		if (item.url) {
-			var location = doc.createElementNS(ns, "location");
-			var url = mapProperty(location, "url", item.url, {"usage":"primary display"});
+			const location = doc.createElementNS(ns, "location");
+			var url = mapProperty(location, "url", item.url, { usage: "primary display" });
 			if (url && item.accessDate) url.setAttribute("dateLastAccessed", item.accessDate);
 			mods.appendChild(location);
 		}
 				
 		// XML tag location.physicalLocation; object field archiveLocation
 		if (item.archiveLocation) {
-			var location = doc.createElementNS(ns, "location");
+			const location = doc.createElementNS(ns, "location");
 			mapProperty(location, "physicalLocation", item.archiveLocation);
 			topOrHost.appendChild(location);
 		}
@@ -559,14 +633,14 @@ function doExport() {
 		mapProperty(mods, "abstract", item.abstractNote);
 		
 		// XML tag series/titleInfo; object field series, seriesTitle, seriesText, seriesNumber
-		var titleInfo = doc.createElementNS(ns, "titleInfo");
+		titleInfo = doc.createElementNS(ns, "titleInfo");
 		mapProperty(titleInfo, "title", item.series);
 		mapProperty(titleInfo, "title", item.seriesTitle);
 		mapProperty(titleInfo, "subTitle", item.seriesText);
 		if (titleInfo.hasChildNodes()) series.appendChild(titleInfo);
 		
 		if (item.seriesNumber) {
-			var seriesPart = doc.createElementNS(ns, "part"),
+			const seriesPart = doc.createElementNS(ns, "part"),
 				detail = doc.createElementNS(ns, "detail"),
 				number = doc.createElementNS(ns, "number");
 			detail.setAttribute("type", "volume");
@@ -579,14 +653,14 @@ function doExport() {
 		/** NOTES **/
 		
 		if (Zotero.getOption("exportNotes")) {
-			for (var j=0; j<item.notes.length; j++) {
+			for (let j = 0; j < item.notes.length; j++) {
 				mapProperty(mods, "note", item.notes[j].note);
 			}
 		}
 		
 		/** TAGS **/
 		
-		for (var j=0; j<item.tags.length; j++) {
+		for (let j = 0; j < item.tags.length; j++) {
 			var subject = doc.createElementNS(ns, "subject"),
 				topic = doc.createElementNS(ns, "topic");
 			topic.appendChild(doc.createTextNode(item.tags[j].tag));
@@ -598,7 +672,7 @@ function doExport() {
 		
 		if (item.language) {
 			var language = doc.createElementNS(ns, "language");
-			mapProperty(language, "languageTerm", item.language, {"type":"text"});
+			mapProperty(language, "languageTerm", item.language, { type: "text" });
 			mods.appendChild(language);
 		}
 
@@ -617,7 +691,7 @@ function doExport() {
 		doc.documentElement.appendChild(mods);
 	}
 	
-	Zotero.write('<?xml version="1.0"?>'+"\n");
+	Zotero.write('<?xml version="1.0"?>\n');
 	var serializer = new XMLSerializer();
 	Zotero.write(serializer.serializeToString(doc));
 }
@@ -625,14 +699,14 @@ function doExport() {
 function processTitleInfo(titleInfo) {
 	var title = ZU.xpathText(titleInfo, "m:title[1]", xns).trim();
 	var subtitle = ZU.xpathText(titleInfo, "m:subTitle[1]", xns);
-	if (subtitle) title = title.replace(/:$/,'') + ": "+ subtitle.trim();
+	if (subtitle) title = title.replace(/:$/, '') + ": " + subtitle.trim();
 	var nonSort = ZU.xpathText(titleInfo, "m:nonSort[1]", xns);
 	if (nonSort) title = nonSort.trim() + " " + title;
 	var partNumber = ZU.xpathText(titleInfo, "m:partNumber[1]", xns);
 	var partName = ZU.xpathText(titleInfo, "m:partName[1]", xns);
-	if (partNumber && partName) title = title.replace(/\.$/,'') + ". "+ partNumber.trim() + ": " + partName.trim()
-	else if (partNumber) title = title.replace(/\.$/,'') + ". " + partNumber.trim()
-	else if (partName) title = title.replace(/\.$/,'') + ". " + partName.trim();
+	if (partNumber && partName) title = title.replace(/\.$/, '') + ". " + partNumber.trim() + ": " + partName.trim();
+	else if (partNumber) title = title.replace(/\.$/, '') + ". " + partNumber.trim();
+	else if (partName) title = title.replace(/\.$/, '') + ". " + partName.trim();
 	return title;
 }
 
@@ -653,29 +727,29 @@ function processTitle(contextElement) {
 function processGenre(contextElement) {
 	// Try to get itemType by treating local genre as Zotero item type
 	var genre = ZU.xpath(contextElement, 'm:genre[@authority="local"]', xns);
-	for (var i=0; i<genre.length; i++) {
-		var genreStr = genre[i].textContent;
+	for (let i = 0; i < genre.length; i++) {
+		const genreStr = genre[i].textContent;
 		if (Zotero.Utilities.itemTypeExists(genreStr)) return genreStr;
 	}
 	
 	// Try to get MARC genre and convert to an item type
 	genre = ZU.xpath(contextElement, 'm:genre[@authority="marcgt"] | m:genre[@authority="marc"]', xns);
-	for (var i=0; i<genre.length; i++) {
-		var genreStr = genre[i].textContent;
+	for (let i = 0; i < genre.length; i++) {
+		const genreStr = genre[i].textContent;
 		if (fromMarcGenre[genreStr]) return fromMarcGenre[genreStr];
 	}
 	
 	// Try to get DCT genre and convert to an item type
 	genre = ZU.xpath(contextElement, 'm:genre[@authority="dct"]', xns);
-	for (var i=0; i<genre.length; i++) {
-		var genreStr = genre[i].textContent.replace(/\s+/g, "");
+	for (let i = 0; i < genre.length; i++) {
+		const genreStr = genre[i].textContent.replace(/\s+/g, "");
 		if (dctGenres[genreStr]) return dctGenres[genreStr];
 	}
 	
 	// Try unlabeled genres
 	genre = ZU.xpath(contextElement, 'm:genre', xns);
-	for (var i=0; i<genre.length; i++) {
-		var genreStr = genre[i].textContent;
+	for (let i = 0; i < genre.length; i++) {
+		const genreStr = genre[i].textContent;
 		
 		// Zotero
 		if (Zotero.Utilities.itemTypeExists(genreStr)) return genreStr;
@@ -688,7 +762,7 @@ function processGenre(contextElement) {
 		if (dctGenres[dctGenreStr]) return dctGenres[dctGenreStr];
 		
 		// Try regexps
-		for (var type in modsTypeRegex) {
+		for (let type in modsTypeRegex) {
 			if (modsTypeRegex[type].exec(genreStr)) return type;
 		}
 	}
@@ -702,7 +776,7 @@ function processItemType(contextElement) {
 	
 	// Try to get type information from typeOfResource
 	var typeOfResource = ZU.xpath(contextElement, 'm:typeOfResource', xns);
-	for (var i=0; i<typeOfResource.length; i++) {
+	for (let i = 0; i < typeOfResource.length; i++) {
 		var typeOfResourceStr = typeOfResource[i].textContent.trim();
 		
 		// Try list
@@ -711,33 +785,44 @@ function processItemType(contextElement) {
 		}
 		
 		// Try regexps
-		for (var type in modsTypeRegex) {
+		for (let type in modsTypeRegex) {
 			if (modsTypeRegex[type].exec(typeOfResourceStr)) return type;
 		}
 	}
 	
-	var hasHost = false;
-	var periodical = false;
-	
 	// Try to get genre data from host
 	var hosts = ZU.xpath(contextElement, 'm:relatedItem[@type="host"]', xns);
-	for (var i=0; i<hosts.length; i++) {
+	for (let i = 0; i < hosts.length; i++) {
 		type = processGenre(hosts[i]);
 		if (type) return type;
 	}
 		
 	// Figure out if it's a periodical
-	var periodical = ZU.xpath(contextElement, 
+	var periodical = ZU.xpath(contextElement,
 		'm:relatedItem[@type="host"]/m:originInfo/m:issuance[text()="continuing" or text()="serial"]',
 		xns).length;
 
 	// Try physicalDescription/internetMediaType
 	var internetMediaTypes = ZU.xpath(contextElement, 'm:physicalDescription/m:internetMediaType', xns);
-	for (var i=0; i<internetMediaTypes.length; i++) {
+	for (let i = 0; i < internetMediaTypes.length; i++) {
 		var internetMediaTypeStr = internetMediaTypes[i].textContent.trim();
 		if (modsInternetMediaTypes[internetMediaTypeStr]) {
 			return modsInternetMediaTypes[internetMediaTypeStr];
-		};
+		}
+	}
+	
+	var isLetter = !!ZU.xpath(contextElement,
+		'm:name/m:role/m:roleTerm[@type="code"][contains(@authority, "marc") or contains(@authority, "MARC")][text()="rcp"]',
+		xns).length;
+	if (isLetter) {
+		return 'letter';
+	}
+	
+	// for US congressional publications
+	// (this is a nonstandard extension field)
+	var isHearing = !!ZU.xpath(contextElement, '//m:congCommittee', xns).length;
+	if (isHearing) {
+		return 'hearing';
 	}
 
 	// As a last resort, if it has a host, let's set it to book chapter, so we can import
@@ -752,7 +837,6 @@ function processItemType(contextElement) {
 
 function processCreator(name, itemType, defaultCreatorType) {
 	var creator = {};
-	var backupName = new Array();
 	creator.firstName = ZU.xpathText(name, 'm:namePart[@type="given"]', xns, " ") || undefined;
 	creator.lastName = ZU.xpathText(name, 'm:namePart[@type="family"]', xns, " ");
 	
@@ -763,10 +847,12 @@ function processCreator(name, itemType, defaultCreatorType) {
 		if (!backupName) return null;
 		
 		if (isPersonalName) {
-			creator = ZU.cleanAuthor(backupName.replace(/[\[\(][^A-Za-z]*[\]\)]/g, ''),
-				"author", true);
+			let cleanedBackupName = backupName.replace(/[[(][^A-Za-z]*[\])]/g, '');
+			creator = ZU.cleanAuthor(cleanedBackupName,
+				"author", cleanedBackupName.includes(','));
 			delete creator.creatorType;
-		} else {
+		}
+		else {
 			creator.lastName = ZU.trimInternal(backupName);
 			creator.fieldMode = 1;
 		}
@@ -775,25 +861,46 @@ function processCreator(name, itemType, defaultCreatorType) {
 	if (!creator.lastName) return null;
 
 	// Look for roles
-	var roles = ZU.xpath(name, 'm:role/m:roleTerm[@type="text" or not(@type)]', xns);
+	let roles = ZU.xpath(name, 'm:role/m:roleTerm[@type="text" or not(@type)]', xns);
 	var validCreatorsForItemType = ZU.getCreatorsForType(itemType);
-	for (var i=0; i<roles.length; i++) {
-		var roleStr = roles[i].textContent.toLowerCase();
-		if (validCreatorsForItemType.indexOf(roleStr) !== -1) {
+	for (let role of roles) {
+		const roleStr = role.textContent.toLowerCase();
+		if (validCreatorsForItemType.includes(roleStr)) {
 			creator.creatorType = roleStr;
 		}
 	}
 	
+	// we want to exclude names with no role other than publisher, distributor,
+	// etc., because they aren't really creators in Zotero's sense of the term
+	// (and they'll end up in other fields later). so we'll keep track of whether
+	// we've encountered one of [pbl, dst] and *no other* relator types, and if
+	// we do, we throw the creator away.
+	let onlyPublisher;
+	
 	if (!creator.creatorType) {
 		// Look for MARC roles
-		var roles = ZU.xpath(name, 'm:role/m:roleTerm[@type="code"][@authority="marcrelator"]', xns);
-		for (var i=0; i<roles.length; i++) {
-			var roleStr = roles[i].textContent.toLowerCase();
-			if (marcRelators[roleStr]) creator.creatorType = marcRelators[roleStr];
+		roles = ZU.xpath(name, 'm:role/m:roleTerm[@type="code"][contains(@authority, "marc") or contains(@authority, "MARC")]', xns);
+		for (let i = 0; i < roles.length; i++) {
+			const roleStr = roles[i].textContent.toLowerCase();
+			if (roleStr == 'pbl' || roleStr == 'dst') {
+				if (onlyPublisher === undefined) {
+					onlyPublisher = true;
+				}
+			}
+			else {
+				onlyPublisher = false;
+			}
+			let marcType = marcRelators[roleStr];
+			if (marcType && validCreatorsForItemType.includes(marcType)) {
+				creator.creatorType = marcRelators[roleStr];
+			}
 		}
 		
-		// Default to author
 		if (!creator.creatorType) creator.creatorType = defaultCreatorType;
+	}
+	
+	if (onlyPublisher) {
+		return null;
 	}
 
 	return creator;
@@ -801,36 +908,36 @@ function processCreator(name, itemType, defaultCreatorType) {
 
 function processCreators(contextElement, newItem, defaultCreatorType) {
 	var names = ZU.xpath(contextElement, 'm:name', xns);
-	for (var i=0; i<names.length; i++) {
+	for (let i = 0; i < names.length; i++) {
 		var creator = processCreator(names[i], newItem.itemType, defaultCreatorType);
 		if (creator) newItem.creators.push(creator);
 	}
 }
 
 function processExtent(extent, newItem) {
-	//try to parse extent according to
-	//http://www.loc.gov/standards/mods/v3/mods-userguide-elements.html#extent
-	//i.e. http://www.loc.gov/marc/bibliographic/bd300.html
-	//and http://www.loc.gov/marc/bibliographic/bd306.html
+	// try to parse extent according to
+	// http://www.loc.gov/standards/mods/v3/mods-userguide-elements.html#extent
+	// i.e. http://www.loc.gov/marc/bibliographic/bd300.html
+	// and http://www.loc.gov/marc/bibliographic/bd306.html
 	var extentRe = new RegExp(
-		'^(.*?)(?=(?:[:;]|$))' +	//extent [1]
-		'(?::.*?(?=(?:;|$)))?' +	//other physical details
-		'(?:;(.*))?' +				//dimensions [2]
-		'$'							//make sure to capture the rest of the line
-		);
+		'^(.*?)(?=(?:[:;]|$))'	// extent [1]
+		+ '(?::.*?(?=(?:;|$)))?'	// other physical details
+		+ '(?:;(.*))?'				// dimensions [2]
+		+ '$'							// make sure to capture the rest of the line
+	);
 
 	var ma = extentRe.exec(extent);
 	if (ma && ma[1]) {
-		//drop supplemental info (i.e. everything after +)
-		if (ma[1].indexOf('+') >= 0) {
+		// drop supplemental info (i.e. everything after +)
+		if (ma[1].includes('+')) {
 			ma[1] = ma[1].slice(0, ma[1].indexOf('+'));
 		}
 
 		// pages
 		if (!newItem.pages && ZU.fieldIsValidForType('pages', newItem.itemType)) {
-			var pages = ma[1].match(/\bp(?:ages?)?\.?\s+([a-z]?\d+(?:\s*-\s*[a-z]?\d+))/i);
+			const pages = ma[1].match(/\bp(?:ages?)?\.?\s+([a-z]?\d+(?:\s*-\s*[a-z]?\d+))/i);
 			if (pages) {
-				newItem.pages = pages[1].replace(/\s+/,'');
+				newItem.pages = pages[1].replace(/\s+/, '');
 			}
 		}
 
@@ -842,7 +949,7 @@ function processExtent(extent, newItem) {
 			}
 		}
 
-		//issue
+		// issue
 		if (!newItem.issue && ZU.fieldIsValidForType('issue', newItem.itemType)) {
 			var issue = ma[1].match(/\b(?:no?|iss(?:ue)?)\.?\s+(\d+)/i);
 			if (issue) {
@@ -852,7 +959,7 @@ function processExtent(extent, newItem) {
 
 		// numPages
 		if (!newItem.numPages && ZU.fieldIsValidForType('numPages', newItem.itemType)) {
-			var pages = ma[1].match(/(\d+)\s*p(?:ages?)?\b/i);
+			const pages = ma[1].match(/(\d+)\s*p(?:ages?)?\b/i);
 			if (pages) {
 				newItem.numPages = pages[1];
 			}
@@ -860,8 +967,8 @@ function processExtent(extent, newItem) {
 
 		// numberOfVolumes
 		if (!newItem.numberOfVolumes && ZU.fieldIsValidForType('numberOfVolumes', newItem.itemType)) {
-			//includes volumes, scores, sound (discs, but I think there could be others)
-			//video (cassette, but could have others)
+			// includes volumes, scores, sound (discs, but I think there could be others)
+			// video (cassette, but could have others)
 			var nVol = ma[1].match(/(\d+)\s+(?:v(?:olumes?)?|scores?|sound|video)\b/i);
 			if (nVol) {
 				newItem.numberOfVolumes = nVol[1];
@@ -870,32 +977,34 @@ function processExtent(extent, newItem) {
 
 		// runningTime
 		if (!newItem.runningTime && ZU.fieldIsValidForType('runningTime', newItem.itemType)) {
-			//several possible formats:
+			// several possible formats:
 			var rt;
 			// 002016 = 20 min., 16 sec.
-			if (rt = ma[1].match(/\b(\d{2,3})(\d{2})(\d{2})\b/)) {
+			if (rt = ma[1].match(/\b(\d{2,3})(\d{2})(\d{2})\b/)) { // eslint-disable-line no-cond-assign
 				newItem.runningTime = rt[1] + ':' + rt[2] + ':' + rt[3];
 			// (ca. 124 min.)
-			} else if (rt = ma[1].match(/((\d+)\s*((?:hours?|hrs?)|(?:minutes?|mins?)|(?:seconds?|secs?))\.?\s+)?((\d+)\s*((?:hours?|hrs?)|(?:minutes?|mins?)|(?:seconds?|secs?))\.?\s+)?((\d+)\s*((?:hours?|hrs?)|(?:minutes?|mins?)|(?:seconds?|secs?))\.?)/i)) {
-				var hrs=0, mins=0, secs=0;
-				for (var i=2; i<7; i+=2) {
+			}
+			// eslint-disable-next-line no-cond-assign
+			else if (rt = ma[1].match(/((\d+)\s*((?:hours?|hrs?)|(?:minutes?|mins?)|(?:seconds?|secs?))\.?\s+)?((\d+)\s*((?:hours?|hrs?)|(?:minutes?|mins?)|(?:seconds?|secs?))\.?\s+)?((\d+)\s*((?:hours?|hrs?)|(?:minutes?|mins?)|(?:seconds?|secs?))\.?)/i)) {
+				var hrs = 0, mins = 0, secs = 0;
+				for (let i = 2; i < 7; i += 2) {
 					if (!rt[i]) continue;
 
 					switch (rt[i].charAt(0).toLowerCase()) {
 						case 'h':
-							hrs = rt[i-1];
+							hrs = rt[i - 1];
 							break;
 						case 'm':
-							mins = rt[i-1];
+							mins = rt[i - 1];
 							break;
 						case 's':
-							secs = rt[i-1];
+							secs = rt[i - 1];
 							break;
 					}
 				}
 
 				if (secs > 59) {
-					mins += secs/60;
+					mins += secs / 60;
 					secs %= 60;
 				}
 				if (secs < 10) {
@@ -903,17 +1012,18 @@ function processExtent(extent, newItem) {
 				}
 
 				if (mins > 59) {
-					hrs += hrs/60;
+					hrs += hrs / 60;
 					mins %= 60;
 				}
 				if (mins < 10) {
 					mins = '0' + mins;
 				}
 
-				newItem.runningTime = ( (hrs*1) ? hrs + ':' : '' ) + mins + ':' + secs;
+				newItem.runningTime = ((hrs * 1) ? hrs + ':' : '') + mins + ':' + secs;
 			// (46:00)
-			} else if (rt = ma[1].match(/\b(\d{0,3}:\d{1,2}:\d{2})\b/)) {
-				newItem.runningTime = rt[1];								
+			}
+			else if (rt = ma[1].match(/\b(\d{0,3}:\d{1,2}:\d{2})\b/)) { // eslint-disable-line no-cond-assign
+				newItem.runningTime = rt[1];
 			}
 		}
 	}
@@ -921,11 +1031,11 @@ function processExtent(extent, newItem) {
 	// dimensions: artworkSize
 	// only part of artwork right now, but maybe will be in other types in the future
 	if (!newItem.artworkSize && ma && ma[2] && ZU.fieldIsValidForType('artworkSize', newItem.itemType)) {
-		//drop supplemental info (i.e. everything after +)
-		if (ma[2].indexOf('+') >= 0) {
+		// drop supplemental info (i.e. everything after +)
+		if (ma[2].includes('+')) {
 			ma[2] = ma[2].slice(0, ma[2].indexOf('+'));
 		}
-		//26 cm. or 33 x 15 cm. or 1/2 in. or 1 1/2 x 15/16 in.
+		// 26 cm. or 33 x 15 cm. or 1/2 in. or 1 1/2 x 15/16 in.
 		var dim = ma[2].match(/(?:(?:(?:\d+\s+)?\d+\/)?\d+\s*x\s*)?(?:(?:\d+\s+)?\d+\/)?\d+\s*(?:cm|mm|m|in|ft)\./i);
 		if (dim) newItem.artworkSize = dim[0];
 	}
@@ -934,16 +1044,16 @@ function processExtent(extent, newItem) {
 function processIdentifiers(contextElement, newItem) {
 	var isbnNodes = ZU.xpath(contextElement, './/m:identifier[@type="isbn"]', xns),
 		isbns = [];
-	for (var i=0; i<isbnNodes.length; i++) {		
-		var m = isbnNodes[i].textContent.replace(/\s*-\s*/g,'').match(/(?:[\dX]{10}|\d{13})/i);
+	for (let i = 0; i < isbnNodes.length; i++) {
+		const m = isbnNodes[i].textContent.replace(/\s*-\s*/g, '').match(/(?:[\dX]{10}|\d{13})/i);
 		if (m) isbns.push(m[0]);
 	}
 	if (isbns.length) newItem.ISBN = isbns.join(", ");
 	
 	var issnNodes = ZU.xpath(contextElement, './/m:identifier[@type="issn"]', xns),
 		issns = [];
-	for (var i=0; i<issnNodes.length; i++) {		
-		var m = issnNodes[i].textContent.match(/\b\d{4}\s*-?\s*\d{4}\b/i);
+	for (let i = 0; i < issnNodes.length; i++) {
+		const m = issnNodes[i].textContent.match(/\b\d{4}\s*-?\s*\d{4}\b/i);
 		if (m) issns.push(m[0]);
 	}
 	if (issns.length) newItem.ISSN = issns.join(", ");
@@ -952,10 +1062,11 @@ function processIdentifiers(contextElement, newItem) {
 }
 
 function getFirstResult(contextNode, xpaths) {
-	for (var i=0; i<xpaths.length; i++) {
+	for (let i = 0; i < xpaths.length; i++) {
 		var results = ZU.xpath(contextNode, xpaths[i], xns);
 		if (results.length) return results[0].textContent;
 	}
+	return null;
 }
 
 function doImport() {
@@ -963,8 +1074,8 @@ function doImport() {
 	
 	var modsElements = ZU.xpath(xml, "/m:mods | /m:modsCollection/m:mods", xns);
 	
-	for (var iModsElements=0, nModsElements=modsElements.length;
-			iModsElements<nModsElements; iModsElements++) {
+	for (let iModsElements = 0, nModsElements = modsElements.length;
+		iModsElements < nModsElements; iModsElements++) {
 		var modsElement = modsElements[iModsElements],
 			newItem = new Zotero.Item();
 		
@@ -980,12 +1091,11 @@ function doImport() {
 		// itemType
 		newItem.itemType = processItemType(modsElement);
 		
-		var isPartialItem = partialItemTypes.indexOf(newItem.itemType) !== -1;
-		
 		// TODO: thesisType, type
 		
 		// creators
-		processCreators(modsElement, newItem, "author");
+		let defaultCreatorType = ZU.getCreatorsForType(newItem.itemType)[0];
+		processCreators(modsElement, newItem, defaultCreatorType);
 		// source
 		newItem.source = ZU.xpathText(modsElement, 'm:recordInfo/m:recordContentSource', xns);
 		// accessionNumber
@@ -993,13 +1103,26 @@ function doImport() {
 		// rights
 		newItem.rights = ZU.xpathText(modsElement, 'm:accessCondition', xns);
 		
+		/** US GOVERNMENT EXTENSIONS **/
+		
+		if (newItem.itemType == 'hearing') {
+			newItem.committee = ZU.xpathText(modsElement,
+				'm:extension/m:congCommittee/m:name[@type="authority-standard"]', xns);
+			newItem.legislativeBody = ZU.capitalizeTitle(ZU.xpathText(modsElement,
+				'm:extension/m:chamber', xns), true);
+			newItem.session = ZU.xpathText(modsElement,
+				'm:extension/m:congress', xns); // this is not great
+			newItem.documentNumber = ZU.xpathText(modsElement,
+				'm:extension/m:number', xns);
+		}
+		
 		/** SUPPLEMENTAL FIELDS **/
 		
 		var part = [], originInfo = [];
 		
 		// host
-		var hostNodes = ZU.xpath(modsElement, 'm:relatedItem[@type="host"]', xns)
-		for (var i=0; i<hostNodes.length; i++) {
+		var hostNodes = ZU.xpath(modsElement, 'm:relatedItem[@type="host"]', xns);
+		for (let i = 0; i < hostNodes.length; i++) {
 			var host = hostNodes[i];
 			
 			// publicationTitle
@@ -1007,7 +1130,7 @@ function doImport() {
 			
 			// journalAbbreviation
 			if (!newItem.journalAbbreviation) {
-				var titleInfo = ZU.xpath(host, 'm:titleInfo[@type="abbreviated"]', xns);
+				const titleInfo = ZU.xpath(host, 'm:titleInfo[@type="abbreviated"]', xns);
 				if (titleInfo.length) {
 					newItem.journalAbbreviation = processTitleInfo(titleInfo[0]);
 				}
@@ -1025,17 +1148,18 @@ function doImport() {
 			originInfo = originInfo.concat(ZU.xpath(host, 'm:originInfo', xns));
 		}
 		
-		if (!newItem.publicationTitle) newItem.publicationTitle = newItem.journalAbbreviation;		
+		if (!newItem.publicationTitle) newItem.publicationTitle = newItem.journalAbbreviation;
 		
 		// series
 		var seriesNodes = ZU.xpath(modsElement, './/m:relatedItem[@type="series"]', xns);
-		for (var i=0; i<seriesNodes.length; i++) {
+		for (let i = 0; i < seriesNodes.length; i++) {
 			var seriesNode = seriesNodes[i];
 			var series = ZU.xpathText(seriesNode, 'm:titleInfo/m:title', xns);
 			
 			if (ZU.fieldIsValidForType('series', newItem.itemType)) {
 				newItem.series = series;
-			} else if (ZU.fieldIsValidForType('seriesTitle', newItem.itemType)) {
+			}
+			else if (ZU.fieldIsValidForType('seriesTitle', newItem.itemType)) {
 				newItem.seriesTitle = series;
 			}
 			
@@ -1058,16 +1182,16 @@ function doImport() {
 		if (part.length) {
 			// volume, issue, section
 			var details = ["volume", "issue", "section"];
-			for (var i=0; i<details.length; i++) {
+			for (let i = 0; i < details.length; i++) {
 				var detail = details[i];
 				
-				newItem[detail] = getFirstResult(part, ['m:detail[@type="'+detail+'"]/m:number',
-					'm:detail[@type="'+detail+'"]']);
+				newItem[detail] = getFirstResult(part, ['m:detail[@type="' + detail + '"]/m:number',
+					'm:detail[@type="' + detail + '"]']);
 			}
 
 			// pages and other extent information
-			var extents = ZU.xpath(part, "m:extent", xns);
-			for (var i=0; i<extents.length; i++) {
+			const extents = ZU.xpath(part, "m:extent", xns);
+			for (let i = 0; i < extents.length; i++) {
 				var extent = extents[i],
 					unit = extent.getAttribute("unit");
 				
@@ -1078,24 +1202,28 @@ function doImport() {
 					if (pagesStart || pagesEnd) {
 						if (pagesStart == pagesEnd) {
 							newItem.pages = pagesStart;
-						} else if (pagesStart && pagesEnd) {
-							newItem.pages = pagesStart+"-"+pagesEnd;
-						} else {
-							newItem.pages = pagesStart+pagesEnd;
+						}
+						else if (pagesStart && pagesEnd) {
+							newItem.pages = pagesStart + "-" + pagesEnd;
+						}
+						else {
+							newItem.pages = pagesStart + pagesEnd;
 						}
 					}
-				} else {
+				}
+				else {
 					processExtent(extent.textContent, newItem);
 				}
 			}
 			
 			newItem.date = getFirstResult(part, ['m:date[not(@point="end")][@encoding]',
-				'm:date[not(@point="end")]', 'm:date']);
+				'm:date[not(@point="end")]',
+				'm:date']);
 		}
 
 		// physical description
-		var extents = ZU.xpath(modsElement, "m:physicalDescription/m:extent", xns);
-		for (var i=0; i<extents.length; i++) {
+		const extents = ZU.xpath(modsElement, "m:physicalDescription/m:extent", xns);
+		for (let i = 0; i < extents.length; i++) {
 			processExtent(extents[i].textContent, newItem);
 		}
 
@@ -1122,9 +1250,12 @@ function doImport() {
 			
 			// date
 			newItem.date = getFirstResult(originInfo, ['m:copyrightDate[@encoding]',
-				'm:copyrightDate', 'm:dateIssued[not(@point="end")][@encoding]',
-				'm:dateIssued[not(@point="end")]', 'm:dateIssued',
-				'm:dateCreated[@encoding]',	'm:dateCreated']) || newItem.date;
+				'm:copyrightDate',
+				'm:dateIssued[not(@point="end")][@encoding]',
+				'm:dateIssued[not(@point="end")]',
+				'm:dateIssued',
+				'm:dateCreated[@encoding]',
+				'm:dateCreated']) || newItem.date;
 			
 			// lastModified
 			newItem.lastModified = getFirstResult(originInfo, ['m:dateModified[@encoding]',
@@ -1143,16 +1274,27 @@ function doImport() {
 
 		// attachments and url
 		var urlNodes = ZU.xpath(modsElement, 'm:location/m:url', xns);
-		for (var i=0; i<urlNodes.length; i++) {
-			var urlNode = urlNodes[0],
-				access = urlNode.getAttribute("access"),
+		for (let urlNode of urlNodes) {
+			var access = urlNode.getAttribute("access"),
 				usage = urlNode.getAttribute("usage");
 			if (access === "raw object") {
 				var attachment = {
-					title:(urlNode.getAttribute("displayLabel") || "Attachment"),
-					path:urlNode.textContent
+					title: (urlNode.getAttribute("displayLabel") || "Attachment"),
+					url: urlNode.textContent
 				};
-				if (attachment.path.substr(-4) === ".pdf") attachment.mimeType = "application/pdf";
+				if (attachment.url.substr(-4) === ".pdf") {
+					attachment.mimeType = "application/pdf";
+				}
+				else if (/\.html?$/.test(attachment.url)) {
+					attachment.mimeType = "text/html";
+				}
+				else if (/\.jpe?g$/.test(attachment.url)) {
+					attachment.mimeType = "image/jpeg";
+				}
+				else if (/\.png$/.test(attachment.url)) {
+					attachment.mimeType = "image/png";
+				}
+				
 				newItem.attachments.push(attachment);
 			}
 			
@@ -1171,23 +1313,22 @@ function doImport() {
 		
 		/** NOTES **/
 		var noteNodes = ZU.xpath(modsElement, 'm:note', xns);
-		for (var i=0; i<noteNodes.length; i++) {
+		for (let i = 0; i < noteNodes.length; i++) {
 			var note = noteNodes[i];
 			newItem.notes.push({ note:
-				(note.hasAttribute("type") ? note.getAttribute("type") + ': ':'') +
-				note.textContent
-			});
+				(note.hasAttribute("type") ? note.getAttribute("type") + ': ' : '')
+				+ note.textContent });
 		}
 
 		// ToC - goes into notes
 		var tocNodes = ZU.xpath(modsElement, 'm:tableOfContents', xns);
-		for (var i=0; i<tocNodes.length; i++) {
-			newItem.notes.push({note:'Table of Contents: ' + tocNodes[i].textContent});
+		for (let i = 0; i < tocNodes.length; i++) {
+			newItem.notes.push({ note: 'Table of Contents: ' + tocNodes[i].textContent });
 		}
 
 		/** TAGS **/
 		var tagNodes = ZU.xpath(modsElement, 'm:subject/m:topic', xns);
-		for (var i=0; i<tagNodes.length; i++) {
+		for (let i = 0; i < tagNodes.length; i++) {
 			newItem.tags.push(ZU.trimInternal(tagNodes[i].textContent));
 		}
 
@@ -1202,39 +1343,38 @@ function doImport() {
 		
 		// Language
 		// create an array of languages
-		var languages = [];
+		var languageNames = [];
+		var languageCodes = [];
 		var languageNodes = ZU.xpath(modsElement, 'm:language', xns);
-		for (var i=0; i<languageNodes.length; i++) {
-			var code = false,
-				languageNode = languageNodes[i],
-				languageTerms = ZU.xpath(languageNode, 'm:languageTerm', xns);
-				
-			for (var j=0; j<languageTerms.length; j++) {
-				var term = languageTerms[j],
-					termType = term.getAttribute("type");
-				
+		for (let languageNode of languageNodes) {
+			var languageTerms = ZU.xpath(languageNode, 'm:languageTerm', xns);
+			
+			if (!languageTerms.length
+				&& languageNode.childNodes.length === 1
+				&& languageNode.firstChild.nodeType === 3 /* Node.TEXT_NODE*/) {
+				languageCodes.push(languageNode.firstChild.nodeValue);
+				continue;
+			}
+			
+			for (let term of languageTerms) {
+				var termType = term.getAttribute("type");
+
 				if (termType === "text") {
-					languages.push(term.textContent);
-					code = false;
-					break;
-				// code authorities should be used, not ignored
-				// but we ignore them for now
-				} else if (termType === "code" || term.hasAttribute("authority")) {
-					code = term.textContent;
+					languageNames.push(term.textContent);
+				}
+				else if (termType === "code" || term.hasAttribute("authority")) {
+					languageCodes.push(term.textContent);
 				}
 			}
-			// If we have a code or text content of the node
-			// (prefer the former), then we add that
-			if (code || (languageNode.childNodes.length === 1
-					&& languageNode.firstChild.nodeType === 3 /* Node.TEXT_NODE*/
-					&& (code = languageNode.firstChild.nodeValue))) {
-				languages.push(code);
-			}
 		}
+		
+		// prefer language codes to avoid localized language names in metadata
+		let languages = languageCodes.length ? languageCodes : languageNames;
+		
 		// join the list separated by semicolons & add it to zotero item
 		newItem.language = languages.join('; ');
 		
-		Zotero.setProgress(iModsElements/nModsElements*100);
+		Zotero.setProgress(iModsElements / nModsElements * 100);
 		newItem.complete();
 	}
 }
@@ -1262,10 +1402,18 @@ var testCases = [
 				"websiteTitle": "Election 2002 Web Archive",
 				"attachments": [],
 				"tags": [
-					"Democratic Party (AK)",
-					"Election",
-					"Elections",
-					"Governors"
+					{
+						"tag": "Democratic Party (AK)"
+					},
+					{
+						"tag": "Election"
+					},
+					{
+						"tag": "Elections"
+					},
+					{
+						"tag": "Governors"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -1287,15 +1435,21 @@ var testCases = [
 					}
 				],
 				"date": "1889",
-				"language": "English",
+				"language": "eng",
 				"rights": "Personal, noncommercial use of this item is permitted in the United States of America. Please see http://digital.library.upenn.edu/women/ for other rights and restrictions that may apply to this resource.",
 				"url": "http://digital.library.upenn.edu/women/alleman/gettysburg/gettysburg.html",
 				"websiteTitle": "A Celebration of Women Writers: Americana",
 				"attachments": [],
 				"tags": [
-					"Gettysburg (Pa.) -- History -- Civil War, 1861-1865",
-					"Gettysburg, Battle of, Gettysburg, Pa., 1863",
-					"United States -- History -- Civil War, 1861-1865 -- Campaigns"
+					{
+						"tag": "Gettysburg (Pa.) -- History -- Civil War, 1861-1865"
+					},
+					{
+						"tag": "Gettysburg, Battle of, Gettysburg, Pa., 1863"
+					},
+					{
+						"tag": "United States -- History -- Civil War, 1861-1865 -- Campaigns"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -1313,7 +1467,7 @@ var testCases = [
 					{
 						"firstName": "Charles Weever",
 						"lastName": "Cushman",
-						"creatorType": "author"
+						"creatorType": "artist"
 					}
 				],
 				"date": "2003",
@@ -1322,10 +1476,18 @@ var testCases = [
 				"url": "http://purl.dlib.indiana.edu/iudl/archives/cushman/P07803",
 				"attachments": [],
 				"tags": [
-					"Mountains",
-					"Snow",
-					"Telescope Peak (Inyo County, Calif.)",
-					"Zabriskie Point (Calif.)"
+					{
+						"tag": "Mountains"
+					},
+					{
+						"tag": "Snow"
+					},
+					{
+						"tag": "Telescope Peak (Inyo County, Calif.)"
+					},
+					{
+						"tag": "Zabriskie Point (Calif.)"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -1355,10 +1517,18 @@ var testCases = [
 				"volume": "3",
 				"attachments": [],
 				"tags": [
-					"College librarians",
-					"College librarians",
-					"Recruiting",
-					"Selection and appointment"
+					{
+						"tag": "College librarians"
+					},
+					{
+						"tag": "College librarians"
+					},
+					{
+						"tag": "Recruiting"
+					},
+					{
+						"tag": "Selection and appointment"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -1388,14 +1558,30 @@ var testCases = [
 				"publisher": "Cornell University Press",
 				"attachments": [],
 				"tags": [
-					"Journalism",
-					"Mass media",
-					"Political aspects",
-					"Political aspects",
-					"Politics and government",
-					"Press and politics",
-					"Talk shows",
-					"Television and politics"
+					{
+						"tag": "Journalism"
+					},
+					{
+						"tag": "Mass media"
+					},
+					{
+						"tag": "Political aspects"
+					},
+					{
+						"tag": "Political aspects"
+					},
+					{
+						"tag": "Politics and government"
+					},
+					{
+						"tag": "Press and politics"
+					},
+					{
+						"tag": "Talk shows"
+					},
+					{
+						"tag": "Television and politics"
+					}
 				],
 				"notes": [
 					{
@@ -1572,8 +1758,12 @@ var testCases = [
 				"publisher": "Nova Music",
 				"attachments": [],
 				"tags": [
-					"Operas",
-					"Songs (High voice) with instrumental ensemble"
+					{
+						"tag": "Operas"
+					},
+					{
+						"tag": "Songs (High voice) with instrumental ensemble"
+					}
 				],
 				"notes": [
 					{
@@ -1625,13 +1815,27 @@ var testCases = [
 				"publisher": "Center for Computer Assisted Research in the Humanities",
 				"attachments": [],
 				"tags": [
-					"Data processing",
-					"Data processing",
-					"Music",
-					"Musicians",
-					"Musicologists",
-					"Musicology",
-					"Musicology"
+					{
+						"tag": "Data processing"
+					},
+					{
+						"tag": "Data processing"
+					},
+					{
+						"tag": "Music"
+					},
+					{
+						"tag": "Musicians"
+					},
+					{
+						"tag": "Musicologists"
+					},
+					{
+						"tag": "Musicology"
+					},
+					{
+						"tag": "Musicology"
+					}
 				],
 				"notes": [
 					{
@@ -1659,12 +1863,12 @@ var testCases = [
 					{
 						"lastName": "Library of Congress: Music Division.",
 						"fieldMode": 1,
-						"creatorType": "author"
+						"creatorType": "programmer"
 					},
 					{
 						"lastName": "Library of Congress: National Digital Library Program.",
 						"fieldMode": 1,
-						"creatorType": "author"
+						"creatorType": "programmer"
 					}
 				],
 				"date": "1998",
@@ -1675,7 +1879,9 @@ var testCases = [
 				"url": "http://hdl.loc.gov/loc.music/collmus.mu000010",
 				"attachments": [],
 				"tags": [
-					"Ballroom dancing"
+					{
+						"tag": "Ballroom dancing"
+					}
 				],
 				"notes": [
 					{
@@ -1723,16 +1929,18 @@ var testCases = [
 				],
 				"date": "1994",
 				"ISBN": "1563963442",
-				"bookTitle": "Journal of vacuum science & technology. B, Microelectronics and nanometer structures processing, measurement and phenomena",
 				"callNumber": "TS695.25 .I57 1993, 621.3815/2",
 				"language": "eng",
-				"pages": "813-998",
 				"place": "New York",
 				"publisher": "Published for the American Vacuum Society by the American Institute of Physics",
 				"attachments": [],
 				"tags": [
-					"Congresses",
-					"Ion implantation"
+					{
+						"tag": "Congresses"
+					},
+					{
+						"tag": "Ion implantation"
+					}
 				],
 				"notes": [
 					{
@@ -1757,7 +1965,7 @@ var testCases = [
 					{
 						"lastName": "Campbell County Chamber of Commerce",
 						"fieldMode": 1,
-						"creatorType": "author"
+						"creatorType": "cartographer"
 					}
 				],
 				"date": "1982",
@@ -1768,7 +1976,9 @@ var testCases = [
 				"scale": "1:510,000",
 				"attachments": [],
 				"tags": [
-					"Maps"
+					{
+						"tag": "Maps"
+					}
 				],
 				"notes": [
 					{
@@ -1793,6 +2003,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
+						"firstName": "",
 						"lastName": "Joseph",
 						"creatorType": "author"
 					},
@@ -1813,11 +2024,21 @@ var testCases = [
 				"publisher": "Nova Music",
 				"attachments": [],
 				"tags": [
-					"Excerpts, Arranged",
-					"Operas",
-					"Scores and parts",
-					"Scores and parts",
-					"Songs (High voice) with instrumental ensemble"
+					{
+						"tag": "Excerpts, Arranged"
+					},
+					{
+						"tag": "Operas"
+					},
+					{
+						"tag": "Scores and parts"
+					},
+					{
+						"tag": "Scores and parts"
+					},
+					{
+						"tag": "Songs (High voice) with instrumental ensemble"
+					}
 				],
 				"notes": [
 					{
@@ -1857,7 +2078,7 @@ var testCases = [
 					{
 						"lastName": "Roustabouts (Musical group)",
 						"fieldMode": 1,
-						"creatorType": "author"
+						"creatorType": "performer"
 					}
 				],
 				"date": "1980",
@@ -1868,8 +2089,12 @@ var testCases = [
 				"place": "Charlotte, NC",
 				"attachments": [],
 				"tags": [
-					"Bluegrass music",
-					"Country music"
+					{
+						"tag": "Bluegrass music"
+					},
+					{
+						"tag": "Country music"
+					}
 				],
 				"notes": [
 					{
@@ -1900,8 +2125,12 @@ var testCases = [
 				"rights": "Open to research.",
 				"attachments": [],
 				"tags": [
-					"Registers of births, etc",
-					"Registers of births, etc"
+					{
+						"tag": "Registers of births, etc"
+					},
+					{
+						"tag": "Registers of births, etc"
+					}
 				],
 				"notes": [
 					{
@@ -1955,6 +2184,263 @@ var testCases = [
 						"note": "reproduction: Elektronisk reproduksjon [Norge] Nasjonalbiblioteket Digital 2014-02-07"
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<mods:mods xmlns:mods=\"http://www.loc.gov/mods/v3\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-7.xsd\" version=\"3.7\">\n\t<mods:titleInfo>\n\t\t<mods:title>[Brief Josef Blaas' an Albrecht Penck]</mods:title>\n\t</mods:titleInfo>\n\t<mods:name type=\"personal\" authority=\"DE-588\" authorityURI=\"http://d-nb.info/gnd/\" valueURI=\"http://d-nb.info/gnd/116198427\">\n\t\t<mods:displayForm>Blaas, Josef</mods:displayForm>\n\t\t<mods:namePart>Blaas, Josef</mods:namePart>\n\t\t<mods:role>\n\t\t\t<mods:roleTerm authority=\"MARC Code List for Relators Scheme\" authorityURI=\"http://id.loc.gov/vocabulary/relators/\" type=\"code\" lang=\"eng\" valueURI=\"http://id.loc.gov/vocabulary/relators/cre\">cre</mods:roleTerm>\n\t\t\t<mods:roleTerm type=\"text\" lang=\"ger\">Verfasser</mods:roleTerm>\n\t\t</mods:role>\n\t</mods:name>\n\t<mods:name type=\"personal\" authority=\"DE-588\" authorityURI=\"http://d-nb.info/gnd/\" valueURI=\"http://d-nb.info/gnd/118739883\">\n\t\t<mods:displayForm>Penck, Albrecht</mods:displayForm>\n\t\t<mods:namePart>Penck, Albrecht</mods:namePart>\n\t\t<mods:role>\n\t\t\t<mods:roleTerm authority=\"MARC Code List for Relators Scheme\" authorityURI=\"http://id.loc.gov/vocabulary/relators/\" type=\"code\" lang=\"eng\" valueURI=\"http://id.loc.gov/vocabulary/relators/rcp\">rcp</mods:roleTerm>\n\t\t\t<mods:roleTerm type=\"text\" lang=\"ger\">Adressat</mods:roleTerm>\n\t\t</mods:role>\n\t</mods:name>\n\t<mods:genre lang=\"ger\" authorityURI=\"http://d-nb.info/gnd/\" valueURI=\"http://d-nb.info/gnd/4008240-4\" authority=\"local\">Brief</mods:genre>\n\t<mods:originInfo>\n\t\t<mods:dateCreated encoding=\"w3cdtf\" keyDate=\"yes\">1930-01-14</mods:dateCreated>\n\t\t<mods:dateCreated>14.01.1930</mods:dateCreated>\n\t\t<mods:place>\n\t\t\t<mods:placeTerm type=\"text\" authorityURI=\"http://d-nb.info/gnd/\" valueURI=\"http://d-nb.info/gnd/4027096-8\">Innsbruck</mods:placeTerm>\n\t\t</mods:place>\n\t</mods:originInfo>\n\t<mods:originInfo>\n\t\t<mods:publisher>semantics</mods:publisher>\n\t\t<mods:place>\n\t\t\t<mods:placeTerm type=\"text\">Aachen</mods:placeTerm>\n\t\t</mods:place>\n\t\t<mods:dateIssued>2021</mods:dateIssued>\n\t\t<mods:edition>[Electronic ed.]</mods:edition>\n\t</mods:originInfo>\n\t<mods:language>\n\t\t<mods:languageTerm authority=\"iso639-2b\" authorityURI=\"http://id.loc.gov/vocabulary/iso639-2/\" valueURI=\"http://id.loc.gov/vocabulary/iso639-2/ger\" type=\"code\">ger</mods:languageTerm>\n\t\t<mods:languageTerm type=\"text\" lang=\"ger\">Deutsch</mods:languageTerm>\n\t</mods:language>\n\t<mods:physicalDescription>\n\t\t<mods:extent>1 Bl. ; 2 Bl.</mods:extent>\n\t</mods:physicalDescription>\n\t<mods:note type=\"formerShelvingLocation\">B E</mods:note>\n\t<mods:note type=\"systemDetails\">Handschrift</mods:note>\n\t<mods:identifier type=\"uri\">https://kalliope-verbund.info/DE-611-HS-3584958</mods:identifier>\n\t<mods:relatedItem type=\"host\">\n\t\t<mods:titleInfo>\n\t\t\t<mods:title>Korrespondenzen (Titel)</mods:title>\n\t\t</mods:titleInfo>\n\t\t<mods:name type=\"personal\" authority=\"DE-588\" authorityURI=\"http://d-nb.info/gnd/\" valueURI=\"http://d-nb.info/gnd/116198427\">\n\t\t\t<mods:displayForm>Blaas, Josef</mods:displayForm>\n\t\t\t<mods:namePart>Blaas, Josef</mods:namePart>\n\t\t\t<mods:namePart type=\"given\">J.</mods:namePart>\n\t\t\t<mods:namePart type=\"family\">Blaas</mods:namePart>\n\t\t\t<mods:namePart type=\"date\">1851-04-29</mods:namePart>\n\t\t\t<mods:role>\n\t\t\t\t<mods:roleTerm type=\"text\" lang=\"ger\">Bestandsbildner</mods:roleTerm>\n\t\t\t</mods:role>\n\t\t</mods:name>\n\t\t<mods:name type=\"personal\" authority=\"DE-588\" authorityURI=\"http://d-nb.info/gnd/\" valueURI=\"http://d-nb.info/gnd/1210871378\">\n\t\t\t<mods:displayForm>Blaas, Leo</mods:displayForm>\n\t\t\t<mods:namePart>Blaas, Leo</mods:namePart>\n\t\t\t<mods:namePart type=\"date\">1891-01-14</mods:namePart>\n\t\t\t<mods:role>\n\t\t\t\t<mods:roleTerm type=\"text\" lang=\"ger\">Bestandsbildner</mods:roleTerm>\n\t\t\t</mods:role>\n\t\t</mods:name>\n\t\t<mods:name type=\"personal\" authority=\"DE-588\" authorityURI=\"http://d-nb.info/gnd/\" valueURI=\"http://d-nb.info/gnd/1210871084\">\n\t\t\t<mods:displayForm>Blaas, Erich</mods:displayForm>\n\t\t\t<mods:namePart>Blaas, Erich</mods:namePart>\n\t\t\t<mods:namePart type=\"date\">1884-04-19</mods:namePart>\n\t\t\t<mods:role>\n\t\t\t\t<mods:roleTerm type=\"text\" lang=\"ger\">Bestandsbildner</mods:roleTerm>\n\t\t\t</mods:role>\n\t\t</mods:name>\n\t\t<mods:originInfo>\n\t\t\t<mods:edition>[Electronic ed.]</mods:edition>\n\t\t\t<mods:place>\n\t\t\t\t<mods:placeTerm type=\"text\">Aachen</mods:placeTerm>\n\t\t\t</mods:place>\n\t\t\t<mods:publisher>semantics</mods:publisher>\n\t\t\t<mods:dateIssued>2021</mods:dateIssued>\n\t\t</mods:originInfo>\n\t\t<mods:note type=\"systemDetails\">Nicht in EAD Vorhanden</mods:note>\n\t\t<mods:identifier type=\"uri\">https://kalliope-verbund.info/DE-611-BF-77880</mods:identifier>\n\t\t<mods:relatedItem type=\"host\">\n\t\t\t<mods:titleInfo>\n\t\t\t\t<mods:title>Teilnachlass Familie Blaas</mods:title>\n\t\t\t</mods:titleInfo>\n\t\t\t<mods:identifier type=\"uri\">https://kalliope-verbund.info/DE-611-BF-77879</mods:identifier>\n\t\t\t<mods:recordInfo>\n\t\t\t\t<mods:recordIdentifier source=\"DE-611\">DE-611-BF-77879</mods:recordIdentifier>\n\t\t\t</mods:recordInfo>\n\t\t</mods:relatedItem>\n\t\t<mods:relatedItem type=\"constituent\">\n\t\t\t<mods:titleInfo>\n\t\t\t\t<mods:title>Nachlass Blaas</mods:title>\n\t\t\t</mods:titleInfo>\n\t\t\t<mods:identifier type=\"uri\">https://kalliope-verbund.info/DE-611-BF-77878</mods:identifier>\n\t\t\t<mods:recordInfo>\n\t\t\t\t<mods:recordIdentifier source=\"DE-611\">DE-611-BF-77878</mods:recordIdentifier>\n\t\t\t</mods:recordInfo>\n\t\t</mods:relatedItem>\n\t\t<mods:location>\n\t\t\t<mods:physicalLocation authority=\"German ISIL- and Library Codes Agency\" authorityURI=\"http://ld.zdb-services.de/resource/organisations/\" valueURI=\"http://ld.zdb-services.de/resource/organisations/DE-2836\">Semantics Kommunikationsmanagement GmbH</mods:physicalLocation>\n\t\t\t<mods:shelfLocator>K</mods:shelfLocator>\n\t\t</mods:location>\n\t\t<mods:extension>\n\t\t\t<vlz:info xmlns:vlz=\"http://visuallibrary.net/vlz/1.0/\" version=\"2\" />\n\t\t</mods:extension>\n\t\t<mods:recordInfo>\n\t\t\t<mods:recordIdentifier source=\"DE-611\">DE-611-BF-77880</mods:recordIdentifier>\n\t\t\t<mods:recordCreationDate encoding=\"iso8601\">20200414</mods:recordCreationDate>\n\t\t\t<mods:recordChangeDate encoding=\"iso8601\">20200414</mods:recordChangeDate>\n\t\t\t<mods:recordChangeDate encoding=\"w3cdtf\">2020-12-16T14:37:29+01:00</mods:recordChangeDate>\n\t\t\t<mods:recordContentSource authority=\"German ISIL- and Library Codes Agency\" authorityURI=\"http://ld.zdb-services.de/resource/organisations/\" valueURI=\"http://ld.zdb-services.de/resource/organisations/DE-2836\">Semantics Kommunikationsmanagement GmbH</mods:recordContentSource>\n\t\t</mods:recordInfo>\n\t\t<mods:extension>\n\t\t\t<vl:id xmlns:vl=\"http://visuallibrary.net/vl\">510999</vl:id>\n\t\t\t<vl:odid xmlns:vl=\"http://visuallibrary.net/vl\">18</vl:odid>\n\t\t\t<vl:datatype xmlns:vl=\"http://visuallibrary.net/vl\">1</vl:datatype>\n\t\t\t<vl:type xmlns:vl=\"http://visuallibrary.net/vl\">60</vl:type>\n\t\t\t<vl:state xmlns:vl=\"http://visuallibrary.net/vl\">1</vl:state>\n\t\t</mods:extension>\n\t</mods:relatedItem>\n\t<mods:relatedItem type=\"constituent\">\n\t\t<mods:titleInfo>\n\t\t\t<mods:title>Nachlass Blaas</mods:title>\n\t\t</mods:titleInfo>\n\t\t<mods:identifier type=\"uri\">https://kalliope-verbund.info/DE-611-BF-77878</mods:identifier>\n\t\t<mods:recordInfo>\n\t\t\t<mods:recordIdentifier source=\"DE-611\">DE-611-BF-77878</mods:recordIdentifier>\n\t\t</mods:recordInfo>\n\t</mods:relatedItem>\n\t<mods:location>\n\t\t<mods:physicalLocation authority=\"German ISIL- and Library Codes Agency\" authorityURI=\"http://ld.zdb-services.de/resource/organisations/\" valueURI=\"http://ld.zdb-services.de/resource/organisations/DE-2836\">Semantics Kommunikationsmanagement GmbH</mods:physicalLocation>\n\t\t<mods:shelfLocator>Br E_O.</mods:shelfLocator>\n\t</mods:location>\n\t<mods:extension>\n\t\t<vlz:info xmlns:vlz=\"http://visuallibrary.net/vlz/1.0/\" version=\"2\" />\n\t</mods:extension>\n\t<mods:recordInfo>\n\t\t<mods:recordIdentifier source=\"DE-611\">DE-611-HS-3584958</mods:recordIdentifier>\n\t\t<mods:recordCreationDate encoding=\"iso8601\">20200428</mods:recordCreationDate>\n\t\t<mods:recordChangeDate encoding=\"iso8601\">20200428</mods:recordChangeDate>\n\t\t<mods:recordChangeDate encoding=\"w3cdtf\">2020-12-16T14:37:29+01:00</mods:recordChangeDate>\n\t\t<mods:recordContentSource authority=\"German ISIL- and Library Codes Agency\" authorityURI=\"http://ld.zdb-services.de/resource/organisations/\" valueURI=\"http://ld.zdb-services.de/resource/organisations/DE-2836\">Semantics Kommunikationsmanagement GmbH</mods:recordContentSource>\n\t</mods:recordInfo>\n\t<mods:identifier type=\"urn\">urn:nbn:de:s2w-13771</mods:identifier>\n</mods:mods>",
+		"items": [
+			{
+				"itemType": "letter",
+				"title": "[Brief Josef Blaas' an Albrecht Penck]",
+				"creators": [
+					{
+						"firstName": "Josef",
+						"lastName": "Blaas",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Albrecht",
+						"lastName": "Penck",
+						"creatorType": "recipient"
+					},
+					{
+						"firstName": "J.",
+						"lastName": "Blaas",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Leo",
+						"lastName": "Blaas",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Erich",
+						"lastName": "Blaas",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2021",
+				"archiveLocation": "Semantics Kommunikationsmanagement GmbH; Semantics Kommunikationsmanagement GmbH",
+				"language": "ger",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "formerShelvingLocation: B E"
+					},
+					{
+						"note": "systemDetails: Handschrift"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<mods xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:exslt=\"http://exslt.org/common\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.loc.gov/mods/v3\" version=\"3.3\" xsi:schemaLocation=\"http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-3.xsd\" ID=\"P0b002ee180250051\">\n<name type=\"corporate\">\n <namePart>United States Government Publishing Office</namePart>\n <role>\n  <roleTerm authority=\"marcrelator\" type=\"text\">publisher</roleTerm>\n  <roleTerm authority=\"marcrelator\" type=\"code\">pbl</roleTerm>\n</role>\n <role>\n  <roleTerm authority=\"marcrelator\" type=\"text\">distributor</roleTerm>\n  <roleTerm authority=\"marcrelator\" type=\"code\">dst</roleTerm>\n</role>\n</name>\n<name type=\"corporate\">\n <namePart>United States</namePart>\n <namePart>Congress</namePart>\n <namePart>Senate</namePart>\n <role>\n  <roleTerm authority=\"marcrelator\" type=\"text\">author</roleTerm>\n  <roleTerm authority=\"marcrelator\" type=\"code\">aut</roleTerm>\n</role>\n <description>Government Organization</description>\n</name>\n<typeOfResource>text</typeOfResource>\n<genre authority=\"marcgt\">government publication</genre>\n<language>\n <languageTerm type=\"code\" authority=\"iso639-2b\">eng</languageTerm>\n</language>\n<extension>\n <collectionCode>CHRG</collectionCode>\n <category>Congressional Committee Materials</category>\n <waisDatabaseName>111_senate_hearings</waisDatabaseName>\n <branch>legislative</branch>\n <dateIngested>2010-06-05</dateIngested>\n</extension>\n<titleInfo>\n <title>AFGHANISTAN</title>\n</titleInfo>\n<titleInfo type=\"alternative\"></titleInfo>\n<location>\n <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/CHRG-111shrg56419</url>\n <url displayLabel=\"HTML rendition\" access=\"raw object\">https://www.govinfo.gov/content/pkg/CHRG-111shrg56419/html/CHRG-111shrg56419.htm</url>\n <url displayLabel=\"PDF rendition\" access=\"raw object\">https://www.govinfo.gov/content/pkg/CHRG-111shrg56419/pdf/CHRG-111shrg56419.pdf</url>\n</location>\n<originInfo>\n <publisher>U.S. Government Publishing Office</publisher>\n <dateIssued encoding=\"w3cdtf\">2009-12-02</dateIssued>\n <issuance>monographic</issuance>\n</originInfo>\n<physicalDescription>\n <note type=\"source content type\">deposited</note>\n <digitalOrigin>born digital</digitalOrigin>\n <extent>191 p.</extent>\n</physicalDescription>\n<classification authority=\"sudocs\">Y 4.AR 5/3:S.HRG.111-415</classification>\n<identifier type=\"uri\">https://www.govinfo.gov/app/details/CHRG-111shrg56419</identifier>\n<identifier type=\"local\">P0b002ee180250051</identifier>\n<identifier type=\"ILS system id\">000704270</identifier>\n<recordInfo>\n <recordContentSource authority=\"marcorg\">DGPO</recordContentSource>\n <recordCreationDate encoding=\"w3cdtf\">2010-06-05</recordCreationDate>\n <recordChangeDate encoding=\"w3cdtf\">2020-01-02</recordChangeDate>\n <recordIdentifier source=\"DGPO\">CHRG-111shrg56419</recordIdentifier>\n <recordOrigin>machine generated</recordOrigin>\n <languageOfCataloging>\n  <languageTerm type=\"code\" authority=\"iso639-2b\">eng</languageTerm>\n</languageOfCataloging>\n</recordInfo>\n<accessCondition type=\"GPO scope determination\">fdlp</accessCondition>\n<extension>\n <docClass>SHRG</docClass>\n <accessId>CHRG-111shrg56419</accessId>\n <type>G</type>\n <chamber>SENATE</chamber>\n <congress>111</congress>\n <session>1</session>\n <number>415</number>\n <heldDate>2009-12-02</heldDate>\n <heldDate>2009-12-08</heldDate>\n</extension>\n<extension>\n <searchTitle>AFGHANISTAN</searchTitle>\n <granuleClass>OTHERPART</granuleClass>\n <accessId>CHRG-111shrg56419</accessId>\n <graphicsInPDF>true</graphicsInPDF>\n <isAppropriation>false</isAppropriation>\n <jacketId>56-419</jacketId>\n <congCommittee authorityId=\"ssas00\" chamber=\"S\" congress=\"111\" type=\"S\">\n                          <name type=\"authority-standard\">Committee on Armed Services</name>\n                          <name type=\"authority-short\">Armed Services</name>\n                    </congCommittee>\n <congMember authorityId=\"1226\" bioGuideId=\"W000437\" chamber=\"S\" congress=\"111\" gpoId=\"8263\" party=\"R\" role=\"COMMMEMBER\" state=\"MS\">\n                          <name type=\"parsed\">ROGER F. WICKER of Mississippi</name>\n                          <name type=\"authority-fnf\">Roger F. Wicker</name>\n                          <name type=\"authority-lnf\">Wicker, Roger F.</name>\n                          <name type=\"authority-other\">Roger Wicker</name>\n                    </congMember>\n <congMember authorityId=\"1299\" bioGuideId=\"B001210\" chamber=\"S\" congress=\"111\" gpoId=\"5833\" party=\"D\" role=\"COMMMEMBER\" state=\"WV\">\n                          <name type=\"parsed\">ROBERT C. BYRD of West Virginia</name>\n                          <name type=\"authority-fnf\">Robert C. Byrd</name>\n                          <name type=\"authority-lnf\">Byrd, Robert C.</name>\n                          <name type=\"authority-other\">Robert Carlyle Byrd</name>\n                    </congMember>\n <congMember authorityId=\"1384\" bioGuideId=\"L000261\" chamber=\"S\" congress=\"111\" gpoId=\"8243\" party=\"D\" role=\"COMMMEMBER\" state=\"MI\">\n                          <name type=\"parsed\">CARL LEVIN of Michigan</name>\n                          <name type=\"authority-fnf\">Carl Levin</name>\n                          <name type=\"authority-lnf\">Levin, Carl</name>\n                          <name type=\"authority-other\">Carl Milton Levin</name>\n                    </congMember>\n <congMember authorityId=\"1385\" bioGuideId=\"L000304\" chamber=\"S\" congress=\"111\" gpoId=\"8246\" party=\"I\" role=\"COMMMEMBER\" state=\"CT\">\n                          <name type=\"parsed\">JOSEPH I. LIEBERMAN of Connecticut</name>\n                          <name type=\"authority-fnf\">Joseph I. Lieberman</name>\n                          <name type=\"authority-lnf\">Lieberman, Joseph I.</name>\n                          <name type=\"authority-other\">Joseph Lieberman</name>\n                    </congMember>\n <congMember authorityId=\"1534\" bioGuideId=\"T000250\" chamber=\"S\" congress=\"111\" gpoId=\"8257\" party=\"R\" role=\"COMMMEMBER\" state=\"SD\">\n                          <name type=\"parsed\">JOHN THUNE of South Dakota</name>\n                          <name type=\"authority-fnf\">John Thune</name>\n                          <name type=\"authority-lnf\">Thune, John</name>\n                          <name type=\"authority-other\">John R. Thune</name>\n                    </congMember>\n <congMember authorityId=\"153\" bioGuideId=\"B001135\" chamber=\"S\" congress=\"111\" gpoId=\"8286\" party=\"R\" role=\"COMMMEMBER\" state=\"NC\">\n                          <name type=\"parsed\">RICHARD BURR of North Carolina</name>\n                          <name type=\"authority-fnf\">Richard Burr</name>\n                          <name type=\"authority-lnf\">Burr, Richard</name>\n                    </congMember>\n <congMember authorityId=\"1541\" bioGuideId=\"C001035\" chamber=\"S\" congress=\"111\" gpoId=\"8291\" party=\"R\" role=\"COMMMEMBER\" state=\"ME\">\n                          <name type=\"parsed\">SUSAN M. COLLINS of Maine</name>\n                          <name type=\"authority-fnf\">Susan M. Collins</name>\n                          <name type=\"authority-lnf\">Collins, Susan M.</name>\n                          <name type=\"authority-other\">Susan Margaret Collins</name>\n                    </congMember>\n <congMember authorityId=\"1548\" bioGuideId=\"S001141\" chamber=\"S\" congress=\"111\" gpoId=\"8281\" party=\"R\" role=\"COMMMEMBER\" state=\"AL\">\n                          <name type=\"parsed\">JEFF SESSIONS of Alabama</name>\n                          <name type=\"authority-fnf\">Jeff Sessions</name>\n                          <name type=\"authority-lnf\">Sessions, Jeff</name>\n                    </congMember>\n <congMember authorityId=\"1572\" bioGuideId=\"B001233\" chamber=\"S\" congress=\"111\" gpoId=\"5765\" party=\"D\" role=\"COMMMEMBER\" state=\"IN\">\n                          <name type=\"parsed\">EVAN BAYH of Indiana</name>\n                          <name type=\"authority-fnf\">Evan Bayh</name>\n                          <name type=\"authority-lnf\">Bayh, Evan</name>\n                    </congMember>\n <congMember authorityId=\"1595\" bioGuideId=\"U000038\" chamber=\"S\" congress=\"111\" gpoId=\"8259\" party=\"D\" role=\"COMMMEMBER\" state=\"CO\">\n                          <name type=\"parsed\">MARK UDALL of Colorado</name>\n                          <name type=\"authority-fnf\">Mark Udall</name>\n                          <name type=\"authority-lnf\">Udall, Mark</name>\n                    </congMember>\n <congMember authorityId=\"1609\" bioGuideId=\"V000127\" chamber=\"S\" congress=\"111\" gpoId=\"8267\" party=\"R\" role=\"COMMMEMBER\" state=\"LA\">\n                          <name type=\"parsed\">DAVID VITTER of Louisiana</name>\n                          <name type=\"authority-fnf\">David Vitter</name>\n                          <name type=\"authority-lnf\">Vitter, David</name>\n                    </congMember>\n <congMember authorityId=\"1820\" bioGuideId=\"M001170\" chamber=\"S\" congress=\"111\" gpoId=\"8252\" party=\"D\" role=\"COMMMEMBER\" state=\"MO\">\n                          <name type=\"parsed\">CLAIRE McCASKILL of Missouri</name>\n                          <name type=\"authority-fnf\">Claire McCaskill</name>\n                          <name type=\"authority-lnf\">McCaskill, Claire</name>\n                    </congMember>\n <congMember authorityId=\"1822\" bioGuideId=\"W000803\" chamber=\"S\" congress=\"111\" gpoId=\"8268\" party=\"D\" role=\"COMMMEMBER\" state=\"VA\">\n                          <name type=\"parsed\">JIM WEBB of Virginia</name>\n                          <name type=\"authority-fnf\">Jim Webb</name>\n                          <name type=\"authority-lnf\">Webb, Jim</name>\n                          <name type=\"authority-other\">Mr. James Webb</name>\n                    </congMember>\n <congMember authorityId=\"188\" bioGuideId=\"C000286\" chamber=\"S\" congress=\"111\" gpoId=\"8284\" party=\"R\" role=\"COMMMEMBER\" state=\"GA\">\n                          <name type=\"parsed\">SAXBY CHAMBLISS of Georgia</name>\n                          <name type=\"authority-fnf\">Saxby Chambliss</name>\n                          <name type=\"authority-lnf\">Chambliss, Saxby</name>\n                    </congMember>\n <congMember authorityId=\"1898\" bioGuideId=\"B001265\" chamber=\"S\" congress=\"111\" gpoId=\"8301\" party=\"D\" role=\"COMMMEMBER\" state=\"AK\">\n                          <name type=\"parsed\">MARK BEGICH of Alaska</name>\n                          <name type=\"authority-fnf\">Mark Begich</name>\n                          <name type=\"authority-lnf\">Begich, Mark</name>\n                    </congMember>\n <congMember authorityId=\"1902\" bioGuideId=\"H001049\" chamber=\"S\" congress=\"111\" gpoId=\"8318\" party=\"D\" role=\"COMMMEMBER\" state=\"NC\">\n                          <name type=\"parsed\">KAY R. HAGAN of North Carolina</name>\n                          <name type=\"authority-fnf\">Kay R. Hagan</name>\n                          <name type=\"authority-lnf\">Hagan, Kay R.</name>\n                          <name type=\"authority-other\">Mrs. Kay Hagan</name>\n                    </congMember>\n <congMember authorityId=\"1963\" bioGuideId=\"B001266\" chamber=\"S\" congress=\"111\" gpoId=\"7753\" party=\"D\" role=\"COMMMEMBER\" state=\"IL\">\n                          <name type=\"parsed\">ROLAND W. BURRIS of Illinois</name>\n                          <name type=\"authority-fnf\">Roland Burris</name>\n                          <name type=\"authority-lnf\">Burris, Roland</name>\n                    </congMember>\n <congMember authorityId=\"1971\" bioGuideId=\"L000572\" chamber=\"S\" congress=\"111\" gpoId=\"7772\" party=\"R\" role=\"COMMMEMBER\" state=\"FL\">\n                          <name type=\"parsed\">GEORGE S. LeMIEUX of Florida</name>\n                          <name type=\"authority-fnf\">George S. LeMieux</name>\n                          <name type=\"authority-lnf\">LeMieux, George S.</name>\n                          <name type=\"authority-other\">Mr. George Lemieux</name>\n                    </congMember>\n <congMember authorityId=\"452\" bioGuideId=\"G000359\" chamber=\"S\" congress=\"111\" gpoId=\"8335\" party=\"R\" role=\"COMMMEMBER\" state=\"SC\">\n                          <name type=\"parsed\">LINDSEY GRAHAM of South Carolina</name>\n                          <name type=\"authority-fnf\">Lindsey Graham</name>\n                          <name type=\"authority-lnf\">Graham, Lindsey</name>\n                          <name type=\"authority-other\">Lindsey O. Graham</name>\n                    </congMember>\n <congMember authorityId=\"583\" bioGuideId=\"I000024\" chamber=\"S\" congress=\"111\" gpoId=\"8322\" party=\"R\" role=\"COMMMEMBER\" state=\"OK\">\n                          <name type=\"parsed\">JAMES M. INHOFE of Oklahoma</name>\n                          <name type=\"authority-fnf\">James M. Inhofe</name>\n                          <name type=\"authority-lnf\">Inhofe, James M.</name>\n                          <name type=\"authority-other\">Jim Inhofe</name>\n                    </congMember>\n <congMember authorityId=\"754\" bioGuideId=\"M000303\" chamber=\"S\" congress=\"111\" gpoId=\"8253\" party=\"R\" role=\"COMMMEMBER\" state=\"AZ\">\n                          <name type=\"parsed\">JOHN McCAIN of Arizona</name>\n                          <name type=\"authority-fnf\">John McCain</name>\n                          <name type=\"authority-lnf\">McCain, John</name>\n                          <name type=\"authority-other\">John Sidney Mccain</name>\n                    </congMember>\n <congMember authorityId=\"7\" bioGuideId=\"A000069\" chamber=\"S\" congress=\"111\" gpoId=\"8305\" party=\"D\" role=\"COMMMEMBER\" state=\"HI\">\n                          <name type=\"parsed\">DANIEL K. AKAKA of Hawaii</name>\n                          <name type=\"authority-fnf\">Daniel K. Akaka</name>\n                          <name type=\"authority-lnf\">Akaka, Daniel K.</name>\n                          <name type=\"authority-other\">Daniel Kohikina Akaka</name>\n                    </congMember>\n <congMember authorityId=\"859\" bioGuideId=\"N000032\" chamber=\"S\" congress=\"111\" gpoId=\"8236\" party=\"D\" role=\"COMMMEMBER\" state=\"FL\">\n                          <name type=\"parsed\">BILL NELSON of Florida</name>\n                          <name type=\"authority-fnf\">Bill Nelson</name>\n                          <name type=\"authority-lnf\">Nelson, Bill</name>\n                          <name type=\"authority-other\">Clarence William Nelson</name>\n                    </congMember>\n <congMember authorityId=\"949\" bioGuideId=\"R000122\" chamber=\"S\" congress=\"111\" gpoId=\"8272\" party=\"D\" role=\"COMMMEMBER\" state=\"RI\">\n                          <name type=\"parsed\">JACK REED of Rhode Island</name>\n                          <name type=\"authority-fnf\">Jack Reed</name>\n                          <name type=\"authority-lnf\">Reed, Jack</name>\n                          <name type=\"authority-other\">John Reed</name>\n                    </congMember>\n <bill congress=\"111\" context=\"BODY\" number=\"2346\" type=\"HR\"></bill>\n <congReport congress=\"111\" number=\"105\" type=\"H\"></congReport>\n <isNomination>false</isNomination>\n <isErrata>false</isErrata>\n</extension>\n<name type=\"corporate\">\n <namePart>United States</namePart>\n <namePart>Congress</namePart>\n <namePart>Senate</namePart>\n <namePart>Committee on Armed Services</namePart>\n <role>\n  <roleTerm authority=\"marcrelator\" type=\"text\">associated name</roleTerm>\n  <roleTerm authority=\"marcrelator\" type=\"code\">asn</roleTerm>\n</role>\n <description>Government Organization</description>\n</name>\n<name type=\"personal\">\n <namePart>Roger F. Wicker</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Robert C. Byrd</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Carl Levin</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Joseph I. Lieberman</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>John Thune</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Richard Burr</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Susan M. Collins</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Jeff Sessions</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Evan Bayh</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Mark Udall</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>David Vitter</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Claire McCaskill</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Jim Webb</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Saxby Chambliss</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Mark Begich</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Kay R. Hagan</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Roland Burris</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>George S. LeMieux</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Lindsey Graham</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>James M. Inhofe</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>John McCain</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Daniel K. Akaka</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Bill Nelson</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Jack Reed</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<relatedItem type=\"isReferencedBy\">\n <identifier type=\"Jacket citation\"></identifier>\n</relatedItem>\n<relatedItem type=\"isReferencedBy\">\n <titleInfo>\n  <title>United States House Bill 2346 (111th Congress)</title>\n</titleInfo>\n <identifier type=\"Congressional Bill citation\">H.R. 2346</identifier>\n <extension>\n  <congress>111</congress>\n  <context>BODY</context>\n</extension>\n</relatedItem>\n<relatedItem type=\"isReferencedBy\">\n <titleInfo>\n  <title>United States House Report 105 (111th Congress)</title>\n</titleInfo>\n <identifier type=\"congressional report citation\">H. Rept. 111-105</identifier>\n</relatedItem>\n</mods>",
+		"items": [
+			{
+				"itemType": "hearing",
+				"title": "AFGHANISTAN",
+				"creators": [
+					{
+						"lastName": "United States: Congress: Senate",
+						"fieldMode": 1,
+						"creatorType": "contributor"
+					},
+					{
+						"lastName": "United States: Congress: Senate: Committee on Armed Services",
+						"fieldMode": 1,
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Roger F.",
+						"lastName": "Wicker",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Robert C.",
+						"lastName": "Byrd",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Carl",
+						"lastName": "Levin",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Joseph I.",
+						"lastName": "Lieberman",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "John",
+						"lastName": "Thune",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Richard",
+						"lastName": "Burr",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Susan M.",
+						"lastName": "Collins",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Jeff",
+						"lastName": "Sessions",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Evan",
+						"lastName": "Bayh",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Mark",
+						"lastName": "Udall",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Vitter",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Claire",
+						"lastName": "McCaskill",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Jim",
+						"lastName": "Webb",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Saxby",
+						"lastName": "Chambliss",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Mark",
+						"lastName": "Begich",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Kay R.",
+						"lastName": "Hagan",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Roland",
+						"lastName": "Burris",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "George S.",
+						"lastName": "LeMieux",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Lindsey",
+						"lastName": "Graham",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "James M.",
+						"lastName": "Inhofe",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "John",
+						"lastName": "McCain",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Daniel K.",
+						"lastName": "Akaka",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Bill",
+						"lastName": "Nelson",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Jack",
+						"lastName": "Reed",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2009-12-02",
+				"committee": "Committee on Armed Services",
+				"documentNumber": "415",
+				"language": "eng",
+				"legislativeBody": "Senate",
+				"publisher": "U.S. Government Publishing Office",
+				"rights": "fdlp",
+				"session": "111",
+				"url": "https://www.govinfo.gov/app/details/CHRG-111shrg56419",
+				"attachments": [
+					{
+						"title": "HTML rendition",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "PDF rendition",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<mods xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.loc.gov/mods/v3\" version=\"3.3\" xsi:schemaLocation=\"http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-3.xsd\" ID=\"P0b002ee183d8e4ad\">\n<name type=\"corporate\">\n <namePart>United States Government Publishing Office</namePart>\n <role>\n  <roleTerm authority=\"marcrelator\" type=\"text\">publisher</roleTerm>\n  <roleTerm authority=\"marcrelator\" type=\"code\">pbl</roleTerm>\n</role>\n <role>\n  <roleTerm authority=\"marcrelator\" type=\"text\">distributor</roleTerm>\n  <roleTerm authority=\"marcrelator\" type=\"code\">dst</roleTerm>\n</role>\n</name>\n<name type=\"corporate\">\n <namePart>United States</namePart>\n <namePart>Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction</namePart>\n <role>\n  <roleTerm authority=\"marcrelator\" type=\"text\">author</roleTerm>\n  <roleTerm authority=\"marcrelator\" type=\"code\">aut</roleTerm>\n</role>\n <description>Government Organization</description>\n</name>\n<typeOfResource>text</typeOfResource>\n<genre authority=\"marcgt\">government publication</genre>\n<language>\n <languageTerm type=\"code\" authority=\"iso639-2b\">eng</languageTerm>\n</language>\n<extension>\n <collectionCode>GPO</collectionCode>\n <category>Executive Agency Publications</category>\n <branch>legislative</branch>\n <dateIngested>2013-02-25</dateIngested>\n</extension>\n<originInfo>\n <publisher>Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction</publisher>\n <dateIssued encoding=\"w3cdtf\">2005-03-31</dateIssued>\n <issuance>monographic</issuance>\n</originInfo>\n<physicalDescription>\n <note type=\"source content type\">Deposited</note>\n <digitalOrigin>born digital</digitalOrigin>\n</physicalDescription>\n<classification authority=\"sudocs\">PREX 1.19:IN 8/W 37</classification>\n<identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD</identifier>\n<identifier type=\"local\">P0b002ee183d8e4ad</identifier>\n<identifier type=\"ILS system id\">000576953</identifier>\n<recordInfo>\n <recordContentSource authority=\"marcorg\">DGPO</recordContentSource>\n <recordCreationDate encoding=\"w3cdtf\">2013-02-25</recordCreationDate>\n <recordChangeDate encoding=\"w3cdtf\">2019-03-28</recordChangeDate>\n <recordIdentifier source=\"DGPO\">GPO-WMD</recordIdentifier>\n <recordOrigin>machine generated</recordOrigin>\n <languageOfCataloging>\n  <languageTerm type=\"code\" authority=\"iso639-2b\">eng</languageTerm>\n</languageOfCataloging>\n</recordInfo>\n<accessCondition type=\"GPO scope determination\">fdlp</accessCondition>\n<extension>\n <docClass>GPO</docClass>\n <accessId>GPO-WMD</accessId>\n <ACCode>GPO</ACCode>\n <fedPubName>Featured Commission Publications</fedPubName>\n <description>The Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction was established in 2004 and charged with examining the capabilities and challenges of the American intelligence community concerning the capabilities, intentions, and activities of foreign powers relating to the design, development, manufacture, acquisition, possession, proliferation, transfer, testing, potential or threatened use, or use of weapons of mass destruction, related means of delivery, and other related threats of the 21st Century.</description>\n <image>thumbnails/GPO-WMD.jpg</image>\n <agency abbrev=\"\">Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction</agency>\n <genericNav1Value>Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction</genericNav1Value>\n <ggrank1>Weapons of Mass Destruction</ggrank1>\n</extension>\n<titleInfo>\n <title>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction</title>\n</titleInfo>\n<location>\n <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD</url>\n <url access=\"raw object\" displayLabel=\"JPEG rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/thumbnails/GPO-WMD.jpg</url>\n <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD.pdf</url>\n</location>\n<abstract>The Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction was established in 2004 and charged with examining the capabilities and challenges of the American intelligence community concerning the capabilities, intentions, and activities of foreign powers relating to the design, development, manufacture, acquisition, possession, proliferation, transfer, testing, potential or threatened use, or use of weapons of mass destruction, related means of delivery, and other related threats of the 21st Century.</abstract>\n<name type=\"corporate\">\n <namePart>United States</namePart>\n <namePart>Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction</namePart>\n <role>\n  <roleTerm authority=\"marcrelator\" type=\"text\">associated name</roleTerm>\n  <roleTerm authority=\"marcrelator\" type=\"code\">asn</roleTerm>\n</role>\n <description>United States Government Agency</description>\n</name>\n<extension>\n <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n            </searchTitle>\n</extension>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384198823\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1/mods.xml\">\n <titleInfo>\n  <title>Report Section</title>\n</titleInfo>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Report Section;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1</accessId>\n  <sequenceNumber>1</sequenceNumber>\n</extension>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384234254\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-1/mods.xml\">\n <titleInfo>\n  <title>Cover Matter</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-1.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d824</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-1</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-1</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-1.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Cover Matter;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-1</accessId>\n  <sequenceNumber>2</sequenceNumber>\n</extension>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384249152\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-2/mods.xml\">\n <titleInfo>\n  <title>Letter to the President on FBI and CIA Transformation Plans</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-2.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d82c</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-2</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-2</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-2.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Letter to the President on FBI and CIA Transformation Plans;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-2</accessId>\n  <sequenceNumber>3</sequenceNumber>\n</extension>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384265001\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-3/mods.xml\">\n <titleInfo>\n  <title>Transmittal Letter</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-3.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d81c</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-3</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-3</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-3.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Transmittal Letter;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-3</accessId>\n  <sequenceNumber>4</sequenceNumber>\n</extension>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384279456\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-4/mods.xml\">\n <titleInfo>\n  <title>Overview of the Report</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-4.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d822</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-4</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-4</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-4.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Overview of the Report;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-4</accessId>\n  <sequenceNumber>5</sequenceNumber>\n</extension>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384293864\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-5/mods.xml\">\n <titleInfo>\n  <title>Part One: Looking Back</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-5.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d823</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-5</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-5</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-5.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Part One: Looking Back;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-5</accessId>\n  <sequenceNumber>6</sequenceNumber>\n</extension>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384310096\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-6/mods.xml\">\n <titleInfo>\n  <title>Chapter One Case Study: Iraq</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-6.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d81b</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-6</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-6</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-6.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Chapter One Case Study: Iraq;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-6</accessId>\n  <sequenceNumber>7</sequenceNumber>\n</extension>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384324472\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-7/mods.xml\">\n <titleInfo>\n  <title>Chapter Two Case Study: Libya</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-7.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d830</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-7</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-7</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-7.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Chapter Two Case Study: Libya;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-7</accessId>\n  <sequenceNumber>8</sequenceNumber>\n</extension>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384341496\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-8/mods.xml\">\n <titleInfo>\n  <title>Chapter Three Case Study: Al-Qa&apos;ida in Afghanistan</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-8.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d827</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-8</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-8</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-8.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Chapter Three Case Study: Al-Qa&apos;ida in Afghanistan;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-8</accessId>\n  <sequenceNumber>9</sequenceNumber>\n</extension>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384358383\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-9/mods.xml\">\n <titleInfo>\n  <title>Chapter Four: Terrorism: Managing Today&apos;s Threat</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-9.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d832</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-9</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-9</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-9.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Chapter Four: Terrorism: Managing Today&apos;s Threat;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-9</accessId>\n  <sequenceNumber>10</sequenceNumber>\n</extension>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384376089\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-10/mods.xml\">\n <titleInfo>\n  <title>Chapter Five: Iran and North Korea: Monitoring the Development of Nuclear Weapons</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-10.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d82b</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-10</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-10</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-10.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Chapter Five: Iran and North Korea: Monitoring the Development of Nuclear Weapons;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-10</accessId>\n  <sequenceNumber>11</sequenceNumber>\n</extension>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384389089\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-11/mods.xml\">\n <titleInfo>\n  <title>Part Two: Looking Forward</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-11.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d820</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-11</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-11</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-11.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Part Two: Looking Forward;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-11</accessId>\n  <sequenceNumber>12</sequenceNumber>\n</extension>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384403849\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-12/mods.xml\">\n <titleInfo>\n  <title>Chapter Six: Leadership and Management: Forging an Integrated Intelligence Community</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-12.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d834</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-12</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-12</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-12.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Chapter Six: Leadership and Management: Forging an Integrated Intelligence Community;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-12</accessId>\n  <sequenceNumber>13</sequenceNumber>\n  <law congress=\"108\" isPrivate=\"false\" number=\"458\"></law>\n</extension>\n <relatedItem type=\"isReferencedBy\">\n  <titleInfo>\n   <title>United States Public Law 458 (108th Congress)</title>\n</titleInfo>\n  <identifier type=\"public law citation\">Public Law 108-458</identifier>\n</relatedItem>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384424681\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-13/mods.xml\">\n <titleInfo>\n  <title>Chapter Seven: Collection</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-13.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d829</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-13</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-13</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-13.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Chapter Seven: Collection;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-13</accessId>\n  <sequenceNumber>14</sequenceNumber>\n</extension>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384438074\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-14/mods.xml\">\n <titleInfo>\n  <title>Chapter Eight: Analysis</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-14.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d831</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-14</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-14</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-14.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Chapter Eight: Analysis;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-14</accessId>\n  <sequenceNumber>15</sequenceNumber>\n  <law congress=\"108\" isPrivate=\"false\" number=\"458\"></law>\n</extension>\n <relatedItem type=\"isReferencedBy\">\n  <titleInfo>\n   <title>United States Public Law 458 (108th Congress)</title>\n</titleInfo>\n  <identifier type=\"public law citation\">Public Law 108-458</identifier>\n</relatedItem>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384454490\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-15/mods.xml\">\n <titleInfo>\n  <title>Chapter Nine: Information Sharing</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-15.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d82d</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-15</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-15</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-15.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Chapter Nine: Information Sharing;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-15</accessId>\n  <sequenceNumber>16</sequenceNumber>\n  <law congress=\"108\" isPrivate=\"false\" number=\"458\"></law>\n</extension>\n <relatedItem type=\"isReferencedBy\">\n  <titleInfo>\n   <title>United States Public Law 458 (108th Congress)</title>\n</titleInfo>\n  <identifier type=\"public law citation\">Public Law 108-458</identifier>\n</relatedItem>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384470348\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-16/mods.xml\">\n <titleInfo>\n  <title>Chapter Ten: Intelligence at Home: The FBI, Justice, and Homeland Security</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-16.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d81f</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-16</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-16</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-16.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Chapter Ten: Intelligence at Home: The FBI, Justice, and Homeland Security;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-16</accessId>\n  <sequenceNumber>17</sequenceNumber>\n</extension>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384484690\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-17/mods.xml\">\n <titleInfo>\n  <title>Chapter Eleven: Counterintelligence</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-17.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d825</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-17</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-17</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-17.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Chapter Eleven: Counterintelligence;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-17</accessId>\n  <sequenceNumber>18</sequenceNumber>\n  <law congress=\"108\" isPrivate=\"false\" number=\"458\"></law>\n</extension>\n <relatedItem type=\"isReferencedBy\">\n  <titleInfo>\n   <title>United States Public Law 458 (108th Congress)</title>\n</titleInfo>\n  <identifier type=\"public law citation\">Public Law 108-458</identifier>\n</relatedItem>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384497155\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-18/mods.xml\">\n <titleInfo>\n  <title>Chapter Twelve: Covert Action</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-18.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d82f</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-18</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-18</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-18.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Chapter Twelve: Covert Action;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-18</accessId>\n  <sequenceNumber>19</sequenceNumber>\n</extension>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384517435\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-19/mods.xml\">\n <titleInfo>\n  <title>Chapter Thirteen: The Changing Proliferation Threat and the Intelligence Response</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-19.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d835</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-19</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-19</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-19.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Chapter Thirteen: The Changing Proliferation Threat and the Intelligence Response;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-19</accessId>\n  <sequenceNumber>20</sequenceNumber>\n  <law congress=\"108\" isPrivate=\"false\" number=\"458\"></law>\n</extension>\n <relatedItem type=\"isReferencedBy\">\n  <titleInfo>\n   <title>United States Public Law 458 (108th Congress)</title>\n</titleInfo>\n  <identifier type=\"public law citation\">Public Law 108-458</identifier>\n</relatedItem>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384532339\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-20/mods.xml\">\n <titleInfo>\n  <title>Conclusion</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-20.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d82e</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-20</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-20</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-20.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Conclusion;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-20</accessId>\n  <sequenceNumber>21</sequenceNumber>\n</extension>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384560386\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-21/mods.xml\">\n <titleInfo>\n  <title>Postscript: Additional Intelligence Challenges</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-21.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d826</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-21</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-21</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-21.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Postscript: Additional Intelligence Challenges;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-21</accessId>\n  <sequenceNumber>22</sequenceNumber>\n</extension>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384575827\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-22/mods.xml\">\n <titleInfo>\n  <title>Appendix A: Authorizing Executive Order</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-22.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d81d</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-22</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-22</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-22.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Appendix A: Authorizing Executive Order;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-22</accessId>\n  <sequenceNumber>23</sequenceNumber>\n  <USCode title=\"5\">\n                           <section number=\"5701\"></section>\n                           <section number=\"5707\"></section>\n                    </USCode>\n  <USCode title=\"50\">\n                           <section detail=\"(1)\" number=\"2302\"></section>\n                           <section detail=\"(4)\" number=\"401a\"></section>\n                    </USCode>\n  <USCode title=\"5\">\n                           <section number=\"5701\"></section>\n                           <section number=\"5707\"></section>\n                    </USCode>\n  <USCode title=\"50\">\n                           <section detail=\"(1)\" number=\"2302\"></section>\n                           <section detail=\"(4)\" number=\"401a\"></section>\n                    </USCode>\n  <presidentialDoc date=\"1995-04-17\" number=\"12958\" type=\"EXECORD\"></presidentialDoc>\n</extension>\n <relatedItem type=\"isReferencedBy\">\n  <titleInfo>\n   <title>United States Code</title>\n   <partNumber>Title 5 Section 5701</partNumber>\n   <partNumber>Title 5 Section 5707</partNumber>\n</titleInfo>\n  <identifier type=\"USC citation\">5 U.S.C. 5701</identifier>\n  <identifier type=\"USC citation\">5 U.S.C. 5707</identifier>\n</relatedItem>\n <relatedItem type=\"isReferencedBy\">\n  <titleInfo>\n   <title>United States Code</title>\n   <partNumber>Title 50 Section 2302(1)</partNumber>\n   <partNumber>Title 50 Section 401a(4)</partNumber>\n</titleInfo>\n  <identifier type=\"USC citation\">50 U.S.C. 2302(1)</identifier>\n  <identifier type=\"USC citation\">50 U.S.C. 401a(4)</identifier>\n</relatedItem>\n <relatedItem type=\"isReferencedBy\">\n  <titleInfo>\n   <title>United States Code</title>\n   <partNumber>Title 5 Section 5701</partNumber>\n   <partNumber>Title 5 Section 5707</partNumber>\n</titleInfo>\n  <identifier type=\"USC citation\">5 U.S.C. 5701</identifier>\n  <identifier type=\"USC citation\">5 U.S.C. 5707</identifier>\n</relatedItem>\n <relatedItem type=\"isReferencedBy\">\n  <titleInfo>\n   <title>United States Code</title>\n   <partNumber>Title 50 Section 2302(1)</partNumber>\n   <partNumber>Title 50 Section 401a(4)</partNumber>\n</titleInfo>\n  <identifier type=\"USC citation\">50 U.S.C. 2302(1)</identifier>\n  <identifier type=\"USC citation\">50 U.S.C. 401a(4)</identifier>\n</relatedItem>\n <relatedItem type=\"isReferencedBy\">\n  <titleInfo>\n   <title>Presidential Executive Order Number 12958</title>\n</titleInfo>\n  <identifier type=\"presidential executive order number\">Executive Order 12958</identifier>\n</relatedItem>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384592754\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-23/mods.xml\">\n <titleInfo>\n  <title>Appendix B: List of Findings and Recommendations</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-23.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d833</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-23</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-23</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-23.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Appendix B: List of Findings and Recommendations;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-23</accessId>\n  <sequenceNumber>24</sequenceNumber>\n</extension>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384604507\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-24/mods.xml\">\n <titleInfo>\n  <title>Appendix C: An Intelligence Community Primer</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-24.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d81e</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-24</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-24</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-24.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Appendix C: An Intelligence Community Primer;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-24</accessId>\n  <sequenceNumber>25</sequenceNumber>\n</extension>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384621867\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-25/mods.xml\">\n <titleInfo>\n  <title>Appendix D: Common Abbreviations</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-25.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d828</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-25</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-25</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-25.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Appendix D: Common Abbreviations;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-25</accessId>\n  <sequenceNumber>26</sequenceNumber>\n</extension>\n</relatedItem>\n<relatedItem type=\"constituent\" ID=\"id-new_child1284384635060\" xlink:href=\"https://www.govinfo.gov/metadata/granule/GPO-WMD/GPO-WMD-1-26/mods.xml\">\n <titleInfo>\n  <title>Appendix E: Biographical Information for Commissioners and List of Commission Staff</title>\n</titleInfo>\n <relatedItem type=\"otherFormat\" xlink:href=\"https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-26.pdf\">\n  <identifier type=\"FDsys Unique ID\">D09002ee1a025d821</identifier>\n</relatedItem>\n <identifier type=\"uri\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-26</identifier>\n <location>\n  <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/GPO-WMD/GPO-WMD-1-26</url>\n  <url access=\"raw object\" displayLabel=\"PDF rendition\">https://www.govinfo.gov/content/pkg/GPO-WMD/pdf/GPO-WMD-1-26.pdf</url>\n</location>\n <subject>\n  <hierarchicalGeographic>\n   <country>United States of America</country>\n   <state></state>\n</hierarchicalGeographic>\n</subject>\n <extension>\n  <searchTitle>Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction;\n              Appendix E: Biographical Information for Commissioners and List of Commission Staff;\n              </searchTitle>\n  <granuleClass>CONTENT</granuleClass>\n  <accessId>GPO-WMD-1-26</accessId>\n  <sequenceNumber>27</sequenceNumber>\n</extension>\n</relatedItem>\n</mods>",
+		"items": [
+			{
+				"itemType": "document",
+				"title": "Unclassified Version of the Report of the Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction",
+				"creators": [
+					{
+						"lastName": "United States: Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction",
+						"fieldMode": 1,
+						"creatorType": "author"
+					},
+					{
+						"lastName": "United States: Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction",
+						"fieldMode": 1,
+						"creatorType": "author"
+					}
+				],
+				"date": "2005-03-31",
+				"abstractNote": "The Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction was established in 2004 and charged with examining the capabilities and challenges of the American intelligence community concerning the capabilities, intentions, and activities of foreign powers relating to the design, development, manufacture, acquisition, possession, proliferation, transfer, testing, potential or threatened use, or use of weapons of mass destruction, related means of delivery, and other related threats of the 21st Century.",
+				"callNumber": "PREX 1.19:IN 8/W 37",
+				"language": "eng",
+				"publisher": "Commission on the Intelligence Capabilities of the United States Regarding Weapons of Mass Destruction",
+				"rights": "fdlp",
+				"url": "https://www.govinfo.gov/app/details/GPO-WMD",
+				"attachments": [
+					{
+						"title": "JPEG rendition",
+						"mimeType": "image/jpeg"
+					},
+					{
+						"title": "PDF rendition",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
 				"seeAlso": []
 			}
 		]

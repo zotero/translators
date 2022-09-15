@@ -18,9 +18,26 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2019-02-03 17:45:00"
+	"lastUpdated": "2021-09-10 18:17:50"
 }
+
+/*
+   BibTeX Translator
+   Copyright (C) 2019 CHNM, Simon Kornblith, Richard Karnesky and Emiliano heyns
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 function detectImport() {
 	var maxChars = 1048576; // 1MB
@@ -57,7 +74,7 @@ function detectImport() {
 				}
 				
 				block = "";
-			} else if (" \n\r\t".indexOf(chr) == -1) {
+			} else if (!" \n\r\t".includes(chr)) {
 				block += chr;
 			}
 		}
@@ -135,6 +152,28 @@ var eprintIds = {
 	'googlebooks': 'GoogleBooksID'
 };
 
+function dateFieldsToDate(year, month, day) {
+	// per the latest ISO 8601 standard, you can't have a month/day without a
+	// year (and it would be silly anyway)
+	if (year) {
+		let date = year;
+		if (month) {
+			if (month.includes(date)) {
+				date = month;
+			}
+			else {
+				date += `-${month}`;
+			}
+			
+			if (day) {
+				date += `-${day}`;
+			}
+		}
+		return ZU.strToISO(date);
+	}
+	return false;
+}
+
 function parseExtraFields(extra) {
 	var lines = extra.split(/[\r\n]+/);
 	var fields = [];
@@ -209,9 +248,11 @@ var bibtex2zoteroTypeMap = {
 	"booklet":"book",
 	"manual":"book",
 	"mastersthesis":"thesis",
-	"misc":"book",
+	"misc":"document",
 	"proceedings":"book",
 	"online":"webpage",
+	// alias for online from BibLaTeX:
+	"electronic":"webpage",
 	// from BibLaTeX translator:
 	"thesis":"thesis",
 	"letter":"letter",
@@ -285,6 +326,9 @@ function processField(item, field, value, rawValue) {
 		if (field == "doi" &&!ZU.fieldIsValidForType("DOI", item.itemType) && ZU.cleanDOI(value)) {
 			item._extraFields.push({field: "DOI", value: ZU.cleanDOI(value)});
 		}
+		if (field == "url") { // pass raw values for URL
+			item.url = rawValue;	
+		}
 		else {
 			item[fieldMap[field]] = value;
 		}
@@ -325,7 +369,7 @@ function processField(item, field, value, rawValue) {
 			if (!name) continue;
 			
 			// Names in BibTeX can have three commas
-			pieces = splitUnprotected(name, /\s*,\s*/g);
+			var pieces = splitUnprotected(name, /\s*,\s*/g);
 			var creator = {};
 			if (pieces.length > 1) {
 				creator.firstName = pieces.pop();
@@ -343,7 +387,7 @@ function processField(item, field, value, rawValue) {
 					lastName: unescapeBibTeX(name),
 					creatorType: field,
 					fieldMode: 1
-				}
+				};
 			}
 			item.creators.push(creator);
 		}
@@ -361,33 +405,20 @@ function processField(item, field, value, rawValue) {
 		} else {
 			item.issue = value;
 		}
+	} else if (field == "day") {
+		// this and the following two blocks assign to temporary fields that
+		// are cleared before the item is completed. "day" isn't an official
+		// field, but some sites use it.
+		item.day = value;
 	} else if (field == "month") {
 		var monthIndex = months.indexOf(value.toLowerCase());
 		if (monthIndex != -1) {
 			value = Zotero.Utilities.formatDate({month:monthIndex});
-		} else {
-			value += " ";
 		}
 		
-		if (item.date) {
-			if (value.indexOf(item.date) != -1) {
-				// value contains year and more
-				item.date = value;
-			} else {
-				item.date = value+item.date;
-			}
-		} else {
-			item.date = value;
-		}
+		item.month = value;
 	} else if (field == "year") {
-		if (item.date) {
-			if (item.date.indexOf(value) == -1) {
-				// date does not already contain year
-				item.date += value;
-			}
-		} else {
-			item.date = value;
-		}
+		item.year = value;
 	} else if (field == "date") {
 	//We're going to assume that "date" and the date parts don't occur together. If they do, we pick date, which should hold all.
 		item.date = value;
@@ -636,18 +667,18 @@ function unescapeBibTeX(value) {
 	
 	// replace accented characters (yucky slow)
 	value = value.replace(/{?(\\[`"'^~=]){?\\?([A-Za-z])}/g, "{$1$2}");
-	//for special characters rendered by \[a-z] we need a space
-	value = value.replace(/{?(\\[a-z]){?\\?([A-Za-z])}/g, "{$1 $2}");
+	// normalize some special characters, e.g. caron \v{c} -> {\v c}
+	value = value.replace(/(\\[a-z]){(\\?[A-Za-z])}/g, "{$1 $2}");
 	//convert tex markup into permitted HTML
 	value = mapTeXmarkup(value);
 	for (var mapped in reversemappingTable) { // really really slow!
 		var unicode = reversemappingTable[mapped];
-		while (value.indexOf(mapped) !== -1) {
+		while (value.includes(mapped)) {
 			Zotero.debug("Replace " + mapped + " in " + value + " with " + unicode);
 			value = value.replace(mapped, unicode);
 		}
 		mapped = mapped.replace(/[{}]/g, "");
-		while (value.indexOf(mapped) !== -1) {
+		while (value.includes(mapped)) {
 			//Z.debug(value)
 			Zotero.debug("Replace(2) " + mapped + " in " + value + " with " + unicode);
 			value = value.replace(mapped, unicode);
@@ -663,17 +694,17 @@ function unescapeBibTeX(value) {
 	// chop off backslashes
 	value = value.replace(/([^\\])\\([#$%&~_^\\{}])/g, "$1$2");
 	value = value.replace(/([^\\])\\([#$%&~_^\\{}])/g, "$1$2");
-	if (value[0] == "\\" && "#$%&~_^\\{}".indexOf(value[1]) != -1) {
+	if (value[0] == "\\" && "#$%&~_^\\{}".includes(value[1])) {
 		value = value.substr(1);
 	}
-	if (value[value.length-1] == "\\" && "#$%&~_^\\{}".indexOf(value[value.length-2]) != -1) {
+	if (value[value.length-1] == "\\" && "#$%&~_^\\{}".includes(value[value.length-2])) {
 		value = value.substr(0, value.length-1);
 	}
 	value = value.replace(/\\\\/g, "\\");
 	value = value.replace(/\s+/g, " ");
 	
 	// Unescape HTML entities coming from web translators
-	if (Zotero.parentTranslator && value.indexOf('&') != -1) {
+	if (Zotero.parentTranslator && value.includes('&')) {
 		value = value.replace(/&#?\w+;/g, function(entity) {
 			var char = ZU.unescapeHTML(entity);
 			if (char == entity) char = ZU.unescapeHTML(entity.toLowerCase()); // Sometimes case can be incorrect and entities are case-sensitive
@@ -733,12 +764,12 @@ function processComment() {
 		return;
 	}
 
-	if (comment.indexOf('jabref-meta: groupstree:') == 0) {
+	if (comment.startsWith('jabref-meta: groupstree:')) {
 		if (jabref.format != 3) {
 			Zotero.debug("jabref: fatal: unsupported group format: " + jabref.format);
 			return;
 		}
-		comment = comment.replace(/^jabref-meta: groupstree:/, '').replace(/[\r\n]/gm, '')
+		comment = comment.replace(/^jabref-meta: groupstree:/, '').replace(/[\r\n]/gm, '');
 
 		var records = jabrefSplit(comment, ';');
 		while (records.length > 0) {
@@ -753,8 +784,8 @@ function processComment() {
 				return;
 			}
 			record.level = parseInt(record.data[1]);
-			record.type = record.data[2]
-			record.name = record.data[3]
+			record.type = record.data[2];
+			record.name = record.data[3];
 			record.intersection = keys.shift(); // 0 = independent, 1 = intersection, 2 = union
 
 			if (isNaN(record.level)) {
@@ -788,9 +819,9 @@ function processComment() {
 				var path = collectionPath[i];
 				Zotero.debug("jabref: looking for child " + path + " under " + collection.name);
 
-				var child = jabrefCollect(collection.children, function(n) { return (n.name == path)})
+				var child = jabrefCollect(collection.children, function(n) { return (n.name == path); });
 				if (child.length != 0) {
-					child = child[0]
+					child = child[0];
 					Zotero.debug("jabref: child " + child.name + " found under " + collection.name);
 				} else {
 					child = new Zotero.Collection();
@@ -807,7 +838,7 @@ function processComment() {
 			}
 
 			if (parentCollection) {
-				parentCollection = jabrefCollect(parentCollection.children, function(n) { return (n.type == 'item') });
+				parentCollection = jabrefCollect(parentCollection.children, function(n) { return (n.type == 'item'); });
 			}
 
 			if (record.intersection == '2' && parentCollection) { // union with parent
@@ -815,7 +846,7 @@ function processComment() {
 			}
 
 			while (keys.length > 0) {
-				key = keys.shift();
+				var key = keys.shift();
 				if (key != '') {
 					Zotero.debug('jabref: adding ' + key + ' to ' + collection.name);
 					collection.children.push({type: 'item', id: key});
@@ -823,7 +854,7 @@ function processComment() {
 			}
 
 			if (parentCollection && record.intersection == '1') { // intersection with parent
-				collection.children = jabrefMap(collection.children, function(n) { parentCollection.indexOf(n) !== -1; });
+				collection.children = jabrefMap(collection.children, function(n) { parentCollection.includes(n); });
 			}
 		}
 	}
@@ -831,7 +862,7 @@ function processComment() {
 
 function beginRecord(type, closeChar) {
 	type = Zotero.Utilities.trimInternal(type.toLowerCase());
-	if (type != "string") {
+	if (type !== "string" && type !== "preamble") {
 		var zoteroType = bibtex2zoteroTypeMap[type];
 		if (!zoteroType) {
 			Zotero.debug("discarded item from BibTeX; type was "+type);
@@ -839,6 +870,10 @@ function beginRecord(type, closeChar) {
 		}
 		var item = new Zotero.Item(zoteroType);
 		item._extraFields = [];
+	} 
+	else if (type == "preamble") { // Preamble (keeping separate in case we want to do something with these)
+		Zotero.debug("discarded preamble from BibTeX");
+		return;
 	}
 	
 	// For theses write the thesisType determined by the BibTeX type.
@@ -855,48 +890,82 @@ function beginRecord(type, closeChar) {
 	while (dontRead || (read = Zotero.read(1))) {
 		dontRead = false;
 		
-		if (read == "=") {								// equals begin a field
-		// read whitespace
-			var read = Zotero.read(1);
-			while (" \n\r\t".indexOf(read) != -1) {
-				read = Zotero.read(1);
-			}
-			
-			if (keyRe.test(read)) {
-				// read numeric data here, since we might get an end bracket
-				// that we should care about
-				value = "";
-				value += read;
-				
-				// character is a number
-				while ((read = Zotero.read(1)) && keyRe.test(read)) {
-					value += read;
+		// the equal sign indicate the start of the value
+		// which will be handled in the following part
+		// possible formats are:
+		//    = 42,
+		//    = "42",
+		//    = {42},
+		//    = name,  (where this is defined as a string)
+		if (read == "=") {
+			var valueArray = [];
+			var rawValueArray = [];
+			// concatenation is possible with # and for that we
+			// do this do-while-loop here, e.g.
+			//     = name # " and " # "Adam Smith",
+			do {
+				var read = Zotero.read(1);
+				// skip whitespaces
+				while (" \n\r\t".includes(read)) {
+					read = Zotero.read(1);
 				}
 				
-				// don't read the next char; instead, process the character
-				// we already read past the end of the string
-				dontRead = true;
+				if (keyRe.test(read)) {
+					// read numeric data here, since we might get an end bracket
+					// that we should care about
+					value = "";
+					value += read;
+					
+					// character is a number or part of a string name
+					while ((read = Zotero.read(1)) && /[a-zA-Z0-9\-:_]/.test(read)) {
+						value += read;
+					}
+					
+					// don't read the next char; instead, process the character
+					// we already read past the end of the string
+					dontRead = true;
+					
+					// see if there's a defined string
+					if (strings[value.toLowerCase()]) value = strings[value.toLowerCase()];
+					
+					// rawValue has to be set for some fields to process
+					// thus, in this case, we set it equal to value
+					rawValue = value;
+				} else {
+					rawValue = getFieldValue(read);
+					value = unescapeBibTeX(rawValue);
+				}
 				
-				// see if there's a defined string
-				if (strings[value]) value = strings[value];
-			} else {
-				rawValue = getFieldValue(read);
-				value = unescapeBibTeX(rawValue);
-			}
+				valueArray.push(value);
+				rawValueArray.push(rawValue);
+				
+				while (" \n\r\t".includes(read)) {
+					read = Zotero.read(1);
+				}
+			
+			} while (read === "#");
+			
+			value = valueArray.join('');
+			rawValue = rawValueArray.join('');
 			
 			if (item) {
 				processField(item, field.toLowerCase(), value, rawValue);
 			} else if (type == "string") {
-				strings[field] = value;
+				strings[field.toLowerCase()] = value;
 			}
 			field = "";
-		} else if (read == ",") {						// commas reset
+		}
+		// commas reset, i.e. we are not reading a field
+		// but rather we are reading the bibkey
+		else if (read == ",") {
 			if (item.itemID == null) {
 				item.itemID = field; // itemID = citekey
 			}
 			field = "";
 
-		} else if (read == closeChar) {
+		}
+		// closing character
+		else if (read == closeChar) {
 			if (item) {
 				if (item.backupLocation) {
 					if (item.itemType=="conferencePaper") {
@@ -906,6 +975,13 @@ function beginRecord(type, closeChar) {
 					}
 					delete item.backupLocation;
 				}
+				
+				if (!item.date) {
+					item.date = dateFieldsToDate(item.year, item.month, item.day);
+				}
+				delete item.year;
+				delete item.month;
+				delete item.day;
 				
 				item.extra = extraFieldsToString(item._extraFields);
 				delete item._extraFields;
@@ -917,7 +993,10 @@ function beginRecord(type, closeChar) {
 				return item.complete();
 			}
 			return;
-		} else if (" \n\r\t".indexOf(read) == -1) {		// skip whitespace
+		}
+		// skip whitespaces; the rest will become
+		// the field name (or bibkey)
+		else if (!" \n\r\t".includes(read)) {
 			field += read;
 		}
 	}
@@ -992,6 +1071,7 @@ function readString(resolve, reject) {
 function writeField(field, value, isMacro) {
 	if (!value && typeof value != "number") return;
 	value = value + ""; // convert integers to strings
+
 	Zotero.write(",\n\t" + field + " = ");
 	if (!isMacro) Zotero.write("{");
 	// url field is preserved, for use with \href and \url
@@ -1000,7 +1080,7 @@ function writeField(field, value, isMacro) {
 		// I hope these are all the escape characters!
 		value = escapeSpecialCharacters(value);
 		
-		if (caseProtectedFields.indexOf(field) != -1) {
+		if (caseProtectedFields.includes(field)) {
 			value = ZU.XRegExp.replace(value, protectCapsRE, "$1{$2$3}"); // only $2 or $3 will have a value, not both
 		}
 	}
@@ -1061,7 +1141,7 @@ function isTitleCase(string) {
 	while (word = wordRE.exec(string)) {
 		word = word[1];
 		if (word.search(/\d/) != -1	//ignore words with numbers (including just numbers)
-			|| skipWords.indexOf(word.toLowerCase()) != -1) {
+			|| skipWords.includes(word.toLowerCase())) {
 			continue;
 		}
 
@@ -1074,13 +1154,13 @@ function isTitleCase(string) {
 // See http://tex.stackexchange.com/questions/230750/open-brace-in-bibtex-fields/230754
 var vphantomRe = /\\vphantom{\\}}((?:.(?!\\vphantom{\\}}))*)\\vphantom{\\{}/g;
 function escapeSpecialCharacters(str) {
-	var newStr = str.replace(/[|\<\>\~\^\\\{\}]/g, function(c) { return alwaysMap[c] })
+	var newStr = str.replace(/[|\<\>\~\^\\\{\}]/g, function(c) { return alwaysMap[c]; })
 		.replace(/([\#\$\%\&\_])/g, "\\$1");
 	
 	// We escape each brace in the text by making sure that it has a counterpart,
 	// but sometimes this is overkill if the brace already has a counterpart in
 	// the text.
-	if (newStr.indexOf('\\vphantom') != -1) {
+	if (newStr.includes('\\vphantom')) {
 		var m;
 		while (m = vphantomRe.exec(newStr)) {
 			// Can't use a simple replace, because we want to match up inner with inner
@@ -1154,7 +1234,6 @@ var numberRe = /^[0-9]+/;
 // Also remove markup
 var citeKeyTitleBannedRe = /\b(a|an|the|some|from|on|in|to|of|do|with|der|die|das|ein|eine|einer|eines|einem|einen|un|une|la|le|l\'|el|las|los|al|uno|una|unos|unas|de|des|del|d\')(\s+|\b)|(<\/?(i|b|sup|sub|sc|span style=\"small-caps\"|span)>)/g;
 var citeKeyConversionsRe = /%([a-zA-Z])/;
-var citeKeyCleanRe = /[^a-z0-9\!\$\&\*\+\-\.\/\:\;\<\>\?\[\]\^\_\`\|]+/g;
 
 var citeKeyConversions = {
 	"a":function (flags, item) {
@@ -1178,7 +1257,7 @@ var citeKeyConversions = {
 		}
 		return "nodate";
 	}
-}
+};
 
 
 function buildCiteKey (item, extraFields, citekeys) {
@@ -1191,7 +1270,7 @@ function buildCiteKey (item, extraFields, citekeys) {
 	
 	var basekey = "";
 	var counter = 0;
-	citeKeyFormatRemaining = citeKeyFormat;
+	var citeKeyFormatRemaining = citeKeyFormat;
 	while (citeKeyConversionsRe.test(citeKeyFormatRemaining)) {
 		if (counter > 100) {
 			Zotero.debug("Pathological BibTeX format: " + citeKeyFormat);
@@ -1226,6 +1305,15 @@ function buildCiteKey (item, extraFields, citekeys) {
 	// however, we want to keep the base characters
 
 	basekey = tidyAccents(basekey);
+	// use legacy pattern for all old items to not break existing usages
+	var citeKeyCleanRe = /[^a-z0-9\!\$\&\*\+\-\.\/\:\;\<\>\?\[\]\^\_\`\|]+/g;
+	// but use the simple pattern for all newly added items
+	// or always if the hiddenPref is set
+	// extensions.zotero.translators.BibTeX.export.simpleCitekey
+	if ((Zotero.getHiddenPref && Zotero.getHiddenPref('BibTeX.export.simpleCitekey'))
+			|| (item.dateAdded && parseInt(item.dateAdded.substr(0, 4)) >= 2020)) {
+		citeKeyCleanRe = /[^a-z0-9_-]/g;
+	}
 	basekey = basekey.replace(citeKeyCleanRe, "");
 	var citekey = basekey;
 	var i = 0;
@@ -1243,14 +1331,14 @@ function doExport() {
 		// Case of words with uppercase characters in non-initial positions is
 		// preserved with braces.
 		// Two extra captures because of the other regexp below
-		protectCapsRE = new ZU.XRegExp("()()\\b(\\p{Letter}+\\p{Uppercase_Letter}\\p{Letter}*)", 'g');
+		protectCapsRE = new ZU.XRegExp("()()\\b([\\p{Letter}\\d]+\\p{Uppercase_Letter}[\\p{Letter}\\d]*)", 'g');
 	} else {
 		// Protect all upper case letters, even if the uppercase letter is only in
 		// initial position of the word.
 		// Don't protect first word if only first letter is capitalized
 		protectCapsRE = new ZU.XRegExp(
-			"(.)\\b(\\p{Letter}*\\p{Uppercase_Letter}\\p{Letter}*)" // Non-initial words with capital letter anywhere
-				+ "|^(\\p{Letter}+\\p{Uppercase_Letter}\\p{Letter}*)" // Initial word with capital in non-initial position
+			"(.)\\b([\\p{Letter}\\d]*\\p{Uppercase_Letter}[\\p{Letter}\\d]*)" // Non-initial words with capital letter anywhere
+				+ "|^([\\p{Letter}\\d]+\\p{Uppercase_Letter}[\\p{Letter}\\d]*)" // Initial word with capital in non-initial position
 			, 'g');
 	}
 	
@@ -1469,8 +1557,10 @@ function doExport() {
 			}
 		}
 		
-		Zotero.write("\n}");
+		Zotero.write(",\n}");
 	}
+	
+	Zotero.write("\n");
 }
 
 var exports = {
@@ -1478,7 +1568,7 @@ var exports = {
 	"doImport": doImport,
 	"setKeywordDelimRe": setKeywordDelimRe,
 	"setKeywordSplitOnSpace": setKeywordSplitOnSpace
-}
+};
 
 /*
  * new mapping table based on that from Matthias Steffens,
@@ -2156,12 +2246,12 @@ var mappingTable = {
 	"\uFB04":"ffl", // LATIN SMALL LIGATURE FFL
 	"\uFB05":"st", // LATIN SMALL LIGATURE LONG S T
 	"\uFB06":"st", // LATIN SMALL LIGATURE ST
-/* Derived accented characters */
+	/* Derived accented characters */
 
-/* These two require the "semtrans" package to work; uncomment to enable */
-/*	"\u02BF":"\{\\Ayn}", // MGR Ayn
-	"\u02BE":"\{\\Alif}", // MGR Alif/Hamza
-*/
+	/* These two require the "semtrans" package to work; uncomment to enable */
+	/*	"\u02BF":"\{\\Ayn}", // MGR Ayn
+		"\u02BE":"\{\\Alif}", // MGR Alif/Hamza
+	*/
 	"\u00C0":"{\\`A}", // LATIN CAPITAL LETTER A WITH GRAVE
 	"\u00C1":"{\\'A}", // LATIN CAPITAL LETTER A WITH ACUTE
 	"\u00C2":"{\\^A}", // LATIN CAPITAL LETTER A WITH CIRCUMFLEX
@@ -2511,7 +2601,7 @@ var reversemappingTable = {
 	"{\\OE}"                          : "\u0152", // LATIN CAPITAL LIGATURE OE
 	"{\\oe}"                          : "\u0153", // LATIN SMALL LIGATURE OE
 	"{\\textasciicircum}"             : "\u02C6", // MODIFIER LETTER CIRCUMFLEX ACCENT
-//    "\\~{}"                           : "\u02DC", // SMALL TILDE
+	//    "\\~{}"                           : "\u02DC", // SMALL TILDE
 	"{\\textacutedbl}"                : "\u02DD", // DOUBLE ACUTE ACCENT
 	
 	//Greek Letters Courtesy of Spartanroc
@@ -2564,11 +2654,12 @@ var reversemappingTable = {
 	"{\\textunderscore}"              : "\u2017", // DOUBLE LOW LINE
 	"{\\textquoteleft}"               : "\u2018", // LEFT SINGLE QUOTATION MARK
 	"{\\textquoteright}"              : "\u2019", // RIGHT SINGLE QUOTATION MARK
+	"{\\textquotesingle}"              : "'", // APOSTROPHE / NEUTRAL SINGLE QUOTATION MARK
 	"{\\quotesinglbase}"              : "\u201A", // SINGLE LOW-9 QUOTATION MARK
 	"{\\textquotedblleft}"            : "\u201C", // LEFT DOUBLE QUOTATION MARK
 	"{\\textquotedblright}"           : "\u201D", // RIGHT DOUBLE QUOTATION MARK
 	"{\\quotedblbase}"                : "\u201E", // DOUBLE LOW-9 QUOTATION MARK
-//    "{\\quotedblbase}"                : "\u201F", // DOUBLE HIGH-REVERSED-9 QUOTATION MARK
+	//    "{\\quotedblbase}"                : "\u201F", // DOUBLE HIGH-REVERSED-9 QUOTATION MARK
 	"{\\textdagger}"                  : "\u2020", // DAGGER
 	"{\\textdaggerdbl}"               : "\u2021", // DOUBLE DAGGER
 	"{\\textbullet}"                  : "\u2022", // BULLET
@@ -2690,6 +2781,7 @@ var reversemappingTable = {
 	"{\\~A}"                          : "\u00C3", // LATIN CAPITAL LETTER A WITH TILDE
 	"{\\\"A}"                         : "\u00C4", // LATIN CAPITAL LETTER A WITH DIAERESIS
 	"{\\r A}"                          : "\u00C5", // LATIN CAPITAL LETTER A WITH RING ABOVE
+	"{\\AA}"                          : "\u00C5", // LATIN CAPITAL LETTER A WITH RING ABOVE
 	"{\\c C}"                          : "\u00C7", // LATIN CAPITAL LETTER C WITH CEDILLA
 	"{\\`E}"                          : "\u00C8", // LATIN CAPITAL LETTER E WITH GRAVE
 	"{\\'E}"                          : "\u00C9", // LATIN CAPITAL LETTER E WITH ACUTE
@@ -2716,6 +2808,7 @@ var reversemappingTable = {
 	"{\\~a}"                          : "\u00E3", // LATIN SMALL LETTER A WITH TILDE
 	"{\\\"a}"                         : "\u00E4", // LATIN SMALL LETTER A WITH DIAERESIS
 	"{\\r a}"                          : "\u00E5", // LATIN SMALL LETTER A WITH RING ABOVE
+	"{\\aa}"                          : "\u00E5", // LATIN SMALL LETTER A WITH RING ABOVE
 	"{\\c c}"                          : "\u00E7", // LATIN SMALL LETTER C WITH CEDILLA
 	"{\\`e}"                          : "\u00E8", // LATIN SMALL LETTER E WITH GRAVE
 	"{\\'e}"                          : "\u00E9", // LATIN SMALL LETTER E WITH ACUTE
@@ -3147,7 +3240,7 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"date": "October 2006",
+				"date": "2006-10",
 				"itemID": "conference:06",
 				"attachments": [],
 				"tags": [],
@@ -3268,7 +3361,7 @@ var testCases = [
 		"input": "@misc{american_rights_at_work_public_2012,\n    title = {Public Service Research Foundation},\n\turl = {http://www.americanrightsatwork.org/blogcategory-275/},\n\turldate = {2012-07-27},\n\tauthor = {American Rights at Work},\n\tyear = {2012},\n\thowpublished = {http://www.americanrightsatwork.org/blogcategory-275/},\n}",
 		"items": [
 			{
-				"itemType": "book",
+				"itemType": "document",
 				"title": "Public Service Research Foundation",
 				"creators": [
 					{
@@ -3531,7 +3624,7 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"date": "March 2013",
+				"date": "2013-03",
 				"DOI": "10.1161/CIR.0b013e318288b4dd",
 				"ISSN": "1524-4539",
 				"extra": "PMID: 23439512",
@@ -3544,16 +3637,36 @@ var testCases = [
 				"volume": "127",
 				"attachments": [],
 				"tags": [
-					"Administrative Personnel",
-					"American Heart Association",
-					"Cardiopulmonary Resuscitation",
-					"Community Health Services",
-					"Health Personnel",
-					"Heart Arrest",
-					"Humans",
-					"Leadership",
-					"Public Health",
-					"United States"
+					{
+						"tag": "Administrative Personnel"
+					},
+					{
+						"tag": "American Heart Association"
+					},
+					{
+						"tag": "Cardiopulmonary Resuscitation"
+					},
+					{
+						"tag": "Community Health Services"
+					},
+					{
+						"tag": "Health Personnel"
+					},
+					{
+						"tag": "Heart Arrest"
+					},
+					{
+						"tag": "Humans"
+					},
+					{
+						"tag": "Leadership"
+					},
+					{
+						"tag": "Public Health"
+					},
+					{
+						"tag": "United States"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -3702,6 +3815,345 @@ var testCases = [
 						"tag": "trajectory patterns"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@article{madoc40756,\n          author = {Elias Naumann and Moritz He{\\ss} and Leander Steinkopf},\n          number = {6},\n        language = {Deutsch},\n          volume = {44},\n       publisher = {Lucius \\& Lucius},\n         address = {Stuttgart},\n           pages = {426--446},\n         journal = {Zeitschrift f{\\\"u}r Soziologie : ZfS},\n            year = {2015},\n             doi = {10.1515/zfsoz-2015-0604},\n           title = {Die Alterung der Gesellschaft und der Generationenkonflikt in Europa},\n             url = {https://madoc.bib.uni-mannheim.de/40756/}\n}\n\n@article {MR3077863,\nAUTHOR = {Eli{\\'a}{\\v{s}}, Marek and Matou{\\v{s}}ek, Ji{\\v{r}}{\\'{\\i}}},\nTITLE = {Higher-order {E}rd{\\H o}s-{S}zekeres theorems},\nJOURNAL = {Adv. Math.},\nFJOURNAL = {Advances in Mathematics},\nVOLUME = {244},\nYEAR = {2013},\nPAGES = {1--15},\nISSN = {0001-8708},\nMRCLASS = {05C65 (05C55 52C10)},\nMRNUMBER = {3077863},\nMRREVIEWER = {David Conlon},\nDOI = {10.1016/j.aim.2013.04.020},\nURL = {http://dx.doi.org/10.1016/j.aim.2013.04.020},\n}",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Die Alterung der Gesellschaft und der Generationenkonflikt in Europa",
+				"creators": [
+					{
+						"firstName": "Elias",
+						"lastName": "Naumann",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Moritz",
+						"lastName": "Heß",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Leander",
+						"lastName": "Steinkopf",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015",
+				"DOI": "10.1515/zfsoz-2015-0604",
+				"issue": "6",
+				"itemID": "madoc40756",
+				"language": "Deutsch",
+				"pages": "426–446",
+				"publicationTitle": "Zeitschrift für Soziologie : ZfS",
+				"url": "https://madoc.bib.uni-mannheim.de/40756/",
+				"volume": "44",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			},
+			{
+				"itemType": "journalArticle",
+				"title": "Higher-order Erdős-Szekeres theorems",
+				"creators": [
+					{
+						"firstName": "Marek",
+						"lastName": "Eliáš",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jiří",
+						"lastName": "Matoušek",
+						"creatorType": "author"
+					}
+				],
+				"date": "2013",
+				"DOI": "10.1016/j.aim.2013.04.020",
+				"ISSN": "0001-8708",
+				"extra": "MR: 3077863",
+				"itemID": "MR3077863",
+				"journalAbbreviation": "Adv. Math.",
+				"pages": "1–15",
+				"publicationTitle": "Advances in Mathematics",
+				"url": "http://dx.doi.org/10.1016/j.aim.2013.04.020",
+				"volume": "244",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@incollection{madoc44942,\n        language = {isl},\n          author = {Eva H. {\\\"O}nnud{\\'o}ttir},\n           title = {B{\\'u}s{\\'a}haldabyltingin : P{\\'o}lit{\\'i}skt jafnr{\\ae}{\\dh}i og {\\th}{\\'a}tttaka almennings {\\'i} m{\\'o}tm{\\ae}lum},\n            year = {2011},\n       publisher = {F{\\'e}lagsv{\\'i}sindastofnun H{\\'a}sk{\\'o}la {\\'I}slands},\n         address = {Reykjavik},\n           pages = {36--44}\n}\n",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Búsáhaldabyltingin : Pólitískt jafnræði og þátttaka almennings í mótmælum",
+				"creators": [
+					{
+						"firstName": "Eva H.",
+						"lastName": "Önnudóttir",
+						"creatorType": "author"
+					}
+				],
+				"date": "2011",
+				"itemID": "madoc44942",
+				"language": "isl",
+				"pages": "36–44",
+				"place": "Reykjavik",
+				"publisher": "Félagsvísindastofnun Háskóla Íslands",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@String {zotero-url = {https://www.zotero.org/}}\n@string(zotero-creator = \"Corporation for Digital Scholarship\"))\n\n@Electronic{example-electronic-string,\n  author = zotero-creator,\n  title= {Zotero's Homepage},\n  year = 2019,\n  url       =zotero-url,\n  urldate=\"2019-10-12\"\n}\n",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Zotero's Homepage",
+				"creators": [
+					{
+						"firstName": "Corporation for Digital",
+						"lastName": "Scholarship",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019",
+				"itemID": "example-electronic-string",
+				"url": "https://www.zotero.org/",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@String {meta:maintainer = \"Xavier D\\\\'ecoret\"}\n\n@\n  %a\npreamble\n  %a\n{ \"Maintained by \" # meta:maintainer }\n@String(Stefan = \"Stefan Swe{\\\\i}g\")\n@String(and = \" and \")\n\n@Book{sweig42,\n  Author =\t stefan # And # meta:maintainer,\n  title =\t { The {impossible} TEL---book },\n  publisher =\t { D\\\\\"ead Po$_{eee}$t Society},\n  yEAr =\t 1942,\n  month =        mar\n}",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "The impossible ℡—book",
+				"creators": [
+					{
+						"firstName": "Stefan",
+						"lastName": "Swe\\ıg",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Xavier",
+						"lastName": "D\\écoret",
+						"creatorType": "author"
+					}
+				],
+				"date": "1942-03",
+				"itemID": "sweig42",
+				"publisher": "D\\ëad Po<sub>eee</sub>t Society",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@preamble{BibTeX for papers by David Kotz; for complete/updated list see\nhttps://www.cs.dartmouth.edu/~kotz/research/papers.html}\n\n@Article{batsis:rural,\n  author =        {John A. Batsis and Curtis L. Petersen and Matthew M. Clark and Summer B. Cook and David Kotz and Tyler L. Gooding and Meredith N. Roderka and Rima I. Al-Nimr and Dawna M. Pidgeon and Ann Haedrich and KC Wright and Christina Aquila and Todd A. Mackenzie},\n  title =         {A Rural Mobile Health Obesity Wellness Intervention for Older Adults with Obesity},\n  journal =       {BMC Geriatrics},\n  year =          2020,\n  month =         {December},\n  copyright =     {the authors},\n  URL =           {https://www.cs.dartmouth.edu/~kotz/research/batsis-rural/index.html},\n  note =          {Accepted for publication},\n}\n",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "A Rural Mobile Health Obesity Wellness Intervention for Older Adults with Obesity",
+				"creators": [
+					{
+						"firstName": "John A.",
+						"lastName": "Batsis",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Curtis L.",
+						"lastName": "Petersen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Matthew M.",
+						"lastName": "Clark",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Summer B.",
+						"lastName": "Cook",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Kotz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tyler L.",
+						"lastName": "Gooding",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Meredith N.",
+						"lastName": "Roderka",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rima I.",
+						"lastName": "Al-Nimr",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Dawna M.",
+						"lastName": "Pidgeon",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ann",
+						"lastName": "Haedrich",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "K. C.",
+						"lastName": "Wright",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christina",
+						"lastName": "Aquila",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Todd A.",
+						"lastName": "Mackenzie",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020-12",
+				"itemID": "batsis:rural",
+				"publicationTitle": "BMC Geriatrics",
+				"rights": "the authors",
+				"url": "https://www.cs.dartmouth.edu/~kotz/research/batsis-rural/index.html",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>Accepted for publication</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@techreport{ietf-bmwg-evpntest-09,\n\tnumber =\t{draft-ietf-bmwg-evpntest-09},\n\ttype =\t\t{Internet-Draft},\n\tinstitution =\t{Internet Engineering Task Force},\n\tpublisher =\t{Internet Engineering Task Force},\n\tnote =\t\t{Work in Progress},\n\turl =\t\t{https://datatracker.ietf.org/doc/html/draft-ietf-bmwg-evpntest-09},\n        author =\t{sudhin jacob and Kishore Tiruveedhula},\n\ttitle =\t\t{{Benchmarking Methodology for EVPN and PBB-EVPN}},\n\tpagetotal =\t28,\n\tyear =\t\t2021,\n\tmonth =\t\tjun,\n\tday =\t\t18,\n\tabstract =\t{This document defines methodologies for benchmarking EVPN and PBB- EVPN performance. EVPN is defined in RFC 7432, and is being deployed in Service Provider networks. Specifically, this document defines the methodologies for benchmarking EVPN/PBB-EVPN convergence, data plane performance, and control plane performance.},\n}\n",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Benchmarking Methodology for EVPN and PBB-EVPN",
+				"creators": [
+					{
+						"firstName": "sudhin",
+						"lastName": "jacob",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kishore",
+						"lastName": "Tiruveedhula",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-06-18",
+				"abstractNote": "This document defines methodologies for benchmarking EVPN and PBB- EVPN performance. EVPN is defined in RFC 7432, and is being deployed in Service Provider networks. Specifically, this document defines the methodologies for benchmarking EVPN/PBB-EVPN convergence, data plane performance, and control plane performance.",
+				"institution": "Internet Engineering Task Force",
+				"itemID": "ietf-bmwg-evpntest-09",
+				"reportNumber": "draft-ietf-bmwg-evpntest-09",
+				"reportType": "Internet-Draft",
+				"url": "https://datatracker.ietf.org/doc/html/draft-ietf-bmwg-evpntest-09",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>Work in Progress</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@inproceedings{NIPS2009_0188e8b8,\n author = {Cuturi, Marco and Vert, Jean-philippe and D\\textquotesingle aspremont, Alexandre},\n booktitle = {Advances in Neural Information Processing Systems},\n editor = {Y. Bengio and D. Schuurmans and J. Lafferty and C. Williams and A. Culotta},\n pages = {},\n publisher = {Curran Associates, Inc.},\n title = {White Functionals for Anomaly Detection in Dynamical Systems},\n url = {https://proceedings.neurips.cc/paper/2009/file/0188e8b8b014829e2fa0f430f0a95961-Paper.pdf},\n volume = {22},\n year = {2009}\n}",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "White Functionals for Anomaly Detection in Dynamical Systems",
+				"creators": [
+					{
+						"firstName": "Marco",
+						"lastName": "Cuturi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jean-philippe",
+						"lastName": "Vert",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alexandre",
+						"lastName": "D' aspremont",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Y.",
+						"lastName": "Bengio",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "D.",
+						"lastName": "Schuurmans",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "J.",
+						"lastName": "Lafferty",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "C.",
+						"lastName": "Williams",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "A.",
+						"lastName": "Culotta",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2009",
+				"itemID": "NIPS2009_0188e8b8",
+				"proceedingsTitle": "Advances in Neural Information Processing Systems",
+				"publisher": "Curran Associates, Inc.",
+				"url": "https://proceedings.neurips.cc/paper/2009/file/0188e8b8b014829e2fa0f430f0a95961-Paper.pdf",
+				"volume": "22",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}

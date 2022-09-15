@@ -8,8 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-03 11:41:00"
+	"lastUpdated": "2021-10-12 19:51:31"
 }
 
 /*
@@ -17,7 +16,7 @@
 
 	OVID Tagged import translator
 	(Based on hhttp://ospguides.ovid.com/OSPguides/medline.htm#PT and lots of testing
-	Created as part of the 2014 Zotero Trainer Workshop in Syracus 
+	Created as part of the 2014 Zotero Trainer Workshop in Syracus
 	and with contributions from participants.)
 	Copyright © 2014 Sebastian Karcher
 
@@ -45,16 +44,16 @@ function detectImport() {
 	while ((line = Zotero.read()) !== false) {
 		line = line.replace(/^\s+/, "");
 		if (line != "") {
-			//All Ovid databases have this at the top:
+			// All Ovid databases have this at the top:
 			if (line.match(/^VN\s{1,2}- Ovid Technologies/)) {
 				return true;
-			} else {
-				if (i++ > 3) {
-					return false;
-				}
+			}
+			else if (i++ > 3) {
+				return false;
 			}
 		}
 	}
+	return false;
 }
 
 var fieldMap = {
@@ -82,72 +81,83 @@ var fieldMap = {
 
 // Only the most basic types. Mostly guessing from existing Ovid records here
 var inputTypeMap = {
-	"Book": "book",
+	Book: "book",
 	"Book Chapter": "bookSection",
 	"Book chapter": "bookSection",
-	"Chapter": "bookSection",
-	"Dissertation": "thesis",
+	Chapter: "bookSection",
+	Dissertation: "thesis",
 	"Dissertation Abstract": "thesis",
 	"Journal Article": "journalArticle",
 	"Newspaper Article": "newspaperArticle",
 	"Video-Audio Media": "videoRecording",
 	"Technical Report": "report",
 	"Legal Case": "case",
-	"Legislation": "statute",
-	"Patent": "patent"
+	Legislation: "statute",
+	Patent: "patent"
 };
-
-var isEndNote = false;
 
 function processTag(item, tag, value) {
 	value = Zotero.Utilities.trim(value);
 	if (fieldMap[tag]) {
 		item[fieldMap[tag]] = value;
-	} else if (tag == "PT" || tag == "DT") {
+	}
+	else if (tag == "PT" || tag == "DT") {
 		if (inputTypeMap[value]) { // first check inputTypeMap
-			item.itemType = inputTypeMap[value]
+			item.itemType = inputTypeMap[value];
 		}
-	//I don't think FED or ED exist, but let's keep them to be safe
-	} else if (tag == "FA" || tag == "FED") {
+	// I don't think FED or ED exist, but let's keep them to be safe
+	}
+	else if (tag == "FA" || tag == "FED") {
+		let type;
 		if (tag == "FA") {
-			var type = "author";
-		} else if (tag == "FED") {
-			var type = "editor";
+			type = "author";
 		}
-		item.creators.push(Zotero.Utilities.cleanAuthor(value, type, value.indexOf(",") != -1));
-	} else if (tag == "AU" || tag == "ED") {
+		else if (tag == "FED") {
+			type = "editor";
+		}
+		item.creators.push(Zotero.Utilities.cleanAuthor(value, type, value.includes(",")));
+	}
+	else if (tag == "AU" || tag == "ED") {
+		let type;
 		if (tag == "AU") {
-			var type = "author";
-		} else if (tag == "ED") {
-			var type = "editor";
+			type = "author";
 		}
-		value = value.replace(/[0-9\,+\*\s]+$/, "").replace(/ Ph\.?D\.?.*/, "").replace(/\[.+/, "").replace(
-			/ (?:MD|[BM]Sc|[BM]A|MPH|MB)(\,\s*)?$/gi, "");
-		//Z.debug(value)
-		item.creatorsBackup.push(Zotero.Utilities.cleanAuthor(value, type, value.indexOf(",") != -1));
-	} else if (tag == "UI") {
+		else if (tag == "ED") {
+			type = "editor";
+		}
+		value = value.replace(/[0-9,+*\s]+$/, "").replace(/ Ph\.?D\.?.*/, "").replace(/\[.+/, "")
+			.replace(/(\b(?:MD|[BM]Sc|[BM]A|MPH|MB)(,\s*)?)+$/gi, "");
+		// Z.debug(value)
+		item.creatorsBackup.push(Zotero.Utilities.cleanAuthor(value, type, value.includes(",")));
+	}
+	else if (tag == "UI") {
 		item.PMID = "PMID: " + value;
-	} else if (tag == "DI" || tag == "DO") {
-		if (value.indexOf("10.") != -1) item.DOI = value
-	} else if (tag == "YR") {
+	}
+	else if (tag == "DI" || tag == "DO") {
+		if (value.includes("10.")) item.DOI = value;
+	}
+	else if (tag == "YR") {
 		item.date = value;
-	} else if (tag == "IN") {
+	}
+	else if (tag == "IN") {
 		item.institution = value;
-	}  else if (tag == "SO") {
+	}
+	else if (tag == "SO") {
 		item.citation = value;
-	}  else if (tag == "PU") {
+	}
+	else if (tag == "PU") {
 		item.publishing = value;
-	}  else if (tag == "KW") {
-		tags = value.split(/;\s*/);
-		for (var i in tags) {
-			item.tags.push(tags[i]);
+	}
+	else if (tag == "KW") {
+		let tags = value.split(/;\s*/);
+		for (let tag of tags) {
+			item.tags.push({ tag });
 		}
 	}
 }
 
 function doImport() {
 	var line = true;
-	var tag = data = false;
 	var potentialItemID, checkID;
 	do { // first valid line is type
 		Zotero.debug("ignoring " + line);
@@ -191,18 +201,17 @@ function doImport() {
 			}
 			
 			data = line.substr(line.indexOf("-") + 1);
-		} else {
+		}
+		else if (tag) {
 			// otherwise, assume this is data from the previous line continued
-			if (tag) {
-				data += " " + line;
-			}
+			data += " " + line;
 		}
 	}
 
 	if (tag) { // save any unprocessed tags
 		processTag(item, tag, data);
 		// and finalize with some post-processing
-		finalizeItem(item)
+		finalizeItem(item);
 	}
 }
 
@@ -212,18 +221,20 @@ function finalizeItem(item) {
 	}
 	delete item.creatorsBackup;
 	if (!item.itemType) item.itemType = inputTypeMap["Journal Article"];
-	item.title = item.title.replace(/(\.\s*)?(\[(Article|Report|Miscellaneous|References)\])?([.\s]*)?$/, "");
-	var monthRegex = /(?:[-/]?(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?))+/;
-	var value = item.citation
-	if (!value && item.itemType == "bookSection") value = item.bookTitle
+	item.title = item.title
+		.replace(/(\.\s*)?(\[(Article|Report|Miscellaneous|References)\])?([.\s]*)?$/, "")
+		.replace(/^\s*"(.+)"\s*$/, '$1');
+	var monthRegex = /(?:[-/]?(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?))+\b/;
+	var value = item.citation;
+	if (!value && item.itemType == "bookSection") value = item.bookTitle;
 	if (item.itemType == "journalArticle" && value) {
 		if (value.match(/\d{4}/)) {
 			if (!item.date) item.date = value.match(/\d{4}/)[0];
 		}
 		var month = monthRegex.exec(value);
 		if (month) item.date = item.date += " " + (month)[0];
-		if (value.match(/(\d+)\((\d+(?:\-\d+)?)\)/)) {
-			var voliss = value.match(/(\d+)\((\d+(?:\-\d+)?)\)/);
+		if (value.match(/(\d+)\((\d+(?:-\d+)?)\)/)) {
+			var voliss = value.match(/(\d+)\((\d+(?:-\d+)?)\)/);
 
 			item.volume = voliss[1];
 			item.issue = voliss[2];
@@ -235,42 +246,43 @@ function finalizeItem(item) {
 		if (value.match(/vol\.\s*\d+\s*,\s*no\.\s*(\d+)/)) {
 			item.issue = value.match(/vol\.\s*\d+\s*,\s*no\.\s*(\d+)/)[1];
 		}
-		if (value.match(/:\s*\d+\-\d+/)) item.pages = value.match(/:\s*(\d+\-\d+)/)[1];
-		if (value.match(/pp\.\s*(\d+\-\d+)/)) item.pages = value.match(/pp\.\s*(\d+\-\d+)/)[1];
-		if (value.match(/[J|j]ournal[-\s\w]+/)) {
-			item.publicationTitle = value.match(/[J|j]ournal[-\s\w]+/)[0];
-		} else {
+		if (value.match(/:\s*\d+-\d+/)) item.pages = value.match(/:\s*(\d+-\d+)/)[1];
+		if (value.match(/pp\.\s*(\d+-\d+)/)) item.pages = value.match(/pp\.\s*(\d+-\d+)/)[1];
+		if (value.match(/^\s*[J|j]ournal[-\s\w&:]+/)) {
+			item.publicationTitle = value.match(/^\s*[J|j]ournal[-\s\w&:]+/)[0];
+		}
+		else {
 			item.publicationTitle = Zotero.Utilities.trimInternal(value.split(/(\.|;|(,\s*vol\.))/)[0]);
 		}
 		item.publicationTitle = item.publicationTitle.split(monthRegex)[0];
 	}
 	if (item.itemType == "bookSection" && value) {
-		if (!item.pages){
-			if (value.match(/:\s*\d+\-\d+/)) item.pages = value.match(/:\s*(\d+\-\d+)/)[1];
-			if (value.match(/pp\.\s*(\d+\-\d+)/)) item.pages = value.match(/pp\.\s*(\d+\-\d+)/)[1];
+		if (!item.pages) {
+			if (value.match(/:\s*\d+-\d+/)) item.pages = value.match(/:\s*(\d+-\d+)/)[1];
+			if (value.match(/pp\.\s*(\d+-\d+)/)) item.pages = value.match(/pp\.\s*(\d+-\d+)/)[1];
 		}
-		//editors are only listed as part of the citation...
-		if (value.match(/(.+?)\[Ed(itor|\.|\])/)) {
+		// editors are only listed as part of the citation...
+		if (/(.+?)\[Ed(itor|\.|\])/.test(value)) {
 			var editors = value.match(/.+?\[Ed(itor|\.|\])/g);
-			for (var i in editors) {
-				editor = editors[i].replace(/\[Ed(itor|\.|\]).*$/, "").replace(/.*?\][,\s]*/, "");
-				item.creators.push(ZU.cleanAuthor(editor, "editor", true))
+			for (let editor of editors) {
+				editor = editor.replace(/\[Ed(itor|\.|\]).*$/, "").replace(/.*?\][,\s]*/, "");
+				item.creators.push(ZU.cleanAuthor(editor, "editor", true));
 			}
 		}
-		if (value.match(/.+\[Ed(?:\.|itor)?\][\.\s]*([^\.]+)/)) {
-			item.bookTitle = value.match(/.+\[Ed(?:\.|itor)?\][\.\s]*(?:\(\d{4}\)\.)?([^\.]+)/)[1]
-		};
+		if (value.match(/.+\[Ed(?:\.|itor)?\][.\s]*([^.]+)/)) {
+			item.bookTitle = value.match(/.+\[Ed(?:\.|itor)?\][.\s]*(?:\(\d{4}\)\.)?([^.]+)/)[1];
+		}
 	}
-	//fix all caps authors
+	// fix all caps authors
 	for (var i in item.creators) {
 		if (item.creators[i].lastName && item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
 			item.creators[i].lastName = ZU.capitalizeTitle(item.creators[i].lastName.toLowerCase(), true);
 		}
 	}
 	if (item.pages) {
-		//Z.debug(item.pages)
-		//where page ranges are given in an abbreviated format, convert to full
-		//taken verbatim from NCBI Pubmed translator
+		// Z.debug(item.pages)
+		// where page ranges are given in an abbreviated format, convert to full
+		// taken verbatim from NCBI Pubmed translator
 		var pageRangeRE = /(\d+)-(\d+)/g;
 		pageRangeRE.lastIndex = 0;
 		var range = pageRangeRE.exec(item.pages);
@@ -281,26 +293,26 @@ function finalizeItem(item) {
 			if (diff > 0) {
 				pageRangeEnd = pageRangeStart.substring(0, diff) + pageRangeEnd;
 				var newRange = pageRangeStart + "-" + pageRangeEnd;
-				var fullPageRange = item.pages.substring(0, range.index) //everything before current range
-				+ newRange //insert the new range
-				+ item.pages.substring(range.index + range[0].length); //everything after the old range
-				//adjust RE index
+				var fullPageRange = item.pages.substring(0, range.index) // everything before current range
+				+ newRange // insert the new range
+				+ item.pages.substring(range.index + range[0].length); // everything after the old range
+				// adjust RE index
 				pageRangeRE.lastIndex += newRange.length - range[0].length;
 				item.pages = fullPageRange;
 			}
 		}
 	}
-	if ((item.itemType == "book" ||item.itemType == "bookSection")&& !item.publisher){
+	if ((item.itemType == "book" || item.itemType == "bookSection") && !item.publisher) {
 		item.publisher = item.publishing;
 	}
 	
 	if (item.publisher && !item.pace) {
 		if (item.publisher.search(/,./) != -1) {
 			item.place = item.publisher.match(/,(.+?)$/)[1];
-			item.publisher = item.publisher.replace(/,.+?$/, "")
+			item.publisher = item.publisher.replace(/,.+?$/, "");
 		}
 	}
-	if (item.itemType == "thesis" && item.institution){
+	if (item.itemType == "thesis" && item.institution) {
 		item.publisher = item.institution.replace(/^.+:\s*/, "");
 		delete item.institution;
 	}
@@ -310,17 +322,19 @@ function finalizeItem(item) {
 	if (item.callNumber) {
 		item.callNumber = item.callNumber.replace(/[.\s]+$/, '');
 	}
-	//strip extraneous label at the end of title (reported for Psycinfo)
-	if (item.libraryCatalog && item.libraryCatalog.indexOf("MEDLINE") != -1 && item.PMID) {
+	// strip extraneous label at the end of title (reported for Psycinfo)
+	if (item.libraryCatalog && item.libraryCatalog.includes("MEDLINE") && item.PMID) {
 		item.extra = item.PMID;
 		delete item.PMID;
 	}
 
-	delete item.publishing
+	delete item.publishing;
 	delete item.citation;
 	delete item.itemID;
 	item.complete();
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "import",
@@ -579,7 +593,7 @@ var testCases = [
 				"issue": "1",
 				"language": "English.",
 				"libraryCatalog": "Journals@Ovid",
-				"publicationTitle": "Journal",
+				"publicationTitle": "ACSM'S Health & Fitness Journal",
 				"volume": "14",
 				"attachments": [],
 				"tags": [],
@@ -639,9 +653,15 @@ var testCases = [
 				"volume": "43",
 				"attachments": [],
 				"tags": [
-					"BCRP",
-					"PI3K/AKT/NF-[kappa]B",
-					"chemoresistance"
+					{
+						"tag": "BCRP"
+					},
+					{
+						"tag": "PI3K/AKT/NF-[kappa]B"
+					},
+					{
+						"tag": "chemoresistance"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -708,13 +728,19 @@ var testCases = [
 				"language": "English.",
 				"libraryCatalog": "Your Journals@Ovid",
 				"pages": "845-849",
-				"publicationTitle": "Journal of Dermatopathology",
+				"publicationTitle": "American Journal of Dermatopathology",
 				"volume": "33",
 				"attachments": [],
 				"tags": [
-					"lobular breast carcinoma",
-					"plexiform schwannoma",
-					"tumor to tumor metastasis"
+					{
+						"tag": "lobular breast carcinoma"
+					},
+					{
+						"tag": "plexiform schwannoma"
+					},
+					{
+						"tag": "tumor to tumor metastasis"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -1041,6 +1067,84 @@ var testCases = [
 				"libraryCatalog": "PsycINFO",
 				"pages": "11-31",
 				"publisher": "Routledge/Taylor & Francis Group; US",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "\n<6. >\nVN  - Ovid Technologies\nDB  - Journals@Ovid\nAN  - 01445365-201506000-00011.\nAU  - Lefkowitz, Rafael Y. MD, MPH 1\nAU  - Slade, Martin D. MPH 1\nAU  - Redlich, Carrie A. MD, MPH 1\nIN  - (1)Yale Occupational and Environmental Medicine, Yale School of Medicine, New Haven, Connecticut\nTI  - \"Injury, Illness, and Work Restriction in Merchant Seafarers\".  [Article]\nSO  - American Journal Of Industrial Medicine June 2015;58(6):688-696\nAB  - Background: Research on seafarer medical conditions at sea is limited. This study describes the frequency and distribution of seafarer injury and illness at sea, and explores potential risk factors for resultant lost work., Materials and Methods: The study analyzed a telemedicine database of 3,921 seafarer medical cases between 2008 and 2011 using descriptive statistics and logistic regression., Results: There were over twice as many illness cases (n = 2,764, 70.5%) as injury (n = 1,157, 29.5%) cases. Disability was more often secondary to illness (n = 646, 54.3%), predominantly from gastrointestinal, dermatologic, and respiratory conditions. Logistic regression revealed age, rank, and worksite as potential risk factors for lost work., Conclusions: This study emphasizes illness as a significant problem occurring in seafarers at sea. Future research should further elucidate risk factors for illness, as well as injury, to inform preventive measures and reduce seafarer disability. Am. J. Ind. Med. 58:688-696, 2015. (C) 2015 Wiley Periodicals, Inc., (C) 2015 John Wiley & Sons, Ltd\nKW  - seafarers;  disability;  telemedicine;  occupational injury;  epidemiology\nLG  - English.\nDT  - Research Articles.\nSB  - Clinical Medicine, Public Health.\nIS  - 0271-3586\nDI  - 10.1002/ajim.22459\nXL  - http://ovidsp.ovid.com/ovidweb.cgi?T=JS&CSC=Y&NEWS=N&PAGE=fulltext&D=ovftq&AN=01445365-201506000-00011",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Injury, Illness, and Work Restriction in Merchant Seafarers",
+				"creators": [
+					{
+						"firstName": "Rafael Y.",
+						"lastName": "Lefkowitz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Martin D.",
+						"lastName": "Slade",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Carrie A.",
+						"lastName": "Redlich",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015 June",
+				"DOI": "10.1002/ajim.22459",
+				"ISSN": "0271-3586",
+				"abstractNote": "Background: Research on seafarer medical conditions at sea is limited. This study describes the frequency and distribution of seafarer injury and illness at sea, and explores potential risk factors for resultant lost work., Materials and Methods: The study analyzed a telemedicine database of 3,921 seafarer medical cases between 2008 and 2011 using descriptive statistics and logistic regression., Results: There were over twice as many illness cases (n = 2,764, 70.5%) as injury (n = 1,157, 29.5%) cases. Disability was more often secondary to illness (n = 646, 54.3%), predominantly from gastrointestinal, dermatologic, and respiratory conditions. Logistic regression revealed age, rank, and worksite as potential risk factors for lost work., Conclusions: This study emphasizes illness as a significant problem occurring in seafarers at sea. Future research should further elucidate risk factors for illness, as well as injury, to inform preventive measures and reduce seafarer disability. Am. J. Ind. Med. 58:688-696, 2015. (C) 2015 Wiley Periodicals, Inc., (C) 2015 John Wiley & Sons, Ltd",
+				"callNumber": "01445365-201506000-00011",
+				"issue": "6",
+				"language": "English.",
+				"libraryCatalog": "Journals@Ovid",
+				"pages": "688-696",
+				"publicationTitle": "American Journal Of Industrial Medicine",
+				"volume": "58",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "disability"
+					},
+					{
+						"tag": "epidemiology"
+					},
+					{
+						"tag": "occupational injury"
+					},
+					{
+						"tag": "seafarers"
+					},
+					{
+						"tag": "telemedicine"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "\n<6. >\nVN  - Ovid Technologies\nTI  - Test\nSO  - A Nonexistent Journal of Marriage and Family Therapy: With a Subtitle June 2019;1(6):123-456\n",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Test",
+				"creators": [],
+				"date": "2019 June",
+				"issue": "6",
+				"pages": "123-456",
+				"publicationTitle": "A Nonexistent Journal of Marriage and Family Therapy: With a Subtitle",
+				"volume": "1",
 				"attachments": [],
 				"tags": [],
 				"notes": [],

@@ -2,14 +2,14 @@
 	"translatorID": "908c1ca2-59b6-4ad8-b026-709b7b927bda",
 	"label": "SAGE Journals",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://journals\\.sagepub\\.com(/doi/((abs|full)/)?10\\.|/action/doSearch\\?|/toc/)",
+	"target": "^https?://journals\\.sagepub\\.com(/doi/((abs|full|pdf)/)?10\\.|/action/doSearch\\?|/toc/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-14 20:53:20"
+	"lastUpdated": "2020-12-06 18:57:06"
 }
 
 /*
@@ -35,26 +35,34 @@
 	***** END LICENSE BLOCK *****
 */
 
-//SAGE uses Atypon, but as of now this is too distinct from any existing Atypon sites to make sense in the same translator.
+// SAGE uses Atypon, but as of now this is too distinct from any existing Atypon sites to make sense in the same translator.
+
+// attr()/text() v2
+// eslint-disable-next-line
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 function detectWeb(doc, url) {
-	if (url.indexOf('/abs/10.') != -1 || url.indexOf('/full/10.') != -1) {
+	let articleMatch = /(abs|full|pdf|doi)\/10\./;
+	if (articleMatch.test(url)) {
 		return "journalArticle";
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//div[contains(@class, "art_title")]/a[contains(@href, "/doi/full/10.") or contains(@href, "/doi/abs/10.")][1]');
+	var rows = ZU.xpath(doc, '//*[contains(@class, "art_title")]/a[contains(@href, "/doi/full/10.") or contains(@href, "/doi/abs/10.") or contains(@href, "/doi/pdf/10.")][1]');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
+		href = href.replace("/doi/pdf/", "/doi/abs/");
 		items[href] = title;
 	}
 	return found ? items : false;
@@ -63,9 +71,9 @@ function getSearchResults(doc, checkOnly) {
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function(items) {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -73,7 +81,8 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -84,28 +93,28 @@ function scrape(doc, url) {
 	if (!doi) {
 		doi = url.match(/10\.[^?#]+/)[0];
 	}
-	var filename = ZU.xpathText(doc, '//input[@name="downloadFileName"]/@value');
-	var post = "doi=" + encodeURIComponent(doi) + "&downloadFileName=" + filename + "&include=abs&format=ris&direct=false&submit=Download+Citation";
+	var post = "doi=" + encodeURIComponent(doi) + "&include=abs&format=ris&direct=false&submit=Download+Citation";
 	var pdfurl = "//" + doc.location.host + "/doi/pdf/" + doi;
-	//Z.debug(pdfurl);
-	//Z.debug(post);
-	ZU.doPost(risURL, post, function(text) {
-		//The publication date is saved in DA and the date first
-		//appeared online is in Y1. Thus, we want to prefer DA over T1
-		//and will therefore simply delete the later in cases both
-		//dates are present.
-		//Z.debug(text);
-		if (text.indexOf("DA  - ")>-1) {
-			text = text.replace(/Y1  - .*\r?\n/, '');
+	var tags = doc.querySelectorAll('div.abstractKeywords a');
+	// Z.debug(pdfurl);
+	// Z.debug(post);
+	ZU.doPost(risURL, post, function (text) {
+		// The publication date is saved in DA and the date first
+		// appeared online is in Y1. Thus, we want to prefer DA over T1
+		// and will therefore simply delete the later in cases both
+		// dates are present.
+		// Z.debug(text);
+		if (text.includes("DA  - ")) {
+			text = text.replace(/Y1[ ]{2}- .*\r?\n/, '');
 		}
 		
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
-		translator.setHandler("itemDone", function(obj, item) {
-			//The subtitle will be neglected in RIS and is only present in
-			//the website itself. Moreover, there can be problems with
-			//encodings of apostrophs.
+		translator.setHandler("itemDone", function (obj, item) {
+			// The subtitle will be neglected in RIS and is only present in
+			// the website itself. Moreover, there can be problems with
+			// encodings of apostrophs.
 			var subtitle = ZU.xpathText(doc, '//div[contains(@class, "publicationContentSubTitle")]/h1');
 			var title = ZU.xpathText(doc, '//div[contains(@class, "publicationContentTitle")]/h1');
 			if (title) {
@@ -114,15 +123,19 @@ function scrape(doc, url) {
 					item.title += ': ' + subtitle.trim();
 				}
 			}
-			//The encoding of apostrophs in the RIS are incorrect and
-			//therefore we extract the abstract again from the website.
+			// The encoding of apostrophs in the RIS are incorrect and
+			// therefore we extract the abstract again from the website.
 			var abstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
 			if (abstract) {
 				item.abstractNote = abstract;
 			}
 			
-			//Workaround while Sage hopefully fixes RIS for authors
-			for (let i = 0; i<item.creators.length; i++) {
+			
+			for (let tag of tags) {
+				item.tags.push(tag.textContent);
+			}
+			// Workaround while Sage hopefully fixes RIS for authors
+			for (let i = 0; i < item.creators.length; i++) {
 				if (!item.creators[i].firstName) {
 					let type = item.creators[i].creatorType;
 					let comma = item.creators[i].lastName.includes(",");
@@ -177,7 +190,17 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "emotion regulation"
+					},
+					{
+						"tag": "facial expression"
+					},
+					{
+						"tag": "facial feedback"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -190,25 +213,25 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://journals.sagepub.com/doi/full/10.1177/0954408914525387",
+		"url": "https://journals.sagepub.com/doi/full/10.1177/0954408914525387",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Brookfield powder flow tester – Results of round robin tests with CRM-116 limestone powder",
 				"creators": [
 					{
-						"firstName": "R. J.",
 						"lastName": "Berry",
+						"firstName": "RJ",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "M. S. A.",
 						"lastName": "Bradley",
+						"firstName": "MSA",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "R. G.",
 						"lastName": "McGregor",
+						"firstName": "RG",
 						"creatorType": "author"
 					}
 				],
@@ -218,6 +241,7 @@ var testCases = [
 				"abstractNote": "A low cost powder flowability tester for industry has been developed at The Wolfson Centre for Bulk Solids Handling Technology, University of Greenwich in collaboration with Brookfield Engineering and four food manufacturers: Cadbury, Kerry Ingredients, GSK and United Biscuits. Anticipated uses of the tester are primarily for quality control and new product development, but it can also be used for storage vessel design., This paper presents the preliminary results from ‘round robin’ trials undertaken with the powder flow tester using the BCR limestone (CRM-116) standard test material. The mean flow properties have been compared to published data found in the literature for the other shear testers.",
 				"issue": "3",
 				"journalAbbreviation": "Proceedings of the Institution of Mechanical Engineers, Part E: Journal of Process Mechanical Engineering",
+				"language": "en",
 				"libraryCatalog": "SAGE Journals",
 				"pages": "215-230",
 				"publicationTitle": "Proceedings of the Institution of Mechanical Engineers, Part E: Journal of Process Mechanical Engineering",
@@ -229,7 +253,32 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "BCR limestone powder (CRM-116)"
+					},
+					{
+						"tag": "Brookfield powder flow tester"
+					},
+					{
+						"tag": "Jenike shear cell"
+					},
+					{
+						"tag": "Schulze ring shear tester"
+					},
+					{
+						"tag": "Shear cell"
+					},
+					{
+						"tag": "characterizing powder flowability"
+					},
+					{
+						"tag": "flow function"
+					},
+					{
+						"tag": "reproducibility"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -242,30 +291,30 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://journals.sagepub.com/doi/full/10.1177/1541204015581389",
+		"url": "https://journals.sagepub.com/doi/full/10.1177/1541204015581389",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Moffitt’s Developmental Taxonomy and Gang Membership: An Alternative Test of the Snares Hypothesis",
 				"creators": [
 					{
-						"firstName": "Melissa A.",
 						"lastName": "Petkovsek",
+						"firstName": "Melissa A.",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Brian B.",
 						"lastName": "Boutwell",
+						"firstName": "Brian B.",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "J. C.",
 						"lastName": "Barnes",
+						"firstName": "J. C.",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Kevin M.",
 						"lastName": "Beaver",
+						"firstName": "Kevin M.",
 						"creatorType": "author"
 					}
 				],
@@ -275,6 +324,7 @@ var testCases = [
 				"abstractNote": "Moffitt’s taxonomy remains an influential theoretical framework within criminology. Despite much empirical scrutiny, comparatively less time has been spent testing the snares component of Moffitt’s work. Specifically, are there factors that might engender continued criminal involvement for individuals otherwise likely to desist? The current study tested whether gang membership increased the odds of contact with the justice system for each of the offender groups specified in Moffitt’s original developmental taxonomy. Our findings provided little evidence that gang membership increased the odds of either adolescence-limited or life-course persistent offenders being processed through the criminal justice system. Moving forward, scholars may wish to shift attention to alternative variables—beyond gang membership—when testing the snares hypothesis.",
 				"issue": "4",
 				"journalAbbreviation": "Youth Violence and Juvenile Justice",
+				"language": "en",
 				"libraryCatalog": "SAGE Journals",
 				"pages": "335-349",
 				"publicationTitle": "Youth Violence and Juvenile Justice",
@@ -287,7 +337,74 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Moffitt’s developmental taxonomy"
+					},
+					{
+						"tag": "delinquency"
+					},
+					{
+						"tag": "gang membership"
+					},
+					{
+						"tag": "snares"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://journals.sagepub.com/doi/10.1177/0263276404046059",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The ‘System’ of Automobility",
+				"creators": [
+					{
+						"lastName": "Urry",
+						"firstName": "John",
+						"creatorType": "author"
+					}
+				],
+				"date": "October 1, 2004",
+				"DOI": "10.1177/0263276404046059",
+				"ISSN": "0263-2764",
+				"abstractNote": "This article is concerned with how to conceptualize and theorize the nature of the ‘car system’ that is a particularly key, if surprisingly neglected, element in ‘globalization’. The article deploys the notion of systems as self-reproducing or autopoietic. This notion is used to understand the origins of the 20th-century car system and especially how its awesome pattern of path dependency was established and exerted a particularly powerful and self-expanding pattern of domination across the globe. The article further considers whether and how the 20th-century car system may be transcended. It elaborates a number of small changes that are now occurring in various test sites, factories, ITC sites, cities and societies. The article briefly considers whether these small changes may in their contingent ordering end this current car system. The article assesses whether such a new system could emerge well before the end of this century, whether in other words some small changes now may produce the very large effect of a new post-car system that would have great implications for urban life, for mobility and for limiting projected climate change.",
+				"issue": "4-5",
+				"journalAbbreviation": "Theory, Culture & Society",
+				"language": "en",
+				"libraryCatalog": "SAGE Journals",
+				"pages": "25-39",
+				"publicationTitle": "Theory, Culture & Society",
+				"url": "https://doi.org/10.1177/0263276404046059",
+				"volume": "21",
+				"attachments": [
+					{
+						"title": "SAGE PDF Full Text",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "automobility"
+					},
+					{
+						"tag": "path dependence"
+					},
+					{
+						"tag": "technology"
+					},
+					{
+						"tag": "time-space"
+					},
+					{
+						"tag": "tipping point"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}

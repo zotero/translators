@@ -1,253 +1,216 @@
 {
 	"translatorID": "c73a4a8c-3ef1-4ec8-8229-7531ee384cc4",
 	"label": "Open WorldCat",
-	"creator": "Simon Kornblith, Sebastian Karcher",
-	"target": "^https?://[^/]+\\.worldcat\\.org/",
-	"minVersion": "3.0.9",
+	"creator": "Simon Kornblith, Sebastian Karcher, Abe Jellinek",
+	"target": "^https?://([^/]+\\.)?worldcat\\.org/",
+	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 12,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2017-03-19 23:26:57"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2022-09-01 00:00:33"
 }
 
-/**
- * Gets Zotero item from a WorldCat icon src
- */
-function getZoteroType(iconSrc) {
-	// only specify types not specified in COinS
-	if (iconSrc.indexOf("icon-rec") != -1) {
-		return "audioRecording";
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2022 Simon Kornblith, Sebastian Karcher, and Abe Jellinek
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
+// http://www.loc.gov/marc/relators/relaterm.html
+// From MARC.js
+const RELATORS = {
+	act: "castMember",
+	asn: "contributor", // Associated name
+	aut: "author",
+	cmp: "composer",
+	ctb: "contributor",
+	drt: "director",
+	edt: "editor",
+	pbl: "SKIP", // publisher
+	prf: "performer",
+	pro: "producer",
+	pub: "SKIP", // publication place
+	trl: "translator"
+};
+
+const RECORD_MAPPING = {
+	oclcNumber: (item, value) => item.extra = (item.extra || '') + `\nOCLC: ${value}`,
+	title: (item, value) => item.title = value.replace(' : ', ': '),
+	edition: 'edition',
+	publisher: 'publisher',
+	publicationPlace: 'place',
+	publicationDate: (item, value) => item.date = ZU.strToISO(value),
+	catalogingLanguage: 'language',
+	summary: 'abstractNote',
+	physicalDescription: (item, value) => {
+		item.numPages = (value.match(/\d+(?= pages?)/) || value.match(/\d+/) || [])[0];
+	},
+	series: 'series',
+	subjectsText: 'tags',
+	cartographicData: 'scale',
+	// genre: 'genre',
+	doi: (item, value) => item.DOI = ZU.cleanDOI(value),
+	mediumOfPerformance: 'medium',
+	issns: (item, value) => item.ISSN = ZU.cleanISSN(value),
+	sourceIssn: (item, value) => item.ISSN = ZU.cleanISSN(value),
+	digitalAccessAndLocations: (item, value) => {
+		if (value.length) {
+			item.url = value[0].uri;
+		}
+	},
+	isbns: (item, value) => item.ISBN = ZU.cleanISBN(value.join(' ')),
+	isbn13: (item, value) => item.ISBN = ZU.cleanISBN(value),
+	publication: (item, value) => {
+		try {
+			let [, publicationTitle, volume, date, page] = value.match(/^(.+), (.+), (.+), (.+)$/);
+			item.publicationTitle = publicationTitle;
+			item.volume = volume;
+			item.date = ZU.strToISO(date);
+			item.pages = page;
+		}
+		catch (e) {
+			Z.debug(e);
+		}
+	},
+	contributors: (item, value) => {
+		for (let contrib of value) {
+			let creatorType;
+			if (contrib.relatorCodes && contrib.relatorCodes[0]) {
+				creatorType = RELATORS[contrib.relatorCodes[0]] || 'contributor';
+				if (creatorType == 'SKIP') continue;
+			}
+			else {
+				creatorType = ZU.getCreatorsForType(item.itemType)[0];
+			}
+			let creator = {
+				firstName: contrib.firstName && contrib.firstName.text,
+				lastName: contrib.secondName && contrib.secondName.text,
+				creatorType
+			};
+			// If only firstName field, set as single-field name
+			if (creator.firstName && !creator.lastName) {
+				creator.lastName = creator.firstName;
+				delete creator.firstName;
+				creator.fieldMode = 1;
+			}
+			item.creators.push(creator);
+		}
 	}
-	if (iconSrc.indexOf("icon-com") != -1) {
-		return "computerProgram";
+};
+
+function detectWeb(doc, url) {
+	if (url.includes('/title/') && doc.querySelector('#__NEXT_DATA__')) {
+		return getItemType(JSON.parse(text(doc, '#__NEXT_DATA__')).props.pageProps.record);
 	}
-	if (iconSrc.indexOf("icon-map") != -1) {
-		return "map";
+	else if (getSearchResults(doc, true)) {
+		return 'multiple';
 	}
 	return false;
 }
 
-/**
- * Generates a Zotero item from a single item WorldCat page,
- * or the first item on a multiple item page
- */
-function generateItem(doc, co) {
-	var item = new Zotero.Item();
-	ZU.parseContextObject(co, item);
-	// if only one, first check for special types (audio & video recording)
-	var type = ZU.xpathText(doc,
-		'//img[@class="icn"][contains(@src, "icon-")][1]/@src');
-	if (type) {
-		type = getZoteroType(type);
-		if (type) item.itemType = type;
-	}
-	
-	return item;
-}
-
-function getSearchResults(doc) {
-	var results = doc.getElementsByClassName('result');
-	for (var i=0; i<results.length; i++) {
-		if (!results[i].getElementsByClassName('name').length) {
-			delete results[i];
-			i--;
+function getItemType(record) {
+	if (record.generalFormat == 'ArtChap') {
+		if (record.specificFormat == 'Artcl') {
+			return 'journalArticle';
+		}
+		else {
+			return 'bookSection';
 		}
 	}
-	return results;
-}
-
-function getTitleNode(searchResult) {
-	return ZU.xpath(searchResult, './div[@class="name"]/a')[0];
-}
-
-function getFirstContextObj(doc) {
-	return ZU.xpathText(doc, '//span[@class="Z3988"][1]/@title');
-}
-
-function detectWeb(doc, url) {
-	//distinguish from Worldcat Discovery
-	if (doc.body.id == "worldcat") {
-		if (getSearchResults(doc).length) {
-			return "multiple";
-		}
-
-		var co = getFirstContextObj(doc);
-		if (!co) return false;
-
-		// generate item and return type
-		return generateItem(doc, co).itemType;
+	else {
+		return 'book';
 	}
 }
 
-/**
- * Given an item URL, extract OCLC ID
- */
-function extractOCLCID(url) {
-	var id = url.match(/\/(\d+)(?=[&?]|$)/);
-	if (!id) return false;
-	return id[1];
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('.MuiGrid-item a[href*="/title/"]:not([data-testid^="format-link"])');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
 }
 
-function cleanBrackets(field) {
-	if (!field) return null;
-	field = field.replace(/^\[|\]\.?$/g, "");
-	return field;
-}
-/**
- * RIS Scraper Function
- *
- */
-var baseURL = ''; //we need to set this when calling from doSearch
-function scrape(ids, data) {
-	var oclcID = ids.shift(),
-		itemData = (data || []).shift();
-	
-	if (!oclcID) return;
-	
-	var risURL = baseURL + "/oclc/" + oclcID
-		+ "?client=worldcat.org-detailed_record&page=endnote";
-	var tryAgain = true;
-	ZU.doGet(risURL + 'alt' /* non-latin RIS first **/, function parseRIS(text) {
-		// Sometimes non-latin RIS is blank
-		if (tryAgain && !/^TY\s\s?-/m.test(text)) {
-			Z.debug("WorldCat did not return valid RIS. Trying Latin RIS.");
-			tryAgain = false;
-			ZU.doGet(risURL, parseRIS);
-			return;
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (items) {
+			await Promise.all(
+				Object.keys(items)
+					.map(url => requestDocument(url).then(scrape))
+			);
 		}
-		
-		//2013-05-28 RIS export currently has messed up authors
-		// e.g. A1  - Gabbay, Dov M., Woods, John Hayden., Hartmann, Stephan, 
-		text = text.replace(/^((?:A[123U]|ED)\s+-\s+)(.+)/mg, function(m, tag, value) {
-			var authors = value.replace(/[.,\s]+$/, '')
-					.split(/[.,],/);
-			var replStr = '';
-			var author;
-			for (var i=0, n=authors.length; i<n; i++) {
-					author = authors[i].trim();
-					if (author) replStr += tag + author + '\n';
-			}
-			return replStr.trim();
-		});
-		
-		// Conference proceedings should be imported as book (below), but authors
-		// are actually editors
-		text = text.replace(/^TY\s+-\s+CONF\s[\s\S]*?^ER\s+-\s/mg, function(m) {
-			if (!/^ED\s+-/m.test(m)) {
-				m = m.replace(/^A[U1](\s+-)/mg, 'ED$1');
-			}
-			return m;
-		})
-		
-		Zotero.debug("Importing corrected RIS: \n" + text);
-		
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		translator.setString(text);
-		translator.setHandler("itemDone", function (obj, item) {
-			item.extra = undefined;
-			item.archive = undefined;
-
-			if (item.libraryCatalog == "http://worldcat.org") {
-				item.libraryCatalog = "Open WorldCat";
-			}
-			//remove space before colon
-			item.title = item.title.replace(/\s+:/, ":")
-			
-			
-			//correct field mode for corporate authors
-			for (i in item.creators) {
-				if (!item.creators[i].firstName){
-					item.creators[i].fieldMode=1;
-				}
-			}
-
-			item.title = cleanBrackets(item.title);
-			item.place = cleanBrackets(item.place);
-			item.publisher = cleanBrackets(item.publisher);
-			//attach notes
-			if (itemData && itemData.notes) {
-				item.notes.push({note: itemData.notes});
-			}
-			if (oclcID) {
-				item.extra = "OCLC: " + oclcID;
-			}
-			
-			item.complete();
-		});
-		
-		translator.getTranslatorObject(function(trans) {
-			trans.options.defaultItemType = 'book'; //if not supplied, default to book
-			trans.options.typeMap = {
-				'ELEC': 'book', //ebooks should be imported as books
-				'CONF': 'book' // proceedings rather than papers
-			};
-			
-			trans.doImport();
-		});
-		
-		scrape(ids, data);
-	});
+	}
+	else {
+		await scrape(doc, url);
+	}
 }
 
-function doWeb(doc, url) {
-	var results = getSearchResults(doc);
-	if (results.length) {
-		var items = {}, itemData = {};
-		for (var i=0, n=results.length; i<n; i++) {
-			var title = getTitleNode(results[i]);
-			if (!title || !title.href) continue;
-			var url = title.href;
-			var oclcID = extractOCLCID(url);
-			if (!oclcID) {
-				Zotero.debug("WorldCat: Failed to extract OCLC ID from URL: " + url);
-				continue;
+async function scrape(doc, url = doc.location.href) {
+	let record = JSON.parse(text(doc, '#__NEXT_DATA__')).props.pageProps.record;
+	if (!url.includes('/' + record.oclcNumber)) {
+		Zotero.debug('__NEXT_DATA__ is stale; requesting page again');
+		doc = await requestDocument(url);
+		record = JSON.parse(text(doc, '#__NEXT_DATA__')).props.pageProps.record;
+	}
+	scrapeRecord([record]);
+}
+
+function scrapeRecord(records) {
+	for (let record of records) {
+		Z.debug(record);
+
+		if (record.doi) {
+			let translate = Z.loadTranslator('search');
+			translate.setSearch({ DOI: record.doi });
+			translate.setTranslator('b28d0d42-8549-4c6d-83fc-8382874a5cb9'); // DOI Content Negotiation
+			translate.translate();
+			continue;
+		}
+
+		let item = new Zotero.Item(getItemType(record));
+		for (let [key, mapper] of Object.entries(RECORD_MAPPING)) {
+			if (!record[key]) continue;
+			if (typeof mapper == 'string') {
+				item[mapper] = record[key];
 			}
-			items[oclcID] = title.textContent;
-			
-			var notes = ZU.xpath(results[i], './div[@class="description" and ./strong[contains(text(), "Notes")]]');
-			if (!notes.length) {
-				//maybe we're looking at our own list
-				notes = ZU.xpath(results[i], './div/div[@class="description"]/div[contains(@id,"saved_comments_") and normalize-space(text())]');
-			}
-			if (notes.length) {
-				notes = ZU.trimInternal(notes[0].innerHTML)
-					.replace(/^<strong>\s*Notes:\s*<\/strong>\s*<br>\s*/i, '');
-				
-				if (notes) {
-					itemData[oclcID] = {
-						notes: ZU.unescapeHTML(ZU.unescapeHTML(notes)) //it's double-escaped on WorldCat
-					};
-				}
+			else {
+				mapper(item, record[key]);
 			}
 		}
 
-		Zotero.selectItems(items, function(items) {
-			if (!items) return true;
-			
-			var ids = [], data = [];
-			for (var i in items) {
-				ids.push(i);
-				data.push(itemData[i]);
-			}
-			
-			scrape(ids, data);
-		});
-	} else {
-		var oclcID = extractOCLCID(url);
-		if (!oclcID) {
-			// Seems like some single search results redirect to the item page,
-			// but the URL is still a search URL. Grab cannonical URL from meta tag
-			// to extract the OCLC ID
-			var canonicalURL = ZU.xpath(doc, '/html/head/link[@rel="canonical"][1]')[0];
-			if (canonicalURL) {
-				oclcID = extractOCLCID(canonicalURL.href);
+		for (let keyToFix of ['title', 'publisher', 'place']) {
+			if (item[keyToFix]) {
+				item[keyToFix] = item[keyToFix].replace(/^\[(.+)\]$/, '$1');
 			}
 		}
-		if (!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
-		scrape([oclcID]);
+
+		item.complete();
 	}
 }
 
@@ -257,14 +220,15 @@ function sanitizeInput(items, checkOnly) {
 	}
 	
 	var cleanItems = [];
-	for (var i=0; i<items.length; i++) {
+	for (let i = 0; i < items.length; i++) {
 		var item = ZU.deepCopy(items[i]),
 			valid = false;
 		if (item.ISBN && typeof item.ISBN == 'string'
 			&& (item.ISBN = ZU.cleanISBN(item.ISBN))
 		) {
 			valid = true;
-		} else {
+		}
+		else {
 			delete item.ISBN;
 		}
 		
@@ -273,7 +237,8 @@ function sanitizeInput(items, checkOnly) {
 		) {
 			valid = true;
 			item.identifiers.oclc = item.identifiers.oclc.trim();
-		} else if (item.identifiers) {
+		}
+		else if (item.identifiers) {
 			delete item.identifiers.oclc;
 		}
 		
@@ -294,13 +259,11 @@ function doSearch(items) {
 	items = sanitizeInput(items);
 	if (!items.length) {
 		Z.debug("Search query does not contain valid identifiers");
-		return false;
+		return;
 	}
 	
-	baseURL = "http://www.worldcat.org"; // Translator-global
-	
 	var ids = [], isbns = [];
-	for (var i=0; i<items.length; i++) {
+	for (let i = 0; i < items.length; i++) {
 		if (items[i].identifiers && items[i].identifiers.oclc) {
 			ids.push(items[i].identifiers.oclc);
 			continue;
@@ -309,13 +272,20 @@ function doSearch(items) {
 		isbns.push(items[i].ISBN);
 	}
 	
-	fetchIDs(isbns, ids, function(ids) {
+	fetchIDs(isbns, ids, function (ids) {
 		if (!ids.length) {
 			Z.debug("Could not retrieve any OCLC IDs");
 			Zotero.done(false);
 			return;
 		}
-		scrape(ids);
+		var url = "https://www.worldcat.org/api/search?q=no%3A"
+			+ ids.map(encodeURIComponent).join('+OR+no%3A');
+		ZU.doGet(url, function (respText) {
+			let json = JSON.parse(respText);
+			if (json.briefRecords) {
+				scrapeRecord(json.briefRecords);
+			}
+		});
 	});
 }
 
@@ -326,40 +296,20 @@ function fetchIDs(isbns, ids, callback) {
 	}
 	
 	var isbn = isbns.shift();
-	var url = "http://www.worldcat.org/search?qt=results_page&q=isbn%3A"
+	var url = "https://www.worldcat.org/api/search?q=bn%3A"
 		+ encodeURIComponent(isbn);
-	ZU.processDocuments(url,
-		function (doc) {
-			//mostly these are search results; for those, we take the first search result
-			var results = getSearchResults(doc);
-			if (results.length) {
-				var title = getTitleNode(results[0]);
-				if (title) {
-					var id = extractOCLCID(title.href);
-					if (id) ids.push(id);
-				} else {
-					Z.debug("Could not extract OCLC ID for ISBN " + isbn);
-				}
-			}
-			//but sometimes we have single items
-			else  {
-				var canonicalURL = ZU.xpathText(doc, '/html/head/link[@rel="canonical"]/@href');
-   				if (canonicalURL) {
-      					oclcID = extractOCLCID(canonicalURL);
-      					if (!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
-         				scrape([oclcID]);
-   				} else {
-     					 Z.debug("No search results found for ISBN " + isbn);
-   				}
+	ZU.doGet(url,
+		function (respText) {
+			let json = JSON.parse(respText);
+			if (json.briefRecords && json.briefRecords.length) {
+				scrapeRecord([json.briefRecords[0]]);
 			}
 		},
-		function() {
-			fetchIDs(isbns, ids, callback)
+		function () {
+			fetchIDs(isbns, ids, callback);
 		}
 	);
 }
-
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -370,26 +320,60 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.worldcat.org/title/argentina/oclc/489605&referer=brief_results",
+		"url": "https://www.worldcat.org/title/489605",
 		"items": [
 			{
 				"itemType": "book",
 				"title": "Argentina",
 				"creators": [
 					{
-						"lastName": "Whitaker",
 						"firstName": "Arthur Preston",
+						"lastName": "Whitaker",
 						"creatorType": "author"
 					}
 				],
 				"date": "1964",
+				"abstractNote": "\"This book delves into the Argentine past seeking the origins of the political, social, and economic conflicts that have stunted Argentina's development after her spectacular progress during the late nineteenth and early twentieth centuries\"--From book jacket",
 				"extra": "OCLC: 489605",
-				"language": "English",
+				"language": "eng",
 				"libraryCatalog": "Open WorldCat",
+				"numPages": "184",
 				"place": "Englewood Cliffs, N.J.",
 				"publisher": "Prentice-Hall",
+				"series": "Spectrum book",
 				"attachments": [],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Argentina"
+					},
+					{
+						"tag": "Argentina Historia 1810-"
+					},
+					{
+						"tag": "Argentina History"
+					},
+					{
+						"tag": "Argentina History 1810-"
+					},
+					{
+						"tag": "Argentine Histoire"
+					},
+					{
+						"tag": "Argentine Histoire 1810-"
+					},
+					{
+						"tag": "Economic history Argentina"
+					},
+					{
+						"tag": "History"
+					},
+					{
+						"tag": "Politics and government Argentina"
+					},
+					{
+						"tag": "Since 1810"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -397,33 +381,125 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.worldcat.org/title/dynamic-systems-approach-to-the-development-of-cognition-and-action/oclc/42854423&referer=brief_results",
+		"url": "https://www.worldcat.org/title/42854423",
 		"items": [
 			{
 				"itemType": "book",
 				"title": "A dynamic systems approach to the development of cognition and action",
 				"creators": [
 					{
-						"lastName": "Thelen",
 						"firstName": "Esther",
+						"lastName": "Thelen",
 						"creatorType": "author"
 					},
 					{
+						"firstName": "Linda B.",
 						"lastName": "Smith",
-						"firstName": "Linda B",
 						"creatorType": "author"
 					}
 				],
 				"date": "1996",
 				"ISBN": "9780585030159",
+				"abstractNote": "Annotation. A Dynamic Systems Approach to the Development of Cognition and Action presents a comprehensive and detailed theory of early human development based on the principles of dynamic systems theory. Beginning with their own research in motor, perceptual, and cognitive development, Thelen and Smith raise fundamental questions about prevailing assumptions in the field. They propose a new theory of the development of cognition and action, unifying recent advances in dynamic systems theory with current research in neuroscience and neural development. In particular, they show how by processes of exploration and selection, multimodal experiences form the bases for self-organizing perception-action categories. Thelen and Smith offer a radical alternative to current cognitive theory, both in their emphasis on dynamic representation and in their focus on processes of change. Among the first attempt to apply complexity theory to psychology, they suggest reinterpretations of several classic issues in early cognitive development. The book is divided into three sections. The first discusses the nature of developmental processes in general terms, the second covers dynamic principles in process and mechanism, and the third looks at how a dynamic theory can be applied to enduring puzzles of development. Cognitive Psychology series",
+				"edition": "1st MIT pbk. ed",
 				"extra": "OCLC: 42854423",
-				"language": "English",
+				"language": "eng",
 				"libraryCatalog": "Open WorldCat",
+				"numPages": "376",
 				"place": "Cambridge, Mass.",
 				"publisher": "MIT Press",
+				"series": "MIT Press/Bradford Books series in cognitive psychology",
 				"url": "http://search.ebscohost.com/login.aspx?direct=true&scope=site&db=nlebk&db=nlabk&AN=1712",
 				"attachments": [],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Activité motrice"
+					},
+					{
+						"tag": "Activité motrice chez le nourrisson"
+					},
+					{
+						"tag": "Child"
+					},
+					{
+						"tag": "Child Development"
+					},
+					{
+						"tag": "Child development"
+					},
+					{
+						"tag": "Children"
+					},
+					{
+						"tag": "Cognition"
+					},
+					{
+						"tag": "Cognition chez le nourrisson"
+					},
+					{
+						"tag": "Cognition in infants"
+					},
+					{
+						"tag": "Developmental psychobiology"
+					},
+					{
+						"tag": "Electronic books"
+					},
+					{
+						"tag": "Enfants"
+					},
+					{
+						"tag": "Enfants Développement"
+					},
+					{
+						"tag": "FAMILY & RELATIONSHIPS Life Stages Infants & Toddlers"
+					},
+					{
+						"tag": "Infant"
+					},
+					{
+						"tag": "Infants"
+					},
+					{
+						"tag": "Motor Skills"
+					},
+					{
+						"tag": "Motor ability"
+					},
+					{
+						"tag": "Motor ability in infants"
+					},
+					{
+						"tag": "Nourrissons"
+					},
+					{
+						"tag": "Perceptual-motor processes"
+					},
+					{
+						"tag": "Processus perceptivomoteurs"
+					},
+					{
+						"tag": "Psychobiologie du développement"
+					},
+					{
+						"tag": "System theory"
+					},
+					{
+						"tag": "Systems Theory"
+					},
+					{
+						"tag": "Théorie des systèmes"
+					},
+					{
+						"tag": "children (people by age group)"
+					},
+					{
+						"tag": "cognition"
+					},
+					{
+						"tag": "infants"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -431,28 +507,50 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://melvyl.worldcat.org/title/cambridge-companion-to-adam-smith/oclc/60321422&referer=brief_results",
+		"url": "https://www.worldcat.org/title/60321422",
 		"items": [
 			{
 				"itemType": "book",
 				"title": "The Cambridge companion to Adam Smith",
 				"creators": [
 					{
-						"lastName": "Haakonssen",
 						"firstName": "Knud",
+						"lastName": "Haakonssen",
 						"creatorType": "author"
 					}
 				],
 				"date": "2006",
-				"ISBN": "9780521770590 9780521779241",
-				"abstractNote": "\"Adam Smith is best known as the founder of scientific economics and as an early proponent of the modern market economy. Political economy, however, was only one part of Smith's comprehensive intellectual system. Consisting of a theory of mind and its functions in language, arts, science, and social intercourse, Smith's system was a towering contribution to the Scottish Enlightenment. His ideas on social intercourse, in fact, also served as the basis for a moral theory that provided both historical and theoretical accounts of law, politics, and economics. This companion volume provides an up-to-date examination of all aspects of Smith's thought. Collectively, the essays take into account Smith's multiple contexts - Scottish, British, European, Atlantic, biographical, institutional, political, philosophical - and they draw on all his works, including student notes from his lectures. Pluralistic in approach, the volume provides a contextualist history of Smith, as well as direct philosophical engagement with his ideas.\"--Jacket.",
+				"ISBN": "9780521770590",
+				"abstractNote": "\"Adam Smith is best known as the founder of scientific economics and as an early proponent of the modern market economy. Political economy, however, was only one part of Smith's comprehensive intellectual system. Consisting of a theory of mind and its functions in language, arts, science, and social intercourse, Smith's system was a towering contribution to the Scottish Enlightenment. His ideas on social intercourse, in fact, also served as the basis for a moral theory that provided both historical and theoretical accounts of law, politics, and economics. This companion volume provides an up-to-date examination of all aspects of Smith's thought. Collectively, the essays take into account Smith's multiple contexts - Scottish, British, European, Atlantic, biographical, institutional, political, philosophical - and they draw on all his works, including student notes from his lectures. Pluralistic in approach, the volume provides a contextualist history of Smith, as well as direct philosophical engagement with his ideas.\"--Jacket",
 				"extra": "OCLC: 60321422",
-				"language": "English",
+				"language": "eng",
 				"libraryCatalog": "Open WorldCat",
-				"place": "Cambridge; New York",
+				"numPages": "409",
+				"place": "Cambridge",
 				"publisher": "Cambridge University Press",
+				"series": "Cambridge companions to philosophy",
+				"url": "http://catdir.loc.gov/catdir/toc/ecip0512/2005011910.html",
 				"attachments": [],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Aufsatzsammlung"
+					},
+					{
+						"tag": "Filosofie"
+					},
+					{
+						"tag": "Smith, Adam"
+					},
+					{
+						"tag": "Smith, Adam 1723-1790"
+					},
+					{
+						"tag": "Smith, Adam Philosoph"
+					},
+					{
+						"tag": "Smith, Adam, 1723-1790"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -460,38 +558,80 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.worldcat.org/title/from-lanka-eastwards-the-ramayana-in-the-literature-and-visual-arts-of-indonesia/oclc/765821302",
+		"url": "https://www.worldcat.org/title/from-lanka-eastwards-the-ramayana-in-the-literature-and-visual-arts-of-indonesia/oclc/765821302",
 		"items": [
 			{
 				"itemType": "book",
 				"title": "From Laṅkā eastwards: the Rāmāyaṇa in the literature and visual arts of Indonesia",
 				"creators": [
 					{
-						"lastName": "Acri",
 						"firstName": "Andrea",
-						"creatorType": "editor"
+						"lastName": "Acri",
+						"creatorType": "author"
 					},
 					{
-						"lastName": "Creese",
 						"firstName": "Helen",
-						"creatorType": "editor"
+						"lastName": "Creese",
+						"creatorType": "author"
 					},
 					{
-						"lastName": "Griffiths",
 						"firstName": "Arlo",
-						"creatorType": "editor"
+						"lastName": "Griffiths",
+						"creatorType": "author"
 					}
 				],
 				"date": "2011",
 				"ISBN": "9789067183840",
 				"extra": "OCLC: 765821302",
-				"language": "English",
+				"language": "eng",
 				"libraryCatalog": "Open WorldCat",
+				"numPages": "259",
 				"place": "Leiden",
 				"publisher": "KITLV Press",
+				"series": "Verhandelingen van het Koninklijk Instituut voor Taal-, Land- en Volkenkunde",
 				"shortTitle": "From Laṅkā eastwards",
 				"attachments": [],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Art indonésien Congrès"
+					},
+					{
+						"tag": "Art, Indonesian"
+					},
+					{
+						"tag": "Art, Indonesian Congresses"
+					},
+					{
+						"tag": "Conference papers and proceedings"
+					},
+					{
+						"tag": "Epen (teksten)"
+					},
+					{
+						"tag": "History Sources"
+					},
+					{
+						"tag": "Kakawin Ramayana"
+					},
+					{
+						"tag": "Kunst"
+					},
+					{
+						"tag": "Literatur"
+					},
+					{
+						"tag": "Râmâyaṇa (Old Javanese kakawin)"
+					},
+					{
+						"tag": "Râmâyaṇa (Old Javanese kakawin) Congresses"
+					},
+					{
+						"tag": "Râmâyaṇa (Old Javanese kakawin) Sources Congresses"
+					},
+					{
+						"tag": "Rezeption"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -499,27 +639,35 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.worldcat.org/title/newmans-relation-to-modernism/oclc/676747555",
+		"url": "https://www.worldcat.org/title/newmans-relation-to-modernism/oclc/676747555",
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Newman's relation to modernism.",
+				"title": "Newman's relation to modernism",
 				"creators": [
 					{
+						"firstName": "Sydney F.",
 						"lastName": "Smith",
-						"firstName": "Sydney F",
 						"creatorType": "author"
 					}
 				],
 				"date": "1912",
-				"extra": "OCLC: 676747555",
-				"language": "English",
+				"extra": "OCLC: 847984210",
+				"language": "eng",
 				"libraryCatalog": "Open WorldCat",
+				"numPages": "1",
 				"place": "London",
 				"publisher": "publisher not identified",
 				"url": "https://archive.org/details/a626827800smituoft/",
 				"attachments": [],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Modernism (Christian theology) Catholic Church"
+					},
+					{
+						"tag": "Newman, John Henry, Saint, 1801-1890"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -527,37 +675,79 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.worldcat.org/title/cahokia-mounds-replicas/oclc/48394842&referer=brief_results",
+		"url": "https://www.worldcat.org/title/48394842",
 		"items": [
 			{
 				"itemType": "book",
 				"title": "Cahokia Mounds replicas",
 				"creators": [
 					{
-						"lastName": "Grimont",
 						"firstName": "Martha LeeAnn",
+						"lastName": "Grimont",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Mink",
 						"firstName": "Claudia Gellman",
+						"lastName": "Mink",
 						"creatorType": "author"
-					},
-					{
-						"lastName": "Cahokia Mounds Museum Society",
-						"creatorType": "author",
-						"fieldMode": 1
 					}
 				],
 				"date": "2000",
 				"ISBN": "9781881563020",
 				"extra": "OCLC: 48394842",
-				"language": "English",
+				"language": "eng",
 				"libraryCatalog": "Open WorldCat",
+				"numPages": "10",
 				"place": "Collinsville, Ill.",
 				"publisher": "Cahokia Mounds Museum Society",
 				"attachments": [],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Antiquities"
+					},
+					{
+						"tag": "Cahokia Mounds State Historic Park (Ill.)"
+					},
+					{
+						"tag": "Cahokia Mounds State Historic Park (Ill.) Antiquities Pottery"
+					},
+					{
+						"tag": "Illinois"
+					},
+					{
+						"tag": "Illinois Antiquities Pottery"
+					},
+					{
+						"tag": "Illinois Cahokia Mounds State Historic Park"
+					},
+					{
+						"tag": "Indians of North America Antiquities"
+					},
+					{
+						"tag": "Indians of North America Illinois Antiquities"
+					},
+					{
+						"tag": "Mound-builders"
+					},
+					{
+						"tag": "Mound-builders Illinois"
+					},
+					{
+						"tag": "Mounds"
+					},
+					{
+						"tag": "Mounds Illinois"
+					},
+					{
+						"tag": "Pottery"
+					},
+					{
+						"tag": "Pottery Illinois"
+					},
+					{
+						"tag": "Tumulus Illinois"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -571,32 +761,32 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "A dynamic systems approach to the development of cognition and action",
 				"creators": [
 					{
-						"lastName": "Thelen",
 						"firstName": "Esther",
+						"lastName": "Thelen",
 						"creatorType": "author"
 					},
 					{
+						"firstName": "Linda B.",
 						"lastName": "Smith",
-						"firstName": "Linda B",
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Open WorldCat",
-				"language": "English",
-				"url": "http://search.ebscohost.com/login.aspx?direct=true&scope=site&db=nlebk&db=nlabk&AN=1712",
-				"title": "A dynamic systems approach to the development of cognition and action",
-				"publisher": "MIT Press",
-				"place": "Cambridge, Mass.",
 				"date": "1996",
 				"ISBN": "9780585030159",
-				"extra": "OCLC: 793205903",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"abstractNote": "Annotation. A Dynamic Systems Approach to the Development of Cognition and Action presents a comprehensive and detailed theory of early human development based on the principles of dynamic systems theory. Beginning with their own research in motor, perceptual, and cognitive development, Thelen and Smith raise fundamental questions about prevailing assumptions in the field. They propose a new theory of the development of cognition and action, unifying recent advances in dynamic systems theory with current research in neuroscience and neural development. In particular, they show how by processes of exploration and selection, multimodal experiences form the bases for self-organizing perception-action categories. Thelen and Smith offer a radical alternative to current cognitive theory, both in their emphasis on dynamic representation and in their focus on processes of change. Among the first attempt to apply complexity theory to psychology, they suggest reinterpretations of several classic issues in early cognitive development. The book is divided into three sections. The first discusses the nature of developmental processes in general terms, the second covers dynamic principles in process and mechanism, and the third looks at how a dynamic theory can be applied to enduring puzzles of development. Cognitive Psychology series",
+				"edition": "1st MIT pbk. ed",
+				"extra": "OCLC: 42854423",
+				"language": "eng",
+				"libraryCatalog": "Open WorldCat",
+				"place": "Cambridge, Mass.",
+				"publisher": "MIT Press",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -610,64 +800,65 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "A dynamic systems approach to the development of cognition and action",
 				"creators": [
 					{
-						"lastName": "Thelen",
 						"firstName": "Esther",
+						"lastName": "Thelen",
 						"creatorType": "author"
 					},
 					{
+						"firstName": "Linda B.",
 						"lastName": "Smith",
-						"firstName": "Linda B",
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Open WorldCat",
-				"language": "English",
-				"url": "http://search.ebscohost.com/login.aspx?direct=true&scope=site&db=nlebk&db=nlabk&AN=1712",
-				"title": "A dynamic systems approach to the development of cognition and action",
-				"publisher": "MIT Press",
-				"place": "Cambridge, Mass.",
 				"date": "1996",
 				"ISBN": "9780585030159",
+				"abstractNote": "Annotation. A Dynamic Systems Approach to the Development of Cognition and Action presents a comprehensive and detailed theory of early human development based on the principles of dynamic systems theory. Beginning with their own research in motor, perceptual, and cognitive development, Thelen and Smith raise fundamental questions about prevailing assumptions in the field. They propose a new theory of the development of cognition and action, unifying recent advances in dynamic systems theory with current research in neuroscience and neural development. In particular, they show how by processes of exploration and selection, multimodal experiences form the bases for self-organizing perception-action categories. Thelen and Smith offer a radical alternative to current cognitive theory, both in their emphasis on dynamic representation and in their focus on processes of change. Among the first attempt to apply complexity theory to psychology, they suggest reinterpretations of several classic issues in early cognitive development. The book is divided into three sections. The first discusses the nature of developmental processes in general terms, the second covers dynamic principles in process and mechanism, and the third looks at how a dynamic theory can be applied to enduring puzzles of development. Cognitive Psychology series",
+				"edition": "1st MIT pbk. ed",
 				"extra": "OCLC: 42854423",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"language": "eng",
+				"libraryCatalog": "Open WorldCat",
+				"place": "Cambridge, Mass.",
+				"publisher": "MIT Press",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "https://www.worldcat.org/title/navigating-the-trilemma-capital-flows-and-monetary-policy-in-china/oclc/4933578953&referer=brief_results",
+		"url": "https://www.worldcat.org/title/4933578953",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Navigating the trilemma: Capital flows and monetary policy in China",
 				"creators": [
 					{
-						"lastName": "Glick",
+						"creatorType": "author",
 						"firstName": "Reuven",
-						"creatorType": "author"
+						"lastName": "Glick"
 					},
 					{
-						"lastName": "Hutchison",
+						"creatorType": "author",
 						"firstName": "Michael",
-						"creatorType": "author"
+						"lastName": "Hutchison"
 					}
 				],
-				"date": "2009",
-				"ISSN": "1049-0078",
-				"abstractNote": "In recent years China has faced an increasing trilemma—how to pursue an independent domestic monetary policy and limit exchange rate flexibility, while at the same time facing large and growing international capital flows. This paper analyzes the impact of the trilemma on China's monetary policy as the country liberalizes its good and financial markets and integrates with the world economy. It shows how China has sought to insulate its reserve money from the effects of balance of payments inflows by sterilizing through the issuance of central bank liabilities. However, we report empirical results indicating that sterilization dropped precipitously in 2006 in the face of the ongoing massive buildup of international reserves, leading to a surge in reserve money growth. We also estimate a vector error correction model linking the surge in China's reserve money to broad money, real GDP, and the price level. We use this model to explore the inflationary implications of different policy scenarios. Under a scenario of continued rapid reserve money growth (consistent with limited sterilization of foreign exchange reserve accumulation) and strong economic growth, the model predicts a rapid increase in inflation. A model simulation using an extension of the framework that incorporates recent increases in bank reserve requirements also implies a rapid rise in inflation. By contrast, model simulations incorporating a sharp slowdown in economic growth such as that seen in late 2008 and 2009 lead to less inflation pressure even with a substantial buildup in international reserves.",
-				"extra": "OCLC: 4933578953",
+				"date": "5/2009",
+				"DOI": "10.1016/j.asieco.2009.02.011",
+				"ISSN": "10490078",
 				"issue": "3",
-				"language": "English",
-				"libraryCatalog": "Open WorldCat",
+				"journalAbbreviation": "Journal of Asian Economics",
+				"language": "en",
+				"libraryCatalog": "DOI.org (Crossref)",
 				"pages": "205-224",
-				"publicationTitle": "ASIECO Journal of Asian Economics",
+				"publicationTitle": "Journal of Asian Economics",
 				"shortTitle": "Navigating the trilemma",
+				"url": "https://linkinghub.elsevier.com/retrieve/pii/S104900780900013X",
 				"volume": "20",
 				"attachments": [],
 				"tags": [],
@@ -704,6 +895,178 @@ var testCases = [
 				"publisher": "中囯建筑工业出版社",
 				"attachments": [],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.worldcat.org/title/994342191",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Medieval science, technology and medicine: an encyclopedia",
+				"creators": [
+					{
+						"firstName": "Thomas F.",
+						"lastName": "Glick",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Steven J.",
+						"lastName": "Livesey",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Faith",
+						"lastName": "Wallis",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2017",
+				"ISBN": "9781315165127",
+				"abstractNote": "\"First published in 2005, this encyclopedia demonstrates that the millennium from the fall of the Roman Empire to the Renaissance was a period of great intellectual and practical achievement and innovation. In Europe, the Islamic world, South and East Asia, and the Americas, individuals built on earlier achievements, introduced sometimes radical refinements and laid the foundations for modern development. Medieval Science, Technology, and Medicine details the whole scope of scientific knowledge in the medieval period in more than 300 A to Z entries. This comprehensive resource discusses the research, application of knowledge, cultural and technology exchanges, experimentation, and achievements in the many disciplines related to science and technology. It also looks at the relationship between medieval science and the traditions it supplanted. Written by a select group of international scholars, this reference work will be of great use to scholars, students, and general readers researching topics in many fields, including medieval studies, world history, history of science, history of technology, history of medicine, and cultural studies.\"--Provided by publisher",
+				"extra": "OCLC: 994342191",
+				"language": "eng",
+				"libraryCatalog": "Open WorldCat",
+				"numPages": "598",
+				"place": "London",
+				"publisher": "Routledge",
+				"series": "Routledge revivals",
+				"shortTitle": "Medieval science, technology and medicine",
+				"url": "https://www.taylorfrancis.com/books/e/9781315165127",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Electronic books"
+					},
+					{
+						"tag": "Encyclopedias"
+					},
+					{
+						"tag": "Medicine, Medieval"
+					},
+					{
+						"tag": "Medicine, Medieval Encyclopedias"
+					},
+					{
+						"tag": "Médecine médiévale Encyclopédies"
+					},
+					{
+						"tag": "Science, Medieval"
+					},
+					{
+						"tag": "Science, Medieval Encyclopedias"
+					},
+					{
+						"tag": "Sciences médiévales Encyclopédies"
+					},
+					{
+						"tag": "Technologie Encyclopédies"
+					},
+					{
+						"tag": "Technology"
+					},
+					{
+						"tag": "Technology Encyclopedias"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://worldcat.org/title/1023201734",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Alices adventures in wonderland",
+				"creators": [
+					{
+						"firstName": "Lewis",
+						"lastName": "Carroll",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Robert",
+						"lastName": "Ingpen",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2017",
+				"ISBN": "9781786751041",
+				"abstractNote": "This edition brings together the complete and unabridged text with more than 70 stunning illustrations by Robert Ingpen, each reflecting his unique style and extraordinary imagination in visualising this enchanting story.",
+				"extra": "OCLC: 1023201734",
+				"language": "eng",
+				"libraryCatalog": "Open WorldCat",
+				"numPages": "192",
+				"publisher": "Palazzo Editions Ltd",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.worldcat.org/fr/title/960449363",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "غرفة واحدة لا تكفي: رواية",
+				"creators": [
+					{
+						"lastName": "سلطان العميمي.",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "عميمي، سلطان علي بن بخيت، 1974-",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2016",
+				"ISBN": "9786140214255",
+				"edition": "al-Ṭabʻah al-thāniyah",
+				"extra": "OCLC: 960449363",
+				"language": "ara",
+				"libraryCatalog": "Open WorldCat",
+				"numPages": "212",
+				"place": "Bayrūt, al-Jazāʼir al-ʻĀṣimah",
+				"publisher": "منشورات ضفاف ؛ منشورات الاختلاف،",
+				"shortTitle": "غرفة واحدة لا تكفي",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "2000-2099"
+					},
+					{
+						"tag": "Arabic fiction"
+					},
+					{
+						"tag": "Arabic fiction 21st century"
+					},
+					{
+						"tag": "Fiction"
+					},
+					{
+						"tag": "Novels"
+					},
+					{
+						"tag": "Roman arabe 21e siècle"
+					},
+					{
+						"tag": "Romans"
+					},
+					{
+						"tag": "novels"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}

@@ -5,11 +5,11 @@
 	"target": "",
 	"minVersion": "3.0.9",
 	"maxVersion": "",
-	"priority": 98,
+	"priority": 97,
 	"inRepository": true,
 	"translatorType": 8,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-04-13 13:41:00"
+	"lastUpdated": "2022-02-07 18:32:41"
 }
 
 

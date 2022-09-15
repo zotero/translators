@@ -14,6 +14,29 @@
 	"lastUpdated": "2017-03-13 11:45:52"
 }
 
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2017-2019 Simon Kornblith
+	
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
 var fieldMap = {
 	edition:"edition",
 	publisher:"publisher",
@@ -96,6 +119,7 @@ function formatDate(date) {
 
 function doExport() {
 	var first = true;
+	let item;
 	while (item = Zotero.nextItem()) {
 		// determine type
 		var type = typeMap[item.itemType];
@@ -168,6 +192,7 @@ function doExport() {
 				if (item.creators.length) {
 					// take up to 4 interviewees
 					var i = 1;
+					let interviewee;
 					while ((interviewee = item.creators.shift()) && i <= 4) {
 						var lastKey = "last";
 						var firstKey = "first";
@@ -182,7 +207,7 @@ function doExport() {
 				}
 				// medium
 				if (item.medium) {
-					properties.type = item.medium
+					properties.type = item.medium;
 				}
 			} else {
 				// check for an editor or translator
@@ -323,7 +348,7 @@ function doExport() {
 		}
 		
 		if (properties.pages) {
-			properties.pages = properties.pages.replace(/[^0-9]+/,"–")//separate page numbers with en dash
+			properties.pages = properties.pages.replace(/[^0-9]+/,"–"); // separate page numbers with en dash
 		}
 		
 		if (item.extra) {
@@ -378,5 +403,5 @@ function doExport() {
 }
 
 function escapeWiki(markup) {
-    return markup.replace('|', '{{!}}');
+	return markup.replace('|', '{{!}}');
 }

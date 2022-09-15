@@ -9,40 +9,63 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-16 05:56:18"
+	"lastUpdated": "2022-02-25 01:19:36"
 }
 
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+/*
+	***** BEGIN LICENSE BLOCK *****
 
+	Copyright © 2022 Simon Kornblith, Frank Bennett, Aurimas Vinckevicius
 
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
+/* Detection for law cases, but not "How cited" pages,
+ * e.g. url of "how cited" page:
+ *   http://scholar.google.co.jp/scholar_case?about=1101424605047973909&q=kelo&hl=en&as_sdt=2002
+ */
 function detectWeb(doc, url) {
-	/* Detection for law cases, but not "How cited" pages,
-	 * e.g. url of "how cited" page:
-	 *   http://scholar.google.co.jp/scholar_case?about=1101424605047973909&q=kelo&hl=en&as_sdt=2002
-	 */
-	if (url.indexOf('/scholar_case?') != -1
-		&& url.indexOf('about=') == -1
+	if (url.includes('/scholar_case?')
+		&& url.includes('case=')
 	) {
 		return "case";
-	} else if (url.indexOf('/citations?') != -1) {
+	}
+	else if (url.includes('/citations?')) {
 		if (getProfileResults(doc, true)) {
 			return "multiple";
 		}
 		
-		//individual saved citation
-		var link = ZU.xpathText(doc, '//a[@class="gsc_vcd_title_link"]/@href');
-		if (!link) return;
-		if (link.indexOf('/scholar_case?') != -1) {
+		// individual saved citation
+		var link = ZU.xpathText(doc, '//a[@class="gsc_oci_title_link"]/@href');
+		if (!link) return false;
+		if (link.includes('/scholar_case?')) {
 			return 'case';
-		} else {
-			//Can't distinguish book from journalArticle
-			//Both have "Journal" fields
+		}
+		else {
+			// Can't distinguish book from journalArticle
+			// Both have "Journal" fields
 			return 'journalArticle';
 		}
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
@@ -50,7 +73,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('.gs_r[data-cid]');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].dataset.cid;
 		var title = text(rows[i], '.gs_rt');
 		if (!href || !title) continue;
@@ -66,8 +89,8 @@ function getProfileResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('a.gsc_a_at');
-	for (var i=0; i<rows.length; i++) {
-		var href = rows[i].dataset.href;
+	for (var i = 0; i < rows.length; i++) {
+		var href = rows[i].href;
 		var title = rows[i].textContent;
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -84,30 +107,32 @@ function doWeb(doc, url) {
 		if (getSearchResults(doc, true)) {
 			Zotero.selectItems(getSearchResults(doc, false), function (items) {
 				if (!items) {
-					return true;
+					return;
 				}
 				var ids = [];
 				for (var i in items) {
 					ids.push(i);
 				}
-				//here it is enough to know the ids and we can call scrape directly
+				// here it is enough to know the ids and we can call scrape directly
 				scrape(doc, ids);
 			});
-		} else if (getProfileResults(doc, true)) {
+		}
+		else if (getProfileResults(doc, true)) {
 			Zotero.selectItems(getProfileResults(doc, false), function (items) {
 				if (!items) {
-					return true;
+					return;
 				}
-				var articles  = [];
+				var articles = [];
 				for (var i in items) {
 					articles.push(i);
 				}
-				//here we need open these pages before calling scrape
+				// here we need open these pages before calling scrape
 				ZU.processDocuments(articles, scrape);
 			});
 		}
-	} else {
-		//e.g. https://scholar.google.de/citations?view_op=view_citation&hl=de&user=INQwsQkAAAAJ&citation_for_view=INQwsQkAAAAJ:u5HHmVD_uO8C
+	}
+	else {
+		// e.g. https://scholar.google.de/citations?view_op=view_citation&hl=de&user=INQwsQkAAAAJ&citation_for_view=INQwsQkAAAAJ:u5HHmVD_uO8C
 		scrape(doc, url, type);
 	}
 }
@@ -116,69 +141,68 @@ function doWeb(doc, url) {
 function scrape(doc, idsOrUrl, type) {
 	if (Array.isArray(idsOrUrl)) {
 		scrapeIds(doc, idsOrUrl);
-	} else {
-		if (type && type=="case") {
-			scrapeCase(doc, idsOrUrl);
-		} else {
-			var related = ZU.xpathText(doc, '//a[contains(@href, "q=related:")]/@href');
-			if (!related) {
-				throw new Error("Could not locate related URL");
-			}
-			var itemID = related.match(/=related:([^:]+):/);
-			if (itemID) {
-				scrapeIds(doc, [itemID[1]]);
-			} else {
-				Z.debug("Can't find itemID. related URL is " + related);
-				throw new Error("Cannot extract itemID from related link");
-			}
+	}
+	else if (type && type == "case") {
+		scrapeCase(doc, idsOrUrl);
+	}
+	else {
+		var related = ZU.xpathText(doc, '//a[contains(@href, "q=related:")]/@href');
+		if (!related) {
+			throw new Error("Could not locate related URL");
+		}
+		var itemID = related.match(/=related:([^:]+):/);
+		if (itemID) {
+			scrapeIds(doc, [itemID[1]]);
+		}
+		else {
+			Z.debug("Can't find itemID. related URL is " + related);
+			throw new Error("Cannot extract itemID from related link");
 		}
 	}
-	
 }
 
 
 function scrapeIds(doc, ids) {
-	for (let i=0; i<ids.length; i++) {
+	for (let i = 0; i < ids.length; i++) {
 		// We need here 'let' to access ids[i] later in the nested functions
 		let context = doc.querySelector('.gs_r[data-cid="' + ids[i] + '"]');
-		if (!context && ids.length==1) context = doc;
+		if (!context && ids.length == 1) context = doc;
 		var citeUrl = '/scholar?q=info:' + ids[i] + ':scholar.google.com/&output=cite&scirp=1';
 		// For 'My Library' we check the search field at the top
 		// and then in these cases change the citeUrl accordingly.
-		var scilib = attr(doc, '#gs_hdr_frm input[name="scilib"]', 'value')
-		if (scilib && scilib==1) {
-			var citeUrl = '/scholar?scila=' + ids[i] + '&output=cite&scirp=1';
+		var scilib = attr(doc, '#gs_hdr_frm input[name="scilib"]', 'value');
+		if (scilib && scilib == 1) {
+			citeUrl = '/scholar?scila=' + ids[i] + '&output=cite&scirp=1';
 		}
-		ZU.doGet(citeUrl, function(citePage) {
-			var m = citePage.match(/href="((https?:\/\/[a-z\.]*)?\/scholar.bib\?[^"]+)/);
+		ZU.doGet(citeUrl, function (citePage) {
+			var m = citePage.match(/href="((https?:\/\/[a-z.]*)?\/scholar.bib\?[^"]+)/);
 			if (!m) {
-				//Saved lists and possibly other places have different formats for BibTeX URLs
-				//Trying to catch them here (can't add test bc lists are tied to google accounts)
+				// Saved lists and possibly other places have different formats for BibTeX URLs
+				// Trying to catch them here (can't add test bc lists are tied to google accounts)
 				m = citePage.match(/href="(.+?)">BibTeX<\/a>/);
 			}
 			if (!m) {
 				var msg = "Could not find BibTeX URL";
 				var title = citePage.match(/<title>(.*?)<\/title>/i);
 				if (title) {
-					if (title) msg += ' Got page with title "' + title[1] +'"';
+					if (title) msg += ' Got page with title "' + title[1] + '"';
 				}
 				throw new Error(msg);
 			}
 			var bibUrl = ZU.unescapeHTML(m[1]);
-			ZU.doGet(bibUrl, function(bibtex) {
-				
+			ZU.doGet(bibUrl, function (bibtex) {
 				var translator = Zotero.loadTranslator("import");
 				translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 				translator.setString(bibtex);
-				translator.setHandler("itemDone", function(obj, item) {
-					//these two variables are extracted from the context
+				translator.setHandler("itemDone", function (obj, item) {
+					// these two variables are extracted from the context
 					var titleLink = attr(context, 'h3 a, #gsc_vcd_title a', 'href');
 					var secondLine = text(context, '.gs_a') || '';
-					//case are not recognized and can be characterized by the
-					//titleLink, or that the second line starts with a number
-					//e.g. 1 Cr. 137 - Supreme Court, 1803
-					if ((titleLink && titleLink.indexOf('/scholar_case?')>-1) || 
-						secondLine && ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].indexOf(secondLine[0])>-1) {
+					// case are not recognized and can be characterized by the
+					// titleLink, or that the second line starts with a number
+					// e.g. 1 Cr. 137 - Supreme Court, 1803
+					if ((titleLink && titleLink.includes('/scholar_case?'))
+						|| secondLine && ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(secondLine[0])) {
 						item.itemType = "case";
 						item.caseName = item.title;
 						item.reporter = item.publicationTitle;
@@ -186,15 +210,15 @@ function scrapeIds(doc, ids) {
 						item.dateDecided = item.date;
 						item.court = item.publisher;
 					}
-					//patents are not recognized but are easily detected
-					//by the titleLink or second line
-					if ((titleLink && titleLink.indexOf('google.com/patents/')>-1) || secondLine.indexOf('Google Patents')>-1) {
+					// patents are not recognized but are easily detected
+					// by the titleLink or second line
+					if ((titleLink && titleLink.includes('google.com/patents/')) || secondLine.includes('Google Patents')) {
 						item.itemType = "patent";
-						//authors are inventors
-						for (var i=0, n=item.creators.length; i<n; i++) {
+						// authors are inventors
+						for (let i = 0, n = item.creators.length; i < n; i++) {
 							item.creators[i].creatorType = 'inventor';
 						}
-						//country and patent number
+						// country and patent number
 						if (titleLink) {
 							let m = titleLink.match(/\/patents\/([A-Za-z]+)(.*)$/);
 							if (m) {
@@ -204,48 +228,48 @@ function scrapeIds(doc, ids) {
 						}
 					}
 					
-					//fix titles in all upper case, e.g. some patents in search results
+					// fix titles in all upper case, e.g. some patents in search results
 					if (item.title.toUpperCase() == item.title) {
 						item.title = ZU.capitalizeTitle(item.title);
 					}
 					
-					//delete "others" as author
+					// delete "others" as author
 					if (item.creators.length) {
-						var lastCreatorIndex = item.creators.length-1,
+						var lastCreatorIndex = item.creators.length - 1,
 							lastCreator = item.creators[lastCreatorIndex];
-						if (lastCreator.lastName === "others" && (lastCreator.fieldMode === 1 ||lastCreator.firstName === "")) {
+						if (lastCreator.lastName === "others" && (lastCreator.fieldMode === 1 || lastCreator.firstName === "")) {
 							item.creators.splice(lastCreatorIndex, 1);
 						}
 					}
 					
-					//clean author names
-					for (var j=0, m=item.creators.length; j<m; j++) {
+					// clean author names
+					for (let j = 0, m = item.creators.length; j < m; j++) {
 						if (!item.creators[j].firstName) continue;
 			
 						item.creators[j] = ZU.cleanAuthor(
-							item.creators[j].lastName + ', ' +
-								item.creators[j].firstName,
+							item.creators[j].lastName + ', '
+								+ item.creators[j].firstName,
 							item.creators[j].creatorType,
 							true);
 					}
 					
-					//attach linked document as attachment if available
+					// attach linked document as attachment if available
 					var documentLinkTarget = attr(context, '.gs_or_ggsm a, #gsc_vcd_title_gg a', 'href');
 					var documentLinkTitle = text(context, '.gs_or_ggsm a, #gsc_vcd_title_gg a');
 					if (documentLinkTarget) {
-						//Z.debug(documentLinkTarget);
-						attachment = {
+						// Z.debug(documentLinkTarget);
+						var	attachment = {
 							title: "Full Text",
 							url: documentLinkTarget
 						};
-						var m = documentLinkTitle.match(/^\[(\w+)\]/);
+						let m = documentLinkTitle.match(/^\[(\w+)\]/);
 						if (m) {
 							var mimeTypes = {
-								'PDF': 'application/pdf',
-								'DOC': 'application/msword',
-								'HTML': 'text/html'
+								PDF: 'application/pdf',
+								DOC: 'application/msword',
+								HTML: 'text/html'
 							};
-							if (Object.keys(mimeTypes).indexOf(m[1].toUpperCase())>-1) {
+							if (Object.keys(mimeTypes).includes(m[1].toUpperCase())) {
 								attachment.mimeType = mimeTypes[m[1]];
 							}
 						}
@@ -282,11 +306,10 @@ var scrapeCase = function (doc, url) {
 	// Citelet is identified by
 	// id="gsl_reference"
 	var refFrag = doc.evaluate('//div[@id="gsl_reference"] | //div[@id="gs_reference"]',
-					doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+		doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (refFrag) {
 		// citelet looks kind of like this
 		// Powell v. McCormack, 395 US 486 - Supreme Court 1969
-		var item = new Zotero.Item("case");
 		var attachmentPointer = url;
 		if (Zotero.isMLZ) {
 			var block = doc.getElementById("gs_opinion_wrapper");
@@ -315,7 +338,7 @@ var scrapeCase = function (doc, url) {
  * ####################
  */
 
-var ItemFactory = function (doc, citeletString, attachmentLinks, titleString /*, bibtexLink*/) {
+var ItemFactory = function (doc, citeletString, attachmentLinks, titleString /* , bibtexLink*/) {
 	// var strings
 	this.v = {};
 	this.v.title = titleString;
@@ -332,7 +355,8 @@ var ItemFactory = function (doc, citeletString, attachmentLinks, titleString /*,
 	this.doc = doc;
 	// working strings
 	this.citelet = citeletString;
-/** handled outside of item factory
+
+	/** handled outside of item factory
 	this.bibtexLink = bibtexLink;
 	this.bibtexData = undefined;
 */
@@ -354,7 +378,7 @@ ItemFactory.prototype.repairTitle = function () {
 	// All-caps words of four or more characters probably need fixing.
 	if (this.v.title.match(/(?:[^a-z]|^)[A-Z]{4,}(?:[^a-z]|$)/)) {
 		this.v.title = ZU.capitalizeTitle(this.v.title.toLowerCase(), true)
-								.replace(/([^0-9a-z])V([^0-9a-z])/, "$1v$2");	
+								.replace(/([^0-9a-z])V([^0-9a-z])/, "$1v$2");
 	}
 };
 
@@ -392,11 +416,13 @@ ItemFactory.prototype.getDate = function () {
 	if (!this.hyphenSplit) {
 		if (this.citelet.match(/\s+-\s+/)) {
 			this.hyphenSplit = this.citelet.split(/\s+-\s+/);
-		} else {
+		}
+		else {
 			m = this.citelet.match(/^(.*),\s+([^,]+Court,\s+[^,]+)$/);
 			if (m) {
 				this.hyphenSplit = [m[1], m[2]];
-			} else {
+			}
+			else {
 				this.hyphenSplit = [this.citelet];
 			}
 		}
@@ -410,7 +436,8 @@ ItemFactory.prototype.getDate = function () {
 				this.v.date = m[2];
 				if (m[1]) {
 					this.hyphenSplit[i] = m[1];
-				} else {
+				}
+				else {
 					this.hyphenSplit[i] = "";
 				}
 				this.hyphenSplit = this.hyphenSplit.slice(0, i + 1);
@@ -419,16 +446,16 @@ ItemFactory.prototype.getDate = function () {
 		}
 	}
 	// If we can find a more specific date in the case's centered text then use it
-	var nodesSnapshot = this.doc.evaluate('//div[@id="gs_opinion"]/center', this.doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null );
-	for ( var iNode = 0; iNode < nodesSnapshot.snapshotLength; iNode++ ) {
+	var nodesSnapshot = this.doc.evaluate('//div[@id="gs_opinion"]/center', this.doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+	for (var iNode = 0; iNode < nodesSnapshot.snapshotLength; iNode++) {
 		var specificDate = nodesSnapshot.snapshotItem(iNode).textContent.trim();
-		// Remove the first word through the first space 
+		// Remove the first word through the first space
 		//  if it starts with "Deci" or it doesn't start with the first three letters of a month
 		//  and if it doesn't start with Submitted or Argued
 		// (So, words like "Decided", "Dated", and "Released" will be removed)
-		specificDate = specificDate.replace(/^(?:Deci|(?!Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|Submitted|Argued))[a-z]+[.:]?\s*/i,"")
+		specificDate = specificDate.replace(/^(?:Deci|(?!Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|Submitted|Argued))[a-z]+[.:]?\s*/i, "")
 		// Remove the trailing period, if it is there
-			.replace(/\.$/,"");
+			.replace(/\.$/, "");
 		// If the remaining text is a valid date...
 		if (!isNaN(Date.parse(specificDate))) {
 			// ...then use it
@@ -462,7 +489,7 @@ ItemFactory.prototype.getCourt = function () {
 		this.v.court = court;
 	}
 	if (jurisdiction) {
-		this.v.extra = "{:jurisdiction: " + jurisdiction + "}";
+		this.v.extra = "Jurisdiction: " + jurisdiction;
 	}
 };
 
@@ -486,7 +513,8 @@ ItemFactory.prototype.getVolRepPag = function () {
 				}
 				gotOne = true;
 				this.vv.volRepPag.push(volRepPag);
-			} else {
+			}
+			else {
 				break;
 			}
 		}
@@ -504,8 +532,7 @@ ItemFactory.prototype.getTitle = function () {
 
 ItemFactory.prototype.getDocketNumber = function (doc) {
 	var docNumFrag = doc.evaluate(
-		'//center[preceding-sibling::center//h3[@id="gsl_case_name"]]\
-		| //div[@class="gsc_value" and preceding-sibling::div[text()="Docket id"]]',
+		'//center[preceding-sibling::center//h3[@id="gsl_case_name"]]	| //div[@class="gsc_value" and preceding-sibling::div[text()="Docket id"]]',
 		doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (docNumFrag) {
 		this.v.docketNumber = docNumFrag.textContent
@@ -523,10 +550,11 @@ ItemFactory.prototype.getAttachments = function (doctype) {
 		if ("string" === typeof this.attachmentLinks[i]) {
 			attachments.push({
 				title: attachmentTitle,
-				url:this.attachmentLinks[i],
-				type:"text/html"
+				url: this.attachmentLinks[i],
+				type: "text/html"
 			});
-		} else {
+		}
+		else {
 			// DOM fragment and parent doc
 			var block = this.attachmentLinks[i];
 			var doc = block.ownerDocument;
@@ -539,12 +567,12 @@ ItemFactory.prototype.getAttachments = function (doctype) {
 			// head element
 			var head = doc.createElement("head");
 			head.innerHTML = '<title>' + title + '</title>';
-			head.innerHTML += '<style type="text/css">' + css + '</style>'; 
+			head.innerHTML += '<style type="text/css">' + css + '</style>';
 
 			var attachmentdoc = Zotero.Utilities.composeDoc(doc, head, block);
 			attachments.push({
 				title: attachmentTitle,
-				document:attachmentdoc
+				document: attachmentdoc
 			});
 
 			// URL for this item
@@ -583,7 +611,7 @@ ItemFactory.prototype.saveItem = function () {
 	if (this.v.title) {
 		this.repairTitle();
 		if (this.vv.volRepPag.length) {
-			var completed_items = [];
+			var completedItems = [];
 			for (i = 0, ilen = this.vv.volRepPag.length; i < ilen; i += 1) {
 				this.item = new Zotero.Item("case");
 				for (key in this.vv.volRepPag[i]) {
@@ -597,34 +625,36 @@ ItemFactory.prototype.saveItem = function () {
 				}
 				this.item.itemID = "" + bogusItemID;
 				bogusItemID += 1;
-				completed_items.push(this.item);
+				completedItems.push(this.item);
 			}
-			if (completed_items.length === 0) {
+			if (completedItems.length === 0) {
 				throw new Error("Failed to parse \"" + this.citelet + "\"");
 			}
-			for (i = 0, ilen = completed_items.length; i < ilen; i += 1) {
-				for (j = 0, jlen = completed_items.length; j < jlen; j += 1) {
+			for (i = 0, ilen = completedItems.length; i < ilen; i += 1) {
+				for (let j = 0, jlen = completedItems.length; j < jlen; j += 1) {
 					if (i === j) {
 						continue;
 					}
-					completed_items[i].seeAlso.push(completed_items[j].itemID);
+					completedItems[i].seeAlso.push(completedItems[j].itemID);
 				}
-				completed_items[i].complete();
+				completedItems[i].complete();
 			}
-		} else {
+		}
+		else {
 			this.item = new Zotero.Item("case");
 			this.saveItemCommonVars();
 			this.pushAttachments("Judgement");
 			this.item.complete();
 		}
-	} else {
+	}
+	else {
 		throw new Error("Failed to find title in \"" + this.citelet + "\"");
 	}
 };
 
 
 ItemFactory.prototype.saveItemCommonVars = function () {
-	for (key in this.v) {
+	for (let key in this.v) {
 		if (this.v[key]) {
 			this.item[key] = this.v[key];
 		}
@@ -632,7 +662,7 @@ ItemFactory.prototype.saveItemCommonVars = function () {
 };
 
 /*
-  Test Case Descriptions:  (these have not been included in the test case JSON below as per 
+  Test Case Descriptions:  (these have not been included in the test case JSON below as per
 							aurimasv's comment on https://github.com/zotero/translators/pull/833)
 
 		"description": "Legacy test case",
@@ -762,7 +792,7 @@ var testCases = [
 				"creators": [],
 				"dateDecided": "September 21, 2005",
 				"court": "Court of Appeals, 9th Appellate Dist.",
-				"extra": "{:jurisdiction: Ohio}",
+				"extra": "Jurisdiction: Ohio",
 				"firstPage": "4933",
 				"itemID": "1",
 				"reporter": "Ohio",
@@ -789,7 +819,7 @@ var testCases = [
 				"creators": [],
 				"dateDecided": "June 13, 2007",
 				"court": "Court of Appeals, 4th Appellate Dist.",
-				"extra": "{:jurisdiction: Ohio}",
+				"extra": "Jurisdiction: Ohio",
 				"firstPage": "3029",
 				"itemID": "1",
 				"reporter": "Ohio",
@@ -816,7 +846,7 @@ var testCases = [
 				"creators": [],
 				"dateDecided": "July 5, 1995",
 				"court": "Supreme Court",
-				"extra": "{:jurisdiction: Ohio}",
+				"extra": "Jurisdiction: Ohio",
 				"firstPage": "415",
 				"itemID": "1",
 				"reporter": "Ohio St. 3d",
@@ -896,7 +926,7 @@ var testCases = [
 				"dateDecided": "February 27, 2013",
 				"court": "Dist. Court",
 				"docketNumber": "Case No. 3:08cv408",
-				"extra": "{:jurisdiction: SD Ohio}",
+				"extra": "Jurisdiction: SD Ohio",
 				"attachments": [
 					{
 						"title": "Google Scholar Judgement",
@@ -962,6 +992,37 @@ var testCases = [
 		"type": "web",
 		"url": "https://scholar.google.be/scholar?hl=en&as_sdt=1,5&as_vis=1&q=%22transformative+works+and+cultures%22&scisbd=1",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://scholar.google.com/citations?user=Cz6X6UYAAAAJ&hl=en",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://scholar.google.com/scholar_case?case=16585781351150334057",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "Strickland v. Washington",
+				"creators": [],
+				"dateDecided": "May 14, 1984",
+				"court": "Supreme Court",
+				"firstPage": "668",
+				"itemID": "1",
+				"reporter": "US",
+				"reporterVolume": "466",
+				"attachments": [
+					{
+						"title": "Google Scholar Judgement",
+						"type": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

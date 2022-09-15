@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-03 13:00:06"
+	"lastUpdated": "2021-09-01 04:27:44"
 }
 
 /*
@@ -80,6 +80,12 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
+	// move meta tags to head for EM
+	// this is a fix for some malformed HTML
+	for (let meta of doc.body.querySelectorAll('meta')) {
+		doc.head.appendChild(meta);
+	}
+	
 	var abstract = ZU.xpathText(doc, '//div[contains(@class, "abstract")]/p[1]');
 	var purl = ZU.xpathText(doc, '//div[@id="purl"]/a/@href');
 	var license = ZU.xpathText(doc, '//a[@id="licenseicon"]/@href');
@@ -121,7 +127,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://quod.lib.umich.edu/p/phimp/3521354.0004.003/1?rgn=full+text;view=image;q1=epistemology",
+		"url": "https://quod.lib.umich.edu/p/phimp/3521354.0004.003/1?rgn=full+text;view=image;q1=epistemology",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -137,6 +143,7 @@ var testCases = [
 				"ISSN": "1533-628X",
 				"abstractNote": "Authors have a lot of leeway with regard to what they can make true in their story. In general, if the author says that p is true in the fiction we're reading, we believe that p is true in that fiction. And if we're playing along with the fictional game, we imagine that, along with everything else in the story, p is true. But there are exceptions to these general principles. Many authors, most notably Kendall Walton and Tamar Szabó Gendler, have discussed apparent counterexamples when p is \"morally deviant\". Many other statements that are conceptually impossible also seem to be counterexamples. In this paper I do four things. I survey the range of counterexamples, or at least putative counterexamples, to the principles. Then I look to explanations of the counterexamples. I argue, following Gendler, that the explanation cannot simply be that morally deviant claims are impossible. I argue that the distinctive attitudes we have towards moral propositions cannot explain the counterexamples, since some of the examples don't involve moral concepts. And I put forward a proposed explanation that turns on the role of 'higher-level concepts', concepts that if they are satisfied are satisfied in virtue of more fundamental facts about the world, in fiction, and in imagination.",
 				"issue": "3",
+				"language": "en",
 				"libraryCatalog": "quod.lib.umich.edu",
 				"publicationTitle": "Philosopher's Imprint",
 				"rights": "http://creativecommons.org/licenses/by-nc-nd/3.0/",
@@ -144,7 +151,8 @@ var testCases = [
 				"volume": "4",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					},
 					{
 						"title": "Full Text PDF",

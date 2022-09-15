@@ -2,20 +2,20 @@
 	"translatorID": "d2c0d2f4-42c0-41e0-8021-3b87b52b27d2",
 	"label": "Landesbibliographie Baden-Württemberg",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?statistik\\.baden-wuerttemberg\\.de/LABI",
+	"target": "^https?://(www\\.)?(statistik\\.baden-wuerttemberg|statistik-bw)\\.de/LABI",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-01 18:12:21"
+	"lastUpdated": "2021-07-12 18:14:55"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2018 Philipp Zumstein
+	Copyright © 2018-2021 Philipp Zumstein
 	
 	This file is part of Zotero.
 
@@ -36,15 +36,12 @@
 */
 
 
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
-
 function detectWeb(doc, url) {
 	if (url.includes('/LABI.asp?')) {
 		if (getSearchResults(doc, true)) {
 			return "multiple";
-		} else {
+		}
+		else {
 			var labels = doc.querySelectorAll('td>b');
 			for (let label of labels) {
 				if (label.textContent == 'ISBN:') {
@@ -57,6 +54,7 @@ function detectWeb(doc, url) {
 			return "report";
 		}
 	}
+	return false;
 }
 
 
@@ -64,7 +62,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('td.right + td>a');
-	for (let i=0; i<rows.length; i++) {
+	for (let i = 0; i < rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -80,7 +78,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -88,7 +86,8 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -97,7 +96,9 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var type = detectWeb(doc, url);
 	var risURL = attr(doc, 'a.export', 'href');
-	ZU.doGet(risURL, function(text) {
+	ZU.doGet(risURL, function (text) {
+		// institutional authors are ending up in A3 now
+		text = text.replace(/^A3/m, 'AU');
 		// for coorperate bodies the place is in brackets sometimes
 		// e.g. AU  - Universität <Mannheim>
 		text = text.replace(/AU\s+-\s+(.*)\s+<(.*)>/g, "AU  - $1 $2");
@@ -105,11 +106,11 @@ function scrape(doc, url) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
-		translator.setHandler("itemDone", function(obj, item) {
+		translator.setHandler("itemDone", function (obj, item) {
 			item.itemType = type;
 			// fixes the added author information in the title,
 			// which might be fixed by them in the future
-			item.title = item.title.replace(/\/[^\/]*$/, '').replace(/ : /g, ': ');
+			item.title = item.title.replace(/\/[^/]*$/, '').replace(/ : /g, ': ');
 			// number of pages land in pages for a book
 			if (type == "book" && item.pages) {
 				let m = item.pages.match(/(\d+) Seiten/);
@@ -127,7 +128,8 @@ function scrape(doc, url) {
 				let m = item.date.match(/(\d+)/);
 				if (m) {
 					item.date = m[1];
-				} else {
+				}
+				else {
 					delete item.date;
 				}
 			}
@@ -147,7 +149,7 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.statistik.baden-wuerttemberg.de/LABI/LABI.asp?HC=63amFSWsgYL&K1=10&T1=mannheim&TA=5",
+		"url": "http://www.statistik-bw.de/LABI/LABI.asp?K1=10&T1=%C3%9Cberfordert%3A+Mozart%3A+Don+Giovanni%3A+Mannheim%2C+Nationaltheater&O1=&K2=2&T2=&O2=&K3=11&T3=&JV=&JB=&EV=&EB=&EF=",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -200,7 +202,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.statistik.baden-wuerttemberg.de/LABI/LABI.asp?HC=53amwU0Dwj6&K1=10&T1=mannheim&TA=12",
+		"url": "http://www.statistik-bw.de/LABI/LABI.asp?K1=10&T1=Hafen+Mannheim+2018%3A+150+Jahre+Mannheimer+Akte&O1=&K2=2&T2=&O2=&K3=11&T3=&JV=&JB=&EV=&EB=&EF=",
 		"items": [
 			{
 				"itemType": "book",
@@ -265,7 +267,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.statistik.baden-wuerttemberg.de/LABI/LABI.asp?HC=53anjtk4Avy&K1=10&T1=mannheim&EF=Z&TA=87",
+		"url": "http://www.statistik-bw.de/LABI/LABI.asp?HC=53uayhgF7jf&K1=10&T1=Rechenschaftsbericht+...+des+Rektors&TA=13",
 		"items": [
 			{
 				"itemType": "report",

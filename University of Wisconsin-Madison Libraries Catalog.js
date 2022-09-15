@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-09-05 20:27:48"
+	"lastUpdated": "2022-05-31 01:20:34"
 }
 
 /*
@@ -43,36 +43,46 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.indexOf('/search/catalog')>-1 && getSearchResults(doc, true)) {
+	if (url.includes('/search/') && getSearchResults(doc, true)) {
 		return "multiple";
-	} else if (url.indexOf('/catalog/')>-1) {
-		var format = ZU.xpathText(doc, '//span[@class="pub_title" and contains(., "Format")]/following-sibling::span[@class="pub_desc"]');
-		//Z.debug(format);
+	}
+	else if (url.includes('/catalog/')) {
+		var format = getFormat(doc);
+		// Z.debug(format);
 		switch (format) {
 			case "Sound Recordings":
 				return "audioRecording";
+
 			case "Videos, Slides, Films":
 				return "videoRecording";
+
 			case "Maps, Atlases":
 				return "map";
+
 			case "Computer software":
 				return "computerProgramm";
+
 			case "Photos, Drawings, Prints":
 				return "artwork";
-			//case "Journals, Magazines, Newspapers":
-			//there is no such itemType yet
+
 			case "Music Scores":
+			case "Journals, Magazines, Newspapers": // there is no such itemType yet
 			default:
 				return "book";
 		}
-	} 
+	}
+	return false;
+}
+
+function getFormat(doc) {
+	return text(doc, '.type');
 }
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('a.item_path[href*="/catalog/"]');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -87,16 +97,16 @@ function getSearchResults(doc, checkOnly) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
+			if (!items) return;
+
 			var articles = [];
 			for (var i in items) {
 				articles.push(i);
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -104,30 +114,35 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	var risURL = url.replace(/[#?].*$/, '') + '.ris';
-	//there is also a link tag for RIS but the href is currently missing
+	// there is also a link tag for RIS but the href is currently missing
 
-	ZU.doGet(risURL, function(text) {
-		//delete birth/death year from author name
+	ZU.doGet(risURL, function (text) {
+		// delete birth/death year from author name
 		text = text.replace(/^(AU\s+-.*), \d\d\d\d-(\d\d\d\d)?$/m, "$1");
-		//music scores should be treated as book
+		// music scores should be treated as book
 		text = text.replace('TY  - MUSIC', 'TY  - BOOK');
-		//Z.debug(text);
+		if (getFormat(doc) && getFormat(doc).includes('Book')) {
+			// fix for an odd RIS issue in one of the tests - a book is tagged
+			// as a presentation
+			text = text.replace('TY  - SLIDE', 'TY  - BOOK');
+		}
+		// Z.debug(text);
 
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
-		translator.setHandler("itemDone", function(obj, item) {
+		translator.setHandler("itemDone", function (obj, item) {
 			if (item.abstractNote) {
-				//sometimes the physical description is saved in the abstract
-				//e.g. 38 pages ; 24 cm
+				// sometimes the physical description is saved in the abstract
+				// e.g. 38 pages ; 24 cm
 				var m = item.abstractNote.match(/(\d+)\spages\b/);
 				if (m) {
 					item.numPages = m[1];
 					delete item.abstractNote;
 				}
 			}
-			//clean-up the information for publisher
-			//e.g. Chicago : Association of College and Research Libraries, 2011.
+			// clean-up the information for publisher
+			// e.g. Chicago : Association of College and Research Libraries, 2011.
 			if (item.publisher) {
 				item.publisher = item.publisher.replace(/,\s\d\d\d\d\.?$/, '');
 				var parts = item.publisher.split(' : ');
@@ -139,7 +154,7 @@ function scrape(doc, url) {
 			item.complete();
 		});
 		translator.translate();
-	})
+	});
 }
 
 /** BEGIN TEST CASES **/
@@ -159,7 +174,7 @@ var testCases = [
 					}
 				],
 				"date": "2011",
-				"callNumber": "PN171.F56 P83 2011",
+				"callNumber": "025.30285 P961z",
 				"libraryCatalog": "University of Wisconsin-Madison Libraries Catalog",
 				"numPages": "159",
 				"place": "Chicago",
@@ -179,7 +194,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://search.library.wisc.edu/catalog/9912334246702121",
+		"url": "https://search.library.wisc.edu/catalog/9912283572402121",
 		"items": [
 			{
 				"itemType": "book",
@@ -192,18 +207,18 @@ var testCases = [
 					}
 				],
 				"date": "2016",
-				"callNumber": "Y 1.1/7: 114-178",
+				"callNumber": "Y 1.1/7:114-178",
 				"libraryCatalog": "University of Wisconsin-Madison Libraries Catalog",
 				"numPages": "38",
 				"place": "Washington",
 				"publisher": "U.S. Government Publishing Office",
 				"shortTitle": "Fiscal year 2017 budget amendments",
-				"url": "https://search.library.wisc.edu/catalog/9912334246702121",
+				"url": "https://search.library.wisc.edu/catalog/9912283572402121",
 				"attachments": [],
 				"tags": [],
 				"notes": [
 					{
-						"note": "<p>Shipping list no.: 2017-0006-M.;&quot;November 14, 2016.&quot;;&quot;Referred to the Committee on Appropriations.&quot;;Microfiche. [Washington, D.C.] : U.S. Government Printing Office, [2017] 1 microfiche : negative.</p>"
+						"note": "<p>Shipping list no.: 2017-0071-P.;&quot;November 14, 2016.&quot;;&quot;Referred to the Committee on Appropriations.&quot;</p>"
 					}
 				],
 				"seeAlso": []
@@ -234,7 +249,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "<p>For clarinet, horn, bassoon, violin, viola, violoncello, and double bass.;Compact disc.;Duration: 42:10.;Program notes by Paolo Petazzi in Italian and English ([14] p. : ill.) inserted in container.;Forms part of: Curtiss Blake Collection.</p>"
+						"note": "<p>For clarinet, horn, bassoon, violin, viola, violoncello, and double bass.;Compact disc.;Duration: 42:10.;Program notes by Paolo Petazzi in Italian and English ([14] p. : ill.) inserted in container.;Forms part of: Curtiss Blake Collection.;Recorded June 11-13, 1988, at the Villa Litta Modigliani, Milan.</p>"
 					}
 				],
 				"seeAlso": []
