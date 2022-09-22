@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-08-29 13:56:41"
+	"lastUpdated": "2022-09-22 15:58:08"
 }
 
 /*
@@ -56,7 +56,7 @@ function detectWeb(doc, url) {
 	// If this is a view page, find the link to the citation
 	var favLink = getFavLink(doc);
 	if ((favLink && getJID(favLink.href)) || getJID(url)) {
-		if (ZU.xpathText(doc, '//li[@class="book_info_button"]')) {
+		if (text(doc, '.book_info_button')) {
 			return "book";
 		}
 		else if (text(doc, 'script[data-analytics-provider]').includes('"chapter view"')) {
@@ -249,10 +249,10 @@ function processRIS(text, jid) {
 		// remove all caps from titles and authors.
 		for (i = 0; i < item.creators.length; i++) {
 			if (item.creators[i].lastName && item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
-				item.creators[i].lastName = ZU.capitalizeTitle(item.creators[i].lastName.toLowerCase(), true);
+				item.creators[i].lastName = ZU.capitalizeName(item.creators[i].lastName, true);
 			}
 			if (item.creators[i].firstName && item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
-				item.creators[i].firstName = ZU.capitalizeTitle(item.creators[i].firstName.toLowerCase(), true);
+				item.creators[i].firstName = ZU.capitalizeName(item.creators[i].firstName, true);
 			}
 		}
 		if (item.title == item.title.toUpperCase()) {
