@@ -92,7 +92,7 @@ function scrape(doc, _url) {
 	var authorMetadata = text(doc, '.notice-auteur').match(/\s*Par\s+(.*)/);
 	if (authorMetadata) {
 		// remove prefix text
-		authorMetadata[1] = authorMetadata[1].replace(/[Nn]otice complétée par |[Nn]otice complétée et corrigée par /,"");
+		authorMetadata[1] = authorMetadata[1].replace(/[Nn]otice complétée par |[Nn]otice complétée et corrigée par /, "");
 		for (var author of authorMetadata[1].split(/, | et /)) {
 			newItem.creators.push(ZU.cleanAuthor(author, "author"));
 		}
