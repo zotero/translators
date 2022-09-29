@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-09-29 01:55:37"
+	"lastUpdated": "2022-09-29 02:24:53"
 }
 
 /*
@@ -309,6 +309,10 @@ function fetchIDs(isbns, ids, callback) {
 		},
 		function () {
 			fetchIDs(isbns, ids, callback);
+		},
+		null,
+		{
+			Referer: 'https://worldcat.org/search?q='
 		}
 	);
 }
