@@ -19,7 +19,7 @@
 		"Full TEI Document": false,
 		"Export Collections": false
 	},
-	"lastUpdated": "2020-07-23 18:31:53"
+	"lastUpdated": "2022-09-30 10:56:50"
 }
 
 // ********************************************************************
@@ -587,6 +587,10 @@ function doExport() {
 
 	var item = null;
 	while (item = Zotero.nextItem()) { // eslint-disable-line no-cond-assign
+		// Skip standalone notes
+		if (item.itemType == 'note') {
+			continue;
+		}
 		allItems[item.uri] = item;
 	}
 

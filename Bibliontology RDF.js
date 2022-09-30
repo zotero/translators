@@ -16,7 +16,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-23 04:15:05"
+	"lastUpdated": "2022-09-30 10:56:50"
 }
 
 var n = {
@@ -1071,6 +1071,10 @@ function doExport() {
 	var item;
 	var items = {};
 	while (item = Zotero.nextItem()) {
+		// Skip standalone notes
+		if (item.itemType == 'note') {
+			continue;
+		}
 		items[item.itemID] = item;
 	}
 	var autoTags = {};
