@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-15 14:04:13"
+	"lastUpdated": "2022-09-22 15:58:08"
 }
 
 /*
@@ -56,7 +56,7 @@ function detectWeb(doc, url) {
 	// If this is a view page, find the link to the citation
 	var favLink = getFavLink(doc);
 	if ((favLink && getJID(favLink.href)) || getJID(url)) {
-		if (ZU.xpathText(doc, '//li[@class="book_info_button"]')) {
+		if (text(doc, '.book_info_button')) {
 			return "book";
 		}
 		else if (text(doc, 'script[data-analytics-provider]').includes('"chapter view"')) {
@@ -236,7 +236,7 @@ function processRIS(text, jid) {
 			}
 			// remove any reviewed authors from the title
 			for (i = 0; i < reviewedAuthors.length; i++) {
-				reviewedTitle = reviewedTitle.replace(", "+reviewedAuthors[i], "");
+				reviewedTitle = reviewedTitle.replace(", " + reviewedAuthors[i], "");
 			}
 			item.title = "Review of " + reviewedTitle;
 		}
@@ -246,6 +246,19 @@ function processRIS(text, jid) {
 		item.url = item.url.replace('http:', 'https:'); // RIS still lists http addresses while JSTOR's stable URLs use https
 		if (item.url && !item.url.startsWith("http")) item.url = "https://" + item.url;
 		
+		// remove all caps from titles and authors.
+		for (i = 0; i < item.creators.length; i++) {
+			if (item.creators[i].lastName && item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
+				item.creators[i].lastName = ZU.capitalizeName(item.creators[i].lastName, true);
+			}
+			if (item.creators[i].firstName && item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
+				item.creators[i].firstName = ZU.capitalizeName(item.creators[i].firstName, true);
+			}
+		}
+		if (item.title == item.title.toUpperCase()) {
+			item.title = ZU.capitalizeTitle(item.title.toLowerCase(), true);
+		}
+
 		// DB in RIS maps to archive; we don't want that
 		delete item.archive;
 		if (item.DOI || /DOI: 10\./.test(item.extra)) {
@@ -757,6 +770,41 @@ var testCases = [
 				"series": "Whiteness and the Creation of the American West",
 				"shortTitle": "“OUR CLIMATE AND SOIL IS COMPLETELY ADAPTED TO THEIR CUSTOMS”",
 				"url": "https://www.jstor.org/stable/j.ctt19jcg63.12",
+				"attachments": [
+					{
+						"title": "JSTOR Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.jstor.org/stable/29533951",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Systems, Not Men: Producing People in Charlotte Perkins Gilman's \"Herland\"",
+				"creators": [
+					{
+						"lastName": "Fusco",
+						"firstName": "Katherine",
+						"creatorType": "author"
+					}
+				],
+				"date": "2009",
+				"ISSN": "0039-3827",
+				"issue": "4",
+				"libraryCatalog": "JSTOR",
+				"pages": "418-434",
+				"publicationTitle": "Studies in the Novel",
+				"shortTitle": "Systems, Not Men",
+				"url": "https://www.jstor.org/stable/29533951",
+				"volume": "41",
 				"attachments": [
 					{
 						"title": "JSTOR Full Text PDF",
