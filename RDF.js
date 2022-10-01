@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-06-17 17:49:14"
+	"lastUpdated": "2022-09-22 02:12:48"
 }
 
 /*
@@ -564,6 +564,13 @@ function detectType(newItem, node, ret) {
 					t.dc = 'bookSection';
 					break;
 
+				// via examples from https://edoc.hu-berlin.de/
+				case 'bachelorthesis':
+				case 'masterthesis':
+				case 'doctoralthesis':
+					t.dc = 'thesis';
+					break;
+				
 				// from http://www.idealliance.org/specifications/prism/specifications/prism-controlled-vocabularies/prism-12-controlled-vocabularies
 				// some are the same as eprints and are handled above
 				case 'electronicbook':
