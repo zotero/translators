@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-09-29 02:24:53"
+	"lastUpdated": "2022-10-01 17:57:17"
 }
 
 /*
@@ -272,26 +272,33 @@ function doSearch(items) {
 		isbns.push(items[i].ISBN);
 	}
 	
-	fetchIDs(isbns, ids, function (ids) {
-		if (!ids.length) {
-			Z.debug("Could not retrieve any OCLC IDs");
-			Zotero.done(false);
-			return;
-		}
-		var url = "https://www.worldcat.org/api/search?q=no%3A"
-			+ ids.map(encodeURIComponent).join('+OR+no%3A');
-		ZU.doGet(url, function (respText) {
-			let json = JSON.parse(respText);
-			if (json.briefRecords) {
-				scrapeRecord(json.briefRecords);
+	// TEMP - we can't actually hardcode the build ID, and this will break when the site is updated
+	let worldCatBuild = 'https://www.worldcat.org/_next/data/7ea36452a4a8192942cb78a606cea6dca8a763c6';
+	ZU.doGet(`${worldCatBuild}/en/search.json`, function (jsonText) {
+		let json = JSON.parse(jsonText);
+		let { secureToken } = json.pageProps;
+		fetchIDs(isbns, ids, secureToken, function (ids) {
+			if (!ids.length) {
+				Z.debug("Could not retrieve any OCLC IDs");
+				Zotero.done(false);
+				return;
 			}
-		}, null, null, {
-			Referer: 'https://worldcat.org/search?q='
+			var url = "https://www.worldcat.org/api/search?q=no%3A"
+				+ ids.map(encodeURIComponent).join('+OR+no%3A');
+			ZU.doGet(url, function (respText) {
+				let json = JSON.parse(respText);
+				if (json.briefRecords) {
+					scrapeRecord(json.briefRecords);
+				}
+			}, null, null, {
+				Referer: 'https://worldcat.org/search?q=',
+				'x-oclc-tkn': secureToken
+			});
 		});
 	});
 }
 
-function fetchIDs(isbns, ids, callback) {
+function fetchIDs(isbns, ids, secureToken, callback) {
 	if (!isbns.length) {
 		callback(ids);
 		return;
@@ -308,11 +315,12 @@ function fetchIDs(isbns, ids, callback) {
 			}
 		},
 		function () {
-			fetchIDs(isbns, ids, callback);
+			fetchIDs(isbns, ids, secureToken, callback);
 		},
 		null,
 		{
-			Referer: 'https://worldcat.org/search?q='
+			Referer: 'https://worldcat.org/search?q=',
+			'x-oclc-tkn': secureToken
 		}
 	);
 }
