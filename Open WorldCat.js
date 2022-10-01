@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-10-01 17:57:17"
+	"lastUpdated": "2022-10-01 19:36:31"
 }
 
 /*
@@ -272,27 +272,28 @@ function doSearch(items) {
 		isbns.push(items[i].ISBN);
 	}
 	
-	// TEMP - we can't actually hardcode the build ID, and this will break when the site is updated
-	let worldCatBuild = 'https://www.worldcat.org/_next/data/7ea36452a4a8192942cb78a606cea6dca8a763c6';
-	ZU.doGet(`${worldCatBuild}/en/search.json`, function (jsonText) {
-		let json = JSON.parse(jsonText);
-		let { secureToken } = json.pageProps;
-		fetchIDs(isbns, ids, secureToken, function (ids) {
-			if (!ids.length) {
-				Z.debug("Could not retrieve any OCLC IDs");
-				Zotero.done(false);
-				return;
-			}
-			var url = "https://www.worldcat.org/api/search?q=no%3A"
-				+ ids.map(encodeURIComponent).join('+OR+no%3A');
-			ZU.doGet(url, function (respText) {
-				let json = JSON.parse(respText);
-				if (json.briefRecords) {
-					scrapeRecord(json.briefRecords);
+	ZU.processDocuments('https://www.worldcat.org/', function (homepageDoc) {
+		let buildID = JSON.parse(text(homepageDoc, '#__NEXT_DATA__')).buildId;
+		ZU.doGet(`https://www.worldcat.org/_next/data/${buildID}/en/search.json`, function (jsonText) {
+			let json = JSON.parse(jsonText);
+			let { secureToken } = json.pageProps;
+			fetchIDs(isbns, ids, secureToken, function (ids) {
+				if (!ids.length) {
+					Z.debug("Could not retrieve any OCLC IDs");
+					Zotero.done(false);
+					return;
 				}
-			}, null, null, {
-				Referer: 'https://worldcat.org/search?q=',
-				'x-oclc-tkn': secureToken
+				var url = "https://www.worldcat.org/api/search?q=no%3A"
+					+ ids.map(encodeURIComponent).join('+OR+no%3A');
+				ZU.doGet(url, function (respText) {
+					let json = JSON.parse(respText);
+					if (json.briefRecords) {
+						scrapeRecord(json.briefRecords);
+					}
+				}, null, null, {
+					Referer: 'https://worldcat.org/search?q=',
+					'x-oclc-tkn': secureToken
+				});
 			});
 		});
 	});
