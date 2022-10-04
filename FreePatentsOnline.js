@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-03-08 14:32:54"
+	"lastUpdated": "2022-10-03 16:35:54"
 }
 
 /*
@@ -155,7 +155,7 @@ function scrape(doc, url) {
 	
 	newItem.attachments.push({
 		document: doc,
-		title: "Snaptshot"
+		title: "Snapshot"
 	});
 	
 	var pdfUrl = ZU.xpathText(doc, "//a[contains(@href, '.pdf')]/@href");
@@ -236,7 +236,7 @@ var testCases = [
 				"url": "http://www.freepatentsonline.com/7751561.html",
 				"attachments": [
 					{
-						"title": "Snaptshot"
+						"title": "Snapshot"
 					},
 					{
 						"title": "Fulltext PDF"
