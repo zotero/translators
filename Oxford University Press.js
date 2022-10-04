@@ -37,13 +37,15 @@
 
 
 function detectWeb(doc, url) {
-	//The url of books contains the ISBN (i.e. 9 digits) where the 
-	//url of journals contains the ISSN (i.e. 4 digits).
-	if (url.indexOf('/product/')>-1 && url.search(/\d{9}/)>-1) {
+	// The url of books contains the ISBN (i.e. 9 digits) where the
+	// url of journals contains the ISSN (i.e. 4 digits).
+	if (url.includes('/product/') && url.search(/\d{9}/) > -1) {
 		return 'book';
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
@@ -51,7 +53,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//td[contains(@class, "result_biblio")]//a[contains(@href, "/academic/product/")]');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -67,7 +69,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -75,13 +77,13 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
-		scrape(doc, url);
+	}
+	else {
+		scrape(doc);
 	}
 }
 
-
-function scrape(doc, url) {
+function scrape(doc) {
 	var item = new Zotero.Item("book");
 
 	var subTitle = doc.getElementsByClassName('product_biblio_strapline')[0];
@@ -96,11 +98,11 @@ function scrape(doc, url) {
 	}
 
 	var creators = ZU.xpath(doc, '//div[@id="content"]/h3[contains(@class, "product_biblio_author")]/b');
-	var role = "author";//default
-	if (ZU.xpathText(doc, '//div[@id="content"]/h3[contains(@class, "product_biblio_author")]').indexOf("Edited by")>-1) {
+	var role = "author";// default
+	if (ZU.xpathText(doc, '//div[@id="content"]/h3[contains(@class, "product_biblio_author")]').includes("Edited by")) {
 		role = "editor";
 	}
-	for (var i=0; i<creators.length; i++) {
+	for (var i = 0; i < creators.length; i++) {
 		var creator = creators[i].textContent;
 		creator = creator.replace(/^(Prof|Dr)/, '');
 		item.creators.push(ZU.cleanAuthor(creator, role));
