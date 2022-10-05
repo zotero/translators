@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-08 15:58:04"
+	"lastUpdated": "2022-10-05 01:20:38"
 }
 
 /*
@@ -108,6 +108,19 @@ function scrape(doc) {
 		item.creators.push(ZU.cleanAuthor(creator, role));
 	}
 	
+	if (!item.creators.length) {
+		// In the cc=us version of the site, we somehow lose the defined bold authors and have to parse them
+		// more crudely
+		creators = text(doc, '#content>h3.product_biblio_author');
+		if (creators.length) {
+			creators = creators.split(/,\s|\sand\s/);
+			for (let creator of creators) {
+				creator = creator.replace(/^(Prof|Dr)/, '');
+				item.creators.push(ZU.cleanAuthor(creator, role));
+			}
+		}
+	}
+
 	var date = ZU.xpathText(doc, '//div[contains(@class, "product_sidebar")]/p[starts-with(., "Published:")]');
 	if (date) {
 		item.date = ZU.strToISO(date);
@@ -167,46 +180,8 @@ var testCases = [
 				"series": "Flute Time",
 				"attachments": [
 					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://global.oup.com/academic/product/form-focused-instruction-and-teacher-education-9780194422505?cc=de&lang=en&",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Form-focused Instruction and Teacher Education: Studies in Honour of Rod Ellis",
-				"creators": [
-					{
-						"firstName": "Sandra",
-						"lastName": "Fotos",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Hossein",
-						"lastName": "Nassaji",
-						"creatorType": "author"
-					}
-				],
-				"date": "2007-05-24",
-				"ISBN": "9780194422505",
-				"abstractNote": "An overview of form-focused instruction as an option for second language grammar teaching. It combines theoretical concerns, classroom practices, and teacher education.",
-				"libraryCatalog": "Oxford University Press",
-				"numPages": "296",
-				"place": "Oxford, New York",
-				"publisher": "Oxford University Press",
-				"series": "Oxford Applied Linguistics",
-				"shortTitle": "Form-focused Instruction and Teacher Education",
-				"attachments": [
-					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -254,7 +229,8 @@ var testCases = [
 				"shortTitle": "Education",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -287,7 +263,8 @@ var testCases = [
 				"publisher": "Oxford University Press",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
