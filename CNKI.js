@@ -212,10 +212,16 @@ function scrape(ids, doc, url, itemInfo) {
 				if (creator.firstName) continue;
 				
 				var lastSpace = creator.lastName.lastIndexOf(' ');
+				var lastMiddleDot = creator.lastName.lastIndexOf('·');
 				if (creator.lastName.search(/[A-Za-z]/) !== -1 && lastSpace !== -1) {
 					// western name. split on last space
 					creator.firstName = creator.lastName.substr(0, lastSpace);
 					creator.lastName = creator.lastName.substr(lastSpace + 1);
+				}
+				else if (lastMiddleDot !== -1) {
+					// translated western name with · as separator
+					creator.firstName = creator.lastName.substr(0, lastMiddleDot);
+					creator.lastName = creator.lastName.substr(lastMiddleDot + 1);
 				}
 				else {
 					// Chinese name. first character is last name, the rest are first name
