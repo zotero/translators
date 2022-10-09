@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcs",
-	"lastUpdated": "2019-12-05 08:10:19"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2022-10-09 16:23:05"
 }
 
 /*
@@ -104,6 +104,7 @@ function getTypeFromDBName(dbname) {
 		CJFQ: "journalArticle",
 		CJFD: "journalArticle",
 		CAPJ: "journalArticle",
+		CCJD: "journalArticle",
 		CDFD: "thesis",
 		CMFD: "thesis",
 		CLKM: "thesis",
@@ -451,6 +452,58 @@ var testCases = [
 					},
 					{
 						"tag": "黄瓜"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kns.cnki.net/kcms/detail/detail.aspx?dbcode=CCJD&dbname=CCJDLAST2&filename=ZKSF202002010&uniplatform=NZKPT&v=RM9dl7WiC7a9v7FVB6ov3OwJSXCWzsWIng_BWXok2rj4YFWz9tZ20FRZxDaeDPCm",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "欧洲陪审团制度新发展:西班牙与俄罗斯的陪审团",
+				"creators": [
+					{
+						"lastName": "萨曼",
+						"firstName": "史蒂芬",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "高",
+						"firstName": "一飞",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020",
+				"abstractNote": "&lt;正&gt;一、简介近来再次对俄罗斯(1993)和西班牙(1995)陪审团审判模式进行介绍的原因有两个方面。第一,在废除传统陪审团审判的情况下,要么采取仅由职业法官组成的法院审理案件,要么由职业法官和审讯顾问合议来判断所有的事实问题、法律问题并作出相应判决,这是一种令人惊闻的倒退。",
+				"issue": "02",
+				"language": "中文;",
+				"libraryCatalog": "CNKI",
+				"pages": "193-212",
+				"publicationTitle": "司法智库",
+				"shortTitle": "欧洲陪审团制度新发展",
+				"url": "https://kns.cnki.net/kcms/detail/detail.aspx?dbcode=CCJD&dbname=CCJDLAST2&filename=ZKSF202002010&uniplatform=NZKPT&v=RM9dl7WiC7a9v7FVB6ov3OwJSXCWzsWIng_BWXok2rj4YFWz9tZ20FRZxDaeDPCm",
+				"volume": "3",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "俄罗斯"
+					},
+					{
+						"tag": "刑事诉讼程序"
+					},
+					{
+						"tag": "判决书"
+					},
+					{
+						"tag": "巴斯克"
+					},
+					{
+						"tag": "陪审团"
 					}
 				],
 				"notes": [],
