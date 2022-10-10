@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2022-10-10 01:29:51"
+	"lastUpdated": "2022-10-10 17:34:35"
 }
 
 /*
@@ -77,6 +77,7 @@ var fieldMap = {
 // Only the most basic types. Most official MEDLINE types make little sense as item types
 var inputTypeMap = {
 	Book: "book",
+	Books: "book", //ERIC
 	"Book Chapter": "bookSection", // can't find in specs, but is used.
 	"Journal Article": "journalArticle",
 	"Newspaper Article": "newspaperArticle",
@@ -97,6 +98,9 @@ function processTag(item, tag, value) {
 	else if (tag == "PT") {
 		if (inputTypeMap[value]) { // first check inputTypeMap
 			item.itemType = inputTypeMap[value];
+		}
+		else if (value.includes("Dissertation")) {
+			item.itemType = "thesis";
 		}
 		else if (value.includes("Report")) {
 			// ERIC nbib has multiple PT tags; Reports can also be other item types
@@ -156,6 +160,10 @@ function processTag(item, tag, value) {
 	else if (tag == "DP") {
 		item.date = value;
 	}
+	else if (tag == "SO") {
+		item.citation = value;
+	}
+
 	// Save link to attached link
 	else if (tag == "LID") {
 		// Pubmed adds all sorts of different IDs in here, so make sure these are URLs
@@ -253,6 +261,7 @@ function finalizeItem(item) {
 	}
 	else if (item.pagesBackup) item.pages = item.pagesBackup;
 	delete item.pagesBackup;
+
 	// check for and remove duplicate ISSNs
 	if (item.ISSN && item.ISSN.includes(" ")) {
 		let ISSN = item.ISSN.split(/\s/);
@@ -260,21 +269,38 @@ function finalizeItem(item) {
 		ISSN = [...new Set(ISSN)];
 		item.ISSN = ISSN.join(" ");
 	}
+	else if (item.ISSN) {
+		item.ISSN = ZU.cleanISSN(item.ISSN.replace(/E?ISSN-/, ""));
+	}
+	if (item.ISBN) {
+		item.ISBN = ZU.cleanISBN(item.ISBN.replace("ISBN-", ""));
+	}
 	
-
-	if (!item.itemType) {
+	if (item.itemType == "book") {
+		item.publisher = item.publicationTitle;
+		delete item.publicationTitle;
+	}
+	else if (item.itemType == "thesis") {
+		if (item.citation && /,[^,]+ University/.test(item.citation)) {
+			// Get the University as good as we can
+			item.university = item.citation.match(/,\s*([^,]+ University)/)[1];
+		}
+		item.archive = item.publicationTitle; // Typically ProQuest here
+		delete item.publicationTitle;
+	}
+	else if (!item.itemType) {
 		if (item.itemTypeBackup && !item.extra.includes("ERIC Number: EJ")) {
 			item.itemType = item.itemTypeBackup; // using report from above
 			item.institution = item.publicationTitle;
 			delete item.publicationTitle;
 		}
 		else {
-			item.itemType = inputTypeMap["Journal Article"]; 	// journal article is the fallback item type
+			item.itemType = "journalArticle"; 	// journal article is the fallback item type
 		}
 	}
-	if (item.itemTypeBackup) {
-		delete item.itemTypeBackup;
-	}
+
+	delete item.citation;
+	delete item.itemTypeBackup;
 	// titles for books are mapped to bookTitle
 	if (item.itemType == "book") item.title = item.bookTitle;
 	item.complete();
@@ -740,7 +766,7 @@ var testCases = [
 					}
 				],
 				"date": "2020",
-				"ISSN": "EISSN-2375-5636",
+				"ISSN": "2375-5636",
 				"abstractNote": "When developing a digital test, one of the first decisions that need to be made is which type of Computer-Based Test (CBT) to develop. Six different CBT types are considered here: linear tests, automatically generated tests, computerized adaptive tests, adaptive learning environments, educational simulations, and educational games. The selection of a CBT type needs to be guided by the intended purposes of the test. The test approach determines which purposes can be achieved by using a particular test. Four different test approaches are discussed here: formative assessment, formative evaluation, summative assessment, and summative evaluation. The suitability of each CBT type to measure performance for the different test approaches is evaluated based on four test characteristics: test purpose, test length, level of interest for measurement (student, class, school, system), and test report. This article aims to provide some guidance in the selection of the most appropriate type of CBT.",
 				"extra": "ERIC Number: EJ1227990",
 				"issue": "1",
@@ -799,7 +825,7 @@ var testCases = [
 					}
 				],
 				"date": "Article 10 2019",
-				"ISSN": "EISSN-2229-0443",
+				"ISSN": "2229-0443",
 				"abstractNote": "Background: Research on the test-taker perception of assessments has been conducted under the assumption that negative test-taker perception may influence test performance by decreasing test-taking motivation. This assumption, however, has not been verified in the field of language testing. Building on expectancy-value theory, this study explored the relationships between test-taker perception, test-taking motivation, and test performance in the context of a computer-delivered speaking test. Methods: Sixty-four Japanese university students took the TOEIC Speaking test and completed a questionnaire that included statements about their test perception, test-taking motivation, and self-perceived test performance. Five students participated in follow-up interviews. Results: Questionnaire results showed that students regarded the TOEIC Speaking test positively in terms of test validity but showed reservations about computer delivery, and that they felt sufficiently motivated during the test. Interview results revealed various reasons for their reservations about computer delivery and factors that distracted them during the test. According to correlation analysis, the effects of test-taker perception and test-taking motivation seemed to be minimal on test performance, and participants' perception of computer delivery was directly related to test-taking effort, but their perception of test validity seemed to be related to test-taking effort only indirectly through the mediation of perceived test importance. Conclusion: Our findings not only provide empirical evidence for the relationship between test-taker perception and test performance but also highlight the importance of considering test-taker reactions in developing tests.",
 				"extra": "ERIC Number: EJ1245375",
 				"language": "English",
@@ -1083,7 +1109,7 @@ var testCases = [
 					}
 				],
 				"date": "Apr 2019",
-				"ISSN": "ISSN-1042-1629",
+				"ISSN": "1042-1629",
 				"abstractNote": "This paper examines whether using \"From Here to There!\" (FH2T:E), a dynamic game-based mathematics learning technology relates to improved early algebraic understanding. We use student log files within FH2T to explore the possible benefits of student behaviors and gamification on learning gains. Using in app measures of student interactions (mouse clicks, resets, errors, problem solving steps, and completions), 19 variables were identified to summarize overall problem solving processes. An exploratory factor analysis identified five clear factors including engagement in problem solving, progress, strategic flexibility, strategic efficiency, and speed. Regression analyses reveal that after accounting for behavior within the app, playing the gamified version of the app contributed to higher learning gains than playing a nongamified version. Next, completing more problems within the game related to higher achievement on the post-test. Third, two significant interactions were found between progress and prior knowledge and engagement in problem solving and prior knowledge, where low performing students gained more when they completed more problems and engaged more with those problems.",
 				"extra": "ERIC Number: EJ1208101",
 				"issue": "2",
@@ -1319,6 +1345,142 @@ var testCases = [
 					},
 					{
 						"tag": "Thinking Skills"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "OWN - ERIC\r\nTI  - Tests of Robustness in Peer Review\r\nAU  - Leipzig, Jeremy\r\nOT  - Robustness (Statistics)\r\nOT  - Peer Evaluation\r\nOT  - Data Analysis\r\nOT  - Computer Software\r\nOT  - Evaluation Methods\r\nOT  - Research Methodology\r\nJT  - ProQuest LLC\r\nSO  - Ph.D. Dissertation, Drexel University\r\nAID - http://gateway.proquest.com/openurl?url_ver=Z39.88-2004&rft_val_fmt=info:ofi/fmt:kev:mtx:dissertation&res_dat=xri:pqm&rft_dat=xri:pqdiss:28967820\r\nOID - ED620611\r\nDP  - 2021\r\nLID - http://eric.ed.gov/?id=ED620611\r\nAB  - Purpose: The purpose of this dissertation is to investigate the feasibility of using tests of robustness in peer review. This study involved selecting three high-impact papers which featured open data and utilized bioinformatic analyses but provided no source code and refactoring these to allow external survey participants to swap tools, parameters, and data subsets to evaluate the robustness and underlying validity of these analyses. Technical advances that have taken place in recent years--scientific computing infrastructure has matured to support the distribution of reproducible computational analyses--enable this approach. These advances, along with cultural shifts encompassing open data and open code initiatives, promise to address technical stumbling blocks that have contributed to the \"reproducibility crisis.\" To take full advantage of these developments toward improving scientific quality, authors, reviewers, and publishers must integrate reproducible analysis into the peer review process. Seven existing major case study types - reproduction, replication, refactor, robustness test, survey, census, and case narrative - have been invaluable toward establishing reproducibility as a serious and independent area of research. Of particular interest are refactors, in which an existing analysis with abstract methods is reimplemented by a third party, and robustness tests, which involve the manipulation of tools, parameters, and data to assess the scientific validity of an analysis. This thesis describes efforts to test the feasibility of robustness testing in the context of in silico peer review. The contributions described are complemented with extensive source code. Design and Methods: A multi-method approach was employed for this study consisting of user surveys and tests of robustness--hands-on, self-directed software development exercises. Three high-impact genomics publications with open data, but no source code, were selected, refactored, and distributed to active study participants who acted as quasi-external reviewers. The process of the refactor was used to evaluate the limitations of reproducibility using conventional tools and to study how best to present analyses for peer review, and the tests of robustness were employed under the hypothesis this practice would help to evaluate the underlying validity of an analysis. Three different approaches were taken in these tests of robustness--a faithful reproduction of the original manuscript into a framework that could be manipulated by participants, a workflow-library approach in which participants were encouraged to employ modern \"off-the-shelf\" pre-built pipelines to triangulate tests, and an advisor-led approach in which senior experts suggested alternate tools to be implemented and I generated a report for their evaluation. Findings: The refactors and tests of robustness produced numerous discoveries both in terms of the underlying scientific content and, more importantly, into the strengths and weakness of the three robustness approaches (faithful/workflow-library/advisor-led) and pain points in the analytic stack, which may be addressed with appropriate software and metadata. The principal findings are that the faithful approach may often discourage aggressive robustness testing because of the inertia imposed by the existing framework, the workflow-library approach is efficient but can prove inconclusive, and the advisor-led approach may be most practical for journals but requires a higher level of communication to be effective. The vast majority of time in all these refactors was spent on sample metadata management, particularly organizing sample groups of biological and technical replicates to produce the numerous and varied tool input manifests. Practical Implications: Reproducibility-enabled in silico peer review is substantially more time-consuming than traditional manuscript peer review and will require economic, cultural, and technical change to bring to reality. The work presented here could contribute to developing new models to minimize the increased effort of this type of peer review while incentivizing reproducibility. Value: This study provides practical guidance toward designing the future of reproducibility-enabled in silico peer review, which is a logical extension of the computational reproducibility afforded by technical advances in dependency management, containerization, pipeline frameworks, and notebooks. [The dissertation citations contained here are published with the permission of ProQuest LLC. Further reproduction is prohibited without permission. Copies of dissertations may be obtained by Telephone (800) 1-800-521-0600. Web page: http://www.proquest.com/en-US/products/dissertations/individuals.shtml.]\r\nISBN - 979-8-2098-8762-1\r\nISSN - EISSN-\r\nLA  - English\r\nPT  - Dissertations/Theses - Doctoral Dissertations\r\n\r\n\r\n\r\nOWN - ERIC\r\nTI  - Evidence-Based Instructional Strategies for Transition. Brookes Transition to Adulthood Series\r\nAU  - Test, David W.\r\nOT  - Adolescents\r\nOT  - Young Adults\r\nOT  - Disabilities\r\nOT  - Transitional Programs\r\nOT  - Special Education Teachers\r\nOT  - School Counselors\r\nOT  - Specialists\r\nOT  - Related Services (Special Education)\r\nOT  - Alignment (Education)\r\nOT  - Student Needs\r\nOT  - Student Interests\r\nOT  - Informal Assessment\r\nOT  - Educational Objectives\r\nOT  - Skill Development\r\nOT  - Job Application\r\nOT  - Interpersonal Competence\r\nOT  - Instructional Effectiveness\r\nOT  - Educational Strategies\r\nOT  - Family Involvement\r\nOT  - Evidence\r\nJT  - Brookes Publishing Company\r\nAID - http://www.brookespublishing.com/store/books/test-71929/index.htm\r\nOID - ED529121\r\nDP  - 2012\r\nLID - http://eric.ed.gov/?id=ED529121\r\nAB  - To meet the high-stakes requirements of IDEA's Indicator 13, professionals need proven and practical ways to support successful transitions for young adults with significant disabilities. Now there's a single guidebook to help them meet that critical goal--straight from David Test, one of today's most highly respected authorities on transitions to adulthood. Packed with down-to-earth, immediately useful transition strategies, this book has the evidence-based guidance readers need to help students with moderate and severe disabilities prepare for every aspect of adult life, from applying for a job to improving social skills. Special educators, transition specialists, guidance counselors, and other professionals will discover how to: (1) align instruction with IDEA requirements; (2) pinpoint student needs and interests with formal and informal assessment strategies; (3) strengthen IEPs with measurable, relevant, and specific postsecondary goals; (4) teach students the skills needed to succeed; (5) use the most effective instructional strategies, such as mnemonics, response prompting, peer assistance, visual displays, and computer-assisted instruction; (6) assess effectiveness of instruction; (7) increase student and family involvement in transition planning--the best way to ensure positive outcomes that reflect a student's individual choices. Readers will help make transition as seamless as possible with practical materials that guide the planning process, including IEP templates and worksheets, checklists and key questions, thumbnails of key research studies, and sample scenarios that show teaching strategies in action. An essential road map for all professionals involved in transition planning, this book will help ensure that students with moderate and severe disabilities reach their destination: a successful adult life that reflects their goals and dreams. Contents of this book include: (1) Transition-Focused Education (David W. Test); (2) Transition Assessment for Instruction (Dawn A. Rowe, Larry Kortering, and David W. Test); (3) Teaching Strategies (Sharon M. Richter, April L. Mustian, and David W. Test); (4) Data Collection Strategies (Valerie L. Mazzotti and David W. Test); (5) Student-Focused Planning (Nicole Uphold and Melissa Hudson); (6) Student Development: Employment Skills (Allison Walker and Audrey Bartholomew); (7) Bound for Success: Teaching Life Skills (April L. Mustian and Sharon L. Richter); and (8) Strategies for Teaching Academic Skills (Allison Walker and Kelly Kelley). An index is included.\r\nISBN - ISBN-978-1-5985-7192-9\r\nPT  - Books\r\nPT  - Collected Works - General",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "Tests of Robustness in Peer Review",
+				"creators": [
+					{
+						"firstName": "Jeremy",
+						"lastName": "Leipzig",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021",
+				"abstractNote": "Purpose: The purpose of this dissertation is to investigate the feasibility of using tests of robustness in peer review. This study involved selecting three high-impact papers which featured open data and utilized bioinformatic analyses but provided no source code and refactoring these to allow external survey participants to swap tools, parameters, and data subsets to evaluate the robustness and underlying validity of these analyses. Technical advances that have taken place in recent years--scientific computing infrastructure has matured to support the distribution of reproducible computational analyses--enable this approach. These advances, along with cultural shifts encompassing open data and open code initiatives, promise to address technical stumbling blocks that have contributed to the \"reproducibility crisis.\" To take full advantage of these developments toward improving scientific quality, authors, reviewers, and publishers must integrate reproducible analysis into the peer review process. Seven existing major case study types - reproduction, replication, refactor, robustness test, survey, census, and case narrative - have been invaluable toward establishing reproducibility as a serious and independent area of research. Of particular interest are refactors, in which an existing analysis with abstract methods is reimplemented by a third party, and robustness tests, which involve the manipulation of tools, parameters, and data to assess the scientific validity of an analysis. This thesis describes efforts to test the feasibility of robustness testing in the context of in silico peer review. The contributions described are complemented with extensive source code. Design and Methods: A multi-method approach was employed for this study consisting of user surveys and tests of robustness--hands-on, self-directed software development exercises. Three high-impact genomics publications with open data, but no source code, were selected, refactored, and distributed to active study participants who acted as quasi-external reviewers. The process of the refactor was used to evaluate the limitations of reproducibility using conventional tools and to study how best to present analyses for peer review, and the tests of robustness were employed under the hypothesis this practice would help to evaluate the underlying validity of an analysis. Three different approaches were taken in these tests of robustness--a faithful reproduction of the original manuscript into a framework that could be manipulated by participants, a workflow-library approach in which participants were encouraged to employ modern \"off-the-shelf\" pre-built pipelines to triangulate tests, and an advisor-led approach in which senior experts suggested alternate tools to be implemented and I generated a report for their evaluation. Findings: The refactors and tests of robustness produced numerous discoveries both in terms of the underlying scientific content and, more importantly, into the strengths and weakness of the three robustness approaches (faithful/workflow-library/advisor-led) and pain points in the analytic stack, which may be addressed with appropriate software and metadata. The principal findings are that the faithful approach may often discourage aggressive robustness testing because of the inertia imposed by the existing framework, the workflow-library approach is efficient but can prove inconclusive, and the advisor-led approach may be most practical for journals but requires a higher level of communication to be effective. The vast majority of time in all these refactors was spent on sample metadata management, particularly organizing sample groups of biological and technical replicates to produce the numerous and varied tool input manifests. Practical Implications: Reproducibility-enabled in silico peer review is substantially more time-consuming than traditional manuscript peer review and will require economic, cultural, and technical change to bring to reality. The work presented here could contribute to developing new models to minimize the increased effort of this type of peer review while incentivizing reproducibility. Value: This study provides practical guidance toward designing the future of reproducibility-enabled in silico peer review, which is a logical extension of the computational reproducibility afforded by technical advances in dependency management, containerization, pipeline frameworks, and notebooks. [The dissertation citations contained here are published with the permission of ProQuest LLC. Further reproduction is prohibited without permission. Copies of dissertations may be obtained by Telephone (800) 1-800-521-0600. Web page: http://www.proquest.com/en-US/products/dissertations/individuals.shtml.]",
+				"archive": "ProQuest LLC",
+				"extra": "ERIC Number: ED620611",
+				"language": "English",
+				"university": "Drexel University",
+				"attachments": [
+					{
+						"title": "Catalog Link",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					{
+						"tag": "Computer Software"
+					},
+					{
+						"tag": "Data Analysis"
+					},
+					{
+						"tag": "Evaluation Methods"
+					},
+					{
+						"tag": "Peer Evaluation"
+					},
+					{
+						"tag": "Research Methodology"
+					},
+					{
+						"tag": "Robustness (Statistics)"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			},
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "David W.",
+						"lastName": "Test",
+						"creatorType": "author"
+					}
+				],
+				"date": "2012",
+				"ISBN": "9781598571929",
+				"abstractNote": "To meet the high-stakes requirements of IDEA's Indicator 13, professionals need proven and practical ways to support successful transitions for young adults with significant disabilities. Now there's a single guidebook to help them meet that critical goal--straight from David Test, one of today's most highly respected authorities on transitions to adulthood. Packed with down-to-earth, immediately useful transition strategies, this book has the evidence-based guidance readers need to help students with moderate and severe disabilities prepare for every aspect of adult life, from applying for a job to improving social skills. Special educators, transition specialists, guidance counselors, and other professionals will discover how to: (1) align instruction with IDEA requirements; (2) pinpoint student needs and interests with formal and informal assessment strategies; (3) strengthen IEPs with measurable, relevant, and specific postsecondary goals; (4) teach students the skills needed to succeed; (5) use the most effective instructional strategies, such as mnemonics, response prompting, peer assistance, visual displays, and computer-assisted instruction; (6) assess effectiveness of instruction; (7) increase student and family involvement in transition planning--the best way to ensure positive outcomes that reflect a student's individual choices. Readers will help make transition as seamless as possible with practical materials that guide the planning process, including IEP templates and worksheets, checklists and key questions, thumbnails of key research studies, and sample scenarios that show teaching strategies in action. An essential road map for all professionals involved in transition planning, this book will help ensure that students with moderate and severe disabilities reach their destination: a successful adult life that reflects their goals and dreams. Contents of this book include: (1) Transition-Focused Education (David W. Test); (2) Transition Assessment for Instruction (Dawn A. Rowe, Larry Kortering, and David W. Test); (3) Teaching Strategies (Sharon M. Richter, April L. Mustian, and David W. Test); (4) Data Collection Strategies (Valerie L. Mazzotti and David W. Test); (5) Student-Focused Planning (Nicole Uphold and Melissa Hudson); (6) Student Development: Employment Skills (Allison Walker and Audrey Bartholomew); (7) Bound for Success: Teaching Life Skills (April L. Mustian and Sharon L. Richter); and (8) Strategies for Teaching Academic Skills (Allison Walker and Kelly Kelley). An index is included.",
+				"extra": "ERIC Number: ED529121",
+				"publisher": "Brookes Publishing Company",
+				"attachments": [
+					{
+						"title": "Catalog Link",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					{
+						"tag": "Adolescents"
+					},
+					{
+						"tag": "Alignment (Education)"
+					},
+					{
+						"tag": "Disabilities"
+					},
+					{
+						"tag": "Educational Objectives"
+					},
+					{
+						"tag": "Educational Strategies"
+					},
+					{
+						"tag": "Evidence"
+					},
+					{
+						"tag": "Family Involvement"
+					},
+					{
+						"tag": "Informal Assessment"
+					},
+					{
+						"tag": "Instructional Effectiveness"
+					},
+					{
+						"tag": "Interpersonal Competence"
+					},
+					{
+						"tag": "Job Application"
+					},
+					{
+						"tag": "Related Services (Special Education)"
+					},
+					{
+						"tag": "School Counselors"
+					},
+					{
+						"tag": "Skill Development"
+					},
+					{
+						"tag": "Special Education Teachers"
+					},
+					{
+						"tag": "Specialists"
+					},
+					{
+						"tag": "Student Interests"
+					},
+					{
+						"tag": "Student Needs"
+					},
+					{
+						"tag": "Transitional Programs"
+					},
+					{
+						"tag": "Young Adults"
 					}
 				],
 				"notes": [],
