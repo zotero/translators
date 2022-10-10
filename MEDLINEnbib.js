@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2022-02-21 17:06:30"
+	"lastUpdated": "2022-10-10 01:29:51"
 }
 
 /*
@@ -83,18 +83,25 @@ var inputTypeMap = {
 	"Video-Audio Media": "videoRecording",
 	"Technical Report": "report",
 	"Legal Case": "case",
+	Preprint: "preprint",
 	Legislation: "statute"
 };
 
 function processTag(item, tag, value) {
 	value = Zotero.Utilities.trim(value);
 	var type;
+
 	if (fieldMap[tag]) {
 		item[fieldMap[tag]] = value;
 	}
 	else if (tag == "PT") {
 		if (inputTypeMap[value]) { // first check inputTypeMap
 			item.itemType = inputTypeMap[value];
+		}
+		else if (value.includes("Report")) {
+			// ERIC nbib has multiple PT tags; Reports can also be other item types
+			// so we're only using this as a fallback
+			item.itemTypeBackup = "report";
 		}
 	}
 	else if (tag == "FAU" || tag == "FED") {
@@ -115,6 +122,9 @@ function processTag(item, tag, value) {
 		}
 		value = value.replace(/\s([A-Z]+)$/, ", $1");
 		item.creatorsBackup.push(Zotero.Utilities.cleanAuthor(value, type, value.includes(",")));
+	}
+	else if (tag == "OID" && /E[JD]\d+/.test(value)) {
+		item.extra = "ERIC Number: " + value;
 	}
 	else if (tag == "PMID") {
 		item.extra = "PMID: " + value;
@@ -152,7 +162,8 @@ function processTag(item, tag, value) {
 		if (value.startsWith("http")) {
 			item.attachments.push({ url: value, title: "Catalog Link", snapshot: false });
 		// If the value is tagged as a PII, we can use this as a page number if we have not previously managed to extract one
-		} else if (value.includes("[pii]")) item.pagesBackup = value.replace(/\s*\[pii\]/, "");
+		}
+		else if (value.includes("[pii]")) item.pagesBackup = value.replace(/\s*\[pii\]/, "");
 	}
 	else if (tag == "MH" || tag == "OT") {
 		item.tags.push(value);
@@ -239,7 +250,8 @@ function finalizeItem(item) {
 			item.pages = fullPageRange;
 		}
 	// If there is not an explicitly defined page range, try and use the value extracted from the LID field
-	} else if (item.pagesBackup) item.pages = item.pagesBackup;
+	}
+	else if (item.pagesBackup) item.pages = item.pagesBackup;
 	delete item.pagesBackup;
 	// check for and remove duplicate ISSNs
 	if (item.ISSN && item.ISSN.includes(" ")) {
@@ -249,8 +261,20 @@ function finalizeItem(item) {
 		item.ISSN = ISSN.join(" ");
 	}
 	
-	// journal article is the fallback item type
-	if (!item.itemType) item.itemType = inputTypeMap["Journal Article"];
+
+	if (!item.itemType) {
+		if (item.itemTypeBackup && !item.extra.includes("ERIC Number: EJ")) {
+			item.itemType = item.itemTypeBackup; // using report from above
+			item.institution = item.publicationTitle;
+			delete item.publicationTitle;
+		}
+		else {
+			item.itemType = inputTypeMap["Journal Article"]; 	// journal article is the fallback item type
+		}
+	}
+	if (item.itemTypeBackup) {
+		delete item.itemTypeBackup;
+	}
 	// titles for books are mapped to bookTitle
 	if (item.itemType == "book") item.title = item.bookTitle;
 	item.complete();
@@ -718,6 +742,7 @@ var testCases = [
 				"date": "2020",
 				"ISSN": "EISSN-2375-5636",
 				"abstractNote": "When developing a digital test, one of the first decisions that need to be made is which type of Computer-Based Test (CBT) to develop. Six different CBT types are considered here: linear tests, automatically generated tests, computerized adaptive tests, adaptive learning environments, educational simulations, and educational games. The selection of a CBT type needs to be guided by the intended purposes of the test. The test approach determines which purposes can be achieved by using a particular test. Four different test approaches are discussed here: formative assessment, formative evaluation, summative assessment, and summative evaluation. The suitability of each CBT type to measure performance for the different test approaches is evaluated based on four test characteristics: test purpose, test length, level of interest for measurement (student, class, school, system), and test report. This article aims to provide some guidance in the selection of the most appropriate type of CBT.",
+				"extra": "ERIC Number: EJ1227990",
 				"issue": "1",
 				"language": "English",
 				"pages": "12-24",
@@ -776,6 +801,7 @@ var testCases = [
 				"date": "Article 10 2019",
 				"ISSN": "EISSN-2229-0443",
 				"abstractNote": "Background: Research on the test-taker perception of assessments has been conducted under the assumption that negative test-taker perception may influence test performance by decreasing test-taking motivation. This assumption, however, has not been verified in the field of language testing. Building on expectancy-value theory, this study explored the relationships between test-taker perception, test-taking motivation, and test performance in the context of a computer-delivered speaking test. Methods: Sixty-four Japanese university students took the TOEIC Speaking test and completed a questionnaire that included statements about their test perception, test-taking motivation, and self-perceived test performance. Five students participated in follow-up interviews. Results: Questionnaire results showed that students regarded the TOEIC Speaking test positively in terms of test validity but showed reservations about computer delivery, and that they felt sufficiently motivated during the test. Interview results revealed various reasons for their reservations about computer delivery and factors that distracted them during the test. According to correlation analysis, the effects of test-taker perception and test-taking motivation seemed to be minimal on test performance, and participants' perception of computer delivery was directly related to test-taking effort, but their perception of test validity seemed to be related to test-taking effort only indirectly through the mediation of perceived test importance. Conclusion: Our findings not only provide empirical evidence for the relationship between test-taker perception and test performance but also highlight the importance of considering test-taker reactions in developing tests.",
+				"extra": "ERIC Number: EJ1245375",
 				"language": "English",
 				"publicationTitle": "Language Testing in Asia",
 				"volume": "9",
@@ -830,7 +856,7 @@ var testCases = [
 				"seeAlso": []
 			},
 			{
-				"itemType": "journalArticle",
+				"itemType": "report",
 				"title": "College Entrance Exams: How Does Test Preparation Affect Retest Scores? Research Report 2019-2",
 				"creators": [
 					{
@@ -851,7 +877,8 @@ var testCases = [
 				],
 				"date": "2019",
 				"abstractNote": "As test preparation becomes widely accessible through different delivery systems, large-scale studies of test preparation efficacy that involve a variety of test preparation activities become more important to understanding the value and impact of test preparation activities on both the ACT and SAT. In this paper, the authors examine the impact of participating in test preparation prior to retaking the ACT test. The study focused on addressing three questions: (1) Using a pretest-posttest design, do students who participate in test preparation have larger score gains relative to students who did not participate in test preparation; does the test preparation effect depend on students' pretest scores?; (2) Among students who participated in test preparation, is the number of hours spent participating in each of 10 test preparation activities related to retest scores?; and (3) Among students who participated in test preparation, do their own beliefs that they might have been ill-prepared to take the test, regardless of the test preparation activities they engaged in, impact retest scores? The study findings showed that test preparation improved students' retest scores, and this effect did not differ depending on students' first ACT score. Among specific test prep activities, only the number of hours using a private tutor resulted in increased score gains above the overall effect of test prep. Students who reported feeling inadequately prepared for the second test had ACT Composite scores that were lower than those students who felt adequately prepared.",
-				"publicationTitle": "ACT, Inc.",
+				"extra": "ERIC Number: ED602023",
+				"institution": "ACT, Inc.",
 				"attachments": [
 					{
 						"title": "Catalog Link",
@@ -957,6 +984,341 @@ var testCases = [
 					},
 					{
 						"tag": "Qualitative analysis"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "\r\nOWN - ERIC\r\nTI  - Findings from the PISA for Development Field Trial of the School-Based Assessment. PISA for Development Brief 16\r\nOT  - International Assessment\r\nOT  - Secondary School Students\r\nOT  - Foreign Countries\r\nOT  - Achievement Tests\r\nOT  - Field Tests\r\nOT  - Educational Assessment\r\nOT  - Cognitive Tests\r\nOT  - Reading Tests\r\nOT  - Mathematics Tests\r\nOT  - Science Tests\r\nOT  - Developing Nations\r\nJT  - OECD Publishing\r\nAID - www.oecd.org/pisa/pisa-for-development/16-Findings-from-in-school-FT.pdf\r\nOID - ED576982\r\nDP  - 2017\r\nLID - http://eric.ed.gov/?id=ED576982\r\nAB  - The PISA for Development (PISA-D) project aims to make PISA more accessible and relevant to middle- and low-income countries by introducing new features to the assessment, including tests that are specially designed to measure lower levels of performance, contextual questionnaires that better reflect the situations of 15-year-olds across a diverse group of countries, and approaches to include out-of-school youth. The PISA-D school-based tests and contextual questionnaires are being piloted in eight countries: Bhutan, Cambodia, Ecuador, Guatemala, Honduras, Paraguay, Senegal, and Zambia. The field trial of the school-based assessment instruments took place from August to December 2016 in seven countries. Based on results of the field trial, the instruments and survey operations were modified as necessary for the main study. The PISA-D school-based assessment field trial reveals that the instruments work as intended. Findings from the analysis of the PISA-D cognitive test field trial data are organised around three major goals and are summarised in the table provided. The test covers reading, mathematics and science. Findings include: (1) The results of the field trial of the PISA for Development (PISA-D) school-based component confirm that the initiative is on track to deliver an assessment that is more relevant to middleand low-income countries; (2) PISA-D instruments work: they capture a wider range of student performance and the diverse contexts found in middle- and low-income countries while ensuring that results are comparable to those of the main PISA test; and (3) Lessons from the field trial are used to inform preparations for the main data collection, which will take place from August to December 2017.\r\nPT  - Reports - Research\r\nPT  - Reports - Evaluative\r\n\r\nOWN - ERIC\r\nTI  - From Here to There! Elementary: A Game-Based Approach to Developing Number Sense and Early Algebraic Understanding\r\nAU  - Hulse, Taylyn\r\nAU  - Daigle, Maria\r\nAU  - Manzo, Daniel\r\nAU  - Braith, Lindsay\r\nAU  - Harrison, Avery\r\nAU  - Ottmar, Erin\r\nOT  - Mathematics Instruction\r\nOT  - Educational Technology\r\nOT  - Technology Uses in Education\r\nOT  - Algebra\r\nOT  - Mathematical Concepts\r\nOT  - Concept Formation\r\nOT  - Educational Games\r\nOT  - Interaction\r\nOT  - Problem Solving\r\nOT  - Student Behavior\r\nOT  - Teaching Methods\r\nOT  - Instructional Effectiveness\r\nOT  - Mathematics Achievement\r\nJT  - Educational Technology Research and Development\r\nSO  - v67 n2 p423-441 Apr 2019\r\nAID - http://dx.doi.org/10.1007/s11423-019-09653-8\r\nOID - EJ1208101\r\nVI  - 67\r\nIP  - 2\r\nPG  - 423-441\r\nDP  - Apr 2019\r\nLID - http://eric.ed.gov/?id=EJ1208101\r\nAB  - This paper examines whether using \"From Here to There!\" (FH2T:E), a dynamic game-based mathematics learning technology relates to improved early algebraic understanding. We use student log files within FH2T to explore the possible benefits of student behaviors and gamification on learning gains. Using in app measures of student interactions (mouse clicks, resets, errors, problem solving steps, and completions), 19 variables were identified to summarize overall problem solving processes. An exploratory factor analysis identified five clear factors including engagement in problem solving, progress, strategic flexibility, strategic efficiency, and speed. Regression analyses reveal that after accounting for behavior within the app, playing the gamified version of the app contributed to higher learning gains than playing a nongamified version. Next, completing more problems within the game related to higher achievement on the post-test. Third, two significant interactions were found between progress and prior knowledge and engagement in problem solving and prior knowledge, where low performing students gained more when they completed more problems and engaged more with those problems.\r\nISSN - ISSN-1042-1629\r\nLA  - English\r\nPT  - Reports - Research\r\nPT  - Reports - Evaluative\r\n\r\nOWN - ERIC\r\nTI  - International Comparative Assessments: Broadening the Interpretability, Application and Relevance to the United States. Research in Review 2012-5\r\nAU  - Di Giacomo, F. Tony\r\nAU  - Fishbein, Bethany G.\r\nAU  - Buckley, Vanessa W.\r\nOT  - Comparative Testing\r\nOT  - International Assessment\r\nOT  - Relevance (Education)\r\nOT  - Testing Programs\r\nOT  - Program Descriptions\r\nOT  - Best Practices\r\nOT  - Adoption (Ideas)\r\nOT  - Technology Transfer\r\nOT  - Economic Impact\r\nOT  - Academic Achievement\r\nOT  - Educational Assessment\r\nOT  - Educational Indicators\r\nOT  - Comparative Education\r\nOT  - Comparative Analysis\r\nOT  - Common Core State Standards\r\nOT  - Educational Policy\r\nOT  - Tables (Data)\r\nOT  - Educational Change\r\nOT  - Educational Practices\r\nOT  - National Competency Tests\r\nOT  - Foreign Countries\r\nOT  - Mathematics Tests\r\nOT  - Science Tests\r\nOT  - Mathematics Achievement\r\nOT  - Elementary Secondary Education\r\nOT  - Science Achievement\r\nOT  - Reading Tests\r\nOT  - Achievement Tests\r\nOT  - Reading Achievement\r\nOT  - Grade 4\r\nJT  - College Board\r\nOID - ED562752\r\nDP  - 2013\r\nLID - http://eric.ed.gov/?id=ED562752\r\nAB  - Many articles and reports have reviewed, researched, and commented on international assessments from the perspective of exploring what is relevant for the United States' education systems. Researchers make claims about whether the top-performing systems have transferable practices or policies that could be applied to the United States. However, looking only at top-performing education systems may omit important knowledge that could be applied from countries with similar demographic, geographic, linguistic, or economic characteristics--even if these countries do not perform highly on comparative assessments. Moreover, by exploring only the top performers, a presumption exists that these international assessments are in alignment with a country's curricular, pedagogic, political, and economic goals, which may falsely lead to the conclusion that by copying top performers, test scores would invariably increase and also meet the nation's needs. While international comparative assessments can be valuable when developing national or state policies, the way in which they are interpreted can be broadened cautiously to better inform their interpretability, relevance, and application to countries such as the United States--all while considering the purpose of each international assessment in the context of a nation's priorities. Ultimately, this report serves as a reference guide for various international assessments, as well as a review of literature that explores a possible relationship between national economies and international assessment performance. In addition, this review will discuss how policymakers might use international assessment results from various systems to adapt successful policies in the United States. Tables are appended.\r\nPT  - Reports - Evaluative\r\nPT  - Information Analyses\r\nPT  - Reports - Research\r\n\r\nOWN - ERIC\r\nTI  - A Test of the Test of Problem Solving (TOPS).\r\nAU  - Bernhardt, Barbara\r\nOT  - Content Validity\r\nOT  - Elementary Education\r\nOT  - Language Handicaps\r\nOT  - Language Tests\r\nOT  - Linguistics\r\nOT  - Problem Solving\r\nOT  - Semantics\r\nOT  - Speech Therapy\r\nOT  - Test Validity\r\nOT  - Thinking Skills\r\nJT  - Language, Speech, and Hearing Services in Schools\r\nSO  - v21 n2 p98-101 Apr 1990\r\nOID - EJ410320\r\nVI  - 21\r\nIP  - 2\r\nPG  - 98-101\r\nDP  - Apr 1990\r\nLID - http://eric.ed.gov/?id=EJ410320\r\nAB  - The Test of Problem Solving (TOPS) was evaluated by 20 speech-language clinicians based on designer claims that the test assesses integration of semantic, linguistic, and reasoning ability and taps skills needed for academic and social acceptance. Results challenged the content validity of the test. (Author/DB)\r\nPT  - Journal Articles\r\nPT  - Reports - Research\r\nPT  - Reports - Evaluative\r\n\r\n",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Findings from the PISA for Development Field Trial of the School-Based Assessment. PISA for Development Brief 16",
+				"creators": [],
+				"date": "2017",
+				"abstractNote": "The PISA for Development (PISA-D) project aims to make PISA more accessible and relevant to middle- and low-income countries by introducing new features to the assessment, including tests that are specially designed to measure lower levels of performance, contextual questionnaires that better reflect the situations of 15-year-olds across a diverse group of countries, and approaches to include out-of-school youth. The PISA-D school-based tests and contextual questionnaires are being piloted in eight countries: Bhutan, Cambodia, Ecuador, Guatemala, Honduras, Paraguay, Senegal, and Zambia. The field trial of the school-based assessment instruments took place from August to December 2016 in seven countries. Based on results of the field trial, the instruments and survey operations were modified as necessary for the main study. The PISA-D school-based assessment field trial reveals that the instruments work as intended. Findings from the analysis of the PISA-D cognitive test field trial data are organised around three major goals and are summarised in the table provided. The test covers reading, mathematics and science. Findings include: (1) The results of the field trial of the PISA for Development (PISA-D) school-based component confirm that the initiative is on track to deliver an assessment that is more relevant to middleand low-income countries; (2) PISA-D instruments work: they capture a wider range of student performance and the diverse contexts found in middle- and low-income countries while ensuring that results are comparable to those of the main PISA test; and (3) Lessons from the field trial are used to inform preparations for the main data collection, which will take place from August to December 2017.",
+				"extra": "ERIC Number: ED576982",
+				"institution": "OECD Publishing",
+				"attachments": [
+					{
+						"title": "Catalog Link",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					{
+						"tag": "Achievement Tests"
+					},
+					{
+						"tag": "Cognitive Tests"
+					},
+					{
+						"tag": "Developing Nations"
+					},
+					{
+						"tag": "Educational Assessment"
+					},
+					{
+						"tag": "Field Tests"
+					},
+					{
+						"tag": "Foreign Countries"
+					},
+					{
+						"tag": "International Assessment"
+					},
+					{
+						"tag": "Mathematics Tests"
+					},
+					{
+						"tag": "Reading Tests"
+					},
+					{
+						"tag": "Science Tests"
+					},
+					{
+						"tag": "Secondary School Students"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			},
+			{
+				"itemType": "journalArticle",
+				"title": "From Here to There! Elementary: A Game-Based Approach to Developing Number Sense and Early Algebraic Understanding",
+				"creators": [
+					{
+						"firstName": "Taylyn",
+						"lastName": "Hulse",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Maria",
+						"lastName": "Daigle",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Daniel",
+						"lastName": "Manzo",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Lindsay",
+						"lastName": "Braith",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Avery",
+						"lastName": "Harrison",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Erin",
+						"lastName": "Ottmar",
+						"creatorType": "author"
+					}
+				],
+				"date": "Apr 2019",
+				"ISSN": "ISSN-1042-1629",
+				"abstractNote": "This paper examines whether using \"From Here to There!\" (FH2T:E), a dynamic game-based mathematics learning technology relates to improved early algebraic understanding. We use student log files within FH2T to explore the possible benefits of student behaviors and gamification on learning gains. Using in app measures of student interactions (mouse clicks, resets, errors, problem solving steps, and completions), 19 variables were identified to summarize overall problem solving processes. An exploratory factor analysis identified five clear factors including engagement in problem solving, progress, strategic flexibility, strategic efficiency, and speed. Regression analyses reveal that after accounting for behavior within the app, playing the gamified version of the app contributed to higher learning gains than playing a nongamified version. Next, completing more problems within the game related to higher achievement on the post-test. Third, two significant interactions were found between progress and prior knowledge and engagement in problem solving and prior knowledge, where low performing students gained more when they completed more problems and engaged more with those problems.",
+				"extra": "ERIC Number: EJ1208101",
+				"issue": "2",
+				"language": "English",
+				"pages": "423-441",
+				"publicationTitle": "Educational Technology Research and Development",
+				"volume": "67",
+				"attachments": [
+					{
+						"title": "Catalog Link",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					{
+						"tag": "Algebra"
+					},
+					{
+						"tag": "Concept Formation"
+					},
+					{
+						"tag": "Educational Games"
+					},
+					{
+						"tag": "Educational Technology"
+					},
+					{
+						"tag": "Instructional Effectiveness"
+					},
+					{
+						"tag": "Interaction"
+					},
+					{
+						"tag": "Mathematical Concepts"
+					},
+					{
+						"tag": "Mathematics Achievement"
+					},
+					{
+						"tag": "Mathematics Instruction"
+					},
+					{
+						"tag": "Problem Solving"
+					},
+					{
+						"tag": "Student Behavior"
+					},
+					{
+						"tag": "Teaching Methods"
+					},
+					{
+						"tag": "Technology Uses in Education"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			},
+			{
+				"itemType": "report",
+				"title": "International Comparative Assessments: Broadening the Interpretability, Application and Relevance to the United States. Research in Review 2012-5",
+				"creators": [
+					{
+						"firstName": "F. Tony",
+						"lastName": "Di Giacomo",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Bethany G.",
+						"lastName": "Fishbein",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Vanessa W.",
+						"lastName": "Buckley",
+						"creatorType": "author"
+					}
+				],
+				"date": "2013",
+				"abstractNote": "Many articles and reports have reviewed, researched, and commented on international assessments from the perspective of exploring what is relevant for the United States' education systems. Researchers make claims about whether the top-performing systems have transferable practices or policies that could be applied to the United States. However, looking only at top-performing education systems may omit important knowledge that could be applied from countries with similar demographic, geographic, linguistic, or economic characteristics--even if these countries do not perform highly on comparative assessments. Moreover, by exploring only the top performers, a presumption exists that these international assessments are in alignment with a country's curricular, pedagogic, political, and economic goals, which may falsely lead to the conclusion that by copying top performers, test scores would invariably increase and also meet the nation's needs. While international comparative assessments can be valuable when developing national or state policies, the way in which they are interpreted can be broadened cautiously to better inform their interpretability, relevance, and application to countries such as the United States--all while considering the purpose of each international assessment in the context of a nation's priorities. Ultimately, this report serves as a reference guide for various international assessments, as well as a review of literature that explores a possible relationship between national economies and international assessment performance. In addition, this review will discuss how policymakers might use international assessment results from various systems to adapt successful policies in the United States. Tables are appended.",
+				"extra": "ERIC Number: ED562752",
+				"institution": "College Board",
+				"attachments": [
+					{
+						"title": "Catalog Link",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					{
+						"tag": "Academic Achievement"
+					},
+					{
+						"tag": "Achievement Tests"
+					},
+					{
+						"tag": "Adoption (Ideas)"
+					},
+					{
+						"tag": "Best Practices"
+					},
+					{
+						"tag": "Common Core State Standards"
+					},
+					{
+						"tag": "Comparative Analysis"
+					},
+					{
+						"tag": "Comparative Education"
+					},
+					{
+						"tag": "Comparative Testing"
+					},
+					{
+						"tag": "Economic Impact"
+					},
+					{
+						"tag": "Educational Assessment"
+					},
+					{
+						"tag": "Educational Change"
+					},
+					{
+						"tag": "Educational Indicators"
+					},
+					{
+						"tag": "Educational Policy"
+					},
+					{
+						"tag": "Educational Practices"
+					},
+					{
+						"tag": "Elementary Secondary Education"
+					},
+					{
+						"tag": "Foreign Countries"
+					},
+					{
+						"tag": "Grade 4"
+					},
+					{
+						"tag": "International Assessment"
+					},
+					{
+						"tag": "Mathematics Achievement"
+					},
+					{
+						"tag": "Mathematics Tests"
+					},
+					{
+						"tag": "National Competency Tests"
+					},
+					{
+						"tag": "Program Descriptions"
+					},
+					{
+						"tag": "Reading Achievement"
+					},
+					{
+						"tag": "Reading Tests"
+					},
+					{
+						"tag": "Relevance (Education)"
+					},
+					{
+						"tag": "Science Achievement"
+					},
+					{
+						"tag": "Science Tests"
+					},
+					{
+						"tag": "Tables (Data)"
+					},
+					{
+						"tag": "Technology Transfer"
+					},
+					{
+						"tag": "Testing Programs"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			},
+			{
+				"itemType": "journalArticle",
+				"title": "A Test of the Test of Problem Solving (TOPS).",
+				"creators": [
+					{
+						"firstName": "Barbara",
+						"lastName": "Bernhardt",
+						"creatorType": "author"
+					}
+				],
+				"date": "Apr 1990",
+				"abstractNote": "The Test of Problem Solving (TOPS) was evaluated by 20 speech-language clinicians based on designer claims that the test assesses integration of semantic, linguistic, and reasoning ability and taps skills needed for academic and social acceptance. Results challenged the content validity of the test. (Author/DB)",
+				"extra": "ERIC Number: EJ410320",
+				"issue": "2",
+				"pages": "98-101",
+				"publicationTitle": "Language, Speech, and Hearing Services in Schools",
+				"volume": "21",
+				"attachments": [
+					{
+						"title": "Catalog Link",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					{
+						"tag": "Content Validity"
+					},
+					{
+						"tag": "Elementary Education"
+					},
+					{
+						"tag": "Language Handicaps"
+					},
+					{
+						"tag": "Language Tests"
+					},
+					{
+						"tag": "Linguistics"
+					},
+					{
+						"tag": "Problem Solving"
+					},
+					{
+						"tag": "Semantics"
+					},
+					{
+						"tag": "Speech Therapy"
+					},
+					{
+						"tag": "Test Validity"
+					},
+					{
+						"tag": "Thinking Skills"
 					}
 				],
 				"notes": [],
