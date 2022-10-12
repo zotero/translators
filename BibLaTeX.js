@@ -17,7 +17,7 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2019-12-15 14:26:00"
+	"lastUpdated": "2022-10-12 19:26:00"
 }
 
 /*
@@ -879,4 +879,6 @@ function doExport() {
 
 		Zotero.write(",\n}");
 	}
+
+	Zotero.write("\n");
 }
