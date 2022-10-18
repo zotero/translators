@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-10-01 19:36:31"
+	"lastUpdated": "2022-10-18 20:35:00"
 }
 
 /*
@@ -277,7 +277,8 @@ function doSearch(items) {
 		ZU.doGet(`https://www.worldcat.org/_next/data/${buildID}/en/search.json`, function (jsonText) {
 			let json = JSON.parse(jsonText);
 			let { secureToken } = json.pageProps;
-			fetchIDs(isbns, ids, secureToken, function (ids) {
+			let cookie = `wc_tkn=${encodeURIComponent(secureToken)}`;
+			fetchIDs(isbns, ids, cookie, function (ids) {
 				if (!ids.length) {
 					Z.debug("Could not retrieve any OCLC IDs");
 					Zotero.done(false);
@@ -292,14 +293,14 @@ function doSearch(items) {
 					}
 				}, null, null, {
 					Referer: 'https://worldcat.org/search?q=',
-					'x-oclc-tkn': secureToken
+					Cookie: cookie
 				});
 			});
 		});
 	});
 }
 
-function fetchIDs(isbns, ids, secureToken, callback) {
+function fetchIDs(isbns, ids, cookie, callback) {
 	if (!isbns.length) {
 		callback(ids);
 		return;
@@ -316,12 +317,12 @@ function fetchIDs(isbns, ids, secureToken, callback) {
 			}
 		},
 		function () {
-			fetchIDs(isbns, ids, secureToken, callback);
+			fetchIDs(isbns, ids, cookie, callback);
 		},
 		null,
 		{
 			Referer: 'https://worldcat.org/search?q=',
-			'x-oclc-tkn': secureToken
+			Cookie: cookie
 		}
 	);
 }
