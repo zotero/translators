@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2022-10-10 17:34:35"
+	"lastUpdated": "2022-10-20 02:34:57"
 }
 
 /*
@@ -77,8 +77,9 @@ var fieldMap = {
 // Only the most basic types. Most official MEDLINE types make little sense as item types
 var inputTypeMap = {
 	Book: "book",
-	Books: "book", //ERIC
+	Books: "book", // ERIC
 	"Book Chapter": "bookSection", // can't find in specs, but is used.
+	"Case Reports": "journalArticle", // Case reports in medicine are basically always in journals
 	"Journal Article": "journalArticle",
 	"Newspaper Article": "newspaperArticle",
 	"Video-Audio Media": "videoRecording",
@@ -304,7 +305,9 @@ function finalizeItem(item) {
 	// titles for books are mapped to bookTitle
 	if (item.itemType == "book") item.title = item.bookTitle;
 	item.complete();
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "import",
@@ -1481,6 +1484,68 @@ var testCases = [
 					},
 					{
 						"tag": "Young Adults"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "PMID- 36216673\r\nOWN - NLM\r\nSTAT- Publisher\r\nLR  - 20221010\r\nIS  - 1545-1534 (Electronic)\r\nIS  - 1080-6032 (Linking)\r\nDP  - 2022 Oct 7\r\nTI  - Lichtenberg Figures: How a Cutaneous Sign Can Solve Suspicious Death Cases.\r\nLID - S1080-6032(22)00139-9 [pii]\r\nLID - 10.1016/j.wem.2022.07.008 [doi]\r\nAB  - Lightning is a natural weather phenomenon that occurs most commonly during the \r\n      summer months in the afternoon or early evening. Lightning strikes can cause \r\n      accidental deaths. In developed countries, lightning fatalities occur almost \r\n      exclusively outdoors. Deaths from lightning may be in remote places with no \r\n      witnesses. Forensic pathologists may not be able to reach the scene of death \r\n      because it is too hazardous or inaccessible. Bodies may have neither evidence of \r\n      skin burns nor torn areas on their clothes. The presumption of accidental death \r\n      may be difficult to prove. We present 3 cases in which neither the examination of \r\n      the death scene nor the examination of the bodies by those who attested to the \r\n      death were performed. The bodies were transported to the morgue for a forensic \r\n      autopsy because the deaths were considered suspicious. Physicians who attest to \r\n      death in open spaces during weather that could produce lightning should actively \r\n      search for Lichtenberg figures, which are considered irrefutable proof of fatal \r\n      lightning in such settings. They should also photograph them and submit them as \r\n      evidence. Nevertheless, physicians should keep in mind that Lichtenberg figures \r\n      are not considered pathognomonic of lightning because some skin manifestations \r\n      may mimic them.\r\nCI  - Copyright © 2022 Wilderness Medical Society. Published by Elsevier Inc. All \r\n      rights reserved.\r\nFAU - Manoubi, Syrine Azza\r\nAU  - Manoubi SA\r\nAD  - Universite de Tunis El Manar Faculte de Medecine de Tunis, Tunis, Tunisia. \r\n      Electronic address: syrine.manoubi.lajmi@gmail.com.\r\nFAU - Shimi, Maha\r\nAU  - Shimi M\r\nAD  - Universite de Tunis El Manar Faculte de Medecine de Tunis, Tunis, Tunisia.\r\nFAU - Gharbaoui, Meriem\r\nAU  - Gharbaoui M\r\nAD  - Universite de Tunis El Manar Faculte de Medecine de Tunis, Tunis, Tunisia.\r\nFAU - Allouche, Mohamed\r\nAU  - Allouche M\r\nAD  - Universite de Tunis El Manar Faculte de Medecine de Tunis, Tunis, Tunisia.\r\nLA  - eng\r\nPT  - Case Reports\r\nDEP - 20221007\r\nPL  - United States\r\nTA  - Wilderness Environ Med\r\nJT  - Wilderness & environmental medicine\r\nJID - 9505185\r\nSB  - IM\r\nOTO - NOTNLM\r\nOT  - autopsy\r\nOT  - forensic pathology\r\nOT  - lightning injury\r\nOT  - natural disaster\r\nOT  - skin manifestation\r\nEDAT- 2022/10/11 06:00\r\nMHDA- 2022/10/11 06:00\r\nCRDT- 2022/10/10 22:05\r\nPHST- 2022/03/21 00:00 [received]\r\nPHST- 2022/07/02 00:00 [revised]\r\nPHST- 2022/07/14 00:00 [accepted]\r\nPHST- 2022/10/10 22:05 [entrez]\r\nPHST- 2022/10/11 06:00 [pubmed]\r\nPHST- 2022/10/11 06:00 [medline]\r\nAID - S1080-6032(22)00139-9 [pii]\r\nAID - 10.1016/j.wem.2022.07.008 [doi]\r\nPST - aheadofprint\r\nSO  - Wilderness Environ Med. 2022 Oct 7:S1080-6032(22)00139-9. doi: \r\n      10.1016/j.wem.2022.07.008.\r\n",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Lichtenberg Figures: How a Cutaneous Sign Can Solve Suspicious Death Cases.",
+				"creators": [
+					{
+						"firstName": "Syrine Azza",
+						"lastName": "Manoubi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Maha",
+						"lastName": "Shimi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Meriem",
+						"lastName": "Gharbaoui",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mohamed",
+						"lastName": "Allouche",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022 Oct 7",
+				"DOI": "10.1016/j.wem.2022.07.008",
+				"ISSN": "1545-1534 1080-6032",
+				"abstractNote": "Lightning is a natural weather phenomenon that occurs most commonly during the summer months in the afternoon or early evening. Lightning strikes can cause  accidental deaths. In developed countries, lightning fatalities occur almost  exclusively outdoors. Deaths from lightning may be in remote places with no  witnesses. Forensic pathologists may not be able to reach the scene of death  because it is too hazardous or inaccessible. Bodies may have neither evidence of  skin burns nor torn areas on their clothes. The presumption of accidental death  may be difficult to prove. We present 3 cases in which neither the examination of  the death scene nor the examination of the bodies by those who attested to the  death were performed. The bodies were transported to the morgue for a forensic  autopsy because the deaths were considered suspicious. Physicians who attest to  death in open spaces during weather that could produce lightning should actively  search for Lichtenberg figures, which are considered irrefutable proof of fatal  lightning in such settings. They should also photograph them and submit them as  evidence. Nevertheless, physicians should keep in mind that Lichtenberg figures  are not considered pathognomonic of lightning because some skin manifestations  may mimic them.",
+				"extra": "PMID: 36216673",
+				"journalAbbreviation": "Wilderness Environ Med",
+				"language": "eng",
+				"pages": "S1080-6032(22)00139-9",
+				"publicationTitle": "Wilderness & environmental medicine",
+				"rights": "Copyright © 2022 Wilderness Medical Society. Published by Elsevier Inc. All rights reserved.",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "autopsy"
+					},
+					{
+						"tag": "forensic pathology"
+					},
+					{
+						"tag": "lightning injury"
+					},
+					{
+						"tag": "natural disaster"
+					},
+					{
+						"tag": "skin manifestation"
 					}
 				],
 				"notes": [],
