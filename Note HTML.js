@@ -66,8 +66,8 @@ function doExport() {
 		}
 	}
 
-	// Insert a PDF link for highlight and image annotation nodes
 	if (Zotero.getOption("includeAppLinks")) {
+		// Insert a PDF link for highlight and image annotation nodes
 		doc.querySelectorAll('span[class="highlight"], img[data-annotation]').forEach(function (node) {
 			try {
 				var annotation = JSON.parse(decodeURIComponent(node.getAttribute('data-annotation')));
