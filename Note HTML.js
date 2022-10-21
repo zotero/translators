@@ -14,7 +14,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2022-06-29 12:00:00"
+	"lastUpdated": "2022-10-21 10:00:00"
 }
 
 /*
@@ -67,52 +67,52 @@ function doExport() {
 	}
 
 	// Insert a PDF link for highlight and image annotation nodes
-	doc.querySelectorAll('span[class="highlight"], img[data-annotation]').forEach(function (node) {
-		try {
-			var annotation = JSON.parse(decodeURIComponent(node.getAttribute('data-annotation')));
-		}
-		catch (e) {
-		}
+	if (Zotero.getOption("includeAppLinks")) {
+		doc.querySelectorAll('span[class="highlight"], img[data-annotation]').forEach(function (node) {
+			try {
+				var annotation = JSON.parse(decodeURIComponent(node.getAttribute('data-annotation')));
+			}
+			catch (e) {
+			}
 
-		if (annotation) {
-			// annotation.uri was used before note-editor v4
-			let uri = annotation.attachmentURI || annotation.uri;
-			let position = annotation.position;
-			if (Zotero.getOption("includeAppLinks")
-				&& typeof uri === 'string'
-				&& typeof position === 'object') {
-				let openURI;
-				let uriParts = uri.split('/');
-				let libraryType = uriParts[3];
-				let key = uriParts[uriParts.length - 1];
-				if (libraryType === 'users') {
-					openURI = 'zotero://open-pdf/library/items/' + key;
-				}
-				// groups
-				else {
-					let groupID = uriParts[4];
-					openURI = 'zotero://open-pdf/groups/' + groupID + '/items/' + key;
-				}
+			if (annotation) {
+				// annotation.uri was used before note-editor v4
+				let uri = annotation.attachmentURI || annotation.uri;
+				let position = annotation.position;
+				if (typeof uri === 'string' && typeof position === 'object') {
+					let openURI;
+					let uriParts = uri.split('/');
+					let libraryType = uriParts[3];
+					let key = uriParts[uriParts.length - 1];
+					if (libraryType === 'users') {
+						openURI = 'zotero://open-pdf/library/items/' + key;
+					}
+					// groups
+					else {
+						let groupID = uriParts[4];
+						openURI = 'zotero://open-pdf/groups/' + groupID + '/items/' + key;
+					}
 
-				openURI += '?page=' + (position.pageIndex + 1)
-					+ (annotation.annotationKey ? '&annotation=' + annotation.annotationKey : '');
+					openURI += '?page=' + (position.pageIndex + 1)
+						+ (annotation.annotationKey ? '&annotation=' + annotation.annotationKey : '');
 
-				let a = doc.createElement('a');
-				a.href = openURI;
-				a.append('pdf');
-				let fragment = doc.createDocumentFragment();
-				fragment.append(' (', a, ') ');
+					let a = doc.createElement('a');
+					a.href = openURI;
+					a.append('pdf');
+					let fragment = doc.createDocumentFragment();
+					fragment.append(' (', a, ') ');
 
-				let nextNode = node.nextElementSibling;
-				if (nextNode && nextNode.classList.contains('citation')) {
-					nextNode.parentNode.insertBefore(fragment, nextNode.nextSibling);
-				}
-				else {
-					node.parentNode.insertBefore(fragment, node.nextSibling);
+					let nextNode = node.nextElementSibling;
+					if (nextNode && nextNode.classList.contains('citation')) {
+						nextNode.parentNode.insertBefore(fragment, nextNode.nextSibling);
+					}
+					else {
+						node.parentNode.insertBefore(fragment, node.nextSibling);
+					}
 				}
 			}
-		}
-	});
+		});
+	}
 
 	// Transform citations to links
 	doc.querySelectorAll('span[class="citation"]').forEach(function (span) {
