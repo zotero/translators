@@ -14,7 +14,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2022-10-21 10:00:00"
+	"lastUpdated": "2022-10-21 10:30:00"
 }
 
 /*
@@ -112,49 +112,45 @@ function doExport() {
 				}
 			}
 		});
-	}
 
-	// Transform citations to links
-	doc.querySelectorAll('span[class="citation"]').forEach(function (span) {
-		try {
-			var citation = JSON.parse(decodeURIComponent(span.getAttribute('data-citation')));
-		}
-		catch (e) {
-		}
+		// Transform citations to links
+		doc.querySelectorAll('span[class="citation"]').forEach(function (span) {
+			try {
+				var citation = JSON.parse(decodeURIComponent(span.getAttribute('data-citation')));
+			}
+			catch (e) {
+			}
 
-		if (citation && citation.citationItems && citation.citationItems.length) {
-			let uris = [];
-			for (let citationItem of citation.citationItems) {
-				let uri = citationItem.uris[0];
-				if (typeof uri === 'string') {
-					let uriParts = uri.split('/');
-					let libraryType = uriParts[3];
-					let key = uriParts[uriParts.length - 1];
-					if (libraryType === 'users') {
-						uris.push('zotero://select/library/items/' + key);
-					}
-					// groups
-					else {
-						let groupID = uriParts[4];
-						uris.push('zotero://select/groups/' + groupID + '/items/' + key);
+			if (citation && citation.citationItems && citation.citationItems.length) {
+				let uris = [];
+				for (let citationItem of citation.citationItems) {
+					let uri = citationItem.uris[0];
+					if (typeof uri === 'string') {
+						let uriParts = uri.split('/');
+						let libraryType = uriParts[3];
+						let key = uriParts[uriParts.length - 1];
+						if (libraryType === 'users') {
+							uris.push('zotero://select/library/items/' + key);
+						}
+						// groups
+						else {
+							let groupID = uriParts[4];
+							uris.push('zotero://select/groups/' + groupID + '/items/' + key);
+						}
 					}
 				}
-			}
 
-			let items = Array.from(span.querySelectorAll('.citation-item')).map(x => x.textContent);
-			// Fallback to pre v5 note-editor schema that was serializing citations as plain text i.e.:
-			// <span class="citation" data-citation="...">(Jang et al., 2005, p. 14; Kongsgaard et al., 2009, p. 790)</span>
-			if (!items.length) {
-				items = span.textContent.slice(1, -1).split('; ');
-			}
+				let items = Array.from(span.querySelectorAll('.citation-item')).map(x => x.textContent);
+				// Fallback to pre v5 note-editor schema that was serializing citations as plain text i.e.:
+				// <span class="citation" data-citation="...">(Jang et al., 2005, p. 14; Kongsgaard et al., 2009, p. 790)</span>
+				if (!items.length) {
+					items = span.textContent.slice(1, -1).split('; ');
+				}
 
-			span.innerHTML = '(' + items.map((item, i) => {
-				return Zotero.getOption('includeAppLinks')
-					? `<a href="${uris[i]}">${item}</a>`
-					: item;
-			}).join('; ') + ')';
-		}
-	});
+				span.innerHTML = '(' + items.map((item, i) => `<a href="${uris[i]}">${item}</a>`).join('; ') + ')';
+			}
+		});
+	}
 
 	// Remove annotation and citation data
 	ZU.xpath(doc, '//span[@data-citation]').forEach(span => span.removeAttribute('data-citation'));
