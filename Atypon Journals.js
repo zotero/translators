@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-09-08 21:30:29"
+	"lastUpdated": "2022-10-25 02:51:38"
 }
 
 /*
@@ -281,7 +281,7 @@ function scrape(doc, url, extras) {
 	var doi = url.match(/10\.[^?#]+/)[0];
 	var citationurl = url.replace(replURLRegExp, "/action/showCitFormats?doi=");
 	var abstract = doc.getElementsByClassName('abstractSection')[0]
-		|| doc.querySelector('#bookExcerpt');
+		|| doc.querySelector('#bookExcerpt, #abstract');
 	var tags = ZU.xpath(doc, '//a[contains(@href, "keyword") or contains(@href, "Keyword=")]');
 	Z.debug("Citation URL: " + citationurl);
 	
@@ -753,8 +753,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2021-06-29",
+				"date": "2021-05-04",
 				"DOI": "10.1128/mSystems.00122-21",
+				"abstractNote": "Coronavirus disease 2019 (COVID-19) has caused global disruption and a significant loss of life. Existing treatments that can be repurposed as prophylactic and therapeutic agents may reduce the pandemic’s devastation. Emerging evidence of potential applications in other therapeutic contexts has led to the investigation of dietary supplements and nutraceuticals for COVID-19. Such products include vitamin C, vitamin D, omega 3 polyunsaturated fatty acids, probiotics, and zinc, all of which are currently under clinical investigation. In this review, we critically appraise the evidence surrounding dietary supplements and nutraceuticals for the prophylaxis and treatment of COVID-19. Overall, further study is required before evidence-based recommendations can be formulated, but nutritional status plays a significant role in patient outcomes, and these products may help alleviate deficiencies. For example, evidence indicates that vitamin D deficiency may be associated with a greater incidence of infection and severity of COVID-19, suggesting that vitamin D supplementation may hold prophylactic or therapeutic value. A growing number of scientific organizations are now considering recommending vitamin D supplementation to those at high risk of COVID-19. Because research in vitamin D and other nutraceuticals and supplements is preliminary, here we evaluate the extent to which these nutraceutical and dietary supplements hold potential in the COVID-19 crisis.\nIMPORTANCE Sales of dietary supplements and nutraceuticals have increased during the pandemic due to their perceived “immune-boosting” effects. However, little is known about the efficacy of these dietary supplements and nutraceuticals against the novel coronavirus (severe acute respiratory syndrome coronavirus 2 [SARS-CoV-2]) or the disease that it causes, CoV disease 2019 (COVID-19). This review provides a critical overview of the potential prophylactic and therapeutic value of various dietary supplements and nutraceuticals from the evidence available to date. These include vitamin C, vitamin D, and zinc, which are often perceived by the public as treating respiratory infections or supporting immune health. Consumers need to be aware of misinformation and false promises surrounding some supplements, which may be subject to limited regulation by authorities. However, considerably more research is required to determine whether dietary supplements and nutraceuticals exhibit prophylactic and therapeutic value against SARS-CoV-2 infection and COVID-19. This review provides perspective on which nutraceuticals and supplements are involved in biological processes that are relevant to recovery from or prevention of COVID-19.",
 				"issue": "3",
 				"libraryCatalog": "journals.asm.org (Atypon)",
 				"pages": "e00122-21",
@@ -929,6 +930,7 @@ var testCases = [
 				],
 				"date": "2016-12-09",
 				"DOI": "10.1126/science.aag1582",
+				"abstractNote": "The appearance of molecular replicators (molecules that can be copied) was probably a critical step in the origin of life. However, parasitic replicators would take over and would have prevented life from taking off unless the replicators were compartmentalized in reproducing protocells. Paradoxically, control of protocell reproduction would seem to require evolved replicators. We show here that a simpler population structure, based on cycles of transient compartmentalization (TC) and mixing of RNA replicators, is sufficient to prevent takeover by parasitic mutants. TC tends to select for ensembles of replicators that replicate at a similar rate, including a diversity of parasites that could serve as a source of opportunistic functionality. Thus, TC in natural, abiological compartments could have allowed life to take hold.",
 				"issue": "6317",
 				"libraryCatalog": "science.org (Atypon)",
 				"pages": "1293-1296",
@@ -978,6 +980,7 @@ var testCases = [
 				],
 				"date": "2022-03-08",
 				"DOI": "10.1073/pnas.2117831119",
+				"abstractNote": "The history of the scientific enterprise demonstrates that it has supported gender, identity, and racial inequity. Further, its institutions have allowed discrimination, harassment, and personal harm of racialized persons and women. This has resulted in a suboptimal and demographically narrow research and innovation system, a concomitant limited lens on research agendas, and less effective knowledge translation between science and society. We argue that, to reverse this situation, the scientific community must reexamine its values and then collectively embark upon a moonshot-level new agenda for equity. This new agenda should be based upon the foundational value that scientific research and technological innovation should be prefaced upon progress toward a better world for all of society and that the process of how we conduct research is just as important as the results of research. Such an agenda will attract individuals who have been historically excluded from participation in science, but we will need to engage in substantial work to overcome the longstanding obstacles to their full participation. We highlight the need to implement this new agenda via a coordinated systems approach, recognizing the mutually reinforcing feedback dynamics among all science system components and aligning our equity efforts across them.",
 				"issue": "10",
 				"libraryCatalog": "pnas.org (Atypon)",
 				"pages": "e2117831119",
@@ -1117,6 +1120,7 @@ var testCases = [
 				],
 				"date": "2022-01-05",
 				"DOI": "10.1126/sciadv.abj8030",
+				"abstractNote": "Polar textures have attracted substantial attention in recent years as a promising analog to spin-based textures in ferromagnets. Here, using optical second-harmonic generation–based circular dichroism, we demonstrate deterministic and reversible control of chirality over mesoscale regions in ferroelectric vortices using an applied electric field. The microscopic origins of the chirality, the pathway during the switching, and the mechanism for electric field control are described theoretically via phase-field modeling and second-principles simulations, and experimentally by examination of the microscopic response of the vortices under an applied field. The emergence of chirality from the combination of nonchiral materials and subsequent control of the handedness with an electric field has far-reaching implications for new electronics based on chirality as a field-controllable order parameter.",
 				"issue": "1",
 				"libraryCatalog": "science.org (Atypon)",
 				"pages": "eabj8030",
