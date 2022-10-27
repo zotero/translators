@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-10-19 04:40:51"
+	"lastUpdated": "2022-10-27 21:05:53"
 }
 
 /*
@@ -119,10 +119,18 @@ const RECORD_MAPPING = {
 
 function detectWeb(doc, url) {
 	if (url.includes('/title/') && doc.querySelector('#__NEXT_DATA__')) {
-		return getItemType(JSON.parse(text(doc, '#__NEXT_DATA__')).props.pageProps.record);
+		try {
+			return getItemType(JSON.parse(text(doc, '#__NEXT_DATA__')).props.pageProps.record);
+		}
+		catch (e) {
+			Z.monitorDOMChanges(doc.body, { childList: true });
+		}
 	}
 	else if (getSearchResults(doc, true)) {
 		return 'multiple';
+	}
+	else if (url.includes('/search?')) {
+		Z.monitorDOMChanges(doc.body, { childList: true, subtree: true });
 	}
 	return false;
 }
