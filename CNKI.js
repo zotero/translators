@@ -317,7 +317,7 @@ function getAttachments(doc, item) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&dbname=CJFDLAST2015&filename=SPZZ201412003&v=MTU2MzMzcVRyV00xRnJDVVJMS2ZidVptRmkva1ZiL09OajNSZExHNEg5WE5yWTlGWjRSOGVYMUx1eFlTN0RoMVQ=",
+		"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&dbname=CJFDLAST2015&filename=SPZZ201412003&v=MTU2MzMzcVRyV00xRnJDVVJMS2ZidVptRmkva1ZiL09OajNSZExHNEg5WE5yWTlGWjRSOGVYMUx1eFlTN0RoMVQ=",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -362,7 +362,7 @@ var testCases = [
 				"libraryCatalog": "CNKI",
 				"pages": "1306-1312",
 				"publicationTitle": "色谱",
-				"url": "http://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&dbname=CJFDLAST2015&filename=SPZZ201412003&v=MTU2MzMzcVRyV00xRnJDVVJMS2ZidVptRmkva1ZiL09OajNSZExHNEg5WE5yWTlGWjRSOGVYMUx1eFlTN0RoMVQ=",
+				"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&dbname=CJFDLAST2015&filename=SPZZ201412003&v=MTU2MzMzcVRyV00xRnJDVVJMS2ZidVptRmkva1ZiL09OajNSZExHNEg5WE5yWTlGWjRSOGVYMUx1eFlTN0RoMVQ=",
 				"volume": "32",
 				"attachments": [],
 				"tags": [
@@ -451,59 +451,6 @@ var testCases = [
 					},
 					{
 						"tag": "黄瓜"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://new.gb.oversea.cnki.net/KCMS/detail/detail.aspx?dbcode=CMFD&dbname=CMFDTEMP&filename=1019926131.nh&v=MTA5MjM2RjdxNkdORFBycEViUElSOGVYMUx1eFlTN0RoMVQzcVRyV00xRnJDVVJMT2VadVJxRnkzblY3dkJWRjI=",
-		"items": [
-			{
-				"itemType": "thesis",
-				"title": "商业银行个人住房不良资产证券化多元回归定价方法研究",
-				"creators": [
-					{
-						"lastName": "张",
-						"firstName": "雪",
-						"creatorType": "author"
-					}
-				],
-				"date": "2019",
-				"abstractNote": "不良资产证券化是一种新型的不良资产处置方式,其拓宽了商业银行处理不良资产的手段,特别适用于单户金额小、户数多的个人不良资产批量处置,而且这种市场化处置方式将银行不良资产处置和资本市场证券产品发行两个不同领域联接在一起,提高了不良资产的价值。本文以个人住房不良资产证券化为研究对象,确定资产池内不良资产未来回收价值。综合对比市场常用的定价方法,在此基础上提出建立多元回归定价模型的思路。利用YN银行个人住房不良贷款历史数据,分析得出影响不良资产定价的因素,建立定价方程,并对拟证券化的虚拟资产池计算整体回收价值,证明多元回归定价模型的有效性。本文提出的定价模型规避了传统资产定价方法效率低、评估结果不严...",
-				"language": "中文;",
-				"libraryCatalog": "CNKI",
-				"thesisType": "硕士",
-				"university": "浙江大学",
-				"url": "http://new.gb.oversea.cnki.net/KCMS/detail/detail.aspx?dbcode=CMFD&dbname=CMFDTEMP&filename=1019926131.nh&v=MTA5MjM2RjdxNkdORFBycEViUElSOGVYMUx1eFlTN0RoMVQzcVRyV00xRnJDVVJMT2VadVJxRnkzblY3dkJWRjI=",
-				"attachments": [],
-				"tags": [
-					{
-						"tag": "Asset pool pricing"
-					},
-					{
-						"tag": "Multiple regression pricing model"
-					},
-					{
-						"tag": "Non-performing asset securitization"
-					},
-					{
-						"tag": "Personal housing loan"
-					},
-					{
-						"tag": "不良资产证券化"
-					},
-					{
-						"tag": "个人住房贷款"
-					},
-					{
-						"tag": "多元回归定价模型"
-					},
-					{
-						"tag": "资产池定价"
 					}
 				],
 				"notes": [],
