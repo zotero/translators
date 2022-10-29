@@ -14,7 +14,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2021-07-14 23:47:43"
+	"lastUpdated": "2022-10-28 14:39:59"
 }
 
 /*
@@ -819,7 +819,11 @@ function processItemType(contextElement) {
 	}
 	
 	// for US congressional publications
-	// (this is a nonstandard extension field)
+	// (these are nonstandard extension fields)
+	var isBill = !!ZU.xpath(contextElement, '//m:billNumber', xns).length;
+	if (isBill) {
+		return 'bill';
+	}
 	var isHearing = !!ZU.xpath(contextElement, '//m:congCommittee', xns).length;
 	if (isHearing) {
 		return 'hearing';
@@ -868,6 +872,13 @@ function processCreator(name, itemType, defaultCreatorType) {
 		if (validCreatorsForItemType.includes(roleStr)) {
 			creator.creatorType = roleStr;
 		}
+	}
+
+	// The below logic is going to want to make the committee, etc., of a bill into "sponsors"
+	// (MODS data from govinfo doesn't often [ever?] include the actual sponsors) - so let's stop
+	// that from happening while keeping the info
+	if (itemType == 'bill' && name.getAttribute('type') == 'corporate') {
+		creator.creatorType = 'contributor'; // Doesn't get cited
 	}
 	
 	// we want to exclude names with no role other than publisher, distributor,
@@ -1108,12 +1119,29 @@ function doImport() {
 		if (newItem.itemType == 'hearing') {
 			newItem.committee = ZU.xpathText(modsElement,
 				'm:extension/m:congCommittee/m:name[@type="authority-standard"]', xns);
-			newItem.legislativeBody = ZU.capitalizeTitle(ZU.xpathText(modsElement,
-				'm:extension/m:chamber', xns), true);
+			let legislativeBody = ZU.xpathText(modsElement, 'm:extension/m:chamber', xns);
+			if (legislativeBody) {
+				newItem.legislativeBody = ZU.capitalizeTitle(legislativeBody, true);
+			}
 			newItem.session = ZU.xpathText(modsElement,
 				'm:extension/m:congress', xns); // this is not great
 			newItem.documentNumber = ZU.xpathText(modsElement,
 				'm:extension/m:number', xns);
+		}
+		else if (newItem.itemType == 'bill') {
+			newItem.billNumber = ZU.xpathText(modsElement, 'm:extension/m:billNumber', xns);
+			if (ZU.xpath(modsElement, 'm:extension/m:USCode', xns).length) {
+				let usc = ZU.xpath(modsElement, 'm:extension/m:USCode', xns)[0];
+				newItem.code = 'U.S.C.';
+				newItem.codeVolume = usc.getAttribute('title');
+				newItem.codePages = [...usc.querySelectorAll('section')].map(e => e.getAttribute('number')).join(', ');
+			}
+			let legislativeBody = ZU.xpathText(modsElement, 'm:extension/m:chamber | m:extension/m:currentChamber', xns);
+			if (legislativeBody) {
+				newItem.legislativeBody = ZU.capitalizeTitle(legislativeBody, true);
+			}
+			newItem.session = ZU.xpathText(modsElement,
+				'm:extension/m:congress', xns); // this is not great
 		}
 		
 		/** SUPPLEMENTAL FIELDS **/
@@ -2437,6 +2465,64 @@ var testCases = [
 					{
 						"title": "PDF rendition",
 						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<mods xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.loc.gov/mods/v3\" version=\"3.3\" xsi:schemaLocation=\"http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-3.xsd\" ID=\"P0b002ee1b786fa55\">\n    <name type=\"corporate\">\n         <namePart>United States Government Publishing Office</namePart>\n         <role>\n              <roleTerm authority=\"marcrelator\" type=\"text\">publisher</roleTerm>\n              <roleTerm authority=\"marcrelator\" type=\"code\">pbl</roleTerm>\n        </role>\n         <role>\n              <roleTerm authority=\"marcrelator\" type=\"text\">distributor</roleTerm>\n              <roleTerm authority=\"marcrelator\" type=\"code\">dst</roleTerm>\n        </role>\n    </name>\n    <name type=\"corporate\">\n         <namePart>United States</namePart>\n         <namePart>Congress</namePart>\n         <namePart>Senate</namePart>\n         <role>\n              <roleTerm authority=\"marcrelator\" type=\"text\">author</roleTerm>\n              <roleTerm authority=\"marcrelator\" type=\"code\">aut</roleTerm>\n        </role>\n         <description>Government Organization</description>\n    </name>\n    <name type=\"corporate\">\n         <namePart>United States</namePart>\n         <namePart>Congress</namePart>\n         <namePart>House of Representatives</namePart>\n         <role>\n              <roleTerm authority=\"marcrelator\" type=\"text\">author</roleTerm>\n              <roleTerm authority=\"marcrelator\" type=\"code\">aut</roleTerm>\n        </role>\n         <description>Government Organization</description>\n    </name>\n    <typeOfResource>text</typeOfResource>\n    <genre authority=\"marcgt\">government publication</genre>\n    <language>\n         <languageTerm type=\"code\" authority=\"iso639-2b\">eng</languageTerm>\n    </language>\n    <extension>\n         <collectionCode>BILLS</collectionCode>\n         <searchTitle>An Act To amend title 38, United States Code, to authorize the Secretary of Veterans Affairs to provide or assist in providing an additional vehicle adapted for operation by disabled individuals to certain eligible persons, and for other purposes.;Advancing Uniform Transportation Opportunities for Veterans Act;AUTO for Veterans Act;H.R. 3304 (RFS)\n    </searchTitle>\n         <category>Bills and Statutes</category>\n         <waisDatabaseName>117_cong_bills</waisDatabaseName>\n         <branch>legislative</branch>\n         <dateIngested>2022-10-12</dateIngested>\n    </extension>\n    <titleInfo>\n         <title>An Act To amend title 38, United States Code, to authorize the Secretary of Veterans Affairs to provide or assist in providing an additional vehicle adapted for operation by disabled individuals to certain eligible persons, and for other purposes.</title>\n    </titleInfo>\n    <titleInfo type=\"alternative\">\n         <title>Advancing Uniform Transportation Opportunities for Veterans Act</title>\n    </titleInfo>\n    <titleInfo type=\"alternative\">\n         <title>AUTO for Veterans Act</title>\n    </titleInfo>\n    <titleInfo type=\"alternative\">\n         <title>H.R. 3304 (RFS)\n    </title>\n    </titleInfo>\n    <originInfo>\n         <publisher>U.S. Government Publishing Office</publisher>\n         <dateIssued encoding=\"w3cdtf\">2022-10-11</dateIssued>\n         <issuance>monographic</issuance>\n    </originInfo>\n    <physicalDescription>\n         <note type=\"source content type\">deposited</note>\n         <digitalOrigin>born digital</digitalOrigin>\n         <extent>4 p.</extent>\n    </physicalDescription>\n    <classification authority=\"sudocs\">Y 1.6:</classification>\n    <classification authority=\"sudocs\">Y 1.4/6:</classification>\n    <identifier type=\"local\">P0b002ee1b786fa55</identifier>\n    <identifier type=\"uri\">https://www.govinfo.gov/app/details/BILLS-117hr3304rfs</identifier>\n    <identifier type=\"preferred citation\">H.R. 3304</identifier>\n    <identifier type=\"stock number\">021-610-00252-9</identifier>\n    <identifier type=\"Parent ILS system id\">000501532</identifier>\n    <identifier type=\"Child ILS system id\">000325573</identifier>\n    <identifier type=\"Parent ILS title\">Congressional bills</identifier>\n    <identifier type=\"Child ILS title\">House bills</identifier>\n    <identifier type=\"former package identifier\">f:h3304_rfs.txt</identifier>\n    <location>\n         <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/BILLS-117hr3304rfs</url>\n         <url displayLabel=\"HTML rendition\" access=\"raw object\">https://www.govinfo.gov/content/pkg/BILLS-117hr3304rfs/html/BILLS-117hr3304rfs.htm</url>\n         <url displayLabel=\"PDF rendition\" access=\"raw object\">https://www.govinfo.gov/content/pkg/BILLS-117hr3304rfs/pdf/BILLS-117hr3304rfs.pdf</url>\n         <url displayLabel=\"XML rendition\" access=\"raw object\">https://www.govinfo.gov/content/pkg/BILLS-117hr3304rfs/xml/BILLS-117hr3304rfs.xml</url>\n    </location>\n    <accessCondition type=\"GPO scope determination\">fdlp</accessCondition>\n    <recordInfo>\n         <recordContentSource authority=\"marcorg\">DGPO</recordContentSource>\n         <recordCreationDate encoding=\"w3cdtf\">2022-10-12</recordCreationDate>\n         <recordChangeDate encoding=\"w3cdtf\">2022-10-13</recordChangeDate>\n         <recordIdentifier source=\"DGPO\">BILLS-117hr3304rfs</recordIdentifier>\n         <recordOrigin>machine generated</recordOrigin>\n         <languageOfCataloging>\n              <languageTerm type=\"code\" authority=\"iso639-2b\">eng</languageTerm>\n        </languageOfCataloging>\n    </recordInfo>\n    <name type=\"corporate\">\n         <namePart>United States</namePart>\n         <namePart>Congress</namePart>\n         <namePart>Senate</namePart>\n         <namePart>Committee on Veterans&apos; Affairs</namePart>\n         <role>\n              <roleTerm authority=\"marcrelator\" type=\"text\">associated name</roleTerm>\n              <roleTerm authority=\"marcrelator\" type=\"code\">asn</roleTerm>\n        </role>\n    </name>\n    <relatedItem type=\"isReferencedBy\">\n         <titleInfo>\n              <title>United States Code</title>\n              <partNumber>Title 38 Section 1701(6)</partNumber>\n              <partNumber>Title 38 Section 3729(b)(2)</partNumber>\n              <partNumber>Title 38 Section 3903(a)</partNumber>\n        </titleInfo>\n         <identifier type=\"USC citation\">38 U.S.C. 1701(6)</identifier>\n         <identifier type=\"USC citation\">38 U.S.C. 3729(b)(2)</identifier>\n         <identifier type=\"USC citation\">38 U.S.C. 3903(a)</identifier>\n    </relatedItem>\n    <extension>\n         <docClass>hr</docClass>\n         <accessId>BILLS-117hr3304rfs</accessId>\n         <congress>117</congress>\n         <session>2</session>\n         <originChamber>HOUSE</originChamber>\n         <currentChamber>SENATE</currentChamber>\n         <billNumber>3304</billNumber>\n         <billVersion reprint=\"false\">rfs</billVersion>\n         <fileSuffix>rfs</fileSuffix>\n         <shortTitle type=\"measure\">Advancing Uniform Transportation Opportunities for Veterans Act</shortTitle>\n         <shortTitle type=\"measure\">AUTO for Veterans Act</shortTitle>\n         <officialTitle>To amend title 38, United States Code, to authorize the Secretary of Veterans Affairs to provide or assist in providing an additional vehicle adapted for operation by disabled individuals to certain eligible persons, and for other purposes.</officialTitle>\n         <action date=\"2022-10-11\">Received; read twice and referred to the Committee on Veterans&apos; Affairs</action>\n         <congCommittee authorityId=\"ssva00\" chamber=\"S\" congress=\"117\" type=\"S\">\n                                \n              <name type=\"authority-standard\">Committee on Veterans&apos; Affairs</name>\n                                \n              <name type=\"authority-short\">Veterans&apos; Affairs</name>\n                            \n        </congCommittee>\n         <isPrivate>false</isPrivate>\n         <isAppropriation>false</isAppropriation>\n         <USCode title=\"38\">\n                                \n              <section detail=\"(6)\" number=\"1701\"></section>\n                                \n              <section detail=\"(b)(2)\" number=\"3729\"></section>\n                                \n              <section detail=\"(a)\" number=\"3903\"></section>\n                            \n        </USCode>\n    </extension>\n</mods>",
+		"items": [
+			{
+				"itemType": "bill",
+				"title": "An Act To amend title 38, United States Code, to authorize the Secretary of Veterans Affairs to provide or assist in providing an additional vehicle adapted for operation by disabled individuals to certain eligible persons, and for other purposes.",
+				"creators": [
+					{
+						"lastName": "United States Government Publishing Office",
+						"fieldMode": 1,
+						"creatorType": "contributor"
+					},
+					{
+						"lastName": "United States: Congress: Senate",
+						"fieldMode": 1,
+						"creatorType": "contributor"
+					},
+					{
+						"lastName": "United States: Congress: House of Representatives",
+						"fieldMode": 1,
+						"creatorType": "contributor"
+					},
+					{
+						"lastName": "United States: Congress: Senate: Committee on Veterans' Affairs",
+						"fieldMode": 1,
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2022-10-11",
+				"billNumber": "3304",
+				"code": "U.S.C.",
+				"codePages": "1701, 3729, 3903",
+				"codeVolume": "38",
+				"language": "eng",
+				"legislativeBody": "Senate",
+				"rights": "fdlp",
+				"session": "117",
+				"url": "https://www.govinfo.gov/app/details/BILLS-117hr3304rfs",
+				"attachments": [
+					{
+						"title": "HTML rendition",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "PDF rendition",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "XML rendition"
 					}
 				],
 				"tags": [],
