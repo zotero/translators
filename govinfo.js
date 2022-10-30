@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-13 02:36:49"
+	"lastUpdated": "2022-10-28 14:47:36"
 }
 
 /*
@@ -36,14 +36,11 @@
 */
 
 
-function detectWeb(doc, _url) {
-	if (doc.querySelector('#mods')) {
-		// document is usually correct, and the page offers few clues. we would
-		// have to resort to regex to make more specific guesses.
-		return "document";
-	}
-	else if (url.includes('/details/')) {
-		Z.monitorDOMChanges(doc.querySelector('body'));
+function detectWeb(doc, url) {
+	// TEMP: Why doesn't monitorDOMChanges() work here?
+	// We'd like to wait for a #mods link, but instead we just have to use the URL for now
+	if (url.includes('/details/')) {
+		return 'document';
 	}
 	// no clear way to do multiples: metadata URLs differ depending on whether
 	// the item is a "granule" or a "package," and I can't find any clues in the

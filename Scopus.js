@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2021-07-26 16:54:03"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2022-10-28 15:24:51"
 }
 
 /*
@@ -60,22 +60,23 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return;
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (items) {
+			for (let url of Object.keys(items)) {
+				await scrape(await requestDocument(url), url);
+				await new Promise(resolve => setTimeout(resolve, 500));
 			}
-			ZU.processDocuments(Object.keys(items), scrape);
-		});
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
 
-function scrape(doc, url) {
+async function scrape(doc, url) {
 	// ISBN, language, and ISSN are not in the export data - get them from the page
 	var ISSN = ZU.xpathText(doc, '//div[contains(@class, "meta-text")]//dl[dt[contains(text(), "ISSN")]]/dd');
 	var ISBN = ZU.xpathText(doc, '//div[contains(@class, "meta-text")]//dl[dt[contains(text(), "ISBN")]]/dd');
@@ -87,43 +88,46 @@ function scrape(doc, url) {
 	var eid = getEID(url);
 	var rislink = baseUrl + eid + "&zone=recordPageHeader&outputType=export&txGid=0";
 	Z.debug(rislink);
-	ZU.doGet(rislink, function (text) {
-		// load translator for RIS
-		// Z.debug(text)
-		if (/T2 {2}-/.test(text) && /JF {2}-/.test(text)) {
-			// SCOPUS RIS mishandles alternate titles and journal titles
-			// if both fields are present, T2 is the alternate title and JF the journal title
-			text = text.replace(/T2 {2}-/, "N1  -").replace(/JF {2}-/, "T2  -");
+	let text = await requestText(rislink);
+	// load translator for RIS
+	// Z.debug(text)
+	if (/T2 {2}-/.test(text) && /JF {2}-/.test(text)) {
+		// SCOPUS RIS mishandles alternate titles and journal titles
+		// if both fields are present, T2 is the alternate title and JF the journal title
+		text = text.replace(/T2 {2}-/, "N1  -").replace(/JF {2}-/, "T2  -");
+	}
+	// Scopus places a stray TY right above the DB field
+	text = text.replace(/TY.+\nDB/, "DB");
+	// Some Journal Articles are oddly SER
+	text = text.replace(/TY {2}- SER/, "TY  - JOUR");
+	// Z.debug(text)
+	var translator = Zotero.loadTranslator("import");
+	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+	translator.setString(text);
+	translator.setHandler("itemDone", function (obj, item) {
+		var notes = [];
+		for (let note of item.notes) {
+			if (/Export Date:|Source:/.test(note.note)) continue;
+			notes.push(note);
 		}
-		// Scopus places a stray TY right above the DB field
-		text = text.replace(/TY.+\nDB/, "DB");
-		// Some Journal Articles are oddly SER
-		text = text.replace(/TY {2}- SER/, "TY  - JOUR");
-		// Z.debug(text)
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		translator.setString(text);
-		translator.setHandler("itemDone", function (obj, item) {
-			var notes = [];
-			for (let note of item.notes) {
-				if (/Export Date:|Source:/.test(note.note)) continue;
-				notes.push(note);
+		item.notes = notes;
+		item.url = "";
+		for (var i = 0; i < item.creators.length; i++) {
+			if (item.creators[i].fieldMode == 1 && item.creators[i].lastName.includes(" ")) {
+				item.creators[i].firstName = item.creators[i].lastName.match(/\s(.+)/)[1];
+				item.creators[i].lastName = item.creators[i].lastName.replace(/\s.+/, "");
+				item.creators[i].fieldMode = 2;
 			}
-			item.notes = notes;
-			item.url = "";
-			for (var i = 0; i < item.creators.length; i++) {
-				if (item.creators[i].fieldMode == 1 && item.creators[i].lastName.includes(" ")) {
-					item.creators[i].firstName = item.creators[i].lastName.match(/\s(.+)/)[1];
-					item.creators[i].lastName = item.creators[i].lastName.replace(/\s.+/, "");
-					item.creators[i].fieldMode = 2;
-				}
-			}
-			item.attachments.push({ document: doc, title: "Snapshot" });
-			if (ISSN) item.ISSN = ZU.cleanISSN(ISSN);
-			if (ISBN) item.ISBN = ZU.cleanISBN(ISBN);
-			if (language) item.language = language.trim();
-			item.complete();
-		});
-		translator.translate();
+		}
+		item.attachments.push({ document: doc, title: "Snapshot" });
+		if (ISSN) item.ISSN = ZU.cleanISSN(ISSN);
+		if (ISBN) item.ISBN = ZU.cleanISBN(ISBN);
+		if (language) item.language = language.trim();
+		item.complete();
 	});
+	await translator.translate();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+]
+/** END TEST CASES **/

@@ -14,7 +14,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2022-10-15 01:42:49"
+	"lastUpdated": "2022-10-29 14:39:59"
 }
 
 /*
@@ -819,11 +819,11 @@ function processItemType(contextElement) {
 	}
 	
 	// for US congressional publications
-	// (this is a nonstandard extension field)
-	if (ZU.xpathText(contextElement, '//m:billNumber', xns)) {
+	// (these are nonstandard extension fields)
+	var isBill = !!ZU.xpath(contextElement, '//m:billNumber', xns).length;
+	if (isBill) {
 		return 'bill';
 	}
-
 	var isHearing = !!ZU.xpath(contextElement, '//m:congCommittee', xns).length;
 	if (isHearing) {
 		return 'hearing';
@@ -872,6 +872,13 @@ function processCreator(name, itemType, defaultCreatorType) {
 		if (validCreatorsForItemType.includes(roleStr)) {
 			creator.creatorType = roleStr;
 		}
+	}
+
+	// The below logic is going to want to make the committee, etc., of a bill into "sponsors"
+	// (MODS data from govinfo doesn't often [ever?] include the actual sponsors) - so let's stop
+	// that from happening while keeping the info
+	if (itemType == 'bill' && name.getAttribute('type') == 'corporate') {
+		creator.creatorType = 'contributor'; // Doesn't get cited
 	}
 	
 	// we want to exclude names with no role other than publisher, distributor,
@@ -1156,11 +1163,20 @@ function doImport() {
 				else {
 					newItem.billNumber = billNumber;
 				}
+        if (ZU.xpath(modsElement, 'm:extension/m:USCode', xns).length) {
+          let usc = ZU.xpath(modsElement, 'm:extension/m:USCode', xns)[0];
+          newItem.code = 'U.S.C.';
+          newItem.codeVolume = usc.getAttribute('title');
+          newItem.codePages = [...usc.querySelectorAll('section')].map(e => e.getAttribute('number')).join(', ');
+          }
 				//	remove other useless info
 				delete newItem.accessionNumber;
 			}
 		}
-		
+
+
+	
+
 		/** SUPPLEMENTAL FIELDS **/
 		
 		var part = [], originInfo = [];

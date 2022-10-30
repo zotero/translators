@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-14 19:43:57"
+	"lastUpdated": "2022-09-24 22:15:07"
 }
 
 /*
@@ -55,7 +55,6 @@ function scrape(doc, _url) {
 	
 	newItem.url = attr(doc, 'link[rel=canonical]', 'href'); // url.replace(/#$/,'');
 	newItem.title = text(doc, '.notice-titre');
-	
 	// if title contains square brackets, take its contents and use as encyclopedia name
 	var subEncyc = newItem.title.match(/\[[^\]]+\]/g);
 	if (subEncyc) {
@@ -80,7 +79,7 @@ function scrape(doc, _url) {
 	// var articleID = newItem.url.match(/\d{2,}/);
 	newItem.attachments.push({
 		document: doc,
-		// this is the archive url, which is nice, but it triggers the print dialog popup whenever it saves
+		// the following archive URL displays better, but triggers a print dialog pop-up whenever it saves
 		// url: "/spip.php?page=imprimir_articulo&id_article="+articleID,
 		title: "Le Maitron snapshot",
 		mimeType: "text/html"
@@ -92,7 +91,11 @@ function scrape(doc, _url) {
 	// Authors – haven't seen more than one attributed at once
 	var authorMetadata = text(doc, '.notice-auteur').match(/\s*Par\s+(.*)/);
 	if (authorMetadata) {
-		newItem.creators.push(ZU.cleanAuthor(authorMetadata[1], "author"));
+		// remove prefix text
+		authorMetadata[1] = authorMetadata[1].replace(/[Nn]otice complétée par |[Nn]otice complétée et corrigée par /, "");
+		for (var author of authorMetadata[1].split(/, | et /)) {
+			newItem.creators.push(ZU.cleanAuthor(author, "author"));
+		}
 	}
 
 	newItem.complete();
@@ -150,7 +153,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2014",
+				"date": "2014-04-14",
 				"abstractNote": "Né le 16 juin 1929 à Alexandrie (Égypte). Sociologue, professeur de civilisation américaine à Montpellier. Anarchiste.",
 				"encyclopediaTitle": "Dictionnaire des anarchistes",
 				"language": "fr",
@@ -189,7 +192,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2019-01-26",
+				"date": "2022-07-05",
 				"abstractNote": "Né le 11 août 1882 à Tikhvine (Russie), mort le 18 septembre 1945 à Paris ; militant et théoricien du mouvement anarchiste ; historien du mouvement makhnoviste.",
 				"encyclopediaTitle": "Dictionnaire des anarchistes",
 				"language": "fr",
@@ -223,7 +226,12 @@ var testCases = [
 				"title": "ABDALLAH (écrit aussi MHAMED Abdallah)",
 				"creators": [
 					{
-						"firstName": "Amar Benamrouche, Louis-Pierre",
+						"firstName": "Amar",
+						"lastName": "Benamrouche",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Louis-Pierre",
 						"lastName": "Montoy",
 						"creatorType": "author"
 					}
@@ -262,14 +270,204 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2021-04-26",
-				"abstractNote": "Né le 31 janvier 1927 à Bayonne (Pyrénées-Atlantiques), mort le 16 avril 2021 à Paris ; modeleur sur bois ; permanent JOC pour la région Sud-Ouest, secrétaire général adjoint (1951-1953) puis vice-président (1953-1955) et enfin président de la JOC (1955-1956), secrétaire général de la JOC internationale (1956-1961) ; secrétaire confédéral CFTC-CFDT (1962-1970), membre de la commission exécutive de la CFDT en charge du secteur international (1970-1979).",
+				"date": "2021-08-16",
+				"abstractNote": "Né le 31 janvier 1927 à Bayonne (Pyrénées-Atlantiques), mort le 16 avril 2021 à Paris (XIVe arr.) ; modeleur sur bois ; permanent JOC pour la région Sud-Ouest, secrétaire général adjoint (1951-1953) puis vice-président (1953-1955) et enfin président de la JOC (1955-1956), secrétaire général de la JOC internationale (1956-1961) ; secrétaire confédéral CFTC-CFDT (1962-1970), membre de la commission exécutive de la CFDT en charge du secteur international (1970-1979).",
 				"encyclopediaTitle": "Le Maitron",
 				"language": "fr",
 				"libraryCatalog": "Le Maitron",
 				"place": "Paris",
 				"publisher": "Maitron/Editions de l'Atelier",
 				"url": "https://maitron.fr/spip.php?article174841",
+				"attachments": [
+					{
+						"title": "Le Maitron snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://maitron.fr/spip.php?article154635",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "MATHA Armand, Louis",
+				"creators": [
+					{
+						"firstName": "Guillaume",
+						"lastName": "Davranche",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022-07-05",
+				"abstractNote": "Né le 10 avril 1861 à Casteljaloux (Lot-et-Garonne) ; mort le 12 février 1930 à Draveil (Seine-et-Oise) ; ouvrier coiffeur puis publiciste ; animateur du Libertaire de 1900 à 1910.",
+				"encyclopediaTitle": "Dictionnaire des anarchistes",
+				"language": "fr",
+				"libraryCatalog": "Le Maitron",
+				"place": "Paris",
+				"publisher": "Maitron/Editions de l'Atelier",
+				"url": "https://maitron.fr/spip.php?article154635",
+				"attachments": [
+					{
+						"title": "Le Maitron snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://maitron.fr/spip.php?article154635",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "MATHA Armand, Louis",
+				"creators": [
+					{
+						"firstName": "Guillaume",
+						"lastName": "Davranche",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022-07-05",
+				"abstractNote": "Né le 10 avril 1861 à Casteljaloux (Lot-et-Garonne) ; mort le 12 février 1930 à Draveil (Seine-et-Oise) ; ouvrier coiffeur puis publiciste ; animateur du Libertaire de 1900 à 1910.",
+				"encyclopediaTitle": "Dictionnaire des anarchistes",
+				"language": "fr",
+				"libraryCatalog": "Le Maitron",
+				"place": "Paris",
+				"publisher": "Maitron/Editions de l'Atelier",
+				"url": "https://maitron.fr/spip.php?article154635",
+				"attachments": [
+					{
+						"title": "Le Maitron snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://maitron.fr/spip.php?article154015",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "WINTSCH Jean",
+				"creators": [
+					{
+						"firstName": "Gianpiero",
+						"lastName": "Bottinelli",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marianne",
+						"lastName": "Enckell",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-08-05",
+				"abstractNote": "Né à Odessa le 19 janvier 1880, mort à Lausanne (Suisse) le 27 avril 1943 ; médecin ; collaborateur du Réveil anarchiste et de la Voix du Peuple, néomalthusien, fondateur de l’école Ferrer de Lausanne ; marié à Natalie Maléef, deux enfants.",
+				"encyclopediaTitle": "Dictionnaire des anarchistes",
+				"language": "fr",
+				"libraryCatalog": "Le Maitron",
+				"place": "Paris",
+				"publisher": "Maitron/Editions de l'Atelier",
+				"url": "https://maitron.fr/spip.php?article154015",
+				"attachments": [
+					{
+						"title": "Le Maitron snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://maitron.fr/spip.php?article153818",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "BERTRAND Julia, Marie, Victorine",
+				"creators": [
+					{
+						"firstName": "Jean",
+						"lastName": "Maitron",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Guillaume",
+						"lastName": "Davranche",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rolf",
+						"lastName": "Dupuy",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022-08-25",
+				"abstractNote": "Née le 14 février 1877 à Gemaingoutte (Vosges), morte le 25 mars 1960 à Fontenay-aux-Roses (Seine, Hauts-de-Seine) ; institutrice ; syndicaliste et anarchiste.",
+				"encyclopediaTitle": "Le Maitron",
+				"language": "fr",
+				"libraryCatalog": "Le Maitron",
+				"place": "Paris",
+				"publisher": "Maitron/Editions de l'Atelier",
+				"url": "https://maitron.fr/spip.php?article153818",
+				"attachments": [
+					{
+						"title": "Le Maitron snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://maitron.fr/spip.php?article156858",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "VOISIN Marcel",
+				"creators": [
+					{
+						"firstName": "René",
+						"lastName": "Bianco",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marianne",
+						"lastName": "Enckell",
+						"creatorType": "author"
+					}
+				],
+				"date": "2014-02-20",
+				"abstractNote": "Né le 26 septembre 1892 à Tours (Indre-et-Loire), mort le 31 janvier 1981 à Paris ; trimardeur, puis gérant d’un magasin de nourriture rationnelle ; militant pacifiste et libertaire.",
+				"encyclopediaTitle": "Dictionnaire des anarchistes",
+				"language": "fr",
+				"libraryCatalog": "Le Maitron",
+				"place": "Paris",
+				"publisher": "Maitron/Editions de l'Atelier",
+				"url": "https://maitron.fr/spip.php?article156858",
 				"attachments": [
 					{
 						"title": "Le Maitron snapshot",
