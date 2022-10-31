@@ -38,7 +38,7 @@
 
 function detectWeb(doc, url) {
 	// TODO: adjust the logic here
-	if (url.includes('isbn')) {
+	if (/[?&]isbn=/.test(url)) {
 		return 'book';
 	}
 	else if (getSearchResults(doc, true)) {
