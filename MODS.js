@@ -14,7 +14,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2022-10-29 14:39:59"
+	"lastUpdated": "2022-10-31 14:01:52"
 }
 
 /*
@@ -1163,18 +1163,16 @@ function doImport() {
 				else {
 					newItem.billNumber = billNumber;
 				}
-        if (ZU.xpath(modsElement, 'm:extension/m:USCode', xns).length) {
-          let usc = ZU.xpath(modsElement, 'm:extension/m:USCode', xns)[0];
-          newItem.code = 'U.S.C.';
-          newItem.codeVolume = usc.getAttribute('title');
-          newItem.codePages = [...usc.querySelectorAll('section')].map(e => e.getAttribute('number')).join(', ');
-          }
+				if (ZU.xpath(modsElement, 'm:extension/m:USCode', xns).length) {
+					let usc = ZU.xpath(modsElement, 'm:extension/m:USCode', xns)[0];
+					newItem.code = 'U.S.C.';
+					newItem.codeVolume = usc.getAttribute('title');
+					newItem.codePages = [...usc.querySelectorAll('section')].map(e => e.getAttribute('number')).join(', ');
+				}
 				//	remove other useless info
 				delete newItem.accessionNumber;
 			}
 		}
-
-
 	
 
 		/** SUPPLEMENTAL FIELDS **/
@@ -2516,6 +2514,9 @@ var testCases = [
 				"creators": [],
 				"date": "2022-10-11",
 				"billNumber": "H.R. 3304",
+				"code": "U.S.C.",
+				"codePages": "1701, 3729, 3903",
+				"codeVolume": "38",
 				"language": "eng",
 				"legislativeBody": "House",
 				"rights": "fdlp",
