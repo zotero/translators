@@ -97,7 +97,7 @@ async function scrape(doc) {
 		let maintitle = text(doc, 'h1');
 		let subtitle = text(doc, 'h2');
 		let title = [maintitle, subtitle];
-		item.title = title.join(": ");
+		item.title = title.filter(Boolean).join(": ");
 	}
 
 	var creators = doc.getElementsByClassName('author');
