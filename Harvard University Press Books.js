@@ -37,7 +37,6 @@
 
 
 function detectWeb(doc, url) {
-	// TODO: adjust the logic here
 	if (/[?&]isbn=/.test(url)) {
 		return 'book';
 	}
@@ -50,12 +49,9 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	// TODO: adjust the CSS selector
 	var rows = doc.querySelectorAll('.resultsContainer .title>a');
 	for (let row of rows) {
-		// TODO: check and maybe adjust
 		let href = row.href;
-		// TODO: check and maybe adjust
 		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
