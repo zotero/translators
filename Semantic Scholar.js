@@ -90,16 +90,16 @@ function doWeb(doc, url) {
 	if (docType == 'multiple') {
 		Zotero.selectItems(getSearchResults(doc, false), (items) => {
 			if (items) {
-				ZU.processDocuments(Object.keys(items), parseDocument);
+				ZU.processDocuments(Object.keys(items), scrape);
 			}
 		});
 		return;
 	}
 
-	parseDocument(doc, url);
+	scrape(doc, url);
 }
 
-function parseDocument(doc, url) {
+function scrape(doc, url) {
 	const itemType = getItemTypeFromBibtex(doc);
 	const item = new Zotero.Item(itemType);
 
