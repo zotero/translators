@@ -131,7 +131,7 @@ function scrape(doc, url) {
 	}
 
 	if (article.author) {
-		article.author.forEach(author => {
+		article.author.forEach((author) => {
 			item.creators.push(ZU.cleanAuthor(author.name, 'author'));
 		});
 	}
