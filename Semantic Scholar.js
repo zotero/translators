@@ -37,109 +37,118 @@
 
 // See also https://github.com/zotero/translators/blob/master/BibTeX.js
 var bibtex2zoteroTypeMap = {
+	article: "journalArticle",
 	inproceedings: "conferencePaper",
 	conference: "conferencePaper",
-	article: "journalArticle"
 };
 
-function detectWeb(doc, url) {
-	if (getSearchResults(doc, true)) {
-		return 'multiple';
+function getItemTypeFromBibtex(doc) {
+	const bibtex = ZU.xpathText(doc, '//pre[@class="bibtex-citation"]');
+	const bibtexType = bibtex.split('{')[0].replace('@', '');
+	return bibtex2zoteroTypeMap[bibtexType] || 'journalArticle';
+}
+
+function getSearchResults(doc, checkOnly) {
+	let searchResults = doc.querySelectorAll('.result-page .cl-paper-row > a');
+	if (checkOnly) {
+		return searchResults.length > 0;
 	}
-	else if (url.includes('semanticscholar.org/search?') && doc.querySelector('#app')) {
+
+	let items = {};
+	for (let row of searchResults) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+
+		if (href && title) {
+			items[href] = title;
+		}
+	}
+
+	return items;
+}
+
+function detectWeb(doc, url) {
+	if (doc.querySelector('#app')) {
 		Z.monitorDOMChanges(
 			doc.querySelector('#app'),
 			{ childList: true, subtree: true }
 		);
-		return false;
 	}
-	let citation = ZU.xpathText(doc, '//pre[@class="bibtex-citation"]');
-	let type = citation.split('{')[0].replace('@', '');
-	return bibtex2zoteroTypeMap[type];
-}
 
-function getSearchResults(doc, checkOnly) {
-	var items = {};
-	var found = false;
-	var rows = doc.querySelectorAll('.result-page .cl-paper-row > a');
-	for (let row of rows) {
-		let href = row.href;
-		let title = ZU.trimInternal(row.textContent);
-		if (!href || !title) continue;
-		if (checkOnly) return true;
-		found = true;
-		items[href] = title;
+	if (url.includes('semanticscholar.org/search?')) {
+		const hasSearchResults = getSearchResults(doc, true);
+		if (hasSearchResults) {
+			return 'multiple';
+		}
 	}
-	return found ? items : false;
+
+	return getItemTypeFromBibtex(doc);
 }
 
 function doWeb(doc, url) {
-	if (detectWeb(doc) == 'multiple') {
+	const docType = detectWeb(doc, url)
+	if (docType == 'multiple') {
 		Zotero.selectItems(getSearchResults(doc, false), (items) => {
-			if (items) ZU.processDocuments(Object.keys(items), parseDocument);
+			if (items) {
+				ZU.processDocuments(Object.keys(items), parseDocument);
+			}
 		});
+		return;
 	}
-	else if (url.includes('pdfs.semanticscholar.org')) {
-		let urlComponents = url.split('/');
-		let paperId = urlComponents[3] + urlComponents[4].replace('.pdf', '');
-		const API_URL = 'https://api.semanticscholar.org/';
-		ZU.processDocuments(API_URL + paperId, parseDocument);
-	}
-	else {
-		parseDocument(doc, url);
-	}
+
+	parseDocument(doc, url);
 }
 
 function parseDocument(doc, url) {
-	let citation = ZU.xpathText(doc, '//pre[@class="bibtex-citation"]');
-	let type = citation.split('{')[0].replace('@', '');
-	const itemType = bibtex2zoteroTypeMap[type];
+	const itemType = getItemTypeFromBibtex(doc);
+	const item = new Zotero.Item(itemType);
 
-	var item = new Zotero.Item(itemType);
-
-	// load structured schema data
-	const schemaTag = doc.querySelector("script.schema-data");
+	const schemaTag = doc.querySelector('script.schema-data');
 	const schemaObject = JSON.parse(schemaTag.innerHTML);
-	const article = schemaObject["@graph"][1][0];
-
+	const article = schemaObject['@graph'][1][0];
+	
 	item.title = article.name;
-	item.abstractNote = article.description;
+	item.abstractNote = article.abstract;
+	item.date = article.datePublished;
+	item.url = url;
+	item.attachments.push({
+		url: url,
+		title: url.includes('semanticscholar.org/reader') ? 'Semantic Reader Link' : 'Semantic Scholar Link',
+		mimeType: 'text/html',
+	});
+
+	if (article.about) {
+		item.abstractNote = article.abstract.substring(article.about.length + 1);
+		item.notes.push('[TLDR] ' + article.about);
+	}
+
+	if (itemType == 'conferencePaper' && article.publisher) {
+		item.publisher = article.publisher.name;
+	}
+
+	if (itemType == 'journalArticle' && article.publication) {
+		item.publicationTitle = article.publication;
+	}
 
 	if (article.author) {
-		article.author.forEach((author) => {
+		article.author.forEach(author => {
 			item.creators.push(ZU.cleanAuthor(author.name, 'author'));
 		});
 	}
-	item.publicationTitle = article.publication;
-	item.date = article.datePublished;
+	
+	if (article.sameAs) {
+		item.DOI = article.sameAs;
+	}
 
-	// attachments
-	item.attachments.push({
-		url: url,
-		title: "Semantic Scholar Link",
-		mimeType: "text/html",
-		snapshot: false
-	});
-
-	// if semantic scholar has a pdf as it's primary paper link it will appear in the about field
-	const paperLink = article.about.url;
-	if (paperLink.includes("pdfs.semanticscholar.org") || paperLink.includes("arxiv.org")) {
+	if (article.mainEntity && (article.mainEntity.includes('pdfs.semanticscholar.org') || article.mainEntity.includes('.pdf'))) {
 		item.attachments.push({
-			url: paperLink,
-			title: "Full Text PDF",
-			mimeType: 'application/pdf'
+			title: 'Fulltext PDF',
+			mimeType: 'application/pdf',
+			url: article.mainEntity
 		});
 	}
 
-	// use the public api to retrieve more structured data
-	const paperIdRegex = /\/(.{40})(\?|$)/;
-	const paperId = paperIdRegex.exec(url)[1];
-	const apiUrl = `https://api.semanticscholar.org/v1/paper/${paperId}?client=zotero_connect`;
-	ZU.doGet(apiUrl, (data) => {
-		let json = JSON.parse(data);
-		item.DOI = json.doi;
-		item.complete();
-	});
+	item.complete();
 }
 
 /** BEGIN TEST CASES **/
