@@ -2,14 +2,14 @@
 	"translatorID": "276cb34c-6861-4de7-a11d-c2e46fb8af28",
 	"label": "Semantic Scholar",
 	"creator": "Guy Aglionby",
-	"target": "^https?://(www\\.semanticscholar\\.org/(paper/.+|search\\?)|pdfs\\.semanticscholar\\.org/)",
-	"minVersion": "3.0",
+	"target": "^https?://(www\\.semanticscholar\\.org/(paper/.+|search\\?|reader/.+)|pdfs\\.semanticscholar\\.org/)",
+	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-08-08 18:14:55"
+	"lastUpdated": "2022-11-01 17:58:48"
 }
 
 /*
