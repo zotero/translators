@@ -11,6 +11,8 @@ mkdir -p connectors
 cd connectors
 
 if [ -d .git ]; then
+	# Temp fix for connectors/src/zotero/resource/schema/global submodule fetch failing
+	git config url."https://".insteadOf git://
 	git pull
 	git submodule update
 	git -C src/zotero/ submodule update -- resource/schema/global
@@ -18,6 +20,7 @@ if [ -d .git ]; then
 	npm ci
 else
 	git clone https://github.com/zotero/zotero-connectors.git --depth 1 .
+	git config url."https://".insteadOf git://
 	git submodule update --init --depth 1
 	git -C src/zotero submodule update --init --depth 1 -- resource/schema/global
 	git -C src/zotero submodule update --init --depth 1 -- resource/SingleFile

@@ -9,37 +9,43 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-05-18 02:42:48"
+	"lastUpdated": "2022-08-15 19:06:04"
 }
+
+let preprintType = ZU.fieldIsValidForType('title', 'preprint')
+	? 'preprint'
+	: 'report';
 
 function detectWeb(doc, url) {
 	var singleRe   = /^https?:\/\/eprint\.iacr\.org\/(\d{4}\/\d{3}|cgi-bin\/print\.pl)/;
-	var multipleRe = /^https?:\/\/eprint\.iacr\.org\/(complete|curr|\d{4}|(cgi|eprint)-bin\/search\.pl)/;
+	var multipleRe = /^https?:\/\/eprint\.iacr\.org\/search\?/;
 	if (singleRe.test(url)) {
-		return "report";
+		return preprintType;
 	} else if (multipleRe.test(url)) {
 		return "multiple";
 	}
 }
 
 function scrape(doc, url) {
-	var reportNoXPath = "//h2";
-	var titleXPath    = "(//p/b)[1]";
-	var authorsXPath  = "(//p/i)[1]";
-	var abstractXPath = "//p[starts-with(b/text(),\"Abstract\")]/text() | //p[not(*)]";
-	var keywordsXPath = "//p[starts-with(b/text(),\"Category\")]";
-	var reportNo = doc.evaluate(reportNoXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var reportNoSelector = "h4";
+	var titleSelector    = "h3";
+	var authorsSelector  = ".authorName";
+	var abstractXPath    = "//h5[starts-with(text(),\"Abstract\")]/following-sibling::p/text()";
+	var keywordsSelector = ".keywords > .keyword";
+	var reportNo = text(doc, reportNoSelector);
 	reportNo = reportNo.match(/(\d{4})\/(\d{3,4})$/);
 	if (reportNo){
 		var year = reportNo[1];
 		var no   = reportNo[2];
 	}
-	var title = doc.evaluate(titleXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var title = text(doc, titleSelector);
 	title = ZU.trimInternal(title);
 
-	var authors = doc.evaluate(authorsXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	authors = ZU.trimInternal(authors);
-	authors = authors.split(" and ");
+	var authors = doc.querySelectorAll(authorsSelector);
+	authors = [...authors].map(author => author.textContent);
+	if (!authors.length) {
+		authors = text(doc, '.fst-italic').split(/\band\b/)
+	}
 	
 	var abstr = "";
 	var abstractLines = doc.evaluate(abstractXPath, doc, null, XPathResult.ANY_TYPE, null);
@@ -52,12 +58,10 @@ function scrape(doc, url) {
 		abstr +=  ZU.trimInternal(nextLine.textContent);
 	}
 	
-	var keywords = doc.evaluate(keywordsXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	var tmp = keywords.match(/Category \/ Keywords: (?:([^\/]*) \/ )?([^\/]*)/);
-	keywords = tmp[2].split(", ")
-	keywords.unshift(tmp[1]);
+	var keywords = doc.querySelectorAll(keywordsSelector);
+	keywords = [...keywords].map(kw => kw.textContent.trim());
 
-	var newItem = new Zotero.Item("report");
+	var newItem = new Zotero.Item(preprintType);
 	
 	newItem.date = year;
 	newItem.reportNumber = no;
@@ -74,43 +78,37 @@ for (var i = 0; i < keywords.length; i++) {
 		newItem.tags.push(keywords[i]);}
 	}
 	newItem.attachments = [
-		{url:newItem.url, title:"ePrint IACR Snapshot", mimeType:"text/html"},
-		{url:newItem.url+".pdf", title:"ePrint IACR Full Text PDF", mimeType:"application/pdf"}
+		{url:newItem.url+".pdf", title:"Full Text PDF", mimeType:"application/pdf"}
 	];
 	newItem.complete();
 
 }
 
 function doWeb(doc, url) {
-
-	var articles = new Array();
-	var items = new Object();
 	var nextTitle;
 
 	if (detectWeb(doc, url) == "multiple") {
-		var titleXPath = "//dl/dd/b";
-		var linkXPath = "//dl/dt/a[1]";
+		var rowSelector = ".paperList > div, .results > div";
+		var titleSelector = ".papertitle, strong";
+		var linkSelector = ".paperlink, a:first-child";
 
-		var titles = doc.evaluate(titleXPath, doc, null, XPathResult.ANY_TYPE, null);
-		var links  = doc.evaluate(linkXPath,  doc, null, XPathResult.ANY_TYPE, null);
-		while (nextTitle = titles.iterateNext()) {
-			nextLink = links.iterateNext();
-			items[nextLink.href] = nextTitle.textContent;
+		let items = {};
+		for (let row of doc.querySelectorAll(rowSelector)) {
+			let title = text(row, titleSelector);
+			let href = attr(row, linkSelector, 'href');
+			if (!title || !href) continue;
+			items[href] = title;
 		}
+
+		var titles = doc.querySelectorAll(titleSelector);
+		var links  = doc.querySelectorAll(linkSelector);
 		Zotero.selectItems(items, function (items) {
-			if (!items) {
-				return true;
-			}
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
 	} else {
 		if (url.search(/\.pdf$/)!= -1) {
 			//go to the landing page to scrape
-			//we use http to prevent (somewhat mysterious) same-origin violations leading to permission denied errors
-			url = url.replace(/\.pdf$/, "").replace(/^https/, "http")
+			url = url.replace(/\.pdf$/, "");
 			ZU.processDocuments([url], scrape)
 		}
 		else scrape(doc, url)
@@ -119,10 +117,10 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://eprint.iacr.org/2005/033",
+		"url": "https://eprint.iacr.org/2005/033",
 		"items": [
 			{
-				"itemType": "report",
+				"itemType": "preprint",
 				"title": "An Attack on CFB Mode Encryption As Used By OpenPGP",
 				"creators": [
 					{
@@ -137,102 +135,121 @@ var testCases = [
 					}
 				],
 				"date": "2005",
-				"abstractNote": "This paper describes an adaptive-chosen-ciphertext attack on the Cipher Feedback (CFB) mode of encryption as used in OpenPGP. In most circumstances it will allow an attacker to determine 16 bits of any block of plaintext with about $2^{15}$ oracle queries for the initial setup work and $2^{15}$ oracle queries for each block. Standard CFB mode encryption does not appear to be affected by this attack. It applies to a particular variation of CFB used by OpenPGP. In particular it exploits an ad-hoc integrity check feature in OpenPGP which was meant as a \"quick check\" to determine the correctness of the decrypting symmetric key.",
-				"accessDate": "CURRENT_TIMESTAMP",
+				"abstractNote": "This paper describes an adaptive-chosen-ciphertext attack on the Cipher Feedback (CFB) mode of encryption as used in OpenPGP. In most circumstances it will allow an attacker to determine 16 bits of any block of plaintext with aboutoracle queries for the initial setup work andoracle queries for each block. Standard CFB mode encryption does not appear to be affected by this attack. It applies to a particular variation of CFB used by OpenPGP. In particular it exploits an ad-hoc integrity check feature in OpenPGP which was meant as a \"quick check\" to determine the correctness of the decrypting symmetric key.",
 				"libraryCatalog": "ePrint IACR",
-				"reportNumber": "033",
-				"url": "http://eprint.iacr.org/2005/033",
+				"url": "https://eprint.iacr.org/2005/033",
 				"attachments": [
 					{
-						"url": "http://eprint.iacr.org/2005/033",
-						"title": "ePrint IACR Snapshot",
-						"mimeType": "text/html"
-					},
-					{
-						"url": "http://eprint.iacr.org/2005/033.pdf",
-						"title": "ePrint IACR Full Text PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
-					"applications",
-					"cryptanalysis",
-					"cryptographic protocols"
+					{
+						"tag": "applications"
+					},
+					{
+						"tag": "cryptanalysis"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "https://eprint.iacr.org/eprint-bin/search.pl?last=31&title=1",
-		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "https://eprint.iacr.org/2016/1013.pdf",
 		"items": [
 			{
-				"itemType": "report",
+				"itemType": "preprint",
 				"title": "A Formal Security Analysis of the Signal Messaging Protocol",
-				"creators": [
-					{
-						"firstName": "Katriel",
-						"lastName": "Cohn-Gordon",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Cas",
-						"lastName": "Cremers",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Benjamin",
-						"lastName": "Dowling",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Luke",
-						"lastName": "Garratt",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Douglas",
-						"lastName": "Stebila",
-						"creatorType": "author"
-					}
-				],
+				"creators": [],
 				"date": "2016",
-				"abstractNote": "Signal is a new security protocol and accompanying app that provides end-to-end encryption for instant messaging. The core protocol has recently been adopted by WhatsApp, Facebook Messenger, and Google Allo among many others; the first two of these have at least 1 billion active users. Signal includes several uncommon security properties (such as \"future secrecy\" or \"post-compromise security\"), enabled by a novel technique called *ratcheting* in which session keys are updated with every message sent. Despite its importance and novelty, there has been little to no academic analysis of the Signal protocol.\n\nWe conduct the first security analysis of Signal's Key Agreement and Double Ratchet as a multi-stage key exchange protocol. We extract from the implementation a formal description of the abstract protocol, and define a security model which can capture the \"ratcheting\" key update structure. We then prove the security of Signal's core in our model, demonstrating several standard security properties. We have found no major flaws in the design, and hope that our presentation and results can serve as a starting point for other analyses of this widely adopted protocol.",
+				"abstractNote": "The Signal protocol is a cryptographic messaging protocol that provides end-to-end encryption for instant messaging in WhatsApp, Wire, and Facebook Messenger among many others, serving well over 1 billion active users. Signal includes several uncommon security properties (such as \"future secrecy\" or \"post-compromise security\"), enabled by a novel technique called *ratcheting* in which session keys are updated with every message sent. We conduct a formal security analysis of Signal's initial extended triple Diffie-Hellman (X3DH) key agreement and Double Ratchet protocols as a multi-stage authenticated key exchange protocol. We extract from the implementation a formal description of the abstract protocol, and define a security model which can capture the ratcheting key update structure as a multi-stage model where there can be a tree of stages, rather than just a sequence. We then prove the security of Signal's key exchange core in our model, demonstrating several standard security properties. We have found no major flaws in the design, and hope that our presentation and results can serve as a foundation for other analyses of this widely adopted protocol.Fix omission in description of initial X3DH handshake, reorganize figures for improved presentation. Full list of changes in Appendix D.",
 				"libraryCatalog": "ePrint IACR",
-				"reportNumber": "1013",
-				"url": "http://eprint.iacr.org/2016/1013",
+				"url": "https://eprint.iacr.org/2016/1013",
 				"attachments": [
 					{
-						"title": "ePrint IACR Snapshot",
-						"mimeType": "text/html"
-					},
-					{
-						"title": "ePrint IACR Full Text PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
-					"Signal",
-					"authenticated key exchange",
-					"cryptographic protocols",
-					"future secrecy",
-					"messaging",
-					"multi-stage key exchange",
-					"post-compromise security",
-					"protocols",
-					"provable security"
+					{
+						"tag": "Signal"
+					},
+					{
+						"tag": "authenticated key exchange"
+					},
+					{
+						"tag": "future secrecy"
+					},
+					{
+						"tag": "messaging"
+					},
+					{
+						"tag": "multi-stage key exchange"
+					},
+					{
+						"tag": "post-compromise security"
+					},
+					{
+						"tag": "protocols"
+					},
+					{
+						"tag": "provable security"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://eprint.iacr.org/2022/1039",
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "The Limits of Provable Security Against Model Extraction",
+				"creators": [
+					{
+						"firstName": "Ari",
+						"lastName": "Karchmer",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022",
+				"abstractNote": "Can we hope to provide provable security against model extraction attacks? As a step towards a theoretical study of this question, we unify and abstract a wide range of \"observational\" model extraction defense mechanisms -- roughly, those that attempt to detect model extraction using a statistical analysis conducted on the distribution over the adversary's queries. To accompany the abstract observational model extraction defense, which we call OMED for short, we define the notion of complete defenses -- the notion that benign clients can freely interact with the model -- and sound defenses -- the notion that adversarial clients are caught and prevented from reverse engineering the model. We then propose a system for obtaining provable security against model extraction by complete and sound OMEDs, using (average-case) hardness assumptions for PAC-learning. Our main result nullifies our proposal for provable security, by establishing a computational incompleteness theorem for the OMED: any efficient OMED for a machine learning model computable by a polynomial size decision tree that satisfies a basic form of completeness cannot satisfy soundness, unless the subexponential Learning Parity with Noise (LPN) assumption does not hold. To prove the incompleteness theorem, we introduce a class of model extraction attacks called natural Covert Learning attacks based on a connection to the Covert Learning model of Canetti and Karchmer (TCC '21), and show that such attacks circumvent any defense within our abstract mechanism in a black-box, nonadaptive way. Finally, we further expose the tension between Covert Learning and OMEDs by proving that Covert Learning algorithms require the nonexistence of provable security via efficient OMEDs. Therefore, we observe a \"win-win\" result by obtaining a characterization of the existence of provable security via efficient OMEDs by the nonexistence of natural Covert Learning algorithms.",
+				"libraryCatalog": "ePrint IACR",
+				"url": "https://eprint.iacr.org/2022/1039",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Covert Learning"
+					},
+					{
+						"tag": "Model Extraction"
+					},
+					{
+						"tag": "Provable Security"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eprint.iacr.org/search?q=test",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

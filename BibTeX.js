@@ -18,7 +18,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2021-09-10 18:17:50"
+	"lastUpdated": "2022-10-31 23:11:08"
 }
 
 /*
@@ -1084,7 +1084,8 @@ function writeField(field, value, isMacro) {
 			value = ZU.XRegExp.replace(value, protectCapsRE, "$1{$2$3}"); // only $2 or $3 will have a value, not both
 		}
 	}
-	if (Zotero.getOption("exportCharset") != "UTF-8") {
+	var exportCharset = Zotero.getOption("exportCharset");
+	if (exportCharset && !exportCharset.startsWith("UTF-8")) {
 		value = value.replace(/[\u0080-\uFFFF]/g, mapAccent);
 	}
 	//convert the HTML markup allowed in Zotero for rich text to TeX; excluding doi/url/file shouldn't be necessary, but better to be safe;

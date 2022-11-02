@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-28 20:01:06"
+	"lastUpdated": "2022-04-05 17:23:30"
 }
 
 /*
@@ -37,8 +37,7 @@
 
 
 function detectWeb(doc, url) {
-	var type = doc.getElementsByTagName('body')[0];
-	if (type.classList.contains('page--article')) {
+	if (doc.querySelector('#page .article')) {
 		return "newspaperArticle";
 	}
 	if (getSearchResults(doc, true)) {
@@ -89,6 +88,8 @@ function scrape(doc, url) {
 	
 	translator.setHandler('itemDone', function (obj, item) {
 		
+		item.title = item.title.split(' | ')[0];
+
 		// Problem: also the place will be taken as part of the autor name
 		// e.g. <meta name="author" content="Matthias Müller, Peking">
 		// e.g. <meta name="author" content="Marco Metzler und Birgit Voigt" />
@@ -108,14 +109,11 @@ function scrape(doc, url) {
 		item.language = "de-CH";
 		item.libraryCatalog = "NZZ";
 		
-		item.section = ZU.xpathText(doc, '//meta[@itemprop="articleSection"]/@content');
-		if (item.section == "NZZ am Sonntag") {
+		item.section = text(doc, '.breadcrumbs > a:last-child');
+		if (item.section == "NZZ am Sonntag" || item.section == "NZZaS") {
 			item.publicationTitle = "NZZ am Sonntag";
 			item.ISSN = "1660-0851";
 			item.section = "";
-		}
-		if (!item.section || item.section == "") {
-			item.section = ZU.xpathText(doc, '//li[@class="mainmenu__item"]/a[contains(@class, "mainmenu__link--active")]');
 		}
 		
 		item.complete();
@@ -129,28 +127,28 @@ function scrape(doc, url) {
 		trans.doWeb(doc, url);
 	});
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.nzz.ch/kuoni-gta-uebernahme-1.13276960",
+		"url": "https://www.nzz.ch/kuoni_gta-uebernahme-ld.692744?reduced=true",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Deutliches Umsatzplus in den ersten neun Monaten: Kuoni profitiert von der GTA-Übernahme",
+				"title": "Kuoni profitiert von der GTA-Übernahme",
 				"creators": [],
-				"date": "2011-11-10 07:55:41",
+				"date": "2011-11-10T06:55:41.000Z",
 				"ISSN": "0376-6829",
-				"abstractNote": "Der Reisekonzern Kuoni hat in den ersten neun Monaten von der Übernahme des Reisekonzerns Gullivers Travel Associates (GTA) profitiert.",
+				"abstractNote": "Der Reisekonzern Kuoni hat in den ersten neun Monaten von der Übernahme des Reisekonzerns Gullivers Travel Associates (GTA) profitiert. Der Umsatz stieg, und der Konzern machte Gewinn.",
 				"language": "de-CH",
 				"libraryCatalog": "NZZ",
 				"publicationTitle": "Neue Zürcher Zeitung",
-				"section": "Wirtschaft",
-				"shortTitle": "Deutliches Umsatzplus in den ersten neun Monaten",
-				"url": "http://www.nzz.ch/kuoni-gta-uebernahme-1.13276960",
+				"url": "https://www.nzz.ch/kuoni_gta-uebernahme-ld.692744",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -161,11 +159,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.nzz.ch/wie-ein-mexikanisches-staedtchen-die-boesewichte-vertrieb-1.17091747",
+		"url": "https://www.nzz.ch/wie-ein-mexikanisches-staedtchen-die-boesewichte-vertrieb-ld.656525?reduced=true",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Landsgemeinde als Mittel gegen das organisierte Verbrechen und korrupte Behörden: Wie ein mexikanisches Städtchen die Bösewichte vertrieb",
+				"title": "Wie ein mexikanisches Städtchen die Bösewichte vertrieb",
 				"creators": [
 					{
 						"firstName": "Matthias",
@@ -173,17 +171,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2012-05-30 11:00:00",
+				"date": "2012-05-30T09:00:00.000Z",
 				"ISSN": "0376-6829",
-				"abstractNote": "Mit einem Aufstand haben die Einwohner der mexikanischen Gemeinde Cherán die Holzfällermafia vertrieben.",
+				"abstractNote": "Mit einem Aufstand haben die Einwohner der mexikanischen Gemeinde Cherán die Holzfällermafia vertrieben. Sie haben eine Landsgemeinde gegründet und entdeckt, dass direktdemokratische Institutionen Korruption verhindern.",
 				"language": "de-CH",
 				"libraryCatalog": "NZZ",
 				"publicationTitle": "Neue Zürcher Zeitung",
-				"shortTitle": "Landsgemeinde als Mittel gegen das organisierte Verbrechen und korrupte Behörden",
-				"url": "http://www.nzz.ch/wie-ein-mexikanisches-staedtchen-die-boesewichte-vertrieb-1.17091747",
+				"url": "https://www.nzz.ch/wie-ein-mexikanisches-staedtchen-die-boesewichte-vertrieb-ld.656525",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -194,16 +192,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.nzz.ch/search?form%5Bq%5D=arbeitsmarkt",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.nzz.ch/nzzas/nzz-am-sonntag/bildung-der-weg-ans-gymnasium-wird-steiniger-ld.85602?reduced=true",
+		"url": "https://www.nzz.ch/nzzas/nzz-am-sonntag/bildung-der-weg-ans-gymnasium-wird-steiniger-ld.85602?reduced=true",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Bildung: Der Weg ans Gymnasium wird steiniger",
+				"title": "Der Weg ans Gymnasium wird steiniger",
 				"creators": [
 					{
 						"firstName": "René",
@@ -213,15 +206,15 @@ var testCases = [
 				],
 				"date": "2016-05-31T07:45:25.872Z",
 				"ISSN": "1660-0851",
-				"abstractNote": "Im Kanton Zürich werden pro Jahr bis zu 400 Schüler weniger den Sprung ans Langgymnasium schaffen Aus Spargründen sollen künftig",
+				"abstractNote": "Im Kanton Zürich werden pro Jahr bis zu 400 Schüler weniger den Sprung ans Langgymnasium schaffen Aus Spargründen sollen künftig weniger Schüler die Gymiprüfung bestehen. Darum müssen die Kriterien verschärft werden.",
 				"language": "de-CH",
 				"libraryCatalog": "NZZ",
 				"publicationTitle": "NZZ am Sonntag",
-				"shortTitle": "Bildung",
-				"url": "http://www.nzz.ch/nzzas/nzz-am-sonntag/bildung-der-weg-ans-gymnasium-wird-steiniger-ld.85602",
+				"url": "https://www.nzz.ch/nzzas/nzz-am-sonntag/bildung-der-weg-ans-gymnasium-wird-steiniger-ld.85602",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -232,11 +225,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.nzz.ch/nzzas/nzz-am-sonntag/manipulation-mit-risiken-wir-haben-zu-viel-desinformation-ld.85314",
+		"url": "https://magazin.nzz.ch/wirtschaft/gerd-gigerenzer-manipulation-mit-risiken-zu-viel-desinformation-ld.145017?reduced=true",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Manipulation mit Risiken: «Wir haben zu viel Desinformation»",
+				"title": "Gerd Gigerenzer: «Wir haben zu viel Desinformation»",
 				"creators": [
 					{
 						"firstName": "Marco",
@@ -249,17 +242,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2016-05-28T23:00:00.000Z",
-				"ISSN": "1660-0851",
-				"abstractNote": "Im Gesundheitswesen wird heftig über den Sinn von teuren Tests zur Krebs-Früherkennung gestritten.",
+				"date": "2016-05-29T08:55:00.000Z",
+				"ISSN": "0376-6829",
+				"abstractNote": "Im Gesundheitswesen wird heftig über den Sinn von teuren Tests zur Krebs-Früherkennung gestritten. Psychologie-Professor Gerd Gigerenzer stellt deren Nutzen infrage.",
 				"language": "de-CH",
 				"libraryCatalog": "NZZ",
-				"publicationTitle": "NZZ am Sonntag",
-				"shortTitle": "Manipulation mit Risiken",
-				"url": "http://www.nzz.ch/nzzas/nzz-am-sonntag/manipulation-mit-risiken-wir-haben-zu-viel-desinformation-ld.85314",
+				"publicationTitle": "NZZ Magazin",
+				"shortTitle": "Gerd Gigerenzer",
+				"url": "https://magazin.nzz.ch/wirtschaft/gerd-gigerenzer-manipulation-mit-risiken-zu-viel-desinformation-ld.145017",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -267,6 +261,12 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nzz.ch/suche?q=Schweiz&filter=",
+		"defer": true,
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

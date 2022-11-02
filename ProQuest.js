@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-04 09:11:57"
+	"lastUpdated": "2022-07-10 13:59:19"
 }
 
 /*
@@ -219,9 +219,23 @@ function doWeb(doc, url, noFollow) {
 		});
 	}
 	else {
-		var abstractTab = doc.getElementById('addFlashPageParameterformat_abstract') || doc.getElementById('addFlashPageParameterformat_citation');
+		// Third option is for EEBO
+		const abstractTab = doc.getElementById('addFlashPageParameterformat_abstract') || doc.getElementById('addFlashPageParameterformat_citation') || doc.getElementById("link_prefix_addFlashPageParameterformat_citation");
+		// E.g. on ERIC
+		const abstractView = doc.getElementsByClassName('abstractContainer');
 		if (abstractTab && abstractTab.classList.contains('active')) {
 			Zotero.debug("On Abstract tab and scraping");
+			scrape(doc, url, type);
+		}
+		else if (abstractTab && abstractTab.href) {
+			var link = abstractTab.href;
+			Zotero.debug("Going to the Abstract tab");
+			ZU.processDocuments(link, function (doc, url) {
+				doWeb(doc, url, true);
+			});
+		}
+		else if (abstractView.length) {
+			Zotero.debug("new Abstract view");
 			scrape(doc, url, type);
 		}
 		else if (noFollow) {
@@ -229,14 +243,7 @@ function doWeb(doc, url, noFollow) {
 			scrape(doc, url, type);
 		}
 		else {
-			var link = abstractTab.href;
-			if (!link) {
-				throw new Error("Could not find the abstract/metadata link");
-			}
-			Zotero.debug("Going to the Abstract tab");
-			ZU.processDocuments(link, function (doc, url) {
-				doWeb(doc, url, true);
-			});
+			throw new Error("Could not find the abstract/metadata link");
 		}
 	}
 }
@@ -333,7 +340,7 @@ function scrape(doc, url, type) {
 				item.ISBN = value;
 				break;
 			case 'DOI':	// test case?
-				item.DOI = value;
+				item.DOI = ZU.cleanDOI(value);
 				break;
 			case 'Copyright':
 				item.rights = value;
@@ -1877,6 +1884,78 @@ var testCases = [
 					},
 					{
 						"tag": "Washington Times"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.proquest.com/docview/2240944639/citation/DC389F101A924D14PQ/1",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Stereometrie: or the art of practical gauging shewing in two parts, first, divers facil and compendious ways for gauging of tunns and brewers vessels, of all forms and figures, either in whole, or gradualy, form inch to inch: whether the tunn, or vessels bases above and below be homogeneal, or heterogeneal. Parallel and alike-situate, or not. Secondly, the gauging of any wine, brandy, or oyl cask; be the same assum'd as sphæroidal, parabolical, conical, or cylindrical; either full, or partly empty, and at any position of the cask, or altitude of contained liquor: performed either by brief calculation, or instrumental operation. Together with a large table of area's of a circles segments, and other necessary tables, & their excellent utilities and emprovements; with a copious and methodical index of the whole; rendring the work perspicuous and intelligible to mean capacities. / By John Smith, philo-accomptant.",
+				"creators": [
+					{
+						"firstName": "John",
+						"lastName": "Smith",
+						"creatorType": "author"
+					}
+				],
+				"date": "1673",
+				"language": "English",
+				"libraryCatalog": "ProQuest",
+				"numPages": "[30], 304 p., [3] leaves of plates :",
+				"place": "London, England",
+				"publisher": "printed by William Godbid, for William Shrowsbury, at the Bible in Duck-Lane",
+				"shortTitle": "Stereometrie",
+				"url": "https://www.proquest.com/docview/2240944639/citation/DC389F101A924D14PQ/1",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf",
+						"proxy": false
+					}
+				],
+				"tags": [
+					{
+						"tag": "Gaging - Early works to 1800."
+					},
+					{
+						"tag": "Liquors - Gaging and testing - Early works to 1800."
+					},
+					{
+						"tag": "Wine and wine making - Gaging and testing - Early works to 1800."
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.proquest.com/docview/2661071397",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "A Pragmatic Future for NAEP: Containing Costs and Updating Technologies. Consensus Study Report",
+				"creators": [],
+				"date": "2022",
+				"ISBN": "9780309275323",
+				"abstractNote": "The National Assessment of Educational Progress (NAEP) -- often called \"The Nation's Report Card\" -- is the largest nationally representative and continuing assessment of what students in public and private schools in the United States know and can do in various subjects and has provided policy makers and the public with invaluable information on U.S. students for more than 50 years. Unique in the information it provides, NAEP is the nation's only mechanism for tracking student achievement over time and comparing trends across states and districts for all students and important student groups (e.g., by race, sex, English learner status, disability status, family poverty status). While the program helps educators, policymakers, and the public understand these educational outcomes, the program has incurred substantially increased costs in recent years and now costs about $175.2 million per year. \"A Pragmatic Future for NAEP: Containing Costs and Updating Technologies\" recommends changes to bolster the future success of the program by identifying areas where federal administrators could take advantage of savings, such as new technological tools and platforms as well as efforts to use local administration and deployment for the tests. Additionally, the report recommends areas where the program should clearly communicate about spending and undertake efforts to streamline management. The report also provides recommendations to increase the visibility and coherence of NAEP's research activities. [Contributors include the Division of Behavioral and Social Sciences and Education; Committee on National Statistics; and Panel on Opportunities for the National Assessment of Educational Progress in an Age of AI and Pervasive Computation: A Pragmatic Vision.]",
+				"language": "English",
+				"libraryCatalog": "ProQuest",
+				"publisher": "National Academies Press500 Fifth Street NW, Washington, DC 20001http://www.nap.eduTel.: 888-624-8373, Fax: 202-334-2793",
+				"shortTitle": "A Pragmatic Future for NAEP",
+				"url": "https://www.proquest.com/docview/2661071397",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Elementary Secondary Education"
 					}
 				],
 				"notes": [],

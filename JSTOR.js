@@ -9,13 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-08 21:10:17"
+	"lastUpdated": "2022-09-22 15:58:08"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2019 Simon Kornblith, Sean Takats, Michael Berkowitz, Eli Osherovich, czar
+	Copyright © 2019-2022 Simon Kornblith, Sean Takats, Michael Berkowitz,
+						  Eli Osherovich, czar
 
 	This file is part of Zotero.
 
@@ -35,24 +36,27 @@
 	***** END LICENSE BLOCK *****
 */
 
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 function detectWeb(doc, url) {
 	// See if this is a search results page or Issue content
 	if (doc.title == "JSTOR: Search Results") {
-		return getSearchResults(doc, true) ? "multiple" : false;
-	}
-	else if (/stable|pss/.test(url) // Issues with DOIs can't be identified by URL
-		&& getSearchResults(doc, true)) {
 		return "multiple";
+	}
+	// Issues with DOIs can't be identified by URL
+	else if (/stable|pss/.test(url)) {
+		if (getSearchResults(doc, true)) {
+			return "multiple";
+		}
+		else {
+			Z.monitorDOMChanges(doc.body,
+				{ attributeFilter: ['style'] });
+		}
 	}
 	
 	// If this is a view page, find the link to the citation
 	var favLink = getFavLink(doc);
 	if ((favLink && getJID(favLink.href)) || getJID(url)) {
-		if (ZU.xpathText(doc, '//li[@class="book_info_button"]')) {
+		if (text(doc, '.book_info_button')) {
 			return "book";
 		}
 		else if (text(doc, 'script[data-analytics-provider]').includes('"chapter view"')) {
@@ -70,13 +74,19 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var resultsBlock = doc.querySelectorAll('.media-body.media-object-section');
 	if (!resultsBlock.length) {
-		resultsBlock = doc.querySelectorAll('.search-result-item-grid');
+		resultsBlock = doc.querySelectorAll('.result');
+	}
+	if (!resultsBlock.length) {
+		resultsBlock = doc.querySelectorAll('.toc-item');
 	}
 	if (!resultsBlock.length) return false;
 	var items = {}, found = false;
-	for (let i = 0; i < resultsBlock.length; i++) {
-		let title = text(resultsBlock[i], '.title, .small-heading').trim();
-		let jid = getJID(attr(resultsBlock[i], 'a', 'href'));
+	for (let row of resultsBlock) {
+		let title = text(row, '.title, .small-heading, toc-view-pharos-link');
+		let jid = getJID(attr(row, 'a', 'href'));
+		if (!jid) {
+			jid = getJID(attr(row, '[href]', 'href'));
+		}
 		if (!jid || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -93,6 +103,7 @@ function getFavLink(doc) {
 }
 
 function getJID(url) {
+	if (!url) return false;
 	var m = url.match(/(?:discover|pss|stable(?:\/info|\/pdf)?)\/(10\.\d+(?:%2F|\/)[^?]+|[a-z0-9.]*)/);
 	if (m) {
 		var jid = decodeURIComponent(m[1]);
@@ -225,7 +236,7 @@ function processRIS(text, jid) {
 			}
 			// remove any reviewed authors from the title
 			for (i = 0; i < reviewedAuthors.length; i++) {
-				reviewedTitle = reviewedTitle.replace(", "+reviewedAuthors[i], "");
+				reviewedTitle = reviewedTitle.replace(", " + reviewedAuthors[i], "");
 			}
 			item.title = "Review of " + reviewedTitle;
 		}
@@ -235,6 +246,19 @@ function processRIS(text, jid) {
 		item.url = item.url.replace('http:', 'https:'); // RIS still lists http addresses while JSTOR's stable URLs use https
 		if (item.url && !item.url.startsWith("http")) item.url = "https://" + item.url;
 		
+		// remove all caps from titles and authors.
+		for (i = 0; i < item.creators.length; i++) {
+			if (item.creators[i].lastName && item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
+				item.creators[i].lastName = ZU.capitalizeName(item.creators[i].lastName, true);
+			}
+			if (item.creators[i].firstName && item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
+				item.creators[i].firstName = ZU.capitalizeName(item.creators[i].firstName, true);
+			}
+		}
+		if (item.title == item.title.toUpperCase()) {
+			item.title = ZU.capitalizeTitle(item.title.toLowerCase(), true);
+		}
+
 		// DB in RIS maps to archive; we don't want that
 		delete item.archive;
 		if (item.DOI || /DOI: 10\./.test(item.extra)) {
@@ -746,6 +770,41 @@ var testCases = [
 				"series": "Whiteness and the Creation of the American West",
 				"shortTitle": "“OUR CLIMATE AND SOIL IS COMPLETELY ADAPTED TO THEIR CUSTOMS”",
 				"url": "https://www.jstor.org/stable/j.ctt19jcg63.12",
+				"attachments": [
+					{
+						"title": "JSTOR Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.jstor.org/stable/29533951",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Systems, Not Men: Producing People in Charlotte Perkins Gilman's \"Herland\"",
+				"creators": [
+					{
+						"lastName": "Fusco",
+						"firstName": "Katherine",
+						"creatorType": "author"
+					}
+				],
+				"date": "2009",
+				"ISSN": "0039-3827",
+				"issue": "4",
+				"libraryCatalog": "JSTOR",
+				"pages": "418-434",
+				"publicationTitle": "Studies in the Novel",
+				"shortTitle": "Systems, Not Men",
+				"url": "https://www.jstor.org/stable/29533951",
+				"volume": "41",
 				"attachments": [
 					{
 						"title": "JSTOR Full Text PDF",

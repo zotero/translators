@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-21 01:45:41"
+	"lastUpdated": "2022-10-04 02:24:06"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 	
-	Engineering Village Translator - Copyright © 2018-2021 Sebastian Karcher 
+	Engineering Village Translator - Copyright © 2018-2022 Sebastian Karcher
 	This file is part of Zotero.
 	
 	Zotero is free software: you can redistribute it and/or modify
@@ -35,19 +35,19 @@
 */
 
 function detectWeb(doc, url) {
-	Z.monitorDOMChanges(doc.getElementById("ev-application"));
-	var printlink = doc.getElementById('printlink');
-	if (url.includes("/search/doc/") && printlink && getDocIDs(printlink.href)) {
+	if (url.includes("docid=")) {
 		return "journalArticle";
 	}
+	Z.monitorDOMChanges(doc.getElementById("ev-application"));
 	if ((url.includes("quick.url?") || url.includes("expert.url?") || url.includes("thesaurus.url?")) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
 function getDocIDs(url) {
-	var m = url.match(/\bdocidlist=([^&#]+)/);
+	var m = url.match(/\bdocid(?:list)?=([^&#]+)/);
 	if (!m) return false;
 	
 	return decodeURIComponent(m[1]).split(',');
@@ -58,7 +58,7 @@ function getSearchResults(doc, checkOnly) {
 	var rows = doc.querySelectorAll('div[class*=result-row]'),
 		items = {},
 		found = false;
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var checkbox = rows[i].querySelector('input[name="cbresult"]');
 		if (!checkbox) continue;
 		var docid = checkbox.getAttribute('docid');
@@ -77,7 +77,7 @@ function getSearchResults(doc, checkOnly) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
 		Zotero.selectItems(getSearchResults(doc), function (items) {
-			if (!items) return true;
+			if (!items) return;
 			
 			var ids = [];
 			for (var i in items) {
@@ -86,9 +86,9 @@ function doWeb(doc, url) {
 			
 			fetchRIS(doc, ids);
 		});
-	} else {
-		var printlink = doc.getElementById('printlink');
-		fetchRIS(doc, getDocIDs(printlink.href));
+	}
+	else {
+		fetchRIS(doc, getDocIDs(url));
 	}
 }
 
@@ -99,8 +99,8 @@ function fetchRIS(doc, docIDs) {
 	// handlelist to accompany the docidlist. Seems like it just has to be a
 	// list of numbers the same size as the docid list.
 	var handleList = new Array(docIDs.length);
-	for (var i=0; i<docIDs.length; i++) {
-		handleList[i] = i+1;
+	for (var i = 0; i < docIDs.length; i++) {
+		handleList[i] = i + 1;
 	}
 	
 	var db = doc.getElementsByName('database')[0];
@@ -116,14 +116,14 @@ function fetchRIS(doc, docIDs) {
 	// This is what their web page does. It also sends Content-type and
 	// Content-length parameters in the body, but seems like we can skip that
 	// part
-	ZU.doPost(url, "", function(text) {
+	ZU.doPost(url, "", function (text) {
 		// Z.debug(text);
 		
 		var translator = Zotero.loadTranslator("import");
 		// RIS
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
-		translator.setHandler('itemDone', function(obj, item) {
+		translator.setHandler('itemDone', function (obj, item) {
 			item.attachments = [];
 			item.notes = [];
 			
@@ -132,6 +132,8 @@ function fetchRIS(doc, docIDs) {
 		translator.translate();
 	});
 }
+
 /** BEGIN TEST CASES **/
-var testCases = []
+var testCases = [
+]
 /** END TEST CASES **/

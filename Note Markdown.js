@@ -14,7 +14,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2021-12-15 10:26:46"
+	"lastUpdated": "2022-08-26 11:00:00"
 }
 
 /*
@@ -1410,6 +1410,54 @@ let turndownService = new TurndownService({
 
 turndownService.use(turndownPluginGfm.gfm);
 
+// https://github.com/mixmark-io/turndown#overriding-turndownserviceprototypeescape
+let escapes = [
+	// [/\\/g, '\\\\'],
+	[/\*/g, '\\*'],
+	[/^-/g, '\\-'],
+	[/^\+ /g, '\\+ '],
+	[/^(=+)/g, '\\$1'],
+	[/^(#{1,6}) /g, '\\$1 '],
+	[/`/g, '\\`'],
+	[/^~~~/g, '\\~~~'],
+	// [/\[/g, '\\['],
+	// [/\]/g, '\\]'],
+	[/^>/g, '\\>'],
+	// [/_/g, '\\_'],
+	[/^(\d+)\. /g, '$1\\. '],
+	// Custom corrections for the previous escapes
+	// [/\\\[\\\[/g, '[['],
+	// [/\\\]\\\]/g, ']]'],
+	[/\\`\\`\\`/g, '```']
+];
+
+TurndownService.prototype.escape = function (string) {
+	return escapes.reduce(function (accumulator, escape) {
+		return accumulator.replace(escape[0], escape[1])
+	}, string);
+};
+
+// https://github.com/mixmark-io/turndown/issues/291
+turndownService.addRule('listItem', {
+	filter: 'li',
+	replacement: function (content, node, options) {
+		content = content
+		.replace(/^\n+/, '') // remove leading newlines
+		 .replace(/\n+$/, '\n') // replace trailing newlines with just a single one
+		 .replace(/\n/gm, '\n    '); // indent
+		var prefix = options.bulletListMarker + ' ';
+		var parent = node.parentNode;
+		if (parent.nodeName === 'OL') {
+			var start = parent.getAttribute('start');
+			var index = Array.prototype.indexOf.call(parent.children, node);
+			prefix = (start ? Number(start) + index : index + 1) + '. ';
+		}
+		return (
+			prefix + content + (node.nextSibling && !/\n$/.test(content) ? '\n' : '')
+		);
+	}
+});
+
 function convert(doc) {
 	// Transform `style="text-decoration: line-through"` nodes to <s> (TinyMCE doesn't support <s>)
 	doc.querySelectorAll('span').forEach(function (span) {
@@ -1421,10 +1469,31 @@ function convert(doc) {
 	});
 
 	// Turndown wants pre content inside additional code block
-	doc.querySelectorAll('pre').forEach(function (pre) {
+	doc.querySelectorAll('pre:not(.math)').forEach(function (pre) {
 		let code = doc.createElement('code');
 		code.append(...pre.childNodes);
 		pre.append(code);
+	});
+
+	doc.querySelectorAll('p').forEach((p) => {
+		let style = p.getAttribute('style');
+		if (style) {
+			let match = style.match(/padding-(left|right): ([0-9]+)px/);
+			if (match) {
+				let px = parseInt(match[2]);
+				if (px > 0 && px % 40 === 0) {
+					let level = px / 40;
+					let spaces = '';
+					for (let i = 0; i < level; i++) {
+						spaces += '\u00A0\u00A0\u00A0\u00A0';
+					}
+					p.insertBefore(doc.createTextNode(spaces), p.firstChild);
+					p.querySelectorAll('br').forEach((br) => {
+						br.parentNode.insertBefore(doc.createTextNode(spaces), br.nextSibling);
+					});
+				}
+			}
+		}
 	});
 	
 	// Insert a PDF link for highlight and image annotation nodes
@@ -1445,7 +1514,7 @@ function convert(doc) {
 				let openURI;
 				let uriParts = uri.split('/');
 				let libraryType = uriParts[3];
-				let key = uriParts[6];
+				let key = uriParts[uriParts.length - 1];
 				if (libraryType === 'users') {
 					openURI = 'zotero://open-pdf/library/items/' + key;
 				}
@@ -1495,7 +1564,7 @@ function convert(doc) {
 				if (typeof uri === 'string') {
 					let uriParts = uri.split('/');
 					let libraryType = uriParts[3];
-					let key = uriParts[6];
+					let key = uriParts[uriParts.length - 1];
 					if (libraryType === 'users') {
 						uris.push('zotero://select/library/items/' + key);
 					}
@@ -1522,7 +1591,11 @@ function convert(doc) {
 		}
 	});
 
-	return turndownService.turndown(doc.body);
+	let text = turndownService.turndown(doc.body);
+
+	// Remove lines with just two spaces which happens for `<p><br>test</p>`
+	text = text.split('\n').filter((line) => line !== '  ').join('\n');
+	return text;
 }
 
 bundle = { convert };

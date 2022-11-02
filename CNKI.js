@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcs",
-	"lastUpdated": "2019-12-05 08:10:19"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2022-10-09 16:23:05"
 }
 
 /*
@@ -104,6 +104,7 @@ function getTypeFromDBName(dbname) {
 		CJFQ: "journalArticle",
 		CJFD: "journalArticle",
 		CAPJ: "journalArticle",
+		CCJD: "journalArticle",
 		CDFD: "thesis",
 		CMFD: "thesis",
 		CLKM: "thesis",
@@ -211,10 +212,16 @@ function scrape(ids, doc, url, itemInfo) {
 				if (creator.firstName) continue;
 				
 				var lastSpace = creator.lastName.lastIndexOf(' ');
+				var lastMiddleDot = creator.lastName.lastIndexOf('·');
 				if (creator.lastName.search(/[A-Za-z]/) !== -1 && lastSpace !== -1) {
 					// western name. split on last space
 					creator.firstName = creator.lastName.substr(0, lastSpace);
 					creator.lastName = creator.lastName.substr(lastSpace + 1);
+				}
+				else if (lastMiddleDot !== -1) {
+					// translated western name with · as separator
+					creator.firstName = creator.lastName.substr(0, lastMiddleDot);
+					creator.lastName = creator.lastName.substr(lastMiddleDot + 1);
 				}
 				else {
 					// Chinese name. first character is last name, the rest are first name
@@ -317,7 +324,7 @@ function getAttachments(doc, item) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&dbname=CJFDLAST2015&filename=SPZZ201412003&v=MTU2MzMzcVRyV00xRnJDVVJMS2ZidVptRmkva1ZiL09OajNSZExHNEg5WE5yWTlGWjRSOGVYMUx1eFlTN0RoMVQ=",
+		"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&dbname=CJFDLAST2015&filename=SPZZ201412003&v=MTU2MzMzcVRyV00xRnJDVVJMS2ZidVptRmkva1ZiL09OajNSZExHNEg5WE5yWTlGWjRSOGVYMUx1eFlTN0RoMVQ=",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -362,7 +369,7 @@ var testCases = [
 				"libraryCatalog": "CNKI",
 				"pages": "1306-1312",
 				"publicationTitle": "色谱",
-				"url": "http://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&dbname=CJFDLAST2015&filename=SPZZ201412003&v=MTU2MzMzcVRyV00xRnJDVVJMS2ZidVptRmkva1ZiL09OajNSZExHNEg5WE5yWTlGWjRSOGVYMUx1eFlTN0RoMVQ=",
+				"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&dbname=CJFDLAST2015&filename=SPZZ201412003&v=MTU2MzMzcVRyV00xRnJDVVJMS2ZidVptRmkva1ZiL09OajNSZExHNEg5WE5yWTlGWjRSOGVYMUx1eFlTN0RoMVQ=",
 				"volume": "32",
 				"attachments": [],
 				"tags": [
@@ -460,50 +467,49 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://new.gb.oversea.cnki.net/KCMS/detail/detail.aspx?dbcode=CMFD&dbname=CMFDTEMP&filename=1019926131.nh&v=MTA5MjM2RjdxNkdORFBycEViUElSOGVYMUx1eFlTN0RoMVQzcVRyV00xRnJDVVJMT2VadVJxRnkzblY3dkJWRjI=",
+		"url": "https://kns.cnki.net/kcms/detail/detail.aspx?dbcode=CCJD&dbname=CCJDLAST2&filename=ZKSF202002010&uniplatform=NZKPT&v=RM9dl7WiC7a9v7FVB6ov3OwJSXCWzsWIng_BWXok2rj4YFWz9tZ20FRZxDaeDPCm",
 		"items": [
 			{
-				"itemType": "thesis",
-				"title": "商业银行个人住房不良资产证券化多元回归定价方法研究",
+				"itemType": "journalArticle",
+				"title": "欧洲陪审团制度新发展:西班牙与俄罗斯的陪审团",
 				"creators": [
 					{
-						"lastName": "张",
-						"firstName": "雪",
+						"lastName": "萨曼",
+						"firstName": "史蒂芬",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "高",
+						"firstName": "一飞",
 						"creatorType": "author"
 					}
 				],
-				"date": "2019",
-				"abstractNote": "不良资产证券化是一种新型的不良资产处置方式,其拓宽了商业银行处理不良资产的手段,特别适用于单户金额小、户数多的个人不良资产批量处置,而且这种市场化处置方式将银行不良资产处置和资本市场证券产品发行两个不同领域联接在一起,提高了不良资产的价值。本文以个人住房不良资产证券化为研究对象,确定资产池内不良资产未来回收价值。综合对比市场常用的定价方法,在此基础上提出建立多元回归定价模型的思路。利用YN银行个人住房不良贷款历史数据,分析得出影响不良资产定价的因素,建立定价方程,并对拟证券化的虚拟资产池计算整体回收价值,证明多元回归定价模型的有效性。本文提出的定价模型规避了传统资产定价方法效率低、评估结果不严...",
+				"date": "2020",
+				"abstractNote": "&lt;正&gt;一、简介近来再次对俄罗斯(1993)和西班牙(1995)陪审团审判模式进行介绍的原因有两个方面。第一,在废除传统陪审团审判的情况下,要么采取仅由职业法官组成的法院审理案件,要么由职业法官和审讯顾问合议来判断所有的事实问题、法律问题并作出相应判决,这是一种令人惊闻的倒退。",
+				"issue": "02",
 				"language": "中文;",
 				"libraryCatalog": "CNKI",
-				"thesisType": "硕士",
-				"university": "浙江大学",
-				"url": "http://new.gb.oversea.cnki.net/KCMS/detail/detail.aspx?dbcode=CMFD&dbname=CMFDTEMP&filename=1019926131.nh&v=MTA5MjM2RjdxNkdORFBycEViUElSOGVYMUx1eFlTN0RoMVQzcVRyV00xRnJDVVJMT2VadVJxRnkzblY3dkJWRjI=",
+				"pages": "193-212",
+				"publicationTitle": "司法智库",
+				"shortTitle": "欧洲陪审团制度新发展",
+				"url": "https://kns.cnki.net/kcms/detail/detail.aspx?dbcode=CCJD&dbname=CCJDLAST2&filename=ZKSF202002010&uniplatform=NZKPT&v=RM9dl7WiC7a9v7FVB6ov3OwJSXCWzsWIng_BWXok2rj4YFWz9tZ20FRZxDaeDPCm",
+				"volume": "3",
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "Asset pool pricing"
+						"tag": "俄罗斯"
 					},
 					{
-						"tag": "Multiple regression pricing model"
+						"tag": "刑事诉讼程序"
 					},
 					{
-						"tag": "Non-performing asset securitization"
+						"tag": "判决书"
 					},
 					{
-						"tag": "Personal housing loan"
+						"tag": "巴斯克"
 					},
 					{
-						"tag": "不良资产证券化"
-					},
-					{
-						"tag": "个人住房贷款"
-					},
-					{
-						"tag": "多元回归定价模型"
-					},
-					{
-						"tag": "资产池定价"
+						"tag": "陪审团"
 					}
 				],
 				"notes": [],

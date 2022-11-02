@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-28 19:49:43"
+	"lastUpdated": "2022-04-04 18:26:02"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2013-2021 Sebastian Karcher and Abe Jellinek
+	Copyright © 2013-2022 Sebastian Karcher and Abe Jellinek
 	
 	This file is part of Zotero.
 
@@ -36,9 +36,13 @@
 */
 
 
+const preprintType = ZU.fieldIsValidForType('title', 'preprint')
+	? 'preprint'
+	: 'report';
+
 function detectWeb(doc, _url) {
 	if (doc.querySelector('meta[name="citation_title"]')) {
-		return "report";
+		return preprintType;
 	}
 	else if (getSearchResults(doc, true)) {
 		return "multiple";
@@ -95,11 +99,18 @@ function scrape(doc, url) {
 			item.date = ZU.strToISO(item.date);
 		}
 		
-		item.itemType = "report";
-		item.reportType = "SSRN Scholarly Paper";
-		item.institution = "Social Science Research Network";
+		item.itemType = preprintType;
 		var number = url.match(/abstract_id=(\d+)/);
-		if (number) item.reportNumber = "ID " + number[1];
+		if (preprintType == 'preprint') {
+			item.genre = "SSRN Scholarly Paper";
+			item.repository = "Social Science Research Network";
+			if (number) item.archiveID = number[1];
+		}
+		else {
+			item.reportType = "SSRN Scholarly Paper";
+			item.institution = "Social Science Research Network";
+			if (number) item.reportNumber = number[1];
+		}
 		item.place = "Rochester, NY";
 		if (abstract) item.abstractNote = abstract.trim();
 		// The pdfurl in the meta tag 'citation_pdf_url' is just pointing
@@ -142,7 +153,7 @@ var testCases = [
 		"url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1450387",
 		"items": [
 			{
-				"itemType": "report",
+				"itemType": "preprint",
 				"title": "Who Doesn't Support the Genocide Convention? A Nested Analysis",
 				"creators": [
 					{
@@ -158,12 +169,11 @@ var testCases = [
 				],
 				"date": "2009",
 				"abstractNote": "What explains the large variation in the time taken by different countries to ratify the 1948 Genocide Convention? The costs of ratiﬁcation would appear to be relatively low, yet many countries have waited for years, and even decades, before ratifying this symbolically important treaty. This study employs a \"nested analysis\" that combines a large-n event history analysis with a detailed study of an important outlying case in order to explain the main sources of this variation. The initial event history history produces a puzzling ﬁnding: countries appear to be less likely to ratify the treaty if relevant peer countries have already done so. We use the case of Japan -- which has not yet ratiﬁed the Genocide Convention, despite the predictions of the event history model -- to explore the proposed causes of ratiﬁcation in more detail. Based on these ﬁndings, we suggest that once the norms embodied in a treaty take on a sufﬁciently \"taken-for-granted\" character, many countries decide that the costs of ratiﬁcation outweigh its marginal beneﬁts. The pattern of ratiﬁcation of the Genocide Convention therefore does not appear to ﬁt the classic model of the \"norm cascade\" that has been used to explain the adoption of other human rights norms. We conclude with suggestions for how the validity of our theory could be tested through a combination of further large-n and small-n analysis.",
-				"institution": "Social Science Research Network",
+				"archiveID": "1450387",
+				"genre": "SSRN Scholarly Paper",
 				"language": "en",
-				"libraryCatalog": "papers.ssrn.com",
+				"libraryCatalog": "Social Science Research Network",
 				"place": "Rochester, NY",
-				"reportNumber": "ID 1450387",
-				"reportType": "SSRN Scholarly Paper",
 				"shortTitle": "Who Doesn't Support the Genocide Convention?",
 				"url": "https://papers.ssrn.com/abstract=1450387",
 				"attachments": [

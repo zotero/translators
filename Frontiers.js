@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-10 03:30:59"
+	"lastUpdated": "2022-04-02 19:36:06"
 }
 
 /*
@@ -77,11 +77,11 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	let risURL = attr(doc, '.citation a[href$="/reference"]', 'href');
 	if (!risURL) {
-		risURL = url.replace(/\/full([?#].*)$/, '/reference');
+		risURL = url.replace(/\/full([?#].*)?$/, '/reference');
 	}
 	let pdfURL = attr(doc, '.download-files-pdf', 'href');
 	if (!pdfURL) {
-		pdfURL = url.replace(/\/full([?#].*)$/, '/pdf');
+		pdfURL = url.replace(/\/full([?#].*)?$/, '/pdf');
 	}
 	
 	ZU.doGet(risURL, function (risText) {

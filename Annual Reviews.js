@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-14 18:37:45"
+	"lastUpdated": "2022-08-02 12:48:22"
 }
 
 /**
@@ -71,7 +71,7 @@ function addByBibTex(doi, tags) {
 }
 
 function detectWeb(doc, url) {
-	if (url.match(/\/doi\/(abs|full|pdf)\//)) {
+	if (/\/doi\/(abs|full|pdf|10\.)/.test(url)) {
 		return 'journalArticle';
 	}
 	else if (getSearchResults(doc, true)) {
@@ -110,7 +110,8 @@ function doWeb(doc, url) {
 
 
 function scrape(doc, url) {
-	var match = url.match(/\/(?:abs|full|pdf)\/([^?]+)/);
+	// match both /doi/abs/10.1146 (etc.) and /doi/10.1146
+	var match = url.match(/\/(?:doi)\/(?:abs|full|pdf)?\/?([^?]+)/);
 	if (match) {
 		let tags = attr(doc, 'meta[name="dc.Subject"]', 'content')
 			.split('; ')
@@ -271,6 +272,52 @@ var testCases = [
 					},
 					{
 						"tag": "history of science"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.annualreviews.org/doi/10.1146/annurev-physchem-040513-103712",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Phase Separation in Bulk Heterojunctions of Semiconducting Polymers and Fullerenes for Photovoltaics",
+				"creators": [
+					{
+						"firstName": "Neil D.",
+						"lastName": "Treat",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael L.",
+						"lastName": "Chabinyc",
+						"creatorType": "author"
+					}
+				],
+				"date": "2014",
+				"DOI": "10.1146/annurev-physchem-040513-103712",
+				"abstractNote": "Thin-film solar cells are an important source of renewable energy. The most efficient thin-film solar cells made with organic materials are blends of semiconducting polymers and fullerenes called the bulk heterojunction (BHJ). Efficient BHJs have a nanoscale phase-separated morphology that is formed during solution casting. This article reviews recent work to understand the nature of the phase-separation process resulting in the formation of the domains in polymer-fullerene BHJs. The BHJ is now viewed as a mixture of polymer-rich, fullerene-rich, and mixed polymer-fullerene domains. The formation of this structure can be understood through fundamental knowledge of polymer physics. The implications of this structure for charge transport and charge generation are given.",
+				"extra": "PMID: 24689796",
+				"issue": "1",
+				"itemID": "doi:10.1146/annurev-physchem-040513-103712",
+				"libraryCatalog": "Annual Reviews",
+				"pages": "59-81",
+				"publicationTitle": "Annual Review of Physical Chemistry",
+				"url": "https://doi.org/10.1146/annurev-physchem-040513-103712",
+				"volume": "65",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "organic electronics"
 					}
 				],
 				"notes": [],

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-26 18:28:41"
+	"lastUpdated": "2022-04-22 20:47:13"
 }
 
 /*
@@ -38,8 +38,18 @@
 
 function detectWeb(doc, url) {
 	if (url.includes('/full-record/') && getItemID(url)) {
-		if (text(doc, '#FullRTa-doctype-0').trim().toLowerCase() == 'proceedings paper') {
+		let docType = text(doc, '#FullRTa-doctype-0').trim().toLowerCase();
+		if (docType == 'proceedings paper') {
 			return "conferencePaper";
+		}
+		else if (docType == "book") {
+			return "book";
+		}
+		else if (docType == "data set") {
+			return "document"; //change to dataset
+		}
+		else if (text(doc, '#FullRTa-patentNumber-0')) {
+			return "patent";
 		}
 		else {
 			return "journalArticle";
@@ -136,8 +146,12 @@ function scrape(doc, url) {
 	});
 }
 
+
+
+
 function getItemID(url) {
-	let idInURL = url.match(/(WOS:[^/?&]+)/);
+	let idInURL = url.match(/((?:WOS|RSCI|KJD|DIIDW|MEDLINE|DRCI|BCI|SCIELO|ZOOREC|CCC):[^/?&]+)/);
+	// Z.debug(idInURL)
 	return idInURL && idInURL[1];
 }
 
@@ -346,6 +360,23 @@ var testCases = [
 						"tag": "video conferencing"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.webofscience.com/wos/alldb/full-record/DIIDW:202205717D",
+		"items": [
+			{
+				"itemType": "patent",
+				"title": "Preparing fibrous distillation membrane useful for anti-scaling pleated membrane distillation comprises preparing super-hydrophobic layer casting film liquid and base film by electrostatic spinning, spraying, cutting, and heating",
+				"creators": [],
+				"language": "English",
+				"url": "https://www.webofscience.com/wos/alldb/full-record/DIIDW:202205717D",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}

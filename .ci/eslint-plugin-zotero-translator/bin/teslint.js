@@ -12,7 +12,7 @@ const translators = require('../lib/translators');
 
 argv
 	.version(CLIEngine.version)
-	.option('-o, --output-json [file]', 'Write report to file as JSON')
+	.option('-o, --output-json [file | -]', 'Write report to file or stdout as JSON')
 	.option('-f, --fix', 'Automatically fix problems')
 	.option('--no-ignore', 'Disable use of ignore files and patterns')
 	.option('--quiet', 'Report errors only - default: false')
@@ -39,7 +39,10 @@ function findIgnore(file, stats) {
 	return !file.endsWith('.js');
 }
 for (const target of argv.args) {
-	if (!fs.existsSync(target)) continue;
+	if (!fs.existsSync(target)) {
+		console.error(`Target file '${target}' does not exist; skipping`); // eslint-disable-line no-console
+		continue;
+	}
 	const files = fs.lstatSync(target).isDirectory() ? find(target, [findIgnore]) : [target];
 	for (const file of files) {
 		if (path.dirname(path.resolve(file)) === translators.cache.repo) {
@@ -123,7 +126,13 @@ for (const translator of sources.translators) {
 }
 
 if (argv.outputJson) {
-	fs.writeFileSync(argv.outputJson, JSON.stringify(allResults), 'utf-8')
+	if (argv.outputJson === '-') {
+		process.stdout.write(JSON.stringify(allResults) + '\n');
+	}
+	else {
+		fs.writeFileSync(argv.outputJson, JSON.stringify(allResults), 'utf-8');
+	}
 }
-
-process.exit(sources.errors); // eslint-disable-line no-process-exit
+else {
+	process.exit(sources.errors); // eslint-disable-line no-process-exit
+}

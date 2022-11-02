@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2020-09-08 02:04:42"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2022-08-15 19:51:07"
 }
 
 /*
@@ -31,13 +31,13 @@
  */
 
 function detectWeb(doc, url) {
-	var action = url.match(/^https?:\/\/[^/]+\/([^/?#]+)/);
+	var action = getAction(url);
 	if (!action) return false;
 	if (!doc.head || !doc.head.getElementsByTagName('meta').length) {
 		Z.debug("Springer Link: No head or meta tags");
 		return false;
 	}
-	switch (action[1]) {
+	switch (action) {
 		case "search":
 		case "journal":
 		case "book":
@@ -61,6 +61,10 @@ function detectWeb(doc, url) {
 	return false;
 }
 
+function getAction(url) {
+	return (url.match(/^https?:\/\/[^/]+\/([^/?#]+)/) || [])[1];
+}
+
 function getResultList(doc) {
 	var results = ZU.xpath(doc,
 		'//ol[@class="content-item-list"]/li/*[self::h3 or self::h2]/a');
@@ -79,6 +83,9 @@ function getResultList(doc) {
 	if (!results.length) {
 		results = ZU.xpath(doc, '//li[@class="c-list-group__item"]//h3/a');
 	}
+	if (!results.length) {
+		results = doc.querySelectorAll('h3.c-card__title > a');
+	}
 	return results;
 }
 
@@ -87,6 +94,9 @@ function doWeb(doc, url) {
 	if (type == "multiple") {
 		var list = getResultList(doc);
 		var items = {};
+		if (getAction(url) == 'book') {
+			items[url] = '[Full Book] ' + text(doc, 'main h1');
+		}
 		for (var i = 0, n = list.length; i < n; i++) {
 			items[list[i].href] = list[i].textContent;
 		}
@@ -178,7 +188,8 @@ function complementItem(doc, item) {
 		// series/seriesNumber
 		if (!item.series) {
 			item.series = ZU.xpathText(doc, '//dd[@id="abstract-about-book-series-title"]')
-				|| ZU.xpathText(doc, '//div[contains(@class, "ArticleHeader")]//a[contains(@href, "/bookseries/")]');
+				|| ZU.xpathText(doc, '//div[contains(@class, "ArticleHeader")]//a[contains(@href, "/bookseries/")]')
+				|| text(doc, '.c-chapter-book-series > a');
 		}
 		if (!item.seriesNumber) {
 			item.seriesNumber = ZU.xpathText(doc, '//dd[@id="abstract-about-book-series-volume"]');
@@ -204,15 +215,40 @@ function complementItem(doc, item) {
 	if (tags && (!item.tags || item.tags.length === 0)) {
 		item.tags = tags.split(',');
 	}
+	tags = doc.querySelectorAll('.c-article-subject-list__subject');
+	if (tags.length && !item.tags.length) {
+		item.tags = [...tags].map(el => el.innerText);
+	}
 	return item;
 }
 
 function scrape(doc, url) {
 	var DOI = url.match(/\/(10\.[^#?]+)/)[1];
-	var risURL = "https://citation-needed.springer.com/v2/references/" + DOI + "?format=refman&flavour=citation";
-	// Z.debug("risURL" + risURL);
 	var pdfURL = "/content/pdf/" + encodeURIComponent(DOI) + ".pdf";
 	// Z.debug("pdfURL: " + pdfURL);
+
+	if (getAction(url) == 'book') {
+		let search = Zotero.loadTranslator('search');
+		search.setSearch({ DOI });
+		search.setHandler('translators', (obj, translators) => {
+			search.setTranslator(translators);
+			search.setHandler('itemDone', (obj, item) => {
+				item = complementItem(doc, item);
+				item.attachments.push({
+					url: pdfURL,
+					title: "Full Text PDF",
+					mimeType: "application/pdf"
+				});
+				item.complete();
+			});
+			search.translate();
+		});
+		search.getTranslators();
+		return;
+	}
+
+	var risURL = "https://citation-needed.springer.com/v2/references/" + DOI + "?format=refman&flavour=citation";
+	// Z.debug("risURL" + risURL);
 	ZU.doGet(risURL, function (text) {
 		// Z.debug(text)
 		var translator = Zotero.loadTranslator("import");
@@ -223,7 +259,7 @@ function scrape(doc, url) {
 
 			item.attachments.push({
 				url: pdfURL,
-				title: "Springer Full Text PDF",
+				title: "Full Text PDF",
 				mimeType: "application/pdf"
 			});
 			item.complete();
@@ -277,7 +313,7 @@ var testCases = [
 				"series": "Lecture Notes in Computer Science",
 				"attachments": [
 					{
-						"title": "Springer Full Text PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -318,7 +354,7 @@ var testCases = [
 				"url": "https://doi.org/10.1007/978-0-387-79061-9_5173",
 				"attachments": [
 					{
-						"title": "Springer Full Text PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -362,58 +398,58 @@ var testCases = [
 				"url": "https://doi.org/10.1007/978-1-60761-839-3_22",
 				"attachments": [
 					{
-						"title": "Springer Full Text PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
 					{
-						"tag": " ANOVA "
+						"tag": "ANOVA"
 					},
 					{
-						"tag": " AUC "
+						"tag": "AUC"
 					},
 					{
-						"tag": " Central Limit Theorem "
+						"tag": "Central Limit Theorem"
 					},
 					{
-						"tag": " Confidence limits "
+						"tag": "Confidence limits"
 					},
 					{
-						"tag": " Correlation "
+						"tag": "Correlation"
 					},
 					{
-						"tag": " Enrichment "
+						"tag": "Enrichment"
 					},
 					{
-						"tag": " Error bars "
+						"tag": "Error bars"
 					},
 					{
-						"tag": " Propagation of error "
+						"tag": "Propagation of error"
 					},
 					{
-						"tag": " ROC curves "
+						"tag": "ROC curves"
 					},
 					{
-						"tag": " Standard deviation "
+						"tag": "Standard deviation"
 					},
 					{
-						"tag": " Student’s t-test "
+						"tag": "Statistics"
 					},
 					{
-						"tag": " Variance "
+						"tag": "Student’s t-test"
 					},
 					{
-						"tag": " Virtual screening "
+						"tag": "Variance"
 					},
 					{
-						"tag": " logit transform "
+						"tag": "Virtual screening"
 					},
 					{
-						"tag": " p-Values "
+						"tag": "logit transform"
 					},
 					{
-						"tag": "Statistics "
+						"tag": "p-Values"
 					}
 				],
 				"notes": [],
@@ -485,11 +521,27 @@ var testCases = [
 				"volume": "17",
 				"attachments": [
 					{
-						"title": "Springer Full Text PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Analytical solutions"
+					},
+					{
+						"tag": "Coastal aquifers"
+					},
+					{
+						"tag": "Elastic storage"
+					},
+					{
+						"tag": "Submarine outlet-capping"
+					},
+					{
+						"tag": "Tidal loading efficiency"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -543,25 +595,25 @@ var testCases = [
 				"url": "https://doi.org/10.1007/0-387-24250-3_4",
 				"attachments": [
 					{
-						"title": "Springer Full Text PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
 					{
-						"tag": " peer interaction "
+						"tag": "Social mediation"
 					},
 					{
-						"tag": " revision "
+						"tag": "peer interaction"
 					},
 					{
-						"tag": " whole-class interaction "
+						"tag": "revision"
 					},
 					{
-						"tag": " writing "
+						"tag": "whole-class interaction"
 					},
 					{
-						"tag": "Social mediation "
+						"tag": "writing"
 					}
 				],
 				"notes": [],

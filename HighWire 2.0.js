@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-21 20:09:35"
+	"lastUpdated": "2022-06-13 22:14:27"
 }
 
 /*
@@ -30,6 +30,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
+const preprintType = ZU.fieldIsValidForType('title', 'preprint')
+	? 'preprint'
+	: 'report';
 
 function getSearchResults(doc, url, checkOnly) {
 	var xpaths = [
@@ -288,8 +292,10 @@ function addEmbMeta(doc, url) {
 
 	translator.setHandler("itemDone", function (obj, item) {
 		if (item.publicationTitle.endsWith('Rxiv')) {
-			item.itemType = 'report';
-			item.extra = (item.extra || '') + '\nType: article';
+			item.itemType = preprintType;
+			if (preprintType != 'preprint') {
+				item.extra = (item.extra || '') + '\nType: article';
+			}
 			item.libraryCatalog = item.publisher = item.publicationTitle;
 			delete item.publicationTitle;
 			delete item.institution;
@@ -403,7 +409,7 @@ function detectWeb(doc, url) {
 			&& !url.includes('/suppl/')
 		) {
 			if (url.includes('medrxiv.org') || url.includes('biorxiv.org')) {
-				return "report";
+				return preprintType;
 			}
 			else {
 				return "journalArticle";
@@ -1239,7 +1245,7 @@ var testCases = [
 		"url": "https://www.biorxiv.org/content/10.1101/2021.08.03.454978v1",
 		"items": [
 			{
-				"itemType": "report",
+				"itemType": "preprint",
 				"title": "Endothelial Semaphorin 3fb regulates Vegf pathway-mediated angiogenic sprouting",
 				"creators": [
 					{
@@ -1264,12 +1270,11 @@ var testCases = [
 					}
 				],
 				"date": "2021-08-05",
+				"DOI": "10.1101/2021.08.03.454978",
 				"abstractNote": "Vessel growth integrates diverse extrinsic signals with intrinsic signaling cascades to coordinate cell migration and sprouting morphogenesis. The pro-angiogenic effects of Vascular Endothelial Growth Factor (VEGF) are carefully controlled during sprouting to generate an efficiently patterned vascular network. We identify crosstalk between VEGF signaling and that of the secreted ligand Semaphorin 3fb (Sema3fb), one of two zebrafish paralogs of mammalian Sema3F. The sema3fb gene is expressed by endothelial cells in actively sprouting vessels. Loss of sema3fb results in abnormally wide and stunted intersegmental vessel artery sprouts. Although the sprouts initiate at the correct developmental time, they have a reduced migration speed. These sprouts have persistent filopodia and abnormally spaced nuclei suggesting dysregulated control of actin assembly. sema3fb mutants show simultaneously higher expression of pro-angiogenic (VEGF receptor 2 (vegfr2) and delta-like 4 (dll4)) and anti-angiogenic (soluble VEGF receptor 1 (svegfr1)/ soluble Fms Related Receptor Tyrosine Kinase 1 (sflt1)) pathway components. We show increased phospho-ERK staining in migrating angioblasts, consistent with enhanced Vegf activity. Reducing Vegfr2 kinase activity in sema3fb mutants rescues angiogenic sprouting. Our data suggest that Sema3fb plays a critical role in promoting endothelial sprouting through modulating the VEGF signaling pathway, acting as an autocrine cue that modulates intrinsic growth factor signaling.\nAuthor summary To supply tissues with essential oxygen and nutrients, blood vessel development is carefully orchestrated by positive ‘go’ and negative ‘stop’ growth signals as well as directional cues to shape patterning. Semaphorin proteins are named after the ‘Semaphore’ railway signaling system that directed trains along the appropriate tracks. Our work highlights the role of the Semaphorin 3fb protein in providing a pro-growth signal to developing vessels. Semaphorin 3fb is both produced by, and acts on the precursors of blood vessels as they migrate, a process known as autocrine control. We find that losing Semaphorin 3fb leads to stalled blood vessel growth, indicating it normally acts as a positive signal. It acts via modulating the VEGF growth factor signaling pathway that in turn, controls the migration process. We propose that Semaphorin3b fine-tunes vessel growth, thus ensuring a properly patterned network develops.",
-				"extra": "Type: article",
-				"institution": "bioRxiv",
 				"language": "en",
 				"libraryCatalog": "bioRxiv",
-				"pages": "2021.08.03.454978",
+				"repository": "bioRxiv",
 				"rights": "© 2021, Posted by Cold Spring Harbor Laboratory. This pre-print is available under a Creative Commons License (Attribution-NonCommercial-NoDerivs 4.0 International), CC BY-NC-ND 4.0, as described at http://creativecommons.org/licenses/by-nc-nd/4.0/",
 				"url": "https://www.biorxiv.org/content/10.1101/2021.08.03.454978v1",
 				"attachments": [
@@ -1293,7 +1298,7 @@ var testCases = [
 		"url": "https://www.medrxiv.org/content/10.1101/2021.06.16.21258632v1",
 		"items": [
 			{
-				"itemType": "report",
+				"itemType": "preprint",
 				"title": "A System Dynamics Model for Effects of Workplace Violence and Clinician Burnout on Agitation Management in the Emergency Department",
 				"creators": [
 					{
@@ -1323,12 +1328,11 @@ var testCases = [
 					}
 				],
 				"date": "2021-06-22",
+				"DOI": "10.1101/2021.06.16.21258632",
 				"abstractNote": "Background Over 1.7 million episodes of agitation occur annually across the United States in emergency departments (EDs), some of which lead to workplace assaults on clinicians and require invasive methods like physical restraints to maintain staff and patient safety. Recent studies demonstrated that experiences of workplace violence lead to symptoms of burnout, which may impact future decisions regarding use of physical restraints on agitated patients. To capture the dynamic interactions between clinicians and agitated patients under their care, we applied qualitative system dynamics methods to develop a model that describes causal feedback mechanisms of clinician burnout and the use of physical restraints to manage agitation.\nMethods We convened an interprofessional panel of clinician stakeholders and agitation experts for a series of model building sessions to develop the current model. The panel derived the final version of our model over ten sessions of iterative refinement and modification, each lasting approximately three to four hours. We incorporated findings from prior studies on agitation and burnout as a result of workplace violence, identifying interpersonal and psychological factors likely to influence our outcomes of interest to form the basis of our model.\nResults The final model resulted in five main sets of feedback loops that describe key narratives regarding the relationship between clinician burnout and agitated patients becoming physically restrained: (1) use of restraints decreases agitation and risk of assault, leading to increased perceptions of safety and decreasing use of restraints in a balancing feedback loop which stabilizes the system; (2) clinician stress leads to a perception of decreased safety and lower threshold to restrain, causing more stress in a negatively reinforcing loop; (3) clinician burnout leads to a decreased perception of colleague support which leads to more burnout in a negatively reinforcing loop; (4) clinician burnout leads to negative perceptions of patient intent during agitation, thus lowering threshold to restrain and leading to higher task load, more likelihood of workplace assaults, and higher burnout in a negatively reinforcing loop; and (5) mutual trust between clinicians causes increased perceptions of safety and improved team control, leading to decreased clinician stress and further increased mutual trust in a positively reinforcing loop.\nConclusions Our system dynamics approach led to the development of a robust qualitative model that illustrates a number of important feedback cycles that underly the relationships between clinician experiences of workplace violence, stress and burnout, and impact on decisions to physically restrain agitated patients. This work identifies potential opportunities at multiple targets to break negatively reinforcing cycles and support positive influences on safety for both clinicians and patients in the face of physical danger.",
-				"extra": "Type: article",
-				"institution": "medRxiv",
 				"language": "en",
 				"libraryCatalog": "medRxiv",
-				"pages": "2021.06.16.21258632",
+				"repository": "medRxiv",
 				"rights": "© 2021, Posted by Cold Spring Harbor Laboratory. The copyright holder for this pre-print is the author. All rights reserved. The material may not be redistributed, re-used or adapted without the author's permission.",
 				"url": "https://www.medrxiv.org/content/10.1101/2021.06.16.21258632v1",
 				"attachments": [

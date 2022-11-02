@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-26 18:03:05"
+	"lastUpdated": "2022-07-19 15:27:10"
 }
 
 /*
@@ -167,19 +167,6 @@ function finalizeItem(item, doc, doi, baseUrl) {
 		url: pdfurl + doi,
 		mimeType: 'application/pdf'
 	}];
-	if (doc) {
-		item.attachments.push({
-			title: 'Snapshot',
-			document: doc
-		});
-	}
-	else {
-		item.attachments.push({
-			title: 'Snapshot',
-			url: item.url || absurl + doi,
-			mimeType: 'text/html'
-		});
-	}
 
 	item.complete();
 }
@@ -225,10 +212,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -297,10 +280,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -359,10 +338,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -443,10 +418,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -484,10 +455,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -551,10 +518,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -615,10 +578,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],

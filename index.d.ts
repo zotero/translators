@@ -116,11 +116,13 @@ declare namespace Zotero {
 			urlRe?: RegExp,
 			rejectRe?: RegExp
 		): { [link: string]: string };
+		/** @deprecated use `requestDocument()` */
 		function processDocuments(
 			urls: string | string[],
 			processor: (doc: Document) => any,
 			noCompleteOnError?: boolean
 		): void;
+		/** @deprecated use `request()`, `requestText()`, `requestJSON()`, or `requestDocument()` */
 		function doGet(
 			urls: string | string[],
 			processor?: (text: string) => void,
@@ -129,6 +131,7 @@ declare namespace Zotero {
 			requestHeaders?: { [header: string]: string },
 			successCodes?: number[]
 		): boolean;
+		/** @deprecated use `request()`, `requestText()`, `requestJSON()`, or `requestDocument()` */
 		function doPost(
 			url: string,
 			body: string,
@@ -154,7 +157,7 @@ declare namespace Zotero {
 
 		type HTTPRequestParameters<T extends HTTPResponseType> = {
 			method?: string = "GET",
-			requestHeaders?: Record<string, string>,
+			headers?: Record<string, string>,
 			body?: string,
 			responseCharset?: string,
 			responseType?: T = "text"
@@ -254,82 +257,55 @@ declare namespace Zotero {
 		tag: string;
 	}
 
-	type ItemType =
-		| "annotation"
-		| "artwork"
-		| "attachment"
-		| "audioRecording"
-		| "bill"
-		| "blogPost"
-		| "book"
-		| "bookSection"
-		| "case"
-		| "computerProgram"
-		| "conferencePaper"
-		| "dictionaryEntry"
-		| "document"
-		| "email"
-		| "encyclopediaArticle"
-		| "film"
-		| "forumPost"
-		| "hearing"
-		| "instantMessage"
-		| "interview"
-		| "journalArticle"
-		| "letter"
-		| "magazineArticle"
-		| "manuscript"
-		| "map"
-		| "newspaperArticle"
-		| "note"
-		| "patent"
-		| "podcast"
-		| "presentation"
-		| "radioBroadcast"
-		| "report"
-		| "statute"
-		| "thesis"
-		| "tvBroadcast"
-		| "videoRecording"
-		| "webpage";
+	type ItemTypes = {
+		"artwork": ArtworkItem,
+		"audioRecording": AudioRecordingItem,
+		"bill": BillItem,
+		"blogPost": BlogPostItem,
+		"book": BookItem,
+		"bookSection": BookSectionItem,
+		"case": CaseItem,
+		"computerProgram": ComputerProgramItem,
+		"conferencePaper": ConferencePaperItem,
+		"dictionaryEntry": DictionaryEntryItem,
+		"document": DocumentItem,
+		"email": EmailItem,
+		"encyclopediaArticle": EncyclopediaArticleItem,
+		"film": FilmItem,
+		"forumPost": ForumPostItem,
+		"hearing": HearingItem,
+		"instantMessage": InstantMessageItem,
+		"interview": InterviewItem,
+		"journalArticle": JournalArticleItem,
+		"letter": LetterItem,
+		"magazineArticle": MagazineArticleItem,
+		"manuscript": ManuscriptItem,
+		"map": MapItem,
+		"newspaperArticle": NewspaperArticleItem,
+		"patent": PatentItem,
+		"podcast": PodcastItem,
+		"preprint": PreprintItem,
+		"presentation": PresentationItem,
+		"radioBroadcast": RadioBroadcastItem,
+		"report": ReportItem,
+		"statute": StatuteItem,
+		"thesis": ThesisItem,
+		"tvBroadcast": TVBroadcastItem,
+		"videoRecording": VideoRecordingItem,
+		"webpage": WebpageItem,
+	}
+
+	type ItemType = keyof ItemTypes;
 
 	var Item: {
-		new(): Item;
-		new(itemType: "artwork"): ArtworkItem;
-		new(itemType: "audioRecording"): AudioRecordingItem;
-		new(itemType: "bill"): BillItem;
-		new(itemType: "blogPost"): BlogPostItem;
-		new(itemType: "book"): BookItem;
-		new(itemType: "bookSection"): BookSectionItem;
-		new(itemType: "case"): CaseItem;
-		new(itemType: "computerProgram"): ComputerProgramItem;
-		new(itemType: "conferencePaper"): ConferencePaperItem;
-		new(itemType: "dictionaryEntry"): DictionaryEntryItem;
-		new(itemType: "document"): DocumentItem;
-		new(itemType: "email"): EmailItem;
-		new(itemType: "encyclopediaArticle"): EncyclopediaArticleItem;
-		new(itemType: "film"): FilmItem;
-		new(itemType: "forumPost"): ForumPostItem;
-		new(itemType: "hearing"): HearingItem;
-		new(itemType: "instantMessage"): InstantMessageItem;
-		new(itemType: "interview"): InterviewItem;
-		new(itemType: "journalArticle"): JournalArticleItem;
-		new(itemType: "letter"): LetterItem;
-		new(itemType: "magazineArticle"): MagazineArticleItem;
-		new(itemType: "manuscript"): ManuscriptItem;
-		new(itemType: "map"): MapItem;
-		new(itemType: "newspaperArticle"): NewspaperArticleItem;
-		new(itemType: "patent"): PatentItem;
-		new(itemType: "podcast"): PodcastItem;
-		new(itemType: "presentation"): PresentationItem;
-		new(itemType: "radioBroadcast"): RadioBroadcastItem;
-		new(itemType: "report"): ReportItem;
-		new(itemType: "statute"): StatuteItem;
-		new(itemType: "thesis"): ThesisItem;
-		new(itemType: "tvBroadcast"): TVBroadcastItem;
-		new(itemType: "videoRecording"): VideoRecordingItem;
-		new(itemType: "webpage"): WebpageItem;
+		new <T extends ItemType>(itemType: T): ItemTypes[T];
+		new(itemType: string): Item;
 	}
+
+	/**
+	 * Generic item with unknown type.
+	 */
+	type Item = ItemTypes[ItemType];
 
 	type ArtworkItem = {
 		itemType: "artwork";
@@ -1114,6 +1090,40 @@ declare namespace Zotero {
 		[key: string]: string;
 	};
 
+	type PreprintItem = {
+		itemType: "preprint";
+		title?: string;
+		abstractNote?: string;
+		genre?: string;
+		repository?: string;
+		archiveID?: string;
+		place?: string;
+		date?: string;
+		series?: string;
+		seriesNumber?: string;
+		DOI?: string;
+		citationKey?: string;
+		url?: string;
+		accessDate?: string;
+		archive?: string;
+		archiveLocation?: string;
+		shortTitle?: string;
+		language?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "contributor" | "editor" | "reviewedAuthor" | "translator">[];
+		attachments: Attachment[];
+		tags: Tag[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
+
+		[key: string]: string;
+	};
+
 	type PresentationItem = {
 		itemType: "presentation";
 		title?: string;
@@ -1352,42 +1362,6 @@ declare namespace Zotero {
 		[key: string]: string;
 	};
 
-	type Item =
-		| ArtworkItem
-		| AudioRecordingItem
-		| BillItem
-		| BlogPostItem
-		| BookItem
-		| BookSectionItem
-		| CaseItem
-		| ComputerProgramItem
-		| ConferencePaperItem
-		| DictionaryEntryItem
-		| DocumentItem
-		| EmailItem
-		| EncyclopediaArticleItem
-		| FilmItem
-		| ForumPostItem
-		| HearingItem
-		| InstantMessageItem
-		| InterviewItem
-		| JournalArticleItem
-		| LetterItem
-		| MagazineArticleItem
-		| ManuscriptItem
-		| MapItem
-		| NewspaperArticleItem
-		| PatentItem
-		| PodcastItem
-		| PresentationItem
-		| RadioBroadcastItem
-		| ReportItem
-		| StatuteItem
-		| ThesisItem
-		| TVBroadcastItem
-		| VideoRecordingItem
-		| WebpageItem;
-
 	interface Note {
 		title?: string;
 		note: string;
@@ -1552,6 +1526,8 @@ declare namespace Zotero {
 	): Zotero.Translate<SearchTranslator>;
 	function done(returnValue: string | false): void;
 	function debug(str: string, level?: 1 | 2 | 3 | 4 | 5): void;
+	function read(length?: number): any;
+	function getXML(): any;
 
 	const isBookmarklet: boolean;
 	const isConnector: boolean;
