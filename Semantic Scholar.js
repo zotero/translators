@@ -142,7 +142,7 @@ function scrape(doc, url) {
 
 	if (article.mainEntity && (article.mainEntity.includes('pdfs.semanticscholar.org') || article.mainEntity.includes('.pdf'))) {
 		item.attachments.push({
-			title: 'Fulltext PDF',
+			title: 'Full Text PDF',
 			mimeType: 'application/pdf',
 			url: article.mainEntity
 		});
