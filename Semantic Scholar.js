@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-02 18:18:17"
+	"lastUpdated": "2022-11-02 21:01:15"
 }
 
 /*
@@ -138,7 +138,7 @@ function scrape(doc, url) {
 	}
 	
 	if (article.sameAs) {
-		item.DOI = ZU.cleanDOI(article.sameAs);
+		item.DOI = ZU.cleanDOI(decodeURIComponent(article.sameAs));
 	}
 
 	if (article.mainEntity && (article.mainEntity.includes('pdfs.semanticscholar.org') || article.mainEntity.includes('.pdf'))) {
@@ -432,7 +432,7 @@ var testCases = [
 					}
 				],
 				"date": "24 February 2021",
-				"DOI": "10.18653/v1%2F2021.emnlp-main.602",
+				"DOI": "10.18653/v1/2021.emnlp-main.602",
 				"abstractNote": "Large language models have become increasingly difficult to train because of the growing computation time and cost. In this work, we present SRU++, a highly-efficient architecture that combines fast recurrence and attention for sequence modeling. SRU++ exhibits strong modeling capacity and training efficiency. On standard language modeling tasks such as Enwik8, Wiki-103 and Billion Word datasets, our model obtains better bits-per-character and perplexity while using 3x-10x less training cost compared to top-performing Transformer models. For instance, our model achieves a state-of-the-art result on the Enwik8 dataset using 1.6 days of training on an 8-GPU machine. We further demonstrate that SRU++ requires minimal attention for near state-of-the-art performance. Our results suggest jointly leveraging fast recurrence with little attention as a promising direction for accelerating model training and inference.",
 				"libraryCatalog": "Semantic Scholar",
 				"publisher": "EMNLP",
