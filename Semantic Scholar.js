@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-01 18:55:47"
+	"lastUpdated": "2022-11-02 18:10:37"
 }
 
 /*
@@ -173,7 +173,7 @@ var testCases = [
 					}
 				],
 				"date": "18 June 2021",
-				"DOI": "https://doi.org/10.1109/IMCEC51613.2021.9482325",
+				"DOI": "10.1109/IMCEC51613.2021.9482325",
 				"abstractNote": "In recent years, the tourism field related websites are increasing day by day, the network has produced massive tourist generation data. Based on the semi-structured data of scenic spots, hotels and caterings on tourist websites and the travel notes published by tourists, this paper constructed the tourism knowledge graph. The extraction of entities from travel notes was faced with the problems of named entity recognition and entity alignment. In order to improve the accuracy of extracting entities from travel notes, in this paper, the named entity recognition model based on BiLSTM-CRF and the entity alignment model based on siamese network were proposed. F values can reach 90.8% and 93.0%, respectively.",
 				"libraryCatalog": "Semantic Scholar",
 				"publicationTitle": "2021 IEEE 4th Advanced Information Management, Communicates, Electronic and Automation Control Conference (IMCEC)",
@@ -222,7 +222,7 @@ var testCases = [
 						"mimeType": "text/html"
 					},
 					{
-						"title": "Fulltext PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -280,7 +280,7 @@ var testCases = [
 						"mimeType": "text/html"
 					},
 					{
-						"title": "Fulltext PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -352,7 +352,7 @@ var testCases = [
 						"mimeType": "text/html"
 					},
 					{
-						"title": "Fulltext PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -399,7 +399,7 @@ var testCases = [
 						"mimeType": "text/html"
 					},
 					{
-						"title": "Fulltext PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -426,7 +426,7 @@ var testCases = [
 					}
 				],
 				"date": "24 February 2021",
-				"DOI": "https://doi.org/10.18653/v1%2F2021.emnlp-main.602",
+				"DOI": "10.18653/v1%2F2021.emnlp-main.602",
 				"abstractNote": "Large language models have become increasingly difficult to train because of the growing computation time and cost. In this work, we present SRU++, a highly-efficient architecture that combines fast recurrence and attention for sequence modeling. SRU++ exhibits strong modeling capacity and training efficiency. On standard language modeling tasks such as Enwik8, Wiki-103 and Billion Word datasets, our model obtains better bits-per-character and perplexity while using 3x-10x less training cost compared to top-performing Transformer models. For instance, our model achieves a state-of-the-art result on the Enwik8 dataset using 1.6 days of training on an 8-GPU machine. We further demonstrate that SRU++ requires minimal attention for near state-of-the-art performance. Our results suggest jointly leveraging fast recurrence with little attention as a promising direction for accelerating model training and inference.",
 				"libraryCatalog": "Semantic Scholar",
 				"publisher": "EMNLP",
@@ -438,7 +438,7 @@ var testCases = [
 						"mimeType": "text/html"
 					},
 					{
-						"title": "Fulltext PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
