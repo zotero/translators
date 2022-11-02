@@ -137,7 +137,7 @@ function scrape(doc, url) {
 	}
 	
 	if (article.sameAs) {
-		item.DOI = article.sameAs;
+		item.DOI = ZU.cleanDOI(article.sameAs);
 	}
 
 	if (article.mainEntity && (article.mainEntity.includes('pdfs.semanticscholar.org') || article.mainEntity.includes('.pdf'))) {
