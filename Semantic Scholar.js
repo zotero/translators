@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-02 18:10:37"
+	"lastUpdated": "2022-11-02 18:18:17"
 }
 
 /*
@@ -115,6 +115,7 @@ function scrape(doc, url) {
 		url: url,
 		title: url.includes('semanticscholar.org/reader') ? 'Semantic Reader Link' : 'Semantic Scholar Link',
 		mimeType: 'text/html',
+		snapshot: false
 	});
 
 	if (article.about) {
@@ -181,7 +182,8 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Semantic Scholar Link",
-						"mimeType": "text/html"
+						"mimeType": "text/html",
+						"snapshot": false
 					}
 				],
 				"tags": [],
@@ -219,7 +221,8 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Semantic Scholar Link",
-						"mimeType": "text/html"
+						"mimeType": "text/html",
+						"snapshot": false
 					},
 					{
 						"title": "Full Text PDF",
@@ -277,7 +280,8 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Semantic Scholar Link",
-						"mimeType": "text/html"
+						"mimeType": "text/html",
+						"snapshot": false
 					},
 					{
 						"title": "Full Text PDF",
@@ -349,7 +353,8 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Semantic Reader Link",
-						"mimeType": "text/html"
+						"mimeType": "text/html",
+						"snapshot": false
 					},
 					{
 						"title": "Full Text PDF",
@@ -396,7 +401,8 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Semantic Reader Link",
-						"mimeType": "text/html"
+						"mimeType": "text/html",
+						"snapshot": false
 					},
 					{
 						"title": "Full Text PDF",
@@ -435,7 +441,8 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Semantic Reader Link",
-						"mimeType": "text/html"
+						"mimeType": "text/html",
+						"snapshot": false
 					},
 					{
 						"title": "Full Text PDF",
