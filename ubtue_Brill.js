@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-08 13:41:19"
+	"lastUpdated": "2022-11-07 18:05:51"
 }
 
 /*
@@ -70,20 +70,20 @@ function getSearchResults(doc) {
 function postProcess(doc, item) {
 	let title = ZU.xpathText(doc, '//meta[@name="citation_title"]//@content');
 	if (title) item.title = title; 
-    let abstracts = ZU.xpath(doc, '//section[@class="abstract"]//p');
-    //multiple abstracts
-    if (abstracts && abstracts.length > 0) {
+	let abstracts = ZU.xpath(doc, '//section[@class="abstract"]//p');
+	//multiple abstracts
+	if (abstracts && abstracts.length > 0) {
 	// Deduplicate original results
 	abstracts = [...new Set(abstracts.map(abstract => abstract.textContent))];
 	item.abstractNote = abstracts[0].trim().replace(/^(Résumé\s?)/i, "");
 		if (abstracts.length > 1) {
-		    for (let abs of abstracts.slice(1)) {
-		              item.notes.push({
-		 	         note: "abs:" + ZU.trimInternal(abs),
+			for (let abs of abstracts.slice(1)) {
+					  item.notes.push({
+		 			 note: "abs:" + ZU.trimInternal(abs),
 		 	  });
 			}
 		}
-    }
+	}
 
 	// i set 100 as limit of string length, because usually a string of a pseudoabstract has less then 150 character e.g. "abstractNote": "\"Die Vernünftigkeit des jüdischen Dogmas\" published on 05 Sep 2020 by Brill."
 	if (item.abstractNote.length < 100) delete item.abstractNote;
@@ -110,8 +110,17 @@ function postProcess(doc, item) {
 	}
 
 	//scrape ORCID from website
-	let authorSectionEntries = doc.querySelectorAll('.text-subheading span');
+	let authorSectionEntries = doc.querySelectorAll('.contributor-details');
 	for (let authorSectionEntry of authorSectionEntries) {
+		let author = ZU.xpathText(authorSectionEntry, './/div/span[@class="contributor-details-link"]');
+		let orcidHref = authorSectionEntry.querySelector('.orcid');
+		if (author && orcidHref) {
+			let orcid = orcidHref.textContent.replace(/.*(\d{4}-\d+-\d+-\d+x?)$/i, '$1');
+			item.notes.push({note: "orcid:" + orcid + ' | ' + author});
+		}
+	}
+	let authorSectionEntries2 = doc.querySelectorAll('.text-subheading span');
+	for (let authorSectionEntry of authorSectionEntries2) {
 		let authorInfo = authorSectionEntry.querySelector('.c-Button--link');
 		let orcidHref = authorSectionEntry.querySelector('.orcid');
 		if (authorInfo && orcidHref) {
@@ -134,6 +143,11 @@ function postProcess(doc, item) {
 	let freeAccess = text(doc, '.color-access-free');
 	if (freeAccess && freeAccess.match(/(free|freier)\s+(access|zugang)/gi)) item.notes.push('LF:');
 	if (!item.itemType)	item.itemType = "journalArticle";
+		for (let tag of ZU.xpath(doc, '//meta[@property="article:tag"]/@content')) {
+		if (!item.tags.includes(tag.textContent)) item.tags.push(tag.textContent);
+	}
+
+	item.attachments = [];
 }
 
 function extractErscheinungsjahr(date) {
@@ -182,7 +196,8 @@ function doWeb(doc, url) {
 		invokeEmbeddedMetadataTranslator(doc, url);
 }
 
-	/** BEGIN TEST CASES **/
+	
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -339,25 +354,28 @@ var testCases = [
 				"publicationTitle": "Oriens",
 				"url": "https://brill.com/view/journals/orie/49/3-4/article-p370_7.xml",
 				"volume": "49",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Shiʿisme duodécimain"
+					},
+					{
+						"tag": "Twelver Shiʿism"
 					},
 					{
 						"tag": "Ziyārat ʿĀšūrā"
 					},
 					{
 						"tag": "chant élégiaque (nawḥa)"
+					},
+					{
+						"tag": "elegiac song (nawḥa)"
+					},
+					{
+						"tag": "elegy (marṯīya)"
+					},
+					{
+						"tag": "popular religion"
 					},
 					{
 						"tag": "religion populaire"
@@ -388,6 +406,79 @@ var testCases = [
 		"type": "web",
 		"url": "https://brill.com/view/journals/orie/49/3-4/orie.49.issue-3-4.xml",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://brill.com/view/journals/jie/6/1/article-p19_2.xml",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Avicenna on Animal Goods",
+				"creators": [
+					{
+						"firstName": "Bethany Somma (بِثَنِي",
+						"lastName": "سومّا)",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022",
+				"DOI": "10.1163/24685542-12340068",
+				"ISSN": "2468-5534, 2468-5542",
+				"abstractNote": "Investigating historical sources for positions on animals and animal ethics within philosophy of the Islamic world is a profound challenge, given the quantity and diversity of possible source texts. This article argues that Ibn Sīnā’s (Avicenna, d. 428/1037) philosophy provides a hitherto unappreciated account of animal well-being. By tracing his conception of providence to that of essences, and by highlighting the role of psychological powers in ensuring the attainment of essential goods, this article argues that Avicenna can account both for essential goods and interests proper to individual species and for the capacity of animals to attain these goods and interests. This account rests on Avicenna’s rich teleology, which includes the role of the lawgiver as the upholder of justice within human society. In the end, human goods and animal goods are articulated with the same overarching account, which human beings are called to know.",
+				"issue": "1",
+				"language": "eng",
+				"libraryCatalog": "brill.com",
+				"pages": "19-52",
+				"publicationTitle": "Journal of Islamic Ethics",
+				"url": "https://brill.com/view/journals/jie/6/1/article-p19_2.xml",
+				"volume": "6",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Animals"
+					},
+					{
+						"tag": "Avicenna"
+					},
+					{
+						"tag": "animal ethics"
+					},
+					{
+						"tag": "philosophy"
+					},
+					{
+						"tag": "providence"
+					},
+					{
+						"tag": "teleology"
+					},
+					{
+						"tag": "أخلاقيات الحيوان"
+					},
+					{
+						"tag": "ابن سينا"
+					},
+					{
+						"tag": "الحيوانات"
+					},
+					{
+						"tag": "العناية الإلهية"
+					},
+					{
+						"tag": "الغائية"
+					},
+					{
+						"tag": "الفلسفة"
+					}
+				],
+				"notes": [
+					{
+						"note": "LF:"
+					}
+				],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
