@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-08 16:31:28"
+	"lastUpdated": "2022-11-07 17:43:27"
 }
 
 /*
@@ -144,6 +144,7 @@ function scrapeBook(doc, url) {
 			'/following-sibling::p'].join(''), null, "\n") || "");
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
 	normalizeIssue(doc, item);
+	newItem.title = newItem.title.replace(/\*+$/, '');
 	newItem.complete();
 }
 
@@ -209,6 +210,7 @@ function scrapeEM(doc, url) {
 			}
 		}
 		normalizeIssue(doc, item);
+		item.title = item.title.replace(/\*+$/, '');
 		item.complete();
 	});
 
@@ -217,6 +219,7 @@ function scrapeEM(doc, url) {
 	addFreeAccessTag(doc, item);
 	getORCID(doc, item);
 	normalizeIssue(doc, item);
+	item.title = item.title.replace(/\*+$/, '');
 	item.complete();
 
 	translator.getTranslatorObject(function(em) {
@@ -381,7 +384,7 @@ function scrapeBibTeX(doc, url) {
 			addFreeAccessTag(doc, item);
 			getORCID(doc, item);
 			normalizeIssue(doc, item);
-			item.title = item.title.replace(/☆+$/, '');
+			item.title = item.title.replace(/\*+$/, '');
 			item.complete();
 		});
 
@@ -459,6 +462,7 @@ function scrapeCochraneTrial(doc, url){
 	addBookReviewTag(doc, item);
 	addArticleNumber(doc, item);
 	normalizeIssue(doc, item);
+	item.title = item.title.replace(/\*+$/, '');
 	item.complete();
 }
 
