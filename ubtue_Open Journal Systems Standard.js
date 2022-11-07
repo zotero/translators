@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-03-23 10:10:43"
+	"lastUpdated": "2022-11-07 12:06:42"
 }
 
 /*
@@ -214,6 +214,15 @@ function invokeEMTranslator(doc) {
 		}
 		if (i.issue === "0") delete i.issue;
 		if (i.abstractNote && i.abstractNote.match(/No abstract available/)) delete i.abstractNote;
+		if (i.abstractNote) {
+			let completeAbstractText = i.abstractNote.replace(/^(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? /, '');
+			let absNr = 0;
+			for (let abs of completeAbstractText.split(/(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? /g)) {
+				if (absNr == 0) i.abstractNote = abs.replace(/^\s*\t*(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? |[\s\t\n]*$/g, '');
+				else i.notes.push('abs:' + abs.replace(/^\s*\t*(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? |[\s\t\n]*$/g, ''));
+				absNr += 1;
+			}
+		}
 		i.tags = splitDotSeparatedKeywords(i);
 		i.title = joinTitleAndSubtitle(doc, i);
 		// some journal assigns the volume to the date
@@ -262,6 +271,7 @@ function doWeb(doc, url) {
 		invokeEMTranslator(doc, url);
 	}
 }
+
 
 
 
@@ -913,6 +923,66 @@ var testCases = [
 					{
 						"note": "orcid:0000-0002-0918-0226 | Elfrieda Marie-Louise Fleischmann"
 					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://tidsskrift.dk/rvt/article/view/132100",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "What Did King Hákon góði Do before the Battle at Fitjar and after the Battle at Avaldsnes?",
+				"creators": [
+					{
+						"firstName": "Andreas",
+						"lastName": "Nordberg",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022/03/25",
+				"DOI": "10.7146/rt.v74i.132100",
+				"ISSN": "1904-8181",
+				"abstractNote": "The starting point for this paper is the enigmatic stanza 6 of the Norwegian skald Guthormr sindri's mid-900s poem Hákonardrápa. This stanza depicts the Norwegian king Hákon góði clashing his spears together over the heads of the fallen warriors after the battle of Avaldsnes. But why did he do it? And what did Hákon do when he \"played\" (lék) in front of his army before the Battle of Fitjar, as portrayed in Eyvindr Finnsson’s poem Hákonarmál? Roman sources, iconographic motifs from the migration period to the Viking age, as well as information in Old Norse literature, suggest that war dances, intimidating movements, as well as aggressive and incendiary gestures, cries and songs constituted an important aspect of warfare among Germanic and Scandinavian peoples. In this paper, it is suggested that Hákon's – to us – enigmatic performances in Hákonardrápa and Hákonarmál may be understandable within the framework of this martial context.",
+				"journalAbbreviation": "RvT",
+				"language": "da",
+				"libraryCatalog": "tidsskrift.dk",
+				"pages": "119-138",
+				"publicationTitle": "Religionsvidenskabeligt Tidsskrift",
+				"rights": "Copyright (c) 2022 Forfatter og Tidsskrift",
+				"url": "https://tidsskrift.dk/rvt/article/view/132100",
+				"volume": "74",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Skaldic Poetry"
+					},
+					{
+						"tag": "battlefield behaviour"
+					},
+					{
+						"tag": "ritual"
+					},
+					{
+						"tag": "war dance"
+					},
+					{
+						"tag": "Óðinn worship"
+					}
+				],
+				"notes": [
+					"abs:Utgångspunkten för denna artikel är en gåtfull strof (6) i den norske skalden Guthormr sindri’s dikt Hákonardrápa, från mitten av 900-talet. Strofen beskriver hur den norske kungen Hákon góði slog samman spjut över huvudena på de fallna krigare, som låg spridda över slagfältet efter slaget vid Avaldsnes. Varför gjorde han det? Och vad gjorde samme kung Hákon, när han enligt Eyvindr Finnsson’s poem Hákonarmál “lekte” (lék) framför sina krigare på slagfältet före slaget vid Fitjar? Romerska källor, ikonografiska motiv från folkvandringstid till vikingatid, liksom uppgifter i den norröna litteraturen, visar att krigsdanser, hotfulla rörelser samt aggressiva och eggande gester, utrop och sånger var viktiga inslag i krigsföringen bland de germanska och skandinaviska folken. I denna artikel föreslås att Hákon’s – för oss – gåtfulla handlingar i Hákonardrápa och Hákonarmál blir förståeliga inom ramen för denna militära kontext."
 				],
 				"seeAlso": []
 			}
