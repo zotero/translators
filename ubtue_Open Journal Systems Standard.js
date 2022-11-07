@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-07 16:14:16"
+	"lastUpdated": "2022-11-07 16:47:35"
 }
 
 /*
@@ -192,7 +192,12 @@ function getOrcids(doc, ISSN) {
 function joinTitleAndSubtitle (doc, item) {
 	if (item.ISSN == '1799-3121') {
 		if (doc.querySelector(".subtitle")) {
-			item.title = item.title + ' ' + doc.querySelector(".subtitle").textContent.trim();
+			item.title = item.title + ': ' + doc.querySelector(".subtitle").textContent.trim();
+		}
+	}
+	if (item.ISSN == '1018-1539') {
+		if (ZU.xpathText(doc, '//h1[@class="page-header"]/small')) {
+			item.title = item.title + ': ' + ZU.xpathText(doc, '//h1[@class="page-header"]/small').trim();
 		}
 	}
 	return item.title;
@@ -904,6 +909,73 @@ var testCases = [
 				],
 				"notes": [
 					"abs:Utgångspunkten för denna artikel är en gåtfull strof (6) i den norske skalden Guthormr sindri’s dikt Hákonardrápa, från mitten av 900-talet. Strofen beskriver hur den norske kungen Hákon góði slog samman spjut över huvudena på de fallna krigare, som låg spridda över slagfältet efter slaget vid Avaldsnes. Varför gjorde han det? Och vad gjorde samme kung Hákon, när han enligt Eyvindr Finnsson’s poem Hákonarmál “lekte” (lék) framför sina krigare på slagfältet före slaget vid Fitjar? Romerska källor, ikonografiska motiv från folkvandringstid till vikingatid, liksom uppgifter i den norröna litteraturen, visar att krigsdanser, hotfulla rörelser samt aggressiva och eggande gester, utrop och sånger var viktiga inslag i krigsföringen bland de germanska och skandinaviska folken. I denna artikel föreslås att Hákon’s – för oss – gåtfulla handlingar i Hákonardrápa och Hákonarmál blir förståeliga inom ramen för denna militära kontext."
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://oerf-journal.eu/index.php/oerf/article/view/318",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Mehrperspektivität durch fächerkooperierenden Unterricht: Interreligiöses Begegnungslernen zwischen Schülerinnen und Schülern der Fächer des RUs und des Ethik- bzw. Philosophieunterrichts",
+				"creators": [
+					{
+						"firstName": "Katja",
+						"lastName": "Boehme",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hans-Bernhard",
+						"lastName": "Petermann",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022/05/16",
+				"DOI": "10.25364/10.30:2022.1.12",
+				"ISSN": "1018-1539",
+				"abstractNote": "Interreligiöses Begegnungslernen (IRBL) in Kooperation der Schul- und Studienfächer der Theologien bzw. des bekenntnisorientierten Religionsunterrichts und der Philosophie/Ethik wird im Raum Heidelberg und in Wien in Schulprojekten durchgeführt und seit 2007/08 &nbsp;in der Lehrkräfteausbildung der KPH Wien/Krems und seit 2011 an der PH Heidelberg (dort in Kooperation mit anderen Lehrkräfteausbildungsstätten) angeboten. Vorliegender Beitrag orientiert über bildungskonzeptionelle Rahmenbedingungen und Herausforderungen einer Kooperation zwischen den Schulfächern des Religions- und Ethikunterrichts wie auch konkret über Organisation und Themen des IRBL auf dem Hintergrund erprobter und evaluierter Projekte in Schule und Hochschule aus dem Raum Heidelberg.",
+				"issue": "1",
+				"journalAbbreviation": "1",
+				"language": "de",
+				"libraryCatalog": "oerf-journal.eu",
+				"pages": "202-217",
+				"publicationTitle": "Österreichisches Religionspädagogisches Forum",
+				"rights": "Copyright (c) 2022 Österreichisches Religionspädagogisches Forum",
+				"shortTitle": "Mehrperspektivität durch fächerkooperierenden Unterricht",
+				"url": "https://oerf-journal.eu/index.php/oerf/article/view/318",
+				"volume": "30",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Begegnungslernen"
+					},
+					{
+						"tag": "Interdisziplinarität"
+					},
+					{
+						"tag": "Interreligiosität"
+					},
+					{
+						"tag": "Mehrperspektivität"
+					},
+					{
+						"tag": "Projektunterricht"
+					}
+				],
+				"notes": [
+					"abs:Interreligious Learning in encounter (IRBL) through cooperation between the subjects of the theologies (or confession-oriented subjects of religious education) and philosophy/ethics in school and university is carried out in school projects in the Heidelberg region and in Vienna and has been offered as an additional qualification in teacher training since 2007/08 at KPH Vienna/Krems and since 2011 at the University of Education in Heidelberg. This article provides an orientation on the educational conceptual framework and challenges of cooperation between the school subjects of religion and ethics and specifically on the organization and topics of the IRBL against the background of practiced and evaluated projects in schools and universities."
 				],
 				"seeAlso": []
 			}
