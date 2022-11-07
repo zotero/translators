@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-07 12:06:42"
+	"lastUpdated": "2022-11-07 16:14:16"
 }
 
 /*
@@ -223,6 +223,15 @@ function invokeEMTranslator(doc) {
 				absNr += 1;
 			}
 		}
+		for (let abs of ZU.xpath(doc, '//meta[@name="DC.Description"]/@content')) {
+			let found = false;
+			for (let note of i.notes) {
+				if (note.substring(0,20) == ('abs:' + abs.textContent).substring(0,20)) found = true;
+			}
+			if (i.abstractNote && !(i.abstractNote.trim().substring(0, 20) == abs.textContent.trim().substring(0, 20)) && !found) {
+				i.notes.push('abs:' + abs.textContent);
+			}
+		}
 		i.tags = splitDotSeparatedKeywords(i);
 		i.title = joinTitleAndSubtitle(doc, i);
 		// some journal assigns the volume to the date
@@ -357,96 +366,6 @@ var testCases = [
 				],
 				"tags": [],
 				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://jeac.de/ojs/index.php/jeac/article/view/850",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Editorial: Ethik der Nächsten und Fremdenliebe",
-				"creators": [
-					{
-						"firstName": "Dorothea",
-						"lastName": "Erbele-Küster",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Michael",
-						"lastName": "Roth",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Raphaela Meyer zu",
-						"lastName": "Hörste-Bührer",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Esther",
-						"lastName": "Kobel",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ulrich",
-						"lastName": "Volp",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ruben",
-						"lastName": "Zimmermann",
-						"creatorType": "author"
-					}
-				],
-				"date": "2021/12/11",
-				"DOI": "10.25784/jeac.v3i0.850",
-				"ISSN": "2627-6062",
-				"journalAbbreviation": "1",
-				"language": "de",
-				"libraryCatalog": "jeac.de",
-				"pages": "3-4",
-				"publicationTitle": "Journal of Ethics in Antiquity and Christianity",
-				"rights": "Copyright (c) 2021 Journal of Ethics in Antiquity and Christianity",
-				"shortTitle": "Editorial",
-				"url": "https://jeac.de/ojs/index.php/jeac/article/view/850",
-				"volume": "3",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Ethik in Antike und Christentum"
-					},
-					{
-						"tag": "Fremdenliebe"
-					},
-					{
-						"tag": "Imigration"
-					},
-					{
-						"tag": "Nächstenliebe"
-					}
-				],
-				"notes": [
-					{
-						"note": "orcid:0000-0002-7458-9466 | Raphaela Meyer zu Hörste-Bührer"
-					},
-					{
-						"note": "orcid:0000-0003-2510-0879 | Ulrich Volp"
-					},
-					{
-						"note": "orcid:0000-0002-1620-4396 | Ruben Zimmermann"
-					}
-				],
 				"seeAlso": []
 			}
 		]
@@ -705,6 +624,7 @@ var testCases = [
 					}
 				],
 				"notes": [
+					"abs:Tras acometer un estado de la cuestión sobre los estudios referidos a la Tercera Orden Franciscana en el caso español y portugués, el trabajo comienza analizando los orígenes medievales del franciscanismo secular en la península ibérica. Posteriormente, estudia las razones del proceso de decadencia en el que se vio sumido a finales del Medievo y comienzos de la Edad Moderna, poniéndolo en relación con cuestiones de carácter político –la presión del poder real–, ideológico –la influencia de los movimientos heréticos– o de propia organización interna del franciscanismo. Se adentra más adelante en las razones de su posterior recuperación, a comienzos del siglo xvii, íntimamente unida a la reforma emanada del Concilio de Trento, en la que el asociacionismo religioso secular juega un papel de primer orden. Finalmente, trata de explicar las claves del éxito de la fórmula terciaria entre los diferentes sectores de la sociedad del Antiguo Régimen, subrayando la necesidad de abandonar los viejos tópicos que acusan a la Tercera Orden de la Época Moderna de alejarse en lo religioso de su pureza originaria.\nReferencias\nAlves, Marieta. História da Venerável Ordem 3ª da Penitência do Seráfico Pe. São Francisco da Congregação da Bahia. Bahia: Imprensa Nacional, 1948.\nAmberes, Fredegando de. La Tercera Orden Secular de San Francisco, 1221-1921. Barcelona: Casa Editorial de Arte Católico, 1925.\nBarcelona, Martín de. «Ensayo de bibliografía hispano-americana referente a la V.O.T.». Estudios franciscanos, 27 (1921): 502-521.\nBarrico, Joaquim Simões. Noticia historica da Veneravel Ordem Terceira da Penitencia de S. Francisco da cidade de Coímbra e do seu Hospital e Asylo. Coímbra: Tipografía de J.J. Reis Leitão, 1895.\nCabot Roselló, Salvador. «Evolución de la regla de la Tercera Orden Franciscana». En El franciscanismo en la Península Ibérica. Balances y perspectivas: I Congreso Internacional, ed. por María del Mar Graña Cid, 653-678. Barcelona: Asociación Hispánica de Estudios Franciscanos, 2005.\nCarrillo, Juan de. Primera parte de la Historia de la Tercera Orden de Nuestro Seraphico P. S. Francisco. Zaragoza: por Lucas Sánchez, 1610.\nDelgado Pavón, María Dolores. Reyes, nobles y burgueses en auxilio de la pobreza (la Venerable Orden Tercera Seglar de San Francisco de Madrid en el siglo xvii). Alcalá de Henares: Universidad de Alcalá, 2009.\nGonzález Lopo, «Balance y perspectivas de los estudios de la VOT franciscana en Galicia (siglos xvii-xix)». En El franciscanismo en la Península Ibérica. Balances y perspectivas: I Congreso Internacional, ed. por María del Mar Graña Cid, 567-583. Barcelona: Asociación Hispánica de Estudios Franciscanos, 2005.\nGraña Cid, María del Mar. «Las órdenes mendicantes en el obispado de Mondoñedo. El convento de San Martín de Villaoriente (1374-1500)». Estudios mindonienses 6 (1990):13-464.\nMartín García, Alfredo. «Los franciscanos seglares en la Corona de Castilla durante el Antiguo Régimen». Hispania Sacra 57, nº 116 (2005): 441-466.\nMartín García, Alfredo. Religión y sociedad en Ferrolterra durante el Antiguo Régimen: La V.O.T. seglar franciscana. Ferrol: Concello de Ferrol, 2005.\nMartín García, Alfredo. «Franciscanismo seglar y propaganda en la Península Ibérica y Ultramar durante la Edad Moderna». Semata: Ciencias sociais e humanidades 26 (2014): 271-293.\nMartín García, Alfredo. «Franciscanismo y religiosidad popular en el Norte de Portugal durante la Edad Moderna. La fraternidad de Ponte de Lima». Archivo Ibero-Americano 74, nº 279 (2014): 517-556.\nMartínez Vega, Elisa. «Los congresos de la VOT en Madrid». En El franciscanismo en la Península Ibérica. Balances y perspectivas: I Congreso Internacional, ed. por María del Mar Graña Cid. Barcelona: Asociación Hispánica de Estudios Franciscanos, 2005.\nMeesserman, Giles Gérard. Dossier de l'Ordre de la pénitence au 13e siècle. Friburgo: Éditions Universitaires, 1961.\nMeesserman, Giles Gérard. Ordo fraternitatis. Confraternite e pietà dei laici nel Medioevo. Roma: Herder, 1977.\nOrtmann, Adalberto. História da Antiga Capela da Ordem Terceira da Penitência de São Francisco em São Paulo. (Rio de Janeiro: Ministério da Educação e Saúde, 1951.\nPompei, Alfonso. «Il movimento penitenziale nei secoli xii-xiii», Collectanea franciscana 41 (1973): 9-40.\nPou y Martí, José María. Visionarios, beguinos y fraticelos catalanes (siglos xiii-xv). Alicante: Instituto de Cultura Juan Gil-Albert, 1996.\nRey Castelao, Ofelia. «La Orden Tercera Franciscana en el contexto del asociacionismo religioso gallego en el Antiguo Régimen: La V.O.T. de la villa de Padrón». Archivo Ibero-Americano 59, nº 232 (1999): 3-47.\nRibeiro, Bartolomeu. Os terceiros franciscanos portugueses. Sete séculos da súa história. Braga: Tipografia «Missões Franciscanas», 1952.\nSánchez Herrero, José. «Beguinos y Tercera Orden Regular de San Francisco en Castilla». Historia. Instituciones. Documentos 19 (1992): 433-448.\nSerra de Manresa, Valentí. «Els Terciaris franciscans a l´epoca moderna (segles xvii i xviii)». Pedralbes 14 (1994): 93-105.\nVillapadierna, Isidoro de. «Observaciones críticas sobre la Tercera Orden de penitencia en España». Collectanea franciscana 41 (1973): 219-227.\nVillapadierna, Isidoro de. «Vida comunitaria de los terciarios franciscanos de España en el siglo xiv». Analecta T.O.R. 6 (1982): 91-113.\nZaremba, Anthony. Franciscan Social Reform. A Study of the Third Order Secular of St. Francis as an Agency of Social Reform, According to Certain Papal Documents. Pulaski, Wisconsin: Catholic University of America, 1947.",
 					{
 						"note": "orcid:0000-0001-6906-0210 | Alfredo Martín García"
 					}
@@ -832,6 +752,7 @@ var testCases = [
 					}
 				],
 				"notes": [
+					"abs:By comparing the Greek and Latin texts of the transfiguration of Jesus on Mount Tabor (Mk 9:2-10; Mt 17:1-9; Lk 9:28-36), it is shown how the Vulgate NT illuminates this central, very special theme. This essay also raises relevant theological questions, such as the genre of the Transfiguration text, but also the connection of the Transfiguration with the episode of the making of the covenant in Ex 24 on Mount Sinai. Is this the literarische Vorlage?",
 					{
 						"note": "orcid:0000-0003-4838-4368 | Tarciziu Hristofor Șerban, Lect. univ. dr."
 					}
