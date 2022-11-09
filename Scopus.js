@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-10-28 15:24:51"
+	"lastUpdated": "2022-11-09 13:19:39"
 }
 
 /*
@@ -48,7 +48,7 @@ function getEID(url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('tr[id *= resultDataRow] td a[title = "Show document details"]');
+	var rows = doc.querySelectorAll('tr[id *= resultDataRow] td a[title = "Show document details"], tr[class *= "resultsRow"] h4 a[title = "Show document details"]');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -127,6 +127,7 @@ async function scrape(doc, url) {
 	});
 	await translator.translate();
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 ]
