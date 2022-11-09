@@ -2,14 +2,14 @@
 	"translatorID": "0722e1d4-3c3b-47b1-b8b2-1ed986030303",
 	"label": "Climate Change and Human Health Literature Portal",
 	"creator": "Sebastian Karcher",
-	"target": "https://tools.niehs.nih.gov/cchhl/",
+	"target": "^https?://tools\\.niehs\\.nih\\.gov/cchhl/index\\.cfm",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-09 02:46:11"
+	"lastUpdated": "2022-11-09 13:13:30"
 }
 
 /*
