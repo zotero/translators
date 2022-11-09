@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-03 19:29:23"
+	"lastUpdated": "2022-11-09 21:08:42"
 }
 
 /*
@@ -66,9 +66,9 @@ function getType(ericID, publicationType) {
 }
 
 function findType(doc, url) {
-	var ERICid = url.match(/id=(E[JD]\d+)/)[1];
+	var ericID = url.match(/id=(E[JD]\d+)/)[1];
 	var typeSecondary = ZU.xpathText(doc, '//div[@class="sInfo"]//div[strong[contains(text(), "Publication Type")]]');
-	return getType(ERICid, typeSecondary);
+	return getType(ericID, typeSecondary);
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -105,7 +105,7 @@ async function doWeb(doc, url) {
 async function scrape(doc, url = doc.location.href) {
 	var abstract = ZU.xpathText(doc, '//div[@class="abstract"]');
 	var DOI = ZU.xpathText(doc, '//a[contains(text(), "Direct link")]/@href');
-	var ERICid = url.match(/id=(E[JD]\d+)/)[1];
+	var ericID = url.match(/id=(E[JD]\d+)/)[1];
 	var authorString = ZU.xpathText(doc, '//meta[@name="citation_author"]/@content');
 	let translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
@@ -137,14 +137,14 @@ async function scrape(doc, url = doc.location.href) {
 			delete item.publisher; // Publisher & Publication Title are often identical
 		}
 
-		item.extra = "ERIC Number: " + ERICid;
+		item.extra = "ERIC Number: " + ericID;
 		// Only include URL if full text is hosted on ERIC
 		if (!ZU.xpath(doc, '//div[@id="r_colR"]//img[@alt="PDF on ERIC"]').length) {
 			delete item.url;
 		}
 		else {
 			// use clean URL
-			item.url = "https://eric.ed.gov/?id=" + ERICid;
+			item.url = "https://eric.ed.gov/?id=" + ericID;
 		}
 		item.libraryCatalog = "ERIC";
 		item.complete();
@@ -191,6 +191,7 @@ async function doSearch(search) {
 	}
 	item.ISBN = doc.isbn && ZU.cleanISBN(doc.isbn.join(' '));
 	item.ISSN = doc.issn && ZU.cleanISSN(doc.issn.join(' ').replace(/ISSN-/g, ''));
+	item.DOI = doc.url && ZU.cleanDOI(decodeURIComponent(doc.url));
 	item.language = doc.language && doc.language[0];
 	item.date = ZU.strToISO(doc.publicationdate || doc.publicationdateyear);
 	item.publisher = doc.publisher && doc.publisher.split('. ')[0];
@@ -898,6 +899,81 @@ var testCases = [
 					},
 					{
 						"tag": "Urban Universities"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"ericNumber": "EJ956651"
+		},
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Collaborating with Parents to Establish Behavioral Goals in Child-Centered Play Therapy",
+				"creators": [
+					{
+						"firstName": "Phyllis B.",
+						"lastName": "Post",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peggy L.",
+						"lastName": "Ceballos",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Saundra L.",
+						"lastName": "Penn",
+						"creatorType": "author"
+					}
+				],
+				"date": "2012-01",
+				"DOI": "10.1177/1066480711425472",
+				"ISSN": "1066-4807",
+				"abstractNote": "The purpose of this article is to provide specific guidelines for child-centered play therapists to set behavioral outcome goals to effectively work with families and to meet the demands for accountability in the managed care environment. The child-centered play therapy orientation is the most widely practiced approach among play therapists who identify a specific theoretical orientation. While information about setting broad objectives is addressed using this approach to therapy, explicit guidelines for setting behavioral goals, while maintaining the integrity of the child-centered theoretical orientation, are needed. The guidelines are presented in three phases of parent consultation: (a) the initial engagement with parents, (b) the ongoing parent consultations, and (c) the termination phase. In keeping with the child-centered approach, the authors propose to work with parents from a person-centered orientation and seek to appreciate how cultural influences relate to parents' concerns and goals for their children. A case example is provided to demonstrate how child-centered play therapists can accomplish the aforementioned goals.",
+				"extra": "ERIC Number: EJ956651",
+				"issue": "1",
+				"language": "English",
+				"libraryCatalog": "ERIC",
+				"pages": "51-57",
+				"publicationTitle": "Family Journal: Counseling and Therapy for Couples and Families",
+				"volume": "20",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Cooperative Planning"
+					},
+					{
+						"tag": "Counseling Techniques"
+					},
+					{
+						"tag": "Counselor Role"
+					},
+					{
+						"tag": "Cultural Influences"
+					},
+					{
+						"tag": "Cultural Relevance"
+					},
+					{
+						"tag": "Guidelines"
+					},
+					{
+						"tag": "Interpersonal Relationship"
+					},
+					{
+						"tag": "Parent Participation"
+					},
+					{
+						"tag": "Play Therapy"
+					},
+					{
+						"tag": "Therapy"
 					}
 				],
 				"notes": [],
