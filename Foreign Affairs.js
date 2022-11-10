@@ -1,7 +1,7 @@
 {
 	"translatorID": "4ab6d49c-d94e-4a9c-ae9a-3310c44ba612",
 	"label": "Foreign Affairs",
-	"creator": "Philipp Zumstein",
+	"creator": "Sebastian Karcher, Philipp Zumstein",
 	"target": "^https?://www\\.foreignaffairs\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-08 03:36:20"
+	"lastUpdated": "2022-11-10 02:39:57"
 }
 
 /*
@@ -49,7 +49,7 @@ function detectWeb(doc, _url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('article>div>a, article>div>div>h2>a');
+	var rows = doc.querySelectorAll('article.article-card > a, div.article-data > h2.title > a');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -79,7 +79,7 @@ async function doWeb(doc, url) {
 async function scrape(doc, url = doc.location.href) {
 	var item = new Zotero.Item("magazineArticle");
 	var author = text(doc, '.article-byline-author');
-
+	var tags = doc.querySelectorAll('.article-footer--tag-item');
 	var issue = text(doc, 'span.article-header--metadata-date>a');
 	item.issue = issue.replace('Issue', '');
 
@@ -102,6 +102,10 @@ async function scrape(doc, url = doc.location.href) {
 	let authors = author.split(/, and|and |, /);
 	for (let aut of authors) {
 		item.creators.push(ZU.cleanAuthor(aut, "author"));
+	}
+
+	for (let tag of tags) {
+		item.tags.push(tag.textContent);
 	}
 	item.url = url;
 	item.attachments.push({ document: doc, title: "Snapshot" });
@@ -147,7 +151,14 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Argentina"
+					},
+					{
+						"tag": "Western Hemisphere"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -181,7 +192,44 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Arms Control & Disarmament"
+					},
+					{
+						"tag": "Defense & Military"
+					},
+					{
+						"tag": "Foreign Policy"
+					},
+					{
+						"tag": "Iran"
+					},
+					{
+						"tag": "Middle East"
+					},
+					{
+						"tag": "Nuclear Weapons & Proliferation"
+					},
+					{
+						"tag": "Obama Administration"
+					},
+					{
+						"tag": "Persian Gulf"
+					},
+					{
+						"tag": "Security"
+					},
+					{
+						"tag": "Strategy & Conflict"
+					},
+					{
+						"tag": "U.S. Foreign Policy"
+					},
+					{
+						"tag": "War & Military Strategy"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -220,7 +268,20 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Asia"
+					},
+					{
+						"tag": "Economic Development"
+					},
+					{
+						"tag": "Europe"
+					},
+					{
+						"tag": "United States"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -253,7 +314,14 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Economics"
+					},
+					{
+						"tag": "India"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -297,11 +365,35 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Authoritarianism"
+					},
+					{
+						"tag": "Disinformation"
+					},
+					{
+						"tag": "Foreign Affairs: 100 Years"
+					},
+					{
+						"tag": "Intelligence"
+					},
+					{
+						"tag": "Science & Technology"
+					},
+					{
+						"tag": "World"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.foreignaffairs.com/search/argentina",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
