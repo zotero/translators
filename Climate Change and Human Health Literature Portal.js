@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-09 13:13:30"
+	"lastUpdated": "2022-11-10 02:47:43"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2022 YOUR_NAME <- TODO
-
+	Copyright © 2022 Sebastian Karcher
+	
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -37,7 +37,6 @@
 
 
 function detectWeb(doc, url) {
-	// TODO: adjust the logic here
 	if (url.includes('/index.cfm/detail/')) {
 		return 'journalArticle';
 	}
@@ -50,12 +49,9 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	// TODO: adjust the CSS selector
 	var rows = doc.querySelectorAll('#ccpp_results-list .ccpp_result-title>a');
 	for (let row of rows) {
-		// TODO: check and maybe adjust
 		let href = row.href;
-		// TODO: check and maybe adjust
 		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -190,6 +186,92 @@ var testCases = [
 		"type": "web",
 		"url": "https://tools.niehs.nih.gov/cchhl/index.cfm/main/search#/params?searchTerm=heat%20pump&selectedFacets=&selectedResults=",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://tools.niehs.nih.gov/cchhl/index.cfm/detail/10206#searchTerm=heat%20pump&selectedFacets=&selectedResults=",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Heat waves, aging, and human cardiovascular health",
+				"creators": [
+					{
+						"firstName": "W. Larry",
+						"lastName": "Kenney",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Daniel H.",
+						"lastName": "Craighead",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Lacy M.",
+						"lastName": "Alexander",
+						"creatorType": "author"
+					}
+				],
+				"date": "2014-10",
+				"DOI": "10.1249/MSS.0000000000000325",
+				"ISSN": "1530-0315",
+				"abstractNote": "This brief review is based on a President's Lecture presented at the Annual Meeting of the American College of Sports Medicine in 2013. The purpose of this review was to assess the effects of climate change and consequent increases in environmental heat stress on the aging cardiovascular system. The earth's average global temperature is slowly but consistently increasing, and along with mean temperature changes come increases in heat wave frequency and severity. Extreme passive thermal stress resulting from prolonged elevations in ambient temperature and prolonged physical activity in hot environments creates a high demand on the left ventricle to pump blood to the skin to dissipate heat. Even healthy aging is accompanied by altered cardiovascular function, which limits the extent to which older individuals can maintain stroke volume, increase cardiac output, and increase skin blood flow when exposed to environmental extremes. In the elderly, the increased cardiovascular demand during heat waves is often fatal because of increased strain on an already compromised left ventricle. Not surprisingly, excess deaths during heat waves 1) occur predominantly in older individuals and 2) are overwhelmingly cardiovascular in origin. Increasing frequency and severity of heat waves coupled with a rapidly growing at-risk population dramatically increase the extent of future untoward health outcomes.",
+				"extra": "PMID: 24598696\nPMCID: PMC4155032",
+				"issue": "10",
+				"journalAbbreviation": "Med Sci Sports Exerc",
+				"language": "eng",
+				"libraryCatalog": "PubMed",
+				"pages": "1891-1899",
+				"publicationTitle": "Medicine and Science in Sports and Exercise",
+				"volume": "46",
+				"attachments": [
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					{
+						"tag": "Aged"
+					},
+					{
+						"tag": "Aged, 80 and over"
+					},
+					{
+						"tag": "Aging"
+					},
+					{
+						"tag": "Cardiovascular Diseases"
+					},
+					{
+						"tag": "Cardiovascular System"
+					},
+					{
+						"tag": "Cause of Death"
+					},
+					{
+						"tag": "Climate Change"
+					},
+					{
+						"tag": "Heat Stress Disorders"
+					},
+					{
+						"tag": "Humans"
+					},
+					{
+						"tag": "Skin Aging"
+					},
+					{
+						"tag": "Sports Medicine"
+					},
+					{
+						"tag": "Sweating"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
