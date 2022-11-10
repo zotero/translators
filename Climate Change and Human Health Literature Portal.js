@@ -76,7 +76,7 @@ async function doWeb(doc, url) {
 		}
 	}
 	else {
-		scrape(doc);
+		await scrape(doc);
 	}
 }
 
@@ -92,7 +92,7 @@ function scrape(doc) {
 		translate.setTranslator('3d0231ce-fd4b-478c-b1d3-840389e5b68c');
 		translate.setSearch({ itemType: "journalArticle", PMID: pmid });
  
-		translate.translate();
+		await translate.translate();
 	}
 	else if (doi) {
 		let translate = Z.loadTranslator('search');
@@ -105,7 +105,7 @@ function scrape(doc) {
 			}
 			item.complete();
 		});
-		translate.translate();
+		await translate.translate();
 	}
 	else {
 		// scrape if we have to; I couldn't find a live example of this
