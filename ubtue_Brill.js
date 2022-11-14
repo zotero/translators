@@ -2,7 +2,7 @@
 	"translatorID": "b2fcf7d9-e023-412e-a2bc-f06d6275da24",
 	"label": "ubtue_Brill",
 	"creator": "Madeesh Kannan",
-	"target": "^https?://brill.com/view/journals/",
+	"target": "^https?://brill.com/(view|abstract)/journals/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 90,
@@ -69,7 +69,7 @@ function getSearchResults(doc) {
 
 function postProcess(doc, item) {
 	let title = ZU.xpathText(doc, '//meta[@name="citation_title"]//@content');
-	if (title) item.title = title; 
+	if (title) item.title = title;
     let abstracts = ZU.xpath(doc, '//section[@class="abstract"]//p');
     //multiple abstracts
     if (abstracts && abstracts.length > 0) {
@@ -127,10 +127,10 @@ function postProcess(doc, item) {
 	}
 	//deduplicate
 	item.notes = Array.from(new Set(item.notes.map(JSON.stringify))).map(JSON.parse);
-	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access	
+	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
 	let openAccessTag = text(doc, '.has-license span');
 	if (openAccessTag && openAccessTag.match(/open\s+access/gi)) item.notes.push({note: 'LF:'});
-  // mark articles as "LF" (MARC=856 |z|kostenfrei), that are free accessible e.g. conference report 10.30965/25890433-04902001 
+  // mark articles as "LF" (MARC=856 |z|kostenfrei), that are free accessible e.g. conference report 10.30965/25890433-04902001
 	let freeAccess = text(doc, '.color-access-free');
 	if (freeAccess && freeAccess.match(/(free|freier)\s+(access|zugang)/gi)) item.notes.push('LF:');
 	if (!item.itemType)	item.itemType = "journalArticle";
@@ -154,7 +154,7 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 			doc.head.appendChild(meta);
 		}
 	}
-	
+
 	var translator = Zotero.loadTranslator("web");
 	// Embedded Metadata
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
