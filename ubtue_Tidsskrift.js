@@ -5,7 +5,7 @@
 	"target": "^https?://tidsskrift.dk/[^/]+/(article|issue)/view.*/[0-9]+",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 150,
+	"priority": 900,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
