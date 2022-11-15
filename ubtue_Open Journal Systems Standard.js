@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-07 16:47:35"
+	"lastUpdated": "2022-11-15 10:15:36"
 }
 
 /*
@@ -223,17 +223,17 @@ function invokeEMTranslator(doc) {
 			let completeAbstractText = i.abstractNote.replace(/^(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? /, '');
 			let absNr = 0;
 			for (let abs of completeAbstractText.split(/(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? /g)) {
-				if (absNr == 0) i.abstractNote = abs.replace(/^\s*\t*(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? |[\s\t\n]*$/g, '');
-				else i.notes.push('abs:' + abs.replace(/^\s*\t*(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? |[\s\t\n]*$/g, ''));
+				if (absNr == 0) i.abstractNote = abs.replace(/^\s*(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? |\s*$/g, '');
+				else i.notes.push('abs:' + abs.replace(/^\s*(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? |\s*$/g, ''));
 				absNr += 1;
 			}
 		}
 		for (let abs of ZU.xpath(doc, '//meta[@name="DC.Description"]/@content')) {
 			let found = false;
 			for (let note of i.notes) {
-				if (note.substring(0,20) == ('abs:' + abs.textContent).substring(0,20)) found = true;
+				if (note.substring(3,20) == abs.textContent.replace(/^(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? /, '').substring(0,20)) found = true;
 			}
-			if (i.abstractNote && !(i.abstractNote.trim().substring(0, 20) == abs.textContent.trim().substring(0, 20)) && !found) {
+			if (i.abstractNote && !(i.abstractNote.trim().substring(0, 20) == abs.textContent.trim().replace(/^(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? /, '').substring(0, 20)) && !found) {
 				i.notes.push('abs:' + abs.textContent);
 			}
 		}
