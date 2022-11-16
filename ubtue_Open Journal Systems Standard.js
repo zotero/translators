@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-15 10:15:36"
+	"lastUpdated": "2022-11-16 13:18:52"
 }
 
 /*
@@ -31,9 +31,8 @@
 function detectWeb(doc, url) {
 	let pkpLibraries = ZU.xpath(doc, '//script[contains(@src, "/lib/pkp/js/")]');
 	if (url.match(/\/issue\//) && getSearchResults(doc)) return "multiple";
-	else if (!(ZU.xpathText(doc, '//a[@id="developedBy"]/@href') == 'http://pkp.sfu.ca/ojs/' ||
-		  pkpLibraries.length >= 1))
-		return false;
+	else if (!ZU.xpathText(doc, '//meta[@name="generator" and contains(@content,"Open Journal Systems")]/@content') && (!(ZU.xpathText(doc, '//a[@id="developedBy"]/@href') == 'http://pkp.sfu.ca/ojs/' ||
+		  pkpLibraries.length >= 1))) return false;
 	else if (url.match(/\/article\//)) return "journalArticle";
 	else return false;
 }
@@ -219,21 +218,23 @@ function invokeEMTranslator(doc) {
 		}
 		if (i.issue === "0") delete i.issue;
 		if (i.abstractNote && i.abstractNote.match(/No abstract available/)) delete i.abstractNote;
+		
 		if (i.abstractNote) {
-			let completeAbstractText = i.abstractNote.replace(/^(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? /, '');
+			let completeAbstractText = i.abstractNote.replace(/^\s*(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? /, '');
 			let absNr = 0;
-			for (let abs of completeAbstractText.split(/(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? /g)) {
-				if (absNr == 0) i.abstractNote = abs.replace(/^\s*(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? |\s*$/g, '');
-				else i.notes.push('abs:' + abs.replace(/^\s*(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? |\s*$/g, ''));
+			for (let abs of completeAbstractText.split(/\s*(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? /g)) {
+				if (absNr == 0) i.abstractNote = abs;
+				else i.notes.push('abs:' + abs);
 				absNr += 1;
 			}
 		}
+		let abstractRegex = /^(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? /;
 		for (let abs of ZU.xpath(doc, '//meta[@name="DC.Description"]/@content')) {
 			let found = false;
 			for (let note of i.notes) {
-				if (note.substring(3,20) == abs.textContent.replace(/^(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? /, '').substring(0,20)) found = true;
+				if (note.substring(4,24) == abs.textContent.replace(abstractRegex, '').substring(0,20)) found = true;
 			}
-			if (i.abstractNote && !(i.abstractNote.trim().substring(0, 20) == abs.textContent.trim().replace(/^(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? /, '').substring(0, 20)) && !found) {
+			if (i.abstractNote && !(i.abstractNote.trim().substring(0, 20) == abs.textContent.trim().replace(abstractRegex, '').substring(0, 20)) && !found) {
 				i.notes.push('abs:' + abs.textContent);
 			}
 		}
@@ -640,65 +641,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.sanisidoro.net/publicaciones/index.php/isidorianum/article/view/147",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "“Battle is over, raise we the cry of victory”. Study of Revelation 19:11-21",
-				"creators": [
-					{
-						"firstName": "Francisco Javier",
-						"lastName": "Ruiz-Ortiz",
-						"creatorType": "author"
-					}
-				],
-				"date": "2020/11/20",
-				"DOI": "10.46543/ISID.2029.1054",
-				"ISSN": "2660-7743",
-				"issue": "2",
-				"journalAbbreviation": "1",
-				"language": "es-ES",
-				"libraryCatalog": "www.sanisidoro.net",
-				"pages": "37-60",
-				"publicationTitle": "Isidorianum",
-				"shortTitle": "“Battle is over, raise we the cry of victory”. Study of Revelation 19",
-				"url": "https://www.sanisidoro.net/publicaciones/index.php/isidorianum/article/view/147",
-				"volume": "29",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Ap 19"
-					},
-					{
-						"tag": "Apocalipsis"
-					},
-					{
-						"tag": "cristología"
-					},
-					{
-						"tag": "juicio final"
-					}
-				],
-				"notes": [
-					{
-						"note": "orcid:0000-0001-6251-0506 | Francisco Javier Ruiz-Ortiz"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "https://vulgata-dialog.ch/ojs/index.php/vidbor/article/view/821",
 		"items": [
 			{
@@ -976,6 +918,68 @@ var testCases = [
 				],
 				"notes": [
 					"abs:Interreligious Learning in encounter (IRBL) through cooperation between the subjects of the theologies (or confession-oriented subjects of religious education) and philosophy/ethics in school and university is carried out in school projects in the Heidelberg region and in Vienna and has been offered as an additional qualification in teacher training since 2007/08 at KPH Vienna/Krems and since 2011 at the University of Education in Heidelberg. This article provides an orientation on the educational conceptual framework and challenges of cooperation between the school subjects of religion and ethics and specifically on the organization and topics of the IRBL against the background of practiced and evaluated projects in schools and universities."
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.sanisidoro.net/publicaciones/index.php/isidorianum/article/view/147",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "“Battle is over, raise we the cry of victory”. Study of Revelation 19:11-21",
+				"creators": [
+					{
+						"firstName": "Francisco Javier",
+						"lastName": "Ruiz-Ortiz",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020/11/20",
+				"DOI": "10.46543/ISID.2029.1054",
+				"ISSN": "2660-7743",
+				"abstractNote": "Using some of the tools of narrative criticism, this article studies the final battle and victory which is achieved by God’s envoy. By unpacking the network of relationship in the text the envoy is identified with the Christ of God, who has been present in the book from the beginning. The article shows how the Rider on the white horse summarises what the book of Revelation has said about Jesus.",
+				"issue": "2",
+				"journalAbbreviation": "Isidorianum",
+				"language": "es",
+				"libraryCatalog": "www.sanisidoro.net",
+				"pages": "37-60",
+				"publicationTitle": "Isidorianum",
+				"rights": "Derechos de autor 2020 Isidorianum",
+				"shortTitle": "“Battle is over, raise we the cry of victory”. Study of Revelation 19",
+				"url": "https://www.sanisidoro.net/publicaciones/index.php/isidorianum/article/view/147",
+				"volume": "29",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Ap 19"
+					},
+					{
+						"tag": "Apocalipsis"
+					},
+					{
+						"tag": "cristología"
+					},
+					{
+						"tag": "juicio final"
+					}
+				],
+				"notes": [
+					"abs:Usando elementos del análisis narrativo, este artículo examina la batalla final y la victoria que se consigue a través del enviado de Dios, un jinete en un caballo blanco. Desenredando la red de relaciones en el texto, el jinete en el caballo blanco se identifica con el Cristo de Dios, que ha estado presente en el libro desde el inicio. El artículo muestra como el Jinete en el caballo blanco resume en sí mismo todo lo que el Apocalipsis dice sobre Jesús.",
+					{
+						"note": "orcid:0000-0001-6251-0506 | Francisco Javier Ruiz-Ortiz"
+					}
 				],
 				"seeAlso": []
 			}
