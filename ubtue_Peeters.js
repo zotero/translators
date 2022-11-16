@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-07 12:24:43"
+	"lastUpdated": "2022-11-16 12:38:57"
 }
 
 /*
@@ -98,47 +98,16 @@ function getValue(nodes) {
 }
 
 function parseAbstract(doc, item) {
-	// the abstract text can be interspersed by inline <i> tags that break
-	// the flow of text. So, we need to iterate through the text nodes and
-	// <i> nodes in sequence
-	let textParts = ZU.xpath(doc, '//b[contains(text(), "Abstract :")]/following-sibling::text()');
-	let italicsParts = ZU.xpath(doc, '//b[contains(text(), "Abstract :")]/following-sibling::i');
-	let usedItalicsParts = 0;
-	if (textParts && textParts.length > 0) {
-		item.abstractNote = "";
-		let fullAbstract = "";
-		let i = 0, j = 0;
-		while (i < textParts.length) {
-			let text = textParts[i].textContent.replace(/\n|\s\s+/g, '');
-			if (text.length == 0) {
-				fullAbstract += '::split::';
-			}
-			if (text && text.length > 0) {
-				fullAbstract += text;
-				if (j < italicsParts.length) {
-					let text = italicsParts[j].textContent;
-					if (textParts[i+1].textContent.replace(/\n|\s\s+/g, '').length > 0) {
-						fullAbstract += text;
-						++j;
-						usedItalicsParts += 1;
-						}
-					}
-			}
-			++i;
-		}
-		//split abstracts
-		fullAbstract = fullAbstract.replace(/(?:::split::)+$|^(?:::split::)+/g, '');
-
-		if (usedItalicsParts < italicsParts.length) {
-			if (usedItalicsParts == italicsParts.length -1) {
-				fullAbstract = italicsParts[0].textContent + fullAbstract;
-			}
-		}
+	let absText = ZU.xpathText(doc, '//td[@class="whitecell"]');
+	if (absText.match(/abstract\s*?:\n/i)) {
+		absText = absText.split(/abstract\s*?:\n/i)[1].replace(/[\n\t]+,\s*\nDownload article$/, "");
 		let absNr = 0;
-		for (let abstract of fullAbstract.split(/::split::/)) {
-			if (absNr == 0) item.abstractNote = abstract;
-			else item.notes.push('abs:' + abstract);
-			absNr += 1;
+		for (let abs of absText.split(/\n\n+/)) {
+			if (abs.length > 100) {
+				if (absNr == 0) item.abstractNote = abs;
+				else item.notes.push('abs:' + abs);
+				absNr += 1;
+			}
 		}
 	}
 }
@@ -200,7 +169,6 @@ function scrape(doc, url) {
 	item.url = url;
 
 	parseAbstract(doc, item);
-	if (item.abstractNote.match(/not\s?available+|^editorial$|^Obituary$/i)) delete item.abstractNote;
 	//scrape e-issn from the journal site
 	let lookupIssn = doc.querySelectorAll('.whitecell');
 	if (lookupIssn && lookupIssn[0]) {
