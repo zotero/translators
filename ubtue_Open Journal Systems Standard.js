@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-17 08:38:01"
+	"lastUpdated": "2022-11-17 09:24:55"
 }
 
 /*
@@ -219,7 +219,7 @@ function invokeEMTranslator(doc) {
 		if (i.issue === "0") delete i.issue;
 		if (i.abstractNote && i.abstractNote.match(/No abstract available/)) delete i.abstractNote;
 		
-		let abstractRegex = /(ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? /;
+		let abstractRegex = /(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? /;
 		if (i.abstractNote) {
 			let absNr = 0;
 			for (let abs of i.abstractNote.split(abstractRegex).filter(str => ! /^\s*$/.test(str))) {
@@ -284,6 +284,7 @@ function doWeb(doc, url) {
 		invokeEMTranslator(doc, url);
 	}
 }
+
 
 
 
