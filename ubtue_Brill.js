@@ -2,14 +2,14 @@
 	"translatorID": "b2fcf7d9-e023-412e-a2bc-f06d6275da24",
 	"label": "ubtue_Brill",
 	"creator": "Madeesh Kannan",
-	"target": "^https?://brill.com/view/journals/",
+	"target": "^https?://brill.com/(view|abstract)/journals/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 90,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-07 18:05:51"
+	"lastUpdated": "2022-11-17 08:50:23"
 }
 
 /*
@@ -69,7 +69,7 @@ function getSearchResults(doc) {
 
 function postProcess(doc, item) {
 	let title = ZU.xpathText(doc, '//meta[@name="citation_title"]//@content');
-	if (title) item.title = title; 
+	if (title) item.title = title;
 	let abstracts = ZU.xpath(doc, '//section[@class="abstract"]//p');
 	//multiple abstracts
 	if (abstracts && abstracts.length > 0) {
@@ -94,6 +94,9 @@ function postProcess(doc, item) {
 		//deduplicate allTags
 		item.tags = Array.from(new Set(allTags.map(JSON.stringify))).map(JSON.parse);
 	}
+	for (let tag of ZU.xpath(doc, '//meta[@property="article:tag"]/@content')) {
+		if (!item.tags.includes(tag.textContent)) item.tags.push(tag.textContent);
+	}
 	let reviewEntry = text(doc, '.articlecategory');
 	if (reviewEntry && reviewEntry.match(/book\sreview/i)) item.tags.push('Book Review');
 	// numbering issues with slash due to cataloguing rule
@@ -110,17 +113,8 @@ function postProcess(doc, item) {
 	}
 
 	//scrape ORCID from website
-	let authorSectionEntries = doc.querySelectorAll('.contributor-details');
+	let authorSectionEntries = doc.querySelectorAll('.text-subheading span');
 	for (let authorSectionEntry of authorSectionEntries) {
-		let author = ZU.xpathText(authorSectionEntry, './/div/span[@class="contributor-details-link"]');
-		let orcidHref = authorSectionEntry.querySelector('.orcid');
-		if (author && orcidHref) {
-			let orcid = orcidHref.textContent.replace(/.*(\d{4}-\d+-\d+-\d+x?)$/i, '$1');
-			item.notes.push({note: "orcid:" + orcid + ' | ' + author});
-		}
-	}
-	let authorSectionEntries2 = doc.querySelectorAll('.text-subheading span');
-	for (let authorSectionEntry of authorSectionEntries2) {
 		let authorInfo = authorSectionEntry.querySelector('.c-Button--link');
 		let orcidHref = authorSectionEntry.querySelector('.orcid');
 		if (authorInfo && orcidHref) {
@@ -136,18 +130,13 @@ function postProcess(doc, item) {
 	}
 	//deduplicate
 	item.notes = Array.from(new Set(item.notes.map(JSON.stringify))).map(JSON.parse);
-	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access	
+	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
 	let openAccessTag = text(doc, '.has-license span');
 	if (openAccessTag && openAccessTag.match(/open\s+access/gi)) item.notes.push({note: 'LF:'});
-  // mark articles as "LF" (MARC=856 |z|kostenfrei), that are free accessible e.g. conference report 10.30965/25890433-04902001 
+  // mark articles as "LF" (MARC=856 |z|kostenfrei), that are free accessible e.g. conference report 10.30965/25890433-04902001
 	let freeAccess = text(doc, '.color-access-free');
 	if (freeAccess && freeAccess.match(/(free|freier)\s+(access|zugang)/gi)) item.notes.push('LF:');
 	if (!item.itemType)	item.itemType = "journalArticle";
-		for (let tag of ZU.xpath(doc, '//meta[@property="article:tag"]/@content')) {
-		if (!item.tags.includes(tag.textContent)) item.tags.push(tag.textContent);
-	}
-
-	item.attachments = [];
 }
 
 function extractErscheinungsjahr(date) {
@@ -168,7 +157,7 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 			doc.head.appendChild(meta);
 		}
 	}
-	
+
 	var translator = Zotero.loadTranslator("web");
 	// Embedded Metadata
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
@@ -196,8 +185,7 @@ function doWeb(doc, url) {
 		invokeEmbeddedMetadataTranslator(doc, url);
 }
 
-	
-/** BEGIN TEST CASES **/
+	/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -354,28 +342,25 @@ var testCases = [
 				"publicationTitle": "Oriens",
 				"url": "https://brill.com/view/journals/orie/49/3-4/article-p370_7.xml",
 				"volume": "49",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [
 					{
 						"tag": "Shiʿisme duodécimain"
-					},
-					{
-						"tag": "Twelver Shiʿism"
 					},
 					{
 						"tag": "Ziyārat ʿĀšūrā"
 					},
 					{
 						"tag": "chant élégiaque (nawḥa)"
-					},
-					{
-						"tag": "elegiac song (nawḥa)"
-					},
-					{
-						"tag": "elegy (marṯīya)"
-					},
-					{
-						"tag": "popular religion"
 					},
 					{
 						"tag": "religion populaire"
@@ -406,79 +391,6 @@ var testCases = [
 		"type": "web",
 		"url": "https://brill.com/view/journals/orie/49/3-4/orie.49.issue-3-4.xml",
 		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://brill.com/view/journals/jie/6/1/article-p19_2.xml",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Avicenna on Animal Goods",
-				"creators": [
-					{
-						"firstName": "Bethany Somma (بِثَنِي",
-						"lastName": "سومّا)",
-						"creatorType": "author"
-					}
-				],
-				"date": "2022",
-				"DOI": "10.1163/24685542-12340068",
-				"ISSN": "2468-5534, 2468-5542",
-				"abstractNote": "Investigating historical sources for positions on animals and animal ethics within philosophy of the Islamic world is a profound challenge, given the quantity and diversity of possible source texts. This article argues that Ibn Sīnā’s (Avicenna, d. 428/1037) philosophy provides a hitherto unappreciated account of animal well-being. By tracing his conception of providence to that of essences, and by highlighting the role of psychological powers in ensuring the attainment of essential goods, this article argues that Avicenna can account both for essential goods and interests proper to individual species and for the capacity of animals to attain these goods and interests. This account rests on Avicenna’s rich teleology, which includes the role of the lawgiver as the upholder of justice within human society. In the end, human goods and animal goods are articulated with the same overarching account, which human beings are called to know.",
-				"issue": "1",
-				"language": "eng",
-				"libraryCatalog": "brill.com",
-				"pages": "19-52",
-				"publicationTitle": "Journal of Islamic Ethics",
-				"url": "https://brill.com/view/journals/jie/6/1/article-p19_2.xml",
-				"volume": "6",
-				"attachments": [],
-				"tags": [
-					{
-						"tag": "Animals"
-					},
-					{
-						"tag": "Avicenna"
-					},
-					{
-						"tag": "animal ethics"
-					},
-					{
-						"tag": "philosophy"
-					},
-					{
-						"tag": "providence"
-					},
-					{
-						"tag": "teleology"
-					},
-					{
-						"tag": "أخلاقيات الحيوان"
-					},
-					{
-						"tag": "ابن سينا"
-					},
-					{
-						"tag": "الحيوانات"
-					},
-					{
-						"tag": "العناية الإلهية"
-					},
-					{
-						"tag": "الغائية"
-					},
-					{
-						"tag": "الفلسفة"
-					}
-				],
-				"notes": [
-					{
-						"note": "LF:"
-					}
-				],
-				"seeAlso": []
-			}
-		]
 	}
 ]
 /** END TEST CASES **/
