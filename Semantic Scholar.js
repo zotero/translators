@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-02 21:01:15"
+	"lastUpdated": "2022-11-16 03:59:09"
 }
 
 /*
@@ -124,7 +124,7 @@ function scrape(doc, url) {
 	}
 
 	if (itemType == 'conferencePaper' && article.publisher) {
-		item.publisher = article.publisher.name;
+		item.conferenceName = article.publisher.name;
 	}
 
 	if (itemType == 'journalArticle' && article.publication) {
