@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-16 13:18:52"
+	"lastUpdated": "2022-11-17 08:38:01"
 }
 
 /*
@@ -219,16 +219,14 @@ function invokeEMTranslator(doc) {
 		if (i.issue === "0") delete i.issue;
 		if (i.abstractNote && i.abstractNote.match(/No abstract available/)) delete i.abstractNote;
 		
+		let abstractRegex = /(ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? /;
 		if (i.abstractNote) {
-			let completeAbstractText = i.abstractNote.replace(/^\s*(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? /, '');
 			let absNr = 0;
-			for (let abs of completeAbstractText.split(/\s*(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? /g)) {
-				if (absNr == 0) i.abstractNote = abs;
-				else i.notes.push('abs:' + abs);
-				absNr += 1;
+			for (let abs of i.abstractNote.split(abstractRegex).filter(str => ! /^\s*$/.test(str))) {
+				absNr == 0 ? i.abstractNote = abs : i.notes.push('abs:' + abs);
+				++absNr;
 			}
 		}
-		let abstractRegex = /^(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? /;
 		for (let abs of ZU.xpath(doc, '//meta[@name="DC.Description"]/@content')) {
 			let found = false;
 			for (let note of i.notes) {
