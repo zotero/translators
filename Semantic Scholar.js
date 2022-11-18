@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-18 00:49:49"
+	"lastUpdated": "2022-11-18 01:12:22"
 }
 
 /*
@@ -165,10 +165,12 @@ function parseWithDOITranslator(item) {
 	translate.setTranslator('b28d0d42-8549-4c6d-83fc-8382874a5cb9'); // DOI Content Negotiation
 	translate.setSearch({ DOI: item.DOI });
 	translate.setHandler('itemDone', (obj, doiItem) => {
+		let originalItemType = item.itemType;
 		let oldAttachments = item.attachments;
 		let oldNotes = item.notes;
 		Object.assign(item, doiItem);
 		item.libraryCatalog = 'Semantic Scholar';
+		item.itemType = originalItemType;
 		if (!item.attachments.length) {
 			item.attachments = oldAttachments;
 		}
