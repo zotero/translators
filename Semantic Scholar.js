@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-17 23:12:25"
+	"lastUpdated": "2022-11-18 00:49:49"
 }
 
 /*
@@ -185,29 +185,45 @@ function parseWithDOITranslator(item) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.semanticscholar.org/paper/Research-on-Entity-Recognition-and-Alignment-in-of-Wu-Zhao/1725fef924948ca4d02d21a60972feeb8244b178",
+		"url": "https://www.semanticscholar.org/paper/Text-Analysis-of-Cases-Description-in-Urban-Field-Liu-Song/dd1e49494be449af48cfb223e22766f805d1f216",
 		"items": [
 			{
-				"itemType": "journalArticle",
-				"title": "Research on Entity Recognition and Alignment Methods in Knowledge Graph Construction of Multi-source Tourism Data",
+				"itemType": "conferencePaper",
+				"title": "Text Analysis of Cases Description in Urban Management Field Based on Knowledge Atlas",
 				"creators": [
 					{
-						"firstName": "Meixue",
-						"lastName": "Wu",
-						"creatorType": "author"
+						"creatorType": "author",
+						"firstName": "Xutong",
+						"lastName": "Liu"
 					},
 					{
-						"firstName": "Hong",
-						"lastName": "Zhao",
-						"creatorType": "author"
+						"creatorType": "author",
+						"firstName": "Hui",
+						"lastName": "Song"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Longqi",
+						"lastName": "Dai"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Bo",
+						"lastName": "Xu"
 					}
 				],
-				"date": "18 June 2021",
-				"DOI": "10.1109/IMCEC51613.2021.9482325",
-				"abstractNote": "In recent years, the tourism field related websites are increasing day by day, the network has produced massive tourist generation data. Based on the semi-structured data of scenic spots, hotels and caterings on tourist websites and the travel notes published by tourists, this paper constructed the tourism knowledge graph. The extraction of entities from travel notes was faced with the problems of named entity recognition and entity alignment. In order to improve the accuracy of extracting entities from travel notes, in this paper, the named entity recognition model based on BiLSTM-CRF and the entity alignment model based on siamese network were proposed. F values can reach 90.8% and 93.0%, respectively.",
+				"date": "2018",
+				"DOI": "10.1145/3207677.3278062",
+				"ISBN": "9781450365123",
+				"abstractNote": "With1 the development of information technology, Chinese urban Management has entered the information age. There will be a large number of cases with unstructured text which are reported by city officers and citizens entering into the digital platform, processing these text only by traditional method such as searching by key words will not only consume a lot of energy and time, but also be difficult to generalize the core issues of urban management because of the lost of the relationships between entities and events. In this paper, we propose a domain-oriented method to analyze the text using the domain-oriented knowledge graph and BLSTM-CRF model. we define a new graph structure to grasp the syntactical pattern and core concepts of this field by the method of hierarchical LDA (H-LDA). Combing the BLSTM-CRF language processing model with the domain knowledge graph, key entities and the corresponding description phrase are extracted from the text and recomposed as a short description. We make a further statistical analysis on the basic of the descriptions and semantic labels to find problems that affecting urban development and put forward pertinent suggestions.",
+				"conferenceName": "the 2nd International Conference",
+				"language": "en",
 				"libraryCatalog": "Semantic Scholar",
-				"publicationTitle": "2021 IEEE 4th Advanced Information Management, Communicates, Electronic and Automation Control Conference (IMCEC)",
-				"url": "https://www.semanticscholar.org/paper/Research-on-Entity-Recognition-and-Alignment-in-of-Wu-Zhao/1725fef924948ca4d02d21a60972feeb8244b178",
+				"pages": "1-7",
+				"place": "Hohhot, China",
+				"proceedingsTitle": "Proceedings of the 2nd International Conference on Computer Science and Application Engineering - CSAE '18",
+				"publisher": "ACM Press",
+				"url": "http://dl.acm.org/citation.cfm?doid=3207677.3278062",
 				"attachments": [
 					{
 						"title": "Semantic Scholar Link",
@@ -217,7 +233,7 @@ var testCases = [
 				],
 				"tags": [],
 				"notes": [
-					"[TLDR] The named entity recognition model based on BiLSTM-CRF and the entity alignment modelbased on siamese network were proposed to improve the accuracy of extracting entities from travel notes."
+					"[TLDR] A new graph structure is defined to grasp the syntactical pattern and core concepts of this field by the method of hierarchical LDA (H-LDA), and key entities and the corresponding description phrase are extracted from the text and recomposed as a short description."
 				],
 				"seeAlso": []
 			}
@@ -244,8 +260,8 @@ var testCases = [
 				],
 				"date": "2020",
 				"abstractNote": "This paper illustrates our approach to the shared task on similar language translation in the fifth conference on machine translation (WMT-20). Our motivation comes from the latest state of the art neural machine translation in which Transformers and Recurrent Attention models are effectively used. A typical sequence-sequence architecture consists of an encoder and a decoder Recurrent Neural Network (RNN). The encoder recursively processes a source sequence and reduces it into a fixed-length vector (context), and the decoder generates a target sequence, token by token, conditioned on the same context. In contrast, the advantage of transformers is to reduce the training time by offering a higher degree of parallelism at the cost of freedom for sequential order. With the introduction of Recurrent Attention, it allows the decoder to focus effectively on order of the source sequence at different decoding steps. In our approach, we have combined the recurrence based layered encoder-decoder model with the Transformer model. Our Attention Transformer model enjoys the benefits of both Recurrent Attention and Transformer to quickly learn the most probable sequence for decoding in the target language. The architecture is especially suited for similar languages (languages coming from the same family). We have submitted our system for both Indo-Aryan Language forward (Hindi to Marathi) and reverse (Marathi to Hindi) pair. Our system trains on the parallel corpus of the training dataset provided by the organizers and achieved an average BLEU point of 3.68 with 97.64 TER score for the Hindi-Marathi, along with 9.02 BLEU point and 88.6 TER score for Marathi-Hindi testing set.",
+				"conferenceName": "WMT",
 				"libraryCatalog": "Semantic Scholar",
-				"publisher": "WMT",
 				"url": "https://www.semanticscholar.org/paper/Attention-Transformer-Model-for-Translation-of-Dhanani-Rafi/6043e3b975a9e775203eec9ef0eab19d6dd0d378",
 				"attachments": [
 					{
@@ -378,7 +394,7 @@ var testCases = [
 				"abstractNote": "The dominant sequence transduction models are based on complex recurrent or convolutional neural networks in an encoder-decoder configuration. The best performing models also connect the encoder and decoder through an attention mechanism. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. Experiments on two machine translation tasks show these models to be superior in quality while being more parallelizable and requiring significantly less time to train. Our model achieves 28.4 BLEU on the WMT 2014 English-to-German translation task, improving over the existing best results, including ensembles by over 2 BLEU. On the WMT 2014 English-to-French translation task, our model establishes a new single-model state-of-the-art BLEU score of 41.8 after training for 3.5 days on eight GPUs, a small fraction of the training costs of the best models from the literature. We show that the Transformer generalizes well to other tasks by applying it successfully to English constituency parsing both with large and limited training data.",
 				"libraryCatalog": "Semantic Scholar",
 				"publicationTitle": "ArXiv",
-				"url": "https://www.semanticscholar.org/reader/204e3073870fae3d05bcbc2f6a8e263d9b72e776",
+				"url": "https://www.semanticscholar.org/paper/204e3073870fae3d05bcbc2f6a8e263d9b72e776",
 				"attachments": [
 					{
 						"title": "Semantic Reader Link",
@@ -426,7 +442,7 @@ var testCases = [
 				"abstractNote": "Neural machine translation is a recently proposed approach to machine translation. Unlike the traditional statistical machine translation, the neural machine translation aims at building a single neural network that can be jointly tuned to maximize the translation performance. The models proposed recently for neural machine translation often belong to a family of encoder-decoders and consists of an encoder that encodes a source sentence into a fixed-length vector from which a decoder generates a translation. In this paper, we conjecture that the use of a fixed-length vector is a bottleneck in improving the performance of this basic encoder-decoder architecture, and propose to extend this by allowing a model to automatically (soft-)search for parts of a source sentence that are relevant to predicting a target word, without having to form these parts as a hard segment explicitly. With this new approach, we achieve a translation performance comparable to the existing state-of-the-art phrase-based system on the task of English-to-French translation. Furthermore, qualitative analysis reveals that the (soft-)alignments found by the model agree well with our intuition.",
 				"libraryCatalog": "Semantic Scholar",
 				"publicationTitle": "CoRR",
-				"url": "https://www.semanticscholar.org/reader/fa72afa9b2cbc8f0d7b05d52548906610ffbb9c5",
+				"url": "https://www.semanticscholar.org/paper/fa72afa9b2cbc8f0d7b05d52548906610ffbb9c5",
 				"attachments": [
 					{
 						"title": "Semantic Reader Link",
@@ -455,18 +471,23 @@ var testCases = [
 				"title": "When Attention Meets Fast Recurrence: Training Language Models with Reduced Compute",
 				"creators": [
 					{
+						"creatorType": "author",
 						"firstName": "Tao",
-						"lastName": "Lei",
-						"creatorType": "author"
+						"lastName": "Lei"
 					}
 				],
-				"date": "24 February 2021",
+				"date": "2021",
 				"DOI": "10.18653/v1/2021.emnlp-main.602",
 				"abstractNote": "Large language models have become increasingly difficult to train because of the growing computation time and cost. In this work, we present SRU++, a highly-efficient architecture that combines fast recurrence and attention for sequence modeling. SRU++ exhibits strong modeling capacity and training efficiency. On standard language modeling tasks such as Enwik8, Wiki-103 and Billion Word datasets, our model obtains better bits-per-character and perplexity while using 3x-10x less training cost compared to top-performing Transformer models. For instance, our model achieves a state-of-the-art result on the Enwik8 dataset using 1.6 days of training on an 8-GPU machine. We further demonstrate that SRU++ requires minimal attention for near state-of-the-art performance. Our results suggest jointly leveraging fast recurrence with little attention as a promising direction for accelerating model training and inference.",
+				"conferenceName": "Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing",
+				"language": "en",
 				"libraryCatalog": "Semantic Scholar",
-				"publisher": "EMNLP",
+				"pages": "7633-7648",
+				"place": "Online and Punta Cana, Dominican Republic",
+				"proceedingsTitle": "Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing",
+				"publisher": "Association for Computational Linguistics",
 				"shortTitle": "When Attention Meets Fast Recurrence",
-				"url": "https://www.semanticscholar.org/reader/2fd10e095b146f99da8cdc6ff58720e2e8fca36d",
+				"url": "https://aclanthology.org/2021.emnlp-main.602",
 				"attachments": [
 					{
 						"title": "Semantic Reader Link",
