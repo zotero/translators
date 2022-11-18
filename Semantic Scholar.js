@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-16 03:59:09"
+	"lastUpdated": "2022-11-17 23:12:25"
 }
 
 /*
@@ -107,10 +107,13 @@ function scrape(doc, url) {
 	const schemaObject = JSON.parse(schemaTag.innerHTML);
 	const article = schemaObject['@graph'][1][0];
 	
-	item.title = article.name;
-	item.abstractNote = article.abstract;
-	item.date = article.datePublished;
-	item.url = url;
+	if (article.about) {
+		item.abstractNote = article.abstract.substring(article.about.length + 1);
+		item.notes.push('[TLDR] ' + article.about);
+	} else {
+		item.abstractNote = article.abstract;
+	}
+	
 	item.attachments.push({
 		url: url,
 		title: url.includes('semanticscholar.org/reader') ? 'Semantic Reader Link' : 'Semantic Scholar Link',
@@ -118,11 +121,28 @@ function scrape(doc, url) {
 		snapshot: false
 	});
 
-	if (article.about) {
-		item.abstractNote = article.abstract.substring(article.about.length + 1);
-		item.notes.push('[TLDR] ' + article.about);
+	if (article.mainEntity && (article.mainEntity.includes('pdfs.semanticscholar.org') || article.mainEntity.includes('.pdf'))) {
+		item.attachments.push({
+			title: 'Full Text PDF',
+			mimeType: 'application/pdf',
+			url: article.mainEntity
+		});
 	}
 
+	if (article.sameAs) {
+		item.DOI = ZU.cleanDOI(decodeURIComponent(article.sameAs));
+		parseWithDOITranslator(item);
+		return;
+	}
+
+	item.title = article.name;
+	item.date = article.datePublished;
+	item.url = url;
+	if (url.includes('semanticscholar.org/reader')) {
+		const catalogPageLink = doc.querySelector('[data-heap-id="reader_to_pdp_link"]');
+		item.url = catalogPageLink ? catalogPageLink.href : null;
+	}
+	
 	if (itemType == 'conferencePaper' && article.publisher) {
 		item.conferenceName = article.publisher.name;
 	}
@@ -136,20 +156,29 @@ function scrape(doc, url) {
 			item.creators.push(ZU.cleanAuthor(author.name, 'author'));
 		});
 	}
-	
-	if (article.sameAs) {
-		item.DOI = ZU.cleanDOI(decodeURIComponent(article.sameAs));
-	}
-
-	if (article.mainEntity && (article.mainEntity.includes('pdfs.semanticscholar.org') || article.mainEntity.includes('.pdf'))) {
-		item.attachments.push({
-			title: 'Full Text PDF',
-			mimeType: 'application/pdf',
-			url: article.mainEntity
-		});
-	}
 
 	item.complete();
+}
+
+function parseWithDOITranslator(item) {
+	var translate = Zotero.loadTranslator('search');
+	translate.setTranslator('b28d0d42-8549-4c6d-83fc-8382874a5cb9'); // DOI Content Negotiation
+	translate.setSearch({ DOI: item.DOI });
+	translate.setHandler('itemDone', (obj, doiItem) => {
+		let oldAttachments = item.attachments;
+		let oldNotes = item.notes;
+		Object.assign(item, doiItem);
+		item.libraryCatalog = 'Semantic Scholar';
+		if (!item.attachments.length) {
+			item.attachments = oldAttachments;
+		}
+		if (!item.notes.length) {
+			item.notes = oldNotes;
+		}
+	});
+	translate.setHandler('done', () =>  item.complete());
+	translate.setHandler('error', (_, error) => Zotero.debug(error));
+	translate.translate();
 }
 
 /** BEGIN TEST CASES **/
