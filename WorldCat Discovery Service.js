@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-28 00:02:21"
+	"lastUpdated": "2022-11-16 22:15:52"
 }
 
 /*
@@ -96,7 +96,7 @@ function generateItem(doc, co) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('a[href*="/search/detail/"]');
+	var rows = doc.querySelectorAll('a[href*="/search/detail/"]:not([id*="availability-section-link"])');
 	if (!rows.length) {
 		rows = doc.querySelectorAll('ol.results li[id*="record"]');
 	}

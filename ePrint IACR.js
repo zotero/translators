@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-08-15 19:06:04"
+	"lastUpdated": "2022-10-28 16:15:17"
 }
 
 let preprintType = ZU.fieldIsValidForType('title', 'preprint')
@@ -29,7 +29,7 @@ function detectWeb(doc, url) {
 function scrape(doc, url) {
 	var reportNoSelector = "h4";
 	var titleSelector    = "h3";
-	var authorsSelector  = ".authorName";
+	var authorsSelector  = 'meta[name="citation_author"]'
 	var abstractXPath    = "//h5[starts-with(text(),\"Abstract\")]/following-sibling::p/text()";
 	var keywordsSelector = ".keywords > .keyword";
 	var reportNo = text(doc, reportNoSelector);
@@ -42,10 +42,7 @@ function scrape(doc, url) {
 	title = ZU.trimInternal(title);
 
 	var authors = doc.querySelectorAll(authorsSelector);
-	authors = [...authors].map(author => author.textContent);
-	if (!authors.length) {
-		authors = text(doc, '.fst-italic').split(/\band\b/)
-	}
+	authors = [...authors].map(author => author.content);
 	
 	var abstr = "";
 	var abstractLines = doc.evaluate(abstractXPath, doc, null, XPathResult.ANY_TYPE, null);
@@ -150,6 +147,65 @@ var testCases = [
 					},
 					{
 						"tag": "cryptanalysis"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eprint.iacr.org/2011/566",
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "Fully Homomorphic Encryption with Polylog Overhead",
+				"creators": [
+					{
+						"firstName": "Craig",
+						"lastName": "Gentry",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Shai",
+						"lastName": "Halevi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nigel P.",
+						"lastName": "Smart",
+						"creatorType": "author"
+					}
+				],
+				"date": "2011",
+				"abstractNote": "We show that homomorphic evaluation of (wide enough) arithmetic circuits can be accomplished with only polylogarithmic overhead. Namely, we present a construction of fully homomorphic encryption (FHE) schemes that for security parametercan evaluate any width-circuit withgates in time. To get low overhead, we use the recent batch homomorphic evaluation techniques of Smart-Vercauteren and Brakerski-Gentry-Vaikuntanathan, who showed that homomorphic operations can be applied to \"packed\" ciphertexts that encrypt vectors of plaintext elements. In this work, we introduce permuting/routing techniques to move plaintext elements across these vectors efficiently. Hence, we are able to implement general arithmetic circuit in a batched fashion without ever needing to \"unpack\" the plaintext vectors. We also introduce some other optimizations that can speed up homomorphic evaluation in certain cases. For example, we show how to use the Frobenius map to raise plaintext elements to powers of~at the \"cost\" of a linear operation.",
+				"libraryCatalog": "ePrint IACR",
+				"url": "https://eprint.iacr.org/2011/566",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Automorphism"
+					},
+					{
+						"tag": "Batching"
+					},
+					{
+						"tag": "Bootstrapping"
+					},
+					{
+						"tag": "Galois group"
+					},
+					{
+						"tag": "Homomorphic encryption"
+					},
+					{
+						"tag": "Permutation network"
 					}
 				],
 				"notes": [],
