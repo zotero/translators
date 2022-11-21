@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-03-23 10:10:43"
+	"lastUpdated": "2022-11-17 09:24:55"
 }
 
 /*
@@ -31,9 +31,8 @@
 function detectWeb(doc, url) {
 	let pkpLibraries = ZU.xpath(doc, '//script[contains(@src, "/lib/pkp/js/")]');
 	if (url.match(/\/issue\//) && getSearchResults(doc)) return "multiple";
-	else if (!(ZU.xpathText(doc, '//a[@id="developedBy"]/@href') == 'http://pkp.sfu.ca/ojs/' ||
-		  pkpLibraries.length >= 1))
-		return false;
+	else if (!ZU.xpathText(doc, '//meta[@name="generator" and contains(@content,"Open Journal Systems")]/@content') && (!(ZU.xpathText(doc, '//a[@id="developedBy"]/@href') == 'http://pkp.sfu.ca/ojs/' ||
+		  pkpLibraries.length >= 1))) return false;
 	else if (url.match(/\/article\//)) return "journalArticle";
 	else return false;
 }
@@ -192,7 +191,12 @@ function getOrcids(doc, ISSN) {
 function joinTitleAndSubtitle (doc, item) {
 	if (item.ISSN == '1799-3121') {
 		if (doc.querySelector(".subtitle")) {
-			item.title = item.title + ' ' + doc.querySelector(".subtitle").textContent.trim();
+			item.title = item.title + ': ' + doc.querySelector(".subtitle").textContent.trim();
+		}
+	}
+	if (item.ISSN == '1018-1539') {
+		if (ZU.xpathText(doc, '//h1[@class="page-header"]/small')) {
+			item.title = item.title + ': ' + ZU.xpathText(doc, '//h1[@class="page-header"]/small').trim();
 		}
 	}
 	return item.title;
@@ -214,6 +218,24 @@ function invokeEMTranslator(doc) {
 		}
 		if (i.issue === "0") delete i.issue;
 		if (i.abstractNote && i.abstractNote.match(/No abstract available/)) delete i.abstractNote;
+		
+		let abstractRegex = /(?:ABSTRACT|RESUME|RESUMEN|SAMMANDRAG|SUMMARY):? /;
+		if (i.abstractNote) {
+			let absNr = 0;
+			for (let abs of i.abstractNote.split(abstractRegex).filter(str => ! /^\s*$/.test(str))) {
+				absNr == 0 ? i.abstractNote = abs : i.notes.push('abs:' + abs);
+				++absNr;
+			}
+		}
+		for (let abs of ZU.xpath(doc, '//meta[@name="DC.Description"]/@content')) {
+			let found = false;
+			for (let note of i.notes) {
+				if (note.substring(4,24) == abs.textContent.replace(abstractRegex, '').substring(0,20)) found = true;
+			}
+			if (i.abstractNote && !(i.abstractNote.trim().substring(0, 20) == abs.textContent.trim().replace(abstractRegex, '').substring(0, 20)) && !found) {
+				i.notes.push('abs:' + abs.textContent);
+			}
+		}
 		i.tags = splitDotSeparatedKeywords(i);
 		i.title = joinTitleAndSubtitle(doc, i);
 		// some journal assigns the volume to the date
@@ -262,6 +284,8 @@ function doWeb(doc, url) {
 		invokeEMTranslator(doc, url);
 	}
 }
+
+
 
 
 
@@ -347,96 +371,6 @@ var testCases = [
 				],
 				"tags": [],
 				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://jeac.de/ojs/index.php/jeac/article/view/850",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Editorial: Ethik der Nächsten und Fremdenliebe",
-				"creators": [
-					{
-						"firstName": "Dorothea",
-						"lastName": "Erbele-Küster",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Michael",
-						"lastName": "Roth",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Raphaela Meyer zu",
-						"lastName": "Hörste-Bührer",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Esther",
-						"lastName": "Kobel",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ulrich",
-						"lastName": "Volp",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ruben",
-						"lastName": "Zimmermann",
-						"creatorType": "author"
-					}
-				],
-				"date": "2021/12/11",
-				"DOI": "10.25784/jeac.v3i0.850",
-				"ISSN": "2627-6062",
-				"journalAbbreviation": "1",
-				"language": "de",
-				"libraryCatalog": "jeac.de",
-				"pages": "3-4",
-				"publicationTitle": "Journal of Ethics in Antiquity and Christianity",
-				"rights": "Copyright (c) 2021 Journal of Ethics in Antiquity and Christianity",
-				"shortTitle": "Editorial",
-				"url": "https://jeac.de/ojs/index.php/jeac/article/view/850",
-				"volume": "3",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Ethik in Antike und Christentum"
-					},
-					{
-						"tag": "Fremdenliebe"
-					},
-					{
-						"tag": "Imigration"
-					},
-					{
-						"tag": "Nächstenliebe"
-					}
-				],
-				"notes": [
-					{
-						"note": "orcid:0000-0002-7458-9466 | Raphaela Meyer zu Hörste-Bührer"
-					},
-					{
-						"note": "orcid:0000-0003-2510-0879 | Ulrich Volp"
-					},
-					{
-						"note": "orcid:0000-0002-1620-4396 | Ruben Zimmermann"
-					}
-				],
 				"seeAlso": []
 			}
 		]
@@ -695,67 +629,9 @@ var testCases = [
 					}
 				],
 				"notes": [
+					"abs:Tras acometer un estado de la cuestión sobre los estudios referidos a la Tercera Orden Franciscana en el caso español y portugués, el trabajo comienza analizando los orígenes medievales del franciscanismo secular en la península ibérica. Posteriormente, estudia las razones del proceso de decadencia en el que se vio sumido a finales del Medievo y comienzos de la Edad Moderna, poniéndolo en relación con cuestiones de carácter político –la presión del poder real–, ideológico –la influencia de los movimientos heréticos– o de propia organización interna del franciscanismo. Se adentra más adelante en las razones de su posterior recuperación, a comienzos del siglo xvii, íntimamente unida a la reforma emanada del Concilio de Trento, en la que el asociacionismo religioso secular juega un papel de primer orden. Finalmente, trata de explicar las claves del éxito de la fórmula terciaria entre los diferentes sectores de la sociedad del Antiguo Régimen, subrayando la necesidad de abandonar los viejos tópicos que acusan a la Tercera Orden de la Época Moderna de alejarse en lo religioso de su pureza originaria.\nReferencias\nAlves, Marieta. História da Venerável Ordem 3ª da Penitência do Seráfico Pe. São Francisco da Congregação da Bahia. Bahia: Imprensa Nacional, 1948.\nAmberes, Fredegando de. La Tercera Orden Secular de San Francisco, 1221-1921. Barcelona: Casa Editorial de Arte Católico, 1925.\nBarcelona, Martín de. «Ensayo de bibliografía hispano-americana referente a la V.O.T.». Estudios franciscanos, 27 (1921): 502-521.\nBarrico, Joaquim Simões. Noticia historica da Veneravel Ordem Terceira da Penitencia de S. Francisco da cidade de Coímbra e do seu Hospital e Asylo. Coímbra: Tipografía de J.J. Reis Leitão, 1895.\nCabot Roselló, Salvador. «Evolución de la regla de la Tercera Orden Franciscana». En El franciscanismo en la Península Ibérica. Balances y perspectivas: I Congreso Internacional, ed. por María del Mar Graña Cid, 653-678. Barcelona: Asociación Hispánica de Estudios Franciscanos, 2005.\nCarrillo, Juan de. Primera parte de la Historia de la Tercera Orden de Nuestro Seraphico P. S. Francisco. Zaragoza: por Lucas Sánchez, 1610.\nDelgado Pavón, María Dolores. Reyes, nobles y burgueses en auxilio de la pobreza (la Venerable Orden Tercera Seglar de San Francisco de Madrid en el siglo xvii). Alcalá de Henares: Universidad de Alcalá, 2009.\nGonzález Lopo, «Balance y perspectivas de los estudios de la VOT franciscana en Galicia (siglos xvii-xix)». En El franciscanismo en la Península Ibérica. Balances y perspectivas: I Congreso Internacional, ed. por María del Mar Graña Cid, 567-583. Barcelona: Asociación Hispánica de Estudios Franciscanos, 2005.\nGraña Cid, María del Mar. «Las órdenes mendicantes en el obispado de Mondoñedo. El convento de San Martín de Villaoriente (1374-1500)». Estudios mindonienses 6 (1990):13-464.\nMartín García, Alfredo. «Los franciscanos seglares en la Corona de Castilla durante el Antiguo Régimen». Hispania Sacra 57, nº 116 (2005): 441-466.\nMartín García, Alfredo. Religión y sociedad en Ferrolterra durante el Antiguo Régimen: La V.O.T. seglar franciscana. Ferrol: Concello de Ferrol, 2005.\nMartín García, Alfredo. «Franciscanismo seglar y propaganda en la Península Ibérica y Ultramar durante la Edad Moderna». Semata: Ciencias sociais e humanidades 26 (2014): 271-293.\nMartín García, Alfredo. «Franciscanismo y religiosidad popular en el Norte de Portugal durante la Edad Moderna. La fraternidad de Ponte de Lima». Archivo Ibero-Americano 74, nº 279 (2014): 517-556.\nMartínez Vega, Elisa. «Los congresos de la VOT en Madrid». En El franciscanismo en la Península Ibérica. Balances y perspectivas: I Congreso Internacional, ed. por María del Mar Graña Cid. Barcelona: Asociación Hispánica de Estudios Franciscanos, 2005.\nMeesserman, Giles Gérard. Dossier de l'Ordre de la pénitence au 13e siècle. Friburgo: Éditions Universitaires, 1961.\nMeesserman, Giles Gérard. Ordo fraternitatis. Confraternite e pietà dei laici nel Medioevo. Roma: Herder, 1977.\nOrtmann, Adalberto. História da Antiga Capela da Ordem Terceira da Penitência de São Francisco em São Paulo. (Rio de Janeiro: Ministério da Educação e Saúde, 1951.\nPompei, Alfonso. «Il movimento penitenziale nei secoli xii-xiii», Collectanea franciscana 41 (1973): 9-40.\nPou y Martí, José María. Visionarios, beguinos y fraticelos catalanes (siglos xiii-xv). Alicante: Instituto de Cultura Juan Gil-Albert, 1996.\nRey Castelao, Ofelia. «La Orden Tercera Franciscana en el contexto del asociacionismo religioso gallego en el Antiguo Régimen: La V.O.T. de la villa de Padrón». Archivo Ibero-Americano 59, nº 232 (1999): 3-47.\nRibeiro, Bartolomeu. Os terceiros franciscanos portugueses. Sete séculos da súa história. Braga: Tipografia «Missões Franciscanas», 1952.\nSánchez Herrero, José. «Beguinos y Tercera Orden Regular de San Francisco en Castilla». Historia. Instituciones. Documentos 19 (1992): 433-448.\nSerra de Manresa, Valentí. «Els Terciaris franciscans a l´epoca moderna (segles xvii i xviii)». Pedralbes 14 (1994): 93-105.\nVillapadierna, Isidoro de. «Observaciones críticas sobre la Tercera Orden de penitencia en España». Collectanea franciscana 41 (1973): 219-227.\nVillapadierna, Isidoro de. «Vida comunitaria de los terciarios franciscanos de España en el siglo xiv». Analecta T.O.R. 6 (1982): 91-113.\nZaremba, Anthony. Franciscan Social Reform. A Study of the Third Order Secular of St. Francis as an Agency of Social Reform, According to Certain Papal Documents. Pulaski, Wisconsin: Catholic University of America, 1947.",
 					{
 						"note": "orcid:0000-0001-6906-0210 | Alfredo Martín García"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.sanisidoro.net/publicaciones/index.php/isidorianum/article/view/147",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "“Battle is over, raise we the cry of victory”. Study of Revelation 19:11-21",
-				"creators": [
-					{
-						"firstName": "Francisco Javier",
-						"lastName": "Ruiz-Ortiz",
-						"creatorType": "author"
-					}
-				],
-				"date": "2020/11/20",
-				"DOI": "10.46543/ISID.2029.1054",
-				"ISSN": "2660-7743",
-				"issue": "2",
-				"journalAbbreviation": "1",
-				"language": "es-ES",
-				"libraryCatalog": "www.sanisidoro.net",
-				"pages": "37-60",
-				"publicationTitle": "Isidorianum",
-				"shortTitle": "“Battle is over, raise we the cry of victory”. Study of Revelation 19",
-				"url": "https://www.sanisidoro.net/publicaciones/index.php/isidorianum/article/view/147",
-				"volume": "29",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Ap 19"
-					},
-					{
-						"tag": "Apocalipsis"
-					},
-					{
-						"tag": "cristología"
-					},
-					{
-						"tag": "juicio final"
-					}
-				],
-				"notes": [
-					{
-						"note": "orcid:0000-0001-6251-0506 | Francisco Javier Ruiz-Ortiz"
 					}
 				],
 				"seeAlso": []
@@ -822,6 +698,7 @@ var testCases = [
 					}
 				],
 				"notes": [
+					"abs:By comparing the Greek and Latin texts of the transfiguration of Jesus on Mount Tabor (Mk 9:2-10; Mt 17:1-9; Lk 9:28-36), it is shown how the Vulgate NT illuminates this central, very special theme. This essay also raises relevant theological questions, such as the genre of the Transfiguration text, but also the connection of the Transfiguration with the episode of the making of the covenant in Ex 24 on Mount Sinai. Is this the literarische Vorlage?",
 					{
 						"note": "orcid:0000-0003-4838-4368 | Tarciziu Hristofor Șerban, Lect. univ. dr."
 					}
@@ -912,6 +789,195 @@ var testCases = [
 				"notes": [
 					{
 						"note": "orcid:0000-0002-0918-0226 | Elfrieda Marie-Louise Fleischmann"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://tidsskrift.dk/rvt/article/view/132100",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "What Did King Hákon góði Do before the Battle at Fitjar and after the Battle at Avaldsnes?",
+				"creators": [
+					{
+						"firstName": "Andreas",
+						"lastName": "Nordberg",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022/03/25",
+				"DOI": "10.7146/rt.v74i.132100",
+				"ISSN": "1904-8181",
+				"abstractNote": "The starting point for this paper is the enigmatic stanza 6 of the Norwegian skald Guthormr sindri's mid-900s poem Hákonardrápa. This stanza depicts the Norwegian king Hákon góði clashing his spears together over the heads of the fallen warriors after the battle of Avaldsnes. But why did he do it? And what did Hákon do when he \"played\" (lék) in front of his army before the Battle of Fitjar, as portrayed in Eyvindr Finnsson’s poem Hákonarmál? Roman sources, iconographic motifs from the migration period to the Viking age, as well as information in Old Norse literature, suggest that war dances, intimidating movements, as well as aggressive and incendiary gestures, cries and songs constituted an important aspect of warfare among Germanic and Scandinavian peoples. In this paper, it is suggested that Hákon's – to us – enigmatic performances in Hákonardrápa and Hákonarmál may be understandable within the framework of this martial context.",
+				"journalAbbreviation": "RvT",
+				"language": "da",
+				"libraryCatalog": "tidsskrift.dk",
+				"pages": "119-138",
+				"publicationTitle": "Religionsvidenskabeligt Tidsskrift",
+				"rights": "Copyright (c) 2022 Forfatter og Tidsskrift",
+				"url": "https://tidsskrift.dk/rvt/article/view/132100",
+				"volume": "74",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Skaldic Poetry"
+					},
+					{
+						"tag": "battlefield behaviour"
+					},
+					{
+						"tag": "ritual"
+					},
+					{
+						"tag": "war dance"
+					},
+					{
+						"tag": "Óðinn worship"
+					}
+				],
+				"notes": [
+					"abs:Utgångspunkten för denna artikel är en gåtfull strof (6) i den norske skalden Guthormr sindri’s dikt Hákonardrápa, från mitten av 900-talet. Strofen beskriver hur den norske kungen Hákon góði slog samman spjut över huvudena på de fallna krigare, som låg spridda över slagfältet efter slaget vid Avaldsnes. Varför gjorde han det? Och vad gjorde samme kung Hákon, när han enligt Eyvindr Finnsson’s poem Hákonarmál “lekte” (lék) framför sina krigare på slagfältet före slaget vid Fitjar? Romerska källor, ikonografiska motiv från folkvandringstid till vikingatid, liksom uppgifter i den norröna litteraturen, visar att krigsdanser, hotfulla rörelser samt aggressiva och eggande gester, utrop och sånger var viktiga inslag i krigsföringen bland de germanska och skandinaviska folken. I denna artikel föreslås att Hákon’s – för oss – gåtfulla handlingar i Hákonardrápa och Hákonarmál blir förståeliga inom ramen för denna militära kontext."
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://oerf-journal.eu/index.php/oerf/article/view/318",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Mehrperspektivität durch fächerkooperierenden Unterricht: Interreligiöses Begegnungslernen zwischen Schülerinnen und Schülern der Fächer des RUs und des Ethik- bzw. Philosophieunterrichts",
+				"creators": [
+					{
+						"firstName": "Katja",
+						"lastName": "Boehme",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hans-Bernhard",
+						"lastName": "Petermann",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022/05/16",
+				"DOI": "10.25364/10.30:2022.1.12",
+				"ISSN": "1018-1539",
+				"abstractNote": "Interreligiöses Begegnungslernen (IRBL) in Kooperation der Schul- und Studienfächer der Theologien bzw. des bekenntnisorientierten Religionsunterrichts und der Philosophie/Ethik wird im Raum Heidelberg und in Wien in Schulprojekten durchgeführt und seit 2007/08 &nbsp;in der Lehrkräfteausbildung der KPH Wien/Krems und seit 2011 an der PH Heidelberg (dort in Kooperation mit anderen Lehrkräfteausbildungsstätten) angeboten. Vorliegender Beitrag orientiert über bildungskonzeptionelle Rahmenbedingungen und Herausforderungen einer Kooperation zwischen den Schulfächern des Religions- und Ethikunterrichts wie auch konkret über Organisation und Themen des IRBL auf dem Hintergrund erprobter und evaluierter Projekte in Schule und Hochschule aus dem Raum Heidelberg.",
+				"issue": "1",
+				"journalAbbreviation": "1",
+				"language": "de",
+				"libraryCatalog": "oerf-journal.eu",
+				"pages": "202-217",
+				"publicationTitle": "Österreichisches Religionspädagogisches Forum",
+				"rights": "Copyright (c) 2022 Österreichisches Religionspädagogisches Forum",
+				"shortTitle": "Mehrperspektivität durch fächerkooperierenden Unterricht",
+				"url": "https://oerf-journal.eu/index.php/oerf/article/view/318",
+				"volume": "30",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Begegnungslernen"
+					},
+					{
+						"tag": "Interdisziplinarität"
+					},
+					{
+						"tag": "Interreligiosität"
+					},
+					{
+						"tag": "Mehrperspektivität"
+					},
+					{
+						"tag": "Projektunterricht"
+					}
+				],
+				"notes": [
+					"abs:Interreligious Learning in encounter (IRBL) through cooperation between the subjects of the theologies (or confession-oriented subjects of religious education) and philosophy/ethics in school and university is carried out in school projects in the Heidelberg region and in Vienna and has been offered as an additional qualification in teacher training since 2007/08 at KPH Vienna/Krems and since 2011 at the University of Education in Heidelberg. This article provides an orientation on the educational conceptual framework and challenges of cooperation between the school subjects of religion and ethics and specifically on the organization and topics of the IRBL against the background of practiced and evaluated projects in schools and universities."
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.sanisidoro.net/publicaciones/index.php/isidorianum/article/view/147",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "“Battle is over, raise we the cry of victory”. Study of Revelation 19:11-21",
+				"creators": [
+					{
+						"firstName": "Francisco Javier",
+						"lastName": "Ruiz-Ortiz",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020/11/20",
+				"DOI": "10.46543/ISID.2029.1054",
+				"ISSN": "2660-7743",
+				"abstractNote": "Using some of the tools of narrative criticism, this article studies the final battle and victory which is achieved by God’s envoy. By unpacking the network of relationship in the text the envoy is identified with the Christ of God, who has been present in the book from the beginning. The article shows how the Rider on the white horse summarises what the book of Revelation has said about Jesus.",
+				"issue": "2",
+				"journalAbbreviation": "Isidorianum",
+				"language": "es",
+				"libraryCatalog": "www.sanisidoro.net",
+				"pages": "37-60",
+				"publicationTitle": "Isidorianum",
+				"rights": "Derechos de autor 2020 Isidorianum",
+				"shortTitle": "“Battle is over, raise we the cry of victory”. Study of Revelation 19",
+				"url": "https://www.sanisidoro.net/publicaciones/index.php/isidorianum/article/view/147",
+				"volume": "29",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Ap 19"
+					},
+					{
+						"tag": "Apocalipsis"
+					},
+					{
+						"tag": "cristología"
+					},
+					{
+						"tag": "juicio final"
+					}
+				],
+				"notes": [
+					"abs:Usando elementos del análisis narrativo, este artículo examina la batalla final y la victoria que se consigue a través del enviado de Dios, un jinete en un caballo blanco. Desenredando la red de relaciones en el texto, el jinete en el caballo blanco se identifica con el Cristo de Dios, que ha estado presente en el libro desde el inicio. El artículo muestra como el Jinete en el caballo blanco resume en sí mismo todo lo que el Apocalipsis dice sobre Jesús.",
+					{
+						"note": "orcid:0000-0001-6251-0506 | Francisco Javier Ruiz-Ortiz"
 					}
 				],
 				"seeAlso": []

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-08 13:41:19"
+	"lastUpdated": "2022-11-17 08:50:23"
 }
 
 /*
@@ -70,32 +70,32 @@ function getSearchResults(doc) {
 function postProcess(doc, item) {
 	let title = ZU.xpathText(doc, '//meta[@name="citation_title"]//@content');
 	if (title) item.title = title;
-    let abstracts = ZU.xpath(doc, '//section[@class="abstract"]//p');
+  let abstracts = ZU.xpath(doc, '//section[@class="abstract"]//p');
 
-    //multiple abstracts
-    if (abstracts && abstracts.length > 0)
+  //multiple abstracts
+  if (abstracts && abstracts.length > 0)
         abstracts = abstracts.map(abstract => abstract.textContent);
 	// Deduplicate original results including potentially existing abstractNote
-    //abstracts.push(item.abstractNote);
-    let all_abstracts_deduplicated = new Set(abstracts);
-    if (all_abstracts_deduplicated.size) {
-        // trim, remove leading comments and remove abstracts that are short forms of other abstracts
-        let all_abstracts_clean = [...all_abstracts_deduplicated]
-                                  .map(abs => abs.trim().replace(/^(?:Résumé|Abstract\s?)/i, ""))
-                                  .filter(abs => /\S/.test(abs))
-                                  .sort((abs1,abs2) => abs1.length - abs2.length)
-                                  .filter(function(abs, index, array) {
-                                      if (index == array.length - 1)
-                                          return true;
-                                      for (let other_abs of array.slice(index + 1)) {
-                                           if (other_abs.startsWith(abs))
-                                              return false;
-                                      }
-                                      return true;
+  //abstracts.push(item.abstractNote);
+  let all_abstracts_deduplicated = new Set(abstracts);
+  if (all_abstracts_deduplicated.size) {
+      // trim, remove leading comments and remove abstracts that are short forms of other abstracts
+      let all_abstracts_clean = [...all_abstracts_deduplicated]
+                                .map(abs => abs.trim().replace(/^(?:Résumé|Abstract\s?)/i, ""))
+                                .filter(abs => /\S/.test(abs))
+                                .sort((abs1,abs2) => abs1.length - abs2.length)
+                                .filter(function(abs, index, array) {
+                                    if (index == array.length - 1)
+                                        return true;
+                                    for (let other_abs of array.slice(index + 1)) {
+                                         if (other_abs.startsWith(abs))
+                                            return false;
+                                    }
+                                    return true;
                                   });
-        if (!all_abstracts_clean.length)
-            return;
-	    item.abstractNote = all_abstracts_clean[0];
+      if (!all_abstracts_clean.length)
+          return;
+	  item.abstractNote = all_abstracts_clean[0];
 		if (all_abstracts_clean.length > 1) {
 		    for (let abs of all_abstracts_clean.slice(1)) {
 		             item.notes.push({
@@ -103,7 +103,7 @@ function postProcess(doc, item) {
 		 	    });
 			}
 		}
-    }
+	}
 
 	// i set 100 as limit of string length, because usually a string of a pseudoabstract has less then 150 character e.g. "abstractNote": "\"Die Vernünftigkeit des jüdischen Dogmas\" published on 05 Sep 2020 by Brill."
 	if (item.abstractNote.length < 100) delete item.abstractNote;
@@ -113,6 +113,9 @@ function postProcess(doc, item) {
 		let allTags = item.tags.map(i => i.textContent.trim());
 		//deduplicate allTags
 		item.tags = Array.from(new Set(allTags.map(JSON.stringify))).map(JSON.parse);
+	}
+	for (let tag of ZU.xpath(doc, '//meta[@property="article:tag"]/@content')) {
+		if (!item.tags.includes(tag.textContent)) item.tags.push(tag.textContent);
 	}
 	let reviewEntry = text(doc, '.articlecategory');
 	if (reviewEntry && reviewEntry.match(/book\sreview/i)) item.tags.push('Book Review');

@@ -5,11 +5,11 @@
 	"target": "/issue/view/|index.php/journal/(?!article/view/)|index.php/eguzkilore/",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 99,
-	"inRepository": false,
+	"priority": 900,
+	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-02-01 12:44:56"
+	"lastUpdated": "2022-11-07 12:00:36"
 }
 
 /*
@@ -119,3 +119,7 @@ function doWeb(doc, url) {
 		}
 	}
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+]
+/** END TEST CASES **/
