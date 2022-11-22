@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-10-07 17:40:01"
+	"lastUpdated": "2022-11-22 16:05:46"
 }
 
 /*
@@ -85,12 +85,12 @@ async function doWeb(doc, url) {
 		}
 	}
 	else {
-		await scrape(doc, url);
+		await scrape(doc);
 	}
 }
 
 
-async function scrape(doc, url = doc.location.href) {
+async function scrape(doc) {
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
@@ -101,11 +101,18 @@ async function scrape(doc, url = doc.location.href) {
 	let pdfURL = null;
 	if (pdfPageURL) {
 		let pdfDoc = await requestDocument(pdfPageURL);
-		Z.debug('PDF embed page HTML:');
-		// This should be short and will help us debug if users get captcha pages, etc
-		Z.debug(pdfDoc.documentElement.innerHTML);
-		pdfURL = attr(pdfDoc, 'frame:not(:first-of-type)', 'src')
-			|| new URLSearchParams(pdfDoc.location.search).get('gotourl');
+		if (pdfDoc && pdfDoc.documentElement) {
+			// we're looking at some sort of intermediary screen or an embedded PDF
+			Z.debug('PDF embed page HTML:');
+			// This should be short and will help us debug if users get captcha pages, etc
+			Z.debug(pdfDoc.documentElement.innerHTML);
+			pdfURL = attr(pdfDoc, 'frame:not(:first-of-type)', 'src')
+				|| new URLSearchParams(pdfDoc.location.search).get('gotourl');
+		}
+		else {
+			// Looking straight at the PDF
+			pdfURL = pdfPageURL;
+		}
 		Z.debug('PDF URL: ' + pdfURL);
 	}
 
