@@ -96,7 +96,7 @@ function generateItem(doc, co) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('a[href*="/search/detail/"]');
+	var rows = doc.querySelectorAll('a[href*="/search/detail/"]:not([id*="availability-section-link"])');
 	if (!rows.length) {
 		rows = doc.querySelectorAll('ol.results li[id*="record"]');
 	}

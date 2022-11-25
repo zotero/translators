@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-09 08:24:34"
+	"lastUpdated": "2022-11-01 19:25:49"
 }
 
 /*
@@ -112,13 +112,18 @@ function scrape(doc, url) {
 			}
 		}
 		else {
-			let authors = doc.querySelectorAll('.author-name');
+			let authors = doc.querySelectorAll('.author-name, a[rel="author"]');
 			authors = Array.from(authors).map(x => x.textContent.trim());
 			item.creators = ZU.arrayUnique(authors)
 				.map(x => ZU.cleanAuthor(x, "author"));
 		}
 		
-		item.date = ZU.xpathText(doc, '//span[@itemprop="datePublished"]/@content') || ZU.xpathText(doc, '//meta[@name="DC.date.issued"]/@content');
+		item.date = attr(doc, 'meta[name="last_updated_date"]', 'content')
+			|| ZU.xpathText(doc, '//span[@itemprop="datePublished"]/@content')
+			|| ZU.xpathText(doc, '//meta[@name="DC.date.issued"]/@content');
+		if (item.date) {
+			item.date = ZU.strToISO(item.date);
+		}
 
 		// the automatic added tags here are usually not really helpful
 		item.tags = [];
@@ -184,7 +189,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2011-09-30T08:06-500",
+				"date": "2011-09-30",
 				"ISSN": "0190-8286",
 				"abstractNote": "The Obama administration has refused to reveal the details of its legal rationale for targeting radical cleric Anwar al-Aulaqi.",
 				"language": "en-US",
@@ -218,7 +223,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2011-11-07T09:49-500",
+				"date": "2011-11-07",
 				"abstractNote": "It’s easy if you know what to do.",
 				"blogTitle": "Washington Post",
 				"language": "en-US",
@@ -249,7 +254,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "1991-04-07T12:00-500",
+				"date": "1991-04-07",
 				"ISSN": "0190-8286",
 				"language": "en-US",
 				"libraryCatalog": "www.washingtonpost.com",
@@ -281,12 +286,51 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2020-07-08",
 				"ISSN": "0190-8286",
 				"abstractNote": "The populist president said he’s taking hydroxychloroquine to treat the infection. The U.S. ambassador to Brazil has tested negative for covid-19.",
 				"language": "en-US",
 				"libraryCatalog": "www.washingtonpost.com",
 				"publicationTitle": "Washington Post",
 				"url": "https://www.washingtonpost.com/world/the_americas/coronavirus-brazil-bolsonaro-tests-positive/2020/07/07/5fa71548-c049-11ea-b4f6-cb39cd8940fb_story.html",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.washingtonpost.com/media/2021/06/09/new-yorker-protest/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "The New Yorker’s labor dispute reaches Anna Wintour’s doorstep",
+				"creators": [
+					{
+						"firstName": "Jada",
+						"lastName": "Yuan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Elahe",
+						"lastName": "Izadi",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-06-09",
+				"ISSN": "0190-8286",
+				"abstractNote": "Workers for the prestigious Condé Nast-owned magazine are threatening a strike.",
+				"language": "en-US",
+				"libraryCatalog": "www.washingtonpost.com",
+				"publicationTitle": "Washington Post",
+				"url": "https://www.washingtonpost.com/media/2021/06/09/new-yorker-protest/",
 				"attachments": [
 					{
 						"title": "Snapshot",

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-25 19:38:38"
+	"lastUpdated": "2022-11-11 14:54:48"
 }
 
 /*
@@ -33,7 +33,7 @@ function detectWeb(doc, url) {
 		//can test manually, e..g
 		//  http://sk.sagepub.com/Search/Results?IncludeParts=true&IncludeSegments=true&DocumentTypes=&BioId=&Products=&Subjects=&Disciplines=&Sort=relevance&Keywords%5B0%5D.Text=leader&Keywords%5B0%5D.Field=FullText
 		//  http://sk.sagepub.com/Search/Results?SearchId=0&IncludeEntireWorks=true&IncludeParts=true&IncludeSegments=true&AvailableToMeOnly=false&SearchWithin=&BioId=&CaseProvider=&Keywords%5B0%5D.Text=zotero&Keywords%5B0%5D.Field=FullText&Contributor=&ContributorTypes=All+People&ContributorTypes=Author%2FEditor&ContributorTypes=Academic&ContributorTypes=Counselor&ContributorTypes=Director&ContributorTypes=Interviewee&ContributorTypes=Interviewer&ContributorTypes=Narrator&ContributorTypes=Practitioner&ContributorTypes=Producer&ContributorTypes=Speaker&Publisher=&PublisherLocation=&OriginalPublicationYear.StartYear=&OriginalPublicationYear.EndYear=&OnlinePublicationYear.StartYear=&OnlinePublicationYear.EndYear=&Products=0&Products=1&Products=5&Products=2&Products=3&Products=4&Products=6&DocumentTypes=Books&VideoTypes=All+Video+Types&VideoTypes=Archival+Content&VideoTypes=Conference&VideoTypes=Counseling+Session&VideoTypes=Definition&VideoTypes=Documentary&VideoTypes=Film&VideoTypes=In+Practice&VideoTypes=Interview&VideoTypes=Key+Note&VideoTypes=Lecture&VideoTypes=Panel+Discussion&VideoTypes=Raw%2FObservational+Footage&VideoTypes=Tutorial&VideoTypes=Video+Case&AcademicLevels=All&AcademicLevels=Basic&AcademicLevels=Intermediate&AcademicLevels=Complex&CaseLengthStart=&CaseLengthEnd=&Disciplines=All&Disciplines=1&Disciplines=2&Disciplines=3&Disciplines=4&Disciplines=5&Disciplines=6&Disciplines=7&Disciplines=8&Disciplines=9&Disciplines=10&PersonsDiscussed=&OrganizationsDiscussed=&EventsDiscussed=&PlacesDiscussed=&CaseOrganizationsDiscussed=&CaseIndustriesDiscussed=
-		if (getSearchResults(doc)) {
+		if (getSearchResults(doc, true)) {
 			return "multiple";
 		}
 	} else {
@@ -156,16 +156,17 @@ function getItem(doc, url) {
 	});
 }
 
-function getSearchResults(doc) {
-	var items = {}, found = false;
-	var results = ZU.xpath(doc, '//div[@id="resultsList"]/div[contains(@class, "result")]//div[contains(@class, "copy")]');
-	for (var i=0; i<results.length; i++) {
-		var title = results[i].textContent;
-		var url = ZU.xpathText(results[i], './h2/a/@href');
-
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('#divSearchResults .holder');
+	for (let row of rows) {
+		var title = text(row, 'h3 > a');
+		var url = attr(row, 'h3 > a', 'href');
 		if (!title || !url) {
 			continue;
 		}
+		if (checkOnly) return true;
 		found = true;
 		items[url] = ZU.trimInternal(title);
 	}
