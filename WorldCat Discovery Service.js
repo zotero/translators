@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-16 22:15:52"
+	"lastUpdated": "2022-11-25 18:53:10"
 }
 
 /*
@@ -106,7 +106,8 @@ function getSearchResults(doc, checkOnly) {
 		if (!title) title = ZU.trimInternal(row.textContent); // v2
 		let oclcID = ZU.xpathText(row, './@data-oclcnum');
 		if (!oclcID) oclcID = extractOCLCID(row.href); // v2
-		let databaseID = ZU.xpathText(row, './@data-database-list');
+		let databaseID = extractDatabaseID(row.href);
+		// Z.debug(databaseID);
 		let risURL = composeURL(oclcID, databaseID);
 		if (!title) continue;
 		if (checkOnly) return true;
@@ -132,12 +133,14 @@ function extractOCLCID(url) {
 /**
  * Given an item URL, extract database ID
  */
-function extractDatabaseID(doc) {
-	return ZU.xpathText(doc, '//input[@id="dbList"]/@value');
+function extractDatabaseID(url) {
+	let db = url.match(/databaseList=([^&]+?)(&|$)/);
+	if (!db) return false;
+	return db[1];
 }
 
 function composeURL(oclcID, databaseID) {
-	var risURL = "/share/citation.ris?oclcNumber=" + oclcID + "&databaseIds=" + encodeURIComponent(databaseID);
+	var risURL = "/share/citation.ris?format=application%2Foctet-stream&oclcNumber=" + oclcID + "&databaseIds=" + encodeURIComponent(databaseID);
 	return risURL;
 }
 
@@ -147,6 +150,7 @@ function composeURL(oclcID, databaseID) {
  */
 
 function scrape(risURL) {
+	// Z.debug(risURL)
 	ZU.doGet(risURL, function (text) {
 		// Z.debug(text);
 
@@ -270,7 +274,8 @@ function doWeb(doc, url) {
 	}
 	else {
 		let oclcID = extractOCLCID(url);
-		let databaseID = extractDatabaseID(doc);
+		let databaseID = extractDatabaseID(url);
+		// Z.debug(databaseID);
 		if (!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
 		let risURL = composeURL(oclcID, databaseID);
 		Z.debug("risURL= " + risURL);
@@ -283,6 +288,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://sbts.on.worldcat.org/oclc/795005226?databaseList=239,283,638",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -311,11 +317,13 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://lpts.on.worldcat.org/search?queryString=au:Mary%20GrandPre%CC%81&databaseList=638",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "https://sbts.on.worldcat.org/search?databaseList=&queryString=runge+discourse+grammar",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
@@ -386,7 +394,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://goshen.on.worldcat.org/v2/search/detail/57358293?queryString=harry%20potter&clusterResults=true&groupVariantRecords=false",
+		"url": "https://goshen.on.worldcat.org/search/detail/57358293?queryString=harry%20potter&clusterResults=true&groupVariantRecords=false",
 		"defer": true,
 		"items": [
 			{
@@ -412,8 +420,8 @@ var testCases = [
 				"numPages": "x, 652",
 				"place": "New York, NY",
 				"publisher": "Arthur A. Levine Books, an imprint of Scholastic Inc.",
-				"series": "Harry Potter Series",
-				"seriesNumber": "6",
+				"series": "Harry Potter",
+				"seriesNumber": "book 6",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -582,6 +590,35 @@ var testCases = [
 				"publisher": "International Monetary Fund",
 				"shortTitle": "International financial policy",
 				"url": "https://search.ebscohost.com/login.aspx?direct=true&scope=site&db=nlebk&db=nlabk&AN=449390",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://concordiauniversity.on.worldcat.org/search/detail/8895651373?queryString=%28%22Cybersecurity%22%20OR%20%22Computer%20security%22%20OR%20%22Information%20security%22%29%20AND%20%22risk%20management%22&clusterResults=true&groupVariantRecords=false&expandSearch=false&translateSearch=false&sortKey=BEST_MATCH&scope=wz%3A15304&subformat=Artchap%3A%3Aartchap_artcl&content=peerReviewed&year=2018..2022&databaseList=283%2C638&page=3",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "REVIEWING INFORMATION SECURITY GOVERNANCE A cybersecurity governance program is only as strong as its weakest link.",
+				"creators": [
+					{
+						"lastName": "Rai",
+						"firstName": "Sajay",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020",
+				"ISSN": "0020-5745",
+				"issue": "6",
+				"libraryCatalog": "WorldCat Discovery Service",
+				"pages": "18(2)",
+				"publicationTitle": "Internal Auditor",
+				"volume": "77",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
