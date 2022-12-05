@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-12-05 13:38:04"
+	"lastUpdated": "2022-12-05 16:35:18"
 }
 
 /*
@@ -77,7 +77,7 @@ async function scrape(doc) {
 	}
 	// Z.debug(name);
 	item.creators.push(name);
-	item.date = text(post, '.detailed-status__datetime');
+	item.date = ZU.strToISO(text(post, '.detailed-status__datetime'));
 	let posturl = attr(post, 'a.detailed-status__datetime', 'href');
 	if ((posturl.match(/@/g) || []).length == 2) {
 		// We're on a different instance than the poster
@@ -110,7 +110,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "Nov 07, 2022, 17:05",
+				"date": "2022-11-07",
 				"forumTitle": "Mastodon",
 				"language": "de",
 				"postType": "Mastodon post",
@@ -142,7 +142,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "Dec 03, 2022, 13:58",
+				"date": "2022-12-03",
 				"abstractNote": "@Lambo Yeah, both Chicago & APA have standard guidance. Citing a Mastodon Post CMOS FN:2. Lambert Heller (@Lambo), “Since The Chicago Manual of Style (or similar authorities) are apparently not in the Fediverse yet, who will explain to us how to cite a toot?  Do you have any idea, @adam42smith?,” Mastodon, Dec. 3, 2022, 11:17 a.m., https://scholar.social/@Lambo/109450640339409266",
 				"forumTitle": "Mastodon",
 				"language": "en",
@@ -176,7 +176,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "Dec 03, 2022, 11:17",
+				"date": "2022-12-03",
 				"abstractNote": "Since The Chicago Manual of Style (or similar authorities) are apparently not in the Fediverse yet, who will explain to us how to cite a toot?  Do you have any idea, @adam42smith?",
 				"forumTitle": "Mastodon",
 				"language": "de",
