@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-14 11:56:51"
+	"lastUpdated": "2022-12-05 20:19:13"
 }
 
 /**
@@ -47,6 +47,11 @@ function detectWeb(doc, _url) {
 		return false;
 	}
 	
+	// excludes special pages, such as https://en.wikipedia.org/wiki/Special:RecentChanges
+	if (doc.body.classList.contains('ns--1')) {
+		return false;
+	}
+
 	// on desktop, the article title is in #firstHeading.
 	// on mobile, it's #section_0.
 	if (doc.getElementById('firstHeading') || doc.getElementById('section_0')) {
