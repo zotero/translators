@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-10 16:40:28"
+	"lastUpdated": "2022-12-06 02:15:49"
 }
 
 /*
@@ -157,7 +157,7 @@ function detectSearch(item) {
 
 function doSearch(item) {
 	let ISBN = ZU.cleanISBN(item.ISBN);
-	let url = `https://apps.who.int/iris/discover/export?format=refman&list=discover&rpp=10&etal=0&query=${ISBN}&group_by=none&page=1`;
+	let url = `https://apps.who.int/iris/discover/export?format=refman&list=discover&rpp=10&etal=0&query=${ISBN}&group_by=none&page=1&filtertype_0=identifier&filter_relational_operator_0=equals&filter_0=${ISBN}`;
 	ZU.doGet(url, function (risText) {
 		if (!risText) return;
 
@@ -204,7 +204,7 @@ var testCases = [
 					{
 						"lastName": "World Health Organization",
 						"creatorType": "author",
-						"fieldMode": true
+						"fieldMode": 1
 					}
 				],
 				"date": "2003",
@@ -299,7 +299,7 @@ var testCases = [
 				"libraryCatalog": "apps.who.int",
 				"pages": "288-302",
 				"publicationTitle": "Bulletin of the World Health Organization",
-				"rights": "http://creativecommons.org/licenses/by/3.0/igo/legalcode",
+				"rights": "https://creativecommons.org/licenses/by-nc-sa/3.0/igo",
 				"shortTitle": "Providing oxygen to children in hospitals",
 				"url": "https://apps.who.int/iris/handle/10665/272081",
 				"volume": "95",
@@ -339,7 +339,7 @@ var testCases = [
 					{
 						"lastName": "Всемирная организация здравоохранения",
 						"creatorType": "author",
-						"fieldMode": true
+						"fieldMode": 1
 					}
 				],
 				"date": "2018",
@@ -396,6 +396,63 @@ var testCases = [
 		"type": "web",
 		"url": "http://apps.who.int/iris/discover?query=acupuncture",
 		"items": "multiple"
+	},
+	{
+		"type": "search",
+		"input": {
+			"ISBN": "9789241506236"
+		},
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Global action plan for the prevention and control of noncommunicable diseases 2013-2020",
+				"creators": [
+					{
+						"lastName": "World Health Organization",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2013",
+				"ISBN": "9789241506236",
+				"language": "en",
+				"libraryCatalog": "WHO IRIS",
+				"place": "Geneva",
+				"publisher": "World Health Organization",
+				"url": "https://apps.who.int/iris/handle/10665/94384",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Cardiovascular Diseases"
+					},
+					{
+						"tag": "Chronic Disease"
+					},
+					{
+						"tag": "Diabetes Mellitus"
+					},
+					{
+						"tag": "Health Planning"
+					},
+					{
+						"tag": "International Cooperation"
+					},
+					{
+						"tag": "Neoplasms"
+					},
+					{
+						"tag": "Respiratory Tract Diseases"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
