@@ -312,8 +312,10 @@ function scrape(doc, url) {
 				item.abstractNote = abstractNode.textContent.trim();
 			}
 		}
+	} else {
+		item.abstractNote = ZU.xpathText(doc, '//div[@id="bookDescription_feature_div"]//div[contains(@class, "a-expander-content")]', undefined, '\n');
 	}
-	
+
 	// Extract info into an array
 	var info = {},
 		els = ZU.xpath(doc, '//div[@class="content"]/ul/li[b]');
@@ -323,6 +325,26 @@ function scrape(doc, url) {
 				key = ZU.xpathText(el, 'b[1]').trim();
 			if (key) {
 				info[key.replace(/\s*:$/, "").toLowerCase()] = el.textContent.substr(key.length + 1).trim();
+			}
+		}
+	}
+	if (!els.length) {
+		// New design encountered 08/31/2020
+		els = doc.querySelectorAll('ul.detail-bullet-list li');
+		if (!els.length) {
+			// New design encountered 2022-11-20
+			els = ZU.xpath(doc, '//div[@id="detailBullets_feature_div"]/ul/li/span');
+		}
+		for (let el of els) {
+			let key = text(el, '.a-list-item span:first-child');
+			let value = text(el, '.a-list-item span:nth-child(2)');
+			if (key && value) {
+				key = key.replace(/\s*:\s*$/, "");
+				// Extra colon in Language field as of 9/4/2020
+				key = key.replace(/\s*:$/, '');
+				// The colon is surrounded by RTL/LTR marks as of 6/24/2021
+				key = key.replace(/[\s\u200e\u200f]*:[\s\u200e\u200f]*$/, '');
+				info[key.toLowerCase()] = value.trim();
 			}
 		}
 	}
@@ -338,28 +360,11 @@ function scrape(doc, url) {
 			}
 		}
 	}
-	if (!els.length) {
-		// New design encountered 08/31/2020
-		els = doc.querySelectorAll('ul.detail-bullet-list li');
-		for (let el of els) {
-			let key = text(el, '.a-list-item span:first-child');
-			let value = text(el, '.a-list-item span:nth-child(2)');
-			if (key && value) {
-				key = key.replace(/\s*:\s*$/, "");
-				// Extra colon in Language field as of 9/4/2020
-				key = key.replace(/\s*:$/, '');
-				// The colon is surrounded by RTL/LTR marks as of 6/24/2021
-				key = key.replace(/[\s\u200e\u200f]*:[\s\u200e\u200f]*$/, '');
-				info[key.toLowerCase()] = value.trim();
-			}
-		}
-	}
-
 	item.ISBN = getField(info, 'ISBN');
 	if (item.ISBN) {
 		item.ISBN = ZU.cleanISBN(item.ISBN);
 	}
-	
+
 	// Date
 	for (let i = 0; i < DATE.length; i++) {
 		item.date = info[DATE[i]];
@@ -483,8 +488,7 @@ var testCases = [
 				"language": "English",
 				"libraryCatalog": "Amazon",
 				"numPages": 320,
-				"place": "New York",
-				"publisher": "Harry N. Abrams",
+				"publisher": "Amulet Paperbacks",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
@@ -613,11 +617,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.amazon.com/gp/registry/registry.html?ie=UTF8&id=1Q7ELHV59D7N&type=wishlist",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "https://www.amazon.fr/Candide-Fran%C3%A7ois-Marie-Voltaire-Arouet-dit/dp/2035866014/ref=sr_1_2?s=books&ie=UTF8&qid=1362329827&sr=1-2",
 		"items": [
 			{
@@ -653,7 +652,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.amazon.de/Fiktionen-Erz%C3%A4hlungen-Jorge-Luis-Borges/dp/3596105811/ref=sr_1_1?ie=UTF8&qid=1362329791&sr=8-1",
+		"url": "https://www.amazon.de/Fiktionen-Erz%C3%A4hlungen-Jorge-Luis-Borges/dp/3596105811/ref=sr_1_1?ie=UTF8&qid=1362329791&sr=8-1&lang=de-de&language=de_DE",
 		"items": [
 			{
 				"itemType": "book",
@@ -667,8 +666,8 @@ var testCases = [
 				],
 				"date": "1992",
 				"ISBN": "9783596105816",
-				"abstractNote": "Gleich bei seinem Erscheinen in den 40er Jahren löste Jorge Luis Borges’ erster Erzählband »Fiktionen« eine literarische Revolution aus. Erfundene Biographien, fiktive Bücher, irreale Zeitläufe und künstliche Realitäten verflocht Borges zu einem geheimnisvollen Labyrinth, das den Leser mit seinen Rätseln stets auf neue herausfordert. Zugleich begründete er mit seinen berühmten Erzählungen wie»›Die Bibliothek zu Babel«, «Die kreisförmigen Ruinen« oder»›Der Süden« den modernen »Magischen Realismus«. »Obwohl sie sich im Stil derart unterscheiden, zeigen zwei Autoren uns ein Bild des nächsten Jahrtausends: Joyce und Borges.« Umberto Eco",
-				"edition": "15",
+				"abstractNote": "Gleich bei seinem Erscheinen in den 40er Jahren löste Jorge Luis Borges’ erster Erzählband »Fiktionen« eine literarische Revolution aus. Erfundene Biographien, fiktive Bücher, irreale Zeitläufe und künstliche Realitäten verflocht Borges zu einem geheimnisvollen Labyrinth, das den Leser mit seinen Rätseln stets auf neue herausfordert. Zugleich begründete er mit seinen berühmten Erzählungen wie»›Die Bibliothek zu Babel«, «Die kreisförmigen Ruinen« oder»›Der Süden« den modernen »Magischen Realismus«.\n\n»Obwohl sie sich im Stil derart unterscheiden, zeigen zwei Autoren uns ein Bild des nächsten Jahrtausends: Joyce und Borges.« Umberto Eco",
+				"edition": "16",
 				"language": "Deutsch",
 				"libraryCatalog": "Amazon",
 				"numPages": 192,
@@ -752,7 +751,6 @@ var testCases = [
 				"language": "Italiano",
 				"libraryCatalog": "Amazon",
 				"numPages": 72,
-				"place": "Milano",
 				"publisher": "Nord-Sud",
 				"attachments": [
 					{
@@ -864,13 +862,14 @@ var testCases = [
 				],
 				"date": "2012-08-02",
 				"ISBN": "9780099578079",
-				"abstractNote": "The year is 1Q84.  This is the real world, there is no doubt about that.   But in this world, there are two moons in the sky.   In this world, the fates of two people, Tengo and Aomame, are closely intertwined. They are each, in their own way, doing something very dangerous. And in this world, there seems no way to save them both.   Something extraordinary is starting.",
+				"abstractNote": "The year is 1Q84. This is the real world, there is no doubt about that.  But in this world, there are two moons in the sky.  In this world, the fates of two people, Tengo and Aomame, are closely intertwined. They are each, in their own way, doing something very dangerous. And in this world, there seems no way to save them both.  Something extraordinary is starting.",
 				"edition": "Combined edition",
 				"language": "English",
 				"libraryCatalog": "Amazon",
 				"numPages": 1328,
 				"publisher": "Vintage",
 				"shortTitle": "1Q84",
+                "place": "London",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
@@ -949,6 +948,7 @@ var testCases = [
 				"language": "Japanese",
 				"libraryCatalog": "Amazon",
 				"publisher": "岩波書店",
+				"abstractNote": "帯ありません。若干のスレはありますがほぼ普通です。小口、天辺に少しヤケがあります。中身は少しヤケはありますがきれいです。",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
@@ -976,13 +976,12 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2018-04-24",
+				"date": "2018-08-24",
 				"ISBN": "9781333821388",
-				"abstractNote": "Excerpt from Studies in Saiva-SiddhantaEuropean Sanskritist, unaware perhaps of the bearings of the expression, rendered the collocation Parama-hamsa' into 'great goose'. The strictly pedagogic purist may endeavour to justify such puerile versions on etymological grounds, but they stand Self-condemned as mal-interpretations reﬂecting anything but the sense and soul of the original. Such lapses into unwitting ignorance, need never be expected in any of the essays contained in the present collection, as our author is not only a sturdy and indefatigable researcher in Tamil philosophic literature illuminative Of the Agamic religion, but has also, in his quest after Truth, freely utilised the services of those Indigenous savam's, who represent the highest water-mark of Hindu traditional learning and spiritual associations at the present-day.About the PublisherForgotten Books publishes hundreds of thousands of rare and classic books. Find more at www.forgottenbooks.comThis book is a reproduction of an important historical work. Forgotten Books uses state-of-the-art technology to digitally reconstruct the work, preserving the original format whilst repairing imperfections present in the aged copy. In rare cases, an imperfection in the original, such as a blemish or missing page, may be replicated in our edition. We do, however, repair the vast majority of imperfections successfully; any imperfections that remain are intentionally left to preserve the state of such historical works.",
+				"abstractNote": "Excerpt from Studies in Saiva-SiddhantaEuropean Sanskritist, unaware perhaps of the bearings of the expression, rendered the collocation Parama-hamsa' into 'great goose'. The strictly pedagogic purist may endeavour to justify such puerile versions on etymological grounds, but they stand Self-condemned as mal-interpretations re?ecting anything but the sense and soul of the original. Such lapses into unwitting ignorance, need never be expected in any of the essays contained in the present collection, as our author is not only a sturdy and indefatigable researcher in Tamil philosophic literature illuminative Of the Agamic religion, but has also, in his quest after Truth, freely utilised the services of those Indigenous savam's, who represent the highest water-mark of Hindu traditional learning and spiritual associations at the present-day.",
 				"language": "English",
 				"libraryCatalog": "Amazon",
-				"numPages": 398,
-				"place": "Place of publication not identified",
+				"numPages": 396,
 				"publisher": "Forgotten Books",
 				"attachments": [
 					{
@@ -1025,6 +1024,7 @@ var testCases = [
 				"edition": "第 1st 版",
 				"libraryCatalog": "Amazon",
 				"publisher": "社会科学文献出版社",
+				"abstractNote": "《中国之翼》是一本书写了一段未被透露的航空编年史的篇章，它讲述了二战时期亚洲战场动荡的背景下的航空冒险的扣人心弦的故事。故事的主体是激动人心的真实的“空中兄弟连”的冒险事迹。正是这些人在二战期间帮助打开了被封锁的中国的天空，并勇敢的在各种冲突中勇敢守卫着它。这是一段值得被更多的中国人和美国人知晓并铭记的航空史和中美关系史。",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
