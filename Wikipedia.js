@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-12-05 20:19:13"
+	"lastUpdated": "2022-12-06 00:08:07"
 }
 
 /**
@@ -47,6 +47,11 @@ function detectWeb(doc, _url) {
 		return false;
 	}
 	
+	// Diff interface is not supported
+	if (new URLSearchParams(doc.location.search).get('diff')) {
+		return false;
+	}
+
 	// excludes special pages, such as https://en.wikipedia.org/wiki/Special:RecentChanges
 	if (doc.body.classList.contains('ns--1')) {
 		return false;
@@ -221,6 +226,7 @@ function filterTags(root, allowSelector) {
 		}
 	}
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
