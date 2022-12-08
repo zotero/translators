@@ -87,12 +87,6 @@ async function scrape(doc, url = doc.location.href) {
 	translator.setDocument(doc);
 	
 	translator.setHandler('itemDone', (_obj, item) => {
-		for (let i = item.attachments.length - 1; i >= 0; i--) {
-			// remove snapshot
-			if (item.attachments[i].title && item.attachments[i].title == "Snapshot") {
-				item.attachments.splice(i, 1);
-			}
-		}
 		item.publisher = attr(doc, 'meta[property="og:site_name"]', 'content');
 		item.complete();
 	});
