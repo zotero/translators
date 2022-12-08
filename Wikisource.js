@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-04-15 06:46:02"
+	"lastUpdated": "2022-12-06 00:17:12"
 }
 
 /*
@@ -37,6 +37,11 @@
 
 
 function detectWeb(doc, url) {
+	// Diff interface is not supported
+	if (new URLSearchParams(doc.location.search).get('diff')) {
+		return false;
+	}
+
 	if (doc.getElementById("header_title_text")) {
 		var titleLink = ZU.xpath(doc, '//span[@id="header_title_text"]/a');
 		if (titleLink.length && (titleLink[0].textContent.match(/Encyclop(æ|ae|e)dia|Dictionary/) )) {
@@ -164,7 +169,8 @@ function scrapeSource(doc, item) {
 		item.creators.push(ZU.cleanAuthor(indexedFields.Illustrator, "contributor"));
 	}
 	item.complete();
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -389,5 +395,5 @@ var testCases = [
 			}
 		]
 	}
-];
+]
 /** END TEST CASES **/
