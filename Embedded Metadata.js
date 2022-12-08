@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-21 21:41:54"
+	"lastUpdated": "2022-12-08 16:38:00"
 }
 
 /*
@@ -539,9 +539,10 @@ function addHighwireMetadata(doc, newItem, hwType) {
 
 		newItem.attachments.push({ title: "Full Text PDF", url: pdfURL, mimeType: "application/pdf" });
 	}
-
-	// add snapshot
-	newItem.attachments.push({ document: doc, title: "Snapshot" });
+	else {
+		// Only add snapshot if we didn't add a PDF
+		newItem.attachments.push({ document: doc, title: "Snapshot" });
+	}
 
 	// store PMID in Extra and as a link attachment
 	// e.g. http://www.sciencemag.org/content/332/6032/977.full
@@ -1062,10 +1063,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1142,10 +1139,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1179,10 +1172,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1235,10 +1224,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1284,10 +1269,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1386,8 +1367,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2015-09-28 00:00",
+				"date": "2015-09-28",
 				"DOI": "10.16995/olh.46",
+				"ISSN": "2056-6700",
 				"issue": "1",
 				"language": "en",
 				"libraryCatalog": "olh.openlibhums.org",
@@ -1398,10 +1380,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1443,7 +1421,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=334",
+		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=5057",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -1521,10 +1499,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1564,10 +1538,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1605,10 +1575,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1676,10 +1642,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1708,7 +1670,8 @@ var testCases = [
 				"url": "https://www.pewresearch.org/fact-tank/2019/12/12/u-s-children-more-likely-than-children-in-other-countries-to-live-with-just-one-parent/",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1830,10 +1793,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1858,7 +1817,7 @@ var testCases = [
 				],
 				"abstractNote": "Es gibt eine Vergleichsredensart: &quot;Der ist über den Jordan gegangen.“ Das heißt, er ist gestorben. Das bezieht sich auf die alten Grenzen Israels. In Wuppertal jedoch liegt jenseits des Flusses das Gefängnis.",
 				"language": "de",
-				"url": "https://www.swr.de/wissen/1000-antworten/kultur/woher-kommt-redensart-ueber-die-wupper-gehen-100.html",
+				"url": "https://www.swr.de/wissen/1000-antworten/woher-kommt-redensart-ueber-die-wupper-gehen-100.html",
 				"websiteTitle": "swr.online",
 				"attachments": [
 					{
@@ -1919,7 +1878,7 @@ var testCases = [
 				"date": "2021-12-30T17:41:33+00:00",
 				"abstractNote": "As this series was dedicated to Windows Privilege escalation thus I’m writing this Post to explain command practice for kernel-mode exploitation. Table of Content What",
 				"blogTitle": "Hacking Articles",
-				"language": "en-US",
+				"language": "en",
 				"shortTitle": "Windows Privilege Escalation",
 				"url": "https://www.hackingarticles.in/windows-privilege-escalation-kernel-exploit/",
 				"attachments": [
