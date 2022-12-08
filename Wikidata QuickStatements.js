@@ -16,7 +16,6 @@
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2017 Philipp Zumstein
-	Copyright © 2022 Pierrick Pratter
 
 	This file is part of Zotero.
 
