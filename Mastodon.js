@@ -2,14 +2,14 @@
 	"translatorID": "98878eeb-84b7-4945-86dd-3d61258ecc1b",
 	"label": "Mastodon",
 	"creator": "Sebastian Karcher",
-	"target": "/@.+/\\d[10]",
+	"target": "/@.+/\\d{10}",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 300,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-12-05 16:35:18"
+	"lastUpdated": "2022-12-09 02:38:35"
 }
 
 /*
@@ -55,12 +55,12 @@ async function scrape(doc) {
 	var post = doc.getElementsByClassName("detailed-status__wrapper")[0];
 	let title = text(post, '.status__content');
 
-	// cut off titles longer than 20 words
-	if ((title.match(/\s/g) || []).length < 20) {
+	// cut off titles longer than 140 characters
+	if (title.length < 140) {
 		item.title = title;
 	}
 	else {
-		item.title = title.replace(/((\S*\s){20})[\s\S]+/i, "$1...");
+		item.title = ZU.ellipsize(title, 140, true);
 		item.abstractNote = title;
 		// we'll keep the full text in the abstract in this case;
 	}
@@ -134,7 +134,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "forumPost",
-				"title": "@Lambo Yeah, both Chicago & APA have standard guidance. Citing a Mastodon Post CMOS FN:2. Lambert Heller (@Lambo), “Since The ...",
+				"title": "@Lambo Yeah, both Chicago & APA have standard guidance. Citing a Mastodon Post CMOS FN:2. Lambert Heller (@Lambo), “Since The Chicago Manual…",
 				"creators": [
 					{
 						"firstName": "Sebastian (@adam42smith@fediscience.org)",
@@ -168,7 +168,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "forumPost",
-				"title": "Since The Chicago Manual of Style (or similar authorities) are apparently not in the Fediverse yet, who will explain to ...",
+				"title": "Since The Chicago Manual of Style (or similar authorities) are apparently not in the Fediverse yet, who will explain to us how to cite a…",
 				"creators": [
 					{
 						"firstName": "Lambert (@Lambo@scholar.social)",
