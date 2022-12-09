@@ -519,10 +519,21 @@ function generateItem(item, zoteroType, resource) {
 }
 
 function makeValidFileURI(path) {
-	path = path.replace(/#/g, '%23').replace(/\?/g, '#3F');
+	path = path
+		.replace(/#/g, '%23')
+		.replace(/\?/g, '#3F')
+		.replace(/ /g, '%20')
+		.replace(/\\/g, '/');
+
+	// Absolute paths
 	if (path.startsWith('/')) {
 		return 'file://' + path;
 	}
+	// Absolute Windows paths with drive letter
+	else if (/^[a-zA-Z]:\//.test(path)) {
+		return 'file:///' + path[0].toLowerCase() + path.slice(1);
+	}
+	// Relative paths
 	else {
 		return path;
 	}
