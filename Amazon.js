@@ -313,7 +313,7 @@ function scrape(doc, url) {
 			}
 		}
 	} else {
-		item.abstractNote = ZU.xpathText(doc, '//div[@id="bookDescription_feature_div"]//div[contains(@class, "a-expander-content")]', undefined, '\n');
+		item.abstractNote = text(doc, '#bookDescription_feature_div .a-expander-content');
 	}
 
 	// Extract info into an array
