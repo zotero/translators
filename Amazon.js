@@ -333,7 +333,7 @@ function scrape(doc, url) {
 		els = doc.querySelectorAll('ul.detail-bullet-list li');
 		if (!els.length) {
 			// New design encountered 2022-11-20
-			els = ZU.xpath(doc, '//div[@id="detailBullets_feature_div"]/ul/li/span');
+			els = doc.querySelectorAll('#detailBullets_feature_div ul > li span');
 		}
 		for (let el of els) {
 			let key = text(el, '.a-list-item span:first-child');
