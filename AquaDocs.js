@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-27 03:36:21"
+	"lastUpdated": "2022-12-24 04:26:24"
 }
 
 /*
@@ -102,69 +102,23 @@ async function scrape(doc, url = doc.location.href) {
 	// Z.debug(xmlURL);
 	let xmlText = await requestText(xmlURL);
 	// Z.debug(xmlText)
-	var xml = (new DOMParser()).parseFromString(xmlText, "text/xml");
-	var ns = {
-		dim: 'http://www.dspace.org/xmlns/dspace/dim',
-		mets: 'http://www.loc.gov/METS/',
-		xlink: 'http://www.w3.org/TR/xlink/'
-	};
+	let translator = Zotero.loadTranslator('import');
+	translator.setTranslator('2c05e2d1-a533-448f-aa20-e919584864cb'); // DIM
+	translator.setString(xmlText);
+	translator.setHandler('itemDone', (_obj, item) => {
+		// TODO tweak some of the output here
+		Z.debug(item.attachments[0])
+		
+		for (let i=0; i<item.attachments.length ; i++) {
+			if (item.attachments[i].url && !item.attachments[i].url.startsWith("http")) {
+				item.attachments[i].url = "https://aquadocs.org" + item.attachments[i].url ;
+			}
+		}
+		item.complete();
+	});
+	await translator.translate();
 
-	let type = ZU.xpathText(xml, '//dim:field[@element="type"]', ns);
-	var item = new Zotero.Item("journalArticle");
-	if (type) {
-		item.itemType = getType(type);
-	}
-
-	item.title = ZU.xpathText(xml, '//dim:field[@element="title"]', ns);
-	let abstract = ZU.xpath(xml, '//dim:field[@qualifier="abstract"]', ns);
-	if (abstract.length) {
-		item.abstractNote = abstract[0].textContent;
-	}
-	item.date = ZU.xpathText(xml, '//dim:field[@element="date" and @qualifier="issued"]', ns);
-	item.language = ZU.xpathText(xml, '//dim:field[@element="language"]', ns);
-	item.issue = ZU.xpathText(xml, '//dim:field[@element="bibliographicCitation" and @qualifier="issue"]', ns);
-	item.volume = ZU.xpathText(xml, '//dim:field[@element="bibliographicCitation" and @qualifier="volume"]', ns);
-	item.publicationTitle = ZU.xpathText(xml, '//dim:field[@element="title" and @qualifier="parent"]', ns);
-	if (!item.publicationTitle) {
-		item.publicationTitle = ZU.xpathText(xml, '//dim:field[@element="bibliographicCitation" and @qualifier="title"]', ns);
-	}
-	item.conferenceName = ZU.xpathText(xml, '//dim:field[@element="bibliographicCitation" and @qualifier="conferencename"]', ns);
-	item.publisher = ZU.xpathText(xml, '//dim:field[@element="publisher" and not(@qualifier="place")]', ns);
-	item.place = ZU.xpathText(xml, '//dim:field[@element="publisher" and @qualifier="place"]', ns);
-	item.series = ZU.xpathText(xml, '//dim:field[@element="relation" and @qualifier="ispartofseries"]', ns);
-	item.ISSN = ZU.xpathText(xml, '//dim:field[@element="identifier" and @qualifier="issn"]', ns);
-	let pages = ZU.xpathText(xml, '//dim:field[@element="format" and @qualifier="pagerange"]', ns);
-	if (pages) {
-		item.pages = pages.replace(/pp?\./i, "");
-	}
-	else if (ZU.xpathText(xml, '//dim:field[@element="bibliographicCitation" and @qualifier="stpage"]', ns)) {
-		item.pages = ZU.xpathText(xml, '//dim:field[@element="bibliographicCitation" and @qualifier="stpage"]', ns)
-			+ "-" + ZU.xpathText(xml, '//dim:field[@element="bibliographicCitation" and @qualifier="endpage"]', ns);
-	}
-	let numPages = ZU.xpathText(xml, '//dim:field[@element="format" and @qualifier="pages"]', ns);
-	if (numPages) {
-		item.numPages = numPages.replace(/pp?\.?/i, "");
-	}
-	item.url = ZU.xpathText(xml, '//dim:field[@element="identifier" and @qualifier="uri"]', ns); // using the handle
-
-	let authors = ZU.xpath(xml, '//dim:field[@element="contributor" and @qualifier="author"]', ns);
-	for (let author of authors) {
-		item.creators.push(ZU.cleanAuthor(author.textContent, "author", true));
-	}
-
-	let tags = ZU.xpath(xml, '//dim:field[@element="subject"]', ns);
-	for (let tag of tags) {
-		item.tags.push(tag.textContent);
-	}
-	// getting only the first PDF
-	let pdfURL = ZU.xpathText(xml, '//mets:file[@MIMETYPE="application/pdf"][1]/mets:FLocat/@xlink:href', ns);
-	if (pdfURL) {
-		pdfURL = "https://aquadocs.org" + pdfURL;
-		item.attachments.push({ url: pdfURL, title: "Full Text PDF", mimeType: "application/pdf" });
-	}
-	item.complete();
 }
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -222,7 +176,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "M/V CONNECTED Coral Reef Restoration Monitoring Report,\nMonitoring Events 2004-2005. Florida Keys National Marine Sanctuary Monroe County, Florida",
+				"title": "M/V CONNECTED Coral Reef Restoration Monitoring Report, Monitoring Events 2004-2005. Florida Keys National Marine Sanctuary Monroe County, Florida",
 				"creators": [
 					{
 						"firstName": "Joe",
