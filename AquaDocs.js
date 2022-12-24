@@ -107,18 +107,18 @@ async function scrape(doc, url = doc.location.href) {
 	translator.setString(xmlText);
 	translator.setHandler('itemDone', (_obj, item) => {
 		// TODO tweak some of the output here
-		Z.debug(item.attachments[0])
+		Z.debug(item.attachments[0]);
 		
-		for (let i=0; i<item.attachments.length ; i++) {
+		for (let i = 0; i < item.attachments.length; i++) {
 			if (item.attachments[i].url && !item.attachments[i].url.startsWith("http")) {
-				item.attachments[i].url = "https://aquadocs.org" + item.attachments[i].url ;
+				item.attachments[i].url = "https://aquadocs.org" + item.attachments[i].url;
 			}
 		}
 		item.complete();
 	});
 	await translator.translate();
-
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
