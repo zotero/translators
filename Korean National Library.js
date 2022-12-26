@@ -83,11 +83,11 @@ function fixCreators(creators) {
 		var regex = "[\\p{hangul}\\{han}]{" + len + "}";
 		var korean = new ZU.XRegExp(regex);
 		if (creators[i].firstName) continue; // likely a Western name
-		else if (len > 3) continue; // likely Japanese name 
-		else if (ZU.XRegExp.test(creators[i].lastName, korean)){
+		else if (len > 3) continue; // likely Japanese name
+		else if (ZU.XRegExp.test(creators[i].lastName, korean)) {
 			// name is almost certainly Korean. First character is lastName
 			creators[i].firstName = creators[i].lastName.replace(/^./, "");
-			creators[i].lastName = creators[i].lastName.replace(/^(.).*/, "$1")
+			creators[i].lastName = creators[i].lastName.replace(/^(.).*/, "$1");
 		}
 	}
 	return creators;
@@ -95,7 +95,7 @@ function fixCreators(creators) {
 
 function fixTags(tags) {
 	var extraTags = [];
-	for (let i = 0; i< tags.length; i++) {
+	for (let i = 0; i < tags.length; i++) {
 		if (/.+\[.+\]/.test(tags[i])) {
 			let extraTag = tags[i].match(/\[(.+)\]/)[1];
 			extraTags.push(extraTag);
