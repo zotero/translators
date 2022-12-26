@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-10 19:04:30"
+	"lastUpdated": "2022-12-26 04:07:14"
 }
 
 /*
@@ -75,6 +75,34 @@ function getType(type) {
 		default:
 			return "book";
 	}
+}
+
+function fixCreators(creators) {
+	for (let i = 0; i < creators.length; i++) {
+		var len = creators[i].lastName.length;
+		var regex = "[\\p{hangul}\\{han}]{" + len + "}";
+		var korean = new ZU.XRegExp(regex);
+		if (creators[i].firstName) continue; // likely a Western name
+		else if (len > 3) continue; // likely Japanese name 
+		else if (ZU.XRegExp.test(creators[i].lastName, korean)){
+			// name is almost certainly Korean. First character is lastName
+			creators[i].firstName = creators[i].lastName.replace(/^./, "");
+			creators[i].lastName = creators[i].lastName.replace(/^(.).*/, "$1")
+		}
+	}
+	return creators;
+}
+
+function fixTags(tags) {
+	var extraTags = [];
+	for (let i = 0; i< tags.length; i++) {
+		if (/.+\[.+\]/.test(tags[i])) {
+			let extraTag = tags[i].match(/\[(.+)\]/)[1];
+			extraTags.push(extraTag);
+			tags[i] = tags[i].replace(/\[.+\]/, "");
+		}
+	}
+	return tags.concat(extraTags);
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -149,6 +177,8 @@ async function scrape(url) {
 			if (item.date) {
 				// dates are in YYYYMMDD format
 				item.date = ZU.strToISO(item.date.replace(/(\d{4})(\d{2})?(\d{2})?[-]*/, "$1-$2-$3"));
+				item.tags = fixTags(item.tags);
+				item.creators = fixCreators(item.creators);
 			}
 			item.complete();
 		});
@@ -160,6 +190,8 @@ async function scrape(url) {
 		translator.setTranslator('a6ee60df-1ddc-4aae-bb25-45e0537be973');
 		translator.setString(marcText);
 		translator.setHandler('itemDone', (_obj, item) => {
+			item.creators = fixCreators(item.creators);
+			item.tags = fixTags(item.tags);
 			item.complete();
 		});
 		await translator.translate();
@@ -177,12 +209,12 @@ var testCases = [
 				"title": "장모-사위 갈등에 관련된 제변인 연구",
 				"creators": [
 					{
-						"firstName": "",
-						"lastName": "원정은",
+						"firstName": "정은",
+						"lastName": "원",
 						"creatorType": "author"
 					}
 				],
-				"date": "2016----",
+				"date": "2016",
 				"archiveLocation": "국립중앙도서관",
 				"callNumber": "332.24",
 				"language": "kor; eng",
@@ -194,13 +226,22 @@ var testCases = [
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "가족 관계[家族關係]"
+						"tag": "丈母"
 					},
 					{
-						"tag": "사위(혼인)[女壻]"
+						"tag": "家族關係"
 					},
 					{
-						"tag": "장모(어머니)[丈母]"
+						"tag": "가족 관계"
+					},
+					{
+						"tag": "사위(혼인)"
+					},
+					{
+						"tag": "장모(어머니)"
+					},
+					{
+						"tag": "女壻"
 					}
 				],
 				"notes": [
@@ -230,8 +271,8 @@ var testCases = [
 				"title": "미군정과 한국의 민주주의",
 				"creators": [
 					{
-						"firstName": "",
-						"lastName": "안진",
+						"firstName": "진",
+						"lastName": "안",
 						"creatorType": "author"
 					}
 				],
@@ -272,7 +313,8 @@ var testCases = [
 				"title": "미군정과 한국의 민주주의=",
 				"creators": [
 					{
-						"lastName": "안진",
+						"firstName": "진",
+						"lastName": "안",
 						"creatorType": "author"
 					}
 				],
@@ -288,7 +330,10 @@ var testCases = [
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "미군정 시대[美軍政時代]"
+						"tag": "美軍政時代"
+					},
+					{
+						"tag": "미군정 시대"
 					},
 					{
 						"tag": "미군정 한국 민주주의"
@@ -353,8 +398,8 @@ var testCases = [
 				"title": "두 단어 영어로 쉽게 대답하기 step 1. 별일 없이 지내. / Smith씨하고 통화할 수 있을까요?",
 				"creators": [
 					{
-						"firstName": "",
-						"lastName": "조정현",
+						"firstName": "정현",
+						"lastName": "조",
 						"creatorType": "director"
 					}
 				],
@@ -371,7 +416,10 @@ var testCases = [
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "영어 회화[英語會話]"
+						"tag": "英語會話"
+					},
+					{
+						"tag": "영어 회화"
 					}
 				],
 				"notes": [
@@ -425,8 +473,8 @@ var testCases = [
 				"title": "LOSE YOUR MIND: feat.Yutaka Furukawa from DOPING PANDA",
 				"creators": [
 					{
-						"firstName": "",
-						"lastName": "보아",
+						"firstName": "아",
+						"lastName": "보",
 						"creatorType": "performer"
 					},
 					{
@@ -463,7 +511,10 @@ var testCases = [
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "대중 음악[大衆音樂]"
+						"tag": "大衆音樂"
+					},
+					{
+						"tag": "대중 음악"
 					}
 				],
 				"notes": [],
@@ -517,59 +568,6 @@ var testCases = [
 				"attachments": [],
 				"tags": [],
 				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.nl.go.kr/EN/contents/engSearch.do?resultType=&pageNum=1&pageSize=30&order=&sort=&srchTarget=total&kwd=lawson&systemType=&lnbTypeName=&category=%ED%95%99%EC%9C%84%EB%85%BC%EB%AC%B8&hanjaFlag=&reSrchFlag=&licYn=&kdcName1s=&manageName=&langName=&ipubYear=&pubyearName=&seShelfCode=&detailSearch=&seriesName=&mediaCode=&offerDbcode2s=&f1=&v1=&f2=&v2=&f3=&v3=&f4=&v4=&and1=&and2=&and3=&and4=&and5=&and6=&and7=&and8=&and9=&and10=&and11=&and12=&isbnOp=&isbnCode=&guCode2=&guCode3=&guCode4=&guCode5=&guCode6=&guCode7=&guCode8=&guCode11=&gu2=&gu7=&gu8=&gu9=&gu10=&gu12=&gu13=&gu14=&gu15=&gu16=&subject=&sYear=&eYear=&sRegDate=&eRegDate=&typeCode=&acConNo=&acConNoSubject=&infoTxt=#viewKey=CNTS-00082435719&viewType=C&category=%ED%95%99%EC%9C%84%EB%85%BC%EB%AC%B8&pageIdx=19&jourId=",
-		"items": [
-			{
-				"itemType": "thesis",
-				"title": "장모-사위 갈등에 관련된 제변인 연구",
-				"creators": [
-					{
-						"firstName": "",
-						"lastName": "원정은",
-						"creatorType": "author"
-					}
-				],
-				"date": "2016",
-				"archiveLocation": "국립중앙도서관",
-				"callNumber": "332.24",
-				"language": "kor; eng",
-				"libraryCatalog": "Korean National Library",
-				"numPages": "99",
-				"place": "서울",
-				"rights": "0",
-				"university": "성신여자대학교",
-				"attachments": [],
-				"tags": [
-					{
-						"tag": "가족 관계[家族關係]"
-					},
-					{
-						"tag": "사위(혼인)[女壻]"
-					},
-					{
-						"tag": "장모(어머니)[丈母]"
-					}
-				],
-				"notes": [
-					{
-						"note": "thesis: 학위논문(박사) -- 성신여자대학교 대학원, 생활문화소비자학과, 2016"
-					},
-					{
-						"note": "language: 영어 요약 있음"
-					},
-					{
-						"note": "bibliography: 참고문헌: p. [111]-[123]"
-					},
-					{
-						"note": "지도교수: 김주희권말부록: 질문지 등"
-					}
-				],
 				"seeAlso": []
 			}
 		]
