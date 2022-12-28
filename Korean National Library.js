@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-12-26 04:07:14"
+	"lastUpdated": "2022-12-28 02:37:11"
 }
 
 /*
@@ -77,7 +77,7 @@ function getType(type) {
 	}
 }
 
-function fixCreators(creators) {
+function fixKoreanCreators(creators) {
 	for (let i = 0; i < creators.length; i++) {
 		var len = creators[i].lastName.length;
 		var regex = "[\\p{hangul}\\{han}]{" + len + "}";
@@ -91,6 +91,13 @@ function fixCreators(creators) {
 		}
 	}
 	return creators;
+}
+
+function fixTitleCapitalization(title) {
+	if (title == title.toUpperCase()) {
+		title = ZU.capitalizeTitle(title, true);
+	}
+	return title;
 }
 
 function fixTags(tags) {
@@ -149,7 +156,7 @@ async function scrape(url) {
 	
 	if (modsURL) {
 		let modsText = await requestText(modsURL);
-		
+		// Z.debug(modsText)
 		// replace the Korean resourceType and genre with corresponding English terms
 		modsText = modsText.replace("<typeOfResource>텍스트</typeOfResource>", "<typeOfResource>text</typeOfResource>")
 						.replace("<typeOfResource>동영상</typeOfResource>", "<typeOfResource>moving image</typeOfResource>")
@@ -170,6 +177,13 @@ async function scrape(url) {
 						.replace("<genre>웹사이트</genre>", "<genre>web site</genre>");
 		// unmapped: 복합기록물 (composite record); 기록물 (record, likely archival)
 
+		// we get the creator straight from MODS
+		//  to fix author strings like "Botvinnik B,  Gilkey P,  Stolz S"
+		modsTextAlt = modsText.replace(/<mods.+?>/, "<mods>")
+		var xml = (new DOMParser()).parseFromString(modsTextAlt, "text/xml");
+		var creatorRegex = /^[A-Z][a-z]+\s[A-Z](,|$)/;
+		var creatorNodes = ZU.xpath(xml, '//name');
+		
 		let translator = Zotero.loadTranslator('import');
 		translator.setTranslator('0e2235e7-babf-413c-9acf-f27cce5f059c'); // MODS
 		translator.setString(modsText);
@@ -177,9 +191,29 @@ async function scrape(url) {
 			if (item.date) {
 				// dates are in YYYYMMDD format
 				item.date = ZU.strToISO(item.date.replace(/(\d{4})(\d{2})?(\d{2})?[-]*/, "$1-$2-$3"));
-				item.tags = fixTags(item.tags);
-				item.creators = fixCreators(item.creators);
 			}
+			item.tags = fixTags(item.tags);
+
+			// fixing poor quality MODS author data
+			if(creatorNodes.length == 1 && item.creators.length == 1 && creatorRegex.test(ZU.xpathText(xml, '//name'))) {
+				let creatorType = item.creators[0].creatorType;
+				item.creators = [];
+
+		
+				let creators = ZU.xpathText(xml, '//name').split(", ");
+				for (let creator of creators) {
+					let lastName = creator.match(/^(.+)\s/);
+					let firstName = creator.match(/.$/);
+					if (lastName && firstName) {
+						item.creators.push({"firstName": firstName[0], "lastName": lastName[1], "creatorType": creatorType})
+					}
+					else {
+						item.creators.push({"lastName": creator, fieldMode: 1, "creatorType": creatorType})
+					}
+				}
+			}
+			item.creators = fixKoreanCreators(item.creators);
+			item.title = fixTitleCapitalization(item.title);
 			item.complete();
 		});
 		await translator.translate();
@@ -190,13 +224,14 @@ async function scrape(url) {
 		translator.setTranslator('a6ee60df-1ddc-4aae-bb25-45e0537be973');
 		translator.setString(marcText);
 		translator.setHandler('itemDone', (_obj, item) => {
-			item.creators = fixCreators(item.creators);
+			item.creators = fixKoreanCreators(item.creators);
 			item.tags = fixTags(item.tags);
 			item.complete();
 		});
 		await translator.translate();
 	}
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -352,42 +387,6 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.nl.go.kr/NL/contents/search.do?srchTarget=total&pageNum=1&pageSize=10&kwd=%EB%AF%B8%EA%B5%B0%EC%A0%95%EA%B3%BC+%ED%95%9C%EA%B5%AD%EC%9D%98+%EB%AF%BC%EC%A3%BC%EC%A3%BC%EC%9D%98",
 		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://www.nl.go.kr/EN/contents/engSearch.do?resultType=&pageNum=1&pageSize=30&order=&sort=&srchTarget=total&kwd=lawson&systemType=&lnbTypeName=&category=&hanjaFlag=&reSrchFlag=&licYn=&kdcName1s=&manageName=&langName=&ipubYear=&pubyearName=&seShelfCode=&detailSearch=&seriesName=&mediaCode=&offerDbcode2s=&f1=&v1=&f2=&v2=&f3=&v3=&f4=&v4=&and1=&and2=&and3=&and4=&and5=&and6=&and7=&and8=&and9=&and10=&and11=&and12=&isbnOp=&isbnCode=&guCode2=&guCode3=&guCode4=&guCode5=&guCode6=&guCode7=&guCode8=&guCode11=&gu2=&gu7=&gu8=&gu9=&gu10=&gu12=&gu13=&gu14=&gu15=&gu16=&subject=&sYear=&eYear=&sRegDate=&eRegDate=&typeCode=&acConNo=&acConNoSubject=&infoTxt=#viewKey=CNTS-00091570741&viewType=C&category=%EA%B8%B0%EC%82%AC&pageIdx=2&jourId=",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "THE GROMOV-LAWSON-ROSENBERG CONJECTURE FOR GROUPS WITH PERIODIC COHOMOLOGY",
-				"creators": [
-					{
-						"firstName": "Gilkey P.",
-						"lastName": "Botvinnik B",
-						"creatorType": "author"
-					}
-				],
-				"date": "1997-07-01",
-				"language": "eng",
-				"libraryCatalog": "Korean National Library",
-				"publicationTitle": "Journal of Differential Geometry. V.46 N.3",
-				"rights": "2",
-				"attachments": [],
-				"tags": [],
-				"notes": [
-					{
-						"note": "자료 조회를 위해서는 별도 뷰어를 설치해야 합니다.뷰어 설치: https://www.cartesianinc.com/Products/CPCView/"
-					},
-					{
-						"note": "LG상남도서관 기증 자료"
-					},
-					{
-						"note": "Botvinnik B UNIV OREGON EUGENE, OR 97403 USA  UNIV NOTRE DAME NOTRE DAME, IN 46556 USA"
-					}
-				],
-				"seeAlso": []
-			}
-		]
 	},
 	{
 		"type": "web",
@@ -568,6 +567,52 @@ var testCases = [
 				"attachments": [],
 				"tags": [],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nl.go.kr/EN/contents/engSearch.do?resultType=&pageNum=1&pageSize=30&order=&sort=&srchTarget=total&kwd=lawson&systemType=&lnbTypeName=&category=&hanjaFlag=&reSrchFlag=&licYn=&kdcName1s=&manageName=&langName=&ipubYear=&pubyearName=&seShelfCode=&detailSearch=&seriesName=&mediaCode=&offerDbcode2s=&f1=&v1=&f2=&v2=&f3=&v3=&f4=&v4=&and1=&and2=&and3=&and4=&and5=&and6=&and7=&and8=&and9=&and10=&and11=&and12=&isbnOp=&isbnCode=&guCode2=&guCode3=&guCode4=&guCode5=&guCode6=&guCode7=&guCode8=&guCode11=&gu2=&gu7=&gu8=&gu9=&gu10=&gu12=&gu13=&gu14=&gu15=&gu16=&subject=&sYear=&eYear=&sRegDate=&eRegDate=&typeCode=&acConNo=&acConNoSubject=&infoTxt=#viewKey=CNTS-00091570741&viewType=C&category=%EA%B8%B0%EC%82%AC&pageIdx=2&jourId=",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The Gromov-Lawson-Rosenberg Conjecture for Groups with Periodic Cohomology",
+				"creators": [
+					{
+						"firstName": "B",
+						"lastName": "Botvinnik",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "P",
+						"lastName": " Gilkey",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "S",
+						"lastName": " Stolz",
+						"creatorType": "author"
+					}
+				],
+				"date": "1997-07-01",
+				"language": "eng",
+				"libraryCatalog": "Korean National Library",
+				"publicationTitle": "Journal of Differential Geometry. V.46 N.3",
+				"rights": "2",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "자료 조회를 위해서는 별도 뷰어를 설치해야 합니다.뷰어 설치: https://www.cartesianinc.com/Products/CPCView/"
+					},
+					{
+						"note": "LG상남도서관 기증 자료"
+					},
+					{
+						"note": "Botvinnik B UNIV OREGON EUGENE, OR 97403 USA  UNIV NOTRE DAME NOTRE DAME, IN 46556 USA"
+					}
+				],
 				"seeAlso": []
 			}
 		]
