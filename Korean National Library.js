@@ -179,7 +179,7 @@ async function scrape(url) {
 
 		// we get the creator straight from MODS
 		//  to fix author strings like "Botvinnik B,  Gilkey P,  Stolz S"
-		modsTextAlt = modsText.replace(/<mods.+?>/, "<mods>")
+		let modsTextAlt = modsText.replace(/<mods.+?>/, "<mods>");
 		var xml = (new DOMParser()).parseFromString(modsTextAlt, "text/xml");
 		var creatorRegex = /^[A-Z][a-z]+\s[A-Z](,|$)/;
 		var creatorNodes = ZU.xpath(xml, '//name');
@@ -195,7 +195,7 @@ async function scrape(url) {
 			item.tags = fixTags(item.tags);
 
 			// fixing poor quality MODS author data
-			if(creatorNodes.length == 1 && item.creators.length == 1 && creatorRegex.test(ZU.xpathText(xml, '//name'))) {
+			if (creatorNodes.length == 1 && item.creators.length == 1 && creatorRegex.test(ZU.xpathText(xml, '//name'))) {
 				let creatorType = item.creators[0].creatorType;
 				item.creators = [];
 
@@ -205,10 +205,10 @@ async function scrape(url) {
 					let lastName = creator.match(/^(.+)\s/);
 					let firstName = creator.match(/.$/);
 					if (lastName && firstName) {
-						item.creators.push({"firstName": firstName[0], "lastName": lastName[1], "creatorType": creatorType})
+						item.creators.push({ firstName: firstName[0], lastName: lastName[1], creatorType: creatorType });
 					}
 					else {
-						item.creators.push({"lastName": creator, fieldMode: 1, "creatorType": creatorType})
+						item.creators.push({ lastName: creator, fieldMode: 1, creatorType: creatorType });
 					}
 				}
 			}
