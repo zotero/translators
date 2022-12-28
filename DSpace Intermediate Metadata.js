@@ -36,7 +36,7 @@
 
 function detectImport() {
 	var text = Zotero.read(1000);
-	return text.includes("//www.dspace.org/xmlns/dspace/dim");
+	return text.includes("http://www.dspace.org/xmlns/dspace/dim");
 }
 
 function getType(string) {
