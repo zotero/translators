@@ -111,7 +111,7 @@ var mapping = {
 	'wdt:P750': 'distributor',
 	'wdt:P698': 'PMID',
 	'wdt:P932': 'PMCID',
-	'wdt:P7864': 'HALID'
+	'wdt:P7864': 'HAL_ID'
 };
 
 // creators with no special role here are treated as contributor
@@ -224,7 +224,7 @@ function scrape(doc, url) {
 									item.tags.push(tag);
 								}
 							}
-							else if (["PMID", "PMCID", "HALID"].includes(zprop)) {
+							else if (["PMID", "PMCID", "HAL_ID"].includes(zprop)) {
 								Z.debug(`Property added to extra: ${zprop}`);
 								if (zprop == "PMCID") {
 									value = `PMC${value.trim()}`;
