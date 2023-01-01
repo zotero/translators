@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-29 16:07:10"
+	"lastUpdated": "2023-01-01 02:29:00"
 }
 
 /*
@@ -102,7 +102,7 @@ var mapping = {
 	'wdt:P433': 'issue',
 	'wdt:P304': 'pages',
 	'wdt:P179': 'series',
-	'wdt:P212':	'ISBN',
+	'wdt:P212': 'ISBN',
 	'wdt:P957': 'ISBN',
 	'wdt:P236': 'ISSN',
 	'wdt:P136': 'genre',
@@ -110,7 +110,8 @@ var mapping = {
 	'wdt:P2047': 'runningTime',
 	'wdt:P750': 'distributor',
 	'wdt:P698': 'PMID',
-	'wdt:P932': 'PMCID'
+	'wdt:P932': 'PMCID',
+	'wdt:P7864': 'HALID'
 };
 
 // creators with no special role here are treated as contributor
@@ -223,7 +224,7 @@ function scrape(doc, url) {
 									item.tags.push(tag);
 								}
 							}
-							else if (["PMID", "PMCID"].includes(zprop)) {
+							else if (["PMID", "PMCID", "HALID"].includes(zprop)) {
 								Z.debug(`Property added to extra: ${zprop}`);
 								if (zprop == "PMCID") {
 									value = `PMC${value.trim()}`;
