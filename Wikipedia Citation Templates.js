@@ -1,6 +1,5 @@
 {
 	"translatorID": "3f50aaac-7acc-4350-acd0-59cb77faf620",
-	"translatorType": 2,
 	"label": "Wikipedia Citation Templates",
 	"creator": "Simon Kornblith",
 	"target": "txt",
@@ -11,7 +10,8 @@
 		"exportCharset": "UTF-8"
 	},
 	"inRepository": true,
-	"lastUpdated": "2017-03-13 11:45:52"
+	"translatorType": 2,
+	"lastUpdated": "2023-01-03 10:30:59"
 }
 
 /*
@@ -90,9 +90,10 @@ function formatAuthors(authors, useTypes) {
 	var text = "";
 	for (var i=0; i<authors.length; i++) {
 		var author = authors[i];
-		text += ", "+author.firstName;
+		text += ", ";
+		if (author.firstName) text += author.firstName;
 		if (author.firstName && author.lastName) text += " ";
-		text += author.lastName;
+		if (author.lastName) text += author.lastName;
 		if (useTypes) text += " ("+Zotero.Utilities.getLocalizedCreatorType(author.creatorType)+")";
 	}
 	return text.substr(2);
