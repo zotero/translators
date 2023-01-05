@@ -224,7 +224,7 @@ function scrape(doc, url) {
 									item.tags.push(tag);
 								}
 							}
-							else if (["PMID", "PMCID", "HAL_ID"].includes(zprop)) {
+							else if (["PMID", "PMCID", "HAL ID"].includes(zprop)) {
 								Z.debug(`Property added to extra: ${zprop}`);
 								if (zprop == "PMCID") {
 									value = `PMC${value.trim()}`;
