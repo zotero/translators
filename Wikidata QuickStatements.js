@@ -149,7 +149,7 @@ var identifierMapping = {
 	OCLC: "P243",
 	"IMDb ID": "P345",
 	"Google-Books-ID": "P675",
-	"HAL_ID": "P7864"
+	"HAL ID": "P7864"
 };
 
 
