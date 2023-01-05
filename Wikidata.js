@@ -111,7 +111,7 @@ var mapping = {
 	'wdt:P750': 'distributor',
 	'wdt:P698': 'PMID',
 	'wdt:P932': 'PMCID',
-	'wdt:P7864': 'HAL_ID'
+	'wdt:P7864': 'HAL ID'
 };
 
 // creators with no special role here are treated as contributor
