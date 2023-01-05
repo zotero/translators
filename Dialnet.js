@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-01-02 19:24:51"
+	"lastUpdated": "2023-01-05 20:54:41"
 }
 
 /*
@@ -125,8 +125,7 @@ function scrape(doc, url) {
 		}
 	
 		// Delete generic keywords
-		if (item.tags);
-		delete item.tags;
+		item.tags = [];
 		item.complete();
 	});
 	translator.getTranslatorObject(function (trans) {
@@ -163,6 +162,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -201,12 +201,9 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -251,6 +248,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
