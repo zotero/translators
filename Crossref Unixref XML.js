@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-12-29 19:43:47"
+	"lastUpdated": "2023-01-12 05:52:38"
 }
 
 /*
@@ -446,13 +446,23 @@ function doImport() {
 	}
 	// Zotero.debug(JSON.stringify(item, null, 4));
 
-	// check if there are potential issues with character encoding and try to fix it
-	// e.g. 10.1057/9780230391116.0016 (en dash in title is presented as <control><control>â)
+	// Check if there are potential issues with character encoding and try to fix them.
+	// E.g., in 10.1057/9780230391116.0016, the en dash in the title is displayed as â<80><93>,
+	// which is what you get if you decode a UTF-8 en dash (<E2><80><93>) as Latin-1 and then serve
+	// as UTF-8 (<C3><A2> <C2><80> <C2><93>)
 	for (var field in item) {
 		if (typeof item[field] != 'string') continue;
-		// check for control characters that should never be in strings from CrossRef
+		// Check for control characters that should never be in strings from Crossref
 		if (/[\u007F-\u009F]/.test(item[field])) {
-			item[field] = decodeURIComponent(escape(item[field]));
+			// <E2><80><93> -> %E2%80%93 -> en dash
+			try {
+				item[field] = decodeURIComponent(escape(item[field]));
+			}
+			// If decoding failed, just strip control characters
+			// https://forums.zotero.org/discussion/102271/lookup-failed-for-doi
+			catch (e) {
+				item[field] = item[field].replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+			}
 		}
 	}
 	item.complete();
@@ -747,6 +757,76 @@ var testCases = [
 				"pages": "1-9",
 				"publisher": "Wiley",
 				"url": "https://onlinelibrary.wiley.com/doi/10.1002/9781119011071.iemp0172",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<doi_records>\n  <doi_record owner=\"10.1045\" timestamp=\"2016-05-13 10:02:13\">\n    <crossref>\n      <journal>\n        <journal_metadata language=\"en\">\n          <full_title>D-Lib Magazine</full_title>\n          <abbrev_title>D-Lib Magazine</abbrev_title>\n          <issn media_type=\"electronic\">1082-9873</issn>\n          <doi_data>\n            <doi>10.1045/dlib.magazine</doi>\n            <resource>http://www.dlib.org/</resource>\n          </doi_data>\n        </journal_metadata>\n        <journal_issue>\n          <publication_date media_type=\"online\">\n            <month>05</month>\n            <year>2016</year>\n          </publication_date>\n          <journal_volume>\n            <volume>22</volume>\n          </journal_volume>\n          <issue>5/6</issue>\n          <doi_data>\n            <doi>10.1045/may2016-contents</doi>\n            <resource>http://www.dlib.org/dlib/may16/05contents.html</resource>\n          </doi_data>\n        </journal_issue>\n        <journal_article publication_type=\"full_text\">\n          <titles>\n            <title>Scientific Stewardship in the Open Data and Big Data Era  Roles and Responsibilities of Stewards and Other Major Product Stakeholders</title>\n          </titles>\n          <contributors>\n            <person_name sequence=\"first\" contributor_role=\"author\">\n              <given_name>Ge</given_name>\n              <surname>Peng</surname>\n            </person_name>\n            <person_name sequence=\"additional\" contributor_role=\"author\">\n              <given_name>Nancy A.</given_name>\n              <surname>Ritchey</surname>\n            </person_name>\n            <person_name sequence=\"additional\" contributor_role=\"author\">\n              <given_name>Kenneth S.</given_name>\n              <surname>Casey</surname>\n            </person_name>\n            <person_name sequence=\"additional\" contributor_role=\"author\">\n              <given_name>Edward J.</given_name>\n              <surname>Kearns</surname>\n            </person_name>\n            <person_name sequence=\"additional\" contributor_role=\"author\">\n              <given_name>Jeffrey L.</given_name>\n              <surname>Prevette</surname>\n            </person_name>\n            <person_name sequence=\"additional\" contributor_role=\"author\">\n              <given_name>Drew</given_name>\n              <surname>Saunders</surname>\n            </person_name>\n            <person_name sequence=\"additional\" contributor_role=\"author\">\n              <given_name>Philip</given_name>\n              <surname>Jones</surname>\n            </person_name>\n            <person_name sequence=\"additional\" contributor_role=\"author\">\n              <given_name>Tom</given_name>\n              <surname>Maycock</surname>\n            </person_name>\n            <person_name sequence=\"additional\" contributor_role=\"author\">\n              <given_name>Steve</given_name>\n              <surname>Ansari</surname>\n            </person_name>\n          </contributors>\n          <publication_date media_type=\"online\">\n            <month>05</month>\n            <year>2016</year>\n          </publication_date>\n          <doi_data>\n            <doi>10.1045/may2016-peng</doi>\n            <resource>http://www.dlib.org/dlib/may16/peng/05peng.html</resource>\n          </doi_data>\n        </journal_article>\n      </journal>\n    </crossref>\n  </doi_record>\n</doi_records>",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Scientific Stewardship in the Open Data and Big Data Era  Roles and Responsibilities of Stewards and Other Major Product Stakeholders",
+				"creators": [
+					{
+						"creatorType": "author",
+						"firstName": "Ge",
+						"lastName": "Peng"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Nancy A.",
+						"lastName": "Ritchey"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Kenneth S.",
+						"lastName": "Casey"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Edward J.",
+						"lastName": "Kearns"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Jeffrey L.",
+						"lastName": "Prevette"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Drew",
+						"lastName": "Saunders"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Philip",
+						"lastName": "Jones"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Tom",
+						"lastName": "Maycock"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Steve",
+						"lastName": "Ansari"
+					}
+				],
+				"date": "05/2016",
+				"DOI": "10.1045/may2016-peng",
+				"ISSN": "1082-9873",
+				"issue": "5/6",
+				"journalAbbreviation": "D-Lib Magazine",
+				"language": "en",
+				"publicationTitle": "D-Lib Magazine",
+				"url": "http://www.dlib.org/dlib/may16/peng/05peng.html",
+				"volume": "22",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
