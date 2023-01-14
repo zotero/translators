@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-01-14 04:43:03"
+	"lastUpdated": "2023-01-14 04:48:29"
 }
 
 /*
@@ -121,7 +121,7 @@ function scrape(doc, url) {
 						if (authorString) {
 							item.creators = [];
 							let authors = authorString.split(/,?\s+and\s+|,\s+/);
-							for (author of authors) {
+							for (let author of authors) {
 								item.creators.push(ZU.cleanAuthor(author, "author", false));
 							}
 						}
