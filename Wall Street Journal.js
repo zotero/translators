@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-01-12 03:10:28"
+	"lastUpdated": "2023-01-14 04:43:03"
 }
 
 /*
@@ -101,7 +101,9 @@ function scrape(doc, url) {
 			var data = JSON.parse(jsonld);
 			for (let i = 0; i < data.length; i++) {
 				if (data[i]["@type"] == "NewsArticle") {
+					let jsonAuthor = false;
 					if (data[i].author && data[i].author.length) {
+						jsonAuthor = true;
 						item.creators = [];
 						for (let j = 0; j < data[i].author.length; j++) {
 							if (data[i].author[j]["@type"] == "Person") {
@@ -109,6 +111,18 @@ function scrape(doc, url) {
 							}
 							else {
 								item.creators.push(ZU.cleanAuthor(data[i].author[j].name, "author", true));
+							}
+						}
+					}
+					if (!jsonAuthor) {
+						// If we don't get authors from JSON (as is the case for old articles)
+						// parse them from metaheader
+						let authorString = attr('meta[name="author"]', 'content');
+						if (authorString) {
+							item.creators = [];
+							let authors = authorString.split(/,?\s+and\s+|,\s+/);
+							for (author of authors) {
+								item.creators.push(ZU.cleanAuthor(author, "author", false));
 							}
 						}
 					}
@@ -173,7 +187,12 @@ var testCases = [
 				"title": "An Odd Turn in Insider Case",
 				"creators": [
 					{
-						"firstName": "Jenny Strasburg and Susan",
+						"firstName": "Jenny",
+						"lastName": "Strasburg",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Susan",
 						"lastName": "Pulliam",
 						"creatorType": "author"
 					}
@@ -200,8 +219,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"defer": true,
 		"url": "https://www.wsj.com/search/term.html?KEYWORDS=argentina&mod=DNH_S",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
