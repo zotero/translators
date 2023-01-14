@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-01-12 15:04:32"
+	"lastUpdated": "2023-01-14 04:26:02"
 }
 
 /*
@@ -117,13 +117,15 @@ async function scrape(doc, url = doc.location.href) {
 				});
 			}
 
-			// Some JF fields have trailing commas
+			// Some fields have trailing commas
 			if (item.publicationTitle) {
 				item.publicationTitle = item.publicationTitle.replace(/,$/, '');
 			}
-			// ditto for abstracts
 			if (item.abstractNote) {
 				item.abstractNote = item.abstractNote.replace(/,$/, '');
+			}
+			if (item.ISSN) {
+				item.ISSN = item.ISSN.replace(/,$/, '');
 			}
 
 			/* var abstract = ZU.xpath(doc,'//div[contains(@class, "abstract")]//div[contains(@class,"article-container")]');
@@ -160,7 +162,7 @@ var testCases = [
 				],
 				"date": "1982",
 				"DOI": "10.1099/00222615-15-2-189",
-				"ISSN": "1473-5644,",
+				"ISSN": "1473-5644",
 				"abstractNote": "SUMMARY The succession of bacterial populations in the large bowel of seven breast-fed and seven formula-fed infants was examined during the first year of life. The composition of the intestinal microflora varied according to the infant’s diet. During the first week of life breast-fed and formula-fed infants were colonised by enterobacteria and enterococci followed by bifidobacteria, Bacteroides spp., clostridia and anaerobic streptococci. From week 4 until solid foods were given, breast-fed babies had a simple flora consisting of bifidobacteria and relatively few enterobacteria and enterococci. Formula-fed babies during the corresponding period were more often colonised by other anaerobes in addition to bifidobacteria and had higher counts of facultatively anaerobic bacteria. The introduction of solid food to the breast-fed infants caused a major disturbance in the microbial ecology of the large bowel as counts of enterobacteria and enterococci rose sharply and colonisation by Bacteroides spp., clostridia and anaerobic streptococci occurred. This was not observed when formula-fed infants began to take solids; instead, counts of facultative anaerobes remained high while colonisation by anaerobes other than bifidobacteria continued. At 12 months, the anaerobic bacterial populations of the large bowel of breast-fed and formula-fed infants were beginning to resemble those of adults in number and composition and there was a corresponding decrease in the number of facultative anaerobes. These changes are discussed in relation to changes in susceptibility to gastro-intestinal infection.",
 				"issue": "2",
 				"libraryCatalog": "Microbiology Society Journals",
@@ -226,7 +228,7 @@ var testCases = [
 				],
 				"date": "2016",
 				"DOI": "10.1099/ijsem.0.000872",
-				"ISSN": "1466-5034,",
+				"ISSN": "1466-5034",
 				"abstractNote": "A repeat multi-locus sequence analysis (MLSA) of concatenated nusA, eno, rpoB, gltB, lepA, nuoL and nrdA sequences of strains classified as Achromobacter marplatensis was performed. The results revealed that earlier reported sequence data of the proposed type strain were erroneous, and that the corrected concatenated sequence divergence between the A. marplatensis LMG 26219T ( = CCUG 56371T) sequence type and that of strains of Achromobacter spiritinus was well below the 2.1 % threshold value that delineates species of the genus Achromobacter. These results therefore demonstrated that strains which were classified as A. spiritinus should be reclassified as A. marplatensis and that the name Achromobacter spiritinus should no longer be used. An emendation of the description of Achromobacter marplatensis is warranted.",
 				"issue": "4",
 				"libraryCatalog": "Microbiology Society Journals",
@@ -317,7 +319,7 @@ var testCases = [
 				],
 				"date": "2021",
 				"DOI": "10.1099/ijsem.0.004683",
-				"ISSN": "1466-5034,",
+				"ISSN": "1466-5034",
 				"abstractNote": "A novel mesophilic sulfate-reducing bacterium, strain HN2T, was isolated from groundwater sampled from the subsurface siliceous mudstone of the Wakkanai Formation located in Horonobe, Hokkaido, Japan. The bacterium was Gram-negative and vibrio-shaped, and its motility was conferred by a single polar flagellum. Cells had desulfoviridin. Catalase and oxidase activities were not detected. It grew in the temperature range of 25–40 °C (optimum, 35 °C) and pH range of 6.3–8.1 (optimum, pH 7.2–7.6). It used sulfate, thiosulfate, dimethyl sulfoxide, anthraquinone-2,6-disulfonate, Fe3+, and manganese oxide, but not elemental sulfur, nitrite, nitrate, or fumarate as electron acceptors. The strain showed weak growth with sulfite as the electron acceptor. Fermentative growth with pyruvate, lactate and cysteine was observed in the absence of sulfate, but not with malate or fumarate. NaCl was not required, but the strain tolerated up to 40 g l–1. Strain HN2T did not require vitamins. The major cellular fatty acids were iso-C15 : 0 (23.8 %), C18 : 1  ω9t (18.4 %), C18 : 0 (15.0 %), C16 : 0 (14.5 %), and anteiso-C17 :0 (10.1 %). The major respiratory quinone was menaquinone MK-6(H2). The G+C content of the genomic DNA was 56.7 mol%. Based on 16S rRNA gene sequence analysis, the closest phylogenetic relative of strain HN2T is Desulfovibrio psychrotolerans JS1T (97.0 %). Digital DNA–DNA hybridization (dDDH) and average nucleotide identity (ANI) values of the strains HN2T and D. psychrotolerans JS1T were 22.2 and 79.8 %, respectively. Based on the phenotypic and molecular genetic evidence, we propose a novel species, D. subterraneus sp. nov. with the type strain HN2T (=DSM 101010T=NBRC 112213T).",
 				"issue": "2",
 				"libraryCatalog": "Microbiology Society Journals",
