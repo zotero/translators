@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-12 18:02:11"
+	"lastUpdated": "2023-01-17 18:34:34"
 }
 
 /*
@@ -211,6 +211,8 @@ function scrapeBibTeX(doc, url) {
 		return;
 	}
 
+	let fallbackTitle = text(doc, '.citation__title');
+
 	// Use the current domain on Wiley subdomains (e.g., ascpt.) so that the
 	// download works even if third-party cookies are blocked. Otherwise, use
 	// the main domain.
@@ -265,6 +267,10 @@ function scrapeBibTeX(doc, url) {
 			}
 
 			// title
+			if (!item.title) {
+				item.title = fallbackTitle;
+			}
+
 			if (item.title && item.title.toUpperCase() == item.title) {
 				item.title = ZU.capitalizeTitle(item.title, true);
 			}
@@ -508,6 +514,7 @@ var testCases = [
 				"itemType": "bookSection",
 				"title": "Endnotes",
 				"creators": [],
+				"date": "2011",
 				"ISBN": "9781118269381",
 				"bookTitle": "The World is Open",
 				"extra": "DOI: 10.1002/9781118269381.notes",
