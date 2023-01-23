@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-12-08 16:38:00"
+	"lastUpdated": "2023-01-23 17:12:53"
 }
 
 /*
@@ -717,6 +717,10 @@ function addLowQualityMetadata(doc, newItem) {
 			|| doc.documentElement.getAttribute('xml:lang');
 	}
 
+	if (!newItem.date) {
+		newItem.date = ZU.strToISO(attr(doc, 'time[datetime]', 'datetime'));
+	}
+
 
 	newItem.libraryCatalog = doc.location.host;
 
@@ -1256,7 +1260,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2013/02/20",
+				"date": "2013/2/20",
 				"DOI": "10.1155/2013/868174",
 				"ISSN": "1024-123X",
 				"abstractNote": "The problem of network-based robust filtering for stochastic systems with sensor nonlinearity is investigated in this paper. In the network environment, the effects of the sensor saturation, output quantization, and network-induced delay are taken into simultaneous consideration, and the output measurements received in the filter side are incomplete. The random delays are modeled as a linear function of the stochastic variable described by a Bernoulli random binary distribution. The derived criteria for performance analysis of the filtering-error system and filter design are proposed which can be solved by using convex optimization method. Numerical examples show the effectiveness of the design method.",
@@ -1291,8 +1295,8 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2013-12-22T11:58:34-05:00",
-				"abstractNote": "Northwestern University recently condemned the American Studies Association boycott of Israel. Unlike some other schools that quit their institutional membership in the ASA over the boycott, Northwestern has not. Many of my Northwestern colleagues were about to start urging a similar withdrawal. Then we learned from our administration that despite being listed as in institutional …",
+				"date": "2013-12-22T16:58:34+00:00",
+				"abstractNote": "Northwestern University recently condemned the American Studies Association boycott of Israel. Unlike some other schools that quit their institutional membership in the ASA over the boycott, Northwestern has not. Many of my Northwestern colleagues were about to start urging a similar withdrawal. Then we learned from our administration that despite being listed as in institutional […]",
 				"blogTitle": "The Volokh Conspiracy",
 				"language": "en-US",
 				"url": "https://volokh.com/2013/12/22/northwestern-cant-quit-asa-boycott-member/",
@@ -1815,7 +1819,8 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"abstractNote": "Es gibt eine Vergleichsredensart: &quot;Der ist über den Jordan gegangen.“ Das heißt, er ist gestorben. Das bezieht sich auf die alten Grenzen Israels. In Wuppertal jedoch liegt jenseits des Flusses das Gefängnis.",
+				"date": "2019-04-11",
+				"abstractNote": "Es gibt eine Vergleichsredensart: \"Der ist über den Jordan gegangen.“ Das heißt, er ist gestorben. Das bezieht sich auf die alten Grenzen Israels. In Wuppertal jedoch liegt jenseits des Flusses das Gefängnis.",
 				"language": "de",
 				"url": "https://www.swr.de/wissen/1000-antworten/woher-kommt-redensart-ueber-die-wupper-gehen-100.html",
 				"websiteTitle": "swr.online",
@@ -1845,6 +1850,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2011-07-29",
 				"abstractNote": "Бу көннәрдә “Идел” җәйләвендә XXI Татар яшьләре көннәре үтә. Яшьләр вакытларын төрле чараларда катнашып үткәрә.",
 				"language": "tt",
 				"url": "https://www.azatliq.org/a/24281041.html",
@@ -1964,7 +1970,33 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://themarkup.org/inside-the-markup/2023/01/18/five-ways-toward-a-fairer-more-transparent-hiring-process",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Five Ways Toward a Fairer, More Transparent Hiring Process – The Markup",
+				"creators": [
+					{
+						"firstName": "Sisi",
+						"lastName": "Wei",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-01-18",
+				"abstractNote": "We want candidates hearing about us for the first time to feel just as equipped as those with friends on staff",
+				"language": "en",
+				"url": "https://themarkup.org/inside-the-markup/2023/01/18/five-ways-toward-a-fairer-more-transparent-hiring-process",
+				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
