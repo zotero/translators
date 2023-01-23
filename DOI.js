@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-01-23 17:03:43"
+	"lastUpdated": "2023-01-23 17:23:16"
 }
 
 /*
@@ -220,7 +220,7 @@ function retrieveDOIs(doiOrDOIs) {
 }
 
 function doWeb(doc, url) {
-	let doiOrDOIs = getDOIs(doc, url)
+	let doiOrDOIs = getDOIs(doc, url);
 	Z.debug(doiOrDOIs);
 	retrieveDOIs(doiOrDOIs);
 }
