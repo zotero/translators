@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-03-13 02:38:54"
+	"lastUpdated": "2023-01-23 16:57:30"
 }
 
 /*
@@ -35,23 +35,58 @@
 	***** END LICENSE BLOCK *****
 */
 
-// builds a list of DOIs
-function getDOIs(doc) {
-	// TODO Detect DOIs more correctly.
-	// The actual rules for DOIs are very lax-- but we're more strict.
-	// Specifically, we should allow space characters, and all Unicode
-	// characters except for control characters. Here, we're cheating
-	// by not allowing ampersands, to fix an issue with getting DOIs
-	// out of URLs.
-	// Additionally, all content inside <noscript> is picked up as text()
-	// by the xpath, which we don't necessarily want to exclude, but
-	// that means that we can get DOIs inside node attributes and we should
-	// exclude quotes in this case.
-	// DOI should never end with a period or a comma (we hope)
-	// Description at: http://www.doi.org/handbook_2000/appendix_1.html#A1-4
-	const DOIre = /\b10\.[0-9]{4,}\/[^\s&"']*[^\s&"'.,]/g;
+// TODO Detect DOIs more correctly.
+// The actual rules for DOIs are very lax-- but we're more strict.
+// Specifically, we should allow space characters, and all Unicode
+// characters except for control characters. Here, we're cheating
+// by not allowing ampersands, to fix an issue with getting DOIs
+// out of URLs.
+// Additionally, all content inside <noscript> is picked up as text()
+// by the xpath, which we don't necessarily want to exclude, but
+// that means that we can get DOIs inside node attributes and we should
+// exclude quotes in this case.
+// DOI should never end with a period or a comma (we hope)
+// Description at: http://www.doi.org/handbook_2000/appendix_1.html#A1-4
+const DOIre = /\b10\.[0-9]{4,}\/[^\s&"']*[^\s&"'.,]/g;
 
-	var dois = [];
+/**
+ * @return {string | string[]} A single string if the URL contains a DOI
+ * 		and the document contains no others, or an array of DOIs otherwise
+ */
+function getDOIs(doc, url) {
+	let fromURL = getDOIsFromURL(url);
+	let fromDocument = getDOIsFromDocument(doc);
+	if (
+		// We got a single DOI from the URL
+		fromURL.length == 1 && (
+			// And none from the document
+			fromDocument.length == 0
+			// Or one from the document, but the same one that was in the URL
+			|| fromDocument.length == 1 && fromDocument[0] == fromURL[0]
+		)
+	) {
+		return fromURL;
+	}
+	// De-duplicate before returning
+	return Array.from(new Set([...fromURL, ...fromDocument]));
+}
+
+function getDOIsFromURL(url) {
+	// Split on # and ?, so that we don't allow DOIs to contain those characters
+	// but do allow finding DOIs on either side of them (e.g. a DOI in the URL hash)
+	let urlParts = url.split(/[#?]/);
+	for (let urlPart of urlParts) {
+		let match = DOIre.exec(urlPart);
+		if (match) {
+			// Only return a single DOI from the URL
+			return [match[0]];
+		}
+	}
+	return [];
+}
+
+function getDOIsFromDocument(doc) {
+	var dois = new Set();
 
 	var m, DOI;
 	var treeWalker = doc.createTreeWalker(doc.documentElement, 4, null, false);
@@ -69,8 +104,8 @@ function getDOIs(doc) {
 				DOI = DOI.substr(0, DOI.length - 1);
 			}
 			// only add new DOIs
-			if (!dois.includes(DOI)) {
-				dois.push(DOI);
+			if (!dois.has(DOI)) {
+				dois.add(DOI);
 			}
 		}
 	}
@@ -90,13 +125,13 @@ function getDOIs(doc) {
 				doi = doi.substr(0, doi.length - 1);
 			}
 			// only add new DOIs
-			if (!dois.includes(doi)) {
-				dois.push(doi);
+			if (!dois.has(doi)) {
+				dois.add(doi);
 			}
 		}
 	}
 
-	return dois;
+	return Array.from(dois);
 }
 
 function detectWeb(doc, url) {
@@ -106,19 +141,24 @@ function detectWeb(doc, url) {
 	const blacklistRe = /^https?:\/\/[^/]*(?:google\.com|sciencedirect\.com\/science\/advertisement\/)/i;
 	
 	if (!blacklistRe.test(url)) {
-		var DOIs = getDOIs(doc);
-		if (DOIs.length) {
+		let doiOrDOIs = getDOIs(doc, url);
+		if (Array.isArray(doiOrDOIs)) {
 			return "multiple";
+		}
+		else {
+			return "journalArticle"; // A decent guess
 		}
 	}
 	return false;
 }
 
-function retrieveDOIs(dois) {
+function retrieveDOIs(doiOrDOIs) {
+	let showSelect = Array.isArray(doiOrDOIs);
+	let DOIs = showSelect ? doiOrDOIs : [doiOrDOIs];
 	let items = {};
-	let numDOIs = dois.length;
+	let numDOIs = DOIs.length;
 
-	for (const doi of dois) {
+	for (const doi of DOIs) {
 		items[doi] = null;
 		
 		const translate = Zotero.loadTranslator("search");
@@ -144,7 +184,17 @@ function retrieveDOIs(dois) {
 					throw new Error("DOI Translator: could not find DOI");
 				}
 				
-				// Only show items that resolved successfully
+				// If showSelect is false, don't show a Select Items dialog,
+				// just complete if we can
+				if (!showSelect) {
+					let firstItem = items[Object.keys(items)[0]];
+					if (firstItem) {
+						firstItem.complete();
+					}
+					return;
+				}
+
+				// Otherwise, allow the user to select among items that resolved successfully
 				let select = {};
 				for (let doi in items) {
 					let item = items[doi];
@@ -169,10 +219,10 @@ function retrieveDOIs(dois) {
 	}
 }
 
-function doWeb(doc) {
-	var dois = getDOIs(doc);
-	Z.debug(dois);
-	retrieveDOIs(dois);
+function doWeb(doc, url) {
+	let doiOrDOIs = getDOIs(doc, url)
+	Z.debug(doiOrDOIs);
+	retrieveDOIs(doiOrDOIs);
 }
 
 /** BEGIN TEST CASES **/
@@ -204,7 +254,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.developmentbookshelf.com/action/showPublications",
+		"url": "https://onlinelibrary.wiley.com/doi/full/10.7448/IAS.15.5.18440",
 		"items": "multiple"
 	}
 ]
