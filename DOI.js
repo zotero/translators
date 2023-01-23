@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-01-23 16:57:30"
+	"lastUpdated": "2023-01-23 17:03:43"
 }
 
 /*
@@ -154,11 +154,11 @@ function detectWeb(doc, url) {
 
 function retrieveDOIs(doiOrDOIs) {
 	let showSelect = Array.isArray(doiOrDOIs);
-	let DOIs = showSelect ? doiOrDOIs : [doiOrDOIs];
+	let dois = showSelect ? doiOrDOIs : [doiOrDOIs];
 	let items = {};
-	let numDOIs = DOIs.length;
+	let numDOIs = dois.length;
 
-	for (const doi of DOIs) {
+	for (const doi of dois) {
 		items[doi] = null;
 		
 		const translate = Zotero.loadTranslator("search");
