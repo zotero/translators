@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-01-23 17:23:16"
+	"lastUpdated": "2023-01-24 15:21:11"
 }
 
 /*
@@ -54,24 +54,24 @@ const DOIre = /\b10\.[0-9]{4,}\/[^\s&"']*[^\s&"'.,]/g;
  * 		and the document contains no others, or an array of DOIs otherwise
  */
 function getDOIs(doc, url) {
-	let fromURL = getDOIsFromURL(url);
+	let fromURL = getDOIFromURL(url);
 	let fromDocument = getDOIsFromDocument(doc);
 	if (
-		// We got a single DOI from the URL
-		fromURL.length == 1 && (
+		// We got a DOI from the URL
+		fromURL && (
 			// And none from the document
 			fromDocument.length == 0
 			// Or one from the document, but the same one that was in the URL
-			|| fromDocument.length == 1 && fromDocument[0] == fromURL[0]
+			|| fromDocument.length == 1 && fromDocument[0] == fromURL
 		)
 	) {
 		return fromURL;
 	}
 	// De-duplicate before returning
-	return Array.from(new Set([...fromURL, ...fromDocument]));
+	return Array.from(new Set(fromURL ? [fromURL, ...fromDocument] : fromDocument));
 }
 
-function getDOIsFromURL(url) {
+function getDOIFromURL(url) {
 	// Split on # and ?, so that we don't allow DOIs to contain those characters
 	// but do allow finding DOIs on either side of them (e.g. a DOI in the URL hash)
 	let urlParts = url.split(/[#?]/);
@@ -79,10 +79,10 @@ function getDOIsFromURL(url) {
 		let match = DOIre.exec(urlPart);
 		if (match) {
 			// Only return a single DOI from the URL
-			return [match[0]];
+			return match[0];
 		}
 	}
-	return [];
+	return null;
 }
 
 function getDOIsFromDocument(doc) {
