@@ -142,7 +142,7 @@ function detectWeb(doc, url) {
 	
 	if (!blacklistRe.test(url)) {
 		let doiOrDOIs = getDOIs(doc, url);
-		if (Array.isArray(doiOrDOIs)) {
+		if (Array.isArray(doiOrDOIs) && doiOrDOIs.length) {
 			return "multiple";
 		}
 		else {
