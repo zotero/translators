@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-01-24 15:21:11"
+	"lastUpdated": "2023-01-25 15:27:33"
 }
 
 /*
@@ -125,7 +125,7 @@ function getDOIsFromDocument(doc) {
 				doi = doi.substr(0, doi.length - 1);
 			}
 			// only add new DOIs
-			if (!dois.has(doi)) {
+			if (!dois.has(doi) && !dois.has(doi.replace(/#.*/, ''))) {
 				dois.add(doi);
 			}
 		}
@@ -255,7 +255,63 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://onlinelibrary.wiley.com/doi/full/10.7448/IAS.15.5.18440",
-		"items": "multiple"
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Track C Epidemiology and Prevention Science",
+				"creators": [],
+				"date": "2012-10-22",
+				"DOI": "10.7448/IAS.15.5.18440",
+				"ISSN": "1758-2652",
+				"issue": "Suppl 3",
+				"journalAbbreviation": "Journal of the International AIDS Society",
+				"libraryCatalog": "DOI.org (Crossref)",
+				"publicationTitle": "Journal of the International AIDS Society",
+				"url": "http://doi.wiley.com/10.7448/IAS.15.5.18440",
+				"volume": "15",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/BEJTMI",
+		"items": [
+			{
+				"itemType": "document",
+				"title": "Transfer of 50 thousand improved genetically improved farmed tilapia (GIFT) fry to Nigeria",
+				"creators": [
+					{
+						"lastName": "Trinh",
+						"firstName": "Trong",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Trinh",
+						"firstName": "Trong",
+						"creatorType": "contributor"
+					},
+					{
+						"lastName": "WorldFish",
+						"creatorType": "contributor",
+						"fieldMode": true
+					}
+				],
+				"date": "2023",
+				"abstractNote": "The data contains the list of female broodstock that produced improved GIFT fry sent to Nigeria in three batches in 2022",
+				"extra": "Type: dataset\nDOI: 10.7910/DVN/BEJTMI",
+				"libraryCatalog": "DOI.org (Datacite)",
+				"publisher": "Harvard Dataverse",
+				"url": "https://dataverse.harvard.edu/citation?persistentId=doi:10.7910/DVN/BEJTMI",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
