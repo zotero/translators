@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-12-21 03:11:03"
+	"lastUpdated": "2022-12-12 19:29:40"
 }
 
 /*
@@ -41,7 +41,7 @@ function detectWeb(doc, url) {
 }
 
 function findItemType(doc, url){
-	var itemType= ZU.xpathText(doc, '//div[contains(@class, "label")]');
+	var itemType = text(doc, 'div.label');
 	//Z.debug(itemType)
 	var typeMap = {
 		"Books": "book",
@@ -65,7 +65,9 @@ function findItemType(doc, url){
 		"Reports": "report",
 		"Rapport": "report",
 		"Theses": "thesis", 
-		"Thèse": "thesis"
+		"Thèse": "thesis",
+		"Poster communications": "presentation",
+		"Poster de conférence": "presentation"
 	}
 	if (typeMap[itemType]) return typeMap[itemType];
 	else if (url.indexOf("medihal-")!=-1) return "artwork";
@@ -129,8 +131,12 @@ function scrape(doc, url) {
 					mimeType: "text/html"
 				}];
 			}
-			if (detectWeb(doc, url)=="artwork"|detectWeb(doc, url)=="presentation"){
-				item.itemType= detectWeb(doc, url);
+			let detectedType = detectWeb(doc, url);
+			if (detectedType == "artwork" || detectedType == "presentation") {
+				item.itemType = detectedType;
+			}
+			if (detectedType == 'presentation' && text(doc, 'div.label-POSTER')) {
+				item.presentationType = 'Poster';
 			}
 			item.complete();
 		});
@@ -337,6 +343,79 @@ var testCases = [
 		"type": "web",
 		"url": "https://hal.archives-ouvertes.fr/search/index/q/%2A/docType_s/THESE/",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://hal.archives-ouvertes.fr/hal-01600136v1",
+		"items": [
+			{
+				"itemType": "presentation",
+				"title": "First results about in vitro bud neoformation on haploid apple leaves",
+				"creators": [
+					{
+						"firstName": "Michel",
+						"lastName": "Duron",
+						"creatorType": "author"
+					}
+				],
+				"date": "1989-06",
+				"abstractNote": "First results about[i] in vitro[/i] bud neoformation on haploid apple leaves. The impact of biotechnology in agriculture. The meeting point between fundamental and applied in vitro culture research",
+				"extra": "Published: The impact of biotechnology in agriculture. The meeting point between fundamental and applied in vitro culture research",
+				"itemID": "duron:hal-01600136",
+				"presentationType": "Poster",
+				"url": "https://hal.archives-ouvertes.fr/hal-01600136",
+				"attachments": [
+					{
+						"title": "HAL PDF Full Text",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "apple tree"
+					},
+					{
+						"tag": "bourgeon"
+					},
+					{
+						"tag": "budwood"
+					},
+					{
+						"tag": "culture in vitro"
+					},
+					{
+						"tag": "diffusion des résultats"
+					},
+					{
+						"tag": "haploid"
+					},
+					{
+						"tag": "haploïdie"
+					},
+					{
+						"tag": "in vitro culture"
+					},
+					{
+						"tag": "plant leaf"
+					},
+					{
+						"tag": "plante néoformee"
+					},
+					{
+						"tag": "pommier"
+					},
+					{
+						"tag": "système foliaire"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Poster</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

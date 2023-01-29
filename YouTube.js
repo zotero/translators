@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2021-08-25 19:44:19"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2023-01-17 19:11:42"
 }
 
 /*
@@ -90,19 +90,47 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var item = new Zotero.Item("videoRecording");
 
+	let jsonLD;
+	try {
+		jsonLD = JSON.parse(text(doc, 'script[type="application/ld+json"]'));
+	}
+	catch (e) {
+		jsonLD = {};
+	}
+
 	/* YouTube won't update the meta tags for the user,
 	 * if they open e.g. a suggested video in the same tab.
 	 * Thus we scrape them from screen instead.
 	 */
 
-	item.title = text(doc, '#info-contents h1.title');
+	item.title = text(doc, '#info-contents h1.title') // Desktop
+		|| text(doc, '#title')
+		|| text(doc, '.slim-video-information-title'); // Mobile
 	// try to scrape only the canonical url, excluding additional query parameters
-	item.url = url.replace(/^(.+\/watch\?v=[0-9a-zA-Z_-]+).*/, "$1");
-	item.runningTime = text(doc, '#movie_player .ytp-time-duration');
-	item.date = ZU.strToISO(text(doc, '#info-strings yt-formatted-string'));
+	item.url = url.replace(/^(.+\/watch\?v=[0-9a-zA-Z_-]+).*/, "$1").replace('m.youtube.com', 'www.youtube.com');
+	item.runningTime = text(doc, '#movie_player .ytp-time-duration') // Desktop
+		|| text(doc, '.ytm-time-display .time-second'); // Mobile after unmute
+	if (!item.runningTime && jsonLD.duration) { // Mobile before unmute
+		let duration = parseInt(jsonLD.duration.substring(2));
+		let hours = String(Math.floor(duration / 3600)).padStart(2, '0');
+		let minutes = String(Math.floor(duration % 3600 / 60)).padStart(2, '0');
+		let seconds = String(duration % 60).padStart(2, '0');
+		if (duration >= 3600) { // Include hours
+			item.runningTime = `${hours}:${minutes}:${seconds}`;
+		}
+		else { // Just include minutes and seconds
+			item.runningTime = `${minutes}:${seconds}`;
+		}
+	}
 
-	var author = text(doc, '#meta-contents #text-container .ytd-channel-name')
-		|| text(doc, '#text-container .ytd-channel-name');
+	item.date = ZU.strToISO(
+		text(doc, '#info-strings yt-formatted-string') // Desktop
+			|| attr(doc, 'ytm-factoid-renderer:last-child > div', 'aria-label') // Mobile if description has been opened
+	) || jsonLD.uploadDate; // Mobile on initial page load
+
+	var author = text(doc, '#meta-contents #text-container .ytd-channel-name') // Desktop
+		|| text(doc, '#text-container .ytd-channel-name')
+		|| text(doc, '.slim-owner-channel-name'); // Mobile
 	if (author) {
 		item.creators.push({
 			lastName: author,
@@ -110,7 +138,9 @@ function scrape(doc, url) {
 			fieldMode: 1
 		});
 	}
-	var description = text(doc, '#description .content') || text(doc, '#description');
+	var description = text(doc, '#description .content')
+		|| text(doc, '#description')
+		|| text(doc, 'ytm-expandable-video-description-body-renderer .collapsed-string-container');
 	if (description) {
 		item.abstractNote = description;
 	}

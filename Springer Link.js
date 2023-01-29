@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-08-15 19:51:07"
+	"lastUpdated": "2022-12-15 14:55:13"
 }
 
 /*
@@ -95,7 +95,7 @@ function doWeb(doc, url) {
 		var list = getResultList(doc);
 		var items = {};
 		if (getAction(url) == 'book') {
-			items[url] = '[Full Book] ' + text(doc, 'main h1');
+			items[url] = '[Full Book] ' + text(doc, 'header h1');
 		}
 		for (var i = 0, n = list.length; i < n; i++) {
 			items[list[i].href] = list[i].textContent;

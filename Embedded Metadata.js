@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-03 16:51:36"
+	"lastUpdated": "2023-01-23 17:12:53"
 }
 
 /*
@@ -539,9 +539,10 @@ function addHighwireMetadata(doc, newItem, hwType) {
 
 		newItem.attachments.push({ title: "Full Text PDF", url: pdfURL, mimeType: "application/pdf" });
 	}
-
-	// add snapshot
-	newItem.attachments.push({ document: doc, title: "Snapshot" });
+	else {
+		// Only add snapshot if we didn't add a PDF
+		newItem.attachments.push({ document: doc, title: "Snapshot" });
+	}
 
 	// store PMID in Extra and as a link attachment
 	// e.g. http://www.sciencemag.org/content/332/6032/977.full
@@ -570,6 +571,7 @@ function addHighwireMetadata(doc, newItem, hwType) {
 // process highwire creators; currently only editor and author, but easy to extend
 function processHighwireCreators(creatorNodes, role, doc) {
 	let itemCreators = [];
+	let lastCreator = null;
 	for (let creatorNode of creatorNodes) {
 		let creators = creatorNode.nodeValue.split(/\s*;\s*/);
 		if (creators.length == 1 && creatorNodes.length == 1) {
@@ -595,6 +597,11 @@ function processHighwireCreators(creatorNodes, role, doc) {
 
 			// skip empty authors. Try to match something other than punctuation
 			if (!creator || !creator.match(/[^\s,-.;]/)) continue;
+
+			// Skip adjacent repeated authors
+			if (lastCreator && creator == lastCreator) continue;
+
+			lastCreator = creator;
 
 			creator = ZU.cleanAuthor(creator, role, creator.includes(","));
 			if (creator.firstName) {
@@ -708,6 +715,10 @@ function addLowQualityMetadata(doc, newItem) {
 			|| ZU.xpathText(doc, '//x:meta[@http-equiv="content-language"]/@content', namespaces)
 			|| ZU.xpathText(doc, '//html/@lang')
 			|| doc.documentElement.getAttribute('xml:lang');
+	}
+
+	if (!newItem.date) {
+		newItem.date = ZU.strToISO(attr(doc, 'time[datetime]', 'datetime'));
 	}
 
 
@@ -1056,10 +1067,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1136,10 +1143,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1173,10 +1176,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1229,10 +1228,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1265,7 +1260,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2013/02/20",
+				"date": "2013/2/20",
 				"DOI": "10.1155/2013/868174",
 				"ISSN": "1024-123X",
 				"abstractNote": "The problem of network-based robust filtering for stochastic systems with sensor nonlinearity is investigated in this paper. In the network environment, the effects of the sensor saturation, output quantization, and network-induced delay are taken into simultaneous consideration, and the output measurements received in the filter side are incomplete. The random delays are modeled as a linear function of the stochastic variable described by a Bernoulli random binary distribution. The derived criteria for performance analysis of the filtering-error system and filter design are proposed which can be solved by using convex optimization method. Numerical examples show the effectiveness of the design method.",
@@ -1278,10 +1273,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1304,8 +1295,8 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2013-12-22T11:58:34-05:00",
-				"abstractNote": "Northwestern University recently condemned the American Studies Association boycott of Israel. Unlike some other schools that quit their institutional membership in the ASA over the boycott, Northwestern has not. Many of my Northwestern colleagues were about to start urging a similar withdrawal. Then we learned from our administration that despite being listed as in institutional …",
+				"date": "2013-12-22T16:58:34+00:00",
+				"abstractNote": "Northwestern University recently condemned the American Studies Association boycott of Israel. Unlike some other schools that quit their institutional membership in the ASA over the boycott, Northwestern has not. Many of my Northwestern colleagues were about to start urging a similar withdrawal. Then we learned from our administration that despite being listed as in institutional […]",
 				"blogTitle": "The Volokh Conspiracy",
 				"language": "en-US",
 				"url": "https://volokh.com/2013/12/22/northwestern-cant-quit-asa-boycott-member/",
@@ -1380,8 +1371,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2015-09-28 00:00",
+				"date": "2015-09-28",
 				"DOI": "10.16995/olh.46",
+				"ISSN": "2056-6700",
 				"issue": "1",
 				"language": "en",
 				"libraryCatalog": "olh.openlibhums.org",
@@ -1392,10 +1384,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1437,7 +1425,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=334",
+		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=5057",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -1515,10 +1503,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1558,10 +1542,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1599,10 +1579,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1670,10 +1646,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1702,7 +1674,8 @@ var testCases = [
 				"url": "https://www.pewresearch.org/fact-tank/2019/12/12/u-s-children-more-likely-than-children-in-other-countries-to-live-with-just-one-parent/",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1824,10 +1797,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1850,9 +1819,10 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"abstractNote": "Es gibt eine Vergleichsredensart: &quot;Der ist über den Jordan gegangen.“ Das heißt, er ist gestorben. Das bezieht sich auf die alten Grenzen Israels. In Wuppertal jedoch liegt jenseits des Flusses das Gefängnis.",
+				"date": "2019-04-11",
+				"abstractNote": "Es gibt eine Vergleichsredensart: \"Der ist über den Jordan gegangen.“ Das heißt, er ist gestorben. Das bezieht sich auf die alten Grenzen Israels. In Wuppertal jedoch liegt jenseits des Flusses das Gefängnis.",
 				"language": "de",
-				"url": "https://www.swr.de/wissen/1000-antworten/kultur/woher-kommt-redensart-ueber-die-wupper-gehen-100.html",
+				"url": "https://www.swr.de/wissen/1000-antworten/woher-kommt-redensart-ueber-die-wupper-gehen-100.html",
 				"websiteTitle": "swr.online",
 				"attachments": [
 					{
@@ -1880,6 +1850,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2011-07-29",
 				"abstractNote": "Бу көннәрдә “Идел” җәйләвендә XXI Татар яшьләре көннәре үтә. Яшьләр вакытларын төрле чараларда катнашып үткәрә.",
 				"language": "tt",
 				"url": "https://www.azatliq.org/a/24281041.html",
@@ -1913,9 +1884,118 @@ var testCases = [
 				"date": "2021-12-30T17:41:33+00:00",
 				"abstractNote": "As this series was dedicated to Windows Privilege escalation thus I’m writing this Post to explain command practice for kernel-mode exploitation. Table of Content What",
 				"blogTitle": "Hacking Articles",
-				"language": "en-US",
+				"language": "en",
 				"shortTitle": "Windows Privilege Escalation",
 				"url": "https://www.hackingarticles.in/windows-privilege-escalation-kernel-exploit/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://opg.optica.org/oe/fulltext.cfm?uri=oe-30-21-39188&id=509758",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Self-calibration interferometric stitching test method for cylindrical surfaces",
+				"creators": [
+					{
+						"firstName": "Hao",
+						"lastName": "Hu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Zizhou",
+						"lastName": "Sun",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Shuai",
+						"lastName": "Xue",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Chaoliang",
+						"lastName": "Guan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yifan",
+						"lastName": "Dai",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Junfeng",
+						"lastName": "Liu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Xiaoqiang",
+						"lastName": "Peng",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Shanyong",
+						"lastName": "Chen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yong",
+						"lastName": "Liu",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022/10/10",
+				"DOI": "10.1364/OE.473836",
+				"ISSN": "1094-4087",
+				"abstractNote": "The surface figure accuracy requirement of cylindrical surfaces widely used in rotors of gyroscope, spindles of ultra-precision machine tools and high-energy laser systems is nearly 0.1 µm. Cylindricity measuring instrument that obtains 1-D profile result cannot be utilized for deterministic figuring methods. Interferometric stitching test for cylindrical surfaces utilizes a CGH of which the system error will accumulated to unacceptable extent for large aperture/angular aperture that require many subapertures. To this end, a self-calibration interferometric stitching method for cylindrical surfaces is proposed. The mathematical model of cylindrical surface figure and the completeness condition of self-calibration stitching test of cylindrical surfaces were analyzed theoretically. The effects of shear/stitching motion error and the subapertures lattice on the self-calibration test results were analyzed. Further, a self-calibration interferometric stitching algorithm that can theoretically recover all the necessary components of the system error for testing cylindrical surfaces was proposed. Simulations and experiments on a shaft were conducted to validate the feasibility.",
+				"issue": "21",
+				"journalAbbreviation": "Opt. Express, OE",
+				"language": "EN",
+				"libraryCatalog": "opg.optica.org",
+				"pages": "39188-39206",
+				"publicationTitle": "Optics Express",
+				"rights": "&#169; 2022 Optica Publishing Group",
+				"url": "https://opg.optica.org/oe/abstract.cfm?uri=oe-30-21-39188",
+				"volume": "30",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://themarkup.org/inside-the-markup/2023/01/18/five-ways-toward-a-fairer-more-transparent-hiring-process",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Five Ways Toward a Fairer, More Transparent Hiring Process – The Markup",
+				"creators": [
+					{
+						"firstName": "Sisi",
+						"lastName": "Wei",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-01-18",
+				"abstractNote": "We want candidates hearing about us for the first time to feel just as equipped as those with friends on staff",
+				"language": "en",
+				"url": "https://themarkup.org/inside-the-markup/2023/01/18/five-ways-toward-a-fairer-more-transparent-hiring-process",
 				"attachments": [
 					{
 						"title": "Snapshot",

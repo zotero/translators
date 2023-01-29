@@ -1,7 +1,6 @@
 'use strict';
 
 const translators = require('../translators').cache;
-const astUtils = require("eslint/lib/util/ast-utils");
 
 module.exports = {
 	meta: {
@@ -27,7 +26,8 @@ module.exports = {
 
 				if (declaration) {
 					const sourceCode = context.getSourceCode();
-					if (astUtils.isSemicolonToken(sourceCode.getLastToken(node))) {
+					const token = sourceCode.getLastToken(node);
+					if (token.type === 'Punctuator' && token.value === ';') {
 						context.report({
 							message: 'testCases should not have trailing semicolon',
 							loc: declaration.loc.end,

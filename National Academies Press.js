@@ -2,14 +2,14 @@
 	"translatorID": "f76afa52-0524-440e-98ba-7c0c10a7b693",
 	"label": "National Academies Press",
 	"creator": "Abe Jellinek",
-	"target": "^https?://(www\\.)?nap\\.edu/",
+	"target": "^https?://nap\\.nationalacademies\\.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-10 15:47:08"
+	"lastUpdated": "2022-12-12 19:59:23"
 }
 
 /*
@@ -61,102 +61,99 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) Object.keys(items).forEach(scrapeFromURL);
-		});
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (items) {
+			await Promise.all(
+				Object.keys(items)
+					.map(url => requestDocument(url).then(scrape))
+			);
+		}
 	}
 	else {
-		scrapeFromURL(url);
+		await scrape(doc, url);
 	}
 }
 
-function scrapeFromURL(url) {
-	let recordID = url.match(/\/catalog\/([^/?#]+)/)[1];
-	// absolute URLs so this can be called from the Transp. Research Board
-	// translator; relative URLs don't always resolve correctly in processDocuments
-	let enwURL = `https://www.nap.edu/citation.php?type=enw&record_id=${recordID}`;
-	let pdfURL = `https://www.nap.edu/cart/download.cgi?record_id=${recordID}`;
-	
-	ZU.doGet(enwURL, function (enwText) {
-		let translator = Zotero.loadTranslator('import');
-		// Refer/BibIX
-		translator.setTranslator('881f60f2-0802-411a-9228-ce5f47b64c7d');
-		translator.setString(enwText);
-		
-		translator.setHandler('itemDone', function (obj, item) {
-			for (let creator of item.creators) {
-				if (/\b(board|academies|council|national)\b/i.test(creator.lastName)) {
-					creator.lastName = creator.firstName + ' ' + creator.lastName;
-					delete creator.firstName;
-					creator.fieldMode = 1;
-					
-					if (/\bacademies\b/i.test(creator.lastName)) {
-						// some name splitting heuristic in the Refer translator
-						// really screws the name of the institution up
-						creator.lastName = 'National Academies of Sciences, Engineering, and Medicine';
-					}
-				}
-			}
-			
-			if (item.abstractNote) {
-				item.abstractNote = ZU.unescapeHTML(item.abstractNote);
-			}
-			
-			if (item.itemType == 'book' && item.pages) {
-				item.numPages = item.pages;
-				delete item.pages;
-			}
-			
-			if (item.type && !item.DOI) {
-				let DOI = ZU.cleanDOI(item.type);
-				if (DOI) item.DOI = DOI;
-				delete item.type;
-			}
-			
-			item.attachments.push({
-				title: 'Full Text PDF',
-				mimeType: 'application/pdf',
-				url: pdfURL
-			});
-			
-			item.complete();
-		});
-		
-		translator.translate();
+async function scrape(doc, url = doc.location.href) {
+	let DOI = attr(doc, 'meta[name="citation_doi"]', 'content');
+	let trans = Zotero.loadTranslator('search');
+	trans.setSearch({ DOI });
+
+	trans.setHandler('translators', (_, translators) => {
+		trans.setTranslator(translators);
+		trans.translate();
 	});
+
+	trans.setHandler('itemDone', (_, item) => {
+		for (let creator of item.creators) {
+			if (creator.fieldMode == 1) {
+				creator.creatorType = 'contributor';
+			}
+		}
+
+		if (item.itemType == 'book') {
+			delete item.pages;
+		}
+
+		let recordID = url.match(/\/catalog\/([^/#?]+)/)[1];
+		item.attachments.push({
+			title: 'Full Text PDF',
+			mimeType: 'application/pdf',
+			url: `https://nap.nationalacademies.org/cart/download.cgi?record_id=${recordID}`
+		});
+
+		item.tags = [];
+		for (let tag of doc.querySelectorAll('.book-topics > li')) {
+			item.tags.push(ZU.trimInternal(tag.textContent.replace(/\s*—\s*/, '--')));
+		}
+
+		item.libraryCatalog = 'National Academies Press';
+
+		item.complete();
+	});
+
+	await trans.getTranslators();
 }
-
-var exports = {
-	scrapeFromURL
-};
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.nap.edu/catalog/26186/the-use-of-limited-access-privilege-programs-in-mixed-use-fisheries",
+		"url": "https://nap.nationalacademies.org/catalog/26186/the-use-of-limited-access-privilege-programs-in-mixed-use-fisheries",
 		"items": [
 			{
 				"itemType": "book",
 				"title": "The Use of Limited Access Privilege Programs in Mixed-Use Fisheries",
 				"creators": [
 					{
-						"lastName": "National Academies of Sciences, Engineering, and Medicine",
-						"creatorType": "author",
-						"fieldMode": 1
+						"creatorType": "contributor",
+						"fieldMode": 1,
+						"lastName": "Committee on the Use of Limited Access Privilege Programs in Mixed-Use Fisheries"
+					},
+					{
+						"creatorType": "contributor",
+						"fieldMode": 1,
+						"lastName": "Ocean Studies Board"
+					},
+					{
+						"creatorType": "contributor",
+						"fieldMode": 1,
+						"lastName": "Division on Earth and Life Studies"
+					},
+					{
+						"creatorType": "contributor",
+						"fieldMode": 1,
+						"lastName": "National Academies of Sciences, Engineering, and Medicine"
 					}
 				],
-				"date": "2021",
+				"date": "2021-12-16",
 				"ISBN": "9780309672979",
-				"abstractNote": "A central goal of U.S. fisheries management is to control the exploitation of fish populations so that fisheries remain biologically productive, economically valuable, and socially equitable. Although the Magnuson-Stevens Fishery Conservation and Management Act led to many improvements, a number of fish populations remained overfished and some fisheries were considered economically inefficient. In response, Congress amended the Act in 2006 to allow additional management approaches, including Limited Access Privilege Programs (LAPPs) in which individuals receive a permit to harvest a defined portion of the total allowable catch for a particular fish stock.\nThis report examines the impacts of LAPPs on mixed-use fisheries, defined as fisheries where recreational, charter, and commercial fishing sectors target the same species or stocks. The report offers recommendations for NOAA's National Marine Fisheries Service (NMFS) and the Regional Fishery Management Councils (the Councils) who oversee and manage federally regulated fisheries. For each of the five mixed-use fisheries included in the report, the committee examined available fisheries data and analyses and collected testimony from fishery participants, relevant Councils, and NMFS regional experts through a series of public meetings.",
-				"language": "English",
+				"extra": "DOI: 10.17226/26186",
 				"libraryCatalog": "National Academies Press",
-				"numPages": "220",
-				"place": "Washington, DC",
-				"publisher": "The National Academies Press",
-				"url": "https://www.nap.edu/catalog/26186/the-use-of-limited-access-privilege-programs-in-mixed-use-fisheries",
+				"place": "Washington, D.C.",
+				"publisher": "National Academies Press",
+				"url": "https://www.nap.edu/catalog/26186",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -165,10 +162,13 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Agriculture"
+						"tag": "Agriculture--Aquaculture and Fisheries"
 					},
 					{
-						"tag": "Earth Sciences"
+						"tag": "Agriculture--Policy, Reviews and Evaluations"
+					},
+					{
+						"tag": "Earth Sciences--Ocean Studies"
 					}
 				],
 				"notes": [],
@@ -178,8 +178,66 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.nap.edu/search/?term=sharks&x=0&y=0",
+		"url": "https://nap.nationalacademies.org/search/?term=sharks&x=0&y=0",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://nap.nationalacademies.org/catalog/25359/socioeconomic-impacts-of-automated-and-connected-vehicles",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Socioeconomic Impacts of Automated and Connected Vehicles",
+				"creators": [
+					{
+						"creatorType": "author",
+						"firstName": "Andrea",
+						"lastName": "Ricci"
+					},
+					{
+						"creatorType": "contributor",
+						"fieldMode": 1,
+						"lastName": "Technical Activities Division"
+					},
+					{
+						"creatorType": "contributor",
+						"fieldMode": 1,
+						"lastName": "Transportation Research Board"
+					},
+					{
+						"creatorType": "contributor",
+						"fieldMode": 1,
+						"lastName": "National Academies of Sciences, Engineering, and Medicine"
+					}
+				],
+				"date": "2018-01-10",
+				"ISBN": "9780309480062",
+				"extra": "DOI: 10.17226/25359",
+				"libraryCatalog": "National Academies Press",
+				"place": "Washington, D.C.",
+				"publisher": "Transportation Research Board",
+				"url": "https://www.nap.edu/catalog/25359",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Transportation and Infrastructure--Economics"
+					},
+					{
+						"tag": "Transportation and Infrastructure--Society"
+					},
+					{
+						"tag": "Transportation and Infrastructure--Vehicles and Equipment"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

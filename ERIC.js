@@ -7,9 +7,9 @@
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 4,
+	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-10-10 14:26:15"
+	"lastUpdated": "2022-11-09 21:08:42"
 }
 
 /*
@@ -41,16 +41,14 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-function findType(doc, url) {
-	var ERICid = url.match(/id=(E[JD]\d+)/)[1];
-	var typeSecondary = ZU.xpathText(doc, '//div[@class="sInfo"]//div[strong[contains(text(), "Publication Type")]]');
+function getType(ericID, publicationType) {
 	// Trying to do reasonable guesses for non-journal types
-	if (ERICid.startsWith("ED")) {
-		if (typeSecondary) {
-			if (typeSecondary.includes("Books")) {
+	if (ericID.startsWith("ED")) {
+		if (publicationType) {
+			if (publicationType.includes("Books")) {
 				return "book";
 			}
-			else if (typeSecondary.includes("Dissertations/Theses")) {
+			else if (publicationType.includes("Dissertations/Theses")) {
 				return "thesis";
 			}
 			else {
@@ -65,6 +63,12 @@ function findType(doc, url) {
 	else {
 		return "journalArticle";
 	}
+}
+
+function findType(doc, url) {
+	var ericID = url.match(/id=(E[JD]\d+)/)[1];
+	var typeSecondary = ZU.xpathText(doc, '//div[@class="sInfo"]//div[strong[contains(text(), "Publication Type")]]');
+	return getType(ericID, typeSecondary);
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -101,7 +105,7 @@ async function doWeb(doc, url) {
 async function scrape(doc, url = doc.location.href) {
 	var abstract = ZU.xpathText(doc, '//div[@class="abstract"]');
 	var DOI = ZU.xpathText(doc, '//a[contains(text(), "Direct link")]/@href');
-	var ERICid = url.match(/id=(E[JD]\d+)/)[1];
+	var ericID = url.match(/id=(E[JD]\d+)/)[1];
 	var authorString = ZU.xpathText(doc, '//meta[@name="citation_author"]/@content');
 	let translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
@@ -133,14 +137,14 @@ async function scrape(doc, url = doc.location.href) {
 			delete item.publisher; // Publisher & Publication Title are often identical
 		}
 
-		item.extra = "ERIC Number: " + ERICid;
+		item.extra = "ERIC Number: " + ericID;
 		// Only include URL if full text is hosted on ERIC
 		if (!ZU.xpath(doc, '//div[@id="r_colR"]//img[@alt="PDF on ERIC"]').length) {
 			delete item.url;
 		}
 		else {
 			// use clean URL
-			item.url = "https://eric.ed.gov/?id=" + ERICid;
+			item.url = "https://eric.ed.gov/?id=" + ericID;
 		}
 		item.libraryCatalog = "ERIC";
 		item.complete();
@@ -148,6 +152,76 @@ async function scrape(doc, url = doc.location.href) {
 
 	let em = await translator.getTranslatorObject();
 	await em.doWeb(doc, url);
+}
+
+function cleanInput(search) {
+	if (typeof search === 'string') {
+		search = { ericNumber: search };
+	}
+	if (typeof search.ericNumber !== 'string') {
+		return false;
+	}
+	let matches = search.ericNumber.match(/E[DJ]\d+/);
+	if (matches) {
+		search.ericNumber = matches[0];
+		return search;
+	}
+	else {
+		return false;
+	}
+}
+
+function detectSearch(search) {
+	return !!cleanInput(search);
+}
+
+async function doSearch(search) {
+	search = cleanInput(search);
+	let { response } = await requestJSON(`https://api.ies.ed.gov/eric/?search=id:${search.ericNumber}&format=json&fields=*`);
+	if (!response.docs || !response.docs.length) {
+		throw new Error('ERIC search returned no results');
+	}
+	let doc = response.docs[0];
+	let item = new Zotero.Item(getType(doc.id, doc.publicationtype.join('; ')));
+	item.title = ZU.unescapeHTML(doc.title);
+	item.creators.push(...doc.author.map(name => ZU.cleanAuthor(name, 'author', true)));
+	item.abstractNote = doc.description || doc.desc;
+	if (item.abstractNote) {
+		item.abstractNote = ZU.unescapeHTML(item.abstractNote);
+	}
+	item.ISBN = doc.isbn && ZU.cleanISBN(doc.isbn.join(' '));
+	item.ISSN = doc.issn && ZU.cleanISSN(doc.issn.join(' ').replace(/ISSN-/g, ''));
+	item.DOI = doc.url && ZU.cleanDOI(decodeURIComponent(doc.url));
+	item.language = doc.language && doc.language[0];
+	item.date = ZU.strToISO(doc.publicationdate || doc.publicationdateyear);
+	item.publisher = doc.publisher && doc.publisher.split('. ')[0];
+	item.numPages = doc.pagecount;
+	if (item.itemType == 'report') {
+		item.institution = doc.institution;
+	}
+	else {
+		item.publicationTitle = doc.source || doc.institution;
+		let matches = doc.sourceid && doc.sourceid.match(/(v\d+)?\s*(n\d+)?\s*(p[\d-]+)?/);
+		if (matches) {
+			let [, volume, number, pages] = matches;
+			item.volume = volume && volume.substring(1);
+			item.issue = number && number.substring(1);
+			item.pages = pages && pages.substring(1);
+		}
+	}
+	item.extra = `ERIC Number: ${doc.id}`;
+	item.tags = doc.subject.map(subject => ({ tag: subject }));
+	if (doc.e_fulltextauth) {
+		item.attachments.push({
+			title: 'Full Text PDF',
+			mimeType: 'application/pdf',
+			url: `https://files.eric.ed.gov/fulltext/${doc.id}.pdf`
+		});
+		item.url = `https://eric.ed.gov/?id=${doc.id}`;
+		// Don't bother including the URL in doc.url: it's usually just the publisher's homepage
+		// and not relevant to the item
+	}
+	item.complete();
 }
 
 
@@ -487,6 +561,419 @@ var testCases = [
 					},
 					{
 						"tag": "Writing Evaluation"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"ericNumber": "EJ1125432"
+		},
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The Influence of Culture in Infant-Toddler Child Care Settings",
+				"creators": [
+					{
+						"firstName": "Joan",
+						"lastName": "Test",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015-03",
+				"ISSN": "0736-8038",
+				"abstractNote": "It is not only in families that young children are influenced to become members of their culture. Around the world and within individual countries, culture influences how care is provided to infants and toddlers in child care settings. In turn, infants and toddlers begin to learn how to act and think as members of their culture. From ways that teachers handle conflicts between toddlers, to how teachers manage transitions, to the organization of groups and physical environments, to more conscious transmission of culture through curriculum, culture influences infants and toddlers to become cultural beings that function well within their culture. This article explores cultural variations in group care and what infants and toddlers learn from these practices about being members of a culture.",
+				"extra": "ERIC Number: EJ1125432",
+				"issue": "4",
+				"language": "English",
+				"libraryCatalog": "ERIC",
+				"pages": "19-26",
+				"publicationTitle": "ZERO TO THREE",
+				"volume": "35",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Child Care"
+					},
+					{
+						"tag": "Child Care Centers"
+					},
+					{
+						"tag": "Child Development"
+					},
+					{
+						"tag": "Comparative Education"
+					},
+					{
+						"tag": "Conflict"
+					},
+					{
+						"tag": "Cultural Differences"
+					},
+					{
+						"tag": "Cultural Influences"
+					},
+					{
+						"tag": "Culture Conflict"
+					},
+					{
+						"tag": "Foreign Countries"
+					},
+					{
+						"tag": "Infants"
+					},
+					{
+						"tag": "Interpersonal Relationship"
+					},
+					{
+						"tag": "Physical Environment"
+					},
+					{
+						"tag": "Preschool Curriculum"
+					},
+					{
+						"tag": "Preschool Teachers"
+					},
+					{
+						"tag": "Toddlers"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"ericNumber": "EJ1179129"
+		},
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Effects of a Self-Monitoring Checklist as a Component of the \"Self-Directed IEP\"",
+				"creators": [
+					{
+						"firstName": "Karen M.",
+						"lastName": "Diegelmann",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David W.",
+						"lastName": "Test",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018-03",
+				"ISSN": "2154-1647",
+				"abstractNote": "Post-school outcomes for students with intellectual disability continue to lag behind other students with disabilities. One way to improve outcomes for these students is to include them in decisions about their future by teaching students how to participate in their IEP meetings. Self-monitoring provides immediate feedback, motivation, and teaches students to self-regulate what they are learning. In this study, two middle school and two high school students learned the steps of leading their IEP meeting. This study used a multiple baseline across participants design to examine the effects of a self-monitoring checklist as an essential component of the \"Self-Directed IEP\" for students with intellectual and multiple disabilities. Results showed three of four students only met criteria once the self-monitoring checklist was introduced. In addition, three students were able to generalize to post-intervention mock IEPs using the self-monitoring checklist.",
+				"extra": "ERIC Number: EJ1179129",
+				"issue": "1",
+				"language": "English",
+				"libraryCatalog": "ERIC",
+				"pages": "73-83",
+				"publicationTitle": "Education and Training in Autism and Developmental Disabilities",
+				"volume": "53",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Check Lists"
+					},
+					{
+						"tag": "Daily Living Skills"
+					},
+					{
+						"tag": "Individualized Education Programs"
+					},
+					{
+						"tag": "Intellectual Disability"
+					},
+					{
+						"tag": "Meetings"
+					},
+					{
+						"tag": "Observation"
+					},
+					{
+						"tag": "Questionnaires"
+					},
+					{
+						"tag": "Secondary School Students"
+					},
+					{
+						"tag": "Self Management"
+					},
+					{
+						"tag": "Student Development"
+					},
+					{
+						"tag": "Student Empowerment"
+					},
+					{
+						"tag": "Student Participation"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"ericNumber": "EJ1194142"
+		},
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Including College and Career Readiness within a Multitiered Systems of Support Framework",
+				"creators": [
+					{
+						"firstName": "Mary E.",
+						"lastName": "Morningstar",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Allison",
+						"lastName": "Lombardi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Test",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018",
+				"abstractNote": "Current practices of college and career readiness (CCR) emerged from within secondary school reform efforts. During a similar timeframe, evidence-based schoolwide interventions--positive behavioral interventions and supports (PBIS) and response to interventions (RTI)--were developed, first targeting elementary initiatives and then translated to secondary schools. We provide an overview of a recently established CCR framework underscoring both academic and nonacademic factors necessary for student success. To operationalize CCR approaches within secondary schools, an effort must be made to utilize existing interventions and strategies as well as data-informed efforts included within multitiered systems of support (MTSS). Therefore, we examine how CCR can be extended within secondary MTSS approaches and extend current methods by recommending measures aligning CCR elements within essential data-based decision making and fidelity of implementation tenets of MTSS. By embedding CCR within established MTSS approaches, improved post-school outcome for all students, including those with disabilities, can be achieved.",
+				"extra": "ERIC Number: EJ1194142",
+				"issue": "1",
+				"language": "English",
+				"libraryCatalog": "ERIC",
+				"publicationTitle": "AERA Open",
+				"url": "https://eric.ed.gov/?id=EJ1194142",
+				"volume": "4",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Career Readiness"
+					},
+					{
+						"tag": "College Readiness"
+					},
+					{
+						"tag": "Critical Thinking"
+					},
+					{
+						"tag": "Disabilities"
+					},
+					{
+						"tag": "Interpersonal Relationship"
+					},
+					{
+						"tag": "Intervention"
+					},
+					{
+						"tag": "Learner Engagement"
+					},
+					{
+						"tag": "Learning Processes"
+					},
+					{
+						"tag": "Planning"
+					},
+					{
+						"tag": "Positive Behavior Supports"
+					},
+					{
+						"tag": "Response to Intervention"
+					},
+					{
+						"tag": "Secondary Education"
+					},
+					{
+						"tag": "Transitional Programs"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"ericNumber": "ED616685"
+		},
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Can Closed-Ended Practice Tests Promote Understanding from Text?",
+				"creators": [
+					{
+						"firstName": "Lena",
+						"lastName": "Hildenbrand",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jennifer",
+						"lastName": "Wiley",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021",
+				"abstractNote": "Many studies have demonstrated that testing students on to-be-learned materials can be an effective learning activity. However, past studies have also shown that some practice test formats are more effective than others. Open-ended recall or short answer practice tests may be effective because the questions prompt deeper processing as students must generate an answer. With closed-ended testing formats such as multiple-choice or true-false tests, there are concerns that they may prompt only superficial processing, and that any benefits will not extend to non-practiced information or over time. They also may not be effective for improving comprehension from text as measured by how-and-why questions. The present study explored the utility of practice tests with closed-ended questions to improve learning from text. Results showed closed-ended practice testing can lead to benefits even when the learning outcome was comprehension of text. [This paper was published in: \"Proceedings of the 43rd Annual Conference of the Cognitive Science Society,\" 2021, pp.327-333.]",
+				"extra": "ERIC Number: ED616685",
+				"language": "English",
+				"libraryCatalog": "ERIC",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Cognitive Processes"
+					},
+					{
+						"tag": "College Entrance Examinations"
+					},
+					{
+						"tag": "Comparative Analysis"
+					},
+					{
+						"tag": "Cues"
+					},
+					{
+						"tag": "Educational Benefits"
+					},
+					{
+						"tag": "Instructional Effectiveness"
+					},
+					{
+						"tag": "Introductory Courses"
+					},
+					{
+						"tag": "Language Processing"
+					},
+					{
+						"tag": "Learning Activities"
+					},
+					{
+						"tag": "Multiple Choice Tests"
+					},
+					{
+						"tag": "Outcomes of Education"
+					},
+					{
+						"tag": "Prior Learning"
+					},
+					{
+						"tag": "Psychology"
+					},
+					{
+						"tag": "Reading Tests"
+					},
+					{
+						"tag": "Recall (Psychology)"
+					},
+					{
+						"tag": "Scores"
+					},
+					{
+						"tag": "Test Format"
+					},
+					{
+						"tag": "Test Items"
+					},
+					{
+						"tag": "Testing"
+					},
+					{
+						"tag": "Undergraduate Students"
+					},
+					{
+						"tag": "Urban Universities"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"ericNumber": "EJ956651"
+		},
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Collaborating with Parents to Establish Behavioral Goals in Child-Centered Play Therapy",
+				"creators": [
+					{
+						"firstName": "Phyllis B.",
+						"lastName": "Post",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peggy L.",
+						"lastName": "Ceballos",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Saundra L.",
+						"lastName": "Penn",
+						"creatorType": "author"
+					}
+				],
+				"date": "2012-01",
+				"DOI": "10.1177/1066480711425472",
+				"ISSN": "1066-4807",
+				"abstractNote": "The purpose of this article is to provide specific guidelines for child-centered play therapists to set behavioral outcome goals to effectively work with families and to meet the demands for accountability in the managed care environment. The child-centered play therapy orientation is the most widely practiced approach among play therapists who identify a specific theoretical orientation. While information about setting broad objectives is addressed using this approach to therapy, explicit guidelines for setting behavioral goals, while maintaining the integrity of the child-centered theoretical orientation, are needed. The guidelines are presented in three phases of parent consultation: (a) the initial engagement with parents, (b) the ongoing parent consultations, and (c) the termination phase. In keeping with the child-centered approach, the authors propose to work with parents from a person-centered orientation and seek to appreciate how cultural influences relate to parents' concerns and goals for their children. A case example is provided to demonstrate how child-centered play therapists can accomplish the aforementioned goals.",
+				"extra": "ERIC Number: EJ956651",
+				"issue": "1",
+				"language": "English",
+				"libraryCatalog": "ERIC",
+				"pages": "51-57",
+				"publicationTitle": "Family Journal: Counseling and Therapy for Couples and Families",
+				"volume": "20",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Cooperative Planning"
+					},
+					{
+						"tag": "Counseling Techniques"
+					},
+					{
+						"tag": "Counselor Role"
+					},
+					{
+						"tag": "Cultural Influences"
+					},
+					{
+						"tag": "Cultural Relevance"
+					},
+					{
+						"tag": "Guidelines"
+					},
+					{
+						"tag": "Interpersonal Relationship"
+					},
+					{
+						"tag": "Parent Participation"
+					},
+					{
+						"tag": "Play Therapy"
+					},
+					{
+						"tag": "Therapy"
 					}
 				],
 				"notes": [],

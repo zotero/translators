@@ -5,7 +5,7 @@
 	"author": "Emiliano Heyns",
 	"main": "index.js",
 	"engines": {
-		"node": ">=0.10.0"
+		"node": ">=16.0.0"
 	},
 	"license": "ISC",
 	"bin": {
