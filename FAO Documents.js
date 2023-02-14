@@ -326,8 +326,7 @@ function scrape(doc, url) {
 }*/
 
 function doWeb(doc, url) {
-
-/*	if (detectWeb(doc, url) == "multiple") {
+	/*	if (detectWeb(doc, url) == "multiple") {
 		Z.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return;
