@@ -2,14 +2,14 @@
 	"translatorID": "4883f662-29df-44ad-959e-27c9d036d165",
 	"label": "FAO Publications",
 	"creator": "Bin Liu <lieubean@gmail.com>",
-	"target": "^https?://www\\.fao\\.org/(documents|publications)/",
+	"target": "^https?://www\\.fao\\.org/publications/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-31 04:00:00"
+	"lastUpdated": "2023-02-14 17:46:00"
 }
 
 /*
@@ -352,7 +352,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.fao.org/documents/card/en/c/ca8466en",
+		"url": "http://www.fao.org/publications/card/en/c/ca8466en",
 		"defer": true,
 		"items": [
 			{
@@ -404,7 +404,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.fao.org/documents/card/en/c/ca8751en/",
+		"url": "http://www.fao.org/publications/card/en/c/ca8751en/",
 		"defer": true,
 		"items": [
 			{
@@ -466,7 +466,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.fao.org/documents/card/en/c/I9069EN",
+		"url": "http://www.fao.org/publications/card/en/c/I9069EN",
 		"defer": true,
 		"items": [
 			{
@@ -532,7 +532,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.fao.org/documents/card/en/c/ca7988en/",
+		"url": "http://www.fao.org/publications/card/en/c/ca7988en/",
 		"defer": true,
 		"items": [
 			{
