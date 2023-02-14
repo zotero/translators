@@ -33,7 +33,7 @@
 
 function detectWeb(doc, url) {
 	// Identify item type (book or conferencePaper) based on "fw-bold" class.
- 	// Page layout for meeting documents is not functioning properly (e.g. https://www.fao.org/documents/card/en/c/ND423EN/ and http://www.fao.org/documents/card/zh/c/mw246ZH/ ). Keep the code for now because it doesn't interfere with books and meeting documents are very few.
+	// Page layout for meeting documents is not functioning properly (e.g. https://www.fao.org/documents/card/en/c/ND423EN/ and http://www.fao.org/documents/card/zh/c/mw246ZH/ ). Keep the code for now because it doesn't interfere with books and meeting documents are very few.
 	if (url.includes('card')) {
 		let isConferencePaper = false;
 		let confMetaName = ['اسم الاجتماع', '会议名称', 'Meeting Name', 'Nom de la réunion', 'Название мероприятия', 'Nombre de la reunión'];
@@ -97,8 +97,8 @@ function scrape(doc, url) {
 		var abs = doc.getElementsByClassName("_card-body-info-center")[0];
 		// abstractNote should be all text before the class "others-info". See example: https://www.fao.org/documents/card/en/c/ca8466en
 		var otherInfo = abs.querySelectorAll(".others-info")[0];
-    	var keywords = abs.querySelectorAll(".tags-list")[0]; // "KEYWORDS:" + tags
-    	newItem.abstractNote = (abs.innerText.replace(otherInfo.innerText, '').replace(keywords.innerText, '')).trim();
+		var keywords = abs.querySelectorAll(".tags-list")[0]; // "KEYWORDS:" + tags
+		newItem.abstractNote = (abs.innerText.replace(otherInfo.innerText, '').replace(keywords.innerText, '')).trim();
 
 		// tags: class="badge" within abs
 		var tags = abs.querySelectorAll(".badge");
@@ -199,7 +199,7 @@ function scrape(doc, url) {
 			for (let key in textVariable) {
 				for (let j = 0; j < textVariable[key].length; j++) {
 					if (metaTextArr[i].includes(textVariable[key][j])) {
-						existingMeta[key] = metaTextArr[i+1]; // In metaTextArr, the value of a meta field always appears at the next element of the meta. 
+						existingMeta[key] = metaTextArr[i + 1]; // In metaTextArr, the value of a meta field always appears at the next element of the meta.
 					}
 				}
 			}
@@ -308,7 +308,7 @@ function scrape(doc, url) {
 }
 
 
-// get items from a multiple-item page. 
+// get items from a multiple-item page.
 // Multiple-item searching is no longer provided.
 /*function getSearchResults(doc, checkOnly) {
 	var items = {};
@@ -326,6 +326,7 @@ function scrape(doc, url) {
 }*/
 
 function doWeb(doc, url) {
+
 /*	if (detectWeb(doc, url) == "multiple") {
 		Z.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
@@ -339,7 +340,7 @@ function doWeb(doc, url) {
 		});
 	}
 	else {*/
-		scrape(doc, url);
+	scrape(doc, url);
 	// }
 }
 
