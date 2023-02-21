@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-02-20 15:19:52"
+	"lastUpdated": "2023-02-21 11:46:43"
 }
 
 /*
@@ -33,11 +33,12 @@ function detectWeb(doc, url) {
 	if (url.includes('card')) {
 		let isConferencePaper = false;
 		let confMetaName = ['اسم الاجتماع', '会议名称', 'Meeting Name', 'Nom de la réunion', 'Название мероприятия', 'Nombre de la reunión'];
+		let labelArray = [];
 		if (url.includes('publications')) {
-			let labelArray = doc.querySelectorAll('.fdr_label'); 	// Identify item type (book or conferencePaper) based on "fdr_label" class.
+			labelArray = doc.querySelectorAll('.fdr_label'); 	// Identify item type (book or conferencePaper) based on "fdr_label" class.
 		}
 		if (url.includes('documents')) {
-			let labelArray = doc.querySelectorAll('.fw-bold'); 	// Identify item type (book or conferencePaper) based on "fw-bold" class.
+			labelArray = doc.querySelectorAll('.fw-bold'); 	// Identify item type (book or conferencePaper) based on "fw-bold" class.
 			// Page layout for meeting documents is not functioning properly at "documents" pages (e.g. https://www.fao.org/documents/card/en/c/ND423EN/ and http://www.fao.org/documents/card/zh/c/mw246ZH/ ). Keep the code for now because it doesn't interfere with books and meeting documents are very few.
 		}
 		for (let i = 0; i < labelArray.length; i++) {
@@ -73,7 +74,7 @@ function cleanMetaPub(str) {
 		return str.slice(str.indexOf(':') + 2);
 	}
 	else {
-		var strArray = str.slice(str.indexOf(':') + 2).split(';');
+		let strArray = str.slice(str.indexOf(':') + 2).split(';');
 		return strArray;
 	}
 }
@@ -84,13 +85,67 @@ function cleanMetaDoc(str) {
 		return str;
 	}
 	else {
-		var strArray = str.split(';').filter(String); // split by semicolon and remove empty elements
+		let strArray = str.split(';').filter(String); // split by semicolon and remove empty elements
 		return strArray;
 	}
 }
 
+function getLang(str) {
+	// language: 2 or 3 letters following ISO 639
+	// indicated by the last 1-3 letters in PDF file name (langCode)
+	// One good example is the various language versions of http://www.fao.org/publications/card/en/c/I2801E
+	let langCode, lang = '';
+	let matches = str.match(/([a-z]+)\.pdf$/i);
+	if (matches) {
+		langCode = matches[1];
+	}
+	// In the new PDF naming scheme, langCode follows ISO 639.
+	if (langCode.length > 1) {
+		lang = langCode.toLowerCase();
+	}
+	// In the old PDF naming scheme, langCode is one lower/upper case letter and only differentiates between the 6 UN languages.
+	else if ((langCode == 'a') || (langCode == 'A')) {
+		lang = 'ar';
+	}
+	else if ((langCode == 'c') || (langCode == 'C')) {
+		lang = 'zh';
+	}
+	else if ((langCode == 'e') || (langCode == 'E')) {
+		lang = 'en';
+	}
+	else if ((langCode == 'f') || (langCode == 'F')) {
+		lang = 'fr';
+	}
+	else if ((langCode == 'r') || (langCode == 'R')) {
+		lang = 'ru';
+	}
+	else if ((langCode == 's') || (langCode == 'S')) {
+		lang = 'es';
+	}
+	else { // Other languages are usually designated 'o'. Using 'else' just to be safe.
+		lang = 'other';
+	}
+	return lang;
+}
+
 function scrape(doc, url) {
 	var newItem = new Z.Item();
+	var abs, existingMeta = {};
+	var textVariable = { // declarations for metadata names as appeared in document pages in different languages
+		date: ['سنة النشر', '出版年份', 'Year of publication', 'Année de publication', 'Год издания', 'Fecha de publicación'],
+		publisher: ['الناشر', '出版方', 'Publisher', 'Éditeur', 'Издатель', 'Editor'],
+		place: ['مكان النشر', '出版地点', 'Place of publication', 'Lieu de publication', 'Место публикации', 'Lugar de publicacion'],
+		pages: ['الصفحات', '页数', 'Pages', 'Страницы', 'Páginas'],
+		ISBN: ['الرقم الدولي الموحد للكتاب', 'ISBN'],
+		author: ['الكاتب', '作者', 'Author', 'Auteur', 'Автор', 'Autor'],
+		seriesTitle: ['العنوان التسلسي', '系列标题', 'Serial Title', 'Titre de la série', 'Название серии', 'Título de la serie'],
+		seriesNumber: ['رقم المسلسل', '系列号码', 'Series number', 'Numéro de série', 'Серийный номер', 'Número de serie'],
+		conference: ['اسم الاجتماع', '会议名称', 'Meeting Name', 'Nom de la réunion', 'Название мероприятия', 'Nombre de la reunión']
+	};
+	var metaText = [];
+	var DOIMatch, pdfUrl, mainTitle, subTitle, metaResult, conferenceWeb = '';
+	var DOILead = 'https://doi.org/';
+
 	if (url.includes('card')) {
 		// attach document card URL and snapshot
 		// TEMP: Disable at least until we have post-JS snapshots
@@ -106,13 +161,13 @@ function scrape(doc, url) {
 			// Some variables always appear and appear at the same location in all document pages.
 
 			// abstract
-			var abs = doc.getElementById("mainContentN0");
+			abs = doc.getElementById("mainContentN0");
 			// The childrens of `abs` are the label "Abstract:" in a strong-tag,
 			// the abstract in several p-tags or text nodes directly, and possibly
 			// a note about other languages which begins also with a strong-tag.
 			if (abs) {
-				var children = abs.childNodes;
-				var abstractFound = false;
+				let children = abs.childNodes;
+				let abstractFound = false;
 				for (let child of children) {
 					if (child.tagName == "STRONG" || (child.nodeType == 1 && ZU.xpathText(child, './/strong'))) {
 						if (abstractFound) {
@@ -134,58 +189,29 @@ function scrape(doc, url) {
 					}
 				}
 				// DOI: Some docs contain DOI as a separate paragraph in abs field
-				var DOILead = 'https://doi.org/';
 				if (abs.innerText.includes(DOILead)) {
-					var DOIMatch = abs.innerText.match(/https:\/\/doi\.org\/(.+)/i);
+					DOIMatch = abs.innerText.match(/https:\/\/doi\.org\/(.+)/i);
 					newItem.DOI = DOIMatch[1];
 				}
 			}
-			// attach PDF
-			var pdfUrl = ZU.xpath(doc, '//*[@id="mainRightN0"]/div[2]/a')[0].href;
+
+			// attach PDF: PDF link in innerHTML of "dynafef_det" class.
+			pdfUrl = (doc.getElementsByClassName("dynafef_det")[0].innerHTML).match(/http\S*\.pdf/gi)[0];
 			newItem.attachments.push({
 				url: pdfUrl,
 				title: 'Full Text PDF',
 				mimeType: 'application/pdf'
 			});
+			
 			// url
 			newItem.url = url;
-			// language: 2 or 3 letters following ISO 639
-			// indicated by the last 1-3 letters in PDF file name (langCode)
-			// One good example is the various language versions of http://www.fao.org/publications/card/en/c/I2801E
-			var langCode = '';
-			var matches = pdfUrl.match(/([a-z]+)\.pdf$/i);
-			if (matches) {
-				langCode = matches[1];
-			}
-			// In the new PDF naming scheme, langCode follows ISO 639.
-			if (langCode.length > 1) {
-				newItem.language = langCode.toLowerCase();
-			}
-			// In the old PDF naming scheme, langCode is one lower/upper case letter and only differentiates between the 6 UN languages.
-			else if ((langCode == 'a') || (langCode == 'A')) {
-				newItem.language = 'ar';
-			}
-			else if ((langCode == 'c') || (langCode == 'C')) {
-				newItem.language = 'zh';
-			}
-			else if ((langCode == 'e') || (langCode == 'E')) {
-				newItem.language = 'en';
-			}
-			else if ((langCode == 'f') || (langCode == 'F')) {
-				newItem.language = 'fr';
-			}
-			else if ((langCode == 'r') || (langCode == 'R')) {
-				newItem.language = 'ru';
-			}
-			else if ((langCode == 's') || (langCode == 'S')) {
-				newItem.language = 'es';
-			}
-			else { // Other languages are usually designated 'o'. Using 'else' just to be safe.
-				newItem.language = 'other';
-			}
+			
+			//language
+			newItem.language = getLang(pdfUrl);
+			
 			// title: use colon to connect main title and subtitle (if subtitle exists)
-			var mainTitle = ZU.xpathText(doc, '//*[@id="headerN0"]/h1');
-			var subTitle = ZU.xpathText(doc, '//h4[@class="csc-firstHeader h1"]');
+			mainTitle = ZU.xpathText(doc, '//*[@id="headerN0"]/h1');
+			subTitle = ZU.xpathText(doc, '//h4[@class="csc-firstHeader h1"]');
 			if (!subTitle) {
 				newItem.title = mainTitle;
 			}
@@ -202,21 +228,9 @@ function scrape(doc, url) {
 			//* ********* Begin dynamic-location variables **********
 
 			// Variables that appear neither in all document pages nor at same positions in the pages.
-			var metaText = ZU.xpath(doc, '//*[@id="mainN0"]')[0].innerText.split('\n'); // scrape text of meta area and split into an array based on line breaks.
+			// scrape text of meta area and split into an array based on line breaks.
+			metaText = ZU.xpath(doc, '//*[@id="mainN0"]')[0].innerText.split('\n');
 			// get what variables are listed in the page, save to object existingMeta
-			var textVariable = { // declarations for metadata names as appeared in document pages in different languages
-				date: ['سنة النشر', '出版年份', 'Year of publication', 'Année de publication', 'Год издания', 'Fecha de publicación'],
-				publisher: ['الناشر', '出版方', 'Publisher', 'Éditeur', 'Издатель', 'Editor'],
-				place: ['مكان النشر', '出版地点', 'Place of publication', 'Lieu de publication', 'Место публикации', 'Lugar de publicacion'],
-				pages: ['الصفحات', '页数', 'Pages', 'Страницы', 'Páginas'],
-				ISBN: ['الرقم الدولي الموحد للكتاب', 'ISBN'],
-				author: ['الكاتب', '作者', 'Author', 'Auteur', 'Автор', 'Autor'],
-				seriesTitle: ['العنوان التسلسي', '系列标题', 'Serial Title', 'Titre de la série', 'Название серии', 'Título de la serie'],
-				seriesNumber: ['رقم المسلسل', '系列号码', 'Series number', 'Numéro de série', 'Серийный номер', 'Número de serie'],
-				conference: ['اسم الاجتماع', '会议名称', 'Meeting Name', 'Nom de la réunion', 'Название мероприятия', 'Nombre de la reunión'],
-				tags: ['المعجم الكلمات الموضوع', 'AGROVOC', 'Agrovoc', 'АГРОВОК']
-			};
-			var existingMeta = {};
 			for (let i = 0; i < metaText.length; i++) {
 				for (let key in textVariable) {
 					for (let j = 0; j < textVariable[key].length; j++) {
@@ -228,7 +242,7 @@ function scrape(doc, url) {
 			}
 
 			for (let key in existingMeta) {
-				var metaResult = cleanMetaPub(existingMeta[key]);
+				metaResult = cleanMetaPub(existingMeta[key]);
 
 				// date
 				if (key.includes('date')) {
@@ -293,7 +307,7 @@ function scrape(doc, url) {
 				}
 				// conferenceName: save for later conditions.
 				if (key.includes('conference')) {
-					var conferenceWeb = metaResult[0];
+					conferenceWeb = metaResult[0];
 					newItem.conferenceName = conferenceWeb;
 				}
 			}
@@ -329,7 +343,7 @@ function scrape(doc, url) {
 			// Some variables always appear and appear at the same location in all document pages.
 
 			// abstract
-			var abs = doc.getElementsByClassName("_card-body-info-center")[0];
+			abs = doc.getElementsByClassName("_card-body-info-center")[0];
 			// abstractNote should be all text before the class "others-info". See example: https://www.fao.org/documents/card/en/c/ca8466en
 			var otherInfo = abs.querySelectorAll(".others-info")[0];
 			var keywords = abs.querySelectorAll(".tags-list")[0]; // "KEYWORDS:" + tags
@@ -337,12 +351,12 @@ function scrape(doc, url) {
 
 			// tags: class="badge" within abs
 			var tags = abs.querySelectorAll(".badge");
-			for (var i = 0; i < tags.length; i++) {
+			for (let i = 0; i < tags.length; i++) {
 				newItem.tags[i] = tags[i].innerText.trim();
 			}
 
 			// attach PDF: PDF link in innerHTML of "_card-buttons-downloads" class.
-			var pdfUrl = (doc.getElementsByClassName("_card-buttons-downloads")[0].innerHTML).match(/http\S*\.pdf/gi)[0];
+			pdfUrl = (doc.getElementsByClassName("_card-buttons-downloads")[0].innerHTML).match(/http\S*\.pdf/gi)[0];
 			newItem.attachments.push({
 				url: pdfUrl,
 				title: 'Full Text PDF',
@@ -353,42 +367,10 @@ function scrape(doc, url) {
 			newItem.url = url;
 
 			// language: 2 or 3 letters following ISO 639
-			// indicated by the last 1-3 letters in PDF file name (langCode)
-			// One good example is the various language versions of http://www.fao.org/publications/card/en/c/I2801E
-			var langCode = '';
-			var matches = pdfUrl.match(/([a-z]+)\.pdf$/i);
-			if (matches) {
-				langCode = matches[1];
-			}
-			// In the new PDF naming scheme, langCode follows ISO 639.
-			if (langCode.length > 1) {
-				newItem.language = langCode.toLowerCase();
-			}
-			// In the old PDF naming scheme, langCode is one lower/upper case letter and only differentiates between the 6 UN languages.
-			else if ((langCode == 'a') || (langCode == 'A')) {
-				newItem.language = 'ar';
-			}
-			else if ((langCode == 'c') || (langCode == 'C')) {
-				newItem.language = 'zh';
-			}
-			else if ((langCode == 'e') || (langCode == 'E')) {
-				newItem.language = 'en';
-			}
-			else if ((langCode == 'f') || (langCode == 'F')) {
-				newItem.language = 'fr';
-			}
-			else if ((langCode == 'r') || (langCode == 'R')) {
-				newItem.language = 'ru';
-			}
-			else if ((langCode == 's') || (langCode == 'S')) {
-				newItem.language = 'es';
-			}
-			else { // Other languages are usually designated 'o'. Using 'else' just to be safe.
-				newItem.language = 'other';
-			}
+			newItem.language = getLang(pdfUrl);
 
 			// title: use colon to connect main title and subtitle (if subtitle exists)
-			var mainTitle = doc.getElementsByClassName("page-title")[0].innerText;
+			mainTitle = doc.getElementsByClassName("page-title")[0].innerText;
 			var subTitleElement = doc.getElementsByClassName("sub-title");
 			if (subTitleElement.length == '0') { // If there's no sub-title class in the web page, subTitleElement is an empty HTMLCollection with “0” (string, not number) as the length attribute.
 				newItem.title = mainTitle;
@@ -406,30 +388,17 @@ function scrape(doc, url) {
 			//* ********* Begin dynamic-location variables **********
 
 			// Variables that appear neither in all document pages nor at same positions in the pages.
-			var metaText = doc.getElementsByClassName("_card-body-info-left")[0].innerText;
+			metaText = doc.getElementsByClassName("_card-body-info-left")[0].innerText;
 
 			// DOI
-			var DOILead = 'https://doi.org/';
 			if (metaText.includes(DOILead)) {
-				var DOIMatch = metaText.match(/https:\/\/doi\.org\/(.+)/i);
+				DOIMatch = metaText.match(/https:\/\/doi\.org\/(.+)/i);
 				newItem.DOI = DOIMatch[1];
 			}
 
-			var metaTextArr = metaText.split('\n'); // scrape text of meta area and split into an array based on line breaks.
-
+			// scrape text of meta area and split into an array based on line breaks.
+			var metaTextArr = metaText.split('\n');
 			// get what variables are listed in the page, save to object existingMeta
-			var textVariable = { // declarations for metadata names as appeared in document pages in different languages
-				date: ['سنة النشر', '出版年份', 'Year of publication', 'Année de publication', 'Год издания', 'Fecha de publicación'],
-				publisher: ['الناشر', '出版方', 'Publisher', 'Éditeur', 'Издатель', 'Editor'],
-				place: ['مكان النشر', '出版地点', 'Place of publication', 'Lieu de publication', 'Место публикации', 'Lugar de publicacion'],
-				pages: ['الصفحات', '页数', 'Pages', 'Страницы', 'Páginas'],
-				ISBN: ['الرقم الدولي الموحد للكتاب', 'ISBN'],
-				author: ['الكاتب', '作者', 'Author', 'Auteur', 'Автор', 'Autor'],
-				seriesTitle: ['العنوان التسلسي', '系列标题', 'Serial Title', 'Titre de la série', 'Название серии', 'Título de la serie'],
-				seriesNumber: ['رقم المسلسل', '系列号码', 'Series number', 'Numéro de série', 'Серийный номер', 'Número de serie'],
-				conference: ['اسم الاجتماع', '会议名称', 'Meeting Name', 'Nom de la réunion', 'Название мероприятия', 'Nombre de la reunión']
-			};
-			var existingMeta = {};
 			for (let i = 0; i < metaTextArr.length; i++) {
 				for (let key in textVariable) {
 					for (let j = 0; j < textVariable[key].length; j++) {
@@ -441,7 +410,7 @@ function scrape(doc, url) {
 			}
 
 			for (let key in existingMeta) {
-				var metaResult = cleanMetaDoc(existingMeta[key]);
+				metaResult = cleanMetaDoc(existingMeta[key]);
 
 				// date
 				if (key.includes('date')) {
@@ -513,7 +482,6 @@ function scrape(doc, url) {
 					newItem.conferenceName = metaResult[0];
 				}
 			}
-
 			// If there's no publisher, use 'FAO' as publisher.
 			if (!newItem.publisher) {
 				newItem.publisher = 'FAO';
