@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-10-09 16:23:05"
+	"lastUpdated": "2023-02-22 03:17:44"
 }
 
 /*
@@ -83,14 +83,9 @@ function getIDFromURL(url) {
 // 网络首发期刊信息并不能从URL获取dbname和filename信息
 // Get dbname and filename from pre-released article web page.
 function getIDFromRef(doc, url) {
-	var func = ZU.xpath(doc, '//div[@class="link"]/a');
-	if (!func.length) {
-		return false;
-	}
-	func = func[0].getAttribute('onclick');
-	var tmp = func.split(',')[1].split('!');
-	// Z.debug(func + tmp[0].slice(1));
-	return { dbname: tmp[0].slice(1), filename: tmp[1], url: url };
+	let database = attr(doc, '#paramdbname', 'value');
+	let filename = attr(doc, '#paramfilename', 'value');
+	return { dbname: database, filename: filename, url: url };
 }
 
 function getIDFromPage(doc, url) {
@@ -510,6 +505,190 @@ var testCases = [
 					},
 					{
 						"tag": "陪审团"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=3uoqIhG8C44YLTlOAiTRKibYlV5Vjs7ioT0BO4yQ4m_mOgeS2ml3UHGnAz_wirMwf-b2NsjH_IkCCqUvvwsK8DOvNyxMAxbu&uniplatform=NZKPT",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "我国绿色产品认证标识法律制度的路径探析",
+				"creators": [
+					{
+						"lastName": "曹",
+						"firstName": "明德",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022",
+				"ISSN": "1001-2397",
+				"abstractNote": "我国绿色产品认证标识制度框架已初步形成。作为一项法律制度,绿色产品标识及认证中形成了两组法律关系:一是就产品认可认证,在行政主体、认证机构与申请人之间构成公私混合的规制关系;二是就绿色产品标识授权使用,在上述法律关系主体间构成的商业许可关系。两组法律关系的搭建,形成了我国绿色产品认证标识制度的基本格局。制度的具体完善路径是将现行同类环保产品认证标识纳入绿色产品标识与绿色属性产品标识的二元框架内,或吸收,或拆解,或由市场逐步淘汰,最终形成统一的绿色产品认证标识体系。在制度构建过程中,对第三方认证机构的规制成为制度有效运行的关键。参考域外经验,我国应当通过强化认证机构的独立性,平衡认证机构与申请人...",
+				"issue": "06",
+				"language": "中文;",
+				"libraryCatalog": "CNKI",
+				"pages": "133-145",
+				"publicationTitle": "现代法学",
+				"url": "https://kns.cnki.net/kcms2/article/abstract?v=3uoqIhG8C44YLTlOAiTRKibYlV5Vjs7ioT0BO4yQ4m_mOgeS2ml3UHGnAz_wirMwf-b2NsjH_IkCCqUvvwsK8DOvNyxMAxbu&uniplatform=NZKPT",
+				"volume": "44",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "certification trade mark"
+					},
+					{
+						"tag": "green product certification"
+					},
+					{
+						"tag": "green product identification"
+					},
+					{
+						"tag": "green products"
+					},
+					{
+						"tag": "third party certification"
+					},
+					{
+						"tag": "第三方认证"
+					},
+					{
+						"tag": "绿色产品"
+					},
+					{
+						"tag": "绿色产品标识"
+					},
+					{
+						"tag": "绿色产品认证"
+					},
+					{
+						"tag": "证明商标"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=ARuSRxW-FQHH_OEY6X72RuJIsrP2RHAQAacVbC9CGuvOv08ETIP-MqQO5E296beGN9e8BXVfYGR6l0qfpFxS9gdAPZ5URHqiAY8WVPwSYoF6MXeqOgFQfX5vrMMS_wZaK3j5TPxvx-nDGPfIMtrXBlDrWr9SVlAl&uniplatform=NZKPT",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "环境法典中新污染物环境风险管控的立法思路",
+				"creators": [
+					{
+						"lastName": "严",
+						"firstName": "厚福",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022",
+				"ISSN": "1671-7287",
+				"abstractNote": "我国对常规污染物的治理取得了显著成效，但以有毒有害化学物质的生产和使用为主要来源的新污染物的环境风险仍然较为严峻。当前我国相关环境法律法规和标准中缺乏对新污染物环境风险管控的要求，对于现有化学物质的环境风险管控还存在较为严重的不足。未来环境法典中新污染物环境风险管控立法应当坚持风险预防原则，但风险预防原则并不以追求“零风险”为目标。新污染物环境风险管控立法总体上应当遵循“风险筛查→风险评估→风险管控”的思路。环境风险评估应当聚焦于从科学角度评估新污染物对公众健康和生态环境带来的“风险”本身，不考虑与环境风险无关的经济、社会等因素。确定什么是“不合理的风险”,除了科学判断之外，也需要“正当程序”...",
+				"issue": "05",
+				"language": "中文;",
+				"libraryCatalog": "CNKI",
+				"pages": "18-30+115",
+				"publicationTitle": "南京工业大学学报(社会科学版)",
+				"url": "https://kns.cnki.net/kcms2/article/abstract?v=ARuSRxW-FQHH_OEY6X72RuJIsrP2RHAQAacVbC9CGuvOv08ETIP-MqQO5E296beGN9e8BXVfYGR6l0qfpFxS9gdAPZ5URHqiAY8WVPwSYoF6MXeqOgFQfX5vrMMS_wZaK3j5TPxvx-nDGPfIMtrXBlDrWr9SVlAl&uniplatform=NZKPT",
+				"volume": "21",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "新污染物风险管控"
+					},
+					{
+						"tag": "环境治理"
+					},
+					{
+						"tag": "环境法典"
+					},
+					{
+						"tag": "环境风险评估"
+					},
+					{
+						"tag": "风险预防原则"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kns.cnki.net/kcms/detail/detail.aspx?doi=10.13863/j.issn1001-4454.2022.01.030",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Box-Behnken Design-响应面法优化碱水解人参茎叶三醇皂苷制备人参皂苷Rg_2工艺研究",
+				"creators": [
+					{
+						"lastName": "史",
+						"firstName": "大臻",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "吴",
+						"firstName": "福林",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "谭",
+						"firstName": "璐",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "周",
+						"firstName": "柏松",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "刘",
+						"firstName": "金平",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "李",
+						"firstName": "平亚",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "赖",
+						"firstName": "思含",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022",
+				"DOI": "10.13863/j.issn1001-4454.2022.01.030",
+				"ISSN": "1001-4454",
+				"abstractNote": "目的：利用Box-Behnken Design-响应面法优选制备人参皂苷Rg_2的最佳工艺参数。方法：以碱解反应的碱度、温度、时间作为考察因素，人参茎叶三醇皂苷中人参皂苷Rg_2含量作为评价指标，运用Design-Expert 8.0.5b软件对工艺参数进行优化并获得最佳工艺参数。结果：经优化得到碱水解人参茎叶三醇皂苷制备人参皂苷Rg_2的最佳工艺参数：反应碱度7.4%、反应温度187℃、反应时间5 h。验证试验表明，在此工艺参数下可将人参皂苷Rg_2含量提高至9.84%,且工艺稳定。结论：经过优化的工艺可有效提高人参茎叶三醇皂苷中人参皂苷Rg_2含量。",
+				"issue": "01",
+				"language": "中文;",
+				"libraryCatalog": "CNKI",
+				"pages": "173-176",
+				"publicationTitle": "中药材",
+				"url": "https://kns.cnki.net/kcms/detail/detail.aspx?doi=10.13863/j.issn1001-4454.2022.01.030",
+				"volume": "45",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Box-Behnken Design-响应面法"
+					},
+					{
+						"tag": "人参皂苷Rg_2"
+					},
+					{
+						"tag": "人参茎叶三醇皂苷"
+					},
+					{
+						"tag": "工艺优化"
 					}
 				],
 				"notes": [],
