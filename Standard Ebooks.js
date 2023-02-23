@@ -136,7 +136,7 @@ async function scrape(doc) {
 	item.rights = "This ebook is only thought to be free of copyright restrictions in the United States. It may still be under copyright in other countries. If you’re not located in the United States, you must check your local laws to verify that the contents of this ebook are free of copyright restrictions in the country you’re located in before downloading or using this ebook.";
 
 	// Full text is available at a consistent URL, /text/single-page
-	// Attach this, rather than the catalog page
+	// Attach this, rather than the catalog page.
 	var fullText = item.url + "/text/single-page"
 	item.attachments.push({
 		title: "Full Text",
