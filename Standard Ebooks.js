@@ -96,7 +96,7 @@ async function scrape(doc) {
 	// for loop based on number of creators, in order to add all authors to item
 	for (let i = 0; i < creators.length; i++) {
 		// load variable capsCreator with all-caps creator from innerText
-		let capsCreator = creators[i].innerText;
+		let creator = creatorElem.textContent;
 		// remove all-caps and replace with standard capitalization
 		// documentation on capitalizeName Zotero utility: https://github.com/zotero/utilities/blob/master/utilities.js
 		let creator = Zotero.Utilities.capitalizeName(capsCreator);
