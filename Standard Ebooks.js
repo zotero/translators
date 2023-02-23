@@ -9,29 +9,23 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-02-23 08:52:15"
+	"lastUpdated": "2023-02-23 15:33:59"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
-
 	Copyright © 2023 Brendan O'Connell
-
 	This file is part of Zotero.
-
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
-
 	Zotero is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 	GNU Affero General Public License for more details.
-
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
-
 	***** END LICENSE BLOCK *****
 */
 
@@ -57,10 +51,10 @@ function getSearchResults(doc, checkOnly) {
 	// loop through the array, just scraping URL and title. title is displayed to the user in
 	// Zotero.selectItems popup, URL is sent to scrape function
 	for (let row of rows) {
-		let href = "https://www.standardebooks.org" + row.attributes.about.nodeValue
+		let href = new URL(row.getAttribute("about"), "https://www.standardebooks.org/").toString();
 		// innerText contains title and author, separated by \n. Delete the author and just display
 		// title to user.
-		let title = row.innerText.slice(0, row.innerText.lastIndexOf('\n'));
+		let title = text(row, 'a[property="schema:url"]');
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -68,7 +62,6 @@ function getSearchResults(doc, checkOnly) {
 	}
 	return found ? items : false;
 }
-
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
@@ -83,30 +76,27 @@ async function doWeb(doc, url) {
 		await scrape(doc, url);
 	}
 }
-
 async function scrape(doc) {
 	var item = new Zotero.Item("book");
-
 	// get item title
-	item.title = doc.querySelectorAll('h1[property="schema:name"]')[0].innerHTML;
+	item.title = text(doc, 'h1[property="schema:name"]');
 
 	// put all authors in an array called creators
 	var creators = doc.querySelectorAll('a[property="schema:author"]');
 
 	// for loop based on number of creators, in order to add all authors to item
-	for (let i = 0; i < creators.length; i++) {
+	for (let creatorElem of creators) {
 		// load variable capsCreator with all-caps creator from innerText
-		let capsCreator = creators[i].innerText;
+		let creator = creatorElem.textContent;
 		// remove all-caps and replace with standard capitalization
 		// documentation on capitalizeName Zotero utility: https://github.com/zotero/utilities/blob/master/utilities.js
-		let creator = Zotero.Utilities.capitalizeName(capsCreator);
 		let role = "author";
 		item.creators.push(ZU.cleanAuthor(creator, role));
 	}
 
 	// if a translator exists, add them to item
-	if (doc.querySelectorAll('div[property="schema:translator"]')[0]) {
-		let translator = doc.querySelectorAll('div[property="schema:translator"] > meta[property="schema:name"]')[0].content;
+	if (doc.querySelector('div[property="schema:translator"]')) {
+		let translator = attr(doc, 'div[property="schema:translator"] > meta[property="schema:name"]', 'content');
 		let role = "translator";
 		item.creators.push(ZU.cleanAuthor(translator, role));
 	}
@@ -130,8 +120,8 @@ async function scrape(doc) {
 	// Although these are public domain ebooks, Standard ebooks is making typographical changes,
 	// which could be considered altering them from their form on Project Gutenberg,
 	// and thus constitute a new "publication".
-	item.date = doc.querySelectorAll('meta[property="schema:dateModified"]')[0].content;
-	item.url = doc.querySelectorAll('meta[property="og:url"]')[0].content;
+	item.date = attr(doc, 'meta[property="schema:dateModified"]', 'content');
+	item.url = attr(doc, 'meta[property="og:url"]', 'content');
 	// all items have the same rights statement
 	item.rights = "This ebook is only thought to be free of copyright restrictions in the United States. It may still be under copyright in other countries. If you’re not located in the United States, you must check your local laws to verify that the contents of this ebook are free of copyright restrictions in the country you’re located in before downloading or using this ebook.";
 
@@ -206,10 +196,12 @@ var testCases = [
 				"libraryCatalog": "Standard Ebooks",
 				"publisher": "Standard Ebooks",
 				"rights": "This ebook is only thought to be free of copyright restrictions in the United States. It may still be under copyright in other countries. If you’re not located in the United States, you must check your local laws to verify that the contents of this ebook are free of copyright restrictions in the country you’re located in before downloading or using this ebook.",
+				"url": "https://standardebooks.org/ebooks/frederic-mistral/mireio/harriet-waters-preston",
 				"attachments": [
 					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
+						"title": "Full Text",
+						"mimeType": "text/html",
+						"snapshot": true
 					}
 				],
 				"tags": [],
