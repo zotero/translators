@@ -60,7 +60,7 @@ function getSearchResults(doc, checkOnly) {
 		let href = new URL(row.getAttribute("about"), "https://www.standardebooks.org/").toString();
 		// innerText contains title and author, separated by \n. Delete the author and just display
 		// title to user.
-		let title = row.innerText.slice(0, row.innerText.lastIndexOf('\n'));
+		let title = text(row, 'a[property="schema:url"]);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
