@@ -57,7 +57,7 @@ function getSearchResults(doc, checkOnly) {
 	// loop through the array, just scraping URL and title. title is displayed to the user in
 	// Zotero.selectItems popup, URL is sent to scrape function
 	for (let row of rows) {
-		let href = "https://www.standardebooks.org" + row.attributes.about.nodeValue
+		let href = new URL(row.getAttribute("about"), "https://www.standardebooks.org/").toString();
 		// innerText contains title and author, separated by \n. Delete the author and just display
 		// title to user.
 		let title = row.innerText.slice(0, row.innerText.lastIndexOf('\n'));
