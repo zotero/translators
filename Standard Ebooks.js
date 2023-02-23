@@ -130,7 +130,7 @@ async function scrape(doc) {
 	// Although these are public domain ebooks, Standard ebooks is making typographical changes,
 	// which could be considered altering them from their form on Project Gutenberg,
 	// and thus constitute a new "publication".
-	item.date = doc.querySelectorAll('meta[property="schema:dateModified"]')[0].content;
+	item.date = attr(doc, 'meta[property="schema:dateModified"]', 'content');
 	item.url = doc.querySelectorAll('meta[property="og:url"]')[0].content;
 	// all items have the same rights statement
 	item.rights = "This ebook is only thought to be free of copyright restrictions in the United States. It may still be under copyright in other countries. If you’re not located in the United States, you must check your local laws to verify that the contents of this ebook are free of copyright restrictions in the country you’re located in before downloading or using this ebook.";
