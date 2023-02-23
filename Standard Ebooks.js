@@ -94,7 +94,7 @@ async function scrape(doc) {
 	var creators = doc.querySelectorAll('a[property="schema:author"]');
 
 	// for loop based on number of creators, in order to add all authors to item
-	for (let i = 0; i < creators.length; i++) {
+	for (let creatorElem of creators) {
 		// load variable capsCreator with all-caps creator from innerText
 		let creator = creatorElem.textContent;
 		// remove all-caps and replace with standard capitalization
