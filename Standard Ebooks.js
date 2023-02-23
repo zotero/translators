@@ -47,7 +47,7 @@ function detectWeb(doc, _url) {
 	}
 	return false;
 }
- // test
+
 // for multiple results
 function getSearchResults(doc, checkOnly) {
 	var items = {};
