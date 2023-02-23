@@ -68,7 +68,7 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-function cleanMetaPub(str) {	
+function cleanMetaPub(str) {
 	// clean meta fields obtained from page for "publications" pages
 	if (str.includes(';') === false) {
 		return str.slice(str.indexOf(':') + 2);
