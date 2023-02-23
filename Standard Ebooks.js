@@ -40,9 +40,9 @@ function detectWeb(doc, _url) {
 	if (doc.querySelectorAll('meta[content="book"]').length) {
 		return 'book';
 	}
-  // run getSearchResults function. If it finds an array of rows, will return true
-  // and this else if will return multiple.
-  else if (getSearchResults(doc, true)) {
+	// run getSearchResults function. If it finds an array of rows, will return true
+	// and this else if will return multiple.
+	else if (getSearchResults(doc, true)) {
 		return 'multiple';
 	}
 	return false;
@@ -53,14 +53,14 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	// create an array
-  	var rows = doc.querySelectorAll('li[typeof="schema:Book"]')
+	var rows = doc.querySelectorAll('li[typeof="schema:Book"]')
 	// loop through the array, just scraping URL and title. title is displayed to the user in
 	// Zotero.selectItems popup, URL is sent to scrape function
 	for (let row of rows) {
 		let href = "https://www.standardebooks.org" + row.attributes.about.nodeValue
-    // innerText contains title and author, separated by \n. Delete the author and just display
-    // title to user.
-		let title = row.innerText.slice(0,row.innerText.lastIndexOf('\n'));
+		// innerText contains title and author, separated by \n. Delete the author and just display
+		// title to user.
+		let title = row.innerText.slice(0, row.innerText.lastIndexOf('\n'));
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -84,64 +84,64 @@ async function doWeb(doc, url) {
 	}
 }
 
-async function scrape(doc, url = doc.location.href) {
+async function scrape(doc) {
 	var item = new Zotero.Item("book");
 
 	// get item title
-	item.title = doc.querySelectorAll('h1[property="schema:name"]')[0].innerHTML
+	item.title = doc.querySelectorAll('h1[property="schema:name"]')[0].innerHTML;
 
 	// put all authors in an array called creators
-	var creators = doc.querySelectorAll('a[property="schema:author"]')
+	var creators = doc.querySelectorAll('a[property="schema:author"]');
 
 	// for loop based on number of creators, in order to add all authors to item
 	for (let i = 0; i < creators.length; i++) {
 		// load variable capsCreator with all-caps creator from innerText
-    let capsCreator = creators[i].innerText;
-    // remove all-caps and replace with standard capitalization
+		let capsCreator = creators[i].innerText;
+		// remove all-caps and replace with standard capitalization
 		// documentation on capitalizeName Zotero utility: https://github.com/zotero/utilities/blob/master/utilities.js
-		let creator = Zotero.Utilities.capitalizeName(capsCreator)
+		let creator = Zotero.Utilities.capitalizeName(capsCreator);
 		let role = "author";
 		item.creators.push(ZU.cleanAuthor(creator, role));
 	}
 
 	// if a translator exists, add them to item
 	if (doc.querySelectorAll('div[property="schema:translator"]')[0]) {
-		let translator = doc.querySelectorAll('div[property="schema:translator"] > meta[property="schema:name"]')[0].content
+		let translator = doc.querySelectorAll('div[property="schema:translator"] > meta[property="schema:name"]')[0].content;
 		let role = "translator";
 		item.creators.push(ZU.cleanAuthor(translator, role));
 	}
 
 	// Sometimes abstractNote accidentally scrapes a promotional message,
-  // "We rely on your support ...", which is displayed sometimes to user.
+	// "We rely on your support ...", which is displayed sometimes to user.
 	// By looping over just the paragraphs within the description, we avoid
-  // adding promo message to abstractNote.
+	// adding promo message to abstractNote.
 	var abstractParagraphs = doc.querySelectorAll('section[id="description"] > p');
 	var finalAbstract = '';
 	for (let j = 0; j < abstractParagraphs.length; j++) {
 		let abstractParagraph = abstractParagraphs[j].innerText + ' ';
-	 	finalAbstract += abstractParagraph;
+		finalAbstract += abstractParagraph;
 	}
 	item.abstractNote = finalAbstract;
 
 	item.publisher = "Standard Ebooks";
 
 	// I've chosen to include the date of the last edit to the ebook as its publication date,
-  // rather than the original publication date of the digitized public domain book.
+	// rather than the original publication date of the digitized public domain book.
 	// Although these are public domain ebooks, Standard ebooks is making typographical changes,
-  // which could be considered altering them from their form on Project Gutenberg,
-  // and thus constitute a new "publication".
-	item.date = doc.querySelectorAll('meta[property="schema:dateModified"]')[0].content
-  item.url = doc.querySelectorAll('meta[property="og:url"]')[0].content
-  // all items have the same rights statement
-	item.rights = "This ebook is only thought to be free of copyright restrictions in the United States. It may still be under copyright in other countries. If you’re not located in the United States, you must check your local laws to verify that the contents of this ebook are free of copyright restrictions in the country you’re located in before downloading or using this ebook."
+	// which could be considered altering them from their form on Project Gutenberg,
+	// and thus constitute a new "publication".
+	item.date = doc.querySelectorAll('meta[property="schema:dateModified"]')[0].content;
+	item.url = doc.querySelectorAll('meta[property="og:url"]')[0].content;
+	// all items have the same rights statement
+	item.rights = "This ebook is only thought to be free of copyright restrictions in the United States. It may still be under copyright in other countries. If you’re not located in the United States, you must check your local laws to verify that the contents of this ebook are free of copyright restrictions in the country you’re located in before downloading or using this ebook.";
 
 	// Full text is available at a consistent URL, /text/single-page
-  // Attach this, rather than the catalog page
-  var fullText = item.url + "/text/single-page"
+	// Attach this, rather than the catalog page
+	var fullText = item.url + "/text/single-page"
 	item.attachments.push({
 		title: "Full Text",
 		url: fullText,
-	  mimeType: 'text/html',
+		mimeType: 'text/html',
 		snapshot: true
 	});
 	item.complete();
