@@ -88,7 +88,7 @@ async function scrape(doc) {
 	var item = new Zotero.Item("book");
 
 	// get item title
-	item.title = doc.querySelectorAll('h1[property="schema:name"]')[0].innerHTML;
+	item.title = text(doc, 'h1[property="schema:name"]');
 
 	// put all authors in an array called creators
 	var creators = doc.querySelectorAll('a[property="schema:author"]');
