@@ -106,7 +106,7 @@ async function scrape(doc) {
 
 	// if a translator exists, add them to item
 	if (doc.querySelectorAll('div[property="schema:translator"]')[0]) {
-		let translator = doc.querySelectorAll('div[property="schema:translator"] > meta[property="schema:name"]')[0].content;
+		let translator = attr(doc, 'div[property="schema:translator"] > meta[property="schema:name"]', 'content');
 		let role = "translator";
 		item.creators.push(ZU.cleanAuthor(translator, role));
 	}
