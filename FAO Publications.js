@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-02-21 11:46:43"
+	"lastUpdated": "2023-02-23 16:43:43"
 }
 
 /*
@@ -548,7 +548,7 @@ function doWeb(doc, url) {
 // Note on test cases: Because the pages use dynamic elements (which is also why the translator doesn't work for multiple item pages), automatic test in Scaffold doesn't work. Every time a test is needed, use "New Web" to manually add it.
 
 /** BEGIN TEST CASES **/
-[
+var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.fao.org/documents/card/en?details=cc0461en",
