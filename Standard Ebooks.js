@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-02-24 08:13:25"
+	"lastUpdated": "2023-02-24 09:12:54"
 }
 
 /*
@@ -30,31 +30,22 @@
 */
 
 function detectWeb(doc, _url) {
-	// if a book is found, return book
 	if (doc.querySelectorAll('meta[content="book"]').length) {
 		return 'book';
 	}
-	// run getSearchResults function. If it finds an array of rows, will return true
-	// and this else if will return multiple.
 	else if (getSearchResults(doc, true)) {
 		return 'multiple';
 	}
 	return false;
 }
 
-// for multiple results
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	// create an array
 	var rows = doc.querySelectorAll('li[typeof="schema:Book"]')
-	// loop through the array, just scraping URL and title. title is displayed to the user in
-	// Zotero.selectItems popup, URL is sent to scrape function
 	for (let row of rows) {
 		let href = new URL(row.getAttribute("about"), "https://www.standardebooks.org/").toString();
-		// innerText contains title and author, separated by \n. Delete the author and just display
-		// title to user.
-  	let title = text(row, 'span[property="schema:name"]');
+	let title = text(row, 'span[property="schema:name"]');
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -65,12 +56,10 @@ function getSearchResults(doc, checkOnly) {
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
-		if (items) {
-			await Promise.all(
-				Object.keys(items)
-					.map(url => requestDocument(url).then(scrape))
-			);
-		}
+	if (!items) return;
+		  for (let url of Object.keys(items)) {
+			  await scrape(await requestDocument(url));
+		  }
 	}
 	else {
 		await scrape(doc, url);
@@ -78,34 +67,27 @@ async function doWeb(doc, url) {
 }
 async function scrape(doc) {
 	var item = new Zotero.Item("book");
-	// get item title
 	item.title = text(doc, 'h1[property="schema:name"]');
-
-	// put all authors in an array called creators
 	var creators = doc.querySelectorAll('a[property="schema:author"]');
 
-	// for loop based on number of creators, in order to add all authors to item
 	for (let creatorElem of creators) {
-		// load variable capsCreator with all-caps creator from innerText
 		let creator = creatorElem.textContent;
-		// remove all-caps and replace with standard capitalization
-		// documentation on capitalizeName Zotero utility: https://github.com/zotero/utilities/blob/master/utilities.js
+
 		let role = "author";
 		item.creators.push(ZU.cleanAuthor(creator, role));
 	}
 
-	// if a translator exists, add them to item
 	if (doc.querySelector('div[property="schema:translator"]')) {
 		let translator = attr(doc, 'div[property="schema:translator"] > meta[property="schema:name"]', 'content');
 		let role = "translator";
 		item.creators.push(ZU.cleanAuthor(translator, role));
 	}
 
-	// Sometimes abstractNote accidentally scrapes a promotional message,
+	// Sometimes section[id="description"] scrapes a promotional message,
 	// "We rely on your support ...", which is displayed sometimes to user.
-	// By looping over just the paragraphs within the description, we avoid
+	// By looping over just the paragraphs within the description, avoids
 	// adding promo message to abstractNote.
-	var abstractParagraphs = doc.querySelectorAll('section[id="description"] > p');
+	var abstractParagraphs = doc.querySelectorAll('#description > p');
 	var finalAbstract = '';
 	for (let j = 0; j < abstractParagraphs.length; j++) {
 		let abstractParagraph = abstractParagraphs[j].innerText + ' ';
@@ -113,20 +95,17 @@ async function scrape(doc) {
 	}
 	item.abstractNote = finalAbstract;
 
-	item.publisher = "Standard Ebooks";
-
-	// I've chosen to include the date of the last edit to the ebook as its publication date,
+	// Include the date of the last edit to the ebook as its publication date,
 	// rather than the original publication date of the digitized public domain book.
-	// Although these are public domain ebooks, Standard ebooks is making typographical changes,
+	// Although these are public domain ebooks with original publication dates over 100 years ago,
+  // Standard ebooks is making typographical changes,
 	// which could be considered altering them from their form on Project Gutenberg,
-	// and thus constitute a new "publication".
+	// and thus potentially constitute a new "publication".
 	item.date = attr(doc, 'meta[property="schema:dateModified"]', 'content');
 	item.url = attr(doc, 'meta[property="og:url"]', 'content');
-	// all items have the same rights statement
+  item.publisher = "Standard Ebooks";
 	item.rights = "This ebook is only thought to be free of copyright restrictions in the United States. It may still be under copyright in other countries. If you’re not located in the United States, you must check your local laws to verify that the contents of this ebook are free of copyright restrictions in the country you’re located in before downloading or using this ebook.";
 
-	// Full text is available at a consistent URL, /text/single-page
-	// Attach this, rather than the catalog page.
 	var fullText = item.url + "/text/single-page"
 	item.attachments.push({
 		title: "Full Text",
