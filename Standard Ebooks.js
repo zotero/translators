@@ -57,9 +57,9 @@ async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
-			for (let url of Object.keys(items)) {
-				await scrape(await requestDocument(url));
-			}
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else {
 		await scrape(doc, url);
