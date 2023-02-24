@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-02-23 15:33:59"
+	"lastUpdated": "2023-02-24 08:13:25"
 }
 
 /*
@@ -54,7 +54,7 @@ function getSearchResults(doc, checkOnly) {
 		let href = new URL(row.getAttribute("about"), "https://www.standardebooks.org/").toString();
 		// innerText contains title and author, separated by \n. Delete the author and just display
 		// title to user.
-		let title = text(row, 'a[property="schema:url"]');
+		let title = text(row, 'span[property="schema:name"]');
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
