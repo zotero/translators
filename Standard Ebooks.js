@@ -42,10 +42,10 @@ function detectWeb(doc, _url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('li[typeof="schema:Book"]')
+	var rows = doc.querySelectorAll('li[typeof="schema:Book"]');
 	for (let row of rows) {
 		let href = new URL(row.getAttribute("about"), "https://www.standardebooks.org/").toString();
-	let title = text(row, 'span[property="schema:name"]');
+		let title = text(row, 'span[property="schema:name"]');
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -56,10 +56,10 @@ function getSearchResults(doc, checkOnly) {
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
-	if (!items) return;
-		  for (let url of Object.keys(items)) {
-			  await scrape(await requestDocument(url));
-		  }
+		if (!items) return;
+			for (let url of Object.keys(items)) {
+				await scrape(await requestDocument(url));
+			}
 	}
 	else {
 		await scrape(doc, url);
@@ -98,15 +98,15 @@ async function scrape(doc) {
 	// Include the date of the last edit to the ebook as its publication date,
 	// rather than the original publication date of the digitized public domain book.
 	// Although these are public domain ebooks with original publication dates over 100 years ago,
-  // Standard ebooks is making typographical changes,
+	// Standard ebooks is making typographical changes,
 	// which could be considered altering them from their form on Project Gutenberg,
 	// and thus potentially constitute a new "publication".
 	item.date = attr(doc, 'meta[property="schema:dateModified"]', 'content');
 	item.url = attr(doc, 'meta[property="og:url"]', 'content');
-  item.publisher = "Standard Ebooks";
+	item.publisher = "Standard Ebooks";
 	item.rights = "This ebook is only thought to be free of copyright restrictions in the United States. It may still be under copyright in other countries. If you’re not located in the United States, you must check your local laws to verify that the contents of this ebook are free of copyright restrictions in the country you’re located in before downloading or using this ebook.";
 
-	var fullText = item.url + "/text/single-page"
+	var fullText = item.url + "/text/single-page";
 	item.attachments.push({
 		title: "Full Text",
 		url: fullText,
