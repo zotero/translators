@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-12-15 14:55:13"
+	"lastUpdated": "2023-02-27 16:31:58"
 }
 
 /*
@@ -32,6 +32,7 @@
 
 function detectWeb(doc, url) {
 	var action = getAction(url);
+	// Z.debug(action)
 	if (!action) return false;
 	if (!doc.head || !doc.head.getElementsByTagName('meta').length) {
 		Z.debug("Springer Link: No head or meta tags");
@@ -83,8 +84,10 @@ function getResultList(doc) {
 	if (!results.length) {
 		results = ZU.xpath(doc, '//li[@class="c-list-group__item"]//h3/a');
 	}
+	// e.g. https://link.springer.com/book/10.1007/978-3-031-04248-5 -- Springer uses both h3 and h4 and sometimes
+	// the h3 link actually points to other volumes, so we're making sure we're in the right li element first
 	if (!results.length) {
-		results = doc.querySelectorAll('h3.c-card__title > a');
+		results = doc.querySelectorAll('li[data-test="chapter"] h4.c-card__title > a, li[data-test="chapter"] h3.c-card__title > a');
 	}
 	return results;
 }
@@ -624,6 +627,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://link.springer.com/journal/10344/volumes-and-issues/66-5",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/book/10.1007/978-3-031-04248-5",
 		"items": "multiple"
 	}
 ]
