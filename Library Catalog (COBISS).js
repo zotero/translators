@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-01 12:01:15"
+	"lastUpdated": "2023-03-01 15:34:52"
 }
 
 /*
@@ -35,59 +35,56 @@
 	***** END LICENSE BLOCK *****
 */
 
-
 function detectWeb(doc, url) {
 	// TODO: move this hash outside of detectWeb
 	// TODO: waiting to hear from Abe if this section makes any sense.
 
 	// Declare a new hashmap object
-	var iconMap = {};
+	var iconMap = [
+			'book',               // icon-1
+			'journalArticle',     // icon-2
+			'newspaperArticle',   // icon-3
+			'audioRecording',     // icon-4
+			'film',               // icon-5
+			'book',               // icon-6 (keyboard)
+			'map',                // icon-7
+			'audioRecording',     // icon-8 (sheet music)
+			'book',               // icon-9 (email icon)
+			'book',               // icon-10 (toy)
+			'book',               // icon-11 (graduation cap)
+			'book',               // icon-12 (camera)
+			'book',               // icon-13 (@ symbol)
+			'videoRecording',     // icon-14
+			'audioRecording',     // icon-15
+			'film',               // icon-16
+			'book',               // icon-17 (set of books)
+			'book',               // icon-18 (globe)
+			'book',               // icon-19 (magazine?)
+			'artwork',            // icon-20 (pictorial material)
+			'audioRecording',     // icon-21 (record player)
+			'audioRecording',     // icon-22 (microphone)
+			'book',               // icon-23 (fountain pen)
+			'book',               // icon-24 (prize medal)
+			'videoRecording',     // icon-25 (DVD with small music icon)
+			'videoRecording',     // icon-26 (Blu-ray)
+			'book',               // icon-27 (e-book)
+			'book',               // icon-28 (audiobook)
+			'videoRecording',     // icon-29 (e-video)
+			'book',               // icon-30 (work performed)
+			'book',               // icon-31 (data)
+			'newspaperArticle'    // icon-32 (e-newspaper)
+	];
 
-  // Initialize the hashmap object with key-value pairs
-	iconMap['icon-1'] = 'book';
-	iconMap['icon-2'] = 'journalArticle';
-	iconMap['icon-3'] = 'newspaperArticle';
-	iconMap['icon-4'] = 'audioRecording';
-	iconMap['icon-5'] = 'film';
-	iconMap['icon-6'] = 'book'; // keyboard (not sure what this would be)
-	iconMap['icon-7'] = 'map';
-	iconMap['icon-8'] = 'audioRecording'; // sheet music
-	iconMap['icon-9'] = 'book'; // email icon
-	iconMap['icon-10'] = 'book'; // toy
-	iconMap['icon-11'] = 'book'; // graduation cap (thesis?)
-	iconMap['icon-12'] = 'book'; // camera
-	iconMap['icon-13'] = 'book'; // @ symbol
-	iconMap['icon-14'] = 'videoRecording';
-	iconMap['icon-15'] = 'audioRecording';
-	iconMap['icon-16'] = 'film';
-	iconMap['icon-17'] = 'book'; // set of books
-	iconMap['icon-18'] = 'book'; // globe
-	iconMap['icon-19'] = 'book'; // magazine?
-	iconMap['icon-20'] = 'artwork'; // pictorial material
-	iconMap['icon-21'] = 'audioRecording'; // record player
-	iconMap['icon-22'] = 'audioRecording'; // microphone
-	iconMap['icon-23'] = 'book'; // fountain pen
-	iconMap['icon-24'] = 'book'; // prize medal
-	iconMap['icon-25'] = 'videoRecording'; // DVD with small music icon
-	iconMap['icon-26'] = 'videoRecording'; // Blu-ray
-	iconMap['icon-27'] = 'book'; // e-book
-	iconMap['icon-28'] = 'book'; // audiobook
-	iconMap['icon-29'] = 'videoRecording'; // e-video
-	iconMap['icon-30'] = 'book'; // work performed (event) (3 people icon)
-	iconMap['icon-31'] = 'book'; // data
-	iconMap['icon-32'] = 'newspaperArticle'; // e-newspaper
-
-
-
+	// single items end in an id number that is 8 digits or more
 	const itemIDURL = /\d{8,}/
 
 	if (url.match(itemIDURL)) {
-		// TODO: clean up this selector, it's messy
-		var icon = doc.querySelector('li[class="in"] > span').children[0].className;
+		var iconCSSSelector = doc.querySelector('li.in > span').firstElementChild.className;
+		var iconNumber = Number(iconCSSSelector.match(/(\d+)/)[0]);
 	}
 
-	if (icon) {
-		return iconMap[icon];
+	if (iconCSSSelector) {
+		return iconMap[iconNumber];
 	}
 
 	else if (getSearchResults(doc, true)) {
@@ -144,25 +141,28 @@ async function doWeb(doc, url) {
 
 async function scrape(doc, url = doc.location.href) {
 
-	let risURL = constructRISURL(url);
-	let risText = await requestText(risURL);
-	let fixedRisText = risText.replace(/^OK##/, '');
-	let translator = Zotero.loadTranslator('import');
+	const risURL = constructRISURL(url);
+	const risText = await requestText(risURL);
+	const fixedRisText = risText.replace(/^OK##/, '');
+	if (doc.getElementById("unpaywall-link")) {
+		var pdfLink = doc.getElementById("unpaywall-link").href;
+	}
+	const translator = Zotero.loadTranslator('import');
 	translator.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7'); // RIS
 	translator.setString(fixedRisText);
 	translator.setHandler('itemDone', (_obj, item) => {
 
-		// TODO are there ever attachments that can be saved? look at some examples
-		// if (pdfLink) {
-		// 	item.attachments.push({
-		// 		url: pdfLink.href,
-		// 		title: 'Full Text PDF',
-		// 		mimeType: 'application/pdf'
-		// 	});
-		// }
-		// TODO: Add item URL
-		// TODO: Add item tags, see https://plus.cobiss.net/cobiss/si/sl/bib/17350659
-		// for example of subject headings for a report
+		if (pdfLink) {
+			item.attachments.push({
+	 		url: pdfLink,
+	 		title: 'Full Text PDF',
+	 		mimeType: 'application/pdf'
+		 	});
+		 }
+		item.url = url;
+
+		// TODO: if there's a link in the catalog record, save it as the snapshot, e.g. https://plus.cobiss.net/cobiss/si/sl/bib/91668227
+		// has a link to full text
 
 		item.attachments.push({
 			title: 'Snapshot',
@@ -181,20 +181,21 @@ var testCases = [
 		"url": "https://plus.cobiss.net/cobiss/si/sl/bib/92020483",
 		"items": [
 			{
-				"itemType": "journalArticle",
+				"itemType": "videoRecording",
 				"title": "Nauk o barvah po Goetheju. DVD 2/3, Poglobitev vsebine nauka o barvah, še posebej poglavja \"Fizične barve\" s prikazom eksperimentov",
 				"creators": [
 					{
 						"lastName": "Kühl",
 						"firstName": "Johannes",
-						"creatorType": "author"
+						"creatorType": "director"
 					}
 				],
 				"date": "2022",
-				"ISSN": "978-961-95275-4-2",
+				"ISBN": "9789619527542",
 				"libraryCatalog": "Library Catalog (COBISS)",
-				"pages": "1 video DVD (116 min, 37 sek)",
-				"series": "Predavanja iz naravoslovja",
+				"place": "Hvaletinci",
+				"studio": "NID Sapientia",
+				"url": "https://plus.cobiss.net/cobiss/si/sl/bib/92020483",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -208,6 +209,216 @@ var testCases = [
 					},
 					{
 						"note": "<p>Tisk po naročilu</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/si/sl/bib/search?q=*&db=cobib&mat=allmaterials&cof=0_105b-p&pdfrom=01.01.2023",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/si/sl/bib/115256576",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Angel z zahodnega okna",
+				"creators": [
+					{
+						"lastName": "Meyrink",
+						"firstName": "Gustav",
+						"creatorType": "author"
+					}
+				],
+				"date": "2001",
+				"ISBN": "9789616400107",
+				"libraryCatalog": "Library Catalog (COBISS)",
+				"numPages": "2 zv. (216; 203 )",
+				"place": "Ljubljana",
+				"publisher": "Založniški atelje Blodnjak",
+				"series": "Zbirka Blodnjak",
+				"url": "https://plus.cobiss.net/cobiss/si/sl/bib/115256576",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>Prevod dela: Der Engel vom westlichen Fenster</p>"
+					},
+					{
+						"note": "<p>Gustav Meyrink / Herman Hesse: str. 198-200</p>"
+					},
+					{
+						"note": "<p>Magični stekleni vrtovi judovske kulture / Jorge Luis Borges: str. 201-203</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/si/sl/bib/139084803",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Poročilo analiz vzorcev odpadnih vod na vsebnost prepovedanih in dovoljenih drog na področju centralne čistilne naprave Kranj (2022)",
+				"creators": [
+					{
+						"lastName": "Heath",
+						"firstName": "Ester",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Verovšek",
+						"firstName": "Taja",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023",
+				"url": "https://plus.cobiss.net/cobiss/si/sl/bib/139084803",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "dovoljene droge"
+					},
+					{
+						"tag": "nedovoljene droge"
+					},
+					{
+						"tag": "odpadne vode"
+					},
+					{
+						"tag": "čistilna naprava"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Nasl. z nasl. zaslona</p>"
+					},
+					{
+						"note": "<p>Opis vira z dne 11. 1. 2023</p>"
+					},
+					{
+						"note": "<p>Bibliografija: str. 13</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/si/sl/bib/84534787",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Flood legislation and land policy framework of EU and non-EU countries in Southern Europe",
+				"creators": [
+					{
+						"lastName": "Kapović-Solomun",
+						"firstName": "Marijana",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Ferreira",
+						"firstName": "Carla S.S.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Zupanc",
+						"firstName": "Vesna",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Ristić",
+						"firstName": "Ratko",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Drobnjak",
+						"firstName": "Aleksandar",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kalantari",
+						"firstName": "Zahra",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022",
+				"ISSN": "2049-1948",
+				"issue": "1",
+				"journalAbbreviation": "WIREs",
+				"libraryCatalog": "Library Catalog (COBISS)",
+				"pages": "1-14",
+				"publicationTitle": "WIREs",
+				"url": "https://plus.cobiss.net/cobiss/si/sl/bib/84534787",
+				"volume": "9",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "EU legislation"
+					},
+					{
+						"tag": "Južna Evropa"
+					},
+					{
+						"tag": "Southern Europe"
+					},
+					{
+						"tag": "floods"
+					},
+					{
+						"tag": "land governance"
+					},
+					{
+						"tag": "policy framework"
+					},
+					{
+						"tag": "politika"
+					},
+					{
+						"tag": "poplave"
+					},
+					{
+						"tag": "upravljanje zemljišč"
+					},
+					{
+						"tag": "zakonodaja EU"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Nasl. z nasl. zaslona</p>"
+					},
+					{
+						"note": "<p>Opis vira z dne 11. 11. 2021</p>"
+					},
+					{
+						"note": "<p>Bibliografija: str. 12-14</p>"
 					}
 				],
 				"seeAlso": []
