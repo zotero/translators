@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-01 15:34:52"
+	"lastUpdated": "2023-03-02 13:57:27"
 }
 
 /*
@@ -36,55 +36,16 @@
 */
 
 function detectWeb(doc, url) {
-	// TODO: move this hash outside of detectWeb
-	// TODO: waiting to hear from Abe if this section makes any sense.
-
-	// Declare a new hashmap object
-	var iconMap = [
-			'book',               // icon-1
-			'journalArticle',     // icon-2
-			'newspaperArticle',   // icon-3
-			'audioRecording',     // icon-4
-			'film',               // icon-5
-			'book',               // icon-6 (keyboard)
-			'map',                // icon-7
-			'audioRecording',     // icon-8 (sheet music)
-			'book',               // icon-9 (email icon)
-			'book',               // icon-10 (toy)
-			'book',               // icon-11 (graduation cap)
-			'book',               // icon-12 (camera)
-			'book',               // icon-13 (@ symbol)
-			'videoRecording',     // icon-14
-			'audioRecording',     // icon-15
-			'film',               // icon-16
-			'book',               // icon-17 (set of books)
-			'book',               // icon-18 (globe)
-			'book',               // icon-19 (magazine?)
-			'artwork',            // icon-20 (pictorial material)
-			'audioRecording',     // icon-21 (record player)
-			'audioRecording',     // icon-22 (microphone)
-			'book',               // icon-23 (fountain pen)
-			'book',               // icon-24 (prize medal)
-			'videoRecording',     // icon-25 (DVD with small music icon)
-			'videoRecording',     // icon-26 (Blu-ray)
-			'book',               // icon-27 (e-book)
-			'book',               // icon-28 (audiobook)
-			'videoRecording',     // icon-29 (e-video)
-			'book',               // icon-30 (work performed)
-			'book',               // icon-31 (data)
-			'newspaperArticle'    // icon-32 (e-newspaper)
-	];
-
-	// single items end in an id number that is 8 digits or more
-	const itemIDURL = /\d{8,}/
+	// single items end in an id number that is 6 digits or more
+	const itemIDURL = /\d{6,}$/;
 
 	if (url.match(itemIDURL)) {
 		var iconCSSSelector = doc.querySelector('li.in > span').firstElementChild.className;
 		var iconNumber = Number(iconCSSSelector.match(/(\d+)/)[0]);
 	}
-
 	if (iconCSSSelector) {
-		return iconMap[iconNumber];
+		// Maps visual icons from catalog page to Zotero itemType
+		return translateIcon(iconNumber);
 	}
 
 	else if (getSearchResults(doc, true)) {
@@ -111,19 +72,60 @@ function getSearchResults(doc, checkOnly) {
 
 function constructRISURL(url) {
 	// catalog page URL: https://plus.cobiss.net/cobiss/si/sl/bib/107937536
-	// RIS URL: https://plus.cobiss.net/cobiss/si/sl/bib/92020483
+	// RIS URL: https://plus.cobiss.net/cobiss/si/sl/bib/risCit/107937536
 
 	// capture first part of URL, e.g. https://plus.cobiss.net/cobiss/si/sl/bib/
-	const firstRegex = /^(.*?)\/bib\//
+	const firstRegex = /^(.*?)\/bib\//;
 	let firstUrl = url.match(firstRegex)[0];
 
-	// captures item ID, e.g. /92020483
-	const secondRegex = /\/([^/]+)$/
+	// capture item ID, e.g. /92020483
+	const secondRegex = /\/([^/]+)$/;
 	let secondUrl = url.match(secondRegex)[0];
 
-	// outputs RIS structure, e.g. https://plus.cobiss.net/cobiss/si/sl/bib/risCit/107937536
+	// outputs RIS URL structure
 	let risURL = firstUrl + "risCit" + secondUrl;
 	return risURL;
+}
+
+function translateIcon(number) {
+	// Maps visual icons on catalog page to Zotero itemType, so user sees the correct icon on
+	// Zotero Save button in browser connector. Icons that don't correspond to an itemType are assigned "book"
+	var iconMap = [
+		'',
+		'book', // icon-1
+		'journalArticle', // icon-2
+		'newspaperArticle', // icon-3
+		'audioRecording', // icon-4
+		'film', // icon-5
+		'book', // icon-6 (keyboard)
+		'map', // icon-7
+		'audioRecording', // icon-8 (sheet music)
+		'book', // icon-9 (email icon)
+		'book', // icon-10 (toy)
+		'book', // icon-11 (graduation cap)
+		'book', // icon-12 (camera)
+		'book', // icon-13 (@ symbol)
+		'videoRecording', // icon-14
+		'audioRecording', // icon-15
+		'film', // icon-16
+		'book', // icon-17 (set of books)
+		'book', // icon-18 (globe)
+		'book', // icon-19 (magazine?)
+		'artwork', // icon-20 (pictorial material)
+		'audioRecording', // icon-21 (record player)
+		'audioRecording', // icon-22 (microphone)
+		'book', // icon-23 (fountain pen)
+		'book', // icon-24 (prize medal)
+		'videoRecording', // icon-25 (DVD with small music icon)
+		'videoRecording', // icon-26 (Blu-ray)
+		'book', // icon-27 (e-book)
+		'book', // icon-28 (audiobook)
+		'videoRecording', // icon-29 (e-video)
+		'book', // icon-30 (work performed)
+		'book', // icon-31 (data)
+		'newspaperArticle' // icon-32 (e-newspaper)
+	];
+	return iconMap[number];
 }
 
 async function doWeb(doc, url) {
@@ -140,9 +142,9 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url = doc.location.href) {
-
 	const risURL = constructRISURL(url);
 	const risText = await requestText(risURL);
+	// RIS always has an extraneous OK## at the beginning, remove it
 	const fixedRisText = risText.replace(/^OK##/, '');
 	if (doc.getElementById("unpaywall-link")) {
 		var pdfLink = doc.getElementById("unpaywall-link").href;
@@ -151,24 +153,20 @@ async function scrape(doc, url = doc.location.href) {
 	translator.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7'); // RIS
 	translator.setString(fixedRisText);
 	translator.setHandler('itemDone', (_obj, item) => {
-
 		if (pdfLink) {
 			item.attachments.push({
-	 		url: pdfLink,
-	 		title: 'Full Text PDF',
-	 		mimeType: 'application/pdf'
-		 	});
-		 }
+				url: pdfLink,
+				title: 'Full Text PDF',
+				mimeType: 'application/pdf'
+			});
+		}
+		else {
+			item.attachments.push({
+				title: 'Snapshot',
+				document: doc
+			});
+		}
 		item.url = url;
-
-		// TODO: if there's a link in the catalog record, save it as the snapshot, e.g. https://plus.cobiss.net/cobiss/si/sl/bib/91668227
-		// has a link to full text
-
-		item.attachments.push({
-			title: 'Snapshot',
-			document: doc
-		});
-
 		item.complete();
 	});
 	await translator.translate();
@@ -419,6 +417,100 @@ var testCases = [
 					},
 					{
 						"note": "<p>Bibliografija: str. 12-14</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/si/sl/bib/5815649",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Rangiranje cest po metodologiji EuroRAP ; Elektronski vir: diplomska naloga = Rating roads using EuroRAP procedures",
+				"creators": [
+					{
+						"lastName": "Pešec",
+						"firstName": "Katja",
+						"creatorType": "author"
+					}
+				],
+				"date": "2012",
+				"shortTitle": "Rangiranje cest po metodologiji EuroRAP ; Elektronski vir",
+				"url": "https://plus.cobiss.net/cobiss/si/sl/bib/5815649",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "EuroRAP"
+					},
+					{
+						"tag": "EuroRAP"
+					},
+					{
+						"tag": "VSŠ"
+					},
+					{
+						"tag": "cesta in obcestje"
+					},
+					{
+						"tag": "diplomska dela"
+					},
+					{
+						"tag": "economic efficiency"
+					},
+					{
+						"tag": "ekonomska učinkovitost"
+					},
+					{
+						"tag": "gradbeništvo"
+					},
+					{
+						"tag": "graduation thesis"
+					},
+					{
+						"tag": "pilot project"
+					},
+					{
+						"tag": "pilotski projekt"
+					},
+					{
+						"tag": "predlagani (proti)ukrepi"
+					},
+					{
+						"tag": "rangiranje cest"
+					},
+					{
+						"tag": "road and roadside"
+					},
+					{
+						"tag": "star rating"
+					},
+					{
+						"tag": "suggested countermeasure"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Diplomsko delo visokošolskega strokovnega študija gradbeništva, Prometna smer</p>"
+					},
+					{
+						"note": "<p>Nasl. z nasl. zaslona</p>"
+					},
+					{
+						"note": "<p>Publikacija v pdf formatu obsega 103 str.</p>"
+					},
+					{
+						"note": "<p>Bibliografija: str. 85-87</p>"
+					},
+					{
+						"note": "<p>Izvleček ; Abstract</p>"
 					}
 				],
 				"seeAlso": []
