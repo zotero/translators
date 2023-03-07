@@ -98,10 +98,10 @@ function scrape(doc, url) {
 		let author = ZU.xpath(doc, '//ul[@class="contributor-list"]//li//a');
 		if(author.length > 0) {
 			// Handled using data attribute
-	        for (let i = 0; i < author.length; i++) {
+			for (let i = 0; i < author.length; i++) {
 				item.creators[i].firstName = author[i].getAttribute('data-firstnames')
 				item.creators[i].lastName = author[i].getAttribute('data-surname')
-	        }
+			}
 		}
 
 		// Abstract
