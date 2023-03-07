@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-31 16:18:23"
+	"lastUpdated": "2023-02-17 09:30:16"
 }
 
 function detectWeb(doc, url) {
@@ -84,9 +84,9 @@ async function scrape(docIDs, itemDoneHandler) {
 				
 				name = name.trim();
 				
-				c.lastName = name.substr(name.length-1);
+				c.lastName = name.substr(0, 1);
 				if (name.length > 1) {
-					c.firstName = name.substr(0, name.length-1);
+					c.firstName = name.substr(1, name.length);
 				} else {
 					delete c.firstName;
 					c.fieldMode = 1;
@@ -178,32 +178,32 @@ var testCases = [
 				"title": "國小自然與生活科技教師參與輔導團研習活動之民俗誌研究",
 				"creators": [
 					{
-						"lastName": "鴻",
+						"lastName": "曾",
 						"creatorType": "author",
-						"firstName": "曾國"
+						"firstName": "國鴻"
 					},
 					{
-						"lastName": "露",
+						"lastName": "賴",
 						"creatorType": "author",
-						"firstName": "賴秋"
+						"firstName": "秋露"
 					},
 					{
-						"lastName": "娟",
+						"lastName": "鍾",
 						"creatorType": "author",
-						"firstName": "鍾季"
+						"firstName": "季娟"
 					},
 					{
-						"lastName": "桂",
+						"lastName": "何",
 						"creatorType": "author",
-						"firstName": "何妙"
+						"firstName": "妙桂"
 					},
 					{
-						"lastName": "榮",
+						"lastName": "廖",
 						"creatorType": "author",
-						"firstName": "廖文"
+						"firstName": "文榮"
 					}
 				],
-				"date": "2004-11",
+				"date": "2004-01",
 				"DOI": "10.29495/CITE.200411.0446",
 				"abstractNote": "本研究針對九年一貫輔導團規劃之「國小自然與生活科技領域研習」進行探究，目的是探討教師參與輔導團研習活動的意願及其影響因素，並瞭解輔導團研習活動對自然與生活科技教師教學能力之影響，最後根據研究結果提供輔導團作爲規劃研習活動之參考。本研究採俗民誌研究法，研究者先進入研習現場參與觀察，再以六位自然與生活科技領域相關教師爲對象，進行焦點團體訪談，最後輔以相關資料文件做分析，研究結果發現：充實知識是參與研習意願的動力來源、研習的時間爲教師決定是否參與研習的重要因素、家庭狀況與研習地點的安排影響教師是否參與研習的決定、研習的方式應考量研習的目的做不同形式的安排、研習教材內容會充實教師的專業知能、講師的授課方式讓研習教師對教學技巧自我反省。研習綜合歸納之研究結論如下：1.自然與生活科技教師參與輔導團研習活動的意願高。2.影響教師參與輔導團研習活動的意願之主要因素爲「研習時間」、「研習地點」、「家庭狀況」。3.輔導團研習活動在「教材內容」方面，對教師之影響爲充實知識與補充教學資料。4.輔導團之研習在「講師授課方式」方面，對教師在運用教具、教學方法與師生互動等層面有影響。The aim of the research is to examine teachers willing of participating in further study in Science and Technology field held by CEAG (Compulsory Education Advisory Group) and factors that influenced their participation. Also, the effects of further study to the teachers teaching abilities in teaching Science and Technology filed. Finally, giving the research results to CEAG as a reference for planning further study afterwards. This research adopt ethnographic approach that researcher goes to the scene of further study to observe, and then choose six teachers to have a group interview. Then compare with the relevant information to analyze. The result shows: Pursuing of great knowledge is the motivation of teachers to participate in further study; Time is the most influential factor that teacher determine whether to attend the further study; Family conditions and place affect their decisions to participate in further study; Way of further study should take the purpose of further study into consideration to have different arrangement; The content of the further study would enrich teachers’ teaching abilities; Teaching style of the lecturer would motivate self-examination in teachers' teaching techniques. In conclusion: 1. Most of teachers in Science and Technology field like to participate in further study. 2. The main reasons that affect teachers’ participation in further study are time, place and family condition. 3. In the aspect of teaching content, further study held by CEAG helps teachers by supplying relevant teaching materials. 4. In the aspect of teaching style of lecturer, further study held by CEAG helps teachers: to use teaching aids more effectively, an alternative thinking on their teaching methods, and improve interaction between teacher and student.",
 				"itemID": "AL:P20110413001-200411-201104130017-201104130017-446-453",
@@ -259,9 +259,9 @@ var testCases = [
 				"title": "學童口腔保健行為與新齲齒發生之探討－10個月追蹤研究",
 				"creators": [
 					{
-						"lastName": "鳳",
+						"lastName": "張",
 						"creatorType": "author",
-						"firstName": "張雀"
+						"firstName": "雀鳳"
 					}
 				],
 				"date": "2007-01",
@@ -492,7 +492,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2021-12",
+				"date": "2021-02",
 				"DOI": "10.6981/FEM.202112_2(12).0063",
 				"ISSN": "2692-7608",
 				"abstractNote": "The Party branch is the Party's basic organization, the basic unit of the Party organization to carry out its work, the Party's fighting fortress in the basic social organizations, and the foundation of all the Party's work and combat effectiveness. Party building work is an effective way for schools to consolidate ideological and political work and an important starting point for carrying out ideological and political education. The construction of grass-roots Party branches is the top priority of the Party building work in colleges and universities, it is necessary to strengthen political guidance and enhance Party member education; strictly grasp standard procedures, do a good job in Party member management, strictly regulate Party discipline, strengthen Party member supervision, focus on central work, extensively organize teachers and students, choose advanced models, focus on propagation work; gather the joint efforts of teachers and students, promote collaborative education; strengthen the sense of purpose, connect and serve teachers and students, and solidly promote the creation of model Party branches, give full play to the leading and exemplary role, educate people for the Party and cultivate talents for the country.",
