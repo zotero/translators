@@ -41,7 +41,7 @@ function detectWeb(doc, url) {
 			else {
 				return "bookSection";
 			}
-		} else if(url.includes('content/video/')) {
+		} else if (url.includes('content/video/')) {
 			return 'videoRecording'; 
 		} else {
 			return "journalArticle";
@@ -92,11 +92,11 @@ function scrape(doc, url) {
 	translator.setHandler('itemDone', function (obj, item) {
 		// Edition
 		let edition = ZU.xpathText(doc, '//meta[@name="citation_edition"]/@content');
-		if(edition) item.edition = edition;
+		if (edition) item.edition = edition;
 
 		// Author
 		let author = ZU.xpath(doc, '//ul[@class="contributor-list"]//li//a');
-		if(author.length > 0) {
+		if (author.length > 0) {
 			// Handled using data attribute
 			for (let i = 0; i < author.length; i++) {
 				item.creators[i].firstName = author[i].getAttribute('data-firstnames')
@@ -106,7 +106,7 @@ function scrape(doc, url) {
 
 		// Abstract
 		let abstractNote = ZU.xpathText(doc, '//meta[@name="citation_abstract"]/@content');
-		if(abstractNote) item.abstractNote = ZU.cleanTags(abstractNote);
+		if (abstractNote) item.abstractNote = ZU.cleanTags(abstractNote);
 
 		item.complete();
 	});
@@ -114,7 +114,7 @@ function scrape(doc, url) {
 	translator.getTranslatorObject(function(trans){
 		// Detect web not get trigger for scape EM translator
 		// - so wll fill those in manually.
-		if(detectWeb(doc, url)) {
+		if (detectWeb(doc, url)) {
 			trans.itemType = detectWeb(doc, url)
 		}
 		trans.addCustomFields({
@@ -122,7 +122,8 @@ function scrape(doc, url) {
 		});		
 		trans.doWeb(doc, url);
 	});
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
