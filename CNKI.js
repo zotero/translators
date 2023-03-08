@@ -1,7 +1,7 @@
 {
 	"translatorID": "5c95b67b-41c5-4f55-b71a-48d5d7183063",
 	"label": "CNKI",
-	"creator": "Aurimas Vinckevicius, Xingzhong Lin",
+	"creator": "Aurimas Vinckevicius, Xingzhong Lin, Zoë C. Ma",
 	"target": "^https?://([^/]+\\.)?cnki\\.net",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-02 03:17:44"
+	"lastUpdated": "2023-03-08 12:33:13"
 }
 
 /*
@@ -91,7 +91,6 @@ function getIDFromURL(url) {
 	return { dbname: dbname[1], filename: filename[1], url: url };
 }
 
-
 // 网络首发期刊信息并不能从URL获取dbname和filename信息
 // Get dbname and filename from pre-released article web page.
 function getIDFromRef(doc, url) {
@@ -100,10 +99,30 @@ function getIDFromRef(doc, url) {
 	return { dbname: database, filename: filename, url: url };
 }
 
+// Get dbname and filename from the link target on the "take note" button in
+// the doc as a fallback.
+// NOTE: As of now (8 Mar 2023) the document sent by CNKI may contain duplicate
+// element ids in the buttons row. In addition, for different article sources,
+// the buttons may follow different patterns, sometimes lacking all the
+// required info. The note-taking button appears more stable across the CNKI
+// domains.
+function getIDFromNoteTakerLink(doc, url) {
+	const noteURLString = doc.querySelector("li.btn-note a").href;
+	if (!noteURLString) return false;
+
+	const urlParams = new URLSearchParams(new URL(noteURLString).search);
+	const dbnameValue = urlParams.get("tablename");
+	const filenameValue = urlParams.get("filename");
+
+	if (!dbnameValue || !filenameValue) return false;
+
+	return { dbname: dbnameValue, filename: filenameValue, url: url };
+}
+
 function getIDFromPage(doc, url) {
 	return getIDFromURL(url)
-		|| getIDFromURL(ZU.xpathText(doc, '//div[@class="zwjdown"]/a/@href'))
-		|| getIDFromRef(doc, url);
+		|| getIDFromRef(doc, url)
+		|| getIDFromNoteTakerLink(doc, url);
 }
 
 function getTypeFromDBName(dbname) {
