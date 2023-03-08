@@ -87,6 +87,9 @@ function constructRISURL(url) {
 	return risURL;
 }
 
+// TODO: change this to capture based on type of material on page, rather than icons
+// waiting for Abe comments
+// regex for item type: \-\s*(.*?)\s*;
 function translateIcon(number) {
 	// Maps visual icons on catalog page to Zotero itemType, so user sees the correct icon on
 	// Zotero Save button in browser connector. Icons that don't correspond to an itemType are assigned "book"
@@ -166,6 +169,7 @@ async function scrape(doc, url = doc.location.href) {
 				document: doc
 			});
 		}
+    // TODO: Save URL only if it's a link to full text
 		item.url = url;
 		item.complete();
 	});
