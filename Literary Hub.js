@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-08 19:04:55"
+	"lastUpdated": "2023-03-09 16:44:44"
 }
 
 /*
@@ -36,17 +36,67 @@
 */
 
 function detectWeb(doc, url) {
-	// XXX: Search not yet implemented; the site seems to return duplicate
-	// items, even on the same page.
+	const urlObj = new URL(url);
+	const searchValue = urlObj.searchParams.get("s");
+	if (urlObj.pathname === "/") { // On search page (i.e. site base URL).
+		if (!searchValue) {
+			// Empty search (searchValue is empty string) or a page
+			// on the expected path but without the required
+			// search-query parameter.
+			return false;
+		}
+		else {
+			return "multiple";
+		}
+	}
+	// Not on search page.
 	return "blogPost";
 }
 
 function doWeb(doc, url) {
-	scrape(doc, url);
+	if (detectWeb(doc, url) === "multiple") {
+		Zotero.selectItems(getSearchResults(doc), (items) => {
+			if (items) {
+				ZU.processDocuments(Object.keys(items), scrape);
+			}
+		});
+	}
+	else {
+		scrape(doc, url);
+	}
 }
 
 function _normalizeWhiteSpace(str) {
 	return str.split(/\s+/).join(" ");
+}
+
+function getSearchResults(doc) {
+	if (!doc) return false;
+	const resultElems = doc.querySelectorAll("div.search");
+	if (!resultElems) return false;
+
+	const items = {};
+	let isNonEmpty = false;
+	resultElems.forEach( (elem) => {
+		const anchor = elem.querySelector(".post_header a");
+		if (anchor) {
+			const href = anchor.href
+			let title = _normalizeWhiteSpace(anchor.textContent.trim());
+			// In the case of duplication with external URL, add
+			// the external hostname in parentheses for the
+			// reader's convenience.
+			const hrefURL = new URL(href);
+			if (hrefURL.origin !== doc.location.origin) {
+				title += ` (${hrefURL.hostname})`;
+			}
+			if (!(href in items) && title) {
+				items[href] = title;
+				isNonEmpty = true;
+			} // Otherwise skip duplicate.
+		}
+	});
+
+	return isNonEmpty && items;
 }
 
 function scrape(doc, url) {
@@ -321,6 +371,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://lithub.com/?s=wonder+AND+lelio",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
