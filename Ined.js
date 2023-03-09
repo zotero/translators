@@ -2,14 +2,14 @@
 	"translatorID": "dd5761aa-4145-4911-b45c-16c78cfc24c8",
 	"label": "Ined",
 	"creator": "Mysciencework",
-	"target": "^https?://archined(-preprod)?\\.ined\\.fr",
+	"target": "^https?://archined\\.ined\\.fr",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-05-23 18:02:42"
+	"lastUpdated": "2023-03-09 15:47:42"
 }
 
 /*
@@ -106,6 +106,30 @@ function scrape(doc, url) {
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(ris);
 		translator.setHandler("itemDone", function (obj, item) {
+			if (item.archiveLocation) {
+				if (item.url) {
+					item.attachments = [{
+						title: item.url,
+						mimeType: "text/html",
+						url: item.url,
+						snapshot: false,
+					}];
+				}
+				item.url = item.archiveLocation;
+				delete item.archiveLocation;
+			}
+			if (item.tags && item.tags.length > 0) {
+				let filtered_tags = [];
+				let all_tags = '';
+				item.tags.sort((a, b) => b.length - a.length)
+					.forEach((tag) => {
+						if (!all_tags.includes(tag.toLowerCase())) {
+							all_tags +=  ' ' + tag.toLowerCase();
+							filtered_tags.push(ZU.capitalizeTitle(tag.toLowerCase(), true));
+						}
+					});
+				item.tags = filtered_tags;
+			}
 			item.complete();
 		});
 		translator.translate();
@@ -113,11 +137,13 @@ function scrape(doc, url) {
 };
 
 
+
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://archined-preprod.ined.fr/view/AXKZJjYfqpl52aYY4O-h",
+		"url": "https://archined.ined.fr/view/AXKZJjYfqpl52aYY4O-h",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -142,58 +168,57 @@ var testCases = [
 				"date": "2020-05-30",
 				"DOI": "10.1186/s40878-020-0174-y",
 				"abstractNote": "This paper reviews new evidence on the trends and patterns of migration between Africa and Europe since the mid-1970s, and discusses their congruency with the changing context of migration policy. Using data from the Determinants of International Migration (DEMIG) and the Migration between Africa and Europe (MAFE) projects, we compare flows and policies of three African and six European destination countries (Democratic Republic of Congo, Ghana, and Senegal, on the one hand; and Belgium, France, Italy, Spain, the Netherlands, and the UK, on the other). The paper focuses on topics that quantitative studies usually overlook due to the lack of data, namely the propensity to out-migrate, legal status at entry, routes of migration, and propensity to return. We show that times of restrictions in Europe do not correspond to less African out-migration, but rather to more unauthorized migration and fewer returns. We further show that trends in African migration differ greatly between historical and new destination countries in Europe.",
-				"archiveLocation": "http://hdl.handle.net/20.500.12204/AXKZJjYfqpl52aYY4O-h",
 				"issue": "19",
 				"journalAbbreviation": "Comparative Migration Studies",
 				"language": "EN",
 				"libraryCatalog": "Ined",
 				"pages": "1-27",
 				"publicationTitle": "Comparative Migration Studies",
-				"url": "https://comparativemigrationstudies.springeropen.com/articles/10.1186/s40878-020-0174-y",
+				"url": "http://hdl.handle.net/20.500.12204/AXKZJjYfqpl52aYY4O-h",
 				"volume": "8",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "https://comparativemigrationstudies.springeropen.com/articles/10.1186/s40878-020-0174-y",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
 				"tags": [
 					{
-						"tag": "AFRIQUE SUBSAHARIENNE / SUB-SAHARAN AFRICA"
+						"tag": "Afrique Subsaharienne / Sub-Saharan Africa"
 					},
 					{
-						"tag": "Africa"
+						"tag": "Europe / Europe"
 					},
 					{
-						"tag": "EUROPE / EUROPE"
+						"tag": "Flux Migratoire / Migration Flows"
 					},
 					{
-						"tag": "Europe"
+						"tag": "Legal Status"
 					},
 					{
-						"tag": "FLUX MIGRATOIRE / MIGRATION FLOWS"
+						"tag": "Migration Internationale / International Migration"
 					},
 					{
-						"tag": "Legal status"
+						"tag": "Migration Policies"
 					},
 					{
-						"tag": "MIGRATION INTERNATIONALE / INTERNATIONAL MIGRATION"
+						"tag": "Migration Routes"
 					},
 					{
-						"tag": "Migration policies"
+						"tag": "Migration Systems"
 					},
 					{
-						"tag": "Migration routes"
+						"tag": "Migration Trends"
 					},
 					{
-						"tag": "Migration systems"
+						"tag": "Out-Migration"
 					},
 					{
-						"tag": "Migration trends"
+						"tag": "Politique Migratoire / Migration Policy"
 					},
 					{
-						"tag": "Out-migration"
-					},
-					{
-						"tag": "POLITIQUE MIGRATOIRE / MIGRATION POLICY"
-					},
-					{
-						"tag": "Quantitative approach"
+						"tag": "Quantitative Approach"
 					},
 					{
 						"tag": "Return"
@@ -206,7 +231,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://archined-preprod.ined.fr/view/AXTjrQ0MkgKZhr-blfp9",
+		"url": "https://archined.ined.fr/view/AXTjrQ0MkgKZhr-blfp9",
 		"items": [
 			{
 				"itemType": "thesis",
@@ -220,120 +245,86 @@ var testCases = [
 				],
 				"date": "2020",
 				"abstractNote": "In 1977, Michael Lipton introduced the Urban Bias Thesis as a framework for understanding how most macro- and microeconomic policy initiatives have historically benefited the overdevelopment of urban areas and the underdevelopment of rural areas, as a result of the historical urban bias in resource reallocation. In Latin America, urbanization and mortality decline have historically been positively related: the health transition in the region has been initiated in the main cities and has tended to proceed more rapidly in countries with higher levels of urbanization. Given this context, this research looks for evidence on two phenomena: the persistence of an urban advantage in mortality; and traces of an “urban bias” in the causes of death patterns in the region. Using a sample of Latin American countries over the period 2000-2010, I apply decomposition methods on life expectancy at birth to analyze the disparities in mortality patterns and causes of death when urban and rural areas are considered separately. Urban is defined as a continuum category instead of a dichotomous concept. Hence, three types of spatial groups are recognizable in each country: main and large cities (more than 500,000 inhabitants); medium-sized and small cities (20,000 to 499,000 inhabitants); and towns and purely rural areas combined (less than 20,000 inhabitants). The countries under analysis are Brazil, Chile, Colombia, Ecuador, Mexico, Peru and Venezuela. Because comparability across time and countries is needed to ensure a high standard of data quality, two major issues are taken into consideration: coverage errors identified as underreporting levels; and quality errors in reported age, sex, residence and causes of death. The results indicate that the urban advantage is persistent and that rural-urban mortality differentials have consistently favored cities. Hardly any improvement in declining mortality exists in older adult ages outside the main and large cities. This urban advantage in mortality comes as an outcome of lower rates for causes of death that are amenable to primary interventions, meaning they are made amenable by the existence of basic public infrastructures as well as by the provision of basic goods and services. Countries and subpopulations are benefiting differently from progress: in the most urbanized countries, spatial-group mortality patterns are converging; while differentials remain in the least urbanized countries.",
-				"archiveLocation": "http://hdl.handle.net/20.500.12204/AXTjrQ0MkgKZhr-blfp9",
 				"language": "EN",
 				"libraryCatalog": "Ined",
 				"numPages": "339",
 				"place": "\"Paris, France\"",
 				"thesisType": "Thèse de doctorat en démographie",
 				"university": "Université Paris 1 Panthéon-Sorbonne",
-				"url": "http://www.theses.fr/s160773",
-				"attachments": [],
+				"url": "http://hdl.handle.net/20.500.12204/AXTjrQ0MkgKZhr-blfp9",
+				"attachments": [
+					{
+						"title": "http://www.theses.fr/s160773",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
 				"tags": [
 					{
-						"tag": "AMERIQUE LATINE / LATIN AMERICA"
+						"tag": "Amerique Latine / Latin America"
 					},
 					{
-						"tag": "BAISSE DE LA MORTALITE / MORTALITY DECLINE"
+						"tag": "Baisse De La Mortalite / Mortality Decline"
 					},
 					{
-						"tag": "BRESIL / BRAZIL"
+						"tag": "Bresil / Brazil"
 					},
 					{
-						"tag": "Brazil"
+						"tag": "Cause De Deces / Causes of Death"
 					},
 					{
-						"tag": "CAUSE DE DECES / CAUSES OF DEATH"
+						"tag": "Chili / Chile"
 					},
 					{
-						"tag": "CHILI / CHILE"
+						"tag": "Colombie / Colombia"
 					},
 					{
-						"tag": "COLOMBIE / COLOMBIA"
-					},
-					{
-						"tag": "Chile"
-					},
-					{
-						"tag": "Colombia"
-					},
-					{
-						"tag": "DIFFERENCE URBAIN-RURAL / RURAL-URBAN DIFFERENTIALS"
-					},
-					{
-						"tag": "ESPERANCE DE VIE EN SANTE / HEALTH EXPECTANCY"
+						"tag": "Difference Urbain-Rural / Rural-Urban Differentials"
 					},
 					{
 						"tag": "Ecuador"
 					},
 					{
-						"tag": "Latin America"
+						"tag": "Esperance De Vie En Sante / Health Expectancy"
 					},
 					{
-						"tag": "MEXIQUE / MEXICO"
+						"tag": "Health Transition"
 					},
 					{
-						"tag": "MORTALITE / MORTALITY"
+						"tag": "International Comparison"
 					},
 					{
-						"tag": "MORTALITE EVITABLE / AVOIDABLE MORTALITY"
+						"tag": "Mexique / Mexico"
 					},
 					{
-						"tag": "Mexico"
+						"tag": "Mortalite Evitable / Avoidable Mortality"
 					},
 					{
-						"tag": "PEROU / PERU"
+						"tag": "Perou / Peru"
 					},
 					{
-						"tag": "Peru"
-					},
-					{
-						"tag": "THESE / THESES"
+						"tag": "These / Theses"
 					},
 					{
 						"tag": "Thesis"
 					},
 					{
-						"tag": "URBANISATION / URBANIZATION"
+						"tag": "Urban Advantage"
 					},
 					{
-						"tag": "VENEZUELA / VENEZUELA"
+						"tag": "Urban Biais"
 					},
 					{
-						"tag": "VILLE / CITIES"
+						"tag": "Urban Growth"
 					},
 					{
-						"tag": "Venezuela"
+						"tag": "Urbanisation / Urbanization"
 					},
 					{
-						"tag": "avoidable mortality"
+						"tag": "Venezuela / Venezuela"
 					},
 					{
-						"tag": "causes of death"
-					},
-					{
-						"tag": "health expectancy"
-					},
-					{
-						"tag": "health transition"
-					},
-					{
-						"tag": "international comparison"
-					},
-					{
-						"tag": "mortality decline"
-					},
-					{
-						"tag": "urban advantage"
-					},
-					{
-						"tag": "urban biais"
-					},
-					{
-						"tag": "urban growth"
-					},
-					{
-						"tag": "urbanisation"
+						"tag": "Ville / Cities"
 					}
 				],
 				"notes": [],
@@ -343,7 +334,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://archined-preprod.ined.fr/view/AXlC5r7ikgKZhr-bl2oh",
+		"url": "https://archined.ined.fr/view/AXlC5r7ikgKZhr-bl2oh",
 		"items": [
 			{
 				"itemType": "report",
@@ -382,7 +373,6 @@ var testCases = [
 				],
 				"date": "2021",
 				"abstractNote": "Entre 2000 et 2016, le nombre d’embauches en CDD de moins d’un mois a progressé de 161 % et celui en intérim de 32 % alors que sur la même période, le nombre d’embauches en CDI ou CDD de plus d’un mois n’a progressé que de 15 %. La forte progression des contrats temporaires dans les embauches s’explique ainsi depuis le début des années 2000 par un raccourcissement de la durée des contrats. Fin 2016, les embauches en CDD de moins d’un mois représentent 69 % des embauches hors intérim. \n\nCette évolution apparaît assez spécifique au marché du travail français : la part des contrats temporaires dans l’emploi salarié du secteur concurrentiel excède la moyenne européenne et la part des contrats de moins de 3 mois y est beaucoup plus élevée qu’en Allemagne, au Danemark ou même en Italie.\n\nPour comprendre les mécanismes à l’œuvre, la Dares a lancé un appel à projet de recherche (APR) autour de trois axes :\n\n- Pourquoi, dans quels cas et selon quelles modalités, les entreprises recourent-elles au contrats courts ?\n- Quelle réalité recouvre la succession de contrats courts pour les travailleurs en France et quel est le rôle des dispositifs publics et de la réglementation des contrats dans ce développement ?\n- Quelles sont les caractéristiques des personnes recrutées en contrats courts et quelles conséquences le passage par un ou plusieurs contrats courts a-t-il sur leurs trajectoires professionnelles à plus long terme ?\n\nJusqu’ici, dans les travaux qualitatifs et/ou sociologiques, la question de l’interaction entre l’usage de contrats courts et l’assurance chômage se limite aux différents métiers du spectacle, parfois comparés à la situation des pigistes. IDHE-S (Institutions et dynamiques historiques de l’économie et de la société) de l’Université de Nanterre et le CEET-CNAM étudient le spectre des usages possibles des contrats courts et des dispositifs d’activité réduite de l’assurance chômage. En effet, l’augmentation des contrats courts pourrait relever à la fois d’une logique générale applicable à tout le marché du travail et aussi de contextes sectoriels : D’un côté, l’augmentation générale des contrats courts semble bien indiquer une tendance commune. De l’autre, le recours au CDD d’usage semble concentré sur certains secteurs.",
-				"archiveLocation": "http://hdl.handle.net/20.500.12204/AXlC5r7ikgKZhr-bl2oh",
 				"institution": "DARES - Ministère de travail",
 				"language": "FR",
 				"libraryCatalog": "Ined",
@@ -392,59 +382,59 @@ var testCases = [
 				"reportType": "Rapport d'études, Dares",
 				"seriesTitle": "Rapport d'études, Dares",
 				"shortTitle": "Emploi discontinu et indemnisation du chômage",
-				"url": "https://dares.travail-emploi.gouv.fr/publication/emploi-discontinu-et-indemnisation-du-chomage",
-				"attachments": [],
+				"url": "http://hdl.handle.net/20.500.12204/AXlC5r7ikgKZhr-bl2oh",
+				"attachments": [
+					{
+						"title": "https://dares.travail-emploi.gouv.fr/publication/emploi-discontinu-et-indemnisation-du-chomage",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
 				"tags": [
 					{
-						"tag": "CDD"
+						"tag": "Analyse De Séquences"
 					},
 					{
-						"tag": "CHOMAGE / UNEMPLOYMENT"
+						"tag": "Cdd"
 					},
 					{
-						"tag": "CONTRAT DE TRAVAIL / LABOUR CONTRACTS"
+						"tag": "Chomage / Unemployment"
 					},
 					{
-						"tag": "EMPLOI / EMPLOYMENT"
+						"tag": "Contrat De Travail / Labour Contracts"
 					},
 					{
-						"tag": "FH-DADS"
+						"tag": "Contrats Courts"
 					},
 					{
-						"tag": "FRANCE / FRANCE"
+						"tag": "Contrats De Travail"
 					},
 					{
-						"tag": "France"
+						"tag": "Emploi / Employment"
 					},
 					{
-						"tag": "PRECARITE / SOCIAL PRECARIOUSNESS"
+						"tag": "Fh-Dads"
 					},
 					{
-						"tag": "RAPPORT DE RECHERCHE / RESEARCH REPORTS"
+						"tag": "France / France"
 					},
 					{
-						"tag": "TRAVAIL TEMPORAIRE / TEMPORARY WORK"
+						"tag": "Indemnisation Chômage"
 					},
 					{
-						"tag": "analyse de séquences"
+						"tag": "Méthodes Mixtes"
 					},
 					{
-						"tag": "contrats courts"
+						"tag": "Precarite / Social Precariousness"
 					},
 					{
-						"tag": "contrats de travail"
+						"tag": "Rapport De Recherche / Research Reports"
 					},
 					{
-						"tag": "indemnisation chômage"
+						"tag": "Trajectoires Professionnelles"
 					},
 					{
-						"tag": "méthodes mixtes"
-					},
-					{
-						"tag": "rapport de recherche"
-					},
-					{
-						"tag": "trajectoires professionnelles"
+						"tag": "Travail Temporaire / Temporary Work"
 					}
 				],
 				"notes": [],
@@ -454,7 +444,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://archined-preprod.ined.fr/view/AXucNy80kgKZhr-bmEo_",
+		"url": "https://archined.ined.fr/view/AXucNy80kgKZhr-bmEo_",
 		"items": [
 			{
 				"itemType": "report",
@@ -478,7 +468,6 @@ var testCases = [
 				],
 				"date": "2021",
 				"abstractNote": "The Global Burden of Disease’s (GBD) comparative risk assessment analysis (CRA) is a quantitative estimation of the contribution of known risk factors to the injuries and sequelae\nenumerated by the study each year. The CRA was introduced in 2002 and has a complex methodology that builds on the epidemiologic concept of attributable risk, or population\nattributable fractions (PAFs). This work, second of two volumes on the GBD’s evolution, is focused on explaining and tracing the methodological choices of its risk assessment\ncomponent, with a specific focus on environmental and occupational risk factors. We explore the estimates provided by the Institute of Health Metrics and Evaluation (IHME) and\nunderstand how they were calculated. Then, we assess some of the most pressing critiques, and conclude by reflecting on its influence, methodological choices, and future outlook as the IHME sets itself a leading institution in health estimates. This work is part of a broader research analyzing the role of population health metrics, in particular PAFs, on the definition of public health problems and influencing their agendas. The research relies on a literature review (nonstructured) of published studies and commentaries. It follows a chronological development of the CRA estimates since their first publication in 2002 to the version released in 2019.",
-				"archiveLocation": "http://hdl.handle.net/20.500.12204/AXucNy80kgKZhr-bmEo_",
 				"institution": "Ined",
 				"language": "EN",
 				"libraryCatalog": "Ined",
@@ -486,23 +475,35 @@ var testCases = [
 				"place": "\"Aubervilliers, France\"",
 				"reportNumber": "266",
 				"reportType": "Documents de travail",
-				"url": "https://www.ined.fr/fr/publications/editions/document-travail/ranking-the-burden-of-disease-attributed-to-known-risk-factors/",
-				"attachments": [],
+				"url": "http://hdl.handle.net/20.500.12204/AXucNy80kgKZhr-bmEo_",
+				"attachments": [
+					{
+						"title": "https://www.ined.fr/fr/publications/editions/document-travail/ranking-the-burden-of-disease-attributed-to-known-risk-factors/",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
 				"tags": [
 					{
-						"tag": "ACCIDENT DU TRAVAIL / OCCUPATIONAL ACCIDENTS"
+						"tag": "Accident Du Travail / Occupational Accidents"
 					},
 					{
-						"tag": "COMPARAISON INTERNATIONALE / INTERNATIONAL COMPARISON"
+						"tag": "Comparaison Internationale / International Comparison"
 					},
 					{
 						"tag": "Comparative Risk Assessment"
 					},
 					{
-						"tag": "ENVIRONNEMENT / ENVIRONMENT"
+						"tag": "Environmental Health"
 					},
 					{
-						"tag": "FACTEUR DE RISQUE / RISK FACTOR"
+						"tag": "Environnement / Environment"
+					},
+					{
+						"tag": "Epidemiology"
+					},
+					{
+						"tag": "Facteur De Risque / Risk Factor"
 					},
 					{
 						"tag": "Gates Foundation"
@@ -511,34 +512,22 @@ var testCases = [
 						"tag": "Global Burden of Disease"
 					},
 					{
-						"tag": "Institute of Health Metrics and Evaluations (IHME)"
+						"tag": "Institute of Health Metrics and Evaluations (ihme)"
 					},
 					{
-						"tag": "PROFESSION / OCCUPATIONS"
+						"tag": "Occupational Health"
 					},
 					{
-						"tag": "SANTE / HEALTH"
+						"tag": "Profession / Occupations"
 					},
 					{
-						"tag": "SANTE PUBLIQUE / PUBLIC HEALTH"
+						"tag": "Risk Factors"
 					},
 					{
-						"tag": "environmental health"
+						"tag": "Sante / Health"
 					},
 					{
-						"tag": "epidemiology"
-					},
-					{
-						"tag": "health metrics"
-					},
-					{
-						"tag": "occupational health"
-					},
-					{
-						"tag": "public health"
-					},
-					{
-						"tag": "risk factors"
+						"tag": "Sante Publique / Public Health"
 					}
 				],
 				"notes": [],
