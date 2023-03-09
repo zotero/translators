@@ -77,10 +77,10 @@ function getSearchResults(doc) {
 
 	const items = {};
 	let isNonEmpty = false;
-	resultElems.forEach( (elem) => {
+	resultElems.forEach((elem) => {
 		const anchor = elem.querySelector(".post_header a");
 		if (anchor) {
-			const href = anchor.href
+			const href = anchor.href;
 			let title = _normalizeWhiteSpace(anchor.textContent.trim());
 			// In the case of duplication with external URL, add
 			// the external hostname in parentheses for the
@@ -144,7 +144,7 @@ function scrape(doc, url) {
 
 		item.tags = [];
 		const tagElems = doc.querySelectorAll(".post_tag a[rel='tag']");
-		tagElems.forEach( (t) => {
+		tagElems.forEach((t) => {
 			item.tags.push(t.textContent.trim());
 		});
 
