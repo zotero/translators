@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-10 16:35:36"
+	"lastUpdated": "2023-03-10 17:59:59"
 }
 
 /*
@@ -234,6 +234,16 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 
 			// Reconstruit le nom en "Code ___ - Article ____"
 			newItem.nameOfAct = code.concat(" - Article ", codeNumber)
+
+			// Dates: original date and dateDecided
+
+			// Exemple : "/loda/id/LEGIARTI000006284446/1994-07-30/"
+			var origdate = ZU.xpathText(doc, '//p[@class="date"]/a/@href');
+			newItem.extra = "origdate: ".concat(origdate.match(/[\d\-]{10}/g)[1]);
+
+			// Exemple : "Version en vigueur depuis le 30 juillet 1994"
+			var date = ZU.xpathText(doc, '//h6[@class="version-article"]')
+			newItem.date = date.match(/(\d{1,2} \w+ (\d{4}|\d{2}))/)[0];
 		}
 
 		var b; // Lois 1er modèle
@@ -468,8 +478,10 @@ var testCases = [
 				"itemType": "statute",
 				"nameOfAct": "Code civil - Article 16",
 				"creators": [],
+				"dateEnacted": "30 juillet 1994",
 				"code": "Code civil",
 				"codeNumber": "16",
+				"extra": "origdate: 1994-07-30",
 				"url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006419320",
 				"attachments": [],
 				"tags": [],
@@ -581,8 +593,10 @@ var testCases = [
 				"itemType": "statute",
 				"nameOfAct": "Code du travail - Article R1234-4",
 				"creators": [],
+				"dateEnacted": "27 septembre 2017",
 				"code": "Code du travail",
 				"codeNumber": "R1234-4",
+				"extra": "origdate: 2017-09-27",
 				"url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000035644695",
 				"attachments": [],
 				"tags": [],
@@ -599,8 +613,10 @@ var testCases = [
 				"itemType": "statute",
 				"nameOfAct": "Code du travail - Article R1234-4",
 				"creators": [],
+				"dateEnacted": "27 septembre 2017",
 				"code": "Code du travail",
 				"codeNumber": "R1234-4",
+				"extra": "origdate: 2017-09-27",
 				"url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000035644695/2023-01-25",
 				"attachments": [],
 				"tags": [],
