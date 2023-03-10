@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-10 15:56:57"
+	"lastUpdated": "2023-03-10 16:22:19"
 }
 
 /*
@@ -53,7 +53,7 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 		} else return false;
 	}
 
-	function scrapecase(doc) { //Jurisprudence
+	function scrapecase(doc, url) { //Jurisprudence
 
 		var newItem = new Zotero.Item("case");
 
