@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-10 08:29:29"
+	"lastUpdated": "2023-03-10 14:57:07"
 }
 
 /*
@@ -39,8 +39,8 @@ function detectWeb(doc, url) {
 	// single items end in an id number that is 6 digits or more
 	const itemIDURL = /\d{6,}$/;
 	if (url.match(itemIDURL)) {
-    var iconCSSSelector = doc.querySelector('li.in > span').firstElementChild.className;
-    var iconNumber = Number(iconCSSSelector.match(/(\d+)/)[0]);
+	var iconCSSSelector = doc.querySelector('li.in > span').firstElementChild.className;
+	var iconNumber = Number(iconCSSSelector.match(/(\d+)/)[0]);
 		if (iconCSSSelector) {
 			// Maps visual icons from catalog page to Zotero itemType
 			return translateIcon(iconNumber);
@@ -210,16 +210,11 @@ async function scrape(doc, url = doc.location.href) {
 	let english = await requestText(englishURL);
 	var typeOfMaterialRegex = /<div\s+class="recordPrompt">\s+<span>Type of material<\/span>\s+-\s+(.*?)(?:\s*;\s*(.*?))?\s+<\/div>/
 	var englishItemType = english.match(typeOfMaterialRegex)[1];
-  Zotero.debug(englishItemType);
-	// Zotero.debug(english);
 	// match englishItemType to something in the dictionary
   // if nothing is found, fall back on icons
   var finalItemType = translateItemType(englishItemType);
-  Zotero.debug(finalItemType);
 	const risURL = constructRISURL(url);
 	const risText = await requestText(risURL);
-
-	// Zotero.debug(englishURL);
 
 	// RIS always has an extraneous OK## at the beginning, remove it
 	const fixedRisText = risText.replace(/^OK##/, '');
@@ -244,11 +239,9 @@ async function scrape(doc, url = doc.location.href) {
 			});
 		}
 		// TODO: Save URL only if it's a link to full text
-		// TODO: Save Link field somewhere, e.g. https://plus.cobiss.net/cobiss/si/en/bib/70461955
+		// Save Link field somewhere, e.g. https://plus.cobiss.net/cobiss/si/en/bib/70461955
 		// here's another URL that's full text: https://plus.cobiss.net/cobiss/si/en/bib/95451907
 		// Links to full text PDF: https://plus.cobiss.net/cobiss/si/en/bib/105123075
-
-
 
 		// if "Type of material" from catalog page isn't in catalogItemTypeHash, finalItemType will return as undefined.
 		// in this case, default Type from RIS will be applied.
@@ -256,8 +249,19 @@ async function scrape(doc, url = doc.location.href) {
 		if (finalItemType) {
 			item.itemType = finalItemType;
 		}
-		// TODO: Add tags, e.g. this example https://plus.cobiss.net/cobiss/si/sl/bib/82789891
-		// or this one https://plus.cobiss.net/cobiss/si/en/bib/94215171
+
+		// some items have tags in RIS KW field and are captured by
+		// RIS translator, e.g. https://plus.cobiss.net/cobiss/si/en/bib/78691587.
+		// don't add tags to these items.
+		if (item.tags.length === 0) {
+			// other items e.g. https://plus.cobiss.net/cobiss/si/sl/bib/82789891 have tags,
+			// but they're not in the RIS for some reason.
+			var pageTags = doc.querySelectorAll('a[href^="bib/search?c=su="]');
+			for (let i = 0; i < pageTags.length; i++) {
+				item.tags.push(pageTags[i].innerText);
+			}
+
+		}
 		item.url = url;
 		item.complete();
 	});
@@ -603,64 +607,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Izvleček ; Abstract</p>"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://plus.cobiss.net/cobiss/si/sl/bib/82789891",
-		"items": [
-			{
-				"itemType": "conferencePaper",
-				"title": "Posvet Avtomatizacija strege in montaže 2021/2021 - ASM '21/22, Ljubljana, 11. 05. 2022: zbornik povzetkov s posveta",
-				"creators": [
-					{
-						"lastName": "Posvet Avtomatizacija strege in montaže",
-						"creatorType": "author",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "Herakovič",
-						"firstName": "Niko",
-						"creatorType": "editor"
-					},
-					{
-						"lastName": "Debevec",
-						"firstName": "Mihael",
-						"creatorType": "editor"
-					},
-					{
-						"lastName": "Pipan",
-						"firstName": "Miha",
-						"creatorType": "editor"
-					},
-					{
-						"lastName": "Adrović",
-						"firstName": "Edo",
-						"creatorType": "editor"
-					}
-				],
-				"date": "2022",
-				"ISBN": "9789616980821",
-				"libraryCatalog": "COBISS",
-				"pages": "141",
-				"place": "Ljubljana",
-				"publisher": "Fakulteta za strojništvo",
-				"shortTitle": "Posvet Avtomatizacija strege in montaže 2021/2021 - ASM '21/22, Ljubljana, 11. 05. 2022",
-				"url": "https://plus.cobiss.net/cobiss/si/sl/bib/82789891",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [
-					{
-						"note": "<p>180 izv.</p>"
 					}
 				],
 				"seeAlso": []
