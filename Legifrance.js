@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-10 16:31:44"
+	"lastUpdated": "2023-03-10 16:35:36"
 }
 
 /*
@@ -219,6 +219,7 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 		// le suffixe "- Légifrance" est retiré.
 		var title = ZU.xpathText(doc, '/html/head/title').slice(0,-13);
 		newItem.title = title;
+		newItem.url = url;
 		newItem.accessDate = 'CURRENT_TIMESTAMP';
 
 		var a; // Codes
@@ -469,6 +470,7 @@ var testCases = [
 				"creators": [],
 				"code": "Code civil",
 				"codeNumber": "16",
+				"url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006419320",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -486,6 +488,7 @@ var testCases = [
 				"creators": [],
 				"dateEnacted": "4 février 1997",
 				"codeNumber": "97-008",
+				"url": "https://www.legifrance.gouv.fr/cnil/id/CNILTEXT000017653865/",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -544,6 +547,7 @@ var testCases = [
 				"creators": [],
 				"dateEnacted": "31 décembre 2012",
 				"codeNumber": "2012-1561",
+				"url": "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000026871286",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -561,6 +565,7 @@ var testCases = [
 				"creators": [],
 				"dateEnacted": "31 décembre 1985",
 				"codeNumber": "85-1483",
+				"url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000000320901",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -578,6 +583,7 @@ var testCases = [
 				"creators": [],
 				"code": "Code du travail",
 				"codeNumber": "R1234-4",
+				"url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000035644695",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -595,6 +601,7 @@ var testCases = [
 				"creators": [],
 				"code": "Code du travail",
 				"codeNumber": "R1234-4",
+				"url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000035644695/2023-01-25",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -610,6 +617,7 @@ var testCases = [
 				"itemType": "statute",
 				"nameOfAct": "Arrêté du 22 février 2000 modifiant l'arrêté du 6 janvier 1962 fixant la liste des actes médicaux ne pouvant être pratiqués que par des médecins ou pouvant être pratiqués également par des auxiliaires médicaux ou par des directeurs de laboratoire d'analyses médicales non médecins",
 				"creators": [],
+				"url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000000581393/",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
