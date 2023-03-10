@@ -106,12 +106,15 @@ function scrape(doc, url) {
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(ris);
 		translator.setHandler("itemDone", function (obj, item) {
+			if (item.place && item.place.length > 0) {
+				item.place = item.place.replace(/"/g, '');
+			}
 			if (item.archiveLocation) {
 				if (item.url) {
 					item.attachments = [{
-						title: item.url,
-						mimeType: "text/html",
+						title: 'Catalog Page',
 						url: item.url,
+						mimeType: "text/html",
 						snapshot: false,
 					}];
 				}
@@ -125,7 +128,7 @@ function scrape(doc, url) {
 					.forEach((tag) => {
 						if (!all_tags.includes(tag.toLowerCase())) {
 							all_tags +=  ' ' + tag.toLowerCase();
-							filtered_tags.push(ZU.capitalizeTitle(tag.toLowerCase(), true));
+							filtered_tags.push({ tag: ZU.capitalizeTitle(tag.toLowerCase(), true) });
 						}
 					});
 				item.tags = filtered_tags;
@@ -178,7 +181,8 @@ var testCases = [
 				"volume": "8",
 				"attachments": [
 					{
-						"title": "https://comparativemigrationstudies.springeropen.com/articles/10.1186/s40878-020-0174-y",
+						"title": "Catalog Page",
+						"url": "https://comparativemigrationstudies.springeropen.com/articles/10.1186/s40878-020-0174-y",
 						"mimeType": "text/html",
 						"snapshot": false
 					}
@@ -248,13 +252,14 @@ var testCases = [
 				"language": "EN",
 				"libraryCatalog": "Ined",
 				"numPages": "339",
-				"place": "\"Paris, France\"",
+				"place": "Paris, France",
 				"thesisType": "Thèse de doctorat en démographie",
 				"university": "Université Paris 1 Panthéon-Sorbonne",
 				"url": "http://hdl.handle.net/20.500.12204/AXTjrQ0MkgKZhr-blfp9",
 				"attachments": [
 					{
-						"title": "http://www.theses.fr/s160773",
+						"title": "Catalog Page",
+						"url": "http://www.theses.fr/s160773",
 						"mimeType": "text/html",
 						"snapshot": false
 					}
@@ -377,7 +382,7 @@ var testCases = [
 				"language": "FR",
 				"libraryCatalog": "Ined",
 				"pages": "263",
-				"place": "\"Paris, France\"",
+				"place": "Paris, France",
 				"reportNumber": "004",
 				"reportType": "Rapport d'études, Dares",
 				"seriesTitle": "Rapport d'études, Dares",
@@ -385,7 +390,8 @@ var testCases = [
 				"url": "http://hdl.handle.net/20.500.12204/AXlC5r7ikgKZhr-bl2oh",
 				"attachments": [
 					{
-						"title": "https://dares.travail-emploi.gouv.fr/publication/emploi-discontinu-et-indemnisation-du-chomage",
+						"title": "Catalog Page",
+						"url": "https://dares.travail-emploi.gouv.fr/publication/emploi-discontinu-et-indemnisation-du-chomage",
 						"mimeType": "text/html",
 						"snapshot": false
 					}
@@ -472,13 +478,14 @@ var testCases = [
 				"language": "EN",
 				"libraryCatalog": "Ined",
 				"pages": "44",
-				"place": "\"Aubervilliers, France\"",
+				"place": "Aubervilliers, France",
 				"reportNumber": "266",
 				"reportType": "Documents de travail",
 				"url": "http://hdl.handle.net/20.500.12204/AXucNy80kgKZhr-bmEo_",
 				"attachments": [
 					{
-						"title": "https://www.ined.fr/fr/publications/editions/document-travail/ranking-the-burden-of-disease-attributed-to-known-risk-factors/",
+						"title": "Catalog Page",
+						"url": "https://www.ined.fr/fr/publications/editions/document-travail/ranking-the-burden-of-disease-attributed-to-known-risk-factors/",
 						"mimeType": "text/html",
 						"snapshot": false
 					}
