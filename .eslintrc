@@ -40,6 +40,7 @@
 
 		"zotero-translator/no-for-each": "warn",
 		"zotero-translator/prefer-index-of": "warn",
+		"zotero-translator/robust-query-selector": "warn",
 
 		"zotero-translator/test-cases-valid-json": "error",
 		"zotero-translator/test-cases": "error",
