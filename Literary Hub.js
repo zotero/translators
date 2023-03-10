@@ -147,7 +147,7 @@ function scrape(doc, url) {
 
 		item.tags = Array
 			.from(doc.querySelectorAll(".post_tag a[rel='tag']"))
-			.map((t) => ({ tag: t.textContent.trim() }));
+			.map(t => ({ tag: t.textContent.trim() }));
 
 		item.complete();
 	});
