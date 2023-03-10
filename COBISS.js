@@ -203,16 +203,22 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url = doc.location.href) {
-	// replace specific language in bib record URL with english to detect item type
-	// TODO: if user accesses the English page, we can skip this and read the itemType right off the English page
-	// might save a little time.
-	var englishURL = constructEnglishURL(url);
-	let english = await requestText(englishURL);
+	// if url matches /en/bib/, then skip constructing englishURL
+	if (url.match("/en/bib")) {
+		var nativeEnglishItemType = doc.querySelector("div.recordPrompt").innerText;
+		const cleanedNativeEnglishItemType = nativeEnglishItemType.replace(/^Type of material - /, "");
+		var finalItemType = translateItemType(cleanedNativeEnglishItemType);
+	} else {
+		// replace specific language in bib record URL with english to detect item type
+		var englishURL = constructEnglishURL(url);
+		var english = await requestText(englishURL);
+		var englishItemType = english.match(typeOfMaterialRegex)[1];
+		// match englishItemType to something in the hash
+  	// if nothing is found, fall back on RIS
+		var finalItemType = translateItemType(englishItemType);
+	}
+
 	var typeOfMaterialRegex = /<div\s+class="recordPrompt">\s+<span>Type of material<\/span>\s+-\s+(.*?)(?:\s*;\s*(.*?))?\s+<\/div>/
-	var englishItemType = english.match(typeOfMaterialRegex)[1];
-	// match englishItemType to something in the dictionary
-  // if nothing is found, fall back on icons
-  var finalItemType = translateItemType(englishItemType);
 	const risURL = constructRISURL(url);
 	const risText = await requestText(risURL);
 
