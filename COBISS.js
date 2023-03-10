@@ -213,7 +213,7 @@ async function scrape(doc, url = doc.location.href) {
 		var englishURL = constructEnglishURL(url);
 		var english = await requestText(englishURL);
 		var englishItemType = english.match(typeOfMaterialRegex)[1];
-		// match englishItemType to something in the hash
+		// match englishItemType to a key in the hash
   	// if nothing is found, fall back on RIS
 		var finalItemType = translateItemType(englishItemType);
 	}
@@ -244,7 +244,9 @@ async function scrape(doc, url = doc.location.href) {
 				document: doc
 			});
 		}
-		// TODO: Save URL only if it's a link to full text
+		// TODO: Figure out what to do with links
+		// They're all over the place. Some are full-text, some say that they're PDFs but aren't actually,
+		// some are something else...
 		// Save Link field somewhere, e.g. https://plus.cobiss.net/cobiss/si/en/bib/70461955
 		// here's another URL that's full text: https://plus.cobiss.net/cobiss/si/en/bib/95451907
 		// Links to full text PDF: https://plus.cobiss.net/cobiss/si/en/bib/105123075
