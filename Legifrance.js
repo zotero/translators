@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-10 18:05:25"
+	"lastUpdated": "2023-03-10 18:09:10"
 }
 
 /*
@@ -71,6 +71,12 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 				mimeType: "application/rtf"
 			}];
 		}
+
+		// Snapshot
+		newItem.attachments.push({
+			title: "Snapshot",
+			document: doc
+		});
 
 		// Situation selon les juridictions
 
@@ -216,6 +222,12 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 
 		var newItem = new Zotero.Item("statute");
 
+		// Snapshot
+		newItem.attachments.push({
+			title: "Snapshot",
+			document: doc
+		});
+
 		// exemple de titre : Article 16 - Code civil - Légifrance
 		// le suffixe "- Légifrance" est retiré.
 		var title = ZU.xpathText(doc, '/html/head/title').slice(0,-13);
@@ -320,7 +332,12 @@ var testCases = [
 				"extra": "Consorts G.  [Calcul de l'indemnité de réduction due par le donataire ou le légataire d'une exploitation agricole en Alsace-Moselle]",
 				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/cons/id/CONSTEXT000026458384/",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -340,7 +357,12 @@ var testCases = [
 				"docketNumber": "C3871",
 				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/ceta/id/CETATEXT000026845833/",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -360,7 +382,12 @@ var testCases = [
 				"docketNumber": "0802183",
 				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/ceta/id/CETATEXT000021750743/",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -382,7 +409,12 @@ var testCases = [
 				"language": "fr-FR",
 				"reporter": "Inédit au recueil Lebon",
 				"url": "https://www.legifrance.gouv.fr/ceta/id/CETATEXT000026925589/",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -404,7 +436,12 @@ var testCases = [
 				"language": "fr-FR",
 				"reporter": "Publié au bulletin",
 				"url": "https://www.legifrance.gouv.fr/juri/id/JURITEXT000026815591/",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [
 					{
 						"tag": "Cour de cassation"
@@ -428,7 +465,12 @@ var testCases = [
 				"docketNumber": "11/01637",
 				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/juri/id/JURITEXT000026870360/",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -448,7 +490,12 @@ var testCases = [
 				"docketNumber": "04/00973",
 				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/juri/id/JURITEXT000020391875/",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -469,7 +516,12 @@ var testCases = [
 				"language": "fr-FR",
 				"reporter": "Publié au bulletin",
 				"url": "https://www.legifrance.gouv.fr/juri/id/JURITEXT000026304473/",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [
 					{
 						"tag": "civile"
@@ -494,7 +546,12 @@ var testCases = [
 				"extra": "origdate: 1994-07-30",
 				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006419320",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -513,7 +570,12 @@ var testCases = [
 				"codeNumber": "97-008",
 				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/cnil/id/CNILTEXT000017653865/",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -534,7 +596,12 @@ var testCases = [
 				"extra": "1ère et 6ème sous-sections réunies",
 				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/ceta/id/CETATEXT000026910036/",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -556,7 +623,12 @@ var testCases = [
 				"language": "fr-FR",
 				"reporter": "Inédit au recueil Lebon",
 				"url": "https://www.legifrance.gouv.fr/ceta/id/CETATEXT000026910028/",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -575,7 +647,12 @@ var testCases = [
 				"codeNumber": "2012-1561",
 				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000026871286",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -594,7 +671,12 @@ var testCases = [
 				"codeNumber": "85-1483",
 				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000000320901",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -615,7 +697,12 @@ var testCases = [
 				"extra": "origdate: 2017-09-27",
 				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000035644695",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -636,7 +723,12 @@ var testCases = [
 				"extra": "origdate: 2017-09-27",
 				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000035644695/2023-01-25",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -653,7 +745,12 @@ var testCases = [
 				"creators": [],
 				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000000581393/",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
