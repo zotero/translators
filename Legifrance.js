@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-10 17:59:59"
+	"lastUpdated": "2023-03-10 18:05:25"
 }
 
 /*
@@ -62,6 +62,7 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 		var title = ZU.xpathText(doc, '//h1[@class="main-title"]');
 		newItem.title = title;
 		newItem.url = doc.location.href;
+		newItem.language = 'fr-FR'
 		var rtfurl = ZU.xpathText(doc, '//a[contains(text(), "Télécharger")]/@href');
 		if (rtfurl) {
 			newItem.attachments = [{
@@ -221,6 +222,7 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 		newItem.title = title;
 		newItem.url = url;
 		newItem.accessDate = 'CURRENT_TIMESTAMP';
+		newItem.language = 'fr-FR'
 
 		var a; // Codes
 		// exemple titre : Article 16 - Code civil
@@ -316,6 +318,7 @@ var testCases = [
 				"court": "Conseil constitutionnel",
 				"docketNumber": "Décision 2012-274 QPC",
 				"extra": "Consorts G.  [Calcul de l'indemnité de réduction due par le donataire ou le légataire d'une exploitation agricole en Alsace-Moselle]",
+				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/cons/id/CONSTEXT000026458384/",
 				"attachments": [],
 				"tags": [],
@@ -335,6 +338,7 @@ var testCases = [
 				"dateDecided": "17/12/2012",
 				"court": "Tribunal des Conflits",
 				"docketNumber": "C3871",
+				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/ceta/id/CETATEXT000026845833/",
 				"attachments": [],
 				"tags": [],
@@ -354,6 +358,7 @@ var testCases = [
 				"dateDecided": "17/12/2009",
 				"court": "Tribunal Administratif de Nantes, 5ème chambre",
 				"docketNumber": "0802183",
+				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/ceta/id/CETATEXT000021750743/",
 				"attachments": [],
 				"tags": [],
@@ -374,6 +379,7 @@ var testCases = [
 				"court": "Cour administrative d'appel de Bordeaux",
 				"docketNumber": "11BX01796",
 				"extra": "2ème chambre (formation à 3)",
+				"language": "fr-FR",
 				"reporter": "Inédit au recueil Lebon",
 				"url": "https://www.legifrance.gouv.fr/ceta/id/CETATEXT000026925589/",
 				"attachments": [],
@@ -395,6 +401,7 @@ var testCases = [
 				"court": "Cour de cassation",
 				"docketNumber": "12-15.063",
 				"extra": "Chambre mixte",
+				"language": "fr-FR",
 				"reporter": "Publié au bulletin",
 				"url": "https://www.legifrance.gouv.fr/juri/id/JURITEXT000026815591/",
 				"attachments": [],
@@ -419,6 +426,7 @@ var testCases = [
 				"dateDecided": "27 décembre 2012",
 				"court": "Cour d'appel de Limoges",
 				"docketNumber": "11/01637",
+				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/juri/id/JURITEXT000026870360/",
 				"attachments": [],
 				"tags": [],
@@ -438,6 +446,7 @@ var testCases = [
 				"dateDecided": "13 janvier 2009",
 				"court": "Conseil de prud'hommes de Bordeaux",
 				"docketNumber": "04/00973",
+				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/juri/id/JURITEXT000020391875/",
 				"attachments": [],
 				"tags": [],
@@ -457,6 +466,7 @@ var testCases = [
 				"dateDecided": "14 mai 2012",
 				"court": "Tribunal des conflits",
 				"docketNumber": "12-03.836",
+				"language": "fr-FR",
 				"reporter": "Publié au bulletin",
 				"url": "https://www.legifrance.gouv.fr/juri/id/JURITEXT000026304473/",
 				"attachments": [],
@@ -482,6 +492,7 @@ var testCases = [
 				"code": "Code civil",
 				"codeNumber": "16",
 				"extra": "origdate: 1994-07-30",
+				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006419320",
 				"attachments": [],
 				"tags": [],
@@ -500,6 +511,7 @@ var testCases = [
 				"creators": [],
 				"dateEnacted": "4 février 1997",
 				"codeNumber": "97-008",
+				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/cnil/id/CNILTEXT000017653865/",
 				"attachments": [],
 				"tags": [],
@@ -520,6 +532,7 @@ var testCases = [
 				"court": "Conseil d'État",
 				"docketNumber": "343126",
 				"extra": "1ère et 6ème sous-sections réunies",
+				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/ceta/id/CETATEXT000026910036/",
 				"attachments": [],
 				"tags": [],
@@ -540,6 +553,7 @@ var testCases = [
 				"court": "Conseil d'État",
 				"docketNumber": "331405",
 				"extra": "10ème sous-section jugeant seule",
+				"language": "fr-FR",
 				"reporter": "Inédit au recueil Lebon",
 				"url": "https://www.legifrance.gouv.fr/ceta/id/CETATEXT000026910028/",
 				"attachments": [],
@@ -559,6 +573,7 @@ var testCases = [
 				"creators": [],
 				"dateEnacted": "31 décembre 2012",
 				"codeNumber": "2012-1561",
+				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000026871286",
 				"attachments": [],
 				"tags": [],
@@ -577,6 +592,7 @@ var testCases = [
 				"creators": [],
 				"dateEnacted": "31 décembre 1985",
 				"codeNumber": "85-1483",
+				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000000320901",
 				"attachments": [],
 				"tags": [],
@@ -597,6 +613,7 @@ var testCases = [
 				"code": "Code du travail",
 				"codeNumber": "R1234-4",
 				"extra": "origdate: 2017-09-27",
+				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000035644695",
 				"attachments": [],
 				"tags": [],
@@ -617,6 +634,7 @@ var testCases = [
 				"code": "Code du travail",
 				"codeNumber": "R1234-4",
 				"extra": "origdate: 2017-09-27",
+				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000035644695/2023-01-25",
 				"attachments": [],
 				"tags": [],
@@ -633,6 +651,7 @@ var testCases = [
 				"itemType": "statute",
 				"nameOfAct": "Arrêté du 22 février 2000 modifiant l'arrêté du 6 janvier 1962 fixant la liste des actes médicaux ne pouvant être pratiqués que par des médecins ou pouvant être pratiqués également par des auxiliaires médicaux ou par des directeurs de laboratoire d'analyses médicales non médecins",
 				"creators": [],
+				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000000581393/",
 				"attachments": [],
 				"tags": [],
