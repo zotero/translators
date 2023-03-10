@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-09 16:44:44"
+	"lastUpdated": "2023-03-10 10:17:06"
 }
 
 /*
@@ -81,15 +81,14 @@ function getSearchResults(doc) {
 		const anchor = elem.querySelector(".post_header a");
 		if (anchor) {
 			const href = anchor.href;
-			let title = _normalizeWhiteSpace(anchor.textContent.trim());
-			// In the case of duplication with external URL, add
-			// the external hostname in parentheses for the
-			// reader's convenience.
+			const title = _normalizeWhiteSpace(anchor.textContent.trim());
+			// Currently, external hyperlinks in search results
+			// will not work correctly, because they are passed to
+			// the same scrape() function that is not designed for
+			// them. Therefore, they are skipped.
 			const hrefURL = new URL(href);
-			if (hrefURL.origin !== doc.location.origin) {
-				title += ` (${hrefURL.hostname})`;
-			}
-			if (!(href in items) && title) {
+			if (hrefURL.origin === doc.location.origin
+				&& !(href in items) && title) {
 				items[href] = title;
 				isNonEmpty = true;
 			} // Otherwise skip duplicate.
