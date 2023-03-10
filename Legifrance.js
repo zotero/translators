@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-10 14:57:58"
+	"lastUpdated": "2023-03-10 15:43:05"
 }
 
 /*
@@ -215,18 +215,22 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 
 		var newItem = new Zotero.Item("statute");
 
-		var title = ZU.xpathText(doc, '//h1[@class="main-title"]');
+		var title = ZU.xpathText(doc, '/html/head/title');
 		newItem.title = title;
 		newItem.accessDate = 'CURRENT_TIMESTAMP';
 
-		//
 		var a; // Codes
-		a = title.match(/(Code.*) - Article (.*)/)
+		// exemple titre : Article 16 - Code civil - Légifrance
+		a = title.match(/Article (.*) - (Code.*) - Légifrance/)
 		if (a) {
-			var code = a[1];
-			var codeNumber = a[2];
+			var codeNumber = a[1];  // N° article
+			var code = a[2]; // "Code ____"
+
 			newItem.code = code;
 			newItem.codeNumber = codeNumber;
+
+			// Reconstruit le nom en "Code ___ - Article ____"
+			newItem.nameOfAct = code.concat(" - Article ", codeNumber)
 		}
 
 		var b; // Lois 1er modèle
@@ -455,16 +459,14 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.legifrance.gouv.fr/affichCodeArticle.do?idArticle=LEGIARTI000006419320&cidTexte=LEGITEXT000006070721&dateTexte=20130114&fastPos=2&fastReqId=490815339&oldAction=rechCodeArticle",
+		"url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006419320",
 		"items": [
 			{
 				"itemType": "statute",
-				"title": "Code civil - Article 16",
+				"nameOfAct": "Code civil - Article 16",
 				"creators": [],
-				"accessDate": "CURRENT_TIMESTAMP",
 				"code": "Code civil",
 				"codeNumber": "16",
-				"libraryCatalog": "Légifrance",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -559,6 +561,40 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP",
 				"code": "85-1483",
 				"libraryCatalog": "Légifrance",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000035644695",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Code du travail - Article R1234-4",
+				"creators": [],
+				"code": "Code du travail",
+				"codeNumber": "R1234-4",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000035644695/2023-01-25",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Code du travail - Article R1234-4",
+				"creators": [],
+				"code": "Code du travail",
+				"codeNumber": "R1234-4",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
