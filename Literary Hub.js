@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-10 10:17:06"
+	"lastUpdated": "2023-03-11 01:35:15"
 }
 
 /*
@@ -42,20 +42,27 @@ function detectWeb(doc, url) {
 		if (!searchValue) {
 			// Empty search (searchValue is empty string) or a page
 			// on the expected path but without the required
-			// search-query parameter.
+			// search-query parameter; skip content check and
+			// reject directly.
 			return false;
 		}
-		else {
+		if (getSearchResults(doc, true)) {
 			return "multiple";
+		}
+		else {
+			return false;
 		}
 	}
 	// Not on search page.
-	return "blogPost";
+	if (doc.querySelector("div.post_wrapper")) {
+		return "blogPost";
+	}
+	return false;
 }
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) === "multiple") {
-		Zotero.selectItems(getSearchResults(doc), (items) => {
+		Zotero.selectItems(getSearchResults(doc, false), (items) => {
 			if (items) {
 				ZU.processDocuments(Object.keys(items), scrape);
 			}
@@ -66,35 +73,32 @@ function doWeb(doc, url) {
 	}
 }
 
-function _normalizeWhiteSpace(str) {
-	return str.split(/\s+/).join(" ");
-}
-
-function getSearchResults(doc) {
-	if (!doc) return false;
-	const resultElems = doc.querySelectorAll("div.search");
-	if (!resultElems) return false;
+function getSearchResults(doc, checkOnly) {
+	const resultElems = doc.querySelectorAll("div.search .post_header a");
+	const rawResultLength = resultElems.length;
+	if (!rawResultLength) return false;
 
 	const items = {};
 	let isNonEmpty = false;
-	resultElems.forEach((elem) => {
-		const anchor = elem.querySelector(".post_header a");
-		if (anchor) {
-			const href = anchor.href;
-			const title = _normalizeWhiteSpace(anchor.textContent.trim());
-			// Currently, external hyperlinks in search results
-			// will not work correctly, because they are passed to
-			// the same scrape() function that is not designed for
-			// them. Therefore, they are skipped.
-			const hrefURL = new URL(href);
-			if (hrefURL.origin === doc.location.origin
-				&& !(href in items) && title) {
-				items[href] = title;
-				isNonEmpty = true;
-			} // Otherwise skip duplicate.
-		}
-	});
+	for (let i = 0; i < rawResultLength; i++) {
+		const anchor = resultElems[i];
+		const href = anchor.href;
+		const title = ZU.trimInternal(anchor.textContent);
 
+		// Currently, external hyperlinks in search results
+		// will not work correctly, because they are passed to
+		// the same scrape() function that is not designed for
+		// them. Therefore, they are skipped.
+		const hrefURL = new URL(href);
+		if (hrefURL.origin === doc.location.origin
+			&& !(href in items) && title) {
+			if (checkOnly) {
+				return true;
+			}
+			items[href] = title;
+			isNonEmpty = true;
+		} // Otherwise skip duplicate or external result.
+	}
 	return isNonEmpty && items;
 }
 
@@ -112,9 +116,9 @@ function scrape(doc, url) {
 		item.creators = [];
 		const rawAuthors
 			= text(doc, ".author_name span[itemprop='name']");
-		const normRawAuthors = _normalizeWhiteSpace(rawAuthors);
+		const normRawAuthors = ZU.trimInternal(rawAuthors);
 		let sponsor = text(doc, ".sponsored>a");
-		sponsor = _normalizeWhiteSpace(sponsor).toLowerCase();
+		sponsor = ZU.trimInternal(sponsor).toLowerCase();
 
 		const authorIsNotPerson
 			= (normRawAuthors.startsWith("Lit Hub")
@@ -141,11 +145,9 @@ function scrape(doc, url) {
 
 		item.publicationTitle = "Literary Hub";
 
-		item.tags = [];
-		const tagElems = doc.querySelectorAll(".post_tag a[rel='tag']");
-		tagElems.forEach((t) => {
-			item.tags.push(t.textContent.trim());
-		});
+		item.tags = Array
+			.from(doc.querySelectorAll(".post_tag a[rel='tag']"))
+			.map((t) => ({ tag: t.textContent.trim() }));
 
 		item.complete();
 	});
