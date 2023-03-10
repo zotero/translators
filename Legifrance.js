@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-10 15:43:05"
+	"lastUpdated": "2023-03-10 15:56:57"
 }
 
 /*
@@ -215,13 +215,15 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 
 		var newItem = new Zotero.Item("statute");
 
-		var title = ZU.xpathText(doc, '/html/head/title');
+		// exemple de titre : Article 16 - Code civil - Légifrance
+		// le suffixe "- Légifrance" est retiré.
+		var title = ZU.xpathText(doc, '/html/head/title').slice(0,-13);
 		newItem.title = title;
 		newItem.accessDate = 'CURRENT_TIMESTAMP';
 
 		var a; // Codes
-		// exemple titre : Article 16 - Code civil - Légifrance
-		a = title.match(/Article (.*) - (Code.*) - Légifrance/)
+		// exemple titre : Article 16 - Code civil
+		a = title.match(/Article (.*) - (Code.*)/)
 		if (a) {
 			var codeNumber = a[1];  // N° article
 			var code = a[2]; // "Code ____"
@@ -551,16 +553,14 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.legifrance.gouv.fr/affichTexte.do?cidTexte=JORFTEXT000000320901&fastPos=4&fastReqId=702580559&categorieLien=id&oldAction=rechTexte",
+		"url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000000320901",
 		"items": [
 			{
 				"itemType": "statute",
-				"title": "Loi n°85-1483 du 31 décembre 1985 AUTORISANT L'APPROBATION D'UN ACCORD DE COOPERATION EN MATIERE ECONOMIQUE ET FINANCIERE ENTRE LE GOUVERNEMENT DE LA REPUBLIQUE FRANCAISE ET LE GOUVERNEMENT DE LA REPUBLIQUE GABONAISE,SIGNE A PARIS LE 14-04-1983",
+				"nameOfAct": "Loi n°85-1483 du 31 décembre 1985 AUTORISANT L'APPROBATION D'UN ACCORD DE COOPERATION EN MATIERE ECONOMIQUE ET FINANCIERE ENTRE LE GOUVERNEMENT DE LA REPUBLIQUE FRANCAISE ET LE GOUVERNEMENT DE LA REPUBLIQUE GABONAISE,SIGNE A PARIS LE 14-04-1983",
 				"creators": [],
-				"date": "31 décembre 1985",
-				"accessDate": "CURRENT_TIMESTAMP",
+				"dateEnacted": "31 décembre 1985",
 				"code": "85-1483",
-				"libraryCatalog": "Légifrance",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -595,6 +595,21 @@ var testCases = [
 				"creators": [],
 				"code": "Code du travail",
 				"codeNumber": "R1234-4",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000000581393/",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Arrêté du 22 février 2000 modifiant l'arrêté du 6 janvier 1962 fixant la liste des actes médicaux ne pouvant être pratiqués que par des médecins ou pouvant être pratiqués également par des auxiliaires médicaux ou par des directeurs de laboratoire d'analyses médicales non médecins",
+				"creators": [],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
