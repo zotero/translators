@@ -14,24 +14,24 @@
 
 /*
 	***** BEGIN LICENSE BLOCK *****
-	
+
 	Copyright © 2013 Guillaume Adreani (guillaume.adreani@gmail.com @adreagui] for Droit.org
-	
+
 	This file is part of Zotero.
-	
+
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
-	
+
 	Zotero is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU Affero General Public License for more details.
-	
+
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-	
+
 	***** END LICENSE BLOCK *****
 */
 
@@ -40,13 +40,13 @@ Thanks to Sebastian Karcher and Aurimas Vinckevicius
 
 */
 
-var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT|CETATEXT|CONSTEXT.+/ 
+var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT|CETATEXT|CONSTEXT.+/
 // Détection occurences multiples uniquement pour la jurisprudence ... pour l'instant
 
 	function detectWeb(doc, url) {
-		if (url.match(/.CETATEXT|CONSTEXT|JURITEXT./)) { // Détection jurisprudence 
+		if (url.match(/.CETATEXT|CONSTEXT|JURITEXT./)) { // Détection jurisprudence
 			return "case";
-		} else if (url.match(/LEGIARTI|affichCodeArticle|affichTexteArticle|KALICONT|JORFTEXT|CNILTEXT/)) { // Détection textes législatifs 
+		} else if (url.match(/LEGIARTI|affichCodeArticle|affichTexteArticle|KALICONT|JORFTEXT|CNILTEXT/)) { // Détection textes législatifs
 			return "statute"; // Détection lois et codes
 		} else if (url.match(/rechJuriConst|rechExpJuriConst|rechJuriAdmin|rechExpJuriAdmin|rechJuriJudi|rechExpJuriJudi/)) { // Détection occurences multiples uniquement pour la jurisprudence
 			return "multiple"; // occurences multiples
@@ -73,7 +73,7 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 
 		// Situation selon les juridictions
 
-		// Conseil constitutionnel 
+		// Conseil constitutionnel
 
 		a = title.match(/(.*) - (.*) - (.*) - (.*)/)
 		if (a) {
@@ -86,7 +86,7 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 			newItem.date = date;
 			newItem.extra = texteparties;
 		}
-		
+
 		// Conseil d'État avec indication de publication
 		b = title.match(/(Conseil d'État), (.*), (s*[0-9/]+), (s*[0-9]+), (.*Lebon)/)
 		if (b) {
@@ -166,7 +166,7 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 
 		// Note : présence d'autres cas pour les TA
 
-		var h; // Cour de cassation 
+		var h; // Cour de cassation
 		h = title.match(/(Cour de cassation), (.*), (.*), (s*[0-9-. ]+), (.*)/)
 		if (h) {
 			var nature = h[1];
@@ -219,7 +219,7 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 		newItem.title = title;
 		newItem.accessDate = 'CURRENT_TIMESTAMP';
 
-		// 
+		//
 		var a; // Codes
 		a = title.match(/(Code.*) - Article (.*)/)
 		if (a) {
@@ -235,7 +235,7 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 
 			var code = b[2];
 			var date = b[3];
-			newItem.code = code; // publicLawNumber non défini 
+			newItem.code = code; // publicLawNumber non défini
 			newItem.date = date;
 
 		}
@@ -246,7 +246,7 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 
 			var code = c[2];
 			var date = c[3];
-			newItem.code = code; // publicLawNumber non défini 
+			newItem.code = code; // publicLawNumber non défini
 			newItem.date = date;
 
 		}
@@ -261,7 +261,7 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 			newItem.code = code;
 			newItem.date = date;
 		}
-		
+
 		newItem.complete();
 	}
 
