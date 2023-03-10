@@ -36,15 +36,15 @@
 */
 
 function detectWeb(doc, url) {
-  var iconCSSSelector = doc.querySelector('li.in > span').firstElementChild.className;
-  var iconNumber = Number(iconCSSSelector.match(/(\d+)/)[0]);
 	// single items end in an id number that is 6 digits or more
 	const itemIDURL = /\d{6,}$/;
 	if (url.match(itemIDURL)) {
-	if (iconCSSSelector) {
-	  // Maps visual icons from catalog page to Zotero itemType
-	  return translateIcon(iconNumber);
-	}
+    var iconCSSSelector = doc.querySelector('li.in > span').firstElementChild.className;
+    var iconNumber = Number(iconCSSSelector.match(/(\d+)/)[0]);
+		if (iconCSSSelector) {
+			// Maps visual icons from catalog page to Zotero itemType
+			return translateIcon(iconNumber);
+		}
 	}
 	else if (getSearchResults(doc, true)) {
 		return 'multiple';
@@ -55,7 +55,6 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	// TODO fix multiple, doesn't work for this page: https://plus.cobiss.net/cobiss/si/sl/bib/search?q=holidays&db=cobib&mat=allmaterials&cof=0_105f-a
 	var rows = doc.querySelectorAll('a[class="title value"]');
 
 	for (let row of rows) {
