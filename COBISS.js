@@ -1,6 +1,6 @@
 {
 	"translatorID": "ceace65b-4daf-4200-a617-a6bf24c75607",
-	"label": "Library Catalog (COBISS)",
+	"label": "COBISS",
 	"creator": "Brendan O'Connell",
 	"target": "^https?://plus\\.cobiss\\.net/cobiss",
 	"minVersion": "5.0",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-02 13:57:27"
+	"lastUpdated": "2023-03-10 08:29:29"
 }
 
 /*
@@ -36,18 +36,16 @@
 */
 
 function detectWeb(doc, url) {
+  var iconCSSSelector = doc.querySelector('li.in > span').firstElementChild.className;
+  var iconNumber = Number(iconCSSSelector.match(/(\d+)/)[0]);
 	// single items end in an id number that is 6 digits or more
 	const itemIDURL = /\d{6,}$/;
-
 	if (url.match(itemIDURL)) {
-		var iconCSSSelector = doc.querySelector('li.in > span').firstElementChild.className;
-		var iconNumber = Number(iconCSSSelector.match(/(\d+)/)[0]);
-	}
 	if (iconCSSSelector) {
-		// Maps visual icons from catalog page to Zotero itemType
-		return translateIcon(iconNumber);
+	  // Maps visual icons from catalog page to Zotero itemType
+	  return translateIcon(iconNumber);
 	}
-
+	}
 	else if (getSearchResults(doc, true)) {
 		return 'multiple';
 	}
@@ -57,6 +55,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
+	// TODO fix multiple, doesn't work for this page: https://plus.cobiss.net/cobiss/si/sl/bib/search?q=holidays&db=cobib&mat=allmaterials&cof=0_105f-a
 	var rows = doc.querySelectorAll('a[class="title value"]');
 
 	for (let row of rows) {
@@ -87,9 +86,69 @@ function constructRISURL(url) {
 	return risURL;
 }
 
-// TODO: change this to capture based on type of material on page, rather than icons
-// waiting for Abe comments
-// regex for item type: \-\s*(.*?)\s*;
+function constructEnglishURL(url) {
+  // default catalog page URL: https://plus.cobiss.net/cobiss/si/sl/bib/107937536
+  // page with English metadata: https://plus.cobiss.net/cobiss/si/en/bib/107937536
+  let englishURL = url.replace(/[a-z]{2}\/bib\//, "en/bib/");
+  return englishURL;
+}
+
+// too many items are classified in RIS as either BOOK or ELEC,
+// including many reports, ebooks etc that thus get itemType "book" or "webpage" too often.
+// this map assigns more accurate itemTypes
+// based on "type of material" classification in English catalog, instead of relying on RIS
+function translateItemType(englishCatalogItemType) {
+  var catalogItemTypeHash = new Map([
+	['undergraduate thesis', 'thesis'],
+	['proceedings', 'conferencePaper'],
+	['novel', 'book'], // https://plus.cobiss.net/cobiss/si/en/bib/35544323
+	['science fiction (prose)', 'book'], //https://plus.cobiss.net/cobiss/si/en/bib/46310659
+	['book', 'book'],
+	['handbook', 'book'],
+	['proceedings of conference contributions', 'conferencePaper'], //https://plus.cobiss.net/cobiss/si/en/bib/91188227
+	['professional monograph', 'report'], //https://plus.cobiss.net/cobiss/si/en/bib/87583747
+	['scientific monograph', 'book'],
+	['textbook', 'book'],
+	['e-book', 'book'],
+	['picture book', 'book'],
+	['treatise, study', 'report'],
+	['catalogue', 'book'],
+	['master\u0027s thesis', 'thesis'], // TODO: test escaped character, https://plus.cobiss.net/cobiss/si/en/bib/92444931
+	['picture book', 'book'],
+	['short stories', 'book'],
+	['research report', 'report'],
+	['poetry', 'book'],
+	['dissertation', 'thesis'],
+	['picture book', 'book'],
+	['offprint', 'magazineArticle'],
+	['guide-book', 'book'],
+	['expertise', 'hearing'], // this is court testimony, not sure what the correct item type should be https://plus.cobiss.net/cobiss/si/en/bib/94791683
+	['profess. monogr', 'report'],
+	['project documentation', 'report'],
+	['antiquarian material', 'book'], // most of these are books, e.g. https://plus.cobiss.net/cobiss/si/en/bib/7543093
+	['other lit.forms', 'book'],
+	['drama','book'],
+	['strip cartoon', 'book'],
+	['documentary lit', 'book'],
+	['encyclopedia', 'book'],
+	['exercise book', 'book'],
+	['educational material', 'book'],
+	['review', 'report'],
+	['statistics', 'report'],
+	['legislation', 'statute'],
+	['essay', 'book'],
+	['final paper', 'thesis'],
+	['standard', 'book'],
+	['specialist thesis', 'book'],
+	['aphorisms, proverbs', 'book'],
+	['humour, satire, parody', 'book'],
+	// TODO: finish once RIS is working again in catalog
+
+  ]);
+	// TODO: if not found in hash, fall back on itemType from detectWeb
+  return (catalogItemTypeHash.get(englishCatalogItemType));;
+}
+
 function translateIcon(number) {
 	// Maps visual icons on catalog page to Zotero itemType, so user sees the correct icon on
 	// Zotero Save button in browser connector. Icons that don't correspond to an itemType are assigned "book"
@@ -145,8 +204,24 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url = doc.location.href) {
+	// replace specific language in bib record URL with english to detect item type
+	// TODO: if user accesses the English page, we can skip this and read the itemType right off the English page
+	// might save a little time.
+	var englishURL = constructEnglishURL(url);
+	let english = await requestText(englishURL);
+	var typeOfMaterialRegex = /<div\s+class="recordPrompt">\s+<span>Type of material<\/span>\s+-\s+(.*?)(?:\s*;\s*(.*?))?\s+<\/div>/
+	var englishItemType = english.match(typeOfMaterialRegex)[1];
+  Zotero.debug(englishItemType);
+	// Zotero.debug(english);
+	// match englishItemType to something in the dictionary
+  // if nothing is found, fall back on icons
+  var finalItemType = translateItemType(englishItemType);
+  Zotero.debug(finalItemType);
 	const risURL = constructRISURL(url);
 	const risText = await requestText(risURL);
+
+	// Zotero.debug(englishURL);
+
 	// RIS always has an extraneous OK## at the beginning, remove it
 	const fixedRisText = risText.replace(/^OK##/, '');
 	if (doc.getElementById("unpaywall-link")) {
@@ -169,7 +244,18 @@ async function scrape(doc, url = doc.location.href) {
 				document: doc
 			});
 		}
-    // TODO: Save URL only if it's a link to full text
+		// TODO: Save URL only if it's a link to full text
+		// TODO: Save Link field somewhere, e.g. https://plus.cobiss.net/cobiss/si/en/bib/70461955
+		// here's another URL that's full text: https://plus.cobiss.net/cobiss/si/en/bib/95451907
+		// Links to full text PDF: https://plus.cobiss.net/cobiss/si/en/bib/105123075
+
+
+
+
+
+		item.itemType = finalItemType
+		// TODO: Add tags, e.g. this example https://plus.cobiss.net/cobiss/si/sl/bib/82789891
+		// or this one https://plus.cobiss.net/cobiss/si/en/bib/94215171
 		item.url = url;
 		item.complete();
 	});
@@ -515,6 +601,199 @@ var testCases = [
 					},
 					{
 						"note": "<p>Izvleček ; Abstract</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/si/sl/bib/82789891",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "Posvet Avtomatizacija strege in montaže 2021/2021 - ASM '21/22, Ljubljana, 11. 05. 2022: zbornik povzetkov s posveta",
+				"creators": [
+					{
+						"lastName": "Posvet Avtomatizacija strege in montaže",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Herakovič",
+						"firstName": "Niko",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Debevec",
+						"firstName": "Mihael",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Pipan",
+						"firstName": "Miha",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Adrović",
+						"firstName": "Edo",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2022",
+				"ISBN": "9789616980821",
+				"libraryCatalog": "COBISS",
+				"pages": "141",
+				"place": "Ljubljana",
+				"publisher": "Fakulteta za strojništvo",
+				"shortTitle": "Posvet Avtomatizacija strege in montaže 2021/2021 - ASM '21/22, Ljubljana, 11. 05. 2022",
+				"url": "https://plus.cobiss.net/cobiss/si/sl/bib/82789891",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>180 izv.</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/si/sl/bib/82789891",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "Posvet Avtomatizacija strege in montaže 2021/2021 - ASM '21/22, Ljubljana, 11. 05. 2022: zbornik povzetkov s posveta",
+				"creators": [
+					{
+						"lastName": "Posvet Avtomatizacija strege in montaže",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Herakovič",
+						"firstName": "Niko",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Debevec",
+						"firstName": "Mihael",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Pipan",
+						"firstName": "Miha",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Adrović",
+						"firstName": "Edo",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2022",
+				"ISBN": "9789616980821",
+				"libraryCatalog": "COBISS",
+				"pages": "141",
+				"place": "Ljubljana",
+				"publisher": "Fakulteta za strojništvo",
+				"shortTitle": "Posvet Avtomatizacija strege in montaže 2021/2021 - ASM '21/22, Ljubljana, 11. 05. 2022",
+				"url": "https://plus.cobiss.net/cobiss/si/sl/bib/82789891",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>180 izv.</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/si/en/bib/78691587",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "Modeliranje obratovanja transformatorskih postaj z metodami strojnega učenja: diplomsko delo: visokošolski strokovni študijski program prve stopnje Računalništvo in informatika",
+				"creators": [
+					{
+						"lastName": "Čuš",
+						"firstName": "Tibor",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022",
+				"libraryCatalog": "COBISS",
+				"numPages": "55",
+				"place": "Ljubljana",
+				"shortTitle": "Modeliranje obratovanja transformatorskih postaj z metodami strojnega učenja",
+				"university": "[T. Čuš]",
+				"url": "https://plus.cobiss.net/cobiss/si/en/bib/78691587",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "computer science"
+					},
+					{
+						"tag": "diploma"
+					},
+					{
+						"tag": "diplomske naloge"
+					},
+					{
+						"tag": "electrical power system"
+					},
+					{
+						"tag": "elektroenergetski sistem"
+					},
+					{
+						"tag": "forecasting models"
+					},
+					{
+						"tag": "indikatorji preobremenitev"
+					},
+					{
+						"tag": "machine learning"
+					},
+					{
+						"tag": "napovedni modeli"
+					},
+					{
+						"tag": "overload indicators"
+					},
+					{
+						"tag": "transformer station"
+					},
+					{
+						"tag": "visokošolski strokovni študij"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Bibliografija: str. 53-55</p>"
+					},
+					{
+						"note": "<p>Povzetek ; Abstract: Modeling transformer station operation with machine learning methods</p>"
 					}
 				],
 				"seeAlso": []
