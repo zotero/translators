@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-10 16:22:19"
+	"lastUpdated": "2023-03-10 16:31:44"
 }
 
 /*
@@ -239,9 +239,9 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 		b = title.match(/(LOI|Décret) n[o°] (s*[0-9-]+) du ((s*[0-9]+) (janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre) (s*[0-9z]+))/)
 		if (b) {
 
-			var code = b[2];
+			var codeNumber = b[2];
 			var date = b[3];
-			newItem.code = code; // publicLawNumber non défini
+			newItem.codeNumber = codeNumber; // publicLawNumber non défini
 			newItem.date = date;
 
 		}
@@ -250,9 +250,9 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 		c = title.match(/(Loi|Décret) n[o°](s*[0-9-]+) du ((s*[0-9]+) (janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre) (s*[0-9z]+))/)
 		if (c) {
 
-			var code = c[2];
+			var codeNumber = c[2];
 			var date = c[3];
-			newItem.code = code; // publicLawNumber non défini
+			newItem.codeNumber = codeNumber; // publicLawNumber non défini
 			newItem.date = date;
 
 		}
@@ -261,10 +261,10 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 		e = title.match(/(Délibération) (s*[0-9-]+) du ((s*[0-9]+) (.*) (s*[0-9]+))/)
 		if (e) {
 			var nameOfAct = e[1];
-			var code = e[2];
+			var codeNumber = e[2];
 			var date = e[3];
 			newItem.nameOfAct = nameOfAct + ' de la Commission Nationale de l\'Informatique et des Libertés';
-			newItem.code = code;
+			newItem.codeNumber = codeNumber;
 			newItem.date = date;
 		}
 
@@ -485,7 +485,7 @@ var testCases = [
 				"nameOfAct": "Délibération de la Commission Nationale de l'Informatique et des Libertés",
 				"creators": [],
 				"dateEnacted": "4 février 1997",
-				"code": "97-008",
+				"codeNumber": "97-008",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -543,7 +543,7 @@ var testCases = [
 				"nameOfAct": "LOI n° 2012-1561 du 31 décembre 2012 relative à la représentation communale dans les communautés de communes et d'agglomération (1)",
 				"creators": [],
 				"dateEnacted": "31 décembre 2012",
-				"code": "2012-1561",
+				"codeNumber": "2012-1561",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -560,7 +560,7 @@ var testCases = [
 				"nameOfAct": "Loi n°85-1483 du 31 décembre 1985 AUTORISANT L'APPROBATION D'UN ACCORD DE COOPERATION EN MATIERE ECONOMIQUE ET FINANCIERE ENTRE LE GOUVERNEMENT DE LA REPUBLIQUE FRANCAISE ET LE GOUVERNEMENT DE LA REPUBLIQUE GABONAISE,SIGNE A PARIS LE 14-04-1983",
 				"creators": [],
 				"dateEnacted": "31 décembre 1985",
-				"code": "85-1483",
+				"codeNumber": "85-1483",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
