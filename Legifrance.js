@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-07 16:46:17"
+	"lastUpdated": "2023-03-10 14:17:47"
 }
 
 /*
@@ -73,8 +73,7 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 
 		// Situation selon les juridictions
 
-		// Conseil constitutionnel
-
+		var a; // Conseil constitutionnel
 		a = title.match(/(.*) - (.*) - (.*) - (.*)/)
 		if (a) {
 			var numero = a[1];
@@ -87,7 +86,7 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 			newItem.extra = texteparties;
 		}
 
-		// Conseil d'État avec indication de publication
+		var b; // Conseil d'État avec indication de publication
 		b = title.match(/(Conseil d'État), (.*), (s*[0-9/]+), (s*[0-9]+), (.*Lebon)/)
 		if (b) {
 			var cour = b[1];
@@ -102,7 +101,7 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 			newItem.reporter = publication;
 		}
 
-		// Conseil d'État sans indication de publication
+		var c; // Conseil d'État sans indication de publication
 		c = title.match(/(Conseil d'État), (.*), (s*[0-9/]+), (s*[0-9]+)/)
 		if (c) {
 			var formation = c[2];
@@ -114,7 +113,7 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 			newItem.docketNumber = numero;
 		}
 
-		// Tribunal des conflits (jp administrative)
+		var d; // Tribunal des conflits (jp administrative)
 		d = title.match(/(Tribunal des Conflits), , (s*[0-9/]+), (.*)/)
 		if (d) {
 			var date = d[2];
@@ -124,7 +123,8 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 			newItem.docketNumber = numero;
 		}
 
-		// Cours administratives d'appel avec publication // très rares cas sans publication
+
+		var e; // Cours administratives d'appel avec publication // très rares cas sans publication
 		e = title.match(/(Cour administrative .*), (.*), (s*[0-9/]+), (.*), (.*Lebon)/)
 		if (e) {
 			var cour = e[1];
@@ -194,7 +194,7 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 			newItem.docketNumber = numero;
 		}
 
-		// Tribunal des conflits - Base CASS
+		var j; // Tribunal des conflits - Base CASS
 		j = title.match(/(Tribunal des conflits), (.*), (.*), (s*[0-9-. ]+), (.*)/)
 		if (j) {
 			var nature = j[2];
