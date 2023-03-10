@@ -1,6 +1,6 @@
 {
 	"env": {
-		"browser": false,
+		"browser": true,
 		"es2017": true
 	},
 	"extends": [
@@ -13,14 +13,9 @@
 		"Zotero": "readonly",
 		"Z": "readonly",
 		"ZU": "readonly",
-		"DOMParser": "readonly",
-		"URLSearchParams": "readonly",
-		"XPathResult": "readonly",
-		"XMLSerializer": "readonly",
 		"attr": "readonly",
 		"innerText": "readonly",
 		"text": "readonly",
-		"atob": "readonly",
 		"request": "readonly",
 		"requestText": "readonly",
 		"requestJSON": "readonly",
