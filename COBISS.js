@@ -112,7 +112,7 @@ function translateItemType(englishCatalogItemType) {
 	['picture book', 'book'],
 	['treatise, study', 'report'],
 	['catalogue', 'book'],
-	['master\u0027s thesis', 'thesis'], // TODO: test escaped character, https://plus.cobiss.net/cobiss/si/en/bib/92444931
+	['master\u0027s thesis', 'thesis'],
 	['picture book', 'book'],
 	['short stories', 'book'],
 	['research report', 'report'],
@@ -141,10 +141,10 @@ function translateItemType(englishCatalogItemType) {
 	['specialist thesis', 'book'],
 	['aphorisms, proverbs', 'book'],
 	['humour, satire, parody', 'book'],
+
 	// TODO: finish once RIS is working again in catalog
 
   ]);
-	// TODO: if not found in hash, fall back on itemType from detectWeb
   return (catalogItemTypeHash.get(englishCatalogItemType));;
 }
 
@@ -250,9 +250,12 @@ async function scrape(doc, url = doc.location.href) {
 
 
 
-
-
-		item.itemType = finalItemType
+		// if "Type of material" from catalog page isn't in catalogItemTypeHash, finalItemType will return as undefined.
+		// in this case, default Type from RIS will be applied.
+		// if finalItemType is found from the catalog page, override itemType from RIS with it.
+		if (finalItemType) {
+			item.itemType = finalItemType;
+		}
 		// TODO: Add tags, e.g. this example https://plus.cobiss.net/cobiss/si/sl/bib/82789891
 		// or this one https://plus.cobiss.net/cobiss/si/en/bib/94215171
 		item.url = url;
