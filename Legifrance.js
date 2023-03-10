@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-10 14:17:47"
+	"lastUpdated": "2023-03-10 14:57:58"
 }
 
 /*
@@ -289,219 +289,167 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.legifrance.gouv.fr/affichJuriConst.do?oldAction=rechJuriConst&idTexte=CONSTEXT000026458384&fastReqId=79382296&fastPos=1",
+		"url": "https://www.legifrance.gouv.fr/cons/id/CONSTEXT000026458384/",
 		"items": [
 			{
 				"itemType": "case",
+				"caseName": "Décision 2012-274 QPC - 28 septembre 2012 - Consorts G.  [Calcul de l'indemnité de réduction due par le donataire ou le légataire d'une exploitation agricole en Alsace-Moselle] - Conformité",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Document en RTF",
-						"mimeType": "application/rtf"
-					}
-				],
-				"title": "Décision 2012-274 QPC - 28 septembre 2012 - Consorts G. [Calcul de l'indemnité de réduction due par le donataire ou le légataire d'une exploitation agricole en Alsace-Moselle] - Conformité",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"url": "http://www.legifrance.gouv.fr/affichJuriConst.do?oldAction=rechJuriConst&idTexte=CONSTEXT000026458384&fastReqId=79382296&fastPos=1",
+				"dateDecided": "28 septembre 2012",
 				"court": "Conseil constitutionnel",
 				"docketNumber": "Décision 2012-274 QPC",
-				"date": "28 septembre 2012",
-				"extra": "Consorts G. [Calcul de l'indemnité de réduction due par le donataire ou le légataire d'une exploitation agricole en Alsace-Moselle]",
-				"libraryCatalog": "Légifrance"
+				"extra": "Consorts G.  [Calcul de l'indemnité de réduction due par le donataire ou le légataire d'une exploitation agricole en Alsace-Moselle]",
+				"url": "https://www.legifrance.gouv.fr/cons/id/CONSTEXT000026458384/",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.legifrance.gouv.fr/affichJuriAdmin.do?oldAction=rechJuriAdmin&idTexte=CETATEXT000026845833&fastReqId=1276712822&fastPos=1",
+		"url": "https://www.legifrance.gouv.fr/ceta/id/CETATEXT000026845833/",
 		"items": [
 			{
 				"itemType": "case",
+				"caseName": "Tribunal des Conflits, , 17/12/2012, C3871",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Document en RTF",
-						"mimeType": "application/rtf"
-					}
-				],
-				"title": "Tribunal des Conflits, , 17/12/2012, C3871",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"url": "http://www.legifrance.gouv.fr/affichJuriAdmin.do?oldAction=rechJuriAdmin&idTexte=CETATEXT000026845833&fastReqId=1276712822&fastPos=1",
+				"dateDecided": "17/12/2012",
 				"court": "Tribunal des Conflits",
-				"date": "17/12/2012",
 				"docketNumber": "C3871",
-				"libraryCatalog": "Légifrance"
+				"url": "https://www.legifrance.gouv.fr/ceta/id/CETATEXT000026845833/",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.legifrance.gouv.fr/affichJuriAdmin.do?oldAction=rechJuriAdmin&idTexte=CETATEXT000021750743&fastReqId=754258727&fastPos=1",
+		"url": "https://www.legifrance.gouv.fr/ceta/id/CETATEXT000021750743/",
 		"items": [
 			{
 				"itemType": "case",
+				"caseName": "Tribunal Administratif de Nantes, 5ème chambre, 17/12/2009, 0802183",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Document en RTF",
-						"mimeType": "application/rtf"
-					}
-				],
-				"title": "Tribunal Administratif de Nantes, 5ème chambre, 17/12/2009, 0802183",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"url": "http://www.legifrance.gouv.fr/affichJuriAdmin.do?oldAction=rechJuriAdmin&idTexte=CETATEXT000021750743&fastReqId=754258727&fastPos=1",
+				"dateDecided": "17/12/2009",
 				"court": "Tribunal Administratif de Nantes, 5ème chambre",
-				"date": "17/12/2009",
 				"docketNumber": "0802183",
-				"libraryCatalog": "Légifrance"
+				"url": "https://www.legifrance.gouv.fr/ceta/id/CETATEXT000021750743/",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.legifrance.gouv.fr/affichJuriAdmin.do?oldAction=rechJuriAdmin&idTexte=CETATEXT000026925589&fastReqId=1836722737&fastPos=1",
+		"url": "https://www.legifrance.gouv.fr/ceta/id/CETATEXT000026925589/",
 		"items": [
 			{
 				"itemType": "case",
+				"caseName": "Cour administrative d'appel de Bordeaux, 2ème chambre (formation à 3), 08/01/2013, 11BX01796, Inédit au recueil Lebon",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Document en RTF",
-						"mimeType": "application/rtf"
-					}
-				],
-				"title": "Cour administrative d'appel de Bordeaux, 2ème chambre (formation à 3), 08/01/2013, 11BX01796, Inédit au recueil Lebon",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"url": "http://www.legifrance.gouv.fr/affichJuriAdmin.do?oldAction=rechJuriAdmin&idTexte=CETATEXT000026925589&fastReqId=1836722737&fastPos=1",
+				"dateDecided": "08/01/2013",
 				"court": "Cour administrative d'appel de Bordeaux",
-				"extra": "2ème chambre (formation à 3)",
-				"date": "08/01/2013",
 				"docketNumber": "11BX01796",
+				"extra": "2ème chambre (formation à 3)",
 				"reporter": "Inédit au recueil Lebon",
-				"libraryCatalog": "Légifrance"
+				"url": "https://www.legifrance.gouv.fr/ceta/id/CETATEXT000026925589/",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.legifrance.gouv.fr/affichJuriJudi.do?oldAction=rechJuriJudi&idTexte=JURITEXT000026815591&fastReqId=673705389&fastPos=2",
+		"url": "https://www.legifrance.gouv.fr/juri/id/JURITEXT000026815591/",
 		"items": [
 			{
 				"itemType": "case",
+				"caseName": "Cour de cassation, Chambre mixte, 21 décembre 2012, 12-15.063, Publié au bulletin",
 				"creators": [],
-				"notes": [],
-				"tags": [
-					"Cour de cassation"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Document en RTF",
-						"mimeType": "application/rtf"
-					}
-				],
-				"title": "Cour de cassation, Chambre mixte, 21 décembre 2012, 12-15.063, Publié au bulletin",
-				"url": "http://www.legifrance.gouv.fr/affichJuriJudi.do?oldAction=rechJuriJudi&idTexte=JURITEXT000026815591&fastReqId=673705389&fastPos=2",
+				"dateDecided": "21 décembre 2012",
 				"court": "Cour de cassation",
-				"extra": "Chambre mixte",
-				"date": "21 décembre 2012",
 				"docketNumber": "12-15.063",
+				"extra": "Chambre mixte",
 				"reporter": "Publié au bulletin",
-				"libraryCatalog": "Légifrance",
-				"accessDate": "CURRENT_TIMESTAMP"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.legifrance.gouv.fr/affichJuriJudi.do?oldAction=rechJuriJudi&idTexte=JURITEXT000026870360&fastReqId=1277546473&fastPos=1",
-		"items": [
-			{
-				"itemType": "case",
-				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Document en RTF",
-						"mimeType": "application/rtf"
-					}
-				],
-				"title": "Cour d'appel de Limoges, 27 décembre 2012, 11/01637",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"url": "http://www.legifrance.gouv.fr/affichJuriJudi.do?oldAction=rechJuriJudi&idTexte=JURITEXT000026870360&fastReqId=1277546473&fastPos=1",
-				"court": "Cour d'appel de Limoges",
-				"date": "27 décembre 2012",
-				"docketNumber": "11/01637",
-				"libraryCatalog": "Légifrance"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.legifrance.gouv.fr/affichJuriJudi.do?oldAction=rechJuriJudi&idTexte=JURITEXT000020391875&fastReqId=1321603064&fastPos=9",
-		"items": [
-			{
-				"itemType": "case",
-				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Document en RTF",
-						"mimeType": "application/rtf"
-					}
-				],
-				"title": "Conseil de prud'hommes de Bordeaux, 13 janvier 2009, 04/00973",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"url": "http://www.legifrance.gouv.fr/affichJuriJudi.do?oldAction=rechJuriJudi&idTexte=JURITEXT000020391875&fastReqId=1321603064&fastPos=9",
-				"court": "Conseil de prud'hommes de Bordeaux",
-				"date": "13 janvier 2009",
-				"docketNumber": "04/00973",
-				"libraryCatalog": "Légifrance"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.legifrance.gouv.fr/affichJuriJudi.do?oldAction=rechJuriJudi&idTexte=JURITEXT000026304473&fastReqId=2146436360&fastPos=11",
-		"items": [
-			{
-				"itemType": "case",
-				"creators": [],
-				"notes": [],
+				"url": "https://www.legifrance.gouv.fr/juri/id/JURITEXT000026815591/",
+				"attachments": [],
 				"tags": [
-					"civile"
-				],
-				"seeAlso": [],
-				"attachments": [
 					{
-						"title": "Document en RTF",
-						"mimeType": "application/rtf"
+						"tag": "Cour de cassation"
 					}
 				],
-				"title": "Tribunal des conflits, civile, 14 mai 2012, 12-03.836, Publié au bulletin",
-				"url": "http://www.legifrance.gouv.fr/affichJuriJudi.do?oldAction=rechJuriJudi&idTexte=JURITEXT000026304473&fastReqId=2146436360&fastPos=11",
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.legifrance.gouv.fr/juri/id/JURITEXT000026870360/",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "Cour d'appel de Limoges, 27 décembre 2012, 11/01637",
+				"creators": [],
+				"dateDecided": "27 décembre 2012",
+				"court": "Cour d'appel de Limoges",
+				"docketNumber": "11/01637",
+				"url": "https://www.legifrance.gouv.fr/juri/id/JURITEXT000026870360/",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.legifrance.gouv.fr/juri/id/JURITEXT000020391875/",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "Conseil de prud'hommes de Bordeaux, 13 janvier 2009, 04/00973",
+				"creators": [],
+				"dateDecided": "13 janvier 2009",
+				"court": "Conseil de prud'hommes de Bordeaux",
+				"docketNumber": "04/00973",
+				"url": "https://www.legifrance.gouv.fr/juri/id/JURITEXT000020391875/",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.legifrance.gouv.fr/juri/id/JURITEXT000026304473/",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "Tribunal des conflits, civile, 14 mai 2012, 12-03.836, Publié au bulletin",
+				"creators": [],
+				"dateDecided": "14 mai 2012",
 				"court": "Tribunal des conflits",
-				"date": "14 mai 2012",
 				"docketNumber": "12-03.836",
 				"reporter": "Publié au bulletin",
-				"libraryCatalog": "Légifrance",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"url": "https://www.legifrance.gouv.fr/juri/id/JURITEXT000026304473/",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "civile"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -511,110 +459,91 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "statute",
-				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
 				"title": "Code civil - Article 16",
+				"creators": [],
 				"accessDate": "CURRENT_TIMESTAMP",
 				"code": "Code civil",
 				"codeNumber": "16",
-				"libraryCatalog": "Légifrance"
+				"libraryCatalog": "Légifrance",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.legifrance.gouv.fr/affichCnil.do?oldAction=rechExpCnil&id=CNILTEXT000017653865&fastReqId=131680152&fastPos=1",
+		"url": "https://www.legifrance.gouv.fr/cnil/id/CNILTEXT000017653865/",
 		"items": [
 			{
 				"itemType": "statute",
-				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Délibération de la Commission Nationale de l'Informatique et des Libertés",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"nameOfAct": "Délibération de la Commission Nationale de l'Informatique et des Libertés",
+				"creators": [],
+				"dateEnacted": "4 février 1997",
 				"code": "97-008",
-				"date": "04 février 1997",
-				"libraryCatalog": "Légifrance"
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.legifrance.gouv.fr/affichJuriAdmin.do?oldAction=rechJuriAdmin&idTexte=CETATEXT000026910036&fastReqId=1849242527&fastPos=10",
+		"url": "https://www.legifrance.gouv.fr/ceta/id/CETATEXT000026910036/",
 		"items": [
 			{
 				"itemType": "case",
+				"caseName": "Conseil d'État, 1ère et 6ème sous-sections réunies, 07/01/2013, 343126",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Document en RTF",
-						"mimeType": "application/rtf"
-					}
-				],
-				"title": "Conseil d'État, 1ère et 6ème sous-sections réunies, 07/01/2013, 343126",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"url": "http://www.legifrance.gouv.fr/affichJuriAdmin.do?oldAction=rechJuriAdmin&idTexte=CETATEXT000026910036&fastReqId=1849242527&fastPos=10",
+				"dateDecided": "07/01/2013",
 				"court": "Conseil d'État",
-				"extra": "1ère et 6ème sous-sections réunies",
-				"date": "07/01/2013",
 				"docketNumber": "343126",
-				"libraryCatalog": "Légifrance"
+				"extra": "1ère et 6ème sous-sections réunies",
+				"url": "https://www.legifrance.gouv.fr/ceta/id/CETATEXT000026910036/",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.legifrance.gouv.fr/affichJuriAdmin.do?oldAction=rechJuriAdmin&idTexte=CETATEXT000026910028&fastReqId=726489675&fastPos=15",
+		"url": "https://www.legifrance.gouv.fr/ceta/id/CETATEXT000026910028/",
 		"items": [
 			{
 				"itemType": "case",
+				"caseName": "Conseil d'État, 10ème sous-section jugeant seule, 28/12/2012, 331405, Inédit au recueil Lebon",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Document en RTF",
-						"mimeType": "application/rtf"
-					}
-				],
-				"title": "Conseil d'État, 10ème sous-section jugeant seule, 28/12/2012, 331405, Inédit au recueil Lebon",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"url": "http://www.legifrance.gouv.fr/affichJuriAdmin.do?oldAction=rechJuriAdmin&idTexte=CETATEXT000026910028&fastReqId=726489675&fastPos=15",
+				"dateDecided": "28/12/2012",
 				"court": "Conseil d'État",
-				"extra": "10ème sous-section jugeant seule",
-				"date": "28/12/2012",
 				"docketNumber": "331405",
+				"extra": "10ème sous-section jugeant seule",
 				"reporter": "Inédit au recueil Lebon",
-				"libraryCatalog": "Légifrance"
+				"url": "https://www.legifrance.gouv.fr/ceta/id/CETATEXT000026910028/",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.legifrance.gouv.fr/affichTexte.do?cidTexte=JORFTEXT000026871286&fastPos=1&fastReqId=217867052&categorieLien=id&oldAction=rechTexte",
+		"url": "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000026871286",
 		"items": [
 			{
 				"itemType": "statute",
+				"nameOfAct": "LOI n° 2012-1561 du 31 décembre 2012 relative à la représentation communale dans les communautés de communes et d'agglomération (1)",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "LOI n° 2012-1561 du 31 décembre 2012 relative à la représentation communale dans les communautés de communes et d'agglomération",
-				"accessDate": "CURRENT_TIMESTAMP",
+				"dateEnacted": "31 décembre 2012",
 				"code": "2012-1561",
-				"date": "31 décembre 2012",
-				"libraryCatalog": "Légifrance"
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -624,16 +553,16 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "statute",
-				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
 				"title": "Loi n°85-1483 du 31 décembre 1985 AUTORISANT L'APPROBATION D'UN ACCORD DE COOPERATION EN MATIERE ECONOMIQUE ET FINANCIERE ENTRE LE GOUVERNEMENT DE LA REPUBLIQUE FRANCAISE ET LE GOUVERNEMENT DE LA REPUBLIQUE GABONAISE,SIGNE A PARIS LE 14-04-1983",
+				"creators": [],
+				"date": "31 décembre 1985",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"code": "85-1483",
-				"date": "31 décembre 1985",
-				"libraryCatalog": "Légifrance"
+				"libraryCatalog": "Légifrance",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
