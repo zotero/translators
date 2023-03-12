@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-11 01:35:15"
+	"lastUpdated": "2023-03-12 20:56:36"
 }
 
 /*
@@ -55,6 +55,10 @@ function detectWeb(doc, url) {
 	}
 	// Not on search page.
 	if (doc.querySelector("div.post_wrapper")) {
+		const tags = getTags(doc);
+		if (tags && tags.includes("podcasts")) {
+			return "podcast";
+		}
 		return "blogPost";
 	}
 	return false;
@@ -103,53 +107,12 @@ function getSearchResults(doc, checkOnly) {
 }
 
 function scrape(doc, url) {
-	var translator = Zotero.loadTranslator('web');
+	const translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	
-	translator.setHandler('itemDone', function (obj, item) {
-		let maybeTrans = item.title.match(/translated by .+$/i);
-		maybeTrans = maybeTrans && maybeTrans.length > 0
-			? maybeTrans[0]
-			: "";
-
-		item.creators = [];
-		const rawAuthors
-			= text(doc, ".author_name span[itemprop='name']");
-		const normRawAuthors = ZU.trimInternal(rawAuthors);
-		let sponsor = text(doc, ".sponsored>a");
-		sponsor = ZU.trimInternal(sponsor).toLowerCase();
-
-		const authorIsNotPerson
-			= (normRawAuthors.startsWith("Lit Hub")
-				|| normRawAuthors === "Literary Hub"
-				|| normRawAuthors === "Book Marks"
-				|| normRawAuthors === "Fiction Non Fiction"
-				// XXX: Missing the "with" pattern of podcast
-				// contributors and other minor patterns.
-				|| sponsor.includes(normRawAuthors.toLowerCase()));
-		if (authorIsNotPerson) {
-			item.creators.push({ fieldMode: 1, lastName: normRawAuthors, creatorType: "author" });
-		}
-		else { // Author(s) is/are likely person(s)
-			for (let auth of rawAuthors.split(/(?:,|\s+and\s+)/)) {
-				auth = auth.trim();
-				if (auth) {
-					const t = maybeTrans.includes(auth)
-						? "translator"
-						: "author";
-					item.creators.push(ZU.cleanAuthor(auth, t));
-				}
-			}
-		}
-
-		item.publicationTitle = "Literary Hub";
-
-		item.tags = Array
-			.from(doc.querySelectorAll(".post_tag a[rel='tag']"))
-			.map(t => ({ tag: t.textContent.trim() }));
-
-		item.complete();
+	translator.setHandler('itemDone', function (tobj, item) {
+		handleItem(doc, item);
 	});
 
 	translator.getTranslatorObject(function (trans) {
@@ -157,26 +120,176 @@ function scrape(doc, url) {
 	});
 }
 
+// Detect the LitHub article type (plain, Lit Hub Excerpts, ...).
+// NOTE: Must be called after the item's tags have been populated, because some
+// detection routines require tag data.
+function detectType(doc) {
+	if (doc.querySelector("div.excerptpage")) {
+		return "excerpt";
+	}
+	// Other types of posts, if needed, may be add here.
+	return false;
+}
+
+// Dispatch the handler based on the document's type.
+function handleItem(doc, item) {
+	item.publicationTitle = "Literary Hub";
+
+	const tags = getTags(doc);
+	item.tags = tags.map(t => ({ tag: t }));
+
+	const articleType = tags.includes("podcasts") ? "podcast" : detectType(doc);
+
+	// Populate the fields (especially authorship info) based on the type
+	// of the article.
+	switch (articleType) {
+		case "excerpt":
+			handleExcerpt(doc, item);
+			break;
+		case "podcast":
+			handlePodcast(doc, item);
+			break;
+		default:
+			handleDefault(doc, item);
+	}
+
+	item.complete();
+}
+
+function handlePodcast(doc, item) {
+	item.itemType = "podcast";
+	item.seriesTitle = getByline(doc);
+	item.creators = getPodcastAuthors(doc);
+	// XXX: get other contributors to the episode.
+}
+
+function getPodcastAuthors(doc) {
+	const textLine = text(doc, ".post_header_wrapper h3");
+	if (!textLine) return [];
+
+	let rawAuth = textLine.match(/(?:conversation with\s+)(.+)(?:\s+on\s+)/i);
+	if (!rawAuth) {
+		rawAuth = textLine.match(/(?:Hosted by\s+)(.+)/i);
+	}
+	if (rawAuth) {
+		return splitNames(rawAuth[1])
+			.map(n => ZU.cleanAuthor(n, "author"));
+	}
+	return [];
+}
+
+function handleDefault(doc, item) {
+	item.creators = getDefaultAuthors(doc, item);
+}
+
+function getDefaultAuthors(doc, item) {
+	let maybeTrans = item.title.match(/translated by .+$/i);
+	maybeTrans = maybeTrans && maybeTrans.length > 0
+		? maybeTrans[0]
+		: "";
+
+	const creators = [];
+	const rawAuthors = getByline(doc);
+	if (rawAuthors === "Literary Hub") {
+		creators.push({ fieldMode: 1, lastName: rawAuthors, creatorType: "author" });
+	}
+	else { // Author(s) is/are likely person(s)
+		for (let auth of splitNames(rawAuthors)) {
+			const t = maybeTrans.includes(auth)
+				? "translator"
+				: "author";
+			creators.push(ZU.cleanAuthor(auth, t));
+		}
+	}
+
+	return creators;
+}
+
+// Handle the page that belongs to the "Lit Hub Excerpts" type.
+function handleExcerpt(doc, item) {
+	item.creators = getExcerptAuthors(doc);
+}
+
+// Parse the document as "Lit Hub Excerpts".
+function getExcerptAuthors(doc) {
+	const rawAuthorText = ZU.trimInternal(text(doc, "div.excerptpage>h2"));
+
+	// Split into possible main author(s)/translator(s) parts.
+	const authTransMatch = rawAuthorText.match(/(.+)\s*\(trans\.\s(.+)\)/);
+
+	const creators = [];
+
+	let nameText;
+	if (authTransMatch) {
+		// Translated work.
+		nameText = authTransMatch[2]; // translator(s)
+		for (let name of splitNames(nameText)) {
+			creators.push(ZU.cleanAuthor(name, "translator"));
+		}
+		nameText = authTransMatch[1]; // original author(s)
+	}
+	else {
+		nameText = rawAuthorText;
+	}
+
+	// Handle original author name(s).
+	for (let name of splitNames(nameText)) {
+		creators.push(ZU.cleanAuthor(name, "author"));
+	}
+
+	return creators;
+}
+
+// Convenience utility functions
+
+// Split a string of personal names delimitered by the comma (,) and optionally
+// with the word "and", no matter whether the Oxford comma style is used.
+function splitNames(str) {
+	return str.split(/(?:,|\s+and\s+)/)
+		.map(s => s.trim())
+		.filter(Boolean);
+}
+
+// Returns an array of tags on the article.
+function getTags(doc) {
+	return Array.from(doc.querySelectorAll(".post_tag a[rel='tag']"))
+		.map(elem => ZU.trimInternal(elem.textContent.trim()));
+}
+
+// Returns the (whitespace-normalized) byline ("By ...") text.
+function getByline(doc) {
+	return ZU.trimInternal(text(doc, ".author_name span[itemprop='name']"));
+}
+
 /** BEGIN TEST CASES **/
 var testCases = [
+	{
+		"type": "web",
+		"url": "https://lithub.com/?s=wonder+AND+lelio",
+		"items": "multiple"
+	},
 	{
 		"type": "web",
 		"url": "https://lithub.com/lydia-conklin-on-letting-their-personality-into-their-work/",
 		"items": [
 			{
-				"itemType": "blogPost",
+				"itemType": "podcast",
 				"title": "Lydia Conklin on Letting Their Personality Into Their Work",
 				"creators": [
 					{
-						"fieldMode": 1,
-						"lastName": "I'm a Writer But",
+						"firstName": "Alex",
+						"lastName": "Higley",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Lindsay",
+						"lastName": "Hunter",
 						"creatorType": "author"
 					}
 				],
-				"date": "2023-03-07T09:52:02+00:00",
 				"abstractNote": "Welcome to I’m a Writer But, where two writers-and talk to other writers-and about their work, their lives, their other work, the stuff that takes up any free time they have, all the stuff th…",
-				"blogTitle": "Literary Hub",
 				"language": "en-US",
+				"seriesTitle": "I'm a Writer But",
 				"url": "https://lithub.com/lydia-conklin-on-letting-their-personality-into-their-work/",
 				"attachments": [
 					{
@@ -325,19 +438,23 @@ var testCases = [
 		"url": "https://lithub.com/eden-boudreau-on-memoirs-that-risk-everything/",
 		"items": [
 			{
-				"itemType": "blogPost",
+				"itemType": "podcast",
 				"title": "Eden Boudreau on Memoirs That Risk Everything",
 				"creators": [
 					{
-						"fieldMode": 1,
-						"lastName": "Write-minded",
+						"firstName": "Brooke",
+						"lastName": "Warner",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Grant",
+						"lastName": "Faulkner",
 						"creatorType": "author"
 					}
 				],
-				"date": "2023-02-28T09:52:51+00:00",
 				"abstractNote": "Write-minded: Weekly Inspiration for Writers is currently in its fourth year. We are a weekly podcast for writers craving a unique blend of inspiration and real talk about the ups and downs of the …",
-				"blogTitle": "Literary Hub",
 				"language": "en-US",
+				"seriesTitle": "Write-minded",
 				"url": "https://lithub.com/eden-boudreau-on-memoirs-that-risk-everything/",
 				"attachments": [
 					{
@@ -375,8 +492,117 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://lithub.com/?s=wonder+AND+lelio",
-		"items": "multiple"
+		"url": "https://lithub.com/lesser-islands/",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "Lesser Islands",
+				"creators": [
+					{
+						"firstName": "Peter",
+						"lastName": "DiGiovanni",
+						"creatorType": "translator"
+					},
+					{
+						"firstName": "Donatella",
+						"lastName": "Melucci",
+						"creatorType": "translator"
+					},
+					{
+						"firstName": "Lorenza",
+						"lastName": "Pieri",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-02-24T09:52:10+00:00",
+				"abstractNote": "We saw the dolphins in the morning. We trailed their shiny fins in the boat for a good half hour; then they went too far, and Papa had to turn back. For me, it was the first time. It was the end of…",
+				"blogTitle": "Literary Hub",
+				"language": "en-US",
+				"url": "https://lithub.com/lesser-islands/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Donatella Melucci"
+					},
+					{
+						"tag": "Europa"
+					},
+					{
+						"tag": "Excerpt"
+					},
+					{
+						"tag": "Fiction"
+					},
+					{
+						"tag": "Italian"
+					},
+					{
+						"tag": "Lesser Islands"
+					},
+					{
+						"tag": "Peter DiGiovanni"
+					},
+					{
+						"tag": "novel"
+					},
+					{
+						"tag": "translation"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://lithub.com/the-forest-a-fable-of-america-in-the-1830s/",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "The Forest: A Fable of America in the 1830s",
+				"creators": [
+					{
+						"firstName": "Alexander",
+						"lastName": "Nemerov",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-03-10T09:08:09+00:00",
+				"abstractNote": "“Smoke and Burnt Pine” Nat Turner saw hieroglyphic characters on the leaves. Written in blood, they portrayed men in different poses, the same he had seen in the sky when the Holy Ghost…",
+				"blogTitle": "Literary Hub",
+				"language": "en-US",
+				"shortTitle": "The Forest",
+				"url": "https://lithub.com/the-forest-a-fable-of-america-in-the-1830s/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Alexander Nemerov"
+					},
+					{
+						"tag": "Excerpt"
+					},
+					{
+						"tag": "Princeton University Press"
+					},
+					{
+						"tag": "The Forest"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
