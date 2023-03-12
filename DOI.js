@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-01-25 15:27:33"
+	"lastUpdated": "2023-03-12 01:46:07"
 }
 
 /*
@@ -139,17 +139,16 @@ function detectWeb(doc, url) {
 	// http://www.sciencedirect.com/science/advertisement/options/num/264322/mainCat/general/cat/general/acct/...
 	// This can be removed from blacklist when 5c324134c636a3a3e0432f1d2f277a6bc2717c2a hits all clients (Z 3.0+)
 	const blacklistRe = /^https?:\/\/[^/]*(?:google\.com|sciencedirect\.com\/science\/advertisement\/)/i;
-	
-	if (!blacklistRe.test(url)) {
-		let doiOrDOIs = getDOIs(doc, url);
-		if (Array.isArray(doiOrDOIs) && doiOrDOIs.length) {
-			return "multiple";
-		}
-		else {
-			return "journalArticle"; // A decent guess
-		}
+	if (blacklistRe.test(url)) {
+		return false;
 	}
-	return false;
+
+	let doiOrDOIs = getDOIs(doc, url);
+	if (Array.isArray(doiOrDOIs)) {
+		return doiOrDOIs.length ? "multiple" : false;
+	}
+
+	return "journalArticle"; // A decent guess
 }
 
 function retrieveDOIs(doiOrDOIs) {
