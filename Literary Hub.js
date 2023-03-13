@@ -199,7 +199,7 @@ function inferPodcastGuests(doc, title) {
 			const txt = txtMatch[0];
 			if (txt === txt.toUpperCase()) {
 				// Skip all-caps, which are relatively noisy.
-				continue
+				continue;
 			}
 			if (!boldFrags.includes(txt)
 				&& normTitle.includes(txt.toLowerCase())) {
