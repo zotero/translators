@@ -39,8 +39,8 @@ function detectWeb(doc, url) {
 	// single items end in an id number that is 6 digits or more
 	const itemIDURL = /\d{6,}$/;
 	if (url.match(itemIDURL)) {
-	var iconCSSSelector = doc.querySelector('li.in > span').firstElementChild.className;
-	var iconNumber = Number(iconCSSSelector.match(/(\d+)/)[0]);
+		var iconCSSSelector = doc.querySelector('li.in > span').firstElementChild.className;
+		var iconNumber = Number(iconCSSSelector.match(/(\d+)/)[0]);
 		if (iconCSSSelector) {
 			// Maps visual icons from catalog page to Zotero itemType
 			return translateIcon(iconNumber);
@@ -55,7 +55,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('a[class="title value"]');
+	var rows = doc.querySelectorAll('a.title.value');
 
 	for (let row of rows) {
 		let href = row.href;
@@ -86,10 +86,10 @@ function constructRISURL(url) {
 }
 
 function constructEnglishURL(url) {
-  // default catalog page URL: https://plus.cobiss.net/cobiss/si/sl/bib/107937536
-  // page with English metadata: https://plus.cobiss.net/cobiss/si/en/bib/107937536
-  let englishURL = url.replace(/[a-z]{2}\/bib\//, "en/bib/");
-  return englishURL;
+	// default catalog page URL: https://plus.cobiss.net/cobiss/si/sl/bib/107937536
+	// page with English metadata: https://plus.cobiss.net/cobiss/si/en/bib/107937536
+	let englishURL = url.replace(/[a-z]{2}\/bib\//, "en/bib/");
+	return englishURL;
 }
 
 // too many items are classified in RIS as either BOOK or ELEC,
@@ -97,55 +97,55 @@ function constructEnglishURL(url) {
 // this map assigns more accurate itemTypes
 // based on "type of material" classification in English catalog, instead of relying on RIS
 function translateItemType(englishCatalogItemType) {
-  var catalogItemTypeHash = new Map([
-	['undergraduate thesis', 'thesis'],
-	['proceedings', 'conferencePaper'],
-	['novel', 'book'], // https://plus.cobiss.net/cobiss/si/en/bib/35544323
-	['science fiction (prose)', 'book'], //https://plus.cobiss.net/cobiss/si/en/bib/46310659
-	['book', 'book'],
-	['handbook', 'book'],
-	['proceedings of conference contributions', 'conferencePaper'], //https://plus.cobiss.net/cobiss/si/en/bib/91188227
-	['professional monograph', 'report'], //https://plus.cobiss.net/cobiss/si/en/bib/87583747
-	['scientific monograph', 'book'],
-	['textbook', 'book'],
-	['e-book', 'book'],
-	['picture book', 'book'],
-	['treatise, study', 'report'],
-	['catalogue', 'book'],
-	['master\u0027s thesis', 'thesis'],
-	['picture book', 'book'],
-	['short stories', 'book'],
-	['research report', 'report'],
-	['poetry', 'book'],
-	['dissertation', 'thesis'],
-	['picture book', 'book'],
-	['offprint', 'magazineArticle'],
-	['guide-book', 'book'],
-	['expertise', 'hearing'], // this is court testimony, not sure what the correct item type should be https://plus.cobiss.net/cobiss/si/en/bib/94791683
-	['profess. monogr', 'report'],
-	['project documentation', 'report'],
-	['antiquarian material', 'book'], // most of these are books, e.g. https://plus.cobiss.net/cobiss/si/en/bib/7543093
-	['other lit.forms', 'book'],
-	['drama','book'],
-	['strip cartoon', 'book'],
-	['documentary lit', 'book'],
-	['encyclopedia', 'book'],
-	['exercise book', 'book'],
-	['educational material', 'book'],
-	['review', 'report'],
-	['statistics', 'report'],
-	['legislation', 'statute'],
-	['essay', 'book'],
-	['final paper', 'thesis'],
-	['standard', 'book'],
-	['specialist thesis', 'book'],
-	['aphorisms, proverbs', 'book'],
-	['humour, satire, parody', 'book'],
+	var catalogItemTypeHash = new Map([
+		['undergraduate thesis', 'thesis'],
+		['proceedings', 'conferencePaper'],
+		['novel', 'book'], // https://plus.cobiss.net/cobiss/si/en/bib/35544323
+		['science fiction (prose)', 'book'], //https://plus.cobiss.net/cobiss/si/en/bib/46310659
+		['book', 'book'],
+		['handbook', 'book'],
+		['proceedings of conference contributions', 'conferencePaper'], //https://plus.cobiss.net/cobiss/si/en/bib/91188227
+		['professional monograph', 'report'], //https://plus.cobiss.net/cobiss/si/en/bib/87583747
+		['scientific monograph', 'book'],
+		['textbook', 'book'],
+		['e-book', 'book'],
+		['picture book', 'book'],
+		['treatise, study', 'report'],
+		['catalogue', 'book'],
+		['master\u0027s thesis', 'thesis'],
+		['picture book', 'book'],
+		['short stories', 'book'],
+		['research report', 'report'],
+		['poetry', 'book'],
+		['dissertation', 'thesis'],
+		['picture book', 'book'],
+		['offprint', 'magazineArticle'],
+		['guide-book', 'book'],
+		['expertise', 'hearing'], // this is court testimony, not sure what the correct item type should be https://plus.cobiss.net/cobiss/si/en/bib/94791683
+		['profess. monogr', 'report'],
+		['project documentation', 'report'],
+		['antiquarian material', 'book'], // most of these are books, e.g. https://plus.cobiss.net/cobiss/si/en/bib/7543093
+		['other lit.forms', 'book'],
+		['drama', 'book'],
+		['strip cartoon', 'book'],
+		['documentary lit', 'book'],
+		['encyclopedia', 'book'],
+		['exercise book', 'book'],
+		['educational material', 'book'],
+		['review', 'report'],
+		['statistics', 'report'],
+		['legislation', 'statute'],
+		['essay', 'book'],
+		['final paper', 'thesis'],
+		['standard', 'book'],
+		['specialist thesis', 'book'],
+		['aphorisms, proverbs', 'book'],
+		['humour, satire, parody', 'book'],
 
-	// TODO: finish once RIS is working again in catalog
+		// TODO: finish once RIS is working again in catalog
 
-  ]);
-  return (catalogItemTypeHash.get(englishCatalogItemType));;
+	]);
+	return (catalogItemTypeHash.get(englishCatalogItemType));
 }
 
 function translateIcon(number) {
@@ -204,21 +204,19 @@ async function doWeb(doc, url) {
 
 async function scrape(doc, url = doc.location.href) {
 	// if url matches /en/bib/, then skip constructing englishURL
+	var finalItemType = "";
 	if (url.match("/en/bib")) {
 		var nativeEnglishItemType = doc.querySelector("div.recordPrompt").innerText;
 		const cleanedNativeEnglishItemType = nativeEnglishItemType.replace(/^Type of material - /, "");
-		var finalItemType = translateItemType(cleanedNativeEnglishItemType);
-	} else {
+		finalItemType = translateItemType(cleanedNativeEnglishItemType);
+	}
+	else {
 		// replace specific language in bib record URL with english to detect item type
 		var englishURL = constructEnglishURL(url);
-		var english = await requestText(englishURL);
-		var englishItemType = english.match(typeOfMaterialRegex)[1];
-		// match englishItemType to a key in the hash
-  	// if nothing is found, fall back on RIS
-		var finalItemType = translateItemType(englishItemType);
+		var englishDocument = await requestDocument(englishURL);
+		var englishItemType = englishDocument.querySelector("button#add-biblioentry-to-shelf").attributes[4].nodeValue;
+		finalItemType = translateItemType(englishItemType);
 	}
-
-	var typeOfMaterialRegex = /<div\s+class="recordPrompt">\s+<span>Type of material<\/span>\s+-\s+(.*?)(?:\s*;\s*(.*?))?\s+<\/div>/
 	const risURL = constructRISURL(url);
 	const risText = await requestText(risURL);
 
@@ -265,10 +263,9 @@ async function scrape(doc, url = doc.location.href) {
 			// other items e.g. https://plus.cobiss.net/cobiss/si/sl/bib/82789891 have tags,
 			// but they're not in the RIS for some reason.
 			var pageTags = doc.querySelectorAll('a[href^="bib/search?c=su="]');
-			for (let i = 0; i < pageTags.length; i++) {
-				item.tags.push(pageTags[i].innerText);
+			for (let tagElem of pageTags) {
+				item.tags.push(tagElem.innerText);
 			}
-
 		}
 		item.url = url;
 		item.complete();
