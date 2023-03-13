@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-13 02:29:24"
+	"lastUpdated": "2023-03-13 03:42:47"
 }
 
 /*
@@ -248,8 +248,11 @@ function parseAuthorTransFromDefault(doc, item) {
 		};
 	}
 
-	// Failure.
-	return false;
+	// Just author names, without translators.
+	return {
+		author: splitNames(rawAuthors),
+		translator: []
+	};
 }
 
 // Handle the page that belongs to the "Lit Hub Excerpts" type.
@@ -778,6 +781,66 @@ var testCases = [
 					},
 					{
 						"tag": "translation"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://lithub.com/small-wonder-the-challenge-of-parenting-through-climate-collapse/",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "Small Wonder: The Challenge of Parenting Through Climate Collapse",
+				"creators": [
+					{
+						"firstName": "Eiren",
+						"lastName": "Caffall",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019-11-18T09:55:49+00:00",
+				"abstractNote": "We come to Monhegan Island—twelve miles off the coast of Maine, perched in the fastest-warming saltwater ecosystem on the planet—to avoid darkness. We come for wonder. We walk across the island onc…",
+				"blogTitle": "Literary Hub",
+				"language": "en-US",
+				"shortTitle": "Small Wonder",
+				"url": "https://lithub.com/small-wonder-the-challenge-of-parenting-through-climate-collapse/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Coast"
+					},
+					{
+						"tag": "Environment"
+					},
+					{
+						"tag": "Maine"
+					},
+					{
+						"tag": "Monhegan Island"
+					},
+					{
+						"tag": "Periwinkles"
+					},
+					{
+						"tag": "Rachel Carson"
+					},
+					{
+						"tag": "Southport"
+					},
+					{
+						"tag": "The Sense of Wonder"
+					},
+					{
+						"tag": "climate change"
 					}
 				],
 				"notes": [],
