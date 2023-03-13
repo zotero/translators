@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-12 13:21:48"
+	"lastUpdated": "2023-03-13 02:29:24"
 }
 
 /*
@@ -131,7 +131,8 @@ function detectType(doc) {
 	return false;
 }
 
-// Dispatch the handler based on the document's type.
+// Handle generic item by populating the tags and publicationTitle fields and
+// dispatch the handler based on the document's type.
 function handleItem(doc, item) {
 	item.publicationTitle = "Literary Hub";
 
@@ -156,6 +157,9 @@ function handleItem(doc, item) {
 	item.complete();
 }
 
+// Type-specific handlers.
+
+// Podcasts hosted by LitHub.
 function handlePodcast(doc, item) {
 	item.itemType = "podcast";
 	item.seriesTitle = getByline(doc);
@@ -164,7 +168,7 @@ function handlePodcast(doc, item) {
 }
 
 function getPodcastAuthors(doc) {
-	const textLine = ZU.trimInternal(text(doc, ".post_header_wrapper h3"));
+	const textLine = getSubheading(doc);
 	if (!textLine) return [];
 
 	let rawAuth = textLine.match(/(?:conversation with\s+)(.+)(?:\s+on\s+)/i);
@@ -178,31 +182,74 @@ function getPodcastAuthors(doc) {
 	return [];
 }
 
+// Default, or "plain" blog post.
 function handleDefault(doc, item) {
 	item.creators = getDefaultAuthors(doc, item);
 }
 
 function getDefaultAuthors(doc, item) {
-	let maybeTrans = item.title.match(/translated by .+$/i);
-	maybeTrans = maybeTrans && maybeTrans.length > 0
-		? maybeTrans[0]
-		: "";
-
 	const creators = [];
 	const rawAuthors = getByline(doc);
 	if (rawAuthors === "Literary Hub") {
 		creators.push({ fieldMode: 1, lastName: rawAuthors, creatorType: "author" });
 	}
-	else { // Author(s) is/are likely person(s)
-		for (let auth of splitNames(rawAuthors)) {
-			const t = maybeTrans.includes(auth)
-				? "translator"
-				: "author";
-			creators.push(ZU.cleanAuthor(auth, t));
+	else {
+		const authorInfo = parseAuthorTransFromDefault(doc, item);
+		if (authorInfo) {
+			for (const [type, names] of Object.entries(authorInfo)) {
+				creators.push(...names.map(n => ZU.cleanAuthor(n, type)));
+			}
 		}
 	}
 
 	return creators;
+}
+
+// Given the document of the article of the "default" type, determine author
+// and possible translator information as an object with properties "author"
+// and "translator", or false if not found.
+function parseAuthorTransFromDefault(doc, item) {
+	const rawAuthors = getByline(doc);
+	if (!rawAuthors) return false;
+
+	// Attempt to parse the raw-byline as "...[,] translated by [...]" or
+	// similar.
+	const bylineMatch = rawAuthors.match(/(.+?)[,;\s([]+trans(?:lated\s+by\s+|\.\s+)(.+)\b/i);
+	if (bylineMatch) {
+		return {
+			author: splitNames(bylineMatch[1]),
+			translator: splitNames(bylineMatch[2])
+		};
+	}
+
+	// Attempt to parse the byline without any "translated by" or "trans."
+	// hints in it. To check for any translator(s), check for any that is
+	// included in the title or subtitle after "translated by ...".
+	const transHeadingRE = /\btranslated by\s+(.+)/i;
+	// Check title.
+	let transHeadingMatch = item.title.match(transHeadingRE);
+	if (!transHeadingMatch) {
+		// Check subtitle h3.
+		const subheading = getSubheading(doc);
+		transHeadingMatch = subheading.match(transHeadingRE);
+	}
+	if (transHeadingMatch) {
+		const translators = splitNames(transHeadingMatch[1]);
+		// Dedup any byline names.
+		const authors = [];
+		for (let name of splitNames(rawAuthors)) {
+			if (!translators.includes(name)) {
+				authors.push(name);
+			}
+		}
+		return {
+			author: authors,
+			translator: translators
+		};
+	}
+
+	// Failure.
+	return false;
 }
 
 // Handle the page that belongs to the "Lit Hub Excerpts" type.
@@ -258,7 +305,19 @@ function getTags(doc) {
 
 // Returns the (whitespace-normalized) byline ("By ...") text.
 function getByline(doc) {
-	return ZU.trimInternal(text(doc, ".author_name span[itemprop='name']"));
+	let byline = text(doc, ".author_name span[itemprop='name']");
+	if (!byline) {
+		// Only for certain pre-2022 posts without more
+		// semantically-clear byline info.
+		byline = text(doc, ".post_detail>a[href*='author']");
+	}
+	return ZU.trimInternal(byline);
+}
+
+// Returns the h3 subheading in the post heading block, which can be rich in
+// information.
+function getSubheading(doc) {
+	return ZU.trimInternal(text(doc, ".post_header_wrapper h3"));
 }
 
 /** BEGIN TEST CASES **/
@@ -597,6 +656,128 @@ var testCases = [
 					},
 					{
 						"tag": "The Forest"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://lithub.com/a-girl-and-the-moon/",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "“A Girl and the Moon”",
+				"creators": [
+					{
+						"firstName": "Lee",
+						"lastName": "Young-Ju",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jae",
+						"lastName": "Kim",
+						"creatorType": "translator"
+					}
+				],
+				"date": "2021-12-17T09:48:57+00:00",
+				"abstractNote": "Mid-night, swinging upside down on a pull-up bar, the girl says, Mother, this bone growing on my back, white in the night, protruding out of my skin, long and endlessly this bone, like a ladder it …",
+				"blogTitle": "Literary Hub",
+				"language": "en-US",
+				"url": "https://lithub.com/a-girl-and-the-moon/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "A Girl and the Moon"
+					},
+					{
+						"tag": "Black Ocean"
+					},
+					{
+						"tag": "Cold Candies"
+					},
+					{
+						"tag": "Jae Kim"
+					},
+					{
+						"tag": "Lee Young-Ju"
+					},
+					{
+						"tag": "translated poetry"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://lithub.com/the-calling-of-st-mattew/",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "“The Calling of St. Matthew”",
+				"creators": [
+					{
+						"firstName": "Adam",
+						"lastName": "Zagajewski",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Clare",
+						"lastName": "Cavanagh",
+						"creatorType": "translator"
+					}
+				],
+				"date": "2021-12-09T09:49:32+00:00",
+				"abstractNote": "that priest looks just like Belmondo –Wislawa  Szymborska, Funeral (II) —Look at his hand, his palm. Like a pianist’s —But that old guy can’t see a thing —What next, paying in a church —Mom, my hea…",
+				"blogTitle": "Literary Hub",
+				"language": "en-US",
+				"url": "https://lithub.com/the-calling-of-st-mattew/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Adam Zagajewski"
+					},
+					{
+						"tag": "Clare Cavanagh"
+					},
+					{
+						"tag": "Farrar Straus and Giroux"
+					},
+					{
+						"tag": "Jonathan Galassi"
+					},
+					{
+						"tag": "Robyn Creswell"
+					},
+					{
+						"tag": "The FSG Poetry Anthology"
+					},
+					{
+						"tag": "a poem"
+					},
+					{
+						"tag": "poetry"
+					},
+					{
+						"tag": "translated poetry"
+					},
+					{
+						"tag": "translation"
 					}
 				],
 				"notes": [],
