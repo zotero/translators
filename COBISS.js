@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-10 14:57:07"
+	"lastUpdated": "2023-03-13 15:31:25"
 }
 
 /*
@@ -38,13 +38,23 @@
 function detectWeb(doc, url) {
 	// single items end in an id number that is 6 digits or more
 	const itemIDURL = /\d{6,}$/;
-	if (url.match(itemIDURL)) {
-		var iconCSSSelector = doc.querySelector('li.in > span').firstElementChild.className;
-		var iconNumber = Number(iconCSSSelector.match(/(\d+)/)[0]);
-		if (iconCSSSelector) {
-			// Maps visual icons from catalog page to Zotero itemType
-			return translateIcon(iconNumber);
-		}
+  const fullRecordURL = /#full$/;
+	if (url.match(itemIDURL) || url.match(fullRecordURL)) {
+	// capture type of material as a string from the catalog, e.g. "undergraduate thesis"
+	var typeOfMaterial = doc.querySelector("button#add-biblioentry-to-shelf").getAttribute("data-mat-type");
+	if (typeOfMaterial) {
+	  // use translateItemType function to translate catalog material type into an official Zotero
+	  // item type, e.g "thesis"
+	  var detectItemType = translateItemType(typeOfMaterial);
+	  if (detectItemType) {
+		return detectItemType;
+	  }
+	  // if a catalog item type isn't contained in the hash in the translateItemType function, just
+	  // return Zotero item type 'book', which is the most common item type in this catalog.
+	  else {
+		return 'book';
+	  }
+	  }
 	}
 	else if (getSearchResults(doc, true)) {
 		return 'multiple';
@@ -66,6 +76,10 @@ function getSearchResults(doc, checkOnly) {
 		items[href] = title;
 	}
 	return found ? items : false;
+}
+
+function bookmarkTranslator(doc) {
+
 }
 
 function constructRISURL(url) {
@@ -142,7 +156,7 @@ function translateItemType(englishCatalogItemType) {
 		['aphorisms, proverbs', 'book'],
 		['humour, satire, parody', 'book'],
 
-		// TODO: finish once RIS is working again in catalog
+		// TODO: finish for remaining types in search all. Not all will have RIS.
 
 	]);
 	return (catalogItemTypeHash.get(englishCatalogItemType));
@@ -214,10 +228,20 @@ async function scrape(doc, url = doc.location.href) {
 		// replace specific language in bib record URL with english to detect item type
 		var englishURL = constructEnglishURL(url);
 		var englishDocument = await requestDocument(englishURL);
-		var englishItemType = englishDocument.querySelector("button#add-biblioentry-to-shelf").attributes[4].nodeValue;
+		var englishItemType = englishDocument.querySelector("button#add-biblioentry-to-shelf").getAttribute("data-mat-type");
 		finalItemType = translateItemType(englishItemType);
 	}
 	const risURL = constructRISURL(url);
+  // TODO: some items don't have RIS, but they have a full catalog record. It seems to either be one
+  // or the other.
+  // e.g. https://plus.cobiss.net/cobiss/si/en/bib/128893 has a Detail page, but no RIS.
+  // https://plus.cobiss.net/cobiss/si/en/bib/93266179#full detail page, no RIS.
+
+  // https://plus.cobiss.net/cobiss/si/en/bib/15409155 has RIS, but no detail page.
+  // https://plus.cobiss.net/cobiss/si/en/bib/19052547 has RIS but no detail page.
+
+
+
 	const risText = await requestText(risURL);
 
 	// RIS always has an extraneous OK## at the beginning, remove it
@@ -291,7 +315,7 @@ var testCases = [
 				],
 				"date": "2022",
 				"ISBN": "9789619527542",
-				"libraryCatalog": "Library Catalog (COBISS)",
+				"libraryCatalog": "COBISS",
 				"place": "Hvaletinci",
 				"studio": "NID Sapientia",
 				"url": "https://plus.cobiss.net/cobiss/si/sl/bib/92020483",
@@ -301,7 +325,14 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Antropozofija"
+					},
+					{
+						"tag": "Barve"
+					}
+				],
 				"notes": [
 					{
 						"note": "<p>Dialogi v slov. in nem. s konsekutivnim prevodom v slov.</p>"
@@ -672,6 +703,269 @@ var testCases = [
 						"note": "<p>180 izv.</p>"
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/si/en/bib/78691587",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "Modeliranje obratovanja transformatorskih postaj z metodami strojnega učenja: diplomsko delo: visokošolski strokovni študijski program prve stopnje Računalništvo in informatika",
+				"creators": [
+					{
+						"lastName": "Čuš",
+						"firstName": "Tibor",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022",
+				"libraryCatalog": "COBISS",
+				"numPages": "55",
+				"place": "Ljubljana",
+				"shortTitle": "Modeliranje obratovanja transformatorskih postaj z metodami strojnega učenja",
+				"university": "[T. Čuš]",
+				"url": "https://plus.cobiss.net/cobiss/si/en/bib/78691587",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "computer science"
+					},
+					{
+						"tag": "diploma"
+					},
+					{
+						"tag": "diplomske naloge"
+					},
+					{
+						"tag": "electrical power system"
+					},
+					{
+						"tag": "elektroenergetski sistem"
+					},
+					{
+						"tag": "forecasting models"
+					},
+					{
+						"tag": "indikatorji preobremenitev"
+					},
+					{
+						"tag": "machine learning"
+					},
+					{
+						"tag": "napovedni modeli"
+					},
+					{
+						"tag": "overload indicators"
+					},
+					{
+						"tag": "transformer station"
+					},
+					{
+						"tag": "visokošolski strokovni študij"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Bibliografija: str. 53-55</p>"
+					},
+					{
+						"note": "<p>Povzetek ; Abstract: Modeling transformer station operation with machine learning methods</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/si/en/bib/94705155#full",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Ljubezen v pismih: dopisovanje med Felicito Koglot in Francem Pericem: Aleksandrija-Bilje: 1921-1931",
+				"creators": [
+					{
+						"lastName": "Koglot",
+						"firstName": "Felicita",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Peric",
+						"firstName": "Franc",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Vončina",
+						"firstName": "Lara",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Orel",
+						"firstName": "Maja",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Koren",
+						"firstName": "Manca",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Mihurko Poniž",
+						"firstName": "Katja",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2022",
+				"ISBN": "9789617025224",
+				"libraryCatalog": "COBISS",
+				"numPages": "235",
+				"place": "V Novi Gorici",
+				"publisher": "Založba Univerze",
+				"shortTitle": "Ljubezen v pismih",
+				"url": "https://plus.cobiss.net/cobiss/si/en/bib/94705155#full",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Primorska"
+					},
+					{
+						"tag": "Slovenke"
+					},
+					{
+						"tag": "emigracija"
+					},
+					{
+						"tag": "pisma"
+					},
+					{
+						"tag": "ženske"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Potiskane notr. str. ov.</p>"
+					},
+					{
+						"note": "<p>250 izv.</p>"
+					},
+					{
+						"note": "<p>Kdo sta bila Felicita Koglot in Franc Peric in o knjižni izdaji njunega dopisovanja / Manca Koren, Maja Orel, Lara Vončina: str. 5-6</p>"
+					},
+					{
+						"note": "<p>Kratek oris zgodovinskih razmer v Egiptu in na Primorskem v obdobju med obema vojnama / Manca Koren: str. 185-195</p>"
+					},
+					{
+						"note": "<p>Franc Peric in Felicita Koglot: večkratne migracije v družinski korespondenci / Mirjam Milharčič Hladnik: str. 197-209</p>"
+					},
+					{
+						"note": "<p>Družinsko življenje in doživljanje aleksandrinstva v pismih / Manca Koren: str. 211-228</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/si/en/bib/15409155#full",
+		"items": [
+			{
+				"itemType": "artwork",
+				"title": "Moja hči",
+				"creators": [
+					{
+						"lastName": "Kraljič",
+						"firstName": "Helena",
+						"creatorType": "artist"
+					}
+				],
+				"date": "2022",
+				"libraryCatalog": "COBISS",
+				"url": "https://plus.cobiss.net/cobiss/si/en/bib/15409155#full",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "pomoč"
+					},
+					{
+						"tag": "prijateljstvo"
+					},
+					{
+						"tag": "razumevanje"
+					},
+					{
+						"tag": "samorealizacija"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Ilustr. na spojnih listih</p>"
+					},
+					{
+						"note": "<p>1.500 izv.</p>"
+					},
+					{
+						"note": "<p>Spremna beseda / Igor Saksida na preliminarni str.</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/si/en/bib/21773059",
+		"items": [
+			{
+				"itemType": "audioRecording",
+				"title": "Druge gumbolovščine so prave pustolovščine: šola za 2. r harmonike z melodijskimi basi",
+				"creators": [
+					{
+						"lastName": "Gvozdenac",
+						"firstName": "Mirjana",
+						"creatorType": "composer"
+					}
+				],
+				"date": "2023",
+				"label": "Musaik",
+				"libraryCatalog": "COBISS",
+				"place": "Izola",
+				"seriesTitle": "Zbirka Musaik : harmonika solo",
+				"shortTitle": "Druge gumbolovščine so prave pustolovščine",
+				"url": "https://plus.cobiss.net/cobiss/si/en/bib/21773059",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Harmonika"
+					},
+					{
+						"tag": "Učbeniki"
+					}
+				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
