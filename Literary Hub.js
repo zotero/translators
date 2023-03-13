@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-12 20:56:36"
+	"lastUpdated": "2023-03-12 13:21:48"
 }
 
 /*
@@ -164,7 +164,7 @@ function handlePodcast(doc, item) {
 }
 
 function getPodcastAuthors(doc) {
-	const textLine = text(doc, ".post_header_wrapper h3");
+	const textLine = ZU.trimInternal(text(doc, ".post_header_wrapper h3"));
 	if (!textLine) return [];
 
 	let rawAuth = textLine.match(/(?:conversation with\s+)(.+)(?:\s+on\s+)/i);
