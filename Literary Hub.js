@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-13 03:42:47"
+	"lastUpdated": "2023-03-13 03:50:57"
 }
 
 /*
@@ -164,7 +164,7 @@ function handlePodcast(doc, item) {
 	item.itemType = "podcast";
 	item.seriesTitle = getByline(doc);
 	item.creators = getPodcastAuthors(doc);
-	// XXX: get other contributors to the episode.
+	item.creators.push(...inferPodcastGuests(doc, item.title));
 }
 
 function getPodcastAuthors(doc) {
@@ -180,6 +180,34 @@ function getPodcastAuthors(doc) {
 			.map(n => ZU.cleanAuthor(n, "author"));
 	}
 	return [];
+}
+
+// Infer the podcast guests from the body paragraphs. The opening bold text of
+// paragraphs are where the names can usually be found. To filter out noise,
+// notice that the guest's name is also most likely part of the title.
+// NOTE: an alternative idea is to look for the guest's name in the tags.
+function inferPodcastGuests(doc, title) {
+	const podBody = doc.querySelector("[itemprop='articleBody']");
+	if (!podBody) return false;
+
+	const normTitle = title.toLowerCase();
+
+	const boldFrags = [];
+	for (const elem of podBody.querySelectorAll("p b, p strong")) {
+		const txtMatch = ZU.trimInternal(elem.textContent).match(/\b.+\b/);
+		if (txtMatch) {
+			const txt = txtMatch[0];
+			if (txt === txt.toUpperCase()) {
+				// Skip all-caps, which are relatively noisy.
+				continue
+			}
+			if (!boldFrags.includes(txt)
+				&& normTitle.includes(txt.toLowerCase())) {
+				boldFrags.push(txt);
+			}
+		}
+	}
+	return boldFrags.map(name => ZU.cleanAuthor(name, "guest"));
 }
 
 // Default, or "plain" blog post.
@@ -347,6 +375,11 @@ var testCases = [
 						"firstName": "Lindsay",
 						"lastName": "Hunter",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Lydia",
+						"lastName": "Conklin",
+						"creatorType": "guest"
 					}
 				],
 				"abstractNote": "Welcome to I’m a Writer But, where two writers-and talk to other writers-and about their work, their lives, their other work, the stuff that takes up any free time they have, all the stuff th…",
@@ -512,6 +545,11 @@ var testCases = [
 						"firstName": "Grant",
 						"lastName": "Faulkner",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Eden",
+						"lastName": "Boudreau",
+						"creatorType": "guest"
 					}
 				],
 				"abstractNote": "Write-minded: Weekly Inspiration for Writers is currently in its fourth year. We are a weekly podcast for writers craving a unique blend of inspiration and real talk about the ups and downs of the …",
@@ -841,6 +879,71 @@ var testCases = [
 					},
 					{
 						"tag": "climate change"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://lithub.com/letters-to-a-writer-of-color-deepa-anappara-and-taymour-soomro-on-finding-community-with-each-other/",
+		"items": [
+			{
+				"itemType": "podcast",
+				"title": "Letters to a Writer of Color: Deepa Anappara and Taymour Soomro on Finding Community With Each Other",
+				"creators": [
+					{
+						"firstName": "Whitney",
+						"lastName": "Terrell",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "V. V.",
+						"lastName": "Ganeshananthan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Deepa",
+						"lastName": "Anappara",
+						"creatorType": "guest"
+					},
+					{
+						"firstName": "Taymour",
+						"lastName": "Soomro",
+						"creatorType": "guest"
+					}
+				],
+				"abstractNote": "Fiction writers Deepa Anappara and Taymour Soomro join co-hosts V.V. Ganeshananthan and Whitney Terrell to discuss the newly published essay collection Letters to a Writer of Color, which they co-e…",
+				"language": "en-US",
+				"seriesTitle": "Fiction Non Fiction",
+				"shortTitle": "Letters to a Writer of Color",
+				"url": "https://lithub.com/letters-to-a-writer-of-color-deepa-anappara-and-taymour-soomro-on-finding-community-with-each-other/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Deepa Anappara"
+					},
+					{
+						"tag": "Fiction/Non/Fiction"
+					},
+					{
+						"tag": "Letters to a Writer of Color"
+					},
+					{
+						"tag": "Lit Hub Radio"
+					},
+					{
+						"tag": "Taymour Soomro"
+					},
+					{
+						"tag": "podcasts"
 					}
 				],
 				"notes": [],
