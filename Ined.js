@@ -34,64 +34,89 @@
 	
 	***** END LICENSE BLOCK *****
 */
+
 function detectWeb(doc, url) {
+
 	function findItemType(doc, url) {
+		Z.monitorDOMChanges(doc.querySelector("body"));
 
-		var risUrl = url.replace(/(\/view\/)/, "/api/public/v2/view/") + "/ris";
-		var response;
-		const httpRequest = new XMLHttpRequest();
+		const typeMap = {
+			"Article in journals listed by research assessment bodies": "journalArticle",
+			"Article in other scientific journals": "journalArticle",
+			"Article in journals of debate": "journalArticle",
+			"Article in popular science journal": "journalArticle",
+			"Editor of special issue": "journalArticle",
+			"Book review": "journalArticle",
+			"Book": "book",
+			"Editor or co-editor of books, proceedings": "book",
+			"Dictionary/Encyclopedia article": "dictionaryEntry",
+			"Book chapter": "bookSection",
+			"Conference proceedings": "bookSection",
+			"Working paper (published in Working paper series)": "report",
+			"Unpublished working paper": "report",
+			"Official report": "report",
+			"Research report": "report",
+			"Institutional report": "report",
+			"Plan de gestion de données": "report",
+			"Doctoral thesis": "thesis",
+			"Habilitation thesis (HDR)": "thesis",
+			"Seminar paper / lecture": "conferencePaper",
+			"Conference paper": "conferencePaper",
+			"Conference poster": "conferencePaper",
+			"Contribution to newspaper / non-academic periodical": "newspaperArticle",
+			"Map": "map",
+			"Teaching material": "report",
+			"Software (computer program, package, etc)": "computerProgram",
+			"Online publication": "blogPost",
+			"Image": "figure",
+			"Movie, video": "videoRecording",
+			"Audio-file": "audioRecording",
+			"Other documents": "report",
+			"Dataset": "report",
+			"Article dans des revues référencées par les instances d’évaluation": "journalArticle",
+			"Article dans d’autres revues scientifiques": "journalArticle",
+			"Article dans des revues de débat": "journalArticle",
+			"Article de vulgarisation scientifique": "journalArticle",
+			"Direction de numéros spéciaux de revues": "journalArticle",
+			"Recension d'ouvrages": "journalArticle",
+			"Ouvrage": "book",
+			"Direction ou co-direction d'ouvrages, actes de colloque": "book",
+			"Article de dictionnaire/d'encyclopédie": "dictionaryEntry",
+			"Chapitre d'ouvrage": "bookSection",
+			"Chapitre d'actes de colloque": "bookSection",
+			"Document de travail (publié dans une collection institutionnelle) ": "report",
+			"Document de travail non-publié": "report",
+			"Rapport aux financeurs ou aux ministères de tutelle": "report",
+			"Rapport de recherche": "report",
+			"Rapport institutionnel": "report",
+			"Data Management Plan": "report",
+			"Thèse de doctorat": "thesis",
+			"Mémoire d'habilitation (HDR)": "thesis",
+			"Communication dans un séminaire scientifique": "conferencePaper",
+			"Communication dans un colloque": "conferencePaper",
+			"Poster dans un colloque": "conferencePaper",
+			"Contribution dans la presse": "newspaperArticle",
+			"Carte": "map",
+			"Matériel pédagogique": "report",
+			"Logiciel (programme, package informatique, etc.)": "computerProgram",
+			"Publication en ligne (article de blog, site web, etc)": "blogPost",
+			"Image": "figure",
+			"Vidéo": "videoRecording",
+			"Audio": "audioRecording",
+			"Autres documents": "report",
+			"Jeu de données": "report",
+									
+		}
 
-		httpRequest.onreadystatechange = function() {
-			if (httpRequest.readyState === XMLHttpRequest.DONE) {
-				if (httpRequest.status === 200) {
-					const type = httpRequest.responseText.match(/(TY\s*-*\s)(\w+)/);
-					const itemType = type[2];
-					var typeMap = {
-						"BOOK": "book",
-						"BLOG": "blogPost",
-						"JOUR": "journalArticle",
-						"CHAP": "bookSection",
-						"FIGURE": "figure",
-						"RPRT": "report",
-						"THES": "thesis",
-						"MAP": "map",
-						"COMP": "computerProgram",
-						"CPAPER": "conferencePaper",
-						"NEWS": "newspaperArticle",
-						"DICT": "dictionaryEntry",
-						"SOUND": "audioRecording",
-						"VIDEO": "videoRecording",
-						"Ouvrage (y compris édition critique et traduction)": "book",
-						"Book sections": "bookSection",
-						"Conference papers": "conferencePaper",
-						"Directions of work or proceedings": "book",
-						"Direction d'ouvrage, Proceedings": "book",
-						"Article dans des revues": "journalArticle",
-						"Lectures": "presentation",
-						"Cours": "presentation",
-						"Other publications": "book",
-						"Autre publication": "book",	
-						"Patents": "patent",
-						"Brevet": "patent",
-						"Preprints, Working Papers, ...": "manuscript",
-						"Pré-publication, Document de travail": "manuscript",
-						"Reports": "report",
-					}
-					
-					if (typeMap[itemType]) response = typeMap[itemType];
-					else response = "journalArticle";
-				} else {
-					response = "journalArticle";
-				}
-			}
-		};
-
-		httpRequest.open('GET', risUrl, false);
-		httpRequest.send();
-		return response;
+		const citationType = doc.querySelector(".hero-body .card-header .tag");
+		Z.debug(citationType.textContent);
+		return citationType && citationType.textContent && typeMap[citationType.textContent]
+			? typeMap[citationType.textContent]
+			: 'journalArticle';
 	}
 
-	if (url.search(/\/view\//) !=-1) return findItemType(doc, url);
+	
+	if (url.search("/view/")) return findItemType(doc, url);
 }
 
 function doWeb(doc, url) {
@@ -122,16 +147,16 @@ function scrape(doc, url) {
 				delete item.archiveLocation;
 			}
 			if (item.tags && item.tags.length > 0) {
-				let filtered_tags = [];
-				let all_tags = '';
+				let filteredTags = [];
+				let allTags = '';
 				item.tags.sort((a, b) => b.length - a.length)
 					.forEach((tag) => {
-						if (!all_tags.includes(tag.toLowerCase())) {
-							all_tags +=  ' ' + tag.toLowerCase();
-							filtered_tags.push({ tag: ZU.capitalizeTitle(tag.toLowerCase(), true) });
+						if (!allTags.includes(tag.toLowerCase())) {
+							allTags +=  ' ' + tag.toLowerCase();
+							filteredTags.push({ tag: ZU.capitalizeTitle(tag.toLowerCase(), true) });
 						}
 					});
-				item.tags = filtered_tags;
+				item.tags = filteredTags;
 			}
 			item.complete();
 		});
@@ -146,6 +171,7 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://archined.ined.fr/view/AXKZJjYfqpl52aYY4O-h",
 		"items": [
 			{
@@ -235,6 +261,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://archined.ined.fr/view/AXTjrQ0MkgKZhr-blfp9",
 		"items": [
 			{
@@ -339,6 +366,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://archined.ined.fr/view/AXlC5r7ikgKZhr-bl2oh",
 		"items": [
 			{
@@ -450,6 +478,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://archined.ined.fr/view/AXucNy80kgKZhr-bmEo_",
 		"items": [
 			{
