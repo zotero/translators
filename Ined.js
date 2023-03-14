@@ -109,7 +109,6 @@ function detectWeb(doc, url) {
 		}
 
 		const citationType = doc.querySelector(".hero-body .card-header .tag");
-		Z.debug(citationType.textContent);
 		return citationType && citationType.textContent && typeMap[citationType.textContent]
 			? typeMap[citationType.textContent]
 			: 'journalArticle';
