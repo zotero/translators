@@ -1,7 +1,7 @@
 {
 	"translatorID": "5c95b67b-41c5-4f55-b71a-48d5d7183063",
 	"label": "CNKI",
-	"creator": "Aurimas Vinckevicius, Xingzhong Lin",
+	"creator": "Aurimas Vinckevicius, Xingzhong Lin, Zoë C. Ma",
 	"target": "^https?://([^/]+\\.)?cnki\\.net",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-02-22 03:17:44"
+	"lastUpdated": "2023-03-08 12:33:13"
 }
 
 /*
@@ -40,27 +40,39 @@
 // ids should be in the form [{dbname: "CDFDLAST2013", filename: "1013102302.nh"}]
 function getRefWorksByID(ids, onDataAvailable) {
 	if (!ids.length) return;
-	var { dbname, filename } = ids.shift();
-	var postData = "formfilenames=" + encodeURIComponent(dbname + "!" + filename + "!1!0,")
-		+ '&hid_kLogin_headerUrl=/KLogin/Request/GetKHeader.ashx%3Fcallback%3D%3F'
-		+ '&hid_KLogin_FooterUrl=/KLogin/Request/GetKHeader.ashx%3Fcallback%3D%3F'
-		+ '&CookieName=FileNameS';
-	ZU.doPost('https://kns.cnki.net/kns/ViewPage/viewsave.aspx?displayMode=Refworks', postData,
+	var { dbname, filename, url } = ids.shift();
+	let postData = "filename=" + filename + 
+		"&displaymode=Refworks&orderparam=0&ordertype=desc&selectfield=&dbname=" + 
+		dbname + "&random=0.2111567532240084";
+	
+	ZU.doPost('https://kns.cnki.net/KNS8/manage/ShowExport', postData,
 		function (text) {
-			var parser = new DOMParser();
-			var html = parser.parseFromString(text, "text/html");
-			var data = ZU.xpath(html, "//table[@class='mainTable']//td")[0].innerHTML
-				.replace(/<br>/g, '\n')
-				.replace(/^RT\s+Dissertation\/Thesis/gmi, 'RT Dissertation')
-				.replace(
-					/^(A[1-4]|U2)\s*([^\r\n]+)/gm,
-					function (m, tag, authors) {
-						authors = authors.split(/\s*[;，,]\s*/); // that's a special comma
-						if (!authors[authors.length - 1].trim()) authors.pop();
-						return tag + ' ' + authors.join('\n' + tag + ' ');
-					}
-				);
-			onDataAvailable(data);
+			let data = text
+				.replace("<ul class='literature-list'><li>", "")
+            	.replace("<br></li></ul>", "")
+            	.replace("</li><li>", "") // divide results
+            	.replace(/<br>|\r/g, "\n")
+            	.replace(/vo (\d+)\n/, "VO $1\n") // Divide VO and IS to different line
+            	.replace(/IS 0(\d+)\n/g, "IS $1\n")  // Remove leading 0
+            	.replace(/VO 0(\d+)\n/g, "VO $1\n")
+            	.replace(/\n+/g, "\n")
+            	.replace(/\n([A-Z][A-Z1-9]\s)/g, "<br>$1")
+            	.replace(/\n/g, "")
+            	.replace(/<br>/g, "\n")
+            	.replace(/\t/g, "") // \t in abstract
+            	.replace(
+            	    /^RT\s+Conference Proceeding/gim,
+            	    "RT Conference Proceedings"
+            	)
+            	.replace(/^RT\s+Dissertation\/Thesis/gim, "RT Dissertation")
+            	.replace(/^(A[1-4]|U2)\s*([^\r\n]+)/gm, function (m, tag, authors) {
+            	    authors = authors.split(/\s*[;，,]\s*/); // that's a special comma
+            	    if (!authors[authors.length - 1].trim()) authors.pop();
+            	    return tag + " " + authors.join("\n" + tag + " ");
+            	})
+            	.trim();
+			// Z.debug(data);
+			onDataAvailable(data, url);
 			// If more results, keep going
 			if (ids.length) {
 				getRefWorksByID(ids, onDataAvailable);
@@ -79,7 +91,6 @@ function getIDFromURL(url) {
 	return { dbname: dbname[1], filename: filename[1], url: url };
 }
 
-
 // 网络首发期刊信息并不能从URL获取dbname和filename信息
 // Get dbname and filename from pre-released article web page.
 function getIDFromRef(doc, url) {
@@ -88,10 +99,30 @@ function getIDFromRef(doc, url) {
 	return { dbname: database, filename: filename, url: url };
 }
 
+// Get dbname and filename from the link target on the "take note" button in
+// the doc as a fallback.
+// NOTE: As of now (8 Mar 2023) the document sent by CNKI may contain duplicate
+// element ids in the buttons row. In addition, for different article sources,
+// the buttons may follow different patterns, sometimes lacking all the
+// required info. The note-taking button appears more stable across the CNKI
+// domains.
+function getIDFromNoteTakerLink(doc, url) {
+	const noteURLString = doc.querySelector("li.btn-note a").href;
+	if (!noteURLString) return false;
+
+	const urlParams = new URLSearchParams(new URL(noteURLString).search);
+	const dbnameValue = urlParams.get("tablename");
+	const filenameValue = urlParams.get("filename");
+
+	if (!dbnameValue || !filenameValue) return false;
+
+	return { dbname: dbnameValue, filename: filenameValue, url: url };
+}
+
 function getIDFromPage(doc, url) {
 	return getIDFromURL(url)
-		|| getIDFromURL(ZU.xpathText(doc, '//div[@class="zwjdown"]/a/@href'))
-		|| getIDFromRef(doc, url);
+		|| getIDFromRef(doc, url)
+		|| getIDFromNoteTakerLink(doc, url);
 }
 
 function getTypeFromDBName(dbname) {

@@ -9,8 +9,32 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-18 08:20:23"
+	"lastUpdated": "2023-03-02 14:47:46"
 }
+
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2023 Simon Kornblith, Michael Berkowitz, Bastian Koenings, and Avram Lyon
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
 
 function detectWeb(doc, url) {
 	if (doc.defaultView !== null && doc.defaultView !== doc.defaultView.top) return false;
@@ -24,18 +48,17 @@ function detectWeb(doc, url) {
 	}
 	
 	// Issue page
-	var results = doc.getElementById('results-blk');
-	if (results) {
+	if ((url.includes("xpl/tocresult.jsp") || url.includes("xpl/mostRecentIssue.jsp")) && getSearchResults(doc, true)) {
 		return getSearchResults(doc, true) ? "multiple" : false;
 	}
 	
 	// Search results
-	if (url.includes("/search/searchresult.jsp")) {
+	if (url.includes("/search/searchresult.jsp") && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	
 	// conference list results
-	if (url.includes("xpl/conhome") && url.includes("proceeding")) {
+	if (url.includes("xpl/conhome") && url.includes("proceeding") && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 
@@ -59,8 +82,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//*[contains(@class, "article-list") or contains(@class, "List-results-items")]//h2/a|//*[@id="results-blk"]//*[@class="art-abs-url"]');
-
+	var rows = ZU.xpath(doc, '//*[contains(@class, "article-list") or contains(@class, "List-results-items")]//a[parent::h2|parent::h3]|//*[@id="results-blk"]//*[@class="art-abs-url"]');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -504,6 +526,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://ieeexplore.ieee.org/xpl/mostRecentIssue.jsp?punumber=6221021",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
@@ -1089,6 +1112,12 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://ieeexplore.ieee.org/xpl/tocresult.jsp?isnumber=10045573&punumber=6221021",
+		"defer": true,
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
