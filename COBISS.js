@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-13 15:31:25"
+	"lastUpdated": "2023-03-14 09:07:20"
 }
 
 /*
@@ -38,23 +38,23 @@
 function detectWeb(doc, url) {
 	// single items end in an id number that is 6 digits or more
 	const itemIDURL = /\d{6,}$/;
-  const fullRecordURL = /#full$/;
+	const fullRecordURL = /#full$/;
 	if (url.match(itemIDURL) || url.match(fullRecordURL)) {
-	// capture type of material as a string from the catalog, e.g. "undergraduate thesis"
-	var typeOfMaterial = doc.querySelector("button#add-biblioentry-to-shelf").getAttribute("data-mat-type");
-	if (typeOfMaterial) {
-	  // use translateItemType function to translate catalog material type into an official Zotero
-	  // item type, e.g "thesis"
-	  var detectItemType = translateItemType(typeOfMaterial);
-	  if (detectItemType) {
-		return detectItemType;
-	  }
-	  // if a catalog item type isn't contained in the hash in the translateItemType function, just
-	  // return Zotero item type 'book', which is the most common item type in this catalog.
-	  else {
-		return 'book';
-	  }
-	  }
+		// capture type of material as a string from the catalog page, e.g. "undergraduate thesis"
+		var typeOfMaterial = doc.querySelector("button#add-biblioentry-to-shelf").getAttribute("data-mat-type");
+		if (typeOfMaterial) {
+			// use translateItemType function to translate catalog material type into an official Zotero
+			// item type, e.g "thesis"
+			var detectItemType = translateItemType(typeOfMaterial);
+			if (detectItemType) {
+				return detectItemType;
+			}
+			// if a catalog item type isn't contained in the hash in the translateItemType function, just
+			// return Zotero item type 'book', which is by far the most common item type in this catalog.
+			else {
+				return 'book';
+			}
+		}
 	}
 	else if (getSearchResults(doc, true)) {
 		return 'multiple';
@@ -76,10 +76,6 @@ function getSearchResults(doc, checkOnly) {
 		items[href] = title;
 	}
 	return found ? items : false;
-}
-
-function bookmarkTranslator(doc) {
-
 }
 
 function constructRISURL(url) {
@@ -106,10 +102,11 @@ function constructEnglishURL(url) {
 	return englishURL;
 }
 
-// too many items are classified in RIS as either BOOK or ELEC,
-// including many reports, ebooks etc that thus get itemType "book" or "webpage" too often.
-// this map assigns more accurate itemTypes
+// in the catalog, too many items are classified in RIS as either BOOK or ELEC,
+// including many reports, ebooks etc that thus get itemType "book" or "webpage" too often
+// when we rely on RIS. this map assigns more accurate itemTypes
 // based on "type of material" classification in English catalog, instead of relying on RIS
+// this function also will assign itemType for catalog items with no RIS
 function translateItemType(englishCatalogItemType) {
 	var catalogItemTypeHash = new Map([
 		['undergraduate thesis', 'thesis'],
@@ -155,52 +152,33 @@ function translateItemType(englishCatalogItemType) {
 		['specialist thesis', 'book'],
 		['aphorisms, proverbs', 'book'],
 		['humour, satire, parody', 'book'],
+		['examin. paper', 'report'],
+		['annual', 'report'],
+		['yearly', 'report'],
+		['documentary lit', 'book'],
+		['folk literature', 'book'],
+		['patent', 'patent'],
+		['regulations', 'report'],
+		['conf. materials', 'conferencePaper'],
+		['radio play', 'book'],
+		['letters', 'book'],
+		['literature survey/review', 'report'],
+		['statute', 'statute'],
+		['matura paper', 'thesis'],
+		['seminar paper', 'thesis'],
+		['habilitation', 'thesis'],
+		['dramaturgical paper', 'thesis'],
+		['', ''],
+		['', ''],
+		['', ''],
+		['', ''],
+		['', ''],
+
 
 		// TODO: finish for remaining types in search all. Not all will have RIS.
 
 	]);
 	return (catalogItemTypeHash.get(englishCatalogItemType));
-}
-
-function translateIcon(number) {
-	// Maps visual icons on catalog page to Zotero itemType, so user sees the correct icon on
-	// Zotero Save button in browser connector. Icons that don't correspond to an itemType are assigned "book"
-	var iconMap = [
-		'',
-		'book', // icon-1
-		'journalArticle', // icon-2
-		'newspaperArticle', // icon-3
-		'audioRecording', // icon-4
-		'film', // icon-5
-		'book', // icon-6 (keyboard)
-		'map', // icon-7
-		'audioRecording', // icon-8 (sheet music)
-		'book', // icon-9 (email icon)
-		'book', // icon-10 (toy)
-		'book', // icon-11 (graduation cap)
-		'book', // icon-12 (camera)
-		'book', // icon-13 (@ symbol)
-		'videoRecording', // icon-14
-		'audioRecording', // icon-15
-		'film', // icon-16
-		'book', // icon-17 (set of books)
-		'book', // icon-18 (globe)
-		'book', // icon-19 (magazine?)
-		'artwork', // icon-20 (pictorial material)
-		'audioRecording', // icon-21 (record player)
-		'audioRecording', // icon-22 (microphone)
-		'book', // icon-23 (fountain pen)
-		'book', // icon-24 (prize medal)
-		'videoRecording', // icon-25 (DVD with small music icon)
-		'videoRecording', // icon-26 (Blu-ray)
-		'book', // icon-27 (e-book)
-		'book', // icon-28 (audiobook)
-		'videoRecording', // icon-29 (e-video)
-		'book', // icon-30 (work performed)
-		'book', // icon-31 (data)
-		'newspaperArticle' // icon-32 (e-newspaper)
-	];
-	return iconMap[number];
 }
 
 async function doWeb(doc, url) {
@@ -232,69 +210,77 @@ async function scrape(doc, url = doc.location.href) {
 		finalItemType = translateItemType(englishItemType);
 	}
 	const risURL = constructRISURL(url);
-  // TODO: some items don't have RIS, but they have a full catalog record. It seems to either be one
-  // or the other.
-  // e.g. https://plus.cobiss.net/cobiss/si/en/bib/128893 has a Detail page, but no RIS.
-  // https://plus.cobiss.net/cobiss/si/en/bib/93266179#full detail page, no RIS.
-
-  // https://plus.cobiss.net/cobiss/si/en/bib/15409155 has RIS, but no detail page.
-  // https://plus.cobiss.net/cobiss/si/en/bib/19052547 has RIS but no detail page.
-
-
-
 	const risText = await requestText(risURL);
-
-	// RIS always has an extraneous OK## at the beginning, remove it
-	const fixedRisText = risText.replace(/^OK##/, '');
-	if (doc.getElementById("unpaywall-link")) {
-		var pdfLink = doc.getElementById("unpaywall-link").href;
-	}
-	const translator = Zotero.loadTranslator('import');
-	translator.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7'); // RIS
-	translator.setString(fixedRisText);
-	translator.setHandler('itemDone', (_obj, item) => {
-		if (pdfLink) {
-			item.attachments.push({
-				url: pdfLink,
-				title: 'Full Text PDF',
-				mimeType: 'application/pdf'
-			});
+	// case for catalog items with RIS (about 95% of items)
+	if (risText) {
+		// RIS always has an extraneous OK## at the beginning, remove it
+		const fixedRisText = risText.replace(/^OK##/, '');
+		if (doc.getElementById("unpaywall-link")) {
+			var pdfLink = doc.getElementById("unpaywall-link").href;
 		}
-		else {
-			item.attachments.push({
-				title: 'Snapshot',
-				document: doc
-			});
-		}
-		// TODO: Figure out what to do with links
-		// They're all over the place. Some are full-text, some say that they're PDFs but aren't actually,
-		// some are something else...
-		// Save Link field somewhere, e.g. https://plus.cobiss.net/cobiss/si/en/bib/70461955
-		// here's another URL that's full text: https://plus.cobiss.net/cobiss/si/en/bib/95451907
-		// Links to full text PDF: https://plus.cobiss.net/cobiss/si/en/bib/105123075
-
-		// if "Type of material" from catalog page isn't in catalogItemTypeHash, finalItemType will return as undefined.
-		// in this case, default Type from RIS will be applied.
-		// if finalItemType is found from the catalog page, override itemType from RIS with it.
-		if (finalItemType) {
-			item.itemType = finalItemType;
-		}
-
-		// some items have tags in RIS KW field and are captured by
-		// RIS translator, e.g. https://plus.cobiss.net/cobiss/si/en/bib/78691587.
-		// don't add tags to these items.
-		if (item.tags.length === 0) {
-			// other items e.g. https://plus.cobiss.net/cobiss/si/sl/bib/82789891 have tags,
-			// but they're not in the RIS for some reason.
-			var pageTags = doc.querySelectorAll('a[href^="bib/search?c=su="]');
-			for (let tagElem of pageTags) {
-				item.tags.push(tagElem.innerText);
+		const translator = Zotero.loadTranslator('import');
+		translator.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7'); // RIS
+		translator.setString(fixedRisText);
+		translator.setHandler('itemDone', (_obj, item) => {
+			if (pdfLink) {
+				item.attachments.push({
+					url: pdfLink,
+					title: 'Full Text PDF',
+					mimeType: 'application/pdf'
+				});
 			}
-		}
-		item.url = url;
-		item.complete();
-	});
-	await translator.translate();
+			else {
+				item.attachments.push({
+					title: 'Snapshot',
+					document: doc
+				});
+			}
+			// TODO: Figure out what to do with links
+			// They're all over the place. Some are full-text, some say that they're PDFs but aren't actually,
+			// some are something else...
+			// Save Link field somewhere, e.g. https://plus.cobiss.net/cobiss/si/en/bib/70461955
+			// here's another URL that's full text: https://plus.cobiss.net/cobiss/si/en/bib/95451907
+			// Links to full text PDF: https://plus.cobiss.net/cobiss/si/en/bib/105123075
+
+			// if "Type of material" from catalog page isn't in catalogItemTypeHash, finalItemType will return as undefined.
+			// in this case, default Type from RIS will be applied.
+			// if finalItemType is found from the catalog page, override itemType from RIS with it.
+			if (finalItemType) {
+				item.itemType = finalItemType;
+			}
+
+			// some items have tags in RIS KW field and are captured by
+			// RIS translator, e.g. https://plus.cobiss.net/cobiss/si/en/bib/78691587.
+			// don't add tags to these items.
+			if (item.tags.length === 0) {
+				// other items e.g. https://plus.cobiss.net/cobiss/si/sl/bib/82789891 have tags,
+				// but they're not in the RIS for some reason.
+				var pageTags = doc.querySelectorAll('a[href^="bib/search?c=su="]');
+				for (let tagElem of pageTags) {
+					item.tags.push(tagElem.innerText);
+				}
+			}
+			item.url = url;
+			item.complete();
+		});
+		await translator.translate();
+	}
+	// some catalog items don't have RIS, so using the RIS import translator won't work on them.
+	// instead, we scrape the #full subpage
+	else {
+		Zotero.debug("no RIS");
+		var fullRecordURL = url + "#full"
+		Zotero.debug(fullRecordURL);
+		var fullRecord = await requestDocument(fullRecordURL);
+			// TODO: some items don't have RIS, but they have a full catalog record. It seems to either be one
+	// or the other.
+	// e.g. https://plus.cobiss.net/cobiss/si/en/bib/128893 has a Detail page, but no RIS.
+	// https://plus.cobiss.net/cobiss/si/en/bib/93266179#full detail page, no RIS.
+		var author = fullRecord.querySelector("div.recordAuthor").innerText;
+		Zotero.debug(author);
+	// https://plus.cobiss.net/cobiss/si/en/bib/15409155 has RIS, but no detail page.
+	// https://plus.cobiss.net/cobiss/si/en/bib/19052547 has RIS but no detail page.
+	}
 }
 
 /** BEGIN TEST CASES **/
@@ -1046,6 +1032,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/si/en/bib/search?q=*&db=cobib&mat=allmaterials&cof=0_105b-mb16",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
