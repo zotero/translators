@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-15 04:25:28"
+	"lastUpdated": "2023-03-15 04:28:28"
 }
 
 /*
@@ -56,10 +56,8 @@ function detectWeb(doc, url) {
 
 function scrape(doc, url) {
 	var newItem = new Zotero.Item("case");
-	var voliss = doc.getElementsByClassName('documentMeta-citation')[0].nextElementSibling;
-	voliss = ZU.trimInternal(
-		ZU.xpathText(voliss, './node()[not(self::script)]', null, '') // We technically only use ./text() parts, but this is less confusing
-	);
+	var voliss = ZU.trimInternal(text('.documentMeta-citation + div'));
+
 	// e.g. Reference re Secession of Quebec, 1998 CanLII 793 (SCC), [1998] 2 SCR 217, <http://canlii.ca/t/1fqr3>, retrieved on 2019-11-25
 	var citationParts = voliss.split(',');
 	newItem.caseName = citationParts[0];
@@ -79,9 +77,9 @@ function scrape(doc, url) {
 		newItem.notes.push({ note: "Other Citations: " + ZU.trimInternal(otherCitations) });
 	}
 	
-	var shortUrl = doc.getElementsByClassName('documentStaticUrl')[0];
+	var shortUrl = text('.documentStaticUrl');
 	if (shortUrl) {
-		newItem.url = shortUrl.textContent.trim();
+		newItem.url = shortUrl.trim();
 	}
 
 	// attach link to pdf version
