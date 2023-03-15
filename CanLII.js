@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-11-25 22:05:12"
+	"lastUpdated": "2023-03-15 04:11:17"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -36,64 +35,47 @@
 	***** END LICENSE BLOCK *****
 */
 
+const isCanLIIurl = (url) => /https?:\/\/(?:www\.)?canlii\.org[^/]*\/(?:en|fr)\/[^/]+\/[^/]+\/doc\/.+/.test(url);
 
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+const detectWeb = (doc, url) =>
+	isCanLIIurl(url) ? 'case'
+	: [...doc.getElementsByTagName('a')].some(el => isCanLIIurl(el.href)) ? 'multiple'
+	: false;
 
-var canLiiRegexp = /https?:\/\/(?:www\.)?canlii\.org[^/]*\/(?:en|fr)\/[^/]+\/[^/]+\/doc\/.+/;
+const scrape = (doc, url) => {
+	const newItem = new Zotero.Item("case");
+	const documentMeta = doc.querySelector('#documentMeta');
 
-function detectWeb(doc, url) {
-	if (canLiiRegexp.test(url)) {
-		return "case";
-	}
-	else {
-		var aTags = doc.getElementsByTagName("a");
-		for (var i = 0; i < aTags.length; i++) {
-			if (canLiiRegexp.test(aTags[i].href)) {
-				return "multiple";
-			}
-		}
-	}
-	return false;
-}
-
-
-function scrape(doc, url) {
-	var newItem = new Zotero.Item("case");
-	var voliss = doc.getElementsByClassName('documentMeta-citation')[0].nextElementSibling;
-	voliss = ZU.trimInternal(
-		ZU.xpathText(voliss, './node()[not(self::script)]', null, '') // We technically only use ./text() parts, but this is less confusing
-	);
 	// e.g. Reference re Secession of Quebec, 1998 CanLII 793 (SCC), [1998] 2 SCR 217, <http://canlii.ca/t/1fqr3>, retrieved on 2019-11-25
-	var citationParts = voliss.split(',');
-	newItem.caseName = citationParts[0];
-	var reporterRegex = /\[\d\d\d\d\]\s+(\d+)\s+([A-Z]+)\s+(\d+)/;
-	var reporterDetails = voliss.match(reporterRegex);
-	if (reporterDetails) {
-		newItem.reporterVolume = reporterDetails[1];
-		newItem.reporter = reporterDetails[2];
-		newItem.firstPage = reporterDetails[3];
-	}
-	
-	newItem.court = text('#breadcrumbs span', 2);
-	newItem.dateDecided = ZU.xpathText(doc, '//div[@id="documentMeta"]//div[contains(text(), "Date")]/following-sibling::div');
-	newItem.docketNumber = ZU.xpathText(doc, '//div[@id="documentMeta"]//div[contains(text(), "File number") or contains(text(), "Numéro de dossier")]/following-sibling::div');
-	var otherCitations = ZU.xpathText(doc, '//div[@id="documentMeta"]//div[contains(text(), "Other citations") or contains(text(), "Autres citations")]/following-sibling::div');
+	const voliss = ZU.trimInternal(text('.documentMeta-citation + div:not(script)'));
+	newItem.caseName = voliss.split(',')[0];
+	const reporterMatch = voliss.match(/\[\d\d\d\d\]\s+(\d+)\s+([A-Z]+)\s+(\d+)/);
+	if (reporterMatch) {
+		newItem.reporterVolume = reporterMatch[1];
+		newItem.reporter = reporterMatch[2];
+		newItem.firstPage = reporterMatch[3];
+	};
+
+	const court = text('#breadcrumbs span.nowrap', 2);
+	if (court) {
+		newItem.court = court;
+	};
+
+	newItem.dateDecided = ZU.xpathText(documentMeta, '//div[contains(text(), "Date")]/following-sibling::div');
+	newItem.docketNumber = ZU.xpathText(documentMeta, '//div[contains(text(), "File number") or contains(text(), "Numéro de dossier")]/following-sibling::div');
+	const otherCitations = ZU.xpathText(documentMeta, '//div[contains(text(), "Other citations") or contains(text(), "Autres citations")]/following-sibling::div');
 	if (otherCitations) {
 		newItem.notes.push({ note: "Other Citations: " + ZU.trimInternal(otherCitations) });
-	}
-	
-	var shortUrl = doc.getElementsByClassName('documentStaticUrl')[0];
-	if (shortUrl) {
-		newItem.url = shortUrl.textContent.trim();
-	}
+	};
+
+	const shortURL = text('.documentStaticUrl');
+	if (shortURL) {
+		newItem.url = shortURL.trim();
+	};
 
 	// attach link to pdf version
-	// Z.debug(url)
-	var pdfurl = url.replace(/\.html(?:[?#].*)?/, ".pdf");
 	newItem.attachments.push({
-		url: pdfurl,
+		url: url.replace(/\.html(?:[?#].*)?/, ".pdf"),
 		title: "CanLII Full Text PDF",
 		mimeType: "application/pdf"
 	});
@@ -101,25 +83,20 @@ function scrape(doc, url) {
 		document: doc,
 		title: "CanLII Snapshot"
 	});
+
 	newItem.complete();
 }
 
-function doWeb(doc, url) {
-	if (canLiiRegexp.test(url)) {
-		scrape(doc, url);
+const doWeb = async (doc, url) => {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else {
-		var items = ZU.getItemArray(doc, doc, canLiiRegexp);
-		Zotero.selectItems(items, function (items) {
-			if (!items) {
-				return;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
+		await scrape(doc, url);
 	}
 }
 
@@ -139,20 +116,21 @@ var testCases = [
 				"firstPage": "6",
 				"reporter": "SCR",
 				"reporterVolume": "1",
-				"url": "http://canlii.ca/t/27jmr",
+				"url": "https://canlii.ca/t/27jmr",
 				"attachments": [
 					{
 						"title": "CanLII Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "CanLII Snapshot"
+						"title": "CanLII Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
 				"notes": [
 					{
-						"note": "Other Citations: 397 NR 232 — [2010] SCJ No 2 (QL) — [2010] ACS no 2"
+						"note": "Other Citations: [2010] ACS no 2 — [2010] SCJ No 2 (QL) — 99 Admin LR (4th) 1 — 315 DLR (4th) 434 — 397 NR 232"
 					}
 				],
 				"seeAlso": []
@@ -170,14 +148,15 @@ var testCases = [
 				"dateDecided": "2011-02-02",
 				"court": "Federal Court",
 				"docketNumber": "T-1089-10",
-				"url": "http://canlii.ca/t/2flrk",
+				"url": "https://canlii.ca/t/2flrk",
 				"attachments": [
 					{
 						"title": "CanLII Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "CanLII Snapshot"
+						"title": "CanLII Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -200,20 +179,21 @@ var testCases = [
 				"firstPage": "6",
 				"reporter": "RCS",
 				"reporterVolume": "1",
-				"url": "http://canlii.ca/t/27jms",
+				"url": "https://canlii.ca/t/27jms",
 				"attachments": [
 					{
 						"title": "CanLII Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "CanLII Snapshot"
+						"title": "CanLII Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
 				"notes": [
 					{
-						"note": "Other Citations: 397 NR 232 — [2010] SCJ No 2 (QL) — [2010] ACS no 2"
+						"note": "Other Citations: [2010] ACS no 2 — [2010] SCJ No 2 (QL) — 99 Admin LR (4th) 1 — 315 DLR (4th) 434 — 397 NR 232"
 					}
 				],
 				"seeAlso": []
@@ -231,14 +211,15 @@ var testCases = [
 				"dateDecided": "2011-02-02",
 				"court": "Cour fédérale",
 				"docketNumber": "T-1089-10",
-				"url": "http://canlii.ca/t/fks9z",
+				"url": "https://canlii.ca/t/fks9z",
 				"attachments": [
 					{
 						"title": "CanLII Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "CanLII Snapshot"
+						"title": "CanLII Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -261,20 +242,21 @@ var testCases = [
 				"firstPage": "6",
 				"reporter": "SCR",
 				"reporterVolume": "1",
-				"url": "http://canlii.ca/t/27jmr",
+				"url": "https://canlii.ca/t/27jmr",
 				"attachments": [
 					{
 						"title": "CanLII Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "CanLII Snapshot"
+						"title": "CanLII Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
 				"notes": [
 					{
-						"note": "Other Citations: 397 NR 232 — [2010] SCJ No 2 (QL) — [2010] ACS no 2"
+						"note": "Other Citations: [2010] ACS no 2 — [2010] SCJ No 2 (QL) — 99 Admin LR (4th) 1 — 315 DLR (4th) 434 — 397 NR 232"
 					}
 				],
 				"seeAlso": []
