@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-15 05:08:01"
+	"lastUpdated": "2023-03-15 05:20:22"
 }
 
 /*
@@ -69,7 +69,7 @@ function scrape(doc, url) {
 		newItem.firstPage = reporterDetails[3];
 	}
 	
-	newItem.court = text('#breadcrumbs *[itemprop="name"] a', 2);
+	newItem.court = text('#breadcrumbs *[itemprop="name"]', 2);
 	newItem.dateDecided = ZU.xpathText(doc, '//div[@id="documentMeta"]//div[contains(text(), "Date")]/following-sibling::div');
 	newItem.docketNumber = ZU.xpathText(doc, '//div[@id="documentMeta"]//div[contains(text(), "File number") or contains(text(), "Numéro de dossier")]/following-sibling::div');
 	var otherCitations = ZU.xpathText(doc, '//div[@id="documentMeta"]//div[contains(text(), "Other citations") or contains(text(), "Autres citations")]/following-sibling::div');
