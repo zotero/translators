@@ -115,7 +115,7 @@ function detectWeb(doc, url) {
 	}
 
 	
-	if (url.search("/view/")) return findItemType(doc, url);
+	if (url.includes("/view/")) return findItemType(doc, url);
 }
 
 function doWeb(doc, url) {
