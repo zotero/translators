@@ -123,7 +123,7 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	var risUrl = url.replace("/view/", "/api/public/v2/view/") + "/ris";
+	var risUrl = url.replace(/[#?].*$/, "").replace("/view/", "/api/public/v2/view/") + "/ris";
 
 	ZU.doGet(risUrl, function (ris) {	
 		var translator = Zotero.loadTranslator("import");
