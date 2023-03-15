@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-14 14:25:56"
+	"lastUpdated": "2023-03-15 14:13:16"
 }
 
 /*
@@ -174,7 +174,6 @@ function translateItemType(englishCatalogItemType) {
 		['', ''],
 		['', ''],
 
-
 		// TODO: finish for remaining types in search all. Not all will have RIS.
 
 	]);
@@ -182,26 +181,29 @@ function translateItemType(englishCatalogItemType) {
 }
 
 async function doWeb(doc, url) {
+	// var fullRecordURL = "https://plus.cobiss.net/cobiss/si/en/bib/COBIB/93266179/full"
+	var fullRecordURL = "https://plus.cobiss.net/cobiss/si/en/bib/93266179#full"
 	if (detectWeb(doc, url) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
 		for (let url of Object.keys(items)) {
-			await scrape(await requestDocument(url));
+			await scrape(await requestDocument(url), await requestDocument(fullRecordURL));
 		}
 	}
 	else {
-		await scrape(doc, url);
+		await scrape(doc, await requestDocument(fullRecordURL), url);
 	}
 }
 
-async function scrape(doc, url = doc.location.href) {
+// async function scrape(doc, url = doc.location.href) {
+async function scrape(doc, fullRecord, url = doc.location.href) {
 	// if url matches /en/bib/, then skip constructing englishURL
-	var fullRecordURL = "https://plus.cobiss.net/cobiss/si/en/bib/COBIB/93266179/full"
-	var fullRecord = await requestDocument(fullRecordURL);
+	// var fullRecordURL = "https://plus.cobiss.net/cobiss/si/en/bib/COBIB/93266179/full"
+	// var fullRecord = await requestDocument(fullRecordURL);
+	// var fullRecord = await requestDocument(fullRecordURL);
 	var finalItemType = "";
 	if (url.match("/en/bib")) {
 		var nativeEnglishItemType = doc.querySelector("button#add-biblioentry-to-shelf").getAttribute("data-mat-type");
-		// var cleanedNativeEnglishItemType = nativeEnglishItemType.replace(/^Type of material - /, "");
 		finalItemType = translateItemType(nativeEnglishItemType);
 		Zotero.debug("finalItemType from /en/bib is" + finalItemType);
 	}
@@ -212,9 +214,10 @@ async function scrape(doc, url = doc.location.href) {
 		var englishItemType = englishDocument.querySelector("button#add-biblioentry-to-shelf").getAttribute("data-mat-type");
 		finalItemType = translateItemType(englishItemType);
 	}
+
+	// case for catalog items with RIS (about 95% of items)
 	const risURL = constructRISURL(url);
 	const risText = await requestText(risURL);
-	// case for catalog items with RIS (about 95% of items)
 	if (risText) {
 		// RIS always has an extraneous OK## at the beginning, remove it
 		const fixedRisText = risText.replace(/^OK##/, '');
@@ -268,22 +271,17 @@ async function scrape(doc, url = doc.location.href) {
 		});
 		await translator.translate();
 	}
-	// some catalog items don't have RIS, so using the RIS import translator won't work on them.
+	// case for catalog items with no RIS (remaining 5% or so of items)
+	// using the RIS import translator won't work on them.
 	// instead, we need to scrape the #full subpage
 	else {
 		// https://plus.cobiss.net/cobiss/si/en/bib/COBIB/93266179/full
 		// var fullRecordURL = url + "/full";
 
 		Zotero.debug("no RIS");
-		Zotero.debug(finalItemType);
+		// Zotero.debug(finalItemType);
 		if (finalItemType) {
 			var noRISItem = new Zotero.Item(finalItemType);
-
-		// TODO: some items don't have RIS, but they have a full catalog record. It seems to either be one
-		// or the other.
-		// e.g. https://plus.cobiss.net/cobiss/si/en/bib/128893 has a Detail page, but no RIS.
-		// https://plus.cobiss.net/cobiss/si/en/bib/93266179#full detail page, no RIS.
-
 			noRISItem.title = doc.querySelector("div.recordTitle").innerText;
 			var creators = doc.querySelectorAll('div.portlet-body > p > a[href^="bib/search?c=ar"]')
 			for (let creatorElem of creators) {
@@ -292,29 +290,23 @@ async function scrape(doc, url = doc.location.href) {
 				let role = "author";
 				noRISItem.creators.push(ZU.cleanAuthor(creator, role, true));
 		 	}
-			// var author = fullRecord.querySelectorAll("tr.attribute-author700701 > td.attribute-value")[0].innerText;
-			// Zotero.debug("author from full page is " + author);
-			Zotero.debug(fullRecord);
-			// var author = fullRecord.querySelectorAll("tr.attribute-author700701 > td.attribute-value")[0].innerText;
-			// Zotero.debug("author from FULL is" + author);
-			test();
+			// Zotero.debug(fullRecord);
 			// TODO: authors and title can be obtained pretty cleanly from item page,
 			// but for other things we really need the #full page
 			// I need to figure out how to wait until the fullRecordURL is loaded
 			// before doing documentSelector stuff on it.
 			// https://developer.mozilla.org/en-US/docs/Web/API/Window/load_event
-						// TODO: there needs to be a case for when user is already at #full URL
+			var td = fullRecord.querySelector("td").innerText;
+			// var author = fullRecord.querySelectorAll("tr.attribute-author700701 > td.attribute-value")[0].innerText;
+			// Zotero.debug("author from full page is " + author);
+			Zotero.debug("first td is " + td);
+			// Zotero.debug("full text" + fullRecord);
 
-			// Zotero.debug(fullRecordURL);
-			// TODO: fullRecord doesn't contain all the information from #full, because it takes a few seconds to load.
-			// Could either use info from the Basic Info tab, or figure out how to wait.
-			// doc.onload = (event) => {
-			// 	Zotero.debug("page is fully loaded");
-			// };
-			//
-			// fullRecord.onload = (event) => {
-			// 	Zotero.debug("page is fully loaded");
-			// }
+			// var author = fullRecord.querySelectorAll("tr.attribute-author700701 > td.attribute-value")[0].innerText;
+			// Zotero.debug("author from FULL is" + author);
+			test();
+
+			// TODO: there needs to be a case for when user is already at #full URL
 
 			noRISItem.complete();
 		}
@@ -324,28 +316,11 @@ async function scrape(doc, url = doc.location.href) {
 				finalItemType = translateItemType(nativeEnglishItemType);
 				Zotero.debug("finalItemType from /en/bib is" + finalItemType);
 				var noRISItem = new Zotero.Item(finalItemType);
-				// TODO: there needs to be a case for when user is already at #full URL
-				var fullRecordURL = url + "#full"
-				Zotero.debug(fullRecordURL);
-				var fullRecord = await requestDocument(fullRecordURL);
-					// TODO: some items don't have RIS, but they have a full catalog record. It seems to either be one
-			// or the other.
-			// e.g. https://plus.cobiss.net/cobiss/si/en/bib/128893 has a Detail page, but no RIS.
-			// https://plus.cobiss.net/cobiss/si/en/bib/93266179#full detail page, no RIS.
 				noRISItem.author = fullRecord.querySelector("div.recordAuthor").innerText;
 				noRISItem.complete();
 			}
 		}
-		// Zotero.debug(author);
-	// https://plus.cobiss.net/cobiss/si/en/bib/15409155 has RIS, but no detail page.
-	// https://plus.cobiss.net/cobiss/si/en/bib/19052547 has RIS but no detail page.
 	}
-}
-
-function test() {
-	//
-	//
-	Zotero.debug("This is a test")
 }
 
 /** BEGIN TEST CASES **/
