@@ -130,7 +130,7 @@ function scrape(doc, url) {
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(ris);
 		translator.setHandler("itemDone", function (obj, item) {
-			if (item.place && item.place.length > 0) {
+			if (item.place) {
 				item.place = item.place.replace(/"/g, '');
 			}
 			if (item.archiveLocation) {
