@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-15 09:15:29"
+	"lastUpdated": "2023-03-16 02:52:40"
 }
 
 /*
@@ -40,283 +40,283 @@ Thanks to Sebastian Karcher and Aurimas Vinckevicius
 
 */
 
-var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT|CETATEXT|CONSTEXT.+/
+var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT|CETATEXT|CONSTEXT.+/;
 // Détection occurences multiples uniquement pour la jurisprudence ... pour l'instant
 
-	function detectWeb(doc, url) {
-		if (url.match(/.CETATEXT|CONSTEXT|JURITEXT./)) { // Détection jurisprudence
-			return "case";
-		} else if (url.match(/LEGIARTI|affichCodeArticle|affichTexteArticle|KALICONT|JORFTEXT|CNILTEXT/)) { // Détection textes législatifs
-			return "statute"; // Détection lois et codes
-		} else if (url.match(/rechJuriConst|rechExpJuriConst|rechJuriAdmin|rechExpJuriAdmin|rechJuriJudi|rechExpJuriJudi/)) { // Détection occurences multiples uniquement pour la jurisprudence
-			return "multiple"; // occurences multiples
-		} else return false;
+function detectWeb(_doc, url) {
+	if (url.match(/.CETATEXT|CONSTEXT|JURITEXT./)) { // Détection jurisprudence
+		return "case";
+	} else if (url.match(/LEGIARTI|affichCodeArticle|affichTexteArticle|KALICONT|JORFTEXT|CNILTEXT/)) { // Détection textes législatifs
+		return "statute"; // Détection lois et codes
+	} else if (url.match(/rechJuriConst|rechExpJuriConst|rechJuriAdmin|rechExpJuriAdmin|rechJuriJudi|rechExpJuriJudi/)) { // Détection occurences multiples uniquement pour la jurisprudence
+		return "multiple"; // occurences multiples
+	} else return false;
+}
+
+function scrapecase(doc) { //Jurisprudence
+
+	var newItem = new Zotero.Item("case");
+
+	// Paramètres communs
+
+	var title = ZU.xpathText(doc, '//h1[@class="main-title"]');
+	newItem.title = title;
+	newItem.url = doc.location.href;
+	newItem.language = 'fr-FR';
+	var rtfurl = ZU.xpathText(doc, '//a[contains(text(), "Télécharger")]/@href');
+	if (rtfurl) {
+		newItem.attachments = [{
+			url: "http://www.legifrance.gouv.fr/" + rtfurl,
+			title: "Document en RTF",
+			mimeType: "application/rtf"
+		}];
 	}
 
-	function scrapecase(doc, url) { //Jurisprudence
+	// Snapshot
+	newItem.attachments.push({
+		title: "Snapshot",
+		document: doc
+	});
 
-		var newItem = new Zotero.Item("case");
+	// Situation selon les juridictions
 
-		// Paramètres communs
+	var a; // Conseil constitutionnel
+	a = title.match(/(.*) - (.*) - (.*) - (.*)/);
+	if (a) {
+		const numero = a[1];
+		const date = a[2];
+		const texteparties = a[3];
+		// const formation = a[4];
+		newItem.court = 'Conseil constitutionnel';
+		newItem.docketNumber = numero;
+		newItem.date = date;
+		newItem.extra = texteparties;
+	}
 
-		var title = ZU.xpathText(doc, '//h1[@class="main-title"]');
-		newItem.title = title;
-		newItem.url = doc.location.href;
-		newItem.language = 'fr-FR'
-		var rtfurl = ZU.xpathText(doc, '//a[contains(text(), "Télécharger")]/@href');
-		if (rtfurl) {
-			newItem.attachments = [{
-				url: "http://www.legifrance.gouv.fr/" + rtfurl,
-				title: "Document en RTF",
-				mimeType: "application/rtf"
-			}];
-		}
+	var b; // Conseil d'État avec indication de publication
+	b = title.match(/(Conseil d'État), (.*), (s*[0-9/]+), (s*[0-9]+), (.*Lebon)/);
+	if (b) {
+		// const cour = b[1];
+		const formation = b[2];
+		const date = b[3];
+		const numero = b[4];
+		const publication = b[5];
+		newItem.court = 'Conseil d\'État';
+		newItem.extra = formation;
+		newItem.date = date;
+		newItem.docketNumber = numero;
+		newItem.reporter = publication;
+	}
 
-		// Snapshot
-		newItem.attachments.push({
-			title: "Snapshot",
-			document: doc
+	var c; // Conseil d'État sans indication de publication
+	c = title.match(/(Conseil d'État), (.*), (s*[0-9/]+), (s*[0-9]+)/);
+	if (c) {
+		const formation = c[2];
+		const date = c[3];
+		const numero = c[4];
+		newItem.court = 'Conseil d\'État';
+		newItem.extra = formation;
+		newItem.date = date;
+		newItem.docketNumber = numero;
+	}
+
+	var d; // Tribunal des conflits (jp administrative)
+	d = title.match(/(Tribunal des Conflits), , (s*[0-9/]+), (.*)/);
+	if (d) {
+		const date = d[2];
+		const numero = d[3];
+		newItem.court = 'Tribunal des Conflits';
+		newItem.date = date;
+		newItem.docketNumber = numero;
+	}
+
+
+	var e; // Cours administratives d'appel avec publication // très rares cas sans publication
+	e = title.match(/(Cour administrative .*), (.*), (s*[0-9/]+), (.*), (.*Lebon)/);
+	if (e) {
+		const cour = e[1];
+		const formation = e[2];
+		const date = e[3];
+		const numero = e[4];
+		const publication = e[5];
+		newItem.court = cour;
+		newItem.extra = formation;
+		newItem.date = date;
+		newItem.docketNumber = numero;
+		newItem.reporter = publication;
+	}
+
+	var f; // tribunaux administratifs avec chambre
+	f = title.match(/(|Tribunal Administratif|administratif.*), (.*chambre), (s*[0-9/]+), (s*[0-9]+)/);
+	if (f) {
+		const cour = f[1];
+		// const formation = f[2];
+		const date = f[3];
+		const numero = f[4];
+		newItem.court = 'Tribunal ' + cour;
+		newItem.date = date;
+		newItem.docketNumber = numero;
+	}
+
+	var g; // tribunaux administratifs sans chambre avec publication
+	g = title.match(/(Tribunal Administratif|administratif.*), du (.*), (s*[0-9-]+), (.*Lebon)/);
+	if (g) {
+		const cour = g[1];
+		const date = g[2];
+		const numero = g[3];
+		const publication = g[4];
+		newItem.court = 'Tribunal ' + cour;
+		newItem.date = date;
+		newItem.docketNumber = numero;
+		newItem.reporter = publication;
+	}
+
+	// Note : présence d'autres cas pour les TA
+
+	var h; // Cour de cassation
+	h = title.match(/(Cour de cassation), (.*), (.*), (s*[0-9-. ]+), (.*)/);
+	if (h) {
+		const nature = h[1];
+		const formation = h[2];
+		const date = h[3];
+		const numero = h[4];
+		const publication = h[5];
+		newItem.court = 'Cour de cassation';
+		if (nature) newItem.tags.push(nature);
+		newItem.extra = formation;
+		newItem.date = date;
+		newItem.docketNumber = numero;
+		newItem.reporter = publication;
+	}
+
+	var i; // cours d'appel et tribunaux
+	i = title.match(/(Cour d'appel.*|Tribunal.*|Conseil.*|Chambre.*|Juridiction.*|Commission.*|Cour d'assises.*) de (.*), (.*), (s*[0-9/]+)/);
+	if (i) {
+		const cour = i[1];
+		const lieu = i[2];
+		const date = i[3];
+		const numero = i[4];
+		newItem.court = cour + ' de ' + lieu;
+		newItem.date = date;
+		newItem.docketNumber = numero;
+	}
+
+	var j; // Tribunal des conflits - Base CASS
+	j = title.match(/(Tribunal des conflits), (.*), (.*), (s*[0-9-. ]+), (.*)/);
+	if (j) {
+		const nature = j[2];
+		const date = j[3];
+		const numero = j[4];
+		const publication = j[5];
+		newItem.court = 'Tribunal des conflits';
+		if (nature) newItem.tags.push(nature);
+		newItem.date = date;
+		newItem.docketNumber = numero;
+		newItem.reporter = publication;
+
+	}
+	newItem.complete();
+}
+
+function scrapelegislation(doc, url) { //Législation
+
+	var newItem = new Zotero.Item("statute");
+
+	// Snapshot
+	newItem.attachments.push({
+		title: "Snapshot",
+		document: doc
+	});
+
+	// exemple de titre : Article 16 - Code civil - Légifrance
+	// le suffixe "- Légifrance" est retiré.
+	var title = ZU.xpathText(doc, '/html/head/title').slice(0, -13);
+	newItem.title = title;
+	newItem.url = url;
+	newItem.accessDate = 'CURRENT_TIMESTAMP';
+	newItem.language = 'fr-FR';
+
+	var a; // Codes
+	// exemple titre : Article 16 - Code civil
+	a = title.match(/Article (.*) - (Code.*)/);
+	if (a) {
+		const codeNumber = a[1];  // N° article
+		const code = a[2]; // "Code ____"
+
+		newItem.code = code;
+		newItem.codeNumber = codeNumber;
+
+		// Reconstruit le nom en "Code ___ - Article ____"
+		newItem.nameOfAct = code.concat(" - Article ", codeNumber);
+
+		// Dates: original date and dateDecided
+
+		// Exemple : "/loda/id/LEGIARTI000006284446/1994-07-30/"
+		const origdate = ZU.xpathText(doc, '//p[@class="date"]/a/@href');
+		newItem.extra = "Original Date: ".concat(origdate.match(/[\d-]{10}/g)[1]);
+
+		// Exemple : "Version en vigueur depuis le 30 juillet 1994"
+		const date = ZU.xpathText(doc, '//h6[@class="version-article"]');
+		newItem.date = date.match(/(\d{1,2} \w+ (\d{4}|\d{2}))/)[0];
+	}
+
+	var b; // Lois 1er modèle
+	b = title.match(/(LOI|Décret) n[o°] (s*[0-9-]+) du ((s*[0-9]+) (janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre) (s*[0-9z]+))/);
+	if (b) {
+
+		const codeNumber = b[2];
+		const date = b[3];
+		newItem.codeNumber = codeNumber; // publicLawNumber non défini
+		newItem.date = date;
+
+	}
+
+	var c; // Lois 2ème modèle
+	c = title.match(/(Loi|Décret) n[o°](s*[0-9-]+) du ((s*[0-9]+) (janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre) (s*[0-9z]+))/);
+	if (c) {
+
+		const codeNumber = c[2];
+		const date = c[3];
+		newItem.codeNumber = codeNumber; // publicLawNumber non défini
+		newItem.date = date;
+
+	}
+
+	var e; // CNIL
+	e = title.match(/(Délibération) (s*[0-9-]+) du ((s*[0-9]+) (.*) (s*[0-9]+))/);
+	if (e) {
+		const nameOfAct = e[1];
+		const codeNumber = e[2];
+		const date = e[3];
+		newItem.nameOfAct = nameOfAct + ' de la Commission Nationale de l\'Informatique et des Libertés';
+		newItem.codeNumber = codeNumber;
+		newItem.date = date;
+	}
+
+	newItem.complete();
+}
+
+function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "case") {
+		scrapecase(doc);
+	} else if (detectWeb(doc, url) == "statute") {
+		scrapelegislation(doc, url);
+	} else if (detectWeb(doc, url) == "multiple") {
+		const items = Zotero.Utilities.getItemArray(doc, doc, legifrancecaseRegexp);
+		const articles = [];
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrapecase);
+
 		});
 
-		// Situation selon les juridictions
-
-		var a; // Conseil constitutionnel
-		a = title.match(/(.*) - (.*) - (.*) - (.*)/)
-		if (a) {
-			var numero = a[1];
-			var date = a[2];
-			var texteparties = a[3]
-			var formation = a[4];
-			newItem.court = 'Conseil constitutionnel';
-			newItem.docketNumber = numero;
-			newItem.date = date;
-			newItem.extra = texteparties;
-		}
-
-		var b; // Conseil d'État avec indication de publication
-		b = title.match(/(Conseil d'État), (.*), (s*[0-9/]+), (s*[0-9]+), (.*Lebon)/)
-		if (b) {
-			var cour = b[1];
-			var formation = b[2];
-			var date = b[3];
-			var numero = b[4];
-			var publication = b[5];
-		  	newItem.court = 'Conseil d\'État';
-			newItem.extra = formation;
-			newItem.date = date;
-			newItem.docketNumber = numero;
-			newItem.reporter = publication;
-		}
-
-		var c; // Conseil d'État sans indication de publication
-		c = title.match(/(Conseil d'État), (.*), (s*[0-9/]+), (s*[0-9]+)/)
-		if (c) {
-			var formation = c[2];
-			var date = c[3];
-			var numero = c[4];
-		   	newItem.court = 'Conseil d\'État';
-			newItem.extra = formation;
-			newItem.date = date;
-			newItem.docketNumber = numero;
-		}
-
-		var d; // Tribunal des conflits (jp administrative)
-		d = title.match(/(Tribunal des Conflits), , (s*[0-9/]+), (.*)/)
-		if (d) {
-			var date = d[2];
-			var numero = d[3];
-			newItem.court = 'Tribunal des Conflits';
-			newItem.date = date;
-			newItem.docketNumber = numero;
-		}
-
-
-		var e; // Cours administratives d'appel avec publication // très rares cas sans publication
-		e = title.match(/(Cour administrative .*), (.*), (s*[0-9/]+), (.*), (.*Lebon)/)
-		if (e) {
-			var cour = e[1];
-			var formation = e[2];
-			var date = e[3];
-			var numero = e[4];
-			var publication = e[5];
-			newItem.court = cour;
-			newItem.extra = formation;
-			newItem.date = date;
-			newItem.docketNumber = numero;
-			newItem.reporter = publication;
-		}
-
-		var f; // tribunaux administratifs avec chambre
-		f = title.match(/(|Tribunal Administratif|administratif.*), (.*chambre), (s*[0-9/]+), (s*[0-9]+)/)
-		if (f) {
-			var cour = f[1];
-			var formation = f[2];
-			var date = f[3];
-			var numero = f[4];
-			newItem.court = 'Tribunal ' + cour;
-			newItem.date = date;
-			newItem.docketNumber = numero;
-		}
-
-		var g; // tribunaux administratifs sans chambre avec publication
-		g = title.match(/(Tribunal Administratif|administratif.*), du (.*), (s*[0-9-]+), (.*Lebon)/)
-		if (g) {
-			var cour = g[1];
-			var date = g[2];
-			var numero = g[3];
-			var publication = g[4];
-			newItem.court = 'Tribunal ' + cour;
-			newItem.date = date;
-			newItem.docketNumber = numero;
-			newItem.reporter = publication;
-		}
-
-		// Note : présence d'autres cas pour les TA
-
-		var h; // Cour de cassation
-		h = title.match(/(Cour de cassation), (.*), (.*), (s*[0-9-. ]+), (.*)/)
-		if (h) {
-			var nature = h[1];
-			var formation = h[2];
-			var date = h[3];
-			var numero = h[4];
-			var publication = h[5];
-			newItem.court = 'Cour de cassation';
-			if (nature) newItem.tags.push(nature);
-			newItem.extra = formation;
-			newItem.date = date;
-			newItem.docketNumber = numero;
-			newItem.reporter = publication;
-		}
-
-		var i; // cours d'appel et tribunaux
-		i = title.match(/(Cour d'appel.*|Tribunal.*|Conseil.*|Chambre.*|Juridiction.*|Commission.*|Cour d'assises.*) de (.*), (.*), (s*[0-9/]+)/)
-		if (i) {
-			var cour = i[1];
-			var lieu = i[2];
-			var date = i[3];
-			var numero = i[4];
-			newItem.court = cour + ' de ' + lieu;
-			newItem.date = date;
-			newItem.docketNumber = numero;
-		}
-
-		var j; // Tribunal des conflits - Base CASS
-		j = title.match(/(Tribunal des conflits), (.*), (.*), (s*[0-9-. ]+), (.*)/)
-		if (j) {
-			var nature = j[2];
-			var date = j[3];
-			var numero = j[4];
-			var publication = j[5];
-			newItem.court = 'Tribunal des conflits';
-			if (nature) newItem.tags.push(nature);
-			newItem.date = date;
-			newItem.docketNumber = numero;
-			newItem.reporter = publication;
-
-		}
-		newItem.complete();
 	}
-
-	function scrapelegislation(doc, url) { //Législation
-
-		var newItem = new Zotero.Item("statute");
-
-		// Snapshot
-		newItem.attachments.push({
-			title: "Snapshot",
-			document: doc
-		});
-
-		// exemple de titre : Article 16 - Code civil - Légifrance
-		// le suffixe "- Légifrance" est retiré.
-		var title = ZU.xpathText(doc, '/html/head/title').slice(0,-13);
-		newItem.title = title;
-		newItem.url = url;
-		newItem.accessDate = 'CURRENT_TIMESTAMP';
-		newItem.language = 'fr-FR'
-
-		var a; // Codes
-		// exemple titre : Article 16 - Code civil
-		a = title.match(/Article (.*) - (Code.*)/)
-		if (a) {
-			var codeNumber = a[1];  // N° article
-			var code = a[2]; // "Code ____"
-
-			newItem.code = code;
-			newItem.codeNumber = codeNumber;
-
-			// Reconstruit le nom en "Code ___ - Article ____"
-			newItem.nameOfAct = code.concat(" - Article ", codeNumber)
-
-			// Dates: original date and dateDecided
-
-			// Exemple : "/loda/id/LEGIARTI000006284446/1994-07-30/"
-			var origdate = ZU.xpathText(doc, '//p[@class="date"]/a/@href');
-			newItem.extra = "Original Date: ".concat(origdate.match(/[\d\-]{10}/g)[1]);
-
-			// Exemple : "Version en vigueur depuis le 30 juillet 1994"
-			var date = ZU.xpathText(doc, '//h6[@class="version-article"]')
-			newItem.date = date.match(/(\d{1,2} \w+ (\d{4}|\d{2}))/)[0];
-		}
-
-		var b; // Lois 1er modèle
-		b = title.match(/(LOI|Décret) n[o°] (s*[0-9-]+) du ((s*[0-9]+) (janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre) (s*[0-9z]+))/)
-		if (b) {
-
-			var codeNumber = b[2];
-			var date = b[3];
-			newItem.codeNumber = codeNumber; // publicLawNumber non défini
-			newItem.date = date;
-
-		}
-
-		var c; // Lois 2ème modèle
-		c = title.match(/(Loi|Décret) n[o°](s*[0-9-]+) du ((s*[0-9]+) (janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre) (s*[0-9z]+))/)
-		if (c) {
-
-			var codeNumber = c[2];
-			var date = c[3];
-			newItem.codeNumber = codeNumber; // publicLawNumber non défini
-			newItem.date = date;
-
-		}
-
-		var e; // CNIL
-		e = title.match(/(Délibération) (s*[0-9-]+) du ((s*[0-9]+) (.*) (s*[0-9]+))/)
-		if (e) {
-			var nameOfAct = e[1];
-			var codeNumber = e[2];
-			var date = e[3];
-			newItem.nameOfAct = nameOfAct + ' de la Commission Nationale de l\'Informatique et des Libertés';
-			newItem.codeNumber = codeNumber;
-			newItem.date = date;
-		}
-
-		newItem.complete();
-	}
-
-	function doWeb(doc, url) {
-		if (detectWeb(doc, url) == "case") {
-			scrapecase(doc, url);
-		} else if (detectWeb(doc, url) == "statute") {
-			scrapelegislation(doc, url);
-		} else if (detectWeb(doc, url) == "multiple") {
-			var items = Zotero.Utilities.getItemArray(doc, doc, legifrancecaseRegexp);
-			var articles = [];
-			Zotero.selectItems(items, function (items) {
-				if (!items) {
-					return true;
-				}
-				for (var i in items) {
-					articles.push(i);
-				}
-				Zotero.Utilities.processDocuments(articles, scrapecase);
-
-			});
-
-		}
-	} /** BEGIN TEST CASES **/
+} /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
