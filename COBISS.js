@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-15 14:13:16"
+	"lastUpdated": "2023-03-16 10:12:29"
 }
 
 /*
@@ -36,20 +36,21 @@
 */
 
 function detectWeb(doc, url) {
-	// single items end in an id number that is 6 digits or more
-	const itemIDURL = /\d{6,}$/;
-	const fullRecordURL = /#full$/;
+	// single items always end in an id number that is 6 digits or more
+	var itemIDURL = /\d{6,}$/;
+	// user may also be on Detailed View of item, which ends in /#full
+	var fullRecordURL = /#full$/;
 	if (url.match(itemIDURL) || url.match(fullRecordURL)) {
 		// capture type of material as a string from the catalog page, e.g. "undergraduate thesis"
 		var typeOfMaterial = doc.querySelector("button#add-biblioentry-to-shelf").getAttribute("data-mat-type");
 		if (typeOfMaterial) {
-			// use translateItemType function to translate catalog material type into an official Zotero
+			// use translateItemType function to translate catalog material type into a Zotero
 			// item type, e.g "thesis"
 			var detectItemType = translateItemType(typeOfMaterial);
 			if (detectItemType) {
 				return detectItemType;
 			}
-			// if a catalog item type isn't contained in the hash in the translateItemType function, just
+			// if a catalog item type isn't contained in the hash in translateItemType function, just
 			// return Zotero item type 'book', which is by far the most common item type in this catalog.
 			else {
 				return 'book';
@@ -90,7 +91,7 @@ function constructRISURL(url) {
 	const secondRegex = /\/([^/]+)$/;
 	let secondUrl = url.match(secondRegex)[0];
 
-	// outputs RIS URL structure
+	// outputs correct RIS URL structure
 	let risURL = firstUrl + "risCit" + secondUrl;
 	return risURL;
 }
@@ -103,20 +104,20 @@ function constructEnglishURL(url) {
 }
 
 // in the catalog, too many items are classified in RIS as either BOOK or ELEC,
-// including many reports, ebooks etc that thus get itemType "book" or "webpage" too often
+// including many reports, ebooks, etc, that thus are incorrectly assigned itemType "book" or "webpage"
 // when we rely on RIS. this map assigns more accurate itemTypes
-// based on "type of material" classification in English catalog, instead of relying on RIS
-// this function also will assign itemType for catalog items with no RIS
+// based on "type of material" classification in English catalog, instead of relying on RIS.
+// this function also assigns itemType for catalog items with no RIS.
 function translateItemType(englishCatalogItemType) {
 	var catalogItemTypeHash = new Map([
 		['undergraduate thesis', 'thesis'],
 		['proceedings', 'conferencePaper'],
-		['novel', 'book'], // https://plus.cobiss.net/cobiss/si/en/bib/35544323
-		['science fiction (prose)', 'book'], //https://plus.cobiss.net/cobiss/si/en/bib/46310659
+		['novel', 'book'],
+		['science fiction (prose)', 'book'],
 		['book', 'book'],
 		['handbook', 'book'],
-		['proceedings of conference contributions', 'conferencePaper'], //https://plus.cobiss.net/cobiss/si/en/bib/91188227
-		['professional monograph', 'report'], //https://plus.cobiss.net/cobiss/si/en/bib/87583747
+		['proceedings of conference contributions', 'conferencePaper'],
+		['professional monograph', 'report'],
 		['scientific monograph', 'book'],
 		['textbook', 'book'],
 		['e-book', 'book'],
@@ -132,10 +133,10 @@ function translateItemType(englishCatalogItemType) {
 		['picture book', 'book'],
 		['offprint', 'magazineArticle'],
 		['guide-book', 'book'],
-		['expertise', 'hearing'], // this is court testimony, not sure what the correct item type should be https://plus.cobiss.net/cobiss/si/en/bib/94791683
+		['expertise', 'hearing'], // court testimony, e.g. https://plus.cobiss.net/cobiss/si/en/bib/94791683
 		['profess. monogr', 'report'],
 		['project documentation', 'report'],
-		['antiquarian material', 'book'], // most of these are books, e.g. https://plus.cobiss.net/cobiss/si/en/bib/7543093
+		['antiquarian material', 'book'], // mostly books, e.g. https://plus.cobiss.net/cobiss/si/en/bib/7543093
 		['other lit.forms', 'book'],
 		['drama', 'book'],
 		['strip cartoon', 'book'],
@@ -174,38 +175,33 @@ function translateItemType(englishCatalogItemType) {
 		['', ''],
 		['', ''],
 
-		// TODO: finish for remaining types in search all. Not all will have RIS.
+		// TODO: finish for remaining types.
 
 	]);
 	return (catalogItemTypeHash.get(englishCatalogItemType));
 }
 
 async function doWeb(doc, url) {
-	// var fullRecordURL = "https://plus.cobiss.net/cobiss/si/en/bib/COBIB/93266179/full"
-	var fullRecordURL = "https://plus.cobiss.net/cobiss/si/en/bib/93266179#full"
 	if (detectWeb(doc, url) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
 		for (let url of Object.keys(items)) {
-			await scrape(await requestDocument(url), await requestDocument(fullRecordURL));
+			await scrape(await requestDocument(url));
 		}
 	}
 	else {
-		await scrape(doc, await requestDocument(fullRecordURL), url);
+		await scrape(doc, url);
 	}
 }
 
-// async function scrape(doc, url = doc.location.href) {
-async function scrape(doc, fullRecord, url = doc.location.href) {
-	// if url matches /en/bib/, then skip constructing englishURL
-	// var fullRecordURL = "https://plus.cobiss.net/cobiss/si/en/bib/COBIB/93266179/full"
-	// var fullRecord = await requestDocument(fullRecordURL);
-	// var fullRecord = await requestDocument(fullRecordURL);
+async function scrape(doc, url = doc.location.href) {
 	var finalItemType = "";
+	// always get item type from English catalog, since it will be the same across multiple languages in different COBISS catalogs.
+	// if url matches /en/bib/, then skip constructing englishURL
+	// get catalog item type from page, then translate to Zotero item type using translateItemType()
 	if (url.match("/en/bib")) {
 		var nativeEnglishItemType = doc.querySelector("button#add-biblioentry-to-shelf").getAttribute("data-mat-type");
 		finalItemType = translateItemType(nativeEnglishItemType);
-		Zotero.debug("finalItemType from /en/bib is" + finalItemType);
 	}
 	else {
 		// replace specific language in bib record URL with english to detect item type
@@ -215,7 +211,7 @@ async function scrape(doc, fullRecord, url = doc.location.href) {
 		finalItemType = translateItemType(englishItemType);
 	}
 
-	// case for catalog items with RIS (about 95% of items)
+	// case for catalog items with RIS
 	const risURL = constructRISURL(url);
 	const risText = await requestText(risURL);
 	if (risText) {
@@ -248,9 +244,9 @@ async function scrape(doc, fullRecord, url = doc.location.href) {
 			// here's another URL that's full text: https://plus.cobiss.net/cobiss/si/en/bib/95451907
 			// Links to full text PDF: https://plus.cobiss.net/cobiss/si/en/bib/105123075
 
-			// if "Type of material" from catalog page isn't in catalogItemTypeHash, finalItemType will return as undefined.
-			// in this case, default Type from RIS will be applied.
 			// if finalItemType is found from the catalog page, override itemType from RIS with it.
+			// if "Type of material" from catalog page isn't in catalogItemTypeHash, finalItemType will return as undefined.
+			// in this case, default Type from RIS will remain.
 			if (finalItemType) {
 				item.itemType = finalItemType;
 			}
@@ -260,7 +256,7 @@ async function scrape(doc, fullRecord, url = doc.location.href) {
 			// don't add tags to these items.
 			if (item.tags.length === 0) {
 				// other items e.g. https://plus.cobiss.net/cobiss/si/sl/bib/82789891 have tags,
-				// but they're not in the RIS for some reason.
+				// but they're not in the RIS for some reason. In this case, add tags from catalog page.
 				var pageTags = doc.querySelectorAll('a[href^="bib/search?c=su="]');
 				for (let tagElem of pageTags) {
 					item.tags.push(tagElem.innerText);
@@ -271,43 +267,34 @@ async function scrape(doc, fullRecord, url = doc.location.href) {
 		});
 		await translator.translate();
 	}
-	// case for catalog items with no RIS (remaining 5% or so of items)
-	// using the RIS import translator won't work on them.
-	// instead, we need to scrape the #full subpage
-	else {
-		// https://plus.cobiss.net/cobiss/si/en/bib/COBIB/93266179/full
-		// var fullRecordURL = url + "/full";
 
-		Zotero.debug("no RIS");
-		// Zotero.debug(finalItemType);
+	// case for catalog items with no RIS (remaining 5% or so of items) where we can't use the RIS import translator
+	else {
+		Zotero.debug("no RIS item");
+		// construct correct fullRecord URL from basic catalog URL or #full URL
+		// base URL: https://plus.cobiss.net/cobiss/si/sl/bib/93266179
+		// JSON URL: https://plus.cobiss.net/cobiss/si/sl/bib/COBIB/93266179/full
+		var jsonUrl = url.replace(/\/bib\/(\d+)/, "/bib/COBIB/$1/full");
+		var fullRecord = await requestJSON(jsonUrl);
+		Zotero.debug(fullRecord);
+		// Zotero.debug("author from JSON is " + fullRecord.author700701.value);
+		// things we can get from JSON:
+		// author, title, language, publication date, edition
+		// publisher, physical description (includes number of pages),
+		// ISBN, notes, subjects
+		// TODO: look at another translator that gets stuff
+		// from JSON, and how they assign to Zotero
 		if (finalItemType) {
 			var noRISItem = new Zotero.Item(finalItemType);
+			// TODO: replace with RIS data, which will be consistent whether user is at base url or #full
 			noRISItem.title = doc.querySelector("div.recordTitle").innerText;
+			// TODO: same, replace with RIS data.
 			var creators = doc.querySelectorAll('div.portlet-body > p > a[href^="bib/search?c=ar"]')
 			for (let creatorElem of creators) {
 				let creator = creatorElem.innerText;
-				Zotero.debug(creator);
 				let role = "author";
 				noRISItem.creators.push(ZU.cleanAuthor(creator, role, true));
 		 	}
-			// Zotero.debug(fullRecord);
-			// TODO: authors and title can be obtained pretty cleanly from item page,
-			// but for other things we really need the #full page
-			// I need to figure out how to wait until the fullRecordURL is loaded
-			// before doing documentSelector stuff on it.
-			// https://developer.mozilla.org/en-US/docs/Web/API/Window/load_event
-			var td = fullRecord.querySelector("td").innerText;
-			// var author = fullRecord.querySelectorAll("tr.attribute-author700701 > td.attribute-value")[0].innerText;
-			// Zotero.debug("author from full page is " + author);
-			Zotero.debug("first td is " + td);
-			// Zotero.debug("full text" + fullRecord);
-
-			// var author = fullRecord.querySelectorAll("tr.attribute-author700701 > td.attribute-value")[0].innerText;
-			// Zotero.debug("author from FULL is" + author);
-			test();
-
-			// TODO: there needs to be a case for when user is already at #full URL
-
 			noRISItem.complete();
 		}
 		else {
@@ -1087,6 +1074,75 @@ var testCases = [
 				"title": "Fizika. Zbirka maturitetnih nalog z rešitvami 2012-2017",
 				"creators": [],
 				"libraryCatalog": "COBISS",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/si/en/bib/93266179",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Matematika na splošni maturi : 2022 : vprašanja in odgovori za ustni izpit iz matematike na splošni maturi za osnovno raven",
+				"creators": [
+					{
+						"firstName": "Bojana",
+						"lastName": "Dvoržak",
+						"creatorType": "author"
+					}
+				],
+				"libraryCatalog": "COBISS",
+				"shortTitle": "Matematika na splošni maturi",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/si/en/bib/93266179",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Matematika na splošni maturi : 2022 : vprašanja in odgovori za ustni izpit iz matematike na splošni maturi za osnovno raven",
+				"creators": [
+					{
+						"firstName": "Bojana",
+						"lastName": "Dvoržak",
+						"creatorType": "author"
+					}
+				],
+				"libraryCatalog": "COBISS",
+				"shortTitle": "Matematika na splošni maturi",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/si/sl/bib/93266179",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Matematika na splošni maturi : 2022 : vprašanja in odgovori za ustni izpit iz matematike na splošni maturi za osnovno raven",
+				"creators": [
+					{
+						"firstName": "Bojana",
+						"lastName": "Dvoržak",
+						"creatorType": "author"
+					}
+				],
+				"libraryCatalog": "COBISS",
+				"shortTitle": "Matematika na splošni maturi",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
