@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-16 10:12:29"
+	"lastUpdated": "2023-03-16 12:24:03"
 }
 
 /*
@@ -277,24 +277,34 @@ async function scrape(doc, url = doc.location.href) {
 		var jsonUrl = url.replace(/\/bib\/(\d+)/, "/bib/COBIB/$1/full");
 		var fullRecord = await requestJSON(jsonUrl);
 		Zotero.debug(fullRecord);
-		// Zotero.debug("author from JSON is " + fullRecord.author700701.value);
-		// things we can get from JSON:
-		// author, title, language, publication date, edition
-		// publisher, physical description (includes number of pages),
-		// ISBN, notes, subjects
-		// TODO: look at another translator that gets stuff
-		// from JSON, and how they assign to Zotero
 		if (finalItemType) {
 			var noRISItem = new Zotero.Item(finalItemType);
-			// TODO: replace with RIS data, which will be consistent whether user is at base url or #full
-			noRISItem.title = doc.querySelector("div.recordTitle").innerText;
-			// TODO: same, replace with RIS data.
-			var creators = doc.querySelectorAll('div.portlet-body > p > a[href^="bib/search?c=ar"]')
-			for (let creatorElem of creators) {
-				let creator = creatorElem.innerText;
+
+			noRISItem.title = fullRecord.titleCard.value;
+			var creatorsJson = fullRecord.author700701.value;
+			var brslashRegex = /<br\/>/;
+			var creators = creatorsJson.split(brslashRegex).map(value => value.trim());
+			for (let creator of creators) {
+				// creator role isn't defined in metadata, so assign everyone "author" role
 				let role = "author";
 				noRISItem.creators.push(ZU.cleanAuthor(creator, role, true));
-		 	}
+			}
+			noRISItem.language = fullRecord.languageCard.value;
+			noRISItem.date = fullRecord.publishDate.value;
+			noRISItem.edition = fullRecord.edition.value;
+			// TODO: extract publication place from publisherCard.
+			// example string: "Ljubljana : Intelego, 2022"
+			noRISItem.publisher = fullRecord.publisherCard.value;
+			noRISItem.ISBN = fullRecord.isbnCard.value;
+			var notesJson = fullRecord.notesCard.value;
+			var brRegex = /<br>/;
+			var notes = notesJson.split(brRegex).map(value => value.trim());
+			for (let note of notes) {
+				noRISItem.notes.push(note);
+			}
+			// TODO: subjects
+
+			// TODO: add attachments to RIS items
 			noRISItem.complete();
 		}
 		else {
@@ -1110,7 +1120,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Matematika na splošni maturi : 2022 : vprašanja in odgovori za ustni izpit iz matematike na splošni maturi za osnovno raven",
+				"title": "Matematika na splošni maturi : 2022 : vprašanja in odgovori za ustni izpit iz matematike na splošni maturi za osnovno raven / Bojana Dvoržak",
 				"creators": [
 					{
 						"firstName": "Bojana",
@@ -1133,7 +1143,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Matematika na splošni maturi : 2022 : vprašanja in odgovori za ustni izpit iz matematike na splošni maturi za osnovno raven",
+				"title": "Matematika na splošni maturi : 2022 : vprašanja in odgovori za ustni izpit iz matematike na splošni maturi za osnovno raven / Bojana Dvoržak",
 				"creators": [
 					{
 						"firstName": "Bojana",
@@ -1143,6 +1153,78 @@ var testCases = [
 				],
 				"libraryCatalog": "COBISS",
 				"shortTitle": "Matematika na splošni maturi",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/si/en/bib/143385859",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Fizika. Zbirka maturitetnih nalog z rešitvami 2012-2017 / [avtorji Vitomir Babič ... [et al.] ; urednika Aleš Drolc, Joži Trkov]",
+				"creators": [
+					{
+						"firstName": "Vito",
+						"lastName": "Babič",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ruben",
+						"lastName": "Belina",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peter",
+						"lastName": "Gabrovec",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marko",
+						"lastName": "Jagodič",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Aleš",
+						"lastName": "Mohorič",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mirijam",
+						"lastName": "Pirc",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Gorazd",
+						"lastName": "Planinšič",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mitja",
+						"lastName": "Slavinec",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ivica",
+						"lastName": "Tomić",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Aleš",
+						"lastName": "Drolc",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Joži",
+						"lastName": "Trkov",
+						"creatorType": "author"
+					}
+				],
+				"libraryCatalog": "COBISS",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
