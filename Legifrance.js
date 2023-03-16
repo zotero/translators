@@ -1,3 +1,16 @@
+{
+	"translatorID": "2dc0b23d-64d8-4933-b629-5c003451ccf7",
+	"label": "Légifrance",
+	"creator": "Guillaume Adreani",
+	"target": "^https?://(www\\.)?legifrance\\.gouv\\.fr/",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2023-03-15 09:15:29"
+}
 
 /*
 	***** BEGIN LICENSE BLOCK *****
