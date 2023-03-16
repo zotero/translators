@@ -2,7 +2,7 @@
 	"translatorID": "f1aaf4bf-f344-41ee-b960-905255d40d53",
 	"label": "Literary Hub",
 	"creator": "Zoë C. Ma",
-	"target": "^https?://lithub\\.com/(?!(?:category|tag|masthead|about-literary-hub|privacy-policy-for-literary-hub-crimereads-and-book-marks)/).+",
+	"target": "^https?://lithub\\.com/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -37,6 +37,16 @@
 
 function detectWeb(doc, url) {
 	const urlObj = new URL(url);
+
+	// Reject "non-processable" pages, i.e. pages for site-structural
+	// purposes, including legal notices, about pages, taxonomy, etc.
+	// Not incorporating this logic into the "target" field of translator
+	// metadata, to keep the RegExp there simple.
+	const skipPath = /\/(category|tag|masthead|about-literary-hub|privacy-policy-for-literary-hub-.+)\//;
+	if (urlObj.pathname.match(skipPath)) {
+		return false;
+	}
+
 	const searchValue = urlObj.searchParams.get("s");
 	if (urlObj.pathname === "/") { // On search page (i.e. site base URL).
 		if (!searchValue) {
