@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-04-20 05:31:35"
+	"lastUpdated": "2023-03-16 04:39:27"
 }
 
 /*
@@ -33,10 +33,6 @@
 
 	***** END LICENSE BLOCK *****
 */
-
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 function detectWeb(doc, url) {
 	if (isContentUrl(url)) {
@@ -154,10 +150,17 @@ function scrape(doc) {
 			// The (co-)chair(s) or supervisor(s) are included in CSL as additional authors.
 			cslItem.author.splice(1);
 		}
+
+		if (cslItem.source && (cslItem.source.includes('19') || cslItem.source.includes('20'))) {
+			// Issue date sometimes goes in source (libraryCatalog)
+			delete cslItem.source;
+		}
 		
 		let item = new Zotero.Item();
 		ZU.itemFromCSLJSON(item, cslItem);
 		
+		item.title = ZU.unescapeHTML(item.title);
+
 		let abstractElements = doc.querySelectorAll('div.article__abstract p, div.abstractSection p');
 		let abstract = Array.from(abstractElements).map(x => x.textContent).join('\n\n');
 		if (abstract.length && abstract.toLowerCase() != 'no abstract available.') {
@@ -171,6 +174,9 @@ function scrape(doc) {
 				title: 'Full Text PDF',
 				mimeType: 'application/pdf'
 			});
+			if (item.DOI) {
+				item.url = 'https://dl.acm.org/doi/' + ZU.cleanDOI(item.DOI);
+			}
 		}
 		
 		if (item.itemType == 'journalArticle') {
@@ -233,6 +239,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://dl.acm.org/doi/abs/10.1145/1596655.1596682",
+		"detectedItemType": "conferencePaper",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -241,13 +248,13 @@ var testCases = [
 					{
 						"lastName": "Mostafa",
 						"firstName": "Nagy",
-						"creatorTypeID": 1,
+						"creatorTypeID": 8,
 						"creatorType": "author"
 					},
 					{
 						"lastName": "Krintz",
 						"firstName": "Chandra",
-						"creatorTypeID": 1,
+						"creatorTypeID": 8,
 						"creatorType": "author"
 					}
 				],
@@ -262,7 +269,7 @@ var testCases = [
 				"proceedingsTitle": "Proceedings of the 7th International Conference on Principles and Practice of Programming in Java",
 				"publisher": "Association for Computing Machinery",
 				"series": "PPPJ '09",
-				"url": "https://doi.org/10.1145/1596655.1596682",
+				"url": "https://dl.acm.org/doi/10.1145/1596655.1596682",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -288,6 +295,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://dl.acm.org/doi/10.5555/1717186",
+		"detectedItemType": "book",
 		"items": [
 			{
 				"itemType": "book",
@@ -296,7 +304,7 @@ var testCases = [
 					{
 						"lastName": "Loeliger",
 						"firstName": "Jon",
-						"creatorTypeID": 1,
+						"creatorTypeID": 8,
 						"creatorType": "author"
 					}
 				],
@@ -306,6 +314,7 @@ var testCases = [
 				"edition": "1st",
 				"itemID": "10.5555/1717186",
 				"libraryCatalog": "ACM Digital Library",
+				"numPages": "336",
 				"publisher": "O'Reilly Media, Inc.",
 				"shortTitle": "Version Control with Git",
 				"attachments": [],
@@ -318,6 +327,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://dl.acm.org/doi/abs/10.1023/A:1008286901817",
+		"detectedItemType": "journalArticle",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -326,13 +336,13 @@ var testCases = [
 					{
 						"lastName": "Tegethoff",
 						"firstName": "Mick",
-						"creatorTypeID": 1,
+						"creatorTypeID": 8,
 						"creatorType": "author"
 					},
 					{
 						"lastName": "Chen",
 						"firstName": "Tom",
-						"creatorTypeID": 1,
+						"creatorTypeID": 8,
 						"creatorType": "author"
 					}
 				],
@@ -383,6 +393,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://dl.acm.org/doi/abs/10.1145/258948.258973",
+		"detectedItemType": "conferencePaper",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -391,13 +402,13 @@ var testCases = [
 					{
 						"lastName": "Elliott",
 						"firstName": "Conal",
-						"creatorTypeID": 1,
+						"creatorTypeID": 8,
 						"creatorType": "author"
 					},
 					{
 						"lastName": "Hudak",
 						"firstName": "Paul",
-						"creatorTypeID": 1,
+						"creatorTypeID": 8,
 						"creatorType": "author"
 					}
 				],
@@ -412,7 +423,7 @@ var testCases = [
 				"proceedingsTitle": "Proceedings of the second ACM SIGPLAN international conference on Functional programming",
 				"publisher": "Association for Computing Machinery",
 				"series": "ICFP '97",
-				"url": "https://doi.org/10.1145/258948.258973",
+				"url": "https://dl.acm.org/doi/10.1145/258948.258973",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -428,6 +439,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://dl.acm.org/doi/abs/10.1145/2566617",
+		"detectedItemType": "journalArticle",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -436,19 +448,19 @@ var testCases = [
 					{
 						"lastName": "Joseph",
 						"firstName": "Kenneth",
-						"creatorTypeID": 1,
+						"creatorTypeID": 8,
 						"creatorType": "author"
 					},
 					{
 						"lastName": "Carley",
 						"firstName": "Kathleen M.",
-						"creatorTypeID": 1,
+						"creatorTypeID": 8,
 						"creatorType": "author"
 					},
 					{
 						"lastName": "Hong",
 						"firstName": "Jason I.",
-						"creatorTypeID": 1,
+						"creatorTypeID": 8,
 						"creatorType": "author"
 					}
 				],
@@ -463,7 +475,7 @@ var testCases = [
 				"pages": "46:1–46:22",
 				"publicationTitle": "ACM Transactions on Intelligent Systems and Technology",
 				"shortTitle": "Check-ins in “Blau Space”",
-				"url": "https://doi.org/10.1145/2566617",
+				"url": "https://dl.acm.org/doi/10.1145/2566617",
 				"volume": "5",
 				"attachments": [
 					{
@@ -493,6 +505,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://dl.acm.org/doi/abs/10.5555/3336323.C5474411",
+		"detectedItemType": "bookSection",
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -514,8 +527,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "November 20, 2019",
 				"ISBN": "9781450372763",
-				"abstractNote": "This organizational history relates the role of the National Science Foundation (NSF) in the development of modern computing. Drawing upon new and existing oral histories, extensive use of NSF documents, and the experience of two of the authors as senior managers, this book describes how NSF's programmatic activities originated and evolved to become the primary source of funding for fundamental research in computing and information technologies. The book traces how NSF's support has provided facilities and education for computing usage by all scientific disciplines, aided in institution and professional community building, supported fundamental research in computer science and allied disciplines, and led the efforts to broaden participation in computing by all segments of society. Today, the research and infrastructure facilitated by NSF computing programs are significant economic drivers of American society and industry. For example, NSF supported work that led to the first widelyused web browser, Netscape; sponsored the creation of algorithms at the core of the Google search engine; facilitated the growth of the public Internet; and funded research on the scientific basis for countless other applications and technologies. NSF has advanced the development of human capital and ideas for future advances in computing and its applications. This account is the first comprehensive coverage of NSF's role in the extraordinary growth and expansion of modern computing and its use. It will appeal to historians of computing, policy makers and leaders in government and academia, and individuals interested in the history and development of computing and the NSF.",
+				"abstractNote": "This organizational history relates the role of the National Science Foundation (NSF) in the development of modern computing. Drawing upon new and existing oral histories, extensive use of NSF documents, and the experience of two of the authors as senior managers, this book describes how NSF's programmatic activities originated and evolved to become the primary source of funding for fundamental research in computing and information technologies.The book traces how NSF's support has provided facilities and education for computing usage by all scientific disciplines, aided in institution and professional community building, supported fundamental research in computer science and allied disciplines, and led the efforts to broaden participation in computing by all segments of society.Today, the research and infrastructure facilitated by NSF computing programs are significant economic drivers of American society and industry. For example, NSF supported work that led to the first widelyused web browser, Netscape; sponsored the creation of algorithms at the core of the Google search engine; facilitated the growth of the public Internet; and funded research on the scientific basis for countless other applications and technologies. NSF has advanced the development of human capital and ideas for future advances in computing and its applications.This account is the first comprehensive coverage of NSF's role in the extraordinary growth and expansion of modern computing and its use. It will appeal to historians of computing, policy makers and leaders in government and academia, and individuals interested in the history and development of computing and the NSF.",
 				"bookTitle": "Computing and the National Science Foundation, 1950--2016: Building a Foundation for Modern Computing",
 				"itemID": "10.5555/3336323.C5474411",
 				"libraryCatalog": "ACM Digital Library",
@@ -536,6 +550,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://dl.acm.org/doi/10.1145/3264631.3264634",
+		"detectedItemType": "journalArticle",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -544,13 +559,13 @@ var testCases = [
 					{
 						"lastName": "Gross",
 						"firstName": "Mikaylah",
-						"creatorTypeID": 1,
+						"creatorTypeID": 8,
 						"creatorType": "author"
 					},
 					{
 						"lastName": "Bolchini",
 						"firstName": "Davide",
-						"creatorTypeID": 1,
+						"creatorTypeID": 8,
 						"creatorType": "author"
 					}
 				],
@@ -576,6 +591,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://dl.acm.org/doi/10.1145/2854146",
+		"detectedItemType": "journalArticle",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -584,13 +600,13 @@ var testCases = [
 					{
 						"lastName": "Potvin",
 						"firstName": "Rachel",
-						"creatorTypeID": 1,
+						"creatorTypeID": 8,
 						"creatorType": "author"
 					},
 					{
 						"lastName": "Levenberg",
 						"firstName": "Josh",
-						"creatorTypeID": 1,
+						"creatorTypeID": 8,
 						"creatorType": "author"
 					}
 				],
@@ -604,7 +620,7 @@ var testCases = [
 				"libraryCatalog": "ACM Digital Library",
 				"pages": "78–87",
 				"publicationTitle": "Communications of the ACM",
-				"url": "https://doi.org/10.1145/2854146",
+				"url": "https://dl.acm.org/doi/10.1145/2854146",
 				"volume": "59",
 				"attachments": [
 					{
@@ -621,6 +637,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://dl.acm.org/doi/book/10.5555/1087674",
+		"detectedItemType": "thesis",
 		"items": [
 			{
 				"itemType": "thesis",
@@ -629,7 +646,7 @@ var testCases = [
 					{
 						"lastName": "Yuan",
 						"firstName": "Wei",
-						"creatorTypeID": 1,
+						"creatorTypeID": 8,
 						"creatorType": "author"
 					}
 				],
