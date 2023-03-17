@@ -40,9 +40,8 @@ function detectWeb(doc, url) {
 	}
 
 	// Also skip pages from magazine sections that has no usable author
-	// info. (Maps, Miscellany, charts and graphs, etc.), 
+	// info. (Maps, Miscellany, charts and graphs, etc.).
 	const skipSection = /^\/.+\/(maps|miscellany|charts-graphs)\/.+/;
-
 	if (urlObj.pathname.match(skipSection)) {
 		return false;
 	}
@@ -211,9 +210,9 @@ async function requestIssueInfo(url) {
 	const [volume, number, year] = dateText.split(/[,|]/)
 		.map(x => x.trim().split(" ")[1]);
 	return {
-		volume:  romanToInt(volume),
+		volume: romanToInt(volume),
 		issue: parseInt(number),
-		date:  parseInt(year)
+		date: parseInt(year)
 	};
 }
 
@@ -263,7 +262,7 @@ function applyPodcast(doc, item) {
 	}
 	else if (podPublication.toLowerCase() === "lq podcast") {
 		// The metadata for "LQ Podcast" is more difficult to obtain.
-		const [_, ep, title] = headingText.match(/#(\d+)\s+(.+)/i);
+		const [_, ep, title] = headingText.match(/#(\d+)\s+(.+)/i); // eslint-disable-line no-unused-vars
 		item.episodeNumber = parseInt(ep);
 		item.title = title;
 	}
@@ -278,7 +277,7 @@ function getPodDuration(doc) {
 
 // Parse mm:ss time duration as number of seconds.
 function parseTime(str) {
-	const [_, mm, ss] = str.match(/(-?\d+):(\d+)/);
+	const [_, mm, ss] = str.match(/(-?\d+):(\d+)/); // eslint-disable-line no-unused-vars
 	let t = parseInt(mm) * 60;
 	const s = parseInt(ss);
 	t += t > 0 ? s : -s;
@@ -315,7 +314,7 @@ const ROMAN_NUMERAL = {
 	V: 5,
 	X: 10,
 	L: 50,
-	C: 100  // "D" and "M" unlikely to be encountered any time soon.
+	C: 100 // "D" and "M" unlikely to be encountered any time soon.
 };
 
 function romanToInt(str) {
