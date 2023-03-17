@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-17 08:39:38"
+	"lastUpdated": "2023-03-17 15:00:59"
 }
 
 /*
@@ -293,7 +293,7 @@ function timeToDuration(s) {
 		h = Math.floor(m / 60);
 		m %= 60;
 	}
-	return h > 0 ? `PT${h}H${m}M${s}S` : `PT${m}M${s}S`;
+	return h > 0 ? `${h}:${m}:${s}` : `${m}:${s}`;
 }
 
 // Utility functions
@@ -481,7 +481,7 @@ var testCases = [
 				"audioFileType": "audio/mpeg",
 				"episodeNumber": 87,
 				"language": "en",
-				"runningTime": "PT35M51S",
+				"runningTime": "35:51",
 				"seriesTitle": "The World in Time",
 				"url": "https://www.laphamsquarterly.org/content/peter-s-goodman",
 				"attachments": [
@@ -508,7 +508,7 @@ var testCases = [
 				"audioFileType": "audio/mpeg",
 				"episodeNumber": 61,
 				"language": "en",
-				"runningTime": "PT43M42S",
+				"runningTime": "43:42",
 				"seriesTitle": "LQ Podcast",
 				"url": "https://www.laphamsquarterly.org/content/soviets-spies",
 				"attachments": [
