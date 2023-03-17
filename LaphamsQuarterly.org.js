@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-17 15:05:11"
+	"lastUpdated": "2023-03-17 15:36:33"
 }
 
 /*
@@ -92,7 +92,7 @@ function getSearchResults(doc, checkOnly = false) {
 	if (!rawResultLength) return false;
 
 	const items = {};
-	const titleCounter = {};
+	const titleCounter = new Map();
 	let isNonEmpty = false;
 	for (let i = 0; i < rawResultLength; i++) {
 		const elem = resultElems[i];
@@ -106,15 +106,16 @@ function getSearchResults(doc, checkOnly = false) {
 			// Title may contain duplicates even if the links are
 			// unique. Try adding a number after title in this case
 			// to help the user choose from the multiple.
-			if (!(title in titleCounter)) {
-				titleCounter[title] = 0;
+			let n;
+			if (!titleCounter.has(title)) {
+				n = 1;
 			}
 			else {
-				titleCounter[title] += 1;
+				n = titleCounter.get(title) + 1;
 			}
+			titleCounter.set(title, n);
 
-			const n = titleCounter[title];
-			const extraTag = n ? ` (${n + 1})` : "";
+			const extraTag = n > 1 ? ` (${n})` : "";
 			items[href] = title + extraTag;
 			isNonEmpty = true;
 		}
@@ -181,16 +182,16 @@ async function applyMagazine(doc, item) {
 // and values are the corresponding issue info returned by
 // requestArticleIssue().  This is to avoid repeated network requests for the
 // same document when saving multiple items.
-const _issueInfoCache = {};
+const _issueInfoCache = new Map();
 
 async function setIssueInfo(url, item) {
 	let value;
-	if (url in _issueInfoCache) {
-		value = _issueInfoCache[url];
+	if (_issueInfoCache.has(url)) {
+		value = _issueInfoCache.get(url);
 	}
 	else {
 		value = await requestIssueInfo(url);
-		_issueInfoCache[url] = value;
+		_issueInfoCache.set(url, value);
 	}
 	Object.assign(item, value);
 }
