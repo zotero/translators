@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-17 15:00:59"
+	"lastUpdated": "2023-03-17 15:05:11"
 }
 
 /*
@@ -262,7 +262,7 @@ function applyPodcast(doc, item) {
 	}
 	else if (podPublication.toLowerCase() === "lq podcast") {
 		// The metadata for "LQ Podcast" is more difficult to obtain.
-		const [_, ep, title] = headingText.match(/#(\d+)\s+(.+)/i); // eslint-disable-line no-unused-vars
+		const [, ep, title] = headingText.match(/#(\d+)\s+(.+)/i);
 		item.episodeNumber = parseInt(ep);
 		item.title = title;
 	}
@@ -277,7 +277,7 @@ function getPodDuration(doc) {
 
 // Parse mm:ss time duration as number of seconds.
 function parseTime(str) {
-	const [_, mm, ss] = str.match(/(-?\d+):(\d+)/); // eslint-disable-line no-unused-vars
+	const [, mm, ss] = str.match(/(-?\d+):(\d+)/);
 	let t = parseInt(mm) * 60;
 	const s = parseInt(ss);
 	t += t > 0 ? s : -s;
