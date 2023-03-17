@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-16 12:24:03"
+	"lastUpdated": "2023-03-17 13:50:17"
 }
 
 /*
@@ -99,8 +99,16 @@ function constructRISURL(url) {
 function constructEnglishURL(url) {
 	// default catalog page URL: https://plus.cobiss.net/cobiss/si/sl/bib/107937536
 	// page with English metadata: https://plus.cobiss.net/cobiss/si/en/bib/107937536
-	let englishURL = url.replace(/[a-z]{2}\/bib\//, "en/bib/");
+	// most COBISS catalogs follow the format where the language code is two characters e.g. "sl"
+	// except for this one: https://plus.cobiss.net/cobiss/cg/cnr_cyrl/bib/20926212
+	const firstPartRegex = /https:\/\/plus\.cobiss\.net\/cobiss\/[a-z]{2}\//;
+	const endPartRegex = /\/bib\/\S*/;
+
+	const firstPart = url.match(firstPartRegex)[0];
+	const endPart = url.match(endPartRegex)[0];
+	var englishURL = firstPart + "en" + endPart;
 	return englishURL;
+
 }
 
 // in the catalog, too many items are classified in RIS as either BOOK or ELEC,
@@ -169,13 +177,32 @@ function translateItemType(englishCatalogItemType) {
 		['seminar paper', 'thesis'],
 		['habilitation', 'thesis'],
 		['dramaturgical paper', 'thesis'],
-		['', ''],
-		['', ''],
-		['', ''],
-		['', ''],
-		['', ''],
-
-		// TODO: finish for remaining types.
+		['article, component part', 'journalArticle'],
+		['e-article', 'journalArticle'],
+		['periodical', 'book'],
+		['monogr. series', 'book'],
+		['audio CD', 'audioRecording'],
+		['audio cassette', 'audioRecording'],
+		['disc', 'audioRecording'],
+		['music, sound recording', 'audioRecording'],
+		['audio DVD', 'audioRecording'],
+		['printed and manuscript music', 'audioRecording'],
+		['graphics', 'artwork'],
+		['poster', 'artwork'],
+		['photograph', 'artwork'],
+		['e-video', 'videoRecording'],
+		['video DVD', 'videoRecording'],
+		['video cassette', 'videoRecording'],
+		['blu-ray', 'videoRecording'],
+		['motion picture', 'videoRecording'],
+		['map', 'map'],
+		['atlas', 'map'],
+		['electronic resource', 'webpage'],
+		['computer CD, DVD, USB', 'computerProgram'],
+		['article, component part ', 'journalArticle']
+		// there are likely other catalog item types in COBISS,
+		// which could be added to this hash later if they're being
+		// imported with the wrong Zotero item type
 
 	]);
 	return (catalogItemTypeHash.get(englishCatalogItemType));
@@ -210,6 +237,12 @@ async function scrape(doc, url = doc.location.href) {
 		var englishItemType = englishDocument.querySelector("button#add-biblioentry-to-shelf").getAttribute("data-mat-type");
 		finalItemType = translateItemType(englishItemType);
 	}
+	if (doc.getElementById("unpaywall-link")) {
+		var pdfLink = doc.getElementById("unpaywall-link").href;
+	}
+	if (doc.getElementById('showUrlHref')) {
+		var fullTextLink = doc.getElementById('showUrlHref').href;
+	}
 
 	// case for catalog items with RIS
 	const risURL = constructRISURL(url);
@@ -217,9 +250,6 @@ async function scrape(doc, url = doc.location.href) {
 	if (risText) {
 		// RIS always has an extraneous OK## at the beginning, remove it
 		const fixedRisText = risText.replace(/^OK##/, '');
-		if (doc.getElementById("unpaywall-link")) {
-			var pdfLink = doc.getElementById("unpaywall-link").href;
-		}
 		const translator = Zotero.loadTranslator('import');
 		translator.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7'); // RIS
 		translator.setString(fixedRisText);
@@ -231,18 +261,22 @@ async function scrape(doc, url = doc.location.href) {
 					mimeType: 'application/pdf'
 				});
 			}
-			else {
-				item.attachments.push({
-					title: 'Snapshot',
-					document: doc
-				});
+			else if (fullTextLink) {
+				if (fullTextLink.match(/.pdf$/)) {
+					item.attachments.push({
+						url: fullTextLink,
+						title: 'Full Text PDF',
+						mimeType: 'application/pdf'
+					});
+				}
+				else {
+					item.attachments.push({
+						url: fullTextLink,
+						title: 'Full Text',
+						mimeType: 'text/html'
+					});
+				}
 			}
-			// TODO: Figure out what to do with links
-			// They're all over the place. Some are full-text, some say that they're PDFs but aren't actually,
-			// some are something else...
-			// Save Link field somewhere, e.g. https://plus.cobiss.net/cobiss/si/en/bib/70461955
-			// here's another URL that's full text: https://plus.cobiss.net/cobiss/si/en/bib/95451907
-			// Links to full text PDF: https://plus.cobiss.net/cobiss/si/en/bib/105123075
 
 			// if finalItemType is found from the catalog page, override itemType from RIS with it.
 			// if "Type of material" from catalog page isn't in catalogItemTypeHash, finalItemType will return as undefined.
@@ -270,55 +304,101 @@ async function scrape(doc, url = doc.location.href) {
 
 	// case for catalog items with no RIS (remaining 5% or so of items) where we can't use the RIS import translator
 	else {
-		Zotero.debug("no RIS item");
 		// construct correct fullRecord URL from basic catalog URL or #full URL
 		// base URL: https://plus.cobiss.net/cobiss/si/sl/bib/93266179
 		// JSON URL: https://plus.cobiss.net/cobiss/si/sl/bib/COBIB/93266179/full
 		var jsonUrl = url.replace(/\/bib\/(\d+)/, "/bib/COBIB/$1/full");
 		var fullRecord = await requestJSON(jsonUrl);
-		Zotero.debug(fullRecord);
-		if (finalItemType) {
-			var noRISItem = new Zotero.Item(finalItemType);
+		var noRISItem = new Zotero.Item(finalItemType);
+		noRISItem.title = fullRecord.titleCard.value;
+		var creatorsJson = fullRecord.author700701.value;
+		var brSlashRegex = /<br\/>/;
+		var creators = creatorsJson.split(brSlashRegex).map(value => value.trim());
+		for (let creator of creators) {
+			// creator role isn't defined in metadata, so assign everyone "author" role
+			let role = "author";
+			noRISItem.creators.push(ZU.cleanAuthor(creator, role, true));
+		}
+		if (fullRecord.languageCard) noRISItem.language = fullRecord.languageCard.value;
+		if (fullRecord.publishDate) noRISItem.date = fullRecord.publishDate.value;
+		if (fullRecord.edition) noRISItem.edition = fullRecord.edition.value;
+		if (fullRecord.isbnCard) noRISItem.ISBN = fullRecord.isbnCard.value;
 
-			noRISItem.title = fullRecord.titleCard.value;
-			var creatorsJson = fullRecord.author700701.value;
-			var brslashRegex = /<br\/>/;
-			var creators = creatorsJson.split(brslashRegex).map(value => value.trim());
-			for (let creator of creators) {
-				// creator role isn't defined in metadata, so assign everyone "author" role
-				let role = "author";
-				noRISItem.creators.push(ZU.cleanAuthor(creator, role, true));
-			}
-			noRISItem.language = fullRecord.languageCard.value;
-			noRISItem.date = fullRecord.publishDate.value;
-			noRISItem.edition = fullRecord.edition.value;
-			// TODO: extract publication place from publisherCard.
-			// example string: "Ljubljana : Intelego, 2022"
-			noRISItem.publisher = fullRecord.publisherCard.value;
-			noRISItem.ISBN = fullRecord.isbnCard.value;
+		if (fullRecord.publisherCard) {
+			var placePublisher = fullRecord.publisherCard.value;
+			// example string for publisherCard.value: "Ljubljana : Intelego, 2022"
+			const colonIndex = placePublisher.indexOf(":");
+			const commaIndex = placePublisher.indexOf(",");
+			noRISItem.place = placePublisher.slice(0, colonIndex).trim();
+			noRISItem.publisher = placePublisher.slice(colonIndex + 2, commaIndex).trim();
+		}
+
+		if (fullRecord.notesCard) {
 			var notesJson = fullRecord.notesCard.value;
 			var brRegex = /<br>/;
 			var notes = notesJson.split(brRegex).map(value => value.trim());
 			for (let note of notes) {
 				noRISItem.notes.push(note);
 			}
-			// TODO: subjects
-
-			// TODO: add attachments to RIS items
-			noRISItem.complete();
 		}
-		else {
-			if (url.match("/en/bib")) {
-				var nativeEnglishItemType = doc.querySelector("button#add-biblioentry-to-shelf").getAttribute("data-mat-type");
-				finalItemType = translateItemType(nativeEnglishItemType);
-				Zotero.debug("finalItemType from /en/bib is" + finalItemType);
-				var noRISItem = new Zotero.Item(finalItemType);
-				noRISItem.author = fullRecord.querySelector("div.recordAuthor").innerText;
-				noRISItem.complete();
+
+		// add subjects from JSON as tags. There are three fields, sgcHeadings, otherSubjects and subjectCardUncon with
+		// different separators. sgcHeadings and otherSubjects use <br>, subjectCardUncon uses /
+		if (fullRecord.sgcHeadings) {
+			var sgcHeadingsJson = fullRecord.sgcHeadings.value;
+			var sgcHeadingTags = sgcHeadingsJson.split(brRegex).map(value => value.trim());
+			for (let sgcHeadingTag of sgcHeadingTags) {
+				noRISItem.tags.push(sgcHeadingTag);
 			}
 		}
+
+		if (fullRecord.otherSubjects) {
+			var otherSubjectsJson = fullRecord.otherSubjects.value;
+			var otherSubjectsTags = otherSubjectsJson.split(brRegex).map(value => value.trim());
+			for (let otherSubjectsTag of otherSubjectsTags) {
+				noRISItem.tags.push(otherSubjectsTag);
+			}
+		}
+
+		if (fullRecord.subjectCardUncon) {
+			var subjectCardUnconJson = fullRecord.subjectCardUncon.value;
+			const slashRegex = /\//;
+			var subjectCardUnconTags = subjectCardUnconJson.split(slashRegex).map(value => value.trim());
+			for (let subjectCardUnconTag of subjectCardUnconTags) {
+				noRISItem.tags.push(subjectCardUnconTag);
+			}
+		}
+		// add attachments to RIS items
+		if (pdfLink) {
+			item.attachments.push({
+				url: pdfLink,
+				title: 'Full Text PDF',
+				mimeType: 'application/pdf'
+			});
+		}
+		else if (fullTextLink) {
+			if (fullTextLink.match(/.pdf$/)) {
+				item.attachments.push({
+					url: fullTextLink,
+					title: 'Full Text PDF',
+					mimeType: 'application/pdf'
+				});
+			}
+			else {
+				item.attachments.push({
+					url: fullTextLink,
+					title: 'Full Text',
+					mimeType: 'text/html'
+				});
+			}
+		}
+		noRISItem.complete();
 	}
 }
+
+
+// TODO: run linter
+// TODO: refactor and cleanup code/comments
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -342,12 +422,7 @@ var testCases = [
 				"place": "Hvaletinci",
 				"studio": "NID Sapientia",
 				"url": "https://plus.cobiss.net/cobiss/si/sl/bib/92020483",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Antropozofija"
@@ -389,18 +464,13 @@ var testCases = [
 				],
 				"date": "2001",
 				"ISBN": "9789616400107",
-				"libraryCatalog": "Library Catalog (COBISS)",
+				"libraryCatalog": "COBISS",
 				"numPages": "2 zv. (216; 203 )",
 				"place": "Ljubljana",
 				"publisher": "Založniški atelje Blodnjak",
 				"series": "Zbirka Blodnjak",
 				"url": "https://plus.cobiss.net/cobiss/si/sl/bib/115256576",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
+				"attachments": [],
 				"tags": [],
 				"notes": [
 					{
@@ -422,7 +492,7 @@ var testCases = [
 		"url": "https://plus.cobiss.net/cobiss/si/sl/bib/139084803",
 		"items": [
 			{
-				"itemType": "webpage",
+				"itemType": "report",
 				"title": "Poročilo analiz vzorcev odpadnih vod na vsebnost prepovedanih in dovoljenih drog na področju centralne čistilne naprave Kranj (2022)",
 				"creators": [
 					{
@@ -437,13 +507,12 @@ var testCases = [
 					}
 				],
 				"date": "2023",
+				"institution": "Institut Jožef Stefan",
+				"libraryCatalog": "COBISS",
+				"pages": "1 USB-ključ",
+				"place": "Ljubljana",
 				"url": "https://plus.cobiss.net/cobiss/si/sl/bib/139084803",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "dovoljene droge"
@@ -516,7 +585,7 @@ var testCases = [
 				"ISSN": "2049-1948",
 				"issue": "1",
 				"journalAbbreviation": "WIREs",
-				"libraryCatalog": "Library Catalog (COBISS)",
+				"libraryCatalog": "COBISS",
 				"pages": "1-14",
 				"publicationTitle": "WIREs",
 				"url": "https://plus.cobiss.net/cobiss/si/sl/bib/84534787",
@@ -525,10 +594,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -583,7 +648,7 @@ var testCases = [
 		"url": "https://plus.cobiss.net/cobiss/si/sl/bib/5815649",
 		"items": [
 			{
-				"itemType": "webpage",
+				"itemType": "thesis",
 				"title": "Rangiranje cest po metodologiji EuroRAP ; Elektronski vir: diplomska naloga = Rating roads using EuroRAP procedures",
 				"creators": [
 					{
@@ -593,7 +658,10 @@ var testCases = [
 					}
 				],
 				"date": "2012",
+				"libraryCatalog": "COBISS",
+				"place": "Ljubljana",
 				"shortTitle": "Rangiranje cest po metodologiji EuroRAP ; Elektronski vir",
+				"university": "[K. Pešec]",
 				"url": "https://plus.cobiss.net/cobiss/si/sl/bib/5815649",
 				"attachments": [
 					{
@@ -714,13 +782,18 @@ var testCases = [
 				"publisher": "Fakulteta za strojništvo",
 				"shortTitle": "Posvet Avtomatizacija strege in montaže 2021/2021 - ASM '21/22, Ljubljana, 11. 05. 2022",
 				"url": "https://plus.cobiss.net/cobiss/si/sl/bib/82789891",
-				"attachments": [
+				"attachments": [],
+				"tags": [
 					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
+						"tag": "Avtomatizacija"
+					},
+					{
+						"tag": "Posvetovanja"
+					},
+					{
+						"tag": "Strojništvo"
 					}
 				],
-				"tags": [],
 				"notes": [
 					{
 						"note": "<p>180 izv.</p>"
@@ -753,7 +826,7 @@ var testCases = [
 				"url": "https://plus.cobiss.net/cobiss/si/en/bib/78691587",
 				"attachments": [
 					{
-						"title": "Snapshot",
+						"title": "Full Text",
 						"mimeType": "text/html"
 					}
 				],
@@ -854,12 +927,7 @@ var testCases = [
 				"publisher": "Založba Univerze",
 				"shortTitle": "Ljubezen v pismih",
 				"url": "https://plus.cobiss.net/cobiss/si/en/bib/94705155#full",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Primorska"
@@ -903,98 +971,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://plus.cobiss.net/cobiss/si/en/bib/15409155#full",
-		"items": [
-			{
-				"itemType": "artwork",
-				"title": "Moja hči",
-				"creators": [
-					{
-						"lastName": "Kraljič",
-						"firstName": "Helena",
-						"creatorType": "artist"
-					}
-				],
-				"date": "2022",
-				"libraryCatalog": "COBISS",
-				"url": "https://plus.cobiss.net/cobiss/si/en/bib/15409155#full",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [
-					{
-						"tag": "pomoč"
-					},
-					{
-						"tag": "prijateljstvo"
-					},
-					{
-						"tag": "razumevanje"
-					},
-					{
-						"tag": "samorealizacija"
-					}
-				],
-				"notes": [
-					{
-						"note": "<p>Ilustr. na spojnih listih</p>"
-					},
-					{
-						"note": "<p>1.500 izv.</p>"
-					},
-					{
-						"note": "<p>Spremna beseda / Igor Saksida na preliminarni str.</p>"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://plus.cobiss.net/cobiss/si/en/bib/21773059",
-		"items": [
-			{
-				"itemType": "audioRecording",
-				"title": "Druge gumbolovščine so prave pustolovščine: šola za 2. r harmonike z melodijskimi basi",
-				"creators": [
-					{
-						"lastName": "Gvozdenac",
-						"firstName": "Mirjana",
-						"creatorType": "composer"
-					}
-				],
-				"date": "2023",
-				"label": "Musaik",
-				"libraryCatalog": "COBISS",
-				"place": "Izola",
-				"seriesTitle": "Zbirka Musaik : harmonika solo",
-				"shortTitle": "Druge gumbolovščine so prave pustolovščine",
-				"url": "https://plus.cobiss.net/cobiss/si/en/bib/21773059",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Harmonika"
-					},
-					{
-						"tag": "Učbeniki"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "https://plus.cobiss.net/cobiss/si/en/bib/78691587",
 		"items": [
 			{
@@ -1016,7 +992,7 @@ var testCases = [
 				"url": "https://plus.cobiss.net/cobiss/si/en/bib/78691587",
 				"attachments": [
 					{
-						"title": "Snapshot",
+						"title": "Full Text",
 						"mimeType": "text/html"
 					}
 				],
@@ -1081,58 +1057,90 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Fizika. Zbirka maturitetnih nalog z rešitvami 2012-2017",
-				"creators": [],
-				"libraryCatalog": "COBISS",
-				"attachments": [],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://plus.cobiss.net/cobiss/si/en/bib/93266179",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Matematika na splošni maturi : 2022 : vprašanja in odgovori za ustni izpit iz matematike na splošni maturi za osnovno raven",
+				"title": "Fizika. Zbirka maturitetnih nalog z rešitvami 2012-2017 / [avtorji Vitomir Babič ... [et al.] ; urednika Aleš Drolc, Joži Trkov]",
 				"creators": [
 					{
-						"firstName": "Bojana",
-						"lastName": "Dvoržak",
+						"firstName": "Vito",
+						"lastName": "Babič",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ruben",
+						"lastName": "Belina",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peter",
+						"lastName": "Gabrovec",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marko",
+						"lastName": "Jagodič",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Aleš",
+						"lastName": "Mohorič",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mirijam",
+						"lastName": "Pirc",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Gorazd",
+						"lastName": "Planinšič",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mitja",
+						"lastName": "Slavinec",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ivica",
+						"lastName": "Tomić",
 						"creatorType": "author"
 					}
 				],
+				"date": "2022",
+				"ISBN": "9789616899420",
+				"edition": "3. ponatis",
+				"language": "Slovenian",
 				"libraryCatalog": "COBISS",
-				"shortTitle": "Matematika na splošni maturi",
+				"place": "Ljubljana",
+				"publisher": "Državni izpitni center",
 				"attachments": [],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://plus.cobiss.net/cobiss/si/en/bib/93266179",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Matematika na splošni maturi : 2022 : vprašanja in odgovori za ustni izpit iz matematike na splošni maturi za osnovno raven / Bojana Dvoržak",
-				"creators": [
+				"tags": [
 					{
-						"firstName": "Bojana",
-						"lastName": "Dvoržak",
-						"creatorType": "author"
+						"tag": "Fizika -- Matura -- 2012-2017 -- Vaje za srednje šole"
+					},
+					{
+						"tag": "Fizika -- Vaje za maturo"
+					},
+					{
+						"tag": "izpitne naloge za srednje šole"
+					},
+					{
+						"tag": "naloge"
+					},
+					{
+						"tag": "rešitve"
+					},
+					{
+						"tag": "testi znanja"
+					},
+					{
+						"tag": "učbeniki za srednje šole"
 					}
 				],
-				"libraryCatalog": "COBISS",
-				"shortTitle": "Matematika na splošni maturi",
-				"attachments": [],
-				"tags": [],
-				"notes": [],
+				"notes": [
+					"Nasl. na hrbtu: Fizika 2012-2017",
+					"Avtorji navedeni v kolofonu",
+					"600 izv."
+				],
 				"seeAlso": []
 			}
 		]
@@ -1151,11 +1159,63 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2022",
+				"ISBN": "9789616558624",
+				"edition": "1. izd.",
+				"language": "slovenski",
 				"libraryCatalog": "COBISS",
+				"place": "Ljubljana",
+				"publisher": "Intelego",
 				"shortTitle": "Matematika na splošni maturi",
 				"attachments": [],
-				"tags": [],
-				"notes": [],
+				"tags": [
+					{
+						"tag": "Matematika"
+					},
+					{
+						"tag": "Matematika -- Katalogi znanja za srednje šole"
+					},
+					{
+						"tag": "Matematika -- Matura -- Vaje za srednje šole"
+					},
+					{
+						"tag": "Matematika -- Vaje za maturo"
+					},
+					{
+						"tag": "Matura"
+					},
+					{
+						"tag": "Naloge, vaje itd."
+					},
+					{
+						"tag": "izpitne naloge za srednje šole"
+					},
+					{
+						"tag": "odgovori"
+					},
+					{
+						"tag": "osnovna raven"
+					},
+					{
+						"tag": "rešitve"
+					},
+					{
+						"tag": "testi znanja"
+					},
+					{
+						"tag": "učbeniki za srednje šole"
+					},
+					{
+						"tag": "vprašanja"
+					},
+					{
+						"tag": "zaključni izpiti"
+					}
+				],
+				"notes": [
+					"Dodatek k nasl. v kolofonu in CIP-u: Vprašanja in odgovori za ustni izpit iz matematike na splošni maturi 2022 za osnovno raven",
+					"1.000 izv."
+				],
 				"seeAlso": []
 			}
 		]
@@ -1212,22 +1272,651 @@ var testCases = [
 						"firstName": "Ivica",
 						"lastName": "Tomić",
 						"creatorType": "author"
+					}
+				],
+				"date": "2023",
+				"ISBN": "9789616899420",
+				"edition": "4. ponatis",
+				"language": "Slovenian",
+				"libraryCatalog": "COBISS",
+				"place": "Ljubljana",
+				"publisher": "Državni izpitni center",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Fizika -- Matura -- 2012-2017 -- Priročniki"
 					},
 					{
-						"firstName": "Aleš",
-						"lastName": "Drolc",
+						"tag": "Fizika -- Vaje za maturo"
+					},
+					{
+						"tag": "izpitne naloge za srednje šole"
+					},
+					{
+						"tag": "naloge"
+					},
+					{
+						"tag": "rešitve"
+					},
+					{
+						"tag": "učbeniki za srednje šole"
+					},
+					{
+						"tag": "vaje za srednje šole"
+					}
+				],
+				"notes": [
+					"Nasl. na hrbtu: Fizika 2012-2017",
+					"Avtorji navedeni v kolofonu"
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/si/en/bib/70461955",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Napredna znanja za kakovostno mentorstvo v zdravstveni negi: znanstvena monografija",
+				"creators": [
+					{
+						"lastName": "Filej",
+						"firstName": "Bojana",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Kaučič",
+						"firstName": "Boris Miha",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2023",
+				"ISBN": "9789616889377",
+				"edition": "1. izd.",
+				"libraryCatalog": "COBISS",
+				"place": "Celje",
+				"publisher": "Fakulteta za zdravstvene vede",
+				"shortTitle": "Napredna znanja za kakovostno mentorstvo v zdravstveni negi",
+				"url": "https://plus.cobiss.net/cobiss/si/en/bib/70461955",
+				"attachments": [
+					{
+						"title": "Full Text",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "izobraževanje"
+					},
+					{
+						"tag": "mentorstvo"
+					},
+					{
+						"tag": "zdravstvena nega"
+					},
+					{
+						"tag": "znanje"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Nasl. z nasl. zaslona</p>"
+					},
+					{
+						"note": "<p>Dokument v pdf formatu obsega 94 str.</p>"
+					},
+					{
+						"note": "<p>Opis vira z dne 1. 2. 2023</p>"
+					},
+					{
+						"note": "<p>Bibliografija pri posameznih poglavjih</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/si/en/bib/105123075",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Storitveni sektor in siva ekonomija v času epidemije COVID-19: raziskovalno delo: področje: ekonomija in turizem",
+				"creators": [
+					{
+						"lastName": "Hochkraut",
+						"firstName": "Nataša",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Joži",
-						"lastName": "Trkov",
+						"lastName": "Verbovšek",
+						"firstName": "Lea",
 						"creatorType": "author"
 					}
 				],
+				"date": "2022",
+				"institution": "Osnovna šola Primoža Trubarja",
 				"libraryCatalog": "COBISS",
+				"place": "Laško",
+				"shortTitle": "Storitveni sektor in siva ekonomija v času epidemije COVID-19",
+				"url": "https://plus.cobiss.net/cobiss/si/en/bib/105123075",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "COVID 19"
+					},
+					{
+						"tag": "SARS-Cov-2"
+					},
+					{
+						"tag": "izvajalci storitev"
+					},
+					{
+						"tag": "korelacija"
+					},
+					{
+						"tag": "koronavirus"
+					},
+					{
+						"tag": "potrošniki"
+					},
+					{
+						"tag": "raziskovalne naloge"
+					},
+					{
+						"tag": "siva ekonomija"
+					},
+					{
+						"tag": "statistika"
+					},
+					{
+						"tag": "storitveni sektor"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Raziskovalna naloga v okviru projekta Mladi za Celje 2022</p>"
+					},
+					{
+						"note": "<p>Povzetek v slov in angl.</p>"
+					},
+					{
+						"note": "<p>Bibliografija: f. 35-36</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/si/en/bib/84576259",
+		"items": [
+			{
+				"itemType": "audioRecording",
+				"title": "Reforma: tribute to Laibach",
+				"creators": [
+					{
+						"lastName": "Noctiferia",
+						"creatorType": "composer",
+						"fieldMode": 1
+					}
+				],
+				"date": "0000 cop",
+				"label": "Nika",
+				"libraryCatalog": "COBISS",
+				"place": "Ljubljana",
+				"shortTitle": "Reforma",
+				"url": "https://plus.cobiss.net/cobiss/si/en/bib/84576259",
+				"attachments": [
+					{
+						"title": "Full Text",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "avantgardna glasba"
+					},
+					{
+						"tag": "avantgardni rock"
+					},
+					{
+						"tag": "black metal"
+					},
+					{
+						"tag": "death metal"
+					},
+					{
+						"tag": "extreme metal"
+					},
+					{
+						"tag": "heavy metal"
+					},
+					{
+						"tag": "industrial metal"
+					},
+					{
+						"tag": "metal"
+					},
+					{
+						"tag": "priredbe"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Leto posnetja 2021</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/al/sq/bib/334906368",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Trëndafili i mesnatës",
+				"creators": [
+					{
+						"lastName": "Riley",
+						"firstName": "Lucinda",
+						"creatorType": "author"
+					}
+				],
+				"date": "[2022]",
+				"ISBN": "9789928366108",
+				"libraryCatalog": "COBISS",
+				"numPages": "603 f.",
+				"place": "[Tiranë]",
+				"publisher": "Dituria",
+				"series": "Letërsi e huaj bashkëkohore",
+				"url": "https://plus.cobiss.net/cobiss/al/sq/bib/334906368",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "letërsia irlandeze"
+					},
+					{
+						"tag": "romane"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Tit. i origj.: The midnight rose</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/bh/sr/bib/47388678",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "The influence of negative transfer on the use of collocations in high school student's writing = Utjecaj negativnog transfera na korištenje kolokacija u pismenim zadaćama učenika srednjih škola",
+				"creators": [
+					{
+						"lastName": "Đapo",
+						"firstName": "Amra",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022",
+				"libraryCatalog": "COBISS",
+				"numPages": "76 listova",
+				"place": "Tuzla",
+				"university": "[A. Đapo]",
+				"url": "https://plus.cobiss.net/cobiss/bh/sr/bib/47388678",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "acquisition"
+					},
+					{
+						"tag": "collocations"
+					},
+					{
+						"tag": "engleski kao drugi jezik"
+					},
+					{
+						"tag": "errors"
+					},
+					{
+						"tag": "greške"
+					},
+					{
+						"tag": "kolokacije"
+					},
+					{
+						"tag": "magistarski rad"
+					},
+					{
+						"tag": "transfer"
+					},
+					{
+						"tag": "transfer"
+					},
+					{
+						"tag": "usvajanje"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Bibliografija: listovi 73-76</p>"
+					},
+					{
+						"note": "<p>Sažetak ; Summary</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/rs/sr/bib/57790729",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Закон о Централном регистру обавезног социјалног осигурања, са подзаконским актима",
+				"creators": [
+					{
+						"lastName": "Србија",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Мартић",
+						"firstName": "Вера",
+						"creatorType": "editor"
+					}
+				],
+				"dateEnacted": "2022",
+				"pages": "II, 74 стр.",
+				"url": "https://plus.cobiss.net/cobiss/rs/sr/bib/57790729",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Београд"
+					},
+					{
+						"tag": "Законски прописи"
+					},
+					{
+						"tag": "Централни регистар обавезног социјалног осигурања"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Тираж 300</p>"
+					},
+					{
+						"note": "<p>Напомене и библиографске референце уз текст.</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/bg/en/bib/51193608",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "Хирургични аспекти на аноректалните абсцеси при деца и възрастни: дисертационен труд за присъждане на образователна и научна степен \"доктор\", област на висше образование 7. Здравеопазване и спорт, професионално направление 7.1 Медицина, научна специалност: 03.01.37 Обща хирургия",
+				"creators": [
+					{
+						"lastName": "Хаджиева",
+						"firstName": "Елена Божидарова",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Hadžieva",
+						"firstName": "Elena Božidarova",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022",
+				"libraryCatalog": "COBISS",
+				"numPages": "198 л.",
+				"place": "Пловдив",
+				"shortTitle": "Хирургични аспекти на аноректалните абсцеси при деца и възрастни",
+				"university": "[Е. Хаджиева]",
+				"url": "https://plus.cobiss.net/cobiss/bg/en/bib/51193608",
 				"attachments": [],
 				"tags": [],
+				"notes": [
+					{
+						"note": "<p>Библиогр.: л. 175-190</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/ks/sq/bib/120263427",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "Kumtesat nga konferenca shkencore ndërkombëtare: (17 dhe 18 nëntor 2021): Ndikimi i COVID-19 në humbjet mësimore - pasojat në rritjen e pabarazive në mësim dhe sfidat e përmbushjes/kompensimit",
+				"creators": [
+					{
+						"lastName": "Instituti Pedagogjik i Kosovës",
+						"firstName": "Konferenca shkencore ndërkombëtare",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Koliqi",
+						"firstName": "Hajrullah",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2021",
+				"ISBN": "9789951591560",
+				"libraryCatalog": "COBISS",
+				"pages": "190 f.",
+				"place": "Prishtinë",
+				"publisher": "Instituti Pedagogjik i Kosovës",
+				"shortTitle": "Kumtesat nga konferenca shkencore ndërkombëtare",
+				"url": "https://plus.cobiss.net/cobiss/ks/sq/bib/120263427",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "covid-19"
+					},
+					{
+						"tag": "mësimi online"
+					},
+					{
+						"tag": "përmbledhjet e punimeve"
+					},
+					{
+						"tag": "sistemet arsimore"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Përmbledhjet në gjuhën shqipe dhe angleze</p>"
+					},
+					{
+						"note": "<p>Bibliografia në fund të çdo punimi</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/mk/en/bib/search?q=*&db=cobib&mat=allmaterials&tyf=1_gla_cd",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/mk/mk/bib/57036037",
+		"items": [
+			{
+				"itemType": "audioRecording",
+				"title": "Крени ме",
+				"creators": [
+					{
+						"lastName": "Кајшаров",
+						"firstName": "Константин",
+						"creatorType": "composer"
+					}
+				],
+				"date": "2022",
+				"label": "К. Кајшаров",
+				"libraryCatalog": "COBISS",
+				"place": "Скопје",
+				"url": "https://plus.cobiss.net/cobiss/mk/mk/bib/57036037",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "CD-a"
+					},
+					{
+						"tag": "Вокално-инструментални композиции"
+					},
+					{
+						"tag": "Духовна музика"
+					}
+				],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/cg/cnr_cyrl/bib/20926212",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "Menadžment ljudskih resursa: diplomski rad",
+				"creators": [
+					{
+						"lastName": "Obradović",
+						"firstName": "Nikoleta",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022",
+				"libraryCatalog": "COBISS",
+				"place": "Podgorica",
+				"shortTitle": "Menadžment ljudskih resursa",
+				"university": "[N. Obradović]",
+				"url": "https://plus.cobiss.net/cobiss/cg/cnr_cyrl/bib/20926212",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Diplomski radovi"
+					},
+					{
+						"tag": "Menadžment ljudskih resursa"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Nasl. sa nasl. ekrana</p>"
+					},
+					{
+						"note": "<p>Bibliografija</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/sr/sr_latn/bib/search?q=*&db=cobib&mat=allmaterials",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://plus.cobiss.net/cobiss/sr/sr_latn/bib/15826441",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Zanosni",
+				"creators": [
+					{
+						"lastName": "Prince",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Принс",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Božić",
+						"firstName": "Aleksandar",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Божић",
+						"firstName": "Александар",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2022",
+				"ISBN": "9788664630160",
+				"libraryCatalog": "COBISS",
+				"numPages": "283",
+				"place": "Beograd",
+				"publisher": "IPC Media",
+				"series": "Edicija (B)io",
+				"url": "https://plus.cobiss.net/cobiss/sr/sr_latn/bib/15826441",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Аутобиографија"
+					},
+					{
+						"tag": "Принс, 1968-2016"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Prevod dela: The beautiful ones / Prince</p>"
+					},
+					{
+						"note": "<p>Autorove slike</p>"
+					},
+					{
+						"note": "<p>Tiraž 1.200</p>"
+					},
+					{
+						"note": "<p>Str. 4-49: Predgovor / Den Pajpenbring</p>"
+					},
+					{
+						"note": "<p>O autorima: str. 283.</p>"
+					}
+				],
 				"seeAlso": []
 			}
 		]
