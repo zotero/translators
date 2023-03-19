@@ -1,6 +1,6 @@
 {
 	"translatorID": "e329ec79-397e-4aa5-a06e-1aa32f10a138",
-	"label": "LaphamsQuarterly.org",
+	"label": "Lapham's Quarterly",
 	"creator": "Zoë C. Ma",
 	"target": "^https?://www\\.laphamsquarterly\\.org/",
 	"minVersion": "5.0",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-17 15:36:33"
+	"lastUpdated": "2023-03-19 08:58:09"
 }
 
 /*
@@ -358,7 +358,7 @@ var testCases = [
 				"abstractNote": "Scribal education in the ancient Mesopotamian tablet house.",
 				"issue": 4,
 				"language": "en",
-				"libraryCatalog": "LaphamsQuarterly.org",
+				"libraryCatalog": "Lapham's Quarterly",
 				"publicationTitle": "Lapham’s Quarterly",
 				"url": "https://www.laphamsquarterly.org/education/schoolboy-where-are-you-going",
 				"volume": 14,
