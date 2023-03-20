@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-17 13:50:17"
+	"lastUpdated": "2023-03-20 08:45:06"
 }
 
 /*
@@ -36,12 +36,12 @@
 */
 
 function detectWeb(doc, url) {
-	// single items always end in an id number that is 6 digits or more
+	// single items may end in an id number that is 6 digits or more
 	var itemIDURL = /\d{6,}$/;
-	// user may also be on Detailed View of item, which ends in /#full
+	// detailed view of single items ends in /#full
 	var fullRecordURL = /#full$/;
 	if (url.match(itemIDURL) || url.match(fullRecordURL)) {
-		// capture type of material as a string from the catalog page, e.g. "undergraduate thesis"
+		// capture type of material directly from the catalog page, e.g. "undergraduate thesis"
 		var typeOfMaterial = doc.querySelector("button#add-biblioentry-to-shelf").getAttribute("data-mat-type");
 		if (typeOfMaterial) {
 			// use translateItemType function to translate catalog material type into a Zotero
@@ -50,7 +50,7 @@ function detectWeb(doc, url) {
 			if (detectItemType) {
 				return detectItemType;
 			}
-			// if a catalog item type isn't contained in the hash in translateItemType function, just
+			// if a catalog item type isn't contained in the hash in translateItemType function,
 			// return Zotero item type 'book', which is by far the most common item type in this catalog.
 			else {
 				return 'book';
@@ -100,7 +100,8 @@ function constructEnglishURL(url) {
 	// default catalog page URL: https://plus.cobiss.net/cobiss/si/sl/bib/107937536
 	// page with English metadata: https://plus.cobiss.net/cobiss/si/en/bib/107937536
 	// most COBISS catalogs follow the format where the language code is two characters e.g. "sl"
-	// except for this one: https://plus.cobiss.net/cobiss/cg/cnr_cyrl/bib/20926212
+	// except ones with three languages, e.g.: https://plus.cobiss.net/cobiss/cg/cnr_cyrl/bib/20926212
+	// where there are language codes for english, latin montenegrin, and cyrillic montenegrin
 	const firstPartRegex = /https:\/\/plus\.cobiss\.net\/cobiss\/[a-z]{2}\//;
 	const endPartRegex = /\/bib\/\S*/;
 
@@ -108,12 +109,11 @@ function constructEnglishURL(url) {
 	const endPart = url.match(endPartRegex)[0];
 	var englishURL = firstPart + "en" + endPart;
 	return englishURL;
-
 }
 
 // in the catalog, too many items are classified in RIS as either BOOK or ELEC,
 // including many reports, ebooks, etc, that thus are incorrectly assigned itemType "book" or "webpage"
-// when we rely on RIS. this map assigns more accurate itemTypes
+// when we rely on Zotero RIS translator. This map assigns more accurate itemTypes
 // based on "type of material" classification in English catalog, instead of relying on RIS.
 // this function also assigns itemType for catalog items with no RIS.
 function translateItemType(englishCatalogItemType) {
@@ -223,10 +223,9 @@ async function doWeb(doc, url) {
 
 async function scrape(doc, url = doc.location.href) {
 	var finalItemType = "";
-	// always get item type from English catalog, since it will be the same across multiple languages in different COBISS catalogs.
 	// if url matches /en/bib/, then skip constructing englishURL
-	// get catalog item type from page, then translate to Zotero item type using translateItemType()
 	if (url.match("/en/bib")) {
+		// get catalog item type from page, then translate to Zotero item type using translateItemType()
 		var nativeEnglishItemType = doc.querySelector("button#add-biblioentry-to-shelf").getAttribute("data-mat-type");
 		finalItemType = translateItemType(nativeEnglishItemType);
 	}
@@ -244,9 +243,9 @@ async function scrape(doc, url = doc.location.href) {
 		var fullTextLink = doc.getElementById('showUrlHref').href;
 	}
 
-	// case for catalog items with RIS
 	const risURL = constructRISURL(url);
 	const risText = await requestText(risURL);
+	// case for catalog items with RIS (95%+ of items)
 	if (risText) {
 		// RIS always has an extraneous OK## at the beginning, remove it
 		const fixedRisText = risText.replace(/^OK##/, '');
@@ -287,10 +286,10 @@ async function scrape(doc, url = doc.location.href) {
 
 			// some items have tags in RIS KW field and are captured by
 			// RIS translator, e.g. https://plus.cobiss.net/cobiss/si/en/bib/78691587.
-			// don't add tags to these items.
+			// don't add dupliicate tags from the page to these items.
 			if (item.tags.length === 0) {
 				// other items e.g. https://plus.cobiss.net/cobiss/si/sl/bib/82789891 have tags,
-				// but they're not in the RIS for some reason. In this case, add tags from catalog page.
+				// but they're not in the RIS. In this case, add tags from catalog page.
 				var pageTags = doc.querySelectorAll('a[href^="bib/search?c=su="]');
 				for (let tagElem of pageTags) {
 					item.tags.push(tagElem.innerText);
@@ -342,7 +341,8 @@ async function scrape(doc, url = doc.location.href) {
 			}
 		}
 
-		// add subjects from JSON as tags. There are three fields, sgcHeadings, otherSubjects and subjectCardUncon with
+		// add subjects from JSON as tags. There are three fields that contain tags,
+		// sgcHeadings, otherSubjects and subjectCardUncon with
 		// different separators. sgcHeadings and otherSubjects use <br>, subjectCardUncon uses /
 		if (fullRecord.sgcHeadings) {
 			var sgcHeadingsJson = fullRecord.sgcHeadings.value;
@@ -370,7 +370,7 @@ async function scrape(doc, url = doc.location.href) {
 		}
 		// add attachments to RIS items
 		if (pdfLink) {
-			item.attachments.push({
+			noRISItem.attachments.push({
 				url: pdfLink,
 				title: 'Full Text PDF',
 				mimeType: 'application/pdf'
@@ -378,14 +378,14 @@ async function scrape(doc, url = doc.location.href) {
 		}
 		else if (fullTextLink) {
 			if (fullTextLink.match(/.pdf$/)) {
-				item.attachments.push({
+				noRISItem.attachments.push({
 					url: fullTextLink,
 					title: 'Full Text PDF',
 					mimeType: 'application/pdf'
 				});
 			}
 			else {
-				item.attachments.push({
+				noRISItem.attachments.push({
 					url: fullTextLink,
 					title: 'Full Text',
 					mimeType: 'text/html'
@@ -395,10 +395,6 @@ async function scrape(doc, url = doc.location.href) {
 		noRISItem.complete();
 	}
 }
-
-
-// TODO: run linter
-// TODO: refactor and cleanup code/comments
 
 /** BEGIN TEST CASES **/
 var testCases = [
