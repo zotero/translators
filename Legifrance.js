@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-16 02:52:40"
+	"lastUpdated": "2023-03-20 21:08:59"
 }
 
 /*
@@ -293,13 +293,14 @@ function scrapelegislation(doc, url) { //Législation
 }
 
 function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "case") {
+	const documentType = detectWeb(doc, url);
+	if (documentType == "case") {
 		scrapecase(doc);
 	}
-	else if (detectWeb(doc, url) == "statute") {
+	else if (documentType == "statute") {
 		scrapelegislation(doc, url);
 	}
-	else if (detectWeb(doc, url) == "multiple") {
+	else if (documentType == "multiple") {
 		const items = Zotero.Utilities.getItemArray(doc, doc, legifrancecaseRegexp);
 		const articles = [];
 		Zotero.selectItems(items, function (items) {
