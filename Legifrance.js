@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-20 21:08:59"
+	"lastUpdated": "2023-03-20 21:26:34"
 }
 
 /*
@@ -249,15 +249,9 @@ function scrapelegislation(doc, url) { //Législation
 		// Reconstruit le nom en "Code ___ - Article ____"
 		newItem.nameOfAct = code.concat(" - Article ", codeNumber);
 
-		// Dates: original date and dateDecided
-
-		// Exemple : "/loda/id/LEGIARTI000006284446/1994-07-30/"
-		const origdate = ZU.xpathText(doc, '//p[@class="date"]/a/@href');
-		newItem.extra = "Original Date: ".concat(origdate.match(/[\d-]{10}/g)[1]);
-
-		// Exemple : "Version en vigueur depuis le 30 juillet 1994"
+		// dateDecided / Exemple : "Version en vigueur depuis le 30 juillet 1994"
 		const date = ZU.xpathText(doc, '//h6[@class="version-article"]');
-		newItem.date = date.match(/(\d{1,2} \w+ (\d{4}|\d{2}))/)[0];
+		newItem.date = date.match(/(\d{1,2} [\wéû]+ (\d{4}|\d{2}))/)[0];
 	}
 
 	var b; // Lois 1er modèle
@@ -542,7 +536,6 @@ var testCases = [
 				"dateEnacted": "30 juillet 1994",
 				"code": "Code civil",
 				"codeNumber": "16",
-				"extra": "Original Date: 1994-07-30",
 				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006419320",
 				"attachments": [
@@ -693,7 +686,6 @@ var testCases = [
 				"dateEnacted": "27 septembre 2017",
 				"code": "Code du travail",
 				"codeNumber": "R1234-4",
-				"extra": "Original Date: 2017-09-27",
 				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000035644695",
 				"attachments": [
@@ -719,7 +711,6 @@ var testCases = [
 				"dateEnacted": "27 septembre 2017",
 				"code": "Code du travail",
 				"codeNumber": "R1234-4",
-				"extra": "Original Date: 2017-09-27",
 				"language": "fr-FR",
 				"url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000035644695/2023-01-25",
 				"attachments": [
