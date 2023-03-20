@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-19 08:58:09"
+	"lastUpdated": "2023-03-20 07:34:39"
 }
 
 /*
@@ -191,18 +191,29 @@ async function setIssueInfo(url, item) {
 	}
 	else {
 		value = await requestIssueInfo(url);
-		_issueInfoCache.set(url, value);
+		if (value) {
+			_issueInfoCache.set(url, value);
+		}
 	}
 	Object.assign(item, value);
 }
 
 async function requestIssueInfo(url) {
-	const doc = await requestDocument(url);
+	let doc;
+	try {
+		doc = await requestDocument(url);
+	}
+	catch (err) {
+		Z.debug(`Failed to request ${url} for issue/date info.`);
+		return null;
+	}
+
 	let dateText = text(doc, "p.date");
 	if (!dateText) {
 		Z.debug(`Issue/date info unexpectedly missing at ${url}`);
-		return {};
+		return null;
 	}
+
 	dateText = ZU.trimInternal(dateText);
 
 	// dateText should look like the following:
