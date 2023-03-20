@@ -1,7 +1,7 @@
 {
 	"translatorID": "7987b420-e8cb-4bea-8ef7-61c2377cd686",
 	"label": "NASA ADS",
-	"creator": "Tim Hostetler and Abe Jellinek",
+	"creator": "Tim Hostetler, Abe Jellinek, and Zoë C. Ma",
 	"target": "^https://ui\\.adsabs\\.harvard\\.edu/(search|abs)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-12 05:31:17"
+	"lastUpdated": "2023-03-20 08:38:43"
 }
 
 /*
@@ -53,7 +53,7 @@ function getSearchResults(doc) {
 }
 
 function extractId(url) {
-	return /\/abs\/([^/]+)/.exec(url)[1];
+	return decodeURIComponent(/\/abs\/([^/]+)/.exec(url)[1]);
 }
 
 function getTypeFromId(id) {
@@ -387,6 +387,69 @@ var testCases = [
 					},
 					{
 						"tag": "Computer Science - Machine Learning"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://ui.adsabs.harvard.edu/abs/2023A%26ARv..31....1A/abstract",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Origin of the elements",
+				"creators": [
+					{
+						"lastName": "Arcones",
+						"firstName": "Almudena",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Thielemann",
+						"firstName": "Friedrich-Karl",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-12-01",
+				"DOI": "10.1007/s00159-022-00146-x",
+				"ISSN": "0935-4956",
+				"abstractNote": "What is the origin of the oxygen we breathe, the hydrogen and oxygen (in form of water H2O) in rivers and oceans, the carbon in all organic compounds, the silicon in electronic hardware, the calcium in our bones, the iron in steel, silver and gold in jewels, the rare earths utilized, e.g. in magnets or lasers, lead or lithium in batteries, and also of naturally occurring uranium and plutonium? The answer lies in the skies. Astrophysical environments from the Big Bang to stars and stellar explosions are the cauldrons where all these elements are made. The papers by Burbidge (Rev Mod Phys 29:547-650, 1957) and Cameron (Publ Astron Soc Pac 69:201, 1957), as well as precursors by Bethe, von Weizsäcker, Hoyle, Gamow, and Suess and Urey provided a very basic understanding of the nucleosynthesis processes responsible for their production, combined with nuclear physics input and required environment conditions such as temperature, density and the overall neutron/proton ratio in seed material. Since then a steady stream of nuclear experiments and nuclear structure theory, astrophysical models of the early universe as well as stars and stellar explosions in single and binary stellar systems has led to a deeper understanding. This involved improvements in stellar models, the composition of stellar wind ejecta, the mechanism of core-collapse supernovae as final fate of massive stars, and the transition (as a function of initial stellar mass) from core-collapse supernovae to hypernovae and long duration gamma-ray bursts (accompanied by the formation of a black hole) in case of single star progenitors. Binary stellar systems give rise to nova explosions, X-ray bursts, type Ia supernovae, neutron star, and neutron star-black hole mergers. All of these events (possibly with the exception of X-ray bursts) eject material with an abundance composition unique to the specific event and lead over time to the evolution of elemental (and isotopic) abundances in the galactic gas and their imprint on the next generation of stars. In the present review, we want to give a modern overview of the nucleosynthesis processes involved, their astrophysical sites, and their impact on the evolution of galaxies.",
+				"extra": "ADS Bibcode: 2023A&ARv..31....1A",
+				"libraryCatalog": "NASA ADS",
+				"pages": "1",
+				"publicationTitle": "Astronomy and Astrophysics Review",
+				"url": "https://ui.adsabs.harvard.edu/abs/2023A&ARv..31....1A",
+				"volume": "31",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Big Bang nucleosynthesis"
+					},
+					{
+						"tag": "Compact binary mergers"
+					},
+					{
+						"tag": "Core collapse"
+					},
+					{
+						"tag": "Element abundance"
+					},
+					{
+						"tag": "Galactic evolution"
+					},
+					{
+						"tag": "Stellar evolution"
+					},
+					{
+						"tag": "Supernovae"
 					}
 				],
 				"notes": [],
