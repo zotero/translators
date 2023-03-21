@@ -414,7 +414,8 @@ function getArticleList(doc) {
 		'//h2//a[contains(@class, "result-list-title-link")]',
 		'//ol[contains(@class, "article-list") or contains(@class, "article-list-items")]//a[contains(@class, "article-content-title")]',
 		'//li[contains(@class, "list-chapter")]//h2//a',
-		'//h4[contains(@class, "chapter-title")]/a'
+		'//h4[contains(@class, "chapter-title")]/a',
+		'//h5[contains(@class, "chapter-title")]/a'
 	];
 	return ZU.xpath(doc, '('
 		+ articlePaths.join('|')
