@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-23 07:42:43"
+	"lastUpdated": "2023-03-23 07:50:40"
 }
 
 /*
@@ -92,8 +92,8 @@ async function getRecord(url) {
 // Topics, in typeRubricId. There seems to be only two, and they don't appear
 // anywhere else except on the page heading.
 const _topicLookup = {
-	"obshhestvo": "Society",
-	"jekonomika": "Economics"
+	obshhestvo: "Society",
+	jekonomika: "Economics"
 };
 
 function populateItem(item, record) {
