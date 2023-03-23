@@ -82,9 +82,9 @@ async function scrape(doc, url = doc.location.href) {
 	// TODO: implement or add a scrape function template
 	let translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
-	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48'); // Embedded Metadata
 	translator.setDocument(doc);
-	
+
 	translator.setHandler('itemDone', (_obj, item) => {
 		// TODO adjust if needed:
 		item.section = 'News';
@@ -98,8 +98,6 @@ async function scrape(doc, url = doc.location.href) {
 		'twitter:description': 'abstractNote'
 	});
 	await em.doWeb(doc, url);
-}
-
 }
 
 /** BEGIN TEST CASES **/
