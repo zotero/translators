@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-24 04:26:22"
+	"lastUpdated": "2023-03-24 07:49:06"
 }
 
 /*
@@ -41,18 +41,39 @@
 // where the "slug" is the captured group; see getRecord().
 const newsArticleRE = new RegExp("^https://novayagazeta.eu/.+/(\\d{4}/\\d{2}/\\d{2}/.+)", "i");
 
-function detectWeb(doc, url) {
+async function detectWeb(doc, url) {
 	if (!url.match(newsArticleRE)) return false;
-	// Note that we don't call the API for the detection of interviews here. If
-	// we use the real API call via getRecord(), detectWeb() has to be
-	// asynchronous, which may not conform to the translator API.
-	const metaGenre = getGenre(doc).toLowerCase();
-	if (metaGenre && (metaGenre === "interview" || metaGenre === "интервью")) {
-		return "interview";
+	// In the browser, the page content (doc) is loaded asynchronously,
+	// including the <meta> tags. This is done by the JS code in the HTML
+	// document requesting full article data from the API server. We would
+	// rather "await"/"then" on this promise that we can control, rather than
+	// banking the page load whose status is not easily known. Note that only
+	// "url" is used in this function.
+	try {
+		const record = await getRecord(url);
+		const recordType = record.typeGenreId;
+		if (recordType) {
+			switch (recordType) {
+				case "intervju":
+					return "interview";
+				case "podkast":
+					return "podcast";
+				default:
+					// NOTE: This encompasses almost all other types published
+					// there.
+					return "newspaperArticle";
+			}
+		}
+		// Fallback: webpage, because it is one. This can happen for some more
+		// ad-hoc "types" such as videos and letters. NOTE: Try harder for more
+		// accurate detection?
+		return "webpage";
 	}
-	// NOTE: This may need further classification, probably as the NGE recovers
-	// from the forced closure and exodus.
-	return "newspaperArticle";
+	catch (err) {
+		Z.debug(`Error: Exception in detectWeb() for article at ${url}`);
+		Z.debug(`       The error was: ${err}`);
+		return false;
+	}
 }
 
 async function doWeb(doc, url) {
@@ -60,7 +81,7 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url = doc.location.href) {
-	const itemType = detectWeb(doc, url);
+	const itemType = await detectWeb(doc, url);
 	if (!itemType) return;
 
 	const item = new Z.Item(itemType);
@@ -93,23 +114,31 @@ async function scrape(doc, url = doc.location.href) {
 
 // Perform request for the JSON data using the Novaya Gazeta RESTful API.
 // Returns a promise that resolves to the record object by parsing as JSON.
+// Memoize the data value because detectWeb() already sent one.
+const _apiCache = new Map();
+
 async function getRecord(url) {
 	// Get the "slug" part from the url for the individual article.
+	if (_apiCache.has(url)) {
+		return _apiCache.get(url);
+	}
 	const articleSlug = url.match(newsArticleRE)[1];
 	const queryURL = `https://novayagazeta.eu/api/v1/get/record?slug=${encodeURIComponent(articleSlug)}`;
 	const { record: articleData } = await requestJSON(queryURL);
+	_apiCache.set(url, articleData);
 	return articleData;
 }
 
-// Topics, in typeRubricId. There seems to be only two for now, and they don't
-// appear anywhere else except on the page heading.
-// The old issues (https://novayagazeta.ru/) once had politics (politika),
-// culture (kul'tura), and sports (sport) in addition to these two. It's
-// possible that this space will be expanded in the future.
-// The English names are taken as they are from the page headings.
+// Topics, in typeRubricId. Only the first two seems to be used extensively for
+// now (especially on the English website), and they don't appear anywhere else
+// except on the page heading. The English names are taken as they are from the
+// page headings wherever possible.
 const _topicLookup = {
 	obshhestvo: "Society",
-	jekonomika: "Economics"
+	jekonomika: "Economics",
+	politika: "Politics", // see https://novayagazeta.eu/articles/2023/02/28/dead-end-en
+	sport: "Sports", // see https://novayagazeta.eu/articles/2022/12/31/mr-edson-moonlight-en
+	kultura: "Culture" // Found in RU edition, yet to see in EN.
 };
 
 function populateItem(item, record) {
@@ -124,6 +153,13 @@ function populateItem(item, record) {
 	const itemAuthors = [];
 	const authType = item.itemType === "interview" ? "interviewer" : "author";
 	for (const author of record.authors) {
+		// If the author is likely "institutional" and the same as the
+		// publisher (or is part of it, such as "video department", skip.
+		// NOTE: This is provisional - we may change how we deal with
+		// "publisher author" with more advice and feedback.
+		if (isNovayaGazeta(author.name)) {
+			continue;
+		}
 		if (record.lang === "ru") {
 			// Extract the Russian names
 			// Here the field "name" refers to the full name.
@@ -209,10 +245,19 @@ function getGenre(doc) {
 	return attr(doc, "meta[name='genre']", "content");
 }
 
+// Returns boolean indicating whether the "author" includes the full name of
+// Novaya Gazeta Europe (if it does, it is likely an "institutional" author,
+// e.g. "Video department Novaya Gazeta Europe").
+function isNovayaGazeta(str) {
+	// This should cover nominative, genitive, and instrumental cases.
+	return (/нов(ая|ой|ою) газет(а|ы|ой|ою) европ(а|ы|ой|ою)/i).test(str);
+}
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://novayagazeta.eu/articles/2023/03/22/chechen-roots-of-frances-wrestling-team-en",
 		"items": [
 			{
@@ -230,6 +275,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "Novaya Gazeta Europe",
 				"publicationTitle": "Novaya Gazeta Europe",
+				"section": "Comment",
 				"url": "https://novayagazeta.eu/articles/2023/03/22/chechen-roots-of-frances-wrestling-team-en",
 				"attachments": [
 					{
@@ -256,7 +302,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://novayagazeta.eu/articles/2023/03/19/will-putin-ever-stand-trial-in-the-hague-en",
-		"defer": true,
 		"items": [
 			{
 				"itemType": "interview",
@@ -300,6 +345,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://novayagazeta.eu/articles/2023/03/11/russias-fake-refugee-haven",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -321,6 +367,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "Novaya Gazeta Europe",
 				"publicationTitle": "Novaya Gazeta Europe",
+				"section": "Data",
 				"url": "https://novayagazeta.eu/articles/2023/03/11/russias-fake-refugee-haven",
 				"attachments": [
 					{
@@ -353,6 +400,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://novayagazeta.eu/articles/2023/03/15/dolche-bita",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -369,6 +417,7 @@ var testCases = [
 				"language": "ru",
 				"libraryCatalog": "Novaya Gazeta Europe",
 				"publicationTitle": "Novaya Gazeta Europe",
+				"section": "Комментарий",
 				"url": "https://novayagazeta.eu/articles/2023/03/15/dolche-bita",
 				"attachments": [
 					{
@@ -385,6 +434,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://novayagazeta.eu/articles/2023/03/23/v-reestr-inoagentov-vnesli-iurista-pavla-chikova-i-blogera-iliu-varlamova-news",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -394,7 +444,65 @@ var testCases = [
 				"language": "ru",
 				"libraryCatalog": "Novaya Gazeta Europe",
 				"publicationTitle": "Novaya Gazeta Europe",
+				"section": "Новости",
 				"url": "https://novayagazeta.eu/articles/2023/03/23/v-reestr-inoagentov-vnesli-iurista-pavla-chikova-i-blogera-iliu-varlamova-news",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://novayagazeta.eu/articles/2023/03/20/donosy-ekho-voiny",
+		"items": [
+			{
+				"itemType": "podcast",
+				"title": "Доносы — эхо войны",
+				"creators": [],
+				"abstractNote": "Как в России доносят на несогласных и почему это может коснуться каждого",
+				"language": "ru",
+				"url": "https://novayagazeta.eu/articles/2023/03/20/donosy-ekho-voiny",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"defer": true,
+		"url": "https://novayagazeta.eu/articles/2022/12/31/mr-edson-moonlight-en",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Mr Edson Moonlight",
+				"creators": [
+					{
+						"firstName": "Alexander",
+						"lastName": "Pracht",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022-12-31T07:43:00.000Z",
+				"abstractNote": "The passing of football legend Pelé marks a moment to review his legacy yet another time and work out why he was so important to The Game",
+				"language": "en",
+				"libraryCatalog": "Novaya Gazeta Europe",
+				"publicationTitle": "Novaya Gazeta Europe",
+				"section": "Stories",
+				"url": "https://novayagazeta.eu/articles/2022/12/31/mr-edson-moonlight-en",
 				"attachments": [
 					{
 						"title": "Snapshot",
