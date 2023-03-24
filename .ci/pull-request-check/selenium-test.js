@@ -113,10 +113,10 @@ var allPassed = false;
 
 		// No API to retrieve extension ID. Hacks, sigh.
 		await driver.get("chrome://system/");
-		await driver.wait(until.elementLocated({id: 'extensions-value-btn'}), 60*1000);
+		await driver.wait(until.elementLocated({id: 'btn-extensions-value'}), 60*1000);
 		// Chrome 89+ has the extension list expanded by default
 		try {
-			let extBtn = await driver.findElement({css: '#extensions-value-btn'});
+			let extBtn = await driver.findElement({css: '#btn-extensions-value'});
 			await extBtn.click();
 		} catch (e) {}
 		let contentElem = await driver.findElement({css: '#content'});
