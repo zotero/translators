@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-24 04:02:46"
+	"lastUpdated": "2023-03-24 04:26:22"
 }
 
 /*
@@ -370,6 +370,31 @@ var testCases = [
 				"libraryCatalog": "Novaya Gazeta Europe",
 				"publicationTitle": "Novaya Gazeta Europe",
 				"url": "https://novayagazeta.eu/articles/2023/03/15/dolche-bita",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://novayagazeta.eu/articles/2023/03/23/v-reestr-inoagentov-vnesli-iurista-pavla-chikova-i-blogera-iliu-varlamova-news",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "В реестр «иноагентов» внесли юриста Павла Чикова и журналиста Илью Варламова",
+				"creators": [],
+				"date": "2023-03-23T17:05:00.000Z",
+				"language": "ru",
+				"libraryCatalog": "Novaya Gazeta Europe",
+				"publicationTitle": "Novaya Gazeta Europe",
+				"url": "https://novayagazeta.eu/articles/2023/03/23/v-reestr-inoagentov-vnesli-iurista-pavla-chikova-i-blogera-iliu-varlamova-news",
 				"attachments": [
 					{
 						"title": "Snapshot",
