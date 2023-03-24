@@ -50,6 +50,8 @@ function detectWeb(doc, url) {
 	if (metaGenre && (metaGenre === "interview" || metaGenre === "интервью")) {
 		return "interview";
 	}
+	// NOTE: This may need further classification, probably as the NGE recovers
+	// from the forced closure and exodus.
 	return "newspaperArticle";
 }
 
@@ -72,6 +74,7 @@ async function scrape(doc, url = doc.location.href) {
 		title: "Snapshot",
 		mimeType: "text/html"
 	}];
+	// NOTE: Download PDF file too?
 
 	try {
 		const record = await getRecord(url);
@@ -98,8 +101,12 @@ async function getRecord(url) {
 	return articleData;
 }
 
-// Topics, in typeRubricId. There seems to be only two, and they don't appear
-// anywhere else except on the page heading.
+// Topics, in typeRubricId. There seems to be only two for now, and they don't
+// appear anywhere else except on the page heading.
+// The old issues (https://novayagazeta.ru/) once had politics (politika),
+// culture (kul'tura), and sports (sport) in addition to these two. It's
+// possible that this space will be expanded in the future.
+// The English names are taken as they are from the page headings.
 const _topicLookup = {
 	obshhestvo: "Society",
 	jekonomika: "Economics"
@@ -127,11 +134,15 @@ function populateItem(item, record) {
 			// These names have separate fields for surname and "name" (i.e.
 			// given name).
 			for (const localeInfo of author.locale) {
-				// XXX: Only handling "en" here because there doesn't seem to
-				// be any other translation-target language now.
+				// NOTE: Only handling "en" here because there doesn't seem to
+				// be any other translation-target language for now. But in the
+				// JSON data this space is an array (with just one item for
+				// now), so it *might* be expanded in the future.
 				if (localeInfo.lang === "en") {
 					itemAuthors.push(ZU.cleanAuthor(`${localeInfo.name} ${localeInfo.surname}`, authType));
-					break; // Break out of the loop for translated names.
+					// Break out of the loop for translated names because we
+					// can only handle "en" for now.
+					break;
 				}
 			}
 		}
@@ -142,7 +153,9 @@ function populateItem(item, record) {
 	}
 	item.creators = itemAuthors; // Could be empty for news.
 
-	item.tags = record.tags; // Could be Russian or English, a bit irregular.
+	// Tags are a bit irregular, and their language doesn't necessarily match
+	// the content's. They could be absent (empty array).
+	item.tags = record.tags;
 
 	// A custom field, see _topicLookup.
 	if (record.lang === "ru") {
@@ -168,6 +181,9 @@ function findInterviewee(record) {
 			// For Interviews, the interviewee is the "hero(ine)" and the
 			// interviewer is the contributor.
 			// The property "name" is in full-name format.
+			// NOTE: We're returning the first match for now. But in theory
+			// there can be more than one interviewee, and this may change
+			// accordingly.
 			return ZU.cleanAuthor(frag.name, "author");
 		}
 	}
@@ -187,6 +203,8 @@ function deHTML(str) {
 
 // Extract the "genre" from the <meta> tag.
 // This is also available from the API result.
+// The content language of the "genre" value already matches the content
+// language.
 function getGenre(doc) {
 	return attr(doc, "meta[name='genre']", "content");
 }
