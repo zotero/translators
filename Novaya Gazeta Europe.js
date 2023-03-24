@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-23 11:35:13"
+	"lastUpdated": "2023-03-24 04:02:46"
 }
 
 /*
@@ -73,20 +73,19 @@ async function scrape(doc, url = doc.location.href) {
 		mimeType: "text/html"
 	}];
 
-	let record;
 	try {
-		record = await getRecord(url);
+		const record = await getRecord(url);
+		populateItem(item, record);
 	}
 	catch (err) {
-		Z.debug(`Error: Failed to get record for article at ${url}`);
+		Z.debug(`Error: Failed to get or use record for article at ${url}`);
 		Z.debug(`       The error was: ${err}`);
-		// Save the bare minimum item (or should we do this?).
-		item.complete();
-		return;
 	}
-	populateItem(item, record);
-
-	item.complete();
+	finally {
+		// Even if an error occured, we can still salvage some bare-minimum
+		// info.
+		item.complete();
+	}
 }
 
 // Perform request for the JSON data using the Novaya Gazeta RESTful API.
