@@ -27,12 +27,59 @@ else
 	npm ci
 fi
 
+get_translators_to_check
+
+if [ -z "${TRANSLATORS_TO_CHECK}" ]; then
+    export TRANSLATORS_TO_CHECK=mockImport.js
+    echo "Found no translator to check; using mock translator to test this test's own functioning."
+    cat > ./mockImport.js << 'EOF'
+{
+	"translatorID": "c4754d0e-7845-49bf-b6cc-291e427c0a08",
+	"label": "mockImport",
+	"creator": "",
+	"target": "",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 1,
+	"lastUpdated": "2023-03-25 04:51:05"
+}
+
+function detectImport() {
+	return true;
+}
+
+function doImport() {
+	const item = new Z.Item("annotation");
+	item.complete();
+}
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "import",
+		"input": "Always succeed",
+		"items": [
+			{
+				"itemType": "annotation",
+				"creators": [],
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
+EOF
+fi
+
 export ZOTERO_REPOSITORY_URL="http://localhost:8085/"
 ./build.sh -p b -d
 cd ..
 
 npm explore chromedriver -- npm run install --detect_chromedriver_version
 
-get_translators_to_check
 ./selenium-test.js "$TRANSLATORS_TO_CHECK"
-
