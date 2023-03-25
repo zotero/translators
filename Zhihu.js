@@ -2,14 +2,14 @@
 	"translatorID": "b06ddb30-55db-49dd-b550-4eb63d184277",
 	"label": "Zhihu",
 	"creator": "Lin Xingzhong",
-	"target": "https?://(zhuanlan|www)\\.zhihu\\.com/",
+	"target": "^https?://(zhuanlan|www)\\.zhihu\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-23 13:45:34"
+	"lastUpdated": "2023-03-25 13:45:55"
 }
 
 /*
@@ -74,7 +74,7 @@ function getSearchResults(doc, checkOnly, itemInfo) {
 			url = rows[i].querySelector("h2 a").getAttribute('href').replace(/^\/\//, 'https://');
 			if (url.startsWith('/')) url = "https://zhihu.com" + url;
 			ZID = getIDFromUrl(url);
-			title = i + ' ' + rows[i].querySelector("h2 a span").textContent;
+			title = i + ' ' + text(rows[i], "h2 a span");
 		}
 		else { // 问题页,首页,专栏
 			data = JSON.parse(data);
@@ -92,77 +92,68 @@ function getSearchResults(doc, checkOnly, itemInfo) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var itemInfo = {};
-		Zotero.selectItems(getSearchResults(doc, false, itemInfo), function (selectedItems) {
-			var ZIDs = [];
-			for (let url in selectedItems) {
-				ZIDs.push(itemInfo[url]);
+		let selectedItems = await Zotero.selectItems(getSearchResults(doc, false, itemInfo));
+		await Promise.all(
+			Object.keys(selectedItems).map(url => {
+				scrape(itemInfo[url]);
 			}
-			scrape(ZIDs);
-		});
+			)
+		);
 	}
 	else {
 		var ZID = getIDFromUrl(url);
-		scrape([ZID]);
+		await scrape(ZID);
 	}
 }
 
-function scrape(ZIDs) {
-	if (!ZIDs.length) return false;
-	var { ztype, zid, url } = ZIDs.shift();
-	let targetUrl = urlHash[ztype] + zid;
-	if (ztype === 'answer') targetUrl = url;
-	ZU.doGet(targetUrl, function (text) {
-		var newItem = new Zotero.Item(ztype === 'answer' ? 'forumPost' : 'blogPost');
-		newItem.url = url;
-		if (ztype === 'answer') {  // For Zhihu answer
-			newItem.postType = '知乎回答';
-			newItem.forumTitle = '知乎';
-			let parser = new DOMParser();
-			let html = parser.parseFromString(text, 'text/html');
-			newItem.title = html.title.replace(" - 知乎", '');
-			let noteContent = ZU.xpath(html, "//div[@class='RichContent-inner']//span")[0].innerHTML;
-			noteContent = noteContent.replace(/<figure.*?<img src="(.*?)".*?<\/figure>/g, "<img src='$1'/>");
-			newItem.abstractNote = ZU.cleanTags(noteContent).slice(0, 150) + "...";
-			newItem.notes.push({ note: noteContent });
-			newItem.date = ZU.xpath(html, "//span[@data-tooltip]")[0].innerText.split(' ').slice(1).join(" ");
-			newItem.websiteType = '知乎回答';
-			let authorMatch = ZU.xpathText(html, "//div[@class='AuthorInfo-head']//a");
-			newItem.creators.push({lastName: authorMatch ? authorMatch : '匿名用户', createType: 'author'});
-			if (ZU.xpath(html, "//meta[@itemprop='keywords']")) {
-				ZU.xpath(html, "//meta[@itemprop='keywords']")[0].content.split(",").forEach(t => newItem.tags.push({ tag: t }));
-			}
-			let vote = html.querySelector("button.Button.VoteButton.VoteButton--up").innerText.match("[0-9]+$");
-			if (vote) newItem.extra = `赞数:${vote[0]}`;
-		} else {  // For Zhihu blog post
-			newItem.postType = '知乎专栏';
-			var textJson = JSON.parse(text);
-			// Z.debug(text);
-			newItem.title = textJson.title ? textJson.title : textJson.question.title;
-			newItem.abstractNote = textJson.share_text.replace(/ [（(]想看更多.*$/, '');
-			let createdTime = textJson.created ? textJson.created : textJson.created_time;
-			newItem.date = new Date(createdTime * 1000).toLocaleString();
-			newItem.websiteType = "知乎专栏文章";
-			newItem.blogTitle = textJson.column ? textJson.column.title : '回答';
-			let content = textJson.content.replace(/<figure.*?<img src="(.*?)".*?<\/figure>/g, "<img src='$1'/>");
-			content = content.replace(/<sup.*?data-text="(.*?)".*?data-url="(.*?)".*?>\[(\d+)\]<\/sup>/g, '<sup><a title="$1" href="$2">[$3]</a></sup>');
-			content = "<h1>正文详情</h1>" + content;
-			newItem.creators.push({ lastName: textJson.author.name, creatorType: "author" });
-			newItem.notes.push({ note: content });
-			if (textJson.topics) {
-				textJson.topics.forEach(t => newItem.tags.push({ tag: t.name }));
-			}
-			newItem.extra = `赞数:${textJson.voteup_count};`;
+async function scrape(ZID) {
+	var { ztype, zid, url } = ZID;
+	var newItem = new Zotero.Item(ztype === 'answer' ? 'forumPost' : 'blogPost');
+	newItem.url = url;
+	if (ztype === 'answer') {  // For Zhihu answer
+		let html = await requestDocument(url);
+		newItem.postType = '知乎回答';
+		newItem.forumTitle = '知乎';
+		newItem.title = html.title.replace(" - 知乎", '');
+		let noteContent = ZU.xpath(html, "//div[@class='RichContent-inner']//span")[0].innerHTML;
+		noteContent = noteContent.replace(/<figure.*?<img src="(.*?)".*?<\/figure>/g, "<img src='$1'/>");
+		newItem.abstractNote = ZU.cleanTags(noteContent).slice(0, 150) + "...";
+		newItem.notes.push({ note: noteContent });
+		newItem.date = ZU.xpathText(html, "//span[@data-tooltip]").split(' ').slice(1).join(" ");
+		newItem.websiteType = '知乎回答';
+		let authorMatch = ZU.xpathText(html, "//div[@class='AuthorInfo-head']//a");
+		newItem.creators.push({ lastName: authorMatch ? authorMatch : '匿名用户', createType: 'author' });
+		if (ZU.xpath(html, "//meta[@itemprop='keywords']")) {
+			ZU.xpath(html, "//meta[@itemprop='keywords']")[0].content.split(",").forEach(t => newItem.tags.push({ tag: t }));
 		}
-		newItem.language = 'zh-CN';
-		newItem.attachments.push({ url: url, title: "Snapshot" });
-		newItem.complete();
-		if (ZIDs.length > 0) {
-			scrape(ZIDs);
+		let vote = html.querySelector("button.Button.VoteButton.VoteButton--up").innerText.match("[0-9]+$");
+		if (vote) newItem.extra = `赞数:${vote[0]}`;
+	} else {  // For Zhihu blog post
+		newItem.postType = '知乎专栏';
+		let targetUrl = urlHash[ztype] + zid;
+		var textJson = await requestJSON(targetUrl);
+		newItem.title = textJson.title ? textJson.title : textJson.question.title;
+		newItem.abstractNote = textJson.share_text.replace(/ [（(]想看更多.*$/, '');
+		let createdTime = textJson.created ? textJson.created : textJson.created_time;
+		newItem.date = new Date(createdTime * 1000).toISOString();
+		newItem.websiteType = "知乎专栏文章";
+		newItem.blogTitle = textJson.column ? textJson.column.title : '回答';
+		let content = textJson.content.replace(/<figure.*?<img src="(.*?)".*?<\/figure>/g, "<img src='$1'/>");
+		content = content.replace(/<sup.*?data-text="(.*?)".*?data-url="(.*?)".*?>\[(\d+)\]<\/sup>/g, '<sup><a title="$1" href="$2">[$3]</a></sup>');
+		content = "<h1>正文详情</h1>" + content;
+		newItem.creators.push({ lastName: textJson.author.name, creatorType: "author" });
+		newItem.notes.push({ note: content });
+		if (textJson.topics) {
+			textJson.topics.forEach(t => newItem.tags.push({ tag: t.name }));
 		}
-	});
+		newItem.extra = `赞数:${textJson.voteup_count};`;
+	}
+	newItem.language = 'zh-CN';
+	newItem.attachments.push({ url: url, title: "Snapshot" });
+	newItem.complete();
 }
 
 
@@ -224,6 +215,57 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.zhihu.com/column/c_1218192088992534528",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.zhihu.com/question/533166415/answer/2491983922",
+		"items": [
+			{
+				"itemType": "forumPost",
+				"title": "请问各路大神，在zotero里面打开PDF版硕士/博士论文，是不显示目录的，有没有插件可以显示目录？",
+				"creators": [
+					{
+						"lastName": "BeWater",
+						"createType": "author"
+					}
+				],
+				"date": "2022-05-19 09:54",
+				"abstractNote": "从知网下载的学位论文页数很多，但pdf文件又没有目录，阅读起来比较麻烦。如何解决呢？\n\n\n需要软件\npdftk Server\nhttps://www.pdflabs.com/tools/pdftk-server/\n\n\nZotero茉莉花插件（使用教程）\n\n\n配置\nPdftk Server下载之后，进...",
+				"extra": "赞数:21",
+				"forumTitle": "知乎",
+				"language": "zh-CN",
+				"postType": "知乎回答",
+				"url": "https://www.zhihu.com/question/533166415/answer/2491983922",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Zotero"
+					},
+					{
+						"tag": "博士"
+					},
+					{
+						"tag": "目录"
+					},
+					{
+						"tag": "硕士"
+					},
+					{
+						"tag": "论文"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p data-first-child=\"\" data-pid=\"UKDJFsMg\">从知网下载的学位论文页数很多，但pdf文件又没有目录，阅读起来比较麻烦。如何解决呢？</p><h3><br><b>需要软件</b></h3><p data-pid=\"vr0CI1Aq\"><br><b>pdftk Server</b><br><a href=\"https://link.zhihu.com/?target=https%3A//www.pdflabs.com/tools/pdftk-server/\" class=\" external\" target=\"_blank\" rel=\"nofollow noreferrer\"><span class=\"invisible\">https://www.</span><span class=\"visible\">pdflabs.com/tools/pdftk</span><span class=\"invisible\">-server/</span><span class=\"ellipsis\"></span></a></p><p data-pid=\"L-oB97X-\"><br><b>Zotero茉莉花插件</b>（<u><a href=\"https://link.zhihu.com/?target=http%3A//mp.weixin.qq.com/s%3F__biz%3DMzA4OTk0NDA0Nw%3D%3D%26mid%3D2654860337%26idx%3D1%26sn%3Db772974b85fce702ab5c7479de642142%26chksm%3D8bda6eb1bcade7a7deceb493fa05b02faa7ff9ff2b0a19ae8359dcc183f42cb7e8a8748a2cab%26scene%3D21%23wechat_redirect\" class=\" wrap external\" target=\"_blank\" rel=\"nofollow noreferrer\">使用教程</a></u>）</p><h3><br><b>配置</b></h3><p data-pid=\"8__GDnxH\"><br>Pdftk Server下载之后，进行安装，记一下<b>安装目录</b>。</p><p data-pid=\"YHWnauRX\"><br>在<b>Zotero &gt; 编辑 &gt; 首选项</b>中选择茉莉花插件，设置 <b>PDFtk Server路径设置</b>，选择刚才的PDftk Server安装目录即可。如果茉莉花成功识别到路径后，后面会出现对勾的标志。<br></p><img src='https://pic1.zhimg.com/50/v2-34c7b9d8b30518976d14007959fbcdd9_720w.jpg?source=1940ef5c'/><p data-pid=\"CI1ZlS2h\">配置成功后，关闭Zotero重启即可。</p><h3><br><b>使用</b></h3><p data-pid=\"5Mlvsiya\"><br>再次打开Zotero，选择一篇中文文献的pdf文件，右键选择<b>知网助手</b> 即可看到 <b>添加PDF书签</b> 功能，即可完成对PDF文件目录的生成。<br></p><img src='https://picx.zhimg.com/50/v2-4cd7c60863432698508867ab8b4489e5_720w.jpg?source=1940ef5c'/><p class=\"ztext-empty-paragraph\"><br></p><p data-pid=\"IkDW0yya\">推一下自己的文章</p><a target=\"_blank\" href=\"https://zhuanlan.zhihu.com/p/514025295\" data-draft-node=\"block\" data-draft-type=\"link-card\" data-text=\"be water：Zotero中文文献那些事\" class=\"LinkCard new\"><span class=\"LinkCard-contents\"><span class=\"LinkCard-title loading\" data-text=\"true\"></span><span class=\"LinkCard-desc loading\"></span></span><span class=\"LinkCard-image LinkCard-image--default\"></span></a><p class=\"ztext-empty-paragraph\"><br></p><p data-pid=\"jKjL9Ofe\">更多文献管理的内容可以关注专栏</p><a target=\"_blank\" href=\"https://www.zhihu.com/column/c_1447680839576842240\" data-draft-node=\"block\" data-draft-type=\"link-card\" data-image=\"https://pic2.zhimg.com/v2-52a669542a8699d42a3c5796c7e536e9_ipico.jpg\" data-image-width=\"200\" data-image-height=\"200\" data-text=\"文献管理\" class=\"LinkCard new\"><span class=\"LinkCard-contents\"><span class=\"LinkCard-title loading\" data-text=\"true\"></span><span class=\"LinkCard-desc loading\"></span></span><span class=\"LinkCard-image LinkCard-image--default\"></span></a><p></p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
