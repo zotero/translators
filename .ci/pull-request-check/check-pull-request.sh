@@ -27,12 +27,13 @@ else
 	npm ci
 fi
 
+cd ..
 get_translators_to_check
 
 if [ -z "${TRANSLATORS_TO_CHECK}" ]; then
     export TRANSLATORS_TO_CHECK=mockImport.js
     echo "Found no translator to check; using mock translator to test this test's own functioning."
-    cat > ./mockImport.js << 'EOF'
+    cat > ./connectors/mockImport.js << 'EOF'
 {
 	"translatorID": "c4754d0e-7845-49bf-b6cc-291e427c0a08",
 	"label": "mockImport",
@@ -76,6 +77,7 @@ var testCases = [
 EOF
 fi
 
+cd connectors
 export ZOTERO_REPOSITORY_URL="http://localhost:8085/"
 ./build.sh -p b -d
 cd ..
