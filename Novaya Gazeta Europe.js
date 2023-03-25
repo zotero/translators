@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-24 07:49:06"
+	"lastUpdated": "2023-03-25 02:52:31"
 }
 
 /*
@@ -44,11 +44,10 @@ const newsArticleRE = new RegExp("^https://novayagazeta.eu/.+/(\\d{4}/\\d{2}/\\d
 async function detectWeb(doc, url) {
 	if (!url.match(newsArticleRE)) return false;
 	// In the browser, the page content (doc) is loaded asynchronously,
-	// including the <meta> tags. This is done by the JS code in the HTML
-	// document requesting full article data from the API server. We would
-	// rather "await"/"then" on this promise that we can control, rather than
-	// banking the page load whose status is not easily known. Note that only
-	// "url" is used in this function.
+	// including the <meta> tags, by AJAX API calls, so page status may be
+	// indefinite. We would rather "await"/"then" on the getRecord() promise
+	// that we control, rather than banking on the page load whose status is
+	// not easily known. Note that only "url" is used in this function.
 	try {
 		const record = await getRecord(url);
 		const recordType = record.typeGenreId;
@@ -77,10 +76,6 @@ async function detectWeb(doc, url) {
 }
 
 async function doWeb(doc, url) {
-	await scrape(doc, url);
-}
-
-async function scrape(doc, url = doc.location.href) {
 	const itemType = await detectWeb(doc, url);
 	if (!itemType) return;
 
@@ -113,8 +108,9 @@ async function scrape(doc, url = doc.location.href) {
 }
 
 // Perform request for the JSON data using the Novaya Gazeta RESTful API.
-// Returns a promise that resolves to the record object by parsing as JSON.
-// Memoize the data value because detectWeb() already sent one.
+// Returns a promise that resolves to the record object by parsing the response
+// as JSON.
+// Memoize the data value because detectWeb() already sent one first.
 const _apiCache = new Map();
 
 async function getRecord(url) {
@@ -129,10 +125,11 @@ async function getRecord(url) {
 	return articleData;
 }
 
-// Topics, in typeRubricId. Only the first two seems to be used extensively for
-// now (especially on the English website), and they don't appear anywhere else
-// except on the page heading. The English names are taken as they are from the
-// page headings wherever possible.
+// What I call "topics", as value of property "typeRubricId". Only the first
+// two seems to be used extensively for now (especially on the English
+// website), and they don't appear anywhere else except on the page heading.
+// The English names are taken as they are from the page headings (i.e.
+// "official" translation) wherever possible.
 const _topicLookup = {
 	obshhestvo: "Society",
 	jekonomika: "Economics",
@@ -151,6 +148,7 @@ function populateItem(item, record) {
 	item.date = (new Date(record.date)).toISOString();
 
 	const itemAuthors = [];
+	// Interviewee is "author"; see notes to findInterviewee().
 	const authType = item.itemType === "interview" ? "interviewer" : "author";
 	for (const author of record.authors) {
 		// If the author is likely "institutional" and the same as the
@@ -166,7 +164,7 @@ function populateItem(item, record) {
 			itemAuthors.push(ZU.cleanAuthor(author.name, authType));
 		}
 		else {
-			// Translated article, extract transliterated names
+			// Translated article, extract Romanized names.
 			// These names have separate fields for surname and "name" (i.e.
 			// given name).
 			for (const localeInfo of author.locale) {
@@ -176,8 +174,10 @@ function populateItem(item, record) {
 				// now), so it *might* be expanded in the future.
 				if (localeInfo.lang === "en") {
 					itemAuthors.push(ZU.cleanAuthor(`${localeInfo.name} ${localeInfo.surname}`, authType));
-					// Break out of the loop for translated names because we
-					// can only handle "en" for now.
+					// NOTE: This break is practically spurious now for the
+					// length-one array. Placeholder in case future expansion
+					// makes more locales available our the code hasn't been
+					// updated to support them.
 					break;
 				}
 			}
