@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-26 18:56:41"
+	"lastUpdated": "2023-03-27 18:54:23"
 }
 
 /*
@@ -76,6 +76,7 @@ async function doWeb(doc, url) {
 		scrape(doc, url);
 	}
 
+	// querySelectors in scrape() not working at this point for multiple. Is the DOM not complete yet?
 	if (detectWeb(doc, url) == 'multiple') {
 		Zotero.debug('doWeb on multiple refs.');
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
@@ -91,21 +92,29 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(next_doc, url) {
-	// querySelectors not working at this point for multiple. Is the DOM not complete yet?
 	var next_url = next_doc.location.href;
+	var origin = next_doc.location.protocol + '//' + next_doc.location.hostname;
+	var pageinfo_url = next_url.replace("view", "ajax/pageinfo");
 	Zotero.debug('trying to process ' + next_url);
-	Zotero.debug('#################\n\n');
-	// Zotero.debug(next_doc.documentElement.innerHTML);
-	Zotero.debug('#################\n\n');
-	Zotero.debug(typeof(next_doc));
-	const elDoi = next_doc.querySelector(".ep-view__share__doi");
-	Zotero.debug('DOI object ' + elDoi);
-	const elRis = next_doc.querySelector(".ep-view__share__ris");
-	const risURL = elRis.querySelectorAll('a')[0].href;
-	const elPdf = next_doc.querySelector(".ep-view__share__downloads");
-	const pdfURL = elPdf.querySelectorAll('a')[0].href;
-	ZU.doGet(risURL, function (text, URL, PDFURL) {
-		processRIS(text, url, pdfURL);
+	Zotero.debug('JSON URL ' + pageinfo_url);
+	ZU.doGet(pageinfo_url, function (text) {
+		var epjson = JSON.parse(text);
+		Zotero.debug(epjson["articles"]["0"]["hasRisLink"]);
+		if (epjson["articles"]["0"]["hasRisLink"]) {
+			var risURL = origin + '/view/' +  epjson["articles"]["0"]["risLink"];
+		} else {
+			var risURL = null;
+		};
+		Zotero.debug(risURL);
+		if (epjson["articles"]["0"]["hasPdfLink"]) {
+			var pdfURL = origin + '/view/' +  epjson["articles"]["0"]["pdfLink"];
+		} else {
+			var pdfURL = null;
+		}
+		Zotero.debug(pdfURL);
+		ZU.doGet(risURL, function (text, URL, PDFURL) {
+			processRIS(text, url, pdfURL);
+		});
 	});
 }
 
@@ -211,12 +220,13 @@ function processRIS(text, URL, pdfURL) {
 		}
 
 		// Retrieve fulltext
-		item.attachments.push({
-			url : pdfURL,
-			title : "E-periodica PDF",
-			type : "application/pdf"
-		});
-		
+		if (pdfURL != null) {
+			item.attachments.push({
+				url : pdfURL,
+				title : "E-periodica PDF",
+				type : "application/pdf"
+			});
+		}
 
 		// DB in RIS maps to archive; we don't want that
 		delete item.archive;
@@ -270,8 +280,7 @@ function processRIS(text, URL, pdfURL) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.e-periodica.ch/digbib/view?pid=enh-006%3A2018%3A11#121",
-		"defer": true,
+		"url": "https://www.e-periodica.ch/digbib/view?pid=enh-006%3A2018%3A11::121#133",
 		"items": [
 			{
 				"itemType": "journalArticle",
