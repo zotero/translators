@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-24 14:40:09"
+	"lastUpdated": "2023-03-27 13:59:57"
 }
 
 /*
@@ -83,6 +83,7 @@ async function scrape(doc, url = doc.location.href) {
 	translator.setHandler('itemDone', (_obj, item) => {
 		item.complete();
 	});
+  // TODO: add attached PDFs
   // var pdfURL = getContent(doc, 'citation_pdf_url');
 
 	let em = await translator.getTranslatorObject();
