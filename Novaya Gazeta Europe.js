@@ -39,7 +39,7 @@
 
 // The RegExp is for "origin/site-section/(yyyy/mm/dd/article-pretty-path)",
 // where the "slug" is the captured group; see getRecord().
-const newsArticleRE = new RegExp("^https://novayagazeta.eu/.+/(\\d{4}/\\d{2}/\\d{2}/.+)", "i");
+const newsArticleRE = new RegExp("^https://novayagazeta\\.eu/.+/(\\d{4}/\\d{2}/\\d{2}/.+)", "i");
 
 async function detectWeb(doc, url) {
 	if (!url.match(newsArticleRE)) return false;
