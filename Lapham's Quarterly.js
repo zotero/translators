@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-28 03:47:45"
+	"lastUpdated": "2023-03-28 05:15:00"
 }
 
 /*
@@ -90,39 +90,47 @@ async function doWeb(doc, url) {
 
 function getSearchResults(doc, checkOnly = false) {
 	const resultElems = doc.querySelectorAll(".search-results .search-result"); // Lovely semantics!
-	const rawResultLength = resultElems.length;
-	if (!rawResultLength) return false;
+	if (!resultElems.length) return false;
 
-	const items = {};
-	const titleCounter = new Map();
-	let isNonEmpty = false;
+	// Title string -> array of URLs.
+	const titleMap = new Map();
+	// While collecting title -> URL mapping for possible duplicate titles,
+	// check for duplicate URLs too, though this is unlikely. If it does
+	// happen, the first one in the document order takes precedence.
+	const hrefsSeen = new Set();
 	for (const elem of resultElems) {
 		const href = attr(elem, "h3>a", "href");
 		const title = text(elem, "h3>a");
 
-		// Double check for duplicates.
-		if (!(href in items) && title) {
+		if (href && !hrefsSeen.has(href) && title) {
 			if (checkOnly) return true;
 
+			hrefsSeen.add(href);
 			// Title may contain duplicates even if the links are
-			// unique. Try adding a number after title in this case
-			// to help the user choose from the multiple.
-			let n;
-			if (!titleCounter.has(title)) {
-				n = 1;
+			// unique. In other words, one title may be associated with
+			// multiple (i.e. an array of) URLs.
+			if (!titleMap.has(title)) {
+				titleMap.set(title, []);
 			}
-			else {
-				n = titleCounter.get(title) + 1;
-			}
-			titleCounter.set(title, n);
-
-			const extraTag = n > 1 ? ` (${n})` : "";
-			items[href] = title + extraTag;
-			isNonEmpty = true;
+			titleMap.get(title).push(href);
 		}
 	}
 
-	return isNonEmpty && items;
+	// If the same title text is associated with multiple URLs, add a
+	// parenthesized number showing the order of the title's appearance in the
+	// search results.
+	let items = {};
+	// Map conveniently maintains insertion order.
+	for (const [title, hrefArray] of titleMap) {
+		const hasDup = hrefArray.length > 1;
+		for (const [i, href] of hrefArray.entries()) {
+			items[href] = !hasDup
+				? title
+				: `${title} (${i + 1}, URL: ${(new URL(href)).pathname})`;
+		}
+	}
+
+	return hrefsSeen.size && items;
 }
 
 async function scrape(doc, url = doc.location.href) {
