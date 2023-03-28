@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-13 03:50:57"
+	"lastUpdated": "2023-03-28 09:16:43"
 }
 
 /*
@@ -42,7 +42,7 @@ function detectWeb(doc, url) {
 	// purposes, including legal notices, about pages, taxonomy, etc.
 	// Not incorporating this logic into the "target" field of translator
 	// metadata, to keep the RegExp there simple.
-	const skipPath = /\/(category|tag|masthead|about-literary-hub|privacy-policy-for-literary-hub-.+)\//;
+	const skipPath = /\/(category|tag|masthead|about-literary-hub|privacy-policy-for-.+)\//;
 	if (urlObj.pathname.match(skipPath)) {
 		return false;
 	}
@@ -74,13 +74,13 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) === "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), (items) => {
-			if (items) {
-				ZU.processDocuments(Object.keys(items), scrape);
-			}
-		});
+		const items = await Z.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (const url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else {
 		scrape(doc, url);
@@ -89,15 +89,13 @@ function doWeb(doc, url) {
 
 function getSearchResults(doc, checkOnly) {
 	const resultElems = doc.querySelectorAll("div.search .post_header a");
-	const rawResultLength = resultElems.length;
-	if (!rawResultLength) return false;
+	if (!resultElems.length) return false;
 
 	const items = {};
 	let isNonEmpty = false;
-	for (let i = 0; i < rawResultLength; i++) {
-		const anchor = resultElems[i];
-		const href = anchor.href;
-		const title = ZU.trimInternal(anchor.textContent);
+	for (const anchorElem of resultElems) {
+		const href = anchorElem.href;
+		const title = ZU.trimInternal(anchorElem.textContent.trim());
 
 		// Currently, external hyperlinks in search results
 		// will not work correctly, because they are passed to
@@ -116,18 +114,15 @@ function getSearchResults(doc, checkOnly) {
 	return isNonEmpty && items;
 }
 
-function scrape(doc, url) {
+async function scrape(doc, url) {
 	const translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-	
+	translator.setDocument(doc);
 	translator.setHandler('itemDone', function (tobj, item) {
 		handleItem(doc, item);
 	});
-
-	translator.getTranslatorObject(function (trans) {
-		trans.doWeb(doc, url);
-	});
+	translator.translate();
 }
 
 // Detect the LitHub article type (plain, Lit Hub Excerpts, ...).
@@ -147,9 +142,11 @@ function handleItem(doc, item) {
 	item.publicationTitle = "Literary Hub";
 
 	const tags = getTags(doc);
-	item.tags = tags.map(t => ({ tag: t }));
+	item.tags = tags;
 
-	const articleType = tags.includes("podcasts") ? "podcast" : detectType(doc);
+	const articleType = tags.map(t => t.toLowerCase()).includes("podcasts")
+		? "podcast"
+		: detectType(doc);
 
 	// Populate the fields (especially authorship info) based on the type
 	// of the article.
@@ -222,10 +219,6 @@ function inferPodcastGuests(doc, title) {
 
 // Default, or "plain" blog post.
 function handleDefault(doc, item) {
-	item.creators = getDefaultAuthors(doc, item);
-}
-
-function getDefaultAuthors(doc, item) {
 	const creators = [];
 	const rawAuthors = getByline(doc);
 	if (rawAuthors === "Literary Hub") {
@@ -239,8 +232,7 @@ function getDefaultAuthors(doc, item) {
 			}
 		}
 	}
-
-	return creators;
+	item.creators = creators;
 }
 
 // Given the document of the article of the "default" type, determine author
@@ -275,7 +267,7 @@ function parseAuthorTransFromDefault(doc, item) {
 		const translators = splitNames(transHeadingMatch[1]);
 		// Dedup any byline names.
 		const authors = [];
-		for (let name of splitNames(rawAuthors)) {
+		for (const name of splitNames(rawAuthors)) {
 			if (!translators.includes(name)) {
 				authors.push(name);
 			}
@@ -295,23 +287,16 @@ function parseAuthorTransFromDefault(doc, item) {
 
 // Handle the page that belongs to the "Lit Hub Excerpts" type.
 function handleExcerpt(doc, item) {
-	item.creators = getExcerptAuthors(doc);
-}
-
-// Parse the document as "Lit Hub Excerpts".
-function getExcerptAuthors(doc) {
 	const rawAuthorText = ZU.trimInternal(text(doc, "div.excerptpage>h2"));
-
 	// Split into possible main author(s)/translator(s) parts.
 	const authTransMatch = rawAuthorText.match(/(.+)\s*\(trans\.\s(.+)\)/);
 
 	const creators = [];
-
 	let nameText;
 	if (authTransMatch) {
 		// Translated work.
 		nameText = authTransMatch[2]; // translator(s)
-		for (let name of splitNames(nameText)) {
+		for (const name of splitNames(nameText)) {
 			creators.push(ZU.cleanAuthor(name, "translator"));
 		}
 		nameText = authTransMatch[1]; // original author(s)
@@ -321,11 +306,11 @@ function getExcerptAuthors(doc) {
 	}
 
 	// Handle original author name(s).
-	for (let name of splitNames(nameText)) {
+	for (const name of splitNames(nameText)) {
 		creators.push(ZU.cleanAuthor(name, "author"));
 	}
 
-	return creators;
+	item.creators = creators;
 }
 
 // Convenience utility functions
