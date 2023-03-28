@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-20 07:34:39"
+	"lastUpdated": "2023-03-28 03:47:45"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 	Copyright © 2023 Zoë C. Ma
-	
+
 	This file is part of Zotero.
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
@@ -33,7 +33,8 @@
 function detectWeb(doc, url) {
 	const urlObj = new URL(url);
 	// About pages, legal notes, content listings, event notices... or
-	// content pages without identifiable author.
+	// content pages without identifiable author, or fragmentary quotations of
+	// historical materials.
 	const skipPath = /^\/(about|legal|issues|archive|contributors|conversations|lq-interactives|outreach|programs|events|world-in-time|deja-vu)/;
 	if (urlObj.pathname.match(skipPath)) {
 		return false;
@@ -47,7 +48,8 @@ function detectWeb(doc, url) {
 	}
 
 	// Also skip "voices in time" (excerpts of historical materials) and
-	// the individual issue pages, which can only be found by inspection.
+	// the individual issue pages. This can only be done by inspecting the
+	// document.
 	if (doc.querySelector("body.node-type-voices-in-time, body.node-type-issue")) {
 		return false;
 	}
@@ -94,8 +96,7 @@ function getSearchResults(doc, checkOnly = false) {
 	const items = {};
 	const titleCounter = new Map();
 	let isNonEmpty = false;
-	for (let i = 0; i < rawResultLength; i++) {
-		const elem = resultElems[i];
+	for (const elem of resultElems) {
 		const href = attr(elem, "h3>a", "href");
 		const title = text(elem, "h3>a");
 
@@ -131,7 +132,7 @@ async function scrape(doc, url = doc.location.href) {
 		// multiple, but that item happens to be something we cannot
 		// exclude based on URL/title alone (such as the Voices in Time
 		// pages).
-		Z.debug(`scrape function encountered mismatched type for ${url}`);
+		Z.debug(`scrape function encountered mismatched type ${type} for ${url}`);
 		return;
 	}
 
@@ -280,23 +281,23 @@ function applyPodcast(doc, item) {
 	}
 }
 
+// Get the duration of episode as a string.
 function getPodDuration(doc) {
 	const currTime = text(doc, ".jp-current-time");
-	const remainTime = text(doc, ".jp-duration");
-	const durSec = parseTime(currTime) - parseTime(remainTime);
-	return timeToDuration(durSec);
+	const remainTime = text(doc, ".jp-duration"); // Negative value.
+	return timeToDuration(parseTime(currTime) - parseTime(remainTime));
 }
 
-// Parse mm:ss time duration as number of seconds.
+// Parse mm:ss time duration string as number of seconds.
 function parseTime(str) {
 	const [, mm, ss] = str.match(/(-?\d+):(\d+)/);
-	let t = parseInt(mm) * 60;
 	const s = parseInt(ss);
+	let t = parseInt(mm) * 60;
 	t += t > 0 ? s : -s;
 	return t;
 }
 
-// Convert number of seconds to duration string ("PT20M5S" etc.)
+// Convert number of seconds to duration string in h:m:s format.
 function timeToDuration(s) {
 	let h = 0;
 	let m = Math.floor(s / 60);
@@ -331,7 +332,7 @@ const ROMAN_NUMERAL = {
 
 function romanToInt(str) {
 	return str.split("")
-		.map(i => ROMAN_NUMERAL[i])
+		.map(i => ROMAN_NUMERAL[i.toUpperCase()])
 		.reduce((sum, curValue, cur, arr) => {
 			const prev = cur - 1;
 			const trySum = sum + curValue;
