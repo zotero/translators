@@ -114,7 +114,7 @@ function getSearchResults(doc, checkOnly) {
 	return isNonEmpty && items;
 }
 
-async function scrape(doc, url) {
+async function scrape(doc, url) { // eslint-disable-line no-unused-vars
 	const translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
