@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-27 18:54:23"
+	"lastUpdated": "2023-03-28 17:54:20"
 }
 
 /*
@@ -35,6 +35,7 @@
 	***** END LICENSE BLOCK *****
 */
 
+// just in case we need it at some point
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -94,12 +95,16 @@ async function doWeb(doc, url) {
 async function scrape(next_doc, url) {
 	var next_url = next_doc.location.href;
 	var origin = next_doc.location.protocol + '//' + next_doc.location.hostname;
-	var pageinfo_url = next_url.replace("view", "ajax/pageinfo");
 	Zotero.debug('trying to process ' + next_url);
+	// Do we really need to handle these #-containing URLs?
+	next_url = next_url.replace("#", "%3A%3A").replace("::", "%3A%3A");
+	next_url = next_url.split("%3A%3A");
+	next_url = next_url[0] + "%3A%3A" + next_url.slice(-1);
+	Zotero.debug('Final URL ' + next_url);
+	var pageinfo_url = next_url.replace("view", "ajax/pageinfo");
 	Zotero.debug('JSON URL ' + pageinfo_url);
 	ZU.doGet(pageinfo_url, function (text) {
 		var epjson = JSON.parse(text);
-		Zotero.debug(epjson["articles"]["0"]["hasRisLink"]);
 		if (epjson["articles"]["0"]["hasRisLink"]) {
 			var risURL = origin + '/view/' +  epjson["articles"]["0"]["risLink"];
 		} else {
@@ -107,14 +112,36 @@ async function scrape(next_doc, url) {
 		};
 		Zotero.debug(risURL);
 		if (epjson["articles"]["0"]["hasPdfLink"]) {
-			var pdfURL = origin + '/view/' +  epjson["articles"]["0"]["pdfLink"];
+			var pdfURL = origin + epjson["articles"]["0"]["pdfLink"];
 		} else {
 			var pdfURL = null;
 		}
 		Zotero.debug(pdfURL);
-		ZU.doGet(risURL, function (text, URL, PDFURL) {
-			processRIS(text, url, pdfURL);
-		});
+		if (risURL != null) {
+			ZU.doGet(risURL, function (text, URL, PDFURL) {
+				processRIS(text, url, pdfURL);
+			});
+		} else {
+			var item = new Zotero.Item("journalArticle");
+			item.title = epjson["articles"]["0"]["title"];
+			item.publicationTitle = epjson["journalTitle"];
+			var numyear = epjson["volumeNumYear"].replace("(", "").replace(")", "").split(" ");
+			if (numyear.length > 1) {
+				item.date = numyear.slice(-1);
+			};
+			if (numyear.length > 0) {
+				item.volume = numyear[0];
+			};
+			if (pdfURL != null) {
+				Zotero.debug('PDF URL: ' + pdfURL);
+				item.attachments.push({
+					url : pdfURL,
+					title : "E-periodica PDF",
+					type : "application/pdf"
+				});
+			}
+			item.complete();
+		};
 	});
 }
 
@@ -284,22 +311,100 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Labiobaetis atrebatinus (Eaton, 1870) (Ephemeroptera: Baetidae) : première mention pour la Suisse et remarques sur l'identification des larves",
+				"title": "Untersuchungen zur aktuellen Verbreitung der schweizerischen Laufkäfer (Coleoptera: Carabidae) : Zwischenbilanz",
 				"creators": [
 					{
-						"lastName": "Wagner",
-						"firstName": "André",
+						"lastName": "Hoess",
+						"firstName": "René",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Chittaro",
+						"firstName": "Yannick",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Walter",
+						"firstName": "Thomas",
 						"creatorType": "author"
 					}
 				],
 				"date": "2018",
-				"DOI": "10.5169/seals-986029",
+				"DOI": "10.5169/seals-986030",
 				"ISSN": "1662-8500",
 				"libraryCatalog": "E-periodica Switzerland",
-				"pages": "117",
+				"pages": "129",
 				"publicationTitle": "Entomo Helvetica : entomologische Zeitschrift der Schweiz",
-				"shortTitle": "Labiobaetis atrebatinus (Eaton, 1870) (Ephemeroptera",
+				"shortTitle": "Untersuchungen zur aktuellen Verbreitung der schweizerischen Laufkäfer (Coleoptera",
 				"volume": "11",
+				"attachments": [
+					{
+						"title": "E-periodica PDF",
+						"type": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.e-periodica.ch/digbib/view?pid=bts-004%3A2011%3A137%3A%3A254&referrer=search#251",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Décentralisation, opportunités et contraintes",
+				"creators": [
+					{
+						"lastName": "Fignolé",
+						"firstName": "Jean-Claude",
+						"creatorType": "author"
+					}
+				],
+				"date": "2011",
+				"DOI": "10.5169/seals-144646",
+				"ISSN": "0251-0979",
+				"issue": "05-06",
+				"libraryCatalog": "E-periodica Switzerland",
+				"pages": "14",
+				"publicationTitle": "Tracés : bulletin technique de la Suisse romande",
+				"volume": "137",
+				"attachments": [
+					{
+						"title": "E-periodica PDF",
+						"type": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.e-periodica.ch/digbib/view?pid=alp-001%3A1907%3A2%3A%3A332#375",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Stimmen und Meinungen : schweizerisches Nationaldrama?",
+				"creators": [
+					{
+						"lastName": "Falke",
+						"firstName": "Konrad",
+						"creatorType": "author"
+					}
+				],
+				"date": "1907-1908",
+				"DOI": "10.5169/seals-747870",
+				"issue": "12",
+				"libraryCatalog": "E-periodica Switzerland",
+				"pages": "364",
+				"publicationTitle": "Berner Rundschau : Halbmonatsschrift für Dichtung, Theater, Musik und bildende Kunst in der Schweiz",
+				"shortTitle": "Stimmen und Meinungen",
+				"volume": "2",
 				"attachments": [
 					{
 						"title": "E-periodica PDF",
