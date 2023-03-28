@@ -77,14 +77,14 @@ function detectWeb(doc, url) {
 
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
-		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		const items = await Z.selectItems(getSearchResults(doc, false));
 		if (!items) return;
-		for (let url of Object.keys(items)) {
+		for (const url of Object.keys(items)) {
 			await scrape(await requestDocument(url));
 		}
 	}
 	else {
-		await scrape(doc, url);
+		scrape(doc, url);
 	}
 }
 
@@ -119,7 +119,7 @@ function getSearchResults(doc, checkOnly = false) {
 	// If the same title text is associated with multiple URLs, add a
 	// parenthesized number showing the order of the title's appearance in the
 	// search results.
-	let items = {};
+	const items = {};
 	// Map conveniently maintains insertion order.
 	for (const [title, hrefArray] of titleMap) {
 		const hasDup = hrefArray.length > 1;
@@ -144,7 +144,7 @@ async function scrape(doc, url = doc.location.href) {
 		return;
 	}
 
-	const item = new Zotero.Item(type);
+	const item = new Z.Item(type);
 	item.url = url;
 	item.language = attr(doc, "html", "lang");
 
