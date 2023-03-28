@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-28 09:16:43"
+	"lastUpdated": "2023-03-28 09:41:06"
 }
 
 /*
@@ -221,11 +221,9 @@ function inferPodcastGuests(doc, title) {
 function handleDefault(doc, item) {
 	const creators = [];
 	const rawAuthors = getByline(doc);
-	if (rawAuthors === "Literary Hub") {
-		creators.push({ fieldMode: 1, lastName: rawAuthors, creatorType: "author" });
-	}
-	else {
-		const authorInfo = parseAuthorTransFromDefault(doc, item);
+	// Skip "institutional author" when it is the same as publisher.
+	if (rawAuthors && rawAuthors.toLowerCase() !== "literary hub") {
+		const authorInfo = parseAuthorTransFromDefault(rawAuthors, doc, item);
 		if (authorInfo) {
 			for (const [type, names] of Object.entries(authorInfo)) {
 				creators.push(...names.map(n => ZU.cleanAuthor(n, type)));
@@ -238,13 +236,10 @@ function handleDefault(doc, item) {
 // Given the document of the article of the "default" type, determine author
 // and possible translator information as an object with properties "author"
 // and "translator", or false if not found.
-function parseAuthorTransFromDefault(doc, item) {
-	const rawAuthors = getByline(doc);
-	if (!rawAuthors) return false;
-
+function parseAuthorTransFromDefault(bylineText, doc, item) {
 	// Attempt to parse the raw-byline as "...[,] translated by [...]" or
 	// similar.
-	const bylineMatch = rawAuthors.match(/(.+?)[,;\s([]+trans(?:lated\s+by\s+|\.\s+)(.+)\b/i);
+	const bylineMatch = bylineText.match(/(.+?)[,;\s([]+trans(?:lated\s+by\s+|\.\s+)(.+)\b/i);
 	if (bylineMatch) {
 		return {
 			author: splitNames(bylineMatch[1]),
@@ -267,7 +262,7 @@ function parseAuthorTransFromDefault(doc, item) {
 		const translators = splitNames(transHeadingMatch[1]);
 		// Dedup any byline names.
 		const authors = [];
-		for (const name of splitNames(rawAuthors)) {
+		for (const name of splitNames(bylineText)) {
 			if (!translators.includes(name)) {
 				authors.push(name);
 			}
@@ -280,7 +275,7 @@ function parseAuthorTransFromDefault(doc, item) {
 
 	// Just author names, without translators.
 	return {
-		author: splitNames(rawAuthors),
+		author: splitNames(bylineText),
 		translator: []
 	};
 }
@@ -480,13 +475,7 @@ var testCases = [
 			{
 				"itemType": "blogPost",
 				"title": "Read the Winners of American Short Fiction’s 2022 Insider Prize, Selected by Lauren Hough",
-				"creators": [
-					{
-						"fieldMode": 1,
-						"lastName": "Literary Hub",
-						"creatorType": "author"
-					}
-				],
+				"creators": [],
 				"date": "2022-09-15T08:55:13+00:00",
 				"abstractNote": "Lauren Hough may be known for her spar-ready online presence, but in real life she’s pure warmth: years ago, she overheard us talking about the Insider Prize—American Short Fiction’s annual contest…",
 				"blogTitle": "Literary Hub",
