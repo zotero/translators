@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-25 02:52:31"
+	"lastUpdated": "2023-03-29 05:53:20"
 }
 
 /*
@@ -88,9 +88,8 @@ async function doWeb(doc, url) {
 	item.attachments = [{
 		document: doc,
 		title: "Snapshot",
-		mimeType: "text/html"
+		mimeType: "text/html",
 	}];
-	// NOTE: Download PDF file too?
 
 	try {
 		const record = await getRecord(url);
@@ -146,6 +145,13 @@ function populateItem(item, record) {
 	// NOTE: Use "subtitle" (which can be substantially long) or "lead"?
 	item.abstractNote = record.subtitle;
 	item.date = (new Date(record.date)).toISOString();
+	if (record.pdfUrl) { // Note the letter case.
+		item.attachments.push({
+			url: record.pdfUrl,
+			title: "Article PDF",
+			mimeType: "application/pdf",
+		});
+	}
 
 	const itemAuthors = [];
 	// Interviewee is "author"; see notes to findInterviewee().
@@ -257,8 +263,8 @@ function isNovayaGazeta(str) {
 var testCases = [
 	{
 		"type": "web",
-		"defer": true,
 		"url": "https://novayagazeta.eu/articles/2023/03/22/chechen-roots-of-frances-wrestling-team-en",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -281,6 +287,10 @@ var testCases = [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
+					},
+					{
+						"title": "Article PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
@@ -450,6 +460,10 @@ var testCases = [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
+					},
+					{
+						"title": "Article PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -483,8 +497,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"defer": true,
 		"url": "https://novayagazeta.eu/articles/2022/12/31/mr-edson-moonlight-en",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "newspaperArticle",
