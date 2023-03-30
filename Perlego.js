@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-30 13:27:53"
+	"lastUpdated": "2023-03-30 14:31:55"
 }
 
 // example: https://github.com/zotero/translators/issues/2810
@@ -20,26 +20,26 @@
 
 
 /*
-    ***** BEGIN LICENSE BLOCK *****
+	***** BEGIN LICENSE BLOCK *****
 
-    Copyright © 2023 Brendan O'Connell
+	Copyright © 2023 Brendan O'Connell
 
-    This file is part of Zotero.
+	This file is part of Zotero.
 
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Affero General Public License for more details.
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
 
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
-    ***** END LICENSE BLOCK *****
+	***** END LICENSE BLOCK *****
 */
 
 
@@ -59,12 +59,18 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	// TODO: adjust the CSS selector
 	var rows = doc.querySelectorAll('div.sc-bhhwZE');
+  var rows = doc.querySelectorAll('a[href*="/book/"]');
 	for (let row of rows) {
-		// TODO: check and maybe adjust
-		let href = row.href;
-    // if row.href contains /null/ remove it, so this will work for non-logged in users
-		// TODO: check and maybe adjust
-		let title = ZU.trimInternal(row.textContent);
+	var href = row.href;
+		// for non-logged in users, row.href contains /null/ so user sees a 404 error instead of the book
+	// remove this so we get to the correct URL
+	if (href.includes("null/")) {
+	  href = href.replace("null/", "");
+	}
+	// innerText example: "Start free trial\nFoundation Mathematics\nK.A. Stroud\n2017"
+	var titleArray = row.innerText.split("\n");
+	// title is equal to element 1 of titleArray, e.g. "Foundation Mathematics"
+	let title = titleArray[1];
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
