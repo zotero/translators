@@ -170,7 +170,7 @@ function scrape(doc, url) {
 		}
 
 		if (url.substr(-4) == ".stm") {
-			item.title = ZU.xpathText(doc, '//meta[@name="Headline"]/@content');
+			item.title = attr(doc, 'meta[name="Headline"]', 'content');
 		}
 
 		item.complete();
