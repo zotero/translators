@@ -2,7 +2,7 @@
 	"translatorID": "08edce2b-4831-417b-be9f-5cae6cac38e5",
 	"label": "Dharitri",
 	"creator": "Subhashish Panigrahi",
-	"target": "^https?://(www|news?)\\.dharitri\\.com",
+	"target": "^https?://(www|news?)\\.dharitri\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
