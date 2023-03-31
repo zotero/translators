@@ -34,10 +34,10 @@ function detectWeb(doc, url) {
 		let isConferencePaper = false;
 		let confMetaName = ['اسم الاجتماع', '会议名称', 'Meeting Name', 'Nom de la réunion', 'Название мероприятия', 'Nombre de la reunión'];
 		let labelArray = [];
-		if (url.includes('publications')) {
+		if (url.includes('/publications/')) {
 			labelArray = doc.querySelectorAll('.fdr_label'); 	// Identify item type (book or conferencePaper) based on "fdr_label" class.
 		}
-		if (url.includes('documents')) {
+		else if (url.includes('/documents/')) {
 			labelArray = doc.querySelectorAll('.fw-bold'); 	// Identify item type (book or conferencePaper) based on "fw-bold" class.
 			// Page layout for meeting documents is not functioning properly at "documents" pages (e.g. https://www.fao.org/documents/card/en/c/ND423EN/ and http://www.fao.org/documents/card/zh/c/mw246ZH/ ). Keep the code for now because it doesn't interfere with books and meeting documents are very few.
 		}
@@ -146,7 +146,7 @@ function scrape(doc, url) {
 	var DOIMatch, pdfUrl, mainTitle, subTitle, metaResult, conferenceWeb = '';
 	var DOILead = 'https://doi.org/';
 
-	if (url.includes('card')) {
+	if (url.includes('/card/')) {
 		// attach document card URL and snapshot
 		// TEMP: Disable at least until we have post-JS snapshots
 		/* newItem.attachments.push({
@@ -155,7 +155,7 @@ function scrape(doc, url) {
 			mimeType: 'text/html',
 			snapshot: true
 		}); */
-		if (url.includes('publications')) {
+		if (url.includes('/publications/')) {
 			//* ********* Begin fixed-location variables **********
 
 			// Some variables always appear and appear at the same location in all document pages.
@@ -169,7 +169,7 @@ function scrape(doc, url) {
 				let children = abs.childNodes;
 				let abstractFound = false;
 				for (let child of children) {
-					if (child.tagName == "STRONG" || (child.nodeType == 1 && ZU.xpathText(child, './/strong'))) {
+					if (child.tagName == "STRONG" || (child.nodeType == Node.ELEMENT_NODE && text(child, 'strong'))) {
 						if (abstractFound) {
 							break; // stop when another strong tag is found
 						}
@@ -196,7 +196,7 @@ function scrape(doc, url) {
 			}
 
 			// attach PDF: PDF link in innerHTML of "dynafef_det" class.
-			pdfUrl = (doc.getElementsByClassName("dynafef_det")[0].innerHTML).match(/http\S*\.pdf/gi)[0];
+			pdfUrl = attr(doc, '.dynafef_det a[href$=".pdf"]', 'href');
 			newItem.attachments.push({
 				url: pdfUrl,
 				title: 'Full Text PDF',
@@ -210,8 +210,8 @@ function scrape(doc, url) {
 			newItem.language = getLang(pdfUrl);
 			
 			// title: use colon to connect main title and subtitle (if subtitle exists)
-			mainTitle = ZU.xpathText(doc, '//*[@id="headerN0"]/h1');
-			subTitle = ZU.xpathText(doc, '//h4[@class="csc-firstHeader h1"]');
+			mainTitle = text(doc, '#headerN0 > h1');
+			subTitle = text(doc, 'h4.csc-firstHeader');
 			if (!subTitle) {
 				newItem.title = mainTitle;
 			}
@@ -229,7 +229,7 @@ function scrape(doc, url) {
 
 			// Variables that appear neither in all document pages nor at same positions in the pages.
 			// scrape text of meta area and split into an array based on line breaks.
-			metaText = ZU.xpath(doc, '//*[@id="mainN0"]')[0].innerText.split('\n');
+			metaText = text(doc, '#mainN0').split('\n');
 			// get what variables are listed in the page, save to object existingMeta
 			for (let i = 0; i < metaText.length; i++) {
 				for (let key in textVariable) {
