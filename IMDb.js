@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-07 11:44:52"
+	"lastUpdated": "2023-03-31 22:02:24"
 }
 
 /*
@@ -97,7 +97,7 @@ function scrape(doc, _url) {
 	}
 
 	item.title = title; // note that json only has the original title
-	var transTitle = ZU.trimInternal(ZU.xpathText(doc, "//h1/text()"));
+	var transTitle = ZU.trimInternal(ZU.xpathText(doc, "//h1//text()"));
 	if (transTitle && transTitle !== item.title) addExtra(item, "Translated title: " + transTitle);
 
 	item.programTitle = doc.title.match(/(?:"([^"]+)")?/)[1];
