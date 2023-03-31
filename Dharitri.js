@@ -111,11 +111,11 @@ function scrape(doc, url) {
 				item.date = date.toISOString();
 			}
 			else {
-				item.date = ZU.xpathText(doc, '//meta[@property="rnews:datePublished"]/@content');
+				item.date = attr(doc, 'meta[property="rnews:datePublished"]', 'content');
 				if (!item.date) {
-					item.date = ZU.xpathText(doc, '//p[@class="timestamp"]');
+					item.date = text(doc, 'p.timestamp');
 					if (!item.date) {
-						item.date = ZU.xpathText(doc, '//meta[@name="OriginalPublicationDate"]/@content');
+						item.date = attr(doc, 'meta[name="OriginalPublicationDate"]', 'content');
 					}
 				}
 			}
