@@ -41,9 +41,11 @@ function detectWeb(doc, url) {
 			else {
 				return "bookSection";
 			}
-		} else if (url.includes('content/video/')) {
-			return 'videoRecording'; 
-		} else {
+		}
+		else if (url.includes('content/video/')) {
+			return 'videoRecording';
+		}
+		else {
 			return "journalArticle";
 		}
 	}
@@ -80,9 +82,9 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	// Missing editions for books and books chapter page 
+	// Missing editions for books and books chapter page
 	// Removed html element in abstract for video and tutorial page
-	// Author not updating in metatag correctly from data and read 
+	// Author not updating in metatag correctly from data and read
 	// client advised to split and handled through custom data attr/obj
 	// - so we'll fill those in manually.
 	var translator = Zotero.loadTranslator('web');
@@ -99,8 +101,8 @@ function scrape(doc, url) {
 		if (author.length > 0) {
 			// Handled using data attribute
 			for (let i = 0; i < author.length; i++) {
-				item.creators[i].firstName = author[i].getAttribute('data-firstnames')
-				item.creators[i].lastName = author[i].getAttribute('data-surname')
+				item.creators[i].firstName = author[i].getAttribute('data-firstnames');
+				item.creators[i].lastName = author[i].getAttribute('data-surname');
 			}
 		}
 
@@ -111,18 +113,19 @@ function scrape(doc, url) {
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function(trans){
+	translator.getTranslatorObject(function (trans) {
 		// Detect web not get trigger for scape EM translator
 		// - so wll fill those in manually.
 		if (detectWeb(doc, url)) {
-			trans.itemType = detectWeb(doc, url)
+			trans.itemType = detectWeb(doc, url);
 		}
 		trans.addCustomFields({
 			citation_book_title: "bookTitle"
-		});		
+		});
 		trans.doWeb(doc, url);
 	});
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
