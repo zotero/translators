@@ -165,7 +165,7 @@ function scrape(doc, url) {
 			item.tags[i] = item.tags[i].charAt(0).toUpperCase() + item.tags[i].substring(1);
 		}
 
-		if (!item.language || item.language === "or") {
+		if (!item.language) {
 			item.language = "or";
 		}
 
