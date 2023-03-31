@@ -143,8 +143,8 @@ function scrape(doc, url) {
 			}
 		}
 		else {
-			authorString = ZU.xpathText(doc, '//p[@class="byline"]');
-			var title = ZU.xpathText(doc, '//em[@class="title"]');
+			authorString = text(doc, 'p.byline');
+			var title = text(doc, 'em.title');
 			if (authorString) {
 				authorString = authorString.replace(title, '').replace('By', '');
 				let authors = authorString.split('&');
