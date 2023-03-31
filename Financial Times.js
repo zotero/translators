@@ -99,7 +99,7 @@ function scrapeAmp(doc, url) {
 	item.publicationTitle = 'Financial Times';
 	item.section = text('a[data-trackable="primary-brand"]')
 		|| text('a[data-trackable="primary-theme"]');
-	item.url = attr('head link[rel="canonical"]', 'href');
+	item.url = attr('link[rel="canonical"]', 'href');
 	item.libraryCatalog = '';
 	item.attachments.push({
 		title: "Snapshot",
