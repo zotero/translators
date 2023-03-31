@@ -106,12 +106,9 @@ async function scrape(doc, url = doc.location.href) {
 	translator.setTranslator('2c05e2d1-a533-448f-aa20-e919584864cb'); // DIM
 	translator.setString(xmlText);
 	translator.setHandler('itemDone', (_obj, item) => {
-		// TODO tweak some of the output here
-		Z.debug(item.attachments[0]);
-		
-		for (let i = 0; i < item.attachments.length; i++) {
-			if (item.attachments[i].url && !item.attachments[i].url.startsWith("http")) {
-				item.attachments[i].url = "https://aquadocs.org" + item.attachments[i].url;
+		for (let attachment of item.attachments) {
+			if (attachment.url && !attachment.url.startsWith("http")) {
+				attachment.url = "https://aquadocs.org" + item.attachments[i].url;
 			}
 		}
 		item.complete();
