@@ -104,7 +104,7 @@ function scrape(doc, url) {
 			item.date = data.datePublished;
 		}
 		else {
-			var seconds = ZU.xpathText(doc, '(//div[h1 or h2]//*[contains(@class, "date")]/@data-seconds)[1]');
+			var seconds = attr(doc, 'div .date[data-seconds]', 'data-seconds');
 			if (!item.date && seconds) {
 				// Z.debug(seconds);
 				var date = new Date(1000 * seconds);
