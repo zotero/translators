@@ -130,8 +130,8 @@ function scrape(doc, url) {
 		// add authors from byline__name but only if they
 		// are real authors and not just part of the webpage title
 		// like By BBC Trending, By News from Elsewhere... or By Who, What Why
-		var authorString = ZU.xpathText(doc, '//span[@class="byline__name"]');
-		var webpageTitle = ZU.xpathText(doc, '//h1');
+		var authorString = text(doc, 'span.byline__name');
+		var webpageTitle = text(doc, 'h1');
 		if (authorString) {
 			authorString = authorString.replace('By', '').replace('...', '');
 			let authors = authorString.split('&');
