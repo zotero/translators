@@ -38,12 +38,8 @@
 function detectWeb(doc, url) {
 	url = url.replace(/[?#].+/, "");
 	if (/\d{8}$/.test(url) || /\d{7}\.(stm)$/.test(url)) {
-		var pageNode = doc.getElementById("page");
-		if (pageNode) {
-			// Z.debug(pageNode.className);
-			if (pageNode.className.includes("media-asset-page") || pageNode.className.includes("vxp-headlines")) {
-				return "videoRecording";
-			}
+		if (doc.querySelector('#page.media-asset-page, #page.vxp-headlines') {
+			return "videoRecording";
 		}
 		return "newspaperArticle";
 	}
