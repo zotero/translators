@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-02-23 16:43:43"
+	"lastUpdated": "2023-04-01 16:44:37"
 }
 
 /*
@@ -30,7 +30,7 @@
 */
 function detectWeb(doc, url) {
 	// Just differentiate single and multiple.
-	if (url.includes('card')) {
+	if (url.includes('/card/')) {
 		let isConferencePaper = false;
 		let confMetaName = ['اسم الاجتماع', '会议名称', 'Meeting Name', 'Nom de la réunion', 'Название мероприятия', 'Nombre de la reunión'];
 		let labelArray = [];
@@ -229,7 +229,7 @@ function scrape(doc, url) {
 
 			// Variables that appear neither in all document pages nor at same positions in the pages.
 			// scrape text of meta area and split into an array based on line breaks.
-			metaText = text(doc, '#mainN0').split('\n');
+			metaText = text(doc, '#fdr_label').split('\n');
 			// get what variables are listed in the page, save to object existingMeta
 			for (let i = 0; i < metaText.length; i++) {
 				for (let key in textVariable) {
