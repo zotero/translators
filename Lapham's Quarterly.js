@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-01 03:21:41"
+	"lastUpdated": "2023-04-01 05:02:53"
 }
 
 /*
@@ -189,30 +189,30 @@ async function applyMagazine(doc, item) {
 	}
 
 	const issueURL = (new URL(issueRelURL, doc.location)).href;
-	return setIssueInfo(issueURL, item);
+	return setIssueDate(issueURL, item);
 }
 
 // Cache for the issue info. Keys are the permalinks to the issue-page URLs,
 // and values are the corresponding issue info returned by
-// requestArticleIssue().  This is to avoid repeated network requests for the
+// fetchIssueDateInfo().  This is to avoid repeated network requests for the
 // same document when saving multiple items.
-const _issueInfoCache = new Map();
+const _issueCache = new Map();
 
-async function setIssueInfo(url, item) {
+async function setIssueDate(url, item) {
 	let value;
-	if (_issueInfoCache.has(url)) {
-		value = _issueInfoCache.get(url);
+	if (_issueCache.has(url)) {
+		value = _issueCache.get(url);
 	}
 	else {
-		value = await requestIssueInfo(url);
+		value = await fetchIssueDateInfo(url);
 		if (value) {
-			_issueInfoCache.set(url, value);
+			_issueCache.set(url, value);
 		}
 	}
 	Object.assign(item, value);
 }
 
-async function requestIssueInfo(url) {
+async function fetchIssueDateInfo(url) {
 	let doc;
 	try {
 		doc = await requestDocument(url);
