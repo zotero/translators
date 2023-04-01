@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-28 05:15:00"
+	"lastUpdated": "2023-04-01 03:21:41"
 }
 
 /*
@@ -84,7 +84,7 @@ async function doWeb(doc, url) {
 		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
@@ -169,7 +169,9 @@ async function scrape(doc, url = doc.location.href) {
 	item.complete();
 }
 
-// Magazine articles.
+// Magazine articles. This will always be async even if the async task is not
+// performed, in the (unlikely) case when the issue-info URL to be scraped is
+// not found on the article page.
 async function applyMagazine(doc, item) {
 	item.ISSN = "1935-7494";
 	item.publicationTitle = "Lapham’s Quarterly";
@@ -181,10 +183,13 @@ async function applyMagazine(doc, item) {
 	if (excerpt) item.abstractNote = excerpt;
 
 	const issueRelURL = attr(doc, ".sticky-content>a", "href");
-	if (!issueRelURL) return;
+	if (!issueRelURL) {
+		Z.debug(`Article at ${item.url} missing the link to its issue.`);
+		return undefined;
+	}
 
 	const issueURL = (new URL(issueRelURL, doc.location)).href;
-	await setIssueInfo(issueURL, item);
+	return setIssueInfo(issueURL, item);
 }
 
 // Cache for the issue info. Keys are the permalinks to the issue-page URLs,
