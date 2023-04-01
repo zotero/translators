@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-01 05:02:53"
+	"lastUpdated": "2023-04-01 05:08:17"
 }
 
 /*
@@ -99,8 +99,8 @@ function getSearchResults(doc, checkOnly = false) {
 	// happen, the first one in the document order takes precedence.
 	const hrefsSeen = new Set();
 	for (const elem of resultElems) {
-		const href = attr(elem, "h3>a", "href");
-		const title = text(elem, "h3>a");
+		const href = attr(elem, "h3 > a", "href");
+		const title = text(elem, "h3 > a");
 
 		if (href && !hrefsSeen.has(href) && title) {
 			if (checkOnly) return true;
@@ -182,7 +182,7 @@ async function applyMagazine(doc, item) {
 	const excerpt = text(doc, ".excerpt");
 	if (excerpt) item.abstractNote = excerpt;
 
-	const issueRelURL = attr(doc, ".sticky-content>a", "href");
+	const issueRelURL = attr(doc, ".sticky-content > a", "href");
 	if (!issueRelURL) {
 		Z.debug(`Article at ${item.url} missing the link to its issue.`);
 		return undefined;
@@ -245,7 +245,7 @@ async function fetchIssueDateInfo(url) {
 // Blog articles.
 function applyBlog(doc, item) {
 	// Blog-article title proper
-	item.title = text(doc, ".title>h2");
+	item.title = text(doc, ".title > h2");
 	item.creators = parseAuthors(getArticleAuthorText(doc));
 	item.date = getBlogPostDate(doc);
 	// blogTitle refers to the name of the blog hosted by Lapham's.
@@ -266,15 +266,15 @@ function getArticleAuthorText(doc) {
 
 // Podcasts
 function applyPodcast(doc, item) {
-	const podPublication = text(doc, ".title>h1");
+	const podPublication = text(doc, ".title > h1");
 	item.seriesTitle = podPublication;
 	// Date text uses the same DOM element as it is on blog articles.
 	item.date = getBlogPostDate(doc);
 	item.runningTime = getPodDuration(doc);
-	item.audioFileType = attr(doc, ".top-image-block audio>source", "type");
+	item.audioFileType = attr(doc, ".top-image-block audio > source", "type");
 	item.abstractNote = attr(doc, "meta[name='description']", "content");
 
-	const headingText = text(doc, ".title>h2");
+	const headingText = text(doc, ".title > h2");
 	if (podPublication.toLowerCase() === "the world in time") {
 		// The EiC's own podcast.
 		item.creators = [ZU.cleanAuthor("Lewis H. Lapham", "author")];
@@ -282,7 +282,7 @@ function applyPodcast(doc, item) {
 		item.creators.push(ZU.cleanAuthor(headingText, "guest"));
 		item.title = headingText;
 		// Extract episode number
-		const epURL = attr(doc, ".top-image-block audio>source", "src");
+		const epURL = attr(doc, ".top-image-block audio > source", "src");
 		const ep = epURL.match(/episode-(\d+)-/i)[1];
 		item.episodeNumber = parseInt(ep);
 	}
