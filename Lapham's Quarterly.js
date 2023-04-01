@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-01 05:08:17"
+	"lastUpdated": "2023-04-01 05:26:35"
 }
 
 /*
@@ -147,6 +147,7 @@ async function scrape(doc, url = doc.location.href) {
 	const item = new Z.Item(type);
 	item.url = url;
 	item.language = attr(doc, "html", "lang");
+	item.attachments = [];
 
 	switch (type) {
 		case "magazineArticle":
@@ -160,11 +161,11 @@ async function scrape(doc, url = doc.location.href) {
 			break;
 	}
 
-	item.attachments = [{
+	item.attachments.push({
 		document: doc,
 		title: "Snapshot",
 		mimeType: "text/html"
-	}];
+	});
 
 	item.complete();
 }
@@ -271,7 +272,10 @@ function applyPodcast(doc, item) {
 	// Date text uses the same DOM element as it is on blog articles.
 	item.date = getBlogPostDate(doc);
 	item.runningTime = getPodDuration(doc);
-	item.audioFileType = attr(doc, ".top-image-block audio > source", "type");
+
+	const mainAudioSelector = ".top-image-block audio > source";
+	const epURL = attr(doc, mainAudioSelector, "src");
+	item.audioFileType = attr(doc, mainAudioSelector, "type");
 	item.abstractNote = attr(doc, "meta[name='description']", "content");
 
 	const headingText = text(doc, ".title > h2");
@@ -282,7 +286,6 @@ function applyPodcast(doc, item) {
 		item.creators.push(ZU.cleanAuthor(headingText, "guest"));
 		item.title = headingText;
 		// Extract episode number
-		const epURL = attr(doc, ".top-image-block audio > source", "src");
 		const ep = epURL.match(/episode-(\d+)-/i)[1];
 		item.episodeNumber = parseInt(ep);
 	}
@@ -292,6 +295,12 @@ function applyPodcast(doc, item) {
 		item.episodeNumber = parseInt(ep);
 		item.title = title;
 	}
+
+	item.attachments.push({
+		title: "Audio",
+		mimeType: item.audioFileType,
+		url: epURL,
+	});
 }
 
 // Get the duration of episode as a string.
@@ -512,6 +521,10 @@ var testCases = [
 				"url": "https://www.laphamsquarterly.org/content/peter-s-goodman",
 				"attachments": [
 					{
+						"title": "Audio",
+						"mimeType": "audio/mpeg"
+					},
+					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
@@ -538,6 +551,10 @@ var testCases = [
 				"seriesTitle": "LQ Podcast",
 				"url": "https://www.laphamsquarterly.org/content/soviets-spies",
 				"attachments": [
+					{
+						"title": "Audio",
+						"mimeType": "audio/mpeg"
+					},
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
