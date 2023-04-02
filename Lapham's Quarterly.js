@@ -467,12 +467,12 @@ function inferEiCPodGuest(doc, headingText, epURL) {
 				.replace(/[\u0300-\u036F]/g, "") // Most of diacritics
 				.toLowerCase()
 				.split("") // to remove noisy puncts
-				.filter(x =>
-					!(x === "." || x === "," || x === "'" || x === "’"))
+				.filter(x => !(x === "." || x === ","
+					|| x === "'" || x === "’"))
 				.join("");
 
-				// Note that we use clean token for logic but original token
-				// for output.
+			// Note that we use clean token for logic but original token
+			// for output.
 			if (epSource.includes(cleanToken)) {
 				filteredTokens.push(token);
 			}
