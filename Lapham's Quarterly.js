@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-01 05:26:35"
+	"lastUpdated": "2023-04-02 05:25:43"
 }
 
 /*
@@ -276,21 +276,30 @@ function applyPodcast(doc, item) {
 	const mainAudioSelector = ".top-image-block audio > source";
 	const epURL = attr(doc, mainAudioSelector, "src");
 	item.audioFileType = attr(doc, mainAudioSelector, "type");
+
 	item.abstractNote = attr(doc, "meta[name='description']", "content");
 
 	const headingText = text(doc, ".title > h2");
 	if (podPublication.toLowerCase() === "the world in time") {
 		// The EiC's own podcast.
 		item.creators = [ZU.cleanAuthor("Lewis H. Lapham", "author")];
-		// The page heading text is the guest's name.
-		item.creators.push(ZU.cleanAuthor(headingText, "guest"));
 		item.title = headingText;
 		// Extract episode number
-		const ep = epURL.match(/episode-(\d+)-/i)[1];
-		item.episodeNumber = parseInt(ep);
+		const epMatch = epURL.match(/episode-(\d+)-/i);
+		if (epMatch) {
+			item.episodeNumber = parseInt(epMatch[1]);
+		}
+
+		const guestName = inferEiCPodGuest(doc, headingText, epURL);
+		if (guestName) {
+			item.creators.push(ZU.cleanAuthor(guestName, "guest"));
+		}
 	}
 	else if (podPublication.toLowerCase() === "lq podcast") {
-		// The metadata for "LQ Podcast" is more difficult to obtain.
+		// The metadata for "LQ Podcast" is more difficult to obtain. The
+		// naming scheme is more diverse, and even if we're tempted to parse
+		// the audio filename for author info, see this for how it may not
+		// work: https://www.laphamsquarterly.org/content/poes-terror-soul
 		const [, ep, title] = headingText.match(/#(\d+)\s+(.+)/i);
 		item.episodeNumber = parseInt(ep);
 		item.title = title;
@@ -329,6 +338,91 @@ function timeToDuration(s) {
 		m %= 60;
 	}
 	return h > 0 ? `${h}:${m}:${s}` : `${m}:${s}`;
+}
+
+// Find the name of the guest in Lewis Lapham's podcast episode.
+// NOTE: Usually the title is the guest's name, but not always.
+// See: https://www.laphamsquarterly.org/content/vicars-christ, where the title
+// is "Vicars of Christ".
+// Therefore we try to infer the name using heuristics:
+// 1. "The name often appears in the main-content paragraphs containing the
+// words '[Lewis H.] Lapham (verb, speaks/talks) with [title] NAME [punct or
+// 'about', but also possibly more noisy words]"
+// 2. "It is very likely to be in the title."
+// 3. "But if not 2, the name may also appear in the audio source file's name
+// in the URL."
+function inferEiCPodGuest(doc, headingText, epURL) {
+	// Take the basename of the episode audio without the last file extension.
+	// .../url/path/to/(basename).ext?query#frag
+	let [, epSource] = epURL.match(/^(?:.+\/)(.+)(?:\..+)$/);
+
+	// Try to find name candidate by parsing the paragraph text.
+	const paragraphs = doc.querySelectorAll(".jp-jplayer ~ p");
+
+	let nameCandidate;
+	if (paragraphs) {
+		const textString = Array.from(paragraphs)
+			.map(x => ZU.trimInternal(x.textContent.trim()))
+			.join(" ");
+		// [Lewis[ H.] ]Lapham [verb] with (noisy name candidate)[, or about ]
+		// Note here "noisy name candidate" matches leniently, but
+		// non-greedily. Otherwise the group will match all the way to the last
+		// comma punct or "about".
+		const nameMatch = textString
+			.match(/(?:Lewis(?: H\.)? )Lapham \S+ with ([\S ]+?)(?:,| about)/);
+		if (nameMatch) {
+			nameCandidate = nameMatch[1];
+		}
+	}
+
+	// If no useful name candidate is extracted, here's our last ditch effort:
+	// fall back to using the episode file name alone (this is the case for
+	// some old episodes).
+	if (!nameCandidate) {
+		return epSource.replace(/_/g, " ");
+	}
+
+	if (nameCandidate.toLowerCase().includes(headingText.toLowerCase())) {
+		// Name candidate (possibly surrounded by noise) is in title: This
+		// means the title can be taken to be the guest's name with high
+		// confidence.
+		return headingText;
+	}
+	else {
+		// Name candidate found but not in title. In this case, use to the
+		// audio file's name as a filter to clean up name candidate.
+		// So we need to case-normalize the episode filename.
+		epSource = epSource.toLowerCase();
+
+		// Generate "token stream" from name candidate, e.g.
+		// "Johann Sebastian Bach" -> ["Johann", "Sebastian", "Bach"]
+		// "Vita Sackerville-West" -> ["Vita", "Sackerville-West"]
+		const tokens = nameCandidate.split(" ");
+		const filteredTokens = []; // output
+		for (const token of tokens) {
+			// Token may contain punct such as period or comma as "noise"
+			// around the word, and apostrophe as internal "noise", but careful
+			// not to overgeneralize (TODO: replace any dash with one single
+			// minus-sign-hyphen (0x2D)?). Also, need to normalize and remove
+			// the diacritics.
+			const cleanToken
+				= token
+				.normalize("NFD")
+				.replace(/[\u0300-\u036F]/g, "") // Most of diacritics
+				.toLowerCase()
+				.split("") // to remove noisy puncts
+				.filter(x =>
+					!(x === "." || x === "," || x === "'" || x === "’"))
+				.join("");
+
+				// Note that we use clean token for logic but original token
+				// for output.
+			if (epSource.includes(cleanToken)) {
+				filteredTokens.push(token);
+			}
+		}
+		return filteredTokens.join(" ");
+	}
 }
 
 // Utility functions
@@ -550,6 +644,172 @@ var testCases = [
 				"runningTime": "43:42",
 				"seriesTitle": "LQ Podcast",
 				"url": "https://www.laphamsquarterly.org/content/soviets-spies",
+				"attachments": [
+					{
+						"title": "Audio",
+						"mimeType": "audio/mpeg"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.laphamsquarterly.org/content/paradise-city",
+		"items": [
+			{
+				"itemType": "podcast",
+				"title": "To the Paradise City",
+				"creators": [
+					{
+						"firstName": "Lewis H.",
+						"lastName": "Lapham",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Brook",
+						"lastName": "Wilensky-Lanford",
+						"creatorType": "guest"
+					}
+				],
+				"abstractNote": "Lewis Lapham talks with author Brook Wilensky-Lanford about the search for Adam and Eve’s hometown.",
+				"audioFileType": "audio/mpeg",
+				"language": "en",
+				"runningTime": "16:27",
+				"seriesTitle": "The World in Time",
+				"url": "https://www.laphamsquarterly.org/content/paradise-city",
+				"attachments": [
+					{
+						"title": "Audio",
+						"mimeType": "audio/mpeg"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.laphamsquarterly.org/content/death-nothing-us",
+		"items": [
+			{
+				"itemType": "podcast",
+				"title": "Death Is Nothing to Us",
+				"creators": [
+					{
+						"firstName": "Lewis H.",
+						"lastName": "Lapham",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Stephen",
+						"lastName": "Greenblatt",
+						"creatorType": "guest"
+					}
+				],
+				"abstractNote": "Historian Stephen Greenblatt writes of “the concentrated force of the buried past” in The Swerve, his 2011 National Book Award winner in nonfiction.",
+				"audioFileType": "audio/mpeg",
+				"language": "en",
+				"runningTime": "20:5",
+				"seriesTitle": "The World in Time",
+				"url": "https://www.laphamsquarterly.org/content/death-nothing-us",
+				"attachments": [
+					{
+						"title": "Audio",
+						"mimeType": "audio/mpeg"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.laphamsquarterly.org/content/roosevelt-montas",
+		"items": [
+			{
+				"itemType": "podcast",
+				"title": "Roosevelt Montás",
+				"creators": [
+					{
+						"firstName": "Lewis H.",
+						"lastName": "Lapham",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Roosevelt",
+						"lastName": "Montás",
+						"creatorType": "guest"
+					}
+				],
+				"abstractNote": "“In my sophomore year of high school, I came upon a remarkable book in a garbage pile next to the house where we rented an apartment in Queens,” scholar Roosevelt Montás writes at the beginning of Rescuing Socrates: How the Great Books Changed My Life and Why They Matter for a New Generation. “It was the second volume of the pretentiously bound Harvard Classics series, and it",
+				"audioFileType": "audio/mpeg",
+				"episodeNumber": 85,
+				"language": "en",
+				"runningTime": "32:19",
+				"seriesTitle": "The World in Time",
+				"url": "https://www.laphamsquarterly.org/content/roosevelt-montas",
+				"attachments": [
+					{
+						"title": "Audio",
+						"mimeType": "audio/mpeg"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.laphamsquarterly.org/content/andrew-j-oshaughnessy",
+		"items": [
+			{
+				"itemType": "podcast",
+				"title": "Andrew J. O’Shaughnessy",
+				"creators": [
+					{
+						"firstName": "Lewis H.",
+						"lastName": "Lapham",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Andrew J.",
+						"lastName": "O’Shaughnessy",
+						"creatorType": "guest"
+					}
+				],
+				"abstractNote": "“Existing biographies of Thomas Jefferson,” the historian Andrew J. O’Shaughnessy writes in The Illimitable Freedom of the Human Mind: Thomas Jefferson’s Idea of a University, treat the retired president’s singular founding of a university “as merely an epilogue, while institutional histories give little consideration to the biographical context…Beginning at the age of",
+				"audioFileType": "audio/mpeg",
+				"episodeNumber": 84,
+				"language": "en",
+				"runningTime": "32:41",
+				"seriesTitle": "The World in Time",
+				"url": "https://www.laphamsquarterly.org/content/andrew-j-oshaughnessy",
 				"attachments": [
 					{
 						"title": "Audio",
