@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-02 05:25:43"
+	"lastUpdated": "2023-04-02 11:25:53"
 }
 
 /*
@@ -47,10 +47,9 @@ function detectWeb(doc, url) {
 		return false;
 	}
 
-	// Also skip "voices in time" (excerpts of historical materials) and
-	// the individual issue pages. This can only be done by inspecting the
-	// document.
-	if (doc.querySelector("body.node-type-voices-in-time, body.node-type-issue")) {
+	// Also skip the individual issue pages. This can only be done by
+	// inspecting the document.
+	if (doc.querySelector("body.node-type-issue")) {
 		return false;
 	}
 
@@ -176,12 +175,25 @@ async function scrape(doc, url = doc.location.href) {
 async function applyMagazine(doc, item) {
 	item.ISSN = "1935-7494";
 	item.publicationTitle = "Lapham’s Quarterly";
-	item.title = text(doc, "#page-title");
 
-	item.creators = parseAuthors(getArticleAuthorText(doc));
+	item.title = text(doc, "#page-title");
 
 	const excerpt = text(doc, ".excerpt");
 	if (excerpt) item.abstractNote = excerpt;
+
+	if (doc.querySelector("body.node-type-voices-in-time")) {
+		// Voice in Time
+		const origYear = text(doc, ".title .date");
+		if (origYear) {
+			item.originalDate = origYear;
+		}
+		const rightsText = getVOTRights(doc);
+		if (rightsText) {
+			item.rights = rightsText;
+		}
+	}
+
+	item.creators = parseAuthors(getArticleAuthorText(doc));
 
 	const issueRelURL = attr(doc, ".sticky-content > a", "href");
 	if (!issueRelURL) {
@@ -243,6 +255,25 @@ async function fetchIssueDateInfo(url) {
 	};
 }
 
+// Get the rights info for VOT if any.
+function getVOTRights(doc) {
+	const paragraphs = doc.querySelectorAll(".content-wrapper > p");
+	if (!paragraphs.length) {
+		return "";
+	}
+	const str
+		= ZU.trimInternal(paragraphs.item(paragraphs.length - 1).textContent);
+
+	if (str) {
+		const match = str.match(/\.\s+((?:\w+\s+)*copyright © \d+ by .+)$/im);
+		if (match) {
+			return match[1];
+		}
+	}
+
+	return "";
+}
+
 // Blog articles.
 function applyBlog(doc, item) {
 	// Blog-article title proper
@@ -260,9 +291,34 @@ function getBlogPostDate(doc) {
 
 // Returns the author string (for magazine article or blog post).
 function getArticleAuthorText(doc) {
-	const byline = text(doc, ".author"); // Could be p or h2 element.
-	if (!byline) return "";
-	return ZU.trimInternal(byline).replace(/^By\s+/i, "");
+	// Take the author's byline from the "Contributor" block, which is more
+	// cumbersome but also more reliable than the byline at ".title .author".
+	let byline = text(doc,
+		'.banner-block a[href^="/contributors/"]' // usual place
+		+ ', .bio-heading a[href^="/contributors/"]' // "voices in time"
+	);
+
+	if (!byline) {
+		// Just in case the above didn't work, try this more obvious but less
+		// generic one.
+		byline = text(doc, ".title .author"); // Could be p or h2 element.
+
+		// NOTE: failure mode: None of the selectors can locate the element.
+		if (!byline) return "";
+
+		// Remove any initial "By ..."
+		byline = byline.replace(/^(By\s+)?/i, "");
+	}
+
+	const authorText = ZU.trimInternal(byline);
+
+	if (authorText === "Lapham’s Quarterly") {
+		// Skip adding author info when the "author" is the same as the
+		// publisher.
+		return "";
+	}
+
+	return authorText;
 }
 
 // Podcasts
@@ -815,6 +871,42 @@ var testCases = [
 						"title": "Audio",
 						"mimeType": "audio/mpeg"
 					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.laphamsquarterly.org/freedom/andrey-kurkov-picks-his-pen",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "Andrey Kurkov Picks Up His Pen",
+				"creators": [
+					{
+						"firstName": "Andrey",
+						"lastName": "Kurkov",
+						"creatorType": "author"
+					}
+				],
+				"date": 2023,
+				"ISSN": "1935-7494",
+				"abstractNote": "On the freedom to write in Ukraine.",
+				"issue": 1,
+				"language": "en",
+				"libraryCatalog": "Lapham's Quarterly",
+				"publicationTitle": "Lapham’s Quarterly",
+				"rights": "Copyright © 2022 by Andrey Kurkov. Used with permission of PEN America.",
+				"url": "https://www.laphamsquarterly.org/freedom/andrey-kurkov-picks-his-pen",
+				"volume": 15,
+				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
