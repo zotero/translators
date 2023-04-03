@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-02 11:25:53"
+	"lastUpdated": "2023-04-03 01:50:13"
 }
 
 /*
@@ -187,7 +187,7 @@ async function applyMagazine(doc, item) {
 		if (origYear) {
 			item.originalDate = origYear;
 		}
-		const rightsText = getVOTRights(doc);
+		const rightsText = getVITRights(doc);
 		if (rightsText) {
 			item.rights = rightsText;
 		}
@@ -255,8 +255,8 @@ async function fetchIssueDateInfo(url) {
 	};
 }
 
-// Get the rights info for VOT if any.
-function getVOTRights(doc) {
+// Get the rights info for Voices in Time if any.
+function getVITRights(doc) {
 	const paragraphs = doc.querySelectorAll(".content-wrapper > p");
 	if (!paragraphs.length) {
 		return "";
@@ -265,6 +265,8 @@ function getVOTRights(doc) {
 		= ZU.trimInternal(paragraphs.item(paragraphs.length - 1).textContent);
 
 	if (str) {
+		// . [word] copyright (C) yyyy by name ... (the rest typically being
+		// further notes about reuse permission).
 		const match = str.match(/\.\s+((?:\w+\s+)*copyright © \d+ by .+)$/im);
 		if (match) {
 			return match[1];
