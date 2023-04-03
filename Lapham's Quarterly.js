@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-03 01:50:13"
+	"lastUpdated": "2023-04-03 02:17:32"
 }
 
 /*
@@ -183,13 +183,19 @@ async function applyMagazine(doc, item) {
 
 	if (doc.querySelector("body.node-type-voices-in-time")) {
 		// Voice in Time
-		const origYear = text(doc, ".title .date");
-		if (origYear) {
-			item.originalDate = origYear;
+		let tmp = text(doc, ".title .date"); // Original date
+		if (tmp) {
+			item.originalDate = tmp;
 		}
-		const rightsText = getVITRights(doc);
-		if (rightsText) {
-			item.rights = rightsText;
+
+		tmp = getVITRights(doc); // Rights (for modern pieces)
+		if (tmp) {
+			item.rights = tmp;
+		}
+
+		tmp = getVITAboutText(doc); // "About the text"
+		if (tmp) {
+			item.notes = [tmp];
 		}
 	}
 
@@ -274,6 +280,23 @@ function getVITRights(doc) {
 	}
 
 	return "";
+}
+
+// Get the text block under "About this text" for Voices in Time. The block is
+// present even if the text has no identifiable author.
+function getVITAboutText(doc) {
+	const paragraphs = doc.querySelectorAll(".bio-block > p");
+	if (!paragraphs.length) {
+		return "";
+	}
+
+	const output = [];
+	for (const paragraph of paragraphs.values()) {
+		output.push(ZU.trimInternal(paragraph.textContent.trim()));
+	}
+	// Re-inserting paragraph-ending line breaks and add extra line break
+	// between paragraphs.
+	return output.join("\n\n");
 }
 
 // Blog articles.
@@ -915,7 +938,41 @@ var testCases = [
 					}
 				],
 				"tags": [],
-				"notes": [],
+				"notes": [
+					"From a speech delivered at the PEN World Voices Festival. The son of a doctor and a pilot, Kurkov trained as a Japanese translator and began writing novels while serving as a prison guard in Odesa. His novel Grey Bees, which he wrote after meeting refugees in Kyiv who made regular trips to the Donbas to deliver medicine, depicts the 2014 war through the perspective of a beekeeper. “For Ukrainians, freedom is more important than stability,” Kurkov said in a March 2022 interview. “For Russians, it is the opposite. Ukrainians change their presidents at each election, Russians keep their tsar until the tsar is dead.”"
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.laphamsquarterly.org/freedom/we-refuse-logic",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "We Refuse This Logic",
+				"creators": [],
+				"date": 2023,
+				"ISSN": "1935-7494",
+				"abstractNote": "The problem is not abortion.",
+				"issue": 1,
+				"language": "en",
+				"libraryCatalog": "Lapham's Quarterly",
+				"publicationTitle": "Lapham’s Quarterly",
+				"rights": "Translation copyright © 2022 by Arlen Austin. Used with permission of Arlen Austin.",
+				"url": "https://www.laphamsquarterly.org/freedom/we-refuse-logic",
+				"volume": 15,
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [
+					"Movimento di Lotta Femminile di Padova, from “Pregnancy and Abortion.” In June 1971 Mariarosa Dalla Costa, who had been active in the Italian workers’ movement, convened a meeting in Padua to discuss demanding wages for housework. The meeting led to the formation of what came to be called Lotta Femminista, which produced pamphlets, conducted studies, and documented its militant activity. This manifesto was later published in Dalla Costa and Selma James’ book The Power of Women and the Subversion of the Community."
+				],
 				"seeAlso": []
 			}
 		]
