@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-04 09:04:26"
+	"lastUpdated": "2023-04-04 09:58:05"
 }
 
 /*
@@ -176,6 +176,7 @@ async function applyMagazine(doc, item) {
 	item.publicationTitle = "Lapham’s Quarterly";
 
 	item.title = text(doc, "#page-title");
+	item.creators = parseAuthors(getArticleAuthorText(doc));
 
 	const excerpt = text(doc, ".excerpt");
 	if (excerpt) item.abstractNote = excerpt;
@@ -187,9 +188,14 @@ async function applyMagazine(doc, item) {
 			item.originalDate = tmp;
 		}
 
-		tmp = getVITRights(doc); // Rights (for modern pieces)
+		tmp = getVITRightsTrans(doc); // Rights and translators
 		if (tmp) {
-			item.rights = tmp;
+			if (tmp.rights) {
+				item.rights = tmp.rights;
+			}
+			if (tmp.translators) { // could be undefined
+				item.creators.push(...tmp.translators);
+			}
 		}
 
 		tmp = getVITAboutText(doc); // "About the text" or brief bio of author
@@ -197,8 +203,6 @@ async function applyMagazine(doc, item) {
 			item.notes = [tmp];
 		}
 	}
-
-	item.creators = parseAuthors(getArticleAuthorText(doc));
 
 	const issueRelURL = attr(doc, ".sticky-content > a", "href");
 	if (!issueRelURL) {
@@ -260,25 +264,38 @@ async function fetchIssueDateInfo(url) {
 	};
 }
 
-// Get the rights info for Voices in Time if any.
-function getVITRights(doc) {
+// Get the rights and translator info for Voices in Time if any.
+function getVITRightsTrans(doc) {
 	const paragraphs = doc.querySelectorAll(".content-wrapper > p");
 	if (!paragraphs.length) {
-		return "";
+		return false;
 	}
+
 	const str
 		= ZU.trimInternal(paragraphs.item(paragraphs.length - 1).textContent);
 
 	if (str) {
-		// . [optional words ](C) yyyy[ by name] ... (the rest typically being
-		// further notes about reuse permission).
-		const match = str.match(/\.\s+((?:\w+\s+)*©\s+\d+.+)$/im);
+		const infoObj = {};
+
+		// . [optional words ](C) yyyy[ by name] ... (full stop)
+		let match = str.match(/(?:^|\.\s+)((?:\w+\s+)*©\s+\d+.+?\.)/im);
 		if (match) {
-			return match[1];
+			infoObj.rights = match[1];
 		}
+
+		// Translator. "Translated by ... [stop or semicolon]"
+		match = str.match(/(?:^|\.\s+)translated by (.+?)[.;]/i);
+		if (match) {
+			const transArray = parseAuthors(match[1], "translator");
+			if (transArray.length) {
+				infoObj.translators = transArray;
+			}
+		}
+
+		return infoObj;
 	}
 
-	return "";
+	return false;
 }
 
 // Get the text block under "About this text" for Voices in Time. The block is
@@ -509,11 +526,11 @@ function inferEiCPodGuest(doc, headingText, epURL) {
 
 // Process author. Parse it as "[possibly Oxford] comma-separated, possibly
 // with the word 'and'".
-function parseAuthors(str) {
+function parseAuthors(str, authorType = "author") {
 	return str.split(/(?:,|\s+and\s+)/)
 		.map(s => s.trim())
 		.filter(Boolean)
-		.map(s => ZU.cleanAuthor(s, "author"));
+		.map(s => ZU.cleanAuthor(s, authorType));
 }
 
 // Convert from Roman numeral to integer. Note that the function assumes a
@@ -927,7 +944,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "Lapham's Quarterly",
 				"publicationTitle": "Lapham’s Quarterly",
-				"rights": "Copyright © 2022 by Andrey Kurkov. Used with permission of PEN America.",
+				"rights": "Copyright © 2022 by Andrey Kurkov.",
 				"url": "https://www.laphamsquarterly.org/freedom/andrey-kurkov-picks-his-pen",
 				"volume": 15,
 				"attachments": [
@@ -951,7 +968,13 @@ var testCases = [
 			{
 				"itemType": "magazineArticle",
 				"title": "We Refuse This Logic",
-				"creators": [],
+				"creators": [
+					{
+						"firstName": "Arlen",
+						"lastName": "Austin",
+						"creatorType": "translator"
+					}
+				],
 				"date": 2023,
 				"ISSN": "1935-7494",
 				"abstractNote": "The problem is not abortion.",
@@ -959,7 +982,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "Lapham's Quarterly",
 				"publicationTitle": "Lapham’s Quarterly",
-				"rights": "Translation copyright © 2022 by Arlen Austin. Used with permission of Arlen Austin.",
+				"rights": "Translation copyright © 2022 by Arlen Austin.",
 				"url": "https://www.laphamsquarterly.org/freedom/we-refuse-logic",
 				"volume": 15,
 				"attachments": [
@@ -988,6 +1011,11 @@ var testCases = [
 						"firstName": "Xu",
 						"lastName": "Wei",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Jonathan",
+						"lastName": "Chaves",
+						"creatorType": "translator"
 					}
 				],
 				"date": 2014,
@@ -997,7 +1025,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "Lapham's Quarterly",
 				"publicationTitle": "Lapham’s Quarterly",
-				"rights": "© 1986, Columbia University Press. Used with permission of Columbia University Press.",
+				"rights": "© 1986, Columbia University Press.",
 				"url": "https://www.laphamsquarterly.org/youth/sweet-and-cold",
 				"volume": 7,
 				"attachments": [
