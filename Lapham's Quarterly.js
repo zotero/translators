@@ -137,8 +137,7 @@ async function scrape(doc, url = doc.location.href) {
 	if (!type) {
 		// This could happen if the user selects an item from the
 		// multiple, but that item happens to be something we cannot
-		// exclude based on URL/title alone (such as the Voices in Time
-		// pages).
+		// exclude based on URL/title alone.
 		Z.debug(`scrape function encountered mismatched type ${type} for ${url}`);
 		return;
 	}
@@ -182,7 +181,7 @@ async function applyMagazine(doc, item) {
 	if (excerpt) item.abstractNote = excerpt;
 
 	if (doc.querySelector("body.node-type-voices-in-time")) {
-		// Voice in Time
+		// Voices in Time
 		let tmp = text(doc, ".title .date"); // Original date
 		if (tmp) {
 			item.originalDate = tmp;
@@ -193,7 +192,7 @@ async function applyMagazine(doc, item) {
 			item.rights = tmp;
 		}
 
-		tmp = getVITAboutText(doc); // "About the text"
+		tmp = getVITAboutText(doc); // "About the text" or brief bio of author
 		if (tmp) {
 			item.notes = [tmp];
 		}
