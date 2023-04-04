@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-04 15:45:17"
+	"lastUpdated": "2023-04-04 18:18:06"
 }
 
 /*
@@ -74,41 +74,45 @@ async function doWeb(doc, url) {
 	}
 }
 
-async function scrape(doc, url) {
+async function scrape(doc, url = doc.location.href) {
 	var item = new Zotero.Item("book");
 	var title = text(doc, '#firstHeading');
 	
 	//check metadata
 	var rows = doc.querySelector('.wi_body table').rows;
 	for (var i = 2; i < rows.length; i++) {
-		if (rows[i].cells[0].innerText.trim() == "Name Translations") {
+		//Z.debug(rows[i].cells[0].innerText);
+		if (rows[i].cells[0].innerText.trim().includes("Name Translations")) {
 			var names = rows[i].cells[1].innerText.trim();
 		}
 		if (rows[i].cells[0].innerText.trim() == "Composer") {
 			var author = rows[i].cells[1].innerText.trim();
 		}
-		if (rows[i].cells[0].innerText.trim() == "Opus/Catalogue Number") {
+		if (rows[i].cells[0].innerText.trim().includes("Opus/Catalogue Number")) {
 			var seriesNumber = rows[i].cells[1].innerText.trim();
 		}
 		if (rows[i].cells[0].innerText.trim() == "Key") {
 			var key = rows[i].cells[1].innerText.trim();
 		}
-		if (rows[i].cells[0].innerText.trim() == "Movements/Sections") {
+		if (rows[i].cells[0].innerText.trim() == "Text Incipit") {
+			var incipit = rows[i].cells[1].innerText.trim();
+		}
+		if (rows[i].cells[0].innerText.trim().includes("Movements/Sections")) {
 			var movements = rows[i].cells[1].innerText.trim();
 		}
-		if (rows[i].cells[0].innerText.trim() == "Year/Date of Composition") {
+		if (rows[i].cells[0].innerText.trim().includes("Year/Date of Composition")) {
 			var date = rows[i].cells[1].innerText.trim();
 		}
-		if (rows[i].cells[0].innerText.trim() == "First Performance") {
+		if (rows[i].cells[0].innerText.trim().includes("First Performance")) {
 			var place = rows[i].cells[1].innerText.trim();
 		}
-		if (rows[i].cells[0].innerText.trim() == "First Publication") {
+		if (rows[i].cells[0].innerText.trim().includes("First Publication")) {
 			var publisher = rows[i].cells[1].innerText.trim();
 		}
 		if (rows[i].cells[0].innerText.trim() == "Language") {
 			var language = rows[i].cells[1].innerText.trim();
 		}
-		if (rows[i].cells[0].innerText.trim() == "Average Duration") {
+		if (rows[i].cells[0].innerText.trim().includes("Average Duration")) {
 			var duration = rows[i].cells[1].innerText.trim();
 		}
 		if (rows[i].cells[0].innerText.trim() == "Piece Style") {
@@ -121,6 +125,8 @@ async function scrape(doc, url) {
 
 	//push metadata
 	item.title = title.replace(/\(.*\)/, "");
+	item.url = url;
+	item.libraryCatalog = null;
 	if (author) {
 		item.creators.push(ZU.cleanAuthor(author, "author", true));
 		item.tags.push(author.split(',')[0]);
@@ -129,7 +135,8 @@ async function scrape(doc, url) {
 		item.abstractNote = names.replace(/\[.*\]/, "");
 	}
 	if (movements) {
-		item.notes.push = "<h1>Movement:<h1>\n" + movements;
+		var movementsNotes = "Movement\n" + movements;
+		item.notes.push({ note: movementsNotes });
 	}
 	if (seriesNumber) {
 		item.seriesNumber = seriesNumber;
@@ -146,8 +153,6 @@ async function scrape(doc, url) {
 	if (language) {
 		item.language = language;
 	}
-	item.url = url;
-	item.libraryCatalog = null;
 	if (duration) {
 		item.extra = "Type: musical_score\nDuration: " + duration;
 	}
@@ -157,11 +162,16 @@ async function scrape(doc, url) {
 	if (key) {
 		item.tags.push(key);
 	}
+	if (incipit) {
+		var incipitNotes = "Text Incipit\n" + incipit;
+		item.notes.push({ note: incipitNotes });
+	}
 	if (style) {
 		item.tags.push(style);
 	}
 	if (instrumentation) {
-		item.notes.push = "<h1>Instrumentation:<h1>\n" + instrumentation;
+		var instrumentationNotes = "Instrumentation\n" + instrumentation;
+		item.notes.push({ note: instrumentationNotes });
 	}
 
 	item.complete();
@@ -172,7 +182,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://imslp.org/wiki/Das_Lied_von_der_Erde_(Mahler%2C_Gustav)",
-		"detectedItemType": "book",
 		"items": [
 			{
 				"itemType": "book",
@@ -200,7 +209,17 @@ var testCases = [
 						"tag": "Romantic"
 					}
 				],
-				"notes": [],
+				"notes": [
+					{
+						"note": "<h1>Movement:<h1>\n6 movements:\nDas Trinklied vom Jammer der Erde\nDer Einsame im Herbst\nVon der Jugend\nVon der Schönheit\nDer Trunkene im Frühling\nDer Abschied"
+					},
+					{
+						"note": "<h1>Text Incipit:<h1>\nsee below\nSchon winkt der Wein im goldnen Pokale\nHerbstnebel wallen bläulich überm See\nMitten in dem kleinen Teiche\nJunge Mädchen pflücken Blumen\nWenn nur ein Traum das Leben ist\nDie Sonne scheidet hinter dem Gebirge"
+					},
+					{
+						"note": "<h1>Instrumentation:<h1>\nvoices, orchestra"
+					}
+				],
 				"seeAlso": []
 			}
 		]
@@ -208,7 +227,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://imslp.org/wiki/Category:Mahler,_Gustav",
-		"detectedItemType": "multiple",
 		"items": "multiple"
 	}
 ]
