@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-03 02:17:32"
+	"lastUpdated": "2023-04-04 09:04:26"
 }
 
 /*
@@ -182,7 +182,7 @@ async function applyMagazine(doc, item) {
 
 	if (doc.querySelector("body.node-type-voices-in-time")) {
 		// Voices in Time
-		let tmp = text(doc, ".title .date"); // Original date
+		let tmp = ZU.trimInternal(text(doc, ".title .date")); // Original date
 		if (tmp) {
 			item.originalDate = tmp;
 		}
@@ -270,9 +270,9 @@ function getVITRights(doc) {
 		= ZU.trimInternal(paragraphs.item(paragraphs.length - 1).textContent);
 
 	if (str) {
-		// . [word] copyright (C) yyyy by name ... (the rest typically being
+		// . [optional words ](C) yyyy[ by name] ... (the rest typically being
 		// further notes about reuse permission).
-		const match = str.match(/\.\s+((?:\w+\s+)*copyright © \d+ by .+)$/im);
+		const match = str.match(/\.\s+((?:\w+\s+)*©\s+\d+.+)$/im);
 		if (match) {
 			return match[1];
 		}
@@ -971,6 +971,44 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					"Movimento di Lotta Femminile di Padova, from “Pregnancy and Abortion.” In June 1971 Mariarosa Dalla Costa, who had been active in the Italian workers’ movement, convened a meeting in Padua to discuss demanding wages for housework. The meeting led to the formation of what came to be called Lotta Femminista, which produced pamphlets, conducted studies, and documented its militant activity. This manifesto was later published in Dalla Costa and Selma James’ book The Power of Women and the Subversion of the Community."
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.laphamsquarterly.org/youth/sweet-and-cold",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "Sweet and Cold",
+				"creators": [
+					{
+						"firstName": "Xu",
+						"lastName": "Wei",
+						"creatorType": "author"
+					}
+				],
+				"date": 2014,
+				"ISSN": "1935-7494",
+				"abstractNote": "What a shame that I have carried a boy, as he ate some candy, to his death.",
+				"issue": 3,
+				"language": "en",
+				"libraryCatalog": "Lapham's Quarterly",
+				"publicationTitle": "Lapham’s Quarterly",
+				"rights": "© 1986, Columbia University Press. Used with permission of Columbia University Press.",
+				"url": "https://www.laphamsquarterly.org/youth/sweet-and-cold",
+				"volume": 7,
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [
+					"“A Kite.” After failing the civil-service examination on eight occasions, Xu became the personal secretary to a military commander in 1558 and assisted in defending his hometown from the attacks of Japanese pirates. After his patron’s downfall and death, he was faced with serious professional difficulties and, either insane or faking it effectively, attempted suicide by pushing an awl through his ear and pounding his testicles with a hammer. Later, he killed his third wife and went to prison but won release after seven years."
 				],
 				"seeAlso": []
 			}
