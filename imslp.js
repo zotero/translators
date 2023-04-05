@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-04 18:18:06"
+	"lastUpdated": "2023-04-05 04:11:21"
 }
 
 /*
@@ -82,6 +82,7 @@ async function scrape(doc, url = doc.location.href) {
 	var rows = doc.querySelector('.wi_body table').rows;
 	for (var i = 2; i < rows.length; i++) {
 		//Z.debug(rows[i].cells[0].innerText);
+		//Z.debug(rows[i].cells[1].innerText);
 		if (rows[i].cells[0].innerText.trim().includes("Name Translations")) {
 			var names = rows[i].cells[1].innerText.trim();
 		}
@@ -95,10 +96,10 @@ async function scrape(doc, url = doc.location.href) {
 			var key = rows[i].cells[1].innerText.trim();
 		}
 		if (rows[i].cells[0].innerText.trim() == "Text Incipit") {
-			var incipit = rows[i].cells[1].innerText.trim();
+			var incipit = rows[i].cells[1].innerHTML;
 		}
 		if (rows[i].cells[0].innerText.trim().includes("Movements/Sections")) {
-			var movements = rows[i].cells[1].innerText.trim();
+			var movements = rows[i].cells[1].innerHTML;
 		}
 		if (rows[i].cells[0].innerText.trim().includes("Year/Date of Composition")) {
 			var date = rows[i].cells[1].innerText.trim();
@@ -118,9 +119,11 @@ async function scrape(doc, url = doc.location.href) {
 		if (rows[i].cells[0].innerText.trim() == "Piece Style") {
 			var style = rows[i].cells[1].innerText.trim();
 		}
+		/* The metadata of instrumention is too mess.
 		if (rows[i].cells[0].innerText.trim() == "Instrumentation") {
 			var instrumentation = rows[i].cells[1].innerText.trim();
-		}
+		}*/
+		//Z.debug(instrumentation);
 	}
 
 	//push metadata
@@ -135,7 +138,7 @@ async function scrape(doc, url = doc.location.href) {
 		item.abstractNote = names.replace(/\[.*\]/, "");
 	}
 	if (movements) {
-		var movementsNotes = "Movement\n" + movements;
+		var movementsNotes = movements;
 		item.notes.push({ note: movementsNotes });
 	}
 	if (seriesNumber) {
@@ -163,16 +166,17 @@ async function scrape(doc, url = doc.location.href) {
 		item.tags.push(key);
 	}
 	if (incipit) {
-		var incipitNotes = "Text Incipit\n" + incipit;
+		var incipitNotes = "Text Incipit:" + incipit.replace(/<i(([\s\S])*?)<\/i>/, "");
 		item.notes.push({ note: incipitNotes });
 	}
 	if (style) {
 		item.tags.push(style);
 	}
+	/* see 122
 	if (instrumentation) {
 		var instrumentationNotes = "Instrumentation\n" + instrumentation;
 		item.notes.push({ note: instrumentationNotes });
-	}
+	}*/
 
 	item.complete();
 }
