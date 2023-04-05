@@ -18,7 +18,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2022-10-31 23:11:08"
+	"lastUpdated": "2023-01-01 03:54:00"
 }
 
 /*
@@ -121,7 +121,8 @@ var extraIdentifiers = {
 	mrnumber: 'MR',
 	zmnumber: 'Zbl',
 	pmid: 'PMID',
-	pmcid: 'PMCID'
+	pmcid: 'PMCID',
+	halid: 'HAL_ID'
 	
 	//Mostly from Wikipedia citation templates
 	//asin - Amazon ID
