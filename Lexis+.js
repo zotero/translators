@@ -2,14 +2,14 @@
 	"translatorID": "419638d9-9049-44ad-ba08-fa54ed24b5e6",
 	"label": "Lexis+",
 	"creator": "Brandon F",
-	"target": "https://plus.lexis.*/",
+	"target": "^https://plus.lexis.*/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-06 19:35:50"
+	"lastUpdated": "2023-04-06 21:58:14"
 }
 
 function scrape(doc, url) {
@@ -54,22 +54,89 @@ function scrape(doc, url) {
 		var title = xPathofTitle.iterateNext().textContent;
 		newStatute.title = title;
 
-		newStatute.codeNumber = title.substring(0, title.indexOf(' '));
-		var isolation = title.substring(title.indexOf(' '), title.lastIndexOf(' ')); // isolate reporter and section symbol
-		newStatute.code = isolation.substring(0, isolation.lastIndexOf(' '));
-		newStatute.section = title.substring(title.lastIndexOf(' ') + 1);
-
 		var xPathofInfo = doc.evaluate('//p[@class="SS_DocumentInfo"]',
-									   doc, nsResolver, XPathResult.ANY_TYPE, null);
+										doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var info = xPathofInfo.iterateNext().textContent;
-		isolation = info.substring(info.search(/\d+-\d+/)); // isolate public law number on the frontend
-		newStatute.publicLawNumber = isolation.substring(0, isolation.indexOf(' ')).replace(/(^,)|(,$)/g, ''); 
-		newStatute.session = newStatute.publicLawNumber.substring(0, newStatute.publicLawNumber.indexOf('-'));
+
 		isolation = info.substring(info.search(
 			/\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)/
-			)) // isolate date on the frontend
+		)) // isolate date on the frontend
 		newStatute.dateEnacted = isolation.substring(0, isolation.search(/[1-2][0-9][0-9][0-9]/) + 4);
-		Zotero.debug(isolation)
+
+		if (title.match(/[Aa][cC][tT]/) ||
+			title.match(/[Oo][Ff]\s[1-2][0-9][0-9][0-9]/)) // session law, not codified statute
+		{
+			// BB 21st ed. requires parallel cite to Pub. L. No. and Stat. for session laws
+			var statutesAtLarge, publicLawNo;
+			var xPathofActiveReporter = doc.evaluate('//a[@class="SS_ActiveRptr"]',
+									 				 doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var potentialReporter = xPathofActiveReporter.iterateNext();
+			if (potentialReporter) // Sometimes Lexis is weird and doesn't give an ActiveRptr
+			{
+				if (potentialReporter.textContent.match(/[sS]tat\./))
+					statutesAtLarge = potentialReporter.textContent;
+				else if (potentialReporter.textContent.match(/[pP]ub\./) ||
+						 potentialReporter.textContent.match(/[pP]\.[lL]\./))
+					publicLawNo = potentialReporter.textContent;
+			}
+
+			var xPathofNonPaginatedReporter = doc.evaluate('//span[@class="SS_NonPaginatedRptr"]',
+									 					   doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var nextReporter;
+			while (nextReporter = xPathofNonPaginatedReporter.iterateNext())
+			{
+				if (nextReporter.textContent.match(/[sS]tat\./))
+					statutesAtLarge = nextReporter.textContent;
+				else if (nextReporter.textContent.match(/[pP]ub\./) ||
+						 nextReporter.textContent.match(/[pP]\.[lL]\./))
+					publicLawNo = nextReporter.textContent;
+			}
+
+			// Turn publicLawNo into the public law fields
+			if (publicLawNo.match(/\d+-\d+/)) // Ex. P.L. 115-164
+			{
+				var numPos = publicLawNo.search(/\d+-\d+/)
+				newStatute.publicLawNumber = publicLawNo.substring(
+					numPos,
+					publiclawNo.substring(numPos + 1).indexOf(' ')); // Gets 115-164
+
+				newStatute.session = newStatute.publicLawNumber.substring(0, newStatute.publicLawNumber.indexOf('-'));
+			}
+			else // Ex. 115 P.L. 164 or 115 Pub. L. No. 164
+			{
+				newStatute.session = publicLawNo.substring(0, publicLawNo.indexOf(' '));
+				newStatute.publicLawNumber = newStatute.session + '-' + publicLawNo.substring(publicLawNo.lastIndexOf(' ') + 1);
+			}
+
+			// Turn statutesAtLarge into the code#/code/section fields
+			// TODO in styles, check for "Stat." as the code, and if so, don't append a section symbol
+			newStatute.codeNumber = statutesAtLarge.substring(0, statutesAtLarge.indexOf(' '));
+			newStatute.code = "Stat.";
+			newStatute.section = statutesAtLarge.substring(statutesAtLarge.lastIndexOf(' ') + 1);
+
+
+		}
+		else
+		{
+			if (title.match(/^\d+/)) // Starts with digit, organized by title, ex. 47 U.S.C.S. § 230
+			{
+				newStatute.codeNumber = title.substring(0, title.indexOf(' '));
+				var isolation = title.substring(title.indexOf(' '), title.lastIndexOf(' ')); // isolate code and section symbol
+				newStatute.code = isolation.substring(0, isolation.lastIndexOf(' '));
+				newStatute.section = title.substring(title.lastIndexOf(' ') + 1);
+			}
+			else // Starts with letter, organized by code, ex. Tex. Bus. & Com. Code § 26.01
+			{
+				newStatute.code = title.substring(0, title.lastIndexOf('§') - 1);
+				newStatute.section = title.substring(title.lastIndexOf(' ') + 1);
+			}
+
+			var isolation = info.substring(info.search(/\d+-\d+/)); // isolate public law number on the frontend
+			newStatute.publicLawNumber = isolation.substring(0, isolation.indexOf(' ')).replace(/(^,)|(,$)/g, ''); 
+			newStatute.session = newStatute.publicLawNumber.substring(0, newStatute.publicLawNumber.indexOf('-'));
+		}
+
+		newStatute.extra = info; // Since the info section is all over the place, just dump the whole thing in for manual cite checks
 
 		newStatute.complete();
 	}
@@ -79,7 +146,9 @@ function detectWeb(doc, url) {
 	if (doc.title.match(/.*results.*/)) {
 		return "multiple"
 	}
-	else if (doc.title.match(/\d+\s[a-zA-Z\. ]+\s§\s\d+/)) // Match: ... 42 U.S.C.S. § 230 ...
+	else if (doc.title.match(/[a-zA-Z\. ]+\s§\s\d+/) ||
+			 doc.title.match(/[aA][cC][tT]/) ||
+			 doc.title.match(/[pP]\.[lL]\./)) // Match: ... Tex. Bus. & Com. Code § 26.01 ...
 	{
 		return "statute"
 	}
@@ -87,6 +156,7 @@ function detectWeb(doc, url) {
 	{
 		return "case"
 	}
+	// TODO secondary sources
 }
 
 function doWeb(doc, url) {
@@ -100,6 +170,7 @@ function doWeb(doc, url) {
 	var nextTitle;
 
 	if (detectWeb(doc, url) == "multiple") {
+		// TODO check what type of element it is (currently only working for 'cases' searches)
 		var titles = doc.evaluate('(//a[@class="titleLink"])',
 								  doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var dates = doc.evaluate('(//span[contains(@class,"metaDataItem")])',
@@ -110,7 +181,6 @@ function doWeb(doc, url) {
 		dates.iterateNext(); // First citation
 
 		while (nextTitle = titles.iterateNext()) {
-			// TODO format this a little, maybe add a year parenthetical
 			items[nextTitle.href] = nextTitle.textContent + "(" + nextDate.textContent + ")";
 			
 			dates.iterateNext(); // Court name
