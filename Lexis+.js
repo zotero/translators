@@ -1,7 +1,7 @@
 {
 	"translatorID": "419638d9-9049-44ad-ba08-fa54ed24b5e6",
 	"label": "Lexis+",
-	"creator": "Brandon F",
+	"creator": "bfahrenfort",
 	"target": "^https://plus.lexis.*/",
 	"minVersion": "5.0",
 	"maxVersion": "",
@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-07 16:00:59"
+	"lastUpdated": "2023-04-07 19:21:13"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2022 YOUR_NAME <- TODO
+	Copyright © 2023 Brandon Fahrenfort
 
 	This file is part of Zotero.
 
@@ -40,8 +40,8 @@ function detectWeb(doc, url) {
 		return "multiple";
 	}
 	else if (doc.title.match(/[a-zA-Z\. ]+\s§\s\d+/) ||
-			 doc.title.match(/[aA][cC][tT]/) ||
-			 doc.title.match(/[pP]\.[lL]\./)) // Match: ... Tex. Bus. & Com. Code § 26.01 ...
+		   doc.title.match(/act/i) ||
+		   doc.title.match(/p\.l\./i)) // Match: ... Tex. Bus. & Com. Code § 26.01 ...
 	{
 		return "statute";
 	}
@@ -55,39 +55,33 @@ function detectWeb(doc, url) {
 }
 
 function getSearchResults(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-	if (prefix == "x" ) return namespace; else return null;
-	} : null;
-
 	var casesOrStatutes = new Array();
 	var items = new Object();
 	var nextTitle; 
 
 	if (detectWeb(doc, url) == "multiple") {
 		// TODO check what type of element it is (currently only working for 'cases' searches)
-		var titles = ZU.xpath(doc, '//a[@class="titleLink"]', nsResolver);
-		var dates = ZU.xpath(doc, '(//span[contains(@class,"metaDataItem")])', nsResolver);
+		var titles = doc.querySelectorAll('a.titleLink');
+		var dates = doc.querySelectorAll('span.metaDataItem'); // Not technically only dates, but that's all I use it for atm
 		var nextDate;
 	var dateOffset = 1;
 	
 	// dates[0] is first court name
-		nextDate = dates[dateOffset];
+	nextDate = dates[dateOffset];
 	dateOffset += 3;
 		// dates[2] is first citation
-    Zotero.debug(titles.length);
 		for (var i = 0; i < titles.length; i++) {
-      Zotero.debug(titles[i].textContent);
-	    nextTitle = titles[i];
+	  Zotero.debug(titles[i].textContent);
+		nextTitle = titles[i];
 			items[nextTitle.href] = nextTitle.textContent + "(" + nextDate.textContent + ")";
 			
 			// dates[0] is court name
 			nextDate = dates[dateOffset];
-	    dateOffset += 3;
+		dateOffset += 3;
 			// dates[2] is a citation
 		}
-    
-    return items;
+	
+	return items;
   }
 
   return false;
@@ -107,11 +101,6 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function([prefix]) {
-	if (prefix == "x" ) return namespace; else return null;
-	} : null;
-
 	if (detectWeb(doc, url) == "case")
 	{
 		var newCase = new Zotero.Item("case");
@@ -119,17 +108,20 @@ async function scrape(doc, url) {
 		
 		newCase.title = text(doc, 'h1#SS_DocumentTitle');
 
-		var xPathofCitation = ZU.xpath(doc, '//span[@class="active-reporter"]');
-		var citation = xPathofCitation[0].textContent;
+		var citation = text(doc, 'span.active-reporter');
 		newCase.reporterVolume = citation.substring(0, citation.indexOf(' '));
 		newCase.reporter = citation.substring(citation.indexOf(' ') + 1, citation.lastIndexOf(' '));
 		newCase.firstPage = citation.substring(citation.lastIndexOf(' ') + 1);
 
-		var xPathofCourt = ZU.xpath(doc, '(//p[@class="SS_DocumentInfo"])[1]', nsResolver);
-		newCase.court = xPathofCourt[0].textContent;
+		newCase.court = text(doc, 'p.SS_DocumentInfo', 0);
 
-		var xPathofDate = ZU.xpath(doc, '//span[@class="date"]', nsResolver);
-		newCase.dateDecided = xPathofDate[0].textContent;
+		newCase.dateDecided = text(doc, 'span.date');
+
+	var docket = text(doc, 'p.SS_DocumentInfo', 2);
+	if (docket.match(/^no\./i) ||
+		  docket.match(/^\d+/) ||
+		docket.match(/^case no\./i))
+	  newCase.docketNumber = docket; // This won't be in perfect cite form, shouldn't be a hassle unless you're citing dozens of memorandum opinions
 
 		newCase.complete();
 	}
@@ -138,44 +130,40 @@ async function scrape(doc, url) {
 		var newStatute = new Zotero.Item("statute");
 		newStatute.url = doc.location.href;
 
-		var xPathofTitle = ZU.xpath(doc, '//h1[@id="SS_DocumentTitle"]', nsResolver);
-		var title = xPathofTitle[0].textContent;
-		newStatute.title = title;
+		var title = text(doc, 'h1#SS_DocumentTitle'); // Saves some lines to have a temp here
+	newStatute.title = title;
 
-		var xPathofInfo = ZU.xpath(doc, '//p[@class="SS_DocumentInfo"]', nsResolver);
-		var info = xPathofInfo[0].textContent;
+		var info = text(doc, 'p.SS_DocumentInfo');
 
 		isolation = info.substring(info.search(
-			/\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)/
+			/\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)/i
 		)) // isolate date on the frontend
 		newStatute.dateEnacted = isolation.substring(0, isolation.search(/[1-2][0-9][0-9][0-9]/) + 4);
 
-		if (title.match(/[Aa][cC][tT]/) ||
-			title.match(/[Oo][Ff]\s[1-2][0-9][0-9][0-9]/)) // session law, not codified statute
+		if (title.match(/act/i) ||
+			  title.match(/of\s[1-2][0-9][0-9][0-9]/i)) // Session law, not codified statute
 		{
 			// BB 21st ed. requires parallel cite to Pub. L. No. and Stat. for session laws
 			var statutesAtLarge, publicLawNo;
-			var xPathofActiveReporter = ZU.xpath(doc, '//a[@class="SS_ActiveRptr"]', nsResolver);
-			if (xPathofActiveReporter.length > 0) // Sometimes Lexis is weird and doesn't give an ActiveRptr
+			var potentialReporter = text(doc, 'a.SS_ActiveRptr');
+			if (potentialReporter) // Sometimes Lexis is weird and doesn't give an ActiveRptr
 			{
-		var potentialReporter = xPathofActiveReporter[0];
-		Zotero.debug(potentialReporter.textContent);
-				if (potentialReporter.textContent.match(/[sS]tat\./))
+				if (potentialReporter.textContent.match(/stat\./i))
 					statutesAtLarge = potentialReporter.textContent;
-				else if (potentialReporter.textContent.match(/[pP]ub\./) ||
-						 potentialReporter.textContent.match(/[pP]\.[lL]\./))
+				else if (potentialReporter.textContent.match(/pub\./i) ||
+							   potentialReporter.textContent.match(/p\.l\./i))
 					publicLawNo = potentialReporter.textContent;
 			}
 
-			var xPathofNonPaginatedReporter = ZU.xpath(doc, '//span[@class="SS_NonPaginatedRptr"]', nsResolver);
+			var otherReporters = doc.querySelectorAll('span.SS_NonPaginatedRptr');
 			
-			for (var i = 0; i < xPathofNonPaginatedReporter.length; i++)
+			for (var i = 0; i < otherReporters.length; i++)
 			{
-		var nextReporter = xPathofNonPaginatedReporter[i].textContent;
-				if (nextReporter.match(/[sS]tat\./))
+			var nextReporter = otherReporters[i].textContent;
+				if (nextReporter.match(/stat\./i))
 					statutesAtLarge = nextReporter;
-				else if (nextReporter.match(/[pP]ub\./) ||
-						 nextReporter.match(/[pP]\.[lL]\./))
+				else if (nextReporter.match(/pub\./i) ||
+							   nextReporter.match(/p\.l\./i))
 					publicLawNo = nextReporter;
 			}
 
@@ -183,9 +171,7 @@ async function scrape(doc, url) {
 			if (publicLawNo.match(/\d+-\d+/)) // Ex. P.L. 115-164
 			{
 				var numPos = publicLawNo.search(/\d+-\d+/)
-				newStatute.publicLawNumber = publicLawNo.substring(
-					numPos,
-					publicLawNo.substring(numPos + 1).indexOf(' ')); // Gets 115-164
+				newStatute.publicLawNumber = publicLawNo.substring(numPos, publicLawNo.substring(numPos + 1).indexOf(' ')); // Gets 115-164
 
 				newStatute.session = newStatute.publicLawNumber.substring(0, newStatute.publicLawNumber.indexOf('-'));
 			}
@@ -201,24 +187,45 @@ async function scrape(doc, url) {
 			newStatute.code = "Stat.";
 			newStatute.section = statutesAtLarge.substring(statutesAtLarge.lastIndexOf(' ') + 1);
 		}
-		else
+		else // Codified statute
 		{
 			if (title.match(/^\d+/)) // Starts with digit, organized by title, ex. 47 U.S.C.S. § 230
 			{
-				newStatute.codeNumber = title.substring(0, title.indexOf(' '));
-				var isolation = title.substring(title.indexOf(' '), title.lastIndexOf(' ')); // isolate code and section symbol
-				newStatute.code = isolation.substring(0, isolation.lastIndexOf(' '));
-				newStatute.section = title.substring(title.lastIndexOf(' ') + 1);
+		// Sadly, named groups aren't working
+		let groups = title.match(/^(\d+)\s([a-zA-Z0-9\. ]+) § ([0-9\.\(\)a-zA-Z]+)/);
+				newStatute.codeNumber = groups[1];
+		newStatute.code = groups[2];
+		newStatute.section = groups[3];
 			}
 			else // Starts with letter, organized by code, ex. Tex. Bus. & Com. Code § 26.01
 			{
-				newStatute.code = title.substring(0, title.lastIndexOf('§') - 1);
-				newStatute.section = title.substring(title.lastIndexOf(' ') + 1);
+		let groups = title.match(/^([a-zA-Z\. ]+) § ([0-9\.\(\)a-zA-Z]+)/);
+				newStatute.code = groups[1];
+				newStatute.section = groups[2];
 			}
 
-			var isolation = info.substring(info.search(/\d+-\d+/)); // isolate public law number on the frontend
-			newStatute.publicLawNumber = isolation.substring(0, isolation.indexOf(' ')).replace(/(^,)|(,$)/g, ''); 
-			newStatute.session = newStatute.publicLawNumber.substring(0, newStatute.publicLawNumber.indexOf('-'));
+	  // No way to tell which will be present
+	  var pL = info.match(/p\.l\. (\d+-\d+)/i);
+	  var pubLaw = info.match(/pub\. law (\d+-\d+)/i);
+	  var pubLawNo = info.match(/pub\. law no\. (\d+-\d+)/i);
+	  var publicLaw = info.match(/public law (\d+-\d+)/i);
+	  var publicLawNo = info.match(/public law no\. (\d+-\d+)/i);
+	  var publicLawNumber = info.match(/public law number (\d+-\d+)/i);
+			if (pL)
+		newStatute.publicLawNumber = pL[1];
+	  if (pubLaw)
+		newStatute.publicLawNumber = pubLaw[1];
+	  if (pubLawNo)
+		newStatute.publicLawNumber = pubLawNo[1];
+	  if (publicLaw)
+		newStatute.publicLawNumber = publicLaw[1];
+	  if (publicLawNo)
+		newStatute.publicLawNumber = publicLawNo[1];
+	  if (publicLawNumber)
+		newStatute.publicLawNumber = publicLawNumber[1];
+
+	  if (newStatute.publicLawNumber)
+			  newStatute.session = newStatute.publicLawNumber.substring(0, newStatute.publicLawNumber.indexOf('-'));
 		}
 
 		newStatute.extra = info; // Since the info section is all over the place, just dump the whole thing in for manual cite checks
