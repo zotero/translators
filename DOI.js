@@ -94,7 +94,8 @@ const contextualDOIRe
 		+ String.raw`[^\s${quotationMarks}]*` // non-ws non-quote characters
 		// word delimiting puncts
 		+ String.raw`[^\s${quotationMarks}([{（）《》.,;:?!。，：；、？！]`,
-		"g");
+	"g");
+
 /*
 	For percent-encoded, or more precisely percent-decodeable URL (absolute or
 	relative) as the value of HTML "href" attribute, it will be preprocessed by
@@ -114,7 +115,7 @@ const contextualDOIRe
 
 	NOTE again: This RE should only be applied to the decoded URL segment.
 */
-const hrefValueDOIRe = /\b10\.[^\/]+\/.+/g;
+const hrefValueDOIRe = /\b10\.[^/]+\/.+/g;
 // NOTE: For some implementations there could be "doubly (or more) encoded"
 // strings in the attribute values -- "doubly encoded" if interpreted as
 // DOI-containing, but perfectly OK as a redirect parameter value, e.g., for
@@ -180,7 +181,7 @@ function getDOIs(doc, url) {
 // for convenience in map().
 function toUpper(str) {
 	return str.toUpperCase();
-} 
+}
 
 // Parse the input string url (assuming it's well-formed encoded URL or
 // component) for DOIs. If getAll, returns an array of matches or false when no
@@ -195,7 +196,7 @@ function getDOIFromURL(url, getAll = false) {
 	let urlParts = url.split(/[#?&]/);
 	for (const urlPart of urlParts) {
 		if (!urlPart) {
-			continue
+			continue;
 		}
 
 		try {
