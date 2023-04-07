@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-07 05:03:57"
+	"lastUpdated": "2023-04-07 06:58:23"
 }
 
 /*
@@ -578,6 +578,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://aurimasv.github.io/z2csl/typeMap.xml",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://onlinelibrary.wiley.com/action/showCitFormats?doi=10.1002%2F(SICI)1521-3951(199911)216%3A1%3C135%3A%3AAID-PSSB135%3E3.0.CO%3B2-%23",
 		"items": "multiple"
 	}
 ]
