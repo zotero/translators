@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-07 04:26:48"
+	"lastUpdated": "2023-04-07 04:35:07"
 }
 
 /*
@@ -447,7 +447,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://onlinelibrary.wiley.com/doi/full/10.7448/IAS.15.5.18440",
+		"url": "https://onlinelibrary.wiley.com/action/showCitFormats?doi=10.7448%2FIAS.15.5.18440",
 		"items": [
 			{
 				"itemType": "journalArticle",
