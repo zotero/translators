@@ -35,56 +35,78 @@
     ***** END LICENSE BLOCK *****
 */
 
+function detectWeb(doc, url) {
+	if (doc.title.match(/.*results.*/)) {
+    Zotero.debug("multiple");
+		return "multiple";
+	}
+	else if (doc.title.match(/[a-zA-Z\. ]+\s§\s\d+/) ||
+			 doc.title.match(/[aA][cC][tT]/) ||
+			 doc.title.match(/[pP]\.[lL]\./)) // Match: ... Tex. Bus. & Com. Code § 26.01 ...
+	{
+		return "statute";
+	}
+	else if (doc.title.match(/\d+\s[a-zA-Z0-9\. ]+\s\d+/)) // Match: ... 5 U.S. 137 ... 
+	{
+		return "case";
+	}
+	// TODO secondary sources
 
-// function detectWeb(doc, url) {
-// 	// TODO: adjust the logic here
-// 	if (url.includes('/article/')) {
-// 		return 'newspaperArticle';
-// 	}
-// 	else if (getSearchResults(doc, true)) {
-// 		return 'multiple';
-// 	}
-// 	return false;
-// }
+  return false;
+}
 
-// function getSearchResults(doc, checkOnly) {
-// 	var items = {};
-// 	var found = false;
-// 	// TODO: adjust the CSS selector
-// 	var rows = doc.querySelectorAll('h2 > a.title[href*="/article/"]');
-// 	for (let row of rows) {
-// 		// TODO: check and maybe adjust
-// 		let href = row.href;
-// 		// TODO: check and maybe adjust
-// 		let title = ZU.trimInternal(row.textContent);
-// 		if (!href || !title) continue;
-// 		if (checkOnly) return true;
-// 		found = true;
-// 		items[href] = title;
-// 	}
-// 	return found ? items : false;
-// }
+function getSearchResults(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+	if (prefix == "x" ) return namespace; else return null;
+	} : null;
 
-// async function doWeb(doc, url) {
-// 	if (detectWeb(doc, url) == 'multiple') {
-// 		let items = await Zotero.selectItems(getSearchResults(doc, false));
-// 		if (!items) return;
-// 		for (let url of Object.keys(items)) {
-// 			await scrape(await requestDocument(url));
-// 		}
-// 	}
-// 	else {
-// 		await scrape(doc, url);
-// 	}
-// }
+	var casesOrStatutes = new Array();
+	var items = new Object();
+	var nextTitle; 
 
-// async function scrape(doc, url = doc.location.href) {
-// 	// TODO: implement or add a scrape function template
-// }
+	if (detectWeb(doc, url) == "multiple") {
+		// TODO check what type of element it is (currently only working for 'cases' searches)
+		var titles = ZU.xpath(doc, '//a[@class="titleLink"]', nsResolver);
+		var dates = ZU.xpath(doc, '(//span[contains(@class,"metaDataItem")])', nsResolver);
+		var nextDate;
+    var dateOffset = 1;
+    
+    // dates[0] is first court name
+		nextDate = dates[dateOffset];
+    dateOffset += 3;
+		// dates[2] is first citation
 
+		for (var i = 0; i < titles.length; i++) {
+      nextTitle = titles[i];
+			items[nextTitle.href] = nextTitle.textContent + "(" + nextDate.textContent + ")";
+			
+			// dates[0] is court name
+			nextDate = dates[dateOffset];
+      dateOffset += 3;
+			// dates[2] is a citation
 
+      return items;
+		}
+  }
 
-function scrape(doc, url) {
+  return false;
+}
+
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, url));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
+	}
+	else {
+		await scrape(doc, url);
+	}
+}
+
+async function scrape(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function([prefix]) {
 	if (prefix == "x" ) return namespace; else return null;
@@ -178,8 +200,6 @@ function scrape(doc, url) {
 			newStatute.codeNumber = statutesAtLarge.substring(0, statutesAtLarge.indexOf(' '));
 			newStatute.code = "Stat.";
 			newStatute.section = statutesAtLarge.substring(statutesAtLarge.lastIndexOf(' ') + 1);
-
-
 		}
 		else
 		{
@@ -207,69 +227,8 @@ function scrape(doc, url) {
 	}
 }
 
-function detectWeb(doc, url) {
-	if (doc.title.match(/.*results.*/)) {
-    Zotero.debug("multiple");
-		return "multiple";
-	}
-	else if (doc.title.match(/[a-zA-Z\. ]+\s§\s\d+/) ||
-			 doc.title.match(/[aA][cC][tT]/) ||
-			 doc.title.match(/[pP]\.[lL]\./)) // Match: ... Tex. Bus. & Com. Code § 26.01 ...
-	{
-		return "statute";
-	}
-	else if (doc.title.match(/\d+\s[a-zA-Z0-9\. ]+\s\d+/)) // Match: ... 5 U.S. 137 ... 
-	{
-		return "case";
-	}
-	// TODO secondary sources
-}
 
-function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-	if (prefix == "x" ) return namespace; else return null;
-	} : null;
-
-	var casesOrStatutes = new Array();
-	var items = new Object();
-	var nextTitle; 
-
-	if (detectWeb(doc, url) == "multiple") {
-		// TODO check what type of element it is (currently only working for 'cases' searches)
-		var titles = ZU.xpath(doc, '//a[@class="titleLink"]', nsResolver);
-		var dates = ZU.xpath(doc, '(//span[contains(@class,"metaDataItem")])', nsResolver);
-		var nextDate;
-    var dateOffset = 1;
-    
-    // dates[0] is first court name
-		nextDate = dates[dateOffset];
-    dateOffset += 3;
-		// dates[2] is first citation
-
-		for (var i = 0; i < titles.length; i++) {
-      nextTitle = titles[i];
-			items[nextTitle.href] = nextTitle.textContent + "(" + nextDate.textContent + ")";
-			
-			// dates[0] is court name
-			nextDate = dates[dateOffset];
-      dateOffset += 3;
-			// dates[2] is a citation
-		}
-
-		items = Zotero.selectItems(items);
-		for(var e in items) {
-			casesOrStatutes.push(e);
-		}
-	}
-	else
-	{
-		casesOrStatutes = [url]
-	}
-
-	Zotero.Utilities.processDocuments(casesOrStatutes, scrape, function(){Zotero.done();});
-	Zotero.wait();
-}/** BEGIN TEST CASES **/
+/** BEGIN TEST CASES **/
 var testCases = [
 ]
 /** END TEST CASES **/
