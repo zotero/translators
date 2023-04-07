@@ -1115,7 +1115,7 @@ function mapTeXmarkup(tex){
 	//italics and bold
 	tex = tex.replace(/\\textit\{([^\}]+\})/g, "<i>$1</i>").replace(/\\textbf\{([^\}]+\})/g, "<b>$1</b>");
 	//two versions of subscript the .* after $ is necessary because people m
-	tex = tex.replace(/\$[^\{\$]*_\{([^\}]+\})\$/g, "<sub>$1</sub>").replace(/\$[^\{]*_\{\\textrm\{([^\}]+\}\})/g, "<sub>$1</sub>");
+	tex = tex.replace(/\$([^\{\$]*)_\{([^\}]+)\}\$/g, "$$$1$$<sub>$2</sub>").replace(/\$([^\{]*)_\{\\textrm\{([^\}]+)\}\}/g, "$$$1$$<sub>$2</sub>");
 	//two version of superscript
 	tex = tex.replace(/\$([^\{]*)\^\{([^\}]+)\}\$/g, "$$$1$$<sup>$2</sup>").replace(/\$([^\{]*)\^\{\\textrm\{([^\}]+\}\})/g, "$$$1$$<sup>$2</sup>");
 	//small caps
