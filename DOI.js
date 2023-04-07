@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-07 04:35:07"
+	"lastUpdated": "2023-04-07 05:03:57"
 }
 
 /*
@@ -77,8 +77,8 @@
 
 	The expression reads
 	"word-boundary, prefix (10 dot something), slash, as many non-whitespace
-	chars as possible, and the furthermost non-whitespace non-delimiting-punct
-	character"
+	non-quotation-mark chars as possible, and the furthermost non-whitespace
+	non-delimiting-punct character"
 
 	Here these delimiting characters (in the last negated bracket character
 	class) are the quotation marks (the part in the regex from " to \u300f),
@@ -87,9 +87,14 @@
 	language-segment-delimiting puncts (full stop, comma, semicolon, etc.), but
 	excluding the hyphen.
 */
+// ASCII double and single quotes plus common Unicode quotation marks.
+const quotationMarks = String.raw`"'«»‘’\u201A-\u201F‹›⹂\u300C-\u300F`;
 const contextualDOIRe
-	= /\b10\.[^\s\/]+\/[^\s]*[^\s"'«»‘’\u201a-\u201f‹›⹂\u300c-\u300f([{（）《》.,;:?!。，：；、？！]/g;
-
+	= new RegExp(String.raw`\b10\.[^\s/]+/` // prefix
+		+ String.raw`[^\s${quotationMarks}]*` // non-ws non-quote characters
+		// word delimiting puncts
+		+ String.raw`[^\s${quotationMarks}([{（）《》.,;:?!。，：；、？！]`,
+		"g");
 /*
 	For percent-encoded, or more precisely percent-decodeable URL (absolute or
 	relative) as the value of HTML "href" attribute, it will be preprocessed by
@@ -568,6 +573,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://aurimasv.github.io/z2csl/typeMap.xml",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
