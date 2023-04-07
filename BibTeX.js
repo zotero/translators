@@ -1117,7 +1117,7 @@ function mapTeXmarkup(tex){
 	//two versions of subscript the .* after $ is necessary because people m
 	tex = tex.replace(/\$[^\{\$]*_\{([^\}]+\})\$/g, "<sub>$1</sub>").replace(/\$[^\{]*_\{\\textrm\{([^\}]+\}\})/g, "<sub>$1</sub>");
 	//two version of superscript
-	tex = tex.replace(/\$([^\{]*)\^\{([^\}]+)\}\$/g, "$1<sup>$2</sup>").replace(/\$([^\{]*)\^\{\\textrm\{([^\}]+\}\})/g, "$1<sup>$2</sup>");
+	tex = tex.replace(/\$([^\{]*)\^\{([^\}]+)\}\$/g, "$$$1$$<sup>$2</sup>").replace(/\$([^\{]*)\^\{\\textrm\{([^\}]+\}\})/g, "$$$1$$<sup>$2</sup>");
 	//small caps
 	tex = tex.replace(/\\textsc\{([^\}]+)/g, "<span style=\"small-caps\">$1</span>");
 	return tex;
