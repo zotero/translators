@@ -190,7 +190,7 @@ async function scrape(doc, url) {
 			var pubLaw = info.match(/pub\. law (\d+-\d+)/i);
 			var pubLawNo = info.match(/pub\. law no\. (\d+-\d+)/i);
 			var publicLaw = info.match(/public law (\d+-\d+)/i);
-			var publicLawNo = info.match(/public law no\. (\d+-\d+)/i);
+			publicLawNo = info.match(/public law no\. (\d+-\d+)/i);
 			var publicLawNumber = info.match(/public law number (\d+-\d+)/i);
 			if (pL) newStatute.publicLawNumber = pL[1];
 			if (pubLaw) newStatute.publicLawNumber = pubLaw[1];
