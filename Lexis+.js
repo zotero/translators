@@ -70,10 +70,10 @@ function getSearchResults(doc, url) {
 		for (var i = 0; i < titles.length; i++) {
 			nextTitle = titles[i];
 			items[nextTitle.href] = nextTitle.textContent + "(" + nextDate.textContent + ")";
-	  
+
 			// dates[0] is court name
 			nextDate = dates[dateOffset];
-	  
+
 			// dates[2] is a citation
 		}
   
@@ -149,7 +149,7 @@ async function scrape(doc, url) {
 			}
 
 			var otherReporters = doc.querySelectorAll('span.SS_NonPaginatedRptr');
-	  
+
 			for (var i = 0; i < otherReporters.length; i++) {
 				var nextReporter = otherReporters[i].textContent;
 				if (nextReporter.match(/stat\./i)) statutesAtLarge = nextReporter;
