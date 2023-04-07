@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-12 01:46:07"
+	"lastUpdated": "2023-04-07 02:15:10"
 }
 
 /*
@@ -35,26 +35,123 @@
 	***** END LICENSE BLOCK *****
 */
 
-// TODO Detect DOIs more correctly.
-// The actual rules for DOIs are very lax-- but we're more strict.
-// Specifically, we should allow space characters, and all Unicode
-// characters except for control characters. Here, we're cheating
-// by not allowing ampersands, to fix an issue with getting DOIs
-// out of URLs.
-// Additionally, all content inside <noscript> is picked up as text()
-// by the xpath, which we don't necessarily want to exclude, but
-// that means that we can get DOIs inside node attributes and we should
-// exclude quotes in this case.
-// DOI should never end with a period or a comma (we hope)
-// Description at: http://www.doi.org/handbook_2000/appendix_1.html#A1-4
-const DOIre = /\b10\.[0-9]{4,}\/[^\s&"']*[^\s&"'.,]/g;
+// NOTE: This is the web translator for scraping DOI from text and links. Not
+// to be confused with the DOI search translator, which it makes use of.
+
+/* General reference for DOI numbering:
+ * https://www.doi.org/the-identifier/resources/handbook/2_numbering
+ *
+ * In a previous version the DOI prefix after "10." is restricted to a digit
+ * sequence not shorter than 4. However, the DOI spec clearly states that part
+ * should just be a "string", and makes use of examples like "10.123/abc".
+ * In practice we don't allow whitespaces or slash.
+ */
+
+/*
+	Non-URLEncoded DOI (i.e. the underlying identifier as-is, as a sequence of
+	Unicode code points). This is for scraping DOIs from text, hence the name
+	"contextual". It may fail to match properly percent-encoded DOI (in HTML
+	attribute values or the "URL-ified" presentation form of DOI, etc.),
+	because the slash between the prefix and the suffix may be percent-encoded.
+
+	There is little restriction on the DOI syntax, except it that should
+	consist of printable Unicode characters (even whitespaces are allowed). In
+	practice, for "contextual" matches we should...
+		1) exclude whitespaces, and
+		2) normally terminate at the last appearance (with possible intervening
+		non-whitespace characters) of typical "delimiting" punctuations such as
+		the comma. These delimiting characters, although permitted, are not
+		very probable in practice.
+
+	NOTE: This RegExp is too strict (because it conditionally excludes certain
+	special characters and "astral" code points), but also too lenient. For
+	example, it will match the following text:
+
+	"Example DOI: 10.0000/example(but this is a bad example)"
+
+	The match will be "10.0000/example(but", which is rarely a sensible output.
+
+	BUT, we will sanitize any unmatched or badly nested parentheses, brackets,
+	braces, and angular braces (lt and gt signs), so the last example will end
+	up being "10.0000/example", which is likely more salvageable.
+
+	The expression reads
+	"word-boundary, prefix (10 dot something), slash, as many non-whitespace
+	chars as possible, and the furthermost non-whitespace non-delimiting-punct
+	character"
+
+	Here these delimiting characters (in the last negated bracket character
+	class) are the quotation marks (the part in the regex from " to \u300f),
+	opening parentheses (matching parentheses pairs may appear in the DOI,
+	except we currently exclude the CJK parentheses), and typical
+	language-segment-delimiting puncts (full stop, comma, semicolon, etc.), but
+	excluding the hyphen.
+*/
+const contextualDOIRe
+	= /\b10\.[^\s\/]+\/[^\s]*[^\s"'«»‘’\u201a-\u201f‹›⹂\u300c-\u300f([{（）《》.,;:?!。，：；、？！]/g;
+
+/*
+	For percent-encoded, or more precisely percent-decodeable URL (absolute or
+	relative) as the value of HTML "href" attribute, it will be preprocessed by
+	splitting at the literal ? (query delimiter), # (fragment delimiter), and &
+	(query parameter separator) characters (if these characters are not
+	percent-encoded, they're special delimiters in the URL).
+
+	Then, each segment will be percent-decoded, then parsed by the RE below.
+
+	In each segment, we match *a lot* more leniently: we will match *including*
+	the whitespaces and puncts. The reason is that the URL or segment should be
+	much less "noisy" (if the creator of the URL knows what they're doing),
+	since they're not textual in nature, typically just a bunch of
+	machine-readable fields. If a part of the URL contains the DOI signature
+	"10.xxx.../" it is likely that the DOI goes to the end of the segment, if
+	the segment decodes successfully.
+
+	NOTE again: This RE should only be applied to the decoded URL segment.
+*/
+const hrefValueDOIRe = /\b10\.[^\/]+\/.+/g;
+// NOTE: For some implementations there could be "doubly (or more) encoded"
+// strings in the attribute values -- "doubly encoded" if interpreted as
+// DOI-containing, but perfectly OK as a redirect parameter value, e.g., for
+// login pages. These links, even if repeatedly decoded to the "fixed point"
+// when they become invariant, are unlikely to produce any DOI we don't
+// otherwise have.
+
+/*
+	Further notes: Our strategy is to *percent-decode* HTML href attribute
+	values (and process them with hrefValueDOIRe), while in textual contexts we
+	take the presented string as-is (and process with contextualDOIRe).
+
+	However, the recommended way to present a DOI *as* a URL string
+	(as path under the https://doi.org/ proxy origin), *even in text*, is to
+	percent-encode the URL, for good interoperability reasons. The problem is
+	that we don't necessarily know whether any such string is *meant* to be
+	decoded or not (also see the "multiply encoded" issue above). And guessing
+	the correct semantics may incur its own penalty.
+
+	But IRL this is rarely a problem, because such proxy-URL-like strings in
+	text are most likely hyperlinked to the correct proxy-URL, and that link
+	value will be processed under our strategy.
+
+	In other words, even if we don't know whether we should decode part of the
+	text, we're not likely to lose information because the form that should be
+	decoded often accompanies that text. We may still generate an *additional*
+	false positive (the encoded form that is taken as raw DOI by our
+	algorithm), but this will incur a resolution failure and we'll not further
+	process it.
+
+	Nevertheless, we are still interested in improving the accuracy, because we
+	want to minimize the number of bad resolution requests. If more accurate
+	algorithms can be reasonably implemented without great detriment to code
+	maintainability, or even improving it, we should welcome them.
+ */
 
 /**
  * @return {string | string[]} A single string if the URL contains a DOI
  * 		and the document contains no others, or an array of DOIs otherwise
  */
 function getDOIs(doc, url) {
-	let fromURL = getDOIFromURL(url);
+	let fromURL = sanitizePairedPunct(getDOIFromURL(url));
 	let fromDocument = getDOIsFromDocument(doc);
 	if (
 		// We got a DOI from the URL
@@ -71,67 +168,164 @@ function getDOIs(doc, url) {
 	return Array.from(new Set(fromURL ? [fromURL, ...fromDocument] : fromDocument));
 }
 
-function getDOIFromURL(url) {
-	// Split on # and ?, so that we don't allow DOIs to contain those characters
-	// but do allow finding DOIs on either side of them (e.g. a DOI in the URL hash)
-	let urlParts = url.split(/[#?]/);
-	for (let urlPart of urlParts) {
-		let match = DOIre.exec(urlPart);
-		if (match) {
-			// Only return a single DOI from the URL
-			return match[0];
+// NOTE: We should case-normalize according to the DOI spec. The spec says the
+// registry uses all uppercase internally, so we follow this convention in our
+// internal normalization.
+
+// for convenience in map().
+function toUpper(str) {
+	return str.toUpperCase();
+} 
+
+// Parse the input string url (assuming it's well-formed encoded URL or
+// component) for DOIs. If getAll, returns an array of matches or false when no
+// match is found. If not getAll (default), return the first match if any, or
+// false if not found. Note that this function itself doesn't sanitize or
+// case-normalize.
+function getDOIFromURL(url, getAll = false) {
+	// Split on #, ?, and &, to minimize noise while match leniently (see
+	// comment at hrefValueDOIRe).
+	const result = [];
+
+	let urlParts = url.split(/[#?&]/);
+	for (const urlPart of urlParts) {
+		if (!urlPart) {
+			continue
+		}
+
+		try {
+			// NOTE: Must decode...
+			const matches = decodeURIComponent(urlPart).match(hrefValueDOIRe);
+			if (matches) {
+				if (getAll) {
+					result.push(...matches.map(toUpper));
+				}
+				else {
+					// Return on first match.
+					return toUpper(matches[0]);
+				}
+			}
+		}
+		catch (err) {
+			// ...but decoding may fail. In that case, skip it.
+			if (!(err instanceof URIError)) {
+				throw err;
+			}
 		}
 	}
-	return null;
+
+	return result.length && result;
 }
 
-function getDOIsFromDocument(doc) {
-	var dois = new Set();
+// Filter out <script> and <style> tags in tree walker.
+const TEXT_NODE_FILTER = new (function () {
+	const ignore = ["script", "style"];
+	this.acceptNode
+		= node => !ignore.includes(node.parentNode.tagName.toLowerCase());
+})();
 
-	var m, DOI;
-	var treeWalker = doc.createTreeWalker(doc.documentElement, 4, null, false);
-	var ignore = ['script', 'style'];
-	while (treeWalker.nextNode()) {
-		if (ignore.includes(treeWalker.currentNode.parentNode.tagName.toLowerCase())) continue;
+// Add the sanitized and normalized results (if any) from an array of string
+// matches to the set.
+function addCleanMatchesTo(set, matchesArray) {
+	matchesArray.forEach((match) => {
+		const cleanMatch = sanitizePairedPunct(toUpper(match));
+		if (cleanMatch) {
+			set.add(cleanMatch);
+		}
+	});
+}
+
+// Scrape the document's text nodes (excluding those of <script> and <style>)
+// and <a> tag's href attribute values for DOIs, keeping the sanitized and
+// case-normalized valus. If not found, return empty array.
+function getDOIsFromDocument(doc) {
+	const dois = new Set();
+
+	doc.body.normalize();
+	const treeWalker = doc.createTreeWalker(doc.body, 4, TEXT_NODE_FILTER);
+
+	let node;
+	while ((node = treeWalker.nextNode()) !== null) {
 		// Z.debug(node.nodeValue)
-		DOIre.lastIndex = 0;
-		while ((m = DOIre.exec(treeWalker.currentNode.nodeValue))) {
-			DOI = m[0];
-			if (DOI.endsWith(")") && !DOI.includes("(")) {
-				DOI = DOI.substr(0, DOI.length - 1);
-			}
-			if (DOI.endsWith("}") && !DOI.includes("{")) {
-				DOI = DOI.substr(0, DOI.length - 1);
-			}
-			// only add new DOIs
-			if (!dois.has(DOI)) {
-				dois.add(DOI);
-			}
+		const textMatches = node.nodeValue.match(contextualDOIRe);
+		if (textMatches) {
+			addCleanMatchesTo(dois, textMatches);
 		}
 	}
 	
-	// FIXME: The test for this (developmentbookshelf.com) fails in Scaffold due
-	// to a cookie error, though running the code in Scaffold still works
-	var links = doc.querySelectorAll('a[href]');
-	for (let link of links) {
-		DOIre.lastIndex = 0;
-		let m = DOIre.exec(link.href);
-		if (m) {
-			let doi = m[0];
-			if (doi.endsWith(")") && !doi.includes("(")) {
-				doi = doi.substr(0, doi.length - 1);
-			}
-			if (doi.endsWith("}") && !doi.includes("{")) {
-				doi = doi.substr(0, doi.length - 1);
-			}
-			// only add new DOIs
-			if (!dois.has(doi) && !dois.has(doi.replace(/#.*/, ''))) {
-				dois.add(doi);
-			}
+	// TODO: Also scrape <meta content="..."> ?
+	const links = doc.querySelectorAll('a[href], link[href]');
+	for (node of links) {
+		// NOTE: The "href" property on this DOM element is the "resolved" or
+		// full URL when the verbatim attribute value on the <a> tag is
+		// relative (such as a fragment). It is not necessary to use the full
+		// URL, because we look for DOIs in each segment. The base URL, if
+		// containing DOI, is already processed. So we retrieve the attribute
+		// value verbatim using getAttribute().
+		const linkHref = node.getAttribute("href");
+		const hrefMatches = getDOIFromURL(linkHref, true/* getAll */);
+		if (hrefMatches) {
+			// TODO: Should we even "clean" this?
+			addCleanMatchesTo(dois, hrefMatches);
 		}
 	}
 
 	return Array.from(dois);
+}
+
+// Sanitize input string by counting the appearance of the following paired
+// punct characters: ( ), [ ], { }, < >. It is highly unlikely that a
+// well-formed DOI should contain unmatched parentheses or so.
+//
+// The string is returned unchanged if it passes the sanitization. Otherwise,
+// return the slice truncated at the furthermost location that will leave the
+// parentheses match (here "match" includes total absence, and the returned
+// slice may be empty).
+//
+// Constant lookup table for groups of puncts.
+const PUNCT_LOOKUP = {
+	"(": "(",
+	"[": "[",
+	"{": "{",
+	"<": "<",
+	")": "(",
+	"]": "[",
+	"}": "{",
+	">": "<",
+};
+
+function sanitizePairedPunct(str) {
+	// This is beyond the reach of regular languages; we need stacks.
+	const stack = [];
+
+	for (let i = 0; i < str.length; i++) {
+		const c = str[i]; // current character
+		const stackKey = PUNCT_LOOKUP[c]; // find pairing group if any
+
+
+		const curObj = { index: i, character: c };
+		if (stackKey) { // skip irrelevant characters
+			if (c === stackKey) {
+				// opening character
+				stack.push(curObj);
+			}
+			else {
+				// closing character
+				const lastObj = stack.pop();
+
+				if (!lastObj) { // dangling closing character
+					stack.push(curObj);
+					break;
+				}
+				else if (lastObj.character !== stackKey) { // badly nested
+					stack.push(lastObj);
+					break;
+				}
+			}
+		}
+	}
+
+	return stack.length ? str.slice(0, stack[0].index) : str;
 }
 
 function detectWeb(doc, url) {
@@ -296,7 +490,7 @@ var testCases = [
 					{
 						"lastName": "WorldFish",
 						"creatorType": "contributor",
-						"fieldMode": true
+						"fieldMode": 1
 					}
 				],
 				"date": "2023",
