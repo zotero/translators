@@ -35,18 +35,16 @@
   ***** END LICENSE BLOCK *****
 */
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	if (doc.title.match(/.*results.*/)) {
 		return "multiple";
 	}
-	else if (doc.title.match(/[a-zA-Z\. ]+\s§\s\d+/)
+	else if (doc.title.match(/[a-zA-Z. ]+\s§\s\d+/)
            || doc.title.match(/act/i)
-           || doc.title.match(/p\.l\./i)) // Match: ... Tex. Bus. & Com. Code § 26.01 ...
-	{
+           || doc.title.match(/p\.l\./i)) { // Match: ... Tex. Bus. & Com. Code § 26.01 ...
 		return "statute";
 	}
-	else if (doc.title.match(/\d+\s[a-zA-Z0-9\. ]+\s\d+/)) // Match: ... 5 U.S. 137 ...
-	{
+	else if (doc.title.match(/\d+\s[a-zA-Z0-9. ]+\s\d+/)) { // Match: ... 5 U.S. 137 ...
 		return "case";
 	}
 	// TODO secondary sources
@@ -55,8 +53,7 @@ function detectWeb(doc, url) {
 }
 
 function getSearchResults(doc, url) {
-	var casesOrStatutes = new Array();
-	var items = new Object();
+	var items = {};
 	var nextTitle;
 
 	if (detectWeb(doc, url) == "multiple") {
@@ -137,13 +134,11 @@ async function scrape(doc, url) {
 		newStatute.dateEnacted = isolation.substring(0, isolation.search(/[1-2][0-9][0-9][0-9]/) + 4);
 
 		if (title.match(/act/i)
-        || title.match(/of\s[1-2][0-9][0-9][0-9]/i)) // Session law, not codified statute
-		{
+        || title.match(/of\s[1-2][0-9][0-9][0-9]/i)) { // Session law, not codified statute
 			// BB 21st ed. requires parallel cite to Pub. L. No. and Stat. for session laws
 			var statutesAtLarge, publicLawNo;
 			var potentialReporter = text(doc, 'a.SS_ActiveRptr');
-			if (potentialReporter) // Sometimes Lexis is weird and doesn't give an ActiveRptr
-			{
+			if (potentialReporter) { // Sometimes Lexis is weird and doesn't give an ActiveRptr
 				if (potentialReporter.textContent.match(/stat\./i)) statutesAtLarge = potentialReporter.textContent;
 				else if (potentialReporter.textContent.match(/pub\./i)
                  || potentialReporter.textContent.match(/p\.l\./i)) publicLawNo = potentialReporter.textContent;
@@ -159,15 +154,13 @@ async function scrape(doc, url) {
 			}
 
 			// Turn publicLawNo into the public law fields
-			if (publicLawNo.match(/\d+-\d+/)) // Ex. P.L. 115-164
-			{
+			if (publicLawNo.match(/\d+-\d+/)) { // Ex. P.L. 115-164
 				var numPos = publicLawNo.search(/\d+-\d+/);
 				newStatute.publicLawNumber = publicLawNo.substring(numPos, publicLawNo.substring(numPos + 1).indexOf(' ')); // Gets 115-164
 
 				newStatute.session = newStatute.publicLawNumber.substring(0, newStatute.publicLawNumber.indexOf('-'));
 			}
-			else // Ex. 115 P.L. 164 or 115 Pub. L. No. 164
-			{
+			else { // Ex. 115 P.L. 164 or 115 Pub. L. No. 164
 				newStatute.session = publicLawNo.substring(0, publicLawNo.indexOf(' '));
 				newStatute.publicLawNumber = newStatute.session + '-' + publicLawNo.substring(publicLawNo.lastIndexOf(' ') + 1);
 			}
@@ -178,19 +171,16 @@ async function scrape(doc, url) {
 			newStatute.code = "Stat.";
 			newStatute.section = statutesAtLarge.substring(statutesAtLarge.lastIndexOf(' ') + 1);
 		}
-		else // Codified statute
-		{
-			if (title.match(/^\d+/)) // Starts with digit, organized by title, ex. 47 U.S.C.S. § 230
-			{
+		else { // Codified statute
+			if (title.match(/^\d+/)) { // Starts with digit, organized by title, ex. 47 U.S.C.S. § 230
 				// Sadly, named groups aren't working
-				let groups = title.match(/^(\d+)\s([a-zA-Z0-9\. ]+) § ([0-9\.\(\)a-zA-Z]+)/);
+				let groups = title.match(/^(\d+)\s([a-zA-Z0-9. ]+) § ([0-9.()a-zA-Z]+)/);
 				newStatute.codeNumber = groups[1];
 				newStatute.code = groups[2];
 				newStatute.section = groups[3];
 			}
-			else // Starts with letter, organized by code, ex. Tex. Bus. & Com. Code § 26.01
-			{
-				let groups = title.match(/^([a-zA-Z\. ]+) § ([0-9\.\(\)a-zA-Z]+)/);
+			else { // Starts with letter, organized by code, ex. Tex. Bus. & Com. Code § 26.01
+				let groups = title.match(/^([a-zA-Z. ]+) § ([0-9.()a-zA-Z]+)/);
 				newStatute.code = groups[1];
 				newStatute.section = groups[2];
 			}
