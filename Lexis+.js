@@ -9,35 +9,34 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-07 14:01:13"
+	"lastUpdated": "2023-04-07 16:00:59"
 }
 
 /*
-    ***** BEGIN LICENSE BLOCK *****
+	***** BEGIN LICENSE BLOCK *****
 
-    Copyright © 2022 YOUR_NAME <- TODO
+	Copyright © 2022 YOUR_NAME <- TODO
 
-    This file is part of Zotero.
+	This file is part of Zotero.
 
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Affero General Public License for more details.
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
 
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
-    ***** END LICENSE BLOCK *****
+	***** END LICENSE BLOCK *****
 */
 
 function detectWeb(doc, url) {
 	if (doc.title.match(/.*results.*/)) {
-    Zotero.debug("multiple");
 		return "multiple";
 	}
 	else if (doc.title.match(/[a-zA-Z\. ]+\s§\s\d+/) ||
@@ -70,24 +69,25 @@ function getSearchResults(doc, url) {
 		var titles = ZU.xpath(doc, '//a[@class="titleLink"]', nsResolver);
 		var dates = ZU.xpath(doc, '(//span[contains(@class,"metaDataItem")])', nsResolver);
 		var nextDate;
-    var dateOffset = 1;
-    
-    // dates[0] is first court name
+	var dateOffset = 1;
+	
+	// dates[0] is first court name
 		nextDate = dates[dateOffset];
-    dateOffset += 3;
+	dateOffset += 3;
 		// dates[2] is first citation
-
+    Zotero.debug(titles.length);
 		for (var i = 0; i < titles.length; i++) {
-      nextTitle = titles[i];
+      Zotero.debug(titles[i].textContent);
+	    nextTitle = titles[i];
 			items[nextTitle.href] = nextTitle.textContent + "(" + nextDate.textContent + ")";
 			
 			// dates[0] is court name
 			nextDate = dates[dateOffset];
-      dateOffset += 3;
+	    dateOffset += 3;
 			// dates[2] is a citation
-
-      return items;
 		}
+    
+    return items;
   }
 
   return false;
@@ -158,8 +158,8 @@ async function scrape(doc, url) {
 			var xPathofActiveReporter = ZU.xpath(doc, '//a[@class="SS_ActiveRptr"]', nsResolver);
 			if (xPathofActiveReporter.length > 0) // Sometimes Lexis is weird and doesn't give an ActiveRptr
 			{
-        var potentialReporter = xPathofActiveReporter[0];
-        Zotero.debug(potentialReporter.textContent);
+		var potentialReporter = xPathofActiveReporter[0];
+		Zotero.debug(potentialReporter.textContent);
 				if (potentialReporter.textContent.match(/[sS]tat\./))
 					statutesAtLarge = potentialReporter.textContent;
 				else if (potentialReporter.textContent.match(/[pP]ub\./) ||
@@ -171,7 +171,7 @@ async function scrape(doc, url) {
 			
 			for (var i = 0; i < xPathofNonPaginatedReporter.length; i++)
 			{
-        var nextReporter = xPathofNonPaginatedReporter[i].textContent;
+		var nextReporter = xPathofNonPaginatedReporter[i].textContent;
 				if (nextReporter.match(/[sS]tat\./))
 					statutesAtLarge = nextReporter;
 				else if (nextReporter.match(/[pP]ub\./) ||
