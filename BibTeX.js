@@ -684,6 +684,7 @@ function unescapeBibTeX(value) {
 			value = value.replace(mapped, unicode);
 		}
 	}
+	value = value.replace(/\$([^$]+)\$/g, '$1')
 	
 	// kill braces
 	value = value.replace(/([^\\])[{}]+/g, "$1");
@@ -1109,15 +1110,23 @@ function mapHTMLmarkup(characters){
 	return characters;
 }
 
-
+function xcase(prefix, cased, markup) {
+	return (prefix ? `$${prefix}$` : '') + `<${markup}>${cased}</${markup}>`;
+}
+function sup(match, prefix, cased) {
+	return xcase(prefix, cased, 'sup');
+}
+function sub(match, prefix, cased) {
+	return xcase(prefix, cased, 'sub');
+}
 function mapTeXmarkup(tex){
 	//reverse of the above - converts tex mark-up into html mark-up permitted by Zotero
 	//italics and bold
 	tex = tex.replace(/\\textit\{([^\}]+\})/g, "<i>$1</i>").replace(/\\textbf\{([^\}]+\})/g, "<b>$1</b>");
 	//two versions of subscript the .* after $ is necessary because people m
-	tex = tex.replace(/\$([^\{\$]*)_\{([^\}]+)\}\$/g, "$$$1$$<sub>$2</sub>").replace(/\$([^\{]*)_\{\\textrm\{([^\}]+)\}\}/g, "$$$1$$<sub>$2</sub>");
+	tex = tex.replace(/\$([^\{\$]*)_\{([^\}]+)\}\$/g, sub).replace(/\$([^\{\$]*)_\{\\textrm\{([^\}\$]+)\}\}\$/g, sub);
 	//two version of superscript
-	tex = tex.replace(/\$([^\{]*)\^\{([^\}]+)\}\$/g, "$$$1$$<sup>$2</sup>").replace(/\$([^\{]*)\^\{\\textrm\{([^\}]+\}\})/g, "$$$1$$<sup>$2</sup>");
+	tex = tex.replace(/\$([^\{\$]*)\^\{([^\}]+)\}\$/g, sup).replace(/\$([^\{\$]*)\^\{\\textrm\{([^\}]+)\}\}\$/g, sup);
 	//small caps
 	tex = tex.replace(/\\textsc\{([^\}]+)/g, "<span style=\"small-caps\">$1</span>");
 	return tex;
