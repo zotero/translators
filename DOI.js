@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-07 02:15:10"
+	"lastUpdated": "2023-04-07 04:26:48"
 }
 
 /*
@@ -499,6 +499,69 @@ var testCases = [
 				"libraryCatalog": "DOI.org (Datacite)",
 				"publisher": "Harvard Dataverse",
 				"url": "https://dataverse.harvard.edu/citation?persistentId=doi:10.7910/DVN/BEJTMI",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://analyticalsciencejournals.onlinelibrary.wiley.com/action/showCitFormats?doi=10.1002%2F%28SICI%291096-9918%28199804%2926%3A4%3C235%3A%3AAID-SIA360%3E3.0.CO%3B2-A",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Oxidation of molybdenum surfaces by reactive oxygen plasma and O2+ bombardment: an auger and XPS study",
+				"creators": [
+					{
+						"creatorType": "author",
+						"firstName": "L. D.",
+						"lastName": "López-Carreño"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "G.",
+						"lastName": "Benítez"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "L.",
+						"lastName": "Viscido"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "J. M.",
+						"lastName": "Heras"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "F.",
+						"lastName": "Yubero"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "J. P.",
+						"lastName": "Espinós"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "A. R.",
+						"lastName": "González-Elipe"
+					}
+				],
+				"date": "04/1998",
+				"DOI": "10.1002/(SICI)1096-9918(199804)26:4<235::AID-SIA360>3.0.CO;2-A",
+				"ISSN": "0142-2421, 1096-9918",
+				"issue": "4",
+				"journalAbbreviation": "Surf. Interface Anal.",
+				"language": "en",
+				"libraryCatalog": "DOI.org (Crossref)",
+				"pages": "235-241",
+				"publicationTitle": "Surface and Interface Analysis",
+				"shortTitle": "Oxidation of molybdenum surfaces by reactive oxygen plasma and O2+ bombardment",
+				"url": "https://onlinelibrary.wiley.com/doi/10.1002/(SICI)1096-9918(199804)26:4<235::AID-SIA360>3.0.CO;2-A",
+				"volume": "26",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
