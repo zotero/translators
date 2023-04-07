@@ -1110,14 +1110,14 @@ function mapHTMLmarkup(characters){
 	return characters;
 }
 
-function xcase(prefix, cased, markup) {
-	return (prefix ? `$${prefix}$` : '') + `<${markup}>${cased}</${markup}>`;
+function xcase(prefix, cased, tag, tex) {
+	return (prefix ? `$${prefix}$` : '') + (reversemappingTable[`$${tex}{${cased}}$`] || `<${tag}>${cased}</${tag}>`)
 }
 function sup(match, prefix, cased) {
-	return xcase(prefix, cased, 'sup');
+	return xcase(prefix, cased, 'sup', '^');
 }
 function sub(match, prefix, cased) {
-	return xcase(prefix, cased, 'sub');
+	return xcase(prefix, cased, 'sub', '_');
 }
 function mapTeXmarkup(tex){
 	//reverse of the above - converts tex mark-up into html mark-up permitted by Zotero
