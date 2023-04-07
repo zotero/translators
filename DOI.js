@@ -1,7 +1,7 @@
 {
 	"translatorID": "c159dcfe-8a53-4301-a499-30f6549c340d",
 	"label": "DOI",
-	"creator": "Simon Kornblith",
+	"creator": "Simon Kornblith, Abe Jellinek, Aurimas Vinckevicius, Avram Lyon, Dan Stillman, Emiliano Heyns, Matt Burton, Philipp Zumstein, Sebastian Karcher, and Zoë C. Ma",
 	"target": "",
 	"minVersion": "3.0",
 	"maxVersion": "",
