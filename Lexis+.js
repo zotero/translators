@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-07 19:21:13"
+	"lastUpdated": "2023-04-07 21:55:44"
 }
 
 /*
@@ -76,7 +76,7 @@ function getSearchResults(doc, url) {
 
 			// dates[2] is a citation
 		}
-  
+
 		return items;
 	}
 
@@ -100,7 +100,7 @@ async function scrape(doc, url) {
 	if (detectWeb(doc, url) == "case") {
 		var newCase = new Zotero.Item("case");
 		newCase.url = doc.location.href;
-	
+
 		newCase.title = text(doc, 'h1#SS_DocumentTitle');
 
 		var citation = text(doc, 'span.active-reporter');
@@ -186,7 +186,7 @@ async function scrape(doc, url) {
 				newStatute.section = groups[3];
 			}
 			else { // Starts with letter, organized by code, ex. Tex. Bus. & Com. Code § 26.01
-				let groups = title.match(/^([a-zA-Z. ]+) § ([0-9.()a-zA-Z]+)/);
+				let groups = title.match(/^([a-zA-Z&. ]+) § ([0-9.()a-zA-Z]+)/);
 				newStatute.code = groups[1];
 				newStatute.section = groups[2];
 			}
