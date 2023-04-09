@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-07 21:55:44"
+	"lastUpdated": "2023-04-09 22:52:49"
 }
 
 /*
@@ -99,9 +99,12 @@ async function doWeb(doc, url) {
 async function scrape(doc, url) {
 	if (detectWeb(doc, url) == "case") {
 		var newCase = new Zotero.Item("case");
-		newCase.url = doc.location.href;
+		//newCase.url = doc.location.href; // Disabled for style reasons
 
-		newCase.title = text(doc, 'h1#SS_DocumentTitle');
+		var title = text(doc, 'h1#SS_DocumentTitle');
+		newCase.title = title;
+
+		newCase.notes.push({note: "Snapshot: " + newCase.title + doc.getElementById('document-content').innerHTML});
 
 		var citation = text(doc, 'span.active-reporter');
 		newCase.reporterVolume = citation.substring(0, citation.indexOf(' '));
@@ -123,10 +126,13 @@ async function scrape(doc, url) {
 	}
 	else if (detectWeb(doc, url) == "statute") {
 		var newStatute = new Zotero.Item("statute");
-		newStatute.url = doc.location.href;
+
+		//newStatute.url = doc.location.href; // Disabled for style reasons
 
 		var title = text(doc, 'h1#SS_DocumentTitle'); // Saves some lines to have a temp here
 		newStatute.title = title;
+
+		newStatute.notes.push({note: "Snapshot: " + newStatute.title + doc.getElementById('document-content').innerHTML});
 
 		var info = text(doc, 'p.SS_DocumentInfo');
 
@@ -208,7 +214,7 @@ async function scrape(doc, url) {
 			if (newStatute.publicLawNumber) newStatute.session = newStatute.publicLawNumber.substring(0, newStatute.publicLawNumber.indexOf('-'));
 		}
 
-		newStatute.extra = info; // Since the info section is all over the place, just dump the whole thing in for manual cite checks
+		newStatute.notes.push({note: "Document Info: " + info}); // Since the info section is all over the place, just dump the whole thing in for manual cite checks
 
 		newStatute.complete();
 	}
