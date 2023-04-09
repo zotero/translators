@@ -197,19 +197,19 @@ async function scrape(doc, url) {
 				newStatute.section = groups[2];
 			}
 
-			// No way to tell which will be present
-			var pL = info.match(/p\.l\. (\d+-\d+)/i);
-			var pubLaw = info.match(/pub\. law (\d+-\d+)/i);
-			var pubLawNo = info.match(/pub\. law no\. (\d+-\d+)/i);
-			var publicLaw = info.match(/public law (\d+-\d+)/i);
-			publicLawNo = info.match(/public law no\. (\d+-\d+)/i);
-			var publicLawNumber = info.match(/public law number (\d+-\d+)/i);
-			if (pL) newStatute.publicLawNumber = pL[1];
-			if (pubLaw) newStatute.publicLawNumber = pubLaw[1];
-			if (pubLawNo) newStatute.publicLawNumber = pubLawNo[1];
-			if (publicLaw) newStatute.publicLawNumber = publicLaw[1];
-			if (publicLawNo) newStatute.publicLawNumber = publicLawNo[1];
-			if (publicLawNumber) newStatute.publicLawNumber = publicLawNumber[1];
+			/*
+			 * Matches: 
+			 * P.L. 117-327
+			 * Pub. L. 117-327
+			 * Pub. Law 117-327
+			 * Pub. L. No. 117-327
+			 * Pub. Law No. 117-327
+			 * Public Law 117-327
+			 * Public Law Number 117-327
+			 * Public Law No. 117-327
+			 */
+			var pL = info.match(/(p\.l\.|pub\. l(?:aw|\.)(?: no\.)?|public law(?: number| no\.)?)\s(\d+-\d+)/i);
+			if (pL) newStatute.publicLawNumber = pL[2];
 
 			if (newStatute.publicLawNumber) newStatute.session = newStatute.publicLawNumber.substring(0, newStatute.publicLawNumber.indexOf('-'));
 		}
