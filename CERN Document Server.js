@@ -58,7 +58,7 @@ function getItemType(doc) {
 			return "report";
 		case "Book":
 		case "Books":
-			return "book"
+			return "book";
 		case "Preprint":
 			return "preprint";
 		case "Talks":
@@ -96,33 +96,33 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url = doc.location.href) {
-		var pdfUrl = attr(doc, '#detailedrecordminipanelfile a:first-of-type[href*=".pdf"]', 'href');
-		var abstract = attr(doc, 'meta[property="og:description"]', 'content');
-		var thesisUniversity = attr(doc, 'meta[name="citation_dissertation_institution"]', 'content');
-		// Z.debug(pdfUrl);
-		let bibUrl = url.replace(/[#?].+/, "") + '/export/hx?ln=en';
-		let bibText = await requestText(bibUrl);
-		bibText = bibText.match(/<pre>([\s\S]+?)<\/pre>/)[1];
-		// Z.debug(bibText)
-		let translator = Zotero.loadTranslator("import");
-		translator.setTranslator('9cb70025-a888-4a29-a210-93ec52da40d4');
-		translator.setString(bibText);
-		translator.setHandler('itemDone', (_obj, item) => {
-			if (pdfUrl) {
-				item.attachments.push({url: pdfUrl, title: "Full Text PDF", mimeType: "application/pdf"})
-			}
-			delete item.itemID;
-			if (item.itemType == "thesis" && !item.university) {
-				item.university = thesisUniversity;
-			}
-			item.abstractNote = abstract;
-			item.itemType = getItemType(doc);
-			item.extra = "";
-			item.complete();
-		});
-		await translator.translate();
-
+	var pdfUrl = attr(doc, '#detailedrecordminipanelfile a:first-of-type[href*=".pdf"]', 'href');
+	var abstract = attr(doc, 'meta[property="og:description"]', 'content');
+	var thesisUniversity = attr(doc, 'meta[name="citation_dissertation_institution"]', 'content');
+	// Z.debug(pdfUrl);
+	let bibUrl = url.replace(/[#?].+/, "") + '/export/hx?ln=en';
+	let bibText = await requestText(bibUrl);
+	bibText = bibText.match(/<pre>([\s\S]+?)<\/pre>/)[1];
+	// Z.debug(bibText)
+	let translator = Zotero.loadTranslator("import");
+	translator.setTranslator('9cb70025-a888-4a29-a210-93ec52da40d4');
+	translator.setString(bibText);
+	translator.setHandler('itemDone', (_obj, item) => {
+		if (pdfUrl) {
+			item.attachments.push({ url: pdfUrl, title: "Full Text PDF", mimeType: "application/pdf" });
+		}
+		delete item.itemID;
+		if (item.itemType == "thesis" && !item.university) {
+			item.university = thesisUniversity;
+		}
+		item.abstractNote = abstract;
+		item.itemType = getItemType(doc);
+		item.extra = "";
+		item.complete();
+	});
+	await translator.translate();
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
