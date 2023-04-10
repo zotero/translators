@@ -2,14 +2,14 @@
 	"translatorID": "419638d9-9049-44ad-ba08-fa54ed24b5e6",
 	"label": "Lexis+",
 	"creator": "bfahrenfort",
-	"target": "^https://plus.lexis.*/",
+	"target": "^https?://plus\\.lexis\\..*/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-09 22:52:49"
+	"lastUpdated": "2023-04-10 03:15:48"
 }
 
 /*
@@ -36,15 +36,15 @@
 */
 
 function detectWeb(doc, _url) {
-	if (doc.title.match(/.*results.*/)) {
+	if (doc.title.includes("results")) {
 		return "multiple";
 	}
-	else if (doc.title.match(/[a-zA-Z. ]+\s§\s\d+/)
-	|| doc.title.match(/act/i)
-	|| doc.title.match(/p\.l\./i)) { // Match: ... Tex. Bus. & Com. Code § 26.01 ...
+	else if (/[a-zA-Z. ]+\s§\s\d+/.test(doc.title)
+	|| /act/i.test(doc.title)
+	|| /p\.l\./i.test(doc.title)) { // Match: ... Tex. Bus. & Com. Code § 26.01 ...
 		return "statute";
 	}
-	else if (doc.title.match(/\d+\s[a-zA-Z0-9. ]+\s\d+/)) { // Match: ... 5 U.S. 137 ...
+	else if (/\d+\s[a-zA-Z0-9. ]+\s\d+/.test(doc.title)) { // Match: ... 5 U.S. 137 ...
 		return "case";
 	}
 	// TODO secondary sources
@@ -58,8 +58,8 @@ function getSearchResults(doc, url) {
 
 	if (detectWeb(doc, url) == "multiple") {
 		// TODO check what type of element it is (currently only working for 'cases' searches)
-		var titles = doc.querySelectorAll('a.titleLink');
-		var dates = doc.querySelectorAll('span.metaDataItem'); // Not technically only dates, but that's all I use it for atm
+		let titles = doc.querySelectorAll('a.titleLink');
+		let dates = doc.querySelectorAll('span.metaDataItem'); // Not technically only dates, but that's all I use it for atm
 		var nextDate;
 		var dateOffset = 1;
 	
@@ -105,9 +105,9 @@ async function scrape(doc, url) {
 
 		newCase.title = title;
 
-		newCase.notes.push({note: "Snapshot: " + newCase.title + doc.getElementById('document-content').innerHTML});
+		newCase.notes.push({ note: "Snapshot: " + newCase.title + doc.getElementById('document-content').innerHTML });
 
-		var citation = text(doc, 'span.active-reporter');
+		let citation = text(doc, 'span.active-reporter');
 		newCase.reporterVolume = citation.substring(0, citation.indexOf(' '));
 		newCase.reporter = citation.substring(citation.indexOf(' ') + 1, citation.lastIndexOf(' '));
 		newCase.firstPage = citation.substring(citation.lastIndexOf(' ') + 1);
@@ -116,10 +116,10 @@ async function scrape(doc, url) {
 
 		newCase.dateDecided = text(doc, 'span.date');
 
-		var docket = text(doc, 'p.SS_DocumentInfo', 2);
-		if (docket.match(/^no\./i)
-		|| docket.match(/^\d+/)
-		|| docket.match(/^case no\./i)) {
+		let docket = text(doc, 'p.SS_DocumentInfo', 2);
+		if (/^no\./i.test(docket)
+		|| /^\d+/.test(docket)
+		|| /^case no\./i.test(docket)) {
 			newCase.docketNumber = docket; // This won't be in perfect cite form, shouldn't be a hassle unless you're citing dozens of memorandum opinions
 		}
 
@@ -130,20 +130,19 @@ async function scrape(doc, url) {
 
 		//newStatute.url = doc.location.href; // Disabled for style reasons
 
-		var title = text(doc, 'h1#SS_DocumentTitle');
 		newStatute.title = title;
 
-		newStatute.notes.push({note: "Snapshot: " + newStatute.title + doc.getElementById('document-content').innerHTML});
+		newStatute.notes.push({ note: "Snapshot: " + newStatute.title + doc.getElementById('document-content').innerHTML });
 
-		var info = text(doc, 'p.SS_DocumentInfo');
+		let info = text(doc, 'p.SS_DocumentInfo');
 
-		var isolation = info.substring(info.search(
+		let isolation = info.substring(info.search(
 			/\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)/i
 		)); // isolate date on the frontend
 		newStatute.dateEnacted = isolation.substring(0, isolation.search(/[1-2][0-9][0-9][0-9]/) + 4);
 
-		if (title.match(/act/i)
-		|| title.match(/of\s[1-2][0-9][0-9][0-9]/i)) { // Session law, or act, not codified statute
+		if (/act/i.test(title)
+		|| /of\s[1-2][0-9][0-9][0-9]/i.test(title)) { // Session law, or act, not codified statute
 			// BB 21st ed. requires parallel cite to Pub. L. No. and Stat. for session laws
 
 			// Title formatting
@@ -153,10 +152,10 @@ async function scrape(doc, url) {
 
 			// Remove some unnecessary information
 			var cleanedTitle = title;
-			var pLCite = title.match(/(\d+ p\.l\. \d+)/i);
-			var statCite = title.match(/(\d+ stat\. \d+)/i);
-			var enactedCite = title.match(/\d+ enacted [a-zA-Z0-9.]+ \d+/gi);
-			var part = title.match(/(part \d+(?: of \d+)?)/i);
+			let pLCite = title.match(/(\d+ p\.l\. \d+)/i);
+			let statCite = title.match(/(\d+ stat\. \d+)/i);
+			let enactedCite = title.match(/\d+ enacted [a-zA-Z0-9.]+ \d+/gi);
+			let part = title.match(/(part \d+(?: of \d+)?)/i);
 			if (pLCite) cleanedTitle = cleanedTitle.replace(pLCite[1], '');
 			if (statCite) cleanedTitle = cleanedTitle.replace(statCite[1], '');
 			if (part) cleanedTitle = cleanedTitle.replace(part[1], '');
@@ -168,9 +167,7 @@ async function scrape(doc, url) {
 			}
 			cleanedTitle = cleanedTitle.replace(/(^\s*,)|(,\s*$)/g, ''); // Trim commas and whitespace
 			cleanedTitle = cleanedTitle.replace(/(^\s*,)|(,\s*$)/g, ''); // Another one
-			Zotero.debug(cleanedTitle);
 			if (ZU.trim(cleanedTitle) === "") { // If the title's empty now, put it as the highest precedence citation in the title
-				Zotero.debug("ha");
 				if (pLCite) cleanedTitle = pLCite[1];
 				else if (statCite) cleanedTitle = statCite[1];
 				else if (enactedCite) {
@@ -181,42 +178,42 @@ async function scrape(doc, url) {
 
 			// Reporter & citation formatting
 			var statutesAtLarge, publicLawNo;
-			var potentialReporter = text(doc, 'a.SS_ActiveRptr');
+			let potentialReporter = text(doc, 'a.SS_ActiveRptr');
 			if (potentialReporter) { // Sometimes Lexis is weird and doesn't give an ActiveRptr
-				if (potentialReporter.match(/stat\./i)) statutesAtLarge = potentialReporter;
-				else if (potentialReporter.match(/pub\./i)
-				|| potentialReporter.match(/p\.l\./i)) {
+				if (/stat\./i.test(potentialReporter)) statutesAtLarge = potentialReporter;
+				else if (/pub\./i.test(potentialReporter)
+				|| /p\.l\./i.test(potentialReporter)) {
 					publicLawNo = potentialReporter;
 				}
 			}
 
-			var otherReporters = doc.querySelectorAll('span.SS_NonPaginatedRptr');
+			let otherReporters = doc.querySelectorAll('span.SS_NonPaginatedRptr');
 
 			for (var i = 0; i < otherReporters.length; i++) {
 				var nextReporter = otherReporters[i].textContent;
-				if (nextReporter.match(/stat\./i)) statutesAtLarge = nextReporter;
-				else if (nextReporter.match(/pub\./i)
-				|| nextReporter.match(/p\.l\./i)) {
+				if (/stat\./i.test(nextReporter)) statutesAtLarge = nextReporter;
+				else if (/pub\./i.test(nextReporter)
+				|| /p\.l\./i.test(nextReporter)) {
 					publicLawNo = nextReporter;
 				}
 			}
 
 			// Turn publicLawNo into the public law fields
-			if (publicLawNo.match(/\d+-\d+/)) { // Ex. P.L. 115-164
-				var numPos = publicLawNo.search(/\d+-\d+/);
+			if (/\d+-\d+/.test(publicLawNo)) { // Ex. P.L. 115-164
+				let numPos = publicLawNo.search(/\d+-\d+/);
 				newStatute.publicLawNumber = publicLawNo.substring(numPos, publicLawNo.substring(numPos + 1).indexOf(' ')); // Gets 115-164
 
 				newStatute.session = newStatute.publicLawNumber.substring(0, newStatute.publicLawNumber.indexOf('-'));
 			}
-			else { // Ex. 115 P.L. 164 or 115 Pub. L. No. 164
-				var pLNumbers = publicLawNo.match(/(\d+) p\.l\. (\d+)/i);
+			else { // Ex. 115 P.L. 164
+				let pLNumbers = publicLawNo.match(/(\d+) p\.l\. (\d+)/i);
 				newStatute.session = pLNumbers[1];
 				newStatute.publicLawNumber = pLNumbers[1] + '-' + pLNumbers[2];
 			}
 
 			// Turn statutesAtLarge into the code#/code/section fields
 			// TODO in styles, check for "Stat." as the code, and if so, don't append a section symbol
-			var statNumbers = statutesAtLarge.match(/(\d+) stat\. (\d+)/i);
+			let statNumbers = statutesAtLarge.match(/(\d+) stat\. (\d+)/i);
 			newStatute.codeNumber = statNumbers[1];
 			newStatute.code = "Stat.";
 			newStatute.section = statNumbers[2];
@@ -238,7 +235,7 @@ async function scrape(doc, url) {
 
 			// Reporter formatting, theoretically unnecessary but nice to have if it's there
 			/*
-			 * Matches: 
+			 * Matches:
 			 * P.L. 117-327
 			 * Pub. L. 117-327
 			 * Pub. Law 117-327
@@ -248,13 +245,13 @@ async function scrape(doc, url) {
 			 * Public Law Number 117-327
 			 * Public Law No. 117-327
 			 */
-			var pL = info.match(/(p\.l\.|pub\. l(?:aw|\.)(?: no\.)?|public law(?: number| no\.)?)\s(\d+-\d+)/i);
+			let pL = info.match(/(p\.l\.|pub\. l(?:aw|\.)(?: no\.)?|public law(?: number| no\.)?)\s(\d+-\d+)/i);
 			if (pL) newStatute.publicLawNumber = pL[2];
 
 			if (newStatute.publicLawNumber) newStatute.session = newStatute.publicLawNumber.substring(0, newStatute.publicLawNumber.indexOf('-'));
 		}
 
-		newStatute.notes.push({note: "Document Info: " + info}); // Since the info section is all over the place, just dump the whole thing in for manual cite checks
+		newStatute.notes.push({ note: "Document Info: " + info }); // Since the info section is all over the place, just dump the whole thing in for manual cite checks
 
 		newStatute.complete();
 	}
