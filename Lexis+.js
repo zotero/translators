@@ -152,14 +152,12 @@ async function scrape(doc, url) {
 
 			// Remove some unnecessary information
 			var cleanedTitle = title;
-			var dating = title.match(/act of\s[1-2][0-9][0-9][0-9](?!.*act of\s[1-2][0-9][0-9][0-9])/); // Last occurrence of 'act of 2017' etc
 			var pLCite = title.match(/(\d+ p\.l\. \d+)/i);
 			var statCite = title.match(/(\d+ stat\. \d+)/i);
 			var enactedCite = title.match(/\d+ enacted [a-zA-Z0-9.]+ \d+/gi);
 			var part = title.match(/(part \d+(?: of \d+)?)/i);
 			if (pLCite) cleanedTitle = cleanedTitle.replace(pLCite[1], '');
 			if (statCite) cleanedTitle = cleanedTitle.replace(statCite[1], '');
-			if (dating) cleanedTitle = cleanedTitle.replace(dating[1], '');
 			if (part) cleanedTitle = cleanedTitle.replace(part[1], '');
 			if (enactedCite) {
 				// Remove every enacted cite
@@ -175,7 +173,7 @@ async function scrape(doc, url) {
 				if (pLCite) cleanedTitle = pLCite[1];
 				else if (statCite) cleanedTitle = statCite[1];
 				else if (enactedCite) {
-					cleanedTitle = enactedCite[0] + " & " + (Object.keys(enactedCite).length - 1) + " more"
+					cleanedTitle = enactedCite[0] + " & " + (Object.keys(enactedCite).length - 1) + " more";
 				}
 			}
 			newStatute.title = cleanedTitle;
