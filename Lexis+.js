@@ -97,11 +97,12 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url) {
+	var title = text(doc, 'h1#SS_DocumentTitle');
+
 	if (detectWeb(doc, url) == "case") {
 		var newCase = new Zotero.Item("case");
 		//newCase.url = doc.location.href; // Disabled for style reasons
 
-		var title = text(doc, 'h1#SS_DocumentTitle');
 		newCase.title = title;
 
 		newCase.notes.push({note: "Snapshot: " + newCase.title + doc.getElementById('document-content').innerHTML});
@@ -129,7 +130,7 @@ async function scrape(doc, url) {
 
 		//newStatute.url = doc.location.href; // Disabled for style reasons
 
-		var title = text(doc, 'h1#SS_DocumentTitle'); // Saves some lines to have a temp here
+		var title = text(doc, 'h1#SS_DocumentTitle');
 		newStatute.title = title;
 
 		newStatute.notes.push({note: "Snapshot: " + newStatute.title + doc.getElementById('document-content').innerHTML});
@@ -142,15 +143,51 @@ async function scrape(doc, url) {
 		newStatute.dateEnacted = isolation.substring(0, isolation.search(/[1-2][0-9][0-9][0-9]/) + 4);
 
 		if (title.match(/act/i)
-		|| title.match(/of\s[1-2][0-9][0-9][0-9]/i)) { // Session law, not codified statute
+		|| title.match(/of\s[1-2][0-9][0-9][0-9]/i)) { // Session law, or act, not codified statute
 			// BB 21st ed. requires parallel cite to Pub. L. No. and Stat. for session laws
+
+			// Title formatting
+			// ZU doesn't capitalize titles right and I'm not writing a capitalization routine
+			//if (title == title.toUpperCase()) newStatute.title = ZU.capitalizeTitle(title.toLowerCase(), true); // Some acts are capitalized
+
+			// Remove some unnecessary information
+			var cleanedTitle = title;
+			var dating = title.match(/act of\s[1-2][0-9][0-9][0-9](?!.*act of\s[1-2][0-9][0-9][0-9])/); // Last occurrence of 'act of 2017' etc
+			var pLCite = title.match(/(\d+ p\.l\. \d+)/i);
+			var statCite = title.match(/(\d+ stat\. \d+)/i);
+			var enactedCite = title.match(/\d+ enacted [a-zA-Z0-9.]+ \d+/gi);
+			var part = title.match(/(part \d+(?: of \d+)?)/i);
+			if (pLCite) cleanedTitle = cleanedTitle.replace(pLCite[1], '');
+			if (statCite) cleanedTitle = cleanedTitle.replace(statCite[1], '');
+			if (dating) cleanedTitle = cleanedTitle.replace(dating[1], '');
+			if (part) cleanedTitle = cleanedTitle.replace(part[1], '');
+			if (enactedCite) {
+				// Remove every enacted cite
+				for (var value of Object.values(enactedCite)) {
+					cleanedTitle = cleanedTitle.replace(value, '');
+				}
+			}
+			cleanedTitle = cleanedTitle.replace(/(^\s*,)|(,\s*$)/g, ''); // Trim commas and whitespace
+			cleanedTitle = cleanedTitle.replace(/(^\s*,)|(,\s*$)/g, ''); // Another one
+			Zotero.debug(cleanedTitle);
+			if (ZU.trim(cleanedTitle) === "") { // If the title's empty now, put it as the highest precedence citation available
+				Zotero.debug("ha");
+				if (pLCite) cleanedTitle = pLCite[1];
+				else if (statCite) cleanedTitle = statCite[1];
+				else if (enactedCite) {
+					cleanedTitle = enactedCite[0] + " & " + (Object.keys(enactedCite).length - 1) + " more"
+				}
+			}
+			newStatute.title = cleanedTitle;
+
+			// Reporter & citation formatting
 			var statutesAtLarge, publicLawNo;
 			var potentialReporter = text(doc, 'a.SS_ActiveRptr');
 			if (potentialReporter) { // Sometimes Lexis is weird and doesn't give an ActiveRptr
-				if (potentialReporter.textContent.match(/stat\./i)) statutesAtLarge = potentialReporter.textContent;
-				else if (potentialReporter.textContent.match(/pub\./i)
-				|| potentialReporter.textContent.match(/p\.l\./i)) {
-					publicLawNo = potentialReporter.textContent;
+				if (potentialReporter.match(/stat\./i)) statutesAtLarge = potentialReporter;
+				else if (potentialReporter.match(/pub\./i)
+				|| potentialReporter.match(/p\.l\./i)) {
+					publicLawNo = potentialReporter;
 				}
 			}
 
@@ -184,6 +221,7 @@ async function scrape(doc, url) {
 			newStatute.section = statutesAtLarge.substring(statutesAtLarge.lastIndexOf(' ') + 1);
 		}
 		else { // Codified statute
+			// Title & citation formatting
 			if (title.match(/^\d+/)) { // Starts with digit, organized by title, ex. 47 U.S.C.S. § 230
 				// Sadly, named groups aren't working
 				let groups = title.match(/^(\d+)\s([a-zA-Z0-9. ]+) § ([0-9.()a-zA-Z]+)/);
@@ -197,6 +235,7 @@ async function scrape(doc, url) {
 				newStatute.section = groups[2];
 			}
 
+			// Reporter formatting, theoretically unnecessary but nice to have if it's there
 			/*
 			 * Matches: 
 			 * P.L. 117-327
