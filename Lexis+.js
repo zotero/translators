@@ -170,7 +170,7 @@ async function scrape(doc, url) {
 			cleanedTitle = cleanedTitle.replace(/(^\s*,)|(,\s*$)/g, ''); // Trim commas and whitespace
 			cleanedTitle = cleanedTitle.replace(/(^\s*,)|(,\s*$)/g, ''); // Another one
 			Zotero.debug(cleanedTitle);
-			if (ZU.trim(cleanedTitle) === "") { // If the title's empty now, put it as the highest precedence citation available
+			if (ZU.trim(cleanedTitle) === "") { // If the title's empty now, put it as the highest precedence citation in the title
 				Zotero.debug("ha");
 				if (pLCite) cleanedTitle = pLCite[1];
 				else if (statCite) cleanedTitle = statCite[1];
