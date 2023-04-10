@@ -62,7 +62,7 @@ function getSearchResults(doc, url) {
 		let dates = doc.querySelectorAll('span.metaDataItem'); // Not technically only dates, but that's all I use it for atm
 		var nextDate;
 		var dateOffset = 1;
-	
+
 		// dates[0] is first court name
 		nextDate = dates[dateOffset];
 		dateOffset += 3;
