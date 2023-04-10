@@ -147,8 +147,9 @@ async function scrape(doc, url) {
 			// BB 21st ed. requires parallel cite to Pub. L. No. and Stat. for session laws
 
 			// Title formatting
-			// ZU doesn't capitalize titles right and I'm not writing a capitalization routine
-			//if (title == title.toUpperCase()) newStatute.title = ZU.capitalizeTitle(title.toLowerCase(), true); // Some acts are capitalized
+			// TODO ZU's capitalizer is good, but doesn't work with closed-up abbreviations like P.L. or U.S.
+			//  This could break titles in future. I do remove P.L. below though.
+			if (title === title.toUpperCase()) title = ZU.capitalizeTitle(title.toLowerCase(), true); // Some acts are capitalized
 
 			// Remove some unnecessary information
 			var cleanedTitle = title;
@@ -208,15 +209,17 @@ async function scrape(doc, url) {
 				newStatute.session = newStatute.publicLawNumber.substring(0, newStatute.publicLawNumber.indexOf('-'));
 			}
 			else { // Ex. 115 P.L. 164 or 115 Pub. L. No. 164
-				newStatute.session = publicLawNo.substring(0, publicLawNo.indexOf(' '));
-				newStatute.publicLawNumber = newStatute.session + '-' + publicLawNo.substring(publicLawNo.lastIndexOf(' ') + 1);
+				var pLNumbers = publicLawNo.match(/(\d+) p\.l\. (\d+)/i);
+				newStatute.session = pLNumbers[1];
+				newStatute.publicLawNumber = pLNumbers[1] + '-' + pLNumbers[2];
 			}
 
 			// Turn statutesAtLarge into the code#/code/section fields
 			// TODO in styles, check for "Stat." as the code, and if so, don't append a section symbol
-			newStatute.codeNumber = statutesAtLarge.substring(0, statutesAtLarge.indexOf(' '));
+			var statNumbers = statutesAtLarge.match(/(\d+) stat\. (\d+)/i);
+			newStatute.codeNumber = statNumbers[1];
 			newStatute.code = "Stat.";
-			newStatute.section = statutesAtLarge.substring(statutesAtLarge.lastIndexOf(' ') + 1);
+			newStatute.section = statNumbers[2];
 		}
 		else { // Codified statute
 			// Title & citation formatting
