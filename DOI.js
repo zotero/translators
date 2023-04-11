@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-11 06:10:00"
+	"lastUpdated": "2023-04-11 06:13:53"
 }
 
 /*
@@ -44,7 +44,8 @@
  * In a previous version the DOI prefix after "10." is restricted to a digit
  * sequence not shorter than 4. However, the DOI spec clearly states that part
  * should just be a "string", and makes use of examples like "10.123/abc".
- * In practice we don't allow whitespaces or slash.
+ * In practice these are rare (but you never know), and we only use the
+ * alphanumeric characters with the full stop.
  */
 
 /*
@@ -86,7 +87,7 @@
 // ASCII double and single quotes plus common Unicode quotation marks.
 const quotationMarks = String.raw`"'«»‘’\u201A-\u201F‹›⹂\u300C-\u300F`;
 const contextualDOIRe
-	= new RegExp(String.raw`\b10\.[^\s/]+/` // prefix
+	= new RegExp(String.raw`\b10\.[0-9A-Za-z.]+/` // prefix
 		+ String.raw`[^\s${quotationMarks}]*` // non-ws non-quote characters
 		// word delimiting puncts
 		+ String.raw`[^\s${quotationMarks}([{（）《》.,;:?!。，：；、？！]`,
