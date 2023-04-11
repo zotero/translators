@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-11 06:13:53"
+	"lastUpdated": "2023-04-11 06:36:22"
 }
 
 /*
@@ -208,19 +208,25 @@ function getDOIFromURL(url, getAll = false) {
 	return result.length && result;
 }
 
-// Filter out <script> and <style> tags in tree walker.
-const TEXT_NODE_FILTER = new (function () {
+// Filter out <script> and <style> tags in tree walker. (ESLint warning
+// suppressed because it can't understand this pattern.
+/* eslint-disable indent */
+const TEXT_NODE_FILTER = (function () {
 	const ignore = ["script", "style"];
-	this.acceptNode
-		= node => !ignore.includes(node.parentNode.tagName.toLowerCase());
-})();
+	return {
+		acceptNode: node => !ignore.includes(node.parentNode.tagName.toLowerCase()),
+	};
+}());
+/* eslint-enable indent */
 
 // Add the sanitized and normalized results (if any) from an array of string
 // matches to the set.
 function addCleanMatchesTo(set, matchesArray) {
 	matchesArray.forEach((match) => {
 		const cleanMatch = sanitizePairedPunct(toUpper(match));
-		if (cleanMatch) {
+		// Only use sanitized output if it is not empty and it matches the RE
+		// for machine-readable fields.
+		if (cleanMatch === match || hrefValueDOIRe.test(cleanMatch)) {
 			set.add(cleanMatch);
 		}
 	});
