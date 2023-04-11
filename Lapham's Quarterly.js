@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-11 09:40:00"
+	"lastUpdated": "2023-04-11 10:35:51"
 }
 
 /*
@@ -259,8 +259,8 @@ async function fetchIssueDateInfo(url) {
 		.map(x => x.trim().split(" ")[1]);
 	return {
 		volume: romanToInt(volume),
-		issue: parseInt(number, 10),
-		date: parseInt(year, 10)
+		issue: parseInt(number),
+		date: parseInt(year)
 	};
 }
 
@@ -368,7 +368,10 @@ function applyPodcast(doc, item) {
 	item.seriesTitle = podPublication;
 	// Date text uses the same DOM element as it is on blog articles.
 	item.date = getBlogPostDate(doc);
-	item.runningTime = getPodDuration(doc);
+	let t = getPodDuration(doc);
+	if (!Number.isNaN(t)) {
+		item.runningTime = t;
+	}
 
 	const mainAudioSelector = ".top-image-block audio > source";
 	const epURL = attr(doc, mainAudioSelector, "src");
@@ -384,7 +387,7 @@ function applyPodcast(doc, item) {
 		// Extract episode number
 		const epMatch = epURL.match(/episode-(\d+)-/i);
 		if (epMatch) {
-			item.episodeNumber = parseInt(epMatch[1], 10);
+			item.episodeNumber = parseInt(epMatch[1]);
 		}
 
 		const guestName = inferEiCPodGuest(doc, headingText, epURL);
@@ -398,7 +401,7 @@ function applyPodcast(doc, item) {
 		// the audio filename for author info, see this for how it may not
 		// work: https://www.laphamsquarterly.org/content/poes-terror-soul
 		const [, ep, title] = headingText.match(/#(\d+)\s+(.+)/i);
-		item.episodeNumber = parseInt(ep, 10);
+		item.episodeNumber = parseInt(ep);
 		item.title = title;
 	}
 
@@ -409,18 +412,24 @@ function applyPodcast(doc, item) {
 	});
 }
 
-// Get the duration of episode as a string.
+// Get the duration of episode as a string. This can return NaN if the duration
+// cannot be scraped from the doc.
 function getPodDuration(doc) {
 	const currTime = text(doc, ".jp-current-time");
 	const remainTime = text(doc, ".jp-duration"); // Negative value.
 	return timeToDuration(parseTime(currTime) - parseTime(remainTime));
 }
 
-// Parse mm:ss time duration string as number of seconds.
+// Parse mm:ss time duration string as number of seconds. Returns NaN if the
+// input string does not match the expected format.
 function parseTime(str) {
-	const [, mm, ss] = str.match(/(-?\d+):(\d+)/);
-	const s = parseInt(ss, 10);
-	let t = parseInt(mm, 10) * 60;
+	const strTimeMatch = str.match(/(-?\d+):(\d+)/);
+	if (!strTimeMatch) {
+		return NaN;
+	}
+	let [, m, s] = strTimeMatch;
+	s = parseInt(s);
+	let t = parseInt(m) * 60;
 	t += t > 0 ? s : -s;
 	return t;
 }
