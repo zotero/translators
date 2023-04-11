@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-11 06:36:22"
+	"lastUpdated": "2023-04-11 06:59:31"
 }
 
 /*
@@ -226,7 +226,7 @@ function addCleanMatchesTo(set, matchesArray) {
 		const cleanMatch = sanitizePairedPunct(toUpper(match));
 		// Only use sanitized output if it is not empty and it matches the RE
 		// for machine-readable fields.
-		if (cleanMatch === match || hrefValueDOIRe.test(cleanMatch)) {
+		if (cleanMatch) {
 			set.add(cleanMatch);
 		}
 	});
@@ -319,7 +319,16 @@ function sanitizePairedPunct(str) {
 		}
 	}
 
-	return stack.length ? str.slice(0, stack[0].index) : str;
+	if (stack.length) {
+		str = str.slice(0, stack[0].index);
+		if (!hrefValueDOIRe.test(str)) {
+			// If the sanitized result no longer matches the (more lenient) RE
+			// for DOI (which is exotic but possible), the string is discarded
+			// and empty string returned.
+			str = "";
+		}
+	}
+	return str;
 }
 
 function detectWeb(doc, url) {
