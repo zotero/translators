@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-04 09:58:05"
+	"lastUpdated": "2023-04-11 09:40:00"
 }
 
 /*
@@ -259,8 +259,8 @@ async function fetchIssueDateInfo(url) {
 		.map(x => x.trim().split(" ")[1]);
 	return {
 		volume: romanToInt(volume),
-		issue: parseInt(number),
-		date: parseInt(year)
+		issue: parseInt(number, 10),
+		date: parseInt(year, 10)
 	};
 }
 
@@ -384,7 +384,7 @@ function applyPodcast(doc, item) {
 		// Extract episode number
 		const epMatch = epURL.match(/episode-(\d+)-/i);
 		if (epMatch) {
-			item.episodeNumber = parseInt(epMatch[1]);
+			item.episodeNumber = parseInt(epMatch[1], 10);
 		}
 
 		const guestName = inferEiCPodGuest(doc, headingText, epURL);
@@ -398,7 +398,7 @@ function applyPodcast(doc, item) {
 		// the audio filename for author info, see this for how it may not
 		// work: https://www.laphamsquarterly.org/content/poes-terror-soul
 		const [, ep, title] = headingText.match(/#(\d+)\s+(.+)/i);
-		item.episodeNumber = parseInt(ep);
+		item.episodeNumber = parseInt(ep, 10);
 		item.title = title;
 	}
 
@@ -419,13 +419,13 @@ function getPodDuration(doc) {
 // Parse mm:ss time duration string as number of seconds.
 function parseTime(str) {
 	const [, mm, ss] = str.match(/(-?\d+):(\d+)/);
-	const s = parseInt(ss);
-	let t = parseInt(mm) * 60;
+	const s = parseInt(ss, 10);
+	let t = parseInt(mm, 10) * 60;
 	t += t > 0 ? s : -s;
 	return t;
 }
 
-// Convert number of seconds to duration string in h:m:s format.
+// Convert number of seconds to duration string in h:mm:ss format.
 function timeToDuration(s) {
 	let h = 0;
 	let m = Math.floor(s / 60);
@@ -434,7 +434,14 @@ function timeToDuration(s) {
 		h = Math.floor(m / 60);
 		m %= 60;
 	}
+	m = zeroPad(m, 2);
+	s = zeroPad(s, 2);
 	return h > 0 ? `${h}:${m}:${s}` : `${m}:${s}`;
+}
+
+// Zero-pad an integer up to length.
+function zeroPad(num, length) {
+	return ZU.lpad(`${num}`, "0", length);
 }
 
 // Find the name of the guest in Lewis Lapham's podcast episode.
@@ -820,7 +827,7 @@ var testCases = [
 				"abstractNote": "Historian Stephen Greenblatt writes of “the concentrated force of the buried past” in The Swerve, his 2011 National Book Award winner in nonfiction.",
 				"audioFileType": "audio/mpeg",
 				"language": "en",
-				"runningTime": "20:5",
+				"runningTime": "20:05",
 				"seriesTitle": "The World in Time",
 				"url": "https://www.laphamsquarterly.org/content/death-nothing-us",
 				"attachments": [
