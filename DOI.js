@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-07 06:58:23"
+	"lastUpdated": "2023-04-11 06:10:00"
 }
 
 /*
@@ -50,9 +50,7 @@
 /*
 	Non-URLEncoded DOI (i.e. the underlying identifier as-is, as a sequence of
 	Unicode code points). This is for scraping DOIs from text, hence the name
-	"contextual". It may fail to match properly percent-encoded DOI (in HTML
-	attribute values or the "URL-ified" presentation form of DOI, etc.),
-	because the slash between the prefix and the suffix may be percent-encoded.
+	"contextual".
 
 	There is little restriction on the DOI syntax, except it that should
 	consist of printable Unicode characters (even whitespaces are allowed). In
@@ -63,8 +61,7 @@
 		the comma. These delimiting characters, although permitted, are not
 		very probable in practice.
 
-	NOTE: This RegExp is too strict (because it conditionally excludes certain
-	special characters and "astral" code points), but also too lenient. For
+	NOTE: Despite these restrictions, the RegExp can be too lenient. For
 	example, it will match the following text:
 
 	"Example DOI: 10.0000/example(but this is a bad example)"
@@ -81,11 +78,10 @@
 	non-delimiting-punct character"
 
 	Here these delimiting characters (in the last negated bracket character
-	class) are the quotation marks (the part in the regex from " to \u300f),
-	opening parentheses (matching parentheses pairs may appear in the DOI,
-	except we currently exclude the CJK parentheses), and typical
-	language-segment-delimiting puncts (full stop, comma, semicolon, etc.), but
-	excluding the hyphen.
+	class) are the quotation marks, opening parentheses (matching parentheses
+	pairs may appear in the DOI, except we currently exclude the CJK
+	parentheses), and typical language-segment-delimiting puncts (full stop,
+	comma, semicolon, etc.), but excluding the hyphen.
 */
 // ASCII double and single quotes plus common Unicode quotation marks.
 const quotationMarks = String.raw`"'«»‘’\u201A-\u201F‹›⹂\u300C-\u300F`;
@@ -107,44 +103,33 @@ const contextualDOIRe
 
 	In each segment, we match *a lot* more leniently: we will match *including*
 	the whitespaces and puncts. The reason is that the URL or segment should be
-	much less "noisy" (if the creator of the URL knows what they're doing),
-	since they're not textual in nature, typically just a bunch of
-	machine-readable fields. If a part of the URL contains the DOI signature
-	"10.xxx.../" it is likely that the DOI goes to the end of the segment, if
-	the segment decodes successfully.
+	much less "noisy" because they are machine-readable in nature. If a part of
+	the URL contains the DOI signature "10.xxx.../" it is likely that the DOI
+	goes to the end of the segment, if the segment decodes successfully.
 
 	NOTE again: This RE should only be applied to the decoded URL segment.
 */
 const hrefValueDOIRe = /\b10\.[^/]+\/.+/g;
 // NOTE: For some implementations there could be "doubly (or more) encoded"
 // strings in the attribute values -- "doubly encoded" if interpreted as
-// DOI-containing, but perfectly OK as a redirect parameter value, e.g., for
-// login pages. These links, even if repeatedly decoded to the "fixed point"
-// when they become invariant, are unlikely to produce any DOI we don't
-// otherwise have.
+// DOI, but perfectly OK as a redirect parameter value, e.g., for login pages.
+// These links are unlikely to produce any DOI we don't otherwise have.
 
 /*
-	Further notes: Our strategy is to *percent-decode* HTML href attribute
-	values (and process them with hrefValueDOIRe), while in textual contexts we
-	take the presented string as-is (and process with contextualDOIRe).
-
-	However, the recommended way to present a DOI *as* a URL string
+	The recommended way to present a DOI *as* a URL string
 	(as path under the https://doi.org/ proxy origin), *even in text*, is to
 	percent-encode the URL, for good interoperability reasons. The problem is
 	that we don't necessarily know whether any such string is *meant* to be
-	decoded or not (also see the "multiply encoded" issue above). And guessing
-	the correct semantics may incur its own penalty.
+	decoded or not. And guessing the correct semantics may incur its own
+	penalty.
 
-	But IRL this is rarely a problem, because such proxy-URL-like strings in
-	text are most likely hyperlinked to the correct proxy-URL, and that link
-	value will be processed under our strategy.
+	But IRL this is rarely a problem, because such URL-like strings in text are
+	most likely hyperlinked to the correct URL, and that link value will be
+	processed under our strategy.
 
-	In other words, even if we don't know whether we should decode part of the
-	text, we're not likely to lose information because the form that should be
-	decoded often accompanies that text. We may still generate an *additional*
-	false positive (the encoded form that is taken as raw DOI by our
-	algorithm), but this will incur a resolution failure and we'll not further
-	process it.
+	We may still generate a false positive (the encoded form that is taken as
+	raw DOI by our algorithm), but this will incur a resolution failure and
+	we'll not further process it.
 
 	Nevertheless, we are still interested in improving the accuracy, because we
 	want to minimize the number of bad resolution requests. If more accurate
@@ -174,9 +159,8 @@ function getDOIs(doc, url) {
 	return Array.from(new Set(fromURL ? [fromURL, ...fromDocument] : fromDocument));
 }
 
-// NOTE: We should case-normalize according to the DOI spec. The spec says the
-// registry uses all uppercase internally, so we follow this convention in our
-// internal normalization.
+// NOTE: We should case-normalize according to the DOI spec, which says the
+// registry uses all uppercase internally. We follow this convention.
 
 // for convenience in map().
 function toUpper(str) {
@@ -242,8 +226,8 @@ function addCleanMatchesTo(set, matchesArray) {
 }
 
 // Scrape the document's text nodes (excluding those of <script> and <style>)
-// and <a> tag's href attribute values for DOIs, keeping the sanitized and
-// case-normalized valus. If not found, return empty array.
+// and <a> or <link> tag's href attribute values for DOIs, keeping the
+// sanitized and case-normalized valus. If not found, return empty array.
 function getDOIsFromDocument(doc) {
 	const dois = new Set();
 
@@ -259,15 +243,12 @@ function getDOIsFromDocument(doc) {
 		}
 	}
 	
-	// TODO: Also scrape <meta content="..."> ?
 	const links = doc.querySelectorAll('a[href], link[href]');
 	for (node of links) {
-		// NOTE: The "href" property on this DOM element is the "resolved" or
-		// full URL when the verbatim attribute value on the <a> tag is
-		// relative (such as a fragment). It is not necessary to use the full
-		// URL, because we look for DOIs in each segment. The base URL, if
-		// containing DOI, is already processed. So we retrieve the attribute
-		// value verbatim using getAttribute().
+		// NOTE: The "href" property returns the whole URL. It is not necessary
+		// to use the whole URL, because we look for DOIs in each segment. The
+		// base URL is processed as its own. So we retrieve the attribute value
+		// verbatim using getAttribute().
 		const linkHref = node.getAttribute("href");
 		const hrefMatches = getDOIFromURL(linkHref, true/* getAll */);
 		if (hrefMatches) {
