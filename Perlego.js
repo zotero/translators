@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-12 08:05:26"
+	"lastUpdated": "2023-04-12 08:25:37"
 }
 
 // example: https://github.com/zotero/translators/issues/2810
@@ -100,10 +100,19 @@ async function doWeb(doc, url) {
 
 async function scrape(doc, url = doc.location.href) {
   let item = new Zotero.Item('book');
-  var rawJson = doc.querySelector('script[id="__NEXT_DATA__"]');
-  var json = JSON.parse(rawJson.innerText);
-  var metadata = json.props.pageProps.bookMetadata[0];
-  Zotero.debug(metadata);
+	// TODO: is there a better way to write this?
+	let id = url.match(/\d{6,8}/)[0];
+	// Zotero.debug(id);
+	let apiUrl = "https://api.perlego.com/metadata/v2/metadata/books/" + id;
+	// Zotero.debug(apiUrl);
+	var apiJson = await requestJSON(apiUrl);
+	var metadata = apiJson.data.results[0];
+	// Zotero.debug(jsonMetadata);
+	// better way to get JSON: https://api.perlego.com/metadata/v2/metadata/books/2697563
+  // var rawJson = doc.querySelector('script[id="__NEXT_DATA__"]');
+  // var json = JSON.parse(rawJson.innerText);
+  // var metadata = json.props.pageProps.bookMetadata[0];
+  // Zotero.debug(metadata);
   // if there's something in the subtitle field, put it into title
   // if not, just use title
   if (metadata.subtitle) {
@@ -121,11 +130,13 @@ async function scrape(doc, url = doc.location.href) {
 	item.creators.push(ZU.cleanAuthor(metadata.author, 'author'));
 	const descriptionWithoutTags = metadata.description.replace(/<[^>]*>/g, '');
 	item.abstractNote = descriptionWithoutTags;
+	// TODO: parse and add publication date
 	item.place = metadata.publication_city;
 	item.edition = metadata.edition_number;
 	item.publisher = metadata.publisher_name;
 	item.language = metadata.language;
-	// TODO: get PDF for logged-in users
+	item.url = url;
+	// TODO: decide whether on not to add subject as a tag. There's a topic and subtopic for each book.
 
   item.complete();
 }
