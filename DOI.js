@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-11 06:59:31"
+	"lastUpdated": "2023-04-13 02:05:47"
 }
 
 /*
@@ -143,7 +143,10 @@ const hrefValueDOIRe = /\b10\.[^/]+\/.+/g;
  * 		and the document contains no others, or an array of DOIs otherwise
  */
 function getDOIs(doc, url) {
-	let fromURL = sanitizePairedPunct(getDOIFromURL(url));
+	let fromURL = getRawDOIFromURL(url); // this doesn't sanitize or normalize
+	if (fromURL) {
+		fromURL = sanitizePairedPunct(fromURL).toUpperCase();
+	}
 	let fromDocument = getDOIsFromDocument(doc);
 	if (
 		// We got a DOI from the URL
@@ -161,19 +164,16 @@ function getDOIs(doc, url) {
 }
 
 // NOTE: We should case-normalize according to the DOI spec, which says the
-// registry uses all uppercase internally. We follow this convention.
-
-// for convenience in map().
-function toUpper(str) {
-	return str.toUpperCase();
-}
+// DOIs are case-insensitive. Here we use all-uppercase internally for
+// deduplication (the DOI field in any saved item, obtained from API call
+// rather than this translator's output, is not affected).
 
 // Parse the input string url (assuming it's well-formed encoded URL or
 // component) for DOIs. If getAll, returns an array of matches or false when no
 // match is found. If not getAll (default), return the first match if any, or
 // false if not found. Note that this function itself doesn't sanitize or
 // case-normalize.
-function getDOIFromURL(url, getAll = false) {
+function getRawDOIFromURL(url, getAll = false) {
 	// Split on #, ?, and &, to minimize noise while match leniently (see
 	// comment at hrefValueDOIRe).
 	const result = [];
@@ -189,11 +189,11 @@ function getDOIFromURL(url, getAll = false) {
 			const matches = decodeURIComponent(urlPart).match(hrefValueDOIRe);
 			if (matches) {
 				if (getAll) {
-					result.push(...matches.map(toUpper));
+					result.push(...matches);
 				}
 				else {
 					// Return on first match.
-					return toUpper(matches[0]);
+					return matches[0];
 				}
 			}
 		}
@@ -208,28 +208,29 @@ function getDOIFromURL(url, getAll = false) {
 	return result.length && result;
 }
 
-// Filter out <script> and <style> tags in tree walker. (ESLint warning
-// suppressed because it can't understand this pattern.
-/* eslint-disable indent */
-const TEXT_NODE_FILTER = (function () {
-	const ignore = ["script", "style"];
-	return {
-		acceptNode: node => !ignore.includes(node.parentNode.tagName.toLowerCase()),
-	};
-}());
-/* eslint-enable indent */
+// Filter out text in the <script> or <style> tags, and all-whitespace text
+// nodes too, in tree walker. Here's just a minimal predicate based on the
+// node's own characteristics, leaving the RE matching & sanitization to
+// getDOIsFromDocument().
+const TEXT_NODE_FILTER = {
+	acceptNode(node) {
+		const p = node.parentElement;
+		// NOTE: OK to trim (and good, to exclude the large number of linebreak
+		// nodes) as long as contextualDOIRe excludes whitespace.
+		return node.nodeValue.trim()
+			&& p && !["SCRIPT", "STYLE"].includes(p.tagName);
+	},
+};
 
 // Add the sanitized and normalized results (if any) from an array of string
 // matches to the set.
 function addCleanMatchesTo(set, matchesArray) {
-	matchesArray.forEach((match) => {
-		const cleanMatch = sanitizePairedPunct(toUpper(match));
-		// Only use sanitized output if it is not empty and it matches the RE
-		// for machine-readable fields.
-		if (cleanMatch) {
-			set.add(cleanMatch);
+	for (const match of matchesArray) {
+		const cleanMatch = sanitizePairedPunct(match);
+		if (cleanMatch) { // Sanitized output may be empty (falsy).
+			set.add(cleanMatch.toUpperCase());
 		}
-	});
+	}
 }
 
 // Scrape the document's text nodes (excluding those of <script> and <style>)
@@ -239,6 +240,7 @@ function getDOIsFromDocument(doc) {
 	const dois = new Set();
 
 	doc.body.normalize();
+	// "4" for text nodes;
 	const treeWalker = doc.createTreeWalker(doc.body, 4, TEXT_NODE_FILTER);
 
 	let node;
@@ -257,9 +259,8 @@ function getDOIsFromDocument(doc) {
 		// base URL is processed as its own. So we retrieve the attribute value
 		// verbatim using getAttribute().
 		const linkHref = node.getAttribute("href");
-		const hrefMatches = getDOIFromURL(linkHref, true/* getAll */);
+		const hrefMatches = getRawDOIFromURL(linkHref, true/* getAll */);
 		if (hrefMatches) {
-			// TODO: Should we even "clean" this?
 			addCleanMatchesTo(dois, hrefMatches);
 		}
 	}
