@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-10 03:09:15"
+	"lastUpdated": "2023-04-13 01:12:36"
 }
 
 /*
@@ -96,11 +96,11 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url = doc.location.href) {
-	var pdfUrl = attr(doc, '#detailedrecordminipanelfile a:first-of-type[href*=".pdf"]', 'href');
+	var pdfUrl = attr(doc, '#detailedrecordminipanelfile a[href*=".pdf"]', 'href');
 	var abstract = attr(doc, 'meta[property="og:description"]', 'content');
 	var thesisUniversity = attr(doc, 'meta[name="citation_dissertation_institution"]', 'content');
 	// Z.debug(pdfUrl);
-	let bibUrl = url.replace(/[#?].+/, "") + '/export/hx?ln=en';
+	let bibUrl = url.replace(/[#?].*/, "") + '/export/hx?ln=en';
 	let bibText = await requestText(bibUrl);
 	bibText = bibText.match(/<pre>([\s\S]+?)<\/pre>/)[1];
 	// Z.debug(bibText)
