@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-13 02:40:47"
+	"lastUpdated": "2023-04-14 07:11:22"
 }
 
 /*
@@ -349,67 +349,82 @@ function detectWeb(doc, url) {
 }
 
 function retrieveDOIs(doiOrDOIs) {
-	let showSelect = Array.isArray(doiOrDOIs);
-	let dois = showSelect ? doiOrDOIs : [doiOrDOIs];
-	let items = {};
+	const showSelect = Array.isArray(doiOrDOIs);
+	const dois = showSelect ? doiOrDOIs : [doiOrDOIs];
+	let resolvedItems = [];
 	let numDOIs = dois.length;
 
-	for (const doi of dois) {
-		items[doi] = null;
-		
+	// We attempt to present the Item Selection rows in the order of the
+	// original order of our "dois" variable (DOIs from text -> DOIs from URL
+	// -> page URL, where each section also follows the document order). This
+	// helps with testing, and is more consistent with the behaviour of other
+	// Web translators.
+	// The loop variable is important for ordering; capture it in closure.
+	function makeItemDoneHandler(id) {
+		return function (translate, item) {
+			// TODO: Consider simply suppressing this anomaly.
+			// Crossref may return garbage data for some garbage input.
+			if (!item.DOI) {
+				item.DOI = `DEBUG: Missing DOI at item No. ${id}`;
+			}
+			resolvedItems[id] = item;
+			// don't save when item is done
+		};
+	}
+
+	// The last translation task handles user selection.
+	function doneHandler() {
+		if ((--numDOIs) > 0) {
+			return;
+		}
+
+		// All DOIs retrieved
+
+		// From here we don't need the sparse structure of "resolvedItems"
+		// any more. It can be consolidated as long as the order is
+		// preserved.
+		resolvedItems = resolvedItems.filter(Boolean);
+
+		// Check to see if there's at least one DOI
+		if (!resolvedItems.length) {
+			throw new Error("DOI Translator: No DOI resolved");
+		}
+
+		// If showSelect is false, don't show a Select Items dialog,
+		// just complete if we can
+		if (!showSelect) {
+			// Here we can assert (resolvedItems.length === 1).
+			resolvedItems[0].complete();
+			return;
+		}
+
+		// Otherwise, allow the user to select among items that
+		// resolved successfully.
+		const select = {};
+		resolvedItems.map((item, id) => select[id] = item.title || `[${item.DOI}]`);
+		// After this, "select" will not be empty.
+
+		Zotero.selectItems(select, function (selectedIDs) {
+			if (!selectedIDs) return;
+
+			// Complete the selected ones.
+			for (const id of Object.keys(selectedIDs)) {
+				resolvedItems[id].complete();
+			}
+		});
+	} // End of the "done" handler function.
+
+	const silentErrors = () => {};
+
+	for (const [id, doi] of dois.entries()) {
 		const translate = Zotero.loadTranslator("search");
 		translate.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
-		translate.setSearch({ itemType: "journalArticle", DOI: doi });
+		translate.setSearch({ DOI: doi });
 	
-		// don't save when item is done
-		translate.setHandler("itemDone", function (_translate, item) {
-			if (!item.title) {
-				Zotero.debug("No title available for " + item.DOI);
-				item.title = "[No Title]";
-			}
-			items[item.DOI] = item;
-		});
-		/* eslint-disable no-loop-func */
-		translate.setHandler("done", function () {
-			numDOIs--;
-			
-			// All DOIs retrieved
-			if (numDOIs <= 0) {
-				// Check to see if there's at least one DOI
-				if (!Object.keys(items).length) {
-					throw new Error("DOI Translator: could not find DOI");
-				}
-				
-				// If showSelect is false, don't show a Select Items dialog,
-				// just complete if we can
-				if (!showSelect) {
-					let firstItem = items[Object.keys(items)[0]];
-					if (firstItem) {
-						firstItem.complete();
-					}
-					return;
-				}
-
-				// Otherwise, allow the user to select among items that resolved successfully
-				let select = {};
-				for (let doi in items) {
-					let item = items[doi];
-					if (item) {
-						select[doi] = item.title || "[" + item.DOI + "]";
-					}
-				}
-				Zotero.selectItems(select, function (selectedDOIs) {
-					if (!selectedDOIs) return;
-					
-					for (let selectedDOI in selectedDOIs) {
-						items[selectedDOI].complete();
-					}
-				});
-			}
-		});
-	
-		// Don't throw on error
-		translate.setHandler("error", function () {});
+		translate.setHandler("itemDone", makeItemDoneHandler(id));
+		translate.setHandler("done", doneHandler);
+		// Don't throw on the "no results" errors.
+		translate.setHandler("error", silentErrors);
 	
 		translate.translate();
 	}
