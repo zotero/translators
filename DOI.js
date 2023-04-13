@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-13 02:05:47"
+	"lastUpdated": "2023-04-13 02:40:47"
 }
 
 /*
@@ -148,19 +148,17 @@ function getDOIs(doc, url) {
 		fromURL = sanitizePairedPunct(fromURL).toUpperCase();
 	}
 	let fromDocument = getDOIsFromDocument(doc);
-	if (
-		// We got a DOI from the URL
-		fromURL && (
-			// And none from the document
-			fromDocument.length == 0
+	if (fromURL) { // We got a DOI from the URL, and...
+		if (fromDocument.size === 0 // None from the document,
 			// Or one from the document, but the same one that was in the URL
-			|| fromDocument.length == 1 && fromDocument[0] == fromURL
-		)
-	) {
-		return fromURL;
+			|| fromDocument.size === 1 && fromDocument.has(fromURL)) {
+			return fromURL;
+		}
+		// Otherwise, put DOIs from doc and url together modulo deduplication.
+		fromDocument.add(fromURL)
 	}
-	// De-duplicate before returning
-	return Array.from(new Set(fromURL ? [fromURL, ...fromDocument] : fromDocument));
+
+	return Array.from(fromDocument);
 }
 
 // NOTE: We should case-normalize according to the DOI spec, which says the
@@ -235,7 +233,8 @@ function addCleanMatchesTo(set, matchesArray) {
 
 // Scrape the document's text nodes (excluding those of <script> and <style>)
 // and <a> or <link> tag's href attribute values for DOIs, keeping the
-// sanitized and case-normalized valus. If not found, return empty array.
+// sanitized and case-normalized valus. Return a set of case-normalized
+// DOI-like strings. If none found, return empty set.
 function getDOIsFromDocument(doc) {
 	const dois = new Set();
 
@@ -265,7 +264,7 @@ function getDOIsFromDocument(doc) {
 		}
 	}
 
-	return Array.from(dois);
+	return dois;
 }
 
 // Sanitize input string by counting the appearance of the following paired
