@@ -155,7 +155,7 @@ function getDOIs(doc, url) {
 			return fromURL;
 		}
 		// Otherwise, put DOIs from doc and url together modulo deduplication.
-		fromDocument.add(fromURL)
+		fromDocument.add(fromURL);
 	}
 
 	return Array.from(fromDocument);
