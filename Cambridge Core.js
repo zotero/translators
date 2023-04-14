@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-14 14:03:21"
+	"lastUpdated": "2023-04-14 14:06:56"
 }
 
 /*
@@ -464,7 +464,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Violence in Pre-Modern Societies: Rural Colombia*",
+				"title": "Violence in Pre-Modern Societies: Rural Colombia",
 				"creators": [
 					{
 						"firstName": "Richard S.",
