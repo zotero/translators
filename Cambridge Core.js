@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-09 00:36:31"
+	"lastUpdated": "2023-04-14 14:03:21"
 }
 
 /*
@@ -53,7 +53,7 @@ function detectWeb(doc, url) {
 		}
 		else return "book";
 	}
-	
+
 	// now let's check for multiples again, just to be sure. this handles some
 	// rare listing page URLs that might not be included in the multiples
 	// regex above.
@@ -155,6 +155,10 @@ function scrape(doc, url) {
 			item.libraryCatalog = "Cambridge University Press";
 			if (item.date.includes("undefined")) {
 				item.date = attr('meta[name="citation_online_date"]', "content");
+			}
+			// remove asterisk or 1 at end of title, e.g. https://www.cambridge.org/core/journals/american-political-science-review/article/abs/violence-in-premodern-societies-rural-colombia/A14B0BB4130A2BA6BE79E2853597526E
+			if (doc.querySelector('h1').innerHTML.match(/.*<\/a>$/)) {
+				item.title = item.title.slice(0, -1);
 			}
 			item.complete();
 		});
@@ -453,6 +457,44 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.cambridge.org/core/journals/ajs-review/latest-issue",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.cambridge.org/core/journals/american-political-science-review/article/abs/violence-in-premodern-societies-rural-colombia/A14B0BB4130A2BA6BE79E2853597526E",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Violence in Pre-Modern Societies: Rural Colombia*",
+				"creators": [
+					{
+						"firstName": "Richard S.",
+						"lastName": "Weinert",
+						"creatorType": "author"
+					}
+				],
+				"date": "1966/06",
+				"DOI": "10.2307/1953360",
+				"ISSN": "0003-0554, 1537-5943",
+				"abstractNote": "Violence is a common phenomenon in developing polities which has received little attention. Clearly a Peronist riot in Buenos Aires, a land invasion in Lima, and a massacre in rural Colombia are all different. Yet we have no typology which relates types of violence to stages or patterns of economic or social development. We know little of the causes, incidence or functions of different forms of violence. This article is an effort to understand one type of violence which can occur in societies in transition.Violence in Colombia has traditionally accompanied transfers of power at the national level. This can account for its outbreak in 1946, when the Conservative Party replaced the Liberals. It cannot account for the intensity or duration of rural violence for two decades. This article focuses primarily on the violence from 1946 to 1953, and explains its intensification and duration as the defense of a traditional sacred order against secular modernizing tendencies undermining that order. We shall discuss violence since 1953 in the concluding section.",
+				"issue": "2",
+				"language": "en",
+				"libraryCatalog": "Cambridge University Press",
+				"pages": "340-347",
+				"publicationTitle": "American Political Science Review",
+				"shortTitle": "Violence in Pre-Modern Societies",
+				"url": "https://www.cambridge.org/core/journals/american-political-science-review/article/abs/violence-in-premodern-societies-rural-colombia/A14B0BB4130A2BA6BE79E2853597526E",
+				"volume": "60",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
