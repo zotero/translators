@@ -8,7 +8,7 @@
 	"priority": 99,
 	"inRepository": true,
 	"translatorType": 8,
-	"lastUpdated": "2022-06-10 06:34:45"
+	"lastUpdated": "2023-04-16 18:12:38"
 }
 
 /*
@@ -35,7 +35,9 @@ along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 */
 
 function detectSearch(item) {
-	return !!item.ISBN;
+	// Disabled due to API outage
+	return false;
+	//return !!item.ISBN;
 }
 
 function doSearch(item) {
