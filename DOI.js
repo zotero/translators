@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-14 07:11:22"
+	"lastUpdated": "2023-04-17 03:26:22"
 }
 
 /*
@@ -142,12 +142,12 @@ const hrefValueDOIRe = /\b10\.[^/]+\/.+/g;
  * @return {string | string[]} A single string if the URL contains a DOI
  * 		and the document contains no others, or an array of DOIs otherwise
  */
-function getDOIs(doc, url) {
+function getDOIs(doc, url, checkOnly = false) {
 	let fromURL = getRawDOIFromURL(url); // this doesn't sanitize or normalize
 	if (fromURL) {
 		fromURL = sanitizePairedPunct(fromURL).toUpperCase();
 	}
-	let fromDocument = getDOIsFromDocument(doc);
+	let fromDocument = getDOIsFromDocument(doc, checkOnly);
 	if (fromURL) { // We got a DOI from the URL, and...
 		if (fromDocument.size === 0 // None from the document,
 			// Or one from the document, but the same one that was in the URL
@@ -209,7 +209,7 @@ function getRawDOIFromURL(url, getAll = false) {
 // Filter out text in the <script> or <style> tags, and all-whitespace text
 // nodes too, in tree walker. Here's just a minimal predicate based on the
 // node's own characteristics, leaving the RE matching & sanitization to
-// getDOIsFromDocument().
+// addCleanMatchesTo().
 const TEXT_NODE_FILTER = {
 	acceptNode(node) {
 		const p = node.parentElement;
@@ -233,9 +233,13 @@ function addCleanMatchesTo(set, matchesArray) {
 
 // Scrape the document's text nodes (excluding those of <script> and <style>)
 // and <a> or <link> tag's href attribute values for DOIs, keeping the
-// sanitized and case-normalized valus. Return a set of case-normalized
-// DOI-like strings. If none found, return empty set.
-function getDOIsFromDocument(doc) {
+// sanitized and case-normalized valus.
+// If checkOnly is falsy (default, which is `undefined`), return a set of
+// case-normalized DOI-like strings. If none found, return empty set.
+// If checkOnly is truthy, try returning as soon as at most two DOIs are found.
+// Why two? Because we want to keep the logic determining the page type in
+// getDOIs().
+function getDOIsFromDocument(doc, checkOnly) {
 	const dois = new Set();
 
 	doc.body.normalize();
@@ -248,6 +252,9 @@ function getDOIsFromDocument(doc) {
 		const textMatches = node.nodeValue.match(contextualDOIRe);
 		if (textMatches) {
 			addCleanMatchesTo(dois, textMatches);
+			if (checkOnly && dois.size > 1) {
+				return dois;
+			}
 		}
 	}
 	
@@ -261,6 +268,9 @@ function getDOIsFromDocument(doc) {
 		const hrefMatches = getRawDOIFromURL(linkHref, true/* getAll */);
 		if (hrefMatches) {
 			addCleanMatchesTo(dois, hrefMatches);
+			if (checkOnly && dois.size > 1) {
+				return dois;
+			}
 		}
 	}
 
@@ -340,7 +350,7 @@ function detectWeb(doc, url) {
 		return false;
 	}
 
-	let doiOrDOIs = getDOIs(doc, url);
+	let doiOrDOIs = getDOIs(doc, url, true/* checkOnly */);
 	if (Array.isArray(doiOrDOIs)) {
 		return doiOrDOIs.length ? "multiple" : false;
 	}
