@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-14 14:06:56"
+	"lastUpdated": "2023-04-17 08:48:37"
 }
 
 /*
@@ -157,8 +157,11 @@ function scrape(doc, url) {
 				item.date = attr('meta[name="citation_online_date"]', "content");
 			}
 			// remove asterisk or 1 at end of title, e.g. https://www.cambridge.org/core/journals/american-political-science-review/article/abs/violence-in-premodern-societies-rural-colombia/A14B0BB4130A2BA6BE79E2853597526E
-			if (doc.querySelector('h1').innerHTML.match(/.*<\/a>$/)) {
-				item.title = item.title.slice(0, -1);
+			const linkRegex = /<a.*\/a>/;
+			const titleWithLink = doc.querySelector("#maincontent h1").innerHTML;
+			if (titleWithLink.match(linkRegex)) {
+				const linkPart = titleWithLink.match(linkRegex)[0];
+				item.title = titleWithLink.replace(linkPart, '');
 			}
 			item.complete();
 		});
@@ -484,6 +487,44 @@ var testCases = [
 				"shortTitle": "Violence in Pre-Modern Societies",
 				"url": "https://www.cambridge.org/core/journals/american-political-science-review/article/abs/violence-in-premodern-societies-rural-colombia/A14B0BB4130A2BA6BE79E2853597526E",
 				"volume": "60",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.cambridge.org/core/journals/journal-of-public-policy/article/abs/when-consumers-oppose-consumer-protection-the-politics-of-regulatory-backlash/2C8E6B9BB6881A233B8936D9AD2C6305",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "When Consumers Oppose Consumer Protection: The Politics of Regulatory Backlash",
+				"creators": [
+					{
+						"firstName": "David",
+						"lastName": "Vogel",
+						"creatorType": "author"
+					}
+				],
+				"date": "1990/10",
+				"DOI": "10.1017/S0143814X00006085",
+				"ISSN": "1469-7815, 0143-814X",
+				"abstractNote": "This article examines a neglected phenomenon in the existing literature on social regulation, namely political opposition to regulation that comes not from business but from consumers. It examines four cases of successful grass-roots consumer opposition to government health and safety regulations in the United States. Two involve rules issued by the National Highway Traffic Safety Administration, a 1974 requirement that all new automobiles be equipped with an engine-interlock system, and a 1967 rule that denied federal highway funds to states that did not require motorcyclists to wear a helmet. In 1977, Congress overturned the Food and Drug Administration's ban on the artificial sweetener, saccharin. Beginning in 1987, the FDA began to yield to pressures from the gay community by agreeing to streamline its procedures for the testing and approval of new drugs designed to fight AIDS and other fatal diseases. The article identifies what these regulations have in common and examines their significance for our understanding the politics of social regulation in the United States and other industrial nations.",
+				"issue": "4",
+				"language": "en",
+				"libraryCatalog": "Cambridge University Press",
+				"pages": "449-470",
+				"publicationTitle": "Journal of Public Policy",
+				"shortTitle": "When Consumers Oppose Consumer Protection",
+				"url": "https://www.cambridge.org/core/journals/journal-of-public-policy/article/abs/when-consumers-oppose-consumer-protection-the-politics-of-regulatory-backlash/2C8E6B9BB6881A233B8936D9AD2C6305",
+				"volume": "10",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
