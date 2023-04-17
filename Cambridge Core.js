@@ -157,11 +157,9 @@ function scrape(doc, url) {
 				item.date = attr('meta[name="citation_online_date"]', "content");
 			}
 			// remove asterisk or 1 at end of title, e.g. https://www.cambridge.org/core/journals/american-political-science-review/article/abs/violence-in-premodern-societies-rural-colombia/A14B0BB4130A2BA6BE79E2853597526E
-			const linkRegex = /<a.*\/a>/;
-			const titleWithLink = doc.querySelector("#maincontent h1").innerHTML;
-			if (titleWithLink.match(linkRegex)) {
-				const linkPart = titleWithLink.match(linkRegex)[0];
-				item.title = titleWithLink.replace(linkPart, '');
+			const titleElem = doc.querySelector("#maincontent h1");
+			if (titleElem.querySelector('a:last-child')) {
+				item.title = titleElem.firstChild.textContent;
 			}
 			item.complete();
 		});
