@@ -178,7 +178,9 @@ function scrape(doc, url) {
 		trans.itemType = itemType;
 		trans.doWeb(doc, url);
 	});
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
