@@ -161,9 +161,7 @@ function scrape(doc, url) {
 		}
 
 
-		for (let i in item.tags) {
-			item.tags[i] = item.tags[i].charAt(0).toUpperCase() + item.tags[i].substring(1);
-		}
+		item.tags = item.tags.map(tag => ZU.capitalizeTitle(tag.tag || tag, true));
 
 		if (!item.language) {
 			item.language = "or";
