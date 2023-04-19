@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-19 19:11:27"
+	"lastUpdated": "2023-04-19 20:17:03"
 }
 
 /*
@@ -155,7 +155,7 @@ function scrape(doc, url) {
 
 			// workaround for pre 6.0.24 versions that don't have proper item type for data
 			// if (schemaType && schemaType.includes("Dataset")) {
-			if (!datasetType == "dataset" && ZU.xpathText(doc, '//span[@class="pull-right"]/span[contains(@class, "label-default") and contains(., "Dataset")]')) {
+			if (!(datasetType == "dataset") && ZU.xpathText(doc, '//span[@class="pull-right"]/span[contains(@class, "label-default") and contains(., "Dataset")]')) {
 				if (item.extra) {
 					item.extra += "\nType: dataset";
 				}
