@@ -17,7 +17,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2022-07-14 15:44:17"
+	"lastUpdated": "2023-04-19 20:13:47"
 }
 
 function detectImport() {
@@ -69,6 +69,7 @@ var exportTypeMap = {
 	dictionaryEntry:"DICT",
 	encyclopediaArticle:"ENCYC",
 	email:"ICOMM",
+	dataset: "DATA",
 	film:"MPCT",
 	hearing:"HEAR",
 	journalArticle:"JOUR",
@@ -112,8 +113,7 @@ var importTypeMap = {
 	CLSWK:"book",
 	CPAPER:"conferencePaper",
 	CTLG:"magazineArticle",
-	DATA:"document", //dataset
-	DBASE:"document", //database
+	DBASE:"dataset", //database
 	EBOOK:"book",
 	ECHAP:"bookSection",
 	EDBOOK:"book",
@@ -265,7 +265,7 @@ var fieldMap = {
 	A4: {
 		"__default":"creators/translator",
 		"creators/counsel":["case"],
-		"creators/contributor":["conferencePaper", "film"]	//translator does not fit these
+		"creators/contributor":["conferencePaper", "film", "dataset"]	//translator does not fit these
 	},
 	C1: {
 		filingDate:["patent"], //not in spec
@@ -298,6 +298,7 @@ var fieldMap = {
 	},
 	CY: {
 		"__default":"place",
+		repositoryLocation:["dataset"],
 		"__exclude":["conferencePaper"] //should be exported as C1
 	},
 	DA: { //also see PY when editing
@@ -310,11 +311,12 @@ var fieldMap = {
 		"__default":"edition",
 //		"__ignore":["journalArticle"], //EPubDate
 		session:["bill", "hearing", "statute"],
-		version:["computerProgram"]
+		versionNumber:["computerProgram", "dataset"]
 	},
 	IS: {
 		"__default":"issue",
-		numberOfVolumes: ["bookSection"]
+		numberOfVolumes: ["bookSection"],
+		"__exclude": ["dataset"] //IS
 	},
 	LA: {
 		"__default":"language",
@@ -344,6 +346,7 @@ var fieldMap = {
 	},
 	NV: {
 		"__default": "numberOfVolumes",
+		identifier:["dataset"],
 		"__exclude": ["bookSection"] //IS
 	},
 	OP: {
@@ -357,6 +360,7 @@ var fieldMap = {
 		distributor:["film"],
 		assignee:["patent"],
 		institution:["report"],
+		repository:["dataset"],
 		university:["thesis"],
 		company:["computerProgram"],
 		studio:["videoRecording"],
@@ -421,6 +425,9 @@ var degenerateImportFieldMap = {
 	H1: "unsupported/Library Catalog", //Citavi specific (possibly multiple occurences)
 	H2: "unsupported/Call Number", //Citavi specific (possibly multiple occurences)
 	ID: "__ignore",
+	IS: {
+		versionNumber:["dataset"]
+	},
 	JA: "journalAbbreviation",
 	JF: "publicationTitle",
 	JO: {
@@ -1738,7 +1745,7 @@ function completeItem(item) {
 	}
 	item.unsupportedFields = undefined;
 	item.unknownFields = undefined;
-
+	
 	return item.complete();
 }
 
@@ -1798,6 +1805,7 @@ function importNext(resolve, reject) {
 		while (entry = RISReader.nextEntry()) {
 			//determine item type
 			var itemType = exportedOptions.itemType;
+			Z.debug(defaultType)
 			if (!itemType && entry.tags.TY) {
 				var risType = entry.tags.TY[0].value.trim().toUpperCase();
 				if (exportedOptions.typeMap) {
@@ -1805,12 +1813,14 @@ function importNext(resolve, reject) {
 				}
 				if (!itemType) {
 					itemType = importTypeMap[risType];
+					Z.debug(itemType)
 				}
 			}
 			
 			//we allow entries without TY and just use default type
 			if (!itemType) {
 				var defaultType = exportedOptions.defaultItemType || DEFAULT_IMPORT_TYPE;
+	
 				if (entry.tags.TY) {
 					Z.debug("RIS: Unknown item type: " + entry.tags.TY[0].value
 						+ ". Defaulting to " + defaultType);
@@ -2815,6 +2825,7 @@ var testCases = [
 				"seriesTitle": "Series Title",
 				"shortTitle": "Short Title",
 				"url": "URL",
+				"versionNumber": "Version",
 				"attachments": [],
 				"tags": [
 					{
@@ -2963,18 +2974,13 @@ var testCases = [
 				"seeAlso": []
 			},
 			{
-				"itemType": "document",
+				"itemType": "dataset",
 				"title": "Title",
 				"creators": [
 					{
-						"lastName": "Producer",
-						"creatorType": "editor",
-						"fieldMode": 1
-					},
-					{
 						"lastName": "Agency",
 						"firstName": "Funding",
-						"creatorType": "translator"
+						"creatorType": "contributor"
 					},
 					{
 						"lastName": "Investigators",
@@ -2987,11 +2993,14 @@ var testCases = [
 				"archive": "Name of Database",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
+				"identifier": "Study Number",
 				"language": "Language",
 				"libraryCatalog": "Database Provider",
-				"publisher": "Distributor",
+				"repository": "Distributor",
+				"repositoryLocation": "Place Published",
 				"shortTitle": "Short Title",
 				"url": "URL",
+				"versionNumber": "Version",
 				"attachments": [],
 				"tags": [
 					{
@@ -4087,7 +4096,7 @@ var testCases = [
 				"seeAlso": []
 			},
 			{
-				"itemType": "document",
+				"itemType": "dataset",
 				"title": "Title",
 				"creators": [
 					{
@@ -4107,8 +4116,10 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"language": "Language",
 				"libraryCatalog": "Database Provider",
-				"publisher": "Publisher",
+				"repository": "Publisher",
+				"repositoryLocation": "Place Published",
 				"url": "URL",
+				"versionNumber": "Date Published",
 				"attachments": [],
 				"tags": [
 					{
@@ -5308,6 +5319,7 @@ var testCases = [
 				"company": "Publisher Name",
 				"place": "Place of Publication",
 				"url": "Location/URL",
+				"versionNumber": "Version",
 				"attachments": [],
 				"tags": [
 					{
@@ -5433,21 +5445,17 @@ var testCases = [
 				"seeAlso": []
 			},
 			{
-				"itemType": "document",
+				"itemType": "dataset",
 				"title": "Analytic Title",
-				"creators": [
-					{
-						"lastName": "Editor/Compiler",
-						"creatorType": "editor",
-						"fieldMode": 1
-					}
-				],
+				"creators": [],
 				"date": "0000 Date",
 				"abstractNote": "Abstract",
 				"archiveLocation": "Address/Availability",
 				"callNumber": "Call Number",
-				"publisher": "Publisher Name",
+				"repository": "Publisher Name",
+				"repositoryLocation": "Place of Publication",
 				"url": "Location/URL",
+				"versionNumber": "Version",
 				"attachments": [],
 				"tags": [
 					{
@@ -7046,6 +7054,42 @@ var testCases = [
 						"note": "<p>Export Date: 13 July 2022</p>"
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "TY  - DATA\r\nT1  - Moving language: Mothers’ verbs correspond to infants’ real-time locomotion\r\nAU  - West, Kelsey Louise\r\nAU  - Tamis-LeMonda, Catherine\r\nAU  - Adolph, Karen\r\nDO  - 10.17910/B7.1322\r\nUR  - http://databrary.org/volume/1322\r\nAB  - How do infants learn language? Infants can only learn the words that they hear. We tested whether infants’ actions affect the words that caregivers say—specifically whether infant locomotion influences caregivers’ language about locomotion. Compared to crawling infants, walkers travel greater distances (Adolph, et al, 2012). Does enhanced locomotion in walkers influence the verbs that caregivers say? We hypothesized that walking creates new opportunities for verb learning. To disentangle locomotor ability from age, we observed same-aged crawlers and walkers (16 13-month-old crawlers and 16 13-month-old walkers) and an older group of walkers (16 18-month-olds) during two hours of activity at home. Mothers’ language was transcribed verbatim. We then identified each “locomotor verb” (e.g., “come,” “bring”) that mothers said, and each bout of infant crawling and walking. Walkers’ enhanced locomotion indeed opened new opportunities for verb learning. Although mothers’ language overall was more frequent to older compared to younger infants, their locomotor verbs were more frequent to walkers than to crawlers. Preliminary findings show that caregivers directed more utterances to 18-month-olds (M = 2,006.00, SD = 579.02) compared to 13-month-old crawlers (M = 1,553.75, SD = 728.42) and walkers (M = 1,363.50, SD = 619.29), F (2, 31) = 3.23, p = .052. Notably, caregivers directed twice as many locomotor verbs to 13- and 18-month-old walkers (M = 53.13, SD = 15.40; M = 53.00, SD = 25.14, respectively) compared with 13-month-old crawlers (M = 25.25, SD = 12.87), F (2, 31) = 5.46, p = .01. Moreover, mothers’ locomotor verbs were related to infants’ moment-to-moment locomotion: Infants who moved more frequently received more locomotor verbs compared to infants who moved less, r(26) = .42, p = .035. Findings indicate that locomotor development leads to more advanced forms of infant activity, which consequently prompts caregivers to use more advanced language.\r\nPY  - 2021\r\nPB  - Databrary\r\nER  - ",
+		"items": [
+			{
+				"itemType": "dataset",
+				"title": "Moving language: Mothers’ verbs correspond to infants’ real-time locomotion",
+				"creators": [
+					{
+						"lastName": "West",
+						"firstName": "Kelsey Louise",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Tamis-LeMonda",
+						"firstName": "Catherine",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Adolph",
+						"firstName": "Karen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021",
+				"DOI": "10.17910/B7.1322",
+				"abstractNote": "How do infants learn language? Infants can only learn the words that they hear. We tested whether infants’ actions affect the words that caregivers say—specifically whether infant locomotion influences caregivers’ language about locomotion. Compared to crawling infants, walkers travel greater distances (Adolph, et al, 2012). Does enhanced locomotion in walkers influence the verbs that caregivers say? We hypothesized that walking creates new opportunities for verb learning. To disentangle locomotor ability from age, we observed same-aged crawlers and walkers (16 13-month-old crawlers and 16 13-month-old walkers) and an older group of walkers (16 18-month-olds) during two hours of activity at home. Mothers’ language was transcribed verbatim. We then identified each “locomotor verb” (e.g., “come,” “bring”) that mothers said, and each bout of infant crawling and walking. Walkers’ enhanced locomotion indeed opened new opportunities for verb learning. Although mothers’ language overall was more frequent to older compared to younger infants, their locomotor verbs were more frequent to walkers than to crawlers. Preliminary findings show that caregivers directed more utterances to 18-month-olds (M = 2,006.00, SD = 579.02) compared to 13-month-old crawlers (M = 1,553.75, SD = 728.42) and walkers (M = 1,363.50, SD = 619.29), F (2, 31) = 3.23, p = .052. Notably, caregivers directed twice as many locomotor verbs to 13- and 18-month-old walkers (M = 53.13, SD = 15.40; M = 53.00, SD = 25.14, respectively) compared with 13-month-old crawlers (M = 25.25, SD = 12.87), F (2, 31) = 5.46, p = .01. Moreover, mothers’ locomotor verbs were related to infants’ moment-to-moment locomotion: Infants who moved more frequently received more locomotor verbs compared to infants who moved less, r(26) = .42, p = .035. Findings indicate that locomotor development leads to more advanced forms of infant activity, which consequently prompts caregivers to use more advanced language.",
+				"repository": "Databrary",
+				"url": "http://databrary.org/volume/1322",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
