@@ -109,14 +109,12 @@ async function scrape(doc) {
 	let risURL = `https://data.datacite.org/application/x-research-info-systems/${DOI}`;
 	// Z.debug(risURL)
 
-
 	let risText = await requestText(risURL);
 	// Z.debug(risText);
 	let translator = Zotero.loadTranslator('import');
 	translator.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7'); // RIS
 	translator.setString(risText);
 	translator.setHandler('itemDone', (_obj, item) => {
-		item.itemType = "dataset";
 		item.attachments.push({
 			title: 'Snapshot',
 			document: doc
