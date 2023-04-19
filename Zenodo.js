@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-07 05:21:23"
+	"lastUpdated": "2023-04-19 19:11:27"
 }
 
 /*
@@ -35,59 +35,65 @@
 	***** END LICENSE BLOCK *****
 */
 
+const datasetType = ZU.fieldIsValidForType('title', 'dataset')
+	? 'dataset'
+	: 'document';
+
 function detectWeb(doc, url) {
 	if (url.includes('/record/')) {
 		var collections = ZU.xpath(doc, '//span[@class="pull-right"]/span[contains(@class, "label-default")]');
-		for (var i=0; i<collections.length; i++) {
+		for (var i = 0; i < collections.length; i++) {
 			var type = collections[i].textContent.toLowerCase();
 			//Z.debug(type)
 			switch (type) {
-			case "software":
-				return "computerProgram";
-			case "video/audio":
-				return "videoRecording";//or audioRecording?
-			case "figure":
-			case "drawing":
-			case "photo":
-			case "diagram":
-			case "plot":
-				return "artwork";
-			case "presentation":
-			case "conference paper":
-			case "poster":
-			case "lesson":
-				return "presentation";
-			case "book":
-				return "book";
-			case "book section":
-				return "bookSection";
-			case "patent":
-				return "patent";
-			case "report":
-			case "working paper":
-			case "project deliverables":
-			case "preprint":
-				return "report";
-			case "thesis":
-				return "thesis";
-			case "dataset":
+				case "software":
+					return "computerProgram";
+				case "video/audio":
+					return "videoRecording";//or audioRecording?
+				case "figure":
+				case "drawing":
+				case "photo":
+				case "diagram":
+				case "plot":
+					return "artwork";
+				case "presentation":
+				case "conference paper":
+				case "poster":
+				case "lesson":
+					return "presentation";
+				case "book":
+					return "book";
+				case "book section":
+					return "bookSection";
+				case "patent":
+					return "patent";
+				case "report":
+				case "working paper":
+				case "project deliverables":
+				case "preprint":
+					return "report";
+				case "thesis":
+					return "thesis";
+				case "dataset":
 				//change when dataset as itemtype is available
-				return "document";
-			case "journal article":
-				return "journalArticle";
+					return datasetType;
+				case "journal article":
+					return "journalArticle";
 			}
 		}
 		return "journalArticle";
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//invenio-search-results//h4/a');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -103,7 +109,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -111,7 +117,8 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -120,16 +127,14 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var abstract = ZU.xpathText(doc, '//meta[@name="description"]/@content');
 	var doi = ZU.xpathText(doc, '//meta[@name="citation_doi"]/@content');
-	var schemaType = ZU.xpathText(doc, '//div[contains(@class, "record-detail")]//div[@itemscope]/@itemtype');
 	var pdfURL = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
 	var tags = ZU.xpath(doc, '//meta[@name="citation_keywords"]');
 	var cslURL = url.replace(/#.+/, "").replace(/\?.+/, "").replace(/\/export\/.+/, "") + "/export/csl";
-	//Z.debug(cslURL)
-	//Z.debug(schemaType)
+	// Z.debug(cslURL)
 	// use CSL JSON translator
-	ZU.processDocuments(cslURL, function(newDoc){
+	ZU.processDocuments(cslURL, function (newDoc) {
 		var text = ZU.xpathText(newDoc, '//h3/following-sibling::pre');
-		//Z.debug(text)
+		// Z. debug(text);
 		text = text.replace(/publisher_place/, "publisher-place");
 		text = text.replace(/container_title/, "container-title");
 
@@ -137,19 +142,20 @@ function scrape(doc, url) {
 		// CSL JSON
 		trans.setTranslator('bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7');
 		trans.setString(text);
-		trans.setHandler("itemDone", function(obj, item) {
+		trans.setHandler("itemDone", function (obj, item) {
+			item.itemType = detectWeb(doc, url);
 			// The "note" field of CSL maps to Extra. Put it in a note instead
 			if (item.extra) {
-				item.notes.push({"note": item.extra});
+				item.notes.push({ note: item.extra });
 				item.extra = "";
 			}
-
-			if (!item.DOI && doi) {
+			if (!ZU.fieldIsValidForType('DOI', item.itemType) && doi) {
 				item.extra = "DOI: " + doi;
 			}
-			//workaround while we don't have proper item type for data
-			//if (schemaType && schemaType.includes("Dataset")) {
-			if (ZU.xpathText(doc, '//span[@class="pull-right"]/span[contains(@class, "label-default") and contains(., "Dataset")]')) {
+
+			// workaround for pre 6.0.24 versions that don't have proper item type for data
+			// if (schemaType && schemaType.includes("Dataset")) {
+			if (!datasetType == "dataset" && ZU.xpathText(doc, '//span[@class="pull-right"]/span[contains(@class, "label-default") and contains(., "Dataset")]')) {
 				if (item.extra) {
 					item.extra += "\nType: dataset";
 				}
@@ -160,24 +166,25 @@ function scrape(doc, url) {
 
 			//get PDF attachment, otherwise just snapshot.
 			if (pdfURL) {
-				item.attachments.push({url:pdfURL, title: "Zenodo Full Text PDF", mimeType: "application/pdf"});
+				item.attachments.push({ url: pdfURL, title: "Zenodo Full Text PDF", mimeType: "application/pdf" });
 			}
 			else {
-				item.attachments.push({url:url, title: "Zenodo Snapshot", mimeType: "text/html"});
+				item.attachments.push({ url: url, title: "Zenodo Snapshot", mimeType: "text/html" });
 			}
-			for (var i = 0; i<tags.length; i++) {
+			for (let i = 0; i < tags.length; i++) {
 				item.tags.push(tags[i].content);
 			}
 
 			//something is odd with zenodo's author parsing to CSL on some pages; fix it
 			//e.g. https://zenodo.org/record/569323
-			for (var i = 0; i< item.creators.length; i++) {
+			for (let i = 0; i < item.creators.length; i++) {
 				let creator = item.creators[i];
 				if (!creator.firstName || !creator.firstName.length) {
 					if (creator.lastName.includes(",")) {
 						creator.firstName = creator.lastName.replace(/.+?,\s*/, "");
 						creator.lastName = creator.lastName.replace(/,.+/, "");
-					} else {
+					}
+					else {
 						item.creators[i] = ZU.cleanAuthor(creator.lastName,
 							creator.creatorType, false);
 					}
@@ -185,9 +192,10 @@ function scrape(doc, url) {
 				delete item.creators[i].creatorTypeID;
 			}
 
-			//Don't use Zenodo as university for theses
+			//Don't use Zenodo as university for theses -- but use as archive
 			if (item.itemType == "thesis" && item.publisher == "Zenodo") {
 				item.publisher = "";
+				item.archive = "Zenodo";
 			}
 			// or as institution for reports
 			else if (item.itemType == "report" && item.institution == "Zenodo") {
@@ -201,18 +209,20 @@ function scrape(doc, url) {
 			item.url = url;
 			if (abstract) item.abstractNote = abstract;
 
-			item.itemType = detectWeb(doc, url);
+
 			item.itemID = "";
 			item.complete();
 		});
 		trans.translate();
 	});
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://zenodo.org/record/54766?ln=en",
+		"url": "https://zenodo.org/record/54766?ln=en#.ZEAfIMQpAUE",
+		"detectedItemType": "thesis",
 		"items": [
 			{
 				"itemType": "thesis",
@@ -226,6 +236,7 @@ var testCases = [
 				],
 				"date": "2016-06-03",
 				"abstractNote": "Modern day manufacturers research and develop vehicles that are equipped with steering assist to help drivers undertake manoeuvres. However the lack of research for a situation where one tie-rod experiences different strains than the opposite one leads to failure in the tie-rod assembly and misalignment in the wheels over time. The performance of the steering system would be improved if this information existed. This bachelor’s dissertation looks into this specific situation and conducts an examination on the tie-rods. A simple kinematic model is used to determine how the steering system moves when there is a steering input. An investigation has been conducted to determine how the system’s geometry affects the strains. The experiment vehicle is a Formula Student car which is designed by the students of Coventry University. The tests performed show the difference in situations where the two front tyres are on a single surface, two different surfaces – one with high friction, the other with low friction and a situation where there’s an obstacle in the way of one of the tyres. The experiment results show a major difference in strain in the front tie-rods in the different situations. Interesting conclusions can be made due to the results for the different surface situation where one of the tyres receives similar results in bothcompression and tension, but the other one receives results with great difference. This results given in the report can be a starting ground and help with the improvement in steering systems if more research is conducted.",
+				"archive": "Zenodo",
 				"extra": "DOI: 10.5281/zenodo.54766",
 				"libraryCatalog": "Zenodo",
 				"url": "https://zenodo.org/record/54766?ln=en",
@@ -236,7 +247,9 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"strain steering system"
+					{
+						"tag": "strain steering system"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -371,10 +384,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://zenodo.org/record/45756?ln=en",
+		"url": "https://zenodo.org/record/45756?ln=en#.ZEAe1sQpAUE",
+		"detectedItemType": "dataset",
 		"items": [
 			{
-				"itemType": "document",
+				"itemType": "dataset",
 				"title": "X-ray diffraction images for  DPF3 tandem PHD fingers co-crystallized with an acetylated histone-derived peptide",
 				"creators": [
 					{
@@ -409,10 +423,10 @@ var testCases = [
 					}
 				],
 				"date": "2016-02-10",
+				"DOI": "10.5281/zenodo.45756",
 				"abstractNote": "This submission includes a tar archive of bzipped diffraction images recorded with the ADSC Q315r detector at the Advanced Photon Source of Argonne National Laboratory, Structural Biology Center beam line 19-ID. Relevant meta data can be found in the headers of those diffraction images. Please find below the content of an input file XDS.INP for the program XDS (Kabsch, 2010), which may be used for data reduction. The \"NAME_TEMPLATE_OF_DATA_FRAMES=\" item inside XDS.INP may need to be edited to point to the location of the downloaded and untarred images. !!! Paste lines below in to a file named XDS.INP DETECTOR=ADSC  MINIMUM_VALID_PIXEL_VALUE=1  OVERLOAD= 65000 DIRECTION_OF_DETECTOR_X-AXIS= 1.0 0.0 0.0 DIRECTION_OF_DETECTOR_Y-AXIS= 0.0 1.0 0.0 TRUSTED_REGION=0.0 1.05 MAXIMUM_NUMBER_OF_JOBS=10 ORGX=   1582.82  ORGY=   1485.54 DETECTOR_DISTANCE= 150 ROTATION_AXIS= -1.0 0.0 0.0 OSCILLATION_RANGE=1 X-RAY_WAVELENGTH= 1.2821511 INCIDENT_BEAM_DIRECTION=0.0 0.0 1.0 FRACTION_OF_POLARIZATION=0.90 POLARIZATION_PLANE_NORMAL= 0.0 1.0 0.0 SPACE_GROUP_NUMBER=20 UNIT_CELL_CONSTANTS= 100.030   121.697    56.554    90.000    90.000    90.000 DATA_RANGE=1  180 BACKGROUND_RANGE=1 6 SPOT_RANGE=1 3 SPOT_RANGE=31 33 MAX_CELL_AXIS_ERROR=0.03 MAX_CELL_ANGLE_ERROR=2.0 TEST_RESOLUTION_RANGE=8.0 3.8 MIN_RFL_Rmeas= 50 MAX_FAC_Rmeas=2.0 VALUE_RANGE_FOR_TRUSTED_DETECTOR_PIXELS= 6000 30000 INCLUDE_RESOLUTION_RANGE=50.0 1.7 FRIEDEL'S_LAW= FALSE STARTING_ANGLE= -100      STARTING_FRAME=1 NAME_TEMPLATE_OF_DATA_FRAMES= ../x247398/t1.0???.img !!! End of XDS.INP",
-				"extra": "DOI: 10.5281/zenodo.45756\nType: dataset",
 				"libraryCatalog": "Zenodo",
-				"publisher": "Zenodo",
+				"repository": "Zenodo",
 				"url": "https://zenodo.org/record/45756?ln=en",
 				"attachments": [
 					{
@@ -445,6 +459,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://zenodo.org/search?page=1&size=20&q=&type=video",
 		"items": "multiple"
 	},
