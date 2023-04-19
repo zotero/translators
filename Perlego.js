@@ -39,7 +39,7 @@
 function detectWeb(doc, url) {
   if (doc.querySelector('div[data-test-locator="BookGridResults"]')) {
     Zotero.debug("book grid found");
-    Z.monitorDOMChanges(doc.querySelector('div[data-test-locator="BookGridResults"]'));
+    Z.monitorDOMChanges(doc.querySelector('div[data-test-locator="BookGridResults"]'), {attributes:true});
     if (getSearchResults(doc, true)) {
       return 'multiple';
     }
@@ -339,7 +339,8 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.perlego.com/browse/literature?tab=book&language=All&publicationDate=&publisher=&author=&format=&page=1",
-		"items": "multiple"
+		"items": "multiple",
+    "defer": true
 	},
 	{
 		"type": "web",
@@ -380,7 +381,8 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.perlego.com/browse/social-sciences/social-science-research-methodology?language=All&publicationDate=&publisher=&author=&format=&page=1",
-		"items": "multiple"
+		"items": "multiple",
+    "defer": true
 	}
 ]
 /** END TEST CASES **/
