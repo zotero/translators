@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-18 14:12:34"
+	"lastUpdated": "2023-04-19 14:33:05"
 }
 
 /*
@@ -37,29 +37,21 @@
 
 
 function detectWeb(doc, url) {
-  if (doc.querySelector('div[data-test-locator="BookGridResults"]')) {
-    Zotero.debug("book grid found");
-    Z.monitorDOMChanges(doc.querySelector('div[data-test-locator="BookGridResults"]'), {attributes:true});
-    if (getSearchResults(doc, true)) {
-      return 'multiple';
-    }
-  }
+	Z.monitorDOMChanges(doc.querySelector('div#root'), {childList:true, subtree:true});
   if (url.includes('/book/')) {
 		return 'book';
 	}
-	// else if (url.includes("/browse/") || url.includes("/search?") || url.includes("/publisher/") || url.includes("/reading-list/")) {
-	// 	return "multiple";
-	// }
+	else if (url.includes("/browse/") || url.includes("/search?") || url.includes("/publisher/") || url.includes("/reading-list/")) {
+		// Z.monitorDOMChanges(doc.querySelector('div[data-test-locator="Grid-ItemGrid"]'), {childList:true});
 
-	// else if (getSearchResults(doc, true)) {
-	// 	return 'multiple';
-	// }
-
+		if (getSearchResults(doc, true)) {
+	  	return 'multiple';
+		}
+	}
 	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
-  Zotero.debug("running getSearchresults");
 	var items = {};
 	var found = false;
 	// limitation: this selector works well for /search?, /browse/, and /publisher/ pages, but doesn't work
@@ -338,13 +330,15 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.perlego.com/browse/literature?tab=book&language=All&publicationDate=&publisher=&author=&format=&page=1",
-		"items": "multiple",
-    "defer": true
+		"url": "https://www.perlego.com/browse/literature?language=All&publicationDate=&publisher=&author=&format=&tab=books&page=1",
+		"defer": true,
+		"detectedItemType": "multiple",
+		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "https://www.perlego.com/book/2179957/chor-und-theorie-zeitgenssische-theatertexte-von-heiner-mller-bis-ren-pollesch-pdf",
+		"detectedItemType": "book",
 		"items": [
 			{
 				"itemType": "book",
@@ -381,8 +375,9 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.perlego.com/browse/social-sciences/social-science-research-methodology?language=All&publicationDate=&publisher=&author=&format=&page=1",
-		"items": "multiple",
-    "defer": true
+		"defer": true,
+		"detectedItemType": "multiple",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
