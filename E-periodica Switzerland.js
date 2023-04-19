@@ -35,20 +35,15 @@
 	***** END LICENSE BLOCK *****
 */
 
-// just in case we need it at some point
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 function detectWeb(doc, url) {
 	// TODO: adjust the logic here
 	if (url.includes('/digbib/view')) {
 		return "journalArticle";
-	} else if (url.includes('/digbib/dossearch?'))
-	{
+	}
+	else if (url.includes('/digbib/dossearch?')) {
 		return "multiple";
-	} else
-	{
+	}
+	else {
 		return false;
 	}
 }
@@ -92,56 +87,58 @@ async function doWeb(doc, url) {
 	*/
 }
 
-async function scrape(next_doc, url) {
-	var next_url = next_doc.location.href;
-	var origin = next_doc.location.protocol + '//' + next_doc.location.hostname;
-	Zotero.debug('trying to process ' + next_url);
+async function scrape(nextDoc, url) {
+	var nextUrl = nextDoc.location.href;
+	var origin = nextDoc.location.protocol + '//' + nextDoc.location.hostname;
+	Zotero.debug('trying to process ' + nextUrl);
 	// Do we really need to handle these #-containing URLs?
-	next_url = next_url.replace("#", "%3A%3A").replace("::", "%3A%3A");
-	next_url = next_url.split("%3A%3A");
-	next_url = next_url[0] + "%3A%3A" + next_url.slice(-1);
-	Zotero.debug('Final URL ' + next_url);
-	var pageinfo_url = next_url.replace("view", "ajax/pageinfo");
-	Zotero.debug('JSON URL ' + pageinfo_url);
-	ZU.doGet(pageinfo_url, function (text) {
+	nextUrl = nextUrl.replace("#", "%3A%3A").replace("::", "%3A%3A");
+	nextUrl = nextUrl.split("%3A%3A");
+	nextUrl = nextUrl[0] + "%3A%3A" + nextUrl.slice(-1);
+	Zotero.debug('Final URL ' + nextUrl);
+	var pageinfoUrl = nextUrl.replace("view", "ajax/pageinfo");
+	Zotero.debug('JSON URL ' + pageinfoUrl);
+	ZU.doGet(pageinfoUrl, function (text) {
 		var epjson = JSON.parse(text);
-		if (epjson["articles"]["0"]["hasRisLink"]) {
-			var risURL = origin + '/view/' +  epjson["articles"]["0"]["risLink"];
-		} else {
-			var risURL = null;
-		};
-		Zotero.debug(risURL);
-		if (epjson["articles"]["0"]["hasPdfLink"]) {
-			var pdfURL = origin + epjson["articles"]["0"]["pdfLink"];
-		} else {
-			var pdfURL = null;
+		Zotero.debug(epjson);
+		var risURL = null;
+		if (epjson.articles["0"].hasRisLink) {
+			risURL = origin + '/view/' + epjson.articles["0"].risLink;
 		}
+		
+		Zotero.debug(risURL);
+		var pdfURL = null;
+		if (epjson.articles["0"].hasPdfLink) {
+			pdfURL = origin + epjson.articles["0"].pdfLink;
+		}
+		
 		Zotero.debug(pdfURL);
-		if (risURL != null) {
-			ZU.doGet(risURL, function (text, URL, PDFURL) {
+		if (risURL !== null) {
+			ZU.doGet(risURL, function (text) {
 				processRIS(text, url, pdfURL);
 			});
-		} else {
+		}
+		else {
 			var item = new Zotero.Item("journalArticle");
-			item.title = epjson["articles"]["0"]["title"];
-			item.publicationTitle = epjson["journalTitle"];
-			var numyear = epjson["volumeNumYear"].replace("(", "").replace(")", "").split(" ");
+			item.title = epjson.articles["0"].title;
+			item.publicationTitle = epjson.journalTitle;
+			var numyear = epjson.volumeNumYear.replace("(", "").replace(")", "").split(" ");
 			if (numyear.length > 1) {
 				item.date = numyear.slice(-1);
-			};
+			}
 			if (numyear.length > 0) {
 				item.volume = numyear[0];
-			};
-			if (pdfURL != null) {
+			}
+			if (pdfURL !== null) {
 				Zotero.debug('PDF URL: ' + pdfURL);
 				item.attachments.push({
-					url : pdfURL,
-					title : "E-periodica PDF",
-					type : "application/pdf"
+					url: pdfURL,
+					title: "E-periodica PDF",
+					type: "application/pdf"
 				});
 			}
 			item.complete();
-		};
+		}
 	});
 }
 
@@ -200,6 +197,8 @@ function processRIS(text, URL, pdfURL) {
 			});
 		}
 		*/
+		Zotero.debug('in processRIS');
+		Zotero.debug(item);
 
 		if (item.ISSN) {
 			item.ISSN = ZU.cleanISSN(item.ISSN);
@@ -247,11 +246,11 @@ function processRIS(text, URL, pdfURL) {
 		}
 
 		// Retrieve fulltext
-		if (pdfURL != null) {
+		if (pdfURL !== null) {
 			item.attachments.push({
-				url : pdfURL,
-				title : "E-periodica PDF",
-				type : "application/pdf"
+				url: pdfURL,
+				title: "E-periodica PDF",
+				type: "application/pdf"
 			});
 		}
 
