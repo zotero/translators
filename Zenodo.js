@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-19 20:17:03"
+	"lastUpdated": "2023-04-19 20:55:45"
 }
 
 /*
@@ -155,7 +155,7 @@ function scrape(doc, url) {
 
 			// workaround for pre 6.0.24 versions that don't have proper item type for data
 			// if (schemaType && schemaType.includes("Dataset")) {
-			if (!(datasetType == "dataset") && ZU.xpathText(doc, '//span[@class="pull-right"]/span[contains(@class, "label-default") and contains(., "Dataset")]')) {
+			if (datasetType != "dataset" && ZU.xpathText(doc, '//span[@class="pull-right"]/span[contains(@class, "label-default") and contains(., "Dataset")]')) {
 				if (item.extra) {
 					item.extra += "\nType: dataset";
 				}
@@ -217,6 +217,41 @@ function scrape(doc, url) {
 	});
 }
 
+
+
+async function scrape(doc, url = doc.location.href) {
+	let DOI = url.match(/\/(10\.[^#?]+)/)[1];
+	// TODO adjust the URL here
+	let risURL = `http://citation-needed.services.springer.com/v2/references/${DOI}?format=refman&flavour=citation`;
+	// Z.debug(risURL)
+
+	// TODO adjust this
+	let pdfLink = doc.querySelector('#articlePDF');
+	// Z.debug("pdfURL: " + pdfURL);
+
+	let risText = await requestText(risURL);
+	let translator = Zotero.loadTranslator('import');
+	translator.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7'); // RIS
+	translator.setString(risText);
+	translator.setHandler('itemDone', (_obj, item) => {
+		// TODO tweak some of the output here
+		if (pdfLink) {
+			item.attachments.push({
+				url: pdfLink.href,
+				title: 'Full Text PDF',
+				mimeType: 'application/pdf'
+			});
+		}
+
+		item.attachments.push({
+			title: 'Snapshot',
+			document: doc
+		});
+
+		item.complete();
+	});
+	await translator.translate();
+}
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
