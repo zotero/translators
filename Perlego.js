@@ -37,24 +37,35 @@
 
 
 function detectWeb(doc, url) {
-	if (url.includes('/book/')) {
+  if (doc.querySelector('div[data-test-locator="BookGridResults"]')) {
+    Zotero.debug("book grid found");
+    Z.monitorDOMChanges(doc.querySelector('div[data-test-locator="BookGridResults"]'));
+    if (getSearchResults(doc, true)) {
+      return 'multiple';
+    }
+  }
+  if (url.includes('/book/')) {
 		return 'book';
 	}
 	// else if (url.includes("/browse/") || url.includes("/search?") || url.includes("/publisher/") || url.includes("/reading-list/")) {
 	// 	return "multiple";
 	// }
-	else if (getSearchResults(doc, true)) {
-		return 'multiple';
-	}
+
+	// else if (getSearchResults(doc, true)) {
+	// 	return 'multiple';
+	// }
+
 	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
+  Zotero.debug("running getSearchresults");
 	var items = {};
 	var found = false;
 	// limitation: this selector works well for /search?, /browse/, and /publisher/ pages, but doesn't work
 	// for /reading-list/, e.g. https://www.perlego.com/reading-list/86/introduction-to-social-movements?queryID=21da233727a255f6d709ad565bddc362
-	var rows = doc.querySelectorAll('a[href*="/book/"]');
+	// var rows = doc.querySelectorAll('div.sc-bhhwZE');
+  var rows = doc.querySelectorAll('a[href*="/book/"]');
 	for (let row of rows) {
 		var href = row.href;
 		// for non-logged in users, row.href sometimes contains /null/ so user sees a 404 error instead of the book
@@ -89,7 +100,7 @@ async function doWeb(doc, url) {
 
 async function scrape(doc, url = doc.location.href) {
 	let item = new Zotero.Item('book');
-	const id = url.match(/\/book\/(\d+)/)[1];
+	const id = url.match(/\d{6,8}/)[0];
 	let apiUrl = "https://api.perlego.com/metadata/v2/metadata/books/" + id;
 	var apiJson = await requestJSON(apiUrl);
 	var metadata = apiJson.data.results[0];
