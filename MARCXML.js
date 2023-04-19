@@ -8,9 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2019-07-11 13:12:18"
+	"lastUpdated": "2023-04-19 14:30:00"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -53,23 +52,22 @@ function detectImport() {
 
 
 function doImport() {
-	var text = "";
-	var line;
-	while ((line = Zotero.read()) !== false) {
-		text += line;
-	}
 	// call MARC translator
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 	translator.getTranslatorObject(function (marc) {
-		var parser = new DOMParser();
-		var xml = parser.parseFromString(text, 'text/xml');
+		var xml = Zotero.getXML();
 		// define the marc namespace
 		var ns = {
 			marc: "http://www.loc.gov/MARC21/slim"
 		};
 		var records = ZU.xpath(xml, '//marc:record', ns);
 		for (let rec of records) {
+			if (!ZU.xpath(rec, "./marc:datafield", ns).length) {
+				Zotero.debug('Skipping empty record');
+				continue;
+			}
+
 			// create one new item per record
 			var record = new marc.record();
 			var newItem = new Zotero.Item();
@@ -362,6 +360,34 @@ var testCases = [
 						"tag": "Issue 41"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<record xmlns=\"http://www.loc.gov/MARC21/slim\">\n<recordSchema>MARC21-xml</recordSchema>\n<recordPacking>xml</recordPacking>\n<recordData>\n<record type=\"Bibliographic\">\n<leader>00000pam a2200000 cc4500</leader>\n<controlfield tag=\"001\">1242883924</controlfield>\n<controlfield tag=\"003\">DE-101</controlfield>\n<controlfield tag=\"005\">20230125220155.0</controlfield>\n<controlfield tag=\"007\">tu</controlfield>\n<controlfield tag=\"008\">211010s2023 gw ||||| |||| 00||||ger </controlfield>\n<datafield tag=\"015\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">23,A04</subfield>\n<subfield code=\"z\">21,N41</subfield>\n<subfield code=\"2\">dnb</subfield>\n</datafield>\n<datafield tag=\"016\" ind1=\"7\" ind2=\" \">\n<subfield code=\"2\">DE-101</subfield>\n<subfield code=\"a\">1242883924</subfield>\n</datafield>\n<datafield tag=\"020\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">9783525560624</subfield>\n<subfield code=\"c\">Festeinband : EUR 85.00 (DE), EUR 88.00 (AT)</subfield>\n<subfield code=\"9\">978-3-525-56062-4</subfield>\n</datafield>\n<datafield tag=\"020\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">3525560621</subfield>\n<subfield code=\"9\">3-525-56062-1</subfield>\n</datafield>\n<datafield tag=\"024\" ind1=\"3\" ind2=\" \">\n<subfield code=\"a\">9783525560624</subfield>\n</datafield>\n<datafield tag=\"028\" ind1=\"5\" ind2=\"2\">\n<subfield code=\"a\">Bestellnummer: VUR0008785</subfield>\n</datafield>\n<datafield tag=\"035\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">(DE-599)DNB1242883924</subfield>\n</datafield>\n<datafield tag=\"035\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">(OCoLC)1365383776</subfield>\n</datafield>\n<datafield tag=\"035\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">(OCoLC)1275381065</subfield>\n</datafield>\n<datafield tag=\"040\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">1245</subfield>\n<subfield code=\"b\">ger</subfield>\n<subfield code=\"c\">DE-101</subfield>\n<subfield code=\"d\">9999</subfield>\n<subfield code=\"e\">rda</subfield>\n</datafield>\n<datafield tag=\"041\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">ger</subfield>\n</datafield>\n<datafield tag=\"044\" ind1=\" \" ind2=\" \">\n<subfield code=\"c\">XA-DE</subfield>\n</datafield>\n<datafield tag=\"082\" ind1=\"7\" ind2=\"4\">\n<subfield code=\"a\">230</subfield>\n<subfield code=\"a\">943</subfield>\n<subfield code=\"q\">DE-101</subfield>\n<subfield code=\"2\">23sdnb</subfield>\n</datafield>\n<datafield tag=\"100\" ind1=\"1\" ind2=\" \">\n<subfield code=\"0\">(DE-588)111415403</subfield>\n<subfield code=\"0\">https://d-nb.info/gnd/111415403</subfield>\n<subfield code=\"0\">(DE-101)111415403</subfield>\n<subfield code=\"a\">Erhart, Hannelore</subfield>\n<subfield code=\"d\">1927-2013</subfield>\n<subfield code=\"e\">Verfasser</subfield>\n<subfield code=\"4\">aut</subfield>\n<subfield code=\"2\">gnd</subfield>\n</datafield>\n<datafield tag=\"245\" ind1=\"1\" ind2=\"0\">\n<subfield code=\"a\">Katharina Staritz</subfield>\n<subfield code=\"n\">Band 2.</subfield>\n<subfield code=\"p\">\n1903-1953 / Ilse Meseberg-Haubold, Dietgard Meyer ; unter Mitarbeit von Hannelore Erhart †\n</subfield>\n<subfield code=\"c\">\nHannelore Erhart ; Ilse Meseberg-Haubold ; Dietgard Meyer. Mit einem Exkurs Elisabeth Schmitz\n</subfield>\n</datafield>\n<datafield tag=\"264\" ind1=\"3\" ind2=\"1\">\n<subfield code=\"a\">Göttingen</subfield>\n<subfield code=\"b\">Vandenhoeck &amp; Ruprecht</subfield>\n<subfield code=\"c\">[2023]</subfield>\n</datafield>\n<datafield tag=\"300\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">XV, 629 Seiten</subfield>\n<subfield code=\"b\">Illustrationen</subfield>\n<subfield code=\"c\">1094 g</subfield>\n</datafield>\n<datafield tag=\"336\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">Text</subfield>\n<subfield code=\"b\">txt</subfield>\n<subfield code=\"2\">rdacontent</subfield>\n</datafield>\n<datafield tag=\"337\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">ohne Hilfsmittel zu benutzen</subfield>\n<subfield code=\"b\">n</subfield>\n<subfield code=\"2\">rdamedia</subfield>\n</datafield>\n<datafield tag=\"338\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">Band</subfield>\n<subfield code=\"b\">nc</subfield>\n<subfield code=\"2\">rdacarrier</subfield>\n</datafield>\n</record>\n</recordData>\n<recordPosition>2</recordPosition>\n</record>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Katharina Staritz. Band 2: 1903-1953 / Ilse Meseberg-Haubold, Dietgard Meyer ; unter Mitarbeit von Hannelore Erhart †",
+				"creators": [
+					{
+						"firstName": "Hannelore",
+						"lastName": "Erhart",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023",
+				"ISBN": "9783525560624 3525560621",
+				"callNumber": "230 943",
+				"language": "ger",
+				"numPages": "629",
+				"place": "Göttingen",
+				"publisher": "Vandenhoeck & Ruprecht",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
