@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-20 12:43:01"
+	"lastUpdated": "2023-04-20 12:44:13"
 }
 
 /*
@@ -115,7 +115,7 @@ function scrapeMainPart(firstDataText, secondDataItem) {
 		// yet contain a doi, then save the doi and delete the url.
 		// If the item contains the doi corresponding to the url
 		// then just delete the url and keep the doi.
-		if (item.url && item.url.search(/^https?:\/\/(?:dx\.)?doi\.org\/10\./i) != -1) {
+		if (item.url && /^https?:\/\/(?:dx\.)?doi\.org\/10\./i.test(item.url)) {
 			var doi = ZU.cleanDOI(item.url);
 			if (doi && (!item.DOI || item.DOI == doi)) {
 				item.DOI = doi;
