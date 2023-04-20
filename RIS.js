@@ -17,7 +17,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2023-04-20 16:20:25"
+	"lastUpdated": "2023-04-20 19:03:44"
 }
 
 /*
@@ -164,6 +164,14 @@ var importTypeMap = {
 var ty;
 for (ty in exportTypeMap) {
 	importTypeMap[exportTypeMap[ty]] = ty;
+}
+
+// for Zotero clients <6.0.24: set dataset back to document
+if (!ZU.fieldIsValidForType('title', 'dataset')) {
+	delete importTypeMap.DATA;
+	delete importTypeMap.DBASE;
+	importTypeMap.DBASE = 'document';
+	importTypeMap.DATA = 'document';
 }
 
 //merge degenerate export type map into main list
