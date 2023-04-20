@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-20 12:44:13"
+	"lastUpdated": "2023-04-20 13:37:43"
 }
 
 /*
@@ -64,7 +64,7 @@ function detectWeb(doc, url) {
 
 
 function scrape(doc, _url) {
-	let allData = doc.querySelectorAll('#bibtex-section');
+	let allData = doc.querySelectorAll('#bibtex-section > pre');
 	let firstData = allData[0];
 	var firstDataText = firstData.textContent.replace(/ ee\s*=/, " url ="); // e.g. ee = {http://dx.doi.org/10.1007/978-3-319-00035-0_37},
 
@@ -391,6 +391,66 @@ var testCases = [
 				"proceedingsTitle": "7th International Conference on Learning Representations, ICLR 2019, New Orleans, LA, USA, May 6-9, 2019",
 				"publisher": "OpenReview.net",
 				"url": "https://openreview.net/forum?id=S1lhbnRqF7",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://dblp.org/rec/reference/choice/LangX16.html?view=bibtex&param=2",
+		"detectedItemType": "bookSection",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Voting in Combinatorial Domains",
+				"creators": [
+					{
+						"firstName": "Jérôme",
+						"lastName": "Lang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Lirong",
+						"lastName": "Xia",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Felix",
+						"lastName": "Brandt",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Vincent",
+						"lastName": "Conitzer",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Ulle",
+						"lastName": "Endriss",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Jérôme",
+						"lastName": "Lang",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Ariel D.",
+						"lastName": "Procaccia",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2016",
+				"ISBN": "9781107446984",
+				"bookTitle": "Handbook of Computational Social Choice",
+				"extra": "DOI: 10.1017/CBO9781107446984.010",
+				"itemID": "DBLP:reference/choice/LangX16",
+				"libraryCatalog": "DBLP Computer Science Bibliography",
+				"pages": "197–222",
+				"publisher": "Cambridge University Press",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
