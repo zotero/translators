@@ -17,7 +17,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2023-04-20 14:02:31"
+	"lastUpdated": "2023-04-20 16:20:25"
 }
 
 /*
@@ -718,7 +718,7 @@ var RISReader = new function () {
 				//doesn't match RIS format and we're not processing a tag-value pair,
 				//so this is not a multi-line tag-value pair
 				if (line.trim()) {
-					Z.debug("RIS: Dropping line outside of RIS record: " + line);
+					// Z.debug("RIS: Dropping line outside of RIS record: " + line);
 				}
 				continue;
 			}
@@ -975,14 +975,14 @@ var ProCiteCleaner = new function () {
 					for (let j = 0, k = authorRoles.length; j < k; j++) {
 						var role = this.proCiteMap['Author Role'][authorRoles[j]];
 						if (!role) {
-							Z.debug('RIS: Unknown ProCite author role: ' + authorRoles[j]);
+							// Z.debug('RIS: Unknown ProCite author role: ' + authorRoles[j]);
 							continue;
 						}
 						role = 'creators/' + role;
 						risTag = importFields.reverseLookup(item.itemType, role);
 						if (!risTag) {
-							Z.debug('RIS: Cannot map ProCite author role to RIS tag: ' + role + ' for ' + item.itemType);
-							Z.debug('RIS: Will not attempt a partial match: ' + m[0]);
+							// Z.debug('RIS: Cannot map ProCite author role to RIS tag: ' + role + ' for ' + item.itemType);
+							// Z.debug('RIS: Will not attempt a partial match: ' + m[0]);
 							fail = true;
 							break;
 						}
@@ -991,8 +991,8 @@ var ProCiteCleaner = new function () {
 					
 					if (fail || !risTags.length) continue;
 					
-					Z.debug('RIS: ' + m[0]);
-					Z.debug('RIS: Mapping preceeding authors to ' + risTags.join(', '));
+					// Z.debug('RIS: ' + m[0]);
+					// Z.debug('RIS: Mapping preceeding authors to ' + risTags.join(', '));
 					let added = this._remapPreceedingTags(entry, i, ['A1', 'A2', 'A3'], risTags);
 					if (added) {
 						this._changeTag(entry, i); //remove ProCite note
@@ -1028,7 +1028,7 @@ var ProCiteCleaner = new function () {
 					if (this.proCiteMap[m[1]]) {
 						risTag = importFields.reverseLookup(item.itemType, this.proCiteMap[m[1]]);
 						if (!risTag) {
-							Z.debug('RIS: Cannot map ProCite note to RIS tag: ' + this.proCiteMap[m[1]] + ' for ' + item.itemType);
+							// Z.debug('RIS: Cannot map ProCite note to RIS tag: ' + this.proCiteMap[m[1]] + ' for ' + item.itemType);
 							continue;
 						}
 						this._changeTag(entry, i, [risTag]);
@@ -1194,7 +1194,7 @@ var ProCiteCleaner = new function () {
 			tag = entry[i].tag;
 			if (!(allowedTags.includes(tag))) {
 				//not allowed to remap this tag
-				Z.debug('RIS: nothing to remap');
+				// Z.debug('RIS: nothing to remap');
 				return false;
 			}
 			
@@ -1284,7 +1284,7 @@ function processTag(item, tagValue, risEntry, allowDeprecated) {
 	
 	var zField = importFields.getField(item.itemType, tag);
 	if (!zField) {
-		Z.debug("Unknown field " + tag + " in entry :\n" + rawLine);
+		// Z.debug("Unknown field " + tag + " in entry :\n" + rawLine);
 		zField = 'unknown'; //this will result in the value being added as note
 	}
 
@@ -1487,7 +1487,7 @@ function applyValue(item, zField, value, rawLine) {
 
 	if (!zField || zField == 'unknown') {
 		if (!ignoreUnknown && !Zotero.parentTranslator) {
-			Z.debug("Entry stored in note: " + rawLine);
+			// Z.debug("Entry stored in note: " + rawLine);
 			item.unknownFields.push(rawLine);
 		}
 		return;
@@ -1495,7 +1495,7 @@ function applyValue(item, zField, value, rawLine) {
 
 	if (zField == 'unsupported') {
 		if (!ignoreUnknown && !Zotero.parentTranslator) {
-			Z.debug("Unsupported field will be stored in note: " + value);
+			// Z.debug("Unsupported field will be stored in note: " + value);
 			item.unsupportedFields.push(value);
 		}
 		return;
@@ -1507,9 +1507,9 @@ function applyValue(item, zField, value, rawLine) {
 		&& zField != 'notes' && zField != 'attachments'
 		&& zField != 'DOI'
 		&& !ZU.fieldIsValidForType(zField, item.itemType)) {
-		Z.debug("Invalid field '" + zField + "' for item type '" + item.itemType + "'.");
+		// Z.debug("Invalid field '" + zField + "' for item type '" + item.itemType + "'.");
 		if (!ignoreUnknown && !Zotero.parentTranslator) {
-			Z.debug("Entry stored in note: " + rawLine);
+			// Z.debug("Entry stored in note: " + rawLine);
 			item.unknownFields.push(rawLine);
 			return;
 		}
@@ -1873,11 +1873,10 @@ function importNext(resolve, reject) {
 				var defaultType = exportedOptions.defaultItemType || DEFAULT_IMPORT_TYPE;
 	
 				if (entry.tags.TY) {
-					Z.debug("RIS: Unknown item type: " + entry.tags.TY[0].value
-						+ ". Defaulting to " + defaultType);
+					// Z.debug("RIS: Unknown item type: " + entry.tags.TY[0].value + ". Defaulting to " + defaultType);
 				}
 				else {
-					Z.debug("RIS: TY tag not specified. Defaulting to " + defaultType);
+					// Z.debug("RIS: TY tag not specified. Defaulting to " + defaultType);
 				}
 				
 				itemType = defaultType;
@@ -2052,7 +2051,7 @@ function doExport() {
 		var type = exportTypeMap[item.itemType];
 		if (!type) {
 			type = DEFAULT_EXPORT_TYPE;
-			Z.debug("Unknown item type: " + item.itemType + ". Defaulting to " + type);
+			// Z.debug("Unknown item type: " + item.itemType + ". Defaulting to " + type);
 		}
 		addTag("TY", type);
 
