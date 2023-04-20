@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-20 19:47:25"
+	"lastUpdated": "2023-04-20 12:43:01"
 }
 
 /*
@@ -103,7 +103,7 @@ function scrapeMainPart(firstDataText, secondDataItem) {
 	trans.setHandler('itemDone', function (obj, item) {
 		if (secondDataItem) {
 			if (secondDataItem.title && item.itemType == "conferencePaper") item.proceedingsTitle = secondDataItem.title;
-			if (secondDataItem.title && item.itemType == "bookSection") item.booktitle = secondDataItem.titel;
+			if (secondDataItem.title && item.itemType == "bookSection") item.bookTitle = secondDataItem.title;
 			if (secondDataItem.creators && secondDataItem.creators.length > 0) item.creators = item.creators.concat(secondDataItem.creators);
 			if (secondDataItem.publisher && !item.publisher) item.publisher = secondDataItem.publisher;
 			if (secondDataItem.series && !item.series) item.series = secondDataItem.series;
