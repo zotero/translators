@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-20 19:37:24"
+	"lastUpdated": "2023-04-20 20:02:47"
 }
 
 /*
@@ -182,7 +182,6 @@ function scrape(doc, url) {
 		Номер: "issue",
 		ISSN: "ISSN",
 		"Число страниц": "pages", // e.g. "83"
-		"Страницы": "pages", // e.g. "10-16"
 		Язык: "language",
 		"Место издания": "place"
 	};
@@ -196,7 +195,6 @@ function scrape(doc, url) {
 	}
 
 	var pages = ZU.xpathText(datablock, '//tr/td/div/text()[contains(., "Страницы")]/following-sibling::*[1]');
-	Zotero.debug("pages: " + pages);
 	if (pages) item.pages = pages;
 	
 	/*
@@ -664,8 +662,7 @@ var testCases = [
 					},
 					{
 						"lastName": "Де Щулф А.",
-						"creatorType": "author",
-						"fieldMode": true
+						"creatorType": "author"
 					},
 					{
 						"firstName": "Е.",
@@ -679,8 +676,7 @@ var testCases = [
 					},
 					{
 						"lastName": "Ван Хооф Л.",
-						"creatorType": "author",
-						"fieldMode": true
+						"creatorType": "author"
 					},
 					{
 						"firstName": "С.",
@@ -689,8 +685,7 @@ var testCases = [
 					},
 					{
 						"lastName": "Де Лангхе К.",
-						"creatorType": "author",
-						"fieldMode": true
+						"creatorType": "author"
 					},
 					{
 						"firstName": "А.",
@@ -699,8 +694,7 @@ var testCases = [
 					},
 					{
 						"lastName": "Ван Де Керчове Р.",
-						"creatorType": "author",
-						"fieldMode": true
+						"creatorType": "author"
 					},
 					{
 						"firstName": "Р.",
@@ -709,8 +703,7 @@ var testCases = [
 					},
 					{
 						"lastName": "Те Киефте Д.",
-						"creatorType": "author",
-						"fieldMode": true
+						"creatorType": "author"
 					}
 				],
 				"date": "2009",
