@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-21 08:35:52"
+	"lastUpdated": "2023-04-21 08:46:50"
 }
 
 /*
@@ -328,12 +328,15 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://bosworthtoller.com/search?q=heorte",
+		"defer": true,
+		"detectedItemType": "multiple",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "https://bosworthtoller.com/search/advanced?q=%7B%22minFields%22%3A1,%22fields%22%3A%5B%7B%22query%22%3A%22c.%252Bnn%22,%22field%22%3A%22headword%22,%22is_regex%22%3Atrue%7D,%7B%22query%22%3A%22%22,%22field%22%3A%22headword%22,%22condition%22%3A%22and%22,%22is_regex%22%3Afalse%7D%5D,%22wordclass%22%3A%7B%22include%22%3A%5B%5D,%22exclude%22%3A%5B%5D%7D,%22gender%22%3A%7B%22include%22%3A%5B%5D,%22exclude%22%3A%5B%5D%7D,%22subcategory%22%3A%7B%22include%22%3A%5B%5D,%22exclude%22%3A%5B%5D%7D,%22volume%22%3Anull%7D",
+		"url": "https://bosworthtoller.com/search/advanced?q=%7B%22minFields%22%3A1,%22fields%22%3A%5B%7B%22query%22%3A%22diacon%22,%22field%22%3A%22headword%22,%22is_regex%22%3Afalse%7D,%7B%22query%22%3A%22%22,%22field%22%3A%22headword%22,%22condition%22%3A%22and%22,%22is_regex%22%3Afalse%7D%5D,%22wordclass%22%3A%7B%22include%22%3A%5B%221%22%5D,%22exclude%22%3A%5B%5D%7D,%22gender%22%3A%7B%22include%22%3A%5B%221%22%5D,%22exclude%22%3A%5B%5D%7D,%22subcategory%22%3A%7B%22include%22%3A%5B%5D,%22exclude%22%3A%5B%5D%7D,%22volume%22%3Anull%7D",
 		"defer": true,
+		"detectedItemType": "multiple",
 		"items": "multiple"
 	},
 	{
