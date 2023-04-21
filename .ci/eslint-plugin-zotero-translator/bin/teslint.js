@@ -4,7 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const find = require('recursive-readdir-synchronous');
+const find = require('recursive-readdir');
 const { ESLint } = require("eslint");
 const argv = require('commander');
 
@@ -35,7 +35,7 @@ async function main() {
 	let allResults = [];
 
 	function findIgnore(file, stats) {
-		if (stats.isDirectory()) return (path.basename(file) == "node_modules");
+		if (stats.isDirectory()) return (path.basename(file) == "node_modules" || path.basename(file) == ".ci");
 		return !file.endsWith('.js');
 	}
 	for (const target of argv.args) {
@@ -43,7 +43,7 @@ async function main() {
 			console.error(`Target file '${target}' does not exist; skipping`); // eslint-disable-line no-console
 			continue;
 		}
-		const files = fs.lstatSync(target).isDirectory() ? find(target, [findIgnore]) : [target];
+		const files = fs.lstatSync(target).isDirectory() ? await find(target, [findIgnore]) : [target];
 		for (const file of files) {
 			if (path.dirname(path.resolve(file)) === translators.cache.repo) {
 				const translator = translators.cache.get(file);
