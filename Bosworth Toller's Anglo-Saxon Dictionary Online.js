@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-21 07:45:40"
+	"lastUpdated": "2023-04-21 08:35:52"
 }
 
 /*
@@ -269,15 +269,13 @@ function getNotes(doc, title) {
 	// around the definitions under it, and a sense can embed more senses
 	// recursively.
 	const definitionNodes = doc.querySelectorAll(".btd--entry-definition");
-	if (definitionNodes) {
-		const definitions = Array.prototype
-			.map.call(definitionNodes,
-				node => ZU.trimInternal(node.innerText.trim()))
-			.filter(Boolean);
+	const definitions = Array.prototype
+		.map.call(definitionNodes,
+			node => ZU.trimInternal(node.innerText.trim()))
+		.filter(Boolean);
 
-		if ((found = definitions.length)) { // NOTE: assignment
-			addSection("h2", "Definition", itemize(definitions));
-		}
+	if ((found = definitions.length)) { // NOTE: assignment
+		addSection("h2", "Definition", itemize(definitions));
 	}
 
 	return found && [{ note: root.innerHTML }];
@@ -291,8 +289,9 @@ function cleanupWordCat(listElement) {
 	if (!listElement) {
 		return null;
 	}
-	return Array.prototype
-		.map.call(listElement.querySelectorAll("li"), cleanListItem);
+	const listItems = listElement.querySelectorAll("li");
+	return Array.prototype.map.call(listItems, cleanListItem)
+		.filter(Boolean); // Don't keep empty output.
 }
 
 // Clean up the text of a single <li> element in the word-category section.
@@ -308,7 +307,7 @@ function cleanListItem(elem) {
 	const flen = fixables.length;
 	if (flen > 1) { // If no more than one "fixable", no need to fix anything.
 		// Fix all but the last "fixables"
-		for (const node of Array.from(fixables).slice(0, flen - 1)) {
+		for (const node of Array.prototype.slice.call(fixables, 0, flen - 1)) {
 			// This amounts to recovering the ::after pseudoelement manually.
 			node.textContent = node.textContent.trim() + ", ";
 		}
