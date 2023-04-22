@@ -113,7 +113,7 @@ async function scrape(nextDoc, url) {
 		}
 		
 		Zotero.debug(pdfURL);
-		if (risURL !== null) {
+		if (risURL) {
 			ZU.doGet(risURL, function (text) {
 				processRIS(text, url, pdfURL);
 			});
