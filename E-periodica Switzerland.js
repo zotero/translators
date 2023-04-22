@@ -98,7 +98,7 @@ async function scrape(nextDoc, url) {
 	Zotero.debug('Final URL ' + nextUrl);
 	var pageinfoUrl = nextUrl.replace("view", "ajax/pageinfo");
 	Zotero.debug('JSON URL ' + pageinfoUrl);
-	ZU.doGet(pageinfoUrl, function (text) {
+	let text = await requestText(pageinfoUrl);
 		var epjson = JSON.parse(text);
 		Zotero.debug(epjson);
 		var risURL = null;
