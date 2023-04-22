@@ -330,7 +330,7 @@ function getByline(doc) {
 	if (!byline) {
 		// Only for certain pre-2022 posts without more
 		// semantically-clear byline info.
-		byline = text(doc, ".post_detail>a[href*='author']");
+		byline = text(doc, ".post_detail > a[href*='author']");
 	}
 	return ZU.trimInternal(byline);
 }
