@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-28 09:41:06"
+	"lastUpdated": "2023-04-22 01:17:26"
 }
 
 /*
@@ -200,7 +200,7 @@ function inferPodcastGuests(doc, title) {
 	const normTitle = title.toLowerCase();
 
 	const boldFrags = [];
-	for (const elem of podBody.querySelectorAll("p b, p strong")) {
+	for (const elem of podBody.querySelectorAll(":scope p b, :scope p strong")) {
 		const txtMatch = ZU.trimInternal(elem.textContent).match(/\b.+\b/);
 		if (txtMatch) {
 			const txt = txtMatch[0];
@@ -346,11 +346,13 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://lithub.com/?s=wonder+AND+lelio",
+		"detectedItemType": "multiple",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "https://lithub.com/lydia-conklin-on-letting-their-personality-into-their-work/",
+		"detectedItemType": "podcast",
 		"items": [
 			{
 				"itemType": "podcast",
@@ -413,6 +415,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://lithub.com/the-cat-thief-by-son-bo-mi-translated-by-janet-hong/",
+		"detectedItemType": "blogPost",
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -471,6 +474,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://lithub.com/read-the-winners-of-american-short-fictions-2022-insider-prize-selected-by-lauren-hough/",
+		"detectedItemType": "blogPost",
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -515,6 +519,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://lithub.com/eden-boudreau-on-memoirs-that-risk-everything/",
+		"detectedItemType": "podcast",
 		"items": [
 			{
 				"itemType": "podcast",
@@ -577,6 +582,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://lithub.com/lesser-islands/",
+		"detectedItemType": "blogPost",
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -646,6 +652,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://lithub.com/the-forest-a-fable-of-america-in-the-1830s/",
+		"detectedItemType": "blogPost",
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -691,6 +698,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://lithub.com/a-girl-and-the-moon/",
+		"detectedItemType": "blogPost",
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -746,6 +754,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://lithub.com/the-calling-of-st-mattew/",
+		"detectedItemType": "blogPost",
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -813,6 +822,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://lithub.com/small-wonder-the-challenge-of-parenting-through-climate-collapse/",
+		"detectedItemType": "blogPost",
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -873,6 +883,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://lithub.com/letters-to-a-writer-of-color-deepa-anappara-and-taymour-soomro-on-finding-community-with-each-other/",
+		"detectedItemType": "podcast",
 		"items": [
 			{
 				"itemType": "podcast",
