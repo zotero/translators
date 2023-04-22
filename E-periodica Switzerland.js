@@ -40,7 +40,7 @@ function detectWeb(doc, url) {
 	if (url.includes('/digbib/view')) {
 		return "journalArticle";
 	}
-	else if (url.includes('/digbib/dossearch?')) {
+	else if (url.includes('/digbib/dossearch?') && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	else {
