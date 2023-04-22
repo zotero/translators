@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-22 01:02:21"
+	"lastUpdated": "2023-04-22 04:15:18"
 }
 
 /*
@@ -174,14 +174,26 @@ function getPage(doc) {
 function normalizeLemma(doc) {
 	// The key is to apply the correct vowel length even if the user disables
 	// its display. This "canonical" form (which corresponds to the original
-	// form in the print book) can be found in the "citation" block under
-	// "entry information" in the doc, no matter the citation style in use on
-	// the page.
+	// form in the print book) can be found either in the metadata or in the
+	// "citation" block under "entry information" in the doc, no matter the
+	// citation style in use on the page.
+	let titleRaw = text(doc, "#btd--entry-lemma").trim();
+	let titleNoDiac = removeDiac(titleRaw);
+
+	const metaTitle = attr(doc, 'meta[property="og:title"]', "content").trim();
+	const metaNoDiac = removeDiac(metaTitle);
+
+	if (metaTitle && titleNoDiac === metaNoDiac) {
+		return metaTitle;
+	}
+
+	// Fallback, using the citation line, just in case.
+	if (!titleRaw) {
+		titleRaw = metaTitle;
+		titleNoDiac = metaNoDiac;
+	}
 	const citeRaw = ZU.trimInternal(text(doc, ".btd--entry-information p"));
 	const citeNoDiac = removeDiac(citeRaw);
-
-	const titleRaw = text(doc, "#btd--entry-lemma").trim();
-	const titleNoDiac = removeDiac(titleRaw);
 
 	if (!titleNoDiac || !citeNoDiac) {
 		return null;
@@ -320,7 +332,7 @@ function cleanListItem(elem) {
 // Remove the diacritics on the letters, by decomposing and removing the
 // letters in the \u0300-\u036F range.
 function removeDiac(str) {
-	return str.normalize("NFD").replace(/[\u0300-\u036F]/, "");
+	return str.normalize("NFD").replace(/[\u0300-\u036F]/g, "");
 }
 
 /** BEGIN TEST CASES **/
