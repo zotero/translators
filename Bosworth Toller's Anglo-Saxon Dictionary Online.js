@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-21 08:46:50"
+	"lastUpdated": "2023-04-22 01:02:21"
 }
 
 /*
@@ -289,7 +289,7 @@ function cleanupWordCat(listElement) {
 	if (!listElement) {
 		return null;
 	}
-	const listItems = listElement.querySelectorAll("li");
+	const listItems = listElement.querySelectorAll(":scope li");
 	return Array.prototype.map.call(listItems, cleanListItem)
 		.filter(Boolean); // Don't keep empty output.
 }
@@ -302,7 +302,7 @@ function cleanupWordCat(listElement) {
 // lot easier to read than a more sophisticated solution.
 function cleanListItem(elem) {
 	const dup = elem.cloneNode(true/* deep */);
-	const fixables = dup.querySelectorAll(".btd--entry-word-category-detail");
+	const fixables = dup.querySelectorAll(":scope .btd--entry-word-category-detail");
 
 	const flen = fixables.length;
 	if (flen > 1) { // If no more than one "fixable", no need to fix anything.
