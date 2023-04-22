@@ -129,7 +129,7 @@ async function scrape(nextDoc, url) {
 			if (numyear.length > 0) {
 				item.volume = numyear[0];
 			}
-			if (pdfURL !== null) {
+			if (pdfURL) {
 				Zotero.debug('PDF URL: ' + pdfURL);
 				item.attachments.push({
 					url: pdfURL,
