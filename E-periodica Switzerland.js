@@ -69,7 +69,7 @@ function getSearchResults(doc, checkOnly) {
 
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'journalArticle') {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 
 	// querySelectors in scrape() not working at this point for multiple. Is the DOM not complete yet?
