@@ -99,17 +99,17 @@ async function scrape(nextDoc, url) {
 	var pageinfoUrl = nextUrl.replace("view", "ajax/pageinfo");
 	Zotero.debug('JSON URL ' + pageinfoUrl);
 	let text = await requestText(pageinfoUrl);
-	var epjson = JSON.parse(text);
-	Zotero.debug(epjson);
+	var epJSON = JSON.parse(text);
+	Zotero.debug(epJSON);
 	var risURL = null;
-	if (epjson.articles["0"].hasRisLink) {
-		risURL = origin + '/view/' + epjson.articles["0"].risLink;
+	if (epJSON.articles["0"].hasRisLink) {
+		risURL = origin + '/view/' + epJSON.articles["0"].risLink;
 	}
 	
 	Zotero.debug(risURL);
 	var pdfURL = null;
-	if (epjson.articles["0"].hasPdfLink) {
-		pdfURL = origin + epjson.articles["0"].pdfLink;
+	if (epJSON.articles["0"].hasPdfLink) {
+		pdfURL = origin + epJSON.articles["0"].pdfLink;
 	}
 	
 	Zotero.debug(pdfURL);
@@ -120,9 +120,9 @@ async function scrape(nextDoc, url) {
 	}
 	else {
 		var item = new Zotero.Item("journalArticle");
-		item.title = epjson.articles["0"].title;
-		item.publicationTitle = epjson.journalTitle;
-		var numyear = epjson.volumeNumYear.replace("(", "").replace(")", "").split(" ");
+		item.title = epJSON.articles["0"].title;
+		item.publicationTitle = epJSON.journalTitle;
+		var numyear = epJSON.volumeNumYear.replace("(", "").replace(")", "").split(" ");
 		if (numyear.length > 1) {
 			item.date = numyear.slice(-1);
 		}
