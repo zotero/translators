@@ -99,47 +99,46 @@ async function scrape(nextDoc, url) {
 	var pageinfoUrl = nextUrl.replace("view", "ajax/pageinfo");
 	Zotero.debug('JSON URL ' + pageinfoUrl);
 	let text = await requestText(pageinfoUrl);
-		var epjson = JSON.parse(text);
-		Zotero.debug(epjson);
-		var risURL = null;
-		if (epjson.articles["0"].hasRisLink) {
-			risURL = origin + '/view/' + epjson.articles["0"].risLink;
+	var epjson = JSON.parse(text);
+	Zotero.debug(epjson);
+	var risURL = null;
+	if (epjson.articles["0"].hasRisLink) {
+		risURL = origin + '/view/' + epjson.articles["0"].risLink;
+	}
+	
+	Zotero.debug(risURL);
+	var pdfURL = null;
+	if (epjson.articles["0"].hasPdfLink) {
+		pdfURL = origin + epjson.articles["0"].pdfLink;
+	}
+	
+	Zotero.debug(pdfURL);
+	if (risURL) {
+		ZU.doGet(risURL, function (text) {
+			processRIS(text, url, pdfURL);
+		});
+	}
+	else {
+		var item = new Zotero.Item("journalArticle");
+		item.title = epjson.articles["0"].title;
+		item.publicationTitle = epjson.journalTitle;
+		var numyear = epjson.volumeNumYear.replace("(", "").replace(")", "").split(" ");
+		if (numyear.length > 1) {
+			item.date = numyear.slice(-1);
 		}
-		
-		Zotero.debug(risURL);
-		var pdfURL = null;
-		if (epjson.articles["0"].hasPdfLink) {
-			pdfURL = origin + epjson.articles["0"].pdfLink;
+		if (numyear.length > 0) {
+			item.volume = numyear[0];
 		}
-		
-		Zotero.debug(pdfURL);
-		if (risURL) {
-			ZU.doGet(risURL, function (text) {
-				processRIS(text, url, pdfURL);
+		if (pdfURL) {
+			Zotero.debug('PDF URL: ' + pdfURL);
+			item.attachments.push({
+				url: pdfURL,
+				title: "E-periodica PDF",
+				type: "application/pdf"
 			});
 		}
-		else {
-			var item = new Zotero.Item("journalArticle");
-			item.title = epjson.articles["0"].title;
-			item.publicationTitle = epjson.journalTitle;
-			var numyear = epjson.volumeNumYear.replace("(", "").replace(")", "").split(" ");
-			if (numyear.length > 1) {
-				item.date = numyear.slice(-1);
-			}
-			if (numyear.length > 0) {
-				item.volume = numyear[0];
-			}
-			if (pdfURL) {
-				Zotero.debug('PDF URL: ' + pdfURL);
-				item.attachments.push({
-					url: pdfURL,
-					title: "E-periodica PDF",
-					type: "application/pdf"
-				});
-			}
-			item.complete();
-		}
-	});
+		item.complete();
+	}
 }
 
 function convertCharRefs(string) {
