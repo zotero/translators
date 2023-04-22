@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-22 04:15:18"
+	"lastUpdated": "2023-04-22 05:18:12"
 }
 
 /*
@@ -98,10 +98,7 @@ const BOSWORTH_TOLLER_INFO = {
 	place: "Prague",
 	publisher: "Faculty of Arts, Charles University",
 	date: "2014",
-	// See https://bosworthtoller.com/images-dictionary/frontback_matter.pdf
-	originalTitle: "An Anglo-Saxon Dictionary, Based on the Manuscript Collections of the Late Joseph Bosworth, D.D., F.R.S., Edited and Enlarged by T. Northcote Toller, M.A. (with Supplement, by T. Northcote Toller)",
 	originalPublisher: "Oxford University Press",
-	originalDate: "1898 (1921)",
 	originalPlace: "London",
 	creators: [ZU.cleanAuthor("Joseph Bosworth", "author"),
 		ZU.cleanAuthor("Thomas Northcote Toller", "editor"),
@@ -127,14 +124,12 @@ function scrape(doc, url = doc.location.href) {
 	// Word entry
 	item.title = normalizeLemma(doc) || "[Unknown entry]";
 
-	// Page number
-	let tmp;
-	if (!isNaN(tmp = getPage(doc))) {
-		item.pages = tmp;
-	}
+	// Original publication and page number in it, if any
+	let tmp = getPage(doc); // may be null, which is OK for assign
+	Object.assign(item, tmp);
 
 	// Notes (summary of word definitions)
-	if ((tmp = getNotes(doc, item.title))) {
+	if ((tmp = getNotes(doc, item.title))) { // NOTE: assignment
 		item.notes = tmp;
 	}
 
@@ -148,18 +143,35 @@ function scrape(doc, url = doc.location.href) {
 	item.complete();
 }
 
-// Get the page number by parsing the URL of the scanned page linked to the
-// article.
+// See https://bosworthtoller.com/images-dictionary/frontback_matter.pdf
+const BOOK_ORIG_INFO = {
+	b: {
+		originalDictionaryTitle: "An Anglo-Saxon Dictionary, Based on the Manuscript Collections of the Late Joseph Bosworth, D.D., F.R.S.",
+		originalDate: "1898",
+	},
+	d: {
+		originalDictionaryTitle: "An Anglo-Saxon Dictionary, Based on the Manuscript Collections of the Late Joseph Bosworth; Supplement",
+		originalDate: "1921",
+	},
+};
+
+// Get the original volume info and page number by parsing the URL of the
+// scanned page linked to the article. Returns an object with the fields
+// suitably populated.
 function getPage(doc) {
 	const imageURL = attr(doc, ".btd--image-pin-pan > img", "src");
 	if (!imageURL) {
-		return NaN;
+		return null;
 	}
-	const pageMatch = imageURL.match(/^\/images-dictionary\/bt_b(\d+)\..+$/);
-	if (!pageMatch || !pageMatch[1]) {
-		return NaN;
+	// "b" for main book (1898), "d" for supplement (1912)
+	const pageMatch = imageURL.match(/^\/images-dictionary\/bt_([bd])(\d+)\..+$/);
+	if (!pageMatch) {
+		return null;
 	}
-	return parseInt(pageMatch[1]);
+	let [, bookKey, page] = pageMatch;
+	const info = BOOK_ORIG_INFO[bookKey];
+	info.originalPage = page.replace(/^0*/, "");
+	return info;
 }
 
 // Normalize the lemma's vowel display-form, following the original book's
@@ -385,7 +397,6 @@ var testCases = [
 				"dictionaryTitle": "An Anglo-Saxon Dictionary Online",
 				"language": "en",
 				"libraryCatalog": "Bosworth Toller's Anglo-Saxon Dictionary Online",
-				"pages": 700,
 				"place": "Prague",
 				"publisher": "Faculty of Arts, Charles University",
 				"rights": "All the data provided here are free for any purpose. If you use the data for academic purposes, we ask that you kindly cite us as your source. In case you need a large portion of the dictionary data or you need it in a specific format, let us know through the contact form, we are happy to do custom database dumps for researchers.",
@@ -440,7 +451,6 @@ var testCases = [
 				"dictionaryTitle": "An Anglo-Saxon Dictionary Online",
 				"language": "en",
 				"libraryCatalog": "Bosworth Toller's Anglo-Saxon Dictionary Online",
-				"pages": 183,
 				"place": "Prague",
 				"publisher": "Faculty of Arts, Charles University",
 				"rights": "All the data provided here are free for any purpose. If you use the data for academic purposes, we ask that you kindly cite us as your source. In case you need a large portion of the dictionary data or you need it in a specific format, let us know through the contact form, we are happy to do custom database dumps for researchers.",
@@ -495,7 +505,6 @@ var testCases = [
 				"dictionaryTitle": "An Anglo-Saxon Dictionary Online",
 				"language": "en",
 				"libraryCatalog": "Bosworth Toller's Anglo-Saxon Dictionary Online",
-				"pages": 855,
 				"place": "Prague",
 				"publisher": "Faculty of Arts, Charles University",
 				"rights": "All the data provided here are free for any purpose. If you use the data for academic purposes, we ask that you kindly cite us as your source. In case you need a large portion of the dictionary data or you need it in a specific format, let us know through the contact form, we are happy to do custom database dumps for researchers.",
@@ -550,7 +559,6 @@ var testCases = [
 				"dictionaryTitle": "An Anglo-Saxon Dictionary Online",
 				"language": "en",
 				"libraryCatalog": "Bosworth Toller's Anglo-Saxon Dictionary Online",
-				"pages": 694,
 				"place": "Prague",
 				"publisher": "Faculty of Arts, Charles University",
 				"rights": "All the data provided here are free for any purpose. If you use the data for academic purposes, we ask that you kindly cite us as your source. In case you need a large portion of the dictionary data or you need it in a specific format, let us know through the contact form, we are happy to do custom database dumps for researchers.",
@@ -565,6 +573,60 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<h1>Summary</h1>mód-c-wánig<h2>Word category</h2><ul><li>adjective</li></ul><h2>Grammar</h2>mód-c-wánig, adj.<h2>Definition</h2><ul><li>Sad at heart</li></ul>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://bosworthtoller.com/53107",
+		"detectedItemType": "dictionaryEntry",
+		"items": [
+			{
+				"itemType": "dictionaryEntry",
+				"title": "hrǽw",
+				"creators": [
+					{
+						"firstName": "Joseph",
+						"lastName": "Bosworth",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Thomas Northcote",
+						"lastName": "Toller",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Christ",
+						"lastName": "Sean",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Ondřej",
+						"lastName": "Tichy",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2014",
+				"dictionaryTitle": "An Anglo-Saxon Dictionary Online",
+				"language": "en",
+				"libraryCatalog": "Bosworth Toller's Anglo-Saxon Dictionary Online",
+				"place": "Prague",
+				"publisher": "Faculty of Arts, Charles University",
+				"rights": "All the data provided here are free for any purpose. If you use the data for academic purposes, we ask that you kindly cite us as your source. In case you need a large portion of the dictionary data or you need it in a specific format, let us know through the contact form, we are happy to do custom database dumps for researchers.",
+				"url": "https://bosworthtoller.com/53107",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<h1>Summary</h1>hrǽw<h2>Definition</h2><ul><li>A living body</li><li>a dead body, corpse</li></ul>"
 					}
 				],
 				"seeAlso": []
