@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-23 08:58:26"
+	"lastUpdated": "2023-04-23 09:00:51"
 }
 
 /*
@@ -36,7 +36,6 @@
 */
 
 function detectWeb(doc, url) {
-	// TODO: adjust the logic here
 	if (url.includes('/digbib/view')) {
 		return "journalArticle";
 	}
@@ -54,10 +53,8 @@ function getSearchResults(doc, checkOnly) {
 	var rows = doc.querySelectorAll('h2.ep-result__title > a');
 	for (let row of rows) {
 		Zotero.debug(row.innerHTML);
-		// TODO: check and maybe adjust
 		let href = row.href;
 		Zotero.debug(href);
-		// TODO: check and maybe adjust
 		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
