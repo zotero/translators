@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-23 09:00:51"
+	"lastUpdated": "2023-04-23 10:01:51"
 }
 
 /*
@@ -115,8 +115,8 @@ async function scrape(nextDoc, url) {
 	}
 	else {
 		var item = new Zotero.Item("journalArticle");
-		item.title = epJSON.articles["0"].title;
-		item.publicationTitle = epJSON.journalTitle;
+		item.title = epJSON.articles["0"].title.replace(' : ', ': ');
+		item.publicationTitle = epJSON.journalTitle.replace(' : ', ': ');
 		var numyear = epJSON.volumeNumYear.replace("(", "").replace(")", "").split(" ");
 		if (numyear.length > 1) {
 			item.date = numyear.slice(-1);
@@ -178,28 +178,13 @@ function processRIS(text, URL, pdfURL) {
 		}
 		// Don't save HTML snapshot from 'UR' tag
 		item.attachments = [];
-		// not currently using but that's where the PDF link is
-		// var pdfurl = attr('a[data-qa="download-pdf"]', 'href');
-		// Books don't have PDFs
-		/*
-		if (/stable\/([a-z0-9.]+)/.test(item.url) & item.itemType != "book") {
-			let pdfurl = "/stable/pdfplus/" + jid + ".pdf?acceptTC=true";
-			item.attachments.push({
-				url: pdfurl,
-				title: "JSTOR Full Text PDF",
-				mimeType: "application/pdf"
-			});
-		}
-		*/
+		
 		Zotero.debug('in processRIS');
 		Zotero.debug(item);
 
 		if (item.ISSN) {
 			item.ISSN = ZU.cleanISSN(item.ISSN);
 		}
-		
-		// Only the DOIs mentioned in RIS are valid, and we don't
-		// add any other jid for DOI because they are only internal.
 		
 		if (maintitle && subtitle) {
 			maintitle[1] = maintitle[1].replace(/:\s*$/, '');
@@ -225,6 +210,10 @@ function processRIS(text, URL, pdfURL) {
 		
 		// titles may also contain escape characters
 		item.title = convertCharRefs(item.title);
+
+		if (item.publicationTitle) {
+			item.publicationTitle = item.publicationTitle.replace(' : ', ': ');
+		}
 		
 		// remove all caps from titles and authors.
 		for (i = 0; i < item.creators.length; i++) {
@@ -301,6 +290,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.e-periodica.ch/digbib/view?pid=enh-006%3A2018%3A11::121#133",
+		"detectedItemType": "journalArticle",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -327,7 +317,7 @@ var testCases = [
 				"ISSN": "1662-8500",
 				"libraryCatalog": "E-periodica Switzerland",
 				"pages": "129",
-				"publicationTitle": "Entomo Helvetica : entomologische Zeitschrift der Schweiz",
+				"publicationTitle": "Entomo Helvetica: entomologische Zeitschrift der Schweiz",
 				"shortTitle": "Untersuchungen zur aktuellen Verbreitung der schweizerischen Laufkäfer (Coleoptera",
 				"volume": "11",
 				"attachments": [
@@ -345,6 +335,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.e-periodica.ch/digbib/view?pid=bts-004%3A2011%3A137%3A%3A254&referrer=search#251",
+		"detectedItemType": "journalArticle",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -362,7 +353,7 @@ var testCases = [
 				"issue": "05-06",
 				"libraryCatalog": "E-periodica Switzerland",
 				"pages": "14",
-				"publicationTitle": "Tracés : bulletin technique de la Suisse romande",
+				"publicationTitle": "Tracés: bulletin technique de la Suisse romande",
 				"volume": "137",
 				"attachments": [
 					{
@@ -379,6 +370,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.e-periodica.ch/digbib/view?pid=alp-001%3A1907%3A2%3A%3A332#375",
+		"detectedItemType": "journalArticle",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -395,7 +387,7 @@ var testCases = [
 				"issue": "12",
 				"libraryCatalog": "E-periodica Switzerland",
 				"pages": "364",
-				"publicationTitle": "Berner Rundschau : Halbmonatsschrift für Dichtung, Theater, Musik und bildende Kunst in der Schweiz",
+				"publicationTitle": "Berner Rundschau: Halbmonatsschrift für Dichtung, Theater, Musik und bildende Kunst in der Schweiz",
 				"shortTitle": "Stimmen und Meinungen",
 				"volume": "2",
 				"attachments": [
