@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-01-23 17:12:53"
+	"lastUpdated": "2023-04-24 14:18:06"
 }
 
 /*
@@ -316,6 +316,7 @@ function init(doc, url, callback, forceLoadRDF) {
 						hwType = "conferencePaper";
 						break;
 					case "citation_book_title":
+					case "citation_inbook_title":					
 						hwType = "bookSection";
 						break;
 					case "citation_dissertation_institution":
