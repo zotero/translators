@@ -119,6 +119,7 @@ async function scrape(doc, url = doc.location.href) {
 		if (rows[i].cells[0].innerText.trim() == "Piece Style") {
 			var style = rows[i].cells[1].innerText.trim();
 		}
+
 		/* The metadata of instrumention is too mess.
 		if (rows[i].cells[0].innerText.trim() == "Instrumentation") {
 			var instrumentation = rows[i].cells[1].innerText.trim();
@@ -172,6 +173,7 @@ async function scrape(doc, url = doc.location.href) {
 	if (style) {
 		item.tags.push(style);
 	}
+
 	/* see 122
 	if (instrumentation) {
 		var instrumentationNotes = "Instrumentation\n" + instrumentation;
