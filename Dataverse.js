@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-20 18:10:33"
+	"lastUpdated": "2023-04-24 16:02:02"
 }
 
 /*
@@ -68,18 +68,20 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) ZU.processDocuments(Object.keys(items), scrape);
-		});
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
-function scrape(doc, url) {
+async function scrape(doc, url = doc.location.href) {
 	let jsonLD = text(doc, 'script[type="application/ld+json"]');
 	// Z.debug(jsonLD)
 	let schema = JSON.parse(jsonLD);
@@ -89,13 +91,17 @@ function scrape(doc, url) {
 		license = schema.license.text;
 	}
 	let version = schema.version;
-	var translator = Zotero.loadTranslator('web');
+	let translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
 	
-	translator.setHandler('itemDone', function (obj, item) {
+	translator.setHandler('itemDone', (_obj, item) => {
 		item.libraryCatalog = text(doc, '#breadcrumbLnk0');
+		// we commonly have two colons in titles. The first one just labels the data as data
+		if (/^(Replication )?[Dd]ata for:/.test(item.title)) {
+			item.shortTitle = item.title.match(/(^(Replication )?[Dd]ata for:.*?)(:|$)/)[1];
+		}
 		if (license) {
 			item.rights = ZU.cleanTags(license).trim();
 		}
@@ -103,11 +109,12 @@ function scrape(doc, url) {
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function (trans) {
-		trans.itemType = datasetType;
-		trans.doWeb(doc, url);
-	});
+	let em = await translator.getTranslatorObject();
+	em.itemType = datasetType;
+	await em.doWeb(doc, url);
 }
+
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
