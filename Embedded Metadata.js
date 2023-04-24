@@ -316,7 +316,7 @@ function init(doc, url, callback, forceLoadRDF) {
 						hwType = "conferencePaper";
 						break;
 					case "citation_book_title":
-					case "citation_inbook_title":					
+					case "citation_inbook_title":
 						hwType = "bookSection";
 						break;
 					case "citation_dissertation_institution":
