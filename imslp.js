@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-05 04:11:21"
+	"lastUpdated": "2023-04-25 15:01:04"
 }
 
 /*
@@ -83,18 +83,21 @@ async function scrape(doc, url = doc.location.href) {
 	for (var i = 2; i < rows.length; i++) {
 		//Z.debug(rows[i].cells[0].innerText);
 		//Z.debug(rows[i].cells[1].innerText);
+		/* waiting for a suitable field
 		if (rows[i].cells[0].innerText.trim().includes("Name Translations")) {
 			var names = rows[i].cells[1].innerText.trim();
-		}
+		}*/
 		if (rows[i].cells[0].innerText.trim() == "Composer") {
 			var author = rows[i].cells[1].innerText.trim();
 		}
 		if (rows[i].cells[0].innerText.trim().includes("Opus/Catalogue Number")) {
 			var seriesNumber = rows[i].cells[1].innerText.trim();
 		}
+
+		/* waiting for a suitable field
 		if (rows[i].cells[0].innerText.trim() == "Key") {
 			var key = rows[i].cells[1].innerText.trim();
-		}
+		}*/
 		if (rows[i].cells[0].innerText.trim() == "Text Incipit") {
 			var incipit = rows[i].cells[1].innerHTML;
 		}
@@ -104,12 +107,14 @@ async function scrape(doc, url = doc.location.href) {
 		if (rows[i].cells[0].innerText.trim().includes("Year/Date of Composition")) {
 			var date = rows[i].cells[1].innerText.trim();
 		}
+
+		/* waiting for a suitable field
 		if (rows[i].cells[0].innerText.trim().includes("First Performance")) {
 			var place = rows[i].cells[1].innerText.trim();
 		}
 		if (rows[i].cells[0].innerText.trim().includes("First Publication")) {
 			var publisher = rows[i].cells[1].innerText.trim();
-		}
+		}*/
 		if (rows[i].cells[0].innerText.trim() == "Language") {
 			var language = rows[i].cells[1].innerText.trim();
 		}
@@ -130,14 +135,15 @@ async function scrape(doc, url = doc.location.href) {
 	//push metadata
 	item.title = title.replace(/\(.*\)/, "");
 	item.url = url;
-	item.libraryCatalog = null;
+	item.libraryCatalog = "IMSLP";
 	if (author) {
 		item.creators.push(ZU.cleanAuthor(author, "author", true));
-		item.tags.push(author.split(',')[0]);
 	}
+
+	/* waiting for a suitable field
 	if (names) {
 		item.abstractNote = names.replace(/\[.*\]/, "");
-	}
+	}*/
 	if (movements) {
 		var movementsNotes = movements;
 		item.notes.push({ note: movementsNotes });
@@ -145,12 +151,14 @@ async function scrape(doc, url = doc.location.href) {
 	if (seriesNumber) {
 		item.seriesNumber = seriesNumber;
 	}
+
+	/* waiting for a suitable field
 	if (place) {
 		item.place = "First Performance: " + place;
 	}
 	if (publisher) {
 		item.publisher = publisher;
-	}
+	}*/
 	if (date) {
 		item.date = date;
 	}
@@ -163,9 +171,11 @@ async function scrape(doc, url = doc.location.href) {
 	else {
 		item.extra = "Type: musical_score";
 	}
+
+	/* waiting for a suitable field
 	if (key) {
 		item.tags.push(key);
-	}
+	}*/
 	if (incipit) {
 		var incipitNotes = "Text Incipit:" + incipit.replace(/<i(([\s\S])*?)<\/i>/, "");
 		item.notes.push({ note: incipitNotes });
@@ -200,30 +210,22 @@ var testCases = [
 					}
 				],
 				"date": "1908–09",
-				"abstractNote": "大地之歌; Pieseň o zemi; Песнь о земле; השיר על הארץ; 대지의 노래;",
 				"extra": "Type: musical_score",
 				"language": "German",
-				"place": "First Performance: 1911-11-20 in Munich, Tonhalle.\nSara Cahier (alto), William Miller (tenor), Orchestra, Bruno Walter (conductor)",
-				"publisher": "1912",
+				"libraryCatalog": "IMSLP",
 				"url": "https://imslp.org/wiki/Das_Lied_von_der_Erde_(Mahler%2C_Gustav)",
 				"attachments": [],
 				"tags": [
-					{
-						"tag": "Mahler"
-					},
 					{
 						"tag": "Romantic"
 					}
 				],
 				"notes": [
 					{
-						"note": "<h1>Movement:<h1>\n6 movements:\nDas Trinklied vom Jammer der Erde\nDer Einsame im Herbst\nVon der Jugend\nVon der Schönheit\nDer Trunkene im Frühling\nDer Abschied"
+						"note": "6 movements:\n<ol><li>Das Trinklied vom Jammer der Erde\n</li><li>Der Einsame im Herbst\n</li><li>Von der Jugend\n</li><li>Von der Schönheit\n</li><li>Der Trunkene im Frühling\n</li><li>Der Abschied\n</li></ol>\n"
 					},
 					{
-						"note": "<h1>Text Incipit:<h1>\nsee below\nSchon winkt der Wein im goldnen Pokale\nHerbstnebel wallen bläulich überm See\nMitten in dem kleinen Teiche\nJunge Mädchen pflücken Blumen\nWenn nur ein Traum das Leben ist\nDie Sonne scheidet hinter dem Gebirge"
-					},
-					{
-						"note": "<h1>Instrumentation:<h1>\nvoices, orchestra"
+						"note": "Text Incipit:\n<ol><li> <span class=\"plainlinks\"><a rel=\"nofollow\" class=\"external text\" href=\"http://www.lieder.net/lieder/get_text.html?TextId=20677\">Schon winkt der Wein im goldnen Pokale</a></span>\n</li><li> <span class=\"plainlinks\"><a rel=\"nofollow\" class=\"external text\" href=\"http://www.lieder.net/lieder/get_text.html?TextId=20681\">Herbstnebel wallen bläulich überm See</a></span>\n</li><li> <span class=\"plainlinks\"><a rel=\"nofollow\" class=\"external text\" href=\"http://www.lieder.net/lieder/get_text.html?TextId=20673\">Mitten in dem kleinen Teiche</a></span>\n</li><li> <span class=\"plainlinks\"><a rel=\"nofollow\" class=\"external text\" href=\"http://www.lieder.net/lieder/get_text.html?TextId=20686\">Junge Mädchen pflücken Blumen</a></span>\n</li><li> <span class=\"plainlinks\"><a rel=\"nofollow\" class=\"external text\" href=\"http://www.lieder.net/lieder/get_text.html?TextId=20690\">Wenn nur ein Traum das Leben ist</a></span>\n</li><li> <span class=\"plainlinks\"><a rel=\"nofollow\" class=\"external text\" href=\"http://www.lieder.net/lieder/get_text.html?TextId=20696\">Die Sonne scheidet hinter dem Gebirge</a></span>\n</li></ol>\n"
 					}
 				],
 				"seeAlso": []
