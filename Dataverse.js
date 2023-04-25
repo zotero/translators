@@ -2,14 +2,14 @@
 	"translatorID": "aedf3fb0-9a50-47b3-ba2f-3206552b82a9",
 	"label": "Dataverse",
 	"creator": "Abe Jellinek, Sebastian Karcher",
-	"target": "^https?://(www\\.)?((open|research-|hei)?data|dvn|e?da[td]os|sodha\\.be|repositoriodedados|archive\\.data\\.jhu\\.edu|repositoriopesquisas|darus)",
+	"target": "^https?://(www\\.)?((open|research-?|hei|planetary-|osna|in|bonn|borealis|lida\\.|archaeology\\.|entrepot\\.recherche\\.|archive\\.|redape\\.)?(data|e?da[td]os)|dvn|sodha\\.be|repositorio(\\.|dedados|pesquisas)|abacus\\.library\\.ubc\\.ca|dorel\\.univ-lorraine\\.fr|darus\\.uni-stuttgart\\.de|dunas\\.ua\\.pt|edmond\\.mpdl\\.mpg\\.de|keen\\.zih\\.tu-dresden\\.de|rdr\\.kuleuven\\.be|portal\\.odissei\\.nl)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-24 16:02:02"
+	"lastUpdated": "2023-04-25 02:19:30"
 }
 
 /*
