@@ -37,15 +37,15 @@
 
 
 function detectWeb(doc, url) {
-  if (url.includes('/book/')) {
+	if (url.includes('/book/')) {
 		return 'book';
 	}
 	else if (url.includes("/browse/") || url.includes("/search?") || url.includes("/publisher/") || url.includes("/reading-list/")) {
 		if (getSearchResults(doc, true)) {
-	  	return 'multiple';
+			return 'multiple';
 		}
 	}
-  Z.monitorDOMChanges(doc.querySelector('div#root'), {childList:true, subtree:true});
+	Z.monitorDOMChanges(doc.querySelector('div#root'), { childList: true, subtree: true });
 	return false;
 }
 
@@ -54,7 +54,7 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	// limitation: this selector works well for /search?, /browse/, and /publisher/ pages, but doesn't work
 	// for /reading-list/, e.g. https://www.perlego.com/reading-list/86/introduction-to-social-movements?queryID=21da233727a255f6d709ad565bddc362
-  var rows = doc.querySelectorAll('a[href*="/book/"]');
+	var rows = doc.querySelectorAll('a[href*="/book/"]');
 	for (let row of rows) {
 		var href = row.href;
 		// for non-logged in users, row.href sometimes contains /null/ so user sees a 404 error instead of the book
@@ -62,7 +62,7 @@ function getSearchResults(doc, checkOnly) {
 		if (href.includes("null/")) {
 			href = href.replace("null/", "");
 		}
-	let title = text(row, 'span');
+		let title = text(row, 'span');
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -90,7 +90,6 @@ async function scrape(doc, url = doc.location.href) {
 	let apiUrl = "https://api.perlego.com/metadata/v2/metadata/books/" + id;
 	var apiJson = await requestJSON(apiUrl);
 	var metadata = apiJson.data.results[0];
-  Zotero.debug(metadata);
 	if (metadata.subtitle) {
 		item.title = metadata.title + ": " + metadata.subtitle;
 	}
@@ -100,7 +99,7 @@ async function scrape(doc, url = doc.location.href) {
 	item.shortTitle = metadata.title;
 	item.ISBN = ZU.cleanISBN(metadata.isbn13);
 	// multiple authors are entered in a single field in JSON, separated by comma or ampersand
-  let authors = metadata.author.split(/[,&]/);
+	let authors = metadata.author.split(/[,&]/);
 	for (let author of authors) {
 		item.creators.push(ZU.cleanAuthor(author, 'author'));
 	}
@@ -113,12 +112,12 @@ async function scrape(doc, url = doc.location.href) {
 	item.publisher = metadata.publisher_name;
 	item.language = metadata.language;
 	item.url = url;
-  if (metadata.subject[0].subject_name) {
-	item.tags.push(metadata.subject[0].subject_name);
-  }
+	if (metadata.subject[0].subject_name) {
+		item.tags.push(metadata.subject[0].subject_name);
+	}
 	if (metadata.topics[0].topic_name) {
-	item.tags.push(metadata.topics[0].topic_name);
-  }
+		item.tags.push(metadata.topics[0].topic_name);
+	}
 	item.complete();
 }
 
