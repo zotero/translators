@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-19 14:33:05"
+	"lastUpdated": "2023-04-26 14:52:00"
 }
 
 /*
@@ -37,17 +37,15 @@
 
 
 function detectWeb(doc, url) {
-	Z.monitorDOMChanges(doc.querySelector('div#root'), {childList:true, subtree:true});
   if (url.includes('/book/')) {
 		return 'book';
 	}
 	else if (url.includes("/browse/") || url.includes("/search?") || url.includes("/publisher/") || url.includes("/reading-list/")) {
-		// Z.monitorDOMChanges(doc.querySelector('div[data-test-locator="Grid-ItemGrid"]'), {childList:true});
-
 		if (getSearchResults(doc, true)) {
 	  	return 'multiple';
 		}
 	}
+  Z.monitorDOMChanges(doc.querySelector('div#root'), {childList:true, subtree:true});
 	return false;
 }
 
@@ -56,7 +54,6 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	// limitation: this selector works well for /search?, /browse/, and /publisher/ pages, but doesn't work
 	// for /reading-list/, e.g. https://www.perlego.com/reading-list/86/introduction-to-social-movements?queryID=21da233727a255f6d709ad565bddc362
-	// var rows = doc.querySelectorAll('div.sc-bhhwZE');
   var rows = doc.querySelectorAll('a[href*="/book/"]');
 	for (let row of rows) {
 		var href = row.href;
@@ -65,10 +62,7 @@ function getSearchResults(doc, checkOnly) {
 		if (href.includes("null/")) {
 			href = href.replace("null/", "");
 		}
-		// innerText example: "Start free trial\nFoundation Mathematics\nK.A. Stroud\n2017"
-		var titleArray = row.innerText.split("\n");
-		// title is equal to element 1 of titleArray, e.g. "Foundation Mathematics"
-		let title = titleArray[1];
+	let title = text(row, 'span');
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -92,10 +86,11 @@ async function doWeb(doc, url) {
 
 async function scrape(doc, url = doc.location.href) {
 	let item = new Zotero.Item('book');
-	const id = url.match(/\d{6,8}/)[0];
+	const id = url.match(/\/book\/(\d+)/)[1];
 	let apiUrl = "https://api.perlego.com/metadata/v2/metadata/books/" + id;
 	var apiJson = await requestJSON(apiUrl);
 	var metadata = apiJson.data.results[0];
+  Zotero.debug(metadata);
 	if (metadata.subtitle) {
 		item.title = metadata.title + ": " + metadata.subtitle;
 	}
@@ -103,26 +98,13 @@ async function scrape(doc, url = doc.location.href) {
 		item.title = metadata.title;
 	}
 	item.shortTitle = metadata.title;
-	item.ISBN = metadata.isbn13;
+	item.ISBN = ZU.cleanISBN(metadata.isbn13);
 	// multiple authors are entered in a single field in JSON, separated by comma or ampersand
-	if (metadata.author.includes(",")) {
-		var commaAuthors = metadata.author.split(",");
-		for (var i in commaAuthors) {
-			item.creators.push(ZU.cleanAuthor(commaAuthors[i], 'author'));
-		}
+  let authors = metadata.author.split(/[,&]/);
+	for (let author of authors) {
+		item.creators.push(ZU.cleanAuthor(author, 'author'));
 	}
-	else if (metadata.author.includes("&")) {
-		var ampAuthors = metadata.author.split("&");
-		for (var j in ampAuthors) {
-			item.creators.push(ZU.cleanAuthor(ampAuthors[j], 'author'));
-		}
-	}
-	else {
-		item.creators.push(ZU.cleanAuthor(metadata.author, 'author'));
-	}
-
-	const descriptionWithoutTags = metadata.description.replace(/<[^>]*>/g, '');
-	item.abstractNote = descriptionWithoutTags;
+	item.abstractNote = ZU.cleanTags(metadata.description);
 	let dateString = metadata.date;
 	let formattedDate = dateString.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
 	item.date = formattedDate;
@@ -131,9 +113,12 @@ async function scrape(doc, url = doc.location.href) {
 	item.publisher = metadata.publisher_name;
 	item.language = metadata.language;
 	item.url = url;
+  if (metadata.subject[0].subject_name) {
 	item.tags.push(metadata.subject[0].subject_name);
+  }
+	if (metadata.topics[0].topic_name) {
 	item.tags.push(metadata.topics[0].topic_name);
-
+  }
 	item.complete();
 }
 
@@ -142,6 +127,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.perlego.com/book/781635/unshakeable-your-guide-to-financial-freedom-pdf",
+		"detectedItemType": "book",
 		"items": [
 			{
 				"itemType": "book",
@@ -160,7 +146,7 @@ var testCases = [
 				],
 				"date": "2017-02-28",
 				"ISBN": "9781471164941",
-				"abstractNote": "*THE NEW YORK TIMES BESTSELLER* Tony Robbins, arguably the most recognizable life and business strategist and guru, is back with a timely, unique follow-up to his smash New York Times bestseller Money: Master the Game. Market corrections are as constant as seasons are in nature. There have been 30 such corrections in the past 30 years, yet there's never been an action plan for how not only to survive, but thrive through each change in the stock market. Building upon the principles in Money: Master the Game, Robbins offers the reader specific steps they can implement to protect their investments while maximizing their wealth. It's a detailed guidedesigned for investors, articulated in the common-sense, practical manner that the millions of loyal Robbins fans and students have come to expect and rely upon. Few have navigated the turbulence of the stock market as adeptly and successfully as Tony Robbins. His proven, consistent success over decades makes him singularly qualified to help investors (both seasoned and first-timers alike) preserve and add to their investments. 'Tony's power is super-human' Oprah Winfrey 'He has a great gift. He has the gift to inspire' Bill Clinton 'Tony Robbins needs no introduction. He is committed to helping make life better for every investor' Carl Icahn 'The high priest of human potential. The world can't get enough of Anthony Robbins' The New York Times",
+				"abstractNote": "*THE NEW YORK TIMES BESTSELLER* Tony Robbins, arguably the most recognizable life and business strategist and guru, is back with a timely, unique follow-up to his smash New York Times bestseller Money: Master the Game.\n Market corrections are as constant as seasons are in nature. There have been 30 such corrections in the past 30 years, yet there's never been an action plan for how not only to survive, but thrive through each change in the stock market.\n Building upon the principles in Money: Master the Game, Robbins offers the reader specific steps they can implement to protect their investments while maximizing their wealth. It's a detailed guidedesigned for investors, articulated in the common-sense, practical manner that the millions of loyal Robbins fans and students have come to expect and rely upon.\n Few have navigated the turbulence of the stock market as adeptly and successfully as Tony Robbins. His proven, consistent success over decades makes him singularly qualified to help investors (both seasoned and first-timers alike) preserve and add to their investments. 'Tony's power is super-human' Oprah Winfrey\n 'He has a great gift. He has the gift to inspire' Bill Clinton\n 'Tony Robbins needs no introduction. He is committed to helping make life better for every investor' Carl Icahn\n 'The high priest of human potential. The world can't get enough of Anthony Robbins' The New York Times",
 				"language": "English",
 				"libraryCatalog": "Perlego",
 				"publisher": "Simon & Schuster UK",
@@ -378,6 +364,54 @@ var testCases = [
 		"defer": true,
 		"detectedItemType": "multiple",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.perlego.com/book/1/sheri-khan-tarakai-and-early-village-life-in-the-borderlands-of-northwest-pakistan-bannu-archaeological-project-surveys-and-excavations-19852001-pdf",
+		"detectedItemType": "book",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Sheri Khan Tarakai and Early Village Life in the Borderlands of North-West Pakistan: Bannu Archaeological Project Surveys and Excavations 1985-2001",
+				"creators": [
+					{
+						"firstName": "Cameron A.",
+						"lastName": "Petrie",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Farid",
+						"lastName": "Khan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J. R.",
+						"lastName": "Knox",
+						"creatorType": "author"
+					}
+				],
+				"date": "2010-05-10",
+				"ISBN": "9781842177358",
+				"abstractNote": "Between 1985 and 2001, the collaborative research initiative known as the Bannu Archaeological Project conducted archaeological explorations and excavations in the Bannu region, in what was then the North West Frontier Province (NWFP) of Pakistan, now Khyber-Pakhtunkhwa. The Project involves scholars from the Pakistan Heritage Society, the British Museum, the Institute of Archaeology (UCL), Bryn Mawr College and the University of Cambridge. This is the first in a series of volumes that present the final reports of the exploration and excavations carried out by the Bannu Archaeological Project. It marks the first attempt to contextualise the earliest village settlements in northwest Pakistan, along with those situated in other parts of the borderlands zone at the western margins of South Asia. An extensive range of archaeological data from the Bannu Archaeological Project excavations at Sheri Khan Tarakai, including stratigraphic, architectural, ceramic, lithic, small find and bioarchaeological elements, are presented, along with the results of surveys and excavations at several other sites in the Bannu Basin and the adjacent Gomal Plain. The work establishes the nature of the relationships between these sites and other early villages elsewhere in South, central and greater West Asia.",
+				"language": "English",
+				"libraryCatalog": "Perlego",
+				"place": "Havertown",
+				"publisher": "Oxbow Books",
+				"shortTitle": "Sheri Khan Tarakai and Early Village Life in the Borderlands of North-West Pakistan",
+				"url": "https://www.perlego.com/book/1/sheri-khan-tarakai-and-early-village-life-in-the-borderlands-of-northwest-pakistan-bannu-archaeological-project-surveys-and-excavations-19852001-pdf",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Asian History"
+					},
+					{
+						"tag": "History"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
