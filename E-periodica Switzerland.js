@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-23 10:25:03"
+	"lastUpdated": "2023-04-27 15:19:03"
 }
 
 /*
@@ -39,7 +39,7 @@ function detectWeb(doc, url) {
 	if (url.includes('/digbib/view')) {
 		return "journalArticle";
 	}
-	else if (url.includes('/digbib/dossearch?') && getSearchResults(doc, true)) {
+	else if (url.includes('/digbib/doasearch') && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	else {
@@ -52,7 +52,7 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	var rows = doc.querySelectorAll('h2.ep-result__title > a');
 	for (let row of rows) {
-		Zotero.debug(row.innerHTML);
+		// Zotero.debug(row.innerHTML);
 		let href = row.href;
 		Zotero.debug(href);
 		let title = ZU.trimInternal(row.textContent);
@@ -67,21 +67,14 @@ function getSearchResults(doc, checkOnly) {
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'journalArticle') {
 		await scrape(doc, url);
-	}
-
-	// querySelectors in scrape() not working at this point for multiple. Is the DOM not complete yet?
-	if (detectWeb(doc, url) == 'multiple') {
-		Zotero.debug('doWeb on multiple refs.');
+	} else if (detectWeb(doc, url) == 'multiple') {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
-	}
-	
-	/*
-	else {
+	} else {
+		// The fallback is not expected to be used on E-periodica, but just in case...
 		await scrape(doc, url);
 	}
-	*/
 }
 
 async function scrape(nextDoc, url) {
@@ -96,7 +89,7 @@ async function scrape(nextDoc, url) {
 	Zotero.debug('JSON URL ' + pageinfoUrl);
 	let text = await requestText(pageinfoUrl);
 	var epJSON = JSON.parse(text);
-	Zotero.debug(epJSON);
+	// Zotero.debug(epJSON);
 	var risURL = null;
 	if (epJSON.articles["0"].hasRisLink) {
 		risURL = '/view/' + epJSON.articles["0"].risLink;
@@ -147,9 +140,6 @@ function processRIS(text, URL, pdfURL) {
 		// Don't save HTML snapshot from 'UR' tag
 		item.attachments = [];
 		
-		Zotero.debug('in processRIS');
-		Zotero.debug(item);
-
 		// change colon spacing in title and publicationTitle
 		if (item.title) {
 			item.title = item.title.replace(' : ', ': ');
@@ -174,48 +164,9 @@ function processRIS(text, URL, pdfURL) {
 
 		// DB in RIS maps to archive; we don't want that
 		delete item.archive;
-		if (item.DOI || /DOI: 10\./.test(item.extra)) {
-			finalizeItem(item);
-		}
-		else {
-			item.complete();
-		}
+		
+		item.complete();
 	});
-
-	function finalizeItem(item) {
-	// Validate DOI
-		let doi = item.DOI || item.extra.match(/DOI: (10\..+)/)[1];
-		Zotero.debug("Validating DOI " + doi);
-		// This just returns two lines of JSON
-		ZU.doGet('https://doi.org/doiRA/' + encodeURIComponent(doi),
-			function (text) {
-			// Z.debug(text)
-				try {
-					var ra = JSON.parse(text);
-					// Z.debug(ra[0].status)
-					if (!ra[0] || ra[0].status == "DOI does not exist") {
-						Z.debug("DOI " + doi + " does not exist");
-						if (item.DOI) {
-							delete item.DOI;
-						}
-						else {
-							item.extra = item.extra.replace(/DOI: 10\..+\n?/, "");
-						}
-					}
-				}
-				catch (e) {
-					if (item.DOI) {
-						delete item.DOI;
-					}
-					else {
-						item.extra.replace(/DOI: 10\..+\n?/, "");
-					}
-					Zotero.debug("Could not parse JSON. Probably invalid DOI");
-				}
-			}, function () {
-				item.complete();
-			});
-	}
 
 	translator.getTranslatorObject(function (trans) {
 		trans.doImport();
@@ -229,7 +180,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Untersuchungen zur aktuellen Verbreitung der schweizerischen Laufkäfer (Coleoptera: Carabidae) : Zwischenbilanz",
+				"title": "Untersuchungen zur aktuellen Verbreitung der schweizerischen Laufkäfer (Coleoptera: Carabidae): Zwischenbilanz",
 				"creators": [
 					{
 						"lastName": "Hoess",
@@ -309,7 +260,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Stimmen und Meinungen : schweizerisches Nationaldrama?",
+				"title": "Stimmen und Meinungen: schweizerisches Nationaldrama?",
 				"creators": [
 					{
 						"lastName": "Falke",
