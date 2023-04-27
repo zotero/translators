@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-06-15 19:04:11"
+	"lastUpdated": "2023-04-27 13:09:03"
 }
 
 /*
@@ -35,7 +35,8 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.includes("/article/")) {
+	// don't detect on PDF pages
+	if (url.includes("/article/") && !url.includes("/_pdf")) {
 		return "journalArticle";
 	}
 	else if ((url.includes("/result/") || url.includes("/browse/"))
