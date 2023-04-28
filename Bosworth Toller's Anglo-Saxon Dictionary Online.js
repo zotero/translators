@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-22 05:18:12"
+	"lastUpdated": "2023-04-28 14:18:49"
 }
 
 /*
@@ -245,11 +245,11 @@ function getNotes(doc, title) {
 
 	// Make an element with enclosed text content (must not be a void element).
 	function elem(tag, content) {
-		const elem = doc.createElement(tag);
+		const newElem = doc.createElement(tag);
 		if (content) {
-			elem.textContent = content;
+			newElem.textContent = content;
 		}
-		return elem;
+		return newElem;
 	}
 
 	// Add a section under the given heading level and text, and if "below" is
