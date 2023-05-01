@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-25 02:19:30"
+	"lastUpdated": "2023-05-01 12:09:04"
 }
 
 /*
@@ -86,6 +86,7 @@ async function scrape(doc, url = doc.location.href) {
 	// Z.debug(jsonLD)
 	let schema = JSON.parse(jsonLD);
 	let license = schema.license;
+	let abstract = schema.description;
 	// License can be stored as a string or an object (should be a string)
 	if (typeof (license) == "object") {
 		license = schema.license.text;
@@ -104,6 +105,9 @@ async function scrape(doc, url = doc.location.href) {
 		}
 		if (license) {
 			item.rights = ZU.cleanTags(license).trim();
+		}
+		if (abstract) {
+			item.abstractNote = abstract;
 		}
 		if (version && version > 1) item.versionNumber = version;
 		item.complete();
@@ -230,7 +234,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.sodha.be/dataset.xhtml?persistentId=doi:10.34934/DVN/HEABHJ",
-		"detectedItemType": "dataset",
 		"items": [
 			{
 				"itemType": "dataset",
@@ -244,7 +247,7 @@ var testCases = [
 				],
 				"date": "2021-07-30",
 				"DOI": "10.34934/DVN/HEABHJ",
-				"abstractNote": "The series is designed to enable a crossnational comparison of values and norms on a wide variety of topics and to monitor changes in values and at...",
+				"abstractNote": "The series is designed to enable a crossnational comparison of values and norms on a wide variety of topics and to monitor changes in values and attitudes across the world in 1981.",
 				"extra": "Type: dataset",
 				"language": "en",
 				"libraryCatalog": "Social Sciences and Digital Humanities Archive – SODHA",
