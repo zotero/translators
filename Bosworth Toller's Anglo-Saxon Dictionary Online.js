@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-28 14:18:49"
+	"lastUpdated": "2023-05-03 01:17:45"
 }
 
 /*
@@ -170,6 +170,7 @@ function getPage(doc) {
 	}
 	let [, bookKey, page] = pageMatch;
 	const info = BOOK_ORIG_INFO[bookKey];
+	// NOTE that this modifies the book info object in-place.
 	info.originalPage = page.replace(/^0*/, "");
 	return info;
 }
@@ -233,10 +234,8 @@ function getNotes(doc, title) {
 	// We do so by creating a detached DOM subtree at "root" using the text
 	// info gleaned from the page. We will only use plain-text info scraped
 	// from the doc to construct our own subtree; no node from the doc, apart
-	// from its textContent, is directly used.
-	// The reason is that 1) using original nodes is error-prone and may alter
-	// the document if not careful, and 2) the page as a remote source is not
-	// to be trusted.
+	// from its textContent, is directly used. This is done so as to return a
+	// minimal HTML-fragment usable as the note, with no attributes etc.
 	// Once done, the subtree's innerHTML (which contains only text nodes and
 	// elements we created on our own, with sanitized input) is used as the
 	// source of the Note.
