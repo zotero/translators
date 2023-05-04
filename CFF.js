@@ -69,8 +69,8 @@ function writeAuthors(itemCreators) {
 
 function doExport() {
 	var item;
-	// eslint-disable-next-line no-cond-assign
 	Zotero.write('# This CITATION.cff file was generated with Zotero.\n');
+	// eslint-disable-next-line no-cond-assign
 	while (item = Zotero.nextItem()) {
 		// Only use for dataset and software
 		if (item.itemType != "dataset" && item.itemType != "computerProgram") {
