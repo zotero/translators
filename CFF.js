@@ -8,30 +8,30 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2023-04-29 02:20:52"
+	"lastUpdated": "2023-05-04 13:21:10"
 }
 
 /*
-    ***** BEGIN LICENSE BLOCK *****
+	***** BEGIN LICENSE BLOCK *****
 
-    Copyright © 2023 Sebastian Karcher
+	Copyright © 2023 Sebastian Karcher
 
-    This file is part of Zotero.
+	This file is part of Zotero.
 
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Affero General Public License for more details.
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
 
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
-    ***** END LICENSE BLOCK *****
+	***** END LICENSE BLOCK *****
 */
 
 function writeKeywords(tags) {
@@ -52,7 +52,7 @@ function writeDOI(itemDOI) {
 function writeAuthors(itemCreators) {
 	let itemAuthors = [];
 	for (let creator of itemCreators) {
-		if (creator.creatorType == "author") {
+		if (creator.creatorType == "author" || creator.creatorType == "programmer") {
 			itemAuthors.push(creator);
 		}
 	}
@@ -70,8 +70,9 @@ function writeAuthors(itemCreators) {
 function doExport() {
 	var item;
 	// eslint-disable-next-line no-cond-assign
+	Zotero.write('# This CITATION.cff file was generated with Zotero.\n');
 	while (item = Zotero.nextItem()) {
-		// can't store independent notes in RIS
+		// Only use for dataset and software
 		if (item.itemType != "dataset" && item.itemType != "computerProgram") {
 			continue;
 		}
@@ -81,11 +82,19 @@ function doExport() {
 		cff.type = item.itemType == 'dataset' ? 'dataset' : 'software';
 		cff.license = item.rights;
 		cff.version = item.versionNumber;
+		cff.url = item.url;
 		cff.keywords = writeKeywords(item.tags);
 		cff.authors = writeAuthors(item.creators);
+		if (item.date) {
+			cff["date-released"] = ZU.strToISO(item.date);
+		}
+		// get DOI from Extra for software; this will stop running automatically once software supports DOI
+		if (!ZU.fieldIsValidForType('DOI', item.itemType) && /^doi:/i.test(item.extra)) {
+			item.DOI = ZU.cleanDOI(item.extra);
+		}
 		cff.identifiers = writeDOI(item.DOI);
 
-		Zotero.write('cff-version: 1.2.0\nmessage: >-\n  If you use this software, please cite it using the metadata from this file.\n');
+		Zotero.write(`\ncff-version: 1.2.0\nmessage: >-\n  If you use this ${cff.type}, please cite it using the metadata from this file.\n`);
 		for (let field in cff) {
 			if (!cff[field]) continue;
 			if (field == "authors" || field == "keywords") {
@@ -97,7 +106,6 @@ function doExport() {
 		}
 	}
 }
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
