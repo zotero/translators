@@ -1,15 +1,15 @@
 {
 	"translatorID": "ade18ffe-62a6-4392-9853-eb658faf36e4",
-	"label": "ubtue_Brepols",
-	"creator": "Timotheus Kim",
-	"target": "https?://www\\.brepolsonline\\.net",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-05-17 12:49:49"
+		"label": "ubtue_Brepols",
+		"creator": "Timotheus Kim",
+		"target": "https?://www\\.brepolsonline\\.net",
+		"minVersion": "3.0",
+		"maxVersion": "",
+		"priority": 100,
+		"inRepository": true,
+		"translatorType": 4,
+		"browserSupport": "gcsibv",
+		"lastUpdated": "2023-05-17 12:49:49"
 }
 
 /*
