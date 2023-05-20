@@ -5,12 +5,12 @@
 	"target": "",
 	"minVersion": "4.0",
 	"maxVersion": "",
-	"priority": 97,
+	"priority": 98,
 	"inRepository": true,
 	"translatorType": 8,
-	"browserSupport": "gcsibv",
+	"browserSupport": "gcsbv",
 	"lastUpdated": "2023-05-20 15:41:08"
-};
+}
 
 /*
 	***** BEGIN LICENSE BLOCK *****
