@@ -1,6 +1,6 @@
 {
-	"translatorID": "7dda2b16-6a04-4d22-afd1-21d59f8d0a4c",
-	"label": "National Library of Poland ISBN search",
+	"translatorID": "aa7f310e-10d3-4209-91dc-88301e7070c6",
+	"label": "National Library of Poland ISBN",
 	"creator": "Maciej Nux Jaros",
 	"target": "",
 	"minVersion": "4.0",
@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 8,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-05-20 21:23:00"
-}
+	"lastUpdated": "2023-05-20 15:41:08"
+};
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2023 Maciej Nux Jaros
-
+	
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -45,7 +45,7 @@ function detectSearch(item) {
 
 function doSearch(item) {
 	const isbn = ZU.cleanISBN(item.ISBN);
-	const url = `https://data.bn.org.pl/api/institutions/bibs.marcxml?isbn=${isbn}`;
+	const url = `https://data.bn.org.pl/api/institutions/bibs.marcxml?isbnIssn=${isbn}`;
 	ZU.doGet(url, function (xmlText) {
 		// example XML:
 		// <resp>
@@ -69,3 +69,50 @@ function doSearch(item) {
 		translator.translate();
 	});
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "search",
+		"input": {
+			"ISBN": "8301136545"
+		},
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Podstawy chemii nieorganicznej",
+				"creators": [
+					{
+						"firstName": "Adam",
+						"lastName": "Bielański",
+						"creatorType": "author"
+					}
+				],
+				"date": "2002",
+				"ISBN": "9788301136543",
+				"callNumber": "2.152.922 A",
+				"edition": "Wyd. 5 zm. i popr",
+				"language": "pol",
+				"libraryCatalog": "National Library of Poland ISBN",
+				"numPages": "1064",
+				"place": "Warszawa",
+				"publisher": "Wydaw. Naukowe PWN",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Chemia nieorganiczna"
+					},
+					{
+						"tag": "Chemia nieorganiczna"
+					},
+					{
+						"tag": "Podręczniki akademickie"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
