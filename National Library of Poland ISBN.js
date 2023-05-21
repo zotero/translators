@@ -40,8 +40,31 @@ function detectSearch(item) {
 	// https://data.bn.org.pl/docs/bibs
 	
 	// for now only using ISBN
-	return !!item.ISBN;
+	if (typeof item.ISBN === 'string') {
+		// filter by country code (83)
+		const isbn = item.ISBN.replace(/[ -]/g, '');
+		return isbn.search(/^(97[8-9]83|83)/) === 0;
+	}
+	return false;
 }
+
+// function test(item) {
+// 	const result = detectSearch(item);
+//   console.log({result, item:JSON.stringify(item)});
+// }
+// // not matched
+// test({})
+// test({ISBN:'123'})
+// test({ISBN:'978'})
+// // matched
+// test({ISBN:'97883'})
+// test({ISBN:'83'})
+// test({ISBN:'978-83-578'})
+// test({ISBN:'83-123456'})
+// test({ISBN:' 978-83-578'})
+// test({ISBN:' 83-123456'})
+// test({ISBN:' -978-83-578'})
+// test({ISBN:' -83-123456'})
 
 function doSearch(item) {
 	const isbn = ZU.cleanISBN(item.ISBN);
