@@ -46,7 +46,7 @@ var HIGHWIRE_MAPPINGS = {
 	citation_date: "date",
 	citation_journal_title: "publicationTitle",
 	citation_journal_abbrev: "journalAbbreviation",
-	citation_inbook_title: "publicationTitle", // used as bookTitle or proceedingTitle, e.g. http://pubs.rsc.org/en/content/chapter/bk9781849730518-00330/
+	citation_inbook_title: "publicationTitle", // used as bookTitle or proceedingTitle, e.g. http://pubs.rsc.org/en/content/chapter/bk9781849730518-00330/978-1-84973-051-8
 	citation_book_title: "bookTitle",
 	citation_volume: "volume",
 	citation_issue: "issue",
@@ -1634,7 +1634,7 @@ var testCases = [
 					}
 				],
 				"date": "2015-06",
-				"ISBN": "",
+				"ISBN": "9788460842118",
 				"abstractNote": "Abstracts aceptados sin presentacion / Accepted abstracts without presentation",
 				"conferenceName": "International Conference Arquitectonics Network: Architecture, Education and Society, Barcelona, 3-5 June 2015: Abstracts",
 				"language": "spa",
@@ -1726,7 +1726,7 @@ var testCases = [
 				],
 				"date": "2020/04",
 				"abstractNote": "Conservation research is essential for advancing knowledge but to make an impact scientific evidence must influence conservation policies, decision making and practice. This raises a multitude of challenges. How should evidence be collated and presented to policymakers to maximise its impact? How can effective collaboration between conservation scientists and decision-makers be established? How can the resulting messages be communicated to bring about change? Emerging from a successful international symposium organised by the British Ecological Society and the Cambridge Conservation Initiative, this is the first book to practically address these questions across a wide range of conservation topics. Well-renowned experts guide readers through global case studies and their own experiences. A must-read for practitioners, researchers, graduate students and policymakers wishing to enhance the prospect of their work 'making a difference'. This title is also available as Open Access on Cambridge Core.",
-				"extra": "DOI: 10.1017/",
+				"extra": "DOI: 10.1017/9781108638210",
 				"language": "en",
 				"url": "https://www.cambridge.org/core/books/conservation-research-policy-and-practice/22AB241C45F182E40FC7F13637485D7E",
 				"websiteTitle": "Cambridge Core",
@@ -1962,7 +1962,7 @@ var testCases = [
 				"journalAbbreviation": "Opt. Express, OE",
 				"language": "EN",
 				"libraryCatalog": "opg.optica.org",
-				"pages": "",
+				"pages": "39188-39206",
 				"publicationTitle": "Optics Express",
 				"rights": "&#169; 2022 Optica Publishing Group",
 				"url": "https://opg.optica.org/oe/abstract.cfm?uri=oe-30-21-39188",
@@ -2011,4 +2011,3 @@ var testCases = [
 	}
 ]
 /** END TEST CASES **/
-9781849730518 FEHLT TheologikumEv9781849730518 FEHLT UB Tue9781849730518 FEHLT TheologikumKath9781108638210 FEHLT UB Tue9788460842118 FEHLT TheologikumEv9781108638210 FEHLT TheologikumEv9788460842118 FEHLT UB Tue9788460842118 FEHLT TheologikumKath9781108638210 FEHLT TheologikumKath3918839206 FEHLT UB Tue3918839206 FEHLT TheologikumEv3918839206 FEHLT TheologikumKath9781108638210 FEHLT IxTheo9788460842118 FEHLT IxTheo9781849730518 FEHLT IxTheo3918839206 FEHLT IxTheo
