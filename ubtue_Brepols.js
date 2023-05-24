@@ -1,15 +1,15 @@
 {
 	"translatorID": "ade18ffe-62a6-4392-9853-eb658faf36e4",
-		"label": "ubtue_Brepols",
-		"creator": "Timotheus Kim",
-		"target": "https?://www\\.brepolsonline\\.net",
-		"minVersion": "3.0",
-		"maxVersion": "",
-		"priority": 100,
-		"inRepository": true,
-		"translatorType": 4,
-		"browserSupport": "gcsibv",
-		"lastUpdated": "2023-05-17 12:49:49"
+	"label": "ubtue_Brepols",
+	"creator": "Timotheus Kim",
+	"target": "https?://www\\.brepolsonline\\.net",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2023-05-24 06:57:27"
 }
 
 /*
@@ -81,11 +81,11 @@ function invokeEMTranslator(doc, url) {
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
 	translator.setHandler('itemDone', function (t, i) {
-		let abstractsEntry = doc.querySelector('.hlFld-Abstract').innerText.replace(/^abstract/i, '').split(/\n\n/g).filter(Boolean);
+		let abstractsEntry = doc.querySelectorAll('.abstractSection, abstractInFull');
 		let abstractNr = 0;
 		for (abstract of abstractsEntry) {
-			if (abstractNr == 0) i.abstractNote = abstract;
-			else i.notes.push('abs:' + abstract);
+			if (abstractNr == 0) i.abstractNote = abstract.innerText;
+			else i.notes.push('abs:' + abstract.innerText);
 			abstractNr += 1;
 		}
 		if (i.reportType === "book-review") i.tags.push('Book review') && delete i.abstractNote;	
@@ -111,6 +111,7 @@ function invokeEMTranslator(doc, url) {
 	});
 	translator.translate();
 }
+
 
 
 /** BEGIN TEST CASES **/
@@ -242,6 +243,48 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"url": "https://www.brepolsonline.net/doi/abs/10.1484/J.REA.4.2019002",
+		"detectedItemType": "journalArticle",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Une appropriation habile de Numénius : Eusèbe de Césarée et son emploi critique de l'adjectif ὁμοούσιος en PE XI 21-22",
+				"creators": [
+					{
+						"firstName": "Fabienne",
+						"lastName": "Jourdan",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018",
+				"DOI": "10.1484/J.REA.4.2019002",
+				"ISSN": "2428-3606",
+				"abstractNote": "En PE XI 21, Eusèbe produit une série de citations de Platon visant à convaincre de l'accord du philosophe avec Moïse sur la définition du Bien identifié à Dieu. Ces citations donnent lieu à une paraphrase affirmant l'accord de Platon et des Hébreux sur le monothéisme, tout en dénonçant le polythéisme philosophique. Or, dans cette critique, Eusèbe a un emploi fort problématique du terme ὁμοούσιος (PE XI 21 6). Le rejet de la notion qu'il véhicule à propos du Bien (identifié à Dieu) et de ce qui provient de lui crée une double difficulté : la compréhension de ce refus lui-même, alors qu'Eusèbe acceptera le terme ὁμοούσιος après Nicée pour évoquer la relation entre le Père et le Fils ; la remise en cause apparente de la divinité du Fils provoquée notamment par ce rejet lorsque le discours d'Eusèbe est envisagé d'un point de vue théologique. Dans sa paraphrase de Platon, Eusèbe s'approprie par avance le propos des quatre fragments de Numénius qu'il cite au chapitre suivant (PE XI 22). Ce premier article montre ce que sa paraphrase doit à ces fragments et comment la double difficulté théologique trouve une première solution grâce à un rappel du sens pris par l'adjectif ὁμοούσιος à l'époque d'Eusèbe et chez Eusèbe lui-même.",
+				"archiveLocation": "Paris",
+				"issue": "2",
+				"language": "fr",
+				"libraryCatalog": "www.brepolsonline.net",
+				"pages": "215-242",
+				"publicationTitle": "Revue d'Etudes Augustiniennes et Patristiques",
+				"shortTitle": "Une appropriation habile de Numénius",
+				"url": "https://www.brepolsonline.net/doi/10.1484/J.REA.4.2019002",
+				"volume": "64",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [
+					"abs:In PE XI 21 Eusebius quotes a series of Plato's texts in order to prove the philosopher's agreement with Moses on the definition of the Good identified with God. These quotations are paraphrased to assert the agreement of Plato and Hebrews on monotheism, while condemning philosophical polytheism. Now, in this criticism, Eusebius has a very problematic use of the term ὁμοούσιος (PE XI 21, 6). The rejection of the notion it conveys about the Good (identified to God) and what comes from it creates a double difficulty: the understanding of this rejection itself, although Eusebius will accept the word ὁμοούσιος after the Council of Nicaea to refer to the relation between the Father and the Son ; and the apparent calling into question of the divinity of the Son produced notably by this rejection, when Eusebius' discourse is considered from a theological point of view. In his paraphrase of Plato Eusebius appropriates in advance the contents of Numenius' four fragments that he quotes in the following chapter (PE XI 22). This first paper shows what his paraphrase owes to these fragments and how the dual theological difficulty finds a first solution by reminding the meaning of the adjective ὁμοούσιος in Eusebius' time and how he used it in his writings."
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
 		"url": "https://www.brepolsonline.net/doi/abs/10.1484/J.REA.4.2019004",
 		"detectedItemType": "journalArticle",
 		"items": [
@@ -286,49 +329,6 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.brepolsonline.net/doi/abs/10.1484/J.REA.4.2019002",
-		"detectedItemType": "journalArticle",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Une appropriation habile de Numénius : Eusèbe de Césarée et son emploi critique de l'adjectif ὁμοούσιος en PE XI 21-22",
-				"creators": [
-					{
-						"firstName": "Fabienne",
-						"lastName": "Jourdan",
-						"creatorType": "author"
-					}
-				],
-				"date": "2018",
-				"DOI": "10.1484/J.REA.4.2019002",
-				"ISSN": "2428-3606",
-				"abstractNote": "En PE XI 21, Eusèbe produit une série de citations de Platon visant à convaincre de l'accord du philosophe avec Moïse sur la définition du Bien identifié à Dieu. Ces citations donnent lieu à une paraphrase affirmant l'accord de Platon et des Hébreux sur le monothéisme, tout en dénonçant le polythéisme philosophique. Or, dans cette critique, Eusèbe a un emploi fort problématique du terme ὁμοούσιος (PE XI 21 6). Le rejet de la notion qu'il véhicule à propos du Bien (identifié à Dieu) et de ce qui provient de lui crée une double difficulté : la compréhension de ce refus lui-même, alors qu'Eusèbe acceptera le terme ὁμοούσιος après Nicée pour évoquer la relation entre le Père et le Fils ; la remise en cause apparente de la divinité du Fils provoquée notamment par ce rejet lorsque le discours d'Eusèbe est envisagé d'un point de vue théologique. Dans sa paraphrase de Platon, Eusèbe s'approprie par avance le propos des quatre fragments de Numénius qu'il cite au chapitre suivant (PE XI 22). Ce premier article montre ce que sa paraphrase doit à ces fragments et comment la double difficulté théologique trouve une première solution grâce à un rappel du sens pris par l'adjectif ὁμοούσιος à l'époque d'Eusèbe et chez Eusèbe lui-même.",
-				"archiveLocation": "Paris",
-				"issue": "2",
-				"language": "fr",
-				"libraryCatalog": "www.brepolsonline.net",
-				"pages": "215-242",
-				"publicationTitle": "Revue d'Etudes Augustiniennes et Patristiques",
-				"shortTitle": "Une appropriation habile de Numénius",
-				"url": "https://www.brepolsonline.net/doi/10.1484/J.REA.4.2019002",
-				"volume": "64",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [
-					"abs:In PE XI 21 Eusebius quotes a series of Plato's texts in order to prove the philosopher's agreement with Moses on the definition of the Good identified with God. These quotations are paraphrased to assert the agreement of Plato and Hebrews on monotheism, while condemning philosophical polytheism. Now, in this criticism, Eusebius has a very problematic use of the term ὁμοούσιος (PE XI 21, 6). The rejection of the notion it conveys about the Good (identified to God) and what comes from it creates a double difficulty: the understanding of this rejection itself, although Eusebius will accept the word ὁμοούσιος after the Council of Nicaea to refer to the relation between the Father and the Son ; and the apparent calling into question of the divinity of the Son produced notably by this rejection, when Eusebius' discourse is considered from a theological point of view. In his paraphrase of Plato Eusebius appropriates in advance the contents of Numenius' four fragments that he quotes in the following chapter (PE XI 22). This first paper shows what his paraphrase owes to these fragments and how the dual theological difficulty finds a first solution by reminding the meaning of the adjective ὁμοούσιος in Eusebius' time and how he used it in his writings."
-				],
-				"seeAlso": []
-			}
-		]
 	}
 ]
 /** END TEST CASES **/
-
