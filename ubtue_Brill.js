@@ -1,15 +1,15 @@
 {
 	"translatorID": "b2fcf7d9-e023-412e-a2bc-f06d6275da24",
-		"label": "ubtue_Brill",
-		"creator": "Madeesh Kannan",
-		"target": "^https?://brill.com/(view|abstract)/journals/",
-		"minVersion": "3.0",
-		"maxVersion": "",
-		"priority": 90,
-		"inRepository": true,
-		"translatorType": 4,
-		"browserSupport": "gcsibv",
-		"lastUpdated": "2023-05-24 12:42:05"
+	"label": "ubtue_Brill",
+	"creator": "Madeesh Kannan",
+	"target": "^https?://brill.com/(view|abstract)/journals/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 90,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2023-05-24 15:50:43"
 }
 
 /*
@@ -150,20 +150,30 @@ function postProcess(doc, item) {
 	}
 	//deduplicate
 	item.notes = Array.from(new Set(item.notes.map(JSON.stringify))).map(JSON.parse);
-	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
+	// mark articles as "LF" in various cases
+	let is_LF = false;
 	let openAccessTag = text(doc, '.has-license span');
-	if (openAccessTag && openAccessTag.match(/open\s+access/gi)) item.notes.push({note: 'LF:'});
+	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
+	if (openAccessTag && openAccessTag.match(/open\s+access/gi)) is_LF = true;
 	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are free accessible e.g. conference report 10.30965/25890433-04902001
-	let freeAccess = text(doc, '.color-access-free');Z.debug(freeAccess)
-	if (freeAccess && freeAccess.match(/(free|freier)\s+(access|zugang)/gi)) item.notes.push('LF:');
-	if (!item.itemType)	item.itemType = "journalArticle";
+	let freeAccess = text(doc, '.color-access-free');
+	//if (freeAccess && freeAccess.match(/(free|freier)\s+(access|zugang)/gi)) is_LF = true;
 	// mark free access article as "LF" e.g. https://brill.com/view/journals/jet/35/2/article-p223_6.xml
 	let scriptItems = doc.querySelectorAll('head > script');
-	if (scriptItems) {
+	if (freeAccess && freeAccess.match(/(free|freier)\s+(access|zugang)/gi))
+	is_LF = true;
+	else {
+		let scriptItems = doc.querySelectorAll('head > script');
 		for (let i of scriptItems) {
-			if (i.text.includes('free-public') && !freeAccess.match(/(free|freier)\s+(access|zugang)/gi)) item.notes.push('LF:');
+			if (i.text.includes('free-public')) {
+				is_LF = true;
+				break;
+			}
 		}
 	}
+	if (is_LF) item.notes.push('LF:');
+	
+	if (!item.itemType)	item.itemType = "journalArticle";
 }
 
 function extractErscheinungsjahr(date) {
@@ -245,6 +255,10 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -265,9 +279,7 @@ var testCases = [
 					}
 				],
 				"notes": [
-					{
-						"note": "LF:"
-					}
+					"LF:"
 				],
 				"seeAlso": []
 			}
@@ -309,6 +321,10 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -329,9 +345,7 @@ var testCases = [
 					}
 				],
 				"notes": [
-					{
-						"note": "LF:"
-					}
+					"LF:"
 				],
 				"seeAlso": []
 			}
@@ -373,6 +387,10 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -476,6 +494,10 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -541,6 +563,10 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -608,6 +634,10 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -634,9 +664,73 @@ var testCases = [
 					}
 				],
 				"notes": [
+					"LF:"
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://brill.com/view/journals/ormo/100/2/article-p172_3.xml",
+		"detectedItemType": "journalArticle",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Alignment and Alienation: The Ambivalent Modernisations of Uyghur Marriage in the 21st Century",
+				"creators": [
 					{
-						"note": "LF:"
+						"firstName": "Rune",
+						"lastName": "Steenberg",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "",
+						"lastName": "Musapir",
+						"creatorType": "author"
 					}
+				],
+				"date": "2020",
+				"DOI": "10.1163/22138617-12340247",
+				"ISSN": "2213-8617, 0030-5472",
+				"abstractNote": "Uyghur marriages in Xinjiang in the 2010s have been characterised by various, sometimes seemingly contradictory trends of modernisation, such as monetisation, simplification, emphasis on ethnic symbolism, displays of piety and the active integration of both Turkish, Western and Chinese elements. This article views these trends as complex, inter-related reactions to the region’s socio-economic transformations and political campaigns. It analyses how these transformations and campaigns affect everyday decisions at the local level. The study of marriage provides a good insight into the effects of economic and political transformations on the ground. In such studies, we argue for a distinction between trends on the level of symbolic positioning and identity display from trends on a deeper structural level pertaining to social relations, economic integration and household strategies. In the case of Uyghurs in southern Xinjiang these two levels have shown opposite trends. On a surface level of symbolic display, the relatively open years of 2010-2014 allowed for the flourishing of trends that did not follow the Party-State line, such as Islamic piety and a strengthened Uyghur ethno-national identity. Yet, on a deeper structural level these trends signified improved integration into modern Chinese society. In contrast, the increased state violence of 2015-2020 enforced a strong symbolic alignment with Chinese Communist Party (CCP) ideology but at the same time alienated the Uyghur population from this society effectively necessitating the development of forms of organisation that the CCP deems backwards and undesirable.",
+				"issue": "2",
+				"language": "eng",
+				"libraryCatalog": "brill.com",
+				"pages": "172-199",
+				"publicationTitle": "Oriente Moderno",
+				"shortTitle": "Alignment and Alienation",
+				"url": "https://brill.com/view/journals/ormo/100/2/article-p172_3.xml",
+				"volume": "100",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Uyghur"
+					},
+					{
+						"tag": "Xinjiang"
+					},
+					{
+						"tag": "commercialisation"
+					},
+					{
+						"tag": "marriage"
+					},
+					{
+						"tag": "modernisation"
+					}
+				],
+				"notes": [
+					"LF:"
 				],
 				"seeAlso": []
 			}
