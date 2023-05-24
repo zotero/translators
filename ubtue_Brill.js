@@ -1,19 +1,19 @@
 {
 	"translatorID": "b2fcf7d9-e023-412e-a2bc-f06d6275da24",
-	"label": "ubtue_Brill",
-	"creator": "Madeesh Kannan",
-	"target": "^https?://brill.com/(view|abstract)/journals/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 90,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-05-24 12:42:05"
+		"label": "ubtue_Brill",
+		"creator": "Madeesh Kannan",
+		"target": "^https?://brill.com/(view|abstract)/journals/",
+		"minVersion": "3.0",
+		"maxVersion": "",
+		"priority": 90,
+		"inRepository": true,
+		"translatorType": 4,
+		"browserSupport": "gcsibv",
+		"lastUpdated": "2023-05-24 12:42:05"
 }
 
 /*
-	***** BEGIN LICENSE BLOCK *****
+ ***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2019 Universitätsbibliothek Tübingen.  All rights reserved.
 
@@ -30,8 +30,8 @@
 	You should have received a copy of the GNU Affero General Public License
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-	***** END LICENSE BLOCK *****
-*/
+ ***** END LICENSE BLOCK *****
+ */
 
 
 function detectWeb(doc, url) {
@@ -39,7 +39,7 @@ function detectWeb(doc, url) {
 		return "journalArticle";
 	} else if (url.match(/issue-\d+(-\d+)?\.xml$/)) {
 		return "multiple";
- 	}
+	}
 	return false;
 }
 
@@ -52,8 +52,8 @@ function getSearchResults(doc) {
 		links = doc.querySelectorAll(".c-Button--link, [target='_self']");
 	}
 	let text = usesTypography ?
-			doc.querySelectorAll(".c-Typography--title > span") :
-			doc.querySelectorAll(".c-Button--link, [target='_self']");
+		doc.querySelectorAll(".c-Typography--title > span") :
+		doc.querySelectorAll(".c-Button--link, [target='_self']");
 	for (let i = 0; i < links.length; ++i) {
 		let href = links[i].href;
 		let title = ZU.trimInternal(text[i].textContent);
@@ -70,37 +70,37 @@ function getSearchResults(doc) {
 function postProcess(doc, item) {
 	let title = ZU.xpathText(doc, '//meta[@name="citation_title"]//@content');
 	if (title) item.title = title;
-  let abstracts = ZU.xpath(doc, '//section[@class="abstract"]//p');
+	let abstracts = ZU.xpath(doc, '//section[@class="abstract"]//p');
 
-  //multiple abstracts
-  if (abstracts && abstracts.length > 0)
+	//multiple abstracts
+	if (abstracts && abstracts.length > 0)
 		abstracts = abstracts.map(abstract => abstract.textContent);
 	// Deduplicate original results including potentially existing abstractNote
-  //abstracts.push(item.abstractNote);
-  let all_abstracts_deduplicated = new Set(abstracts);
-  if (all_abstracts_deduplicated.size) {
-	  // trim, remove leading comments and remove abstracts that are short forms of other abstracts
-	  let all_abstracts_clean = [...all_abstracts_deduplicated]
-								.map(abs => abs.trim().replace(/^(?:Résumé|Abstract\s?)/i, ""))
-								.filter(abs => /\S/.test(abs))
-								.sort((abs1,abs2) => abs1.length - abs2.length)
-								.filter(function(abs, index, array) {
-									if (index == array.length - 1)
-										return true;
-									for (let other_abs of array.slice(index + 1)) {
-										 if (other_abs.startsWith(abs))
-											return false;
-									}
-									return true;
-								  });
-	  if (!all_abstracts_clean.length)
-		  return;
-	  item.abstractNote = all_abstracts_clean[0];
+	//abstracts.push(item.abstractNote);
+	let all_abstracts_deduplicated = new Set(abstracts);
+	if (all_abstracts_deduplicated.size) {
+		// trim, remove leading comments and remove abstracts that are short forms of other abstracts
+		let all_abstracts_clean = [...all_abstracts_deduplicated]
+			.map(abs => abs.trim().replace(/^(?:Résumé|Abstract\s?)/i, ""))
+			.filter(abs => /\S/.test(abs))
+			.sort((abs1,abs2) => abs1.length - abs2.length)
+			.filter(function(abs, index, array) {
+				if (index == array.length - 1)
+					return true;
+				for (let other_abs of array.slice(index + 1)) {
+					if (other_abs.startsWith(abs))
+						return false;
+				}
+				return true;
+			});
+		if (!all_abstracts_clean.length)
+			return;
+		item.abstractNote = all_abstracts_clean[0];
 		if (all_abstracts_clean.length > 1) {
 			for (let abs of all_abstracts_clean.slice(1)) {
-					 item.notes.push({
-		 			 note: "abs:" + ZU.trimInternal(abs),
-		 		});
+				item.notes.push({
+					note: "abs:" + ZU.trimInternal(abs),
+				});
 			}
 		}
 	}
@@ -153,7 +153,7 @@ function postProcess(doc, item) {
 	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
 	let openAccessTag = text(doc, '.has-license span');
 	if (openAccessTag && openAccessTag.match(/open\s+access/gi)) item.notes.push({note: 'LF:'});
-  	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are free accessible e.g. conference report 10.30965/25890433-04902001
+	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are free accessible e.g. conference report 10.30965/25890433-04902001
 	let freeAccess = text(doc, '.color-access-free');Z.debug(freeAccess)
 	if (freeAccess && freeAccess.match(/(free|freier)\s+(access|zugang)/gi)) item.notes.push('LF:');
 	if (!item.itemType)	item.itemType = "journalArticle";
@@ -177,9 +177,9 @@ function extractBerichtsjahr(dateEntry) {
 
 function invokeEmbeddedMetadataTranslator(doc, url) {
 	if (doc.querySelector('body > meta')) {
-	// Brill's HTML is structured incorrectly, and it causes some parsers
-	// to interpret the <meta> tags as being in the body, which breaks EM.
-	// We'll fix it here.
+		// Brill's HTML is structured incorrectly, and it causes some parsers
+		// to interpret the <meta> tags as being in the body, which breaks EM.
+		// We'll fix it here.
 		for (let meta of doc.querySelectorAll('body > meta')) {
 			doc.head.appendChild(meta);
 		}
@@ -212,7 +212,7 @@ function doWeb(doc, url) {
 		invokeEmbeddedMetadataTranslator(doc, url);
 }
 
-	/** BEGIN TEST CASES **/
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
