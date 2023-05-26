@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-10 03:15:48"
+	"lastUpdated": "2023-05-26 03:27:41"
 }
 
 /*
@@ -40,7 +40,7 @@ function detectWeb(doc, _url) {
 		return "multiple";
 	}
 	else if (/[a-zA-Z. ]+\s§\s\d+/.test(doc.title)
-	|| /act/i.test(doc.title)
+	|| /\W*(act)\W/i.test(doc.title)
 	|| /p\.l\./i.test(doc.title)) { // Match: ... Tex. Bus. & Com. Code § 26.01 ...
 		return "statute";
 	}
