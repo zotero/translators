@@ -9,13 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-02-25 01:19:36"
+	"lastUpdated": "2023-06-04 11:32:20"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2022 Simon Kornblith, Frank Bennett, Aurimas Vinckevicius
+	Copyright © 2022 Simon Kornblith, Frank Bennett, Aurimas Vinckevicius, and
+	Zoë C. Ma.
 
 	This file is part of Zotero.
 
@@ -101,48 +102,40 @@ function getProfileResults(doc, checkOnly) {
 }
 
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	var type = detectWeb(doc, url);
-	if (type == "multiple") {
-		if (getSearchResults(doc, true)) {
-			Zotero.selectItems(getSearchResults(doc, false), function (items) {
-				if (!items) {
-					return;
-				}
-				var ids = [];
-				for (var i in items) {
-					ids.push(i);
-				}
-				// here it is enough to know the ids and we can call scrape directly
-				scrape(doc, ids);
-			});
+	if (type === "multiple") {
+		if (getSearchResults(doc, true/* checkOnly */)) {
+			const items = await Z.selectItems(getSearchResults(doc, false/* checkOnly */));
+			if (!items) {
+				return;
+			}
+			// here it is enough to know the ids and we can call scrape directly
+			await scrape(doc, Object.keys(items));
 		}
 		else if (getProfileResults(doc, true)) {
-			Zotero.selectItems(getProfileResults(doc, false), function (items) {
-				if (!items) {
-					return;
-				}
-				var articles = [];
-				for (var i in items) {
-					articles.push(i);
-				}
-				// here we need open these pages before calling scrape
-				ZU.processDocuments(articles, scrape);
-			});
+			const items = await Z.selectItems(getProfileResults(doc, false));
+			if (!items) {
+				return;
+			}
+			// here we need open these pages before calling scrape
+			for (const item of Object.keys(items)) {
+				await scrape(await requestDocument(item));
+			}
 		}
 	}
 	else {
 		// e.g. https://scholar.google.de/citations?view_op=view_citation&hl=de&user=INQwsQkAAAAJ&citation_for_view=INQwsQkAAAAJ:u5HHmVD_uO8C
-		scrape(doc, url, type);
+		await scrape(doc, url, type);
 	}
 }
 
 
-function scrape(doc, idsOrUrl, type) {
+async function scrape(doc, idsOrUrl, type) {
 	if (Array.isArray(idsOrUrl)) {
-		scrapeIds(doc, idsOrUrl);
+		await scrapeIds(doc, idsOrUrl);
 	}
-	else if (type && type == "case") {
+	else if (type && type === "case") {
 		scrapeCase(doc, idsOrUrl);
 	}
 	else {
@@ -152,7 +145,7 @@ function scrape(doc, idsOrUrl, type) {
 		}
 		var itemID = related.match(/=related:([^:]+):/);
 		if (itemID) {
-			scrapeIds(doc, [itemID[1]]);
+			await scrapeIds(doc, [itemID[1]]);
 		}
 		else {
 			Z.debug("Can't find itemID. related URL is " + related);
@@ -162,134 +155,155 @@ function scrape(doc, idsOrUrl, type) {
 }
 
 
-function scrapeIds(doc, ids) {
+async function processCitePage(citeURL, context) {
+	// Note that the page at citeURL has no doctype and is not a complete HTML
+	// document. The browser can parse it in quirks mode but ZU.requestDocument
+	// has trouble with it.
+	const citePage = await ZU.requestText(citeURL);
+
+	let m = citePage.match(/href="((https?:\/\/[a-z.]*)?\/scholar.bib\?[^"]+)/);
+	if (!m) {
+		// Saved lists and possibly other places have different formats for
+		// BibTeX URLs
+		// Trying to catch them here (can't add test bc lists are tied to
+		// google accounts)
+		m = citePage.match(/href="(.+?)">BibTeX<\/a>/);
+	}
+	if (!m) {
+		var msg = "Could not find BibTeX URL";
+		var title = citePage.match(/<title>(.*?)<\/title>/i);
+		if (title) {
+			msg += ' Got page with title "' + title[1] + '"';
+		}
+		throw new Error(msg);
+	}
+	const bibTeXURL = ZU.unescapeHTML(m[1]);
+
+	await delay(500);
+	const bibTeXBody = await ZU.requestText(bibTeXURL);
+
+	const translator = Z.loadTranslator("import");
+	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4"); // BibTeX
+	translator.setString(bibTeXBody);
+	translator.setHandler("itemDone", function (obj, item) {
+		// these two variables are extracted from the context
+		var titleLink = attr(context, 'h3 a, #gsc_vcd_title a', 'href');
+		var secondLine = text(context, '.gs_a') || '';
+		// case are not recognized and can be characterized by the
+		// titleLink, or that the second line starts with a number
+		// e.g. 1 Cr. 137 - Supreme Court, 1803
+		if ((titleLink && titleLink.includes('/scholar_case?'))
+			|| secondLine && ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(secondLine[0])) {
+			item.itemType = "case";
+			item.caseName = item.title;
+			item.reporter = item.publicationTitle;
+			item.reporterVolume = item.volume;
+			item.dateDecided = item.date;
+			item.court = item.publisher;
+		}
+		// patents are not recognized but are easily detected
+		// by the titleLink or second line
+		if ((titleLink && titleLink.includes('google.com/patents/')) || secondLine.includes('Google Patents')) {
+			item.itemType = "patent";
+			// authors are inventors
+			for (let i = 0, n = item.creators.length; i < n; i++) {
+				item.creators[i].creatorType = 'inventor';
+			}
+			// country and patent number
+			if (titleLink) {
+				let m = titleLink.match(/\/patents\/([A-Za-z]+)(.*)$/);
+				if (m) {
+					item.country = m[1];
+					item.patentNumber = m[2];
+				}
+			}
+		}
+
+		// fix titles in all upper case, e.g. some patents in search results
+		if (item.title.toUpperCase() === item.title) {
+			item.title = ZU.capitalizeTitle(item.title);
+		}
+
+		// delete "others" as author
+		if (item.creators.length) {
+			var lastCreatorIndex = item.creators.length - 1,
+				lastCreator = item.creators[lastCreatorIndex];
+			if (lastCreator.lastName === "others" && (lastCreator.fieldMode === 1 || lastCreator.firstName === "")) {
+				item.creators.splice(lastCreatorIndex, 1);
+			}
+		}
+
+		// clean author names
+		for (let j = 0, m = item.creators.length; j < m; j++) {
+			if (!item.creators[j].firstName) {
+				continue;
+			}
+
+			item.creators[j] = ZU.cleanAuthor(
+				item.creators[j].lastName + ', '
+					+ item.creators[j].firstName,
+				item.creators[j].creatorType,
+				true);
+		}
+
+		// attach linked document as attachment if available
+		var documentLinkTarget = attr(context, '.gs_or_ggsm a, #gsc_vcd_title_gg a', 'href');
+		var documentLinkTitle = text(context, '.gs_or_ggsm a, #gsc_vcd_title_gg a');
+		if (documentLinkTarget) {
+			// Z.debug(documentLinkTarget);
+			var	attachment = {
+				title: "Full Text",
+				url: documentLinkTarget
+			};
+			let m = documentLinkTitle.match(/^\[(\w+)\]/);
+			if (m) {
+				var mimeTypes = {
+					PDF: 'application/pdf',
+					DOC: 'application/msword',
+					HTML: 'text/html'
+				};
+				if (Object.keys(mimeTypes).includes(m[1].toUpperCase())) {
+					attachment.mimeType = mimeTypes[m[1]];
+				}
+			}
+			item.attachments.push(attachment);
+		}
+
+		// Attach linked page as snapshot if available
+		if (titleLink && titleLink !== documentLinkTarget) {
+			item.attachments.push({
+				url: titleLink,
+				title: "Snapshot",
+				mimeType: "text/html"
+			});
+		}
+
+		item.complete();
+	});
+	translator.translate();
+}
+
+
+async function scrapeIds(doc, ids) {
 	for (let i = 0; i < ids.length; i++) {
 		// We need here 'let' to access ids[i] later in the nested functions
 		let context = doc.querySelector('.gs_r[data-cid="' + ids[i] + '"]');
-		if (!context && ids.length == 1) context = doc;
-		var citeUrl = '/scholar?q=info:' + ids[i] + ':scholar.google.com/&output=cite&scirp=1';
+		if (!context && ids.length === 1) {
+			context = doc;
+		}
+
+		let citeUrl = '/scholar?q=info:' + ids[i] + ':scholar.google.com/&output=cite&scirp=1';
 		// For 'My Library' we check the search field at the top
 		// and then in these cases change the citeUrl accordingly.
-		var scilib = attr(doc, '#gs_hdr_frm input[name="scilib"]', 'value');
-		if (scilib && scilib == 1) {
+		let scilib = attr(doc, '#gs_hdr_frm input[name="scilib"]', 'value');
+		if (scilib && scilib === 1) {
 			citeUrl = '/scholar?scila=' + ids[i] + '&output=cite&scirp=1';
 		}
-		ZU.doGet(citeUrl, function (citePage) {
-			var m = citePage.match(/href="((https?:\/\/[a-z.]*)?\/scholar.bib\?[^"]+)/);
-			if (!m) {
-				// Saved lists and possibly other places have different formats for BibTeX URLs
-				// Trying to catch them here (can't add test bc lists are tied to google accounts)
-				m = citePage.match(/href="(.+?)">BibTeX<\/a>/);
-			}
-			if (!m) {
-				var msg = "Could not find BibTeX URL";
-				var title = citePage.match(/<title>(.*?)<\/title>/i);
-				if (title) {
-					if (title) msg += ' Got page with title "' + title[1] + '"';
-				}
-				throw new Error(msg);
-			}
-			var bibUrl = ZU.unescapeHTML(m[1]);
-			ZU.doGet(bibUrl, function (bibtex) {
-				var translator = Zotero.loadTranslator("import");
-				translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
-				translator.setString(bibtex);
-				translator.setHandler("itemDone", function (obj, item) {
-					// these two variables are extracted from the context
-					var titleLink = attr(context, 'h3 a, #gsc_vcd_title a', 'href');
-					var secondLine = text(context, '.gs_a') || '';
-					// case are not recognized and can be characterized by the
-					// titleLink, or that the second line starts with a number
-					// e.g. 1 Cr. 137 - Supreme Court, 1803
-					if ((titleLink && titleLink.includes('/scholar_case?'))
-						|| secondLine && ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(secondLine[0])) {
-						item.itemType = "case";
-						item.caseName = item.title;
-						item.reporter = item.publicationTitle;
-						item.reporterVolume = item.volume;
-						item.dateDecided = item.date;
-						item.court = item.publisher;
-					}
-					// patents are not recognized but are easily detected
-					// by the titleLink or second line
-					if ((titleLink && titleLink.includes('google.com/patents/')) || secondLine.includes('Google Patents')) {
-						item.itemType = "patent";
-						// authors are inventors
-						for (let i = 0, n = item.creators.length; i < n; i++) {
-							item.creators[i].creatorType = 'inventor';
-						}
-						// country and patent number
-						if (titleLink) {
-							let m = titleLink.match(/\/patents\/([A-Za-z]+)(.*)$/);
-							if (m) {
-								item.country = m[1];
-								item.patentNumber = m[2];
-							}
-						}
-					}
-					
-					// fix titles in all upper case, e.g. some patents in search results
-					if (item.title.toUpperCase() == item.title) {
-						item.title = ZU.capitalizeTitle(item.title);
-					}
-					
-					// delete "others" as author
-					if (item.creators.length) {
-						var lastCreatorIndex = item.creators.length - 1,
-							lastCreator = item.creators[lastCreatorIndex];
-						if (lastCreator.lastName === "others" && (lastCreator.fieldMode === 1 || lastCreator.firstName === "")) {
-							item.creators.splice(lastCreatorIndex, 1);
-						}
-					}
-					
-					// clean author names
-					for (let j = 0, m = item.creators.length; j < m; j++) {
-						if (!item.creators[j].firstName) continue;
-			
-						item.creators[j] = ZU.cleanAuthor(
-							item.creators[j].lastName + ', '
-								+ item.creators[j].firstName,
-							item.creators[j].creatorType,
-							true);
-					}
-					
-					// attach linked document as attachment if available
-					var documentLinkTarget = attr(context, '.gs_or_ggsm a, #gsc_vcd_title_gg a', 'href');
-					var documentLinkTitle = text(context, '.gs_or_ggsm a, #gsc_vcd_title_gg a');
-					if (documentLinkTarget) {
-						// Z.debug(documentLinkTarget);
-						var	attachment = {
-							title: "Full Text",
-							url: documentLinkTarget
-						};
-						let m = documentLinkTitle.match(/^\[(\w+)\]/);
-						if (m) {
-							var mimeTypes = {
-								PDF: 'application/pdf',
-								DOC: 'application/msword',
-								HTML: 'text/html'
-							};
-							if (Object.keys(mimeTypes).includes(m[1].toUpperCase())) {
-								attachment.mimeType = mimeTypes[m[1]];
-							}
-						}
-						item.attachments.push(attachment);
-					}
-					
-					// Attach linked page as snapshot if available
-					if (titleLink && titleLink != documentLinkTarget) {
-						item.attachments.push({
-							url: titleLink,
-							title: "Snapshot",
-							mimeType: "text/html"
-						});
-					}
 
-					item.complete();
-				});
-				translator.translate();
-			});
-		});
+		await processCitePage(citeUrl, context);
+		if (i !== ids.length - 1) {
+			await delay(500);
+		}
 	}
 }
 
@@ -661,6 +675,20 @@ ItemFactory.prototype.saveItemCommonVars = function () {
 	}
 };
 
+
+/*
+ * #########################
+ * ### Utility Functions ###
+ * #########################
+ */
+
+
+// Returns a promise that resolves (to undefined) after the miminum time delay
+// specified in milliseconds.
+function delay(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 /*
   Test Case Descriptions:  (these have not been included in the test case JSON below as per
 							aurimasv's comment on https://github.com/zotero/translators/pull/833)
@@ -942,10 +970,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://scholar.google.de/citations?view_op=view_citation&hl=de&user=INQwsQkAAAAJ&citation_for_view=INQwsQkAAAAJ:u5HHmVD_uO8C",
+		"detectedItemType": "journalArticle",
 		"items": [
 			{
-				"itemType": "journalArticle",
-				"title": "Linked data-the story so far",
+				"itemType": "bookSection",
+				"title": "Linked data: The story so far",
 				"creators": [
 					{
 						"firstName": "Christian",
@@ -963,20 +992,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2009",
-				"itemID": "bizer2009linked",
+				"date": "2011",
+				"bookTitle": "Semantic services, interoperability and web applications: emerging concepts",
+				"itemID": "bizer2011linked",
 				"libraryCatalog": "Google Scholar",
 				"pages": "205–227",
-				"publicationTitle": "Semantic services, interoperability and web applications: emerging concepts",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Fulltext",
-						"mimeType": "application/pdf"
-					}
-				],
+				"publisher": "IGI global",
+				"shortTitle": "Linked data",
+				"attachments": [],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
