@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-04 11:32:20"
+	"lastUpdated": "2023-06-05 08:15:25"
 }
 
 /*
@@ -155,11 +155,12 @@ async function scrape(doc, idsOrUrl, type) {
 }
 
 
-async function processCitePage(citeURL, context) {
+async function processCitePage(citeURL, context, referrer) {
 	// Note that the page at citeURL has no doctype and is not a complete HTML
 	// document. The browser can parse it in quirks mode but ZU.requestDocument
 	// has trouble with it.
-	const citePage = await ZU.requestText(citeURL);
+	let reqOptions = { headers: { Referer: referrer || "" } };
+	const citePage = await ZU.requestText(citeURL, reqOptions);
 
 	let m = citePage.match(/href="((https?:\/\/[a-z.]*)?\/scholar.bib\?[^"]+)/);
 	if (!m) {
@@ -179,8 +180,13 @@ async function processCitePage(citeURL, context) {
 	}
 	const bibTeXURL = ZU.unescapeHTML(m[1]);
 
+	// Pause between obtaining the citation info page and sending the request
+	// for the BibTeX document.
 	await delay(500);
-	const bibTeXBody = await ZU.requestText(bibTeXURL);
+	// NOTE: To emulate the web app, the referrer for the BibTeX text is always
+	// set to the origin (i.e. https://scholar.google.com/)
+	reqOptions.headers.Referer = "https://scholar.google.com/";
+	const bibTeXBody = await ZU.requestText(bibTeXURL, reqOptions);
 
 	const translator = Z.loadTranslator("import");
 	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4"); // BibTeX
@@ -292,17 +298,18 @@ async function scrapeIds(doc, ids) {
 			context = doc;
 		}
 
-		let citeUrl = '/scholar?q=info:' + ids[i] + ':scholar.google.com/&output=cite&scirp=1';
+		let citeUrl = '/scholar?q=info:' + ids[i] + ':scholar.google.com/&output=cite&scirp=0&hl=en';
 		// For 'My Library' we check the search field at the top
 		// and then in these cases change the citeUrl accordingly.
 		let scilib = attr(doc, '#gs_hdr_frm input[name="scilib"]', 'value');
 		if (scilib && scilib === 1) {
-			citeUrl = '/scholar?scila=' + ids[i] + '&output=cite&scirp=1';
+			citeUrl = '/scholar?scila=' + ids[i] + '&output=cite&scirp=0&hl=en';
 		}
 
-		await processCitePage(citeUrl, context);
+		await processCitePage(citeUrl, context, doc.location.href);
+		// Pause for 1s before processing next citeUrl.
 		if (i !== ids.length - 1) {
-			await delay(500);
+			await delay(1000);
 		}
 	}
 }
