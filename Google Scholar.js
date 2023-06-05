@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-05 08:15:25"
+	"lastUpdated": "2023-06-05 09:03:27"
 }
 
 /*
@@ -35,6 +35,8 @@
 
 	***** END LICENSE BLOCK *****
 */
+
+const DELAY_INTERVAL = 1000; // in milliseconds.
 
 /* Detection for law cases, but not "How cited" pages,
  * e.g. url of "how cited" page:
@@ -106,21 +108,27 @@ async function doWeb(doc, url) {
 	var type = detectWeb(doc, url);
 	if (type === "multiple") {
 		if (getSearchResults(doc, true/* checkOnly */)) {
-			const items = await Z.selectItems(getSearchResults(doc, false/* checkOnly */));
+			let items = await Z.selectItems(getSearchResults(doc, false/* checkOnly */));
 			if (!items) {
 				return;
 			}
-			// here it is enough to know the ids and we can call scrape directly
-			await scrape(doc, Object.keys(items));
+			// Here it is enough to know the ids and we can call scrapeIds()
+			// with an array directly. scrapeIds will sequentialize the
+			// requests with delay.
+			await scrapeIds(doc, Object.keys(items));
 		}
 		else if (getProfileResults(doc, true)) {
-			const items = await Z.selectItems(getProfileResults(doc, false));
+			let items = await Z.selectItems(getProfileResults(doc, false));
 			if (!items) {
 				return;
 			}
 			// here we need open these pages before calling scrape
-			for (const item of Object.keys(items)) {
-				await scrape(await requestDocument(item));
+			let pfURLs = Object.keys(items);
+			for (let i = 0; i < pfURLs.length; i++) {
+				await scrape(await requestDocument(pfURLs[i]));
+				if (i < pfURLs.length - 1) {
+					await delay(DELAY_INTERVAL);
+				}
 			}
 		}
 	}
@@ -131,12 +139,10 @@ async function doWeb(doc, url) {
 }
 
 
-async function scrape(doc, idsOrUrl, type) {
-	if (Array.isArray(idsOrUrl)) {
-		await scrapeIds(doc, idsOrUrl);
-	}
-	else if (type && type === "case") {
-		scrapeCase(doc, idsOrUrl);
+// Scrape one GS entry by its URL.
+async function scrape(doc, url, type) {
+	if (type && type === "case") {
+		scrapeCase(doc, url);
 	}
 	else {
 		var related = ZU.xpathText(doc, '//a[contains(@href, "q=related:")]/@href');
@@ -182,13 +188,13 @@ async function processCitePage(citeURL, context, referrer) {
 
 	// Pause between obtaining the citation info page and sending the request
 	// for the BibTeX document.
-	await delay(500);
+	await delay(DELAY_INTERVAL);
 	// NOTE: To emulate the web app, the referrer for the BibTeX text is always
 	// set to the origin (i.e. https://scholar.google.com/)
 	reqOptions.headers.Referer = "https://scholar.google.com/";
 	const bibTeXBody = await ZU.requestText(bibTeXURL, reqOptions);
 
-	const translator = Z.loadTranslator("import");
+	let translator = Z.loadTranslator("import");
 	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4"); // BibTeX
 	translator.setString(bibTeXBody);
 	translator.setHandler("itemDone", function (obj, item) {
@@ -307,9 +313,9 @@ async function scrapeIds(doc, ids) {
 		}
 
 		await processCitePage(citeUrl, context, doc.location.href);
-		// Pause for 1s before processing next citeUrl.
+		// Pause before processing next citeUrl.
 		if (i !== ids.length - 1) {
-			await delay(1000);
+			await delay(DELAY_INTERVAL);
 		}
 	}
 }
