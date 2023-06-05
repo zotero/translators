@@ -106,7 +106,7 @@ function getProfileResults(doc, checkOnly) {
 
 async function doWeb(doc, url) {
 	var type = detectWeb(doc, url);
-	if (type === "multiple") {
+	if (type == "multiple") {
 		if (getSearchResults(doc, true/* checkOnly */)) {
 			let items = await Z.selectItems(getSearchResults(doc, false/* checkOnly */));
 			if (!items) {
@@ -141,7 +141,7 @@ async function doWeb(doc, url) {
 
 // Scrape one GS entry by its URL.
 async function scrape(doc, url, type) {
-	if (type && type === "case") {
+	if (type && type == "case") {
 		scrapeCase(doc, url);
 	}
 	else {
@@ -300,7 +300,7 @@ async function scrapeIds(doc, ids) {
 	for (let i = 0; i < ids.length; i++) {
 		// We need here 'let' to access ids[i] later in the nested functions
 		let context = doc.querySelector('.gs_r[data-cid="' + ids[i] + '"]');
-		if (!context && ids.length === 1) {
+		if (!context && ids.length == 1) {
 			context = doc;
 		}
 
@@ -308,7 +308,7 @@ async function scrapeIds(doc, ids) {
 		// For 'My Library' we check the search field at the top
 		// and then in these cases change the citeUrl accordingly.
 		let scilib = attr(doc, '#gs_hdr_frm input[name="scilib"]', 'value');
-		if (scilib && scilib === 1) {
+		if (scilib && scilib == 1) {
 			citeUrl = '/scholar?scila=' + ids[i] + '&output=cite&scirp=0&hl=en';
 		}
 
