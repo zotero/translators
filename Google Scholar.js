@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-05 09:03:27"
+	"lastUpdated": "2023-06-06 06:44:29"
 }
 
 /*
@@ -161,11 +161,11 @@ async function scrape(doc, url, type) {
 }
 
 
-async function processCitePage(citeURL, context, referrer) {
+async function processCitePage(citeURL, context, docURL) {
+	let reqOptions = { headers: { Referer: docURL.href || "" } };
 	// Note that the page at citeURL has no doctype and is not a complete HTML
 	// document. The browser can parse it in quirks mode but ZU.requestDocument
 	// has trouble with it.
-	let reqOptions = { headers: { Referer: referrer || "" } };
 	const citePage = await ZU.requestText(citeURL, reqOptions);
 
 	let m = citePage.match(/href="((https?:\/\/[a-z.]*)?\/scholar.bib\?[^"]+)/);
@@ -190,8 +190,9 @@ async function processCitePage(citeURL, context, referrer) {
 	// for the BibTeX document.
 	await delay(DELAY_INTERVAL);
 	// NOTE: To emulate the web app, the referrer for the BibTeX text is always
-	// set to the origin (i.e. https://scholar.google.com/)
-	reqOptions.headers.Referer = "https://scholar.google.com/";
+	// set to the origin (e.g. https://scholar.google.com/), imitating
+	// strict-origin-when-cross-origin
+	reqOptions.headers.Referer = docURL.origin + "/";
 	const bibTeXBody = await ZU.requestText(bibTeXURL, reqOptions);
 
 	let translator = Z.loadTranslator("import");
@@ -297,6 +298,8 @@ async function processCitePage(citeURL, context, referrer) {
 
 
 async function scrapeIds(doc, ids) {
+	let docURL = new URL(doc.location);
+	let hl = docURL.searchParams.get("hl") || "en"; // interface language
 	for (let i = 0; i < ids.length; i++) {
 		// We need here 'let' to access ids[i] later in the nested functions
 		let context = doc.querySelector('.gs_r[data-cid="' + ids[i] + '"]');
@@ -304,15 +307,15 @@ async function scrapeIds(doc, ids) {
 			context = doc;
 		}
 
-		let citeUrl = '/scholar?q=info:' + ids[i] + ':scholar.google.com/&output=cite&scirp=0&hl=en';
+		let citeUrl = '/scholar?q=info:' + ids[i] + ':scholar.google.com/&output=cite&scirp=0&hl=' + hl;
 		// For 'My Library' we check the search field at the top
 		// and then in these cases change the citeUrl accordingly.
 		let scilib = attr(doc, '#gs_hdr_frm input[name="scilib"]', 'value');
 		if (scilib && scilib == 1) {
-			citeUrl = '/scholar?scila=' + ids[i] + '&output=cite&scirp=0&hl=en';
+			citeUrl = '/scholar?scila=' + ids[i] + '&output=cite&scirp=0&hl=' + hl;
 		}
 
-		await processCitePage(citeUrl, context, doc.location.href);
+		await processCitePage(citeUrl, context, docURL);
 		// Pause before processing next citeUrl.
 		if (i !== ids.length - 1) {
 			await delay(DELAY_INTERVAL);
