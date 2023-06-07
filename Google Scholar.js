@@ -145,6 +145,12 @@ async function scrape(doc, url, type) {
 		scrapeCase(doc, url);
 	}
 	else {
+		// This kind of stand-alone article-info page can be navigated to from
+		// a profile page. The page contains links to versions of the article,
+		// and the first one is (likely?) the "canonical" version (of record,
+		// if possible). The Google Scholar id for that version can be
+		// extracted by examining part of the URL of that item's "Related
+		// articles" link.
 		var related = ZU.xpathText(doc, '//a[contains(@href, "q=related:")]/@href');
 		if (!related) {
 			throw new Error("Could not locate related URL");
