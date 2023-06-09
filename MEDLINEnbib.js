@@ -80,6 +80,7 @@ var inputTypeMap = {
 	Books: "book", // ERIC
 	"Book Chapter": "bookSection", // can't find in specs, but is used.
 	"Case Reports": "journalArticle", // Case reports in medicine are basically always in journals
+	"Case Report": "journalArticle",
 	"Journal Article": "journalArticle",
 	"Newspaper Article": "newspaperArticle",
 	"Video-Audio Media": "videoRecording",
@@ -174,7 +175,7 @@ function processTag(item, tag, value) {
 		}
 		else if (value.includes("[pii]")) item.pagesBackup = value.replace(/\s*\[pii\]/, "");
 	}
-	else if (tag == "MH" || tag == "OT") {
+	else if (tag == "MH" || tag == "OT" || tag = "KW") { // KoreaMed uses KW
 		item.tags.push(value);
 	}
 }
