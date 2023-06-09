@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2023-06-07 14:18:54"
+	"lastUpdated": "2023-06-09 02:21:30"
 }
 
 /*
@@ -175,7 +175,7 @@ function processTag(item, tag, value) {
 		}
 		else if (value.includes("[pii]")) item.pagesBackup = value.replace(/\s*\[pii\]/, "");
 	}
-	else if (tag == "MH" || tag == "OT" || tag = "KW") { // KoreaMed uses KW
+	else if (tag == "MH" || tag == "OT" || tag == "KW") { // KoreaMed uses KW
 		item.tags.push(value);
 	}
 }
