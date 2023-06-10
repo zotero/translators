@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-05-04 14:14:25"
+	"lastUpdated": "2023-06-09 21:19:36"
 }
 
 /*
@@ -37,10 +37,6 @@
 
 // SAGE uses Atypon, but as of now this is too distinct from any existing Atypon sites to make sense in the same translator.
 
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
 function detectWeb(doc, url) {
 	let articleMatch = /(abs|full|pdf|doi)\/10\./;
 	if (articleMatch.test(url)) {
@@ -55,7 +51,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//*[contains(@class, "art_title")]/a[contains(@href, "/doi/full/10.") or contains(@href, "/doi/abs/10.") or contains(@href, "/doi/pdf/10.")][1]');
+	var rows = ZU.xpath(doc, '//*[contains(@class, "item__title")]/a[contains(@href, "/doi/full/10.") or contains(@href, "/doi/abs/10.") or contains(@href, "/doi/pdf/10.")][1]');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -69,90 +65,85 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
-function scrape(doc, url) {
-	var risURL = "//journals.sagepub.com/action/downloadCitation";
-	var doi = ZU.xpathText(doc, '//meta[@name="dc.Identifier" and @scheme="doi"]/@content');
+async function scrape(doc, url) {
+	let risURL = "//journals.sagepub.com/action/downloadCitation";
+	let doi = ZU.xpathText(doc, '//meta[@name="dc.Identifier" and @scheme="doi"]/@content');
 	if (!doi) {
 		doi = url.match(/10\.[^?#]+/)[0];
 	}
-	var post = "doi=" + encodeURIComponent(doi) + "&include=abs&format=ris&direct=false&submit=Download+Citation";
-	var pdfurl = "//" + doc.location.host + "/doi/pdf/" + doi;
-	var tags = doc.querySelectorAll('div.abstractKeywords a');
+	let post = "doi=" + encodeURIComponent(doi) + "&include=abs&format=ris&direct=false&submit=Download+Citation";
+	let pdfurl = "//" + doc.location.host + "/doi/pdf/" + doi;
+	let tags = doc.querySelectorAll('div.abstractKeywords a');
 	// Z.debug(pdfurl);
 	// Z.debug(post);
-	ZU.doPost(risURL, post, function (text) {
-		// The publication date is saved in DA and the date first
-		// appeared online is in Y1. Thus, we want to prefer DA over T1
-		// and will therefore simply delete the later in cases both
-		// dates are present.
-		// Z.debug(text);
-		if (text.includes("DA  - ")) {
-			text = text.replace(/Y1[ ]{2}- .*\r?\n/, '');
+	let options = { method: "POST", body: post };
+	let text = await requestText(risURL, options);
+	// The publication date is saved in DA and the date first
+	// appeared online is in Y1. Thus, we want to prefer DA over T1
+	// and will therefore simply delete the later in cases both
+	// dates are present.
+	// Z.debug(text);
+	if (text.includes("DA  - ")) {
+		text = text.replace(/Y1[ ]{2}- .*\r?\n/, '');
+	}
+
+	let translator = Zotero.loadTranslator("import");
+	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+	translator.setString(text);
+	translator.setHandler("itemDone", (_obj, item) => {
+		// The subtitle will be neglected in RIS and is only present in
+		// the website itself. Moreover, there can be problems with
+		// encodings of apostrophs.
+		let subtitle = ZU.xpathText(doc, '//div[contains(@class, "publicationContentSubTitle")]/h1');
+		let title = ZU.xpathText(doc, '//div[contains(@class, "publicationContentTitle")]/h1');
+		if (title) {
+			item.title = title.trim();
+			if (subtitle) {
+				item.title += ': ' + subtitle.trim();
+			}
+		}
+		// The encoding of apostrophs in the RIS are incorrect and
+		// therefore we extract the abstract again from the website.
+		let abstract = doc.querySelector("#abstract");
+		if (abstract) {
+			item.abstractNote = abstract.innerText.replace(/^Abstract/, "").replace(/:\n/g, ": ").trim();
 		}
 
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		translator.setString(text);
-		translator.setHandler("itemDone", function (obj, item) {
-			// The subtitle will be neglected in RIS and is only present in
-			// the website itself. Moreover, there can be problems with
-			// encodings of apostrophs.
-			var subtitle = ZU.xpathText(doc, '//div[contains(@class, "publicationContentSubTitle")]/h1');
-			var title = ZU.xpathText(doc, '//div[contains(@class, "publicationContentTitle")]/h1');
-			if (title) {
-				item.title = title.trim();
-				if (subtitle) {
-					item.title += ': ' + subtitle.trim();
-				}
+		for (let tag of tags) {
+			item.tags.push(tag.textContent);
+		}
+		// Workaround while Sage hopefully fixes RIS for authors
+		for (let i = 0; i < item.creators.length; i++) {
+			if (!item.creators[i].firstName) {
+				let type = item.creators[i].creatorType;
+				let comma = item.creators[i].lastName.includes(",");
+				item.creators[i] = ZU.cleanAuthor(item.creators[i].lastName, type, comma);
 			}
-			// The encoding of apostrophs in the RIS are incorrect and
-			// therefore we extract the abstract again from the website.
-			var abstract = doc.querySelector("#abstract > div").innerText;
-			if (abstract) {
-				item.abstractNote = abstract;
-			}
+		}
 
-			for (let tag of tags) {
-				item.tags.push(tag.textContent);
-			}
-			// Workaround while Sage hopefully fixes RIS for authors
-			for (let i = 0; i < item.creators.length; i++) {
-				if (!item.creators[i].firstName) {
-					let type = item.creators[i].creatorType;
-					let comma = item.creators[i].lastName.includes(",");
-					item.creators[i] = ZU.cleanAuthor(item.creators[i].lastName, type, comma);
-				}
-			}
-
-			item.notes = [];
-			item.language = ZU.xpathText(doc, '//meta[@name="dc.Language"]/@content');
-			item.attachments.push({
-				url: pdfurl,
-				title: "SAGE PDF Full Text",
-				mimeType: "application/pdf"
-			});
-			item.complete();
+		item.notes = [];
+		item.language = ZU.xpathText(doc, '//meta[@name="dc.Language"]/@content');
+		item.attachments.push({
+			url: pdfurl,
+			title: "SAGE PDF Full Text",
+			mimeType: "application/pdf"
 		});
-		translator.translate();
+		item.complete();
 	});
+	await translator.translate();
 }
 
 /** BEGIN TEST CASES **/
@@ -198,8 +189,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://journals.sagepub.com/toc/rera/86/3",
-		"detectedItemType": false,
-		"items": []
+		"items": "multiple"
 	},
 	{
 		"type": "web",
