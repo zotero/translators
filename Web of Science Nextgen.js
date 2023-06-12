@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-12 14:52:18"
+	"lastUpdated": "2023-06-12 14:55:21"
 }
 
 /*
@@ -150,7 +150,7 @@ function scrape(doc, url) {
 
 
 function getItemID(url) {
-	let idInURL = url.match(/((?:WOS|RSCI|KJD|DIIDW|MEDLINE|DRCI|BCI|SCIELO|ZOOREC|CCC):[^/?&]+)/);
+	let idInURL = url.match(/((?:WOS|RSCI|KJD|DIIDW|MEDLINE|DRCI|BCI|SCIELO|ZOOREC|CCC):[^/?&(]+)/);
 	// Z.debug(idInURL)
 	return idInURL && idInURL[1];
 }
