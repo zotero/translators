@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-04-22 20:47:13"
+	"lastUpdated": "2023-06-12 14:52:18"
 }
 
 /*
@@ -156,7 +156,7 @@ function getItemID(url) {
 }
 
 function getSessionID(doc, callback) {
-	const sidRegex = /sid=([a-zA-Z0-9]+)/i;
+	const sidRegex = /(?:sid=|"SID":")([a-zA-Z0-9]+)/i;
 	
 	// session ID is embedded in the static page inside an inline <script>
 	// if you have the right HttpOnly cookie set. if we can't find it, we
