@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-12 10:11:38"
+	"lastUpdated": "2023-06-13 09:38:47"
 }
 
 /*
@@ -1480,7 +1480,16 @@ var testCases = [
 				"pages": "205–227",
 				"publisher": "IGI global",
 				"shortTitle": "Linked data",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Full Text",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
