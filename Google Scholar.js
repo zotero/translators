@@ -36,7 +36,7 @@
 	***** END LICENSE BLOCK *****
 */
 
-const DELAY_INTERVAL = 1000; // in milliseconds.
+const DELAY_INTERVAL = 2000; // in milliseconds.
 
 var GS_CONFIG = { baseURL: undefined, lang: undefined };
 
@@ -143,7 +143,7 @@ async function doWeb(doc, url) {
 
 			multiScraper = makeGSScraper(Object.keys(urls),
 				rowsFromProfile,
-				getEmulatedSearchURL(pfName));
+				getEmulatedSearchURL(pfName), true/* expensive */);
 		}
 
 		await multiScraper(doc);
@@ -171,7 +171,7 @@ async function scrape(doc, url, type) {
 				function* () {
 					yield emuRowObj;
 				},
-				getEmulatedSearchURL(pfName));
+				getEmulatedSearchURL(pfName), true);
 
 			await singleScraper(doc);
 		}
@@ -577,7 +577,6 @@ ItemFactory.prototype.saveItemCommonVars = function () {
  * #########################
  */
 
-
 // Returns a promise that resolves (to undefined) after the miminum time delay
 // specified in milliseconds.
 function delay(ms) {
@@ -593,46 +592,37 @@ function delay(ms) {
  * @param {string} searchKey - The property to be used for the ID in the
  * item-stub object used as the basis of search (e.g. "DOI", "arXiv", etc.)
  * @param {string} translatorUUID - The id of the search translator.
+ * @property {Z.Translate<Z.SearchTranslator>} translator
+ * @property {string} key
  */
 function ExternalSearch(searchKey, translatorUUID) {
 	let trans = Z.loadTranslator("search");
 	trans.setTranslator(translatorUUID);
 	trans.setHandler("itemDone", extHandler);
+	// NOTE that any error during translation is suppressed, but as no item
+	// gets saved, there will be an error raised anyway.
 	trans.setHandler("error", () => {});
 
-	/** @member {Z.Translate<Z.SearchTranslator>} **/
 	this.translator = trans;
-
-	/** @member {string} **/
 	this.key = searchKey;
 }
 
 /**
- * Execute the translation using identifier, catching all exceptions.
- * Returns a promise that resolves to a boolean, indicating whether the
- * translation failed.
+ * Execute the translation using identifier. This is intended to be used as the
+ * work function of a TransPipeline.
  *
  * @async
  * @param {string} identifier - Search term.
- * @returns {Promise<boolean>}
+ * @returns {Promise<Z.Item[]>}
  * TODO: post-processing (for attachment, etc.)
  */
 ExternalSearch.prototype.translate = async function (identifier) {
 	this.translator.setSearch({ [this.key]: identifier });
 
-	let error = false;
-
 	Z.debug(`Processing external id ${identifier} (${this.key})`);
-	try {
-		await this.translator.translate();
-	}
-	catch (transError) {
-		error = true;
-		Z.debug(`Translation of identifier ${identifier} with ${this.key} failed; skipping. The error was:`);
-		Z.debug(transError);
-	}
-
-	return error;
+	// Let any translation exception (most likely the "no item saved" error)
+	// propagate, and make it a rule for the caller to handle it.
+	return this.translator.translate();
 };
 
 // "itemDone" handler callback. Currently, only adds "via Google Scholar" to
@@ -709,13 +699,16 @@ function extractArXiv(row) {
  * tasks will be appended.
  * @property {Promise[]} trace - Array holding references to each task promise
  * that passes through the pipeline.
+ * @property {boolean} restLeads - Whether the "rest" shall apply to the
+ * leading edge of a work task, in addition to the trailing edge.
  */
-function TransPipeline(identify, work, rest, context) {
-	Object.assign(this, { identify, work, rest, context });
+function TransPipeline(identify, work, rest, context, label = "[unnamed]") {
+	Object.assign(this, { identify, work, rest, context, label });
 	this.next = undefined;
 	this.bin = [];
 	this.current = Promise.resolve();
 	this.trace = [];
+	this.restLeads = false;
 }
 
 TransPipeline.prototype = {
@@ -733,13 +726,14 @@ TransPipeline.prototype = {
 			id = this.identify(row);
 		}
 		catch (err) {
-			// failed identification falls through to falsy id.
+			// failed identification falls through to the case of falsy id.
 		}
 		if (!id) {
 			this.pass(row);
 			return;
 		}
 		let currPromise = this.current.then(this.getTask(id, row));
+		// TODO: Can we add less promises to the "trace"?
 		this.trace.push(currPromise);
 		this.current = currPromise;
 	},
@@ -751,17 +745,33 @@ TransPipeline.prototype = {
 	 * @param {string} id - ID string as returned by this.identify(row);
 	 * @param {RowObj} row - The row object being operated on.
 	 * @returns {AsyncFunction} An async function that takes no arguments. It
-	 * will execute the task work, and if its return value resolves to "true"
-	 * (indicating a failure), pass the row to the next in the pipeline if any.
+	 * will execute the task on the row, and, if the task raises no exceptions,
+	 * the row will not be further processed. If however the task throws, the
+	 * row will be passed to downstream pipelines if any. The thrown error is
+	 * suppressed, and the task always fulfills.
 	 */
 	getTask: function (id, row) {
 		let that = this;
 		async function task() {
-			let error = await that.work(id, row, that.context);
-			if (error) {
+			if (that.restLeads && that.rest) {
+				await delay(that.rest);
+			}
+
+			// Suppress any error because the pipeline isn't designed to handle
+			// true rejection of the task. The rows that failed all pipelines
+			// will end up in the bin.
+			try {
+				await that.work(id, row, that.context);
+			}
+			catch (error) {
+				Z.debug(`Pipeline ${that.label} work-function failed with input row:`);
+				Z.debug(row);
+				Z.debug(error);
 				that.pass(row);
 			}
-			if (that.rest) {
+
+			// Rest no matter the success status. Unless the row says not.
+			if (that.rest && !row.last) {
 				await delay(that.rest);
 			}
 		}
@@ -824,7 +834,8 @@ function makeExtPipeline(key, uuid, identify, rest) {
 	let searchObj = new ExternalSearch(key, uuid);
 	return new TransPipeline(identify,
 		searchObj.translate.bind(searchObj), // work function, only takes ID.
-		rest);
+		rest, null/* context */,
+		`[${key}]`); // use the key for pipeline label, for debugging.
 }
 
 /**
@@ -920,12 +931,16 @@ function* rowsFromProfile(pfURLs, pfDoc) {
  * requests to citation-info page fragments.
  * @param {number} pause - Mimium duration of the pause after each translation
  * run, in milliseconds.
+ * @param {boolean} [restLeads=false] - Whether the rest should apply to the
+ * leading edge as well.
  * @returns {TransPipeline} The pipeline object that utilizes citation-info
  * from Google Scholar itself.
  */
-function makeGSPipeline(searchReferrer, pause) {
-	return new TransPipeline(row => row.id, // trivial identification function
-		workGS, pause, searchReferrer);
+function makeGSPipeline(searchReferrer, pause, restLeads = false) {
+	let p = new TransPipeline(row => row.id, // trivial identification function
+		workGS, pause, searchReferrer, "[GS native]");
+	p.restLeads = restLeads;
+	return p;
 }
 
 /**
@@ -936,10 +951,14 @@ function makeGSPipeline(searchReferrer, pause) {
  * @param {Generator|AsyncGenerator} rowGenerator - Generator of rows, e.g.
  * rowsFromSearchResult or rowsFromProfile.
  * @param {URL} referrerURL - URL object for the referrer, actual or emulated.
+ * @param {boolean} [expensive=false] - Whether the scraper is "expensive" in
+ * the sense of using GS resources for both row-generation and translation
+ * (this is true for profile scraping).
  * @returns {AsyncFunction} Multiscraper function that operates on the doc
  * being scraped.
  */
-function makeGSScraper(inputStrings, rowGenerator, referrerURL) {
+function makeGSScraper(inputStrings, rowGenerator, referrerURL,
+	expensive = false) {
 	return async function (doc) {
 		let rowGen = rowGenerator(inputStrings, doc);
 
@@ -949,23 +968,34 @@ function makeGSScraper(inputStrings, rowGenerator, referrerURL) {
 			.add(makeExtPipeline("arXiv",
 				"ecddda2e-4fc6-4aea-9f17-ef3b56d7377a", // ArXiv.org
 				extractArXiv, 3000))
-			.add(makeGSPipeline(referrerURL, 1500)); // Native GS scraping.
+			.add(makeGSPipeline(referrerURL,
+				expensive ? Math.ceil(DELAY_INTERVAL / 2) : DELAY_INTERVAL,
+				expensive/* restLeads */)); // Native GS scraping.
 
+		let n = inputStrings.length;
 		for (let rowPromise of rowGen) {
 			let row = await rowPromise;
+			// NOTE that unecessary after-operation delays (for the last item)
+			// are cancelled.
 			if (row) {
+				if (n <= 1) {
+					row.last = true; // cancel trailing delays in the pipelines
+				}
+
 				pipeline.handleRow(row);
 			}
-			// Pause before getting next row; necessary for async
-			// row-generation from the profile page.
-			await delay(DELAY_INTERVAL);
+			if (expensive && (n > 1)) {
+				// Pause before getting next row; necessary for async
+				// row-generation from the profile page.
+				await delay(DELAY_INTERVAL);
+			}
+			n -= 1;
 		}
 
-		// Barrier for the resolution of all translation tasks.
+		// Barrier for the conclusion of all translation tasks.
 		await Promise.all(pipeline.trace);
 
 		if (pipeline.bin.length) {
-			Z.debug(pipeline.bin);
 			throw new Error(`${pipeline.bin.length} row(s) failed to translate.`);
 		}
 	};
