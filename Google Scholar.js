@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-13 09:38:47"
+	"lastUpdated": "2023-06-13 22:40:37"
 }
 
 /*
@@ -189,7 +189,7 @@ async function scrape(doc, url, type) {
  * @returns {URL}
  */
 function getEmulatedSearchURL(pfName) {
-	return new URL(`/scholar?hl=${GS_CONFIG.lang}&as_sdt=0%2C5&q=${encodeURIComponent(pfName).replace("%20", "+")}&btnG=`, GS_CONFIG.baseURL);
+	return new URL(`/scholar?hl=${GS_CONFIG.lang}&as_sdt=0%2C5&q=${encodeURIComponent(pfName).replace(/%20/g, "+")}&btnG=`, GS_CONFIG.baseURL);
 }
 
 /**
