@@ -616,7 +616,7 @@ function ExternalSearch(searchKey, translatorUUID) {
  * @returns {Promise<Z.Item[]>}
  * TODO: post-processing (for attachment, etc.)
  */
-ExternalSearch.prototype.translate = async function (identifier) {
+ExternalSearch.prototype.translate = function (identifier) {
 	this.translator.setSearch({ [this.key]: identifier });
 
 	Z.debug(`Processing external id ${identifier} (${this.key})`);
@@ -664,6 +664,7 @@ function extractArXiv(row) {
 		return null;
 	}
 	let path = decodeURIComponent(urlObj.pathname);
+	// TODO: additional patterns to "/abs/..."
 	let m = path.match(/\/abs\/([a-z-]+\/\d+|\d+\.\d+)$/);
 	return m && m[1];
 }
@@ -1172,7 +1173,7 @@ async function processCitePage(citeURL, row, referrer) {
 
 		item.complete();
 	});
-	translator.translate();
+	return translator.translate();
 }
 
 /*
