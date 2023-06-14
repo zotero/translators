@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-14 00:06:19"
+	"lastUpdated": "2023-06-14 06:38:33"
 }
 
 /*
@@ -592,19 +592,28 @@ function delay(ms) {
  * @param {string} searchKey - The property to be used for the ID in the
  * item-stub object used as the basis of search (e.g. "DOI", "arXiv", etc.)
  * @param {string} translatorUUID - The id of the search translator.
+ * @param {boolean} [doAttach=false] - Whether we should use a workaround to
+ * save attachments.
  * @property {Z.Translate<Z.SearchTranslator>} translator
  * @property {string} key
  */
-function ExternalSearch(searchKey, translatorUUID) {
+function ExternalSearch(searchKey, translatorUUID, doAttach = false) {
 	let trans = Z.loadTranslator("search");
 	trans.setTranslator(translatorUUID);
-	trans.setHandler("itemDone", extHandler);
 	// NOTE that any error during translation is suppressed, but as no item
 	// gets saved, there will be an error raised anyway.
 	trans.setHandler("error", () => {});
 
-	this.translator = trans;
+	if (doAttach) {
+		trans.setHandler("itemDone", (obj, item) => {
+			addAttachment(item, this.row); // hack for attachment saving.
+		});
+	}
+	trans.setHandler("itemDone", extHandler);
+
+	this.translate = trans;
 	this.key = searchKey;
+	this.doAttach = doAttach;
 }
 
 /**
@@ -613,16 +622,20 @@ function ExternalSearch(searchKey, translatorUUID) {
  *
  * @async
  * @param {string} identifier - Search term.
+ * @param {RowObj} [row] - Optional row object, used internally for attachment
+ * saving when this feature is not available from the search translator.
  * @returns {Promise<Z.Item[]>}
- * TODO: post-processing (for attachment, etc.)
  */
-ExternalSearch.prototype.translate = function (identifier) {
-	this.translator.setSearch({ [this.key]: identifier });
+ExternalSearch.prototype.work = function (identifier, row) {
+	this.translate.setSearch({ [this.key]: identifier });
+	if (this.doAttach) {
+		this.row = row; // hack for attachment saving.
+	}
 
 	Z.debug(`Processing external id ${identifier} (${this.key})`);
 	// Let any translation exception (most likely the "no item saved" error)
 	// propagate, and make it a rule for the caller to handle it.
-	return this.translator.translate();
+	return this.translate.translate();
 };
 
 // "itemDone" handler callback. Currently, only adds "via Google Scholar" to
@@ -828,14 +841,16 @@ TransPipeline.prototype = {
  * @param {Function} identify - Row-identification function.
  * @param {number} rest - "Rest" time between consecutive task runs in
  * milliseconds.
+ * @param {boolean} [attach=false] - Whether this pipeline should attach the
+ * documents as appearing on the left side on GS pages.
  * @returns {TransPipeline}
  */
-function makeExtPipeline(key, uuid, identify, rest) {
-	let searchObj = new ExternalSearch(key, uuid);
+function makeExtPipeline(key, uuid, identify, rest, attach = false) {
+	let searchObj = new ExternalSearch(key, uuid, attach);
 	return new TransPipeline(identify,
-		searchObj.translate.bind(searchObj), // work function, only takes ID.
+		searchObj.work.bind(searchObj), // work function.
 		rest, null/* context */,
-		`[${key}]`); // use the key for pipeline label, for debugging.
+		`[${key}]`); // use the key as pipeline label, for debugging.
 }
 
 /**
@@ -964,7 +979,7 @@ function makeGSScraper(inputStrings, rowGenerator, referrerURL,
 
 		let pipeline = makeExtPipeline("DOI",
 			"b28d0d42-8549-4c6d-83fc-8382874a5cb9", // DOI Content Negotiation
-			extractDOI, 20)
+			extractDOI, 20, true/* attach */)
 			.add(makeExtPipeline("arXiv",
 				"ecddda2e-4fc6-4aea-9f17-ef3b56d7377a", // ArXiv.org
 				extractArXiv, 3000))
@@ -1148,31 +1163,35 @@ async function processCitePage(citeURL, row, referrer) {
 				true);
 		}
 
-		// attach linked document as attachment if available
-		if (row.attachmentLink) {
-			let	attachment = {
-				title: "Full Text",
-				url: row.attachmentLink,
-			};
-			let mimeType = MIME_TYPES[row.attachmentType];
-			if (mimeType) {
-				attachment.mimeType = mimeType;
-			}
-			item.attachments.push(attachment);
-		}
-
-		// Attach linked page as snapshot if available
-		if (row.directLink && row.directLink !== row.attachmentLink) {
-			item.attachments.push({
-				url: row.directLink,
-				title: "Snapshot",
-				mimeType: "text/html"
-			});
-		}
+		addAttachment(item, row);
 
 		item.complete();
 	});
 	return translator.translate();
+}
+
+function addAttachment(item, row) {
+	// attach linked document as attachment if available
+	if (row.attachmentLink) {
+		let	attachment = {
+			title: "Full Text (via Google Scholar)",
+			url: row.attachmentLink,
+		};
+		let mimeType = MIME_TYPES[row.attachmentType];
+		if (mimeType) {
+			attachment.mimeType = mimeType;
+		}
+		item.attachments.push(attachment);
+	}
+
+	// Attach linked page as snapshot if available
+	if (row.directLink && row.directLink !== row.attachmentLink) {
+		item.attachments.push({
+			url: row.directLink,
+			title: "Snapshot",
+			mimeType: "text/html"
+		});
+	}
 }
 
 /*
@@ -1485,9 +1504,10 @@ var testCases = [
 				"pages": "205–227",
 				"publisher": "IGI global",
 				"shortTitle": "Linked data",
+				"url": "https://www.igi-global.com/chapter/linkeddata-story-far/55046",
 				"attachments": [
 					{
-						"title": "Full Text",
+						"title": "Full Text (via Google Scholar)",
 						"mimeType": "application/pdf"
 					},
 					{
