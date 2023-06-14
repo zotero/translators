@@ -648,7 +648,7 @@ function extractDOI(row) {
 	// end, e.g. the link in the header title of
 	// https://scholar.google.com/citations?view_op=view_citation&hl=en&user=Cz6X6UYAAAAJ&citation_for_view=Cz6X6UYAAAAJ:zYLM7Y9cAGgC
 	// https://www.nomos-elibrary.de/10.5771/9783845229614-153.pdf
-	let m = path.match(/(10\.\d{4,}\/.+?)(?:\.(?:pdf|htm|html|epub))?$/);
+	let m = path.match(/(10\.\d{4,}\/.+?)(?:\.(?:pdf|htm|html|xhtml|epub|xml))?$/i);
 	return m && m[1];
 }
 
@@ -660,17 +660,16 @@ function extractDOI(row) {
  */
 function extractArXiv(row) {
 	let urlObj = new URL(row.directLink);
-	if (urlObj.hostname !== "arxiv.org") {
+	if (urlObj.hostname.toLowerCase() !== "arxiv.org") {
 		return null;
 	}
 	let path = decodeURIComponent(urlObj.pathname);
-	// TODO: additional patterns to "/abs/..."
-	let m = path.match(/\/abs\/([a-z-]+\/\d+|\d+\.\d+)$/);
+	let m = path.match(/\/\w+\/([a-z-]+\/\d+|\d+\.\d+)$/i);
 	return m && m[1];
 }
 
 // Translation pipeline utilities.
-// The translations are attempted in the order of DOI -> ArXi -> GS native.
+// The translations are attempted in the order of DOI -> ArXiv -> GS native.
 // Each pipeline item will execute the translation and consume the row object
 // if it succeeds, or pass it to the next one if it fails. The pipelines can be
 // composed, building up a chain.
