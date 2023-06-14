@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-13 22:40:37"
+	"lastUpdated": "2023-06-14 00:06:19"
 }
 
 /*
@@ -1114,6 +1114,11 @@ async function processCitePage(citeURL, row, referrer) {
 					item.patentNumber = m[2];
 				}
 			}
+		}
+
+		// Add the title link as the url of the item.
+		if (row.directLink) {
+			item.url = row.directLink;
 		}
 
 		// fix titles in all upper case, e.g. some patents in search results
