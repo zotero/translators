@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-05-31 20:54:48"
+	"lastUpdated": "2023-06-14 16:16:24"
 }
 
 /*
@@ -35,16 +35,17 @@
 	***** END LICENSE BLOCK *****
 */
 
+const preprintType = ZU.fieldIsValidForType('title', 'preprint')
+	? 'preprint'
+	: 'report';
+
 function detectWeb(doc, url) {
 	var multipleRe = /^https?:\/\/eccc\.weizmann\.ac\.il\/(title|year|keyword)\//;
 	if (multipleRe.test(url)) {
 		return "multiple";
 	}
-	else if (ZU.fieldIsValidForType('title', 'preprint')) {
-		return "preprint";
-	}
 	else {
-		return "report";
+		return preprintType;
 	}
 }
 
@@ -54,17 +55,7 @@ function metaXPath(name) {
 }
 
 function scrape(doc) {
-	var hasPreprint;
-	if (ZU.fieldIsValidForType('title', 'preprint')) {
-		hasPreprint = true;
-	}
-	var newItem;
-	if (hasPreprint) {
-		newItem = new Zotero.Item("preprint");
-	}
-	else {
-		newItem = new Zotero.Item("report");
-	}
+	newItem = new Zotero.Item(preprintType);
 
 	var url = doc.location.href;
 
@@ -72,7 +63,7 @@ function scrape(doc) {
 	newItem.title = ZU.xpathText(doc, metaXPath("title"));
 	newItem.date = ZU.xpathText(doc, metaXPath("publication_date"));
 	
-	if (hasPreprint) {
+	if (preprintType == 'preprint') {
 		newItem.archiveID = ZU.xpathText(doc, metaXPath("technical_report_number"));
 		newItem.publisher = "Electronic Colloquium on Computational Complexity";
 	}
