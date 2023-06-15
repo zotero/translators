@@ -123,7 +123,7 @@ async function scrape(nextDoc, url) {
 			Zotero.debug('PDF URL: ' + pdfURL);
 			item.attachments.push({
 				url: pdfURL,
-				title: "E-periodica PDF",
+				title: "Full Text PDF",
 				type: "application/pdf"
 			});
 		}
