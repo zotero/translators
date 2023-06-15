@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2023-06-15 10:22:48"
+	"lastUpdated": "2023-06-15 10:54:59"
 }
 
 /*
@@ -228,12 +228,12 @@ function doImport(text) {
 	var rawLine;
 	while ((rawLine = Zotero.read()) !== false) {    // until EOF
 		//Z.debug("line: " + rawLine);
-		let split = rawLine.match(/^([A-Z0-9]{2})\s(?:([^\n]*))?/);
-		// EF is equivalent to the end of file.
 		if (/^EF\s*/.test(rawLine)) {
 			Z.debug("Encountered EF (equivalent to End of File)");
 			break;
 		}
+
+		let split = rawLine.match(/^([A-Z0-9]{2})\s(?:([^\n]*))?/);
 		// Force a match for ER
 		if (rawLine == "ER") split = ["","ER",""];
 		if (split) {
