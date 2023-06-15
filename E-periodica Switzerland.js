@@ -92,7 +92,7 @@ async function scrape(nextDoc, url) {
 	let text = await requestText(pageinfoUrl);
 	var epJSON = JSON.parse(text);
 	// Zotero.debug(epJSON);
-	var risURL = null;
+	let risURL;
 	if (epJSON.articles["0"].hasRisLink) {
 		risURL = '/view/' + epJSON.articles["0"].risLink;
 	}
