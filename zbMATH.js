@@ -46,7 +46,7 @@ function detectWeb(doc) {
 	return false;
 }
 
-function getSearchResults(doc, checkOnly) {
+function getSearchResults(doc) {
 	let items = {};
 	let found = false;
 	let rows = doc.querySelectorAll(".content-result .list > article");
@@ -54,16 +54,15 @@ function getSearchResults(doc, checkOnly) {
 		let href = attr(row, ".title a", "href");
 		let title = ZU.trimInternal(text(row, ".title"));
 		if (!href || !title) continue;
-		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
 	}
-	return found && items;
+	return found ? items : false;
 }
 
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
-		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		let items = await Zotero.selectItems(getSearchResults(doc));
 		if (!items) return;
 		for (let url of Object.keys(items)) {
 			await scrape(await requestDocument(url));
@@ -80,7 +79,7 @@ async function scrape(doc, url) {
 		Z.debug(`Error: document at ${url} does not contain bibTeX link`);
 		return;
 	}
-	let bibTeXDoc = await ZU.requestText(bibURL);
+	let bibTeXDoc = await requestText(bibURL);
 	if (!bibTeXDoc) {
 		Z.debug(`Error: failed to request BibTeX content at ${bibURL}`);
 		return;
