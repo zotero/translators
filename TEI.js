@@ -1,13 +1,11 @@
 {
 	"translatorID": "032ae9b7-ab90-9205-a479-baf81f49184a",
-	"translatorType": 2,
 	"label": "TEI",
 	"creator": "Stefan Majewski",
 	"target": "xml",
 	"minVersion": "4.0.27",
-	"maxVersion": null,
+	"maxVersion": "",
 	"priority": 25,
-	"inRepository": true,
 	"configOptions": {
 		"dataMode": "xml/dom",
 		"getCollections": "true"
@@ -19,7 +17,9 @@
 		"Full TEI Document": false,
 		"Export Collections": false
 	},
-	"lastUpdated": "2022-09-30 10:56:50"
+	"inRepository": true,
+	"translatorType": 2,
+	"lastUpdated": "2023-06-15 10:46:23"
 }
 
 // ********************************************************************
@@ -59,17 +59,27 @@
 // Zotero.addOption("exportNotes", false);
 // Zotero.addOption("generateXMLIds", true);
 
-var ns = {
+const ns = {
 	tei: "http://www.tei-c.org/ns/1.0",
 	xml: "http://www.w3.org/XML/1998/namespace"
 };
 
 
-var exportedXMLIds = {};
-var generatedItems = {};
-var allItems = {};
+const exportedXMLIds = {};
+const generatedItems = {};
+const allItems = {};
 
-// replace formatting with TEI tags
+
+// build one time
+const xmlparser = new DOMParser();
+const xmlser = new XMLSerializer();
+
+/**
+ * Replace formatting with TEI tags.
+ * [2023-06 FG] Legacy, @see appendXML(), to have formatting as element node
+ * @param {*} title 
+ * @returns 
+ */
 function replaceFormatting(title) {
 	var titleText = title;
 	// italics
@@ -92,6 +102,50 @@ function replaceFormatting(title) {
 	titleText = titleText.replace(/<span class="nocase">(.*?)<\/span>/g, '<hi rend="nocase">$1</hi>');
 
 	return titleText;
+}
+
+/**
+ * Append possible rich text html as TEI element (<hi rend="…">)
+ * @param {*} node 
+ * @param {*} html 
+ */
+function appendXML (node, html) {
+	if (!html) return;
+	// import html as dom and export is as xml to avoid xml malformations
+	let dom = xmlparser.parseFromString(html, "text/html");
+	html = xmlser.serializeToString(dom.getElementsByTagName("body").item(0));
+	// transform html to tei, xslt not available
+	// https://forums.zotero.org/discussion/comment/344940/
+	// tags supported by Zotero
+	// https://www.zotero.org/support/kb/rich_text_bibliography
+	let xml = html
+		// changing namespace of root element
+		.replace(/http:\/\/www.w3.org\/1999\/xhtml/g, 'http://www.tei-c.org/ns/1.0')
+		// <b> bold
+		.replace(/<b>/g, '<hi rend="bold">')
+		.replace(/<\/b>/g, '</hi>')
+		// <i> italics
+		.replace(/<i>/g, '<hi rend="italics">')
+		.replace(/<\/i>/g, '</hi>')
+		// nocase
+		.replace(/<span class="nocase">(.*?)<\/span>/g, '<hi rend="nocase">$1</hi>')
+		// <sc> seems no more supported in Zotero desk client
+		// small-caps
+		.replace(/<span style="font-variant:\s*small-caps;">(.*?)<\/span>/g, '<hi rend="smallcaps">$1</hi>')
+		// <sub> subscript
+		.replace(/<sup>/g, '<hi rend="sup">')
+		.replace(/<\/sup>/g, '</hi>')
+		// <sup> superscript
+		.replace(/<sup>/g, '<hi rend="sup">')
+		.replace(/<\/sup>/g, '</hi>')
+	;
+	dom = xmlparser.parseFromString(xml, "text/xml");
+	const children = dom.documentElement.childNodes
+	for(let i = 0, len = children.length; i < len; i++) {
+		const child = children[i];
+		const imported = node.ownerDocument.importNode(child, true);
+		node.appendChild(imported);
+	}
 }
 
 function genXMLId(item) {
@@ -225,9 +279,7 @@ function generateItem(item, teiDoc) {
 		var analyticTitle = teiDoc.createElementNS(ns.tei, "title");
 		analyticTitle.setAttribute("level", "a");
 		analytic.appendChild(analyticTitle);
-		if (item.title) {
-			analyticTitle.appendChild(teiDoc.createTextNode(replaceFormatting(item.title)));
-		}
+		appendXML(analyticTitle, item.title);
 		// A DOI is presumably for the article, not the journal.
 		if (item.DOI) {
 			idno = teiDoc.createElementNS(ns.tei, "idno");
@@ -246,7 +298,7 @@ function generateItem(item, teiDoc) {
 			else {
 				pubTitle.setAttribute("level", "m");
 			}
-			pubTitle.appendChild(teiDoc.createTextNode(replaceFormatting(publicationTitle)));
+			appendXML(pubTitle, publicationTitle);
 			monogr.appendChild(pubTitle);
 		}
 
@@ -263,7 +315,7 @@ function generateItem(item, teiDoc) {
 		if (item.title) {
 			title = teiDoc.createElementNS(ns.tei, "title");
 			title.setAttribute("level", "m");
-			title.appendChild(teiDoc.createTextNode(replaceFormatting(item.title)));
+			appendXML(title, item.title);
 			monogr.appendChild(title);
 		}
 		else if (!item.conferenceName) {
@@ -291,7 +343,7 @@ function generateItem(item, teiDoc) {
 	if (item.conferenceName) {
 		var conferenceName = teiDoc.createElementNS(ns.tei, "title");
 		conferenceName.setAttribute("type", "conferenceName");
-		conferenceName.appendChild(teiDoc.createTextNode(replaceFormatting(item.conferenceName)));
+		appendXML(conferenceName, item.conferenceName);
 		monogr.appendChild(conferenceName);
 	}
 
@@ -304,14 +356,14 @@ function generateItem(item, teiDoc) {
 		if (item.series) {
 			title = teiDoc.createElementNS(ns.tei, "title");
 			title.setAttribute("level", "s");
-			title.appendChild(teiDoc.createTextNode(replaceFormatting(item.series)));
+			appendXML(title, item.series);
 			series.appendChild(title);
 		}
 		if (item.seriesTitle) {
 			var seriesTitle = teiDoc.createElementNS(ns.tei, "title");
 			seriesTitle.setAttribute("level", "s");
 			seriesTitle.setAttribute("type", "alternative");
-			seriesTitle.appendChild(teiDoc.createTextNode(replaceFormatting(item.seriesTitle)));
+			appendXML(seriesTitle, item.seriesTitle);
 			series.appendChild(seriesTitle);
 		}
 		if (item.seriesText) {
@@ -581,9 +633,8 @@ function doExport() {
 
 
 	// Initialize XML Doc
-	var parser = new DOMParser();
 	var teiDoc // <TEI/>
-		= parser.parseFromString('<TEI xmlns="http://www.tei-c.org/ns/1.0"><teiHeader><fileDesc><titleStmt><title>Exported from Zotero</title></titleStmt><publicationStmt><p>unpublished</p></publicationStmt><sourceDesc><p>Generated from Zotero database</p></sourceDesc></fileDesc></teiHeader></TEI>', 'application/xml');
+		= xmlparser.parseFromString('<TEI xmlns="http://www.tei-c.org/ns/1.0"><teiHeader><fileDesc><titleStmt><title>Exported from Zotero</title></titleStmt><publicationStmt><p>unpublished</p></publicationStmt><sourceDesc><p>Generated from Zotero database</p></sourceDesc></fileDesc></teiHeader></TEI>', 'application/xml');
 
 	var item = null;
 	while (item = Zotero.nextItem()) { // eslint-disable-line no-cond-assign
@@ -638,11 +689,14 @@ function doExport() {
 		outputElement = listBibls[0];
 	}
 	else {
-		outputElement = teiDoc.createElement("empty");
+		outputElement = teiDoc.createElement("empty");  
 	}
 
 	// write to file.
 	Zotero.write('<?xml version="1.0" encoding="UTF-8"?>\n');
-	var serializer = new XMLSerializer();
-	Zotero.write(serializer.serializeToString(outputElement));
+	Zotero.write(xmlser.serializeToString(outputElement));
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+]
+/** END TEST CASES **/
