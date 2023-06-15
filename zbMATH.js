@@ -1,7 +1,7 @@
 {
 	"translatorID": "1d84c107-9dbb-4b87-8208-e3632b87889f",
 	"label": "zbMATH",
-	"creator": "Philipp Zumstein",
+	"creator": "Philipp Zumstein and contributors",
 	"target": "^https?://(www\\.)?zbmath\\.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-10 18:47:46"
+	"lastUpdated": "2023-06-15 09:57:22"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 	
-	zbMATH Translator, Copyright © 2014 Philipp Zumstein
+	zbMATH Translator, Copyright © 2014 Philipp Zumstein and contributors.
 	This file is part of Zotero.
 	
 	Zotero is free software: you can redistribute it and/or modify
@@ -35,105 +35,163 @@
 */
 
 
-function detectWeb(doc, _url) {
-	if (ZU.xpath(doc, '//div[@class="list"]/article').length > 0) {
+function detectWeb(doc) {
+	if (doc.querySelector(".content-result")) { // search results present
 		return "multiple";
 	}
-	else if (ZU.xpath(doc, '//a[contains(@class, "bib")]').length > 0) { // contains
+	else if (doc.querySelector(".bib")) {
 		// it is a single entry --> generic fallback = journalArticle
 		return "journalArticle";
 	}
 	return false;
 }
 
-function scrape(doc, _url) {
-	var bibArray = doc.getElementsByClassName("bib");
-	var bibUrl = bibArray[0].getAttribute('href');// e.g. "bibtex/06115874.bib"
-
-	ZU.doGet(bibUrl, function (text) {
-		// Z.debug(text);
-		
-		var trans = Zotero.loadTranslator('import');
-		trans.setTranslator('9cb70025-a888-4a29-a210-93ec52da40d4');// https://github.com/zotero/translators/blob/master/BibTeX.js
-		trans.setString(text);
-
-		trans.setHandler('itemDone', function (obj, item) {
-			item.title = item.title.replace(/\.$/, '');
-			
-			if (item.publisher) {
-				var publisherSeparation = item.publisher.indexOf(":");
-				if (publisherSeparation != -1) {
-					item.place = item.publisher.substr(0, publisherSeparation);
-					item.publisher = item.publisher.substr(publisherSeparation + 1);
-				}
-			}
-			
-			// keywords are normally not in the bib file, so we take them from the page
-			// moreover, the meaning of the MSC classification is also only given on the page
-			if (item.tags.length == 0) {
-				var keywords = ZU.xpath(doc, '//div[@class="keywords"]/a');
-				for (var i = 0; i < keywords.length; i++) {
-					item.tags.push(keywords[i].textContent);
-				}
-				var classifications = ZU.xpath(doc, '//div[@class="classification"]//tr');
-				for (let classification of classifications) {
-					item.extra = (item.extra ? item.extra + "\n" : '') + 'MSC2010: ' + ZU.trimInternal(ZU.xpathText(classification, './td', null, " = "));
-				}
-			}
-			
-			// add abstract but not review
-			var abstractOrReview = ZU.xpathText(doc, '//div[@class="abstract"]');
-			if (abstractOrReview.indexOf('Summary') == 0) {
-				item.abstractNote = abstractOrReview.replace(/^Summary:?\s*/, '');
-			}
-			
-			item.attachments = [{
-				title: "Snapshot",
-				document: doc
-			}];
-
-			var id = ZU.xpath(doc, '//div[@class="title"]/a[@class="label"]')[0];
-			if (id) {
-				if (!item.extra) item.extra = '';
-				else item.extra += "\n";
-				
-				item.extra += 'Zbl: ' + ZU.trimInternal(id.textContent)
-					.replace(/^\s*Zbl\s+/i, ''); // e.g. Zbl 1255.05045
-				item.url = id.href;
-			}
-			
-			item.complete();
-			// Z.debug(item);
-		});
-		
-		trans.translate();
-	});
+function getSearchResults(doc, checkOnly) {
+	let items = {};
+	let found = false;
+	let rows = doc.querySelectorAll(".content-result .list > article");
+	for (let row of rows) {
+		let href = attr(row, ".title a", "href");
+		let title = ZU.trimInternal(text(row, ".title"));
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found && items;
 }
 
-
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		var items = {};
-		var rows = ZU.xpath(doc, '//div[@class="list"]/article');
-		for (let row of rows) {
-			var title = ZU.xpathText(row, './div[@class="title"]/a[1]');
-			var link = ZU.xpathText(row, './div[@class="title"]/a[1]/@href');
-			items[link] = title;
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
 		}
-		Zotero.selectItems(items, function (items) {
-			if (items) ZU.processDocuments(Object.keys(items), scrape);
-		});
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
+}
+
+async function scrape(doc, url) {
+	let bibURL = attr(doc, ".bib", "href");
+	if (!bibURL) {
+		Z.debug(`Error: document at ${url} does not contain bibTeX link`);
+		return;
+	}
+	let bibTeXDoc = await ZU.requestText(bibURL);
+	if (!bibTeXDoc) {
+		Z.debug(`Error: failed to request BibTeX content at ${bibURL}`);
+		return;
+	}
+
+	let trans = Zotero.loadTranslator('import');
+	trans.setTranslator('9cb70025-a888-4a29-a210-93ec52da40d4'); // BibTeX
+	trans.setString(bibTeXDoc);
+
+	trans.setHandler('itemDone', function (obj, item) {
+		item.title = item.title.replace(/\.$/, '');
+
+		if (item.publisher) {
+			let splitPublisher = item.publisher.split(":");
+			if (splitPublisher[1]) {
+				item.place = splitPublisher[0];
+				item.publisher = splitPublisher[1].trim();
+			}
+		}
+
+		// The BibTeX contains MSC as keywords. Scrape the textual labels to
+		// MSC as well as the words under "Keywords".
+		function cleanText(element) {
+			return ZU.trimInternal(element.textContent.trim());
+		}
+
+		function pushWord(element) {
+			let word = cleanText(element);
+			if (word) {
+				item.tags.push(word);
+			}
+		}
+
+		// Keywords
+		doc.querySelectorAll(".keywords a").forEach(pushWord);
+		// Labels to MSC identifiers. Don't put the replaced MathJax/MathML
+		// in $ $, because this isn't very useful in tags.
+		doc.querySelectorAll(".classification td.space")
+			.forEach(node => pushWord(cleanupMath(node, false/* laTeXify */)));
+
+		// add abstract but not review
+		let abstractOrReview = doc.querySelector(".abstract");
+		if (abstractOrReview.innerText.trim().indexOf('Summary') == 0) {
+			// Strip the MathJax/MathML, put in the LaTeX math text, and
+			// surround them with $ $.
+			item.abstractNote = cleanupMath(abstractOrReview)
+				.innerText.trim().replace(/^Summary:\s*/i, "");
+		}
+
+		item.attachments = [{
+			title: "Snapshot",
+			document: doc
+		}];
+
+		let zbIDElem = doc.querySelector(".label");
+		if (zbIDElem) {
+			let zbID = cleanText(zbIDElem); // Zbl number (see also URL).
+
+			if (zbID) {
+				zbID = zbID.replace(/^Zbl\s*/i, "Zbl: ");
+				if (!item.extra) {
+					item.extra = zbID;
+				}
+				else {
+					item.extra += `\n${zbID}`;
+				}
+
+				// zb permalink, cleaner than document URL
+				item.url = zbIDElem.href;
+			}
+		}
+
+		item.complete();
+	});
+
+	trans.translate();
+}
+
+// Clean up the MathJaX-rendered text in elements. Returns a clone of the node
+// with the duplicate-causing elements removed and the LaTeX math text
+// converted to text nodes (surrounded with $ $ if laTeXify = true).
+function cleanupMath(element, laTeXify = true) {
+	let dup = element.cloneNode(true/* deep */);
+	let doc = dup.ownerDocument;
+
+	// Delete the rendered MathML whose innert text tends to cause dupes
+	dup.querySelectorAll(":scope span[id^='MathJax-Element']")
+		.forEach(node => node.remove());
+
+	// Keep "math/tex" "script" tags and convert them to text.
+	dup.querySelectorAll(":scope script[type='math/tex']")
+		.forEach((node) => {
+			let content = node.textContent.trim();
+			if (laTeXify) {
+				content = `$${content}$`;
+			}
+
+			let textNode = doc.createTextNode(content);
+			let parentNode = node.parentNode;
+
+			parentNode.replaceChild(textNode, node);
+		});
+	return dup;
 }
 
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.zbmath.org/?q=an:06115874",
+		"url": "https://zbmath.org/?q=an:06115874",
+		"detectedItemType": "journalArticle",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -158,8 +216,8 @@ var testCases = [
 				"date": "2012",
 				"DOI": "10.1002/rsa.20472",
 				"ISSN": "1042-9832",
-				"abstractNote": "We prove that a given tree TT on n vertices with bounded maximum degree is contained asymptotically almost surely in the binomial random graph G(n,(1+ε)lognn)G\\left(n,\\frac {(1+\\varepsilon)\\log n}{n}\\right) provided that TT belongs to one of the following two classes: \n\n(1)TT has linearly many leaves; (2)TT has a path of linear length all of whose vertices have degree two in TT.",
-				"extra": "MSC2010: 05C05 = Trees\nMSC2010: 05C80 = Random graphs (graph-theoretic aspects)\nZbl: 1255.05045",
+				"abstractNote": "We prove that a given tree $T$ on n vertices with bounded maximum degree is contained asymptotically almost surely in the binomial random graph $G\\left(n,\\frac {(1+\\varepsilon)\\log n}{n}\\right)$ provided that $T$ belongs to one of the following two classes: \n\n(1)$T$ has linearly many leaves; (2)$T$ has a path of linear length all of whose vertices have degree two in $T$.",
+				"extra": "Zbl: 1255.05045",
 				"issue": "4",
 				"itemID": "zbMATH06115874",
 				"journalAbbreviation": "Random Struct. Algorithms",
@@ -167,7 +225,7 @@ var testCases = [
 				"libraryCatalog": "zbMATH",
 				"pages": "391–412",
 				"publicationTitle": "Random Structures & Algorithms",
-				"url": "https://www.zbmath.org/?q=an%3A1255.05045",
+				"url": "https://zbmath.org/1255.05045",
 				"volume": "41",
 				"attachments": [
 					{
@@ -176,6 +234,18 @@ var testCases = [
 					}
 				],
 				"tags": [
+					{
+						"tag": "05C05"
+					},
+					{
+						"tag": "05C80"
+					},
+					{
+						"tag": "Random graphs (graph-theoretic aspects)"
+					},
+					{
+						"tag": "Trees"
+					},
 					{
 						"tag": "random graphs"
 					},
@@ -196,12 +266,14 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.zbmath.org/?q=se:00001331+ai:bollobas.bela",
+		"url": "https://zbmath.org/?q=se:00001331+ai:bollobas.bela",
+		"detectedItemType": "multiple",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "https://zbmath.org/?q=an:06212000",
+		"detectedItemType": "journalArticle",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -231,7 +303,8 @@ var testCases = [
 				"date": "2013",
 				"DOI": "10.1137/090771478",
 				"ISSN": "0895-4801",
-				"extra": "MSC2010: 90C27 = Combinatorial optimization\nMSC2010: 05C85 = Graph algorithms (graph-theoretic aspects)\nMSC2010: 91A06 = nn-person games, n>2n>2\nZbl: 1273.90167",
+				"abstractNote": "We study a natural network creation game, in which each node locally tries to minimize its local diameter or its local average distance to other nodes by swapping one incident edge at a time. The central question is what structure the resulting equilibrium graphs have, in particular, how well they globally minimize diameter. For the local-average-distance version, we prove an upper bound of $2^{O(\\sqrt{\\lg n})}$, a lower bound of 3, and a tight bound of exactly 2 for trees, and give evidence of a general polylogarithmic upper bound. For the local-diameter version, we prove a lower bound of $\\Omega(\\sqrt{n})$ and a tight upper bound of 3 for trees. The same bounds apply, up to constant factors, to the price of anarchy. Our network creation games are closely related to the previously studied unilateral network creation game. The main difference is that our model has no parameter $\\alpha$ for the link creation cost, so our results effectively apply for all values of $\\alpha$ without additional effort; furthermore, equilibrium can be checked in polynomial time in our model, unlike in previous models. Our perspective enables simpler proofs that get at the heart of network creation games.",
+				"extra": "Zbl: 1273.90167",
 				"issue": "2",
 				"itemID": "zbMATH06212000",
 				"journalAbbreviation": "SIAM J. Discrete Math.",
@@ -239,7 +312,7 @@ var testCases = [
 				"libraryCatalog": "zbMATH",
 				"pages": "656–668",
 				"publicationTitle": "SIAM Journal on Discrete Mathematics",
-				"url": "https://zbmath.org/?q=an%3A1273.90167",
+				"url": "https://zbmath.org/1273.90167",
 				"volume": "27",
 				"attachments": [
 					{
@@ -249,10 +322,28 @@ var testCases = [
 				],
 				"tags": [
 					{
+						"tag": "05C85"
+					},
+					{
+						"tag": "90C27"
+					},
+					{
+						"tag": "91A06"
+					},
+					{
+						"tag": "Combinatorial optimization"
+					},
+					{
+						"tag": "Graph algorithms (graph-theoretic aspects)"
+					},
+					{
 						"tag": "equilibrium"
 					},
 					{
 						"tag": "low diameter"
+					},
+					{
+						"tag": "n-person games, n>2"
 					},
 					{
 						"tag": "network creation"
@@ -271,7 +362,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://zbmath.org/?q=cc:35",
+		"url": "https://zbmath.org/?q=cc:35",
+		"detectedItemType": "multiple",
 		"items": "multiple"
 	}
 ]
