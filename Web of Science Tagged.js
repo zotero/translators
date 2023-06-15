@@ -1,20 +1,20 @@
 {
 	"translatorID": "594ebe3c-90a0-4830-83bc-9502825a6810",
 	"label": "Web of Science Tagged",
-	"creator": "Michael Berkowitz, Avram Lyon",
+	"creator": "Michael Berkowitz, Avram Lyon, and contributors",
 	"target": "txt",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-07-21 02:48:00"
+	"lastUpdated": "2023-06-15 10:22:48"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2015-2021 Michael Berkowitz, Avram Lyon
+	Copyright © 2015-2021 Michael Berkowitz, Avram Lyon, and contributors.
 
 	This file is part of Zotero.
 
@@ -229,6 +229,11 @@ function doImport(text) {
 	while ((rawLine = Zotero.read()) !== false) {    // until EOF
 		//Z.debug("line: " + rawLine);
 		let split = rawLine.match(/^([A-Z0-9]{2})\s(?:([^\n]*))?/);
+		// EF is equivalent to the end of file.
+		if (/^EF\s*/.test(rawLine)) {
+			Z.debug("Encountered EF (equivalent to End of File)");
+			break;
+		}
 		// Force a match for ER
 		if (rawLine == "ER") split = ["","ER",""];
 		if (split) {
