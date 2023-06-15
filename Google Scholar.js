@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-14 06:38:33"
+	"lastUpdated": "2023-06-15 00:44:22"
 }
 
 /*
@@ -36,7 +36,7 @@
 	***** END LICENSE BLOCK *****
 */
 
-const DELAY_INTERVAL = 2000; // in milliseconds.
+const DELAY_INTERVAL = 2000; // in milliseconds
 
 var GS_CONFIG = { baseURL: undefined, lang: undefined };
 
@@ -115,13 +115,13 @@ function getProfileResults(doc, checkOnly) {
 async function doWeb(doc, url) {
 	// Determine the domain and language variant of the page.
 	let urlObj = new URL(url);
-	// Set the globals.
 	GS_CONFIG.baseURL = urlObj.origin;
 	GS_CONFIG.lang = urlObj.searchParams.get("hl") || "en";
 
 	var type = detectWeb(doc, url);
 	if (type == "multiple") {
-		// We'll construct an appropriate "multi-scraper" async function.
+		// An appropriate "multi-scraper" async function will be constructed
+		// depending on how the entry row info is generated
 		let multiScraper;
 
 		if (getSearchResults(doc, true/* checkOnly */)) {
@@ -130,20 +130,25 @@ async function doWeb(doc, url) {
 				return;
 			}
 
-			multiScraper = makeGSScraper(Object.keys(items),
+			multiScraper = makeGSScraper(
+				Object.keys(items),
 				rowsFromSearchResult,
-				new URL(doc.location));
+				new URL(doc.location)
+			);
 		}
 		else if (getProfileResults(doc, true/* checkOnly */)) {
 			let urls = await Z.selectItems(getProfileResults(doc, false));
 			if (!urls) {
 				return;
 			}
-			const pfName = text(doc, "#gsc_prf_in");
+			const profileName = text(doc, "#gsc_prf_in");
 
-			multiScraper = makeGSScraper(Object.keys(urls),
+			multiScraper = makeGSScraper(
+				Object.keys(urls),
 				rowsFromProfile,
-				getEmulatedSearchURL(pfName), true/* expensive */);
+				getEmulatedSearchURL(profileName),
+				true/* expensive */
+			);
 		}
 
 		await multiScraper(doc);
@@ -155,47 +160,51 @@ async function doWeb(doc, url) {
 }
 
 
-// Scrape one GS entry.
+// Scrape one GS entry
 async function scrape(doc, url, type) {
 	if (type && type == "case") {
 		scrapeCase(doc, url);
 	}
 	else {
-		// Stand-alone "Article View" page
-		const pfName = text(doc, "#gsc_sb_ui > div > a");
-		let emuRowObj = parseArticleView(doc);
-		if (emuRowObj.id) {
+		// Stand-alone "View article" page
+		const profileName = text(doc, "#gsc_sb_ui > div > a");
+		// Single-item row computed from "View article" page content.
+		let row = parseViewArticle(doc);
+		if (row.id) {
 			// Create an async scraper that reuses the profile scraper, for
 			// this one entry only.
-			let singleScraper = makeGSScraper([url],
+			let singleScraper = makeGSScraper(
+				[url],
 				function* () {
-					yield emuRowObj;
+					yield row;
 				},
-				getEmulatedSearchURL(pfName), true);
+				getEmulatedSearchURL(profileName),
+				true/* expensive */);
 
 			await singleScraper(doc);
 		}
 		else {
-			throw new Error(`Expected 'Article View' page at ${url}, but failed to extract article info from it.`);
+			throw new Error(`Expected 'View article' page at ${url}, but failed to extract article info from it.`);
 		}
 	}
 }
 
 /**
  * Returns an emulated search URL for a GS search with the profile name as the
- * search term.
- * @param {string} pfName - Name of the profile's owner (e.g.,
- * "Sebastian Karcher")
+ * search term
+ *
+ * @param {string} profileName - Name of the profile's owner
  * @returns {URL}
  */
-function getEmulatedSearchURL(pfName) {
-	return new URL(`/scholar?hl=${GS_CONFIG.lang}&as_sdt=0%2C5&q=${encodeURIComponent(pfName).replace(/%20/g, "+")}&btnG=`, GS_CONFIG.baseURL);
+function getEmulatedSearchURL(profileName) {
+	return new URL(`/scholar?hl=${GS_CONFIG.lang}&as_sdt=0%2C5&q=${encodeURIComponent(profileName).replace(/%20/g, "+")}&btnG=`, GS_CONFIG.baseURL);
 }
 
 /**
- * Information object for one Google Scholar entry or "row".
+ * Information object for one Google Scholar entry or "row"
+ *
  * @typedef {Object} RowObj
- * @property {string} id
+ * @property {?string} id
  * @property {string} [directLink]
  * @property {string} [attachmentLink]
  * @property {string} [attachmentType]
@@ -577,23 +586,23 @@ ItemFactory.prototype.saveItemCommonVars = function () {
  * #########################
  */
 
-// Returns a promise that resolves (to undefined) after the miminum time delay
-// specified in milliseconds.
+// Returns a promise that resolves (to undefined) after the minimum time delay
+// specified in milliseconds
 function delay(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Reusable external-search utility for both DOI and ArXiv.
+// Reusable external-search utility for both DOI and ArXiv
 
 /**
- * Search using external ID.
+ * Search using external ID
  *
  * @constructor
  * @param {string} searchKey - The property to be used for the ID in the
  * item-stub object used as the basis of search (e.g. "DOI", "arXiv", etc.)
- * @param {string} translatorUUID - The id of the search translator.
+ * @param {string} translatorUUID - The id of the search translator
  * @param {boolean} [doAttach=false] - Whether we should use a workaround to
- * save attachments.
+ * save attachments
  * @property {Z.Translate<Z.SearchTranslator>} translator
  * @property {string} key
  */
@@ -609,6 +618,7 @@ function ExternalSearch(searchKey, translatorUUID, doAttach = false) {
 			addAttachment(item, this.row); // hack for attachment saving.
 		});
 	}
+	// NOTE: Here setHandler() is best understood as "append handler".
 	trans.setHandler("itemDone", extHandler);
 
 	this.translate = trans;
@@ -617,14 +627,24 @@ function ExternalSearch(searchKey, translatorUUID, doAttach = false) {
 }
 
 /**
- * Execute the translation using identifier. This is intended to be used as the
- * work function of a TransPipeline.
+ * The signature of the work function (the function that is called for the
+ * translation of each row)
  *
+ * @typedef {Function} WorkFunction
  * @async
- * @param {string} identifier - Search term.
- * @param {RowObj} [row] - Optional row object, used internally for attachment
- * saving when this feature is not available from the search translator.
- * @returns {Promise<Z.Item[]>}
+ * @param {string} identifier - Identifier (internal or external) of the row
+ * @param {RowObj} [row] - The row being translated
+ * @param {*} [context] - A "free-form" context object that the work
+ * function can use
+ * @returns {Promise} A promise that fulfills upon the completion of the
+ * translation
+ */
+
+/**
+ * Execute the translation using identifier. This is intended to be used as the
+ * work function of a TranslationPipeline.
+ *
+ * @type {WorkFunction}
  */
 ExternalSearch.prototype.work = function (identifier, row) {
 	this.translate.setSearch({ [this.key]: identifier });
@@ -645,13 +665,13 @@ function extHandler(obj, item) { // eslint-disable-line no-unused-vars
 	item.complete();
 }
 
-// Identification functions for external searches.
+// Identification functions for external searches
 
 /**
- * Extract candidate DOI from row by parsing its direct-link URL.
+ * Extract candidate DOI from row by parsing its direct-link URL
  *
  * @param {RowObj} row
- * @returns {string?} Candidate DOI string, or null if not found.
+ * @returns {string?} Candidate DOI string, or null if not found
  */
 function extractDOI(row) {
 	let path = decodeURIComponent((new URL(row.directLink)).pathname);
@@ -666,10 +686,10 @@ function extractDOI(row) {
 }
 
 /**
- * Extract arXiv ID from row by parsing its direct-link URL.
+ * Extract arXiv ID from row by parsing its direct-link URL
  *
  * @param {RowObj} row
- * @returns {string?} ArXiv ID, or null if not found.
+ * @returns {string?} ArXiv ID, or null if not found
  */
 function extractArXiv(row) {
 	let urlObj = new URL(row.directLink);
@@ -681,56 +701,56 @@ function extractArXiv(row) {
 	return m && m[1];
 }
 
-// Translation pipeline utilities.
+// Translation pipeline utilities
+//
 // The translations are attempted in the order of DOI -> ArXiv -> GS native.
 // Each pipeline item will execute the translation and consume the row object
 // if it succeeds, or pass it to the next one if it fails. The pipelines can be
 // composed, building up a chain.
+//
 // The pipeline head has two special properties, "bin" for rows that failed all
 // translations, and "trace" for the translation-task promises, suitable to be
 // passed to Promise.all().
 
 /**
  * A translation pipeline component (e.g. DOI search, ArXiv search, GS BibTeX
- * import, or indirect GS import via GS profile).
+ * import, or indirect GS import via GS profile)
  *
  * @constructor
  * @param {Function} identify - Function that takes a RowObj and
  * returns a string ID, or falsy if the input row cannot be processed by this
- * pipeline.
- * @param {AsyncFunction} work - The async work function, to be called as
- * this.work(id, row, context), which implements the processing work of the
- * pipeline. Its argument "id" can be an external or internal string ID. The
- * "context" parameter's value is this.context.
+ * pipeline
+ * @param {WorkFunction} work - The function that implements the processing
+ * work of the pipeline. The "context" parameter's value is this.context.
  * @param {number} rest - The minimum "rest" duration, between successive tasks
- * processed by this pipeline, in milliseconds.
+ * processed by this pipeline, in milliseconds
  * @param {Object} context - A free-form context variable, to be interpreted by
- * this.work as it sees fit.
- * @property {TransPipeline?} next - Next pipeline in the chain.
- * @property {RowObj[]} bin - Row objects that failed all translations.
+ * this.work as it sees fit
+ * @property {TranslationPipeline?} next - Next pipeline in the chain
+ * @property {RowObj[]} bin - Row objects that failed all translations
  * @property {Promise} current - The current task-queue tail to which further
- * tasks will be appended.
+ * tasks will be appended
  * @property {Promise[]} trace - Array holding references to each task promise
- * that passes through the pipeline.
- * @property {boolean} restLeads - Whether the "rest" shall apply to the
- * leading edge of a work task, in addition to the trailing edge.
+ * that passes through the pipeline
+ * @property {boolean} restOnLead - Whether the "rest" shall apply to the
+ * leading edge of a work task, in addition to the trailing edge
  */
-function TransPipeline(identify, work, rest, context, label = "[unnamed]") {
+function TranslationPipeline(identify, work, rest, context, label = "[unnamed]") {
 	Object.assign(this, { identify, work, rest, context, label });
 	this.next = undefined;
 	this.bin = [];
 	this.current = Promise.resolve();
 	this.trace = [];
-	this.restLeads = false;
+	this.restOnLead = false;
 }
 
-TransPipeline.prototype = {
+TranslationPipeline.prototype = {
 
 	/**
 	 * Accept a row and create the queued task for it, or delegate to the next
 	 * in the pipeline, if any, when the identification fails.
 	 *
-	 * @param {RowObj} row - The row sent into the pipeline.
+	 * @param {RowObj} row - The row sent into the pipeline
 	 */
 	handleRow: function (row) {
 		// Identify the row; falsy means we can't handle it.
@@ -738,8 +758,8 @@ TransPipeline.prototype = {
 		try {
 			id = this.identify(row);
 		}
-		catch (err) {
-			// failed identification falls through to the case of falsy id.
+		catch (error) {
+			// failed identification falls through to the case of falsy id
 		}
 		if (!id) {
 			this.pass(row);
@@ -753,10 +773,10 @@ TransPipeline.prototype = {
 
 	/**
 	 * Create an async function that executes the task -- this.work(id, row,
-	 * this.context) -- with mandatory "rest" after task execution.
+	 * this.context) -- with mandatory "rest" after task execution
 	 *
-	 * @param {string} id - ID string as returned by this.identify(row);
-	 * @param {RowObj} row - The row object being operated on.
+	 * @param {string} id - ID string as returned by this.identify(row)
+	 * @param {RowObj} row - The row object being operated on
 	 * @returns {AsyncFunction} An async function that takes no arguments. It
 	 * will execute the task on the row, and, if the task raises no exceptions,
 	 * the row will not be further processed. If however the task throws, the
@@ -766,7 +786,7 @@ TransPipeline.prototype = {
 	getTask: function (id, row) {
 		let that = this;
 		async function task() {
-			if (that.restLeads && that.rest) {
+			if (that.restOnLead && that.rest) {
 				await delay(that.rest);
 			}
 
@@ -807,15 +827,15 @@ TransPipeline.prototype = {
 	},
 
 	/**
-	 * Compose the pipeline by adding another pipeline item.
+	 * Compose the pipeline chain by adding another pipeline item
 	 *
 	 * The input pipeline will be appended to the tail of the current pipeline.
 	 * Its "trace" and "bin" properties will be set to reference the head
 	 * pipeline's.
 	 *
-	 * @param {TransPipeline} other - The pipeline to be appended.
-	 * @returns {TransPipeline} Returns this, to facilitate cascading
-	 * composition.
+	 * @param {TranslationPipeline} other - The pipeline to be appended
+	 * @returns {TranslationPipeline} Returns this, to facilitate cascading
+	 * composition
 	 */
 	add: function (other) {
 		let p = this; // eslint-disable-line consistent-this
@@ -830,36 +850,38 @@ TransPipeline.prototype = {
 };
 
 // Factory functions that creates reusable components from the translation
-// implementations and the pipelines controlling them.
+// implementations and the pipelines controlling them
 
 /**
  * Convenience function that creates an external-search pipeline (DOI or
- * ArXiV).
+ * ArXiV)
  *
- * @param {string} key - Search key, e.g. "DOI" or "arXiv".
- * @param {string} uuid - UUID of the search translator.
- * @param {Function} identify - Row-identification function.
+ * @param {string} key - Search key, e.g. "DOI" or "arXiv"
+ * @param {string} uuid - UUID of the search translator
+ * @param {Function} identify - Row-identification function
  * @param {number} rest - "Rest" time between consecutive task runs in
- * milliseconds.
+ * milliseconds
  * @param {boolean} [attach=false] - Whether this pipeline should attach the
- * documents as appearing on the left side on GS pages.
- * @returns {TransPipeline}
+ * documents as appearing on the left side on GS pages
+ * @returns {TranslationPipeline}
  */
-function makeExtPipeline(key, uuid, identify, rest, attach = false) {
+function makeExternalPipeline(key, uuid, identify, rest, attach = false) {
 	let searchObj = new ExternalSearch(key, uuid, attach);
-	return new TransPipeline(identify,
+	return new TranslationPipeline(
+		identify,
 		searchObj.work.bind(searchObj), // work function.
 		rest, null/* context */,
-		`[${key}]`); // use the key as pipeline label, for debugging.
+		`[${key}]` // use the key as pipeline label, for debugging
+	);
 }
 
 /**
- * Work-function impementation for the Google Scholar translation.
+ * Work-function impementation for the Google Scholar translation
  *
  * @async
  */
 function workGS(id, row, referrer) {
-	// URL of the citation-info page fragment for the current row.
+	// URL of the citation-info page fragment for the current row
 	let citeURL;
 
 	if (referrer.searchParams.get("scilib") === "1") { // My Library
@@ -873,25 +895,24 @@ function workGS(id, row, referrer) {
 }
 
 /**
- * Generate the row objects from the GS IDs on a search-result document.
+ * Generate the row objects from the GS IDs on a search-result document
  *
- * @param {string[]} gsIDs - Array of GS IDs selected by the user during
- * multi-select.
- * @param {Document} doc - The document from which the IDs are extracted.
+ * @param {string[]} gsIDs - Array of GS IDs computed from those entries on the
+ * search-result page that are selected by the user
+ * @param {Document} doc - The document from which the IDs are extracted
  * @yields {RowObj}
  */
 function* rowsFromSearchResult(gsIDs, doc) {
 	for (const id of gsIDs) {
 		let entryElem = doc.querySelector(`.gs_r[data-cid="${id}"]`);
-		// href from an <a> tag, direct link to the source.
-		// Note that the ID starting with number can be fine, but the
-		// selector is a pain.
+		// href from an <a> tag, direct link to the source. Note that the ID
+		// starting with number can be fine, but the selector is a pain.
 		let aElem = doc.getElementById(id);
 		let directLink = aElem ? aElem.href : undefined;
 		let attachmentLink = attr(entryElem, ".gs_ggs a", "href");
 		let attachmentType = text(entryElem, ".gs_ctg2");
 		if (attachmentType) {
-			// Remove the brackets.
+			// Remove the brackets
 			attachmentType = attachmentType.slice(1, -1).toUpperCase();
 		}
 		let byline = text(entryElem, ".gs_a");
@@ -902,96 +923,104 @@ function* rowsFromSearchResult(gsIDs, doc) {
 
 /**
  * Asynchronously generate rows from the selected entries of a GS profile page,
- * for each selected URL.
+ * for each selected URL
  *
  * @async
- * @param {string[]} pfURLS - URLs selected by the user, as returned by
- * getProfileResults().
- * @param {Document} pfDoc - The profile-page document being scraped.
- * @yields {Promise<RowObj?>} Promise that resolves to the row object, obtained
- * by requesting the "Article View" document at the selected URL, or undefined
- * in the case of failure.
+ * @param {string[]} viewArticleURLs - The URLs on the profile page (leading to
+ * "View article" pages) selected by the user, as returned by
+ * getProfileResults()
+ * @param {Document} profileDoc - The profile-page document being scraped
+ * @yields {Promise<(RowObj|undefined)>} Promise that resolves to the row object, obtained
+ * by requesting the "View article" document at the selected URL, or undefined
+ * in the case of failure
  */
-function* rowsFromProfile(pfURLs, pfDoc) {
-	// Go to the linked "Article View" page from the real profile page.
-	const reqOptions = { headers: { Referer: pfDoc.location.href } };
+function* rowsFromProfile(viewArticleURLs, profileDoc) {
+	// To "navigate" to the linked "View article" page from the profile page, a
+	// referrer is sent as header in the request
+	const requestOptions = { headers: { Referer: profileDoc.location.href } };
 
-	for (let i = 0; i < pfURLs.length; i++) {
-		let url = pfURLs[i];
+	for (let i = 0; i < viewArticleURLs.length; i++) {
+		let url = viewArticleURLs[i];
 		Z.debug(url);
 
-		yield requestDocument(url, reqOptions)
-			.then((avDoc) => {
-				let emuObj = parseArticleView(avDoc);
-				if (emuObj.id !== null) {
-					return emuObj;
+		yield requestDocument(url, requestOptions)
+			.then((viewArticleDoc) => {
+				let row = parseViewArticle(viewArticleDoc);
+				if (row.id !== null) {
+					return row;
 				}
 				else {
-					Z.debug(`Warning: cannot find Google Scholar id in profile article-view page at ${url}; skipping.`);
+					Z.debug(`Warning: cannot find Google Scholar id in profile view-article page at ${url}; skipping.`);
 					return undefined;
 				}
-			}, (err) => {
-				Z.debug(`Warning: cannot get retrieve the profile article-view page at ${url}; skipping. The error was:`);
-				Z.debug(err);
+			}, (error) => {
+				Z.debug(`Warning: cannot get retrieve the profile view-article page at ${url}; skipping. The error was:`);
+				Z.debug(error);
 				return undefined;
 			});
 	}
 }
 
 /**
- * Create a TransPipeline instance for translating using Google Scholar
- * resources.
+ * Create a TranslationPipeline instance for translating using Google Scholar
+ * resources
  *
  * @param {URL} searchReferrer - URL object to be used as the referrer of
- * requests to citation-info page fragments.
+ * requests to citation-info page fragments
  * @param {number} pause - Mimium duration of the pause after each translation
- * run, in milliseconds.
- * @param {boolean} [restLeads=false] - Whether the rest should apply to the
- * leading edge as well.
- * @returns {TransPipeline} The pipeline object that utilizes citation-info
- * from Google Scholar itself.
+ * run, in milliseconds
+ * @param {boolean} [restOnLead=false] - Whether the rest should apply to the
+ * leading edge as well as the trailing edge of the request-response roundtrip
+ * @returns {TranslationPipeline} The pipeline object that utilizes
+ * citation-info from Google Scholar itself
  */
-function makeGSPipeline(searchReferrer, pause, restLeads = false) {
-	let p = new TransPipeline(row => row.id, // trivial identification function
-		workGS, pause, searchReferrer, "[GS native]");
-	p.restLeads = restLeads;
+function makeGSPipeline(searchReferrer, pause, restOnLead = false) {
+	let p = new TranslationPipeline(row => row.id, // trivial identification function
+		workGS, pause, searchReferrer/* context */, "[GS native]");
+	p.restOnLead = restOnLead;
 	return p;
 }
 
 /**
- * Convenience function that creates a GS-based multiscraper.
+ * Convenience function that creates a GS-based multiscraper
  *
  * @param {string[]} inputStrings - Array of strings that is the key array of
- * the object returned by getSearchResults() or getProfileResults().
+ * the object returned by getSearchResults() or getProfileResults()
  * @param {Generator|AsyncGenerator} rowGenerator - Generator of rows, e.g.
- * rowsFromSearchResult or rowsFromProfile.
- * @param {URL} referrerURL - URL object for the referrer, actual or emulated.
+ * rowsFromSearchResult or rowsFromProfile
+ * @param {URL} referrerURL - URL object for the referrer, actual or emulated
  * @param {boolean} [expensive=false] - Whether the scraper is "expensive" in
  * the sense of using GS resources for both row-generation and translation
  * (this is true for profile scraping).
  * @returns {AsyncFunction} Multiscraper function that operates on the doc
- * being scraped.
+ * being scraped
  */
 function makeGSScraper(inputStrings, rowGenerator, referrerURL,
 	expensive = false) {
 	return async function (doc) {
-		let rowGen = rowGenerator(inputStrings, doc);
+		let rows = rowGenerator(inputStrings, doc);
 
-		let pipeline = makeExtPipeline("DOI",
+		let pipeline = makeExternalPipeline(
+			"DOI",
 			"b28d0d42-8549-4c6d-83fc-8382874a5cb9", // DOI Content Negotiation
-			extractDOI, 20, true/* attach */)
-			.add(makeExtPipeline("arXiv",
-				"ecddda2e-4fc6-4aea-9f17-ef3b56d7377a", // ArXiv.org
-				extractArXiv, 3000))
-			.add(makeGSPipeline(referrerURL,
-				expensive ? Math.ceil(DELAY_INTERVAL / 2) : DELAY_INTERVAL,
-				expensive/* restLeads */)); // Native GS scraping.
+			extractDOI,
+			20, true/* attach */
+		).add(makeExternalPipeline(
+			"arXiv",
+			"ecddda2e-4fc6-4aea-9f17-ef3b56d7377a", // arXiv.org
+			extractArXiv,
+			3000)
+		).add(makeGSPipeline( // "native" GS pipeline
+			referrerURL,
+			expensive ? Math.ceil(DELAY_INTERVAL / 2) : DELAY_INTERVAL,
+			expensive/* restOnLead */)
+		);
 
 		let n = inputStrings.length;
-		for (let rowPromise of rowGen) {
+		for (let rowPromise of rows) {
 			let row = await rowPromise;
 			// NOTE that unecessary after-operation delays (for the last item)
-			// are cancelled.
+			// are cancelled
 			if (row) {
 				if (n <= 1) {
 					row.last = true; // cancel trailing delays in the pipelines
@@ -1016,29 +1045,30 @@ function makeGSScraper(inputStrings, rowGenerator, referrerURL,
 	};
 }
 
-// Page-processing utilities.
+// Page-processing utilities
 
 /**
- * Parse the Article View page and returns the equivalent of a GS search-result
- * row.
- * @param {Document} avDoc - "Article View" document.
+ * Parse the "View article" page and returns the equivalent of a GS
+ * search-result row
+ *
+ * @param {Document} viewArticleDoc - "View article" document
  * @returns {RowObj} The row object; if the id property is null, the parsing
  * failed.
  */
-function parseArticleView(avDoc) {
-	let related = ZU.xpathText(avDoc,
+function parseViewArticle(viewArticleDoc) {
+	let related = ZU.xpathText(viewArticleDoc,
 		'//a[contains(@href, "q=related:")]/@href');
 	if (!related) {
-		Z.debug("Could not locate 'related' link on the Article View page.");
+		Z.debug("Could not locate 'related' link on the 'View article' page.");
 		return { id: null };
 	}
 
-	let m = related.match(/=related:([^:]+):/); // GS id.
+	let m = related.match(/=related:([^:]+):/); // GS id
 	if (m) {
 		let id = m[1];
-		let directLink = attr(avDoc, ".gsc_oci_title_link", "href");
-		let attachmentLink = attr(avDoc, "#gsc_oci_title_gg a", "href");
-		let attachmentType = text(avDoc, ".gsc_vcd_title_ggt");
+		let directLink = attr(viewArticleDoc, ".gsc_oci_title_link", "href");
+		let attachmentLink = attr(viewArticleDoc, "#gsc_oci_title_gg a", "href");
+		let attachmentType = text(viewArticleDoc, ".gsc_vcd_title_ggt");
 		if (attachmentType) {
 			attachmentType = attachmentType.slice(1, -1).toUpperCase();
 		}
@@ -1062,11 +1092,11 @@ function parseArticleView(avDoc) {
  * request.
  */
 async function processCitePage(citeURL, row, referrer) {
-	let reqOptions = { headers: { Referer: referrer } };
+	let requestOptions = { headers: { Referer: referrer } };
 	// Note that the page at citeURL has no doctype and is not a complete HTML
 	// document. The browser can parse it in quirks mode but ZU.requestDocument
 	// has trouble with it.
-	const citePage = await ZU.requestText(citeURL, reqOptions);
+	const citePage = await ZU.requestText(citeURL, requestOptions);
 
 	let m = citePage.match(/href="((https?:\/\/[a-z.]*)?\/scholar.bib\?[^"]+)/);
 	if (!m) {
@@ -1087,14 +1117,14 @@ async function processCitePage(citeURL, row, referrer) {
 	const bibTeXURL = ZU.unescapeHTML(m[1]);
 
 	// Pause between obtaining the citation info page and sending the request
-	// for the BibTeX document.
+	// for the BibTeX document
 	await delay(DELAY_INTERVAL);
 
 	// NOTE: To emulate the web app, the referrer for the BibTeX text is always
 	// set to the origin (e.g. https://scholar.google.com/), imitating
 	// strict-origin-when-cross-origin
-	reqOptions.headers.Referer = GS_CONFIG.baseURL + "/";
-	const bibTeXBody = await ZU.requestText(bibTeXURL, reqOptions);
+	requestOptions.headers.Referer = GS_CONFIG.baseURL + "/";
+	const bibTeXBody = await ZU.requestText(bibTeXURL, requestOptions);
 
 	let translator = Z.loadTranslator("import");
 	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4"); // BibTeX
@@ -1131,7 +1161,7 @@ async function processCitePage(citeURL, row, referrer) {
 			}
 		}
 
-		// Add the title link as the url of the item.
+		// Add the title link as the url of the item
 		if (row.directLink) {
 			item.url = row.directLink;
 		}
