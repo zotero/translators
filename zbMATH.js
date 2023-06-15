@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-15 09:57:22"
+	"lastUpdated": "2023-06-15 14:43:38"
 }
 
 /*
@@ -127,6 +127,14 @@ async function scrape(doc, url) {
 			// surround them with $ $.
 			item.abstractNote = cleanupMath(abstractOrReview)
 				.innerText.trim().replace(/^Summary:\s*/i, "");
+		}
+
+		// The title from BibTeX uses the \( \) syntax for math text. Math in
+		// title is not well-parsed by the import translator; falling back to
+		// scraping.
+		let titleNode = doc.querySelector("article .title strong");
+		if (titleNode && titleNode.innerText) {
+			item.title = cleanupMath(titleNode).innerText.replace(/\.$/, "");
 		}
 
 		item.attachments = [{
@@ -364,6 +372,77 @@ var testCases = [
 		"url": "https://zbmath.org/?q=cc:35",
 		"detectedItemType": "multiple",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://zbmath.org/7694014",
+		"detectedItemType": "journalArticle",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Soft and collinear limits in $\\mathcal{N} = 8$ supergravity using double copy formalism",
+				"creators": [
+					{
+						"firstName": "Nabamita",
+						"lastName": "Banerjee",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tabasum",
+						"lastName": "Rahnuma",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ranveer Kumar",
+						"lastName": "Singh",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023",
+				"DOI": "10.1007/JHEP04(2023)126",
+				"ISSN": "1126-6708",
+				"abstractNote": "It is known that $\\mathcal{N} = 8$ supergravity is dual to $\\mathcal{N} = 4$ super Yang-Mills (SYM) via the double copy relation. Using the explicit relation between scattering amplitudes in the two theories, we calculate the soft and collinear limits in $\\mathcal{N} = 8$ supergravity from know results in $\\mathcal{N} = 4$ SYM. In our application of double copy, a particular self-duality condition is chosen for scalars that allows us to constrain and determine the R-symmetry indices of the supergravity states in the collinear limit.",
+				"extra": "Zbl: 07694014",
+				"issue": "4",
+				"itemID": "zbMATH07694014",
+				"journalAbbreviation": "J. High Energy Phys.",
+				"language": "English",
+				"libraryCatalog": "zbMATH",
+				"pages": "45",
+				"publicationTitle": "Journal of High Energy Physics",
+				"url": "https://zbmath.org/7694014",
+				"volume": "2023",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "81-XX"
+					},
+					{
+						"tag": "Quantum theory"
+					},
+					{
+						"tag": "extended supersymmetry"
+					},
+					{
+						"tag": "scattering amplitudes"
+					},
+					{
+						"tag": "supergravity models"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Id/No 126</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
