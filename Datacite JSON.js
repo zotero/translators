@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2022-08-25 10:25:41"
+	"lastUpdated": "2023-06-16 14:51:19"
 }
 
 /*
@@ -35,19 +35,25 @@
 */
 
 
+const datasetType = ZU.fieldIsValidForType('title', 'dataset')
+	? 'dataset'
+	: 'document';
+
 // copied from CSL JSON
 function parseInput() {
 	var str, json = "";
 	
-	// Read in the whole file at once, since we can't easily parse a JSON stream. The 
+	// Read in the whole file at once, since we can't easily parse a JSON stream. The
 	// chunk size here is pretty arbitrary, although larger chunk sizes may be marginally
 	// faster. We set it to 1MB.
 	while ((str = Z.read(1048576)) !== false) json += str;
 	
 	try {
 		return JSON.parse(json);
-	} catch(e) {
+	}
+	catch (e) {
 		Zotero.debug(e);
+		return false;
 	}
 }
 
@@ -59,37 +65,41 @@ function detectImport() {
 	return false;
 }
 
-
+/* eslint-disable camelcase*/
 var mappingTypes = {
-	"book": "book",
-	"chapter": "bookSection",
+	book: "book",
+	chapter: "bookSection",
 	"article-journal": "journalArticle",
 	"article-magazine": "magazineArticle",
 	"article-newspaper": "newspaperArticle",
-	"thesis": "thesis",
+	thesis: "thesis",
 	"entry-encyclopedia": "encyclopediaArticle",
 	"entry-dictionary": "dictionaryEntry",
 	"paper-conference": "conferencePaper",
-	"personal_communication": "letter",
-	"manuscript": "manuscript",
-	"interview": "interview",
-	"motion_picture": "film",
-	"graphic": "artwork",
-	"webpage": "webpage",
-	"report": "report",
-	"bill": "bill",
-	"legal_case": "case",
-	"patent": "patent",
-	"legislation": "statute",
-	"map": "map",
+	personal_communication: "letter",
+	manuscript: "manuscript",
+	interview: "interview",
+	motion_picture: "film",
+	graphic: "artwork",
+	webpage: "webpage",
+	report: "report",
+	bill: "bill",
+	legal_case: "case",
+	patent: "patent",
+	legislation: "statute",
+	map: "map",
 	"post-weblog": "blogPost",
-	"post": "forumPost",
-	"song": "audioRecording",
-	"speech": "presentation",
-	"broadcast": "radioBroadcast",
-	"dataset": "document"
+	post: "forumPost",
+	song: "audioRecording",
+	speech: "presentation",
+	broadcast: "radioBroadcast",
+	dataset: "dataset"
 };
-
+/* eslint-enable camelcase*/
+// pre-6.0.26 releases don't have a dataset item type
+if (datasetType == "document") {
+	mappingTypes.dataset = document;
+}
 
 
 function doImport() {
@@ -104,7 +114,7 @@ function doImport() {
 	}
 
 	var item = new Zotero.Item(type);
-	if (data.types.citeproc == "dataset") {
+	if (data.types.citeproc == "dataset" && datasetType == "document") {
 		item.extra = "Type: dataset";
 	}
 	var title = "";
@@ -114,27 +124,27 @@ function doImport() {
 		}
 		if (!titleElement.titleType) {
 			title = titleElement.title + title;
-		} else if (titleElement.titleType.toLowerCase() == "subtitle") {
-			title = title + ": " + titleElement["title"];
 		}
-		
+		else if (titleElement.titleType.toLowerCase() == "subtitle") {
+			title = title + ": " + titleElement.title;
+		}
 	}
 	item.title = title;
 	
 	if (data.creators) {
 		for (let creator of data.creators) {
-			if (creator.nameType == "Personal") {
-				if (creator.familyName && creator.givenName) {
-					item.creators.push({
-						"lastName": creator.familyName,
-						"firstName": creator.givenName,
-						"creatorType": "author"
-					});
-				} else {
-					item.creators.push(ZU.cleanAuthor(creator.name, "author", true));
-				}
-			} else {
-				item.creators.push({"lastName": creator.name, "creatorType": "author", "fieldMode": true});
+			if (creator.familyName && creator.givenName) {
+				item.creators.push({
+					lastName: creator.familyName,
+					firstName: creator.givenName,
+					creatorType: "author"
+				});
+			}
+			else if (creator.nameType == "Personal") {
+				item.creators.push(ZU.cleanAuthor(creator.name, "author", true));
+			}
+			else {
+				item.creators.push({ lastName: creator.name, creatorType: "author", fieldMode: 1 });
 			}
 		}
 	}
@@ -142,7 +152,7 @@ function doImport() {
 		for (let contributor of data.contributors) {
 			let role = "contributor";
 			if (contributor.contributorRole) {
-				switch(contributor.contributorRole.toLowerCase()) {
+				switch (contributor.contributorRole.toLowerCase()) {
 					case "editor":
 						role = "editor";
 						break;
@@ -153,18 +163,18 @@ function doImport() {
 						// use the already assigned value
 				}
 			}
-			if (contributor.nameType == "Personal") {
-				if (contributor.familyName && contributor.givenName) {
-					item.creators.push({
-						"lastName": contributor.familyName,
-						"firstName": contributor.givenName,
-						"creatorType": role
-					});
-				} else {
-					item.creators.push(ZU.cleanAuthor(contributor.name, role));
-				}
-			} else {
-				item.creators.push({"lastName": contributor.name, "creatorType": role, "fieldMode": true});
+			if (contributor.familyName && contributor.givenName) {
+				item.creators.push({
+					lastName: contributor.familyName,
+					firstName: contributor.givenName,
+					creatorType: role
+				});
+			}
+			else if (contributor.nameType == "Personal") {
+				item.creators.push(ZU.cleanAuthor(contributor.name, role));
+			}
+			else {
+				item.creators.push({ lastName: contributor.name, creatorType: role, fieldMode: 1 });
 			}
 		}
 	}
@@ -176,15 +186,16 @@ function doImport() {
 		for (let date of data.dates) {
 			dates[date.dateType] = date.date;
 		}
-		item.date = dates["Issued"] || dates["Updated"] || dates["Available"]  || dates["Accepted"] || dates["Submitted"] || dates["Created"] || data.publicationYear;
+		item.date = dates.Issued || dates.Updated || dates.Available || dates.Accepted || dates.Submitted || dates.Created || data.publicationYear;
 	}
 	
 	item.DOI = data.doi;
 	//add DOI to extra for unsupported items
 	if (item.DOI && !ZU.fieldIsValidForType("DOI", item.itemType)) {
-		if (item.extra){
+		if (item.extra) {
 			item.extra += "\nDOI: " + item.DOI;
-		} else {
+		}
+		else {
 			item.extra = "DOI: " + item.DOI;
 		}
 	}
@@ -211,13 +222,14 @@ function doImport() {
 		for (let description of data.descriptions) {
 			if (description.descriptionType == "Abstract") {
 				item.abstractNote = description.description;
-			} else {
+			}
+			else {
 				descriptionNote += "<h2>" + description.descriptionType + "</h2>\n" + description.description;
 			}
 		}
 	}
 	if (descriptionNote !== "") {
-		item.notes.push({"note": descriptionNote});
+		item.notes.push({ note: descriptionNote });
 	}
 	if (data.container) {
 		if (data.container.type == "Series") {
@@ -423,7 +435,7 @@ var testCases = [
 		"input": "{\n  \"id\": \"https://doi.org/10.17171/2-3-12-1\",\n  \"doi\": \"10.17171/2-3-12-1\",\n  \"url\": \"http://repository.edition-topoi.org/collection/MAGN/single/0012/0\",\n  \"types\": {\n    \"resourceTypeGeneral\": \"Dataset\",\n    \"resourceType\": \"3D Data\",\n    \"schemaOrg\": \"Dataset\",\n    \"citeproc\": \"dataset\",\n    \"bibtex\": \"misc\",\n    \"ris\": \"DATA\"\n  },\n  \"creators\": [\n    {\n      \"nameType\": \"Personal\",\n      \"name\": \"Fritsch, Bernhard\",\n      \"givenName\": \"Bernhard\",\n      \"familyName\": \"Fritsch\"\n    }\n  ],\n  \"titles\": [\n    {\n      \"title\": \"3D model of object V 1.2-71\"\n    },\n    {\n      \"title\": \"Structured-light Scan, Staatliche Museen zu Berlin -  Antikensammlung\",\n      \"titleType\": \"Subtitle\"\n    }\n  ],\n  \"publisher\": \"Edition Topoi\",\n  \"container\": {\n    \"type\": \"DataRepository\",\n    \"identifier\": \"10.17171/2-3-1\",\n    \"identifierType\": \"DOI\",\n    \"title\": \"Architectural Fragments from Magnesia on the Maeander\"\n  },\n  \"subjects\": [\n    {\n      \"subject\": \"101 Ancient Cultures\"\n    },\n    {\n      \"subject\": \"410-01 Building and Construction History\"\n    }\n  ],\n  \"contributors\": [\n\n  ],\n  \"dates\": [\n    {\n      \"date\": \"2016\",\n      \"dateType\": \"Updated\"\n    },\n    {\n      \"date\": \"2016\",\n      \"dateType\": \"Issued\"\n    }\n  ],\n  \"publicationYear\": \"2016\",\n  \"identifiers\": [\n    {\n      \"identifierType\": \"DOI\",\n      \"identifier\": \"https://doi.org/10.17171/2-3-12-1\"\n    }\n  ],\n  \"sizes\": [\n\n  ],\n  \"formats\": [\n    \"nxs\"\n  ],\n  \"rightsList\": [\n\n  ],\n  \"descriptions\": [\n    {\n      \"description\": \"Architectural Fragments from Magnesia on the Maeander\",\n      \"descriptionType\": \"SeriesInformation\"\n    }\n  ],\n  \"geoLocations\": [\n\n  ],\n  \"fundingReferences\": [\n\n  ],\n  \"relatedIdentifiers\": [\n    {\n      \"relatedIdentifier\": \"10.17171/2-3-1\",\n      \"relatedIdentifierType\": \"DOI\",\n      \"relationType\": \"IsPartOf\"\n    },\n    {\n      \"relatedIdentifier\": \"10.17171/2-3\",\n      \"relatedIdentifierType\": \"DOI\",\n      \"relationType\": \"IsPartOf\"\n    }\n  ],\n  \"schemaVersion\": \"http://datacite.org/schema/kernel-3\",\n  \"providerId\": \"tib\",\n  \"clientId\": \"tib.topoi\",\n  \"agency\": \"DataCite\",\n  \"state\": \"findable\"\n}",
 		"items": [
 			{
-				"itemType": "document",
+				"itemType": "dataset",
 				"title": "3D model of object V 1.2-71: Structured-light Scan, Staatliche Museen zu Berlin -  Antikensammlung",
 				"creators": [
 					{
@@ -433,8 +445,9 @@ var testCases = [
 					}
 				],
 				"date": "2016",
-				"extra": "Type: dataset\nDOI: 10.17171/2-3-12-1",
-				"publisher": "Edition Topoi",
+				"DOI": "10.17171/2-3-12-1",
+				"format": "nxs",
+				"repository": "Edition Topoi",
 				"url": "http://repository.edition-topoi.org/collection/MAGN/single/0012/0",
 				"attachments": [],
 				"tags": [
