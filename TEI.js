@@ -127,7 +127,7 @@ function appendXML(node, html, blocks=false) {
 		root = body.firstElementChild;
 	}
 	else {
-		root = body; // seems needed for typing
+		root = body;
 	}
 	html = xmlser.serializeToString(root);
 	// transform html to tei, xslt not available
@@ -222,6 +222,11 @@ function parseExtraFields(extra) {
 	return fields;
 }
 
+/**
+ * Stefan Majewski
+ * @param {*} item 
+ * @returns 
+ */
 function genXMLId(item) {
 	// use Better BibTeX for Zotero citation key if available
 	if (item.extra) {
@@ -302,22 +307,26 @@ function genXMLId(item) {
 
 /**
  * Convert Zotero parsed date to xml date YYYY-MM-DD
- *  [2023-06 FG]
+ * [2023-06 FG]
  */
-function date2when(date) {
-	let when = null;
-	if (!date.year) return when;
-	when = String(date.year).padStart(4, '0');
-	if (!date.month) return when;
-	when += '-' + String(date.month).padStart(2, '0');
-	if (!date.day) return when;
-	when += '-' + String(date.day).padStart(2, '0');
-	return when;
+function date2iso(date) {
+	let iso = null;
+	let year = Number(date.year);
+	if (isNaN(year)) return iso; 
+	if (!date.year) return iso;
+	iso = String(date.year).padStart(4, '0');
+	let month = Number(date.month);
+	if (isNaN(month)) return iso;
+	// january = 0
+	iso += '-' + String(date.month + 1).padStart(2, '0');
+	if (!date.day) return iso;
+	iso += '-' + String(date.day).padStart(2, '0');
+	return iso;
 }
 
 /**
- * Repeated code to append simple value
- *  [2023-06 FG]
+ * Append simple value
+ * [2023-06 FG]
  * @param {*} parent 
  * @param {*} name 
  * @param {*} value 
@@ -409,7 +418,7 @@ function generateItem(item, teiDoc) {
 	// creators are all people only remotely involved into the creation of
 	// a resource
 	for (let creator of item.creators) {
-		var curCreator = '';
+		var curCreator = null;
 		var curRespStmt = null;
 		var type = creator.creatorType;
 		if (type == "author") {
@@ -620,10 +629,13 @@ function generateItem(item, teiDoc) {
 	imprint.appendChild(teiDoc.createTextNode('\n'));
 	// use @when 
 	if (item.date) {
-		const when = date2when(Zotero.Utilities.strToDate(item.date));
+		const dateO = Zotero.Utilities.strToDate(item.date);
+		const when = date2iso(dateO);
 
 		date.setAttribute("when", when);
 		date.appendChild(teiDoc.createTextNode(item.date));
+		// debug
+		// date.appendChild(teiDoc.createTextNode(JSON.stringify(dateO, null, 2)));
 	}
 	// [FG] publisher, maybe kicked for Journal Article, get it back from extra
 	let publisher = null;
@@ -652,7 +664,7 @@ function generateItem(item, teiDoc) {
 	appendField(imprint, 'biblScope', item.issue, {'unit': 'issue'});
 	appendField(imprint, 'biblScope', item.section, {'unit': 'chapter'});
 	appendField(imprint, 'biblScope', item.pages, {'unit': 'page'});
-	// date im @when ?
+	// date in @when ?
 	appendField(imprint, 'date', item.accessDate, {'type': 'accessed'});
 	// not thought
 	appendField(imprint, 'note', item.thesisType, {'type': 'thesisType'});
