@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-15 14:43:38"
+	"lastUpdated": "2023-06-16 06:21:57"
 }
 
 /*
@@ -52,7 +52,9 @@ function getSearchResults(doc) {
 	let rows = doc.querySelectorAll(".content-result .list > article");
 	for (let row of rows) {
 		let href = attr(row, ".title a", "href");
-		let title = ZU.trimInternal(text(row, ".title"));
+		let titleElem = row.querySelector(".title");
+		if (!titleElem) continue;
+		let title = cleanText(cleanupMath(titleElem, false/* laTeXify*/));
 		if (!href || !title) continue;
 		found = true;
 		items[href] = title;
@@ -102,10 +104,6 @@ async function scrape(doc, url) {
 
 		// The BibTeX contains MSC as keywords. Scrape the textual labels to
 		// MSC as well as the words under "Keywords".
-		function cleanText(element) {
-			return ZU.trimInternal(element.textContent.trim());
-		}
-
 		function pushWord(element) {
 			let word = cleanText(element);
 			if (word) {
@@ -116,7 +114,7 @@ async function scrape(doc, url) {
 		// Keywords
 		doc.querySelectorAll(".keywords a").forEach(pushWord);
 		// Labels to MSC identifiers. Don't put the replaced MathJax/MathML
-		// in $ $, because this isn't very useful in tags.
+		// in $ $, because this isn't very useful in tags (brief inline text).
 		doc.querySelectorAll(".classification td.space")
 			.forEach(node => pushWord(cleanupMath(node, false/* laTeXify */)));
 
@@ -134,7 +132,8 @@ async function scrape(doc, url) {
 		// scraping.
 		let titleNode = doc.querySelector("article .title strong");
 		if (titleNode && titleNode.innerText) {
-			item.title = cleanupMath(titleNode).innerText.replace(/\.$/, "");
+			item.title = cleanupMath(titleNode, false)
+				.innerText.replace(/\.$/, "");
 		}
 
 		item.attachments = [{
@@ -166,30 +165,81 @@ async function scrape(doc, url) {
 	trans.translate();
 }
 
-// Clean up the MathJaX-rendered text in elements. Returns a clone of the node
-// with the duplicate-causing elements removed and the LaTeX math text
-// converted to text nodes (surrounded with $ $ if laTeXify = true).
+// Utility functions
+
+// Convenience function to clean up the displayed text of a node, suitable for
+// inline elements
+function cleanText(element) {
+	return ZU.trimInternal(element.innerText.trim());
+}
+
+/**
+ * Clean up the MathJax-rendered text in elements. Returns a cloned node with
+ * the duplicate-causing elements removed and the LaTeX math text converted to
+ * text nodes (surrounded with $ $ if laTeXify = true).
+ *
+ * @param {HTMLElement} element - The DOM element node to operate on
+ * @param {boolean} [laTeXify=true] - Whether to replace the MathML nodes with
+ * LaTeX source surrounded by $ $. If set to false, the replacement will be the
+ * inner text of the rendered MathML, which is better suited for brief inline
+ * math text, such as in titles and tags.
+ * @returns {Node} Cloned node with MathML replaced
+ */
 function cleanupMath(element, laTeXify = true) {
 	let dup = element.cloneNode(true/* deep */);
 	let doc = dup.ownerDocument;
 
-	// Delete the rendered MathML whose innert text tends to cause dupes
-	dup.querySelectorAll(":scope span[id^='MathJax-Element']")
-		.forEach(node => node.remove());
+	let deleteNode = node => node.remove();
+	let textify = (node, content) => {
+		let textNode = doc.createTextNode(content);
+		node.parentNode.replaceChild(textNode, node);
+	};
 
-	// Keep "math/tex" "script" tags and convert them to text.
-	dup.querySelectorAll(":scope script[type='math/tex']")
-		.forEach((node) => {
-			let content = node.textContent.trim();
-			if (laTeXify) {
+	// Top-level contentful MathML elements. If this doesn't exist, there's no
+	// math.
+	let baseMathList = dup.querySelectorAll(":scope span[id^='MathJax-Element']");
+	if (!baseMathList.length) {
+		return dup;
+	}
+
+	if (laTeXify) {
+		// Delete the rendered MathML whose inner text tends to cause dupes
+		baseMathList.forEach(deleteNode);
+
+		// Keep "math/tex" "script" tags and convert them to text.
+		dup.querySelectorAll(":scope script[type='math/tex']")
+			.forEach((node) => {
+				let content = node.textContent.trim();
 				content = `$${content}$`;
+				textify(node, content);
+			});
+	}
+	else {
+		// Operation mode is to un-LaTeXify by reusing rendered MathML,
+		// especially the text nodes
+		let nodeList = dup.querySelectorAll(":scope span.MJX_Assistive_MathML");
+		if (nodeList.length) {
+			// An accurate and uniform way to extract the MathML content, from
+			// assistive MathML. The top-level math <span> node is replaced by
+			// the text so extracted. This works even with SVG renderer.
+			nodeList.forEach(node => textify(node.parentNode, cleanText(node)));
+		}
+		else {
+			Z.debug("Warning: Assistive MathML turned off; text-conversion results may be inaccurate."); // bad
+			if (dup.querySelector("span[id^='MathJax-Element-'] svg")) {
+				Z.debug("Warning: using SVG MathJaX renderer; no text available!"); // worse
 			}
 
-			let textNode = doc.createTextNode(content);
-			let parentNode = node.parentNode;
+			// Strip any annotations
+			dup.querySelectorAll(":scope annotation").forEach(deleteNode);
 
-			parentNode.replaceChild(textNode, node);
-		});
+			baseMathList.forEach(node => textify(node, cleanText(node)));
+		}
+
+		// Then delete the LaTeX source in <script> tags
+		dup.querySelectorAll(":scope script[type='math/tex']")
+			.forEach(deleteNode);
+	}
 	return dup;
 }
 
@@ -370,17 +420,17 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://zbmath.org/?q=cc:35",
+		"defer": true,
 		"detectedItemType": "multiple",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "https://zbmath.org/7694014",
-		"detectedItemType": "journalArticle",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Soft and collinear limits in $\\mathcal{N} = 8$ supergravity using double copy formalism",
+				"title": "Soft and collinear limits in N=8 supergravity using double copy formalism",
 				"creators": [
 					{
 						"firstName": "Nabamita",
