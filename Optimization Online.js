@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-04 09:53:10"
+	"lastUpdated": "2023-06-18 08:16:06"
 }
 
 /*
@@ -82,15 +82,13 @@ async function scrape(doc, url) {
 	translator.setHandler('itemDone', (_obj, item) => {
 		// Item
 		item.itemType = 'preprint';
-		let title = doc.querySelector('h1.entry-title');
+		let title = text(doc, 'h1.entry-title');
 		if (title) {
-			item.title = ZU.capitalizeTitle(title.innerText);
+			item.title = ZU.capitalizeTitle(title);
 		}
 		let tags = doc.querySelectorAll('div.entry-meta > span.tags-links > a[rel="tag"]');
-		if (tags.length) {
-			for (var i = 0; i < tags.length; i++) {
-				item.tags.push(ZU.cleanTags(tags[i].text));
-			}
+		for (let tag of tags) {
+			item.tags.push(ZU.cleanTags(tag.text));
 		}
 		let abstractNote = doc.querySelector('div.entry-content > div > p');
 		if (abstractNote) {
@@ -98,22 +96,26 @@ async function scrape(doc, url) {
 		}
 
 		// Attachment
-		let attachmentUrl = ZU.xpath(doc, '//div[@class="entry-content"]//a[contains(text(), "Download")]/@href');
+		let attachmentUrl = attr(doc, '.entry-content a[href*="/wp-content/uploads/"]', 'href');
 		item.attachments = [];
 		if (attachmentUrl.length) {
 			item.attachments.push({
 				title: 'Full Text PDF',
 				mimeType: 'application/pdf',
-				url: attachmentUrl[0].nodeValue,
+				url: attachmentUrl,
 			});
 		}
 
 		// Archive
 		item.publisher = 'Optimization Online'; // repository
 		item.libraryCatalog = 'optimization-online.org';
-		let archiveID = doc.querySelector('article');
+		let archiveID = attr(doc, 'article', 'id');
 		if (archiveID) {
-			item.archiveID = archiveID.id.split('-')[1];
+			item.archiveID = archiveID.split('-')[1];
+		}
+		let shortUrl = doc.querySelector('span.shorturl > a').href;
+		if (shortUrl) {
+			item.url = shortUrl;
 		}
 
 		item.complete();
@@ -157,7 +159,7 @@ var testCases = [
 				"language": "en-US",
 				"libraryCatalog": "optimization-online.org",
 				"repository": "Optimization Online",
-				"url": "https://optimization-online.org/2023/05/political-districting-to-optimize-the-polsby-popper-compactness-score/",
+				"url": "https://optimization-online.org/?p=23021",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -205,7 +207,7 @@ var testCases = [
 				"language": "en-US",
 				"libraryCatalog": "optimization-online.org",
 				"repository": "Optimization Online",
-				"url": "https://optimization-online.org/2023/05/maximum-likelihood-probability-measures-over-sets-and-applications-to-data-driven-optimization/",
+				"url": "https://optimization-online.org/?p=22948",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -249,7 +251,7 @@ var testCases = [
 				"language": "en-US",
 				"libraryCatalog": "optimization-online.org",
 				"repository": "Optimization Online",
-				"url": "https://optimization-online.org/2023/05/modeling-risk-for-cvar-based-decisions-in-risk-aggregation/",
+				"url": "https://optimization-online.org/?p=22890",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -292,7 +294,7 @@ var testCases = [
 				"language": "en-US",
 				"libraryCatalog": "optimization-online.org",
 				"repository": "Optimization Online",
-				"url": "https://optimization-online.org/2018/03/6538/",
+				"url": "https://optimization-online.org/?p=15107",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
