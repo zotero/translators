@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-18 14:15:00"
+	"lastUpdated": "2023-06-18 14:47:59"
 }
 
 /*
@@ -130,7 +130,7 @@ async function scrape(doc, url) {
 		newdoc = await requestDocument(info_url);
 		await scrapeWetsvoorstelInfo(newdoc, info_url);
 	}
-	else if (detectWeb(doc, url) == "document") {
+	else if (url.includes('/behandeling/') && url.includes('/info')) {
 		await scrapeWetsvoorstelInfo(doc, url);
 	}
 
@@ -298,6 +298,31 @@ var testCases = [
 					},
 					{
 						"title": "Beslisnota wetsvoorstel sluitingsbevoegdheid burgemeester",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.eerstekamer.nl/behandeling/20221003/voorstel_van_wet_2/info",
+		"detectedItemType": "bill",
+		"items": [
+			{
+				"itemType": "document",
+				"title": "voorstel van wet  (TK, 2); Uitbreiding sluitingsbevoegdheid burgemeester en gezaghebber ter handhaving van de openbare orde (36.217)",
+				"creators": [],
+				"date": "3 oktober 2022",
+				"language": "nl-NL",
+				"libraryCatalog": "Eerste Kamer der Staten-Generaal",
+				"url": "https://www.eerstekamer.nl/behandeling/20221003/voorstel_van_wet_2/info",
+				"attachments": [
+					{
+						"title": "voorstel van wet  (TK, 2); Uitbreiding sluitingsbevoegdheid burgemeester en gezaghebber ter handhaving van de openbare orde (36.217)",
 						"mimeType": "application/pdf"
 					}
 				],
