@@ -39,7 +39,7 @@ function detectWeb(doc, url) {
 	if (url.includes('/nieuws/')) {
 		return "newspaperArticle";
 	}
-	else if (url.endsWith(".nl/") || url.endsWith(".nl") || url.includes("/index/") || url.includes("/search/")) {
+	else if ((url.endsWith(".nl/") || url.endsWith(".nl") || url.includes("/index/") || url.includes("/search/")) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 
