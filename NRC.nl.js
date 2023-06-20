@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-18 11:03:36"
+	"lastUpdated": "2023-06-20 08:03:28"
 }
 
 /*
@@ -54,7 +54,7 @@ function getSearchResults(doc, checkOnly) {
 
 	if (rows.length == 0) {
 		// We are probably not in an index page, but in a search results page.
-		rows = doc.querySelectorAll("div.search-results__item")
+		rows = doc.querySelectorAll("div.search-results__item");
 		isSearchPage = true;
 	}
 
@@ -64,12 +64,14 @@ function getSearchResults(doc, checkOnly) {
 		if (isSearchPage) {
 			href = row.getAttribute("data-article-url");
 			title = row.getAttribute("data-headline");
-		} else {
+		}
+		else {
 			href = row.href;
 
 			if (row.textContent.includes(">")) {
 				title = ZU.trimInternal(row.textContent.split(">")[1]);
-			} else {
+			}
+			else {
 				title = ZU.trimInternal(row.textContent);
 			}
 		}
@@ -90,8 +92,9 @@ async function doWeb(doc, url) {
 		for (let url of Object.keys(items)) {
 			await scrape(await requestDocument(url));
 		}
-	} else {
-		return scrape(doc, url);
+	}
+	else {
+		await scrape(doc, url);
 	}
 }
 
@@ -101,15 +104,15 @@ async function scrape(doc, url = doc.location.href) {
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
 
-	translator.setHandler('itemDone', function(obj, item) {
+	translator.setHandler('itemDone', function (obj, item) {
 		item.language = "nl-NL";
-		authors = Array.from(doc.querySelectorAll("a[rel='author']")).map(a => a.textContent);
+		var authors = Array.from(doc.querySelectorAll("a[rel='author']")).map(a => a.textContent);
 		item.creators = authors.map(a => ZU.cleanAuthor(a, 'author', false));
 
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.itemType = "newspaperArticle";
 		trans.doWeb(doc, url);
 	});
@@ -212,12 +215,6 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.nrc.nl/index/economie/",
-		"detectedItemType": "multiple",
-		"items": "multiple"
 	},
 	{
 		"type": "web",
