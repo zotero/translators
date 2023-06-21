@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-21 12:09:14"
+	"lastUpdated": "2023-06-21 13:27:59"
 }
 
 /*
@@ -70,7 +70,7 @@ function getSearchResults(doc) {
 function postProcess(doc, item) {
 	let title = ZU.xpathText(doc, '//meta[@name="citation_title"]//@content');
 	if (title) item.title = title;
-	let abstracts = ZU.xpath(doc, '//section[@class="abstract"]//p');
+	let abstracts = ZU.xpath(doc, '//section[@class="abstract"]//p|//abstract');
 
 	//multiple abstracts
 	if (abstracts && abstracts.length > 0)
@@ -376,7 +376,7 @@ var testCases = [
 				"date": "2021/11/18",
 				"DOI": "10.1163/18778372-12340005",
 				"ISSN": "0078-6527, 1877-8372",
-				"abstractNote": "In Iranian Twelver Shiʿism, two categories of popular traditions (including rituals, practices and beliefs) have taken shape over time around the issue of evil, namely the harm and death suffered by the holy figures of the house of the Prophet (ahl al-bayt). The first category includes elegiac poetic expressions (marṯīya), accompanied by ritual practices reflecting passion and compassion for the victims of unjust death – notably the third imam, Ḥusayn. The second category includes violent and satirical expressions of maledictions, addressed to the authors of this evil. This tradition also involves the recitation of prayers and devotional formulas borrowed from the sacred scriptural corpus as well as particular practices called ʿUmar-košī (the murder of ʿUmar). This article offers an analysis of the formation and function of these two traditions, as well as the development of their form and meaning in the social context of contemporary Iranian Shiʿism. It shows that, by being in line with the double Shiʿi principle of tawallāʾ (loyalty and love towards the Imams) and tabarrāʾ (dissociation and hatred towards the enemies of the Imams), these two traditions clearly reflect the autonomy of the believers vis-à-vis both political power and institutional religious authority.",
+				"abstractNote": "In Iranian Twelver Shiʿism, two categories of popular traditions (including rituals, practices and beliefs) have taken shape over time around the issue of evil, namely the harm and death suffered by the holy figures of the house of the Prophet (ahl al-bayt). The first category includes elegiac poetic expressions (marṯīya), accompanied by ritual practices reflecting passion and compassion for the victims of unjust death – notably the third imam, Ḥusayn. The second category includes violent and satirical expressions of maledictions, addressed to the authors of this evil. This tradition also involves the recitation of prayers and devotional formulas borrowed from the sacred scriptural corpus as well as particular practices called ʿUmar-košī (the murder of ʿUmar). This article offers an analysis of the formation and function of these two traditions, as well as the development of their form and meaning in the social context of contemporary Iranian Shiʿism. It shows that, by being in line with the double Shiʿi principle of tawallā (loyalty and love towards the Imams) and tabarrā (dissociation and hatred towards the enemies of the Imams), these two traditions clearly reflect the autonomy of the believers vis-à-vis both political power and institutional religious authority.",
 				"issue": "3/4",
 				"language": "fre",
 				"libraryCatalog": "brill.com",
@@ -430,6 +430,9 @@ var testCases = [
 					}
 				],
 				"notes": [
+					{
+						"note": "abs:In Iranian Twelver Shiʿism, two categories of popular traditions (including rituals, practices and beliefs) have taken shape over time around the issue of evil, namely the harm and death suffered by the holy figures of the house of the Prophet (ahl al-bayt). The first category includes elegiac poetic expressions (marṯīya), accompanied by ritual practices reflecting passion and compassion for the victims of unjust death – notably the third imam, Ḥusayn. The second category includes violent and satirical expressions of maledictions, addressed to the authors of this evil. This tradition also involves the recitation of prayers and devotional formulas borrowed from the sacred scriptural corpus as well as particular practices called ʿUmar-košī (the murder of ʿUmar). This article offers an analysis of the formation and function of these two traditions, as well as the development of their form and meaning in the social context of contemporary Iranian Shiʿism. It shows that, by being in line with the double Shiʿi principle of tawallāʾ (loyalty and love towards the Imams) and tabarrāʾ (dissociation and hatred towards the enemies of the Imams), these two traditions clearly reflect the autonomy of the believers vis-à-vis both political power and institutional religious authority."
+					},
 					{
 						"note": "abs:Dans le shiʿisme duodécimain iranien, deux catégories de traditions populaires (comprenant rituels, pratiques et croyances) ont pris forme au cours du temps autour de la question du mal, précisément des souffrances et de la mort subies par les personnes de la famille du Prophète (ahl al-bayt). La première catégorie comprend les expressions poétiques élégiaques (marṯīya) accompagnées de pratiques reflétant la passion et la compassion pour les victimes de la mort injuste, à commencer par le troisième imam Ḥusayn. La seconde catégorie comprend de violentes expressions satiriques de malédiction adressées aux auteurs de ce mal. Cette tradition mobilise aussi la récitation de prières et de formules dévotionnelles tirées du corpus scripturaire sacré, ainsi qu’un ensemble de pratiques particulières appelées ʿUmar-košī (« le meurtre de ʿUmar »). Cet article propose d’analyser la formation et la fonction de ces deux traditions, ainsi que l’évolution de leur forme et de leur signification dans le contexte social du shiʿisme iranien contemporain. Il montrera que ces deux traditions, tout en étant cohérentes avec le double principe shiʿite de tawallāʾ (loyauté et amour pour les imams) et tabarrāʾ (dissociation et haine à l’égard de leurs adversaires), reflètent clairement l’autonomie des croyants vis-à-vis du pouvoir politique comme de l’autorité religieuse institutionnelle."
 					},
@@ -778,7 +781,7 @@ var testCases = [
 				"date": "2022/10/24",
 				"DOI": "10.1163/22143955-12340008",
 				"ISSN": "2214-3947, 2214-3955",
-				"abstractNote": "Drawing from visual studies scholarship, we highlight current and persistent critiques of sociological visualization, note recent developments in visualization tools for sociologists, and propose how sociologists can be reflective about their visualization choices. As a case study, we outline the visualization development and selection process in our project of mapping Chinese religious venues. We explain the visualization challenges we faced, the visual biases we hoped to manage, the strengths and limitations of various visualization methods we identified, and how we selected visualizations for varying research queries. In addition, we provide a list of considerations for fellow sociologists working to visualize geospatial point data.",
+				"abstractNote": "摘要基於可視化研究的學術領域，我們提出對於社會學可視化研究已有的和持續的批評，指出可視化工具的新近發展，對於社會學學者在可視化選擇過程中應有的反思提出建議。作為一個案例研究，我們簡要概述在製作中國宗教場所地圖過程中關於可視化的種種選擇，坦承解釋所遇到的種種挑戰，如何盡力減少視覺偏見，檢討不同可視化方法的優點和侷限，以及如何根據研究問題而選定可視方式。最後，我們提供一個需要考慮因素的清單，或許可以作為社會學學者在地理空間點狀數據的可視化中的參考。",
 				"issue": "2",
 				"language": "eng",
 				"libraryCatalog": "brill.com",
@@ -828,10 +831,79 @@ var testCases = [
 				],
 				"notes": [
 					{
+						"note": "abs:Drawing from visual studies scholarship, we highlight current and persistent critiques of sociological visualization, note recent developments in visualization tools for sociologists, and propose how sociologists can be reflective about their visualization choices. As a case study, we outline the visualization development and selection process in our project of mapping Chinese religious venues. We explain the visualization challenges we faced, the visual biases we hoped to manage, the strengths and limitations of various visualization methods we identified, and how we selected visualizations for varying research queries. In addition, we provide a list of considerations for fellow sociologists working to visualize geospatial point data."
+					},
+					{
 						"note": "orcid:0000-0002-1935-3215 | Jackie Henke | taken from website"
 					},
 					{
 						"note": "orcid:0000-0002-4723-9735 | Fenggang Yang (楊鳳崗) | taken from website"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://brill.com/view/journals/rrcs/9/2/article-p170_2.xml",
+		"detectedItemType": "journalArticle",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Toward a Chinese Buddhist Modernism: Khenpo Sodargye and the Han Inundation of Larung Gar",
+				"creators": [
+					{
+						"firstName": "Andrew S.",
+						"lastName": "Taylor (唐安竺)",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022/10/24",
+				"DOI": "10.1163/22143955-12340005",
+				"ISSN": "2214-3947, 2214-3955",
+				"abstractNote": "摘要佛学者和佛教徒都同意喇荣五明佛学院是中国境内真正藏传佛教修行的最后堡垒。然而，每年都有数以万计的汉族朝圣者到访喇荣，其中包含了数百名在藏传佛教传承中出家发愿的汉族僧侣。作者利用各种口头和书面资料表明汉族在喇荣的存在并非偶然的现象，而是喇荣的佛教领袖—尤其是索达吉堪布—主动招募汉族的佛教徒的结果。通过对藏文和语文材料的比较分析，本文展示用于招募汉族佛教徒的“新科学”和“新治疗”的教法，虽然表面上类似于在西方和西藏的“佛教现代主义”的话语，但其内容在“现代主义”之上救世神学的色彩更浓。本文讨论了汉族佛教徒与藏传佛教之间的相遇是否最终可能代表了一种新兴的、跨民族“中国佛教现代主义”。",
+				"issue": "2",
+				"language": "eng",
+				"libraryCatalog": "brill.com",
+				"pages": "170-197",
+				"publicationTitle": "Review of Religion and Chinese Society",
+				"shortTitle": "Toward a Chinese Buddhist Modernism",
+				"url": "https://brill.com/view/journals/rrcs/9/2/article-p170_2.xml",
+				"volume": "9",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Chinese Buddhist modernism"
+					},
+					{
+						"tag": "Khenpo Sodargye"
+					},
+					{
+						"tag": "Larung Gar"
+					},
+					{
+						"tag": "中国佛教现代主义"
+					},
+					{
+						"tag": "喇荣五明佛学院"
+					},
+					{
+						"tag": "索达吉堪布"
+					}
+				],
+				"notes": [
+					{
+						"note": "abs:Larung Gar is often hailed by scholars and practitioners alike as a last bastion of authentic Buddhist practice by ethnic Tibetans within the PRC. And yet, Larung is visited every year by tens of thousands of Han pilgrims and houses hundreds of Han monastics who have taken vows in the Tibetan Buddhist tradition. The author draws on a variety of oral and written sources to show that the Han inundation of Larung was not a byproduct of happenstance, but was actively facilitated by the Larung leadership, especially Khenpo Sodargye (མཁན་པོ་བསོད་དར་རྒྱས་ 索达吉堪布), through the targeted recruitment of Han practitioners. A comparative analysis of Tibetan- and Chinese-language materials shows that the neo-scientific and therapeutic teachings used to recruit Han practitioners superficially resemble similar “Buddhist modernist” discourses in the west and Tibet, but that their content is decidedly more soteriological than this moniker suggests. The article considers whether the encounter between Han practitioners and Tibetan Buddhism might eventually represent a nascent form of inter-ethnic Chinese Buddhist modernism."
 					}
 				],
 				"seeAlso": []
