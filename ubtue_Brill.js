@@ -140,7 +140,6 @@ function postProcess(doc, item) {
 			let author = authorInfo.childNodes[0].textContent;
 			let orcid = orcidHref.textContent.replace(/.*(\d{4}-\d+-\d+-\d+x?)$/i, '$1');
 			item.notes.push({note: "orcid:" + orcid + ' | ' + author});
-			foundOrcid = true;
 		}
 	}
 
