@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-14 08:30:04"
+	"lastUpdated": "2023-05-04 14:16:27"
 }
 
 /*
@@ -162,6 +162,27 @@ function getOrcids(doc, ISSN) {
   		}
   	}
 	
+	// kein Beispiel gefunden
+  	/*if (orcidAuthorEntryCaseC) {
+  		for (let c of orcidAuthorEntryCaseC) {
+  			if (c && c.innerText.match(/\d+-\d+-\d+-\d+x?/gi)) {
+  				let author = c.innerText;//Z.debug(author  + '   CCC')
+  				notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:')});
+  			}
+  		}
+  	}*/
+  	
+  	// kein Beispiel gefunden
+	/*let orcidAuthorEntryCaseD = ZU.xpath(doc, '//div[@id="authors"]');
+	if (orcidAuthorEntryCaseD.length != 0) {
+		for (let o of ZU.xpath(orcidAuthorEntryCaseD[0], './/div[@class="card-body"]')) {
+			if (ZU.xpathText(o, './/a[contains(@href, "orcid")]') != null) {
+				let orcid = ZU.trimInternal(ZU.xpathText(o, './/a[contains(@href, "orcid")]'));
+				let author = ZU.trimInternal(o.innerHTML.split('&nbsp;')[0]);
+				notes.push({note: author + ' | orcid:' + orcid.replace(/https?:\/\/orcid\.org\//g, '')});
+			}
+		}
+	}*/
 	return notes;
 }
 
@@ -232,9 +253,9 @@ function invokeEMTranslator(doc) {
 		}
 		}
 		
-		if (['2617-3697', '2660-4418', '2748-6419', '1988-3269', '1804-6444', '2627-6062', '2504-5156', '2709-8435'].includes(i.ISSN)) {
+		if (['2617-3697', '2660-4418', '2748-6419', '1988-3269', '1804-6444', '2627-6062', '2504-5156'].includes(i.ISSN)) {
 			if (ZU.xpath(doc, '//meta[@name="DC.Type.articleType"]')) {
-				if (ZU.xpath(doc, '//meta[@name="DC.Type.articleType"]')[0].content.match(/(Media reviews)|(Rezensionen)|(Reseñas)|(Book Reviews?)|(Buchbesprechungen)/i)) {
+				if (ZU.xpath(doc, '//meta[@name="DC.Type.articleType"]')[0].content.match(/(Media reviews)|(Rezensionen)|(Reseñas)|(Book Reviews?)/i)) {
 					i.tags.push("Book Review");
 				}
 			}
