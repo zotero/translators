@@ -9,34 +9,61 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-10-28 16:15:17"
+	"lastUpdated": "2023-06-25 18:34:47"
 }
+
+/*
+    ***** BEGIN LICENSE BLOCK *****
+
+    Copyright © 2010-2023 Jonas Schrieb and Zotero IACR ePrint translator contributors
+
+    This file is part of Zotero.
+
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+    ***** END LICENSE BLOCK *****
+*/
 
 let preprintType = ZU.fieldIsValidForType('title', 'preprint')
 	? 'preprint'
 	: 'report';
 
 function detectWeb(doc, url) {
-	var singleRe   = /^https?:\/\/eprint\.iacr\.org\/(\d{4}\/\d{3}|cgi-bin\/print\.pl)/;
+	var singleRe = /^https?:\/\/eprint\.iacr\.org\/(\d{4}\/\d{3}|cgi-bin\/print\.pl)/;
 	var multipleRe = /^https?:\/\/eprint\.iacr\.org\/search\?/;
 	if (singleRe.test(url)) {
+		Zotero.debug(url);
 		return preprintType;
-	} else if (multipleRe.test(url)) {
+	}
+	else if (multipleRe.test(url)) {
 		return "multiple";
 	}
+
+	return false;
 }
 
 function scrape(doc, url) {
 	var reportNoSelector = "h4";
-	var titleSelector    = "h3";
-	var authorsSelector  = 'meta[name="citation_author"]'
-	var abstractXPath    = "//h5[starts-with(text(),\"Abstract\")]/following-sibling::p/text()";
+	var titleSelector = "h3";
+	var authorsSelector = 'meta[name="citation_author"]';
+	var abstractXPath = "//h5[starts-with(text(),\"Abstract\")]/following-sibling::p/text()";
 	var keywordsSelector = ".keywords > .keyword";
 	var reportNo = text(doc, reportNoSelector);
 	reportNo = reportNo.match(/(\d{4})\/(\d{3,4})$/);
-	if (reportNo){
+	if (reportNo) {
 		var year = reportNo[1];
-		var no   = reportNo[2];
+		var no = reportNo[2];
 	}
 	var title = text(doc, titleSelector);
 	title = ZU.trimInternal(title);
@@ -47,12 +74,12 @@ function scrape(doc, url) {
 	var abstr = "";
 	var abstractLines = doc.evaluate(abstractXPath, doc, null, XPathResult.ANY_TYPE, null);
 	var nextLine;
-	while (nextLine = abstractLines.iterateNext()) {
+	while ((nextLine = abstractLines.iterateNext()) !== null) {
 		// An inner line starting with \n starts a new paragraph in the abstract.
 		if (nextLine.textContent[0] == "\n") {
 			abstr += "\n\n";
 		}
-		abstr +=  ZU.trimInternal(nextLine.textContent);
+		abstr += ZU.trimInternal(nextLine.textContent);
 	}
 	
 	var keywords = doc.querySelectorAll(keywordsSelector);
@@ -62,28 +89,26 @@ function scrape(doc, url) {
 	
 	newItem.date = year;
 	newItem.reportNumber = no;
-	//we want to use this later & make sure we don't make http--> https requests or vice versa. 
-	newItem.url = url.match(/^https?:\/\/[^\/]+/)[0] + "/" + year + "/" + no;
+	//we want to use this later & make sure we don't make http--> https requests or vice versa.
+	newItem.url = url.match(/^https?:\/\/[^/]+/)[0] + "/" + year + "/" + no;
 	newItem.title = title;
 	newItem.abstractNote = abstr;
-	for (var i in authors) {
+	for (let i in authors) {
 		newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i], "author"));
 	}
-for (var i = 0; i < keywords.length; i++) {
-	//sometimes the keywords split returns an empty tag - those crash the translator if they're pushed.
-	if (keywords[i] != null){
-		newItem.tags.push(keywords[i]);}
+	for (let i = 0; i < keywords.length; i++) {
+		//sometimes the keywords split returns an empty tag - those crash the translator if they're pushed.
+		if (keywords[i] !== null) {
+			newItem.tags.push(keywords[i]);
+		}
 	}
 	newItem.attachments = [
-		{url:newItem.url+".pdf", title:"Full Text PDF", mimeType:"application/pdf"}
+		{ url: newItem.url + ".pdf", title: "Full Text PDF", mimeType: "application/pdf" }
 	];
 	newItem.complete();
-
 }
 
 function doWeb(doc, url) {
-	var nextTitle;
-
 	if (detectWeb(doc, url) == "multiple") {
 		var rowSelector = ".paperList > div, .results > div";
 		var titleSelector = ".papertitle, strong";
@@ -97,19 +122,16 @@ function doWeb(doc, url) {
 			items[href] = title;
 		}
 
-		var titles = doc.querySelectorAll(titleSelector);
-		var links  = doc.querySelectorAll(linkSelector);
 		Zotero.selectItems(items, function (items) {
 			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
-	} else {
-		if (url.search(/\.pdf$/)!= -1) {
-			//go to the landing page to scrape
-			url = url.replace(/\.pdf$/, "");
-			ZU.processDocuments([url], scrape)
-		}
-		else scrape(doc, url)
 	}
+	else if (/\.pdf$/.test(url)) {
+		//go to the landing page to scrape
+		url = url.replace(/\.pdf$/, "");
+		ZU.processDocuments([url], scrape);
+	}
+	else scrape(doc, url);
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -268,7 +290,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "preprint",
-				"title": "The Limits of Provable Security Against Model Extraction",
+				"title": "Theoretical Limits of Provable Security Against Model Extraction by Efficient Observational Defenses",
 				"creators": [
 					{
 						"firstName": "Ari",
@@ -277,7 +299,7 @@ var testCases = [
 					}
 				],
 				"date": "2022",
-				"abstractNote": "Can we hope to provide provable security against model extraction attacks? As a step towards a theoretical study of this question, we unify and abstract a wide range of \"observational\" model extraction defense mechanisms -- roughly, those that attempt to detect model extraction using a statistical analysis conducted on the distribution over the adversary's queries. To accompany the abstract observational model extraction defense, which we call OMED for short, we define the notion of complete defenses -- the notion that benign clients can freely interact with the model -- and sound defenses -- the notion that adversarial clients are caught and prevented from reverse engineering the model. We then propose a system for obtaining provable security against model extraction by complete and sound OMEDs, using (average-case) hardness assumptions for PAC-learning. Our main result nullifies our proposal for provable security, by establishing a computational incompleteness theorem for the OMED: any efficient OMED for a machine learning model computable by a polynomial size decision tree that satisfies a basic form of completeness cannot satisfy soundness, unless the subexponential Learning Parity with Noise (LPN) assumption does not hold. To prove the incompleteness theorem, we introduce a class of model extraction attacks called natural Covert Learning attacks based on a connection to the Covert Learning model of Canetti and Karchmer (TCC '21), and show that such attacks circumvent any defense within our abstract mechanism in a black-box, nonadaptive way. Finally, we further expose the tension between Covert Learning and OMEDs by proving that Covert Learning algorithms require the nonexistence of provable security via efficient OMEDs. Therefore, we observe a \"win-win\" result by obtaining a characterization of the existence of provable security via efficient OMEDs by the nonexistence of natural Covert Learning algorithms.",
+				"abstractNote": "Can we hope to provide provable security against model extraction attacks? As a step towards a theoretical study of this question, we unify and abstract a wide range of \"observational\" model extraction defenses (OMEDs) --- roughly, those that attempt to detect model extraction by analyzing the distribution over the adversary's queries. To accompany the abstract OMED, we define the notion of complete OMEDs --- when benign clients can freely interact with the model --- and sound OMEDs --- when adversarial clients are caught and prevented from reverse engineering the model. Our formalism facilitates a simple argument for obtaining provable security against model extraction by complete and sound OMEDs, using (average-case) hardness assumptions for PAC-learning, in a way that abstracts current techniques in the prior literature. The main result of this work establishes a partial computational incompleteness theorem for the OMED: any efficient OMED for a machine learning model computable by a polynomial size decision tree that satisfies a basic form of completeness cannot satisfy soundness, unless the subexponential Learning Parity with Noise (LPN) assumption does not hold. To prove the incompleteness theorem, we introduce a class of model extraction attacks called natural Covert Learning attacks based on a connection to the Covert Learning model of Canetti and Karchmer (TCC '21), and show that such attacks circumvent any defense within our abstract mechanism in a black-box, nonadaptive way. As a further technical contribution, we extend the Covert Learning algorithm of Canetti and Karchmer to work over any \"concise\" product distribution (albeit for juntas of a logarithmic number of variables rather than polynomial size decision trees), by showing that the technique of learning with a distributional inverter of Binnendyk et al. (ALT '22) remains viable in the Covert Learning setting.This is an updated version. The paper has been modified to improve readability and argumentation. Some new results have been added in section 5. The previous version of the paper appeared under the title \"The Limits of Provable Security Against Model Extraction.\" The current version is the same as for publication in IEEE SATML '23, except for minor differences and formatting.",
 				"libraryCatalog": "ePrint IACR",
 				"url": "https://eprint.iacr.org/2022/1039",
 				"attachments": [
