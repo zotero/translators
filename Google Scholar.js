@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-15 00:44:22"
+	"lastUpdated": "2023-06-27 06:36:51"
 }
 
 /*
@@ -1204,7 +1204,7 @@ function addAttachment(item, row) {
 	// attach linked document as attachment if available
 	if (row.attachmentLink) {
 		let	attachment = {
-			title: "Full Text (via Google Scholar)",
+			title: "Available Version",
 			url: row.attachmentLink,
 		};
 		let mimeType = MIME_TYPES[row.attachmentType];
@@ -1212,15 +1212,6 @@ function addAttachment(item, row) {
 			attachment.mimeType = mimeType;
 		}
 		item.attachments.push(attachment);
-	}
-
-	// Attach linked page as snapshot if available
-	if (row.directLink && row.directLink !== row.attachmentLink) {
-		item.attachments.push({
-			url: row.directLink,
-			title: "Snapshot",
-			mimeType: "text/html"
-		});
 	}
 }
 
@@ -1537,12 +1528,8 @@ var testCases = [
 				"url": "https://www.igi-global.com/chapter/linkeddata-story-far/55046",
 				"attachments": [
 					{
-						"title": "Full Text (via Google Scholar)",
+						"title": "Available Version",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
