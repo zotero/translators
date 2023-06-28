@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-28 08:49:28"
+	"lastUpdated": "2023-06-28 09:01:42"
 }
 
 /*
@@ -436,6 +436,9 @@ var testCases = [
 					},
 					{
 						"note": "abs:Dans le shiʿisme duodécimain iranien, deux catégories de traditions populaires (comprenant rituels, pratiques et croyances) ont pris forme au cours du temps autour de la question du mal, précisément des souffrances et de la mort subies par les personnes de la famille du Prophète (ahl al-bayt). La première catégorie comprend les expressions poétiques élégiaques (marṯīya) accompagnées de pratiques reflétant la passion et la compassion pour les victimes de la mort injuste, à commencer par le troisième imam Ḥusayn. La seconde catégorie comprend de violentes expressions satiriques de malédiction adressées aux auteurs de ce mal. Cette tradition mobilise aussi la récitation de prières et de formules dévotionnelles tirées du corpus scripturaire sacré, ainsi qu’un ensemble de pratiques particulières appelées ʿUmar-košī (« le meurtre de ʿUmar »). Cet article propose d’analyser la formation et la fonction de ces deux traditions, ainsi que l’évolution de leur forme et de leur signification dans le contexte social du shiʿisme iranien contemporain. Il montrera que ces deux traditions, tout en étant cohérentes avec le double principe shiʿite de tawallāʾ (loyauté et amour pour les imams) et tabarrāʾ (dissociation et haine à l’égard de leurs adversaires), reflètent clairement l’autonomie des croyants vis-à-vis du pouvoir politique comme de l’autorité religieuse institutionnelle."
+					},
+					{
+						"note": "orcid:0000-0002-3202-386X | Sepideh Parsapajouh"
 					}
 				],
 				"seeAlso": []
@@ -532,6 +535,21 @@ var testCases = [
 					}
 				],
 				"notes": [
+					{
+						"note": "orcid:0000-0003-1217-916X | Evelyn Schnaufer"
+					},
+					{
+						"note": "orcid:0000-0002-8322-2885 | Mirjam Rutkowski"
+					},
+					{
+						"note": "orcid:0000-0002-3635-3946 | Antti Räsänen"
+					},
+					{
+						"note": "orcid:0000-0001-9238-7676 | Christina Osbeck"
+					},
+					{
+						"note": "orcid:0000-0003-1701-1147 | Friedrich Schweitzer"
+					},
 					"LF:"
 				],
 				"seeAlso": []
