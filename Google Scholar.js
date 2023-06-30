@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-27 06:36:51"
+	"lastUpdated": "2023-06-29 23:52:53"
 }
 
 /*
@@ -1204,7 +1204,7 @@ function addAttachment(item, row) {
 	// attach linked document as attachment if available
 	if (row.attachmentLink) {
 		let	attachment = {
-			title: "Available Version",
+			title: "Available Version via Google Scholar",
 			url: row.attachmentLink,
 		};
 		let mimeType = MIME_TYPES[row.attachmentType];
@@ -1528,7 +1528,7 @@ var testCases = [
 				"url": "https://www.igi-global.com/chapter/linkeddata-story-far/55046",
 				"attachments": [
 					{
-						"title": "Available Version",
+						"title": "Available Version via Google Scholar",
 						"mimeType": "application/pdf"
 					}
 				],
