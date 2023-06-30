@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-29 23:52:53"
+	"lastUpdated": "2023-06-30 02:41:02"
 }
 
 /*
@@ -681,7 +681,7 @@ function extractDOI(row) {
 	// end, e.g. the link in the header title of
 	// https://scholar.google.com/citations?view_op=view_citation&hl=en&user=Cz6X6UYAAAAJ&citation_for_view=Cz6X6UYAAAAJ:zYLM7Y9cAGgC
 	// https://www.nomos-elibrary.de/10.5771/9783845229614-153.pdf
-	let m = path.match(/(10\.\d{4,}\/.+?)(?:\.(?:pdf|htm|html|xhtml|epub|xml))?$/i);
+	let m = path.match(/(10\.\d{4,}\/.+?)(?:[./](?:pdf|htm|html|xhtml|epub|xml))?$/i);
 	return m && m[1];
 }
 
@@ -1571,6 +1571,45 @@ var testCases = [
 					{
 						"title": "Google Scholar Judgement",
 						"type": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=RjsFKYEAAAAJ&cstart=20&pagesize=80&citation_for_view=RjsFKYEAAAAJ:5nxA0vEk-isC",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The Weakness of Power and the Power of Weakness: The Ethics of War in a Time of Terror",
+				"creators": [
+					{
+						"creatorType": "author",
+						"firstName": "Michael",
+						"lastName": "Northcott"
+					}
+				],
+				"date": "04/2007",
+				"DOI": "10.1177/0953946806075493",
+				"ISSN": "0953-9468, 1745-5235",
+				"abstractNote": "In 2002 a significant number of American theologians declared that the ‘war on terror’ was a just war. But the indiscriminate strategies and munitions technologies deployed in the invasion and occupation of Iraq fall short of the just war principles of non-combatant immunity, and proportionate response. The just war tradition is one of Christendom's most enduring legacies to the law of nations. Its practice implies a standard of virtue in war that is undermined by the indiscriminate effects of many modern weapons and by the deliberate targeting of civilian infrastructure. The violent power represented by the technology of what the Vatican calls ‘total war’has occasioned a significant shift in Catholic social teaching on just war since the Second World War. Total war generates an asymmetry of weakness in those subjected to these techniques of terror, and this has only strengthened the violence of the Islamist struggle against the West. But those who draw inspiration and legitimacy from this weakness in their struggle with the West also reject virtue in war. In a time of terror the theological vocation is to speak peace and to recall the terms in which the peace of God was achieved by way of the cross.",
+				"issue": "1",
+				"journalAbbreviation": "Studies in Christian Ethics",
+				"language": "en",
+				"libraryCatalog": "DOI.org (Crossref) via Google Scholar",
+				"pages": "88-101",
+				"publicationTitle": "Studies in Christian Ethics",
+				"shortTitle": "The Weakness of Power and the Power of Weakness",
+				"url": "http://journals.sagepub.com/doi/10.1177/0953946806075493",
+				"volume": "20",
+				"attachments": [
+					{
+						"title": "Available Version via Google Scholar",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
