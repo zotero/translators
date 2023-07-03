@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-01 16:55:37"
+	"lastUpdated": "2023-07-03 14:16:41"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2021 Abe Jellinek
+	Copyright © 2021 Abe Jellinek and contributors
 	
 	This file is part of Zotero.
 
@@ -78,17 +78,17 @@ function scrape(doc, url) {
 	let meta = JSON.parse(text(doc, jsonSelector));
 
 	let item = new Zotero.Item('newspaperArticle');
-	item.title = meta.headline;
+	// Prefer the title on the page over metadata, because the latter may be a
+	// different title made for social media / SEO
+	item.title = text(doc, "#story-headline, .story-headline__title, .long-headline") || meta.headline;
 	item.date = ZU.strToISO(meta.datePublished);
 	item.abstractNote = meta.description;
-	if (meta.author) {
-		item.creators = meta.author.name
-			.split(/ and |, /)
-			.map(name => ZU.cleanAuthor(name, 'author', false));
-	}
-	item.publicationTitle = meta.publisher.name;
+	item.creators = getAuthors(meta.author, doc);
+	// Get rid of trailing strings inserted after publisher name for SEO
+	// purposes
+	item.publicationTitle = meta.publisher.name.match(/^(.+?)(?:[—|].*)?$/)[1].trim();
 	item.section = getSection(doc);
-	item.url = meta.mainEntityOfPage['@id'];
+	item.url = url;
 	item.libraryCatalog = '';
 	item.attachments.push({
 		title: "Snapshot",
@@ -99,14 +99,42 @@ function scrape(doc, url) {
 	item.complete();
 }
 
+function getAuthors(authorFromJSON, doc) {
+	let byline = authorFromJSON;
+	if (byline) {
+		// The author field may be an array (multiple authors) or an atom
+		// object (one author)
+		if (!Array.isArray(byline)) {
+			byline = [byline];
+		}
+	}
+	else {
+		// Fallback to scraping
+		byline = doc.querySelectorAll("meta[name='article:author']");
+		if (!byline) {
+			return null;
+		}
+		byline = Array.from(byline);
+	}
+	// The "author" field may be malformed (not an array, but the "name" field
+	// is a string with separators between author names). Deal with "," and
+	// "and" as separator.
+	return byline.flatMap(obj => obj.name
+		.split(/, |and /i)
+		.map(str => str.trim())
+		.filter(Boolean)
+		.map(str => ZU.cleanAuthor(str, "author", false))
+	);
+}
+
 function getSection(doc) {
-	let breadcrumbs = doc.querySelector('#breadcrumbs');
-	if (!breadcrumbs || breadcrumbs.childElementCount < 2) {
+	let breadCrumbItems = doc.querySelectorAll(".breadcrumbs__item, .breadcrumbs_li");
+	if (breadCrumbItems.length < 2) {
 		// we want to return null, not '', if we can't find a section tag
 		return text(doc, '.tg-tlc-storyheader_sectiontag') || null;
 	}
 	
-	return ZU.capitalizeTitle(breadcrumbs.lastChild.innerText, true);
+	return ZU.capitalizeTitle(breadCrumbItems[breadCrumbItems.length - 1].innerText, true);
 }
 
 /** BEGIN TEST CASES **/
