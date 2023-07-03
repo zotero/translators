@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-03 16:28:13"
+	"lastUpdated": "2023-07-03 16:31:30"
 }
 
 /*
@@ -54,7 +54,7 @@ function getSearchResults(doc, checkOnly) {
 	for (let row of rows) {
 		// Zotero.debug(row.innerHTML);
 		let href = row.href;
-		Zotero.debug(href);
+		// Zotero.debug(href);
 		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -99,13 +99,13 @@ async function scrape(nextDoc, url) {
 		risURL = '/view/' + epJSON.articles["0"].risLink;
 	}
 	
-	Zotero.debug(risURL);
+	// Zotero.debug(risURL);
 	var pdfURL = null;
 	if (epJSON.articles["0"].hasPdfLink) {
 		pdfURL = epJSON.articles["0"].pdfLink;
 	}
 	
-	Zotero.debug(pdfURL);
+	// Zotero.debug(pdfURL);
 	if (risURL) {
 		let text = await requestText(risURL);
 		processRIS(text, url, pdfURL);
@@ -122,7 +122,7 @@ async function scrape(nextDoc, url) {
 			item.volume = numyear[0];
 		}
 		if (pdfURL) {
-			Zotero.debug('PDF URL: ' + pdfURL);
+			// Zotero.debug('PDF URL: ' + pdfURL);
 			item.attachments.push({
 				url: pdfURL,
 				title: "Full Text PDF",
