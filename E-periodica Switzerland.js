@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-03 16:50:16"
+	"lastUpdated": "2023-07-03 16:54:43"
 }
 
 /*
@@ -210,7 +210,7 @@ var testCases = [
 				"volume": "11",
 				"attachments": [
 					{
-						"title": "E-periodica PDF",
+						"title": "Full Text PDF",
 						"type": "application/pdf"
 					}
 				],
@@ -245,7 +245,7 @@ var testCases = [
 				"volume": "137",
 				"attachments": [
 					{
-						"title": "E-periodica PDF",
+						"title": "Full Text PDF",
 						"type": "application/pdf"
 					}
 				],
@@ -280,7 +280,7 @@ var testCases = [
 				"volume": "2",
 				"attachments": [
 					{
-						"title": "E-periodica PDF",
+						"title": "Full Text PDF",
 						"type": "application/pdf"
 					}
 				],
