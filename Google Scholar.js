@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-30 02:41:02"
+	"lastUpdated": "2023-07-03 04:50:33"
 }
 
 /*
@@ -707,10 +707,6 @@ function extractArXiv(row) {
 // Each pipeline item will execute the translation and consume the row object
 // if it succeeds, or pass it to the next one if it fails. The pipelines can be
 // composed, building up a chain.
-//
-// The pipeline head has two special properties, "bin" for rows that failed all
-// translations, and "trace" for the translation-task promises, suitable to be
-// passed to Promise.all().
 
 /**
  * A translation pipeline component (e.g. DOI search, ArXiv search, GS BibTeX
@@ -730,8 +726,6 @@ function extractArXiv(row) {
  * @property {RowObj[]} bin - Row objects that failed all translations
  * @property {Promise} current - The current task-queue tail to which further
  * tasks will be appended
- * @property {Promise[]} trace - Array holding references to each task promise
- * that passes through the pipeline
  * @property {boolean} restOnLead - Whether the "rest" shall apply to the
  * leading edge of a work task, in addition to the trailing edge
  */
@@ -740,7 +734,6 @@ function TranslationPipeline(identify, work, rest, context, label = "[unnamed]")
 	this.next = undefined;
 	this.bin = [];
 	this.current = Promise.resolve();
-	this.trace = [];
 	this.restOnLead = false;
 }
 
@@ -766,8 +759,6 @@ TranslationPipeline.prototype = {
 			return;
 		}
 		let currPromise = this.current.then(this.getTask(id, row));
-		// TODO: Can we add less promises to the "trace"?
-		this.trace.push(currPromise);
 		this.current = currPromise;
 	},
 
@@ -830,8 +821,7 @@ TranslationPipeline.prototype = {
 	 * Compose the pipeline chain by adding another pipeline item
 	 *
 	 * The input pipeline will be appended to the tail of the current pipeline.
-	 * Its "trace" and "bin" properties will be set to reference the head
-	 * pipeline's.
+	 * Its "bin" property will be set to reference the head pipeline's.
 	 *
 	 * @param {TranslationPipeline} other - The pipeline to be appended
 	 * @returns {TranslationPipeline} Returns this, to facilitate cascading
@@ -843,10 +833,25 @@ TranslationPipeline.prototype = {
 			p = p.next;
 		}
 		p.next = other;
-		other.trace = this.trace;
 		other.bin = this.bin;
 		return this;
 	},
+
+	/**
+	 * Returns a promise that fulfills when all pipelines in the chain finish
+	 * processing.
+	 *
+	 * @returns {Promise<undefined[]>}
+	 */
+	barrier: function () {
+		let currentJobs = [];
+		let p = this; // eslint-disable-line consistent-this
+		while (p) {
+			currentJobs.push(p.current);
+			p = p.next;
+		}
+		return Promise.all(currentJobs);
+	}
 };
 
 // Factory functions that creates reusable components from the translation
@@ -1037,7 +1042,7 @@ function makeGSScraper(inputStrings, rowGenerator, referrerURL,
 		}
 
 		// Barrier for the conclusion of all translation tasks.
-		await Promise.all(pipeline.trace);
+		await pipeline.barrier();
 
 		if (pipeline.bin.length) {
 			throw new Error(`${pipeline.bin.length} row(s) failed to translate.`);
