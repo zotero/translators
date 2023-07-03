@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-03 16:38:30"
+	"lastUpdated": "2023-07-03 16:50:16"
 }
 
 /*
@@ -93,7 +93,7 @@ async function scrape(nextDoc, url) {
 	Zotero.debug('JSON URL ' + pageinfoUrl);
 	let text = await requestText(pageinfoUrl);
 	var epJSON = JSON.parse(text);
-	// Zotero.debug(epJSON);
+	Zotero.debug(epJSON);
 	let risURL;
 	if (epJSON.articles["0"].hasRisLink) {
 		risURL = '/view/' + epJSON.articles["0"].risLink;
