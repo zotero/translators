@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-03 16:31:30"
+	"lastUpdated": "2023-07-03 16:38:30"
 }
 
 /*
@@ -159,7 +159,7 @@ function processRIS(text, URL, pdfURL) {
 		if (pdfURL !== null) {
 			item.attachments.push({
 				url: pdfURL,
-				title: "E-periodica PDF",
+				title: "Full Text PDF",
 				type: "application/pdf"
 			});
 		}
