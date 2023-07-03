@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-27 15:22:23"
+	"lastUpdated": "2023-07-03 16:28:13"
 }
 
 /*
@@ -145,9 +145,7 @@ function processRIS(text, URL, pdfURL) {
 		item.attachments = [];
 		
 		// change colon spacing in title and publicationTitle
-		if (item.title) {
-			item.title = item.title.replace(' : ', ': ');
-		}
+		item.title = item.title.replace(' : ', ': ');
 
 		if (item.publicationTitle) {
 			item.publicationTitle = item.publicationTitle.replace(' : ', ': ');
