@@ -69,9 +69,11 @@ async function doWeb(doc, url) {
 		await scrape(doc, url);
 	}
 	else if (detectWeb(doc, url) == 'multiple') {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) ZU.processDocuments(Object.keys(items), scrape);
-		});
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else {
 		// The fallback is not expected to be used on E-periodica, but just in case...
