@@ -652,6 +652,14 @@ function generateItem(item, teiDoc) {
 		appendIndent(monogr, extent, 2);
 	}
 
+	// abstract
+	if (item.abstractNote) {
+		const note = teiDoc.createElementNS(ns.tei, "note");
+		note.setAttribute("type", "abstract");
+		appendXML(note, item.abstractNote, true);
+		appendIndent(bibl, note, 1);
+	}
+
 	// Extra fields
 	if (extra.note) {
 		const note = teiDoc.createElementNS(ns.tei, "note");
@@ -681,49 +689,6 @@ function generateItem(item, teiDoc) {
 			appendIndent(bibl, note, 1);
 		}
 	}
-			/* Notes could have relations and tags, what to do with that ?
-    {
-      "key": "NDE85Y8J",
-      "version": 1721,
-      "itemType": "note",
-      "parentItem": "RCIWSIIV",
-      "note": "&lt;div data-schema-version=\"8\"&gt;&lt;p&gt;A note&lt;/p&gt;\n&lt;/div&gt;",
-      "tags": [
-        {
-          "tag": "TAG"
-        }
-      ],
-      "relations": {
-        "dc:relation": [
-          "http://zotero.org/users/8989645/items/ZS5KBUK5"
-        ]
-      },
-      "dateAdded": "2023-06-15T21:04:13Z",
-      "dateModified": "2023-06-15T21:04:42Z",
-      "uri": "http://zotero.org/users/8989645/items/NDE85Y8J"
-    }
-			*/
-	// TODO, attachements  <listRef>   
-	/*
-	  "attachments": [
-    {
-      "version": 1718,
-      "itemType": "attachment",
-      "title": "An attached link",
-      "url": "https://gogle.com/",
-      "accessDate": "2023-06-15T21:04:01Z",
-      "parentItem": "RCIWSIIV",
-      "linkMode": "linked_url",
-      "contentType": "",
-      "charset": "",
-      "tags": [],
-      "relations": {},
-      "dateAdded": "2023-06-15T21:04:01Z",
-      "dateModified": "2023-06-15T21:04:01Z",
-      "uri": "http://zotero.org/users/8989645/items/5YRYLNJW"
-    }
-  ],
-  	*/
 
 	// export tags, if available
 	if (Zotero.getOption("Export Tags") && item.tags && item.tags.length > 0) {
