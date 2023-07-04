@@ -7,15 +7,15 @@
 	"maxVersion": "",
 	"priority": 25,
 	"configOptions": {
-		"dataMode": "xml/dom",
-		"getCollections": "true"
+	"dataMode": "xml/dom",
+	"getCollections": "true"
 	},
 	"displayOptions": {
-		"exportNotes": true,
-		"Export Tags": true,
-		"Generate XML IDs": false,
-		"Full TEI Document": false,
-		"Debug": true
+	"exportNotes": true,
+	"Export Tags": true,
+	"Generate XML IDs": false,
+	"Full TEI Document": false,
+	"Debug": true
 	},
 	"inRepository": true,
 	"translatorType": 2,
@@ -72,8 +72,8 @@ const generatedItems = {};
 const allItems = {};
 
 // build one time
-const xmlparser = new DOMParser();
-const xmlser = new XMLSerializer();
+const xmlParser = new DOMParser();
+const xmlSerializer = new XMLSerializer();
 const indent = "    ";
 
 /**
@@ -84,14 +84,14 @@ const indent = "    ";
  * @param {*} blocks 
  * @returns 
  */
-const appendXML = function(node, html, blocks=false) {
+function appendXML(node, html, blocks = false) {
 	if (!html) return;
 	// import html as dom and export is as xml to avoid xml malformations
-	let dom = xmlparser.parseFromString(html, "text/html");
+	let dom = xmlParser.parseFromString(html, "text/html");
 	let body = dom.getElementsByTagName("body").item(0);
 	let root;
 	// notes could be embed in an ugly <div>
-	if (blocks 
+	if (blocks
 		&& body.childElementCount === 1
 		&& body.firstElementChild.tagName.toLowerCase() == 'div'
 	) {
@@ -100,7 +100,7 @@ const appendXML = function(node, html, blocks=false) {
 	else {
 		root = body;
 	}
-	html = xmlser.serializeToString(root);
+	html = xmlSerializer.serializeToString(root);
 	// transform html to tei, xslt not available
 	// https://forums.zotero.org/discussion/comment/344940/
 	// tags supported by Zotero
@@ -127,7 +127,7 @@ const appendXML = function(node, html, blocks=false) {
 		// <sup> superscript
 		.replace(/<sup>/g, '<hi rend="sup">')
 		.replace(/<\/sup>/g, '</hi>')
-	;
+		;
 	// notes can hav block level elementts
 	if (blocks) {
 		xml = xml
@@ -138,11 +138,11 @@ const appendXML = function(node, html, blocks=false) {
 			.replace(/<(h\d)>/g, '<label type="$1">')
 			.replace(/<\/(h\d)>/g, '</label>')
 			.replace(/<\/(ul|ol)>/g, '</list>')
-			.replace(/<a [^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/g, 
+			.replace(/<a [^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/g,
 				'<ref target="$1">$2</ref>')
-		;
+			;
 	}
-	dom = xmlparser.parseFromString(xml, "text/xml");
+	dom = xmlParser.parseFromString(xml, "text/xml");
 	const children = dom.documentElement.childNodes
 	for (let i = 0, len = children.length; i < len; i++) {
 		const child = children[i];
@@ -283,7 +283,7 @@ function genXMLId(item) {
 function date2iso(date) {
 	let iso = null;
 	let year = Number(date.year);
-	if (isNaN(year)) return iso; 
+	if (isNaN(year)) return iso;
 	iso = String(date.year).padStart(4, '0');
 	let month = Number(date.month);
 	if (isNaN(month)) return iso;
@@ -301,7 +301,7 @@ function date2iso(date) {
  * @param {*} child 
  * @param {*} level 
  */
-const appendIndent = function (parent, child, level) {
+function appendIndent(parent, child, level) {
 	const doc = parent.ownerDocument;
 	parent.appendChild(doc.createTextNode(indent.repeat(level)));
 	parent.appendChild(child);
@@ -317,12 +317,12 @@ const appendIndent = function (parent, child, level) {
  * @param {*} atts 
  * @returns 
  */
-const appendField = function(parent, name, value, level=2, atts={}) {
+function appendField(parent, name, value, level = 2, atts = {}) {
 	if (!value) return;
 	const doc = parent.ownerDocument;
 	const child = doc.createElementNS(ns.tei, name);
 	if (atts === null) atts = {};
-	for (var key in atts) { 
+	for (var key in atts) {
 		child.setAttribute(key, atts[key]);
 	}
 	child.appendChild(doc.createTextNode(value));
@@ -416,7 +416,12 @@ function generateItem(item, teiDoc) {
 		let resp = null;
 		let levelNames = 3;
 		const type = creator.creatorType;
-		if (type == "author") {
+		if (type == "reviewedAuthor") {
+			// A reviewed author is not a statement of responsability
+			// is a subject, TEI uncleat, send in notes
+			continue
+		}
+		else if (type == "author") {
 			pers = teiDoc.createElementNS(ns.tei, "author");
 		}
 		else if (type == "editor") {
@@ -438,21 +443,9 @@ function generateItem(item, teiDoc) {
 			levelNames++;
 			resp.appendChild(teiDoc.createTextNode(indent.repeat(2)));
 		}
-		pers.appendChild(teiDoc.createTextNode('\n'));
 
-		// add the names of a particular creator
-		// A first name is alaways a first name
-		appendField(pers, 'forename', creator.firstName, levelNames);
-		// A last name is a family name with a first name
-		if (creator.lastName && creator.firstName) {
-			appendField(pers, 'surname', creator.lastName, levelNames);
-		}
-		// A last name without a first name is just a name
-		else if (creator.lastName) {
-			appendField(pers, 'name', creator.lastName, levelNames);
-		}
-		appendField(pers, 'name', creator.name, levelNames);
-		pers.appendChild(teiDoc.createTextNode(indent.repeat(levelNames - 1)));
+		// append names of a particular creator
+		persName(pers, creator, levelNames);
 
 
 		// what to append
@@ -477,7 +470,7 @@ function generateItem(item, teiDoc) {
 		}
 	}
 
-	// <title> is required, no test, but a block to limit variable scope
+	// <title> is required
 	{
 		const title = teiDoc.createElementNS(ns.tei, "title");
 		appendXML(title, item.title); // maybe rich text
@@ -495,9 +488,9 @@ function generateItem(item, teiDoc) {
 		parent.appendChild(title);
 		parent.appendChild(teiDoc.createTextNode('\n'));
 		// short title
-		appendField(parent, 'title', item.shortTitle, 2, {'type': 'short'});
+		appendField(parent, 'title', item.shortTitle, 2, { 'type': 'short' });
 		// for analytic, a DOI is presumably for the article, not the journal.
-		appendField(parent, 'idno', item.DOI, 2, {'type': 'DOI'});
+		appendField(parent, 'idno', item.DOI, 2, { 'type': 'DOI' });
 	}
 
 	// conference is not well tested
@@ -522,7 +515,7 @@ function generateItem(item, teiDoc) {
 		appendXML(title, xml);
 		appendIndent(monogr, title, 2)
 	}
-	
+
 
 	// https://github.com/TEIC/TEI/issues/1788
 	// url of item according to TEI spec
@@ -537,9 +530,9 @@ function generateItem(item, teiDoc) {
 		}
 	}
 	// Other canonical ref nos come right after the title(s) in monogr.
-	appendField(monogr, 'idno', item.ISBN, 2, {'type': 'ISBN'});
-	appendField(monogr, 'idno', item.ISSN, 2, {'type': 'ISSN'});
-	appendField(monogr, 'idno', item.callNumber, 2, {'type': 'callNumber'});
+	appendField(monogr, 'idno', item.ISBN, 2, { 'type': 'ISBN' });
+	appendField(monogr, 'idno', item.ISSN, 2, { 'type': 'ISSN' });
+	appendField(monogr, 'idno', item.callNumber, 2, { 'type': 'callNumber' });
 
 
 	// [2023-06 FG] series element should have been created here if needed
@@ -564,7 +557,7 @@ function generateItem(item, teiDoc) {
 			appendXML(note, item.seriesText, true);
 			appendIndent(series, note, 2);
 		}
-		appendField(series, 'biblScope', item.seriesNumber, 2, {'unit': 'volume'});
+		appendField(series, 'biblScope', item.seriesNumber, 2, { 'unit': 'volume' });
 	}
 
 
@@ -584,7 +577,7 @@ function generateItem(item, teiDoc) {
 		edition.appendChild(teiDoc.createTextNode(item.versionNumber));
 		appendIndent(monogr, edition, 2);
 	}
-	appendField(monogr, 'edition', item.versionNumber, 2, {'type': 'callNumber'});
+	appendField(monogr, 'edition', item.versionNumber, 2, { 'type': 'callNumber' });
 
 
 	// <imprint> is required
@@ -600,13 +593,14 @@ function generateItem(item, teiDoc) {
 			const dateO = Zotero.Utilities.strToDate(item.date);
 			const when = date2iso(dateO);
 			date.setAttribute("when", when);
+			let display = item.date;
 			if (extra['date-display']) {
 				// A non iso date, ex: Christmas 1956 
-				date.appendChild(teiDoc.createTextNode(extra['date-display']));
+				display = extra['date-display'];
 				delete extra['date-display'];
 			}
-			else {
-				date.appendChild(teiDoc.createTextNode(item.date));
+			if (display != when) {
+				date.appendChild(teiDoc.createTextNode(display));
 			}
 		}
 	}
@@ -618,14 +612,14 @@ function generateItem(item, teiDoc) {
 	delete extra['publisher-place']; // delete used extra field
 	appendField(imprint, 'pubPlace', extra['place'], 3);
 	delete extra['place']; // delete used extra field
-	appendField(imprint, 'biblScope', item.volume, 3, {'unit': 'volume'});
-	appendField(imprint, 'biblScope', item.issue, 3, {'unit': 'issue'});
-	appendField(imprint, 'biblScope', item.section, 3, {'unit': 'chapter'});
-	appendField(imprint, 'biblScope', item.pages, 3, {'unit': 'page'});
+	appendField(imprint, 'biblScope', item.volume, 3, { 'unit': 'volume' });
+	appendField(imprint, 'biblScope', item.issue, 3, { 'unit': 'issue' });
+	appendField(imprint, 'biblScope', item.section, 3, { 'unit': 'chapter' });
+	appendField(imprint, 'biblScope', item.pages, 3, { 'unit': 'page' });
 	// date in @when ?
-	appendField(imprint, 'date', item.accessDate, 3, {'type': 'accessed'});
+	appendField(imprint, 'date', item.accessDate, 3, { 'type': 'accessed' });
 	// not thought
-	appendField(imprint, 'note', item.thesisType, 3, {'type': 'thesisType'});
+	appendField(imprint, 'note', item.thesisType, 3, { 'type': 'thesisType' });
 	// ending indent
 	imprint.appendChild(teiDoc.createTextNode(indent.repeat(2)));
 
@@ -651,6 +645,9 @@ function generateItem(item, teiDoc) {
 		extent.appendChild(teiDoc.createTextNode(indent.repeat(2)));
 		appendIndent(monogr, extent, 2);
 	}
+	// other potional physical informations in extra field
+	appendField(monogr, 'extent', extra['format'], 2);
+	delete extra['format']; // delete used extra field
 
 	// abstract
 	if (item.abstractNote) {
@@ -659,6 +656,31 @@ function generateItem(item, teiDoc) {
 		appendXML(note, item.abstractNote, true);
 		appendIndent(bibl, note, 1);
 	}
+
+	// reviewedAuthor(s) in a note
+	{
+		const note = teiDoc.createElementNS(ns.tei, "note");
+		note.setAttribute("type", "review");
+		note.appendChild(note.ownerDocument.createTextNode('\n'));
+		let count = 0;
+		for (let creator of item.creators) {
+			const type = creator.creatorType;
+			if (type != "reviewedAuthor") {
+				continue;
+			}
+			count++;
+			const pers = teiDoc.createElementNS(ns.tei, "persName");
+			// append names
+			persName(pers, creator, 3);
+			appendIndent(note, pers, 2);
+		}
+		if (count) {
+			appendIndent(bibl, note, 1);
+			note.appendChild(note.ownerDocument.createTextNode(indent.repeat(1)));
+		}
+	}
+
+
 
 	// Extra fields
 	if (extra.note) {
@@ -675,7 +697,7 @@ function generateItem(item, teiDoc) {
 		note.appendChild(teiDoc.createTextNode(JSON.stringify(extra, null, 2)));
 		appendIndent(bibl, note, 1);
 	}
-	
+
 	// export notes, be conservative, do not strip tags
 	// prefer output html even if is not correct TEI
 	if (item.notes && Zotero.getOption("exportNotes")) {
@@ -717,6 +739,32 @@ function generateItem(item, teiDoc) {
 	if (series) series.appendChild(teiDoc.createTextNode(indent.repeat(1)));
 
 	return bibl;
+}
+
+/**
+ * Append name components to a parent element according
+ * to a zotero creator object
+ * @param {*} parent 
+ * @param {*} creator 
+ */
+function persName(parent, creator, level = 3) {
+	if (level < 1) level = 1;
+	parent.appendChild(parent.ownerDocument.createTextNode('\n'));
+	// A first name is alaways a first name
+	appendField(parent, 'forename', creator.firstName, level);
+	// A last name is a family name with a first name
+	if (creator.lastName && creator.firstName) {
+		appendField(parent, 'surname', creator.lastName, level);
+	}
+	// A last name without a first name is just a name
+	else if (creator.lastName) {
+		appendField(parent, 'name', creator.lastName, level);
+	}
+	// a name, is a name
+	appendField(parent, 'name', creator.name, level);
+	// indent closing tag
+	parent.appendChild(parent.ownerDocument.createTextNode(indent.repeat(level - 1)));
+
 }
 
 function generateCollection(collection, teiDoc) {
@@ -761,7 +809,7 @@ function doExport() {
 
 	// Initialize XML Doc
 	var teiDoc // <TEI/>
-		= xmlparser.parseFromString('<TEI xmlns="http://www.tei-c.org/ns/1.0"><teiHeader><fileDesc><titleStmt><title>Exported from Zotero</title></titleStmt><publicationStmt><p>unpublished</p></publicationStmt><sourceDesc><p>Generated from Zotero database</p></sourceDesc></fileDesc></teiHeader></TEI>', 'application/xml');
+		= xmlParser.parseFromString('<TEI xmlns="http://www.tei-c.org/ns/1.0"><teiHeader><fileDesc><titleStmt><title>Exported from Zotero</title></titleStmt><publicationStmt><p>unpublished</p></publicationStmt><sourceDesc><p>Generated from Zotero database</p></sourceDesc></fileDesc></teiHeader></TEI>', 'application/xml');
 
 	var item = null;
 	while (item = Zotero.nextItem()) { // eslint-disable-line no-cond-assign
@@ -823,7 +871,7 @@ function doExport() {
 
 	// write to file.
 	Zotero.write('<?xml version="1.0" encoding="UTF-8"?>\n');
-	Zotero.write(xmlser.serializeToString(outputElement));
+	Zotero.write(xmlSerializer.serializeToString(outputElement));
 }
 /** BEGIN TEST CASES **/
 var testCases = [
