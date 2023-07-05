@@ -49,27 +49,32 @@ var ITEM_TYPES = {
 var HANDLER_CACHE = {};
 
 // Handler getter for creator-like fields
-function getCreatorHandler(type) {
-	let fcn = HANDLER_CACHE[type];
+function getCreatorHandler(creatorType) {
+	let fcn = HANDLER_CACHE[creatorType];
 	if (!fcn) {
 		fcn = function (item, creators) {
 			for (let creator of creators) {
-				item.creators.push(stringToCreator(creator, type));
+				item.creators.push(stringToCreator(creator, creatorType));
 			}
 		};
-		HANDLER_CACHE[type] = fcn;
+		HANDLER_CACHE[creatorType] = fcn;
 	}
 	return fcn;
 }
 
 // Handler getter for the fields that expect doing a "reduce"- or "join"-like
 // operation on the value array
-function getArrayJoiner(itemProperty, joiner = " ") {
-	let key = itemProperty + joiner;
+function getArrayJoiner(itemProperty, titleCase = false, force = false, joiner = " ") {
+	let toNum = x => Number(!!x);
+	let key = `${itemProperty}!${joiner}!${toNum(titleCase)}!${toNum(force)}`;
 	let fcn = HANDLER_CACHE[key];
 	if (!fcn) {
 		fcn = function (item, contentArray) {
-			item[itemProperty] = ZU.trimInternal(contentArray.join(joiner));
+			let result = contentArray.join(joiner);
+			if (titleCase) {
+				result = selectiveTitleCase(result, force);
+			}
+			item[itemProperty] = result;
 		};
 	}
 	HANDLER_CACHE[key] = fcn;
@@ -84,13 +89,14 @@ function pushTags(item, content) {
 // Tags that are handled by a callback function
 var TAG_HANDLERS = {
 	AA: getCreatorHandler("contributor"), // additional author
-	AE: getArrayJoiner("assignee"),
+	AE: getArrayJoiner("assignee", true, true), // mitigate all-caps
 	AB: getArrayJoiner("abstractNote"),
 	AF: getCreatorHandler("author"),
 	AU: getCreatorHandler("author"),
 	BD: pushTags, // broad terms, like DE
 	BE: getCreatorHandler("editor"),
-	CT: getArrayJoiner("conferenceName"),
+	CL: getArrayJoiner("place", true), // conference location
+	CT: getArrayJoiner("conferenceName", true, true),
 	DE: pushTags, // author-defined keywords
 	ED: getCreatorHandler("editor"),
 	TR: getCreatorHandler("translator"),
@@ -99,14 +105,17 @@ var TAG_HANDLERS = {
 	MC: pushTags, // Major Concepts or Derwent Manual Code(s)
 	MQ: pushTags, // methods, supplies
 	OR: pushTags, // organism descriptors
-	PA: getArrayJoiner("place"), // publisher address
-	SN: getArrayJoiner("ISSN", ", "), // ISSN
+	PA: getArrayJoiner("place", true), // publisher address; don't force TitleCase because the source is usually good enough
+	PI: getArrayJoiner("place", true), // publisher city
+	PU: getArrayJoiner("publisher", true, true), // mitigate all-caps
+	PV: getArrayJoiner("place", true), // place of publication
+	SN: getArrayJoiner("ISSN", false, false, ", "), // ISSN
 	// Titles; may be so long as to cause line continuation.
-	// NOTE: Some titles may be in all-uppercase, but transforming it into
-	// title-case may garble all-cap acronyms (such as "JAMA").
-	SE: getArrayJoiner("seriesTitle"),
-	SO: getArrayJoiner("publicationTitle"),
-	TI: getArrayJoiner("title"),
+	// Titles should not be force-converted into TitleCase; titles are meant to
+	// be adjusted by the user.
+	SE: getArrayJoiner("seriesTitle", true),
+	SO: getArrayJoiner("publicationTitle", true),
+	TI: getArrayJoiner("title", true),
 };
 
 // Tags whose values can be assumed to be short enough (i.e. fit on a line) and
@@ -118,7 +127,6 @@ var SIMPLE_FIELDS = {
 	BN: "ISBN",
 	BP: "pages", // start page
 	CE: "edition",
-	CL: "place",
 	// NOTE: CY is conference date, not "issued" (published) date
 	DI: "DOI",
 	FN: "libraryCatalog", // almost always the database name
@@ -127,14 +135,11 @@ var SIMPLE_FIELDS = {
 	IS: "issue",
 	JI: "journalAbbreviation",
 	LA: "language",
-	PI: "place", // publisher city
 	PC: "country", // patent country
 	PD: "date",
 	PG: "numPages",
 	PN: "patentNumber",
 	PS: "pages",
-	PU: "publisher", // NOTE: title-casing may garble names like "AAAS"
-	PV: "place",
 	PY: "date", // publication year
 	UR: "url",
 	VL: "volume",
@@ -247,11 +252,6 @@ ItemMap.prototype = {
 				return;
 			}
 
-			if (!content) {
-				Z.debug(`Tag ${head} has no associated value; skipping.`);
-				return;
-			}
-
 			// Double check if there is duplicate tag
 			if (this.records.has(head)) {
 				// TODO: should it throw?
@@ -271,17 +271,15 @@ ItemMap.prototype = {
 	 * emit a warning message and do nothing.
 	 */
 	save: function () {
+		if (!this.records.size) {
+			return;
+		}
+
 		this.normalize();
 
 		// Pop the type string from the normalized record
 		let type = this.records.get("DT");
 		this.records.delete("DT");
-
-		// If beside the possible type there's nothing
-		if (!this.records.size) {
-			Z.debug("Warning: no records to save");
-			return;
-		}
 
 		// Fix creator type
 		if (type === "patent") {
@@ -456,8 +454,8 @@ function splitLine(line) {
 	// the pattern of a tag-value line.
 	let m = line.match(/^( {2}|[A-Z]{2}|[A-Z][0-9])( .+)?$/);
 	if (!m) {
-		Z.debug(`Possible continued-line without explicit line continuation: ${line.slice(0, 5)}...`);
-		return ["  ", line];
+		// Z.debug(`Possible continued-line without explicit line continuation: ${line.slice(0, 5)}...`);
+		return ["  "/* two spaces */, line];
 	}
 
 	return [m[1], m[2] && m[2].trim()];
@@ -489,6 +487,43 @@ function stringToCreator(author, type) {
 		author = author.replace(" ", ", "); // replace first space
 	}
 	return ZU.cleanAuthor(author, type, true/* useComma */);
+}
+
+// like ZU.capitalizeTitle but mindful of some words that are often encountered
+// in conference or publisher names. This is most useful for cleaning all-cap
+// fields that are not titles.
+function selectiveTitleCase(string, force) {
+	let allCaps = ["AAAS", "ACM", "AIP", "BMJ", "IEEE", "IPCC", "ITU", "JAMA", "MDPI", "SAGE", "USA"];
+	let wordForms = { PLOS: "PLoS" };
+	for (let word of allCaps) {
+		wordForms[word] = word;
+	}
+
+	let cleanInput = ZU.trimInternal(string);
+	let cleanInputArray = cleanInput.split(" ");
+
+	let arrayLocations = new Map();
+
+	for (let [word, form] of Object.entries(wordForms)) {
+		for (let index of indexOfAll(cleanInputArray, word)) {
+			arrayLocations.set(index, form);
+		}
+	}
+
+	let outputArray = ZU.capitalizeTitle(cleanInput, force).split(" ");
+
+	for (let [index, form] of arrayLocations.entries()) {
+		outputArray[index] = form;
+	}
+	return outputArray.join(" ");
+}
+
+// Search array for searchElement. Returns an array of indices where
+// searchElement appears, or empty array if searchElement is missing.
+function indexOfAll(array, searchElement) {
+	return array
+		.map((elem, index) => (elem === searchElement ? index : null))
+		.filter(x => x !== null);
 }
 
 /** BEGIN TEST CASES **/
