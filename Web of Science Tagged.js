@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2023-07-05 09:01:40"
+	"lastUpdated": "2023-07-05 10:14:24"
 }
 
 /*
@@ -65,20 +65,13 @@ function getCreatorHandler(creatorType) {
 // Handler getter for the fields that expect doing a "reduce"- or "join"-like
 // operation on the value array
 function getArrayJoiner(itemProperty, titleCase = false, force = false, joiner = " ") {
-	let toNum = x => Number(!!x);
-	let key = `${itemProperty}!${joiner}!${toNum(titleCase)}!${toNum(force)}`;
-	let fcn = HANDLER_CACHE[key];
-	if (!fcn) {
-		fcn = function (item, contentArray) {
-			let result = contentArray.join(joiner);
-			if (titleCase) {
-				result = selectiveTitleCase(result, force);
-			}
-			item[itemProperty] = result;
-		};
-	}
-	HANDLER_CACHE[key] = fcn;
-	return fcn;
+	return function (item, contentArray) {
+		let result = contentArray.join(joiner);
+		if (titleCase) {
+			result = selectiveTitleCase(result, force);
+		}
+		item[itemProperty] = result;
+	};
 }
 
 function pushTags(item, content) {
@@ -95,7 +88,6 @@ var TAG_HANDLERS = {
 	AU: getCreatorHandler("author"),
 	BD: pushTags, // broad terms, like DE
 	BE: getCreatorHandler("editor"),
-	CL: getArrayJoiner("place", true), // conference location
 	CT: getArrayJoiner("conferenceName", true, true),
 	DE: pushTags, // author-defined keywords
 	ED: getCreatorHandler("editor"),
@@ -105,10 +97,7 @@ var TAG_HANDLERS = {
 	MC: pushTags, // Major Concepts or Derwent Manual Code(s)
 	MQ: pushTags, // methods, supplies
 	OR: pushTags, // organism descriptors
-	PA: getArrayJoiner("place", true), // publisher address; don't force TitleCase because the source is usually good enough
-	PI: getArrayJoiner("place", true), // publisher city
 	PU: getArrayJoiner("publisher", true, true), // mitigate all-caps
-	PV: getArrayJoiner("place", true), // place of publication
 	SN: getArrayJoiner("ISSN", false, false, ", "), // ISSN
 	// Titles; may be so long as to cause line continuation.
 	// Titles should not be force-converted into TitleCase; titles are meant to
@@ -126,6 +115,7 @@ var SIMPLE_FIELDS = {
 	BN: "ISBN",
 	BP: "pages", // start page
 	CE: "edition",
+	CL: "place", // conference location
 	// NOTE: CY is conference date, not "issued" (published) date
 	DI: "DOI",
 	FN: "libraryCatalog", // almost always the database name
@@ -134,11 +124,14 @@ var SIMPLE_FIELDS = {
 	IS: "issue",
 	JI: "journalAbbreviation",
 	LA: "language",
+	PA: "place", // publisher address; don't force TitleCase because the source is usually good enough
 	PC: "country", // patent country
 	PD: "date",
 	PG: "numPages",
+	PI: "place", // publisher city
 	PN: "patentNumber",
 	PS: "pages",
+	PV: "place", // place of publication
 	PY: "date", // publication year
 	UR: "url",
 	VL: "volume",
@@ -500,8 +493,8 @@ function stringToCreator(author, type) {
 // in conference or publisher names. This is most useful for cleaning all-cap
 // fields that are not titles.
 function selectiveTitleCase(string, force) {
-	let allCaps = ["AAAS", "ACM", "AIP", "BMJ", "IEEE", "IPCC", "ITU", "JAMA", "MDPI", "SAGE", "USA"];
-	let wordForms = { PLOS: "PLoS" };
+	let allCaps = ["ACM", "AIP", "BMJ", "CRC"/* CRC Press */, "IEEE", "MDPI", "SAGE", "USA"];
+	let wordForms = { IOP: "IoP", PEERJ: "PeerJ", PLOS: "PLoS" };
 	for (let word of allCaps) {
 		wordForms[word] = word;
 	}
