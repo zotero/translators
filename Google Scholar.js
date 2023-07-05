@@ -1000,8 +1000,7 @@ function makeGSPipeline(searchReferrer, pause, restOnLead = false) {
  * @returns {AsyncFunction} Multiscraper function that operates on the doc
  * being scraped
  */
-function makeGSScraper(inputStrings, rowGenerator, referrerURL,
-	expensive = false) {
+function makeGSScraper(inputStrings, rowGenerator, referrerURL, expensive = false) {
 	return async function (doc) {
 		let rows = rowGenerator(inputStrings, doc);
 
@@ -1101,7 +1100,7 @@ async function processCitePage(citeURL, row, referrer) {
 	// Note that the page at citeURL has no doctype and is not a complete HTML
 	// document. The browser can parse it in quirks mode but ZU.requestDocument
 	// has trouble with it.
-	const citePage = await ZU.requestText(citeURL, requestOptions);
+	const citePage = await requestText(citeURL, requestOptions);
 
 	let m = citePage.match(/href="((https?:\/\/[a-z.]*)?\/scholar.bib\?[^"]+)/);
 	if (!m) {
@@ -1129,7 +1128,7 @@ async function processCitePage(citeURL, row, referrer) {
 	// set to the origin (e.g. https://scholar.google.com/), imitating
 	// strict-origin-when-cross-origin
 	requestOptions.headers.Referer = GS_CONFIG.baseURL + "/";
-	const bibTeXBody = await ZU.requestText(bibTeXURL, requestOptions);
+	const bibTeXBody = await requestText(bibTeXURL, requestOptions);
 
 	let translator = Z.loadTranslator("import");
 	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4"); // BibTeX
