@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2023-07-05 10:14:24"
+	"lastUpdated": "2023-07-05 10:36:36"
 }
 
 /*
@@ -493,7 +493,7 @@ function stringToCreator(author, type) {
 // in conference or publisher names. This is most useful for cleaning all-cap
 // fields that are not titles.
 function selectiveTitleCase(string, force) {
-	let allCaps = ["ACM", "AIP", "BMJ", "CRC"/* CRC Press */, "IEEE", "MDPI", "SAGE", "USA"];
+	let allCaps = ["ACM", "AIP", "BMC", "BMJ", "CRC"/* CRC Press */, "IEEE", "JAMA", "MDPI", "SAGE", "USA"];
 	let wordForms = { IOP: "IoP", PEERJ: "PeerJ", PLOS: "PLoS" };
 	for (let word of allCaps) {
 		wordForms[word] = word;
