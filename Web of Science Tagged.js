@@ -110,7 +110,7 @@ var TAG_HANDLERS = {
 };
 
 // Tags whose values can be assumed to be short enough (i.e. fit on a line) and
-// "atomic", such that a simple assignment will suffice
+// "atomic" (denoting one entity rather than an array thereof), such that a simple assignment will suffice
 // TODO: Further normalization
 var SIMPLE_FIELDS = {
 	AR: "pages", // article number
@@ -198,7 +198,8 @@ ItemMap.prototype = {
 
 	/**
 	 * Validate a line and push it into the item map record if it's valid data
-	 * line, or do an action if it is one of the special tags (ER and EF)
+	 * line, or do an action if it is one of the special tags (ER and EF). If a
+	 * tag other than ER and EF has no value, it is dropped entirely.
 	 *
 	 * This function is strictly concerned with the form of the lines and
 	 * converting the line data to key-value pairs. It does not apply any
@@ -272,24 +273,11 @@ ItemMap.prototype = {
 	save: function () {
 		this.normalize();
 
-		// Always handle item type first because of "polymorphism" of the tags
-		// that changes meaning based on type
-		// TODO: this goes into normalize().
-		let type = this.records.get("DT") || this.records.get("PT");
-		Z.debug(`TYPE: ${type}`);
-		if (type) {
-			type = ITEM_TYPES[type];
-			Z.debug(`TYPE: ${type}`);
-			// fall through
-		}
-		if (!type) {
-			Z.debug("Warning: no type identified; falling back to journalArticle.");
-			type = "journalArticle";
-		}
-		// force-delete the original type fields if any
+		// Pop the type string from the normalized record
+		let type = this.records.get("DT");
 		this.records.delete("DT");
-		this.records.delete("PT");
 
+		// If beside the possible type there's nothing
 		if (!this.records.size) {
 			Z.debug("Warning: no records to save");
 			return;
@@ -357,24 +345,24 @@ ItemMap.prototype = {
 		let r = this.records; // for ergonomics
 
 		// Type. Make the field value a primitive for convenience in
-		// ItemType#save(), and use DT in preference to PT.
-		let type;
-		if ((type = r.get("DT"))) {
-			type = type[0].toUpperCase();
-			if (ITEM_TYPES[type]) { // DT value is understood
-				Z.debug(`Using DT ${type} for item type`);
-
-				r.set("DT", type);
-				r.delete("PT");
-			}
-			else {
-				Z.debug(`Ignoring unimplemented DT value ${type}`);
-				r.delete("DT");
-			}
+		// ItemMap#save(), and use DT in preference to PT.
+		// Because of the special role of type, it is always transformed into
+		// a string.
+		// NOTE: After we identify the Zotero type, DT is replaced by that
+		// Zotero type string, and PT deleted.
+		let wosType = r.get("DT"); // If DT present, begin with it
+		let zoteroType = wosToZoteroType(wosType, "DT");
+		if (!zoteroType) {
+			wosType = r.get("PT"); // Try PT next if DT not useable
+			zoteroType = wosToZoteroType(wosType, "PT");
 		}
-		if ((type = r.get("PT"))) {
-			r.set("PT", type[0]);
+		if (!zoteroType) {
+			Z.debug("Warning: No type found for item; falling back to journal article");
+			zoteroType = "journalArticle";
 		}
+		// Delete PT and set DT to Zotero type
+		r.delete("PT");
+		r.set("DT", zoteroType);
 
 		// Authors. Use AF in preference to AU.
 		if (r.has("AF") && r.has("AU")) {
@@ -476,6 +464,23 @@ function splitLine(line) {
 }
 
 // Convenience functions
+
+function wosToZoteroType(wosType, debugTag) {
+	let zoteroType;
+	if (wosType) {
+		// case-normalized WoS type string
+		let wosTypeNormalized = wosType[0].toUpperCase();
+
+		if (ITEM_TYPES[wosTypeNormalized]) { // value is understood
+			Z.debug(`Using ${debugTag} ${wosType} for item type`);
+			zoteroType = ITEM_TYPES[wosTypeNormalized];
+		}
+		else {
+			Z.debug(`Ignoring unimplemented ${debugTag} value ${wosType}`);
+		}
+	}
+	return zoteroType;
+}
 
 function stringToCreator(author, type) {
 	// Strip any parenthesized text
