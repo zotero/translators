@@ -120,7 +120,6 @@ var TAG_HANDLERS = {
 
 // Tags whose values can be assumed to be short enough (i.e. fit on a line) and
 // "atomic" (denoting one entity rather than an array thereof), such that a simple assignment will suffice
-// TODO: Further normalization
 var SIMPLE_FIELDS = {
 	AR: "pages", // article number
 	AW: "url",
@@ -155,33 +154,33 @@ var EXTRA_FIELDS = {
 
 // Translator detect/do functions
 
-// TODO: reuse existing facilities
 function detectImport() {
-	var line;
-	var i = 0;
-	while ((line = Zotero.read()) !== false) {
-		line = line.replace(/^\s+/, "");
-		if (line != "") {
-			if (line.substr(0, 4).match(/^PT [A-Z]/)) {
-				return true;
-			}
-			else if (i++ > 3) {
-				return false;
-			}
-		}
-	}
-	return false;
+	return work(true/* checkOnly */);
 }
 
 function doImport() {
-	let map = new ItemMap();
+	return work();
+}
+
+function work(checkOnly = false) {
+	let map = new ItemMap(checkOnly);
 
 	let line;
 	while (!map.terminate && ((line = Z.read()) !== false)) {
 		map.scanLine(line);
+		if (checkOnly && map.checkOnlyAndFound) {
+			return true;
+		}
 	}
-	// try saving any leftover fields as an item
+	// Try saving any leftover fields as an item; this can happen when the last
+	// record lacks ER or EF. In that case, we shouldn't throw away the data
+	// simply because the file didn't properly end.
 	map.save();
+	if (checkOnly && map.checkOnlyAndFound) {
+		return true;
+	}
+
+	return false;
 }
 
 // Utilities
@@ -191,12 +190,15 @@ function doImport() {
  *
  * @constructor
  */
-function ItemMap() {
+function ItemMap(checkOnly = false) {
 	// Hold the property => value map for an item.
 	this.records = new Map();
 	// Cursor to current property
 	this.cursor = null;
 	this.terminate = false;
+	if ((this.checkOnly = !!checkOnly)) {
+		this.checkOnlyAndFound = false;
+	}
 }
 
 ItemMap.prototype = {
@@ -280,6 +282,11 @@ ItemMap.prototype = {
 		// Pop the type string from the normalized record
 		let type = this.records.get("DT");
 		this.records.delete("DT");
+
+		if (this.checkOnly && this.records.size) {
+			this.checkOnlyAndFound = true;
+			return;
+		}
 
 		// Fix creator type
 		if (type === "patent") {
