@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2023-07-05 10:36:36"
+	"lastUpdated": "2023-07-06 06:18:35"
 }
 
 /*
@@ -46,76 +46,16 @@ var ITEM_TYPES = {
 	"PROCEEDINGS PAPER": "conferencePaper",
 };
 
-var HANDLER_CACHE = {};
-
-// Handler getter for creator-like fields
-function getCreatorHandler(creatorType) {
-	let fcn = HANDLER_CACHE[creatorType];
-	if (!fcn) {
-		fcn = function (item, creators) {
-			for (let creator of creators) {
-				item.creators.push(stringToCreator(creator, creatorType));
-			}
-		};
-		HANDLER_CACHE[creatorType] = fcn;
-	}
-	return fcn;
-}
-
-// Handler getter for the fields that expect doing a "reduce"- or "join"-like
-// operation on the value array
-function getArrayJoiner(itemProperty, titleCase = false, force = false, joiner = " ") {
-	return function (item, contentArray) {
-		let result = contentArray.join(joiner);
-		if (titleCase) {
-			result = selectiveTitleCase(result, force);
-		}
-		item[itemProperty] = result;
-	};
-}
-
-function pushTags(item, content) {
-	let tagsString = ZU.trimInternal(content.join(" "));
-	item.tags.push(...tagsString.split("; "));
-}
-
-// Tags that are handled by a callback function
-var TAG_HANDLERS = {
-	AA: getCreatorHandler("contributor"), // additional author
-	AE: getArrayJoiner("assignee", true, true), // mitigate all-caps
-	AB: getArrayJoiner("abstractNote"),
-	AF: getCreatorHandler("author"),
-	AU: getCreatorHandler("author"),
-	BD: pushTags, // broad terms, like DE
-	BE: getCreatorHandler("editor"),
-	CT: getArrayJoiner("conferenceName", true, true),
-	DE: pushTags, // author-defined keywords
-	ED: getCreatorHandler("editor"),
-	TR: getCreatorHandler("translator"),
-	ID: pushTags, // keywords
-	IP: pushTags, // patent category
-	MC: pushTags, // Major Concepts or Derwent Manual Code(s)
-	MQ: pushTags, // methods, supplies
-	OR: pushTags, // organism descriptors
-	PU: getArrayJoiner("publisher", true, true), // mitigate all-caps
-	SN: getArrayJoiner("ISSN", false, false, ", "), // ISSN
-	// Titles; may be so long as to cause line continuation.
-	// Titles should not be force-converted into TitleCase; titles are meant to
-	// be adjusted by the user.
-	SE: getArrayJoiner("seriesTitle", true),
-	SO: getArrayJoiner("publicationTitle", true),
-	TI: getArrayJoiner("title", true),
-};
-
-// Tags whose values can be assumed to be short enough (i.e. fit on a line) and
-// "atomic" (denoting one entity rather than an array thereof), such that a simple assignment will suffice
-var SIMPLE_FIELDS = {
+var FIELD_MAP = {
+	AE: "assignee",
+	AB: "abstractNote",
 	AR: "pages", // article number
 	AW: "url",
 	BN: "ISBN",
 	BP: "pages", // start page
 	CE: "edition",
 	CL: "place", // conference location
+	CT: "conferenceName",
 	// NOTE: CY is conference date, not "issued" (published) date
 	DI: "DOI",
 	FN: "libraryCatalog", // almost always the database name
@@ -124,55 +64,59 @@ var SIMPLE_FIELDS = {
 	IS: "issue",
 	JI: "journalAbbreviation",
 	LA: "language",
-	PA: "place", // publisher address; don't force TitleCase because the source is usually good enough
+	PA: "place",
 	PC: "country", // patent country
 	PD: "date",
 	PG: "numPages",
 	PI: "place", // publisher city
 	PN: "patentNumber",
 	PS: "pages",
+	PU: "publisher",
 	PV: "place", // place of publication
 	PY: "date", // publication year
 	UR: "url",
 	VL: "volume",
 	VN: "versionNumber", // NOTE: "VR" is the version of the export format
-};
-
-// The fields that always go into the extras
-var EXTRA_FIELDS = {
-	NO: "Comments, Corrections, Erratum",
-	NT: "Notes",
-	UT: "Web of Science ID", // almost always WoS entry id
+	// Title fields,
+	SE: "seriesTitle",
+	SO: "publicationTitle",
+	TI: "title",
 };
 
 // Translator detect/do functions
 
 function detectImport() {
-	return work(true/* checkOnly */);
+	// If we don't find item type (PT or DT) within first 10 non-empty lines,
+	// return false; see also RIS.js.
+	let line;
+	let i = 0;
+	while ((line = Zotero.read()) !== false && i < 10) {
+		let lineData = splitLine(line);
+		if (lineData) {
+			i += 1;
+			if (["PT", "DT"].includes(lineData[0])) {
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 function doImport() {
 	return work();
 }
 
-function work(checkOnly = false) {
-	let map = new ItemMap(checkOnly);
+function work() {
+	let map = new ItemMap();
 
 	let line;
 	while (!map.terminate && ((line = Z.read()) !== false)) {
 		map.scanLine(line);
-		if (checkOnly && map.checkOnlyAndFound) {
-			return true;
-		}
 	}
 	// Try saving any leftover fields as an item; this can happen when the last
 	// record lacks ER or EF. In that case, we shouldn't throw away the data
 	// simply because the file didn't properly end.
 	map.save();
-	if (checkOnly && map.checkOnlyAndFound) {
-		return true;
-	}
-
 	return false;
 }
 
@@ -183,23 +127,19 @@ function work(checkOnly = false) {
  *
  * @constructor
  */
-function ItemMap(checkOnly = false) {
+function ItemMap() {
 	// Hold the property => value map for an item.
 	this.records = new Map();
 	// Cursor to current property
-	this.cursor = null;
+	this.currentKey = null;
 	this.terminate = false;
-	if ((this.checkOnly = !!checkOnly)) {
-		this.checkOnlyAndFound = false;
-	}
 }
 
 ItemMap.prototype = {
 
 	/**
 	 * Validate a line and push it into the item map record if it's valid data
-	 * line, or do an action if it is one of the special tags (ER and EF). If a
-	 * tag other than ER and EF has no value, it is dropped entirely.
+	 * line, or do an action if it is one of the special tags (ER and EF).
 	 *
 	 * This function is strictly concerned with the form of the lines and
 	 * converting the line data to key-value pairs. It does not apply any
@@ -213,24 +153,27 @@ ItemMap.prototype = {
 		if (!lineRecord) {
 			return;
 		}
-		// head can be tag or double space
 		let [head, content] = lineRecord;
 
-		if (head === "  ") { // two spaces, line continuation
-			// NOTE: Cursor should not move while handling line continuation
-			if (!this.cursor) {
+		if (head === "  ") { // two spaces for line continuation
+			if (!this.currentKey) {
 				throw new Error(`Dangling line continuation; the rest of line is ${content}`);
 			}
 
-			let itemFieldValue = this.records.get(this.cursor);
-			if (!itemFieldValue) {
+			let currentValueArray = this.records.get(this.currentKey);
+
+			if (!Array.isArray(currentValueArray)) {
 				// Continued line can be traced to a tag but the tag's field is
 				// not initialized. This should not happen and is an internal
 				// error.
-				throw new Error(`Unexpected uninitialized field at ${this.cursor} found while handling line continuation`);
+				throw new Error(`Unexpected uninitialized field at ${this.currentKey} found while handling line continuation`);
 			}
-			// Put the continued line in the container for the field value
-			itemFieldValue.push(content);
+
+			// Add the continued line, if non-empty, into the container for the
+			// field value
+			if (content) {
+				currentValueArray.push(content);
+			}
 		}
 		else { // Not line continuation; a new tag begins.
 			if (head === "ER") {
@@ -255,73 +198,113 @@ ItemMap.prototype = {
 
 			// Initialize the tag field with a new array to accommodate
 			// continued lines
-			this.records.set(head, [content]);
-			this.cursor = head;
+			this.records.set(head, content ? [content] : []);
+			this.currentKey = head;
 		}
 	},
 
 	/**
 	 * Create a new Zotero item, populate it using this item map after
-	 * normalization, and complete the Zotero item. If this item map is empty,
-	 * emit a warning message and do nothing.
+	 * normalization, and complete the Zotero item.
 	 */
 	save: function () {
-		if (!this.records.size) {
-			return;
-		}
-
 		this.normalize();
 
 		// Pop the type string from the normalized record
 		let type = this.records.get("DT");
 		this.records.delete("DT");
 
-		if (this.checkOnly && this.records.size) {
-			this.checkOnlyAndFound = true;
-			return;
-		}
-
-		// Fix creator type
-		if (type === "patent") {
-			TAG_HANDLERS.AF = TAG_HANDLERS.AU = getCreatorHandler("inventor");
-		}
-		else {
-			TAG_HANDLERS.AF = TAG_HANDLERS.AU = getCreatorHandler("author");
-		}
-
 		let item = new Z.Item(type);
-		let extra = [];
+		let extra = []; // temporary array for holding lines in the extra
+		let tagMissed = 0; // number of tags unhandled
 
-		for (const [tag, content] of this.records) {
-			let target = TAG_HANDLERS[tag];
+		for (let [wosTag, tagValueArray] of this.records) {
+			// The array content concatenated into a single string
+			let tagValueString = ZU.trimInternal(tagValueArray.join(" "));
 
-			// target is a specific handler function
-			if (target) {
-				target(item, content);
-				continue;
-			}
+			switch (wosTag) {
+				// Main authors. After normalization, AF and AU cannot both
+				// exist.
+				case "AF":
+				case "AU":
+					addCreator(item, tagValueArray,
+						type === "patent" ? "inventor" : "author");
+					break;
+				// Other types of creators
+				case "BE": // Book editor
+				case "ED": // Editors
+					addCreator(item, tagValueArray, "editor");
+					break;
+				case "TR":
+					addCreator(item, tagValueArray, "translator");
+					break;
+				case "AA": // Additional Authors
+					addCreator(item, tagValueArray, "contributor");
+					break;
 
-			// target is a simple string (property to set)
-			target = SIMPLE_FIELDS[tag];
-			if (target) {
-				item[target] = content[0];
-				continue;
-			}
+				// Keywords, ontology terms, etc. as item tags
+				case "BD": // broad terms, like DE below
+				case "DE": // author-defined keywords
+				case "ID": // keywords
+				case "IP": // patent category
+				case "MC": // Major Concepts or Derwent Manual Code(s)
+				case "MQ": // methods, supplies
+				case "OR": // organism descriptors
+					item.tags.push(...tagValueString.split("; "));
+					break;
 
-			// target should be appended as an extra field
-			target = EXTRA_FIELDS[tag];
-			if (target) {
-				extra.push(`${target}: ${content.join(" ")}`);
-				continue;
-			}
+				// Additional information that becomes lines in the extra field
+				case "NO":
+					extra.push(`Comments, Corrections, Erratum: ${tagValueString}`);
+					break;
+				case "NT":
+					extra.push(`Notes: ${tagValueString}`);
+					break;
+				case "UT":
+					extra.push(`Web of Science ID: ${tagValueString}`);
+					break;
 
-			// Normal control flow should not reach here.
-			throw new Error(`Unexpected data: ${tag} => ${content}`);
+				// ISSN
+				case "SN":
+					item.ISSN = tagValueArray.join(", ") || undefined;
+					break;
+
+				// Title fields (often in all-caps) are turned into Title Case
+				// if the pref "capitalizeTitles" is true (default false)
+				case "SE":
+				case "SO":
+				case "TI":
+					tagValueString = selectiveTitleCase(tagValueString);
+					item[FIELD_MAP[wosTag]] = tagValueString;
+					break;
+				// The following non-title fields are converted to Title Case
+				case "AE": // patent assignee
+				case "CT": // conference name
+				case "PU": // publisher
+					tagValueString = selectiveTitleCase(tagValueString, true/* force */);
+					/* NOTE: FALL THROUGH */
+				default:
+				{
+					let itemField = FIELD_MAP[wosTag];
+					if (!itemField) { // unknown tag
+						Z.debug(`Unhandled tag ${wosTag} => ${tagValueArray}`);
+						tagMissed += 1;
+					}
+					else {
+						item[itemField] = tagValueString;
+					}
+				}
+			} // bottom of the switch statement
+		}
+
+		if (tagMissed === this.records.size) { // item is not populated
+			return;
 		}
 
 		if (extra.length) {
 			item.extra = extra.join("\n");
 		}
+
 		item.complete();
 	},
 
@@ -330,24 +313,21 @@ ItemMap.prototype = {
 	 */
 	reset: function () {
 		this.records.clear();
-		this.cursor = null;
+		this.currentKey = null;
 		this.terminate = false;
 	},
 
 	/**
-	 * Normalize the structure of internal records. This must be called only
-	 * after all the fields of an item is populated. Any unimplemented tags are
-	 * purged. After normalization, the cursor must be assumed invalid.
+	 * Normalize the content of internal records. This must be called only
+	 * after all the fields of an item is populated.
 	 */
 	normalize: function () {
 		let r = this.records; // for ergonomics
 
-		// Type. Make the field value a primitive for convenience in
-		// ItemMap#save(), and use DT in preference to PT.
-		// Because of the special role of type, it is always transformed into
-		// a string.
-		// NOTE: After we identify the Zotero type, DT is replaced by that
-		// Zotero type string, and PT deleted.
+		// Normalize type. Turn the field value into a Zotero item-type string
+		// for convenience because it is always used in a special way, unlike
+		// other tags. DT takes precedence over PT.
+		// NOTE: After we identify the Zotero type, DT is set and PT deleted.
 		let wosType = r.get("DT"); // If DT present, begin with it
 		let zoteroType = wosToZoteroType(wosType, "DT");
 		if (!zoteroType) {
@@ -367,19 +347,22 @@ ItemMap.prototype = {
 			r.delete("AU");
 		}
 
-		// Pages. If page range present, use it.
+		// Normalize pages. If page range present, use it.
 		if (r.has("PS")) {
-			r.delete("BP"); // start page
+			r.delete("BP"); // begin page
 			r.delete("EP"); // end page
 		}
 		else { // no page range
 			let begin = r.get("BP");
 			let end = r.get("EP");
-			if (begin && end) {
-				r.set("PS", [`${begin}-${end}`]);
+			// If BP exists, try construct a page range like "begin-end" if EP
+			// exists, or without the "-end" suffix if EP is missing.
+			if (begin) {
+				let suffix = (end && end[0]) ? `-${end[0]}` : "";
+				r.set("PS", [`${begin[0]}${suffix}`]);
+				r.delete("BP");
+				r.delete("EP");
 			}
-			r.delete("BP");
-			r.delete("EP");
 		}
 
 		// Most electronic journals use article number (AR), but if both
@@ -388,23 +371,25 @@ ItemMap.prototype = {
 			r.delete("AR");
 		}
 
-		// Dates
+		// Normalize dates. PY refers to the year, and PD is the more detailed
+		// date, like month-day ("JAN 1"), month ("JAN"), season ("SPR"),
+		// possibly with redundant year.
 		if (r.has("PY")) { // year
-			if (!r.has("PD")) { // not having PD (date with month, season, etc.)
-				Z.debug(`Using PY ${r.get("PY")} verbatim as date fallback`);
+			if (!r.has("PD")) { // but without PD
+				Z.debug(`Using PY ${r.get("PY")} verbatim as date`);
 				r.set("PD", r.get("PY"));
 			}
 			else {
 				let year = r.get("PY")[0];
 				let pd = r.get("PD")[0];
-				if (!pd.includes(year)) { // PD present but not including year
+				if (!pd.includes(year)) { // PD doesn't have redundant year
 					Z.debug(`Adding PY ${year} to PD ${pd}`);
 					pd += ` ${year}`;
 					r.set("PD", [pd]);
 				}
 			}
-			// Here we can assert that PD exists, and it is as complete as we
-			// can get
+			// We have put whatever date details we have into PD, and PY is now
+			// redundant
 			r.delete("PY");
 		}
 
@@ -415,23 +400,12 @@ ItemMap.prototype = {
 			r.delete("PA");
 		}
 
-		// ISSN
-		let issn = [];
-		issn.push(r.get("SN"));
-		issn.push(r.get("EI")); // eISSN
-		issn = issn.flat().filter(Boolean);
+		// ISSN; consolidate EI (eISSN) into SN
+		let issn = [...(r.get("SN") || []), ...(r.get("EI") || [])]
+			.filter(Boolean);
 		if (issn.length) {
 			r.set("SN", issn);
 			r.delete("EI");
-		}
-
-		// Delete any keys that are not used
-		for (const key of r.keys()) {
-			if (!(TAG_HANDLERS[key] || SIMPLE_FIELDS[key]
-				|| EXTRA_FIELDS[key] || ["DT", "PT"].includes(key))) {
-				Z.debug(`Deleting unhandled record: ${key} => ${r.get(key)}`);
-				r.delete(key);
-			}
 		}
 	},
 };
@@ -448,20 +422,26 @@ function splitLine(line) {
 		return null;
 	}
 
-	// Split into tag and value.
+	// Split line into tag and "content" that comes after the tag.
 	// NOTE: When the file doesn't use explicit line-continuation (three
-	// spaces), there's ambiguity when the line meant as continued data matches
-	// the pattern of a tag-value line.
-	let m = line.match(/^( {2}|[A-Z]{2}|[A-Z][0-9])( .+)?$/);
+	// spaces), there's ambiguity when the line meant to be continued data
+	// happens to match the pattern of a tag-value line.
+	let m = line.match(/^( {2}|[A-Z][A-Z0-9])( .+)?$/);
 	if (!m) {
 		// Z.debug(`Possible continued-line without explicit line continuation: ${line.slice(0, 5)}...`);
 		return ["  "/* two spaces */, line];
 	}
 
-	return [m[1], m[2] && m[2].trim()];
+	return [m[1]/* tag */, m[2] && m[2].trim()/* tag content, or undefined */];
 }
 
 // Convenience functions
+
+function addCreator(item, authorArray, authorType) {
+	for (let author of authorArray) {
+		item.creators.push(stringToCreator(author, authorType));
+	}
+}
 
 function wosToZoteroType(wosType, debugTag) {
 	let zoteroType;
@@ -1117,6 +1097,7 @@ var testCases = [
 				"ISSN": "0419-4217",
 				"extra": "Web of Science ID: FSTA:1989-04-N-0004",
 				"issue": "4",
+				"pages": "BRD",
 				"publicationTitle": "Dissertation Abstracts International, B",
 				"volume": "49",
 				"attachments": [],
@@ -1138,6 +1119,7 @@ var testCases = [
 				"ISSN": "0419-4217",
 				"extra": "Web of Science ID: CABI:19910448509",
 				"issue": "5",
+				"pages": "1459",
 				"publicationTitle": "Dissertation Abstracts International. B, Sciences and Engineering",
 				"volume": "49",
 				"attachments": [],
