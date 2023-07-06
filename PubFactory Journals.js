@@ -2,14 +2,14 @@
 	"translatorID": "8d1fb775-df6d-4069-8830-1dfe8e8387dd",
 	"label": "PubFactory Journals",
 	"creator": "Brendan O'Connell",
-	"target": "^https?:\\/\\/(?:[\\w-]+\\.)+[\\w-]+(?:\\/[^\\/\\s]*)+\\.xml(?:\\?.*)?$|^https:\\/\\/(?:[\\w-]+\\.)+[\\w-]+\\/search\\?[^\\/\\s]*source=%2Fjournals%2F\\w+%2F\\w+-overview\\.xml(?:&q=[^&\\s]*)?$",
+	"target": "^https://([^/]+/view/journals/.+\\.xml|[^.]*journals\\.[^/]+/search)\\b",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-29 13:58:05"
+	"lastUpdated": "2023-07-06 14:02:57"
 }
 
 /*
@@ -43,7 +43,7 @@ function detectWeb(doc) {
 	// because there are multiple items that match the rows selector in getSearchResults and
 	// haven't found a way to write a querySelectorAll() that only matches the main article on single pages
 	// with related items.
-	if (doc.querySelector('meta[name="citation_title"]')) {
+	if (doc.querySelector('meta[property="og:type"][content="article"]')) {
 		return "journalArticle";
 	}
 	else if (getSearchResults(doc, true)) {
@@ -55,11 +55,23 @@ function detectWeb(doc) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('a.c-Button--link[href*="/view/journals/"][href$=".xml"][target="_self"]');
+	// var rows = doc.querySelectorAll('a.c-Button--link[href*="/view/journals/"][href$=".xml"][target="_self"]');
+  // // var rows = doc.querySelectorAll('.content-box h1 a[href*=".xml"]');
+	// for (let row of rows) {
+	// 	let href = row.href;
+	// 	let title = ZU.trimInternal(row.innerText);
+	// 	if (!href || !title) continue;
+	// 	if (checkOnly) return true;
+	// 	found = true;
+	// 	items[href] = title;
+	// }
+	// return found ? items : false;
+  let linkSelector = 'a.c-Button--link[href^="/"][href*=".xml"]';
+	let rows = doc.querySelectorAll(`#searchContent ${linkSelector}, .issue-toc ${linkSelector}`);
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.innerText);
-		if (!href || !title) continue;
+		if (!href || !title || /\bissue-.+\.xml\b/.test(href)) continue;
 		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
@@ -82,7 +94,8 @@ async function doWeb(doc, url) {
 
 async function scrape(doc, url = doc.location.href) {
 	if (doc.querySelector('meta[name="citation_pdf_url"]')) {
-		var pdfURL = doc.querySelector('meta[name="citation_pdf_url"]').getAttribute("content");
+		// var pdfURL = doc.querySelector('meta[name="citation_pdf_url"]').getAttribute("content");
+	var pdfURL = attr(doc, 'meta[name="citation_pdf_url"]', "content");
 	}
 	let translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
@@ -91,11 +104,13 @@ async function scrape(doc, url = doc.location.href) {
 
 	translator.setHandler('itemDone', (_obj, item) => {
 		// remove word "Abstract" from abstract if present, e.g. https://journals.ametsoc.org/view/journals/atsc/72/8/jas-d-14-0363.1.xml
-		var abstract = doc.querySelector('meta[property="og:description"]').content;
-		if (abstract.startsWith("Abstract")) {
-			var cleanAbstract = abstract.substring(8); // remove the first 8 characters ("Abstract ")
+		// var abstract = doc.querySelector('meta[property="og:description"]').content;
+		var abstract = attr(doc, 'meta[property="og:description"]', "content");
+		var cleanAbstract = abstract.replace(/^Abstract\s+/i, "");
+		// if (abstract.startsWith("Abstract")) {
+		// 	var cleanAbstract = abstract.substring(8); // remove the first 8 characters ("Abstract ")
 			item.abstractNote = cleanAbstract;
-		}
+		// }
 		if (pdfURL) {
 			item.attachments = [];
 			item.attachments.push({
@@ -118,60 +133,6 @@ var testCases = [
 		"type": "web",
 		"url": "https://journals.ametsoc.org/view/journals/amsm/59/1/amsm.59.issue-1.xml",
 		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://journals.humankinetics.com/view/journals/cssm/12/1/cssm.2022-0019.xml",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Learning How to Make Decisions in a Nonprofit Sport Organization: An Application of Strategic Decision-Making Theory",
-				"creators": [
-					{
-						"firstName": "Erik L.",
-						"lastName": "Lachance",
-						"creatorType": "author"
-					}
-				],
-				"date": "2023/01/01",
-				"DOI": "10.1123/cssm.2022-0019",
-				"ISSN": "2167-2458, 2372-5540",
-				"abstractNote": "This teaching-based case study tasks students with analyzing a strategic decision. This analysis is guided by a script describing a strategic decision undertaken in a fictional nonprofit sport organization (i.e., Canadian Ice Tennis Federation). Students’ analysis is achieved by applying strategic decision-making theory, including its five central constructs: centrality, duration, flow, interaction, and scrutiny. Knowledge is gained by analyzing a strategic decision according to its level of authorization, length, delays, negotiations, and information sources. This teaching-based case study is intended for undergraduate students in general sport management and/or strategy/strategic management courses. The benefit of this teaching-based case study resides in its ability to teach students how to make decisions, a central and ubiquitous task in organizational life, and their future endeavors in the sport industry.",
-				"issue": "1",
-				"language": "en",
-				"libraryCatalog": "journals.humankinetics.com",
-				"pages": "1-5",
-				"publicationTitle": "Case Studies in Sport Management",
-				"shortTitle": "Learning How to Make Decisions in a Nonprofit Sport Organization",
-				"url": "https://journals.humankinetics.com/view/journals/cssm/12/1/cssm.2022-0019.xml",
-				"volume": "12",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [
-					{
-						"tag": "decision-making process"
-					},
-					{
-						"tag": "not-for-profit sport organizations"
-					},
-					{
-						"tag": "strategic decisions"
-					},
-					{
-						"tag": "strategic management"
-					},
-					{
-						"tag": "strategy"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
 	},
 	{
 		"type": "web",
@@ -447,6 +408,206 @@ var testCases = [
 					},
 					{
 						"tag": "In situ atmospheric observations"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://akjournals.com/view/journals/2006/12/2/article-p303.xml?rskey=lLnjOM&result=2",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Thinking beyond cut-off scores in the assessment of potentially addictive behaviors: A brief illustration in the context of binge-watching",
+				"creators": [
+					{
+						"firstName": "Pauline",
+						"lastName": "Billaux",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Joël",
+						"lastName": "Billieux",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Stéphanie",
+						"lastName": "Baggio",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Pierre",
+						"lastName": "Maurage",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Maèva",
+						"lastName": "Flayelle",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023/06/30",
+				"DOI": "10.1556/2006.2023.00032",
+				"ISSN": "2063-5303, 2062-5871",
+				"abstractNote": "While applying a diagnostic approach (i.e., comparing “clinical” cases with “healthy” controls) is part of our methodological habits as researchers and clinicians, this approach has been particularly criticized in the behavioral addictions research field, in which a lot of studies are conducted on “emerging” conditions. Here we exemplify the pitfalls of using a cut-off-based approach in the context of binge-watching (i.e., watching multiple episodes of series back-to-back) by demonstrating that no reliable cut-off scores could be determined with a widely used assessment instrument measuring binge-watching.",
+				"issue": "2",
+				"language": "en",
+				"libraryCatalog": "akjournals.com",
+				"pages": "303-308",
+				"publicationTitle": "Journal of Behavioral Addictions",
+				"shortTitle": "Thinking beyond cut-off scores in the assessment of potentially addictive behaviors",
+				"url": "https://akjournals.com/view/journals/2006/12/2/article-p303.xml",
+				"volume": "12",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "addictive behaviors"
+					},
+					{
+						"tag": "behavioral addictions"
+					},
+					{
+						"tag": "binge-watching"
+					},
+					{
+						"tag": "cut-off scores"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://akjournals.com/view/journals/2006/12/2/2006.12.issue-2.xml",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://akjournals.com/view/journals/606/aop/issue.xml",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://jnccn.org/view/journals/jnccn/21/6/jnccn.21.issue-6.xml",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://jnccn.org/view/journals/jnccn/21/6/article-p685.xml",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Increasing Private Payer and Medicare Coverage of Circulating Tumor DNA Tests: What’s at Stake?",
+				"creators": [
+					{
+						"firstName": "Mariana P.",
+						"lastName": "Socal",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023/06/01",
+				"DOI": "10.6004/jnccn.2023.7038",
+				"ISSN": "1540-1405, 1540-1413",
+				"abstractNote": "\"Increasing Private Payer and Medicare Coverage of Circulating Tumor DNA Tests: What’s at Stake?\" published on Jun 2023 by National Comprehensive Cancer Network.",
+				"issue": "6",
+				"language": "EN",
+				"libraryCatalog": "jnccn.org",
+				"pages": "685-686",
+				"publicationTitle": "Journal of the National Comprehensive Cancer Network",
+				"shortTitle": "Increasing Private Payer and Medicare Coverage of Circulating Tumor DNA Tests",
+				"url": "https://jnccn.org/view/journals/jnccn/21/6/article-p685.xml",
+				"volume": "21",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.ajtmh.org/view/journals/tpmd/109/1/tpmd.109.issue-1.xml",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://akjournals.com/view/journals/2006/12/2/article-p303.xml?rskey=lLnjOM&result=2",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Thinking beyond cut-off scores in the assessment of potentially addictive behaviors: A brief illustration in the context of binge-watching",
+				"creators": [
+					{
+						"firstName": "Pauline",
+						"lastName": "Billaux",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Joël",
+						"lastName": "Billieux",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Stéphanie",
+						"lastName": "Baggio",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Pierre",
+						"lastName": "Maurage",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Maèva",
+						"lastName": "Flayelle",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023/06/30",
+				"DOI": "10.1556/2006.2023.00032",
+				"ISSN": "2063-5303, 2062-5871",
+				"abstractNote": "While applying a diagnostic approach (i.e., comparing “clinical” cases with “healthy” controls) is part of our methodological habits as researchers and clinicians, this approach has been particularly criticized in the behavioral addictions research field, in which a lot of studies are conducted on “emerging” conditions. Here we exemplify the pitfalls of using a cut-off-based approach in the context of binge-watching (i.e., watching multiple episodes of series back-to-back) by demonstrating that no reliable cut-off scores could be determined with a widely used assessment instrument measuring binge-watching.",
+				"issue": "2",
+				"language": "en",
+				"libraryCatalog": "akjournals.com",
+				"pages": "303-308",
+				"publicationTitle": "Journal of Behavioral Addictions",
+				"shortTitle": "Thinking beyond cut-off scores in the assessment of potentially addictive behaviors",
+				"url": "https://akjournals.com/view/journals/2006/12/2/article-p303.xml",
+				"volume": "12",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "addictive behaviors"
+					},
+					{
+						"tag": "behavioral addictions"
+					},
+					{
+						"tag": "binge-watching"
+					},
+					{
+						"tag": "cut-off scores"
 					}
 				],
 				"notes": [],
