@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2023-07-06 06:18:35"
+	"lastUpdated": "2023-07-06 06:26:44"
 }
 
 /*
@@ -103,10 +103,6 @@ function detectImport() {
 }
 
 function doImport() {
-	return work();
-}
-
-function work() {
 	let map = new ItemMap();
 
 	let line;
