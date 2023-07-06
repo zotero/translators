@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2023-06-16 14:51:19"
+	"lastUpdated": "2023-07-06 12:34:43"
 }
 
 /*
@@ -98,7 +98,7 @@ var mappingTypes = {
 /* eslint-enable camelcase*/
 // pre-6.0.26 releases don't have a dataset item type
 if (datasetType == "document") {
-	mappingTypes.dataset = document;
+	mappingTypes.dataset = 'document';
 }
 
 
