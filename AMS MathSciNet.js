@@ -1,24 +1,23 @@
 {
-	"translatorID": "a354331-981b-43de-a61-bc26dd1be3a9",
+	"translatorID": "16f2936d-a059-40e8-a48e-f0acbb1e93e0",
 	"label": "AMS MathSciNet",
-	"creator": "Simon Kornblith",
-	"target": "^https?://(mathscinet.)?ams.[^/]*/mathscinet(/article\\?|/publications-search\\?)",
+	"creator": "Sebastian Karcher",
+	"target": "^https?://mathscinet\\.ams\\.[^/]*/mathscinet/(article\\?|publications-search\\?|author\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-05 03:32:36"
+	"lastUpdated": "2023-07-06 14:22:36"
 }
 
 function detectWeb(doc, url) {
-	var itemType;
 	if (getSearchResults(doc, true)) {
 		return "multiple"
 	} else if (url.includes("article?mr=")) {
 		if (doc.querySelector('div[data-testid="ap-book-isbn"]')) {
-			if (doc.querySelector('div[data-testid="ap-book-collection"]'))
+			if (doc.querySelector('div[data-testid="ap-book-collection"] a.router-link-active'))
 				return "bookSection";
 			else return "book";
 		}
@@ -31,7 +30,6 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	// TODO: adjust the CSS selector
 	var rows = doc.querySelectorAll('.results div.font-weight-bold');
 	for (let row of rows) {
 		let href = attr(row, 'a', 'href');
@@ -64,18 +62,19 @@ async function scrape(doc, url = doc.location.href) {
 		throw("No MR ID, can't proceed")
 	}
 	let bibJSONUrl = '/mathscinet/api/publications/format?formats=bib&ids=' + id[1];
-	Z.debug(bibJSONUrl)
+	// Z.debug(bibJSONUrl)
 	let bibJSON = await requestText(bibJSONUrl);
-	Z.debug(bibJSON)
+	// Z.debug(bibJSON)
 	// the JSON parser doesn't like newlines or backslashes in the bibtex
 	bibJSON = bibJSON.replace(/\\n/g , "").replace(/\\/g, "");
 	bibJSON = JSON.parse(bibJSON);
 	let bibTex = bibJSON[0].bib;
-	Z.debug(bibTex)
+	// Z.debug(bibTex)
 	let translator = Zotero.loadTranslator("import");
 		translator.setTranslator('9cb70025-a888-4a29-a210-93ec52da40d4');
 		translator.setString(bibTex);
 		translator.setHandler('itemDone', (_obj, item) => {
+			item.url = ""; // these aren't full text URLs
 			item.attachments.push({
 				title: 'Snapshot',
 				document: doc
@@ -93,12 +92,7 @@ async function scrape(doc, url = doc.location.href) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://mathscinet.ams.org/mathscinet/search/publications.html?pg4=AUCN&s4=Karcher&co4=AND&pg5=TI&s5=&co5=AND&pg6=PC&s6=&co6=AND&pg7=ALLF&s7=&co7=AND&Submit=Search&dr=all&yrop=eq&arg3=&yearRangeFirst=&yearRangeSecond=&pg8=ET&s8=All&review_format=html",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://mathscinet.ams.org/mathscinet-getitem?mr=3004573",
+		"url": "https://mathscinet.ams.org/mathscinet/article?mr=3004573",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -122,18 +116,18 @@ var testCases = [
 				],
 				"date": "2013",
 				"DOI": "10.1016/j.jmva.2012.11.004",
-				"ISSN": "0047-259X",
+				"ISSN": "0047-259X,1095-7243",
 				"extra": "MR: 3004573",
 				"itemID": "MR3004573",
 				"journalAbbreviation": "J. Multivariate Anal.",
 				"libraryCatalog": "AMS MathSciNet",
 				"pages": "516–536",
 				"publicationTitle": "Journal of Multivariate Analysis",
-				"url": "https://mathscinet.ams.org/mathscinet-getitem?mr=3004573",
 				"volume": "115",
 				"attachments": [
 					{
-						"title": "MathSciNet Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -144,12 +138,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://mathscinet.ams.org/mathscinet/search/publications.html?pg1=ISSI&s1=308850",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://mathscinet.ams.org/mathscinet-getitem?mr=2767535",
+		"url": "https://mathscinet.ams.org/mathscinet/article?mr=2767535",
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -172,16 +161,17 @@ var testCases = [
 					}
 				],
 				"date": "2011",
+				"ISBN": "9783790826272",
 				"bookTitle": "Advances in directional and linear statistics",
 				"extra": "MR: 2767535\nDOI: 10.1007/978-3-7908-2628-9_7",
 				"itemID": "MR2767535",
 				"libraryCatalog": "AMS MathSciNet",
 				"pages": "97–111",
 				"publisher": "Physica-Verlag/Springer, Heidelberg",
-				"url": "https://mathscinet.ams.org/mathscinet-getitem?mr=2767535",
 				"attachments": [
 					{
-						"title": "MathSciNet Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -192,7 +182,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://mathscinet.ams.org/mathscinet-getitem?mr=2663710",
+		"url": "https://mathscinet.ams.org/mathscinet/article?mr=2663710",
 		"items": [
 			{
 				"itemType": "book",
@@ -216,10 +206,10 @@ var testCases = [
 				"libraryCatalog": "AMS MathSciNet",
 				"numPages": "xiv+321",
 				"publisher": "Physica-Verlag/Springer, Heidelberg",
-				"url": "https://mathscinet.ams.org/mathscinet-getitem?mr=2663710",
 				"attachments": [
 					{
-						"title": "MathSciNet Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -234,11 +224,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://mathscinet.ams.org/mathscinet-getitem?mr=1346201",
+		"url": "https://mathscinet.ams.org/mathscinet/article?mr=1346201",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Sommation des séries divergentes",
+				"title": "Sommation des s'eries divergentes",
 				"creators": [
 					{
 						"firstName": "Bernard",
@@ -255,11 +245,11 @@ var testCases = [
 				"libraryCatalog": "AMS MathSciNet",
 				"pages": "163–222",
 				"publicationTitle": "Expositiones Mathematicae. International Journal",
-				"url": "https://mathscinet.ams.org/mathscinet-getitem?mr=1346201",
 				"volume": "13",
 				"attachments": [
 					{
-						"title": "MathSciNet Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -267,6 +257,16 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://mathscinet.ams.org/mathscinet/publications-search?query=karcher&page=1&size=20&sort=newest&facets=",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://mathscinet.ams.org/mathscinet/author?authorId=98350",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
