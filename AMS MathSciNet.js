@@ -12,17 +12,40 @@
 	"lastUpdated": "2023-07-06 14:22:36"
 }
 
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2023 Sebastian Karcher
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
 function detectWeb(doc, url) {
 	if (getSearchResults(doc, true)) {
-		return "multiple"
-	} else if (url.includes("article?mr=")) {
+		return "multiple";
+	}
+	else if (url.includes("article?mr=")) {
 		if (doc.querySelector('div[data-testid="ap-book-isbn"]')) {
-			if (doc.querySelector('div[data-testid="ap-book-collection"] a.router-link-active'))
-				return "bookSection";
+			if (doc.querySelector('div[data-testid="ap-book-collection"] a.router-link-active')) return "bookSection";
 			else return "book";
 		}
 		else return "journalArticle";
-			
 	}
 	else return false;
 }
@@ -56,36 +79,32 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url = doc.location.href) {
-	Z.debug(url);
 	let id = url.match(/\?mr=(\d+)/);
 	if (!id) {
-		throw("No MR ID, can't proceed")
+		throw new Error("No MR ID, can't proceed");
 	}
 	let bibJSONUrl = '/mathscinet/api/publications/format?formats=bib&ids=' + id[1];
 	// Z.debug(bibJSONUrl)
 	let bibJSON = await requestText(bibJSONUrl);
 	// Z.debug(bibJSON)
 	// the JSON parser doesn't like newlines or backslashes in the bibtex
-	bibJSON = bibJSON.replace(/\\n/g , "").replace(/\\/g, "");
+	bibJSON = bibJSON.replace(/\\n/g, "").replace(/\\/g, "");
 	bibJSON = JSON.parse(bibJSON);
 	let bibTex = bibJSON[0].bib;
 	// Z.debug(bibTex)
 	let translator = Zotero.loadTranslator("import");
-		translator.setTranslator('9cb70025-a888-4a29-a210-93ec52da40d4');
-		translator.setString(bibTex);
-		translator.setHandler('itemDone', (_obj, item) => {
-			item.url = ""; // these aren't full text URLs
-			item.attachments.push({
-				title: 'Snapshot',
-				document: doc
-			});
-			item.complete();
+	translator.setTranslator('9cb70025-a888-4a29-a210-93ec52da40d4');
+	translator.setString(bibTex);
+	translator.setHandler('itemDone', (_obj, item) => {
+		item.url = ""; // these aren't full text URLs
+		item.attachments.push({
+			title: 'Snapshot',
+			document: doc
 		});
-		await translator.translate();
+		item.complete();
+	});
+	await translator.translate();
 }
-
-
-
 
 
 /** BEGIN TEST CASES **/
