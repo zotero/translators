@@ -83,6 +83,19 @@ var FIELD_MAP = {
 	TI: "title",
 };
 
+// The translator works as follows.
+// First, each line is analyzed and partitioned into the tag and content
+// (splitLine). If the line doesn't start a new tag field, but is a
+// continuation of the previous tag content, two space characters is used as
+// the "tag". For each tag, the content value is accumulated into an array,
+// with each non-empty input line being an element.
+// This continues until the tag ER or EF is encountered, or the input's end is
+// reached.
+// Then, the current record is normalized (normalizeRecord), and then turned
+// into a new Zotero item (saveItem) if it is not empty.
+// The process begins again with the rest of the input and a new record, unless
+// it has already been terminated by EF or end of input.
+
 // Translator detect/do functions
 
 function detectImport() {
@@ -103,308 +116,280 @@ function detectImport() {
 }
 
 function doImport() {
-	let map = new ItemMap();
+	// record is a Map<string, string[]> -- mapping two-character tags to an
+	// array of strings. Each continued line in the input becomes one array
+	// element (unless that line has no content).
+	let record = new Map();
+	let lastTag = null;
 
-	let line;
-	while (!map.terminate && ((line = Z.read()) !== false)) {
-		map.scanLine(line);
-	}
-	// Try saving any leftover fields as an item; this can happen when the last
-	// record lacks ER or EF. In that case, we shouldn't throw away the data
-	// simply because the file didn't properly end.
-	map.save();
-	return false;
-}
-
-// Utilities
-
-/**
- * Utility for mapping tagged data to item fields
- *
- * @constructor
- */
-function ItemMap() {
-	// Hold the property => value map for an item.
-	this.records = new Map();
-	// Cursor to current property
-	this.currentKey = null;
-	this.terminate = false;
-}
-
-ItemMap.prototype = {
-
-	/**
-	 * Validate a line and push it into the item map record if it's valid data
-	 * line, or do an action if it is one of the special tags (ER and EF).
-	 *
-	 * This function is strictly concerned with the form of the lines and
-	 * converting the line data to key-value pairs. It does not apply any
-	 * semantics to the data.
-	 *
-	 * @param {string} line
-	 * @throws {Error} When line fails validation
-	 */
-	scanLine: function (line) {
-		let lineRecord = splitLine(line);
-		if (!lineRecord) {
-			return;
+	while (true) {
+		let line = Z.read();
+		if (line === false) { // End of input
+			line = "EF"; // equivalent to the "end of file" tag
 		}
-		let [head, content] = lineRecord;
 
-		if (head === "  ") { // two spaces for line continuation
-			if (!this.currentKey) {
+		let parsedLine = splitLine(line);
+		if (!parsedLine) {
+			continue; // skip a line without parseable info
+		}
+
+		let wosTag = parsedLine[0];
+		let content = parsedLine[1];
+
+		// ER and EF are not real tags but delimiters.
+		if (["ER", "EF"].includes(wosTag)) {
+			normalizeRecord(record);
+			saveItem(record);
+			if (wosTag === "EF") {
+				// end of file; any further lines will not be processed
+				return;
+			}
+			else {
+				// end of record; reset state and move to next line
+				record.clear();
+				lastTag = null;
+				continue;
+			}
+		}
+
+		// Feed the line into record
+
+		if (wosTag !== "  ") { // Not line continuation; a new tag begins.
+			if (record.has(wosTag)) {
+				// TODO: should it throw?
+				Z.debug(`Warning: duplicate tag ${wosTag}; new input field value is ${content}; old value was ${record.get(wosTag)}`);
+			}
+
+			// Initialize the tag field with a new array to accommodate
+			// continued lines. If content is empty, just create the array
+			// without the empty string element.
+			record.set(wosTag, content ? [content] : []);
+			lastTag = wosTag;
+		}
+		else { // Line continuation
+			if (!lastTag) {
 				throw new Error(`Dangling line continuation; the rest of line is ${content}`);
 			}
 
-			let currentValueArray = this.records.get(this.currentKey);
-
-			if (!Array.isArray(currentValueArray)) {
-				// Continued line can be traced to a tag but the tag's field is
-				// not initialized. This should not happen and is an internal
-				// error.
-				throw new Error(`Unexpected uninitialized field at ${this.currentKey} found while handling line continuation`);
-			}
+			let valueContainer = record.get(lastTag);
 
 			// Add the continued line, if non-empty, into the container for the
 			// field value
 			if (content) {
-				currentValueArray.push(content);
+				valueContainer.push(content);
 			}
 		}
-		else { // Not line continuation; a new tag begins.
-			if (head === "ER") {
-				// End of Record; Save this item and reset for any subsequent
-				// items.
-				this.save();
-				this.reset();
-				return;
-			}
+	}
+}
 
-			if (head === "EF") {
-				// End of File; Simply signal the end of processing.
-				this.terminate = true;
-				return;
-			}
+// Normalize the record by consolidating related fields and remove redundant
+// ones. This will make it straightforward to translate the record into a
+// Zotero item.
+function normalizeRecord(record) {
+	normalizeType(record);
+	normalizeAuthors(record);
+	normalizePages(record);
+	normalizeDate(record);
+	normalizePublisherAddress(record);
+	normalizeISSN(record);
+}
 
-			// Double check if there is duplicate tag
-			if (this.records.has(head)) {
-				// TODO: should it throw?
-				Z.debug(`Warning: duplicate tag ${head}; new input field value is ${content}; old value was ${this.records.get(head).toString()}`);
-			}
+// Turn the field value into a Zotero item-type string for convenience because
+// it is always used in a special way, unlike other tags. DT takes precedence
+// over PT.
+// NOTE: After we identify the Zotero type, DT is set and PT deleted.
+function normalizeType(record) {
+	let wosType = record.get("DT"); // If DT present, begin with it
+	let zoteroType = wosToZoteroType(wosType, "DT");
+	if (!zoteroType) {
+		wosType = record.get("PT"); // Try PT next if DT not useable
+		zoteroType = wosToZoteroType(wosType, "PT");
+	}
+	if (!zoteroType) {
+		Z.debug("No type found for record; falling back to journal article");
+		zoteroType = "journalArticle";
+	}
+	// Delete PT and set DT to Zotero type
+	record.delete("PT");
+	record.set("DT", zoteroType);
+}
 
-			// Initialize the tag field with a new array to accommodate
-			// continued lines
-			this.records.set(head, content ? [content] : []);
-			this.currentKey = head;
+// Use AF in preference to AU.
+function normalizeAuthors(record) {
+	if (record.has("AF") && record.has("AU")) {
+		record.delete("AU");
+	}
+}
+
+function normalizePages(record) {
+	// If page range present, use it.
+	if (record.has("PS")) {
+		record.delete("BP"); // begin page
+		record.delete("EP"); // end page
+	}
+	else { // no page range
+		let begin = record.get("BP");
+		let end = record.get("EP");
+		// If BP exists, try construct a page range like "begin-end" if EP
+		// exists, or without the "-end" suffix if EP is missing.
+		if (begin) {
+			let suffix = (end && end[0]) ? `-${end[0]}` : "";
+			record.set("PS", [`${begin[0]}${suffix}`]);
+			record.delete("BP");
+			record.delete("EP");
 		}
-	},
+	}
 
-	/**
-	 * Create a new Zotero item, populate it using this item map after
-	 * normalization, and complete the Zotero item.
-	 */
-	save: function () {
-		this.normalize();
+	// Most electronic journals use article number (AR), but if both
+	// article number and pages present, ignore article number.
+	if (record.has("AR") && (record.has("PS") || record.has("BP"))) {
+		record.delete("AR");
+	}
+}
 
-		// Pop the type string from the normalized record
-		let type = this.records.get("DT");
-		this.records.delete("DT");
+function normalizeDate(record) {
+	// Normalize dates. PY refers to the year, and PD is the more detailed
+	// date, like month-day ("JAN 1"), month ("JAN"), season ("SPR"),
+	// possibly with redundant year.
+	if (record.has("PY")) { // year
+		if (!record.has("PD")) { // but without PD
+			Z.debug(`Using PY ${record.get("PY")} verbatim as date`);
+			record.set("PD", record.get("PY"));
+		}
+		else {
+			let year = record.get("PY")[0];
+			let pd = record.get("PD")[0];
+			if (!pd.includes(year)) { // PD doesn't have redundant year
+				Z.debug(`Adding PY ${year} to PD ${pd}`);
+				pd += ` ${year}`;
+				record.set("PD", [pd]);
+			}
+		}
+		// We have put whatever date details we have into PD, and PY is now
+		// redundant
+		record.delete("PY");
+	}
+}
 
-		let item = new Z.Item(type);
-		let extra = []; // temporary array for holding lines in the extra
-		let tagMissed = 0; // number of tags unhandled
+function normalizePublisherAddress(record) {
+	// Publisher address; don't use full address if PI (city) is available
+	if (record.has("PI")) {
+		let city = record.get("PI")[0];
+		record.set("PI", [ZU.capitalizeTitle(city, true/* force */)]);
+		record.delete("PA");
+	}
+}
 
-		for (let [wosTag, tagValueArray] of this.records) {
-			// The array content concatenated into a single string
-			let tagValueString = ZU.trimInternal(tagValueArray.join(" "));
+function normalizeISSN(record) {
+	// ISSN; consolidate EI (eISSN) into SN
+	let issn = [...(record.get("SN") || []), ...(record.get("EI") || [])];
+	if (issn.length) {
+		record.set("SN", issn);
+		record.delete("EI");
+	}
+}
 
-			switch (wosTag) {
-				// Main authors. After normalization, AF and AU cannot both
-				// exist.
-				case "AF":
-				case "AU":
-					addCreator(item, tagValueArray,
-						type === "patent" ? "inventor" : "author");
-					break;
-				// Other types of creators
-				case "BE": // Book editor
-				case "ED": // Editors
-					addCreator(item, tagValueArray, "editor");
-					break;
-				case "TR":
-					addCreator(item, tagValueArray, "translator");
-					break;
-				case "AA": // Additional Authors
-					addCreator(item, tagValueArray, "contributor");
-					break;
+// Translate the record into a Zotero item. If the record is empty except
+// the item type, no (empty) item is saved.
+// This should be called on a normalized record.
+function saveItem(normalizedRecord) {
+	// Pop the type string from the normalized record
+	let type = normalizedRecord.get("DT");
+	normalizedRecord.delete("DT");
 
-				// Keywords, ontology terms, etc. as item tags
-				case "BD": // broad terms, like DE below
-				case "DE": // author-defined keywords
-				case "ID": // keywords
-				case "IP": // patent category
-				case "MC": // Major Concepts or Derwent Manual Code(s)
-				case "MQ": // methods, supplies
-				case "OR": // organism descriptors
-					item.tags.push(...tagValueString.split("; "));
-					break;
+	let item = new Z.Item(type);
+	let extra = []; // temporary array for holding lines in the extra
+	let tagMissed = 0; // number of tags unhandled
 
-				// Additional information that becomes lines in the extra field
-				case "NO":
-					extra.push(`Comments, Corrections, Erratum: ${tagValueString}`);
-					break;
-				case "NT":
-					extra.push(`Notes: ${tagValueString}`);
-					break;
-				case "UT":
-					extra.push(`Web of Science ID: ${tagValueString}`);
-					break;
+	for (let [wosTag, tagValueArray] of normalizedRecord) {
+		// The array content concatenated into a single string
+		let tagValueString = ZU.trimInternal(tagValueArray.join(" "));
 
-				// ISSN
-				case "SN":
-					item.ISSN = tagValueArray.join(", ") || undefined;
-					break;
+		switch (wosTag) {
+			// Main authors. After normalization, AF and AU cannot both
+			// exist.
+			case "AF":
+			case "AU":
+				addCreator(item, tagValueArray,
+					type === "patent" ? "inventor" : "author");
+				break;
+			// Other types of creators
+			case "BE": // Book editor
+			case "ED": // Editors
+				addCreator(item, tagValueArray, "editor");
+				break;
+			case "TR":
+				addCreator(item, tagValueArray, "translator");
+				break;
+			case "AA": // Additional Authors
+				addCreator(item, tagValueArray, "contributor");
+				break;
 
-				// Title fields (often in all-caps) are turned into Title Case
-				// if the pref "capitalizeTitles" is true (default false)
-				case "SE":
-				case "SO":
-				case "TI":
-					tagValueString = selectiveTitleCase(tagValueString);
-					item[FIELD_MAP[wosTag]] = tagValueString;
-					break;
-				// The following non-title fields are converted to Title Case
-				case "AE": // patent assignee
-				case "CT": // conference name
-				case "PU": // publisher
-					tagValueString = selectiveTitleCase(tagValueString, true/* force */);
-					/* NOTE: FALL THROUGH */
-				default:
-				{
-					let itemField = FIELD_MAP[wosTag];
-					if (!itemField) { // unknown tag
-						Z.debug(`Unhandled tag ${wosTag} => ${tagValueArray}`);
-						tagMissed += 1;
-					}
-					else {
-						item[itemField] = tagValueString;
-					}
+			// Keywords, ontology terms, etc. as item tags
+			case "BD": // broad terms, like DE below
+			case "DE": // author-defined keywords
+			case "ID": // keywords
+			case "IP": // patent category
+			case "MC": // Major Concepts or Derwent Manual Code(s)
+			case "MQ": // methods, supplies
+			case "OR": // organism descriptors
+				item.tags.push(...tagValueString.split("; "));
+				break;
+
+			// Additional information that becomes lines in the extra field
+			case "NO":
+				extra.push(`Comments, Corrections, Erratum: ${tagValueString}`);
+				break;
+			case "NT":
+				extra.push(`Notes: ${tagValueString}`);
+				break;
+			case "UT":
+				extra.push(`Web of Science ID: ${tagValueString}`);
+				break;
+
+			// ISSN
+			case "SN":
+				item.ISSN = tagValueArray.join(", ");
+				break;
+
+			// Title fields (often in all-caps) are turned into Title Case
+			// if the pref "capitalizeTitles" is true (default false)
+			case "SE":
+			case "SO":
+			case "TI":
+				tagValueString = selectiveTitleCase(tagValueString);
+				item[FIELD_MAP[wosTag]] = tagValueString;
+				break;
+			// The following non-title fields are converted to Title Case
+			case "AE": // patent assignee
+			case "CT": // conference name
+			case "PU": // publisher
+				tagValueString = selectiveTitleCase(tagValueString, true/* force */);
+				/* NOTE: FALL THROUGH */
+			default: {
+				let itemField = FIELD_MAP[wosTag];
+				if (!itemField) { // unknown tag
+					Z.debug(`Unhandled tag ${wosTag} => ${tagValueArray}`);
+					tagMissed += 1;
 				}
-			} // bottom of the switch statement
-		}
-
-		if (tagMissed === this.records.size) { // item is not populated
-			return;
-		}
-
-		if (extra.length) {
-			item.extra = extra.join("\n");
-		}
-
-		item.complete();
-	},
-
-	/**
-	 * Reset the internal state of the item map
-	 */
-	reset: function () {
-		this.records.clear();
-		this.currentKey = null;
-		this.terminate = false;
-	},
-
-	/**
-	 * Normalize the content of internal records. This must be called only
-	 * after all the fields of an item is populated.
-	 */
-	normalize: function () {
-		let r = this.records; // for ergonomics
-
-		// Normalize type. Turn the field value into a Zotero item-type string
-		// for convenience because it is always used in a special way, unlike
-		// other tags. DT takes precedence over PT.
-		// NOTE: After we identify the Zotero type, DT is set and PT deleted.
-		let wosType = r.get("DT"); // If DT present, begin with it
-		let zoteroType = wosToZoteroType(wosType, "DT");
-		if (!zoteroType) {
-			wosType = r.get("PT"); // Try PT next if DT not useable
-			zoteroType = wosToZoteroType(wosType, "PT");
-		}
-		if (!zoteroType) {
-			Z.debug("Warning: No type found for item; falling back to journal article");
-			zoteroType = "journalArticle";
-		}
-		// Delete PT and set DT to Zotero type
-		r.delete("PT");
-		r.set("DT", zoteroType);
-
-		// Authors. Use AF in preference to AU.
-		if (r.has("AF") && r.has("AU")) {
-			r.delete("AU");
-		}
-
-		// Normalize pages. If page range present, use it.
-		if (r.has("PS")) {
-			r.delete("BP"); // begin page
-			r.delete("EP"); // end page
-		}
-		else { // no page range
-			let begin = r.get("BP");
-			let end = r.get("EP");
-			// If BP exists, try construct a page range like "begin-end" if EP
-			// exists, or without the "-end" suffix if EP is missing.
-			if (begin) {
-				let suffix = (end && end[0]) ? `-${end[0]}` : "";
-				r.set("PS", [`${begin[0]}${suffix}`]);
-				r.delete("BP");
-				r.delete("EP");
-			}
-		}
-
-		// Most electronic journals use article number (AR), but if both
-		// article number and pages present, ignore article number.
-		if (r.has("AR") && (r.has("PS") || r.has("BP"))) {
-			r.delete("AR");
-		}
-
-		// Normalize dates. PY refers to the year, and PD is the more detailed
-		// date, like month-day ("JAN 1"), month ("JAN"), season ("SPR"),
-		// possibly with redundant year.
-		if (r.has("PY")) { // year
-			if (!r.has("PD")) { // but without PD
-				Z.debug(`Using PY ${r.get("PY")} verbatim as date`);
-				r.set("PD", r.get("PY"));
-			}
-			else {
-				let year = r.get("PY")[0];
-				let pd = r.get("PD")[0];
-				if (!pd.includes(year)) { // PD doesn't have redundant year
-					Z.debug(`Adding PY ${year} to PD ${pd}`);
-					pd += ` ${year}`;
-					r.set("PD", [pd]);
+				else {
+					item[itemField] = tagValueString;
 				}
 			}
-			// We have put whatever date details we have into PD, and PY is now
-			// redundant
-			r.delete("PY");
-		}
+		} // bottom of the switch statement
+	} // end of the loop over record entries
 
-		// Publisher address; don't use full address if PI (city) is available
-		if (r.has("PI")) {
-			let city = r.get("PI")[0];
-			r.set("PI", [ZU.capitalizeTitle(city, true/* force */)]);
-			r.delete("PA");
-		}
+	if (tagMissed === normalizedRecord.size) { // item is not populated
+		Z.debug("No item is saved because no field is populated from record");
+		return;
+	}
 
-		// ISSN; consolidate EI (eISSN) into SN
-		let issn = [...(r.get("SN") || []), ...(r.get("EI") || [])]
-			.filter(Boolean);
-		if (issn.length) {
-			r.set("SN", issn);
-			r.delete("EI");
-		}
-	},
-};
+	if (extra.length) {
+		item.extra = extra.join("\n");
+	}
+
+	item.complete();
+}
 
 // split line into an array of [tag, tag value] (the latter optional).
 function splitLine(line) {
@@ -424,12 +409,14 @@ function splitLine(line) {
 	// spaces), there's ambiguity when the line meant to be continued data
 	// happens to match the pattern of a tag-value line.
 	let m = line.match(/^( {2}|[A-Z][A-Z0-9])( .+)?$/);
-	if (!m) {
-		// Z.debug(`Possible continued-line without explicit line continuation: ${line.slice(0, 5)}...`);
+	if (!m) { // implicit line continuation
 		return ["  "/* two spaces */, line];
 	}
 
-	return [m[1]/* tag */, m[2] && m[2].trim()/* tag content, or undefined */];
+	return [
+		m[1], // tag or two spaces
+		m[2] && m[2].trim() // tag content, or undefined
+	];
 }
 
 // Convenience functions
@@ -438,6 +425,15 @@ function addCreator(item, authorArray, authorType) {
 	for (let author of authorArray) {
 		item.creators.push(stringToCreator(author, authorType));
 	}
+}
+
+function stringToCreator(author, type) {
+	// Strip any parenthesized text
+	author = author.replace(/\(.*\)/g, "");
+	if (!author.includes(",")) { // as "LAST F", rather than "Last, F"
+		author = author.replace(" ", ", "); // replace first space
+	}
+	return ZU.cleanAuthor(author, type, true/* useComma */);
 }
 
 function wosToZoteroType(wosType, debugTag) {
@@ -455,15 +451,6 @@ function wosToZoteroType(wosType, debugTag) {
 		}
 	}
 	return zoteroType;
-}
-
-function stringToCreator(author, type) {
-	// Strip any parenthesized text
-	author = author.replace(/\(.*\)/g, "");
-	if (!author.includes(",")) { // as "LAST F", rather than "Last, F"
-		author = author.replace(" ", ", "); // replace first space
-	}
-	return ZU.cleanAuthor(author, type, true/* useComma */);
 }
 
 // like ZU.capitalizeTitle but mindful of some words that are often encountered
