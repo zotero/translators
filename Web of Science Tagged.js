@@ -69,6 +69,7 @@ var FIELD_MAP = {
 	PD: "date",
 	PG: "numPages",
 	PI: "place", // publisher city
+	PM: "PMID", // PubMed ID
 	PN: "patentNumber",
 	PS: "pages",
 	PU: "publisher",
