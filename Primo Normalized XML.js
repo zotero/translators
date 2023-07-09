@@ -314,14 +314,6 @@ function doImport() {
 			}
 		}
 	}
-	if (!callArray.length) {
-		callNumber = ZU.xpath(doc, '//p:delivery/p:bestlocation/p:callNumber', ns);
-		for (let i = 0; i < callNumber.length; i++) {
-			if (callNumber[i].textContent.search(/\$\$2.+\$/) != -1) {
-				callArray.push(callNumber[i].textContent.match(/\$\$2\(?(.+?)(?:\s*\))?\$/)[1]);
-			}
-		}
-	}
 	if (callArray.length) {
 		// remove duplicate call numbers
 		callArray = dedupeArray(callArray);
