@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-03 04:50:33"
+	"lastUpdated": "2023-07-11 05:43:37"
 }
 
 /*
@@ -45,6 +45,130 @@ const MIME_TYPES = {
 	DOC: 'application/msword',
 	HTML: 'text/html',
 };
+
+/**
+ * Information object for one Google Scholar entry or "row"
+ *
+ * @typedef {Object} RowObj
+ * @property {?string} id
+ * @property {string} [directLink]
+ * @property {string} [attachmentLink]
+ * @property {string} [attachmentType]
+ * @property {string} [byline]
+ */
+
+function rowFromSearchResult(id, doc) {
+	let entryElem = doc.querySelector(`.gs_r[data-cid="${id}"]`);
+	// href from an <a> tag, direct link to the source. Note that the ID
+	// starting with number can be fine, but the selector is a pain.
+	let aElem = doc.getElementById(id);
+	let directLink = aElem ? aElem.href : undefined;
+	let attachmentLink = attr(entryElem, ".gs_ggs a", "href");
+	let attachmentType = text(entryElem, ".gs_ctg2");
+	if (attachmentType) {
+		// Remove the brackets
+		attachmentType = attachmentType.slice(1, -1).toUpperCase();
+	}
+	let byline = text(entryElem, ".gs_a");
+
+	return { id, directLink, attachmentLink, attachmentType, byline };
+}
+
+async function rowFromProfile(url, profileDoc) {
+	// To "navigate" to the linked "View article" page from the profile page, a
+	// referrer is sent as header in the request
+	const requestOptions = { headers: { Referer: profileDoc.location.href } };
+
+	try {
+		let viewArticleDoc = await requestDocument(url, requestOptions);
+		let row = parseViewArticle(viewArticleDoc);
+		// XXX
+		if (row) {
+			return row;
+		}
+	}
+	catch (error) {
+		Z.debug(`Warning: cannot retrieve the profile view-article page at ${url}; skipping. The error was:`);
+		Z.debug(error);
+		return undefined;
+	}
+
+	Z.debug(`Warning: cannot find Google Scholar id in profile view-article page at ${url}; skipping.`);
+	return undefined;
+}
+
+async function scrapeInStages(row, referrerURL) {
+	try {
+		await scrapeDOI(row);
+		return;
+	}
+	catch (error) {
+	}
+
+	try {
+		await scrapeArXiV(row);
+		return;
+	}
+	catch (error) {
+	}
+
+	Z.debug(`Falling back to Google Scholar scraping for ${row.directLink}`);
+	await scrapeGoogleScholar(row, referrerURL);
+}
+
+async function scrapeDOI(row) {
+	let doi = extractDOI(row);
+	if (!doi) {
+		throw new Error(`No DOI found for link: ${row.directLink}`);
+	}
+
+	let translate = Z.loadTranslator("search");
+	// DOI Content Negotiation
+	translate.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
+	translate.setHandler("error", () => {});
+	translate.setHandler("itemDone", (obj, item) => {
+		// NOTE: The 'DOI Content Negotiation' translator does not add
+		// attachments on its own
+		addAttachment(item, row);
+		item.complete();
+	});
+	translate.setSearch({ DOI: doi });
+	Z.debug(`Trying DOI search for ${row.directLink}`);
+	return translate.translate();
+}
+
+async function scrapeArXiV(row) {
+	let eprintID = extractArXiv(row);
+	if (!eprintID) {
+		throw new Error(`No ArXiV eprint ID found for link: ${row.directLink}`);
+	}
+
+	let translate = Z.loadTranslator("search");
+	// arXiv.org
+	translate.setTranslator("ecddda2e-4fc6-4aea-9f17-ef3b56d7377a");
+	translate.setHandler("error", () => {});
+	translate.setHandler("itemDone", (obj, item) => {
+		// NOTE: Attachment is handled by the arXiv.org search translator
+		item.complete();
+	});
+	translate.setSearch({ arXiv: eprintID });
+	Z.debug(`Trying ArXiV search for ${row.directLink}`);
+	return translate.translate();
+}
+
+function scrapeGoogleScholar(row, referrerURL) {
+	// URL of the citation-info page fragment for the current row
+	let citeURL;
+
+	if (referrerURL.searchParams.get("scilib") === "1") { // My Library
+		citeURL = `${GS_CONFIG.baseURL}/scholar?scila=${row.id}&output=cite&scirp=0&hl=${GS_CONFIG.lang}`;
+	}
+	else { // Normal search page
+		citeURL = `${GS_CONFIG.baseURL}/scholar?q=info:${row.id}:scholar.google.com/&output=cite&scirp=0&hl=${GS_CONFIG.lang}`;
+	}
+
+	return processCitePage(citeURL, row, referrerURL.href);
+}
 
 /* Detection for law cases, but not "How cited" pages,
  * e.g. url of "how cited" page:
@@ -118,23 +242,22 @@ async function doWeb(doc, url) {
 	GS_CONFIG.baseURL = urlObj.origin;
 	GS_CONFIG.lang = urlObj.searchParams.get("hl") || "en";
 
-	var type = detectWeb(doc, url);
+	let type = detectWeb(doc, url);
+
 	if (type == "multiple") {
-		// An appropriate "multi-scraper" async function will be constructed
-		// depending on how the entry row info is generated
-		let multiScraper;
+		let failedRows = [];
+		let referrerURL;
+		let getRow;
+		let keys;
 
 		if (getSearchResults(doc, true/* checkOnly */)) {
 			let items = await Z.selectItems(getSearchResults(doc, false));
 			if (!items) {
 				return;
 			}
-
-			multiScraper = makeGSScraper(
-				Object.keys(items),
-				rowsFromSearchResult,
-				new URL(doc.location)
-			);
+			referrerURL = new URL(doc.location);
+			getRow = rowFromSearchResult;
+			keys = Object.keys(items);
 		}
 		else if (getProfileResults(doc, true/* checkOnly */)) {
 			let urls = await Z.selectItems(getProfileResults(doc, false));
@@ -142,16 +265,29 @@ async function doWeb(doc, url) {
 				return;
 			}
 			const profileName = text(doc, "#gsc_prf_in");
-
-			multiScraper = makeGSScraper(
-				Object.keys(urls),
-				rowsFromProfile,
-				getEmulatedSearchURL(profileName),
-				true/* expensive */
-			);
+			referrerURL = getEmulatedSearchURL(profileName);
+			getRow = rowFromProfile;
+			keys = Object.keys(urls);
 		}
 
-		await multiScraper(doc);
+		for (let i = 0; i < keys.length; i++) {
+			let key = keys[i];
+			let row = await getRow(key, doc);
+			if (row) {
+				try {
+					await scrapeInStages(row, referrerURL);
+				}
+				catch (error) {
+					failedRows.push(row);
+				}
+			}
+			if (i < keys.length - 1) {
+				await delay(DELAY_INTERVAL);
+			}
+		}
+		if (failedRows.length) {
+			throw new Error(`${failedRows.length} row(s) failed to translate: ${failedRows}`);
+		}
 	}
 	else {
 		// e.g. https://scholar.google.de/citations?view_op=view_citation&hl=de&user=INQwsQkAAAAJ&citation_for_view=INQwsQkAAAAJ:u5HHmVD_uO8C
@@ -168,20 +304,16 @@ async function scrape(doc, url, type) {
 	else {
 		// Stand-alone "View article" page
 		const profileName = text(doc, "#gsc_sb_ui > div > a");
+		let referrerURL = getEmulatedSearchURL(profileName);
 		// Single-item row computed from "View article" page content.
 		let row = parseViewArticle(doc);
-		if (row.id) {
-			// Create an async scraper that reuses the profile scraper, for
-			// this one entry only.
-			let singleScraper = makeGSScraper(
-				[url],
-				function* () {
-					yield row;
-				},
-				getEmulatedSearchURL(profileName),
-				true/* expensive */);
-
-			await singleScraper(doc);
+		if (row) {
+			try {
+				await scrapeInStages(row, referrerURL);
+			}
+			catch (error) {
+				throw new Error(`Failed to translate: ${row}`, error);
+			}
 		}
 		else {
 			throw new Error(`Expected 'View article' page at ${url}, but failed to extract article info from it.`);
@@ -199,17 +331,6 @@ async function scrape(doc, url, type) {
 function getEmulatedSearchURL(profileName) {
 	return new URL(`/scholar?hl=${GS_CONFIG.lang}&as_sdt=0%2C5&q=${encodeURIComponent(profileName).replace(/%20/g, "+")}&btnG=`, GS_CONFIG.baseURL);
 }
-
-/**
- * Information object for one Google Scholar entry or "row"
- *
- * @typedef {Object} RowObj
- * @property {?string} id
- * @property {string} [directLink]
- * @property {string} [attachmentLink]
- * @property {string} [attachmentType]
- * @property {string} [byline]
- */
 
 
 /*
@@ -592,79 +713,6 @@ function delay(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Reusable external-search utility for both DOI and ArXiv
-
-/**
- * Search using external ID
- *
- * @constructor
- * @param {string} searchKey - The property to be used for the ID in the
- * item-stub object used as the basis of search (e.g. "DOI", "arXiv", etc.)
- * @param {string} translatorUUID - The id of the search translator
- * @param {boolean} [doAttach=false] - Whether we should use a workaround to
- * save attachments
- * @property {Z.Translate<Z.SearchTranslator>} translator
- * @property {string} key
- */
-function ExternalSearch(searchKey, translatorUUID, doAttach = false) {
-	let trans = Z.loadTranslator("search");
-	trans.setTranslator(translatorUUID);
-	// NOTE that any error during translation is suppressed, but as no item
-	// gets saved, there will be an error raised anyway.
-	trans.setHandler("error", () => {});
-
-	if (doAttach) {
-		trans.setHandler("itemDone", (obj, item) => {
-			addAttachment(item, this.row); // hack for attachment saving.
-		});
-	}
-	// NOTE: Here setHandler() is best understood as "append handler".
-	trans.setHandler("itemDone", extHandler);
-
-	this.translate = trans;
-	this.key = searchKey;
-	this.doAttach = doAttach;
-}
-
-/**
- * The signature of the work function (the function that is called for the
- * translation of each row)
- *
- * @typedef {Function} WorkFunction
- * @async
- * @param {string} identifier - Identifier (internal or external) of the row
- * @param {RowObj} [row] - The row being translated
- * @param {*} [context] - A "free-form" context object that the work
- * function can use
- * @returns {Promise} A promise that fulfills upon the completion of the
- * translation
- */
-
-/**
- * Execute the translation using identifier. This is intended to be used as the
- * work function of a TranslationPipeline.
- *
- * @type {WorkFunction}
- */
-ExternalSearch.prototype.work = function (identifier, row) {
-	this.translate.setSearch({ [this.key]: identifier });
-	if (this.doAttach) {
-		this.row = row; // hack for attachment saving.
-	}
-
-	Z.debug(`Processing external id ${identifier} (${this.key})`);
-	// Let any translation exception (most likely the "no item saved" error)
-	// propagate, and make it a rule for the caller to handle it.
-	return this.translate.translate();
-};
-
-// "itemDone" handler callback. Currently, only adds "via Google Scholar" to
-// external libraryCatalog, and saves the item.
-function extHandler(obj, item) { // eslint-disable-line no-unused-vars
-	item.libraryCatalog = `${item.libraryCatalog} via Google Scholar`;
-	item.complete();
-}
-
 // Identification functions for external searches
 
 /**
@@ -701,354 +749,6 @@ function extractArXiv(row) {
 	return m && m[1];
 }
 
-// Translation pipeline utilities
-//
-// The translations are attempted in the order of DOI -> ArXiv -> GS native.
-// Each pipeline item will execute the translation and consume the row object
-// if it succeeds, or pass it to the next one if it fails. The pipelines can be
-// composed, building up a chain.
-
-/**
- * A translation pipeline component (e.g. DOI search, ArXiv search, GS BibTeX
- * import, or indirect GS import via GS profile)
- *
- * @constructor
- * @param {Function} identify - Function that takes a RowObj and
- * returns a string ID, or falsy if the input row cannot be processed by this
- * pipeline
- * @param {WorkFunction} work - The function that implements the processing
- * work of the pipeline. The "context" parameter's value is this.context.
- * @param {number} rest - The minimum "rest" duration, between successive tasks
- * processed by this pipeline, in milliseconds
- * @param {Object} context - A free-form context variable, to be interpreted by
- * this.work as it sees fit
- * @property {TranslationPipeline?} next - Next pipeline in the chain
- * @property {RowObj[]} bin - Row objects that failed all translations
- * @property {Promise} current - The current task-queue tail to which further
- * tasks will be appended
- * @property {boolean} restOnLead - Whether the "rest" shall apply to the
- * leading edge of a work task, in addition to the trailing edge
- */
-function TranslationPipeline(identify, work, rest, context, label = "[unnamed]") {
-	Object.assign(this, { identify, work, rest, context, label });
-	this.next = undefined;
-	this.bin = [];
-	this.current = Promise.resolve();
-	this.restOnLead = false;
-}
-
-TranslationPipeline.prototype = {
-
-	/**
-	 * Accept a row and create the queued task for it, or delegate to the next
-	 * in the pipeline, if any, when the identification fails.
-	 *
-	 * @param {RowObj} row - The row sent into the pipeline
-	 */
-	handleRow: function (row) {
-		// Identify the row; falsy means we can't handle it.
-		let id;
-		try {
-			id = this.identify(row);
-		}
-		catch (error) {
-			// failed identification falls through to the case of falsy id
-		}
-		if (!id) {
-			this.pass(row);
-			return;
-		}
-		let currPromise = this.current.then(this.getTask(id, row));
-		this.current = currPromise;
-	},
-
-	/**
-	 * Create an async function that executes the task -- this.work(id, row,
-	 * this.context) -- with mandatory "rest" after task execution
-	 *
-	 * @param {string} id - ID string as returned by this.identify(row)
-	 * @param {RowObj} row - The row object being operated on
-	 * @returns {AsyncFunction} An async function that takes no arguments. It
-	 * will execute the task on the row, and, if the task raises no exceptions,
-	 * the row will not be further processed. If however the task throws, the
-	 * row will be passed to downstream pipelines if any. The thrown error is
-	 * suppressed, and the task always fulfills.
-	 */
-	getTask: function (id, row) {
-		let that = this;
-		async function task() {
-			if (that.restOnLead && that.rest) {
-				await delay(that.rest);
-			}
-
-			// Suppress any error because the pipeline isn't designed to handle
-			// true rejection of the task. The rows that failed all pipelines
-			// will end up in the bin.
-			try {
-				await that.work(id, row, that.context);
-			}
-			catch (error) {
-				Z.debug(`Pipeline ${that.label} work-function failed with input row:`);
-				Z.debug(row);
-				Z.debug(error);
-				that.pass(row);
-			}
-
-			// Rest no matter the success status. Unless the row says not.
-			if (that.rest && !row.last) {
-				await delay(that.rest);
-			}
-		}
-		return task;
-	},
-
-	/**
-	 * Pass the row to the next in the pipeline, if any. If this is the last in
-	 * the pipeline, push the row into the "bin" array.
-	 *
-	 * @param {RowObj} row
-	 */
-	pass: function (row) {
-		if (this.next) {
-			this.next.handleRow(row);
-		}
-		else {
-			this.bin.push(row);
-		}
-	},
-
-	/**
-	 * Compose the pipeline chain by adding another pipeline item
-	 *
-	 * The input pipeline will be appended to the tail of the current pipeline.
-	 * Its "bin" property will be set to reference the head pipeline's.
-	 *
-	 * @param {TranslationPipeline} other - The pipeline to be appended
-	 * @returns {TranslationPipeline} Returns this, to facilitate cascading
-	 * composition
-	 */
-	add: function (other) {
-		let p = this; // eslint-disable-line consistent-this
-		while (p.next) {
-			p = p.next;
-		}
-		p.next = other;
-		other.bin = this.bin;
-		return this;
-	},
-
-	/**
-	 * Returns a promise that fulfills when all pipelines in the chain finish
-	 * processing.
-	 *
-	 * @returns {Promise<undefined[]>}
-	 */
-	barrier: function () {
-		let currentJobs = [];
-		let p = this; // eslint-disable-line consistent-this
-		while (p) {
-			currentJobs.push(p.current);
-			p = p.next;
-		}
-		return Promise.all(currentJobs);
-	}
-};
-
-// Factory functions that creates reusable components from the translation
-// implementations and the pipelines controlling them
-
-/**
- * Convenience function that creates an external-search pipeline (DOI or
- * ArXiV)
- *
- * @param {string} key - Search key, e.g. "DOI" or "arXiv"
- * @param {string} uuid - UUID of the search translator
- * @param {Function} identify - Row-identification function
- * @param {number} rest - "Rest" time between consecutive task runs in
- * milliseconds
- * @param {boolean} [attach=false] - Whether this pipeline should attach the
- * documents as appearing on the left side on GS pages
- * @returns {TranslationPipeline}
- */
-function makeExternalPipeline(key, uuid, identify, rest, attach = false) {
-	let searchObj = new ExternalSearch(key, uuid, attach);
-	return new TranslationPipeline(
-		identify,
-		searchObj.work.bind(searchObj), // work function.
-		rest, null/* context */,
-		`[${key}]` // use the key as pipeline label, for debugging
-	);
-}
-
-/**
- * Work-function impementation for the Google Scholar translation
- *
- * @async
- */
-function workGS(id, row, referrer) {
-	// URL of the citation-info page fragment for the current row
-	let citeURL;
-
-	if (referrer.searchParams.get("scilib") === "1") { // My Library
-		citeURL = `${GS_CONFIG.baseURL}/scholar?scila=${id}&output=cite&scirp=0&hl=${GS_CONFIG.lang}`;
-	}
-	else { // Normal search page
-		citeURL = `${GS_CONFIG.baseURL}/scholar?q=info:${id}:scholar.google.com/&output=cite&scirp=0&hl=${GS_CONFIG.lang}`;
-	}
-
-	return processCitePage(citeURL, row, referrer.href);
-}
-
-/**
- * Generate the row objects from the GS IDs on a search-result document
- *
- * @param {string[]} gsIDs - Array of GS IDs computed from those entries on the
- * search-result page that are selected by the user
- * @param {Document} doc - The document from which the IDs are extracted
- * @yields {RowObj}
- */
-function* rowsFromSearchResult(gsIDs, doc) {
-	for (const id of gsIDs) {
-		let entryElem = doc.querySelector(`.gs_r[data-cid="${id}"]`);
-		// href from an <a> tag, direct link to the source. Note that the ID
-		// starting with number can be fine, but the selector is a pain.
-		let aElem = doc.getElementById(id);
-		let directLink = aElem ? aElem.href : undefined;
-		let attachmentLink = attr(entryElem, ".gs_ggs a", "href");
-		let attachmentType = text(entryElem, ".gs_ctg2");
-		if (attachmentType) {
-			// Remove the brackets
-			attachmentType = attachmentType.slice(1, -1).toUpperCase();
-		}
-		let byline = text(entryElem, ".gs_a");
-
-		yield { id, directLink, attachmentLink, attachmentType, byline };
-	}
-}
-
-/**
- * Asynchronously generate rows from the selected entries of a GS profile page,
- * for each selected URL
- *
- * @async
- * @param {string[]} viewArticleURLs - The URLs on the profile page (leading to
- * "View article" pages) selected by the user, as returned by
- * getProfileResults()
- * @param {Document} profileDoc - The profile-page document being scraped
- * @yields {Promise<(RowObj|undefined)>} Promise that resolves to the row object, obtained
- * by requesting the "View article" document at the selected URL, or undefined
- * in the case of failure
- */
-function* rowsFromProfile(viewArticleURLs, profileDoc) {
-	// To "navigate" to the linked "View article" page from the profile page, a
-	// referrer is sent as header in the request
-	const requestOptions = { headers: { Referer: profileDoc.location.href } };
-
-	for (let i = 0; i < viewArticleURLs.length; i++) {
-		let url = viewArticleURLs[i];
-		Z.debug(url);
-
-		yield requestDocument(url, requestOptions)
-			.then((viewArticleDoc) => {
-				let row = parseViewArticle(viewArticleDoc);
-				if (row.id !== null) {
-					return row;
-				}
-				else {
-					Z.debug(`Warning: cannot find Google Scholar id in profile view-article page at ${url}; skipping.`);
-					return undefined;
-				}
-			}, (error) => {
-				Z.debug(`Warning: cannot get retrieve the profile view-article page at ${url}; skipping. The error was:`);
-				Z.debug(error);
-				return undefined;
-			});
-	}
-}
-
-/**
- * Create a TranslationPipeline instance for translating using Google Scholar
- * resources
- *
- * @param {URL} searchReferrer - URL object to be used as the referrer of
- * requests to citation-info page fragments
- * @param {number} pause - Mimium duration of the pause after each translation
- * run, in milliseconds
- * @param {boolean} [restOnLead=false] - Whether the rest should apply to the
- * leading edge as well as the trailing edge of the request-response roundtrip
- * @returns {TranslationPipeline} The pipeline object that utilizes
- * citation-info from Google Scholar itself
- */
-function makeGSPipeline(searchReferrer, pause, restOnLead = false) {
-	let p = new TranslationPipeline(row => row.id, // trivial identification function
-		workGS, pause, searchReferrer/* context */, "[GS native]");
-	p.restOnLead = restOnLead;
-	return p;
-}
-
-/**
- * Convenience function that creates a GS-based multiscraper
- *
- * @param {string[]} inputStrings - Array of strings that is the key array of
- * the object returned by getSearchResults() or getProfileResults()
- * @param {Generator|AsyncGenerator} rowGenerator - Generator of rows, e.g.
- * rowsFromSearchResult or rowsFromProfile
- * @param {URL} referrerURL - URL object for the referrer, actual or emulated
- * @param {boolean} [expensive=false] - Whether the scraper is "expensive" in
- * the sense of using GS resources for both row-generation and translation
- * (this is true for profile scraping).
- * @returns {AsyncFunction} Multiscraper function that operates on the doc
- * being scraped
- */
-function makeGSScraper(inputStrings, rowGenerator, referrerURL, expensive = false) {
-	return async function (doc) {
-		let rows = rowGenerator(inputStrings, doc);
-
-		let pipeline = makeExternalPipeline(
-			"DOI",
-			"b28d0d42-8549-4c6d-83fc-8382874a5cb9", // DOI Content Negotiation
-			extractDOI,
-			20, true/* attach */
-		).add(makeExternalPipeline(
-			"arXiv",
-			"ecddda2e-4fc6-4aea-9f17-ef3b56d7377a", // arXiv.org
-			extractArXiv,
-			3000)
-		).add(makeGSPipeline( // "native" GS pipeline
-			referrerURL,
-			expensive ? Math.ceil(DELAY_INTERVAL / 2) : DELAY_INTERVAL,
-			expensive/* restOnLead */)
-		);
-
-		let n = inputStrings.length;
-		for (let rowPromise of rows) {
-			let row = await rowPromise;
-			// NOTE that unecessary after-operation delays (for the last item)
-			// are cancelled
-			if (row) {
-				if (n <= 1) {
-					row.last = true; // cancel trailing delays in the pipelines
-				}
-
-				pipeline.handleRow(row);
-			}
-			if (expensive && (n > 1)) {
-				// Pause before getting next row; necessary for async
-				// row-generation from the profile page.
-				await delay(DELAY_INTERVAL);
-			}
-			n -= 1;
-		}
-
-		// Barrier for the conclusion of all translation tasks.
-		await pipeline.barrier();
-
-		if (pipeline.bin.length) {
-			throw new Error(`${pipeline.bin.length} row(s) failed to translate.`);
-		}
-	};
-}
-
 // Page-processing utilities
 
 /**
@@ -1056,15 +756,14 @@ function makeGSScraper(inputStrings, rowGenerator, referrerURL, expensive = fals
  * search-result row
  *
  * @param {Document} viewArticleDoc - "View article" document
- * @returns {RowObj} The row object; if the id property is null, the parsing
- * failed.
+ * @returns {RowObj?} The row object, or null if parsing failed.
  */
 function parseViewArticle(viewArticleDoc) {
 	let related = ZU.xpathText(viewArticleDoc,
 		'//a[contains(@href, "q=related:")]/@href');
 	if (!related) {
 		Z.debug("Could not locate 'related' link on the 'View article' page.");
-		return { id: null };
+		return null;
 	}
 
 	let m = related.match(/=related:([^:]+):/); // GS id
@@ -1080,7 +779,7 @@ function parseViewArticle(viewArticleDoc) {
 	}
 	else {
 		Z.debug("Unexpected format of 'related' URL; can't find Google Scholar id. 'related' URL is " + related);
-		return { id: null };
+		return null;
 	}
 }
 
@@ -1208,7 +907,7 @@ function addAttachment(item, row) {
 	// attach linked document as attachment if available
 	if (row.attachmentLink) {
 		let	attachment = {
-			title: "Available Version via Google Scholar",
+			title: "Available Version (via Google Scholar)",
 			url: row.attachmentLink,
 		};
 		let mimeType = MIME_TYPES[row.attachmentType];
@@ -1532,7 +1231,7 @@ var testCases = [
 				"url": "https://www.igi-global.com/chapter/linkeddata-story-far/55046",
 				"attachments": [
 					{
-						"title": "Available Version via Google Scholar",
+						"title": "Available Version (via Google Scholar)",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -1586,6 +1285,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=RjsFKYEAAAAJ&cstart=20&pagesize=80&citation_for_view=RjsFKYEAAAAJ:5nxA0vEk-isC",
+		"detectedItemType": "journalArticle",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1604,7 +1304,7 @@ var testCases = [
 				"issue": "1",
 				"journalAbbreviation": "Studies in Christian Ethics",
 				"language": "en",
-				"libraryCatalog": "DOI.org (Crossref) via Google Scholar",
+				"libraryCatalog": "DOI.org (Crossref)",
 				"pages": "88-101",
 				"publicationTitle": "Studies in Christian Ethics",
 				"shortTitle": "The Weakness of Power and the Power of Weakness",
@@ -1612,7 +1312,7 @@ var testCases = [
 				"volume": "20",
 				"attachments": [
 					{
-						"title": "Available Version via Google Scholar",
+						"title": "Available Version (via Google Scholar)",
 						"mimeType": "application/pdf"
 					}
 				],
