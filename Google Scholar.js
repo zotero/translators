@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-11 05:43:37"
+	"lastUpdated": "2023-07-11 07:58:52"
 }
 
 /*
@@ -46,129 +46,20 @@ const MIME_TYPES = {
 	HTML: 'text/html',
 };
 
+// The only "typedef" that needs to be kept in mind: a data object representing
+// a row in the seach/profile listing.
+
 /**
  * Information object for one Google Scholar entry or "row"
  *
  * @typedef {Object} RowObj
- * @property {?string} id
- * @property {string} [directLink]
- * @property {string} [attachmentLink]
- * @property {string} [attachmentType]
- * @property {string} [byline]
+ * @property {?string} id - Google Scholar ID string
+ * @property {string} [directLink] - href of the title link
+ * @property {string} [attachmentLink] - href of the attachment link found by GS
+ * @property {string} [attachmentType] - type (file extension) of the attachment
+ * @property {string} [byline] - the line of text below the title (in green)
  */
 
-function rowFromSearchResult(id, doc) {
-	let entryElem = doc.querySelector(`.gs_r[data-cid="${id}"]`);
-	// href from an <a> tag, direct link to the source. Note that the ID
-	// starting with number can be fine, but the selector is a pain.
-	let aElem = doc.getElementById(id);
-	let directLink = aElem ? aElem.href : undefined;
-	let attachmentLink = attr(entryElem, ".gs_ggs a", "href");
-	let attachmentType = text(entryElem, ".gs_ctg2");
-	if (attachmentType) {
-		// Remove the brackets
-		attachmentType = attachmentType.slice(1, -1).toUpperCase();
-	}
-	let byline = text(entryElem, ".gs_a");
-
-	return { id, directLink, attachmentLink, attachmentType, byline };
-}
-
-async function rowFromProfile(url, profileDoc) {
-	// To "navigate" to the linked "View article" page from the profile page, a
-	// referrer is sent as header in the request
-	const requestOptions = { headers: { Referer: profileDoc.location.href } };
-
-	try {
-		let viewArticleDoc = await requestDocument(url, requestOptions);
-		let row = parseViewArticle(viewArticleDoc);
-		// XXX
-		if (row) {
-			return row;
-		}
-	}
-	catch (error) {
-		Z.debug(`Warning: cannot retrieve the profile view-article page at ${url}; skipping. The error was:`);
-		Z.debug(error);
-		return undefined;
-	}
-
-	Z.debug(`Warning: cannot find Google Scholar id in profile view-article page at ${url}; skipping.`);
-	return undefined;
-}
-
-async function scrapeInStages(row, referrerURL) {
-	try {
-		await scrapeDOI(row);
-		return;
-	}
-	catch (error) {
-	}
-
-	try {
-		await scrapeArXiV(row);
-		return;
-	}
-	catch (error) {
-	}
-
-	Z.debug(`Falling back to Google Scholar scraping for ${row.directLink}`);
-	await scrapeGoogleScholar(row, referrerURL);
-}
-
-async function scrapeDOI(row) {
-	let doi = extractDOI(row);
-	if (!doi) {
-		throw new Error(`No DOI found for link: ${row.directLink}`);
-	}
-
-	let translate = Z.loadTranslator("search");
-	// DOI Content Negotiation
-	translate.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
-	translate.setHandler("error", () => {});
-	translate.setHandler("itemDone", (obj, item) => {
-		// NOTE: The 'DOI Content Negotiation' translator does not add
-		// attachments on its own
-		addAttachment(item, row);
-		item.complete();
-	});
-	translate.setSearch({ DOI: doi });
-	Z.debug(`Trying DOI search for ${row.directLink}`);
-	return translate.translate();
-}
-
-async function scrapeArXiV(row) {
-	let eprintID = extractArXiv(row);
-	if (!eprintID) {
-		throw new Error(`No ArXiV eprint ID found for link: ${row.directLink}`);
-	}
-
-	let translate = Z.loadTranslator("search");
-	// arXiv.org
-	translate.setTranslator("ecddda2e-4fc6-4aea-9f17-ef3b56d7377a");
-	translate.setHandler("error", () => {});
-	translate.setHandler("itemDone", (obj, item) => {
-		// NOTE: Attachment is handled by the arXiv.org search translator
-		item.complete();
-	});
-	translate.setSearch({ arXiv: eprintID });
-	Z.debug(`Trying ArXiV search for ${row.directLink}`);
-	return translate.translate();
-}
-
-function scrapeGoogleScholar(row, referrerURL) {
-	// URL of the citation-info page fragment for the current row
-	let citeURL;
-
-	if (referrerURL.searchParams.get("scilib") === "1") { // My Library
-		citeURL = `${GS_CONFIG.baseURL}/scholar?scila=${row.id}&output=cite&scirp=0&hl=${GS_CONFIG.lang}`;
-	}
-	else { // Normal search page
-		citeURL = `${GS_CONFIG.baseURL}/scholar?q=info:${row.id}:scholar.google.com/&output=cite&scirp=0&hl=${GS_CONFIG.lang}`;
-	}
-
-	return processCitePage(citeURL, row, referrerURL.href);
-}
 
 /* Detection for law cases, but not "How cited" pages,
  * e.g. url of "how cited" page:
@@ -245,7 +136,6 @@ async function doWeb(doc, url) {
 	let type = detectWeb(doc, url);
 
 	if (type == "multiple") {
-		let failedRows = [];
 		let referrerURL;
 		let getRow;
 		let keys;
@@ -270,28 +160,40 @@ async function doWeb(doc, url) {
 			keys = Object.keys(urls);
 		}
 
-		for (let i = 0; i < keys.length; i++) {
-			let key = keys[i];
-			let row = await getRow(key, doc);
-			if (row) {
-				try {
-					await scrapeInStages(row, referrerURL);
-				}
-				catch (error) {
-					failedRows.push(row);
-				}
-			}
-			if (i < keys.length - 1) {
-				await delay(DELAY_INTERVAL);
-			}
-		}
-		if (failedRows.length) {
-			throw new Error(`${failedRows.length} row(s) failed to translate: ${failedRows}`);
-		}
+		await scrapeMany(keys, doc, getRow, referrerURL);
 	}
 	else {
 		// e.g. https://scholar.google.de/citations?view_op=view_citation&hl=de&user=INQwsQkAAAAJ&citation_for_view=INQwsQkAAAAJ:u5HHmVD_uO8C
 		await scrape(doc, url, type);
+	}
+}
+
+
+// Scrape an array of string IDs or URLs (keys) that are obtained from
+// the GS search/profile document (baseDocument). rowRequestor is a function
+// that returns the row or a promise resolving to a row when called as
+// rowRequestor(key, baseDocument).
+// This function will reject if some rows failed to translate.
+async function scrapeMany(keys, baseDocument, rowRequestor, referrerURL) {
+	let failedRows = [];
+	let promises = [];
+	for (let i = 0; i < keys.length; i++) {
+		let key = keys[i];
+		let row = await rowRequestor(key, baseDocument);
+		if (row) {
+			// NOTE: here we start a promise that scrapes the row in the stages
+			// of DOI -> arXiv -> Google Scholar, but don't wait for it in the
+			// loop over rows
+			promises.push(scrapeInStages(row, referrerURL, failedRows));
+		}
+		if (i < keys.length - 1) {
+			// But we do wait between iterations over the rows
+			await delay(DELAY_INTERVAL);
+		}
+	}
+	await Promise.all(promises);
+	if (failedRows.length) {
+		throw new Error(`${failedRows.length} row(s) failed to translate`);
 	}
 }
 
@@ -308,11 +210,10 @@ async function scrape(doc, url, type) {
 		// Single-item row computed from "View article" page content.
 		let row = parseViewArticle(doc);
 		if (row) {
-			try {
-				await scrapeInStages(row, referrerURL);
-			}
-			catch (error) {
-				throw new Error(`Failed to translate: ${row}`, error);
+			let failedRow = [];
+			await scrapeInStages(row, referrerURL, failedRow);
+			if (failedRow.length) {
+				throw new Error(`Failed to translate: ${row}`);
 			}
 		}
 		else {
@@ -321,17 +222,138 @@ async function scrape(doc, url, type) {
 	}
 }
 
-/**
- * Returns an emulated search URL for a GS search with the profile name as the
- * search term
- *
- * @param {string} profileName - Name of the profile's owner
- * @returns {URL}
- */
-function getEmulatedSearchURL(profileName) {
-	return new URL(`/scholar?hl=${GS_CONFIG.lang}&as_sdt=0%2C5&q=${encodeURIComponent(profileName).replace(/%20/g, "+")}&btnG=`, GS_CONFIG.baseURL);
+// "row requestor" functions
+// For search results - given ID and the document it originates, return a row.
+// This function does not incur additional network requests.
+function rowFromSearchResult(id, doc) {
+	try {
+		let entryElem = doc.querySelector(`.gs_r[data-cid="${id}"]`);
+		// href from an <a> tag, direct link to the source. Note that the ID
+		// starting with number can be fine, but the selector is a pain.
+		let aElem = doc.getElementById(id);
+		let directLink = aElem ? aElem.href : undefined;
+		let attachmentLink = attr(entryElem, ".gs_ggs a", "href");
+		let attachmentType = text(entryElem, ".gs_ctg2");
+		if (attachmentType) {
+			// Remove the brackets
+			attachmentType = attachmentType.slice(1, -1).toUpperCase();
+		}
+		let byline = text(entryElem, ".gs_a");
+
+		return { id, directLink, attachmentLink, attachmentType, byline };
+	}
+	catch (error) {
+		Z.debug(`Warning: failed to get row info for GS id ${id}`);
+		return undefined;
+	}
 }
 
+// For search results - given "Article view" URLs and the profile document it
+// originates, return a row. This will incur one request (to get the "Article
+// view" document) per row.
+async function rowFromProfile(url, profileDoc) {
+	// To "navigate" to the linked "View article" page from the profile page, a
+	// referrer is sent as header in the request
+	const requestOptions = { headers: { Referer: profileDoc.location.href } };
+
+	try {
+		let viewArticleDoc = await requestDocument(url, requestOptions);
+		let row = parseViewArticle(viewArticleDoc);
+		if (row) {
+			return row;
+		}
+	}
+	catch (error) {
+		Z.debug(`Warning: cannot retrieve the profile view-article page at ${url}; skipping. The error was:`);
+		Z.debug(error);
+		return undefined;
+	}
+
+	Z.debug(`Warning: cannot find Google Scholar id in profile view-article page at ${url}; skipping.`);
+	return undefined;
+}
+
+// process the row in the order of DOI -> arXiv -> GS. If all fail, add the row
+// to the array failedRows. This function never rejects.
+async function scrapeInStages(row, referrerURL, failedRows) {
+	try {
+		await scrapeDOI(row);
+		return;
+	}
+	catch (error) {
+	}
+
+	try {
+		await scrapeArXiv(row);
+		return;
+	}
+	catch (error) {
+	}
+
+	try {
+		await scrapeGoogleScholar(row, referrerURL);
+	}
+	catch (error) {
+		Z.debug(`Error with Google Scholar scraping of row ${row.directLink}`);
+		Z.debug(`The error was: ${error}`);
+		failedRows.push(row);
+	}
+}
+
+function scrapeDOI(row) {
+	let doi = extractDOI(row);
+	if (!doi) {
+		throw new Error(`No DOI found for link: ${row.directLink}`);
+	}
+
+	let translate = Z.loadTranslator("search");
+	// DOI Content Negotiation
+	translate.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
+	translate.setHandler("error", () => {});
+	translate.setHandler("itemDone", (obj, item) => {
+		// NOTE: The 'DOI Content Negotiation' translator does not add
+		// attachments on its own
+		addAttachment(item, row);
+		item.complete();
+	});
+	translate.setSearch({ DOI: doi });
+	Z.debug(`Trying DOI search for ${row.directLink}`);
+	return translate.translate();
+}
+
+function scrapeArXiv(row) {
+	let eprintID = extractArXiv(row);
+	if (!eprintID) {
+		throw new Error(`No ArXiv eprint ID found for link: ${row.directLink}`);
+	}
+
+	let translate = Z.loadTranslator("search");
+	// arXiv.org
+	translate.setTranslator("ecddda2e-4fc6-4aea-9f17-ef3b56d7377a");
+	translate.setHandler("error", () => {});
+	translate.setHandler("itemDone", (obj, item) => {
+		// NOTE: Attachment is handled by the arXiv.org search translator
+		item.complete();
+	});
+	translate.setSearch({ arXiv: eprintID });
+	Z.debug(`Trying ArXiv search for ${row.directLink}`);
+	return translate.translate();
+}
+
+function scrapeGoogleScholar(row, referrerURL) {
+	// URL of the citation-info page fragment for the current row
+	let citeURL;
+
+	if (referrerURL.searchParams.get("scilib") === "1") { // My Library
+		citeURL = `${GS_CONFIG.baseURL}/scholar?scila=${row.id}&output=cite&scirp=0&hl=${GS_CONFIG.lang}`;
+	}
+	else { // Normal search page
+		citeURL = `${GS_CONFIG.baseURL}/scholar?q=info:${row.id}:scholar.google.com/&output=cite&scirp=0&hl=${GS_CONFIG.lang}`;
+	}
+
+	Z.debug(`Falling back to Google Scholar scraping for ${row.directLink || "citation-only entry"}`);
+	return processCitePage(citeURL, row, referrerURL.href);
+}
 
 /*
  * #########################
@@ -752,6 +774,17 @@ function extractArXiv(row) {
 // Page-processing utilities
 
 /**
+ * Returns an emulated search URL for a GS search with the profile name as the
+ * search term
+ *
+ * @param {string} profileName - Name of the profile's owner
+ * @returns {URL}
+ */
+function getEmulatedSearchURL(profileName) {
+	return new URL(`/scholar?hl=${GS_CONFIG.lang}&as_sdt=0%2C5&q=${encodeURIComponent(profileName).replace(/%20/g, "+")}&btnG=`, GS_CONFIG.baseURL);
+}
+
+/**
  * Parse the "View article" page and returns the equivalent of a GS
  * search-result row
  *
@@ -785,7 +818,8 @@ function parseViewArticle(viewArticleDoc) {
 
 /**
  * Request and read the page-fragment with citation info, retrieve BibTeX, and
- * import.
+ * import. Each call sends two network requests, and each request is preceded
+ * by a delay.
  *
  * @param {string} citeURL - The citation-info page fragment's URL, to be
  * requested.
@@ -799,6 +833,7 @@ async function processCitePage(citeURL, row, referrer) {
 	// Note that the page at citeURL has no doctype and is not a complete HTML
 	// document. The browser can parse it in quirks mode but ZU.requestDocument
 	// has trouble with it.
+	await delay(DELAY_INTERVAL);
 	const citePage = await requestText(citeURL, requestOptions);
 
 	let m = citePage.match(/href="((https?:\/\/[a-z.]*)?\/scholar.bib\?[^"]+)/);
