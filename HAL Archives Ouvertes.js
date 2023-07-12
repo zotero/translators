@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-12 07:30:59"
+	"lastUpdated": "2023-07-12 08:47:33"
 }
 
 /*
@@ -45,35 +45,36 @@ function findItemType(doc, url) {
 	var itemType = text(doc, '.typdoc')
 		// do some preliminary cleaning
 		.split("(")[0].trim() // discard parenthesized text
-		.split(", ")[0].trim(); // simplify "Pré-publication, Document de travail" and " Preprints, Working Papers, ..."
+		.split(", ")[0].trim() // simplify "Pré-publication, Document de travail" and " Preprints, Working Papers, ..."
+		.toLowerCase();
 	var typeMap = {
 		/* eslint-disable quote-props */
-		"Books": "book",
-		"Ouvrages": "book",
-		"Book sections": "bookSection",
-		"Chapitre d'ouvrage": "bookSection",
-		"Conference papers": "conferencePaper",
-		"Communication dans un congrès": "conferencePaper",
-		"Directions of work or proceedings": "book",
-		"Direction d'ouvrage, Proceedings": "book",
-		"Journal articles": "journalArticle",
-		"Article dans une revue": "journalArticle",
-		"Lectures": "presentation",
-		"Cours": "presentation",
-		"Other publications": "book", // this could also be report, not sure here but bibtex guesses book
-		"Autre publication scientifique": "book", // this could also be report, not sure here but bibtex guesses book
-		"Patents": "patent",
-		"Brevet": "patent",
-		"Preprints": "preprint",
-		"Pré-publication": "preprint",
-		"Reports": "report",
-		"Rapport": "report",
-		"Scientific blog post": "blogPost",
-		"Article de blog scientifique": "blogPost",
-		"Theses": "thesis",
-		"Thèse": "thesis",
-		"Poster communications": "presentation",
-		"Poster de conférence": "presentation",
+		"books": "book",
+		"ouvrages": "book",
+		"book sections": "bookSection",
+		"chapitre d'ouvrage": "bookSection",
+		"conference papers": "conferencePaper",
+		"communication dans un congrès": "conferencePaper",
+		"directions of work or proceedings": "book",
+		"direction d'ouvrage": "book",
+		"journal articles": "journalArticle",
+		"article dans une revue": "journalArticle",
+		"lectures": "presentation",
+		"cours": "presentation",
+		"other publications": "book", // this could also be report, not sure here but bibtex guesses book
+		"autre publication scientifique": "book", // this could also be report, not sure here but bibtex guesses book
+		"patents": "patent",
+		"brevet": "patent",
+		"preprints": "preprint",
+		"pré-publication": "preprint",
+		"reports": "report",
+		"rapport": "report",
+		"scientific blog post": "blogPost",
+		"article de blog scientifique": "blogPost",
+		"theses": "thesis",
+		"thèse": "thesis",
+		"poster communications": "presentation",
+		"poster de conférence": "presentation",
 		/* eslint-enable quote-props */
 	};
 	if (typeMap[itemType]) return typeMap[itemType];
@@ -111,8 +112,8 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	var bibtexUrl = url.replace(/#.+|\/$/, "") + "/bibtex";
-	var abstract = ZU.xpathText(doc, '//div[@class="abstract-content"]');
-	var pdfUrl = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
+	var abstract = text(doc, '.abstract-content');
+	var pdfUrl = attr(doc, "#viewer-detailed a[download]", "href");
 	// Z.debug("pdfURL " + pdfUrl)
 	ZU.doGet(bibtexUrl, function (bibtex) {
 		// Z.debug(bibtex)
@@ -121,7 +122,7 @@ function scrape(doc, url) {
 		translator.setString(bibtex);
 		translator.setHandler("itemDone", function (obj, item) {
 			if (abstract) {
-				item.abstractNote = abstract.replace(/(Abstract|Résumé)\s*:/, "");
+				item.abstractNote = abstract.replace(/^(Abstract|Résumé)\s*:/, "");
 			}
 			if (pdfUrl) {
 				item.attachments = [{
