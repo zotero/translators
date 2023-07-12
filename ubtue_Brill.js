@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-05 13:02:58"
+	"lastUpdated": "2023-07-12 10:55:09"
 }
 
 /*
@@ -132,26 +132,18 @@ function postProcess(doc, item) {
 		item.date;
 	}
 	//scrape ORCID from website
-	let authorSectionEntries = doc.querySelectorAll('.text-subheading span');
+	let SubheadingSpanHasOrcid = doc.querySelectorAll('.text-subheading span .orcid').length;
+	let authorSectionEntries = SubheadingSpanHasOrcid ? doc.querySelectorAll('.text-subheading span') :
+                           doc.querySelectorAll('.content-contributor-author .contributor-details');
+	let furtherSelector = SubheadingSpanHasOrcid ? '.c-Button--link' : '.contributor-details-link';
 	if (authorSectionEntries) {
 		for (let authorSectionEntry of authorSectionEntries) {
-			let authorInfo = authorSectionEntry.querySelector('.c-Button--link');
+			let authorInfo = authorSectionEntry.querySelector(furtherSelector);
 			let orcidHref = authorSectionEntry.querySelector('.orcid');
 			if (authorInfo && orcidHref) {
 				let author = authorInfo.childNodes[0].textContent;
 				let orcid = orcidHref.textContent.replace(/.*(\d{4}-\d+-\d+-\d+x?)$/i, '$1');
 				item.notes.push({note: "orcid:" + orcid + ' | ' + author});
-			} else if (authorInfo == null && orcidHref == null) {
-				authorSectionEntries = doc.querySelectorAll('.content-contributor-author.single-line .contributor-details');
-				for (let authorSectionEntry of authorSectionEntries) {
-					authorInfo = authorSectionEntry.querySelector('.contributor-details-link');
-					orcidHref = authorSectionEntry.querySelector('.orcid');
-					if (authorInfo && orcidHref) {
-						author = authorInfo.childNodes[0].textContent;
-						orcid = orcidHref.textContent.replace(/.*(\d{4}-\d+-\d+-\d+x?)$/i, '$1');
-						item.notes.push({note: "orcid:" + orcid + ' | ' + author});		
-					}
-				}
 			}
 		}
 	}
