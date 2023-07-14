@@ -196,7 +196,7 @@ function cleanupMath(element, laTeXify = true) {
 
 	// Top-level contentful MathML elements. If this doesn't exist, there's no
 	// math.
-	let baseMathList = dup.querySelectorAll(":scope span[id^='MathJax-Element']");
+	let baseMathList = dup.querySelectorAll("span[id^='MathJax-Element']");
 	if (!baseMathList.length) {
 		return dup;
 	}
@@ -206,7 +206,7 @@ function cleanupMath(element, laTeXify = true) {
 		baseMathList.forEach(deleteNode);
 
 		// Keep "math/tex" "script" tags and convert them to text.
-		dup.querySelectorAll(":scope script[type='math/tex']")
+		dup.querySelectorAll("script[type='math/tex']")
 			.forEach((node) => {
 				let content = node.textContent.trim();
 				content = `$${content}$`;
@@ -216,7 +216,7 @@ function cleanupMath(element, laTeXify = true) {
 	else {
 		// Operation mode is to un-LaTeXify by reusing rendered MathML,
 		// especially the text nodes
-		let nodeList = dup.querySelectorAll(":scope span.MJX_Assistive_MathML");
+		let nodeList = dup.querySelectorAll("span.MJX_Assistive_MathML");
 		if (nodeList.length) {
 			// An accurate and uniform way to extract the MathML content, from
 			// assistive MathML. The top-level math <span> node is replaced by
@@ -230,13 +230,13 @@ function cleanupMath(element, laTeXify = true) {
 			}
 
 			// Strip any annotations
-			dup.querySelectorAll(":scope annotation").forEach(deleteNode);
+			dup.querySelectorAll("annotation").forEach(deleteNode);
 
 			baseMathList.forEach(node => textify(node, cleanText(node)));
 		}
 
 		// Then delete the LaTeX source in <script> tags
-		dup.querySelectorAll(":scope script[type='math/tex']")
+		dup.querySelectorAll("script[type='math/tex']")
 			.forEach(deleteNode);
 	}
 	return dup;
