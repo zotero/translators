@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-03 14:16:41"
+	"lastUpdated": "2023-07-14 10:46:05"
 }
 
 /*
@@ -88,7 +88,14 @@ function scrape(doc, url) {
 	// purposes
 	item.publicationTitle = meta.publisher.name.match(/^(.+?)(?:[—|].*)?$/)[1].trim();
 	item.section = getSection(doc);
-	item.url = url;
+	if (meta.mainEntityOfPage["@type"] === "WebPage"
+		&& /^https?:\/\//.test(meta.mainEntityOfPage["@id"])) {
+		// Page URL from JSON-LD should be less prone to line noise
+		item.url = meta.mainEntityOfPage["@id"];
+	}
+	if (!item.url) {
+		item.url = url;
+	}
 	item.libraryCatalog = '';
 	item.attachments.push({
 		title: "Snapshot",
