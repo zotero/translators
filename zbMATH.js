@@ -177,6 +177,10 @@ function cleanText(element) {
  * the duplicate-causing elements removed and the LaTeX math text converted to
  * text nodes (surrounded with $ $ if laTeXify = true).
  *
+ * NOTE: If the node containes unrendered MathJax source, the surrounding
+ * delimiters \( and \) will be removed if laTeXify is false, or replaced with
+ * $ $ if laTeXify is true.
+ *
  * @param {HTMLElement} element - The DOM element node to operate on
  * @param {boolean} [laTeXify=true] - Whether to replace the MathML nodes with
  * LaTeX source surrounded by $ $. If set to false, the replacement will be the
@@ -194,10 +198,22 @@ function cleanupMath(element, laTeXify = true) {
 		node.parentNode.replaceChild(textNode, node);
 	};
 
-	// Top-level contentful MathML elements. If this doesn't exist, there's no
-	// math.
+	// Top-level contentful MathML elements.
 	let baseMathList = dup.querySelectorAll("span[id^='MathJax-Element']");
 	if (!baseMathList.length) {
+		// When we're saving one of the multiples from getSearchResults, even
+		// if there's math, MathJax code will not be run. In this case, we do a
+		// text replacement
+		dup.normalize();
+		let walker = doc.createTreeWalker(dup, 4/* SHOW_TEXT */);
+		let currentNode;
+		while ((currentNode = walker.nextNode())/* assignment */) {
+			currentNode.textContent
+				= currentNode.textContent.replace(
+					/\\\(|\\\)/g, // \( or \); MathJax source text
+					laTeXify ? "$" : "",
+				);
+		}
 		return dup;
 	}
 
