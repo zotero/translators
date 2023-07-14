@@ -127,9 +127,8 @@ async function scrape(doc, url) {
 				.innerText.trim().replace(/^Summary:\s*/i, "");
 		}
 
-		// The title from BibTeX uses the \( \) syntax for math text. Math in
-		// title is not well-parsed by the import translator; falling back to
-		// scraping.
+		// Math in the title from the BibTeX data is not well-parsed by the
+		// import translator; falling back to page-scraping.
 		let titleNode = doc.querySelector("article .title strong");
 		if (titleNode && titleNode.innerText) {
 			item.title = cleanupMath(titleNode, false)
