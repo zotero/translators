@@ -8,14 +8,14 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2021-10-11 01:07:25"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2023-07-14 08:32:44"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2021 Simon Kornblith, Michael Berkowitz, Josh Geller
+	Copyright © 2021 Simon Kornblith, Michael Berkowitz, Josh Geller, and contributors
 
 	This file is part of Zotero.
 
@@ -55,8 +55,8 @@ function detectWeb(doc, url) {
 /*
  * given the text of the delivery page, downloads an item
  */
-function downloadFunction(text, url, prefs) {
-	if (text.search(/^TY\s\s?-/m) == -1) {
+async function downloadFunction(text, url, prefs) {
+	if (/^TY\s\s?-/m.test(text)) {
 		text = "\nTY  - JOUR\n" + text;	// this is probably not going to work if there is garbage text in the begining
 	}
 
@@ -108,6 +108,8 @@ function downloadFunction(text, url, prefs) {
 	var season = text.match(
 		/^(Y1\s+-\s+(\d{2})(\d{2})\/\/\/)(?:\2?\3(.+)|(.+?)\2?\3)\s*$/m);
 	season = season && (season[4] || season[5]);
+
+	var pdfAttachment = await makePDFAttachment(url, prefs);
 	
 	// load translator for RIS
 	var translator = Zotero.loadTranslator("import");
@@ -199,74 +201,73 @@ function downloadFunction(text, url, prefs) {
 				item.url = undefined;
 			}
 		}
-		
-		if (prefs.pdfURL) {
-			item.attachments.push({
-				url: prefs.pdfURL,
+
+		if (pdfAttachment) {
+			item.attachments.push(pdfAttachment);
+		}
+
+		item.complete();
+	});
+
+	let risTranslator = await translator.getTranslatorObject();
+	risTranslator.options.itemType = itemType;
+	risTranslator.doImport();
+}
+
+async function makePDFAttachment(url, prefs) {
+	if (prefs.pdfURL) {
+		return {
+			url: prefs.pdfURL,
+			title: "EBSCO Full Text",
+			mimeType: "application/pdf"
+		};
+	}
+	else if (prefs.fetchPDF) {
+		var args = urlToArgs(url);
+		if (prefs.mobile) {
+			// the PDF is not embedded in the mobile view
+			var id = url.match(/([^/]+)\?sid/)[1];
+			var pdfurl = "/ehost/pdfviewer/pdfviewer/"
+				+ id
+				+ "?sid=" + args.sid
+				+ "&vid=" + args.vid;
+
+			return {
+				url: pdfurl,
 				title: "EBSCO Full Text",
 				mimeType: "application/pdf"
-			});
-			item.complete();
-		}
-		else if (prefs.fetchPDF) {
-			var args = urlToArgs(url);
-			if (prefs.mobile) {
-				// the PDF is not embedded in the mobile view
-				var id = url.match(/([^/]+)\?sid/)[1];
-				var pdfurl = "/ehost/pdfviewer/pdfviewer/"
-					+ id
-					+ "?sid=" + args.sid
-					+ "&vid=" + args.vid;
-				item.attachments.push({
-					url: pdfurl,
-					title: "EBSCO Full Text",
-					mimeType: "application/pdf"
-				});
-				item.complete();
-			}
-			else {
-				var pdf = "/ehost/pdfviewer/pdfviewer?"
-					+ "sid=" + args.sid
-					+ "&vid=" + args.vid;
-				Z.debug("Fetching PDF from " + pdf);
-
-				ZU.processDocuments(pdf,
-					function (pdfDoc) {
-						if (!isCorrectViewerPage(pdfDoc)) {
-							Z.debug('PDF viewer page doesn\'t appear to be serving the correct PDF. Skipping PDF attachment.');
-							return;
-						}
-						
-						var realpdf = findPdfUrl(pdfDoc);
-						if (realpdf) {
-							item.attachments.push({
-								url: realpdf,
-								title: "EBSCO Full Text",
-								mimeType: "application/pdf",
-								proxy: false
-							});
-						}
-						else {
-							Z.debug("Could not find a reference to PDF.");
-						}
-					},
-					function () {
-						Z.debug("PDF retrieval done.");
-						item.complete();
-					}
-				);
-			}
+			};
 		}
 		else {
-			Z.debug("Not attempting to retrieve PDF.");
-			item.complete();
-		}
-	});
+			var pdf = "/ehost/pdfviewer/pdfviewer?"
+				+ "sid=" + args.sid
+				+ "&vid=" + args.vid;
+			Z.debug("Fetching PDF from " + pdf);
 
-	translator.getTranslatorObject(function (trans) {
-		trans.options.itemType = itemType;
-		trans.doImport();
-	});
+			let pdfDoc = await requestDocument(pdf);
+
+			Z.debug("PDF retrieval done.");
+
+			if (!isCorrectViewerPage(pdfDoc)) {
+				Z.debug('PDF viewer page doesn\'t appear to be serving the correct PDF. Skipping PDF attachment.');
+				return false;
+			}
+
+			var realpdf = findPdfUrl(pdfDoc);
+			if (realpdf) {
+				return {
+					url: realpdf,
+					title: "EBSCO Full Text",
+					mimeType: "application/pdf",
+					proxy: false
+				};
+			}
+			else {
+				Z.debug("Could not find a reference to PDF.");
+			}
+		}
+	}
+	return false;
 }
 
 // collects item url->title (in items) and item url->database info (in itemInfo)
@@ -398,109 +399,42 @@ function findPdfUrl(pdfDoc) {
 	return realpdf;
 }
 
-/**
- * borrowed from http://www.webtoolkit.info/javascript-base64.html
- */
-var base64KeyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-
-function utf8Encode(string) {
-	string = string.replace(/\r\n/g, "\n");
-	var utftext = "";
-
-	for (var n = 0; n < string.length; n++) {
-		var c = string.charCodeAt(n);
-		if (c < 128) {
-			utftext += String.fromCharCode(c);
-		}
-		else if ((c > 127) && (c < 2048)) {
-			utftext += String.fromCharCode((c >> 6) | 192);
-			utftext += String.fromCharCode((c & 63) | 128);
-		}
-		else {
-			utftext += String.fromCharCode((c >> 12) | 224);
-			utftext += String.fromCharCode(((c >> 6) & 63) | 128);
-			utftext += String.fromCharCode((c & 63) | 128);
-		}
-	}
-	return utftext;
-}
-
-function btoa(input) {
-	var output = "";
-	var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
-	var i = 0;
-	input = utf8Encode(input);
-		
-	while (i < input.length) {
-		chr1 = input.charCodeAt(i++);
-		chr2 = input.charCodeAt(i++);
-		chr3 = input.charCodeAt(i++);
-		enc1 = chr1 >> 2;
-		enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
-		enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
-		enc4 = chr3 & 63;
-		if (isNaN(chr2)) {
-			enc3 = enc4 = 64;
-		}
-		else if (isNaN(chr3)) {
-			enc4 = 64;
-		}
-		output = output
-				+ base64KeyStr.charAt(enc1) + base64KeyStr.charAt(enc2)
-				+ base64KeyStr.charAt(enc3) + base64KeyStr.charAt(enc4);
-	}
-	return output;
-}
-
-/**
- * end borrowed code
- */
  
 /**
  * EBSCOhost encodes the target url before posting the form
- * Replicated from http://global.ebsco-content.com/interfacefiles/13.4.0.98/javascript/bundled/_layout2/master.js
+ *
+ * Cf. "The 'Unicode Problem'" from MDN:
+ * https://developer.mozilla.org/en-US/docs/Glossary/Base64#the_unicode_problem
  */
 function urlSafeEncodeBase64(str) {
-	return btoa(str).replace(/\+/g, "-").replace(/\//g, "_")
-		.replace(/=*$/, function (m) {
-			return m.length;
-		});
+	let bytes = new TextEncoder().encode(str);
+	let binString = Array.from(bytes, x => String.fromCodePoint(x)).join("");
+	return btoa(binString);
 }
 
 // var counter;
 // eslint-disable-next-line no-unused-vars
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 // counter = 0;
 	var items = {};
 	var itemInfo = {};
 	var multiple = getResultList(doc, items, itemInfo);
 
 	if (multiple) {
-		Zotero.selectItems(items, function (items) {
-			if (!items) {
-				return;
-			}
-
-			// fetch each url assynchronously
-			for (let i in items) {
-				(function (itemInfo) {
-					ZU.processDocuments(
-						i.replace(/#.*$/, ''),
-						function (doc) {
-							doDelivery(doc, itemInfo);
-						}
-					);
-				})(itemInfo[i]);
-			}
-		});
+		let urls = await Zotero.selectItems(items);
+		if (!urls) return;
+		for (let url of Object.keys(urls)) {
+			let requestedDoc = await requestDocument(url.replace(/#.*$/, ""));
+			await doDelivery(requestedDoc, itemInfo[url]);
+		}
 	}
 	else {
-		doDelivery(doc); // Individual record.
+		await doDelivery(doc); // Individual record.
 		// Record key exists in attribute for add to folder link in DOM
 	}
 }
 
-function doDelivery(doc, itemInfo) {
+async function doDelivery(doc, itemInfo) {
 	var folderData;
 	if (!itemInfo || !itemInfo.folderData)	{
 		// Get the db, AN, and tag from ep.clientData instead
@@ -577,11 +511,12 @@ function doDelivery(doc, itemInfo) {
 		+ "&vid=" + args.vid
 		+ "&bdata=" + args.bdata
 		+ "&theExportFormat=1";	// RIS file
-	ZU.doGet(postURL, function (text) {
-		downloadFunction(text, postURL, prefs);
-	});
+
+	let responseBody = await requestText(postURL);
+	await downloadFunction(responseBody, postURL, prefs);
 }
 
 /** BEGIN TEST CASES **/
-var testCases = []
+var testCases = [
+]
 /** END TEST CASES **/
