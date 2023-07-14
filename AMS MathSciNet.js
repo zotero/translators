@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-06 14:22:36"
+	"lastUpdated": "2023-07-14 11:04:37"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -87,8 +86,6 @@ async function scrape(doc, url = doc.location.href) {
 	// Z.debug(bibJSONUrl)
 	let bibJSON = await requestText(bibJSONUrl);
 	// Z.debug(bibJSON)
-	// the JSON parser doesn't like newlines or backslashes in the bibtex
-	bibJSON = bibJSON.replace(/\\n/g, "").replace(/\\/g, "");
 	bibJSON = JSON.parse(bibJSON);
 	let bibTex = bibJSON[0].bib;
 	// Z.debug(bibTex)
@@ -247,7 +244,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Sommation des s'eries divergentes",
+				"title": "Sommation des séries divergentes",
 				"creators": [
 					{
 						"firstName": "Bernard",
