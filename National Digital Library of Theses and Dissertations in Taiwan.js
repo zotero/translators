@@ -52,7 +52,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	// get list
-	var rows = doc.querySelectorAll('a[class="slink"]');
+	var rows = doc.querySelectorAll('a.slink');
 	//Z.debug(rows);
 	for (let row of rows) {
 		let href = row.href;
