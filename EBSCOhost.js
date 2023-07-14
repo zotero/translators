@@ -56,7 +56,7 @@ function detectWeb(doc, url) {
  * given the text of the delivery page, downloads an item
  */
 async function downloadFunction(text, url, prefs) {
-	if (/^TY\s\s?-/m.test(text)) {
+	if (!/^TY\s\s?-/m.test(text)) {
 		text = "\nTY  - JOUR\n" + text;	// this is probably not going to work if there is garbage text in the begining
 	}
 
