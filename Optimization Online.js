@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-18 08:16:06"
+	"lastUpdated": "2023-07-15 13:50:06"
 }
 
 /*
@@ -82,7 +82,8 @@ async function scrape(doc, url) {
 	translator.setHandler('itemDone', (_obj, item) => {
 		// Item
 		item.itemType = 'preprint';
-		let title = text(doc, 'h1.entry-title');
+		// Use innerText instead of textContent (duplicated LaTeX)
+		let title = innerText(doc, 'h1.entry-title');
 		if (title) {
 			item.title = ZU.capitalizeTitle(title);
 		}
@@ -90,9 +91,10 @@ async function scrape(doc, url) {
 		for (let tag of tags) {
 			item.tags.push(ZU.cleanTags(tag.text));
 		}
-		let abstractNote = doc.querySelector('div.entry-content > div > p');
+		// Use innerText instead of textContent (duplicated LaTeX)
+		let abstractNote = innerText(doc, 'div.entry-content > div > p');
 		if (abstractNote) {
-			item.abstractNote = ZU.trimInternal(abstractNote.innerText);
+			item.abstractNote = ZU.trimInternal(abstractNote);
 		}
 
 		// Attachment
@@ -175,6 +177,56 @@ var testCases = [
 					},
 					{
 						"tag": "misocp"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://optimization-online.org/2023/06/mind-the-tildeo-asymptotically-better-but-still-impractical-quantum-distributed-algorithms/",
+		"detectedItemType": "preprint",
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "Mind the \\tilde{O}: asymptotically better, but still impractical, quantum distributed algorithms",
+				"creators": [
+					{
+						"firstName": "David E. Bernal",
+						"lastName": "Neira",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-06-22",
+				"archiveID": "23283",
+				"language": "en-US",
+				"libraryCatalog": "optimization-online.org",
+				"repository": "Optimization Online",
+				"shortTitle": "Mind the \\tilde{O}",
+				"url": "https://optimization-online.org/?p=23283",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Directed Minimum Spanning Tree"
+					},
+					{
+						"tag": "complexity"
+					},
+					{
+						"tag": "distributed computing"
+					},
+					{
+						"tag": "quantum computing"
+					},
+					{
+						"tag": "steiner tree"
 					}
 				],
 				"notes": [],
