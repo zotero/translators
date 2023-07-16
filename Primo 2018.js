@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-06 11:37:17"
+	"lastUpdated": "2022-05-11 21:32:37"
 }
 
 /*
@@ -107,7 +107,6 @@ function getPnxElems(doc) {
 	if (single.length == 1) return single;
 	return doc.querySelectorAll('.urlToXmlPnx[data-url]');
 }
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
