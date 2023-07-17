@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2023-07-06 06:26:44"
+	"lastUpdated": "2023-07-17 03:09:44"
 }
 
 /*
@@ -410,7 +410,8 @@ ItemMap.prototype = {
 function splitLine(line) {
 	// First trim line end and strip the line of BOM (U+FEFF) if any, as
 	// show in a test case
-	line = line.trimEnd();
+	// TODO: Use trimEnd() once Z6 support is dropped
+	line = line.replace(/\s*$/, '');
 	line = line.replace(/\uFEFF/g, "");
 
 	// skip empty line
