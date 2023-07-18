@@ -5,11 +5,11 @@
 	"target": "^https://([^/]+/view/journals/.+\\.xml|[^.]*journals\\.[^/]+/search)\\b",
 	"minVersion": "5.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-07 08:29:31"
+	"lastUpdated": "2023-07-18 08:25:36"
 }
 
 /*
@@ -100,7 +100,12 @@ async function scrape(doc, url = doc.location.href) {
 	// Z.debug(doc);
 	// TODO: why is metadata so bad on multiple?
 	// if I import this directly, it works great: https://journals.humankinetics.com/view/journals/jab/39/3/article-p199.xml
-	// but imported as a multiple from here, it's terrible: https://journals.humankinetics.com/view/journals/jab/39/3/jab.39.issue-3.xml
+	// but imported as a multiple from here, it only imports title and abstract: https://journals.humankinetics.com/view/journals/jab/39/3/jab.39.issue-3.xml
+	// this is probably it's bad: https://groups.google.com/g/zotero-dev/c/yIVWbu0xNlQ/m/THjnupckAwAJ
+	// also here: https://groups.google.com/g/zotero-dev/c/EnC5teZkSP8/m/dmygGUMIBQAJ
+	// so the solution for multiple is we need to get the page data from an API or JSON so that web translator can read it
+	// however, looking at the network traffic, I don't see an API call... just the page load
+	// https://groups.google.com/g/zotero-dev/c/2gCD5-mM_Cg/m/tbJH6siaUWkJ
 	if (doc.querySelector('meta[name="citation_pdf_url"]')) {
 		// var pdfURL = doc.querySelector('meta[name="citation_pdf_url"]').getAttribute("content");
 		var pdfURL = attr(doc, 'meta[name="citation_pdf_url"]', "content");
@@ -628,6 +633,109 @@ var testCases = [
 		"type": "web",
 		"url": "https://journals.humankinetics.com/view/journals/jab/39/3/jab.39.issue-3.xml",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://journals.ametsoc.org/view/journals/amsm/59/1/amsmonographs-d-18-0006.1.xml?tab_body=abstract-display",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "100 Years of Progress in Atmospheric Observing Systems",
+				"creators": [
+					{
+						"firstName": "Jeffrey L.",
+						"lastName": "Stith",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Darrel",
+						"lastName": "Baumgardner",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Julie",
+						"lastName": "Haggerty",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "R. Michael",
+						"lastName": "Hardesty",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Wen-Chau",
+						"lastName": "Lee",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Donald",
+						"lastName": "Lenschow",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peter",
+						"lastName": "Pilewskie",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Paul L.",
+						"lastName": "Smith",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Matthias",
+						"lastName": "Steiner",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Holger",
+						"lastName": "Vömel",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018/01/01",
+				"DOI": "10.1175/AMSMONOGRAPHS-D-18-0006.1",
+				"abstractNote": "Although atmospheric observing systems were already an important part of meteorology before the American Meteorological Society was established in 1919, the past 100 years have seen a steady increase in their numbers and types. Examples of how observing systems were developed and how they have enabled major scientific discoveries are presented. These examples include observing systems associated with the boundary layer, the upper air, clouds and precipitation, and solar and terrestrial radiation. Widely used specialized observing systems such as radar, lidar, and research aircraft are discussed, and examples of applications to weather forecasting and climate are given. Examples drawn from specific types of chemical measurements, such as ozone and carbon dioxide, are included. Sources of information on observing systems, including other chapters of this monograph, are also discussed. The past 100 years has been characterized by synergism between societal needs for weather observations and the needs of fundamental meteorological research into atmospheric processes. In the latter half of the period, observing system improvements have been driven by the increasing demands for higher-resolution data for numerical models, the need for long-term measurements, and for more global coverage. This has resulted in a growing demand for data access and for integrating data from an increasingly wide variety of observing system types and networks. These trends will likely continue.",
+				"issue": "1",
+				"language": "EN",
+				"libraryCatalog": "journals.ametsoc.org",
+				"pages": "2.1-2.55",
+				"publicationTitle": "Meteorological Monographs",
+				"url": "https://journals.ametsoc.org/view/journals/amsm/59/1/amsmonographs-d-18-0006.1.xml",
+				"volume": "59",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Aircraft observations"
+					},
+					{
+						"tag": "Automatic weather stations"
+					},
+					{
+						"tag": "Dropsondes"
+					},
+					{
+						"tag": "Profilers"
+					},
+					{
+						"tag": "Radars/Radar observations"
+					},
+					{
+						"tag": "Radiosonde observations"
+					},
+					{
+						"tag": "atmospheric"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
