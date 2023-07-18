@@ -1,6 +1,6 @@
 {
 	"translatorID": "b0abb562-218c-4bf6-af66-c320fdb8ddd3",
-	"label": "Philosopher's Imprint",
+	"label": "Philosophers' Imprint",
 	"creator": "Philipp Zumstein",
 	"target": "^https?://quod\\.lib\\.umich\\.edu/p/phimp",
 	"minVersion": "3.0",
@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-01 04:27:44"
+	"lastUpdated": "2023-07-18 13:54:55"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017 Philipp Zumstein
+	Copyright © 2017 Philipp Zumstein and contributors
 	
 	This file is part of Zotero.
 
@@ -36,19 +36,21 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.indexOf('/p/phimp?t')>-1 && getSearchResults(doc, true)) {
+	if (url.includes('/p/phimp?t') && getSearchResults(doc, true)) {
 		return "multiple";
-	} else if (url.indexOf('/p/phimp/')>-1) {
+	}
+	else if (url.includes('/p/phimp/')) {
 		return "journalArticle";
 	}
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	//TODO: adjust the xpath
+	// TODO: adjust the xpath
 	var rows = ZU.xpath(doc, '//table[@id="searchresults"]//td[2]/a');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -60,32 +62,20 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			
-			
-			ZU.processDocuments(articles, scrape);
-		});
-	} else {
+		let items = await Zotero.selectItems(getSearchResults(doc));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url), url);
+		}
+	}
+	else {
 		scrape(doc, url);
 	}
 }
 
-function scrape(doc, url) {
-	// move meta tags to head for EM
-	// this is a fix for some malformed HTML
-	for (let meta of doc.body.querySelectorAll('meta')) {
-		doc.head.appendChild(meta);
-	}
-	
+function scrape(doc, url = doc.location.href) { // eslint-disable-line no-unused-vars
 	var abstract = ZU.xpathText(doc, '//div[contains(@class, "abstract")]/p[1]');
 	var purl = ZU.xpathText(doc, '//div[@id="purl"]/a/@href');
 	var license = ZU.xpathText(doc, '//a[@id="licenseicon"]/@href');
