@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-19 03:41:31"
+	"lastUpdated": "2023-07-19 03:49:49"
 }
 
 /*
@@ -48,7 +48,9 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//table[contains("searchresults,browselist,picklistitems", @id)]//td[2]/a');
+	var rowsRoot = doc.querySelector("#searchresults, #browselist, #picklistitems");
+	if (!rowsRoot) return false;
+	var rows = ZU.xpath(rowsRoot, '//td[2]/a');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
