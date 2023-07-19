@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-18 13:54:55"
+	"lastUpdated": "2023-07-19 03:15:02"
 }
 
 /*
@@ -80,6 +80,8 @@ function scrape(doc, url = doc.location.href) { // eslint-disable-line no-unused
 	var purl = ZU.xpathText(doc, '//div[@id="purl"]/a/@href');
 	var license = ZU.xpathText(doc, '//a[@id="licenseicon"]/@href');
 	var pdfurl = ZU.xpathText(doc, '//li[@id="download-pdf"]/a/@href');
+
+	var dateField = text(doc, ".periodical");
 	
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
@@ -98,6 +100,12 @@ function scrape(doc, url = doc.location.href) { // eslint-disable-line no-unused
 				title: "Full Text PDF",
 				mimeType: "application/pdf"
 			});
+		}
+		if (dateField) {
+			let pagesMatch = dateField.match(/.+pp\.\s+(\d+(?:-\d+))$/);
+			if (pagesMatch) {
+				item.pages = pagesMatch[1];
+			}
 		}
 		item.rights = license;
 		item.place = "Ann Arbor, MI";
