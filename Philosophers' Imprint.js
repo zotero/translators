@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-19 03:15:02"
+	"lastUpdated": "2023-07-19 03:41:31"
 }
 
 /*
@@ -36,10 +36,10 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.includes('/p/phimp?t') && getSearchResults(doc, true)) {
+	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
-	else if (url.includes('/p/phimp/')) {
+	else if (/^\/p\/phimp\/\d+\.\d+\.\d+\//.test(new URL(url).pathname)) {
 		return "journalArticle";
 	}
 	return false;
@@ -48,8 +48,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	// TODO: adjust the xpath
-	var rows = ZU.xpath(doc, '//table[@id="searchresults"]//td[2]/a');
+	var rows = ZU.xpath(doc, '//table[contains("searchresults,browselist,picklistitems", @id)]//td[2]/a');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -162,6 +161,21 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://quod.lib.umich.edu/p/phimp/3521354.0021?rgn=full+text",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://quod.lib.umich.edu/p/phimp?key=title;page=browse",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://quod.lib.umich.edu/p/phimp?key=author;page=browse",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
