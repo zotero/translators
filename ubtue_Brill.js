@@ -71,8 +71,6 @@ function postProcess(doc, item) {
 	let title = ZU.xpathText(doc, '//meta[@name="citation_title"]//@content');
 	if (title) item.title = title;
 	let abstracts = ZU.xpath(doc, '//section[@class="abstract"]//p | //abstract[@lang="zh-Hans"]/p');
-	//let chineseAbstract = ZU.xpath(doc, '//p[@lang="zh-Hans"]');
-
 	//multiple abstracts
 	if (abstracts && abstracts.length > 0)
 		abstracts = abstracts.map(abstract => abstract.textContent);
