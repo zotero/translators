@@ -3,13 +3,13 @@
 	"label": "Philosophers' Imprint",
 	"creator": "Philipp Zumstein",
 	"target": "^https?://quod\\.lib\\.umich\\.edu/p/phimp",
-	"minVersion": "3.0",
+	"minVersion": "6.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-19 03:49:49"
+	"lastUpdated": "2023-07-20 02:12:14"
 }
 
 /*
