@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-21 04:55:10"
+	"lastUpdated": "2023-07-20 05:19:04"
 }
 
 /*
@@ -90,15 +90,6 @@ function scrape(doc, url) {
 		return;
 	}
 	
-	if (doc.querySelector('body > meta')) {
-		// Brill's HTML is structured incorrectly, and it causes some parsers
-		// to interpret the <meta> tags as being in the body, which breaks EM.
-		// We'll fix it here.
-		for (let meta of doc.querySelectorAll('body > meta')) {
-			doc.head.appendChild(meta);
-		}
-	}
-	
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
@@ -140,7 +131,15 @@ function scrape(doc, url) {
 		if (url.includes('referenceworks.brillonline.com/entries/')) {
 			trans.itemType = 'encyclopediaArticle';
 		}
-		
+
+		if (doc.querySelector('body > meta')) {
+			// Brill's HTML is structured incorrectly due to a bug in the
+			// Pubfactory CMS, and it causes some parsers to put the <meta>
+			// tags in the body. We'll fix it by telling EM to work around it.
+			Z.debug("Brill: working around malformed HTML by search for meta in body");
+			trans.searchForMetaTagsInBody = true;
+		}
+
 		trans.doWeb(doc, url);
 	});
 }
