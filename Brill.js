@@ -86,7 +86,7 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	if (url.includes('bibliographies.brillonline.com/entries/')) {
-		scrapeBibliography(doc, url);
+		scrapeBibliography(doc);
 		return;
 	}
 	
@@ -144,7 +144,7 @@ function scrape(doc, url) {
 	});
 }
 
-function scrapeBibliography(doc, url) {
+function scrapeBibliography(doc) {
 	let params = new URLSearchParams({
 		entryId: attr(doc, 'input[name="entryId"]', 'value'),
 		dest: attr(doc, 'input[name="dest"]', 'value')
