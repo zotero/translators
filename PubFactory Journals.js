@@ -101,7 +101,7 @@ async function scrape(doc, url = doc.location.href) {
 	// TODO: why is metadata so bad on multiple?
 	// if I import this directly, it works great: https://journals.humankinetics.com/view/journals/jab/39/3/article-p199.xml
 	// but imported as a multiple from here, it only imports title and abstract: https://journals.humankinetics.com/view/journals/jab/39/3/jab.39.issue-3.xml
-	// this is probably it's bad: https://groups.google.com/g/zotero-dev/c/yIVWbu0xNlQ/m/THjnupckAwAJ
+	// this is probably why it's bad: https://groups.google.com/g/zotero-dev/c/yIVWbu0xNlQ/m/THjnupckAwAJ
 	// also here: https://groups.google.com/g/zotero-dev/c/EnC5teZkSP8/m/dmygGUMIBQAJ
 	// so the solution for multiple is we need to get the page data from an API or JSON so that web translator can read it
 	// however, looking at the network traffic, I don't see an API call... just the page load
