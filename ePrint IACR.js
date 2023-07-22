@@ -129,10 +129,7 @@ async function scrape(doc, url = doc.location.href) {
 	}
 
 	for (let i in keywords) {
-		// Sometimes the keywords split returns an empty tag - those crash the translator if they're pushed.
-		if (keywords[i]) {
-			newItem.tags.push(keywords[i]);
-		}
+		newItem.tags.push(keywords[i]);
 	}
 
 	newItem.attachments = [
