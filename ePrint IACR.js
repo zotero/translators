@@ -3,13 +3,13 @@
 	"label": "ePrint IACR",
 	"creator": "Jonas Schrieb",
 	"target": "^https://eprint\\.iacr\\.org/",
-	"minVersion": "1.0.0b3.r1",
+	"minVersion": "6.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-16 13:17:09"
+	"lastUpdated": "2023-07-22 15:15:56"
 }
 
 /*
@@ -35,11 +35,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-// TODO: can this be removed already (with a minimum supported version bump)?
-let preprintType = ZU.fieldIsValidForType('title', 'preprint')
-	? 'preprint'
-	: 'report';
-
 // There are several types of searches available on ePrint, producing pages with different structure, need to distinguish them
 // This covers the standard text-based search
 const SEARCH_TYPE_TEXT = "text";
@@ -60,7 +55,7 @@ function detectWeb(doc, url) {
 	var multipleTimeSearchAllRe = new RegExp(eprintBaseURLRe.source + /complete\/?$/.source);
 
 	if (singleRe.test(url)) {
-		return preprintType;
+		return 'preprint';
 	}
 	else if (multipleTextSearchRe.test(url)) {
 		searchType = SEARCH_TYPE_TEXT;
@@ -112,7 +107,7 @@ async function scrape(doc, url = doc.location.href) {
 	var keywords = doc.querySelectorAll(keywordsSelector);
 	keywords = [...keywords].map(kw => kw.textContent.trim());
 
-	var newItem = new Zotero.Item(preprintType);
+	var newItem = new Zotero.Item('preprint');
 
 	newItem.date = paperYear;
 
@@ -121,12 +116,7 @@ async function scrape(doc, url = doc.location.href) {
 	// TODO: Do we want to differentiate Archive and Library Catalog like this (the latter has FQDN appended)? Do we want to populate both or just one of them? The translator population has all possible approaches.
 	newItem.archive = archiveName;
 	newItem.libraryCatalog = `${archiveName} (${eprintFQDN})`;
-	if (preprintType === 'preprint') {
-		newItem.archiveID = paperID;
-	}
-	else {
-		newItem.reportNumber = paperID;
-	}
+	newItem.archiveID = paperID;
 
 	// Canonicalize the URL to avoid errors if e.g., the user removed or prepended extra zeroes to the paper ID in the original URL
 	newItem.url = urlComponents[0] + "/" + paperID;
