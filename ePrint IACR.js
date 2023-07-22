@@ -208,7 +208,8 @@ async function doWeb(doc, url) {
 			await scrape(await requestDocument(url));
 		}
 	}
-	// TODO: This is never called except if URL value is modified in the function directly to append ".pdf". Instead, the PDF link gets directly opened by the system PDF reader when in Scaffold (and e.g., the test times out) and in browser the standard "Save to Zotero (PDF)" icon appears instead.
+	// Firefox restrictions will prevent this convenience clause from running (Chrome works as expected)
+	// Standard PDF saving (and metadata retrieval) logic will be used instead
 	else if (/\.pdf$/.test(url)) {
 		// Go to the landing page to scrape
 		url = url.replace(/\.pdf$/, "");
@@ -321,55 +322,6 @@ var testCases = [
 					},
 					{
 						"tag": "Permutation network"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://eprint.iacr.org/2016/1013.pdf",
-		"items": [
-			{
-				"itemType": "preprint",
-				"title": "A Formal Security Analysis of the Signal Messaging Protocol",
-				"creators": [],
-				"date": "2016",
-				"abstractNote": "The Signal protocol is a cryptographic messaging protocol that provides end-to-end encryption for instant messaging in WhatsApp, Wire, and Facebook Messenger among many others, serving well over 1 billion active users. Signal includes several uncommon security properties (such as \"future secrecy\" or \"post-compromise security\"), enabled by a novel technique called *ratcheting* in which session keys are updated with every message sent. We conduct a formal security analysis of Signal's initial extended triple Diffie-Hellman (X3DH) key agreement and Double Ratchet protocols as a multi-stage authenticated key exchange protocol. We extract from the implementation a formal description of the abstract protocol, and define a security model which can capture the ratcheting key update structure as a multi-stage model where there can be a tree of stages, rather than just a sequence. We then prove the security of Signal's key exchange core in our model, demonstrating several standard security properties. We have found no major flaws in the design, and hope that our presentation and results can serve as a foundation for other analyses of this widely adopted protocol.Fix omission in description of initial X3DH handshake, reorganize figures for improved presentation. Full list of changes in Appendix D.",
-				"libraryCatalog": "ePrint IACR",
-				"url": "https://eprint.iacr.org/2016/1013",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Signal"
-					},
-					{
-						"tag": "authenticated key exchange"
-					},
-					{
-						"tag": "future secrecy"
-					},
-					{
-						"tag": "messaging"
-					},
-					{
-						"tag": "multi-stage key exchange"
-					},
-					{
-						"tag": "post-compromise security"
-					},
-					{
-						"tag": "protocols"
-					},
-					{
-						"tag": "provable security"
 					}
 				],
 				"notes": [],
