@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-22 15:15:56"
+	"lastUpdated": "2023-07-22 15:29:56"
 }
 
 /*
@@ -45,7 +45,8 @@ let searchType = "";
 function detectWeb(doc, url) {
 	var eprintBaseURLRe = /^https:\/\/eprint\.iacr\.org\//;
 	// Single paper URL format is https://<ePrint FQDN>/<year>/<paper number within the year>
-	// The year is always 4 digits, paper number can technically be 1 digit or more, default is 3 or 4 digits (the former is left-padded with zeroes if smaller than 100)
+	// The year is always 4 digits, paper number can technically be 1 digit or more,
+	// the default is 3 or 4 digits (the former is left-padded with zeroes if smaller than 100)
 	var singleRe = new RegExp(eprintBaseURLRe.source + /\d{4}\/\d+/.source);
 
 	var multipleTextSearchRe = new RegExp(eprintBaseURLRe.source + /search\?/.source);
