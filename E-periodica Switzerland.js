@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-23 10:15:20"
+	"lastUpdated": "2023-07-23 10:37:03"
 }
 
 /*
@@ -83,17 +83,17 @@ async function doWeb(doc, url) {
 
 async function scrape(nextDoc, url) {
 	var nextUrl = nextDoc.location.href;
-	Zotero.debug('trying to process ' + nextUrl);
+	//Zotero.debug('trying to process ' + nextUrl);
 	// Do we really need to handle these #-containing URLs?
 	nextUrl = nextUrl.replace("#", "%3A%3A").replace("::", "%3A%3A");
 	nextUrl = nextUrl.split("%3A%3A");
 	nextUrl = nextUrl[0] + "%3A%3A" + nextUrl.slice(-1);
-	Zotero.debug('Final URL ' + nextUrl);
+	//Zotero.debug('Final URL ' + nextUrl);
 	var pageinfoUrl = nextUrl.replace("view", "ajax/pageinfo");
-	Zotero.debug('JSON URL ' + pageinfoUrl);
+	//Zotero.debug('JSON URL ' + pageinfoUrl);
 	let text = await requestText(pageinfoUrl);
 	var epJSON = JSON.parse(text);
-	Zotero.debug(epJSON);
+	//Zotero.debug(epJSON);
 	let risURL;
 	if (epJSON.articles.length == 0) {
 		// Fallback for non-article content, listed as Werbung, Sonstiges and various others:
@@ -118,7 +118,7 @@ async function scrape(nextDoc, url) {
 		var item = new Zotero.Item("journalArticle");
 		item.title = epJSON.articles["0"].title.replace(' : ', ': ');
 		item.publicationTitle = epJSON.journalTitle.replace(' : ', ': ');
-		var numyear = epJSON.volumeNumYear.replace("(", " ").replace(")", "").split(" ");
+		var numyear = epJSON.volumeNumYear.split(/[ ()]/).filter(element => element);
 		if (numyear.length > 1) {
 			item.date = numyear.slice(-1);
 		}
@@ -144,9 +144,7 @@ async function scrape(nextDoc, url) {
 				pdfURL = "https://www.e-periodica.ch" + epJSON.pdfLink;
 			}
 		}
-		Zotero.debug(pdfURL);
 		if (pdfURL) {
-			// Zotero.debug('PDF URL: ' + pdfURL);
 			item.attachments.push({
 				url: pdfURL,
 				title: "Full Text PDF",
