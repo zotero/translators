@@ -7,15 +7,15 @@
 	"maxVersion": "",
 	"priority": 25,
 	"configOptions": {
-	"dataMode": "xml/dom",
-	"getCollections": "true"
+		"dataMode": "xml/dom",
+		"getCollections": "true"
 	},
 	"displayOptions": {
-	"exportNotes": true,
-	"Export Tags": true,
-	"Generate XML IDs": false,
-	"Full TEI Document": false,
-	"Debug": true
+		"exportNotes": true,
+		"Export Tags": true,
+		"Generate XML IDs": false,
+		"Full TEI Document": false,
+		"Debug": true
 	},
 	"inRepository": true,
 	"translatorType": 2,
@@ -77,79 +77,229 @@ const xmlSerializer = new XMLSerializer();
 const indent = "    ";
 
 /**
- * Append possible rich text html as TEI element (<hi rend="…">)
- * [2023-06 FG]
- * @param {*} node 
- * @param {*} html 
- * @param {*} blocks 
+ * Inline markup allowed in titles and other rich text fields
+ * startElement / endElenent
+ * markup events recorded in source text
+ */
+
+const inlineMarkup = {
+	'<b>': {
+		startElement: 'b',
+		tei: 'hi',
+		rend: "bold",
+	},
+	'</b>': {
+		endElement: 'b',
+		tei: 'hi',
+	},
+	'<i>': {
+		startElement: 'i',
+		tei: 'hi',
+		rend: 'italic',
+	},
+	'</i>': {
+		endElement: 'i',
+		tei: 'hi',
+	},
+	'<span style="font-variant:small-caps;">': {
+		startElement: 'span',
+		tei: 'hi',
+		rend: 'small-caps',
+	},
+	'<span class="nocase">': {
+		startElement: 'span',
+		tei: 'hi',
+		rend: 'nocase',
+	},
+	'</span>': {
+		endElement: 'span',
+		tei: 'hi',
+	},
+	'<sub>': {
+		startElement: 'sub',
+		tei: 'hi',
+		rend: 'sub',
+	},
+	'</sub>': {
+		endElement: 'sub',
+		tei: 'hi',
+	},
+	'<sup>': {
+		startElement: 'sup',
+		tei: 'hi',
+		rend: 'sup',
+	},
+	'</sup>': {
+		endElement: 'sup',
+		tei: 'hi',
+	}
+};
+
+/**
+ * Taken from Zotero source
+ * https://github.com/zotero/zotero/blob/main/chrome/content/zotero/itemTree.jsx#L2610
+ * Advised by @dstillman 
+ * https://github.com/zotero/translators/pull/3054#discussion_r1252896581
+ * 
+ * The problem: rich text in fields is not html. Ex:
+ * Not closing <b> or<strong>unknown tag</strong>, kept as text nodes; <i>italic</i>, is an element
+ * 
+ * @param {*} tagSoup
+ * @param {*} dstParent
  * @returns 
  */
-function appendXML(node, html, blocks = false) {
+function inlineParse(tagSoup, dstParent) {
+	if (!tagSoup) return;
+	/** stack of markup events in source to ensure close/open */
+	const markupStack = [];
+	/** stack of created elements */
+	const nodeStack = [dstParent];
+	/** text content of  */
+	let textContent = '';
+	/** Document to create nodes */
+	const document = dstParent.ownerDocument;
+
+	for (let token of tagSoup.split(/(<[^>]+>)/)) {
+
+		if (inlineMarkup.hasOwnProperty(token)) {
+			const markup = inlineMarkup[token];
+			if (markup.startElement) {
+				let node = document.createElementNS(ns.tei, markup.tei);
+				if (markup.rend) {
+					node.setAttribute('rend', markup.rend);
+				}
+				// copy markup fields with token as a new object
+				markupStack.push({ ...markup, token });
+				nodeStack.push(node);
+				continue;
+			}
+			// close tag, only if one of same name is opened
+			else if (
+				markup.endElement
+				&& markupStack.some(
+					otherMarkup => otherMarkup.startElement === markup.endElement
+				)
+			) {
+				// rewind the stacks
+				while (markupStack.length) {
+					let discardedMarkup = markupStack.pop();
+					let discardedNode = nodeStack.pop();
+					// the startElement event matching with this endElement
+					// append it
+					if (discardedMarkup.startElement === markup.endElement) {
+						// append the element created to previous 
+						nodeStack[nodeStack.length - 1].append(discardedNode);
+						break;
+					}
+					// an open tag without closing
+					// append the token as text, and possible children 
+					// (text or element)
+					else {
+						nodeStack[nodeStack.length - 1].append(discardedMarkup.token, ...discardedNode.childNodes);
+					}
+				}
+
+				continue;
+			}
+			// markup event without opening or closing
+		}
+		// default case, not recognized as markup, appended as text
+		nodeStack[nodeStack.length - 1].append(token);
+		textContent += token;
+	}
+	// exhausts possible attenpt to open an element
+	while (markupStack.length) {
+		let discardedMarkup = markupStack.pop();
+		let discardedNode = nodeStack.pop();
+		nodeStack[0].append(discardedMarkup.token, ...discardedNode.childNodes);
+	}
+	// ? will bug 
+	return textContent;
+}
+
+
+/**
+ * Trnsform note html in tei
+ * @param {*} html 
+ * @param {*} dstParent 
+ * @returns 
+ */
+function noteParse(html, dstParent) {
 	if (!html) return;
-	// import html as dom and export is as xml to avoid xml malformations
+	// import html as dom
 	let dom = xmlParser.parseFromString(html, "text/html");
 	let body = dom.getElementsByTagName("body").item(0);
-	let root;
+	let srcParent;
 	// notes could be embed in an ugly <div>
-	if (blocks
-		&& body.childElementCount === 1
+	if (
+		body.childElementCount === 1
 		&& body.firstElementChild.tagName.toLowerCase() == 'div'
 	) {
-		root = body.firstElementChild;
+		srcParent = body.firstElementChild;
 	}
 	else {
-		root = body;
+		srcParent = body;
 	}
-	html = xmlSerializer.serializeToString(root);
-	// transform html to tei, xslt not available
-	// https://forums.zotero.org/discussion/comment/344940/
-	// tags supported by Zotero
-	// https://www.zotero.org/support/kb/rich_text_bibliography
-	let xml = html
-		// changing namespace of root element
-		.replace(/http:\/\/www.w3.org\/1999\/xhtml/g, 'http://www.tei-c.org/ns/1.0')
-		// <b> bold
-		.replace(/<b>/g, '<hi rend="bold">')
-		.replace(/<\/b>/g, '</hi>')
-		// <em> <emph>
-		.replace(/<(\/?)em>/g, '<$1emph>')
-		// <i> italic
-		.replace(/<(i)>/g, '<hi rend="italic">')
-		.replace(/<\/i>/g, '</hi>')
-		// nocase
-		.replace(/<span class="nocase">(.*?)<\/span>/g, '<hi rend="nocase">$1</hi>')
-		// <sc> seems no more supported in Zotero desk client
-		// small-caps
-		.replace(/<span style="font-variant:\s*small-caps;">(.*?)<\/span>/g, '<hi rend="smallcaps">$1</hi>')
-		// <sub> subscript
-		.replace(/<sup>/g, '<hi rend="sup">')
-		.replace(/<\/sup>/g, '</hi>')
-		// <sup> superscript
-		.replace(/<sup>/g, '<hi rend="sup">')
-		.replace(/<\/sup>/g, '</hi>')
-		;
-	// notes can hav block level elementts
-	if (blocks) {
-		xml = xml
-			.replace(/<(\/?)blockquote>/g, '<$1quote>')
-			.replace(/<(\/?)li>/g, '<$1item>')
-			.replace(/<ol>/g, '<list rend="numbered">')
-			.replace(/<ul>/g, '<list rend="bulleted">')
-			.replace(/<(h\d)>/g, '<label type="$1">')
-			.replace(/<\/(h\d)>/g, '</label>')
-			.replace(/<\/(ul|ol)>/g, '</list>')
-			.replace(/<a [^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/g,
-				'<ref target="$1">$2</ref>')
-			;
-	}
-	dom = xmlParser.parseFromString(xml, "text/xml");
-	const children = dom.documentElement.childNodes
-	for (let i = 0, len = children.length; i < len; i++) {
-		const child = children[i];
-		const imported = node.ownerDocument.importNode(child, true);
-		node.appendChild(imported);
-	}
+	domWalk(srcParent, dstParent)
 }
+
+/**
+ * A simple tag translator
+ */
+const html2tei = {
+	"a" : {tei: "ref"},
+	"b" : {tei: "hi", rend: "bold"},
+	"blockquote" : {tei:"quote"},
+	"em" : {tei:"emph"},
+	"i" : {tei:"hi", rend:"italic"},
+	"li" : {tei:"item"},
+	"ol" : {tei:"list", rend:"numbered"},
+	"p" : {tei:"p"},
+	"ul" : {tei:"list", rend:"bulleted"},
+	"sub" : {tei:"hi", rend:"sub"},
+	"sup" : {tei:"hi", rend:"sup"},
+};
+
+/**
+ * Recursive dom translator, for notes
+ * @param {*} srcParent 
+ * @param {*} dstParent 
+ */
+function domWalk(srcParent, dstParent) {
+	const dstDoc = dstParent.ownerDocument;
+	for(
+		let srcChild = srcParent.firstChild; 
+		srcChild !== null; 
+		srcChild = srcChild.nextSibling
+	) {
+		if (srcChild.nodeType == Node.TEXT_NODE) {
+			dstParent.appendChild(dstDoc.createTextNode(srcChild.textContent));
+			continue;
+		}
+		if (srcChild.nodeType == Node.ELEMENT_NODE) {
+			let dstChild = null;
+			const srcName = srcChild.tagName.toLowerCase();
+			if (html2tei.hasOwnProperty(srcName)) {
+				const dstName = html2tei[srcName].tei;
+				dstChild = dstDoc.createElementNS(ns.tei, dstName);
+				if (html2tei[srcName].rend) {
+					dstChild.setAttribute("rend", html2tei[srcName].rend);
+				}
+				if (srcChild.hasAttribute('href')) {
+					dstChild.setAttribute("target", srcChild.getAttribute("href"))
+				}
+			}
+			else {
+				// unknown tag, send it n TEI ns, consumer will correct by hand
+				dstChild = dstDoc.createElementNS(ns.tei, srcName);
+			}
+			domWalk(srcChild, dstChild);
+			dstParent.appendChild(dstChild);
+			continue;
+		}
+		// commenty ? PI ?
+	}	
+ }
 
 /**
  * Parse the “extra” field to get “extra fields”
@@ -473,7 +623,7 @@ function generateItem(item, teiDoc) {
 	// <title> is required
 	{
 		const title = teiDoc.createElementNS(ns.tei, "title");
-		appendXML(title, item.title); // maybe rich text
+		inlineParse(item.title, title); // maybe rich text
 		let parent = null;
 		if (isAnalytic) {
 			parent = analytic;
@@ -497,14 +647,14 @@ function generateItem(item, teiDoc) {
 	if (item.conferenceName) {
 		const title = teiDoc.createElementNS(ns.tei, "title");
 		title.setAttribute("type", "conferenceName");
-		appendXML(title, item.conferenceName);
+		inlineParse(item.conferenceName, title);
 		appendIndent(monogr, title, 2);
 	}
 
 	// publication title
 	test = item.bookTitle || item.proceedingsTitle || item.encyclopediaTitle || item.dictionaryTitle || item.publicationTitle || item.websiteTitle;
 	if (test) {
-		const xml = test;
+		const tagsoup = test;
 		const title = teiDoc.createElementNS(ns.tei, "title");
 		if (item.itemType == "journalArticle") {
 			title.setAttribute("level", "j");
@@ -512,7 +662,7 @@ function generateItem(item, teiDoc) {
 		else {
 			title.setAttribute("level", "m");
 		}
-		appendXML(title, xml);
+		inlineParse(tagsoup, title);
 		appendIndent(monogr, title, 2)
 	}
 
@@ -540,21 +690,21 @@ function generateItem(item, teiDoc) {
 		if (item.series) {
 			const title = teiDoc.createElementNS(ns.tei, "title");
 			title.setAttribute("level", "s");
-			appendXML(title, item.series);
+			inlineParse(item.series, title);
 			appendIndent(series, title, 2);
 		}
 		if (item.seriesTitle) {
 			const title = teiDoc.createElementNS(ns.tei, "title");
 			title.setAttribute("level", "s");
 			title.setAttribute("type", "alternative");
-			appendXML(title, item.seriesTitle);
+			inlineParse(item.seriesTitle, title);
 			appendIndent(series, title, 2);
 		}
 		if (item.seriesText) {
 			const note = teiDoc.createElementNS(ns.tei, "note");
 			note.setAttribute("type", "description");
 			// note.appendChild(teiDoc.createTextNode(item.seriesText));
-			appendXML(note, item.seriesText, true);
+			noteParse(item.seriesText, note);
 			appendIndent(series, note, 2);
 		}
 		appendField(series, 'biblScope', item.seriesNumber, 2, { 'unit': 'volume' });
@@ -653,7 +803,7 @@ function generateItem(item, teiDoc) {
 	if (item.abstractNote) {
 		const note = teiDoc.createElementNS(ns.tei, "note");
 		note.setAttribute("type", "abstract");
-		appendXML(note, item.abstractNote, true);
+		noteParse(item.abstractNote, note);
 		appendIndent(bibl, note, 1);
 	}
 
@@ -686,7 +836,7 @@ function generateItem(item, teiDoc) {
 	if (extra.note) {
 		const note = teiDoc.createElementNS(ns.tei, "note");
 		note.setAttribute("type", "extra");
-		appendXML(note, extra.note, true);
+		noteParse(extra.note, note);
 		appendIndent(bibl, note, 1);
 		delete extra.note; // delete used extra field
 	}
@@ -707,7 +857,7 @@ function generateItem(item, teiDoc) {
 			note.setAttribute('corresp', noteObj.uri);
 			// spaces may be significative if formated text
 			// note.setAttributeNS(ns.xml, "xml:space", 'preserve');
-			appendXML(note, noteObj.note, true);
+			noteParse(noteObj.note, note);
 			appendIndent(bibl, note, 1);
 		}
 	}
