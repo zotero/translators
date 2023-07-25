@@ -11,11 +11,11 @@
 		"getCollections": "true"
 	},
 	"displayOptions": {
-		"exportNotes": true,
 		"Export Tags": true,
+		"Export Notes": true,
 		"Generate XML IDs": false,
 		"Full TEI Document": false,
-		"Debug": true
+		"Debug": false
 	},
 	"inRepository": true,
 	"translatorType": 2,
@@ -77,9 +77,11 @@ const xmlSerializer = new XMLSerializer();
 const indent = "    ";
 
 /**
- * Inline markup allowed in titles and other rich text fields
- * startElement / endElenent
- * markup events recorded in source text
+ * Inline markup allowed in titles and some other rich text fields
+ * startElement: opening tag event (required if no endElement)
+ * endElement: closing tag event (required if no startElement)
+ * tei: required, tei TagName element to create
+ * rend: optional, tei attribute rend="value" 
  */
 
 const inlineMarkup = {
@@ -203,7 +205,7 @@ function inlineParse(tagSoup, dstParent) {
 			}
 			// markup event without opening or closing
 		}
-		// default case, not recognized as markup, appended as text
+		// default case, not recognized as markup, append as text
 		nodeStack[nodeStack.length - 1].append(token);
 		textContent += token;
 	}
@@ -213,13 +215,13 @@ function inlineParse(tagSoup, dstParent) {
 		let discardedNode = nodeStack.pop();
 		nodeStack[0].append(discardedMarkup.token, ...discardedNode.childNodes);
 	}
-	// ? will bug 
+	// really the textContent ? Even with non closing tags ?
 	return textContent;
 }
 
 
 /**
- * Trnsform note html in tei
+ * Transform note html in tei
  * @param {*} html 
  * @param {*} dstParent 
  * @returns 
@@ -273,7 +275,7 @@ function domWalk(srcParent, dstParent) {
 		srcChild = srcChild.nextSibling
 	) {
 		if (srcChild.nodeType == Node.TEXT_NODE) {
-			dstParent.appendChild(dstDoc.createTextNode(srcChild.textContent));
+			dstParent.append(srcChild.textContent);
 			continue;
 		}
 		if (srcChild.nodeType == Node.ELEMENT_NODE) {
@@ -285,6 +287,7 @@ function domWalk(srcParent, dstParent) {
 				if (html2tei[srcName].rend) {
 					dstChild.setAttribute("rend", html2tei[srcName].rend);
 				}
+				// special case of links
 				if (srcChild.hasAttribute('href')) {
 					dstChild.setAttribute("target", srcChild.getAttribute("href"))
 				}
@@ -294,7 +297,7 @@ function domWalk(srcParent, dstParent) {
 				dstChild = dstDoc.createElementNS(ns.tei, srcName);
 			}
 			domWalk(srcChild, dstChild);
-			dstParent.appendChild(dstChild);
+			dstParent.append(dstChild);
 			continue;
 		}
 		// commenty ? PI ?
@@ -453,9 +456,7 @@ function date2iso(date) {
  */
 function appendIndent(parent, child, level) {
 	const doc = parent.ownerDocument;
-	parent.appendChild(doc.createTextNode(indent.repeat(level)));
-	parent.appendChild(child);
-	parent.appendChild(doc.createTextNode('\n'));
+	parent.append(indent.repeat(level), child, '\n');
 }
 
 /**
@@ -473,9 +474,11 @@ function appendField(parent, name, value, level = 2, atts = {}) {
 	const child = doc.createElementNS(ns.tei, name);
 	if (atts === null) atts = {};
 	for (var key in atts) {
+		// no empty attribute value
+		if (!atts[key]) continue;
 		child.setAttribute(key, atts[key]);
 	}
-	child.appendChild(doc.createTextNode(value));
+	child.append(value);
 	appendIndent(parent, child, level);
 }
 
@@ -484,7 +487,7 @@ function appendField(parent, name, value, level = 2, atts = {}) {
  * Populate a <biblStruct>
  * @param {*} item 
  * @param {*} teiDoc 
- * @returns 
+ * @returns {Node}
  */
 function generateItem(item, teiDoc) {
 	// fixme not all conferencepapers are analytic!
@@ -533,29 +536,21 @@ function generateItem(item, teiDoc) {
 
 	// analytic or monographic, XML structure with indent
 	let monogr = teiDoc.createElementNS(ns.tei, "monogr");
-	monogr.appendChild(teiDoc.createTextNode('\n'));
+	monogr.append("\n");
 	let analytic = null;
 	let series = null;
 	if (isAnalytic) {
 		analytic = teiDoc.createElementNS(ns.tei, "analytic");
-		analytic.appendChild(teiDoc.createTextNode('\n'));
-		bibl.appendChild(teiDoc.createTextNode('\n' + indent));
-		bibl.appendChild(analytic);
-		bibl.appendChild(teiDoc.createTextNode('\n' + indent));
-		bibl.appendChild(monogr);
-		bibl.appendChild(teiDoc.createTextNode('\n'));
+		analytic.append("\n");
+		bibl.append("\n" + indent, analytic, "\n" + indent, monogr, "\n");
 	}
 	else {
-		bibl.appendChild(teiDoc.createTextNode('\n' + indent));
-		bibl.appendChild(monogr);
-		bibl.appendChild(teiDoc.createTextNode('\n'));
+		bibl.append("\n" + indent, monogr, "\n");
 	}
 	if (item.series || item.seriesTitle) {
 		series = teiDoc.createElementNS(ns.tei, "series");
-		bibl.appendChild(teiDoc.createTextNode(indent));
-		bibl.appendChild(series);
-		series.appendChild(teiDoc.createTextNode('\n'));
-		bibl.appendChild(teiDoc.createTextNode('\n'));
+		series.append("\n");
+		bibl.append(indent, series, "\n");
 	}
 
 
@@ -586,12 +581,12 @@ function generateItem(item, teiDoc) {
 		// a reponsability with a label
 		else {
 			resp = teiDoc.createElementNS(ns.tei, "respStmt");
-			resp.appendChild(teiDoc.createTextNode('\n'));
+			resp.append("\n");
 			appendField(resp, 'resp', type, 3);
 			pers = teiDoc.createElementNS(ns.tei, "persName");
 			appendIndent(resp, pers, 3);
 			levelNames++;
-			resp.appendChild(teiDoc.createTextNode(indent.repeat(2)));
+			resp.append(indent.repeat(2));
 		}
 
 		// append names of a particular creator
@@ -634,9 +629,7 @@ function generateItem(item, teiDoc) {
 			title.setAttribute("level", "m");
 		}
 		// append title to analytic or monogr
-		parent.appendChild(teiDoc.createTextNode(indent.repeat(2)));
-		parent.appendChild(title);
-		parent.appendChild(teiDoc.createTextNode('\n'));
+		parent.append(indent.repeat(2), title, "\n");
 		// short title
 		appendField(parent, 'title', item.shortTitle, 2, { 'type': 'short' });
 		// for analytic, a DOI is presumably for the article, not the journal.
@@ -703,7 +696,6 @@ function generateItem(item, teiDoc) {
 		if (item.seriesText) {
 			const note = teiDoc.createElementNS(ns.tei, "note");
 			note.setAttribute("type", "description");
-			// note.appendChild(teiDoc.createTextNode(item.seriesText));
 			noteParse(item.seriesText, note);
 			appendIndent(series, note, 2);
 		}
@@ -711,29 +703,17 @@ function generateItem(item, teiDoc) {
 	}
 
 
-	if (item.edition) {
-		const edition = teiDoc.createElementNS(ns.tei, "edition");
-		if (item.versionNumber) {
-			edition.setAttribute("n", item.versionNumber);
-		}
-		if (item.edition) {
-			edition.appendChild(teiDoc.createTextNode(item.edition));
-		}
-		appendIndent(monogr, edition, 2);
+	appendField(monogr, 'edition', item.edition, 2, { 'n': item.versionNumber });
+	// maybe a software with a version number but no edition name
+	if (!item.edition && item.versionNumber) {
+		appendField(monogr, 'edition', item.versionNumber, 2, { 'type': 'callNumber' });
 	}
-	// software, not well testes
-	else if (item.versionNumber) {
-		const edition = teiDoc.createElementNS(ns.tei, "edition");
-		edition.appendChild(teiDoc.createTextNode(item.versionNumber));
-		appendIndent(monogr, edition, 2);
-	}
-	appendField(monogr, 'edition', item.versionNumber, 2, { 'type': 'callNumber' });
 
 
 	// <imprint> is required
 	const imprint = teiDoc.createElementNS(ns.tei, "imprint");
 	appendIndent(monogr, imprint, 2);
-	imprint.appendChild(teiDoc.createTextNode('\n'));
+	imprint.append("\n");
 	// Date is required for an  <imprint> so create it by default
 	{
 		const date = teiDoc.createElementNS(ns.tei, "date");
@@ -750,7 +730,7 @@ function generateItem(item, teiDoc) {
 				delete extra['date-display'];
 			}
 			if (display != when) {
-				date.appendChild(teiDoc.createTextNode(display));
+				date.append(display);
 			}
 		}
 	}
@@ -771,12 +751,12 @@ function generateItem(item, teiDoc) {
 	// not thought
 	appendField(imprint, 'note', item.thesisType, 3, { 'type': 'thesisType' });
 	// ending indent
-	imprint.appendChild(teiDoc.createTextNode(indent.repeat(2)));
+	imprint.append(indent.repeat(2));
 
 	// after imprint
 	if (item.numberOfVolumes || item.numPages) {
 		const extent = teiDoc.createElementNS(ns.tei, "extent");
-		extent.appendChild(teiDoc.createTextNode('\n'));
+		extent.append("\n");
 		if (item.numberOfVolumes) {
 			// <measure unit="vol" quantity="4.2"/>
 			const measure = teiDoc.createElementNS(ns.tei, "measure");
@@ -792,7 +772,7 @@ function generateItem(item, teiDoc) {
 			appendIndent(extent, measure, 3);
 		}
 		// indent closing </extent>
-		extent.appendChild(teiDoc.createTextNode(indent.repeat(2)));
+		extent.append(indent.repeat(2));
 		appendIndent(monogr, extent, 2);
 	}
 	// other potional physical informations in extra field
@@ -811,7 +791,7 @@ function generateItem(item, teiDoc) {
 	{
 		const note = teiDoc.createElementNS(ns.tei, "note");
 		note.setAttribute("type", "review");
-		note.appendChild(note.ownerDocument.createTextNode('\n'));
+		note.append("\n");
 		let count = 0;
 		for (let creator of item.creators) {
 			const type = creator.creatorType;
@@ -826,7 +806,7 @@ function generateItem(item, teiDoc) {
 		}
 		if (count) {
 			appendIndent(bibl, note, 1);
-			note.appendChild(note.ownerDocument.createTextNode(indent.repeat(1)));
+			note.append(indent);
 		}
 	}
 
@@ -844,7 +824,7 @@ function generateItem(item, teiDoc) {
 	if (Object.keys(extra).length) {
 		const note = teiDoc.createElementNS(ns.tei, "note");
 		note.setAttribute("type", "unused");
-		note.appendChild(teiDoc.createTextNode(JSON.stringify(extra, null, 2)));
+		note.append(JSON.stringify(extra, null, 2));
 		appendIndent(bibl, note, 1);
 	}
 
@@ -865,28 +845,28 @@ function generateItem(item, teiDoc) {
 	// export tags, if available
 	if (Zotero.getOption("Export Tags") && item.tags && item.tags.length > 0) {
 		const tags = teiDoc.createElementNS(ns.tei, "note");
-		tags.appendChild(teiDoc.createTextNode('\n'));
+		tags.append("\n");
 		appendIndent(bibl, tags, 1);
 		tags.setAttribute("type", "tags");
 		for (let tag of item.tags) {
 			let term = teiDoc.createElementNS(ns.tei, "term");
 			term.setAttribute("type", "tag");
-			term.appendChild(teiDoc.createTextNode(tag.tag));
+			term.append(tag.tag);
 			appendIndent(tags, term, 2);
 		}
-		tags.appendChild(teiDoc.createTextNode(indent.repeat(1)));
+		tags.append(indent);
 	}
 	// for debug
 	if (Zotero.getOption("Debug")) {
 		const note = teiDoc.createElementNS(ns.tei, "note");
 		note.setAttribute("type", "debug");
-		note.appendChild(teiDoc.createTextNode(JSON.stringify(item, null, 2)));
+		note.append(JSON.stringify(item, null, 2));
 		appendIndent(bibl, note, 1);
 	}
 	// last indent
-	monogr.appendChild(teiDoc.createTextNode(indent.repeat(1)));
-	if (analytic) analytic.appendChild(teiDoc.createTextNode(indent.repeat(1)));
-	if (series) series.appendChild(teiDoc.createTextNode(indent.repeat(1)));
+	monogr.append(indent);
+	if (analytic) analytic.append(indent);
+	if (series) series.append(indent);
 
 	return bibl;
 }
@@ -899,7 +879,7 @@ function generateItem(item, teiDoc) {
  */
 function persName(parent, creator, level = 3) {
 	if (level < 1) level = 1;
-	parent.appendChild(parent.ownerDocument.createTextNode('\n'));
+	parent.append("\n");
 	// A first name is alaways a first name
 	appendField(parent, 'forename', creator.firstName, level);
 	// A last name is a family name with a first name
@@ -913,7 +893,7 @@ function persName(parent, creator, level = 3) {
 	// a name, is a name
 	appendField(parent, 'name', creator.name, level);
 	// indent closing tag
-	parent.appendChild(parent.ownerDocument.createTextNode(indent.repeat(level - 1)));
+	parent.append(indent.repeat(level - 1));
 
 }
 
@@ -925,15 +905,15 @@ function generateCollection(collection, teiDoc) {
 	if (children.length > 0) {
 		listBibl = teiDoc.createElementNS(ns.tei, "listBibl");
 		var colHead = teiDoc.createElementNS(ns.tei, "head");
-		colHead.appendChild(teiDoc.createTextNode(collection.name));
-		listBibl.appendChild(colHead);
+		colHead.append(collection.name);
+		listBibl.append(colHead);
 		for (var i = 0; i < children.length; i++) {
 			var child = children[i];
 			if (child.type == "collection") {
-				listBibl.appendChild(generateCollection(child, teiDoc));
+				listBibl.append(generateCollection(child, teiDoc));
 			}
 			else if (allItems[child.id]) {
-				listBibl.appendChild(generateItem(allItems[child.id], teiDoc));
+				listBibl.append(generateItem(allItems[child.id], teiDoc));
 			}
 		}
 	}
@@ -943,10 +923,10 @@ function generateCollection(collection, teiDoc) {
 function generateTEIDocument(listBibls, teiDoc) {
 	var text = teiDoc.createElementNS(ns.tei, "text");
 	var body = teiDoc.createElementNS(ns.tei, "body");
-	teiDoc.documentElement.appendChild(text);
-	text.appendChild(body);
+	teiDoc.documentElement.append(text);
+	text.append(body);
 	for (var i = 0; i < listBibls.length; i++) {
-		body.appendChild(listBibls[i]);
+		body.append(listBibls[i]);
 	}
 	return teiDoc;
 }
@@ -993,9 +973,7 @@ function doExport() {
 			if (item.itemType == "attachment") {
 				continue;
 			}
-			listBibl.appendChild(teiDoc.createTextNode('\n'));
-			listBibl.appendChild(generateItem(item, teiDoc));
-			listBibl.appendChild(teiDoc.createTextNode('\n'));
+			listBibl.append("\n", generateItem(item, teiDoc), "\n");
 		}
 		listBibls.push(listBibl);
 	}
@@ -1009,7 +987,7 @@ function doExport() {
 	else if (listBibls.length > 1) {
 		outputElement = teiDoc.createElementNS(ns.tei, "listBibl");
 		for (let i = 0; i < listBibls.length; i++) {
-			outputElement.appendChild(listBibls[i]);
+			outputElement.append(listBibls[i]);
 		}
 	}
 	else if (listBibls.length == 1) {
