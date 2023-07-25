@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-07 08:48:13"
+	"lastUpdated": "2023-07-25 08:12:34"
 }
 
 /*
@@ -100,9 +100,11 @@ function scrape(doc, url) {
 		let author = ZU.xpath(doc, '//ul[@class="contributor-list"]//li//a');
 		if (author.length > 0) {
 			// Handled using data attribute
+			// Get first name, lastname and author type(Author/Editor etc...)
 			for (let i = 0; i < author.length; i++) {
 				item.creators[i].firstName = author[i].getAttribute('data-firstnames');
 				item.creators[i].lastName = author[i].getAttribute('data-surname');
+				item.creators[i].creatorType = author[i].getAttribute('data-authortype');
 			}
 		}
 
@@ -130,26 +132,51 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.accessengineeringlibrary.com/content/book/9781259860386/",
+		"url": "https://www.accessengineeringlibrary.com/content/book/9781259860225",
 		"items": [
 			{
 				"itemType": "book",
-				"title": "3D Printer Projects for Makerspaces",
+				"title": "Handbook of Environmental Engineering",
 				"creators": [
 					{
-						"firstName": "Lydia Sloan",
-						"lastName": "Cline",
-						"creatorType": "author"
+						"firstName": "Rao Y.",
+						"lastName": "Surampalli",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Tian C.",
+						"lastName": "Zhang",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Satinder Kaur",
+						"lastName": "Brar",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Krishnamoorthy",
+						"lastName": "Hegde",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Rama",
+						"lastName": "Pulicharla",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Mausam",
+						"lastName": "Verma",
+						"creatorType": "editor"
 					}
 				],
-				"date": "2017",
-				"ISBN": "9781259860386",
-				"abstractNote": "Learn to model and print 3D designs—no experience required!This easy-to-follow guide features twenty 3D printing projects for makers of all skill levels to enjoy. Written in a tutorial, step-by-step manner, 3D Printer Projects for Makerspaces shows how to use Fusion 360, SketchUp, Meshmixer, Remake, and Inkscape to create fun and useful things. Scanning, slicers, silicone molds, settings, and build plate orientation are also covered, as well as post-processing methods that will make your prints really pop!Inside, you9ll learn to model, analyze, and print a:• Phone case• Coin bank• Art stencil• Cookie cutter• Cookie dunker• Personalized key fob• Lens cap holder• Lithophane night-light• Pencil cup with applied sketch• Business card with QR code• Bronze pendant• Soap mold• Hanging lampshade• Scanned Buddha charm• And more!",
+				"date": "2018",
+				"ISBN": "9781259860225",
+				"abstractNote": "A complete guide to environmental regulations and remediation.This practical resource offers thorough coverage of current environmental issues and policies along with step-by-step remediation procedures. With contributions from dozens of  industry-recognized experts, Handbook of Environmental Engineering features information on all segments of the market—including water and air quality and hazardous waste—and enables you to ensure compliance with all applicable regulations. You will get details about sensors, monitoring, and toxicity treatment and controls as well as waste management and safe disposal. Real-world examples demonstrate how to apply techniques and achieve compliance, while environmental impact assessments and measurement data enhance the book9s utility.Coverage includes:• Environmental legislation• Environmental impact assessments• Air pollution control and management• Potable water treatment• Wastewater treatment and reuse• Solid waste management• Hazardous waste management• Emerging wastes in the environment• Environmental monitoring and measurements",
 				"edition": "1st Edition",
 				"language": "en",
 				"libraryCatalog": "www.accessengineeringlibrary.com",
 				"publisher": "McGraw-Hill Education",
-				"url": "https://www.accessengineeringlibrary.com/content/book/9781259860386",
+				"url": "https://www.accessengineeringlibrary.com/content/book/9781259860225",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -164,28 +191,62 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.accessengineeringlibrary.com/content/book/9781259860386/chapter/chapter12",
+		"url": "https://www.accessengineeringlibrary.com/content/book/9781259860225/toc-chapter/chapter3/section/section1",
 		"items": [
 			{
 				"itemType": "bookSection",
-				"title": "PROJECT 12: Lithophane Night-Light",
+				"title": "CHAPTER PRELIMINARIES",
 				"creators": [
 					{
-						"firstName": "Lydia Sloan",
-						"lastName": "Cline",
+						"firstName": "Ashok",
+						"lastName": "Kumar",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Hamid",
+						"lastName": "Omidvarborna",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rao Y.",
+						"lastName": "Surampalli",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Tian C.",
+						"lastName": "Zhang",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Satinder Kaur",
+						"lastName": "Brar",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Krishnamoorthy",
+						"lastName": "Hegde",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Rama",
+						"lastName": "Pulicharla",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Mausam",
+						"lastName": "Verma",
+						"creatorType": "editor"
 					}
 				],
-				"date": "2017",
-				"ISBN": "9781259860386",
-				"abstractNote": "Learn to model and print 3D designs—no experience required!This easy-to-follow guide features twenty 3D printing projects for makers of all skill levels to enjoy. Written in a tutorial, step-by-step manner, 3D Printer Projects for Makerspaces shows how to use Fusion 360, SketchUp, Meshmixer, Remake, and Inkscape to create fun and useful things. Scanning, slicers, silicone molds, settings, and build plate orientation are also covered, as well as post-processing methods that will make your prints really pop!Inside, you'll learn to model, analyze, and print a:• Phone case• Coin bank• Art stencil• Cookie cutter• Cookie dunker• Personalized key fob• Lens cap holder• Lithophane night-light• Pencil cup with applied sketch• Business card with QR code• Bronze pendant• Soap mold• Hanging lampshade• Scanned Buddha charm• And more!",
-				"bookTitle": "3D Printer Projects for Makerspaces",
+				"date": "2018",
+				"ISBN": "9781259860225",
+				"abstractNote": "A complete guide to environmental regulations and remediation.This practical resource offers thorough coverage of current environmental issues and policies along with step-by-step remediation procedures. With contributions from dozens of  industry-recognized experts, Handbook of Environmental Engineering features information on all segments of the market—including water and air quality and hazardous waste—and enables you to ensure compliance with all applicable regulations. You will get details about sensors, monitoring, and toxicity treatment and controls as well as waste management and safe disposal. Real-world examples demonstrate how to apply techniques and achieve compliance, while environmental impact assessments and measurement data enhance the book's utility.Coverage includes:• Environmental legislation• Environmental impact assessments• Air pollution control and management• Potable water treatment• Wastewater treatment and reuse• Solid waste management• Hazardous waste management• Emerging wastes in the environment• Environmental monitoring and measurements",
+				"bookTitle": "Handbook of Environmental Engineering",
 				"edition": "1st Edition",
 				"language": "en",
 				"libraryCatalog": "www.accessengineeringlibrary.com",
 				"publisher": "McGraw-Hill Education",
-				"shortTitle": "PROJECT 12",
-				"url": "https://www.accessengineeringlibrary.com/content/book/9781259860386/chapter/chapter12",
+				"url": "https://www.accessengineeringlibrary.com/content/book/9781259860225/toc-chapter/chapter3/section/section1",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -307,7 +368,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2014-02-01",
+				"date": "2014/02/01/",
 				"abstractNote": "This tutorial teaches the Manning equation and its use for uniform open channel flow calculations, including the hydraulic radius, Manning roughness coefficient, and normal depth. There are example problems and illustrations show how to use spreadsheets for the calculations.",
 				"language": "en",
 				"libraryCatalog": "www.accessengineeringlibrary.com",
