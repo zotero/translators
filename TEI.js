@@ -509,7 +509,7 @@ function generateItem(item, teiDoc) {
 
 	// parsed extra maybe useful in multiple places
 	const extra = parseExtraFields(item.extra);
-	// A variable used to calculate complx tests
+	// A variable used to calculate complex tests
 	let test;
 
 
@@ -632,6 +632,15 @@ function generateItem(item, teiDoc) {
 		parent.append(indent.repeat(2), title, "\n");
 		// short title
 		appendField(parent, 'title', item.shortTitle, 2, { 'type': 'short' });
+		// APA7, extra field for reviewed title
+		if (extra['reviewed-title']) {
+			const title = teiDoc.createElementNS(ns.tei, "title");
+			title.setAttribute("type", "reviewed");
+			inlineParse(extra['reviewed-title'], title); // maybe rich text
+			parent.append(indent.repeat(2), title, "\n");
+			delete extra['reviewed-title'];
+		}
+
 		// for analytic, a DOI is presumably for the article, not the journal.
 		appendField(parent, 'idno', item.DOI, 2, { 'type': 'DOI' });
 	}
@@ -820,13 +829,6 @@ function generateItem(item, teiDoc) {
 		appendIndent(bibl, note, 1);
 		delete extra.note; // delete used extra field
 	}
-	// if extra fields still not used, output them in a note
-	if (Object.keys(extra).length) {
-		const note = teiDoc.createElementNS(ns.tei, "note");
-		note.setAttribute("type", "unused");
-		note.append(JSON.stringify(extra, null, 2));
-		appendIndent(bibl, note, 1);
-	}
 
 	// export notes, be conservative, do not strip tags
 	// prefer output html even if is not correct TEI
@@ -858,6 +860,13 @@ function generateItem(item, teiDoc) {
 	}
 	// for debug
 	if (Zotero.getOption("Debug")) {
+		// if extra fields still not used, output them in a note
+		if (Object.keys(extra).length) {
+			const note = teiDoc.createElementNS(ns.tei, "note");
+			note.setAttribute("type", "extra-unused");
+			note.append(JSON.stringify(extra, null, 2));
+			appendIndent(bibl, note, 1);
+		}
 		const note = teiDoc.createElementNS(ns.tei, "note");
 		note.setAttribute("type", "debug");
 		note.append(JSON.stringify(item, null, 2));
