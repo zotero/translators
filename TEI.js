@@ -536,23 +536,20 @@ function generateItem(item, teiDoc) {
 
 	// analytic or monographic, XML structure with indent
 	let monogr = teiDoc.createElementNS(ns.tei, "monogr");
+	// most specific parent for fields
+	let monoana = monogr;
 	monogr.append("\n");
 	let analytic = null;
 	let series = null;
+	// (TEI schema) analytic before monogr
 	if (isAnalytic) {
 		analytic = teiDoc.createElementNS(ns.tei, "analytic");
 		analytic.append("\n");
-		bibl.append("\n" + indent, analytic, "\n" + indent, monogr, "\n");
+		bibl.append("\n" + indent, analytic);
+		monoana = analytic;
 	}
-	else {
-		bibl.append("\n" + indent, monogr, "\n");
-	}
-	if (item.series || item.seriesTitle) {
-		series = teiDoc.createElementNS(ns.tei, "series");
-		series.append("\n");
-		bibl.append(indent, series, "\n");
-	}
-
+	// (TEI schema) always monogr
+	bibl.append("\n" + indent, monogr, "\n");
 
 	// creators are all people only remotely involved into the creation of
 	// a resource
@@ -563,7 +560,7 @@ function generateItem(item, teiDoc) {
 		const type = creator.creatorType;
 		if (type == "reviewedAuthor") {
 			// A reviewed author is not a statement of responsability
-			// is a subject, TEI uncleat, send in notes
+			// is a subject, sent in a note
 			continue
 		}
 		else if (type == "author") {
@@ -619,30 +616,18 @@ function generateItem(item, teiDoc) {
 	{
 		const title = teiDoc.createElementNS(ns.tei, "title");
 		inlineParse(item.title, title); // maybe rich text
-		let parent = null;
 		if (isAnalytic) {
-			parent = analytic;
 			title.setAttribute("level", "a");
 		}
 		else {
-			parent = monogr;
 			title.setAttribute("level", "m");
 		}
 		// append title to analytic or monogr
-		parent.append(indent.repeat(2), title, "\n");
+		monoana.append(indent.repeat(2), title, "\n");
 		// short title
-		appendField(parent, 'title', item.shortTitle, 2, { 'type': 'short' });
-		// APA7, extra field for reviewed title
-		if (extra['reviewed-title']) {
-			const title = teiDoc.createElementNS(ns.tei, "title");
-			title.setAttribute("type", "reviewed");
-			inlineParse(extra['reviewed-title'], title); // maybe rich text
-			parent.append(indent.repeat(2), title, "\n");
-			delete extra['reviewed-title'];
-		}
-
+		appendField(monoana, 'title', item.shortTitle, 2, { 'type': 'short' });
 		// for analytic, a DOI is presumably for the article, not the journal.
-		appendField(parent, 'idno', item.DOI, 2, { 'type': 'DOI' });
+		appendField(monoana, 'idno', item.DOI, 2, { 'type': 'DOI' });
 	}
 
 	// conference is not well tested
@@ -674,42 +659,13 @@ function generateItem(item, teiDoc) {
 	if (item.url) {
 		const ptr = teiDoc.createElementNS(ns.tei, "ptr");
 		ptr.setAttribute("target", item.url);
-		if (isAnalytic) {
-			appendIndent(analytic, ptr, 2);
-		}
-		else {
-			appendIndent(monogr, ptr, 2);
-		}
+		appendIndent(monoana, ptr, 2);
 	}
-	// Other canonical ref nos come right after the title(s) in monogr.
+	// Other canonical ref nos come right after the title(s)
 	appendField(monogr, 'idno', item.ISBN, 2, { 'type': 'ISBN' });
 	appendField(monogr, 'idno', item.ISSN, 2, { 'type': 'ISSN' });
-	appendField(monogr, 'idno', item.callNumber, 2, { 'type': 'callNumber' });
-
-
-	// [2023-06 FG] series element should have been created here if needed
-	if (item.series || item.seriesTitle) {
-		if (item.series) {
-			const title = teiDoc.createElementNS(ns.tei, "title");
-			title.setAttribute("level", "s");
-			inlineParse(item.series, title);
-			appendIndent(series, title, 2);
-		}
-		if (item.seriesTitle) {
-			const title = teiDoc.createElementNS(ns.tei, "title");
-			title.setAttribute("level", "s");
-			title.setAttribute("type", "alternative");
-			inlineParse(item.seriesTitle, title);
-			appendIndent(series, title, 2);
-		}
-		if (item.seriesText) {
-			const note = teiDoc.createElementNS(ns.tei, "note");
-			note.setAttribute("type", "description");
-			noteParse(item.seriesText, note);
-			appendIndent(series, note, 2);
-		}
-		appendField(series, 'biblScope', item.seriesNumber, 2, { 'unit': 'volume' });
-	}
+	// if analytic, call number is for analytic 
+	appendField(monoana, 'idno', item.callNumber, 2, { 'type': 'callNumber' });
 
 
 	appendField(monogr, 'edition', item.edition, 2, { 'n': item.versionNumber });
@@ -755,9 +711,8 @@ function generateItem(item, teiDoc) {
 	appendField(imprint, 'biblScope', item.issue, 3, { 'unit': 'issue' });
 	appendField(imprint, 'biblScope', item.section, 3, { 'unit': 'chapter' });
 	appendField(imprint, 'biblScope', item.pages, 3, { 'unit': 'page' });
-	// date in @when ?
 	appendField(imprint, 'date', item.accessDate, 3, { 'type': 'accessed' });
-	// not thought
+	// not well thought
 	appendField(imprint, 'note', item.thesisType, 3, { 'type': 'thesisType' });
 	// ending indent
 	imprint.append(indent.repeat(2));
@@ -784,9 +739,36 @@ function generateItem(item, teiDoc) {
 		extent.append(indent.repeat(2));
 		appendIndent(monogr, extent, 2);
 	}
-	// other potional physical informations in extra field
+	// other physical informations in extra field
 	appendField(monogr, 'extent', extra['format'], 2);
 	delete extra['format']; // delete used extra field
+
+	if (item.series || item.seriesTitle) {
+		// (TEI schema) series after monogr
+		series = teiDoc.createElementNS(ns.tei, "series");
+		series.append("\n");
+		bibl.append(indent, series, "\n");
+		if (item.series) {
+			const title = teiDoc.createElementNS(ns.tei, "title");
+			title.setAttribute("level", "s");
+			inlineParse(item.series, title);
+			appendIndent(series, title, 2);
+		}
+		if (item.seriesTitle) {
+			const title = teiDoc.createElementNS(ns.tei, "title");
+			title.setAttribute("level", "s");
+			title.setAttribute("type", "alternative");
+			inlineParse(item.seriesTitle, title);
+			appendIndent(series, title, 2);
+		}
+		if (item.seriesText) {
+			const note = teiDoc.createElementNS(ns.tei, "note");
+			note.setAttribute("type", "description");
+			noteParse(item.seriesText, note);
+			appendIndent(series, note, 2);
+		}
+		appendField(series, 'biblScope', item.seriesNumber, 2, { 'unit': 'volume' });
+	}
 
 	// abstract
 	if (item.abstractNote) {
@@ -796,7 +778,7 @@ function generateItem(item, teiDoc) {
 		appendIndent(bibl, note, 1);
 	}
 
-	// reviewedAuthor(s) in a note
+	// Review: author(s) and title in a note
 	{
 		const note = teiDoc.createElementNS(ns.tei, "note");
 		note.setAttribute("type", "review");
@@ -809,14 +791,25 @@ function generateItem(item, teiDoc) {
 			}
 			count++;
 			const pers = teiDoc.createElementNS(ns.tei, "persName");
+			pers.setAttribute("type", "reviewed");
 			// append names
 			persName(pers, creator, 3);
 			appendIndent(note, pers, 2);
+		}
+		// APA7, extra field for reviewed title
+		if (extra['reviewed-title']) {
+			const title = teiDoc.createElementNS(ns.tei, "title");
+			title.setAttribute("type", "reviewed");
+			inlineParse(extra['reviewed-title'], title); // maybe rich text
+			note.append(indent.repeat(2), title, "\n");
+			delete extra['reviewed-title'];
+			count++;
 		}
 		if (count) {
 			appendIndent(bibl, note, 1);
 			note.append(indent);
 		}
+		
 	}
 
 
