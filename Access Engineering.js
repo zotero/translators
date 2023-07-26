@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-25 08:12:34"
+	"lastUpdated": "2023-07-26 03:27:52"
 }
 
 /*
@@ -121,9 +121,6 @@ function scrape(doc, url) {
 		if (detectWeb(doc, url)) {
 			trans.itemType = detectWeb(doc, url);
 		}
-		trans.addCustomFields({
-			citation_book_title: "bookTitle"
-		});
 		trans.doWeb(doc, url);
 	});
 }
