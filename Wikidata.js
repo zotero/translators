@@ -72,6 +72,7 @@ var typeMapping = {
 	Q10870555: "report",
 	Q820655: "statute",
 	Q1266946: "thesis",
+	Q187685: "thesis", // doctoral thesis
 	Q15416: "tvBroadcast",
 	Q30070675: "videoRecording",
 	Q36774: "webpage",
