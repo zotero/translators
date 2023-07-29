@@ -74,7 +74,7 @@ const allItems = {};
 // build one time
 const xmlParser = new DOMParser();
 const xmlSerializer = new XMLSerializer();
-const indent = "    ";
+const indent = "  ";
 
 /**
  * Inline markup allowed in titles and some other rich text fields
@@ -718,7 +718,7 @@ function generateItem(item, teiDoc) {
 	imprint.append(indent.repeat(2));
 
 	// after imprint
-	if (item.numberOfVolumes || item.numPages) {
+	if (item.numberOfVolumes || item.numPages || extra['format']) {
 		const extent = teiDoc.createElementNS(ns.tei, "extent");
 		extent.append("\n");
 		if (item.numberOfVolumes) {
@@ -735,12 +735,12 @@ function generateItem(item, teiDoc) {
 			measure.setAttribute("quantity", item.numPages);
 			appendIndent(extent, measure, 3);
 		}
+		// other physical informations in extra field
+		appendField(extent, 'measure', extra['format'], 3);
 		// indent closing </extent>
 		extent.append(indent.repeat(2));
 		appendIndent(monogr, extent, 2);
 	}
-	// other physical informations in extra field
-	appendField(monogr, 'extent', extra['format'], 2);
 	delete extra['format']; // delete used extra field
 
 	if (item.series || item.seriesTitle) {
