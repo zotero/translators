@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-31 21:01:05"
+	"lastUpdated": "2023-07-31 21:04:54"
 }
 
 function detectWeb(doc, url) {
@@ -314,18 +314,18 @@ var testCases = [
 				"title": "Jones Dye Test與Fluorescein Dye Disappearance Test的再評估",
 				"creators": [
 					{
-						"firstName": "陳彥",
-						"lastName": "志",
+						"firstName": "彥志",
+						"lastName": "陳",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "高啓",
-						"lastName": "祥",
+						"firstName": "啓祥",
+						"lastName": "高",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "林素",
-						"lastName": "玲",
+						"firstName": "素玲",
+						"lastName": "林",
 						"creatorType": "author"
 					}
 				],
@@ -385,7 +385,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2021-02",
+				"date": "2021-12",
 				"DOI": "10.6981/FEM.202112_2(12).0063",
 				"ISSN": "2692-7608",
 				"abstractNote": "The Party branch is the Party's basic organization, the basic unit of the Party organization to carry out its work, the Party's fighting fortress in the basic social organizations, and the foundation of all the Party's work and combat effectiveness. Party building work is an effective way for schools to consolidate ideological and political work and an important starting point for carrying out ideological and political education. The construction of grass-roots Party branches is the top priority of the Party building work in colleges and universities, it is necessary to strengthen political guidance and enhance Party member education; strictly grasp standard procedures, do a good job in Party member management, strictly regulate Party discipline, strengthen Party member supervision, focus on central work, extensively organize teachers and students, choose advanced models, focus on propagation work; gather the joint efforts of teachers and students, promote collaborative education; strengthen the sense of purpose, connect and serve teachers and students, and solidly promote the creation of model Party branches, give full play to the leading and exemplary role, educate people for the Party and cultivate talents for the country.",
