@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-02 15:46:17"
+	"lastUpdated": "2023-08-02 16:03:19"
 }
 
 /*
@@ -66,10 +66,13 @@ async function scrape(doc, url = doc.location.href) {
 			item.tags[i] = keywords[i].textContent;
 		}
 
-		var abstractLines = ZU.xpath(doc, "id('box')/p");
+		var abstractParagraphs = ZU.xpath(doc, "id('box')/p");
 		item.abstractNote = "";
-		for (let i = 0; i < abstractLines.length; i++) {
-			item.abstractNote += abstractLines[i].textContent;
+		for (let i = 0; i < abstractParagraphs.length; i++) {
+			var abstractLines = abstractParagraphs[i].innerHTML.split("<br>");
+			for (let j = 0; j < abstractLines.length; j++) {
+				item.abstractNote += abstractLines[j] + "\n";
+			}
 		}
 		item.complete();
 	});
@@ -189,7 +192,7 @@ var testCases = [
 					}
 				],
 				"date": "2007/11/12",
-				"abstractNote": "The sign-rank of a real matrix M is the least rankof a matrix R in which every entry has the same sign as thecorresponding entry of M. We determine the sign-rank of everymatrix of the form M=[ D(|x AND y|) ]_{x,y}, whereD:{0,1,...,n}->{-1,+1} is given and x and y range over {0,1}^n.Specifically, we prove that the sign-rank of M equals 2^{\\tilde Theta(k)}, where k is the number of times D changessign in {0,1,...,n}.\n         Put differently, we prove an optimal lower boundon the unbounded-error communication complexity of everysymmetric function, i.e., a function of the form f(x,y)=D(|x AND y|) for some D. The unbounded-error model isessentially the most powerful of all models of communication(both classical and quantum), and proving lower bounds in itis a substantial challenge. The only previous nontrivial lowerbounds for this model appear in the groundbreaking work ofForster (2001) and its extensions.  As corollaries to ourresult, we give new lower bounds for PAC learning and forthreshold-of-majority circuits.\n         The technical content of our proof is diverse andfeatures random walks on (Z_2)^n, discrete approximation theory,the Fourier transform on (Z_2)^n, linear-programming duality,and matrix analysis.",
+				"abstractNote": "The sign-rank of a real matrix M is the least rank\nof a matrix R in which every entry has the same sign as the\ncorresponding entry of M. We determine the sign-rank of every\nmatrix of the form M=[ D(|x AND y|) ]_{x,y}, where\nD:{0,1,...,n}-&gt;{-1,+1} is given and x and y range over {0,1}^n.\nSpecifically, we prove that the sign-rank of M equals \n2^{\\tilde Theta(k)}, where k is the number of times D changes\nsign in {0,1,...,n}.\n         Put differently, we prove an optimal lower bound\non the unbounded-error communication complexity of every\nsymmetric function, i.e., a function of the form \nf(x,y)=D(|x AND y|) for some D. The unbounded-error model is\nessentially the most powerful of all models of communication\n(both classical and quantum), and proving lower bounds in it\nis a substantial challenge. The only previous nontrivial lower\nbounds for this model appear in the groundbreaking work of\nForster (2001) and its extensions.  As corollaries to our\nresult, we give new lower bounds for PAC learning and for\nthreshold-of-majority circuits.\n         The technical content of our proof is diverse and\nfeatures random walks on (Z_2)^n, discrete approximation theory,\nthe Fourier transform on (Z_2)^n, linear-programming duality,\nand matrix analysis.",
 				"archiveID": "TR07-112",
 				"language": "en",
 				"libraryCatalog": "eccc.weizmann.ac.il",
