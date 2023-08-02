@@ -8,7 +8,7 @@
 	"priority": 98,
 	"inRepository": true,
 	"translatorType": 8,
-	"lastUpdated": "2023-07-31 15:26:06"
+	"lastUpdated": "2023-08-02 14:24:24"
 }
 
 /*
@@ -77,14 +77,16 @@ async function doSearch(items) {
 }
 
 function translateResult(result) {
+	Z.debug(result)
 	let item = new Zotero.Item('book');
 	item.title = result.Title;
 	if (result.Subtitle && !item.title.includes(':') && !result.Subtitle.includes(':')) {
 		item.title += ': ' + result.Subtitle;
 	}
+	item.title = fixCase(item.title);
 	item.abstractNote = result.Sinopse;
+	item.series = fixCase(result.Colection);
 	// TODO: Need example data for:
-	// item.series
 	// item.seriesNumber
 	// item.volume
 	// item.numberOfVolumes
@@ -92,8 +94,8 @@ function translateResult(result) {
 	if (item.edition == '1') {
 		item.edition = '';
 	}
-	item.place = result.Cidade;
-	item.publisher = result.Imprint;
+	item.place = (result.Cidade || '') + (result.UF ? ', ' + result.UF : '');
+	item.publisher = fixCase(result.Imprint);
 	item.date = ZU.strToISO(result.Date);
 	item.numPages = result.Paginas;
 	if (item.numPages == '0') {
@@ -155,7 +157,9 @@ function translateResult(result) {
 		// and which are given names is outside the scope of this translator.
 		// Chicago indexes by the final element of the name alone, and so will we:
 		//   https://en.wikipedia.org/wiki/Portuguese_name#Indexing
-		item.creators.push(ZU.cleanAuthor(author, creatorType, author.includes(',')));
+		let creator = ZU.cleanAuthor(author, creatorType, author.includes(','));
+		if (!creator.firstName) creator.fieldMode = 1;
+		item.creators.push(creator);
 	}
 	if (result.Subject) {
 		item.tags.push({ tag: result.Subject });
@@ -164,6 +168,13 @@ function translateResult(result) {
 		item.tags.push({ tag });
 	}
 	item.complete();
+}
+
+function fixCase(s) {
+	if (s && s == s.toUpperCase()) {
+		s = ZU.capitalizeTitle(s, true);
+	}
+	return s;
 }
 
 function cleanData(items) {
@@ -233,7 +244,7 @@ var testCases = [
 				"abstractNote": "Em políticas públicas, o debate sobre como as técnicas de investigações criminais devem responder à digitalização das dinâmicas sociais tem se sobressaído e caminha em uma linha tênue entre otimização dos processos administrativos e possíveis transgressões em relação aos direitos fundamentais. Nesse sentido, técnicas de hacking governamental, ou seja, de superação de recursos de segurança em dispositivos pessoais, vem ganhando uma escalabilidade crescente e envolve a ampliação de fabricantes, revendedores e contratos com a administração pública, ao passo em que seus efeitos colaterais aos direitos fundamentais, sobretudo em relação à sociedade civil, vêm sendo denunciados internacionalmente.",
 				"language": "pt-BR",
 				"libraryCatalog": "Câmara Brasileira do Livro ISBN",
-				"place": "Recife",
+				"place": "Recife, PE",
 				"publisher": "IP.rec",
 				"shortTitle": "Mercadores da Insegurança",
 				"attachments": [],
@@ -273,7 +284,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "HARRY POTTER E A PEDRA FILOSOFAL",
+				"title": "Harry Potter E a Pedra Filosofal",
 				"creators": [
 					{
 						"firstName": "J. K.",
@@ -328,6 +339,7 @@ var testCases = [
 				"language": "pt-BR",
 				"libraryCatalog": "Câmara Brasileira do Livro ISBN",
 				"publisher": "Rocco",
+				"series": "Harry Potter",
 				"attachments": [],
 				"tags": [
 					{
@@ -374,7 +386,7 @@ var testCases = [
 				"language": "pt-BR",
 				"libraryCatalog": "Câmara Brasileira do Livro ISBN",
 				"numPages": "96",
-				"place": "São Paulo",
+				"place": "São Paulo, SP",
 				"publisher": "Autonomia Literaria",
 				"shortTitle": "Einstein Socialista",
 				"attachments": [],
@@ -427,7 +439,7 @@ var testCases = [
 				"language": "Inglês (EUA)",
 				"libraryCatalog": "Câmara Brasileira do Livro ISBN",
 				"numPages": "58",
-				"place": "São Paulo",
+				"place": "São Paulo, SP",
 				"publisher": "Sociedade Beneficente Israelita Brasileira Albert Einstein",
 				"attachments": [],
 				"tags": [
@@ -476,7 +488,7 @@ var testCases = [
 				"language": "pt-BR",
 				"libraryCatalog": "Câmara Brasileira do Livro ISBN",
 				"numPages": "360",
-				"place": "SÃO PAULO",
+				"place": "SÃO PAULO, SP",
 				"publisher": "Chão Editora",
 				"shortTitle": "Filipson",
 				"attachments": [],
@@ -512,7 +524,8 @@ var testCases = [
 					{
 						"firstName": "",
 						"lastName": "Homero",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					},
 					{
 						"firstName": "Trajano",
@@ -526,7 +539,7 @@ var testCases = [
 				"language": "pt-BR",
 				"libraryCatalog": "Câmara Brasileira do Livro ISBN",
 				"numPages": "1048",
-				"place": "São Paulo",
+				"place": "São Paulo, SP",
 				"publisher": "Editora 34",
 				"attachments": [],
 				"tags": [
@@ -570,8 +583,8 @@ var testCases = [
 				"language": "pt-BR",
 				"libraryCatalog": "Câmara Brasileira do Livro ISBN",
 				"numPages": "232",
-				"place": "Rio de Janeiro",
-				"publisher": "FREITAS BASTOS EDITORA",
+				"place": "Rio de Janeiro, RJ",
+				"publisher": "Freitas Bastos Editora",
 				"shortTitle": "Manual de Sentença Trabalhista",
 				"attachments": [],
 				"tags": [
@@ -666,7 +679,7 @@ var testCases = [
 				"language": "pt-BR",
 				"libraryCatalog": "Câmara Brasileira do Livro ISBN",
 				"numPages": "100",
-				"place": "Barueri",
+				"place": "Barueri, SP",
 				"publisher": "Panini Comics",
 				"attachments": [],
 				"tags": [
@@ -737,7 +750,7 @@ var testCases = [
 				"language": "pt-BR",
 				"libraryCatalog": "Câmara Brasileira do Livro ISBN",
 				"numPages": "100",
-				"place": "Barueri",
+				"place": "Barueri, SP",
 				"publisher": "Panini Comics",
 				"attachments": [],
 				"tags": [
@@ -749,6 +762,33 @@ var testCases = [
 					},
 					{
 						"tag": "super-herois"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"ISBN": "8576664984"
+		},
+		"items": [
+			{
+				"itemType": "book",
+				"title": "A Religião Nos Limites Da Simples Razão",
+				"creators": [],
+				"date": "2006-01-02",
+				"ISBN": "9788576664987",
+				"language": "pt-BR",
+				"libraryCatalog": "Câmara Brasileira do Livro ISBN",
+				"publisher": "Escala Educacional",
+				"series": "Série Filosofar",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Literatura"
 					}
 				],
 				"notes": [],
