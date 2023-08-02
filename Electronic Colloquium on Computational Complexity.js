@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-02 15:31:56"
+	"lastUpdated": "2023-08-02 15:46:17"
 }
 
 /*
@@ -41,7 +41,7 @@ const preprintType = ZU.fieldIsValidForType('title', 'preprint')
 
 function detectWeb(doc, url) {
 	var multipleRe = /^https?:\/\/eccc\.weizmann\.ac\.il\/(title|year|keyword)\//;
-	var singleRe = /^https?:\/\/eccc\.weizmann\.ac\.il\/report\//
+	var singleRe = /^https?:\/\/eccc\.weizmann\.ac\.il\/report\//;
 	if (multipleRe.test(url)) {
 		return "multiple";
 	}
@@ -175,27 +175,26 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://eccc.weizmann.ac.il/report/2023/078/",
+		"url": "https://eccc.weizmann.ac.il/report/2007/112/",
 		"detectedItemType": "preprint",
 		"items": [
 			{
 				"itemType": "preprint",
-				"title": "Toward Better Depth Lower Bounds: A KRW-like theorem for Strong Composition",
+				"title": "Unbounded-Error Communication Complexity of Symmetric Functions",
 				"creators": [
 					{
-						"firstName": "Or",
-						"lastName": "Meir",
+						"firstName": "Alexander A.",
+						"lastName": "Sherstov",
 						"creatorType": "author"
 					}
 				],
-				"date": "2023/5/30",
-				"abstractNote": "One of the major open problems in complexity theory is proving super-logarithmic lower bounds on the depth of circuits (i.e., $\\mathbf{P}\\not\\subseteq \\mathbf{NC}^{1}$). Karchmer, Raz, and Wigderson (Computational Complexity 5(3/4), 1995) suggested to approach this problem by proving that depth complexity of a composition of functions $f \\diamond g$ is roughly the sum of the depth complexities of $f$ and $g$. They showed that the validity of this conjecture would imply that $\\mathbf{P}\\not\\subseteq\\mathbf{NC}^{1}$.The intuition that underlies the KRW conjecture is that the composition $f \\diamond g$ should behave like a \"direct-sum problem\", in a certain sense, and therefore the depth complexity of $f \\diamond g$ should be the sum of the individual depth complexities. Nevertheless, there are two obstacles toward turning this intuition into a proof: first, we do not know how to prove that $f \\diamond g$ must behave like a direct-sum problem; second, we do not know how to prove that the complexity of the latter direct-sum problem is indeed the sum of the individual complexities.In this work, we focus on the second obstacle. To this end, we study a notion called ``strong composition'', which is the same as $f \\diamond g$ except that it is forced to behave like a direct-sum problem. We prove a variant of the KRW conjecture for strong composition, thus overcoming the above second obstacle. This result demonstrates that the first obstacle above is the crucial barrier toward resolving the KRW conjecture. Along the way, we develop some general techniques that might be of independent interest.",
-				"archiveID": "TR23-078",
+				"date": "2007/11/12",
+				"abstractNote": "The sign-rank of a real matrix M is the least rankof a matrix R in which every entry has the same sign as thecorresponding entry of M. We determine the sign-rank of everymatrix of the form M=[ D(|x AND y|) ]_{x,y}, whereD:{0,1,...,n}->{-1,+1} is given and x and y range over {0,1}^n.Specifically, we prove that the sign-rank of M equals 2^{\\tilde Theta(k)}, where k is the number of times D changessign in {0,1,...,n}.\n         Put differently, we prove an optimal lower boundon the unbounded-error communication complexity of everysymmetric function, i.e., a function of the form f(x,y)=D(|x AND y|) for some D. The unbounded-error model isessentially the most powerful of all models of communication(both classical and quantum), and proving lower bounds in itis a substantial challenge. The only previous nontrivial lowerbounds for this model appear in the groundbreaking work ofForster (2001) and its extensions.  As corollaries to ourresult, we give new lower bounds for PAC learning and forthreshold-of-majority circuits.\n         The technical content of our proof is diverse andfeatures random walks on (Z_2)^n, discrete approximation theory,the Fourier transform on (Z_2)^n, linear-programming duality,and matrix analysis.",
+				"archiveID": "TR07-112",
 				"language": "en",
 				"libraryCatalog": "eccc.weizmann.ac.il",
 				"repository": "Electronic Colloquium on Computational Complexity",
-				"shortTitle": "Toward Better Depth Lower Bounds",
-				"url": "https://eccc.weizmann.ac.il/report/2023/078/",
+				"url": "https://eccc.weizmann.ac.il/report/2007/112/",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -204,46 +203,13 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Circuit Complexity Lower Bounds"
+						"tag": "Communication complexity"
 					},
 					{
-						"tag": "Depth Lower bounds"
+						"tag": "Sign-rank"
 					},
 					{
-						"tag": "KRW"
-					},
-					{
-						"tag": "KRW composition conjecture"
-					},
-					{
-						"tag": "KRW conjecture"
-					},
-					{
-						"tag": "KW games"
-					},
-					{
-						"tag": "KW relation"
-					},
-					{
-						"tag": "Karchmer Wigderson game"
-					},
-					{
-						"tag": "Karchmer-Raz-Wigderson conjecture"
-					},
-					{
-						"tag": "Karchmer-Wigderson games"
-					},
-					{
-						"tag": "circuit lower bounds"
-					},
-					{
-						"tag": "formula complexity"
-					},
-					{
-						"tag": "formula lower bound"
-					},
-					{
-						"tag": "formula lower bounds"
+						"tag": "Unbounded-error communication complexity"
 					}
 				],
 				"notes": [],
