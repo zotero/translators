@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-14 17:00:22"
+	"lastUpdated": "2023-08-02 15:31:56"
 }
 
 /*
@@ -41,12 +41,14 @@ const preprintType = ZU.fieldIsValidForType('title', 'preprint')
 
 function detectWeb(doc, url) {
 	var multipleRe = /^https?:\/\/eccc\.weizmann\.ac\.il\/(title|year|keyword)\//;
+	var singleRe = /^https?:\/\/eccc\.weizmann\.ac\.il\/report\//
 	if (multipleRe.test(url)) {
 		return "multiple";
 	}
-	else {
+	else if (singleRe.test(url)) {
 		return preprintType;
 	}
+	else return false;
 }
 
 async function scrape(doc, url = doc.location.href) {
