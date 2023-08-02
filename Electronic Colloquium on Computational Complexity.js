@@ -2,14 +2,14 @@
 	"translatorID": "09a9599e-c20e-a405-d10d-35ad4130a426",
 	"label": "Electronic Colloquium on Computational Complexity",
 	"creator": "Jonas Schrieb and Morgan Shirley",
-	"target": "^https?://eccc\\.weizmann\\.ac\\.il/(title|year|keyword|report)",
+	"target": "^https?://eccc\\.weizmann\\.ac\\.il/(title|year|keyword|report|search)",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-02 16:03:19"
+	"lastUpdated": "2023-08-02 16:18:22"
 }
 
 /*
@@ -40,7 +40,7 @@ const preprintType = ZU.fieldIsValidForType('title', 'preprint')
 	: 'report';
 
 function detectWeb(doc, url) {
-	var multipleRe = /^https?:\/\/eccc\.weizmann\.ac\.il\/(title|year|keyword)\//;
+	var multipleRe = /^https?:\/\/eccc\.weizmann\.ac\.il\/(title|year|keyword|search)\//;
 	var singleRe = /^https?:\/\/eccc\.weizmann\.ac\.il\/report\//;
 	if (multipleRe.test(url)) {
 		return "multiple";
@@ -219,6 +219,12 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://eccc.weizmann.ac.il/search/?search=combinatorial",
+		"detectedItemType": "multiple",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
