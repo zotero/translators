@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-02 16:18:22"
+	"lastUpdated": "2023-08-02 16:48:21"
 }
 
 /*
@@ -83,9 +83,8 @@ async function scrape(doc, url = doc.location.href) {
 	});
 }
 
-function doWeb(doc, url) {
-	var articles = [];
-	var items = {};
+async function doWeb(doc, url) {
+	var articles = {};
 
 	if (detectWeb(doc, url) == "multiple") {
 		var titleXPath = "//a[starts-with(@href,'/report/')]/h4";
@@ -94,20 +93,18 @@ function doWeb(doc, url) {
 		var titles = ZU.xpath(doc, titleXPath);
 		var links = ZU.xpath(doc, linkXPath);
 		for (let i = 0; i < titles.length; i++) {
-			items[links[i].href] = titles[i].textContent;
+			articles[links[i].href] = titles[i].textContent;
 		}
-		Zotero.selectItems(items, function (items) {
-			if (!items) {
-				Zotero.done();
-			}
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
+		let items = await Zotero.selectItems(articles);
+		if (!items) {
+			Zotero.done();
+		}
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
