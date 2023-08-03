@@ -107,46 +107,31 @@ function doWeb(doc, url) {
  * legal Reports in Appendix A, but I've not been able to locate
  * a copy with the appendix intact yet.
 */
-var courtMap = new Map();
-courtMap.set('Federal Court of Australia', 'FCA');
-courtMap.set('High Court of Australia', 'HCA');
-courtMap.set('Family Court of Australia', 'FamCA');
-courtMap.set('Australian Information Commissioner', 'AICmr');
-
-function abbrevCourt(fullname) {
-	var abbrev = courtMap.get(fullname);
-	if (abbrev === undefined) {
-		abbrev = fullname;
-	}
-	return abbrev;
-}
+var courtAbbrev = {
+	"Federal Court of Australia": "FCA",
+	"High Court of Australia": "HCA",
+	"Family Court of Australia": "FamCA",
+	"Australian Information Commissioner": "AICmr"
+};
 
 /*
  * Adjust some jurisdiction abbreviations
  */
-var jMap = new Map();
-jMap.set('Commonwealth', 'Cth');
-jMap.set('CTH', 'Cth');
-jMap.set('Australian Capital Territory', 'ACT');
-jMap.set('New South Wales', 'NSW');
-jMap.set('Northern Territory', 'NT');
-jMap.set('Queensland', 'Qld');
-jMap.set('QLD', 'Qld');
-jMap.set('South Australia', 'SA');
-jMap.set('Tasmania', 'Tas');
-jMap.set('TAS', 'Tas');
-jMap.set('Victoria', 'Vic');
-jMap.set('VIC', 'Vic');
-jMap.set('Western Australia', 'WA');
-
-function abbrevJurisdiction(fullname) {
-
-	var abbrev = jMap.get(fullname);
-	if (abbrev === undefined) {
-		abbrev = fullname;
-	}
-	return abbrev;
-}
+var jurisdictionAbbrev = {
+	"Commonwealth": "Cth",
+	"CTH": "Cth",
+	"Australian Capital Territory": "ACT",
+	"New South Wales": "NSW",
+	"Northern Territory": "NT",
+	"Queensland": "Qld",
+	"QLD": "Qld",
+	"South Australia": "SA",
+	"Tasmania": "Tas",
+	"TAS": "Tas",
+	"Victoria": "Vic",
+	"VIC": "Vic",
+	"Western Australia": "WA"
+};
 
 /*
  * ZU.capitalizeTitle doesn't cope with Act Names (With Parenthetical Names) Acts
@@ -184,7 +169,8 @@ function parseActName(nameOfAct) {
 function scrape(doc, url) {
 	var type = detectWeb(doc, url);
 	var newItem = new Zotero.Item(type);
-	var jurisdiction = abbrevJurisdiction(text(doc, 'li.ribbon-jurisdiction>a>span'));
+	var full_jurisdiction = text(doc, 'li.ribbon-jurisdiction>a>span');
+	var jurisdiction = jurisdictionAbbrev[full_jurisdiction] || full_jurisdiction;
 	if (jurisdiction) {
 		newItem.code = jurisdiction;
 	}
@@ -206,7 +192,8 @@ function scrape(doc, url) {
 			else {
 				newItem.dateDecided = text(doc, 'li.ribbon-year>a>span');
 			}
-			newItem.court = abbrevCourt(text(doc, 'li.ribbon-database>a>span'));
+			var full_court = text(doc, 'li.ribbon-database>a>span');
+			newItem.court = courtAbbrev[full_court] || full_court;
 			if (citation) {
 				var lastNumber = citation.match(/(\d+)$/);
 				if (lastNumber) {
