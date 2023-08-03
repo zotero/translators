@@ -390,6 +390,8 @@ function genXMLId(item) {
 		// Name = NameStartChar | "-" | "." | [0-9] | #xB7 |
 		// [#x0300-#x036F] | [#x203F-#x2040]
 
+		// [FG] maybe optimized with unicode property \P{L} 
+		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions/Unicode_character_class_escape
 		xmlid = xmlid.replace(/^[^A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\u10000-\uEFFFF]/, "");
 		xmlid = xmlid.replace(/[^-A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\u10000-\uEFFFF.0-9\u00B7\u0300-\u036F\u203F-\u2040]/g, "");
 	}
@@ -509,8 +511,6 @@ function generateItem(item, teiDoc) {
 
 	// parsed extra maybe useful in multiple places
 	const extra = parseExtraFields(item.extra);
-	// A variable used to calculate complex tests
-	let test;
 
 
 	if (Zotero.getOption("Generate XML IDs")) {
@@ -550,6 +550,10 @@ function generateItem(item, teiDoc) {
 	}
 	// (TEI schema) always monogr
 	bibl.append("\n" + indent, monogr, "\n");
+	// language of text
+	if (item.language) {
+		monoana.setAttributeNS(ns.xml, "xml:lang", item.language);
+	}
 
 	// creators are all people only remotely involved into the creation of
 	// a resource
@@ -628,7 +632,7 @@ function generateItem(item, teiDoc) {
 		appendField(monoana, 'title', item.shortTitle, 2, { 'type': 'short' });
 		// for analytic, a DOI is presumably for the article, not the journal.
 		appendField(monoana, 'idno', item.DOI, 2, { 'type': 'DOI' });
-	}
+	}	
 
 	// conference is not well tested
 	if (item.conferenceName) {
@@ -639,9 +643,9 @@ function generateItem(item, teiDoc) {
 	}
 
 	// publication title
-	test = item.bookTitle || item.proceedingsTitle || item.encyclopediaTitle || item.dictionaryTitle || item.publicationTitle || item.websiteTitle;
-	if (test) {
-		const tagsoup = test;
+	do {
+		const tagsoup = item.bookTitle || item.proceedingsTitle || item.encyclopediaTitle || item.dictionaryTitle || item.publicationTitle || item.websiteTitle;
+		if (!tagsoup) break;
 		const title = teiDoc.createElementNS(ns.tei, "title");
 		if (item.itemType == "journalArticle") {
 			title.setAttribute("level", "j");
@@ -651,8 +655,8 @@ function generateItem(item, teiDoc) {
 		}
 		inlineParse(tagsoup, title);
 		appendIndent(monogr, title, 2)
-	}
 
+	} while(false)
 
 	// https://github.com/TEIC/TEI/issues/1788
 	// url of item according to TEI spec
@@ -737,11 +741,11 @@ function generateItem(item, teiDoc) {
 		}
 		// other physical informations in extra field
 		appendField(extent, 'measure', extra['format'], 3);
+		delete extra['format']; // delete used extra field
 		// indent closing </extent>
 		extent.append(indent.repeat(2));
 		appendIndent(monogr, extent, 2);
 	}
-	delete extra['format']; // delete used extra field
 
 	if (item.series || item.seriesTitle) {
 		// (TEI schema) series after monogr
@@ -809,12 +813,11 @@ function generateItem(item, teiDoc) {
 			appendIndent(bibl, note, 1);
 			note.append(indent);
 		}
-		
 	}
 
 
 
-	// Extra fields
+	// Extra field contains free text considered as a note
 	if (extra.note) {
 		const note = teiDoc.createElementNS(ns.tei, "note");
 		note.setAttribute("type", "extra");
@@ -823,11 +826,9 @@ function generateItem(item, teiDoc) {
 		delete extra.note; // delete used extra field
 	}
 
-	// export notes, be conservative, do not strip tags
-	// prefer output html even if is not correct TEI
-	if (item.notes && Zotero.getOption("exportNotes")) {
+	// notes
+	if (item.notes && Zotero.getOption("Export Notes")) {
 		for (let noteObj of item.notes) {
-			// keep HTML tags
 			const note = teiDoc.createElementNS(ns.tei, "note");
 			note.setAttribute('corresp', noteObj.uri);
 			// spaces may be significative if formated text
@@ -851,19 +852,13 @@ function generateItem(item, teiDoc) {
 		}
 		tags.append(indent);
 	}
-	// for debug
+	// Show source data for debug
 	if (Zotero.getOption("Debug")) {
+		appendField(bibl, 'note', JSON.stringify(item, null, 2), 1, { 'type': 'debug-json' });
 		// if extra fields still not used, output them in a note
 		if (Object.keys(extra).length) {
-			const note = teiDoc.createElementNS(ns.tei, "note");
-			note.setAttribute("type", "extra-unused");
-			note.append(JSON.stringify(extra, null, 2));
-			appendIndent(bibl, note, 1);
+			appendField(bibl, 'note', JSON.stringify(extra, null, 2), 1, { 'type': 'debug-extra-unused' });
 		}
-		const note = teiDoc.createElementNS(ns.tei, "note");
-		note.setAttribute("type", "debug");
-		note.append(JSON.stringify(item, null, 2));
-		appendIndent(bibl, note, 1);
 	}
 	// last indent
 	monogr.append(indent);
