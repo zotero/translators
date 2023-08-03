@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-03 10:25:19"
+	"lastUpdated": "2023-08-03 11:11:09"
 }
 
 /*
@@ -184,13 +184,21 @@ async function getIssue(dateArray) {
 	}
 	let issueURL = `https://www.nybooks.com/issues/${key}/`;
 	let issuePageDoc = await requestDocument(issueURL);
-	let issueTitle = attr(issuePageDoc,
-		"head meta[property='og:title']", "content");
-	let m = issueTitle.match(/volume (\d+), number (\d+)/i);
-	if (m) {
-		let result = { volume: m[1], issue: m[2] };
-		issueCache[key] = result;
-		return result;
+
+	// Use LD-JSON to retrieve the breadcrumb containing volume / issue info
+	let linkedData = text(issuePageDoc, "script[type='application/ld+json']");
+	if (linkedData) {
+		let issueInfo = JSON.parse(linkedData);
+		let breadcrumbs = issueInfo["@graph"].filter(x => x["@type"] === "BreadcrumbList");
+		if (breadcrumbs.length) {
+			breadcrumbs = breadcrumbs[0].itemListElement || [];
+		}
+		for (let bcItem of breadcrumbs) {
+			let m = bcItem.name.match(/^volume (\d+), (?:issue|number) (\d+)/i);
+			if (m) {
+				return { volume: m[1], issue: m[2] };
+			}
+		}
 	}
 	return null;
 }
