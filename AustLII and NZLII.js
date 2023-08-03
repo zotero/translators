@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-09-12 13:08:10"
+	"lastUpdated": "2023-08-03 04:51:32"
 }
 
 /*
@@ -107,13 +107,13 @@ function doWeb(doc, url) {
  * legal Reports in Appendix A, but I've not been able to locate
  * a copy with the appendix intact yet.
 */
-function abbrevCourt(fullname) {
-	var courtMap = new Map();
-	courtMap.set('Federal Court of Australia', 'FCA');
-	courtMap.set('High Court of Australia', 'HCA');
-	courtMap.set('Family Court of Australia', 'FamCA');
-	courtMap.set('Australian Information Commissioner', 'AICmr');
+var courtMap = new Map();
+courtMap.set('Federal Court of Australia', 'FCA');
+courtMap.set('High Court of Australia', 'HCA');
+courtMap.set('Family Court of Australia', 'FamCA');
+courtMap.set('Australian Information Commissioner', 'AICmr');
 
+function abbrevCourt(fullname) {
 	var abbrev = courtMap.get(fullname);
 	if (abbrev === undefined) {
 		abbrev = fullname;
@@ -124,21 +124,22 @@ function abbrevCourt(fullname) {
 /*
  * Adjust some jurisdiction abbreviations
  */
+var jMap = new Map();
+jMap.set('Commonwealth', 'Cth');
+jMap.set('CTH', 'Cth');
+jMap.set('Australian Capital Territory', 'ACT');
+jMap.set('New South Wales', 'NSW');
+jMap.set('Northern Territory', 'NT');
+jMap.set('Queensland', 'Qld');
+jMap.set('QLD', 'Qld');
+jMap.set('South Australia', 'SA');
+jMap.set('Tasmania', 'Tas');
+jMap.set('TAS', 'Tas');
+jMap.set('Victoria', 'Vic');
+jMap.set('VIC', 'Vic');
+jMap.set('Western Australia', 'WA');
+
 function abbrevJurisdiction(fullname) {
-	var jMap = new Map();
-	jMap.set('Commonwealth', 'Cth');
-	jMap.set('CTH', 'Cth');
-	jMap.set('Australian Capital Territory', 'ACT');
-	jMap.set('New South Wales', 'NSW');
-	jMap.set('Northern Territory', 'NT');
-	jMap.set('Queensland', 'Qld');
-	jMap.set('QLD', 'Qld');
-	jMap.set('South Australia', 'SA');
-	jMap.set('Tasmania', 'Tas');
-	jMap.set('TAS', 'Tas');
-	jMap.set('Victoria', 'Vic');
-	jMap.set('VIC', 'Vic');
-	jMap.set('Western Australia', 'WA');
 
 	var abbrev = jMap.get(fullname);
 	if (abbrev === undefined) {
@@ -165,7 +166,6 @@ function capitalizeWithPunctuation(string) {
 			newString += ZU.capitalizeTitle(words[i].toLowerCase(), true);
 		}
 	}
-	Zotero.debug(newString);
 	return newString;
 }
 
@@ -271,7 +271,7 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www7.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/FamCA/2006/212.html",
+		"url": "http://www.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/FamCA/2006/212.html",
 		"items": [
 			{
 				"itemType": "case",
@@ -281,7 +281,7 @@ var testCases = [
 				"code": "Cth",
 				"court": "FamCA",
 				"docketNumber": "212",
-				"url": "http://www7.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/FamCA/2006/212.html",
+				"url": "http://www.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/FamCA/2006/212.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -296,7 +296,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www8.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/FCA/2010/1.html",
+		"url": "http://www.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/FCA/2010/1.html",
 		"items": [
 			{
 				"itemType": "case",
@@ -306,7 +306,7 @@ var testCases = [
 				"code": "Cth",
 				"court": "FCA",
 				"docketNumber": "1",
-				"url": "http://www8.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/FCA/2010/1.html",
+				"url": "http://www.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/FCA/2010/1.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -345,12 +345,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www8.austlii.edu.au/cgi-bin/viewtoc/au/cases/act/ACTSC/2010/",
+		"url": "http://www.austlii.edu.au/cgi-bin/viewtoc/au/cases/act/ACTSC/2010/",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www8.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/AICmr/2017/134.html",
+		"url": "http://www.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/AICmr/2017/134.html",
 		"items": [
 			{
 				"itemType": "case",
@@ -360,7 +360,7 @@ var testCases = [
 				"code": "Cth",
 				"court": "AICmr",
 				"docketNumber": "134",
-				"url": "http://www8.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/AICmr/2017/134.html",
+				"url": "http://www.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/AICmr/2017/134.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -375,7 +375,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www8.austlii.edu.au/cgi-bin/viewdoc/au/legis/cth/consol_act/foia1982222/s24ab.html",
+		"url": "http://www.austlii.edu.au/cgi-bin/viewdoc/au/legis/cth/consol_act/foia1982222/s24ab.html",
 		"items": [
 			{
 				"itemType": "statute",
@@ -384,7 +384,7 @@ var testCases = [
 				"dateEnacted": "1982",
 				"code": "Cth",
 				"section": "24AB",
-				"url": "http://www8.austlii.edu.au/cgi-bin/viewdoc/au/legis/cth/consol_act/foia1982222/s24ab.html",
+				"url": "http://www.austlii.edu.au/cgi-bin/viewdoc/au/legis/cth/consol_act/foia1982222/s24ab.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -399,7 +399,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www8.austlii.edu.au/cgi-bin/viewdb/au/legis/cth/consol_act/foia1982222/",
+		"url": "http://www.austlii.edu.au/cgi-bin/viewdb/au/legis/cth/consol_act/foia1982222/",
 		"items": [
 			{
 				"itemType": "statute",
@@ -407,7 +407,7 @@ var testCases = [
 				"creators": [],
 				"dateEnacted": "1982",
 				"code": "Cth",
-				"url": "http://www8.austlii.edu.au/cgi-bin/viewdb/au/legis/cth/consol_act/foia1982222/",
+				"url": "http://www.austlii.edu.au/cgi-bin/viewdb/au/legis/cth/consol_act/foia1982222/",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -468,7 +468,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www9.austlii.edu.au/cgi-bin/viewdoc/au/journals/AdminRw//2010/9.html",
+		"url": "http://www.austlii.edu.au/cgi-bin/viewdoc/au/journals/AdminRw//2010/9.html",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -488,7 +488,7 @@ var testCases = [
 				"date": "2010",
 				"libraryCatalog": "AustLII and NZLII",
 				"publicationTitle": "Administrative Review Council - Admin Review",
-				"url": "http://www9.austlii.edu.au/cgi-bin/viewdoc/au/journals/AdminRw//2010/9.html",
+				"url": "http://www.austlii.edu.au/cgi-bin/viewdoc/au/journals/AdminRw//2010/9.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -503,12 +503,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www7.austlii.edu.au/cgi-bin/sinosrch.cgi?mask_path=;method=auto;query=adam%20smith;view=relevance&mask_path=au/cases/act/ACTCA",
+		"url": "http://www.austlii.edu.au/cgi-bin/sinosrch.cgi?mask_path=;method=auto;query=adam%20smith;view=relevance&mask_path=au/cases/act/ACTCA",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www8.austlii.edu.au/cgi-bin/sinodisp/au/cases/cth/AICmr/2017/20.html",
+		"url": "http://www.austlii.edu.au/cgi-bin/sinodisp/au/cases/cth/AICmr/2017/20.html",
 		"items": [
 			{
 				"itemType": "case",
