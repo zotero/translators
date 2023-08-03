@@ -6,7 +6,8 @@
 	"scripts": {
 		"test": "teslint .",
 		"lint": "teslint",
-		"lint:linter": "eslint --no-ignore .ci"
+		"lint:linter": "eslint --no-ignore .ci",
+		"updateTypes": ".ci/updateTypes.mjs"
 	},
 	"author": "kba+pz",
 	"license": "CC0-1.0",
