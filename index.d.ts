@@ -48,7 +48,6 @@ declare namespace Zotero {
 			chunkSize: number,
 			func: (chunk: Type[]) => RetType
 		): RetType[];
-		function assignProps(target: any, source: any, props?: string[]): void;
 		function rand(min: number, max: number): number;
 		function getPageRange(pages: string): [fromPage: number, toPage: number];
 		function lpad(s: string, pad: string, length: number): string;
@@ -91,19 +90,12 @@ declare namespace Zotero {
 		// varDump
 		function itemToCSLJSON(item: Zotero.Item): any | Promise<any>;
 		function itemFromCSLJSON(item: Zotero.Item, cslItem: any): void;
-		function parseURL(url: string): {
-			fileName: string;
-			fileExtension: string;
-			fileBaseName: string;
-		};
-		function resolveIntermediateURL(url: string): string;
 		function stringToUTF8Array(
 			s: string,
 			array: number[] | Uint8Array,
 			offset?: number
 		): void;
 		function getStringByteLength(s: string): number;
-		function determineAttachmentIcon(attachment: Attachment): string;
 		function generateObjectKey(): string;
 		function isValidObjectKey(s: string): boolean;
 		// XRegExp
