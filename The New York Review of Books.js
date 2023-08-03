@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-03 11:11:09"
+	"lastUpdated": "2023-08-03 11:23:30"
 }
 
 /*
@@ -176,11 +176,11 @@ function urlToDateArray(url) {
 
 // Given the date-array of the issue, find the volume and number by requesting
 // the issue's page and parse the metadata. This function is memoized.
-var issueCache = {};
+var ISSUE_CACHE = {};
 async function getIssue(dateArray) {
 	let key = dateArray.join("/");
-	if (issueCache[key]) {
-		return issueCache[key];
+	if (ISSUE_CACHE[key]) {
+		return ISSUE_CACHE[key];
 	}
 	let issueURL = `https://www.nybooks.com/issues/${key}/`;
 	let issuePageDoc = await requestDocument(issueURL);
@@ -196,7 +196,9 @@ async function getIssue(dateArray) {
 		for (let bcItem of breadcrumbs) {
 			let m = bcItem.name.match(/^volume (\d+), (?:issue|number) (\d+)/i);
 			if (m) {
-				return { volume: m[1], issue: m[2] };
+				let result = { volume: m[1], issue: m[2] };
+				ISSUE_CACHE[key] = result;
+				return result;
 			}
 		}
 	}
