@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-29 16:07:10"
+	"lastUpdated": "2023-07-28 20:20:01"
 }
 
 /*
@@ -72,6 +72,7 @@ var typeMapping = {
 	Q10870555: "report",
 	Q820655: "statute",
 	Q1266946: "thesis",
+	Q187685: "thesis", // doctoral thesis
 	Q15416: "tvBroadcast",
 	Q30070675: "videoRecording",
 	Q36774: "webpage",

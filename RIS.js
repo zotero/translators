@@ -17,7 +17,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2023-04-20 19:03:44"
+	"lastUpdated": "2023-07-28 09:46:04"
 }
 
 /*
@@ -1252,15 +1252,15 @@ var CitaviCleaner = new function () {
 		
 		if (!entry.tags.H1) {
 			// Only have a call number (maybe multiple, so take the first)
-			let at = entry.tags.indexOf(entry.tags.H2[0]);
-			TagCleaner.changeTag(entry, at, 'CN');
+			let at = entry.indexOf(entry.tags.H2[0]);
+			TagCleaner.changeTag(entry, at, ['CN']);
 			return;
 		}
 		
 		if (!entry.tags.H1) {
 			// Only have a library
-			let at = entry.tags.indexOf(entry.tags.H1[0]);
-			TagCleaner.changeTag(entry, at, 'DP');
+			let at = entry.indexOf(entry.tags.H1[0]);
+			TagCleaner.changeTag(entry, at, ['DP']);
 		}
 		
 		// We have pairs, so find the first set and change it
@@ -7236,6 +7236,26 @@ var testCases = [
 				"url": "http://databrary.org/volume/1322",
 				"attachments": [],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "TY  - GEN\nT1  - Citavi Item\nKW  - Tag\nH2  - Call Number\nM4  - Citavi\nER  -",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Citavi Item",
+				"creators": [],
+				"callNumber": "Call Number",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Tag"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
