@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-08-03 22:06:14"
+	"lastUpdated": "2023-07-03 07:36:57"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2021 Abe Jellinek
+	Copyright © 2021 Abe Jellinek and contributors
 	
 	This file is part of Zotero.
 
@@ -141,6 +141,75 @@ let report6Wg2Ch17Authors = 'Mark New; Diana Reckien; David Viner; Carolina Adle
 let report6Wg2Ch18Authors = 'E. Lisa F. Schipper; Aromar Revi; Benjamin L. Preston; Edward. R. Carr; Siri H. Eriksen; Luis R. Fernández-Carril; Bruce Glavovic; Nathalie J.M. Hilmi; Debora Ley; Rupa Mukerji; M. Silvia Muylaert de Araujo; Rosa Perez; Steven K. Rose; Pramod K. Singh'
 	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
 
+let report6Wg3Editors = "Priyadarshi R. Shukla; Jim Skea; Raphael Slade; Al Khourdajie, Alaa; van Diemen, Renée; David McCollum; Minal Pathak; Shreya Some; Purvi Vyas; Roger Fradera; Malek Belkacemi; Apoorva Hasija; Géninha Lisboa; Sigourney Luz; Juliette Malley"
+	.split('; ').map(name => ZU.cleanAuthor(name, 'editor', name.includes(', ')));
+
+let report6Wg3SFPAuthors = "Jim Skea; Priyadarshi R. Shukla; Andy Reisinger; Raphael Slade; Minal Pathak; Al Khourdajie, Alaa; van Diemen, Renée; Amjad Abdulla; Keigo Akimoto; Mustafa Babiker; Quan Bai; Igor A. Bashmakov; Christopher Bataille; Göran Berndes; Gabriel Blanco; Kornelis Blok; Mercedes Bustamante; Edward Byers; Luisa F. Cabeza; Katherine Calvin; Carlo Carraro; Leon Clarke; Annette Cowie; Felix Creutzig; Diriba Korecha Dadi; Dipak Dasgupta; de Coninck, Heleen; Fatima Denton; Shobhakar Dhakal; Navroz K. Dubash; Oliver Geden; Michael Grubb; Céline Guivarch; Shreekant Gupta; Andrea N. Hahmann; Kirsten Halsnaes; Paulina Jaramillo; Kejun Jiang; Frank Jotzo; Tae Yong Jung; Kahn Ribeiro, Suzana; Smail Khennas; Şiir Kılkış; Silvia Kreibiehl; Volker Krey; Elmar Kriegler; William F. Lamb; Franck Lecocq; Shuaib Lwasa; Nagmeldin Mahmoud; Cheikh Mbow; David McCollum; Jan Christoph Minx; Catherine Mitchell; Rachid Mrabet; Yacob Mulugetta; Gert-Jan Nabuurs; Gregory F. Nemet; Peter Newman; Leila Niamir; Lars J. Nilsson; Sudarmanto Budi Nugroho; Chukwumerije Okereke; Shonali Pachauri; Anthony Patt; Ramón Pichs-Madruga; Joana Portugal-Pereira; Lavanya Rajamani; Keywan Riahi; Joyashree Roy; Yamina Saheb; Roberto Schaeffer; Karen C. Seto; Shreya Some; Linda Steg; Ferenc L. Toth; Diana Ürge-Vorsatz; van Vuuren, Detlef P.; Elena Verdolini; Purvi Vyas; Yi-Ming Wei; Mariama Williams; Harald Winkler"
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
+
+let report6Wg3TechSummaryAuthors = "Minal Pathak; Raphael Slade; Ramón Pichs-Madruga; Diana Ürge-Vorsatz; Priyadarshi R. Shukla; Jim Skea; Amjad Abdulla; Al Khourdajie, Alaa; Mustafa Babiker; Quan Bai; Igor A. Bashmakov; Christopher Bataille; Göran Berndes; Gabriel Blanco; Luisa F. Cabeza; Carlo Carraro; Leon Clarke; de Coninck, Heleen; Felix Creutzig; Diriba Korecha Dadi; Fatima Denton; Shobhakar Dhakal; van Diemen, Renée; Navroz K. Dubash; Amit Garg; Oliver Geden; Michael Grubb; Céline Guivarch; Kirsten Halsnaes; Paulina Jaramillo; Tae Yong Jung; Kahn Ribeiro, Suzana; Şiir Kılkış; Alexandre Koberle; Silvia Kreibiehl; Elmar Kriegler; William F. Lamb; Franck Lecocq; Shuaib Lwasa; Nagmeldin Mahmoud; Eric Masanet; David McCollum; Jan Christoph Minx; Catherine Mitchell; Kanako Morita; Rachid Mrabet; Gert-Jan Nabuurs; Peter Newman; Leila Niamir; Lars J. Nilsson; Chukwumerije Okereke; Anthony Patt; Joana Portugal-Pereira; Lavanya Rajamani; Andy Reisinger; Keywan Riahi; Joyashree Roy; Ambuj Sagar; Yamina Saheb; Roberto Schaeffer; Karen C. Seto; Pete Smith; Shreya Some; Benjamin K. Sovacool; Linda Steg; Massimo Tavoni; Ferenc L. Toth; Purvi Vyas; Yi-Ming Wei; Jake Whitehead; Thomas Wiedmann; Harald Winkler"
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
+
+let report6Wg3Ch1Authors = "Michael Grubb; Chukwumerije Okereke; Jun Arima; Valentina Bosetti; Ying Chen; James Edmonds; Shreekant Gupta; Alexandre Köberle; Snorre Kverndokk; Arunima Malik; Linda Yanti Sulistiawati"
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
+
+let report6Wg3Ch2Authors = "Shobhakar Dhakal; Jan Christoph Minx; Ferenc L. Toth; Amr Abdel-Aziz; Figueroa Meza, Maria Josefina; Klaus Hubacek; Inge G.C. Jonckheere; Yong-Gun Kim; Gregory F. Nemet; Shonali Pachauri; Xianchun C. Tan; Thomas Wiedmann"
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
+
+let report6Wg3Ch3Authors = "Keywan Riahi; Roberto Schaeffer; Jacobo Arango; Katherine Calvin; Céline Guivarch; Tomoko Hasegawa,; Kejun Jiang; Elmar Kriegler; Robert Matthews; Glen P. Peters; Anand Rao; Simon Robertson; Adam Mohammed Sebbit; Julia Steinberger; Massimo Tavoni; van Vuuren, Detlef P."
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
+
+let report6Wg3Ch4Authors = "Franck Lecocq; Harald Winkler; Julius Partson Daka; Sha Fu; James S. Gerber; Sivan Kartha; Volker Krey; Hans Lofgren; Toshihiko Masui; Ritu Mathur; Joana Portugal-Pereira; Benjamin K. Sovacool; Maria Virginia Vilariño; Nan Zhou"
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
+
+let report6Wg3Ch5Authors = "Felix Creutzig; Joyashree Roy; Patrick Devine-Wright; Julio Díaz-José; Frank W. Geels; Arnulf Grubler; Nadia Maïzi; Eric Masanet; Yacob Mulugetta; Chioma Daisy Onyige; Patricia E. Perkins; Alessandro Sanches-Pereira; Elke Ursula Weber"
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
+
+let report6Wg3Ch6Authors = "Leon Clarke; Yi-Ming Wei; De La Vega Navarro, Angel; Amit Garg; Andrea N. Hahmann; Smail Khennas; Lima de Azevedo, Inês Margarida; Andreas Löschel; Ajay Kumar Singh; Linda Steg; Goran Strbac; Kenichi Wada"
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
+
+let report6Wg3Ch7Authors = "Gert-Jan Nabuurs; Rachid Mrabet; Abu Hatab, Assem; Mercedes Bustamante; Harry Clark; Petr Havlík; Joanna I. House; Cheikh Mbow; Karachepone N. Ninan; Alexander Popp; Stephanie Roe; Brent Sohngen; Sirintornthep Towprayoon"
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
+
+let report6Wg3Ch8Authors = "Shuaib Lwasa; Karen C. Seto; Xuemei Bai; Hilda Blanco; Kevin R. Gurney; Şiir Kılkış; Oswaldo Lucon; Jin Murakami; Jiahua Pan; Ayyoob Sharifi; Yoshiki Yamagata"
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
+
+let report6Wg3Ch9Authors = "Luisa F. Cabeza; Quan Bai; Paolo Bertoldi; Jacob M. Kihila; André F.P. Lucena; Érika Mata; Sebastian Mirasgedis; Aleksandra Novikova; Yamina Saheb"
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
+
+let report6Wg3Ch10Authors = "Paulina Jaramillo; Kahn Ribeiro, Suzana; Peter Newman; Subash Dhar; Ogheneruona E. Diemuodeke; Tsutomu Kajino; David Simon Lee; Sudarmanto Budi Nugroho; Xunmin Ou; Anders Hammer Strømman; Jake Whitehead"
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
+
+let report6Wg3Ch11Authors = "Igor A. Bashmakov; Lars J. Nilsson; Adolf Acquaye; Christopher Bataille; Jonathan M. Cullen; de la Rue du Can, Stéphane; Manfred Fischedick; Yong Geng; Kanako Tanaka"
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
+
+let report6Wg3Ch12Authors = "Mustafa Babiker; Göran Berndes; Kornelis Blok; Brett Cohen; Annette Cowie; Oliver Geden; Veronika Ginzburg; Adrian Leip; Pete Smith; Masahiro Sugiyama; Francis Yamba"
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
+
+let report6Wg3Ch13Authors = "Navroz K. Dubash; Catherine Mitchell; Elin Lerum Boasson; Mercy J. Borbor-Córdova; Solomone Fifita; Erik Haites; Mark Jaccard; Frank Jotzo; Sasha Naidoo; Patricia Romero-Lankao; Wei Shen; Mykola Shlapak; Libo Wu"
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
+
+let report6Wg3Ch14Authors = "Anthony Patt; Lavanya Rajamani; Preety Bhandari; Antonina Ivanova Boncheva; Alejandro Caparrós; Kamal Djemouai; Izumi Kubota; Jacqueline Peel; Agus Pratama Sari; Detlef F. Sprinz; Jørgen Wettestad"
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
+
+let report6Wg3Ch15Authors = "Silvia Kreibiehl; Tae Yong Jung; Stefano Battiston; Carvajal Sarzosa, Pablo Esteban; Christa Clapp; Dipak Dasgupta; Nokuthula Dube; Raphaël Jachnik; Kanako Morita; Nahla Samargandi; Mariama Williams"
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
+
+let report6Wg3Ch16Authors = "Gabriel Blanco; de Coninck, Heleen; Lawrence Agbemabiese; El Hadji Mbaye Diagne; Diaz Anadon, Laura; Yun Seng Lim; Walter Alberto Pengue; Ambuj D. Sagar; Taishi Sugiyama; Kenji Tanaka; Elena Verdolini; Jan Witajewski-Baltvilks"
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
+
+let report6Wg3Ch17Authors = "Fatima Denton; Kirsten Halsnæs; Keigo Akimoto; Sarah Burch; Diaz Morejon, Cristobal; Fernando Farias; Joni Jupesta; Ali Shareef; Petra Schweizer-Ries; Fei Teng; Eric Zusman"
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
+
+let report6Wg3Annex1Authors = "van Diemen, Renée; J.B. Robin Matthews; Vincent Möller; Jan S. Fuglestvedt; Valérie Masson-Delmotte; Carlos Méndez; Andy Reisinger; Sergey Semenov"
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
+
+let report6Wg3Annex2Authors = "Al Khourdajie, Alaa; van Diemen, Renée; William F. Lamb; Minal Pathak; Andy Reisinger; de la Rue du Can, Stéphane; Jim Skea; Raphael Slade; Shreya Some; Linda Steg"
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
+
+let report6Wg3Annex3Authors = "Céline Guivarch; Elmar Kriegler; Joana Portugal-Pereira, Valentina Bosetti; James Edmonds; Manfred Fischedick; Petr Havlík; Paulina Jaramillo; Volker Krey; Franck Lecocq; André F.P. Lucena; Malte Meinshausen; Sebastian Mirasgedis; Brian O’Neill; Glen P. Peters; Joeri Rogelj; Steven Rose; Yamina Saheb; Goran Strbac; Anders Hammer Strømman; van Vuuren, Detlef P.; Nan Zhou"
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
+
 function wg1Chapter(slug, itemTemplate) {
 	return Object.assign(new Zotero.Item('bookSection'), itemTemplate, {
 		bookTitle: 'Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report of the Intergovernmental Panel on Climate Change',
@@ -170,6 +239,23 @@ function wg2Chapter(slug, itemTemplate) {
 				title: 'Full Text PDF',
 				mimeType: 'application/pdf',
 				url: `https://www.ipcc.ch/report/ar6/wg2/downloads/report/IPCC_AR6_WGII_${slug}.pdf`
+			}
+		]
+	});
+}
+
+function wg3Chapter(slug, itemTemplate) {
+	return Object.assign(new Zotero.Item('bookSection'), itemTemplate, {
+		bookTitle: 'Climate Change 2022: Mitigation of Climate Change. Contribution of Working Group III to the Sixth Assessment Report of the Intergovernmental Panel on Climate Change',
+		publisher: 'Cambridge University Press',
+		place: "Cambridge, UK and New York, NY, USA",
+		date: '2022',
+		creators: [...(itemTemplate.creators || []), ...report6Wg3Editors],
+		attachments: [
+			{
+				title: 'Full Text PDF',
+				mimeType: 'application/pdf',
+				url: `https://www.ipcc.ch/report/ar6/wg3/downloads/report/IPCC_AR6_WGIII_${slug}.pdf`
 			}
 		]
 	});
@@ -444,7 +530,172 @@ let citations = {
 			title: 'Climate resilient development pathways',
 			creators: report6Wg2Ch18Authors
 		})
-	}
+	},
+	"/report/ar6/wg3/": {
+		'Full Report': Object.assign(new Zotero.Item('book'), {
+			title: 'Climate Change 2022: Impacts, Adaptation and Vulnerability. Contribution of Working Group III to the Sixth Assessment Report of the Intergovernmental Panel on Climate Change.',
+			date: '2022',
+			creators: report6Wg3Editors,
+			ISBN: "978-92-9169-160-9",
+			DOI: "10.1017/9781009157926",
+			attachments: [
+				{
+					title: 'Full Text PDF',
+					mimeType: 'application/pdf',
+					url: 'https://www.ipcc.ch/report/ar6/wg3/downloads/report/IPCC_AR6_WGIII_FullReport.pdf'
+				}
+			]
+		}),
+		'Summary for Policymakers': wg3Chapter('SummaryForPolicymakers', {
+			title: 'Summary for Policymakers',
+			abstractNote: 'The Summary for Policymakers (SPM) provides a high-level summary of the key findings of the Working Group III Report and is approved by the IPCC member governments line by line.',
+			DOI: "10.1017/9781009157926.001",
+			pages: "1-48",
+			creators: report6Wg3SFPAuthors
+		}),
+		'Technical Summary': wg3Chapter('TS', {
+			title: 'Technical Summary',
+			abstractNote: 'The Technical Summary (TS) provides extended summary of key findings and serves as a link between the comprehensive assessment of the Working Group III Report and the concise SPM..',
+			DOI: "10.1017/9781009157926.002",
+			pages: "49-147",
+			creators: report6Wg3TechSummaryAuthors
+		}),
+		'Chapter 1: Introduction and Framing': wg3Chapter('Chapter01', {
+			title: 'Introduction and Framing',
+			DOI: "10.1017/9781009157926.003",
+			pages: "151-213",
+			creators: report6Wg3Ch1Authors
+		}),
+		'Chapter 2: Emissions trends and drivers': wg3Chapter('Chapter02', {
+			title: 'Emissions Trends and Drivers',
+			DOI: "10.1017/9781009157926.004",
+			pages: "215-294",
+			creators: report6Wg3Ch2Authors
+		}),
+		'Chapter 3: Mitigation pathways compatible with long-term goals': wg3Chapter('Chapter03', {
+			title: 'Mitigation pathways compatible with long-term goals',
+			DOI: "10.1017/9781009157926.005",
+			pages: "295-408",
+			creators: report6Wg3Ch3Authors
+		}),
+		'Chapter 4: Mitigation and development pathways in the near- to mid-term': wg3Chapter('Chapter04', {
+			title: 'Mitigation and development pathways in the near- to mid-term',
+			DOI: "10.1017/9781009157926.006",
+			pages: "409-502",
+			creators: report6Wg3Ch4Authors
+		}),
+		'Chapter 5: Demand, services and social aspects of mitigation': wg3Chapter('Chapter05', {
+			title: 'Demand, services and social aspects of mitigation',
+			DOI: "10.1017/9781009157926.007",
+			pages: "503-612",
+			creators: report6Wg3Ch5Authors
+		}),
+		'Chapter 6: Energy systems': wg3Chapter('Chapter06', {
+			title: 'Energy Systems',
+			DOI: "10.1017/9781009157926.008",
+			pages: "613-746",
+			creators: report6Wg3Ch6Authors
+		}),
+		'Chapter 7: Agriculture, Forestry, and Other Land Uses (AFOLU)': wg3Chapter('Chapter07', {
+			title: 'Agriculture, Forestry and Other Land Uses (AFOLU)',
+			DOI: "10.1017/9781009157926.009",
+			pages: "747-860",
+			creators: report6Wg3Ch7Authors
+		}),
+		'Chapter 8: Urban systems and other settlements': wg3Chapter('Chapter08', {
+			title: 'Urban systems and other settlements',
+			DOI: "10.1017/9781009157926.010",
+			pages: "861-952",
+			creators: report6Wg3Ch8Authors
+		}),
+		'Chapter 9: Buildings': wg3Chapter('Chapter09', {
+			title: 'Buildings',
+			DOI: "10.1017/9781009157926.011",
+			pages: "953-1048",
+			creators: report6Wg3Ch9Authors
+		}),
+		'Chapter 10: Transport': wg3Chapter('Chapter10', {
+			title: 'Transport',
+			DOI: "10.1017/9781009157926.012",
+			pages: "1049-1160",
+			creators: report6Wg3Ch10Authors
+		}),
+		'Chapter 11: Industry': wg3Chapter('Chapter11', {
+			title: 'Industry',
+			DOI: "10.1017/9781009157926.013",
+			pages: "1161-1243",
+			creators: report6Wg3Ch11Authors
+		}),
+		'Chapter 12: Cross sectoral perspectives': wg3Chapter('Chapter12', {
+			title: 'Cross-sectoral perspectives',
+			DOI: "10.1017/9781009157926.014",
+			pages: "1245-1354",
+			creators: report6Wg3Ch12Authors
+		}),
+		'Chapter 13: National and sub-national policies and institution': wg3Chapter('Chapter13', {
+			title: 'National and sub-national policies and institution',
+			DOI: "10.1017/9781009157926.015",
+			pages: "1355-1450",
+			creators: report6Wg3Ch13Authors
+		}),
+		'Chapter 14: International cooperation': wg3Chapter('Chapter14', {
+			title: 'International cooperation',
+			DOI: "10.1017/9781009157926.016",
+			pages: "1451-1545",
+			creators: report6Wg3Ch14Authors
+		}),
+		'Chapter 15: Investment and finance': wg3Chapter('Chapter15', {
+			title: 'Investment and finance',
+			DOI: "10.1017/9781009157926.017",
+			pages: "1547-1640",
+			creators: report6Wg3Ch15Authors
+		}),
+		'Chapter 16: Innovation, technology development and transfer': wg3Chapter('Chapter16', {
+			title: 'Innovation, technology development and transfer',
+			DOI: "10.1017/9781009157926.018",
+			pages: "1641-1725",
+			creators: report6Wg3Ch16Authors
+		}),
+		'Chapter 17: Accelerating the transition in the context of sustainable development': wg3Chapter('Chapter17', {
+			title: 'Accelerating the transition in the context of sustainable development',
+			DOI: "10.1017/9781009157926.019",
+			pages: "1727-1790",
+			creators: report6Wg3Ch17Authors
+		}),
+		'Annex I: Glossary': wg3Chapter('Annex-I', {
+			title: 'Annex I: Glossary',
+			DOI: "10.1017/9781009157926.020",
+			pages: "1793-1820",
+			creators: report6Wg3Annex1Authors,
+		}),
+		'Annex II: Definitions, units and conventions': wg3Chapter('Annex-II', {
+			title: 'Annex II: Definitions, Units and Conventions',
+			DOI: "10.1017/9781009157926.021",
+			pages: "1821-1840",
+			creators: report6Wg3Annex2Authors,
+		}),
+		'Annex III: Scenarios and modelling methods': wg3Chapter('Annex-III', {
+			title: 'Annex III: Scenarios and modelling methods',
+			DOI: "10.1017/9781009157926.022",
+			pages: "1841-1908",
+			creators: report6Wg3Annex3Authors,
+		}),
+		'Annex IV: Contributors to the IPCC Working Group III Sixth Assessment Report': wg3Chapter('Annex-IV', {
+			DOI: "10.1017/9781009157926.023",
+			pages: "1909-1924",
+			title: 'Annex IV: Contributors to the IPCC Working Group III Sixth Assessment Report'
+		}),
+		'Annex V: Expert Reviewers of the IPCC WGIII Sixth Assessment Report': wg3Chapter('Annex-V', {
+			DOI: "10.1017/9781009157926.024",
+			pages: "1925-1968",
+			title: 'Annex V: Expert Reviewers of the IPCC WGIII Sixth Assessment Report'
+		}),
+		'Annex VI: Acronyms': wg3Chapter('Annex-VI', {
+			DOI: "10.1017/9781009157926.024",
+			pages: "1969-1977",
+			title: 'Annex VI: Acronyms'
+		}),
+	},
 };
 
 function getCitations(doc) {
@@ -454,6 +705,9 @@ function getCitations(doc) {
 	}
 	else if (pathname == '/report/sixth-assessment-report-working-group-ii/') {
 		pathname = '/report/ar6/wg2/';
+	}
+	else if (pathname == '/report/sixth-assessment-report-working-group-3/') {
+		pathname = '/report/ar6/wg3/';
 	}
 	return citations[pathname];
 }
@@ -492,6 +746,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.ipcc.ch/report/ar6/wg2/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.ipcc.ch/report/ar6/wg3/",
 		"items": "multiple"
 	}
 ]
