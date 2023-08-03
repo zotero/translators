@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2020-03-09 18:50:52"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2023-04-20 20:02:47"
 }
 
 /*
@@ -182,7 +182,6 @@ function scrape(doc, url) {
 		Номер: "issue",
 		ISSN: "ISSN",
 		"Число страниц": "pages", // e.g. "83"
-		Страницы: "pages", // e.g. "10-16"
 		Язык: "language",
 		"Место издания": "place"
 	};
@@ -194,6 +193,9 @@ function scrape(doc, url) {
 			item[mapping[key]] = t;
 		}
 	}
+
+	var pages = ZU.xpathText(datablock, '//tr/td/div/text()[contains(., "Страницы")]/following-sibling::*[1]');
+	if (pages) item.pages = pages;
 	
 	/*
 	// Times-cited in Russian-Science-Citation-Index.
@@ -202,6 +204,8 @@ function scrape(doc, url) {
 	var rsci = ZU.xpathText(doc, '//tr/td/text()[contains(., "Цитирований в РИНЦ")]/following-sibling::*[2]');
 	Zotero.debug("Russian Science Citation Index: " + rsci);
 	if (rsci) item.extra = "Цитируемость в РИНЦ: " + rsci;
+
+
 	*/
 
 	var journalBlock = ZU.xpath(datablock, './table/tbody[tr[1]/td/font[contains(text(), "ЖУРНАЛ:")]]/tr[2]/td[2]');
@@ -290,7 +294,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://elibrary.ru/item.asp?id=17339044",
+		"url": "https://www.elibrary.ru/item.asp?id=17339044",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -330,21 +334,9 @@ var testCases = [
 				"libraryCatalog": "eLibrary.ru",
 				"pages": "1-10",
 				"publicationTitle": "Плодоводство И Виноградарство Юга России",
-				"url": "https://elibrary.ru/item.asp?id=17339044",
+				"url": "https://www.elibrary.ru/item.asp?id=17339044",
 				"attachments": [],
 				"tags": [
-					{
-						"tag": "Apple-Tree"
-					},
-					{
-						"tag": "Immunity"
-					},
-					{
-						"tag": "Scab"
-					},
-					{
-						"tag": "Variety"
-					},
 					{
 						"tag": "Иммунитет"
 					},
@@ -365,7 +357,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://elibrary.ru/item.asp?id=21640363",
+		"url": "https://www.elibrary.ru/item.asp?id=21640363",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -398,7 +390,7 @@ var testCases = [
 				"language": "ru",
 				"libraryCatalog": "eLibrary.ru",
 				"pages": "83",
-				"url": "https://elibrary.ru/item.asp?id=21640363",
+				"url": "https://www.elibrary.ru/item.asp?id=21640363",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -647,7 +639,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://elibrary.ru/item.asp?id=18310800",
+		"url": "https://www.elibrary.ru/item.asp?id=18310800",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -670,8 +662,7 @@ var testCases = [
 					},
 					{
 						"lastName": "Де Щулф А.",
-						"creatorType": "author",
-						"fieldMode": true
+						"creatorType": "author"
 					},
 					{
 						"firstName": "Е.",
@@ -685,8 +676,7 @@ var testCases = [
 					},
 					{
 						"lastName": "Ван Хооф Л.",
-						"creatorType": "author",
-						"fieldMode": true
+						"creatorType": "author"
 					},
 					{
 						"firstName": "С.",
@@ -695,8 +685,7 @@ var testCases = [
 					},
 					{
 						"lastName": "Де Лангхе К.",
-						"creatorType": "author",
-						"fieldMode": true
+						"creatorType": "author"
 					},
 					{
 						"firstName": "А.",
@@ -705,8 +694,7 @@ var testCases = [
 					},
 					{
 						"lastName": "Ван Де Керчове Р.",
-						"creatorType": "author",
-						"fieldMode": true
+						"creatorType": "author"
 					},
 					{
 						"firstName": "Р.",
@@ -715,8 +703,7 @@ var testCases = [
 					},
 					{
 						"lastName": "Те Киефте Д.",
-						"creatorType": "author",
-						"fieldMode": true
+						"creatorType": "author"
 					}
 				],
 				"date": "2009",
@@ -726,21 +713,9 @@ var testCases = [
 				"libraryCatalog": "eLibrary.ru",
 				"pages": "10-20",
 				"publicationTitle": "Мир Евразии",
-				"url": "https://elibrary.ru/item.asp?id=18310800",
+				"url": "https://www.elibrary.ru/item.asp?id=18310800",
 				"attachments": [],
 				"tags": [
-					{
-						"tag": "Belgian-Russian Expedition"
-					},
-					{
-						"tag": "Karakol"
-					},
-					{
-						"tag": "Scythian Culture"
-					},
-					{
-						"tag": "Uch Enmek Park"
-					},
 					{
 						"tag": "Бельгийско-Русская Экспедиция"
 					},
@@ -752,6 +727,93 @@ var testCases = [
 					},
 					{
 						"tag": "Скифская Культура"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.elibrary.ru/item.asp?id=22208210",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Biological and cognitive correlates of murder and attempted murder in the italian regions",
+				"creators": [
+					{
+						"firstName": "D. I.",
+						"lastName": "Templer",
+						"creatorType": "author"
+					}
+				],
+				"date": "2013",
+				"ISSN": "0025-2344",
+				"issue": "1",
+				"language": "en",
+				"libraryCatalog": "eLibrary.ru",
+				"pages": "26-48",
+				"publicationTitle": "Mankind Quarterly",
+				"url": "https://www.elibrary.ru/item.asp?id=22208210",
+				"volume": "54",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://elibrary.ru/item.asp?id=35209757",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Факторы Патогенности Недифтерийных Коринебактерий, Выделенных От Больных С Патологией Респираторного Тракта",
+				"creators": [
+					{
+						"firstName": "А. А.",
+						"lastName": "Алиева",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Галина Георгиевна",
+						"lastName": "Харсеева",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Э. О.",
+						"lastName": "Мангутов",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "С. Н.",
+						"lastName": "Головин",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018",
+				"DOI": "10.18821/0869-2084-2018-63-6-375-378",
+				"ISSN": "0869-2084, 2412-1320",
+				"abstractNote": "Недифтерийные коринебактерии штаммов C. pseudodiphtheriticum, несмотря на отсутствие способности продуцировать токсин, могут быть связаны с развитием воспалительных заболеваний респираторного и урогенитального тракта, кожи, гнойно-септических процессов различной локализации и др. Это свидетельствует о наличии у них факторов патогенности, помимо токсина, которые могут обусловливать адгезивную и инвазивную активность. Цель исследования - характеристика факторов патогенности (адгезивности, инвазивности) недифтерийных коринебактерий, выделенных от больных с патологией респираторного тракта. Исследованы штаммы недифтерийных коринебактерий (n = 38), выделенные из верхних дыхательных путей от больных с хроническим тонзиллитом (C. pseudodiphtheriticum, n = 9 ), ангинами (C. pseudodiphtheriticum, n = 14), практически здоровых обследованных (C. Pseudodiphtheriticum, n = 15). Способность к адгезии и инвазии коринебактерий исследовали на культуре клеток карциномы фарингеального эпителия Hep-2...\n\nНедифтерийные коринебактерии штаммов C. pseudodiphtheriticum, несмотря на отсутствие способности продуцировать токсин, могут быть связаны с развитием воспалительных заболеваний респираторного и урогенитального тракта, кожи, гнойно-септических процессов различной локализации и др. Это свидетельствует о наличии у них факторов патогенности, помимо токсина, которые могут обусловливать адгезивную и инвазивную активность. Цель исследования - характеристика факторов патогенности (адгезивности, инвазивности) недифтерийных коринебактерий, выделенных от больных с патологией респираторного тракта. Исследованы штаммы недифтерийных коринебактерий (n = 38), выделенные из верхних дыхательных путей от больных с хроническим тонзиллитом (C. pseudodiphtheriticum, n = 9 ), ангинами (C. pseudodiphtheriticum, n = 14), практически здоровых обследованных (C. Pseudodiphtheriticum, n = 15). Способность к адгезии и инвазии коринебактерий исследовали на культуре клеток карциномы фарингеального эпителия Hep-2. Количество коринебактерий, адгезированных и инвазированных на клетках Нер-2, определяли путём высева смыва на 20%-ный сывороточный агар с последующим подсчётом среднего количества колониеобразующих единиц (КОЕ) в 1 мл. Электронно-микроскопическое исследование адгезии и инвазии коринебактерий на культуре клеток Нер-2 проводили методом трансмиссионной электронной микроскопии. У выделенных от практически здоровых лиц штаммов C. pseudodiphtheriticum адгезивность была ниже (р ≤ 0,05), чем у всех исследованных штаммов недифтерийных коринебактерий, выделенных от больных с патологией респираторного тракта. Наиболее выраженные адгезивные свойства (238,3 ± 6,5 КОЕ/мл) обнаружены у штаммов C. pseudodiphtheriticum, выделенных от больных ангинами, по сравнению с таковыми, выделенными от больных хроническим тонзиллитом. Адгезивность и инвазивность у всех исследованных штаммов имели положительную коррелятивную связь. При электронно-микроскопическом исследовании видны коринебактерии, как адгезированные на поверхности клеток Нер-2 и накопившие контрастное вещество, так и инвазированные, электронно-прозрачные. Недифтерийные коринебактерии штаммов С. pseudodiphtheriticum, выделенных от больных с патологией респираторного тракта (ангина, хронический тонзиллит), обладали более высокой способностью к адгезии и инвазии по сравнению со штаммами С. pseudodiphtheriticum, изолированными от практически здоровых лиц. Выраженная способность к адгезии и инвазии, рассматриваемым как факторы патогенности С.pseudodiphtheriticum, позволяет им реализовывать свой патогенный потенциал, защищая от действия иммунной системы хозяина и антибактериальных препаратов.\n\nfunction show_abstract() {\n  $('#abstract1').hide();\n  $('#abstract2').show();\n  $('#abstract_expand').hide();\n}\n\n▼Показать полностью",
+				"issue": "6",
+				"language": "ru",
+				"libraryCatalog": "eLibrary.ru",
+				"pages": "375-378",
+				"publicationTitle": "Клиническая Лабораторная Диагностика",
+				"url": "https://elibrary.ru/item.asp?id=35209757",
+				"volume": "63",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Адгезия"
+					},
+					{
+						"tag": "Инвазия"
+					},
+					{
+						"tag": "Факторы Патогенности"
 					}
 				],
 				"notes": [],

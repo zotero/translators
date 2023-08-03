@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-08-08 15:57:25"
+	"lastUpdated": "2022-10-05 15:16:38"
 }
 
 /*
@@ -73,9 +73,19 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
+	let jsonText = text(doc, 'script[type="application/ld+json"]');
+
+	if (jsonText) {
+		scrapeJSON(JSON.parse(jsonText), doc, url);
+	}
+	else {
+		scrapeHTML(doc, url);
+	}
+}
+
+function scrapeJSON(json, doc, url) {
 	let item = new Zotero.Item('blogPost');
-	let json = JSON.parse(text(doc, 'script[type="application/ld+json"]'));
-	
+
 	item.title = json.headline;
 	item.abstractNote = json.description;
 	item.date = ZU.strToISO(json.dateModified || json.datePublished);
@@ -88,13 +98,31 @@ function scrape(doc, url) {
 		item.creators.push(ZU.cleanAuthor(json.author.name, 'author'));
 	}
 	item.blogTitle = json.publisher.name;
-	item.url = url.replace(/[#?].*$/, '');
+	item.url = attr(doc, 'link[rel="canonical"]', 'href');
 	item.attachments.push({
 		title: 'Snapshot',
 		document: doc
 	});
 	item.websiteType = 'Substack newsletter';
 	
+	item.complete();
+}
+
+function scrapeHTML(doc, url) {
+	let item = new Zotero.Item('blogPost');
+
+	item.title = text(doc, 'h1.post-title');
+	item.abstractNote = attr(doc, 'meta[name="description"]', 'content');
+	item.date = ZU.strToISO(attr(doc, '.post-date time', 'datetime'));
+	item.creators.push(ZU.cleanAuthor(text(doc, '.author a'), 'author'));
+	item.blogTitle = text(doc, 'h1.navbar-title a');
+	item.url = attr(doc, 'link[rel="canonical"]', 'href');
+	item.attachments.push({
+		title: 'Snapshot',
+		document: doc
+	});
+	item.websiteType = 'Substack newsletter';
+
 	item.complete();
 }
 
@@ -154,6 +182,37 @@ var testCases = [
 				"abstractNote": "#81: a sleek AC unit, planet-saving shampoo bars, and a core-strengthening rocking chair",
 				"blogTitle": "Worn In, Worn Out",
 				"url": "https://worninwornout.substack.com/p/get-a-move-on",
+				"websiteType": "Substack newsletter",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://minter.substack.com/p/have-you-ever-thought-about-your/comments",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "Have you ever thought about your own legacy?",
+				"creators": [
+					{
+						"firstName": "Minter",
+						"lastName": "Dial",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022-09-13",
+				"abstractNote": "Have you ever come across the poem by Rupert Brooke, The Soldier? It starts: If I should die, think only this of me: That there's some corner of…",
+				"blogTitle": "DIALOGOS - Meaningful Conversation",
+				"url": "https://minter.substack.com/p/have-you-ever-thought-about-your/comments",
 				"websiteType": "Substack newsletter",
 				"attachments": [
 					{

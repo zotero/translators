@@ -2,20 +2,20 @@
 	"translatorID": "f20f91fe-d875-47e7-9656-0abb928be472",
 	"label": "HAL Archives Ouvertes",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://hal\\.archives-ouvertes\\.fr",
+	"target": "^https://(hal\\.archives-ouvertes\\.fr|hal\\.science)\\b",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-12-21 03:11:03"
+	"lastUpdated": "2023-07-12 08:47:33"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 	HAL translator
-	Copyright © 2012-2014 Sebastian Karcher 
+	Copyright © 2012-2014 Sebastian Karcher and contributors
 	
 	This file is part of Zotero.
 	
@@ -36,49 +36,59 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.search(/\/search\/index\//)!=-1) return "multiple";
-	if (url.search(/\index\.php\?halsid=|\.fr\/[a-z]+-\d+/)!=-1) return findItemType(doc, url);
+	if (/\/search\/index\//.test(url)) return "multiple";
+	if (/\/hal-\d+/.test(url)) return findItemType(doc, url);
+	return false;
 }
 
-function findItemType(doc, url){
-	var itemType= ZU.xpathText(doc, '//div[contains(@class, "label")]');
-	//Z.debug(itemType)
+function findItemType(doc, url) {
+	var itemType = text(doc, '.typdoc')
+		// do some preliminary cleaning
+		.split("(")[0].trim() // discard parenthesized text
+		.split(", ")[0].trim() // simplify "Pré-publication, Document de travail" and " Preprints, Working Papers, ..."
+		.toLowerCase();
 	var typeMap = {
-		"Books": "book",
-		"Ouvrage (y compris édition critique et traduction)": "book",
-		"Book sections": "bookSection",
-		"Chapitre d'ouvrage": "bookSection",
-		"Conference papers": "conferencePaper",
-		"Communication dans un congrès": "conferencePaper",
-		"Directions of work or proceedings": "book",
-		"Direction d'ouvrage, Proceedings": "book",
-		"Journal articles": "journalArticle",
-		"Article dans des revues": "journalArticle",
-		"Lectures": "presentation",
-		"Cours": "presentation",
-		"Other publications": "book",  //this could also be report, not sure here but bibtex guesses book
-		"Autre publication": "book",  //this could also be report, not sure here but bibtex guesses book		
-		"Patents": "patent",
-		"Brevet": "patent",
-		"Preprints, Working Papers, ...": "manuscript",
-		"Pré-publication, Document de travail": "manuscript",
-		"Reports": "report",
-		"Rapport": "report",
-		"Theses": "thesis", 
-		"Thèse": "thesis"
-	}
+		/* eslint-disable quote-props */
+		"books": "book",
+		"ouvrages": "book",
+		"book sections": "bookSection",
+		"chapitre d'ouvrage": "bookSection",
+		"conference papers": "conferencePaper",
+		"communication dans un congrès": "conferencePaper",
+		"directions of work or proceedings": "book",
+		"direction d'ouvrage": "book",
+		"journal articles": "journalArticle",
+		"article dans une revue": "journalArticle",
+		"lectures": "presentation",
+		"cours": "presentation",
+		"other publications": "book", // this could also be report, not sure here but bibtex guesses book
+		"autre publication scientifique": "book", // this could also be report, not sure here but bibtex guesses book
+		"patents": "patent",
+		"brevet": "patent",
+		"preprints": "preprint",
+		"pré-publication": "preprint",
+		"reports": "report",
+		"rapport": "report",
+		"scientific blog post": "blogPost",
+		"article de blog scientifique": "blogPost",
+		"theses": "thesis",
+		"thèse": "thesis",
+		"poster communications": "presentation",
+		"poster de conférence": "presentation",
+		/* eslint-enable quote-props */
+	};
 	if (typeMap[itemType]) return typeMap[itemType];
-	else if (url.indexOf("medihal-")!=-1) return "artwork";
+	else if (url.includes("medihal-")) return "artwork";
 	else return "journalArticle";
 }
 
 function doWeb(doc, url) {
-	var articles = new Array();
+	var articles = [];
 	if (detectWeb(doc, url) == "multiple") {
 		var items = {};
 		var titles = doc.evaluate('//strong/a[@data-original-title="Display the resource" or @data-original-title="Voir la ressource"]', doc, null, XPathResult.ANY_TYPE, null);
 		var title;
-		while (title = titles.iterateNext()) {
+		while ((title = titles.iterateNext())/* assignment */) {
 			items[title.href] = title.textContent;
 		}
 		Zotero.selectItems(items, function (items) {
@@ -88,34 +98,33 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, scrape)
+			Zotero.Utilities.processDocuments(articles, scrape);
+			return true;
 		});
-	} else {
-		//work on PDF pages
-		if (url.search(/\/document$/) != -1 ) {
-			var articleURL = url.replace(/\/document$/, "")
-			//Z.debug(articleURL)
-			ZU.processDocuments(articleURL, scrape);
-		}
-		else scrape(doc, url);
 	}
+	else if (/\/document$/.test(url)) { // work on PDF pages
+		var articleURL = url.replace(/\/document$/, "");
+		// Z.debug(articleURL)
+		ZU.processDocuments(articleURL, scrape);
+	}
+	else scrape(doc, url);
 }
 
 function scrape(doc, url) {
 	var bibtexUrl = url.replace(/#.+|\/$/, "") + "/bibtex";
-	var abstract = ZU.xpathText(doc, '//div[@class="abstract-content"]');
-	var pdfUrl = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content'); 
-	//Z.debug("pdfURL " + pdfUrl)
+	var abstract = text(doc, '.abstract-content');
+	var pdfUrl = attr(doc, "#viewer-detailed a[download]", "href");
+	// Z.debug("pdfURL " + pdfUrl)
 	ZU.doGet(bibtexUrl, function (bibtex) {
-		//Z.debug(bibtex)
+		// Z.debug(bibtex)
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 		translator.setString(bibtex);
 		translator.setHandler("itemDone", function (obj, item) {
-			if (abstract){
-				item.abstractNote=abstract.replace(/(Abstract|Résumé)\s*:/, "");
+			if (abstract) {
+				item.abstractNote = abstract.replace(/^(Abstract|Résumé)\s*:/, "");
 			}
-			if (pdfUrl){	
+			if (pdfUrl) {
 				item.attachments = [{
 					url: pdfUrl,
 					title: "HAL PDF Full Text",
@@ -129,14 +138,19 @@ function scrape(doc, url) {
 					mimeType: "text/html"
 				}];
 			}
-			if (detectWeb(doc, url)=="artwork"|detectWeb(doc, url)=="presentation"){
-				item.itemType= detectWeb(doc, url);
+			let detectedType = detectWeb(doc, url);
+			if (detectedType == "artwork" || detectedType == "presentation") {
+				item.itemType = detectedType;
+			}
+			if (detectedType == 'presentation' && text(doc, 'div.label-POSTER')) {
+				item.presentationType = 'Poster';
 			}
 			item.complete();
 		});
 		translator.translate();
-	})
+	});
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -337,6 +351,79 @@ var testCases = [
 		"type": "web",
 		"url": "https://hal.archives-ouvertes.fr/search/index/q/%2A/docType_s/THESE/",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://hal.archives-ouvertes.fr/hal-01600136v1",
+		"items": [
+			{
+				"itemType": "presentation",
+				"title": "First results about in vitro bud neoformation on haploid apple leaves",
+				"creators": [
+					{
+						"firstName": "Michel",
+						"lastName": "Duron",
+						"creatorType": "author"
+					}
+				],
+				"date": "1989-06",
+				"abstractNote": "First results about[i] in vitro[/i] bud neoformation on haploid apple leaves. The impact of biotechnology in agriculture. The meeting point between fundamental and applied in vitro culture research",
+				"extra": "Published: The impact of biotechnology in agriculture. The meeting point between fundamental and applied in vitro culture research",
+				"itemID": "duron:hal-01600136",
+				"presentationType": "Poster",
+				"url": "https://hal.archives-ouvertes.fr/hal-01600136",
+				"attachments": [
+					{
+						"title": "HAL PDF Full Text",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "apple tree"
+					},
+					{
+						"tag": "bourgeon"
+					},
+					{
+						"tag": "budwood"
+					},
+					{
+						"tag": "culture in vitro"
+					},
+					{
+						"tag": "diffusion des résultats"
+					},
+					{
+						"tag": "haploid"
+					},
+					{
+						"tag": "haploïdie"
+					},
+					{
+						"tag": "in vitro culture"
+					},
+					{
+						"tag": "plant leaf"
+					},
+					{
+						"tag": "plante néoformee"
+					},
+					{
+						"tag": "pommier"
+					},
+					{
+						"tag": "système foliaire"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Poster</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

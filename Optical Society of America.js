@@ -2,14 +2,14 @@
 	"translatorID": "a1a97ad4-493a-45f2-bd46-016069de4162",
 	"label": "Optical Society of America",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?osapublishing\\.org",
+	"target": "^https?://((www\\.)?osapublishing|opg\\.optica)\\.org",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-07 21:36:17"
+	"lastUpdated": "2022-11-22 16:05:46"
 }
 
 /*
@@ -38,7 +38,7 @@
 
 function detectWeb(doc, url) {
 	url = url.toLowerCase();
-	if (url.includes("/abstract.cfm") || url.includes("/viewmedia.cfm")) {
+	if (url.includes("/abstract.cfm") || url.includes("/fulltext.cfm") || url.includes("/viewmedia.cfm")) {
 		var conference = ZU.xpathText(doc, '//meta[@name="citation_conference_title"]/@content');
 		var journal = ZU.xpathText(doc, '//meta[@name="citation_journal_title"]/@content');
 		if (conference) {
@@ -74,30 +74,47 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (items) {
+			await Promise.all(
+				Object.keys(items)
+					.map(url => requestDocument(url).then(scrape))
+			);
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc);
 	}
 }
 
 
-function scrape(doc, url) {
+async function scrape(doc) {
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	// translator.setDocument(doc);
+
+	let pdfPageURL = attr(doc, 'meta[name="citation_pdf_url"]', 'content')
+		|| attr(doc, '#link-pdf', 'href');
+	let pdfURL = null;
+	if (pdfPageURL) {
+		let pdfDoc = await requestDocument(pdfPageURL);
+		if (pdfDoc && pdfDoc.documentElement) {
+			// we're looking at some sort of intermediary screen or an embedded PDF
+			Z.debug('PDF embed page HTML:');
+			// This should be short and will help us debug if users get captcha pages, etc
+			Z.debug(pdfDoc.documentElement.innerHTML);
+			pdfURL = attr(pdfDoc, 'frame:not(:first-of-type)', 'src')
+				|| new URLSearchParams(pdfDoc.location.search).get('gotourl');
+		}
+		else {
+			// Looking straight at the PDF
+			pdfURL = pdfPageURL;
+		}
+		Z.debug('PDF URL: ' + pdfURL);
+	}
 
 	translator.setHandler('itemDone', function (obj, item) {
 		item.title = decodeEntities(item.title, doc);
@@ -109,12 +126,31 @@ function scrape(doc, url) {
 			item.abstractNote = ZU.trimInternal(item.abstractNote);
 		}
 
+		item.attachments = [];
+		if (pdfURL) {
+			item.attachments.push({
+				title: 'Full Text PDF',
+				mimeType: 'application/pdf',
+				url: pdfURL
+			});
+		}
+		else if (pdfPageURL) {
+			Z.debug('Falling back to pdfPageURL');
+			// This isn't going to work, but it'll show a red X next to the attachment
+			// to make it clear that we at least tried
+			Z.debug(pdfPageURL);
+			item.attachments.push({
+				title: 'Full Text PDF',
+				mimeType: 'application/pdf',
+				url: pdfPageURL
+			});
+		}
+		
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function (trans) {
-		trans.doWeb(doc, url);
-	});
+	translator.setDocument(doc);
+	await translator.translate();
 }
 
 
@@ -133,7 +169,7 @@ function decodeEntities(str, doc) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.osapublishing.org/josaa/abstract.cfm?URI=josaa-16-1-191",
+		"url": "https://opg.optica.org/josaa/fulltext.cfm?uri=josaa-16-1-191&id=1091",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -157,21 +193,17 @@ var testCases = [
 				"issue": "1",
 				"journalAbbreviation": "J. Opt. Soc. Am. A, JOSAA",
 				"language": "EN",
-				"libraryCatalog": "www.osapublishing.org",
+				"libraryCatalog": "opg.optica.org",
 				"pages": "191-197",
 				"publicationTitle": "JOSA A",
 				"rights": "© 1999 Optical Society of America",
 				"shortTitle": "Lens axicons",
-				"url": "https://www.osapublishing.org/josaa/abstract.cfm?uri=josaa-16-1-191",
+				"url": "https://opg.optica.org/josaa/abstract.cfm?uri=josaa-16-1-191",
 				"volume": "16",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -201,13 +233,13 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.osapublishing.org/search.cfm?q=test&meta=1&cj=1&cc=1",
+		"url": "https://opg.optica.org/search.cfm?q=test&meta=1&cj=1&cc=1",
 		"defer": true,
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "https://www.osapublishing.org/abstract.cfm?URI=OFC-2006-JThB89",
+		"url": "https://opg.optica.org/abstract.cfm?URI=OFC-2006-JThB89",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -223,20 +255,16 @@ var testCases = [
 				"abstractNote": "Resilient Packet Ring (RPR) is a metropolitan area network technology for data transfer based on ring configuration and is standardized as IEEE 802.17. RPR testing is challenging as it combines best of SONET networks and Data networks. The paper provides guidelines for generation of standard compliant test suite, recommends simulated environments for RPR testing and puts forward a strategy for automation of RPR testing. The paper describes various stages of RPR testing and the challenges considering entire project cycle.",
 				"conferenceName": "Optical Fiber Communication Conference",
 				"language": "EN",
-				"libraryCatalog": "www.osapublishing.org",
+				"libraryCatalog": "opg.optica.org",
 				"pages": "JThB89",
 				"proceedingsTitle": "Optical Fiber Communication Conference and Exposition and The National Fiber Optic Engineers Conference (2006), paper JThB89",
-				"publisher": "Optical Society of America",
+				"publisher": "Optica Publishing Group",
 				"rights": "© 2006 Optical Society of America",
-				"url": "https://www.osapublishing.org/abstract.cfm?uri=OFC-2006-JThB89",
+				"url": "https://opg.optica.org/abstract.cfm?uri=OFC-2006-JThB89",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -266,7 +294,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.osapublishing.org/ao/abstract.cfm?URI=ao-31-26-5706",
+		"url": "https://opg.optica.org/ao/fulltext.cfm?uri=ao-31-26-5706&id=60063",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -300,20 +328,16 @@ var testCases = [
 				"issue": "26",
 				"journalAbbreviation": "Appl. Opt., AO",
 				"language": "EN",
-				"libraryCatalog": "www.osapublishing.org",
+				"libraryCatalog": "opg.optica.org",
 				"pages": "5706-5711",
 				"publicationTitle": "Applied Optics",
 				"rights": "© 1992 Optical Society of America",
-				"url": "https://www.osapublishing.org/ao/abstract.cfm?uri=ao-31-26-5706",
+				"url": "https://opg.optica.org/ao/abstract.cfm?uri=ao-31-26-5706",
 				"volume": "31",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -343,7 +367,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.osapublishing.org/ol/abstract.cfm?uri=ol-40-24-5750",
+		"url": "https://opg.optica.org/ol/fulltext.cfm?uri=ol-40-24-5750&id=333270",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -372,20 +396,16 @@ var testCases = [
 				"issue": "24",
 				"journalAbbreviation": "Opt. Lett., OL",
 				"language": "EN",
-				"libraryCatalog": "www.osapublishing.org",
+				"libraryCatalog": "opg.optica.org",
 				"pages": "5750-5753",
 				"publicationTitle": "Optics Letters",
 				"rights": "© 2015 Optical Society of America",
-				"url": "https://www.osapublishing.org/ol/abstract.cfm?uri=ol-40-24-5750",
+				"url": "https://opg.optica.org/ol/abstract.cfm?uri=ol-40-24-5750",
 				"volume": "40",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -406,6 +426,131 @@ var testCases = [
 					},
 					{
 						"tag": "Plasmon waveguides"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://opg.optica.org/abstract.cfm?uri=CLEOPR-2017-s2069",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "Hybrid Silicon Photonics Flip-Chip Laser Integration with Vertical Self-Alignment",
+				"creators": [
+					{
+						"firstName": "A.",
+						"lastName": "Moscoso-Mártir",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "F.",
+						"lastName": "Merget",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J.",
+						"lastName": "Mueller",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J.",
+						"lastName": "Hauck",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "S.",
+						"lastName": "Romero-García",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "B.",
+						"lastName": "Shen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "F.",
+						"lastName": "Lelarge",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "R.",
+						"lastName": "Brenot",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "A.",
+						"lastName": "Garreau",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "E.",
+						"lastName": "Mentovich",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "A.",
+						"lastName": "Sandomirsky",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "A.",
+						"lastName": "Badihi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "D. E.",
+						"lastName": "Rasmussen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "R.",
+						"lastName": "Setter",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J.",
+						"lastName": "Witzens",
+						"creatorType": "author"
+					}
+				],
+				"date": "2017/07/31",
+				"abstractNote": "We present a flip-chip integration process in which the vertical alignment is guaranteed by a mechanical contact between pedestals defined in a recess etched into a silicon photonics chip and a laser or semiconductor optical amplifier. By selectively etching up to the active region of the III-V materials, we can make the accuracy of vertical alignment independent on the process control applied to layer thicknesses during silicon photonics or III-V chip fabrication, enabling alignment tolerances below ±10 nm in the vertical (Z-)direction.",
+				"conferenceName": "Conference on Lasers and Electro-Optics/Pacific Rim",
+				"language": "EN",
+				"libraryCatalog": "opg.optica.org",
+				"pages": "s2069",
+				"proceedingsTitle": "2017 Conference on Lasers and Electro-Optics Pacific Rim (2017), paper s2069",
+				"publisher": "Optica Publishing Group",
+				"rights": "© 2017 Optical Society of America",
+				"url": "https://opg.optica.org/abstract.cfm?uri=CLEOPR-2017-s2069",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Laser materials processing"
+					},
+					{
+						"tag": "Laser sources"
+					},
+					{
+						"tag": "Process control"
+					},
+					{
+						"tag": "Semiconductor lasers"
+					},
+					{
+						"tag": "Semiconductor optical amplifiers"
+					},
+					{
+						"tag": "Silicon photonics"
 					}
 				],
 				"notes": [],

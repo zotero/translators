@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-10 13:59:19"
+	"lastUpdated": "2022-12-15 15:34:27"
 }
 
 /*
@@ -71,9 +71,13 @@ function getTextValue(doc, fields) {
 
 // initializes field map translations
 function initLang(doc) {
-	var lang = ZU.xpathText(doc, '//a[span[contains(@class,"uxf-globe")]]');
-	if (lang && lang.trim() != "English") {
-		lang = lang.trim().split(',')[0];
+	let lang = text(doc, '.gaMRLanguage');
+	if (!lang) lang = ZU.xpathText(doc, '//a[span[contains(@class,"uxf-globe")]]');
+	lang = lang.replace(/\u200e/g, ''); // Remove stray left-to-right markers
+	Z.debug('Full language label: ' + JSON.stringify(lang));
+	if (lang && lang != "English") {
+		lang = lang.split(',')[0].trim();
+		Z.debug('Trimmed language label: ' + JSON.stringify(lang));
 
 		// if already initialized, don't need to do anything else
 		if (lang == language) return;
@@ -580,6 +584,11 @@ function getItemType(types) {
 		else if (testString.includes("letter") || testString.includes("cable")) {
 			guessType = "letter";
 		}
+	}
+
+	// We don't have localized strings for item types, so just guess that it's a journal article
+	if (!guessType && language != 'English') {
+		return 'journalArticle';
 	}
 
 	return guessType;
@@ -1223,7 +1232,7 @@ var fieldNames = {
 		Subject: 'Konu',
 		"Journal subject": 'Dergi konusu'
 	},
-	'中文(简体)‎': {
+	'中文(简体)': {
 		"Source type": '来源类型',
 		"Document type": '文档类型',
 		// "Record type"

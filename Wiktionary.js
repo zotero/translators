@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-26 17:09:55"
+	"lastUpdated": "2022-12-05 20:28:20"
 }
 
 /*
@@ -37,6 +37,11 @@
 
 
 function detectWeb(doc, url) {
+	// excludes special pages, such as /wiki/Special:RecentChanges
+	if (doc.body.classList.contains('ns--1')) {
+		return false;
+	}
+
 	if (url.includes('/wiki/')) {
 		return "dictionaryEntry";
 	}

@@ -1,15 +1,15 @@
 {
 	"translatorID": "5c95b67b-41c5-4f55-b71a-48d5d7183063",
 	"label": "CNKI",
-	"creator": "Aurimas Vinckevicius, Xingzhong Lin",
+	"creator": "Aurimas Vinckevicius, Xingzhong Lin, Zoë C. Ma",
 	"target": "^https?://([^/]+\\.)?cnki\\.net",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcs",
-	"lastUpdated": "2019-12-05 08:10:19"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2023-03-08 12:33:13"
 }
 
 /*
@@ -40,27 +40,39 @@
 // ids should be in the form [{dbname: "CDFDLAST2013", filename: "1013102302.nh"}]
 function getRefWorksByID(ids, onDataAvailable) {
 	if (!ids.length) return;
-	var { dbname, filename } = ids.shift();
-	var postData = "formfilenames=" + encodeURIComponent(dbname + "!" + filename + "!1!0,")
-		+ '&hid_kLogin_headerUrl=/KLogin/Request/GetKHeader.ashx%3Fcallback%3D%3F'
-		+ '&hid_KLogin_FooterUrl=/KLogin/Request/GetKHeader.ashx%3Fcallback%3D%3F'
-		+ '&CookieName=FileNameS';
-	ZU.doPost('https://kns.cnki.net/kns/ViewPage/viewsave.aspx?displayMode=Refworks', postData,
+	var { dbname, filename, url } = ids.shift();
+	let postData = "filename=" + filename + 
+		"&displaymode=Refworks&orderparam=0&ordertype=desc&selectfield=&dbname=" + 
+		dbname + "&random=0.2111567532240084";
+	
+	ZU.doPost('https://kns.cnki.net/KNS8/manage/ShowExport', postData,
 		function (text) {
-			var parser = new DOMParser();
-			var html = parser.parseFromString(text, "text/html");
-			var data = ZU.xpath(html, "//table[@class='mainTable']//td")[0].innerHTML
-				.replace(/<br>/g, '\n')
-				.replace(/^RT\s+Dissertation\/Thesis/gmi, 'RT Dissertation')
-				.replace(
-					/^(A[1-4]|U2)\s*([^\r\n]+)/gm,
-					function (m, tag, authors) {
-						authors = authors.split(/\s*[;，,]\s*/); // that's a special comma
-						if (!authors[authors.length - 1].trim()) authors.pop();
-						return tag + ' ' + authors.join('\n' + tag + ' ');
-					}
-				);
-			onDataAvailable(data);
+			let data = text
+				.replace("<ul class='literature-list'><li>", "")
+            	.replace("<br></li></ul>", "")
+            	.replace("</li><li>", "") // divide results
+            	.replace(/<br>|\r/g, "\n")
+            	.replace(/vo (\d+)\n/, "VO $1\n") // Divide VO and IS to different line
+            	.replace(/IS 0(\d+)\n/g, "IS $1\n")  // Remove leading 0
+            	.replace(/VO 0(\d+)\n/g, "VO $1\n")
+            	.replace(/\n+/g, "\n")
+            	.replace(/\n([A-Z][A-Z1-9]\s)/g, "<br>$1")
+            	.replace(/\n/g, "")
+            	.replace(/<br>/g, "\n")
+            	.replace(/\t/g, "") // \t in abstract
+            	.replace(
+            	    /^RT\s+Conference Proceeding/gim,
+            	    "RT Conference Proceedings"
+            	)
+            	.replace(/^RT\s+Dissertation\/Thesis/gim, "RT Dissertation")
+            	.replace(/^(A[1-4]|U2)\s*([^\r\n]+)/gm, function (m, tag, authors) {
+            	    authors = authors.split(/\s*[;，,]\s*/); // that's a special comma
+            	    if (!authors[authors.length - 1].trim()) authors.pop();
+            	    return tag + " " + authors.join("\n" + tag + " ");
+            	})
+            	.trim();
+			// Z.debug(data);
+			onDataAvailable(data, url);
 			// If more results, keep going
 			if (ids.length) {
 				getRefWorksByID(ids, onDataAvailable);
@@ -79,24 +91,38 @@ function getIDFromURL(url) {
 	return { dbname: dbname[1], filename: filename[1], url: url };
 }
 
-
 // 网络首发期刊信息并不能从URL获取dbname和filename信息
 // Get dbname and filename from pre-released article web page.
 function getIDFromRef(doc, url) {
-	var func = ZU.xpath(doc, '//div[@class="link"]/a');
-	if (!func.length) {
-		return false;
-	}
-	func = func[0].getAttribute('onclick');
-	var tmp = func.split(',')[1].split('!');
-	// Z.debug(func + tmp[0].slice(1));
-	return { dbname: tmp[0].slice(1), filename: tmp[1], url: url };
+	let database = attr(doc, '#paramdbname', 'value');
+	let filename = attr(doc, '#paramfilename', 'value');
+	return { dbname: database, filename: filename, url: url };
+}
+
+// Get dbname and filename from the link target on the "take note" button in
+// the doc as a fallback.
+// NOTE: As of now (8 Mar 2023) the document sent by CNKI may contain duplicate
+// element ids in the buttons row. In addition, for different article sources,
+// the buttons may follow different patterns, sometimes lacking all the
+// required info. The note-taking button appears more stable across the CNKI
+// domains.
+function getIDFromNoteTakerLink(doc, url) {
+	const noteURLString = doc.querySelector("li.btn-note a").href;
+	if (!noteURLString) return false;
+
+	const urlParams = new URLSearchParams(new URL(noteURLString).search);
+	const dbnameValue = urlParams.get("tablename");
+	const filenameValue = urlParams.get("filename");
+
+	if (!dbnameValue || !filenameValue) return false;
+
+	return { dbname: dbnameValue, filename: filenameValue, url: url };
 }
 
 function getIDFromPage(doc, url) {
 	return getIDFromURL(url)
-		|| getIDFromURL(ZU.xpathText(doc, '//div[@class="zwjdown"]/a/@href'))
-		|| getIDFromRef(doc, url);
+		|| getIDFromRef(doc, url)
+		|| getIDFromNoteTakerLink(doc, url);
 }
 
 function getTypeFromDBName(dbname) {
@@ -104,6 +130,7 @@ function getTypeFromDBName(dbname) {
 		CJFQ: "journalArticle",
 		CJFD: "journalArticle",
 		CAPJ: "journalArticle",
+		CCJD: "journalArticle",
 		CDFD: "thesis",
 		CMFD: "thesis",
 		CLKM: "thesis",
@@ -211,10 +238,16 @@ function scrape(ids, doc, url, itemInfo) {
 				if (creator.firstName) continue;
 				
 				var lastSpace = creator.lastName.lastIndexOf(' ');
+				var lastMiddleDot = creator.lastName.lastIndexOf('·');
 				if (creator.lastName.search(/[A-Za-z]/) !== -1 && lastSpace !== -1) {
 					// western name. split on last space
 					creator.firstName = creator.lastName.substr(0, lastSpace);
 					creator.lastName = creator.lastName.substr(lastSpace + 1);
+				}
+				else if (lastMiddleDot !== -1) {
+					// translated western name with · as separator
+					creator.firstName = creator.lastName.substr(0, lastMiddleDot);
+					creator.lastName = creator.lastName.substr(lastMiddleDot + 1);
 				}
 				else {
 					// Chinese name. first character is last name, the rest are first name
@@ -317,7 +350,7 @@ function getAttachments(doc, item) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&dbname=CJFDLAST2015&filename=SPZZ201412003&v=MTU2MzMzcVRyV00xRnJDVVJMS2ZidVptRmkva1ZiL09OajNSZExHNEg5WE5yWTlGWjRSOGVYMUx1eFlTN0RoMVQ=",
+		"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&dbname=CJFDLAST2015&filename=SPZZ201412003&v=MTU2MzMzcVRyV00xRnJDVVJMS2ZidVptRmkva1ZiL09OajNSZExHNEg5WE5yWTlGWjRSOGVYMUx1eFlTN0RoMVQ=",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -362,7 +395,7 @@ var testCases = [
 				"libraryCatalog": "CNKI",
 				"pages": "1306-1312",
 				"publicationTitle": "色谱",
-				"url": "http://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&dbname=CJFDLAST2015&filename=SPZZ201412003&v=MTU2MzMzcVRyV00xRnJDVVJMS2ZidVptRmkva1ZiL09OajNSZExHNEg5WE5yWTlGWjRSOGVYMUx1eFlTN0RoMVQ=",
+				"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&dbname=CJFDLAST2015&filename=SPZZ201412003&v=MTU2MzMzcVRyV00xRnJDVVJMS2ZidVptRmkva1ZiL09OajNSZExHNEg5WE5yWTlGWjRSOGVYMUx1eFlTN0RoMVQ=",
 				"volume": "32",
 				"attachments": [],
 				"tags": [
@@ -460,50 +493,233 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://new.gb.oversea.cnki.net/KCMS/detail/detail.aspx?dbcode=CMFD&dbname=CMFDTEMP&filename=1019926131.nh&v=MTA5MjM2RjdxNkdORFBycEViUElSOGVYMUx1eFlTN0RoMVQzcVRyV00xRnJDVVJMT2VadVJxRnkzblY3dkJWRjI=",
+		"url": "https://kns.cnki.net/kcms/detail/detail.aspx?dbcode=CCJD&dbname=CCJDLAST2&filename=ZKSF202002010&uniplatform=NZKPT&v=RM9dl7WiC7a9v7FVB6ov3OwJSXCWzsWIng_BWXok2rj4YFWz9tZ20FRZxDaeDPCm",
 		"items": [
 			{
-				"itemType": "thesis",
-				"title": "商业银行个人住房不良资产证券化多元回归定价方法研究",
+				"itemType": "journalArticle",
+				"title": "欧洲陪审团制度新发展:西班牙与俄罗斯的陪审团",
 				"creators": [
 					{
-						"lastName": "张",
-						"firstName": "雪",
+						"lastName": "萨曼",
+						"firstName": "史蒂芬",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "高",
+						"firstName": "一飞",
 						"creatorType": "author"
 					}
 				],
-				"date": "2019",
-				"abstractNote": "不良资产证券化是一种新型的不良资产处置方式,其拓宽了商业银行处理不良资产的手段,特别适用于单户金额小、户数多的个人不良资产批量处置,而且这种市场化处置方式将银行不良资产处置和资本市场证券产品发行两个不同领域联接在一起,提高了不良资产的价值。本文以个人住房不良资产证券化为研究对象,确定资产池内不良资产未来回收价值。综合对比市场常用的定价方法,在此基础上提出建立多元回归定价模型的思路。利用YN银行个人住房不良贷款历史数据,分析得出影响不良资产定价的因素,建立定价方程,并对拟证券化的虚拟资产池计算整体回收价值,证明多元回归定价模型的有效性。本文提出的定价模型规避了传统资产定价方法效率低、评估结果不严...",
+				"date": "2020",
+				"abstractNote": "&lt;正&gt;一、简介近来再次对俄罗斯(1993)和西班牙(1995)陪审团审判模式进行介绍的原因有两个方面。第一,在废除传统陪审团审判的情况下,要么采取仅由职业法官组成的法院审理案件,要么由职业法官和审讯顾问合议来判断所有的事实问题、法律问题并作出相应判决,这是一种令人惊闻的倒退。",
+				"issue": "02",
 				"language": "中文;",
 				"libraryCatalog": "CNKI",
-				"thesisType": "硕士",
-				"university": "浙江大学",
-				"url": "http://new.gb.oversea.cnki.net/KCMS/detail/detail.aspx?dbcode=CMFD&dbname=CMFDTEMP&filename=1019926131.nh&v=MTA5MjM2RjdxNkdORFBycEViUElSOGVYMUx1eFlTN0RoMVQzcVRyV00xRnJDVVJMT2VadVJxRnkzblY3dkJWRjI=",
+				"pages": "193-212",
+				"publicationTitle": "司法智库",
+				"shortTitle": "欧洲陪审团制度新发展",
+				"url": "https://kns.cnki.net/kcms/detail/detail.aspx?dbcode=CCJD&dbname=CCJDLAST2&filename=ZKSF202002010&uniplatform=NZKPT&v=RM9dl7WiC7a9v7FVB6ov3OwJSXCWzsWIng_BWXok2rj4YFWz9tZ20FRZxDaeDPCm",
+				"volume": "3",
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "Asset pool pricing"
+						"tag": "俄罗斯"
 					},
 					{
-						"tag": "Multiple regression pricing model"
+						"tag": "刑事诉讼程序"
 					},
 					{
-						"tag": "Non-performing asset securitization"
+						"tag": "判决书"
 					},
 					{
-						"tag": "Personal housing loan"
+						"tag": "巴斯克"
 					},
 					{
-						"tag": "不良资产证券化"
+						"tag": "陪审团"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=3uoqIhG8C44YLTlOAiTRKibYlV5Vjs7ioT0BO4yQ4m_mOgeS2ml3UHGnAz_wirMwf-b2NsjH_IkCCqUvvwsK8DOvNyxMAxbu&uniplatform=NZKPT",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "我国绿色产品认证标识法律制度的路径探析",
+				"creators": [
+					{
+						"lastName": "曹",
+						"firstName": "明德",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022",
+				"ISSN": "1001-2397",
+				"abstractNote": "我国绿色产品认证标识制度框架已初步形成。作为一项法律制度,绿色产品标识及认证中形成了两组法律关系:一是就产品认可认证,在行政主体、认证机构与申请人之间构成公私混合的规制关系;二是就绿色产品标识授权使用,在上述法律关系主体间构成的商业许可关系。两组法律关系的搭建,形成了我国绿色产品认证标识制度的基本格局。制度的具体完善路径是将现行同类环保产品认证标识纳入绿色产品标识与绿色属性产品标识的二元框架内,或吸收,或拆解,或由市场逐步淘汰,最终形成统一的绿色产品认证标识体系。在制度构建过程中,对第三方认证机构的规制成为制度有效运行的关键。参考域外经验,我国应当通过强化认证机构的独立性,平衡认证机构与申请人...",
+				"issue": "06",
+				"language": "中文;",
+				"libraryCatalog": "CNKI",
+				"pages": "133-145",
+				"publicationTitle": "现代法学",
+				"url": "https://kns.cnki.net/kcms2/article/abstract?v=3uoqIhG8C44YLTlOAiTRKibYlV5Vjs7ioT0BO4yQ4m_mOgeS2ml3UHGnAz_wirMwf-b2NsjH_IkCCqUvvwsK8DOvNyxMAxbu&uniplatform=NZKPT",
+				"volume": "44",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "certification trade mark"
 					},
 					{
-						"tag": "个人住房贷款"
+						"tag": "green product certification"
 					},
 					{
-						"tag": "多元回归定价模型"
+						"tag": "green product identification"
 					},
 					{
-						"tag": "资产池定价"
+						"tag": "green products"
+					},
+					{
+						"tag": "third party certification"
+					},
+					{
+						"tag": "第三方认证"
+					},
+					{
+						"tag": "绿色产品"
+					},
+					{
+						"tag": "绿色产品标识"
+					},
+					{
+						"tag": "绿色产品认证"
+					},
+					{
+						"tag": "证明商标"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=ARuSRxW-FQHH_OEY6X72RuJIsrP2RHAQAacVbC9CGuvOv08ETIP-MqQO5E296beGN9e8BXVfYGR6l0qfpFxS9gdAPZ5URHqiAY8WVPwSYoF6MXeqOgFQfX5vrMMS_wZaK3j5TPxvx-nDGPfIMtrXBlDrWr9SVlAl&uniplatform=NZKPT",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "环境法典中新污染物环境风险管控的立法思路",
+				"creators": [
+					{
+						"lastName": "严",
+						"firstName": "厚福",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022",
+				"ISSN": "1671-7287",
+				"abstractNote": "我国对常规污染物的治理取得了显著成效，但以有毒有害化学物质的生产和使用为主要来源的新污染物的环境风险仍然较为严峻。当前我国相关环境法律法规和标准中缺乏对新污染物环境风险管控的要求，对于现有化学物质的环境风险管控还存在较为严重的不足。未来环境法典中新污染物环境风险管控立法应当坚持风险预防原则，但风险预防原则并不以追求“零风险”为目标。新污染物环境风险管控立法总体上应当遵循“风险筛查→风险评估→风险管控”的思路。环境风险评估应当聚焦于从科学角度评估新污染物对公众健康和生态环境带来的“风险”本身，不考虑与环境风险无关的经济、社会等因素。确定什么是“不合理的风险”,除了科学判断之外，也需要“正当程序”...",
+				"issue": "05",
+				"language": "中文;",
+				"libraryCatalog": "CNKI",
+				"pages": "18-30+115",
+				"publicationTitle": "南京工业大学学报(社会科学版)",
+				"url": "https://kns.cnki.net/kcms2/article/abstract?v=ARuSRxW-FQHH_OEY6X72RuJIsrP2RHAQAacVbC9CGuvOv08ETIP-MqQO5E296beGN9e8BXVfYGR6l0qfpFxS9gdAPZ5URHqiAY8WVPwSYoF6MXeqOgFQfX5vrMMS_wZaK3j5TPxvx-nDGPfIMtrXBlDrWr9SVlAl&uniplatform=NZKPT",
+				"volume": "21",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "新污染物风险管控"
+					},
+					{
+						"tag": "环境治理"
+					},
+					{
+						"tag": "环境法典"
+					},
+					{
+						"tag": "环境风险评估"
+					},
+					{
+						"tag": "风险预防原则"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kns.cnki.net/kcms/detail/detail.aspx?doi=10.13863/j.issn1001-4454.2022.01.030",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Box-Behnken Design-响应面法优化碱水解人参茎叶三醇皂苷制备人参皂苷Rg_2工艺研究",
+				"creators": [
+					{
+						"lastName": "史",
+						"firstName": "大臻",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "吴",
+						"firstName": "福林",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "谭",
+						"firstName": "璐",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "周",
+						"firstName": "柏松",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "刘",
+						"firstName": "金平",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "李",
+						"firstName": "平亚",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "赖",
+						"firstName": "思含",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022",
+				"DOI": "10.13863/j.issn1001-4454.2022.01.030",
+				"ISSN": "1001-4454",
+				"abstractNote": "目的：利用Box-Behnken Design-响应面法优选制备人参皂苷Rg_2的最佳工艺参数。方法：以碱解反应的碱度、温度、时间作为考察因素，人参茎叶三醇皂苷中人参皂苷Rg_2含量作为评价指标，运用Design-Expert 8.0.5b软件对工艺参数进行优化并获得最佳工艺参数。结果：经优化得到碱水解人参茎叶三醇皂苷制备人参皂苷Rg_2的最佳工艺参数：反应碱度7.4%、反应温度187℃、反应时间5 h。验证试验表明，在此工艺参数下可将人参皂苷Rg_2含量提高至9.84%,且工艺稳定。结论：经过优化的工艺可有效提高人参茎叶三醇皂苷中人参皂苷Rg_2含量。",
+				"issue": "01",
+				"language": "中文;",
+				"libraryCatalog": "CNKI",
+				"pages": "173-176",
+				"publicationTitle": "中药材",
+				"url": "https://kns.cnki.net/kcms/detail/detail.aspx?doi=10.13863/j.issn1001-4454.2022.01.030",
+				"volume": "45",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Box-Behnken Design-响应面法"
+					},
+					{
+						"tag": "人参皂苷Rg_2"
+					},
+					{
+						"tag": "人参茎叶三醇皂苷"
+					},
+					{
+						"tag": "工艺优化"
 					}
 				],
 				"notes": [],
