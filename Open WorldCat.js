@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-01 19:40:33"
+	"lastUpdated": "2023-08-04 15:38:48"
 }
 
 /*
@@ -269,7 +269,7 @@ function detectSearch(items) {
 	return sanitizeInput(items, true);
 }
 
-function doSearch(items) {
+async function doSearch(items) {
 	items = sanitizeInput(items);
 	if (!items.length) {
 		Z.debug("Search query does not contain valid identifiers");
@@ -285,63 +285,64 @@ function doSearch(items) {
 		
 		isbns.push(items[i].ISBN);
 	}
-	
-	ZU.processDocuments('https://www.worldcat.org/', function (homepageDoc) {
-		let buildID = JSON.parse(text(homepageDoc, '#__NEXT_DATA__')).buildId;
-		ZU.doGet(`https://www.worldcat.org/_next/data/${buildID}/en/search.json`, function (jsonText) {
-			let json = JSON.parse(jsonText);
-			let { secureToken } = json.pageProps;
-			let cookie = `wc_tkn=${encodeURIComponent(secureToken)}`;
-			fetchIDs(isbns, ids, cookie, function (ids) {
-				if (!ids.length) {
-					Z.debug("Could not retrieve any OCLC IDs");
-					Zotero.done(false);
-					return;
-				}
-				var url = "https://www.worldcat.org/api/search?q=no%3A"
-					+ ids.map(encodeURIComponent).join('+OR+no%3A');
-				ZU.doGet(url, function (respText) {
-					let json = JSON.parse(respText);
-					if (json.briefRecords) {
-						scrapeRecord(json.briefRecords);
-					}
-				}, null, null, {
-					Referer: 'https://worldcat.org/search?q=',
-					Cookie: cookie
-				});
-			});
-		});
-	});
-}
-
-function fetchIDs(isbns, ids, cookie, callback) {
-	if (!isbns.length) {
-		callback(ids);
+		
+	let secureToken = await getSecureToken();
+	let cookie = `wc_tkn=${encodeURIComponent(secureToken)}`;
+	ids = await fetchIDs(isbns, ids, cookie);
+	if (!ids.length) {
+		Z.debug("Could not retrieve any OCLC IDs");
+		Zotero.done(false);
 		return;
 	}
-	
-	var isbn = isbns.shift();
-	// As of 10/19/2022, WorldCat's API seems to do an unindexed lookup for ISBNs without hyphens,
-	// with requests taking 40+ seconds, so we hyphenate them
-	isbn = wcHyphenateISBN(isbn);
-	var url = "https://www.worldcat.org/api/search?q=bn%3A"
-		+ encodeURIComponent(isbn);
-	ZU.doGet(url,
-		function (respText) {
-			let json = JSON.parse(respText);
-			if (json.briefRecords && json.briefRecords.length) {
-				scrapeRecord([json.briefRecords[0]]);
-			}
-		},
-		function () {
-			fetchIDs(isbns, ids, cookie, callback);
-		},
-		null,
-		{
+	var url = "https://www.worldcat.org/api/search?q=no%3A"
+		+ ids.map(encodeURIComponent).join('+OR+no%3A');
+	let json = await requestJSON(url, {
+		headers: {
 			Referer: 'https://worldcat.org/search?q=',
 			Cookie: cookie
 		}
-	);
+	});
+	if (json.briefRecords) {
+		scrapeRecord(json.briefRecords);
+	}
+}
+
+async function getSecureToken() {
+	let doc;
+	try {
+		doc = await requestDocument('https://www.worldcat.org/');
+	}
+	catch (e) {
+		Zotero.debug('Initial request to homepage failed; trying latest archive');
+		doc = await requestDocument('https://web.archive.org/web/https://worldcat.org/');
+	}
+	let buildID = JSON.parse(text(doc, '#__NEXT_DATA__')).buildId;
+	Z.debug('buildID: ' + buildID);
+	let json = await requestJSON(`https://www.worldcat.org/_next/data/${buildID}/en/search.json`);
+	let { secureToken } = json.pageProps;
+	Z.debug('secureToken: ' + secureToken);
+	return secureToken;
+}
+
+async function fetchIDs(isbns, ids, cookie) {
+	while (isbns.length) {
+		let isbn = isbns.shift();
+		// As of 10/19/2022, WorldCat's API seems to do an unindexed lookup for ISBNs without hyphens,
+		// with requests taking 40+ seconds, so we hyphenate them
+		isbn = wcHyphenateISBN(isbn);
+		let url = "https://www.worldcat.org/api/search?q=bn%3A"
+			+ encodeURIComponent(isbn);
+		let json = await requestJSON(url, {
+			headers: {
+				Referer: 'https://worldcat.org/search?q=',
+				Cookie: cookie
+			}
+		});
+		if (json.briefRecords && json.briefRecords.length) {
+			scrapeRecord([json.briefRecords[0]]);
+		}
+	}
+	return ids;
 }
 
 // Copied from Zotero.Utilities.Internal.hyphenateISBN()
