@@ -313,8 +313,14 @@ async function getSecureToken() {
 		doc = await requestDocument('https://www.worldcat.org/');
 	}
 	catch (e) {
-		Zotero.debug('Initial request to homepage failed; trying latest archive');
-		doc = await requestDocument('https://web.archive.org/web/https://worldcat.org/');
+		Z.debug('Initial request to homepage failed; trying latest Google cache');
+		try {
+			doc = await requestDocument('https://webcache.googleusercontent.com/search?q=cache%3Aworldcat.org');
+		}
+		catch (e) {
+			Z.debug('Request to Google cache failed; trying archive.org');
+			doc = await requestDocument('https://web.archive.org/web/https://worldcat.org/');
+		}
 	}
 	let buildID = JSON.parse(text(doc, '#__NEXT_DATA__')).buildId;
 	Z.debug('buildID: ' + buildID);
