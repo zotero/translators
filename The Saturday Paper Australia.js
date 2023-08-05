@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-05 02:13:38"
+	"lastUpdated": "2023-08-05 02:26:58"
 }
 
 /*
@@ -36,8 +36,8 @@
 */
 
 
-function detectWeb(doc, url) {
-	var articlePageTitle = doc.querySelector('div.content > div > div.article-page > div.article-page__header > h1')
+function detectWeb(doc, _url) {
+	var articlePageTitle = doc.querySelector('div.content > div > div.article-page > div.article-page__header > h1');
 	if (articlePageTitle) {
 		return 'newspaperArticle';
 	}
@@ -84,7 +84,7 @@ function scrape(doc, url = doc.location.href) {
 	item.title = attr(doc, 'meta[name="dcterms.title"]', 'content');
 	item.date = ZU.strToISO(attr(doc, 'meta[name="dcterms.date"]', 'content'));
 	item.abstractNote = attr(doc, 'meta[name="dcterms.description"]', 'content');
-	item.creators.push(ZU.cleanAuthor(attr(doc, 'meta[name="dcterms.creator"]', 'content'),"author"));
+	item.creators.push(ZU.cleanAuthor(attr(doc, 'meta[name="dcterms.creator"]', 'content'), "author"));
 	item.language = "en-AU";
 	item.url = url;
 	// The section name is the first part of the path after the FQDN in the url
