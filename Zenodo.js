@@ -1,21 +1,21 @@
 {
 	"translatorID": "a714cb93-6595-482f-b371-a4ca0be14449",
 	"label": "Zenodo",
-	"creator": "Philipp Zumstein, Sebastian Karcher",
+	"creator": "Philipp Zumstein, Sebastian Karcher and contributors",
 	"target": "^https?://zenodo\\.org",
-	"minVersion": "3.0",
+	"minVersion": "6.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-19 20:55:45"
+	"lastUpdated": "2023-08-06 15:15:41"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2016, 2017 Philipp Zumstein & Sebastian Karcher
+	Copyright © 2016-2023 Philipp Zumstein, Sebastian Karcher and contributors
 
 	This file is part of Zotero.
 
@@ -70,8 +70,9 @@ function detectWeb(doc, url) {
 				case "report":
 				case "working paper":
 				case "project deliverables":
-				case "preprint":
 					return "report";
+				case "preprint":
+					return "preprint";
 				case "thesis":
 					return "thesis";
 				case "dataset":
@@ -550,6 +551,75 @@ var testCases = [
 					}
 				],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://zenodo.org/record/8092340",
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "Creating Virtuous Cycles for DNA Barcoding: A Case Study in Science Innovation, Entrepreneurship, and Diplomacy",
+				"creators": [
+					{
+						"lastName": "Schindel",
+						"firstName": "David E.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Page",
+						"firstName": "Roderic D. M. Page",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-06-28",
+				"DOI": "10.5281/zenodo.8092340",
+				"abstractNote": "This essay on the history of the DNA barcoding enterprise attempts to set the stage for the more scholarly contributions that follow. How did the enterprise begin? What were its goals, how did it develop, and to what degree are its goals being realized? We have taken a keen interest in the barcoding movement and its relationship to taxonomy, collections and biodiversity informatics more broadly considered. This essay integrates our two different perspectives on barcoding. DES was the Executive Secretary of the Consortium for the Barcode of Life from 2004 to 2017, with the mission to support the success of DNA barcoding without being directly involved in generating barcode data. RDMP viewed barcoding as an important entry into the landscape of biodiversity data, with many potential linkages to other components of the landscape. We also saw it as a critical step toward the era of international genomic research that was sure to follow. Like the Mercury Program that paved the way for lunar landings by the Apollo Program, we saw DNA barcoding as the proving grounds for the interdisciplinary and international cooperation that would be needed for success of whole-genome research.",
+				"libraryCatalog": "Zenodo",
+				"repository": "Zenodo",
+				"shortTitle": "Creating Virtuous Cycles for DNA Barcoding",
+				"url": "https://zenodo.org/record/8092340",
+				"attachments": [
+					{
+						"title": "Zenodo Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "BOLD"
+					},
+					{
+						"tag": "Barcode of Life Data System"
+					},
+					{
+						"tag": "CBoL"
+					},
+					{
+						"tag": "Consortium for the Barcode of Life"
+					},
+					{
+						"tag": "DNA barcoding"
+					},
+					{
+						"tag": "dark taxa"
+					},
+					{
+						"tag": "preprint"
+					},
+					{
+						"tag": "specimen voucher"
+					},
+					{
+						"tag": "taxonomy"
+					},
+					{
+						"tag": "virtuous cycles"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
