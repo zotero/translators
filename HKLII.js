@@ -2,14 +2,14 @@
 	"translatorID": "3660386b-6bd1-40ae-a4f9-dcfc16db520c",
 	"label": "HKLII",
 	"creator": "Sin Wah Tsang",
-	"target": "^https?:\/\/(v2|www)\.hklii\.hk",
+	"target": "^https?:\\/\\/(v2|www)\\.hklii\\.hk",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-09 14:51:00"
+	"lastUpdated": "2023-08-09 23:29:12"
 }
 
 /*
@@ -47,8 +47,11 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('table > tbody > tr > td.pr-3 > a');	
+	var rows = doc.querySelectorAll('a.routing');	
 	for (let i = 0; i < rows.length; i++) {
+		let titleElement = rows[i].querySelector('p.resultcontent.resulttitle');
+		if (!titleElement) continue;
+		
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
