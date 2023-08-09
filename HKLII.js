@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-09 23:29:12"
+	"lastUpdated": "2023-08-09 23:43:09"
 }
 
 /*
@@ -83,68 +83,83 @@ function doWeb(doc, url) {
 	return false;
 }
 
-function scrape(doc, url){
-	var type = detectWeb(doc, url);
-	var newItem = new Zotero.Item(type);
+async function scrape(doc, url){
+	var itemType = await detectWeb(doc, url);
+	if (!itemType) return;
+
+	var newItem = new Z.Item(itemType);
 	
-	if (text(doc, '#app')) {
-		
-		if (type == 'case') {
-			
-			// All page titles have '|', except for UKPC cases which do not have it
-			// UKPC cases refer to the United Kingdom Privy Council Judgments for Hong Kong
-			var pageTitle = text(doc, 'head > title');
-
-			// e.g. NG KA LING AND ANOTHER V. THE DIRECTOR OF IMMIGRATION | HKLII
-			if (pageTitle.includes('|')) {
-				caseTitle = pageTitle.replace(/\s?\|.*$/, '');
-			} else {
-				caseTitle = pageTitle ;
-			}
-			newItem.caseName = caseTitle; 				
-			
-			var dateDecided = text(doc, '#infotable > div > div:nth-child(1) > div.pl-1 > span');
-			if (dateDecided) {
-				newItem.dateDecided = dateDecided;
-			}
-			
-			var court = text(doc, 'li:nth-child(5) > a > span');
-			if (court) {
-				newItem.court = court;
-			}
-
-			var actionNo = text(doc, 'div:nth-child(3) > div > span > div > span');
-			if (actionNo) {
-				newItem.number = actionNo;
-			}
-			
-			// Extract the Neutral Citation
-			var neutralCit = text(doc, 'li > div > span');
-			if (neutralCit) {
-				newItem.extra = `Neutral Cit: ${neutralCit} \n`;
-			}
-			
-			// Extract the first Parallel Citation
-			var firstParallelCit = text(doc, 'div:nth-child(7) > div.pl-1 > span > div:nth-child(1) > span');
-			if (firstParallelCit) {
-				newItem.extra += `Parallel Cit: ${firstParallelCit} \n`;
-			}
-		} else {
-			newItem.title = text(doc, 'head > title');
-		}
-	} else {
-		newItem.title = text(doc, 'head > title');
-	}
-		
 	newItem.url = url;
-		
 	newItem.attachments.push({
 		document: doc,
 		title: 'Snapshot',
 		mimeType:'text/html'
 	});
+
+	let newUrl = new URL(url);
+	let apiURL = getApiUrl(newUrl);
 		
-	newItem.complete();	
+	try {
+		const record = await getJudgment(apiURL);
+		populateItem(newItem, record);
+	}
+	catch (err) {
+		Z.debug(`Error: Failed to get or use record for article at ${url}`);
+		Z.debug(`The error was: ${err}`);
+	}
+	finally {
+		newItem.complete();
+	}
+}
+
+function getApiUrl(newUrl) {
+	let path = newUrl.pathname.split("/");
+	let lang = path[1];
+	let abbr = path[3];
+	let year = path[4];
+	let num = path[5];
+	let params = new URLSearchParams({
+		lang: lang,
+		abbr: abbr,
+		year: year,
+		num: num
+	});
+	let apiURL = `https://www.hklii.hk/api/getjudgment?${params.toString()}`;
+	return apiURL;
+}
+
+async function getJudgment(apiURL) {
+	let response = await requestJSON(apiURL);				
+	return response;
+}
+
+function populateItem(newItem, record) {
+
+	if (newItem.itemType === "case") {
+
+		let { date, neutral, cases, parallel_citation} = record;
+
+		newItem.dateDecided = date.split('T')[0];
+		newItem.caseName = cases[0].title;
+		newItem.extra = `Action No: ${cases[0].act}\n`;
+
+		let neutralParts = neutral.split(" ");
+		newItem.court = neutralParts[1];
+		newItem.docketNumber = neutralParts[2];
+
+		if (parallel_citation && parallel_citation.length > 0) {
+
+			let parParts = parallel_citation[0].split(" ");
+
+			if (parParts.length == 4) {
+				newItem.reporterVolume = parParts[0] + " " + parParts[1];
+				newItem.reporter = parParts[2];
+				newItem.firstPage = parParts[3];
+			} else if (parParts.length == 3) {
+				[newItem.reporterVolume, newItem.reporter, newItem.firstPage] = parParts;
+			}
+		}
+	}
 }
 /** BEGIN TEST CASES **/
 var testCases = [
