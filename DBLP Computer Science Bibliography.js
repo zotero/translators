@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-20 19:47:25"
+	"lastUpdated": "2023-04-20 13:37:43"
 }
 
 /*
@@ -64,7 +64,7 @@ function detectWeb(doc, url) {
 
 
 function scrape(doc, _url) {
-	let allData = doc.querySelectorAll('#bibtex-section');
+	let allData = doc.querySelectorAll('#bibtex-section > pre');
 	let firstData = allData[0];
 	var firstDataText = firstData.textContent.replace(/ ee\s*=/, " url ="); // e.g. ee = {http://dx.doi.org/10.1007/978-3-319-00035-0_37},
 
@@ -103,7 +103,7 @@ function scrapeMainPart(firstDataText, secondDataItem) {
 	trans.setHandler('itemDone', function (obj, item) {
 		if (secondDataItem) {
 			if (secondDataItem.title && item.itemType == "conferencePaper") item.proceedingsTitle = secondDataItem.title;
-			if (secondDataItem.title && item.itemType == "bookSection") item.booktitle = secondDataItem.titel;
+			if (secondDataItem.title && item.itemType == "bookSection") item.bookTitle = secondDataItem.title;
 			if (secondDataItem.creators && secondDataItem.creators.length > 0) item.creators = item.creators.concat(secondDataItem.creators);
 			if (secondDataItem.publisher && !item.publisher) item.publisher = secondDataItem.publisher;
 			if (secondDataItem.series && !item.series) item.series = secondDataItem.series;
@@ -115,7 +115,7 @@ function scrapeMainPart(firstDataText, secondDataItem) {
 		// yet contain a doi, then save the doi and delete the url.
 		// If the item contains the doi corresponding to the url
 		// then just delete the url and keep the doi.
-		if (item.url && item.url.search(/^https?:\/\/(?:dx\.)?doi\.org\/10\./i) != -1) {
+		if (item.url && /^https?:\/\/(?:dx\.)?doi\.org\/10\./i.test(item.url)) {
 			var doi = ZU.cleanDOI(item.url);
 			if (doi && (!item.DOI || item.DOI == doi)) {
 				item.DOI = doi;
@@ -391,6 +391,66 @@ var testCases = [
 				"proceedingsTitle": "7th International Conference on Learning Representations, ICLR 2019, New Orleans, LA, USA, May 6-9, 2019",
 				"publisher": "OpenReview.net",
 				"url": "https://openreview.net/forum?id=S1lhbnRqF7",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://dblp.org/rec/reference/choice/LangX16.html?view=bibtex&param=2",
+		"detectedItemType": "bookSection",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Voting in Combinatorial Domains",
+				"creators": [
+					{
+						"firstName": "Jérôme",
+						"lastName": "Lang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Lirong",
+						"lastName": "Xia",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Felix",
+						"lastName": "Brandt",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Vincent",
+						"lastName": "Conitzer",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Ulle",
+						"lastName": "Endriss",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Jérôme",
+						"lastName": "Lang",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Ariel D.",
+						"lastName": "Procaccia",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2016",
+				"ISBN": "9781107446984",
+				"bookTitle": "Handbook of Computational Social Choice",
+				"extra": "DOI: 10.1017/CBO9781107446984.010",
+				"itemID": "DBLP:reference/choice/LangX16",
+				"libraryCatalog": "DBLP Computer Science Bibliography",
+				"pages": "197–222",
+				"publisher": "Cambridge University Press",
 				"attachments": [],
 				"tags": [],
 				"notes": [],

@@ -7,9 +7,9 @@
 	"maxVersion": "",
 	"priority": 110,
 	"inRepository": true,
-	"translatorType": 12,
+	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-02-17 09:30:16"
+	"lastUpdated": "2023-08-04 05:04:16"
 }
 
 function detectWeb(doc, url) {
@@ -112,62 +112,7 @@ function buildQuery(docIDs) {
 		url += '&DocIDs[' + i + ']=' + encodeURIComponent(docIDs[i]);
 	}
 	return url;
-}
-
-// TODO: Re-enable search
-// e.g. 10.6220/joq.2012.19(1).01
-function detectSearch(items) {
-	if (!items) return false;
-	
-	if (typeof items == 'string' || !items.length) items = [items];
-	
-	for (var i=0, n=items.length; i<n; i++) {
-		if (!items[i]) continue;
-		
-		if (items[i].DOI && ZU.cleanDOI(items[i].DOI)) return true;
-		if (typeof items[i] == 'string' && ZU.cleanDOI(items[i])) return true;
-	}
-	
-	return false;
-}
-
-function filterQuery(items) {
-	if (!items) return [];
-	
-	if (typeof items == 'string' || !items.length) items = [items];
-	
-	//filter out invalid queries
-	var query = [];
-	for (var i=0, n=items.length; i<n; i++) {
-		if ( ( items[i].DOI && ZU.cleanDOI(items[i].DOI) )
-			|| ( typeof items[i] == 'string' && ZU.cleanDOI(items[i]) ) ) {
-			query.push(items[i]);
-		}
-	}
-	return query;
-}
-
-function doSearch(items) {
-	var query = filterQuery(items);
-	var queryTracker = {};
-	var dois = [];
-	for (let i=0, n=query.length; i<n; i++) {
-		var doi = ZU.cleanDOI(query[i].DOI || query[i]);
-		followDOI(doi);
-	}
-}
-
-function followDOI(doi) {
-	ZU.processDocuments('https://doi.org/' + encodeURIComponent(doi), async function(doc, url) {
-		//var redirectedUrl = ZU.xpathText(doc, '//meta[@name="citation_abstract_html_url"]/@content');
-		var docID = ZU.xpathText(doc, '//a/@docid');
-		if (!docID) return;
-		await scrape([docID]);
-	});
-}
-
-
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -361,58 +306,6 @@ var testCases = [
 		]
 	},
 	{
-		"type": "search",
-		"input": {
-			"DOI": "10.6220/joq.2012.19(1).01"
-		},
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "The Study of Second Level of People Capability Maturity Model on the Industrial Control Industry in Taiwan",
-				"creators": [
-					{
-						"firstName": "Yin-Che",
-						"lastName": "Chen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "King-Ching",
-						"lastName": "Hsieh",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Mei-Tai",
-						"lastName": "Wu",
-						"creatorType": "author"
-					}
-				],
-				"date": "February 2012",
-				"DOI": "10.6220/joq.2012.19(1).01",
-				"ISSN": "1022-0690",
-				"abstractNote": "The People Capability Maturity Model (P-CMM) is an evolving channel for and a roadmap of organizational development and improvement. This model comprises five consecutive maturity levels: initial, managed, defined, predictable, and optimized. The unique characteristics of P-CMM lie in the standardization of processes guiding employees to perform their daily routines more efficiently. This was a field research project that used document analysis, observation, interviews, and analysis of researchers' field notes. By triangulating this data, researchers hoped to maintain a satisfactory level of reliability and validity for the model. Through on-site research into the industrial control industry, researchers endeavored to obtain some indication of the significance and potential application of this model. After evaluating each step of the current production process, researchers made necessary changes or appropriate adjustments based on the protocol set out in the second level of P-CMM to evaluate and diagnose the model.",
-				"issue": "1",
-				"itemID": "AL:10220690-201202-201202200002-201202200002-1-20",
-				"language": "zh",
-				"libraryCatalog": "Airiti",
-				"pages": "1-20",
-				"publicationTitle": "品質學報",
-				"url": "http://www.airitilibrary.com/Publication/alDetailedMesh?DocID=10220690-201202-201202200002-201202200002-1-20",
-				"volume": "19",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [
-					"field research",
-					"people capability maturity model"
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
 		"type": "web",
 		"url": "https://www.airitilibrary.com/Publication/alDetailedMesh?DocID=10213120-198905-28-1-377-382-a&PublishTypeID=P001",
 		"items": [
@@ -421,18 +314,18 @@ var testCases = [
 				"title": "Jones Dye Test與Fluorescein Dye Disappearance Test的再評估",
 				"creators": [
 					{
-						"firstName": "陳彥",
-						"lastName": "志",
+						"firstName": "彥志",
+						"lastName": "陳",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "高啓",
-						"lastName": "祥",
+						"firstName": "啓祥",
+						"lastName": "高",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "林素",
-						"lastName": "玲",
+						"firstName": "素玲",
+						"lastName": "林",
 						"creatorType": "author"
 					}
 				],
@@ -492,7 +385,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2021-02",
+				"date": "2021-12",
 				"DOI": "10.6981/FEM.202112_2(12).0063",
 				"ISSN": "2692-7608",
 				"abstractNote": "The Party branch is the Party's basic organization, the basic unit of the Party organization to carry out its work, the Party's fighting fortress in the basic social organizations, and the foundation of all the Party's work and combat effectiveness. Party building work is an effective way for schools to consolidate ideological and political work and an important starting point for carrying out ideological and political education. The construction of grass-roots Party branches is the top priority of the Party building work in colleges and universities, it is necessary to strengthen political guidance and enhance Party member education; strictly grasp standard procedures, do a good job in Party member management, strictly regulate Party discipline, strengthen Party member supervision, focus on central work, extensively organize teachers and students, choose advanced models, focus on propagation work; gather the joint efforts of teachers and students, promote collaborative education; strengthen the sense of purpose, connect and serve teachers and students, and solidly promote the creation of model Party branches, give full play to the leading and exemplary role, educate people for the Party and cultivate talents for the country.",
