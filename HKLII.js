@@ -1,6 +1,6 @@
 {
 	"translatorID": "3660386b-6bd1-40ae-a4f9-dcfc16db520c",
-	"label": "HKLIIv2",
+	"label": "HKLII",
 	"creator": "Sin Wah Tsang",
 	"target": "^https?:\/\/(v2|www)\.hklii\.hk",
 	"minVersion": "5.0",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-09 14:30:00"
+	"lastUpdated": "2023-08-09 14:51:00"
 }
 
 /*
