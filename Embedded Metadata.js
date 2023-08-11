@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-24 14:42:56"
+	"lastUpdated": "2023-08-11 09:54:50"
 }
 
 /*
@@ -736,7 +736,7 @@ function tryOgAuthors(doc) {
 	var authors = [];
 	var ogAuthors = ZU.xpath(doc, '//meta[@property="article:author" or @property="video:director" or @property="music:musician"]');
 	for (var i = 0; i < ogAuthors.length; i++) {
-		if (ogAuthors[i].content && /(https?:\/\/)?[\da-z.-]+\.[a-z.]{2,6}/.test(ogAuthors[i].content) && ogAuthors[i].content !== "false") {
+		if (ogAuthors[i].content && !/(https?:\/\/)?[\da-z.-]+\.[a-z.]{2,6}/.test(ogAuthors[i].content) && ogAuthors[i].content !== "false") {
 			authors.push(ZU.cleanAuthor(ogAuthors[i].content, "author"));
 		}
 	}
