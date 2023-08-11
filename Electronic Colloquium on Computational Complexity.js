@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-02 17:34:54"
+	"lastUpdated": "2023-08-11 17:11:06"
 }
 
 /*
@@ -39,18 +39,6 @@ const preprintType = ZU.fieldIsValidForType('title', 'preprint')
 	? 'preprint'
 	: 'report';
 
-function detectWeb(doc, url) {
-	var multipleRe = /^https?:\/\/eccc\.weizmann\.ac\.il\/(title|year|keyword|search)\//;
-	var singleRe = /^https?:\/\/eccc\.weizmann\.ac\.il\/report\//;
-	if (multipleRe.test(url)) {
-		return "multiple";
-	}
-	else if (singleRe.test(url)) {
-		return preprintType;
-	}
-	else return false;
-}
-
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
@@ -65,6 +53,19 @@ function getSearchResults(doc, checkOnly) {
 	}
 	return found ? items : false;
 }
+
+function detectWeb(doc, url) {
+	var multipleRe = /^https?:\/\/eccc\.weizmann\.ac\.il\/(title|year|keyword|search)\//;
+	var singleRe = /^https?:\/\/eccc\.weizmann\.ac\.il\/report\//;
+	if (multipleRe.test(url)) {
+		return getSearchResults(doc, true) && "multiple";
+	}
+	else if (singleRe.test(url)) {
+		return preprintType;
+	}
+	else return false;
+}
+
 async function scrape(doc, url = doc.location.href) {
 	let translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
@@ -88,28 +89,15 @@ async function scrape(doc, url = doc.location.href) {
 		item.complete();
 	});
 
-	await translator.getTranslatorObject(function (trans) {
-		trans.itemType = preprintType;
-		trans.doWeb(doc, url);
-	});
+	let em = await translator.getTranslatorObject();
+	em.itemType = preprintType;
+	await em.doWeb(doc, url);
 }
 
 async function doWeb(doc, url) {
-	var articles = {};
-
-	if (detectWeb(doc, url) == "multiple") {
-		var titleXPath = "//a[starts-with(@href,'/report/')]/h4";
-		var linkXPath = "//a[starts-with(@href,'/report/')][h4]";
-
-		var titles = ZU.xpath(doc, titleXPath);
-		var links = ZU.xpath(doc, linkXPath);
-		for (let i = 0; i < titles.length; i++) {
-			articles[links[i].href] = titles[i].textContent;
-		}
-		let items = await Zotero.selectItems(articles);
-		if (!items) {
-			Zotero.done();
-		}
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
 		for (let url of Object.keys(items)) {
 			await scrape(await requestDocument(url));
 		}
@@ -117,9 +105,7 @@ async function doWeb(doc, url) {
 	else {
 		await scrape(doc, url);
 	}
-}
-
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -233,6 +219,12 @@ var testCases = [
 		"url": "https://eccc.weizmann.ac.il/search/?search=combinatorial",
 		"detectedItemType": "multiple",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://eccc.weizmann.ac.il/search/?search=asdf",
+		"detectedItemType": false,
+		"items": []
 	}
 ]
 /** END TEST CASES **/
