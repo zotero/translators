@@ -2008,6 +2008,31 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nhs.uk/conditions/baby/babys-development/behaviour/separation-anxiety/",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Separation anxiety",
+				"creators": [],
+				"date": "7 Dec 2020, 4:40 p.m.",
+				"abstractNote": "Separation anxiety is a normal part of your child's development. Find out how to handle the times when your baby or toddler cries or is clingy when you leave them.",
+				"language": "en",
+				"url": "https://www.nhs.uk/conditions/baby/babys-development/behaviour/separation-anxiety/",
+				"websiteTitle": "nhs.uk",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
