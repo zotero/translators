@@ -257,6 +257,7 @@ const html2tei = {
 	"li" : {tei:"item"},
 	"ol" : {tei:"list", rend:"numbered"},
 	"p" : {tei:"p"},
+	"u" : {tei:"hi", rend:"u"},
 	"ul" : {tei:"list", rend:"bulleted"},
 	"sub" : {tei:"hi", rend:"sub"},
 	"sup" : {tei:"hi", rend:"sup"},
@@ -281,6 +282,16 @@ function domWalk(srcParent, dstParent) {
 		if (srcChild.nodeType == Node.ELEMENT_NODE) {
 			let dstChild = null;
 			const srcName = srcChild.tagName.toLowerCase();
+			// go through some non significative elements
+			if (srcName == 'span' 
+				&& srcChild.hasAttribute('style') 
+				&& srcChild.getAttribute("style") == 'color: black'
+			) {
+				domWalk(srcChild, dstParent);
+				continue;
+			}
+
+
 			if (html2tei.hasOwnProperty(srcName)) {
 				const dstName = html2tei[srcName].tei;
 				dstChild = dstDoc.createElementNS(ns.tei, dstName);
@@ -295,6 +306,11 @@ function domWalk(srcParent, dstParent) {
 			else {
 				// unknown tag, send it n TEI ns, consumer will correct by hand
 				dstChild = dstDoc.createElementNS(ns.tei, srcName);
+				// copy attributes
+				for (let i = 0; i < srcChild.attributes.length; i++) {
+					const att = srcChild.attributes[i];
+					dstChild.setAttribute(att.name, att.value);
+				}
 			}
 			domWalk(srcChild, dstChild);
 			dstParent.append(dstChild);
@@ -450,20 +466,7 @@ function date2iso(date) {
 }
 
 /**
- * Append a leave element with basic indentation
- * [2023-06 FG]
- * @param {*} parent 
- * @param {*} child 
- * @param {*} level 
- */
-function appendIndent(parent, child, level) {
-	const doc = parent.ownerDocument;
-	parent.append(indent.repeat(level), child, '\n');
-}
-
-/**
  * Append simple value
- * [2023-06 FG]
  * @param {*} parent 
  * @param {*} name 
  * @param {*} value 
@@ -481,7 +484,7 @@ function appendField(parent, name, value, level = 2, atts = {}) {
 		child.setAttribute(key, atts[key]);
 	}
 	child.append(value);
-	appendIndent(parent, child, level);
+	parent.append("\n", indent.repeat(level), child);
 }
 
 
@@ -538,18 +541,43 @@ function generateItem(item, teiDoc) {
 	let monogr = teiDoc.createElementNS(ns.tei, "monogr");
 	// most specific parent for fields
 	let monoana = monogr;
-	monogr.append("\n");
 	let analytic = null;
 	let series = null;
 	// (TEI schema) analytic before monogr
 	if (isAnalytic) {
 		analytic = teiDoc.createElementNS(ns.tei, "analytic");
-		analytic.append("\n");
 		bibl.append("\n" + indent, analytic);
 		monoana = analytic;
 	}
 	// (TEI schema) always monogr
-	bibl.append("\n" + indent, monogr, "\n");
+	bibl.append("\n" + indent, monogr);
+	// (TEI schema) series after monogr
+	if (item.series || item.seriesTitle) {
+		series = teiDoc.createElementNS(ns.tei, "series");
+		bibl.append("\n", indent, series);
+		if (item.series) {
+			const title = teiDoc.createElementNS(ns.tei, "title");
+			title.setAttribute("level", "s");
+			inlineParse(item.series, title);
+			series.append("\n", indent.repeat(2), title);
+		}
+		if (item.seriesTitle) {
+			const title = teiDoc.createElementNS(ns.tei, "title");
+			title.setAttribute("level", "s");
+			title.setAttribute("type", "alternative");
+			inlineParse(item.seriesTitle, title);
+			series.append("\n", indent.repeat(2), title);
+		}
+		if (item.seriesText) {
+			const note = teiDoc.createElementNS(ns.tei, "note");
+			note.setAttribute("type", "description");
+			noteParse(item.seriesText, note);
+			series.append("\n", indent.repeat(2), note);
+		}
+		appendField(series, 'biblScope', item.seriesNumber, 2, { 'unit': 'volume' });
+	}
+
+
 	// language of text
 	if (item.language) {
 		monoana.setAttributeNS(ns.xml, "xml:lang", item.language);
@@ -559,12 +587,12 @@ function generateItem(item, teiDoc) {
 	// a resource
 	for (let creator of item.creators) {
 		let pers = null;
-		let resp = null;
+		let respStmt = null;
 		let levelNames = 3;
 		const type = creator.creatorType;
 		if (type == "reviewedAuthor") {
 			// A reviewed author is not a statement of responsability
-			// is a subject, sent in a note
+			// send it to relatedItem
 			continue
 		}
 		else if (type == "author") {
@@ -581,13 +609,12 @@ function generateItem(item, teiDoc) {
 		}
 		// a reponsability with a label
 		else {
-			resp = teiDoc.createElementNS(ns.tei, "respStmt");
-			resp.append("\n");
-			appendField(resp, 'resp', type, 3);
+			respStmt = teiDoc.createElementNS(ns.tei, "respStmt");
+			appendField(respStmt, 'resp', type, 3);
 			pers = teiDoc.createElementNS(ns.tei, "persName");
-			appendIndent(resp, pers, 3);
+			respStmt.append('\n', indent.repeat(3), pers);
 			levelNames++;
-			resp.append(indent.repeat(2));
+			respStmt.append("\n", indent.repeat(2));
 		}
 
 		// append names of a particular creator
@@ -596,8 +623,8 @@ function generateItem(item, teiDoc) {
 
 		// what to append
 		let child = null;
-		if (resp) {
-			child = resp;
+		if (respStmt) {
+			child = respStmt;
 		}
 		else {
 			child = pers;
@@ -605,14 +632,13 @@ function generateItem(item, teiDoc) {
 
 		// decide where the creator shall appear
 		if (type == "seriesEditor" && series) {
-			appendIndent(series, child, 2);
+			series.append("\n", indent.repeat(2), child);
 		}
 		else if (isAnalytic && (type != 'editor' && type != 'bookAuthor')) {
-			// [Majewski] assuming that only authors go here [2023-06 FG] ??
-			appendIndent(analytic, child, 2);
+			analytic.append("\n", indent.repeat(2), child);
 		}
 		else {
-			appendIndent(monogr, child, 2);
+			monogr.append("\n", indent.repeat(2), child);
 		}
 	}
 
@@ -627,7 +653,7 @@ function generateItem(item, teiDoc) {
 			title.setAttribute("level", "m");
 		}
 		// append title to analytic or monogr
-		monoana.append(indent.repeat(2), title, "\n");
+		monoana.append("\n", indent.repeat(2), title);
 		// short title
 		appendField(monoana, 'title', item.shortTitle, 2, { 'type': 'short' });
 		// for analytic, a DOI is presumably for the article, not the journal.
@@ -639,7 +665,7 @@ function generateItem(item, teiDoc) {
 		const title = teiDoc.createElementNS(ns.tei, "title");
 		title.setAttribute("type", "conferenceName");
 		inlineParse(item.conferenceName, title);
-		appendIndent(monogr, title, 2);
+		monogr.append('\n', indent.repeat(2), title);
 	}
 
 	// publication title
@@ -654,8 +680,7 @@ function generateItem(item, teiDoc) {
 			title.setAttribute("level", "m");
 		}
 		inlineParse(tagsoup, title);
-		appendIndent(monogr, title, 2)
-
+		monogr.append('\n', indent.repeat(2), title);
 	} while(false)
 
 	// https://github.com/TEIC/TEI/issues/1788
@@ -663,7 +688,7 @@ function generateItem(item, teiDoc) {
 	if (item.url) {
 		const ptr = teiDoc.createElementNS(ns.tei, "ptr");
 		ptr.setAttribute("target", item.url);
-		appendIndent(monoana, ptr, 2);
+		monogr.append('\n', indent.repeat(2), ptr);
 	}
 	// Other canonical ref nos come right after the title(s)
 	appendField(monogr, 'idno', item.ISBN, 2, { 'type': 'ISBN' });
@@ -681,12 +706,11 @@ function generateItem(item, teiDoc) {
 
 	// <imprint> is required
 	const imprint = teiDoc.createElementNS(ns.tei, "imprint");
-	appendIndent(monogr, imprint, 2);
-	imprint.append("\n");
+	monogr.append('\n', indent.repeat(2), imprint);
 	// Date is required for an  <imprint> so create it by default
 	{
 		const date = teiDoc.createElementNS(ns.tei, "date");
-		appendIndent(imprint, date, 3);
+		imprint.append('\n', indent.repeat(3), date);
 		// use @when 
 		if (item.date) {
 			const dateO = Zotero.Utilities.strToDate(item.date);
@@ -707,10 +731,17 @@ function generateItem(item, teiDoc) {
 	// [FG] publisher, maybe kicked for Journal Article, get it back from extra
 	appendField(imprint, 'publisher', extra.publisher, 3);
 	delete extra.publisher; // delete used extra field
-	appendField(imprint, 'pubPlace', extra['publisher-place'], 3);
-	delete extra['publisher-place']; // delete used extra field
-	appendField(imprint, 'pubPlace', extra['place'], 3);
-	delete extra['place']; // delete used extra field
+	if (item.place) {
+		appendField(imprint, 'pubPlace', item.place, 3);
+	}
+	// Extra may keep a publication place for articles
+	else {
+		appendField(imprint, 'pubPlace', extra['publisher-place'], 3);
+		delete extra['publisher-place']; // delete used extra field
+		appendField(imprint, 'pubPlace', extra['place'], 3);
+		delete extra['place']; // delete used extra field	
+	}
+
 	appendField(imprint, 'biblScope', item.volume, 3, { 'unit': 'volume' });
 	appendField(imprint, 'biblScope', item.issue, 3, { 'unit': 'issue' });
 	appendField(imprint, 'biblScope', item.section, 3, { 'unit': 'chapter' });
@@ -719,99 +750,86 @@ function generateItem(item, teiDoc) {
 	// not well thought
 	appendField(imprint, 'note', item.thesisType, 3, { 'type': 'thesisType' });
 	// ending indent
-	imprint.append(indent.repeat(2));
+	imprint.append("\n", indent.repeat(2));
 
 	// after imprint
-	if (item.numberOfVolumes || item.numPages || extra['format']) {
+	if (item.numberOfVolumes || item.numPages || extra['dimensions']) {
 		const extent = teiDoc.createElementNS(ns.tei, "extent");
-		extent.append("\n");
 		if (item.numberOfVolumes) {
 			// <measure unit="vol" quantity="4.2"/>
 			const measure = teiDoc.createElementNS(ns.tei, "measure");
 			measure.setAttribute("unit", "volume");
 			measure.setAttribute("quantity", item.numberOfVolumes);
-			appendIndent(extent, measure, 3);
+			extent.append('\n', indent.repeat(3), measure);
 		}
 		if (item.numPages) {
 			// <measure unit="vol" quantity="4.2"/>
 			let measure = teiDoc.createElementNS(ns.tei, "measure");
 			measure.setAttribute("unit", "page");
 			measure.setAttribute("quantity", item.numPages);
-			appendIndent(extent, measure, 3);
+			extent.append('\n', indent.repeat(3), measure);
 		}
 		// other physical informations in extra field
-		appendField(extent, 'measure', extra['format'], 3);
-		delete extra['format']; // delete used extra field
+		appendField(extent, 'measure', extra['dimensions'], 3);
+		delete extra['dimensions']; // delete used extra field
 		// indent closing </extent>
-		extent.append(indent.repeat(2));
-		appendIndent(monogr, extent, 2);
+		extent.append("\n", indent.repeat(2));
+		monogr.append('\n', indent.repeat(2), extent);
 	}
 
-	if (item.series || item.seriesTitle) {
-		// (TEI schema) series after monogr
-		series = teiDoc.createElementNS(ns.tei, "series");
-		series.append("\n");
-		bibl.append(indent, series, "\n");
-		if (item.series) {
-			const title = teiDoc.createElementNS(ns.tei, "title");
-			title.setAttribute("level", "s");
-			inlineParse(item.series, title);
-			appendIndent(series, title, 2);
-		}
-		if (item.seriesTitle) {
-			const title = teiDoc.createElementNS(ns.tei, "title");
-			title.setAttribute("level", "s");
-			title.setAttribute("type", "alternative");
-			inlineParse(item.seriesTitle, title);
-			appendIndent(series, title, 2);
-		}
-		if (item.seriesText) {
-			const note = teiDoc.createElementNS(ns.tei, "note");
-			note.setAttribute("type", "description");
-			noteParse(item.seriesText, note);
-			appendIndent(series, note, 2);
-		}
-		appendField(series, 'biblScope', item.seriesNumber, 2, { 'unit': 'volume' });
-	}
+
 
 	// abstract
 	if (item.abstractNote) {
 		const note = teiDoc.createElementNS(ns.tei, "note");
 		note.setAttribute("type", "abstract");
 		noteParse(item.abstractNote, note);
-		appendIndent(bibl, note, 1);
+		bibl.append("\n", indent, note);
 	}
 
-	// Review: author(s) and title in a note
+	/*
+	 * review
+	 * <relatedItem type="reviewed">
+	 *   <bibl>
+	 *     <title>Reviewed title</title>
+	 *     <author>
+	 *       <forename>John</forename>
+	 *       <surname>Doe</surname>
+	 *     </author>
+	 *   </bibl>
+	 * </relatedItem>
+	 */
+
 	{
-		const note = teiDoc.createElementNS(ns.tei, "note");
-		note.setAttribute("type", "review");
-		note.append("\n");
-		let count = 0;
+		const relatedItem = teiDoc.createElementNS(ns.tei, "relatedItem");
+		relatedItem.setAttribute("type", "reviewed");
+		const biblReviewed = teiDoc.createElementNS(ns.tei, "bibl");
+		relatedItem.append("\n", indent.repeat(2), biblReviewed, "\n", indent);
+		let found = false;
 		for (let creator of item.creators) {
 			const type = creator.creatorType;
 			if (type != "reviewedAuthor") {
 				continue;
 			}
-			count++;
-			const pers = teiDoc.createElementNS(ns.tei, "persName");
-			pers.setAttribute("type", "reviewed");
-			// append names
-			persName(pers, creator, 3);
-			appendIndent(note, pers, 2);
+			found = true;
+			const author = teiDoc.createElementNS(ns.tei, "author");
+			persName(author, creator, 4);
+			biblReviewed.append("\n", indent.repeat(3), author);
 		}
 		// APA7, extra field for reviewed title
 		if (extra['reviewed-title']) {
 			const title = teiDoc.createElementNS(ns.tei, "title");
-			title.setAttribute("type", "reviewed");
 			inlineParse(extra['reviewed-title'], title); // maybe rich text
-			note.append(indent.repeat(2), title, "\n");
+			biblReviewed.append("\n", indent.repeat(3), title);
 			delete extra['reviewed-title'];
-			count++;
+			found = true;
+			// if reviewed-title, extra.medium is its inprint 
+			appendField(biblReviewed, 'edition', extra['medium'], 3);
+			delete extra['medium'];
 		}
-		if (count) {
-			appendIndent(bibl, note, 1);
-			note.append(indent);
+		if (found) {
+			biblReviewed.append("\n", indent.repeat(2));
+			bibl.append("\n", indent, relatedItem);
 		}
 	}
 
@@ -822,7 +840,7 @@ function generateItem(item, teiDoc) {
 		const note = teiDoc.createElementNS(ns.tei, "note");
 		note.setAttribute("type", "extra");
 		noteParse(extra.note, note);
-		appendIndent(bibl, note, 1);
+		bibl.append("\n", indent, note);
 		delete extra.note; // delete used extra field
 	}
 
@@ -834,23 +852,22 @@ function generateItem(item, teiDoc) {
 			// spaces may be significative if formated text
 			// note.setAttributeNS(ns.xml, "xml:space", 'preserve');
 			noteParse(noteObj.note, note);
-			appendIndent(bibl, note, 1);
+			bibl.append("\n", indent, note);
 		}
 	}
 
 	// export tags, if available
 	if (Zotero.getOption("Export Tags") && item.tags && item.tags.length > 0) {
 		const tags = teiDoc.createElementNS(ns.tei, "note");
-		tags.append("\n");
-		appendIndent(bibl, tags, 1);
+		bibl.append("\n", indent, tags);
 		tags.setAttribute("type", "tags");
 		for (let tag of item.tags) {
 			let term = teiDoc.createElementNS(ns.tei, "term");
 			term.setAttribute("type", "tag");
 			term.append(tag.tag);
-			appendIndent(tags, term, 2);
+			tags.append("\n", indent.repeat(2), term);
 		}
-		tags.append(indent);
+		tags.append("\n", indent);
 	}
 	// Show source data for debug
 	if (Zotero.getOption("Debug")) {
@@ -861,9 +878,10 @@ function generateItem(item, teiDoc) {
 		}
 	}
 	// last indent
-	monogr.append(indent);
-	if (analytic) analytic.append(indent);
-	if (series) series.append(indent);
+	bibl.append("\n");
+	monogr.append("\n", indent);
+	if (analytic) analytic.append("\n", indent);
+	if (series) series.append("\n", indent);
 
 	return bibl;
 }
@@ -876,7 +894,6 @@ function generateItem(item, teiDoc) {
  */
 function persName(parent, creator, level = 3) {
 	if (level < 1) level = 1;
-	parent.append("\n");
 	// A first name is alaways a first name
 	appendField(parent, 'forename', creator.firstName, level);
 	// A last name is a family name with a first name
@@ -890,7 +907,7 @@ function persName(parent, creator, level = 3) {
 	// a name, is a name
 	appendField(parent, 'name', creator.name, level);
 	// indent closing tag
-	parent.append(indent.repeat(level - 1));
+	parent.append("\n", indent.repeat(level - 1));
 
 }
 
