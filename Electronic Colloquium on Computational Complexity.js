@@ -76,12 +76,12 @@ async function scrape(doc, url = doc.location.href) {
 		item.publisher = "Electronic Colloquium on Computational Complexity";
 
 		// Keywords and abstract are not in the metadata; scrape from webpage
-		var keywords = ZU.xpath(doc, "id('box')//a[contains(@href,'keyword')]");
+		var keywords = doc.querySelectorAll("#box a[href^='/keyword/']");
 		for (let i = 0; i < keywords.length; i++) {
 			item.tags[i] = keywords[i].textContent;
 		}
 
-		var abstractParagraphs = ZU.xpath(doc, "id('box')/p");
+		var abstractParagraphs = doc.querySelectorAll("#box p");
 		item.abstractNote = "";
 		for (let i = 0; i < abstractParagraphs.length; i++) {
 			item.abstractNote += abstractParagraphs[i].innerText + "\n";
