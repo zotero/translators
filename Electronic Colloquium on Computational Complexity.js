@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-11 17:11:06"
+	"lastUpdated": "2023-08-14 06:03:23"
 }
 
 /*
@@ -166,12 +166,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://eccc.weizmann.ac.il/keyword/13486/",
-		"detectedItemType": "multiple",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "https://eccc.weizmann.ac.il/report/2007/112/",
 		"detectedItemType": "preprint",
 		"items": [
@@ -225,6 +219,12 @@ var testCases = [
 		"url": "https://eccc.weizmann.ac.il/search/?search=asdf",
 		"detectedItemType": false,
 		"items": []
+	},
+	{
+		"type": "web",
+		"url": "https://eccc.weizmann.ac.il/keyword/14114/",
+		"detectedItemType": "multiple",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
