@@ -66,23 +66,23 @@ function getSearchResults(doc, checkOnly) {
 
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'journalArticle') {
-		await scrape(doc);
+		await scrape(url);
 	}
 	else if (detectWeb(doc) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
 		for (let url of Object.keys(items)) {
-			await scrape(await requestDocument(url));
+			await scrape(url);
 		}
 	}
 	else {
 		// The fallback is not expected to be used on E-periodica, but just in case...
-		await scrape(doc);
+		await scrape(url);
 	}
 }
 
-async function scrape(nextDoc) {
-	var nextUrl = nextDoc.location.href;
+async function scrape(url) {
+	var nextUrl = url;
 	//Zotero.debug('trying to process ' + nextUrl);
 	// Do we really need to handle these #-containing URLs?
 	nextUrl = nextUrl.replace("#", "%3A%3A").replace("::", "%3A%3A");
