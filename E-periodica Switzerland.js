@@ -66,9 +66,9 @@ function getSearchResults(doc, checkOnly) {
 
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'journalArticle') {
-		await scrape(doc, url);
+		await scrape(doc);
 	}
-	else if (detectWeb(doc, url) == 'multiple') {
+	else if (detectWeb(doc) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
 		for (let url of Object.keys(items)) {
@@ -77,11 +77,11 @@ async function doWeb(doc, url) {
 	}
 	else {
 		// The fallback is not expected to be used on E-periodica, but just in case...
-		await scrape(doc, url);
+		await scrape(doc);
 	}
 }
 
-async function scrape(nextDoc, url) {
+async function scrape(nextDoc) {
 	var nextUrl = nextDoc.location.href;
 	//Zotero.debug('trying to process ' + nextUrl);
 	// Do we really need to handle these #-containing URLs?
@@ -111,7 +111,7 @@ async function scrape(nextDoc, url) {
 	// Zotero.debug(pdfURL);
 	if (risURL) {
 		let risText = await requestText(risURL);
-		processRIS(risText, url, pdfURL);
+		processRIS(risText, pdfURL);
 	}
 	else {
 		var item = new Zotero.Item("journalArticle");
@@ -154,7 +154,7 @@ async function scrape(nextDoc, url) {
 	}
 }
 
-function processRIS(risText, URL, pdfURL) {
+function processRIS(risText, pdfURL) {
 	// load translator for RIS
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
