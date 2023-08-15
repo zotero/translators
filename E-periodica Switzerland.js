@@ -91,8 +91,8 @@ async function scrape(nextDoc, url) {
 	//Zotero.debug('Final URL ' + nextUrl);
 	var pageinfoUrl = nextUrl.replace("view", "ajax/pageinfo");
 	//Zotero.debug('JSON URL ' + pageinfoUrl);
-	let text = await requestText(pageinfoUrl);
-	var epJSON = JSON.parse(text);
+	let epText = await requestText(pageinfoUrl);
+	var epJSON = JSON.parse(epText);
 	//Zotero.debug(epJSON);
 	let risURL;
 	if (epJSON.articles.length == 0) {
@@ -111,8 +111,8 @@ async function scrape(nextDoc, url) {
 	}
 	// Zotero.debug(pdfURL);
 	if (risURL) {
-		let text = await requestText(risURL);
-		processRIS(text, url, pdfURL);
+		let risText = await requestText(risURL);
+		processRIS(risText, url, pdfURL);
 	}
 	else {
 		var item = new Zotero.Item("journalArticle");
@@ -155,13 +155,13 @@ async function scrape(nextDoc, url) {
 	}
 }
 
-function processRIS(text, URL, pdfURL) {
+function processRIS(risText, URL, pdfURL) {
 	// load translator for RIS
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 	// Z.debug(text);
 	
-	translator.setString(text);
+	translator.setString(risText);
 	translator.setHandler("itemDone", function (obj, item) {
 		// Don't save HTML snapshot from 'UR' tag
 		item.attachments = [];
