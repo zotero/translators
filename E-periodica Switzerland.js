@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-23 10:37:03"
+	"lastUpdated": "2023-08-15 20:15:50"
 }
 
 /*
@@ -39,7 +39,7 @@ function detectWeb(doc, url) {
 	if (url.includes('/digbib/view')) {
 		return "journalArticle";
 	}
-	else if (url.includes('/digbib/doasearch') && getSearchResults(doc, true)) {
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	else {
@@ -49,17 +49,20 @@ function detectWeb(doc, url) {
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
+	Zotero.debug(items);
 	var found = false;
 	var rows = doc.querySelectorAll('h2.ep-result__title > a');
 	for (let row of rows) {
-		// Zotero.debug(row.innerHTML);
+		//Zotero.debug(row.textContent);
 		let href = row.href;
-		// Zotero.debug(href);
+		//Zotero.debug(href);
 		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
+		// sth goes wrong when we return from here
 		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
+		Zotero.debug(items[href]);
 	}
 	return found ? items : false;
 }
@@ -68,11 +71,11 @@ async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'journalArticle') {
 		await scrape(url);
 	}
-	else if (detectWeb(doc) == 'multiple') {
+	else if (detectWeb(doc, url) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
-		for (let url of Object.keys(items)) {
-			await scrape(url);
+		for (let resultUrl of Object.keys(items)) {
+			await scrape(resultUrl);
 		}
 	}
 	else {
