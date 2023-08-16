@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-09-22 15:58:08"
+	"lastUpdated": "2023-08-16 14:56:23"
 }
 
 /*
@@ -54,8 +54,8 @@ function detectWeb(doc, url) {
 	}
 	
 	// If this is a view page, find the link to the citation
-	var favLink = getFavLink(doc);
-	if ((favLink && getJID(favLink.href)) || getJID(url)) {
+	var permaLink = getCanonicalLink(doc);
+	if ((permaLink && getJID(permaLink)) || getJID(url)) {
 		if (text(doc, '.book_info_button')) {
 			return "book";
 		}
@@ -96,10 +96,8 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function getFavLink(doc) {
-	var a = doc.getElementById('favorites');
-	if (a && a.href) return a;
-	return false;
+function getCanonicalLink(doc) {
+	return attr(doc, "head > link[rel='canonical']", "href");
 }
 
 function getJID(url) {
@@ -133,14 +131,14 @@ function doWeb(doc, url) {
 	}
 	else {
 		// If this is a view page, find the link to the citation
-		var favLink = getFavLink(doc);
+		var permaLink = getCanonicalLink(doc);
 		var jid;
-		if (favLink && (jid = getJID(favLink.href))) {
-			Zotero.debug("JID found 1 " + jid);
+		if (permaLink && (jid = getJID(permaLink))) {
+			Zotero.debug("JID found 1 (canonical url) " + jid);
 			scrape([jid]);
 		}
 		else if ((jid = getJID(url))) {
-			Zotero.debug("JID found 2 " + jid);
+			Zotero.debug("JID found 2 (page url) " + jid);
 			scrape([jid]);
 		}
 	}
@@ -805,6 +803,41 @@ var testCases = [
 				"shortTitle": "Systems, Not Men",
 				"url": "https://www.jstor.org/stable/29533951",
 				"volume": "41",
+				"attachments": [
+					{
+						"title": "JSTOR Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.jstor.org/stable/bf3f923a-35f7-30d7-9678-8b673809fbce?seq=19",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Agoras and Fora: Developments in the Central Public Space of the Cities of Greece During the Roman Period",
+				"creators": [
+					{
+						"lastName": "Evangelidis",
+						"firstName": "Vasilis",
+						"creatorType": "author"
+					}
+				],
+				"date": "2014",
+				"ISSN": "0068-2454",
+				"abstractNote": "Despite the old image of degradation and fally modern research has shown that Roman Greece underwent a senes of changes which are best reflected in the central public space of the ancient city, the agora. A variety of different factors, such as the dynamic presence of the local elite, the exploitation of the past, the imperial presence and most importantly the will to maximise functionality and monumentality, contributed to the formation of the spatial and architectural framework of the agora. In many cities the development of the agora is best described as the juxtaposition of old and new, which was achieved by the preservation and enhancement of the traditional landscape as well as by its enrichment with new buildings, many of which, like the Roman-style baths, improved the provision of services. In this context the term Romanisation describes the effort of each city to adapt to the requirements of the urban framework of the Imperial period, a framework characterised by monumentality and functionality. Roman colonies were the newest additions in the city pattern of Greece. In contrast to the Roman colonies in the west, many of the Roman foundations in Greece were founded over pre-existing cities with long histories. Therefore, they raise a series of questions concerning not only their architectural development but also the process of restructuring the existing landscape in order to create an urban framework that reflects their romanitas. Πέρα από την καθιερωμένη εικόνα της παρακμής και πτώσης, η σύγχρονη έρευνα έχει καταδείξει ότι η ρωμαϊκή Ελλάδα γνώρισε μία σειρά αλλαγών που αντανακλώνται με τον πιο χαρακτηριστικό τρόπο στον κεντρικό δημόσιο χώρο της αρχαίας ελληνικής πόλης, την Αγορά. Διαφορετικοί παράγοντες όπως η δυναμική παρουσία της τοπικής αριστοκρατίας, η εκμετάλλευση του παρελθόντος, η αυτοκρατορική παρουσία ή ακόμα και η διάθεση να μεγιστοποιηθεί η πρακτική χρήση του χώρου> συντέλεσαν στη διαμόρφωση του χωρο-οργανωτικού και αρχιτεκτονικού πλαισίου της Αγοράς. Σε πολλές πόλεις η εξέλιξη της Αγοράς χαρακτηρίζεται από την αντίθεση παλαιού και νέου, από τη διατήρηση και ενίσχυση του παραδοσιακού χαρακτήρα του χώρου αλλά και τον εμπλουτισμό του με νέα κτίρια πολλά από τα οποία, όττως τα ρωμαϊκού τύπου λουτρά ενισχυσαν την παροχή υπηρεσιών. Σε αυτό το πλαίσιο, ο όρος εκρωμαϊσμός χρησιμοποιείται για να περιγράψει την προσπάθεια κάθε πόλης να προσαρμοστεί στις νέες απαιτήσεις της περιόδου: μνημειακότητα, προώθηση της αυτοκρατορικής ιδεολογίας, νοσταλγία, προσφορά υπηρεσιών κ.α. Οι ρωμαϊκές αποικίες αποτέλεσαν τη νεότερη προσθήκη στο οικιστικό πλαίσιο του ελλαδικού χώρου. Σε αντίθεση με τις αντίστοιχες αποικίες στις δυτικές επαρχίες, οι ρωμαϊκές αποικίες της Ελλάδας ιδρύθηκαν πάνω σε προϋπάρχουσες πόλεις με μακρά ιστορία. Γι3αυτό και εγείρουν μία σειρά ερωτημάτων σχετικά όχι μόνο με την αρχιτεκτονική τους εξέλιξη αλλά και τη διαδικασία διαμόρφωσης του υπάρχοντος αστικού τοπίου έτσι ώστε να εκφράζει τον ξεκάθαρα ρωμαϊκό χαρακτήρα τους.",
+				"libraryCatalog": "JSTOR",
+				"pages": "335-356",
+				"publicationTitle": "The Annual of the British School at Athens",
+				"shortTitle": "Agoras and Fora",
+				"url": "https://www.jstor.org/stable/44082098",
+				"volume": "109",
 				"attachments": [
 					{
 						"title": "JSTOR Full Text PDF",
