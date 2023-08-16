@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-16 01:46:35"
+	"lastUpdated": "2023-08-16 02:30:26"
 }
 
 /*
@@ -144,6 +144,38 @@ async function scrape(doc, url = doc.location.href) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.bostonreview.net/forum_response/rethinking-family-life-robin-west/",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "Rethinking Family Life",
+				"creators": [
+					{
+						"firstName": "Robin",
+						"lastName": "West",
+						"creatorType": "author"
+					}
+				],
+				"date": "2012-11-09T21:13:19+00:00",
+				"abstractNote": "Rethinking Family Life James Heckman provides an economic argument for a claim that is often thought to be supported at most by moral considerations:",
+				"language": "en-US",
+				"libraryCatalog": "Boston Review",
+				"publicationTitle": "Boston Review",
+				"url": "https://www.bostonreview.net/forum_response/rethinking-family-life-robin-west/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
 	{
 		"type": "web",
 		"url": "https://www.bostonreview.net/forum/can-global-brands-create-just-supply-chains-richard-locke",
