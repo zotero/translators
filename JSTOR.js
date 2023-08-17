@@ -120,49 +120,39 @@ function getJID(url) {
 // Extract the object describing the item embedded in the Google Analytics
 // script. NOTE: This is a simplified solution; in general JavaScript cannot be
 // parsed by RegEx. Here we're relying on the assumption that the object being
-// etracted is a simple string -> string record.
+// etracted is a simple string-to-string record.
 function extractGAData(script) {
 	let m = script.match(/gaData\.content\s*=\s*({.+?});/s);
 	return m && JSON.parse(m[1]);
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
-		Zotero.selectItems(getSearchResults(doc), function (selectedItems) {
-			if (selectedItems) {
-				var jids = [];
-				for (var j in selectedItems) {
-					jids.push(j);
-				}
-				scrape(jids);
-			}
-		});
+		let items = await Zotero.selectItems(getSearchResults(doc));
+		if (!items) return;
+		for (let jid of Object.keys(items)) {
+			await scrape(jid);
+		}
 	}
 	else {
-		// If this is a view page, find the link to the citation
+		// If this is a view page, find the permalink
 		var permaLink = getCanonicalLink(doc);
 		var jid;
 		if (permaLink && (jid = getJID(permaLink))) {
 			Zotero.debug("JID found 1 (canonical url) " + jid);
-			scrape([jid]);
+			await scrape(jid);
 		}
 		else if ((jid = getJID(url))) {
 			Zotero.debug("JID found 2 (page url) " + jid);
-			scrape([jid]);
+			await scrape(jid);
 		}
 	}
 }
 
-function scrape(jids) {
+async function scrape(jid) {
 	var risURL = "/citation/ris/";
-	(function next() {
-		if (!jids.length) return;
-		var jid = jids.shift();
-		ZU.doGet(risURL + jid, function (text) {
-			processRIS(text, jid);
-			next();
-		});
-	})();
+	let risText = await requestText(risURL + jid);
+	return processRIS(risText);
 }
 
 function convertCharRefs(string) {
@@ -173,7 +163,7 @@ function convertCharRefs(string) {
 		});
 }
 
-function processRIS(text, jid) {
+async function processRIS(text, jid) {
 	// load translator for RIS
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -276,9 +266,7 @@ function processRIS(text, jid) {
 		}
 	});
 		
-	translator.getTranslatorObject(function (trans) {
-		trans.doImport();
-	});
+	return translator.translate();
 }
 
 function finalizeItem(item) {
