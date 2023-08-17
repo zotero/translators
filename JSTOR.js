@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-17 06:48:01"
+	"lastUpdated": "2023-08-17 07:20:30"
 }
 
 /*
@@ -53,19 +53,19 @@ function detectWeb(doc, url) {
 		}
 	}
 	
-	// If this is a view page, find the link to the citation
-	var permaLink = getCanonicalLink(doc);
-	if ((permaLink && getJID(permaLink)) || getJID(url)) {
-		if (text(doc, '.book_info_button')) {
-			return "book";
-		}
-		else if (text(doc, 'script[data-analytics-provider]').includes('"chapter view"')) {
-			// might not stick around, but this is really just for the toolbar icon
-			// (and tests)
-			return "bookSection";
-		}
-		else {
-			return "journalArticle";
+	// If this is a view page, identify its type (for connector icon)
+	let gaScript = text(doc, "script[data-analytics-provider='ga']");
+	if (gaScript) {
+		let gaData = extractGAData(gaScript);
+		switch (gaData && gaData.contentType) {
+			case "book":
+				return "book";
+			case "chapter":
+				return "bookSection";
+			default:
+				return (gaData && gaData.itemType === "mp_research_report_part")
+					? "report"
+					: "journalArticle";
 		}
 	}
 	return false;
@@ -115,6 +115,15 @@ function getJID(url) {
 		return jid;
 	}
 	return false;
+}
+
+// Extract the object describing the item embedded in the Google Analytics
+// script. NOTE: This is a simplified solution; in general JavaScript cannot be
+// parsed by RegEx. Here we're relying on the assumption that the object being
+// etracted is a simple string -> string record.
+function extractGAData(script) {
+	let m = script.match(/gaData\.content\s*=\s*({.+?});/s);
+	return m && JSON.parse(m[1]);
 }
 
 function doWeb(doc, url) {
@@ -839,6 +848,38 @@ var testCases = [
 				"shortTitle": "Agoras and Fora",
 				"url": "https://www.jstor.org/stable/44082098",
 				"volume": "109",
+				"attachments": [
+					{
+						"title": "JSTOR Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.jstor.org/stable/resrep32862.7",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Context and Conceptual Frameworks",
+				"creators": [
+					{
+						"lastName": "Latif",
+						"firstName": "Sara Abdel",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021",
+				"institution": "Swisspeace",
+				"libraryCatalog": "JSTOR",
+				"pages": "14-19",
+				"seriesTitle": "The Families of the Missing in Lebanon",
+				"url": "https://www.jstor.org/stable/resrep32862.7",
 				"attachments": [
 					{
 						"title": "JSTOR Full Text PDF",
