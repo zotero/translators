@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-21 04:55:10"
+	"lastUpdated": "2023-08-17 20:03:38"
 }
 
 /*
@@ -86,17 +86,8 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	if (url.includes('bibliographies.brillonline.com/entries/')) {
-		scrapeBibliography(doc, url);
+		scrapeBibliography(doc);
 		return;
-	}
-	
-	if (doc.querySelector('body > meta')) {
-		// Brill's HTML is structured incorrectly, and it causes some parsers
-		// to interpret the <meta> tags as being in the body, which breaks EM.
-		// We'll fix it here.
-		for (let meta of doc.querySelectorAll('body > meta')) {
-			doc.head.appendChild(meta);
-		}
 	}
 	
 	var translator = Zotero.loadTranslator('web');
@@ -140,12 +131,17 @@ function scrape(doc, url) {
 		if (url.includes('referenceworks.brillonline.com/entries/')) {
 			trans.itemType = 'encyclopediaArticle';
 		}
-		
+
+		// Brill's HTML is structured incorrectly due to a bug in the
+		// Pubfactory CMS, and it causes some parsers to put the <meta>
+		// tags in the body. We'll fix it by telling EM to work around it.
+		trans.searchForMetaTagsInBody = true;
+
 		trans.doWeb(doc, url);
 	});
 }
 
-function scrapeBibliography(doc, url) {
+function scrapeBibliography(doc) {
 	let params = new URLSearchParams({
 		entryId: attr(doc, 'input[name="entryId"]', 'value'),
 		dest: attr(doc, 'input[name="dest"]', 'value')

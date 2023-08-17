@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-11 09:54:50"
+	"lastUpdated": "2023-08-16 15:18:29"
 }
 
 /*
@@ -179,7 +179,13 @@ function getContentText(doc, name, strict, all) {
 }
 
 function getContent(doc, name, strict) {
-	var xpath = '/x:html/x:head/x:meta['
+	var xpath = '/x:html/'
+		+ (
+			exports.searchForMetaTagsInBody
+				? '*[local-name() = "head" or local-name() = "body"]'
+				: 'x:head' // default
+		)
+		+ '/x:meta['
 		+ (strict ? '@name' : 'substring(@name, string-length(@name)-' + (name.length - 1) + ')')
 		+ '="' + name + '"]/';
 	return ZU.xpath(doc, xpath + '@content | ' + xpath + '@contents', namespaces);
@@ -234,10 +240,14 @@ function detectWeb(doc, url) {
 function init(doc, url, callback, forceLoadRDF) {
 	getPrefixes(doc);
 
-	var metaTags = doc.head.getElementsByTagName("meta");
+	let metaSelector
+		= exports.searchForMetaTagsInBody
+			? "head > meta, body > meta"
+			: "head > meta"; // default
+	var metaTags = doc.querySelectorAll(metaSelector);
 	Z.debug("Embedded Metadata: found " + metaTags.length + " meta tags.");
 	if (forceLoadRDF /* check if this is called from doWeb */ && !metaTags.length) {
-		if (doc.head) {
+		if (!exports.searchForMetaTagsInBody && doc.head) {
 			Z.debug(doc.head.innerHTML
 				.replace(/<style[^<]+(?:<\/style>|\/>)/ig, '')
 				.replace(/<link[^>]+>/ig, '')
@@ -245,7 +255,7 @@ function init(doc, url, callback, forceLoadRDF) {
 			);
 		}
 		else {
-			Z.debug("Embedded Metadata: No head tag");
+			Z.debug("Embedded Metadata: No <meta> tag found in body or head tag");
 		}
 	}
 
@@ -1001,6 +1011,9 @@ var exports = {
 	detectWeb: detectWeb,
 	addCustomFields: addCustomFields,
 	itemType: false,
+	// workaround for meta tags in body caused by parsing invalid HTML; only
+	// use as a last resort
+	searchForMetaTagsInBody: false,
 	// activate/deactivate splitting tags in final data cleanup when they contain commas or semicolons
 	splitTags: true,
 	fixSchemaURI: setPrefixRemap
