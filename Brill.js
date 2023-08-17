@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-20 05:19:04"
+	"lastUpdated": "2023-08-17 20:03:38"
 }
 
 /*
@@ -132,13 +132,10 @@ function scrape(doc, url) {
 			trans.itemType = 'encyclopediaArticle';
 		}
 
-		if (doc.querySelector('body > meta')) {
-			// Brill's HTML is structured incorrectly due to a bug in the
-			// Pubfactory CMS, and it causes some parsers to put the <meta>
-			// tags in the body. We'll fix it by telling EM to work around it.
-			Z.debug("Brill: working around malformed HTML by search for meta in body");
-			trans.searchForMetaTagsInBody = true;
-		}
+		// Brill's HTML is structured incorrectly due to a bug in the
+		// Pubfactory CMS, and it causes some parsers to put the <meta>
+		// tags in the body. We'll fix it by telling EM to work around it.
+		trans.searchForMetaTagsInBody = true;
 
 		trans.doWeb(doc, url);
 	});
