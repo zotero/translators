@@ -488,6 +488,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://plus.cobiss.net/cobiss/si/sl/bib/139084803",
+		"detectedItemType": "book",
 		"items": [
 			{
 				"itemType": "report",
@@ -543,6 +544,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://plus.cobiss.net/cobiss/si/sl/bib/84534787",
+		"detectedItemType": "book",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -644,6 +646,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://plus.cobiss.net/cobiss/si/sl/bib/5815649",
+		"detectedItemType": "book",
 		"items": [
 			{
 				"itemType": "thesis",
@@ -741,6 +744,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://plus.cobiss.net/cobiss/si/sl/bib/82789891",
+		"detectedItemType": "book",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -1304,8 +1308,9 @@ var testCases = [
 					}
 				],
 				"notes": [
-					"Nasl. na hrbtu: Fizika 2012-2017",
-					"Avtorji navedeni v kolofonu"
+					"Hrbtni nasl.: Fizika 2012-2017",
+					"Avtorji navedeni v kolofonu",
+					"300 izv."
 				],
 				"seeAlso": []
 			}
@@ -1346,16 +1351,28 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "izobraževanje"
+						"tag": "Izobrževanje"
 					},
 					{
-						"tag": "mentorstvo"
+						"tag": "Mentorstvo"
 					},
 					{
-						"tag": "zdravstvena nega"
+						"tag": "Mentorstvo"
 					},
 					{
-						"tag": "znanje"
+						"tag": "Praktična znanja"
+					},
+					{
+						"tag": "Vzgoja in izobraževanje"
+					},
+					{
+						"tag": "Zborniki"
+					},
+					{
+						"tag": "Zdravstvena nega"
+					},
+					{
+						"tag": "Zdravstvena nega"
 					}
 				],
 				"notes": [
@@ -1468,7 +1485,7 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"date": "0000 cop",
+				"date": "2021",
 				"label": "Nika",
 				"libraryCatalog": "COBISS",
 				"place": "Ljubljana",
@@ -1561,6 +1578,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://plus.cobiss.net/cobiss/bh/sr/bib/47388678",
+		"detectedItemType": "book",
 		"items": [
 			{
 				"itemType": "thesis",
@@ -1626,6 +1644,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://plus.cobiss.net/cobiss/rs/sr/bib/57790729",
+		"detectedItemType": "book",
 		"items": [
 			{
 				"itemType": "statute",
@@ -1709,6 +1728,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://plus.cobiss.net/cobiss/ks/sq/bib/120263427",
+		"detectedItemType": "book",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -1773,6 +1793,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://plus.cobiss.net/cobiss/mk/mk/bib/57036037",
+		"detectedItemType": "book",
 		"items": [
 			{
 				"itemType": "audioRecording",
@@ -1809,6 +1830,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://plus.cobiss.net/cobiss/cg/cnr_cyrl/bib/20926212",
+		"detectedItemType": "book",
 		"items": [
 			{
 				"itemType": "thesis",
@@ -1884,7 +1906,7 @@ var testCases = [
 				"date": "2022",
 				"ISBN": "9788664630160",
 				"libraryCatalog": "COBISS",
-				"numPages": "283",
+				"numPages": "281",
 				"place": "Beograd",
 				"publisher": "IPC Media",
 				"series": "Edicija (B)io",
@@ -1895,7 +1917,7 @@ var testCases = [
 						"tag": "Аутобиографија"
 					},
 					{
-						"tag": "Принс, 1968-2016"
+						"tag": "Принс, 1958-2016"
 					}
 				],
 				"notes": [
@@ -1906,13 +1928,13 @@ var testCases = [
 						"note": "<p>Autorove slike</p>"
 					},
 					{
-						"note": "<p>Tiraž 1.200</p>"
+						"note": "<p>Tiraž 1.000</p>"
 					},
 					{
 						"note": "<p>Str. 4-49: Predgovor / Den Pajpenbring</p>"
 					},
 					{
-						"note": "<p>O autorima: str. 283.</p>"
+						"note": "<p>O autorima: str. [282].</p>"
 					}
 				],
 				"seeAlso": []
