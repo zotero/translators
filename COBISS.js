@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-20 08:45:06"
+	"lastUpdated": "2023-08-17 18:57:34"
 }
 
 /*
@@ -248,7 +248,9 @@ async function scrape(doc, url = doc.location.href) {
 	// case for catalog items with RIS (95%+ of items)
 	if (risText) {
 		// RIS always has an extraneous OK## at the beginning, remove it
-		const fixedRisText = risText.replace(/^OK##/, '');
+		let fixedRisText = risText.replace(/^OK##/, '');
+		// PY tag sometimes has 'cop.' at the end - remove it or it makes the date parser return '0000' for some reason
+		fixedRisText = fixedRisText.replace(/^(PY\s*-\s*.+)cop\.$/m, '$1');
 		const translator = Zotero.loadTranslator('import');
 		translator.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7'); // RIS
 		translator.setString(fixedRisText);
