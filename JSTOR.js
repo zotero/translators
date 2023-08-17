@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-16 14:56:23"
+	"lastUpdated": "2023-08-17 06:48:01"
 }
 
 /*
@@ -82,7 +82,7 @@ function getSearchResults(doc, checkOnly) {
 	if (!resultsBlock.length) return false;
 	var items = {}, found = false;
 	for (let row of resultsBlock) {
-		let title = text(row, '.title, .small-heading, toc-view-pharos-link');
+		let title = text(row, '.title, .small-heading, [data-pharos-component="PharosLink"]');
 		let jid = getJID(attr(row, 'a', 'href'));
 		if (!jid) {
 			jid = getJID(attr(row, '[href]', 'href'));
@@ -600,7 +600,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.jstor.org/stable/i250748",
+		"url": "https://www.jstor.org/stable/i250748",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
