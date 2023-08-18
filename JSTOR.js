@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-18 02:04:55"
+	"lastUpdated": "2023-08-18 02:12:57"
 }
 
 /*
@@ -120,10 +120,10 @@ function getJID(url) {
 // Extract the object describing the item embedded in the Google Analytics
 // script. NOTE: This is a simplified solution; in general JavaScript cannot be
 // parsed by RegEx. Here we're relying on the assumption that the object being
-// extracted is a simple string-to-string record and no closing brace character
-// is in the string keys or values.
+// extracted is a simple string-to-string record and no "};" sequence is in the
+// string keys or values.
 function extractGAData(script) {
-	let m = script.match(/gaData\.content\s*=\s*({.+?});/s);
+	let m = script.match(/gaData\.content\s*=\s*({.+?})\s*;/s);
 	return m && JSON.parse(m[1]);
 }
 
