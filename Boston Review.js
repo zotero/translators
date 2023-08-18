@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-16 02:30:26"
+	"lastUpdated": "2023-08-18 06:17:49"
 }
 
 /*
@@ -111,7 +111,7 @@ async function scrape(doc, url = doc.location.href) {
 			date = text(doc, ".elementor-post-info [itemprop='dateModified']");
 		}
 		if (date) {
-			item.date = date;
+			item.date = ZU.strToISO(date);
 		}
 
 		// Remove suffix " - Boston Review" in title
@@ -158,7 +158,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2012-11-09T21:13:19+00:00",
+				"date": "2012-11-09",
 				"abstractNote": "Rethinking Family Life James Heckman provides an economic argument for a claim that is often thought to be supported at most by moral considerations:",
 				"language": "en-US",
 				"libraryCatalog": "Boston Review",
@@ -190,7 +190,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2013-05-21T10:22:49+00:00",
+				"date": "2013-05-21",
 				"abstractNote": "When Jia Jingchuan, a 27-year-old electronics worker in Suzhou, China, sought compensation for the chemical poisoning he suffered at work, he appealed",
 				"language": "en-US",
 				"libraryCatalog": "Boston Review",
@@ -232,7 +232,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2013-06-07T12:00:00+00:00",
+				"date": "2013-06-07",
 				"abstractNote": "Last November when I first wrote about student loans for Boston Review, the Department of Education estimated it would be pulling in around $25 billion in",
 				"language": "en-US",
 				"libraryCatalog": "Boston Review",
@@ -292,7 +292,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2020-08-04T12:00:00+00:00",
+				"date": "2020-08-04",
 				"abstractNote": "Astra Taylor talks with Rutgers faculty union president Todd Wolfson about organizing academic communities in the age of COVID-19.",
 				"language": "en-US",
 				"libraryCatalog": "Boston Review",
