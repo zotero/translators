@@ -67,10 +67,7 @@ function getSearchResults(doc, checkOnly) {
 }
 
 async function doWeb(doc, url) {
-	if (detectWeb(doc, url) == 'journalArticle') {
-		await scrape(url);
-	}
-	else if (detectWeb(doc, url) == 'multiple') {
+	if (detectWeb(doc, url) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
 		for (let resultUrl of Object.keys(items)) {
