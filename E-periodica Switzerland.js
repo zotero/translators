@@ -75,7 +75,7 @@ async function doWeb(doc, url) {
 		}
 	}
 	else {
-		// The fallback is not expected to be used on E-periodica, but just in case...
+		// The journalArticle type will be applicable in general unless we find multiple refs.
 		await scrape(url);
 	}
 }
