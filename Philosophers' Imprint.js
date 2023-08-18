@@ -50,7 +50,7 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	var rowsRoot = doc.querySelector("#searchresults, #browselist, #picklistitems");
 	if (!rowsRoot) return false;
-	var rows = ZU.xpath(rowsRoot, '//td[2]/a');
+	var rows = rowsRoot.querySelectorAll('td:nth-child(2) > a');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
