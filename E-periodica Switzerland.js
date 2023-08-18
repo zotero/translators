@@ -49,7 +49,7 @@ function detectWeb(doc, url) {
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
-	Zotero.debug(items);
+	// Zotero.debug(items);
 	var found = false;
 	var rows = doc.querySelectorAll('h2.ep-result__title > a');
 	for (let row of rows) {
@@ -61,7 +61,7 @@ function getSearchResults(doc, checkOnly) {
 		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
-		Zotero.debug(items[href]);
+		// Zotero.debug(items[href]);
 	}
 	return found ? items : false;
 }
@@ -84,14 +84,20 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(url) {
-	var nextUrl = url;
-	//Zotero.debug('trying to process ' + nextUrl);
-	// Do we really need to handle these #-containing URLs?
-	nextUrl = nextUrl.replace("#", "%3A%3A").replace("::", "%3A%3A");
-	nextUrl = nextUrl.split("%3A%3A");
-	nextUrl = nextUrl[0] + "%3A%3A" + nextUrl.slice(-1);
-	//Zotero.debug('Final URL ' + nextUrl);
-	var pageinfoUrl = nextUrl.replace("view", "ajax/pageinfo");
+	// In general the article ID is given the pid parameter in the URL
+	// If the URL ends with a hash/fragment identifier, 
+	//  the final digits of the pid parameter (after a double colon) must be replaced with the hash ID
+	//  e.g. alp-001:1907:2::332#375 => alp-001:1907:2::375
+	let articleURL = new URL(url);
+	let articleID = articleURL.searchParams.get("pid");
+	let articleViewFragment = articleURL.hash.replace(/^#/, ""); // trim leading #
+	if (/\d+/.test(articleViewFragment)) {
+		// Normalize article ID by replacing the last segment with the real
+		// page id if any
+		articleID = articleID.replace(/::\d+$/, "::" + articleViewFragment);
+	}
+	let pageinfoUrl = "https://www.e-periodica.ch/digbib/ajax/pageinfo?pid=" + encodeURI(articleID);
+	
 	//Zotero.debug('JSON URL ' + pageinfoUrl);
 	let epJSON = await requestJSON(pageinfoUrl);
 	//Zotero.debug(epJSON);
