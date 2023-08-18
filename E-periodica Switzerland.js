@@ -85,7 +85,7 @@ async function doWeb(doc, url) {
 
 async function scrape(url) {
 	// In general the article ID is given the pid parameter in the URL
-	// If the URL ends with a hash/fragment identifier, 
+	// If the URL ends with a hash/fragment identifier,
 	//  the final digits of the pid parameter (after a double colon) must be replaced with the hash ID
 	//  e.g. alp-001:1907:2::332#375 => alp-001:1907:2::375
 	let articleURL = new URL(url);
