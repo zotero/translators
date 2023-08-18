@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-20 02:57:32"
+	"lastUpdated": "2023-08-18 07:02:25"
 }
 
 /*
@@ -92,10 +92,10 @@ const BOSWORTH_TOLLER_INFO = {
 	originalPublisher: "Oxford University Press",
 	originalPlace: "London",
 	creators: [
-		ZU.cleanAuthor("Joseph Bosworth", "author"),
-		ZU.cleanAuthor("Thomas Northcote Toller", "editor"),
-		ZU.cleanAuthor("Christ Sean", "editor"),
-		ZU.cleanAuthor("Ondřej Tichy", "editor"),
+		{ firstName: "Joseph", lastName: "Bosworth", creatorType: "author" },
+		{ firstName: "Thomas Northcote", lastName: "Toller", creatorType: "editor" },
+		{ firstName: "Christ", lastName: "Sean", creatorType: "editor" },
+		{ firstName: "Ondřej", lastName: "Tichy", creatorType: "editor" },
 	],
 };
 
@@ -104,7 +104,6 @@ function scrape(doc, url = doc.location.href) {
 
 	// "Constant" fields
 	Object.assign(item, BOSWORTH_TOLLER_INFO);
-	item.rights = ZU.trimInternal(text(doc, ".btd--copyright-citation p")); // first paragraph
 
 	// Page-specific data
 	item.url = url;
@@ -113,13 +112,7 @@ function scrape(doc, url = doc.location.href) {
 	item.title = normalizeLemma(doc) || "[Unknown entry]";
 
 	// Original publication and page number in it, if any
-	let tmp = getPage(doc); // may be null, which is OK for assign
-	Object.assign(item, tmp);
-
-	// Notes (summary of word definitions)
-	if ((tmp = getNotes(doc, item.title))) { // NOTE: assignment
-		item.notes = tmp;
-	}
+	Object.assign(item, getPage(doc));
 
 	// Snapshot
 	item.attachments = [{
@@ -193,134 +186,11 @@ function normalizeLemma(doc) {
 	return null;
 }
 
-// Return an array of a single Note object representing the word definitions,
-// word-category info, and the grammar info, or false if none of such info is
-// found.
-function getNotes(doc, title) {
-	// We do so by creating a detached DOM subtree at "root" using the text
-	// info gleaned from the page. We will only use plain-text info scraped
-	// from the doc to construct our own subtree; no node from the doc, apart
-	// from its textContent, is directly used. This is done so as to return a
-	// minimal HTML-fragment usable as the note, with no attributes etc.
-	// Once done, the subtree's innerHTML (which contains only text nodes and
-	// elements we created on our own, with sanitized input) is used as the
-	// source of the Note.
-	let root = doc.createElement("div");
-	let done = false; // truthiness of "done" is used as guard for return value
-
-	// Make an element with enclosed text content (must not be a void element)
-	function newElement(tag, content) {
-		let element = doc.createElement(tag);
-		if (content) {
-			element.textContent = content; // this also sanitizes the content
-		}
-		return element;
-	}
-
-	// Add a section under the given heading level and text, and if "textBelow"
-	// is truthy, append it (i.e. it becomes the content below the heading).
-	function addSection(headingLevel, headingText, textBelow) {
-		root.append(newElement(headingLevel, headingText));
-		if (textBelow) {
-			root.append(textBelow);
-		}
-		return root;
-	}
-
-	// Make an <ul> element, with given array of strings as the text content
-	// in its <li> child elements.
-	function itemize(stringArray) {
-		let list = doc.createElement("ul");
-		list.append(...stringArray.map(str => newElement("li", str)));
-		return list;
-	}
-
-	addSection("h1", "Summary", title);
-
-	// Word category, or part of speech (brief summary)
-	// get an array of cleaned text into "tmp"
-	let tmp = cleanupWordCategories(doc.querySelector(".btd--entry-word-categories"));
-	if ((done = (tmp && tmp.length))) { // NOTE: assignment
-		addSection("h2", "Word category", itemize(tmp));
-	}
-
-	// Principal parts for inflection, etc. "tmp" is a string.
-	tmp = ZU.trimInternal(text(doc, ".btd--entry-grammar").trim());
-	if ((done = tmp)) { // NOTE: assignment
-		addSection("h2", "Grammar", tmp);
-	}
-
-	// XXX: see complex definitions: https://bosworthtoller.com/27305
-	// This doesn't work reliably because for complex definitions the data may
-	// not have been correctly tagged.
-	// Here we are only collecting "definitions" (brief definition in modern
-	// English). Each entry is properly understood as a "sense" with context
-	// around the definitions under it, and a sense can embed more senses
-	// recursively.
-	// NOTE: Some entries have extra "blurb" for addenda ("Add:") before all
-	// senses that also uses the ".btd--entry-definition" class, but not for
-	// definitions.
-	let definitionNodes = doc.querySelectorAll(".btd--entry-definition");
-	let definitions
-		= Array.prototype.map.call(
-			definitionNodes,
-			node => ZU.trimInternal(node.innerText.trim())
-		).filter(str => str && !str.startsWith("Add: "));
-
-	const maxDefinitions = 5;
-	if ((done = definitions.length)) { // NOTE: assignment
-		if (definitions.length > maxDefinitions) {
-			let numTruncated = definitions.length - maxDefinitions;
-			definitions[maxDefinitions] = `[${numTruncated} more item${numTruncated > 1 ? "s" : ""} omitted]`;
-		}
-		addSection("h2", "Definition",
-			itemize(definitions.slice(0, maxDefinitions + 1))
-		);
-	}
-
-	return !!done && [{ note: root.innerHTML }];
-}
-
-// Clean-up the text of the word categories which makes heavy use of CSS
-// pseudoelements. Without cleaning, the text in the brackets may run into each
-// other without word-break. Given an input element, returns an array of
-// cleaned strings for each <li> element under it.
-function cleanupWordCategories(listElement) {
-	if (!listElement) {
-		return null;
-	}
-	let listItems = listElement.querySelectorAll(":scope li");
-	return Array.prototype.map.call(listItems, cleanListItem)
-		.filter(Boolean); // Don't keep empty output.
-}
-
-// Clean up the text of a single <li> element in the word-category section.
-// This is done by duplicating the node, selecting a nodelist of
-// ".btd--entry-word-category-detail" elements, fix all but the last one of
-// them (which we assume are sibling elements, as it happens), and return the
-// text of the fixed subtree. This is not the most efficient, but probably a
-// lot easier to read than a more sophisticated solution.
-function cleanListItem(element) {
-	let dup = element.cloneNode(true/* deep */);
-	let fixables = dup.querySelectorAll(":scope .btd--entry-word-category-detail");
-
-	const numFixables = fixables.length;
-	if (numFixables > 1) { // If no more than one "fixable", no need to fix anything.
-		// Fix all but the last "fixables"
-		for (let node of Array.prototype.slice.call(fixables, 0, numFixables - 1)) {
-			// This amounts to recovering the ::after pseudoelement manually
-			node.textContent = node.textContent.trim() + ", ";
-		}
-	}
-	return ZU.trimInternal(dup.textContent);
-}
-
 // Utility functions
 
-// Remove the diacritics on the letters, by decomposing and removing the
-// combining diacritic characters in the \u0300-\u036F range.
+// Remove the acute accent and macron if any.
 function removeDiacritics(str) {
-	return str.normalize("NFD").replace(/[\u0300-\u036F]/g, "");
+	return str.normalize("NFD").replace(/[\u0301\u0304]/g, "");
 }
 
 /** BEGIN TEST CASES **/
@@ -372,7 +242,6 @@ var testCases = [
 				"libraryCatalog": "Bosworth Toller's Anglo-Saxon Dictionary Online",
 				"place": "Prague",
 				"publisher": "Faculty of Arts, Charles University",
-				"rights": "All the data provided here are free for any purpose. If you use the data for academic purposes, we ask that you kindly cite us as your source. In case you need a large portion of the dictionary data or you need it in a specific format, let us know through the contact form, we are happy to do custom database dumps for researchers.",
 				"url": "https://bosworthtoller.com/23205",
 				"attachments": [
 					{
@@ -381,11 +250,7 @@ var testCases = [
 					}
 				],
 				"tags": [],
-				"notes": [
-					{
-						"note": "<h1>Summary</h1>mucg-wyrt<h2>Grammar</h2>mucg-wyrt, mug-wyrt, e; f.<h2>Definition</h2><ul><li>A plant name mug-wort, (Scott. ) muggart, muggon, also called mother-wort. In the Herbarium, Lchdm. i, three kinds of mug-wort are mentioned</li></ul>"
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
@@ -425,7 +290,6 @@ var testCases = [
 				"libraryCatalog": "Bosworth Toller's Anglo-Saxon Dictionary Online",
 				"place": "Prague",
 				"publisher": "Faculty of Arts, Charles University",
-				"rights": "All the data provided here are free for any purpose. If you use the data for academic purposes, we ask that you kindly cite us as your source. In case you need a large portion of the dictionary data or you need it in a specific format, let us know through the contact form, we are happy to do custom database dumps for researchers.",
 				"url": "https://bosworthtoller.com/7096",
 				"attachments": [
 					{
@@ -434,11 +298,7 @@ var testCases = [
 					}
 				],
 				"tags": [],
-				"notes": [
-					{
-						"note": "<h1>Summary</h1>CYN<h2>Word category</h2><ul><li>noun [ masculine, neuter ]</li></ul><h2>Grammar</h2>CYN, cynn,es; n.<h2>Definition</h2><ul><li>every being of one kind, a kindred, kind, race, nation, people, tribe, family, lineage, generation, progeny, KIN ; genus, gens, natio, populus, stirps, tribus, familia, natales, origo, generatio, proles, progenies</li><li>Gender; genus</li><li>a sex; sexus</li></ul>"
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
@@ -478,7 +338,6 @@ var testCases = [
 				"libraryCatalog": "Bosworth Toller's Anglo-Saxon Dictionary Online",
 				"place": "Prague",
 				"publisher": "Faculty of Arts, Charles University",
-				"rights": "All the data provided here are free for any purpose. If you use the data for academic purposes, we ask that you kindly cite us as your source. In case you need a large portion of the dictionary data or you need it in a specific format, let us know through the contact form, we are happy to do custom database dumps for researchers.",
 				"url": "https://bosworthtoller.com/27305",
 				"attachments": [
 					{
@@ -487,11 +346,7 @@ var testCases = [
 					}
 				],
 				"tags": [],
-				"notes": [
-					{
-						"note": "<h1>Summary</h1>secgan<h2>Word category</h2><ul><li>verb [ weak ]</li></ul><h2>Grammar</h2>secgan, secgean, secggan, secggean, sæcgan ; p. sægde, sǽde; pp. sægd, sǽd. [Forms as from an infin. sagian—sagast, sagaþ ; p. sagode; imp. saga, are given here.]<h2>Definition</h2><ul><li>To say (of written or spoken words).</li><li>to say certain words, the words used being given</li><li>pronounce, deliver</li><li>to speak of, tell, relate, narrate, declare, announce, give an account of something</li><li>Ger. Dank sagen)</li><li>[5 more items omitted]</li></ul>"
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
@@ -531,7 +386,6 @@ var testCases = [
 				"libraryCatalog": "Bosworth Toller's Anglo-Saxon Dictionary Online",
 				"place": "Prague",
 				"publisher": "Faculty of Arts, Charles University",
-				"rights": "All the data provided here are free for any purpose. If you use the data for academic purposes, we ask that you kindly cite us as your source. In case you need a large portion of the dictionary data or you need it in a specific format, let us know through the contact form, we are happy to do custom database dumps for researchers.",
 				"url": "https://bosworthtoller.com/23035",
 				"attachments": [
 					{
@@ -540,11 +394,7 @@ var testCases = [
 					}
 				],
 				"tags": [],
-				"notes": [
-					{
-						"note": "<h1>Summary</h1>mód-c-wánig<h2>Word category</h2><ul><li>adjective</li></ul><h2>Grammar</h2>mód-c-wánig, adj.<h2>Definition</h2><ul><li>Sad at heart</li></ul>"
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
@@ -584,7 +434,6 @@ var testCases = [
 				"libraryCatalog": "Bosworth Toller's Anglo-Saxon Dictionary Online",
 				"place": "Prague",
 				"publisher": "Faculty of Arts, Charles University",
-				"rights": "All the data provided here are free for any purpose. If you use the data for academic purposes, we ask that you kindly cite us as your source. In case you need a large portion of the dictionary data or you need it in a specific format, let us know through the contact form, we are happy to do custom database dumps for researchers.",
 				"url": "https://bosworthtoller.com/53107",
 				"attachments": [
 					{
@@ -593,11 +442,7 @@ var testCases = [
 					}
 				],
 				"tags": [],
-				"notes": [
-					{
-						"note": "<h1>Summary</h1>hrǽw<h2>Definition</h2><ul><li>A living body</li><li>a dead body, corpse</li></ul>"
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
@@ -637,7 +482,6 @@ var testCases = [
 				"libraryCatalog": "Bosworth Toller's Anglo-Saxon Dictionary Online",
 				"place": "Prague",
 				"publisher": "Faculty of Arts, Charles University",
-				"rights": "All the data provided here are free for any purpose. If you use the data for academic purposes, we ask that you kindly cite us as your source. In case you need a large portion of the dictionary data or you need it in a specific format, let us know through the contact form, we are happy to do custom database dumps for researchers.",
 				"url": "https://bosworthtoller.com/42878",
 				"attachments": [
 					{
@@ -646,11 +490,7 @@ var testCases = [
 					}
 				],
 				"tags": [],
-				"notes": [
-					{
-						"note": "<h1>Summary</h1>dón<h2>Word category</h2><ul><li>verb</li></ul><h2>Definition</h2><ul><li>to do, act</li><li>make war</li><li>to make.</li><li>with acc.</li><li>to cause.</li><li>[9 more items omitted]</li></ul>"
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
