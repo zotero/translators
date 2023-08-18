@@ -93,7 +93,7 @@ async function scrape(url) {
 		// page id if any
 		articleID = articleID.replace(/::\d+$/, "::" + articleViewFragment);
 	}
-	let pageinfoUrl = "https://www.e-periodica.ch/digbib/ajax/pageinfo?pid=" + encodeURI(articleID);
+	let pageinfoUrl = "https://www.e-periodica.ch/digbib/ajax/pageinfo?pid=" + encodeURIComponent(articleID);
 	
 	//Zotero.debug('JSON URL ' + pageinfoUrl);
 	let epJSON = await requestJSON(pageinfoUrl);
