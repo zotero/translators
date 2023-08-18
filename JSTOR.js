@@ -120,7 +120,8 @@ function getJID(url) {
 // Extract the object describing the item embedded in the Google Analytics
 // script. NOTE: This is a simplified solution; in general JavaScript cannot be
 // parsed by RegEx. Here we're relying on the assumption that the object being
-// etracted is a simple string-to-string record.
+// extracted is a simple string-to-string record and no closing brace character
+// is in the string keys or values.
 function extractGAData(script) {
 	let m = script.match(/gaData\.content\s*=\s*({.+?});/s);
 	return m && JSON.parse(m[1]);
