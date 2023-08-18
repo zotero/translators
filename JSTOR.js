@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-17 07:20:30"
+	"lastUpdated": "2023-08-18 01:52:22"
 }
 
 /*
@@ -156,10 +156,11 @@ async function scrape(jid) {
 }
 
 function convertCharRefs(string) {
-	// converts hex decimal encoded html entities used by JSTOR to regular utf-8
+	// converts hex decimal encoded html numeric character references used by
+	// JSTOR to regular characters
 	return string
-		.replace(/&#x([A-Za-z0-9]+);/g, function (match, num) {
-			return String.fromCharCode(parseInt(num, 16));
+		.replace(/&#x([A-Fa-f0-9]+);/g, function (match, num) {
+			return String.fromCodePoint(parseInt(num, 16));
 		});
 }
 
