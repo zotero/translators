@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-18 07:02:25"
+	"lastUpdated": "2023-08-18 07:39:58"
 }
 
 /*
@@ -89,8 +89,6 @@ const BOSWORTH_TOLLER_INFO = {
 	place: "Prague",
 	publisher: "Faculty of Arts, Charles University",
 	date: "2014",
-	originalPublisher: "Oxford University Press",
-	originalPlace: "London",
 	creators: [
 		{ firstName: "Joseph", lastName: "Bosworth", creatorType: "author" },
 		{ firstName: "Thomas Northcote", lastName: "Toller", creatorType: "editor" },
@@ -111,8 +109,8 @@ function scrape(doc, url = doc.location.href) {
 	// Word entry
 	item.title = normalizeLemma(doc) || "[Unknown entry]";
 
-	// Original publication and page number in it, if any
-	Object.assign(item, getPage(doc));
+	// Original publication and page number in it, if any, as extra
+	item.extra = getExtraInfo(doc);
 
 	// Snapshot
 	item.attachments = [{
@@ -126,34 +124,27 @@ function scrape(doc, url = doc.location.href) {
 
 // See https://bosworthtoller.com/images-dictionary/frontback_matter.pdf
 var BOOK_ORIG_INFO = {
-	b: {
-		originalDictionaryTitle: "An Anglo-Saxon Dictionary, Based on the Manuscript Collections of the Late Joseph Bosworth, D.D., F.R.S.",
-		originalDate: "1898",
-	},
-	d: {
-		originalDictionaryTitle: "An Anglo-Saxon Dictionary, Based on the Manuscript Collections of the Late Joseph Bosworth; Supplement",
-		originalDate: "1921",
-	},
+	b: "Original Dictionary Title: An Anglo-Saxon Dictionary, Based on the Manuscript Collections of the Late Joseph Bosworth, D.D., F.R.S.\nOriginal Date: 1898\nOriginal Publisher: Oxford University Press\nOriginal Place: London",
+	d: "Original Dictionary Title: An Anglo-Saxon Dictionary, Based on the Manuscript Collections of the Late Joseph Bosworth; Supplement\nOriginal Date: 1921\nOriginal Publisher: Oxford University Press\nOriginal Place: London",
 };
 
-// Get the original volume info and page number by parsing the URL of the
-// scanned page linked to the article. Returns an object with the fields
-// suitably populated.
-function getPage(doc) {
+// Get the extra info including original volume info and page number by parsing
+// the URL of the scanned page linked to the article. Returns a string where
+// each extra entry occupies one line in `key: value` format, or empty string
+// if the original book and page cannot be determined.
+function getExtraInfo(doc) {
 	let imageURL = attr(doc, ".btd--image-pin-pan > img", "src");
 	if (!imageURL) {
-		return null;
+		return "";
 	}
 	// "b" for main book (1898), "d" for supplement (1912)
 	let pageMatch = imageURL.match(/^\/images-dictionary\/bt_([bd])(\d+)\..+$/);
 	if (!pageMatch) {
-		return null;
+		return "";
 	}
 	let [, bookKey, page] = pageMatch;
-	let info = BOOK_ORIG_INFO[bookKey];
-	// NOTE that this modifies the book info object in-place
-	info.originalPage = page.replace(/^0*/, "");
-	return info;
+	return BOOK_ORIG_INFO[bookKey] // static original publication info
+		+ "\nOriginal Page: " + page.replace(/^0*/, ""); // trim leading zero
 }
 
 // Normalize the lemma's vowel display-form, following the original book's
@@ -238,6 +229,7 @@ var testCases = [
 				],
 				"date": "2014",
 				"dictionaryTitle": "An Anglo-Saxon Dictionary Online",
+				"extra": "Original Dictionary Title: An Anglo-Saxon Dictionary, Based on the Manuscript Collections of the Late Joseph Bosworth, D.D., F.R.S.\nOriginal Date: 1898\nOriginal Publisher: Oxford University Press\nOriginal Place: London\nOriginal Page: 700",
 				"language": "en",
 				"libraryCatalog": "Bosworth Toller's Anglo-Saxon Dictionary Online",
 				"place": "Prague",
@@ -286,6 +278,7 @@ var testCases = [
 				],
 				"date": "2014",
 				"dictionaryTitle": "An Anglo-Saxon Dictionary Online",
+				"extra": "Original Dictionary Title: An Anglo-Saxon Dictionary, Based on the Manuscript Collections of the Late Joseph Bosworth, D.D., F.R.S.\nOriginal Date: 1898\nOriginal Publisher: Oxford University Press\nOriginal Place: London\nOriginal Page: 183",
 				"language": "en",
 				"libraryCatalog": "Bosworth Toller's Anglo-Saxon Dictionary Online",
 				"place": "Prague",
@@ -334,6 +327,7 @@ var testCases = [
 				],
 				"date": "2014",
 				"dictionaryTitle": "An Anglo-Saxon Dictionary Online",
+				"extra": "Original Dictionary Title: An Anglo-Saxon Dictionary, Based on the Manuscript Collections of the Late Joseph Bosworth, D.D., F.R.S.\nOriginal Date: 1898\nOriginal Publisher: Oxford University Press\nOriginal Place: London\nOriginal Page: 855",
 				"language": "en",
 				"libraryCatalog": "Bosworth Toller's Anglo-Saxon Dictionary Online",
 				"place": "Prague",
@@ -382,6 +376,7 @@ var testCases = [
 				],
 				"date": "2014",
 				"dictionaryTitle": "An Anglo-Saxon Dictionary Online",
+				"extra": "Original Dictionary Title: An Anglo-Saxon Dictionary, Based on the Manuscript Collections of the Late Joseph Bosworth, D.D., F.R.S.\nOriginal Date: 1898\nOriginal Publisher: Oxford University Press\nOriginal Place: London\nOriginal Page: 694",
 				"language": "en",
 				"libraryCatalog": "Bosworth Toller's Anglo-Saxon Dictionary Online",
 				"place": "Prague",
@@ -430,6 +425,7 @@ var testCases = [
 				],
 				"date": "2014",
 				"dictionaryTitle": "An Anglo-Saxon Dictionary Online",
+				"extra": "Original Dictionary Title: An Anglo-Saxon Dictionary, Based on the Manuscript Collections of the Late Joseph Bosworth; Supplement\nOriginal Date: 1921\nOriginal Publisher: Oxford University Press\nOriginal Place: London\nOriginal Page: 562",
 				"language": "en",
 				"libraryCatalog": "Bosworth Toller's Anglo-Saxon Dictionary Online",
 				"place": "Prague",
@@ -478,6 +474,7 @@ var testCases = [
 				],
 				"date": "2014",
 				"dictionaryTitle": "An Anglo-Saxon Dictionary Online",
+				"extra": "Original Dictionary Title: An Anglo-Saxon Dictionary, Based on the Manuscript Collections of the Late Joseph Bosworth; Supplement\nOriginal Date: 1921\nOriginal Publisher: Oxford University Press\nOriginal Place: London\nOriginal Page: 154",
 				"language": "en",
 				"libraryCatalog": "Bosworth Toller's Anglo-Saxon Dictionary Online",
 				"place": "Prague",
