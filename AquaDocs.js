@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-12-24 04:26:24"
+	"lastUpdated": "2023-08-19 01:20:42"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2022 Sebastian Karcher
+	Copyright © 2023 Sebastian Karcher
 
 	This file is part of Zotero.
 
@@ -66,11 +66,9 @@ function getSearchResults(doc, checkOnly) {
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
-		if (items) {
-			await Promise.all(
-				Object.keys(items)
-					.map(url => requestDocument(url).then(scrape))
-			);
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
 		}
 	}
 	else {
@@ -108,7 +106,7 @@ async function scrape(doc, url = doc.location.href) {
 	translator.setHandler('itemDone', (_obj, item) => {
 		for (let attachment of item.attachments) {
 			if (attachment.url && !attachment.url.startsWith("http")) {
-				attachment.url = "https://aquadocs.org" + item.attachments[i].url;
+				attachment.url = "https://aquadocs.org" + attachment.url;
 			}
 		}
 		item.complete();
