@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-21 13:32:08"
+	"lastUpdated": "2023-08-21 13:53:20"
 }
 
 /*
@@ -76,18 +76,22 @@ function getSearchResults(doc, checkOnly) {
 	for (let row of rows) {
 		let href, title;
 
-		if (["bio_entities", "indications", "spectra"].includes(searchKind)) {
-			[href, title] = getFirstTwoColumns(row);
-		}
-		else if (searchKind === "structures") {
-			[href, title] = getMoleculeColumns(row);
-		}
-		else if (searchKind === "reactions") {
-			[href, title] = getReactions(row);
-		}
-		else { // row is just an <a> tag with an entry name as textContent
-			href = row.href;
-			title = ZU.trimInternal(row.textContent.trim());
+		switch (searchKind) {
+			case "bio_entities":
+			case "indications":
+			case "spectra":
+				[href, title] = getFirstTwoColumns(row);
+				break;
+			case "structures":
+				[href, title] = getMoleculeColumns(row);
+				break;
+			case "reactions":
+				[href, title] = getReactions(row);
+				break;
+			default: {
+				href = row.href;
+				title = ZU.trimInternal(row.textContent.trim());
+			}
 		}
 
 		if (!href || !title) continue;
@@ -283,6 +287,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://go.drugbank.com/reactions?approved=0&nutraceutical=0&illicit=0&investigational=0&withdrawn=0&experimental=0&us=0&ca=0&eu=0&commit=Apply+Filter&q%5Bsubstrate%5D=Fluoxetine&q%5Benzyme%5D=&q%5Bproduct%5D=",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
@@ -386,6 +391,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://go.drugbank.com/structures/search/small_molecule_drugs/mass?query_from=100&query_to=200&filters%5Bdrug_groups%5D%5Bapproved%5D=on&commit=Search#results",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
