@@ -79,7 +79,7 @@ module.exports = {
 					}
 					else if (testCase.type === 'search') {
 						// console.log(JSON.stringify(testCase.input))
-						const expected = ['DOI', 'ISBN', 'PMID', 'identifiers', 'contextObject', 'adsBibcode'];
+						const expected = ['DOI', 'ISBN', 'PMID', 'identifiers', 'contextObject', 'adsBibcode', 'ericNumber'];
 						if (!Object.keys(testCase.input).every(key => expected.includes(key))) {
 							let invalidKey = Object.keys(testCase.input).find(key => !expected.includes(key));
 							context.report({
