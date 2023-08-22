@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-04 15:38:48"
+	"lastUpdated": "2023-08-22 04:34:31"
 }
 
 /*
@@ -169,11 +169,9 @@ function getSearchResults(doc, checkOnly) {
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
-		if (items) {
-			await Promise.all(
-				Object.keys(items)
-					.map(url => requestDocument(url).then(scrape))
-			);
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
 		}
 	}
 	else {
@@ -981,7 +979,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.worldcat.org/search?q=isbn%3A7112062314",
+		"url": "https://www.worldcat.org/search?q=isbn%3A7112062314",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
