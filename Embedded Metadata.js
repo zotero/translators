@@ -308,6 +308,9 @@ function init(doc, url, callback, forceLoadRDF) {
 				if (lcValue.includes('blogger')
 					|| lcValue.includes('wordpress')
 					|| lcValue.includes('wooframework')
+					|| lcValue.includes('hugo')
+					|| lcValue.includes('eleventy')
+					|| lcValue.includes('jekyll')
 				) {
 					generatorType = 'blogPost';
 				}
