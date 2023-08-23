@@ -2,14 +2,14 @@
 	"translatorID": "d921155f-0186-1684-615c-ca57682ced9b",
 	"label": "JSTOR",
 	"creator": "Simon Kornblith, Sean Takats, Michael Berkowitz, Eli Osherovich, czar",
-	"target": "^https?://([^/]+\\.)?jstor\\.org/(discover/|action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch|doAdvancedResults|doBasicResults)|stable/|pss/|openurl\\?|sici\\?)",
-	"minVersion": "3.0.12",
+	"target": "^https?://([^/]+\\.)?jstor\\.org/(discover/|action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch|doAdvancedResults|doBasicResults)|stable/|pss/|openurl\\?|sici\\?|tc/accept\\?)",
+	"minVersion": "6.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-18 02:12:57"
+	"lastUpdated": "2023-08-23 02:44:06"
 }
 
 /*
@@ -38,54 +38,104 @@
 
 
 function detectWeb(doc, url) {
-	// See if this is a search results page or Issue content
-	if (doc.title == "JSTOR: Search Results") {
-		return "multiple";
+	// Download confirm page; actual type doesn't matter much
+	if (/\/tc\/accept\b/.test(url)) {
+		Z.debug(url);
+		return "journalArticle";
 	}
-	// Issues with DOIs can't be identified by URL
-	else if (/stable|pss/.test(url)) {
-		if (getSearchResults(doc, true)) {
-			return "multiple";
-		}
-		else {
-			Z.monitorDOMChanges(doc.body,
-				{ attributeFilter: ['style'] });
-		}
-	}
-	
 	// If this is a view page, identify its type (for connector icon)
+	// Co-opt the Google Analytics script because it is in the static HTML
+	// source, hence not dependent on Ajax rendering. NOTE: A book also has TOC
+	// listing and we prefer detecting it as a single book rather than a
+	// multiple
 	let gaScript = text(doc, "script[data-analytics-provider='ga']");
 	if (gaScript) {
 		let gaData = extractGAData(gaScript);
-		switch (gaData && gaData.contentType) {
-			case "book":
+		if (gaData) {
+			if (gaData.contentType === "book") {
 				return "book";
-			case "chapter":
+			}
+			if (gaData.contentType === "chapter") {
 				return "bookSection";
-			default:
-				return (gaData && gaData.itemType === "mp_research_report_part")
-					? "report"
-					: "journalArticle";
+			}
+			if (gaData.itemType === "mp_research_report_part") {
+				return "report";
+			}
+			if (gaData.contentType === "journal"
+				&& gaData.itemType === "article") {
+				return "journalArticle";
+			}
 		}
 	}
+	else {
+		// Fallback in case the GA script is no longer there (for instance,
+		// removed from HTML source by ad blocker).
+		// Books come with JSON-LD in static HTML; opportunistically use it to
+		// detect the book type as early as possible
+		let ldSource = text(doc, "script[type='application/ld+json']");
+		if (ldSource) {
+			let linkedData = JSON.parse(ldSource);
+			if (linkedData && linkedData["@type"] === "book") {
+				return "book";
+			}
+		}
+		// Below, we relies on Ajax rendering of the page
+		let contentRoot = doc.querySelector("#content");
+		if (contentRoot) {
+			Z.monitorDOMChanges(contentRoot);
+		}
+		if (doc.querySelector(".book-description")) {
+			return "book";
+		}
+		let typeLabel = text(
+			doc,
+			".header-metadata .content-type > span, .content-meta-data-label"
+		).toLowerCase();
+		switch (typeLabel) {
+			case "book chapter":
+				return "bookSection";
+			case "research report":
+				return "report";
+			case "journal article":
+				return "journalArticle";
+		}
+	}
+
+	// Issue TOC (the possibility of this being a book has been handled above)
+	// An issue can be identified without full rendering of the page, and
+	// there's no need to call getSearchResults() because it can't be empty
+	if (doc.querySelector("#toc-mount-point")) {
+		return "multiple";
+	}
+
+	// See if this is a search results page
+	let searchRoot = doc.querySelector("#search-results-vue-mount");
+	if (searchRoot) {
+		// Search results can be empty due to bad search term, or filtering by
+		// the user
+		if (doc.querySelector(".no-results-layout")) {
+			// Don't have to observe because the only way to go back to a
+			// search page with results from the no-result page is to browse
+			// back (i.e. no-result cannot gain search result "live").
+			return false;
+		}
+		else {
+			// The search-result page may become no-result in a "live" manner
+			Z.monitorDOMChanges(searchRoot);
+			return "multiple";
+		}
+	}
+
 	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
-	var resultsBlock = doc.querySelectorAll('.media-body.media-object-section');
-	if (!resultsBlock.length) {
-		resultsBlock = doc.querySelectorAll('.result');
-	}
-	if (!resultsBlock.length) {
-		resultsBlock = doc.querySelectorAll('.toc-item');
-	}
-	if (!resultsBlock.length) return false;
 	var items = {}, found = false;
-	for (let row of resultsBlock) {
-		let title = text(row, '.title, .small-heading, [data-pharos-component="PharosLink"]');
-		let jid = getJID(attr(row, 'a', 'href'));
+	for (let row of doc.querySelectorAll(".result .title, .toc-item > div > [data-qa~='title']")) {
+		let title = ZU.trimInternal(row.textContent);
+		let jid = getJID(row.getAttribute("href")); // for issue TOC
 		if (!jid) {
-			jid = getJID(attr(row, '[href]', 'href'));
+			jid = getJID(attr(row, '[href]', 'href')); // for search results
 		}
 		if (!jid || !title) continue;
 		if (checkOnly) return true;
