@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-23 07:48:34"
+	"lastUpdated": "2023-08-23 07:58:07"
 }
 
 /*
@@ -47,12 +47,19 @@ function detectWeb(doc, _url) {
 }
 
 function getSearchResults(doc, checkOnly) {
+	let isIssues = /^https:\/\/[^/]+\/issues\/.+/.test(doc.location.href);
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('article.article-card > a, div.article-data > h2.title > a');
 	for (let row of rows) {
 		let href = row.href;
-		let title = ZU.trimInternal(row.textContent);
+		let title;
+		if (isIssues) {
+			title = text(row, ".article-card-title");
+		}
+		else {
+			title = ZU.trimInternal(row.textContent);
+		}
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
