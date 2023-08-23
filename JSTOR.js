@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-23 02:44:06"
+	"lastUpdated": "2023-08-23 04:52:20"
 }
 
 /*
@@ -203,7 +203,7 @@ async function doWeb(doc, url) {
 async function scrape(jid) {
 	var risURL = "/citation/ris/";
 	let risText = await requestText(risURL + jid);
-	await processRIS(risText);
+	await processRIS(risText, jid);
 }
 
 function convertCharRefs(string) {
