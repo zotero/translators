@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-19 01:20:42"
+	"lastUpdated": "2023-08-24 02:41:29"
 }
 
 /*
@@ -51,7 +51,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('div.row div.description-content>a');
+	var rows = doc.querySelectorAll('.main-content .description-content a');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -68,11 +68,11 @@ async function doWeb(doc, url) {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
 		for (let url of Object.keys(items)) {
-			await scrape(await requestDocument(url));
+			await scrape(url);
 		}
 	}
 	else {
-		await scrape(doc, url);
+		await scrape(url);
 	}
 }
 
@@ -95,7 +95,7 @@ function getType(string) {
 	}
 }
 
-async function scrape(doc, url = doc.location.href) {
+async function scrape(url) {
 	let xmlURL = url.replace("/handle/", "/metadata/handle/").replace(/[?#].*$/, "") + "/mets.xml";
 	// Z.debug(xmlURL);
 	let xmlText = await requestText(xmlURL);
