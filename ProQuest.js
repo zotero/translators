@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-12-15 15:34:27"
+	"lastUpdated": "2023-08-24 15:19:14"
 }
 
 /*
@@ -498,10 +498,11 @@ function scrape(doc, url, type) {
 		item.tags = altKeywords.join(',').split(/\s*(?:,|;)\s*/);
 	}
 	
-	if (doc.getElementById('downloadPDFLink')) {
+	let pdfLink = doc.querySelector('[id^="downloadPDFLink"]');
+	if (pdfLink) {
 		item.attachments.push({
 			title: 'Full Text PDF',
-			url: doc.getElementById('downloadPDFLink').href,
+			url: pdfLink.href,
 			mimeType: 'application/pdf',
 			proxy: false
 		});
