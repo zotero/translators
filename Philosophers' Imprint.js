@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-20 02:12:14"
+	"lastUpdated": "2023-08-25 02:00:20"
 }
 
 /*
@@ -77,10 +77,10 @@ async function doWeb(doc, url) {
 }
 
 function scrape(doc, url = doc.location.href) { // eslint-disable-line no-unused-vars
-	var abstract = ZU.xpathText(doc, '//div[contains(@class, "abstract")]/p[1]');
-	var purl = ZU.xpathText(doc, '//div[@id="purl"]/a/@href');
-	var license = ZU.xpathText(doc, '//a[@id="licenseicon"]/@href');
-	var pdfurl = ZU.xpathText(doc, '//li[@id="download-pdf"]/a/@href');
+	var abstract = text(doc, ".abstract p:first-of-type");
+	var purl = attr(doc, "#purl a", "href");
+	var license = attr(doc, "#licenseicon", "href");
+	var pdfurl = attr(doc, "#download-pdf a", "href");
 
 	var dateField = text(doc, ".periodical");
 	
@@ -96,6 +96,9 @@ function scrape(doc, url = doc.location.href) { // eslint-disable-line no-unused
 			item.url = purl;
 		}
 		if (pdfurl) {
+			// Delete the EM-generated snapshot, which is not very useful for
+			// the journal article with VoR already there
+			item.attachments = item.attachments.filter(obj => obj.title !== "Snapshot");
 			item.attachments.push({
 				url: pdfurl,
 				title: "Full Text PDF",
@@ -109,8 +112,16 @@ function scrape(doc, url = doc.location.href) { // eslint-disable-line no-unused
 			}
 		}
 		item.rights = license;
+		// Delete irrelevant fields from EM (which will go into extra but are
+		// still irrelevant there)
+		delete item.institution;
+		delete item.company;
+		delete item.label;
+		delete item.distributor;
 		item.place = "Ann Arbor, MI";
-		item.publisher = "University of Michigan";
+		item.publisher = "Michigan Publishing";
+		// Their metadata about their name is wrong
+		item.publicationTitle = "Philosophers' Imprint";
 		
 		item.complete();
 	});
@@ -144,15 +155,12 @@ var testCases = [
 				"issue": "3",
 				"language": "en",
 				"libraryCatalog": "quod.lib.umich.edu",
-				"publicationTitle": "Philosopher's Imprint",
+				"pages": "1-27",
+				"publicationTitle": "Philosophers' Imprint",
 				"rights": "http://creativecommons.org/licenses/by-nc-nd/3.0/",
 				"url": "http://hdl.handle.net/2027/spo.3521354.0004.003",
 				"volume": "4",
 				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					},
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
