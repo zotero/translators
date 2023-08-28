@@ -44,7 +44,7 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	item = new Zotero.Item('encyclopediaArticle');
+	var item = new Zotero.Item('encyclopediaArticle');
 
 	// Title initially formatted: hangulName(hanjaName); adding space between
 	item.title = doc.title.split(' - ')[0].replace('(', ' (');
