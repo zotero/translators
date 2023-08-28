@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-27 23:38:58"
+	"lastUpdated": "2023-08-28 00:04:42"
 }
 
 /*
@@ -35,8 +35,13 @@
 	***** END LICENSE BLOCK *****
 */
 
+function text(docOrElem, selector, index) {
+	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
+	return elem ? elem.textContent : null;
+}
+
 function detectWeb(doc, url) {
-	return url.match(/E\d{7}(#.*)?/) ? 'encyclopediaArticle' : false;
+	return 'encyclopediaArticle';
 }
 
 function doWeb(doc, url) {
@@ -46,14 +51,14 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	item = new Zotero.Item('encyclopediaArticle');
 
-	// Title is formatted: hangulName(hanjaName); adding space between
+	// Title initially formatted: hangulName(hanjaName); adding space between
 	item.title = doc.title.split(' - ')[0].replace('(', ' (');
 	item.encyclopediaTitle = "Encyclopedia of Korean Culture";
 	item.publisher = "Academy of Korean Studies";
 	item.language = "ko";
 	item.url = url;
 
-	// Author processing; may be multiple and names will be in Korean
+	// Author processing; may be 0 or more names, would be in Korean
 	var authors = doc.querySelector('div[class="author-wrap"] > span');
 
 	if (authors) {
@@ -74,49 +79,77 @@ var testCases = [
 		"type": "web",
 		"url": "https://encykorea.aks.ac.kr/Article/E0013414#cm_multimedia",
 		"detectedItemType": "encyclopediaArticle",
-		"items": [{
-             "itemType": "encyclopediaArticle",
-             "creators": [{
-                     "lastName": "오",
-                     "firstName": "건환",
-                     "creatorType": "author"
-                 }, {
-                     "lastName": "김",
-                     "firstName": "건유",
-                     "creatorType": "author"
-                 }
-             ],
-             "notes": [],
-             "tags": [],
-             "seeAlso": [],
-             "attachments": [],
-             "title": "다대포 (多大浦)",
-             "encyclopediaTitle": "Encyclopedia of Korean Culture",
-             "publisher": "Academy of Korean Studies",
-             "language": "ko",
-             "url": "https://encykorea.aks.ac.kr/Article/E0013414#cm_multimedia",
-             "libraryCatalog": "Encyclopedia of Korean Culture"
-         }]
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "다대포 (多大浦)",
+				"creators": [
+					{
+						"lastName": "오",
+						"firstName": "건환",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "김",
+						"firstName": "건유",
+						"creatorType": "author"
+					}
+				],
+				"encyclopediaTitle": "Encyclopedia of Korean Culture",
+				"language": "ko",
+				"libraryCatalog": "Encyclopedia of Korean Culture",
+				"publisher": "Academy of Korean Studies",
+				"url": "https://encykorea.aks.ac.kr/Article/E0013414#cm_multimedia",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	},
 	{
 		"type": "web",
 		"url": "https://encykorea.aks.ac.kr/Article/E0002855",
 		"detectedItemType": "encyclopediaArticle",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "경주 남산 탑곡 마애불상군 (慶州 南山 塔谷 磨崖佛像群)",
+				"creators": [],
+				"encyclopediaTitle": "Encyclopedia of Korean Culture",
+				"language": "ko",
+				"libraryCatalog": "Encyclopedia of Korean Culture",
+				"publisher": "Academy of Korean Studies",
+				"url": "https://encykorea.aks.ac.kr/Article/E0002855",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://encykorea.aks.ac.kr/Article/E0025488",
+		"detectedItemType": "encyclopediaArticle",
 		"items": [{
-			 "itemType": "encyclopediaArticle",
-             "creators": [],
-             "notes": [],
-             "tags": [],
-             "seeAlso": [],
-             "attachments": [],
-             "title": "경주 남산 탑곡 마애불상군 (慶州 南山 塔谷 磨崖佛像群)",
-             "encyclopediaTitle": "Encyclopedia of Korean Culture",
-             "publisher": "Academy of Korean Studies",
-             "language": "ko",
-             "url": "https://encykorea.aks.ac.kr/Article/E0002855",
-             "libraryCatalog": "Encyclopedia of Korean Culture"
+				"itemType": "encyclopediaArticle",
+				"title": "사랑 (舍廊)",
+				"creators": [{
+						"lastName": "김",
+						"firstName": "동욱",
+						"creatorType": "author"
+					}],
+				"encyclopediaTitle": "Encyclopedia of Korean Culture",
+				"language": "ko",
+				"libraryCatalog": "Encyclopedia of Korean Culture",
+				"publisher": "Academy of Korean Studies",
+				"url": "https://encykorea.aks.ac.kr/Article/E0025488",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 		}]
 	}
-
 ]
 /** END TEST CASES **/
