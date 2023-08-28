@@ -61,11 +61,11 @@ function scrape(doc, url) {
 		// For simplicity, assume one character surnames for everybody (there are rare exceptions)
 		for (let author of authors.split('·')) {
 			item.creators.push({
-				"lastName": author[0],
-				"firstName": author.slice(1),
-				"creatorType": "author"
+				lastName: author[0],
+				firstName: author.slice(1),
+				creatorType: "author"
 			});
-		} 
+		}
 	}
 	item.complete();
 }/** BEGIN TEST CASES **/
