@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-28 00:04:42"
+	"lastUpdated": "2023-08-28 00:11:25"
 }
 
 /*
@@ -35,12 +35,7 @@
 	***** END LICENSE BLOCK *****
 */
 
-function text(docOrElem, selector, index) {
-	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
-	return elem ? elem.textContent : null;
-}
-
-function detectWeb(doc, url) {
+function detectWeb() {
 	return 'encyclopediaArticle';
 }
 
@@ -132,14 +127,15 @@ var testCases = [
 		"type": "web",
 		"url": "https://encykorea.aks.ac.kr/Article/E0025488",
 		"detectedItemType": "encyclopediaArticle",
-		"items": [{
+		"items": [
+			{
 				"itemType": "encyclopediaArticle",
 				"title": "사랑 (舍廊)",
 				"creators": [{
-						"lastName": "김",
-						"firstName": "동욱",
-						"creatorType": "author"
-					}],
+					"lastName": "김",
+					"firstName": "동욱",
+					"creatorType": "author"
+				}],
 				"encyclopediaTitle": "Encyclopedia of Korean Culture",
 				"language": "ko",
 				"libraryCatalog": "Encyclopedia of Korean Culture",
@@ -149,7 +145,8 @@ var testCases = [
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
-		}]
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
