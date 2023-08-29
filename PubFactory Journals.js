@@ -55,17 +55,6 @@ function detectWeb(doc) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	// var rows = doc.querySelectorAll('a.c-Button--link[href*="/view/journals/"][href$=".xml"][target="_self"]');
-	// // var rows = doc.querySelectorAll('.content-box h1 a[href*=".xml"]');
-	// for (let row of rows) {
-	// 	let href = row.href;
-	// 	let title = ZU.trimInternal(row.innerText);
-	// 	if (!href || !title) continue;
-	// 	if (checkOnly) return true;
-	// 	found = true;
-	// 	items[href] = title;
-	// }
-	// return found ? items : false;
 	let linkSelector = 'a.c-Button--link[href^="/"][href*=".xml"]';
 	let rows = doc.querySelectorAll(`#searchContent ${linkSelector}, .issue-toc ${linkSelector}`);
 	for (let row of rows) {
@@ -81,12 +70,9 @@ function getSearchResults(doc, checkOnly) {
 
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
-		Z.debug("running doWeb multiple items");
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
-		// if (items) Z.debug("there are items");
 		if (!items) return;
 		for (let url of Object.keys(items)) {
-			Z.debug(url);
 			await scrape(await requestDocument(url));
 		}
 	}
@@ -96,18 +82,7 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url = doc.location.href) {
-	// Z.debug("scrape");
-	// Z.debug(doc);
-	// TODO: why is metadata so bad on multiple?
-	// if I import this directly, it works great: https://journals.humankinetics.com/view/journals/jab/39/3/article-p199.xml
-	// but imported as a multiple from here, it only imports title and abstract: https://journals.humankinetics.com/view/journals/jab/39/3/jab.39.issue-3.xml
-	// this is probably why it's bad: https://groups.google.com/g/zotero-dev/c/yIVWbu0xNlQ/m/THjnupckAwAJ
-	// also here: https://groups.google.com/g/zotero-dev/c/EnC5teZkSP8/m/dmygGUMIBQAJ
-	// so the solution for multiple is we need to get the page data from an API or JSON so that web translator can read it
-	// however, looking at the network traffic, I don't see an API call... just the page load
-	// https://groups.google.com/g/zotero-dev/c/2gCD5-mM_Cg/m/tbJH6siaUWkJ
 	if (doc.querySelector('meta[name="citation_pdf_url"]')) {
-		// var pdfURL = doc.querySelector('meta[name="citation_pdf_url"]').getAttribute("content");
 		var pdfURL = attr(doc, 'meta[name="citation_pdf_url"]', "content");
 	}
 	let translator = Zotero.loadTranslator('web');
@@ -117,14 +92,9 @@ async function scrape(doc, url = doc.location.href) {
 
 	translator.setHandler('itemDone', (_obj, item) => {
 		// remove word "Abstract" from abstract if present, e.g. https://journals.ametsoc.org/view/journals/atsc/72/8/jas-d-14-0363.1.xml
-		// var abstract = doc.querySelector('meta[property="og:description"]').content;
 		var abstract = attr(doc, 'meta[property="og:description"]', "content");
 		var cleanAbstract = abstract.replace(/^Abstract\s+/i, "");
-		// Z.debug(item.publicationTitle);
-		// if (abstract.startsWith("Abstract")) {
-		// 	var cleanAbstract = abstract.substring(8); // remove the first 8 characters ("Abstract ")
 		item.abstractNote = cleanAbstract;
-		// }
 		if (pdfURL) {
 			item.attachments = [];
 			item.attachments.push({
@@ -138,6 +108,8 @@ async function scrape(doc, url = doc.location.href) {
 
 	let em = await translator.getTranslatorObject();
 	em.itemType = 'journalArticle';
+	// fix when meta elements are incorrectly placed in body on journal pages
+	// https://github.com/zotero/translators/pull/3009#discussion_r1268956903
 	if (doc.querySelector("body > meta")) {
 		em.searchForMetaTagsInBody = true;
 	}
