@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-18 08:25:36"
+	"lastUpdated": "2023-08-29 11:01:36"
 }
 
 /*
@@ -138,6 +138,9 @@ async function scrape(doc, url = doc.location.href) {
 
 	let em = await translator.getTranslatorObject();
 	em.itemType = 'journalArticle';
+	if (doc.querySelector("body > meta")) {
+		em.searchForMetaTagsInBody = true;
+	}
 	await em.doWeb(doc, url);
 }
 
