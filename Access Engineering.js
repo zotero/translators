@@ -2,14 +2,14 @@
 	"translatorID": "d120a8a7-9d45-446e-8c18-ad9ef0a6bf47",
 	"label": "Access Engineering",
 	"creator": "Vinoth K - highwirepress.com",
-	"target": "^https?://www\\.accessengineeringlibrary\\.com/content/(book|chapter|case-study|video|calculator|tutorial)",
+	"target": "^https?://www\\.accessengineeringlibrary\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 4,
+	"translatorType": 15,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-07 08:48:13"
+	"lastUpdated": "2023-08-31 12:46:24"
 }
 
 /*
@@ -97,7 +97,8 @@ function scrape(doc, url) {
 		if (edition) item.edition = edition;
 
 		// Author
-		let author = ZU.xpath(doc, '//ul[@class="contributor-list"]//li//a');
+		// Some of old pages not having first and lastname and ignore if empty or undefined
+		let author = ZU.xpath(doc, '//ul[@class="contributor-list"]//li[@data-firstnames]');
 		if (author.length > 0) {
 			// Handled using data attribute
 			for (let i = 0; i < author.length; i++) {
@@ -119,9 +120,6 @@ function scrape(doc, url) {
 		if (detectWeb(doc, url)) {
 			trans.itemType = detectWeb(doc, url);
 		}
-		trans.addCustomFields({
-			citation_book_title: "bookTitle"
-		});
 		trans.doWeb(doc, url);
 	});
 }
@@ -130,26 +128,31 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.accessengineeringlibrary.com/content/book/9781259860386/",
+		"url": "https://www.accessengineeringlibrary.com/content/book/9780071472425",
 		"items": [
 			{
 				"itemType": "book",
-				"title": "3D Printer Projects for Makerspaces",
+				"title": "Applied Cell and Molecular Biology for Engineers",
 				"creators": [
 					{
-						"firstName": "Lydia Sloan",
-						"lastName": "Cline",
-						"creatorType": "author"
+						"firstName": "Gabi Nindle",
+						"lastName": "Waite",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Lee Waite",
+						"lastName": "R",
+						"creatorType": "editor"
 					}
 				],
-				"date": "2017",
-				"ISBN": "9781259860386",
-				"abstractNote": "Learn to model and print 3D designs—no experience required!This easy-to-follow guide features twenty 3D printing projects for makers of all skill levels to enjoy. Written in a tutorial, step-by-step manner, 3D Printer Projects for Makerspaces shows how to use Fusion 360, SketchUp, Meshmixer, Remake, and Inkscape to create fun and useful things. Scanning, slicers, silicone molds, settings, and build plate orientation are also covered, as well as post-processing methods that will make your prints really pop!Inside, you9ll learn to model, analyze, and print a:• Phone case• Coin bank• Art stencil• Cookie cutter• Cookie dunker• Personalized key fob• Lens cap holder• Lithophane night-light• Pencil cup with applied sketch• Business card with QR code• Bronze pendant• Soap mold• Hanging lampshade• Scanned Buddha charm• And more!",
+				"date": "2007",
+				"ISBN": "9780071472425",
+				"abstractNote": "New engineering concepts that foster better machines and procedures in the health field. Bridging the gap between two rapidly merging fields, this resource provides you with a solid foundation in the biological sciences and the quantitative analysis and technical skills necessary for engineering.This presentation of biological concepts in an engineering language encourages you to develop devices and procedures that solve medical and health-related problems.",
 				"edition": "1st Edition",
 				"language": "en",
 				"libraryCatalog": "www.accessengineeringlibrary.com",
 				"publisher": "McGraw-Hill Education",
-				"url": "https://www.accessengineeringlibrary.com/content/book/9781259860386",
+				"url": "https://www.accessengineeringlibrary.com/content/book/9780071472425",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -164,28 +167,37 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.accessengineeringlibrary.com/content/book/9781259860386/chapter/chapter12",
+		"url": "https://www.accessengineeringlibrary.com/content/book/9780071472425/chapter/chapter2",
 		"items": [
 			{
 				"itemType": "bookSection",
-				"title": "PROJECT 12: Lithophane Night-Light",
+				"title": "Cell Morphology",
 				"creators": [
 					{
-						"firstName": "Lydia Sloan",
-						"lastName": "Cline",
+						"firstName": "Michael B.",
+						"lastName": "Worrell",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Gabi Nindle",
+						"lastName": "Waite",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Lee Waite",
+						"lastName": "R",
+						"creatorType": "editor"
 					}
 				],
-				"date": "2017",
-				"ISBN": "9781259860386",
-				"abstractNote": "Learn to model and print 3D designs—no experience required!This easy-to-follow guide features twenty 3D printing projects for makers of all skill levels to enjoy. Written in a tutorial, step-by-step manner, 3D Printer Projects for Makerspaces shows how to use Fusion 360, SketchUp, Meshmixer, Remake, and Inkscape to create fun and useful things. Scanning, slicers, silicone molds, settings, and build plate orientation are also covered, as well as post-processing methods that will make your prints really pop!Inside, you'll learn to model, analyze, and print a:• Phone case• Coin bank• Art stencil• Cookie cutter• Cookie dunker• Personalized key fob• Lens cap holder• Lithophane night-light• Pencil cup with applied sketch• Business card with QR code• Bronze pendant• Soap mold• Hanging lampshade• Scanned Buddha charm• And more!",
-				"bookTitle": "3D Printer Projects for Makerspaces",
+				"date": "2007",
+				"ISBN": "9780071472425",
+				"abstractNote": "New engineering concepts that foster better machines and procedures in the health field. Bridging the gap between two rapidly merging fields, this resource provides you with a solid foundation in the biological sciences and the quantitative analysis and technical skills necessary for engineering.This presentation of biological concepts in an engineering language encourages you to develop devices and procedures that solve medical and health-related problems.",
+				"bookTitle": "Applied Cell and Molecular Biology for Engineers",
 				"edition": "1st Edition",
 				"language": "en",
 				"libraryCatalog": "www.accessengineeringlibrary.com",
 				"publisher": "McGraw-Hill Education",
-				"shortTitle": "PROJECT 12",
-				"url": "https://www.accessengineeringlibrary.com/content/book/9781259860386/chapter/chapter12",
+				"url": "https://www.accessengineeringlibrary.com/content/book/9780071472425/chapter/chapter2",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -200,118 +212,19 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.accessengineeringlibrary.com/content/video/V4768153299001",
+		"url": "https://www.accessengineeringlibrary.com/content/video/V4005352521001",
 		"items": [
 			{
 				"itemType": "videoRecording",
-				"title": "10% Infill and a Bridge",
-				"creators": [
-					{
-						"firstName": "Lydia",
-						"lastName": "Cline",
-						"creatorType": "author"
-					}
-				],
-				"date": "2016",
-				"abstractNote": "This video shows an item being printed with a 10% infill and includes a bridge.",
+				"title": "123D Design: Cut Text Through a Plane",
+				"creators": [],
+				"date": "2014",
+				"abstractNote": "This video shows how to cut text through a plane with Combine/Subtract.",
 				"language": "en",
 				"libraryCatalog": "www.accessengineeringlibrary.com",
+				"shortTitle": "123D Design",
 				"studio": "McGraw-Hill Education",
-				"url": "https://www.accessengineeringlibrary.com/content/video/V4768153299001",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.accessengineeringlibrary.com/content/calculator/S0018_Analysis_of_AC_and_DC_Circuits_Basic_Calculations",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Analysis of A.C. and D.C. Circuits - Basic Calculations",
-				"creators": [
-					{
-						"firstName": "William",
-						"lastName": "Prudhomme",
-						"creatorType": "author"
-					}
-				],
-				"date": "2018/12/13/",
-				"abstractNote": "Software simulation programs are generally used for modeling and designing complex electronic circuits and applications, but frequently only a basic calculation is needed to solve an immediate design problem or to calculate the value of a specific circuit element. This Excel workbook addresses this need by automating the calculation of over 70 basic electronics formulas in direct current (d.c.) and alternating current (a.c.) circuits and applications.",
-				"language": "en",
-				"libraryCatalog": "www.accessengineeringlibrary.com",
-				"url": "https://www.accessengineeringlibrary.com/content/calculator/S0018_Analysis_of_AC_and_DC_Circuits_Basic_Calculations",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.accessengineeringlibrary.com/content/case-study/CS0004_Atrial_Fibrillation",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Atrial Fibrillation: Improving Therapy via Engineering Advancements",
-				"creators": [
-					{
-						"firstName": "Michael J.",
-						"lastName": "Rust",
-						"creatorType": "author"
-					}
-				],
-				"date": "2020-04-23",
-				"abstractNote": "This case will explore atrial fibrillation from several perspectives, including the underlying physiology, clinical relevance, and instrumentation used for diagnosis and therapy. Students will identify and investigate unmet clinical needs that led to recent developments in technologies to treat atrial fibrillation.",
-				"language": "en",
-				"libraryCatalog": "www.accessengineeringlibrary.com",
-				"shortTitle": "Atrial Fibrillation",
-				"url": "https://www.accessengineeringlibrary.com/content/case-study/CS0004_Atrial_Fibrillation",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.accessengineeringlibrary.com/content/tutorial/T0002_Open_Channel_Flow_Calculations_with_the_Manning_Equation",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Open Channel Flow Calculations with the Manning Equation using Excel Spreadsheets",
-				"creators": [
-					{
-						"firstName": "Harlan",
-						"lastName": "H. Bengtson",
-						"creatorType": "author"
-					}
-				],
-				"date": "2014-02-01",
-				"abstractNote": "This tutorial teaches the Manning equation and its use for uniform open channel flow calculations, including the hydraulic radius, Manning roughness coefficient, and normal depth. There are example problems and illustrations show how to use spreadsheets for the calculations.",
-				"language": "en",
-				"libraryCatalog": "www.accessengineeringlibrary.com",
-				"url": "https://www.accessengineeringlibrary.com/content/tutorial/T0002_Open_Channel_Flow_Calculations_with_the_Manning_Equation",
+				"url": "https://www.accessengineeringlibrary.com/content/video/V4005352521001",
 				"attachments": [
 					{
 						"title": "Snapshot",
