@@ -2,18 +2,17 @@
 	"translatorID": "938ebe32-2b2e-4349-a5b3-b3a05d3de627",
 	"label": "ACS Publications",
 	"creator": "Sean Takats, Michael Berkowitz, Santawort, and Aurimas Vinckevicius",
-	"target": "^https?://pubs\\.acs\\.org/(toc/|journal/|topic/|isbn/\\d|doi/(full/|abs/)?10\\.|action/doSearch\\?)",
+	"target": "^https?://pubs\\.acs\\.org/(toc/|journal/|topic/|isbn/\\d|doi/(full/|abs/|epdf/)?10\\.|action/doSearch\\?)",
 	"minVersion": "4.0.5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-10-07 09:04:25"
+	"lastUpdated": "2023-08-31 15:51:43"
 }
 
-
-function getSearchResults(doc, checkOnly, itemOpts) {
+function getSearchResults(doc, checkOnly) {
 	var items = {}, found = false;
 	var rows = doc.querySelectorAll('.issue-item_title a, .teaser_title a');
 	for (let i = 0; i < rows.length; i++) {
@@ -23,53 +22,23 @@ function getSearchResults(doc, checkOnly, itemOpts) {
 		if (!href || !title || !doi) continue;
 		if (checkOnly) return true;
 		found = true;
-		items[doi] = title;
-		
-		// Not sure if this is still working on the new websites...
-		itemOpts[doi] = {};
-
-		/*
-		//check if article contains supporting info,
-		//so we don't have to waste an HTTP request later if it doesn't
-		var articleBox = titles[i].parentNode.parentNode;
-		if (!articleBox.classList.contains('articleBox')) {
-			// e.g. Most Recently Published under Subject Search
-			continue;
-		}
-		
-		if (ZU.xpath(articleBox, './/a[text()="Supporting Info"]').length) {
-			itemOpts[doi].hasSupp = true;
-		}
-		*/
 	}
 	
 	return found ? items : false;
 }
 
 function getDoi(url) {
-	var m = url.match(/https?:\/\/[^/]*\/doi\/(?:abs\/|full\/)?(10\.[^?#]+)/);
-	if (m) {
-		var doi = m[1];
-		if (doi.includes("prevSearch")) {
-			doi = doi.substring(0, doi.indexOf("?"));
-		}
-		return decodeURIComponent(doi);
+	let urlObj = new URL(url);
+	let doi = urlObj.pathname.match(/^\/doi\/(?:.+\/)?(10\.\d\d\d\d\/.+)$/);
+	if (doi) {
+		doi = doi[1];
 	}
-	return false;
+	return doi;
 }
 
 /** ***************************
  * BEGIN: Supplementary data *
  *****************************/
-// Get supplementary file names either from the Supporting Info page or the tooltip
-function getSuppFiles(div) {
-	var fileNames = ZU.xpath(div, './/li//li');
-	var attach = [];
-	for (var i = 0, n = fileNames.length; i < n; i++) {
-		attach.push(fileNames[i].textContent.trim().replace(/\s[\s\S]+/, ''));
-	}
-	return attach;
-}
 
 var suppTypeMap = {
 	pdf: 'application/pdf',
@@ -79,28 +48,23 @@ var suppTypeMap = {
 	xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 };
 
-function getSuppMimeType(fileName) {
-	var ext = fileName.substr(fileName.lastIndexOf('.') + 1);
-	var mimeType = suppTypeMap[ext];
-	return mimeType ? mimeType : undefined;
-}
-
-function attachSupp(item, doi, opts) {
-	if (!opts.attach) return;
-	if (!item.attachments) item.attachments = [];
-	var attachment;
-	for (var i = 0, n = opts.attach.length; i < n; i++) {
-		attachment = {
-			title: opts.attach[i]
-		};
-		attachment.url = '/doi/suppl/' + doi + '/suppl_file/' + attachment.title;
-		attachment.mimeType = getSuppMimeType(attachment.title);
-		if (opts.attachAsLink || !attachment.mimeType) { // don't download unknown file types
-			attachment.snapshot = false;
+function getSupplements(doc) {
+	let supplements = [];
+	if (doc) {
+		let suppLinks = doc.querySelectorAll("#article_content-right .suppl-anchor");
+		for (let i = 0; i < suppLinks.length; i++) {
+			let elem = suppLinks[i];
+			let url = elem.href;
+			if (!url) continue;
+			let cleanURL = url.replace(/[?#].+$/, "");
+			let ext = cleanURL.split(".").at(-1).toLowerCase();
+			let mimeType = suppTypeMap[ext];
+			if (!mimeType) continue;
+			let title = `Supplement ${i + 1}`;
+			supplements.push({ title, url, mimeType });
 		}
-		
-		item.attachments.push(attachment);
 	}
+	return supplements;
 }
 
 /** *************************
@@ -123,160 +87,81 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-function doWeb(doc, url) {
-	var opts = {};
+async function doWeb(doc, url) {
+	let attachSupp = false;
 	// reduce some overhead by fetching these only once
 	if (Z.getHiddenPref) {
-		opts.attachSupp = Z.getHiddenPref("attachSupplementary");
-		opts.attachAsLink = Z.getHiddenPref("supplementaryAsLink");
+		attachSupp = Z.getHiddenPref("attachSupplementary");
 	}
+	attachSupp = true;
 	
-	var itemOpts = {};
 	if (detectWeb(doc, url) == "multiple") { // search
-		Zotero.selectItems(getSearchResults(doc, false, itemOpts), function (items) {
-			if (!items) {
-				return;
-			}
-			
-			var dois = [];
-			for (let i in items) {
-				itemOpts[i].pdf = '/doi/pdf/' + i;
-				dois.push({ doi: i, opts: itemOpts[i] });
-			}
-			
-			scrape(dois, opts);
-		});
+		let items = await Z.selectItems(getSearchResults(doc));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(
+				attachSupp && await requestDocument(url),
+				url,
+				doc.cookie
+			);
+		}
 	}
 	else { // single article
-		var doi = getDoi(url);
-		Zotero.debug("DOI= " + doi);
-		// we can determine file names from the tooltip, which saves us an HTTP request
-		var suppTip = doc.getElementById('suppTipDiv');
-		if (opts.attachSupp && suppTip) {
-			try {
-				opts.attach = getSuppFiles(suppTip, opts);
-			}
-			catch (e) {
-				Z.debug("Error getting supplementary files.");
-				Z.debug(e);
-			}
-		}
-		
-		// if we couldn't find this on the individual item page,
-		// then it doesn't have supp info anyway. This way we know not to check later
-		if (!opts.attach) opts.attach = [];
-		
-		itemOpts.pdf = ZU.xpathText(doc, '(//a[i[contains(@class, "icon-file-pdf-o")]]/@href)[1]') || '/doi/pdf/' + doi;
-		
-		scrape([{ doi: doi, opts: itemOpts }], opts);
+		await scrape(attachSupp && doc, url, doc.cookie);
 	}
 }
 
-function scrape(items, opts) {
-	for (var i = 0, n = items.length; i < n; i++) {
-		processCallback(items[i], opts);
+async function scrape(doc, url, cookie) {
+	let doi = getDoi(url);
+	if (!doi) {
+		throw new Error("no doi");
 	}
-}
+	let risURL = new URL("/action/downloadCitation?include=abs&format=ris&direct=true", url);
+	risURL.searchParams.set("doi", doi);
+	risURL.searchParams.set("downloadFileName", doi.replace(/^10\.\d\d\d\d\//, ""));
+	// ACS may send us an error page indicating "cookie has not been accepted"
+	// if the RIS request is sent without cookie. Emulate cookie acceptance by
+	// re-using the context page's cookie.
+	let requestOpt = { headers: { Referer: url } };
+	Z.debug(cookie);
+	if (doc && doc.cookie) {
+		requestOpt.headers.Cookie = doc.cookie;
+	}
+	else if (cookie) {
+		requestOpt.headers.Cookie = cookie;
+	}
+	let risText = await requestText(risURL.href, requestOpt);
+	// Fix the wrong mapping for journal abbreviations
+	risText = risText.replace("\nJO  -", "\nJ2  -");
+	// Use publication date when available
+	if (risText.includes("\nDA  -")) {
+		risText = risText.replace(/\nY1 {2}- [^\n]*/, "")
+			.replace("\nDA  -", "\nY1  -");
+	}
+	Z.debug(risText);
 
-function processCallback(fetchItem, opts) {
-	var baseurl = "/action/downloadCitation";
-	var doi = fetchItem.doi;
-	var post = "https//pubs.acs.org/action/downloadCitation?direct=true&doi=" + encodeURIComponent(fetchItem.doi) + "&format=ris&include=abs&submit=Download+Citation";
-	ZU.doPost(baseurl, post, function (text) {
-		// Fix the RIS doi mapping
-		text = text.replace("\nN1  - doi:", "\nDO  - ");
-		// Fix the wrong mapping for journal abbreviations
-		text = text.replace("\nJO  -", "\nJ2  -");
-		// Use publication date when available
-		if (text.includes("\nDA  -")) {
-			text = text.replace(/\nY1 {2}- [^\n]*/, "")
-					.replace("\nDA  -", "\nY1  -");
+	let translator = Zotero.loadTranslator("import");
+	// RIS
+	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+	translator.setString(risText);
+	translator.setHandler("itemDone", function (obj, item) {
+		if (item.date) {
+			item.date = ZU.strToISO(item.date);
 		}
-		// Zotero.debug("ris= "+ text);
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		translator.setString(text);
-		translator.setHandler("itemDone", function (obj, item) {
-			if (item.date) {
-				item.date = ZU.strToISO(item.date);
-			}
-			item.attachments = [];
-
-			// standard pdf and snapshot
-			if (fetchItem.opts.pdf) {
-				item.attachments.push({
-					title: "Full Text PDF",
-					url: fetchItem.opts.pdf,
-					mimeType: "application/pdf"
-				});
-			}
-			item.attachments.push({
-				title: "ACS Full Text Snapshot",
-				url: '/doi/full/' + doi,
-				mimeType: "text/html"
-			});
-				
-			// supplementary data
-			try {
-				if (opts.attachSupp && opts.attach) {
-					// came from individual item page
-					attachSupp(item, doi, opts);
-				}
-				else if (opts.attachSupp && fetchItem.opts.hasSupp) {
-					// was a search result and has supp info
-					var suppUrl = '/doi/suppl/' + doi;
-						
-					if (opts.attachAsLink) {
-						// if we're only attaching links, it's not worth linking to each doc
-						item.attachments.push({
-							title: "Supporting Information",
-							url: suppUrl,
-							mimeType: 'text/html',
-							snapshot: false
-						});
-					}
-					else {
-						ZU.processDocuments(suppUrl, function (suppDoc) {
-							try {
-								var div = suppDoc.getElementById('supInfoBox');
-								if (div) {
-									var files = getSuppFiles(div);
-									attachSupp(item, doi, {
-										attach: files,
-										attachAsLink: opts.attachAsLink
-									});
-								}
-								else {
-									Z.debug("Div not found");
-									item.attachments.push({
-										title: "Supporting Information",
-										url: suppUrl,
-										mimeType: 'text/html',
-										snapshot: false
-									});
-								}
-							}
-							catch (e) {
-								Z.debug("Error attaching supplementary files.");
-								Z.debug(e);
-							}
-							item.complete();
-						}, null, function () {
-							item.complete();
-						});
-						return; // don't call item.complete() yet
-					}
-				}
-			}
-			catch (e) {
-				Z.debug("Error attaching supplementary files.");
-				Z.debug(e);
-			}
-				
-			item.complete();
+		item.attachments = [];
+		// standard pdf
+		item.attachments.push({
+			title: "Full Text PDF",
+			url: new URL(`/doi/pdf/${doi}`, url).href,
+			mimeType: "application/pdf"
 		});
-		translator.translate();
+		if (doc) {
+			item.attachments.push(...getSupplements(doc));
+		}
+		Z.debug(item.attachments);
+		item.complete();
 	});
+	await translator.translate();
 }
 
 /** BEGIN TEST CASES **/
