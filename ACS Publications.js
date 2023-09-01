@@ -42,8 +42,9 @@ function getSearchResults(doc, checkOnly) {
 	for (let i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
 		var doi = getDoi(href);
-		if (!href || !title || !doi) continue;
+		if (!doi) continue;
 		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
@@ -70,6 +71,11 @@ function getDoi(url) {
  *****************************/
 
 var suppTypeMap = {
+	txt: 'text/plain',
+	csv: 'text/csv',
+	bz2: 'application/x-bzip2',
+	gz: 'application/gzip',
+	zip: 'application/zip',
 	pdf: 'application/pdf',
 	doc: 'application/msword',
 	docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -77,24 +83,28 @@ var suppTypeMap = {
 	xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 };
 
-function getSupplements(doc) {
+function getSupplements(doc, supplementAsLink = false) {
 	let supplements = [];
-	if (doc) {
-		// Note that the lists of supplements are duplicated in the main
-		// content side and right-side panel (if any). We want to confine it to
-		// one (or the only) side in order to avoid having to deduplicate.
-		let suppLinks = doc.querySelectorAll(".article_content-left .suppl-anchor");
-		for (let i = 0; i < suppLinks.length; i++) {
-			let elem = suppLinks[i];
-			let url = elem.href;
-			if (!url) continue;
-			let cleanURL = url.replace(/[?#].+$/, "");
-			let ext = cleanURL.split(".").at(-1).toLowerCase();
-			let mimeType = suppTypeMap[ext];
-			if (!mimeType) continue;
-			let title = `Supplement ${i + 1}`;
-			supplements.push({ title, url, mimeType });
-		}
+	// Note that the lists of supplements are duplicated in the main
+	// content side and right-side panel (if any). We want to confine it to
+	// one (or the only) side in order to avoid having to deduplicate.
+	let supplementLinks = doc.querySelectorAll(".article_content-left .suppl-anchor");
+	for (let i = 0; i < supplementLinks.length; i++) {
+		let elem = supplementLinks[i];
+		let url = elem.href;
+		if (!url) continue;
+		let cleanURL = url.replace(/[?#].+$/, "");
+		let ext = cleanURL.split(".").at(-1).toLowerCase();
+		let mimeType = suppTypeMap[ext];
+		// Only save file when MIME type is known *and* when we aren't
+		// specifically told otherwise
+		let snapshot = Boolean(!supplementAsLink && mimeType);
+		// The "title" (text describing what the supplement file is for) can be
+		// substantially long, while the filename is redundant (and it doesn't
+		// inform the user that the file is meant to be a supplement). We
+		// simply number them in the order they appear.
+		let title = `Supplement ${i + 1}`;
+		supplements.push({ title, url, mimeType, snapshot });
 	}
 	return supplements;
 }
@@ -144,34 +154,36 @@ function detectWeb(doc, url) {
 // fetched by us) when we want the supplements.
 
 async function doWeb(doc, url) {
-	let attachSupp = false;
+	let attachSupplement = false;
+	let supplementAsLink = false;
 	// reduce some overhead by fetching these only once
 	if (Z.getHiddenPref) {
-		attachSupp = Z.getHiddenPref("attachSupplementary");
+		attachSupplement = Z.getHiddenPref("attachSupplementary");
+		supplementAsLink = Z.getHiddenPref("supplementaryAsLink");
 	}
-	attachSupp = true; // XXX debug only
+	// XXX debug only
+	attachSupplement = true;
+	supplementAsLink = true;
 	
 	if (detectWeb(doc, url) == "multiple") { // search
 		let items = await Z.selectItems(getSearchResults(doc));
 		if (!items) return;
 		for (let url of Object.keys(items)) {
 			await scrape(
-				attachSupp && await requestDocument(url),
-				url
+				attachSupplement && await requestDocument(url),
+				url,
+				supplementAsLink
 			);
 		}
 	}
 	else {
 		// single article
-		await scrape(attachSupp && doc, url);
+		await scrape(attachSupplement && doc, url, supplementAsLink);
 	}
 }
 
-async function scrape(doc, url) {
+async function scrape(doc, url, supplementAsLink) {
 	let doi = getDoi(url);
-	if (!doi) {
-		throw new Error("no doi");
-	}
 
 	if (doc && /\/action\/showCitFormats\?/.test(url)) {
 		// standalone "export citation" page And supplements are desired; we
@@ -179,6 +191,7 @@ async function scrape(doc, url) {
 		url = `https://pubs.acs.org/doi/${doi}`;
 		doc = await requestDocument(url);
 	}
+	// TODO: similarly for epdf viewer
 
 	let risURL = new URL("/action/downloadCitation?include=abs&format=ris&direct=true", url);
 	risURL.searchParams.set("doi", doi);
@@ -212,7 +225,7 @@ async function scrape(doc, url) {
 			mimeType: "application/pdf"
 		});
 		if (doc) {
-			item.attachments.push(...getSupplements(doc));
+			item.attachments.push(...getSupplements(doc, supplementAsLink));
 		}
 		// Cleanup unhelpful fields
 		if (Object.hasOwn(item, "numberOfVolumes")
