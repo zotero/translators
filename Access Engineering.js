@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 15,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-31 12:46:24"
+	"lastUpdated": "2023-09-01 01:49:43"
 }
 
 /*
@@ -46,7 +46,7 @@ function detectWeb(doc, url) {
 			return 'videoRecording';
 		}
 		else {
-			return "journalArticle";
+			return "webpage";
 		}
 	}
 	else if (getSearchResults(doc, true)) {
@@ -97,7 +97,7 @@ function scrape(doc, url) {
 		if (edition) item.edition = edition;
 
 		// Author
-		// Some of old pages not having first and lastname and ignore if empty or undefined
+		// Some of old pages not having firstname, lastname seperation in markup and ignore if not
 		let author = ZU.xpath(doc, '//ul[@class="contributor-list"]//li[@data-firstnames]');
 		if (author.length > 0) {
 			// Handled using data attribute
@@ -128,31 +128,51 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.accessengineeringlibrary.com/content/book/9780071472425",
+		"url": "https://www.accessengineeringlibrary.com/content/book/9781259860225",
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Applied Cell and Molecular Biology for Engineers",
+				"title": "Handbook of Environmental Engineering",
 				"creators": [
 					{
-						"firstName": "Gabi Nindle",
-						"lastName": "Waite",
+						"firstName": "Rao Y.",
+						"lastName": "Surampalli",
 						"creatorType": "editor"
 					},
 					{
-						"firstName": "Lee Waite",
-						"lastName": "R",
+						"firstName": "Tian C.",
+						"lastName": "Zhang",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Satinder Kaur",
+						"lastName": "Brar",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Krishnamoorthy",
+						"lastName": "Hegde",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Rama",
+						"lastName": "Pulicharla",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Mausam",
+						"lastName": "Verma",
 						"creatorType": "editor"
 					}
 				],
-				"date": "2007",
-				"ISBN": "9780071472425",
-				"abstractNote": "New engineering concepts that foster better machines and procedures in the health field. Bridging the gap between two rapidly merging fields, this resource provides you with a solid foundation in the biological sciences and the quantitative analysis and technical skills necessary for engineering.This presentation of biological concepts in an engineering language encourages you to develop devices and procedures that solve medical and health-related problems.",
+				"date": "2018",
+				"ISBN": "9781259860225",
+				"abstractNote": "A complete guide to environmental regulations and remediation.This practical resource offers thorough coverage of current environmental issues and policies along with step-by-step remediation procedures. With contributions from dozens of  industry-recognized experts, Handbook of Environmental Engineering features information on all segments of the market—including water and air quality and hazardous waste—and enables you to ensure compliance with all applicable regulations. You will get details about sensors, monitoring, and toxicity treatment and controls as well as waste management and safe disposal. Real-world examples demonstrate how to apply techniques and achieve compliance, while environmental impact assessments and measurement data enhance the book9s utility.Coverage includes:• Environmental legislation• Environmental impact assessments• Air pollution control and management• Potable water treatment• Wastewater treatment and reuse• Solid waste management• Hazardous waste management• Emerging wastes in the environment• Environmental monitoring and measurements",
 				"edition": "1st Edition",
 				"language": "en",
 				"libraryCatalog": "www.accessengineeringlibrary.com",
 				"publisher": "McGraw-Hill Education",
-				"url": "https://www.accessengineeringlibrary.com/content/book/9780071472425",
+				"url": "https://www.accessengineeringlibrary.com/content/book/9781259860225",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -167,37 +187,93 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.accessengineeringlibrary.com/content/book/9780071472425/chapter/chapter2",
+		"url": "https://www.accessengineeringlibrary.com/content/book/9781259860225/toc-chapter/chapter3/section/section1",
 		"items": [
 			{
 				"itemType": "bookSection",
-				"title": "Cell Morphology",
+				"title": "CHAPTER PRELIMINARIES",
 				"creators": [
 					{
-						"firstName": "Michael B.",
-						"lastName": "Worrell",
+						"firstName": "Ashok",
+						"lastName": "Kumar",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Gabi Nindle",
-						"lastName": "Waite",
+						"firstName": "Hamid",
+						"lastName": "Omidvarborna",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rao Y.",
+						"lastName": "Surampalli",
 						"creatorType": "editor"
 					},
 					{
-						"firstName": "Lee Waite",
-						"lastName": "R",
+						"firstName": "Tian C.",
+						"lastName": "Zhang",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Satinder Kaur",
+						"lastName": "Brar",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Krishnamoorthy",
+						"lastName": "Hegde",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Rama",
+						"lastName": "Pulicharla",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Mausam",
+						"lastName": "Verma",
 						"creatorType": "editor"
 					}
 				],
-				"date": "2007",
-				"ISBN": "9780071472425",
-				"abstractNote": "New engineering concepts that foster better machines and procedures in the health field. Bridging the gap between two rapidly merging fields, this resource provides you with a solid foundation in the biological sciences and the quantitative analysis and technical skills necessary for engineering.This presentation of biological concepts in an engineering language encourages you to develop devices and procedures that solve medical and health-related problems.",
-				"bookTitle": "Applied Cell and Molecular Biology for Engineers",
-				"edition": "1st Edition",
+				"date": "2018",
+				"ISBN": "9781259860225",
+				"abstractNote": "A complete guide to environmental regulations and remediation.This practical resource offers thorough coverage of current environmental issues and policies along with step-by-step remediation procedures. With contributions from dozens of  industry-recognized experts, Handbook of Environmental Engineering features information on all segments of the market—including water and air quality and hazardous waste—and enables you to ensure compliance with all applicable regulations. You will get details about sensors, monitoring, and toxicity treatment and controls as well as waste management and safe disposal. Real-world examples demonstrate how to apply techniques and achieve compliance, while environmental impact assessments and measurement data enhance the book's utility.Coverage includes:• Environmental legislation• Environmental impact assessments• Air pollution control and management• Potable water treatment• Wastewater treatment and reuse• Solid waste management• Hazardous waste management• Emerging wastes in the environment• Environmental monitoring and measurements",
+				"bookTitle": "Handbook of Environmental Engineering",
 				"language": "en",
 				"libraryCatalog": "www.accessengineeringlibrary.com",
 				"publisher": "McGraw-Hill Education",
-				"url": "https://www.accessengineeringlibrary.com/content/book/9780071472425/chapter/chapter2",
+				"url": "https://www.accessengineeringlibrary.com/content/book/9781259860225/toc-chapter/chapter3/section/section1",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.accessengineeringlibrary.com/content/video/V4768153299001",
+		"items": [
+			{
+				"itemType": "videoRecording",
+				"title": "10% Infill and a Bridge",
+				"creators": [
+					{
+						"firstName": "Lydia",
+						"lastName": "Cline",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016",
+				"abstractNote": "This video shows an item being printed with a 10% infill and includes a bridge.",
+				"language": "en",
+				"libraryCatalog": "www.accessengineeringlibrary.com",
+				"studio": "McGraw-Hill Education",
+				"url": "https://www.accessengineeringlibrary.com/content/video/V4768153299001",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -225,6 +301,102 @@ var testCases = [
 				"shortTitle": "123D Design",
 				"studio": "McGraw-Hill Education",
 				"url": "https://www.accessengineeringlibrary.com/content/video/V4005352521001",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.accessengineeringlibrary.com/content/calculator/S0071_Basic_Transformer_Calculations",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Basic Transformer Calculations",
+				"creators": [
+					{
+						"firstName": "Bhagyalakshmi",
+						"lastName": "Kerekare",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022/06/25/",
+				"abstractNote": "This Excel workbook contains four worksheets. The first worksheet covers the basic concepts of single phase transformer such as turns ratio, primary current, secondary current, primary voltage, secondary voltage, and transformer ratio calculations. The second worksheet covers the basic concepts of power, efficiency, primary/secondary EMF and transformer rating calculations. The third worksheet covers the basic concepts of three phase transformers, highlighting the star and delta connections. Calculations are done for phase voltage, phase current, line voltage, and line current for star and delta connections. The fourth worksheet covers the basic concepts kVA Ratings, 3-phase primary, and secondary full load current 3-phase voltage calculations.",
+				"language": "en",
+				"url": "https://www.accessengineeringlibrary.com/content/calculator/S0071_Basic_Transformer_Calculations",
+				"websiteTitle": "McGraw-Hill Education - Access Engineering",
+				"websiteType": "text",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.accessengineeringlibrary.com/content/case-study/CS0004_Atrial_Fibrillation",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Atrial Fibrillation: Improving Therapy via Engineering Advancements",
+				"creators": [
+					{
+						"firstName": "Michael J.",
+						"lastName": "Rust",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020-04-23",
+				"abstractNote": "This case will explore atrial fibrillation from several perspectives, including the underlying physiology, clinical relevance, and instrumentation used for diagnosis and therapy. Students will identify and investigate unmet clinical needs that led to recent developments in technologies to treat atrial fibrillation.",
+				"language": "en",
+				"shortTitle": "Atrial Fibrillation",
+				"url": "https://www.accessengineeringlibrary.com/content/case-study/CS0004_Atrial_Fibrillation",
+				"websiteTitle": "McGraw-Hill Education - Access Engineering",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.accessengineeringlibrary.com/content/tutorial/T0004_Partially_Full_Pipe_Flow_Calculations_Using_Excel_Spreadsheets",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Partially Full Pipe Flow Calculations Using Excel Spreadsheets",
+				"creators": [
+					{
+						"firstName": "Harlan H.",
+						"lastName": "Bengtson",
+						"creatorType": "author"
+					}
+				],
+				"date": "2014/02/01/",
+				"abstractNote": "This tutorial provides discussion of, and illustration by, examples for use of an Excel spreadsheet for making a variety of calculations for the flow of water in a partially full circular pipe using the Manning Equation. Equations for calculating area, wetted perimeter, and hydraulic radius for partially full pipe flow are included in this tutorial along with a brief review of the Manning Equation and discussion of its use to calculate a) the flow rate in a given pipe (given diameter, slope, &amp; Manning roughness) at a specified depth of flow, b) the required diameter for a specified flow rate at a target percent full in a given pipe, and c) the normal depth (depth of flow) for a specified flow rate in a given pipe. This includes presentation and discussion of the equations for the calculations, example calculations, and screenshots of spreadsheets to facilitate the calculations.",
+				"language": "en",
+				"url": "https://www.accessengineeringlibrary.com/content/tutorial/T0004_Partially_Full_Pipe_Flow_Calculations_Using_Excel_Spreadsheets",
+				"websiteTitle": "McGraw-Hill Education - Access Engineering",
+				"websiteType": "text",
 				"attachments": [
 					{
 						"title": "Snapshot",
