@@ -2,15 +2,39 @@
 	"translatorID": "938ebe32-2b2e-4349-a5b3-b3a05d3de627",
 	"label": "ACS Publications",
 	"creator": "Sean Takats, Michael Berkowitz, Santawort, and Aurimas Vinckevicius",
-	"target": "^https?://pubs\\.acs\\.org/(toc/|journal/|topic/|isbn/\\d|doi/(full/|abs/|epdf/)?10\\.|action/doSearch\\?)",
+	"target": "^https?://pubs\\.acs\\.org/(toc/|journal/|topic/|isbn/\\d|doi/(full/|abs/|epdf/)?10\\.|action/(doSearch\\?|showCitFormats\\?.*doi))",
 	"minVersion": "4.0.5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-31 15:51:43"
+	"lastUpdated": "2023-09-01 08:17:02"
 }
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2008 Sean Takats, Michael Berkowitz, Santawort, Aurimas
+	Vinckevicius, Philipp Zumstein, and other contributors.
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
 
 function getSearchResults(doc, checkOnly) {
 	var items = {}, found = false;
@@ -22,16 +46,21 @@ function getSearchResults(doc, checkOnly) {
 		if (!href || !title || !doi) continue;
 		if (checkOnly) return true;
 		found = true;
+		items[href] = title;
 	}
 	
 	return found ? items : false;
 }
 
+// Return the DOI indicated by the URL, or null when no DOI is found
 function getDoi(url) {
 	let urlObj = new URL(url);
 	let doi = urlObj.pathname.match(/^\/doi\/(?:.+\/)?(10\.\d\d\d\d\/.+)$/);
 	if (doi) {
 		doi = doi[1];
+	}
+	else {
+		doi = urlObj.searchParams.get("doi");
 	}
 	return doi;
 }
@@ -51,7 +80,10 @@ var suppTypeMap = {
 function getSupplements(doc) {
 	let supplements = [];
 	if (doc) {
-		let suppLinks = doc.querySelectorAll("#article_content-right .suppl-anchor");
+		// Note that the lists of supplements are duplicated in the main
+		// content side and right-side panel (if any). We want to confine it to
+		// one (or the only) side in order to avoid having to deduplicate.
+		let suppLinks = doc.querySelectorAll(".article_content-left .suppl-anchor");
 		for (let i = 0; i < suppLinks.length; i++) {
 			let elem = suppLinks[i];
 			let url = elem.href;
@@ -75,7 +107,24 @@ function detectWeb(doc, url) {
 	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	let urlObj = new URL(url);
+	// standalone "download citation" page
+	if (urlObj.pathname === "/action/showCitFormats"
+		&& urlObj.searchParams.get("doi")) {
+		// May be inaccurate, but better than not detecting
+		return "journalArticle";
+	}
+	// epdf viewer web app
+	if (urlObj.pathname.startsWith("/doi/epdf/")) {
+		// TODO: check if "epdf" viewer is always for journal articles
+		return "journalArticle";
+	}
+	if (doc.querySelector("#returnToBook")) {
+		// Some of them may be conference articles, but the RIS doesn't say so
+		return "bookSection";
+	}
 	else if (getDoi(url)) {
+		// TODO: check if this block still works
 		var type = doc.getElementsByClassName("content-navigation__contentType");
 		if (type.length && type[0].textContent.includes("Chapter")) {
 			return "bookSection";
@@ -93,7 +142,7 @@ async function doWeb(doc, url) {
 	if (Z.getHiddenPref) {
 		attachSupp = Z.getHiddenPref("attachSupplementary");
 	}
-	attachSupp = true;
+	attachSupp = true; // XXX debug only
 	
 	if (detectWeb(doc, url) == "multiple") { // search
 		let items = await Z.selectItems(getSearchResults(doc));
@@ -123,7 +172,6 @@ async function scrape(doc, url, cookie) {
 	// if the RIS request is sent without cookie. Emulate cookie acceptance by
 	// re-using the context page's cookie.
 	let requestOpt = { headers: { Referer: url } };
-	Z.debug(cookie);
 	if (doc && doc.cookie) {
 		requestOpt.headers.Cookie = doc.cookie;
 	}
@@ -131,6 +179,10 @@ async function scrape(doc, url, cookie) {
 		requestOpt.headers.Cookie = cookie;
 	}
 	let risText = await requestText(risURL.href, requestOpt);
+	// Delete redundant DOI info
+	risText = risText.replace(/\nN1 {2}- doi:[^\n]+/, "");
+	// Fix noise in DO field
+	risText = risText.replace("\nDO  - doi:", "\nDO  - ");
 	// Fix the wrong mapping for journal abbreviations
 	risText = risText.replace("\nJO  -", "\nJ2  -");
 	// Use publication date when available
@@ -138,7 +190,6 @@ async function scrape(doc, url, cookie) {
 		risText = risText.replace(/\nY1 {2}- [^\n]*/, "")
 			.replace("\nDA  -", "\nY1  -");
 	}
-	Z.debug(risText);
 
 	let translator = Zotero.loadTranslator("import");
 	// RIS
@@ -158,7 +209,11 @@ async function scrape(doc, url, cookie) {
 		if (doc) {
 			item.attachments.push(...getSupplements(doc));
 		}
-		Z.debug(item.attachments);
+		// Cleanup unhelpful fields
+		if (Object.hasOwn(item, "numberOfVolumes")
+			&& parseInt(item.numberOfVolumes) === 0) {
+			delete item.numberOfVolumes;
+		}
 		item.complete();
 	});
 	await translator.translate();
