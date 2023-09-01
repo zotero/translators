@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-01 08:17:02"
+	"lastUpdated": "2023-09-01 09:19:30"
 }
 
 /*
@@ -136,6 +136,13 @@ function detectWeb(doc, url) {
 	return false;
 }
 
+// In most cases the URL contains the DOI which is sufficient for obtaining the
+// RIS, so there's no need to download the document if it's not already there.
+// But when supplements as attachments are desired, we need the actual document
+// for the supplement links. Our convention here is to pass falsy as the "doc"
+// argument when supplements are not requested, and the actual doc (maybe
+// fetched by us) when we want the supplements.
+
 async function doWeb(doc, url) {
 	let attachSupp = false;
 	// reduce some overhead by fetching these only once
@@ -150,35 +157,33 @@ async function doWeb(doc, url) {
 		for (let url of Object.keys(items)) {
 			await scrape(
 				attachSupp && await requestDocument(url),
-				url,
-				doc.cookie
+				url
 			);
 		}
 	}
-	else { // single article
-		await scrape(attachSupp && doc, url, doc.cookie);
+	else {
+		// single article
+		await scrape(attachSupp && doc, url);
 	}
 }
 
-async function scrape(doc, url, cookie) {
+async function scrape(doc, url) {
 	let doi = getDoi(url);
 	if (!doi) {
 		throw new Error("no doi");
 	}
+
+	if (doc && /\/action\/showCitFormats\?/.test(url)) {
+		// standalone "export citation" page And supplements are desired; we
+		// need to fetch the actual article page and scrape that
+		url = `https://pubs.acs.org/doi/${doi}`;
+		doc = await requestDocument(url);
+	}
+
 	let risURL = new URL("/action/downloadCitation?include=abs&format=ris&direct=true", url);
 	risURL.searchParams.set("doi", doi);
 	risURL.searchParams.set("downloadFileName", doi.replace(/^10\.\d\d\d\d\//, ""));
-	// ACS may send us an error page indicating "cookie has not been accepted"
-	// if the RIS request is sent without cookie. Emulate cookie acceptance by
-	// re-using the context page's cookie.
-	let requestOpt = { headers: { Referer: url } };
-	if (doc && doc.cookie) {
-		requestOpt.headers.Cookie = doc.cookie;
-	}
-	else if (cookie) {
-		requestOpt.headers.Cookie = cookie;
-	}
-	let risText = await requestText(risURL.href, requestOpt);
+	let risText = await requestText(risURL.href, { headers: { Referer: url } });
 	// Delete redundant DOI info
 	risText = risText.replace(/\nN1 {2}- doi:[^\n]+/, "");
 	// Fix noise in DO field
