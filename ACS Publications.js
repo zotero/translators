@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-02 13:22:38"
+	"lastUpdated": "2023-09-02 13:27:44"
 }
 
 /*
@@ -187,13 +187,13 @@ async function doWeb(doc, url) {
 async function scrape(doc, url, supplementAsLink) {
 	let doi = getDoi(url);
 
-	if (doc && /\/action\/showCitFormats\?/.test(url)) {
-		// standalone "export citation" page And supplements are desired; we
-		// need to fetch the actual article page and scrape that
+	if (doc && /\/action\/showCitFormats\?|\/doi\/epdf\//.test(url)) {
+		// standalone "export citation" page or "epdf viewer", *and*
+		// supplements are desired; we need to fetch the actual article page
+		// and scrape that
 		url = `https://pubs.acs.org/doi/${doi}`;
 		doc = await requestDocument(url);
 	}
-	// TODO: similarly for epdf viewer
 
 	let risURL = new URL("/action/downloadCitation?include=abs&format=ris&direct=true", url);
 	risURL.searchParams.set("doi", doi);
