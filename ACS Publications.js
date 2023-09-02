@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-01 09:19:30"
+	"lastUpdated": "2023-09-02 13:22:38"
 }
 
 /*
@@ -104,7 +104,9 @@ function getSupplements(doc, supplementAsLink = false) {
 		// inform the user that the file is meant to be a supplement). We
 		// simply number them in the order they appear.
 		let title = `Supplement ${i + 1}`;
-		supplements.push({ title, url, mimeType, snapshot });
+		let attachment = { title, url, snapshot };
+		if (mimeType) attachment.mimeType = mimeType;
+		supplements.push(attachment);
 	}
 	return supplements;
 }
@@ -224,6 +226,7 @@ async function scrape(doc, url, supplementAsLink) {
 			url: new URL(`/doi/pdf/${doi}`, url).href,
 			mimeType: "application/pdf"
 		});
+		// supplements
 		if (doc) {
 			item.attachments.push(...getSupplements(doc, supplementAsLink));
 		}
