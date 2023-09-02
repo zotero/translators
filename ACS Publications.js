@@ -2,14 +2,14 @@
 	"translatorID": "938ebe32-2b2e-4349-a5b3-b3a05d3de627",
 	"label": "ACS Publications",
 	"creator": "Sean Takats, Michael Berkowitz, Santawort, and Aurimas Vinckevicius",
-	"target": "^https?://pubs\\.acs\\.org/(toc/|journal/|topic/|isbn/\\d|doi/(full/|abs/|epdf/)?10\\.|action/(doSearch\\?|showCitFormats\\?.*doi))",
+	"target": "^https?://pubs\\.acs\\.org/(toc/|journal/|topic/|isbn/\\d|doi/(full/|abs/|epdf/|book/)?10\\.|action/(doSearch\\?|showCitFormats\\?.*doi))",
 	"minVersion": "4.0.5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-02 13:27:44"
+	"lastUpdated": "2023-09-02 14:40:47"
 }
 
 /*
@@ -131,6 +131,10 @@ function detectWeb(doc, url) {
 		// TODO: check if "epdf" viewer is always for journal articles
 		return "journalArticle";
 	}
+	// books such as https://pubs.acs.org/doi/book/10.1021/acsguide
+	if (urlObj.pathname.startsWith("/doi/book/")) {
+		return "book";
+	}
 	if (doc.querySelector("#returnToBook")) {
 		// Some of them may be conference articles, but the RIS doesn't say so
 		return "bookSection";
@@ -146,6 +150,15 @@ function detectWeb(doc, url) {
 		}
 	}
 	return false;
+}
+
+function cleanNumberField(item, field) {
+	if (Object.hasOwn(item, field)) {
+		let n = parseInt(item[field]);
+		if (n <= 0 || isNaN(n)) {
+			delete item[field];
+		}
+	}
 }
 
 // In most cases the URL contains the DOI which is sufficient for obtaining the
@@ -221,20 +234,20 @@ async function scrape(doc, url, supplementAsLink) {
 		}
 		item.attachments = [];
 		// standard pdf
-		item.attachments.push({
-			title: "Full Text PDF",
-			url: new URL(`/doi/pdf/${doi}`, url).href,
-			mimeType: "application/pdf"
-		});
+		if (!/\/doi\/book\//.test(url)) {
+			item.attachments.push({
+				title: "Full Text PDF",
+				url: new URL(`/doi/pdf/${doi}`, url).href,
+				mimeType: "application/pdf"
+			});
+		}
 		// supplements
 		if (doc) {
 			item.attachments.push(...getSupplements(doc, supplementAsLink));
 		}
-		// Cleanup unhelpful fields
-		if (Object.hasOwn(item, "numberOfVolumes")
-			&& parseInt(item.numberOfVolumes) === 0) {
-			delete item.numberOfVolumes;
-		}
+		// Cleanup fields that may contain invalid numeric values
+		cleanNumberField(item, "numberOfVolumes");
+		cleanNumberField(item, "numPages");
 		item.complete();
 	});
 	await translator.translate();
