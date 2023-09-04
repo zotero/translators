@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-02 14:40:47"
+	"lastUpdated": "2023-09-04 07:23:44"
 }
 
 /*
@@ -54,9 +54,10 @@ function getSearchResults(doc, checkOnly) {
 }
 
 // Return the DOI indicated by the URL, or null when no DOI is found
+// The input should be a properly encoded URL
 function getDoi(url) {
 	let urlObj = new URL(url);
-	let doi = urlObj.pathname.match(/^\/doi\/(?:.+\/)?(10\.\d\d\d\d\/.+)$/);
+	let doi = decodeURIComponent(urlObj.pathname).match(/^\/doi\/(?:.+\/)?(10\.\d\d\d\d\/.+)$/);
 	if (doi) {
 		doi = doi[1];
 	}
@@ -176,9 +177,6 @@ async function doWeb(doc, url) {
 		attachSupplement = Z.getHiddenPref("attachSupplementary");
 		supplementAsLink = Z.getHiddenPref("supplementaryAsLink");
 	}
-	// XXX debug only
-	attachSupplement = true;
-	supplementAsLink = true;
 	
 	if (detectWeb(doc, url) == "multiple") { // search
 		let items = await Z.selectItems(getSearchResults(doc));
@@ -233,8 +231,18 @@ async function scrape(doc, url, supplementAsLink) {
 			item.date = ZU.strToISO(item.date);
 		}
 		item.attachments = [];
-		// standard pdf
-		if (!/\/doi\/book\//.test(url)) {
+		if (/\/doi\/book\//.test(url)) {
+			// books as standalone items don't have full pdfs (TODO: verify)
+			if (doc) {
+				item.attachments.push({
+					title: "Snapshot",
+					url: url,
+					mimeType: "text/html"
+				});
+			}
+		}
+		else {
+			// standard pdf
 			item.attachments.push({
 				title: "Full Text PDF",
 				url: new URL(`/doi/pdf/${doi}`, url).href,
@@ -294,10 +302,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "ACS Full Text Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -336,7 +340,6 @@ var testCases = [
 				"bookTitle": "Aquatic Redox Chemistry",
 				"extra": "DOI: 10.1021/bk-2011-1071.ch005",
 				"libraryCatalog": "ACS Publications",
-				"numberOfVolumes": "0",
 				"pages": "85-111",
 				"publisher": "American Chemical Society",
 				"series": "ACS Symposium Series",
@@ -348,10 +351,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "ACS Full Text Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -409,10 +408,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "ACS Full Text Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -423,11 +418,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://pubs.acs.org/isbn/9780841239999",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "https://pubs.acs.org/journal/acbcct",
 		"items": "multiple"
 	},
@@ -435,6 +425,49 @@ var testCases = [
 		"type": "web",
 		"url": "https://pubs.acs.org/action/doSearch?text1=zotero&field1=AllField",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://pubs.acs.org/doi/book/10.1021/acsguide",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "The ACS Guide to Scholarly Communication",
+				"creators": [
+					{
+						"lastName": "Banik",
+						"firstName": "Gregory M.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Baysinger",
+						"firstName": "Grace",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kamat",
+						"firstName": "Prashant V.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Pienta",
+						"firstName": "Norbert",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019-10-02",
+				"ISBN": "9780841235861",
+				"extra": "DOI: 10.1021/acsguide",
+				"libraryCatalog": "ACS Publications",
+				"publisher": "American Chemical Society",
+				"series": "ACS Guide to Scholarly Communication",
+				"url": "https://doi.org/10.1021/acsguide",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
