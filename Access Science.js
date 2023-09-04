@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-01 18:58:09"
+	"lastUpdated": "2023-09-04 08:32:13"
 }
 
 /*
@@ -52,10 +52,10 @@ function detectWeb(doc, url) {
 		}
 		else if (url.includes('content/article/')) {
 			return "journalArticle";
-		} 
-		else if(url.includes('news') || url.includes('briefing')) {
+		}
+		else if (url.includes('news') || url.includes('briefing')) {
 			return "magazineArticle";
-		} 
+		}
 		else {
 			return "webpage";
 		}
@@ -102,20 +102,21 @@ function scrape(doc, url) {
 		
 		// Author
 		if (detectedType == 'videoRecording' && item.creators[0] != undefined) {
-			// Some of video pages having old content which does not contain the 
-			// firstname and lastname. which is binding in a single string in 
+			// Some of video pages having old content which does not contain the
+			// firstname and lastname. which is binding in a single string in
 			// metadata tags, So those cases we were assigning in the fullname
 			// All video pages having one or none author meta tag(Handled in above checkpoint)
 			const name = ZU.xpath(doc, '//meta[@name="citation_author"]/@content');
 			let creators = [];
-			const authorName = name[0].value;
-			if(authorName.includes(',')) {
-				creators = item.creators.map(({firstName,lastName,...rest}) => ({
-					fullName: authorName,
+			const authorFullNames = name[0].value;
+			if (authorFullNames.includes(',')) {
+				creators = item.creators.map(({ firstName, lastName, ...rest }) => ({
+					fullName: authorFullNames,
 					...rest
 				}));
 			}
 			item.creators = creators[0];
+			
 		}
 		
 		// Abstract
