@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-04 07:23:44"
+	"lastUpdated": "2023-09-04 07:34:40"
 }
 
 /*
@@ -463,6 +463,160 @@ var testCases = [
 				"series": "ACS Guide to Scholarly Communication",
 				"url": "https://doi.org/10.1021/acsguide",
 				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://pubs.acs.org/action/showCitFormats?doi=10.1021%2Facscentsci.3c00243",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Generic Platform for the Multiplexed Targeted Electrochemical Detection of Osteoporosis-Associated Single Nucleotide Polymorphisms Using Recombinase Polymerase Solid-Phase Primer Elongation and Ferrocene-Modified Nucleoside Triphosphates",
+				"creators": [
+					{
+						"lastName": "Ortiz",
+						"firstName": "Mayreli",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Jauset-Rubio",
+						"firstName": "Miriam",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Trummer",
+						"firstName": "Olivia",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Foessl",
+						"firstName": "Ines",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kodr",
+						"firstName": "David",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Acero",
+						"firstName": "Josep Lluís",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Botero",
+						"firstName": "Mary Luz",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Biggs",
+						"firstName": "Phil",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Lenartowicz",
+						"firstName": "Daniel",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Trajanoska",
+						"firstName": "Katerina",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Rivadeneira",
+						"firstName": "Fernando",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Hocek",
+						"firstName": "Michal",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Obermayer-Pietsch",
+						"firstName": "Barbara",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "O’Sullivan",
+						"firstName": "Ciara K.",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-08-23",
+				"DOI": "10.1021/acscentsci.3c00243",
+				"ISSN": "2374-7943",
+				"abstractNote": "Osteoporosis is a multifactorial disease influenced by genetic and environmental factors, which contributes to an increased risk of bone fracture, but early diagnosis of this disease cannot be achieved using current techniques. We describe a generic platform for the targeted electrochemical genotyping of SNPs identified by genome-wide association studies to be associated with a genetic predisposition to osteoporosis. The platform exploits isothermal solid-phase primer elongation with ferrocene-labeled nucleoside triphosphates. Thiolated reverse primers designed for each SNP were immobilized on individual gold electrodes of an array. These primers are designed to hybridize to the SNP site at their 3′OH terminal, and primer elongation occurs only where there is 100% complementarity, facilitating the identification and heterozygosity of each SNP under interrogation. The platform was applied to real blood samples, which were thermally lysed and directly used without the need for DNA extraction or purification. The results were validated using Taqman SNP genotyping assays and Sanger sequencing. The assay is complete in just 15 min with a total cost of 0.3€ per electrode. The platform is completely generic and has immense potential for deployment at the point of need in an automated device for targeted SNP genotyping with the only required end-user intervention being sample addition.",
+				"issue": "8",
+				"journalAbbreviation": "ACS Cent. Sci.",
+				"libraryCatalog": "ACS Publications",
+				"pages": "1591-1602",
+				"publicationTitle": "ACS Central Science",
+				"url": "https://doi.org/10.1021/acscentsci.3c00243",
+				"volume": "9",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://pubs.acs.org/doi/epdf/10.1021/acscentsci.3c00323",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Dynamics of Rayleigh Fission Processes in ∼100 nm Charged Aqueous Nanodrops",
+				"creators": [
+					{
+						"lastName": "Hanozin",
+						"firstName": "Emeline",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Harper",
+						"firstName": "Conner C.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "McPartlan",
+						"firstName": "Matthew S.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Williams",
+						"firstName": "Evan R.",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-08-23",
+				"DOI": "10.1021/acscentsci.3c00323",
+				"ISSN": "2374-7943",
+				"abstractNote": "Fission of micron-size charged droplets has been observed using optical methods, but little is known about fission dynamics and breakup of smaller nanosize droplets that are important in a variety of natural and industrial processes. Here, spontaneous fission of individual aqueous nanodrops formed by electrospray is investigated using charge detection mass spectrometry. Fission processes ranging from formation of just two progeny droplets in 2 ms to production of dozens of progeny droplets over 100+ ms are observed for nanodrops that are charged above the Rayleigh limit. These results indicate that Rayleigh fission is a continuum of processes that produce progeny droplets that vary widely in charge, mass, and number.",
+				"issue": "8",
+				"journalAbbreviation": "ACS Cent. Sci.",
+				"libraryCatalog": "ACS Publications",
+				"pages": "1611-1622",
+				"publicationTitle": "ACS Central Science",
+				"url": "https://doi.org/10.1021/acscentsci.3c00323",
+				"volume": "9",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
