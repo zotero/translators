@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-04 07:34:40"
+	"lastUpdated": "2023-09-04 07:44:18"
 }
 
 /*
@@ -187,12 +187,17 @@ async function doWeb(doc, url) {
 				url,
 				supplementAsLink
 			);
+			await delay(500);
 		}
 	}
 	else {
 		// single article
 		await scrape(attachSupplement && doc, url, supplementAsLink);
 	}
+}
+
+function delay(milliseconds) {
+	return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
 
 async function scrape(doc, url, supplementAsLink) {
