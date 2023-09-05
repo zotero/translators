@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-04 08:32:13"
+	"lastUpdated": "2023-09-05 09:10:42"
 }
 
 /*
@@ -99,26 +99,23 @@ function scrape(doc, url) {
 	translator.setDocument(doc);
 	translator.setHandler('itemDone', function (obj, item) {
 		let detectedType = detectWeb(doc, url);
-		
 		// Author
-		if (detectedType == 'videoRecording' && item.creators[0] != undefined) {
-			// Some of video pages having old content which does not contain the
-			// firstname and lastname. which is binding in a single string in
-			// metadata tags, So those cases we were assigning in the fullname
-			// All video pages having one or none author meta tag(Handled in above checkpoint)
-			const name = ZU.xpath(doc, '//meta[@name="citation_author"]/@content');
-			let creators = [];
-			const authorFullNames = name[0].value;
-			if (authorFullNames.includes(',')) {
-				creators = item.creators.map(({ firstName, lastName, ...rest }) => ({
-					fullName: authorFullNames,
-					...rest
-				}));
+		// Some of video pages having old content which does not contain the
+		// firstname and lastname. which is binding in a single string in
+		// metadata tags, So those cases we were split and mapped accordingly
+		if (detectedType == 'videoRecording') {
+			const author_name = ZU.xpath(doc, '//meta[@name="citation_author"]/@content');
+			if(author_name) {
+				item.creators = [];
+				for(let name of author_name) {
+					name = name.value;
+					if (name.includes(',') && name.split(',').length > 2) {
+						let authorFullName = name.split(',')[0];
+						item.creators.push(ZU.cleanAuthor(authorFullName, "author", false));
+					}
+				}
 			}
-			item.creators = creators[0];
-			
 		}
-		
 		// Abstract
 		const abstractNote = ZU.xpathText(doc, '//meta[@name="citation_abstract"]/@content');
 		if (abstractNote) item.abstractNote = ZU.cleanTags(abstractNote);
@@ -176,7 +173,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.accessscience.com/content/book/9781260452297/chapter/chapter2?implicit-login=true",
+		"url": "https://www.accessscience.com/content/book/9781260452297/chapter/chapter2",
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -230,10 +227,13 @@ var testCases = [
 			{
 				"itemType": "videoRecording",
 				"title": "Supplementary Problem 10.12",
-				"creators": {
-					"fullName": "Rebecca B. DeVasher, Ph.D., Assistant Professor, Department of Chemistry, Rose-Hulman Institute of Technology",
-					"creatorType": "author"
-				},
+				"creators": [
+					{
+						"firstName": "Rebecca B.",
+						"lastName": "DeVasher",
+						"creatorType": "author"
+					}
+				],
 				"date": "2013",
 				"abstractNote": "This video details a problem involving unit cells and the calculation of the mass of a cell, length of a cell and radius of an atom in the unit cell based on the density of a solid.",
 				"language": "en",
@@ -259,10 +259,7 @@ var testCases = [
 			{
 				"itemType": "videoRecording",
 				"title": "Anderson, John R.",
-				"creators": {
-					"fullName": "Anderson, John R.",
-					"creatorType": "author"
-				},
+				"creators": [],
 				"date": "2011",
 				"abstractNote": "AccessScience is an authoritative and dynamic online resource that contains incisively written, high-quality educational material covering all major scientific disciplines. An acclaimed gateway to scientific knowledge, AccessScience is continually expanding the ways it can demonstrate and explain core, trustworthy scientific information that inspires and guides users to deeper knowledge.",
 				"language": "en",
@@ -283,7 +280,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.accessscience.com/content/article/a694300",
+		"url": "https://www.accessscience.com/content/article/a694300?implicit-login=true",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -373,7 +370,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.accessscience.com/content/biography/m0073908?implicit-login=true",
+		"url": "https://www.accessscience.com/content/biography/m0073908",
 		"items": [
 			{
 				"itemType": "webpage",
