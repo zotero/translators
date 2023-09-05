@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-05 09:10:42"
+	"lastUpdated": "2023-09-05 09:21:42"
 }
 
 /*
@@ -104,10 +104,10 @@ function scrape(doc, url) {
 		// firstname and lastname. which is binding in a single string in
 		// metadata tags, So those cases we were split and mapped accordingly
 		if (detectedType == 'videoRecording') {
-			const author_name = ZU.xpath(doc, '//meta[@name="citation_author"]/@content');
-			if(author_name) {
+			const authorName = ZU.xpath(doc, '//meta[@name="citation_author"]/@content');
+			if (authorName) {
 				item.creators = [];
-				for(let name of author_name) {
+				for (let name of authorName) {
 					name = name.value;
 					if (name.includes(',') && name.split(',').length > 2) {
 						let authorFullName = name.split(',')[0];
