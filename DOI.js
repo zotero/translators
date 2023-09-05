@@ -151,26 +151,47 @@ function detectWeb(doc, url) {
 	return "journalArticle"; // A decent guess
 }
 
-async function retrieveDOIs(doiOrDOIs) {
+// If the current page matches and returns "multiple", and there's no current
+// page in the items to choose, we offer the current page with snapshot as a
+// choice during item selection. This is triggered when all other translators
+// fail to detect (incl. EM) while this translator (lowest priority) detects
+// multiple. NOTE that when this translator fails to match, the user will get
+// the "save web page" fallback by default.
+
+var MAGIC_INVALID_DOI = "not a DOI; placeholder for current webpage"; // clearer than using a nullish value
+
+async function retrieveDOIs(doiOrDOIs, fallbackDoc) {
 	let showSelect = Array.isArray(doiOrDOIs);
-	let dois = showSelect ? doiOrDOIs : [doiOrDOIs];
+	let dois = showSelect ? [MAGIC_INVALID_DOI, ...doiOrDOIs] : [doiOrDOIs];
 	let items = {};
 	let numDOIs = dois.length;
 
 	for (const doi of dois) {
 		items[doi] = null;
-		
-		const translate = Zotero.loadTranslator("search");
-		translate.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
-		translate.setSearch({ itemType: "journalArticle", DOI: doi });
-	
+
+		let translate;
+		if (doi === MAGIC_INVALID_DOI) {
+			// First, create the special item for the current page, to be
+			// saved as a webpage item if selected
+			translate = Zotero.loadTranslator("web");
+			// Embedded Metadata
+			translate.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+			translate.setDocument(fallbackDoc);
+		}
+		else {
+			translate = Zotero.loadTranslator("search");
+			translate.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
+			translate.setSearch({ itemType: "journalArticle", DOI: doi });
+		}
+
 		// don't save when item is done
 		translate.setHandler("itemDone", function (_translate, item) {
+			let key = item.DOI || MAGIC_INVALID_DOI;
 			if (!item.title) {
-				Zotero.debug("No title available for " + item.DOI);
+				Zotero.debug("No title available for " + key);
 				item.title = "[No Title]";
 			}
-			items[item.DOI] = item;
+			items[key] = item;
 		});
 		/* eslint-disable no-loop-func */
 		translate.setHandler("done", function () {
@@ -198,7 +219,13 @@ async function retrieveDOIs(doiOrDOIs) {
 				for (let doi in items) {
 					let item = items[doi];
 					if (item) {
-						select[doi] = item.title || "[" + item.DOI + "]";
+						if (doi === MAGIC_INVALID_DOI) {
+							select[doi] = "Current Webpage"
+							+ (item.title !== "[No title]" ? ` (${item.title})` : "");
+						}
+						else {
+							select[doi] = item.title || "[" + item.DOI + "]";
+						}
 					}
 				}
 				Zotero.selectItems(select, function (selectedDOIs) {
@@ -296,7 +323,7 @@ var testCases = [
 					{
 						"lastName": "WorldFish",
 						"creatorType": "contributor",
-						"fieldMode": true
+						"fieldMode": 1
 					}
 				],
 				"date": "2023",
@@ -311,6 +338,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.callingbullshit.org/syllabus.html",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
