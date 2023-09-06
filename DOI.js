@@ -215,22 +215,10 @@ async function retrieveDOIs(doiOrDOIs, fallbackDoc) {
 				}
 
 				// Otherwise, allow the user to select among items that resolved successfully
-				let select = {};
-				for (let doi in items) {
-					let item = items[doi];
-					if (item) {
-						if (doi === MAGIC_INVALID_DOI) {
-							select[doi] = "Current Webpage"
-							+ (item.title !== "[No title]" ? ` (${item.title})` : "");
-						}
-						else {
-							select[doi] = item.title || "[" + item.DOI + "]";
-						}
-					}
-				}
+				let select = buildSelections(items);
 				Zotero.selectItems(select, function (selectedDOIs) {
 					if (!selectedDOIs) return;
-					
+
 					for (let selectedDOI in selectedDOIs) {
 						items[selectedDOI].complete();
 					}
@@ -249,6 +237,129 @@ async function doWeb(doc, url) {
 	let doiOrDOIs = getDOIs(doc, url);
 	Z.debug(doiOrDOIs);
 	await retrieveDOIs(doiOrDOIs);
+}
+
+function buildSelections(items) {
+	let select = {};
+	// The `select` mapping will be populated from the `items`
+	// object keyed by DOI, but first, we check if the special item
+	// "current web page" may be a duplicate of the DOI-resolved
+	// items -- and if so, the "current web page" choice is no
+	// longer offered.
+	let possibleCurrentWebPageDOI;
+	let minDissimilarity = 1;
+	let currentWebPageItem = items[MAGIC_INVALID_DOI];
+	if (currentWebPageItem) {
+		for (let [doi, item] of Object.entries(items)) {
+			if (doi === MAGIC_INVALID_DOI || !item) {
+				continue;
+			}
+			let d = itemDissimilarity(currentWebPageItem, item);
+			if (d < minDissimilarity) {
+				minDissimilarity = d;
+				possibleCurrentWebPageDOI = doi;
+			}
+		}
+	}
+
+	if (minDissimilarity <= 0.05) {
+		delete items[MAGIC_INVALID_DOI];
+	}
+
+	for (let doi in items) {
+		let item = items[doi];
+		if (item) {
+			if (doi === MAGIC_INVALID_DOI) {
+				select[doi] = "Current Webpage"
+					+ (item.title !== "[No title]" ? ` (${item.title})` : "");
+			}
+			else {
+				let title = item.title || "[" + item.DOI + "]";
+				if (doi === possibleCurrentWebPageDOI
+					&& minDissimilarity <= 0.05) {
+					title += " (possibly current web page)";
+				}
+				select[doi] = title;
+			}
+		}
+	}
+	return select;
+}
+
+// Item dissimilarity, for deduplicating the "current web page" among the
+// multiple. It is a number between 0 (identical) and 1 (totally different),
+// calculated as the minimum of URL- and title-based dissimilarity metric.
+function itemDissimilarity(a, b) {
+	return Math.min(urlDissimilarity(a, b), titleDissimilarity(a, b));
+}
+
+// URL-based dissimilarity. If either item's URL is missing, the dissimilarity
+// maxes out at 1. If top-level domains differ, it also maxes out. When
+// top-level domains are the same, only the pathnames (without subdomains,
+// query, fragment, etc.) are checked. The trailing slash in the pathname, if
+// present, is ignored.
+function urlDissimilarity(a, b) {
+	if (!(a.url && b.url)) {
+		return 1;
+	}
+	let aURL = new URL(a.url);
+	let bURL = new URL(b.url);
+	// only consider top-level domains; if they differ, max out the
+	// dissimilarity
+	if (topLevelDomain(aURL.hostname) !== topLevelDomain(bURL.hostname)) {
+		return 1;
+	}
+	// further check among the URLs with the same hostname, by computing the
+	// dissimilarity of pathnames
+	let options = { isPath: true };
+	let aPath = normalizeString(aURL.pathname, options);
+	let bPath = normalizeString(bURL.pathname, options);
+	return ZU.levenshtein(aPath, bPath) / Math.max(aPath.length, bPath.length);
+}
+
+// Title-based dissimilarity. If either item's URL is missing, the dissimilarity
+// maxes out at 1.
+function titleDissimilarity(a, b) {
+	let aTitle = a.title || "";
+	let bTitle = b.title || "";
+	if (!(a.title && b.title)) {
+		return 1;
+	}
+	let options = { normalizeDiacritics: true };
+	aTitle = normalizeString(
+		ZU.cleanTags(
+			ZU.trimInternal(aTitle.trim())
+		),
+		options
+	);
+	bTitle = normalizeString(
+		ZU.cleanTags(
+			ZU.trimInternal(bTitle.trim())
+		),
+		options
+	);
+	return ZU.levenshtein(aTitle, bTitle) / Math.max(aTitle.length, bTitle.length);
+}
+
+function normalizeString(str, options = {}) {
+	let output = str;
+	if (options.isPath) {
+		output = output.replace(/\/$/, ""); // strip last slash if any
+	}
+	output = output.toLowerCase(); // case-normalize
+	if (options.normalizeDiacritics) {
+		output = ZU.removeDiacritics(output);
+	}
+	// encode the astrals so that the JS "length" property is equal to the
+	// string's code-point length
+	return encodeURI(output);
+}
+
+function topLevelDomain(hostname) {
+	return hostname.toLowerCase()
+		.split(".")
+		.slice(-2)
+		.join(".");
 }
 
 /** BEGIN TEST CASES **/
@@ -342,6 +453,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.callingbullshit.org/syllabus.html",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://physics.aps.org/articles/v16/127",
 		"items": "multiple"
 	}
 ]
