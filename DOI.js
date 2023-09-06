@@ -158,7 +158,7 @@ function detectWeb(doc, url) {
 // multiple. NOTE that when this translator fails to match, the user will get
 // the "save web page" fallback by default.
 
-var MAGIC_INVALID_DOI = "not a DOI; placeholder for current webpage"; // clearer than using a nullish value
+var MAGIC_INVALID_DOI = "not a DOI; placeholder for current web page"; // clearer than using a nullish value
 
 async function retrieveDOIs(doiOrDOIs, fallbackDoc) {
 	let showSelect = Array.isArray(doiOrDOIs);
@@ -177,6 +177,12 @@ async function retrieveDOIs(doiOrDOIs, fallbackDoc) {
 			// Embedded Metadata
 			translate.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 			translate.setDocument(fallbackDoc);
+			// Expando flag as a hack to be used in itemDone handler callback.
+			// This is a workaround for the case when the DOI resolution API
+			// returns an item without actual DOI field; very much an edge case
+			// (but see the "Template_talk:Doi" test case). TODO: Actually
+			// purge those invalid items.
+			translate.isEM = true;
 		}
 		else {
 			translate = Zotero.loadTranslator("search");
@@ -186,7 +192,7 @@ async function retrieveDOIs(doiOrDOIs, fallbackDoc) {
 
 		// don't save when item is done
 		translate.setHandler("itemDone", function (_translate, item) {
-			let key = item.DOI || MAGIC_INVALID_DOI;
+			let key = translate.isEM ? MAGIC_INVALID_DOI : item.DOI;
 			if (!item.title) {
 				Zotero.debug("No title available for " + key);
 				item.title = "[No Title]";
@@ -270,7 +276,7 @@ function buildSelections(items) {
 		let item = items[doi];
 		if (item) {
 			if (doi === MAGIC_INVALID_DOI) {
-				select[doi] = "Current Webpage"
+				select[doi] = "Current Web Page"
 					+ (item.title !== "[No title]" ? ` (${item.title})` : "");
 			}
 			else {
