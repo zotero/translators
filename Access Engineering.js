@@ -7,9 +7,9 @@
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 4,
+	"translatorType": 15,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-02 11:09:20"
+	"lastUpdated": "2023-09-07 20:16:51"
 }
 
 /*
@@ -117,9 +117,7 @@ function scrape(doc, url) {
 	translator.getTranslatorObject(function (trans) {
 		// Detect web not get trigger for scape EM translator
 		// - so wll fill those in manually.
-		if (detectWeb(doc, url)) {
-			trans.itemType = detectWeb(doc, url);
-		}
+		trans.itemType = detectWeb(doc, url);
 		trans.doWeb(doc, url);
 	});
 }
