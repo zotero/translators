@@ -8,7 +8,7 @@
 	"priority": 98,
 	"inRepository": true,
 	"translatorType": 8,
-	"lastUpdated": "2023-09-07 18:46:49"
+	"lastUpdated": "2023-09-07 18:56:42"
 }
 
 /*
@@ -153,6 +153,19 @@ function translateResult(result) {
 		//   https://en.wikipedia.org/wiki/Portuguese_name#Indexing
 		let creator = ZU.cleanAuthor(author, creatorType, author.includes(','));
 		if (!creator.firstName) creator.fieldMode = 1;
+		
+		// That said, we will handle name suffixes, which should be combined with the last "middle"
+		// name particle in the last name
+		if (creator.firstName && creator.lastName
+				&& ['filho', 'junior', 'neto', 'sobrinho', 'segundo', 'terceiro']
+					.includes(ZU.removeDiacritics(creator.lastName.toLowerCase()))) {
+			let firstNameSplit = creator.firstName.split(/\s+/);
+			if (firstNameSplit.length) {
+				let lastParticleFirstName = firstNameSplit[firstNameSplit.length - 1];
+				creator.lastName = lastParticleFirstName + ' ' + creator.lastName;
+				creator.firstName = firstNameSplit.slice(0, firstNameSplit.length - 1).join(' ');
+			}
+		}
 		item.creators.push(creator);
 	}
 	if (result.Subject) {
@@ -783,6 +796,39 @@ var testCases = [
 				"tags": [
 					{
 						"tag": "Literatura"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"ISBN": "9788591597512"
+		},
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Visões da áfrica: angola e moçambiqueJorge Alves de Lima Filho",
+				"creators": [
+					{
+						"firstName": "Jorge Alves de",
+						"lastName": "Lima Filho",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015-09-29",
+				"ISBN": "9788591597512",
+				"language": "pt-BR",
+				"libraryCatalog": "Câmara Brasileira do Livro ISBN",
+				"publisher": "Jorge Alves de Lima Filho",
+				"shortTitle": "Visões da áfrica",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Coleções de obras diversas sem assunto específico"
 					}
 				],
 				"notes": [],
