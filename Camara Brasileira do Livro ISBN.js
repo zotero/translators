@@ -8,7 +8,7 @@
 	"priority": 98,
 	"inRepository": true,
 	"translatorType": 8,
-	"lastUpdated": "2023-08-02 14:24:24"
+	"lastUpdated": "2023-09-07 18:46:49"
 }
 
 /*
@@ -111,45 +111,39 @@ function translateResult(result) {
 			author = ZU.capitalizeName(author);
 		}
 		let creatorType;
-		if (result.Profissoes && result.Profissoes.length) {
-			// If there's a corresponding entry in the Profissoes array, use it
-			if (result.Profissoes.length > i) {
-				switch (result.Profissoes[i]) {
-					case 'Coordenador':
-					case 'Autor':
-					case 'Roteirista':
-						creatorType = 'author';
-						break;
-					case 'Revisor':
-					case 'Organizador':
-					case 'Editor':
-						creatorType = 'editor';
-						break;
-					case 'Tradutor':
-						creatorType = 'translator';
-						break;
-					case 'Ilustrador': // TODO: Used?
-					case 'Projeto Gráfico':
-						creatorType = 'illustrator';
-						break;
-					default:
-						// First creator is probably an author,
-						// even if the Profissoes string is something weird
-						creatorType = i == 0 ? 'author' : 'contributor';
-						break;
-				}
-			}
-			// If the Profissoes array ended early and the last creator was not an author,
-			// reuse their type
-			else if (i > 0 && item.creators[i - 1].creatorType != 'author') {
-				creatorType = item.creators[i - 1].creatorType;
-			}
-			// Otherwise, the array ended on a primary author, so this is probably a contributor
-			else {
-				creatorType = 'contributor';
+		if (result.Profissoes && result.Profissoes.length === result.Authors.length) {
+			switch (result.Profissoes[i]) {
+				case 'Coordenador':
+				case 'Autor':
+				case 'Roteirista':
+					creatorType = 'author';
+					break;
+				case 'Revisor':
+				case 'Organizador':
+				case 'Editor':
+					creatorType = 'editor';
+					break;
+				case 'Tradutor':
+					creatorType = 'translator';
+					break;
+				case 'Ilustrador': // TODO: Used?
+				case 'Projeto Gráfico':
+					creatorType = 'illustrator';
+					break;
+				default:
+					// First creator is probably an author,
+					// even if the Profissoes string is something weird
+					creatorType = i == 0 ? 'author' : 'contributor';
+					break;
 			}
 		}
-		// No Profissoes array, so we have to guess that everyone is an author
+		// No/mismatched-length Profissoes array, so we have to guess that this non-primary creator
+		// is a contributor
+		else if (i > 0) {
+			creatorType = 'contributor';
+		}
+		// No/mismatched-length Profissoes array, so we have to guess that this primary creator
+		// is an author
 		else {
 			creatorType = 'author';
 		}
@@ -216,27 +210,27 @@ var testCases = [
 					{
 						"firstName": "Pedro",
 						"lastName": "Amaral",
-						"creatorType": "author"
+						"creatorType": "contributor"
 					},
 					{
 						"firstName": "Mariana",
 						"lastName": "Canto",
-						"creatorType": "editor"
+						"creatorType": "contributor"
 					},
 					{
 						"firstName": "Marcos César M.",
 						"lastName": "Pereira",
-						"creatorType": "illustrator"
+						"creatorType": "contributor"
 					},
 					{
 						"firstName": "Raquel",
 						"lastName": "Saraiva",
-						"creatorType": "illustrator"
+						"creatorType": "contributor"
 					},
 					{
 						"firstName": "Clara",
 						"lastName": "Guimarães",
-						"creatorType": "illustrator"
+						"creatorType": "contributor"
 					}
 				],
 				"date": "2022-10-11",
@@ -326,12 +320,12 @@ var testCases = [
 					{
 						"firstName": "Lia",
 						"lastName": "Wyler",
-						"creatorType": "author"
+						"creatorType": "contributor"
 					},
 					{
 						"firstName": "Arch",
 						"lastName": "Apolar",
-						"creatorType": "author"
+						"creatorType": "contributor"
 					}
 				],
 				"date": "2020-03-04",
@@ -645,32 +639,32 @@ var testCases = [
 					{
 						"firstName": "James Tynion",
 						"lastName": "IV",
-						"creatorType": "editor"
+						"creatorType": "contributor"
 					},
 					{
 						"firstName": "Dandara",
 						"lastName": "Palankof",
-						"creatorType": "translator"
+						"creatorType": "contributor"
 					},
 					{
 						"firstName": "Pedro",
 						"lastName": "Catarino",
-						"creatorType": "illustrator"
+						"creatorType": "contributor"
 					},
 					{
 						"firstName": "Travel",
 						"lastName": "Foreman",
-						"creatorType": "illustrator"
+						"creatorType": "contributor"
 					},
 					{
 						"firstName": "Riccardo",
 						"lastName": "Federici",
-						"creatorType": "illustrator"
+						"creatorType": "contributor"
 					},
 					{
 						"firstName": "Jorge",
 						"lastName": "Jimenez",
-						"creatorType": "illustrator"
+						"creatorType": "contributor"
 					}
 				],
 				"date": "2022-03-11",
@@ -716,32 +710,32 @@ var testCases = [
 					{
 						"firstName": "Phillip Kennedy",
 						"lastName": "Johnson",
-						"creatorType": "editor"
+						"creatorType": "contributor"
 					},
 					{
 						"firstName": "Gabriel",
 						"lastName": "Faria",
-						"creatorType": "translator"
+						"creatorType": "contributor"
 					},
 					{
 						"firstName": "Rodrigo",
 						"lastName": "Barros",
-						"creatorType": "illustrator"
+						"creatorType": "contributor"
 					},
 					{
 						"firstName": "Sami",
 						"lastName": "Basri",
-						"creatorType": "illustrator"
+						"creatorType": "contributor"
 					},
 					{
 						"firstName": "Phil",
 						"lastName": "Hester",
-						"creatorType": "illustrator"
+						"creatorType": "contributor"
 					},
 					{
 						"firstName": "Daniel",
 						"lastName": "Sampere",
-						"creatorType": "illustrator"
+						"creatorType": "contributor"
 					}
 				],
 				"date": "2022-03-10",
