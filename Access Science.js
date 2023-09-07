@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-05 09:21:42"
+	"lastUpdated": "2023-09-07 19:50:32"
 }
 
 /*
@@ -98,40 +98,35 @@ function scrape(doc, url) {
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
 	translator.setHandler('itemDone', function (obj, item) {
-		let detectedType = detectWeb(doc, url);
 		// Author
 		// Some of video pages having old content which does not contain the
 		// firstname and lastname. which is binding in a single string in
 		// metadata tags, So those cases we were split and mapped accordingly
-		if (detectedType == 'videoRecording') {
-			const authorName = ZU.xpath(doc, '//meta[@name="citation_author"]/@content');
+		if (item.itemType == 'videoRecording') {
+			let authorName = attr(doc, 'meta[name="citation_author"]', 'content');
 			if (authorName) {
 				item.creators = [];
-				for (let name of authorName) {
-					name = name.value;
-					if (name.includes(',') && name.split(',').length > 2) {
-						let authorFullName = name.split(',')[0];
-						item.creators.push(ZU.cleanAuthor(authorFullName, "author", false));
-					}
+				if (authorName.includes(',') && authorName.split(',').length > 2) {
+					authorName = authorName.split(',')[0];
+					item.creators.push(ZU.cleanAuthor(authorName, "author", false));
 				}
 			}
 		}
-		// Abstract
-		const abstractNote = ZU.xpathText(doc, '//meta[@name="citation_abstract"]/@content');
-		if (abstractNote) item.abstractNote = ZU.cleanTags(abstractNote);
+
+		// Abstract contain html element
+		let abstractNote = attr(doc, 'meta[name="citation_abstract"]', 'content');
+		let isHTML = RegExp.prototype.test.bind(/(<([^>]+)>)/i);
+		if (isHTML(abstractNote)) item.abstractNote = ZU.cleanTags(abstractNote);
 
 		item.complete();
 	});
 
 	translator.getTranslatorObject(function (trans) {
-		// Detect web not get trigger for scape EM translator
-		// - so wll fill those in manually.
-		if (detectWeb(doc, url)) {
-			trans.itemType = detectWeb(doc, url);
-		}
+		trans.itemType = detectWeb(doc, url);
 		trans.doWeb(doc, url);
 	});
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -312,7 +307,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.accessscience.com/content/news/aSN2301171",
+		"url": "https://www.accessscience.com/content/news/aSN2301171?implicit-login=true",
 		"items": [
 			{
 				"itemType": "magazineArticle",
