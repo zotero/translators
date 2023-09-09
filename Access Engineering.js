@@ -7,9 +7,9 @@
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 15,
+	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-07 20:16:51"
+	"lastUpdated": "2023-09-09 09:42:36"
 }
 
 /*
@@ -41,9 +41,6 @@ function detectWeb(doc, url) {
 			else {
 				return "bookSection";
 			}
-		}
-		else if (url.includes('content/video/')) {
-			return 'videoRecording';
 		}
 		else {
 			return "webpage";
@@ -98,13 +95,15 @@ function scrape(doc, url) {
 
 		// Author
 		// Some of old pages not having firstname, lastname seperation in markup and ignore if not
-		let author = ZU.xpath(doc, '//ul[@class="contributor-list"]//li[@data-firstnames]');
-		if (author.length > 0) {
-			// Handled using data attribute
-			for (let i = 0; i < author.length; i++) {
-				item.creators[i].firstName = author[i].getAttribute('data-firstnames');
-				item.creators[i].lastName = author[i].getAttribute('data-surname');
-			}
+		let author = doc.querySelectorAll("ul.contributor-list > [data-firstnames]");
+		item.creators = [];
+		for (let i = 0; i < author.length; i++) {
+			let creatorData = author[i].dataset;
+			item.creators.push({
+				firstName: creatorData.firstnames,
+				lastName: creatorData.surname,
+				creatorType: creatorData.authortype
+			});
 		}
 
 		// Abstract
@@ -254,51 +253,19 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.accessengineeringlibrary.com/content/video/V4768153299001",
-		"items": [
-			{
-				"itemType": "videoRecording",
-				"title": "10% Infill and a Bridge",
-				"creators": [
-					{
-						"firstName": "Lydia",
-						"lastName": "Cline",
-						"creatorType": "author"
-					}
-				],
-				"date": "2016",
-				"abstractNote": "This video shows an item being printed with a 10% infill and includes a bridge.",
-				"language": "en",
-				"libraryCatalog": "www.accessengineeringlibrary.com",
-				"studio": "McGraw-Hill Education",
-				"url": "https://www.accessengineeringlibrary.com/content/video/V4768153299001",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "https://www.accessengineeringlibrary.com/content/video/V4005352521001",
 		"items": [
 			{
-				"itemType": "videoRecording",
+				"itemType": "webpage",
 				"title": "123D Design: Cut Text Through a Plane",
 				"creators": [],
 				"date": "2014",
 				"abstractNote": "This video shows how to cut text through a plane with Combine/Subtract.",
 				"language": "en",
-				"libraryCatalog": "www.accessengineeringlibrary.com",
 				"shortTitle": "123D Design",
-				"studio": "McGraw-Hill Education",
 				"url": "https://www.accessengineeringlibrary.com/content/video/V4005352521001",
+				"websiteTitle": "McGraw-Hill Education - Access Engineering",
+				"websiteType": "text",
 				"attachments": [
 					{
 						"title": "Snapshot",
