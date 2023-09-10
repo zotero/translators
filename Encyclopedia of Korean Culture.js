@@ -2,52 +2,86 @@
 	"translatorID": "dc879929-ae39-45b3-b49b-dab2c80815ab",
 	"label": "Encyclopedia of Korean Culture",
 	"creator": "jacoblee36251",
-	"target": "^https?://(www.)?encykorea.aks.ac.kr/Article/E\\d{7}(#.*)?",
+	"target": "^https?://(www\\\\.)?encykorea\\\\.aks\\\\.ac\\\\.kr/Article/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-28 00:11:25"
+	"lastUpdated": "2023-09-10 10:28:51"
 }
 
 /*
-	***** BEGIN LICENSE BLOCK *****
+    ***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2023 jacoblee36251
-	
-	This file is part of Zotero.
+    Copyright © 2023 jacoblee36251
 
-	Zotero is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
+    This file is part of Zotero.
 
-	Zotero is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-	GNU Affero General Public License for more details.
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-	You should have received a copy of the GNU Affero General Public License
-	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU Affero General Public License for more details.
 
-	***** END LICENSE BLOCK *****
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+    ***** END LICENSE BLOCK *****
 */
 
-function detectWeb() {
-	return 'encyclopediaArticle';
+
+function detectWeb(doc, url) {
+	// TODO: adjust the logic here
+	if (url.match(/E\d{7}(#.*)?/)) {
+		return 'encyclopediaArticle';
+	}
+	else if (getSearchResults(doc, true)) {
+		return 'multiple';
+	}
+	Zotero.debug("nothing detected") // TODO: REMOVE ME
+	return false;
 }
 
-function doWeb(doc, url) {
-	scrape(doc, url);
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('li[class="item"] > a[href*="/Article/"]');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.querySelector('div[class="title"]').textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	// Zotero.debug(found ? items : false)
+	return found ? items : false;
 }
 
-function scrape(doc, url) {
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
+	}
+	else {
+		await scrape(doc, url);
+	}
+}
+
+async function scrape(doc, url = doc.location.href) {
 	var item = new Zotero.Item('encyclopediaArticle');
 
 	// Title initially formatted: hangulName(hanjaName); adding space between
-	item.title = doc.title.split(' - ')[0].replace('(', ' (');
+	item.title = ZU.trimInternal(text(doc, ".content-head-title"))
 	item.encyclopediaTitle = "Encyclopedia of Korean Culture";
 	item.publisher = "Academy of Korean Studies";
 	item.language = "ko";
@@ -131,11 +165,13 @@ var testCases = [
 			{
 				"itemType": "encyclopediaArticle",
 				"title": "사랑 (舍廊)",
-				"creators": [{
-					"lastName": "김",
-					"firstName": "동욱",
-					"creatorType": "author"
-				}],
+				"creators": [
+					{
+						"lastName": "김",
+						"firstName": "동욱",
+						"creatorType": "author"
+					}
+				],
 				"encyclopediaTitle": "Encyclopedia of Korean Culture",
 				"language": "ko",
 				"libraryCatalog": "Encyclopedia of Korean Culture",
@@ -147,6 +183,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://encykorea.aks.ac.kr/Article/Search/%ED%95%99%EC%9B%90?field=&type=&alias=false&body=false&containdesc=false&keyword=%ED%95%99%EC%9B%90",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
