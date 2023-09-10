@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-10 04:26:21"
+	"lastUpdated": "2023-09-10 10:15:23"
 }
 
 /*
@@ -99,9 +99,18 @@ async function scrape(doc, url = doc.location.href) {
 		item.publicationTitle = "The Atlantic";
 		item.libraryCatalog = "The Atlantic";
 
+		// get rid of trailing "- The Atlantic" in some titles
+		item.title = item.title.replace(/\s+-\s+The Atlantic$/i, "");
+
+		// tags from EM is rarely helpful for The Atlantic; they're from the
+		// meta[name='keywords'] tags, and are either redundant with "Section"
+		// (in the extra) or spam.
+		item.tags = [];
+
 		// fix multiple authors; metadata give us one comma-separated string
 		item.creators = [];
-		for (let element of doc.querySelectorAll('#byline [data-event-element="author"]')) {
+		// latter selector for legacy layout
+		for (let element of doc.querySelectorAll('#byline [data-event-element="author"], .byline span[itemprop="author"]')) {
 			item.creators.push(
 				ZU.cleanAuthor(
 					ZU.trimInternal(element.textContent),
@@ -264,11 +273,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "politics"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -302,11 +307,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "international"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -343,11 +344,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "health"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -387,11 +384,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "podcasts"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -441,11 +434,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "podcasts"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -501,11 +490,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "podcasts"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -515,6 +500,38 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.theatlantic.com/projects/new-rules/",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.theatlantic.com/projects/ideas-2010/archive/2010/06/reading-writing-and-thinking-online-an-interview-with-alan-jacobs/57807/",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "Reading, Writing, and Thinking Online: An Interview With Alan Jacobs",
+				"creators": [
+					{
+						"firstName": "Conor",
+						"lastName": "Friedersdorf",
+						"creatorType": "author"
+					}
+				],
+				"date": "2010-06-08",
+				"abstractNote": "An accomplished author, essayist and academic on how he successfully navigates the Web, why English students should be forced to recite poems from memory, and why it's a bad idea to read your child Goodnight Moon on a Kindle.",
+				"blogTitle": "The Atlantic",
+				"language": "en",
+				"shortTitle": "Reading, Writing, and Thinking Online",
+				"url": "https://www.theatlantic.com/projects/ideas-2010/archive/2010/06/reading-writing-and-thinking-online-an-interview-with-alan-jacobs/57807/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
