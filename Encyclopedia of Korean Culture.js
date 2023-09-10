@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-10 10:33:20"
+	"lastUpdated": "2023-09-10 11:01:49"
 }
 
 /*
@@ -78,12 +78,12 @@ async function doWeb(doc, url) {
 async function scrape(doc, url = doc.location.href) {
 	var item = new Zotero.Item('encyclopediaArticle');
 
-	// Title initially formatted: hangulName(hanjaName); adding space between
 	item.title = ZU.trimInternal(text(doc, ".content-head-title"));
 	item.encyclopediaTitle = "Encyclopedia of Korean Culture";
 	item.publisher = "Academy of Korean Studies";
 	item.language = "ko";
-	item.url = url;
+	// Clean url by removing # terms
+	item.url = url.replace(/#.*/, "");
 
 	// Author processing; may be 0 or more names, would be in Korean
 	var authors = doc.querySelector('div[class="author-wrap"] > span');
@@ -126,7 +126,7 @@ var testCases = [
 				"language": "ko",
 				"libraryCatalog": "Encyclopedia of Korean Culture",
 				"publisher": "Academy of Korean Studies",
-				"url": "https://encykorea.aks.ac.kr/Article/E0013414#cm_multimedia",
+				"url": "https://encykorea.aks.ac.kr/Article/E0013414",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
