@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-10 10:15:23"
+	"lastUpdated": "2023-09-12 14:55:28"
 }
 
 /*
@@ -185,12 +185,9 @@ function getPodcastCreators(doc) {
 		if (!element) continue;
 
 		let elementText = element.textContent;
-		if (elementText === containerElement.textContent) continue;
-
 		let nameString = ZU.trimInternal(elementText).replace(/\s*:$/, "");
-		if (!nameString) continue;
-
-		if (skip.has(nameString)) continue;
+		if (skip.has(nameString) || !nameString) continue;
+		if (elementText === containerElement.textContent) continue;
 
 		// Quotes may contain participant's first mentions but also irrelevant
 		// names (e.g. from newsreels) for context. Stash these names for
