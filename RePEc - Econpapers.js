@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-12 09:04:50"
+	"lastUpdated": "2023-09-12 14:43:55"
 }
 
 /*
@@ -41,8 +41,16 @@
 
 function detectWeb(doc, url) {
 	let path = new URL(url).pathname;
-	let pathMatch = path.match(/\/(\w+)\/.+\/.+/);
 
+	if (isSearch(path) && getSearchResults(doc, true)) {
+		return 'multiple';
+	}
+
+	if (isListing(path) && getListing(doc, true)) {
+		return 'multiple';
+	}
+
+	let pathMatch = path.match(/\/(\w+)\/.+\/.+/);
 	if (pathMatch) {
 		switch (pathMatch[1]) {
 			case "article":
@@ -54,14 +62,6 @@ function detectWeb(doc, url) {
 			case "bookchap":
 				return getBookChapType(doc);
 		}
-	}
-
-	if (isSearch(path) && getSearchResults(doc, true)) {
-		return 'multiple';
-	}
-
-	if (isListing(path) && getListing(doc, true)) {
-		return 'multiple';
 	}
 
 	return false;
@@ -114,7 +114,7 @@ function getSearchResults(doc, checkOnly) {
 }
 
 function isListing(path) {
-	return /\/(article|paper|software|bookchap)\/.+\//.test(path);
+	return /\/(article|paper|software|bookchap)\/.+\/(default\d+\.htm)?$/.test(path);
 }
 
 function getListing(doc, checkOnly) {
@@ -159,7 +159,10 @@ async function scrape(doc, url = doc.location.href) {
 
 		switch (type) {
 			case "report":
-				handleReport(item, doc);
+				item.reportType = "Working paper";
+				break;
+			case "journalArticle":
+				handleJournalArticle(item);
 				break;
 			case "book":
 				handleBook(item, doc);
@@ -175,18 +178,17 @@ async function scrape(doc, url = doc.location.href) {
 	let em = await translator.getTranslatorObject();
 	em.itemType = type;
 	em.addCustomFields({
-		'book_title': 'bookTitle' // eslint-disable-line quote-props
+		book_title: 'bookTitle', // eslint-disable-line camelcase
+		series: 'seriesTitle'
 	});
 	await em.doWeb(doc, url);
 }
 
-function handleReport(item, doc) {
-	// The DC metadata simply shows the broad type "text" and then
-	// "techreport". Replace it with the descriptive label of its origin
-	let reportType = attr(doc, "meta[name='series']", "content")
-		.replace(/^(.*(?:document|paper|report))s$/i, "$1");
-	if (reportType) {
-		item.reportType = reportType;
+function handleJournalArticle(item) {
+	// clean up the seriesTitle that we've EM translator to produce, because
+	// it's redundant with the publicationTitle
+	if (item.publicationTitle && item.publicationTitle === item.seriesTitle) {
+		delete item.seriesTitle;
 	}
 }
 
@@ -198,11 +200,6 @@ function handleBook(item, doc) {
 }
 
 function handleComputerProgram(item, doc) {
-	let series = attr(doc, "meta[name='series']", "content");
-	if (series) {
-		item.seriesTitle = series;
-	}
-
 	let lang = getBoldHeadLineContent(doc, "Language:");
 	if (lang) {
 		item.programmingLanguage = lang;
@@ -227,7 +224,7 @@ function finalize(item, doc) {
 	let doiElem = paragraphHeadedBy(doc, "DOI:");
 	if (doiElem) {
 		let doi = text(doiElem, "a[href^='/scripts/redir.pf']").trim();
-		Z.debug(`Possible DOI string: ${doi}`);
+		Z.debug(`Possible DOI string: ${doi}`, 4);
 		if (/10\.\d{4,}\/.+/.test(doi)) {
 			item.DOI = doi;
 		}
@@ -297,10 +294,10 @@ function creatAttachments(elements, item, keepNonPDF) {
 			continue;
 		}
 
-		Z.debug(`External link: ${targetURL}`);
+		Z.debug(`External link: ${targetURL}`, 4);
 		let doi;
 		if (!item.DOI && (doi = doiFromExtLink(targetURLObj))) {
-			Z.debug(`DOI (from external link): ${doi}`);
+			Z.debug(`DOI (from external link): ${doi}`, 4);
 			item.DOI = doi;
 		}
 		// Best-effort try for PDF link; NOTE that even if the page may say
@@ -323,6 +320,8 @@ function creatAttachments(elements, item, keepNonPDF) {
 	}
 }
 
+// A conservative DOI-extractor that works on the "Downloads" section. Only try
+// to extract if the link's domain is a well-known resolver.
 function doiFromExtLink(urlObj) {
 	if (/^((dx\.)?doi\.org|hdl\.handle\.net)$/.test(urlObj.hostname)) {
 		let m = decodeURIComponent(urlObj.pathname).match(/^\/(10\.\d{4,}\/.+)/);
@@ -349,8 +348,6 @@ function addExtraLine(item, line) {
 
 // Remove unnecessary and non-informative fields from embedded metadata,
 // especially the DC fields
-// Notice that we clean reportType too, which will be populated by
-// handleReport() later
 var FIELDS_TO_CLEAN = ["label", "distributor", "letterType", "manuscriptType", "mapType", "thesisType", "websiteType", "presentationType", "postType", "audioFileType", "reportType"];
 
 function cleanItem(item) {
@@ -388,7 +385,8 @@ var testCases = [
 				"institution": "National Bureau of Economic Research, Inc",
 				"libraryCatalog": "EconPapers",
 				"reportNumber": "11309",
-				"reportType": "NBER Working Paper",
+				"reportType": "Working paper",
+				"seriesTitle": "NBER Working Papers",
 				"shortTitle": "Does Voting Technology Affect Election Outcomes?",
 				"url": "https://EconPapers.repec.org/RePEc:nbr:nberwo:11309",
 				"attachments": [
@@ -667,6 +665,51 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://econpapers.repec.org/RePEc:oup:copoec:v:39:y:2020:i:1:p:91-94.",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Gresham’s Law: The Life and World of Queen Elizabeth I’s Banker",
+				"creators": [
+					{
+						"firstName": "Mohamed A.",
+						"lastName": "El-Erian",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020",
+				"DOI": "10.1093/cpe/bzaa009",
+				"abstractNote": "By Mohamed A El-Erian; Gresham’s Law: The Life and World of Queen Elizabeth I’s Banker",
+				"issue": "1",
+				"libraryCatalog": "EconPapers",
+				"pages": "91-94",
+				"publicationTitle": "Contributions to Political Economy",
+				"shortTitle": "Gresham’s Law",
+				"url": "https://EconPapers.repec.org/RePEc:oup:copoec:v:39:y:2020:i:1:p:91-94.",
+				"volume": "39",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "RePEc External Link",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://econpapers.repec.org/paper/bisbiswps/default8.htm",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
