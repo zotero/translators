@@ -865,9 +865,9 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName":"Luca",
-						"lastName":"Settanni",
-						"creatorType":"author"
+						"firstName": "Luca",
+						"lastName": "Settanni",
+						"creatorType": "author"
 					},
 					{
 						"firstName": "José Paulo",
