@@ -845,7 +845,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Cláudia Carvalho, Cláudia",
+						"firstName": "Cláudia",
 						"lastName": "Carvalho",
 						"creatorType": "author"
 					},
@@ -855,22 +855,27 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Marco Alexandre Guerreiro, Marco Alexandre",
+						"firstName": "Marco Alexandre",
 						"lastName": "Guerreiro",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Pedro Almeida, Pedro",
+						"firstName": "Pedro",
 						"lastName": "Almeida",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Luca",
-						"lastName": "Settanni",
+						"firstName":"Luca",
+						"lastName":"Settanni",
+						"creatorType":"author"
+					},
+					{
+						"firstName": "José Paulo",
+						"lastName": "Sampaio",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Bruno Massa, Bruno",
+						"firstName": "Bruno",
 						"lastName": "Massa",
 						"creatorType": "author"
 					},
