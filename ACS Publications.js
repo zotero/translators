@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-04 07:44:18"
+	"lastUpdated": "2023-09-14 09:56:33"
 }
 
 /*
@@ -57,7 +57,7 @@ function getSearchResults(doc, checkOnly) {
 // The input should be a properly encoded URL
 function getDoi(url) {
 	let urlObj = new URL(url);
-	let doi = decodeURIComponent(urlObj.pathname).match(/^\/doi\/(?:.+\/)?(10\.\d\d\d\d\/.+)$/);
+	let doi = decodeURIComponent(urlObj.pathname).match(/^\/doi\/(?:.+\/)?(10\.\d{4,}\/.+)$/);
 	if (doi) {
 		doi = doi[1];
 	}
@@ -213,7 +213,7 @@ async function scrape(doc, url, supplementAsLink) {
 
 	let risURL = new URL("/action/downloadCitation?include=abs&format=ris&direct=true", url);
 	risURL.searchParams.set("doi", doi);
-	risURL.searchParams.set("downloadFileName", doi.replace(/^10\.\d\d\d\d\//, ""));
+	risURL.searchParams.set("downloadFileName", doi.replace(/^10\.\d{4,}\//, ""));
 	let risText = await requestText(risURL.href, { headers: { Referer: url } });
 	// Delete redundant DOI info
 	risText = risText.replace(/\nN1 {2}- doi:[^\n]+/, "");
