@@ -2,14 +2,14 @@
 	"translatorID": "dc879929-ae39-45b3-b49b-dab2c80815ab",
 	"label": "Encyclopedia of Korean Culture",
 	"creator": "jacoblee36251",
-	"target": "^https?://(www\\\\.)?encykorea\\\\.aks\\\\.ac\\\\.kr/Article/",
+	"target": "^https?://(www\\.)?encykorea\\.aks\\.ac\\.kr/Article/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-10 11:01:49"
+	"lastUpdated": "2023-09-15 01:46:27"
 }
 
 /*
@@ -38,7 +38,7 @@
 
 function detectWeb(doc, url) {
 	// TODO: adjust the logic here
-	if (url.match(/E\d{7}(#.*)?/)) {
+	if (/^https?:\/\/[^\/]+\/Article\/E\d+/.test(url)) {
 		return 'encyclopediaArticle';
 	}
 	else if (getSearchResults(doc, true)) {
@@ -50,10 +50,10 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('li[class="item"] > a[href*="/Article/"]');
+	var rows = doc.querySelectorAll('li.item > a[href*="/Article/"]');
 	for (let row of rows) {
 		let href = row.href;
-		let title = ZU.trimInternal(row.querySelector('div[class="title"]').textContent);
+		let title = ZU.trimInternal(row.querySelector('div.title').textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -79,14 +79,14 @@ async function scrape(doc, url = doc.location.href) {
 	var item = new Zotero.Item('encyclopediaArticle');
 
 	item.title = ZU.trimInternal(text(doc, ".content-head-title"));
-	item.encyclopediaTitle = "Encyclopedia of Korean Culture";
+	item.encyclopediaTitle = "한국민족문화대백과사전 [Encyclopedia of Korean Culture]";
 	item.publisher = "Academy of Korean Studies";
 	item.language = "ko";
 	// Clean url by removing # terms
 	item.url = url.replace(/#.*/, "");
 
 	// Author processing; may be 0 or more names, would be in Korean
-	var authors = doc.querySelector('div[class="author-wrap"] > span');
+	var authors = doc.querySelector('div.author-wrap > span');
 
 	if (authors) {
 		authors = authors.textContent;
@@ -100,6 +100,7 @@ async function scrape(doc, url = doc.location.href) {
 		}
 	}
 	item.complete();
+	item.attachments.push({ title: "Snapshot", document: doc, mimeType: "text/html" });
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
