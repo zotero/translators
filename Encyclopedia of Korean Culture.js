@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-15 10:31:10"
+	"lastUpdated": "2023-09-15 20:07:33"
 }
 
 /*
@@ -126,10 +126,15 @@ var testCases = [
 				],
 				"encyclopediaTitle": "한국민족문화대백과사전 [Encyclopedia of Korean Culture]",
 				"language": "ko",
-				"libraryCatalog": "한국민족문화대백과사전 [Encyclopedia of Korean Culture]",
+				"libraryCatalog": "Encyclopedia of Korean Culture",
 				"publisher": "Academy of Korean Studies",
 				"url": "https://encykorea.aks.ac.kr/Article/E0013414",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -147,10 +152,15 @@ var testCases = [
 				"creators": [],
 				"encyclopediaTitle": "한국민족문화대백과사전 [Encyclopedia of Korean Culture]",
 				"language": "ko",
-				"libraryCatalog": "한국민족문화대백과사전 [Encyclopedia of Korean Culture]",
+				"libraryCatalog": "Encyclopedia of Korean Culture",
 				"publisher": "Academy of Korean Studies",
 				"url": "https://encykorea.aks.ac.kr/Article/E0002855",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -174,10 +184,15 @@ var testCases = [
 				],
 				"encyclopediaTitle": "한국민족문화대백과사전 [Encyclopedia of Korean Culture]",
 				"language": "ko",
-				"libraryCatalog": "한국민족문화대백과사전 [Encyclopedia of Korean Culture]",
+				"libraryCatalog": "Encyclopedia of Korean Culture",
 				"publisher": "Academy of Korean Studies",
 				"url": "https://encykorea.aks.ac.kr/Article/E0025488",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -187,16 +202,19 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://encykorea.aks.ac.kr/Article/Search/%ED%95%99%EC%9B%90?field=&type=&alias=false&body=false&containdesc=false&keyword=%ED%95%99%EC%9B%90",
+		"detectedItemType": "multiple",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "https://encykorea.aks.ac.kr/Article/List/Field/%EC%98%88%EC%88%A0%C2%B7%EC%B2%B4%EC%9C%A1%3E%EC%A1%B0%EA%B0%81",
+		"detectedItemType": "multiple",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "https://encykorea.aks.ac.kr/Article/List/Type/%EC%9C%A0%EC%A0%81",
+		"detectedItemType": "multiple",
 		"items": "multiple"
 	}
 ]
