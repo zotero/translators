@@ -158,11 +158,21 @@ function detectWeb(doc, url) {
 // multiple. NOTE that when this translator fails to match, the user will get
 // the "save web page" fallback by default.
 
-var MAGIC_INVALID_DOI = "not a DOI; placeholder for current web page"; // clearer than using a nullish value
+var FALLBACK_CURRENT_PAGE_KEY = "not a DOI; placeholder for current web page"; // clearer than using a nullish value
 
 async function retrieveDOIs(doiOrDOIs, fallbackDoc) {
+	// Use the URL of the current page (the page from which the translation was
+	// initiated) as the key for the item corresponding to the current page.
+	// This will have special meaning for Connector and its title will be
+	// marked as current page, in the correct localization.
+	let currentPageKey = fallbackDoc.location.href;
+	// In the rare case the location.href is falsy or not looking like a real
+	// location, don't use it; instead use a string that doesn't match DOI.
+	if (!/^https?:\/\/.+/.test(currentPageKey)) {
+		currentPageKey = FALLBACK_CURRENT_PAGE_KEY;
+	}
 	let showSelect = Array.isArray(doiOrDOIs);
-	let dois = showSelect ? [MAGIC_INVALID_DOI, ...doiOrDOIs] : [doiOrDOIs];
+	let dois = showSelect ? [currentPageKey, ...doiOrDOIs] : [doiOrDOIs];
 	let items = {};
 	let numDOIs = dois.length;
 
@@ -170,7 +180,7 @@ async function retrieveDOIs(doiOrDOIs, fallbackDoc) {
 		items[doi] = null;
 
 		let translate;
-		if (doi === MAGIC_INVALID_DOI) {
+		if (doi === currentPageKey) {
 			// First, create the special item for the current page, to be
 			// saved as a webpage item if selected
 			translate = Zotero.loadTranslator("web");
@@ -192,7 +202,7 @@ async function retrieveDOIs(doiOrDOIs, fallbackDoc) {
 
 		// don't save when item is done
 		translate.setHandler("itemDone", function (_translate, item) {
-			let key = translate.isEM ? MAGIC_INVALID_DOI : item.DOI;
+			let key = translate.isEM ? currentPageKey : item.DOI;
 			if (!item.title) {
 				Zotero.debug("No title available for " + key);
 				item.title = "[No Title]";
@@ -213,7 +223,7 @@ async function retrieveDOIs(doiOrDOIs, fallbackDoc) {
 				// If showSelect is false, don't show a Select Items dialog,
 				// just complete if we can
 				if (!showSelect) {
-					let firstItem = items[Object.keys(items)[0]];
+					let firstItem = Object.values(items)[0];
 					if (firstItem) {
 						firstItem.complete();
 					}
@@ -221,7 +231,13 @@ async function retrieveDOIs(doiOrDOIs, fallbackDoc) {
 				}
 
 				// Otherwise, allow the user to select among items that resolved successfully
-				let select = buildSelections(items);
+				// build the selection options by filtering through the
+				// "items", skipping any failed resolution, and do some
+				// cross-correlation to detect whether one of the DOI-resolved
+				// item could refer to the current page. In the latter case,
+				// "item" will be updated to use the special "currentPageKey"
+				// for that item.
+				let select = buildSelections(items, currentPageKey);
 				Zotero.selectItems(select, function (selectedDOIs) {
 					if (!selectedDOIs) return;
 
@@ -245,49 +261,51 @@ async function doWeb(doc, url) {
 	await retrieveDOIs(doiOrDOIs);
 }
 
-function buildSelections(items) {
-	let select = {};
-	// The `select` mapping will be populated from the `items`
-	// object keyed by DOI, but first, we check if the special item
-	// "current web page" may be a duplicate of the DOI-resolved
-	// items -- and if so, the "current web page" choice is no
-	// longer offered.
+// Build a key -> title mapping to be passed to Z.selectItems().
+// "currentPageKey" is the URL of the page on which the translation is
+// initiated. If none of the DOI-items looks like the current page, we keep the
+// first, EM-generated item, as a choice presented to the user. Otherwise, if
+// one of the DOI-items looks like it's referring to the current page, its key
+// is set to the reference URL in both the input "items" (NOTE: this is a
+// side-effect) and the output object.
+function buildSelections(items, currentPageKey) {
 	let possibleCurrentWebPageDOI;
-	let minDissimilarity = 1;
-	let currentWebPageItem = items[MAGIC_INVALID_DOI];
+	// min. dissimilarity of DOI-items to the current-page special item
+	let minDissimilarity = 2; // starting with a value greater than max
+	let currentWebPageItem = items[currentPageKey];
 	if (currentWebPageItem) {
-		for (let [doi, item] of Object.entries(items)) {
-			if (doi === MAGIC_INVALID_DOI || !item) {
+		for (let [key, item] of Object.entries(items)) {
+			if (key === currentPageKey || !item) {
+				// Either it's the special item or the item failed to resolve
 				continue;
 			}
 			let d = itemDissimilarity(currentWebPageItem, item);
 			if (d < minDissimilarity) {
-				minDissimilarity = d;
-				possibleCurrentWebPageDOI = doi;
+				minDissimilarity = d; // update min
+				possibleCurrentWebPageDOI = key;
 			}
 		}
 	}
 
-	if (minDissimilarity <= 0.05) {
-		delete items[MAGIC_INVALID_DOI];
+	// Populate the output
+	let select = {};
+	if (minDissimilarity <= 0.05) { // One of the DOI-items is current page
+		currentWebPageItem = items[possibleCurrentWebPageDOI];
+		// In the input "items", reset the current-page-as-DOI-item's key to
+		// the special key "currentPageKey", by deleting the old key and
+		// insert the value at "currentPageKey"; this also overwrites the old
+		// value -- the EM-generated item -- if any.
+		items[currentPageKey] = currentWebPageItem;
+		delete items[possibleCurrentWebPageDOI];
 	}
+	for (let [key, item] of Object.entries(items)) {
+		if (!item) continue;
 
-	for (let doi in items) {
-		let item = items[doi];
-		if (item) {
-			if (doi === MAGIC_INVALID_DOI) {
-				select[doi] = "Current Web Page"
-					+ (item.title !== "[No title]" ? ` (${item.title})` : "");
-			}
-			else {
-				let title = item.title || "[" + item.DOI + "]";
-				if (doi === possibleCurrentWebPageDOI
-					&& minDissimilarity <= 0.05) {
-					title += " (possibly current web page)";
-				}
-				select[doi] = title;
-			}
+		let title = item.title;
+		if (key === currentPageKey) {
+			title = `Current Web Page (${title})`;
 		}
+		select[key] = title;
 	}
 	return select;
 }
