@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-15 08:34:47"
+	"lastUpdated": "2023-09-15 10:31:10"
 }
 
 /*
@@ -124,9 +124,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"encyclopediaTitle": "Encyclopedia of Korean Culture",
+				"encyclopediaTitle": "한국민족문화대백과사전 [Encyclopedia of Korean Culture]",
 				"language": "ko",
-				"libraryCatalog": "Encyclopedia of Korean Culture",
+				"libraryCatalog": "한국민족문화대백과사전 [Encyclopedia of Korean Culture]",
 				"publisher": "Academy of Korean Studies",
 				"url": "https://encykorea.aks.ac.kr/Article/E0013414",
 				"attachments": [],
@@ -145,9 +145,9 @@ var testCases = [
 				"itemType": "encyclopediaArticle",
 				"title": "경주 남산 탑곡 마애불상군 (慶州 南山 塔谷 磨崖佛像群)",
 				"creators": [],
-				"encyclopediaTitle": "Encyclopedia of Korean Culture",
+				"encyclopediaTitle": "한국민족문화대백과사전 [Encyclopedia of Korean Culture]",
 				"language": "ko",
-				"libraryCatalog": "Encyclopedia of Korean Culture",
+				"libraryCatalog": "한국민족문화대백과사전 [Encyclopedia of Korean Culture]",
 				"publisher": "Academy of Korean Studies",
 				"url": "https://encykorea.aks.ac.kr/Article/E0002855",
 				"attachments": [],
@@ -172,9 +172,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"encyclopediaTitle": "Encyclopedia of Korean Culture",
+				"encyclopediaTitle": "한국민족문화대백과사전 [Encyclopedia of Korean Culture]",
 				"language": "ko",
-				"libraryCatalog": "Encyclopedia of Korean Culture",
+				"libraryCatalog": "한국민족문화대백과사전 [Encyclopedia of Korean Culture]",
 				"publisher": "Academy of Korean Studies",
 				"url": "https://encykorea.aks.ac.kr/Article/E0025488",
 				"attachments": [],
