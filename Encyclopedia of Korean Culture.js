@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-15 01:46:27"
+	"lastUpdated": "2023-09-15 01:59:49"
 }
 
 /*
@@ -38,7 +38,7 @@
 
 function detectWeb(doc, url) {
 	// TODO: adjust the logic here
-	if (/^https?:\/\/[^\/]+\/Article\/E\d+/.test(url)) {
+	if (/^https?:\/\/[^/]+\/Article\/E\d+/.test(url)) {
 		return 'encyclopediaArticle';
 	}
 	else if (getSearchResults(doc, true)) {
