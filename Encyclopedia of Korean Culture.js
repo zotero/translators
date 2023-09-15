@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-15 01:59:49"
+	"lastUpdated": "2023-09-15 02:06:12"
 }
 
 /*
@@ -186,6 +186,16 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://encykorea.aks.ac.kr/Article/Search/%ED%95%99%EC%9B%90?field=&type=&alias=false&body=false&containdesc=false&keyword=%ED%95%99%EC%9B%90",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://encykorea.aks.ac.kr/Article/List/Field/%EC%98%88%EC%88%A0%C2%B7%EC%B2%B4%EC%9C%A1%3E%EC%A1%B0%EA%B0%81",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://encykorea.aks.ac.kr/Article/List/Type/%EC%9C%A0%EC%A0%81",
 		"items": "multiple"
 	}
 ]
