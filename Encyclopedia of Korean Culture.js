@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-15 02:07:55"
+	"lastUpdated": "2023-09-15 08:28:26"
 }
 
 /*
@@ -37,7 +37,6 @@
 
 
 function detectWeb(doc, url) {
-	// TODO: adjust the logic here
 	if (/^https?:\/\/[^/]+\/Article\/E\d+/.test(url)) {
 		return 'encyclopediaArticle';
 	}
@@ -50,7 +49,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('li.item > a[href*="/Article/"]');
+	var rows = doc.querySelectorAll('li.item > a[href^="/Article/E"]');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.querySelector('div.title').textContent);
@@ -101,7 +100,8 @@ async function scrape(doc, url = doc.location.href) {
 	}
 	item.attachments.push({ title: "Snapshot", document: doc, mimeType: "text/html" });
 	item.complete();
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
