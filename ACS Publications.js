@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-14 09:56:33"
+	"lastUpdated": "2023-09-16 00:07:05"
 }
 
 /*
@@ -94,8 +94,9 @@ function getSupplements(doc, supplementAsLink = false) {
 		let elem = supplementLinks[i];
 		let url = elem.href;
 		if (!url) continue;
-		let cleanURL = url.replace(/[?#].+$/, "");
-		let ext = cleanURL.split(".").at(-1).toLowerCase();
+		let pathComponents = url.replace(/[?#].+$/, "").split(".");
+		// possible location of file extension (following the last dot)
+		let ext = pathComponents[pathComponents.length - 1].toLowerCase();
 		let mimeType = suppTypeMap[ext];
 		// Only save file when MIME type is known *and* when we aren't
 		// specifically told otherwise
@@ -250,7 +251,7 @@ async function scrape(doc, url, supplementAsLink) {
 			// standard pdf
 			item.attachments.push({
 				title: "Full Text PDF",
-				url: new URL(`/doi/pdf/${doi}`, url).href,
+				url: `/doi/pdf/${doi}`,
 				mimeType: "application/pdf"
 			});
 		}
