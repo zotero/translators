@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-12 14:55:28"
+	"lastUpdated": "2023-09-16 01:54:13"
 }
 
 /*
@@ -63,6 +63,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	let items = {};
 	let found = false;
+	// "li.article" selector: see https://www.theatlantic.com/category/fiction/
 	let rows = doc.querySelectorAll("li.article > a, a[data-action~='title']");
 	for (let row of rows) {
 		let href = row.href;
@@ -110,7 +111,7 @@ async function scrape(doc, url = doc.location.href) {
 		// fix multiple authors; metadata give us one comma-separated string
 		item.creators = [];
 		// latter selector for legacy layout
-		for (let element of doc.querySelectorAll('#byline [data-event-element="author"], .byline span[itemprop="author"]')) {
+		for (let element of doc.querySelectorAll('#byline a[href*="/author/"], .byline span[itemprop="author"]')) {
 			item.creators.push(
 				ZU.cleanAuthor(
 					ZU.trimInternal(element.textContent),
@@ -125,7 +126,7 @@ async function scrape(doc, url = doc.location.href) {
 		}
 
 		if (type === "magazineArticle") {
-			let issueTitle = text(doc, '[class*="ArticleMagazineIssueNav_title"]')
+			let issueTitle = text(doc, 'div[class*="ArticleMagazineIssueNav_title"]')
 				.replace(/\s+Issue$/i, "");
 			if (issueTitle) {
 				if (!item.extra) {
