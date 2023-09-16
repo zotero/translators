@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-16 03:26:02"
+	"lastUpdated": "2023-09-16 03:30:01"
 }
 
 /*
@@ -86,10 +86,10 @@ async function doWeb(doc, url) {
 
 
 async function scrape(identifiers, isPhilArchive) {
-		let baseUrl = isPhilArchive ? "https://philarchive.org" : "https://philpapers.org";
+	let baseUrl = isPhilArchive ? "https://philarchive.org" : "https://philpapers.org";
 	for (let id of identifiers) {
 		let bibUrl = `${baseUrl}/item.pl?eId=${id}&format=bib`;
-		let bibText = await requestText(bibUrl);	
+		let bibText = await requestText(bibUrl);
 		let url = "/rec/" + id;
 		let translator = Zotero.loadTranslator("import");
 		translator.setTranslator('9cb70025-a888-4a29-a210-93ec52da40d4');
