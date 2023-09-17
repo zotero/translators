@@ -289,13 +289,13 @@ function buildSelections(items, currentPageKey) {
 
 	// Populate the output
 	let select = {};
+	let empty = true;
 	if (minDissimilarity <= 0.05) { // One of the DOI-items is current page
-		currentWebPageItem = items[possibleCurrentWebPageDOI];
 		// In the input "items", reset the current-page-as-DOI-item's key to
 		// the special key "currentPageKey", by deleting the old key and
 		// insert the value at "currentPageKey"; this also overwrites the old
 		// value -- the EM-generated item -- if any.
-		items[currentPageKey] = currentWebPageItem;
+		items[currentPageKey] = items[possibleCurrentWebPageDOI];
 		delete items[possibleCurrentWebPageDOI];
 	}
 	for (let [key, item] of Object.entries(items)) {
@@ -306,8 +306,9 @@ function buildSelections(items, currentPageKey) {
 			title = `Current Web Page (${title})`;
 		}
 		select[key] = title;
+		empty = false;
 	}
-	return select;
+	return !empty && select;
 }
 
 // Item dissimilarity, for deduplicating the "current web page" among the
