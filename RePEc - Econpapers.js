@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-12 14:43:55"
+	"lastUpdated": "2023-09-17 06:58:54"
 }
 
 /*
@@ -78,7 +78,8 @@ function getBookChapType(doc) {
 		if (accessStatisticsLine) {
 			accessStatisticsLine = ZU.trimInternal(accessStatisticsLine);
 			// take last word
-			type = accessStatisticsLine.split(" ").at(-1);
+			let components = accessStatisticsLine.split(" ");
+			type = components[components.length - 1];
 		}
 	}
 
