@@ -312,34 +312,28 @@ function buildSelections(items, currentPageKey) {
 }
 
 // Item dissimilarity, for deduplicating the "current web page" among the
-// multiple. It is a number between 0 (identical) and 1 (totally different),
-// calculated as the minimum of URL- and title-based dissimilarity metric.
+// multiple. It is a number between 0 (identical) and 1 (totally different).
 function itemDissimilarity(a, b) {
-	return Math.min(urlDissimilarity(a, b), titleDissimilarity(a, b));
+	return urlDissimilarity(a, b) && titleDissimilarity(a, b);
 }
 
 // URL-based dissimilarity. If either item's URL is missing, the dissimilarity
-// maxes out at 1. If top-level domains differ, it also maxes out. When
-// top-level domains are the same, only the pathnames (without subdomains,
-// query, fragment, etc.) are checked. The trailing slash in the pathname, if
-// present, is ignored.
+// maxes out. Scheme, query, fragment are ignored; domain comparison is modulo
+// subdomains and letter case. Pathname equality check is done ignoring the
+// last trailing slash but otherwise verbatim. The output is either 0 or 1.
 function urlDissimilarity(a, b) {
 	if (!(a.url && b.url)) {
 		return 1;
 	}
 	let aURL = new URL(a.url);
 	let bURL = new URL(b.url);
-	// only consider top-level domains; if they differ, max out the
-	// dissimilarity
-	if (topLevelDomain(aURL.hostname) !== topLevelDomain(bURL.hostname)) {
+	if (aURL.pathname.replace(/\/$/, "") !== bURL.pathname.replace(/\/$/, "")) {
 		return 1;
 	}
-	// further check among the URLs with the same hostname, by computing the
-	// dissimilarity of pathnames
-	let options = { isPath: true };
-	let aPath = normalizeString(aURL.pathname, options);
-	let bPath = normalizeString(bURL.pathname, options);
-	return ZU.levenshtein(aPath, bPath) / Math.max(aPath.length, bPath.length);
+	if (!isSubDomain(aURL.hostname, bURL.hostname)) {
+		return 1;
+	}
+	return 0;
 }
 
 // Title-based dissimilarity. If either item's URL is missing, the dissimilarity
@@ -350,41 +344,55 @@ function titleDissimilarity(a, b) {
 	if (!(a.title && b.title)) {
 		return 1;
 	}
-	let options = { normalizeDiacritics: true };
-	aTitle = normalizeString(
-		ZU.cleanTags(
-			ZU.trimInternal(aTitle.trim())
-		),
-		options
-	);
-	bTitle = normalizeString(
-		ZU.cleanTags(
-			ZU.trimInternal(bTitle.trim())
-		),
-		options
-	);
-	return ZU.levenshtein(aTitle, bTitle) / Math.max(aTitle.length, bTitle.length);
+	aTitle = normalizeTitle(aTitle);
+	bTitle = normalizeTitle(bTitle);
+	let d = ZU.levenshtein(aTitle, bTitle) / Math.max(aTitle.length, bTitle.length);
+	return d;
 }
 
-function normalizeString(str, options = {}) {
-	let output = str;
-	if (options.isPath) {
-		output = output.replace(/\/$/, ""); // strip last slash if any
+var NORM_TITLE_CACHE = {};
+function normalizeTitle(str) {
+	if (Object.hasOwn(NORM_TITLE_CACHE, str)) {
+		return NORM_TITLE_CACHE[str];
 	}
-	output = output.toLowerCase(); // case-normalize
-	if (options.normalizeDiacritics) {
-		output = ZU.removeDiacritics(output);
-	}
+	let output = ZU.cleanTags(str).toLowerCase(); // case-normalize
+	output = ZU.removeDiacritics(output);
+	output = ZU.trimInternal(
+		ZU.XRegExp.replace(
+			output,
+			ZU.XRegExp('[^\\pL\\pN\\s]', "g"), // Remove punctuations
+			""
+		)
+	);
 	// encode the astrals so that the JS "length" property is equal to the
-	// string's code-point length
-	return encodeURI(output);
+	// string's code-point length, but reinstate the space for debugging
+	output = encodeURI(output).replace(/%20/g, " ");
+	NORM_TITLE_CACHE[str] = output;
+	return output;
 }
 
-function topLevelDomain(hostname) {
-	return hostname.toLowerCase()
-		.split(".")
-		.slice(-2)
-		.join(".");
+// Test whether a is a subdomain of b or vice versa
+function isSubDomain(a, b) {
+	let aParts = a.replace(/\.$/, "").toLowerCase().split(".");
+	let bParts = b.replace(/\.$/, "").toLowerCase().split(".");
+	let long, short;
+	if (aParts.length >= bParts.length) {
+		long = aParts;
+		short = bParts;
+	}
+	else {
+		short = aParts;
+		long = bParts;
+	}
+	let str;
+	let result = true;
+	while (typeof (str = short.pop()) !== "undefined") {
+		if (str !== long.pop()) {
+			result = false;
+			break;
+		}
+	}
+	return result;
 }
 
 /** BEGIN TEST CASES **/
