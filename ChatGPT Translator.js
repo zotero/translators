@@ -12,6 +12,29 @@
 	"lastUpdated": "2023-09-17 18:51:17"
 }
 
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2023 Malek Ibrahim
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
 function detectWeb(doc, url) {
 	Zotero.debug("This message will appear in the Zotero debug output.");
 	if (url.includes("chat.openai.com")) {
@@ -37,12 +60,17 @@ function doWeb(doc, url) {
 	var titleElement = doc.querySelector("h1");
 	if (titleElement) {
 		item.title = titleElement.textContent;
-	} else {
-		item.title = "Chat with ChatGPT";  // Fallback title in case <h1> is not found
+	}
+	else {
+		item.title = "Chat with ChatGPT"; // Fallback title in case <h1> is not found
 	}
 
 	// Setting the author
-	item.creators.push({firstName: "", lastName: "ChatGPT", creatorType: "author"});
+	item.creators.push({
+		firstName: "",
+		lastName: "ChatGPT",
+		creatorType: "author"
+	});
 		
 	item.url = url;
 	item.accessDate = new Date().toISOString();
@@ -53,6 +81,7 @@ function doWeb(doc, url) {
 	item.complete();
 	Zotero.debug("After completing item.");
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
