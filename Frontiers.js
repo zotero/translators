@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-20 09:51:39"
+	"lastUpdated": "2023-09-20 10:37:36"
 }
 
 /*
@@ -34,6 +34,12 @@
 
 	***** END LICENSE BLOCK *****
 */
+
+// NOTE: Most of the article URLs are DOI-based; see
+// https://helpcenter.frontiersin.org/s/article/Article-URLs-and-File-Formats
+// We don't use DOI translator directly, because for new articles the
+// resolution may not be ready yet, and because 3rd-party requests to doi.org
+// is unnecessary -- the Frontiers site has everything we need.
 
 const ARTICLE_BASEURL = "https://www.frontiersin.org/articles";
 const SEARCH_PAGE_RE = /^https:\/\/[^/]+\/search([?#].*)?$/;
@@ -90,8 +96,6 @@ function getArticleSearch(doc, checkOnly) {
 }
 
 function getListing(doc, checkOnly) {
-	// actual search result pages don't use <a> tags and instead emulate tags
-	// with JS onclick, so this is just for topics/collections
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('.article-card, .CardArticle > a');
@@ -141,10 +145,10 @@ async function doWeb(doc, url) {
 async function scrape(doc, doi, supplementOpts, articleID) {
 	let supplements = [];
 	if (supplementOpts.attach) {
-		// If we need supplements, we have to obtain the articleID (string of
-		// numbers) to construct the URL for the JSON article-info file
-		// containing the supplement names and URLs.  articleID may be already
-		// there, or it may have to be scraped from the doc
+		// If we need supplements, we need the articleID (string of numbers) to
+		// construct the URL for the JSON article-info file containing the
+		// supplement names and URLs. articleID may already be there, or it may
+		// have to be scraped from the doc
 		if (!articleID) {
 			if (!doc) {
 				doc = await requestDocument(`${ARTICLE_BASEURL}/${doi}/full`);
