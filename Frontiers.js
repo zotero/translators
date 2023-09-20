@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-20 08:19:47"
+	"lastUpdated": "2023-09-20 09:51:39"
 }
 
 /*
@@ -35,33 +35,76 @@
 	***** END LICENSE BLOCK *****
 */
 
+const ARTICLE_BASEURL = "https://www.frontiersin.org/articles";
+const SEARCH_PAGE_RE = /^https:\/\/[^/]+\/search([?#].*)?$/;
 
-function detectWeb(doc, _url) {
+function detectWeb(doc, url) {
 	if (doc.querySelector('meta[name^="citation_"]')) {
 		return "journalArticle";
 	}
-	else if (getSearchResults(doc, true)) {
-		return "multiple";
+
+	if (SEARCH_PAGE_RE.test(url)) {
+		// For live Ajax search filtering. NOTE that Z.monitorDOMChanges() can
+		// only be called from detectWeb().
+		let liveSearchElem = doc.querySelector("app-root");
+		if (liveSearchElem) {
+			Z.monitorDOMChanges(liveSearchElem);
+		}
+		return getArticleSearch(doc, true) && "multiple";
 	}
-	return false;
+	else {
+		return getListing(doc, true) && "multiple";
+	}
 }
 
 function getSearchResults(doc, checkOnly) {
+	if (SEARCH_PAGE_RE.test(doc.location.href)) {
+		return getArticleSearch(doc, checkOnly);
+	}
+	else {
+		return getListing(doc, checkOnly);
+	}
+}
+
+function getArticleSearch(doc, checkOnly) {
+	// search results doesn't contain article links in the typical format
+	// (DOI-based). Only articleID in some element attribute values. But the
+	// site redirects '/articles/(articleID)' to the DOI-based article URL.
+	var items = {};
+	var found = false;
+	// "top results" and "articles" panels respectively
+	var rows = doc.querySelectorAll('a[data-test-id^="article_navigate_"], li[data-test-id^="topresults_article_"]');
+	for (let row of rows) {
+		let articleIDMatch = row.dataset.testId.match(/_(\d+)$/);
+		if (!articleIDMatch) continue;
+		let articleID = articleIDMatch[1];
+
+		let title = text(row, ".title");
+		if (!title) continue;
+
+		if (checkOnly) return true;
+		found = true;
+		items[articleID] = title;
+	}
+	return found ? items : false;
+}
+
+function getListing(doc, checkOnly) {
 	// actual search result pages don't use <a> tags and instead emulate tags
 	// with JS onclick, so this is just for topics/collections
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('.article-card, .CardArticle > a');
 	for (let row of rows) {
-		let href = row.href;
+		let doi = row.href && getDOI(row.href);
 		let title = text(row, "h1, h3"); // issue/topic listing, respectively
 		if (!title) {
 			title = ZU.trimInternal(row.textContent);
 		}
-		if (!href || !title) continue;
+		if (!doi || !title) continue;
 		if (checkOnly) return true;
 		found = true;
-		items[href] = title;
+		items[doi] = title;
 	}
 	return found ? items : false;
 }
@@ -76,33 +119,44 @@ async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
-		for (let url of Object.keys(items)) {
-			// for indirect savign via multiple, use the bibTeX instead of the
-			// document itself whenever possible, to save bandwidth
-			await scrape(null, url, supplementOpts);
+		for (let id of Object.keys(items)) {
+			// The URL may be in "/article/nnnn.." rather than DOI-based (from
+			// search results). In that case we'll always
+			if (/^10\.\d{4,}\/.+/.test(id)) { // id is DOI
+				await scrape(null, id/* doi */, supplementOpts);
+			}
+			else { // id is articleID
+				// take the redirect
+				let articleDoc = await requestDocument(`${ARTICLE_BASEURL}/${id}`);
+				await scrape(articleDoc, getDOI(articleDoc.location.href),
+					supplementOpts, id/* articleID */);
+			}
 		}
 	}
 	else {
-		await scrape(doc, url, supplementOpts);
+		await scrape(doc, getDOI(url), supplementOpts);
 	}
 }
 
-async function scrape(doc, url, supplementOpts) {
+async function scrape(doc, doi, supplementOpts, articleID) {
 	let supplements = [];
 	if (supplementOpts.attach) {
 		// If we need supplements, we have to obtain the articleID (string of
-		// numbers) that leads to their locations by inspecting the document.
-		// This might be replaced by a more lightweight fetch if we knew how to
-		// map DOI to articleID.
-		if (!doc) {
-			doc = await requestDocument(url);
+		// numbers) to construct the URL for the JSON article-info file
+		// containing the supplement names and URLs.  articleID may be already
+		// there, or it may have to be scraped from the doc
+		if (!articleID) {
+			if (!doc) {
+				doc = await requestDocument(`${ARTICLE_BASEURL}/${doi}/full`);
+			}
+			articleID = getArticleID(doc);
 		}
-		let articleID = getArticleID(doc);
-		// Skip the fetch of supplement info JSON (although lightweight) if
-		// there's no supplement button on the page. Avoid the
+		// Skip the fetch of supplement info JSON (although lightweight) if doc
+		// is available but there's no supplement button on the page. Avoid the
 		// "#supplementary_view" selector because it's a duplicated element id
 		// (the page is malformed).
-		if (doc.querySelector(".btn-open-supplemental") && articleID) {
+		if (articleID
+			&& (!doc || doc.querySelector(".btn-open-supplemental"))) {
 			supplements = await getSupplements(articleID, supplementOpts.asLink);
 		}
 	}
@@ -111,7 +165,7 @@ async function scrape(doc, url, supplementOpts) {
 		await translateEM(doc, supplements);
 	}
 	else {
-		await translateBibTeX(url, supplements);
+		await translateBibTeX(doi, supplements);
 	}
 }
 
@@ -132,11 +186,9 @@ async function translateEM(doc, supplements) {
 	await em.doWeb(doc, doc.location.href);
 }
 
-async function translateBibTeX(url, supplements) {
+async function translateBibTeX(doi, supplements) {
 	Z.debug("Frontiers: translating using bibTeX");
-	let doi = getDOI(url);
-	let bibTeXURL = `https://www.frontiersin.org/articles/${doi}/bibTex`;
-	let bibText = await requestText(bibTeXURL);
+	let bibText = await requestText(`${ARTICLE_BASEURL}/${doi}/bibTex`);
 
 	let translator = Zotero.loadTranslator("import");
 	translator.setTranslator('9cb70025-a888-4a29-a210-93ec52da40d4'); // bibTeX
@@ -153,7 +205,7 @@ function finalizeItem(item, doi, supplements) {
 	if (doi) {
 		item.attachments.push({
 			title: 'Full Text PDF',
-			url: `https://www.frontiersin.org/articles/${doi}/pdf`,
+			url: `${ARTICLE_BASEURL}/${doi}/pdf`,
 			mimeType: "application/pdf"
 		});
 	}
@@ -184,7 +236,7 @@ var MIME_TYPES = {
 };
 
 async function getSupplements(articleID, asLink) {
-	let infoObj = await requestJSON(`https://www.frontiersin.org/articles/getsupplementaryfilesbyarticleid?articleid=${encodeURIComponent(articleID)}&ispublishedv2=false`);
+	let infoObj = await requestJSON(`${ARTICLE_BASEURL}/getsupplementaryfilesbyarticleid?articleid=${encodeURIComponent(articleID)}&ispublishedv2=false`);
 	let attachments = [];
 	let fileInfoArray;
 	if (infoObj && infoObj.SupplimentalFileDetails
@@ -524,6 +576,18 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.frontiersin.org/journals/digital-humanities/articles?type=24&section=913",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.frontiersin.org/search?query=ballot+secrecy+election&tab=top-results",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.frontiersin.org/search?query=ballot+secrecy+election&tab=articles",
 		"defer": true,
 		"items": "multiple"
 	}
