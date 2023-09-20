@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-20 08:09:45"
+	"lastUpdated": "2023-09-20 08:19:47"
 }
 
 /*
@@ -518,6 +518,12 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.frontiersin.org/research-topics/9706/workshop-proceedings-of-the-13th-international-aaai-conference-on-web-and-social-media",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.frontiersin.org/journals/digital-humanities/articles?type=24&section=913",
 		"defer": true,
 		"items": "multiple"
 	}
