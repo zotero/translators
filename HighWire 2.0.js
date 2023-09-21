@@ -425,9 +425,10 @@ function detectWeb(doc, url) {
 				return "journalArticle";
 			}
 		}
-		else if (getSearchResults(doc, url, true)) {
-			return "multiple";
-		}
+	}
+
+	if (getSearchResults(doc, url, true)) {
+		return "multiple";
 	}
 	return false;
 }
@@ -438,7 +439,7 @@ async function doWeb(doc, url) {
 
 	// Z.debug(items)
 	if (detectWeb(doc, url) == "multiple") {
-		let items = await Z.selectItems(getSearchResults(doc, false));
+		let items = await Z.selectItems(getSearchResults(doc, url, false));
 		if (!items) return;
 		for (let url of Object.keys(items)) {
 			await addEmbMeta(await requestDocument(url), url);
