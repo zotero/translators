@@ -58,9 +58,7 @@ function filterQuery(items) {
 }
 
 async function doSearch(items) {
-	var dois = filterQuery(items);
-	if (!dois.length) return;
-	for (let doi of dois) {
+	for (let doi of filterQuery(items)) {
 		await processDOI(doi);
 	}
 }
