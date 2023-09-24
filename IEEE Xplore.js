@@ -151,7 +151,7 @@ async function scrape(doc, url = doc.location.href) {
 	let bibtexURL = "/rest/search/citation/format?recordIds=" + arnumber + "&fromPage=&citations-format=citation-abstract&download-format=download-bibtex";
 	Z.debug(bibtexURL);
 	// metadata is downloaded in a JSON data field
-	let bibtex = await requestJSON(bibtexURL);
+	let bibtex = await requestJSON(bibtexURL, { headers: { Referer: url} });
 	bibtex = bibtex.data;
 	bibtex = ZU.unescapeHTML(bibtex.replace(/(&[^\s;]+) and/g, '$1;'));
 	// remove empty tag - we can take this out once empty tags are ignored
