@@ -8,7 +8,7 @@
 	"priority": 98,
 	"inRepository": true,
 	"translatorType": 8,
-	"lastUpdated": "2023-09-07 18:56:42"
+	"lastUpdated": "2023-09-26 16:11:18"
 }
 
 /*
@@ -193,7 +193,9 @@ function cleanData(items) {
 			if (typeof item === 'string') {
 				item = { ISBN: item };
 			}
-			item.ISBN = ZU.cleanISBN(item.ISBN);
+			if (item.ISBN) {
+				item.ISBN = ZU.cleanISBN(item.ISBN);
+			}
 			return item;
 		})
 		.filter(item => item.ISBN && (
