@@ -38,17 +38,19 @@
 const BASE_URL = "https://ieeexplore.ieee.org";
 
 function detectWeb(doc, url) {
-	let globalWrapper = doc.querySelector('.global-content-wrapper');
-	if (globalWrapper) {
-		Zotero.monitorDOMChanges(globalWrapper);
+	// TODO this is not necessary for papers
+	let appRoot = doc.querySelector('xpl-root');
+	if (appRoot) {
+		Zotero.monitorDOMChanges(appRoot);
 	}
 	if (doc.defaultView !== null && doc.defaultView !== doc.defaultView.top) return false;
 	
 	if (getArticleID(url) !== null) {
-		var firstBreadcrumb = text(doc, ".breadcrumbs > span:first-of-type > a");
-		if (firstBreadcrumb.toLowerCase().includes("conference")) {
+		var firstBreadcrumb = text(doc, ".breadcrumbs > span:first-of-type > a").toLowerCase();
+		if (firstBreadcrumb.includes("conference")) {
 			return "conferencePaper";
 		}
+		// TODO: Handle other types such as standards
 		return "journalArticle";
 	}
 	
