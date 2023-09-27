@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-20 10:37:36"
+	"lastUpdated": "2023-09-27 07:21:09"
 }
 
 /*
@@ -125,7 +125,7 @@ async function doWeb(doc, url) {
 		if (!items) return;
 		for (let id of Object.keys(items)) {
 			// The URL may be in "/article/nnnn.." rather than DOI-based (from
-			// search results). In that case we'll always
+			// search results).
 			if (/^10\.\d{4,}\/.+/.test(id)) { // id is DOI
 				await scrape(null, id/* doi */, supplementOpts);
 			}
@@ -205,6 +205,9 @@ async function translateBibTeX(doi, supplements) {
 }
 
 function finalizeItem(item, doi, supplements) {
+	if (item.date) {
+		item.date = ZU.strToISO(item.date);
+	}
 	item.attachments = []; // delete EM snapshot if any; redundant with PDF
 	if (doi) {
 		item.attachments.push({
@@ -294,7 +297,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2011/11/15",
+				"date": "2011-11-15",
 				"DOI": "10.3389/fpsyg.2011.00326",
 				"ISSN": "1664-1078",
 				"abstractNote": "Research progress in machine vision has been very significant in recent years. Robust face detection and identification algorithms are already readily available to consumers, and modern computer vision algorithms for generic object recognition are now coping with the richness and complexity of natural visual scenes. Unlike early vision models of object recognition that emphasized the role of figure-ground segmentation and spatial information between parts, recent successful approaches are based on the computation of loose collections of image features without prior segmentation or any explicit encoding of spatial relations. While these models remain simplistic models of visual processing, they suggest that, in principle, bottom-up activation of a loose collection of image features could support the rapid recognition of natural object categories and provide an initial coarse visual representation before more complex visual routines and attentional mechanisms take place. Focusing on biologically-plausible computational models of (bottom-up) pre-attentive visual recognition, we review some of the key visual features that have been described in the literature. We discuss the consistency of these feature-based representations with classical theories from visual psychology and test their ability to account for human performance on a rapid object categorization task.",
@@ -446,7 +449,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2014/08/13",
+				"date": "2014-08-13",
 				"DOI": "10.3389/fmicb.2014.00402",
 				"ISSN": "1664-302X",
 				"abstractNote": "Efficient microbial conversion of lignocellulosic hydrolysates to biofuels is a key barrier to the economically viable deployment of lignocellulosic biofuels. A chief contributor to this barrier is the impact on microbial processes and energy metabolism of lignocellulose-derived inhibitors, including phenolic carboxylates, phenolic amides (for ammonia-pretreated biomass), phenolic aldehydes, and furfurals. To understand the bacterial pathways induced by inhibitors present in ammonia-pretreated biomass hydrolysates, which are less well studied than acid-pretreated biomass hydrolysates, we developed and exploited synthetic mimics of ammonia-pretreated corn stover hydrolysate (ACSH). To determine regulatory responses to the inhibitors normally present in ACSH, we measured transcript and protein levels in an Escherichia coli ethanologen using RNA-seq and quantitative proteomics during fermentation to ethanol of synthetic hydrolysates containing or lacking the inhibitors. Our study identified four major regulators mediating these responses, the MarA/SoxS/Rob network, AaeR, FrmR, and YqhC. Induction of these regulons was correlated with a reduced rate of ethanol production, buildup of pyruvate, depletion of ATP and NAD(P)H, and an inhibition of xylose conversion. The aromatic aldehyde inhibitor 5-hydroxymethylfurfural appeared to be reduced to its alcohol form by the ethanologen during fermentation whereas phenolic acid and amide inhibitors were not metabolized. Together, our findings establish that the major regulatory responses to lignocellulose-derived inhibitors are mediated by transcriptional rather than translational regulators, suggest that energy consumed for inhibitor efflux and detoxification may limit biofuel production, and identify a network of regulators for future synthetic biology efforts.",
@@ -532,7 +535,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2019/06/25",
+				"date": "2019-06-25",
 				"DOI": "10.3389/fdata.2019.00017",
 				"ISSN": "2624-909X",
 				"abstractNote": "Social Media platforms in Cyberspace provide communication channels for individuals, businesses, as well as state and non-state actors (i.e., individuals and groups) to conduct messaging campaigns. What are the spheres of influence that arose around the keyword \\textit{\\#Munich} on Twitter following an active shooter event at a Munich shopping mall in July $2016$? To answer that question in this work, we capture tweets utilizing \\textit{\\#Munich} beginning one hour after the shooting was reported, and the data collection ends approximately one month later~\\footnote{The collected dataset will be posted online for public use once the research work is published.}. We construct both daily networks and a cumulative network from this data. We analyze community evolution using the standard Louvain algorithm, and how the communities change over time to study how they both encourage and discourage the effectiveness of an information messaging campaign. We conclude that the large communities observed in the early stage of the data disappear from the \\textit{\\#Munich} conversation within seven days. The politically charged nature of many of these communities suggests their activity is migrated to other Twitter hashtags (i.e., conversation topics). Future analysis of Twitter activity might focus on tracking communities across topics and time.",
