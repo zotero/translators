@@ -236,7 +236,11 @@ function processExtraFields(item, fields) {
 				if (!item.audioRecordingFormat) item.audioRecordingFormat = field.value;
 				break;
 			case "authority":
-				if (!item.authority) item.authority = item.court = item.issuingAuthority = item.legislativeBody = item.organization = field.value;
+				if (!item.authority) item.authority = field.value;
+				if (!item.court) item.court = field.value;
+				if (!item.issuingAuthority) item.issuingAuthority = field.value;
+				if (!item.legislativeBody) item.legislativeBody = field.value;
+				if (!item.organization) item.organization = field.value;
 				break;
 			case "bill number":
 				if (!item.billNumber) item.billNumber = field.value;
@@ -284,7 +288,10 @@ function processExtraFields(item, fields) {
 				if (!item.court) item.court = field.value;
 				break;
 			case "date":
-				if (!item.date) item.date = item.dateDecided = item.dateEnacted = item.issueDate = field.value;
+				if (!item.date) item.date = field.value;
+				if (!item.dateDecided) item.dateDecided = field.value;
+				if (!item.dateEnacted) item.dateEnacted = field.value;
+				if (!item.issueDate) item.issueDate = field.value;
 				break;
 			case "date added":
 				if (!item.dateAdded) item.dateAdded = field.value;
@@ -318,6 +325,9 @@ function processExtraFields(item, fields) {
 				break;
 			case "episode number":
 				if (!item.episodeNumber) item.episodeNumber = field.value;
+				break;
+			case "extra":
+				if (!item.extra) item.extra = field.value;
 				break;
 			case "filing date":
 				if (!item.filingDate) item.filingDate = field.value;
@@ -386,7 +396,13 @@ function processExtraFields(item, fields) {
 				if (!item.mapType) item.mapType = field.value;
 				break;
 			case "medium":
-				if (!item.artworkMedium) item.artworkMedium = item.audioFileType = item.audioRecordingFormat = item.format = item.interviewMedium = item.medium = item.videoRecordingFormat = field.value;
+				if (!item.artworkMedium) item.artworkMedium = field.value;
+				if (!item.audioFileType) item.audioFileType = field.value;
+				if (!item.audioRecordingFormat) item.audioRecordingFormat = field.value;
+				if (!item.format) item.format = field.value;
+				if (!item.interviewMedium) item.interviewMedium = field.value;
+				if (!item.medium) item.medium = field.value;
+				if (!item.videoRecordingFormat) item.videoRecordingFormat = field.value;
 				break;
 			case "meeting name":
 				if (!item.meetingName) item.meetingName = field.value;
@@ -401,7 +417,16 @@ function processExtraFields(item, fields) {
 				if (!item.numPages) item.numPages = field.value;
 				break;
 			case "number":
-				if (!item.archiveID) item.archiveID = item.billNumber = item.docketNumber = item.documentNumber = item.episodeNumber = item.identifier = item.number = item.patentNumber = item.publicLawNumber = item.reportNumber = field.value;
+				if (!item.archiveID) item.archiveID = field.value;
+				if (!item.billNumber) item.billNumber = field.value;
+				if (!item.docketNumber) item.docketNumber = field.value;
+				if (!item.documentNumber) item.documentNumber = field.value;
+				if (!item.episodeNumber) item.episodeNumber = field.value;
+				if (!item.identifier) item.identifier = field.value;
+				if (!item.number) item.number = field.value;
+				if (!item.patentNumber) item.patentNumber = field.value;
+				if (!item.publicLawNumber) item.publicLawNumber = field.value;
+				if (!item.reportNumber) item.reportNumber = field.value;
 				break;
 			case " of volumes":
 				if (!item.numberOfVolumes) item.numberOfVolumes = field.value;
@@ -410,13 +435,16 @@ function processExtraFields(item, fields) {
 				if (!item.organization) item.organization = field.value;
 				break;
 			case "pages":
-				if (!item.codePages) item.codePages = item.firstPage = item.pages = field.value;
+				if (!item.codePages) item.codePages = field.value;
+				if (!item.firstPage) item.firstPage = field.value;
+				if (!item.pages) item.pages = field.value;
 				break;
 			case "patent number":
 				if (!item.patentNumber) item.patentNumber = field.value;
 				break;
 			case "place":
-				if (!item.place) item.place = item.repositoryLocation = field.value;
+				if (!item.place) item.place = field.value;
+				if (!item.repositoryLocation) item.repositoryLocation = field.value;
 				break;
 			case "post type":
 				if (!item.postType) item.postType = field.value;
@@ -440,10 +468,26 @@ function processExtraFields(item, fields) {
 				if (!item.publicLawNumber) item.publicLawNumber = field.value;
 				break;
 			case "publication":
-				if (!item.blogTitle) item.blogTitle = item.bookTitle = item.dictionaryTitle = item.encyclopediaTitle = item.forumTitle = item.proceedingsTitle = item.programTitle = item.publicationTitle = item.websiteTitle = field.value;
+				if (!item.blogTitle) item.blogTitle = field.value;
+				if (!item.bookTitle) item.bookTitle = field.value;
+				if (!item.dictionaryTitle) item.dictionaryTitle = field.value;
+				if (!item.encyclopediaTitle) item.encyclopediaTitle = field.value;
+				if (!item.forumTitle) item.forumTitle = field.value;
+				if (!item.proceedingsTitle) item.proceedingsTitle = field.value;
+				if (!item.programTitle) item.programTitle = field.value;
+				if (!item.publicationTitle) item.publicationTitle = field.value;
+				if (!item.websiteTitle) item.websiteTitle = field.value;
 				break;
 			case "publisher":
-				if (!item.company) item.company = item.distributor = item.institution = item.label = item.network = item.publisher = item.repository = item.studio = item.university = field.value;
+				if (!item.company) item.company = field.value;
+				if (!item.distributor) item.distributor = field.value;
+				if (!item.institution) item.institution = field.value;
+				if (!item.label) item.label = field.value;
+				if (!item.network) item.network = field.value;
+				if (!item.publisher) item.publisher = field.value;
+				if (!item.repository) item.repository = field.value;
+				if (!item.studio) item.studio = field.value;
+				if (!item.university) item.university = field.value;
 				break;
 			case "references":
 				if (!item.references) item.references = field.value;
@@ -497,7 +541,8 @@ function processExtraFields(item, fields) {
 				if (!item.shortTitle) item.shortTitle = field.value;
 				break;
 			case "status":
-				if (!item.legalStatus) item.legalStatus = item.status = field.value;
+				if (!item.legalStatus) item.legalStatus = field.value;
+				if (!item.status) item.status = field.value;
 				break;
 			case "studio":
 				if (!item.studio) item.studio = field.value;
@@ -512,10 +557,22 @@ function processExtraFields(item, fields) {
 				if (!item.thesisType) item.thesisType = field.value;
 				break;
 			case "title":
-				if (!item.caseName) item.caseName = item.nameOfAct = item.subject = item.title = field.value;
+				if (!item.caseName) item.caseName = field.value;
+				if (!item.nameOfAct) item.nameOfAct = field.value;
+				if (!item.subject) item.subject = field.value;
+				if (!item.title) item.title = field.value;
 				break;
 			case "type":
-				if (!item.genre) item.genre = item.letterType = item.manuscriptType = item.mapType = item.postType = item.presentationType = item.reportType = item.thesisType = item.type = item.websiteType = field.value;
+				if (!item.genre) item.genre = field.value;
+				if (!item.letterType) item.letterType = field.value;
+				if (!item.manuscriptType) item.manuscriptType = field.value;
+				if (!item.mapType) item.mapType = field.value;
+				if (!item.postType) item.postType = field.value;
+				if (!item.presentationType) item.presentationType = field.value;
+				if (!item.reportType) item.reportType = field.value;
+				if (!item.thesisType) item.thesisType = field.value;
+				if (!item.type) item.type = field.value;
+				if (!item.websiteType) item.websiteType = field.value;
 				break;
 			case "university":
 				if (!item.university) item.university = field.value;
@@ -530,7 +587,9 @@ function processExtraFields(item, fields) {
 				if (!item.videoRecordingFormat) item.videoRecordingFormat = field.value;
 				break;
 			case "volume":
-				if (!item.codeVolume) item.codeVolume = item.reporterVolume = item.volume = field.value;
+				if (!item.codeVolume) item.codeVolume = field.value;
+				if (!item.reporterVolume) item.reporterVolume = field.value;
+				if (!item.volume) item.volume = field.value;
 				break;
 			case "website title":
 				if (!item.websiteTitle) item.websiteTitle = field.value;
