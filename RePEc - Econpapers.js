@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-17 06:58:54"
+	"lastUpdated": "2023-09-27 07:32:02"
 }
 
 /*
@@ -219,7 +219,9 @@ function handleComputerProgram(item, doc) {
 function finalize(item, doc) {
 	let jelCodes = ZU.trimInternal(attr(doc, "meta[name='JEL-Codes']", "content"));
 	if (jelCodes) {
-		addExtraLine(item, `JEL Code: ${jelCodes}`);
+		for (let code of jelCodes.split("; ")) {
+			item.tags.push(code);
+		}
 	}
 
 	let doiElem = paragraphHeadedBy(doc, "DOI:");
@@ -382,7 +384,6 @@ var testCases = [
 				],
 				"date": "2005/05",
 				"abstractNote": "Supporters of touch-screen voting claim it is a highly reliable voting technology, while a growing number of critics argue that paperless electronic voting systems are vulnerable to fraud. In this paper we use county-level data on voting technologies in the 2000 and 2004 presidential elections to test whether voting technology affects electoral outcomes. We first show that there is a positive correlation between use of touch-screen voting and the level of electoral support for George Bush. This is true in models that compare the 2000-2004 changes in vote shares between adopting and non-adopting counties within a state, after controlling for income, demographic composition, and other factors. Although small, the effect could have been large enough to influence the final results in some closely contested states. While on the surface this pattern would appear to be consistent with allegations of voting irregularities, a closer examination suggests this interpretation is incorrect. If irregularities did take place, they would be most likely in counties that could potentially affect statewide election totals, or in counties where election officials had incentives to affect the results. Contrary to this prediction, we find no evidence that touch-screen voting had a larger effect in swing states, or in states with a Republican Secretary of State. Touch-screen voting could also indirectly affect vote shares by influencing the relative turnout of different groups. We find that the adoption of touch-screen voting has a negative effect on estimated turnout rates, controlling for state effects and a variety of county-level controls. This effect is larger in counties with a higher fraction of Hispanic residents (who tend to favor Democrats) but not in counties with more African Americans (who are overwhelmingly Democrat voters). Models for the adoption of touch-screen voting suggest it was more likely to be used in counties with a higher fraction of Hispanic and Black residents, especially in swing states. Nevertheless, the impact of non-random adoption patterns on vote shares is small.",
-				"extra": "JEL Code: H0; J0",
 				"institution": "National Bureau of Economic Research, Inc",
 				"libraryCatalog": "EconPapers",
 				"reportNumber": "11309",
@@ -400,7 +401,14 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "H0"
+					},
+					{
+						"tag": "J0"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
