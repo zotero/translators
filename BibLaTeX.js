@@ -17,7 +17,7 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2022-10-12 19:26:00"
+	"lastUpdated": "2023-09-27 11:08:00"
 }
 
 /*
@@ -112,6 +112,358 @@ function parseExtraFields(extra) {
 		fields.push(rec);
 	}
 	return fields;
+}
+
+function processExtraFields(item, fields) {
+	for (const field of fields) {
+		switch (field.field.toLowerCase().replace(/[^a-z ]/g, '')) {
+			case "doi":
+				if (!item.DOI) item.DOI = field.value;
+				break;
+			case "isbn":
+				if (!item.ISBN) item.ISBN = field.value;
+				break;
+			case "issn":
+				if (!item.ISSN) item.ISSN = field.value;
+				break;
+			case "abstract":
+				if (!item.abstractNote) item.abstractNote = field.value;
+				break;
+			case "accessed":
+				if (!item.accessDate) item.accessDate = field.value;
+				break;
+			case "application number":
+				if (!item.applicationNumber) item.applicationNumber = field.value;
+				break;
+			case "archive":
+				if (!item.archive) item.archive = field.value;
+				break;
+			case "archive id":
+				if (!item.archiveID) item.archiveID = field.value;
+				break;
+			case "loc in archive":
+				if (!item.archiveLocation) item.archiveLocation = field.value;
+				break;
+			case "medium":
+				if (!item.artworkMedium) item.artworkMedium = field.value;
+				break;
+			case "artwork size":
+				if (!item.artworkSize) item.artworkSize = field.value;
+				break;
+			case "assignee":
+				if (!item.assignee) item.assignee = field.value;
+				break;
+			case "file type":
+				if (!item.audioFileType) item.audioFileType = field.value;
+				break;
+			case "format":
+				if (!item.audioRecordingFormat) item.audioRecordingFormat = field.value;
+				break;
+			case "authority":
+				if (!item.authority) item.authority = item.court = item.issuingAuthority = item.legislativeBody = item.organization = field.value;
+				break;
+			case "bill number":
+				if (!item.billNumber) item.billNumber = field.value;
+				break;
+			case "blog title":
+				if (!item.blogTitle) item.blogTitle = field.value;
+				break;
+			case "book title":
+				if (!item.bookTitle) item.bookTitle = field.value;
+				break;
+			case "call number":
+				if (!item.callNumber) item.callNumber = field.value;
+				break;
+			case "case name":
+				if (!item.caseName) item.caseName = field.value;
+				break;
+			case "citation key":
+				if (!item.citationKey) item.citationKey = field.value;
+				break;
+			case "code":
+				if (!item.code) item.code = field.value;
+				break;
+			case "code number":
+				if (!item.codeNumber) item.codeNumber = field.value;
+				break;
+			case "code pages":
+				if (!item.codePages) item.codePages = field.value;
+				break;
+			case "code volume":
+				if (!item.codeVolume) item.codeVolume = field.value;
+				break;
+			case "committee":
+				if (!item.committee) item.committee = field.value;
+				break;
+			case "company":
+				if (!item.company) item.company = field.value;
+				break;
+			case "conference name":
+				if (!item.conferenceName) item.conferenceName = field.value;
+				break;
+			case "country":
+				if (!item.country) item.country = field.value;
+				break;
+			case "court":
+				if (!item.court) item.court = field.value;
+				break;
+			case "date":
+				if (!item.date) item.date = item.dateDecided = item.dateEnacted = item.issueDate = field.value;
+				break;
+			case "date added":
+				if (!item.dateAdded) item.dateAdded = field.value;
+				break;
+			case "date decided":
+				if (!item.dateDecided) item.dateDecided = field.value;
+				break;
+			case "date enacted":
+				if (!item.dateEnacted) item.dateEnacted = field.value;
+				break;
+			case "modified":
+				if (!item.dateModified) item.dateModified = field.value;
+				break;
+			case "dictionary title":
+				if (!item.dictionaryTitle) item.dictionaryTitle = field.value;
+				break;
+			case "distributor":
+				if (!item.distributor) item.distributor = field.value;
+				break;
+			case "docket number":
+				if (!item.docketNumber) item.docketNumber = field.value;
+				break;
+			case "document number":
+				if (!item.documentNumber) item.documentNumber = field.value;
+				break;
+			case "edition":
+				if (!item.edition) item.edition = field.value;
+				break;
+			case "encyclopedia title":
+				if (!item.encyclopediaTitle) item.encyclopediaTitle = field.value;
+				break;
+			case "episode number":
+				if (!item.episodeNumber) item.episodeNumber = field.value;
+				break;
+			case "filing date":
+				if (!item.filingDate) item.filingDate = field.value;
+				break;
+			case "first page":
+				if (!item.firstPage) item.firstPage = field.value;
+				break;
+			case "format":
+				if (!item.format) item.format = field.value;
+				break;
+			case "forumlistserv title":
+				if (!item.forumTitle) item.forumTitle = field.value;
+				break;
+			case "genre":
+				if (!item.genre) item.genre = field.value;
+				break;
+			case "history":
+				if (!item.history) item.history = field.value;
+				break;
+			case "identifier":
+				if (!item.identifier) item.identifier = field.value;
+				break;
+			case "institution":
+				if (!item.institution) item.institution = field.value;
+				break;
+			case "medium":
+				if (!item.interviewMedium) item.interviewMedium = field.value;
+				break;
+			case "issue":
+				if (!item.issue) item.issue = field.value;
+				break;
+			case "issue date":
+				if (!item.issueDate) item.issueDate = field.value;
+				break;
+			case "issuing authority":
+				if (!item.issuingAuthority) item.issuingAuthority = field.value;
+				break;
+			case "item type":
+				if (!item.itemType) item.itemType = field.value;
+				break;
+			case "journal abbr":
+				if (!item.journalAbbreviation) item.journalAbbreviation = field.value;
+				break;
+			case "label":
+				if (!item.label) item.label = field.value;
+				break;
+			case "language":
+				if (!item.language) item.language = field.value;
+				break;
+			case "legal status":
+				if (!item.legalStatus) item.legalStatus = field.value;
+				break;
+			case "legislative body":
+				if (!item.legislativeBody) item.legislativeBody = field.value;
+				break;
+			case "type":
+				if (!item.letterType) item.letterType = field.value;
+				break;
+			case "library catalogue":
+				if (!item.libraryCatalog) item.libraryCatalog = field.value;
+				break;
+			case "type":
+				if (!item.manuscriptType) item.manuscriptType = field.value;
+				break;
+			case "type":
+				if (!item.mapType) item.mapType = field.value;
+				break;
+			case "medium":
+				if (!item.artworkMedium) item.artworkMedium = item.audioFileType = item.audioRecordingFormat = item.format = item.interviewMedium = item.medium = item.videoRecordingFormat = field.value;
+				break;
+			case "meeting name":
+				if (!item.meetingName) item.meetingName = field.value;
+				break;
+			case "name of act":
+				if (!item.nameOfAct) item.nameOfAct = field.value;
+				break;
+			case "network":
+				if (!item.network) item.network = field.value;
+				break;
+			case " of pages":
+				if (!item.numPages) item.numPages = field.value;
+				break;
+			case "number":
+				if (!item.archiveID) item.archiveID = item.billNumber = item.docketNumber = item.documentNumber = item.episodeNumber = item.identifier = item.number = item.patentNumber = item.publicLawNumber = item.reportNumber = field.value;
+				break;
+			case " of volumes":
+				if (!item.numberOfVolumes) item.numberOfVolumes = field.value;
+				break;
+			case "organization":
+				if (!item.organization) item.organization = field.value;
+				break;
+			case "pages":
+				if (!item.codePages) item.codePages = item.firstPage = item.pages = field.value;
+				break;
+			case "patent number":
+				if (!item.patentNumber) item.patentNumber = field.value;
+				break;
+			case "place":
+				if (!item.place) item.place = item.repositoryLocation = field.value;
+				break;
+			case "post type":
+				if (!item.postType) item.postType = field.value;
+				break;
+			case "type":
+				if (!item.presentationType) item.presentationType = field.value;
+				break;
+			case "priority numbers":
+				if (!item.priorityNumbers) item.priorityNumbers = field.value;
+				break;
+			case "proceedings title":
+				if (!item.proceedingsTitle) item.proceedingsTitle = field.value;
+				break;
+			case "program title":
+				if (!item.programTitle) item.programTitle = field.value;
+				break;
+			case "prog language":
+				if (!item.programmingLanguage) item.programmingLanguage = field.value;
+				break;
+			case "public law number":
+				if (!item.publicLawNumber) item.publicLawNumber = field.value;
+				break;
+			case "publication":
+				if (!item.blogTitle) item.blogTitle = item.bookTitle = item.dictionaryTitle = item.encyclopediaTitle = item.forumTitle = item.proceedingsTitle = item.programTitle = item.publicationTitle = item.websiteTitle = field.value;
+				break;
+			case "publisher":
+				if (!item.company) item.company = item.distributor = item.institution = item.label = item.network = item.publisher = item.repository = item.studio = item.university = field.value;
+				break;
+			case "references":
+				if (!item.references) item.references = field.value;
+				break;
+			case "report number":
+				if (!item.reportNumber) item.reportNumber = field.value;
+				break;
+			case "report type":
+				if (!item.reportType) item.reportType = field.value;
+				break;
+			case "reporter":
+				if (!item.reporter) item.reporter = field.value;
+				break;
+			case "reporter volume":
+				if (!item.reporterVolume) item.reporterVolume = field.value;
+				break;
+			case "repository":
+				if (!item.repository) item.repository = field.value;
+				break;
+			case "repo location":
+				if (!item.repositoryLocation) item.repositoryLocation = field.value;
+				break;
+			case "rights":
+				if (!item.rights) item.rights = field.value;
+				break;
+			case "running time":
+				if (!item.runningTime) item.runningTime = field.value;
+				break;
+			case "scale":
+				if (!item.scale) item.scale = field.value;
+				break;
+			case "section":
+				if (!item.section) item.section = field.value;
+				break;
+			case "series":
+				if (!item.series) item.series = field.value;
+				break;
+			case "series number":
+				if (!item.seriesNumber) item.seriesNumber = field.value;
+				break;
+			case "series text":
+				if (!item.seriesText) item.seriesText = field.value;
+				break;
+			case "series title":
+				if (!item.seriesTitle) item.seriesTitle = field.value;
+				break;
+			case "session":
+				if (!item.session) item.session = field.value;
+				break;
+			case "short title":
+				if (!item.shortTitle) item.shortTitle = field.value;
+				break;
+			case "status":
+				if (!item.legalStatus) item.legalStatus = item.status = field.value;
+				break;
+			case "studio":
+				if (!item.studio) item.studio = field.value;
+				break;
+			case "subject":
+				if (!item.subject) item.subject = field.value;
+				break;
+			case "system":
+				if (!item.system) item.system = field.value;
+				break;
+			case "type":
+				if (!item.thesisType) item.thesisType = field.value;
+				break;
+			case "title":
+				if (!item.caseName) item.caseName = item.nameOfAct = item.subject = item.title = field.value;
+				break;
+			case "type":
+				if (!item.genre) item.genre = item.letterType = item.manuscriptType = item.mapType = item.postType = item.presentationType = item.reportType = item.thesisType = item.type = item.websiteType = field.value;
+				break;
+			case "university":
+				if (!item.university) item.university = field.value;
+				break;
+			case "url":
+				if (!item.url) item.url = field.value;
+				break;
+			case "version":
+				if (!item.versionNumber) item.versionNumber = field.value;
+				break;
+			case "format":
+				if (!item.videoRecordingFormat) item.videoRecordingFormat = field.value;
+				break;
+			case "volume":
+				if (!item.codeVolume) item.codeVolume = item.reporterVolume = item.volume = field.value;
+				break;
+			case "website title":
+				if (!item.websiteTitle) item.websiteTitle = field.value;
+				break;
+			case "website type":
+				if (!item.websiteType) item.websiteType = field.value;
+				break;
+		}
+	}
 }
 
 function extraFieldsToString(extra) {
@@ -528,6 +880,7 @@ function doExport() {
 
 		var extraFields = item.extra ? parseExtraFields(item.extra) : null;
 		var citekey = buildCiteKey(item, extraFields, citekeys);
+		processExtraFields(item, extraFields);
 
 		// write citation key (removed the comma)
 		Zotero.write((first ? "" : "\n\n") + "@" + type + "{" + citekey);
