@@ -2,14 +2,14 @@
 	"translatorID": "92d4ed84-8d0-4d3c-941f-d4b9124cfbb",
 	"label": "IEEE Xplore",
 	"creator": "Simon Kornblith, Michael Berkowitz, Bastian Koenings, and Avram Lyon",
-	"target": "^https?://([^/]+\\.)?ieeexplore\\.ieee\\.org/([^#]+[&?]arnumber=\\d+|(abstract/)?document/|search/(searchresult|selected)\\.jsp|xpl/(mostRecentIssue|tocresult)\\.jsp\\?|xpl/conhome/\\d+/proceeding)",
+	"target": "^https?://([^/]+\\.)?ieeexplore\\.ieee\\.org/([^#]+[&?]arnumber=\\d+|(abstract/)?document/|book/|search/(searchresult|selected)\\.jsp|xpl/(mostRecentIssue|tocresult)\\.jsp\\?|xpl/conhome/\\d+/proceeding)",
 	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-26 10:17:17"
+	"lastUpdated": "2023-10-03 09:46:56"
 }
 
 /*
@@ -44,16 +44,21 @@ function detectWeb(doc, url) {
 		Zotero.monitorDOMChanges(appRoot);
 	}
 	if (doc.defaultView !== null && doc.defaultView !== doc.defaultView.top) return false;
-	
-	if (getArticleID(url) !== null) {
-		var firstBreadcrumb = text(doc, ".breadcrumbs > span:first-of-type > a").toLowerCase();
-		if (firstBreadcrumb.includes("conference")) {
-			return "conferencePaper";
-		}
-		// TODO: Handle other types such as standards
+
+	// pdf-viewer page contains too little metadata; journalArticle is a
+	// reasonable guess
+	if (isPDFViewer(url)) {
 		return "journalArticle";
 	}
-	
+
+	let metadata = extractJSON(doc);
+	if (metadata) {
+		let type = getTypeFromJSON(metadata);
+		if (type !== null) {
+			return type;
+		}
+	}
+
 	// Issue page
 	if ((url.includes("xpl/tocresult.jsp") || url.includes("xpl/mostRecentIssue.jsp")) && getSearchResults(doc, true)) {
 		return getSearchResults(doc, true) ? "multiple" : false;
@@ -115,10 +120,12 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url = doc.location.href) {
+	// articleID may be falsy for books; it will be handled as a special case.
+	// NOTE that books don't have PDF-views, only individual chapters do.
 	let articleID = getArticleID(url);
 	let canonicalURL = `${BASE_URL}/document/${articleID}`;
 
-	if (/^https:\/\/[^/]+\/stamp\//.test(url)) { // pdf viewer
+	if (isPDFViewer(url)) {
 		Z.debug(`Input is PDF-view page; article ID ${articleID}`);
 		// get the abstract page
 		doc = await requestDocument(canonicalURL);
@@ -126,22 +133,17 @@ async function scrape(doc, url = doc.location.href) {
 
 	let metadata = extractJSON(doc);
 	if (!metadata) {
-		throw new Error(`No metadata extract for page at ${url}; article ID ${articleID}`);
+		throw new Error(`No metadata extracted for page at ${url}`);
 	}
 
-	let type;
-	switch (metadata.contentType) {
-		case "periodicals":
-			type = "journalArticle";
-			break;
-		case "conferences":
-			type = "conferencePaper";
-			break;
-		default:
-			throw new Error(`Unimplemented content type; source: ${metadata.contentType}`);
-	}
+	let type = getTypeFromJSON(metadata);
 	let item = new Z.Item(type);
-	item.url = canonicalURL;
+	if (type === "book" && metadata.bookNumber) {
+		item.url = `${BASE_URL}/book/${metadata.bookNumber}`;
+	}
+	else {
+		item.url = canonicalURL;
+	}
 
 	// Set doc metadata field as item field
 	function setField(metadataField, itemField = metadataField) {
@@ -152,7 +154,7 @@ async function scrape(doc, url = doc.location.href) {
 	}
 
 	// metadata field -> item field
-	setField("title", "formulaStrippedArticleTitle");
+	setField("formulaStrippedArticleTitle", "title");
 	if (!item.title) {
 		setField("title");
 	}
@@ -168,13 +170,18 @@ async function scrape(doc, url = doc.location.href) {
 		item.abstractNote = ZU.trimInternal(ZU.unescapeHTML(ZU.cleanTags(metadata.abstract)));
 	}
 
-	// creators
-	for (let authorObj of metadata.authors || []) {
-		item.creators.push({
-			firstName: authorObj.firstName,
-			lastName: authorObj.lastName,
-			creatorType: "author",
-		});
+	// creators; property name can be "authors" or "author" (books)
+	for (let authorObj of metadata.authors || metadata.author || []) {
+		if (authorObj.firstName || authorObj.lastName) {
+			item.creators.push({
+				firstName: authorObj.firstName,
+				lastName: authorObj.lastName,
+				creatorType: "author",
+			});
+		}
+		else if (authorObj.name) {
+			item.creators.push(ZU.cleanAuthor(authorObj.name, "author"));
+		}
 	}
 
 	// pages
@@ -190,7 +197,15 @@ async function scrape(doc, url = doc.location.href) {
 	setSN(item, metadata, "ISSN");
 	setSN(item, metadata, "ISBN");
 
-	item.tags.push(...getTags(metadata));
+	// Special handling for book; return early to skip irrelevant parts
+	// (attachment etc.)
+	if (type === "book") {
+		setField("copyrightYear", "date");
+		setField("pages", "numPages");
+		item.tags.push(...metadata.topics.split(" ; "));
+		item.complete();
+		return;
+	}
 
 	if (type === "conferencePaper") {
 		setField("confLoc", "place");
@@ -201,6 +216,12 @@ async function scrape(doc, url = doc.location.href) {
 			item.extra = item.extra ? item.extra + `\n${extraText}` : extraText;
 		}
 	}
+	else if (type === "standard") {
+		setField("standardNumber", "number");
+		setField("status");
+	}
+
+	item.tags.push(...getTags(metadata));
 
 	item.attachments.push(getFullTextPDF(articleID));
 
@@ -213,7 +234,11 @@ function getArticleID(url) {
 	if (m) {
 		return m[1];
 	}
-	return urlObj.searchParams.get("arnumber");
+	return urlObj.searchParams.get("arnumber"); // for pdf-viewer
+}
+
+function isPDFViewer(url) {
+	return /^https:\/\/[^/]+\/stamp\//.test(url);
 }
 
 // Extract form the embedded code the JS object initializer that is the source
@@ -221,8 +246,30 @@ function getArticleID(url) {
 function extractJSON(doc) {
 	for (let elem of doc.querySelectorAll("script[type='text/javascript']")) {
 		if (elem.getAttribute("src")) continue;
-		let m = elem.textContent.match(/;\s*xplGlobal\.document\.metadata\s*=\s*(\{.+?\});\s*$/sm);
-		if (m) return JSON.parse(m[1]);
+		let m = elem.textContent.match(/(;|^)\s*xplGlobal\.document\.metadata\s*=\s*(\{.+?\});\s*$/sm);
+		if (m) return JSON.parse(m[2]);
+	}
+	return null;
+}
+
+function getTypeFromJSON(metadata) {
+	let type = metadata.contentType;
+	if (type === "periodicals") {
+		return metadata.contentTypeDisplay === "Magazines"
+			? "magazineArticle"
+			: "journalArticle";
+	}
+	else if (type === "conferences") {
+		return "conferencePaper";
+	}
+	else if (type === "standards") {
+		return "standard";
+	}
+	else if (type === "Books") {
+		return "book";
+	}
+	else if (metadata.isBook && metadata.isChapter) {
+		return "bookSection";
 	}
 	return null;
 }
@@ -234,6 +281,11 @@ function getTags(metadata) {
 			let key = word.toLowerCase();
 			if (!keywords.has(key)) keywords.set(key, word);
 		}
+	}
+	for (let { code, term } of metadata.icsCodes || []) {
+		keywords.set(code, code);
+		let key = term.toLowerCase();
+		if (!keywords.has(key)) keywords.set(key, term);
 	}
 	return keywords.values();
 }
@@ -1134,6 +1186,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7265050",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1251,6 +1304,434 @@ var testCases = [
 					},
 					{
 						"tag": "uncertainties"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://ieeexplore.ieee.org/book/6480473",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Mobile Ad Hoc Networking: The Cutting Edge Directions",
+				"creators": [
+					{
+						"firstName": "Stefano",
+						"lastName": "Basagni",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marco",
+						"lastName": "Conti",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Silvia",
+						"lastName": "Giordano",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ivan",
+						"lastName": "Stojmenovic",
+						"creatorType": "author"
+					}
+				],
+				"date": "2013",
+				"ISBN": "9781118511237",
+				"abstractNote": "\"An excellent book for those who are interested in learning the current status of research and development . . . [and] who want to get a comprehensive overview of the current state-of-the-art.\" —E-Streams This book provides up-to-date information on research and development in the rapidly growing area of networks based on the multihop ad hoc networking paradigm. It reviews all classes of networks that have successfully adopted this paradigm, pointing out how they penetrated the mass market and sparked breakthrough research. Covering both physical issues and applications, Mobile Ad Hoc Networking: Cutting Edge Directions offers useful tools for professionals and researchers in diverse areas wishing to learn about the latest trends in sensor, actuator, and robot networking, mesh networks, delay tolerant and opportunistic networking, and vehicular networks. Chapter coverage includes: Multihop ad hoc networking Enabling technologies and standards for mobile multihop wireless networking Resource optimization in multiradio multichannel wireless mesh networks QoS in mesh networks Routing and data dissemination in opportunistic networks Task farming in crowd computing Mobility models, topology, and simulations in VANET MAC protocols for VANET Wireless sensor networks with energy harvesting nodes Robot-assisted wireless sensor networks: recent applications and future challenges Advances in underwater acoustic networking Security in wireless ad hoc networks Mobile Ad Hoc Networking will appeal to researchers, developers, and students interested in computer science, electrical engineering, and telecommunications.",
+				"libraryCatalog": "IEEE Xplore",
+				"numPages": "888",
+				"publisher": "IEEE",
+				"shortTitle": "Mobile Ad Hoc Networking",
+				"url": "https://ieeexplore.ieee.org/book/6480473",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Communication, Networking and Broadcast Technologies"
+					},
+					{
+						"tag": "Components, Circuits, Devices and Systems"
+					},
+					{
+						"tag": "Computing and Processing"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://ieeexplore.ieee.org/document/6482734/keywords#keywords",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Advances in Underwater Acoustic Networking",
+				"creators": [
+					{
+						"firstName": "Stefano",
+						"lastName": "Basagni",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marco",
+						"lastName": "Conti",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Silvia",
+						"lastName": "Giordano",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ivan",
+						"lastName": "Stojmenovic",
+						"creatorType": "author"
+					}
+				],
+				"ISBN": "9781118511237",
+				"abstractNote": "This chapter contains sections titled: Introduction Communication Architecture Basics of Underwater Communications Physical Layer Medium Access Control Layer Network Layer Cross-Layer Design Experimental Platforms UW-Buffalo: An Underwater Acoustic Testbed at the University at Buffalo Conclusions References",
+				"bookTitle": "Mobile Ad Hoc Networking: The Cutting Edge Directions",
+				"libraryCatalog": "IEEE Xplore",
+				"pages": "804-852",
+				"publisher": "Wiley-IEEE Press",
+				"url": "https://ieeexplore.ieee.org/document/6482734",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Acoustics"
+					},
+					{
+						"tag": "Logic gates"
+					},
+					{
+						"tag": "Transducers"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://ieeexplore.ieee.org/document/4472240",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "An Introduction To Compressive Sampling",
+				"creators": [
+					{
+						"firstName": "Emmanuel J.",
+						"lastName": "Candes",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael B.",
+						"lastName": "Wakin",
+						"creatorType": "author"
+					}
+				],
+				"date": "March 2008",
+				"ISSN": "1558-0792",
+				"abstractNote": "Conventional approaches to sampling signals or images follow Shannon's theorem: the sampling rate must be at least twice the maximum frequency present in the signal (Nyquist rate). In the field of data conversion, standard analog-to-digital converter (ADC) technology implements the usual quantized Shannon representation - the signal is uniformly sampled at or above the Nyquist rate. This article surveys the theory of compressive sampling, also known as compressed sensing or CS, a novel sensing/sampling paradigm that goes against the common wisdom in data acquisition. CS theory asserts that one can recover certain signals and images from far fewer samples or measurements than traditional methods use.",
+				"issue": "2",
+				"libraryCatalog": "IEEE Xplore",
+				"pages": "21-30",
+				"publicationTitle": "IEEE Signal Processing Magazine",
+				"url": "https://ieeexplore.ieee.org/document/4472240",
+				"volume": "25",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Biomedical imaging"
+					},
+					{
+						"tag": "Data acquisition"
+					},
+					{
+						"tag": "Frequency"
+					},
+					{
+						"tag": "Image coding"
+					},
+					{
+						"tag": "Image sampling"
+					},
+					{
+						"tag": "Protocols"
+					},
+					{
+						"tag": "Receivers"
+					},
+					{
+						"tag": "Relatively few wavelet"
+					},
+					{
+						"tag": "Sampling methods"
+					},
+					{
+						"tag": "Signal processing"
+					},
+					{
+						"tag": "Signal sampling"
+					},
+					{
+						"tag": "compressed sensing"
+					},
+					{
+						"tag": "compressive sampling"
+					},
+					{
+						"tag": "image processing"
+					},
+					{
+						"tag": "image recovery"
+					},
+					{
+						"tag": "sampling paradigm"
+					},
+					{
+						"tag": "sensing paradigm"
+					},
+					{
+						"tag": "signal processing equipment"
+					},
+					{
+						"tag": "signal recovery"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://ieeexplore.ieee.org/document/8332112",
+		"items": [
+			{
+				"itemType": "standard",
+				"title": "1547-2018 - IEEE Standard for Interconnection and Interoperability of Distributed Energy Resources with Associated Electric Power Systems Interfaces",
+				"creators": [],
+				"date": "06 April 2018",
+				"DOI": "10.1109/IEEESTD.2018.8332112",
+				"abstractNote": "The technical specifications for, and testing of, the interconnection and interoperability between utility electric power systems (EPSs) and distributed energy resources (DERs) are the focus of this standard. It provides requirements relevant to the performance, operation, testing, safety considerations, and maintenance of the interconnection. It also includes general requirements, response to abnormal conditions, power quality, islanding, and test specifications and requirements for design, production, installation evaluation, commissioning, and periodic tests. The stated requirements are universally needed for interconnection of DER, including synchronous machines, induction machines, or power inverters/converters and will be sufficient for most installations. The criteria and requirements are applicable to all DER technologies interconnected to EPSs at typical primary and/or secondary distribution voltages. Installation of DER on radial primary and secondary distribution systems is the main emphasis of this document, although installation of DERs on primary and secondary network distribution systems is considered. This standard is written considering that the DER is a 60 Hz source.",
+				"libraryCatalog": "IEEE Xplore",
+				"number": "1547-2018",
+				"publisher": "IEEE",
+				"status": "active",
+				"url": "https://ieeexplore.ieee.org/document/8332112",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "27.100"
+					},
+					{
+						"tag": "Diesel engines"
+					},
+					{
+						"tag": "Energy management"
+					},
+					{
+						"tag": "Energy storage"
+					},
+					{
+						"tag": "Fault diagnosis"
+					},
+					{
+						"tag": "Flicker"
+					},
+					{
+						"tag": "Generators"
+					},
+					{
+						"tag": "IEEE 1547"
+					},
+					{
+						"tag": "IEEE Standards"
+					},
+					{
+						"tag": "Power distribution"
+					},
+					{
+						"tag": "Power stations in general"
+					},
+					{
+						"tag": "Power systems reliability"
+					},
+					{
+						"tag": "certification"
+					},
+					{
+						"tag": "clearing time"
+					},
+					{
+						"tag": "codes"
+					},
+					{
+						"tag": "commissioning"
+					},
+					{
+						"tag": "communications"
+					},
+					{
+						"tag": "dc injection"
+					},
+					{
+						"tag": "design"
+					},
+					{
+						"tag": "diesel generators"
+					},
+					{
+						"tag": "dispersed generation"
+					},
+					{
+						"tag": "distributed generation"
+					},
+					{
+						"tag": "electric distribution systems"
+					},
+					{
+						"tag": "electric power systems"
+					},
+					{
+						"tag": "energy resources"
+					},
+					{
+						"tag": "faults"
+					},
+					{
+						"tag": "field"
+					},
+					{
+						"tag": "frequency support"
+					},
+					{
+						"tag": "fuel cells"
+					},
+					{
+						"tag": "grid"
+					},
+					{
+						"tag": "grid support"
+					},
+					{
+						"tag": "harmonics"
+					},
+					{
+						"tag": "induction machines"
+					},
+					{
+						"tag": "installation"
+					},
+					{
+						"tag": "interconnection requirements and specifications"
+					},
+					{
+						"tag": "interoperability"
+					},
+					{
+						"tag": "inverters"
+					},
+					{
+						"tag": "islanding"
+					},
+					{
+						"tag": "microturbines"
+					},
+					{
+						"tag": "monitoring and control"
+					},
+					{
+						"tag": "networks"
+					},
+					{
+						"tag": "paralleling"
+					},
+					{
+						"tag": "performance"
+					},
+					{
+						"tag": "photovoltaic power systems"
+					},
+					{
+						"tag": "point of common coupling"
+					},
+					{
+						"tag": "power"
+					},
+					{
+						"tag": "power converters"
+					},
+					{
+						"tag": "production tests"
+					},
+					{
+						"tag": "protection functions"
+					},
+					{
+						"tag": "public utility commissions"
+					},
+					{
+						"tag": "quality"
+					},
+					{
+						"tag": "reclosing coordination"
+					},
+					{
+						"tag": "regulations"
+					},
+					{
+						"tag": "ride through"
+					},
+					{
+						"tag": "rule-making"
+					},
+					{
+						"tag": "standards"
+					},
+					{
+						"tag": "storage"
+					},
+					{
+						"tag": "synchronous machines"
+					},
+					{
+						"tag": "testing"
+					},
+					{
+						"tag": "trip setting"
+					},
+					{
+						"tag": "utilities"
+					},
+					{
+						"tag": "voltage regulation"
+					},
+					{
+						"tag": "wind energy systems"
 					}
 				],
 				"notes": [],
