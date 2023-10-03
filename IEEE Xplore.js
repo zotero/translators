@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-03 09:46:56"
+	"lastUpdated": "2023-10-03 13:41:01"
 }
 
 /*
@@ -162,8 +162,10 @@ async function scrape(doc, url = doc.location.href) {
 	setField("doi", "DOI");
 	setField("publicationTitle");
 	setField("publisher");
-	setField("volume");
-	setField("issue");
+	if (!metadata.isEarlyAccess) {
+		setField("volume");
+		setField("issue");
+	}
 
 	// abstract
 	if (metadata.abstract) {
@@ -221,9 +223,18 @@ async function scrape(doc, url = doc.location.href) {
 		setField("status");
 	}
 
+	if (metadata.pubMedId) {
+		let extraText = `PMID: ${metadata.pubMedId}`;
+		item.extra = item.extra ? item.extra + `\n${extraText}` : extraText;
+	}
+
 	item.tags.push(...getTags(metadata));
 
 	item.attachments.push(getFullTextPDF(articleID));
+
+	if (metadata.xploreNote) {
+		item.notes.push({ note: metadata.xploreNote });
+	}
 
 	item.complete();
 }
@@ -1735,6 +1746,103 @@ var testCases = [
 					}
 				],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://ieeexplore.ieee.org/document/8626494",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Stacked Deconvolutional Network for Semantic Segmentation",
+				"creators": [
+					{
+						"firstName": "Jun",
+						"lastName": "Fu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jing",
+						"lastName": "Liu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yuhang",
+						"lastName": "Wang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jin",
+						"lastName": "Zhou",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Changyong",
+						"lastName": "Wang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hanqing",
+						"lastName": "Lu",
+						"creatorType": "author"
+					}
+				],
+				"DOI": "10.1109/TIP.2019.2895460",
+				"ISSN": "1941-0042",
+				"abstractNote": "Recent progress in semantic segmentation has been driven by improving the spatial resolution under Fully Convolutional Networks (FCNs). To address this problem, we propose a Stacked Deconvolutional Network (SDN) for semantic segmentation. In SDN, multiple shallow deconvolutional networks, which are called as SDN units, are stacked one by one to integrate contextual information and bring the fine recovery of localization information. Meanwhile, inter-unit and intra-unit connections are designed to assist network training and enhance feature fusion since the connections improve the flow of information and gradient propagation throughout the network. Besides, hierarchical supervision is applied during the upsampling process of each SDN unit, which enhances the discrimination of feature representations and benefits the network optimization. We carry out comprehensive experiments and achieve the new state-ofthe- art results on four datasets, including PASCAL VOC 2012, CamVid, GATECH, COCO Stuff. In particular, our best model without CRF post-processing achieves an intersection-over-union score of 86.6% in the test set.",
+				"extra": "PMID: 30703024",
+				"libraryCatalog": "IEEE Xplore",
+				"pages": "1-1",
+				"publicationTitle": "IEEE Transactions on Image Processing",
+				"url": "https://ieeexplore.ieee.org/document/8626494",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Decoding"
+					},
+					{
+						"tag": "Deconvolutional Neural Network"
+					},
+					{
+						"tag": "Dense Connection"
+					},
+					{
+						"tag": "Hierarchical Supervision"
+					},
+					{
+						"tag": "Image segmentation"
+					},
+					{
+						"tag": "Pattern recognition"
+					},
+					{
+						"tag": "Semantic Segmentation"
+					},
+					{
+						"tag": "Semantics"
+					},
+					{
+						"tag": "Spatial resolution"
+					},
+					{
+						"tag": "Task analysis"
+					},
+					{
+						"tag": "Training"
+					}
+				],
+				"notes": [
+					{
+						"note": "IEEE Xplore Notice to Reader: \"Stacked Deconvolutional Network for Semantic Segmentation, by Jun Fu, Jing Lu, Yuhang Wang, Jin Zhou, Changyong Wang, and Hanqing Lu, published in the IEEE Transactions on Image Processing Early Access Digital Object Identifier: 10.1109/TIP.2019.2895460 This article will not be published in final form due to unauthorized changes made to the authorship following acceptance of the paper. It should not be considered for citation purposes. We regret any inconvenience this may have caused. Gaurav Sharma Editor-in-Chief IEEE Transactions on Image Processing "
+					}
+				],
 				"seeAlso": []
 			}
 		]
