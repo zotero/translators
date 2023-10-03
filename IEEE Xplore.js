@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-03 16:28:25"
+	"lastUpdated": "2023-10-03 17:00:55"
 }
 
 /*
@@ -164,6 +164,14 @@ async function scrape(doc, url = doc.location.href) {
 	if (!metadata.isEarlyAccess) {
 		setField("volume");
 		setField("issue");
+
+		let pages = metadata.startPage;
+		if (typeof pages === "string") {
+			if (metadata.endPage) {
+				pages += `-${metadata.endPage}`;
+			}
+			item.pages = pages;
+		}
 	}
 
 	// abstract
@@ -183,15 +191,6 @@ async function scrape(doc, url = doc.location.href) {
 		else if (authorObj.name) {
 			item.creators.push(ZU.cleanAuthor(authorObj.name, "author"));
 		}
-	}
-
-	// pages
-	let pages = metadata.startPage;
-	if (typeof pages === "string") {
-		if (metadata.endPage) {
-			pages += `-${metadata.endPage}`;
-		}
-		item.pages = pages;
 	}
 
 	// ISSN and ISBN if any, keeping only the ones for electronic media
@@ -1793,7 +1792,6 @@ var testCases = [
 				"abstractNote": "Recent progress in semantic segmentation has been driven by improving the spatial resolution under Fully Convolutional Networks (FCNs). To address this problem, we propose a Stacked Deconvolutional Network (SDN) for semantic segmentation. In SDN, multiple shallow deconvolutional networks, which are called as SDN units, are stacked one by one to integrate contextual information and bring the fine recovery of localization information. Meanwhile, inter-unit and intra-unit connections are designed to assist network training and enhance feature fusion since the connections improve the flow of information and gradient propagation throughout the network. Besides, hierarchical supervision is applied during the upsampling process of each SDN unit, which enhances the discrimination of feature representations and benefits the network optimization. We carry out comprehensive experiments and achieve the new state-ofthe- art results on four datasets, including PASCAL VOC 2012, CamVid, GATECH, COCO Stuff. In particular, our best model without CRF post-processing achieves an intersection-over-union score of 86.6% in the test set.",
 				"extra": "PMID: 30703024",
 				"libraryCatalog": "IEEE Xplore",
-				"pages": "1-1",
 				"publicationTitle": "IEEE Transactions on Image Processing",
 				"url": "https://ieeexplore.ieee.org/document/8626494",
 				"attachments": [
