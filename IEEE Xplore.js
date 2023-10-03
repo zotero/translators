@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-03 13:41:01"
+	"lastUpdated": "2023-10-03 16:28:25"
 }
 
 /*
@@ -43,7 +43,6 @@ function detectWeb(doc, url) {
 	if (appRoot) {
 		Zotero.monitorDOMChanges(appRoot);
 	}
-	if (doc.defaultView !== null && doc.defaultView !== doc.defaultView.top) return false;
 
 	// pdf-viewer page contains too little metadata; journalArticle is a
 	// reasonable guess
