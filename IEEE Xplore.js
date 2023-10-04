@@ -2,14 +2,14 @@
 	"translatorID": "92d4ed84-8d0-4d3c-941f-d4b9124cfbb",
 	"label": "IEEE Xplore",
 	"creator": "Simon Kornblith, Michael Berkowitz, Bastian Koenings, and Avram Lyon",
-	"target": "^https?://([^/]+\\.)?ieeexplore\\.ieee\\.org/([^#]+[&?]arnumber=\\d+|(abstract/)?document/|book/|search/(searchresult|selected)\\.jsp|xpl/(mostRecentIssue|tocresult)\\.jsp\\?|xpl/conhome/\\d+/proceeding)",
+	"target": "^https?://([^/]+\\.)?ieeexplore\\.ieee\\.org/([^#]+[&?]arnumber=\\d+|(abstract/)?document/|book/|search/(searchresult|selected)\\.jsp|xpl/((most)?RecentIssue|tocresult)\\.jsp\\?|xpl/conhome/\\d+/proceeding)",
 	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-03 17:00:55"
+	"lastUpdated": "2023-10-04 04:00:26"
 }
 
 /*
@@ -58,42 +58,13 @@ function detectWeb(doc, url) {
 		}
 	}
 
-	// Issue page
-	if ((url.includes("xpl/tocresult.jsp") || url.includes("xpl/mostRecentIssue.jsp")) && getSearchResults(doc, true)) {
-		return getSearchResults(doc, true) ? "multiple" : false;
-	}
-	
-	// Search results
-	if (url.includes("/search/searchresult.jsp") && getSearchResults(doc, true)) {
-		return "multiple";
-	}
-	
-	// conference list results
-	if (url.includes("xpl/conhome") && url.includes("proceeding") && getSearchResults(doc, true)) {
-		return "multiple";
-	}
-
-	// more generic method for other cases (is this still needed?)
-	/*
-	var scope = ZU.xpath(doc, '//div[contains(@class, "ng-scope")]')[0];
-	if (!scope) {
-		Zotero.debug("No scope");
-		return;
-	}
-	
-	Z.monitorDOMChanges(scope, {childList: true});
-
-	if (getSearchResults(doc, true)) {
-		return "multiple";
-	}
-	*/
-	return false;
+	return getSearchResults(doc, true) && "multiple";
 }
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//*[contains(@class, "article-list") or contains(@class, "List-results-items")]//a[parent::h2|parent::h3]|//*[@id="results-blk"]//*[@class="art-abs-url"]');
+	var rows = doc.querySelectorAll(".result-item .text-md-md-lh a, .popular-articles a.article-title");
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -1843,6 +1814,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://ieeexplore.ieee.org/xpl/RecentIssue.jsp?punumber=83",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
