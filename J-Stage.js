@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-27 13:09:03"
+	"lastUpdated": "2023-10-06 07:23:03"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 	
 	J-Stage translator - Copyright © 2012 Sebastian Karcher,
-	Copyright © 2019 Satoshi Ando
+	Copyright © 2023 Satoshi Ando
 	This file is part of Zotero.
 	
 	Zotero is free software: you can redistribute it and/or modify
@@ -78,7 +78,7 @@ function doWeb(doc, url) {
 
 // help function
 function scrape(doc, url) {
-	// get abstract and tags from article plage
+	// get abstract and tags from article page
 	var abs = text("#article-overiew-abstract-wrap");
 	var tagNodes = doc.querySelectorAll("meta[name='citation_keywords']");
 	var tags = [];
@@ -86,33 +86,28 @@ function scrape(doc, url) {
 		tags.push(tagNode.content);
 	}
 
-	// get BibTex Link
-	var bibtexurl = ZU.xpathText(doc, '//a[contains(text(), "BIB TEX")]/@href');
+	// get RIS Link
 	var risurl = ZU.xpathText(doc, '//a[contains(text(), "RIS")]/@href');
-	//ZU.doGet(bibtexurl, function (text) {
 	ZU.doGet(risurl, function (text) {
-		var bibtex = text;
-		// Zotero.debug(bibtex)
+		var ris = text;
 		var translator = Zotero.loadTranslator("import");
-		//translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
-		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		translator.setString(bibtex);
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");	// RIS
+		translator.setString(ris);
 		translator.setHandler("itemDone", function (obj, item) {
 			if (abs) item.abstractNote = abs.replace(/^\s*(?:Abstract|抄録)\s*/, '');
 			if (tags) item.tags = tags;
-			delete item.creators;
-//			for (var i = 0; i < item.creators.length; i++) {
-//				if (item.creators[i].lastName && item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
-//					item.creators[i].lastName = ZU.capitalizeTitle(item.creators[i].lastName.toLowerCase(), true);
-//				}
-//				if (item.creators[i].firstName && item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
-//					item.creators[i].firstName = ZU.capitalizeTitle(item.creators[i].firstName.toLowerCase(), true);
-//				}
-//			}
+			for (var i = 0; i < item.creators.length; i++) {
+				if (item.creators[i].lastName && item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
+					item.creators[i].lastName = ZU.capitalizeTitle(item.creators[i].lastName.toLowerCase(), true);
+				}
+				if (item.creators[i].firstName && item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
+					item.creators[i].firstName = ZU.capitalizeTitle(item.creators[i].firstName.toLowerCase(), true);
+				}
+			}
 			if (item.title == item.title.toUpperCase()) {
 				item.title = ZU.capitalizeTitle(item.title.toLowerCase(), true);
 			}
-			delete item.title;
+			delete item.journalAbbreviation;	// J-Stage doesn't output journal abbreviations.
 
 			if (item.publicationTitle == item.publicationTitle.toUpperCase()) {
 				item.publicationTitle = ZU.capitalizeTitle(item.publicationTitle.toLowerCase(), true);
@@ -130,27 +125,6 @@ function scrape(doc, url) {
 					title: "Full Text PDF",
 					mimeType: "application/pdf"
 				});
-			}
-			//item.complete();
-		});
-		translator.translate();
-	});
-	
-	// get RIS Link
-	var risurl = ZU.xpathText(doc, '//a[contains(text(), "RIS")]/@href');
-	ZU.doGet(risurl, function (text) {
-		var ris = text;
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		translator.setString(ris);
-		translator.setHandler("itemDone", function (obj, item) {
-			for (var i = 0; i < item.creators.length; i++) {
-				if (item.creators[i].lastName && item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
-					item.creators[i].lastName = ZU.capitalizeTitle(item.creators[i].lastName.toLowerCase(), true);
-				}
-				if (item.creators[i].firstName && item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
-					item.creators[i].firstName = ZU.capitalizeTitle(item.creators[i].firstName.toLowerCase(), true);
-				}
 			}
 			item.complete();
 		});
