@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-08-26 04:11:42"
+	"lastUpdated": "2021-12-28 03:53:31"
 }
 
 /* other example here: http://ocl.tlcdelivers.com/TLCScripts/interpac.dll?LabelDisplay&LastResult=Search%26Config=ysm%26FormId=6588839%26Branch=,0,%26LimitsId=0%26StartIndex=0%26SearchField=7%26SearchType=1%26SearchData=food%26NotAddToHistory=1%26ItemsPerPage=30%26SortField=0%26PeriodLimit=-1%26SearchAvailableOnly=0&DataNumber=52182&RecordNumber=52182&SearchAvailableOnly=0&FormId=6588839&ItemField=1&Config=ysm&Branch=,0, 
@@ -30,68 +30,71 @@ function doWeb(doc, url) {
 	var newUris = new Array();
 
 	if (detailRe.test(uri)) {
-		newUris.push(uri.replace("LabelDisplay", "MARCDisplay"));
+		ZU.processDocuments(uri.replace("LabelDisplay", "MARCDisplay"), scrape);
 	} else {
 		var items = Zotero.Utilities.getItemArray(doc, doc, 'TLCScripts/interpac\.dll\?.*LabelDisplay.*RecordNumber=[0-9]');
-		items = Zotero.selectItems(items);
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return;
+			}
 
-		if (!items) {
-			return true;
-		}
+			for (var i in items) {
+				newUris.push(i.replace("LabelDisplay", "MARCDisplay"));
+			}
 
-		for (var i in items) {
-			newUris.push(i.replace("LabelDisplay", "MARCDisplay"));
-		}
+			ZU.processDocuments(newUris, scrape);
+		});
 	}
+}
 
+function scrape(newDoc, url) {
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 	translator.getTranslatorObject(function(marc) {
-		Zotero.Utilities.processDocuments(newUris, function (newDoc) {
-			var uri = newDoc.location.href;
-			var record = new marc.record();
-			var elmts = newDoc.evaluate('/html/body/table/tbody/tr[td[4]]', newDoc, null, XPathResult.ANY_TYPE, null);
-			var tag, ind, content, elmt;
-	
-			while (elmt = elmts.iterateNext()) {
-				tag = newDoc.evaluate('./td[2]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-				var inds = newDoc.evaluate('./td[3]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	
-				tag = tag.replace(/[\r\n]/g, "");
-				inds = inds.replace(/[\r\n\xA0]/g, "");
-	
-				var children = newDoc.evaluate('./td[4]//text()', elmt, null, XPathResult.ANY_TYPE, null);
-				var subfield = children.iterateNext();
-				var fieldContent = children.iterateNext();
-	
-				if (tag == "LDR") {
-					record.leader = "00000" + subfield.nodeValue;
+		var uri = newDoc.location.href;
+		var record = new marc.record();
+		var elmts = newDoc.evaluate('/html/body/table/tbody/tr[td[4]]', newDoc, null, XPathResult.ANY_TYPE, null);
+		var tag, ind, content, elmt;
+
+		while (elmt = elmts.iterateNext()) {
+			tag = newDoc.evaluate('./td[2]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			var inds = newDoc.evaluate('./td[3]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+
+			tag = tag.replace(/[\r\n]/g, "");
+			inds = inds.replace(/[\r\n\xA0]/g, "");
+
+			var children = newDoc.evaluate('./td[4]//text()', elmt, null, XPathResult.ANY_TYPE, null);
+			var subfield = children.iterateNext();
+			var fieldContent = children.iterateNext();
+
+			if (tag == "LDR") {
+				record.leader = "00000" + subfield.nodeValue;
+			} else {
+				content = "";
+				if (!fieldContent) {
+					content = subfield.nodeValue;
 				} else {
-					content = "";
-					if (!fieldContent) {
-						content = subfield.nodeValue;
-					} else {
-						while (subfield && fieldContent) {
-							content += marc.subfieldDelimiter + subfield.nodeValue.substr(1, 1) + fieldContent.nodeValue;
-							var subfield = children.iterateNext();
-							var fieldContent = children.iterateNext();
-						}
+					while (subfield && fieldContent) {
+						content += marc.subfieldDelimiter + subfield.nodeValue.substr(1, 1) + fieldContent.nodeValue;
+						var subfield = children.iterateNext();
+						var fieldContent = children.iterateNext();
 					}
-	
-					record.addField(tag, inds, content);
 				}
+
+				record.addField(tag, inds, content);
 			}
-	
-			var newItem = new Zotero.Item();
-			record.translate(newItem);
-	
-			var domain = url.match(/https?:\/\/([^/]+)/);
-			newItem.repository = domain[1] + " Library Catalog";
-	
-			newItem.complete();
-		});
+		}
+
+		var newItem = new Zotero.Item();
+		record.translate(newItem);
+
+		var domain = url.match(/https?:\/\/([^/]+)/);
+		newItem.repository = domain[1] + " Library Catalog";
+
+		newItem.complete();
 	});
-} 
+}
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{

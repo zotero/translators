@@ -2,14 +2,14 @@
 	"translatorID": "658f2707-bb46-44eb-af0a-e73a5387fc90",
 	"label": "DART-Europe",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.dart-europe\\.eu",
+	"target": "^https?://www\\.dart-europe\\.org",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-17 03:09:28"
+	"lastUpdated": "2022-05-04 03:09:28"
 }
 
 /**
@@ -134,12 +134,12 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.dart-europe.eu/basic-results.php?kw[]=labor&f=n&hist=y",
+		"url": "http://www.dart-europe.org/basic-results.php?kw[]=labor&f=n&hist=y",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.dart-europe.eu/full.php?id=284332",
+		"url": "http://www.dart-europe.org/full.php?id=284332",
 		"items": [
 			{
 				"itemType": "thesis",

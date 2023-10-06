@@ -8,8 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-01-27 16:34:49"
+	"lastUpdated": "2023-07-06 12:34:43"
 }
 
 /*
@@ -36,19 +35,25 @@
 */
 
 
+const datasetType = ZU.fieldIsValidForType('title', 'dataset')
+	? 'dataset'
+	: 'document';
+
 // copied from CSL JSON
 function parseInput() {
 	var str, json = "";
 	
-	// Read in the whole file at once, since we can't easily parse a JSON stream. The 
+	// Read in the whole file at once, since we can't easily parse a JSON stream. The
 	// chunk size here is pretty arbitrary, although larger chunk sizes may be marginally
 	// faster. We set it to 1MB.
 	while ((str = Z.read(1048576)) !== false) json += str;
 	
 	try {
 		return JSON.parse(json);
-	} catch(e) {
+	}
+	catch (e) {
 		Zotero.debug(e);
+		return false;
 	}
 }
 
@@ -60,37 +65,41 @@ function detectImport() {
 	return false;
 }
 
-
+/* eslint-disable camelcase*/
 var mappingTypes = {
-	"book": "book",
-	"chapter": "bookSection",
+	book: "book",
+	chapter: "bookSection",
 	"article-journal": "journalArticle",
 	"article-magazine": "magazineArticle",
 	"article-newspaper": "newspaperArticle",
-	"thesis": "thesis",
+	thesis: "thesis",
 	"entry-encyclopedia": "encyclopediaArticle",
 	"entry-dictionary": "dictionaryEntry",
 	"paper-conference": "conferencePaper",
-	"personal_communication": "letter",
-	"manuscript": "manuscript",
-	"interview": "interview",
-	"motion_picture": "film",
-	"graphic": "artwork",
-	"webpage": "webpage",
-	"report": "report",
-	"bill": "bill",
-	"legal_case": "case",
-	"patent": "patent",
-	"legislation": "statute",
-	"map": "map",
+	personal_communication: "letter",
+	manuscript: "manuscript",
+	interview: "interview",
+	motion_picture: "film",
+	graphic: "artwork",
+	webpage: "webpage",
+	report: "report",
+	bill: "bill",
+	legal_case: "case",
+	patent: "patent",
+	legislation: "statute",
+	map: "map",
 	"post-weblog": "blogPost",
-	"post": "forumPost",
-	"song": "audioRecording",
-	"speech": "presentation",
-	"broadcast": "radioBroadcast",
-	"dataset": "document"
+	post: "forumPost",
+	song: "audioRecording",
+	speech: "presentation",
+	broadcast: "radioBroadcast",
+	dataset: "dataset"
 };
-
+/* eslint-enable camelcase*/
+// pre-6.0.26 releases don't have a dataset item type
+if (datasetType == "document") {
+	mappingTypes.dataset = 'document';
+}
 
 
 function doImport() {
@@ -105,8 +114,8 @@ function doImport() {
 	}
 
 	var item = new Zotero.Item(type);
-	if (data.types.citeproc == "dataset") {
-		item.extra = "type: dataset";
+	if (data.types.citeproc == "dataset" && datasetType == "document") {
+		item.extra = "Type: dataset";
 	}
 	var title = "";
 	for (let titleElement of data.titles) {
@@ -115,94 +124,112 @@ function doImport() {
 		}
 		if (!titleElement.titleType) {
 			title = titleElement.title + title;
-		} else if (titleElement.titleType.toLowerCase() == "subtitle") {
-			title = title + ": " + titleElement["title"];
 		}
-		
+		else if (titleElement.titleType.toLowerCase() == "subtitle") {
+			title = title + ": " + titleElement.title;
+		}
 	}
 	item.title = title;
 	
-	for (let creator of data.creators) {
-		if (creator.nameType == "Personal") {
+	if (data.creators) {
+		for (let creator of data.creators) {
 			if (creator.familyName && creator.givenName) {
 				item.creators.push({
-					"lastName": creator.familyName,
-					"firstName": creator.givenName,
-					"creatorType": "author"
+					lastName: creator.familyName,
+					firstName: creator.givenName,
+					creatorType: "author"
 				});
-			} else {
-				item.creators.push(ZU.cleanAuthor(creator.name, "author"));
 			}
-		} else {
-			item.creators.push({"lastName": creator.name, "creatorType": "author", "fieldMode": true});
+			else if (creator.nameType == "Personal") {
+				item.creators.push(ZU.cleanAuthor(creator.name, "author", true));
+			}
+			else {
+				item.creators.push({ lastName: creator.name, creatorType: "author", fieldMode: 1 });
+			}
 		}
 	}
-	for (let contributor of data.contributors) {
-		let role = "contributor";
-		if (contributor.contributorRole) {
-			switch(contributor.contributorRole.toLowerCase()) {
-				case "editor":
-					role = "editor";
-					break;
-				case "producer":
-					role = "producer";
-					break;
-				default:
-					// use the already assigned value
+	if (data.contributors) {
+		for (let contributor of data.contributors) {
+			let role = "contributor";
+			if (contributor.contributorRole) {
+				switch (contributor.contributorRole.toLowerCase()) {
+					case "editor":
+						role = "editor";
+						break;
+					case "producer":
+						role = "producer";
+						break;
+					default:
+						// use the already assigned value
+				}
 			}
-		}
-		if (contributor.nameType == "Personal") {
 			if (contributor.familyName && contributor.givenName) {
 				item.creators.push({
-					"lastName": contributor.familyName,
-					"firstName": contributor.givenName,
-					"creatorType": role
+					lastName: contributor.familyName,
+					firstName: contributor.givenName,
+					creatorType: role
 				});
-			} else {
+			}
+			else if (contributor.nameType == "Personal") {
 				item.creators.push(ZU.cleanAuthor(contributor.name, role));
 			}
-		} else {
-			item.creators.push({"lastName": contributor.name, "creatorType": role, "fieldMode": true});
+			else {
+				item.creators.push({ lastName: contributor.name, creatorType: role, fieldMode: 1 });
+			}
 		}
 	}
 	
 	item.publisher = data.publisher;
 	
 	let dates = {};
-	for (let date of data.dates) {
-		dates[date.dateType] = date.date;
+	if (data.dates) {
+		for (let date of data.dates) {
+			dates[date.dateType] = date.date;
+		}
+		item.date = dates.Issued || dates.Updated || dates.Available || dates.Accepted || dates.Submitted || dates.Created || data.publicationYear;
 	}
-	item.date = dates["Issued"] || dates["Updated"] || dates["Available"]  || dates["Accepted"] || dates["Submitted"] || dates["Created"] || data.publicationYear;
 	
 	item.DOI = data.doi;
 	//add DOI to extra for unsupported items
 	if (item.DOI && !ZU.fieldIsValidForType("DOI", item.itemType)) {
-		if (item.extra){
+		if (item.extra) {
 			item.extra += "\nDOI: " + item.DOI;
-		} else {
+		}
+		else {
 			item.extra = "DOI: " + item.DOI;
 		}
 	}
 	item.url = data.url;
 	item.language = data.language;
-	for (let subject of data.subjects) {
-		item.tags.push(subject.subject);
+	if (data.subjects) {
+		for (let subject of data.subjects) {
+			item.tags.push(subject.subject);
+		}
 	}
-	item.medium = data.formats.join();
-	item.pages = item.artworkSize = data.sizes.join(", ");
+	if (data.formats) {
+		item.medium = data.formats.join();
+	}
+	if (data.sizes) {
+		item.pages = item.artworkSize = data.sizes.join(", ");
+	}
 	item.versionNumber = data.version;
-	item.rights = data.rightsList.map(x => x.rights).join(", ");
+	if (data.rightsList) {
+		item.rights = data.rightsList.map(x => x.rights).join(", ");
+	}
 	
 	var descriptionNote = "";
-	for (let description of data.descriptions) {
-		if (description.descriptionType == "Abstract") {
-			item.abstractNote = description.description;
-		} else {
-			descriptionNote += "<h2>" + description.descriptionType + "</h2>\n" + description.description;
+	if (data.descriptions) {
+		for (let description of data.descriptions) {
+			if (description.descriptionType == "Abstract") {
+				item.abstractNote = description.description;
+			}
+			else {
+				descriptionNote += "<h2>" + description.descriptionType + "</h2>\n" + description.description;
+			}
 		}
 	}
 	if (descriptionNote !== "") {
-		item.notes.push({"note": descriptionNote});
+		item.notes.push({ note: descriptionNote });
 	}
 	if (data.container) {
 		if (data.container.type == "Series") {
@@ -223,17 +250,17 @@ function doImport() {
 		}
 	}
 	
-	for (let relates of data.relatedIdentifiers) {
-		if (!item.ISSN && relates.relatedIdentifierType == "ISSN") {
-			item.ISSN = relates.relatedIdentifier;
-		}
-		if (!item.ISBN && relates.relatedIdentifierType == "ISBN") {
-			item.ISBN = relates.relatedIdentifier;
+	if (data.relatedIdentifiers) {
+		for (let relates of data.relatedIdentifiers) {
+			if (!item.ISSN && relates.relatedIdentifierType == "ISSN") {
+				item.ISSN = relates.relatedIdentifier;
+			}
+			if (!item.ISBN && relates.relatedIdentifierType == "ISBN") {
+				item.ISBN = relates.relatedIdentifier;
+			}
 		}
 	}
 	
-	
-
 	item.complete();
 }
 
@@ -408,7 +435,7 @@ var testCases = [
 		"input": "{\n  \"id\": \"https://doi.org/10.17171/2-3-12-1\",\n  \"doi\": \"10.17171/2-3-12-1\",\n  \"url\": \"http://repository.edition-topoi.org/collection/MAGN/single/0012/0\",\n  \"types\": {\n    \"resourceTypeGeneral\": \"Dataset\",\n    \"resourceType\": \"3D Data\",\n    \"schemaOrg\": \"Dataset\",\n    \"citeproc\": \"dataset\",\n    \"bibtex\": \"misc\",\n    \"ris\": \"DATA\"\n  },\n  \"creators\": [\n    {\n      \"nameType\": \"Personal\",\n      \"name\": \"Fritsch, Bernhard\",\n      \"givenName\": \"Bernhard\",\n      \"familyName\": \"Fritsch\"\n    }\n  ],\n  \"titles\": [\n    {\n      \"title\": \"3D model of object V 1.2-71\"\n    },\n    {\n      \"title\": \"Structured-light Scan, Staatliche Museen zu Berlin -  Antikensammlung\",\n      \"titleType\": \"Subtitle\"\n    }\n  ],\n  \"publisher\": \"Edition Topoi\",\n  \"container\": {\n    \"type\": \"DataRepository\",\n    \"identifier\": \"10.17171/2-3-1\",\n    \"identifierType\": \"DOI\",\n    \"title\": \"Architectural Fragments from Magnesia on the Maeander\"\n  },\n  \"subjects\": [\n    {\n      \"subject\": \"101 Ancient Cultures\"\n    },\n    {\n      \"subject\": \"410-01 Building and Construction History\"\n    }\n  ],\n  \"contributors\": [\n\n  ],\n  \"dates\": [\n    {\n      \"date\": \"2016\",\n      \"dateType\": \"Updated\"\n    },\n    {\n      \"date\": \"2016\",\n      \"dateType\": \"Issued\"\n    }\n  ],\n  \"publicationYear\": \"2016\",\n  \"identifiers\": [\n    {\n      \"identifierType\": \"DOI\",\n      \"identifier\": \"https://doi.org/10.17171/2-3-12-1\"\n    }\n  ],\n  \"sizes\": [\n\n  ],\n  \"formats\": [\n    \"nxs\"\n  ],\n  \"rightsList\": [\n\n  ],\n  \"descriptions\": [\n    {\n      \"description\": \"Architectural Fragments from Magnesia on the Maeander\",\n      \"descriptionType\": \"SeriesInformation\"\n    }\n  ],\n  \"geoLocations\": [\n\n  ],\n  \"fundingReferences\": [\n\n  ],\n  \"relatedIdentifiers\": [\n    {\n      \"relatedIdentifier\": \"10.17171/2-3-1\",\n      \"relatedIdentifierType\": \"DOI\",\n      \"relationType\": \"IsPartOf\"\n    },\n    {\n      \"relatedIdentifier\": \"10.17171/2-3\",\n      \"relatedIdentifierType\": \"DOI\",\n      \"relationType\": \"IsPartOf\"\n    }\n  ],\n  \"schemaVersion\": \"http://datacite.org/schema/kernel-3\",\n  \"providerId\": \"tib\",\n  \"clientId\": \"tib.topoi\",\n  \"agency\": \"DataCite\",\n  \"state\": \"findable\"\n}",
 		"items": [
 			{
-				"itemType": "document",
+				"itemType": "dataset",
 				"title": "3D model of object V 1.2-71: Structured-light Scan, Staatliche Museen zu Berlin -  Antikensammlung",
 				"creators": [
 					{
@@ -418,8 +445,9 @@ var testCases = [
 					}
 				],
 				"date": "2016",
-				"extra": "type: dataset\nDOI: 10.17171/2-3-12-1",
-				"publisher": "Edition Topoi",
+				"DOI": "10.17171/2-3-12-1",
+				"format": "nxs",
+				"repository": "Edition Topoi",
 				"url": "http://repository.edition-topoi.org/collection/MAGN/single/0012/0",
 				"attachments": [],
 				"tags": [
@@ -499,6 +527,43 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<h2>SeriesInformation</h2>\nThe Journal of Transcultural Studies, No 1-2 (2018)"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "{\n  \"id\": \"https://doi.org/10.7916/d8959hr1\",\n  \"doi\": \"10.7916/D8959HR1\",\n  \"url\": \"https://tremorjournal.org/index.php/tremor/article/view/413\",\n  \"types\": {\n    \"ris\": \"RPRT\",\n    \"bibtex\": \"article\",\n    \"citeproc\": \"article-journal\",\n    \"schemaOrg\": \"ScholarlyArticle\",\n    \"resourceType\": \"Article\",\n    \"resourceTypeGeneral\": \"Text\"\n  },\n  \"creators\": [\n    {\n      \"name\": \"Hogg, Elliot\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Elliot\",\n      \"familyName\": \"Hogg\",\n      \"affiliation\": []\n    },\n    {\n      \"name\": \"Tagliati, Michele\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Michele\",\n      \"familyName\": \"Tagliati\",\n      \"affiliation\": []\n    }\n  ],\n  \"titles\": [\n    {\n      \"title\": \"Overuse Cervical Dystonia: A Case Report and Literature Review\"\n    }\n  ],\n  \"publisher\": \"Tremor and Other Hyperkinetic Movements\",\n  \"container\": {\n    \"type\": \"Series\",\n    \"title\": \"Tremor and Other Hyperkinetic Movements\",\n    \"firstPage\": \"Tremor and Other Hyperkinetic Movements\"\n  },\n  \"contributors\": [],\n  \"dates\": [\n    {\n      \"date\": \"2016-06-28\",\n      \"dateType\": \"Submitted\"\n    },\n    {\n      \"date\": \"2016-08-22\",\n      \"dateType\": \"Accepted\"\n    },\n    {\n      \"date\": \"2019-02-06\",\n      \"dateType\": \"Updated\"\n    },\n    {\n      \"date\": \"2016-09-14\",\n      \"dateType\": \"Issued\"\n    }\n  ],\n  \"publicationYear\": 2016,\n  \"language\": \"en\",\n  \"identifiers\": [\n    {\n      \"identifier\": \"https://doi.org/10.7916/d8959hr1\",\n      \"identifierType\": \"DOI\"\n    },\n    {\n      \"identifier\": \"1-2-413\",\n      \"identifierType\": \"publisherId\"\n    }\n  ],\n  \"descriptions\": [\n    {\n      \"description\": \"Background: Overuse or task-specific dystonia has been described in a number of professions characterized by repetitive actions, typically affecting the upper extremities. Cervical dystonia (CD), however, has rarely been associated with overuse. Case Report: We present a case report of typical CD that developed in the context of chronic repetitive movements associated with the patient’s professional occupation as an office manager who spent many hours per day holding a phone to his ear. Discussion: Overuse CD should be suspected when typical symptoms and signs of CD develop in the context of chronic repetitive use or overuse of cervical muscles, especially where exacerbating tasks involve asymmetric postures.\",\n      \"descriptionType\": \"Abstract\"\n    },\n    {\n      \"description\": \"Tremor and Other Hyperkinetic Movements, Tremor and Other Hyperkinetic Movements\",\n      \"descriptionType\": \"SeriesInformation\"\n    }\n  ],\n  \"providerId\": \"cul\",\n  \"clientId\": \"cul.columbia\",\n  \"agency\": \"DataCite\",\n  \"state\": \"findable\"\n}",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Overuse Cervical Dystonia: A Case Report and Literature Review",
+				"creators": [
+					{
+						"lastName": "Hogg",
+						"firstName": "Elliot",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Tagliati",
+						"firstName": "Michele",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016-09-14",
+				"DOI": "10.7916/D8959HR1",
+				"abstractNote": "Background: Overuse or task-specific dystonia has been described in a number of professions characterized by repetitive actions, typically affecting the upper extremities. Cervical dystonia (CD), however, has rarely been associated with overuse. Case Report: We present a case report of typical CD that developed in the context of chronic repetitive movements associated with the patient’s professional occupation as an office manager who spent many hours per day holding a phone to his ear. Discussion: Overuse CD should be suspected when typical symptoms and signs of CD develop in the context of chronic repetitive use or overuse of cervical muscles, especially where exacerbating tasks involve asymmetric postures.",
+				"language": "en",
+				"pages": "Tremor and Other Hyperkinetic Movements",
+				"publicationTitle": "Tremor and Other Hyperkinetic Movements",
+				"url": "https://tremorjournal.org/index.php/tremor/article/view/413",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<h2>SeriesInformation</h2>\nTremor and Other Hyperkinetic Movements, Tremor and Other Hyperkinetic Movements"
 					}
 				],
 				"seeAlso": []

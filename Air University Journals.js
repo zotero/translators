@@ -2,14 +2,14 @@
 	"translatorID": "e317b4d4-03cf-4356-aa3c-defadc6fd10e",
 	"label": "Air University Journals",
 	"creator": "Sebastian Karcher",
-	"target": "https?://www\\.airuniversity\\.af\\.mil/(ASPJ|SSQ)",
+	"target": "https?://www\\.airuniversity\\.af\\.edu/(ASPJ|SSQ)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-12-11 22:06:13"
+	"lastUpdated": "2021-10-14 19:04:37"
 }
 
 /*
@@ -35,15 +35,12 @@
 	***** END LICENSE BLOCK *****
 */
 
-
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
-
+// eslint-disable-next-line no-unused-vars
 function detectWeb(doc, url) {
-	if (text(doc, 'a[title="View Article"]', 1)) {
+	if (text(doc, 'a[title="View Article"], h2>a[href*="documents"]', 1)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
@@ -53,39 +50,46 @@ function doWeb(doc, url) {
 		if (rows.length < 3) {
 			rows = ZU.xpath(doc, '//div[@class="da_black"]//p[span//a[@title="View Article"]]');
 		}
-		// Z.debug(rows.length);
+		if (!rows.length) {
+			// New layout, e.g. https://www.airuniversity.af.edu/SSQ/Display/Article/2748342/volume-15-issue-3-fall-2021/
+			rows = ZU.xpath(doc, '//div[@class="da_black"]//li//div[h2/a or h2/em/a]');
+		}
+
 		var items = {};
+		var journal, abbr, ISSN;
 		if (url.includes("/ASPJ/")) {
-			var journal = "Air & Space Power Journal";
-			var abbr = "ASPJ";
-			var ISSN = "1554-2505";
+			journal = "Air & Space Power Journal";
+			abbr = "ASPJ";
+			ISSN = "1554-2505";
 		}
 		else if (url.includes("/SSQ/")) {
-			var journal = "Strategic Studies Quarterly";
-			var abbr = "SSQ";
-			var ISSN = "1936-1815";
+			journal = "Strategic Studies Quarterly";
+			abbr = "SSQ";
+			ISSN = "1936-1815";
 		}
 		var voliss = text(doc, 'h1.title');
 		var date = text(doc, 'p.da_story_info');
 		for (let i = 0; i < rows.length; i++) {
-			var infoArray = [];
-
 			var title = text(rows[i], 'span > a[title="View Article"]');
-			var id = attr(rows[i], 'span > a[title="View Article"]', "id");
+			var id = attr(rows[i], 'span > a[title="View Article"]', "href");
 			if (!title) {
 				title = text(rows[i], 'strong > a[title="View Article"]');
-				id = attr(rows[i], 'strong > a[title="View Article"]', "id");
+				id = attr(rows[i], 'strong > a[title="View Article"]', "href");
 			}
-
+			
+			if (!title) {
+				title = text(rows[i], 'h2 > a, h2>em>a');
+				id = attr(rows[i], 'h2 > a, h2>em>a', "href");
+			}
 			if (title !== null) {
 				items[id] = title;
 			}
 		}
 
-		Zotero.selectItems(items, function(items) {
+		Zotero.selectItems(items, function (items) {
 			// Z.debug(items);
 			if (!items) {
-				return true;
+				return;
 			}
 			for (let id in items) {
 				scrapeMultiples(doc, id, date, voliss, journal, abbr, ISSN);
@@ -96,39 +100,82 @@ function doWeb(doc, url) {
 
 
 function scrapeMultiples(doc, id, date, voliss, journal, abbr, ISSN) {
-	// Z.debug(id)
 	var item = new Z.Item('journalArticle');
-	var title = text(doc, 'span > a#' + id);
-	var link = attr(doc, 'span > a#' + id, "href");
+	
+	var titleXpath = '//span/a[contains(@href,  "' + id + '")]';
+	var title = ZU.xpathText(doc, titleXpath);
+	var link = id;
+	
 	if (!title) {
-		title = text(doc, 'strong > a#' + id);
-		link = attr(doc, 'strong > a#' + id, "href");
+		titleXpath = '//strong/a[contains(@href, "' + id + '")]';
+		title = ZU.xpathText(doc, titleXpath);
+		link = id;
+	}
+	
+	// Newer issues
+	if (!title) {
+		titleXpath = '//h2//a[contains(@href, "' + id + '")]';
+		title = ZU.xpathText(doc, titleXpath);
+		link = id;
 	}
 	item.title = ZU.trimInternal(title.trim());
-	var section = ZU.xpath(doc, '//div[@class="da_black"]/table[tbody//a[@id="' + id + '"]]');
+	
+	var sectionXpath = '//div[@class="da_black"]/table[tbody//a[@href="' + id + '"]]';
+	var section = ZU.xpath(doc, sectionXpath);
 	if (!section.length) {
-		section = ZU.xpath(doc, '//div[@class="da_black"]/p[span//a[@id="' + id + '"]]');
+		sectionXpath = '//div[@class="da_black"]/p[span//a[@href="' + id + '"]]';
+		section = ZU.xpath(doc, sectionXpath);
 	}
+	
+	// Newer issues
+	if (!section.length) {
+		sectionXpath = '//div[@class="da_black"]//div[h2//a[@href="' + id + '"]]';
+		section = ZU.xpath(doc, sectionXpath);
+	}
+	
 	if (section.length) {
 		var authors = text(section[0], 'p>span>strong');
 		if (!authors) authors = text(section[0], 'p>strong>span');
+		
+		// Newer issues
+		if (!authors) authors = text(section[0], 'strong');
+
 		if (authors) {
-			authors = ZU.trimInternal(authors.trim());
-			// delete name suffixes
-			authors = authors.replace(/, (USAF|USN|Retired|PE|LMFT)\b/g, "");
-			authorsList = authors.split(/\/|,?\sand\s|,\s/);
-			var rank = /^(By:|Adm|Rear Adm|Col|Lt Col|Brig Gen|Gen|Maj Gen \(sel\)|Maj|Capt|Maj Gen|2nd Lt|W(in)?g Cdr|Mr?s\.|Mr\.|Dr\.)\s/;
+			if (authors.includes("Reviewed by")) {
+				var reviewedAuthor = authors.match(/^by\s(.+)/);
+				var reviewer = authors.match(/Reviewed by\s(.+)/);
+				
+				if (reviewedAuthor) {
+					reviewedAuthor = parseAuthors(reviewedAuthor[1], "reviewedAuthor");
+				}
+				if (reviewer) {
+					reviewer = parseAuthors(reviewer[1], "author");
+				}
 			
-			for (i = 0; i < authorsList.length; i++) {
-				// Z.debug(authorsList[i]);
-				var author = authorsList[i].trim().replace(rank, "");
-				item.creators.push(ZU.cleanAuthor(author, "author"));
+				if (reviewedAuthor && reviewer) {
+					item.creators = reviewer.concat(reviewedAuthor);
+				}
+				
+				else {
+					item.creators = reviewer || reviewedAuthor;
+				}
+			}
+			else {
+				authors = ZU.trimInternal(authors.trim());
+				// delete name suffixes
+				item.creators = parseAuthors(authors, "author");
 			}
 		}
-		var abstract = text(section[0], 'p > span', 2);
-		if (!abstract) abstract = text(section[0], 'p > span', 1);
+		// ASPJ
+		var abstract = text(section[0], 'p > span', 1);
+		
+		// SSQ
+		if (!abstract) abstract = ZU.xpathText(section[0], './/p/span[1]/text()');
+		
+		// Newer issues
+		if (!abstract) abstract = ZU.xpathText(section[0], './/p/text()');
 		if (abstract) {
-			item.abstractNote = ZU.trimInternal(abstract.trim());
+			item.abstractNote = ZU.trimInternal(abstract.trim().replace(/^,\s/, ""));
 		}
 	}
 
@@ -156,16 +203,33 @@ function scrapeMultiples(doc, id, date, voliss, journal, abbr, ISSN) {
 	item.complete();
 }
 
-/** BEGIN TEST CASES **/
+function parseAuthors(creators, type) {
+	creators = ZU.trimInternal(creators.trim());
+	// delete name suffixes
+	creators = creators.replace(/, (USAF|USN|Retired|PE|LMFT|USA|[^,]+Air Force)\b/g, "");
+	let creatorsList = creators.split(/\/|,?\sand\s|,\s/);
+	var rank = /^(By:|Adm|Rear Adm|Col|Lt Col|LTC|Brig Gen|Gen|Maj Gen \(sel\)|Maj|Capt|CAPT|Maj Gen|2nd Lt|W(in)?g Cdr|Mr?s\.|Mr\.|Dr\.)\s/;
+	var creatorsArray = [];
+	for (let creator of creatorsList) {
+		creator = creator.trim().replace(rank, "");
+		creatorsArray.push(ZU.cleanAuthor(creator, type));
+	}
+	return creatorsArray;
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.airuniversity.af.mil/SSQ/Display/Article/1261066/volume-11-issue-3-fall-2017/",
+		"url": "https://www.airuniversity.af.edu/SSQ/Display/Article/1261066/volume-11-issue-3-fall-2017/",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.airuniversity.af.mil/ASPJ/Display/Article/1151902/volume-30-issue-2-summer-2016/",
+		"url": "https://www.airuniversity.af.edu/ASPJ/Display/Article/1151902/volume-30-issue-2-summer-2016/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.airuniversity.af.edu/SSQ/Display/Article/2748342/volume-15-issue-3-fall-2021/",
 		"items": "multiple"
 	}
 ]

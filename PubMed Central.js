@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-04-07 17:23:07"
+	"lastUpdated": "2022-08-12 07:27:23"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -37,7 +36,10 @@
 */
 
 function detectWeb(doc, url) {
-	if (getPMCID(url)) {
+	// Make sure the page have a PMCID and we're on a valid item page,
+	// or looking at a PDF
+	if (getPMCID(url) && (url.includes(".pdf")
+	|| 	doc.getElementsByClassName('fm-ids').length)) {
 		return "journalArticle";
 	}
 	
@@ -67,7 +69,9 @@ function doWeb(doc, url) {
 		var pmcid = getPMCID(url);
 		var pdf = getPDF(doc, '//td[@class="format-menu"]//a[contains(@href,".pdf")]'
 				+ '|//div[@class="format-menu"]//a[contains(@href,".pdf")]'
-				+ '|//aside[@id="jr-alt-p"]/div/a[contains(@href,".pdf")]');
+				+ '|//aside[@id="jr-alt-p"]/div/a[contains(@href,".pdf")]'
+				+ '|//li[contains(@class, "pdf-link")]/a');
+		// Z.debug(pdf);
 		// if we're looking at a pdf, just use the current url
 		if (!pdf && url.search(/\/pdf\/.+.pdf/) != -1) {
 			pdf = url;
@@ -192,6 +196,11 @@ function lookupPMCIDs(ids, doc, pdfLink) {
 			else if (firstPage) {
 				newItem.pages = firstPage;
 			}
+			// use elocationid where we don't have itemIDs
+			if (!newItem.pages) {
+				newItem.pages = ZU.xpathText(article, 'elocationid');
+			}
+			
 
 			var pubDate = ZU.xpath(article, 'pubdate[@pubtype="ppub"]');
 			if (!pubDate.length) {
@@ -476,6 +485,7 @@ var testCases = [
 				"issue": "1",
 				"journalAbbreviation": "PLoS One",
 				"libraryCatalog": "PubMed Central",
+				"pages": "e8653",
 				"publicationTitle": "PLoS ONE",
 				"url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2801612/",
 				"volume": "5",

@@ -17,9 +17,32 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2017-10-28 09:11:30"
+	"lastUpdated": "2023-07-28 09:46:04"
 }
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2006-2023 Simon Kornblith, Aurimas Vinckevicus, Abe Jellinek
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
 
 function detectImport() {
 	var line;
@@ -29,20 +52,20 @@ function detectImport() {
 		if (line != "") {
 			if (line.substr(0, 6).match(/^TY {1,2}- /)) {
 				return true;
-			} else {
-				if (i++ > 3) {
-					return false;
-				}
+			}
+			else if (i++ > 3) {
+				return false;
 			}
 		}
 	}
+	return false;
 }
 
 /********************
  * Exported options *
  ********************/
- //exported as translatorObject.options
- var exportedOptions = {
+//exported as translatorObject.options
+var exportedOptions = {
 	itemType: false, //allows translators to override item type
 	defaultItemType: false, //item type to default to
 	typeMap: false,
@@ -58,33 +81,34 @@ var DEFAULT_EXPORT_TYPE = 'GEN';
 var DEFAULT_IMPORT_TYPE = 'journalArticle';
 
 var exportTypeMap = {
-	artwork:"ART",
-	audioRecording:"SOUND", //consider MUSIC
-	bill:"BILL",
-	blogPost:"BLOG",
-	book:"BOOK",
-	bookSection:"CHAP",
-	"case":"CASE",
-	computerProgram:"COMP",
-	conferencePaper:"CONF",
-	dictionaryEntry:"DICT",
-	encyclopediaArticle:"ENCYC",
-	email:"ICOMM",
-	film:"MPCT",
-	hearing:"HEAR",
-	journalArticle:"JOUR",
-	letter:"PCOMM",
-	magazineArticle:"MGZN",
-	manuscript:"MANSCPT",
-	map:"MAP",
-	newspaperArticle:"NEWS",
-	patent:"PAT",
-	presentation:"SLIDE",
-	report:"RPRT",
-	statute:"STAT",
-	thesis:"THES",
-	videoRecording:"VIDEO",
-	webpage:"ELEC"
+	artwork: "ART",
+	audioRecording: "SOUND", //consider MUSIC
+	bill: "BILL",
+	blogPost: "BLOG",
+	book: "BOOK",
+	bookSection: "CHAP",
+	case: "CASE",
+	computerProgram: "COMP",
+	conferencePaper: "CONF",
+	dictionaryEntry: "DICT",
+	encyclopediaArticle: "ENCYC",
+	email: "ICOMM",
+	dataset: "DATA",
+	film: "MPCT",
+	hearing: "HEAR",
+	journalArticle: "JOUR",
+	letter: "PCOMM",
+	magazineArticle: "MGZN",
+	manuscript: "MANSCPT",
+	map: "MAP",
+	newspaperArticle: "NEWS",
+	patent: "PAT",
+	presentation: "SLIDE",
+	report: "RPRT",
+	statute: "STAT",
+	thesis: "THES",
+	videoRecording: "VIDEO",
+	webpage: "ELEC"
 };
 
 //These export type maps are degenerate
@@ -92,55 +116,62 @@ var exportTypeMap = {
 //These should either be duplicates of some of the RIS types above
 //  or be different from the importTypeMap mappings
 var degenerateExportTypeMap = {
-	interview:"PCOMM",
-	instantMessage:"ICOMM",
-	forumPost:"ICOMM",
-	tvBroadcast:"MPCT",
-	radioBroadcast:"SOUND",
-	podcast:"SOUND",
-	document:"GEN" //imported as journalArticle
+	interview: "PCOMM",
+	instantMessage: "ICOMM",
+	forumPost: "ICOMM",
+	tvBroadcast: "MPCT",
+	radioBroadcast: "SOUND",
+	podcast: "SOUND",
+	document: "GEN" //imported as journalArticle
 };
 
 //These are degenerate types that are not exported as the same TY value
 //These should not include any types from exportTypeMap
 //We add the rest from exportTypeMap
 var importTypeMap = {
-	ABST:"journalArticle",
-	ADVS:"film",
-	AGGR:"document", //how can we handle "database" citations?
-	ANCIENT:"document",
-	CHART:"artwork",
-	CLSWK:"book",
-	CPAPER:"conferencePaper",
-	CTLG:"magazineArticle",
-	DATA:"document", //dataset
-	DBASE:"document", //database
-	EBOOK:"book",
-	ECHAP:"bookSection",
-	EDBOOK:"book",
-	EJOUR:"journalArticle",
-	EQUA:"document", //what's a good way to handle this?
-	FIGURE:"artwork",
-	GEN:"journalArticle",
-	GOVDOC:"report",
-	GRNT:"document",
-	INPR:"manuscript",
-	JFULL:"journalArticle",
-	LEGAL:"case", //is this what they mean?
-	MULTI:"videoRecording", //maybe?
-	MUSIC:"audioRecording",
-	PAMP:"manuscript",
-	SER:"book",
-	STAND:"report",
-	UNBILL:"manuscript",
-	UNPD:"manuscript",
-	WEB:"webpage"	//not in spec, but used by EndNote
+	ABST: "journalArticle",
+	ADVS: "film",
+	AGGR: "document", //how can we handle "database" citations?
+	ANCIENT: "document",
+	CHART: "artwork",
+	CLSWK: "book",
+	CPAPER: "conferencePaper",
+	CTLG: "magazineArticle",
+	DBASE: "dataset", //database
+	EBOOK: "book",
+	ECHAP: "bookSection",
+	EDBOOK: "book",
+	EJOUR: "journalArticle",
+	EQUA: "document", //what's a good way to handle this?
+	FIGURE: "artwork",
+	GEN: "journalArticle",
+	GOVDOC: "report",
+	GRNT: "document",
+	INPR: "manuscript",
+	JFULL: "journalArticle",
+	LEGAL: "case", //is this what they mean?
+	MULTI: "videoRecording", //maybe?
+	MUSIC: "audioRecording",
+	PAMP: "manuscript",
+	SER: "book",
+	STAND: "report",
+	UNBILL: "manuscript",
+	UNPD: "manuscript",
+	WEB: "webpage"	//not in spec, but used by EndNote
 };
 
 //supplement input map with export
 var ty;
 for (ty in exportTypeMap) {
 	importTypeMap[exportTypeMap[ty]] = ty;
+}
+
+// for Zotero clients <6.0.24: set dataset back to document
+if (!ZU.fieldIsValidForType('title', 'dataset')) {
+	delete importTypeMap.DATA;
+	delete importTypeMap.DBASE;
+	importTypeMap.DBASE = 'document';
+	importTypeMap.DATA = 'document';
 }
 
 //merge degenerate export type map into main list
@@ -175,215 +206,231 @@ for (ty in degenerateExportTypeMap) {
 //(except for item types that do not have unique RIS types, see above)
 var fieldMap = {
 	//same for all itemTypes
-	AB:"abstractNote",
-	AN:"archiveLocation",
-	CN:"callNumber",
-	DB:"archive",
-	DO:"DOI",
-	DP:"libraryCatalog",
-	J2:"journalAbbreviation",
-	KW:"tags",
-	L1:"attachments/PDF",
-	L2:"attachments/HTML",
-	L4:"attachments/other",
-	N1:"notes",
-	ST:"shortTitle",
-	UR:"url",
-	Y2:"accessDate",
+	AB: "abstractNote",
+	AN: "archiveLocation",
+	CN: "callNumber",
+	DB: "archive",
+	DO: "DOI",
+	DP: "libraryCatalog",
+	J2: "journalAbbreviation",
+	KW: "tags",
+	L1: "attachments/PDF",
+	L2: "attachments/HTML",
+	L4: "attachments/other",
+	N1: "notes",
+	ST: "shortTitle",
+	UR: "url",
+	Y2: "accessDate",
 
 	//type specific
 	//tag => field:itemTypes
 	//if itemType not explicitly given, __default field is used
 	//  unless itemType is excluded in __exclude
 	TI: {
-		"__default":"title",
-		subject:["email"],
-		caseName:["case"],
-		nameOfAct:["statute"]
+		__default: "title",
+		subject: ["email"],
+		caseName: ["case"],
+		nameOfAct: ["statute"]
 	},
 	T2: {
-		code:["bill", "statute"],
-		bookTitle:["bookSection"],
-		blogTitle:["blogPost"],
-		conferenceName:["conferencePaper"],
-		dictionaryTitle:["dictionaryEntry"],
-		encyclopediaTitle:["encyclopediaArticle"],
-		committee:["hearing"],
-		forumTitle:["forumPost"],
-		websiteTitle:["webpage"],
-		programTitle:["radioBroadcast", "tvBroadcast"],
-		meetingName:["presentation"],
-		seriesTitle:["computerProgram", "map", "report"],
+		code: ["bill", "statute"],
+		bookTitle: ["bookSection"],
+		blogTitle: ["blogPost"],
+		conferenceName: ["conferencePaper"],
+		dictionaryTitle: ["dictionaryEntry"],
+		encyclopediaTitle: ["encyclopediaArticle"],
+		committee: ["hearing"],
+		forumTitle: ["forumPost"],
+		websiteTitle: ["webpage"],
+		programTitle: ["radioBroadcast", "tvBroadcast"],
+		meetingName: ["presentation"],
+		seriesTitle: ["computerProgram", "map", "report"],
 		series: ["book"],
-		publicationTitle:["journalArticle", "magazineArticle", "newspaperArticle"]
+		publicationTitle: ["journalArticle", "magazineArticle", "newspaperArticle"]
 	},
 	T3: {
-		legislativeBody:["hearing", "bill"],
-		series:["bookSection", "conferencePaper", "journalArticle"],
-		seriesTitle:["audioRecording"]
+		legislativeBody: ["hearing", "bill"],
+		series: ["bookSection", "conferencePaper", "journalArticle"],
+		seriesTitle: ["audioRecording"]
 	},
 	//NOT HANDLED: reviewedAuthor, scriptwriter, contributor, guest
 	AU: {
-		"__default":"creators/author",
-		"creators/artist":["artwork"],
-		"creators/cartographer":["map"],
-		"creators/composer":["audioRecording"],
-		"creators/director":["film", "radioBroadcast", "tvBroadcast", "videoRecording"], //this clashes with audioRecording
-		"creators/interviewee":["interview"],
-		"creators/inventor":["patent"],
-		"creators/podcaster":["podcast"],
-		"creators/programmer":["computerProgram"]
+		__default: "creators/author",
+		"creators/artist": ["artwork"],
+		"creators/cartographer": ["map"],
+		"creators/composer": ["audioRecording"],
+		"creators/director": ["film", "radioBroadcast", "tvBroadcast", "videoRecording"], //this clashes with audioRecording
+		"creators/interviewee": ["interview"],
+		"creators/inventor": ["patent"],
+		"creators/podcaster": ["podcast"],
+		"creators/programmer": ["computerProgram"]
+	},
+	A1: {
+		__default: "creators/author",
+		"creators/artist": ["artwork"],
+		"creators/cartographer": ["map"],
+		"creators/composer": ["audioRecording"],
+		"creators/director": ["film", "radioBroadcast", "tvBroadcast", "videoRecording"], //this clashes with audioRecording
+		"creators/interviewee": ["interview"],
+		"creators/inventor": ["patent"],
+		"creators/podcaster": ["podcast"],
+		"creators/programmer": ["computerProgram"]
 	},
 	A2: {
-		"creators/sponsor":["bill"],
-		"creators/performer":["audioRecording"],
-		"creators/presenter":["presentation"],
-		"creators/interviewer":["interview"],
-		"creators/editor":["journalArticle", "bookSection", "conferencePaper", "dictionaryEntry", "document", "encyclopediaArticle"],
-		"creators/seriesEditor":["book", "report"],
-		"creators/recipient":["email", "instantMessage", "letter"],
-		reporter:["case"],
-		issuingAuthority:["patent"]
+		"creators/sponsor": ["bill"],
+		"creators/performer": ["audioRecording"],
+		"creators/presenter": ["presentation"],
+		"creators/interviewer": ["interview"],
+		"creators/editor": ["journalArticle", "bookSection", "conferencePaper", "dictionaryEntry", "document", "encyclopediaArticle"],
+		"creators/seriesEditor": ["book", "report"],
+		"creators/recipient": ["email", "instantMessage", "letter"],
+		reporter: ["case"],
+		issuingAuthority: ["patent"]
 	},
 	A3: {
-		"creators/cosponsor":["bill"],
-		"creators/producer":["film", "tvBroadcast", "videoRecording", "radioBroadcast"],
-		"creators/editor":["book"],
-		"creators/seriesEditor":["bookSection", "conferencePaper", "dictionaryEntry", "encyclopediaArticle", "map"]
+		"creators/contributor": ["thesis"],
+		"creators/cosponsor": ["bill"],
+		"creators/producer": ["film", "tvBroadcast", "videoRecording", "radioBroadcast"],
+		"creators/editor": ["book"],
+		"creators/seriesEditor": ["bookSection", "conferencePaper", "dictionaryEntry", "encyclopediaArticle", "map"]
 	},
 	A4: {
-		"__default":"creators/translator",
-		"creators/counsel":["case"],
-		"creators/contributor":["conferencePaper", "film"]	//translator does not fit these
+		__default: "creators/translator",
+		"creators/counsel": ["case"],
+		"creators/contributor": ["conferencePaper", "film", "dataset"]	//translator does not fit these
 	},
 	C1: {
-		filingDate:["patent"], //not in spec
-		"creators/castMember":["radioBroadcast", "tvBroadcast", "videoRecording"],
-		scale:["map"],
-		place:["conferencePaper"]
+		filingDate: ["patent"], //not in spec
+		"creators/castMember": ["radioBroadcast", "tvBroadcast", "videoRecording"],
+		scale: ["map"],
+		place: ["conferencePaper"]
 	},
 	C2: {
-		issueDate:["patent"], //not in spec
-		"creators/bookAuthor":["bookSection"],
-		"creators/commenter":["blogPost"]
+		issueDate: ["patent"], //not in spec
+		"creators/bookAuthor": ["bookSection"],
+		"creators/commenter": ["blogPost"]
 	},
 	C3: {
-		artworkSize:["artwork"],
-		proceedingsTitle:["conferencePaper"],
-		country:["patent"]
+		artworkSize: ["artwork"],
+		proceedingsTitle: ["conferencePaper"],
+		country: ["patent"]
 	},
 	C4: {
-		"creators/wordsBy":["audioRecording"], //not in spec
-		"creators/attorneyAgent":["patent"],
-		genre:["film"]
+		"creators/wordsBy": ["audioRecording"], //not in spec
+		"creators/attorneyAgent": ["patent"],
+		genre: ["film"]
 	},
 	C5: {
-		references:["patent"],
-		audioRecordingFormat:["audioRecording", "radioBroadcast"],
-		videoRecordingFormat:["film", "tvBroadcast", "videoRecording"]
+		references: ["patent"],
+		audioRecordingFormat: ["audioRecording", "radioBroadcast"],
+		videoRecordingFormat: ["film", "tvBroadcast", "videoRecording"]
 	},
 	C6: {
-		legalStatus:["patent"],
+		legalStatus: ["patent"],
 	},
 	CY: {
-		"__default":"place",
-		"__exclude":["conferencePaper"] //should be exported as C1
+		__default: "place",
+		repositoryLocation: ["dataset"],
+		__exclude: ["conferencePaper"] //should be exported as C1
 	},
 	DA: { //also see PY when editing
-		"__default":"date",
-		dateEnacted:["statute"],
-		dateDecided:["case"],
-		issueDate:["patent"]
+		__default: "date",
+		dateEnacted: ["statute"],
+		dateDecided: ["case"],
+		issueDate: ["patent"]
 	},
 	ET: {
-		"__default":"edition",
-//		"__ignore":["journalArticle"], //EPubDate
-		session:["bill", "hearing", "statute"],
-		version:["computerProgram"]
+		__default: "edition",
+		//		"__ignore":["journalArticle"], //EPubDate
+		session: ["bill", "hearing", "statute"],
+		versionNumber: ["computerProgram", "dataset"]
 	},
 	IS: {
-		"__default":"issue",
-		numberOfVolumes: ["bookSection"]
+		__default: "issue",
+		numberOfVolumes: ["bookSection"],
+		__exclude: ["dataset"] //IS
 	},
 	LA: {
-		"__default":"language",
+		__default: "language",
 		programmingLanguage: ["computerProgram"]
 	},
 	M1: {
-		seriesNumber:["book"],
-		billNumber:["bill"],
-		system:["computerProgram"],
-		documentNumber:["hearing"],
-		applicationNumber:["patent"],
-		publicLawNumber:["statute"],
-		episodeNumber:["podcast", "radioBroadcast", "tvBroadcast"]
+		seriesNumber: ["book"],
+		billNumber: ["bill"],
+		system: ["computerProgram"],
+		documentNumber: ["hearing"],
+		applicationNumber: ["patent"],
+		publicLawNumber: ["statute"],
+		episodeNumber: ["podcast", "radioBroadcast", "tvBroadcast"]
 	},
 	M3: {
-		manuscriptType:["manuscript"],
-		mapType:["map"],
-		reportType:["report"],
-		thesisType:["thesis"],
-		websiteType:["blogPost", "webpage"],
-		postType:["forumPost"],
-		letterType:["letter"],
-		interviewMedium:["interview"],
-		presentationType:["presentation"],
-		artworkMedium:["artwork"],
-		audioFileType:["podcast"]
+		manuscriptType: ["manuscript"],
+		mapType: ["map"],
+		reportType: ["report"],
+		thesisType: ["thesis"],
+		websiteType: ["blogPost", "webpage"],
+		postType: ["forumPost"],
+		letterType: ["letter"],
+		interviewMedium: ["interview"],
+		presentationType: ["presentation"],
+		artworkMedium: ["artwork"],
+		audioFileType: ["podcast"]
 	},
 	NV: {
-		"__default": "numberOfVolumes",
-		"__exclude": ["bookSection"] //IS
+		__default: "numberOfVolumes",
+		identifier: ["dataset"],
+		__exclude: ["bookSection"] //IS
 	},
 	OP: {
-		history:["hearing", "statute", "bill", "case"],
-		priorityNumbers:["patent"]
+		history: ["hearing", "statute", "bill", "case"],
+		priorityNumbers: ["patent"]
 	},
 	PB: {
-		"__default":"publisher",
-		label:["audioRecording"],
-		court:["case"],
-		distributor:["film"],
-		assignee:["patent"],
-		institution:["report"],
-		university:["thesis"],
-		company:["computerProgram"],
-		studio:["videoRecording"],
-		network:["radioBroadcast", "tvBroadcast"]
+		__default: "publisher",
+		label: ["audioRecording"],
+		court: ["case"],
+		distributor: ["film"],
+		assignee: ["patent"],
+		institution: ["report"],
+		repository: ["dataset"],
+		university: ["thesis"],
+		company: ["computerProgram"],
+		studio: ["videoRecording"],
+		network: ["radioBroadcast", "tvBroadcast"]
 	},
 	PY: { //duplicate of DA, but this will only output year
-		"__default":"date",
-		dateEnacted:["statute"],
-		dateDecided:["case"],
-		issueDate:["patent"]
+		__default: "date",
+		dateEnacted: ["statute"],
+		dateDecided: ["case"],
+		issueDate: ["patent"]
 	},
 	SE: {
-		"__default": "section",	//though this can refer to pages, start page, etc. for some types. Zotero does not support any of those combinations, however.
-		"__exclude": ["case"]
+		__default: "section",	//though this can refer to pages, start page, etc. for some types. Zotero does not support any of those combinations, however.
+		__exclude: ["case"]
 	},
 	SN: {
-		"__default":"ISBN",
-		ISSN:["journalArticle", "magazineArticle", "newspaperArticle"],
-		patentNumber:["patent"],
-		reportNumber:["report"],
+		__default: "ISBN",
+		ISSN: ["journalArticle", "magazineArticle", "newspaperArticle"],
+		patentNumber: ["patent"],
+		reportNumber: ["report"],
 	},
 	SP: {
-		"__default":"pages", //needs extra processing
-		codePages:["bill"], //bill
-		numPages:["book", "thesis", "manuscript"], //manuscript not really in spec
-		firstPage:["case"],
-		runningTime:["film"]
+		__default: "pages", //needs extra processing
+		codePages: ["bill"], //bill
+		numPages: ["book", "thesis", "manuscript"], //manuscript not really in spec
+		firstPage: ["case"],
+		runningTime: ["film"]
 	},
 	SV: {
 		seriesNumber: ["bookSection"],
 		docketNumber: ["case"]	//not in spec. EndNote exports this way
 	},
 	VL: {
-		"__default":"volume",
-		codeNumber:["statute"],
-		codeVolume:["bill"],
-		reporterVolume:["case"],
-		"__exclude":["patent", "webpage"]
+		__default: "volume",
+		codeNumber: ["statute"],
+		codeVolume: ["bill"],
+		reporterVolume: ["case"],
+		__exclude: ["patent", "webpage"]
 	}
 };
 
@@ -391,34 +438,37 @@ var fieldMap = {
 //used ONLY for importing and only if these fields are not specified above (e.g. M3)
 //these are not exported the same way
 var degenerateImportFieldMap = {
-	A1: fieldMap["AU"],
 	AD: {
-		"__default": "unsupported/Author Address",
+		__default: "unsupported/Author Address",
 		"unsupported/Inventor Address": ["patent"]
 	},
 	AV: "archiveLocation", //REFMAN
 	BT: {
 		title: ["book", "manuscript"],
 		bookTitle: ["bookSection"],
-		"__default": "backupPublicationTitle" //we do more filtering on this later
+		__default: "backupPublicationTitle" //we do more filtering on this later
 	},
 	CA: "unsupported/Caption",
 	CR: "rights",
 	CT: "title",
+	CY: "place", // ProCite and Springer are using CY instead of C1 also for conferencePapers
 	ED: "creators/editor",
 	EP: "pages",
 	H1: "unsupported/Library Catalog", //Citavi specific (possibly multiple occurences)
 	H2: "unsupported/Call Number", //Citavi specific (possibly multiple occurences)
 	ID: "__ignore",
+	IS: {
+		versionNumber: ["dataset"]
+	},
 	JA: "journalAbbreviation",
 	JF: "publicationTitle",
 	JO: {
-		"__default": "journalAbbreviation",
+		__default: "journalAbbreviation",
 		conferenceName: ["conferencePaper"]
 	},
 	LB: "unsupported/Label",
 	M1: {
-		"__default":"extra",
+		__default: "extra",
 		issue: ["journalArticle"], //EndNote hack
 		numberOfVolumes: ["bookSection"],	//EndNote exports here instead of IS
 		accessDate: ["webpage"]		//this is access date when coming from EndNote
@@ -428,18 +478,18 @@ var degenerateImportFieldMap = {
 	N2: "abstractNote",
 	NV: "numberOfVolumes",
 	OP: {
-		"__default": "unsupported/Original Publication",
+		__default: "unsupported/Original Publication",
 		"unsupported/Content": ["blogPost", "computerProgram", "film", "presentation", "report", "videoRecording", "webpage"]
 	},
 	RI: {
-		"__default":"unsupported/Reviewed Item",
+		__default: "unsupported/Reviewed Item",
 		"unsupported/Article Number": ["statute"]
 	},
 	RN: "notes",
 	SE: {
 		"unsupported/File Date": ["case"]
 	},
-	T1: fieldMap["TI"],
+	T1: fieldMap.TI,
 	T2: "backupPublicationTitle", //most item types should be covered above
 	T3: {
 		series: ["book"]
@@ -447,25 +497,34 @@ var degenerateImportFieldMap = {
 	TA: "unsupported/Translated Author",
 	TT: "unsupported/Translated Title",
 	VL: {
-		"unsupported/Patent Version Number":['patent'],
+		"unsupported/Patent Version Number": ['patent'],
 		accessDate: ["webpage"]	//technically access year according to EndNote
 	},
-	Y1: fieldMap["DA"] // Old RIS spec
+	Y1: fieldMap.DA // Old RIS spec
 };
 
 /**
  * @class Generic tag mapping with caching
- * 
+ *
  * @param {Tag <-> zotero field map []} mapList An array of field map lists as
  *   described above. Lists are matched in order they are supplied. If a tag is
  *   not present in the list, the next list is checked. If the RIS tag is
  *   present, but an item type does not match (no __default) or is explicit
  *   excluded from matching (__exclude), the next list is checked.
+ *   The `deprecatedMap` should be a subset of the maps in this list.
+ * @param {Tag <-> zotero field map} deprecatedMap A map, in the same format as
+ *   the entries in the `mapList`, containing deprecated tags that should only
+ *   be used if no other tag maps to the same Zotero item field.
  */
-var TagMapper = function(mapList) {
+var TagMapper = function (mapList, deprecatedMap) {
 	this.cache = {};
 	this.reverseCache = {};
 	this.mapList = mapList;
+	this.deprecatedMap = deprecatedMap;
+};
+
+TagMapper.prototype.isDeprecated = function (tag) {
+	return this.deprecatedMap.hasOwnProperty(tag);
 };
 
 /**
@@ -476,7 +535,7 @@ var TagMapper = function(mapList) {
  * @param {String} tag RIS tag
  * @return {String} Zotero field
  */
-TagMapper.prototype.getField = function(itemType, tag) {
+TagMapper.prototype.getField = function (itemType, tag) {
 	if (!this.cache[itemType]) this.cache[itemType] = {};
 
 	//retrieve from cache if available
@@ -486,9 +545,9 @@ TagMapper.prototype.getField = function(itemType, tag) {
 	}
 
 	var field = false;
-	for (var i=0, n=this.mapList.length; i<n; i++) {
+	for (let i = 0, n = this.mapList.length; i < n; i++) {
 		var map = this.mapList[i];
-		if (typeof(map[tag]) == 'object') {
+		if (typeof (map[tag]) == 'object') {
 			var def, exclude = false;
 			for (var f in map[tag]) {
 				//__ignore is not handled here. It's returned as a Zotero field so it
@@ -500,13 +559,13 @@ TagMapper.prototype.getField = function(itemType, tag) {
 				}
 
 				if (f == "__exclude") {
-					if (map[tag][f].indexOf(itemType) != -1) {
+					if (map[tag][f].includes(itemType)) {
 						exclude = true; //don't break. Let explicit mapping override this
 					}
 					continue;
 				}
 
-				if (map[tag][f].indexOf(itemType) != -1) {
+				if (map[tag][f].includes(itemType)) {
 					field = f;
 					break;
 				}
@@ -514,7 +573,8 @@ TagMapper.prototype.getField = function(itemType, tag) {
 
 			//assign default value if not excluded
 			if (!field && def && !exclude) field = def;
-		} else if (typeof(map[tag]) == 'string') {
+		}
+		else if (typeof (map[tag]) == 'string') {
 			field = map[tag];
 		}
 
@@ -535,35 +595,37 @@ TagMapper.prototype.getField = function(itemType, tag) {
  * @param {String} zField Zotero field
  * @return {String} RIS tag
  */
-TagMapper.prototype.reverseLookup = function(itemType, zField) {
+TagMapper.prototype.reverseLookup = function (itemType, zField) {
 	if (!this.reverseCache[itemType]) this.reverseCache[itemType] = {};
 	
 	if (this.reverseCache[itemType][zField] !== undefined) {
 		return this.reverseCache[itemType][zField];
 	}
 	
-	for (var i=0, n=this.mapList.length; i<n; i++) {
+	for (let i = 0, n = this.mapList.length; i < n; i++) {
 		var risTag;
+	
 		for (risTag in this.mapList[i]) {
 			var typeMap = this.mapList[i][risTag];
 			if (typeMap == zField) {
 				// item type indepndent
 				this.reverseCache[itemType][zField] = risTag;
 				return risTag;
-			} else if (typeof(typeMap) == 'object') {
-				if (typeMap[zField] && typeMap[zField].indexOf(itemType) !== -1) {
+			}
+			else if (typeof (typeMap) == 'object') {
+				if (typeMap[zField] && typeMap[zField].includes(itemType)) {
 					//explicitly mapped
 					this.reverseCache[itemType][zField] = risTag;
 					return risTag;
 				}
-				if (!(typeMap.__exclude && typeMap.__exclude.indexOf(itemType) !== -1)
+				if (!(typeMap.__exclude && typeMap.__exclude.includes(itemType))
 					&& typeMap.__default == zField
 				) {
 					// may be mapped via default, but make sure this item type is not
 					// explicitly mapped somewhere else
 					var preventDefault = false;
 					for (var field in typeMap) {
-						if (typeMap[field].indexOf(itemType) != -1) {
+						if (typeMap[field].includes(itemType)) {
 							// mapped to something else
 							preventDefault = true;
 							break;
@@ -596,9 +658,10 @@ var ignoreUnknown = true;
 /**
  * @singleton Provides facilities to read one RIS entry at a time
  */
-var RISReader = new function() {
+var RISReader = new function () {
 	//if we read a tag-value pair from the next entry, we need to keep it for later
 	var _tagValueBuffer = [];
+
 	/**
 	 * public
 	 * Returns the next RIS entry
@@ -609,11 +672,12 @@ var RISReader = new function() {
 	 *   The values of the list are arrays, which contain references to the
 	 *   tag-value pairs stored in the returned array.
 	 */
-	this.nextEntry = function() {
+	this.nextEntry = function () {
 		var tagValue,
 			entry = []; //maintain tag order
 		entry.tags = {}; //tag list for convenience
 		
+		// eslint-disable-next-line no-cond-assign
 		while (tagValue = (_tagValueBuffer.length && _tagValueBuffer.pop()) || _getTagValue()) {
 			if (tagValue.tag == 'TY' && entry.length) {
 				//we hit a new entry. ER was omitted, but we'll forgive
@@ -633,13 +697,14 @@ var RISReader = new function() {
 		}
 		
 		if (entry.length) return entry;
+		return false;
 	};
 	
-	var RIS_format = /^([A-Z][A-Z0-9]) {1,2}-(?: (.*))?$/, //allow empty entries
-	//list of tags for which we preserve newlines
+	var risFormat = /^([A-Z][A-Z0-9]) {1,2}-(?: (.*))?$/, //allow empty entries
+		//list of tags for which we preserve newlines
 		preserveNewLines = ['KW', 'L1', 'L2', 'L3'], //these could use newline as separator
-	//keep track of maximum line length so we can make a better call on whether
-	//something should be on a new line or not
+		//keep track of maximum line length so we can make a better call on whether
+		//something should be on a new line or not
 		_maxLineLength = 0;
 	
 	/**
@@ -655,13 +720,13 @@ var RISReader = new function() {
 	function _getTagValue() {
 		var line, tagValue, temp, lastLineLength = 0;
 		while ((line = _nextLine()) !== false) { //could be reading empty lines
-			temp = line.match(RIS_format);
+			temp = line.match(risFormat);
 			
 			if (!temp && !tagValue) {
 				//doesn't match RIS format and we're not processing a tag-value pair,
 				//so this is not a multi-line tag-value pair
 				if (line.trim()) {
-					Z.debug("RIS: Dropping line outside of RIS record: " + line);
+					// Z.debug("RIS: Dropping line outside of RIS record: " + line);
 				}
 				continue;
 			}
@@ -684,13 +749,14 @@ var RISReader = new function() {
 				};
 				
 				if (tagValue.value === undefined) tagValue.value = '';
-			} else {
+			}
+			else {
 				//tagValue && !temp
 				//multi-line RIS tag-value pair
 				var newLineAdded = false;
 				var cleanLine = line.trim();
 				//new lines would probably only be meaningful in notes and abstracts
-				if ((['AB', 'N1', 'N2', 'RN']).indexOf(tagValue.tag) !== -1
+				if (['AB', 'N1', 'N2', 'RN'].includes(tagValue.tag)
 					//if all lines are not trimmed to ~80 characters or previous line was
 					// short, this would probably be on a new line. Might want to consider
 					// looking for periods and capital letters to make a better call.
@@ -698,20 +764,19 @@ var RISReader = new function() {
 					&& (_maxLineLength > 85
 						|| (lastLineLength !== undefined && lastLineLength < 65)
 						|| cleanLine.length == 0)
-					) {
-					
+				) {
 					cleanLine = "\n" + cleanLine;
 					newLineAdded = true;
 				}
 				
 				//don't remove new lines from keywords or attachments
-				if (!newLineAdded && preserveNewLines.indexOf(tagValue.tag) != -1) {
+				if (!newLineAdded && preserveNewLines.includes(tagValue.tag)) {
 					cleanLine = "\n" + cleanLine;
 					newLineAdded = true;
 				}
 				
 				//check if we need to add a space before concatenating
-				if (!newLineAdded && tagValue.value.charAt(tagValue.value.length-1) != ' ') {
+				if (!newLineAdded && tagValue.value.charAt(tagValue.value.length - 1) != ' ') {
 					cleanLine = ' ' + cleanLine;
 				}
 	
@@ -723,9 +788,11 @@ var RISReader = new function() {
 		}
 		
 		if (tagValue) return tagValue;
+		return false;
 	}
 	
 	var _lineBuffer = [];
+
 	/**
 	 * private
 	 * Gets the next line in the buffer or file
@@ -737,7 +804,7 @@ var RISReader = new function() {
 		//  because we may have an empty line, which could be meaningful
 		if (_lineBuffer.length) return _lineBuffer.pop();
 		var line = Zotero.read();
-		if (line && (line.indexOf('\u2028') != -1 || line.indexOf('\u2029') != -1)) {
+		if (line && (line.includes('\u2028') || line.includes('\u2029'))) {
 			// Apparently some services think that it's cool to break up single
 			// lines in RIS into shorter lines using Unicode "LINE SEPARATOR"
 			// character. Well, that sucks for us, because . (dot) in regexp does
@@ -756,6 +823,7 @@ var RISReader = new function() {
  * Generic methods for cleaning RIS tags
  */
 var TagCleaner = {
+
 	/**
 	 * public
 	 * Changes the RIS tag for an indicated tag-value pair. If more than one tag
@@ -765,25 +833,26 @@ var TagCleaner = {
 	 * @param (Integer) at Index in entry of the tag-value pair to alter
 	 * @param (String[]) toTags Array of tags to change to
 	 */
-	changeTag: function(entry, at, toTags) {
+	changeTag: function (entry, at, toTags) {
 		var source = entry[at], byTag = entry.tags[source.tag];
 		
 		//clean up "tags" list
-		byTag.splice(byTag.indexOf(source),1);
+		byTag.splice(byTag.indexOf(source), 1);
 		if (!byTag.length) delete entry.tags[source.tag];
 		
 		if (!toTags || !toTags.length) {
 			//then we just remove
-			entry.splice(at,1);
-		} else {
+			entry.splice(at, 1);
+		}
+		else {
 			source.tag = toTags[0]; //re-use the same pair for first tag
 			if (!entry.tags[toTags[0]]) entry.tags[toTags[0]] = [];
 			entry.tags[toTags[0]].push(source);
 			//if we're changing to more than one tag, we need to add extras
-			for (var i=1, n=toTags.length; i<n; i++) {
+			for (let i = 1, n = toTags.length; i < n; i++) {
 				var newSource = ZU.deepCopy(source);
 				newSource.tag = toTags[i];
-				entry.splice(at+i, 0, newSource);
+				entry.splice(at + i, 0, newSource);
 				if (!entry.tags[toTags[i]]) entry.tags[toTags[i]] = [];
 				entry.tags[toTags[i]].push(newSource);
 			}
@@ -797,43 +866,43 @@ var TagCleaner = {
  * Note that after processing, the order of tag-value pairs in the "tags" list
  *   may be out of order
  */
-var ProCiteCleaner = new function() {
+var ProCiteCleaner = new function () {
 	this.proCiteMode = false; //are we sure we're processing a ProCite file?
 	//ProCite -> Zotero field map
 	this.proCiteMap = {
 		'Author Role': { //special case
-			'actor': 'cast-member',
-			'author': 'author',
-			'cartographer': 'cartographer',
-			'composer': 'composer',
-			'composed': 'composer',
-			'director': 'director',
-			'directed': 'director',
-			'performer': 'performer',
-			'performed': 'performer',
-			'producer': 'producer',
-			'produced': 'producer',
-			'editor': 'editor',
-			'ed': 'editor',
-			'edited': 'editor',
+			actor: 'cast-member',
+			author: 'author',
+			cartographer: 'cartographer',
+			composer: 'composer',
+			composed: 'composer',
+			director: 'director',
+			directed: 'director',
+			performer: 'performer',
+			performed: 'performer',
+			producer: 'producer',
+			produced: 'producer',
+			editor: 'editor',
+			ed: 'editor',
+			edited: 'editor',
 			'editor-in-chief': 'editor',
-			'compiler': 'editor',
-			'compiled': 'editor',
-			'collected': 'editor',
-			'assembled': 'editor',
-			'presenter': 'presenter',
-			'presented': 'presenter',
-			'translator': 'translator',
-			'translated':'translator',
-			'introduction': 'contributor'
+			compiler: 'editor',
+			compiled: 'editor',
+			collected: 'editor',
+			assembled: 'editor',
+			presenter: 'presenter',
+			presented: 'presenter',
+			translator: 'translator',
+			translated: 'translator',
+			introduction: 'contributor'
 			//conductor
 			//illustrator
 			//librettist
 		},
 		'Call Number': 'callNumber',
-		'Edition': 'edition',
-		'ISBN': 'ISBN',
-		'Language': 'language',
+		Edition: 'edition',
+		ISBN: 'ISBN',
+		Language: 'language',
 		'Publisher Name': 'publisher',
 		'Series Title': 'series',
 		'Proceedings Title': 'proceedingsTitle',
@@ -842,10 +911,10 @@ var ProCiteCleaner = new function() {
 		'Issue ID': 'issue',
 		'Issue Identification': 'issue',
 		'Series Volume ID': 'seriesNumber',
-		'Scale': 'scale',
+		Scale: 'scale',
 		'Place of Publication': 'place',
-		'Histroy': 'history', // yes, it's misspelled in their export filter
-		'Size': 'artworkSize'
+		Histroy: 'history', // yes, it's misspelled in their export filter
+		Size: 'artworkSize'
 	};
 	
 	var tagValueSplit = /([A-Za-z,\s]+)\s*:\s*([\s\S]*)/; //ProCite version
@@ -856,7 +925,7 @@ var ProCiteCleaner = new function() {
 	 * @param (RISReader entry) entry Entry to be cleaned up in-place
 	 * @param (Zotero.Item) item Indicates item type for proper mapping
 	 */
-	this.cleanTags = function(entry, item) {
+	this.cleanTags = function (entry, item) {
 		// We _must_ change some tags before mapping from notes, otherwise
 		// there will be ambiguity
 		var ty;
@@ -869,12 +938,12 @@ var ProCiteCleaner = new function() {
 		}
 		
 		
-		var notes = entry.tags.N1, extentOfWork, packagingMethod;
+		var extentOfWork, packagingMethod;
 		//go through all the notes
-		for (var i=0; notes && notes.length && i<entry.length; i++) {
-			var m;
+		for (let i = 0; i < entry.length; i++) {
+			var m, risTag;
 			if (entry[i].tag !== 'N1'
-				|| !(m = entry[i].value.trim().match(tagValueSplit)) ) {
+				|| !(m = entry[i].value.trim().match(tagValueSplit))) {
 				continue;
 			}
 			
@@ -884,21 +953,21 @@ var ProCiteCleaner = new function() {
 					//seems to always come before "Author Role"
 					//we guess what RIS tag to assign,
 					//but this gets fixed on next iteration anyway
-					var risTag = entry.tags.A1 ? (entry.tags.A2 ? 'A3' : 'A2') : 'A1';
+					risTag = entry.tags.A1 ? (entry.tags.A2 ? 'A3' : 'A2') : 'A1';
 					var authors = m[2].split(/;\s*/); //multiple authors on the same line
 					this._changeTag(entry, i, [risTag]);
 					//use current tag-value pair for first author
 					//authors are in firstName lastName format, we need to fix it
 					entry[i].value = _fixAuthor(authors[0]);
 					//subsequent authors need to have their own tag-value pairs
-					for (var j=1; j<authors.length; j++) {
+					for (let j = 1; j < authors.length; j++) {
 						var newEntry = ZU.deepCopy(entry[i]);
 						newEntry.value = authors[j];
-						entry.splice(i+1,0,newEntry); //insert into tag-value array
+						entry.splice(i + 1, 0, newEntry); //insert into tag-value array
 						entry.tags[risTag].push(newEntry); //and add to tags
 					}
 					i += authors.length - 1; //skip past the new entries we just added
-				break;
+					break;
 				case 'Artist Role':
 				case 'Series Editor Role':
 				case 'Editor/Compiler Role':
@@ -907,66 +976,67 @@ var ProCiteCleaner = new function() {
 				case 'Producer Role':
 				case 'Director Role':
 				case 'Performer Role':
-				case 'Author Role':
+				case 'Author Role': {
 					var authorRoles = _normalizeAuthorRole(m[2]);
 					var risTags = [], fail = false;
 					//find a RIS tag for each author role
-					for (var j=0, k=authorRoles.length; j<k; j++) {
+					for (let j = 0, k = authorRoles.length; j < k; j++) {
 						var role = this.proCiteMap['Author Role'][authorRoles[j]];
 						if (!role) {
-							Z.debug('RIS: Unknown ProCite author role: ' + authorRoles[j]);
+							// Z.debug('RIS: Unknown ProCite author role: ' + authorRoles[j]);
 							continue;
 						}
 						role = 'creators/' + role;
-						var risTag = importFields.reverseLookup(item.itemType, role);
+						risTag = importFields.reverseLookup(item.itemType, role);
 						if (!risTag) {
-							Z.debug('RIS: Cannot map ProCite author role to RIS tag: ' + role + ' for ' + item.itemType);
-							Z.debug('RIS: Will not attempt a partial match: ' + m[0]);
+							// Z.debug('RIS: Cannot map ProCite author role to RIS tag: ' + role + ' for ' + item.itemType);
+							// Z.debug('RIS: Will not attempt a partial match: ' + m[0]);
 							fail = true;
 							break;
 						}
-						if (risTags.indexOf(risTag) === -1) risTags.push(risTag); //don't add same role
+						if (!(risTags.includes(risTag))) risTags.push(risTag); //don't add same role
 					}
 					
 					if (fail || !risTags.length) continue;
 					
-					Z.debug('RIS: ' + m[0]);
-					Z.debug('RIS: Mapping preceeding authors to ' + risTags.join(', '));
-					var added;
-					if (added = this._remapPreceedingTags(entry, i, ['A1','A2','A3'], risTags)) {
+					// Z.debug('RIS: ' + m[0]);
+					// Z.debug('RIS: Mapping preceeding authors to ' + risTags.join(', '));
+					let added = this._remapPreceedingTags(entry, i, ['A1', 'A2', 'A3'], risTags);
+					if (added) {
 						this._changeTag(entry, i); //remove ProCite note
 						i--;
 						if (added !== true) {
 							i += added;
 						}
 					}
-				break;
+					break;
+				}
 				case 'Record ID':
 				case 'Record Number':
 					this._changeTag(entry, i, ['ID']);
 					entry[i].value = m[2];
-				break;
+					break;
 				case 'Notes':
 					entry[i].value = m[2];
-				break;
+					break;
 				case 'Connective Phrase':
 					if (m[2].trim().toLowerCase() == 'in') {
 						//this is somewhat meaningless, remove it
 						this._changeTag(entry, i);
 						i--;
 					}
-				break;
+					break;
 				case 'Extent of Work':
 					extentOfWork = entry[i]; //processed later
-				break;
+					break;
 				case 'Packaging Method':
 					packagingMethod = entry[i]; //processed later
-				break;
+					break;
 				default:
 					if (this.proCiteMap[m[1]]) {
-						var risTag = importFields.reverseLookup(item.itemType, this.proCiteMap[m[1]]);
+						risTag = importFields.reverseLookup(item.itemType, this.proCiteMap[m[1]]);
 						if (!risTag) {
-							Z.debug('RIS: Cannot map ProCite note to RIS tag: ' + this.proCiteMap[m[1]] + ' for ' + item.itemType);
+							// Z.debug('RIS: Cannot map ProCite note to RIS tag: ' + this.proCiteMap[m[1]] + ' for ' + item.itemType);
 							continue;
 						}
 						this._changeTag(entry, i, [risTag]);
@@ -976,7 +1046,7 @@ var ProCiteCleaner = new function() {
 		}
 		
 		if (extentOfWork) {
-			var extent = extentOfWork.value.match(tagValueSplit)[2],
+			let extent = extentOfWork.value.match(tagValueSplit)[2],
 				m = extent.match(/^(\d+)\s*(pages?|p(?:p|gs?)?|vols?|volumes?)\.?$/i), //e.g. 2 vols.
 				units, deletePackagingMethod = false;
 			if (m) {
@@ -984,7 +1054,8 @@ var ProCiteCleaner = new function() {
 				//packagingMethod will be useless
 				units = m[2].charAt(0).toLowerCase() == 'p' ? 'numPages' : 'numberOfVolumes';
 				extent = m[1];
-			} else if (packagingMethod && /^\s*\d+\s*$/.test(extent) //numeric extent
+			}
+			else if (packagingMethod && /^\s*\d+\s*$/.test(extent) //numeric extent
 				&& (m = packagingMethod.value.match(/:\s*(pages?|p(?:p|gs?)?|vols?|volumes?)\.?\s*$/i))
 			) {
 				units = m[1].charAt(0).toLowerCase() == 'p' ? 'numPages' : 'numberOfVolumes';
@@ -1013,8 +1084,8 @@ var ProCiteCleaner = new function() {
 		//essentially, make sure there are no duplicate T tags and put them in order
 		if (ty == 'CHAP') {
 			var titleTags = ['T3', 'T2', 'TI'];
-			for (var i=0; i<entry.length && titleTags.length; i++) {
-				if ((['TI', 'T1', 'T2', 'T3']).indexOf(entry[i].tag) !== -1) {
+			for (let i = 0; i < entry.length && titleTags.length; i++) {
+				if (['TI', 'T1', 'T2', 'T3'].includes(entry[i].tag)) {
 					var newTag = titleTags.pop();
 					if (entry[i].tag == newTag) continue; //already correct
 					this._changeTag(entry, i, [newTag]);
@@ -1032,12 +1103,7 @@ var ProCiteCleaner = new function() {
 			this._changeTag(entry, entry.indexOf(entry.tags.VL[0]), ['ET']);
 		}
 		
-		//fix publication place for conferences. Should be C1, not CY
-		if (ty == 'CONF' && entry.tags.CY && !entry.tags.C1) {
-			_changeAllTags(entry, 'CY', 'C1');
-		}
-		
-		if (ty == 'COMP'&& entry.tags.IS) {
+		if (ty == 'COMP' && entry.tags.IS) {
 			_changeAllTags(entry, 'IS', 'ET');
 		}
 		
@@ -1061,7 +1127,7 @@ var ProCiteCleaner = new function() {
 	 */
 	function _normalizeAuthorRole(role) {
 		return role.toLowerCase()
-			.replace(/s\b|\.|\s+by\b|with an\s*/g,'')
+			.replace(/s\b|\.|\s+by\b|with an\s*/g, '')
 			//split multiple types
 			.split(/\s*(?:,|and)\s*/);
 	}
@@ -1074,15 +1140,15 @@ var ProCiteCleaner = new function() {
 	 * @return (String)
 	 */
 	function _fixAuthor(author) {
-		if (author.indexOf(',') !== -1 || author.trim().indexOf(' ') === -1) return author;
+		if (author.includes(',') || !(author.trim().includes(' '))) return author;
 		author = author.trim();
-		return author.substr(author.lastIndexOf(' ')+1) + ', ' + author.substring(0,author.lastIndexOf(' '));
+		return author.substr(author.lastIndexOf(' ') + 1) + ', ' + author.substring(0, author.lastIndexOf(' '));
 	}
 		
 	/**
 	 * private
 	 * Change all appearances of tag to another tag
-	 * 
+	 *
 	 * @param (RISReader entry) entry
 	 * @param (String) from
 	 * @param (String) to
@@ -1090,7 +1156,7 @@ var ProCiteCleaner = new function() {
 	function _changeAllTags(entry, from, to) {
 		if (!from || !to) return;
 		
-		for (var i=0; i<entry.tags[from].length; i++) {
+		for (let i = 0; i < entry.tags[from].length; i++) {
 			entry.tags[from][i].tag = to;
 		}
 		
@@ -1102,7 +1168,7 @@ var ProCiteCleaner = new function() {
 	 * public
 	 * Wrapper for TagCleaner.changeTag
 	 */
-	this._changeTag = function(entry, at, toTags) {
+	this._changeTag = function (entry, at, toTags) {
 		TagCleaner.changeTag(entry, at, toTags);
 		
 		//if we're changing tags, then we're sure this is ProCite format
@@ -1125,20 +1191,19 @@ var ProCiteCleaner = new function() {
 	 *   If risTags contains more than one tag, then this will be Integer
 	 *   indicating how many new tag-value pairs were inserted.
 	 */
-	this._remapPreceedingTags = function(entry, start, allowedTags, risTags) {
+	this._remapPreceedingTags = function (entry, start, allowedTags, risTags) {
 		var tag, added = 0;
-		for (var i=start-1; i>=0; i--) {
-			
+		for (let i = start - 1; i >= 0; i--) {
 			if (tag && entry[i].tag !== tag) {
 				//different from the tags we changed previously. Don't continue
 				return added ? added : true;
 			}
 			
 			tag = entry[i].tag;
-			if (allowedTags.indexOf(tag) === -1) {
+			if (!(allowedTags.includes(tag))) {
 				//not allowed to remap this tag
-				Z.debug('RIS: nothing to remap');
-				return;
+				// Z.debug('RIS: nothing to remap');
+				return false;
 			}
 			
 			this._changeTag(entry, i, risTags); //don't need to adjust i, since we're traversing backwards
@@ -1148,33 +1213,36 @@ var ProCiteCleaner = new function() {
 		//we should not end up at the begining of entry,
 		//since we will probably never be replacing TY, but just in case
 		if (tag) return added ? added : true;
+		return false;
 	};
-}
+};
+
 /**
  * @singleton Fixes some EndNote bugs, makes it more conveninent to import
  */
-var EndNoteCleaner = new function() {
+var EndNoteCleaner = new function () {
+	// eslint-disable-next-line lines-around-comment
 	/**
 	 * public
-	 * 
+	 *
 	 * @param (RISReader entry) entry Entry to be cleaned up in-place
 	 * @param (Zotero.Item) item Indicates item type for proper mapping
 	 */
-	this.cleanTags = function(entry, item) {
+	this.cleanTags = function (entry) {
 		// for edited books, treat authors as editors
 		if (entry.tags.TY && entry.tags.TY[0].value == 'EDBOOK' && entry.tags.AU) {
-			for (var i = entry.tags.AU.length-1; i>=0; i--) {
+			for (let i = entry.tags.AU.length - 1; i >= 0; i--) {
 				TagCleaner.changeTag(entry, entry.indexOf(entry.tags.AU[i]), ['A3']);
 			}
 		}
-	}
+	};
 };
 
 /**
  * @singleton Deals with some Citavi specific nuances
  */
-var CitaviCleaner = new function() {
-	this.cleanTags = function(entry, item) {
+var CitaviCleaner = new function () {
+	this.cleanTags = function (entry) {
 		// Citavi uses multiple H1 and H2 tags to list mutliple libraries and call
 		// numbers for items. We can only store one, so we will transform the first
 		// set of H1+H2 tags to DP+CN tags
@@ -1184,39 +1252,47 @@ var CitaviCleaner = new function() {
 		
 		if (!entry.tags.H1) {
 			// Only have a call number (maybe multiple, so take the first)
-			var at = entry.tags.indexOf(entry.tags.H2[0]);
-			TagCleaner.changeTag(entry, at, 'CN');
+			let at = entry.indexOf(entry.tags.H2[0]);
+			TagCleaner.changeTag(entry, at, ['CN']);
 			return;
 		}
 		
 		if (!entry.tags.H1) {
 			// Only have a library
-			var at = entry.tags.indexOf(entry.tags.H1[0]);
-			TagCleaner.changeTag(entry, at, 'DP');
+			let at = entry.indexOf(entry.tags.H1[0]);
+			TagCleaner.changeTag(entry, at, ['DP']);
 		}
 		
 		// We have pairs, so find the first set and change it
-		for (var i=0; i<entry.length - 1; i++) {
-			if (entry[i].tag == 'H1' && entry[i+1].tag == 'H2') {
+		for (let i = 0; i < entry.length - 1; i++) {
+			if (entry[i].tag == 'H1' && entry[i + 1].tag == 'H2') {
 				TagCleaner.changeTag(entry, i, ['DP']);
-				TagCleaner.changeTag(entry, i+1, ['CN']);
+				TagCleaner.changeTag(entry, i + 1, ['CN']);
 				return;
 			}
 		}
-	}
-}
+	};
+};
 
-function processTag(item, tagValue, risEntry) {
+/**
+ * Returns false and fails to process if the provided tag is deprecated and
+ * allowDeprecated is false.
+ */
+function processTag(item, tagValue, risEntry, allowDeprecated) {
 	var tag = tagValue.tag;
 	var value = tagValue.value.trim();
 	var rawLine = tagValue.raw;
 	
 	//drop empty fields
-	if (value === "") return;
+	if (value === "") return false;
+	
+	if (!allowDeprecated && importFields.isDeprecated(tag)) {
+		return false;
+	}
 	
 	var zField = importFields.getField(item.itemType, tag);
 	if (!zField) {
-		Z.debug("Unknown field " + tag + " in entry :\n" + rawLine);
+		// Z.debug("Unknown field " + tag + " in entry :\n" + rawLine);
 		zField = 'unknown'; //this will result in the value being added as note
 	}
 
@@ -1236,28 +1312,31 @@ function processTag(item, tagValue, risEntry) {
 				value = undefined;
 				processFields = false;
 			//do some HTML formatting in non-HTML notes
-			} else if (!value.match(/<[^>]+>/)) { //from cleanTags
+			}
+			else if (!value.match(/<[^>]+>/)) { //from cleanTags
 				value = '<p>'
 					+ value.replace(/\n\n/g, '</p><p>')
-					 .replace(/\n/g, '<br/>')
-					 .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
-					 .replace(/  /g, '&nbsp;&nbsp;')
+					.replace(/\n/g, '<br/>')
+					.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
+					.replace(/ {2}/g, '&nbsp;&nbsp;')
 					+ '</p>';
 			}
-		break;
+			break;
 		case "EP":
 			if (item.pages) {
-				if (item.pages.indexOf('-') == -1) {
+				if (!(item.pages.includes('-'))) {
 					item.pages = item.pages + '-' + value;
-				} else {
+				}
+				else {
 					item.backupNumPages = value;
 				}
 				value = undefined;
-			} else {
+			}
+			else {
 				item.backupEndPage = value;	//store this for an odd case where SP comes after EP
 				value = undefined;
 			}
-		break;
+			break;
 		case "M1":
 			//Endnote exports access date for webpages to M1
 			//It makes much more sense to export to Y2
@@ -1266,11 +1345,11 @@ function processTag(item, tagValue, risEntry) {
 				item.backupAccessDate = {
 					field: zField[0],
 					value: dateRIStoZotero(value, zField[0])
-				}
+				};
 				value = undefined;
 				processFields = false;
 			}
-		break;
+			break;
 		case "M3":
 			// This is DOI when coming from EndNote, but it can be used for
 			// publication type as well
@@ -1278,11 +1357,12 @@ function processTag(item, tagValue, risEntry) {
 				var cleanDOI = ZU.cleanDOI(value);
 				if (cleanDOI) {
 					value = cleanDOI;
-				} else {
-					zField[0] = 'unknown'
+				}
+				else {
+					zField[0] = 'unknown';
 				}
 			}
-		break;
+			break;
 		case "VL":
 			if (zField[0] == "accessDate") {
 				//EndNote screws up webpage entries. VL is access year, but access date is available
@@ -1295,7 +1375,7 @@ function processTag(item, tagValue, risEntry) {
 				value = undefined;
 				processFields = false;
 			}
-		break;
+			break;
 		//PY is typically less complete than other dates. We'll store it as backup
 		case "PY":
 			item.backupDate = {
@@ -1304,35 +1384,35 @@ function processTag(item, tagValue, risEntry) {
 			};
 			value = undefined;
 			processFields = false;
-		break;
+			break;
 		case "UR":
 			//REFMAN places PMIDS in UR sometimes
-			if (value.indexOf('PM:') != -1) {
+			if (value.includes('PM:')) {
 				value = 'PMID: ' + value.substr(3);
 				zField = ['extra'];
 			}
-		break;
+			break;
 	}
 
 	//zField based manipulations
-	if (processFields){
+	if (processFields) {
 		switch (zField[0]) {
 			case "__ignore":
 				value = undefined;
-			break;
+				break;
 			case "backupPublicationTitle":
 				item.backupPublicationTitle = value;
 				value = undefined;
-			break;
+				break;
 			case "creators":
 				var lName = value.split(/\s*,\s*/)[0];
 				var fName = value.substr(lName.length).replace(/^\s*,\s*/, '');
-				value = {lastName: lName, firstName:fName, creatorType:zField[1]};
+				value = { lastName: lName, firstName: fName, creatorType: zField[1] };
 				if (!value.firstName) {	//corporate
 					delete value.firstName;
 					value.fieldMode = 1;
 				}
-			break;
+				break;
 			case "date":
 			case "accessDate":
 			case "filingDate":
@@ -1340,7 +1420,7 @@ function processTag(item, tagValue, risEntry) {
 			case "dateEnacted":
 			case "dateDecided":
 				value = dateRIStoZotero(value, zField[0]);
-			break;
+				break;
 			case "tags":
 				//allow new lines or semicolons. Commas, might be more problematic
 				//%K part is a hack for REFMAN exports
@@ -1350,32 +1430,41 @@ function processTag(item, tagValue, risEntry) {
 				//but it will still allow a blank tag if there is a newline or
 				//semicolon at the begining or the end
 				if (!value[0]) value.shift();
-				if (value.length && !value[value.length-1]) value.pop();
+				if (value.length && !value[value.length - 1]) value.pop();
 
 				if (!value.length) {
 					value = undefined;
 				}
-			break;
+				break;
 			case "notes":
-				value = {note:value};
+				value = { note: value };
 				//we can specify note title in the field mapping table
 				if (zField[1]) {
 					value.note = zField[1] + ': ' + value.note;
 				}
-			break;
+				break;
 			case "attachments":
 				var values = value.split('\n');
 				var title, mimeType, url;
-				for (var i=0, n=values.length; i<n; i++) {
+				for (let i = 0, n = values.length; i < n; i++) {
 					//support for EndNote's relative paths
-					url = values[i].replace(/^internal-pdf:\/\//i,'PDF/').trim();
+					url = values[i].replace(/^internal-pdf:\/\//i, 'PDF/').trim();
 					if (!url) continue;
 					
 					//get title from file name
-					title = url.match(/([^\/\\]+)(?:\.\w{1,8})$/);
-					if (title) title = decodeURIComponent(title[1]);
-					else title = "Attachment";
-					
+					title = url.match(/([^/\\]+)(?:\.\w{1,8})$/);
+					if (title) {
+						try {
+							title = decodeURIComponent(title[1]);
+						}
+						catch (e) {
+							title = title[1];
+						}
+					}
+					else {
+						title = "Attachment";
+					}
+
 					if (zField[1] == 'HTML') {
 						title = "Full Text (HTML)";
 						mimeType = "text/html";
@@ -1388,17 +1477,17 @@ function processTag(item, tagValue, risEntry) {
 					});
 				}
 				value = false;
-			break;
+				break;
 			case "unsupported":	//unsupported fields
 				//we can convert a RIS tag to something more useful though
 				if (zField[1]) {
 					value = zField[1] + ': ' + value;
 				}
-			break;
+				break;
 		}
 	}
-
 	applyValue(item, zField[0], value, rawLine);
+	return true;
 }
 
 function applyValue(item, zField, value, rawLine) {
@@ -1406,7 +1495,7 @@ function applyValue(item, zField, value, rawLine) {
 
 	if (!zField || zField == 'unknown') {
 		if (!ignoreUnknown && !Zotero.parentTranslator) {
-			Z.debug("Entry stored in note: " + rawLine);
+			// Z.debug("Entry stored in note: " + rawLine);
 			item.unknownFields.push(rawLine);
 		}
 		return;
@@ -1414,7 +1503,7 @@ function applyValue(item, zField, value, rawLine) {
 
 	if (zField == 'unsupported') {
 		if (!ignoreUnknown && !Zotero.parentTranslator) {
-			Z.debug("Unsupported field will be stored in note: " + value);
+			// Z.debug("Unsupported field will be stored in note: " + value);
 			item.unsupportedFields.push(value);
 		}
 		return;
@@ -1426,15 +1515,14 @@ function applyValue(item, zField, value, rawLine) {
 		&& zField != 'notes' && zField != 'attachments'
 		&& zField != 'DOI'
 		&& !ZU.fieldIsValidForType(zField, item.itemType)) {
-		Z.debug("Invalid field '" + zField + "' for item type '" + item.itemType + "'.");
+		// Z.debug("Invalid field '" + zField + "' for item type '" + item.itemType + "'.");
 		if (!ignoreUnknown && !Zotero.parentTranslator) {
-			Z.debug("Entry stored in note: " + rawLine);
+			// Z.debug("Entry stored in note: " + rawLine);
 			item.unknownFields.push(rawLine);
 			return;
 		}
 		//otherwise, we can still store them and they will get dropped automatically
 	}
-
 	//special processing for certain fields
 	switch (zField) {
 		case 'notes':
@@ -1445,27 +1533,32 @@ function applyValue(item, zField, value, rawLine) {
 				value = [value];
 			}
 			item[zField] = item[zField].concat(value);
-		break;
+			break;
 		case 'extra':
 			if (item.extra) {
 				item.extra += '\n' + value;
-			} else {
+			}
+			else {
 				item.extra = value;
 			}
-		break;
+			break;
 		case 'DOI':
 			value = ZU.cleanDOI(value);
-			//add DOI to extra field, 
+			//add DOI to extra field,
 			if (!ZU.fieldIsValidForType("DOI", item.itemType) && value) {
 				if (item.extra) {
-					if (item.extra.search(/^DOI:/) == -1) {
+					if (!(/^DOI:/.test(item.extra))) {
 						item.extra += '\nDOI: ' + value;
 					}
-				} else {
+				}
+				else {
 					item.extra = 'DOI: ' + value;
 				}
-				break;
 			}
+			else {
+				item[zField] = value;
+			}
+			break;
 		default:
 			//check if value already exists. Don't overwrite existing values
 			if (item[zField]) {
@@ -1473,7 +1566,8 @@ function applyValue(item, zField, value, rawLine) {
 				if (!ignoreUnknown && !Zotero.parentTranslator && item[zField] != value) {
 					item.unsupportedFields.push(zField + ': ' + value);
 				}
-			} else {
+			}
+			else {
 				item[zField] = value;
 			}
 	}
@@ -1483,21 +1577,21 @@ function dateRIStoZotero(risDate, zField) {
 	var date = [];
 	//we'll be very lenient about formatting
 	//First, YYYY/MM/DD/other with everything but year optional
-	var m = risDate.match(/^(\d+)(?:\/(\d{0,2})(?:\/(\d{0,2})(?:(?:\/|\s)([^\/]*))?)?)?$/);
-	var timeCheck, part;
+	var m = risDate.match(/^(\d+)(?:\/(\d{0,2})(?:\/(\d{0,2})(?:(?:\/|\s)([^/]*))?)?)?$/);
+	var timeCheck;
 	if (m) {
 		date[0] = m[1];	//year
 		date[1] = m[2];	//month
 		date[2] = m[3]; //day
 		timeCheck = m[4];
-		part = m[4];
-	} else {
+	}
+	else {
 		//EndNote suggests entering only Month and Day in the date field
 		//We'll return this, but also add 0000 as a placeholder for year
 		//This will come from PY at some point and we'll let Zotero figure out the date
 		//This will NOT work with access date, but there's only so much we can do
 		var y = risDate.match(/\b\d{4}\b/);
-		var d = risDate.match(/\b(?:[1-3]\d|[1-9])\b/);
+		let d = risDate.match(/\b(?:[1-3]\d|[1-9])\b/);
 		m = risDate.match(/[A-Za-z]+/);
 		if (!y && m) {
 			return '0000 ' + m[0] + (d ? ' ' + d[0] : '');
@@ -1517,12 +1611,11 @@ function dateRIStoZotero(risDate, zField) {
 		date[0] = parsedDate.year;
 		date[1] = '' + (parsedDate.month + 1);
 		date[2] = '' + parsedDate.day;
-		part = parsedDate.part;
 	}
 
 	//sometimes unknown parts of date are given as 0. Drop these and anything that follows
-	for (var i=0; i<3; i++) {
-		if (date[i] !== undefined) date[i] = date[i].replace(/^0+/,'');	//drop leading 0s
+	for (let i = 0; i < 3; i++) {
+		if (date[i] !== undefined) date[i] = date[i].replace(/^0+/, '');	//drop leading 0s
 
 		if (!date[i]) {
 			date.splice(i);
@@ -1535,7 +1628,7 @@ function dateRIStoZotero(risDate, zField) {
 
 		//adjust month to be 0 based
 		if (date[1]) {
-			date[1] = parseInt(date[1], 10);
+			date[1] = parseInt(date[1]);
 			if (date[1]) date[1] = '' + (date[1] - 1);	//make it a string again to keep things simpler
 			else date[1] = '0';	//the regex above should ensure this never happens. We don't even test the day
 		}
@@ -1551,23 +1644,25 @@ function dateRIStoZotero(risDate, zField) {
 				if (!time[3]) time[3] = '0';
 
 				if (time[4]) {
-					var hour = parseInt(time[1],10);	//this should not fail
+					var hour = parseInt(time[1]);	//this should not fail
 					if (time[4].toLowerCase() == 'pm' && hour < 12) {
 						time[1] = '' + (hour + 12);
-					} else if (time[4].toLowerCase() == 'am' && hour == 12) {
+					}
+					else if (time[4].toLowerCase() == 'am' && hour == 12) {
 						time[1] = '0';
 					}
 				}
 			}
 		}
 
-		/** 
+		/**
 		 * we export as UTC, so assume UTC on import as well,
 		 * but only if we have a time part. Otherwise this might be coming from
 		 * other software, which is probably local time.
 		 * (maybe also look for time zone in the future)
 		 */
-		var d = new Date();
+		let d = new Date();
+
 		/** We intentionally avoid passing parameters in the constructor,
 		 * because it interprets dates with 2 digits or less as 1900+ dates.
 		 * This is clearly not a problem with accessDate, but maybe this will
@@ -1576,35 +1671,40 @@ function dateRIStoZotero(risDate, zField) {
 		if (time) {
 			d.setUTCFullYear(date[0], date[1], date[2]);
 			d.setUTCHours(time[1], time[2], time[3]);
-		} else {
+		}
+		else {
 			d.setFullYear(date[0], date[1], date[2]);
 		}
 
-		var pad = function(n, width) {
+		var pad = function (n, width) {
 			n = '000' + n;	//that should be sufficient for our purposes here
-			return n.substr(n.length-width);
-		}
-
-		var sqlDate
+			return n.substr(n.length - width);
+		};
 
 		return pad(d.getUTCFullYear(), 4) + '-' + pad(d.getUTCMonth() + 1, 2)
 			+ '-' + pad(d.getUTCDate(), 2)
-			+ (time ? ' '	+ pad(d.getUTCHours(), 2) + ':'
+			+ (time
+				? ' '	+ pad(d.getUTCHours(), 2) + ':'
 							+ pad(d.getUTCMinutes(), 2) + ':'
 							+ pad(d.getUTCSeconds(), 2)
-					: '');
-	} else {
-		//adjust month (it's 0 based)
-		if (date[1]) {
-			date[1] = parseInt(date[1], 10);
-			if (date[1]) date[1]--;
+				: '');
+	}
+	else {
+		let [year, month, day] = date;
+		let dateString = "";
+		if (date.length === 0) {
+			return dateString;
 		}
-
-		return ZU.formatDate({
-				'year': date[0],
-				'month': date[1],
-				'day': date[2]
-			});
+		else {
+			dateString = year.padStart(4, '0');
+			if (month) {
+				dateString += "-" + month.padStart(2, '0');
+				if (day) {
+					dateString += "-" + day.padStart(2, '0');
+				}
+			}
+			return dateString;
+		}
 	}
 }
 
@@ -1628,9 +1728,11 @@ function completeItem(item) {
 	if (item.backupEndPage) {
 		if (!item.pages) {
 			item.pages = item.backupEndPage;
-		} else if (item.pages.indexOf('-') == -1) {
+		}
+		else if (!(item.pages.includes('-'))) {
 			item.pages += '-' + item.backupEndPage;
-		} else if (!item.numPages) {	//should we do this?
+		}
+		else if (!item.numPages) {	//should we do this?
 			item.numPages = item.backupEndPage;
 		}
 		item.backupEndPage = undefined;
@@ -1640,7 +1742,8 @@ function completeItem(item) {
 	if (item.backupDate) {
 		if (!item[item.backupDate.field]) {
 			item[item.backupDate.field] = item.backupDate.value;
-		} else {
+		}
+		else {
 			item[item.backupDate.field] = item[item.backupDate.field]
 				.replace(/\b0000\b/, item.backupDate.value);
 		}
@@ -1662,12 +1765,12 @@ function completeItem(item) {
 	}
 
 	// hack for sites like Nature, which only use JA, journal abbreviation
-	if (item.journalAbbreviation && !item.publicationTitle){
+	if (item.journalAbbreviation && !item.publicationTitle) {
 		item.publicationTitle = item.journalAbbreviation;
 	}
 
 	// Hack for Endnote exports missing full title
-	if (item.shortTitle && !item.title){
+	if (item.shortTitle && !item.title) {
 		item.title = item.shortTitle;
 	}
 
@@ -1676,7 +1779,7 @@ function completeItem(item) {
 	if (item.tags.length == 1) {
 		item.tags = item.tags[0].split(/\s*(?:,\s*)+/);
 		if (!item.tags[0]) item.tags.shift();
-		if (item.tags.length && !item.tags[item.tags.length-1]) item.tags.pop();
+		if (item.tags.length && !item.tags[item.tags.length - 1]) item.tags.pop();
 	}
 
 	//don't pass access date if this is called from (most likely) a web translator
@@ -1687,21 +1790,21 @@ function completeItem(item) {
 	//store unsupported and unknown fields in a single note
 	if (!Zotero.parentTranslator) {
 		var note = '';
-		for (var i=0, n=item.unsupportedFields.length; i<n; i++) {
+		for (let i = 0, n = item.unsupportedFields.length; i < n; i++) {
 			note += item.unsupportedFields[i] + '<br/>';
 		}
-		for (var i=0, n=item.unknownFields.length; i<n; i++) {
+		for (let i = 0, n = item.unknownFields.length; i < n; i++) {
 			note += item.unknownFields[i] + '<br/>';
 		}
 	
 		if (note) {
 			note = "The following values have no corresponding Zotero field:<br/>" + note;
-			item.notes.push({note: note.trim(), tags: ['_RIS import']});
+			item.notes.push({ note: note.trim(), tags: ['_RIS import'] });
 		}
 	}
 	item.unsupportedFields = undefined;
 	item.unknownFields = undefined;
-
+	
 	return item.complete();
 }
 
@@ -1721,6 +1824,7 @@ function doImport() {
 				throw e;
 			}
 		);
+		return false;
 	}
 	else {
 		return new Promise(function (resolve, reject) {
@@ -1734,15 +1838,15 @@ function startImport(resolve, reject) {
 		//set up import field mapper
 		var maps = [fieldMap, degenerateImportFieldMap];
 		if (exportedOptions.fieldMap) maps.unshift(exportedOptions.fieldMap);
-		importFields = new TagMapper(maps);
+		importFields = new TagMapper(maps, degenerateImportFieldMap);
 		
 		//prepare some configurable options
 		if (Zotero.getHiddenPref) {
-			var pref = Zotero.getHiddenPref("RIS.import.ignoreUnknown");
+			let pref = Zotero.getHiddenPref("RIS.import.ignoreUnknown");
 			if (pref != undefined) {
 				ignoreUnknown = pref;
 			}
-			var pref = Zotero.getHiddenPref("RIS.import.keepID");
+			pref = Zotero.getHiddenPref("RIS.import.keepID");
 			if (pref === true) {
 				degenerateImportFieldMap.ID = pref;
 			}
@@ -1758,6 +1862,7 @@ function startImport(resolve, reject) {
 function importNext(resolve, reject) {
 	try {
 		var entry;
+		// eslint-disable-next-line no-cond-assign
 		while (entry = RISReader.nextEntry()) {
 			//determine item type
 			var itemType = exportedOptions.itemType;
@@ -1774,11 +1879,12 @@ function importNext(resolve, reject) {
 			//we allow entries without TY and just use default type
 			if (!itemType) {
 				var defaultType = exportedOptions.defaultItemType || DEFAULT_IMPORT_TYPE;
+	
 				if (entry.tags.TY) {
-					Z.debug("RIS: Unknown item type: " + entry.tags.TY[0].value
-						+ ". Defaulting to " + defaultType);
-				} else {
-					Z.debug("RIS: TY tag not specified. Defaulting to " + defaultType);
+					// Z.debug("RIS: Unknown item type: " + entry.tags.TY[0].value + ". Defaulting to " + defaultType);
+				}
+				else {
+					// Z.debug("RIS: TY tag not specified. Defaulting to " + defaultType);
 				}
 				
 				itemType = defaultType;
@@ -1789,12 +1895,19 @@ function importNext(resolve, reject) {
 			EndNoteCleaner.cleanTags(entry, item); //some tweaks to EndNote export
 			CitaviCleaner.cleanTags(entry, item);
 			
-			for (var i=0, n=entry.length; i<n; i++) {
-				if ((['TY', 'ER']).indexOf(entry[i].tag) == -1) { //ignore TY and ER tags
-					processTag(item, entry[i], entry);
+			var deferredEntries = [];
+		
+			for (let i = 0, n = entry.length; i < n; i++) {
+				//ignore TY and ER tags
+				if (['TY', 'ER'].includes(entry[i].tag)) continue;
+				
+				if (!processTag(item, entry[i], entry, false)) {
+					deferredEntries.push(entry[i]);
 				}
 			}
-			
+			for (let deferred of deferredEntries) {
+				processTag(item, deferred, entry, true);
+			}
 			var maybePromise = completeItem(item);
 			if (maybePromise) {
 				maybePromise.then(function () {
@@ -1818,15 +1931,95 @@ function importNext(resolve, reject) {
 //RIS files have a certain structure, which is often meaningful
 //Records always start with TY and end with ER. This is hardcoded below
 var exportOrder = {
-	"__default": ["TI", "AU", "T2", "A2", "T3", "A3", "A4", "AB", "C1", "C2", "C3",
-	"C4", "C5", "C6", "CN", "CY", "DA", "PY", "DO", "DP", "ET", "VL", "IS", "SP",
-	"J2", "LA", "M1", "M3", "NV", "OP", "PB", "SE", "SN", "ST", "SV", "UR", "AN",
-	"DB", "Y2", "L1", "L2", "L4", "N1", "KW"],
+	__default: ["TI",
+		"AU",
+		"T2",
+		"A2",
+		"T3",
+		"A3",
+		"A4",
+		"AB",
+		"C1",
+		"C2",
+		"C3",
+		"C4",
+		"C5",
+		"C6",
+		"CN",
+		"CY",
+		"DA",
+		"PY",
+		"DO",
+		"DP",
+		"ET",
+		"VL",
+		"IS",
+		"SP",
+		"J2",
+		"LA",
+		"M1",
+		"M3",
+		"NV",
+		"OP",
+		"PB",
+		"SE",
+		"SN",
+		"ST",
+		"SV",
+		"UR",
+		"AN",
+		"DB",
+		"Y2",
+		"L1",
+		"L2",
+		"L4",
+		"N1",
+		"KW"],
 	//in bill sponsor (A2) and cosponsor (A3) should be together and not split by legislativeBody (T3)
-	"bill": ["TI", "AU", "T2", "A2", "A3", "T3", "A4", "AB", "C1", "C2", "C3",
-	"C4", "C5", "C6", "CN", "CY", "DA", "PY", "DO", "DP", "ET", "VL", "IS", "SP",
-	"J2", "LA", "M1", "M3", "NV", "OP", "PB", "SE", "SN", "ST", "SV", "UR", "AN",
-	"DB", "Y2", "L1", "L2", "L4", "N1", "KW"]
+	bill: ["TI",
+		"AU",
+		"T2",
+		"A2",
+		"A3",
+		"T3",
+		"A4",
+		"AB",
+		"C1",
+		"C2",
+		"C3",
+		"C4",
+		"C5",
+		"C6",
+		"CN",
+		"CY",
+		"DA",
+		"PY",
+		"DO",
+		"DP",
+		"ET",
+		"VL",
+		"IS",
+		"SP",
+		"J2",
+		"LA",
+		"M1",
+		"M3",
+		"NV",
+		"OP",
+		"PB",
+		"SE",
+		"SN",
+		"ST",
+		"SV",
+		"UR",
+		"AN",
+		"DB",
+		"Y2",
+		"L1",
+		"L2",
+		"L4",
+		"N1",
+		"KW"]
 };
 
 var newLineChar = "\r\n"; //from spec
@@ -1837,7 +2030,7 @@ var exportFields;
 function addTag(tag, value) {
 	if (!(value instanceof Array)) value = [value];
 
-	for (var i=0, n=value.length; i<n; i++) {
+	for (let i = 0, n = value.length; i < n; i++) {
 		if (value[i] === undefined) return;
 		//don't export empty strings
 		var v = (value[i] + '').trim();
@@ -1848,13 +2041,14 @@ function addTag(tag, value) {
 }
 
 function doExport() {
-	var item, order, tag, fields, field, value;
+	var item, order, tag, field, value;
 	
 	//set up field mapper
 	var map = [fieldMap];
 	if (exportedOptions.fieldMap) map.unshift(exportedOptions.fieldMap);
 	exportFields = new TagMapper(map);
 
+	// eslint-disable-next-line no-cond-assign
 	while (item = Zotero.nextItem()) {
 		// can't store independent notes in RIS
 		if (item.itemType == "note" || item.itemType == "attachment") {
@@ -1865,7 +2059,7 @@ function doExport() {
 		var type = exportTypeMap[item.itemType];
 		if (!type) {
 			type = DEFAULT_EXPORT_TYPE;
-			Z.debug("Unknown item type: " + item.itemType + ". Defaulting to " + type);
+			// Z.debug("Unknown item type: " + item.itemType + ". Defaulting to " + type);
 		}
 		addTag("TY", type);
 
@@ -1876,21 +2070,21 @@ function doExport() {
 			other: []
 		};
 
-		for (var i=0, n=item.attachments.length; i<n; i++) {
+		for (let i = 0, n = item.attachments.length; i < n; i++) {
 			switch (item.attachments[i].mimeType) {
 				case 'application/pdf':
 					attachments.PDF.push(item.attachments[i]);
-				break;
+					break;
 				case 'text/html':
 					attachments.HTML.push(item.attachments[i]);
-				break;
+					break;
 				default:
 					attachments.other.push(item.attachments[i]);
 			}
 		}
 
-		order = exportOrder[item.itemType] || exportOrder["__default"];
-		for (var i=0, n=order.length; i<n; i++) {
+		order = exportOrder[item.itemType] || exportOrder.__default;
+		for (let i = 0, n = order.length; i < n; i++) {
 			tag = order[i];
 			//find the appropriate field to export for this item type
 			field = exportFields.getField(item.itemType, tag);
@@ -1909,7 +2103,7 @@ function doExport() {
 					//Zotero does not store suffixes in a separate field
 					value = [];
 					var name;
-					for (var j=0, m=item.creators.length; j<m; j++) {
+					for (let j = 0, m = item.creators.length; j < m; j++) {
 						name = [];
 						if (item.creators[j].creatorType == field[1]) {
 							name.push(item.creators[j].lastName);
@@ -1918,27 +2112,32 @@ function doExport() {
 						}
 					}
 					if (!value.length) value = undefined;
-				break;
+					break;
 				case "notes":
 					if (item.notes && Zotero.getOption("exportNotes")) {
-						value = item.notes.map(function(n) { return n.note.replace(/(?:\r\n?|\n)/g, "\r\n"); });
+						value = item.notes.map(function (n) {
+							return n.note.replace(/(?:\r\n?|\n)/g, "\r\n");
+						});
 					}
-				break;
+					break;
 				case "tags":
-					value = item.tags.map(function(t) { return t.tag; });
-				break;
+					value = item.tags.map(function (t) {
+						return t.tag;
+					});
+					break;
 				case "attachments":
 					value = [];
 					var att = attachments[field[1]];
-					for (var j=0, m=att.length; j<m; j++) {
+					for (let j = 0, m = att.length; j < m; j++) {
 						if (att[j].saveFile) {	//local file
 							value.push(att[j].defaultPath);
 							att[j].saveFile(att[j].defaultPath);
-						} else {	//link to remote file
+						}
+						else {	//link to remote file
 							value.push(att[j].url);
 						}
 					}
-				break;
+					break;
 				case "pages":
 					if (tag == "SP" && item.pages) {
 						var m = item.pages.trim().match(/(.+?)[\u002D\u00AD\u2010-\u2015\u2212\u2E3A\u2E3B\s]+(.+)/);
@@ -1946,39 +2145,43 @@ function doExport() {
 							addTag(tag, m[1]);
 							tag = "EP";
 							value = m[2];
-						} else {
+						}
+						else {
 							value = item.pages;
 						}
 					}
-				break;
+					break;
 				default:
 					value = item[field];
 			}
 
 			//handle special cases based on RIS tag
+			let date;
 			switch (tag) {
 				case "PY":
-					var date = ZU.strToDate(item[field]);
+					date = ZU.strToDate(item[field]);
 					if (date.year) {
 						value = ('000' + date.year).substr(-4); //since this is in export, this should not be a problem with MS JavaScript implementation of substr
-					} else {
+					}
+					else {
 						value = item[field];
-					} 
-				break;
+					}
+					break;
 				case "Y2":
 				case "DA":
-					var date = ZU.strToDate(item[field]);
+					date = ZU.strToDate(item[field]);
 					if (date.year) {
 						date.year = ('000' + date.year).substr(-4);
-						date.month = (date.month || date.month===0 || date.month==="0")?('0' + (date.month+1)).substr(-2):'';
-						date.day = date.day?('0' + date.day).substr(-2):'';
+						date.month = (date.month || date.month === 0 || date.month === "0") ? ('0' + (date.month + 1)).substr(-2) : '';
+						date.day = date.day ? ('0' + date.day).substr(-2) : '';
 						if (!date.part) date.part = '';
 	
 						value = date.year + '/' + date.month + '/' + date.day + '/' + date.part;
-					} else {
+					}
+					else {
 						value = item[field];
 					}
-				break;
+					break;
 			}
 
 			addTag(tag, value);
@@ -1989,10 +2192,11 @@ function doExport() {
 }
 
 var exports = {
-	"doExport": doExport,
-	"doImport": doImport,
-	"options": exportedOptions
-}
+	doExport: doExport,
+	doImport: doImport,
+	options: exportedOptions
+};
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -2038,12 +2242,24 @@ var testCases = [
 				"volume": "85",
 				"attachments": [],
 				"tags": [
-					"blood-brain barrier",
-					"cortical contusion",
-					"head trauma",
-					"hippocampus",
-					"horseradish peroxidase",
-					"rat"
+					{
+						"tag": "blood-brain barrier"
+					},
+					{
+						"tag": "cortical contusion"
+					},
+					{
+						"tag": "head trauma"
+					},
+					{
+						"tag": "hippocampus"
+					},
+					{
+						"tag": "horseradish peroxidase"
+					},
+					{
+						"tag": "rat"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -2069,7 +2285,7 @@ var testCases = [
 						"creatorType": "inventor"
 					}
 				],
-				"issueDate": "February 27, 1990",
+				"issueDate": "1990-02-27",
 				"abstractNote": "A method is disclosed for detecting the presence of HTLV III infected cells in a medium. The method comprises contacting the medium with monoclonal antibodies against an antigen produced as a result of the infection and detecting the binding of the antibodies to the antigen. The antigen may be a gene product of the HTLV III virus or may be bound to such gene product. On the other hand the antigen may not be a viral gene product but may be produced as a result of the infection and may further be bound to a lymphocyte. The medium may be a human body fluid or a culture medium. A particular embodiment of the present method involves a method for determining the presence of a AIDS virus in a person. The method comprises combining a sample of a body fluid from the person with a monoclonal antibody that binds to an antigen produced as a result of the infection and detecting the binding of the monoclonal antibody to the antigen. The presence of the binding indicates the presence of a AIDS virus infection. Also disclosed are novel monoclonal antibodies, noval compositions of matter, and novel diagnostic kits",
 				"applicationNumber": "G01N 33/569 G01N 33/577",
 				"assignee": "4,629,783",
@@ -2078,10 +2294,18 @@ var testCases = [
 				"place": "OR",
 				"attachments": [],
 				"tags": [
-					"AIDS",
-					"antigens",
-					"infection",
-					"virus"
+					{
+						"tag": "AIDS"
+					},
+					{
+						"tag": "antigens"
+					},
+					{
+						"tag": "infection"
+					},
+					{
+						"tag": "virus"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -2119,9 +2343,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2171,9 +2401,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2209,9 +2445,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2257,9 +2499,15 @@ var testCases = [
 				"videoRecordingFormat": "Format",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2296,9 +2544,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2334,9 +2588,15 @@ var testCases = [
 				"websiteType": "Type of Medium",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2398,9 +2658,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2463,9 +2729,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2496,13 +2768,18 @@ var testCases = [
 				"language": "Language",
 				"reporter": "Reporter",
 				"reporterVolume": "Reporter Volume",
-				"shortTitle": "Abbreviated Case Name",
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2550,9 +2827,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2586,9 +2869,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2640,9 +2929,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2677,12 +2972,18 @@ var testCases = [
 				"seriesTitle": "Series Title",
 				"shortTitle": "Short Title",
 				"url": "URL",
-				"version": "Version",
+				"versionNumber": "Version",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2729,9 +3030,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2793,9 +3100,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2808,18 +3121,13 @@ var testCases = [
 				"seeAlso": []
 			},
 			{
-				"itemType": "document",
+				"itemType": "dataset",
 				"title": "Title",
 				"creators": [
 					{
-						"lastName": "Producer",
-						"creatorType": "editor",
-						"fieldMode": 1
-					},
-					{
 						"lastName": "Agency",
 						"firstName": "Funding",
-						"creatorType": "translator"
+						"creatorType": "contributor"
 					},
 					{
 						"lastName": "Investigators",
@@ -2832,16 +3140,25 @@ var testCases = [
 				"archive": "Name of Database",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
+				"identifier": "Study Number",
 				"language": "Language",
 				"libraryCatalog": "Database Provider",
-				"publisher": "Distributor",
+				"repository": "Distributor",
+				"repositoryLocation": "Place Published",
 				"shortTitle": "Short Title",
 				"url": "URL",
+				"versionNumber": "Version",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2898,9 +3215,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2952,9 +3275,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2998,9 +3327,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3055,9 +3390,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3119,9 +3460,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3177,9 +3524,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3218,9 +3571,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3254,9 +3613,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3303,9 +3668,15 @@ var testCases = [
 				"videoRecordingFormat": "Format",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3360,9 +3731,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3408,9 +3785,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3453,9 +3836,15 @@ var testCases = [
 				"volume": "Amount Requested",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3487,9 +3876,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3567,9 +3962,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3612,9 +4013,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3656,9 +4063,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3698,9 +4111,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3755,9 +4174,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3797,9 +4222,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3812,7 +4243,7 @@ var testCases = [
 				"seeAlso": []
 			},
 			{
-				"itemType": "document",
+				"itemType": "dataset",
 				"title": "Title",
 				"creators": [
 					{
@@ -3832,13 +4263,21 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"language": "Language",
 				"libraryCatalog": "Database Provider",
-				"publisher": "Publisher",
+				"repository": "Publisher",
+				"repositoryLocation": "Place Published",
 				"url": "URL",
+				"versionNumber": "Date Published",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3877,9 +4316,15 @@ var testCases = [
 				"videoRecordingFormat": "Format/Length",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3926,9 +4371,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3972,9 +4423,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4019,9 +4476,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4076,9 +4539,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4140,9 +4609,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4181,9 +4656,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4209,13 +4690,18 @@ var testCases = [
 				"publicLawNumber": "Public Law Number",
 				"section": "Sections",
 				"session": "Session",
-				"shortTitle": "Short Title",
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4231,6 +4717,11 @@ var testCases = [
 				"itemType": "thesis",
 				"title": "Title",
 				"creators": [
+					{
+						"lastName": "Advisor",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
 					{
 						"lastName": "Name1",
 						"firstName": "Author",
@@ -4258,9 +4749,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4306,9 +4803,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4344,9 +4847,15 @@ var testCases = [
 				"websiteType": "Type of Medium",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4409,7 +4918,6 @@ var testCases = [
 				"abstractNote": "Optimal integration of next-generation sequencing into mainstream research requires re-evaluation of how problems can be reasonably overcome and what questions can be asked. .... The random sequencing-based approach to identify microsatellites was rapid, cost-effective and identified thousands of useful microsatellite loci in a previously unstudied species.",
 				"issue": "9999",
 				"publicationTitle": "Molecular Ecology Resources",
-				"shortTitle": "Rapid identification of thousands of copperhead snake (Agkistrodon contortrix) microsatellite loci from modest amounts of 454 shotgun genome sequence",
 				"url": "http://dx.doi.org/10.1111/j.1755-0998.2009.02750.x",
 				"volume": "9999",
 				"attachments": [
@@ -4442,7 +4950,7 @@ var testCases = [
 	},
 	{
 		"type": "import",
-		"input": "TY  - BILL\nN1  - Record ID: 10\nA1  - Author Name, Author2 Name2\nTI  - Act Name\nRP  - Reprint Status, Date\nCY  - Code\nPY  - Date of Code\nY2  - Date\nVL  - Bill/Res Number\nSP  - Section(s)\nN1  - Histroy: History\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - ART\nN1  - Record ID: 20\nA1  - Author Name, Author2 Name2\nN1  - Artist Role: Artist Role\nT1  - Title/Subject\nM1  - Medium\nN1  - Connective Phrase: Connective Phrase\nN1  - Author, Monographic: Monographic Author\nN1  - Author Role: Author Role\nN1  - Title Monographic: Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nY1  - Date of Publication\nN1  - Location in Work: Location in Work\nN1  - Size: Size\nN1  - Series Title: Series Title\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - ADVS\nN1  - Record ID: 30\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nT1  - Analytic Title\nM3  - Medium Designator\nN1  - Connective Phrase: Connective Phrase\nN1  - Author, Monographic: Monographic Author\nN1  - Author Role: Monographic Author Role\nN1  - Title Monographic: Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nIS  - Volume ID\nN1  - Location in Work: Location in Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nN1  - Series Editor: Series Editor\nN1  - Series Editor Role: Series Editor Role\nN1  - Series Title: Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Series Issue ID: Series Issue ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CHAP\nN1  - Record ID: 40\nA1  - Author Name, Author2 Name2\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Monographic Author\nN1  - Author Role: Author Role\nT2  - Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Volume ID: Volume ID\nN1  - Issue ID: Issue ID\nSP  - Page(s)\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nN1  - Series Title: Series Title\nN1  - Series Volume ID: Series Volume Identification\nN1  - Series Issue ID: Series Issue Identification\nN1  - Connective PhraseConnective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CHAP\nN1  - Record ID: 50\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Monographic Author\nN1  - Author Role: Author Role\nT2  - Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nN1  - Volume ID: Volume ID\nN1  - Issue ID: Issue ID\nSP  - Page(s)\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - ABST\nN1  - Record ID: 180\nA1  - Author Name, Author2 Name2\nT1  - Title\nJF  - Journal Title\nRP  - Reprint Status, Date\nY1  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nAD  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - BOOK\nN1  - Record ID: 190\nA1  - Monographic Author\nT1  - Monographic Title\nRP  - Reprint Status, Date\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - BOOK\nN1  - Record ID: 200\nA1  - Monographic Author\nN1  - Author Role: Author Role\nT1  - Monographic Title\nN1  - Translated Title: Translated Title\nRP  - Reprint Status, Date\nVL  - Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Original Pub Date: Original Pub Date\nIS  - Volume ID\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CASE\nN1  - Record Number: 210\nA1  - Counsel\nT1  - Case Name\nT2  - Case Name (Abbrev)\nRP  - Reprint Status, Date\nCY  - Reporter\nPB  - Court\nPY  - Date Field\nY2  - Date Decided\nN1  - First Page: First Page\nVL  - Reporter Number\nSP  - Page(s)\nT3  - History\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - COMP\nN1  - Record Number: 220\nT1  - Program Title\nN1  - Computer Program: Computer Program\nN1  - Connective Phrase: Connective Phrase\nA1  - Author/Programmer\nN1  - Author Role: Author Role\nN1  - Title: Title\nRP  - Reprint Status, Date\nIS  - Version\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nN1  - Report Identification: Report ID\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CONF\nN1  - Record Number: 230\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nN1  - Author Affiliation, Ana.: Author Affiliation\nT1  - Paper/Section Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Editor/Compiler\nN1  - Editor/Compiler Role: Editor/Compiler Role\nN1  - Proceedings Title: Proceedings Title\nY2  - Date of Meeting\nN1  - Place of Meeting: Place of Meeting\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nVL  - Volume ID\nSP  - Location in Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nAV  - Address/Availability\nUR  - Location/URL\nN1  - ISBN: ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - DATA\nN1  - Record Number: 240\nT1  - Analytic Title\nN1  - Medium (Data File): Medium (Data File)\nN1  - Connective Phrase: Connective Phrase\nA2  - Editor/Compiler\nN1  - Editor/Compiler Role: Editor/Compiler Role\nN1  - Title, Monographic: Monographic Title\nRP  - Reprint Status, Date\nIS  - Version\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nSP  - Location in Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - THES\nN1  - Record Number: 250\nA1  - Author Name, Author2 Name2\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nRP  - Reprint Status, Date\nN1  - Place of Publication: Place of Publication\nPB  - University\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nSP  - Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - ELEC\nN1  - Record Number: 260\nA1  - Author Name, Author2 Name2\nT1  - Title\nM1  - Medium\nJO  - Source\nRP  - Reprint Status, Date\nIS  - Edition\nPB  - Publisher Name\nPY  - Last Update\nY2  - Access Date\nN1  - Volume ID: Volume ID\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - ICOMM\nN1  - Record Number: 270\nA1  - Author Name, Author2 Name2\nN1  - Author E-mail: Author E-mail\nN1  - Author Affiliation: Author Affiliation\nT1  - Subject\nA2  - Recipient\nN1  - Recipient E-mail: Recipient E-mail\nRP  - Reprint Status, Date\nPY  - Date of Message\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - GEN\nN1  - Record Number: 280\nA1  - Author Name, Author2 Name2\nT1  - Analytic Title\nA2  - Monographic Author\nT2  - Monographic Title\nJO  - Journal Title\nRP  - Reprint Status, Date\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nY2  - Date of Copyright\nVL  - Volume ID\nIS  - Issue ID\nSP  - Location in Work\nA3  - Series Editor\nT3  - Series Title\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - HEAR\nN1  - Record Number: 290\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nN1  - Author Affiliation: Author Affiliation\nT1  - Title\nN1  - Medium Designator: Medium Designator\nRP  - Reprint Status, Date\nCY  - Committee\nPB  - Subcommittee\nPY  - Hearing Date\nY2  - Date\nVL  - Bill Number\nN1  - Issue ID: Issue ID\nN1  - Location in Work: Location/URL\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - MGZN\nN1  - Record Number: 300\nA1  - Author Name, Author2 Name2\nT1  - Article Title\nJO  - Magazine Title\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Copyright Date: Date of Copyright\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - INPR\nN1  - Record Number: 310\nA1  - Author Name, Author2 Name2\nT1  - Title\nJO  - Journal Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nN1  - Volume ID: Volume ID\nN1  - Page(s): Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - JOUR\nN1  - Record Number: 320\nA1  - Author Name, Author2 Name2\nT1  - Article Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nJF  - Journal Title\nN1  - Translated Title: Translated Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nN1  - Language: Language\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - JOUR\nN1  - Record Number: 330\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nN1  - Author Affiliation: Author Affiliation\nT1  - Article Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nN1  - Author, Monographic: Monographic Author\nN1  - Author Role: Author Role\nJF  - Journal Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - CODEN: CODEN\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - JOUR\nN1  - Record Number: 340\nA1  - Author Name, Author2 Name2\nT1  - Analytic Title\nJF  - Journal Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - JFULL\nN1  - Record Number: 350\nN1  - Editor: Editor\nJF  - Journal Title\nRP  - Reprint Status, Date\nN1  - Medium Designator: Medium Designator\nN1  - Edition: Edition\nN1  - Place of Publication: Place of Publication\nN1  - Publisher Name: Publisher Name\nPY  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Frequency of Publication: Frequency of Publication\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - CODEN: CODEN\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - PCOMM\nN1  - Record Number: 360\nA1  - Author Name, Author2 Name2\nN1  - Author Affiliation: Author Affiliation\nN1  - Medium Designator: Medium Designator\nA2  - Recipient\nRP  - Reprint Status, Date\nN1  - Place of Publication: Place of Publication\nPY  - Date of Letter\nN1  - Extent of Letter: Extent of Letter\nN1  - Packaging Method: Packaging Method\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - SER\nN1  - Record Number: 370\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nT3  - Collection Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nSP  - Location of Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Document Type: Document Type\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - MAP\nN1  - Record Number: 380\nT1  - Map Title\nM2  - Map Type\nA1  - Cartographer\nN1  - Cartographer Role: Cartographer Role\nRP  - Reprint Status, Date\nM1  - Area\nN1  - Medium Designator: Medium Designator\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nY2  - Date of Copyright\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nN1  - Scale: Scale\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Series Issue ID: Series Issue ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - SER\nN1  - Record Number: 390\nA1  - Monographic Author\nN1  - Author Role: Author Role\nT1  - Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - MUSIC\nN1  - Record Number: 400\nA1  - Composer\nN1  - Composer Role: Composer Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Editor/Compiler\nN1  - Editor/Compiler Role: Editor/Compiler Role\nN1  - Title, Monographic: Monographic Title\nRP  - Reprint Status, Date\nN1  - Medium Designator: Medium Designator\nVL  - Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Copyright Date: Copyright Date\nIS  - Volume ID\nN1  - Report Identification: Report ID\nN1  - Plate Number: Plate Number\nN1  - Location in Work: Location in Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Series Issue ID: Series Issue ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - MPCT\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Producer: Producer\nN1  - Producer Role: Producer Role\nRP  - Reprint Status, Date\nA1  - Director\nN1  - Director Role: Director Role\nCY  - Place of Publication\nU5  - Distributor\nPY  - Date of Publication\nM2  - Timing\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nT3  - Series Title\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - NEWS\nN1  - Record Number: 420\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nJO  - Newspaper Name\nRP  - Reprint Status, Date\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nM2  - Section\nN1  - Column Number: Column Number\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - PAT\nN1  - Record Number: 430\nA1  - Inventor Name\nN1  - Address: Address\nT1  - Patent Title\nA2  - Assignee\nN1  - Title, Short Form: Title, Short Form\nN1  - Title, Long Form: Title, Long Form\nN1  - Abstract Journal Date: Abstract Journal Date\nCY  - Country\nM3  - Document Type\nIS  - Patent Number\nN1  - Abstract Journal Title: Abstract Journal Title\nPY  - Date of Patent Issue\nVL  - Application No./Date\nN1  - Abstract Journal Volume: Abstract Journal Volume\nN1  - Abstract Journal Issue: Abstract Journal Issue\nSP  - Abstract Journal Page(s)\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Language: Language\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nM2  - Class Code, National\nM1  - Class Code, International\nN1  - Related Document No.: Related Document Number\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Registry Number: Registry Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - RPRT\nN1  - Record Number: 440\nA1  - Author Name, Author2 Name2\nN1  - Author Role, Analytic: Author Role\nN1  - Author Affiliation: Author Affiliation\nN1  - Section Title: Section Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Monographic Author\nN1  - Author Role: Author Role\nT1  - Report Title\nRP  - Reprint Status, Date\nN1  - Edition: Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nVL  - Report ID\nSP  - Extent of Work\nN1  - Packaging Method: Packaging Method\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Series Issue ID: Series Issue ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - CODEN: CODEN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - SOUND\nN1  - Record Number: 450\nA1  - Composer\nN1  - Composer Role: Composer Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nN1  - Editor/Compiler: Editor/Compiler\nN1  - Editor/Compiler Role: Editor/Compiler Role\nN1  - Recording Title: Recording Title\nRP  - Reprint Status, Date\nN1  - Edition: Edition\nA2  - Performer\nN1  - Performer Role: Performer Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Copyright Date: Date of Copyright\nN1  - Acquisition Number: Acquisition Number\nN1  - Matrix Number: Matrix Number\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nN1  - Reproduction Ratio: Reproduction Ratio\nT3  - Series Title\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - STAT\nN1  - Record Number: 460\nA1  - Author Name, Author2 Name2\nT1  - Statute Title\nRP  - Reprint Status, Date\nCY  - Code\nPY  - Date of Publication\nY2  - Date\nVL  - Title/Code Number\nSP  - Section(s)\nT3  - History\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CTLG\nN1  - Record Number: 470\nA1  - Author Name, Author2 Name2\nT1  - Catalog Title\nN1  - Medium Designator: Medium Designator\nRP  - Reprint Status, Date\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nIS  - Catalog Number\nN1  - Issue Identification: Issue ID\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - UNBILL\nN1  - Record Number: 480\nA1  - Author Name, Author2 Name2\nT1  - Act Title\nRP  - Reprint Status, Date\nCY  - Code\nPY  - Date of Code\nY2  - Date\nVL  - Bill/Res Number\nT3  - History\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - UNPB\nN1  - Record Number: 490\nA1  - Author Name, Author2 Name2\nT1  - Title\nA2  - Editor(s)\nRP  - Reprint Status, Date\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - VIDEO\nN1  - Record Number: 500\nA1  - Author Name, Author2 Name2\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Producer: Producer\nN1  - Producer Role: Producer Role\nRP  - Reprint Status, Date\nN1  - Director: Director\nN1  - Director Role: Director Role\nCY  - Place of Publication\nPB  - Distributor\nPY  - Date of Publication\nM2  - Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nT3  - Series Title\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - ELEC\nN1  - Record Number: 510\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nN1  - Author Affiliation: Author Affiliation\nT1  - Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nY2  - Date of Access\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n",
+		"input": "TY  - BILL\nN1  - Record ID: 10\nA1  - Author Name, Author2 Name2\nTI  - Act Name\nRP  - Reprint Status, Date\nCY  - Code\nPY  - Date of Code\nY2  - Date\nVL  - Bill/Res Number\nSP  - Section(s)\nN1  - Histroy: History\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - ART\nN1  - Record ID: 20\nA1  - Author Name, Author2 Name2\nN1  - Artist Role: Artist Role\nT1  - Title/Subject\nM1  - Medium\nN1  - Connective Phrase: Connective Phrase\nN1  - Author, Monographic: Monographic Author\nN1  - Author Role: Author Role\nN1  - Title Monographic: Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nY1  - Date of Publication\nN1  - Location in Work: Location in Work\nN1  - Size: Size\nN1  - Series Title: Series Title\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - ADVS\nN1  - Record ID: 30\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nT1  - Analytic Title\nM3  - Medium Designator\nN1  - Connective Phrase: Connective Phrase\nN1  - Author, Monographic: Monographic Author\nN1  - Author Role: Monographic Author Role\nN1  - Title Monographic: Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nIS  - Volume ID\nN1  - Location in Work: Location in Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nN1  - Series Editor: Series Editor\nN1  - Series Editor Role: Series Editor Role\nN1  - Series Title: Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Series Issue ID: Series Issue ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CHAP\nN1  - Record ID: 40\nA1  - Author Name, Author2 Name2\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Monographic Author\nN1  - Author Role: Author Role\nT2  - Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Volume ID: Volume ID\nN1  - Issue ID: Issue ID\nSP  - Page(s)\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nN1  - Series Title: Series Title\nN1  - Series Volume ID: Series Volume Identification\nN1  - Series Issue ID: Series Issue Identification\nN1  - Connective PhraseConnective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CHAP\nN1  - Record ID: 50\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Monographic Author\nN1  - Author Role: Author Role\nT2  - Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nN1  - Volume ID: Volume ID\nN1  - Issue ID: Issue ID\nSP  - Page(s)\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - ABST\nN1  - Record ID: 180\nA1  - Author Name, Author2 Name2\nT1  - Title\nJF  - Journal Title\nRP  - Reprint Status, Date\nY1  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nAD  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - BOOK\nN1  - Record ID: 190\nA1  - Monographic Author\nT1  - Monographic Title\nRP  - Reprint Status, Date\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - BOOK\nN1  - Record ID: 200\nA1  - Monographic Author\nN1  - Author Role: Author Role\nT1  - Monographic Title\nN1  - Translated Title: Translated Title\nRP  - Reprint Status, Date\nVL  - Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Original Pub Date: Original Pub Date\nIS  - Volume ID\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CASE\nN1  - Record Number: 210\nA1  - Counsel\nT1  - Case Name\nT2  - Case Name (Abbrev)\nRP  - Reprint Status, Date\nCY  - Reporter\nPB  - Court\nPY  - Date Field\nY2  - Date Decided\nN1  - First Page: First Page\nVL  - Reporter Number\nSP  - Page(s)\nT3  - History\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - COMP\nN1  - Record Number: 220\nT1  - Program Title\nN1  - Computer Program: Computer Program\nN1  - Connective Phrase: Connective Phrase\nA1  - Author/Programmer\nN1  - Author Role: Author Role\nN1  - Title: Title\nRP  - Reprint Status, Date\nIS  - Version\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nN1  - Report Identification: Report ID\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CONF\nN1  - Record Number: 230\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nN1  - Author Affiliation, Ana.: Author Affiliation\nT1  - Paper/Section Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Editor/Compiler\nN1  - Editor/Compiler Role: Editor/Compiler Role\nN1  - Proceedings Title: Proceedings Title\nY2  - Date of Meeting\nN1  - Place of Meeting: Place of Meeting\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nVL  - Volume ID\nSP  - Location in Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nAV  - Address/Availability\nUR  - Location/URL\nN1  - ISBN: ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - DATA\nN1  - Record Number: 240\nT1  - Analytic Title\nN1  - Medium (Data File): Medium (Data File)\nN1  - Connective Phrase: Connective Phrase\nA2  - Editor/Compiler\nN1  - Editor/Compiler Role: Editor/Compiler Role\nN1  - Title, Monographic: Monographic Title\nRP  - Reprint Status, Date\nIS  - Version\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nSP  - Location in Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - THES\nN1  - Record Number: 250\nA1  - Author Name, Author2 Name2\nA3  - Supervisor surname, Supervisor name\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nRP  - Reprint Status, Date\nN1  - Place of Publication: Place of Publication\nPB  - University\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nSP  - Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - ELEC\nN1  - Record Number: 260\nA1  - Author Name, Author2 Name2\nT1  - Title\nM1  - Medium\nJO  - Source\nRP  - Reprint Status, Date\nIS  - Edition\nPB  - Publisher Name\nPY  - Last Update\nY2  - Access Date\nN1  - Volume ID: Volume ID\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - ICOMM\nN1  - Record Number: 270\nA1  - Author Name, Author2 Name2\nN1  - Author E-mail: Author E-mail\nN1  - Author Affiliation: Author Affiliation\nT1  - Subject\nA2  - Recipient\nN1  - Recipient E-mail: Recipient E-mail\nRP  - Reprint Status, Date\nPY  - Date of Message\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - GEN\nN1  - Record Number: 280\nA1  - Author Name, Author2 Name2\nT1  - Analytic Title\nA2  - Monographic Author\nT2  - Monographic Title\nJO  - Journal Title\nRP  - Reprint Status, Date\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nY2  - Date of Copyright\nVL  - Volume ID\nIS  - Issue ID\nSP  - Location in Work\nA3  - Series Editor\nT3  - Series Title\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - HEAR\nN1  - Record Number: 290\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nN1  - Author Affiliation: Author Affiliation\nT1  - Title\nN1  - Medium Designator: Medium Designator\nRP  - Reprint Status, Date\nCY  - Committee\nPB  - Subcommittee\nPY  - Hearing Date\nY2  - Date\nVL  - Bill Number\nN1  - Issue ID: Issue ID\nN1  - Location in Work: Location/URL\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - MGZN\nN1  - Record Number: 300\nA1  - Author Name, Author2 Name2\nT1  - Article Title\nJO  - Magazine Title\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Copyright Date: Date of Copyright\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - INPR\nN1  - Record Number: 310\nA1  - Author Name, Author2 Name2\nT1  - Title\nJO  - Journal Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nN1  - Volume ID: Volume ID\nN1  - Page(s): Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - JOUR\nN1  - Record Number: 320\nA1  - Author Name, Author2 Name2\nT1  - Article Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nJF  - Journal Title\nN1  - Translated Title: Translated Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nN1  - Language: Language\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - JOUR\nN1  - Record Number: 330\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nN1  - Author Affiliation: Author Affiliation\nT1  - Article Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nN1  - Author, Monographic: Monographic Author\nN1  - Author Role: Author Role\nJF  - Journal Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - CODEN: CODEN\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - JOUR\nN1  - Record Number: 340\nA1  - Author Name, Author2 Name2\nT1  - Analytic Title\nJF  - Journal Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - JFULL\nN1  - Record Number: 350\nN1  - Editor: Editor\nJF  - Journal Title\nRP  - Reprint Status, Date\nN1  - Medium Designator: Medium Designator\nN1  - Edition: Edition\nN1  - Place of Publication: Place of Publication\nN1  - Publisher Name: Publisher Name\nPY  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Frequency of Publication: Frequency of Publication\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - CODEN: CODEN\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - PCOMM\nN1  - Record Number: 360\nA1  - Author Name, Author2 Name2\nN1  - Author Affiliation: Author Affiliation\nN1  - Medium Designator: Medium Designator\nA2  - Recipient\nRP  - Reprint Status, Date\nN1  - Place of Publication: Place of Publication\nPY  - Date of Letter\nN1  - Extent of Letter: Extent of Letter\nN1  - Packaging Method: Packaging Method\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - SER\nN1  - Record Number: 370\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nT3  - Collection Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nSP  - Location of Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Document Type: Document Type\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - MAP\nN1  - Record Number: 380\nT1  - Map Title\nM2  - Map Type\nA1  - Cartographer\nN1  - Cartographer Role: Cartographer Role\nRP  - Reprint Status, Date\nM1  - Area\nN1  - Medium Designator: Medium Designator\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nY2  - Date of Copyright\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nN1  - Scale: Scale\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Series Issue ID: Series Issue ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - SER\nN1  - Record Number: 390\nA1  - Monographic Author\nN1  - Author Role: Author Role\nT1  - Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - MUSIC\nN1  - Record Number: 400\nA1  - Composer\nN1  - Composer Role: Composer Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Editor/Compiler\nN1  - Editor/Compiler Role: Editor/Compiler Role\nN1  - Title, Monographic: Monographic Title\nRP  - Reprint Status, Date\nN1  - Medium Designator: Medium Designator\nVL  - Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Copyright Date: Copyright Date\nIS  - Volume ID\nN1  - Report Identification: Report ID\nN1  - Plate Number: Plate Number\nN1  - Location in Work: Location in Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Series Issue ID: Series Issue ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - MPCT\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Producer: Producer\nN1  - Producer Role: Producer Role\nRP  - Reprint Status, Date\nA1  - Director\nN1  - Director Role: Director Role\nCY  - Place of Publication\nU5  - Distributor\nPY  - Date of Publication\nM2  - Timing\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nT3  - Series Title\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - NEWS\nN1  - Record Number: 420\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nJO  - Newspaper Name\nRP  - Reprint Status, Date\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nM2  - Section\nN1  - Column Number: Column Number\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - PAT\nN1  - Record Number: 430\nA1  - Inventor Name\nN1  - Address: Address\nT1  - Patent Title\nA2  - Assignee\nN1  - Title, Short Form: Title, Short Form\nN1  - Title, Long Form: Title, Long Form\nN1  - Abstract Journal Date: Abstract Journal Date\nCY  - Country\nM3  - Document Type\nIS  - Patent Number\nN1  - Abstract Journal Title: Abstract Journal Title\nPY  - Date of Patent Issue\nVL  - Application No./Date\nN1  - Abstract Journal Volume: Abstract Journal Volume\nN1  - Abstract Journal Issue: Abstract Journal Issue\nSP  - Abstract Journal Page(s)\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Language: Language\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nM2  - Class Code, National\nM1  - Class Code, International\nN1  - Related Document No.: Related Document Number\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Registry Number: Registry Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - RPRT\nN1  - Record Number: 440\nA1  - Author Name, Author2 Name2\nN1  - Author Role, Analytic: Author Role\nN1  - Author Affiliation: Author Affiliation\nN1  - Section Title: Section Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Monographic Author\nN1  - Author Role: Author Role\nT1  - Report Title\nRP  - Reprint Status, Date\nN1  - Edition: Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nVL  - Report ID\nSP  - Extent of Work\nN1  - Packaging Method: Packaging Method\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Series Issue ID: Series Issue ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - CODEN: CODEN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - SOUND\nN1  - Record Number: 450\nA1  - Composer\nN1  - Composer Role: Composer Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nN1  - Editor/Compiler: Editor/Compiler\nN1  - Editor/Compiler Role: Editor/Compiler Role\nN1  - Recording Title: Recording Title\nRP  - Reprint Status, Date\nN1  - Edition: Edition\nA2  - Performer\nN1  - Performer Role: Performer Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Copyright Date: Date of Copyright\nN1  - Acquisition Number: Acquisition Number\nN1  - Matrix Number: Matrix Number\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nN1  - Reproduction Ratio: Reproduction Ratio\nT3  - Series Title\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - STAT\nN1  - Record Number: 460\nA1  - Author Name, Author2 Name2\nT1  - Statute Title\nRP  - Reprint Status, Date\nCY  - Code\nPY  - Date of Publication\nY2  - Date\nVL  - Title/Code Number\nSP  - Section(s)\nT3  - History\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CTLG\nN1  - Record Number: 470\nA1  - Author Name, Author2 Name2\nT1  - Catalog Title\nN1  - Medium Designator: Medium Designator\nRP  - Reprint Status, Date\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nIS  - Catalog Number\nN1  - Issue Identification: Issue ID\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - UNBILL\nN1  - Record Number: 480\nA1  - Author Name, Author2 Name2\nT1  - Act Title\nRP  - Reprint Status, Date\nCY  - Code\nPY  - Date of Code\nY2  - Date\nVL  - Bill/Res Number\nT3  - History\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - UNPB\nN1  - Record Number: 490\nA1  - Author Name, Author2 Name2\nT1  - Title\nA2  - Editor(s)\nRP  - Reprint Status, Date\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - VIDEO\nN1  - Record Number: 500\nA1  - Author Name, Author2 Name2\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Producer: Producer\nN1  - Producer Role: Producer Role\nRP  - Reprint Status, Date\nN1  - Director: Director\nN1  - Director Role: Director Role\nCY  - Place of Publication\nPB  - Distributor\nPY  - Date of Publication\nM2  - Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nT3  - Series Title\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - ELEC\nN1  - Record Number: 510\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nN1  - Author Affiliation: Author Affiliation\nT1  - Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nY2  - Date of Access\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n",
 		"items": [
 			{
 				"itemType": "bill",
@@ -4463,8 +4971,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -4492,8 +5004,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -4546,8 +5062,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -4636,8 +5156,12 @@ var testCases = [
 				"volume": "Volume ID",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -4708,8 +5232,12 @@ var testCases = [
 				"volume": "Volume ID",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -4768,8 +5296,12 @@ var testCases = [
 				"volume": "Volume ID",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -4798,8 +5330,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -4842,8 +5378,12 @@ var testCases = [
 				"volume": "Volume ID",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -4891,8 +5431,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -4922,11 +5466,15 @@ var testCases = [
 				"company": "Publisher Name",
 				"place": "Place of Publication",
 				"url": "Location/URL",
-				"version": "Version",
+				"versionNumber": "Version",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -4996,8 +5544,12 @@ var testCases = [
 				"volume": "Volume ID",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5040,25 +5592,25 @@ var testCases = [
 				"seeAlso": []
 			},
 			{
-				"itemType": "document",
+				"itemType": "dataset",
 				"title": "Analytic Title",
-				"creators": [
-					{
-						"lastName": "Editor/Compiler",
-						"creatorType": "editor",
-						"fieldMode": 1
-					}
-				],
+				"creators": [],
 				"date": "0000 Date",
 				"abstractNote": "Abstract",
 				"archiveLocation": "Address/Availability",
 				"callNumber": "Call Number",
-				"publisher": "Publisher Name",
+				"repository": "Publisher Name",
+				"repositoryLocation": "Place of Publication",
 				"url": "Location/URL",
+				"versionNumber": "Version",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5099,6 +5651,11 @@ var testCases = [
 						"lastName": "Author Name",
 						"firstName": "Author2 Name2",
 						"creatorType": "author"
+					},
+					{
+						"lastName": "Supervisor surname",
+						"firstName": "Supervisor name",
+						"creatorType": "contributor"
 					}
 				],
 				"date": "0000 Date",
@@ -5111,8 +5668,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5149,8 +5710,12 @@ var testCases = [
 				"websiteTitle": "Source",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5182,8 +5747,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5230,8 +5799,12 @@ var testCases = [
 				"volume": "Volume ID",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5257,8 +5830,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5300,8 +5877,12 @@ var testCases = [
 				"volume": "Volume ID",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5330,8 +5911,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5366,8 +5951,12 @@ var testCases = [
 				"volume": "Volume ID",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5415,8 +6004,12 @@ var testCases = [
 				"volume": "Volume ID",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5465,8 +6058,12 @@ var testCases = [
 				"volume": "Volume ID",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5490,8 +6087,12 @@ var testCases = [
 				"volume": "Volume ID",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5539,8 +6140,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5583,8 +6188,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5635,8 +6244,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5690,8 +6303,12 @@ var testCases = [
 				"volume": "Edition",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5730,8 +6347,12 @@ var testCases = [
 				"volume": "Edition",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5809,8 +6430,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5861,8 +6486,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5904,8 +6533,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -5975,8 +6608,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -6047,8 +6684,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -6116,8 +6757,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -6145,8 +6790,12 @@ var testCases = [
 				"volume": "Edition",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -6185,8 +6834,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -6217,8 +6870,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -6251,8 +6908,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -6300,8 +6961,12 @@ var testCases = [
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
+					{
+						"tag": "Keywords1, Keywords2, Keywords3"
+					},
+					{
+						"tag": "Keywords4"
+					}
 				],
 				"notes": [
 					{
@@ -6337,7 +7002,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "June 1, 2014",
+				"date": "2014-06-01",
 				"DOI": "10.3109/07434618.2014.906498",
 				"ISSN": "0743-4618",
 				"issue": "2",
@@ -6390,9 +7055,206 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Constitutional law",
-					"Finanzkrise / Eigentum / Haftung / Ordnungspolitik / Aufsatzsammlung / Online-Publikation",
-					"Law"
+					{
+						"tag": "Constitutional law"
+					},
+					{
+						"tag": "Finanzkrise / Eigentum / Haftung / Ordnungspolitik / Aufsatzsammlung / Online-Publikation"
+					},
+					{
+						"tag": "Law"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "TY  - JOUR\nT1  - Deprecated tag test\nN1  - The Y1 date tag is deprecated. Its value should not be used when DA is present, even if Y1 comes first.\nY1  - 1900/01/01\nDA  - 1950/01/01\nER  - ",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Deprecated tag test",
+				"creators": [],
+				"date": "1950-01-01",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>The Y1 date tag is deprecated. Its value should not be used when DA is present, even if Y1 comes first.</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "TY  - JOUR\nTI  - Mixed author tags\nN1  - A1 should not be treated as deprecated or authors will appear out of order.\nA1  - Georgiev, Danko\nAU  - Bello, Leon\nAU  - Carmi, Avishy\nAU  - Cohen, Eliahu\nER  - ",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Mixed author tags",
+				"creators": [
+					{
+						"lastName": "Georgiev",
+						"firstName": "Danko",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bello",
+						"firstName": "Leon",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Carmi",
+						"firstName": "Avishy",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Cohen",
+						"firstName": "Eliahu",
+						"creatorType": "author"
+					}
+				],
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>A1 should not be treated as deprecated or authors will appear out of order.</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "TY  - JOUR\r\nTI  - Using focus groups to adapt ethnically appropriate, information-seeking and recruitment messages for a prostate cancer screening program for men at high risk\r\nT2  - Journal of the National Medical Association\r\nVL  - 100\r\nIS  - 6\r\nSP  - 674\r\nEP  - 682\r\nPY  - 2008\r\nDO  - 10.1016/S0027-9684(15)31340-7\r\nAU  - Bryan, C.J.\r\nAU  - Wetmore-Arkader, L.\r\nAU  - Calvano, T.\r\nAU  - Deatrick, J.A.\r\nAU  - Giri, V.N.\r\nAU  - Bruner, D.W.\r\nN1  - Cited By :10\r\nN1  - Export Date: 13 July 2022\r\nER  - \r\n\r\nTY  - JOUR\r\nT2  - Prostate Cancer Mortality Statistics 2015\r\nPY  - 0000\r\nN1  - Cited By :1\r\nN1  - Export Date: 13 July 2022\r\nER  - \r\n\r\n",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Using focus groups to adapt ethnically appropriate, information-seeking and recruitment messages for a prostate cancer screening program for men at high risk",
+				"creators": [
+					{
+						"lastName": "Bryan",
+						"firstName": "C.J.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wetmore-Arkader",
+						"firstName": "L.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Calvano",
+						"firstName": "T.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Deatrick",
+						"firstName": "J.A.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Giri",
+						"firstName": "V.N.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bruner",
+						"firstName": "D.W.",
+						"creatorType": "author"
+					}
+				],
+				"date": "2008",
+				"DOI": "10.1016/S0027-9684(15)31340-7",
+				"issue": "6",
+				"pages": "674-682",
+				"publicationTitle": "Journal of the National Medical Association",
+				"volume": "100",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>Cited By :10</p>"
+					},
+					{
+						"note": "<p>Export Date: 13 July 2022</p>"
+					}
+				],
+				"seeAlso": []
+			},
+			{
+				"itemType": "journalArticle",
+				"creators": [],
+				"publicationTitle": "Prostate Cancer Mortality Statistics 2015",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>Cited By :1</p>"
+					},
+					{
+						"note": "<p>Export Date: 13 July 2022</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "TY  - DATA\r\nT1  - Moving language: Mothers’ verbs correspond to infants’ real-time locomotion\r\nAU  - West, Kelsey Louise\r\nAU  - Tamis-LeMonda, Catherine\r\nAU  - Adolph, Karen\r\nDO  - 10.17910/B7.1322\r\nUR  - http://databrary.org/volume/1322\r\nAB  - How do infants learn language? Infants can only learn the words that they hear. We tested whether infants’ actions affect the words that caregivers say—specifically whether infant locomotion influences caregivers’ language about locomotion. Compared to crawling infants, walkers travel greater distances (Adolph, et al, 2012). Does enhanced locomotion in walkers influence the verbs that caregivers say? We hypothesized that walking creates new opportunities for verb learning. To disentangle locomotor ability from age, we observed same-aged crawlers and walkers (16 13-month-old crawlers and 16 13-month-old walkers) and an older group of walkers (16 18-month-olds) during two hours of activity at home. Mothers’ language was transcribed verbatim. We then identified each “locomotor verb” (e.g., “come,” “bring”) that mothers said, and each bout of infant crawling and walking. Walkers’ enhanced locomotion indeed opened new opportunities for verb learning. Although mothers’ language overall was more frequent to older compared to younger infants, their locomotor verbs were more frequent to walkers than to crawlers. Preliminary findings show that caregivers directed more utterances to 18-month-olds (M = 2,006.00, SD = 579.02) compared to 13-month-old crawlers (M = 1,553.75, SD = 728.42) and walkers (M = 1,363.50, SD = 619.29), F (2, 31) = 3.23, p = .052. Notably, caregivers directed twice as many locomotor verbs to 13- and 18-month-old walkers (M = 53.13, SD = 15.40; M = 53.00, SD = 25.14, respectively) compared with 13-month-old crawlers (M = 25.25, SD = 12.87), F (2, 31) = 5.46, p = .01. Moreover, mothers’ locomotor verbs were related to infants’ moment-to-moment locomotion: Infants who moved more frequently received more locomotor verbs compared to infants who moved less, r(26) = .42, p = .035. Findings indicate that locomotor development leads to more advanced forms of infant activity, which consequently prompts caregivers to use more advanced language.\r\nPY  - 2021\r\nPB  - Databrary\r\nER  - ",
+		"items": [
+			{
+				"itemType": "dataset",
+				"title": "Moving language: Mothers’ verbs correspond to infants’ real-time locomotion",
+				"creators": [
+					{
+						"lastName": "West",
+						"firstName": "Kelsey Louise",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Tamis-LeMonda",
+						"firstName": "Catherine",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Adolph",
+						"firstName": "Karen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021",
+				"DOI": "10.17910/B7.1322",
+				"abstractNote": "How do infants learn language? Infants can only learn the words that they hear. We tested whether infants’ actions affect the words that caregivers say—specifically whether infant locomotion influences caregivers’ language about locomotion. Compared to crawling infants, walkers travel greater distances (Adolph, et al, 2012). Does enhanced locomotion in walkers influence the verbs that caregivers say? We hypothesized that walking creates new opportunities for verb learning. To disentangle locomotor ability from age, we observed same-aged crawlers and walkers (16 13-month-old crawlers and 16 13-month-old walkers) and an older group of walkers (16 18-month-olds) during two hours of activity at home. Mothers’ language was transcribed verbatim. We then identified each “locomotor verb” (e.g., “come,” “bring”) that mothers said, and each bout of infant crawling and walking. Walkers’ enhanced locomotion indeed opened new opportunities for verb learning. Although mothers’ language overall was more frequent to older compared to younger infants, their locomotor verbs were more frequent to walkers than to crawlers. Preliminary findings show that caregivers directed more utterances to 18-month-olds (M = 2,006.00, SD = 579.02) compared to 13-month-old crawlers (M = 1,553.75, SD = 728.42) and walkers (M = 1,363.50, SD = 619.29), F (2, 31) = 3.23, p = .052. Notably, caregivers directed twice as many locomotor verbs to 13- and 18-month-old walkers (M = 53.13, SD = 15.40; M = 53.00, SD = 25.14, respectively) compared with 13-month-old crawlers (M = 25.25, SD = 12.87), F (2, 31) = 5.46, p = .01. Moreover, mothers’ locomotor verbs were related to infants’ moment-to-moment locomotion: Infants who moved more frequently received more locomotor verbs compared to infants who moved less, r(26) = .42, p = .035. Findings indicate that locomotor development leads to more advanced forms of infant activity, which consequently prompts caregivers to use more advanced language.",
+				"repository": "Databrary",
+				"url": "http://databrary.org/volume/1322",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "TY  - GEN\nT1  - Citavi Item\nKW  - Tag\nH2  - Call Number\nM4  - Citavi\nER  -",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Citavi Item",
+				"creators": [],
+				"callNumber": "Call Number",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Tag"
+					}
 				],
 				"notes": [],
 				"seeAlso": []

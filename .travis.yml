@@ -1,7 +1,0 @@
-language: node_js
-node_js:
-  - "8"
-script:
-  - git diff -z --name-only $TRAVIS_COMMIT_RANGE *.js | xargs -0 npm run lint --
-  - cd .ci && ./checkDeletedTxt.sh
-cache: npm

@@ -5,13 +5,11 @@
 	"target": "",
 	"minVersion": "3.0.9",
 	"maxVersion": "",
-	"priority": 98,
+	"priority": 97,
 	"inRepository": true,
 	"translatorType": 8,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-04-13 13:41:00"
+	"lastUpdated": "2023-08-25 05:06:07"
 }
-
 
 function detectSearch(item) {
 	//re-enable once 
@@ -23,15 +21,16 @@ function detectSearch(item) {
 
 
 function doSearch(item) {
-	//Sends an SRU formatted as CQL to the library of Congress asking for marcXML back
-	//http://www.loc.gov/standards/sru/
+	// Sends an SRU formatted as CQL to the Library of Congress asking for MARCXML back
+	// https://www.loc.gov/standards/sru/
+	// https://www.loc.gov/z3950/lcserver.html
 	
 	let url;
 	if (item.ISBN) {
-		url = "http://lx2.loc.gov:210/LCDB?operation=searchRetrieve&version=1.1&query=bath.ISBN=^" + ZU.cleanISBN(item.ISBN) + "&maximumRecords=1";
+		url = "https://lx2.loc.gov/sru/lcdb?operation=searchRetrieve&version=1.1&query=bath.ISBN=^" + ZU.cleanISBN(item.ISBN) + "&maximumRecords=1";
 	}
 	else if (item.query) {
-		url = "http://lx2.loc.gov:210/LCDB?operation=searchRetrieve&version=1.1&query=" + encodeURIComponent(item.query) + "&maximumRecords=50";
+		url = "https://lx2.loc.gov/sru/lcdb?operation=searchRetrieve&version=1.1&query=" + encodeURIComponent(item.query) + "&maximumRecords=50";
 	}
 	
 	ZU.doGet(url, function (text) {

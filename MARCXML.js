@@ -8,66 +8,85 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2018-08-25 14:14:34"
+	"lastUpdated": "2023-04-19 14:30:00"
 }
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2012 Sebastian Karcher
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
 
 function detectImport() {
 	var line;
 	var i = 0;
 	while ((line = Zotero.read()) !== false) {
 		if (line !== "") {
-			if (line.match(/<(marc\:)?(collection|record) xmlns(\:marc)?=\"http:\/\/www\.loc\.gov\/MARC21\/slim\"/)) {
+			if (line.match(/xmlns(:marc)?="http:\/\/www\.loc\.gov\/MARC21\/slim"/)) {
 				return true;
-			} else {
-				if (i++ > 5) {
-					return false;
-				}
+			}
+			else if (i++ > 5) {
+				return false;
 			}
 		}
 	}
+	return false;
 }
 
 
 function doImport() {
-	var text = "";
-	var line;
-	while ((line = Zotero.read()) !== false) {
-		text += line;
-	}
-	//call MARC translator
+	// call MARC translator
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 	translator.getTranslatorObject(function (marc) {
-
-		var parser = new DOMParser();
-		var xml = parser.parseFromString(text, 'text/xml');
-		//define the marc namespace
+		var xml = Zotero.getXML();
+		// define the marc namespace
 		var ns = {
-			"marc": "http://www.loc.gov/MARC21/slim"
+			marc: "http://www.loc.gov/MARC21/slim"
 		};
 		var records = ZU.xpath(xml, '//marc:record', ns);
 		for (let rec of records) {
+			if (!ZU.xpath(rec, "./marc:datafield", ns).length) {
+				Zotero.debug('Skipping empty record');
+				continue;
+			}
 
-			//create one new item per record
+			// create one new item per record
 			var record = new marc.record();
 			var newItem = new Zotero.Item();
 			record.leader = ZU.xpathText(rec, "./marc:leader", ns);
 			var fields = ZU.xpath(rec, "./marc:datafield", ns);
 			for (let field of fields) {
-				//go through every datafield (corresponds to a MARC field)
+				// go through every datafield (corresponds to a MARC field)
 				var subfields = ZU.xpath(field, "./marc:subfield", ns);
 				var tag = "";
 				for (let subfield of subfields) {
-					//get the subfields and their codes...
+					// get the subfields and their codes...
 					var code = ZU.xpathText(subfield, "./@code", ns);
 					var sf = ZU.xpathText(subfield, "./text()", ns);
-					//delete non-sorting symbols
-					//e.g. &#152;Das&#156; Adam-Smith-Projekt
+					// delete non-sorting symbols
+					// e.g. &#152;Das&#156; Adam-Smith-Projekt
 					if (sf) {
-						sf = sf.replace(/[\x80-\x9F]/g,"");
-						//concat all subfields in one datafield, with subfield delimiter and code between them
-						tag = tag + marc.subfieldDelimiter + code + sf
+						sf = sf.replace(/[\x80-\x9F]/g, "");
+						// concat all subfields in one datafield, with subfield delimiter and code between them
+						tag = tag + marc.subfieldDelimiter + code + sf;
 					}
 				}
 				record.addField(ZU.xpathText(field, "./@tag", ns), ZU.xpathText(field, "./@ind1", ns) + ZU.xpathText(field, "./@ind2"), tag);
@@ -75,8 +94,9 @@ function doImport() {
 			record.translate(newItem);
 			newItem.complete();
 		}
-	}); //get Translator end
+	}); // get Translator end
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -340,6 +360,34 @@ var testCases = [
 						"tag": "Issue 41"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<record xmlns=\"http://www.loc.gov/MARC21/slim\">\n<recordSchema>MARC21-xml</recordSchema>\n<recordPacking>xml</recordPacking>\n<recordData>\n<record type=\"Bibliographic\">\n<leader>00000pam a2200000 cc4500</leader>\n<controlfield tag=\"001\">1242883924</controlfield>\n<controlfield tag=\"003\">DE-101</controlfield>\n<controlfield tag=\"005\">20230125220155.0</controlfield>\n<controlfield tag=\"007\">tu</controlfield>\n<controlfield tag=\"008\">211010s2023 gw ||||| |||| 00||||ger </controlfield>\n<datafield tag=\"015\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">23,A04</subfield>\n<subfield code=\"z\">21,N41</subfield>\n<subfield code=\"2\">dnb</subfield>\n</datafield>\n<datafield tag=\"016\" ind1=\"7\" ind2=\" \">\n<subfield code=\"2\">DE-101</subfield>\n<subfield code=\"a\">1242883924</subfield>\n</datafield>\n<datafield tag=\"020\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">9783525560624</subfield>\n<subfield code=\"c\">Festeinband : EUR 85.00 (DE), EUR 88.00 (AT)</subfield>\n<subfield code=\"9\">978-3-525-56062-4</subfield>\n</datafield>\n<datafield tag=\"020\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">3525560621</subfield>\n<subfield code=\"9\">3-525-56062-1</subfield>\n</datafield>\n<datafield tag=\"024\" ind1=\"3\" ind2=\" \">\n<subfield code=\"a\">9783525560624</subfield>\n</datafield>\n<datafield tag=\"028\" ind1=\"5\" ind2=\"2\">\n<subfield code=\"a\">Bestellnummer: VUR0008785</subfield>\n</datafield>\n<datafield tag=\"035\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">(DE-599)DNB1242883924</subfield>\n</datafield>\n<datafield tag=\"035\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">(OCoLC)1365383776</subfield>\n</datafield>\n<datafield tag=\"035\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">(OCoLC)1275381065</subfield>\n</datafield>\n<datafield tag=\"040\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">1245</subfield>\n<subfield code=\"b\">ger</subfield>\n<subfield code=\"c\">DE-101</subfield>\n<subfield code=\"d\">9999</subfield>\n<subfield code=\"e\">rda</subfield>\n</datafield>\n<datafield tag=\"041\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">ger</subfield>\n</datafield>\n<datafield tag=\"044\" ind1=\" \" ind2=\" \">\n<subfield code=\"c\">XA-DE</subfield>\n</datafield>\n<datafield tag=\"082\" ind1=\"7\" ind2=\"4\">\n<subfield code=\"a\">230</subfield>\n<subfield code=\"a\">943</subfield>\n<subfield code=\"q\">DE-101</subfield>\n<subfield code=\"2\">23sdnb</subfield>\n</datafield>\n<datafield tag=\"100\" ind1=\"1\" ind2=\" \">\n<subfield code=\"0\">(DE-588)111415403</subfield>\n<subfield code=\"0\">https://d-nb.info/gnd/111415403</subfield>\n<subfield code=\"0\">(DE-101)111415403</subfield>\n<subfield code=\"a\">Erhart, Hannelore</subfield>\n<subfield code=\"d\">1927-2013</subfield>\n<subfield code=\"e\">Verfasser</subfield>\n<subfield code=\"4\">aut</subfield>\n<subfield code=\"2\">gnd</subfield>\n</datafield>\n<datafield tag=\"245\" ind1=\"1\" ind2=\"0\">\n<subfield code=\"a\">Katharina Staritz</subfield>\n<subfield code=\"n\">Band 2.</subfield>\n<subfield code=\"p\">\n1903-1953 / Ilse Meseberg-Haubold, Dietgard Meyer ; unter Mitarbeit von Hannelore Erhart †\n</subfield>\n<subfield code=\"c\">\nHannelore Erhart ; Ilse Meseberg-Haubold ; Dietgard Meyer. Mit einem Exkurs Elisabeth Schmitz\n</subfield>\n</datafield>\n<datafield tag=\"264\" ind1=\"3\" ind2=\"1\">\n<subfield code=\"a\">Göttingen</subfield>\n<subfield code=\"b\">Vandenhoeck &amp; Ruprecht</subfield>\n<subfield code=\"c\">[2023]</subfield>\n</datafield>\n<datafield tag=\"300\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">XV, 629 Seiten</subfield>\n<subfield code=\"b\">Illustrationen</subfield>\n<subfield code=\"c\">1094 g</subfield>\n</datafield>\n<datafield tag=\"336\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">Text</subfield>\n<subfield code=\"b\">txt</subfield>\n<subfield code=\"2\">rdacontent</subfield>\n</datafield>\n<datafield tag=\"337\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">ohne Hilfsmittel zu benutzen</subfield>\n<subfield code=\"b\">n</subfield>\n<subfield code=\"2\">rdamedia</subfield>\n</datafield>\n<datafield tag=\"338\" ind1=\" \" ind2=\" \">\n<subfield code=\"a\">Band</subfield>\n<subfield code=\"b\">nc</subfield>\n<subfield code=\"2\">rdacarrier</subfield>\n</datafield>\n</record>\n</recordData>\n<recordPosition>2</recordPosition>\n</record>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Katharina Staritz. Band 2: 1903-1953 / Ilse Meseberg-Haubold, Dietgard Meyer ; unter Mitarbeit von Hannelore Erhart †",
+				"creators": [
+					{
+						"firstName": "Hannelore",
+						"lastName": "Erhart",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023",
+				"ISBN": "9783525560624 3525560621",
+				"callNumber": "230 943",
+				"language": "ger",
+				"numPages": "629",
+				"place": "Göttingen",
+				"publisher": "Vandenhoeck & Ruprecht",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}

@@ -5,7 +5,7 @@
 	"author": "Emiliano Heyns",
 	"main": "index.js",
 	"engines": {
-		"node": ">=0.10.0"
+		"node": ">=16.0.0"
 	},
 	"license": "ISC",
 	"bin": {
@@ -14,7 +14,7 @@
 	"dependencies": {
 		"commander": "^2.19.0",
 		"find-root": "^1.1.0",
-		"recursive-readdir-synchronous": "0.0.4",
+		"recursive-readdir": "^2.2.3",
 		"require-dir": "^1.2.0",
 		"uuid": "^3.3.2"
 	}

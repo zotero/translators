@@ -8,8 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 3,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-12-17 17:43:00"
+	"lastUpdated": "2022-07-14 20:21:20"
 }
 
 /*
@@ -234,13 +233,18 @@ function doExport() {
 '<H1>Bookmarks Menu</H1>\n'+
 '<DL>\n';
 	var footer = '</DL>';
-	//var tags = "";
 
 	Zotero.write(header);
 	while (item = Zotero.nextItem()) {
 		// TODO Be more verbose, making an informative title and including more metadata
-		//tags = item.tags.forEach(function (tag) {return tag.tag}).join(",");
-		if (item.url) Zotero.write('    <DT><A HREF="'+item.url+'">'+item.title+'</A>\n');
+		let tags = item.tags.map(tag => tag.tag).join(',');
+		if (item.url) {
+			Zotero.write('    <DT><A HREF="'+item.url+'"');
+			if (tags) {
+				Zotero.write(' TAGS="' + tags + '"');
+			}
+			Zotero.write('>'+item.title+'</A>\n');
+		}
 		else Zotero.debug("Skipping item without URL: "+item.title);
 	}
 	Zotero.write(footer);

@@ -1,18 +1,17 @@
 {
 	"translatorID": "93514073-b541-4e02-9180-c36d2f3bb401",
-	"translatorType": 1,
 	"label": "Crossref Unixref XML",
 	"creator": "Sebastian Karcher",
 	"target": "xml",
 	"minVersion": "3.0",
-	"maxVersion": null,
+	"maxVersion": "",
 	"priority": 100,
-	"inRepository": true,
-	"browserSupport": "gcsibv",
 	"configOptions": {
 		"dataMode": "xml/dom"
 	},
-	"lastUpdated": "2019-04-27 02:15:00"
+	"inRepository": true,
+	"translatorType": 1,
+	"lastUpdated": "2023-01-12 05:52:38"
 }
 
 /*
@@ -238,8 +237,10 @@ function doImport() {
 		var bookType = itemXML[0].hasAttribute("book_type") ? itemXML[0].getAttribute("book_type") : null;
 		var componentType = ZU.xpathText(itemXML[0], 'content_item/@component_type');
 		// is this an entry in a reference book?
-		var isReference = ["reference", "other"].includes(bookType)
-				&& ["chapter", "reference_entry"].includes(componentType);
+		var isReference = (bookType == "reference"
+				&& ["chapter", "reference_entry", "other"].includes(componentType))
+			|| (bookType == "other"
+				&& ["chapter", "reference_entry"].includes(componentType));
 
 		// for items that are entry in reference books OR edited book types that have some type of a chapter entry.
 		if ((bookType === "edited_book" && componentType) || isReference) {
@@ -304,7 +305,7 @@ function doImport() {
 	else if ((itemXML = ZU.xpath(doiRecord, 'crossref/database')).length) {
 		item = new Zotero.Item("report"); // should be dataset
 		refXML = ZU.xpath(itemXML, 'dataset');
-		item.extra = "type: dataset";
+		item.extra = "Type: dataset";
 		metadataXML = ZU.xpath(itemXML, 'database_metadata');
 		
 		var pubDate = ZU.xpath(refXML, 'database_date/publication_date');
@@ -339,7 +340,7 @@ function doImport() {
 		item = new Zotero.Item("manuscript"); // is this the best category
 		item.date = parseDate(ZU.xpath(itemXML, "reviewed_date"));
 		if (ZU.xpath(itemXML, "/contributors/anonymous")) {
-			item.creators.push({ lastName: "Anonymous Reviewer", fieldMode: "1", creatorType: "author" });
+			item.creators.push({ lastName: "Anonymous Reviewer", fieldMode: 1, creatorType: "author" });
 		}
 		item.type = "peer review";
 		var reviewOf = ZU.xpathText(itemXML, "//related_item/inter_work_relation");
@@ -445,13 +446,23 @@ function doImport() {
 	}
 	// Zotero.debug(JSON.stringify(item, null, 4));
 
-	// check if there are potential issues with character encoding and try to fix it
-	// e.g. 10.1057/9780230391116.0016 (en dash in title is presented as <control><control>â)
+	// Check if there are potential issues with character encoding and try to fix them.
+	// E.g., in 10.1057/9780230391116.0016, the en dash in the title is displayed as â<80><93>,
+	// which is what you get if you decode a UTF-8 en dash (<E2><80><93>) as Latin-1 and then serve
+	// as UTF-8 (<C3><A2> <C2><80> <C2><93>)
 	for (var field in item) {
 		if (typeof item[field] != 'string') continue;
-		// check for control characters that should never be in strings from CrossRef
+		// Check for control characters that should never be in strings from Crossref
 		if (/[\u007F-\u009F]/.test(item[field])) {
-			item[field] = decodeURIComponent(escape(item[field]));
+			// <E2><80><93> -> %E2%80%93 -> en dash
+			try {
+				item[field] = decodeURIComponent(escape(item[field]));
+			}
+			// If decoding failed, just strip control characters
+			// https://forums.zotero.org/discussion/102271/lookup-failed-for-doi
+			catch (e) {
+				item[field] = item[field].replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+			}
 		}
 	}
 	item.complete();
@@ -547,6 +558,7 @@ var testCases = [
 				"DOI": "10.1111/1574-6941.12040",
 				"ISSN": "01686496",
 				"issue": "1",
+				"journalAbbreviation": "FEMS Microbiol Ecol",
 				"language": "en",
 				"pages": "60-74",
 				"publicationTitle": "FEMS Microbiology Ecology",
@@ -577,6 +589,7 @@ var testCases = [
 				"DOI": "10.2747/1539-7216.50.2.197",
 				"ISSN": "1538-7216, 1938-2863",
 				"issue": "2",
+				"journalAbbreviation": "Eurasian Geography and Economics",
 				"language": "en",
 				"pages": "197-221",
 				"publicationTitle": "Eurasian Geography and Economics",
@@ -654,7 +667,7 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Anonymous Reviewer",
-						"fieldMode": "1",
+						"fieldMode": 1,
 						"creatorType": "author"
 					}
 				],
@@ -703,11 +716,117 @@ var testCases = [
 				"DOI": "10.4086/cjtcs.2012.002",
 				"ISSN": "1073-0486",
 				"issue": "1",
+				"journalAbbreviation": "Chicago J. of Theoretical Comp. Sci.",
 				"language": "en",
 				"pages": "1-10",
 				"publicationTitle": "Chicago Journal of Theoretical Computer Science",
 				"url": "http://cjtcs.cs.uchicago.edu/articles/2012/2/contents.html",
 				"volume": "18",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<doi_records>\n  <doi_record owner=\"10.1002\" timestamp=\"2020-10-06 16:52:28\">\n    <crossref>\n      <book book_type=\"reference\">\n        <book_metadata language=\"en\">\n          <contributors>\n            <person_name contributor_role=\"editor\" sequence=\"first\">\n              <given_name>Jan</given_name>\n              <surname>Bulck</surname>\n            </person_name>\n          </contributors>\n          <titles>\n            <title>The International Encyclopedia of Media Psychology</title>\n          </titles>\n          <edition_number>1</edition_number>\n          <publication_date media_type=\"online\">\n            <month>09</month>\n            <day>08</day>\n            <year>2020</year>\n          </publication_date>\n          <isbn media_type=\"electronic\">9781119011071</isbn>\n          <publisher>\n            <publisher_name>Wiley</publisher_name>\n          </publisher>\n          <publisher_item>\n            <identifier id_type=\"doi\">10.1002/9781119011071</identifier>\n          </publisher_item>\n          <program name=\"AccessIndicators\">\n            <license_ref applies_to=\"tdm\">http://doi.wiley.com/10.1002/tdm_license_1.1</license_ref>\n          </program>\n          <doi_data>\n            <doi>10.1002/9781119011071</doi>\n            <timestamp>2020100613475700320</timestamp>\n            <resource>https://onlinelibrary.wiley.com/doi/book/10.1002/9781119011071</resource>\n          </doi_data>\n        </book_metadata>\n        <content_item component_type=\"other\" level_sequence_number=\"1\" publication_type=\"full_text\">\n          <contributors>\n            <person_name contributor_role=\"author\" sequence=\"first\">\n              <given_name>Allison</given_name>\n              <surname>Eden</surname>\n            </person_name>\n          </contributors>\n          <titles>\n            <title>Appreciation and Eudaimonic Reactions to Media</title>\n          </titles>\n          <publication_date media_type=\"online\">\n            <month>09</month>\n            <day>09</day>\n            <year>2020</year>\n          </publication_date>\n          <pages>\n            <first_page>1</first_page>\n            <last_page>9</last_page>\n          </pages>\n          <publisher_item>\n            <identifier id_type=\"doi\">10.1002/9781119011071.iemp0172</identifier>\n          </publisher_item>\n          <archive_locations>\n            <archive name=\"Portico\" />\n          </archive_locations>\n          <program name=\"AccessIndicators\">\n            <license_ref applies_to=\"tdm\">http://doi.wiley.com/10.1002/tdm_license_1.1</license_ref>\n          </program>\n          <doi_data>\n            <doi>10.1002/9781119011071.iemp0172</doi>\n            <timestamp>2020100613475700320</timestamp>\n            <resource>https://onlinelibrary.wiley.com/doi/10.1002/9781119011071.iemp0172</resource>\n            <collection property=\"crawler-based\">\n              <item crawler=\"iParadigms\">\n                <resource>https://onlinelibrary.wiley.com/doi/pdf/10.1002/9781119011071.iemp0172</resource>\n              </item>\n            </collection>\n            <collection property=\"text-mining\">\n              <item>\n                <resource mime_type=\"application/pdf\">https://onlinelibrary.wiley.com/doi/pdf/10.1002/9781119011071.iemp0172</resource>\n              </item>\n              <item>\n                <resource mime_type=\"application/xml\">https://onlinelibrary.wiley.com/doi/full-xml/10.1002/9781119011071.iemp0172</resource>\n              </item>\n            </collection>\n          </doi_data>\n          <citation_list>\n            <citation key=\"e_1_2_9_1_2_1\">\n              <doi>10.1080/15213269.2016.1182030</doi>\n            </citation>\n            <citation key=\"e_1_2_9_1_3_1\">\n              <doi>10.1080/23736992.2017.1329019</doi>\n            </citation>\n            <citation key=\"e_1_2_9_1_4_1\">\n              <doi>10.1111/jcom.12228</doi>\n            </citation>\n            <citation key=\"e_1_2_9_1_5_1\">\n              <doi>10.1080/10510974.2017.1340903</doi>\n            </citation>\n            <citation key=\"e_1_2_9_1_6_1\">\n              <doi>10.1111/jcom.12101</doi>\n            </citation>\n            <citation key=\"e_1_2_9_1_7_1\">\n              <doi>10.1080/15205436.2013.872277</doi>\n            </citation>\n            <citation key=\"e_1_2_9_1_8_1\">\n              <doi>10.1111/j.1468-2958.2009.01368.x</doi>\n            </citation>\n            <citation key=\"e_1_2_9_1_9_1\">\n              <doi>10.1027/1864-1105/a000029</doi>\n            </citation>\n            <citation key=\"e_1_2_9_1_10_1\">\n              <doi>10.1037/ppm0000066</doi>\n            </citation>\n            <citation key=\"e_1_2_9_1_11_1\">\n              <doi>10.1111/j.1460-2466.2011.01585.x</doi>\n            </citation>\n            <citation key=\"e_1_2_9_1_12_1\">\n              <volume_title>The role of intuition accessibility on the appraisal and selection of media content</volume_title>\n              <author>Prabhu S.</author>\n              <cYear>2014</cYear>\n            </citation>\n            <citation key=\"e_1_2_9_1_13_1\">\n              <doi>10.1080/15213269.2013.773494</doi>\n            </citation>\n            <citation key=\"e_1_2_9_1_14_1\">\n              <doi>10.1111/j.1460-2466.2012.01649.x</doi>\n            </citation>\n            <citation key=\"e_1_2_9_1_15_1\">\n              <doi>10.1111/jcom.12099</doi>\n            </citation>\n            <citation key=\"e_1_2_9_1_16_1\">\n              <doi>10.1111/jcom.12097</doi>\n            </citation>\n            <citation key=\"e_1_2_9_1_17_1\">\n              <doi>10.1111/jcom.12100</doi>\n            </citation>\n            <citation key=\"e_1_2_9_1_18_1\">\n              <doi>10.1027/1864-1105/a000031</doi>\n            </citation>\n            <citation key=\"e_1_2_9_1_19_1\">\n              <volume_title>Sage handbook of media processes and effects</volume_title>\n              <author>Vorderer P.</author>\n              <first_page>455</first_page>\n              <cYear>2009</cYear>\n            </citation>\n            <citation key=\"e_1_2_9_1_20_1\">\n              <doi>10.1111/j.1468-2958.2012.01434.x</doi>\n            </citation>\n            <citation key=\"e_1_2_9_1_21_1\">\n              <doi>10.1177/000276488031003005</doi>\n            </citation>\n            <citation key=\"e_1_2_9_2_2_1\">\n              <doi>10.1080/15213260701813447</doi>\n            </citation>\n            <citation key=\"e_1_2_9_2_3_1\">\n              <volume_title>Thinking, fast and slow</volume_title>\n              <author>Kahneman D.</author>\n              <cYear>2011</cYear>\n            </citation>\n            <citation key=\"e_1_2_9_2_4_1\">\n              <doi>10.1093/joc/jqx020</doi>\n            </citation>\n          </citation_list>\n        </content_item>\n      </book>\n    </crossref>\n  </doi_record>\n</doi_records>",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Appreciation and Eudaimonic Reactions to Media",
+				"creators": [
+					{
+						"creatorType": "editor",
+						"firstName": "Jan",
+						"lastName": "Bulck"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Allison",
+						"lastName": "Eden"
+					}
+				],
+				"date": "2020-09-09",
+				"ISBN": "9781119011071",
+				"bookTitle": "The International Encyclopedia of Media Psychology",
+				"edition": "1",
+				"extra": "DOI: 10.1002/9781119011071.iemp0172",
+				"language": "en",
+				"pages": "1-9",
+				"publisher": "Wiley",
+				"url": "https://onlinelibrary.wiley.com/doi/10.1002/9781119011071.iemp0172",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<doi_records>\n  <doi_record owner=\"10.1045\" timestamp=\"2016-05-13 10:02:13\">\n    <crossref>\n      <journal>\n        <journal_metadata language=\"en\">\n          <full_title>D-Lib Magazine</full_title>\n          <abbrev_title>D-Lib Magazine</abbrev_title>\n          <issn media_type=\"electronic\">1082-9873</issn>\n          <doi_data>\n            <doi>10.1045/dlib.magazine</doi>\n            <resource>http://www.dlib.org/</resource>\n          </doi_data>\n        </journal_metadata>\n        <journal_issue>\n          <publication_date media_type=\"online\">\n            <month>05</month>\n            <year>2016</year>\n          </publication_date>\n          <journal_volume>\n            <volume>22</volume>\n          </journal_volume>\n          <issue>5/6</issue>\n          <doi_data>\n            <doi>10.1045/may2016-contents</doi>\n            <resource>http://www.dlib.org/dlib/may16/05contents.html</resource>\n          </doi_data>\n        </journal_issue>\n        <journal_article publication_type=\"full_text\">\n          <titles>\n            <title>Scientific Stewardship in the Open Data and Big Data Era  Roles and Responsibilities of Stewards and Other Major Product Stakeholders</title>\n          </titles>\n          <contributors>\n            <person_name sequence=\"first\" contributor_role=\"author\">\n              <given_name>Ge</given_name>\n              <surname>Peng</surname>\n            </person_name>\n            <person_name sequence=\"additional\" contributor_role=\"author\">\n              <given_name>Nancy A.</given_name>\n              <surname>Ritchey</surname>\n            </person_name>\n            <person_name sequence=\"additional\" contributor_role=\"author\">\n              <given_name>Kenneth S.</given_name>\n              <surname>Casey</surname>\n            </person_name>\n            <person_name sequence=\"additional\" contributor_role=\"author\">\n              <given_name>Edward J.</given_name>\n              <surname>Kearns</surname>\n            </person_name>\n            <person_name sequence=\"additional\" contributor_role=\"author\">\n              <given_name>Jeffrey L.</given_name>\n              <surname>Prevette</surname>\n            </person_name>\n            <person_name sequence=\"additional\" contributor_role=\"author\">\n              <given_name>Drew</given_name>\n              <surname>Saunders</surname>\n            </person_name>\n            <person_name sequence=\"additional\" contributor_role=\"author\">\n              <given_name>Philip</given_name>\n              <surname>Jones</surname>\n            </person_name>\n            <person_name sequence=\"additional\" contributor_role=\"author\">\n              <given_name>Tom</given_name>\n              <surname>Maycock</surname>\n            </person_name>\n            <person_name sequence=\"additional\" contributor_role=\"author\">\n              <given_name>Steve</given_name>\n              <surname>Ansari</surname>\n            </person_name>\n          </contributors>\n          <publication_date media_type=\"online\">\n            <month>05</month>\n            <year>2016</year>\n          </publication_date>\n          <doi_data>\n            <doi>10.1045/may2016-peng</doi>\n            <resource>http://www.dlib.org/dlib/may16/peng/05peng.html</resource>\n          </doi_data>\n        </journal_article>\n      </journal>\n    </crossref>\n  </doi_record>\n</doi_records>",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Scientific Stewardship in the Open Data and Big Data Era  Roles and Responsibilities of Stewards and Other Major Product Stakeholders",
+				"creators": [
+					{
+						"creatorType": "author",
+						"firstName": "Ge",
+						"lastName": "Peng"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Nancy A.",
+						"lastName": "Ritchey"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Kenneth S.",
+						"lastName": "Casey"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Edward J.",
+						"lastName": "Kearns"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Jeffrey L.",
+						"lastName": "Prevette"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Drew",
+						"lastName": "Saunders"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Philip",
+						"lastName": "Jones"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Tom",
+						"lastName": "Maycock"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Steve",
+						"lastName": "Ansari"
+					}
+				],
+				"date": "05/2016",
+				"DOI": "10.1045/may2016-peng",
+				"ISSN": "1082-9873",
+				"issue": "5/6",
+				"journalAbbreviation": "D-Lib Magazine",
+				"language": "en",
+				"publicationTitle": "D-Lib Magazine",
+				"url": "http://www.dlib.org/dlib/may16/peng/05peng.html",
+				"volume": "22",
 				"attachments": [],
 				"tags": [],
 				"notes": [],

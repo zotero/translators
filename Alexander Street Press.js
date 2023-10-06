@@ -1,6 +1,5 @@
 {
 	"translatorID": "0a84a653-79ea-4c6a-8a68-da933e3b504a",
-	"translatorType": 4,
 	"label": "Alexander Street Press",
 	"creator": "John West and Michael Berkowitz",
 	"target": "^https?://(www\\.)alexanderstreet",
@@ -8,45 +7,47 @@
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
-	"lastUpdated": "2009-01-08 08:19:07"
+	"translatorType": 4,
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2021-12-28 04:42:00"
 }
 
 function detectWeb(doc, url) {
 	if ( url.indexOf("object.details.aspx") != -1 ) {
 		var zitemtype = doc.getElementById("ctl00_ctl00_MasterContentBody_ContentPlaceHolder1_txtZType").value;
 		switch (zitemtype.toLowerCase()) {
-		        case "book":
-		        	return "book";
-		        	break;
-		        case "chapter":
-		        	return "bookSection";
-		        	break;
-		        case "journal":
-		        	return "journalArticle";
-		        	break;
-		        case "manuscript":
-		        	return "manuscript";
-		        	break;
-		        case "audio":
-		        	return "audioRecording";
-		        	break;
-		        case "video":
-		        	return "videoRecording";
-		        	break;
-		        case "issue":
-		        	return "journalArticle";
-		        	break;
-		        case "article":
-		        	return "journalArticle";
-		        	break;
-		        case "series":
-		        	return "interview";
-		        	break;
-		        case "session":
-		        	return "interview";
-		        	break;
-		        default:
-		        	return "document";
+				case "book":
+					return "book";
+					break;
+				case "chapter":
+					return "bookSection";
+					break;
+				case "journal":
+					return "journalArticle";
+					break;
+				case "manuscript":
+					return "manuscript";
+					break;
+				case "audio":
+					return "audioRecording";
+					break;
+				case "video":
+					return "videoRecording";
+					break;
+				case "issue":
+					return "journalArticle";
+					break;
+				case "article":
+					return "journalArticle";
+					break;
+				case "series":
+					return "interview";
+					break;
+				case "session":
+					return "interview";
+					break;
+				default:
+					return "document";
 		}
 	} else if (url.indexOf("results.aspx") != -1) {
 		return "multiple";
@@ -140,39 +141,39 @@ function scrape(doc, url) {
 
 function GetItemType(zitemtype) {
 	switch (zitemtype.toLowerCase()) {
-	        case "book":
-	        	return "book";
-	        	break;
-	        case "chapter":
-	        	return "bookSection";
-	        	break;
-	        case "journal":
-	        	return "journalArticle";
-	        	break;
-	        case "manuscript":
-	        	return "manuscript";
-	        	break;
-	        case "audio":
-	        	return "audioRecording";
-	        	break;
-	        case "video":
-	        	return "videoRecording";
-	        	break;
-	        case "issue":
-	        	return "journalArticle";
-	        	break;
-	        case "article":
-	        	return "journalArticle";
-	        	break;
-	        case "series":
-	        	return "interview";
-	        	break;
-	        case "session":
-	        	return "interview";
-	        	break;
-	        default:
-	        	return "document";
-       }
+			case "book":
+				return "book";
+				break;
+			case "chapter":
+				return "bookSection";
+				break;
+			case "journal":
+				return "journalArticle";
+				break;
+			case "manuscript":
+				return "manuscript";
+				break;
+			case "audio":
+				return "audioRecording";
+				break;
+			case "video":
+				return "videoRecording";
+				break;
+			case "issue":
+				return "journalArticle";
+				break;
+			case "article":
+				return "journalArticle";
+				break;
+			case "series":
+				return "interview";
+				break;
+			case "session":
+				return "interview";
+				break;
+			default:
+				return "document";
+	   }
 }
 
 function doWeb(doc, url) {
@@ -185,13 +186,13 @@ function doWeb(doc, url) {
 		while (next_title = titles.iterateNext()) {
 			items[next_title.href] = next_title.textContent;
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
+		Zotero.selectItems(items, function (items) {
+			if (!items) return;
+			ZU.processDocuments(Object.keys(items), scrape);
+		});
 	} else {
-		articles = [url];
+		scrape(doc, url);
 	}
-
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-}
+}/** BEGIN TEST CASES **/
+var testCases = []
+/** END TEST CASES **/

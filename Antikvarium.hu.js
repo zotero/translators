@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-11-11 15:26:37"
+	"lastUpdated": "2021-09-22 19:39:49"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017 Velősy Péter Kristóf
+	Copyright © 2017-2021 Velősy Péter Kristóf
 	
 	This file is part of Zotero.
 
@@ -36,16 +36,14 @@
 */
 
 
-//Zotero attr() and text() functions:
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
-
 function detectWeb(doc, url) {
 	if (url.includes('konyv')) {
 		return "book";
-	} else if (url.includes('index.php?type=search') && getSearchResults(doc, true)){
+	}
+	else if (url.includes('index.php?type=search') && getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
@@ -53,9 +51,9 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('.src-result-book');
-	for (var i=0; i<rows.length; i++) {
-		var href = attr(rows[i], '#searchResultKonyv-csempes', 'href');
-		var title = ZU.trimInternal(text(rows[i], '.book-title-src'));
+	for (let row of rows) {
+		var href = attr(row, '#searchResultKonyv-csempes', 'href');
+		var title = ZU.trimInternal(text(row, '.book-title-src'));
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -68,22 +66,16 @@ function getSearchResults(doc, checkOnly) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
 
 
-function scrape(doc, url) {
+function scrape(doc, _url) {
 	var newItem = new Zotero.Item('book');
 
 	newItem.title = text(doc, '[itemprop=name]', 0).trim();
@@ -108,24 +100,22 @@ function scrape(doc, url) {
 		newItem.volume = newItem.seriesNumber;
 	}
 
-	var publisherElement = doc.querySelector('[itemprop=publisher]');
-	if (publisherElement) {
-
-		var publisherName = text(publisherElement, '[itemprop=name]', 0);
-		if (publisherName) {
-			newItem.publisher = publisherName;
-		}
-
-		var publisherPlace = text(publisherElement, '[itemprop=address]', 0);
-		if (publisherPlace) {
-			newItem.place = publisherPlace.replace('(', '').replace(')', '');
-		}
+	var publisherName = text(doc, '#konyvAdatlapKiadoLink [itemprop=name]')
+		|| text(doc, '[itemprop=name]', 1);
+	if (publisherName) {
+		newItem.publisher = publisherName;
 	}
-	newItem.date = text(doc, '[itemprop=datePublished]');
 
-	newItem.numPages = text(doc, '[itemprop=numberOfPages]', 0);
+	var publisherPlace = firstText(doc, '[itemprop=address]');
+	if (publisherPlace) {
+		newItem.place = publisherPlace.replace('(', '').replace(')', '');
+	}
+		
+	newItem.date = firstText(doc, '[itemprop=datePublished]');
+
+	newItem.numPages = firstText(doc, '[itemprop=numberOfPages]');
 	
-	newItem.language = text(doc, '[itemprop=inLanguage]', 0);
+	newItem.language = firstText(doc, '[itemprop=inLanguage]');
 
 	var isbnElement = getElementByInnerText(doc, 'th', 'ISBN:');
 	if (isbnElement) {
@@ -134,12 +124,24 @@ function scrape(doc, url) {
 
 	var contentsElement = doc.getElementById('tartalomFull');
 	if (contentsElement) {
-		newItem.notes.push({note: contentsElement.innerText});
+		newItem.notes.push({ note: contentsElement.innerText });
 	}
 
-	newItem.attachments.push({document: doc, title: "Antikvarium.hu Snapshot", mimeType: "text/html" });
+	newItem.attachments.push({ document: doc, title: "Antikvarium.hu Snapshot", mimeType: "text/html" });
 
 	newItem.complete();
+}
+
+/**
+ * Return the first element matching the selector with non-empty text.
+ */
+function firstText(docOrElem, selector) {
+	for (let elem of docOrElem.querySelectorAll(selector)) {
+		let elemText = elem.textContent.trim();
+		if (elemText) return elemText;
+	}
+	
+	return '';
 }
 
 function getElementByInnerText(doc, elementType, innerText) {
@@ -156,7 +158,8 @@ function getElementByInnerText(doc, elementType, innerText) {
 function cleanHungarianAuthor(authorName) {
 	if (authorName.includes(',')) {
 		return Zotero.Utilities.cleanAuthor(authorName, 'author', true);
-	} else {
+	}
+	else {
 		var author = Zotero.Utilities.cleanAuthor(authorName, 'author', false);
 		var firstName = author.lastName;
 		var lastName = author.firstName;
@@ -169,7 +172,7 @@ function cleanHungarianAuthor(authorName) {
 function capitalizeHungarianTitle(title) {
 	title = title[0].toUpperCase() + title.substring(1).toLowerCase();
 	var words = title.split(/[ !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/);
-	words.forEach(w => {
+	words.forEach((w) => {
 		if (isRomanNumeral(w)) {
 			title = title.replace(w, w.toUpperCase());
 		}
@@ -179,8 +182,9 @@ function capitalizeHungarianTitle(title) {
 
 function isRomanNumeral(word) {
 	var romanRegex = /^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/;
-	return word.toUpperCase().match(romanRegex) ? true : false;
+	return !!word.toUpperCase().match(romanRegex);
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -224,6 +228,53 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.antikvarium.hu/index.php?type=search&ksz=atlasz&reszletes=0&newSearch=1&searchstart=ksz&interfaceid=101",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.antikvarium.hu/konyv/peter-harrison-mary-harrison-misztikus-erok-51027-0",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Misztikus erők: Mistic forces/testen túli tapasztalatok",
+				"creators": [
+					{
+						"firstName": "Harrison",
+						"lastName": "Peter",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Harrison",
+						"lastName": "Mary",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nóra",
+						"lastName": "Rohonczi",
+						"creatorType": "author"
+					}
+				],
+				"ISBN": "9789637994043",
+				"language": "Magyar",
+				"libraryCatalog": "Antikvarium.hu",
+				"numPages": "274",
+				"place": "Budapest",
+				"publisher": "Pesti Szalon Könyvkiadó",
+				"shortTitle": "Misztikus erők",
+				"attachments": [
+					{
+						"title": "Antikvarium.hu Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "TARTALOM\nKöszönetnyilvánítás\t3\nElőszó\t5\nBevezetés\t9\nMi a TTT?\t13\nA fény\t23\nA magaslati nézőpont\t35\nA mennyországban?\t49\nA gyógyító erő\t55\nKülönös hatóerők\t75\nÁllatok\t91\nZene\t105\nA határterület\t111\nIdőutazások\t121\nA döntés\t141\nAz ezüstzsinór\t151\nEgybeesések\t163\nA fátum\t173\nMenekülés\t193\nGyermekek\t201\nA halálfélelem legyőzése\t213\nMegérzések\t231\nAz okkultizmus veszélyei\t235\nA lélek illata\t247\nAngyalok\t257\nPozitív végkövetkeztetések\t273"
+					}
+				],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

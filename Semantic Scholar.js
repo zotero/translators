@@ -2,14 +2,14 @@
 	"translatorID": "276cb34c-6861-4de7-a11d-c2e46fb8af28",
 	"label": "Semantic Scholar",
 	"creator": "Guy Aglionby",
-	"target": "^https?://(www\\.semanticscholar\\.org/(search|paper|author)|pdfs\\.semanticscholar\\.org/)",
-	"minVersion": "3.0",
+	"target": "^https?://(www\\.semanticscholar\\.org/(paper/.+|search\\?|reader/.+)|pdfs\\.semanticscholar\\.org/)",
+	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-07-07 21:59:05"
+	"lastUpdated": "2022-11-18 01:12:22"
 }
 
 /*
@@ -37,196 +37,195 @@
 
 // See also https://github.com/zotero/translators/blob/master/BibTeX.js
 var bibtex2zoteroTypeMap = {
+	article: "journalArticle",
 	inproceedings: "conferencePaper",
 	conference: "conferencePaper",
-	article: "journalArticle"
 };
 
+function getItemTypeFromBibtex(doc) {
+	const bibtex = ZU.xpathText(doc, '//pre[@class="bibtex-citation"]');
+	const bibtexType = bibtex.split('{')[0].replace('@', '');
+	return bibtex2zoteroTypeMap[bibtexType] || 'journalArticle';
+}
+
+function getSearchResults(doc, checkOnly) {
+	let searchResults = doc.querySelectorAll('.result-page .cl-paper-row > a');
+	if (checkOnly) {
+		return searchResults.length > 0;
+	}
+
+	let items = {};
+	for (let row of searchResults) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+
+		if (href && title) {
+			items[href] = title;
+		}
+	}
+
+	return items;
+}
+
 function detectWeb(doc, url) {
-	if (url.includes('/search') || url.includes('/author/')) {
-		return 'multiple';
+	if (doc.querySelector('#app')) {
+		Z.monitorDOMChanges(
+			doc.querySelector('#app'),
+			{ childList: true, subtree: true }
+		);
 	}
-	else if (url.includes('pdfs.semanticscholar.org')) {
-		return 'journalArticle';
+
+	if (url.includes('semanticscholar.org/search?')) {
+		const hasSearchResults = getSearchResults(doc, true);
+		if (hasSearchResults) {
+			return 'multiple';
+		}
 	}
-	else {
-		let citation = ZU.xpathText(doc, '//pre[@class="bibtex-citation"]');
-		let type = citation.split('{')[0].replace('@', '');
-		return bibtex2zoteroTypeMap[type];
-	}
+
+	return getItemTypeFromBibtex(doc);
 }
 
 function doWeb(doc, url) {
-	if (detectWeb(doc, url) === 'multiple') {
-		Zotero.selectItems(getSearchResults(doc), function (selected) {
-			if (selected) {
-				ZU.processDocuments(Object.keys(selected), parseDocument);
+	const docType = detectWeb(doc, url)
+	if (docType == 'multiple') {
+		Zotero.selectItems(getSearchResults(doc, false), (items) => {
+			if (items) {
+				ZU.processDocuments(Object.keys(items), scrape);
 			}
 		});
+		return;
 	}
-	else if (url.includes('pdfs.semanticscholar.org')) {
-		let urlComponents = url.split('/');
-		let paperId = urlComponents[3] + urlComponents[4].replace('.pdf', '');
-		const API_URL = 'https://api.semanticscholar.org/';
-		ZU.processDocuments(API_URL + paperId, parseDocument);
-	}
-	else {
-		parseDocument(doc, url);
-	}
+
+	scrape(doc, url);
 }
 
-function getSearchResults(doc) {
-	var titles = ZU.xpath(doc, '//a[@data-selenium-selector="title-link"]');
-	var results = {};
-	titles.forEach(function (linkElement) {
-		results[linkElement.href] = linkElement.textContent;
-	});
-	return results;
-}
+function scrape(doc, url) {
+	const itemType = getItemTypeFromBibtex(doc);
+	const item = new Zotero.Item(itemType);
 
-function parseDocument(doc, url) {
-	let citation = ZU.xpathText(doc, '//pre[@class="bibtex-citation"]');
+	const schemaTag = doc.querySelector('script.schema-data');
+	const schemaObject = JSON.parse(schemaTag.innerHTML);
+	const article = schemaObject['@graph'][1][0];
 	
-	let translator = Zotero.loadTranslator("import");
-	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
-	translator.setString(citation);
-	translator.setHandler("itemDone", function (obj, item) {
-		// Add the link to Semantic Scholar
+	if (article.about) {
+		item.abstractNote = article.abstract.substring(article.about.length + 1);
+		item.notes.push('[TLDR] ' + article.about);
+	} else {
+		item.abstractNote = article.abstract;
+	}
+	
+	item.attachments.push({
+		url: url,
+		title: url.includes('semanticscholar.org/reader') ? 'Semantic Reader Link' : 'Semantic Scholar Link',
+		mimeType: 'text/html',
+		snapshot: false
+	});
+
+	if (article.mainEntity && (article.mainEntity.includes('pdfs.semanticscholar.org') || article.mainEntity.includes('.pdf'))) {
 		item.attachments.push({
-			url: url,
-			title: "Semantic Scholar Link",
-			mimeType: "text/html",
-			snapshot: false
+			title: 'Full Text PDF',
+			mimeType: 'application/pdf',
+			url: article.mainEntity
 		});
+	}
 
-		// Attach the PDF
-		var scripts = ZU.xpath(doc, '//script');
-		var rawData = {};
-		const DATA_INDICATOR = 'var DATA = \'';
-		for (let i = 0; i < scripts.length; i++) {
-			if (scripts[i].innerHTML.startsWith(DATA_INDICATOR)) {
-				let dataText = scripts[i].innerHTML.replace(DATA_INDICATOR, '').slice(0, -2);
-				dataText = decodeURIComponent(atob(dataText));
-				rawData = JSON.parse(dataText)[1].resultData.paper;
-				break;
-			}
-		}
-		
-		if (item.pages) {
-			item.pages = fixPageRange(item.pages);
-		}
-		
-		if (item.volume && item.volume.includes(' ')) {
-			let volumeAndIssue = item.volume.split(' ');
-			item.volume = volumeAndIssue[0];
-			item.issue = volumeAndIssue[1];
-		}
-		
-		if (rawData.hasPdf && (rawData.primaryPaperLink.linkType === 's2'
-			|| rawData.primaryPaperLink.linkType == 'arxiv')) {
-			item.attachments.push({
-				url: rawData.primaryPaperLink.url,
-				title: "Full Text PDF",
-				mimeType: 'application/pdf'
-			});
-			if (rawData.primaryPaperLink.linkType == 'arxiv') {
-				let arxivId = rawData.primaryPaperLink.url.match(/\d{4}\.\d{5}/);
-				if (arxivId.length >= 1) {
-					if (item.extra) {
-						item.extra += '\narXiv: ' + arxivId[0];
-					}
-					else {
-						item.extra = 'arXiv: ' + arxivId[0];
-					}
-				}
-			}
-		}
+	if (article.sameAs) {
+		item.DOI = ZU.cleanDOI(decodeURIComponent(article.sameAs));
+		parseWithDOITranslator(item);
+		return;
+	}
 
-		if (rawData.paperAbstract && rawData.paperAbstract.text) {
-			item.abstractNote = ZU.unescapeHTML(rawData.paperAbstract.text);
-		}
+	item.title = article.name;
+	item.date = article.datePublished;
+	item.url = url;
+	if (url.includes('semanticscholar.org/reader')) {
+		const catalogPageLink = doc.querySelector('[data-heap-id="reader_to_pdp_link"]');
+		item.url = catalogPageLink ? catalogPageLink.href : null;
+	}
+	
+	if (itemType == 'conferencePaper' && article.publisher) {
+		item.conferenceName = article.publisher.name;
+	}
 
-		if (rawData.doiInfo && rawData.doiInfo.doi) {
-			item.DOI = rawData.doiInfo.doi;
-		}
-		
-		if (rawData.entities) {
-			for (let entity of rawData.entities) {
-				item.tags.push(entity.name);
-			}
-		}
+	if (itemType == 'journalArticle' && article.publication) {
+		item.publicationTitle = article.publication;
+	}
 
-		item.complete();
-	});
-	translator.translate();
+	if (article.author) {
+		article.author.forEach((author) => {
+			item.creators.push(ZU.cleanAuthor(author.name, 'author'));
+		});
+	}
+
+	item.complete();
 }
 
-// Some page ranges are given as e.g. 575-84. Expand these to e.g. 575-584
-function fixPageRange(pageRange) {
-	let numbers = pageRange.split('-');
-	if (numbers.length !== 2) {
-		return pageRange;
-	}
-	
-	numbers = numbers.map(function (x) {
-		return parseInt(x);
+function parseWithDOITranslator(item) {
+	var translate = Zotero.loadTranslator('search');
+	translate.setTranslator('b28d0d42-8549-4c6d-83fc-8382874a5cb9'); // DOI Content Negotiation
+	translate.setSearch({ DOI: item.DOI });
+	translate.setHandler('itemDone', (obj, doiItem) => {
+		let originalItemType = item.itemType;
+		let oldAttachments = item.attachments;
+		let oldNotes = item.notes;
+		Object.assign(item, doiItem);
+		item.libraryCatalog = 'Semantic Scholar';
+		item.itemType = originalItemType;
+		if (!item.attachments.length) {
+			item.attachments = oldAttachments;
+		}
+		if (!item.notes.length) {
+			item.notes = oldNotes;
+		}
 	});
-	
-	// No change is needed if they're already correctly formatted
-	if (numbers[0] < numbers[1]) {
-		return pageRange;
-	}
-	else {
-		let digitsInSecond = Math.floor(Math.log10(numbers[1])) + 1;
-		let baseNumber = numbers[0];
-		let difference = 0;
-		
-		for (let i = 1; i <= digitsInSecond; i++) {
-			let mod = baseNumber % (10 ** i);
-			baseNumber -= mod;
-			difference += mod;
-		}
-		
-		// If the given pageRange doesn't make sense, just leave it as it has been given
-		// e.g. '95-10'
-		if (difference > numbers[1]) {
-			return pageRange;
-		}
-		
-		numbers[1] = baseNumber + numbers[1];
-		
-		return numbers[0] + '-' + numbers[1];
-	}
+	translate.setHandler('done', () =>  item.complete());
+	translate.setHandler('error', (_, error) => Zotero.debug(error));
+	translate.translate();
 }
 
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.semanticscholar.org/paper/TectoMT%3A-Modular-NLP-Framework-Popel-Zabokrtsk%C3%BD/e1ea10a288632a4003a4221759bc7f7a2df36208",
+		"url": "https://www.semanticscholar.org/paper/Text-Analysis-of-Cases-Description-in-Urban-Field-Liu-Song/dd1e49494be449af48cfb223e22766f805d1f216",
 		"items": [
 			{
 				"itemType": "conferencePaper",
-				"title": "TectoMT: Modular NLP Framework",
+				"title": "Text Analysis of Cases Description in Urban Management Field Based on Knowledge Atlas",
 				"creators": [
 					{
-						"firstName": "Martin",
-						"lastName": "Popel",
-						"creatorType": "author"
+						"creatorType": "author",
+						"firstName": "Xutong",
+						"lastName": "Liu"
 					},
 					{
-						"firstName": "Zdenek",
-						"lastName": "Zabokrtský",
-						"creatorType": "author"
+						"creatorType": "author",
+						"firstName": "Hui",
+						"lastName": "Song"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Longqi",
+						"lastName": "Dai"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Bo",
+						"lastName": "Xu"
 					}
 				],
-				"date": "2010",
-				"DOI": "10.1007/978-3-642-14770-8_33",
-				"abstractNote": "In the present paper we describe TectoMT, a multi-purpose open-source NLP framework. It allows for fast and efficient development of NLP applications by exploiting a wide range of software modules already integrated in TectoMT, such as tools for sentence segmentation, tokenization, morphological analysis, POS tagging, shallow and deep syntax parsing, named entity recognition, anaphora resolution, tree-to-tree translation, natural language generation, word-level alignment of parallel corpora, and other tasks. One of the most complex applications of TectoMT is the English-Czech machine translation system with transfer on deep syntactic (tectogrammatical) layer. Several modules are available also for other languages (German, Russian, Arabic). Where possible, modules are implemented in a language-independent way, so they can be reused in many applications.",
-				"itemID": "Popel2010TectoMTMN",
+				"date": "2018",
+				"DOI": "10.1145/3207677.3278062",
+				"ISBN": "9781450365123",
+				"abstractNote": "With1 the development of information technology, Chinese urban Management has entered the information age. There will be a large number of cases with unstructured text which are reported by city officers and citizens entering into the digital platform, processing these text only by traditional method such as searching by key words will not only consume a lot of energy and time, but also be difficult to generalize the core issues of urban management because of the lost of the relationships between entities and events. In this paper, we propose a domain-oriented method to analyze the text using the domain-oriented knowledge graph and BLSTM-CRF model. we define a new graph structure to grasp the syntactical pattern and core concepts of this field by the method of hierarchical LDA (H-LDA). Combing the BLSTM-CRF language processing model with the domain knowledge graph, key entities and the corresponding description phrase are extracted from the text and recomposed as a short description. We make a further statistical analysis on the basic of the descriptions and semantic labels to find problems that affecting urban development and put forward pertinent suggestions.",
+				"conferenceName": "the 2nd International Conference",
+				"language": "en",
 				"libraryCatalog": "Semantic Scholar",
-				"proceedingsTitle": "IceTAL",
-				"shortTitle": "TectoMT",
+				"pages": "1-7",
+				"place": "Hohhot, China",
+				"proceedingsTitle": "Proceedings of the 2nd International Conference on Computer Science and Application Engineering - CSAE '18",
+				"publisher": "ACM Press",
+				"url": "http://dl.acm.org/citation.cfm?doid=3207677.3278062",
 				"attachments": [
 					{
 						"title": "Semantic Scholar Link",
@@ -234,139 +233,38 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"tags": [
-					{
-						"tag": "Anaphora (linguistics)"
-					},
-					{
-						"tag": "Language-independent specification"
-					},
-					{
-						"tag": "Machine translation"
-					},
-					{
-						"tag": "Multi-Purpose Viewer"
-					},
-					{
-						"tag": "Named-entity recognition"
-					},
-					{
-						"tag": "Natural language generation"
-					},
-					{
-						"tag": "Natural language processing"
-					},
-					{
-						"tag": "Open-source software"
-					},
-					{
-						"tag": "Parallel text"
-					},
-					{
-						"tag": "Parsing"
-					},
-					{
-						"tag": "Part-of-speech tagging"
-					},
-					{
-						"tag": "Sentence boundary disambiguation"
-					},
-					{
-						"tag": "Text corpus"
-					},
-					{
-						"tag": "Tokenization (data security)"
-					}
+				"tags": [],
+				"notes": [
+					"[TLDR] A new graph structure is defined to grasp the syntactical pattern and core concepts of this field by the method of hierarchical LDA (H-LDA), and key entities and the corresponding description phrase are extracted from the text and recomposed as a short description."
 				],
-				"notes": [],
 				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "https://www.semanticscholar.org/paper/The-spring-in-the-arch-of-the-human-foot-Ker-Bennett/8555e05e52e5c04017ca7a9c9da9ed9c39e4f9a0",
-		"defer": true,
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "The spring in the arch of the human foot",
-				"creators": [
-					{
-						"firstName": "Robert F.",
-						"lastName": "Ker",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Michael Brian",
-						"lastName": "Bennett",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "S. R.",
-						"lastName": "Bibby",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ralph Charles",
-						"lastName": "Kester",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "R. McN",
-						"lastName": "Alexander",
-						"creatorType": "author"
-					}
-				],
-				"date": "1987",
-				"DOI": "10.1038/325147a0",
-				"abstractNote": "Large mammals, including humans, save much of the energy needed for running by means of elastic structures in their legs and feet1,2. Kinetic and potential energy removed from the body in the first half of the stance phase is stored briefly as elastic strain energy and then returned in the second half by elastic recoil. Thus the animal runs in an analogous fashion to a rubber ball bouncing along. Among the elastic structures involved, the tendons of distal leg muscles have been shown to be important2,3. Here we show that the elastic properties of the arch of the human foot are also important.",
-				"itemID": "Ker1987TheSI",
-				"libraryCatalog": "Semantic Scholar",
-				"pages": "147-149",
-				"publicationTitle": "Nature",
-				"volume": "325",
-				"attachments": [
-					{
-						"title": "Semantic Scholar Link",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
-				"tags": [
-					{
-						"tag": "Tendon structure"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.semanticscholar.org/paper/Foundations-of-Statistical-Natural-Language-Manning-Sch%C3%BCtze/06fd7d924d499fbc62ccbcc2e458fb6c187bcf6f",
+		"url": "https://www.semanticscholar.org/paper/Attention-Transformer-Model-for-Translation-of-Dhanani-Rafi/6043e3b975a9e775203eec9ef0eab19d6dd0d378",
 		"items": [
 			{
 				"itemType": "conferencePaper",
-				"title": "Foundations of statistical natural language processing",
+				"title": "Attention Transformer Model for Translation of Similar Languages",
 				"creators": [
 					{
-						"firstName": "Christopher D.",
-						"lastName": "Manning",
+						"firstName": "Farhan",
+						"lastName": "Dhanani",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Hinrich",
-						"lastName": "Schütze",
+						"firstName": "Muhammad",
+						"lastName": "Rafi",
 						"creatorType": "author"
 					}
 				],
-				"date": "1999",
-				"DOI": "10.1023/A:1011424425034",
-				"abstractNote": "Statistical approaches to processing natural language text have become dominant in recent years. This foundational text is the first comprehensive introduction to statistical natural language processing (NLP) to appear. The book contains all the theory and algorithms needed for building NLP tools. It provides broad but rigorous coverage of mathematical and linguistic foundations, as well as detailed discussion of statistical methods, allowing students and researchers to construct their own implementations. The book covers collocation finding, word sense disambiguation, probabilistic parsing, information retrieval, and other applications.",
-				"itemID": "Manning1999FoundationsOS",
+				"date": "2020",
+				"abstractNote": "This paper illustrates our approach to the shared task on similar language translation in the fifth conference on machine translation (WMT-20). Our motivation comes from the latest state of the art neural machine translation in which Transformers and Recurrent Attention models are effectively used. A typical sequence-sequence architecture consists of an encoder and a decoder Recurrent Neural Network (RNN). The encoder recursively processes a source sequence and reduces it into a fixed-length vector (context), and the decoder generates a target sequence, token by token, conditioned on the same context. In contrast, the advantage of transformers is to reduce the training time by offering a higher degree of parallelism at the cost of freedom for sequential order. With the introduction of Recurrent Attention, it allows the decoder to focus effectively on order of the source sequence at different decoding steps. In our approach, we have combined the recurrence based layered encoder-decoder model with the Transformer model. Our Attention Transformer model enjoys the benefits of both Recurrent Attention and Transformer to quickly learn the most probable sequence for decoding in the target language. The architecture is especially suited for similar languages (languages coming from the same family). We have submitted our system for both Indo-Aryan Language forward (Hindi to Marathi) and reverse (Marathi to Hindi) pair. Our system trains on the parallel corpus of the training dataset provided by the organizers and achieved an average BLEU point of 3.68 with 97.64 TER score for the Hindi-Marathi, along with 9.02 BLEU point and 88.6 TER score for Marathi-Hindi testing set.",
+				"conferenceName": "WMT",
 				"libraryCatalog": "Semantic Scholar",
+				"url": "https://www.semanticscholar.org/paper/Attention-Transformer-Model-for-Translation-of-Dhanani-Rafi/6043e3b975a9e775203eec9ef0eab19d6dd0d378",
 				"attachments": [
 					{
 						"title": "Semantic Scholar Link",
@@ -378,319 +276,54 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [
-					{
-						"tag": "Algorithm"
-					},
-					{
-						"tag": "Data compression"
-					},
-					{
-						"tag": "Grams"
-					},
-					{
-						"tag": "Language model"
-					},
-					{
-						"tag": "Linear interpolation"
-					},
-					{
-						"tag": "N-gram"
-					},
-					{
-						"tag": "Natural language processing"
-					},
-					{
-						"tag": "Protologism"
-					},
-					{
-						"tag": "Smoothing"
-					},
-					{
-						"tag": "Stochastic grammar"
-					}
+				"tags": [],
+				"notes": [
+					"[TLDR] This paper illustrates the approach to the shared task on similar language translation in the fifth conference on machine translation (WMT-20) with a recurrence based layered encoder-decoder model with the Transformer model that enjoys the benefits of both Recurrent Attention and Transformer."
 				],
-				"notes": [],
 				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "https://www.semanticscholar.org/paper/Interleukin-7-mediates-the-homeostasis-of-na%C3%AFve-and-Schluns-Kieper/aee7b854bed51120fe356a5792dfb22fec7cf2ae",
+		"url": "https://www.semanticscholar.org/paper/TRANS-BLSTM%3A-Transformer-with-Bidirectional-LSTM-Huang-Xu/c79a8fd667f59e6f1ca9d54afc34f792e9079c7e",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Interleukin-7 mediates the homeostasis of naïve and memory CD8 T cells in vivo",
+				"title": "TRANS-BLSTM: Transformer with Bidirectional LSTM for Language Understanding",
 				"creators": [
 					{
-						"firstName": "Kimberly S.",
-						"lastName": "Schluns",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "William C.",
-						"lastName": "Kieper",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Stephen C.",
-						"lastName": "Jameson",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Leo",
-						"lastName": "Lefrançois",
-						"creatorType": "author"
-					}
-				],
-				"date": "2000",
-				"DOI": "10.1038/80868",
-				"abstractNote": "The naïve and memory T lymphocyte pools are maintained through poorly understood homeostatic mechanisms that may include signaling via cytokine receptors. We show that interleukin-7 (IL-7) plays multiple roles in regulating homeostasis of CD8+ T cells. We found that IL-7 was required for homeostatic expansion of naïve CD8+ and CD4+ T cells in lymphopenic hosts and for CD8+ T cell survival in normal hosts. In contrast, IL- 7 was not necessary for growth of CD8+ T cells in response to a virus infection but was critical for generating T cell memory. Up-regulation of Bcl-2 in the absence of IL-7 signaling was impaired after activation in vivo. Homeostatic proliferation of memory cells was also partially dependent on IL-7. These results point to IL-7 as a pivotal cytokine in T cell homeostasis.",
-				"itemID": "Schluns2000Interleukin7MT",
-				"libraryCatalog": "Semantic Scholar",
-				"pages": "426-432",
-				"publicationTitle": "Nature Immunology",
-				"volume": "1",
-				"attachments": [
-					{
-						"title": "Semantic Scholar Link",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
-				"tags": [
-					{
-						"tag": "Chronic Lymphocytic Leukemia"
-					},
-					{
-						"tag": "Homeostasis"
-					},
-					{
-						"tag": "Interleukin-7"
-					},
-					{
-						"tag": "Leukemia, B-Cell"
-					},
-					{
-						"tag": "Memory Disorders"
-					},
-					{
-						"tag": "T-Lymphocyte"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.semanticscholar.org/paper/Prim%C3%A4re-Ziliendyskinesie-in-%C3%96sterreich-Lesic-Maurer/13c67d45a9919f44bbd07fde9bdf5f4a0e9ecc8d",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Primäre Ziliendyskinesie in Österreich",
-				"creators": [
-					{
-						"firstName": "Irena",
-						"lastName": "Lesic",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Elisabeth",
-						"lastName": "Maurer",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Marie-Pierre F.",
-						"lastName": "Strippoli",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Claudia E.",
-						"lastName": "Kuehni",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Angelo",
-						"lastName": "Barbato",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Thomas",
-						"lastName": "Frischer",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "ERS Taskforce on Primary Ciliary Dyskinesia in",
-						"lastName": "children",
-						"creatorType": "author"
-					}
-				],
-				"date": "2009",
-				"DOI": "10.1007/s00508-009-1197-4",
-				"abstractNote": "SummaryINTRODUCTION: Primary ciliary dyskinesia (PCD) is a rare hereditary recessive disease with symptoms of recurrent pneumonia, chronic bronchitis, bronchiectasis, and chronic sinusitis. Chronic rhinitis is often the presenting symptom in newborns and infants. Approximately half of the patients show visceral mirror image arrangements (situs inversus). In this study, we aimed 1) to determine the number of paediatric PCD patients in Austria, 2) to show the diagnostic and therapeutic modalities used in the clinical centres and 3) to describe symptoms of children with PCD. PATIENTS, MATERIAL AND METHODS: For the first two aims, we analysed data from a questionnaire survey of the European Respiratory Society (ERS) task force on Primary Ciliary Dyskinesia in children. All paediatric respiratory units in Austria received a questionnaire. Symptoms of PCD patients from Vienna Children's University Hospital (aim 3) were extracted from case histories. RESULTS: In 13 Austrian clinics 48 patients with PCD (36 aged from 0–19 years) were identified. The prevalence of reported cases (aged 0–19 yrs) in Austria was 1:48000. Median age at diagnosis was 4.8 years (IQR 0.3–8.2), lower in children with situs inversus compared to those without (3.1 vs. 8.1 yrs, p = 0.067). In 2005–2006, the saccharine test was still the most commonly used screening test for PCD in Austria (45%). Confirmation of the diagnosis was usually by electron microscopy (73%). All clinics treated exacerbations immediately with antibiotics, 73% prescribed airway clearance therapy routinely to all patients. Other therapies and diagnostic tests were applied very inconsistently across Austrian hospitals. All PCD patients from Vienna (n = 13) had increased upper and lower respiratory secretions, most had recurring airway infections (n = 12), bronchiectasis (n = 7) and bronchitis (n = 7). CONCLUSION: Diagnosis and therapy of PCD in Austria are inhomogeneous. Prospective studies are needed to learn more about the course of the disease and to evaluate benefits and harms of different treatment strategies.ZusammenfassungEINLEITUNG: Die primäre Ziliendyskinesie (Primary Ciliary Dykinesia, PCD) ist eine seltene, meist autosomal-rezessiv vererbte Erkrankung, mit den typischen Manifestationen rezidivierende Pneumonien, chronische Bronchitis, Bronchiektasien, chronische Sinusitis und, insbesondere bei Neugeborenen und Säuglingen, chronischer Rhinitis. Die Hälfte der Patienten haben einen Situs inversus. Die Ziele dieser Studie waren, 1) die Anzahl pädiatrischer PCD-Patienten in Österreich zu erfassen, 2) die diagnostischen und therapeutischen Modalitäten der behandelnden Zentren darzustellen und 3) die Symptomatik der Patienten zu beschreiben. PATIENTEN, MATERIAL UND METHODEN: Zur Beantwortung der ersten zwei Fragen analysierten wir die österreichischen Resultate einer Fragebogenuntersuchung der pädiatrischen PCD Taskforce der European Respiratory Society (ERS). Die klinischen Charakteristika der PCD-Patienten an der Universitätsklinik für Kinder- und Jugendheilkunde in Wien stellten wir anhand der Krankengeschichten zusammen. ERGEBNISSE: In 13 österreichischen Krankenhäusern wurden 48 Patienten identifiziert (36 im Alter von 0–19 Jahre). Dies ergibt für Österreich eine Prävalenz diagnostizierter PCD-Patienten (0–19 Jahre) von 1:48000. Das mediane Alter bei Diagnose war 4,8 Jahre (IQR 0,3–8,2 Jahre). Patienten mit Situs inversus wurden früher diagsnotiziert (3,1 Jahre versus 8,1 Jahre; p = 0,067). Das gebräuchlichste screening-Verfahren (2005–2006) war der Saccharintest (45%), zur Diagnosesicherung wurde meist die Elektronenmikroskopie eingesetzt (73%). Alle Kliniken behandelten Exazerbationen sofort antibiotisch, Atemphysiotherapie wurde in 73% der Zentren eingesetzt. Insgesamt waren Diagnostik und Therapie der PCD in Österreich uneinheitlich. Alle Patienten der Universitätsklinik Wien (n = 13) hatten eine verstärkte Sekretproduktion, die meisten rezidivierende Atemwegsinfekte (n = 12), Bronchiektasen (n = 7) und Bronchitis (n = 7). KONKLUSION: Diagnostik und Therapie der PCD in Österreich sind uneinheitlich. Prospektive Studien sind notwendig, den Verlauf der Erkrankung zu erforschen sowie Nutzen und Schaden unterschiedlicher Therapie-konzepte darzustellen.",
-				"itemID": "Lesic2009PrimreZI",
-				"libraryCatalog": "Semantic Scholar",
-				"pages": "616-622",
-				"publicationTitle": "Wiener klinische Wochenschrift",
-				"volume": "121",
-				"attachments": [
-					{
-						"title": "Semantic Scholar Link",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
-				"tags": [
-					{
-						"tag": "Addison Disease"
-					},
-					{
-						"tag": "Apoptosis"
-					},
-					{
-						"tag": "Bronchiectasis"
-					},
-					{
-						"tag": "Bronchitis, Chronic"
-					},
-					{
-						"tag": "Chronic sinusitis"
-					},
-					{
-						"tag": "Ciliary Motility Disorders"
-					},
-					{
-						"tag": "Dyskinesia, Drug-Induced"
-					},
-					{
-						"tag": "Epilepsy"
-					},
-					{
-						"tag": "Extraction"
-					},
-					{
-						"tag": "Infant, Newborn"
-					},
-					{
-						"tag": "Kartagener Syndrome"
-					},
-					{
-						"tag": "Neoplasms, Unknown Primary"
-					},
-					{
-						"tag": "Osteoarthritis, Spine"
-					},
-					{
-						"tag": "Physical medicine/manipulation"
-					},
-					{
-						"tag": "Recurrent pneumonia"
-					},
-					{
-						"tag": "Situs Inversus"
-					},
-					{
-						"tag": "Surgical Wound Infection"
-					},
-					{
-						"tag": "Urinary Calculi"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.semanticscholar.org/author/Jane-Holmes/3023517",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://www.semanticscholar.org/paper/Superpower-Your-Browser-with-LibX-and-Zotero-Puckett/ac7caef334a4296503cc062529290d4c3ef6be32",
-		"items": [
-			{
-				"itemType": "conferencePaper",
-				"title": "Superpower Your Browser with LibX and Zotero",
-				"creators": [
-					{
-						"firstName": "J.",
-						"lastName": "Puckett",
-						"creatorType": "author"
-					}
-				],
-				"date": "2010",
-				"abstractNote": "© 2010 Jason Puckett the providers of either program discontinued supporting them, another institution could simply download the source code and take over development. As Firefox plugins, both LibX and Zotero are self-updating. Firefox periodically checks for new versions of all its add-ons and prompts the user to update with a few clicks. This process is unlikely to confuse even users who have never installed software. (The Internet Explorer version of LibX must be updated manually by downloading a new version from the library’s Web site and running an executable fi le.) This allows the library to push out new search options, and Zotero’s developers to push updates ranging from new features to updated bibliographic styles. It also allows for far more frequent improvements to the software than most commercial programs provide.",
-				"itemID": "Puckett2010SuperpowerYB",
-				"libraryCatalog": "Semantic Scholar",
-				"attachments": [
-					{
-						"title": "Semantic Scholar Link",
-						"mimeType": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [
-					{
-						"tag": "LibX"
-					},
-					{
-						"tag": "Zotero"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.semanticscholar.org/paper/Tracking-State-Changes-in-Procedural-Text%3A-A-and-Dalvi-Huang/5e9c9d0164ae041786f8fdc5726da12403e91a6c",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Tracking State Changes in Procedural Text: A Challenge Dataset and Models for Process Paragraph Comprehension",
-				"creators": [
-					{
-						"firstName": "Bhavana",
-						"lastName": "Dalvi",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Lifu",
+						"firstName": "Zhiheng",
 						"lastName": "Huang",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Niket",
-						"lastName": "Tandon",
+						"firstName": "Peng",
+						"lastName": "Xu",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Wen-tau",
-						"lastName": "Yih",
+						"firstName": "Davis",
+						"lastName": "Liang",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Peter",
-						"lastName": "Clark",
+						"firstName": "Ajay K.",
+						"lastName": "Mishra",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Bing",
+						"lastName": "Xiang",
 						"creatorType": "author"
 					}
 				],
-				"date": "2018",
-				"abstractNote": "We present a new dataset and models for comprehending paragraphs about processes (e.g., photosynthesis), an important genre of text describing a dynamic world. The new dataset, ProPara, is the first to contain natural (rather than machine-generated) text about a changing world along with a full annotation of entity states (location and existence) during those changes (81k datapoints). The end-task, tracking the location and existence of entities through the text, is challenging because the causal effects of actions are often implicit and need to be inferred. We find that previous models that have worked well on synthetic data achieve only mediocre performance on ProPara, and introduce two new neural models that exploit alternative mechanisms for state prediction, in particular using LSTM input encoding and span prediction. The new models improve accuracy by up to 19%. The dataset and models are available to the community at http://data.allenai.org/propara.",
-				"itemID": "Dalvi2018TrackingSC",
+				"date": "16 March 2020",
+				"abstractNote": "Bidirectional Encoder Representations from Transformers (BERT) has recently achieved state-of-the-art performance on a broad range of NLP tasks including sentence classification, machine translation, and question answering. The BERT model architecture is derived primarily from the transformer. Prior to the transformer era, bidirectional Long Short-Term Memory (BLSTM) has been the dominant modeling architecture for neural machine translation and question answering. In this paper, we investigate how these two modeling techniques can be combined to create a more powerful model architecture. We propose a new architecture denoted as Transformer with BLSTM (TRANS-BLSTM) which has a BLSTM layer integrated to each transformer block, leading to a joint modeling framework for transformer and BLSTM. We show that TRANS-BLSTM models consistently lead to improvements in accuracy compared to BERT baselines in GLUE and SQuAD 1.1 experiments. Our TRANS-BLSTM model obtains an F1 score of 94.01% on the SQuAD 1.1 development dataset, which is comparable to the state-of-the-art result.",
 				"libraryCatalog": "Semantic Scholar",
-				"proceedingsTitle": "NAACL-HLT",
-				"shortTitle": "Tracking State Changes in Procedural Text",
+				"publicationTitle": "ArXiv",
+				"shortTitle": "TRANS-BLSTM",
+				"url": "https://www.semanticscholar.org/paper/TRANS-BLSTM%3A-Transformer-with-Bidirectional-LSTM-Huang-Xu/c79a8fd667f59e6f1ca9d54afc34f792e9079c7e",
 				"attachments": [
 					{
 						"title": "Semantic Scholar Link",
@@ -702,27 +335,177 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [
+				"tags": [],
+				"notes": [
+					"[TLDR] It is shown that TRANS-BLSTM models consistently lead to improvements in accuracy compared to BERT baselines in GLUE and SQuAD 1.1 experiments, and is proposed as a joint modeling framework for transformer and BLSTM."
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.semanticscholar.org/reader/204e3073870fae3d05bcbc2f6a8e263d9b72e776",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Attention is All you Need",
+				"creators": [
 					{
-						"tag": "Causal filter"
+						"firstName": "Ashish",
+						"lastName": "Vaswani",
+						"creatorType": "author"
 					},
 					{
-						"tag": "Entity"
+						"firstName": "Noam M.",
+						"lastName": "Shazeer",
+						"creatorType": "author"
 					},
 					{
-						"tag": "List comprehension"
+						"firstName": "Niki",
+						"lastName": "Parmar",
+						"creatorType": "author"
 					},
 					{
-						"tag": "Long short-term memory"
+						"firstName": "Jakob",
+						"lastName": "Uszkoreit",
+						"creatorType": "author"
 					},
 					{
-						"tag": "Synthetic data"
+						"firstName": "Llion",
+						"lastName": "Jones",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Aidan N.",
+						"lastName": "Gomez",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Lukasz",
+						"lastName": "Kaiser",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Illia",
+						"lastName": "Polosukhin",
+						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"seeAlso": [],
+				"date": "12 June 2017",
+				"abstractNote": "The dominant sequence transduction models are based on complex recurrent or convolutional neural networks in an encoder-decoder configuration. The best performing models also connect the encoder and decoder through an attention mechanism. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. Experiments on two machine translation tasks show these models to be superior in quality while being more parallelizable and requiring significantly less time to train. Our model achieves 28.4 BLEU on the WMT 2014 English-to-German translation task, improving over the existing best results, including ensembles by over 2 BLEU. On the WMT 2014 English-to-French translation task, our model establishes a new single-model state-of-the-art BLEU score of 41.8 after training for 3.5 days on eight GPUs, a small fraction of the training costs of the best models from the literature. We show that the Transformer generalizes well to other tasks by applying it successfully to English constituency parsing both with large and limited training data.",
+				"libraryCatalog": "Semantic Scholar",
 				"publicationTitle": "ArXiv",
-				"volume": "abs/1805.06975"
+				"url": "https://www.semanticscholar.org/paper/204e3073870fae3d05bcbc2f6a8e263d9b72e776",
+				"attachments": [
+					{
+						"title": "Semantic Reader Link",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [
+					"[TLDR] A new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely is proposed, which generalizes well to other tasks by applying it successfully to English constituency parsing both with large and limited training data."
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.semanticscholar.org/reader/fa72afa9b2cbc8f0d7b05d52548906610ffbb9c5",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Neural Machine Translation by Jointly Learning to Align and Translate",
+				"creators": [
+					{
+						"firstName": "Dzmitry",
+						"lastName": "Bahdanau",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kyunghyun",
+						"lastName": "Cho",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yoshua",
+						"lastName": "Bengio",
+						"creatorType": "author"
+					}
+				],
+				"date": "1 September 2014",
+				"abstractNote": "Neural machine translation is a recently proposed approach to machine translation. Unlike the traditional statistical machine translation, the neural machine translation aims at building a single neural network that can be jointly tuned to maximize the translation performance. The models proposed recently for neural machine translation often belong to a family of encoder-decoders and consists of an encoder that encodes a source sentence into a fixed-length vector from which a decoder generates a translation. In this paper, we conjecture that the use of a fixed-length vector is a bottleneck in improving the performance of this basic encoder-decoder architecture, and propose to extend this by allowing a model to automatically (soft-)search for parts of a source sentence that are relevant to predicting a target word, without having to form these parts as a hard segment explicitly. With this new approach, we achieve a translation performance comparable to the existing state-of-the-art phrase-based system on the task of English-to-French translation. Furthermore, qualitative analysis reveals that the (soft-)alignments found by the model agree well with our intuition.",
+				"libraryCatalog": "Semantic Scholar",
+				"publicationTitle": "CoRR",
+				"url": "https://www.semanticscholar.org/paper/fa72afa9b2cbc8f0d7b05d52548906610ffbb9c5",
+				"attachments": [
+					{
+						"title": "Semantic Reader Link",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [
+					"[TLDR] It is conjecture that the use of a fixed-length vector is a bottleneck in improving the performance of this basic encoder-decoder architecture, and it is proposed to extend this by allowing a model to automatically (soft-)search for parts of a source sentence that are relevant to predicting a target word, without having to form these parts as a hard segment explicitly."
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.semanticscholar.org/reader/2fd10e095b146f99da8cdc6ff58720e2e8fca36d",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "When Attention Meets Fast Recurrence: Training Language Models with Reduced Compute",
+				"creators": [
+					{
+						"creatorType": "author",
+						"firstName": "Tao",
+						"lastName": "Lei"
+					}
+				],
+				"date": "2021",
+				"DOI": "10.18653/v1/2021.emnlp-main.602",
+				"abstractNote": "Large language models have become increasingly difficult to train because of the growing computation time and cost. In this work, we present SRU++, a highly-efficient architecture that combines fast recurrence and attention for sequence modeling. SRU++ exhibits strong modeling capacity and training efficiency. On standard language modeling tasks such as Enwik8, Wiki-103 and Billion Word datasets, our model obtains better bits-per-character and perplexity while using 3x-10x less training cost compared to top-performing Transformer models. For instance, our model achieves a state-of-the-art result on the Enwik8 dataset using 1.6 days of training on an 8-GPU machine. We further demonstrate that SRU++ requires minimal attention for near state-of-the-art performance. Our results suggest jointly leveraging fast recurrence with little attention as a promising direction for accelerating model training and inference.",
+				"conferenceName": "Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing",
+				"language": "en",
+				"libraryCatalog": "Semantic Scholar",
+				"pages": "7633-7648",
+				"place": "Online and Punta Cana, Dominican Republic",
+				"proceedingsTitle": "Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing",
+				"publisher": "Association for Computational Linguistics",
+				"shortTitle": "When Attention Meets Fast Recurrence",
+				"url": "https://aclanthology.org/2021.emnlp-main.602",
+				"attachments": [
+					{
+						"title": "Semantic Reader Link",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [
+					"[TLDR] This work presents SRU++, a highly-efficient architecture that combines fast recurrence and attention for sequence modeling that exhibits strong modeling capacity and training efficiency and suggests jointly leveragingFast recurrence with little attention as a promising direction for accelerating model training and inference."
+				],
+				"seeAlso": []
 			}
 		]
 	}

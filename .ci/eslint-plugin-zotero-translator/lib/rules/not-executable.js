@@ -17,6 +17,8 @@ module.exports = {
 	create: function (context) {
 		return {
 			Program: function (node) {
+				if (process.platform == 'win32') return; // X_OK always succeeds on Windows
+
 				const translator = translators.get(context.getFilename());
 
 				if (!translator.source) return; // only check translators

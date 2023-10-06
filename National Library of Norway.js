@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-11-29 23:36:00"
+	"lastUpdated": "2021-07-14 15:58:43"
 }
 
 /*
@@ -243,26 +243,26 @@ var testCases = [
 				"title": "Memoirs of Lewis Holberg",
 				"creators": [
 					{
-						"lastName": "Holberg",
 						"firstName": "Ludvig",
+						"lastName": "Holberg",
 						"creatorType": "author"
 					}
 				],
 				"date": "1827",
+				"language": "eng; lat",
 				"libraryCatalog": "National Library of Norway",
 				"numPages": "vii+289",
 				"place": "London",
 				"publisher": "Hunt and Clarke",
-				"language": "eng; lat",
 				"series": "Autobiography : a collection of the most instructive and amusing lives ever published vol. 12",
 				"url": "https://urn.nb.no/URN:NBN:no-nb_digibok_2013022624011",
 				"attachments": [],
+				"tags": [],
 				"notes": [
 					{
-						"note": "statement of responsibility: written by himself in Latin : and now first translated into English.\nreproduction: Elektronisk reproduksjon [Norge] Nasjonalbiblioteket Digital 2013-03-01"
+						"note": "statement of responsibility: written by himself in Latin : and now first translated into English.\nFormatangivelse etter Ehrenchron-Müller, b. 10, s. 125.\nreproduction: Elektronisk reproduksjon [Norge] Nasjonalbiblioteket Digital 2013-03-01"
 					}
 				],
-				"tags": [],
 				"seeAlso": []
 			}
 		]
@@ -276,8 +276,8 @@ var testCases = [
 				"title": "Mat frå gard og grend: om mat og matkultur i Lesja og Gudbrandsdalen gjennom 100år",
 				"creators": [
 					{
-						"lastName": "Nordset",
 						"firstName": "Bjørg",
+						"lastName": "Nordset",
 						"creatorType": "author"
 					},
 					{
@@ -288,21 +288,21 @@ var testCases = [
 				],
 				"date": "1995",
 				"ISBN": "9788291375052",
+				"language": "nob",
 				"libraryCatalog": "National Library of Norway",
 				"numPages": "176",
+				"place": "Lesja",
 				"publisher": "Snøhetta forl.",
 				"shortTitle": "Mat frå gard og grend",
 				"url": "https://urn.nb.no/URN:NBN:no-nb_digibok_2008030304011",
 				"attachments": [],
+				"tags": [],
 				"notes": [
 					{
 						"note": "statement of responsibility: Lesja bondekvinnelag ; red.: Bjørg Nordset ; [foto: [hovedsakelig] Bjarne Fossøy].\nOpplagshistorikk: 2. oppl. 1995; 3. oppl. 2001.\nreproduction: Elektronisk reproduksjon [Norge] Nasjonalbiblioteket Digital 2009-04-09"
 					}
 				],
-				"seeAlso": [],
-				"tags": [],
-				"place": "Lesja",
-				"language": "nob"
+				"seeAlso": []
 			}
 		]
 	}
