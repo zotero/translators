@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-09 10:24:32"
+	"lastUpdated": "2023-10-09 10:41:18"
 }
 
 /*
@@ -289,7 +289,7 @@ function getFullTextPDF(articleID, isNumber, puNumber) {
 	// "ref" is the base64-encoded canonical URL of article without the
 	// trailing slash. The encoded URL is always ASCII so btoa() suffices.
 	let ref = btoa(`${BASE_URL}/document/${articleID}`);
-	let url = `${BASE_URL}/ielx7/${puNumber}/${isNumber}/${articleID}.pdf?tp=&arnumber=${articleID}&isNumber=${isNumber}&ref=${ref}`;
+	let url = `${BASE_URL}/ielx7/${puNumber}/${isNumber}/${ZU.lpad(articleID, "0", 8)}.pdf?tp=&arnumber=${articleID}&isnumber=${isNumber}&ref=${ref}`;
 	return { title: "Full Text PDF", url, mimeType: "application/pdf" };
 }
 
