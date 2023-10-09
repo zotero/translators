@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-04 04:00:26"
+	"lastUpdated": "2023-10-09 09:55:38"
 }
 
 /*
@@ -38,12 +38,6 @@
 const BASE_URL = "https://ieeexplore.ieee.org";
 
 function detectWeb(doc, url) {
-	// TODO this is not necessary for papers
-	let appRoot = doc.querySelector('xpl-root');
-	if (appRoot) {
-		Zotero.monitorDOMChanges(appRoot);
-	}
-
 	// pdf-viewer page contains too little metadata; journalArticle is a
 	// reasonable guess
 	if (isPDFViewer(url)) {
@@ -56,6 +50,14 @@ function detectWeb(doc, url) {
 		if (type !== null) {
 			return type;
 		}
+	}
+
+	// The item is not an identifiable single, therefore a candidate for
+	// multiple. In this case watch the root web-app node for AJAX-based
+	// rendering and filtering
+	let appRoot = doc.querySelector('xpl-root');
+	if (appRoot) {
+		Zotero.monitorDOMChanges(appRoot);
 	}
 
 	return getSearchResults(doc, true) && "multiple";
@@ -1165,127 +1167,34 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7265050",
-		"defer": true,
+		"url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10016690",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Disturbance-Observer-Based Control and Related Methods—An Overview",
+				"title": "Editorial 2022 Best Papers, Outstanding Associate Editors, and Outstanding Reviewers",
 				"creators": [
 					{
-						"firstName": "Wen-Hua",
-						"lastName": "Chen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Jun",
-						"lastName": "Yang",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Lei",
-						"lastName": "Guo",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Shihua",
+						"firstName": "Fangxing",
 						"lastName": "Li",
 						"creatorType": "author"
 					}
 				],
-				"date": "February 2016",
-				"DOI": "10.1109/TIE.2015.2478397",
-				"ISSN": "1557-9948",
-				"abstractNote": "Disturbance-observer-based control (DOBC) and related methods have been researched and applied in various industrial sectors in the last four decades. This survey, at first time, gives a systematic and comprehensive tutorial and summary on the existing disturbance/uncertainty estimation and attenuation techniques, most notably, DOBC, active disturbance rejection control, disturbance accommodation control, and composite hierarchical antidisturbance control. In all of these methods, disturbance and uncertainty are, in general, lumped together, and an observation mechanism is employed to estimate the total disturbance. This paper first reviews a number of widely used linear and nonlinear disturbance/uncertainty estimation techniques and then discusses and compares various compensation techniques and the procedures of integrating disturbance/uncertainty compensation with a (predesigned) linear/nonlinear controller. It also provides concise tutorials of the main methods in this area with clear descriptions of their features. The application of this group of methods in various industrial sections is reviewed, with emphasis on the commercialization of some algorithms. The survey is ended with the discussion of future directions.",
-				"issue": "2",
+				"date": "2023",
+				"DOI": "10.1109/OAJPE.2022.3232736",
+				"ISSN": "2687-7910",
+				"abstractNote": "The Editorial Board of the IEEE Open Access Journal of Power and Energy (OAJPE) would like to recognize the following best papers selected from all papers published between October 1, 2019, and September 30, 2022, in OAJPE and its preceding journal, IEEE Power and Energy Technology Systems Journal (PETS-J).",
 				"libraryCatalog": "IEEE Xplore",
-				"pages": "1083-1095",
-				"publicationTitle": "IEEE Transactions on Industrial Electronics",
-				"url": "https://ieeexplore.ieee.org/document/7265050",
-				"volume": "63",
+				"pages": "1-1",
+				"publicationTitle": "IEEE Open Access Journal of Power and Energy",
+				"url": "https://ieeexplore.ieee.org/document/10016690",
+				"volume": "10",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [
-					{
-						"tag": "Attenuation"
-					},
-					{
-						"tag": "Disturbances"
-					},
-					{
-						"tag": "Frequency estimation"
-					},
-					{
-						"tag": "Nonlinear systems"
-					},
-					{
-						"tag": "Observers"
-					},
-					{
-						"tag": "Robustness"
-					},
-					{
-						"tag": "Uncertainty"
-					},
-					{
-						"tag": "active disturbance rejection control"
-					},
-					{
-						"tag": "attenuation techniques"
-					},
-					{
-						"tag": "compensation"
-					},
-					{
-						"tag": "compensation techniques"
-					},
-					{
-						"tag": "composite hierarchical antidisturbance control"
-					},
-					{
-						"tag": "disturbance accommodation control"
-					},
-					{
-						"tag": "disturbance-observer-based control"
-					},
-					{
-						"tag": "disturbance-uncertainty compensation"
-					},
-					{
-						"tag": "estimation"
-					},
-					{
-						"tag": "industrial sections"
-					},
-					{
-						"tag": "linear systems"
-					},
-					{
-						"tag": "linear-nonlinear controller"
-					},
-					{
-						"tag": "motion control"
-					},
-					{
-						"tag": "nonlinear control systems"
-					},
-					{
-						"tag": "nonlinear disturbance-uncertainty estimation"
-					},
-					{
-						"tag": "power system control"
-					},
-					{
-						"tag": "power system faults"
-					},
-					{
-						"tag": "uncertainties"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1818,6 +1727,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://ieeexplore.ieee.org/xpl/RecentIssue.jsp?punumber=83",
+		"defer": true,
 		"items": "multiple"
 	}
 ]
