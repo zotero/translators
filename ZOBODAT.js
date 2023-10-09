@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-09 16:23:51"
+	"lastUpdated": "2023-10-09 16:28:03"
 }
 
 /*
@@ -51,11 +51,12 @@ function getSearchResults(doc) {
 	var found = false;
 	var rows = doc.querySelectorAll('.result');
 	for (var i = 0; i < rows.length; i++) {
-		var href = rows[i].querySelector(['a[href^="publikation_articles.php"]'])
+		var href = rows[i].querySelector(['a[href^="publikation_articles.php"]']);
 		var title = ZU.trimInternal(rows[i].querySelector('.title').textContent);
 		if (!href || !title) {
 			continue;
-		} else {
+		}
+		else {
 			found = true;
 			items[href.href] = title;
 		}
@@ -78,7 +79,7 @@ async function doWeb(doc, url) {
 
 async function scrape(doc, url = doc.location.href) {
 	var item = new Zotero.Item("journalArticle");
-	item.url = doc.location.href
+	item.url = url;
 
 	var reference = doc.querySelector('#publikation_articles h1 + div');
 
@@ -89,7 +90,7 @@ async function scrape(doc, url = doc.location.href) {
 	// Authors
 	var authors = authorshipParts[1].split(', ');
 	for (var i = 0; i < authors.length; i++) {
-		var author = authors[i].split(' ')
+		var author = authors[i].split(' ');
 		item.creators.push({
 			lastName: author[author.length - 1],
 			firstName: author.slice(0, -1).join(' '),
@@ -105,7 +106,8 @@ async function scrape(doc, url = doc.location.href) {
 	if (pdfLink) {
 		item.title = pdfLink.textContent;
 		item.attachments.push({ title: 'Full Text PDF', mimeType: 'application/pdf', url: pdfLink.href });
-	} else {
+	}
+	else {
 		item.title = authorshipParts[3];
 	}
 
@@ -113,7 +115,8 @@ async function scrape(doc, url = doc.location.href) {
 	var journalLink = reference.querySelector('a[href^="publikation_series"]');
 	if (journalLink) {
 		item.publicationTitle = journalLink.textContent;
-	} else {
+	}
+	else {
 		item.publicationTitle = referenceParts[1];
 	}
 
@@ -121,7 +124,8 @@ async function scrape(doc, url = doc.location.href) {
 	var volumeLink = reference.querySelector('a[href^="publikation_volumes"]');
 	if (volumeLink) {
 		item.volume = volumeLink.textContent;
-	} else {
+	}
+	else {
 		item.volume = locatorParts[1];
 	}
 
