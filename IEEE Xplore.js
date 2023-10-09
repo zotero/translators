@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-09 09:55:38"
+	"lastUpdated": "2023-10-09 10:24:32"
 }
 
 /*
@@ -201,7 +201,11 @@ async function scrape(doc, url = doc.location.href) {
 
 	item.tags.push(...getTags(metadata));
 
-	item.attachments.push(getFullTextPDF(articleID));
+	let issueNumber = metadata.isNumber;
+	let publicationNumber = metadata.publicationNumber;
+	if (issueNumber && publicationNumber) {
+		item.attachments.push(getFullTextPDF(articleID, issueNumber, publicationNumber));
+	}
 
 	if (metadata.xploreNote) {
 		item.notes.push({ note: metadata.xploreNote });
@@ -281,11 +285,11 @@ function setSN(item, metadata, snType) {
 	}
 }
 
-function getFullTextPDF(articleID) {
+function getFullTextPDF(articleID, isNumber, puNumber) {
 	// "ref" is the base64-encoded canonical URL of article without the
 	// trailing slash. The encoded URL is always ASCII so btoa() suffices.
 	let ref = btoa(`${BASE_URL}/document/${articleID}`);
-	let url = `${BASE_URL}/stampPDF/getPDF.jsp?tp=&arnumber=${articleID}&ref=${ref}`;
+	let url = `${BASE_URL}/ielx7/${puNumber}/${isNumber}/${articleID}.pdf?tp=&arnumber=${articleID}&isNumber=${isNumber}&ref=${ref}`;
 	return { title: "Full Text PDF", url, mimeType: "application/pdf" };
 }
 
