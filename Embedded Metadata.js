@@ -1,15 +1,15 @@
 {
 	"translatorID": "951c027d-74ac-47d4-a107-9c3069ab7b48",
-	"translatorType": 4,
 	"label": "Embedded Metadata",
 	"creator": "Simon Kornblith and Avram Lyon",
-	"target": null,
+	"target": "",
 	"minVersion": "3.0.4",
-	"maxVersion": null,
+	"maxVersion": "",
 	"priority": 320,
 	"inRepository": true,
+	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-10 04:50:00"
+	"lastUpdated": "2023-10-09 08:38:31"
 }
 
 /*
@@ -407,13 +407,16 @@ function addHighwireMetadata(doc, newItem, hwType) {
 		var authors = authorNodes[i].nodeValue.split(/\s*;\s*/);
 		if (authors.length == 1 && authorNodes.length == 1) {
 			var authorsByComma = authors[0].split(/\s*,\s*/);
-			
+
 			/* If there is only one author node and
 			we get nothing when splitting by semicolon, and at least two words on
-			either side of the comma when splitting by comma, we split by comma. */
-			
+			either side of the comma when splitting by comma, we split by comma.
+			unless we have some special case*/
+
+			LAST_NAME_PREFIX = "^(van|de|von)";
 			if (authorsByComma.length > 1
 				&& authorsByComma[0].includes(" ")
+				&& !authorsByComma[0].match(LAST_NAME_PREFIX)
 				&& authorsByComma[1].includes(" ")) authors = authorsByComma;
 		}
 		for (var j = 0, m = authors.length; j < m; j++) {
@@ -494,18 +497,18 @@ function addHighwireMetadata(doc, newItem, hwType) {
 		newItem.pages = firstpage
 			+ ((lastpage && (lastpage = lastpage.trim())) ? '-' + lastpage : '');
 	}
-	
+
 	// swap in hwType for itemType
 	if (hwType && hwType != newItem.itemType) {
 		newItem.itemType = hwType;
 	}
-	
-	
+
+
 	// fall back to some other date options
 	if (!newItem.date) {
 		var onlineDate = getContentText(doc, 'citation_online_date');
 		var citationYear = getContentText(doc, 'citation_year');
-		
+
 		if (onlineDate && citationYear) {
 			onlineDate = ZU.strToISO(onlineDate);
 			if (citationYear < onlineDate.substr(0, 4)) {
@@ -663,7 +666,7 @@ function addLowQualityMetadata(doc, newItem) {
 	if (!newItem.url) {
 		newItem.url = ZU.xpathText(doc, '//head/link[@rel="canonical"]/@href') || doc.location.href;
 	}
-	
+
 	if (!newItem.language) {
 		newItem.language = ZU.xpathText(doc, '//x:meta[@name="language"]/@content', namespaces)
 			|| ZU.xpathText(doc, '//x:meta[@name="lang"]/@content', namespaces)
