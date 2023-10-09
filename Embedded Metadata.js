@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-09 08:38:31"
+	"lastUpdated": "2023-10-09 09:15:32"
 }
 
 /*
@@ -413,12 +413,14 @@ function addHighwireMetadata(doc, newItem, hwType) {
 			either side of the comma when splitting by comma, we split by comma.
 			unless we have some special case*/
 
-			LAST_NAME_PREFIX = "^(van|de|von)";
+			LAST_NAME_PREFIX = /^(van|de|von)/i;
 			if (authorsByComma.length > 1
 				&& authorsByComma[0].includes(" ")
-				&& !authorsByComma[0].match(LAST_NAME_PREFIX)
-				&& authorsByComma[1].includes(" ")) authors = authorsByComma;
+				&& authorsByComma[1].includes(" ")
+				&& !LAST_NAME_PREFIX.test(authorsByComma[0]))
+			    authors = authorsByComma;
 		}
+
 		for (var j = 0, m = authors.length; j < m; j++) {
 			var author = authors[j].trim();
 
