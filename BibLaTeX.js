@@ -98,19 +98,193 @@ var revEprintIds = {
 	GoogleBooksID: 'googlebooks'
 };
 
-function parseExtraFields(extra) {
-	var lines = extra.split(/[\r\n]+/);
-	var fields = [];
-	for (var i = 0; i < lines.length; i++) {
-		var rec = { raw: lines[i] };
-		var line = lines[i].trim();
-		var splitAt = line.indexOf(':');
-		if (splitAt > 1) {
-			rec.field = line.substr(0, splitAt).trim();
-			rec.value = line.substr(splitAt + 1).trim();
-		}
-		fields.push(rec);
+const extra = {
+	field: { // english-text label or CSL field => Zotero fields
+		'application number': [ 'applicationNumber' ],
+		'archive id': [ 'archiveID' ],
+		'loc in archive': [ 'archiveLocation' ],
+		'artwork size': [ 'artworkSize' ],
+		assignee: [ 'assignee' ],
+		'file type': [ 'audioFileType' ],
+		format: [ 'audioRecordingFormat', 'format', 'videoRecordingFormat' ],
+		'bill number': [ 'billNumber' ],
+		'blog title': [ 'blogTitle' ],
+		'book title': [ 'bookTitle' ],
+		'call number': [ 'callNumber' ],
+		'case name': [ 'caseName' ],
+		'citation key': [ 'citationKey' ],
+		code: [ 'code' ],
+		'code number': [ 'codeNumber' ],
+		'code pages': [ 'codePages' ],
+		'code volume': [ 'codeVolume' ],
+		committee: [ 'committee' ],
+		company: [ 'company' ],
+		'conference name': [ 'conferenceName' ],
+		country: [ 'country' ],
+		court: [ 'court' ],
+		date: [ 'date', 'dateDecided', 'dateEnacted', 'issueDate' ],
+		'date added': [ 'dateAdded' ],
+		'date decided': [ 'dateDecided' ],
+		'date enacted': [ 'dateEnacted' ],
+		modified: [ 'dateModified' ],
+		'dictionary title': [ 'dictionaryTitle' ],
+		distributor: [ 'distributor' ],
+		'docket number': [ 'docketNumber' ],
+		'document number': [ 'documentNumber' ],
+		doi: [ 'DOI' ],
+		'encyclopedia title': [ 'encyclopediaTitle' ],
+		'episode number': [ 'episodeNumber' ],
+		'filing date': [ 'filingDate' ],
+		'first page': [ 'firstPage' ],
+		'forumlistserv title': [ 'forumTitle' ],
+		history: [ 'history' ],
+		identifier: [ 'identifier' ],
+		institution: [ 'institution' ],
+		isbn: [ 'ISBN' ],
+		issn: [ 'ISSN' ],
+		'issue date': [ 'issueDate' ],
+		'issuing authority': [ 'issuingAuthority' ],
+		'item type': [ 'itemType' ],
+		'journal abbr': [ 'journalAbbreviation' ],
+		label: [ 'label' ],
+		'legal status': [ 'legalStatus' ],
+		'legislative body': [ 'legislativeBody' ],
+		type: [ 'genre', 'letterType', 'manuscriptType', 'mapType', 'postType', 'presentationType', 'reportType', 'thesisType', 'type', 'websiteType' ],
+		'library catalogue': [ 'libraryCatalog' ],
+		'meeting name': [ 'meetingName' ],
+		'name of act': [ 'nameOfAct' ],
+		network: [ 'network' ],
+		'nr of volumes': [ 'numberOfVolumes' ],
+		'# of volumes': [ 'numberOfVolumes' ],
+		'nr of pages': [ 'numPages' ],
+		'# of pages': [ 'numPages' ],
+		organization: [ 'organization' ],
+		pages: [ 'codePages', 'firstPage', 'pages' ],
+		'patent number': [ 'patentNumber' ],
+		place: [ 'place', 'repositoryLocation' ],
+		'post type': [ 'postType' ],
+		'priority numbers': [ 'priorityNumbers' ],
+		'proceedings title': [ 'proceedingsTitle' ],
+		'prog language': [ 'programmingLanguage' ],
+		'program title': [ 'programTitle' ],
+		publication: [ 'blogTitle', 'bookTitle', 'dictionaryTitle', 'encyclopediaTitle', 'forumTitle', 'proceedingsTitle', 'programTitle', 'publicationTitle', 'websiteTitle' ],
+		'public law number': [ 'publicLawNumber' ],
+		reporter: [ 'reporter' ],
+		'reporter volume': [ 'reporterVolume' ],
+		'report number': [ 'reportNumber' ],
+		'report type': [ 'reportType' ],
+		repository: [ 'repository' ],
+		'repo location': [ 'repositoryLocation' ],
+		rights: [ 'rights' ],
+		'running time': [ 'runningTime' ],
+		series: [ 'series' ],
+		'series number': [ 'seriesNumber' ],
+		'series text': [ 'seriesText' ],
+		'series title': [ 'seriesTitle' ],
+		session: [ 'session' ],
+		'short title': [ 'shortTitle' ],
+		studio: [ 'studio' ],
+		subject: [ 'subject' ],
+		system: [ 'system' ],
+		university: [ 'university' ],
+		url: [ 'url' ],
+		'website title': [ 'websiteTitle' ],
+		'website type': [ 'websiteType' ],
+		abstract: [ 'abstractNote' ],
+		archive: [ 'archive' ],
+		archivelocation: [ 'archiveLocation' ],
+		authority: [ 'authority' ],
+		'call-number': [ 'applicationNumber', 'callNumber' ],
+		'chapter-number': [ 'session' ],
+		'collection-number': [ 'seriesNumber' ],
+		'collection-title': [ 'series', 'seriesTitle' ],
+		'container-title': [ 'code', 'publicationTitle', 'reporter' ],
+		dimensions: [ 'artworkSize', 'runningTime' ],
+		edition: [ 'edition' ],
+		'event-place': [ 'place' ],
+		'event-title': [ 'conferenceName', 'meetingName' ],
+		genre: [ 'programmingLanguage', 'type' ],
+		issue: [ 'issue', 'priorityNumbers' ],
+		journalabbreviation: [ 'journalAbbreviation' ],
+		language: [ 'language' ],
+		license: [ 'rights' ],
+		medium: [ 'medium', 'system' ],
+		number: [ 'number' ],
+		'number-of-pages': [ 'numPages' ],
+		'number-of-volumes': [ 'numberOfVolumes' ],
+		page: [ 'pages' ],
+		publisher: [ 'publisher' ],
+		'publisher-place': [ 'place' ],
+		references: [ 'history', 'references' ],
+		scale: [ 'scale' ],
+		section: [ 'committee', 'section' ],
+		shorttitle: [ 'shortTitle' ],
+		source: [ 'libraryCatalog' ],
+		status: [ 'status' ],
+		title: [ 'title' ],
+		'title-short': [ 'shortTitle' ],
+		version: [ 'versionNumber' ],
+		volume: [ 'codeNumber', 'volume' ],
+		accessed: [ 'accessDate' ],
+		issued: [ 'date' ],
+		submitted: [ 'filingDate' ]
+	},
+	creator: { // CSL creator => Zotero creator
+		author: 'author',
+		'container-author': 'bookAuthor',
+		performer: 'castMember',
+		composer: 'composer',
+		contributor: 'contributor',
+		director: 'director',
+		editor: 'editor',
+		guest: 'guest',
+		interviewer: 'interviewer',
+		producer: 'producer',
+		recipient: 'recipient',
+		'reviewed-author': 'reviewedAuthor',
+		'collection-editor': 'seriesEditor',
+		'script-writer': 'scriptwriter',
+		translator: 'translator'
 	}
+};
+
+function parseExtraFields(item) {
+	if (!item.extra) return null;
+
+	const fields = [];
+	item.extra = item.extra.split('\n').filter(line => { // discard lines we're consuming into the object
+		const rec = { raw: line };
+		const kv = line.match(/^([^:]+)\s*:\s*(.+)/);
+		if (kv) {
+			for (const field of (extra.field[field.field] || [])) {
+				rec.field = kv[0].toLowerCase();
+				rec.value = kv[1];
+				item[field] = item[field] || rec.value;
+			}
+
+			const creatorType = extra.creator[kv[0]]
+			if (creator) {
+				rec.field = kv[0].toLowerCase();
+
+				const fl = v.split('||').map(n => n.trim());
+				if (fl.length === 2) {
+					item.creators.push(rec.value = { creatorType, firstName: fl[1], lastName: fl[0] });
+				}
+				else {
+					item.creators.push(rec.value = { creatorType, name: v });
+				}
+			}
+
+			if (rec.field) {
+				fields.push(rec);
+				return false;
+			}
+			else {
+				return true;
+			}
+		}
+	}).join('\n');
+
 	return fields;
 }
 
@@ -937,7 +1111,7 @@ function doExport() {
 
 		if (!type) type = "misc";
 
-		var extraFields = item.extra ? parseExtraFields(item.extra) : null;
+		var extraFields = parseExtraFields(item);
 		var citekey = buildCiteKey(item, extraFields, citekeys);
 		processExtraFields(item, extraFields);
 
