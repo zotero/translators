@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-09 16:28:03"
+	"lastUpdated": "2023-10-10 08:37:47"
 }
 
 /*
@@ -52,7 +52,7 @@ function getSearchResults(doc) {
 	var rows = doc.querySelectorAll('.result');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].querySelector(['a[href^="publikation_articles.php"]']);
-		var title = ZU.trimInternal(rows[i].querySelector('.title').textContent);
+		var title = ZU.trimInternal(text(rows[i], '.title'));
 		if (!href || !title) {
 			continue;
 		}
@@ -78,24 +78,19 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url = doc.location.href) {
-	var item = new Zotero.Item("journalArticle");
+	var item = new Zotero.Item('journalArticle');
 	item.url = url;
 
 	var reference = doc.querySelector('#publikation_articles h1 + div');
 
-	var referenceParts = reference.textContent.split(' – ');
+	var referenceParts = ZU.trimInternal(reference.textContent).split(' – ');
 	var authorshipParts = referenceParts[0].match(/^(.+) \((\d+)\): (.+)$/);
 	var locatorParts = referenceParts[referenceParts.length - 1].match(/(.+): (.+ - .+)\.$/);
 
 	// Authors
 	var authors = authorshipParts[1].split(', ');
 	for (var i = 0; i < authors.length; i++) {
-		var author = authors[i].split(' ');
-		item.creators.push({
-			lastName: author[author.length - 1],
-			firstName: author.slice(0, -1).join(' '),
-			creatorType: "author"
-		});
+		item.creators.push(ZU.cleanAuthor(authors[i], 'author'));
 	}
 
 	// Publication date
@@ -112,26 +107,30 @@ async function scrape(doc, url = doc.location.href) {
 	}
 
 	// Journal
-	var journalLink = reference.querySelector('a[href^="publikation_series"]');
-	if (journalLink) {
-		item.publicationTitle = journalLink.textContent;
-	}
-	else {
-		item.publicationTitle = referenceParts[1];
-	}
+	item.publicationTitle = cleanJournalTitle(text(reference, 'a[href^="publikation_series"]') || referenceParts[1]);
 
 	// Locator
-	var volumeLink = reference.querySelector('a[href^="publikation_volumes"]');
-	if (volumeLink) {
-		item.volume = volumeLink.textContent;
+	var volume = text(reference, 'a[href^="publikation_volumes"]') || locatorParts[1];
+	var volumeParts = volume.match(/^(\d+)_(\d+)$/);
+	if (volumeParts) {
+		item.volume = cleanNumber(volumeParts[1]);
+		item.issue = cleanNumber(volumeParts[2]);
 	}
 	else {
-		item.volume = locatorParts[1];
+		item.volume = cleanNumber(volume);
 	}
 
-	item.pages = locatorParts[2].split(' - ').join('-');
+	item.pages = locatorParts[2].split(' - ').map(cleanNumber).join('-');
 
 	item.complete();
+}
+
+function cleanJournalTitle(journal) {
+	return journal.replace(/\.([A-Za-z])/g, '. $1');
+}
+
+function cleanNumber(number) {
+	return number.replace(/^0+([1-9]\d*)/g, '$1');
 }
 
 /** BEGIN TEST CASES **/
@@ -231,6 +230,83 @@ var testCases = [
 		"url": "https://www.zobodat.at/personen.php?id=5312",
 		"detectedItemType": false,
 		"items": []
+	},
+	{
+		"type": "web",
+		"url": "https://www.zobodat.at/publikation_articles.php?id=256029",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "A faunistic study of Braconidae (Hymenoptera: Ichneumonoidea)\nfrom southern Iran",
+				"creators": [
+					{
+						"lastName": "Samin",
+						"firstName": "Najmeh",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Achterberg",
+						"firstName": "Cees van (auch Cornelis)",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Ghahari",
+						"firstName": "Hassan",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015",
+				"issue": "2",
+				"libraryCatalog": "ZOBODAT",
+				"pages": "1801-1809",
+				"publicationTitle": "Linzer biologische Beiträge",
+				"shortTitle": "A faunistic study of Braconidae (Hymenoptera",
+				"url": "https://www.zobodat.at/publikation_articles.php?id=256029",
+				"volume": "47",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.zobodat.at/publikation_articles.php?id=10027526",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The valid name for the genus *Loxocephalus* #Foerster#, 1862 (Insecta, Hymenoptera: Braconidae), preoccupied by *Loxocephalus* #Eberhard#, 1862 (Protozoa: Ciliophora)",
+				"creators": [
+					{
+						"lastName": "Foissner",
+						"firstName": "Wilhelm",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Achterberg",
+						"firstName": "Cees van (auch Cornelis)",
+						"creatorType": "author"
+					}
+				],
+				"date": "1997",
+				"libraryCatalog": "ZOBODAT",
+				"pages": "31-32",
+				"publicationTitle": "Zooel. Meded. Leiden",
+				"shortTitle": "The valid name for the genus *Loxocephalus* #Foerster#, 1862 (Insecta, Hymenoptera",
+				"url": "https://www.zobodat.at/publikation_articles.php?id=10027526",
+				"volume": "71",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
