@@ -17,7 +17,7 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2023-09-27 11:08:00"
+	"lastUpdated": "2023-10-11 14:22:04"
 }
 
 /*
@@ -256,22 +256,24 @@ function parseExtraFields(item) {
 		const rec = { raw: line };
 		const kv = line.match(/^([^:]+)\s*:\s*(.+)/);
 		if (kv) {
-			for (const field of (extra.field[field.field] || [])) {
-				rec.field = kv[0].toLowerCase();
-				rec.value = kv[1];
+			const label = kv[1].toLowerCase();
+			const value = kv[2];
+			for (const field of (extra.field[label] || [])) {
+				rec.field = label;
+				rec.value = value;
 				item[field] = item[field] || rec.value;
 			}
 
-			const creatorType = extra.creator[kv[0]];
+			const creatorType = extra.creator[label];
 			if (creatorType) {
-				rec.field = kv[0].toLowerCase();
+				rec.field = label;
 
-				const fl = kv[1].split('||').map(n => n.trim());
-				if (fl.length === 2) {
-					item.creators.push(rec.value = { creatorType, firstName: fl[1], lastName: fl[0] });
+				const name = value.split('||').map(n => n.trim());
+				if (name.length === 2) {
+					item.creators.push(rec.value = { creatorType, firstName: name[1], lastName: name[0] });
 				}
 				else {
-					item.creators.push(rec.value = { creatorType, name: kv[1] });
+					item.creators.push(rec.value = { creatorType, name: value });
 				}
 			}
 
