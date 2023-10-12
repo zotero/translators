@@ -174,7 +174,7 @@ function dateFieldsToDate(year, month, day) {
 	return false;
 }
 
-const EXTRA = { // fields picked up in structured key-value format in the same way as citeproc would
+const EXTRA_FIELDS = { // fields picked up in structured key-value format in the same way as citeproc would
 	field: {
 		'application number': ['applicationNumber'],
 		'archive id': ['archiveID'],
@@ -340,13 +340,13 @@ function parseAndConvertExtraFields(item) {
 		if (kv) {
 			const label = kv[1].toLowerCase();
 			const value = kv[2];
-			for (const field of (EXTRA.field[label] || [])) {
+			for (const field of (EXTRA_FIELDS.field[label] || [])) {
 				rec.field = label;
 				rec.value = value;
 				item[field] = item[field] || rec.value;
 			}
 
-			const creatorType = EXTRA.creator[label];
+			const creatorType = EXTRA_FIELDS.creator[label];
 			if (creatorType) {
 				rec.field = label;
 
