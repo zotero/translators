@@ -248,7 +248,13 @@ const EXTRA = { // fields picked up in structured key-value format in the same w
 	}
 };
 
-function parseExtraFields(item) {
+/*
+	* this function parses structured key-value lines from the `extra` field as citeproc does, and
+	* stores them into the item as regular item fields. This way, the extra information present is
+	* taken into account when generating the biblatex output. The recognized fields are removed
+	* from the `extra` field in the process as their purpose is not general-purpose item notes.
+	*/
+function parseAndConvertExtraFields(item) {
 	if (!item.extra) return null;
 
 	const fields = [];
@@ -701,7 +707,7 @@ function doExport() {
 
 		if (!type) type = "misc";
 
-		var extraFields = parseExtraFields(item);
+		var extraFields = parseAndConvertExtraFields(item);
 		var citekey = buildCiteKey(item, extraFields, citekeys);
 
 		// write citation key (removed the comma)
