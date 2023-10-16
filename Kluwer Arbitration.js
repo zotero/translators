@@ -74,15 +74,16 @@ async function detectWeb(doc, url) {
 		let detailsURL = "https://www.kluwerarbitration.com/api/publicationdetail?documentId=" + documentID;
 		let details = await ZU.requestJSON(detailsURL);
 
-		let pubType = details.publicationType
+		let pubType = details.publicationType;
 		if (getType(pubType, '')) {
 			Z.debug(getType(pubType, ''));
 			return getType(pubType, '');
 		}
 		else {
-			Z.debug(type + " not yet suppported");
+			Z.debug(pubType + " not yet suppported");
 		}
-	} else if (url.includes('/search')) {
+	}
+    else if (url.includes('/search')) {
 		Z.debug("Investigating search page");
 		let selector = 'div#vueApp';
 		Z.debug(doc.querySelector(selector));
@@ -96,7 +97,7 @@ async function detectWeb(doc, url) {
 }
 
 function getSearchResults(doc, checkOnly) {
-	Z.debug("Checking search results")
+	Z.debug("Checking search results");
 	var items = {};
 	var found = false;
 	// TODO: adjust the CSS selector for blog posts as well
@@ -157,17 +158,18 @@ async function scrape(doc, url, documentID) {
 	Z.debug(item);
 
 	if (details.publicationInfo) {
-		let publicationInfo = details.publicationInfo
+		let publicationInfo = details.publicationInfo;
 		if (publicationInfo.isbn) {
-			item.ISBN = publicationInfo.isbn
+			item.ISBN = publicationInfo.isbn;
 		}
 		if (publicationInfo.ISSN) {
-			Z.debug(publicationInfo.issn)
-			item.ISSN = publicationInfo.ISSN
+			Z.debug(publicationInfo.issn);
+			item.ISSN = publicationInfo.ISSN;
 		}
 		if (publicationInfo.publisher) {
-			item.publisher = publicationInfo.publisher
+			item.publisher = publicationInfo.publisher;
 		}
+        
 		/*if(publicationInfo.publicationDate) {
 			item.date = ZU.strToISO(publicationInfo.publicationDate);
 		}*/
@@ -183,8 +185,8 @@ async function scrape(doc, url, documentID) {
 	// Update type
 	item.itemType = getType(data.PublicationType, data.Type);
 
-	item.title = data.TitleHtml
-	item.date = data.PublicationDate
+	item.title = data.TitleHtml;
+	item.date = data.PublicationDate;
 	item.creators = [];
 
 	for (let author of data.Authors) {
