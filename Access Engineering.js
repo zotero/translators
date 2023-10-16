@@ -42,8 +42,11 @@ function detectWeb(doc, url) {
 				return "bookSection";
 			}
 		}
+		else if (url.includes('content/video/')) {
+			return 'videoRecording';
+		}
 		else {
-			return "webpage";
+			return "journalArticle";
 		}
 	}
 	else if (getSearchResults(doc, true)) {
@@ -256,16 +259,16 @@ var testCases = [
 		"url": "https://www.accessengineeringlibrary.com/content/video/V4005352521001",
 		"items": [
 			{
-				"itemType": "webpage",
+				"itemType": "videoRecording",
 				"title": "123D Design: Cut Text Through a Plane",
 				"creators": [],
 				"date": "2014",
 				"abstractNote": "This video shows how to cut text through a plane with Combine/Subtract.",
 				"language": "en",
+				"libraryCatalog": "www.accessengineeringlibrary.com",
 				"shortTitle": "123D Design",
+				"studio": "McGraw-Hill Education",
 				"url": "https://www.accessengineeringlibrary.com/content/video/V4005352521001",
-				"websiteTitle": "McGraw-Hill Education - Access Engineering",
-				"websiteType": "text",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -283,7 +286,7 @@ var testCases = [
 		"url": "https://www.accessengineeringlibrary.com/content/calculator/S0071_Basic_Transformer_Calculations",
 		"items": [
 			{
-				"itemType": "webpage",
+				"itemType": "journalArticle",
 				"title": "Basic Transformer Calculations",
 				"creators": [
 					{
@@ -295,9 +298,8 @@ var testCases = [
 				"date": "2022/06/25/",
 				"abstractNote": "This Excel workbook contains four worksheets. The first worksheet covers the basic concepts of single phase transformer such as turns ratio, primary current, secondary current, primary voltage, secondary voltage, and transformer ratio calculations. The second worksheet covers the basic concepts of power, efficiency, primary/secondary EMF and transformer rating calculations. The third worksheet covers the basic concepts of three phase transformers, highlighting the star and delta connections. Calculations are done for phase voltage, phase current, line voltage, and line current for star and delta connections. The fourth worksheet covers the basic concepts kVA Ratings, 3-phase primary, and secondary full load current 3-phase voltage calculations.",
 				"language": "en",
+				"libraryCatalog": "www.accessengineeringlibrary.com",
 				"url": "https://www.accessengineeringlibrary.com/content/calculator/S0071_Basic_Transformer_Calculations",
-				"websiteTitle": "McGraw-Hill Education - Access Engineering",
-				"websiteType": "text",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -315,7 +317,7 @@ var testCases = [
 		"url": "https://www.accessengineeringlibrary.com/content/case-study/CS0004_Atrial_Fibrillation",
 		"items": [
 			{
-				"itemType": "webpage",
+				"itemType": "journalArticle",
 				"title": "Atrial Fibrillation: Improving Therapy via Engineering Advancements",
 				"creators": [
 					{
@@ -327,9 +329,9 @@ var testCases = [
 				"date": "2020-04-23",
 				"abstractNote": "This case will explore atrial fibrillation from several perspectives, including the underlying physiology, clinical relevance, and instrumentation used for diagnosis and therapy. Students will identify and investigate unmet clinical needs that led to recent developments in technologies to treat atrial fibrillation.",
 				"language": "en",
+				"libraryCatalog": "www.accessengineeringlibrary.com",
 				"shortTitle": "Atrial Fibrillation",
 				"url": "https://www.accessengineeringlibrary.com/content/case-study/CS0004_Atrial_Fibrillation",
-				"websiteTitle": "McGraw-Hill Education - Access Engineering",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -347,7 +349,7 @@ var testCases = [
 		"url": "https://www.accessengineeringlibrary.com/content/tutorial/T0004_Partially_Full_Pipe_Flow_Calculations_Using_Excel_Spreadsheets",
 		"items": [
 			{
-				"itemType": "webpage",
+				"itemType": "journalArticle",
 				"title": "Partially Full Pipe Flow Calculations Using Excel Spreadsheets",
 				"creators": [
 					{
@@ -359,9 +361,8 @@ var testCases = [
 				"date": "2014/02/01/",
 				"abstractNote": "This tutorial provides discussion of, and illustration by, examples for use of an Excel spreadsheet for making a variety of calculations for the flow of water in a partially full circular pipe using the Manning Equation. Equations for calculating area, wetted perimeter, and hydraulic radius for partially full pipe flow are included in this tutorial along with a brief review of the Manning Equation and discussion of its use to calculate a) the flow rate in a given pipe (given diameter, slope, &amp; Manning roughness) at a specified depth of flow, b) the required diameter for a specified flow rate at a target percent full in a given pipe, and c) the normal depth (depth of flow) for a specified flow rate in a given pipe. This includes presentation and discussion of the equations for the calculations, example calculations, and screenshots of spreadsheets to facilitate the calculations.",
 				"language": "en",
+				"libraryCatalog": "www.accessengineeringlibrary.com",
 				"url": "https://www.accessengineeringlibrary.com/content/tutorial/T0004_Partially_Full_Pipe_Flow_Calculations_Using_Excel_Spreadsheets",
-				"websiteTitle": "McGraw-Hill Education - Access Engineering",
-				"websiteType": "text",
 				"attachments": [
 					{
 						"title": "Snapshot",
