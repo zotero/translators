@@ -17,7 +17,7 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2023-10-11 14:22:04"
+	"lastUpdated": "2023-10-17 15:35:00"
 }
 
 /*
@@ -78,12 +78,11 @@ var fieldMap = {
  */
 // Exported in BibTeX and BibLaTeX
 var revExtraIds = {
-	LCCN: 'lccn',
-	MR: 'mrnumber',
-	Zbl: 'zmnumber',
-	PMCID: 'pmcid',
-	PMID: 'pmid',
-	DOI: 'doi'
+	lccn: 'lccn',
+	mr: 'mrnumber',
+	zbl: 'zmnumber',
+	pmcid: 'pmcid',
+	pmid: 'pmid',
 };
 
 // Imported by BibTeX. Exported by BibLaTeX only
@@ -281,6 +280,11 @@ function parseAndConvertExtraFields(item) {
 				else {
 					item.creators.push(rec.value = { creatorType, name: value });
 				}
+			}
+
+			if (revExtraIds[label]) {
+				rec.field = label;
+				rec.value = value;
 			}
 
 			if (rec.field) {
@@ -986,8 +990,7 @@ function doExport() {
 		if (extraFields) {
 			// Export identifiers
 			// Dedicated fields
-			for (let i = 0; i < extraFields.length; i++) {
-				var rec = extraFields[i];
+			for (const rec of extraFields) {
 				if (!rec.field) continue;
 
 				if (!revExtraIds[rec.field] && !revEprintIds[rec.field]) continue;
@@ -1006,13 +1009,9 @@ function doExport() {
 						writeField('eprint', '{' + value + '}', true);
 					}
 				}
-				extraFields.splice(i, 1);
-				i--;
 			}
-
-			var extra = extraFieldsToString(extraFields);
-			if (extra && !noteused) writeField("note", extra);
 		}
+		if (item.extra && !noteused) writeField("note", item.extra);
 
 		if (item.tags && item.tags.length) {
 			var tagString = "";

@@ -18,7 +18,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2023-09-27 11:08:00"
+	"lastUpdated": "2023-10-17 15:35:00"
 }
 
 /*
@@ -139,6 +139,13 @@ var revExtraIds = {'DOI': 'doi'};
 for (var field in extraIdentifiers) {
 	revExtraIds[extraIdentifiers[field]] = field;
 }
+var revExtraIgnore = [
+	'lccn',
+	'mr',
+	'zbl',
+	'pmcid',
+	'pmid',
+];
 
 // Import only. Exported by BibLaTeX
 var eprintIds = {
@@ -357,6 +364,10 @@ function parseAndConvertExtraFields(item) {
 				else {
 					item.creators.push(rec.value = { creatorType, name: value });
 				}
+			}
+
+			if (revExtraIgnore.includes(label)) {
+				return false;
 			}
 
 			if (rec.field) {
@@ -1671,21 +1682,7 @@ function doExport() {
 			}
 		}
 
-		if (extraFields) {
-			// Export identifiers
-			for (var i=0; i<extraFields.length; i++) {
-				var rec = extraFields[i];
-				if (!rec.field || !revExtraIds[rec.field]) continue;
-				var value = rec.value.trim();
-				if (value) {
-					writeField(revExtraIds[rec.field], '{'+value+'}', true);
-					extraFields.splice(i, 1);
-					i--;
-				}
-			}
-			var extra = extraFieldsToString(extraFields); // Make sure we join exactly with what we split
-			if (extra) writeField("note", extra);
-		}
+		if (item.extra) writeField("note", item.extra);
 
 		if (item.tags && item.tags.length) {
 			var tagString = "";
