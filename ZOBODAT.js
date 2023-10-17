@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-10 08:37:47"
+	"lastUpdated": "2023-10-17 11:17:19"
 }
 
 /*
@@ -107,7 +107,7 @@ async function scrape(doc, url = doc.location.href) {
 	}
 
 	// Journal
-	item.publicationTitle = cleanJournalTitle(text(reference, 'a[href^="publikation_series"]') || referenceParts[1]);
+	item.publicationTitle = text(reference, 'a[href^="publikation_series"]') || referenceParts[1];
 
 	// Locator
 	var volume = text(reference, 'a[href^="publikation_volumes"]') || locatorParts[1];
@@ -123,10 +123,6 @@ async function scrape(doc, url = doc.location.href) {
 	item.pages = locatorParts[2].split(' - ').map(cleanNumber).join('-');
 
 	item.complete();
-}
-
-function cleanJournalTitle(journal) {
-	return journal.replace(/\.([A-Za-z])/g, '. $1');
 }
 
 function cleanNumber(number) {
@@ -181,18 +177,18 @@ var testCases = [
 				"title": "A provisional multispecies toxicity test using indigenous organisms",
 				"creators": [
 					{
-						"lastName": "Cairns",
 						"firstName": "John",
+						"lastName": "Cairns",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Pratt",
 						"firstName": "James R.",
+						"lastName": "Pratt",
 						"creatorType": "author"
 					},
 					{
+						"firstName": "B. R.",
 						"lastName": "Niederlehner",
-						"firstName": "B.R.",
 						"creatorType": "author"
 					}
 				],
@@ -284,23 +280,56 @@ var testCases = [
 				"title": "The valid name for the genus *Loxocephalus* #Foerster#, 1862 (Insecta, Hymenoptera: Braconidae), preoccupied by *Loxocephalus* #Eberhard#, 1862 (Protozoa: Ciliophora)",
 				"creators": [
 					{
-						"lastName": "Foissner",
 						"firstName": "Wilhelm",
+						"lastName": "Foissner",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Achterberg",
 						"firstName": "Cees van (auch Cornelis)",
+						"lastName": "Achterberg",
 						"creatorType": "author"
 					}
 				],
 				"date": "1997",
 				"libraryCatalog": "ZOBODAT",
 				"pages": "31-32",
-				"publicationTitle": "Zooel. Meded. Leiden",
+				"publicationTitle": "Zooel.Meded.Leiden",
 				"shortTitle": "The valid name for the genus *Loxocephalus* #Foerster#, 1862 (Insecta, Hymenoptera",
 				"url": "https://www.zobodat.at/publikation_articles.php?id=10027526",
 				"volume": "71",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.zobodat.at/publikation_articles.php?id=521285",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Kleintierhabitate",
+				"creators": [
+					{
+						"firstName": "Daniela",
+						"lastName": "Hofinger",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Harald",
+						"lastName": "Kutzenberger",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023",
+				"issue": "1",
+				"libraryCatalog": "ZOBODAT",
+				"pages": "11-14",
+				"publicationTitle": "ÖKO.L Zeitschrift für Ökologie, Natur- und Umweltschutz",
+				"url": "https://www.zobodat.at/publikation_articles.php?id=521285",
+				"volume": "2023",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
