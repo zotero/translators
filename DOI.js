@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-18 11:11:59"
+	"lastUpdated": "2023-10-18 13:29:55"
 }
 
 /*
@@ -258,7 +258,7 @@ async function retrieveDOIs(doiOrDOIs, fallbackDoc) {
 async function doWeb(doc, url) {
 	let doiOrDOIs = getDOIs(doc, url);
 	Z.debug(doiOrDOIs);
-	await retrieveDOIs(doiOrDOIs);
+	await retrieveDOIs(doiOrDOIs, doc);
 }
 
 // Build a key -> title mapping to be passed to Z.selectItems().
