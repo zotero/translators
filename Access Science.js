@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-07 20:06:31"
+	"lastUpdated": "2023-10-17 20:19:39"
 }
 
 /*
@@ -115,9 +115,8 @@ function scrape(doc, url) {
 
 		// Abstract contain html element
 		let abstractNote = attr(doc, 'meta[name="citation_abstract"]', 'content');
-		let isHTML = RegExp.prototype.test.bind(/(<([^>]+)>)/i);
-		if (isHTML(abstractNote)) item.abstractNote = ZU.cleanTags(abstractNote);
-
+		item.abstractNote = abstractNote.length && ZU.cleanTags(abstractNote);
+		
 		item.complete();
 	});
 
@@ -198,7 +197,6 @@ var testCases = [
 				],
 				"date": "2022",
 				"ISBN": "9781260452297",
-				"abstractNote": "AccessScience is an authoritative and dynamic online resource that contains incisively written, high-quality educational material covering all major scientific disciplines. An acclaimed gateway to scientific knowledge, AccessScience is continually expanding the ways it can demonstrate and explain core, trustworthy scientific information that inspires and guides users to deeper knowledge.",
 				"bookTitle": "Casarett & Doull's Essentials of Toxicology",
 				"language": "en",
 				"libraryCatalog": "www.accessscience.com",
@@ -257,7 +255,6 @@ var testCases = [
 				"title": "Anderson, John R.",
 				"creators": [],
 				"date": "2011",
-				"abstractNote": "AccessScience is an authoritative and dynamic online resource that contains incisively written, high-quality educational material covering all major scientific disciplines. An acclaimed gateway to scientific knowledge, AccessScience is continually expanding the ways it can demonstrate and explain core, trustworthy scientific information that inspires and guides users to deeper knowledge.",
 				"language": "en",
 				"libraryCatalog": "www.accessscience.com",
 				"studio": "McGraw Hill",
@@ -290,7 +287,6 @@ var testCases = [
 				],
 				"date": "2023",
 				"DOI": "10.1036/1097-8542.694300",
-				"abstractNote": "AccessScience is an authoritative and dynamic online resource that contains incisively written, high-quality educational material covering all major scientific disciplines. An acclaimed gateway to scientific knowledge, AccessScience is continually expanding the ways it can demonstrate and explain core, trustworthy scientific information that inspires and guides users to deeper knowledge.",
 				"language": "en",
 				"libraryCatalog": "www.accessscience.com",
 				"url": "https://www.accessscience.com/content/article/a694300",
@@ -321,7 +317,6 @@ var testCases = [
 					}
 				],
 				"date": "2023",
-				"abstractNote": "AccessScience is an authoritative and dynamic online resource that contains incisively written, high-quality educational material covering all major scientific disciplines. An acclaimed gateway to scientific knowledge, AccessScience is continually expanding the ways it can demonstrate and explain core, trustworthy scientific information that inspires and guides users to deeper knowledge.",
 				"extra": "DOI: 10.1036/1097-8542.SN0000000",
 				"language": "en",
 				"libraryCatalog": "www.accessscience.com",
@@ -372,7 +367,6 @@ var testCases = [
 				"itemType": "webpage",
 				"title": "Abbe, Cleveland (1838–1916)",
 				"creators": [],
-				"abstractNote": "AccessScience is an authoritative and dynamic online resource that contains incisively written, high-quality educational material covering all major scientific disciplines. An acclaimed gateway to scientific knowledge, AccessScience is continually expanding the ways it can demonstrate and explain core, trustworthy scientific information that inspires and guides users to deeper knowledge.",
 				"language": "en",
 				"url": "https://www.accessscience.com/content/biography/m0073908",
 				"websiteTitle": "McGraw Hill's AccessScience",
