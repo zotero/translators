@@ -113,9 +113,8 @@ function scrape(doc, url) {
 			}
 		}
 
-		// Abstract contain html element
 		let abstractNote = attr(doc, 'meta[name="citation_abstract"]', 'content');
-		item.abstractNote = abstractNote.length && ZU.cleanTags(abstractNote);
+		item.abstractNote = abstractNote && ZU.cleanTags(abstractNote);
 		
 		item.complete();
 	});
