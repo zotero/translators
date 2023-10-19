@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-19 20:50:10"
+	"lastUpdated": "2023-10-19 21:17:51"
 }
 
 /*
@@ -124,7 +124,7 @@ function getDocId(url) {
 	return documentID;
 }
 
-async function getTypeAndDetails(url) {
+async function getTypeAndDetails(doc, url) {
 	if (url.includes('/document/')) {
 		Zotero.debug('Found a document');
 		
@@ -161,8 +161,7 @@ async function getTypeAndDetails(url) {
 async function detectWeb(doc, url) {
 	Z.debug("STARTING DETECT WEB");
 
-	const result = await getTypeAndDetails(url);
-	Z.debug(result);
+	const result = await getTypeAndDetails(doc, url);
 
 	Z.debug("Resulting Zotero type: " + result.type);
 
@@ -170,7 +169,7 @@ async function detectWeb(doc, url) {
 }
 
 function getSearchResults(doc, checkOnly) {
-	Z.debug("Checking search results")
+	Z.debug("Checking search results");
 	var items = {};
 	var found = false;
 	// TODO: adjust the CSS selector for blog posts as well
@@ -198,50 +197,42 @@ function getSearchResults(doc, checkOnly) {
 async function doWeb(doc, url) {
 	Z.debug("STARTING DO WEB");
 
+	const { type: zotType, pubDetails, docDetails } = await getTypeAndDetails(doc, url);
 
-	let detection = await detectWeb(doc, url);
-
-	Z.debug("detection result: " + detection);
-	if (detection == 'multiple') {
+	Z.debug("detection result: " + zotType);
+	if (zotType == 'multiple') {
 		Z.debug('Will try to save multiple items');
 
-		let urlObject = new URL(url);
-		let documentID = urlObject.pathname.replace('/document/', '');
-		let pubDetails = await getPublicationDetails(documentID);
-		Z.debug("If it's a book, we might want to get all sections: " + pubDetails.publicationType);
-
-		if (pubDetails.publicationType == 'book') {
-			await getEntireBook(pubDetails.bookTocId);
-		}
-		else {
-			let items = await Zotero.selectItems(getSearchResults(doc, false));
-			Z.debug(items);
-			if (!items) return;
-			for (let url of Object.keys(items)) {
-				Z.debug(url);
-				let docID = getDocId(url);
-				await scrape(await requestDocument(url));
-			}
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		Z.debug(items);
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			Z.debug(url);
+			let docId = getDocId(url);
+			await scrapeId(docId);
 		}
 	}
-	else if (detection == 'blogPost') {
+	else if (zotType == 'blogPost') {
 		Z.debug("Scraping blog post");
-		await scrapeBlog(doc, url);
+		await scrapeBlog(doc);
 	}
 	else {
 		Z.debug("Single document, start scrape");
-		await scrape(doc, url);
+		await scrapeDoc(url, zotType, pubDetails, docDetails);
 	}
+}
+
+async function scrapeId(docId) {
+	Z.debug("Scraping from web results not yet implemented. Doc: " + docId);
 }
 
 /*function addNote(item: Zotero.Item, note: String) {
 	item.notes.push({note: note});
 }*/
 
-async function scrape(doc, url) {
+async function scrapeDoc(url, zotType, pubDetails, docDetails) {
 	// Publication details
 	let documentID = getDocId(url);
-	const { type: zotType, pubDetails, docDetails } = await getTypeAndDetails(url);
 
 	Z.debug(zotType);
 
@@ -265,6 +256,7 @@ async function scrape(doc, url) {
 		if (publicationInfo.publisher) {
 			item.publisher = publicationInfo.publisher;
 		}
+
 		/*if(publicationInfo.publicationDate) {
 			item.date = ZU.strToISO(publicationInfo.publicationDate);
 		}*/
@@ -317,7 +309,6 @@ async function scrape(doc, url) {
 			let parties = "Parties: " + docDetails.Parties[0] + " v. " + docDetails.Parties[1];
 			item.notes.push({ note: parties });
 		}
-
 	} /*else if (pubDetails) {
 		item.title = pubDetails.publicationTitle;
 		item.abstractNote = pubDetails.descriptiveText
@@ -347,7 +338,8 @@ async function scrape(doc, url) {
 		let section = sectionNodes.find(node => (node.docId.toLowerCase() == documentID.toLowerCase()));
 		if (section) Z.debug(section);
 		if (section.pageRange.first && section.pageRange.last) item.pages = section.pageRange.first + "-" + section.pageRange.last;
-	} else if (type == 'journalArticle') {
+	}
+	else if (type == 'journalArticle') {
 		let volumeRegex = /Volume\s([a-zA-Z0-9]+)/;
 		let issueRegex = /Issue\s([a-zA-Z0-9]+)/;
 		//let pagesRegex = /pp\.\s([a-zA-Z0-9]+)\s-\s([a-zA-Z0-9]+)/;
@@ -372,28 +364,26 @@ async function scrape(doc, url) {
 	Z.debug(item);
 
 	// Getting PDF
-	if ( type == 'book' ) {
-
+	if (type == 'book') {
 		Z.debug("Before search: " + item);
 
 		var search = Zotero.loadTranslator("search");
 
-		search.setHandler("translators", function(obj, translators) {
-	 		search.setTranslator(translators);
-	 		search.translate();
+		search.setHandler("translators", function (obj, translators) {
+			search.setTranslator(translators);
+			search.translate();
 		});
 
-		search.setHandler("itemDone", function(obj, item) {
+		search.setHandler("itemDone", function (obj, item) {
 			// Getting PDFs of all sections
 			let sectionNodes = flattenNodes(pubDetails.tocNodes);
-			let sectionList = sectionNodes.map((node) => ([node.docId, node.label]));
+			let sectionList = sectionNodes.map(node => ([node.docId, node.label]));
 			let sections = Object.fromEntries(sectionList);
 			Z.debug(sections);
-			Z.selectItems(sections, function(items) {
-
+			Z.selectItems(sections, function (items) {
 				if (!items) {
 					// CANCEL ITEM
-					return
+					return;
 				}
 
 				for (const [sectionID, sectionLabel] of Object.entries(items)) {
@@ -420,8 +410,8 @@ async function scrape(doc, url) {
 		search.setSearch(item);
 		// look for translators for given item
 		search.getTranslators();
-
-	} else {
+	}
+	else {
 		let pdfURL = "https://www.kluwerarbitration.com/document/print?title=PDF&ids=" + docDetails.Id;
 		Z.debug(pdfURL);
 		item.attachments.push({
@@ -441,7 +431,7 @@ async function scrape(doc, url) {
 	}
 }
 
-async function scrapeBlog(doc, url) {
+async function scrapeBlog(doc) {
 	Z.debug("Saving blog post");
 	var item = new Z.Item('blogPost');
 	Z.debug(item);
@@ -449,7 +439,7 @@ async function scrapeBlog(doc, url) {
 	var translator = Z.loadTranslator("web");
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 
-	translator.setHandler("itemDone", function(obj, item) {
+	translator.setHandler("itemDone", function (obj, item) {
 		item.itemType = 'blogPost';
 
 		item.complete();
@@ -479,7 +469,8 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Gary B.",
-						"lastName": "Born"
+						"lastName": "Born",
+						"creatorType": "author"
 					}
 				],
 				"abstractNote": "Kluwer Arbitration, Home",
