@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-04-04 18:35:34"
+	"lastUpdated": "2023-10-19 07:35:30"
 }
 
 /*
@@ -44,24 +44,24 @@ function detectWeb(doc, url) {
 	if (text(doc, 'h1#preprintTitle')) {
 		return preprintType;
 	}
-	else if (url.includes("discover?") && getSearchResults(doc, true)) {
-		return "multiple";
+	if (url.includes("/discover?") || url.includes("/search?")) {
+		Z.monitorDOMChanges(doc.body);
+		return getSearchResults(doc, true) && "multiple";
 	}
-	Z.monitorDOMChanges(doc.body);
 	return false;
 }
 
+const SUPPORTED_SITES = /^https?:\/\/(osf\.io|psyarxiv\.com|arabixiv\.org|biohackrxiv\.org|eartharxiv\.org|ecoevorxiv\.org|ecsarxiv\.org|edarxiv\.org|engrxiv\.org|frenxiv\.org|indiarxiv\.org|mediarxiv\.org|paleorxiv\.org)\//;
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	// The Preprint search on OSF includes other preprints such as PeerJ and RePec
-	var supportedSites = /^https?:\/\/(osf\.io|psyarxiv\.com|arabixiv\.org|biohackrxiv\.org|eartharxiv\.org|ecoevorxiv\.org|ecsarxiv\.org|edarxiv\.org|engrxiv\.org|frenxiv\.org|indiarxiv\.org|mediarxiv\.org|paleorxiv\.org)/;
-	var rows = doc.querySelectorAll('.search-result h4>a');
+	var rows = doc.querySelectorAll('div[class*="_result-card-container"] h4 > a');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
-		if (!href || !title || !supportedSites.test(href)) continue;
+		if (!href || !title || !SUPPORTED_SITES.test(href)) continue;
 		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
@@ -172,7 +172,7 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://psyarxiv.com/nx2b4/",
+		"url": "https://osf.io/preprints/psyarxiv/nx2b4/",
 		"defer": true,
 		"items": [
 			{
@@ -197,7 +197,7 @@ var testCases = [
 				"libraryCatalog": "OSF Preprints",
 				"repository": "PsyArXiv",
 				"shortTitle": "The Dutch Auditory & Image Vocabulary Test (DAIVT)",
-				"url": "https://psyarxiv.com/nx2b4/",
+				"url": "https://osf.io/preprints/psyarxiv/nx2b4/",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
