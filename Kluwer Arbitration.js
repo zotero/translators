@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-19 21:17:51"
+	"lastUpdated": "2023-10-19 23:04:06"
 }
 
 /*
@@ -37,11 +37,15 @@
 
 /*
 - DocumentID examples:
-  - Book section: KLI-KA-Born-2021-Ch01
-  - Book section: KLI-KA-Lopez-Rodriguez-2019-Ch05
-  - Book: TOC-Lopez-Rodriguez-2019
-  - Article: KLI-KA-ASAB31020011
-  - Book: TOC-Born-2021
+  - bookSection: KLI-KA-Born-2021-Ch01
+  - bookSection: KLI-KA-Lopez-Rodriguez-2019-Ch05
+  - book: TOC-Lopez-Rodriguez-2019
+  - journalArticle: KLI-KA-ASAB31020011
+  - case: kli-ka-1105506-n
+  - book: TOC-Born-2021
+  - statute: kli-ka-1134507-n
+  - statute: ipn15507
+  - blog: https://arbitrationblog.kluwerarbitration.com/2023/10/18/hong-kong-arbitration-week-recap-a-step-forward-or-challenges-for-the-21st-century/
 - Normal URL: https://www.kluwerarbitration.com/document/
 - Publication details (whole book): https://www.kluwerarbitration.com/api/publicationdetail?documentId=
 - Document details: https://www.kluwerarbitration.com/api/Document?id=
@@ -49,7 +53,7 @@
 */
 
 function getType(pubDetails, docDetails) {
-	let pubType = pubDetails.publicationType;
+	let pubType = pubDetails.publicationType ? pubDetails.publicationType : docDetails.PublicationType;
 	let hasDocument = docDetails !== null;
 
 	switch (pubType) {
@@ -57,27 +61,41 @@ function getType(pubDetails, docDetails) {
 			// Multiple here would show a selection screen with the option to save the book or individual chapters, but we use the selection screen to indicate which items to download as part of the book
 			return hasDocument ? 'bookSection' : 'book';
 		case 'journal':
-			return 'journalArticle';
-		case 'internet':
 			switch (docDetails.Type) {
 				case 'Court Decisions':
 				case 'Awards':
 					return 'case';
+				case 'Conventions':
 				case 'Rules':
 				case 'Legislation':
-					return 'statute';
 				case 'BITs':
-					return 'treaty';
+					return 'statute';
+				case 'Commentary':
+					return 'journalArticle';
+			}
+			break;
+		case 'loose-leaf':
+			switch (docDetails.Type) {
+				case 'Models':
+					return 'statute';
+			}
+			break;
+		case 'internet':
+			switch (docDetails.Type) {
+				case 'Awards':
+					return 'case';
 				default:
 					return 'webpage';
 			}
 		case 'blog': // Does it exist?
 			return 'blogPost';
-		default:
-			return false;
 	}
+
+	Z.debug("Could not match pairing: " + pubType + ", " + docDetails.Type);
+	return false;
 }
 
+// Function used to get all documents contained within a collection (such as chapters of a book)
 function flattenNodes(tocNodes) {
 	let result = [];
 	recursion(0, tocNodes, result);
@@ -97,36 +115,32 @@ function recursion(index, inputArray, outputArray) {
 	recursion(index + 1, inputArray, outputArray);
 }
 
-// For the whole book
+// Get the JSON object describing the publication (i.e., the book for a section or the journal for an article)
 async function getPublicationDetails(documentID) {
 	let detailsURL = "https://www.kluwerarbitration.com/api/publicationdetail?documentId=" + documentID;
 	Z.debug("Requesting publication details");
 	Z.debug(detailsURL);
-	let details = await ZU.requestJSON(detailsURL);
-
-	return details;
+	return ZU.requestJSON(detailsURL);
 }
 
-// For the section/document itself
+// Get the JSON object describing the document itself (article, book section, etc.)
 async function getDocumentDetails(documentID) {
 	let detailsURL = "https://www.kluwerarbitration.com/api/Document?id=" + documentID;
 	Z.debug("Requesting document details");
 	Z.debug(detailsURL);
-	let details = await ZU.requestJSON(detailsURL);
-
-	return details;
+	return ZU.requestJSON(detailsURL);
 }
 
 function getDocId(url) {
-	let urlObject = new URL(url);
-	let documentID = urlObject.pathname.replace('/document/', '');
+	const segments = new URL(url).pathname.split('/');
+	const documentID = segments.pop() || segments.pop(); // Handle potential trailing slash
 	Z.debug("Document ID: " + documentID);
 	return documentID;
 }
 
 async function getTypeAndDetails(doc, url) {
 	if (url.includes('/document/')) {
-		Zotero.debug('Found a document');
+		Z.debug('Found a document');
 		
 		let documentID = getDocId(url);
 		let pubDetails = await getPublicationDetails(documentID);
@@ -266,7 +280,7 @@ async function scrapeDoc(url, zotType, pubDetails, docDetails) {
 	//item.itemType = getType(docDetails.PublicationType, docDetails.Type);
 
 	if (docDetails) {
-		item.title = docDetails.TitleHtml;
+		item.title = docDetails.Title;
 		item.date = docDetails.PublicationDate;
 		item.creators = [];
 
@@ -280,34 +294,51 @@ async function scrapeDoc(url, zotType, pubDetails, docDetails) {
 
 		// Potential editors
 		// TODO check duplicates
-		for (let pubAuthor of pubDetails.authors) {
-			item.creators.push({
-				firstName: pubAuthor.name,
-				lastName: pubAuthor.surname,
-				creatorType: "editor"
-			});
+		if (type == 'journalArticle' || type == 'bookSection') {
+			for (let pubAuthor of pubDetails.authors) {
+				item.creators.push({
+					firstName: pubAuthor.name,
+					lastName: pubAuthor.surname,
+					creatorType: "editor"
+				});
+			}
+
+			// Potential editors too
+			// TODO check duplicates
+			for (let pubEditor of pubDetails.editors) {
+				item.creators.push({
+					firstName: pubEditor.name,
+					lastName: pubEditor.surname,
+					creatorType: "editor"
+				});
+			}
 		}
 
-		// Potential editors too
-		// TODO check duplicates
-		for (let pubEditor of pubDetails.editors) {
-			item.creators.push({
-				firstName: pubEditor.name,
-				lastName: pubEditor.surname,
-				creatorType: "editor"
-			});
-		}
+		if (type == 'case') item.reporter = docDetails.PublicationTitle;
+		else item.publicationTitle = docDetails.PublicationTitle;
 
-		item.publicationTitle = docDetails.PublicationTitle;
+		if (docDetails.LegislationDate) item.dateEnacted = docDetails.LegislationDate;
 
 		let bibRef = "Bibliographic reference: " + docDetails.BibliographicReference + ".";
 		item.notes.push({ note: bibRef });
 
 		// Case details if available, for articles too
 		if (docDetails.CaseNumbers[0]) item.docketNumer = docDetails.CaseNumbers[0];
-		if (docDetails.Parties && docDetails.Parties.length == 2) {
-			let parties = "Parties: " + docDetails.Parties[0] + " v. " + docDetails.Parties[1];
+		if (docDetails.Parties) {
+			let parties = "Parties: " + docDetails.Parties.join("<br/>");
 			item.notes.push({ note: parties });
+		}
+		if (docDetails.Court[0]) item.court = docDetails.Court[0];
+		if (docDetails.Organization[0] && docDetails.Type == 'Awards') item.court = docDetails.Organization[0];
+		if (docDetails.CaseDate) item.dateDecided = docDetails.CaseDate;
+		// How do we set jurisdiction for JurisM?
+		if (docDetails.Jurisdictions[0]) item.country = docDetails.Jurisdictions[0];
+
+		// Keywords
+		if (docDetails.KeyWords) {
+			for (let tag of docDetails.KeyWords) {
+				item.tags.push({ tag: tag.trim() });
+			}
 		}
 	} /*else if (pubDetails) {
 		item.title = pubDetails.publicationTitle;
@@ -339,24 +370,21 @@ async function scrapeDoc(url, zotType, pubDetails, docDetails) {
 		if (section) Z.debug(section);
 		if (section.pageRange.first && section.pageRange.last) item.pages = section.pageRange.first + "-" + section.pageRange.last;
 	}
-	else if (type == 'journalArticle') {
+	else if (type == 'journalArticle' | type == 'case') {
 		let volumeRegex = /Volume\s([a-zA-Z0-9]+)/;
 		let issueRegex = /Issue\s([a-zA-Z0-9]+)/;
-		//let pagesRegex = /pp\.\s([a-zA-Z0-9]+)\s-\s([a-zA-Z0-9]+)/;
-		let pagesRegex = /pp\.\s([a-zA-Z0-9]+\s-\s[a-zA-Z0-9]+)/;
+		let pagesRegex = /pp\.\s([a-zA-Z0-9]+)\s-\s([a-zA-Z0-9]+)/;
 
-		let volume = docDetails.BibliographicReference.match(volumeRegex)[1];
-		Z.debug(volume);
-		let issue = docDetails.BibliographicReference.match(issueRegex)[1];
-		Z.debug(issue);
-		let pages = docDetails.BibliographicReference.match(pagesRegex)[1];
-		Z.debug(pages);
-		//let pageFirst = docDetails.BibliographicReference.match(pagesRegex)[1];
-		//let pageLast = docDetails.BibliographicReference.match(pagesRegex)[2];
+		let volume = docDetails.BibliographicReference.match(volumeRegex);
+		let issue = docDetails.BibliographicReference.match(issueRegex);
+		let pages = docDetails.BibliographicReference.match(pagesRegex);
 
-		item.volume = volume;
-		item.issue = issue;
-		item.pages = pages;
+		if (volume) item.volume = volume[1];
+		if (issue) item.issue = issue[1];
+		if (pages) {
+			if (type == 'case') item.firstPage = pages[1];
+			else item.pages = pages[1] + "-" + pages[2];
+		}
 	}
 
 	//item.url = url;
@@ -412,7 +440,9 @@ async function scrapeDoc(url, zotType, pubDetails, docDetails) {
 		search.getTranslators();
 	}
 	else {
-		let pdfURL = "https://www.kluwerarbitration.com/document/print?title=PDF&ids=" + docDetails.Id;
+		let pdfURL = '';
+		if (type == 'case' && docDetails.PublicationType == 'internet') pdfURL = "https://www.kluwerarbitration.com/document/GetPdf/" + docDetails.Id;
+		else pdfURL = "https://www.kluwerarbitration.com/document/print?title=PDF&ids=" + docDetails.Id;
 		Z.debug(pdfURL);
 		item.attachments.push({
 			title: "Full Text PDF",
