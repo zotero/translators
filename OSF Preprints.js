@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-19 07:35:30"
+	"lastUpdated": "2023-10-19 08:34:02"
 }
 
 /*
@@ -41,7 +41,7 @@ const preprintType = ZU.fieldIsValidForType('title', 'preprint')
 	: 'report';
 
 function detectWeb(doc, url) {
-	if (text(doc, 'h1#preprintTitle')) {
+	if (doc.getElementById("preprintTitle")) {
 		return preprintType;
 	}
 	if (url.includes("/discover?") || url.includes("/search?")) {
@@ -69,53 +69,49 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) ZU.doGet(constructAPIURL(Object.keys(items)), osfAPIImport);
-		});
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(url);
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(url);
 	}
 }
 
-
-// takes and array of preprint URLs, extracts the ID and constructs an API call to OSF
-function constructAPIURL(urls) {
-	var ids = [];
-	for (let url of urls) {
-		let id;
-		if (url.match(/\.(io|com|org)\/([a-z0-9]+)/)) {
-			id = url.match(/\.(?:io|com|org)\/([a-z0-9]+)/)[1];
-		}
-		if (id) {
-			ids.push("https://api.osf.io/v2/preprints/" + id + "/?embed=contributors&embed=provider");
-		}
-	}
-	return ids;
+// takes preprint URL, extracts the ID and constructs an API call to OSF
+function constructAPIURL(url) {
+	let urlObj = new URL(url);
+	let last = urlObj.pathname.replace(/\/$/, "").split("/").slice(-1)[0];
+	return last && /[a-z0-9]+/.test(last) && ("https://api.osf.io/v2/preprints/" + last + "/?embed=contributors&embed=provider");
 }
 
-function osfAPIImport(text) {
-	// Z.debug(text);
-	let json = JSON.parse(text);
-	let attr = json.data.attributes;
-	let embeds = json.data.embeds;
+function osfAPIImport(inputJSON) {
+	let attributes = inputJSON.data.attributes;
+	let embeds = inputJSON.data.embeds;
 	var item = new Zotero.Item(preprintType);
 	// currently we're just doing preprints, but putting this here in case we'll want to handle different OSF
 	// item types in the future
-	// let type = json.data.type
-	item.title = attr.title;
-	item.abstractNote = attr.description;
-	item.date = attr.date_published;
+	// let type = inputJSON.data.type
+	item.title = ZU.unescapeHTML(attributes.title);
+	item.abstractNote = ZU.unescapeHTML(attributes.description);
+	item.date = ZU.strToISO(attributes.date_published);
 	item.publisher = embeds.provider.data.attributes.name;
-	item.DOI = json.data.links.preprint_doi && ZU.cleanDOI(json.data.links.preprint_doi);
+	item.DOI = inputJSON.data.links.preprint_doi && ZU.cleanDOI(inputJSON.data.links.preprint_doi);
 	if (preprintType != 'preprint') {
 		item.extra = "type: article";
 	}
-	item.url = json.data.links.html;
-	for (let tag of attr.tags) {
+	item.url = inputJSON.data.links.html;
+	for (let tag of attributes.tags) {
 		item.tags.push(tag);
+	}
+	// Somehow the "subjects" field is a nested array; Array#flat() is not well
+	// supported, so we just flatten one level.
+	for (let subject of [].concat(...attributes.subjects)) {
+		item.tags.push(subject.text);
 	}
 
 	for (let contributor of embeds.contributors.data) {
@@ -129,44 +125,22 @@ function osfAPIImport(text) {
 			item.creators.push({ lastName: author.full_name, creatorType: "author", fieldMode: 1 });
 		}
 	}
-	if (json.data.relationships.primary_file) {
-		let fileID = json.data.relationships.primary_file.links.related.href.replace("https://api.osf.io/v2/files/", "");
+	if (inputJSON.data.relationships.primary_file) {
+		let fileID = inputJSON.data.relationships.primary_file.links.related.href.replace("https://api.osf.io/v2/files/", "");
 		item.attachments.push({ url: "https://osf.io/download/" + fileID, title: "OSF Preprint", mimeType: "application/pdf" });
 	}
 
 	item.complete();
 }
 
-function scrape(doc, url) {
-	var translator = Zotero.loadTranslator('web');
-	// Embedded Metadata
-	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-
-	translator.setHandler('itemDone', function (obj, item) {
-		if (preprintType != 'preprint') {
-			if (item.extra) {
-				item.extra += "\ntype: article";
-			}
-			else {
-				item.extra = "type: article";
-			}
-		}
-		// remove Snapshot, which is useless for OSF preprints (plus we should always get a PDF)
-		for (let i = item.attachments.length - 1; i >= 0; i--) {
-			if (item.attachments[i].title == "Snapshot") {
-				item.attachments.splice(i, 1);
-			}
-		}
-		item.libraryCatalog = "OSF Preprints";
-		item.complete();
-	});
-
-	translator.getTranslatorObject(function (trans) {
-		trans.itemType = preprintType;
-		trans.doWeb(doc, url);
-	});
+async function scrape(url) {
+	let apiURL = constructAPIURL(url);
+	if (!apiURL) {
+		throw new Error(`Unexpected failure to extract API call URL for input URL ${url}`);
+	}
+	let metadata = await requestJSON(apiURL);
+	osfAPIImport(metadata);
 }
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -180,27 +154,26 @@ var testCases = [
 				"title": "The Dutch Auditory & Image Vocabulary Test (DAIVT): A New Dutch Receptive Vocabulary Test for Students",
 				"creators": [
 					{
-						"firstName": "Ibrich",
 						"lastName": "Bousard",
+						"firstName": "Ibrich",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Marc",
 						"lastName": "Brysbaert",
+						"firstName": "Marc",
 						"creatorType": "author"
 					}
 				],
-				"date": "2020-05-05T19:14:05.245Z",
+				"date": "2020-05-05",
 				"DOI": "10.31234/osf.io/nx2b4",
 				"abstractNote": "We introduce a new Dutch receptive vocabulary test, the Dutch auditory & image vocabulary test (DAIVT). The test is multiple choice and assesses vocabulary knowledge for spoken words. The measure has an online format, has free access, and allows easy data collection. The test was developed with the intent to enable testing for research purposes with university students. This paper describes the test construction. We cover three phases: 1) collecting stimulus materials and developing the test’s first version, 2) an exploratory item-analysis on the first draft (n= 93), and 3) validating the test (both the second and the final version) by comparing it to two existing tests (n= 270, n= 157). The results indicate that the test is reliable and correlates well with existing Dutch receptive vocabulary tests (convergent validity). The final version of the DAIVT comprises 90 test items and 1 practice item. It can be used freely for research purposes.",
-				"language": "en-us",
 				"libraryCatalog": "OSF Preprints",
 				"repository": "PsyArXiv",
 				"shortTitle": "The Dutch Auditory & Image Vocabulary Test (DAIVT)",
 				"url": "https://osf.io/preprints/psyarxiv/nx2b4/",
 				"attachments": [
 					{
-						"title": "Full Text PDF",
+						"title": "OSF Preprint",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -248,72 +221,66 @@ var testCases = [
 				"title": "‘All In’: A Pragmatic Framework for COVID-19 Testing and Action on a Global Scale",
 				"creators": [
 					{
-						"firstName": "Syril",
 						"lastName": "Pettit",
+						"firstName": "Syril D",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Keith",
 						"lastName": "Jerome",
+						"firstName": "Keith",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "David",
 						"lastName": "Rouquie",
+						"firstName": "David",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Susan",
 						"lastName": "Hester",
+						"firstName": "Susan",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Leah",
 						"lastName": "Wehmas",
+						"firstName": "Leah",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Bernard",
 						"lastName": "Mari",
+						"firstName": "Bernard",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Pascal",
 						"lastName": "Barbry",
+						"firstName": "Pascal",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Yasunari",
 						"lastName": "Kanda",
+						"firstName": "Yasunari",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Mineo",
 						"lastName": "Matsumoto",
+						"firstName": "Mineo",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jason",
 						"lastName": "Botten",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Emily",
-						"lastName": "Bruce",
+						"firstName": "Jason",
 						"creatorType": "author"
 					}
 				],
-				"date": "2020-04-29T12:19:21.907Z",
+				"date": "2020-04-29",
 				"DOI": "10.31219/osf.io/b2xmp",
 				"abstractNote": "Current demand for SARS-CoV-2 testing is straining material resource and labor capacity around the globe.  As a result, the public health and clinical community are hindered in their ability to monitor and contain the spread of COVID-19.  Despite broad consensus that more testing is needed, pragmatic guidance towards realizing this objective has been limited.  This paper addresses this limitation by proposing a novel and geographically agnostic framework (‘the 4Ps Framework) to guide multidisciplinary, scalable, resource-efficient, and achievable efforts towards enhanced testing capacity.  The 4Ps (Prioritize, Propagate, Partition, and Provide) are described in terms of specific opportunities to enhance the volume, diversity, characterization, and implementation of SARS-CoV-2 testing to benefit public health.  Coordinated deployment of the strategic and tactical recommendations described in this framework have the potential to rapidly expand available testing capacity, improve public health decision-making in response to the COVID-19 pandemic, and/or to be applied in future emergent disease outbreaks.",
-				"language": "en-us",
 				"libraryCatalog": "OSF Preprints",
-				"repository": "OSF Preprints",
+				"repository": "Open Science Framework",
 				"shortTitle": "‘All In’",
 				"url": "https://osf.io/b2xmp/",
 				"attachments": [
 					{
-						"title": "Full Text PDF",
+						"title": "OSF Preprint",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -340,13 +307,10 @@ var testCases = [
 						"tag": "Pandemic"
 					},
 					{
-						"tag": "Public Affairs"
+						"tag": "Public Affairs, Public Policy and Public Administration"
 					},
 					{
 						"tag": "Public Health"
-					},
-					{
-						"tag": "Public Policy and Public Administration"
 					},
 					{
 						"tag": "RT-PCR"
@@ -374,7 +338,19 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://osf.io/preprints/discover?provider=OSFORAgriXivORSocArXiv&q=testing",
+		"url": "https://osf.io/search?q=testing&resourceType=Preprint",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://osf.io/search?activeFilters=%5B%7B%22propertyVisibleLabel%22%3A%22Subject%22%2C%22propertyPathKey%22%3A%22subject%22%2C%22label%22%3A%22Race%20and%20Ethnicity%22%2C%22value%22%3A%22https%3A%2F%2Fapi.osf.io%2Fv2%2Fsubjects%2F584240d954be81056ceca9e9%2F%22%7D%5D&q=%22group%20threat%22&resourceType=Preprint",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://osf.io/preprints/psyarxiv/discover?q=Perceived%20Muslim%20Population%20Growth",
 		"defer": true,
 		"items": "multiple"
 	}
