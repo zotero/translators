@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-19 08:34:02"
+	"lastUpdated": "2023-10-19 09:01:28"
 }
 
 /*
@@ -138,7 +138,7 @@ async function scrape(url) {
 	if (!apiURL) {
 		throw new Error(`Unexpected failure to extract API call URL for input URL ${url}`);
 	}
-	let metadata = await requestJSON(apiURL);
+	let metadata = await requestJSON(apiURL, { headers: { Accept: "application/json" } });
 	osfAPIImport(metadata);
 }
 
