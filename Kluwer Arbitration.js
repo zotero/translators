@@ -479,6 +479,7 @@ async function scrapeBlog(doc, url = doc.location.href) {
 	em.itemType = 'blogPost';
 	await em.doWeb(doc, url);
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
