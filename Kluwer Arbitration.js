@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-20 00:47:16"
+	"lastUpdated": "2023-10-20 12:55:15"
 }
 
 /*
@@ -36,17 +36,8 @@
 */
 
 /*
-- DocumentID examples:
-  - bookSection: KLI-KA-Born-2021-Ch01
-  - bookSection: KLI-KA-Lopez-Rodriguez-2019-Ch05
-  - book: TOC-Lopez-Rodriguez-2019
-  - journalArticle: KLI-KA-ASAB31020011
-  - case: kli-ka-1105506-n
-  - book: TOC-Born-2021
-  - statute: kli-ka-1134507-n
-  - statute: ipn15507
-  - blog: https://arbitrationblog.kluwerarbitration.com/2023/10/18/hong-kong-arbitration-week-recap-a-step-forward-or-challenges-for-the-21st-century/
-- Normal URL: https://www.kluwerarbitration.com/document/
+See test cases for examples. URLs used:
+- Document URL: https://www.kluwerarbitration.com/document/
 - Publication details (whole book): https://www.kluwerarbitration.com/api/publicationdetail?documentId=
 - Document details: https://www.kluwerarbitration.com/api/Document?id=
 - PDF request: https://www.kluwerarbitration.com/document/print?title=PDF&ids=
@@ -78,6 +69,8 @@ function getType(pubDetails, docDetails) {
 			switch (docDetails.Type) {
 				case 'Models':
 					return 'statute';
+				case 'Commentary':
+					return 'report';
 			}
 			break;
 		case 'internet':
@@ -87,7 +80,7 @@ function getType(pubDetails, docDetails) {
 				default:
 					return 'webpage';
 			}
-		case 'blog': // Does it exist?
+		case 'blog': // Only if we're reading from the search results JSON
 			return 'blogPost';
 	}
 
@@ -131,6 +124,29 @@ async function getDocumentDetails(documentID) {
 	return ZU.requestJSON(detailsURL);
 }
 
+// Get the JSON object describing the standalone case (i.e., not contained in a journal)
+async function getCaseDetails(caseID) {
+	let detailsURL = "https://www.kluwerarbitration.com/case/GetDetailsByCaseId?caseId=" + caseID;
+	Z.debug("Requesting case details");
+	Z.debug(detailsURL);
+	return ZU.requestJSON(detailsURL);
+}
+
+// Get the JSON object of the case ToC (history)
+async function getCaseToc(caseID) {
+	let detailsURL = "https://www.kluwerarbitration.com/case/" + caseID + "/GetToc";
+	Z.debug("Requesting case ToC");
+	Z.debug(detailsURL);
+	return ZU.requestJSON(detailsURL);
+}
+
+async function getProceedingDetails(proceedingID) {
+	let detailsURL = "https://www.kluwerarbitration.com/proceeding/" + proceedingID;
+	Z.debug("Requesting proceeding details");
+	Z.debug(detailsURL);
+	return ZU.requestJSON(detailsURL);
+}
+
 function getDocId(url) {
 	const segments = new URL(url).pathname.split('/');
 	const documentID = segments.pop() || segments.pop(); // Handle potential trailing slash
@@ -138,8 +154,40 @@ function getDocId(url) {
 	return documentID;
 }
 
+function getCaseId(url) {
+	const path = new URL(url).pathname;
+	const regex = /case\/(\d+)/;
+	let caseID
+	if ((caseID = regex.exec(path)) !== null) {
+		Z.debug("Case ID: " + caseID[1]);
+		return caseID[1];
+	}
+	return null;
+}
+
+function getProceedingId(url) {
+	const path = new URL(url).pathname;
+	const regex = /case\/(\d+\/\d+)/;
+	let proceedingID
+	if ((proceedingID = regex.exec(path)) !== null) {
+		Z.debug("Proceeding ID: " + proceedingID[1]);
+		return proceedingID[1];
+	}
+	return null;
+}
+
 async function getTypeAndDetails(doc, url) {
-	if (url.includes('/document/')) {
+	if (url.includes('document/case')) {
+		Z.debug('Found a case');
+
+		/*let caseID = getCaseId(url);
+		let documentID = getDocId(url);
+		let caseDetails = await getCaseDetails(caseID);
+		//let caseToc = await getCaseToc(caseID);
+		let docDetails = await getDocumentDetails(documentID);*/
+		return { type: 'case', pubDetails: null, docDetails: null };
+	}
+	else if (url.includes('/document/')) {
 		Z.debug('Found a document');
 		
 		let documentID = getDocId(url);
@@ -152,7 +200,7 @@ async function getTypeAndDetails(doc, url) {
 			Z.debug("Document is: " + zotType);
 			return { type: zotType, pubDetails: pubDetails, docDetails: docDetails };
 		}
-		
+
 		/*else {
 			Z.debug(pubType + " not yet suppported");
 		}*/
@@ -160,12 +208,11 @@ async function getTypeAndDetails(doc, url) {
 	else if (url.includes('/search')) {
 		Z.debug("Investigating search page");
 		let selector = 'div#vueApp';
-		Z.debug(doc.querySelector(selector));
+		Z.debug("Monitoring " + selector);
 		Z.monitorDOMChanges(doc.querySelector(selector));
 		if (getSearchResults(doc, true)) {
 			return { type: 'multiple', pubDetails: null, docDetails: null };
 		}
-		return false;
 	}
 	else if (url.includes('arbitrationblog')) {
 		return { type: 'blogPost', pubDetails: null, docDetails: null };
@@ -188,17 +235,15 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	// TODO: adjust the CSS selector for blog posts as well
-	var rows = doc.querySelectorAll('div.search-results div.item-result div.content > div.title > a[href*="/document/"]');
-	Z.debug("Number of rows" + rows.length);
+	var searchResults = doc.querySelectorAll('div.search-results div.item-result div.content > div.title > a');
+	Z.debug("Number of results: " + searchResults.length);
 
-	for (let row of rows) {
-		Z.debug(row);
-
+	for (let result of searchResults) {
 		// TODO: check and maybe adjust
-		let href = row.href;
+		let href = result.href;
 		Z.debug(href);
 		// TODO: check and maybe adjust
-		let title = ZU.trimInternal(row.textContent);
+		let title = ZU.trimInternal(result.textContent);
 		Z.debug(title);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -211,34 +256,44 @@ function getSearchResults(doc, checkOnly) {
 
 async function doWeb(doc, url) {
 	Z.debug("STARTING DO WEB");
-
-	const { type: zotType, pubDetails, docDetails } = await getTypeAndDetails(doc, url);
-
-	Z.debug("detection result: " + zotType);
-	if (zotType == 'multiple') {
-		Z.debug('Will try to save multiple items');
+	
+	if (url.includes('/document/case/')) {
+		Z.debug('Scraping standalone case');
+		//const { type: zotType, caseDetails, docDetails } = await getTypeAndDetails(doc, url);
+		await scrapeCase(url);
+	}
+	else if(url.includes('/search')) {
+		Z.debug('Scraping search results');
 
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		Z.debug(items);
 		if (!items) return;
 		for (let url of Object.keys(items)) {
 			Z.debug(url);
-			let docId = getDocId(url);
-			await scrapeId(docId);
+			await scrapeURL(url);
 		}
 	}
-	else if (zotType == 'blogPost') {
-		Z.debug("Scraping blog post");
-		await scrapeBlog(doc);
-	}
 	else {
-		Z.debug("Single document, start scrape");
-		await scrapeDoc(url, zotType, pubDetails, docDetails);
+		if (!doc) Z.debug("Requesting document for: " + url);
+		doc ??= await ZU.requestDocument(url);
+
+		const { type: zotType, pubDetails, docDetails } = await getTypeAndDetails(doc, url);
+
+		Z.debug("detection result: " + zotType);
+		if (zotType == 'blogPost') {
+			Z.debug("Scraping blog post");
+			await scrapeBlog(doc);
+		}
+		else {
+			Z.debug("Scraping document");
+			await scrapeDoc(url, zotType, pubDetails, docDetails);
+		}
 	}
 }
 
-async function scrapeId(docId) {
-	Z.debug("Scraping from web results not yet implemented. Doc: " + docId);
+async function scrapeURL(url) {
+	Z.debug("Scraping from search result for: " + url);
+	await doWeb(null, url);
 }
 
 /*function addNote(item: Zotero.Item, note: String) {
@@ -257,7 +312,6 @@ async function scrapeDoc(url, zotType, pubDetails, docDetails) {
 	}
 	Z.debug("Type is " + type);
 	var item = new Z.Item(type);
-	Z.debug(item);
 
 	if (pubDetails.publicationInfo) {
 		let publicationInfo = pubDetails.publicationInfo;
@@ -324,8 +378,8 @@ async function scrapeDoc(url, zotType, pubDetails, docDetails) {
 		item.notes.push({ note: bibRef });
 
 		// Case details if available, for articles too
-		if (docDetails.CaseNumbers[0]) item.docketNumer = docDetails.CaseNumbers[0];
-		if (docDetails.Parties) {
+		if (docDetails.CaseNumbers[0]) item.docketNumber = docDetails.CaseNumbers[0];
+		if (docDetails.Parties.length) {
 			let parties = "Parties: " + docDetails.Parties.join("<br/>");
 			item.notes.push({ note: parties });
 		}
@@ -389,8 +443,6 @@ async function scrapeDoc(url, zotType, pubDetails, docDetails) {
 	}
 
 	//item.url = url;
-
-	Z.debug(item);
 
 	// Getting PDF
 	if (type == 'book') {
@@ -480,14 +532,81 @@ async function scrapeBlog(doc, url = doc.location.href) {
 	await em.doWeb(doc, url);
 }
 
+async function scrapeCase(url) {
+	let caseID = getCaseId(url);
+	let documentID = getDocId(url);
+	let proceedingID = getProceedingId(url);
+	Z.debug("Scraping standalone case: " + caseID);
+	Z.debug("Proceeding: " + proceedingID);
+	Z.debug("Matching document: " + documentID);
+
+	var item = new Z.Item('case');
+	let caseDetails = await getCaseDetails(caseID);
+	let caseToc = await getCaseToc(caseID);
+	let docDetails = await getDocumentDetails(documentID);
+	let procDetails = proceedingID ? await getProceedingDetails(proceedingID) : null;
+
+	/*Z.debug(caseDetails);
+	Z.debug(caseToc);
+	Z.debug(docDetails);
+	Z.debug(procDetails);*/
+
+	item.docketNumber = caseDetails.caseNo;
+	item.court = caseDetails.institutionLong;
+	item.caseName = caseDetails.casename;
+	item.language = caseDetails.languages.join(" ");
+	item.filingDate = procDetails?.commencementDate;
+	item.dateDecided = procDetails?.dateOfOutcome;
+
+	// Counsels and arbitrators
+	for (let person of caseDetails.arbitrators) {
+		item.creators.push({
+			firstName: person.firstName,
+			lastName: person.lastName,
+			creatorType: person.role == "Counsel" ? "counsel" : "author"
+		});
+	}
+
+	if (docDetails) {
+		let pdfURL = '';
+		if (docDetails.PublicationType == 'internet') pdfURL = "https://www.kluwerarbitration.com/document/GetPdf/" + docDetails.Id;
+		else pdfURL = "https://www.kluwerarbitration.com/document/print?title=PDF&ids=" + docDetails.Id;
+		Z.debug(pdfURL);
+		item.attachments.push({
+			title: "Full Text PDF",
+			mimeType: "application/pdf",
+			url: pdfURL
+		});
+	} 
+	else {
+		// Select case files to download
+		let docs = caseToc.tocItems.flatMap(node => node.documents).filter(doc => doc?.documentId).map(doc => [doc.documentId, doc.title]);
+		let items = await Z.selectItems(Object.fromEntries(docs));
+		if (items) {
+			for (const [docId, docLabel] of Object.entries(items)) {
+				let pdfURL = "https://www.kluwerarbitration.com/document/GetPdf/" + docId + ".pdf";
+				Z.debug(pdfURL);
+				item.attachments.push({
+					title: docLabel,
+					mimeType: "application/pdf",
+					url: pdfURL
+				});
+			}
+		}
+	}
+
+	item.attachments.push({
+		url: url,
+		title: "Read on Kluwer Arbitration",
+		mimeType: "text/html",
+		snapshot: false
+	});
+
+	item.complete();
+}
+
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "https://www.kluwerarbitration.com/search?q=counterclaim+OR+counterclaims&sortBy=date+desc",
-		"detectedItemType": "multiple",
-		"items": []
-	},
 	{
 		"type": "web",
 		"url": "https://www.kluwerarbitration.com/document/KLI-KA-Born-2021-Ch01",
@@ -528,9 +647,6 @@ var testCases = [
 				"notes": [
 					{
 						"note": "Bibliographic reference: 'Chapter 1: Overview of International Commercial Arbitration', in Gary B. Born, International Commercial Arbitration (Third Edition),  (© Kluwer Law International; Kluwer Law International 2021)."
-					},
-					{
-						"note": "Parties: "
 					}
 				],
 				"seeAlso": []
@@ -636,9 +752,6 @@ var testCases = [
 				"notes": [
 					{
 						"note": "Bibliographic reference: Sai Ramani Garimella and Poomintr Sooksripaisarnkit, 'Chapter 5: Emergency Arbitrator Awards: Addressing Enforceability Concerns Through National Law and the New York Convention', in Katia Fach Gomez and Ana M. Lopez-Rodriguez (eds), 60 Years of the New York Convention: Key Issues and Future Challenges,  (© Kluwer Law International; Kluwer Law International 2019), pp. 67 - 84."
-					},
-					{
-						"note": "Parties: "
 					}
 				],
 				"seeAlso": []
@@ -791,14 +904,108 @@ var testCases = [
 				"notes": [
 					{
 						"note": "Bibliographic reference: 'UNCITRAL Model Law on International Commercial Arbitration (1985, with 2006 amendments)', in Lise Bosman (ed), ICCA International Handbook on Commercial Arbitration, (© Kluwer Law International; ICCA & Kluwer Law International 2023, Supplement No. 52, June 2008), pp. 1 - 17."
-					},
-					{
-						"note": "Parties: "
 					}
 				],
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.kluwerarbitration.com/document/case/2113/35563/kli-ka-kaces-25110",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "NJSC Naftogaz of Ukraine, PJSC State Joint Stock Company Chornomornaftogaz, PJSC Ukrgasvydobuvannya, Others. v. Russian Federation",
+				"creators": [
+					{
+						"firstName": "Anna",
+						"lastName": "Kozmenko",
+						"creatorType": "counsel"
+					},
+					{
+						"firstName": "William Ian Cornell",
+						"lastName": "Binnie",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Baiju S.",
+						"lastName": "Vasani",
+						"creatorType": "counsel"
+					},
+					{
+						"firstName": "Christopher",
+						"lastName": "Boog",
+						"creatorType": "counsel"
+					},
+					{
+						"firstName": "Elliott",
+						"lastName": "Geisinger",
+						"creatorType": "counsel"
+					},
+					{
+						"firstName": "Julie",
+						"lastName": "Raneda",
+						"creatorType": "counsel"
+					},
+					{
+						"firstName": "Charles",
+						"lastName": "Poncet",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Maja",
+						"lastName": "Stanivuković",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Erin",
+						"lastName": "Thomas",
+						"creatorType": "counsel"
+					},
+					{
+						"firstName": "Joshua B.",
+						"lastName": "Picker",
+						"creatorType": "counsel"
+					},
+					{
+						"firstName": "Marney L.",
+						"lastName": "Cheek",
+						"creatorType": "counsel"
+					}
+				],
+				"dateDecided": "12/04/2023",
+				"court": "Permanent Court of Arbitration",
+				"docketNumber": "PCA Case No. 2017-16",
+				"language": "English",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Read on Kluwer Arbitration",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.kluwerarbitration.com/document/case/2113",
+		"detectedItemType": "case",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.kluwerarbitration.com/search?q=counterclaim+OR+counterclaims&sortBy=date+desc",
+		"detectedItemType": "multiple",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
