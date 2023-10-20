@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-19 23:04:06"
+	"lastUpdated": "2023-10-20 00:47:16"
 }
 
 /*
@@ -146,15 +146,16 @@ async function getTypeAndDetails(doc, url) {
 		let pubDetails = await getPublicationDetails(documentID);
 		let docDetails = await getDocumentDetails(documentID);
 		
-		let pubType = pubDetails.publicationType;
+		//let pubType = pubDetails.publicationType;
 		let zotType = getType(pubDetails, docDetails);
 		if (zotType) {
 			Z.debug("Document is: " + zotType);
 			return { type: zotType, pubDetails: pubDetails, docDetails: docDetails };
 		}
-		else {
+		
+		/*else {
 			Z.debug(pubType + " not yet suppported");
-		}
+		}*/
 	}
 	else if (url.includes('/search')) {
 		Z.debug("Investigating search page");
@@ -461,25 +462,23 @@ async function scrapeDoc(url, zotType, pubDetails, docDetails) {
 	}
 }
 
-async function scrapeBlog(doc) {
-	Z.debug("Saving blog post");
-	var item = new Z.Item('blogPost');
-	Z.debug(item);
-
-	var translator = Z.loadTranslator("web");
-	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
-
-	translator.setHandler("itemDone", function (obj, item) {
-		item.itemType = 'blogPost';
-
+async function scrapeBlog(doc, url = doc.location.href) {
+	let translator = Zotero.loadTranslator('web');
+	// Embedded Metadata
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	translator.setDocument(doc);
+	
+	translator.setHandler('itemDone', (_obj, item) => {
+		for (let tag of doc.querySelectorAll("div.entry-category > a[rel='category tag']")) {
+			item.tags.push({ tag: tag.textContent.trim() });
+		}
 		item.complete();
 	});
 
-	translator.setDocument(doc);
-	translator.translate();
+	let em = await translator.getTranslatorObject();
+	em.itemType = 'blogPost';
+	await em.doWeb(doc, url);
 }
-
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -491,7 +490,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.kluwerarbitration.com/document/KLI-KA-Born-2021-Ch01",
-		"detectedItemType": "bookSection",
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -501,19 +499,302 @@ var testCases = [
 						"firstName": "Gary B.",
 						"lastName": "Born",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Gary B.",
+						"lastName": "Born",
+						"creatorType": "editor"
 					}
 				],
-				"abstractNote": "Kluwer Arbitration, Home",
-				"libraryCatalog": "www.kluwerarbitration.com",
-				"url": "https://www.kluwerarbitration.com/document/KLI-KA-Born-2021-Ch01",
+				"date": "Jan 2021",
+				"ISBN": "9789403526430",
+				"bookTitle": "International Commercial Arbitration (Third Edition)",
+				"libraryCatalog": "Kluwer Arbitration",
+				"publisher": "Kluwer Law International",
+				"shortTitle": "Chapter 1",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Read on Kluwer Arbitration",
+						"mimeType": "text/html",
+						"snapshot": false
 					}
 				],
 				"tags": [],
+				"notes": [
+					{
+						"note": "Bibliographic reference: 'Chapter 1: Overview of International Commercial Arbitration', in Gary B. Born, International Commercial Arbitration (Third Edition),  (© Kluwer Law International; Kluwer Law International 2021)."
+					},
+					{
+						"note": "Parties: "
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://arbitrationblog.kluwerarbitration.com/2023/10/18/hong-kong-arbitration-week-recap-a-step-forward-or-challenges-for-the-21st-century/",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "Hong Kong Arbitration Week Recap: A Step Forward or Challenges for the 21st Century?",
+				"creators": [
+					{
+						"firstName": "Vera",
+						"lastName": "He",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-10-18T06:49:12+00:00",
+				"abstractNote": "On the second day of Hong Kong Arbitration Week 2023, the ICC International Court of Arbitration (ICC) and the International Chamber of Commerce – Hong Kong (ICC-HK) hosted an in-person event on “Challenges of the 21st Century: Regulation of Use of AI in Dispute Resolution and Making ADR Work.” The event explored the appropriate techniques... Continue reading",
+				"blogTitle": "Kluwer Arbitration Blog",
+				"language": "en-US",
+				"shortTitle": "Hong Kong Arbitration Week Recap",
+				"url": "https://arbitrationblog.kluwerarbitration.com/2023/10/18/hong-kong-arbitration-week-recap-a-step-forward-or-challenges-for-the-21st-century/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "ADR"
+					},
+					{
+						"tag": "Artificial Intelligence"
+					},
+					{
+						"tag": "HK Arbitration Week"
+					},
+					{
+						"tag": "HKIAC"
+					},
+					{
+						"tag": "Hong Kong"
+					}
+				],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.kluwerarbitration.com/document/KLI-KA-Lopez-Rodriguez-2019-Ch05",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Chapter 5: Emergency Arbitrator Awards: Addressing Enforceability Concerns Through National Law and the New York Convention",
+				"creators": [
+					{
+						"firstName": "Sai Ramani",
+						"lastName": "Garimella",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Poomintr",
+						"lastName": "Sooksripaisarnkit",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Katia",
+						"lastName": "Fach Gomez",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Ana M.",
+						"lastName": "Lopez-Rodriguez",
+						"creatorType": "editor"
+					}
+				],
+				"date": "07 Mar 2019",
+				"ISBN": "9789403501550",
+				"bookTitle": "60 Years of the New York Convention: Key Issues and Future Challenges",
+				"libraryCatalog": "Kluwer Arbitration",
+				"pages": "67-84",
+				"publisher": "Kluwer Law International",
+				"shortTitle": "Chapter 5",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Read on Kluwer Arbitration",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "Bibliographic reference: Sai Ramani Garimella and Poomintr Sooksripaisarnkit, 'Chapter 5: Emergency Arbitrator Awards: Addressing Enforceability Concerns Through National Law and the New York Convention', in Katia Fach Gomez and Ana M. Lopez-Rodriguez (eds), 60 Years of the New York Convention: Key Issues and Future Challenges,  (© Kluwer Law International; Kluwer Law International 2019), pp. 67 - 84."
+					},
+					{
+						"note": "Parties: "
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.kluwerarbitration.com/document/TOC-Lopez-Rodriguez-2019",
+		"detectedItemType": "book",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.kluwerarbitration.com/document/KLI-KA-ASAB31020011",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The Capacity of a Bankrupt Party to Be or Remain a Party to International Arbitral Proceedings: A Landmark Decision of the Swiss Federal Supreme Court",
+				"creators": [
+					{
+						"firstName": "Georg",
+						"lastName": "Naegeli",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Matthias",
+						"lastName": "Scherer",
+						"creatorType": "editor"
+					}
+				],
+				"date": "Jun 2013",
+				"ISSN": "1010-9153",
+				"issue": "2",
+				"libraryCatalog": "Kluwer Arbitration",
+				"pages": "372-382",
+				"publicationTitle": "ASA Bulletin",
+				"shortTitle": "The Capacity of a Bankrupt Party to Be or Remain a Party to International Arbitral Proceedings",
+				"volume": "31",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Read on Kluwer Arbitration",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "Bibliographic reference: Georg Naegeli, 'The Capacity of a Bankrupt Party to Be or Remain a Party to International Arbitral Proceedings: A Landmark Decision of the Swiss Federal Supreme Court', ASA Bulletin, (© Association Suisse de l'Arbitrage; Kluwer Law International 2013, Volume 31, Issue 2), pp. 372 - 382."
+					},
+					{
+						"note": "Parties: Claimant, X. Lda., handelnd durch Dr. M., Administradora de Insolvencia<br/>Defendant, Y. Ltd."
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.kluwerarbitration.com/document/kli-ka-1105506-n",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "Société d'études et représentations navales et industrielles (Soerni) et autres v. société Air Sea Broker Ltd. (ASB), Cour de cassation (1re Ch. civ.), Not Indicated, 8 July 2009",
+				"creators": [],
+				"dateDecided": "2009",
+				"court": "Court of Cassation of France, First Civil Law Chamber",
+				"firstPage": "529",
+				"reporter": "Revue de l'Arbitrage",
+				"reporterVolume": "2009",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Read on Kluwer Arbitration",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					{
+						"tag": "Arbitrage international"
+					},
+					{
+						"tag": "Clause compromissoire"
+					},
+					{
+						"tag": "Croyance légitime dans les pouvoirs du signataire de la clause pour conclure un acte de gestion courante liant la société"
+					},
+					{
+						"tag": "Engagement d'une société à l'arbitrage"
+					},
+					{
+						"tag": "Engagement ne s'appréciant pas par référence à une quelconque loi nationale"
+					},
+					{
+						"tag": "Exigence de bonne foi"
+					},
+					{
+						"tag": "Fondement de cette règle"
+					},
+					{
+						"tag": "Règle matérielle déduite du principe de validité de la convention d'arbitrage"
+					},
+					{
+						"tag": "Volonté commune des parties"
+					}
+				],
+				"notes": [
+					{
+						"note": "Bibliographic reference: 'Société d'études et représentations navales et industrielles (Soerni) et autres v. société Air Sea Broker Ltd. (ASB), Cour de cassation (1re Ch. civ.), Not Indicated, 8 July 2009', Revue de l'Arbitrage, (© Comité Français de l'Arbitrage; Comité Français de l'Arbitrage 2009, Volume 2009, Issue 3), pp. 529 - 532."
+					},
+					{
+						"note": "Parties: Claimant, Société d'études et représentations navales et industrielles (Soerni) et autres<br/>Defendant, société Air Sea Broker Ltd. (ASB)"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.kluwerarbitration.com/document/kli-ka-1134507-n",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "UNCITRAL Model Law on International Commercial Arbitration (1985, with 2006 amendments)",
+				"creators": [],
+				"dateEnacted": "2008",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Read on Kluwer Arbitration",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "Bibliographic reference: 'UNCITRAL Model Law on International Commercial Arbitration (1985, with 2006 amendments)', in Lise Bosman (ed), ICCA International Handbook on Commercial Arbitration, (© Kluwer Law International; ICCA & Kluwer Law International 2023, Supplement No. 52, June 2008), pp. 1 - 17."
+					},
+					{
+						"note": "Parties: "
+					}
+				],
 				"seeAlso": []
 			}
 		]
