@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-23 10:29:18"
+	"lastUpdated": "2023-10-23 10:32:55"
 }
 
 /*
@@ -39,10 +39,10 @@ function detectSearch(item) {
 	return !!item.arXiv;
 }
 
-function doSearch(item) {
+async function doSearch(item) {
 	var url = 'https://export.arxiv.org/oai2?verb=GetRecord&metadataPrefix=oai_dc'
 		+ '&identifier=oai%3AarXiv.org%3A' + encodeURIComponent(item.arXiv);
-	ZU.doGet(url, parseXML);
+	return parseXML(await requestText(url));
 }
 
 
@@ -805,6 +805,56 @@ var testCases = [
 		"url": "https://arxiv.org/search/?query=australopithecus&searchtype=title&abstracts=show&order=-announced_date_first&size=25",
 		"defer": true,
 		"items": "multiple"
+	},
+	{
+		"type": "search",
+		"input": {
+			"arXiv": "math/0211159"
+		},
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "The entropy formula for the Ricci flow and its geometric applications",
+				"creators": [
+					{
+						"firstName": "Grisha",
+						"lastName": "Perelman",
+						"creatorType": "author"
+					}
+				],
+				"date": "2002-11-11",
+				"abstractNote": "We present a monotonic expression for the Ricci flow, valid in all dimensions and without curvature assumptions. It is interpreted as an entropy for a certain canonical ensemble. Several geometric applications are given. In particular, (1) Ricci flow, considered on the space of riemannian metrics modulo diffeomorphism and scaling, has no nontrivial periodic orbits (that is, other than fixed points); (2) In a region, where singularity is forming in finite time, the injectivity radius is controlled by the curvature; (3) Ricci flow can not quickly turn an almost euclidean region into a very curved one, no matter what happens far away. We also verify several assertions related to Richard Hamilton's program for the proof of Thurston geometrization conjecture for closed three-manifolds, and give a sketch of an eclectic proof of this conjecture, making use of earlier results on collapsing with local lower curvature bound.",
+				"archiveID": "arXiv:math/0211159",
+				"extra": "arXiv:math/0211159",
+				"libraryCatalog": "arXiv.org",
+				"repository": "arXiv",
+				"url": "http://arxiv.org/abs/math/0211159",
+				"attachments": [
+					{
+						"title": "arXiv Fulltext PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "arXiv.org Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "53C"
+					},
+					{
+						"tag": "Mathematics - Differential Geometry"
+					}
+				],
+				"notes": [
+					{
+						"note": "Comment: 39 pages"
+					}
+				],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
