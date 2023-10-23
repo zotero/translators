@@ -87,7 +87,7 @@ function scrape(doc, url) {
 	}
 
 	// get RIS Link
-	var risurl = ZU.xpathText(doc, '//a[contains(text(), "RIS")]/@href');
+	var risurl = ZU.xpathText(doc, '//div[contains(@class, "third-level-sublinks")]//a[contains(text(), "RIS")]/@href');
 	ZU.doGet(risurl, function (text) {
 		var ris = text;
 		var translator = Zotero.loadTranslator("import");
