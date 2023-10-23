@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-23 08:53:16"
+	"lastUpdated": "2023-10-23 09:05:55"
 }
 
 /*
@@ -211,6 +211,40 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.dukeupress.edu/books/browse?sortid=7",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.dukeupress.edu/beyond-this-narrow-now",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "\"Beyond This Narrow Now\": Or, Delimitations, of W. E. B. Du Bois",
+				"creators": [
+					{
+						"firstName": "Nahum Dimitri",
+						"lastName": "Chandler",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022",
+				"ISBN": "9781478014805",
+				"abstractNote": "In “Beyond This Narrow Now” Nahum Dimitri Chandler shows that the premises of W. E. B. Du Bois's thinking at the turn of the twentieth century stand as fundamental references for the whole itinerary of his thought. Opening with a distinct approach to the legacy of Du Bois, Chandler proceeds through a series of close readings of Du Bois's early essays, previously unpublished or seldom studied, with discrete annotations of The Souls of Black Folk: Essays and Sketches of 1903, elucidating and elaborating basic epistemological terms of his thought. With theoretical attention to how the African American stands as an example of possibility for Du Bois and renders problematic traditional ontological thought, Chandler also proposes that Du Bois's most well-known phrase—“the problem of the color line”—sustains more conceptual depth than has yet been understood, with pertinence for our accounts of modern systems of enslavement and imperial colonialism and the incipient moments of modern capitalization. Chandler's work exemplifies a more profound engagement with Du Bois, demonstrating that he must be re-read, appreciated, and studied anew as a philosophical writer and thinker contemporary to our time.",
+				"libraryCatalog": "Duke University Press Books",
+				"numPages": "328",
+				"place": "Durham, NC",
+				"publisher": "Duke University Press",
+				"shortTitle": "\"Beyond This Narrow Now\"",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
