@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-20 12:55:15"
+	"lastUpdated": "2023-10-23 09:40:05"
 }
 
 /*
@@ -88,24 +88,25 @@ function getType(pubDetails, docDetails) {
 	return false;
 }
 
-// Function used to get all documents contained within a collection (such as chapters of a book)
+// Function used to get all documents contained within a collection (such as chapters of a book) based on its ToC
+// ToC nodes can be used to retrieve page numbers and documents
 function flattenNodes(tocNodes) {
 	let result = [];
-	recursion(0, tocNodes, result);
+	depthFirstFlatten(0, tocNodes, result);
 	return result;
 }
 
-function recursion(index, inputArray, outputArray) {
+function depthFirstFlatten(index, inputArray, outputArray) {
 	if (index >= inputArray.length) return;
 
 	if (inputArray[index].children) {
-		recursion(0, inputArray[index].children, outputArray);
+		depthFirstFlatten(0, inputArray[index].children, outputArray);
 	}
 	else {
 		outputArray.push(inputArray[index]);
 	}
 
-	recursion(index + 1, inputArray, outputArray);
+	depthFirstFlatten(index + 1, inputArray, outputArray);
 }
 
 // Get the JSON object describing the publication (i.e., the book for a section or the journal for an article)
@@ -113,7 +114,7 @@ async function getPublicationDetails(documentID) {
 	let detailsURL = "https://www.kluwerarbitration.com/api/publicationdetail?documentId=" + documentID;
 	Z.debug("Requesting publication details");
 	Z.debug(detailsURL);
-	return ZU.requestJSON(detailsURL);
+	return requestJSON(detailsURL);
 }
 
 // Get the JSON object describing the document itself (article, book section, etc.)
@@ -121,7 +122,7 @@ async function getDocumentDetails(documentID) {
 	let detailsURL = "https://www.kluwerarbitration.com/api/Document?id=" + documentID;
 	Z.debug("Requesting document details");
 	Z.debug(detailsURL);
-	return ZU.requestJSON(detailsURL);
+	return requestJSON(detailsURL);
 }
 
 // Get the JSON object describing the standalone case (i.e., not contained in a journal)
@@ -129,7 +130,7 @@ async function getCaseDetails(caseID) {
 	let detailsURL = "https://www.kluwerarbitration.com/case/GetDetailsByCaseId?caseId=" + caseID;
 	Z.debug("Requesting case details");
 	Z.debug(detailsURL);
-	return ZU.requestJSON(detailsURL);
+	return requestJSON(detailsURL);
 }
 
 // Get the JSON object of the case ToC (history)
@@ -137,41 +138,39 @@ async function getCaseToc(caseID) {
 	let detailsURL = "https://www.kluwerarbitration.com/case/" + caseID + "/GetToc";
 	Z.debug("Requesting case ToC");
 	Z.debug(detailsURL);
-	return ZU.requestJSON(detailsURL);
+	return requestJSON(detailsURL);
 }
 
 async function getProceedingDetails(proceedingID) {
 	let detailsURL = "https://www.kluwerarbitration.com/proceeding/" + proceedingID;
 	Z.debug("Requesting proceeding details");
 	Z.debug(detailsURL);
-	return ZU.requestJSON(detailsURL);
+	return requestJSON(detailsURL);
 }
 
 function getDocId(url) {
-	const segments = new URL(url).pathname.split('/');
-	const documentID = segments.pop() || segments.pop(); // Handle potential trailing slash
+	let segments = new URL(url).pathname.split('/');
+	let documentID = segments.pop() || segments.pop(); // Handle potential trailing slash
 	Z.debug("Document ID: " + documentID);
 	return documentID;
 }
 
 function getCaseId(url) {
-	const path = new URL(url).pathname;
-	const regex = /case\/(\d+)/;
-	let caseID
-	if ((caseID = regex.exec(path)) !== null) {
-		Z.debug("Case ID: " + caseID[1]);
-		return caseID[1];
+	let path = new URL(url).pathname;
+	let m = path.match(/case\/(\d+)/);
+	if (m) {
+		Z.debug("Case ID: " + m[1]);
+		return m[1];
 	}
 	return null;
 }
 
 function getProceedingId(url) {
-	const path = new URL(url).pathname;
-	const regex = /case\/(\d+\/\d+)/;
-	let proceedingID
-	if ((proceedingID = regex.exec(path)) !== null) {
-		Z.debug("Proceeding ID: " + proceedingID[1]);
-		return proceedingID[1];
+	let path = new URL(url).pathname;
+	let m = path.match(/case\/(\d+\/\d+)/);
+	if (m) {
+		Z.debug("Proceeding ID: " + m[1]);
+		return m[1];
 	}
 	return null;
 }
@@ -180,11 +179,6 @@ async function getTypeAndDetails(doc, url) {
 	if (url.includes('document/case')) {
 		Z.debug('Found a case');
 
-		/*let caseID = getCaseId(url);
-		let documentID = getDocId(url);
-		let caseDetails = await getCaseDetails(caseID);
-		//let caseToc = await getCaseToc(caseID);
-		let docDetails = await getDocumentDetails(documentID);*/
 		return { type: 'case', pubDetails: null, docDetails: null };
 	}
 	else if (url.includes('/document/')) {
@@ -200,10 +194,6 @@ async function getTypeAndDetails(doc, url) {
 			Z.debug("Document is: " + zotType);
 			return { type: zotType, pubDetails: pubDetails, docDetails: docDetails };
 		}
-
-		/*else {
-			Z.debug(pubType + " not yet suppported");
-		}*/
 	}
 	else if (url.includes('/search')) {
 		Z.debug("Investigating search page");
@@ -223,7 +213,7 @@ async function getTypeAndDetails(doc, url) {
 async function detectWeb(doc, url) {
 	Z.debug("STARTING DETECT WEB");
 
-	const result = await getTypeAndDetails(doc, url);
+	let result = await getTypeAndDetails(doc, url);
 
 	Z.debug("Resulting Zotero type: " + result.type);
 
@@ -234,15 +224,14 @@ function getSearchResults(doc, checkOnly) {
 	Z.debug("Checking search results");
 	var items = {};
 	var found = false;
-	// TODO: adjust the CSS selector for blog posts as well
+
 	var searchResults = doc.querySelectorAll('div.search-results div.item-result div.content > div.title > a');
 	Z.debug("Number of results: " + searchResults.length);
 
 	for (let result of searchResults) {
-		// TODO: check and maybe adjust
 		let href = result.href;
 		Z.debug(href);
-		// TODO: check and maybe adjust
+
 		let title = ZU.trimInternal(result.textContent);
 		Z.debug(title);
 		if (!href || !title) continue;
@@ -259,25 +248,26 @@ async function doWeb(doc, url) {
 	
 	if (url.includes('/document/case/')) {
 		Z.debug('Scraping standalone case');
-		//const { type: zotType, caseDetails, docDetails } = await getTypeAndDetails(doc, url);
+
 		await scrapeCase(url);
 	}
-	else if(url.includes('/search')) {
+	else if (url.includes('/search')) {
 		Z.debug('Scraping search results');
 
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		Z.debug(items);
 		if (!items) return;
 		for (let url of Object.keys(items)) {
-			Z.debug(url);
-			await scrapeURL(url);
+			// Scrape each search result's URL. We do not use processDocuments because they are not required for all situations
+			Z.debug("Scraping from search result for: " + url);
+			await doWeb(null, url);
 		}
 	}
 	else {
-		if (!doc) Z.debug("Requesting document for: " + url);
-		doc ??= await ZU.requestDocument(url);
+		// If doWeb() was called from the search results, we need to load the document
+		if (!doc) requestDocument(url);
 
-		const { type: zotType, pubDetails, docDetails } = await getTypeAndDetails(doc, url);
+		let { type: zotType, pubDetails, docDetails } = await getTypeAndDetails(doc, url);
 
 		Z.debug("detection result: " + zotType);
 		if (zotType == 'blogPost') {
@@ -291,16 +281,7 @@ async function doWeb(doc, url) {
 	}
 }
 
-async function scrapeURL(url) {
-	Z.debug("Scraping from search result for: " + url);
-	await doWeb(null, url);
-}
-
-/*function addNote(item: Zotero.Item, note: String) {
-	item.notes.push({note: note});
-}*/
-
-async function scrapeDoc(url, zotType, pubDetails, docDetails) {
+function scrapeDoc(url, zotType, pubDetails, docDetails) {
 	// Publication details
 	let documentID = getDocId(url);
 
@@ -330,9 +311,6 @@ async function scrapeDoc(url, zotType, pubDetails, docDetails) {
 			item.date = ZU.strToISO(publicationInfo.publicationDate);
 		}*/
 	}
-
-	// Update type
-	//item.itemType = getType(docDetails.PublicationType, docDetails.Type);
 
 	if (docDetails) {
 		item.title = docDetails.Title;
@@ -467,7 +445,7 @@ async function scrapeDoc(url, zotType, pubDetails, docDetails) {
 					return;
 				}
 
-				for (const [sectionID, sectionLabel] of Object.entries(items)) {
+				for (let [sectionID, sectionLabel] of Object.entries(items)) {
 					let pdfURL = "https://www.kluwerarbitration.com/document/print?title=PDF&ids=" + sectionID;
 					Z.debug(pdfURL);
 					item.attachments.push({
@@ -480,7 +458,7 @@ async function scrapeDoc(url, zotType, pubDetails, docDetails) {
 
 			item.attachments.push({
 				url: url,
-				title: "Read on Kluwer Arbitration",
+				title: "Kluwer Arbitration Link",
 				mimeType: "text/html",
 				snapshot: false
 			});
@@ -555,8 +533,10 @@ async function scrapeCase(url) {
 	item.court = caseDetails.institutionLong;
 	item.caseName = caseDetails.casename;
 	item.language = caseDetails.languages.join(" ");
-	item.filingDate = procDetails?.commencementDate;
-	item.dateDecided = procDetails?.dateOfOutcome;
+	if (procDetails) {
+		item.filingDate = procDetails.commencementDate;
+		item.dateDecided = procDetails.dateOfOutcome;
+	}
 
 	// Counsels and arbitrators
 	for (let person of caseDetails.arbitrators) {
@@ -577,13 +557,13 @@ async function scrapeCase(url) {
 			mimeType: "application/pdf",
 			url: pdfURL
 		});
-	} 
+	}
 	else {
 		// Select case files to download
-		let docs = caseToc.tocItems.flatMap(node => node.documents).filter(doc => doc?.documentId).map(doc => [doc.documentId, doc.title]);
+		let docs = caseToc.tocItems.flatMap(node => node.documents).filter(doc => (doc ? doc.documentId : false)).map(doc => [doc.documentId, doc.title]);
 		let items = await Z.selectItems(Object.fromEntries(docs));
 		if (items) {
-			for (const [docId, docLabel] of Object.entries(items)) {
+			for (let [docId, docLabel] of Object.entries(items)) {
 				let pdfURL = "https://www.kluwerarbitration.com/document/GetPdf/" + docId + ".pdf";
 				Z.debug(pdfURL);
 				item.attachments.push({
@@ -697,63 +677,6 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.kluwerarbitration.com/document/KLI-KA-Lopez-Rodriguez-2019-Ch05",
-		"items": [
-			{
-				"itemType": "bookSection",
-				"title": "Chapter 5: Emergency Arbitrator Awards: Addressing Enforceability Concerns Through National Law and the New York Convention",
-				"creators": [
-					{
-						"firstName": "Sai Ramani",
-						"lastName": "Garimella",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Poomintr",
-						"lastName": "Sooksripaisarnkit",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Katia",
-						"lastName": "Fach Gomez",
-						"creatorType": "editor"
-					},
-					{
-						"firstName": "Ana M.",
-						"lastName": "Lopez-Rodriguez",
-						"creatorType": "editor"
-					}
-				],
-				"date": "07 Mar 2019",
-				"ISBN": "9789403501550",
-				"bookTitle": "60 Years of the New York Convention: Key Issues and Future Challenges",
-				"libraryCatalog": "Kluwer Arbitration",
-				"pages": "67-84",
-				"publisher": "Kluwer Law International",
-				"shortTitle": "Chapter 5",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Read on Kluwer Arbitration",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
-				"tags": [],
-				"notes": [
-					{
-						"note": "Bibliographic reference: Sai Ramani Garimella and Poomintr Sooksripaisarnkit, 'Chapter 5: Emergency Arbitrator Awards: Addressing Enforceability Concerns Through National Law and the New York Convention', in Katia Fach Gomez and Ana M. Lopez-Rodriguez (eds), 60 Years of the New York Convention: Key Issues and Future Challenges,  (© Kluwer Law International; Kluwer Law International 2019), pp. 67 - 84."
-					}
-				],
 				"seeAlso": []
 			}
 		]
