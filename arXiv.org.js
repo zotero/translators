@@ -101,6 +101,9 @@ function getSearchResultsLegacy(doc, checkOnly = false) {
 	let root = doc.querySelector("#dlpage");
 	if (!root) return false;
 	// Alternating rows of <dt> and <dd> elements
+	// NOTE: For listing and legacy search, there's one <dl> per page and the
+	// <dt>/<dd> elements are direct children. For catchup, there is a <dl> for
+	// each item with a pair of <dt>/<dd> children.
 	let dts = root.querySelectorAll("dl > dt");
 	let dds = root.querySelectorAll("dl > dd");
 	if (dts.length !== dds.length) {
