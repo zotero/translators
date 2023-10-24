@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-23 09:40:05"
+	"lastUpdated": "2023-10-24 22:50:39"
 }
 
 /*
@@ -44,7 +44,11 @@ See test cases for examples. URLs used:
 */
 
 function getType(pubDetails, docDetails) {
-	let pubType = pubDetails.publicationType ? pubDetails.publicationType : docDetails.PublicationType;
+	if (!pubDetails && !docDetails) {
+		Z.debug("Cannot get type when there are no publication and document details! Check if requests succeed.");
+		return false;
+	}
+	let pubType = pubDetails && pubDetails.publicationType ? pubDetails.publicationType : docDetails.PublicationType;
 	let hasDocument = docDetails !== null;
 
 	switch (pubType) {
@@ -274,9 +278,13 @@ async function doWeb(doc, url) {
 			Z.debug("Scraping blog post");
 			await scrapeBlog(doc);
 		}
+		else if (zotType == 'book') {
+			Z.debug("Scraping full book");
+			scrapeBook(url, pubDetails);
+		}
 		else {
 			Z.debug("Scraping document");
-			await scrapeDoc(url, zotType, pubDetails, docDetails);
+			scrapeDoc(url, zotType, pubDetails, docDetails);
 		}
 	}
 }
@@ -423,73 +431,115 @@ function scrapeDoc(url, zotType, pubDetails, docDetails) {
 	//item.url = url;
 
 	// Getting PDF
-	if (type == 'book') {
-		Z.debug("Before search: " + item);
+	let pdfURL = '';
+	if (type == 'case' && docDetails.PublicationType == 'internet') pdfURL = "https://www.kluwerarbitration.com/document/GetPdf/" + docDetails.Id;
+	else pdfURL = "https://www.kluwerarbitration.com/document/print?title=PDF&ids=" + docDetails.Id;
+	Z.debug(pdfURL);
+	item.attachments.push({
+		title: "Full Text PDF",
+		mimeType: "application/pdf",
+		url: pdfURL
+	});
 
-		var search = Zotero.loadTranslator("search");
+	item.attachments.push({
+		url: url,
+		title: "Read on Kluwer Arbitration",
+		mimeType: "text/html",
+		snapshot: false
+	});
 
-		search.setHandler("translators", function (obj, translators) {
-			search.setTranslator(translators);
-			search.translate();
-		});
+	item.complete();
+}
 
-		search.setHandler("itemDone", function (obj, item) {
-			// Getting PDFs of all sections
-			let sectionNodes = flattenNodes(pubDetails.tocNodes);
-			let sectionList = sectionNodes.map(node => ([node.docId, node.label]));
-			let sections = Object.fromEntries(sectionList);
-			Z.debug(sections);
-			Z.selectItems(sections, function (items) {
-				if (!items) {
-					// CANCEL ITEM
-					return;
-				}
+function scrapeBook(url, pubDetails) {
+	var item = new Z.Item('book');
 
-				for (let [sectionID, sectionLabel] of Object.entries(items)) {
-					let pdfURL = "https://www.kluwerarbitration.com/document/print?title=PDF&ids=" + sectionID;
-					Z.debug(pdfURL);
-					item.attachments.push({
-						title: sectionLabel,
-						mimeType: "application/pdf",
-						url: pdfURL
-					});
-				}
-			});
+	if (pubDetails && pubDetails.publicationInfo) {
+		if (pubDetails.publicationInfo.isbn) item.ISBN = pubDetails.publicationInfo.isbn;
+		else if (pubDetails.publicationInfo.publicationTitle) item.title = pubDetails.publicationInfo.publicationTitle;
+	}
 
+	Z.debug("Searching book with item: ");
+	Z.debug(item);
+
+	var search = Zotero.loadTranslator("search");
+
+	search.setHandler("translators", function (obj, translators) {
+		search.setTranslator(translators);
+		search.translate();
+	});
+
+	search.setHandler("itemDone", function (obj, item) {
+		completeBookScrape(url, pubDetails, item);
+	});
+
+	search.setHandler("error", function (error) {
+		// If ISBN search failed for some reason, use the publication details from Kluwer
+		Z.debug("ISBN search for " + item.ISBN + " failed: " + error);
+		Z.debug("Using publication details from Kluwer instead.");
+
+		if (pubDetails) {
+			item.title = pubDetails.publicationTitle;
+			item.date = pubDetails.publicationDate;
+			item.publisher = pubDetails.publisher;
+			item.abstractNote = pubDetails.descriptiveText;
+
+			for (let pubAuthor of pubDetails.authors) {
+				item.creators.push({
+					firstName: pubAuthor.name,
+					lastName: pubAuthor.surname,
+					creatorType: "author"
+				});
+			}
+
+			for (let pubEditor of pubDetails.editors) {
+				item.creators.push({
+					firstName: pubEditor.name,
+					lastName: pubEditor.surname,
+					creatorType: "editor"
+				});
+			}
+		}
+
+		completeBookScrape(url, pubDetails, item);
+	});
+
+	search.setSearch(item);
+	// look for translators for given item
+	search.getTranslators();
+}
+
+function completeBookScrape(url, pubDetails, item) {
+	// Getting PDFs of all sections
+	let sectionNodes = flattenNodes(pubDetails.tocNodes);
+	let sectionList = sectionNodes.map(node => ([node.docId, node.label]));
+	let sections = Object.fromEntries(sectionList);
+	Z.debug(sections);
+	Z.selectItems(sections, function (items) {
+		if (!items) {
+			// CANCEL ITEM
+			return;
+		}
+
+		for (let [sectionID, sectionLabel] of Object.entries(items)) {
+			let pdfURL = "https://www.kluwerarbitration.com/document/print?title=PDF&ids=" + sectionID;
+			Z.debug(pdfURL);
 			item.attachments.push({
-				url: url,
-				title: "Kluwer Arbitration Link",
-				mimeType: "text/html",
-				snapshot: false
+				title: sectionLabel,
+				mimeType: "application/pdf",
+				url: pdfURL
 			});
+		}
+	});
 
-			item.complete();
-		});
+	item.attachments.push({
+		url: url,
+		title: "Kluwer Arbitration Link",
+		mimeType: "text/html",
+		snapshot: false
+	});
 
-		search.setSearch(item);
-		// look for translators for given item
-		search.getTranslators();
-	}
-	else {
-		let pdfURL = '';
-		if (type == 'case' && docDetails.PublicationType == 'internet') pdfURL = "https://www.kluwerarbitration.com/document/GetPdf/" + docDetails.Id;
-		else pdfURL = "https://www.kluwerarbitration.com/document/print?title=PDF&ids=" + docDetails.Id;
-		Z.debug(pdfURL);
-		item.attachments.push({
-			title: "Full Text PDF",
-			mimeType: "application/pdf",
-			url: pdfURL
-		});
-
-		item.attachments.push({
-			url: url,
-			title: "Read on Kluwer Arbitration",
-			mimeType: "text/html",
-			snapshot: false
-		});
-
-		item.complete();
-	}
+	item.complete();
 }
 
 async function scrapeBlog(doc, url = doc.location.href) {
