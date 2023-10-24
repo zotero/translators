@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-24 08:44:44"
+	"lastUpdated": "2023-10-24 09:16:01"
 }
 
 /*
@@ -58,27 +58,40 @@ function extractId(url) {
 	return m && decodeURIComponent(m[1]);
 }
 
+// "Snoop" the item type from the page itself - this is used for displaying the
+// connector icon. The actual itemType will handled a lot better by 'ADS
+// Bibcode.js' search translator using more information that becomes available
+// only after querying the API. For the UI, we don't have to be super precise.
+// Ref: https://adsabs.harvard.edu/abs_doc/journals1.html
+// https://adsabs.harvard.edu/abs_doc/conferences1.html
 function getTypeFromId(id) {
-	// bibcodes always start with 4 digit year, then bibstem
-	const bibstem = id.slice(4);
-	if (bibstem.startsWith("MsT") || bibstem.startsWith("PhDT")) {
+	let bibstem = id.slice(4);
+	if (/^(MsT|PhDT)/.test(bibstem)) {
 		return "thesis";
 	}
-	else if (bibstem.startsWith("arXiv")) {
+	if (/^(arXiv|gr_qc|hep_|math_ph|math|nucl_|physics)/.test(bibstem)) {
 		return preprintType;
 	}
-	else {
-		// now scan past the bibstem and find the volume number/type abbrev.
-		const volume = bibstem.substring(5, 9);
-		if (volume == "conf" || volume == "meet" || volume == "coll"
-			|| volume == "proc" || volume == "book") {
-			return "book";
-		}
-		else if (volume == "rept") {
-			return "report";
-		}
+
+	let volume = bibstem.substring(5, 9);
+	if (volume === "rept") {
+		return "report";
 	}
-	return "journalArticle";
+
+	// determine whether the special "volumes" refer to a container (book,
+	// incl. proceedings book) or a component (chapter, conference paper)
+	// If the "page number" does not look like wdigits, it's likely a
+	// container.
+	let pages = bibstem.slice(10, 14).replace(/^\.*/, "");
+	let isNumbered = /^\d+$/.test(pages);
+	if (volume === "book") {
+		return isNumbered ? "bookSection" : "book";
+	}
+	if (["coll", "conf", "cong", "meet", "symp", "work"].includes(volume)) {
+		return isNumbered ? "conferencePaper" : "book";
+	}
+
+	return "journalArticle"; // fallback
 }
 
 function detectWeb(doc, url) {
