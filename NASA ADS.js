@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-09 17:06:21"
+	"lastUpdated": "2023-10-24 03:58:56"
 }
 
 /*
@@ -39,25 +39,23 @@ const preprintType = ZU.fieldIsValidForType('title', 'preprint')
 	? 'preprint'
 	: 'report';
 
-function getSearchResults(doc) {
-	const results = doc.querySelectorAll("a[href$=abstract]");
-	const entries = {};
-	for (let el of results) {
-		const titleEl = el.querySelector(":scope h3");
-		if (!titleEl) {
-			continue;
-		}
-		const hrefParts = el.getAttribute("href").split("/");
-		if (hrefParts.length > 2) {
-			const identifier = hrefParts[hrefParts.length - 2];
-			entries[identifier] = ZU.trimInternal(titleEl.textContent);
-		}
+function getSearchResults(doc, checkOnly = false) {
+	let entries = {};
+	let found = false;
+	for (let row of doc.querySelectorAll(".results-list > li")) {
+		let id = text(row, ".identifier").trim();
+		let title = ZU.trimInternal(text(row, ".s-results-title"));
+		if (!id || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		entries[id] = title;
 	}
-	return entries;
+	return found && entries;
 }
 
 function extractId(url) {
-	return decodeURIComponent(/\/abs\/([^/]+)/.exec(url)[1]);
+	let m = url.match(/\/abs\/([^/]+)/);
+	return m && decodeURIComponent(m[1]);
 }
 
 function getTypeFromId(id) {
@@ -84,21 +82,35 @@ function getTypeFromId(id) {
 }
 
 function detectWeb(doc, url) {
-	if (url.includes("/search/")) {
-		return "multiple";
+	let path = new URL(url).pathname;
+	if (path.startsWith("/search/")) { // search page
+		// Prefer watching the AJAX-generated container for search results to
+		// watching its high-level parent defined in the static HTML source
+		let root = doc.getElementById("results-middle-column") || doc.getElementById("body-template-container");
+		if (root) Z.monitorDOMChanges(root);
+		return getSearchResults(doc, true) && "multiple";
 	}
-	else if (url.includes("/abs/")) {
+
+	if (/^\/abs\/[^/]+\/(references|similar|coreads|citations)$/.test(path)) {
+		// List of articles related to the current article ("subview")
+		let root = doc.getElementById("current-subview");
+		if (root) Z.monitorDOMChanges(root);
+		if (getSearchResults(doc, true)) return "multiple";
+	}
+
+	// If the related-article list is empty, this will fall back to the current
+	// single article
+	if (path.startsWith("/abs/")) {
 		return getTypeFromId(extractId(url));
 	}
 	return false;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) === "multiple") {
-		Zotero.selectItems(getSearchResults(doc), function (items) {
-			if (!items) return true;
-			return scrape(Object.keys(items));
-		});
+		let items = await Zotero.selectItems(getSearchResults(doc));
+		if (!items) return;
+		scrape(Object.keys(items));
 	}
 	else {
 		scrape([extractId(url)]);
@@ -461,6 +473,12 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://ui.adsabs.harvard.edu/abs/2011PhRvA..84f3834P/coreads",
+		"defer": true,
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
