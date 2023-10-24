@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-24 03:58:56"
+	"lastUpdated": "2023-10-24 08:44:44"
 }
 
 /*
@@ -91,7 +91,7 @@ function detectWeb(doc, url) {
 		return getSearchResults(doc, true) && "multiple";
 	}
 
-	if (/^\/abs\/[^/]+\/(references|similar|coreads|citations)$/.test(path)) {
+	if (/^\/abs\/[^/]+\/(references|similar|coreads|citations|toc)$/.test(path)) {
 		// List of articles related to the current article ("subview")
 		let root = doc.getElementById("current-subview");
 		if (root) Z.monitorDOMChanges(root);
@@ -477,6 +477,12 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://ui.adsabs.harvard.edu/abs/2011PhRvA..84f3834P/coreads",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://ui.adsabs.harvard.edu/abs/2020jsrs.conf.....B/toc",
 		"defer": true,
 		"items": "multiple"
 	}
