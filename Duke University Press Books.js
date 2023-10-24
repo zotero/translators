@@ -9,30 +9,30 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-10-05 02:33:49"
+	"lastUpdated": "2023-10-23 09:05:55"
 }
 
 /*
-    ***** BEGIN LICENSE BLOCK *****
+	***** BEGIN LICENSE BLOCK *****
 
-    Copyright © 2022 Sebastian Karcher
+	Copyright © 2022 Sebastian Karcher
 
-    This file is part of Zotero.
+	This file is part of Zotero.
 
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Affero General Public License for more details.
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
 
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
-    ***** END LICENSE BLOCK *****
+	***** END LICENSE BLOCK *****
 */
 
 
@@ -64,11 +64,9 @@ function getSearchResults(doc, checkOnly) {
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
-		if (items) {
-			await Promise.all(
-				Object.keys(items)
-					.map(url => requestDocument(url).then(scrape))
-			);
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
 		}
 	}
 	else {
@@ -213,6 +211,40 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.dukeupress.edu/books/browse?sortid=7",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.dukeupress.edu/beyond-this-narrow-now",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "\"Beyond This Narrow Now\": Or, Delimitations, of W. E. B. Du Bois",
+				"creators": [
+					{
+						"firstName": "Nahum Dimitri",
+						"lastName": "Chandler",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022",
+				"ISBN": "9781478014805",
+				"abstractNote": "In “Beyond This Narrow Now” Nahum Dimitri Chandler shows that the premises of W. E. B. Du Bois's thinking at the turn of the twentieth century stand as fundamental references for the whole itinerary of his thought. Opening with a distinct approach to the legacy of Du Bois, Chandler proceeds through a series of close readings of Du Bois's early essays, previously unpublished or seldom studied, with discrete annotations of The Souls of Black Folk: Essays and Sketches of 1903, elucidating and elaborating basic epistemological terms of his thought. With theoretical attention to how the African American stands as an example of possibility for Du Bois and renders problematic traditional ontological thought, Chandler also proposes that Du Bois's most well-known phrase—“the problem of the color line”—sustains more conceptual depth than has yet been understood, with pertinence for our accounts of modern systems of enslavement and imperial colonialism and the incipient moments of modern capitalization. Chandler's work exemplifies a more profound engagement with Du Bois, demonstrating that he must be re-read, appreciated, and studied anew as a philosophical writer and thinker contemporary to our time.",
+				"libraryCatalog": "Duke University Press Books",
+				"numPages": "328",
+				"place": "Durham, NC",
+				"publisher": "Duke University Press",
+				"shortTitle": "\"Beyond This Narrow Now\"",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
