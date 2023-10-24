@@ -5,7 +5,15 @@ const path = require('path');
 const findRoot = require('find-root');
 const childProcess = require('child_process');
 
-const repo = path.resolve(findRoot(__dirname, dir => fs.existsSync(path.resolve(dir, '.git'))));
+let repo;
+try {
+	repo = path.resolve(findRoot(__dirname, dir => fs.existsSync(path.resolve(dir, '.git'))));
+}
+catch (e) {
+	console.error('ERROR: Translators can only be linted inside a clone of the zotero/translators repo (not a ZIP downloaded from GitHub)');
+	console.error('  git clone https://github.com/zotero/translators.git');
+	process.exit(1);
+}
 
 const metaDataRules = [
 	'zotero-translator/header-valid-json',
