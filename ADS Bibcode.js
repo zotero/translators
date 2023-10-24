@@ -113,7 +113,7 @@ async function scrape(ids) {
 	let response = await requestJSON("https://ui.adsabs.harvard.edu/v1/export/ris", {
 		method: "POST",
 		body,
-		headers:{
+		headers: {
 			Accept: "application/json",
 			Authorization: `Bearer ${bootstrap.access_token}`,
 			"Content-Type": "application/json",
