@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-24 22:50:39"
+	"lastUpdated": "2023-10-24 23:19:05"
 }
 
 /*
@@ -51,6 +51,9 @@ function getType(pubDetails, docDetails) {
 	let pubType = pubDetails && pubDetails.publicationType ? pubDetails.publicationType : docDetails.PublicationType;
 	let hasDocument = docDetails !== null;
 
+	Z.debug(`Publication type is ${pubType}`);
+	if (docDetails) Z.debug(`Document type is ${docDetails.Type}`);
+
 	switch (pubType) {
 		case 'book':
 			// Multiple here would show a selection screen with the option to save the book or individual chapters, but we use the selection screen to indicate which items to download as part of the book
@@ -81,6 +84,7 @@ function getType(pubDetails, docDetails) {
 			switch (docDetails.Type) {
 				case 'Awards':
 					return 'case';
+				case 'Commentary': // For some online insights and commentaries, could be considered blog posts but that would change the logic
 				default:
 					return 'webpage';
 			}
@@ -293,13 +297,11 @@ function scrapeDoc(url, zotType, pubDetails, docDetails) {
 	// Publication details
 	let documentID = getDocId(url);
 
-	Z.debug(zotType);
-
 	var type = 'document';
 	if (zotType) {
 		type = zotType;
 	}
-	Z.debug("Type is " + type);
+	Z.debug("Creating new item of type: " + type);
 	var item = new Z.Item(type);
 
 	if (pubDetails.publicationInfo) {
@@ -428,7 +430,7 @@ function scrapeDoc(url, zotType, pubDetails, docDetails) {
 		}
 	}
 
-	//item.url = url;
+	if (type == 'webpage') item.url = url;
 
 	// Getting PDF
 	let pdfURL = '';
@@ -441,12 +443,14 @@ function scrapeDoc(url, zotType, pubDetails, docDetails) {
 		url: pdfURL
 	});
 
-	item.attachments.push({
-		url: url,
-		title: "Read on Kluwer Arbitration",
-		mimeType: "text/html",
-		snapshot: false
-	});
+	if (type != 'webpage') {
+		item.attachments.push({
+			url: url,
+			title: "Read on Kluwer Arbitration",
+			mimeType: "text/html",
+			snapshot: false
+		});
+	}
 
 	item.complete();
 }
@@ -979,6 +983,42 @@ var testCases = [
 		"url": "https://www.kluwerarbitration.com/search?q=counterclaim+OR+counterclaims&sortBy=date+desc",
 		"detectedItemType": "multiple",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.kluwerarbitration.com/document/kli-kapp-piap-tp-mca",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Practical Insights on Third Parties – Multi-Contract Arbitration",
+				"creators": [
+					{
+						"firstName": "Bernard",
+						"lastName": "Hanotiau",
+						"creatorType": "author"
+					}
+				],
+				"url": "https://www.kluwerarbitration.com/document/kli-kapp-piap-tp-mca",
+				"websiteTitle": "Practical Insights on Arbitral Procedure",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Third Parties – Multi-Contract Arbitration"
+					}
+				],
+				"notes": [
+					{
+						"note": "Bibliographic reference: Bernard Hanotiau, 'Practical Insights on Third Parties – Multi-Contract Arbitration', Practical Insights on Arbitral Procedure (© Kluwer Law International; Kluwer Law International)."
+					}
+				],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
