@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 8,
-	"lastUpdated": "2023-10-24 08:32:15"
+	"lastUpdated": "2023-10-25 11:39:45"
 }
 
 /*
@@ -109,8 +109,8 @@ async function scrape(ids) {
 	if (!bootstrap || !bootstrap.access_token) {
 		throw new Error("ADS Bibcode: cannot obtain access token");
 	}
-	let body = JSON.stringify({ bibcode: ids, sort: ['date desc, bibcode desc'] });
-	let response = await requestJSON("https://ui.adsabs.harvard.edu/v1/export/ris", {
+	let body = JSON.stringify({ bibcode: ids, sort: ['no sort'] });
+	let response = await requestJSON("https://api.adsabs.harvard.edu/v1/export/ris", {
 		method: "POST",
 		body,
 		headers: {
@@ -272,6 +272,7 @@ var testCases = [
 				"abstractNote": "Gravitational-wave astronomy is now a reality. During my time at Caltech, the Advanced LIGO and Virgo observatories have detected gravitational waves from dozens of compact binary coalescences. All of these gravitational-wave events occurred in the relatively local Universe. In the first part of this thesis, I will instead look towards the remote Universe, investigating what LIGO and Virgo may be able to learn about cosmologically-distant compact binaries via observation of the stochastic gravitational-wave background. The stochastic gravitational-wave background is composed of the incoherent superposition of all distant, individually-unresolvable gravitational-wave sources. I explore what we learn from study of the gravitational-wave background, both about the astrophysics of compact binaries and the fundamental nature of gravitational waves. Of course, before we can study the gravitational-wave background we must first detect it. I therefore present searches for the gravitational-wave background using data from Advanced LIGO's first two observing runs, obtaining the most stringent upper limits to date on strength of the stochastic background. Finally, I consider how one might validate an apparent detection of the gravitational-wave background, confidently distinguishing a true astrophysical signal from spurious terrestrial artifacts. The second part of this thesis concerns the search for electromagnetic counterparts to gravitational-wave events. The binary neutron star merger GW170817 was accompanied by a rich set of electromagnetic counterparts spanning nearly the entire electromagnetic spectrum. Beyond these counterparts, compact binaries may additionally generate powerful radio transients at or near their time of merger. First, I consider whether there is a plausible connection between this so-called \"prompt radio emission\" and fast radio bursts — enigmatic radio transients of unknown origin. Next, I present the first direct search for prompt radio emission from a compact binary merger using the Owens Valley Radio Observatory Long Wavelength Array (OVRO-LWA). While no plausible candidates are identified, this effort successfully demonstrates the prompt radio follow-up of a gravitational-wave source, providing a blueprint for LIGO and Virgo follow-up in their O3 observing run and beyond.",
 				"extra": "ADS Bibcode: 2021PhDT.........5C",
 				"libraryCatalog": "NASA ADS",
+				"thesisType": "Ph.D. thesis",
 				"url": "https://ui.adsabs.harvard.edu/abs/2021PhDT.........5C",
 				"attachments": [
 					{
@@ -480,7 +481,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "preprint",
-				"title": "Ricci flow with surgery on three-manifolds",
+				"title": "The entropy formula for the Ricci flow and its geometric applications",
 				"creators": [
 					{
 						"lastName": "Perelman",
@@ -488,13 +489,13 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2003-03-01",
-				"DOI": "10.48550/arXiv.math/0303109",
-				"abstractNote": "This is a technical paper, which is a continuation of math.DG/0211159. Here we construct Ricci flow with surgeries and verify most of the assertions, made in section 13 of that e-print; the exceptions are (1) the statement that manifolds that can collapse with local lower bound on sectional curvature are graph manifolds - this is deferred to a separate paper, since the proof has nothing to do with the Ricci flow, and (2) the claim on the lower bound for the volume of maximal horns and the smoothness of solutions from some time on, which turned out to be unjustified and, on the other hand, irrelevant for the other conclusions.",
-				"extra": "ADS Bibcode: 2003math......3109P",
+				"date": "2002-11-01",
+				"DOI": "10.48550/arXiv.math/0211159",
+				"abstractNote": "We present a monotonic expression for the Ricci flow, valid in all dimensions and without curvature assumptions. It is interpreted as an entropy for a certain canonical ensemble. Several geometric applications are given. In particular, (1) Ricci flow, considered on the space of riemannian metrics modulo diffeomorphism and scaling, has no nontrivial periodic orbits (that is, other than fixed points); (2) In a region, where singularity is forming in finite time, the injectivity radius is controlled by the curvature; (3) Ricci flow can not quickly turn an almost euclidean region into a very curved one, no matter what happens far away. We also verify several assertions related to Richard Hamilton's program for the proof of Thurston geometrization conjecture for closed three-manifolds, and give a sketch of an eclectic proof of this conjecture, making use of earlier results on collapsing with local lower curvature bound.",
+				"extra": "ADS Bibcode: 2002math.....11159P",
 				"libraryCatalog": "NASA ADS",
 				"repository": "arXiv",
-				"url": "https://ui.adsabs.harvard.edu/abs/2003math......3109P",
+				"url": "https://ui.adsabs.harvard.edu/abs/2002math.....11159P",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -514,7 +515,7 @@ var testCases = [
 			},
 			{
 				"itemType": "preprint",
-				"title": "The entropy formula for the Ricci flow and its geometric applications",
+				"title": "Ricci flow with surgery on three-manifolds",
 				"creators": [
 					{
 						"lastName": "Perelman",
@@ -522,13 +523,13 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2002-11-01",
-				"DOI": "10.48550/arXiv.math/0211159",
-				"abstractNote": "We present a monotonic expression for the Ricci flow, valid in all dimensions and without curvature assumptions. It is interpreted as an entropy for a certain canonical ensemble. Several geometric applications are given. In particular, (1) Ricci flow, considered on the space of riemannian metrics modulo diffeomorphism and scaling, has no nontrivial periodic orbits (that is, other than fixed points); (2) In a region, where singularity is forming in finite time, the injectivity radius is controlled by the curvature; (3) Ricci flow can not quickly turn an almost euclidean region into a very curved one, no matter what happens far away. We also verify several assertions related to Richard Hamilton's program for the proof of Thurston geometrization conjecture for closed three-manifolds, and give a sketch of an eclectic proof of this conjecture, making use of earlier results on collapsing with local lower curvature bound.",
-				"extra": "ADS Bibcode: 2002math.....11159P",
+				"date": "2003-03-01",
+				"DOI": "10.48550/arXiv.math/0303109",
+				"abstractNote": "This is a technical paper, which is a continuation of math.DG/0211159. Here we construct Ricci flow with surgeries and verify most of the assertions, made in section 13 of that e-print; the exceptions are (1) the statement that manifolds that can collapse with local lower bound on sectional curvature are graph manifolds - this is deferred to a separate paper, since the proof has nothing to do with the Ricci flow, and (2) the claim on the lower bound for the volume of maximal horns and the smoothness of solutions from some time on, which turned out to be unjustified and, on the other hand, irrelevant for the other conclusions.",
+				"extra": "ADS Bibcode: 2003math......3109P",
 				"libraryCatalog": "NASA ADS",
 				"repository": "arXiv",
-				"url": "https://ui.adsabs.harvard.edu/abs/2002math.....11159P",
+				"url": "https://ui.adsabs.harvard.edu/abs/2003math......3109P",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
