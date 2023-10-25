@@ -3,12 +3,12 @@
 	"label": "ADS Bibcode",
 	"creator": "Abe Jellinek",
 	"target": "",
-	"minVersion": "4.0",
+	"minVersion": "6.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 8,
-	"lastUpdated": "2023-10-25 11:39:45"
+	"lastUpdated": "2023-10-25 13:17:57"
 }
 
 /*
@@ -33,10 +33,6 @@
 
 	***** END LICENSE BLOCK *****
 */
-
-const preprintType = ZU.fieldIsValidForType('title', 'preprint')
-	? 'preprint'
-	: 'report';
 
 // Logic for accurate type detection. In general, the type in the RIS export is
 // fairly accurate. However, it may misidentify a proceedings book as JOUR (but
@@ -134,10 +130,7 @@ async function scrape(ids) {
 		}
 
 		if (isArXiv(item, bibStem)) {
-			item.itemType = preprintType;
-			if (preprintType == "report") {
-				item.extra = (item.extra || "") + '\nType: article'; // will map to preprint
-			}
+			item.itemType = "preprint";
 			item.publisher = "arXiv";
 			delete item.pages;
 			delete item.publicationTitle;
