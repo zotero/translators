@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-24 23:19:05"
+	"lastUpdated": "2023-10-25 00:48:11"
 }
 
 /*
@@ -484,8 +484,8 @@ function scrapeBook(url, pubDetails) {
 
 		if (pubDetails) {
 			item.title = pubDetails.publicationTitle;
-			item.date = pubDetails.publicationDate;
-			item.publisher = pubDetails.publisher;
+			item.date = pubDetails.publicationInfo.publicationDate;
+			item.publisher = pubDetails.publicationInfo.publisher;
 			item.abstractNote = pubDetails.descriptiveText;
 
 			for (let pubAuthor of pubDetails.authors) {
