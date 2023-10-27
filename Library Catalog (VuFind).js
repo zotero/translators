@@ -1,7 +1,7 @@
 {
 	"translatorID": "862b5893-2d6f-4082-bcc5-a40cfd4663fc",
 	"label": "Library Catalog (VuFind)",
-	"creator": "",
+	"creator": "Matt Teichman, Abe Jellinek, Mathieu Grimault, Zoë C. Ma",
 	"target": "/Record/[^/?]+|/Search/Results",
 	"minVersion": "5.0",
 	"maxVersion": "",
@@ -15,7 +15,8 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2022 Matt Teichman, Abe Jellinek, Mathieu Grimault
+	Copyright © 2022 Matt Teichman, Abe Jellinek, Mathieu Grimault, Zoë C. Ma,
+	and contributors
 
 	This file is part of Zotero.
 
@@ -45,41 +46,38 @@
  * vanilla VuFind :
  * https://github.com/vufind-org/vufind/blob/dev/import/translation_maps/format_map.properties
  */
-const customizeFormatDetection = (doc) => {
-	let mainBody = doc.querySelector('div.mainbody');
-	if (mainBody) {
-		let format = mainBody.querySelector('span.format');
-		if (format) {
-			if (format.className.includes('book')) {
-				return 'book';
-			}
-			if (format.className.includes('article')) {
-				return 'journalArticle';
-			}
-			if (format.className.includes('video')) {
-				return 'videoRecording';
-			}
-			if (format.className.includes('thesis')) {
-				return 'thesis';
-			}
-			if (format.className.includes('dissertations')) {
-				return 'thesis';
-			}
-			if (format.className.includes('archivesmanuscripts')) {
-				return 'manuscript';
-			}
-			if (format.className.includes('audio')) {
-				return 'audioRecording';
-			}
-			if (format.className.includes('map')) {
-				return 'map';
-			}
+function customizeFormatDetection(doc) {
+	let format = doc.querySelector('div.mainbody span.format');
+	if (format) {
+		if (format.className.includes('book')) {
+			return 'book';
+		}
+		if (format.className.includes('article')) {
+			return 'journalArticle';
+		}
+		if (format.className.includes('video')) {
+			return 'videoRecording';
+		}
+		if (format.className.includes('thesis')) {
+			return 'thesis';
+		}
+		if (format.className.includes('dissertations')) {
+			return 'thesis';
+		}
+		if (format.className.includes('archivesmanuscripts')) {
+			return 'manuscript';
+		}
+		if (format.className.includes('audio')) {
+			return 'audioRecording';
+		}
+		if (format.className.includes('map')) {
+			return 'map';
 		}
 	}
 
 	// default
 	return 'book';
-};
+}
 
 /**
  * Custom tweaks to the return of the Zotero MARC translator
@@ -89,7 +87,7 @@ const customizeFormatDetection = (doc) => {
  *
  * You will probably want to use the commented functions below.
  */
-const customizeMARC = (_item, _marc) => {
+function customizeMARC(_item, _marc) {
 	// look up all hits for a MARC field in a MARC record
 	/* const lookupValues = (key, table) => {
 		// starting position of the content of a record
@@ -146,7 +144,7 @@ const customizeMARC = (_item, _marc) => {
 		const values = lookupValues(key, table);
 		return values.length !== 0;
 	}; */
-};
+}
 
 async function scrape(url, libraryCatalog) {
 	let cleanURL = url.replace(/[#?].*$/, '').replace(/\/$/, '');
@@ -189,7 +187,7 @@ async function scrape(url, libraryCatalog) {
 // MARC retrieval code: run the MARC import translator, then perform a
 // few adjustments to the output by looking things up in the MARC record.
 // Overall design based on Finna translator
-const scrapeMARC = async (data, libraryCatalog) => {
+async function scrapeMARC(data, libraryCatalog) {
 	// use MARC import translator to ingest binary MARC records
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
@@ -212,9 +210,9 @@ const scrapeMARC = async (data, libraryCatalog) => {
 	});
 
 	await translator.translate();
-};
+}
 
-const scrapeReferBibIX = async (data, libraryCatalog) => {
+async function scrapeReferBibIX(data, libraryCatalog) {
 	let translator = Zotero.loadTranslator('import');
 	translator.setTranslator('881f60f2-0802-411a-9228-ce5f47b64c7d');
 	translator.setString(data);
@@ -228,9 +226,9 @@ const scrapeReferBibIX = async (data, libraryCatalog) => {
 		item.complete();
 	});
 	await translator.translate();
-};
+}
 
-const scrapeRIS = async (data, libraryCatalog) => {
+async function scrapeRIS(data, libraryCatalog) {
 	let translator = Zotero.loadTranslator("import");
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 	translator.setString(data);
@@ -240,37 +238,24 @@ const scrapeRIS = async (data, libraryCatalog) => {
 		item.complete();
 	});
 	await translator.translate();
-};
+}
 
-const getSearchResults = (doc, checkOnly) => {
+function getSearchResults(doc, checkOnly) {
 	let obj = {};
-	let content = doc.getElementById('content');
-	if (content) {
-		const rowNodes = content.querySelectorAll('[id^=result]');
-		// make the node list into an array
-		const a = Array.from(rowNodes);
-		// search for links to single records
-		for (let r of a) {
-			const linkElement = r.querySelector('a.title.getFull');
-
-			if (!linkElement) {
-				continue;
-			}
-
-			const entryUrl = linkElement.href;
-			// link must have a content !
-			const title = Zotero.Utilities.trimInternal(linkElement.textContent);
-			if (entryUrl && title) {
-				if (checkOnly) {
-					return true;
-				}
-				obj[entryUrl] = title;
-			}
-		}
+	let found = false;
+	// search for links to single records
+	for (let linkElement of doc.querySelectorAll('#content [id^=result] a.title.getFull')) {
+		const entryUrl = linkElement.href;
+		// link must have a content !
+		const title = ZU.trimInternal(linkElement.textContent);
+		if (!entryUrl || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		obj[entryUrl] = title;
 	}
 
-	return checkOnly ? !!Object.keys(obj).length : obj;
-};
+	return found && obj;
+}
 
 async function detectWeb(doc, url) {
 	// VuFind URL patterns starting with 'Record' are for single items
@@ -299,12 +284,12 @@ async function doWeb(doc, url) {
 	if (type == 'multiple') {
 		// ingest multiple records
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
-		if (items) {
-			let itemURLs = Object.keys(items);
-			await Promise.all(itemURLs.map(url => scrape(url, libraryCatalog)));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(url, libraryCatalog);
 		}
 	}
-	if (type !== false) {
+	else if (type) {
 		// ingest single record
 		await scrape(url, libraryCatalog);
 	}
@@ -359,12 +344,12 @@ var testCases = [
 					{
 						"lastName": "Association des amis de la Bibliothèque municipale de Nantes",
 						"creatorType": "contributor",
-						"fieldMode": true
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Musée Jules Verne",
 						"creatorType": "contributor",
-						"fieldMode": true
+						"fieldMode": 1
 					}
 				],
 				"date": "2013",
