@@ -36,6 +36,15 @@
 	***** END LICENSE BLOCK *****
 */
 
+/*
+ * TODO:
+ * - bulk export for multiple in one request - e.g.
+ * GET https://ixtheo.de/Cart/doExport?f=RIS&i[]=Solr|1640914242&i[]=Solr|1165461676&i[]=Solr|1643208144
+ * should detect available format from the search page
+ * - let parent translator calling this one set a hint for the type of export format to use; for different institutions the "best" (most accurate) format can be different
+ * - unify the itemDone handler function, becaues we want this translator to be generic
+ */
+
 /**
  * Format detection
  *
