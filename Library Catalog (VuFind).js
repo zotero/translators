@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-27 10:31:51"
+	"lastUpdated": "2023-10-27 14:42:08"
 }
 
 /*
@@ -147,20 +147,25 @@ function commonItemDoneHandler(obj, item) { // eslint-disable-line: no-unused
 }
 
 function getSearchResults(doc, checkOnly) {
-	let obj = {};
+	let items = {};
 	let found = false;
 	// search for links to single records
-	for (let linkElement of doc.querySelectorAll('#content [id^=result] a.title.getFull')) {
-		const entryUrl = linkElement.href;
-		// link must have a content !
-		const title = ZU.trimInternal(linkElement.textContent);
-		if (!entryUrl || !title) continue;
+	for (let row of doc.querySelectorAll('#content .result')) {
+		let url = attr(row, "a.title", "href");
+		let title = ZU.trimInternal(text(row, "a.title"));
+
+		if (!url || !title) continue;
 		if (checkOnly) return true;
 		found = true;
-		obj[entryUrl] = title;
+
+		// if some items are ticked on the page, pre-tick them in the item
+		// selector
+		let checkbox = row.querySelector("input[type='checkbox']");
+		let checked = !!checkbox && checkbox.checked;
+		items[url] = { title, checked };
 	}
 
-	return found && obj;
+	return found && items;
 }
 
 // Hard-coded "best input type" for particular domains
@@ -195,9 +200,6 @@ function getSupportedFormat(doc) {
 }
 
 function detectWeb(doc, url) {
-	// VuFind URL patterns starting with 'Record' are for single items
-	// VuFind URL patterns starting with 'Search' are for search results
-	// the translator should do nothing on every other URL pattern
 	if (url.includes('/Record')) {
 		if (getSupportedFormat(doc)) {
 			return itemDisplayType(doc);
@@ -211,21 +213,27 @@ function detectWeb(doc, url) {
 
 async function doWeb(doc, url) {
 	let libraryCatalog = new URL(url).hostname;
-	let format = getSupportedFormat(doc);
-	Z.debug(`Selected format: ${format}`);
 	if (detectWeb(doc, url) == 'multiple') {
-		// ingest multiple records
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
-		if (format === exports.inputFormat && exports.bulkImport) {
+		let urls = Object.keys(items);
+
+		let format = getSupportedFormat(doc) || getSupportedFormat(await requestDocument(urls[0]));
+		if (!format) throw new Error("Cannot determine input format (multiple)");
+		Z.debug(`Selected format: ${format}`);
+
+		if (format === exports.inputFormat && exports.bulkImport && urls.length >= 5) {
 			// TODO: do bulk import
 		}
-		for (let url of Object.keys(items)) {
+
+		for (let url of urls) {
 			await scrape(url, format, libraryCatalog);
 		}
 	}
 	else {
-		// ingest single record
+		let format = getSupportedFormat(doc);
+		if (!format) throw new Error("Cannot determine input format (single)");
+		Z.debug(`Selected format: ${format}`);
 		await scrape(url, format, libraryCatalog);
 	}
 }
