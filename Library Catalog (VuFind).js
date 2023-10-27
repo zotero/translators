@@ -128,9 +128,6 @@ async function scrapeMARC(data, libraryCatalog) {
 			item.publisher = item.publisher.replace(/&amp;/g, '&');
 		}
 
-		// Optionnal : apply customizations
-		customizeMARC(item, data);
-
 		item.complete();
 	});
 
