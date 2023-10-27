@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-27 00:42:14"
+	"lastUpdated": "2023-10-27 08:50:12"
 }
 
 /*
@@ -268,7 +268,7 @@ async function scrape(doc, url = doc.location.href) {
 	item.caseName = caseName;
 	item.court = court ? court : tribunal;
 	item.country = jurisdiction ? jurisdiction : seat;
-	item.dateDecided = date;
+	item.dateDecided = ZU.strToISO(date);
 	item.docketNumber = docket;
 	item["CISG-Online"] = eprint;
 
@@ -319,7 +319,7 @@ var testCases = [
 				"itemType": "case",
 				"caseName": "Brands International Corporation v. Reach Companies, LLC",
 				"creators": [],
-				"dateDecided": "02 October 2023",
+				"dateDecided": "2023-10-02",
 				"court": "U.S. District Court for the District of Minnesota",
 				"docketNumber": "21-1026 (JRT/DLM)",
 				"url": "https://cisg-online.org/search-for-cases?caseId=14425",
@@ -364,7 +364,7 @@ var testCases = [
 				"itemType": "case",
 				"caseName": "Alcala v. Verbruggen Palletizing Solutions, Inc.",
 				"creators": [],
-				"dateDecided": "14 June 2023",
+				"dateDecided": "2023-06-14",
 				"court": "Supreme Court of the State of Idaho",
 				"docketNumber": "49473, 49474",
 				"url": "https://cisg-online.org/search-for-cases?caseId=14276",
@@ -401,7 +401,7 @@ var testCases = [
 				"itemType": "case",
 				"caseName": "Organic barley case",
 				"creators": [],
-				"dateDecided": "13 November 2002",
+				"dateDecided": "2002-11-13",
 				"court": "Oberlandesgericht München (Court of Appeal Munich)",
 				"docketNumber": "27 U 346/02",
 				"url": "https://cisg-online.org/search-for-cases?caseId=6714",
@@ -441,7 +441,7 @@ var testCases = [
 				"itemType": "case",
 				"caseName": "Dioctyl phthalate case",
 				"creators": [],
-				"dateDecided": "16 August 1996",
+				"dateDecided": "1996-08-16",
 				"court": "China International Economic & Trade Arbitration Commission (CIETAC)",
 				"docketNumber": "CISG/1996/39",
 				"url": "https://cisg-online.org/search-for-cases?caseId=7035",
@@ -478,7 +478,7 @@ var testCases = [
 				"itemType": "case",
 				"caseName": "MSS, Inc. v. Maser Corp.",
 				"creators": [],
-				"dateDecided": "18 July 2011",
+				"dateDecided": "2011-07-18",
 				"court": "U.S. District Court for the District of Maryland",
 				"docketNumber": "3:09-cv-00601",
 				"url": "https://cisg-online.org/search-for-cases?caseId=8138",
@@ -518,7 +518,7 @@ var testCases = [
 				"itemType": "case",
 				"caseName": "Brands International Corporation v. Reach Companies, LLC",
 				"creators": [],
-				"dateDecided": "11 April 2023",
+				"dateDecided": "2023-04-11",
 				"court": "U.S. District Court for the District of Minnesota",
 				"docketNumber": "0:2021cv01026",
 				"url": "https://cisg-online.org/search-for-cases?caseId=14193",
