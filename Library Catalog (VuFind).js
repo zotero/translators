@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-27 09:58:09"
+	"lastUpdated": "2023-10-27 10:31:51"
 }
 
 /*
@@ -40,17 +40,19 @@
  * TODO:
  * - bulk export for multiple in one request - e.g.
  * GET https://ixtheo.de/Cart/doExport?f=RIS&i[]=Solr|1640914242&i[]=Solr|1165461676&i[]=Solr|1643208144
- * should detect available format from the search page
- * - let parent translator calling this one set a hint for the type of export format to use; for different institutions the "best" (most accurate) format can be different
- * - unify the itemDone handler function, becaues we want this translator to be generic
+ * should detect available format from the search page, or use bulk export only
+ * when explicitly told to (with a format manually specified)
  */
 
 /*
  * Options controlling the behaviour of this translator when called from
  * another translator:
- *   inputFormat: string, such as "MARC", "RIS", "EndNote", "BibTeX"; preferred
- *   import format
- *   inputPreprocessor: function string->string, transforming the input text
+ *   - bulkImport: boolean, whether to use the "bulk export" API to get a file
+ *   containing all of the selected items in one request. Default false. Only
+ *   takes effect when inputFormat is set and valid.
+ *   - inputFormat: string, such as "MARC", "RIS", "EndNote", "BibTeX";
+ *   preferred import format
+ *   - inputPreprocessor: function string->string, transforming the input text
  *   before import. If it's a method, it should be properly bound before use.
  *   (Useful for working around know defects in the exported file)
  */
@@ -58,6 +60,7 @@
 var exports = {
 	doWeb: doWeb,
 	detectWeb: detectWeb,
+	bulkImport: false,
 	inputFormat: null,
 	inputPreprocessor: null,
 };
@@ -214,6 +217,9 @@ async function doWeb(doc, url) {
 		// ingest multiple records
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
+		if (format === exports.inputFormat && exports.bulkImport) {
+			// TODO: do bulk import
+		}
 		for (let url of Object.keys(items)) {
 			await scrape(url, format, libraryCatalog);
 		}
