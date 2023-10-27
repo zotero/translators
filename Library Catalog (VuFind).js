@@ -205,10 +205,9 @@ async function detectWeb(doc, url) {
 
 async function doWeb(doc, url) {
 	let libraryCatalog = new URL(url).hostname;
-	let type = detectWeb(doc, url);
 	let format = getSupportedFormat(doc);
 	Z.debug(`supported format: ${format}`);
-	if (type == 'multiple') {
+	if (detectWeb(doc, url) == 'multiple') {
 		// ingest multiple records
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
@@ -216,7 +215,7 @@ async function doWeb(doc, url) {
 			await scrape(url, format, libraryCatalog);
 		}
 	}
-	else if (type) {
+	else {
 		// ingest single record
 		await scrape(url, format, libraryCatalog);
 	}
