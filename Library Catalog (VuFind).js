@@ -45,17 +45,17 @@
  * - unify the itemDone handler function, becaues we want this translator to be generic
  */
 
+var exports = {
+	doWeb: doWeb,
+	detectWeb: detectWeb,
+	inputFormat: null,
+};
+
 /**
- * Format detection
- *
- * If you want to customize it : create a new translator with a priority < 270,
- * (priority = 100 for a specific domain) and modify the code below
- *
- * Zotero formats : https://aurimasv.github.io/z2csl/typeMap.xml
  * vanilla VuFind :
  * https://github.com/vufind-org/vufind/blob/dev/import/translation_maps/format_map.properties
  */
-function customizeFormatDetection(doc) {
+function itemDisplayType(doc) {
 	let format = doc.querySelector('div.mainbody span.format');
 	if (format) {
 		if (format.className.includes('book')) {
@@ -86,73 +86,6 @@ function customizeFormatDetection(doc) {
 
 	// default
 	return 'book';
-}
-
-/**
- * Custom tweaks to the return of the Zotero MARC translator
- *
- * If you want to customize it : create a new translator with a priority < 270,
- * (priority = 100 for a specific domain) and add your code here...
- *
- * You will probably want to use the commented functions below.
- */
-function customizeMARC(_item, _marc) {
-	// look up all hits for a MARC field in a MARC record
-	/* const lookupValues = (key, table) => {
-		// starting position of the content of a record
-		const basePos = table => parseInt(table.substring(12, 17));
-		// directory substring of a MARC record
-		const rawDirectory = table => table.substring(24, basePos(table));
-		// the MARC directory as an association list
-		const directory = (table) => {
-			const raw = rawDirectory(table);
-			const twelves = raw.match(/.{12}/g);
-			const processEntry = (str) => {
-				const field = str.substring(0, 3);
-				const valueLength = parseInt(str.substring(3, 7));
-				const valuePos = parseInt(str.substring(7, 12));
-				return [field, valueLength, valuePos];
-			};
-			return twelves.map(processEntry);
-		};
-		// for any MARC field, return the length and starting position of
-		// the value
-		const lookupInDirectory = (key, threes) => {
-			const assocs = threes.filter(three => three[0] == key);
-			return assocs.map(x => x.slice(1));
-		};
-		// the data portion of a MARC record
-		const dataPortion = table.substring(basePos(table));
-		// the information needed to retrieve all values for a given field
-		const fields = lookupInDirectory(key, directory(table));
-		// retrieve the value for a single length and position
-		const lookupValue = ([l, s]) => dataPortion.substring(s, l + s - 1).trim();
-		return fields.map(lookupValue);
-	}; */
-
-	// look up the subfields under all the values associated with a
-	// given field
-	/* const lookupSubfields = (key, subfield, table) => {
-		// look up subfield values for each field, length, and start index
-		const subfields = subfield => (value) => {
-			const startswith = chr => str => str[0] === chr;
-			const values = value.split('\x1F');
-			const correctValues = values.filter(startswith(subfield));
-			return correctValues.map(v => v.substring(1));
-		};
-		// all the values associated with the input MARC field
-		const values = lookupValues(key, table);
-		// flatten a list of lists
-		const flatten = arr => arr.reduce((acc, elm) => acc.concat(elm), []);
-		// return a simple list of all field/subfield values
-		return flatten(values.map(subfields(subfield)));
-	}; */
-
-	// predicate saying whether input field is present in a MARC record
-	/* const fieldExists = (key, table) => {
-		const values = lookupValues(key, table);
-		return values.length !== 0;
-	}; */
 }
 
 async function scrape(url, inputFormat, libraryCatalog) {
@@ -264,7 +197,7 @@ async function detectWeb(doc, url) {
 	// the translator should do nothing on every other URL pattern
 	if (url.includes('/Record')) {
 		if (getSupportedFormat(doc)) {
-			return customizeFormatDetection(doc);
+			return itemDisplayType(doc);
 		}
 	}
 	else if (url.includes('/Search/Results') && getSearchResults(doc, true)) {
