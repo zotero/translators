@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-27 04:58:01"
+	"lastUpdated": "2023-10-27 08:50:50"
 }
 
 /*
@@ -56,30 +56,32 @@ var exports = {
  * https://github.com/vufind-org/vufind/blob/dev/import/translation_maps/format_map.properties
  */
 function itemDisplayType(doc) {
-	let format = doc.querySelector('div.mainbody span.format');
-	if (format) {
-		if (format.className.includes('book')) {
+	let formatElement = doc.querySelector('.mainbody span.format:last-child, .mainbody span.iconlabel:last-child');
+	if (formatElement) {
+		let classes = formatElement.className;
+
+		if (classes.includes('book')) {
 			return 'book';
 		}
-		if (format.className.includes('article')) {
+		if (classes.includes('article')) {
 			return 'journalArticle';
 		}
-		if (format.className.includes('video')) {
+		if (classes.includes('video')) {
 			return 'videoRecording';
 		}
-		if (format.className.includes('thesis')) {
+		if (classes.includes('thesis')) {
 			return 'thesis';
 		}
-		if (format.className.includes('dissertations')) {
+		if (classes.includes('dissertations')) {
 			return 'thesis';
 		}
-		if (format.className.includes('archivesmanuscripts')) {
+		if (classes.includes('archivesmanuscripts')) {
 			return 'manuscript';
 		}
-		if (format.className.includes('audio')) {
+		if (classes.includes('audio')) {
 			return 'audioRecording';
 		}
-		if (format.className.includes('map')) {
+		if (classes.includes('map')) {
 			return 'map';
 		}
 	}
@@ -88,78 +90,43 @@ function itemDisplayType(doc) {
 	return 'book';
 }
 
+const TRANSLATORS = {
+	MARC: "a6ee60df-1ddc-4aae-bb25-45e0537be973",
+	RIS: "32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7",
+	EndNote: "881f60f2-0802-411a-9228-ce5f47b64c7d", // Refer/BibIX
+};
+
+// Some services, such as Nantilus, refuse the requests without an 'Accept:'
+// header. Without it, the request sent from Scaffold will simply timeout. I
+// haven't checked if _any_ value would make it work, but we attempt to send
+// the right value.
+const MIME_TYPES = {
+	MARC: "application/MARC,*/*",
+	RIS: "application/x-research-info-systems,text/plain,*/*",
+	EndNote: "application/x-endnote-refer,text/plain,*/*",
+};
+
 async function scrape(url, inputFormat, libraryCatalog) {
 	let cleanURL = url.replace(/[#?].*$/, '').replace(/\/$/, '');
 	let data = await requestText(
 		cleanURL + `/Export?style=${inputFormat}`,
-		{ headers: { Referer: url } },
+		{ headers: { Referer: url, Accept: MIME_TYPES[inputFormat] } },
 	);
-	let scrapeFunction;
-	switch (inputFormat) {
-		case "MARC":
-			scrapeFunction = scrapeMARC;
-			break;
-		case "RIS":
-			scrapeFunction = scrapeRIS;
-			break;
-		case "EndNote":
-			scrapeFunction = scrapeReferBibIX;
-			break;
+
+	let translate = Z.loadTranslator("import");
+	translate.setTranslator(TRANSLATORS[inputFormat]);
+	translate.setString(data);
+	translate.setHandler("itemDone", (obj, item) => item.libraryCatalog = libraryCatalog);
+	translate.setHandler("itemDone", commonItemDoneHandler);
+	await translate.translate();
+}
+
+function commonItemDoneHandler(obj, item) { // eslint-disable-line: no-unused
+	if (item.url && item.url.includes(', ')) {
+		item.url = item.url.split(', ')[0];
 	}
-	await scrapeFunction(data, libraryCatalog);
-}
 
-// MARC retrieval code: run the MARC import translator, then perform a
-// few adjustments to the output by looking things up in the MARC record.
-// Overall design based on Finna translator
-async function scrapeMARC(data, libraryCatalog) {
-	// use MARC import translator to ingest binary MARC records
-	var translator = Zotero.loadTranslator("import");
-	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
-	translator.setString(data);
-	translator.setHandler('itemDone', function (_, item) {
-		item.libraryCatalog = libraryCatalog;
-
-		// Some cleaning
-		if (item.place) {
-			item.place = item.place.replace(/\[[^[]+\]/, '');
-		}
-		if (item.publisher) {
-			item.publisher = item.publisher.replace(/&amp;/g, '&');
-		}
-
-		item.complete();
-	});
-
-	await translator.translate();
-}
-
-async function scrapeReferBibIX(data, libraryCatalog) {
-	let translator = Zotero.loadTranslator('import');
-	translator.setTranslator('881f60f2-0802-411a-9228-ce5f47b64c7d');
-	translator.setString(data);
-	translator.setHandler('itemDone', (_, item) => {
-		item.libraryCatalog = libraryCatalog;
-
-		if (item.url && item.url.includes(', ')) {
-			item.url = item.url.split(', ')[0];
-		}
-
-		item.complete();
-	});
-	await translator.translate();
-}
-
-async function scrapeRIS(data, libraryCatalog) {
-	let translator = Zotero.loadTranslator("import");
-	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-	translator.setString(data);
-	translator.setHandler("itemDone", (_, item) => {
-		item.libraryCatalog = libraryCatalog;
-
-		item.complete();
-	});
-	await translator.translate();
+	item.complete();
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -179,8 +146,30 @@ function getSearchResults(doc, checkOnly) {
 	return found && obj;
 }
 
+// Hard-coded "best input type" for particular domains
+// FIXME: This is for use during development and testing; once finished we
+// should consider moving the domain-specific handling to their own translators
+// calling this one.
+function snoopInputFormat(domain) {
+	if (/\bwellesley\.edu$/.test(domain)) {
+		return "RIS";
+	}
+	return null;
+}
+
 function getSupportedFormat(doc) {
-	for (let format of ['MARC', 'EndNote', 'RIS']) {
+	// in descending order of "generally being the better one most of the time"
+	const supportedFormats = ['MARC', 'EndNote', 'RIS'];
+	let format = exports.inputFormat;
+	if (format && !supportedFormats.includes(format)) {
+		Z.debug(`Chosen format ${format} not one of ${supportedFormats}; ignored`);
+		format = null;
+	}
+	// FIXME: For development only
+	if (!format) format = snoopInputFormat(new URL(doc.location.href).hostname);
+	if (format) return format;
+
+	for (format of supportedFormats) {
 		if (doc.querySelector(`a[href*="/Export?style=${format}"]`)) {
 			return format;
 		}
