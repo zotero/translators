@@ -146,42 +146,25 @@ function customizeMARC(_item, _marc) {
 	}; */
 }
 
-async function scrape(url, libraryCatalog) {
+async function scrape(url, inputFormat, libraryCatalog) {
 	let cleanURL = url.replace(/[#?].*$/, '').replace(/\/$/, '');
-
-	// MARC export ?
-	try {
-		let marcData = await requestText(cleanURL + '/Export?style=MARC');
-		if (!marcData.trim().startsWith('<!DOCTYPE')) {
-			await scrapeMARC(marcData, libraryCatalog);
-		}
-		return;
+	let data = await requestText(
+		cleanURL + `/Export?style=${inputFormat}`,
+		{ headers: { Referer: url } },
+	);
+	let scrapeFunction;
+	switch (inputFormat) {
+		case "MARC":
+			scrapeFunction = scrapeMARC;
+			break;
+		case "RIS":
+			scrapeFunction = scrapeRIS;
+			break;
+		case "EndNote":
+			scrapeFunction = scrapeReferBibIX;
+			break;
 	}
-	catch (e) {
-		Zotero.debug(e);
-	}
-
-	// EndNote export ?
-	try {
-		let data = await requestText(cleanURL + '/Export?style=EndNote');
-		await scrapeReferBibIX(data, libraryCatalog);
-		return;
-	}
-	catch (e) {
-		Zotero.debug(e);
-	}
-
-	// RIS export ?
-	try {
-		let data = await requestText(cleanURL + '/Export?style=RIS');
-		await scrapeRIS(data, libraryCatalog);
-		return;
-	}
-	catch (e) {
-		Zotero.debug(e);
-	}
-
-	// VuFind supports COinS, it will probably be the fallback method
+	await scrapeFunction(data, libraryCatalog);
 }
 
 // MARC retrieval code: run the MARC import translator, then perform a
@@ -257,22 +240,25 @@ function getSearchResults(doc, checkOnly) {
 	return found && obj;
 }
 
+function getSupportedFormat(doc) {
+	for (let format of ['MARC', 'EndNote', 'RIS']) {
+		if (doc.querySelector(`a[href*="/Export?style=${format}"]`)) {
+			return format;
+		}
+	}
+	return null;
+}
+
 async function detectWeb(doc, url) {
 	// VuFind URL patterns starting with 'Record' are for single items
 	// VuFind URL patterns starting with 'Search' are for search results
 	// the translator should do nothing on every other URL pattern
-
 	if (url.includes('/Record')) {
-		// let's see if exports are available
-		let supportedExportFormats = ['MARC', 'EndNote', 'RIS']
-			.filter(format => !!doc.querySelector(`a[href*="/Export?style=${format}"]`));
-		if (!supportedExportFormats.length) {
-			return false;
+		if (getSupportedFormat(doc)) {
+			return customizeFormatDetection(doc);
 		}
-
-		return customizeFormatDetection(doc);
 	}
-	if (url.includes('/Search/Results') && getSearchResults(doc, true)) {
+	else if (url.includes('/Search/Results') && getSearchResults(doc, true)) {
 		return 'multiple';
 	}
 	return false;
@@ -281,17 +267,19 @@ async function detectWeb(doc, url) {
 async function doWeb(doc, url) {
 	let libraryCatalog = new URL(url).hostname;
 	let type = detectWeb(doc, url);
+	let format = getSupportedFormat(doc);
+	Z.debug(`supported format: ${format}`);
 	if (type == 'multiple') {
 		// ingest multiple records
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
 		for (let url of Object.keys(items)) {
-			await scrape(url, libraryCatalog);
+			await scrape(url, format, libraryCatalog);
 		}
 	}
 	else if (type) {
 		// ingest single record
-		await scrape(url, libraryCatalog);
+		await scrape(url, format, libraryCatalog);
 	}
 }
 
