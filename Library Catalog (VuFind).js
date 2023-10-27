@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-27 08:50:50"
+	"lastUpdated": "2023-10-27 09:58:09"
 }
 
 /*
@@ -45,10 +45,21 @@
  * - unify the itemDone handler function, becaues we want this translator to be generic
  */
 
+/*
+ * Options controlling the behaviour of this translator when called from
+ * another translator:
+ *   inputFormat: string, such as "MARC", "RIS", "EndNote", "BibTeX"; preferred
+ *   import format
+ *   inputPreprocessor: function string->string, transforming the input text
+ *   before import. If it's a method, it should be properly bound before use.
+ *   (Useful for working around know defects in the exported file)
+ */
+
 var exports = {
 	doWeb: doWeb,
 	detectWeb: detectWeb,
 	inputFormat: null,
+	inputPreprocessor: null,
 };
 
 /**
@@ -92,34 +103,35 @@ function itemDisplayType(doc) {
 	return 'book';
 }
 
-const TRANSLATORS = {
-	MARC: "a6ee60df-1ddc-4aae-bb25-45e0537be973",
-	RIS: "32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7",
-	EndNote: "881f60f2-0802-411a-9228-ce5f47b64c7d", // Refer/BibIX
-};
-
 // Some services, such as Nantilus, refuse the requests without an 'Accept:'
 // header. Without it, the request sent from Scaffold will simply timeout. I
 // haven't checked if _any_ value would make it work, but we attempt to send
 // the right value.
 const MIME_TYPES = {
-	MARC: "application/MARC,*/*",
-	RIS: "application/x-research-info-systems,text/plain,*/*",
+	MARC: "application/MARC,text/plain,*/*",
 	EndNote: "application/x-endnote-refer,text/plain,*/*",
+	RIS: "application/x-research-info-systems,text/plain,*/*",
+	BibTeX: "application/x-bibtex,text/plain,*/*",
 };
 
 async function scrape(url, inputFormat, libraryCatalog) {
 	let cleanURL = url.replace(/[#?].*$/, '').replace(/\/$/, '');
 	let data = await requestText(
-		cleanURL + `/Export?style=${inputFormat}`,
+		`${cleanURL}/Export?style=${inputFormat}`,
 		{ headers: { Referer: url, Accept: MIME_TYPES[inputFormat] } },
 	);
+	if (typeof exports.inputPreprocessor === "function") {
+		data = exports.inputPreprocessor(data);
+	}
 
 	let translate = Z.loadTranslator("import");
-	translate.setTranslator(TRANSLATORS[inputFormat]);
+	translate.setHandler("translators", (obj, translators) => {
+		translate.setTranslator(translators);
+	});
 	translate.setString(data);
 	translate.setHandler("itemDone", (obj, item) => item.libraryCatalog = libraryCatalog);
 	translate.setHandler("itemDone", commonItemDoneHandler);
+	await translate.getTranslators();
 	await translate.translate();
 }
 
@@ -161,7 +173,7 @@ function snoopInputFormat(domain) {
 
 function getSupportedFormat(doc) {
 	// in descending order of "generally being the better one most of the time"
-	const supportedFormats = ['MARC', 'EndNote', 'RIS'];
+	const supportedFormats = ['MARC', 'EndNote', 'RIS', 'BibTeX'];
 	let format = exports.inputFormat;
 	if (format && !supportedFormats.includes(format)) {
 		Z.debug(`Chosen format ${format} not one of ${supportedFormats}; ignored`);
