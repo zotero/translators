@@ -1,5 +1,5 @@
 {
-	"translatorID": "862b5893-2d6f-4082-bcc5-a40cfd4663fc",
+	"translatorID": "0b7cbf89-c5d8-49c0-99b3-1854e661ba37",
 	"label": "Library Catalog (VuFind)",
 	"creator": "Matt Teichman, Abe Jellinek, Mathieu Grimault, Zoë C. Ma",
 	"target": "/Record/[^/?]+|/Search/Results",
