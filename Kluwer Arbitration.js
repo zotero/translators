@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-26 20:18:44"
+	"lastUpdated": "2023-10-27 08:42:26"
 }
 
 /*
@@ -367,7 +367,7 @@ function scrapeDoc(url, zotType, pubDetails, docDetails) {
 
 	if (docDetails) {
 		item.title = docDetails.Title;
-		item.date = docDetails.PublicationDate;
+		item.date = ZU.strToISO(docDetails.PublicationDate);
 		item.creators = [];
 
 		for (let author of docDetails.Authors) {
@@ -403,7 +403,8 @@ function scrapeDoc(url, zotType, pubDetails, docDetails) {
 		if (type == 'case') item.reporter = docDetails.PublicationTitle;
 		else item.publicationTitle = docDetails.PublicationTitle;
 
-		if (docDetails.LegislationDate) item.dateEnacted = docDetails.LegislationDate;
+		if (docDetails.LegislationDate) item.dateEnacted = ZU.strToISO(docDetails.LegislationDate);
+		if (item.itemType == 'statute' && item.dateEnacted) delete item.date;
 
 		let bibRef = "Bibliographic reference: " + docDetails.BibliographicReference + ".";
 		item.notes.push({ note: bibRef });
@@ -416,7 +417,8 @@ function scrapeDoc(url, zotType, pubDetails, docDetails) {
 		}
 		if (docDetails.Court[0]) item.court = docDetails.Court[0];
 		if (docDetails.Organization[0] && docDetails.Type == 'Awards') item.court = docDetails.Organization[0];
-		if (docDetails.CaseDate) item.dateDecided = docDetails.CaseDate;
+		if (docDetails.CaseDate) item.dateDecided = ZU.strToISO(docDetails.CaseDate);
+		if (item.itemType == 'case' && item.dateDecided) delete item.date;
 		// How do we set jurisdiction for JurisM?
 		if (docDetails.Jurisdictions[0]) item.country = docDetails.Jurisdictions[0];
 
@@ -524,7 +526,7 @@ function scrapeBook(url, pubDetails) {
 
 		if (pubDetails) {
 			item.title = pubDetails.publicationTitle;
-			item.date = pubDetails.publicationInfo.publicationDate;
+			item.date = ZU.strToISO(pubDetails.publicationInfo.publicationDate);
 			item.publisher = pubDetails.publicationInfo.publisher;
 			item.abstractNote = pubDetails.descriptiveText;
 
@@ -623,8 +625,8 @@ async function scrapeCase(url) {
 	item.caseName = caseDetails.casename;
 	item.language = caseDetails.languages.join(", ");
 	if (procDetails) {
-		item.filingDate = procDetails.commencementDate;
-		item.dateDecided = procDetails.dateOfOutcome;
+		item.filingDate = ZU.strToISO(procDetails.commencementDate);
+		item.dateDecided = ZU.strToISO(procDetails.dateOfOutcome);
 	}
 
 	// Counsels and arbitrators
@@ -690,7 +692,7 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"date": "Jan 2021",
+				"date": "2021-01",
 				"ISBN": "9789403526430",
 				"bookTitle": "International Commercial Arbitration (Third Edition)",
 				"libraryCatalog": "Kluwer Arbitration",
@@ -786,7 +788,7 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"date": "Jun 2013",
+				"date": "2013-06",
 				"ISSN": "1010-9153",
 				"issue": "2",
 				"libraryCatalog": "Kluwer Arbitration",
@@ -822,7 +824,7 @@ var testCases = [
 				"itemType": "case",
 				"caseName": "Société d'études et représentations navales et industrielles (Soerni) et autres v. société Air Sea Broker Ltd. (ASB), Cour de cassation (1re Ch. civ.), Not Indicated, 8 July 2009",
 				"creators": [],
-				"dateDecided": "2009",
+				"dateDecided": "2009-07-08",
 				"court": "Court of Cassation of France, First Civil Law Chamber",
 				"firstPage": "529",
 				"reporter": "Revue de l'Arbitrage",
@@ -883,7 +885,7 @@ var testCases = [
 				"itemType": "statute",
 				"nameOfAct": "UNCITRAL Model Law on International Commercial Arbitration (1985, with 2006 amendments)",
 				"creators": [],
-				"dateEnacted": "2008",
+				"dateEnacted": "2006-07-07",
 				"url": "https://www.kluwerarbitration.com/document/kli-ka-1134507-n",
 				"attachments": [
 					{
@@ -965,7 +967,7 @@ var testCases = [
 						"creatorType": "counsel"
 					}
 				],
-				"dateDecided": "12/04/2023",
+				"dateDecided": "2023-12-04",
 				"court": "Permanent Court of Arbitration",
 				"docketNumber": "PCA Case No. 2017-16",
 				"language": "English",
