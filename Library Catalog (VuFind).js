@@ -194,7 +194,7 @@ function getSupportedFormat(doc) {
 	return null;
 }
 
-async function detectWeb(doc, url) {
+function detectWeb(doc, url) {
 	// VuFind URL patterns starting with 'Record' are for single items
 	// VuFind URL patterns starting with 'Search' are for search results
 	// the translator should do nothing on every other URL pattern
