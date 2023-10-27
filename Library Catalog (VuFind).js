@@ -54,6 +54,8 @@ var exports = {
 /**
  * vanilla VuFind :
  * https://github.com/vufind-org/vufind/blob/dev/import/translation_maps/format_map.properties
+ * NOTE: This function is not meant to return falsy; otherwise detectWeb() will
+ * return falsy
  */
 function itemDisplayType(doc) {
 	let formatElement = doc.querySelector('.mainbody span.format:last-child, .mainbody span.iconlabel:last-child');
@@ -195,7 +197,7 @@ async function detectWeb(doc, url) {
 async function doWeb(doc, url) {
 	let libraryCatalog = new URL(url).hostname;
 	let format = getSupportedFormat(doc);
-	Z.debug(`supported format: ${format}`);
+	Z.debug(`Selected format: ${format}`);
 	if (detectWeb(doc, url) == 'multiple') {
 		// ingest multiple records
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
