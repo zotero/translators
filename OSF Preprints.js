@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-19 09:01:28"
+	"lastUpdated": "2023-10-27 16:03:03"
 }
 
 /*
@@ -96,8 +96,8 @@ function osfAPIImport(inputJSON) {
 	// currently we're just doing preprints, but putting this here in case we'll want to handle different OSF
 	// item types in the future
 	// let type = inputJSON.data.type
-	item.title = ZU.unescapeHTML(attributes.title);
-	item.abstractNote = ZU.unescapeHTML(attributes.description);
+	item.title = ZU.unescapeHTML(attributes.title || "");
+	item.abstractNote = ZU.unescapeHTML(attributes.description || "");
 	item.date = ZU.strToISO(attributes.date_published);
 	item.publisher = embeds.provider.data.attributes.name;
 	item.DOI = inputJSON.data.links.preprint_doi && ZU.cleanDOI(inputJSON.data.links.preprint_doi);
