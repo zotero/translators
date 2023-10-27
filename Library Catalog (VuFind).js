@@ -72,7 +72,7 @@ var exports = {
  * return falsy
  */
 function itemDisplayType(doc) {
-	let formatElement = doc.querySelector('.mainbody span.format:last-child, .mainbody span.iconlabel:last-child');
+	let formatElement = doc.querySelector('.mainbody span.format:last-of-type, .mainbody span.iconlabel:last-of-type');
 	if (formatElement) {
 		let classes = formatElement.className;
 
@@ -111,7 +111,7 @@ function itemDisplayType(doc) {
 // haven't checked if _any_ value would make it work, but we attempt to send
 // the right value.
 const MIME_TYPES = {
-	MARC: "application/MARC,text/plain,*/*",
+	MARC: "application/MARC,*/*",
 	EndNote: "application/x-endnote-refer,text/plain,*/*",
 	RIS: "application/x-research-info-systems,text/plain,*/*",
 	BibTeX: "application/x-bibtex,text/plain,*/*",
