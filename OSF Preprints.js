@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-27 16:03:03"
+	"lastUpdated": "2023-10-28 10:23:10"
 }
 
 /*
@@ -119,7 +119,7 @@ function osfAPIImport(inputJSON) {
 		if (author.given_name && author.family_name) {
 			// add middle names
 			let givenNames = author.given_name + ' ' + author.middle_names;
-			item.creators.push({ lastName: author.family_name, firstName: givenNames.trim(), creatorType: "author" });
+			item.creators.push(ZU.cleanAuthor(`${author.family_name}, ${givenNames}`, "author", true/* useComma */));
 		}
 		else {
 			item.creators.push({ lastName: author.full_name, creatorType: "author", fieldMode: 1 });
@@ -127,7 +127,11 @@ function osfAPIImport(inputJSON) {
 	}
 	if (inputJSON.data.relationships.primary_file) {
 		let fileID = inputJSON.data.relationships.primary_file.links.related.href.replace("https://api.osf.io/v2/files/", "");
-		item.attachments.push({ url: "https://osf.io/download/" + fileID, title: "OSF Preprint", mimeType: "application/pdf" });
+		item.attachments.push({
+			url: "https://osf.io/download/" + fileID,
+			title: "Preprint PDF",
+			mimeType: "application/pdf",
+		});
 	}
 
 	item.complete();
@@ -154,13 +158,13 @@ var testCases = [
 				"title": "The Dutch Auditory & Image Vocabulary Test (DAIVT): A New Dutch Receptive Vocabulary Test for Students",
 				"creators": [
 					{
-						"lastName": "Bousard",
 						"firstName": "Ibrich",
+						"lastName": "Bousard",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Brysbaert",
 						"firstName": "Marc",
+						"lastName": "Brysbaert",
 						"creatorType": "author"
 					}
 				],
@@ -173,7 +177,7 @@ var testCases = [
 				"url": "https://osf.io/preprints/psyarxiv/nx2b4/",
 				"attachments": [
 					{
-						"title": "OSF Preprint",
+						"title": "Preprint PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -221,53 +225,53 @@ var testCases = [
 				"title": "‘All In’: A Pragmatic Framework for COVID-19 Testing and Action on a Global Scale",
 				"creators": [
 					{
+						"firstName": "Syril D.",
 						"lastName": "Pettit",
-						"firstName": "Syril D",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Jerome",
 						"firstName": "Keith",
+						"lastName": "Jerome",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Rouquie",
 						"firstName": "David",
+						"lastName": "Rouquie",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Hester",
 						"firstName": "Susan",
+						"lastName": "Hester",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Wehmas",
 						"firstName": "Leah",
+						"lastName": "Wehmas",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Mari",
 						"firstName": "Bernard",
+						"lastName": "Mari",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Barbry",
 						"firstName": "Pascal",
+						"lastName": "Barbry",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Kanda",
 						"firstName": "Yasunari",
+						"lastName": "Kanda",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Matsumoto",
 						"firstName": "Mineo",
+						"lastName": "Matsumoto",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Botten",
 						"firstName": "Jason",
+						"lastName": "Botten",
 						"creatorType": "author"
 					}
 				],
@@ -280,7 +284,7 @@ var testCases = [
 				"url": "https://osf.io/b2xmp/",
 				"attachments": [
 					{
-						"title": "OSF Preprint",
+						"title": "Preprint PDF",
 						"mimeType": "application/pdf"
 					}
 				],
