@@ -2,14 +2,14 @@
 	"translatorID": "b2a735f3-11ac-4e9f-b22b-00e1b1d3c9f6",
 	"label": "DrugBank",
 	"creator": "Tom Hodder <tom@limepepper.co.uk> and contributors",
-	"target": "^https://go.drugbank.com/",
+	"target": "^https://go\\.drugbank\\.com/",
 	"minVersion": "6.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-21 13:53:20"
+	"lastUpdated": "2023-10-28 15:29:51"
 }
 
 /*
