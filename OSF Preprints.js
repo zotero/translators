@@ -3,13 +3,13 @@
 	"label": "OSF Preprints",
 	"creator": "Sebastian Karcher",
 	"target": "^https://osf\\.io/",
-	"minVersion": "3.0",
+	"minVersion": "6.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-28 11:03:06"
+	"lastUpdated": "2023-10-28 15:19:45"
 }
 
 /*
@@ -36,13 +36,9 @@
 */
 
 
-const preprintType = ZU.fieldIsValidForType('title', 'preprint')
-	? 'preprint'
-	: 'report';
-
 function detectWeb(doc, url) {
 	if (doc.getElementById("preprintTitle")) {
-		return preprintType;
+		return 'preprint';
 	}
 	if (url.includes("/discover?") || url.includes("/search?")) {
 		Z.monitorDOMChanges(doc.body);
@@ -90,7 +86,7 @@ function constructAPIURL(url) {
 function osfAPIImport(inputJSON) {
 	let attributes = inputJSON.data.attributes;
 	let embeds = inputJSON.data.embeds;
-	var item = new Zotero.Item(preprintType);
+	var item = new Zotero.Item("preprint");
 	// currently we're just doing preprints, but putting this here in case we'll want to handle different OSF
 	// item types in the future
 	// let type = inputJSON.data.type
@@ -99,9 +95,6 @@ function osfAPIImport(inputJSON) {
 	item.date = ZU.strToISO(attributes.date_published);
 	item.publisher = embeds.provider.data.attributes.name;
 	item.DOI = inputJSON.data.links.preprint_doi && ZU.cleanDOI(inputJSON.data.links.preprint_doi);
-	if (preprintType != 'preprint') {
-		item.extra = "type: article";
-	}
 	item.url = inputJSON.data.links.html;
 	for (let tag of attributes.tags) {
 		item.tags.push(tag);
