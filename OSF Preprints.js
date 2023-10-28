@@ -2,14 +2,14 @@
 	"translatorID": "3b978207-5d5c-416f-b15e-2d9da4aa75e9",
 	"label": "OSF Preprints",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://(osf\\.io|psyarxiv\\.com|arabixiv\\.org|biohackrxiv\\.org|eartharxiv\\.org|ecoevorxiv\\.org|ecsarxiv\\.org|edarxiv\\.org|engrxiv\\.org|frenxiv\\.org|indiarxiv\\.org|mediarxiv\\.org|paleorxiv\\.org)",
+	"target": "^https://osf\\.io/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-28 10:23:10"
+	"lastUpdated": "2023-10-28 11:03:06"
 }
 
 /*
@@ -51,8 +51,6 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-const SUPPORTED_SITES = /^https?:\/\/(osf\.io|psyarxiv\.com|arabixiv\.org|biohackrxiv\.org|eartharxiv\.org|ecoevorxiv\.org|ecsarxiv\.org|edarxiv\.org|engrxiv\.org|frenxiv\.org|indiarxiv\.org|mediarxiv\.org|paleorxiv\.org)\//;
-
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
@@ -61,7 +59,7 @@ function getSearchResults(doc, checkOnly) {
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
-		if (!href || !title || !SUPPORTED_SITES.test(href)) continue;
+		if (!href || !title || !/^https:\/\/osf\.io\//.test(href)) continue;
 		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
