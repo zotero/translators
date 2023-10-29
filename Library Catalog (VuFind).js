@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-29 07:51:48"
+	"lastUpdated": "2023-10-29 08:14:01"
 }
 
 /*
@@ -70,7 +70,7 @@ var exports = {
  * https://github.com/vufind-org/vufind/blob/dev/import/translation_maps/format_map.properties
  */
 function itemDisplayType(doc) {
-	let container = doc.querySelector(".mainbody, #record-details-column");
+	let container = doc.querySelector("#record-details-column, .record");
 	if (!container) {
 		Z.debug("VuFind: selector for info container unknown");
 		return false;
@@ -812,6 +812,48 @@ var testCases = [
 				"notes": [
 					{
 						"note": "Cover; Contents; List of Plates; Introduction to the New Edition; Acknowledgements; Chronology; Prologue; PART ONE: THE LIFE AND DEATH OF JEANNE LA PUCELLE; 1. Maid of France; 2. A Divided Realm; 3. The King and his Crown; 4. Prophet; 5. Harlot of the Armagnacs; 6. Heretic; 7. Ideal Androgyne; 8. Knight; PART TWO: THE AFTERLIFE OF JOAN OF ARC; 9. The Vindication; 10. Amazon; 11. Personification of Virtue; 12. Child of Nature; 13. Saint or Patriot?; Bibliographical Notes; Index; A; B; C; D; E; F; G; H; I; J; K; L; M; N; O; P; Q; R; S; T; U; V; W; X; Y"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://hds.hebis.de/ubmr/Record/HEB211177393",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Psychologie des Glücks: Handbuch",
+				"creators": [
+					{
+						"firstName": "Anton A.",
+						"lastName": "Bucher",
+						"creatorType": "author"
+					}
+				],
+				"date": "2009",
+				"ISBN": "9783621276535",
+				"callNumber": "b",
+				"edition": "1. Aufl",
+				"language": "ger",
+				"libraryCatalog": "hds.hebis.de",
+				"numPages": "268",
+				"place": "Weinheim ",
+				"publisher": "Beltz, PVU",
+				"shortTitle": "Psychologie des Glücks",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Glück"
+					},
+					{
+						"tag": "Psychologie"
+					}
+				],
+				"notes": [
+					{
+						"note": "Literaturverz. S. 209 - 248"
 					}
 				],
 				"seeAlso": []
