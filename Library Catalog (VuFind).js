@@ -213,7 +213,7 @@ function snoopInputFormat(domain) {
 		return "RIS";
 	}
 	if ("bdtd.ibict.br" === domain) {
-		return "EndNote";
+		return "EndNote"; // MARC not supported; short-cut it
 	}
 	return null;
 }
