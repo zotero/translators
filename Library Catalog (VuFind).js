@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-27 14:42:08"
+	"lastUpdated": "2023-10-29 02:23:24"
 }
 
 /*
@@ -72,33 +72,56 @@ var exports = {
  * return falsy
  */
 function itemDisplayType(doc) {
-	let formatElement = doc.querySelector('.mainbody span.format:last-of-type, .mainbody span.iconlabel:last-of-type');
-	if (formatElement) {
-		let classes = formatElement.className;
+	let mainBody = doc.querySelector(".mainbody");
+	if (!mainBody) {
+		throw new Error("VuFind: selector for main body unknown");
+	}
+	// Build a "key" that concatenates the type-identifying class names (i.e.
+	// excluding things like "format" and "iconlabel" themselves, "label",
+	// "label-info"
+	let typeKeySet = new Set();
+	for (let span of mainBody.querySelectorAll(`span.format, span.iconlabel`)) {
+		for (let className of span.classList) {
+			if (!["format", "iconlabel", "label", "label-info"].includes(className)) {
+				typeKeySet.add(className);
+			}
+		}
+	}
+	let typeKey = Array.from(typeKeySet).join(" ");
+	Z.debug(`type key: ${typeKey}`);
 
-		if (classes.includes('book')) {
-			return 'book';
-		}
-		if (classes.includes('article')) {
-			return 'journalArticle';
-		}
-		if (classes.includes('video')) {
+	// Check the typekey for classes in the order from the more specific to
+	// more generic: e.g. "map" refers to a specific type the item is of, while
+	// "book" either refers to a book or expresses that the item is book-like
+	// (for instance, a thesis can be book-like). The tests should exclude
+	// classes purely indicating physical format, such as "print"
+	if (typeKey) {
+		if (typeKey.includes('video')) {
 			return 'videoRecording';
 		}
-		if (classes.includes('thesis')) {
-			return 'thesis';
-		}
-		if (classes.includes('dissertations')) {
-			return 'thesis';
-		}
-		if (classes.includes('archivesmanuscripts')) {
-			return 'manuscript';
-		}
-		if (classes.includes('audio')) {
+		if (typeKey.includes('audio')) {
 			return 'audioRecording';
 		}
-		if (classes.includes('map')) {
+		if (typeKey.includes('thesis')) {
+			return 'thesis';
+		}
+		if (typeKey.includes('dissertations')) {
+			return 'thesis';
+		}
+		if (typeKey.includes('archivesmanuscripts')) {
+			return 'manuscript';
+		}
+		if (typeKey.includes('map')) {
 			return 'map';
+		}
+		if (typeKey.includes('booksection')) {
+			return 'bookSection';
+		}
+		if (typeKey.includes('article')) {
+			return 'journalArticle';
+		}
+		if (typeKey.includes('book')) {
+			return 'book';
 		}
 	}
 
