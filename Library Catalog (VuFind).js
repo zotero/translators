@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-29 06:48:55"
+	"lastUpdated": "2023-10-29 07:24:29"
 }
 
 /*
@@ -162,6 +162,14 @@ function commonItemDoneHandler(obj, item) { // eslint-disable-line: no-unused
 	if (item.url && item.url.includes(', ')) {
 		item.url = item.url.split(', ')[0];
 	}
+	// deduplicate tags
+	if (item.tags) {
+		let tagStrings = new Set();
+		for (let tag of item.tags) {
+			tagStrings.add(typeof tag === "string" ? tag : tag.tag);
+		}
+		item.tags = Array.from(tagStrings.values());
+	}
 
 	item.complete();
 }
@@ -248,7 +256,7 @@ async function doWeb(doc, url) {
 	let itemURL;
 	while ((itemURL = urls.shift())) {
 		Z.debug(`Scraping URL ${itemURL} using format ${format}`);
-		let cleanURL = itemURL.replace(/[#?].*$/, '').replace(/\/$/, '');
+		let cleanURL = itemURL.replace(/(\/Record\/[^/]+)[/#?].*$/, '$1');
 		let data;
 		try {
 			data = await requestText(
@@ -603,22 +611,32 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://ixtheo.de/Record/1770813810",
-		"detectedItemType": "audioRecording",
 		"items": [
 			{
-				"itemType": "book",
+				"itemType": "audioRecording",
 				"title": "Diesseits von Eden: der Podcast der katholischen Fakultäten Österreichs & Südtirols",
 				"creators": [],
 				"date": "2021",
-				"language": "German",
+				"callNumber": "230",
+				"label": "Studio Omega, Verein für Christliche Radioarbeit",
+				"language": "ger",
 				"libraryCatalog": "ixtheo.de",
 				"place": "Wien",
-				"publisher": "Studio Omega, Verein für Christliche Radioarbeit",
 				"shortTitle": "Diesseits von Eden",
-				"url": "https://diesseits.theopodcast.at/home",
 				"attachments": [],
-				"tags": [],
-				"notes": [],
+				"tags": [
+					{
+						"tag": "Podcast"
+					},
+					{
+						"tag": "Zeitschrift"
+					}
+				],
+				"notes": [
+					{
+						"note": "Gesehen am 16.09.2021"
+					}
+				],
 				"seeAlso": []
 			}
 		]
@@ -674,6 +692,121 @@ var testCases = [
 				"attachments": [],
 				"tags": [],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://cmc.marmot.org/Record/.b11174316",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "The Pentagon papers as published by the New York times",
+				"creators": [
+					{
+						"firstName": "Neil",
+						"lastName": "Sheehan",
+						"creatorType": "editor"
+					}
+				],
+				"date": "1971",
+				"callNumber": "E183.8.V5 P4 1971",
+				"libraryCatalog": "cmc.marmot.org",
+				"numPages": "810",
+				"place": "New York",
+				"publisher": "Quadrangle Books",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Foreign relations"
+					},
+					{
+						"tag": "Juvenile literature"
+					},
+					{
+						"tag": "Literature"
+					},
+					{
+						"tag": "Politics and government"
+					},
+					{
+						"tag": "United States"
+					},
+					{
+						"tag": "Vietnam"
+					},
+					{
+						"tag": "Vietnam War, 1961-1975"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://library.villanova.edu/Find/Record/2423035/Description#holdings",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Joan of Arc: the Image of Female Heroism",
+				"creators": [
+					{
+						"firstName": "Marina",
+						"lastName": "Warner",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "PALCI EBSCO books",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					}
+				],
+				"date": "2013",
+				"ISBN": "9780191651939",
+				"abstractNote": "The fame of Joan of Arc began in her lifetime and, though it has dipped a little now and then, she has never vanished from view. Her image acts as a seismograph for the shifts and settlings of personal and political ideals: Joan of Arc is the heroine every movement has wanted as their figurehead. In France, anti-semitic, xenophobic, extreme right parties have claimed her since the Action Francaise in the 19th century. By contrast, Socialists, feminists, and liberal Catholicsrallied to her as the champion of the dispossessed and the wrongly accused. Joan of Arc has also played a crucial role in",
+				"callNumber": "DC103 .W27 2013",
+				"edition": "2nd ed",
+				"extra": "OCLC: ocn861559413",
+				"libraryCatalog": "library.villanova.edu",
+				"numPages": "1",
+				"place": "Oxford",
+				"publisher": "OUP Oxford",
+				"shortTitle": "Joan of Arc",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Biographies"
+					},
+					{
+						"tag": "Biography"
+					},
+					{
+						"tag": "Christian saints"
+					},
+					{
+						"tag": "Electronic books"
+					},
+					{
+						"tag": "Europe France"
+					},
+					{
+						"tag": "France"
+					},
+					{
+						"tag": "HISTORY"
+					},
+					{
+						"tag": "Joan"
+					}
+				],
+				"notes": [
+					{
+						"note": "Cover; Contents; List of Plates; Introduction to the New Edition; Acknowledgements; Chronology; Prologue; PART ONE: THE LIFE AND DEATH OF JEANNE LA PUCELLE; 1. Maid of France; 2. A Divided Realm; 3. The King and his Crown; 4. Prophet; 5. Harlot of the Armagnacs; 6. Heretic; 7. Ideal Androgyne; 8. Knight; PART TWO: THE AFTERLIFE OF JOAN OF ARC; 9. The Vindication; 10. Amazon; 11. Personification of Virtue; 12. Child of Nature; 13. Saint or Patriot?; Bibliographical Notes; Index; A; B; C; D; E; F; G; H; I; J; K; L; M; N; O; P; Q; R; S; T; U; V; W; X; Y"
+					}
+				],
 				"seeAlso": []
 			}
 		]
