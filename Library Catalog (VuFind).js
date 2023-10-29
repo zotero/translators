@@ -68,20 +68,19 @@ var exports = {
 /**
  * vanilla VuFind :
  * https://github.com/vufind-org/vufind/blob/dev/import/translation_maps/format_map.properties
- * NOTE: This function is not meant to return falsy; otherwise detectWeb() will
- * return falsy
  */
 function itemDisplayType(doc) {
-	let mainBody = doc.querySelector(".mainbody");
-	if (!mainBody) {
-		throw new Error("VuFind: selector for main body unknown");
+	let container = doc.querySelector(".mainbody, #record-details-column");
+	if (!container) {
+		Z.debug("VuFind: selector for info container unknown");
+		return false;
 	}
 	// Build a "key" that concatenates the type-identifying class names (i.e.
 	// excluding things like "format" and "iconlabel" themselves, "label",
 	// "label-info"
 	const formatClasses = ["format", "format2", "iconlabel"];
 	let typeKeySet = new Set();
-	for (let span of mainBody.querySelectorAll(formatClasses.map(s => `span.${s}`).join(","))) {
+	for (let span of container.querySelectorAll(formatClasses.map(s => `span.${s}`).join(","))) {
 		for (let className of span.classList) {
 			if (![...formatClasses, "label", "label-info"].includes(className)) {
 				typeKeySet.add(className);
