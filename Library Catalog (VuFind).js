@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-29 07:24:29"
+	"lastUpdated": "2023-10-29 07:51:48"
 }
 
 /*
@@ -156,9 +156,16 @@ const MIME_TYPES = {
 	EndNote: "application/x-endnote-refer,text/plain,*/*",
 	RIS: "application/x-research-info-systems,text/plain,*/*",
 	BibTeX: "application/x-bibtex,text/plain,*/*",
+	MARCXML: "application/xml,text/xml,text/plain,*/*",
 };
 
 function commonItemDoneHandler(obj, item) { // eslint-disable-line: no-unused
+	if (item.place) {
+		item.place = item.place.replace(/\[[^[]+\]/, '').replace(/\[|\]/g, "");
+	}
+	if (item.publisher) {
+		item.publisher = ZU.unescapeHTML(item.publisher);
+	}
 	if (item.url && item.url.includes(', ')) {
 		item.url = item.url.split(', ')[0];
 	}
