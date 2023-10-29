@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-29 03:16:11"
+	"lastUpdated": "2023-10-29 04:33:39"
 }
 
 /*
@@ -79,10 +79,11 @@ function itemDisplayType(doc) {
 	// Build a "key" that concatenates the type-identifying class names (i.e.
 	// excluding things like "format" and "iconlabel" themselves, "label",
 	// "label-info"
+	const formatClasses = ["format", "format2", "iconlabel"];
 	let typeKeySet = new Set();
-	for (let span of mainBody.querySelectorAll(`span.format, span.iconlabel`)) {
+	for (let span of mainBody.querySelectorAll(formatClasses.map(s => `span.${s}`).join(","))) {
 		for (let className of span.classList) {
-			if (!["format", "iconlabel", "label", "label-info"].includes(className)) {
+			if (![...formatClasses, "label", "label-info"].includes(className)) {
 				typeKeySet.add(className);
 			}
 		}
@@ -129,23 +130,7 @@ function itemDisplayType(doc) {
 	return 'book';
 }
 
-// Some services, such as Nantilus, refuse the requests without an 'Accept:'
-// header. Without it, the request sent from Scaffold will simply timeout. I
-// haven't checked if _any_ value would make it work, but we attempt to send
-// the right value.
-const MIME_TYPES = {
-	MARC: "application/MARC,*/*",
-	EndNote: "application/x-endnote-refer,text/plain,*/*",
-	RIS: "application/x-research-info-systems,text/plain,*/*",
-	BibTeX: "application/x-bibtex,text/plain,*/*",
-};
-
-async function scrape(url, inputFormat, libraryCatalog) {
-	let cleanURL = url.replace(/[#?].*$/, '').replace(/\/$/, '');
-	let data = await requestText(
-		`${cleanURL}/Export?style=${inputFormat}`,
-		{ headers: { Referer: url, Accept: MIME_TYPES[inputFormat] } },
-	);
+async function scrapeContent(data, libraryCatalog) {
 	if (typeof exports.inputPreprocessor === "function") {
 		data = exports.inputPreprocessor(data);
 	}
@@ -157,9 +142,22 @@ async function scrape(url, inputFormat, libraryCatalog) {
 	translate.setString(data);
 	translate.setHandler("itemDone", (obj, item) => item.libraryCatalog = libraryCatalog);
 	translate.setHandler("itemDone", commonItemDoneHandler);
-	await translate.getTranslators();
+	if (!(await translate.getTranslators()).length) {
+		throw new Error("No import translator found for input; invalid data for given format?");
+	}
 	await translate.translate();
 }
+
+// Some services, such as Nantilus, refuse the requests without an 'Accept:'
+// header. Without it, the request sent from Scaffold will simply timeout. I
+// haven't checked if _any_ value would make it work, but we attempt to send
+// the right value.
+const MIME_TYPES = {
+	MARC: "application/MARC,*/*",
+	EndNote: "application/x-endnote-refer,text/plain,*/*",
+	RIS: "application/x-research-info-systems,text/plain,*/*",
+	BibTeX: "application/x-bibtex,text/plain,*/*",
+};
 
 function commonItemDoneHandler(obj, item) { // eslint-disable-line: no-unused
 	if (item.url && item.url.includes(', ')) {
@@ -191,7 +189,8 @@ function getSearchResults(doc, checkOnly) {
 	return found && items;
 }
 
-// Hard-coded "best input type" for particular domains
+// Hard-coded default initial ("best") input type for particular domains
+// This may even include formats not shown as supported by the site.
 // FIXME: This is for use during development and testing; once finished we
 // should consider moving the domain-specific handling to their own translators
 // calling this one.
@@ -199,33 +198,16 @@ function snoopInputFormat(domain) {
 	if (/\.wellesley\.edu$/.test(domain)) {
 		return "RIS";
 	}
-	if ("ixtheo.de" === domain) {
-		return "MARC"; // not shown in the web app, but supported nonetheless
-	}
-	if (/\.aut\.ac\.nz$/.test(domain)) {
-		return "MARC"; // not shown in the web app, but supported nonetheless
+	if ("bdtd.ibict.br" === domain) {
+		return "EndNote";
 	}
 	return null;
 }
 
-function getSupportedFormat(doc) {
-	// in descending order of "generally being the better one most of the time"
-	const supportedFormats = ['MARC', 'EndNote', 'RIS', 'BibTeX'];
-	let format = exports.inputFormat;
-	if (format && !supportedFormats.includes(format)) {
-		Z.debug(`Chosen format ${format} not one of ${supportedFormats}; ignored`);
-		format = null;
-	}
-	// FIXME: For development only
-	if (!format) format = snoopInputFormat(new URL(doc.location.href).hostname);
-	if (format) return format;
-
-	for (format of supportedFormats) {
-		if (doc.querySelector(`a[href*="/Export?style=${format}"]`)) {
-			return format;
-		}
-	}
-	return null;
+// Get the export formats advertised by the site itself that are supported
+function getAdvertisedFormats(doc) {
+	return ['MARC', 'EndNote', 'RIS', 'BibTeX']
+		.filter(format => doc.querySelector(`a[href$="/Export?style=${format}"]`));
 }
 
 function hasMultiple(doc, url) {
@@ -233,7 +215,7 @@ function hasMultiple(doc, url) {
 }
 
 function detectWeb(doc, url) {
-	if (url.includes('/Record/') && getSupportedFormat(doc)) {
+	if (url.includes('/Record/')) {
 		return itemDisplayType(doc);
 	}
 	else if (hasMultiple(doc, url)) {
@@ -248,28 +230,68 @@ async function doWeb(doc, url) {
 	// display; the real itemType will be set by the imported file. Avoid
 	// having to go that path when we just use detectWeb() in doWeb() to check
 	// if we're dealing with a multiple scraping or not
-	if (hasMultiple(doc, url)) {
-		let items = await Zotero.selectItems(getSearchResults(doc, false));
-		if (!items) return;
-		let urls = Object.keys(items);
-
-		let format = getSupportedFormat(doc) || getSupportedFormat(await requestDocument(urls[0]));
-		if (!format) throw new Error("Cannot determine input format (multiple)");
-		Z.debug(`Selected format: ${format}`);
-
-		if (format === exports.inputFormat && exports.bulkImport && urls.length >= 5) {
-			// TODO: do bulk import
-		}
-
-		for (let url of urls) {
-			await scrape(url, format, libraryCatalog);
-		}
+	let urls;
+	if (!hasMultiple(doc, url)) {
+		urls = [url];
 	}
 	else {
-		let format = getSupportedFormat(doc);
-		if (!format) throw new Error("Cannot determine input format (single)");
-		Z.debug(`Selected format: ${format}`);
-		await scrape(url, format, libraryCatalog);
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		urls = Object.keys(items);
+	}
+
+	const initialFormat = exports.inputFormat
+		|| snoopInputFormat(new URL(doc.location.href).hostname)
+		|| "MARC";
+	let format = initialFormat;
+	let fallbackFormats = null;
+
+	let itemURL;
+	while ((itemURL = urls.shift())) {
+		Z.debug(`Scraping URL ${itemURL} using format ${format}`);
+		let cleanURL = itemURL.replace(/[#?].*$/, '').replace(/\/$/, '');
+		let data;
+		try {
+			data = await requestText(
+				`${cleanURL}/Export?style=${format}`,
+				{ headers: { Referer: itemURL, Accept: MIME_TYPES[format] } },
+			);
+			await scrapeContent(data, libraryCatalog);
+		}
+		catch (err) {
+			Z.debug(`Input format ${format} not supported`);
+			Z.debug(`The error was: ${err}`);
+			// Initialize fallback formats
+			if (!fallbackFormats) {
+				if (exports.inputFormat) {
+					Z.debug(`Input format was set manually; ignore any fallbacks`);
+					fallbackFormats = [];
+				}
+				else {
+					// If we're scraping single, get formats from current
+					// document; otherwise, inspect the document at the item
+					// URL we're trying to scrape.
+					fallbackFormats = getAdvertisedFormats(
+						hasMultiple(doc, url)
+							? await requestDocument(itemURL)
+							: doc);
+				}
+			}
+
+			// Use a fallback format, skipping dups of the initial format
+			do {
+				format = fallbackFormats.shift();
+			} while (format && format === initialFormat);
+
+			if (!format) { // no more formats to try
+				throw new Error(`No supported input format`, { cause: err });
+			}
+
+			Z.debug(`Fall back to format ${format}; yet to try: ${fallbackFormats}`);
+			// Retry this item with new input format
+			urls.unshift(itemURL);
+			continue;
+		}
 	}
 }
 
