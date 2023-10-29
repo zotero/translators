@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-29 04:33:39"
+	"lastUpdated": "2023-10-29 06:48:55"
 }
 
 /*
@@ -645,6 +645,33 @@ var testCases = [
 				"place": "Hki",
 				"publisher": "Tammi",
 				"shortTitle": "Suomi, Suomi",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://bdtd.ibict.br/vufind/Record/UNB_4a3348cb5eaabe2380fec54ebbbbeb9a",
+		"detectedItemType": "thesis",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Modelo de previsão de insolvência de concessionárias de ferrovias no Brasil",
+				"creators": [
+					{
+						"firstName": "João Marcelo",
+						"lastName": "Carneiro",
+						"creatorType": "author"
+					}
+				],
+				"date": "2011",
+				"abstractNote": "Dissertação (mestrado)—Universidade de Brasília, Faculdade de Tecnologia, Departamento de Engenharia Civil e Ambiental, 2011.",
+				"language": "por",
+				"libraryCatalog": "bdtd.ibict.br",
+				"url": "http://repositorio.unb.br/handle/10482/9493",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
