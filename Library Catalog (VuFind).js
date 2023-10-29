@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-29 02:23:24"
+	"lastUpdated": "2023-10-29 02:23:56"
 }
 
 /*
@@ -593,6 +593,34 @@ var testCases = [
 						"note": "Gesehen am 16.09.2021"
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.finna.fi/Record/piki.1362247",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Suomi, Suomi: Suomi, Suomi, vedenpirstoma synnyinmaani",
+				"creators": [
+					{
+						"firstName": "Aulikki",
+						"lastName": "Oksanen",
+						"creatorType": "author"
+					}
+				],
+				"date": "1987",
+				"ISBN": "9789513065805",
+				"bookTitle": "Tämän runon haluaisin kuulla",
+				"libraryCatalog": "www.finna.fi",
+				"place": "Hki",
+				"publisher": "Tammi",
+				"shortTitle": "Suomi, Suomi",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
