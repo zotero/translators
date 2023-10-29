@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-29 02:28:38"
+	"lastUpdated": "2023-10-29 03:16:11"
 }
 
 /*
@@ -196,8 +196,14 @@ function getSearchResults(doc, checkOnly) {
 // should consider moving the domain-specific handling to their own translators
 // calling this one.
 function snoopInputFormat(domain) {
-	if (/\bwellesley\.edu$/.test(domain)) {
+	if (/\.wellesley\.edu$/.test(domain)) {
 		return "RIS";
+	}
+	if ("ixtheo.de" === domain) {
+		return "MARC"; // not shown in the web app, but supported nonetheless
+	}
+	if (/\.aut\.ac\.nz$/.test(domain)) {
+		return "MARC"; // not shown in the web app, but supported nonetheless
 	}
 	return null;
 }
@@ -222,21 +228,27 @@ function getSupportedFormat(doc) {
 	return null;
 }
 
+function hasMultiple(doc, url) {
+	return url.includes('/Search/Results') && getSearchResults(doc, true);
+}
+
 function detectWeb(doc, url) {
-	if (url.includes('/Record')) {
-		if (getSupportedFormat(doc)) {
-			return itemDisplayType(doc);
-		}
+	if (url.includes('/Record/') && getSupportedFormat(doc)) {
+		return itemDisplayType(doc);
 	}
-	else if (url.includes('/Search/Results') && getSearchResults(doc, true)) {
-		return 'multiple';
+	else if (hasMultiple(doc, url)) {
+		return "multiple";
 	}
 	return false;
 }
 
 async function doWeb(doc, url) {
 	let libraryCatalog = new URL(url).hostname;
-	if (detectWeb(doc, url) == 'multiple') {
+	// The detection of item type is fairly non-trivial but it's only for
+	// display; the real itemType will be set by the imported file. Avoid
+	// having to go that path when we just use detectWeb() in doWeb() to check
+	// if we're dealing with a multiple scraping or not
+	if (hasMultiple(doc, url)) {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
 		let urls = Object.keys(items);
