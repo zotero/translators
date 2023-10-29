@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-29 02:23:56"
+	"lastUpdated": "2023-10-29 02:28:38"
 }
 
 /*
@@ -464,17 +464,20 @@ var testCases = [
 		"url": "https://libcat.wellesley.edu/Record/ebs14973473e",
 		"items": [
 			{
-				"itemType": "journalArticle",
-				"title": "Climate Change Operational Framework 2017–2030: Enhanced Actions for Low Greenhouse Gas Emissions and Climate-Resilient Development",
+				"itemType": "book",
+				"title": "Climate Change Operational Framework 2017-2030: Enhanced Actions for Low Greenhouse Gas Emissions and Climate-Resilient Development",
 				"creators": [
 					{
 						"lastName": "Asian Development Bank",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
+				"date": "2017",
+				"ISBN": "9789292579081",
 				"libraryCatalog": "libcat.wellesley.edu",
-				"publicationTitle": "ProQuest Ebook Central - Academic Complete",
-				"shortTitle": "Climate Change Operational Framework 2017–2030",
+				"publisher": "Asian Development Bank",
+				"shortTitle": "Climate Change Operational Framework 2017-2030",
 				"url": "https://ezproxy.wellesley.edu/login?url=https://ebookcentral.proquest.com/lib/well/detail.action?docID=5317390",
 				"attachments": [],
 				"tags": [],
@@ -567,32 +570,22 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://ixtheo.de/Record/1770813810",
+		"detectedItemType": "audioRecording",
 		"items": [
 			{
-				"itemType": "audioRecording",
+				"itemType": "book",
 				"title": "Diesseits von Eden: der Podcast der katholischen Fakultäten Österreichs & Südtirols",
 				"creators": [],
 				"date": "2021",
-				"callNumber": "230",
-				"label": "Studio Omega, Verein für Christliche Radioarbeit",
-				"language": "ger",
+				"language": "German",
 				"libraryCatalog": "ixtheo.de",
 				"place": "Wien",
+				"publisher": "Studio Omega, Verein für Christliche Radioarbeit",
 				"shortTitle": "Diesseits von Eden",
+				"url": "https://diesseits.theopodcast.at/home",
 				"attachments": [],
-				"tags": [
-					{
-						"tag": "Podcast"
-					},
-					{
-						"tag": "Zeitschrift"
-					}
-				],
-				"notes": [
-					{
-						"note": "Gesehen am 16.09.2021"
-					}
-				],
+				"tags": [],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
