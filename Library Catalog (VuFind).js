@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-29 08:14:01"
+	"lastUpdated": "2023-10-29 08:49:09"
 }
 
 /*
@@ -47,22 +47,14 @@
 /*
  * Options controlling the behaviour of this translator when called from
  * another translator:
- *   - bulkImport: boolean, whether to use the "bulk export" API to get a file
- *   containing all of the selected items in one request. Default false. Only
- *   takes effect when inputFormat is set and valid.
  *   - inputFormat: string, such as "MARC", "RIS", "EndNote", "BibTeX";
  *   preferred import format
- *   - inputPreprocessor: function string->string, transforming the input text
- *   before import. If it's a method, it should be properly bound before use.
- *   (Useful for working around know defects in the exported file)
  */
 
 var exports = {
 	doWeb: doWeb,
 	detectWeb: detectWeb,
-	bulkImport: false,
 	inputFormat: null,
-	inputPreprocessor: null,
 };
 
 /**
@@ -130,10 +122,6 @@ function itemDisplayType(doc) {
 }
 
 async function scrapeContent(data, libraryCatalog) {
-	if (typeof exports.inputPreprocessor === "function") {
-		data = exports.inputPreprocessor(data);
-	}
-
 	let translate = Z.loadTranslator("import");
 	translate.setHandler("translators", (obj, translators) => {
 		translate.setTranslator(translators);
