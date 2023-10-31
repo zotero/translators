@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-29 08:49:09"
+	"lastUpdated": "2023-10-31 05:02:35"
 }
 
 /*
@@ -53,7 +53,8 @@
 
 var exports = {
 	doWeb: doWeb,
-	detectWeb: detectWeb,
+	scrape: scrape,
+	libraryCatalog: null,
 	inputFormat: null,
 };
 
@@ -148,6 +149,25 @@ const MIME_TYPES = {
 };
 
 function commonItemDoneHandler(obj, item) { // eslint-disable-line: no-unused
+	// Normalize creators - cleanup mononyms; remove duplicates
+	// See e.g. https://bemis.marmot.org/Record/.b33973477 for duplicate
+	// authors and tags
+	let creatorKeyMapping = new Map();
+	for (let creator of item.creators) {
+		if (!creator.firstName || !creator.lastName) {
+			creator.fieldMode = 1;
+			creator.lastName = creator.lastName || creator.firstName;
+			delete creator.firstName;
+		}
+		creator.fieldMode = creator.fieldMode && 1;
+		if (!creator.fieldMode) {
+			creator = ZU.cleanAuthor(`${creator.lastName}, ${creator.firstName}`, creator.creatorType, true/* useComma */);
+		}
+		let key = `${(creator.lastName || "").toLowerCase()}\n${(creator.firstName || "").toLowerCase()}\n${creator.creatorType || "author"}\n${creator.fieldMode ? "1" : "0"}`;
+		creatorKeyMapping.set(key, creator);
+	}
+	item.creators = Array.from(creatorKeyMapping.values());
+
 	if (item.place) {
 		item.place = item.place.replace(/\[[^[]+\]/, '').replace(/\[|\]/g, "");
 	}
@@ -157,13 +177,16 @@ function commonItemDoneHandler(obj, item) { // eslint-disable-line: no-unused
 	if (item.url && item.url.includes(', ')) {
 		item.url = item.url.split(', ')[0];
 	}
-	// deduplicate tags
+	// deduplicate tags; for example:
+	// https://kirkes.finna.fi/Record/kirkes.252925
 	if (item.tags) {
-		let tagStrings = new Set();
+		let tagMap = new Map();
 		for (let tag of item.tags) {
-			tagStrings.add(typeof tag === "string" ? tag : tag.tag);
+			let tagString = typeof tag === "string" ? tag : tag.tag;
+			tagString = ZU.trimInternal(tagString);
+			tagMap.set(tagString.toLowerCase(), tagString);
 		}
-		item.tags = Array.from(tagStrings.values());
+		item.tags = Array.from(tagMap.values());
 	}
 
 	item.complete();
@@ -227,24 +250,25 @@ function detectWeb(doc, url) {
 }
 
 async function doWeb(doc, url) {
-	let libraryCatalog = new URL(url).hostname;
-	// The detection of item type is fairly non-trivial but it's only for
-	// display; the real itemType will be set by the imported file. Avoid
-	// having to go that path when we just use detectWeb() in doWeb() to check
-	// if we're dealing with a multiple scraping or not
-	let urls;
-	if (!hasMultiple(doc, url)) {
-		urls = [url];
-	}
-	else {
+	if (hasMultiple(doc, url)) {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
-		urls = Object.keys(items);
+		await scrape(Object.keys(items), doc);
 	}
+	else {
+		await scrape(url, doc);
+	}
+}
 
+async function scrape(urls, contextDoc) {
+	if (!Array.isArray(urls)) urls = [urls];
+
+	const contextDomain = new URL(contextDoc.location.href).hostname;
 	const initialFormat = exports.inputFormat
-		|| snoopInputFormat(new URL(doc.location.href).hostname)
+		|| snoopInputFormat(contextDomain)
 		|| "MARC";
+	let libraryCatalog = exports.libraryCatalog || contextDomain;
+
 	let format = initialFormat;
 	let fallbackFormats = null;
 
@@ -274,11 +298,10 @@ async function doWeb(doc, url) {
 					// document; otherwise, inspect the document at the item
 					// URL we're trying to scrape.
 					fallbackFormats = getAdvertisedFormats(
-						hasMultiple(doc, url)
-							? await requestDocument(itemURL)
-							: doc);
+						urls.length ? await requestDocument(itemURL) : contextDoc);
 				}
 			}
+			Z.debug(fallbackFormats);
 
 			// Use a fallback format, skipping dups of the initial format
 			do {
@@ -844,6 +867,242 @@ var testCases = [
 						"note": "Literaturverz. S. 209 - 248"
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kansalliskirjasto.finna.fi/Record/fikka.3295274",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Test pilot",
+				"creators": [
+					{
+						"firstName": "Leonard",
+						"lastName": "Sealey",
+						"creatorType": "author"
+					}
+				],
+				"date": "1977",
+				"ISBN": "9789511044376",
+				"callNumber": "Ga 1973- Ga 1973- Ga 1973-",
+				"language": "eng fin",
+				"libraryCatalog": "Finna",
+				"numPages": "16",
+				"place": "Helsingissä",
+				"publisher": "Otava",
+				"series": "Lively readers",
+				"seriesNumber": "4",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "Finnish vocabulary comp. by Anneli Aarikka"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kansalliskirjasto.finna.fi/Record/doria.10024_82096",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Goodrich \"High-test\" konehihnat",
+				"creators": [
+					{
+						"lastName": "Auto-Vulcano",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"language": "fin",
+				"libraryCatalog": "Finna",
+				"url": "http://www.doria.fi/handle/10024/82096",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Goodrich (tavaramerkki)"
+					},
+					{
+						"tag": "Moottoriajoneuvojen esitteet ja hinnastot"
+					},
+					{
+						"tag": "hinnastot"
+					},
+					{
+						"tag": "moottoriajoneuvot"
+					},
+					{
+						"tag": "tavaramerkit"
+					},
+					{
+						"tag": "tieliikenne"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kirkes.finna.fi/Record/kirkes.252925",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Suomen maatalouden historia: jälleenrakennuskaudesta EU-Suomeen. 3: Suurten muutosten aika",
+				"creators": [
+					{
+						"firstName": "Pirjo",
+						"lastName": "Markkola",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Viljo",
+						"lastName": "Rasila",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2004",
+				"ISBN": "9789517464833 9789517464802",
+				"abstractNote": "Summary: Overwiew of tghe history of finnish agriculture - from prehistory to the 21st century / Viljo Rasila",
+				"callNumber": "67.09",
+				"language": "fin",
+				"libraryCatalog": "Finna",
+				"numPages": "518",
+				"place": "Helsinki",
+				"publisher": "Suomalaisen Kirjallisuuden Seura",
+				"series": "Suomalaisen Kirjallisuuden Seuran toimituksia",
+				"seriesNumber": "914:3",
+				"shortTitle": "Suomen maatalouden historia",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "1870-1950-luku"
+					},
+					{
+						"tag": "1940-2000-luku"
+					},
+					{
+						"tag": "Euroopan Unioni"
+					},
+					{
+						"tag": "Euroopan unioni"
+					},
+					{
+						"tag": "Eurooppa"
+					},
+					{
+						"tag": "Suomi"
+					},
+					{
+						"tag": "asutustoiminta"
+					},
+					{
+						"tag": "historia"
+					},
+					{
+						"tag": "integraatio"
+					},
+					{
+						"tag": "jälleenrakentaminen"
+					},
+					{
+						"tag": "karjatalous"
+					},
+					{
+						"tag": "kasvu"
+					},
+					{
+						"tag": "luonnonmukainen tuotanto"
+					},
+					{
+						"tag": "maaltamuutto"
+					},
+					{
+						"tag": "maaseutu"
+					},
+					{
+						"tag": "maatalous"
+					},
+					{
+						"tag": "maatalous"
+					},
+					{
+						"tag": "maatalouspolitiikka"
+					},
+					{
+						"tag": "maatalousteknologia"
+					},
+					{
+						"tag": "maataloustuotanto"
+					},
+					{
+						"tag": "maataloustyö"
+					},
+					{
+						"tag": "osuustoiminta"
+					},
+					{
+						"tag": "rakennemuutos"
+					},
+					{
+						"tag": "taloushistoria"
+					},
+					{
+						"tag": "tukimuodot"
+					}
+				],
+				"notes": [
+					{
+						"note": "S. 490-507: Overview of the Finnish agriculture / Viljo Rasila"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://blanka.finna.fi/Search/Results?sort=main_date_str+desc&limit=0&filter%5B%5D=first_indexed%3A%22%5BNOW-1MONTHS%2FDAY+TO+%2A%5D%22&filter%5B%5D=%7Eformat%3A%220%2FBook%2F%22&filter%5B%5D=%7Eformat%3A%220%2FOther%2F%22&filter%5B%5D=%7Eformat%3A%220%2FSound%2F%22&filter%5B%5D=%7Eformat%3A%220%2FVideo%2F%22&filter%5B%5D=%7Eformat%3A%220%2FMusicalScore%2F%22&type=AllFields",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://finna.fi/Search/Results?lookfor=test&type=AllFields",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://ixtheo.de/Record/1796986143",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Updated Christus Victor: A Neurotheological Perspective",
+				"creators": [
+					{
+						"firstName": "Flavius D.",
+						"lastName": "Raslau",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021",
+				"ISSN": "0733-4273",
+				"abstractNote": "Competing models have been proposed to explain Christ's atonement and its significance. Each model proffers its own rational merits, but embodied experiences lead us to intuit differently the plausibility of various metaphors by which we then reason about the atonement. An updated Christus Victor account from a neurotheological perspective intends to draw out stronger intuitions toward its plausibility by leaning into the sciences of unconscious cognition, epigenetics, embodiment, and dynamical systems theory, as well as environmental, technological, and relational influences. These unveil our vulnerability to forces outside our conscious control and explain not only our deformation (enslavement), but also the pathway toward transformation (victory), which resonates with Christus Victor motifs. Theological reflections are offered toward greater embodied and ecclesial integration of topics such as sanctification, sin, and salvation. In short, a neurotheological perspective of Christus Victor has the resources to complement a modern atonement theology that is more consonant with the psychology of lived experience",
+				"callNumber": "1",
+				"language": "eng",
+				"libraryCatalog": "ixtheo.de",
+				"pages": "329-343",
+				"publicationTitle": "Journal of psychology and christianity",
+				"shortTitle": "Updated Christus Victor",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
