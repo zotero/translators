@@ -65,7 +65,7 @@ function itemDisplayType(doc) {
 	let container = doc.querySelector("#record-details-column, .record");
 	if (!container) {
 		Z.debug("VuFind: selector for info container unknown");
-		return false;
+		container = doc.body; // fallback
 	}
 	// Build a "key" that concatenates the type-identifying class names (i.e.
 	// excluding things like "format" and "iconlabel" themselves, "label",
