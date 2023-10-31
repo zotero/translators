@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-31 09:11:35"
+	"lastUpdated": "2023-10-31 15:17:06"
 }
 
 /*
@@ -186,7 +186,7 @@ async function scrapeContent(data, options) {
 	});
 	translate.setHandler("itemDone", commonItemDoneHandler);
 	if (!(await translate.getTranslators()).length) {
-		throw new Error("No import translator found for input; invalid data for given format?");
+		throw new Error(`No import translator found for input; invalid data for given format? (data string length ${data.length}, first 16 characters ${data.slice(0, 16)}`);
 	}
 	await translate.translate();
 }
@@ -348,7 +348,7 @@ async function scrapeURLs(urls, contextDoc) {
 			await scrapeContent(data, { libraryCatalog, itemType });
 		}
 		catch (err) {
-			Z.debug(`Input format ${format} not supported`);
+			Z.debug(`Translation with input format ${format} failed`);
 			Z.debug(`The error was: ${err}`);
 			// Initialize fallback formats
 			if (!fallbackFormats) {
@@ -364,7 +364,6 @@ async function scrapeURLs(urls, contextDoc) {
 						urls.length ? await requestDocument(itemURL) : contextDoc);
 				}
 			}
-			Z.debug(fallbackFormats);
 
 			// Use a fallback format, skipping dups of the initial format
 			do {
@@ -456,6 +455,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.finna.fi/Record/deutschebibliothek.37415",
+		"detectedItemType": "bookSection",
 		"items": [
 			{
 				"itemType": "book",
@@ -946,13 +946,18 @@ var testCases = [
 						"firstName": "Leonard",
 						"lastName": "Sealey",
 						"creatorType": "author"
+					},
+					{
+						"lastName": "Otava, kustannusosakeyhtiö",
+						"creatorType": "contributor",
+						"fieldMode": 1
 					}
 				],
 				"date": "1977",
 				"ISBN": "9789511044376",
 				"callNumber": "Ga 1973- Ga 1973- Ga 1973-",
 				"language": "eng fin",
-				"libraryCatalog": "Finna",
+				"libraryCatalog": "kansalliskirjasto.finna.fi",
 				"numPages": "16",
 				"place": "Helsingissä",
 				"publisher": "Otava",
@@ -983,8 +988,9 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
+				"abstractNote": "kuv., 10 x 15 cm",
 				"language": "fin",
-				"libraryCatalog": "Finna",
+				"libraryCatalog": "kansalliskirjasto.finna.fi",
 				"url": "http://www.doria.fi/handle/10024/82096",
 				"attachments": [],
 				"tags": [
@@ -1036,7 +1042,7 @@ var testCases = [
 				"abstractNote": "Summary: Overwiew of tghe history of finnish agriculture - from prehistory to the 21st century / Viljo Rasila",
 				"callNumber": "67.09",
 				"language": "fin",
-				"libraryCatalog": "Finna",
+				"libraryCatalog": "kirkes.finna.fi",
 				"numPages": "518",
 				"place": "Helsinki",
 				"publisher": "Suomalaisen Kirjallisuuden Seura",
@@ -1053,9 +1059,6 @@ var testCases = [
 					},
 					{
 						"tag": "Euroopan Unioni"
-					},
-					{
-						"tag": "Euroopan unioni"
 					},
 					{
 						"tag": "Eurooppa"
@@ -1089,9 +1092,6 @@ var testCases = [
 					},
 					{
 						"tag": "maaseutu"
-					},
-					{
-						"tag": "maatalous"
 					},
 					{
 						"tag": "maatalous"
