@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-31 05:02:35"
+	"lastUpdated": "2023-10-31 09:11:35"
 }
 
 /*
@@ -47,13 +47,65 @@
 /*
  * Options controlling the behaviour of this translator when called from
  * another translator:
+ *   - itemType: string, the Zotero item type that overrides the
+ *   automaticlly-determined type
+ *   - libraryCatalog: string, to use as the libraryCatalog property of the
+ *   generated items
  *   - inputFormat: string, such as "MARC", "RIS", "EndNote", "BibTeX";
  *   preferred import format
+ *
+ * The functions
+ *   - doWeb() (relying on generic detection and getSearchResults internal to
+ *   this translator) and
+ *   - scrapeURLs() (no dependence on detection and getSearchResults)
+ * are exported for use.
+ *
+ * NOTE! The scrapeURLs() function is called as
+ *     async scrapeURLs(urls, contextDoc)
+ * where urls is either a URL string or an array of URL strings (one for each
+ * input page) and contextDoc is the Document object that is the document on
+ * which the translation is initiated (i.e. it is the `doc` object on which
+ * your own translator's doWeb(doc, url) is called). The contextDoc is used for
+ * two purposes: to obtain the site's hostname (for setting site-specific
+ * default input type for some sites and for use as default libraryCatalog if
+ * none explicitly given), and to extract a list of site-available export
+ * formats to use as fallback input formats.
+ *
+ * NOTE: This choice of the function name scrapeURLs and its signature are
+ * deliberate, because it operates differently from most web translators'
+ * scrape() function that scrapes a single document. In fact, this scrapeURLs()
+ * function tries to throw if it detects such a call.
  */
+
+// HOW TO USE:
+//
+// 1. You can use the standard template `async doWeb(doc, url)` function as
+// your doWeb() and load this translator in your own web translator's scrape()
+// function:
+
+//		let translator = Zotero.loadTranslator("web");
+//		translator.setTranslator("0b7cbf89-c5d8-49c0-99b3-1854e661ba37"); // VuFind
+//		translator.setDocument(doc); // necessary for resolving url
+//		// Optional custom post-processing handler
+//		translator.setHandler("itemDone", function (obj, item) { ... });
+//		let vuf = await translator.getTranslatorObject();
+//		vuf.itemType = ...; // optinal
+//		vuf.libraryCatalog = ...; // optinal
+//		vuf.inputFormat = ...; // optinal, e.g. "MARC" (default), "RIS", etc.
+//		await vuf.doWeb(doc, url);
+
+// 2. It is usually not necessary to load each input URL as document using
+// requestDocument and pass the document individually to your own scrape()
+// function. By using the VuFind translator's underlying scrapeURLs() function
+// directly, you can also make use of your own detectWeb() (and
+// getSearchResults() or its equivalent), while saving considerable overhead.
+// For an example, see 'Library Catalog (Pika).js'.
 
 var exports = {
 	doWeb: doWeb,
-	scrape: scrape,
+	detectWeb: detectWeb,
+	scrapeURLs: scrapeURLs,
+	itemType: null,
 	libraryCatalog: null,
 	inputFormat: null,
 };
@@ -122,13 +174,16 @@ function itemDisplayType(doc) {
 	return 'book';
 }
 
-async function scrapeContent(data, libraryCatalog) {
+async function scrapeContent(data, options) {
 	let translate = Z.loadTranslator("import");
 	translate.setHandler("translators", (obj, translators) => {
 		translate.setTranslator(translators);
 	});
 	translate.setString(data);
-	translate.setHandler("itemDone", (obj, item) => item.libraryCatalog = libraryCatalog);
+	translate.setHandler("itemDone", (obj, item) => {
+		if (options.itemType) item.itemType = options.itemType;
+		item.libraryCatalog = options.libraryCatalog;
+	});
 	translate.setHandler("itemDone", commonItemDoneHandler);
 	if (!(await translate.getTranslators()).length) {
 		throw new Error("No import translator found for input; invalid data for given format?");
@@ -253,14 +308,19 @@ async function doWeb(doc, url) {
 	if (hasMultiple(doc, url)) {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
-		await scrape(Object.keys(items), doc);
+		await scrapeURLs(Object.keys(items), doc);
 	}
 	else {
-		await scrape(url, doc);
+		await scrapeURLs(url, doc);
 	}
 }
 
-async function scrape(urls, contextDoc) {
+async function scrapeURLs(urls, contextDoc) {
+	// Try to throw if the caller calls this scrapeURLs function like the
+	// conventional scrape() function ubiquitous in web translators
+	if (urls instanceof Document) {
+		throw new TypeError("VuFind's scrapeURLs() function should be called as scrapeURLs(string | string[], Document)");
+	}
 	if (!Array.isArray(urls)) urls = [urls];
 
 	const contextDomain = new URL(contextDoc.location.href).hostname;
@@ -268,6 +328,9 @@ async function scrape(urls, contextDoc) {
 		|| snoopInputFormat(contextDomain)
 		|| "MARC";
 	let libraryCatalog = exports.libraryCatalog || contextDomain;
+	let itemType = exports.itemType && ZU.itemTypeExists(exports.itemType)
+		? exports.itemType
+		: null;
 
 	let format = initialFormat;
 	let fallbackFormats = null;
@@ -282,7 +345,7 @@ async function scrape(urls, contextDoc) {
 				`${cleanURL}/Export?style=${format}`,
 				{ headers: { Referer: itemURL, Accept: MIME_TYPES[format] } },
 			);
-			await scrapeContent(data, libraryCatalog);
+			await scrapeContent(data, { libraryCatalog, itemType });
 		}
 		catch (err) {
 			Z.debug(`Input format ${format} not supported`);
