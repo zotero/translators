@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-31 09:11:51"
+	"lastUpdated": "2023-10-31 10:50:38"
 }
 
 /*
@@ -247,12 +247,37 @@ var testCases = [
 				],
 				"date": "2021",
 				"ISBN": "9781538716670",
-				"callNumber": "813.6",
+				"abstractNote": "\"When it comes to personal training, Taylor Powell kicks serious butt. Unfortunately, her bills are piling up, rent is due, and the money situation is dire. Taylor needs more than the support of her new best friends, Samiah and London. She needs a miracle. And Jamar Dixon might just be it. The oh-so-fine former pro athlete wants back into the game, and he wants Taylor to train him. There's just one catch -- no one can know what they're doing. But when they're accidentally outed as a couple, Taylor's plan is turned completely upside down. Is Jamar just playing to win . . . or is he playing for keeps?\"--",
+				"callNumber": "PS3618.O346 D38 2021",
+				"edition": "First edition",
 				"libraryCatalog": "Libraries Online Inc.",
-				"numPages": "367",
+				"numPages": "370",
+				"place": "New York",
 				"publisher": "Forever",
 				"attachments": [],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "African Americans"
+					},
+					{
+						"tag": "Fiction"
+					},
+					{
+						"tag": "Football players"
+					},
+					{
+						"tag": "Man-woman relationships"
+					},
+					{
+						"tag": "Novels"
+					},
+					{
+						"tag": "Personal trainers"
+					},
+					{
+						"tag": "Romance fiction"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
