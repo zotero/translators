@@ -129,7 +129,8 @@ async function scrape(doc, url = doc.location.href) {
 			item.section = "";
 		}
 
-		// title (headline); EM sometimes gives headline that contains more noise
+		// title (headline); EM sometimes gives headline that contains more
+		// noise
 		if (ld.headline) {
 			item.title = ld.headline.replace(/ [-|] .+$/, "");
 		}
@@ -141,7 +142,7 @@ async function scrape(doc, url = doc.location.href) {
 		}
 		else {
 			let lede = text(doc, "main header h1 + p");
-			if (!lede) {
+			if (lede) {
 				item.abstractNote = lede;
 			}
 		}
