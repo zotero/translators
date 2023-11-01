@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-11-01 06:26:04"
+	"lastUpdated": "2023-11-01 07:14:14"
 }
 
 /**
@@ -37,6 +37,9 @@ function detectWeb(doc, url) {
 	}
 	if (/\/opinions?\/letters\//.test(url)) {
 		return "letter";
+	}
+	if (/-cartoon\/|\/opinions\/caricatures\//.test(url)) {
+		return "artwork";
 	}
 	let ld = getLD(doc);
 	if (ld && ld["@type"] === "NewsArticle") {
@@ -521,6 +524,37 @@ var testCases = [
 				"letterType": "מכתב לעורך",
 				"libraryCatalog": "Haaretz",
 				"url": "https://www.haaretz.co.il/opinions/letters/2023-10-31/ty-article-opinion/.premium/0000018b-85eb-d805-a98f-b5fb8d4e0000",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.haaretz.co.il/opinions/caricatures/2023-10-18/ty-article-opinion/.premium/0000018b-3d97-dd29-a3df-fdf735970000",
+		"items": [
+			{
+				"itemType": "artwork",
+				"title": "קריקטורה יומית",
+				"creators": [
+					{
+						"firstName": "ערן",
+						"lastName": "וולקובסקי",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-10-18",
+				"abstractNote": "הארץ",
+				"language": "he",
+				"libraryCatalog": "Haaretz",
+				"url": "https://www.haaretz.co.il/opinions/caricatures/2023-10-18/ty-article-opinion/.premium/0000018b-3d97-dd29-a3df-fdf735970000",
 				"attachments": [
 					{
 						"title": "Snapshot",
