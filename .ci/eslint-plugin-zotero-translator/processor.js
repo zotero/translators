@@ -177,6 +177,7 @@ module.exports = {
 			const header = parsed.header;
 			if (header.text) {
 				messages = messages.filter((m) => {
+					if (!m.ruleId) return true
 					if (m.ruleId.startsWith('zotero-translator/header') && m.line > header.end) return false;
 					switch (m.ruleId) {
 						case 'no-unused-expressions':
@@ -206,6 +207,7 @@ module.exports = {
 			const testcases = parsed.testcases;
 			if (testcases && testcases.text) {
 				messages = messages.filter((m) => {
+					if (!m.ruleId) return true
 					if (m.ruleId.startsWith('zotero-translator/test-cases') && m.line < testcases.start) return false;
 
 					switch (m.ruleId) {
