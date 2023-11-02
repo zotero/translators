@@ -64,6 +64,7 @@ function doImport() {
 		case 'pbook':
 		case 'print_book':
 		case 'books':
+		case 'conference_proceeding':
 		case 'score':
 		case 'journal':		// as long as we don't have a periodical item type;
 			item.itemType = "book";
@@ -111,9 +112,6 @@ function doImport() {
 			break;
 		case 'newspaper_article':
 			item.itemType = "newspaperArticle";
-			break;
-		case 'conference_proceeding':
-			item.itemType = "conferencePaper";
 			break;
 		default:
 			item.itemType = "document";
