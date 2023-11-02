@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const { parsed } = require('../processor').support;
+const { parsed } = require('../../processor').support;
 
 module.exports = {
 	meta: {

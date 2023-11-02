@@ -1,6 +1,6 @@
 'use strict';
 
-const { parsed } = require('../processor').support;
+const { parsed } = require('../../processor').support;
 const findRoot = require("find-root");
 const fs = require('fs');
 const path = require('path');

@@ -1,6 +1,6 @@
 'use strict';
 
-const { parsed, header } = require('../processor').support;
+const { parsed, header } = require('../../processor').support;
 const fs = require('fs');
 
 module.exports = {

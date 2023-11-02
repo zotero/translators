@@ -46,11 +46,10 @@ async function serveCode(req, res) {
 	}
 }
 
-async function requestListener(req, res) { // eslint-disable-line consistent-return
+async function requestListener(req, res) {
 	if (req.url.startsWith('/metadata')) {
 		return serveMetadata(req, res);
-	}
-	else if (req.url.startsWith('/code')) {
+	} else if (req.url.startsWith('/code')) {
 		return serveCode(req, res);
 	}
 	res.writeHead(404);
@@ -58,14 +57,14 @@ async function requestListener(req, res) { // eslint-disable-line consistent-ret
 }
 
 module.exports = {
-	serve: async function () {
+	serve: async function() {
 		await loadTranslators();
 		server = http.createServer(requestListener);
 		server.listen(port, host, () => {
 			console.log(`Translator server is running on http://${host}:${port}`);
 		});
 	},
-	stopServing: function () {
+	stopServing: function() {
 		server.close();
 	},
 	filenameToTranslator,

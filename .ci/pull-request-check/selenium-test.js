@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-/* eslint-disable no-process-env, no-process-exit */
-
 const path = require('path');
 const process = require('process');
 const selenium = require('selenium-webdriver');
@@ -41,7 +39,7 @@ async function getTranslatorsToTest() {
 	}
 	if (tooManyTranslators) {
 		console.log(
-			`Over 10 translators need to be tested, but this will take too long
+`Over 10 translators need to be tested, but this will take too long
 and timeout the CI environment. Truncating to 10.
 
 This is likely to happen when changing Embedded Metadata which is
@@ -49,7 +47,7 @@ loaded by pretty much every other translator or when a PR contains
 a lot of changed translators.
 
 You may want to consider adding '[ci skip]' in the commit message.`
-		);
+		)
 	}
 	console.log(`Will run tests for translators ${JSON.stringify(Array.from(toTestTranslatorNames))}`);
 	return Array.from(toTestTranslatorIDs);
@@ -63,9 +61,9 @@ function report(results) {
 		let padding = 2;
 		let output = translatorResults.message.split("\n");
 		for (let line of output) {
-			if (line.match(/^TranslatorTester: Running [^T]*Test [0-9]*$/)
-				|| line.match(/^TranslatorTester: Running [0-9]* tests for .*$/)) {
-				console.log("  ".repeat(padding - 1) + chalk.bgCyan(chalk.black(line)));
+			if (line.match(/^TranslatorTester: Running [^T]*Test [0-9]*$/) ||
+				line.match(/^TranslatorTester: Running [0-9]* tests for .*$/)) {
+				console.log("  ".repeat(padding-1) + chalk.bgCyan(chalk.black(line)));
 			}
 			else if (line.match(/^-/)) {
 				console.log(chalk.red("-" + "  ".repeat(padding) + line.substr(1)));
@@ -91,64 +89,62 @@ function report(results) {
 		console.log("\n");
 	}
 
-	return allPassed;
+	return allPassed
 }
 
 var allPassed = false;
 
-(async function () {
-let driver;
-try {
-	translatorServer.serve();
-	require('chromedriver');
-	let chrome = require('selenium-webdriver/chrome');
-	let options = new chrome.Options();
-	options.addArguments(`load-extension=${chromeExtensionDir}`);
-	if ('BROWSER_EXECUTABLE' in process.env) {
-		options.setChromeBinaryPath(process.env.BROWSER_EXECUTABLE);
-	}
+(async function() {
+	let driver;
+	try {
+		translatorServer.serve();
+		require('chromedriver');
+		let chrome = require('selenium-webdriver/chrome');
+		let options = new chrome.Options();
+		options.addArguments(`load-extension=${chromeExtensionDir}`);
+		if ('BROWSER_EXECUTABLE' in process.env) {
+			options.setChromeBinaryPath(process.env['BROWSER_EXECUTABLE']);
+		}
 
-	driver = new selenium.Builder()
+		driver = new selenium.Builder()
 			.forBrowser('chrome')
 			.setChromeOptions(options)
 			.build();
 
-	// No API to retrieve extension ID. Hacks, sigh.
-	await driver.get("chrome://system/");
-	await driver.wait(until.elementLocated({ id: 'btn-extensions-value' }), 60 * 1000);
-	// Chrome 89+ has the extension list expanded by default
-	try {
-		let extBtn = await driver.findElement({ css: '#btn-extensions-value' });
-		await extBtn.click();
-	}
-	catch (e) {}
-	let contentElem = await driver.findElement({ css: '#content' });
-	let text = await contentElem.getText();
-	let extId = text.match(/([^\s]*) : Zotero Connector/)[1];
+		// No API to retrieve extension ID. Hacks, sigh.
+		await driver.get("chrome://system/");
+		await driver.wait(until.elementLocated({id: 'btn-extensions-value'}), 60*1000);
+		// Chrome 89+ has the extension list expanded by default
+		try {
+			let extBtn = await driver.findElement({css: '#btn-extensions-value'});
+			await extBtn.click();
+		} catch (e) {}
+		let contentElem = await driver.findElement({css: '#content'});
+		let text = await contentElem.getText();
+		let extId = text.match(/([^\s]*) : Zotero Connector/)[1];
 
-	// We got the extension ID and test URL, let's test
-	const translatorsToTest = await getTranslatorsToTest();
-	let testUrl = `chrome-extension://${extId}/tools/testTranslators/testTranslators.html#translators=${translatorsToTest.join(',')}`;
-	await new Promise(resolve => setTimeout(() => resolve(driver.get(testUrl)), 500));
-	await driver.wait(until.elementLocated({ id: 'translator-tests-complete' }), 30 * 60 * 1000);
-	const testResults = await driver.executeScript('return window.seleniumOutput');
+		// We got the extension ID and test URL, let's test
+		const translatorsToTest = await getTranslatorsToTest();
+		let testUrl = `chrome-extension://${extId}/tools/testTranslators/testTranslators.html#translators=${translatorsToTest.join(',')}`;
+		await new Promise((resolve) => setTimeout(() => resolve(driver.get(testUrl)), 500));
+		await driver.wait(until.elementLocated({id: 'translator-tests-complete'}), 30*60*1000);
+		testResults = await driver.executeScript('return window.seleniumOutput');
 
-	allPassed = report(testResults);
-}
-catch (e) {
-	console.error(e);
-}
-finally {
-	if (!KEEP_BROWSER_OPEN) {
-		await driver.quit();
+		allPassed = report(testResults);
 	}
-	translatorServer.stopServing();
-	if (allPassed) {
-		console.log(chalk.green("All translator tests passed"));
+	catch (e) {
+		console.error(e);
 	}
-	else {
-		console.log(chalk.red("Some translator tests failed"));
+	finally {
+		if (!KEEP_BROWSER_OPEN) {
+			await driver.quit();
+		}
+		translatorServer.stopServing();
+		if (allPassed) {
+			console.log(chalk.green("All translator tests passed"));
+		} else {
+			console.log(chalk.red("Some translator tests failed"));
+		}
+		process.exit(allPassed ? 0 : 1);
 	}
-	process.exit(allPassed ? 0 : 1);
-}
 })();

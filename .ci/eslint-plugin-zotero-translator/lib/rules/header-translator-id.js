@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const uuid = require('uuid/v4');
 
-const { repo, parsed, header, IDconflict } = require('../processor').support;
+const { repo, parsed, header, IDconflict } = require('../../processor').support;
 
 const deleted = new Set(
 	fs.readFileSync(path.join(repo, 'deleted.txt'), 'utf-8')

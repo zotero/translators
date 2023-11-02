@@ -1,6 +1,6 @@
 'use strict';
 
-const { parsed } = require('../processor').support;
+const { parsed } = require('../../processor').support;
 
 module.exports = {
 	meta: {
