@@ -20,7 +20,6 @@ module.exports = {
 					const m = line.match(/for each *\(/);
 					if (m) {
 						context.report({
-							node,
 							message: "Deprecated JavaScript 'for each' statement",
 							loc: { start: { line: lineno, column: line.indexOf(m[0]) + 1 } },
 						});
