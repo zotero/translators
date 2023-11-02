@@ -16,41 +16,41 @@ module.exports = {
 	create: function (context) {
 		return {
 			Program: function (node) {
-        const filename = context.getFilename();
-        const translator = parsed(filename);
-        if (!translator || !translator.header.fields) return; // regular js source, or header is invalid
+				const filename = context.getFilename();
+				const translator = parsed(filename);
+				if (!translator || !translator.header.fields) return; // regular js source, or header is invalid
         
-        const lastUpdated = header(node).properties.find(p => p.key.value === 'lastUpdated');
+				const lastUpdated = header(node).properties.find(p => p.key.value === 'lastUpdated');
         
 				if (!lastUpdated) {
 					context.report({
 						loc: { start: { line: 1, column: 1 } },
 						message: 'Header needs lastUpdated field',
 					});
-          return
+					return;
 				}
 
-        const format = date => date.toISOString().replace('T', ' ').replace(/\..*/, '');
+				const format = date => date.toISOString().replace('T', ' ').replace(/\..*/, '');
 				const now = format(new Date());
-        const fix = (fixer)  => fixer.replaceText(lastUpdated.value, `"${now}"`);
+				const fix = fixer => fixer.replaceText(lastUpdated.value, `"${now}"`);
 
 				if (typeof lastUpdated.value.value !== 'string' || !lastUpdated.value.value.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
 					context.report({
 						node: lastUpdated.value,
 						message: `lastUpdated field must be a string in YYYY-MM-DD HH:MM:SS format`,
-            fix,
+						fix,
 					});
-          return
-        }
+					return;
+				}
 
-        console.log(filename)
-        const fileUpdated = format(new Date(fs.statSync(filename)))
+				console.log(filename);
+				const fileUpdated = format(new Date(fs.statSync(filename)));
 				if (fileUpdated > lastUpdated.value.value) {
 					context.report({
 						node: lastUpdated.value,
-            message: `lastUpdated field must be updated to be > ${fileUpdated} to push to clients`,
-            fix,
-          });
+						message: `lastUpdated field must be updated to be > ${fileUpdated} to push to clients`,
+						fix,
+					});
 				}
 			}
 		};

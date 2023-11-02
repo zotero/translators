@@ -9,7 +9,7 @@ const requireDir = require('require-dir');
 
 module.exports = {
 	rules: requireDir('./rules'),
-  processors: {
-    translator: require('./processor'),
-  },
+	processors: {
+		translator: require('./processor'),
+	},
 };

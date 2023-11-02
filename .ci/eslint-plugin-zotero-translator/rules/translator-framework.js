@@ -15,15 +15,15 @@ module.exports = {
 	create: function (context) {
 		return {
 			Program: function (node) {
-        const translator = parsed(context.getFilename());
-        if (!translator) return; // regular js source
+				const translator = parsed(context.getFilename());
+				if (!translator) return; // regular js source
 
-        if (translator.FWLine) {
-          context.report({
-            loc: { start: { line: translator.FWLine, column: 1 } },
-            message: 'uses deprecated Translator Framework'
-          });
-        }
+				if (translator.FWLine) {
+					context.report({
+						loc: { start: { line: translator.FWLine, column: 1 } },
+						message: 'uses deprecated Translator Framework'
+					});
+				}
 			}
 		};
 	},

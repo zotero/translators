@@ -19,7 +19,7 @@ module.exports = {
 
 				if (!translator || translator.header.fields) return; // regular js source, or header is valid json
 
-        const err = json.try(translator.header.text, { line: 0, position: 1})
+				const err = json.try(translator.header.text, { line: 0, position: 1 });
 				if (err) {
 					context.report({
 						message: `Could not parse header: ${err.message}`,

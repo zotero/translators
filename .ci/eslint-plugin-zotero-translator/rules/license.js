@@ -18,22 +18,22 @@ module.exports = {
 	create: function (context) {
 		return {
 			Program: function (node) {
-        const translator = parsed(context.getFilename());
+				const translator = parsed(context.getFilename());
         
-        if (!translator) return; // regular js source
+				if (!translator) return; // regular js source
         
-        if (node.body.length < 2) return; // no body?
+				if (node.body.length < 2) return; // no body?
 
 				const options = context.options[0];
 				if (!options.mustMatch) throw new Error('license/mustMatch not set');
 				if (!options.templateFile) throw new Error('license/templateFile not set');
 
-        const license = context.getSourceCode().getAllComments().find(comment => {
-          return comment.type === 'Block' && comment.value.match(/BEGIN LICENSE BLOCK[\s\S]+END LICENSE BLOCK/)
-        });
+				const license = context.getSourceCode().getAllComments().find((comment) => {
+					return comment.type === 'Block' && comment.value.match(/BEGIN LICENSE BLOCK[\s\S]+END LICENSE BLOCK/);
+				});
 
-        if (!license) {
-          const properties = translator.header.fields;
+				if (!license) {
+					const properties = translator.header.fields;
 				  const copyright = {
 					  holder: properties.creator || 'Zotero Contributors',
 					  period: `${(new Date).getFullYear()}`,
@@ -53,28 +53,27 @@ module.exports = {
 					  id = id.trim();
 					  return copyright[id] || `<undefined '${id}'>`;
 				  }) + '\n\n';
-          context.report({ 
-            message: 'Missing license block',
-            loc: node.body[1].loc.start,
+					context.report({
+						message: 'Missing license block',
+						loc: node.body[1].loc.start,
 					  fix: fixer => fixer.insertTextBefore(node.body[1], licenseText),
-          });
-          return
-        }
+					});
+					return;
+				}
         
-        if (node.body.length > 2 && node.body[1].loc.start.line < license.loc.start.line) {
+				if (node.body.length > 2 && node.body[1].loc.start.line < license.loc.start.line) {
 					context.report({
 						loc: license.loc,
 						message: 'Preferred to have license block at the top'
 					});
-          return;
-        }
+					return;
+				}
 
 				if (!license.value.match(new RegExp(options.mustMatch))) {
 					context.report({
 						loc: copyright.loc,
 						message: `Copyright preferred to be ${options.mustMatch}`,
 					});
-					return;
 				}
 			}
 		};

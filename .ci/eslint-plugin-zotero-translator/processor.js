@@ -170,7 +170,6 @@ module.exports = {
 	postprocess: function (messages, filename) {
 		messages = [].concat(...messages)
 
-    console.log(filename)
     const parsed = cache[filename]
 
     if (parsed) {
@@ -207,7 +206,6 @@ module.exports = {
       }
 
       const testcases = parsed.testcases
-      // console.log(header)
       if (testcases?.text) {
         messages = messages.filter(m => {
           if (m.ruleId.startsWith('zotero-translator/test-cases') && m.line < testcases.start) return false

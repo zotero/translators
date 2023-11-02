@@ -20,7 +20,7 @@ module.exports = {
 				if (process.platform == 'win32') return; // X_OK always succeeds on Windows
 
 				const filename = context.getFilename();
-        if (!parsed(filename)) return; // only check translators
+				if (!parsed(filename)) return; // only check translators
 
 				try {
 					fs.accessSync(filename, fs.constants.X_OK);
