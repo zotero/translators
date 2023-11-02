@@ -4,8 +4,8 @@
 	"description": "Continuous integration of Zotero translators",
 	"main": "index.js",
 	"scripts": {
-		"test": "teslint .",
-		"lint": "teslint",
+		"test": "eslint .",
+		"lint": "eslint",
 		"lint:linter": "eslint --no-ignore .ci",
 		"updateTypes": ".ci/updateTypes.mjs"
 	},
