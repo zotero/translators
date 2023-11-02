@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-11-01 07:14:14"
+	"lastUpdated": "2023-11-02 08:17:01"
 }
 
 /**
@@ -32,15 +32,21 @@
 
 
 function detectWeb(doc, url) {
-	if (/article-podcast\//.test(url)) {
+	let path = new URL(url).pathname;
+	if (/article-podcast\//.test(path)) {
 		return "podcast";
 	}
-	if (/\/opinions?\/letters\//.test(url)) {
+	if (/\/opinions?\/letters\//.test(path)) {
 		return "letter";
 	}
-	if (/-cartoon\/|\/opinions\/caricatures\//.test(url)) {
+	if (/-cartoon\/|\/opinions\/caricatures\//.test(path)) {
 		return "artwork";
 	}
+	// Selectors for multiple results will also match on the home page but not
+	// all of them point to single items. Special-case the home page to prevent
+	// this. This could have been dealt with better if the class names weren't
+	// obfuscated.
+	if (path === "/") return false;
 	let ld = getLD(doc);
 	if (ld && ld["@type"] === "NewsArticle") {
 		return "newspaperArticle";
@@ -51,6 +57,10 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	let url = doc.location.href;
 	if (/^https:\/\/[^/]+\/search-results($|\?)/.test(url)) {
+		if (checkOnly) { // only observe in detection stage; otherwise an error
+			let root = doc.getElementById("__next");
+			if (root) Z.monitorDOMChanges(root);
+		}
 		return getSiteSearchContent(doc, checkOnly);
 	}
 	else {
