@@ -19,9 +19,9 @@ module.exports = {
 				const filename = context.getFilename();
 				const translator = parsed(filename);
 				if (!translator || !translator.header.fields) return; // regular js source, or header is invalid
-        
+
 				const lastUpdated = header(node).properties.find(p => p.key.value === 'lastUpdated');
-        
+
 				if (!lastUpdated) {
 					context.report({
 						loc: { start: { line: 1, column: 1 } },
