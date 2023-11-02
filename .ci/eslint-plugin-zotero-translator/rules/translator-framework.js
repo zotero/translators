@@ -14,16 +14,14 @@ module.exports = {
 
 	create: function (context) {
 		return {
-			Program: function (node) {
+			Program: function (_node) {
 				const translator = parsed(context.getFilename());
-				if (!translator) return; // regular js source
+				if (!translator || !translator.FW) return; // regular js source, or no FW present
 
-				if (translator.FWLine) {
-					context.report({
-						loc: { start: { line: translator.FWLine, column: 1 } },
-						message: 'uses deprecated Translator Framework'
-					});
-				}
+				context.report({
+					loc: translator.FW.loc,
+					message: 'uses deprecated Translator Framework'
+				});
 			}
 		};
 	},

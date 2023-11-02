@@ -12,7 +12,7 @@ module.exports = {
 
 	create: function (context) {
 		return {
-			Program: function (node) {
+			Program: function (_node) {
 				let lineno = 0;
 				for (const line of context.getSourceCode().getText().split('\n')) {
 					lineno += 1;

@@ -26,20 +26,20 @@ module.exports = {
 	create: function (context) {
 		return {
 			Program: function (node) {
-        const filename = context.getFilename();
-        const translator = parsed(filename);
-        if (!translator?.header.fields) return; // regular js source, or header is invalid
+				const filename = context.getFilename();
+				const translator = parsed(filename);
+				if (!translator || !translator.header.fields) return; // regular js source, or header is invalid
 
-        const translatorID = header(node).properties.find(p => p.key.value === 'translatorID');
+				const translatorID = header(node).properties.find(p => p.key.value === 'translatorID');
 
 				if (!translatorID || !translatorID.value.value) {
 					context.report({
 						node: header(node),
 						message: 'Header has no translator ID',
 					});
-          return
+					return;
 				}
-        
+
 				if (deleted.has(translatorID.value.value)) {
 					context.report({
 						node: translatorID.value,
@@ -48,18 +48,18 @@ module.exports = {
 							return fixer.replaceText(translatorID.value, `"${uuid()}"`);
 						}
 					});
-          return;
+					return;
 				}
 
-				const conflict = IDconflict(filename)
+				const conflict = IDconflict(filename);
 				if (conflict) {
-          context.report({
-					  node: translatorID.value,
-					  message: `re-uses translator ID of ${conflict.label}`,
-					  fix: fixer => fixer.replaceText(translatorID.value, `"${uuid()}"`),
-				  });
-        }
+					context.report({
+						node: translatorID.value,
+						message: `re-uses translator ID of ${conflict.label}`,
+						fix: fixer => fixer.replaceText(translatorID.value, `"${uuid()}"`),
+					});
+				}
 			}
-		}
+		};
 	}
 };

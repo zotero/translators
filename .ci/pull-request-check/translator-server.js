@@ -46,7 +46,7 @@ async function serveCode(req, res) {
 	}
 }
 
-async function requestListener(req, res) {
+async function requestListener(req, res) { // eslint-disable-line consistent-return
 	if (req.url.startsWith('/metadata')) {
 		return serveMetadata(req, res);
 	}

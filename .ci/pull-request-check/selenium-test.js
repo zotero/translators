@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+/* eslint-disable no-process-env, no-process-exit */
+
 const path = require('path');
 const process = require('process');
 const selenium = require('selenium-webdriver');
@@ -129,7 +131,7 @@ try {
 	let testUrl = `chrome-extension://${extId}/tools/testTranslators/testTranslators.html#translators=${translatorsToTest.join(',')}`;
 	await new Promise(resolve => setTimeout(() => resolve(driver.get(testUrl)), 500));
 	await driver.wait(until.elementLocated({ id: 'translator-tests-complete' }), 30 * 60 * 1000);
-	testResults = await driver.executeScript('return window.seleniumOutput');
+	const testResults = await driver.executeScript('return window.seleniumOutput');
 
 	allPassed = report(testResults);
 }

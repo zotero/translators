@@ -1,7 +1,6 @@
 'use strict';
 
 const { parsed, json } = require('../processor').support;
-const path = require('path');
 
 module.exports = {
 	meta: {

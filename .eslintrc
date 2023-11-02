@@ -39,7 +39,6 @@
 		"zotero-translator/prefer-index-of": "warn",
 		"zotero-translator/robust-query-selector": "warn",
 
-		"zotero-translator/test-cases-valid-json": "error",
 		"zotero-translator/test-cases": "error",
 		"zotero-translator/translator-framework": "warn",
 
