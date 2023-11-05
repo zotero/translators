@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-11-02 08:17:01"
+	"lastUpdated": "2023-11-05 08:15:35"
 }
 
 /**
@@ -48,7 +48,7 @@ function detectWeb(doc, url) {
 	// obfuscated.
 	if (path === "/") return false;
 	let ld = getLD(doc);
-	if (ld && ld["@type"] === "NewsArticle") {
+	if (ld && ["NewsArticle", "LiveBlogPosting"].includes(ld["@type"])) {
 		return "newspaperArticle";
 	}
 	return getSearchResults(doc, true) && "multiple";
@@ -199,11 +199,6 @@ async function scrape(doc, url = doc.location.href) {
 			if (langIsEn) item.creators = [];
 		}
 
-		// clean up tags
-		if (item.tags) {
-			item.tags = deduplicateTags(item.tags);
-		}
-
 		item.complete();
 	});
 
@@ -214,25 +209,11 @@ async function scrape(doc, url = doc.location.href) {
 
 function getLD(doc) {
 	let ldScript = text(doc, "script[type='application/ld+json']");
-	if (ldScript) {
-		try {
-			return JSON.parse(ldScript);
-		}
-		catch (err) {
-			if (!(err instanceof SyntaxError)) throw err;
-		}
-	}
+	if (ldScript) return JSON.parse(ldScript);
 	return null;
 }
 
-function deduplicateTags(tagArray) {
-	let tagKeyMap = new Map();
-	for (let tag of tagArray) {
-		tag = typeof tag === "string" ? tag : tag.tag;
-		tagKeyMap.set(tag.toLowerCase(), tag);
-	}
-	return Array.from(tagKeyMap.values());
-}/** BEGIN TEST CASES **/
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
