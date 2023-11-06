@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-12-08 18:55:55"
+	"lastUpdated": "2023-10-23 08:35:07"
 }
 
 /*
@@ -52,7 +52,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('.MatchResult > a');
+	var rows = doc.querySelectorAll('.MatchResult article a');
 	for (let row of rows) {
 		let href = row.href;
 
@@ -68,11 +68,9 @@ function getSearchResults(doc, checkOnly) {
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
-		if (items) {
-			await Promise.all(
-				Object.keys(items)
-					.map(url => requestDocument(url).then(scrape))
-			);
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
 		}
 	}
 	else {
@@ -89,6 +87,9 @@ async function scrape(doc, url = doc.location.href) {
 	translator.setHandler('itemDone', (_obj, item) => {
 		item.publisher = attr(doc, 'meta[property="og:site_name"]', 'content');
 		item.libraryCatalog = "Cambridge Engage Preprints";
+		if (item.date) {
+			item.date = ZU.strToISO(item.date);
+		}
 		item.complete();
 	});
 
@@ -102,6 +103,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://chemrxiv.org/engage/chemrxiv/search-dashboard?text=acid",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
@@ -123,7 +125,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2021/10/08",
+				"date": "2021-10-08",
 				"DOI": "10.26434/chemrxiv-2021-mjpkz",
 				"abstractNote": "Conversion of readily available feedstocks to valuable platform chemicals via a sustainable catalytic pathway has always been one of the key focuses of synthetic chemists. Cheaper, less toxic, and more abundant base metals as a catalyst for performing such transformations provide an additional boost. In this context, herein, we report a reformation of readily available feedstock, ethylene glycol, to value-added platform molecules, glycolic acid, and lactic acid. A bench stable base metal complex {[HN(C2H4PPh2)2]Mn(CO)2Br}, Mn-I, known as Mn-PhMACHO, catalyzed the reformation of ethylene glycol to glycolic acid at 140 oC in high selectivity with a turnover number TON = 2400, surpassing previously used homogeneous catalysts for such a reaction. Pure hydrogen gas is evolved without the need for an acceptor. On the other hand, a bench stable Mn(I)-complex, {(iPrPN5P)Mn(CO)2Br}, Mn-III, with a triazine backbone, efficiently catalyzed the acceptorless dehydrogenative coupling of ethylene glycol and methanol for the synthesis of lactic acid, even at a ppm level of catalyst loading, reaching the TON of 11,500. Detailed mechanistic studies were performed to elucidate the involvements of different manganese(I)-species during the catalysis.",
 				"language": "en",
@@ -180,7 +182,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2019/10/02",
+				"date": "2019-10-03",
 				"DOI": "10.33774/apsa-2019-if2he-v2",
 				"abstractNote": "The discipline of political science has been engaged in discussion about when, why, and how to make scholarship more transparent for at least three decades. This piece argues that qualitative researchers can achieve transparency in diverse ways, using techniques and strategies that allow them to balance and optimize among competing considerations that affect the pursuit of transparency.. We begin by considering the “state of the debate,” briefly outlining the contours of the scholarship on transparency in political and other social sciences, which so far has focussed mostly on questions of “whether” and “what” to share. We investigate competing considerations that researchers have to consider when working towards transparent research. The heart of the piece considers various strategies, illustrated by exemplary applications, for making qualitative research more transparent.",
 				"language": "en",
@@ -238,7 +240,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2021/07/20",
+				"date": "2021-07-20",
 				"DOI": "10.33774/miir-2021-7cdx1",
 				"abstractNote": "This report addresses the construction of carbon fibre wing boxes and the problems associated with using carbon fibre sheets rather than individual carbon fibre tapes. In the case that the wing boxes are developable surfaces the lay up of carbon fibre sheets is straightforward, since the fibres can follow the contours of the surface without any need for shearing or extension of the fibres. To further expand the potential design space for the wing boxes, this report investigates the lay up of sheets over non-developable surfaces where some shearing of the sheet is required to achieve the desired results. In this report, three analytical approaches are considered, driven by the results from numerical studies on different surface geometries. Each of the approaches offers insights as to the type of geometric perturbations achievable when constrained by a maximum shear angle.",
 				"language": "en",

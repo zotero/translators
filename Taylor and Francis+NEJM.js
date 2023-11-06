@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-19 15:27:10"
+	"lastUpdated": "2023-10-27 16:03:23"
 }
 
 /*
@@ -38,7 +38,7 @@
 
 
 function detectWeb(doc, url) {
-	if (url.match(/\/doi\/(abs|full|figure)\/10\./)) {
+	if (url.match(/\/doi(\/(abs|full|figure))?\/10\./)) {
 		return "journalArticle";
 	}
 	else if ((url.includes('/action/doSearch?') || url.includes('/toc/')) && getSearchResults(doc, true)) {
@@ -88,7 +88,7 @@ function doWeb(doc, url) {
 
 
 function scrape(doc, url) {
-	var match = url.match(/\/doi\/(?:abs|full|figure)\/(10\.[^?#]+)/);
+	var match = url.match(/\/doi(?:\/(?:abs|full|figure))?\/(10\.[^?#]+)/);
 	var doi = match[1];
 
 	var baseUrl = url.match(/https?:\/\/[^/]+/)[0];
@@ -574,6 +574,43 @@ var testCases = [
 				"publicationTitle": "Accounting and Business Research",
 				"url": "https://doi.org/10.1080/00014788.2016.1157680",
 				"volume": "46",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nejm.org/doi/10.1056/NEJMcibr2307735",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "A Holy Grail — The Prediction of Protein Structure",
+				"creators": [
+					{
+						"lastName": "Altman",
+						"firstName": "Russ B.",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-10-12",
+				"DOI": "10.1056/NEJMcibr2307735",
+				"ISSN": "0028-4793",
+				"extra": "PMID: 37732608",
+				"issue": "15",
+				"itemID": "doi:10.1056/NEJMcibr2307735",
+				"libraryCatalog": "Taylor and Francis+NEJM",
+				"pages": "1431-1434",
+				"publicationTitle": "New England Journal of Medicine",
+				"url": "https://doi.org/10.1056/NEJMcibr2307735",
+				"volume": "389",
 				"attachments": [
 					{
 						"title": "Full Text PDF",

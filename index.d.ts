@@ -48,7 +48,6 @@ declare namespace Zotero {
 			chunkSize: number,
 			func: (chunk: Type[]) => RetType
 		): RetType[];
-		function assignProps(target: any, source: any, props?: string[]): void;
 		function rand(min: number, max: number): number;
 		function getPageRange(pages: string): [fromPage: number, toPage: number];
 		function lpad(s: string, pad: string, length: number): string;
@@ -91,19 +90,12 @@ declare namespace Zotero {
 		// varDump
 		function itemToCSLJSON(item: Zotero.Item): any | Promise<any>;
 		function itemFromCSLJSON(item: Zotero.Item, cslItem: any): void;
-		function parseURL(url: string): {
-			fileName: string;
-			fileExtension: string;
-			fileBaseName: string;
-		};
-		function resolveIntermediateURL(url: string): string;
 		function stringToUTF8Array(
 			s: string,
 			array: number[] | Uint8Array,
 			offset?: number
 		): void;
 		function getStringByteLength(s: string): number;
-		function determineAttachmentIcon(attachment: Attachment): string;
 		function generateObjectKey(): string;
 		function isValidObjectKey(s: string): boolean;
 		// XRegExp
@@ -215,36 +207,21 @@ declare namespace Zotero {
 		proxy?: boolean;
 	}
 
-	type CreatorType =
-		| "artist"
-		| "contributor"
-		| "performer"
-		| "composer"
-		| "wordsBy"
-		| "sponsor"
-		| "cosponsor"
-		| "author"
-		| "commenter"
-		| "editor"
-		| "translator"
-		| "seriesEditor"
-		| "bookAuthor"
-		| "counsel"
-		| "programmer"
-		| "reviewedAuthor"
-		| "recipient"
-		| "director"
-		| "scriptwriter"
-		| "producer"
-		| "interviewee"
-		| "interviewer"
-		| "cartographer"
-		| "inventor"
-		| "attorneyAgent"
-		| "podcaster"
-		| "guest"
-		| "presenter"
-		| "castMember";
+	interface Tag {
+		tag: string;
+	}
+
+	type ItemType = keyof ItemTypes;
+
+	/**
+	 * Generic item with unknown type.
+	 */
+	type Item = ItemTypes[ItemType];
+
+	var Item: {
+		new <T extends ItemType>(itemType: T): ItemTypes[T];
+		new(itemType: string): Item;
+	}
 
 	interface Creator<T extends CreatorType> {
 		lastName: string?;
@@ -253,10 +230,7 @@ declare namespace Zotero {
 		fieldMode: 1?;
 	}
 
-	interface Tag {
-		tag: string;
-	}
-
+	/* *** BEGIN GENERATED TYPES *** */
 	type ItemTypes = {
 		"artwork": ArtworkItem,
 		"audioRecording": AudioRecordingItem,
@@ -267,6 +241,7 @@ declare namespace Zotero {
 		"case": CaseItem,
 		"computerProgram": ComputerProgramItem,
 		"conferencePaper": ConferencePaperItem,
+		"dataset": DatasetItem,
 		"dictionaryEntry": DictionaryEntryItem,
 		"document": DocumentItem,
 		"email": EmailItem,
@@ -288,24 +263,13 @@ declare namespace Zotero {
 		"presentation": PresentationItem,
 		"radioBroadcast": RadioBroadcastItem,
 		"report": ReportItem,
+		"standard": StandardItem,
 		"statute": StatuteItem,
 		"thesis": ThesisItem,
 		"tvBroadcast": TVBroadcastItem,
 		"videoRecording": VideoRecordingItem,
 		"webpage": WebpageItem,
-	}
-
-	type ItemType = keyof ItemTypes;
-
-	var Item: {
-		new <T extends ItemType>(itemType: T): ItemTypes[T];
-		new(itemType: string): Item;
-	}
-
-	/**
-	 * Generic item with unknown type.
-	 */
-	type Item = ItemTypes[ItemType];
+	};
 
 	type ArtworkItem = {
 		itemType: "artwork";
@@ -359,7 +323,7 @@ declare namespace Zotero {
 		rights?: string;
 		extra?: string;
 
-		creators: Creator<"performer" | "composer" | "contributor" | "wordsBy">[];
+		creators: Creator<"performer" | "contributor" | "composer" | "wordsBy">[];
 		attachments: Attachment[];
 		tags: Tag[];
 		notes: Note[];
@@ -389,7 +353,7 @@ declare namespace Zotero {
 		rights?: string;
 		extra?: string;
 
-		creators: Creator<"sponsor" | "contributor" | "cosponsor">[];
+		creators: Creator<"sponsor" | "cosponsor" | "contributor">[];
 		attachments: Attachment[];
 		tags: Tag[];
 		notes: Note[];
@@ -448,7 +412,7 @@ declare namespace Zotero {
 		rights?: string;
 		extra?: string;
 
-		creators: Creator<"author" | "contributor" | "editor" | "seriesEditor" | "translator">[];
+		creators: Creator<"author" | "contributor" | "editor" | "translator" | "seriesEditor">[];
 		attachments: Attachment[];
 		tags: Tag[];
 		notes: Note[];
@@ -484,7 +448,7 @@ declare namespace Zotero {
 		rights?: string;
 		extra?: string;
 
-		creators: Creator<"author" | "bookAuthor" | "contributor" | "editor" | "seriesEditor" | "translator">[];
+		creators: Creator<"author" | "contributor" | "editor" | "bookAuthor" | "translator" | "seriesEditor">[];
 		attachments: Attachment[];
 		tags: Tag[];
 		notes: Note[];
@@ -512,7 +476,7 @@ declare namespace Zotero {
 		rights?: string;
 		extra?: string;
 
-		creators: Creator<"author" | "contributor" | "counsel">[];
+		creators: Creator<"author" | "counsel" | "contributor">[];
 		attachments: Attachment[];
 		tags: Tag[];
 		notes: Note[];
@@ -579,7 +543,41 @@ declare namespace Zotero {
 		rights?: string;
 		extra?: string;
 
-		creators: Creator<"author" | "contributor" | "editor" | "seriesEditor" | "translator">[];
+		creators: Creator<"author" | "contributor" | "editor" | "translator" | "seriesEditor">[];
+		attachments: Attachment[];
+		tags: Tag[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
+
+		[key: string]: string;
+	};
+
+	type DatasetItem = {
+		itemType: "dataset";
+		title?: string;
+		abstractNote?: string;
+		identifier?: string;
+		type?: string;
+		versionNumber?: string;
+		date?: string;
+		repository?: string;
+		repositoryLocation?: string;
+		format?: string;
+		DOI?: string;
+		citationKey?: string;
+		url?: string;
+		accessDate?: string;
+		archive?: string;
+		archiveLocation?: string;
+		shortTitle?: string;
+		language?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "contributor">[];
 		attachments: Attachment[];
 		tags: Tag[];
 		notes: Note[];
@@ -615,7 +613,7 @@ declare namespace Zotero {
 		rights?: string;
 		extra?: string;
 
-		creators: Creator<"author" | "contributor" | "editor" | "seriesEditor" | "translator">[];
+		creators: Creator<"author" | "contributor" | "editor" | "translator" | "seriesEditor">[];
 		attachments: Attachment[];
 		tags: Tag[];
 		notes: Note[];
@@ -642,7 +640,7 @@ declare namespace Zotero {
 		rights?: string;
 		extra?: string;
 
-		creators: Creator<"author" | "contributor" | "editor" | "reviewedAuthor" | "translator">[];
+		creators: Creator<"author" | "contributor" | "editor" | "translator" | "reviewedAuthor">[];
 		attachments: Attachment[];
 		tags: Tag[];
 		notes: Note[];
@@ -700,7 +698,7 @@ declare namespace Zotero {
 		rights?: string;
 		extra?: string;
 
-		creators: Creator<"author" | "contributor" | "editor" | "seriesEditor" | "translator">[];
+		creators: Creator<"author" | "contributor" | "editor" | "translator" | "seriesEditor">[];
 		attachments: Attachment[];
 		tags: Tag[];
 		notes: Note[];
@@ -730,7 +728,7 @@ declare namespace Zotero {
 		rights?: string;
 		extra?: string;
 
-		creators: Creator<"director" | "contributor" | "producer" | "scriptwriter">[];
+		creators: Creator<"director" | "contributor" | "scriptwriter" | "producer">[];
 		attachments: Attachment[];
 		tags: Tag[];
 		notes: Note[];
@@ -870,7 +868,7 @@ declare namespace Zotero {
 		rights?: string;
 		extra?: string;
 
-		creators: Creator<"author" | "contributor" | "editor" | "reviewedAuthor" | "translator">[];
+		creators: Creator<"author" | "contributor" | "editor" | "translator" | "reviewedAuthor">[];
 		attachments: Attachment[];
 		tags: Tag[];
 		notes: Note[];
@@ -928,7 +926,7 @@ declare namespace Zotero {
 		rights?: string;
 		extra?: string;
 
-		creators: Creator<"author" | "contributor" | "reviewedAuthor" | "translator">[];
+		creators: Creator<"author" | "contributor" | "translator" | "reviewedAuthor">[];
 		attachments: Attachment[];
 		tags: Tag[];
 		notes: Note[];
@@ -1022,7 +1020,7 @@ declare namespace Zotero {
 		rights?: string;
 		extra?: string;
 
-		creators: Creator<"author" | "contributor" | "reviewedAuthor" | "translator">[];
+		creators: Creator<"author" | "contributor" | "translator" | "reviewedAuthor">[];
 		attachments: Attachment[];
 		tags: Tag[];
 		notes: Note[];
@@ -1114,7 +1112,7 @@ declare namespace Zotero {
 		rights?: string;
 		extra?: string;
 
-		creators: Creator<"author" | "contributor" | "editor" | "reviewedAuthor" | "translator">[];
+		creators: Creator<"author" | "contributor" | "editor" | "translator" | "reviewedAuthor">[];
 		attachments: Attachment[];
 		tags: Tag[];
 		notes: Note[];
@@ -1171,7 +1169,7 @@ declare namespace Zotero {
 		rights?: string;
 		extra?: string;
 
-		creators: Creator<"director" | "castMember" | "contributor" | "guest" | "producer" | "scriptwriter">[];
+		creators: Creator<"director" | "scriptwriter" | "producer" | "castMember" | "contributor" | "guest">[];
 		attachments: Attachment[];
 		tags: Tag[];
 		notes: Note[];
@@ -1203,7 +1201,44 @@ declare namespace Zotero {
 		rights?: string;
 		extra?: string;
 
-		creators: Creator<"author" | "contributor" | "seriesEditor" | "translator">[];
+		creators: Creator<"author" | "contributor" | "translator" | "seriesEditor">[];
+		attachments: Attachment[];
+		tags: Tag[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
+
+		[key: string]: string;
+	};
+
+	type StandardItem = {
+		itemType: "standard";
+		title?: string;
+		abstractNote?: string;
+		organization?: string;
+		committee?: string;
+		type?: string;
+		number?: string;
+		versionNumber?: string;
+		status?: string;
+		date?: string;
+		publisher?: string;
+		place?: string;
+		DOI?: string;
+		citationKey?: string;
+		url?: string;
+		accessDate?: string;
+		archive?: string;
+		archiveLocation?: string;
+		shortTitle?: string;
+		numPages?: string;
+		language?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "contributor">[];
 		attachments: Attachment[];
 		tags: Tag[];
 		notes: Note[];
@@ -1294,7 +1329,7 @@ declare namespace Zotero {
 		rights?: string;
 		extra?: string;
 
-		creators: Creator<"director" | "castMember" | "contributor" | "guest" | "producer" | "scriptwriter">[];
+		creators: Creator<"director" | "scriptwriter" | "producer" | "castMember" | "contributor" | "guest">[];
 		attachments: Attachment[];
 		tags: Tag[];
 		notes: Note[];
@@ -1328,7 +1363,7 @@ declare namespace Zotero {
 		rights?: string;
 		extra?: string;
 
-		creators: Creator<"director" | "castMember" | "contributor" | "producer" | "scriptwriter">[];
+		creators: Creator<"director" | "scriptwriter" | "producer" | "castMember" | "contributor">[];
 		attachments: Attachment[];
 		tags: Tag[];
 		notes: Note[];
@@ -1361,6 +1396,38 @@ declare namespace Zotero {
 
 		[key: string]: string;
 	};
+
+	type CreatorType =
+		| "artist"
+		| "attorneyAgent"
+		| "author"
+		| "bookAuthor"
+		| "cartographer"
+		| "castMember"
+		| "commenter"
+		| "composer"
+		| "contributor"
+		| "cosponsor"
+		| "counsel"
+		| "director"
+		| "editor"
+		| "guest"
+		| "interviewee"
+		| "interviewer"
+		| "inventor"
+		| "performer"
+		| "podcaster"
+		| "presenter"
+		| "producer"
+		| "programmer"
+		| "recipient"
+		| "reviewedAuthor"
+		| "scriptwriter"
+		| "seriesEditor"
+		| "sponsor"
+		| "translator"
+		| "wordsBy";
+	/* *** END GENERATED TYPES *** */
 
 	interface Note {
 		title?: string;

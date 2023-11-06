@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2021-10-23 20:56:30"
+	"lastUpdated": "2023-10-27 09:03:42"
 }
 
 function detectImport() {
@@ -104,6 +104,7 @@ var typeMap = {
 // TODO: BILL, CASE, COMP, CONF, DATA, HEAR, MUSIC, PAT, SOUND, STAT
 var inputTypeMap = {
 	"Ancient Text": "book",
+	Audio: "audioRecording",
 	"Audiovisual Material": "videoRecording",
 	Generic: "book",
 	"Chart or Table": "artwork",
@@ -433,6 +434,26 @@ var testCases = [
 						"tag": "Corn -- Yields"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "%0 Serial\n%0 Audio\n%I Studio Omega, Verein für Christliche Radioarbeit\n%D 2021\n%C Wien\n%G German\n%T Diesseits von Eden: der Podcast der katholischen Fakultäten Österreichs & Südtirols\n%U https://diesseits.theopodcast.at/home",
+		"items": [
+			{
+				"itemType": "audioRecording",
+				"title": "Diesseits von Eden: der Podcast der katholischen Fakultäten Österreichs & Südtirols",
+				"creators": [],
+				"date": "2021",
+				"label": "Studio Omega, Verein für Christliche Radioarbeit",
+				"language": "German",
+				"place": "Wien",
+				"url": "https://diesseits.theopodcast.at/home",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}

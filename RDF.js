@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2022-09-22 02:12:48"
+	"lastUpdated": "2023-04-24 15:51:01"
 }
 
 /*
@@ -39,6 +39,9 @@
 
 	***** END LICENSE BLOCK *****
 */
+const datasetType = ZU.fieldIsValidForType('title', 'dataset')
+	? 'dataset'
+	: 'document';
 
 function detectImport() {
 	// Make sure there are actually nodes
@@ -444,8 +447,7 @@ function detectType(newItem, node, ret) {
 				t.so = 'artwork'; break;
 			case 'datacatalog':
 			case 'dataset':
-				t.so = 'journalArticle'; break; // until dataset gets implemented
-
+				t.so = datasetType; break;
 			// specials cases
 			case "article":
 			// choose between journal, newspaper, and magazine articles
@@ -532,8 +534,10 @@ function detectType(newItem, node, ret) {
 				case 'conferenceposter':
 					t.dc = 'conferencePaper';
 					break;
+				case 'dataset':
+					t.dc = datasetType;
+					break;
 				case 'article': // from http://www.idealliance.org/specifications/prism/specifications/prism-controlled-vocabularies/prism-12-controlled-vocabularies
-				case 'dataset': // until dataset gets implemented
 				case 'journalitem':
 				case 'journalarticle':
 				case 'submittedjournalarticle':
@@ -616,7 +620,7 @@ function detectType(newItem, node, ret) {
 				// very broad
 					t.dcGuess = 'journalArticle';
 					break;
-				// collection, dataset, interactiveresource, physicalobject,
+				// collection, interactiveresource, physicalobject,
 				// service
 			}
 		}
@@ -644,10 +648,12 @@ function detectType(newItem, node, ret) {
 			case 'conferenceposter':
 				t.eprints = 'conferencePaper';
 				break;
+			case 'dataset':
+				t.eprints = datasetType;
+				break;
 			case 'journalitem':
 			case 'journalarticle':
 			case 'submittedjournalarticle':
-			case 'dataset': // map to dataset once we have it as item type
 			case 'article':
 				t.eprints = 'journalArticle';
 				break;
@@ -1220,8 +1226,8 @@ function importItem(newItem, node) {
 	// type
 	let type = getFirstResults(node, [n.dc + "type", n.dc1_0 + "type", n.dcterms + "type"], true);
 
-	/** CUSTOM ITEM TYPE  -- Currently only Dataset **/
-	if (type && (type.toLowerCase() == "dataset" || type.toLowerCase() == "datacatalog")) {
+	/** CUSTOM ITEM TYPE  -- Keeping for <6.0.24 clients w/o dataset support **/
+	if (datasetType != "dataset" && type && (type.toLowerCase() == "dataset" || type.toLowerCase() == "datacatalog")) {
 		if (newItem.extra) {
 			newItem.extra += "\nType: dataset";
 		}

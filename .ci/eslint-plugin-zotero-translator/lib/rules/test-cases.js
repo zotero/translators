@@ -79,9 +79,16 @@ module.exports = {
 					}
 					else if (testCase.type === 'search') {
 						// console.log(JSON.stringify(testCase.input))
-						const expected = ['DOI', 'ISBN', 'PMID', 'identifiers', 'contextObject', 'adsBibcode'];
-						if (!Object.keys(testCase.input).every(key => expected.includes(key))) {
-							let invalidKey = Object.keys(testCase.input).find(key => !expected.includes(key));
+						const expected = ['DOI', 'ISBN', 'PMID', 'identifiers', 'contextObject', 'adsBibcode', 'ericNumber'];
+						let keys;
+						if (Array.isArray(testCase.input)) {
+							keys = testCase.input.flatMap(Object.keys);
+						}
+						else {
+							keys = Object.keys(testCase.input);
+						}
+						if (!keys.every(key => expected.includes(key))) {
+							let invalidKey = keys.find(key => !expected.includes(key));
 							context.report({
 								message: `${prefix} of type "${testCase.type}" has invalid search term '${invalidKey}' - expected one of ${expected.join(', ')}`,
 								loc,
