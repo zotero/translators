@@ -1,7 +1,6 @@
 'use strict';
 
 const { parsed, header } = require('../../processor').support;
-const fs = require('fs');
 
 module.exports = {
 	meta: {
@@ -43,12 +42,10 @@ module.exports = {
 					return;
 				}
 
-				console.log(filename);
-				const fileUpdated = format(new Date(fs.statSync(filename)));
-				if (fileUpdated > lastUpdated.value.value) {
+				if (translator.lastUpdated && translator.lastUpdated > lastUpdated.value.value) {
 					context.report({
 						node: lastUpdated.value,
-						message: `lastUpdated field must be updated to be > ${fileUpdated} to push to clients`,
+						message: `lastUpdated field must be updated to be > ${translator.lastUpdated} to push to clients`,
 						fix,
 					});
 				}

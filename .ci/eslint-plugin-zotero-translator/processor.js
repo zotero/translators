@@ -5,6 +5,7 @@ const clarinet = require('clarinet');
 const findRoot = require('find-root');
 const path = require('path');
 const fs = require('fs');
+const childProcess = require('child_process');
 
 let repo;
 try {
@@ -14,6 +15,10 @@ catch (e) {
 	console.error('ERROR: Translators can only be linted inside a clone of the zotero/translators repo (not a ZIP downloaded from GitHub)');
 	console.error('	git clone https://github.com/zotero/translators.git');
 	process.exit(1); // eslint-disable-line no-process-exit
+}
+
+function exec(cmd) {
+	return childProcess.execSync(cmd, { cwd: repo, encoding: 'utf8' });
 }
 
 // have to pre-load evertyhing to test for conflicting headers
@@ -66,6 +71,14 @@ for (let filename of fs.readdirSync(repo).sort()) {
 	catch (err) {
 		// ignore
 	}
+}
+
+for (const lu of exec(`git grep '"lastUpdated"' HEAD~1`).split('\n')) {
+	const m = lu.match(/^HEAD~1:([^:]+):\s*"lastUpdated"\s*:\s*"([-0-9: ]+)"/);
+	if (!m) continue;
+	const [, translator, lastUpdated] = m;
+	const filename = path.join(repo, translator);
+	if (cache[filename]) cache[filename].lastUpdated = lastUpdated;
 }
 
 function tryJSON(json, offset) {
@@ -142,10 +155,11 @@ function conflict(filename) {
 	return null;
 }
 
+const junk = new RegExp(`${path.sep}0_`.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&') + '.*');
 module.exports = {
 	support: {
 		repo,
-		parsed: filename => cache[filename],
+		parsed: filename => cache[filename.replace(junk, '')],
 		header,
 		IDconflict: conflict,
 		json: {

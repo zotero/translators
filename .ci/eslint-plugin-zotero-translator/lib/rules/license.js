@@ -29,7 +29,7 @@ module.exports = {
 				if (!options.templateFile) throw new Error('license/templateFile not set');
 
 				const license = context.getSourceCode().getAllComments().find((comment) => {
-					return comment.type === 'Block' && comment.value.match(/BEGIN LICENSE BLOCK[\s\S]+END LICENSE BLOCK/);
+					return comment.type === 'Block' && comment.value.match(/(BEGIN LICENSE BLOCK[\s\S]+END LICENSE BLOCK)|(Copyright)/i);
 				});
 
 				if (!license) {
