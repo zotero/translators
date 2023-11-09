@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2022-08-18 11:23:00"
+	"lastUpdated": "2023-11-09 18:20:01"
 }
 
 /*
@@ -93,7 +93,7 @@ var typeMapping = {
 	UnpublishedWork: "report" // Graue Literatur / Bericht / Report
 };
 
-async function importItems({ references, doc, citaviVersion, rememberTags, itemIdList, unfinishedReferences, progress }) {
+async function importItems({ references, doc, citaviVersion, rememberTags, rememberCustomFields, itemIdList, unfinishedReferences, progress }) {
 	for (var i = 0, n = references.length; i < n; i++) {
 		var type = ZU.xpathText(references[i], 'ReferenceType');
 		let item;
@@ -137,6 +137,14 @@ async function importItems({ references, doc, citaviVersion, rememberTags, itemI
 			var note = ZU.xpathText(references[i], './' + field);
 			if (note) {
 				item.notes.push({ note: note, tags: ["#" + field] });
+			}
+		}
+
+		for (field in rememberCustomFields) {
+			var label = rememberCustomFields[field];
+			var customField = ZU.xpathText(references[i], './' + field);
+			if (customField) {
+				item.notes.push({ note: label + ": " + customField, tags: ["#CustomField"] });
 			}
 		}
 
@@ -436,6 +444,19 @@ async function doImport() {
 			}
 		}
 	}
+	var rememberCustomFields = {};
+	var customFields = ZU.xpath(doc, '//CustomFields/CustomFieldSettings');
+	for (let customField of customFields) {
+		let customFieldLabel = ZU.xpathText(customField, './LabelText');
+		let customFieldName = ZU.xpathText(customField, './PropertyName');
+		if (customFieldName) {
+			if (!customFieldLabel) {
+				customFieldLabel = customFieldName;
+			}
+			rememberCustomFields[customFieldName] = customFieldLabel;
+		}
+	}
+
 	var tasks = ZU.xpath(doc, '//TaskItems/TaskItem');
 	var categories = ZU.xpath(doc, '//Categories/Category');
 
@@ -449,7 +470,7 @@ async function doImport() {
 	const totalProgress = references.length + tasks.length + categories.length;
 	const progress = { total: totalProgress * 2, current: 0 };
 
-	await importItems({ references, doc, citaviVersion, rememberTags, itemIdList, progress, unfinishedReferences });
+	await importItems({ references, doc, citaviVersion, rememberTags, rememberCustomFields, itemIdList, progress, unfinishedReferences });
 	await importUnfinished({ doc, itemIdList, unfinishedReferences, progress });
 	await importTasks({ tasks, progress });
 	importCategories({ categories, doc, progress });
