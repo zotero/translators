@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2021-10-19 08:34:52"
+	"lastUpdated": "2023-11-15 09:29:21"
 }
 
 /*
@@ -106,6 +106,18 @@ function undesirableAbstractPresent(doc, item) {
 	return textStart.indexOf(item.abstractNote) != -1;
 }
 
+
+function isOpenAccess(doc, item) {
+	let oa_desc0 = ZU.xpathText(doc, '//span[@data-test="open-access"]');
+	if (oa_desc0 && oa_desc0.match(/open access/i))
+        return true;
+
+	let oa_desc1 = ZU.xpathText(doc, '//li[@class="c-article-identifiers__item"]/a');
+	if (oa_desc1 && oa_desc1.match(/open access/i))
+        return true;
+}
+
+
 function complementItem(doc, item) {
 	var itemType = detectWeb(doc, doc.location.href);
 	// in case we're missing something, we can try supplementing it from page
@@ -151,9 +163,8 @@ function complementItem(doc, item) {
 		if (!item.journalAbbreviation || item.publicationTitle == item.journalAbbreviation) {
 			item.journalAbbreviation = ZU.xpathText(doc, '//meta[@name="citation_journal_abbrev"]/@content');
 		}
-		let oa_desc = ZU.xpathText(doc, '//span[@data-test="open-access"]');
-		if (oa_desc && oa_desc.match(/open access/i))
-			item.notes.push({note: 'LF:'});
+		if (isOpenAccess(doc,item))
+		    item.notes.push({note: 'LF:'});
 	}
 	
 	if (itemType == 'bookSection' || itemType == "conferencePaper") {
