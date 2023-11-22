@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-08 12:33:13"
+	"lastUpdated": "2023-11-22 15:14:19"
 }
 
 /*
@@ -38,47 +38,49 @@
 
 // Fetches RefWorks records for provided IDs and calls onDataAvailable with resulting text
 // ids should be in the form [{dbname: "CDFDLAST2013", filename: "1013102302.nh"}]
-function getRefWorksByID(ids, onDataAvailable) {
-	if (!ids.length) return;
-	var { dbname, filename, url } = ids.shift();
-	let postData = "filename=" + filename + 
-		"&displaymode=Refworks&orderparam=0&ordertype=desc&selectfield=&dbname=" + 
-		dbname + "&random=0.2111567532240084";
-	
-	ZU.doPost('https://kns.cnki.net/KNS8/manage/ShowExport', postData,
-		function (text) {
-			let data = text
-				.replace("<ul class='literature-list'><li>", "")
-            	.replace("<br></li></ul>", "")
-            	.replace("</li><li>", "") // divide results
-            	.replace(/<br>|\r/g, "\n")
-            	.replace(/vo (\d+)\n/, "VO $1\n") // Divide VO and IS to different line
-            	.replace(/IS 0(\d+)\n/g, "IS $1\n")  // Remove leading 0
-            	.replace(/VO 0(\d+)\n/g, "VO $1\n")
-            	.replace(/\n+/g, "\n")
-            	.replace(/\n([A-Z][A-Z1-9]\s)/g, "<br>$1")
-            	.replace(/\n/g, "")
-            	.replace(/<br>/g, "\n")
-            	.replace(/\t/g, "") // \t in abstract
-            	.replace(
-            	    /^RT\s+Conference Proceeding/gim,
-            	    "RT Conference Proceedings"
-            	)
-            	.replace(/^RT\s+Dissertation\/Thesis/gim, "RT Dissertation")
-            	.replace(/^(A[1-4]|U2)\s*([^\r\n]+)/gm, function (m, tag, authors) {
-            	    authors = authors.split(/\s*[;，,]\s*/); // that's a special comma
-            	    if (!authors[authors.length - 1].trim()) authors.pop();
-            	    return tag + " " + authors.join("\n" + tag + " ");
-            	})
-            	.trim();
-			// Z.debug(data);
-			onDataAvailable(data, url);
-			// If more results, keep going
-			if (ids.length) {
-				getRefWorksByID(ids, onDataAvailable);
+async function getRefWorksByID(id) {
+	if (!id) return;
+	var { dbname, filename } = id;
+	var postData = `FileName=${dbname}!${filename}!1!0&DisplayMode=Refworks&OrderParam=0&OrderType=desc&SelectField=&PageIndex=1&PageSize=20&language=&uniplatform=NZKPT&random=0.30585230060685187`;
+	var refer = `https://kns.cnki.net/dm/manage/export.html?filename=${dbname}!${filename}!1!0&displaymode=NEW&uniplatform=NZKPT`;
+	var reftext = await request(
+		'https://kns.cnki.net/dm/api/ShowExport',
+		{
+			method: "POST",
+			body: postData,
+			headers: {
+				Referer: refer
 			}
 		}
 	);
+	return reftext
+		.body
+		.replace("<ul class='literature-list'><li>", "")
+		.replace("<br></li></ul>", "")
+		.replace("</li><li>", "") // divide results
+		.replace(/<br>|\r/g, "\n")
+		.replace(/vo (\d+)\n/, "VO $1\n") // Divide VO and IS to different line
+		.replace(/IS (\d+)\nvo/, "IS $1\nVO")// Uppercase VO
+		.replace(/IS 0(\d+)\n/g, "IS $1\n")// Remove leading 0
+		.replace(/VO 0(\d+)\n/g, "VO $1\n")
+		.replace(/\n+/g, "\n")
+		.replace(/\n([A-Z][A-Z1-9]\s)/g, "<br>$1")
+		.replace(/\n/g, "")
+		.replace(/<br>/g, "\n")
+		.replace(/(K1 .*[\u4e00-\u9fa5]) ([a-zA-Z])/g, "$1;$2")// cn keywwords and en keywords
+		.replace(/\t/g, "") // \t in abstract
+		.replace(
+			/^RT\s+Conference Proceeding/gim,
+			"RT Conference Proceedings"
+		)
+		.replace(/^RT\s+Dissertation\/Thesis/gim, "RT Dissertation")
+		.replace(/^(A[1-4]|U2)\s*([^\r\n]+)/gm, function (m, tag, authors) {
+			authors = authors.split(/\s*[;，,]\s*/); // that's a special comma
+			if (!authors[authors.length - 1].trim()) authors.pop();
+			return tag + " " + authors.join("\n" + tag + " ");
+		})
+		.replace(/LA 中文;?/g, "LA zh-CN")
+		.trim();
 }
 
 function getIDFromURL(url) {
@@ -96,7 +98,11 @@ function getIDFromURL(url) {
 function getIDFromRef(doc, url) {
 	let database = attr(doc, '#paramdbname', 'value');
 	let filename = attr(doc, '#paramfilename', 'value');
-	return { dbname: database, filename: filename, url: url };
+	if (database && filename) {
+		return { dbname: database, filename: filename, url: url };
+	} else {
+		return false;
+	}
 }
 
 // Get dbname and filename from the link target on the "take note" button in
@@ -107,7 +113,7 @@ function getIDFromRef(doc, url) {
 // required info. The note-taking button appears more stable across the CNKI
 // domains.
 function getIDFromNoteTakerLink(doc, url) {
-	const noteURLString = doc.querySelector("li.btn-note a").href;
+	const noteURLString = attr(doc, "li.btn-note a", "href");
 	if (!noteURLString) return false;
 
 	const urlParams = new URLSearchParams(new URL(noteURLString).search);
@@ -117,6 +123,16 @@ function getIDFromNoteTakerLink(doc, url) {
 	if (!dbnameValue || !filenameValue) return false;
 
 	return { dbname: dbnameValue, filename: filenameValue, url: url };
+}
+
+function getIDFromSearchRow(row) {
+	var dbcode = attr(row, "a.icon-collect", "data-dbname");
+	var filename = attr(row, "a.icon-collect", "data-filename");
+	if (dbcode && filename) {
+		return { dbcode: dbcode, dbname: dbcode, filename: filename };
+	} else {
+		return false;
+	}
 }
 
 function getIDFromPage(doc, url) {
@@ -130,12 +146,19 @@ function getTypeFromDBName(dbname) {
 		CJFQ: "journalArticle",
 		CJFD: "journalArticle",
 		CAPJ: "journalArticle",
+		SJES: "journalArticle",
+		SJPD: "journalArticle",
+		SSJD: "journalArticle",
 		CCJD: "journalArticle",
+		CDMD: "journalArticle",
+		CYFD: "journalArticle",
 		CDFD: "thesis",
 		CMFD: "thesis",
 		CLKM: "thesis",
 		CCND: "newspaperArticle",
 		CPFD: "conferencePaper",
+		IPFD: "conferencePaper",
+		SCPD: "patent"
 	};
 	var db = dbname.substr(0, 4).toUpperCase();
 	if (dbType[db]) {
@@ -161,7 +184,6 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 		links = ZU.xpath(doc, '//table[@class="GridTableContent"]/tbody/tr[./td[2]/a]');
 		aXpath = './td[2]/a';
 	}
-
 	if (!links.length) {
 		return false;
 	}
@@ -171,7 +193,7 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 		var a = ZU.xpath(links[i], aXpath)[0];
 		var title = ZU.xpathText(a, './node()[not(name()="SCRIPT")]', null, '');
 		if (title) title = ZU.trimInternal(title);
-		var id = getIDFromURL(a.href);
+		var id = getIDFromURL(a.href) || getIDFromSearchRow(links[i]);
 		// pre-released item can not get ID from URL, try to get ID from element.value
 		if (!id) {
 			var td1 = ZU.xpath(links[i], './td')[0];
@@ -202,99 +224,84 @@ function detectWeb(doc, url) {
 	}
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var itemInfo = {};
 		var items = getItemsFromSearchResults(doc, url, itemInfo);
-		Z.selectItems(items, function (selectedItems) {
-			if (!selectedItems) return;
-			
-			var itemInfoByTitle = {};
-			var ids = [];
-			for (var url in selectedItems) {
-				ids.push(itemInfo[url].id);
-				itemInfoByTitle[selectedItems[url]] = itemInfo[url];
-				itemInfoByTitle[selectedItems[url]].url = url;
+		let selectItems = await Z.selectItems(items);
+		if (selectItems) {
+			for (let url in selectItems) {
+				await scrape(itemInfo[url].id, doc, { url: url });
 			}
-			scrape(ids, doc, url, itemInfoByTitle);
-		});
+		}
 	}
 	else {
-		scrape([getIDFromPage(doc, url)], doc, url);
+		await scrape(getIDFromPage(doc, url), doc);
 	}
 }
 
-function scrape(ids, doc, url, itemInfo) {
-	getRefWorksByID(ids, function (text) {
-		var translator = Z.loadTranslator('import');
-		translator.setTranslator('1a3506da-a303-4b0a-a1cd-f216e6138d86'); // RefWorks Tagged
-		text = text.replace(/IS (\d+)\nvo/, "IS $1\nVO");
-		translator.setString(text);
-		
-		translator.setHandler('itemDone', function (obj, newItem) {
-			// split names
-			for (var i = 0, n = newItem.creators.length; i < n; i++) {
-				var creator = newItem.creators[i];
-				if (creator.firstName) continue;
-				
-				var lastSpace = creator.lastName.lastIndexOf(' ');
-				var lastMiddleDot = creator.lastName.lastIndexOf('·');
-				if (creator.lastName.search(/[A-Za-z]/) !== -1 && lastSpace !== -1) {
-					// western name. split on last space
-					creator.firstName = creator.lastName.substr(0, lastSpace);
-					creator.lastName = creator.lastName.substr(lastSpace + 1);
-				}
-				else if (lastMiddleDot !== -1) {
-					// translated western name with · as separator
-					creator.firstName = creator.lastName.substr(0, lastMiddleDot);
-					creator.lastName = creator.lastName.substr(lastMiddleDot + 1);
-				}
-				else {
-					// Chinese name. first character is last name, the rest are first name
-					creator.firstName = creator.lastName.substr(1);
-					creator.lastName = creator.lastName.charAt(0);
-				}
-			}
+async function scrape(id, doc, extraData) {
+	const text = await getRefWorksByID(id);
+	var translator = Z.loadTranslator('import');
+	translator.setTranslator('1a3506da-a303-4b0a-a1cd-f216e6138d86'); // RefWorks Tagged
+	translator.setString(text);
+	
+	translator.setHandler('itemDone', function (obj, newItem) {
+		// split names
+		for (var i = 0, n = newItem.creators.length; i < n; i++) {
+			var creator = newItem.creators[i];
+			if (creator.firstName) continue;
 			
-			if (newItem.abstractNote) {
-				newItem.abstractNote = newItem.abstractNote.replace(/\s*[\r\n]\s*/g, '\n');
+			var lastSpace = creator.lastName.lastIndexOf(' ');
+			var lastMiddleDot = creator.lastName.lastIndexOf('·');
+			if (creator.lastName.search(/[A-Za-z]/) !== -1 && lastSpace !== -1) {
+				// western name. split on last space
+				creator.firstName = creator.lastName.substr(0, lastSpace);
+				creator.lastName = creator.lastName.substr(lastSpace + 1);
 			}
-			
-			// clean up tags. Remove numbers from end
-			for (var j = 0, l = newItem.tags.length; j < l; j++) {
-				newItem.tags[j] = newItem.tags[j].replace(/:\d+$/, '');
-			}
-			
-			newItem.title = ZU.trimInternal(newItem.title);
-			if (itemInfo) {
-				var info = itemInfo[newItem.title];
-				if (!info) {
-					Z.debug('No item info for "' + newItem.title + '"');
-				}
-				else {
-					newItem.url = info.url;
-				}
+			else if (lastMiddleDot !== -1) {
+				// translated western name with · as separator
+				creator.firstName = creator.lastName.substr(0, lastMiddleDot);
+				creator.lastName = creator.lastName.substr(lastMiddleDot + 1);
 			}
 			else {
-				newItem.url = url;
+				// Chinese name. first character is last name, the rest are first name
+				creator.firstName = creator.lastName.substr(1);
+				creator.lastName = creator.lastName.charAt(0);
 			}
-
-			// CN 中国刊物编号，非refworks中的callNumber
-			// CN in CNKI refworks format explains Chinese version of ISSN
-			if (newItem.callNumber) {
-			//	newItem.extra = 'CN ' + newItem.callNumber;
-				newItem.callNumber = "";
-			}
-			// don't download PDF/CAJ on searchResult(multiple)
-			var webType = detectWeb(doc, url);
-			if (webType && webType != 'multiple') {
-				newItem.attachments = getAttachments(doc, newItem);
-			}
-			newItem.complete();
-		});
+		}
 		
-		translator.translate();
+		if (newItem.abstractNote) {
+			newItem.abstractNote = newItem.abstractNote.replace(/\s*[\r\n]\s*/g, '\n');
+		}
+		
+		// clean up tags. Remove numbers from end
+		for (var j = 0, l = newItem.tags.length; j < l; j++) {
+			newItem.tags[j] = newItem.tags[j].replace(/:\d+$/, '');
+		}
+		
+		newItem.title = ZU.trimInternal(newItem.title);
+		if (extraData) {
+			newItem.url = extraData.url;
+		}
+		else {
+			newItem.url = id.url;
+		}
+
+		// CN 中国刊物编号，非refworks中的callNumber
+		// CN in CNKI refworks format explains Chinese version of ISSN
+		if (newItem.callNumber) {
+		//	newItem.extra = 'CN ' + newItem.callNumber;
+			newItem.callNumber = "";
+		}
+		// don't download PDF/CAJ on searchResult(multiple)
+		var webType = detectWeb(doc, id.url);
+		if (webType && webType != 'multiple') {
+			newItem.attachments = getAttachments(doc, newItem);
+		}
+		newItem.complete();
 	});
+	translator.translate();
 }
 
 // get pdf download link
