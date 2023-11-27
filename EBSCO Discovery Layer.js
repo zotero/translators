@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-16 00:45:19"
+	"lastUpdated": "2023-11-27 04:12:52"
 }
 
 /*
@@ -35,7 +35,7 @@
 	***** END LICENSE BLOCK *****
 */
 
-const itemRegex = /\/c\/([^/]+)\/(?:details|viewer\/pdf)\/([^?]+)/;
+const itemRegex = /\/c\/([^/]+)(?:\/search)?\/(?:details|viewer\/pdf)\/([^?]+)/;
 function detectWeb(doc, url) {
 	if (itemRegex.test(url)) {
 		if (url.includes("/viewer/pdf")) {
