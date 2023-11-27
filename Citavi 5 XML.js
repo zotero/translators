@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2023-11-27 18:23:50"
+	"lastUpdated": "2023-11-27 19:38:44"
 }
 
 /*
@@ -181,9 +181,11 @@ async function importItems({ references, doc, citaviVersion, rememberTags, remem
 		var keywords = ZU.xpathText(doc, '//ReferenceKeywords/OnetoN[starts-with(text(), "' + item.itemID + '")]');
 		if (keywords && keywords.length > 0) {
 			item.tags = attachName(doc, keywords);
+		} else {
+			item.tags = [];
 		}
 		if (rememberTags[item.itemID]) {
-			for (var j = 0; j < rememberTags[item.itemID].length; j++) {
+			for (let j = 0; j < rememberTags[item.itemID].length; j++) {
 				item.tags.push(rememberTags[item.itemID][j]);
 			}
 		}
@@ -208,8 +210,16 @@ async function importItems({ references, doc, citaviVersion, rememberTags, remem
 			if (pages) {
 				noteObject.note += "<i>" + pages + "</i>";
 			}
+			var keywords = ZU.xpathText(doc, '//KnowledgeItemKeywords/OnetoN[starts-with(text(), "' + noteObject.id + '")]');
+			if (keywords && keywords.length > 0) {
+				noteObject.tags = attachName(doc, keywords);
+			} else {
+				noteObject.tags = [];
+			}
 			if (rememberTags[noteObject.id]) {
-				noteObject.tags = rememberTags[noteObject.id];
+				for (let j = 0; j < rememberTags[noteObject.id]; j++) {
+					noteObject.tags.append(rememberTags[noteObject.id][j]);
+				}
 			}
 			if (noteObject.note != "") {
 				item.notes.push(noteObject);
@@ -488,8 +498,15 @@ function attachName(doc, ids) {
 	var idList = ids.split(';');
 	// skip the first element which is the id of reference
 	for (var j = 1; j < idList.length; j++) {
-		var author = doc.getElementById(idList[j]);
-		valueList.push(ZU.xpathText(author, 'Name'));
+		// sometimes the id is appended by the a (rank?) number,
+		// which needs to be cleaned first
+		id = idList[j].split(":")[0];
+		var author = doc.getElementById(id);
+		if (author) {
+			valueList.push(ZU.xpathText(author, 'Name'));
+		} else {
+			Z.debug("Can't find this id:", id);
+		}
 	}
 	return valueList;
 }
