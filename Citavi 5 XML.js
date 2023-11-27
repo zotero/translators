@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2025-01-04 01:03:00"
+	"lastUpdated": "2025-03-07 15:55:00"
 }
 
 /*
@@ -194,7 +194,8 @@ async function importItems({ references, doc, citaviVersion, rememberTags, itemI
 				noteObject.note += '<h1>' + title + "</h1>\n";
 			}
 			if (text) {
-				noteObject.note += "<p>" + ZU.xpathText(citations[j], 'Text') + "</p>\n";
+				text = text.split(/\r?\n/).join("<br />");
+				noteObject.note += "<p>" + text+ "</p>\n";
 			}
 			if (pages) {
 				noteObject.note += "<i>" + pages + "</i>";
