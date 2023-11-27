@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2023-11-27 18:17:48"
+	"lastUpdated": "2023-11-27 18:23:50"
 }
 
 /*
@@ -124,6 +124,7 @@ async function importItems({ references, doc, citaviVersion, rememberTags, remem
 		item.numberOfVolumes = ZU.xpathText(references[i], './NumberOfVolumes');
 
 		addExtraLine(item, "PMID", ZU.xpathText(references[i], './PubMedID'));
+		addExtraLine(item, "Citation Key", ZU.xpathText(references[i], './BibTeXKey'));
 
 		item.pages = extractPages(ZU.xpathText(references[i], './PageRange'));
 		item.numPages = extractPages(ZU.xpathText(references[i], './PageCount'));
