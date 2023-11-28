@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2023-11-28 08:44:23"
+	"lastUpdated": "2023-11-28 11:43:16"
 }
 
 /*
@@ -181,7 +181,8 @@ async function importItems({ references, doc, citaviVersion, rememberTags, remem
 		var keywords = ZU.xpathText(doc, '//ReferenceKeywords/OnetoN[starts-with(text(), "' + item.itemID + '")]');
 		if (keywords && keywords.length > 0) {
 			item.tags = attachName(doc, keywords);
-		} else {
+		}
+		else {
 			item.tags = [];
 		}
 		if (rememberTags[item.itemID]) {
@@ -194,7 +195,7 @@ async function importItems({ references, doc, citaviVersion, rememberTags, remem
 		// the information of it.
 		var citations = ZU.xpath(doc, '//KnowledgeItem[ReferenceID="' + item.itemID + '"]');
 		for (let j = 0; j < citations.length; j++) {
-			noteObject = extractNote(doc, citations[j], rememberTags);
+			var noteObject = extractNote(doc, citations[j], rememberTags);
 			if (noteObject.note != "") {
 				item.notes.push(noteObject);
 			}
@@ -341,11 +342,11 @@ async function importTasks({ tasks, progress }) {
 async function importStandalonNotes(doc, rememberTags, progress) {
 	var knowledgeItems = ZU.xpath(doc, '//KnowledgeItem[not(ReferenceID)]');
 	for (let knowledgeItem of knowledgeItems) {
-		nodeObject = extractNote(doc, knowledgeItem, rememberTags);
+		let noteObject = extractNote(doc, knowledgeItem, rememberTags);
 		if (noteObject.note != "") {
 			let item = new Zotero.Item("note");
-			for (let key in nodeObject) {
-				item[key] =  nodeObject[key];
+			for (let key in noteObject) {
+				item[key] = noteObject[key];
 			}
 			await item.complete();
 			Z.setProgress(++progress.current / progress.total * 100);
@@ -491,7 +492,7 @@ function extractNote(doc, noteXML, rememberTags) {
 	}
 	if (text) {
 		text = text.split(/\r?\n/).join("<br />");
-		noteObject.note += "<p>" + text+ "</p>\n";
+		noteObject.note += "<p>" + text + "</p>\n";
 	}
 	if (pages) {
 		noteObject.note += "<i>" + pages + "</i>";
@@ -499,7 +500,8 @@ function extractNote(doc, noteXML, rememberTags) {
 	var keywords = ZU.xpathText(doc, '//KnowledgeItemKeywords/OnetoN[starts-with(text(), "' + noteObject.id + '")]');
 	if (keywords && keywords.length > 0) {
 		noteObject.tags = attachName(doc, keywords);
-	} else {
+	}
+	else {
 		noteObject.tags = [];
 	}
 	if (rememberTags[noteObject.id]) {
@@ -522,11 +524,12 @@ function attachName(doc, ids) {
 	for (var j = 1; j < idList.length; j++) {
 		// sometimes the id is appended by the a (rank?) number,
 		// which needs to be cleaned first
-		id = idList[j].split(":")[0];
+		let id = idList[j].split(":")[0];
 		var author = doc.getElementById(id);
 		if (author) {
 			valueList.push(ZU.xpathText(author, 'Name'));
-		} else {
+		}
+		else {
 			Z.debug("Can't find this id:", id);
 		}
 	}
