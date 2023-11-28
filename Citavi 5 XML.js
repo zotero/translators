@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2023-11-27 19:38:44"
+	"lastUpdated": "2023-11-28 08:44:23"
 }
 
 /*
@@ -194,33 +194,7 @@ async function importItems({ references, doc, citaviVersion, rememberTags, remem
 		// the information of it.
 		var citations = ZU.xpath(doc, '//KnowledgeItem[ReferenceID="' + item.itemID + '"]');
 		for (let j = 0; j < citations.length; j++) {
-			var noteObject = {};
-			noteObject.id = ZU.xpathText(citations[j], '@id');
-			var title = ZU.xpathText(citations[j], 'CoreStatement');
-			var text = ZU.xpathText(citations[j], 'Text');
-			var pages = extractPages(ZU.xpathText(citations[j], 'PageRange'));
-			noteObject.note = '';
-			if (title) {
-				noteObject.note += '<h1>' + title + "</h1>\n";
-			}
-			if (text) {
-				text = text.split(/\r?\n/).join("<br />");
-				noteObject.note += "<p>" + text+ "</p>\n";
-			}
-			if (pages) {
-				noteObject.note += "<i>" + pages + "</i>";
-			}
-			var keywords = ZU.xpathText(doc, '//KnowledgeItemKeywords/OnetoN[starts-with(text(), "' + noteObject.id + '")]');
-			if (keywords && keywords.length > 0) {
-				noteObject.tags = attachName(doc, keywords);
-			} else {
-				noteObject.tags = [];
-			}
-			if (rememberTags[noteObject.id]) {
-				for (let j = 0; j < rememberTags[noteObject.id]; j++) {
-					noteObject.tags.append(rememberTags[noteObject.id][j]);
-				}
-			}
+			noteObject = extractNote(doc, citations[j], rememberTags);
 			if (noteObject.note != "") {
 				item.notes.push(noteObject);
 			}
@@ -363,6 +337,22 @@ async function importTasks({ tasks, progress }) {
 	}
 }
 
+// Standalone notes are the ones with no ReferenceID property
+async function importStandalonNotes(doc, rememberTags, progress) {
+	var knowledgeItems = ZU.xpath(doc, '//KnowledgeItem[not(ReferenceID)]');
+	for (let knowledgeItem of knowledgeItems) {
+		nodeObject = extractNote(doc, knowledgeItem, rememberTags);
+		if (noteObject.note != "") {
+			let item = new Zotero.Item("note");
+			for (let key in nodeObject) {
+				item[key] =  nodeObject[key];
+			}
+			await item.complete();
+			Z.setProgress(++progress.current / progress.total * 100);
+		}
+	}
+}
+
 function addHierarchyNumberRecursive(collections, level = null) {
 	let index = 1;
 	for (const collection of collections) {
@@ -485,7 +475,39 @@ async function doImport() {
 	await importItems({ references, doc, citaviVersion, rememberTags, rememberCustomFields, itemIdList, progress, unfinishedReferences });
 	await importUnfinished({ doc, itemIdList, unfinishedReferences, progress });
 	await importTasks({ tasks, progress });
+	await importStandalonNotes(doc, rememberTags, progress);
 	importCategories({ categories, doc, progress });
+}
+
+function extractNote(doc, noteXML, rememberTags) {
+	var noteObject = {};
+	noteObject.id = ZU.xpathText(noteXML, '@id');
+	var title = ZU.xpathText(noteXML, 'CoreStatement');
+	var text = ZU.xpathText(noteXML, 'Text');
+	var pages = extractPages(ZU.xpathText(noteXML, 'PageRange'));
+	noteObject.note = '';
+	if (title) {
+		noteObject.note += '<h1>' + title + "</h1>\n";
+	}
+	if (text) {
+		text = text.split(/\r?\n/).join("<br />");
+		noteObject.note += "<p>" + text+ "</p>\n";
+	}
+	if (pages) {
+		noteObject.note += "<i>" + pages + "</i>";
+	}
+	var keywords = ZU.xpathText(doc, '//KnowledgeItemKeywords/OnetoN[starts-with(text(), "' + noteObject.id + '")]');
+	if (keywords && keywords.length > 0) {
+		noteObject.tags = attachName(doc, keywords);
+	} else {
+		noteObject.tags = [];
+	}
+	if (rememberTags[noteObject.id]) {
+		for (let j = 0; j < rememberTags[noteObject.id]; j++) {
+			noteObject.tags.append(rememberTags[noteObject.id][j]);
+		}
+	}
+	return noteObject;
 }
 
 function attachName(doc, ids) {
