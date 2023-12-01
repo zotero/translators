@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-11-22 15:14:19"
+	"lastUpdated": "2023-11-27 05:30:22"
 }
 
 /*
@@ -38,21 +38,7 @@
 
 // Fetches RefWorks records for provided IDs and calls onDataAvailable with resulting text
 // ids should be in the form [{dbname: "CDFDLAST2013", filename: "1013102302.nh"}]
-async function getRefWorksByID(id) {
-	if (!id) return;
-	var { dbname, filename } = id;
-	var postData = `FileName=${dbname}!${filename}!1!0&DisplayMode=Refworks&OrderParam=0&OrderType=desc&SelectField=&PageIndex=1&PageSize=20&language=&uniplatform=NZKPT&random=0.30585230060685187`;
-	var refer = `https://kns.cnki.net/dm/manage/export.html?filename=${dbname}!${filename}!1!0&displaymode=NEW&uniplatform=NZKPT`;
-	var reftext = await request(
-		'https://kns.cnki.net/dm/api/ShowExport',
-		{
-			method: "POST",
-			body: postData,
-			headers: {
-				Referer: refer
-			}
-		}
-	);
+function toStdRef(reftext) {
 	return reftext
 		.body
 		.replace("<ul class='literature-list'><li>", "")
@@ -100,7 +86,8 @@ function getIDFromRef(doc, url) {
 	let filename = attr(doc, '#paramfilename', 'value');
 	if (database && filename) {
 		return { dbname: database, filename: filename, url: url };
-	} else {
+	}
+	else {
 		return false;
 	}
 }
@@ -130,7 +117,8 @@ function getIDFromSearchRow(row) {
 	var filename = attr(row, "a.icon-collect", "data-filename");
 	if (dbcode && filename) {
 		return { dbcode: dbcode, dbname: dbcode, filename: filename };
-	} else {
+	}
+	else {
 		return false;
 	}
 }
@@ -160,7 +148,7 @@ function getTypeFromDBName(dbname) {
 		IPFD: "conferencePaper",
 		SCPD: "patent"
 	};
-	var db = dbname.substr(0, 4).toUpperCase();
+	var db = dbname.substring(0, 4).toUpperCase();
 	if (dbType[db]) {
 		return dbType[db];
 	}
@@ -213,6 +201,10 @@ function detectWeb(doc, url) {
 	// Z.debug(doc);
 	var id = getIDFromPage(doc, url);
 	var items = getItemsFromSearchResults(doc, url);
+	var searchResult = doc.querySelector("#ModuleSearchResult");
+	if (searchResult) {
+		Z.monitorDOMChanges(searchResult, { childList: true, subtree: true });
+	}
 	if (id) {
 		return getTypeFromDBName(id.dbname);
 	}
@@ -241,10 +233,22 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(id, doc, extraData) {
-	const text = await getRefWorksByID(id);
+	var { dbname, filename } = id;
+	var postData = `FileName=${dbname}!${filename}!1!0&DisplayMode=Refworks&OrderParam=0&OrderType=desc&SelectField=&PageIndex=1&PageSize=20&language=&uniplatform=NZKPT&random=0.30585230060685187`;
+	var refer = `https://kns.cnki.net/dm/manage/export.html?filename=${dbname}!${filename}!1!0&displaymode=NEW&uniplatform=NZKPT`;
+	var reftext = await request(
+		'https://kns.cnki.net/dm/api/ShowExport',
+		{
+			method: "POST",
+			body: postData,
+			headers: {
+				Referer: refer
+			}
+		}
+	);
 	var translator = Z.loadTranslator('import');
 	translator.setTranslator('1a3506da-a303-4b0a-a1cd-f216e6138d86'); // RefWorks Tagged
-	translator.setString(text);
+	translator.setString(toStdRef(reftext));
 	
 	translator.setHandler('itemDone', function (obj, newItem) {
 		// split names
@@ -254,19 +258,19 @@ async function scrape(id, doc, extraData) {
 			
 			var lastSpace = creator.lastName.lastIndexOf(' ');
 			var lastMiddleDot = creator.lastName.lastIndexOf('·');
-			if (creator.lastName.search(/[A-Za-z]/) !== -1 && lastSpace !== -1) {
+			if (/[A-Za-z]/.test(creator.lastName) && lastSpace !== -1) {
 				// western name. split on last space
-				creator.firstName = creator.lastName.substr(0, lastSpace);
-				creator.lastName = creator.lastName.substr(lastSpace + 1);
+				creator.firstName = creator.lastName.substring(0, lastSpace);
+				creator.lastName = creator.lastName.substring(lastSpace + 1);
 			}
 			else if (lastMiddleDot !== -1) {
 				// translated western name with · as separator
-				creator.firstName = creator.lastName.substr(0, lastMiddleDot);
-				creator.lastName = creator.lastName.substr(lastMiddleDot + 1);
+				creator.firstName = creator.lastName.substring(0, lastMiddleDot);
+				creator.lastName = creator.lastName.substring(lastMiddleDot + 1);
 			}
 			else {
 				// Chinese name. first character is last name, the rest are first name
-				creator.firstName = creator.lastName.substr(1);
+				creator.firstName = creator.lastName.substring(1);
 				creator.lastName = creator.lastName.charAt(0);
 			}
 		}
@@ -358,6 +362,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&dbname=CJFDLAST2015&filename=SPZZ201412003&v=MTU2MzMzcVRyV00xRnJDVVJMS2ZidVptRmkva1ZiL09OajNSZExHNEg5WE5yWTlGWjRSOGVYMUx1eFlTN0RoMVQ=",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -398,29 +403,19 @@ var testCases = [
 				"ISSN": "1000-8713",
 				"abstractNote": "来自中药的水溶性多糖具有广谱治疗和低毒性特点,是天然药物及保健品研发中的重要组成部分。针对中药多糖结构复杂、难以表征的问题,本文以中药黄芪中的多糖为研究对象,采用\"自下而上\"法完成对黄芪多糖的表征。首先使用部分酸水解方法水解黄芪多糖,分别考察了水解时间、酸浓度和温度的影响。在适宜条件(4 h、1.5mol/L三氟乙酸、80℃)下,黄芪多糖被水解为特征性的寡糖片段。接下来,采用亲水作用色谱与质谱联用对黄芪多糖部分酸水解产物进行分离和结构表征。结果表明,提取得到的黄芪多糖主要为1→4连接线性葡聚糖,水解得到聚合度4~11的葡寡糖。本研究对其他中药多糖的表征具有一定的示范作用。",
 				"issue": "12",
-				"language": "中文;",
+				"language": "zh-CN",
 				"libraryCatalog": "CNKI",
 				"pages": "1306-1312",
 				"publicationTitle": "色谱",
 				"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&dbname=CJFDLAST2015&filename=SPZZ201412003&v=MTU2MzMzcVRyV00xRnJDVVJMS2ZidVptRmkva1ZiL09OajNSZExHNEg5WE5yWTlGWjRSOGVYMUx1eFlTN0RoMVQ=",
 				"volume": "32",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [
-					{
-						"tag": "Astragalus"
-					},
-					{
-						"tag": "characterization"
-					},
-					{
-						"tag": "hydrophilic interaction liquid chromatography(HILIC)mass spectrometry(MS)"
-					},
-					{
-						"tag": "partial acid hydrolysis"
-					},
-					{
-						"tag": "polysaccharides"
-					},
 					{
 						"tag": "亲水作用色谱"
 					},
@@ -448,6 +443,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CMFD&dbname=CMFD201701&filename=1017045605.nh&v=MDc3ODZPZVorVnZGQ3ZrV3JyT1ZGMjZHYk84RzlmTXFwRWJQSVI4ZVgxTHV4WVM3RGgxVDNxVHJXTTFGckNVUkw=",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "thesis",
@@ -459,27 +455,15 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2015",
-				"abstractNote": "黄瓜(Cucumis sativus L.)是我国最大的保护地栽培蔬菜作物,也是植物性别发育和维管束运输研究的重要模式植物。黄瓜基因组序列图谱已经构建完成,并且在此基础上又完成了全基因组SSR标记开发和涵盖330万个变异位点变异组图谱,成为黄瓜功能基因研究的重要平台和工具,相关转录组研究也有很多报道,不过共表达网络研究还是空白。本实验以温室型黄瓜9930为研究对象,选取10个不同组织,进行转录组测序,获得10份转录组原始数据。在对原始数据去除接头与低质量读段后,将高质量读段用Tophat2回贴到已经发表的栽培黄瓜基因组序列上。用Cufflinks对回贴后的数据计算FPKM值,获得10份组织的2...",
-				"language": "中文;",
+				"date": "2017",
+				"abstractNote": "黄瓜(Cucumis sativus L.)是我国最大的保护地栽培蔬菜作物,也是植物性别发育和维管束运输研究的重要模式植物。黄瓜基因组序列图谱已经构建完成,并且在此基础上又完成了全基因组SSR标记开发和涵盖330万个变异位点变异组图谱,成为黄瓜功能基因研究的重要平台和工具,相关转录组研究也有很多报道,不过共表达网络研究还是空白。本实验以温室型黄瓜9930为研究对象,选取10个不同组织,进行转录组测序,获得10份转录组原始数据。在对原始数据去除接头与低质量读段后,将高质量读段用Tophat2回贴到已经发表的栽培黄瓜基因组序列上。用Cufflinks对回贴后的数据计算FPKM值,获得10份组织的24274基因的表达量数据。计算结果中的回贴率比较理想,不过有些基因的表达量过低。为了防止表达量低的基因对结果的影响,将10份组织中表达量最大小于5的基因去除,得到16924个基因,进行下一步分析。共表达网络的构建过程是将上步获得的表达量数据,利用R语言中WGCNA(weighted gene co-expression network analysis)包构建共表达网络。结果得到的共表达网络包括1134个模块。这些模块中的基因表达模式类似,可以认为是共表达关系。不过结果中一些模块内基因间相关性同其他模块相比比较低,在分析过程中,将模块中基因相关性平均值低于0.9的模块都去除,最终得到839个模块,一共11,844个基因。共表达的基因因其表达模式类似而聚在一起,这些基因可能与10份组织存在特异性关联。为了计算模块与组织间的相关性,首先要对每个模块进行主成分分析(principle component analysis,PCA),获得特征基因(module eigengene,ME),特征基因可以表示这个模块所有基因共有的表达趋势。通过计算特征基因与组织间的相关性,从而挑选出组织特异性模块,这些模块一共有323个。利用topGO功能富集分析的结果表明这些特异性模块所富集的功能与组织相关。共表达基因在染色体上的物理位置经常是成簇分布的。按照基因间隔小于25kb为标准。分别对839个模块进行分析,结果发现在71个模块中共有220个cluster,这些cluster 一般有2～5个基因,cluster中的基因在功能上也表现出一定的联系。共表达基因可能受到相同的转录调控,这些基因在启动子前2kb可能会存在有相同的motif以供反式作用元...",
+				"language": "zh-CN",
 				"libraryCatalog": "CNKI",
 				"thesisType": "硕士",
 				"university": "南京农业大学",
 				"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CMFD&dbname=CMFD201701&filename=1017045605.nh&v=MDc3ODZPZVorVnZGQ3ZrV3JyT1ZGMjZHYk84RzlmTXFwRWJQSVI4ZVgxTHV4WVM3RGgxVDNxVHJXTTFGckNVUkw=",
 				"attachments": [],
 				"tags": [
-					{
-						"tag": "co-expression"
-					},
-					{
-						"tag": "cucumber"
-					},
-					{
-						"tag": "network"
-					},
-					{
-						"tag": "transcriptome"
-					},
 					{
 						"tag": "共表达"
 					},
@@ -501,6 +485,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://kns.cnki.net/kcms/detail/detail.aspx?dbcode=CCJD&dbname=CCJDLAST2&filename=ZKSF202002010&uniplatform=NZKPT&v=RM9dl7WiC7a9v7FVB6ov3OwJSXCWzsWIng_BWXok2rj4YFWz9tZ20FRZxDaeDPCm",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -518,16 +503,21 @@ var testCases = [
 					}
 				],
 				"date": "2020",
-				"abstractNote": "&lt;正&gt;一、简介近来再次对俄罗斯(1993)和西班牙(1995)陪审团审判模式进行介绍的原因有两个方面。第一,在废除传统陪审团审判的情况下,要么采取仅由职业法官组成的法院审理案件,要么由职业法官和审讯顾问合议来判断所有的事实问题、法律问题并作出相应判决,这是一种令人惊闻的倒退。",
-				"issue": "02",
-				"language": "中文;",
+				"abstractNote": "<正>一、简介近来再次对俄罗斯(1993)和西班牙(1995)陪审团审判模式进行介绍的原因有两个方面。第一,在废除传统陪审团审判的情况下,要么采取仅由职业法官组成的法院审理案件,要么由职业法官和审讯顾问合议来判断所有的事实问题、法律问题并作出相应判决,这是一种令人惊闻的倒退。",
+				"issue": "2",
+				"language": "zh-CN",
 				"libraryCatalog": "CNKI",
 				"pages": "193-212",
 				"publicationTitle": "司法智库",
 				"shortTitle": "欧洲陪审团制度新发展",
 				"url": "https://kns.cnki.net/kcms/detail/detail.aspx?dbcode=CCJD&dbname=CCJDLAST2&filename=ZKSF202002010&uniplatform=NZKPT&v=RM9dl7WiC7a9v7FVB6ov3OwJSXCWzsWIng_BWXok2rj4YFWz9tZ20FRZxDaeDPCm",
 				"volume": "3",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [
 					{
 						"tag": "俄罗斯"
@@ -552,7 +542,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://kns.cnki.net/kcms2/article/abstract?v=3uoqIhG8C44YLTlOAiTRKibYlV5Vjs7ioT0BO4yQ4m_mOgeS2ml3UHGnAz_wirMwf-b2NsjH_IkCCqUvvwsK8DOvNyxMAxbu&uniplatform=NZKPT",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=aGn3Ey0ZxcAi0XeGEjt5HeH9QvBBKaMwsES4SuFJjIdiexE2qhU8bX2aGBIHriUe6WrMOFyCz6TIuYJGlA_YQUO9h2FJwGt_gZfkHkLHnqVgNK8uMWo5lKYMqxvBPfO6_0Zy21140lIwEFrUw-cJtw==&uniplatform=NZKPT",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -566,31 +557,21 @@ var testCases = [
 				],
 				"date": "2022",
 				"ISSN": "1001-2397",
-				"abstractNote": "我国绿色产品认证标识制度框架已初步形成。作为一项法律制度,绿色产品标识及认证中形成了两组法律关系:一是就产品认可认证,在行政主体、认证机构与申请人之间构成公私混合的规制关系;二是就绿色产品标识授权使用,在上述法律关系主体间构成的商业许可关系。两组法律关系的搭建,形成了我国绿色产品认证标识制度的基本格局。制度的具体完善路径是将现行同类环保产品认证标识纳入绿色产品标识与绿色属性产品标识的二元框架内,或吸收,或拆解,或由市场逐步淘汰,最终形成统一的绿色产品认证标识体系。在制度构建过程中,对第三方认证机构的规制成为制度有效运行的关键。参考域外经验,我国应当通过强化认证机构的独立性,平衡认证机构与申请人...",
-				"issue": "06",
-				"language": "中文;",
+				"abstractNote": "我国绿色产品认证标识制度框架已初步形成。作为一项法律制度,绿色产品标识及认证中形成了两组法律关系:一是就产品认可认证,在行政主体、认证机构与申请人之间构成公私混合的规制关系;二是就绿色产品标识授权使用,在上述法律关系主体间构成的商业许可关系。两组法律关系的搭建,形成了我国绿色产品认证标识制度的基本格局。制度的具体完善路径是将现行同类环保产品认证标识纳入绿色产品标识与绿色属性产品标识的二元框架内,或吸收,或拆解,或由市场逐步淘汰,最终形成统一的绿色产品认证标识体系。在制度构建过程中,对第三方认证机构的规制成为制度有效运行的关键。参考域外经验,我国应当通过强化认证机构的独立性,平衡认证机构与申请人之间的制约关系,以及通过加强行政监管与社会监督,防止认证权力寻租,充分发挥绿色产品认证标识制度的实践效果。",
+				"issue": "6",
+				"language": "zh-CN",
 				"libraryCatalog": "CNKI",
 				"pages": "133-145",
 				"publicationTitle": "现代法学",
-				"url": "https://kns.cnki.net/kcms2/article/abstract?v=3uoqIhG8C44YLTlOAiTRKibYlV5Vjs7ioT0BO4yQ4m_mOgeS2ml3UHGnAz_wirMwf-b2NsjH_IkCCqUvvwsK8DOvNyxMAxbu&uniplatform=NZKPT",
+				"url": "https://kns.cnki.net/kcms2/article/abstract?v=aGn3Ey0ZxcAi0XeGEjt5HeH9QvBBKaMwsES4SuFJjIdiexE2qhU8bX2aGBIHriUe6WrMOFyCz6TIuYJGlA_YQUO9h2FJwGt_gZfkHkLHnqVgNK8uMWo5lKYMqxvBPfO6_0Zy21140lIwEFrUw-cJtw==&uniplatform=NZKPT",
 				"volume": "44",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [
-					{
-						"tag": "certification trade mark"
-					},
-					{
-						"tag": "green product certification"
-					},
-					{
-						"tag": "green product identification"
-					},
-					{
-						"tag": "green products"
-					},
-					{
-						"tag": "third party certification"
-					},
 					{
 						"tag": "第三方认证"
 					},
@@ -614,7 +595,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://kns.cnki.net/kcms2/article/abstract?v=ARuSRxW-FQHH_OEY6X72RuJIsrP2RHAQAacVbC9CGuvOv08ETIP-MqQO5E296beGN9e8BXVfYGR6l0qfpFxS9gdAPZ5URHqiAY8WVPwSYoF6MXeqOgFQfX5vrMMS_wZaK3j5TPxvx-nDGPfIMtrXBlDrWr9SVlAl&uniplatform=NZKPT",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=aGn3Ey0ZxcCQMiRSLWzbqHFLmF0YiAvOI33I1RqvSIDdZeLKl7q3QL7ioYjCbxuMHo1CSBSG2LYUjI9r30yPonoox-iGbCfgn-YF7W2h79KqPswOTOxrzPV94p2evWa1-zchF2wLCag2WcjSEGNUdSNYdPlVmcGt&uniplatform=NZKPT",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -628,15 +610,20 @@ var testCases = [
 				],
 				"date": "2022",
 				"ISSN": "1671-7287",
-				"abstractNote": "我国对常规污染物的治理取得了显著成效，但以有毒有害化学物质的生产和使用为主要来源的新污染物的环境风险仍然较为严峻。当前我国相关环境法律法规和标准中缺乏对新污染物环境风险管控的要求，对于现有化学物质的环境风险管控还存在较为严重的不足。未来环境法典中新污染物环境风险管控立法应当坚持风险预防原则，但风险预防原则并不以追求“零风险”为目标。新污染物环境风险管控立法总体上应当遵循“风险筛查→风险评估→风险管控”的思路。环境风险评估应当聚焦于从科学角度评估新污染物对公众健康和生态环境带来的“风险”本身，不考虑与环境风险无关的经济、社会等因素。确定什么是“不合理的风险”,除了科学判断之外，也需要“正当程序”...",
-				"issue": "05",
-				"language": "中文;",
+				"abstractNote": "我国对常规污染物的治理取得了显著成效，但以有毒有害化学物质的生产和使用为主要来源的新污染物的环境风险仍然较为严峻。当前我国相关环境法律法规和标准中缺乏对新污染物环境风险管控的要求，对于现有化学物质的环境风险管控还存在较为严重的不足。未来环境法典中新污染物环境风险管控立法应当坚持风险预防原则，但风险预防原则并不以追求“零风险”为目标。新污染物环境风险管控立法总体上应当遵循“风险筛查→风险评估→风险管控”的思路。环境风险评估应当聚焦于从科学角度评估新污染物对公众健康和生态环境带来的“风险”本身，不考虑与环境风险无关的经济、社会等因素。确定什么是“不合理的风险”,除了科学判断之外，也需要“正当程序”的加持。风险无法确定时，比照“存在不合理风险”进行管控。在选择风险管控措施时，应当考虑新污染物对公众健康和生态环境的影响程度以及经济、社会等因素。对于新化学物质，应当秉承“除非能证明无害，否则都应当进行适当风险管控”的理念。",
+				"issue": "5",
+				"language": "zh-CN",
 				"libraryCatalog": "CNKI",
 				"pages": "18-30+115",
 				"publicationTitle": "南京工业大学学报(社会科学版)",
-				"url": "https://kns.cnki.net/kcms2/article/abstract?v=ARuSRxW-FQHH_OEY6X72RuJIsrP2RHAQAacVbC9CGuvOv08ETIP-MqQO5E296beGN9e8BXVfYGR6l0qfpFxS9gdAPZ5URHqiAY8WVPwSYoF6MXeqOgFQfX5vrMMS_wZaK3j5TPxvx-nDGPfIMtrXBlDrWr9SVlAl&uniplatform=NZKPT",
+				"url": "https://kns.cnki.net/kcms2/article/abstract?v=aGn3Ey0ZxcCQMiRSLWzbqHFLmF0YiAvOI33I1RqvSIDdZeLKl7q3QL7ioYjCbxuMHo1CSBSG2LYUjI9r30yPonoox-iGbCfgn-YF7W2h79KqPswOTOxrzPV94p2evWa1-zchF2wLCag2WcjSEGNUdSNYdPlVmcGt&uniplatform=NZKPT",
 				"volume": "21",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [
 					{
 						"tag": "新污染物风险管控"
@@ -661,11 +648,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://kns.cnki.net/kcms/detail/detail.aspx?doi=10.13863/j.issn1001-4454.2022.01.030",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=aGn3Ey0ZxcBuyOSvEQLm_QauzuszuNvOETrZkPfTUVjXy6wyG6-n2nHmyA70y6TC3IN6i68HMAN2clvthsV7F1ypcjao4RepuYmOZSEVhLK8lN1UAkOxmQkqtJdHoHI1N1gKQDPjuaEbdR6APIJ1sA==&uniplatform=NZKPT&language=CHS",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Box-Behnken Design-响应面法优化碱水解人参茎叶三醇皂苷制备人参皂苷Rg_2工艺研究",
+				"title": "Box-Behnken Design-响应面法优化碱水解人参茎叶三醇皂苷制备人参皂苷Rg2工艺研究",
 				"creators": [
 					{
 						"lastName": "史",
@@ -706,21 +694,26 @@ var testCases = [
 				"date": "2022",
 				"DOI": "10.13863/j.issn1001-4454.2022.01.030",
 				"ISSN": "1001-4454",
-				"abstractNote": "目的：利用Box-Behnken Design-响应面法优选制备人参皂苷Rg_2的最佳工艺参数。方法：以碱解反应的碱度、温度、时间作为考察因素，人参茎叶三醇皂苷中人参皂苷Rg_2含量作为评价指标，运用Design-Expert 8.0.5b软件对工艺参数进行优化并获得最佳工艺参数。结果：经优化得到碱水解人参茎叶三醇皂苷制备人参皂苷Rg_2的最佳工艺参数：反应碱度7.4%、反应温度187℃、反应时间5 h。验证试验表明，在此工艺参数下可将人参皂苷Rg_2含量提高至9.84%,且工艺稳定。结论：经过优化的工艺可有效提高人参茎叶三醇皂苷中人参皂苷Rg_2含量。",
-				"issue": "01",
-				"language": "中文;",
+				"abstractNote": "目的：利用Box-Behnken Design-响应面法优选制备人参皂苷Rg<sub>2</sub>的最佳工艺参数。方法：以碱解反应的碱度、温度、时间作为考察因素，人参茎叶三醇皂苷中人参皂苷Rg<sub>2</sub>含量作为评价指标，运用Design-Expert 8.0.5b软件对工艺参数进行优化并获得最佳工艺参数。结果：经优化得到碱水解人参茎叶三醇皂苷制备人参皂苷Rg<sub>2</sub>的最佳工艺参数：反应碱度7.4%、反应温度187℃、反应时间5 h。验证试验表明，在此工艺参数下可将人参皂苷Rg<sub>2</sub>含量提高至9.84%,且工艺稳定。结论：经过优化的工艺可有效提高人参茎叶三醇皂苷中人参皂苷Rg<sub>2</sub>含量。",
+				"issue": "1",
+				"language": "zh-CN",
 				"libraryCatalog": "CNKI",
 				"pages": "173-176",
 				"publicationTitle": "中药材",
-				"url": "https://kns.cnki.net/kcms/detail/detail.aspx?doi=10.13863/j.issn1001-4454.2022.01.030",
+				"url": "https://kns.cnki.net/kcms2/article/abstract?v=aGn3Ey0ZxcBuyOSvEQLm_QauzuszuNvOETrZkPfTUVjXy6wyG6-n2nHmyA70y6TC3IN6i68HMAN2clvthsV7F1ypcjao4RepuYmOZSEVhLK8lN1UAkOxmQkqtJdHoHI1N1gKQDPjuaEbdR6APIJ1sA==&uniplatform=NZKPT&language=CHS",
 				"volume": "45",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [
 					{
 						"tag": "Box-Behnken Design-响应面法"
 					},
 					{
-						"tag": "人参皂苷Rg_2"
+						"tag": "人参皂苷Rg2"
 					},
 					{
 						"tag": "人参茎叶三醇皂苷"
