@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-14 19:42:21"
+	"lastUpdated": "2023-12-03 18:15:18"
 }
 
 /*
@@ -38,10 +38,11 @@
 
 
 function detectWeb(doc, url) {
-	if (/articles/.test(url)) {
-		return "blogPost";
-	} else if (getSearchResults(doc, true)) {
+	if (/search/.test(url)) {
 		return "multiple";
+	}
+	else {
+		return "webpage";
 	}
 }
 
@@ -52,25 +53,26 @@ function scrape(doc, url) {
 	translator.setDocument(doc);
 	
 	translator.setHandler('itemDone', function (obj, item) { // corrections to EM
-		item.itemType = "blogPost";
+		item.itemType = "webpage";
 		if (item.publicationTitle) {
-			item.publicationTitle = item.publicationTitle.replace('.net','');
+			item.publicationTitle = item.publicationTitle.replace('.net', '');
 		}
 		if (item.abstractNote) {
-			item.abstractNote = item.abstractNote.replace(/&hellip;/,"...");
+			item.abstractNote = item.abstractNote.replace(/&hellip;/, "...");
 		}
-		var json_ld = doc.querySelector('script[type="application/ld+json"]'); // JSON-LD not yet built into EM
-		if (json_ld) {
-			var json = JSON.parse(json_ld.textContent);
+		item.creators = []; // reset bad author metadata
+		var jsonld = doc.querySelector('script[type="application/ld+json"]'); // JSON-LD not yet built into EM
+		if (jsonld) {
+			var json = JSON.parse(jsonld.textContent);
 			item.date = json.datePublished;
 			if (json.author && json.author.name) {
 				item.creators.push(ZU.cleanAuthor(json.author.name, "author"));
 			}
 		}
 		if (item.creators.length === 0) { // usgamer.net doesn't have JSON-LD and Eurogamer.de's didn't include authors
-			var authorMetadata = doc.querySelectorAll('.author .name a, .details .author a');
+			var authorMetadata = doc.querySelectorAll('.byline .author a');
 			for (let author of authorMetadata) {
-				item.creators.push(ZU.cleanAuthor(author.text, "author"));
+				item.creators.push(ZU.cleanAuthor(author.textContent, "author"));
 			}
 		}
 		if (!item.date) { // usgamer.net doesn't have JSON-LD
@@ -92,7 +94,7 @@ function scrape(doc, url) {
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.doWeb(doc, url);
 	});
 }
@@ -102,7 +104,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('a.gs-title, .details .title a');
-	for (let i=0; i<rows.length; i++) {
+	for (let i = 0; i < rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -126,6 +128,7 @@ function doWeb(doc, url) {
 					articles.push(i);
 				}
 				ZU.processDocuments(articles, scrape);
+				return true;
 			});
 			break;
 		default:
@@ -351,7 +354,7 @@ var testCases = [
 		"url": "https://www.eurogamer.de/articles/2013-07-26-was-die-naechste-generation-von-earthbound-lernen-kann",
 		"items": [
 			{
-				"itemType": "blogPost",
+				"itemType": "webpage",
 				"title": "Was die nächste Generation von Earthbound lernen kann",
 				"creators": [
 					{
@@ -360,11 +363,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2013-07-26T13:30:00+02:00",
+				"date": "2013-07-26T11:30:00+00:00",
 				"abstractNote": "Earthbound für die Wii U Virtual Console ist ein Spiel, das sich kommende Titel als Vorbild nehmen sollten.",
 				"blogTitle": "Eurogamer.de",
 				"language": "de",
-				"url": "https://www.eurogamer.de/articles/2013-07-26-was-die-naechste-generation-von-earthbound-lernen-kann",
+				"url": "https://www.eurogamer.de/was-die-naechste-generation-von-earthbound-lernen-kann",
 				"attachments": [
 					{
 						"title": "Snapshot"
