@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-13 11:53:25"
+	"lastUpdated": "2019-01-10 21:34:35"
 }
 
 /*
@@ -103,10 +103,46 @@ function scrape(doc, url) {
 			item.url = url.match(/^https?:\/\/[^\/]+/i)[0] + item.url;
 		}
 		
-		var author = ZU.xpathText(doc, '//span[@itemprop="author"]');
+		// var author = ZU.xpathText(doc, '//span[@itemprop="author"]'); no more 
+		var author = ZU.xpathText(doc, '//span[@class="author__name"]');
 		if (author) {
 			item.creators.push( ZU.cleanAuthor(author, "author") );
+		} else {
+			author = ZU.xpathText(doc, '//span[@class="meta__author"]');
+			if (author) {
+				item.creators.push( ZU.cleanAuthor(author, "author") );
+			}
 		}
+		
+		var ld_json_rows = ZU.xpath(doc, '//script[@type="application/ld+json"]');
+		ld_json_rows.forEach(function(row){
+			obj = row.text;
+			json_obj = JSON.parse(obj);
+			json_obj_type = json_obj['@type'];
+			switch (json_obj_type) {
+				case 'NewsArticle':
+					// creators may be a singleton or an array 
+					// if it exists here, it must be a more accurate guess of author's name
+					var the_creators = json_obj['author'];
+					if (the_creators) {
+						item.creators = [];  // now it's empty
+						if (the_creators.constructor === Array) {
+							// Array
+							the_creators.forEach(function(element) {
+								author_name = element['name'];
+								item.creators.push(ZU.cleanAuthor(author_name, "author"));
+							});
+						} else {
+							// Single value
+							author_name = the_creators['name'];
+							item.creators.push(ZU.cleanAuthor(author_name, "author"));
+						}
+					}
+				break;
+			}
+		
+		});
+		
 		
 		item.section = ZU.xpathText(doc, '//nav[@id="navigation-generale"]/ul/li[contains(@class,"alt")]/a/@data-rubrique-title');
 		
@@ -118,12 +154,11 @@ function scrape(doc, url) {
 		trans.doWeb(doc, url);
 	});
 }
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.lemonde.fr/elections-departementales-2015/article/2015/03/13/apres-grenoble-les-ecologistes-visent-l-isere_4592922_4572524.html",
+		"url": "https://www.lemonde.fr/elections-departementales-2015/article/2015/03/13/apres-grenoble-les-ecologistes-visent-l-isere_4592922_4572524.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -140,9 +175,8 @@ var testCases = [
 				"abstractNote": "Victorieuse dans la préfecture aux municipales de 2014, l’alliance Verts-Parti de gauche menace la majorité socialiste dans les cantons.",
 				"language": "fr",
 				"libraryCatalog": "Le Monde",
-				"publicationTitle": "Le Monde.fr",
 				"section": "Politique",
-				"url": "http://www.lemonde.fr/elections-departementales-2015/article/2015/03/13/apres-grenoble-les-ecologistes-visent-l-isere_4592922_4572524.html",
+				"url": "https://www.lemonde.fr/elections-departementales-2015/article/2015/03/13/apres-grenoble-les-ecologistes-visent-l-isere_4592922_4572524.html",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -161,21 +195,26 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.lemonde.fr/idees/article/2015/03/13/syrie-un-desastre-sans-precedent_4593097_3232.html",
+		"url": "https://www.lemonde.fr/idees/article/2015/03/13/syrie-un-desastre-sans-precedent_4593097_3232.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
 				"title": "Syrie : un désastre sans précédent",
-				"creators": [],
+				"creators": [
+					{
+						"firstName": "Le",
+						"lastName": "Monde",
+						"creatorType": "author"
+					}
+				],
 				"date": "2015-03-13T11:50:19+01:00",
 				"ISSN": "1950-6244",
 				"abstractNote": "Editorial. Après plus de 220 000 morts, le pays s’enfonce toujours plus dans une guerre aux fronts multiples à laquelle les puissances occidentales ne trouvent pas de réponse.",
 				"language": "fr",
 				"libraryCatalog": "Le Monde",
-				"publicationTitle": "Le Monde.fr",
 				"section": "Idées",
 				"shortTitle": "Syrie",
-				"url": "http://www.lemonde.fr/idees/article/2015/03/13/syrie-un-desastre-sans-precedent_4593097_3232.html",
+				"url": "https://www.lemonde.fr/idees/article/2015/03/13/syrie-un-desastre-sans-precedent_4593097_3232.html",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -189,11 +228,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.lemonde.fr/campus/article/2015/03/13/classement-international-les-universites-francaises-en-manque-de-prestige_4593287_4401467.html",
+		"url": "https://www.lemonde.fr/campus/article/2015/03/13/classement-international-les-universites-francaises-en-manque-de-prestige_4593287_4401467.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Classement international : les universités françaises en manque de prestige",
+				"title": "Les universités françaises peinent à soigner leur réputation internationale",
 				"creators": [
 					{
 						"firstName": "Matteo",
@@ -201,15 +240,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2015-03-13T22:03:36+01:00",
-				"ISSN": "1950-6244",
+				"date": "2015-03-13",
 				"abstractNote": "Selon le dernier classement du magazine « Times Higher Education », les universités françaises peinent à obtenir la reconnaissance internationale de leurs pairs.",
 				"language": "fr",
 				"libraryCatalog": "Le Monde",
-				"publicationTitle": "Le Monde.fr",
-				"section": "Campus",
-				"shortTitle": "Classement international",
-				"url": "http://www.lemonde.fr/campus/article/2015/03/13/classement-international-les-universites-francaises-en-manque-de-prestige_4593287_4401467.html",
+				"url": "https://www.lemonde.fr/campus/article/2015/03/13/classement-international-les-universites-francaises-en-manque-de-prestige_4593287_4401467.html",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -223,26 +258,23 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.lemonde.fr/culture/article/2013/09/28/arturo-brachetti-dans-son-repaire-a-turin_3486315_3246.html#meter_toaster",
+		"url": "https://www.lemonde.fr/culture/article/2013/09/28/arturo-brachetti-dans-son-repaire-a-turin_3486315_3246.html#meter_toaster",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
 				"title": "Dans le repaire turinois d'Arturo Brachetti",
 				"creators": [
 					{
-						"firstName": "Sandrine Blanchard (Turin, envoyée",
-						"lastName": "spéciale)",
+						"firstName": "Sandrine",
+						"lastName": "Blanchard",
 						"creatorType": "author"
 					}
 				],
-				"date": "2013-09-28T09:26:28+02:00",
-				"ISSN": "1950-6244",
+				"date": "2013-09-28",
 				"abstractNote": "Visiter la maison de l'artiste, en spectacle à Paris à partir du 3 octobre, c'est entrer dans un monde empli de magie.",
 				"language": "fr",
 				"libraryCatalog": "Le Monde",
-				"publicationTitle": "Le Monde.fr",
-				"section": "Culture",
-				"url": "http://www.lemonde.fr/culture/article/2013/09/28/arturo-brachetti-dans-son-repaire-a-turin_3486315_3246.html",
+				"url": "https://www.lemonde.fr/culture/article/2013/09/28/arturo-brachetti-dans-son-repaire-a-turin_3486315_3246.html",
 				"attachments": [
 					{
 						"title": "Snapshot"
