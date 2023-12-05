@@ -2,14 +2,14 @@
 	"translatorID": "cabfb36f-3b4c-4d42-ac79-90eeeeaec3c6",
 	"label": "ubtue_Project MUSE",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://[^/]*muse\\.jhu\\.edu/(book/|article/|issue/|search\\?)",
+	"target": "^https?://[^/]*muse\\.jhu\\.edu/(book/|article/|issue/|search|pub/article\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 99,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-11-16 07:44:05"
+	"lastUpdated": "2023-12-05 15:57:27"
 }
 
 /*
@@ -102,17 +102,11 @@ function isSupplement(item) {
 function scrape(doc) {
 	let citationURL = ZU.xpathText(doc, '//li[@class="view_citation"]//a/@href');
 	ZU.processDocuments(citationURL, function (text) {
-		let risEntry = ZU.xpathText(text, '//*[(@id = "tabs-4")]//p');
-		let doiEntry = ZU.xpathText(text, '//*[(@id = "tabs-1")]//p');
-		if (doiEntry.includes('doi:')) {
-			var doi = doiEntry.split('doi:')[1].replace(/.$/, '');
-		}
-		// RIS translator
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		translator.setString(risEntry);
+		// Embedded Metadata
+		let translator = Zotero.loadTranslator('web');
+		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+		translator.setDocument(doc);
 		translator.setHandler("itemDone", function (obj, item) {
-			if (doi) item.DOI = doi;
 			let abstract = ZU.xpathText(doc, '//div[@class="abstract"][1]/p');
 			if (!abstract) abstract = ZU.xpathText(doc, '//div[@class="description"][1]');
 			if (!abstract) abstract = ZU.xpathText(doc, '//div[contains(@class, "card_summary") and contains(@class, "no_border")]');
