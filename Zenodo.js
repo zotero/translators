@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-06 15:15:41"
+	"lastUpdated": "2023-12-08 08:51:49"
 }
 
 /*
@@ -40,10 +40,10 @@ const datasetType = ZU.fieldIsValidForType('title', 'dataset')
 	: 'document';
 
 function detectWeb(doc, url) {
-	if (url.includes('/record/')) {
-		var collections = ZU.xpath(doc, '//span[@class="pull-right"]/span[contains(@class, "label-default")]');
+	if (url.includes('/records/')) {
+		var collections = doc.querySelectorAll('span[aria-label="Resource type"]');
 		for (var i = 0; i < collections.length; i++) {
-			var type = collections[i].textContent.toLowerCase();
+			var type = collections[i].textContent.toLowerCase().trim();
 			//Z.debug(type)
 			switch (type) {
 				case "software":
