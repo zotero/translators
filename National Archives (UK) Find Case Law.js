@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-12-11 14:59:32"
+	"lastUpdated": "2023-12-11 17:04:08"
 }
 
 /*
@@ -86,7 +86,7 @@ function scrape(doc, url) {
 		new Array(xpath('//akn:judge/@refersTo')).forEach(function (href) {
 			if (href !== null) {
 				const id = href.replace("#", "");
-				item.creators.pop({
+				item.creators.push({
 					lastName: xpath(`//akn:TLCPerson[@eId='${id}']/@showAs`),
 					creatorType: "author",
 					fieldMode: 1
@@ -95,6 +95,19 @@ function scrape(doc, url) {
 		});
 		const ncn = xpath("//uk:cite");
 		item.notes.push({ note: `Neutral Citation Number: ${ncn}` });
+		ZU.doGet(item.uri, function (text) {
+			const parser = new DOMParser();
+			const htmlDoc = parser.parseFromString(text, "text/html");
+			const downloadButton = htmlDoc.querySelector(".judgment-toolbar-buttons__option--pdf");
+			const pdfURL = downloadButton && downloadButton.getAttribute("href");
+			if (pdfURL) {
+				item.attachments.push({
+					url: "https://caselaw.nationalarchives.gov.uk" + pdfURL,
+					title: "Full Text PDF",
+					mimeType: "application/pdf"
+				});
+			}
+		});
 		item.complete();
 	});
 }
@@ -138,7 +151,12 @@ var testCases = [
 				"creators": [],
 				"dateDecided": "2021-04-20",
 				"court": "EWCA-Civil",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [],
 				"notes": [
 					{
