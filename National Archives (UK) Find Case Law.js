@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-12-11 17:04:08"
+	"lastUpdated": "2023-12-12 04:54:26"
 }
 
 /*
@@ -71,7 +71,11 @@ function isResultsList(doc) {
 
 function scrape(doc, url) {
 	const item = new Z.Item("case");
-	ZU.doGet(url + "/data.xml", function (text) {
+	const dataUrl = new URL(url);
+	dataUrl.pathname += "/data.xml";
+	dataUrl.search = null;
+
+	ZU.doGet(dataUrl.href, function (text) {
 		const parser = new DOMParser();
 		const xmlDoc = parser.parseFromString(text, "text/xml");
 		function xpath(path) {
@@ -130,7 +134,12 @@ var testCases = [
 				],
 				"dateDecided": "2020-11-20",
 				"court": "EWHC-QBD",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [],
 				"notes": [
 					{
@@ -171,6 +180,38 @@ var testCases = [
 		"type": "web",
 		"url": "https://caselaw.nationalarchives.gov.uk/judgments/search?query=Corbyn",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://caselaw.nationalarchives.gov.uk/ewhc/qb/2020/3156?query=vardy+v+Rooney",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "Vardy v Rooney",
+				"creators": [
+					{
+						"lastName": "THE HON. MR JUSTICE WARBY",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"dateDecided": "2020-11-20",
+				"court": "EWHC-QBD",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "Neutral Citation Number: [2020] EWHC 3156 (QB)"
+					}
+				],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
