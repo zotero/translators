@@ -36,9 +36,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-
-/* global attr, text */
-
 function detectWeb(doc, _url) {
 	if (attr(doc, "meta[property='og:type']", "content") === "article") {
 		return "newspaperArticle";
