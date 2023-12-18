@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-12-18 03:50:49"
+	"lastUpdated": "2023-12-18 03:52:11"
 }
 
 /*
@@ -120,7 +120,6 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"abstractNote": "Patreon is empowering a new generation of creators. \nSupport and engage with artists and creators as they live out their passions!",
 				"postType": "text",
 				"url": "https://www.patreon.com/posts/xin-zhan-shi-jin-93844184",
 				"attachments": [
@@ -148,7 +147,6 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"abstractNote": "Patreon is empowering a new generation of creators. \nSupport and engage with artists and creators as they live out their passions!",
 				"postType": "text",
 				"url": "https://www.patreon.com/posts/nong-li-qi-yue-55316874",
 				"attachments": [
