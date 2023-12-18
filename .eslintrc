@@ -1,26 +1,18 @@
 {
 	"env": {
-		"browser": false,
-		"es2017": true
+		"browser": true,
+		"es2018": true
 	},
 	"extends": [
 		"@zotero"
 	],
-	"parserOptions": {
-		"ecmaVersion": 2017
-	},
 	"globals": {
 		"Zotero": "readonly",
 		"Z": "readonly",
 		"ZU": "readonly",
-		"DOMParser": "readonly",
-		"URLSearchParams": "readonly",
-		"XPathResult": "readonly",
-		"XMLSerializer": "readonly",
 		"attr": "readonly",
 		"innerText": "readonly",
 		"text": "readonly",
-		"atob": "readonly",
 		"request": "readonly",
 		"requestText": "readonly",
 		"requestJSON": "readonly",
@@ -45,6 +37,7 @@
 
 		"zotero-translator/no-for-each": "warn",
 		"zotero-translator/prefer-index-of": "warn",
+		"zotero-translator/robust-query-selector": "warn",
 
 		"zotero-translator/test-cases-valid-json": "error",
 		"zotero-translator/test-cases": "error",

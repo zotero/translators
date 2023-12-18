@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-02 16:50:48"
+	"lastUpdated": "2023-08-22 10:02:55"
 }
 
 /*
@@ -91,9 +91,9 @@ async function doWeb(doc, url) {
 		if (!items) {
 			return;
 		}
-		await Promise.all(
-			Object.keys(items).map(async url => scrape(await requestDocument(url), url))
-		);
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url), url);
+		}
 	}
 	else {
 		await scrape(doc, url);
@@ -132,7 +132,7 @@ async function scrape(doc, url) {
 	var postData = JSON.stringify({
 		api: "record.exportRISFile",
 		params: {
-			UIDList: [{UID: uid, ProductCode: productCode}],
+			UIDList: [{ UID: uid, ProductCode: productCode }],
 			exportType: "zotero"
 		}
 	});
@@ -199,7 +199,7 @@ function processRIS(text, doc) {
 
 // try to figure out ids that we can use for fetching RIS
 async function getIds(doc, url) {
-	Z.debug('Finding IDs in ' + url)
+	Z.debug('Finding IDs in ' + url);
 	// try to extract uid from the table
 	var uid = text(doc, '#uid + dd') || text(doc, '#bookUID');
 	if (uid) {
@@ -700,6 +700,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://psycnet.apa.org/search/results?id=e6cd5430-40d2-11ee-9aa2-b3e92ca9fef3",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2022-10-20 02:34:57"
+	"lastUpdated": "2023-06-09 02:21:30"
 }
 
 /*
@@ -80,6 +80,7 @@ var inputTypeMap = {
 	Books: "book", // ERIC
 	"Book Chapter": "bookSection", // can't find in specs, but is used.
 	"Case Reports": "journalArticle", // Case reports in medicine are basically always in journals
+	"Case Report": "journalArticle",
 	"Journal Article": "journalArticle",
 	"Newspaper Article": "newspaperArticle",
 	"Video-Audio Media": "videoRecording",
@@ -174,7 +175,7 @@ function processTag(item, tag, value) {
 		}
 		else if (value.includes("[pii]")) item.pagesBackup = value.replace(/\s*\[pii\]/, "");
 	}
-	else if (tag == "MH" || tag == "OT") {
+	else if (tag == "MH" || tag == "OT" || tag == "KW") { // KoreaMed uses KW
 		item.tags.push(value);
 	}
 }
@@ -186,7 +187,7 @@ function doImport() {
 	do { // first valid line is type
 		Zotero.debug("ignoring " + line);
 		line = Zotero.read();
-	} while (line !== false && line.search(/^[A-Z0-9]+\s*-/) == -1);
+	} while (line !== false && !(/^[A-Z0-9]+\s*-/.test(line)));
 
 	var item = new Zotero.Item();
 	item.creatorsBackup = [];
@@ -204,7 +205,7 @@ function doImport() {
 				item.creatorsBackup = [];
 			}
 		}
-		else if (line.search(/^[A-Z0-9]+\s*-/) != -1) {
+		else if (/^[A-Z0-9]+\s*-/.test(line)) {
 			// if this line is a tag, take a look at the previous line to map
 			// its tag
 			if (tag) {
@@ -290,7 +291,7 @@ function finalizeItem(item) {
 		delete item.publicationTitle;
 	}
 	else if (!item.itemType) {
-		if (item.itemTypeBackup && !item.extra.includes("ERIC Number: EJ")) {
+		if (item.itemTypeBackup && (!item.extra || !item.extra.includes("ERIC Number: EJ"))) {
 			item.itemType = item.itemTypeBackup; // using report from above
 			item.institution = item.publicationTitle;
 			delete item.publicationTitle;

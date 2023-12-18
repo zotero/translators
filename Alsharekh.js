@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-04 18:27:28"
+	"lastUpdated": "2023-07-24 02:21:59"
 }
 
 /*
@@ -43,7 +43,11 @@ function detectWeb(doc, url) {
 	if (urlRe.test(url)) {
 		return "magazineArticle";
 	}
-	else if (getSearchResults(doc, true)) {
+	let appElem = doc.querySelector("app-root");
+	if (appElem) {
+		Z.monitorDOMChanges(appElem);
+	}
+	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	return false;
@@ -52,11 +56,9 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('td > a[href*="/Articles/"]');
+	var rows = doc.querySelectorAll('td > a[href^="/Articles/"], th > a[href^="/Articles/"]');
 	for (let row of rows) {
-		// TODO: check and maybe adjust
 		let href = row.href;
-		// TODO: check and maybe adjust
 		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -66,45 +68,47 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) ZU.processDocuments(Object.keys(items), scrape);
-		});
+		let items = await Z.selectItems(getSearchResults(doc));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(null, url);
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
-function scrape(doc, url) {
+async function scrape(doc, url) {
 	let item = new Zotero.Item('magazineArticle');
 	
 	let [, MID, IID, AID] = url.match(urlRe);
-	ZU.doGet(`${apiBase}/Search/IssueHInfo?MID=${MID}&IID=${IID}`, function (respText) {
-		let issue = JSON.parse(respText);
-		ZU.doGet(`${apiBase}/Search/ArticleHInfo?AID=${AID}`, function (respText) {
-			let article = JSON.parse(respText);
+	let issue = await requestJSON(`${apiBase}/Search/IssueHInfo?MID=${MID}&IID=${IID}`);
+	let article = await requestJSON(`${apiBase}/Search/ArticleHInfo?AID=${AID}`);
 			
-			item.title = article.articleTitle.replace(' : ', ": ");
-			item.pages = article.pageNo;
-			item.creators.push(ZU.cleanAuthor(article.articleAuthor, 'author'));
-			
-			item.publicationTitle = issue.magazineArabicName;
-			item.place = issue.countryName;
-			item.issue = issue.issuenumber || issue.issueName;
-			item.date = ZU.strToISO(arabicToEnglishDate(issue.newIssueDate));
-			
-			item.url = url;
-			
-			item.attachments.push({
-				title: 'Snapshot',
-				document: doc
-			});
-			
-			item.complete();
-		});
-	});
+	item.title = article.articleTitle.replace(' : ', ": ");
+	item.pages = article.pageNo;
+	item.creators.push(ZU.cleanAuthor(article.articleAuthor, 'author'));
+
+	item.publicationTitle = issue.magazineArabicName;
+	item.place = issue.countryName;
+	item.issue = issue.issuenumber || issue.issueName;
+	item.date = ZU.strToISO(arabicToEnglishDate(issue.newIssueDate));
+
+	item.url = url;
+
+	let attachment = { title: "Snapshot" };
+	if (doc) {
+		attachment.document = doc;
+	}
+	else {
+		attachment.url = url;
+	}
+	item.attachments.push(attachment);
+
+	item.complete();
 }
 
 // just so we get months on non-Arabic locales
@@ -226,6 +230,12 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://archive.alsharekh.org/contents/174/19785",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://archive.alsharekh.org/AuthorArticles/124",
 		"items": "multiple"
 	}
 ]

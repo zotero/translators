@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-11-04 21:18:44"
+	"lastUpdated": "2023-04-27 09:24:18"
 }
 
 function getSearchResults(doc) {
@@ -101,6 +101,9 @@ function makeItem(doc, url) {
 }
 
 function detectSearch(items) {
+	// Disabled -- no longer working
+	return false;
+
 	if (items.ISBN) return true;
 	
 	if (!items.length) return;
@@ -120,7 +123,7 @@ function doSearch(items) {
 		var isbn;
 		if (items[i].ISBN && (isbn = ZU.cleanISBN('' + items[i].ISBN))) {
 			(function(item, isbn) {
-				ZU.processDocuments('http://www.lulu.com/shop/search.ep?keyWords=' + isbn, function(doc, url) {
+				ZU.processDocuments('https://www.lulu.com/shop/search.ep?keyWords=' + isbn, function(doc, url) {
 					var results = getSearchResults(doc);
 					if (!results.length) {
 						if (item.complete) item.complete();

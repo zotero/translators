@@ -9,10 +9,34 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-18 08:20:23"
+	"lastUpdated": "2023-09-24 03:17:24"
 }
 
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2023 Simon Kornblith, Michael Berkowitz, Bastian Koenings, and Avram Lyon
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
 function detectWeb(doc, url) {
+	Zotero.monitorDOMChanges(doc.querySelector('.global-content-wrapper'));
 	if (doc.defaultView !== null && doc.defaultView !== doc.defaultView.top) return false;
 	
 	if (/[?&]arnumber=(\d+)/i.test(url) || /\/document\/\d+/i.test(url)) {
@@ -24,18 +48,17 @@ function detectWeb(doc, url) {
 	}
 	
 	// Issue page
-	var results = doc.getElementById('results-blk');
-	if (results) {
+	if ((url.includes("xpl/tocresult.jsp") || url.includes("xpl/mostRecentIssue.jsp")) && getSearchResults(doc, true)) {
 		return getSearchResults(doc, true) ? "multiple" : false;
 	}
 	
 	// Search results
-	if (url.includes("/search/searchresult.jsp")) {
+	if (url.includes("/search/searchresult.jsp") && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	
 	// conference list results
-	if (url.includes("xpl/conhome") && url.includes("proceeding")) {
+	if (url.includes("xpl/conhome") && url.includes("proceeding") && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 
@@ -59,8 +82,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//*[contains(@class, "article-list") or contains(@class, "List-results-items")]//h2/a|//*[@id="results-blk"]//*[@class="art-abs-url"]');
-
+	var rows = ZU.xpath(doc, '//*[contains(@class, "article-list") or contains(@class, "List-results-items")]//a[parent::h2|parent::h3]|//*[@id="results-blk"]//*[@class="art-abs-url"]');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -89,28 +111,25 @@ function fixUrl(url) {
 	}
 }
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc), function (items) {
-			if (!items) {
-				return;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
+
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else if (url.includes("/search/") || url.includes("/stamp/") || url.includes("/ielx4/") || url.includes("/ielx5/")) {
-		ZU.processDocuments([fixUrl(url)], scrape);
+		await scrape(await requestDocument([fixUrl(url)]));
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
-function scrape(doc, url) {
+
+async function scrape(doc, url = doc.location.href) {
 	var arnumber = (url.match(/arnumber=(\d+)/) || url.match(/\/document\/(\d+)/))[1];
 	var pdf = "/stamp/stamp.jsp?tp=&arnumber=" + arnumber;
 	// Z.debug("arNumber = " + arnumber);
@@ -129,97 +148,100 @@ function scrape(doc, url) {
 	}
 	
 	
-	var post = "recordIds=" + arnumber + "&fromPage=&citations-format=citation-abstract&download-format=download-bibtex";
-	ZU.doPost('/xpl/downloadCitations', post, function (text) {
-		text = ZU.unescapeHTML(text.replace(/(&[^\s;]+) and/g, '$1;'));
-		// remove empty tag - we can take this out once empty tags are ignored
-		text = text.replace(/(keywords=\{.+);\}/, "$1}");
-		var earlyaccess = false;
-		if (text.search(/^@null/) != -1) {
-			earlyaccess = true;
-			text = text.replace(/^@null/, "@article");
+	let bibtexURL = "/rest/search/citation/format?recordIds=" + arnumber + "&fromPage=&citations-format=citation-abstract&download-format=download-bibtex";
+	Z.debug(bibtexURL);
+	// metadata is downloaded in a JSON data field
+	let bibtex = await requestJSON(bibtexURL, { headers: { Referer: url} });
+	bibtex = bibtex.data;
+	bibtex = ZU.unescapeHTML(bibtex.replace(/(&[^\s;]+) and/g, '$1;'));
+	// remove empty tag - we can take this out once empty tags are ignored
+	bibtex = bibtex.replace(/(keywords=\{.+);\}/, "$1}");
+	var earlyaccess = false;
+	if (/^@null/.test(bibtex)) {
+		earlyaccess = true;
+		bibtex = text.replace(/^@null/, "@article");
+	}
+	var translator = Zotero.loadTranslator("import");
+	// Calling the BibTeX translator
+	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+	translator.setString(bibtex);
+	translator.setHandler("itemDone", function (obj, item) {
+		item.notes = [];
+		var res;
+		// Rearrange titles, per http://forums.zotero.org/discussion/8056
+		// If something has a comma or a period, and the text after comma ends with
+		// "of", "IEEE", or the like, then we switch the parts. Prefer periods.
+		if (item.publicationTitle.includes(".")) {
+			res = item.publicationTitle.trim().match(/^(.*)\.(.*(?:of|on|IEE|IEEE|IET|IRE))$/);
 		}
-		var translator = Zotero.loadTranslator("import");
-		// Calling the BibTeX translator
-		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
-		translator.setString(text);
-		translator.setHandler("itemDone", function (obj, item) {
-			item.notes = [];
-			var res;
-			// Rearrange titles, per http://forums.zotero.org/discussion/8056
-			// If something has a comma or a period, and the text after comma ends with
-			// "of", "IEEE", or the like, then we switch the parts. Prefer periods.
-			if (item.publicationTitle.includes(".")) {
-				res = item.publicationTitle.trim().match(/^(.*)\.(.*(?:of|on|IEE|IEEE|IET|IRE))$/);
-			}
-			else {
-				res = item.publicationTitle.trim().match(/^(.*),(.*(?:of|on|IEE|IEEE|IET|IRE))$/);
-			}
-			if (res) {
-				item.publicationTitle = res[2] + " " + res[1];
-			}
-			item.proceedingsTitle = item.conferenceName = item.publicationTitle;
-			if (earlyaccess) {
-				item.volume = "Early Access Online";
-				item.issue = "";
-				item.pages = "";
-			}
+		else {
+			res = item.publicationTitle.trim().match(/^(.*),(.*(?:of|on|IEE|IEEE|IET|IRE))$/);
+		}
+		if (res) {
+			item.publicationTitle = res[2] + " " + res[1];
+		}
+		item.proceedingsTitle = item.conferenceName = item.publicationTitle;
+		if (earlyaccess) {
+			item.volume = "Early Access Online";
+			item.issue = "";
+			item.pages = "";
+		}
 			
-			if (data && data.authors && data.authors.length == item.creators.length) {
-				item.creators = [];
-				for (let author of data.authors) {
-					item.creators.push({
-						firstName: author.firstName,
-						lastName: author.lastName,
-						creatorType: "author"
+		if (data && data.authors && data.authors.length == item.creators.length) {
+			item.creators = [];
+			for (let author of data.authors) {
+				item.creators.push({
+					firstName: author.firstName,
+					lastName: author.lastName,
+					creatorType: "author"
+				});
+			}
+		}
+			
+		if (!item.ISSN && data && data.issn) {
+			item.ISSN = data.issn.map(el => el.value).join(", ");
+		}
+		if (item.ISSN && !ZU.fieldIsValidForType('ISSN', item.itemType)) {
+			item.extra = "ISSN: " + item.ISSN;
+		}
+		item.url = url;
+		item.attachments.push({
+			document: doc,
+			title: "IEEE Xplore Abstract Record"
+		});
+			
+		if (pdf) {
+			ZU.doGet(pdf, function (src) {
+				// Either the PDF is embedded in the page, or (e.g. for iOS)
+				// the page has a redirect to the full-page PDF
+				//
+				// As of 3/2020, embedded PDFs via a web-based proxy are
+				// being served as getPDF.jsp, so support that in addition
+				// to direct .pdf URLs.
+				var m = /<i?frame src="([^"]+\.pdf\b[^"]*|[^"]+\/getPDF\.jsp\b[^"]*)"|<meta HTTP-EQUIV="REFRESH" content="0; url=([^\s"]+\.pdf\b[^\s"]*)"/.exec(src);
+				var pdfUrl = m && (m[1] || m[2]);
+				if (pdfUrl) {
+					item.attachments.unshift({
+						url: pdfUrl,
+						title: "IEEE Xplore Full Text PDF",
+						mimeType: "application/pdf"
 					});
 				}
-			}
-			
-			if (!item.ISSN && data && data.issn) {
-				item.ISSN = data.issn.map(el => el.value).join(", ");
-			}
-			if (item.ISSN && !ZU.fieldIsValidForType('ISSN', item.itemType)) {
-				item.extra = "ISSN: " + item.ISSN;
-			}
-			
-			item.attachments.push({
-				document: doc,
-				title: "IEEE Xplore Abstract Record"
-			});
-			
-			if (pdf) {
-				ZU.doGet(pdf, function (src) {
-					// Either the PDF is embedded in the page, or (e.g. for iOS)
-					// the page has a redirect to the full-page PDF
-					//
-					// As of 3/2020, embedded PDFs via a web-based proxy are
-					// being served as getPDF.jsp, so support that in addition
-					// to direct .pdf URLs.
-					var m = /<i?frame src="([^"]+\.pdf\b[^"]*|[^"]+\/getPDF\.jsp\b[^"]*)"|<meta HTTP-EQUIV="REFRESH" content="0; url=([^\s"]+\.pdf\b[^\s"]*)"/.exec(src);
-					var pdfUrl = m && (m[1] || m[2]);
-					if (pdfUrl) {
-						item.attachments.unshift({
-							url: pdfUrl,
-							title: "IEEE Xplore Full Text PDF",
-							mimeType: "application/pdf"
-						});
-					}
-					item.complete();
-				}, null);
-			}
-			else {
 				item.complete();
-			}
-		});
+			}, null);
+		}
+		else {
+			item.complete();
+		}
+	});
 
-		translator.getTranslatorObject(function (trans) {
-			trans.setKeywordSplitOnSpace(false);
-			trans.setKeywordDelimRe('\\s*;\\s*', '');
-			trans.doImport();
-		});
+	translator.getTranslatorObject(function (trans) {
+		trans.setKeywordSplitOnSpace(false);
+		trans.setKeywordDelimRe('\\s*;\\s*', '');
+		trans.doImport();
 	});
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -504,6 +526,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://ieeexplore.ieee.org/xpl/mostRecentIssue.jsp?punumber=6221021",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
@@ -1089,6 +1112,12 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://ieeexplore.ieee.org/xpl/tocresult.jsp?isnumber=10045573&punumber=6221021",
+		"defer": true,
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-08-31 14:35:47"
+	"lastUpdated": "2023-08-23 07:21:42"
 }
 
 /*
@@ -73,11 +73,9 @@ function getSearchResults(doc, checkOnly) {
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
-		if (items) {
-			await Promise.all(
-				Object.keys(items)
-					.map(url => requestDocument(url).then(scrape))
-			);
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
 		}
 	}
 	else {
@@ -87,10 +85,13 @@ async function doWeb(doc, url) {
 
 async function scrape(doc, url) {
 	if (doc.querySelector('.peer-reviewed-box')) {
-		let DOI = doc.querySelector('.peer-reviewed-box .journal-ref').lastChild.nodeValue;
-		if (DOI) DOI = ZU.cleanDOI(DOI);
-		if (DOI) {
-			await scrapeDOI(DOI);
+		let doiNode = doc.querySelector('.peer-reviewed-box .journal-ref');
+		if (doiNode) {
+			let DOI = doiNode.lastChild.nodeValue;
+			if (DOI) DOI = ZU.cleanDOI(DOI);
+			if (DOI) {
+				await scrapeDOI(DOI);
+			}
 		}
 		else {
 			await scrapePublisher(attr(doc, '.peer-reviewed-box a', 'href'));

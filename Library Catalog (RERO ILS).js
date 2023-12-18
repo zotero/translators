@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-05-09 18:12:21"
+	"lastUpdated": "2023-08-17 15:05:49"
 }
 
 /*
@@ -75,7 +75,15 @@ async function detectWeb(doc, url) {
 	}
 
 	if (getDomainAndID(url).length) {
-		return 'book';
+		let type = attr('#thumbnail > img[src*="icon_"]', 'src').match(/icon_([^.]+)/);
+		if (type) {
+			return TYPE_MAPPING[type[1]]
+				// Assume that "online" items are articles and everything else is some kind of book
+				|| (type[1] === 'docmaintype_online' ? 'journalArticle' : 'book');
+		}
+		else {
+			return 'book';
+		}
 	}
 	else if (getSearchResults(doc, true)) {
 		return 'multiple';
@@ -147,11 +155,32 @@ async function scrape([domain, id]) {
 
 	if (json.contribution && json.contribution.length) {
 		for (let creator of json.contribution) {
+			let metadata;
+			if (creator.agent) {
+				if (creator.agent.preferred_name) {
+					metadata = creator.agent;
+				}
+				else {
+					metadata = (await requestJSON(creator.agent.$ref)).metadata;
+				}
+			}
+			else if (creator.entity) {
+				if (creator.entity.preferred_name) {
+					metadata = creator.entity;
+				}
+				else {
+					metadata = (await requestJSON(creator.entity.$ref)).metadata;
+				}
+			}
+			else {
+				Zotero.debug('Invalid creator');
+				Zotero.debug(creator);
+				continue;
+			}
 			let type = CREATOR_MAPPING[creator.role[0]] || 'author';
 			if (type === 'SKIP') continue;
-			let name = creator.agent.preferred_name
-				|| (await requestJSON(creator.agent.$ref)).metadata.preferred_name;
-			if (creator.agent.type == 'bf:Organisation') {
+			let name = metadata.preferred_name;
+			if (metadata.type == 'bf:Organisation') {
 				item.creators.push({
 					lastName: name,
 					creatorType: type,
@@ -352,12 +381,7 @@ var testCases = [
 				"place": "Paris",
 				"publisher": "Armand Colin",
 				"shortTitle": "Histoire économique de la France",
-				"attachments": [
-					{
-						"title": "Catalog Entry",
-						"mimeType": "text/html"
-					}
-				],
+				"attachments": [],
 				"tags": [],
 				"notes": [
 					{
@@ -390,14 +414,9 @@ var testCases = [
 				"language": "eng",
 				"libraryCatalog": "Library Catalog (RERO ILS)",
 				"numPages": "XV, 251",
-				"place": "New York (N.Y.)",
+				"place": "New York",
 				"publisher": "Van Nostrand Reinhold",
-				"attachments": [
-					{
-						"title": "Catalog Entry",
-						"mimeType": "text/html"
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Bender-Gestalt Test"
@@ -453,10 +472,6 @@ var testCases = [
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf",
 						"snapshot": false
-					},
-					{
-						"title": "Catalog Entry",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -504,25 +519,22 @@ var testCases = [
 						"creatorType": "contributor"
 					},
 					{
-						"lastName": "The Beecham choral society ( London )",
+						"lastName": "The Beecham choral society (London, 1955-1962)",
 						"creatorType": "contributor",
 						"fieldMode": 1
 					},
 					{
-						"lastName": "Royal Philharmonic Orchestra ( Londres )",
+						"lastName": "Royal Philharmonic Orchestra (Londres)",
 						"creatorType": "contributor",
 						"fieldMode": 1
 					}
 				],
+				"callNumber": "R006481802",
 				"label": "Columbia, P",
 				"language": "eng",
 				"libraryCatalog": "Library Catalog (RERO ILS)",
-				"attachments": [
-					{
-						"title": "Catalog Entry",
-						"mimeType": "text/html"
-					}
-				],
+				"place": "Lieu de publication non identifié",
+				"attachments": [],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -560,18 +572,13 @@ var testCases = [
 				"numPages": "X, 166",
 				"place": "Buckinghamshire",
 				"publisher": "Open university",
-				"attachments": [
-					{
-						"title": "Catalog Entry",
-						"mimeType": "text/html"
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
-						"tag": "Mixed economy - Great Britain"
+						"tag": "Mixed economy"
 					},
 					{
-						"tag": "Social service - Government policy - Great Britain"
+						"tag": "Social service"
 					}
 				],
 				"notes": [],
@@ -601,18 +608,13 @@ var testCases = [
 				"numPages": "xxv, 413",
 				"place": "Thousand Oaks",
 				"publisher": "Sage",
-				"attachments": [
-					{
-						"title": "Catalog Entry",
-						"mimeType": "text/html"
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
-						"tag": "Cities and towns - Cross-cultural studies"
+						"tag": "Cities and towns"
 					},
 					{
-						"tag": "Metropolitan areas - Cross-cultural studies"
+						"tag": "Metropolitan areas"
 					},
 					{
 						"tag": "Sociology, Urban"
@@ -651,6 +653,7 @@ var testCases = [
 					}
 				],
 				"date": "2014",
+				"callNumber": "R008116813",
 				"label": "Tôt ou Tard",
 				"language": "eng",
 				"libraryCatalog": "Library Catalog (RERO ILS)",
@@ -662,6 +665,35 @@ var testCases = [
 						"note": "1 livret"
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://bib.rero.ch/rbnj/documents/627927",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Bakŝis, skizoj el la vivo de Egiptoj : novelaro",
+				"creators": [
+					{
+						"firstName": "Leonard Noel Mansell",
+						"lastName": "Newell",
+						"creatorType": "author"
+					}
+				],
+				"date": "1938",
+				"callNumber": "R003853768",
+				"language": "epo",
+				"libraryCatalog": "Library Catalog (RERO ILS)",
+				"numPages": "149",
+				"place": "Budapest",
+				"publisher": "Literatura Mondo",
+				"shortTitle": "Bakŝis, skizoj el la vivo de Egiptoj",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
 				"seeAlso": []
 			}
 		]

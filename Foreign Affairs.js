@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-10 02:39:57"
+	"lastUpdated": "2023-08-23 12:37:06"
 }
 
 /*
@@ -47,12 +47,19 @@ function detectWeb(doc, _url) {
 }
 
 function getSearchResults(doc, checkOnly) {
+	let isIssues = /^https:\/\/[^/]+\/issues\/.+/.test(doc.location.href);
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('article.article-card > a, div.article-data > h2.title > a');
 	for (let row of rows) {
 		let href = row.href;
-		let title = ZU.trimInternal(row.textContent);
+		let title;
+		if (isIssues) {
+			title = text(row, ".article-card-title");
+		}
+		else {
+			title = ZU.trimInternal(row.textContent);
+		}
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -64,11 +71,9 @@ function getSearchResults(doc, checkOnly) {
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
-		if (items) {
-			await Promise.all(
-				Object.keys(items)
-					.map(url => requestDocument(url).then(scrape))
-			);
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
 		}
 	}
 	else {
@@ -80,23 +85,26 @@ async function scrape(doc, url = doc.location.href) {
 	var item = new Zotero.Item("magazineArticle");
 	var author = text(doc, '.article-byline-author');
 	var tags = doc.querySelectorAll('.article-footer--tag-item');
-	var issue = text(doc, 'span.article-header--metadata-date>a');
-	item.issue = issue.replace('Issue', '');
+	let issueNode = doc.querySelector(".article-header--metadata-date > a");
+	if (issueNode) {
+		var volumeTitle = ZU.trimInternal(issueNode.textContent.trim());
+		// the digits are yyyy/vol/num
+		let issueMatch = issueNode.href.match(/\/issues\/\d+\/(\d+)\/(\d+)$/);
+		if (issueMatch) {
+			item.volume = issueMatch[1];
+			item.issue = issueMatch[2];
+		}
+	}
+	if (volumeTitle) {
+		if (!item.extra) item.extra = "";
+		item.extra += `\nVolume Title: ${volumeTitle}`;
+	}
 
-	// the date published can be unreliable. If the issue is earlier than than the
-	// publication date, use the former
-	// e.g. https://www.foreignaffairs.com/articles/middle-east/2012-01-01/time-attack-iran
 	item.date = attr(doc, 'meta[property="article:published_time"]', 'content');
 	item.title = attr(doc, 'meta[property="og:title"]', 'content');
 	item.abstractNote = attr(doc, 'meta[name="abstract"]', 'content');
-	if (item.issue) {
-		var issueYear = item.issue.match(/\d{4}/);
-	}
 	if (item.date) {
-		var dateYear = item.date.match(/\d{4}/);
-	}
-	if (issueYear && (!item.date || dateYear > issueYear)) {
-		item.date = issueYear[0];
+		item.date = ZU.strToISO(item.date);
 	}
 
 	let authors = author.split(/, and|and |, /);
@@ -121,6 +129,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.foreignaffairs.com/issues/2012/91/01",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
@@ -137,14 +146,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2003",
+				"date": "2003-05-01",
 				"ISSN": "0015-7120",
 				"abstractNote": "A fascinating and well-translated account of Argentina's misadventures over the last century by one of that country's brightest historians. Absorbing vast amounts of British capital and tens of thousands of European immigrants, Argentina began the century with great promise. In 1914, with half of its population still foreign, a dynamic society had emerged that was both open and mobile.",
-				"issue": "May/June 2003",
+				"extra": "Volume Title: May/June 2003",
+				"issue": "3",
 				"language": "en-US",
 				"libraryCatalog": "Foreign Affairs",
 				"publicationTitle": "Foreign Affairs",
 				"url": "https://www.foreignaffairs.com/reviews/capsule-review/2003-05-01/history-argentina-twentieth-century",
+				"volume": "82",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -178,14 +189,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2012",
+				"date": "2012-01-01",
 				"ISSN": "0015-7120",
 				"abstractNote": "Opponents of military action against Iran assume a U.S. strike would be far more dangerous than simply letting Tehran build a bomb. Not so, argues this former Pentagon defense planner. With a carefully designed attack, Washington could mitigate the costs and spare the region and the world from an unacceptable threat.",
-				"issue": "January/February 2012",
+				"extra": "Volume Title: January/February 2012",
+				"issue": "1",
 				"language": "en-US",
 				"libraryCatalog": "Foreign Affairs",
 				"publicationTitle": "Foreign Affairs",
 				"url": "https://www.foreignaffairs.com/articles/middle-east/2012-01-01/time-attack-iran",
+				"volume": "91",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -209,6 +222,9 @@ var testCases = [
 						"tag": "Middle East"
 					},
 					{
+						"tag": "North America"
+					},
+					{
 						"tag": "Nuclear Weapons & Proliferation"
 					},
 					{
@@ -225,6 +241,9 @@ var testCases = [
 					},
 					{
 						"tag": "U.S. Foreign Policy"
+					},
+					{
+						"tag": "United States"
 					},
 					{
 						"tag": "War & Military Strategy"
@@ -254,14 +273,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2014-09-04T21:23:08-04:00",
+				"date": "2014-08-11",
 				"ISSN": "0015-7120",
 				"abstractNote": "Most economists agree that the global economy is stagnating and that governments need to stimulate growth, but lowering interest rates still further could spur a damaging cycle of booms and busts. Instead, central banks should hand consumers cash directly.",
-				"issue": "September/October 2014",
+				"extra": "Volume Title: September/October 2014",
+				"issue": "5",
 				"language": "en-US",
 				"libraryCatalog": "Foreign Affairs",
 				"publicationTitle": "Foreign Affairs",
 				"url": "https://www.foreignaffairs.com/articles/united-states/2014-08-11/print-less-transfer-more",
+				"volume": "93",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -277,6 +298,9 @@ var testCases = [
 					},
 					{
 						"tag": "Europe"
+					},
+					{
+						"tag": "North America"
 					},
 					{
 						"tag": "United States"
@@ -301,7 +325,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2014-09-08T22:34:01-04:00",
+				"date": "2014-09-08",
 				"ISSN": "0015-7120",
 				"abstractNote": "India needs fundamental change: its rural land rights system is a mess, its manufacturing sector has been strangled by labor market restrictions, and its states are poorly integrated. But, so far, Modi has squandered major opportunities to establish his economic vision.",
 				"language": "en-US",
@@ -320,6 +344,9 @@ var testCases = [
 					},
 					{
 						"tag": "India"
+					},
+					{
+						"tag": "South Asia"
 					}
 				],
 				"notes": [],
@@ -351,14 +378,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2022-09-07T21:41:06-04:00",
+				"date": "2022-08-31",
 				"ISSN": "0015-7120",
 				"abstractNote": "How AI distorts decision-making and makes dictators more dangerous.",
-				"issue": "September/October 2022",
+				"extra": "Volume Title: September/October 2022",
+				"issue": "5",
 				"language": "en-US",
 				"libraryCatalog": "Foreign Affairs",
 				"publicationTitle": "Foreign Affairs",
 				"url": "https://www.foreignaffairs.com/world/spirals-delusion-artificial-intelligence-decision-making",
+				"volume": "101",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -367,10 +396,10 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Authoritarianism"
+						"tag": "Artificial Intelligence"
 					},
 					{
-						"tag": "Disinformation"
+						"tag": "Authoritarianism"
 					},
 					{
 						"tag": "Foreign Affairs: 100 Years"
@@ -379,7 +408,16 @@ var testCases = [
 						"tag": "Intelligence"
 					},
 					{
+						"tag": "Politics & Society"
+					},
+					{
+						"tag": "Propaganda & Disinformation"
+					},
+					{
 						"tag": "Science & Technology"
+					},
+					{
+						"tag": "Security"
 					},
 					{
 						"tag": "World"
@@ -393,6 +431,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.foreignaffairs.com/search/argentina",
+		"defer": true,
 		"items": "multiple"
 	}
 ]

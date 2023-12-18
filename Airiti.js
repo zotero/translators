@@ -7,9 +7,9 @@
 	"maxVersion": "",
 	"priority": 110,
 	"inRepository": true,
-	"translatorType": 12,
+	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-31 16:18:23"
+	"lastUpdated": "2023-08-04 05:04:16"
 }
 
 function detectWeb(doc, url) {
@@ -84,9 +84,9 @@ async function scrape(docIDs, itemDoneHandler) {
 				
 				name = name.trim();
 				
-				c.lastName = name.substr(name.length-1);
+				c.lastName = name.substr(0, 1);
 				if (name.length > 1) {
-					c.firstName = name.substr(0, name.length-1);
+					c.firstName = name.substr(1, name.length);
 				} else {
 					delete c.firstName;
 					c.fieldMode = 1;
@@ -112,62 +112,7 @@ function buildQuery(docIDs) {
 		url += '&DocIDs[' + i + ']=' + encodeURIComponent(docIDs[i]);
 	}
 	return url;
-}
-
-// TODO: Re-enable search
-// e.g. 10.6220/joq.2012.19(1).01
-function detectSearch(items) {
-	if (!items) return false;
-	
-	if (typeof items == 'string' || !items.length) items = [items];
-	
-	for (var i=0, n=items.length; i<n; i++) {
-		if (!items[i]) continue;
-		
-		if (items[i].DOI && ZU.cleanDOI(items[i].DOI)) return true;
-		if (typeof items[i] == 'string' && ZU.cleanDOI(items[i])) return true;
-	}
-	
-	return false;
-}
-
-function filterQuery(items) {
-	if (!items) return [];
-	
-	if (typeof items == 'string' || !items.length) items = [items];
-	
-	//filter out invalid queries
-	var query = [];
-	for (var i=0, n=items.length; i<n; i++) {
-		if ( ( items[i].DOI && ZU.cleanDOI(items[i].DOI) )
-			|| ( typeof items[i] == 'string' && ZU.cleanDOI(items[i]) ) ) {
-			query.push(items[i]);
-		}
-	}
-	return query;
-}
-
-function doSearch(items) {
-	var query = filterQuery(items);
-	var queryTracker = {};
-	var dois = [];
-	for (let i=0, n=query.length; i<n; i++) {
-		var doi = ZU.cleanDOI(query[i].DOI || query[i]);
-		followDOI(doi);
-	}
-}
-
-function followDOI(doi) {
-	ZU.processDocuments('https://doi.org/' + encodeURIComponent(doi), async function(doc, url) {
-		//var redirectedUrl = ZU.xpathText(doc, '//meta[@name="citation_abstract_html_url"]/@content');
-		var docID = ZU.xpathText(doc, '//a/@docid');
-		if (!docID) return;
-		await scrape([docID]);
-	});
-}
-
-
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -178,32 +123,32 @@ var testCases = [
 				"title": "國小自然與生活科技教師參與輔導團研習活動之民俗誌研究",
 				"creators": [
 					{
-						"lastName": "鴻",
+						"lastName": "曾",
 						"creatorType": "author",
-						"firstName": "曾國"
+						"firstName": "國鴻"
 					},
 					{
-						"lastName": "露",
+						"lastName": "賴",
 						"creatorType": "author",
-						"firstName": "賴秋"
+						"firstName": "秋露"
 					},
 					{
-						"lastName": "娟",
+						"lastName": "鍾",
 						"creatorType": "author",
-						"firstName": "鍾季"
+						"firstName": "季娟"
 					},
 					{
-						"lastName": "桂",
+						"lastName": "何",
 						"creatorType": "author",
-						"firstName": "何妙"
+						"firstName": "妙桂"
 					},
 					{
-						"lastName": "榮",
+						"lastName": "廖",
 						"creatorType": "author",
-						"firstName": "廖文"
+						"firstName": "文榮"
 					}
 				],
-				"date": "2004-11",
+				"date": "2004-01",
 				"DOI": "10.29495/CITE.200411.0446",
 				"abstractNote": "本研究針對九年一貫輔導團規劃之「國小自然與生活科技領域研習」進行探究，目的是探討教師參與輔導團研習活動的意願及其影響因素，並瞭解輔導團研習活動對自然與生活科技教師教學能力之影響，最後根據研究結果提供輔導團作爲規劃研習活動之參考。本研究採俗民誌研究法，研究者先進入研習現場參與觀察，再以六位自然與生活科技領域相關教師爲對象，進行焦點團體訪談，最後輔以相關資料文件做分析，研究結果發現：充實知識是參與研習意願的動力來源、研習的時間爲教師決定是否參與研習的重要因素、家庭狀況與研習地點的安排影響教師是否參與研習的決定、研習的方式應考量研習的目的做不同形式的安排、研習教材內容會充實教師的專業知能、講師的授課方式讓研習教師對教學技巧自我反省。研習綜合歸納之研究結論如下：1.自然與生活科技教師參與輔導團研習活動的意願高。2.影響教師參與輔導團研習活動的意願之主要因素爲「研習時間」、「研習地點」、「家庭狀況」。3.輔導團研習活動在「教材內容」方面，對教師之影響爲充實知識與補充教學資料。4.輔導團之研習在「講師授課方式」方面，對教師在運用教具、教學方法與師生互動等層面有影響。The aim of the research is to examine teachers willing of participating in further study in Science and Technology field held by CEAG (Compulsory Education Advisory Group) and factors that influenced their participation. Also, the effects of further study to the teachers teaching abilities in teaching Science and Technology filed. Finally, giving the research results to CEAG as a reference for planning further study afterwards. This research adopt ethnographic approach that researcher goes to the scene of further study to observe, and then choose six teachers to have a group interview. Then compare with the relevant information to analyze. The result shows: Pursuing of great knowledge is the motivation of teachers to participate in further study; Time is the most influential factor that teacher determine whether to attend the further study; Family conditions and place affect their decisions to participate in further study; Way of further study should take the purpose of further study into consideration to have different arrangement; The content of the further study would enrich teachers’ teaching abilities; Teaching style of the lecturer would motivate self-examination in teachers' teaching techniques. In conclusion: 1. Most of teachers in Science and Technology field like to participate in further study. 2. The main reasons that affect teachers’ participation in further study are time, place and family condition. 3. In the aspect of teaching content, further study held by CEAG helps teachers by supplying relevant teaching materials. 4. In the aspect of teaching style of lecturer, further study held by CEAG helps teachers: to use teaching aids more effectively, an alternative thinking on their teaching methods, and improve interaction between teacher and student.",
 				"itemID": "AL:P20110413001-200411-201104130017-201104130017-446-453",
@@ -259,9 +204,9 @@ var testCases = [
 				"title": "學童口腔保健行為與新齲齒發生之探討－10個月追蹤研究",
 				"creators": [
 					{
-						"lastName": "鳳",
+						"lastName": "張",
 						"creatorType": "author",
-						"firstName": "張雀"
+						"firstName": "雀鳳"
 					}
 				],
 				"date": "2007-01",
@@ -361,58 +306,6 @@ var testCases = [
 		]
 	},
 	{
-		"type": "search",
-		"input": {
-			"DOI": "10.6220/joq.2012.19(1).01"
-		},
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "The Study of Second Level of People Capability Maturity Model on the Industrial Control Industry in Taiwan",
-				"creators": [
-					{
-						"firstName": "Yin-Che",
-						"lastName": "Chen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "King-Ching",
-						"lastName": "Hsieh",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Mei-Tai",
-						"lastName": "Wu",
-						"creatorType": "author"
-					}
-				],
-				"date": "February 2012",
-				"DOI": "10.6220/joq.2012.19(1).01",
-				"ISSN": "1022-0690",
-				"abstractNote": "The People Capability Maturity Model (P-CMM) is an evolving channel for and a roadmap of organizational development and improvement. This model comprises five consecutive maturity levels: initial, managed, defined, predictable, and optimized. The unique characteristics of P-CMM lie in the standardization of processes guiding employees to perform their daily routines more efficiently. This was a field research project that used document analysis, observation, interviews, and analysis of researchers' field notes. By triangulating this data, researchers hoped to maintain a satisfactory level of reliability and validity for the model. Through on-site research into the industrial control industry, researchers endeavored to obtain some indication of the significance and potential application of this model. After evaluating each step of the current production process, researchers made necessary changes or appropriate adjustments based on the protocol set out in the second level of P-CMM to evaluate and diagnose the model.",
-				"issue": "1",
-				"itemID": "AL:10220690-201202-201202200002-201202200002-1-20",
-				"language": "zh",
-				"libraryCatalog": "Airiti",
-				"pages": "1-20",
-				"publicationTitle": "品質學報",
-				"url": "http://www.airitilibrary.com/Publication/alDetailedMesh?DocID=10220690-201202-201202200002-201202200002-1-20",
-				"volume": "19",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [
-					"field research",
-					"people capability maturity model"
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
 		"type": "web",
 		"url": "https://www.airitilibrary.com/Publication/alDetailedMesh?DocID=10213120-198905-28-1-377-382-a&PublishTypeID=P001",
 		"items": [
@@ -421,18 +314,18 @@ var testCases = [
 				"title": "Jones Dye Test與Fluorescein Dye Disappearance Test的再評估",
 				"creators": [
 					{
-						"firstName": "陳彥",
-						"lastName": "志",
+						"firstName": "彥志",
+						"lastName": "陳",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "高啓",
-						"lastName": "祥",
+						"firstName": "啓祥",
+						"lastName": "高",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "林素",
-						"lastName": "玲",
+						"firstName": "素玲",
+						"lastName": "林",
 						"creatorType": "author"
 					}
 				],

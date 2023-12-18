@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-29 16:07:10"
+	"lastUpdated": "2023-08-19 09:56:11"
 }
 
 /*
@@ -72,6 +72,7 @@ var typeMapping = {
 	Q10870555: "report",
 	Q820655: "statute",
 	Q1266946: "thesis",
+	Q187685: "thesis", // doctoral thesis
 	Q15416: "tvBroadcast",
 	Q30070675: "videoRecording",
 	Q36774: "webpage",
@@ -209,7 +210,7 @@ function scrape(doc, url) {
 								// Z.debug("Internal look up resource: " + resource);
 								value = ZU.xpathText(xml, '//rdf:Description[@rdf:about="' + resource + '"]/rdfs:label[contains(@xml:lang, "en")][1]', namespaces)
 									|| ZU.xpathText(xml, '//rdf:Description[@rdf:about="' + resource + '"]/rdfs:label[1]', namespaces);
-									
+								if (!value) { continue; }
 								// Z.debug(value);
 							}
 							if (zprop == "creator") {
@@ -828,6 +829,81 @@ var testCases = [
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.wikidata.org/wiki/Q30834230",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Nicola",
+						"lastName": "Francesca",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Cláudia",
+						"lastName": "Carvalho",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ciro",
+						"lastName": "Sannino",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marco Alexandre",
+						"lastName": "Guerreiro",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Pedro",
+						"lastName": "Almeida",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Luca",
+						"lastName": "Settanni",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "José Paulo",
+						"lastName": "Sampaio",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Bruno",
+						"lastName": "Massa",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Giancarlo",
+						"lastName": "Moschetti",
+						"creatorType": "author"
+					}
+				],
+				"tags": [
+					{
+						"tag": "species nova",
+						"type": 1
+					},
+					{
+						"tag": "species nova",
+						"type": 1
+					}
+				],
+				"extra": "QID: Q30834230\nPMID: 24981278",
+				"date": "2014-07-28T00:00:00Z",
+				"issue": "6",
+				"publicationTitle": "FEMS Yeast Research, FEMS Yeast Research",
+				"DOI": "10.1111/1567-1364.12179",
+				"volume": "14",
+				"title": "Yeasts vectored by migratory birds collected in the Mediterranean island of Ustica and description of Phaffomyces usticensis f.a. sp. nov., a new species related to the cactus ecoclade",
+				"pages": "910-921",
+				"libraryCatalog": "Wikidata"
 			}
 		]
 	}

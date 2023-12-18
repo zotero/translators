@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-27 16:17:23"
+	"lastUpdated": "2023-03-27 05:16:52"
 }
 
 /*
@@ -73,6 +73,9 @@ function doWeb(doc, url) {
 }
 
 function scrape(_doc, url) {
+	// amp.ft.com/<path> now redirects to www.ft.com/<path>, and there appears
+	// to be no other way to get AMP versions of Financial Times articles,
+	// but we'll keep the current code structure for now, just in case.
 	ZU.processDocuments(url.replace('www.ft.com/', 'amp.ft.com/'), scrapeAmp);
 }
 
@@ -81,7 +84,8 @@ function scrapeAmp(doc, url) {
 	
 	let meta = [...doc.querySelectorAll('script[type="application/ld+json"]')]
 		.map(elem => JSON.parse(elem.textContent))
-		.find(json => json['@type'] != 'WebSite');
+		.find(json => json['@type'] != 'WebSite'
+			&& json['@type'] != 'BreadcrumbList');
 	if (!meta) {
 		throw new Error("No article metadata (probably hit paywall)");
 	}
@@ -90,14 +94,12 @@ function scrapeAmp(doc, url) {
 	item.date = ZU.strToISO(meta.datePublished);
 	item.abstractNote = meta.description
 		|| text('.article-standfirst');
-	// something funky is going on with the JSON-LD authors, so we'll just
-	// parse from the HTML
-	item.creators = [...doc.querySelectorAll('a.article-author-byline__author')]
-		.map(link => ZU.cleanAuthor(link.innerText, 'author', false));
+	item.creators = meta.author
+		.map(obj => ZU.cleanAuthor(obj.name, 'author', false));
 	item.publicationTitle = 'Financial Times';
-	item.section = text('h2.primary-brand a')
-		|| text('h2.primary-theme a');
-	item.url = meta.mainEntityofPage;
+	item.section = text('a[data-trackable="primary-brand"]')
+		|| text('a[data-trackable="primary-theme"]');
+	item.url = attr('link[rel="canonical"]', 'href');
 	item.libraryCatalog = '';
 	item.attachments.push({
 		title: "Snapshot",

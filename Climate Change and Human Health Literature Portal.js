@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-10 02:47:43"
+	"lastUpdated": "2023-08-22 04:14:33"
 }
 
 /*
@@ -40,9 +40,16 @@ function detectWeb(doc, url) {
 	if (url.includes('/index.cfm/detail/')) {
 		return 'journalArticle';
 	}
-	else if (getSearchResults(doc, true)) {
+
+	let appRoot = doc.querySelector("#app"); // Ajax app "mount point"
+	if (appRoot) {
+		// Watch for live filtering of search results)
+		Z.monitorDOMChanges(appRoot);
+	}
+	if (getSearchResults(doc, true)) {
 		return 'multiple';
 	}
+
 	return false;
 }
 
@@ -64,11 +71,9 @@ function getSearchResults(doc, checkOnly) {
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
-		if (items) {
-			await Promise.all(
-				Object.keys(items)
-					.map(url => requestDocument(url).then(scrape))
-			);
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
 		}
 	}
 	else {
@@ -76,7 +81,7 @@ async function doWeb(doc, url) {
 	}
 }
 
-function scrape(doc) {
+async function scrape(doc) {
 	var pmid = text(doc, 'li>a[href*="www.ncbi.nlm.nih.gov/pubmed"]');
 	var doi = text(doc, 'li>a[href*="doi.org/10."]');
 	var abstract = text(doc, '#cchh-detail-abstract');
@@ -185,6 +190,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://tools.niehs.nih.gov/cchhl/index.cfm/main/search#/params?searchTerm=heat%20pump&selectedFacets=&selectedResults=",
+		"defer": true,
 		"items": "multiple"
 	},
 	{

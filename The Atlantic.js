@@ -2,23 +2,20 @@
 	"translatorID": "575ba37f-c871-4ee8-8bdb-3e7f954e4e6a",
 	"label": "The Atlantic",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.theatlantic\\.com",
-	"minVersion": "2.1.9",
+	"target": "^https://www\\.theatlantic\\.com/.+",
+	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2016-12-27 20:33:39"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2023-09-16 01:54:13"
 }
-
-/* FW LINE 59:b820c6d */ function flatten(t){var e=new Array;for(var i in t){var r=t[i];r instanceof Array?e=e.concat(flatten(r)):e.push(r)}return e}var FW={_scrapers:new Array};FW._Base=function(){this.callHook=function(t,e,i,r){if("object"==typeof this.hooks){var n=this.hooks[t];"function"==typeof n&&n(e,i,r)}},this.evaluateThing=function(t,e,i){var r=typeof t;if("object"===r){if(t instanceof Array){var n=this.evaluateThing,a=t.map(function(t){return n(t,e,i)});return flatten(a)}return t.evaluate(e,i)}return"function"===r?t(e,i):t},this.makeItems=function(t,e,i,r,n){n()}},FW.Scraper=function(t){FW._scrapers.push(new FW._Scraper(t))},FW._Scraper=function(t){for(x in t)this[x]=t[x];this._singleFieldNames=["abstractNote","applicationNumber","archive","archiveLocation","artworkMedium","artworkSize","assignee","audioFileType","audioRecordingType","billNumber","blogTitle","bookTitle","callNumber","caseName","code","codeNumber","codePages","codeVolume","committee","company","conferenceName","country","court","date","dateDecided","dateEnacted","dictionaryTitle","distributor","docketNumber","documentNumber","DOI","edition","encyclopediaTitle","episodeNumber","extra","filingDate","firstPage","forumTitle","genre","history","institution","interviewMedium","ISBN","ISSN","issue","issueDate","issuingAuthority","journalAbbreviation","label","language","legalStatus","legislativeBody","letterType","libraryCatalog","manuscriptType","mapType","medium","meetingName","nameOfAct","network","number","numberOfVolumes","numPages","pages","patentNumber","place","postType","presentationType","priorityNumbers","proceedingsTitle","programTitle","programmingLanguage","publicLawNumber","publicationTitle","publisher","references","reportNumber","reportType","reporter","reporterVolume","rights","runningTime","scale","section","series","seriesNumber","seriesText","seriesTitle","session","shortTitle","studio","subject","system","thesisType","title","type","university","url","version","videoRecordingType","volume","websiteTitle","websiteType"],this._makeAttachments=function(t,e,i,r){if(i instanceof Array)i.forEach(function(i){this._makeAttachments(t,e,i,r)},this);else if("object"==typeof i){var n=i.urls||i.url,a=i.types||i.type,s=i.titles||i.title,o=i.snapshots||i.snapshot,u=this.evaluateThing(n,t,e),l=this.evaluateThing(s,t,e),c=this.evaluateThing(a,t,e),h=this.evaluateThing(o,t,e);u instanceof Array||(u=[u]);for(var f in u){var p,m,v,d=u[f];p=c instanceof Array?c[f]:c,m=l instanceof Array?l[f]:l,v=h instanceof Array?h[f]:h,r.attachments.push({url:d,title:m,mimeType:p,snapshot:v})}}},this.makeItems=function(t,e,i,r,n){var a=new Zotero.Item(this.itemType);a.url=e;for(var s in this._singleFieldNames){var o=this._singleFieldNames[s];if(this[o]){var u=this.evaluateThing(this[o],t,e);u instanceof Array?a[o]=u[0]:a[o]=u}}var l=["creators","tags"];for(var c in l){var h=l[c],f=this.evaluateThing(this[h],t,e);if(f)for(var p in f)a[h].push(f[p])}this._makeAttachments(t,e,this.attachments,a),r(a,this,t,e),n()}},FW._Scraper.prototype=new FW._Base,FW.MultiScraper=function(t){FW._scrapers.push(new FW._MultiScraper(t))},FW._MultiScraper=function(t){for(x in t)this[x]=t[x];this._mkSelectItems=function(t,e){var i=new Object;for(var r in t)i[e[r]]=t[r];return i},this._selectItems=function(t,e,i){var r=new Array;Zotero.selectItems(this._mkSelectItems(t,e),function(t){for(var e in t)r.push(e);i(r)})},this._mkAttachments=function(t,e,i){var r=this.evaluateThing(this.attachments,t,e),n=new Object;if(r)for(var a in i)n[i[a]]=r[a];return n},this._makeChoices=function(t,e,i,r,n){if(t instanceof Array)t.forEach(function(t){this._makeTitlesUrls(t,e,i,r,n)},this);else if("object"==typeof t){var a=t.urls||t.url,s=t.titles||t.title,o=this.evaluateThing(a,e,i),u=this.evaluateThing(s,e,i),l=u instanceof Array;o instanceof Array||(o=[o]);for(var c in o){var h,f=o[c];h=l?u[c]:u,n.push(f),r.push(h)}}},this.makeItems=function(t,e,i,r,n){if(this.beforeFilter){var a=this.beforeFilter(t,e);if(a!=e)return void this.makeItems(t,a,i,r,n)}var s=[],o=[];this._makeChoices(this.choices,t,e,s,o);var u=this._mkAttachments(t,e,o),l=this.itemTrans;this._selectItems(s,o,function(t){if(t){var e=function(t){var e=t.documentURI,i=l;void 0===i&&(i=FW.getScraper(t,e)),void 0===i||i.makeItems(t,e,u[e],r,function(){})};Zotero.Utilities.processDocuments(t,e,n)}else n()})}},FW._MultiScraper.prototype=new FW._Base,FW.WebDelegateTranslator=function(t){return new FW._WebDelegateTranslator(t)},FW._WebDelegateTranslator=function(t){for(x in t)this[x]=t[x];this.makeItems=function(t,e,i,r,n){var a=this,s=Zotero.loadTranslator("web");s.setHandler("itemDone",function(i,n){r(n,a,t,e)}),s.setDocument(t),this.translatorId?(s.setTranslator(this.translatorId),s.translate()):(s.setHandler("translators",function(t,e){e.length&&(s.setTranslator(e[0]),s.translate())}),s.getTranslators()),n()}},FW._WebDelegateTranslator.prototype=new FW._Base,FW._StringMagic=function(){this._filters=new Array,this.addFilter=function(t){return this._filters.push(t),this},this.split=function(t){return this.addFilter(function(e){return e.split(t).filter(function(t){return""!=t})})},this.replace=function(t,e,i){return this.addFilter(function(r){return r.match(t)?r.replace(t,e,i):r})},this.prepend=function(t){return this.replace(/^/,t)},this.append=function(t){return this.replace(/$/,t)},this.remove=function(t,e){return this.replace(t,"",e)},this.trim=function(){return this.addFilter(function(t){return Zotero.Utilities.trim(t)})},this.trimInternal=function(){return this.addFilter(function(t){return Zotero.Utilities.trimInternal(t)})},this.match=function(t,e){return e||(e=0),this.addFilter(function(i){var r=i.match(t);return void 0===r||null===r?void 0:r[e]})},this.cleanAuthor=function(t,e){return this.addFilter(function(i){return Zotero.Utilities.cleanAuthor(i,t,e)})},this.key=function(t){return this.addFilter(function(e){return e[t]})},this.capitalizeTitle=function(){return this.addFilter(function(t){return Zotero.Utilities.capitalizeTitle(t)})},this.unescapeHTML=function(){return this.addFilter(function(t){return Zotero.Utilities.unescapeHTML(t)})},this.unescape=function(){return this.addFilter(function(t){return unescape(t)})},this._applyFilters=function(t,e){for(i in this._filters){t=flatten(t),t=t.filter(function(t){return void 0!==t&&null!==t});for(var r=0;r<t.length;r++)try{if(void 0===t[r]||null===t[r])continue;t[r]=this._filters[i](t[r],e)}catch(n){t[r]=void 0,Zotero.debug("Caught exception "+n+"on filter: "+this._filters[i])}t=t.filter(function(t){return void 0!==t&&null!==t})}return flatten(t)}},FW.PageText=function(){return new FW._PageText},FW._PageText=function(){this._filters=new Array,this.evaluate=function(t){var e=[t.documentElement.innerHTML];return e=this._applyFilters(e,t),0==e.length?!1:e}},FW._PageText.prototype=new FW._StringMagic,FW.Url=function(){return new FW._Url},FW._Url=function(){this._filters=new Array,this.evaluate=function(t,e){var i=[e];return i=this._applyFilters(i,t),0==i.length?!1:i}},FW._Url.prototype=new FW._StringMagic,FW.Xpath=function(t){return new FW._Xpath(t)},FW._Xpath=function(t){this._xpath=t,this._filters=new Array,this.text=function(){var t=function(t){return"object"==typeof t&&t.textContent?t.textContent:t};return this.addFilter(t),this},this.sub=function(t){var e=function(e,i){var r=i.evaluate(t,e,null,XPathResult.ANY_TYPE,null);return r?r.iterateNext():void 0};return this.addFilter(e),this},this.evaluate=function(t){var e=t.evaluate(this._xpath,t,null,XPathResult.ANY_TYPE,null),i=e.resultType,r=new Array;if(i==XPathResult.STRING_TYPE)r.push(e.stringValue);else if(i==XPathResult.BOOLEAN_TYPE)r.push(e.booleanValue);else if(i==XPathResult.NUMBER_TYPE)r.push(e.numberValue);else if(i==XPathResult.ORDERED_NODE_ITERATOR_TYPE||i==XPathResult.UNORDERED_NODE_ITERATOR_TYPE)for(var n;n=e.iterateNext();)r.push(n);return r=this._applyFilters(r,t),0==r.length?!1:r}},FW._Xpath.prototype=new FW._StringMagic,FW.detectWeb=function(t,e){for(var i in FW._scrapers){var r=FW._scrapers[i],n=r.evaluateThing(r.itemType,t,e),a=r.evaluateThing(r.detect,t,e);if(a.length>0&&a[0])return n}},FW.getScraper=function(t,e){var i=FW.detectWeb(t,e);return FW._scrapers.filter(function(r){return r.evaluateThing(r.itemType,t,e)==i&&r.evaluateThing(r.detect,t,e)})[0]},FW.doWeb=function(t,e){var i=FW.getScraper(t,e);i.makeItems(t,e,[],function(t,e,i,r){e.callHook("scraperDone",t,i,r),t.title||(t.title=""),t.complete()},function(){Zotero.done()}),Zotero.wait()};
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	The Atlantic Translator
-	Copyright © 2011 Sebastian Karcher
+	Copyright © 2011 Sebastian Karcher and contributors
 
 	This file is part of Zotero.
 
@@ -38,61 +35,210 @@
 	***** END LICENSE BLOCK *****
 */
 
-function detectWeb(doc, url) { return FW.detectWeb(doc, url); }
-function doWeb(doc, url) { return FW.doWeb(doc, url); }
- 
-/** Magazine */
-FW.Scraper({
-itemType         : 'magazineArticle',
-detect           : FW.Xpath('//article[@id="article"]//h1[@class="hed"]'),
-title            : FW.Xpath('//article[@id="article"]//h1[@class="hed"]').text().trim(),
-attachments      : [{ url: FW.Url(),
-  title:  "The Atlantic Snapshot",
-  type: "text/html" }],
-creators         : FW.Xpath('//div[@class="article-cover-extra"]//ul[@class="metadata"]/li[@class="byline"]').text().cleanAuthor("author"),
-date             : FW.Xpath('//div[@class="article-cover-extra"]//ul[@class="metadata"]/li[@class="date"]').text(),
-abstractNote     : FW.Xpath('//article//p[@class="dek"]').text().trim(),
-publicationTitle : "The Atlantic",
-ISSN             : "1072-7825"
-}); 
-  
- 
-/** Magazine Features */
-FW.Scraper({
-itemType         : 'magazineArticle',
-detect           : FW.Xpath('//article[@class="article"]//h1[@class="hed"]'),
-title            : FW.Xpath('//article[@class="article"]//h1[@class="hed"]').text().trim(),
-attachments      : [{ url: FW.Url(),
-  title:  "The Atlantic Snapshot",
-  type: "text/html" }],
-creators         : FW.Xpath('//header//address[@class="byline"]/a').text().cleanAuthor("author"),
-date             : FW.Xpath('//header/time[@class="date"]').text(),
-abstractNote     : FW.Xpath('//article//p[@class="dek"]').text().trim(),
-publicationTitle : "The Atlantic",
-ISSN             : "1072-7825"
-}); 
-  
- /** Search Results */
-FW.MultiScraper({
-itemType         : 'multiple',
-detect           : FW.Url().match(/search\/\?q=/),
-choices          : {
-  titles :  FW.Xpath('//a[@class="gs-title"]').text().trim(),
-  urls    :  FW.Xpath('//a[@class="gs-title"]').key("href").text()
-}
-}); 
- 
+// path at /[type]/archive/yyyy/mm/...
+const SINGLE_ITEM_URL_RE = /^https:\/\/[^/]+\/(.+)\/archive\/\d{4}\/\d{2}\/.+/;
 
- /**Blog Landing page*/
-FW.MultiScraper({
-itemType         : 'multiple',
-detect           : FW.Xpath('//div[@id="landing"]//li[contains(@class, "article")]'),
-choices          : {
-  titles :  FW.Xpath('//li[contains(@class, "article")]/a').text().trim(),
-  urls    :  FW.Xpath('//li[contains(@class, "article")]/a').key("href").text()
+function detectWeb(doc, url) {
+	let singleItemMatch = url.match(SINGLE_ITEM_URL_RE);
+
+	if (!singleItemMatch) {
+		return getSearchResults(doc, true) && "multiple";
+	}
+
+	switch (singleItemMatch[1]) {
+		// articles from print issues
+		case "magazine":
+			return "magazineArticle";
+		case "podcasts":
+			return "podcast";
+		default:
+			// see, e.g. https://www.theatlantic.com/category/fiction/
+			// and look at the class list of the li elements; the
+			// non-magazineArticle items have "blog-article" as one of its
+			// classes
+			return "blogPost"; // TODO: consider this
+	}
 }
-}); 
- 
+
+function getSearchResults(doc, checkOnly) {
+	let items = {};
+	let found = false;
+	// "li.article" selector: see https://www.theatlantic.com/category/fiction/
+	let rows = doc.querySelectorAll("li.article > a, a[data-action~='title']");
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!title || !SINGLE_ITEM_URL_RE.test(href)) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
+	}
+	else {
+		await scrape(doc, url);
+	}
+}
+
+async function scrape(doc, url = doc.location.href) {
+	let type = detectWeb(doc, url);
+	let translator = Zotero.loadTranslator('web');
+	// Embedded Metadata
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	translator.setDocument(doc);
+
+	translator.setHandler('itemDone', (_obj, item) => {
+		item.publicationTitle = "The Atlantic";
+		item.libraryCatalog = "The Atlantic";
+
+		// get rid of trailing "- The Atlantic" in some titles
+		item.title = item.title.replace(/\s+-\s+The Atlantic$/i, "");
+
+		// tags from EM is rarely helpful for The Atlantic; they're from the
+		// meta[name='keywords'] tags, and are either redundant with "Section"
+		// (in the extra) or spam.
+		item.tags = [];
+
+		// fix multiple authors; metadata give us one comma-separated string
+		item.creators = [];
+		// latter selector for legacy layout
+		for (let element of doc.querySelectorAll('#byline a[href*="/author/"], .byline span[itemprop="author"]')) {
+			item.creators.push(
+				ZU.cleanAuthor(
+					ZU.trimInternal(element.textContent),
+					"author"
+				)
+			);
+		}
+
+		// keep only the date part of the datetime
+		if (item.date) {
+			item.date = ZU.strToISO(item.date);
+		}
+
+		if (type === "magazineArticle") {
+			let issueTitle = text(doc, 'div[class*="ArticleMagazineIssueNav_title"]')
+				.replace(/\s+Issue$/i, "");
+			if (issueTitle) {
+				if (!item.extra) {
+					item.extra = "";
+				}
+				else {
+					item.extra += "\n";
+				}
+				item.extra += `Volume Title: ${issueTitle}`;
+			}
+
+			item.ISSN = "2151-9463";
+		}
+		else if (type === "podcast") {
+			item.seriesTitle = text(doc, "#rubric");
+			let podcasters = []; // plain name strings, "First Last"
+			for (let creator of item.creators) {
+				creator.creatorType = "podcaster";
+				podcasters.push([creator.firstName, creator.lastName].join(" "));
+			}
+			for (let creator of getPodcastCreators(doc)) {
+				if (!podcasters.includes(creator)) {
+					item.creators.push(ZU.cleanAuthor(creator, "guest"));
+				}
+			}
+		}
+
+		item.complete();
+	});
+
+	let em = await translator.getTranslatorObject();
+	em.itemType = type || "webpage";
+	await em.doWeb(doc, url);
+}
+
+// Get podcast participants from the transcript (paragraph-leading text in
+// <strong>). The assumption is that the first mention of anyone is the
+// person's full name, and that the further mentions of any particular person
+// is a substring of the full name, and they're used consistently in the
+// transcripts.
+function getPodcastCreators(doc) {
+	// transcript paragraphs
+	let containers = doc.querySelectorAll('p[class*="ArticleParagraph_root"], div[class*="ArticleLegacyHtml_root"]');
+
+	let namesInQuotes = new Set();
+	let creatorNames = [];
+	let skip = new Set();
+	Z.debug(`total paragraphs: ${containers.length}`);
+	let i = 0; // NOTE: debug only
+	for (let containerElement of containers) {
+		// Contributor name in bold (<strong> tag), leading a paragraph in the
+		// transcript
+		let element = containerElement.querySelector("strong");
+
+		// if no <strong> tag, or if the first <strong> tag contains all the
+		// text of the paragraph or div, it's not a name string.
+		if (!element) continue;
+
+		let elementText = element.textContent;
+		let nameString = ZU.trimInternal(elementText).replace(/\s*:$/, "");
+		if (skip.has(nameString) || !nameString) continue;
+		if (elementText === containerElement.textContent) continue;
+
+		// Quotes may contain participant's first mentions but also irrelevant
+		// names (e.g. from newsreels) for context. Stash these names for
+		// further processing.
+		if (element.querySelector("em")) {
+			namesInQuotes.add(nameString);
+			continue;
+		}
+
+		i++; // NOTE: debug only
+		// only if a name string is a not a substring of any other name we've
+		// kept, add it to the array of name we keep (creatorNames)
+		// NOTE: nested substring test
+		if (!creatorNames.filter(keptName => keptName.includes(nameString)).length) {
+			creatorNames.push(nameString); // keep this string
+		}
+		skip.add(nameString); // skip further appearances
+	}
+
+	Z.debug(`names contributing to substring test cost ${i}`);
+	// Process names in quoted content (text lines in <em> tags). Take a string
+	// X from quotes, and check 1) if no kept creator name is a substring of X,
+	// X is discarded because it's irrelevant; 2) if a string Y from the kept
+	// names is a substring of X, Y is discarded, X is kept.
+	Z.debug(`kept names from main paragraphs ${creatorNames.length}`);
+	creatorNames = new Set(creatorNames);
+	i = 0; // NOTE: debug only
+	Z.debug(`names from quotation paragraphs ${namesInQuotes.size}`);
+	for (let str of namesInQuotes) {
+		if (skip.has(str)) continue;
+		i++; // NOTE: debug only
+
+		let keepStr = false;
+		for (let keptName of creatorNames) { // NOTE: nested substring test
+			if (str.includes(keptName)) {
+				creatorNames.delete(keptName);
+				skip.add(keptName);
+				keepStr = true;
+			}
+		}
+		if (keepStr) {
+			creatorNames.add(str);
+		}
+		skip.add(str);
+	}
+	Z.debug(`names from quotation contributing to substring test cost ${i}`);
+
+	return creatorNames;
+}
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -105,7 +251,7 @@ var testCases = [
 		"url": "https://www.theatlantic.com/politics/archive/2011/06/jon-stewart-challenges-fox-news-to-correct-its-errors/240900/",
 		"items": [
 			{
-				"itemType": "magazineArticle",
+				"itemType": "blogPost",
 				"title": "Jon Stewart Challenges Fox News to Correct Its Errors",
 				"creators": [
 					{
@@ -114,15 +260,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "Jun 23, 2011",
-				"ISSN": "1072-7825",
+				"date": "2011-06-23",
 				"abstractNote": "In the same segment, the comedian apologized for saying its viewers are always found to be the most misinformed",
-				"libraryCatalog": "The Atlantic",
-				"publicationTitle": "The Atlantic",
+				"blogTitle": "The Atlantic",
+				"language": "en",
 				"url": "https://www.theatlantic.com/politics/archive/2011/06/jon-stewart-challenges-fox-news-to-correct-its-errors/240900/",
 				"attachments": [
 					{
-						"title": "The Atlantic Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -146,15 +291,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "July/August 2011 Issue",
-				"ISSN": "1072-7825",
+				"date": "2011-06-07",
+				"ISSN": "2151-9463",
 				"abstractNote": "How a German scientist is using test data to revolutionize global learning",
+				"extra": "Volume Title: July/August 2011",
+				"language": "en",
 				"libraryCatalog": "The Atlantic",
 				"publicationTitle": "The Atlantic",
 				"url": "https://www.theatlantic.com/magazine/archive/2011/07/the-worlds-schoolmaster/308532/",
 				"attachments": [
 					{
-						"title": "The Atlantic Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -175,7 +322,7 @@ var testCases = [
 		"url": "https://www.theatlantic.com/health/archive/2014/03/the-toxins-that-threaten-our-brains/284466/",
 		"items": [
 			{
-				"itemType": "magazineArticle",
+				"itemType": "blogPost",
 				"title": "The Toxins That Threaten Our Brains",
 				"creators": [
 					{
@@ -184,15 +331,197 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "Mar 18, 2014",
-				"ISSN": "1072-7825",
+				"date": "2014-03-18",
 				"abstractNote": "Leading scientists recently identified a dozen chemicals as being responsible for widespread behavioral and cognitive problems. But the scope of the chemical dangers in our environment is likely even greater. Why children and the poor are most susceptible to neurotoxic exposure that may be costing the U.S. billions of dollars and immeasurable peace of mind.",
-				"libraryCatalog": "The Atlantic",
-				"publicationTitle": "The Atlantic",
+				"blogTitle": "The Atlantic",
+				"language": "en",
 				"url": "https://www.theatlantic.com/health/archive/2014/03/the-toxins-that-threaten-our-brains/284466/",
 				"attachments": [
 					{
-						"title": "The Atlantic Snapshot",
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.theatlantic.com/podcasts/archive/2023/09/ba-286-covid-variant-future/675248/",
+		"items": [
+			{
+				"itemType": "podcast",
+				"title": "Our First ‘Nonemergency’ COVID Season",
+				"creators": [
+					{
+						"firstName": "Hanna",
+						"lastName": "Rosin",
+						"creatorType": "podcaster"
+					},
+					{
+						"firstName": "Katie",
+						"lastName": "Wu",
+						"creatorType": "guest"
+					},
+					{
+						"firstName": "Sarah",
+						"lastName": "Zhang",
+						"creatorType": "guest"
+					}
+				],
+				"abstractNote": "A new wave. A new variant. A new vaccine. Do we know COVID’s annual pattern yet?",
+				"language": "en",
+				"seriesTitle": "Radio Atlantic",
+				"url": "https://www.theatlantic.com/podcasts/archive/2023/09/ba-286-covid-variant-future/675248/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.theatlantic.com/podcasts/archive/2023/08/trans-texas/675188/",
+		"items": [
+			{
+				"itemType": "podcast",
+				"title": "When the State Has a Problem With Your Identity",
+				"creators": [
+					{
+						"firstName": "Hanna",
+						"lastName": "Rosin",
+						"creatorType": "podcaster"
+					},
+					{
+						"firstName": "Ethan",
+						"lastName": "Brooks",
+						"creatorType": "podcaster"
+					},
+					{
+						"firstName": "",
+						"lastName": "Teenager",
+						"creatorType": "guest"
+					},
+					{
+						"firstName": "",
+						"lastName": "Mom",
+						"creatorType": "guest"
+					},
+					{
+						"firstName": "",
+						"lastName": "Dad",
+						"creatorType": "guest"
+					}
+				],
+				"abstractNote": "Inside one family’s decision to move from Texas to California to protect their transgender teenager",
+				"language": "en",
+				"seriesTitle": "Radio Atlantic",
+				"url": "https://www.theatlantic.com/podcasts/archive/2023/08/trans-texas/675188/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.theatlantic.com/podcasts/archive/2023/06/buying-house-with-friends-family/674343/",
+		"items": [
+			{
+				"itemType": "podcast",
+				"title": "How to Talk to People: What Makes a House a Home",
+				"creators": [
+					{
+						"firstName": "Julie",
+						"lastName": "Beck",
+						"creatorType": "podcaster"
+					},
+					{
+						"firstName": "Rebecca",
+						"lastName": "Rashid",
+						"creatorType": "podcaster"
+					},
+					{
+						"firstName": "Deborah",
+						"lastName": "Tepley",
+						"creatorType": "guest"
+					},
+					{
+						"firstName": "Bethany",
+						"lastName": "Fleming",
+						"creatorType": "guest"
+					},
+					{
+						"firstName": "Luke",
+						"lastName": "Jackson",
+						"creatorType": "guest"
+					},
+					{
+						"firstName": "T. J.",
+						"lastName": "Fleming",
+						"creatorType": "guest"
+					}
+				],
+				"abstractNote": "Two married couples who bought a home together have found that expanding their household led to a deeper sense of community.",
+				"language": "en",
+				"seriesTitle": "Podcasts",
+				"shortTitle": "How to Talk to People",
+				"url": "https://www.theatlantic.com/podcasts/archive/2023/06/buying-house-with-friends-family/674343/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.theatlantic.com/projects/new-rules/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.theatlantic.com/projects/ideas-2010/archive/2010/06/reading-writing-and-thinking-online-an-interview-with-alan-jacobs/57807/",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "Reading, Writing, and Thinking Online: An Interview With Alan Jacobs",
+				"creators": [
+					{
+						"firstName": "Conor",
+						"lastName": "Friedersdorf",
+						"creatorType": "author"
+					}
+				],
+				"date": "2010-06-08",
+				"abstractNote": "An accomplished author, essayist and academic on how he successfully navigates the Web, why English students should be forced to recite poems from memory, and why it's a bad idea to read your child Goodnight Moon on a Kindle.",
+				"blogTitle": "The Atlantic",
+				"language": "en",
+				"shortTitle": "Reading, Writing, and Thinking Online",
+				"url": "https://www.theatlantic.com/projects/ideas-2010/archive/2010/06/reading-writing-and-thinking-online-an-interview-with-alan-jacobs/57807/",
+				"attachments": [
+					{
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],

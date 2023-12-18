@@ -18,7 +18,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2022-10-31 23:11:08"
+	"lastUpdated": "2023-04-09 18:35:07"
 }
 
 /*
@@ -684,6 +684,7 @@ function unescapeBibTeX(value) {
 			value = value.replace(mapped, unicode);
 		}
 	}
+	value = value.replace(/\$([^$]+)\$/g, '$1')
 	
 	// kill braces
 	value = value.replace(/([^\\])[{}]+/g, "$1");
@@ -1109,15 +1110,23 @@ function mapHTMLmarkup(characters){
 	return characters;
 }
 
-
+function xcase(prefix, cased, tag, tex) {
+	return (prefix ? `$${prefix}$` : '') + (reversemappingTable[`$${tex}{${cased}}$`] || `<${tag}>${cased}</${tag}>`)
+}
+function sup(match, prefix, cased) {
+	return xcase(prefix, cased, 'sup', '^');
+}
+function sub(match, prefix, cased) {
+	return xcase(prefix, cased, 'sub', '_');
+}
 function mapTeXmarkup(tex){
 	//reverse of the above - converts tex mark-up into html mark-up permitted by Zotero
 	//italics and bold
 	tex = tex.replace(/\\textit\{([^\}]+\})/g, "<i>$1</i>").replace(/\\textbf\{([^\}]+\})/g, "<b>$1</b>");
 	//two versions of subscript the .* after $ is necessary because people m
-	tex = tex.replace(/\$[^\{\$]*_\{([^\}]+\})\$/g, "<sub>$1</sub>").replace(/\$[^\{]*_\{\\textrm\{([^\}]+\}\})/g, "<sub>$1</sub>");
+	tex = tex.replace(/\$([^\{\$]*)_\{([^\}]+)\}\$/g, sub).replace(/\$([^\{\$]*)_\{\\textrm\{([^\}\$]+)\}\}\$/g, sub);
 	//two version of superscript
-	tex = tex.replace(/\$[^\{]*\^\{([^\}]+\}\$)/g, "<sup>$1</sup>").replace(/\$[^\{]*\^\{\\textrm\{([^\}]+\}\})/g, "<sup>$1</sup>");
+	tex = tex.replace(/\$([^\{\$]*)\^\{([^\}]+)\}\$/g, sup).replace(/\$([^\{\$]*)\^\{\\textrm\{([^\}]+)\}\}\$/g, sup);
 	//small caps
 	tex = tex.replace(/\\textsc\{([^\}]+)/g, "<span style=\"small-caps\">$1</span>");
 	return tex;
@@ -3326,7 +3335,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Test of markupconversion: Italics, bold, superscript, subscript, and small caps: Mitochondrial DNA<sub>2</sub>$ sequences suggest unexpected phylogenetic position of Corso-Sardinian grass snakes (<i>Natrix cetti</i>) and <b>do not</b> support their <span style=\"small-caps\">species status</span>, with notes on phylogeography and subspecies delineation of grass snakes.",
+				"title": "Test of markupconversion: Italics, bold, superscript, subscript, and small caps: Mitochondrial DNA₂ sequences suggest unexpected phylogenetic position of Corso-Sardinian grass snakes (<i>Natrix cetti</i>) and <b>do not</b> support their <span style=\"small-caps\">species status</span>, with notes on phylogeography and subspecies delineation of grass snakes.",
 				"creators": [
 					{
 						"firstName": "U.",
@@ -3348,7 +3357,7 @@ var testCases = [
 				"DOI": "10.1007/s13127-011-0069-8",
 				"itemID": "Frit2",
 				"pages": "71-80",
-				"publicationTitle": "Actes du <sup>ème</sup>$ Congrès Français d'Acoustique",
+				"publicationTitle": "Actes du 4<sup>ème</sup> Congrès Français d'Acoustique",
 				"volume": "12",
 				"attachments": [],
 				"tags": [],
@@ -4153,6 +4162,40 @@ var testCases = [
 				"publisher": "Curran Associates, Inc.",
 				"url": "https://proceedings.neurips.cc/paper/2009/file/0188e8b8b014829e2fa0f430f0a95961-Paper.pdf",
 				"volume": "22",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@article{Borissov:2855446,\r\n              author        = \"Borissov, Alexander and Solokhin, Sergei\",\r\n              collaboration = \"ALICE\",\r\n              title         = \"{Production of $\\Sigma^{0}$ Hyperon and Search of\r\n                               $\\Sigma^{0}$ Hypernuclei at LHC with ALICE}\",\r\n              journal       = \"Phys. At. Nucl.\",\r\n              volume        = \"85\",\r\n              number        = \"6\",\r\n              pages         = \"970-975\",\r\n              year          = \"2023\",\r\n              url           = \"https://cds.cern.ch/record/2855446\",\r\n              doi           = \"10.1134/S1063778823010131\",\r\n        }",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Production of Σ⁰ Hyperon and Search of Σ⁰ Hypernuclei at LHC with ALICE",
+				"creators": [
+					{
+						"firstName": "Alexander",
+						"lastName": "Borissov",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sergei",
+						"lastName": "Solokhin",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023",
+				"DOI": "10.1134/S1063778823010131",
+				"issue": "6",
+				"itemID": "Borissov:2855446",
+				"pages": "970-975",
+				"publicationTitle": "Phys. At. Nucl.",
+				"url": "https://cds.cern.ch/record/2855446",
+				"volume": "85",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
