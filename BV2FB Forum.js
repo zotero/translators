@@ -1,15 +1,15 @@
 {
 	"translatorID": "c00df5a5-9017-4a31-892f-7486873f1f21",
-	"label": "BV2FB 論壇",
+	"label": "BV2FB Forum",
 	"creator": "Andy Kwok",
-	"target": "\\.bv2fb\\.com",
+	"target": "^https?://(www\\.)?bv2fb\\.com",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-01-05 16:21:37"
+	"lastUpdated": "2023-12-18 02:19:12"
 }
 
 /*
@@ -84,6 +84,7 @@ async function scrape(doc, url = doc.location.href) {
 			
 			item.creators.push(ZU.cleanAuthor("ralph5973", "author", true));
 			item.forumTitle = "BV2FB 論壇";
+			item.postType = "text";
 			item.complete();
 	});
 	translator.getTranslatorObject(function(trans) {
