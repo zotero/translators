@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-12-18 02:50:41"
+	"lastUpdated": "2023-12-18 03:47:38"
 }
 
 /*
@@ -84,6 +84,11 @@ function scrape(doc, url) {
 	
 	translator.setHandler('itemDone', function (obj, item) {
 		// TODO adjust if needed:
+
+		splitTitle = item.title.split("|");
+		item.creators.push({lastName: splitTitle.pop().trim(), creatorType: "author", fieldMode: 1});
+		item.title = splitTitle.join("|");
+
 		item.postType = "text"
 		item.tags = null;
 		item.complete();
@@ -106,8 +111,14 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "forumPost",
-				"title": "心戰室今日暫停｜F1第23站阿布達比煞科戰專欄｜希望2024繼續｜角田練兵千日 用在’24❓ | 丹尼爾 vs 陳恩能",
-				"creators": [],
+				"title": "心戰室今日暫停｜F1第23站阿布達比煞科戰專欄｜希望2024繼續｜角田練兵千日 用在’24❓",
+				"creators": [
+					{
+						"lastName": "丹尼爾 vs 陳恩能",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
 				"abstractNote": "Patreon is empowering a new generation of creators. \nSupport and engage with artists and creators as they live out their passions!",
 				"postType": "text",
 				"url": "https://www.patreon.com/posts/xin-zhan-shi-jin-93844184",
