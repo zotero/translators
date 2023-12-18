@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-12-18 03:52:11"
+	"lastUpdated": "2023-12-18 03:54:49"
 }
 
 /*
@@ -89,7 +89,8 @@ function scrape(doc, url) {
 		item.creators.push({lastName: splitTitle.pop().trim(), creatorType: "author", fieldMode: 1});
 		item.title = splitTitle.join("|");
 
-		item.postType = "text";
+		item.forumTitle = 'Patreon';
+		item.postType = 'text';
 		item.abstractNote = null;
 		item.tags = null;
 		item.complete();
@@ -120,6 +121,7 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
+				"forumTitle": "Patreon",
 				"postType": "text",
 				"url": "https://www.patreon.com/posts/xin-zhan-shi-jin-93844184",
 				"attachments": [
@@ -147,6 +149,7 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
+				"forumTitle": "Patreon",
 				"postType": "text",
 				"url": "https://www.patreon.com/posts/nong-li-qi-yue-55316874",
 				"attachments": [
