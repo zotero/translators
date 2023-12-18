@@ -2,14 +2,14 @@
 	"translatorID": "e79f3610-5e29-4194-a6f9-87a725330ce1",
 	"label": "Patreon",
 	"creator": "Andy Kwok",
-	"target": "patreon.com",
+	"target": "^https?://(www\\.)?patreon\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-03-10 07:37:06"
+	"lastUpdated": "2023-12-18 02:36:42"
 }
 
 /*
@@ -39,9 +39,7 @@
 function detectWeb(doc, url) {
 	// TODO: adjust the logic here
 	
-	return "blogPost"
-	
-	if (url.includes('/article/')) {
+	if (url.includes('/posts/')) {
 		return "blogPost";
 	}
 	else if (getSearchResults(doc, true)) {
@@ -86,7 +84,8 @@ function scrape(doc, url) {
 	
 	translator.setHandler('itemDone', function (obj, item) {
 		// TODO adjust if needed:
-		item.websiteType = 'Patreon';
+		item.websiteType = 'text';
+		item.tags = null;
 		item.complete();
 	});
 
@@ -99,3 +98,30 @@ function scrape(doc, url) {
 		trans.doWeb(doc, url);
 	});
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.patreon.com/posts/xin-zhan-shi-jin-93844184",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "心戰室今日暫停｜F1第23站阿布達比煞科戰專欄｜希望2024繼續｜角田練兵千日 用在’24❓ | 丹尼爾 vs 陳恩能",
+				"creators": [],
+				"abstractNote": "Patreon is empowering a new generation of creators. \nSupport and engage with artists and creators as they live out their passions!",
+				"blogTitle": "Patreon",
+				"url": "https://www.patreon.com/posts/xin-zhan-shi-jin-93844184",
+				"websiteType": "text",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
