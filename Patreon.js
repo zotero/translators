@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-12-18 03:47:38"
+	"lastUpdated": "2023-12-18 03:48:32"
 }
 
 /*
@@ -122,6 +122,34 @@ var testCases = [
 				"abstractNote": "Patreon is empowering a new generation of creators. \nSupport and engage with artists and creators as they live out their passions!",
 				"postType": "text",
 				"url": "https://www.patreon.com/posts/xin-zhan-shi-jin-93844184",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.patreon.com/posts/nong-li-qi-yue-55316874",
+		"items": [
+			{
+				"itemType": "forumPost",
+				"title": "農曆七月，吸血殭屍",
+				"creators": [
+					{
+						"lastName": "Dr. Wan Chin",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"abstractNote": "Patreon is empowering a new generation of creators. \nSupport and engage with artists and creators as they live out their passions!",
+				"postType": "text",
+				"url": "https://www.patreon.com/posts/nong-li-qi-yue-55316874",
 				"attachments": [
 					{
 						"title": "Snapshot",
