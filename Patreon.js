@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-12-18 02:38:12"
+	"lastUpdated": "2023-12-18 02:43:56"
 }
 
 /*
@@ -40,7 +40,7 @@ function detectWeb(doc, url) {
 	// TODO: adjust the logic here
 	
 	if (url.includes('/posts/')) {
-		return "blogPost";
+		return "forumPost";
 	}
 	else if (getSearchResults(doc, true)) {
 		return "multiple";
@@ -84,13 +84,13 @@ function scrape(doc, url) {
 	
 	translator.setHandler('itemDone', function (obj, item) {
 		// TODO adjust if needed:
-		item.websiteType = 'text';
+		item.postType = "text"
 		item.tags = null;
 		item.complete();
 	});
 
 	translator.getTranslatorObject(function (trans) {
-		trans.itemType = "blogPost";
+		trans.itemType = "forumPost";
 		// TODO map additional meta tags here, or delete completely
 		trans.addCustomFields({
 			'twitter:description': 'abstractNote'
@@ -105,13 +105,12 @@ var testCases = [
 		"url": "https://www.patreon.com/posts/xin-zhan-shi-jin-93844184",
 		"items": [
 			{
-				"itemType": "blogPost",
+				"itemType": "forumPost",
 				"title": "心戰室今日暫停｜F1第23站阿布達比煞科戰專欄｜希望2024繼續｜角田練兵千日 用在’24❓ | 丹尼爾 vs 陳恩能",
 				"creators": [],
 				"abstractNote": "Patreon is empowering a new generation of creators. \nSupport and engage with artists and creators as they live out their passions!",
-				"blogTitle": "Patreon",
+				"postType": "text",
 				"url": "https://www.patreon.com/posts/xin-zhan-shi-jin-93844184",
-				"websiteType": "text",
 				"attachments": [
 					{
 						"title": "Snapshot",
