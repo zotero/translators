@@ -12,26 +12,26 @@
 	"lastUpdated": "2023-12-20 15:33:44"
 }
 
-	/*
-	***** BEGIN LICENSE BLOCK *****
+/*
+***** BEGIN LICENSE BLOCK *****
 
-	InView Essentials Translator, Copyright © 2023 Casper van Wetten
-	This file is part of Zotero.
+InView Essentials Translator, Copyright © 2023 Casper van Wetten
+This file is part of Zotero.
 
-	Zotero is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
+Zotero is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-	Zotero is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-	GNU Affero General Public License for more details.
+Zotero is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
 
-	You should have received a copy of the GNU Affero General Public License
-	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU Affero General Public License
+along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
-	***** END LICENSE BLOCK *****
+***** END LICENSE BLOCK *****
 */
 
 function detectWeb(doc, url) {
@@ -42,65 +42,82 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var metaUrl = url.match(/https?:\/\/wetten.overheid.nl\/BWBR[0-9]*\/[0-9]{4}-[0-9]{2}-[0-9]{2}/)[0] + "/0/informatie"; 
-	ZU.doGet(metaUrl, scrape)
+	var metaUrl = url.match(/https?:\/\/wetten.overheid.nl\/BWBR[0-9]*\/[0-9]{4}-[0-9]{2}-[0-9]{2}/)[0] + "/0/informatie";
+	ZU.doGet(metaUrl, scrape);
 }
 
 function scrape(respString, respObject, url) {
 	var newItem = new Zotero.Item("statute");
-	var parsed = stringToHtml(respString)
+	var parsed = stringToHtml(respString);
 	
 	// Get the easy stuff
 	newItem.dateEnacted = url.match(/[0-9]{4}-[0-9]{2}-[0-9]{2}/)[0];
-	newItem.url = url.replace(/.{13}$/, '')
+	newItem.url = url.replace(/.{13}$/, '');
 
 	// The title can vary
-	var title = parsed.getElementsByTagName("h1")[0].textContent
+	var title = parsed.getElementsByTagName("h1")[0].textContent;
 	// Statues ending in "wet" or in "book" shoudl have different definitive articles
-	if (title.match(/W?w?et$/)) {title = "de " + title}
-	if (title.match(/B?b?oek ?\d?$/)) {title = "het " + title}
+	if (title.match(/W?w?et$/)) {
+		title = "de " + title;
+	}
+	if (title.match(/B?b?oek ?\d?$/)) {
+		title = "het " + title;
+	}
 	// The "Burgerlijke wetboeken" have a specific phrasiing to them, this fixes that
-	if (title.match(/Burgerlijk/)) { title = title.replace(/(.*)(\sBoek \d+)/, "$2 van $1");}
-	newItem.title = title
+	if (title.match(/Burgerlijk/)) {
+		title = title.replace(/(.*)(\sBoek \d+)/, "$2 van $1");
+	}
+	newItem.title = title;
 
 
 	//If there is a short title, go and get it
-	var shortTitles = parsed.querySelectorAll("td[data-before='Afkortingen'], td[data-before='Afkorting']")
-	if (shortTitles[0].textContent != "Geen") { 
-		if (shortTitles[0].textContent == "BW") {newItem.shortTitle = shortTitles[2].textContent}
-		else 									{newItem.shortTitle = shortTitles[0].textContent} //The "Burgerlijk Wetboeken" have the same initial short title (BW), but the third short title (like BW5) is the one we want
-	}	
+	var shortTitles = parsed.querySelectorAll("td[data-before='Afkortingen'], td[data-before='Afkorting']");
+	if (shortTitles[0].textContent != "Geen") {
+		if (shortTitles[0].textContent == "BW") {
+			newItem.shortTitle = shortTitles[2].textContent;
+		}
+		else {
+			newItem.shortTitle = shortTitles[0].textContent;
+		} //The "Burgerlijk Wetboeken" have the same initial short title (BW), but the third short title (like BW5) is the one we want
+	}
 
 	//Get the code
-	newItem.code = parsed.querySelector("td[data-before='Identificatienummer']").textContent
+	newItem.code = parsed.querySelector("td[data-before='Identificatienummer']").textContent;
 
 	//Get the law field as tags
-	let tagArray = []
-	tags = parsed.querySelectorAll("td[data-before='Rechtsgebied']")
-	if (tags.length == 0) {tags = parsed.querySelectorAll("td[data-before='Rechtsgebieden']")}
-	for (let tag of tags){
-		if (tag.textContent.includes('|')) {
-			for (tag of tag.textContent.split('|').map(tag => tag.trim())){
-				if (!tagArray.includes(tag)) {tagArray.push(tag)} 
-			}		
-		}
-		else {if (!tagArray.includes(tag)) {tagArray.push(tag)} }
+	let tagArray = [];
+	let tags;
+	tags = parsed.querySelectorAll("td[data-before='Rechtsgebied']");
+	if (tags.length == 0) {
+		tags = parsed.querySelectorAll("td[data-before='Rechtsgebieden']");
 	}
-	newItem.tags = tagArray
+	for (let tag of tags) {
+		if (tag.textContent.includes('|')) {
+			for (tag of tag.textContent.split('|').map(tag => tag.trim())) {
+				if (!tagArray.includes(tag)) {
+					tagArray.push(tag);
+				}
+			}
+		}
+		else if (!tagArray.includes(tag)) {
+			tagArray.push(tag);
+		}
+	}
+	newItem.tags = tagArray;
 
 	//Get law-family
-	var li = parsed.getElementById("Wetsfamilie").nextElementSibling.getElementsByTagName("li")
-	var seeAlso = []
+	var li = parsed.getElementById("Wetsfamilie").nextElementSibling.getElementsByTagName("li");
+	var seeAlso = [];
 	for (var i = 0; i < li.length; i++) {
 		if (li[i].textContent != parsed.getElementsByTagName("h1")[0].textContent) {
 			seeAlso.push(li[i].textContent);
 		}
 	}
-	newItem.seeAlso = seeAlso
+	newItem.seeAlso = seeAlso;
 
 
 	//Finish the item
-	newItem.complete()
+	newItem.complete();
 }
 
 
@@ -108,7 +125,8 @@ function stringToHtml(str) {
 	var parser = new DOMParser();
 	var doc = parser.parseFromString(str, 'text/html');
 	return doc;
-};
+}
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
