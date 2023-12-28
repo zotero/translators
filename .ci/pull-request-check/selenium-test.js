@@ -113,15 +113,11 @@ var allPassed = false;
 
 		// No API to retrieve extension ID. Hacks, sigh.
 		await driver.get("chrome://system/");
-		await driver.wait(until.elementLocated({id: 'btn-extensions-value'}), 60*1000);
-		// Chrome 89+ has the extension list expanded by default
-		try {
-			let extBtn = await driver.findElement({css: '#btn-extensions-value'});
-			await extBtn.click();
-		} catch (e) {}
-		let contentElem = await driver.findElement({css: '#content'});
-		let text = await contentElem.getText();
-		let extId = text.match(/([^\s]*) : Zotero Connector/)[1];
+		await driver.wait(until.elementLocated({tagName: 'system-app'}), 60*1000);
+		let systemAppElement = await driver.findElement({tagName: 'system-app'});
+		let logs = await driver.executeAsyncScript('arguments[0].connectedCallback().then(() => arguments[1](arguments[0].logs_))', systemAppElement);
+		let extensionStat = logs.find(log => log.statName === 'extensions');
+		let extId = extensionStat.statValue.match(/([^\s]*) : Zotero Connector/)[1];
 
 		// We got the extension ID and test URL, let's test
 		const translatorsToTest = await getTranslatorsToTest();
