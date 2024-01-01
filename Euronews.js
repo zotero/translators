@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-12-18 01:59:25"
+	"lastUpdated": "2023-12-27 05:55:17"
 }
 
 /*
@@ -80,6 +80,11 @@ async function scrape(doc, url = doc.location.href) {
 	translator.setHandler('itemDone', (_obj, item) => {
 		// TODO adjust if needed:
 		item.section = 'News';
+		
+		if (item.publicationTitle == null) {
+			item.publicationTitle = 'Euronews';	
+		}
+
 		item.complete();
 	});
 
@@ -97,17 +102,18 @@ async function scrape(doc, url = doc.location.href) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.euronews.com/next/2023/12/17/inside-the-worlds-first-reactor-that-will-power-earth-using-the-same-nuclear-reaction-as-t",
+		"url": "https://www.euronews.com/next/2023/12/26/inside-the-worlds-first-reactor-that-will-power-earth-using-the-same-nuclear-reaction-as-t",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Inside the world’s first reactor that could produce unlimited energy",
 				"creators": [],
-				"date": "2023-12-17",
+				"date": "2023-12-26",
 				"abstractNote": "We go behind the scenes at the world’s largest nuclear fusion device attempting to harness energy from the same reaction that powers the Sun and stars.",
 				"language": "en",
 				"libraryCatalog": "www.euronews.com",
-				"url": "https://www.euronews.com/next/2023/12/17/inside-the-worlds-first-reactor-that-will-power-earth-using-the-same-nuclear-reaction-as-t",
+				"publicationTitle": "Euronews",
+				"url": "https://www.euronews.com/next/2023/12/26/inside-the-worlds-first-reactor-that-will-power-earth-using-the-same-nuclear-reaction-as-t",
 				"attachments": [
 					{
 						"title": "Snapshot",
