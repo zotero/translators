@@ -14,7 +14,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2022-10-26 10:47:11"
+	"lastUpdated": "2024-01-02 18:26:09"
 }
 
 /*
@@ -140,7 +140,11 @@ function doExport() {
 					}
 				}
 
-				let items = Array.from(span.querySelectorAll('.citation-item')).map(x => x.textContent);
+				let items = Array.from(span.querySelectorAll('.citation-item'))
+					.map(x => x.innerText
+						// Replace bidi control characters (FIRST STRONG ISOLATE, POP DIRECTIONAL ISOLATE)
+						// with an HTML equivalent so they don't show as placeholders in Office apps
+						.replace(/\u2068([^\u2069]*)\u2069/g, '<span style="unicode-bidi: isolate">$1</span>'));
 				// Fallback to pre v5 note-editor schema that was serializing citations as plain text i.e.:
 				// <span class="citation" data-citation="...">(Jang et al., 2005, p. 14; Kongsgaard et al., 2009, p. 790)</span>
 				if (!items.length) {
