@@ -2,14 +2,14 @@
 	"translatorID": "d0b1914a-11f1-4dd7-8557-b32fe8a3dd47",
 	"label": "EBSCOhost",
 	"creator": "Simon Kornblith, Michael Berkowitz, Josh Geller",
-	"target": "^https?://[^/]+/(eds|bsi|ehost)/(results|detail|folder|pdfviewer)",
+	"target": "^https?://[^/]+/(eds|bsi|ehost|src_ic)/(results|detail|folder|pdfviewer)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2021-10-11 01:07:25"
+	"lastUpdated": "2022-08-24 14:54:00"
 }
 
 /*
