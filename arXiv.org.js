@@ -111,7 +111,7 @@ function doWeb(doc, url) {
 			
 			var urls = [];
 			for (var id in items) {
-				urls.push('http://export.arxiv.org/oai2'
+				urls.push('https://export.arxiv.org/oai2'
 					+ '?verb=GetRecord&metadataPrefix=oai_dc'
 					+ '&identifier=oai%3AarXiv.org%3A' + encodeURIComponent(id)
 				);
@@ -137,7 +137,7 @@ function doWeb(doc, url) {
 		}
 		if (!id) throw new Error('Could not find arXiv ID on page.');
 		id = id.trim().replace(/^arxiv:\s*|v\d+|\s+.*$/ig, '');
-		var apiurl = 'http://export.arxiv.org/oai2?verb=GetRecord&metadataPrefix=oai_dc'
+		var apiurl = 'https://export.arxiv.org/oai2?verb=GetRecord&metadataPrefix=oai_dc'
 			+ '&identifier=oai%3AarXiv.org%3A' + encodeURIComponent(id);
 		ZU.doGet(apiurl, parseXML);
 	}
