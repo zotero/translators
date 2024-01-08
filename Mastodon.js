@@ -88,7 +88,8 @@ async function scrape(doc) {
 		let match = url.match(standardPattern);
 		if (match) {
 			return `https://${match[1]}/@${match[2]}/${match[3]}`;
-		} else {
+		} 
+		else {
 			match = url.match(alternativePattern);
 			if (match) {
 				return `https://${match[1]}/@${match[2]}@${match[3]}/${match[4]}`;
