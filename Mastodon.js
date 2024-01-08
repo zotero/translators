@@ -79,13 +79,24 @@ async function scrape(doc) {
 	item.creators.push(name);
 	item.date = ZU.strToISO(text(post, '.detailed-status__datetime'));
 	let posturl = attr(post, 'a.detailed-status__datetime', 'href');
-	if ((posturl.match(/@/g) || []).length == 2) {
-		// We're on a different instance than the poster
-		item.url = "https://" + posturl.replace(/\/(@.+?)@([^/]+)(\/.+)/, "$2/$1$3");
+	function parseMastonURL(url) {
+		// pattern to match the standard Mastodon URL format
+		const standardPattern = /https?:\/\/([a-zA-Z0-9.-]+)\/@([a-zA-Z0-9]+)\/(\d+)/;
+		// pattern to match the alternative Mastodon URL format
+		const alternativePattern = /https?:\/\/([a-zA-Z0-9.-]+)\/@([a-zA-Z0-9]+)@([a-zA-Z0-9.-]+)\/(\d+)/;
+		
+		let match = url.match(standardPattern);
+		if (match) {
+			return `https://${match[1]}/@${match[2]}/${match[3]}`;
+		} else {
+			match = url.match(alternativePattern);
+			if (match) {
+				return `https://${match[1]}/@${match[2]}@${match[3]}/${match[4]}`;
+			}
+		}
+		return url
 	}
-	else {
-		item.url = "https://" + doc.location.host + posturl;
-	}
+	item.url = parseMastonURL(posturl);
 	item.attachments.push({ document: doc, title: "Snapshot" });
 	item.language = attr(post, '.status__content__text', 'lang');
 	item.forumTitle = "Mastodon";
