@@ -33,9 +33,7 @@ get_translators_to_check() {
 	# when running from a local development PR branch
 	#
 	# The branching point hash retrieval logic is based on https://stackoverflow.com/a/12185115/3199106
-
 	TRANSLATORS_TO_CHECK=""
-
 	# Push to master
 	if [ "${GITHUB_REF:-}" = "refs/heads/master" ]; then
 		before_commit=$(jq -r '.before' $(echo $GITHUB_EVENT_PATH))
