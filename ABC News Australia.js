@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-09 19:51:55"
+	"lastUpdated": "2024-01-09 20:41:36"
 }
 
 /*
@@ -38,13 +38,14 @@
 
 function detectWeb(doc, _url) {
 	let contentType = attr(doc, 'meta[property="ABC.ContentType"]', 'content');
-	if (contentType == 'CMChannel' && getSearchResults(doc, true)) {
+	contentType = contentType.toUpperCase();	// Case-insensitive treatment of content type
+	if (contentType == 'CMCHANNEL' && getSearchResults(doc, true)) {
 		return 'multiple';
 	}
-	else if (contentType == 'Video') {
+	else if (contentType == 'VIDEO') {
 		return 'videoRecording';
 	}
-	else if (contentType == 'Article') {
+	else if (contentType == 'ARTICLE') {
 		return 'newspaperArticle';
 	}
 	return false;
@@ -109,14 +110,22 @@ function scrape(doc, url) {
 			item.date = ZU.strToISO(attr(doc, 'time', 'datetime'));
 		}
 		
-		var authors = text(doc, '[data-component="Byline"] p, [data-component="Byline"] span');
-		if (authors && item.creators.length <= 1) {
-			authors = authors.replace(/^By /, '');
-			if (authors == authors.toUpperCase()) { // convert to title case if all caps
-				authors = ZU.capitalizeTitle(authors, true);
+		// Preferentially use linked authornames if they are present, rather than parsing byline
+		var authorNameLinks = doc.querySelectorAll('[data-uri^="coremedia://person/"]');
+		var bylineText = text(doc, '[data-component="Byline"] p, [data-component="Byline"] span');
+		if (authorNameLinks.length > 0) {
+			for(let i = 0; i < authorNameLinks.length; i++) {
+				let authorName = authorNameLinks[i].innerText;
+				item.creators.push(ZU.cleanAuthor(authorName, "author"));
+			}
+		}
+		else if (bylineText && item.creators.length <= 1) {
+			bylineText = bylineText.replace(/^By /, '');
+			if (bylineText == bylineText.toUpperCase()) { // convert to title case if all caps
+				bylineText = ZU.capitalizeTitle(bylineText, true);
 			}
 			item.creators = [];
-			var authorsList = authors.split(/,|\band\b/);
+			var authorsList = bylineText.split(/,|\band\b/);
 			for (let i = 0; i < authorsList.length; i++) {
 				item.creators.push(ZU.cleanAuthor(authorsList[i], "author"));
 			}
@@ -213,6 +222,64 @@ var testCases = [
 					},
 					{
 						"tag": "tokyo olympics 2021"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.abc.net.au/news/2024-01-03/killing-of-hamas-deputy-leader-saleh-al-arouri-what-will-iran-do/103282230",
+		"detectedItemType": "newspaperArticle",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "With the killing of Saleh al-Arouri, it appears that Israel has struck in the heart of Hezbollah territory. So what will Iran do?",
+				"creators": [
+					{
+						"firstName": "John",
+						"lastName": "Lyons",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024-01-03",
+				"abstractNote": "With the assassination of one of Hamas' most senior leaders in Lebanon, it appears that Israel has taken the fight against Hamas into the heart of Hezbollah territory, writes John Lyons.",
+				"language": "en-AU",
+				"libraryCatalog": "www.abc.net.au",
+				"publicationTitle": "ABC News",
+				"url": "https://www.abc.net.au/news/2024-01-03/killing-of-hamas-deputy-leader-saleh-al-arouri-what-will-iran-do/103282230",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "gaza"
+					},
+					{
+						"tag": "hamas"
+					},
+					{
+						"tag": "hezbollah"
+					},
+					{
+						"tag": "iran"
+					},
+					{
+						"tag": "israel"
+					},
+					{
+						"tag": "lebanon"
+					},
+					{
+						"tag": "saleh al-arouri"
+					},
+					{
+						"tag": "war"
 					}
 				],
 				"notes": [],
