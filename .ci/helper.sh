@@ -39,7 +39,7 @@ get_translators_to_check() {
 	# Push to master
 	if [ "${GITHUB_REF:-}" = "refs/heads/master" ]; then
 		before_commit=$(jq -r '.before' $(echo $GITHUB_EVENT_PATH))
-		TRANSLATORS_TO_CHECK=$(git diff $before_commit --name-only | { grep -e "^[^/]*.js$" || true; } | xargs)
+		TRANSLATORS_TO_CHECK=$(git diff $before_commit --name-only | { grep -e "^[^/]*.js$" || true; })
 	# Pull request
 	else
 		# Gets parent commits. Either one or two hashes
@@ -49,11 +49,11 @@ get_translators_to_check() {
 		if [ $num_parent_commits -gt 1 ]; then
 			first_parent=$(git rev-list --first-parent ^master HEAD^2 | tail -n1)
 			branch_point=$(git rev-list "$first_parent^^!")
-			TRANSLATORS_TO_CHECK=$(git diff HEAD^2 $branch_point --name-only | { grep -e "^[^/]*.js$" || true; } | xargs)
+			TRANSLATORS_TO_CHECK=$(git diff HEAD^2 $branch_point --name-only | { grep -e "^[^/]*.js$" || true; })
 		else
 			first_parent=$(git rev-list --first-parent ^master HEAD | tail -n1)
 			branch_point=$(git rev-list "$first_parent^^!")
-			TRANSLATORS_TO_CHECK=$(git diff $branch_point --name-only | { grep -e "^[^/]*.js$" || true; } | xargs)
+			TRANSLATORS_TO_CHECK=$(git diff $branch_point --name-only | { grep -e "^[^/]*.js$" || true; })
 		fi
 	fi
 }
