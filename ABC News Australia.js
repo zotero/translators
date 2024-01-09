@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-23 00:29:10"
+	"lastUpdated": "2024-01-09 19:51:55"
 }
 
 /*
@@ -109,7 +109,7 @@ function scrape(doc, url) {
 			item.date = ZU.strToISO(attr(doc, 'time', 'datetime'));
 		}
 		
-		var authors = text(doc, '[data-component="Byline"] p');
+		var authors = text(doc, '[data-component="Byline"] p, [data-component="Byline"] span');
 		if (authors && item.creators.length <= 1) {
 			authors = authors.replace(/^By /, '');
 			if (authors == authors.toUpperCase()) { // convert to title case if all caps
