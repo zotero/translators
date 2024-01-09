@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-12-18 03:54:49"
+	"lastUpdated": "2024-01-09 06:31:35"
 }
 
 /*
@@ -152,6 +152,34 @@ var testCases = [
 				"forumTitle": "Patreon",
 				"postType": "text",
 				"url": "https://www.patreon.com/posts/nong-li-qi-yue-55316874",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.patreon.com/posts/zheng-zhi-shi-gu-96090680",
+		"items": [
+			{
+				"itemType": "forumPost",
+				"title": "股評家開始接受政治市：恒指長期陰乾，二〇二四年繼續跌",
+				"creators": [
+					{
+						"lastName": "Dr. Wan Chin",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"forumTitle": "Patreon",
+				"postType": "text",
+				"url": "https://www.patreon.com/posts/zheng-zhi-shi-gu-96090680",
 				"attachments": [
 					{
 						"title": "Snapshot",
