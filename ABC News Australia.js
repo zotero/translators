@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-09 20:46:52"
+	"lastUpdated": "2024-01-09 21:09:32"
 }
 
 /*
@@ -245,7 +245,6 @@ var testCases = [
 					}
 				],
 				"date": "2024-01-03",
-				"abstractNote": "With the assassination of one of Hamas' most senior leaders in Lebanon, it appears that Israel has taken the fight against Hamas into the heart of Hezbollah territory, writes John Lyons.",
 				"language": "en-AU",
 				"libraryCatalog": "www.abc.net.au",
 				"publicationTitle": "ABC News",
