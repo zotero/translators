@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-09 20:41:36"
+	"lastUpdated": "2024-01-09 20:46:52"
 }
 
 /*
@@ -114,7 +114,7 @@ function scrape(doc, url) {
 		var authorNameLinks = doc.querySelectorAll('[data-uri^="coremedia://person/"]');
 		var bylineText = text(doc, '[data-component="Byline"] p, [data-component="Byline"] span');
 		if (authorNameLinks.length > 0) {
-			for(let i = 0; i < authorNameLinks.length; i++) {
+			for (let i = 0; i < authorNameLinks.length; i++) {
 				let authorName = authorNameLinks[i].innerText;
 				item.creators.push(ZU.cleanAuthor(authorName, "author"));
 			}
