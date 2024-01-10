@@ -9,26 +9,31 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-28 15:50:57"
+	"lastUpdated": "2024-01-09 03:40:58"
 }
 
 /*
- *  Bibliothèque nationale de France Translator
- *  Copyright (C) 2010 Florian Ziche, ziche@noos.fr
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+    ***** BEGIN LICENSE BLOCK *****
+
+    Copyright © 2010-2024 Florian Ziche, Sylvain Machefert
+
+    This file is part of Zotero.
+
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+    ***** END LICENSE BLOCK *****
+*/
 
 
 /* Bnf namespace. */
@@ -472,12 +477,8 @@ var BnfClass = function () {
 		for (var i = 0; i < rows.length; i++) {
 			var title = "";
 			var href = attr(rows[i], 'div[class="notice-synthese"] a', "href");
-			try {
-				title = ZU.trim(text(rows[i], 'div[class="notice-synthese"] a h2'));
-			}
-			catch (x) {
-				title = ZU.trim(text(rows[i], 'div[class="notice-synthese"] a'));
-			}
+			title = ZU.trim(text(rows[i], 'div[class="notice-synthese"] a'));
+		
 			var documentYear = text(rows[i], 'span[class="notice-ordre"]');
 			if (documentYear.length == 6) {
 				title += " / " + documentYear;

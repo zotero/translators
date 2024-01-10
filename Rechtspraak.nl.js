@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-01-18 18:21:16"
+	"lastUpdated": "2024-01-09 03:25:57"
 }
 
 /*
@@ -75,13 +75,13 @@ function cleanTags(x) {
 }
 
 function detectWeb(doc, url) {
-	if (url.includes('/#!/details') || url.includes('/front/portal/document-viewer')) {
+	if (url.includes('.nl/details') || url.includes('/front/portal/document-viewer')) {
 		return "case";
 	}
 	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
-	else if (url.includes('/#!/resultaat') && doc.querySelector('app-results')) {
+	else if (url.includes('/resultaat') && doc.querySelector('app-results')) {
 		Z.monitorDOMChanges(doc.querySelector('app-results'), { childList: true, subtree: true });
 	}
 	return false;
@@ -90,7 +90,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('.rnl-listresults-item-title > a[href*="#!/details"]');
+	var rows = doc.querySelectorAll('.rnl-listresults-item-title > a[href*="/details"]');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -117,8 +117,8 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(url) {
-	let apiURL = url.includes('#!/details')
-		? url.replace('#!/details', 'api/document/')
+	let apiURL = url.includes('/details')
+		? url.replace('/details', '/api/document/')
 		: `https://uitspraken.rechtspraak.nl/api/document/?id=${url.match(/ext-id=([^&#]+)/)[1]}`;
 	let json = await requestJSON(apiURL);
 	let item = new Zotero.Item("case");
@@ -163,7 +163,7 @@ async function scrape(url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://uitspraken.rechtspraak.nl/#!/details?id=ECLI:NL:GHDHA:2018:2591",
+		"url": "https://uitspraken.rechtspraak.nl/details?id=ECLI:NL:GHDHA:2018:2591",
 		"items": [
 			{
 				"itemType": "case",
@@ -194,7 +194,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://uitspraken.rechtspraak.nl/#!/details?id=ECLI:NL:PHR:2019:1016",
+		"url": "https://uitspraken.rechtspraak.nl/details?id=ECLI:NL:PHR:2019:1016",
 		"items": [
 			{
 				"itemType": "case",
@@ -225,7 +225,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://uitspraken.rechtspraak.nl/#!/details?id=ECLI:NL:ORBAACM:2020:30&showbutton=true",
+		"url": "https://uitspraken.rechtspraak.nl/details?id=ECLI:NL:ORBAACM:2020:30&showbutton=true",
 		"items": [
 			{
 				"itemType": "case",
@@ -258,7 +258,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://uitspraken.rechtspraak.nl/#!/resultaat?zoekterm=test&inhoudsindicatie=zt0&publicatiestatus=ps1&sort=Relevance",
+		"url": "https://uitspraken.rechtspraak.nl/resultaat?zoekterm=test&inhoudsindicatie=zt0&publicatiestatus=ps1&sort=Relevance",
 		"items": "multiple"
 	},
 	{
