@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-10 03:17:33"
+	"lastUpdated": "2024-01-10 03:27:11"
 }
 
 /*
@@ -39,11 +39,12 @@ const ICON_DETECT_MAPPING = {
 	"s_book.gif": "journalArticle",
 	"s_e_resource.gif": "journalArticle",
 	"book.gif": "book"
-}
+};
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	// Rather than parsing text in two different languages, we are using the icon
 	let typeIcon = doc.getElementsByClassName("crs_recordtype_icon")[0].src;
+	let iname;
 	for (iname in ICON_DETECT_MAPPING) {
 		if (typeIcon.includes(iname)) {
 			return ICON_DETECT_MAPPING[iname];
@@ -80,14 +81,14 @@ async function doWeb(doc, url) {
 	}
 }
 
-async function scrape(doc, url = doc.location.href) {
+async function scrape(doc, _url = doc.location.href) {
 	doc.getElementById("DirectLink").click();
 	await new Promise(resolve => setTimeout(resolve, 2000));
 
 	let exportButton = doc.getElementById("exportBibs");
 	let marcUrl = exportButton.href;
 
-	ZU.doGet(marcUrl, function(result) {
+	ZU.doGet(marcUrl, function (result) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("edd87d07-9194-42f8-b2ad-997c4c7deefd");
 		translator.setString(result);
@@ -99,7 +100,7 @@ async function scrape(doc, url = doc.location.href) {
 	});
 }
 
-async function finalize(doc, item) {
+async function finalize(_doc, _item) {
 
 }/** BEGIN TEST CASES **/
 var testCases = [
