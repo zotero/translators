@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-11 21:54:58"
+	"lastUpdated": "2024-01-11 21:58:13"
 }
 
 /*
@@ -78,6 +78,7 @@ async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (items) return ZU.processDocuments(Object.keys(items), scrape);
+			return true;
 		});
 	}
 	else {
@@ -86,7 +87,6 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url = doc.location.href) {
-	let exportBtnLink = attr(doc, "#DirectLink", "href");
 	let urlParts = new URL(url);
 	let pathParts = urlParts.pathname.split('/');
 	let entryID = pathParts[pathParts.length - 1];	// Last part of path is typically the ID
@@ -100,6 +100,7 @@ async function scrape(doc, url = doc.location.href) {
 		translator.translate();
 	});
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
