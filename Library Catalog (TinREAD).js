@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-11 20:32:10"
+	"lastUpdated": "2024-01-11 21:00:57"
 }
 
 /*
@@ -85,12 +85,15 @@ async function doWeb(doc, url) {
 	}
 }
 
-async function scrape(doc, _url = doc.location.href) {
-	doc.getElementById("DirectLink").click();
-	await new Promise(resolve => setTimeout(resolve, 2000));
-
-	let exportButton = doc.getElementById("exportBibs");
-	let marcUrl = exportButton.href;
+async function scrape(doc, url = doc.location.href) {
+	let exportBtnLink = attr(doc, "#DirectLink", "href");
+	let urlParts = new URL(url);
+	let pathParts = urlParts.pathname.split('/');
+	let entryID = pathParts[pathParts.length - 1];	// Last part of path is typically the ID
+	Z.debug(entryID);
+	let marcUrl = "/marcexport.svc?enc=UTF-8&fmt=xml&items=none&marc=Current&type=bib&id=";
+	marcUrl = marcUrl.concat(entryID);
+	Z.debug(marcUrl);
 
 	ZU.doGet(marcUrl, function (result) {
 		var translator = Zotero.loadTranslator("import");
