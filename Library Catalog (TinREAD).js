@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-11 21:58:13"
+	"lastUpdated": "2024-01-11 22:01:06"
 }
 
 /*
@@ -92,13 +92,12 @@ async function scrape(doc, url = doc.location.href) {
 	let entryID = pathParts[pathParts.length - 1];	// Last part of path is typically the ID
 	let marcUrl = "/marcexport.svc?enc=UTF-8&fmt=xml&items=none&marc=Current&type=bib&id=";
 	marcUrl = marcUrl.concat(entryID);
+	let marcText = await requestText(marcUrl);
 
-	ZU.doGet(marcUrl, function (result) {
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("edd87d07-9194-42f8-b2ad-997c4c7deefd"); // MARCXML
-		translator.setString(result);
-		translator.translate();
-	});
+	var translator = Zotero.loadTranslator("import");
+	translator.setTranslator("edd87d07-9194-42f8-b2ad-997c4c7deefd"); // MARCXML
+	translator.setString(marcText);
+	await translator.translate();
 }
 
 /** BEGIN TEST CASES **/
