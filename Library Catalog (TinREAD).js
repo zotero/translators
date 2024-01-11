@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-11 21:00:57"
+	"lastUpdated": "2024-01-11 21:54:58"
 }
 
 /*
@@ -46,8 +46,10 @@ function detectWeb(doc, _url) {
 	if (!footer.toUpperCase().includes("TINREAD")) return false;
 
 	// Rather than parsing text in two different languages, we are using the icon
-	let typeIcon = attr(doc, ".crs_recordtype_icon", "src");
-	if (!typeIcon) return false;
+	let typeIcons = doc.querySelectorAll(".crs_recordtype_icon");
+	if (typeIcons.length == 0) return false;
+	else if (typeIcons.length > 1) return "multiple";
+	let typeIcon = typeIcons[0].src;
 	let iname;
 	for (iname in ICON_DETECT_MAPPING) {
 		if (typeIcon.includes(iname)) {
@@ -62,8 +64,8 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	var rows = doc.querySelectorAll('li.reslt_item_head > a[name="book_link"]');
 	for (let row of rows) {
-		let href = row.href;
-		let title = ZU.trimInternal(row.textContent);
+		let href = new URL(row.href).href;
+		let title = row.title;
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -74,11 +76,9 @@ function getSearchResults(doc, checkOnly) {
 
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
-		let items = await Zotero.selectItems(getSearchResults(doc, false));
-		if (!items) return;
-		for (let url of Object.keys(items)) {
-			await scrape(await requestDocument(url));
-		}
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (items) return ZU.processDocuments(Object.keys(items), scrape);
+		});
 	}
 	else {
 		await scrape(doc, url);
@@ -90,25 +90,15 @@ async function scrape(doc, url = doc.location.href) {
 	let urlParts = new URL(url);
 	let pathParts = urlParts.pathname.split('/');
 	let entryID = pathParts[pathParts.length - 1];	// Last part of path is typically the ID
-	Z.debug(entryID);
 	let marcUrl = "/marcexport.svc?enc=UTF-8&fmt=xml&items=none&marc=Current&type=bib&id=";
 	marcUrl = marcUrl.concat(entryID);
-	Z.debug(marcUrl);
 
 	ZU.doGet(marcUrl, function (result) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("edd87d07-9194-42f8-b2ad-997c4c7deefd"); // MARCXML
 		translator.setString(result);
-		translator.setHandler("itemDone", function (obj, item) {
-			finalize(doc, item);
-			item.complete();
-		});
 		translator.translate();
 	});
-}
-
-async function finalize(_doc, _item) {
-
 }
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -280,6 +270,12 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://opac.biblioteca.ase.ro/opac/search?q=wirtschaftstheorie&max=0&view=&sb=relevance&ob=asc&level=all&material_type=all&do_file_type=all&location=0",
+		"detectedItemType": "multiple",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
