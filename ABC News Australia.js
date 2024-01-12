@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-09 21:09:32"
+	"lastUpdated": "2024-01-12 21:22:12"
 }
 
 /*
@@ -38,7 +38,7 @@
 
 function detectWeb(doc, _url) {
 	let contentType = attr(doc, 'meta[property="ABC.ContentType"]', 'content');
-	contentType = contentType.toUpperCase();	// Case-insensitive treatment of content type
+	contentType = contentType.toUpperCase(); // Case-insensitive treatment of content type
 	if (contentType == 'CMCHANNEL' && getSearchResults(doc, true)) {
 		return 'multiple';
 	}
@@ -114,8 +114,8 @@ function scrape(doc, url) {
 		var authorNameLinks = doc.querySelectorAll('[data-uri^="coremedia://person/"]');
 		var bylineText = text(doc, '[data-component="Byline"] p, [data-component="Byline"] span');
 		if (authorNameLinks.length > 0) {
-			for (let i = 0; i < authorNameLinks.length; i++) {
-				let authorName = authorNameLinks[i].innerText;
+			for (let authorLink of authorNameLinks) {
+				let authorName = authorLink.textContent;
 				item.creators.push(ZU.cleanAuthor(authorName, "author"));
 			}
 		}
@@ -126,8 +126,8 @@ function scrape(doc, url) {
 			}
 			item.creators = [];
 			var authorsList = bylineText.split(/,|\band\b/);
-			for (let i = 0; i < authorsList.length; i++) {
-				item.creators.push(ZU.cleanAuthor(authorsList[i], "author"));
+			for (let author of authorsList) {
+				item.creators.push(ZU.cleanAuthor(author, "author"));
 			}
 		}
 		
