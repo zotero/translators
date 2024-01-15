@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-15 23:37:16"
+	"lastUpdated": "2024-01-15 23:40:41"
 }
 
 /*
@@ -84,13 +84,13 @@ async function scrape(doc, url = doc.location.href) {
 	caseItem.language = "en-US";
 	caseItem.url = url;
 
-	caseItem.caseName = caseJson["name"];
-	caseItem.shortTitle = caseJson["name_abbreviation"];
-	caseItem.court = caseJson["court"]["name"];
-	caseItem.dateDecided = caseJson["decision_date"];
-	caseItem.docketNumber = caseJson["docket_number"];
-	caseItem.reporter = caseJson["reporter"]["full_name"];
-	caseItem.reporterVolume = caseJson["volume"]["volume_number"];
+	caseItem.caseName = caseJson.name;
+	caseItem.shortTitle = caseJson.name_abbreviation;
+	caseItem.court = caseJson.court.name;
+	caseItem.dateDecided = caseJson.decision_date;
+	caseItem.docketNumber = caseJson.docket_number;
+	caseItem.reporter = caseJson.reporter.full_name;
+	caseItem.reporterVolume = caseJson.volume.volume_number;
 
 	caseItem.complete();
 }
