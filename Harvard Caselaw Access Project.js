@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-15 23:40:41"
+	"lastUpdated": "2024-01-15 23:41:24"
 }
 
 /*
@@ -36,7 +36,7 @@
 */
 
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	if (doc.querySelectorAll('.case-container').length > 0) {
 		return 'case';
 	}
