@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-12-27 05:55:17"
+	"lastUpdated": "2024-01-15 11:40:11"
 }
 
 /*
@@ -37,7 +37,7 @@
 
 
 function detectWeb(doc, url) {
-	return 'journalArticle';
+	return 'magazineArticle';
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -89,7 +89,7 @@ async function scrape(doc, url = doc.location.href) {
 	});
 
 	let em = await translator.getTranslatorObject();
-	em.itemType = 'journalArticle';
+	em.itemType = 'magazineArticle';
 	// TODO map additional meta tags here, or delete completely
 	em.addCustomFields({
 		'twitter:description': 'abstractNote'
@@ -105,7 +105,7 @@ var testCases = [
 		"url": "https://www.euronews.com/next/2023/12/26/inside-the-worlds-first-reactor-that-will-power-earth-using-the-same-nuclear-reaction-as-t",
 		"items": [
 			{
-				"itemType": "journalArticle",
+				"itemType": "magazineArticle",
 				"title": "Inside the world’s first reactor that could produce unlimited energy",
 				"creators": [],
 				"date": "2023-12-26",
@@ -138,6 +138,42 @@ var testCases = [
 					},
 					{
 						"tag": "scientific research"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.euronews.com/2024/01/14/denmarks-queen-margrethe-signs-her-historic-abdication-as-son-becomes-king",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "Frederik X proclaimed new king of Denmark as his mother abdicates",
+				"creators": [],
+				"date": "2024-01-14",
+				"abstractNote": "The long-reigning monarch handed over the role of sovereign to her son, who becomes the nation's new sovereign.",
+				"language": "en",
+				"libraryCatalog": "www.euronews.com",
+				"publicationTitle": "Euronews",
+				"url": "https://www.euronews.com/2024/01/14/denmarks-queen-margrethe-signs-her-historic-abdication-as-son-becomes-king",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Denmark"
+					},
+					{
+						"tag": "Monarchy"
+					},
+					{
+						"tag": "royalty"
 					}
 				],
 				"notes": [],
