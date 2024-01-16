@@ -77,8 +77,7 @@ async function doWeb(doc, url) {
 
 async function scrape(doc, url = doc.location.href) {
 	let apiUrl = attr(doc, "a[href*='api.case.law/v1/cases/']", 'href');
-	let caseText = await requestText(apiUrl);
-	let caseJson = JSON.parse(caseText);
+	let caseJson= await requestJSON(apiUrl);
 
 	let caseItem = new Zotero.Item("case");
 	caseItem.language = "en-US";
