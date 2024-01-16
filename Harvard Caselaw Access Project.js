@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-15 23:41:24"
+	"lastUpdated": "2024-01-16 05:06:07"
 }
 
 /*
@@ -52,7 +52,6 @@ function getSearchResults(doc, checkOnly) {
 	var rows = doc.querySelectorAll('div.result-title > div > a');
 	for (let row of rows) {
 		let href = row.href;
-		Z.debug(href);
 		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -164,7 +163,6 @@ var testCases = [
 			}
 		]
 	},
-
 	{
 		"type": "web",
 		"url": "https://case.law/search/#/cases?search=abc&page=1&ordering=relevance",
