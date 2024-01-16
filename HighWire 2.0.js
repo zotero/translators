@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-06-13 22:14:27"
+	"lastUpdated": "2023-09-21 14:43:53"
 }
 
 /*
@@ -283,15 +283,19 @@ function attachSupplementary(doc, item, next) {
 	}
 }
 
+function isBioMedRxiv(url) {
+	return /^https?:\/\/([^/.]+\.)*(medrxiv|biorxiv)\.org\//.test(url);
+}
+
 // add using embedded metadata
-function addEmbMeta(doc, url) {
+async function addEmbMeta(doc, url) {
 	var translator = Zotero.loadTranslator("web");
 	// Embedded Metadata translator
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 
 	translator.setHandler("itemDone", function (obj, item) {
-		if (item.publicationTitle.endsWith('Rxiv')) {
+		if (item.itemType === preprintType) {
 			item.itemType = preprintType;
 			if (preprintType != 'preprint') {
 				item.extra = (item.extra || '') + '\nType: article';
@@ -299,6 +303,12 @@ function addEmbMeta(doc, url) {
 			item.libraryCatalog = item.publisher = item.publicationTitle;
 			delete item.publicationTitle;
 			delete item.institution;
+		}
+
+		if (isBioMedRxiv(item.url)) {
+			// from citation_firstpage; almost certainly malformed for
+			// bio/medrxiv, but not sure about other preprint services
+			delete item.pages;
 		}
 		
 		// remove all caps in Names and Titles
@@ -337,7 +347,7 @@ function addEmbMeta(doc, url) {
 		
 		// try to get PubMed ID and link if we don't already have it from EM
 		var pmDiv;
-		if ((!item.extra || item.extra.search(/\bPMID:/) == -1)
+		if ((!item.extra || !/\bPMID:/.test(item.extra))
 			&& (pmDiv = doc.getElementById('cb-art-pm'))) {
 			var pmId = ZU.xpathText(pmDiv, './/a[contains(@class, "cite-link")]/@href')
 					|| ZU.xpathText(pmDiv, './ol/li[1]/a/@href');	// e.g. http://www.pnas.org/content/108/52/20881.full
@@ -377,9 +387,9 @@ function addEmbMeta(doc, url) {
 		}
 	});
 
-	translator.getTranslatorObject(function (trans) {
-		trans.doWeb(doc, url);
-	});
+	let em = await translator.getTranslatorObject();
+	em.itemType = detectWeb(doc, url) || "journalArticle";
+	await em.doWeb(doc, url);
 }
 
 function detectWeb(doc, url) {
@@ -408,36 +418,40 @@ function detectWeb(doc, url) {
 		if (/content\/(early\/)?[0-9]+/.test(url)
 			&& !url.includes('/suppl/')
 		) {
-			if (url.includes('medrxiv.org') || url.includes('biorxiv.org')) {
+			if (isBioMedRxiv(url)) {
 				return preprintType;
 			}
 			else {
 				return "journalArticle";
 			}
 		}
-		else if (getSearchResults(doc, url, true)) {
-			return "multiple";
-		}
+	}
+
+	if (getSearchResults(doc, url, true)) {
+		return "multiple";
 	}
 	return false;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (!url) url = doc.documentElement.location;
 	
 
 	// Z.debug(items)
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) ZU.processDocuments(Object.keys(items), addEmbMeta);
-		});
+		let items = await Z.selectItems(getSearchResults(doc, url, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await addEmbMeta(await requestDocument(url), url);
+		}
 	}
 	else if (url.includes('.full.pdf+html')) {
 		// abstract in EM is not reliable. Fetch abstract page and scrape from there.
-		ZU.processDocuments(url.replace(/\.full\.pdf\+html.*/, ''), addEmbMeta);
+		url = url.replace(/\.full\.pdf\+html.*/, '');
+		await addEmbMeta(await requestDocument(url), url);
 	}
 	else {
-		addEmbMeta(doc, url);
+		await addEmbMeta(doc, url);
 	}
 }
 
@@ -1279,12 +1293,8 @@ var testCases = [
 				"url": "https://www.biorxiv.org/content/10.1101/2021.08.03.454978v1",
 				"attachments": [
 					{
-						"title": "Full Text PDF",
+						"title": "Preprint PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1337,12 +1347,8 @@ var testCases = [
 				"url": "https://www.medrxiv.org/content/10.1101/2021.06.16.21258632v1",
 				"attachments": [
 					{
-						"title": "Full Text PDF",
+						"title": "Preprint PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],

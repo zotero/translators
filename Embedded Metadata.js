@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-16 15:18:29"
+	"lastUpdated": "2023-09-21 14:42:05"
 }
 
 /*
@@ -369,7 +369,7 @@ function init(doc, url, callback, forceLoadRDF) {
 				rdf.itemType = exports.itemType;
 				_itemType = exports.itemType;
 			}
-			else if (hwType) _itemType = hwType; // hwTypes are generally most accurate
+			else if (hwType && _itemType !== "preprint") _itemType = hwType; // hwTypes are generally most accurate, except for preprints
 			else {
 				_itemType = nodes.length ? rdf.detectType({}, nodes[0], {}) : rdf.defaultUnknownType;
 			}
@@ -502,8 +502,9 @@ function addHighwireMetadata(doc, newItem, hwType) {
 			+ ((lastpage && (lastpage = lastpage.trim())) ? '-' + lastpage : '');
 	}
 	
-	// swap in hwType for itemType
-	if (hwType && hwType != newItem.itemType) {
+	// swap in hwType for itemType, except for preprint, for HW is not known to
+	// distinguish preprint from journal article
+	if (hwType && newItem.itemType !== "preprint") {
 		newItem.itemType = hwType;
 	}
 	
@@ -548,7 +549,11 @@ function addHighwireMetadata(doc, newItem, hwType) {
 			}
 		}
 
-		newItem.attachments.push({ title: "Full Text PDF", url: pdfURL, mimeType: "application/pdf" });
+		newItem.attachments.push({
+			title: newItem.itemType === "preprint" ? "Preprint PDF" : "Full Text PDF",
+			url: pdfURL,
+			mimeType: "application/pdf"
+		});
 	}
 	else {
 		// Only add snapshot if we didn't add a PDF
