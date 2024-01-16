@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-16 05:07:12"
+	"lastUpdated": "2024-01-16 05:43:22"
 }
 
 /*
@@ -82,8 +82,25 @@ async function scrape(doc, url = doc.location.href) {
 	caseItem.language = "en-US";
 	caseItem.url = url;
 
-	caseItem.caseName = caseJson.name;
-	caseItem.shortTitle = caseJson.name_abbreviation;
+	let caseName = caseJson.name;
+	let abbrvCaseName = caseJson.name_abbreviation;
+	let caseNameParts = caseName.split(' ');
+	let caseBody = text(doc, 'casebody');
+	for (let i = 0; i < caseNameParts.length; i++) { // Use context to fix capitalization in the title
+		let word = caseNameParts[i];
+		let uppercaseWord = word.toUpperCase();
+		let searchWord = uppercaseWord.replace(/[\.,?]$/g, "");
+		let titleWord = word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+
+		if (word != uppercaseWord) continue; // We only need to fix words that are all-caps
+		if (abbrvCaseName.includes(searchWord)) continue; // If abbreviated title contains all-caps version, probably an acronym
+		if (caseBody.includes(searchWord)) continue; // If case body contains all-caps version, probably an acronym
+		caseNameParts[i] = titleWord; // Otherwise, use title-case
+	}
+	caseName = caseNameParts.join(' ');
+
+	caseItem.caseName = caseName;
+	caseItem.shortTitle = abbrvCaseName;
 	caseItem.court = caseJson.court.name;
 	caseItem.dateDecided = caseJson.decision_date;
 	caseItem.docketNumber = caseJson.docket_number;
@@ -101,7 +118,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "case",
-				"caseName": "PASA of FAGATOGO, Plaintiff v. FAIISIOTA of FAGANEANEA, Defendant",
+				"caseName": "Pasa of Fagatogo, Plaintiff v. Faiisiota of Faganeanea, Defendant",
 				"creators": [],
 				"dateDecided": "1947-02-07",
 				"court": "High Court of American Samoa",
@@ -111,29 +128,6 @@ var testCases = [
 				"reporterVolume": "2",
 				"shortTitle": "Pasa v. Faiisiota",
 				"url": "https://cite.case.law/am-samoa/2/3/",
-				"attachments": [],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://cite.case.law/so-2d/57/40/9903854/",
-		"items": [
-			{
-				"itemType": "case",
-				"caseName": "TUCKER v. CENTRAL MOTORS, Inc.",
-				"creators": [],
-				"dateDecided": "1952-01-14",
-				"court": "Louisiana Supreme Court",
-				"docketNumber": "No. 40041",
-				"language": "en-US",
-				"reporter": "Southern Reporter, Second Series",
-				"reporterVolume": "57",
-				"shortTitle": "Tucker v. Central Motors, Inc.",
-				"url": "https://cite.case.law/so-2d/57/40/9903854/",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -167,6 +161,49 @@ var testCases = [
 		"type": "web",
 		"url": "https://case.law/search/#/cases?search=abc&page=1&ordering=relevance",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://cite.case.law/doug/1/450/",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "Dousman v. O'Malley",
+				"creators": [],
+				"dateDecided": "1844-01",
+				"court": "Michigan Supreme Court",
+				"language": "en-US",
+				"reporter": "Reports of cases argued and determined in the Supreme Court of the state of Michigan",
+				"reporterVolume": "1",
+				"url": "https://cite.case.law/doug/1/450/",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://cite.case.law/so-2d/57/40/9903854/",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "Tucker v. Central Motors, Inc.",
+				"creators": [],
+				"dateDecided": "1952-01-14",
+				"court": "Louisiana Supreme Court",
+				"docketNumber": "No. 40041",
+				"language": "en-US",
+				"reporter": "Southern Reporter, Second Series",
+				"reporterVolume": "57",
+				"url": "https://cite.case.law/so-2d/57/40/9903854/",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
