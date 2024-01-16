@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-16 05:45:02"
+	"lastUpdated": "2024-01-16 20:41:04"
 }
 
 /*
@@ -103,7 +103,7 @@ async function scrape(doc, url = doc.location.href) {
 	caseItem.shortTitle = abbrvCaseName;
 	caseItem.court = caseJson.court.name;
 	caseItem.dateDecided = caseJson.decision_date;
-	caseItem.docketNumber = caseJson.docket_number;
+	caseItem.docketNumber = caseJson.docket_number.replace(/[Nn]o\.?\s*/g, "");
 	caseItem.reporter = caseJson.reporter.full_name;
 	caseItem.reporterVolume = caseJson.volume.volume_number;
 
@@ -122,7 +122,7 @@ var testCases = [
 				"creators": [],
 				"dateDecided": "1947-02-07",
 				"court": "High Court of American Samoa",
-				"docketNumber": "No. 2-1944",
+				"docketNumber": "2-1944",
 				"language": "en-US",
 				"reporter": "American Samoa Reports",
 				"reporterVolume": "2",
@@ -145,7 +145,7 @@ var testCases = [
 				"creators": [],
 				"dateDecided": "1971-02-19",
 				"court": "Adams County Court of Common Pleas",
-				"docketNumber": "no. 47",
+				"docketNumber": "47",
 				"language": "en-US",
 				"reporter": "Pennsylvania District and County Reports",
 				"reporterVolume": "51",
@@ -193,7 +193,7 @@ var testCases = [
 				"creators": [],
 				"dateDecided": "1952-01-14",
 				"court": "Louisiana Supreme Court",
-				"docketNumber": "No. 40041",
+				"docketNumber": "40041",
 				"language": "en-US",
 				"reporter": "Southern Reporter, Second Series",
 				"reporterVolume": "57",
