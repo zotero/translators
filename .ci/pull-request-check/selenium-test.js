@@ -98,7 +98,7 @@ var allPassed = false;
 (async function() {
 	let driver;
 	try {
-		translatorServer.serve();
+		await translatorServer.serve();
 		require('chromedriver');
 		let chrome = require('selenium-webdriver/chrome');
 		let options = new chrome.Options();
