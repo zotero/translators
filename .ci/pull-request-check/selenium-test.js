@@ -14,6 +14,7 @@ const ZOTERO_CONNECTOR_EXTENSION_ID = 'ekhagklcjbdpajgpjgmbionohlpdbjgc';
 
 async function getTranslatorsToTest() {
 	const translatorFilenames = process.argv[2].split('\n').filter(filename => filename.trim().length > 0);
+	console.log("translators to check:", translatorFilenames);
 	let changedTranslatorIDs = [];
 	let toTestTranslatorIDs = new Set();
 	let toTestTranslatorNames = new Set();
