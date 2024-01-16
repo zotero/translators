@@ -2,14 +2,14 @@
 	"translatorID": "2a1cafb9-6f61-48d3-b621-c3265fde9eba",
 	"label": "Harvard Caselaw Access Project",
 	"creator": "Franklin Pezzuti Dyer",
-	"target": "^https://(.*\\.)*case\\.law",
+	"target": "^https://(cite\\.)?case\\.law",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-16 05:06:07"
+	"lastUpdated": "2024-01-16 05:07:12"
 }
 
 /*
