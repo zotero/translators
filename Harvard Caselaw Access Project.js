@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-16 05:43:22"
+	"lastUpdated": "2024-01-16 05:45:02"
 }
 
 /*
@@ -76,7 +76,7 @@ async function doWeb(doc, url) {
 
 async function scrape(doc, url = doc.location.href) {
 	let apiUrl = attr(doc, "a[href*='api.case.law/v1/cases/']", 'href');
-	let caseJson= await requestJSON(apiUrl);
+	let caseJson = await requestJSON(apiUrl);
 
 	let caseItem = new Zotero.Item("case");
 	caseItem.language = "en-US";
@@ -89,7 +89,7 @@ async function scrape(doc, url = doc.location.href) {
 	for (let i = 0; i < caseNameParts.length; i++) { // Use context to fix capitalization in the title
 		let word = caseNameParts[i];
 		let uppercaseWord = word.toUpperCase();
-		let searchWord = uppercaseWord.replace(/[\.,?]$/g, "");
+		let searchWord = uppercaseWord.replace(/[.,?]$/g, "");
 		let titleWord = word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 
 		if (word != uppercaseWord) continue; // We only need to fix words that are all-caps
