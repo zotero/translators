@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-17 00:57:03"
+	"lastUpdated": "2024-01-17 01:06:01"
 }
 
 /*
@@ -76,8 +76,8 @@ async function doWeb(doc, url) {
 
 async function scrape(doc, url = doc.location.href) {
 	let apiUrl = attr(doc, "a[href*='api.case.law/v1/cases/']", 'href');
-	let pdfUrl = attr(doc, "a[href*='cite.case.law/pdf/']", 'href');
 	let caseJson = await requestJSON(apiUrl);
+	let pdfUrl = caseJson.frontend_pdf_url;
 
 	let caseItem = new Zotero.Item("case");
 	caseItem.language = "en-US";
