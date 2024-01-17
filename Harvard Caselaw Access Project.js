@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-16 20:41:04"
+	"lastUpdated": "2024-01-17 00:57:03"
 }
 
 /*
@@ -76,6 +76,7 @@ async function doWeb(doc, url) {
 
 async function scrape(doc, url = doc.location.href) {
 	let apiUrl = attr(doc, "a[href*='api.case.law/v1/cases/']", 'href');
+	let pdfUrl = attr(doc, "a[href*='cite.case.law/pdf/']", 'href');
 	let caseJson = await requestJSON(apiUrl);
 
 	let caseItem = new Zotero.Item("case");
@@ -106,12 +107,22 @@ async function scrape(doc, url = doc.location.href) {
 	caseItem.docketNumber = caseJson.docket_number.replace(/[Nn]o\.?\s*/g, "");
 	caseItem.reporter = caseJson.reporter.full_name;
 	caseItem.reporterVolume = caseJson.volume.volume_number;
+	caseItem.attachments = [{
+		title: "Full Text PDF",
+		url: pdfUrl,
+		mimeType: "application/pdf"
+	}];
 
 	caseItem.complete();
 }
 
 /** BEGIN TEST CASES **/
 var testCases = [
+	{
+		"type": "web",
+		"url": "https://case.law/search/#/cases?search=abc&page=1&ordering=relevance",
+		"items": "multiple"
+	},
 	{
 		"type": "web",
 		"url": "https://cite.case.law/am-samoa/2/3/",
@@ -128,7 +139,12 @@ var testCases = [
 				"reporterVolume": "2",
 				"shortTitle": "Pasa v. Faiisiota",
 				"url": "https://cite.case.law/am-samoa/2/3/",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -150,17 +166,17 @@ var testCases = [
 				"reporter": "Pennsylvania District and County Reports",
 				"reporterVolume": "51",
 				"url": "https://cite.case.law/pa-d-c2d/51/424/",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "https://case.law/search/#/cases?search=abc&page=1&ordering=relevance",
-		"items": "multiple"
 	},
 	{
 		"type": "web",
@@ -176,7 +192,12 @@ var testCases = [
 				"reporter": "Reports of cases argued and determined in the Supreme Court of the state of Michigan",
 				"reporterVolume": "1",
 				"url": "https://cite.case.law/doug/1/450/",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -198,7 +219,12 @@ var testCases = [
 				"reporter": "Southern Reporter, Second Series",
 				"reporterVolume": "57",
 				"url": "https://cite.case.law/so-2d/57/40/9903854/",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
