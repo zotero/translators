@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-17 01:16:52"
+	"lastUpdated": "2024-01-17 01:22:49"
 }
 
 /*
@@ -113,10 +113,11 @@ async function scrape(doc, url = doc.location.href) {
 		mimeType: "application/pdf"
 	}];
 	
-	let parallelCitations = caseJson.citations.filter((c) => c.type == "parallel").map((c) => c.cite);
+	let parallelCitations = caseJson.citations.filter(c => c.type == "parallel").map(c => c.cite);
 	if (parallelCitations.length == 0) {
 		caseItem.history = "";
-	} else {
+	}
+	else {
 		caseItem.history = parallelCitations.join(",");
 	}
 
@@ -222,6 +223,7 @@ var testCases = [
 				"dateDecided": "1952-01-14",
 				"court": "Louisiana Supreme Court",
 				"docketNumber": "40041",
+				"history": "220 La. 510",
 				"language": "en-US",
 				"reporter": "Southern Reporter, Second Series",
 				"reporterVolume": "57",
