@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-17 01:06:01"
+	"lastUpdated": "2024-01-17 01:16:52"
 }
 
 /*
@@ -112,6 +112,13 @@ async function scrape(doc, url = doc.location.href) {
 		url: pdfUrl,
 		mimeType: "application/pdf"
 	}];
+	
+	let parallelCitations = caseJson.citations.filter((c) => c.type == "parallel").map((c) => c.cite);
+	if (parallelCitations.length == 0) {
+		caseItem.history = "";
+	} else {
+		caseItem.history = parallelCitations.join(",");
+	}
 
 	caseItem.complete();
 }
