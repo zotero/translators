@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-18 15:48:38"
+	"lastUpdated": "2024-01-18 15:58:11"
 }
 
 /*
@@ -86,7 +86,7 @@ function doWeb(doc, url) {
 }
 
 
-function isSupplement(item, text) {
+function isSupplement(item) {
 	if (!item.notes)
 		return false;
 	for (let note of item.notes) {
@@ -123,9 +123,7 @@ function scrape(doc) {
 		if (item.pages && item.pages.match(/([ivx]+)-\1/i))
 			item.pages = item.pages.split('-')[0];
 		
-			//AddRISInformation(item, text);
 		let citationURL = ZU.xpathText(doc, '//li[@class="view_citation"]//a/@href');
-		//Z.debug("CITATION URL:" + citationURL);
 		ZU.processDocuments(citationURL, function (citation_page_doc) {
 			let risEntry = ZU.xpathText(citation_page_doc, '//*[(@id = "tabs-4")]//p');
 			var ris_translator = Zotero.loadTranslator("import");
