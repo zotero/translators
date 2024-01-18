@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-12-05 15:57:27"
+	"lastUpdated": "2024-01-18 15:48:38"
 }
 
 /*
@@ -86,7 +86,7 @@ function doWeb(doc, url) {
 }
 
 
-function isSupplement(item) {
+function isSupplement(item, text) {
 	if (!item.notes)
 		return false;
 	for (let note of item.notes) {
@@ -100,42 +100,49 @@ function isSupplement(item) {
 
 
 function scrape(doc) {
-	let citationURL = ZU.xpathText(doc, '//li[@class="view_citation"]//a/@href');
-	ZU.processDocuments(citationURL, function (text) {
-		// Embedded Metadata
-		let translator = Zotero.loadTranslator('web');
-		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
-		translator.setDocument(doc);
-		translator.setHandler("itemDone", function (obj, item) {
-			let abstract = ZU.xpathText(doc, '//div[@class="abstract"][1]/p');
-			if (!abstract) abstract = ZU.xpathText(doc, '//div[@class="description"][1]');
-			if (!abstract) abstract = ZU.xpathText(doc, '//div[contains(@class, "card_summary") and contains(@class, "no_border")]');
-			if (abstract) {
-				item.abstractNote = abstract.replace(/^,*\s*Abstract[:,]*/, "").replace(/show (less|more)$/, "").replace(/,\s*$/, "");
-			}
-			let tags = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "kwd-group", " " ))]//p');			
-			if (tags) {
-				item.tags = tags.split(",");
-			}
-			//ubtue: add tag "Book Review"
-			let dcType = ZU.xpathText(doc, '//span[@class="Review"] | //meta[@name="citation_article_type"]/@content | //div[@class="reviewedby"]');
-			if (dcType && dcType.match(/Review/i)) {
-				item.tags.push("Book Review");
-			}
-			if (item.pages && item.pages.match(/([ivx]+)-\1/i))
-					item.pages = item.pages.split('-')[0];
+	// Embedded Metadata
+	let translator = Zotero.loadTranslator('web');
+	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+	translator.setDocument(doc);
+	translator.setHandler("itemDone", function (obj, item) {
+		let abstract = ZU.xpathText(doc, '//div[@class="abstract"][1]/p');
+		if (!abstract) abstract = ZU.xpathText(doc, '//div[@class="description"][1]');
+		if (!abstract) abstract = ZU.xpathText(doc, '//div[contains(@class, "card_summary") and contains(@class, "no_border")]');
+		if (abstract) {
+			item.abstractNote = abstract.replace(/^,*\s*Abstract[:,]*/, "").replace(/show (less|more)$/, "").replace(/,\s*$/, "");
+		}
+		let tags = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "kwd-group", " " ))]//p');			
+		if (tags) {
+			item.tags = tags.split(",");
+		}
+		//ubtue: add tag "Book Review"
+		let dcType = ZU.xpathText(doc, '//span[@class="Review"] | //meta[@name="citation_article_type"]/@content | //div[@class="reviewedby"]');
+		if (dcType && dcType.match(/Review/i)) {
+		item.tags.push("Book Review");
+		}
+		if (item.pages && item.pages.match(/([ivx]+)-\1/i))
+			item.pages = item.pages.split('-')[0];
 		
-			if (isSupplement(item))
-				item.issue = item.issue + " (Supplement)";
-			item.notes = [];
+			//AddRISInformation(item, text);
+		let citationURL = ZU.xpathText(doc, '//li[@class="view_citation"]//a/@href');
+		//Z.debug("CITATION URL:" + citationURL);
+		ZU.processDocuments(citationURL, function (citation_page_doc) {
+			let risEntry = ZU.xpathText(citation_page_doc, '//*[(@id = "tabs-4")]//p');
+			var ris_translator = Zotero.loadTranslator("import");
+			ris_translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			ris_translator.setString(risEntry);
+			ris_translator.setHandler("itemDone", function (obj, ris_item) {
+				if (isSupplement(ris_item))
+					item.issue = item.issue + " (Supplement)";
+			    item.complete();
+			 });
 			
+			ris_translator.translate();
 
-			item.complete();
 		});
-		translator.translate();
 	});
-}
-/** BEGIN TEST CASES **/
+	translator.translate();
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
