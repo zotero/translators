@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-21 03:13:11"
+	"lastUpdated": "2024-01-21 04:47:05"
 }
 
 /*
@@ -40,7 +40,7 @@ async function detectWeb(doc, url) {
 		return "multiple";
 	// match items but not series, agencies, or functions (VPRS, VA or VF)
 	}
-	else if (url.match(/archive\/(?!VPRS|VA|VF)[A-Z0-9-]+/)) {
+	else if (/archive\/(?!VPRS|VA|VF)[A-Z0-9-]+/.test(url)) {
 		return "manuscript";
 	}
 	return false;
@@ -52,7 +52,7 @@ function getSearchResults(doc, checkOnly) {
 	let rows = doc.querySelectorAll(".sub_heading_search_result");
 	for (let row of rows) {
 		let href = row.href;
-		href = href.match(/archive\/(?!VPRS|VA|VF)[A-Z0-9-]+/) ? href : null;
+		href = /archive\/(?!VPRS|VA|VF)[A-Z0-9-]+/.test(href) ? href : null;
 		let title = row.innerText.replace(/\n/g, " ");
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -89,10 +89,10 @@ async function scrape(url) {
 	item.type = record.category;
 	item.archive = "Public Record Office Victoria";
 	item.archiveLocation = record.citation;
-	item.libraryCatalog = "PROV API";
+	item.libraryCatalog = "Public Record Office Victoria API";
 	item.url = url;
 	item.rights = record.rights_status.join(", ");
-	item.place = record.location.join(", ");
+	item["archive-place"] = record.location.join(", ");
 	item.abstractNote = record["description.aggregate"];
 
 	// Normalise dates and drop default values
@@ -184,9 +184,8 @@ var testCases = [
 				"abstractNote": "[Swimming]; Swimming; [No slip]",
 				"archive": "Public Record Office Victoria",
 				"archiveLocation": "VPRS 10742/P0000, B1324",
-				"libraryCatalog": "PROV API",
+				"libraryCatalog": "Public Record Office Victoria API",
 				"manuscriptType": "Item",
-				"place": "North Melbourne, Online",
 				"rights": "Open",
 				"url": "https://prov.vic.gov.au/archive/0C7B792B-F7F4-11E9-AE98-39C0B3AF8E48?image=1",
 				"attachments": [
