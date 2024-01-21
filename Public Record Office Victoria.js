@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-21 01:09:39"
+	"lastUpdated": "2024-01-21 03:13:11"
 }
 
 /*
@@ -191,7 +191,7 @@ var testCases = [
 				"url": "https://prov.vic.gov.au/archive/0C7B792B-F7F4-11E9-AE98-39C0B3AF8E48?image=1",
 				"attachments": [
 					{
-						"title": "Download PDF",
+						"title": "Download file as PDF",
 						"mimeType": "application/pdf",
 						"snapshot": false
 					},
@@ -199,6 +199,11 @@ var testCases = [
 						"title": "IIIF manifest",
 						"mimeType": "application/json",
 						"snapshot": false
+					},
+					{
+						"title": "Page 1 image",
+						"mimeType": "image/jpeg",
+						"snapshot": true
 					}
 				],
 				"tags": [],
