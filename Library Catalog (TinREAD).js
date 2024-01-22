@@ -90,8 +90,7 @@ async function scrape(doc, url = doc.location.href) {
 	let urlParts = new URL(url);
 	let pathParts = urlParts.pathname.split('/');
 	let entryID = pathParts[pathParts.length - 1];	// Last part of path is typically the ID
-	let marcUrl = "/marcexport.svc?enc=UTF-8&fmt=xml&items=none&marc=Current&type=bib&id=";
-	marcUrl = marcUrl.concat(entryID);
+	let marcUrl = "/marcexport.svc?enc=UTF-8&fmt=xml&items=none&marc=Current&type=bib&id=" + entryID;
 	let marcText = await requestText(marcUrl);
 
 	var translator = Zotero.loadTranslator("import");
