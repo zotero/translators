@@ -2,14 +2,14 @@
 	"translatorID": "92d4ed84-8d0-4d3c-941f-d4b9124cfbb",
 	"label": "IEEE Xplore",
 	"creator": "Simon Kornblith, Michael Berkowitz, Bastian Koenings, and Avram Lyon",
-	"target": "^https?://([^/]+\\.)?ieeexplore\\.ieee\\.org/([^#]+[&?]arnumber=\\d+|(abstract/)?document/|search/(searchresult|selected)\\.jsp|xpl/(mostRecentIssue|tocresult)\\.jsp\\?|xpl/conhome/\\d+/proceeding)",
+	"target": "^https?://([^/]+\\.)?ieeexplore\\.ieee\\.org/([^#]+[&?]arnumber=\\d+|(abstract/)?document/|book/|search/(searchresult|selected)\\.jsp|xpl/((most)?RecentIssue|tocresult)\\.jsp\\?|xpl/conhome/\\d+/proceeding)",
 	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-24 03:17:24"
+	"lastUpdated": "2023-10-10 02:08:12"
 }
 
 /*
@@ -35,82 +35,48 @@
 	***** END LICENSE BLOCK *****
 */
 
+const BASE_URL = "https://ieeexplore.ieee.org";
+
 function detectWeb(doc, url) {
-	Zotero.monitorDOMChanges(doc.querySelector('.global-content-wrapper'));
-	if (doc.defaultView !== null && doc.defaultView !== doc.defaultView.top) return false;
-	
-	if (/[?&]arnumber=(\d+)/i.test(url) || /\/document\/\d+/i.test(url)) {
-		var firstBreadcrumb = ZU.xpathText(doc, '(//div[contains(@class, "breadcrumbs")]//a)[1]');
-		if (firstBreadcrumb == "Conferences") {
-			return "conferencePaper";
-		}
+	// pdf-viewer page contains too little metadata; journalArticle is a
+	// reasonable guess
+	if (isPDFViewer(url)) {
 		return "journalArticle";
 	}
-	
-	// Issue page
-	if ((url.includes("xpl/tocresult.jsp") || url.includes("xpl/mostRecentIssue.jsp")) && getSearchResults(doc, true)) {
-		return getSearchResults(doc, true) ? "multiple" : false;
-	}
-	
-	// Search results
-	if (url.includes("/search/searchresult.jsp") && getSearchResults(doc, true)) {
-		return "multiple";
-	}
-	
-	// conference list results
-	if (url.includes("xpl/conhome") && url.includes("proceeding") && getSearchResults(doc, true)) {
-		return "multiple";
+
+	let metadata = extractJSON(doc);
+	if (metadata) {
+		let type = getTypeFromJSON(metadata);
+		if (type !== null) {
+			return type;
+		}
 	}
 
-	// more generic method for other cases (is this still needed?)
-	/*
-	var scope = ZU.xpath(doc, '//div[contains(@class, "ng-scope")]')[0];
-	if (!scope) {
-		Zotero.debug("No scope");
-		return;
+	// The item is not an identifiable single, therefore a candidate for
+	// multiple. In this case watch the root web-app node for AJAX-based
+	// rendering and filtering
+	let appRoot = doc.querySelector('xpl-root');
+	if (appRoot) {
+		Zotero.monitorDOMChanges(appRoot);
 	}
-	
-	Z.monitorDOMChanges(scope, {childList: true});
 
-	if (getSearchResults(doc, true)) {
-		return "multiple";
-	}
-	*/
-	return false;
+	return getSearchResults(doc, true) && "multiple";
 }
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//*[contains(@class, "article-list") or contains(@class, "List-results-items")]//a[parent::h2|parent::h3]|//*[@id="results-blk"]//*[@class="art-abs-url"]');
+	var rows = doc.querySelectorAll(".result-item .text-md-md-lh a, .popular-articles a.article-title");
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
-		items[fixUrl(href)] = title;
+		items[href] = title;
 	}
 	return found ? items : false;
 }
-
-// Some pages don't show the metadata we need (http://forums.zotero.org/discussion/16283)
-// No data: http://ieeexplore.ieee.org/search/srchabstract.jsp?tp=&arnumber=1397982
-// No data: http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1397982
-// Data: http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1397982
-// Also address issue of saving from PDF itself, I hope
-// URL like http://ieeexplore.ieee.org/ielx4/78/2655/00080767.pdf?tp=&arnumber=80767&isnumber=2655
-// Or: http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1575188&tag=1
-function fixUrl(url) {
-	var arnumber = url.match(/arnumber=(\d+)/);
-	if (arnumber) {
-		return url.replace(/\/(?:search|stamp|ielx[45])\/.*$/, "/xpls/abs_all.jsp?arnumber=" + arnumber[1]);
-	}
-	else {
-		return url;
-	}
-}
-
 
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
@@ -120,128 +86,221 @@ async function doWeb(doc, url) {
 			await scrape(await requestDocument(url));
 		}
 	}
-	else if (url.includes("/search/") || url.includes("/stamp/") || url.includes("/ielx4/") || url.includes("/ielx5/")) {
-		await scrape(await requestDocument([fixUrl(url)]));
-	}
 	else {
 		await scrape(doc, url);
 	}
 }
 
-
 async function scrape(doc, url = doc.location.href) {
-	var arnumber = (url.match(/arnumber=(\d+)/) || url.match(/\/document\/(\d+)/))[1];
-	var pdf = "/stamp/stamp.jsp?tp=&arnumber=" + arnumber;
-	// Z.debug("arNumber = " + arnumber);
-	
-	var script = ZU.xpathText(doc, '//script[@type="text/javascript" and contains(., "global.document.metadata")]');
-	if (script) {
-		var dataRaw = script.split("global.document.metadata")[1]
-.replace(/^=/, '').replace(/};[\s\S]*$/m, '}');
-		try {
-			var data = JSON.parse(dataRaw);
-		}
-		catch (e) {
-			Z.debug("Error parsing JSON data:");
-			Z.debug(e);
-		}
-	}
-	
-	
-	let bibtexURL = "/rest/search/citation/format?recordIds=" + arnumber + "&fromPage=&citations-format=citation-abstract&download-format=download-bibtex";
-	Z.debug(bibtexURL);
-	// metadata is downloaded in a JSON data field
-	let bibtex = await requestJSON(bibtexURL, { headers: { Referer: url} });
-	bibtex = bibtex.data;
-	bibtex = ZU.unescapeHTML(bibtex.replace(/(&[^\s;]+) and/g, '$1;'));
-	// remove empty tag - we can take this out once empty tags are ignored
-	bibtex = bibtex.replace(/(keywords=\{.+);\}/, "$1}");
-	var earlyaccess = false;
-	if (/^@null/.test(bibtex)) {
-		earlyaccess = true;
-		bibtex = text.replace(/^@null/, "@article");
-	}
-	var translator = Zotero.loadTranslator("import");
-	// Calling the BibTeX translator
-	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
-	translator.setString(bibtex);
-	translator.setHandler("itemDone", function (obj, item) {
-		item.notes = [];
-		var res;
-		// Rearrange titles, per http://forums.zotero.org/discussion/8056
-		// If something has a comma or a period, and the text after comma ends with
-		// "of", "IEEE", or the like, then we switch the parts. Prefer periods.
-		if (item.publicationTitle.includes(".")) {
-			res = item.publicationTitle.trim().match(/^(.*)\.(.*(?:of|on|IEE|IEEE|IET|IRE))$/);
-		}
-		else {
-			res = item.publicationTitle.trim().match(/^(.*),(.*(?:of|on|IEE|IEEE|IET|IRE))$/);
-		}
-		if (res) {
-			item.publicationTitle = res[2] + " " + res[1];
-		}
-		item.proceedingsTitle = item.conferenceName = item.publicationTitle;
-		if (earlyaccess) {
-			item.volume = "Early Access Online";
-			item.issue = "";
-			item.pages = "";
-		}
-			
-		if (data && data.authors && data.authors.length == item.creators.length) {
-			item.creators = [];
-			for (let author of data.authors) {
-				item.creators.push({
-					firstName: author.firstName,
-					lastName: author.lastName,
-					creatorType: "author"
-				});
-			}
-		}
-			
-		if (!item.ISSN && data && data.issn) {
-			item.ISSN = data.issn.map(el => el.value).join(", ");
-		}
-		if (item.ISSN && !ZU.fieldIsValidForType('ISSN', item.itemType)) {
-			item.extra = "ISSN: " + item.ISSN;
-		}
-		item.url = url;
-		item.attachments.push({
-			document: doc,
-			title: "IEEE Xplore Abstract Record"
-		});
-			
-		if (pdf) {
-			ZU.doGet(pdf, function (src) {
-				// Either the PDF is embedded in the page, or (e.g. for iOS)
-				// the page has a redirect to the full-page PDF
-				//
-				// As of 3/2020, embedded PDFs via a web-based proxy are
-				// being served as getPDF.jsp, so support that in addition
-				// to direct .pdf URLs.
-				var m = /<i?frame src="([^"]+\.pdf\b[^"]*|[^"]+\/getPDF\.jsp\b[^"]*)"|<meta HTTP-EQUIV="REFRESH" content="0; url=([^\s"]+\.pdf\b[^\s"]*)"/.exec(src);
-				var pdfUrl = m && (m[1] || m[2]);
-				if (pdfUrl) {
-					item.attachments.unshift({
-						url: pdfUrl,
-						title: "IEEE Xplore Full Text PDF",
-						mimeType: "application/pdf"
-					});
-				}
-				item.complete();
-			}, null);
-		}
-		else {
-			item.complete();
-		}
-	});
+	// articleID may be falsy for books; it will be handled as a special case.
+	// NOTE that books don't have PDF-views, only individual chapters do.
+	let articleID = getArticleID(url);
+	let canonicalURL = `${BASE_URL}/document/${articleID}`;
 
-	translator.getTranslatorObject(function (trans) {
-		trans.setKeywordSplitOnSpace(false);
-		trans.setKeywordDelimRe('\\s*;\\s*', '');
-		trans.doImport();
-	});
+	if (isPDFViewer(url)) {
+		Z.debug(`Input is PDF-view page; article ID ${articleID}`);
+		// get the abstract page
+		doc = await requestDocument(canonicalURL);
+	}
+
+	let metadata = extractJSON(doc);
+	if (!metadata) {
+		throw new Error(`No metadata extracted for page at ${url}`);
+	}
+
+	let type = getTypeFromJSON(metadata);
+	let item = new Z.Item(type);
+	if (type === "book" && metadata.bookNumber) {
+		item.url = `${BASE_URL}/book/${metadata.bookNumber}`;
+	}
+	else {
+		item.url = canonicalURL;
+	}
+
+	// Set doc metadata field as item field
+	function setField(metadataField, itemField = metadataField) {
+		let value = metadata[metadataField];
+		if (value) {
+			item[itemField] = value;
+		}
+	}
+
+	// metadata field -> item field
+	setField("formulaStrippedArticleTitle", "title");
+	if (!item.title) {
+		setField("title");
+	}
+	setField("publicationDate", "date");
+	setField("doi", "DOI");
+	setField("publicationTitle");
+	setField("publisher");
+	if (!metadata.isEarlyAccess) {
+		setField("volume");
+		setField("issue");
+
+		let pages = metadata.startPage;
+		if (typeof pages === "string") {
+			if (metadata.endPage) {
+				pages += `-${metadata.endPage}`;
+			}
+			item.pages = pages;
+		}
+	}
+
+	// abstract
+	if (metadata.abstract) {
+		item.abstractNote = ZU.trimInternal(ZU.unescapeHTML(ZU.cleanTags(metadata.abstract)));
+	}
+
+	// creators; property name can be "authors" or "author" (books)
+	for (let authorObj of metadata.authors || metadata.author || []) {
+		if (authorObj.firstName || authorObj.lastName) {
+			item.creators.push({
+				firstName: authorObj.firstName,
+				lastName: authorObj.lastName,
+				creatorType: "author",
+			});
+		}
+		else if (authorObj.name) {
+			item.creators.push(ZU.cleanAuthor(authorObj.name, "author"));
+		}
+	}
+
+	// ISSN and ISBN if any, keeping only the ones for electronic media
+	setSN(item, metadata, "ISSN");
+	setSN(item, metadata, "ISBN");
+
+	// Special handling for book; return early to skip irrelevant parts
+	// (attachment etc.)
+	if (type === "book") {
+		setField("copyrightYear", "date");
+		setField("pages", "numPages");
+		item.tags.push(...metadata.topics.split(" ; "));
+		item.complete();
+		return;
+	}
+
+	if (type === "conferencePaper") {
+		setField("confLoc", "place");
+		setField("displayPublicationTitle", "conferenceName");
+		let confDates = metadata.displayPublicationDate;
+		if (confDates) {
+			let extraText = `Conference Dates: ${confDates}`;
+			item.extra = item.extra ? item.extra + `\n${extraText}` : extraText;
+		}
+	}
+	else if (type === "standard") {
+		setField("standardNumber", "number");
+		setField("status");
+	}
+
+	if (metadata.pubMedId) {
+		let extraText = `PMID: ${metadata.pubMedId}`;
+		item.extra = item.extra ? item.extra + `\n${extraText}` : extraText;
+	}
+
+	item.tags.push(...getTags(metadata));
+
+	let issueNumber = metadata.isNumber;
+	let publicationNumber = metadata.publicationNumber;
+	if (issueNumber && publicationNumber) {
+		item.attachments.push(
+			getFullTextPDF(articleID, metadata.openAccessFlag === "T",
+				issueNumber, publicationNumber)
+		);
+	}
+
+	if (metadata.xploreNote) {
+		item.notes.push({ note: metadata.xploreNote });
+	}
+
+	item.complete();
 }
 
+function getArticleID(url) {
+	let urlObj = new URL(url);
+	let m = urlObj.pathname.match(/\/document\/(\d+)($|\/)/);
+	if (m) {
+		return m[1];
+	}
+	return urlObj.searchParams.get("arnumber"); // for pdf-viewer
+}
+
+function isPDFViewer(url) {
+	return /^https:\/\/[^/]+\/stamp\//.test(url);
+}
+
+// Extract form the embedded code the JS object initializer that is the source
+// data for the page rendered in client JS, using regex for simplicity.
+function extractJSON(doc) {
+	for (let elem of doc.querySelectorAll("script[type='text/javascript']")) {
+		if (elem.getAttribute("src")) continue;
+		let m = elem.textContent.match(/(;|^)\s*xplGlobal\.document\.metadata\s*=\s*(\{.+?\});\s*$/sm);
+		if (m) return JSON.parse(m[2]);
+	}
+	return null;
+}
+
+function getTypeFromJSON(metadata) {
+	let type = metadata.contentType;
+	if (type === "periodicals") {
+		return metadata.contentTypeDisplay === "Magazines"
+			? "magazineArticle"
+			: "journalArticle";
+	}
+	else if (type === "conferences") {
+		return "conferencePaper";
+	}
+	else if (type === "standards") {
+		return "standard";
+	}
+	else if (type === "Books") {
+		return "book";
+	}
+	else if (metadata.isBook && metadata.isChapter) {
+		return "bookSection";
+	}
+	return null;
+}
+
+function getTags(metadata) {
+	let keywords = new Map();
+	for (let keywordsObj of metadata.keywords || []) {
+		for (let word of keywordsObj.kwd) {
+			let key = word.toLowerCase();
+			if (!keywords.has(key)) keywords.set(key, word);
+		}
+	}
+	for (let { code, term } of metadata.icsCodes || []) {
+		keywords.set(code, code);
+		let key = term.toLowerCase();
+		if (!keywords.has(key)) keywords.set(key, term);
+	}
+	return keywords.values();
+}
+
+function setSN(item, metadata, snType) {
+	for (let obj of metadata[snType.toLowerCase()] || []) {
+		if (obj.format === `Electronic ${snType}`) {
+			item[snType] = obj.value;
+			return;
+		}
+	}
+}
+
+function getFullTextPDF(articleID, isOA, isNumber, puNumber) {
+	// "ref" is the base64-encoded canonical URL of article without the
+	// trailing slash. The encoded URL is always ASCII so btoa() suffices.
+	let ref = btoa(`${BASE_URL}/document/${articleID}`);
+	let url;
+	if (isOA) {
+		url = `${BASE_URL}/ielx7/${puNumber}/${isNumber}/${ZU.lpad(articleID, "0", 8)}.pdf?tp=&arnumber=${articleID}&isnumber=${isNumber}&ref=${ref}`;
+	}
+	else {
+		url = `${BASE_URL}/stampPDF/getPDF.jsp?tp=&arnumber=${articleID}&ref=${ref}`;
+	}
+	return { title: "Full Text PDF", url, mimeType: "application/pdf" };
+}
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -1116,6 +1175,571 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://ieeexplore.ieee.org/xpl/tocresult.jsp?isnumber=10045573&punumber=6221021",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10016690",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Editorial 2022 Best Papers, Outstanding Associate Editors, and Outstanding Reviewers",
+				"creators": [
+					{
+						"firstName": "Fangxing",
+						"lastName": "Li",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023",
+				"DOI": "10.1109/OAJPE.2022.3232736",
+				"ISSN": "2687-7910",
+				"abstractNote": "The Editorial Board of the IEEE Open Access Journal of Power and Energy (OAJPE) would like to recognize the following best papers selected from all papers published between October 1, 2019, and September 30, 2022, in OAJPE and its preceding journal, IEEE Power and Energy Technology Systems Journal (PETS-J).",
+				"libraryCatalog": "IEEE Xplore",
+				"pages": "1-1",
+				"publicationTitle": "IEEE Open Access Journal of Power and Energy",
+				"url": "https://ieeexplore.ieee.org/document/10016690",
+				"volume": "10",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://ieeexplore.ieee.org/book/6480473",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Mobile Ad Hoc Networking: The Cutting Edge Directions",
+				"creators": [
+					{
+						"firstName": "Stefano",
+						"lastName": "Basagni",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marco",
+						"lastName": "Conti",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Silvia",
+						"lastName": "Giordano",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ivan",
+						"lastName": "Stojmenovic",
+						"creatorType": "author"
+					}
+				],
+				"date": "2013",
+				"ISBN": "9781118511237",
+				"abstractNote": "\"An excellent book for those who are interested in learning the current status of research and development . . . [and] who want to get a comprehensive overview of the current state-of-the-art.\" —E-Streams This book provides up-to-date information on research and development in the rapidly growing area of networks based on the multihop ad hoc networking paradigm. It reviews all classes of networks that have successfully adopted this paradigm, pointing out how they penetrated the mass market and sparked breakthrough research. Covering both physical issues and applications, Mobile Ad Hoc Networking: Cutting Edge Directions offers useful tools for professionals and researchers in diverse areas wishing to learn about the latest trends in sensor, actuator, and robot networking, mesh networks, delay tolerant and opportunistic networking, and vehicular networks. Chapter coverage includes: Multihop ad hoc networking Enabling technologies and standards for mobile multihop wireless networking Resource optimization in multiradio multichannel wireless mesh networks QoS in mesh networks Routing and data dissemination in opportunistic networks Task farming in crowd computing Mobility models, topology, and simulations in VANET MAC protocols for VANET Wireless sensor networks with energy harvesting nodes Robot-assisted wireless sensor networks: recent applications and future challenges Advances in underwater acoustic networking Security in wireless ad hoc networks Mobile Ad Hoc Networking will appeal to researchers, developers, and students interested in computer science, electrical engineering, and telecommunications.",
+				"libraryCatalog": "IEEE Xplore",
+				"numPages": "888",
+				"publisher": "IEEE",
+				"shortTitle": "Mobile Ad Hoc Networking",
+				"url": "https://ieeexplore.ieee.org/book/6480473",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Communication, Networking and Broadcast Technologies"
+					},
+					{
+						"tag": "Components, Circuits, Devices and Systems"
+					},
+					{
+						"tag": "Computing and Processing"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://ieeexplore.ieee.org/document/6482734/keywords#keywords",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Advances in Underwater Acoustic Networking",
+				"creators": [
+					{
+						"firstName": "Stefano",
+						"lastName": "Basagni",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marco",
+						"lastName": "Conti",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Silvia",
+						"lastName": "Giordano",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ivan",
+						"lastName": "Stojmenovic",
+						"creatorType": "author"
+					}
+				],
+				"ISBN": "9781118511237",
+				"abstractNote": "This chapter contains sections titled: Introduction Communication Architecture Basics of Underwater Communications Physical Layer Medium Access Control Layer Network Layer Cross-Layer Design Experimental Platforms UW-Buffalo: An Underwater Acoustic Testbed at the University at Buffalo Conclusions References",
+				"bookTitle": "Mobile Ad Hoc Networking: The Cutting Edge Directions",
+				"libraryCatalog": "IEEE Xplore",
+				"pages": "804-852",
+				"publisher": "Wiley-IEEE Press",
+				"url": "https://ieeexplore.ieee.org/document/6482734",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Acoustics"
+					},
+					{
+						"tag": "Logic gates"
+					},
+					{
+						"tag": "Transducers"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://ieeexplore.ieee.org/document/4472240",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "An Introduction To Compressive Sampling",
+				"creators": [
+					{
+						"firstName": "Emmanuel J.",
+						"lastName": "Candes",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael B.",
+						"lastName": "Wakin",
+						"creatorType": "author"
+					}
+				],
+				"date": "March 2008",
+				"ISSN": "1558-0792",
+				"abstractNote": "Conventional approaches to sampling signals or images follow Shannon's theorem: the sampling rate must be at least twice the maximum frequency present in the signal (Nyquist rate). In the field of data conversion, standard analog-to-digital converter (ADC) technology implements the usual quantized Shannon representation - the signal is uniformly sampled at or above the Nyquist rate. This article surveys the theory of compressive sampling, also known as compressed sensing or CS, a novel sensing/sampling paradigm that goes against the common wisdom in data acquisition. CS theory asserts that one can recover certain signals and images from far fewer samples or measurements than traditional methods use.",
+				"issue": "2",
+				"libraryCatalog": "IEEE Xplore",
+				"pages": "21-30",
+				"publicationTitle": "IEEE Signal Processing Magazine",
+				"url": "https://ieeexplore.ieee.org/document/4472240",
+				"volume": "25",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Biomedical imaging"
+					},
+					{
+						"tag": "Data acquisition"
+					},
+					{
+						"tag": "Frequency"
+					},
+					{
+						"tag": "Image coding"
+					},
+					{
+						"tag": "Image sampling"
+					},
+					{
+						"tag": "Protocols"
+					},
+					{
+						"tag": "Receivers"
+					},
+					{
+						"tag": "Relatively few wavelet"
+					},
+					{
+						"tag": "Sampling methods"
+					},
+					{
+						"tag": "Signal processing"
+					},
+					{
+						"tag": "Signal sampling"
+					},
+					{
+						"tag": "compressed sensing"
+					},
+					{
+						"tag": "compressive sampling"
+					},
+					{
+						"tag": "image processing"
+					},
+					{
+						"tag": "image recovery"
+					},
+					{
+						"tag": "sampling paradigm"
+					},
+					{
+						"tag": "sensing paradigm"
+					},
+					{
+						"tag": "signal processing equipment"
+					},
+					{
+						"tag": "signal recovery"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://ieeexplore.ieee.org/document/8332112",
+		"items": [
+			{
+				"itemType": "standard",
+				"title": "1547-2018 - IEEE Standard for Interconnection and Interoperability of Distributed Energy Resources with Associated Electric Power Systems Interfaces",
+				"creators": [],
+				"date": "06 April 2018",
+				"DOI": "10.1109/IEEESTD.2018.8332112",
+				"abstractNote": "The technical specifications for, and testing of, the interconnection and interoperability between utility electric power systems (EPSs) and distributed energy resources (DERs) are the focus of this standard. It provides requirements relevant to the performance, operation, testing, safety considerations, and maintenance of the interconnection. It also includes general requirements, response to abnormal conditions, power quality, islanding, and test specifications and requirements for design, production, installation evaluation, commissioning, and periodic tests. The stated requirements are universally needed for interconnection of DER, including synchronous machines, induction machines, or power inverters/converters and will be sufficient for most installations. The criteria and requirements are applicable to all DER technologies interconnected to EPSs at typical primary and/or secondary distribution voltages. Installation of DER on radial primary and secondary distribution systems is the main emphasis of this document, although installation of DERs on primary and secondary network distribution systems is considered. This standard is written considering that the DER is a 60 Hz source.",
+				"libraryCatalog": "IEEE Xplore",
+				"number": "1547-2018",
+				"publisher": "IEEE",
+				"status": "active",
+				"url": "https://ieeexplore.ieee.org/document/8332112",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "27.100"
+					},
+					{
+						"tag": "Diesel engines"
+					},
+					{
+						"tag": "Energy management"
+					},
+					{
+						"tag": "Energy storage"
+					},
+					{
+						"tag": "Fault diagnosis"
+					},
+					{
+						"tag": "Flicker"
+					},
+					{
+						"tag": "Generators"
+					},
+					{
+						"tag": "IEEE 1547"
+					},
+					{
+						"tag": "IEEE Standards"
+					},
+					{
+						"tag": "Power distribution"
+					},
+					{
+						"tag": "Power stations in general"
+					},
+					{
+						"tag": "Power systems reliability"
+					},
+					{
+						"tag": "certification"
+					},
+					{
+						"tag": "clearing time"
+					},
+					{
+						"tag": "codes"
+					},
+					{
+						"tag": "commissioning"
+					},
+					{
+						"tag": "communications"
+					},
+					{
+						"tag": "dc injection"
+					},
+					{
+						"tag": "design"
+					},
+					{
+						"tag": "diesel generators"
+					},
+					{
+						"tag": "dispersed generation"
+					},
+					{
+						"tag": "distributed generation"
+					},
+					{
+						"tag": "electric distribution systems"
+					},
+					{
+						"tag": "electric power systems"
+					},
+					{
+						"tag": "energy resources"
+					},
+					{
+						"tag": "faults"
+					},
+					{
+						"tag": "field"
+					},
+					{
+						"tag": "frequency support"
+					},
+					{
+						"tag": "fuel cells"
+					},
+					{
+						"tag": "grid"
+					},
+					{
+						"tag": "grid support"
+					},
+					{
+						"tag": "harmonics"
+					},
+					{
+						"tag": "induction machines"
+					},
+					{
+						"tag": "installation"
+					},
+					{
+						"tag": "interconnection requirements and specifications"
+					},
+					{
+						"tag": "interoperability"
+					},
+					{
+						"tag": "inverters"
+					},
+					{
+						"tag": "islanding"
+					},
+					{
+						"tag": "microturbines"
+					},
+					{
+						"tag": "monitoring and control"
+					},
+					{
+						"tag": "networks"
+					},
+					{
+						"tag": "paralleling"
+					},
+					{
+						"tag": "performance"
+					},
+					{
+						"tag": "photovoltaic power systems"
+					},
+					{
+						"tag": "point of common coupling"
+					},
+					{
+						"tag": "power"
+					},
+					{
+						"tag": "power converters"
+					},
+					{
+						"tag": "production tests"
+					},
+					{
+						"tag": "protection functions"
+					},
+					{
+						"tag": "public utility commissions"
+					},
+					{
+						"tag": "quality"
+					},
+					{
+						"tag": "reclosing coordination"
+					},
+					{
+						"tag": "regulations"
+					},
+					{
+						"tag": "ride through"
+					},
+					{
+						"tag": "rule-making"
+					},
+					{
+						"tag": "standards"
+					},
+					{
+						"tag": "storage"
+					},
+					{
+						"tag": "synchronous machines"
+					},
+					{
+						"tag": "testing"
+					},
+					{
+						"tag": "trip setting"
+					},
+					{
+						"tag": "utilities"
+					},
+					{
+						"tag": "voltage regulation"
+					},
+					{
+						"tag": "wind energy systems"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://ieeexplore.ieee.org/document/8626494",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Stacked Deconvolutional Network for Semantic Segmentation",
+				"creators": [
+					{
+						"firstName": "Jun",
+						"lastName": "Fu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jing",
+						"lastName": "Liu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yuhang",
+						"lastName": "Wang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jin",
+						"lastName": "Zhou",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Changyong",
+						"lastName": "Wang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hanqing",
+						"lastName": "Lu",
+						"creatorType": "author"
+					}
+				],
+				"DOI": "10.1109/TIP.2019.2895460",
+				"ISSN": "1941-0042",
+				"abstractNote": "Recent progress in semantic segmentation has been driven by improving the spatial resolution under Fully Convolutional Networks (FCNs). To address this problem, we propose a Stacked Deconvolutional Network (SDN) for semantic segmentation. In SDN, multiple shallow deconvolutional networks, which are called as SDN units, are stacked one by one to integrate contextual information and bring the fine recovery of localization information. Meanwhile, inter-unit and intra-unit connections are designed to assist network training and enhance feature fusion since the connections improve the flow of information and gradient propagation throughout the network. Besides, hierarchical supervision is applied during the upsampling process of each SDN unit, which enhances the discrimination of feature representations and benefits the network optimization. We carry out comprehensive experiments and achieve the new state-ofthe- art results on four datasets, including PASCAL VOC 2012, CamVid, GATECH, COCO Stuff. In particular, our best model without CRF post-processing achieves an intersection-over-union score of 86.6% in the test set.",
+				"extra": "PMID: 30703024",
+				"libraryCatalog": "IEEE Xplore",
+				"publicationTitle": "IEEE Transactions on Image Processing",
+				"url": "https://ieeexplore.ieee.org/document/8626494",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Decoding"
+					},
+					{
+						"tag": "Deconvolutional Neural Network"
+					},
+					{
+						"tag": "Dense Connection"
+					},
+					{
+						"tag": "Hierarchical Supervision"
+					},
+					{
+						"tag": "Image segmentation"
+					},
+					{
+						"tag": "Pattern recognition"
+					},
+					{
+						"tag": "Semantic Segmentation"
+					},
+					{
+						"tag": "Semantics"
+					},
+					{
+						"tag": "Spatial resolution"
+					},
+					{
+						"tag": "Task analysis"
+					},
+					{
+						"tag": "Training"
+					}
+				],
+				"notes": [
+					{
+						"note": "IEEE Xplore Notice to Reader: \"Stacked Deconvolutional Network for Semantic Segmentation, by Jun Fu, Jing Lu, Yuhang Wang, Jin Zhou, Changyong Wang, and Hanqing Lu, published in the IEEE Transactions on Image Processing Early Access Digital Object Identifier: 10.1109/TIP.2019.2895460 This article will not be published in final form due to unauthorized changes made to the authorship following acceptance of the paper. It should not be considered for citation purposes. We regret any inconvenience this may have caused. Gaurav Sharma Editor-in-Chief IEEE Transactions on Image Processing "
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://ieeexplore.ieee.org/xpl/RecentIssue.jsp?punumber=83",
 		"defer": true,
 		"items": "multiple"
 	}
