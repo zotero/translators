@@ -9,30 +9,30 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-11 22:01:06"
+	"lastUpdated": "2024-01-22 22:36:15"
 }
 
 /*
-    ***** BEGIN LICENSE BLOCK *****
+	***** BEGIN LICENSE BLOCK *****
 
-    Copyright © 2024 Franklin Pezzuti Dyer
+	Copyright © 2024 Franklin Pezzuti Dyer
 
-    This file is part of Zotero.
+	This file is part of Zotero.
 
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Affero General Public License for more details.
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
 
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
-    ***** END LICENSE BLOCK *****
+	***** END LICENSE BLOCK *****
 */
 
 const ICON_DETECT_MAPPING = {
@@ -76,11 +76,10 @@ function getSearchResults(doc, checkOnly) {
 
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
-		let items = await Zotero.selectItems(getSearchResults(doc, false));
-		if (!items) return;
-		for (let url of Object.keys(items)) {
-			await scrape(await requestDocument(url));
-		}
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (items) return ZU.processDocuments(Object.keys(items), scrape);
+			return true;
+		});
 	}
 	else {
 		await scrape(doc, url);
@@ -90,8 +89,9 @@ async function doWeb(doc, url) {
 async function scrape(doc, url = doc.location.href) {
 	let urlParts = new URL(url);
 	let pathParts = urlParts.pathname.split('/');
-	let entryID = pathParts[pathParts.length - 1];	// Last part of path is typically the ID
-	let marcUrl = "/marcexport.svc?enc=UTF-8&fmt=xml&items=none&marc=Current&type=bib&id=" + entryID;
+	let entryID = pathParts[pathParts.length - 1];	// Last part of path is the ID
+	let marcUrl = "/marcexport.svc?enc=UTF-8&fmt=xml&items=none&marc=Current&type=bib&id=";
+	marcUrl = marcUrl.concat(entryID);
 	let marcText = await requestText(marcUrl);
 
 	var translator = Zotero.loadTranslator("import");
