@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-15 10:32:16"
+	"lastUpdated": "2024-01-22 13:20:09"
 }
 
 /*
@@ -67,7 +67,7 @@ function getAuthorName(text) {
 
 function addBookReviewTag(doc, item) {
 	var primaryHeading = ZU.xpathText(doc, '//span[@class="primary-heading"]');
-	if (primaryHeading.match(/Book Review|Review Essays?|Reviews?/i)) {
+	if (primaryHeading.match(/Book Review\b|Review Essays?|Reviews?\b/i)) {
 		item.tags.push('Book Review');
 	}
 }
