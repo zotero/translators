@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-21 04:47:05"
+	"lastUpdated": "2024-01-23 04:55:10"
 }
 
 /*
@@ -92,7 +92,6 @@ async function scrape(url) {
 	item.libraryCatalog = "Public Record Office Victoria API";
 	item.url = url;
 	item.rights = record.rights_status.join(", ");
-	item["archive-place"] = record.location.join(", ");
 	item.abstractNote = record["description.aggregate"];
 
 	// Normalise dates and drop default values
@@ -108,7 +107,7 @@ async function scrape(url) {
 		item.date = startDate;
 	}
 	else {
-		item.issued = startDate + "/" + endDate;
+		item.extra = (item.extra ? item.extra + "\n" : "") + "Issued: " + startDate + "/" + endDate;
 	}
 	
 	// Add creating agencies
@@ -121,8 +120,11 @@ async function scrape(url) {
 		});
 	}
 
-	// Include a series reference
-	item.series = record["is_part_of_series.id"][0] + ", " + record["is_part_of_series.title"][0];
+	// Location of archive
+	item.extra = (item.extra ? item.extra + "\n" : "") + "Archive Place: " + record.location.join(", ");
+
+	// Include a series reference (archive collection)
+	item.extra = (item.extra ? item.extra + "\n" : "") + "Archive Collection: " + record["is_part_of_series.id"][0] + ", " + record["is_part_of_series.title"][0];
 
 	// Digitised files have IIIF manifests, which can be used to get PDFs and images
 	if ("iiif-manifest" in record) {
@@ -184,6 +186,7 @@ var testCases = [
 				"abstractNote": "[Swimming]; Swimming; [No slip]",
 				"archive": "Public Record Office Victoria",
 				"archiveLocation": "VPRS 10742/P0000, B1324",
+				"extra": "Archive Place: North Melbourne, Online\nArchive Collection: VPRS10742, Photographic Negatives [1956 Melbourne Olympics Photograph Collection]",
 				"libraryCatalog": "Public Record Office Victoria API",
 				"manuscriptType": "Item",
 				"rights": "Open",
@@ -205,6 +208,39 @@ var testCases = [
 						"snapshot": true
 					}
 				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://prov.vic.gov.au/archive/8B8A4428-F4D0-11E9-AE98-D598FD7FCBF4",
+		"items": [
+			{
+				"itemType": "manuscript",
+				"title": "Rabbit Processing",
+				"creators": [
+					{
+						"lastName": "VA3125, Employee Relations Commission",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "VA1010, Conciliation and Arbitration Boards (formerly known as Wages Boards 1896-1981)",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					}
+				],
+				"archive": "Public Record Office Victoria",
+				"archiveLocation": "VPRS 5467/P0002, Rabbit Processing",
+				"extra": "Issued: 1977-11-07/1982-10-20\nArchive Place: North Melbourne\nArchive Collection: VPRS5467, Minute Books",
+				"libraryCatalog": "Public Record Office Victoria API",
+				"manuscriptType": "Item",
+				"rights": "Open",
+				"url": "https://prov.vic.gov.au/archive/8B8A4428-F4D0-11E9-AE98-D598FD7FCBF4",
+				"attachments": [],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
