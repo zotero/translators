@@ -1,6 +1,6 @@
 {
 	"translatorID": "5f506a9a-8076-4e1e-950c-f55d32003aae",
-	"label": "Libris",
+	"label": "LIBRIS ISBN",
 	"creator": "Sebastian Berlin",
 	"target": "",
 	"minVersion": "5.0",
@@ -8,7 +8,7 @@
 	"priority": 98,
 	"inRepository": true,
 	"translatorType": 8,
-	"lastUpdated": "2023-11-14 12:10:23"
+	"lastUpdated": "2024-01-23 08:54:03"
 }
 
 /*
@@ -41,7 +41,7 @@ function detectSearch(item) {
 
 	// Filter by country code 91 (Sweden).
 	let isbn = ZU.cleanISBN(item.ISBN);
-	return isbn.search(/^(97[8-9])?91/) === 0;
+	return /^(97[8-9])?91/.test(isbn);
 }
 
 async function doSearch(item) {
@@ -82,7 +82,7 @@ var testCases = [
 				"date": "2008",
 				"ISBN": "9789197710947",
 				"edition": "Ny utg.",
-				"libraryCatalog": "Libris",
+				"libraryCatalog": "LIBRIS ISBN",
 				"numPages": "244",
 				"place": "Ronneby",
 				"publisher": "Hexa",
