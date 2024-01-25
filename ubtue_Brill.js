@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-19 08:17:28"
+	"lastUpdated": "2024-01-25 11:37:27"
 }
 
 /*
@@ -133,7 +133,7 @@ function postProcess(doc, item) {
 	//scrape ORCID from website
 	let SubheadingSpanHasOrcid = doc.querySelectorAll('.text-subheading span .orcid').length;
 	let authorSectionEntries = SubheadingSpanHasOrcid ? doc.querySelectorAll('.text-subheading span') :
-						   doc.querySelectorAll('.content-contributor-author .contributor-details');
+						   doc.querySelectorAll('.content-contributor-author, .contributor-details');
 	let furtherSelector = SubheadingSpanHasOrcid ? '.c-Button--link' : '.contributor-details-link';
 	if (authorSectionEntries) {
 		for (let authorSectionEntry of authorSectionEntries) {
