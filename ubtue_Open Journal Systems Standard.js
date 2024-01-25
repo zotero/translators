@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-05-04 14:16:27"
+	"lastUpdated": "2024-01-25 09:55:26"
 }
 
 /*
@@ -106,7 +106,7 @@ function getOrcids(doc, ISSN) {
   	 // e.g. https://jeac.de/ojs/index.php/jeac/article/view/844
   	 // e.g. https://jebs.eu/ojs/index.php/jebs/article/view/336
   	 // e.g. https://bildungsforschung.org/ojs/index.php/beabs/article/view/783
-  	 if (['2627-6062', '1804-6444', '2748-6419'].includes(ISSN)) {
+	 if (['2627-6062', '1804-6444', '2748-6419', '1018-1539'].includes(ISSN)) {
   	 	let orcidAuthorEntryCaseA = doc.querySelectorAll('.authors');
   	 	if (orcidAuthorEntryCaseA) {
   		for (let a of orcidAuthorEntryCaseA) {
