@@ -64,17 +64,18 @@ function getSearchResults(doc, checkOnly) {
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), (items) => {
-			if (!items) {
-				return true;
-			}
-			const articles = [];
-			for (const i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
+		let items = Zotero.selectItems(getSearchResults(doc, false));
+
+		if (!items) {
 			return true;
-		});
+		}
+
+		const articles = [];
+		for (const i in items) {
+			articles.push(i);
+		}
+		ZU.processDocuments(articles, scrape);
+		return true;
 	}
 	else {
 		return scrape(doc, url);
