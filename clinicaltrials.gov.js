@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-12 05:42:11"
+	"lastUpdated": "2023-09-17 06:35:36"
 }
 
 /*
@@ -117,12 +117,8 @@ async function scrape(clinicalTrialID) {
 }
 
 function getClinicalTrialID(url) {
-	let urlObj = new URL(url);
-	return urlObj.pathname.split("/").at(-1); // last component in pathname
-}
-
-function dateTimeToDateString(dateTime) {
-	return dateTime.split(" ")[0].split(":").join("-");
+	let pathComponents = new URL(url).pathname.split("/");
+	return pathComponents[pathComponents.length - 1]; // last component in pathname
 }
 
 // Convert the data object from the JSON response of "classic" API into item
@@ -179,7 +175,7 @@ function classicJSONToItem(data) {
 
 	item.title = idModule.OfficialTitle;
 	item.date = statusModule.LastUpdateSubmitDate;
-	item.accessDate = dateTimeToDateString(data.FullStudiesResponse.DataVrs);
+	item.accessDate = ZU.strToISO(data.FullStudiesResponse.DataVrs);
 	item.institution = "clinicaltrials.gov"; // publisher
 	item.reportNumber = idModule.NCTId;
 	item.shortTitle = idModule.BriefTitle;

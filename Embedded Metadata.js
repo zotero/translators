@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-24 14:42:56"
+	"lastUpdated": "2023-08-16 15:18:29"
 }
 
 /*
@@ -179,7 +179,13 @@ function getContentText(doc, name, strict, all) {
 }
 
 function getContent(doc, name, strict) {
-	var xpath = '/x:html/x:head/x:meta['
+	var xpath = '/x:html/'
+		+ (
+			exports.searchForMetaTagsInBody
+				? '*[local-name() = "head" or local-name() = "body"]'
+				: 'x:head' // default
+		)
+		+ '/x:meta['
 		+ (strict ? '@name' : 'substring(@name, string-length(@name)-' + (name.length - 1) + ')')
 		+ '="' + name + '"]/';
 	return ZU.xpath(doc, xpath + '@content | ' + xpath + '@contents', namespaces);
@@ -234,10 +240,14 @@ function detectWeb(doc, url) {
 function init(doc, url, callback, forceLoadRDF) {
 	getPrefixes(doc);
 
-	var metaTags = doc.head.getElementsByTagName("meta");
+	let metaSelector
+		= exports.searchForMetaTagsInBody
+			? "head > meta, body > meta"
+			: "head > meta"; // default
+	var metaTags = doc.querySelectorAll(metaSelector);
 	Z.debug("Embedded Metadata: found " + metaTags.length + " meta tags.");
 	if (forceLoadRDF /* check if this is called from doWeb */ && !metaTags.length) {
-		if (doc.head) {
+		if (!exports.searchForMetaTagsInBody && doc.head) {
 			Z.debug(doc.head.innerHTML
 				.replace(/<style[^<]+(?:<\/style>|\/>)/ig, '')
 				.replace(/<link[^>]+>/ig, '')
@@ -245,7 +255,7 @@ function init(doc, url, callback, forceLoadRDF) {
 			);
 		}
 		else {
-			Z.debug("Embedded Metadata: No head tag");
+			Z.debug("Embedded Metadata: No <meta> tag found in body or head tag");
 		}
 	}
 
@@ -736,7 +746,7 @@ function tryOgAuthors(doc) {
 	var authors = [];
 	var ogAuthors = ZU.xpath(doc, '//meta[@property="article:author" or @property="video:director" or @property="music:musician"]');
 	for (var i = 0; i < ogAuthors.length; i++) {
-		if (ogAuthors[i].content && /(https?:\/\/)?[\da-z.-]+\.[a-z.]{2,6}/.test(ogAuthors[i].content) && ogAuthors[i].content !== "false") {
+		if (ogAuthors[i].content && !/(https?:\/\/)?[\da-z.-]+\.[a-z.]{2,6}/.test(ogAuthors[i].content) && ogAuthors[i].content !== "false") {
 			authors.push(ZU.cleanAuthor(ogAuthors[i].content, "author"));
 		}
 	}
@@ -1001,6 +1011,9 @@ var exports = {
 	detectWeb: detectWeb,
 	addCustomFields: addCustomFields,
 	itemType: false,
+	// workaround for meta tags in body caused by parsing invalid HTML; only
+	// use as a last resort
+	searchForMetaTagsInBody: false,
 	// activate/deactivate splitting tags in final data cleanup when they contain commas or semicolons
 	splitTags: true,
 	fixSchemaURI: setPrefixRemap
@@ -1997,6 +2010,31 @@ var testCases = [
 				"abstractNote": "We want candidates hearing about us for the first time to feel just as equipped as those with friends on staff",
 				"language": "en",
 				"url": "https://themarkup.org/inside-the-markup/2023/01/18/five-ways-toward-a-fairer-more-transparent-hiring-process",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nhs.uk/conditions/baby/babys-development/behaviour/separation-anxiety/",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Separation anxiety",
+				"creators": [],
+				"date": "7 Dec 2020, 4:40 p.m.",
+				"abstractNote": "Separation anxiety is a normal part of your child's development. Find out how to handle the times when your baby or toddler cries or is clingy when you leave them.",
+				"language": "en",
+				"url": "https://www.nhs.uk/conditions/baby/babys-development/behaviour/separation-anxiety/",
+				"websiteTitle": "nhs.uk",
 				"attachments": [
 					{
 						"title": "Snapshot",

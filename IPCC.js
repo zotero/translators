@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-03 07:36:57"
+	"lastUpdated": "2023-09-18 01:10:08"
 }
 
 /*
@@ -445,7 +445,7 @@ let citations = {
 				{
 					title: 'Full Text PDF',
 					mimeType: 'application/pdf',
-					url: 'https://www.ipcc.ch/report/ar6/wg2/downloads/report/IPCC_AR6_WGII_FinalDraft_FullReport.pdf'
+					url: 'https://report.ipcc.ch/ar6/wg2/IPCC_AR6_WGII_FullReport.pdf'
 				}
 			]
 		}),
@@ -458,75 +458,75 @@ let citations = {
 			abstractNote: 'The Technical Summary (TS) provides extended summary of key findings and serves as a link between the comprehensive assessment of the Working Group II Report and the concise SPM.',
 			creators: report6Wg2TechSummaryAuthors
 		}),
-		'Chapter 1: Point of departure and key concepts': wg2Chapter('FinalDraft_Chapter01', {
+		'Chapter 1: Point of departure and key concepts': wg2Chapter('Chapter01', {
 			title: 'Point of departure and key concepts',
 			creators: report6Wg2Ch1Authors
 		}),
-		'Chapter 2: Terrestrial and freshwater ecosystems and their services': wg2Chapter('FinalDraft_Chapter02', {
+		'Chapter 2: Terrestrial and freshwater ecosystems and their services': wg2Chapter('Chapter02', {
 			title: 'Terrestrial and freshwater ecosystems and their services',
 			creators: report6Wg2Ch2Authors
 		}),
-		'Chapter 3: Ocean and coastal ecosystems and their services': wg2Chapter('FinalDraft_Chapter03', {
+		'Chapter 3: Ocean and coastal ecosystems and their services': wg2Chapter('Chapter03', {
 			title: 'Ocean and coastal ecosystems and their services',
 			creators: report6Wg2Ch3Authors
 		}),
-		'Chapter 4: Water': wg2Chapter('FinalDraft_Chapter04', {
+		'Chapter 4: Water': wg2Chapter('Chapter04', {
 			title: 'Water',
 			creators: report6Wg2Ch4Authors
 		}),
-		'Chapter 5: Food, fibre, and other ecosystem products': wg2Chapter('FinalDraft_Chapter05', {
+		'Chapter 5: Food, fibre, and other ecosystem products': wg2Chapter('Chapter05', {
 			title: 'Food, fibre, and other ecosystem products',
 			creators: report6Wg2Ch5Authors
 		}),
-		'Chapter 6: Cities, settlements and key infrastructure': wg2Chapter('FinalDraft_Chapter06', {
+		'Chapter 6: Cities, settlements and key infrastructure': wg2Chapter('Chapter06', {
 			title: 'Cities, settlements and key infrastructure',
 			creators: report6Wg2Ch6Authors
 		}),
-		'Chapter 7: Health, wellbeing and the changing structure of communities': wg2Chapter('FinalDraft_Chapter07', {
+		'Chapter 7: Health, wellbeing and the changing structure of communities': wg2Chapter('Chapter07', {
 			title: 'Health, wellbeing and the changing structure of communities',
 			creators: report6Wg2Ch7Authors
 		}),
-		'Chapter 8: Poverty, livelihoods and sustainable development': wg2Chapter('FinalDraft_Chapter08', {
+		'Chapter 8: Poverty, livelihoods and sustainable development': wg2Chapter('Chapter08', {
 			title: 'Poverty, livelihoods and sustainable development',
 			creators: report6Wg2Ch8Authors
 		}),
-		'Chapter 9: Africa': wg2Chapter('FinalDraft_Chapter09', {
+		'Chapter 9: Africa': wg2Chapter('Chapter09', {
 			title: 'Africa',
 			creators: report6Wg2Ch9Authors
 		}),
-		'Chapter 10: Asia': wg2Chapter('FinalDraft_Chapter10', {
+		'Chapter 10: Asia': wg2Chapter('Chapter10', {
 			title: 'Asia',
 			creators: report6Wg2Ch10Authors
 		}),
-		'Chapter 11: Australasia': wg2Chapter('FinalDraft_Chapter11', {
+		'Chapter 11: Australasia': wg2Chapter('Chapter11', {
 			title: 'Australasia',
 			creators: report6Wg2Ch11Authors
 		}),
-		'Chapter 12: Central and South America': wg2Chapter('FinalDraft_Chapter12', {
+		'Chapter 12: Central and South America': wg2Chapter('Chapter12', {
 			title: 'Central and South America',
 			creators: report6Wg2Ch12Authors
 		}),
-		'Chapter 13: Europe': wg2Chapter('FinalDraft_Chapter13', {
+		'Chapter 13: Europe': wg2Chapter('Chapter13', {
 			title: 'Europe',
 			creators: report6Wg2Ch13Authors
 		}),
-		'Chapter 14: North America': wg2Chapter('FinalDraft_Chapter14', {
+		'Chapter 14: North America': wg2Chapter('Chapter14', {
 			title: 'North America',
 			creators: report6Wg2Ch14Authors
 		}),
-		'Chapter 15: Small Islands': wg2Chapter('FinalDraft_Chapter15', {
+		'Chapter 15: Small Islands': wg2Chapter('Chapter15', {
 			title: 'Small Islands',
 			creators: report6Wg2Ch15Authors
 		}),
-		'Chapter 16: Key risks across sectors and regions': wg2Chapter('FinalDraft_Chapter16', {
+		'Chapter 16: Key risks across sectors and regions': wg2Chapter('Chapter16', {
 			title: 'Key risks across sectors and regions',
 			creators: report6Wg2Ch16Authors
 		}),
-		'Chapter 17: Decision-making options for managing risk': wg2Chapter('FinalDraft_Chapter17', {
+		'Chapter 17: Decision-making options for managing risk': wg2Chapter('Chapter17', {
 			title: 'Decision-making options for managing risk',
 			creators: report6Wg2Ch17Authors
 		}),
-		'Chapter 18: Climate resilient development pathways': wg2Chapter('FinalDraft_Chapter18', {
+		'Chapter 18: Climate resilient development pathways': wg2Chapter('Chapter18', {
 			title: 'Climate resilient development pathways',
 			creators: report6Wg2Ch18Authors
 		})

@@ -8,8 +8,7 @@
 	"priority": 98,
 	"inRepository": true,
 	"translatorType": 8,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2023-05-20 15:41:08"
+	"lastUpdated": "2023-06-15 02:45:16"
 }
 
 /*
@@ -77,7 +76,7 @@ function doSearch(item) {
 		// 		<record xmlns='http://www.loc.gov/MARC21/slim'>...</record>
 		// 	</collection>
 		// </resp>
-		const doc = ((new DOMParser()).parseFromString(xmlText, 'text/xml'))
+		const doc = ((new DOMParser()).parseFromString(xmlText, 'text/xml'));
 		let record = doc.querySelector('collection > record');
 		if (!record) {
 			return;

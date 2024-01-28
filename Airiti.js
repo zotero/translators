@@ -7,9 +7,9 @@
 	"maxVersion": "",
 	"priority": 110,
 	"inRepository": true,
-	"translatorType": 12,
+	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-31 21:04:54"
+	"lastUpdated": "2023-08-04 05:04:16"
 }
 
 function detectWeb(doc, url) {

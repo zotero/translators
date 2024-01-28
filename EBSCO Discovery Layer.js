@@ -2,14 +2,14 @@
 	"translatorID": "660fcf3e-3414-41b8-97a5-e672fc2e491d",
 	"label": "EBSCO Discovery Layer",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://discovery\\.ebsco\\.com/",
+	"target": "^https?://(discovery|research)\\.ebsco\\.com/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-02-12 03:36:07"
+	"lastUpdated": "2023-11-27 04:12:52"
 }
 
 /*
@@ -35,7 +35,7 @@
 	***** END LICENSE BLOCK *****
 */
 
-const itemRegex = /\/c\/([^/]+)\/(?:details|viewer\/pdf)\/([^?]+)/;
+const itemRegex = /\/c\/([^/]+)(?:\/search)?\/(?:details|viewer\/pdf)\/([^?]+)/;
 function detectWeb(doc, url) {
 	if (itemRegex.test(url)) {
 		if (url.includes("/viewer/pdf")) {
