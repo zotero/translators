@@ -1,21 +1,21 @@
 {
 	"translatorID": "a714cb93-6595-482f-b371-a4ca0be14449",
 	"label": "Zenodo",
-	"creator": "Philipp Zumstein, Sebastian Karcher",
+	"creator": "Philipp Zumstein, Sebastian Karcher and contributors",
 	"target": "^https?://zenodo\\.org",
-	"minVersion": "3.0",
+	"minVersion": "6.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-19 20:55:45"
+	"lastUpdated": "2023-12-08 09:09:32"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2016, 2017 Philipp Zumstein & Sebastian Karcher
+	Copyright © 2016-2023 Philipp Zumstein, Sebastian Karcher and contributors
 
 	This file is part of Zotero.
 
@@ -40,11 +40,10 @@ const datasetType = ZU.fieldIsValidForType('title', 'dataset')
 	: 'document';
 
 function detectWeb(doc, url) {
-	if (url.includes('/record/')) {
-		var collections = ZU.xpath(doc, '//span[@class="pull-right"]/span[contains(@class, "label-default")]');
+	if (url.includes('/records/')) {
+		var collections = doc.querySelectorAll('span[aria-label="Resource type"]');
 		for (var i = 0; i < collections.length; i++) {
-			var type = collections[i].textContent.toLowerCase();
-			//Z.debug(type)
+			var type = collections[i].textContent.toLowerCase().trim();
 			switch (type) {
 				case "software":
 					return "computerProgram";
@@ -70,8 +69,9 @@ function detectWeb(doc, url) {
 				case "report":
 				case "working paper":
 				case "project deliverables":
-				case "preprint":
 					return "report";
+				case "preprint":
+					return "preprint";
 				case "thesis":
 					return "thesis";
 				case "dataset":
@@ -92,7 +92,8 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//invenio-search-results//h4/a');
+	// this section is not rendered in the 6.0 Scaffold browser, OK in v7
+	var rows = doc.querySelectorAll('section[aria-label="Search results"] h2 a');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -105,7 +106,7 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
@@ -119,110 +120,104 @@ function doWeb(doc, url) {
 		});
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
 
-function scrape(doc, url) {
+async function scrape(doc, url) {
 	var abstract = ZU.xpathText(doc, '//meta[@name="description"]/@content');
 	var doi = ZU.xpathText(doc, '//meta[@name="citation_doi"]/@content');
 	var pdfURL = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
 	var tags = ZU.xpath(doc, '//meta[@name="citation_keywords"]');
 	var cslURL = url.replace(/#.+/, "").replace(/\?.+/, "").replace(/\/export\/.+/, "") + "/export/csl";
-	// Z.debug(cslURL)
 	// use CSL JSON translator
-	ZU.processDocuments(cslURL, function (newDoc) {
-		var text = ZU.xpathText(newDoc, '//h3/following-sibling::pre');
-		// Z. debug(text);
-		text = text.replace(/publisher_place/, "publisher-place");
-		text = text.replace(/container_title/, "container-title");
+	var text = await requestText(cslURL);
+	text = text.replace(/publisher_place/, "publisher-place");
+	text = text.replace(/container_title/, "container-title");
 
-		var trans = Zotero.loadTranslator('import');
-		// CSL JSON
-		trans.setTranslator('bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7');
-		trans.setString(text);
-		trans.setHandler("itemDone", function (obj, item) {
-			item.itemType = detectWeb(doc, url);
-			// The "note" field of CSL maps to Extra. Put it in a note instead
+	var trans = Zotero.loadTranslator('import');
+	trans.setTranslator('bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7');
+	trans.setString(text);
+	trans.setHandler("itemDone", function (obj, item) {
+		item.itemType = detectWeb(doc, url);
+		// The "note" field of CSL maps to Extra. Put it in a note instead
+		if (item.extra) {
+			item.notes.push({ note: item.extra });
+			item.extra = "";
+		}
+		if (!ZU.fieldIsValidForType('DOI', item.itemType) && doi) {
+			item.extra = "DOI: " + doi;
+		}
+
+		// workaround for pre 6.0.24 versions that don't have proper item type for data
+		// if (schemaType && schemaType.includes("Dataset")) {
+		if (datasetType != "dataset" && ZU.xpathText(doc, '//span[@class="pull-right"]/span[contains(@class, "label-default") and contains(., "Dataset")]')) {
 			if (item.extra) {
-				item.notes.push({ note: item.extra });
-				item.extra = "";
-			}
-			if (!ZU.fieldIsValidForType('DOI', item.itemType) && doi) {
-				item.extra = "DOI: " + doi;
-			}
-
-			// workaround for pre 6.0.24 versions that don't have proper item type for data
-			// if (schemaType && schemaType.includes("Dataset")) {
-			if (datasetType != "dataset" && ZU.xpathText(doc, '//span[@class="pull-right"]/span[contains(@class, "label-default") and contains(., "Dataset")]')) {
-				if (item.extra) {
-					item.extra += "\nType: dataset";
-				}
-				else {
-					item.extra = "Type: dataset";
-				}
-			}
-
-			//get PDF attachment, otherwise just snapshot.
-			if (pdfURL) {
-				item.attachments.push({ url: pdfURL, title: "Zenodo Full Text PDF", mimeType: "application/pdf" });
+				item.extra += "\nType: dataset";
 			}
 			else {
-				item.attachments.push({ url: url, title: "Zenodo Snapshot", mimeType: "text/html" });
+				item.extra = "Type: dataset";
 			}
-			for (let i = 0; i < tags.length; i++) {
-				item.tags.push(tags[i].content);
-			}
+		}
 
-			//something is odd with zenodo's author parsing to CSL on some pages; fix it
-			//e.g. https://zenodo.org/record/569323
-			for (let i = 0; i < item.creators.length; i++) {
-				let creator = item.creators[i];
-				if (!creator.firstName || !creator.firstName.length) {
-					if (creator.lastName.includes(",")) {
-						creator.firstName = creator.lastName.replace(/.+?,\s*/, "");
-						creator.lastName = creator.lastName.replace(/,.+/, "");
-					}
-					else {
-						item.creators[i] = ZU.cleanAuthor(creator.lastName,
-							creator.creatorType, false);
-					}
+		//get PDF attachment, otherwise just snapshot.
+		if (pdfURL) {
+			item.attachments.push({ url: pdfURL, title: "Zenodo Full Text PDF", mimeType: "application/pdf" });
+		}
+		else {
+			item.attachments.push({ url: url, title: "Zenodo Snapshot", mimeType: "text/html" });
+		}
+		for (let i = 0; i < tags.length; i++) {
+			item.tags.push(tags[i].content);
+		}
+
+		//something is odd with zenodo's author parsing to CSL on some pages; fix it
+		//e.g. https://zenodo.org/record/569323
+		for (let i = 0; i < item.creators.length; i++) {
+			let creator = item.creators[i];
+			if (!creator.firstName || !creator.firstName.length) {
+				if (creator.lastName.includes(",")) {
+					creator.firstName = creator.lastName.replace(/.+?,\s*/, "");
+					creator.lastName = creator.lastName.replace(/,.+/, "");
 				}
-				delete item.creators[i].creatorTypeID;
+				else {
+					item.creators[i] = ZU.cleanAuthor(creator.lastName,
+						creator.creatorType, false);
+				}
 			}
+			delete item.creators[i].creatorTypeID;
+		}
 
-			//Don't use Zenodo as university for theses -- but use as archive
-			if (item.itemType == "thesis" && item.publisher == "Zenodo") {
-				item.publisher = "";
-				item.archive = "Zenodo";
-			}
-			// or as institution for reports
-			else if (item.itemType == "report" && item.institution == "Zenodo") {
-				item.institution = "";
-			}
+		//Don't use Zenodo as university for theses -- but use as archive
+		if (item.itemType == "thesis" && item.publisher == "Zenodo") {
+			item.publisher = "";
+			item.archive = "Zenodo";
+		}
+		// or as institution for reports
+		else if (item.itemType == "report" && item.institution == "Zenodo") {
+			item.institution = "";
+		}
 
-			if (item.date) item.date = ZU.strToISO(item.date);
-			if (url.includes('#')) {
-				url = url.substring(0, url.indexOf('#'));
-			}
-			item.url = url;
-			if (abstract) item.abstractNote = abstract;
+		if (item.date) item.date = ZU.strToISO(item.date);
+		if (url.includes('#')) {
+			url = url.substring(0, url.indexOf('#'));
+		}
+		item.url = url;
+		if (abstract) item.abstractNote = abstract;
 
 
-			item.itemID = "";
-			item.complete();
-		});
-		trans.translate();
+		item.itemID = "";
+		item.complete();
 	});
+	trans.translate();
 }
 
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://zenodo.org/record/54766?ln=en#.ZEAfIMQpAUE",
-		"detectedItemType": "thesis",
+		"url": "https://zenodo.org/records/54766#.ZEAfIMQpAUE",
 		"items": [
 			{
 				"itemType": "thesis",
@@ -239,7 +234,7 @@ var testCases = [
 				"archive": "Zenodo",
 				"extra": "DOI: 10.5281/zenodo.54766",
 				"libraryCatalog": "Zenodo",
-				"url": "https://zenodo.org/record/54766?ln=en",
+				"url": "https://zenodo.org/records/54766",
 				"attachments": [
 					{
 						"title": "Zenodo Full Text PDF",
@@ -258,7 +253,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://zenodo.org/record/54747",
+		"url": "https://zenodo.org/records/54747",
 		"items": [
 			{
 				"itemType": "presentation",
@@ -273,7 +268,7 @@ var testCases = [
 				"date": "2015-09-17",
 				"abstractNote": "Guides you through important steps in developing relevant visualizations by showcasing the work of PASTEUR4OA to develop visualizations from ROARMAP.",
 				"extra": "DOI: 10.5281/zenodo.54747",
-				"url": "https://zenodo.org/record/54747",
+				"url": "https://zenodo.org/records/54747",
 				"attachments": [
 					{
 						"title": "Zenodo Snapshot",
@@ -281,20 +276,34 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Data visualisation",
-					"Open Access",
-					"Open Access policy",
-					"PASTEUR4OA",
-					"ROARMAP"
+					{
+						"tag": "Data visualisation"
+					},
+					{
+						"tag": "Open Access"
+					},
+					{
+						"tag": "Open Access policy"
+					},
+					{
+						"tag": "PASTEUR4OA"
+					},
+					{
+						"tag": "ROARMAP"
+					}
 				],
-				"notes": [],
+				"notes": [
+					{
+						"note": "Funding by European Commission ROR 00k4n6c32."
+					}
+				],
 				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "https://zenodo.org/record/14837?ln=en",
+		"url": "https://zenodo.org/records/14837",
 		"items": [
 			{
 				"itemType": "artwork",
@@ -316,7 +325,7 @@ var testCases = [
 				"extra": "DOI: 10.5281/zenodo.14837",
 				"libraryCatalog": "Zenodo",
 				"shortTitle": "Figures 8-11 in A new Savignia from Cretan caves (Araneae",
-				"url": "https://zenodo.org/record/14837?ln=en",
+				"url": "https://zenodo.org/records/14837",
 				"attachments": [
 					{
 						"title": "Zenodo Snapshot",
@@ -324,28 +333,42 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Arachnida",
-					"Araneae",
-					"Crete",
-					"Greece",
-					"Linyphiidae",
-					"Savignia",
-					"cave",
-					"new species",
-					"troglobiont"
-				],
-				"notes": [
 					{
-						"note": "Figure uploaded by Plazi"
+						"tag": "Arachnida"
+					},
+					{
+						"tag": "Araneae"
+					},
+					{
+						"tag": "Crete"
+					},
+					{
+						"tag": "Greece"
+					},
+					{
+						"tag": "Linyphiidae"
+					},
+					{
+						"tag": "Savignia"
+					},
+					{
+						"tag": "cave"
+					},
+					{
+						"tag": "new species"
+					},
+					{
+						"tag": "troglobiont"
 					}
 				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "https://zenodo.org/record/11879?ln=en",
+		"url": "https://zenodo.org/records/11879",
 		"items": [
 			{
 				"itemType": "book",
@@ -364,7 +387,7 @@ var testCases = [
 				"libraryCatalog": "Zenodo",
 				"place": "Düsseldorf",
 				"publisher": "Düsseldorf University Press",
-				"url": "https://zenodo.org/record/11879?ln=en",
+				"url": "https://zenodo.org/records/11879",
 				"attachments": [
 					{
 						"title": "Zenodo Full Text PDF",
@@ -372,10 +395,18 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"computational linguistics",
-					"historical linguistics",
-					"phonetic alignment",
-					"sequence comparison"
+					{
+						"tag": "computational linguistics"
+					},
+					{
+						"tag": "historical linguistics"
+					},
+					{
+						"tag": "phonetic alignment"
+					},
+					{
+						"tag": "sequence comparison"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -384,8 +415,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://zenodo.org/record/45756?ln=en#.ZEAe1sQpAUE",
-		"detectedItemType": "dataset",
+		"url": "https://zenodo.org/records/45756#.ZEAe1sQpAUE",
 		"items": [
 			{
 				"itemType": "dataset",
@@ -427,7 +457,7 @@ var testCases = [
 				"abstractNote": "This submission includes a tar archive of bzipped diffraction images recorded with the ADSC Q315r detector at the Advanced Photon Source of Argonne National Laboratory, Structural Biology Center beam line 19-ID. Relevant meta data can be found in the headers of those diffraction images. Please find below the content of an input file XDS.INP for the program XDS (Kabsch, 2010), which may be used for data reduction. The \"NAME_TEMPLATE_OF_DATA_FRAMES=\" item inside XDS.INP may need to be edited to point to the location of the downloaded and untarred images. !!! Paste lines below in to a file named XDS.INP DETECTOR=ADSC  MINIMUM_VALID_PIXEL_VALUE=1  OVERLOAD= 65000 DIRECTION_OF_DETECTOR_X-AXIS= 1.0 0.0 0.0 DIRECTION_OF_DETECTOR_Y-AXIS= 0.0 1.0 0.0 TRUSTED_REGION=0.0 1.05 MAXIMUM_NUMBER_OF_JOBS=10 ORGX=   1582.82  ORGY=   1485.54 DETECTOR_DISTANCE= 150 ROTATION_AXIS= -1.0 0.0 0.0 OSCILLATION_RANGE=1 X-RAY_WAVELENGTH= 1.2821511 INCIDENT_BEAM_DIRECTION=0.0 0.0 1.0 FRACTION_OF_POLARIZATION=0.90 POLARIZATION_PLANE_NORMAL= 0.0 1.0 0.0 SPACE_GROUP_NUMBER=20 UNIT_CELL_CONSTANTS= 100.030   121.697    56.554    90.000    90.000    90.000 DATA_RANGE=1  180 BACKGROUND_RANGE=1 6 SPOT_RANGE=1 3 SPOT_RANGE=31 33 MAX_CELL_AXIS_ERROR=0.03 MAX_CELL_ANGLE_ERROR=2.0 TEST_RESOLUTION_RANGE=8.0 3.8 MIN_RFL_Rmeas= 50 MAX_FAC_Rmeas=2.0 VALUE_RANGE_FOR_TRUSTED_DETECTOR_PIXELS= 6000 30000 INCLUDE_RESOLUTION_RANGE=50.0 1.7 FRIEDEL'S_LAW= FALSE STARTING_ANGLE= -100      STARTING_FRAME=1 NAME_TEMPLATE_OF_DATA_FRAMES= ../x247398/t1.0???.img !!! End of XDS.INP",
 				"libraryCatalog": "Zenodo",
 				"repository": "Zenodo",
-				"url": "https://zenodo.org/record/45756?ln=en",
+				"url": "https://zenodo.org/records/45756",
 				"attachments": [
 					{
 						"title": "Zenodo Snapshot",
@@ -448,24 +478,20 @@ var testCases = [
 						"tag": "protein structure"
 					}
 				],
-				"notes": [
-					{
-						"note": "Argonne is operated by UChicago Argonne, LLC, for the U.S. Department of Energy, Office of Biological and Environmental Research under contract DE-AC02-06CH11357. The SGC is a registered charity (number 1097737) that receives funds from AbbVie, Bayer Pharma AG, Boehringer Ingelheim, Canada Foundation for Innovation, Eshelman Institute for Innovation, Genome Canada through Ontario Genomics Institute, Innovative Medicines Initiative (EU/EFPIA) [ULTRA-DD grant no. 115766], Janssen, Merck & Co., Novartis Pharma AG, Ontario Ministry of Economic Development and Innovation, Pfizer, São Paulo Research Foundation-FAPESP, Takeda, and the Wellcome Trust."
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"defer": true,
 		"url": "https://zenodo.org/search?page=1&size=20&q=&type=video",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "https://zenodo.org/record/569323",
+		"url": "https://zenodo.org/records/569323",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -484,7 +510,7 @@ var testCases = [
 				"libraryCatalog": "Zenodo",
 				"pages": "52-56",
 				"publicationTitle": "Qualitative & Multi-Method Research",
-				"url": "https://zenodo.org/record/569323",
+				"url": "https://zenodo.org/records/569323",
 				"volume": "14",
 				"attachments": [
 					{
@@ -504,7 +530,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://zenodo.org/record/1048320",
+		"url": "https://zenodo.org/records/1048320",
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -513,27 +539,27 @@ var testCases = [
 					{
 						"firstName": "Carl",
 						"lastName": "Boettiger",
-						"creatorType": "author"
+						"creatorType": "programmer"
 					},
 					{
 						"firstName": "Maëlle",
 						"lastName": "Salmon",
-						"creatorType": "author"
+						"creatorType": "programmer"
 					},
 					{
 						"firstName": "Noam",
 						"lastName": "Ross",
-						"creatorType": "author"
+						"creatorType": "programmer"
 					},
 					{
 						"firstName": "Arfon",
 						"lastName": "Smith",
-						"creatorType": "author"
+						"creatorType": "programmer"
 					},
 					{
 						"firstName": "Anna",
 						"lastName": "Krystalli",
-						"creatorType": "author"
+						"creatorType": "programmer"
 					}
 				],
 				"date": "2017-11-13",
@@ -542,7 +568,8 @@ var testCases = [
 				"extra": "DOI: 10.5281/zenodo.1048320",
 				"libraryCatalog": "Zenodo",
 				"shortTitle": "ropensci/codemetar",
-				"url": "https://zenodo.org/record/1048320",
+				"url": "https://zenodo.org/records/1048320",
+				"versionNumber": "0.1.2",
 				"attachments": [
 					{
 						"title": "Zenodo Snapshot",
@@ -550,6 +577,75 @@ var testCases = [
 					}
 				],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://zenodo.org/records/8092340",
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "Creating Virtuous Cycles for DNA Barcoding: A Case Study in Science Innovation, Entrepreneurship, and Diplomacy",
+				"creators": [
+					{
+						"lastName": "Schindel",
+						"firstName": "David E.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Page",
+						"firstName": "Roderic D. M. Page",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-06-28",
+				"DOI": "10.5281/zenodo.8092340",
+				"abstractNote": "This essay on the history of the DNA barcoding enterprise attempts to set the stage for the more scholarly contributions that follow. How did the enterprise begin? What were its goals, how did it develop, and to what degree are its goals being realized? We have taken a keen interest in the barcoding movement and its relationship to taxonomy, collections and biodiversity informatics more broadly considered. This essay integrates our two different perspectives on barcoding. DES was the Executive Secretary of the Consortium for the Barcode of Life from 2004 to 2017, with the mission to support the success of DNA barcoding without being directly involved in generating barcode data. RDMP viewed barcoding as an important entry into the landscape of biodiversity data, with many potential linkages to other components of the landscape. We also saw it as a critical step toward the era of international genomic research that was sure to follow. Like the Mercury Program that paved the way for lunar landings by the Apollo Program, we saw DNA barcoding as the proving grounds for the interdisciplinary and international cooperation that would be needed for success of whole-genome research.",
+				"libraryCatalog": "Zenodo",
+				"repository": "Zenodo",
+				"shortTitle": "Creating Virtuous Cycles for DNA Barcoding",
+				"url": "https://zenodo.org/records/8092340",
+				"attachments": [
+					{
+						"title": "Zenodo Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "BOLD"
+					},
+					{
+						"tag": "Barcode of Life Data System"
+					},
+					{
+						"tag": "CBoL"
+					},
+					{
+						"tag": "Consortium for the Barcode of Life"
+					},
+					{
+						"tag": "DNA barcoding"
+					},
+					{
+						"tag": "dark taxa"
+					},
+					{
+						"tag": "preprint"
+					},
+					{
+						"tag": "specimen voucher"
+					},
+					{
+						"tag": "taxonomy"
+					},
+					{
+						"tag": "virtuous cycles"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
