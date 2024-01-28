@@ -49,7 +49,7 @@ function getSearchResults(doc, checkOnly) {
 	let items = {};
 	let found = false;
 	let rows = doc.querySelectorAll('.news-link ');
-	//Zotero.debug(rows)
+	//Zotero.debug(rows);
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -58,7 +58,7 @@ function getSearchResults(doc, checkOnly) {
 		found = true;
 		items[href] = title;
 	}
-	Zotero.debug(items)
+	Zotero.debug(items);
 	return found ? items : false;
 }
 
@@ -66,6 +66,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (items) ZU.processDocuments(Object.keys(items), scrape);
+            return true;
 		});
 	}
 	else {
