@@ -2,14 +2,14 @@
 	"translatorID": "ac3b958f-0581-4117-bebc-44af3b876545",
 	"label": "Substack",
 	"creator": "Abe Jellinek",
-	"target": "^https://[^.]+\\.substack\\.com/(p/|archive)",
+	"target": "/p/|/archive",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-10-05 15:16:38"
+	"lastUpdated": "2024-01-29 20:12:55"
 }
 
 /*
@@ -37,6 +37,8 @@
 
 
 function detectWeb(doc, url) {
+	if (!url.match(/^https:\/\/[^.]+\.substack\.com\/(p\/|archive)/) && !text(doc, "a.footer-substack-cta"))
+		return false;
 	if (url.includes('/p/')) {
 		return "blogPost";
 	}
@@ -49,7 +51,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('a.post-preview-title[href*="/p/"]');
+	var rows = doc.querySelectorAll('a[data-testid="post-preview-title"][href*="/p/"]');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -213,6 +215,37 @@ var testCases = [
 				"abstractNote": "Have you ever come across the poem by Rupert Brooke, The Soldier? It starts: If I should die, think only this of me: That there's some corner of…",
 				"blogTitle": "DIALOGOS - Meaningful Conversation",
 				"url": "https://minter.substack.com/p/have-you-ever-thought-about-your/comments",
+				"websiteType": "Substack newsletter",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.latent.space/p/ai-ux-moat",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "How to Make AI UX Your Moat",
+				"creators": [
+					{
+						"firstName": "Anshul",
+						"lastName": "Ramachandran",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-07-07",
+				"abstractNote": "Design great AI Products that go beyond \"just LLM Wrappers\": make AI more present, more practical, and then more powerful.",
+				"blogTitle": "Latent Space",
+				"url": "https://www.latent.space/p/ai-ux-moat",
 				"websiteType": "Substack newsletter",
 				"attachments": [
 					{
