@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-20 00:44:51"
+	"lastUpdated": "2023-12-28 11:22:13"
 }
 
 function detectWeb(doc, url) {
@@ -44,7 +44,7 @@ function detectWeb(doc, url) {
 			return false;
 		}
 	}
-	if (!url.includes("pdf")) {
+	if (!new URL(url).pathname.includes("pdf")) {
 		// Book sections have the ISBN in the URL
 		if (url.includes("/B978")) {
 			return "bookSection";
