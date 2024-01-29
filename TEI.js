@@ -1,5 +1,5 @@
 {
-	"translatorID": "032ae9b7-ab90-9205-a479-baf81f49184a",
+	"translatorID": "1a043ed7-f15b-4f18-aeae-c793bdc0fa2e",
 	"label": "TEI",
 	"creator": "Stefan Majewski",
 	"target": "xml",
@@ -19,45 +19,49 @@
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2023-06-15 16:09:13"
+	"lastUpdated": "2024-01-29 19:01:40"
 }
 
 // "displayOptions": "Export Collections": false // seems broken
 
-// ********************************************************************
-//
-// tei-zotero-translator. Zotero 2 to TEI P5 exporter.
-//
-// Copyright (C) 2010 Stefan Majewski <xml@stefanmajewski.eu>
+/*
+	***** BEGIN LICENSE BLOCK *****
 
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+	Copyright (C) 2010 Stefan Majewski <xml@stefanmajewski.eu>
 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+	This file is part of Zotero.
 
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
 
 
-// *********************************************************************
-//
-// This script does fairly well with papers, theses, websites and
-// books. Some item properties, important for the more exotic
-// publication types, are still missing. That means, the first 30 are
-// implemented, the rest may be added when I need them. If you like to
-// see some particular item property and you also have a basic idea
-// how to represent them in TEI (without breaking the, to me, more
-// important ones), please contact me or send a patch.
-//
-// <analytic> vs <monogr> Both elements are used. The script tries to
-// figure out where which information might be appropriately placed. I
-// hope this works.
-//
+/*
+	This script does fairly well with papers, theses, websites and
+	books. Some item properties, important for the more exotic
+	publication types, are still missing. That means, the first 30 are
+	implemented, the rest may be added when I need them. If you like to
+	see some particular item property and you also have a basic idea
+	how to represent them in TEI (without breaking the, to me, more
+	important ones), please contact me or send a patch.
+
+	<analytic> vs <monogr> Both elements are used. The script tries to
+	figure out where which information might be appropriately placed. I
+	hope this works.
+*/
+
 // Zotero.addOption("exportNotes", false);
 // Zotero.addOption("generateXMLIds", true);
 
@@ -81,7 +85,7 @@ const indent = "  ";
  * startElement: opening tag event (required if no endElement)
  * endElement: closing tag event (required if no startElement)
  * tei: required, tei TagName element to create
- * rend: optional, tei attribute rend="value" 
+ * rend: optional, tei attribute rend="value"
  */
 
 const inlineMarkup = {
@@ -140,15 +144,15 @@ const inlineMarkup = {
 /**
  * Taken from Zotero source
  * https://github.com/zotero/zotero/blob/main/chrome/content/zotero/itemTree.jsx#L2610
- * Advised by @dstillman 
+ * Advised by @dstillman
  * https://github.com/zotero/translators/pull/3054#discussion_r1252896581
- * 
+ *
  * The problem: rich text in fields is not html. Ex:
  * Not closing <b> or<strong>unknown tag</strong>, kept as text nodes; <i>italic</i>, is an element
- * 
+ *
  * @param {*} tagSoup
  * @param {*} dstParent
- * @returns 
+ * @returns
  */
 function inlineParse(tagSoup, dstParent) {
 	if (!tagSoup) return;
@@ -189,12 +193,12 @@ function inlineParse(tagSoup, dstParent) {
 					// the startElement event matching with this endElement
 					// append it
 					if (discardedMarkup.startElement === markup.endElement) {
-						// append the element created to previous 
+						// append the element created to previous
 						nodeStack[nodeStack.length - 1].append(discardedNode);
 						break;
 					}
 					// an open tag without closing
-					// append the token as text, and possible children 
+					// append the token as text, and possible children
 					// (text or element)
 					else {
 						nodeStack[nodeStack.length - 1].append(discardedMarkup.token, ...discardedNode.childNodes);
@@ -222,9 +226,9 @@ function inlineParse(tagSoup, dstParent) {
 
 /**
  * Transform note html in tei
- * @param {*} html 
- * @param {*} dstParent 
- * @returns 
+ * @param {*} html
+ * @param {*} dstParent
+ * @returns
  */
 function noteParse(html, dstParent) {
 	if (!html) return;
@@ -265,14 +269,14 @@ const html2tei = {
 
 /**
  * Recursive dom translator, for notes
- * @param {*} srcParent 
- * @param {*} dstParent 
+ * @param {*} srcParent
+ * @param {*} dstParent
  */
 function domWalk(srcParent, dstParent) {
 	const dstDoc = dstParent.ownerDocument;
 	for(
-		let srcChild = srcParent.firstChild; 
-		srcChild !== null; 
+		let srcChild = srcParent.firstChild;
+		srcChild !== null;
 		srcChild = srcChild.nextSibling
 	) {
 		if (srcChild.nodeType == Node.TEXT_NODE) {
@@ -283,8 +287,8 @@ function domWalk(srcParent, dstParent) {
 			let dstChild = null;
 			const srcName = srcChild.tagName.toLowerCase();
 			// go through some non significative elements
-			if (srcName == 'span' 
-				&& srcChild.hasAttribute('style') 
+			if (srcName == 'span'
+				&& srcChild.hasAttribute('style')
 				&& srcChild.getAttribute("style") == 'color: black'
 			) {
 				domWalk(srcChild, dstParent);
@@ -318,63 +322,184 @@ function domWalk(srcParent, dstParent) {
 		}
 		// commenty ? PI ?
 	}	
- }
+}
 
 /**
- * Parse the “extra” field to get “extra fields”
+ * Parse the “extra” field to get “extra fields”.
+ * Adaptation of Zotero.Utilities.Item.extraToCSL()
+ * https://github.com/zotero/utilities/blob/9c89b23153ce621ed0f1d581a5e32248704c6fb7/utilities_item.js#L614
  * Syntax, one property by line
- * 
- * key1: value
- * key2: value
- * 
- * This could be a free note, parse is stoped at first empty line.
- * [2023-06 FG]
- * @param {*} extra 
- * @returns 
+ *
+ * known-propertie: value
+ * Othe Known: value
+ *
+ * This: could be a free note.
+ * [2024-01 FG]
+ * @param {*} item
+ * @returns
  */
-function parseExtraFields(extra) {
-	let fields = {};
-	if (!extra) return fields;
-	// keep blank lines
-	let lines = extra.replace('/\r\n/g', '\n').replace('/\r/g', '\n').split('\n');
-	let count = 0;
-	for (var i = 0; i < lines.length; i++) {
-		var line = lines[i].trim();
-		var splitAt = line.indexOf(':');
-		if (splitAt > 1) {
-			let key = line.substr(0, splitAt).trim();
-			key = key.replace(/\s+/g, '-').toLowerCase();
-			let value = line.substr(splitAt + 1).trim();
-			fields[key] = value;
-			count++;
-		}
-		// skip empty lines at start
-		else if (count === 0 && line.length === 0) {
-			continue;
-		}
-		// break at first empty line (Extra may contain free text)
-		else if (line.length === 0) {
-			let note = lines.slice(i + 1).join('\n');
-			fields['note'] = note;
-			break;
-		}
+function parseExtraFields(item) {
+	// Fields from https://aurimasv.github.io/z2csl/typeMap.xml
+	const cslScalars = {
+		"abstract": "abstractNote",
+		"accessed": "accessDate",
+		"annote": "annote", // not zot
+		"archive": "archive",
+		"archive-collection": "seriesTitle", // not zot
+		"archive-location": "archiveLocation",
+		"archive-place": "place", // not zot
+		"authority": "authority", // zot:legislativeBody, zot:court, zot:issuingAuthority
+		"available-date": "available-date", // not zot
+		"call-number": "callNumber",
+		"chair": "chair",
+		"chapter-number": "session", // legal, audio
+		"citation-label": "citationKey",
+		"citation-number": "citationKey",
+		"collection-number": "seriesNumber",
+		"collection-title": "seriesTitle",
+		"container": "container",
+		"container-title": "container-title", // zot:bookTitle, zot:proceedingsTitle, zot:encyclopediaTitle, zot:dictionaryTitle, zot:publicationTitle, zot:websiteTitle
+		"container-title-short": "journalAbbreviation",
+		"dimensions": "dimensions", // zot:artworkSize, zot:runningTime
+		"division": "division", // not zot
+		"doi": "DOI",
+		"edition": "edition",
+		// "event": "event", // Deprecated legacy variant of event-title
+		"event-date": "date",
+		"event-place": "place",
+		"event-title": "event-title", // zot:conferenceName, zot:meetingName
+		"first-reference-note-number": "first-reference-note-number", // not zot
+		"genre": "genre", // zot:websiteType, zot:programmingLanguage, zot:genre, zot:postType, zot:letterType, zot:manuscriptType, zot:mapType, zot:presentationType, zot:reportType, zot:thesisType
+		"isbn": "ISBN",
+		"issn": "ISSN",
+		"issue": "issue",
+		"issued": "date", // zot:dateDecided, zot:dateEnacted
+		"jurisdiction": "jurisdiction", // not zot
+		"language": "language",
+		"license":  "rights",
+		"locator": "locator", // not zot
+		"medium": "medium", // zot:artworkMedium, zot:audioRecordingFormat, zot:system, zot:videoRecordingFormat, zot:interviewMedium, zot:audioFileType
+		"note": "extra",
+		"number": "number", // zot:billNumber
+		"number-of-pages": "numPages",
+		"number-of-volumes": "numberOfVolumes",
+		"original-date": "original-date", // not zot
+		"original-publisher": "original-publisher", // not zot
+		"original-publisher-place": "original-publisher-place", // not zot
+		"original-title": "original-title", // not zot
+		"page": "page", // zot:page, zot:codePage
+		// "page-first": "page-first", // not zot
+		"part-number": "part-number", // not zot
+		"part-title": "part-title", // not zot
+		"pmcid": "PMCID",
+		"pmid": "PMID",
+		"publisher": "publisher",
+		"publisher-place": "place",
+		"references": "references", // zot:history, zot:references
+		"reviewed-genre": "reviewed-genre", // not zot
+		"reviewed-title": "reviewed-title", // not zot
+		"scale": "scale",
+		"section": "section", // zot:section, zot:committee
+		"source": "libraryCatalog",
+		"status": "legalStatus",
+		"submitted": "filingDate",
+		"supplement-number": "supplement-number", // not zot
+		"title": "title",
+		"title-short": "shortTitle",
+		"url": "URL",
+		"version": "versionNumber",
+		"volume": "volume",
+		"year-suffix": "year-suffix", // not zot
+	};
+	const cslNames = {
+		"author": "author",
+		"chair": "chair", // not zot
+		"collection-editor": "seriesEditor",
+		"compiler": "compiler", // not zot
+		"composer": "composer",
+		"container-author": "container-author",
+		"contributor": "contributor",
+		"curator": "curator", // not zot
+		"director": "author", // cinema
+		"editor": "editor",
+		"editor-translator": "editorial-translator", // not zot
+		"editorial-director": "editorial-director", // not zot
+		"executive-producer": "executive-producer", // not zot
+		"guest": "guest",
+		"host": "host", // not zot
+		"illustrator": "illustrator", // not zot
+		"interviewer": "interviewer",
+		"narrator": "narrator", // not zot
+		"organizer": "organizer", // not zot
+		"original-author": "original-author", // not zot
+		"performer": "performer",
+		"recipient": "recipient",
+		"reviewed-author": "reviewedAuthor",
+		"script-writer": "scriptwriter",
+		"translator": "translator",
+	};
+	if (!item['extra']) return;
+	const extra = item['extra'].trim();
+	if (!extra) {
+		delete item['extra'];
+		return;
 	}
-	return fields;
+	// loop on extra, extract known properties as a dictionary, let unknown lines as
+	let note = extra.replace(/^([A-Za-z \-]+)[\s ]*:\s*(.+)/gm, function (_, label, value) {
+		value = value.trim();
+		if (!value) { // keep line as is
+			return _;
+		}
+		const csl = label.toLowerCase().replace(/ /g, '-');
+		let zot = cslScalars[csl];
+		if (zot) { // Standard or Number property
+			item[zot] = value;
+			return "";
+		}
+		zot = cslNames[csl];
+		if (zot) { // a name to append
+			if (!Array.isArray(item[zot])) {
+				item[zot] = [];
+			}
+			const name = {};
+			const i = value.indexOf(',');
+			if (i < 0) {
+				name["literal"] = value;
+			}
+			else {
+				name["family"] = value.splice(0, i).trim();
+				name["given"] = value.splice(i+1).trim();
+			}
+			item[zot].push(name);
+			return "";
+		}
+		zot = "keyword";
+		if (csl == zot) {
+			if (!Array.isArray(item[zot])) {
+				item[zot] = [];
+			}
+			item[zot].push(value);
+			return "";
+		}
+		// default, append to note
+		return _;
+	});
+	note = note.trim();
+	if (!note) {
+		delete item['extra'];
+	}
+	else {
+		item['extra'] = note;
+	}
 }
 
 /**
  * Stefan Majewski
- * @param {*} item 
- * @returns 
+ * @param {*} item
+ * @returns
  */
 function genXMLId(item) {
 	// use Better BibTeX for Zotero citation key if available
-	if (item.extra) {
-		item.extra = item.extra.replace(/(?:^|\n)citation key\s*:\s*([^\s]+)(?:\n|$)/i, (m, citationKey) => {
-			item.citationKey = citationKey;
-			return '\n';
-		}).trim();
-	}
 	if (item.citationKey) return item.citationKey;
 
 	var xmlid = '';
@@ -406,7 +531,7 @@ function genXMLId(item) {
 		// Name = NameStartChar | "-" | "." | [0-9] | #xB7 |
 		// [#x0300-#x036F] | [#x203F-#x2040]
 
-		// [FG] maybe optimized with unicode property \P{L} 
+		// [FG] maybe optimized with unicode property \P{L}
 		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions/Unicode_character_class_escape
 		xmlid = xmlid.replace(/^[^A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\u10000-\uEFFFF]/, "");
 		xmlid = xmlid.replace(/[^-A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\u10000-\uEFFFF.0-9\u00B7\u0300-\u036F\u203F-\u2040]/g, "");
@@ -467,11 +592,11 @@ function date2iso(date) {
 
 /**
  * Append simple value
- * @param {*} parent 
- * @param {*} name 
- * @param {*} value 
- * @param {*} atts 
- * @returns 
+ * @param {*} parent
+ * @param {*} name
+ * @param {*} value
+ * @param {*} atts
+ * @returns
  */
 function appendField(parent, name, value, level = 2, atts = {}) {
 	if (!value) return;
@@ -490,8 +615,8 @@ function appendField(parent, name, value, level = 2, atts = {}) {
 
 /**
  * Populate a <biblStruct>
- * @param {*} item 
- * @param {*} teiDoc 
+ * @param {*} item
+ * @param {*} teiDoc
  * @returns {Node}
  */
 function generateItem(item, teiDoc) {
@@ -512,9 +637,8 @@ function generateItem(item, teiDoc) {
 	// create attribute for Zotero item URI
 	bibl.setAttribute("corresp", item.uri);
 
-	// parsed extra maybe useful in multiple places
-	const extra = parseExtraFields(item.extra);
-
+	// Enrich item with extra fields
+	parseExtraFields(item);
 
 	if (Zotero.getOption("Generate XML IDs")) {
 		var xmlid;
@@ -668,9 +792,9 @@ function generateItem(item, teiDoc) {
 		monogr.append('\n', indent.repeat(2), title);
 	}
 
-	// publication title
+	// publication title, csl:container-title may come from extra
 	do {
-		const tagsoup = item.bookTitle || item.proceedingsTitle || item.encyclopediaTitle || item.dictionaryTitle || item.publicationTitle || item.websiteTitle;
+		const tagsoup = item['container-title'] || item.bookTitle || item.proceedingsTitle || item.encyclopediaTitle || item.dictionaryTitle || item.publicationTitle || item.websiteTitle;
 		if (!tagsoup) break;
 		const title = teiDoc.createElementNS(ns.tei, "title");
 		if (item.itemType == "journalArticle") {
@@ -693,7 +817,7 @@ function generateItem(item, teiDoc) {
 	// Other canonical ref nos come right after the title(s)
 	appendField(monogr, 'idno', item.ISBN, 2, { 'type': 'ISBN' });
 	appendField(monogr, 'idno', item.ISSN, 2, { 'type': 'ISSN' });
-	// if analytic, call number is for analytic 
+	// if analytic, call number is for analytic
 	appendField(monoana, 'idno', item.callNumber, 2, { 'type': 'callNumber' });
 
 
@@ -703,7 +827,6 @@ function generateItem(item, teiDoc) {
 		appendField(monogr, 'edition', item.versionNumber, 2, { 'type': 'callNumber' });
 	}
 
-
 	// <imprint> is required
 	const imprint = teiDoc.createElementNS(ns.tei, "imprint");
 	monogr.append('\n', indent.repeat(2), imprint);
@@ -711,39 +834,19 @@ function generateItem(item, teiDoc) {
 	{
 		const date = teiDoc.createElementNS(ns.tei, "date");
 		imprint.append('\n', indent.repeat(3), date);
-		// use @when 
+		// use @when
 		if (item.date) {
 			const dateO = Zotero.Utilities.strToDate(item.date);
 			const when = date2iso(dateO);
 			date.setAttribute("when", when);
 			let display = item.date;
-			if (extra['date-display']) {
-				// A non iso date, ex: Christmas 1956 
-				display = extra['date-display'];
-				delete extra['date-display'];
-			}
-			if (display != when) {
-				date.append(display);
-			}
+			date.append(display);
 		}
 	}
 	appendField(imprint, 'publisher', item.publisher, 3);
-	// [FG] publisher, maybe kicked for Journal Article, get it back from extra
-	appendField(imprint, 'publisher', extra.publisher, 3);
-	delete extra.publisher; // delete used extra field
-	if (item.place) {
-		appendField(imprint, 'pubPlace', item.place, 3);
-	}
-	// Extra may keep a publication place for articles
-	else {
-		appendField(imprint, 'pubPlace', extra['publisher-place'], 3);
-		delete extra['publisher-place']; // delete used extra field
-		appendField(imprint, 'pubPlace', extra['place'], 3);
-		delete extra['place']; // delete used extra field	
-	}
-
-	appendField(imprint, 'biblScope', item.volume, 3, { 'unit': 'volume' });
-	appendField(imprint, 'biblScope', item.issue, 3, { 'unit': 'issue' });
+	appendField(imprint, 'pubPlace', item['place'], 3);
+	appendField(imprint, 'biblScope', item['volume'], 3, { 'unit': 'volume' });
+	appendField(imprint, 'biblScope', item['issue'], 3, { 'unit': 'issue' });
 	appendField(imprint, 'biblScope', item.section, 3, { 'unit': 'chapter' });
 	appendField(imprint, 'biblScope', item.pages, 3, { 'unit': 'page' });
 	appendField(imprint, 'date', item.accessDate, 3, { 'type': 'accessed' });
@@ -753,7 +856,7 @@ function generateItem(item, teiDoc) {
 	imprint.append("\n", indent.repeat(2));
 
 	// after imprint
-	if (item.numberOfVolumes || item.numPages || extra['dimensions']) {
+	if (item.numberOfVolumes || item.numPages || item['dimensions']) {
 		const extent = teiDoc.createElementNS(ns.tei, "extent");
 		if (item.numberOfVolumes) {
 			// <measure unit="vol" quantity="4.2"/>
@@ -770,8 +873,7 @@ function generateItem(item, teiDoc) {
 			extent.append('\n', indent.repeat(3), measure);
 		}
 		// other physical informations in extra field
-		appendField(extent, 'measure', extra['dimensions'], 3);
-		delete extra['dimensions']; // delete used extra field
+		appendField(extent, 'measure', item['dimensions'], 3);
 		// indent closing </extent>
 		extent.append("\n", indent.repeat(2));
 		monogr.append('\n', indent.repeat(2), extent);
@@ -817,15 +919,13 @@ function generateItem(item, teiDoc) {
 			biblReviewed.append("\n", indent.repeat(3), author);
 		}
 		// APA7, extra field for reviewed title
-		if (extra['reviewed-title']) {
+		if (item['reviewed-title']) {
 			const title = teiDoc.createElementNS(ns.tei, "title");
-			inlineParse(extra['reviewed-title'], title); // maybe rich text
+			inlineParse(item['reviewed-title'], title); // maybe rich text
 			biblReviewed.append("\n", indent.repeat(3), title);
-			delete extra['reviewed-title'];
 			found = true;
-			// if reviewed-title, extra.medium is its inprint 
-			appendField(biblReviewed, 'edition', extra['medium'], 3);
-			delete extra['medium'];
+			// if reviewed-title, medium is its inprint
+			appendField(biblReviewed, 'edition', item['medium'], 3);
 		}
 		if (found) {
 			biblReviewed.append("\n", indent.repeat(2));
@@ -836,12 +936,11 @@ function generateItem(item, teiDoc) {
 
 
 	// Extra field contains free text considered as a note
-	if (extra.note) {
+	if (item.extra) {
 		const note = teiDoc.createElementNS(ns.tei, "note");
 		note.setAttribute("type", "extra");
-		noteParse(extra.note, note);
+		noteParse(item.extra, note);
 		bibl.append("\n", indent, note);
-		delete extra.note; // delete used extra field
 	}
 
 	// notes
@@ -869,14 +968,7 @@ function generateItem(item, teiDoc) {
 		}
 		tags.append("\n", indent);
 	}
-	// Show source data for debug
-	if (Zotero.getOption("Debug")) {
-		appendField(bibl, 'note', JSON.stringify(item, null, 2), 1, { 'type': 'debug-json' });
-		// if extra fields still not used, output them in a note
-		if (Object.keys(extra).length) {
-			appendField(bibl, 'note', JSON.stringify(extra, null, 2), 1, { 'type': 'debug-extra-unused' });
-		}
-	}
+
 	// last indent
 	bibl.append("\n");
 	monogr.append("\n", indent);
@@ -889,8 +981,8 @@ function generateItem(item, teiDoc) {
 /**
  * Append name components to a parent element according
  * to a zotero creator object
- * @param {*} parent 
- * @param {*} creator 
+ * @param {*} parent
+ * @param {*} creator
  */
 function persName(parent, creator, level = 3) {
 	if (level < 1) level = 1;
