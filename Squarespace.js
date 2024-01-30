@@ -181,6 +181,45 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.silvabokis.com/search?q=squarespace",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://originalbox.co/blog/tags-squarespace-add-categories",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "What are tags on Squarespace and how to add categories",
+				"creators": [
+					{
+						"lastName": "Roshni Kahol",
+						"fieldMode": 1,
+						"creatorType": "author"
+					}
+				],
+				"date": "2020-10-31T17:28:38+0000",
+				"abstractNote": "Using the blog page as an example, we explain how to use tags on Squarespace. We also teach how to add, edit and delete categories on Squarespace.",
+				"blogTitle": "Original Box",
+				"language": "en-GB",
+				"url": "https://originalbox.co/blog/tags-squarespace-add-categories",
+				"websiteType": "Squarespace blog",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "2020"
+					},
+					{
+						"tag": "october 2020"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
