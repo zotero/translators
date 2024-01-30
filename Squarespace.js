@@ -15,7 +15,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2022 Thaddeus Hetling
+	Copyright © 2024 Thaddeus Hetling
 
 	This file is part of Zotero.
 
