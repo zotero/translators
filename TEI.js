@@ -18,10 +18,8 @@
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2024-01-29 20:38:21"
+	"lastUpdated": "2024-01-30 13:09:39"
 }
-
-// "displayOptions": "Export Collections": false // seems broken
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -47,8 +45,8 @@
 */
 
 
-/*
-2010, Stefan Majewski.
+/* 2010, Stefan Majewski.
+
 	This script does fairly well with papers, theses, websites and
 	books. Some item properties, important for the more exotic
 	publication types, are still missing. That means, the first 30 are
@@ -62,8 +60,7 @@
 	hope this works.
 */
 
-/*
-2024, Frédéric Glorieux.
+/* 2024, Frédéric Glorieux.
 
 // item produced by Zotero
 {
@@ -138,76 +135,76 @@
 
 // Generated TEI
 
-          <biblStruct type="journalArticle" corresp="http://zotero.org/users/8989645/items/RLRXRWYM">
-           <analytic xml:lang="fr">
-             <author>
-               <forename>Jean</forename>
-               <surname>Piaget</surname>
-             </author>
-             <respStmt>
-               <resp>contributor</resp>
-               <persName>
-                 <forename>J.</forename>
-                 <surname>Contributor</surname>
-               </persName>
-             </respStmt>
-             <respStmt>
-               <resp>editorial-director</resp>
-               <persName>
-                 <forename>John</forename>
-                 <surname>One</surname>
-               </persName>
-             </respStmt>
-             <respStmt>
-               <resp>editorial-director</resp>
-               <persName>
-                 <forename>John</forename>
-                 <surname>Two</surname>
-               </persName>
-             </respStmt>
-             <title level="a">Not closing &lt;b&gt; or&lt;strong&gt;unknown tag&lt;/strong&gt;, kept as text nodes; <hi rend="italic">italic</hi>, is an element</title>
-             <idno type="callNumber">piaget1929a02</idno>
-           </analytic>
-           <monogr>
-             <editor>
-               <forename>M.</forename>
-               <surname>Editor</surname>
-             </editor>
-             <title level="j">Archives de psychologie</title>
-             <imprint>
-               <date when="1929">1929</date>
-               <biblScope unit="volume">22</biblScope>
-               <biblScope unit="issue">85</biblScope>
-               <biblScope unit="page">117-118</biblScope>
-             </imprint>
-           </monogr>
-           <relatedItem type="reviewed">
-             <bibl>
-               <author>
-                 <name>Eugène Minkowski</name>
-               </author>
-               <title>Rich text &gt;&gt; <hi rend="italic">italic</hi></title>
-               <edition>Paris, &lt;Payot&gt;, 1927</edition>
-             </bibl>
-           </relatedItem>
-           <note type="extra">Start of text note.
-         
-         Unknown CSL property: CLA1929_5
-         Note continuing.</note>
-           <note corresp="http://zotero.org/users/8989645/items/6SE87GSB"><p>A zotero note with some <emph>formatting</emph>.</p>
-         <list rend="numbered">
-         <item>
-         Hate Numbered List
-         </item>
-         <item>
-         Go to 1.
-         </item>
-         </list>
-         </note>
-           <note type="tags">
-             <term type="tag">AddATag</term>
-           </note>
-         </biblStruct>
+<biblStruct type="journalArticle" corresp="http://zotero.org/users/8989645/items/RLRXRWYM">
+	<analytic xml:lang="fr">
+		<author>
+		<forename>Jean</forename>
+		<surname>Piaget</surname>
+		</author>
+		<respStmt>
+		<resp>contributor</resp>
+		<persName>
+			<forename>J.</forename>
+			<surname>Contributor</surname>
+		</persName>
+		</respStmt>
+		<respStmt>
+		<resp>editorial-director</resp>
+		<persName>
+			<forename>John</forename>
+			<surname>One</surname>
+		</persName>
+		</respStmt>
+		<respStmt>
+		<resp>editorial-director</resp>
+		<persName>
+			<forename>John</forename>
+			<surname>Two</surname>
+		</persName>
+		</respStmt>
+		<title level="a">Not closing &lt;b&gt; or&lt;strong&gt;unknown tag&lt;/strong&gt;, kept as text nodes; <hi rend="italic">italic</hi>, is an element</title>
+		<idno type="callNumber">piaget1929a02</idno>
+	</analytic>
+	<monogr>
+		<editor>
+		<forename>M.</forename>
+		<surname>Editor</surname>
+		</editor>
+		<title level="j">Archives de psychologie</title>
+		<imprint>
+		<date when="1929">1929</date>
+		<biblScope unit="volume">22</biblScope>
+		<biblScope unit="issue">85</biblScope>
+		<biblScope unit="page">117-118</biblScope>
+		</imprint>
+	</monogr>
+	<relatedItem type="reviewed">
+		<bibl>
+		<author>
+			<name>Eugène Minkowski</name>
+		</author>
+		<title>Rich text &gt;&gt; <hi rend="italic">italic</hi></title>
+		<edition>Paris, &lt;Payot&gt;, 1927</edition>
+		</bibl>
+	</relatedItem>
+	<note type="extra">Start of text note.
+	
+	Unknown CSL property: CLA1929_5
+	Note continuing.</note>
+	<note corresp="http://zotero.org/users/8989645/items/6SE87GSB"><p>A zotero note with some <emph>formatting</emph>.</p>
+	<list rend="numbered">
+	<item>
+	Hate Numbered List
+	</item>
+	<item>
+	Go to 1.
+	</item>
+	</list>
+	</note>
+	<note type="tags">
+		<term type="tag">AddATag</term>
+	</note>
+</biblStruct>
 
 */
 
@@ -224,14 +221,14 @@ const allItems = {};
 // build one time
 const xmlParser = new DOMParser();
 const xmlSerializer = new XMLSerializer();
-const indent = "  ";
+const indent = "\t";
 
 /**
  * Inline markup allowed in titles and some other rich text fields,
  * conversion in TEI.
  * Imitated from zotero source code
  * https://github.com/zotero/zotero/blob/main/chrome/content/zotero/itemTree.jsx#L2472
- * 
+ *
  * startElement: opening tag event (required if no endElement)
  * endElement: closing tag event (required if no startElement)
  * tei: required, tei TagName element to create
@@ -373,7 +370,7 @@ function inlineParse(tagSoup, dstParent) {
 
 
 /**
- * Zotero notes may contain rich text (html). 
+ * Zotero notes may contain rich text (html).
  * Transform in in tei by traversing the dom tree.
  * @param {*} html
  * @param {*} dstParent
@@ -479,7 +476,7 @@ function domWalk(srcParent, dstParent) {
  * These properties are unique for a record and override
  * values from zotero form.
  * References https://aurimasv.github.io/z2csl/typeMap.xml
- */ 
+ */
 const cslScalars = {
 	abstract: "abstractNote",
 	accessed: "accessDate",
@@ -557,7 +554,7 @@ const cslScalars = {
  * List of CSL properties with zotero key if available.
  * These properties are repeatable and are appended.
  * References https://aurimasv.github.io/z2csl/typeMap.xml
- */ 
+ */
 const cslCreators = {
 	author: "author",
 	chair: "chair", // not zot
@@ -595,7 +592,7 @@ const cslCreators = {
  *
  * known-propertie: value
  * Othe Known: value
- * 
+ *
  *
  * This: could be a free note.
  * [2024-01 FG]
@@ -1041,17 +1038,17 @@ function generateItem(item, teiDoc) {
 	}
 
 	/*
-	 * review
-	 * <relatedItem type="reviewed">
-	 *   <bibl>
-	 *     <title>Reviewed title</title>
-	 *     <author>
-	 *       <forename>John</forename>
-	 *       <surname>Doe</surname>
-	 *     </author>
-	 *   </bibl>
-	 * </relatedItem>
-	 */
+	* review
+	* <relatedItem type="reviewed">
+	*   <bibl>
+	*     <title>Reviewed title</title>
+	*     <author>
+	*       <forename>John</forename>
+	*       <surname>Doe</surname>
+	*     </author>
+	*   </bibl>
+	* </relatedItem>
+	*/
 
 	{
 		const relatedItem = teiDoc.createElementNS(ns.tei, "relatedItem");
@@ -1258,4 +1255,5 @@ function doExport() {
 }
 
 /** BEGIN TEST CASES **/
+
 /** END TEST CASES **/
