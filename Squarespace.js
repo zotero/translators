@@ -109,9 +109,6 @@ async function scrape(doc, url = doc.location.href) {
 
 	let em = await translator.getTranslatorObject();
 	em.itemType = 'blogPost';
-	em.addCustomFields({
-		'datePublished': 'date'
-	});
 	await em.doWeb(doc, url);
 }
 /** BEGIN TEST CASES **/
