@@ -48,6 +48,7 @@
 
 
 /*
+2010, Stefan Majewski.
 	This script does fairly well with papers, theses, websites and
 	books. Some item properties, important for the more exotic
 	publication types, are still missing. That means, the first 30 are
@@ -59,6 +60,155 @@
 	<analytic> vs <monogr> Both elements are used. The script tries to
 	figure out where which information might be appropriately placed. I
 	hope this works.
+*/
+
+/*
+2024, Frédéric Glorieux.
+
+// item produced by Zotero
+{
+	"version": 3038
+	"itemType": "journalArticle"
+	"title": "Not closing <b> or<strong>unknown tag</strong>, kept as text nodes; <i>italic</i>, is an element"
+	"date": "1929"
+	"language": "fr"
+	"callNumber": "piaget1929a02"
+	"extra": "Start of text note.\nGenre: Review of\nReviewed Title: Rich text >> <i>italic</i>\nMedium: Paris, <Payot>, 1927\nUnknown CSL property: CLA1929_5\nNote continuing.\nEditorial Director: One || John\nEditorial Director: Two || John"
+	"volume": "22"
+	"pages": "117-118"
+	"publicationTitle": "Archives de psychologie"
+	"issue": "85"
+	"creators": [
+		"0": {
+			"firstName": "Jean"
+			"lastName": "Piaget"
+			"creatorType": "author"
+		}
+		"1": {
+			"name": "Eugène Minkowski"
+			"creatorType": "reviewedAuthor"
+		}
+		"2": {
+			"firstName": "J."
+			"lastName": "Contributor"
+			"creatorType": "contributor"
+		}
+		"3": {
+			"firstName": "M."
+			"lastName": "Editor"
+			"creatorType": "editor"
+		}
+	]
+	"tags": [
+		"0": {
+			"tag": "AddATag"
+		}
+	]
+	"collections": [
+		"0": "U8JSTJZ5"
+	]
+	"relations": {
+		"owl:sameAs": [
+			"0": "http://zotero.org/groups/5048422/items/G99GTU5D"
+		]
+	}
+	"dateAdded": "2024-01-29T19:58:13Z"
+	"dateModified": "2024-01-30T12:55:46Z"
+	"uri": "http://zotero.org/users/8989645/items/RLRXRWYM"
+	"attachments": []
+	"notes": [
+		"0": {
+			"key": "6SE87GSB"
+			"version": 3020
+			"itemType": "note"
+			"parentItem": "RLRXRWYM"
+			"note": "<div data-schema-version=\"8\"><p>A zotero note with some <em>formatting</em>.</p>\n<ol>\n<li>\nHate Numbered List\n</li>\n<li>\nGo to 1.\n</li>\n</ol>\n</div>"
+			"tags": []
+			"relations": {}
+			"dateAdded": "2024-01-30T12:10:49Z"
+			"dateModified": "2024-01-30T12:12:30Z"
+			"uri": "http://zotero.org/users/8989645/items/6SE87GSB"
+		}
+	]
+}
+
+// APA7 bibliographic item (handling some Extra fields)
+
+<div class="csl-entry">Piaget, J. (1929). Not closing &lt;b&gt; or&lt;strong&gt;unknown tag&lt;/strong&gt;, kept as text nodes; <i>italic</i>, is an element [Review of <i>Rich text &gt;&gt; <span style="font-style:normal;">italic</span></i>, par Eugène Minkowski; Paris, &lt;Payot&gt;, 1927]. <i>Archives de psychologie</i>, <i>22</i>(85), 117‑118.</div>
+
+// Generated TEI
+
+          <biblStruct type="journalArticle" corresp="http://zotero.org/users/8989645/items/RLRXRWYM">
+           <analytic xml:lang="fr">
+             <author>
+               <forename>Jean</forename>
+               <surname>Piaget</surname>
+             </author>
+             <respStmt>
+               <resp>contributor</resp>
+               <persName>
+                 <forename>J.</forename>
+                 <surname>Contributor</surname>
+               </persName>
+             </respStmt>
+             <respStmt>
+               <resp>editorial-director</resp>
+               <persName>
+                 <forename>John</forename>
+                 <surname>One</surname>
+               </persName>
+             </respStmt>
+             <respStmt>
+               <resp>editorial-director</resp>
+               <persName>
+                 <forename>John</forename>
+                 <surname>Two</surname>
+               </persName>
+             </respStmt>
+             <title level="a">Not closing &lt;b&gt; or&lt;strong&gt;unknown tag&lt;/strong&gt;, kept as text nodes; <hi rend="italic">italic</hi>, is an element</title>
+             <idno type="callNumber">piaget1929a02</idno>
+           </analytic>
+           <monogr>
+             <editor>
+               <forename>M.</forename>
+               <surname>Editor</surname>
+             </editor>
+             <title level="j">Archives de psychologie</title>
+             <imprint>
+               <date when="1929">1929</date>
+               <biblScope unit="volume">22</biblScope>
+               <biblScope unit="issue">85</biblScope>
+               <biblScope unit="page">117-118</biblScope>
+             </imprint>
+           </monogr>
+           <relatedItem type="reviewed">
+             <bibl>
+               <author>
+                 <name>Eugène Minkowski</name>
+               </author>
+               <title>Rich text &gt;&gt; <hi rend="italic">italic</hi></title>
+               <edition>Paris, &lt;Payot&gt;, 1927</edition>
+             </bibl>
+           </relatedItem>
+           <note type="extra">Start of text note.
+         
+         Unknown CSL property: CLA1929_5
+         Note continuing.</note>
+           <note corresp="http://zotero.org/users/8989645/items/6SE87GSB"><p>A zotero note with some <emph>formatting</emph>.</p>
+         <list rend="numbered">
+         <item>
+         Hate Numbered List
+         </item>
+         <item>
+         Go to 1.
+         </item>
+         </list>
+         </note>
+           <note type="tags">
+             <term type="tag">AddATag</term>
+           </note>
+         </biblStruct>
+
 */
 
 const ns = {
@@ -77,7 +227,11 @@ const xmlSerializer = new XMLSerializer();
 const indent = "  ";
 
 /**
- * Inline markup allowed in titles and some other rich text fields
+ * Inline markup allowed in titles and some other rich text fields,
+ * conversion in TEI.
+ * Imitated from zotero source code
+ * https://github.com/zotero/zotero/blob/main/chrome/content/zotero/itemTree.jsx#L2472
+ * 
  * startElement: opening tag event (required if no endElement)
  * endElement: closing tag event (required if no startElement)
  * tei: required, tei TagName element to create
@@ -214,13 +368,13 @@ function inlineParse(tagSoup, dstParent) {
 		let discardedNode = nodeStack.pop();
 		nodeStack[0].append(discardedMarkup.token, ...discardedNode.childNodes);
 	}
-	// really the textContent ? Even with non closing tags ?
 	// return textContent; // lint see it’s not used
 }
 
 
 /**
- * Transform note html in tei
+ * Zotero notes may contain rich text (html). 
+ * Transform in in tei by traversing the dom tree.
  * @param {*} html
  * @param {*} dstParent
  * @returns
@@ -245,7 +399,7 @@ function noteParse(html, dstParent) {
 }
 
 /**
- * A simple tag translator
+ * A simple tag translator html -> tei
  */
 const html2tei = {
 	a: { tei: "ref" },
@@ -263,7 +417,7 @@ const html2tei = {
 };
 
 /**
- * Recursive dom translator, for notes
+ * Recursive dom translator, for zotero notes.
  * @param {*} srcParent
  * @param {*} dstParent
  */
@@ -320,6 +474,120 @@ function domWalk(srcParent, dstParent) {
 }
 
 /**
+ * For a parser of zot:extra field,
+ * List of CSL properties with zotero key if available.
+ * These properties are unique for a record and override
+ * values from zotero form.
+ * References https://aurimasv.github.io/z2csl/typeMap.xml
+ */ 
+const cslScalars = {
+	abstract: "abstractNote",
+	accessed: "accessDate",
+	annote: "annote", // not zot
+	archive: "archive",
+	"archive-collection": "seriesTitle", // not zot
+	"archive-location": "archiveLocation",
+	"archive-place": "place", // not zot
+	authority: "authority", // zot:legislativeBody, zot:court, zot:issuingAuthority
+	"available-date": "available-date", // not zot
+	"call-number": "callNumber",
+	chair: "chair",
+	"chapter-number": "session", // legal, audio
+	"citation-label": "citationKey",
+	"citation-number": "citationKey",
+	"collection-number": "seriesNumber",
+	"collection-title": "seriesTitle",
+	container: "container",
+	"container-title": "container-title", // zot:bookTitle, zot:proceedingsTitle, zot:encyclopediaTitle, zot:dictionaryTitle, zot:publicationTitle, zot:websiteTitle
+	"container-title-short": "journalAbbreviation",
+	dimensions: "dimensions", // zot:artworkSize, zot:runningTime
+	division: "division", // not zot
+	doi: "DOI",
+	edition: "edition",
+	// "event": "event", // Deprecated legacy variant of event-title
+	"event-date": "date",
+	"event-place": "place",
+	"event-title": "event-title", // zot:conferenceName, zot:meetingName
+	"first-reference-note-number": "first-reference-note-number", // not zot
+	genre: "genre", // zot:websiteType, zot:programmingLanguage, zot:genre, zot:postType, zot:letterType, zot:manuscriptType, zot:mapType, zot:presentationType, zot:reportType, zot:thesisType
+	isbn: "ISBN",
+	issn: "ISSN",
+	issue: "issue",
+	issued: "date", // zot:dateDecided, zot:dateEnacted
+	jurisdiction: "jurisdiction", // not zot
+	language: "language",
+	license: "rights",
+	locator: "locator", // not zot
+	medium: "medium", // zot:artworkMedium, zot:audioRecordingFormat, zot:system, zot:videoRecordingFormat, zot:interviewMedium, zot:audioFileType
+	note: "extra",
+	number: "number", // zot:billNumber
+	"number-of-pages": "numPages",
+	"number-of-volumes": "numberOfVolumes",
+	"original-date": "original-date", // not zot
+	"original-publisher": "original-publisher", // not zot
+	"original-publisher-place": "original-publisher-place", // not zot
+	"original-title": "original-title", // not zot
+	page: "page", // zot:page, zot:codePage
+	// "page-first": "page-first", // not zot
+	"part-number": "part-number", // not zot
+	"part-title": "part-title", // not zot
+	pmcid: "PMCID",
+	pmid: "PMID",
+	publisher: "publisher",
+	"publisher-place": "place",
+	references: "references", // zot:history, zot:references
+	"reviewed-genre": "reviewed-genre", // not zot
+	"reviewed-title": "reviewed-title", // not zot
+	scale: "scale",
+	section: "section", // zot:section, zot:committee
+	source: "libraryCatalog",
+	status: "legalStatus",
+	submitted: "filingDate",
+	"supplement-number": "supplement-number", // not zot
+	title: "title",
+	"title-short": "shortTitle",
+	url: "URL",
+	version: "versionNumber",
+	volume: "volume",
+	"year-suffix": "year-suffix", // not zot
+};
+
+/**
+ * For a parser of zot:extra field,
+ * List of CSL properties with zotero key if available.
+ * These properties are repeatable and are appended.
+ * References https://aurimasv.github.io/z2csl/typeMap.xml
+ */ 
+const cslCreators = {
+	author: "author",
+	chair: "chair", // not zot
+	"collection-editor": "seriesEditor",
+	compiler: "compiler", // not zot
+	composer: "composer",
+	"container-author": "container-author",
+	contributor: "contributor",
+	curator: "curator", // not zot
+	director: "author", // cinema
+	editor: "editor",
+	"editor-translator": "editorial-translator", // not zot
+	"editorial-director": "editorial-director", // not zot
+	"executive-producer": "executive-producer", // not zot
+	guest: "guest",
+	host: "host", // not zot
+	illustrator: "illustrator", // not zot
+	interviewer: "interviewer",
+	narrator: "narrator", // not zot
+	organizer: "organizer", // not zot
+	"original-author": "original-author", // not zot
+	performer: "performer",
+	recipient: "recipient",
+	"reviewed-author": "reviewedAuthor",
+	"script-writer": "scriptWriter",
+	translator: "translator",
+};
+
+
+/**
  * Parse the “extra” field to get “extra fields”.
  * Adaptation of Zotero.Utilities.Item.extraToCSL()
  * https://github.com/zotero/utilities/blob/9c89b23153ce621ed0f1d581a5e32248704c6fb7/utilities_item.js#L614
@@ -327,6 +595,7 @@ function domWalk(srcParent, dstParent) {
  *
  * known-propertie: value
  * Othe Known: value
+ * 
  *
  * This: could be a free note.
  * [2024-01 FG]
@@ -334,105 +603,6 @@ function domWalk(srcParent, dstParent) {
  * @returns
  */
 function parseExtraFields(item) {
-	// Fields from https://aurimasv.github.io/z2csl/typeMap.xml
-	const cslScalars = {
-		abstract: "abstractNote",
-		accessed: "accessDate",
-		annote: "annote", // not zot
-		archive: "archive",
-		"archive-collection": "seriesTitle", // not zot
-		"archive-location": "archiveLocation",
-		"archive-place": "place", // not zot
-		authority: "authority", // zot:legislativeBody, zot:court, zot:issuingAuthority
-		"available-date": "available-date", // not zot
-		"call-number": "callNumber",
-		chair: "chair",
-		"chapter-number": "session", // legal, audio
-		"citation-label": "citationKey",
-		"citation-number": "citationKey",
-		"collection-number": "seriesNumber",
-		"collection-title": "seriesTitle",
-		container: "container",
-		"container-title": "container-title", // zot:bookTitle, zot:proceedingsTitle, zot:encyclopediaTitle, zot:dictionaryTitle, zot:publicationTitle, zot:websiteTitle
-		"container-title-short": "journalAbbreviation",
-		dimensions: "dimensions", // zot:artworkSize, zot:runningTime
-		division: "division", // not zot
-		doi: "DOI",
-		edition: "edition",
-		// "event": "event", // Deprecated legacy variant of event-title
-		"event-date": "date",
-		"event-place": "place",
-		"event-title": "event-title", // zot:conferenceName, zot:meetingName
-		"first-reference-note-number": "first-reference-note-number", // not zot
-		genre: "genre", // zot:websiteType, zot:programmingLanguage, zot:genre, zot:postType, zot:letterType, zot:manuscriptType, zot:mapType, zot:presentationType, zot:reportType, zot:thesisType
-		isbn: "ISBN",
-		issn: "ISSN",
-		issue: "issue",
-		issued: "date", // zot:dateDecided, zot:dateEnacted
-		jurisdiction: "jurisdiction", // not zot
-		language: "language",
-		license: "rights",
-		locator: "locator", // not zot
-		medium: "medium", // zot:artworkMedium, zot:audioRecordingFormat, zot:system, zot:videoRecordingFormat, zot:interviewMedium, zot:audioFileType
-		note: "extra",
-		number: "number", // zot:billNumber
-		"number-of-pages": "numPages",
-		"number-of-volumes": "numberOfVolumes",
-		"original-date": "original-date", // not zot
-		"original-publisher": "original-publisher", // not zot
-		"original-publisher-place": "original-publisher-place", // not zot
-		"original-title": "original-title", // not zot
-		page: "page", // zot:page, zot:codePage
-		// "page-first": "page-first", // not zot
-		"part-number": "part-number", // not zot
-		"part-title": "part-title", // not zot
-		pmcid: "PMCID",
-		pmid: "PMID",
-		publisher: "publisher",
-		"publisher-place": "place",
-		references: "references", // zot:history, zot:references
-		"reviewed-genre": "reviewed-genre", // not zot
-		"reviewed-title": "reviewed-title", // not zot
-		scale: "scale",
-		section: "section", // zot:section, zot:committee
-		source: "libraryCatalog",
-		status: "legalStatus",
-		submitted: "filingDate",
-		"supplement-number": "supplement-number", // not zot
-		title: "title",
-		"title-short": "shortTitle",
-		url: "URL",
-		version: "versionNumber",
-		volume: "volume",
-		"year-suffix": "year-suffix", // not zot
-	};
-	const cslNames = {
-		author: "author",
-		chair: "chair", // not zot
-		"collection-editor": "seriesEditor",
-		compiler: "compiler", // not zot
-		composer: "composer",
-		"container-author": "container-author",
-		contributor: "contributor",
-		curator: "curator", // not zot
-		director: "author", // cinema
-		editor: "editor",
-		"editor-translator": "editorial-translator", // not zot
-		"editorial-director": "editorial-director", // not zot
-		"executive-producer": "executive-producer", // not zot
-		guest: "guest",
-		host: "host", // not zot
-		illustrator: "illustrator", // not zot
-		interviewer: "interviewer",
-		narrator: "narrator", // not zot
-		organizer: "organizer", // not zot
-		"original-author": "original-author", // not zot
-		performer: "performer",
-		recipient: "recipient",
-		"reviewed-author": "reviewedAuthor",
-		"script-writer": "scriptwriter",
-		translator: "translator",
-	};
 	if (!item.extra) return;
 	const extra = item.extra.trim();
 	if (!extra) {
@@ -446,34 +616,35 @@ function parseExtraFields(item) {
 			return _;
 		}
 		const csl = label.toLowerCase().replace(/ /g, '-');
-		let zot = cslScalars[csl];
+		const zot = cslScalars[csl];
 		if (zot) { // Standard or Number property
 			item[zot] = value;
 			return "";
 		}
-		zot = cslNames[csl];
-		if (zot) { // a name to append
-			if (!Array.isArray(item[zot])) {
-				item[zot] = [];
+		const creatorType = cslCreators[csl];
+		if (creatorType) { // a name to append
+			if (!Array.isArray(item.creators)) {
+				item.creators = [];
 			}
-			const name = {};
-			const i = value.indexOf(',');
+			const creator = {};
+			const i = value.indexOf('||');
 			if (i < 0) {
-				name.literal = value;
+				creator.name = value;
 			}
 			else {
-				name.family = value.splice(0, i).trim();
-				name.given = value.splice(i + 1).trim();
+				creator.lastName = value.slice(0, i).trim();
+				creator.firstName = value.slice(i + 2).trim();
 			}
-			item[zot].push(name);
+			creator.creatorType = creatorType;
+			item.creators.push(creator);
 			return "";
 		}
-		zot = "keyword";
-		if (csl == zot) {
-			if (!Array.isArray(item[zot])) {
-				item[zot] = [];
+		const field = "keyword";
+		if (csl == field) {
+			if (!Array.isArray(item[field])) {
+				item[field] = [];
 			}
-			item[zot].push(value);
+			item[field].push(value);
 			return "";
 		}
 		// default, append to note
@@ -484,7 +655,7 @@ function parseExtraFields(item) {
 		delete item.extra;
 	}
 	else {
-		item.extra = note;
+		item.extra = note.replace(/\n\n+/g, "\n\n");
 	}
 }
 
@@ -600,6 +771,7 @@ function appendField(parent, name, value, level = 2, atts = {}) {
  * @returns {Node}
  */
 function generateItem(item, teiDoc) {
+	Zotero.debug(item);
 	// fixme not all conferencepapers are analytic!
 	var analyticItemTypes = {
 		journalArticle: true,
