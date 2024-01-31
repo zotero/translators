@@ -104,6 +104,7 @@ async function scrape(doc, url = doc.location.href) {
 			});
 		}
 		if (item.abstractNote) item.abstractNote = ZU.unescapeHTML(item.abstractNote);
+		item.tags = Array.prototype.slice.call(doc.querySelectorAll('.blog-item-tag-wrapper a')).map((tag) => ZU.trim(tag.textContent));
 		item.complete();
 	});
 
