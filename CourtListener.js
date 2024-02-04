@@ -74,7 +74,6 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url = doc.location.href) {
-
 	var item = new Zotero.Item('case');
 	let citeString = text(doc, 'h2');
 	
@@ -268,4 +267,5 @@ var testCases = [
 		]
 	}
 ]
+
 /** END TEST CASES **/
