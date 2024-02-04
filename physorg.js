@@ -54,7 +54,7 @@ function getSearchResults(doc, checkOnly) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
-		if (checkOnly) return true;x
+		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
 	}
