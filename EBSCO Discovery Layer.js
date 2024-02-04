@@ -143,7 +143,5 @@ async function scrape(doc, url = doc.location.href) {
 }
 
 /** BEGIN TEST CASES **/
-var testCases = [
-]
 
 /** END TEST CASES **/
