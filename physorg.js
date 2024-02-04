@@ -1,6 +1,6 @@
 {
 	"translatorID": "e835ac2f-181b-41fe-a509-4f9d20797515",
-	"label": "physorg",
+	"label": "Physorg",
 	"creator": "Laurence Stevens",
 	"target": "https?://(www\\.)?phys\\.org/news",
 	"minVersion": "5.0",
@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-28 11:32:40"
+	"lastUpdated": "2024-02-04 09:33:12"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2021 Laurence Stevens
+	Copyright © 2024 Laurence Stevens
 
 	This file is part of Zotero.
 
@@ -54,7 +54,7 @@ function getSearchResults(doc, checkOnly) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
-		if (checkOnly) return true;
+		if (checkOnly) return true;x
 		found = true;
 		items[href] = title;
 	}
