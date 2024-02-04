@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-14 20:23:54"
+	"lastUpdated": "2024-02-04 05:00:08"
 }
 
 /*
@@ -73,7 +73,8 @@ async function doWeb(doc, url) {
 	}
 }
 
-async function scrape(doc) {
+async function scrape(doc, url = doc.location.href) {
+
 	var item = new Zotero.Item('case');
 	let citeString = text(doc, 'h2');
 	
@@ -125,6 +126,7 @@ async function scrape(doc) {
 	for (let author of authors) {
 		item.creators.push(ZU.cleanAuthor(author.textContent.trim(), "author", false));
 	}
+	item.url = url.replace(/\/\?.*/, "");
 	item.attachments.push({ document: doc, title: "Full Text" });
 	item.extra = "";
 	item.complete();
@@ -146,6 +148,7 @@ var testCases = [
 				"firstPage": "1332",
 				"reporter": "So.2d",
 				"reporterVolume": "594",
+				"url": "https://www.courtlistener.com/opinion/1872757/gibson-v-bossier-city-general-hosp",
 				"attachments": [
 					{
 						"title": "Full Text",
@@ -178,6 +181,7 @@ var testCases = [
 				"firstPage": "802",
 				"reporter": "F.Supp.",
 				"reporterVolume": "540",
+				"url": "https://www.courtlistener.com/opinion/1611405/blackwell-v-power-test-corp",
 				"attachments": [
 					{
 						"title": "Full Text",
@@ -211,6 +215,7 @@ var testCases = [
 				"history": "91 S. Ct. 849, 28 L. Ed. 2d 158, 1971 U.S. LEXIS 134",
 				"reporter": "U.S.",
 				"reporterVolume": "401",
+				"url": "https://www.courtlistener.com/opinion/108284/griggs-v-duke-power-co",
 				"attachments": [
 					{
 						"title": "Full Text",
@@ -249,6 +254,7 @@ var testCases = [
 				"history": "20 Ohio App. 3d 172",
 				"reporter": "N.E.2d",
 				"reporterVolume": "485",
+				"url": "https://www.courtlistener.com/opinion/3959231/state-v-martin",
 				"attachments": [
 					{
 						"title": "Full Text",
