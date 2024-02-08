@@ -2,7 +2,7 @@
 	"translatorID": "99592877-f698-4e14-b541-b6181f6c577f",
 	"label": "Public Record Office Victoria",
 	"creator": "Tim Sherratt (tim@timsherratt.au)",
-	"target": "^https?://prov\\.vic\\.gov\\.au/(archive|search_journey)/*",
+	"target": "^https?://prov\\.vic\\.gov\\.au/(archive|search_journey)/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -38,8 +38,8 @@
 async function detectWeb(doc, url) {
 	if (getSearchResults(doc, true)) {
 		return "multiple";
-	// match items but not series, agencies, or functions (VPRS, VA or VF)
 	}
+	// Match items but not series, agencies, or functions (VPRS, VA or VF)
 	else if (/archive\/(?!VPRS|VA|VF)[A-Z0-9-]+/.test(url)) {
 		return "manuscript";
 	}
