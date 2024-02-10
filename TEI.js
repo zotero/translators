@@ -62,150 +62,8 @@
 
 /* 2024, Frédéric Glorieux.
 
-// item produced by Zotero
-{
-	"version": 3038
-	"itemType": "journalArticle"
-	"title": "Not closing <b> or<strong>unknown tag</strong>, kept as text nodes; <i>italic</i>, is an element"
-	"date": "1929"
-	"language": "fr"
-	"callNumber": "piaget1929a02"
-	"extra": "Start of text note.\nGenre: Review of\nReviewed Title: Rich text >> <i>italic</i>\nMedium: Paris, <Payot>, 1927\nUnknown CSL property: CLA1929_5\nNote continuing.\nEditorial Director: One || John\nEditorial Director: Two || John"
-	"volume": "22"
-	"pages": "117-118"
-	"publicationTitle": "Archives de psychologie"
-	"issue": "85"
-	"creators": [
-		"0": {
-			"firstName": "Jean"
-			"lastName": "Piaget"
-			"creatorType": "author"
-		}
-		"1": {
-			"name": "Eugène Minkowski"
-			"creatorType": "reviewedAuthor"
-		}
-		"2": {
-			"firstName": "J."
-			"lastName": "Contributor"
-			"creatorType": "contributor"
-		}
-		"3": {
-			"firstName": "M."
-			"lastName": "Editor"
-			"creatorType": "editor"
-		}
-	]
-	"tags": [
-		"0": {
-			"tag": "AddATag"
-		}
-	]
-	"collections": [
-		"0": "U8JSTJZ5"
-	]
-	"relations": {
-		"owl:sameAs": [
-			"0": "http://zotero.org/groups/5048422/items/G99GTU5D"
-		]
-	}
-	"dateAdded": "2024-01-29T19:58:13Z"
-	"dateModified": "2024-01-30T12:55:46Z"
-	"uri": "http://zotero.org/users/8989645/items/RLRXRWYM"
-	"attachments": []
-	"notes": [
-		"0": {
-			"key": "6SE87GSB"
-			"version": 3020
-			"itemType": "note"
-			"parentItem": "RLRXRWYM"
-			"note": "<div data-schema-version=\"8\"><p>A zotero note with some <em>formatting</em>.</p>\n<ol>\n<li>\nHate Numbered List\n</li>\n<li>\nGo to 1.\n</li>\n</ol>\n</div>"
-			"tags": []
-			"relations": {}
-			"dateAdded": "2024-01-30T12:10:49Z"
-			"dateModified": "2024-01-30T12:12:30Z"
-			"uri": "http://zotero.org/users/8989645/items/6SE87GSB"
-		}
-	]
-}
-
-// APA7 bibliographic item (handling some Extra fields)
-
-<div class="csl-entry">Piaget, J. (1929). Not closing &lt;b&gt; or&lt;strong&gt;unknown tag&lt;/strong&gt;, kept as text nodes; <i>italic</i>, is an element [Review of <i>Rich text &gt;&gt; <span style="font-style:normal;">italic</span></i>, par Eugène Minkowski; Paris, &lt;Payot&gt;, 1927]. <i>Archives de psychologie</i>, <i>22</i>(85), 117‑118.</div>
-
-// Generated TEI
-
-<biblStruct type="journalArticle" corresp="http://zotero.org/users/8989645/items/RLRXRWYM">
-	<analytic xml:lang="fr">
-		<author>
-		<forename>Jean</forename>
-		<surname>Piaget</surname>
-		</author>
-		<respStmt>
-		<resp>contributor</resp>
-		<persName>
-			<forename>J.</forename>
-			<surname>Contributor</surname>
-		</persName>
-		</respStmt>
-		<respStmt>
-		<resp>editorial-director</resp>
-		<persName>
-			<forename>John</forename>
-			<surname>One</surname>
-		</persName>
-		</respStmt>
-		<respStmt>
-		<resp>editorial-director</resp>
-		<persName>
-			<forename>John</forename>
-			<surname>Two</surname>
-		</persName>
-		</respStmt>
-		<title level="a">Not closing &lt;b&gt; or&lt;strong&gt;unknown tag&lt;/strong&gt;, kept as text nodes; <hi rend="italic">italic</hi>, is an element</title>
-		<idno type="callNumber">piaget1929a02</idno>
-	</analytic>
-	<monogr>
-		<editor>
-		<forename>M.</forename>
-		<surname>Editor</surname>
-		</editor>
-		<title level="j">Archives de psychologie</title>
-		<imprint>
-		<date when="1929">1929</date>
-		<biblScope unit="volume">22</biblScope>
-		<biblScope unit="issue">85</biblScope>
-		<biblScope unit="page">117-118</biblScope>
-		</imprint>
-	</monogr>
-	<relatedItem type="reviewed">
-		<bibl>
-		<author>
-			<name>Eugène Minkowski</name>
-		</author>
-		<title>Rich text &gt;&gt; <hi rend="italic">italic</hi></title>
-		<edition>Paris, &lt;Payot&gt;, 1927</edition>
-		</bibl>
-	</relatedItem>
-	<note type="extra">Start of text note.
-	
-	Unknown CSL property: CLA1929_5
-	Note continuing.</note>
-	<note corresp="http://zotero.org/users/8989645/items/6SE87GSB"><p>A zotero note with some <emph>formatting</emph>.</p>
-	<list rend="numbered">
-	<item>
-	Hate Numbered List
-	</item>
-	<item>
-	Go to 1.
-	</item>
-	</list>
-	</note>
-	<note type="tags">
-		<term type="tag">AddATag</term>
-	</note>
-</biblStruct>
-
+Documentation and discussion in the Pull Request.
+https://github.com/zotero/translators/pull/3245
 */
 
 const ns = {
@@ -228,6 +86,8 @@ const indent = "\t";
  * conversion in TEI.
  * Imitated from zotero source code
  * https://github.com/zotero/zotero/blob/main/chrome/content/zotero/itemTree.jsx#L2472
+ * According to the CSL specification
+ * https://citeproc-js.readthedocs.io/en/latest/csl-json/markup.html#html-like-formatting-tags
  *
  * startElement: opening tag event (required if no endElement)
  * endElement: closing tag event (required if no startElement)
@@ -365,7 +225,6 @@ function inlineParse(tagSoup, dstParent) {
 		let discardedNode = nodeStack.pop();
 		nodeStack[0].append(discardedMarkup.token, ...discardedNode.childNodes);
 	}
-	// return textContent; // lint see it’s not used
 }
 
 
@@ -380,7 +239,7 @@ function noteParse(html, dstParent) {
 	if (!html) return;
 	// import html as dom
 	let dom = xmlParser.parseFromString(html, "text/html");
-	let body = dom.getElementsByTagName("body").item(0);
+	let body = dom.body;
 	let srcParent;
 	// notes could be embed in an ugly <div>
 	if (
@@ -409,6 +268,7 @@ const html2tei = {
 	p: { tei: "p" },
 	u: { tei: "hi", rend: "u" },
 	ul: { tei: "list", rend: "bulleted" },
+	strong: { tei: "hi", rend: "strong" },
 	sub: { tei: "hi", rend: "sub" },
 	sup: { tei: "hi", rend: "sup" },
 };
@@ -657,6 +517,11 @@ function parseExtraFields(item) {
 }
 
 /**
+ * RegeExp for allowed chars in XML names.
+ */
+const nameRE = new ZU.XRegExp("[^\\p{Letter}\\d]+");
+
+/**
  * Stefan Majewski
  * @param {*} item
  * @returns
@@ -675,14 +540,14 @@ function genXMLId(item) {
 			xmlid = item.creators[0].name.trim();
 		}
 		if (item.date) {
-			var date = Zotero.Utilities.strToDate(item.date);
+			var date = ZU.strToDate(item.date);
 			if (date.year) {
 				xmlid += date.year;
 			}
 		}
-		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions/Unicode_character_class_escape
-		// unicode classes seems not supported
-		// xmlid = xmlid.normalize("NFD").replace(/\p{M}+/u, '');
+		// https://github.com/slevithan/xregexp
+		// strip non xml name chars
+		xmlid = ZU.XRegExp.replace(xmlid, nameRE, '');
 	}
 	else {
 		// "zoteroItem_item.key" as value for entries without creator
@@ -721,24 +586,6 @@ function genXMLId(item) {
 }
 
 /**
- * Convert Zotero parsed date to xml date YYYY-MM-DD
- * [2023-06 FG]
- */
-function date2iso(date) {
-	let iso = null;
-	let year = Number(date.year);
-	if (isNaN(year)) return iso;
-	iso = String(date.year).padStart(4, '0');
-	let month = Number(date.month);
-	if (isNaN(month)) return iso;
-	// january = 0
-	iso += '-' + String(date.month + 1).padStart(2, '0');
-	if (!date.day) return iso;
-	iso += '-' + String(date.day).padStart(2, '0');
-	return iso;
-}
-
-/**
  * Append simple value
  * @param {*} parent
  * @param {*} name
@@ -768,7 +615,6 @@ function appendField(parent, name, value, level = 2, atts = {}) {
  * @returns {Node}
  */
 function generateItem(item, teiDoc) {
-	Zotero.debug(item);
 	// fixme not all conferencepapers are analytic!
 	var analyticItemTypes = {
 		journalArticle: true,
@@ -985,9 +831,7 @@ function generateItem(item, teiDoc) {
 		imprint.append('\n', indent.repeat(3), date);
 		// use @when
 		if (item.date) {
-			const dateO = Zotero.Utilities.strToDate(item.date);
-			const when = date2iso(dateO);
-			date.setAttribute("when", when);
+			date.setAttribute("when", ZU.strToISO(item.date));
 			let display = item.date;
 			date.append(display);
 		}
@@ -1184,9 +1028,7 @@ function generateTEIDocument(listBibls, teiDoc) {
 }
 
 function doExport() {
-	Zotero.debug("starting TEI-XML export");
 	Zotero.setCharacterSet("utf-8");
-	Zotero.debug("TEI-XML Exporting items");
 
 
 	// Initialize XML Doc
