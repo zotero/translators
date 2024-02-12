@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-02-12 05:01:36"
+	"lastUpdated": "2024-02-12 05:21:06"
 }
 
 /*
@@ -61,26 +61,20 @@ function getSearchResults(doc, checkOnly) {
 }
 
 async function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
+	if (detectWeb(doc, url) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
-
-		if (!items) {
-			return true;
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url), url);
 		}
-
-		const articles = [];
-		for (const i in items) {
-			articles.push(i);
-		}
-		await ZU.processDocuments(articles, scrape);
-		return true;
 	}
 	else {
-		return await scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
-function scrape(doc, url) {
+async function scrape(doc, url) {
+	let type = detectWeb(doc, url);
 	const translator = Zotero.loadTranslator('web');
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48'); // Embedded Metadata
 	translator.setDocument(doc);
@@ -91,7 +85,7 @@ function scrape(doc, url) {
 		let byline = text(doc, '.article-byline');
 		let [name, publisher] = byline.split(', ');
 		name = name.replace(/^by /, '');
-		item.creators = ZU.cleanAuthor(name, 'author');
+		item.creators = [ZU.cleanAuthor(name, 'author')];
 		if (publisher) {
 			item.extra = (item.extra ? item.extra + '\n' : '') + 'Original Publisher: ' + publisher;
 		}
@@ -110,10 +104,9 @@ function scrape(doc, url) {
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function (trans) {
-		trans.itemType = detectWeb(doc, url);
-		trans.doWeb(doc, url);
-	});
+	let em = await translator.getTranslatorObject();
+	em.itemType = type || "webpage";
+	await em.doWeb(doc, url);
 }
 
 
@@ -126,11 +119,13 @@ var testCases = [
 			{
 				"itemType": "blogPost",
 				"title": "Colossal Biosciences finds a home for one extinct species",
-				"creators": {
-					"firstName": "Irving",
-					"lastName": "Mejia-Hilario",
-					"creatorType": "author"
-				},
+				"creators": [
+					{
+						"firstName": "Irving",
+						"lastName": "Mejia-Hilario",
+						"creatorType": "author"
+					}
+				],
 				"date": "2023-11-22T10:01:06-05:00",
 				"abstractNote": "After years of working on bringing back one of the most popular extinct animals—the dodo—Colossal Biosciences has found a home for its bird in Mauritius in a new partnership with the Mauritian Wildlife Foundation.",
 				"blogTitle": "Phys.org",
@@ -184,11 +179,13 @@ var testCases = [
 			{
 				"itemType": "blogPost",
 				"title": "'Love hormone' is revealed to have heart healing properties",
-				"creators": {
-					"firstName": "",
-					"lastName": "Frontiers",
-					"creatorType": "author"
-				},
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "Frontiers",
+						"creatorType": "author"
+					}
+				],
 				"date": "2022-09-30T00:10:01-04:00",
 				"abstractNote": "The neurohormone oxytocin is well-known for promoting social bonds and generating pleasurable feelings, for example from art, exercise, or sex. But the hormone has many other functions, such as the regulation of lactation and uterine contractions in females, and the regulation of ejaculation, sperm transport, and testosterone production in males.",
 				"blogTitle": "Phys.org",
@@ -241,11 +238,13 @@ var testCases = [
 			{
 				"itemType": "blogPost",
 				"title": "Researchers demonstrate multi-photon state transfer between remote superconducting nodes",
-				"creators": {
-					"firstName": "Ingrid",
-					"lastName": "Fadelli",
-					"creatorType": "author"
-				},
+				"creators": [
+					{
+						"firstName": "Ingrid",
+						"lastName": "Fadelli",
+						"creatorType": "author"
+					}
+				],
 				"date": "2024-02-10T08:30:01-05:00",
 				"abstractNote": "Over the past few decades, quantum physicists and engineers have been trying to develop new, reliable quantum communication systems. These systems could ultimately serve as a testbed to evaluate and advance communication protocols.",
 				"blogTitle": "Phys.org",
