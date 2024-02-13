@@ -14,7 +14,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2022-10-26 10:47:11"
+	"lastUpdated": "2024-02-13 18:47:05"
 }
 
 /*
@@ -93,8 +93,16 @@ function doExport() {
 						openURI = 'zotero://open-pdf/groups/' + groupID + '/items/' + key;
 					}
 
-					openURI += '?page=' + (position.pageIndex + 1)
-						+ (annotation.annotationKey ? '&annotation=' + annotation.annotationKey : '');
+					if (position.type === 'FragmentSelector') {
+						openURI += '?cfi=' + encodeURIComponent(position.value);
+					}
+					else if (position.type === 'CssSelector') {
+						openURI += '?sel=' + encodeURIComponent(position.value);
+					}
+					else {
+						openURI += '?page=' + (position.pageIndex + 1)
+							+ (annotation.annotationKey ? '&annotation=' + annotation.annotationKey : '');
+					}
 
 					let a = doc.createElement('a');
 					a.href = openURI;
