@@ -35,7 +35,7 @@
 	***** END LICENSE BLOCK *****
 */
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	try {
 		// article metadata is located in the third application/ld+json section
 		let metadata = JSON.parse(ZU.xpathText(doc, '//script[@type="application/ld+json"][3]'));
@@ -65,7 +65,7 @@ async function scrape(doc, url) {
 			if (linkedData.headline) item.title = linkedData.headline;
 			if (linkedData.description) item.abstractNote = linkedData.description;
 			if (linkedData.datePublished) item.date = linkedData.datePublished;
-			if (linkedData['author']['name']) item.creators = [ZU.cleanAuthor(linkedData['author']['name'], 'author')];
+			if (linkedData.author.name) item.creators = [ZU.cleanAuthor(linkedData.author.name, 'author')];
 		}
 
 		item.complete();
