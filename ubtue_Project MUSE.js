@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-18 15:58:11"
+	"lastUpdated": "2024-02-15 08:17:15"
 }
 
 /*
@@ -116,7 +116,7 @@ function scrape(doc) {
 			item.tags = tags.split(",");
 		}
 		//ubtue: add tag "Book Review"
-		let dcType = ZU.xpathText(doc, '//span[@class="Review"] | //meta[@name="citation_article_type"]/@content | //div[@class="reviewedby"]');
+		let dcType = ZU.xpathText(doc, '//span[@class="Review"] | //meta[@name="citation_article_type"] | //div[@class="reviewedby"]');
 		if (dcType && dcType.match(/Review/i)) {
 		item.tags.push("Book Review");
 		}
@@ -132,7 +132,7 @@ function scrape(doc) {
 			ris_translator.setHandler("itemDone", function (obj, ris_item) {
 				if (isSupplement(ris_item))
 					item.issue = item.issue + " (Supplement)";
-			    item.complete();
+				item.complete();
 			 });
 			
 			ris_translator.translate();
