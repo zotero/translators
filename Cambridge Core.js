@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-17 08:48:37"
+	"lastUpdated": "2024-02-17 18:58:43"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2016-2020 Sebastian Karcher
+	Copyright © 2016-2024 Sebastian Karcher
 
 	This file is part of Zotero.
 
@@ -68,7 +68,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll(
-		'li.title a[href*="/article/"], li.title a[href*="/product/"], li.title a[href*="/books/"]'
+		'li.title a[href*="/article/"], li.title a[href*="/product/"], li.title a[href*="/books/"], div.results .product-listing-with-inputs-content a[href*="/books/"]'
 	);
 	for (let row of rows) {
 		var href = row.href;
@@ -82,28 +82,24 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return;
-			}
-			var articles = [];
-			for (let i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
-function scrape(doc, url) {
+
+async function scrape(doc, url = doc.location.href) {
 	// Book metadata is much better using RIS
 	if (detectWeb(doc, url) == "book" || detectWeb(doc, url) == "bookSection") {
-		let productID = url.replace(/[#?].+/, "").match(/\/([^/]+)$/)[1];
+		let productID = url.replace(/[#?].*/, "").match(/\/([^/]+)$/)[1];
 		let risURL
 			= "/core/services/aop-easybib/export?exportType=ris&productIds="
 			+ productID + "&citationStyle=apa";
@@ -113,38 +109,39 @@ function scrape(doc, url) {
 			'//meta[contains(@name, "citation_pdf_url")]/@content'
 		);
 		// Z.debug("pdfURL: " + pdfURL);
-		ZU.doGet(risURL, function (text) {
-			var translator = Zotero.loadTranslator(
-				"import");
-			translator.setTranslator(
-				"32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-			translator.setString(text);
-			translator.setHandler("itemDone", function (obj,
-				item) {
-				if (pdfURL) {
-					item.attachments.push({
-						url: pdfURL,
-						title: "Full Text PDF",
-						mimeType: "application/pdf"
-					});
-				}
+		var text = await requestText(risURL);
+		var translator = Zotero.loadTranslator(
+			"import");
+		translator.setTranslator(
+			"32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		translator.setString(text);
+		translator.setHandler("itemDone", function (obj,
+			item) {
+			if (pdfURL) {
 				item.attachments.push({
-					title: "Snapshot",
-					document: doc
+					url: pdfURL,
+					title: "Full Text PDF",
+					mimeType: "application/pdf"
 				});
-				// don't save Cambridge Core to archive
-				item.archive = "";
-				item.complete();
+			}
+			item.attachments.push({
+				title: "Snapshot",
+				document: doc
 			});
-			translator.translate();
+			// don't save Cambridge Core to archive
+			item.archive = "";
+			item.complete();
 		});
+		await translator.translate();
 	}
 	// Some elements of journal citations look better with EM
 	else {
-		var translator = Zotero.loadTranslator('web');
+		let translator = Zotero.loadTranslator('web');
 		// Embedded Metadata
 		translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-		translator.setHandler('itemDone', function (obj, item) {
+		translator.setDocument(doc);
+		
+		translator.setHandler('itemDone', (_obj, item) => {
 			item.url = url;
 			var abstract = ZU.xpathText(doc,
 				'//div[@class="abstract"]');
@@ -152,6 +149,7 @@ function scrape(doc, url) {
 				item.abstractNote = abstract;
 			}
 			item.title = ZU.unescapeHTML(item.title);
+			item.publisher = ""; // don't grab the publisher
 			item.libraryCatalog = "Cambridge University Press";
 			if (item.date.includes("undefined")) {
 				item.date = attr('meta[name="citation_online_date"]', "content");
@@ -161,18 +159,18 @@ function scrape(doc, url) {
 			if (titleElem.querySelector('a:last-child')) {
 				item.title = titleElem.firstChild.textContent;
 			}
+
 			item.complete();
 		});
-
-		translator.getTranslatorObject(function (trans) {
-			if (url.includes("/books")) {
-				trans.itemType = "book";
-			}
-			else {
-				trans.itemType = "journalArticle";
-			}
-			trans.doWeb(doc, url);
-		});
+		let em = await translator.getTranslatorObject();
+		// TODO map additional meta tags here, or delete completely
+		if (url.includes("/books")) {
+			em.itemType = "book";
+		}
+		else {
+			em.itemType = "journalArticle";
+		}
+		await em.doWeb(doc, url);
 	}
 }
 
@@ -208,10 +206,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -258,10 +252,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -451,11 +441,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.cambridge.org/core/journals/ajs-review/firstview",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "https://www.cambridge.org/core/journals/ajs-review/latest-issue",
 		"items": "multiple"
 	},
@@ -534,6 +519,12 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.cambridge.org/core/journals/american-political-science-review/firstview",
+		"items": "multiple"
 	}
 ]
+
 /** END TEST CASES **/
