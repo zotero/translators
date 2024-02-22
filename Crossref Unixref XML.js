@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2023-01-12 05:52:38"
+	"lastUpdated": "2024-02-22 19:17:41"
 }
 
 /*
@@ -436,7 +436,7 @@ function doImport() {
 		);
 		var subtitle = ZU.xpath(refXML, 'titles[1]/subtitle[1]')[0];
 		if (subtitle) {
-			item.title += ': ' + ZU.trimInternal(
+			item.title = item.title.replace(/:$/, '') + ': ' + ZU.trimInternal(
 				removeUnsupportedMarkup(innerXML(subtitle))
 			);
 		}
@@ -827,6 +827,42 @@ var testCases = [
 				"publicationTitle": "D-Lib Magazine",
 				"url": "http://www.dlib.org/dlib/may16/peng/05peng.html",
 				"volume": "22",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<doi_records>\n\t<doi_record owner=\"10.1300\" timestamp=\"2017-11-02 16:28:36\">\n\t\t<crossref>\n\t\t\t<journal>\n\t\t\t\t<journal_metadata language=\"en\">\n\t\t\t\t\t<full_title>Journal of Hospitality &amp; Leisure Marketing</full_title>\n\t\t\t\t\t<abbrev_title>Journal of Hospitality &amp; Leisure Marketing</abbrev_title>\n\t\t\t\t\t<issn media_type=\"print\">1050-7051</issn>\n\t\t\t\t\t<issn media_type=\"electronic\">1541-0897</issn>\n\t\t\t\t</journal_metadata>\n\t\t\t\t<journal_issue>\n\t\t\t\t\t<publication_date media_type=\"online\">\n\t\t\t\t\t\t<month>10</month>\n\t\t\t\t\t\t<day>25</day>\n\t\t\t\t\t\t<year>2008</year>\n\t\t\t\t\t</publication_date>\n\t\t\t\t\t<publication_date media_type=\"print\">\n\t\t\t\t\t\t<month>05</month>\n\t\t\t\t\t\t<day>10</day>\n\t\t\t\t\t\t<year>1996</year>\n\t\t\t\t\t</publication_date>\n\t\t\t\t\t<journal_volume>\n\t\t\t\t\t\t<volume>3</volume>\n\t\t\t\t\t</journal_volume>\n\t\t\t\t\t<issue>4</issue>\n\t\t\t\t</journal_issue>\n\t\t\t\t<journal_article publication_type=\"full_text\">\n\t\t\t\t\t<titles>\n\t\t\t\t\t\t<title>Service Value Determination:</title>\n\t\t\t\t\t\t<subtitle>An Integrative Perspective</subtitle>\n\t\t\t\t\t</titles>\n\t\t\t\t\t<contributors>\n\t\t\t\t\t\t<person_name sequence=\"first\" contributor_role=\"author\">\n\t\t\t\t\t\t\t<given_name>Rama K.</given_name>\n\t\t\t\t\t\t\t<surname>Jayanti</surname>\n\t\t\t\t\t\t\t<affiliation>a Department of Marketing, James J. Nance College of Business, Cleveland State\n\t\t\t\t\t\t\t\tUniversity, Cleveland, OH, 44115\n\t\t\t\t\t\t\t</affiliation>\n\t\t\t\t\t\t</person_name>\n\t\t\t\t\t\t<person_name sequence=\"additional\" contributor_role=\"author\">\n\t\t\t\t\t\t\t<given_name>Amit K.</given_name>\n\t\t\t\t\t\t\t<surname>Ghosh</surname>\n\t\t\t\t\t\t\t<affiliation>a Department of Marketing, James J. Nance College of Business, Cleveland State\n\t\t\t\t\t\t\t\tUniversity, Cleveland, OH, 44115\n\t\t\t\t\t\t\t</affiliation>\n\t\t\t\t\t\t</person_name>\n\t\t\t\t\t</contributors>\n\t\t\t\t\t<publication_date media_type=\"online\">\n\t\t\t\t\t\t<month>10</month>\n\t\t\t\t\t\t<day>25</day>\n\t\t\t\t\t\t<year>2008</year>\n\t\t\t\t\t</publication_date>\n\t\t\t\t\t<publication_date media_type=\"print\">\n\t\t\t\t\t\t<month>05</month>\n\t\t\t\t\t\t<day>10</day>\n\t\t\t\t\t\t<year>1996</year>\n\t\t\t\t\t</publication_date>\n\t\t\t\t\t<pages>\n\t\t\t\t\t\t<first_page>5</first_page>\n\t\t\t\t\t\t<last_page>25</last_page>\n\t\t\t\t\t</pages>\n\t\t\t\t\t<publisher_item>\n\t\t\t\t\t\t<item_number item_number_type=\"sequence-number\">2</item_number>\n\t\t\t\t\t\t<identifier id_type=\"doi\">10.1300/J150v03n04_02</identifier>\n\t\t\t\t\t</publisher_item>\n\t\t\t\t\t<doi_data>\n\t\t\t\t\t\t<doi>10.1300/J150v03n04_02</doi>\n\t\t\t\t\t\t<resource>https://www.tandfonline.com/doi/full/10.1300/J150v03n04_02</resource>\n\t\t\t\t\t\t<collection property=\"crawler-based\">\n\t\t\t\t\t\t\t<item crawler=\"iParadigms\">\n\t\t\t\t\t\t\t\t<resource>https://www.tandfonline.com/doi/pdf/10.1300/J150v03n04_02</resource>\n\t\t\t\t\t\t\t</item>\n\t\t\t\t\t\t</collection>\n\t\t\t\t\t</doi_data>\n\t\t\t\t</journal_article>\n\t\t\t</journal>\n\t\t</crossref>\n\t</doi_record>\n</doi_records>",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Service Value Determination: An Integrative Perspective",
+				"creators": [
+					{
+						"creatorType": "author",
+						"firstName": "Rama K.",
+						"lastName": "Jayanti"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Amit K.",
+						"lastName": "Ghosh"
+					}
+				],
+				"date": "1996-05-10",
+				"DOI": "10.1300/J150v03n04_02",
+				"ISSN": "1050-7051, 1541-0897",
+				"issue": "4",
+				"journalAbbreviation": "Journal of Hospitality & Leisure Marketing",
+				"language": "en",
+				"pages": "5-25",
+				"publicationTitle": "Journal of Hospitality & Leisure Marketing",
+				"url": "https://www.tandfonline.com/doi/full/10.1300/J150v03n04_02",
+				"volume": "3",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
