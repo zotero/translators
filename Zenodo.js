@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-12-08 09:09:32"
+	"lastUpdated": "2024-02-26 08:39:41"
 }
 
 /*
@@ -93,7 +93,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	// this section is not rendered in the 6.0 Scaffold browser, OK in v7
-	var rows = doc.querySelectorAll('section[aria-label="Search results"] h2 a');
+	var rows = doc.querySelectorAll('h2>a[href*="/records/"]');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -650,6 +650,12 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://zenodo.org/communities/oat23/records?q=&l=list&p=1&s=10&sort=newest",
+		"defer": true,
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
