@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-28 16:22:30"
+	"lastUpdated": "2024-03-03 08:55:39"
 }
 
 /*
@@ -61,7 +61,7 @@ const invenioPreRdmRepositories = ['www.fdr.uni-hamburg.de', 'rodare.hzdr.de', '
 
 function detectWeb(doc, url) {
 	let collections;
-	if (url.includes('/record')) {
+	if (url.includes(doc.location.hostname + '/record')) {
 		if (invenioPreRdmRepositories.includes(doc.location.hostname)) {
 			collections = ZU.xpath(doc, '//span[@class="pull-right"]/span[contains(@class, "label-default")]');
 		}
@@ -73,8 +73,9 @@ function detectWeb(doc, url) {
 			}
 		}
 
-		for (let i = 0; i < collections.length; i++) {
-			let type = collections[i].textContent.toLowerCase().trim();
+		for (let collection of collections) {
+			let type = collection.textContent.toLowerCase().trim();
+			Zotero.debug('type:', type);
 			switch (type) {
 				case "software":
 					return "computerProgram";
@@ -113,6 +114,7 @@ function detectWeb(doc, url) {
 					return "journalArticle";
 			}
 		}
+		// Fall-back case
 		return "journalArticle";
 	}
 	else if (getSearchResults(doc, true)) {
@@ -130,8 +132,9 @@ function getSearchResults(doc, checkOnly) {
 	}
 	else {
 		// this section is not rendered in the 6.0 Scaffold browser, OK in v7
-		rows = doc.querySelectorAll('section[aria-label="Search results"] h2 a');
+		rows = doc.querySelectorAll('h2>a[href*="/records/"]');
 	}
+	//Zotero.debug(rows);
 	for (let row of rows) {
 		let href = row.href;
 		var title = ZU.trimInternal(row.textContent);
@@ -140,6 +143,8 @@ function getSearchResults(doc, checkOnly) {
 		found = true;
 		items[href] = title;
 	}
+	Zotero.debug('found?', found);
+	Zotero.debug('items', items);
 	return found ? items : false;
 }
 
@@ -178,7 +183,7 @@ async function scrape(doc, url) {
 		text = ZU.xpathText(newDoc, '//h3/following-sibling::pre');
 	}
 	else {
-		tags = Array.from(doc.querySelectorAll('.subject')).map(el => el.textContent.trim());
+		tags = Array.from(doc.querySelectorAll('a.subject')).map(el => el.textContent.trim());
 		text = await requestText(cslURL);
 	}
 	
@@ -207,8 +212,15 @@ async function scrape(doc, url) {
 		else {
 			item.attachments.push({ url: url, title: "Snapshot", mimeType: "text/html" });
 		}
-		for (let tag of tags) {
-			item.tags.push(tag.content);
+		if (invenioPreRdmRepositories.includes(doc.location.hostname)) {
+			for (let tag of tags) {
+				item.tags.push(tag.content);
+			}
+		}
+		else {
+			for (let tag of tags) {
+				item.tags.push(tag);
+			}
 		}
 
 		//something is odd with zenodo's author parsing to CSL on some pages; fix it
@@ -268,8 +280,8 @@ var testCases = [
 					}
 				],
 				"date": "2016-06-03",
-				"abstractNote": "Modern day manufacturers research and develop vehicles that are equipped with steering assist to help drivers undertake manoeuvres. However the lack of research for a situation where one tie-rod experiences different strains than the opposite one leads to failure in the tie-rod assembly and misalignment in the wheels over time. The performance of the steering system would be improved if this information existed. This bachelor’s dissertation looks into this specific situation and conducts an examination on the tie-rods. A simple kinematic model is used to determine how the steering system moves when there is a steering input. An investigation has been conducted to determine how the system’s geometry affects the strains. The experiment vehicle is a Formula Student car which is designed by the students of Coventry University. The tests performed show the difference in situations where the two front tyres are on a single surface, two different surfaces – one with high friction, the other with low friction and a situation where there’s an obstacle in the way of one of the tyres. The experiment results show a major difference in strain in the front tie-rods in the different situations. Interesting conclusions can be made due to the results for the different surface situation where one of the tyres receives similar results in bothcompression and tension, but the other one receives results with great difference. This results given in the report can be a starting ground and help with the improvement in steering systems if more research is conducted.",
-				"archive": "InvenioRDM",
+				"abstractNote": "Modern day manufacturers research and develop vehicles that are equipped\nwith steering assist to help drivers undertake manoeuvres. However the lack of\nresearch for a situation where one tie-rod experiences different strains than the\nopposite one leads to failure in the tie-rod assembly and misalignment in the wheels over time. The performance of the steering system would be improved if this information existed. This bachelor’s dissertation looks into this specific situation and conducts an examination on the tie-rods.\nA simple kinematic model is used to determine how the steering system moves\nwhen there is a steering input. An investigation has been conducted to determine how the system’s geometry affects the strains.\nThe experiment vehicle is a Formula Student car which is designed by the\nstudents of Coventry University. The tests performed show the difference in situations where the two front tyres are on a single surface, two different surfaces – one with high friction, the other with low friction and a situation where there’s an obstacle in the way of one of the tyres.\nThe experiment results show a major difference in strain in the front tie-rods in\nthe different situations. Interesting conclusions can be made due to the results for the different surface situation where one of the tyres receives similar results in bothcompression and tension, but the other one receives results with great difference.\nThis results given in the report can be a starting ground and help with the\nimprovement in steering systems if more research is conducted.",
+				"archive": "Zenodo",
 				"extra": "DOI: 10.5281/zenodo.54766",
 				"libraryCatalog": "InvenioRDM",
 				"url": "https://zenodo.org/records/54766",
@@ -758,6 +770,7 @@ var testCases = [
 				],
 				"date": "2023-11-28",
 				"abstractNote": "Dieser Datensatz beinhaltet die Rohdaten, die für die Produktion des Lernvideos verwendet wurden. Diese bestehen aus den Videoaufzeichnungen, den Präsentationsfolien und der H5P-Datei. Rohdaten und Lernvideo wurden für Lehrzwecke für die VU Konstruktionswerkstoffe [206.455] erstellt. Im Video wird die Herstellung von Probekörpern (Würfel, Balken) aus Textilbeton gezeigt.",
+				"extra": "DOI: 10.3217/7cqqh-nma57",
 				"language": "deu",
 				"libraryCatalog": "InvenioRDM",
 				"shortTitle": "Rohdaten zum Lernvideo",
@@ -1234,6 +1247,12 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://zenodo.org/communities/oat23/records?q=&l=list&p=1&s=10&sort=newest",
+		"defer": true,
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
