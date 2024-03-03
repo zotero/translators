@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-18 11:11:59"
+	"lastUpdated": "2023-10-18 13:29:55"
 }
 
 /*
@@ -151,26 +151,63 @@ function detectWeb(doc, url) {
 	return "journalArticle"; // A decent guess
 }
 
-async function retrieveDOIs(doiOrDOIs) {
+// If the current page matches and returns "multiple", and there's no current
+// page in the items to choose, we offer the current page with snapshot as a
+// choice during item selection. This is triggered when all other translators
+// fail to detect (incl. EM) while this translator (lowest priority) detects
+// multiple. NOTE that when this translator fails to match, the user will get
+// the "save web page" fallback by default.
+
+var FALLBACK_CURRENT_PAGE_KEY = "not a DOI; placeholder for current web page"; // clearer than using a nullish value
+
+async function retrieveDOIs(doiOrDOIs, fallbackDoc) {
+	// Use the URL of the current page (the page from which the translation was
+	// initiated) as the key for the item corresponding to the current page.
+	// This will have special meaning for Connector and its title will be
+	// marked as current page, in the correct localization.
+	let currentPageKey = fallbackDoc.location.href;
+	// In the rare case the location.href is falsy or not looking like a real
+	// location, don't use it; instead use a string that doesn't match DOI.
+	if (!/^https?:\/\/.+/.test(currentPageKey)) {
+		currentPageKey = FALLBACK_CURRENT_PAGE_KEY;
+	}
 	let showSelect = Array.isArray(doiOrDOIs);
-	let dois = showSelect ? doiOrDOIs : [doiOrDOIs];
+	let dois = showSelect ? [currentPageKey, ...doiOrDOIs] : [doiOrDOIs];
 	let items = {};
 	let numDOIs = dois.length;
 
 	for (const doi of dois) {
 		items[doi] = null;
-		
-		const translate = Zotero.loadTranslator("search");
-		translate.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
-		translate.setSearch({ itemType: "journalArticle", DOI: doi });
-	
+
+		let translate;
+		if (doi === currentPageKey) {
+			// First, create the special item for the current page, to be
+			// saved as a webpage item if selected
+			translate = Zotero.loadTranslator("web");
+			// Embedded Metadata
+			translate.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+			translate.setDocument(fallbackDoc);
+			// Expando flag as a hack to be used in itemDone handler callback.
+			// This is a workaround for the case when the DOI resolution API
+			// returns an item without actual DOI field; very much an edge case
+			// (but see the "Template_talk:Doi" test case). TODO: Actually
+			// purge those invalid items.
+			translate.isEM = true;
+		}
+		else {
+			translate = Zotero.loadTranslator("search");
+			translate.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
+			translate.setSearch({ itemType: "journalArticle", DOI: doi });
+		}
+
 		// don't save when item is done
 		translate.setHandler("itemDone", function (_translate, item) {
+			let key = translate.isEM ? currentPageKey : item.DOI;
 			if (!item.title) {
-				Zotero.debug("No title available for " + item.DOI);
+				Zotero.debug("No title available for " + key);
 				item.title = "[No Title]";
 			}
-			items[item.DOI] = item;
+			items[key] = item;
 		});
 		/* eslint-disable no-loop-func */
 		translate.setHandler("done", function () {
@@ -186,7 +223,7 @@ async function retrieveDOIs(doiOrDOIs) {
 				// If showSelect is false, don't show a Select Items dialog,
 				// just complete if we can
 				if (!showSelect) {
-					let firstItem = items[Object.keys(items)[0]];
+					let firstItem = Object.values(items)[0];
 					if (firstItem) {
 						firstItem.complete();
 					}
@@ -194,16 +231,16 @@ async function retrieveDOIs(doiOrDOIs) {
 				}
 
 				// Otherwise, allow the user to select among items that resolved successfully
-				let select = {};
-				for (let doi in items) {
-					let item = items[doi];
-					if (item) {
-						select[doi] = item.title || "[" + item.DOI + "]";
-					}
-				}
+				// build the selection options by filtering through the
+				// "items", skipping any failed resolution, and do some
+				// cross-correlation to detect whether one of the DOI-resolved
+				// item could refer to the current page. In the latter case,
+				// "item" will be updated to use the special "currentPageKey"
+				// for that item.
+				let select = buildSelections(items, currentPageKey);
 				Zotero.selectItems(select, function (selectedDOIs) {
 					if (!selectedDOIs) return;
-					
+
 					for (let selectedDOI in selectedDOIs) {
 						items[selectedDOI].complete();
 					}
@@ -221,7 +258,141 @@ async function retrieveDOIs(doiOrDOIs) {
 async function doWeb(doc, url) {
 	let doiOrDOIs = getDOIs(doc, url);
 	Z.debug(doiOrDOIs);
-	await retrieveDOIs(doiOrDOIs);
+	await retrieveDOIs(doiOrDOIs, doc);
+}
+
+// Build a key -> title mapping to be passed to Z.selectItems().
+// "currentPageKey" is the URL of the page on which the translation is
+// initiated. If none of the DOI-items looks like the current page, we keep the
+// first, EM-generated item, as a choice presented to the user. Otherwise, if
+// one of the DOI-items looks like it's referring to the current page, its key
+// is set to the reference URL in both the input "items" (NOTE: this is a
+// side-effect) and the output object.
+function buildSelections(items, currentPageKey) {
+	let possibleCurrentWebPageDOI;
+	// min. dissimilarity of DOI-items to the current-page special item
+	let minDissimilarity = 2; // starting with a value greater than max
+	let currentWebPageItem = items[currentPageKey];
+	if (currentWebPageItem) {
+		for (let [key, item] of Object.entries(items)) {
+			if (key === currentPageKey || !item) {
+				// Either it's the special item or the item failed to resolve
+				continue;
+			}
+			let d = itemDissimilarity(currentWebPageItem, item);
+			if (d < minDissimilarity) {
+				minDissimilarity = d; // update min
+				possibleCurrentWebPageDOI = key;
+			}
+		}
+	}
+
+	// Populate the output
+	let select = {};
+	let empty = true;
+	if (minDissimilarity <= 0.05) { // One of the DOI-items is current page
+		// In the input "items", reset the current-page-as-DOI-item's key to
+		// the special key "currentPageKey", by deleting the old key and
+		// insert the value at "currentPageKey"; this also overwrites the old
+		// value -- the EM-generated item -- if any.
+		items[currentPageKey] = items[possibleCurrentWebPageDOI];
+		delete items[possibleCurrentWebPageDOI];
+	}
+	for (let [key, item] of Object.entries(items)) {
+		if (!item) continue;
+
+		let title = item.title;
+		if (key === currentPageKey) {
+			title = `Current Web Page (${title})`;
+		}
+		select[key] = title;
+		empty = false;
+	}
+	return !empty && select;
+}
+
+// Item dissimilarity, for deduplicating the "current web page" among the
+// multiple. It is a number between 0 (identical) and 1 (totally different).
+function itemDissimilarity(a, b) {
+	return urlDissimilarity(a, b) && titleDissimilarity(a, b);
+}
+
+// URL-based dissimilarity. If either item's URL is missing, the dissimilarity
+// maxes out. Scheme, query, fragment are ignored; domain comparison is modulo
+// subdomains and letter case. Pathname equality check is done ignoring the
+// last trailing slash but otherwise verbatim. The output is either 0 or 1.
+function urlDissimilarity(a, b) {
+	if (!(a.url && b.url)) {
+		return 1;
+	}
+	let aURL = new URL(a.url);
+	let bURL = new URL(b.url);
+	if (aURL.pathname.replace(/\/$/, "") !== bURL.pathname.replace(/\/$/, "")) {
+		return 1;
+	}
+	if (!isSubDomain(aURL.hostname, bURL.hostname)) {
+		return 1;
+	}
+	return 0;
+}
+
+// Title-based dissimilarity. If either item's URL is missing, the dissimilarity
+// maxes out at 1.
+function titleDissimilarity(a, b) {
+	let aTitle = a.title || "";
+	let bTitle = b.title || "";
+	if (!(a.title && b.title)) {
+		return 1;
+	}
+	aTitle = normalizeTitle(aTitle);
+	bTitle = normalizeTitle(bTitle);
+	let d = ZU.levenshtein(aTitle, bTitle) / Math.max(aTitle.length, bTitle.length);
+	return d;
+}
+
+var NORM_TITLE_CACHE = {};
+function normalizeTitle(str) {
+	if (Object.hasOwn(NORM_TITLE_CACHE, str)) {
+		return NORM_TITLE_CACHE[str];
+	}
+	let output = ZU.cleanTags(str).toLowerCase(); // case-normalize
+	output = ZU.removeDiacritics(output);
+	output = ZU.trimInternal(
+		ZU.XRegExp.replace(
+			output,
+			ZU.XRegExp('[^\\pL\\pN\\s]', "g"), // Remove punctuations
+			""
+		)
+	);
+	// encode the astrals so that the JS "length" property is equal to the
+	// string's code-point length, but reinstate the space for debugging
+	output = encodeURI(output).replace(/%20/g, " ");
+	NORM_TITLE_CACHE[str] = output;
+	return output;
+}
+
+// Test whether a is a subdomain of b or vice versa
+function isSubDomain(a, b) {
+	let aParts = a.replace(/\.$/, "").toLowerCase().split(".");
+	let bParts = b.replace(/\.$/, "").toLowerCase().split(".");
+	let long, short;
+	if (aParts.length >= bParts.length) {
+		long = aParts;
+		short = bParts;
+	}
+	else {
+		short = aParts;
+		long = bParts;
+	}
+	let str;
+	let result = true;
+	while (typeof (str = short.pop()) !== "undefined") {
+		if (str !== long.pop()) {
+			result = false;
+			break;
+		}
+	}
+	return result;
 }
 
 /** BEGIN TEST CASES **/
@@ -296,7 +467,7 @@ var testCases = [
 					{
 						"lastName": "WorldFish",
 						"creatorType": "contributor",
-						"fieldMode": true
+						"fieldMode": 1
 					}
 				],
 				"date": "2023",
@@ -311,6 +482,16 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.callingbullshit.org/syllabus.html",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://physics.aps.org/articles/v16/127",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
