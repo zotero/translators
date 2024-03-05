@@ -39,7 +39,7 @@ function detectWeb(doc, _url) {
 	for (let json of doc.querySelectorAll('script[type="application/ld+json"]')) {
 		let metadata = JSON.parse(json.textContent);
 		// this can be order sensitive, all Video Articles are News Articles but not all News Articles are Video Articles
-		if (metadata["page_type"] === "Video Article") {
+		if (metadata.page_type === "Video Article") {
 			return "videoRecording";
 		}
 		if (metadata["@type"] === "NewsArticle") {
