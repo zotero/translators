@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-02-13 04:56:54"
+	"lastUpdated": "2024-03-05 08:09:46"
 }
 
 /*
@@ -36,15 +36,17 @@
 */
 
 function detectWeb(doc, _url) {
-	try {
-		// article metadata is located in the third application/ld+json section
-		let metadata = JSON.parse(ZU.xpathText(doc, '//script[@type="application/ld+json"][3]'));
+	for (let json of doc.querySelectorAll('script[type="application/ld+json"]')) {
+		let metadata = JSON.parse(json.textContent);
+		// this can be order sensitive, all Video Articles are News Articles but not all News Articles are Video Articles
+		if (metadata["page_type"] === "Video Article") {
+			return "videoRecording";
+		}
 		if (metadata["@type"] === "NewsArticle") {
 			return "newspaperArticle";
 		}
-	} catch (error) {
-		Zotero.debug("Unable to find article metadata");
 	}
+	
 	return false;
 }
 
@@ -135,6 +137,37 @@ var testCases = [
 				"publicationTitle": "The Independent",
 				"section": "Independent Premium",
 				"url": "https://www.independent.co.uk/independentpremium/lifestyle/working-from-home-health-wfh-b2493645.html",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.independent.co.uk/tv/news/missing-florida-girl-police-rescue-b2504518.html",
+		"items": [
+			{
+				"itemType": "videoRecording",
+				"title": "Missing five-year-old girl’s touching words to police as she is rescued from Florida swamp",
+				"creators": [
+					{
+						"firstName": "Lucy",
+						"lastName": "Leeson",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024-02-29T13:07:09.000Z",
+				"abstractNote": "This is the moment a missing five-year-old girl who wandered into woods in Florida is rescued by police. The Hillsborough County Sheriff's Office Aviation Unit used thermal imaging to locate the girl walking through a dense wooded area in Tampa on Monday evening (26 February). She was heading towards a body of water, and aviation guided deputies to find her. The girl throws her hands up in the air when she sees the officers and asks “Are you going to get me out of the water?”. The officer then scoops her up and carries her out of the water to safety.",
+				"language": "en",
+				"libraryCatalog": "www.independent.co.uk",
+				"url": "https://www.independent.co.uk/tv/news/missing-florida-girl-police-rescue-b2504518.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
