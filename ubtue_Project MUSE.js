@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-02-15 08:17:15"
+	"lastUpdated": "2024-03-06 13:24:05"
 }
 
 /*
@@ -122,7 +122,7 @@ function scrape(doc) {
 		}
 		if (item.pages && item.pages.match(/([ivx]+)-\1/i))
 			item.pages = item.pages.split('-')[0];
-		
+
 		let citationURL = ZU.xpathText(doc, '//li[@class="view_citation"]//a/@href');
 		ZU.processDocuments(citationURL, function (citation_page_doc) {
 			let risEntry = ZU.xpathText(citation_page_doc, '//*[(@id = "tabs-4")]//p');
@@ -138,6 +138,7 @@ function scrape(doc) {
 			ris_translator.translate();
 
 		});
+		item.date = ZU.xpathText(doc, '//meta[@name="citation_year"]/@content');
 	});
 	translator.translate();
 }/** BEGIN TEST CASES **/
