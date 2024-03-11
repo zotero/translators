@@ -53,7 +53,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	// Adjust the CSS Selectors
-	var rows = doc.querySelectorAll('.card.cardListing.rightImage');
+	var rows = doc.querySelectorAll('.card.cardListing');
 	for (const row of rows) {
 		var href = row.href;
 		var title = text(row, 'h3.headline');
