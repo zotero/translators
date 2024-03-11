@@ -37,13 +37,13 @@
 
 function detectWeb(doc, url) {
 	let path = new URL(url).pathname;
-	if (/search/.test(path) && getSearchResults(doc, true)) {
+	if (path.includes("/search?") && getSearchResults(doc, true)) {
 		return 'multiple';
 	}
 	else if ((/(news|sports|radio|books|arts|music|life|television|archives)\//.test(path)) && getLD(doc)) {
 		return "newspaperArticle";
 	}
-	else if (/player/.test(path)) {
+	else if (path.includes("/player/")) {
 		return "videoRecording";
 	}
 	return false;
@@ -56,7 +56,7 @@ function getSearchResults(doc, checkOnly) {
 	var rows = doc.querySelectorAll('.card.cardListing.rightImage');
 	for (const row of rows) {
 		var href = row.href;
-		var title = row.children[1].children[0].children[0].children[0].textContent;
+		var title = text(row, 'h3.headline');
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -91,8 +91,12 @@ async function scrape(doc, url = doc.location.href) {
 			item.url = getMetaContent(doc, 'property', "og:url");
 
 			item.title = ld.headline ? ld.headline : ld.name;
-			if (item.itemType == "videoRecording") item.date = ZU.strToISO(ld.uploadDate);
-			else item.date = ZU.strToISO(ld.datePublished);
+			if (item.itemType == "videoRecording") {
+				item.date = ZU.strToISO(ld.uploadDate);
+			}
+			else {
+				item.date = ZU.strToISO(ld.datePublished);
+			}
 			item.abstractNote = ld.description;
 
 			item.creators = []; // clear existing authors
