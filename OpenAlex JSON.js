@@ -8,30 +8,30 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2024-02-26 04:33:01"
+	"lastUpdated": "2024-03-09 04:00:37"
 }
 
 /*
-    ***** BEGIN LICENSE BLOCK *****
+	***** BEGIN LICENSE BLOCK *****
 
-    Copyright © 2024 Sebastian Karcher
+	Copyright © 2024 Sebastian Karcher
 
-    This file is part of Zotero.
+	This file is part of Zotero.
 
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Affero General Public License for more details.
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
 
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
-    ***** END LICENSE BLOCK *****
+	***** END LICENSE BLOCK *****
 */
 
 // copied from CSL JSON
@@ -58,6 +58,9 @@ function detectImport() {
 	if (parsedData && parsedData.ids && parsedData.ids.openalex) {
 		return true;
 	}
+	else if (parsedData && parsedData.results && parsedData.results[0].ids && parsedData.results[0].ids.openalex) {
+		return true;
+	}
 	return false;
 }
 
@@ -66,7 +69,7 @@ var PDFversionMap = {
 	submittedVersion: "Submitted Version PDF",
 	acceptedVersion: "Accepted Version PDF",
 	publishedVersion: "Full Text PDF"
-}
+};
 /* eslint-disable camelcase*/
 var mappingTypes = {
 	article: "journalArticle",
@@ -88,16 +91,32 @@ var mappingTypes = {
 
 function doImport() {
 	var data = parseInput();
+	if (data.ids) {
+		parseIndividual(data);
+	}
+	else {
+		let results = data.results;
+		for (let result of results) {
+			parseIndividual(result);
+		}
+	}
+}
+
+function parseIndividual(data) {
 	let OAtype = data.type;
 	// Z.debug(OAtype)
 	let type = "document"; // default to document
 	type = mappingTypes[OAtype];
 	var item = new Zotero.Item(type);
 	item.title = data.title;
+	// fix all caps titles
+	if (item.title == item.title.toUpperCase()) {
+		item.title = ZU.capitalizeTitle(item.title, true);
+	}
 	item.date = data.publication_date;
 	item.language = data.language;
 	if (data.doi) {
-			item.DOI = ZU.cleanDOI(data.doi);
+		item.DOI = ZU.cleanDOI(data.doi);
 	}
 	if (data.primary_location.source) {
 		let sourceName = data.primary_location.source.display_name;
@@ -114,6 +133,7 @@ function doImport() {
 		item.ISSN = data.primary_location.source.issn;
 	}
 
+
 	let biblio = data.biblio;
 	item.issue = biblio.issue;
 	item.volume = biblio.volume;
@@ -128,22 +148,26 @@ function doImport() {
 	let authors = data.authorships;
 	for (let author of authors) {
 		let authorName = author.author.display_name;
-		item.creators.push(ZU.cleanAuthor(authorName, "author", false))
+		item.creators.push(ZU.cleanAuthor(authorName, "author", false));
 	}
+	if (item.itemType == "thesis" && !item.publisher & authors.length) {
+		// use author affiliation as university
+		item.university = authors[0].raw_affiliation_string;
+	}
+
 	if (data.best_oa_location && data.best_oa_location.pdf_url) {
 		let version = "Submitted Version PDF";
 		if (data.best_oa_location.version) {
 			version = PDFversionMap[data.best_oa_location.version];
 		}
-		item.attachments.push({url: data.best_oa_location.pdf_url, title: version, mimeType: "application/pdf"})
+		item.attachments.push({ url: data.best_oa_location.pdf_url, title: version, mimeType: "application/pdf" });
 	}
 	let tags = data.keywords;
 	for (let tag of tags) {
-		item.tags.push(tag.keyword)
+		item.tags.push(tag.keyword);
 	}
 	item.complete();
 }
-
 
 
 /** BEGIN TEST CASES **/
@@ -310,6 +334,197 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "import",
+		"input": "{\"id\":\"https://openalex.org/W2257674859\",\"doi\":\"https://doi.org/10.18130/v3v002\",\"title\":\"The GULag and Laogai: A Comparative Study of Forced Labor through Camp Literature\",\"display_name\":\"The GULag and Laogai: A Comparative Study of Forced Labor through Camp Literature\",\"publication_year\":2017,\"publication_date\":\"2017-08-09\",\"ids\":{\"openalex\":\"https://openalex.org/W2257674859\",\"doi\":\"https://doi.org/10.18130/v3v002\",\"mag\":\"2257674859\"},\"language\":\"en\",\"primary_location\":{\"is_oa\":true,\"landing_page_url\":\"https://doi.org/10.18130/v3v002\",\"pdf_url\":\"https://libraetd.lib.virginia.edu/downloads/5425kb078?filename=Stepanic_Stanley_Dec2012.pdf\",\"source\":null,\"license\":null,\"version\":\"publishedVersion\",\"is_accepted\":true,\"is_published\":true},\"type\":\"dissertation\",\"type_crossref\":\"dissertation\",\"indexed_in\":[\"crossref\"],\"open_access\":{\"is_oa\":true,\"oa_status\":\"bronze\",\"oa_url\":\"https://libraetd.lib.virginia.edu/downloads/5425kb078?filename=Stepanic_Stanley_Dec2012.pdf\",\"any_repository_has_fulltext\":true},\"authorships\":[{\"author_position\":\"first\",\"author\":{\"id\":\"https://openalex.org/A5078709935\",\"display_name\":\"Stanley Joseph Stepanic\",\"orcid\":null},\"institutions\":[{\"id\":\"https://openalex.org/I51556381\",\"display_name\":\"University of Virginia\",\"ror\":\"https://ror.org/0153tk833\",\"country_code\":\"US\",\"type\":\"education\",\"lineage\":[\"https://openalex.org/I51556381\"]}],\"countries\":[\"US\"],\"is_corresponding\":true,\"raw_author_name\":\"Stanley Joseph Stepanic\",\"raw_affiliation_string\":\"University of Virginia\",\"raw_affiliation_strings\":[\"University of Virginia\"]}],\"countries_distinct_count\":1,\"institutions_distinct_count\":1,\"corresponding_author_ids\":[\"https://openalex.org/A5078709935\"],\"corresponding_institution_ids\":[\"https://openalex.org/I51556381\"],\"apc_list\":null,\"apc_paid\":null,\"has_fulltext\":true,\"fulltext_origin\":\"pdf\",\"cited_by_count\":1,\"cited_by_percentile_year\":{\"min\":70,\"max\":76},\"biblio\":{\"volume\":null,\"issue\":null,\"first_page\":null,\"last_page\":null},\"is_retracted\":false,\"is_paratext\":false,\"primary_topic\":{\"id\":\"https://openalex.org/T13802\",\"display_name\":\"Social and Cultural Development in Vietnam\",\"score\":0.9421,\"subfield\":{\"id\":\"https://openalex.org/subfields/3312\",\"display_name\":\"Sociology and Political Science\"},\"field\":{\"id\":\"https://openalex.org/fields/33\",\"display_name\":\"Social Sciences\"},\"domain\":{\"id\":\"https://openalex.org/domains/2\",\"display_name\":\"Social Sciences\"}},\"topics\":[{\"id\":\"https://openalex.org/T13802\",\"display_name\":\"Social and Cultural Development in Vietnam\",\"score\":0.9421,\"subfield\":{\"id\":\"https://openalex.org/subfields/3312\",\"display_name\":\"Sociology and Political Science\"},\"field\":{\"id\":\"https://openalex.org/fields/33\",\"display_name\":\"Social Sciences\"},\"domain\":{\"id\":\"https://openalex.org/domains/2\",\"display_name\":\"Social Sciences\"}},{\"id\":\"https://openalex.org/T10893\",\"display_name\":\"Religious Diversity and Regulation in Chinese Society\",\"score\":0.9331,\"subfield\":{\"id\":\"https://openalex.org/subfields/3312\",\"display_name\":\"Sociology and Political Science\"},\"field\":{\"id\":\"https://openalex.org/fields/33\",\"display_name\":\"Social Sciences\"},\"domain\":{\"id\":\"https://openalex.org/domains/2\",\"display_name\":\"Social Sciences\"}}],\"keywords\":[{\"keyword\":\"gulag\",\"score\":0.6365},{\"keyword\":\"forced labor\",\"score\":0.5605},{\"keyword\":\"camp\",\"score\":0.3939},{\"keyword\":\"laogai\",\"score\":0.3371}],\"concepts\":[{\"id\":\"https://openalex.org/C2776721811\",\"wikidata\":\"https://www.wikidata.org/wiki/Q161448\",\"display_name\":\"Gulag\",\"level\":2,\"score\":0.97338235},{\"id\":\"https://openalex.org/C95457728\",\"wikidata\":\"https://www.wikidata.org/wiki/Q309\",\"display_name\":\"History\",\"level\":0,\"score\":0.34109622},{\"id\":\"https://openalex.org/C17744445\",\"wikidata\":\"https://www.wikidata.org/wiki/Q36442\",\"display_name\":\"Political science\",\"level\":0,\"score\":0.33254576},{\"id\":\"https://openalex.org/C199539241\",\"wikidata\":\"https://www.wikidata.org/wiki/Q7748\",\"display_name\":\"Law\",\"level\":1,\"score\":0.12201893}],\"mesh\":[],\"locations_count\":1,\"locations\":[{\"is_oa\":true,\"landing_page_url\":\"https://doi.org/10.18130/v3v002\",\"pdf_url\":\"https://libraetd.lib.virginia.edu/downloads/5425kb078?filename=Stepanic_Stanley_Dec2012.pdf\",\"source\":null,\"license\":null,\"version\":\"publishedVersion\",\"is_accepted\":true,\"is_published\":true}],\"best_oa_location\":{\"is_oa\":true,\"landing_page_url\":\"https://doi.org/10.18130/v3v002\",\"pdf_url\":\"https://libraetd.lib.virginia.edu/downloads/5425kb078?filename=Stepanic_Stanley_Dec2012.pdf\",\"source\":null,\"license\":null,\"version\":\"publishedVersion\",\"is_accepted\":true,\"is_published\":true},\"sustainable_development_goals\":[{\"id\":\"https://metadata.un.org/sdg/8\",\"score\":0.67,\"display_name\":\"Decent work and economic growth\"}],\"grants\":[],\"referenced_works_count\":0,\"referenced_works\":[],\"related_works\":[\"https://openalex.org/W2748952813\",\"https://openalex.org/W2590215521\",\"https://openalex.org/W2331145549\",\"https://openalex.org/W1514633335\",\"https://openalex.org/W4200446317\",\"https://openalex.org/W3210235098\",\"https://openalex.org/W4386637648\",\"https://openalex.org/W4386051922\",\"https://openalex.org/W2932913126\",\"https://openalex.org/W1503036515\"],\"ngrams_url\":\"https://api.openalex.org/works/W2257674859/ngrams\",\"abstract_inverted_index\":{\"This\":[0,190],\"is\":[1,96,184,221,349,358,361,558,564,651,654],\"the\":[2,12,18,43,61,64,122,131,153,156,161,195,243,253,257,271,337,340,387,407,417,425,435,438,526,529,533,536,567,599,629,634,668,674,703,710,723,727,739],\"first\":[3,661],\"comparative\":[4],\"study\":[5],\"ever\":[6],\"undertaken\":[7],\"in\":[8,17,39,42,69,108,125,152,232,252,309,334,376,404,525,573,582,620,696,755],\"an\":[9,57],\"investigation\":[10],\"of\":[11,14,60,63,66,77,88,175,270,273,327,339,380,386,423,437,466,482,487,528,593,631,686,706,757],\"history\":[13,62,76],\"forced\":[15,67,89,296],\"labor\":[16,68,272],\"Soviet\":[19,126,154,310,575],\"Union\":[20],\"and\":[21,30,49,102,127,179,200,286,383,445,448,454,458,477,490,503,515,544,601,612,649,670,688,726,748],\"China.\":[22],\"It\":[23,207,653],\"makes\":[24],\"no\":[25],\"claims\":[26],\"to\":[27,36,54,97,115,144,193,226,236,247,260,292,297,303,306,316,352,397,473,492,498,509,511,523,566,586,613,729],\"be\":[28,217,234,304,353,398],\"exhaustive,\":[29],\"serves\":[31],\"mainly\":[32],\"as\":[33,104,148,617,691],\"a\":[34,74,137,228,377,401,590,646,684,732],\"foundation\":[35],\"further\":[37],\"work\":[38,191,293],\"this\":[40,198,321,348,557,562],\"subject\":[41],\"near\":[44],\"future.\":[45],\"Various\":[46],\"historical\":[47],\"works\":[48],\"documents\":[50],\"have\":[51,369,396],\"been\":[52,374,644,678],\"utilized\":[53],\"create,\":[55],\"firstly,\":[56],\"acceptable\":[58],\"overview\":[59],\"practice\":[65],\"both\":[70,111],\"countries,\":[71],\"followed\":[72],\"by\":[73,86,120,598],\"short\":[75],\"so\":[78,261],\"-\":[79,330,539,570,623,752],\"called\":[80],\"\\u2018camp\":[81],\"literature',\":[82],\"or\":[83,604,608,639],\"memoirs\":[84],\"written\":[85],\"survivors\":[87],\"labor,\":[90,611],\"generally\":[91],\"speaking.\":[92],\"The\":[93,574],\"main\":[94],\"focus\":[95],\"analyze\":[98],\"several\":[99,116,202],\"key\":[100],\"similarities\":[101],\"differences\":[103],\"they\":[105,676],\"are\":[106,290,412,496,585],\"found\":[107],\"examples\":[109],\"from\":[110,500,546],\"countries.\":[112],\"Differences\":[113],\"lead\":[114],\"interesting\":[117],\"points,\":[118],\"discovered\":[119],\"observing\":[121],\"narrative\":[123],\"persona\":[124],\"Chinese\":[128,132,254,647,740],\"examples.\":[129],\"On\":[130],\"side,\":[133],\"one\":[134,245,595],\"can\":[135],\"find\":[136],\"much\":[138],\"more\":[139],\"accepting\":[140],\"narrator,\":[141],\"who\":[142,281,289,312,549,596],\"seems\":[143],\"view\":[145],\"his\":[146,182,187,607],\"situation\":[147],\"somehow\":[149],\"necessary,\":[150],\"whereas\":[151],\"context\":[155],\"prisoner\":[157,258],\"almost\":[158],\"always\":[159],\"condemns\":[160],\"government.\":[162],\"Even\":[163],\"when\":[164],\"he\":[165,168,641,650],\"does\":[166,208,239,256],\"not,\":[167,250],\"at\":[169,223,450,461],\"least\":[170],\"suggests\":[171,181],\"that\":[172,230,346,365,393,434,714],\"some\":[173],\"sort\":[174,705],\"mistake\":[176],\"was\":[177,716,722,744],\"made\":[178],\"rarely\":[180],\"imprisonment\":[183],\"truly\":[185],\"for\":[186,197,204,278,287,370,410,456,480,532,673],\"own\":[188,610],\"good.\":[189],\"aims\":[192],\"investigate\":[194],\"reason\":[196],\"phenomenon\":[199],\"poses\":[201],\"reasons\":[203],\"its\":[205,467],\"existence.\":[206],\"not\":[209,363,391,432,471,507,521],\"provide\":[210],\"answers,\":[211],\"only\":[212,462],\"possibilities.\":[213],\"Further\":[214],\"research\":[215],\"will\":[216,324,343,550],\"required,\":[218],\"if\":[219],\"it\":[220,357,362,390,431,470,506,520,637],\"even\":[222,659],\"all\":[224,347],\"possible\":[225],\"answer\":[227],\"question\":[229],\"may,\":[231],\"fact,\":[233],\"impossible\":[235],\"prove.\":[237],\"Namely,\":[238],\"one's\":[240],\"culture\":[241],\"shape\":[242],\"way\":[244,322,728],\"tends\":[246],\"think?\":[248],\"If\":[633],\"why,\":[251],\"context,\":[255],\"seem\":[259],\"willingly\":[262],\"accept\":[263],\"their\":[264,671],\"situation?\":[265],\"W4\":[266],\"\\u2018mz\":[267],\"...make\":[268],\"use\":[269],\"those\":[274,279,288,307,746],\"persons\":[275],\"under\":[276],\"arrest,\\u2018\":[277],\"gentlemen\":[280],\"live\":[282],\"without\":[283,294,734],\"any\":[284],\"occupation,\\u2018\":[285],\"unable\":[291],\"being\":[295],\"do\":[298],\"so.\":[299],\"Such\":[300],\"punishment\":[301],\"ought\":[302],\"applied\":[305],\"working\":[308],\"institutions\":[311],\"demonstrate\":[313],\"unconscientious\":[314],\"attitudes\":[315],\"work,\":[317],\"tardiness,\":[318],\"etc.\":[319,428],\"...In\":[320],\"we\":[323],\"create\":[325],\"schools\":[326],\"labor.\":[328],\"1\":[329],\"Dzerzhinsky's\":[331],\"public\":[332],\"speech\":[333],\"1919\":[335],\"concerning\":[336,628],\"reeducation\":[338],\"bourgeois.\":[341],\"You\":[342],\"say,\":[344],\"perhaps,\":[345],\"too\":[350],\"stupid\":[351,364,392,433,472,508,522],\"true.\":[354,359],\"But,\":[355],\"unfortunately,\":[356],\"And\":[360],\"160,\":[366],\"000,000\":[367],\"people\":[368,616],\"eighteen\":[371],\"years\":[372],\"past\":[373],\"resident\":[375],\"vast\":[378],\"territory\":[379],\"good\":[381],\"soil\":[382],\"starving\":[384],\"most\":[385],\"time?\":[388],\"Is\":[389,430,469,505,519],\"three\":[394],\"families\":[395],\"crowded\":[399],\"into\":[400,589],\"single\":[402],\"room\":[403],\"Moscow,\":[405],\"while\":[406,484],\"millions\":[408,488],\"needed\":[409],\"housing\":[411],\"lavished\":[413],\"on\":[414,443],\"projects\":[415],\"like\":[416],\"\\u2018Palace\":[418],\"ofSoviets'\":[419],\"(The\":[420],\"Communist\":[421],\"Tower\":[422],\"Babel),\":[424],\"\\u2018Dynamo\":[426],\"',\":[427],\"?\":[429],\"construction\":[436],\"Dniepostroi\":[439],\"Water\":[440],\"Plant\":[441],\"went\":[442,701],\"day\":[444],\"night,\":[446],\"winter\":[447],\"summer,\":[449],\"enormous\":[451],\"sacrifice\":[452],\"oflives\":[453],\"money\":[455],\"years,\":[457],\"now\":[459],\"functions\":[460],\"twelve\":[463],\"per\":[464],\"cent\":[465],\"capacity?\":[468],\"let\":[474],\"horses,\":[475],\"cows,\":[476],\"pigs\":[478],\"starve\":[479],\"lack\":[481],\"fodder\":[483],\"spending\":[485],\"tens\":[486],\"importing\":[489],\"trying\":[491],\"breed\":[493],\"rabbits,\":[494],\"which\":[495],\"certain\":[497],\"succumb\":[499],\"unsuitable\":[501],\"food\":[502],\"climate?\":[504],\"try\":[510],\"domesticate\":[512],\"Karelian\":[513],\"elks\":[514],\"Kamchatka\":[516],\"bears\":[517],\"instead?\":[518],\"import,\":[524],\"vicinity\":[527],\"Arctic\":[530],\"Circle,\":[531],\"purpose\":[534],\"ofbuilding\":[535],\"White\":[537],\"Sea\":[538],\"Baltic\":[540],\"Canal,\":[541],\"60,000\":[542],\"Usbeks\":[543],\"Khirghizians\":[545],\"southern\":[547],\"Russia\":[548],\"probably\":[551],\"perish\":[552],\"within\":[553],\"six\":[554],\"months?\":[555],\"All\":[556],\"revoltingly\":[559],\"stupid,\":[560],\"but\":[561,708],\"stupidity\":[563],\"armed\":[565],\"teeth.\":[568],\"2\":[569],\"Ivan\":[571],\"Solonevich\":[572],\"Paradise\":[576],\"Lost.\":[577],\"China\":[578],\"'s\":[579],\"basic\":[580],\"goals\":[581],\"criminal\":[583],\"reform\":[584],\"turn\":[587],\"ojfenders\":[588],\"dijferent\":[591],\"kind\":[592],\"person,\":[594],\"abides\":[597],\"law\":[600],\"supports\":[602],\"himself\":[603],\"herself\":[605],\"with\":[606,683,692],\"her\":[609],\"reestablish\":[614],\"these\":[615],\"free\":[618],\"citizens\":[619],\"society.\":[621],\"3\":[622],\"Beijing's\":[624],\"official\":[625],\"political\":[626],\"statement\":[627],\"existence\":[630],\"Laogai.\":[632],\"reader\":[635],\"finds\":[636],\"preposterous\":[638],\"exaggerated,\":[640],\"has\":[642],\"never\":[643],\"inside\":[645],\"prison,\":[648],\"lucky.\":[652],\"utterly\":[655],\"typical\":[656],\"ofthat\":[657],\"country,\":[658],\"today...The\":[660],\"times\":[662],\"I\":[663,680,700,715,737,743],\"encountered\":[664],\"prisoners\":[665],\"actually\":[666],\"thanking\":[667],\"government\":[669],\"jailers\":[672],\"sentences\":[675],\"had\":[677],\"given,\":[679],\"regarded\":[681],\"them\":[682],\"mixture\":[685],\"astonishment\":[687],\"scorn.\":[689],\"Later,\":[690],\"my\":[693,719],\"Ideological\":[694],\"Reviews\":[695],\"Prison\":[697],\"Number\":[698],\"One,\":[699],\"through\":[702,731],\"same\":[704],\"motions,\":[707],\"maintained\":[709],\"small\":[711],\"mental\":[712],\"reserve\":[713],\"onbz\":[717],\"protecting\":[718],\"skin:\":[720],\"That\":[721],\"form\":[724],\"expected\":[725],\"go\":[730],\"sentence\":[733],\"trouble.\":[735],\"Before\":[736],\"left\":[738],\"jails,\":[741],\"though,\":[742],\"writing\":[745],\"phrases\":[747],\"believing\":[749],\"them.\":[750],\"4\":[751],\"Bao\":[753],\"Ruo-Wang\":[754],\"Prisoner\":[756],\"Mao.\":[758]},\"cited_by_api_url\":\"https://api.openalex.org/works?filter=cites:W2257674859\",\"counts_by_year\":[{\"year\":2013,\"cited_by_count\":1}],\"updated_date\":\"2024-02-20T18:51:19.096305\",\"created_date\":\"2016-06-24\"}\r\n",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "The GULag and Laogai: A Comparative Study of Forced Labor through Camp Literature",
+				"creators": [
+					{
+						"firstName": "Stanley Joseph",
+						"lastName": "Stepanic",
+						"creatorType": "author"
+					}
+				],
+				"date": "2017-08-09",
+				"language": "en",
+				"university": "University of Virginia",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "camp"
+					},
+					{
+						"tag": "forced labor"
+					},
+					{
+						"tag": "gulag"
+					},
+					{
+						"tag": "laogai"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "{\"meta\":{\"count\":5,\"db_response_time_ms\":444,\"page\":1,\"per_page\":25,\"groups_count\":null},\"results\":[{\"id\":\"https://openalex.org/W2046245907\",\"doi\":\"https://doi.org/10.1109/tau.1965.1161805\",\"title\":\"On the audibility of amplifier phase distortion\",\"display_name\":\"On the audibility of amplifier phase distortion\",\"relevance_score\":0.99999994,\"publication_year\":1965,\"publication_date\":\"1965-07-01\",\"ids\":{\"openalex\":\"https://openalex.org/W2046245907\",\"doi\":\"https://doi.org/10.1109/tau.1965.1161805\",\"mag\":\"2046245907\"},\"language\":\"en\",\"primary_location\":{\"is_oa\":false,\"landing_page_url\":\"https://doi.org/10.1109/tau.1965.1161805\",\"pdf_url\":null,\"source\":{\"id\":\"https://openalex.org/S186564409\",\"display_name\":\"IEEE Transactions on Audio\",\"issn_l\":\"0096-1620\",\"issn\":[\"1558-2663\",\"0096-1620\"],\"is_oa\":false,\"is_in_doaj\":false,\"host_organization\":\"https://openalex.org/P4310319808\",\"host_organization_name\":\"Institute of Electrical and Electronics Engineers\",\"host_organization_lineage\":[\"https://openalex.org/P4310319808\"],\"host_organization_lineage_names\":[\"Institute of Electrical and Electronics Engineers\"],\"type\":\"journal\"},\"license\":null,\"version\":null,\"is_accepted\":false,\"is_published\":false},\"type\":\"article\",\"type_crossref\":\"journal-article\",\"indexed_in\":[\"crossref\"],\"open_access\":{\"is_oa\":false,\"oa_status\":\"closed\",\"oa_url\":null,\"any_repository_has_fulltext\":false},\"authorships\":[{\"author_position\":\"first\",\"author\":{\"id\":\"https://openalex.org/A5025692314\",\"display_name\":\"G. Wentworth\",\"orcid\":null},\"institutions\":[],\"countries\":[],\"is_corresponding\":true,\"raw_author_name\":\"G. Wentworth\",\"raw_affiliation_string\":\"Ridgmar Blvd. Fort Worth, Tex\",\"raw_affiliation_strings\":[\"Ridgmar Blvd. Fort Worth, Tex\"]}],\"countries_distinct_count\":0,\"institutions_distinct_count\":0,\"corresponding_author_ids\":[\"https://openalex.org/A5025692314\"],\"corresponding_institution_ids\":[],\"apc_list\":null,\"apc_paid\":null,\"has_fulltext\":true,\"fulltext_origin\":\"ngrams\",\"cited_by_count\":2,\"cited_by_percentile_year\":{\"min\":74,\"max\":78},\"biblio\":{\"volume\":\"AU-13\",\"issue\":\"4\",\"first_page\":\"99\",\"last_page\":\"99\"},\"is_retracted\":false,\"is_paratext\":false,\"primary_topic\":{\"id\":\"https://openalex.org/T10688\",\"display_name\":\"Image Denoising Techniques and Algorithms\",\"score\":0.5802,\"subfield\":{\"id\":\"https://openalex.org/subfields/1707\",\"display_name\":\"Computer Vision and Pattern Recognition\"},\"field\":{\"id\":\"https://openalex.org/fields/17\",\"display_name\":\"Computer Science\"},\"domain\":{\"id\":\"https://openalex.org/domains/3\",\"display_name\":\"Physical Sciences\"}},\"topics\":[{\"id\":\"https://openalex.org/T10688\",\"display_name\":\"Image Denoising Techniques and Algorithms\",\"score\":0.5802,\"subfield\":{\"id\":\"https://openalex.org/subfields/1707\",\"display_name\":\"Computer Vision and Pattern Recognition\"},\"field\":{\"id\":\"https://openalex.org/fields/17\",\"display_name\":\"Computer Science\"},\"domain\":{\"id\":\"https://openalex.org/domains/3\",\"display_name\":\"Physical Sciences\"}},{\"id\":\"https://openalex.org/T13493\",\"display_name\":\"Acousto-Optic Interaction in Crystalline Materials\",\"score\":0.5614,\"subfield\":{\"id\":\"https://openalex.org/subfields/3107\",\"display_name\":\"Atomic and Molecular Physics, and Optics\"},\"field\":{\"id\":\"https://openalex.org/fields/31\",\"display_name\":\"Physics and Astronomy\"},\"domain\":{\"id\":\"https://openalex.org/domains/3\",\"display_name\":\"Physical Sciences\"}},{\"id\":\"https://openalex.org/T10662\",\"display_name\":\"Guided Wave Structural Health Monitoring in Materials\",\"score\":0.5351,\"subfield\":{\"id\":\"https://openalex.org/subfields/2211\",\"display_name\":\"Mechanics of Materials\"},\"field\":{\"id\":\"https://openalex.org/fields/22\",\"display_name\":\"Engineering\"},\"domain\":{\"id\":\"https://openalex.org/domains/3\",\"display_name\":\"Physical Sciences\"}}],\"keywords\":[{\"keyword\":\"amplifier phase distortion\",\"score\":0.8078},{\"keyword\":\"audibility\",\"score\":0.5295}],\"concepts\":[{\"id\":\"https://openalex.org/C194257627\",\"wikidata\":\"https://www.wikidata.org/wiki/Q211554\",\"display_name\":\"Amplifier\",\"level\":3,\"score\":0.66258776},{\"id\":\"https://openalex.org/C126780896\",\"wikidata\":\"https://www.wikidata.org/wiki/Q899871\",\"display_name\":\"Distortion (music)\",\"level\":4,\"score\":0.65470827},{\"id\":\"https://openalex.org/C57747864\",\"wikidata\":\"https://www.wikidata.org/wiki/Q7180948\",\"display_name\":\"Phase distortion\",\"level\":3,\"score\":0.60850114},{\"id\":\"https://openalex.org/C44280652\",\"wikidata\":\"https://www.wikidata.org/wiki/Q104837\",\"display_name\":\"Phase (matter)\",\"level\":2,\"score\":0.51192963},{\"id\":\"https://openalex.org/C24890656\",\"wikidata\":\"https://www.wikidata.org/wiki/Q82811\",\"display_name\":\"Acoustics\",\"level\":1,\"score\":0.477577},{\"id\":\"https://openalex.org/C192562407\",\"wikidata\":\"https://www.wikidata.org/wiki/Q228736\",\"display_name\":\"Materials science\",\"level\":0,\"score\":0.44682446},{\"id\":\"https://openalex.org/C119599485\",\"wikidata\":\"https://www.wikidata.org/wiki/Q43035\",\"display_name\":\"Electrical engineering\",\"level\":1,\"score\":0.43042603},{\"id\":\"https://openalex.org/C121332964\",\"wikidata\":\"https://www.wikidata.org/wiki/Q413\",\"display_name\":\"Physics\",\"level\":0,\"score\":0.34204704},{\"id\":\"https://openalex.org/C127413603\",\"wikidata\":\"https://www.wikidata.org/wiki/Q11023\",\"display_name\":\"Engineering\",\"level\":0,\"score\":0.33855706},{\"id\":\"https://openalex.org/C106131492\",\"wikidata\":\"https://www.wikidata.org/wiki/Q3072260\",\"display_name\":\"Filter (signal processing)\",\"level\":2,\"score\":0.09166792},{\"id\":\"https://openalex.org/C46362747\",\"wikidata\":\"https://www.wikidata.org/wiki/Q173431\",\"display_name\":\"CMOS\",\"level\":2,\"score\":0.0},{\"id\":\"https://openalex.org/C62520636\",\"wikidata\":\"https://www.wikidata.org/wiki/Q944\",\"display_name\":\"Quantum mechanics\",\"level\":1,\"score\":0.0}],\"mesh\":[],\"locations_count\":1,\"locations\":[{\"is_oa\":false,\"landing_page_url\":\"https://doi.org/10.1109/tau.1965.1161805\",\"pdf_url\":null,\"source\":{\"id\":\"https://openalex.org/S186564409\",\"display_name\":\"IEEE Transactions on Audio\",\"issn_l\":\"0096-1620\",\"issn\":[\"1558-2663\",\"0096-1620\"],\"is_oa\":false,\"is_in_doaj\":false,\"host_organization\":\"https://openalex.org/P4310319808\",\"host_organization_name\":\"Institute of Electrical and Electronics Engineers\",\"host_organization_lineage\":[\"https://openalex.org/P4310319808\"],\"host_organization_lineage_names\":[\"Institute of Electrical and Electronics Engineers\"],\"type\":\"journal\"},\"license\":null,\"version\":null,\"is_accepted\":false,\"is_published\":false}],\"best_oa_location\":null,\"sustainable_development_goals\":[{\"score\":0.74,\"id\":\"https://metadata.un.org/sdg/7\",\"display_name\":\"Affordable and clean energy\"}],\"grants\":[],\"referenced_works_count\":0,\"referenced_works\":[],\"related_works\":[\"https://openalex.org/W2116460786\",\"https://openalex.org/W2626065499\",\"https://openalex.org/W2074878601\",\"https://openalex.org/W1918166830\",\"https://openalex.org/W2060986946\",\"https://openalex.org/W2136031634\",\"https://openalex.org/W2084404188\",\"https://openalex.org/W4247383620\",\"https://openalex.org/W3113937270\",\"https://openalex.org/W1568978649\"],\"ngrams_url\":\"https://api.openalex.org/works/W2046245907/ngrams\",\"abstract_inverted_index\":null,\"cited_by_api_url\":\"https://api.openalex.org/works?filter=cites:W2046245907\",\"counts_by_year\":[],\"updated_date\":\"2024-02-27T07:19:02.045114\",\"created_date\":\"2016-06-24\"},{\"id\":\"https://openalex.org/W4237963058\",\"doi\":\"https://doi.org/10.1056/nejm198301133080228\",\"title\":\"Notices\",\"display_name\":\"Notices\",\"relevance_score\":0.99999994,\"publication_year\":1983,\"publication_date\":\"1983-01-13\",\"ids\":{\"openalex\":\"https://openalex.org/W4237963058\",\"doi\":\"https://doi.org/10.1056/nejm198301133080228\"},\"language\":null,\"primary_location\":{\"is_oa\":false,\"landing_page_url\":\"https://doi.org/10.1056/nejm198301133080228\",\"pdf_url\":null,\"source\":{\"id\":\"https://openalex.org/S62468778\",\"display_name\":\"The New England Journal of Medicine\",\"issn_l\":\"0028-4793\",\"issn\":[\"0028-4793\",\"1533-4406\"],\"is_oa\":false,\"is_in_doaj\":false,\"host_organization\":\"https://openalex.org/P4310320239\",\"host_organization_name\":\"Massachusetts Medical Society\",\"host_organization_lineage\":[\"https://openalex.org/P4310320239\"],\"host_organization_lineage_names\":[\"Massachusetts Medical Society\"],\"type\":\"journal\"},\"license\":null,\"version\":null,\"is_accepted\":false,\"is_published\":false},\"type\":\"article\",\"type_crossref\":\"journal-article\",\"indexed_in\":[\"crossref\"],\"open_access\":{\"is_oa\":false,\"oa_status\":\"closed\",\"oa_url\":null,\"any_repository_has_fulltext\":false},\"authorships\":[],\"countries_distinct_count\":0,\"institutions_distinct_count\":0,\"corresponding_author_ids\":[],\"corresponding_institution_ids\":[],\"apc_list\":null,\"apc_paid\":null,\"has_fulltext\":false,\"cited_by_count\":0,\"cited_by_percentile_year\":{\"min\":0,\"max\":60},\"biblio\":{\"volume\":\"308\",\"issue\":\"2\",\"first_page\":\"112\",\"last_page\":\"112\"},\"is_retracted\":false,\"is_paratext\":false,\"primary_topic\":null,\"topics\":[],\"keywords\":[],\"concepts\":[{\"id\":\"https://openalex.org/C71924100\",\"wikidata\":\"https://www.wikidata.org/wiki/Q11190\",\"display_name\":\"Medicine\",\"level\":0,\"score\":0.90406847}],\"mesh\":[],\"locations_count\":1,\"locations\":[{\"is_oa\":false,\"landing_page_url\":\"https://doi.org/10.1056/nejm198301133080228\",\"pdf_url\":null,\"source\":{\"id\":\"https://openalex.org/S62468778\",\"display_name\":\"The New England Journal of Medicine\",\"issn_l\":\"0028-4793\",\"issn\":[\"0028-4793\",\"1533-4406\"],\"is_oa\":false,\"is_in_doaj\":false,\"host_organization\":\"https://openalex.org/P4310320239\",\"host_organization_name\":\"Massachusetts Medical Society\",\"host_organization_lineage\":[\"https://openalex.org/P4310320239\"],\"host_organization_lineage_names\":[\"Massachusetts Medical Society\"],\"type\":\"journal\"},\"license\":null,\"version\":null,\"is_accepted\":false,\"is_published\":false}],\"best_oa_location\":null,\"sustainable_development_goals\":[],\"grants\":[],\"referenced_works_count\":0,\"referenced_works\":[],\"related_works\":[\"https://openalex.org/W2048182022\",\"https://openalex.org/W2748952813\",\"https://openalex.org/W2899084033\",\"https://openalex.org/W3032375762\",\"https://openalex.org/W1995515455\",\"https://openalex.org/W2080531066\",\"https://openalex.org/W3108674512\",\"https://openalex.org/W1506200166\",\"https://openalex.org/W2604872355\",\"https://openalex.org/W3031052312\"],\"ngrams_url\":\"https://api.openalex.org/works/W4237963058/ngrams\",\"abstract_inverted_index\":null,\"cited_by_api_url\":\"https://api.openalex.org/works?filter=cites:W4237963058\",\"counts_by_year\":[],\"updated_date\":\"2024-03-03T21:00:09.353994\",\"created_date\":\"2022-05-12\"},{\"id\":\"https://openalex.org/W4239223537\",\"doi\":\"https://doi.org/10.4018/978-1-7998-7705-9.ch090\",\"title\":\"The Big Data Research Ecosystem\",\"display_name\":\"The Big Data Research Ecosystem\",\"relevance_score\":0.99999994,\"publication_year\":2020,\"publication_date\":\"2020-11-27\",\"ids\":{\"openalex\":\"https://openalex.org/W4239223537\",\"doi\":\"https://doi.org/10.4018/978-1-7998-7705-9.ch090\"},\"language\":\"en\",\"primary_location\":{\"is_oa\":false,\"landing_page_url\":\"https://doi.org/10.4018/978-1-7998-7705-9.ch090\",\"pdf_url\":null,\"source\":{\"id\":\"https://openalex.org/S4306463409\",\"display_name\":\"IGI Global eBooks\",\"issn_l\":null,\"issn\":null,\"is_oa\":false,\"is_in_doaj\":false,\"host_organization\":\"https://openalex.org/P4310320424\",\"host_organization_name\":\"IGI Global\",\"host_organization_lineage\":[\"https://openalex.org/P4310320424\"],\"host_organization_lineage_names\":[\"IGI Global\"],\"type\":\"ebook platform\"},\"license\":null,\"version\":null,\"is_accepted\":false,\"is_published\":false},\"type\":\"book-chapter\",\"type_crossref\":\"book-chapter\",\"indexed_in\":[\"crossref\"],\"open_access\":{\"is_oa\":false,\"oa_status\":\"closed\",\"oa_url\":null,\"any_repository_has_fulltext\":false},\"authorships\":[{\"author_position\":\"first\",\"author\":{\"id\":\"https://openalex.org/A5079822857\",\"display_name\":\"Moses John Strydom\",\"orcid\":\"https://orcid.org/0000-0002-8865-7474\"},\"institutions\":[{\"id\":\"https://openalex.org/I165390105\",\"display_name\":\"University of South Africa\",\"ror\":\"https://ror.org/048cwvf49\",\"country_code\":\"ZA\",\"type\":\"education\",\"lineage\":[\"https://openalex.org/I165390105\"]}],\"countries\":[\"ZA\"],\"is_corresponding\":false,\"raw_author_name\":\"Moses John Strydom\",\"raw_affiliation_string\":\"University of South Africa, South Africa\",\"raw_affiliation_strings\":[\"University of South Africa, South Africa\"]},{\"author_position\":\"last\",\"author\":{\"id\":\"https://openalex.org/A5016670485\",\"display_name\":\"Sheryl Buckley\",\"orcid\":\"https://orcid.org/0000-0002-2393-4741\"},\"institutions\":[{\"id\":\"https://openalex.org/I165390105\",\"display_name\":\"University of South Africa\",\"ror\":\"https://ror.org/048cwvf49\",\"country_code\":\"ZA\",\"type\":\"education\",\"lineage\":[\"https://openalex.org/I165390105\"]}],\"countries\":[\"ZA\"],\"is_corresponding\":false,\"raw_author_name\":\"Sheryl Buckley\",\"raw_affiliation_string\":\"University of South Africa, South Africa\",\"raw_affiliation_strings\":[\"University of South Africa, South Africa\"]}],\"countries_distinct_count\":1,\"institutions_distinct_count\":1,\"corresponding_author_ids\":[],\"corresponding_institution_ids\":[],\"apc_list\":null,\"apc_paid\":null,\"has_fulltext\":false,\"cited_by_count\":0,\"cited_by_percentile_year\":{\"min\":0,\"max\":67},\"biblio\":{\"volume\":null,\"issue\":null,\"first_page\":\"2027\",\"last_page\":\"2057\"},\"is_retracted\":false,\"is_paratext\":false,\"primary_topic\":{\"id\":\"https://openalex.org/T11891\",\"display_name\":\"Impact of Big Data Analytics on Business Performance\",\"score\":0.9997,\"subfield\":{\"id\":\"https://openalex.org/subfields/1404\",\"display_name\":\"Management Information Systems\"},\"field\":{\"id\":\"https://openalex.org/fields/14\",\"display_name\":\"Business, Management and Accounting\"},\"domain\":{\"id\":\"https://openalex.org/domains/2\",\"display_name\":\"Social Sciences\"}},\"topics\":[{\"id\":\"https://openalex.org/T11891\",\"display_name\":\"Impact of Big Data Analytics on Business Performance\",\"score\":0.9997,\"subfield\":{\"id\":\"https://openalex.org/subfields/1404\",\"display_name\":\"Management Information Systems\"},\"field\":{\"id\":\"https://openalex.org/fields/14\",\"display_name\":\"Business, Management and Accounting\"},\"domain\":{\"id\":\"https://openalex.org/domains/2\",\"display_name\":\"Social Sciences\"}},{\"id\":\"https://openalex.org/T14280\",\"display_name\":\"Impact of Big Data on Society and Industry\",\"score\":0.9881,\"subfield\":{\"id\":\"https://openalex.org/subfields/1802\",\"display_name\":\"Information Systems and Management\"},\"field\":{\"id\":\"https://openalex.org/fields/18\",\"display_name\":\"Decision Sciences\"},\"domain\":{\"id\":\"https://openalex.org/domains/2\",\"display_name\":\"Social Sciences\"}},{\"id\":\"https://openalex.org/T11719\",\"display_name\":\"Data Quality Assessment and Improvement\",\"score\":0.9859,\"subfield\":{\"id\":\"https://openalex.org/subfields/1803\",\"display_name\":\"Management Science and Operations Research\"},\"field\":{\"id\":\"https://openalex.org/fields/18\",\"display_name\":\"Decision Sciences\"},\"domain\":{\"id\":\"https://openalex.org/domains/2\",\"display_name\":\"Social Sciences\"}}],\"keywords\":[{\"keyword\":\"big data research ecosystem\",\"score\":0.9748},{\"keyword\":\"big data\",\"score\":0.6606}],\"concepts\":[{\"id\":\"https://openalex.org/C75684735\",\"wikidata\":\"https://www.wikidata.org/wiki/Q858810\",\"display_name\":\"Big data\",\"level\":2,\"score\":0.8965882},{\"id\":\"https://openalex.org/C2522767166\",\"wikidata\":\"https://www.wikidata.org/wiki/Q2374463\",\"display_name\":\"Data science\",\"level\":1,\"score\":0.73832947},{\"id\":\"https://openalex.org/C9652623\",\"wikidata\":\"https://www.wikidata.org/wiki/Q190109\",\"display_name\":\"Field (mathematics)\",\"level\":2,\"score\":0.63086545},{\"id\":\"https://openalex.org/C63882131\",\"wikidata\":\"https://www.wikidata.org/wiki/Q17122954\",\"display_name\":\"Strengths and weaknesses\",\"level\":2,\"score\":0.5127207},{\"id\":\"https://openalex.org/C2776291640\",\"wikidata\":\"https://www.wikidata.org/wiki/Q2912517\",\"display_name\":\"Value (mathematics)\",\"level\":2,\"score\":0.500679},{\"id\":\"https://openalex.org/C98045186\",\"wikidata\":\"https://www.wikidata.org/wiki/Q205663\",\"display_name\":\"Process (computing)\",\"level\":2,\"score\":0.47819757},{\"id\":\"https://openalex.org/C539667460\",\"wikidata\":\"https://www.wikidata.org/wiki/Q2414942\",\"display_name\":\"Management science\",\"level\":1,\"score\":0.3904409},{\"id\":\"https://openalex.org/C41008148\",\"wikidata\":\"https://www.wikidata.org/wiki/Q21198\",\"display_name\":\"Computer science\",\"level\":0,\"score\":0.38717905},{\"id\":\"https://openalex.org/C55587333\",\"wikidata\":\"https://www.wikidata.org/wiki/Q1133029\",\"display_name\":\"Engineering ethics\",\"level\":1,\"score\":0.33696997},{\"id\":\"https://openalex.org/C127413603\",\"wikidata\":\"https://www.wikidata.org/wiki/Q11023\",\"display_name\":\"Engineering\",\"level\":0,\"score\":0.20919424},{\"id\":\"https://openalex.org/C124101348\",\"wikidata\":\"https://www.wikidata.org/wiki/Q172491\",\"display_name\":\"Data mining\",\"level\":1,\"score\":0.09868121},{\"id\":\"https://openalex.org/C111472728\",\"wikidata\":\"https://www.wikidata.org/wiki/Q9471\",\"display_name\":\"Epistemology\",\"level\":1,\"score\":0.09483838},{\"id\":\"https://openalex.org/C33923547\",\"wikidata\":\"https://www.wikidata.org/wiki/Q395\",\"display_name\":\"Mathematics\",\"level\":0,\"score\":0.0},{\"id\":\"https://openalex.org/C119857082\",\"wikidata\":\"https://www.wikidata.org/wiki/Q2539\",\"display_name\":\"Machine learning\",\"level\":1,\"score\":0.0},{\"id\":\"https://openalex.org/C202444582\",\"wikidata\":\"https://www.wikidata.org/wiki/Q837863\",\"display_name\":\"Pure mathematics\",\"level\":1,\"score\":0.0},{\"id\":\"https://openalex.org/C111919701\",\"wikidata\":\"https://www.wikidata.org/wiki/Q9135\",\"display_name\":\"Operating system\",\"level\":1,\"score\":0.0},{\"id\":\"https://openalex.org/C138885662\",\"wikidata\":\"https://www.wikidata.org/wiki/Q5891\",\"display_name\":\"Philosophy\",\"level\":0,\"score\":0.0}],\"mesh\":[],\"locations_count\":1,\"locations\":[{\"is_oa\":false,\"landing_page_url\":\"https://doi.org/10.4018/978-1-7998-7705-9.ch090\",\"pdf_url\":null,\"source\":{\"id\":\"https://openalex.org/S4306463409\",\"display_name\":\"IGI Global eBooks\",\"issn_l\":null,\"issn\":null,\"is_oa\":false,\"is_in_doaj\":false,\"host_organization\":\"https://openalex.org/P4310320424\",\"host_organization_name\":\"IGI Global\",\"host_organization_lineage\":[\"https://openalex.org/P4310320424\"],\"host_organization_lineage_names\":[\"IGI Global\"],\"type\":\"ebook platform\"},\"license\":null,\"version\":null,\"is_accepted\":false,\"is_published\":false}],\"best_oa_location\":null,\"sustainable_development_goals\":[],\"grants\":[],\"referenced_works_count\":55,\"referenced_works\":[\"https://openalex.org/W174892117\",\"https://openalex.org/W841229804\",\"https://openalex.org/W916305875\",\"https://openalex.org/W1177011000\",\"https://openalex.org/W1729469618\",\"https://openalex.org/W1967228906\",\"https://openalex.org/W2007338412\",\"https://openalex.org/W2043896876\",\"https://openalex.org/W2109574129\",\"https://openalex.org/W2118023920\",\"https://openalex.org/W2159128662\",\"https://openalex.org/W2202488771\",\"https://openalex.org/W2261525379\",\"https://openalex.org/W2269816967\",\"https://openalex.org/W2276640131\",\"https://openalex.org/W2287388632\",\"https://openalex.org/W2290480557\",\"https://openalex.org/W2307193480\",\"https://openalex.org/W2379922473\",\"https://openalex.org/W2393015989\",\"https://openalex.org/W2395492686\",\"https://openalex.org/W2398958885\",\"https://openalex.org/W2412675936\",\"https://openalex.org/W2417029388\",\"https://openalex.org/W2468725466\",\"https://openalex.org/W2506205276\",\"https://openalex.org/W2529628152\",\"https://openalex.org/W2533835508\",\"https://openalex.org/W2557108776\",\"https://openalex.org/W2571665755\",\"https://openalex.org/W2582605192\",\"https://openalex.org/W2583655187\",\"https://openalex.org/W2589699175\",\"https://openalex.org/W2593865443\",\"https://openalex.org/W2603280631\",\"https://openalex.org/W2605195075\",\"https://openalex.org/W2605610514\",\"https://openalex.org/W2605660454\",\"https://openalex.org/W2624543473\",\"https://openalex.org/W2734575787\",\"https://openalex.org/W2736503637\",\"https://openalex.org/W2739265471\",\"https://openalex.org/W2750764235\",\"https://openalex.org/W2753588101\",\"https://openalex.org/W2755741740\",\"https://openalex.org/W2763310390\",\"https://openalex.org/W2763473974\",\"https://openalex.org/W2765564498\",\"https://openalex.org/W2766908073\",\"https://openalex.org/W2767547957\",\"https://openalex.org/W2772452442\",\"https://openalex.org/W2774112958\",\"https://openalex.org/W2788448133\",\"https://openalex.org/W2802730911\",\"https://openalex.org/W3099185017\"],\"related_works\":[\"https://openalex.org/W4390608645\",\"https://openalex.org/W4233347783\",\"https://openalex.org/W4295769391\",\"https://openalex.org/W4247566972\",\"https://openalex.org/W2960264696\",\"https://openalex.org/W3090563135\",\"https://openalex.org/W2497432351\",\"https://openalex.org/W4206777497\",\"https://openalex.org/W2972220648\",\"https://openalex.org/W2910064364\"],\"ngrams_url\":\"https://api.openalex.org/works/W4239223537/ngrams\",\"abstract_inverted_index\":{\"Big\":[0],\"data\":[1,28,102,127],\"is\":[2,30,34],\"the\":[3,26,53,96],\"emerging\":[4],\"field\":[5,54,99],\"where\":[6],\"innovative\":[7],\"technology\":[8,46],\"offers\":[9],\"new\":[10],\"ways\":[11],\"to\":[12,36,55,110,141],\"extract\":[13],\"value\":[14],\"from\":[15],\"an\":[16,88],\"unequivocal\":[17],\"plethora\":[18],\"of\":[19,74,92,100,113,125],\"available\":[20],\"information.\":[21],\"By\":[22],\"its\":[23],\"fundamental\":[24],\"characteristic,\":[25],\"big\":[27,101,126,143],\"ecosystem\":[29],\"highly\":[31],\"conjectural\":[32],\"and\":[33,38,47,67,82,116,134,138],\"susceptible\":[35],\"continuous\":[37],\"rapid\":[39],\"evolution\":[40],\"in\":[41,45,57,95,122],\"line\":[42],\"with\":[43],\"developments\":[44],\"opportunities,\":[48],\"a\":[49,71],\"situation\":[50],\"that\":[51],\"predisposes\":[52],\"research\":[56,103],\"very\":[58],\"brief\":[59],\"time\":[60],\"spans.\":[61],\"Against\":[62],\"this\":[63],\"background,\":[64],\"both\":[65],\"academics\":[66],\"practitioners\":[68],\"oddly\":[69],\"have\":[70],\"limited\":[72],\"understanding\":[73],\"how\":[75],\"organizations\":[76],\"translate\":[77],\"potential\":[78],\"into\":[79],\"actual\":[80],\"social\":[81],\"economic\":[83],\"value.\":[84],\"This\":[85],\"chapter\":[86],\"conducts\":[87],\"in-depth\":[89],\"systematic\":[90],\"review\":[91],\"existing\":[93],\"penchants\":[94],\"rapidly\":[97],\"developing\":[98],\"and,\":[104],\"thereafter,\":[105],\"systematically\":[106],\"reviewed\":[107],\"these\":[108],\"studies\":[109],\"identify\":[111],\"some\":[112],\"their\":[114],\"weaknesses\":[115],\"challenges.\":[117],\"The\":[118],\"authors\":[119],\"argue\":[120],\"that,\":[121],\"practice,\":[123],\"most\":[124],\"surveys\":[128],\"do\":[129],\"not\":[130],\"focus\":[131],\"on\":[132],\"technologies,\":[133],\"instead\":[135],\"present\":[136],\"algorithms\":[137],\"approaches\":[139],\"employed\":[140],\"process\":[142],\"data.\":[144]},\"cited_by_api_url\":\"https://api.openalex.org/works?filter=cites:W4239223537\",\"counts_by_year\":[],\"updated_date\":\"2024-02-25T19:34:08.400474\",\"created_date\":\"2022-05-12\"},{\"id\":\"https://openalex.org/W78857221\",\"doi\":null,\"title\":\"RELATIVE BIOLOGICAL EFFECTIVENESS OF HIGH ENERGY PROTONS AFFECTING CABBAGE SEEDS\",\"display_name\":\"RELATIVE BIOLOGICAL EFFECTIVENESS OF HIGH ENERGY PROTONS AFFECTING CABBAGE SEEDS\",\"relevance_score\":0.99999994,\"publication_year\":1966,\"publication_date\":\"1966-08-01\",\"ids\":{\"openalex\":\"https://openalex.org/W78857221\",\"mag\":\"78857221\"},\"language\":\"de\",\"primary_location\":{\"is_oa\":false,\"landing_page_url\":\"http://www.osti.gov/scitech/biblio/4528110\",\"pdf_url\":null,\"source\":{\"id\":\"https://openalex.org/S4210171837\",\"display_name\":\"Genetika\",\"issn_l\":\"0534-0012\",\"issn\":[\"1820-6069\",\"0534-0012\"],\"is_oa\":true,\"is_in_doaj\":false,\"host_organization\":\"https://openalex.org/P4310321594\",\"host_organization_name\":\"Serbian Genetics Society\",\"host_organization_lineage\":[\"https://openalex.org/P4310321594\"],\"host_organization_lineage_names\":[\"Serbian Genetics Society\"],\"type\":\"journal\"},\"license\":null,\"version\":null,\"is_accepted\":false,\"is_published\":false},\"type\":\"article\",\"type_crossref\":\"journal-article\",\"indexed_in\":[],\"open_access\":{\"is_oa\":false,\"oa_status\":\"closed\",\"oa_url\":null,\"any_repository_has_fulltext\":false},\"authorships\":[{\"author_position\":\"first\",\"author\":{\"id\":\"https://openalex.org/A5007998022\",\"display_name\":\"L.V. Nevzgodina\",\"orcid\":null},\"institutions\":[],\"countries\":[],\"is_corresponding\":false,\"raw_author_name\":\"L.V. Nevzgodina\",\"raw_affiliation_string\":\"\",\"raw_affiliation_strings\":[]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5068277177\",\"display_name\":\"\\u0412. \\u0413. \\u041a\\u0443\\u0437\\u043d\\u0435\\u0446\\u043e\\u0432\",\"orcid\":\"https://orcid.org/0000-0003-1996-0055\"},\"institutions\":[],\"countries\":[],\"is_corresponding\":false,\"raw_author_name\":\"V.G. Kuznetsov\",\"raw_affiliation_string\":\"\",\"raw_affiliation_strings\":[]},{\"author_position\":\"last\",\"author\":{\"id\":\"https://openalex.org/A5004871662\",\"display_name\":\"Sychkov\",\"orcid\":null},\"institutions\":[],\"countries\":[],\"is_corresponding\":false,\"raw_author_name\":\"Sychkov\",\"raw_affiliation_string\":\"\",\"raw_affiliation_strings\":[]}],\"countries_distinct_count\":0,\"institutions_distinct_count\":0,\"corresponding_author_ids\":[],\"corresponding_institution_ids\":[],\"apc_list\":null,\"apc_paid\":null,\"has_fulltext\":false,\"cited_by_count\":0,\"cited_by_percentile_year\":{\"min\":0,\"max\":66},\"biblio\":{\"volume\":null,\"issue\":null,\"first_page\":null,\"last_page\":null},\"is_retracted\":false,\"is_paratext\":false,\"primary_topic\":{\"id\":\"https://openalex.org/T12976\",\"display_name\":\"Influence of Magnetic Fields on Biological Systems\",\"score\":0.1936,\"subfield\":{\"id\":\"https://openalex.org/subfields/1314\",\"display_name\":\"Physiology\"},\"field\":{\"id\":\"https://openalex.org/fields/13\",\"display_name\":\"Biochemistry, Genetics and Molecular Biology\"},\"domain\":{\"id\":\"https://openalex.org/domains/1\",\"display_name\":\"Life Sciences\"}},\"topics\":[{\"id\":\"https://openalex.org/T12976\",\"display_name\":\"Influence of Magnetic Fields on Biological Systems\",\"score\":0.1936,\"subfield\":{\"id\":\"https://openalex.org/subfields/1314\",\"display_name\":\"Physiology\"},\"field\":{\"id\":\"https://openalex.org/fields/13\",\"display_name\":\"Biochemistry, Genetics and Molecular Biology\"},\"domain\":{\"id\":\"https://openalex.org/domains/1\",\"display_name\":\"Life Sciences\"}},{\"id\":\"https://openalex.org/T12639\",\"display_name\":\"Global Energy Transition and Fossil Fuel Depletion\",\"score\":0.1922,\"subfield\":{\"id\":\"https://openalex.org/subfields/2105\",\"display_name\":\"Renewable Energy, Sustainability and the Environment\"},\"field\":{\"id\":\"https://openalex.org/fields/21\",\"display_name\":\"Energy\"},\"domain\":{\"id\":\"https://openalex.org/domains/3\",\"display_name\":\"Physical Sciences\"}},{\"id\":\"https://openalex.org/T13776\",\"display_name\":\"Medicinal and Therapeutic Potential of Sea Buckthorn\",\"score\":0.1719,\"subfield\":{\"id\":\"https://openalex.org/subfields/2707\",\"display_name\":\"Complementary and alternative medicine\"},\"field\":{\"id\":\"https://openalex.org/fields/27\",\"display_name\":\"Medicine\"},\"domain\":{\"id\":\"https://openalex.org/domains/4\",\"display_name\":\"Health Sciences\"}}],\"keywords\":[{\"keyword\":\"cabbage seeds\",\"score\":0.622},{\"keyword\":\"high energy protons\",\"score\":0.5826},{\"keyword\":\"relative biological effectiveness\",\"score\":0.2662}],\"concepts\":[{\"id\":\"https://openalex.org/C39432304\",\"wikidata\":\"https://www.wikidata.org/wiki/Q188847\",\"display_name\":\"Environmental science\",\"level\":0,\"score\":0.39743245},{\"id\":\"https://openalex.org/C86803240\",\"wikidata\":\"https://www.wikidata.org/wiki/Q420\",\"display_name\":\"Biology\",\"level\":0,\"score\":0.36749262},{\"id\":\"https://openalex.org/C144027150\",\"wikidata\":\"https://www.wikidata.org/wiki/Q48803\",\"display_name\":\"Horticulture\",\"level\":1,\"score\":0.34196246}],\"mesh\":[],\"locations_count\":1,\"locations\":[{\"is_oa\":false,\"landing_page_url\":\"http://www.osti.gov/scitech/biblio/4528110\",\"pdf_url\":null,\"source\":{\"id\":\"https://openalex.org/S4210171837\",\"display_name\":\"Genetika\",\"issn_l\":\"0534-0012\",\"issn\":[\"1820-6069\",\"0534-0012\"],\"is_oa\":true,\"is_in_doaj\":false,\"host_organization\":\"https://openalex.org/P4310321594\",\"host_organization_name\":\"Serbian Genetics Society\",\"host_organization_lineage\":[\"https://openalex.org/P4310321594\"],\"host_organization_lineage_names\":[\"Serbian Genetics Society\"],\"type\":\"journal\"},\"license\":null,\"version\":null,\"is_accepted\":false,\"is_published\":false}],\"best_oa_location\":null,\"sustainable_development_goals\":[{\"score\":0.53,\"id\":\"https://metadata.un.org/sdg/2\",\"display_name\":\"Zero hunger\"}],\"grants\":[],\"referenced_works_count\":0,\"referenced_works\":[],\"related_works\":[\"https://openalex.org/W7475701\",\"https://openalex.org/W17057142\",\"https://openalex.org/W22326495\",\"https://openalex.org/W72313218\",\"https://openalex.org/W91982152\",\"https://openalex.org/W98590474\",\"https://openalex.org/W126479662\",\"https://openalex.org/W135474527\",\"https://openalex.org/W136277763\",\"https://openalex.org/W137814310\",\"https://openalex.org/W206653402\",\"https://openalex.org/W234420188\",\"https://openalex.org/W241081558\",\"https://openalex.org/W278696559\",\"https://openalex.org/W329171942\",\"https://openalex.org/W865308638\",\"https://openalex.org/W1993604795\",\"https://openalex.org/W2266389294\",\"https://openalex.org/W2270463542\",\"https://openalex.org/W3194140224\"],\"ngrams_url\":\"https://api.openalex.org/works/W78857221/ngrams\",\"abstract_inverted_index\":null,\"cited_by_api_url\":\"https://api.openalex.org/works?filter=cites:W78857221\",\"counts_by_year\":[],\"updated_date\":\"2024-02-25T13:03:22.988032\",\"created_date\":\"2016-06-24\"},{\"id\":\"https://openalex.org/W2358372115\",\"doi\":null,\"title\":\"Reasons and Preventions of the Credit Risk with Village Banks\",\"display_name\":\"Reasons and Preventions of the Credit Risk with Village Banks\",\"relevance_score\":0.99999994,\"publication_year\":2012,\"publication_date\":\"2012-01-01\",\"ids\":{\"openalex\":\"https://openalex.org/W2358372115\",\"mag\":\"2358372115\"},\"language\":\"en\",\"primary_location\":{\"is_oa\":false,\"landing_page_url\":\"https://en.cnki.com.cn/Article_en/CJFDTOTAL-SQZJ201203023.htm\",\"pdf_url\":null,\"source\":{\"id\":\"https://openalex.org/S2764379636\",\"display_name\":\"Journal of Shangqiu Vocational and Technical College\",\"issn_l\":null,\"issn\":null,\"is_oa\":false,\"is_in_doaj\":false,\"host_organization\":null,\"host_organization_name\":null,\"host_organization_lineage\":[],\"host_organization_lineage_names\":[],\"type\":\"journal\"},\"license\":null,\"version\":null,\"is_accepted\":false,\"is_published\":false},\"type\":\"article\",\"type_crossref\":\"journal-article\",\"indexed_in\":[],\"open_access\":{\"is_oa\":false,\"oa_status\":\"closed\",\"oa_url\":null,\"any_repository_has_fulltext\":false},\"authorships\":[{\"author_position\":\"first\",\"author\":{\"id\":\"https://openalex.org/A5072691128\",\"display_name\":\"Ying Pang\",\"orcid\":\"https://orcid.org/0000-0001-6195-2150\"},\"institutions\":[{\"id\":\"https://openalex.org/I40963666\",\"display_name\":\"Central China Normal University\",\"ror\":\"https://ror.org/03x1jna21\",\"country_code\":\"CN\",\"type\":\"education\",\"lineage\":[\"https://openalex.org/I40963666\"]}],\"countries\":[\"CN\"],\"is_corresponding\":true,\"raw_author_name\":\"Pang Ying\",\"raw_affiliation_string\":\"Economic College, Central China Normal University, Wuhan 430079, China )\",\"raw_affiliation_strings\":[\"Economic College, Central China Normal University, Wuhan 430079, China )\"]}],\"countries_distinct_count\":1,\"institutions_distinct_count\":1,\"corresponding_author_ids\":[\"https://openalex.org/A5072691128\"],\"corresponding_institution_ids\":[\"https://openalex.org/I40963666\"],\"apc_list\":null,\"apc_paid\":null,\"has_fulltext\":false,\"cited_by_count\":0,\"cited_by_percentile_year\":{\"min\":0,\"max\":70},\"biblio\":{\"volume\":null,\"issue\":null,\"first_page\":null,\"last_page\":null},\"is_retracted\":false,\"is_paratext\":false,\"primary_topic\":{\"id\":\"https://openalex.org/T10987\",\"display_name\":\"Microfinance, Gender Empowerment, and Economic Development\",\"score\":0.7316,\"subfield\":{\"id\":\"https://openalex.org/subfields/2002\",\"display_name\":\"Economics and Econometrics\"},\"field\":{\"id\":\"https://openalex.org/fields/20\",\"display_name\":\"Economics, Econometrics and Finance\"},\"domain\":{\"id\":\"https://openalex.org/domains/2\",\"display_name\":\"Social Sciences\"}},\"topics\":[{\"id\":\"https://openalex.org/T10987\",\"display_name\":\"Microfinance, Gender Empowerment, and Economic Development\",\"score\":0.7316,\"subfield\":{\"id\":\"https://openalex.org/subfields/2002\",\"display_name\":\"Economics and Econometrics\"},\"field\":{\"id\":\"https://openalex.org/fields/20\",\"display_name\":\"Economics, Econometrics and Finance\"},\"domain\":{\"id\":\"https://openalex.org/domains/2\",\"display_name\":\"Social Sciences\"}}],\"keywords\":[{\"keyword\":\"credit risk\",\"score\":0.6668},{\"keyword\":\"preventions\",\"score\":0.2534}],\"concepts\":[{\"id\":\"https://openalex.org/C178350159\",\"wikidata\":\"https://www.wikidata.org/wiki/Q162714\",\"display_name\":\"Credit risk\",\"level\":2,\"score\":0.69062895},{\"id\":\"https://openalex.org/C182306322\",\"wikidata\":\"https://www.wikidata.org/wiki/Q1779371\",\"display_name\":\"Order (exchange)\",\"level\":2,\"score\":0.6181609},{\"id\":\"https://openalex.org/C144133560\",\"wikidata\":\"https://www.wikidata.org/wiki/Q4830453\",\"display_name\":\"Business\",\"level\":0,\"score\":0.6125847},{\"id\":\"https://openalex.org/C24308983\",\"wikidata\":\"https://www.wikidata.org/wiki/Q5183781\",\"display_name\":\"Credit reference\",\"level\":3,\"score\":0.59351885},{\"id\":\"https://openalex.org/C68842666\",\"wikidata\":\"https://www.wikidata.org/wiki/Q1070699\",\"display_name\":\"Credit history\",\"level\":2,\"score\":0.57673407},{\"id\":\"https://openalex.org/C31348098\",\"wikidata\":\"https://www.wikidata.org/wiki/Q3423719\",\"display_name\":\"Credit enhancement\",\"level\":4,\"score\":0.5681863},{\"id\":\"https://openalex.org/C2982805371\",\"wikidata\":\"https://www.wikidata.org/wiki/Q104493\",\"display_name\":\"Risk prevention\",\"level\":2,\"score\":0.48103765},{\"id\":\"https://openalex.org/C180879305\",\"wikidata\":\"https://www.wikidata.org/wiki/Q590998\",\"display_name\":\"Credit crunch\",\"level\":2,\"score\":0.43411663},{\"id\":\"https://openalex.org/C10138342\",\"wikidata\":\"https://www.wikidata.org/wiki/Q43015\",\"display_name\":\"Finance\",\"level\":1,\"score\":0.41794646},{\"id\":\"https://openalex.org/C73283319\",\"wikidata\":\"https://www.wikidata.org/wiki/Q1416617\",\"display_name\":\"Financial system\",\"level\":1,\"score\":0.36988437},{\"id\":\"https://openalex.org/C162118730\",\"wikidata\":\"https://www.wikidata.org/wiki/Q1128453\",\"display_name\":\"Actuarial science\",\"level\":1,\"score\":0.34195477},{\"id\":\"https://openalex.org/C112930515\",\"wikidata\":\"https://www.wikidata.org/wiki/Q4389547\",\"display_name\":\"Risk analysis (engineering)\",\"level\":1,\"score\":0.22332808}],\"mesh\":[],\"locations_count\":1,\"locations\":[{\"is_oa\":false,\"landing_page_url\":\"https://en.cnki.com.cn/Article_en/CJFDTOTAL-SQZJ201203023.htm\",\"pdf_url\":null,\"source\":{\"id\":\"https://openalex.org/S2764379636\",\"display_name\":\"Journal of Shangqiu Vocational and Technical College\",\"issn_l\":null,\"issn\":null,\"is_oa\":false,\"is_in_doaj\":false,\"host_organization\":null,\"host_organization_name\":null,\"host_organization_lineage\":[],\"host_organization_lineage_names\":[],\"type\":\"journal\"},\"license\":null,\"version\":null,\"is_accepted\":false,\"is_published\":false}],\"best_oa_location\":null,\"sustainable_development_goals\":[],\"grants\":[],\"referenced_works_count\":0,\"referenced_works\":[],\"related_works\":[\"https://openalex.org/W2348633948\",\"https://openalex.org/W2351788559\",\"https://openalex.org/W2354090623\",\"https://openalex.org/W2355993715\",\"https://openalex.org/W2357332618\",\"https://openalex.org/W2358595772\",\"https://openalex.org/W2359558374\",\"https://openalex.org/W2361023201\",\"https://openalex.org/W2364845452\",\"https://openalex.org/W2364984641\",\"https://openalex.org/W2365176669\",\"https://openalex.org/W2369743027\",\"https://openalex.org/W2374288397\",\"https://openalex.org/W2379826515\",\"https://openalex.org/W2380611485\",\"https://openalex.org/W2385249515\",\"https://openalex.org/W2386016711\",\"https://openalex.org/W2388342831\",\"https://openalex.org/W2392239461\",\"https://openalex.org/W2393937760\"],\"ngrams_url\":\"https://api.openalex.org/works/W2358372115/ngrams\",\"abstract_inverted_index\":{\"Village\":[0],\"banks\":[1],\"are\":[2,23],\"the\":[3,7,26,34,38,45,51,54,57,61,73,76,90],\"core\":[4],\"strength\":[5],\"of\":[6,13,25,42,53,56,66,92],\"new\":[8],\"rural\":[9,30,68],\"financial\":[10,69],\"institutions.But\":[11],\"because\":[12],\"their\":[14],\"own\":[15],\"development\":[16,43],\"is\":[17],\"not\":[18],\"perfect\":[19],\"and\":[20,63,71,84,87],\"many\":[21],\"people\":[22],\"lack\":[24],\"credit\":[27,58,77,95],\"consciousness\":[28],\"in\":[29,37],\"area,credit\":[31],\"risk\":[32],\"becomes\":[33],\"outstanding\":[35],\"problem\":[36],\"village\":[39,93],\"banks'\":[40,94],\"process\":[41],\"at\":[44],\"present\":[46],\"stage.This\":[47],\"article\":[48],\"starts\":[49],\"from\":[50],\"form\":[52],\"expression\":[55],\"risk,combining\":[59],\"with\":[60,75,89],\"characteristic\":[62],\"special\":[64],\"status\":[65],\"our\":[67],\"market.Analyzing\":[70],\"discussing\":[72],\"reasons\":[74],\"risk,in\":[78],\"order\":[79],\"putting\":[80],\"forward\":[81],\"some\":[82],\"positive\":[83],\"effective\":[85],\"countermeasures\":[86],\"suggestions\":[88],\"prevention\":[91],\"risk.\":[96]},\"cited_by_api_url\":\"https://api.openalex.org/works?filter=cites:W2358372115\",\"counts_by_year\":[],\"updated_date\":\"2024-03-01T20:11:08.405481\",\"created_date\":\"2016-06-24\"}],\"group_by\":[]}\r\n",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "On the audibility of amplifier phase distortion",
+				"creators": [
+					{
+						"firstName": "G.",
+						"lastName": "Wentworth",
+						"creatorType": "author"
+					}
+				],
+				"date": "1965-07-01",
+				"DOI": "10.1109/tau.1965.1161805",
+				"ISSN": "1558-2663,0096-1620",
+				"issue": "4",
+				"language": "en",
+				"pages": "99",
+				"publicationTitle": "IEEE Transactions on Audio",
+				"volume": "AU-13",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "amplifier phase distortion"
+					},
+					{
+						"tag": "audibility"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			},
+			{
+				"itemType": "journalArticle",
+				"title": "Notices",
+				"creators": [],
+				"date": "1983-01-13",
+				"DOI": "10.1056/nejm198301133080228",
+				"ISSN": "0028-4793,1533-4406",
+				"issue": "2",
+				"pages": "112",
+				"publicationTitle": "The New England Journal of Medicine",
+				"volume": "308",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			},
+			{
+				"itemType": "bookSection",
+				"title": "The Big Data Research Ecosystem",
+				"creators": [
+					{
+						"firstName": "Moses John",
+						"lastName": "Strydom",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sheryl",
+						"lastName": "Buckley",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020-11-27",
+				"bookTitle": "IGI Global eBooks",
+				"language": "en",
+				"pages": "2027-2057",
+				"publisher": "IGI Global",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "big data"
+					},
+					{
+						"tag": "big data research ecosystem"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			},
+			{
+				"itemType": "journalArticle",
+				"title": "Relative Biological Effectiveness of High Energy Protons Affecting Cabbage Seeds",
+				"creators": [
+					{
+						"firstName": "L. V.",
+						"lastName": "Nevzgodina",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "В. Г.",
+						"lastName": "Кузнецов",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "",
+						"lastName": "Sychkov",
+						"creatorType": "author"
+					}
+				],
+				"date": "1966-08-01",
+				"ISSN": "1820-6069,0534-0012",
+				"language": "de",
+				"publicationTitle": "Genetika",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "cabbage seeds"
+					},
+					{
+						"tag": "high energy protons"
+					},
+					{
+						"tag": "relative biological effectiveness"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			},
+			{
+				"itemType": "journalArticle",
+				"title": "Reasons and Preventions of the Credit Risk with Village Banks",
+				"creators": [
+					{
+						"firstName": "Ying",
+						"lastName": "Pang",
+						"creatorType": "author"
+					}
+				],
+				"date": "2012-01-01",
+				"language": "en",
+				"publicationTitle": "Journal of Shangqiu Vocational and Technical College",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "credit risk"
+					},
+					{
+						"tag": "preventions"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
+
 /** END TEST CASES **/
