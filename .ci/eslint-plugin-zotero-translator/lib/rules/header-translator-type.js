@@ -47,7 +47,7 @@ module.exports = {
 					return;
 				}
 
-				for (const name of ['detectWeb', 'doWeb', 'detectImport', 'doImport', 'doExport']) {
+				for (const name of ['detectWeb', 'doWeb', 'detectImport', 'doImport', 'doExport', 'detectSearch', 'doSearch']) {
 					const handler = functions.includes(name);
 					const mode = name.replace(/^(detect|do)/, '').toLowerCase();
 					const bit = type[mode];
@@ -59,9 +59,19 @@ module.exports = {
 						return;
 					}
 					if (!handler && (translatorType & bit)) {
+						let message = `translatorType specifies ${mode} (${bit}), but no ${name} present`;
+						if (translatorType & type.web && mode !== 'web') {
+							// Lots of common errors involve web translator developers not understanding
+							// translator type jargon and checking too many boxes - checking "search"
+							// because the translator supports search pages, or "import" because it
+							// imports items from the site.
+							// Be extra explicit when it seems like that might be the situation.
+							message += `. This web translator is probably NOT a${bit <= 2 ? 'n' : ''} ${mode} translator, `
+								+ `even if it supports "${mode}" pages or "${mode}ing". Uncheck "${mode}" in Scaffold.`;
+						}
 						context.report({
 							loc: { start: { line: 1, column: 1 } },
-							message: `translatorType specifies ${mode} (${bit}), but no ${name} present`,
+							message,
 						});
 						return;
 					}
