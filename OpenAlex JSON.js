@@ -105,8 +105,7 @@ function doImport() {
 function parseIndividual(data) {
 	let OAtype = data.type;
 	// Z.debug(OAtype)
-	let type = "document"; // default to document
-	type = mappingTypes[OAtype];
+	let type = mappingTypes[OAtype] || "document";
 	var item = new Zotero.Item(type);
 	item.title = data.title;
 	// fix all caps titles
