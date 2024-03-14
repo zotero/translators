@@ -2,14 +2,14 @@
 	"translatorID": "03c4b906-8cb2-4850-a771-697cbd92c2a1",
 	"label": "CBC",
 	"creator": "Geoff Banh",
-	"target": "^https?:\\/\\/www\\.cbc\\.ca",
+	"target": "^https?:\\/\\/www\\.cbc\\.ca/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-08 23:10:27"
+	"lastUpdated": "2024-03-14 19:01:01"
 }
 
 /*
@@ -340,7 +340,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "The past, present and future of Canadian reggae",
+				"title": "Canadian reggae's past, present and future",
 				"creators": [
 					{
 						"firstName": "Kelsey",
@@ -436,5 +436,4 @@ var testCases = [
 		"items": "multiple"
 	}
 ]
-
 /** END TEST CASES **/
