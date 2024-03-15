@@ -8,9 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2020-10-14 14:41:53"
+	"lastUpdated": "2024-03-15 21:14:09"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
