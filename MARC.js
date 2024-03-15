@@ -113,7 +113,7 @@ function glueTogether(part1, part2, delimiter) {
 		return part1 + ' ' + part2;
 	}
 	// we only add the delimiter, if part1 is not ending with a punctation
-	if (part1.search(/[?:,.!;]\s*$/) > -1) {
+	if (/[?:,.!;]\s*$/.test(part1)) {
 		return part1 + ' ' + part2;
 	}
 	return part1 + delimiter + part2;
