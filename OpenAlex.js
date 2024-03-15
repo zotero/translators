@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-12 03:50:36"
+	"lastUpdated": "2024-03-15 21:06:17"
 }
 
 /*
@@ -37,7 +37,7 @@
 
 
 function detectWeb(doc, url) {
-	if (url.includes('/works/w')) {
+	if (/\/works\/w\d+/i.test(url) || /zoom=w\d+/.test(url)) {
 		return 'journalArticle'; // we'll default to
 	}
 	else if (getSearchResults(doc, true)) {
@@ -67,12 +67,16 @@ async function doWeb(doc, url) {
 		if (!items) return;
 		let ids = [];
 		for (let url of Object.keys(items)) {
-			ids.push(url.match(/\/(w\d+)/i)[1]);
+			ids.push(url.match(/zoom=(w\d+)/i)[1]);
 		}
 		await scrape(ids);
 	}
 	else {
-		await scrape([url.match(/\/(w\d+)/i)[1]]);
+		let id = url.match(/zoom=(w\d+)/i);
+		if (!id) {
+			id = url.match(/\/works\/(w\d+)/i);
+		}
+		await scrape([id[1]]);
 	}
 }
 
@@ -142,7 +146,51 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://openalex.org/works?page=1&filter=default.search%3Atest&sort=relevance_score%3Adesc&zoom=w2159306398",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Coefficient alpha and the internal structure of tests",
+				"creators": [
+					{
+						"firstName": "Lee J.",
+						"lastName": "Cronbach",
+						"creatorType": "author"
+					}
+				],
+				"date": "1951-09-01",
+				"DOI": "10.1007/bf02310555",
+				"ISSN": "0033-3123,1860-0980",
+				"issue": "3",
+				"language": "en",
+				"libraryCatalog": "OpenAlex",
+				"pages": "297-334",
+				"publicationTitle": "Psychometrika",
+				"volume": "16",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "alpha"
+					},
+					{
+						"tag": "internal structure"
+					},
+					{
+						"tag": "tests"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
-
 /** END TEST CASES **/
