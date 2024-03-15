@@ -410,7 +410,7 @@ record.prototype.translate = function (item) {
 			let authorTab = this.getFieldSubfields(i);
 			for (let j in authorTab) {
 				if (authorTab[j].a) {
-					item.creators.push({ lastName: authorTab[j].a, creatorType: "contributor", fieldMode: true });
+					item.creators.push({ lastName: authorTab[j].a, creatorType: "contributor", fieldMode: 1 });
 				}
 			}
 		}
@@ -534,7 +534,7 @@ record.prototype.translate = function (item) {
 						authorTab[j].a = authorTab[j].a.replace(/^[\s\u00A0.,/[\]:]+/, '')
 							.replace(/[\s\u00A0.,/[\]:]+$/, '')
 							.replace(/[\s\u00A0]+/, ' ');
-						creatorObject = { lastName: authorTab[j].a, creatorType: "contributor", fieldMode: true };
+						creatorObject = { lastName: authorTab[j].a, creatorType: "contributor", fieldMode: 1 };
 					}
 					// some heuristic for the default values:
 					// in a book without any person as a main entry (no 100 field)
