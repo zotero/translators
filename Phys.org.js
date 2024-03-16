@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-02-12 05:21:06"
+	"lastUpdated": "2024-03-16 06:11:50"
 }
 
 /*
@@ -86,6 +86,10 @@ async function scrape(doc, url) {
 		let [name, publisher] = byline.split(', ');
 		name = name.replace(/^by /, '');
 		item.creators = [ZU.cleanAuthor(name, 'author')];
+
+		// strip repeated tags that are on every page
+		item.tags = [];
+
 		if (publisher) {
 			item.extra = (item.extra ? item.extra + '\n' : '') + 'Original Publisher: ' + publisher;
 		}
@@ -138,35 +142,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "Materials"
-					},
-					{
-						"tag": "Nanotech"
-					},
-					{
-						"tag": "Physics"
-					},
-					{
-						"tag": "Physics News"
-					},
-					{
-						"tag": "Science"
-					},
-					{
-						"tag": "Science"
-					},
-					{
-						"tag": "Science news"
-					},
-					{
-						"tag": "Technology"
-					},
-					{
-						"tag": "Technology News"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -197,35 +173,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "Materials"
-					},
-					{
-						"tag": "Nanotech"
-					},
-					{
-						"tag": "Physics"
-					},
-					{
-						"tag": "Physics News"
-					},
-					{
-						"tag": "Science"
-					},
-					{
-						"tag": "Science"
-					},
-					{
-						"tag": "Science news"
-					},
-					{
-						"tag": "Technology"
-					},
-					{
-						"tag": "Technology News"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -257,35 +205,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "Materials"
-					},
-					{
-						"tag": "Nanotech"
-					},
-					{
-						"tag": "Physics"
-					},
-					{
-						"tag": "Physics News"
-					},
-					{
-						"tag": "Science"
-					},
-					{
-						"tag": "Science"
-					},
-					{
-						"tag": "Science news"
-					},
-					{
-						"tag": "Technology"
-					},
-					{
-						"tag": "Technology News"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
