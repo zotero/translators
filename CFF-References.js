@@ -71,8 +71,6 @@ function writeAuthors(itemCreators) {
 function doExport() {
 	var item;
 
-	var references_spacing = '    '
-
 	Zotero.write('# This CITATION.cff reference content was generated from Zotero.\n');
 	Zotero.write('references:\n');
 
