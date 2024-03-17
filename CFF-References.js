@@ -35,20 +35,20 @@
 */
 
 // set a global for spacing purposes under the references key of a citation.cff file
-var references_spacing = '    '
+var referencesSpacing = '    ';
 
 function writeKeywords(tags) {
 	if (!tags.length) return false;
 	let keywords = "\n";
 	for (let tag of tags) {
-		keywords += references_spacing + "  - " + tag.tag + "\n";
+		keywords += referencesSpacing + "  - " + tag.tag + "\n";
 	}
 	return keywords.replace(/\\n$/, "");
 }
 
 function writeDOI(itemDOI) {
 	if (!itemDOI) return false;
-	let doi = "\n" + references_spacing + "  - type: doi\n" + references_spacing + "    value: " + itemDOI + "\n";
+	let doi = "\n" + referencesSpacing + "  - type: doi\n" + referencesSpacing + "    value: " + itemDOI + "\n";
 	return doi;
 }
 
@@ -60,9 +60,9 @@ function writeAuthors(itemCreators) {
 	if (!itemAuthors.length) return false;
 	let authors = "\n";
 	for (let author of itemAuthors) {
-		authors += references_spacing + "  - family-names: " + author.lastName + "\n";
+		authors += referencesSpacing + "  - family-names: " + author.lastName + "\n";
 		if (author.firstName) {
-			authors += references_spacing + "    given-names: " + author.firstName + "\n";
+			authors += referencesSpacing + "    given-names: " + author.firstName + "\n";
 		}
 	}
 	return authors;
@@ -76,9 +76,8 @@ function doExport() {
 
 	// eslint-disable-next-line no-cond-assign
 	while (item = Zotero.nextItem()) {
-
 		var cff = {};
-		cff.title = ">-\n" + references_spacing + "  " + item.title + "\n";
+		cff.title = ">-\n" + referencesSpacing + "  " + item.title + "\n";
 		cff.abstract = item.abstractNote;
 		cff.type = item.itemType;
 		cff.license = item.rights;
@@ -96,21 +95,24 @@ function doExport() {
 		cff.identifiers = writeDOI(item.DOI);
 
 		// prep the entry as a new item
-		Zotero.write('  - ')
+		Zotero.write('  - ');
 
 		// loop through the cff elements and write output
 		for (let field in cff) {
 			if (!cff[field]) continue;
-			if( field == "title"){
+			if (field == "title") {
 				// rely on prep dash for item start above for titles
 				Zotero.write(field + ": " + cff[field]);
-			}else if (field == "abstract"){
+			}
+			else if (field == "abstract") {
 				// special case for abstract, which can sometimes be large
-				Zotero.write(references_spacing + field + ": |\n" + references_spacing + "  " + cff[field] + "\n");
-			}else if (field == "authors" || field == "keywords") {
-				Zotero.write(references_spacing + field + ": " + cff[field]);
-			}else {
-				Zotero.write(references_spacing + field + ": " + cff[field] + "\n");
+				Zotero.write(referencesSpacing + field + ": |\n" + referencesSpacing + "  " + cff[field] + "\n");
+			}
+			else if (field == "authors" || field == "keywords") {
+				Zotero.write(referencesSpacing + field + ": " + cff[field]);
+			}
+			else {
+				Zotero.write(referencesSpacing + field + ": " + cff[field] + "\n");
 			}
 		}
 	}
