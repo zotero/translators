@@ -18,7 +18,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2023-04-09 18:35:07"
+	"lastUpdated": "2024-03-18 01:19:20"
 }
 
 /*
@@ -2896,8 +2896,8 @@ var reversemappingTable = {
 	"{\\c l}"                          : "\u013C", // LATIN SMALL LETTER L WITH CEDILLA
 	"{\\v L}"                          : "\u013D", // LATIN CAPITAL LETTER L WITH CARON
 	"{\\v l}"                          : "\u013E", // LATIN SMALL LETTER L WITH CARON
-	"{\\L }"                           : "\u0141", //LATIN CAPITAL LETTER L WITH STROKE
-	"{\\l }"                           : "\u0142", //LATIN SMALL LETTER L WITH STROKE
+	"{\\L}"                           : "\u0141", //LATIN CAPITAL LETTER L WITH STROKE
+	"{\\l}"                           : "\u0142", //LATIN SMALL LETTER L WITH STROKE
 	"{\\'N}"                          : "\u0143", // LATIN CAPITAL LETTER N WITH ACUTE
 	"{\\'n}"                          : "\u0144", // LATIN SMALL LETTER N WITH ACUTE
 	"{\\c N}"                          : "\u0145", // LATIN CAPITAL LETTER N WITH CEDILLA
@@ -4196,6 +4196,35 @@ var testCases = [
 				"publicationTitle": "Phys. At. Nucl.",
 				"url": "https://cds.cern.ch/record/2855446",
 				"volume": "85",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@book{derbis1998poczucie,\r\ntitle={Poczucie jako{\\'s}ci {\\.z}ycia a swoboda dzia{\\l}ania i odpowiedzialno{\\'s}{\\'c}},\r\nauthor={Derbis, Romuald and Ba{\\'n}ka, Augustyn},\r\nyear={1998},\r\npublisher={Stowarzyszenie Psychologia i Architektura}\r\n}",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Poczucie jakości życia a swoboda działania i odpowiedzialność",
+				"creators": [
+					{
+						"firstName": "Romuald",
+						"lastName": "Derbis",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Augustyn",
+						"lastName": "Bańka",
+						"creatorType": "author"
+					}
+				],
+				"date": "1998",
+				"itemID": "derbis1998poczucie",
+				"publisher": "Stowarzyszenie Psychologia i Architektura",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
