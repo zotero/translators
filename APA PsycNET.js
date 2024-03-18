@@ -207,10 +207,10 @@ async function getIds(doc, url) {
 	}
 
 	// try to extract uid from the url
-	if (url.includes('/record/')) {
-		let m = url.match(/\/record\/([\d-]*)/);
-		if (m && m[1]) {
-			return m[1];
+	if (url.includes('/record/') || url.includes('/fulltext/')) {
+		let m = url.match(/\/(record|fulltext)\/([\d-]*)/);
+		if (m && m[2]) {
+			return m[2];
 		}
 	}
 
