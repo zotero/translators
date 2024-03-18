@@ -1,7 +1,7 @@
 {
 	"translatorID": "a5998785-222b-4459-9ce8-9c081d599af7",
 	"label": "Milli Kütüphane",
-	"creator": "Philipp Zumstein",
+	"creator": "Philipp Zumstein, Sebastian Karcher",
 	"target": "^https?://(www\\.)?kasif\\.mkutup\\.gov\\.tr/",
 	"minVersion": "4.0",
 	"maxVersion": "",
@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-10-01 17:23:23"
+	"lastUpdated": "2024-03-15 18:16:49"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017 Philipp Zumstein
+	Copyright © 2017-2024 Philipp Zumstein & Sebastian Karcher
 	
 	This file is part of Zotero.
 
@@ -36,40 +36,38 @@
 */
 
 
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
-
-
 function detectWeb(doc, url) {
-	if (url.indexOf('/SonucDetay.aspx?MakId=')>-1) {
+	if (url.includes('?MakId=')) {
 		return "book";
-	} else if (url.indexOf('/OpacArama.aspx?')>-1 && getSearchResults(doc, true)) {
+	}
+	else if (url.includes('/OpacArama') && getSearchResults(doc, url, true)) {
 		return "multiple";
 	}
-	Z.monitorDOMChanges(doc.getElementById('dvKapsam'), {childList: true});
+	Z.monitorDOMChanges(doc.getElementById('dvKapsam'), { childList: true });
+	return false;
 }
 
 
-function getSearchResults(doc, checkOnly) {
+function getSearchResults(doc, url, checkOnly) {
 	var items = {};
 	var found = false;
-
-	var rows = doc.querySelectorAll('.SonucDiv1');
-	
-	for (var i=0; i<rows.length; i++) {
-		var onclick = rows[i].onclick;
-		var href;
-		if (onclick) {
-			var param = onclick.toString().match(/Goster\((\d+),(\d+)\)/);
-			if (param) {
+	let baseURL = 'SonucDetay.aspx?MakId=';
+	if (url.includes("OpacAramaEn.aspx?")) { // English catalog
+		baseURL = 'SonucDetayEn.aspx?MakId=';
+	}
+	var rows = doc.querySelectorAll('div.DivSonuc');
+	for (let row of rows) {
+		let title = ZU.trimInternal(text(row, '.SonucBaslik'));
+		let id = attr(row, '.SonucDiv1', 'onclick');
+		let href;
+		if (id) {
+			let param = id.match(/Goster\((\d+),(\d+)\)/);
+			if (param && param[2] !== "1700") {
 				//we don't handle articles which don't have MARC data
-				if (param[2] !== "1700") {
-					href = 'SonucDetay.aspx?MakId=' + param[1];
-				}
+				href = baseURL + param[1];
+				if (!href || !title) continue;
 			}
 		}
-		var title = ZU.trimInternal(rows[i].textContent);
-		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
@@ -78,63 +76,56 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
-	} else {
-		scrape(doc, url);
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, url, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
+	}
+	else {
+		await scrape(doc);
 	}
 }
 
 
-function scrape(doc, url) {
-	
+async function scrape(doc) {
 	var lines = doc.querySelectorAll('#cntPlcPortal_grdMrc tr');
 	
-	//call MARC translator
-	var translator = Zotero.loadTranslator("import");
-	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
-	translator.getTranslatorObject(function (marc) {
+	let translator = Zotero.loadTranslator('import');
+	translator.setTranslator('a6ee60df-1ddc-4aae-bb25-45e0537be973'); // MARC
+	let marc = await translator.getTranslatorObject();
 
-		var record = new marc.record();
-		var newItem = new Zotero.Item();
-		//ignore the table headings in lines[0]
-		record.leader = text(lines[1], 'td', 4);
-		var fieldTag, indicators, fieldContent;
-		for (var j=2; j<lines.length; j++) {
-			//multiple lines with same fieldTag do not repeat it
-			//i.e. in these cases we will just take same value as before
-			if (text(lines[j], 'td', 0).trim().length>0) {
-				fieldTag = text(lines[j], 'td', 0);
-			}
-			indicators = text(lines[j], 'td', 1) + text(lines[j], 'td', 2);
-			fieldContent = '';
-			if (text(lines[j], 'td', 3).trim().length>0) {
-				fieldContent = marc.subfieldDelimiter + text(lines[j], 'td', 3);
-			}
-			fieldContent += text(lines[j], 'td', 4);
+	let record = new marc.record();
+	let newItem = new Zotero.Item();
+	//ignore the table headings in lines[0]
+	record.leader = text(lines[1], 'td', 4);
+	var fieldTag, indicators, fieldContent;
+	for (var j = 2; j < lines.length; j++) {
+		//multiple lines with same fieldTag do not repeat it
+		//i.e. in these cases we will just take same value as before
+		if (text(lines[j], 'td', 0).trim().length > 0) {
+			fieldTag = text(lines[j], 'td', 0);
+		}
+		indicators = text(lines[j], 'td', 1) + text(lines[j], 'td', 2);
+		fieldContent = '';
+		if (text(lines[j], 'td', 3).trim().length > 0) {
+			fieldContent = marc.subfieldDelimiter + text(lines[j], 'td', 3);
+		}
+		fieldContent += text(lines[j], 'td', 4);
 			
-			record.addField(fieldTag, indicators, fieldContent);
-		}
+		record.addField(fieldTag, indicators, fieldContent);
+	}
 		
-		record.translate(newItem);
+	record.translate(newItem);
 		
-		//don't save value "no publisher" = "yayl.y."
-		if (newItem.publisher == 'yayl.y.') {
-			delete newItem.publisher;
-		}
+	//don't save value "no publisher" = "yayl.y."
+	if (newItem.publisher == 'yayl.y.') {
+		delete newItem.publisher;
+	}
 		
-		newItem.complete();
-	});
+	newItem.complete();
 }
 
 /** BEGIN TEST CASES **/
@@ -207,6 +198,47 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://kasif.mkutup.gov.tr/SonucDetayEn.aspx?MakId=1705892",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Labor laws ın Turkey",
+				"creators": [
+					{
+						"lastName": "The İstanbul Chamber of Commerce",
+						"creatorType": "editor",
+						"fieldMode": 1
+					},
+					{
+						"firstName": "A. Murat",
+						"lastName": "Demircioğlu",
+						"creatorType": "editor"
+					}
+				],
+				"date": "1988",
+				"callNumber": "1989 AD 1093",
+				"language": "TUR",
+				"libraryCatalog": "Milli Kütüphane",
+				"numPages": "43",
+				"place": "İstanbul",
+				"publisher": "The Istanbul Chamber of Commerce",
+				"series": "ICOC Publication",
+				"seriesNumber": "1988-20",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kasif.mkutup.gov.tr/OpacAramaEn.aspx?Ara=test&DtSrc=0&fld=-1&NvBar=0",
+		"defer": true,
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
