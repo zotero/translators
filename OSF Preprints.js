@@ -41,7 +41,10 @@ const preprintType = ZU.fieldIsValidForType('title', 'preprint')
 	: 'report';
 
 function detectWeb(doc, url) {
-	if (text(doc, 'h1#preprintTitle')) {
+	if (url.includes('osf.io') && !url.includes('/preprints/')) {
+		return "webpage"; // Change this to capture as a webpage
+	}
+	else if (text(doc, 'h1#preprintTitle')) {
 		return preprintType;
 	}
 	else if (url.includes("discover?") && getSearchResults(doc, true)) {
@@ -143,6 +146,11 @@ function scrape(doc, url) {
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 
 	translator.setHandler('itemDone', function (obj, item) {
+		if (url.includes('osf.io')) {
+			item.itemType = "webpage";
+			item.data = "Date Created";
+			item.websiteType = "OSF Project";
+		}
 		if (preprintType != 'preprint') {
 			if (item.extra) {
 				item.extra += "\ntype: article";
