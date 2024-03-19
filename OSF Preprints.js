@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-04-04 18:35:34"
+	"lastUpdated": "2024-01-08 03:07:26"
 }
 
 /*
@@ -41,7 +41,10 @@ const preprintType = ZU.fieldIsValidForType('title', 'preprint')
 	: 'report';
 
 function detectWeb(doc, url) {
-	if (text(doc, 'h1#preprintTitle')) {
+	if (url.includes('osf.io') && !url.includes('/preprints/')) {
+		return "webpage"; // Change this to capture as a webpage
+	}
+	else if (text(doc, 'h1#preprintTitle')) {
 		return preprintType;
 	}
 	else if (url.includes("discover?") && getSearchResults(doc, true)) {
@@ -143,6 +146,7 @@ function scrape(doc, url) {
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 
 	translator.setHandler('itemDone', function (obj, item) {
+
 		if (preprintType != 'preprint') {
 			if (item.extra) {
 				item.extra += "\ntype: article";
@@ -158,6 +162,10 @@ function scrape(doc, url) {
 			}
 		}
 		item.libraryCatalog = "OSF Preprints";
+		if (url.includes('osf.io ') && !url.includes('/preprints/')) {
+			item.itemType = "webpage";
+			item.websiteType = "OSF Project";
+		}
 		item.complete();
 	});
 
@@ -166,6 +174,7 @@ function scrape(doc, url) {
 		trans.doWeb(doc, url);
 	});
 }
+
 
 
 /** BEGIN TEST CASES **/
@@ -244,7 +253,7 @@ var testCases = [
 		"defer": true,
 		"items": [
 			{
-				"itemType": "preprint",
+				"itemType": "webpage",
 				"title": "‘All In’: A Pragmatic Framework for COVID-19 Testing and Action on a Global Scale",
 				"creators": [
 					{
