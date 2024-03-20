@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-03 08:55:39"
+	"lastUpdated": "2024-03-20 14:43:12"
 }
 
 /*
@@ -59,9 +59,9 @@ Also supports some repositories based on Zenodo's pre-October 2023 Invenio code 
 const invenioPreRdmRepositories = ['www.fdr.uni-hamburg.de', 'rodare.hzdr.de', 'aperta.ulakbim.gov.tr', 'www.openaccessrepository.it', 'eic-zenodo.sdcc.bnl.gov'];
 
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	let collections;
-	if (url.includes(doc.location.hostname + '/record')) {
+	if (doc.location.pathname.startsWith('/record')) {
 		if (invenioPreRdmRepositories.includes(doc.location.hostname)) {
 			collections = ZU.xpath(doc, '//span[@class="pull-right"]/span[contains(@class, "label-default")]');
 		}
@@ -143,8 +143,6 @@ function getSearchResults(doc, checkOnly) {
 		found = true;
 		items[href] = title;
 	}
-	Zotero.debug('found?', found);
-	Zotero.debug('items', items);
 	return found ? items : false;
 }
 
@@ -192,7 +190,7 @@ async function scrape(doc, url) {
 	text = text.replace(/container_title/, "container-title");
 
 	var trans = Zotero.loadTranslator('import');
-	trans.setTranslator('bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7');
+	trans.setTranslator('bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7'); // CSL JSON
 	trans.setString(text);
 	trans.setHandler("itemDone", function (obj, item) {
 		item.itemType = detectWeb(doc, url);
@@ -257,6 +255,10 @@ async function scrape(doc, url) {
 		item.url = url;
 		if (abstract) item.abstractNote = abstract;
 
+		if (doc.location.hostname == "zenodo.org") {
+			item.libraryCatalog = "Zenodo";
+		}
+
 		item.itemID = "";
 		item.complete();
 	});
@@ -283,7 +285,7 @@ var testCases = [
 				"abstractNote": "Modern day manufacturers research and develop vehicles that are equipped\nwith steering assist to help drivers undertake manoeuvres. However the lack of\nresearch for a situation where one tie-rod experiences different strains than the\nopposite one leads to failure in the tie-rod assembly and misalignment in the wheels over time. The performance of the steering system would be improved if this information existed. This bachelor’s dissertation looks into this specific situation and conducts an examination on the tie-rods.\nA simple kinematic model is used to determine how the steering system moves\nwhen there is a steering input. An investigation has been conducted to determine how the system’s geometry affects the strains.\nThe experiment vehicle is a Formula Student car which is designed by the\nstudents of Coventry University. The tests performed show the difference in situations where the two front tyres are on a single surface, two different surfaces – one with high friction, the other with low friction and a situation where there’s an obstacle in the way of one of the tyres.\nThe experiment results show a major difference in strain in the front tie-rods in\nthe different situations. Interesting conclusions can be made due to the results for the different surface situation where one of the tyres receives similar results in bothcompression and tension, but the other one receives results with great difference.\nThis results given in the report can be a starting ground and help with the\nimprovement in steering systems if more research is conducted.",
 				"archive": "Zenodo",
 				"extra": "DOI: 10.5281/zenodo.54766",
-				"libraryCatalog": "InvenioRDM",
+				"libraryCatalog": "Zenodo",
 				"url": "https://zenodo.org/records/54766",
 				"attachments": [
 					{
@@ -373,7 +375,7 @@ var testCases = [
 				"date": "2002-11-26",
 				"abstractNote": "FIGURES 8-11. Savignia naniplopi sp. nov., female paratype. 8, epigyne, ventral view; 9, epigyne, posterior view; 10, epigyne, lateral view; 11, cleared vulva, ventral view. Scale bar: 8-10, 0.30 mm; 11, 0.13 mm.",
 				"extra": "DOI: 10.5281/zenodo.14837",
-				"libraryCatalog": "InvenioRDM",
+				"libraryCatalog": "Zenodo",
 				"shortTitle": "Figures 8-11 in A new Savignia from Cretan caves (Araneae",
 				"url": "https://zenodo.org/records/14837",
 				"attachments": [
@@ -434,7 +436,7 @@ var testCases = [
 				"ISBN": "9783943460728",
 				"abstractNote": "The comparison of sound sequences (words, morphemes) constitutes the core of many techniques and methods in historical linguistics. With the help of these techniques, corresponding sounds can be determined, historically related words can be identified, and the history of languages can be uncovered. So far, the application of traditional techniques for sequence comparison is very tedious and time-consuming, since scholars have to apply them manually, without computational support. In this study, algorithms from bioinformatics are used to develop computational methods for sequence comparison in historical linguistics. The new methods automatize several steps of the traditional comparative method and can thus help to ease the painstaking work of language comparison.",
 				"extra": "DOI: 10.5281/zenodo.11879",
-				"libraryCatalog": "InvenioRDM",
+				"libraryCatalog": "Zenodo",
 				"place": "Düsseldorf",
 				"publisher": "Düsseldorf University Press",
 				"url": "https://zenodo.org/records/11879",
@@ -504,8 +506,8 @@ var testCases = [
 				],
 				"date": "2016-02-10",
 				"DOI": "10.5281/zenodo.45756",
-				"abstractNote": "This submission includes a tar archive of bzipped diffraction images recorded with the ADSC Q315r detector at the Advanced Photon Source of Argonne National Laboratory, Structural Biology Center beam line 19-ID. Relevant meta data can be found in the headers of those diffraction images. Please find below the content of an input file XDS.INP for the program XDS (Kabsch, 2010), which may be used for data reduction. The \"NAME_TEMPLATE_OF_DATA_FRAMES=\" item inside XDS.INP may need to be edited to point to the location of the downloaded and untarred images. !!! Paste lines below in to a file named XDS.INP DETECTOR=ADSC  MINIMUM_VALID_PIXEL_VALUE=1  OVERLOAD= 65000 DIRECTION_OF_DETECTOR_X-AXIS= 1.0 0.0 0.0 DIRECTION_OF_DETECTOR_Y-AXIS= 0.0 1.0 0.0 TRUSTED_REGION=0.0 1.05 MAXIMUM_NUMBER_OF_JOBS=10 ORGX=   1582.82  ORGY=   1485.54 DETECTOR_DISTANCE= 150 ROTATION_AXIS= -1.0 0.0 0.0 OSCILLATION_RANGE=1 X-RAY_WAVELENGTH= 1.2821511 INCIDENT_BEAM_DIRECTION=0.0 0.0 1.0 FRACTION_OF_POLARIZATION=0.90 POLARIZATION_PLANE_NORMAL= 0.0 1.0 0.0 SPACE_GROUP_NUMBER=20 UNIT_CELL_CONSTANTS= 100.030   121.697    56.554    90.000    90.000    90.000 DATA_RANGE=1  180 BACKGROUND_RANGE=1 6 SPOT_RANGE=1 3 SPOT_RANGE=31 33 MAX_CELL_AXIS_ERROR=0.03 MAX_CELL_ANGLE_ERROR=2.0 TEST_RESOLUTION_RANGE=8.0 3.8 MIN_RFL_Rmeas= 50 MAX_FAC_Rmeas=2.0 VALUE_RANGE_FOR_TRUSTED_DETECTOR_PIXELS= 6000 30000 INCLUDE_RESOLUTION_RANGE=50.0 1.7 FRIEDEL'S_LAW= FALSE STARTING_ANGLE= -100      STARTING_FRAME=1 NAME_TEMPLATE_OF_DATA_FRAMES= ../x247398/t1.0???.img !!! End of XDS.INP",
-				"libraryCatalog": "InvenioRDM",
+				"abstractNote": "This submission includes a tar archive of bzipped diffraction images recorded with the ADSC Q315r detector at the Advanced Photon Source of Argonne National Laboratory, Structural Biology Center beam line 19-ID. Relevant meta data can be found in the headers of those diffraction images.\n\n\nPlease find below the content of an input file XDS.INP for the program XDS (Kabsch, 2010), which may be used for data reduction. The \"NAME_TEMPLATE_OF_DATA_FRAMES=\" item inside XDS.INP may need to be edited to point to the location of the downloaded and untarred images.\n\n\n!!! Paste lines below in to a file named XDS.INP\n\n\nDETECTOR=ADSC  MINIMUM_VALID_PIXEL_VALUE=1  OVERLOAD= 65000\nDIRECTION_OF_DETECTOR_X-AXIS= 1.0 0.0 0.0\nDIRECTION_OF_DETECTOR_Y-AXIS= 0.0 1.0 0.0\nTRUSTED_REGION=0.0 1.05\nMAXIMUM_NUMBER_OF_JOBS=10\nORGX=   1582.82  ORGY=   1485.54\nDETECTOR_DISTANCE= 150\nROTATION_AXIS= -1.0 0.0 0.0\nOSCILLATION_RANGE=1\nX-RAY_WAVELENGTH= 1.2821511\nINCIDENT_BEAM_DIRECTION=0.0 0.0 1.0\nFRACTION_OF_POLARIZATION=0.90\nPOLARIZATION_PLANE_NORMAL= 0.0 1.0 0.0\nSPACE_GROUP_NUMBER=20\nUNIT_CELL_CONSTANTS= 100.030   121.697    56.554    90.000    90.000    90.000\nDATA_RANGE=1  180\nBACKGROUND_RANGE=1 6\nSPOT_RANGE=1 3\nSPOT_RANGE=31 33\nMAX_CELL_AXIS_ERROR=0.03\nMAX_CELL_ANGLE_ERROR=2.0\nTEST_RESOLUTION_RANGE=8.0 3.8\nMIN_RFL_Rmeas= 50\nMAX_FAC_Rmeas=2.0\nVALUE_RANGE_FOR_TRUSTED_DETECTOR_PIXELS= 6000 30000\nINCLUDE_RESOLUTION_RANGE=50.0 1.7\nFRIEDEL'S_LAW= FALSE\nSTARTING_ANGLE= -100      STARTING_FRAME=1\nNAME_TEMPLATE_OF_DATA_FRAMES= ../x247398/t1.0???.img\n\n\n!!! End of XDS.INP",
+				"libraryCatalog": "Zenodo",
 				"repository": "Zenodo",
 				"url": "https://zenodo.org/records/45756",
 				"attachments": [
@@ -557,7 +559,7 @@ var testCases = [
 				"DOI": "10.5281/zenodo.569323",
 				"abstractNote": "In mulling over how to most productively respond to the reflections offered by Lahra Smith, Gary Goertz, and Patrick Jackson, I tried to place myself in the armchair of a Qualitative & Multi-Method Research reader. What big methodological questions, I asked myself, are raised by their reviews of my book? How might I weigh in, generatively, on those questions?",
 				"issue": "1/2",
-				"libraryCatalog": "InvenioRDM",
+				"libraryCatalog": "Zenodo",
 				"pages": "52-56",
 				"publicationTitle": "Qualitative & Multi-Method Research",
 				"url": "https://zenodo.org/records/569323",
@@ -616,7 +618,7 @@ var testCases = [
 				"abstractNote": "an R package for generating and working with codemeta",
 				"company": "Zenodo",
 				"extra": "DOI: 10.5281/zenodo.1048320",
-				"libraryCatalog": "InvenioRDM",
+				"libraryCatalog": "Zenodo",
 				"shortTitle": "ropensci/codemetar",
 				"url": "https://zenodo.org/records/1048320",
 				"versionNumber": "0.1.2",
@@ -654,7 +656,7 @@ var testCases = [
 				"date": "2023-06-28",
 				"DOI": "10.5281/zenodo.8092340",
 				"abstractNote": "This essay on the history of the DNA barcoding enterprise attempts to set the stage for the more scholarly contributions that follow. How did the enterprise begin? What were its goals, how did it develop, and to what degree are its goals being realized? We have taken a keen interest in the barcoding movement and its relationship to taxonomy, collections and biodiversity informatics more broadly considered. This essay integrates our two different perspectives on barcoding. DES was the Executive Secretary of the Consortium for the Barcode of Life from 2004 to 2017, with the mission to support the success of DNA barcoding without being directly involved in generating barcode data. RDMP viewed barcoding as an important entry into the landscape of biodiversity data, with many potential linkages to other components of the landscape. We also saw it as a critical step toward the era of international genomic research that was sure to follow. Like the Mercury Program that paved the way for lunar landings by the Apollo Program, we saw DNA barcoding as the proving grounds for the interdisciplinary and international cooperation that would be needed for success of whole-genome research.",
-				"libraryCatalog": "InvenioRDM",
+				"libraryCatalog": "Zenodo",
 				"repository": "Zenodo",
 				"shortTitle": "Creating Virtuous Cycles for DNA Barcoding",
 				"url": "https://zenodo.org/records/8092340",
