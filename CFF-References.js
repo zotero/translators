@@ -1,6 +1,6 @@
 {
 	"translatorID": "99A6641F-A8C2-4923-9BBB-0DA87F1E5187",
-	"label": "CFF-References",
+	"label": "CFF References",
 	"creator": "Sebastian Karcher, Dave Bunten",
 	"target": "cff",
 	"minVersion": "5.0",
@@ -14,7 +14,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2023 Sebastian Karcher
+	Copyright © 2024 Sebastian Karcher
 
 	This file is part of Zotero.
 
@@ -86,7 +86,12 @@ function doExport() {
 		cff.keywords = writeKeywords(item.tags);
 		cff.authors = writeAuthors(item.creators);
 		if (item.date) {
-			cff["date-released"] = ZU.strToISO(item.date);
+			// if we have a dataset or software, use date-released field
+			if (item.itemType == "dataset" || item.itemType == "computerProgram") {
+				cff["date-released"] = ZU.strToISO(item.date);
+			}
+			// include date published for any item types
+			cff["date-published"] = ZU.strToISO(item.date);
 		}
 		// get DOI from Extra for software; this will stop running automatically once software supports DOI
 		if (!ZU.fieldIsValidForType('DOI', item.itemType) && /^doi:/i.test(item.extra)) {
