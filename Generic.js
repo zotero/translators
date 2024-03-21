@@ -631,9 +631,9 @@ var testCases = [
 				"ISSN": "1821-9241",
 				"abstractNote": "The synergistic interaction between Human Immunodeficiency virus (HIV) disease and Malaria makes it mandatory for patients with HIV to respond appropriately in preventing and treating malaria. Such response will help to control the two diseases. This study assessed the knowledge of 495 patients attending the HIV clinic, in Lagos University Teaching Hospital, Nigeria.&nbsp; Their treatment seeking, preventive practices with regards to malaria, as well as the impact of socio &ndash; demographic / socio - economic status were assessed. Out of these patients, 245 (49.5 %) used insecticide treated bed nets; this practice was not influenced by socio &ndash; demographic or socio &ndash; economic factors.&nbsp; However, knowledge of the cause, knowledge of prevention of malaria, appropriate use of antimalarial drugs and seeking treatment from the right source increased with increasing level of education (p &lt; 0.05). A greater proportion of the patients, 321 (64.9 %) utilized hospitals, pharmacy outlets or health centres when they perceived an attack of malaria. Educational intervention may result in these patients seeking treatment from the right place when an attack of malaria fever is perceived.",
 				"issue": "4",
-				"journalAbbreviation": "1",
+				"journalAbbreviation": "Tanzania J Hlth Res",
 				"language": "en",
-				"libraryCatalog": "www.ajol.info",
+				"libraryCatalog": "DOI.org (Crossref)",
 				"publicationTitle": "Tanzania Journal of Health Research",
 				"rights": "Copyright (c)",
 				"url": "https://www.ajol.info/index.php/thrb/article/view/63347",
@@ -648,7 +648,26 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "HIV patients"
+					},
+					{
+						"tag": "Nigeria"
+					},
+					{
+						"tag": "knowledge"
+					},
+					{
+						"tag": "malaria"
+					},
+					{
+						"tag": "prevention"
+					},
+					{
+						"tag": "treatment"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -669,7 +688,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2011",
+				"date": "2011-11-19",
 				"abstractNote": "Why wait for federal action on incentives to reduce energy use and address  Greenhouse Gas (GHG) reductions (e.g. CO2), when we can take personal  actions right now in our private lives and in our communities? One such  initiative by private citizens working with Portsmouth NH officials resulted  in the installation of energy reducing lighting products on Court St. and  the benefits to taxpayers are still coming after over 4 years of operation.  This citizen initiative to save money and reduce CO2 emissions, while only  one small effort, could easily be duplicated in many towns and cities.  Replacing old lamps in just one street fixture with a more energy efficient  (Non-LED) lamp has resulted after 4 years of operation ($\\sim $15,000 hr.  life of product) in real electrical energy savings of $>$ {\\$}43. and CO2  emission reduction of $>$ 465 lbs. The return on investment (ROI) was less  than 2 years. This is much better than any financial investment available  today and far safer. Our street only had 30 such lamps installed; however,  the rest of Portsmouth (population 22,000) has at least another 150 street  lamp fixtures that are candidates for such an upgrade. The talk will also  address other energy reduction measures that green the planet and also put  more green in the pockets of citizens and municipalities.",
 				"conferenceName": "Climate Change and the Future of Nuclear Power",
 				"language": "en",
@@ -708,7 +727,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2012",
+				"date": "2012-03-09",
 				"DOI": "10.7275/R5KW5CXB",
 				"ISSN": "1947-508X",
 				"abstractNote": "The purpose of this paper is to examine the contemporary role of an eighteenth century bounty proclamation issued on the Penobscot Indians of Maine. We focus specifically on how the changing cultural context of the 1755 Spencer Phips Bounty Proclamation has transformed the document from serving as a tool for sanctioned violence to a tool of decolonization for the Indigenous peoples of Maine. We explore examples of the ways indigenous and non-indigenous people use the Phips Proclamation to illustrate past violence directed against Indigenous peoples. This exploration is enhanced with an analysis of the re-introduction of the Phips Proclamation using concepts of decolonization theory.",
@@ -730,7 +749,17 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Bounty Proclamations"
+					},
+					{
+						"tag": "Decolonization"
+					},
+					{
+						"tag": "Wabanaki"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -751,13 +780,13 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2012",
+				"date": "2012-02-01",
 				"abstractNote": "This thesis examines decentralized meta-reasoning. For a single agent or multiple agents, it may not be enough for agents to compute correct decisions if they do not do so in a timely or resource efficient fashion. The utility of agent decisions typically increases with decision quality, but decreases with computation time. The reasoning about one's computation process is referred to as meta-reasoning. Aspects of meta-reasoning considered in this thesis include the reasoning about how to allocate computational resources, including when to stop one type of computation and begin another, and when to stop all computation and report an answer. Given a computational model, this translates into computing how to schedule the basic computations that solve a problem. This thesis constructs meta-reasoning strategies for the purposes of monitoring and control in multi-agent settings, specifically settings that can be modeled by the Decentralized Partially Observable Markov Decision Process (Dec-POMDP). It uses decision theory to optimize computation for efficiency in time and space in communicative and non-communicative decentralized settings. Whereas base-level reasoning describes the optimization of actual agent behaviors, the meta-reasoning strategies produced by this thesis dynamically optimize the computational resources which lead to the selection of base-level behaviors.",
 				"extra": "DOI: 10.7275/n8e9-xy93",
 				"language": "en",
 				"libraryCatalog": "scholarworks.umass.edu",
 				"university": "University of Massachusetts Amherst",
-				"url": "https://scholarworks.umass.edu/open_access_dissertations/508",
+				"url": "https://scholarworks.umass.edu/cgi/viewcontent.cgi?article=1506&context=open_access_dissertations",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -768,7 +797,26 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Agents"
+					},
+					{
+						"tag": "Dec-POMDP"
+					},
+					{
+						"tag": "MDP"
+					},
+					{
+						"tag": "Meta-reasoning"
+					},
+					{
+						"tag": "Multiagent"
+					},
+					{
+						"tag": "Partial Observability"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -805,7 +853,6 @@ var testCases = [
 					}
 				],
 				"date": "2007-12",
-				"DOI": "10.1590/S0034-89102007000900015",
 				"ISSN": "0034-8910, 0034-8910, 1518-8787",
 				"abstractNote": "OBJETIVO: Descrever as impressões, experiências, conhecimentos, crenças e a receptividade de usuários de drogas injetáveis para participar das estratégias de testagem rápida para HIV. MÉTODOS: Estudo qualitativo exploratório foi conduzido entre usuários de drogas injetáveis, de dezembro de 2003 a fevereiro de 2004, em cinco cidades brasileiras, localizadas em quatro regiões do País. Um roteiro de entrevista semi-estruturado contendo questões fechadas e abertas foi usado para avaliar percepções desses usuários sobre procedimentos e formas alternativas de acesso e testagem. Foram realizadas 106 entrevistas, aproximadamente 26 por região. RESULTADOS: Características da população estudada, opiniões sobre o teste rápido e preferências por usar amostras de sangue ou saliva foram apresentadas junto com as vantagens e desvantagens associadas a cada opção. Os resultados mostraram a viabilidade do uso de testes rápidos entre usuários de drogas injetáveis e o interesse deles quanto à utilização destes métodos, especialmente se puderem ser equacionadas questões relacionadas à confidencialidade e confiabilidade dos testes. CONCLUSÕES: Os resultados indicam que os testes rápidos para HIV seriam bem recebidos por essa população. Esses testes podem ser considerados uma ferramenta valiosa, ao permitir que mais usuários de drogas injetáveis conheçam sua sorologia para o HIV e possam ser referidos para tratamento, como subsidiar a melhoria das estratégias de testagem entre usuários de drogas injetáveis.",
 				"journalAbbreviation": "Rev. Saúde Pública",
@@ -825,7 +872,35 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "AIDS serodiagnosis"
+					},
+					{
+						"tag": "Acquired immunodeficiency syndrome"
+					},
+					{
+						"tag": "Brazil"
+					},
+					{
+						"tag": "Diagnostic services"
+					},
+					{
+						"tag": "Diagnostic techniques and procedures"
+					},
+					{
+						"tag": "Health vulnerability"
+					},
+					{
+						"tag": "Qualitative research"
+					},
+					{
+						"tag": "Substance abuse"
+					},
+					{
+						"tag": "intravenous"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -856,12 +931,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2013/02/20",
+				"date": "2013/2/20",
 				"DOI": "10.1155/2013/868174",
-				"ISSN": "1024-123X",
+				"ISSN": "1024-123X, 1563-5147",
 				"abstractNote": "The problem of network-based robust filtering for stochastic systems with sensor nonlinearity is investigated in this paper. In the network environment, the effects of the sensor saturation, output quantization, and network-induced delay are taken into simultaneous consideration, and the output measurements received in the filter side are incomplete. The random delays are modeled as a linear function of the stochastic variable described by a Bernoulli random binary distribution. The derived criteria for performance analysis of the filtering-error system and filter design are proposed which can be solved by using convex optimization method. Numerical examples show the effectiveness of the design method.",
+				"journalAbbreviation": "Mathematical Problems in Engineering",
 				"language": "en",
-				"libraryCatalog": "www.hindawi.com",
+				"libraryCatalog": "DOI.org (Crossref)",
+				"pages": "1-11",
 				"publicationTitle": "Mathematical Problems in Engineering",
 				"url": "https://www.hindawi.com/journals/mpe/2013/868174/",
 				"volume": "2013",
@@ -896,8 +973,8 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2013-12-22T11:58:34-05:00",
-				"abstractNote": "Northwestern University recently condemned the American Studies Association boycott of Israel. Unlike some other schools that quit their institutional membership in the ASA over the boycott, Northwestern has not. Many of my Northwestern colleagues were about to start urging a similar withdrawal. Then we learned from our administration that despite being listed as in institutional …",
+				"date": "2013-12-22T16:58:34+00:00",
+				"abstractNote": "Northwestern University recently condemned the American Studies Association boycott of Israel. Unlike some other schools that quit their institutional membership in the ASA over the boycott, Northwestern has not. Many of my Northwestern colleagues were about to start urging a similar withdrawal. Then we learned from our administration that despite being listed as in institutional […]",
 				"blogTitle": "The Volokh Conspiracy",
 				"language": "en-US",
 				"url": "https://volokh.com/2013/12/22/northwestern-cant-quit-asa-boycott-member/",
@@ -948,7 +1025,17 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Managing yourself"
+					},
+					{
+						"tag": "Meeting management"
+					},
+					{
+						"tag": "Workspaces design"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -974,8 +1061,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2015-09-28 00:00",
+				"date": "2015-09-28",
 				"DOI": "10.16995/olh.46",
+				"ISSN": "2056-6700",
 				"issue": "1",
 				"language": "en",
 				"libraryCatalog": "olh.openlibhums.org",
@@ -1004,7 +1092,7 @@ var testCases = [
 		"detectedItemType": "multiple",
 		"items": [
 			{
-				"itemType": "webpage",
+				"itemType": "newspaperArticle",
 				"title": "#WheresRey and the big Star Wars toy controversy, explained",
 				"creators": [
 					{
@@ -1016,15 +1104,29 @@ var testCases = [
 				"date": "2016-01-07T08:20:02-05:00",
 				"abstractNote": "Excluding female characters in merchandise is an ongoing pattern.",
 				"language": "en",
+				"libraryCatalog": "www.vox.com",
+				"publicationTitle": "Vox",
 				"url": "https://www.vox.com/2016/1/7/10726296/wheres-rey-star-wars-monopoly",
-				"websiteTitle": "Vox",
 				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Culture"
+					},
+					{
+						"tag": "Front Page"
+					},
+					{
+						"tag": "Movies"
+					},
+					{
+						"tag": "Star Wars"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1032,7 +1134,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=334",
+		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=-5161",
 		"detectedItemType": "multiple",
 		"items": [
 			{
@@ -1106,7 +1208,7 @@ var testCases = [
 				"language": "eng",
 				"libraryCatalog": "www.diva-portal.org",
 				"shortTitle": "Mobility modeling for transport efficiency",
-				"url": "http://urn.kb.se/resolve?urn=urn:nbn:se:liu:diva-112443",
+				"url": "https://urn.kb.se/resolve?urn=urn:nbn:se:liu:diva-112443",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1117,7 +1219,14 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Transport Systems and Logistics"
+					},
+					{
+						"tag": "Transportteknik och logistik"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1138,7 +1247,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "1999/04/01",
+				"date": "2014-01-06T00:00:00Z",
 				"DOI": "10.1023/A:1021669308832",
 				"ISSN": "1572-9524",
 				"abstractNote": "This is a brief reply to S. Goldstein's article “Quantum theory without observers” in Physics Today. It is pointed out that Bohm's pilot wave theory is successful only because it keeps Schrödinger's (exact) wave mechanics unchanged, while the rest of it is observationally meaningless and solely based on classical prejudice.",
@@ -1161,7 +1270,32 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Biological and Medical Physics"
+					},
+					{
+						"tag": "Biophysics"
+					},
+					{
+						"tag": "Classical Mechanics"
+					},
+					{
+						"tag": "Classical and Quantum Gravitation"
+					},
+					{
+						"tag": "Condensed Matter Physics"
+					},
+					{
+						"tag": "Physics"
+					},
+					{
+						"tag": "Relativity Theory"
+					},
+					{
+						"tag": "general"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1182,16 +1316,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2000",
+				"date": "09/2000",
 				"DOI": "10.1353/kri.2008.0061",
 				"ISSN": "1538-5000",
 				"issue": "4",
+				"journalAbbreviation": "kri",
 				"language": "en",
-				"libraryCatalog": "muse.jhu.edu",
+				"libraryCatalog": "DOI.org (Crossref)",
 				"pages": "627-656",
 				"publicationTitle": "Kritika: Explorations in Russian and Eurasian History",
 				"shortTitle": "Serfs on the Move",
-				"url": "https://muse.jhu.edu/article/234097",
+				"url": "https://muse.jhu.edu/pub/28/article/234097",
 				"volume": "1",
 				"attachments": [
 					{
@@ -1235,7 +1370,35 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "35c3"
+					},
+					{
+						"tag": "9386"
+					},
+					{
+						"tag": "Chaos Computer Club"
+					},
+					{
+						"tag": "Hacker"
+					},
+					{
+						"tag": "Media"
+					},
+					{
+						"tag": "Science"
+					},
+					{
+						"tag": "Streaming"
+					},
+					{
+						"tag": "TV"
+					},
+					{
+						"tag": "Video"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1276,7 +1439,17 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Architectural theory"
+					},
+					{
+						"tag": "Teoria arquitectònica"
+					},
+					{
+						"tag": "Àrees temàtiques de la UPC::Arquitectura"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1284,7 +1457,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.pewresearch.org/fact-tank/2019/12/12/u-s-children-more-likely-than-children-in-other-countries-to-live-with-just-one-parent/",
+		"url": "https://www.pewresearch.org/short-reads/2019/12/12/u-s-children-more-likely-than-children-in-other-countries-to-live-with-just-one-parent/",
 		"detectedItemType": "multiple",
 		"items": [
 			{
@@ -1300,10 +1473,11 @@ var testCases = [
 				"abstractNote": "Almost a quarter of U.S. children under 18 live with one parent and no other adults, more than three times the share of children around the world who do so.",
 				"blogTitle": "Pew Research Center",
 				"language": "en-US",
-				"url": "https://www.pewresearch.org/fact-tank/2019/12/12/u-s-children-more-likely-than-children-in-other-countries-to-live-with-just-one-parent/",
+				"url": "https://www.pewresearch.org/short-reads/2019/12/12/u-s-children-more-likely-than-children-in-other-countries-to-live-with-just-one-parent/",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1318,7 +1492,7 @@ var testCases = [
 		"detectedItemType": "multiple",
 		"items": [
 			{
-				"itemType": "webpage",
+				"itemType": "book",
 				"title": "Conservation Research, Policy and Practice",
 				"creators": [
 					{
@@ -1352,12 +1526,15 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"date": "2020/04",
+				"date": "2020-04-16",
+				"ISBN": "9781108638210 9781108714587",
 				"abstractNote": "Conservation research is essential for advancing knowledge but to make an impact scientific evidence must influence conservation policies, decision making and practice. This raises a multitude of challenges. How should evidence be collated and presented to policymakers to maximise its impact? How can effective collaboration between conservation scientists and decision-makers be established? How can the resulting messages be communicated to bring about change? Emerging from a successful international symposium organised by the British Ecological Society and the Cambridge Conservation Initiative, this is the first book to practically address these questions across a wide range of conservation topics. Well-renowned experts guide readers through global case studies and their own experiences. A must-read for practitioners, researchers, graduate students and policymakers wishing to enhance the prospect of their work 'making a difference'. This title is also available as Open Access on Cambridge Core.",
+				"edition": "1",
 				"extra": "DOI: 10.1017/9781108638210",
 				"language": "en",
+				"libraryCatalog": "DOI.org (Crossref)",
+				"publisher": "Cambridge University Press",
 				"url": "https://www.cambridge.org/core/books/conservation-research-policy-and-practice/22AB241C45F182E40FC7F13637485D7E",
-				"websiteTitle": "Cambridge Core",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -1415,9 +1592,10 @@ var testCases = [
 				"ISSN": "2473-8689",
 				"abstractNote": "Forced alignment automatically aligns audio recordings of spoken language with transcripts at the segment level, greatly reducing the time required to prepare data for phonetic analysis. However, existing algorithms are mostly trained on a few well-documented languages. We test the performance of three algorithms against manually aligned data. For at least some tasks, unsupervised alignment (either based on English or trained from a small corpus) is sufficiently reliable for it to be used on legacy data for low-resource languages. Descriptive phonetic work on vowel inventories and prosody can be accurately captured by automatic alignment with minimal training data. Consonants provided significantly more challenges for forced alignment.",
 				"issue": "1",
+				"journalAbbreviation": "Proc Ling Soc Amer",
 				"language": "en",
 				"libraryCatalog": "journals.linguisticsociety.org",
-				"pages": "3-12",
+				"pages": "3:1-12",
 				"publicationTitle": "Proceedings of the Linguistic Society of America",
 				"rights": "Copyright (c) 2019 Sarah Babinski, Rikker Dockum, J. Hunter Craft, Anelisa Fergus, Dolly Goldenberg, Claire Bowern",
 				"shortTitle": "A Robin Hood approach to forced alignment",
@@ -1433,7 +1611,23 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Australian languages"
+					},
+					{
+						"tag": "Yidiny"
+					},
+					{
+						"tag": "forced alignment"
+					},
+					{
+						"tag": "language documentation"
+					},
+					{
+						"tag": "phonetics"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1441,7 +1635,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.swr.de/wissen/1000-antworten/kultur/woher-kommt-redensart-ueber-die-wupper-gehen-100.html",
+		"url": "https://www.swr.de/wissen/1000-antworten/woher-kommt-redensart-ueber-die-wupper-gehen-102.html",
 		"detectedItemType": "multiple",
 		"items": [
 			{
@@ -1454,9 +1648,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"abstractNote": "Es gibt eine Vergleichsredensart: &quot;Der ist über den Jordan gegangen.“ Das heißt, er ist gestorben. Das bezieht sich auf die alten Grenzen Israels. In Wuppertal jedoch liegt jenseits des Flusses das Gefängnis.",
+				"abstractNote": "Es gibt eine Vergleichsredensart: \"Der ist über den Jordan gegangen.\" Das heißt, er ist gestorben. Das bezieht sich auf die alten Grenzen Israels. In Wuppertal jedoch liegt jenseits des Flusses das Gefängnis. Von Rolf-Bernhard Essig",
 				"language": "de",
-				"url": "https://www.swr.de/wissen/1000-antworten/kultur/woher-kommt-redensart-ueber-die-wupper-gehen-100.html",
+				"url": "https://www.swr.de/wissen/1000-antworten/woher-kommt-redensart-ueber-die-wupper-gehen-102.html",
 				"websiteTitle": "swr.online",
 				"attachments": [
 					{
@@ -1476,7 +1670,7 @@ var testCases = [
 		"detectedItemType": "multiple",
 		"items": [
 			{
-				"itemType": "webpage",
+				"itemType": "newspaperArticle",
 				"title": "Татар яшьләре татарлыкны сакларга тырыша",
 				"creators": [
 					{
@@ -1485,17 +1679,23 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2011-07-29 13:00:00Z",
 				"abstractNote": "Бу көннәрдә “Идел” җәйләвендә XXI Татар яшьләре көннәре үтә. Яшьләр вакытларын төрле чараларда катнашып үткәрә.",
-				"language": "tt",
+				"language": "tt-BA",
+				"libraryCatalog": "www.azatliq.org",
+				"publicationTitle": "Азатлык Радиосы",
 				"url": "https://www.azatliq.org/a/24281041.html",
-				"websiteTitle": "Азатлык Радиосы",
 				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "татарстан"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1519,7 +1719,7 @@ var testCases = [
 				"date": "2021-12-30T17:41:33+00:00",
 				"abstractNote": "As this series was dedicated to Windows Privilege escalation thus I’m writing this Post to explain command practice for kernel-mode exploitation. Table of Content What",
 				"blogTitle": "Hacking Articles",
-				"language": "en-US",
+				"language": "en",
 				"shortTitle": "Windows Privilege Escalation",
 				"url": "https://www.hackingarticles.in/windows-privilege-escalation-kernel-exploit/",
 				"attachments": [
