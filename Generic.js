@@ -387,9 +387,11 @@ async function doWeb(doc, url) {
 	let headDois = getHeadDois(doc);
 	// Get DOIs from document text nodes - visible text
 	let visibleDois = getVisibleDois(doc);
+	// If we have DOIs in the HEAD, use those
+	let documentDois = headDois.length ? headDois : visibleDois;
 	
 	// Combine all DOIs and filter the unique ones
-	let allDois = [...new Set([...urlDois, ...visibleDois])];
+	let allDois = [...new Set([...urlDois, ...documentDois])];
 	
 	// Try to get the main item of the page
 	let mainItem;
@@ -473,8 +475,6 @@ async function doWeb(doc, url) {
 	for (let itemGroup of itemGroups) {
 		combineMultipleItems(items, itemGroup, single);
 	}
-	
-	console.log('ITEMMS', items);
 	
 	Zotero.debug(JSON.stringify({
 		url,
