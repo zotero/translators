@@ -2,14 +2,14 @@
 	"translatorID": "d921155f-0186-1684-615c-ca57682ced9b",
 	"label": "JSTOR",
 	"creator": "Simon Kornblith, Sean Takats, Michael Berkowitz, Eli Osherovich, czar",
-	"target": "^https?://([^/]+\\.)?jstor\\.org/(discover/|action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch|doAdvancedResults|doBasicResults)|stable/|pss/|openurl\\?|sici\\?)",
-	"minVersion": "3.0.12",
+	"target": "^https?://([^/]+\\.)?jstor\\.org/(discover/|action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch|doAdvancedResults|doBasicResults)|stable/|pss/|openurl\\?|sici\\?|tc/accept\\?)",
+	"minVersion": "6.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-09-22 15:58:08"
+	"lastUpdated": "2023-08-23 04:52:20"
 }
 
 /*
@@ -38,54 +38,104 @@
 
 
 function detectWeb(doc, url) {
-	// See if this is a search results page or Issue content
-	if (doc.title == "JSTOR: Search Results") {
-		return "multiple";
+	// Download confirm page; actual type doesn't matter much
+	if (/\/tc\/accept\b/.test(url)) {
+		Z.debug(url);
+		return "journalArticle";
 	}
-	// Issues with DOIs can't be identified by URL
-	else if (/stable|pss/.test(url)) {
-		if (getSearchResults(doc, true)) {
-			return "multiple";
-		}
-		else {
-			Z.monitorDOMChanges(doc.body,
-				{ attributeFilter: ['style'] });
+	// If this is a view page, identify its type (for connector icon)
+	// Co-opt the Google Analytics script because it is in the static HTML
+	// source, hence not dependent on Ajax rendering. NOTE: A book also has TOC
+	// listing and we prefer detecting it as a single book rather than a
+	// multiple
+	let gaScript = text(doc, "script[data-analytics-provider='ga']");
+	if (gaScript) {
+		let gaData = extractGAData(gaScript);
+		if (gaData) {
+			if (gaData.contentType === "book") {
+				return "book";
+			}
+			if (gaData.contentType === "chapter") {
+				return "bookSection";
+			}
+			if (gaData.itemType === "mp_research_report_part") {
+				return "report";
+			}
+			if (gaData.contentType === "journal"
+				&& gaData.itemType === "article") {
+				return "journalArticle";
+			}
 		}
 	}
-	
-	// If this is a view page, find the link to the citation
-	var favLink = getFavLink(doc);
-	if ((favLink && getJID(favLink.href)) || getJID(url)) {
-		if (text(doc, '.book_info_button')) {
+	else {
+		// Fallback in case the GA script is no longer there (for instance,
+		// removed from HTML source by ad blocker).
+		// Books come with JSON-LD in static HTML; opportunistically use it to
+		// detect the book type as early as possible
+		let ldSource = text(doc, "script[type='application/ld+json']");
+		if (ldSource) {
+			let linkedData = JSON.parse(ldSource);
+			if (linkedData && linkedData["@type"] === "book") {
+				return "book";
+			}
+		}
+		// Below, we relies on Ajax rendering of the page
+		let contentRoot = doc.querySelector("#content");
+		if (contentRoot) {
+			Z.monitorDOMChanges(contentRoot);
+		}
+		if (doc.querySelector(".book-description")) {
 			return "book";
 		}
-		else if (text(doc, 'script[data-analytics-provider]').includes('"chapter view"')) {
-			// might not stick around, but this is really just for the toolbar icon
-			// (and tests)
-			return "bookSection";
-		}
-		else {
-			return "journalArticle";
+		let typeLabel = text(
+			doc,
+			".header-metadata .content-type > span, .content-meta-data-label"
+		).toLowerCase();
+		switch (typeLabel) {
+			case "book chapter":
+				return "bookSection";
+			case "research report":
+				return "report";
+			case "journal article":
+				return "journalArticle";
 		}
 	}
+
+	// Issue TOC (the possibility of this being a book has been handled above)
+	// An issue can be identified without full rendering of the page, and
+	// there's no need to call getSearchResults() because it can't be empty
+	if (doc.querySelector("#toc-mount-point")) {
+		return "multiple";
+	}
+
+	// See if this is a search results page
+	let searchRoot = doc.querySelector("#search-results-vue-mount");
+	if (searchRoot) {
+		// Search results can be empty due to bad search term, or filtering by
+		// the user
+		if (doc.querySelector(".no-results-layout")) {
+			// Don't have to observe because the only way to go back to a
+			// search page with results from the no-result page is to browse
+			// back (i.e. no-result cannot gain search result "live").
+			return false;
+		}
+		else {
+			// The search-result page may become no-result in a "live" manner
+			Z.monitorDOMChanges(searchRoot);
+			return "multiple";
+		}
+	}
+
 	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
-	var resultsBlock = doc.querySelectorAll('.media-body.media-object-section');
-	if (!resultsBlock.length) {
-		resultsBlock = doc.querySelectorAll('.result');
-	}
-	if (!resultsBlock.length) {
-		resultsBlock = doc.querySelectorAll('.toc-item');
-	}
-	if (!resultsBlock.length) return false;
 	var items = {}, found = false;
-	for (let row of resultsBlock) {
-		let title = text(row, '.title, .small-heading, toc-view-pharos-link');
-		let jid = getJID(attr(row, 'a', 'href'));
+	for (let row of doc.querySelectorAll(".result .title, .toc-item > div > [data-qa~='title']")) {
+		let title = ZU.trimInternal(row.textContent);
+		let jid = getJID(row.getAttribute("href")); // for issue TOC
 		if (!jid) {
-			jid = getJID(attr(row, '[href]', 'href'));
+			jid = getJID(attr(row, '[href]', 'href')); // for search results
 		}
 		if (!jid || !title) continue;
 		if (checkOnly) return true;
@@ -96,10 +146,8 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function getFavLink(doc) {
-	var a = doc.getElementById('favorites');
-	if (a && a.href) return a;
-	return false;
+function getCanonicalLink(doc) {
+	return attr(doc, "head > link[rel='canonical']", "href");
 }
 
 function getJID(url) {
@@ -119,54 +167,55 @@ function getJID(url) {
 	return false;
 }
 
-function doWeb(doc, url) {
+// Extract the object describing the item embedded in the Google Analytics
+// script. NOTE: This is a simplified solution; in general JavaScript cannot be
+// parsed by RegEx. Here we're relying on the assumption that the object being
+// extracted is a simple string-to-string record and no "};" sequence is in the
+// string keys or values.
+function extractGAData(script) {
+	let m = script.match(/gaData\.content\s*=\s*({.+?})\s*;/s);
+	return m && JSON.parse(m[1]);
+}
+
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
-		Zotero.selectItems(getSearchResults(doc), function (selectedItems) {
-			if (selectedItems) {
-				var jids = [];
-				for (var j in selectedItems) {
-					jids.push(j);
-				}
-				scrape(jids);
-			}
-		});
+		let items = await Zotero.selectItems(getSearchResults(doc));
+		if (!items) return;
+		for (let jid of Object.keys(items)) {
+			await scrape(jid);
+		}
 	}
 	else {
-		// If this is a view page, find the link to the citation
-		var favLink = getFavLink(doc);
+		// If this is a view page, find the permalink
+		var permaLink = getCanonicalLink(doc);
 		var jid;
-		if (favLink && (jid = getJID(favLink.href))) {
-			Zotero.debug("JID found 1 " + jid);
-			scrape([jid]);
+		if (permaLink && (jid = getJID(permaLink))) {
+			Zotero.debug("JID found 1 (canonical url) " + jid);
+			await scrape(jid);
 		}
 		else if ((jid = getJID(url))) {
-			Zotero.debug("JID found 2 " + jid);
-			scrape([jid]);
+			Zotero.debug("JID found 2 (page url) " + jid);
+			await scrape(jid);
 		}
 	}
 }
 
-function scrape(jids) {
+async function scrape(jid) {
 	var risURL = "/citation/ris/";
-	(function next() {
-		if (!jids.length) return;
-		var jid = jids.shift();
-		ZU.doGet(risURL + jid, function (text) {
-			processRIS(text, jid);
-			next();
-		});
-	})();
+	let risText = await requestText(risURL + jid);
+	await processRIS(risText, jid);
 }
 
 function convertCharRefs(string) {
-	// converts hex decimal encoded html entities used by JSTOR to regular utf-8
+	// converts hex decimal encoded html numeric character references used by
+	// JSTOR to regular characters
 	return string
-		.replace(/&#x([A-Za-z0-9]+);/g, function (match, num) {
-			return String.fromCharCode(parseInt(num, 16));
+		.replace(/&#x([A-Fa-f0-9]+);/g, function (match, num) {
+			return String.fromCodePoint(parseInt(num, 16));
 		});
 }
 
-function processRIS(text, jid) {
+async function processRIS(text, jid) {
 	// load translator for RIS
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -269,9 +318,7 @@ function processRIS(text, jid) {
 		}
 	});
 		
-	translator.getTranslatorObject(function (trans) {
-		trans.doImport();
-	});
+	await translator.translate();
 }
 
 function finalizeItem(item) {
@@ -602,7 +649,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.jstor.org/stable/i250748",
+		"url": "https://www.jstor.org/stable/i250748",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
@@ -805,6 +853,73 @@ var testCases = [
 				"shortTitle": "Systems, Not Men",
 				"url": "https://www.jstor.org/stable/29533951",
 				"volume": "41",
+				"attachments": [
+					{
+						"title": "JSTOR Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.jstor.org/stable/bf3f923a-35f7-30d7-9678-8b673809fbce?seq=19",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Agoras and Fora: Developments in the Central Public Space of the Cities of Greece During the Roman Period",
+				"creators": [
+					{
+						"lastName": "Evangelidis",
+						"firstName": "Vasilis",
+						"creatorType": "author"
+					}
+				],
+				"date": "2014",
+				"ISSN": "0068-2454",
+				"abstractNote": "Despite the old image of degradation and fally modern research has shown that Roman Greece underwent a senes of changes which are best reflected in the central public space of the ancient city, the agora. A variety of different factors, such as the dynamic presence of the local elite, the exploitation of the past, the imperial presence and most importantly the will to maximise functionality and monumentality, contributed to the formation of the spatial and architectural framework of the agora. In many cities the development of the agora is best described as the juxtaposition of old and new, which was achieved by the preservation and enhancement of the traditional landscape as well as by its enrichment with new buildings, many of which, like the Roman-style baths, improved the provision of services. In this context the term Romanisation describes the effort of each city to adapt to the requirements of the urban framework of the Imperial period, a framework characterised by monumentality and functionality. Roman colonies were the newest additions in the city pattern of Greece. In contrast to the Roman colonies in the west, many of the Roman foundations in Greece were founded over pre-existing cities with long histories. Therefore, they raise a series of questions concerning not only their architectural development but also the process of restructuring the existing landscape in order to create an urban framework that reflects their romanitas. Πέρα από την καθιερωμένη εικόνα της παρακμής και πτώσης, η σύγχρονη έρευνα έχει καταδείξει ότι η ρωμαϊκή Ελλάδα γνώρισε μία σειρά αλλαγών που αντανακλώνται με τον πιο χαρακτηριστικό τρόπο στον κεντρικό δημόσιο χώρο της αρχαίας ελληνικής πόλης, την Αγορά. Διαφορετικοί παράγοντες όπως η δυναμική παρουσία της τοπικής αριστοκρατίας, η εκμετάλλευση του παρελθόντος, η αυτοκρατορική παρουσία ή ακόμα και η διάθεση να μεγιστοποιηθεί η πρακτική χρήση του χώρου> συντέλεσαν στη διαμόρφωση του χωρο-οργανωτικού και αρχιτεκτονικού πλαισίου της Αγοράς. Σε πολλές πόλεις η εξέλιξη της Αγοράς χαρακτηρίζεται από την αντίθεση παλαιού και νέου, από τη διατήρηση και ενίσχυση του παραδοσιακού χαρακτήρα του χώρου αλλά και τον εμπλουτισμό του με νέα κτίρια πολλά από τα οποία, όττως τα ρωμαϊκού τύπου λουτρά ενισχυσαν την παροχή υπηρεσιών. Σε αυτό το πλαίσιο, ο όρος εκρωμαϊσμός χρησιμοποιείται για να περιγράψει την προσπάθεια κάθε πόλης να προσαρμοστεί στις νέες απαιτήσεις της περιόδου: μνημειακότητα, προώθηση της αυτοκρατορικής ιδεολογίας, νοσταλγία, προσφορά υπηρεσιών κ.α. Οι ρωμαϊκές αποικίες αποτέλεσαν τη νεότερη προσθήκη στο οικιστικό πλαίσιο του ελλαδικού χώρου. Σε αντίθεση με τις αντίστοιχες αποικίες στις δυτικές επαρχίες, οι ρωμαϊκές αποικίες της Ελλάδας ιδρύθηκαν πάνω σε προϋπάρχουσες πόλεις με μακρά ιστορία. Γι3αυτό και εγείρουν μία σειρά ερωτημάτων σχετικά όχι μόνο με την αρχιτεκτονική τους εξέλιξη αλλά και τη διαδικασία διαμόρφωσης του υπάρχοντος αστικού τοπίου έτσι ώστε να εκφράζει τον ξεκάθαρα ρωμαϊκό χαρακτήρα τους.",
+				"libraryCatalog": "JSTOR",
+				"pages": "335-356",
+				"publicationTitle": "The Annual of the British School at Athens",
+				"shortTitle": "Agoras and Fora",
+				"url": "https://www.jstor.org/stable/44082098",
+				"volume": "109",
+				"attachments": [
+					{
+						"title": "JSTOR Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.jstor.org/stable/resrep32862.7",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Context and Conceptual Frameworks",
+				"creators": [
+					{
+						"lastName": "Latif",
+						"firstName": "Sara Abdel",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021",
+				"institution": "Swisspeace",
+				"libraryCatalog": "JSTOR",
+				"pages": "14-19",
+				"seriesTitle": "The Families of the Missing in Lebanon",
+				"url": "https://www.jstor.org/stable/resrep32862.7",
 				"attachments": [
 					{
 						"title": "JSTOR Full Text PDF",
