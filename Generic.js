@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-21 15:07:32"
+	"lastUpdated": "2024-03-21 19:44:53"
 }
 
 function detectWeb(doc, url) {
@@ -182,7 +182,7 @@ function getPotentialTitles(doc) {
 async function getDoiItem(doi) {
 	try {
 		let translator = Zotero.loadTranslator("search");
-		translator.setTranslator('11645bd1-0420-45c1-badb-53fb41eeb753');
+		translator.setTranslator('b28d0d42-8549-4c6d-83fc-8382874a5cb9');
 		translator.setSearch({"itemType": "journalArticle", "DOI": doi});
 		translator.setHandler("itemDone", function (obj, item) {
 		});
