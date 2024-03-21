@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-21 19:19:24"
+	"lastUpdated": "2024-03-21 20:53:10"
 }
 
 /*
@@ -87,7 +87,7 @@ async function doWeb(doc, url) {
 
 
 async function scrape(jsonURL) {
-	Z.debug(jsonURL);
+	// Z.debug(jsonURL);
 	let respText = await requestJSON(jsonURL);
 	processJSON(respText);
 }
@@ -100,7 +100,7 @@ function getJSONURL(pageURL) {
 }
 
 function processJSON(json) {
-	Z.debug(json);
+	// Z.debug(json);
 	if (!json.resultList || !json.resultList.result || !json.resultList.result.length) {
 		Z.debug('Query returned no results');
 		return;
@@ -220,7 +220,7 @@ function processKeywordList(keywordList, item) {
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
-		type: "web",
+		"type": "web",
 		"url": "https://europepmc.org/article/MED/32923700",
 		"items": [
 			{
@@ -446,5 +446,4 @@ var testCases = [
 		]
 	}
 ]
-
 /** END TEST CASES **/
