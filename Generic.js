@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-01 19:46:46"
+	"lastUpdated": "2024-03-21 15:07:32"
 }
 
 function detectWeb(doc, url) {
@@ -133,8 +133,8 @@ function getHeadDois(doc) {
 }
 
 function matchTitle(text, pattern) {
-	text = Zotero.Utilities.normalize(text);
-	pattern = Zotero.Utilities.normalize(pattern);
+	text = Zotero.Utilities.asciify(text).toLowerCase();
+	pattern = Zotero.Utilities.asciify(pattern).toLowerCase();
 	
 	if (text.length < pattern.length) {
 		pattern = pattern.slice(0, text.length);
