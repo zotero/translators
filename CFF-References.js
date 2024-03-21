@@ -14,7 +14,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2024 Sebastian Karcher
+	Copyright © 2024 Sebastian Karcher, Dave Bunten
 
 	This file is part of Zotero.
 
