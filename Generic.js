@@ -290,6 +290,11 @@ async function getJsonldItems(doc) {
  * @return {Zotero.Item}
  */
 function combineItems(existingItem, newItem) {
+	if (existingItem.itemType === 'webpage' && newItem.itemType !== 'webpage') {
+		Zotero.debug('Switching to item type ' + newItem.itemType);
+		existingItem.itemType = newItem.itemType;
+	}
+
 	for (let fieldName in newItem) {
 		if (
 			Zotero.Utilities.fieldIsValidForType(fieldName, existingItem.itemType) ||
