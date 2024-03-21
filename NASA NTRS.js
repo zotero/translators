@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-01 04:47:52"
+	"lastUpdated": "2024-03-21 20:00:21"
 }
 
 /*
@@ -67,18 +67,16 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) return;
-			for (let url of Object.keys(items)) {
-				// don't bother fetching the doc, it's useless
-				scrape(null, url);
-			}
-		});
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(null, url);
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
@@ -98,7 +96,8 @@ function mapType(docType) {
 		patent: 'patent',
 		'computer program': 'computerProgram',
 		'motion picture|video': 'videoRecording',
-		'preprint|manuscript': 'manuscript'
+		preprint: 'preprint',
+		manuscript: 'manuscript'
 	};
 
 	for (let [regex, itemType] of Object.entries(mapping)) {
@@ -216,16 +215,14 @@ function processJSON(json) {
 	return item;
 }
 
-function scrape(doc, url) {
-	ZU.doGet(url.replace('/citations', '/api/citations'), function (text) {
-		let json = JSON.parse(text);
-		let item = processJSON(json);
-		item.url = url;
-		if (doc) {
-			item.attachments.push({ title: "Snapshot", document: doc });
-		}
-		item.complete();
-	});
+async function scrape(doc, url) {
+	let json = await requestJSON(url.replace('/citations', '/api/citations'));
+	let item = processJSON(json);
+	item.url = url;
+	if (doc) {
+		item.attachments.push({ title: "Snapshot", document: doc });
+	}
+	item.complete();
 }
 
 /** BEGIN TEST CASES **/
@@ -550,7 +547,7 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "SPACE VEHICLES"
+						"tag": "Space Vehicles"
 					}
 				],
 				"notes": [],
@@ -609,4 +606,5 @@ var testCases = [
 		]
 	}
 ]
+
 /** END TEST CASES **/
