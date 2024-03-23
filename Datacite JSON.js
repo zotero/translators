@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2024-03-22 03:58:08"
+	"lastUpdated": "2024-03-23 00:20:22"
 }
 
 /*
@@ -179,12 +179,12 @@ function doImport() {
 			else if (contributor.nameType == "Personal") {
 				item.creators.push(ZU.cleanAuthor(contributor.name, role));
 			}
-			else {							
-				item.creators.push({ lastName: contributor.name, creatorType: role, fieldMode: 1 }); 
+			else {
+				item.creators.push({ lastName: contributor.name, creatorType: role, fieldMode: 1 });
 			}
 		}
 	}
-	if (typeof(data.publisher) == "object") {
+	if (typeof (data.publisher) == "object") {
 		item.publisher = data.publisher.name;
 	}
 	else {
@@ -259,7 +259,7 @@ function doImport() {
 		}
 	}
 	if (data.relatedItems) {
-		for (container of data.relatedItems) {
+		for (let container of data.relatedItems) {
 			// For containers following Metadata Kernel 4.4 update
 			if (container.relationType == "IsPublishedIn") {
 				// we only grab the container info for IsPublishedIn, i.e. mostly books for chapter & journals
@@ -274,7 +274,7 @@ function doImport() {
 				}
 				if (container.relatedItemIdentifier) {
 					if (container.relatedItemIdentifier.relatedItemIdentifierType == "ISSN") {
-						item.ISSN =  container.relatedItemIdentifier.relatedItemIdentifier;
+						item.ISSN = container.relatedItemIdentifier.relatedItemIdentifier;
 					}
 					else if (container.relatedItemIdentifier.relatedItemIdentifierType == "ISBN") {
 						item.ISBN = container.relatedItemIdentifier.relatedItemIdentifier;
@@ -293,16 +293,16 @@ function doImport() {
 
 				item.edition = container.edition;
 				if (container.contributor) {
-					for (contributor of container.contributor) {
+					for (let contributor of container.contributor) {
 						let role = "contributor";
 						if (contributor.contributorType == "Editor") {
 							role = "editor";
 						}
 						if (contributor.familyName && contributor.givenName) {
 							item.creators.push({
-							lastName: contributor.familyName,
-							firstName: contributor.givenName,
-							creatorType: role
+								lastName: contributor.familyName,
+								firstName: contributor.givenName,
+								creatorType: role
 							});
 						}
 						else if (contributor.nameType == "Personal") {
@@ -310,7 +310,7 @@ function doImport() {
 						}
 						else {
 							item.creators.push({ lastName: contributor.name, creatorType: role, fieldMode: 1 });
-						}	
+						}
 					}
 				}
 				break;
@@ -319,7 +319,6 @@ function doImport() {
 				continue;
 			}
 		}
-
 	}
 	if (data.relatedIdentifiers) {
 		for (let relates of data.relatedIdentifiers) {
