@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2024-03-20 20:31:52"
+	"lastUpdated": "2024-03-23 02:00:53"
 }
 
 /*
@@ -44,13 +44,6 @@
 /** ********************
  * Utilitiy Functions *
  **********************/
-const datasetType = ZU.fieldIsValidForType('title', 'dataset')
-	? 'preprint'
-	: 'document';
-const standardType = ZU.fieldIsValidForType('title', 'standard')
-	? 'preprint'
-	: 'report';
-
 
 function innerXML(n) {
 	var escapedXMLcharacters = {
@@ -294,10 +287,7 @@ function doImport() {
 		item.place = ZU.xpathText(metadataXML, 'publisher/publisher_place');
 	}
 	else if ((itemXML = ZU.xpath(doiRecord, 'crossref/standard')).length) {
-		item = new Zotero.Item(standardType);
-		if (standardType !== "standard") {
-			item.extra = "Type: standard";
-		}
+		item = new Zotero.Item('standard');
 		refXML = ZU.xpath(itemXML, 'standard_metadata');
 		metadataXML = ZU.xpath(itemXML, 'standard_metadata');
 	}
@@ -313,11 +303,8 @@ function doImport() {
 	}
 
 	else if ((itemXML = ZU.xpath(doiRecord, 'crossref/database')).length) {
-		item = new Zotero.Item(datasetType);
+		item = new Zotero.Item('dataset');
 		refXML = ZU.xpath(itemXML, 'dataset');
-		if (datasetType !== "dataset") {
-			item.extra = "Type: dataset";
-		}
 		metadataXML = ZU.xpath(itemXML, 'database_metadata');
 		var pubDate = ZU.xpath(refXML, 'database_date/publication_date');
 		if (!pubDate.length) pubDate = ZU.xpath(metadataXML, 'database_date/publication_date');
