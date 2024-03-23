@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-12 02:31:11"
+	"lastUpdated": "2024-03-23 22:38:45"
 }
 
 /*
@@ -38,7 +38,8 @@
 
 function detectWeb(doc, _url) {
 	let jsonText = text(doc, 'script[type="application/ld+json"]');
-	if (jsonText && JSON.parse(jsonText)['@type'] == 'NewsArticle') {
+	let type = JSON.parse(jsonText)['@type']
+	if (jsonText && type == 'NewsArticle' || type == 'ReportageNewsArticle') {
 		return "newspaperArticle";
 	}
 	else if (getSearchResults(doc, true)) {
@@ -82,7 +83,7 @@ function scrape(doc, _url) {
 	item.abstractNote = json.description;
 	item.publicationTitle = json.publisher.name;
 	item.language = 'en';
-	item.creators.push(ZU.cleanAuthor(json.author.name, 'author'));
+	item.creators.push(ZU.cleanAuthor(json.author[0].name, 'author'));
 	
 	if (doc.querySelector('.wire-published-by__authors')) {
 		item.creators = [];
