@@ -265,7 +265,7 @@ function doImport() {
 				// we only grab the container info for IsPublishedIn, i.e. mostly books for chapter & journals
 				item.volume = container.volume;
 				if (container.titles) {
-					if (Array.isArray(container.titles)) {
+					if (Array.isArray(container.titles) && container.titles.length) {
 						item.publicationTitle = container.titles[0].title;
 					}
 					else {
@@ -288,11 +288,11 @@ function doImport() {
 					item.pages = container.firstPage + "-" + container.lastPage;
 				}
 				else {
-					item.pages = container.firstPage + container.lastPage;
+					item.pages = (container.firstPage || "") + (container.lastPage || "");
 				}
 
 				item.edition = container.edition;
-				if (container.contributor) {
+				if (container.contributor && Array.isArray(container.contributor)) {
 					for (let contributor of container.contributor) {
 						let role = "contributor";
 						if (contributor.contributorType == "Editor") {
