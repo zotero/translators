@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-21 20:53:10"
+	"lastUpdated": "2024-03-23 01:38:15"
 }
 
 /*
@@ -39,7 +39,7 @@
 function detectWeb(doc, url) {
 	if (url.includes('/article/')) {
 		if (url.includes('/PPR/')) {
-			return 'report';
+			return 'preprint';
 		}
 		else {
 			return "journalArticle";
@@ -364,7 +364,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://europepmc.org/article/PPR/PPR358366",
-		"detectedItemType": "report",
 		"items": [
 			{
 				"itemType": "preprint",
