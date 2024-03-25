@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-19 08:52:49"
+	"lastUpdated": "2024-03-23 01:38:15"
 }
 
 /*
@@ -39,7 +39,7 @@
 function detectWeb(doc, url) {
 	if (url.includes('/article/')) {
 		if (url.includes('/PPR/')) {
-			return 'report';
+			return 'preprint';
 		}
 		else {
 			return "journalArticle";
@@ -66,17 +66,18 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) return;
-			Object.keys(items).forEach(scrape);
-		});
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else {
 		let jsonURL = getJSONURL(url);
 		if (jsonURL) {
-			scrape(jsonURL);
+			await scrape(jsonURL);
 		}
 		else {
 			Z.debug('Couldn\'t extract ID from URL: ' + url);
@@ -84,10 +85,11 @@ function doWeb(doc, url) {
 	}
 }
 
-function scrape(jsonURL) {
-	ZU.doGet(jsonURL, function (respText) {
-		processJSON(JSON.parse(respText));
-	});
+
+async function scrape(jsonURL) {
+	// Z.debug(jsonURL);
+	let respText = await requestJSON(jsonURL);
+	processJSON(respText);
 }
 
 function getJSONURL(pageURL) {
@@ -98,6 +100,7 @@ function getJSONURL(pageURL) {
 }
 
 function processJSON(json) {
+	// Z.debug(json);
 	if (!json.resultList || !json.resultList.result || !json.resultList.result.length) {
 		Z.debug('Query returned no results');
 		return;
@@ -145,8 +148,7 @@ function processPubTypeList(pubTypeList, item) {
 	if (!pubTypeList || !pubTypeList.pubType) return;
 	
 	if (pubTypeList.pubType.length == 1 && pubTypeList.pubType[0] == 'Preprint') {
-		item.itemType = 'report';
-		item.extra = (item.extra || '') + `Type: article\n`;
+		item.itemType = 'preprint';
 	}
 	else {
 		item.itemType = 'journalArticle';
@@ -213,6 +215,7 @@ function processKeywordList(keywordList, item) {
 		item.tags.push({ tag: keyword });
 	}
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -363,7 +366,7 @@ var testCases = [
 		"url": "https://europepmc.org/article/PPR/PPR358366",
 		"items": [
 			{
-				"itemType": "report",
+				"itemType": "preprint",
 				"title": "Fly ash application in moorum embankment and its stability analysis using FLAC/SLOPE and Response Surface Metho",
 				"creators": [
 					{
@@ -378,11 +381,17 @@ var testCases = [
 					}
 				],
 				"date": "2021",
+				"DOI": "10.21203/rs.3.rs-631949/v1",
 				"abstractNote": "This paper presents the application of fly ash in moorum embankment by partial replacement of moorum with fly ash and its stability analysis has been carried out. An experimental investigation was carried out on moorum blended with fly ash at different proportions of fly ash by dry weight of soil for the moorum embankment stability analysis. The Index properties and strength properties were assessed by performing Atterberg's limit, specific gravity, grain size distribution, compaction test, direct shear test (DST), and California Bearing Ratio (CBR) test respectively. The embankment slope stability analysis was performed using FLAC/SLOPE version 8.10 (Fast Lagrangian Analysis of Continua) software at a various slope angle of 30°, 32°, and 34° and different heights of the embankment of 6 m, 8 m, and 10 m to calculate Factor of Safety (FOS). FOS decreases with the increment of fly ash content, the height of embankment, and slope angle respectively. In addition to the numerical analysis, Response Surface Methodology (RSM) based (Face-Centered Central Composite Design) was used to predict FOS. The developed mathematical equation illustrates that the RSM model was statistically significant and the results give a reliable prediction of FOS.",
-				"extra": "Type: article",
 				"libraryCatalog": "Europe PMC",
+				"rights": "cc by",
 				"url": "https://doi.org/10.21203/rs.3.rs-631949/v1",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF (Open access)",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
