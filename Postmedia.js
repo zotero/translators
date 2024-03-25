@@ -38,7 +38,7 @@
 
 function detectWeb(doc, _url) {
 	let jsonText = text(doc, 'script[type="application/ld+json"]');
-	let type = JSON.parse(jsonText)['@type']
+	let type = JSON.parse(jsonText)['@type'];
 	if (jsonText && type == 'NewsArticle' || type == 'ReportageNewsArticle') {
 		return "newspaperArticle";
 	}
@@ -84,8 +84,8 @@ function scrape(doc, _url) {
 	item.publicationTitle = json.publisher.name;
 	item.language = 'en';
 	// ignore generic authors
-	if (!json.creator.name.includes('News')&&!json.creator.name.includes('staff')) {
-	item.creators.push(ZU.cleanAuthor(json.creator.name, 'author'));
+	if (!json.creator.name.includes('News') && !json.creator.name.includes('staff')) {
+		item.creators.push(ZU.cleanAuthor(json.creator.name, 'author'));
 	}
 	if (doc.querySelector('.wire-published-by__authors')) {
 		item.creators = [];
