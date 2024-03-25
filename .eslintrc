@@ -30,6 +30,13 @@
 		"no-redeclare": ["error", {"builtinGlobals": true}],
 		"linebreak-style": ["error", "unix"],
 
+		"lines-around-comment": [
+			"error",
+			{
+				"ignorePattern": "END TEST CASES"
+			}
+		],
+
 		"zotero-translator/not-executable": "error",
 		"zotero-translator/header-valid-json": "error",
 		"zotero-translator/header-translator-id": "error",
