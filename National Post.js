@@ -83,8 +83,7 @@ function scrape(doc, _url) {
 	item.abstractNote = json.description;
 	item.publicationTitle = json.publisher.name;
 	item.language = 'en';
-	item.creators.push(ZU.cleanAuthor(json.author[0].name, 'author'));
-	
+	item.creators.push(ZU.cleanAuthor(json.creator.name, 'author'));
 	if (doc.querySelector('.wire-published-by__authors')) {
 		item.creators = [];
 		for (let author of text(doc, '.wire-published-by__authors').split(/, | and /)) {
