@@ -1,13 +1,11 @@
 {
 	"translatorID": "b6e39b57-8942-4d11-8259-342c46ce395f",
-	"translatorType": 2,
 	"label": "BibLaTeX",
 	"creator": "Simon Kornblith, Richard Karnesky and Anders Johansson",
 	"target": "bib",
 	"minVersion": "2.1.9",
-	"maxVersion": "null",
+	"maxVersion": "",
 	"priority": 100,
-	"inRepository": true,
 	"configOptions": {
 		"getCollections": true
 	},
@@ -17,7 +15,9 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2022-10-12 19:26:00"
+	"inRepository": true,
+	"translatorType": 2,
+	"lastUpdated": "2024-03-25 14:49:42"
 }
 
 /*
@@ -882,3 +882,7 @@ function doExport() {
 
 	Zotero.write("\n");
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+]
+/** END TEST CASES **/
