@@ -2,14 +2,14 @@
 	"translatorID": "1c5b122c-7e58-4cd5-932b-93f5ca0b7e1a",
 	"label": "National Post",
 	"creator": "Adam Crymble and Abe Jellinek",
-	"target": "^https://(www\\.)?(national|financial)post\\.com/",
+	"target": "^https://(www\\.|o\\.)?((((national|financial|leader|fairview|princegeorge)post|(edmonton|stthomastimes|melfort)journal|(edmonton|calgary|toronto|ottawa|winnipeg|vancouver|peacecountry|coldlake)sun|(cochrane|highriver|wetaskiwin|owensoundsun|timmins)times|(prrecord|montreal)gazette|(seaforthhuron)expositor|(edmonton|sprucegrove)examiner|(chatham|kingston|sarnia|sault)thisweek|(airdrie|pinchercreek|wiarton)echo|(calgary|hanna|stratfordbeacon)herald|(strathroyage)dispatch|(draytonvalleywestern|woodstocksentinel|)review|(fortsaskatchewan|clintonnews|)record|(stonyplain|gananoque|)reporter|(vulcan|mitchell|)advocate|(whitecourt|goderichsignal|sault|thesudbury|windsor|)star|(vermilion|)standard|(lf|wallaceburgcourier|timmins|)press|ontariofarmer|(parisstar|thechronicle-|)online|(pembroke)observer|(nanton|sherwoodpark|kenoraminerand|tillsonburg|kincardine|)news|thegrowthop|midnorthmonitor|(mayerthorpefreelanc|standard-freehold)er|thestarphoenix|dailyheraldtribune|fortmcmurraytoday|leducrep|canoe|lakeshoreadvance|thewhig|lucknowsentinel|ottawacitizen|napaneeguide|thegraphicleader|theprovince|shorelinebeacon|canada)(\\.com))|(((driv|health)ing|thecragandcanyon|devondispatch|(thebeaumont|northern|chathamdaily)news|countymarket|cochranetimespost|communitypress|greybrucethisweek|nugget|countyweeklynews|brantfordexpositor|(intelligenc|thelondon|theobserv|record|todaysfarm|simcoereform)er|thepost\\.on|elliotlakestandard|trentonian)(\\.ca))|tj\\.news)/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-23 22:38:45"
+	"lastUpdated": "2024-03-25 04:53:34"
 }
 
 /*
@@ -182,6 +182,163 @@ var testCases = [
 		"type": "web",
 		"url": "https://nationalpost.com/search/?search_text=uefa&date_range=-30d&sort=score",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://edmontonjournal.com/business/cold-lake-alberta-trapper-skunk-removal",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "‘Pretty simple animals’: Cold Lake hires trapper for free skunk removal",
+				"creators": [
+					{
+						"firstName": "Lauren",
+						"lastName": "Krugel",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024-03-23",
+				"abstractNote": "The eastern Alberta city has hired Babincak to trap the striped critters and relocate them where they can't cause a stink for residents.",
+				"language": "en",
+				"publicationTitle": "Edmonton Journal",
+				"shortTitle": "‘Pretty simple animals’",
+				"url": "https://edmontonjournal.com/business/cold-lake-alberta-trapper-skunk-removal",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.thecragandcanyon.ca/news/local-news/parks-canada-derails-banff-townsite-to-norquay-gondola/wcm/577f1324-4669-4406-869a-727ad54515ef",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Parks Canada derails Banff townsite-to-Norquay gondola plan",
+				"creators": [
+					{
+						"firstName": "Bill",
+						"lastName": "Kaufmann",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024-03-21",
+				"abstractNote": "Parks Canada has re-affirmed its opposition to a planned gondola linking the Banff townsite to Mount Norquay, citing environmental concerns.",
+				"language": "en",
+				"publicationTitle": "Bow Valley Crag & Canyon",
+				"url": "https://www.thecragandcanyon.ca/news/local-news/parks-canada-derails-banff-townsite-to-norquay-gondola",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://calgarysun.com/news/local-news/calgarian-joins-son-under-russian-fire-in-frontline-ukrainian-city/wcm/3e1a336d-e645-4335-87cf-6ab5a7f62ba7",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "'Anything can happen:' Calgarian joins son under Russian fire in frontline Ukrainian city",
+				"creators": [
+					{
+						"firstName": "Bill",
+						"lastName": "Kaufmann",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024-03-24",
+				"abstractNote": "Calgarian Paul Hughes has joined his son to do aid work in the front line Ukrainian city of Kherson, under constant Russian bombardment.",
+				"language": "en",
+				"publicationTitle": "Calgary Sun",
+				"shortTitle": "'Anything can happen",
+				"url": "https://calgarysun.com/news/local-news/calgarian-joins-son-under-russian-fire-in-frontline-ukrainian-city",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.cochranetimes.com/news/local-news/proposed-bearspaw-development-showdown/wcm/60ee4648-1428-4b38-b0fe-4f840f9be71a",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Foes, backers of huge proposed Bearspaw development gird for crucial showdown",
+				"creators": [
+					{
+						"firstName": "Bill",
+						"lastName": "Kaufmann",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024-01-18",
+				"abstractNote": "Foes and proponents of a huge shopping-residential proposal for Bearspaw are girding for a crucial public hearing.",
+				"language": "en",
+				"publicationTitle": "Cochrane Times",
+				"url": "https://www.cochranetimes.com/news/local-news/proposed-bearspaw-development-showdown",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.prrecordgazette.com/sports/grande-prairie-storm-tie-calgary-playoffs",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Grande Prairie Storm defeat Calgary Canucks tie playoff series in heart-pounding game Mar. 19",
+				"creators": [
+					{
+						"firstName": "Daniel",
+						"lastName": "Janson",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024-03-21",
+				"abstractNote": "The Grande Prairie Storm AJHL game 4 playoff matchup vs the Calgary Canucks.",
+				"language": "en",
+				"publicationTitle": "Peace River Record Gazette",
+				"url": "https://www.prrecordgazette.com/sports/grande-prairie-storm-tie-calgary-playoffs",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
