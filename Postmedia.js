@@ -1,5 +1,5 @@
 {
-	"translatorID": "1c5b122c-7e58-4cd5-932b-93f5ca0b7e1a",
+	"translatorID": "0d5f319b-324f-4fb5-ac3c-d820d8ee4591",
 	"label": "Postmedia",
 	"creator": "Adam Crymble and Abe Jellinek",
 	"target": "^https://(www\\.|o\\.)?((((national|financial|leader|fairview|princegeorge)post|(edmonton|stthomastimes|melfort)journal|(edmonton|calgary|toronto|ottawa|winnipeg|vancouver|peacecountry|coldlake)sun|(cochrane|highriver|wetaskiwin|owensoundsun|timmins)times|(prrecord|montreal)gazette|(seaforthhuron)expositor|(edmonton|sprucegrove)examiner|(chatham|kingston|sarnia|sault)thisweek|(airdrie|pinchercreek|wiarton)echo|(calgary|hanna|stratfordbeacon)herald|(strathroyage)dispatch|(draytonvalleywestern|woodstocksentinel|)review|(fortsaskatchewan|clintonnews|)record|(stonyplain|gananoque|)reporter|(vulcan|mitchell|)advocate|(whitecourt|goderichsignal|sault|thesudbury|windsor|)star|(vermilion|)standard|(lf|wallaceburgcourier|timmins|)press|ontariofarmer|(parisstar|thechronicle-|)online|(pembroke)observer|(nanton|sherwoodpark|kenoraminerand|tillsonburg|kincardine|)news|thegrowthop|midnorthmonitor|(mayerthorpefreelanc|standard-freehold)er|thestarphoenix|dailyheraldtribune|fortmcmurraytoday|leducrep|canoe|lakeshoreadvance|thewhig|lucknowsentinel|ottawacitizen|napaneeguide|thegraphicleader|theprovince|shorelinebeacon|canada)(\\.com))|(((driv|health)ing|thecragandcanyon|devondispatch|(thebeaumont|northern|chathamdaily)news|countymarket|cochranetimespost|communitypress|greybrucethisweek|nugget|countyweeklynews|brantfordexpositor|(intelligenc|thelondon|theobserv|record|todaysfarm|simcoereform)er|thepost\\.on|elliotlakestandard|trentonian)(\\.ca))|tj\\.news)/",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-25 04:53:34"
+	"lastUpdated": "2024-03-25 05:25:15"
 }
 
 /*
