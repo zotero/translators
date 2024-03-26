@@ -122,13 +122,13 @@ var testCases = [
 					}
 				],
 				"date": "1969-08-17",
-				"abstractNote": "BETHEL, N. Y., Aug. 16 -- Despite massive traffic jams, drenching rainstorms and shortages of food, water and medical facilities, about 300,000 young people swarmed over this rural area today for the Woodstock Music and Art Fair.",
+				"ISSN": "0362-4331",
+				"abstractNote": "BETHEL, N. Y., Aug. 16 — Despite massive traffic jams, drenching rainstorms and shortages of food, water and medical facilities, about 300,000 young people swarmed over this rural area today for the Woodstock Music and Art Fair.",
 				"language": "en",
 				"libraryCatalog": "TimesMachine",
 				"pages": "1, 80",
-				"place": "Bethel",
 				"publicationTitle": "The New York Times",
-				"url": "http://timesmachine.nytimes.com/timesmachine/1969/08/17/89365215.html?pageNumber=1",
+				"url": "https://timesmachine.nytimes.com/timesmachine/1969/08/17/89365215.html",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -160,13 +160,13 @@ var testCases = [
 				"title": "PORTUGAL'S NEEDS DEBATED IN PRESS",
 				"creators": [],
 				"date": "1969-08-17",
-				"abstractNote": "LISBON, Aug. 16 -- The principal problem facing Portugal today is freedom, according to the leader of the Democratic opposition, but it is education in the view of the head of the regime's political organization.",
+				"ISSN": "0362-4331",
+				"abstractNote": "LISBON, Aug. 16 — The principal problem facing Portugal today is freedom, according to the leader of the Democratic opposition, but it is education in the view of the head of the regime's political organization.",
 				"language": "en",
 				"libraryCatalog": "TimesMachine",
 				"pages": "2",
-				"place": "Lisbon",
 				"publicationTitle": "The New York Times",
-				"url": "http://timesmachine.nytimes.com/timesmachine/1969/08/17/89365277.html?pageNumber=2",
+				"url": "https://timesmachine.nytimes.com/timesmachine/1969/08/17/89365277.html",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -195,13 +195,13 @@ var testCases = [
 				"title": "Saudis Replacing Bedouin Rifles With Missiles",
 				"creators": [],
 				"date": "1969-08-17",
-				"abstractNote": "RIYADH, Saudi Arabia, Aug. 16 (Reuters) -- This Islamic kingdom, forged in this century by the rifles of Bedouin nomads in 30 years of desert warfare, is equipping itself for defense in the missile age.",
+				"ISSN": "0362-4331",
+				"abstractNote": "RIYADH, Saudi Arabia, Aug. 16 (Reuters) — This Islamic kingdom, forged in this century by the rifles of Bedouin nomads in 30 years of desert warfare, is equipping itself for defense in the missile age.",
 				"language": "en",
 				"libraryCatalog": "TimesMachine",
 				"pages": "16",
-				"place": "Riyadh",
 				"publicationTitle": "The New York Times",
-				"url": "http://timesmachine.nytimes.com/timesmachine/1969/08/17/89365432.html?pageNumber=16",
+				"url": "https://timesmachine.nytimes.com/timesmachine/1969/08/17/89365432.html",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
