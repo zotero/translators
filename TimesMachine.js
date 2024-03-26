@@ -64,7 +64,7 @@ function scrape(doc, url) {
 		item.pages = ZU.trimInternal(text(doc, '#page_num_content'))
 			.replace(/ ,/g, ',');
 		
-		// The URL and abstract don't update when you move from issue to article and it dupplicates the hostname
+		// The URL and abstract don't update when you move from issue to article and it duplicates the hostname
 		item.url = doc.location.href.replace(/\?.+./, "");
 		item.abstractNote = text(doc, '.index_article_lede');
 		
