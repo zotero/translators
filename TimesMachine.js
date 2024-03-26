@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-26 00:42:06"
+	"lastUpdated": "2024-03-26 18:04:55"
 }
 
 /*
@@ -72,7 +72,7 @@ function scrape(doc, url) {
 		for (let author of byline.split(/ and |, /)) {
 			author = ZU.capitalizeName(author);
 			
-			if (author == 'Special to The New York Times') {
+			if (author.toLowerCase() == 'special to the new york times') {
 				continue;
 			}
 			
