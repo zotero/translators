@@ -1,7 +1,7 @@
 {
 	"translatorID": "86c3832a-ccc6-40ab-b5e9-83892423df11",
 	"label": "TimesMachine",
-	"creator": "Abe Jellinek",
+	"creator": "Abe Jellinek, Sebastian Karcher",
 	"target": "^https?://timesmachine\\.nytimes\\.com/timesmachine/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-17 16:19:53"
+	"lastUpdated": "2024-03-26 00:42:06"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2021 Abe Jellinek
+	Copyright © 2021-2024 Abe Jellinek, Sebastian Karcher
 	
 	This file is part of Zotero.
 
@@ -36,7 +36,7 @@
 */
 
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	if (doc.querySelector('#index_article_selected_view')) {
 		return "newspaperArticle";
 	}
@@ -64,12 +64,9 @@ function scrape(doc, url) {
 		item.pages = ZU.trimInternal(text(doc, '#page_num_content'))
 			.replace(/ ,/g, ',');
 		
-		if (item.abstractNote) {
-			let place = item.abstractNote.match(/^([A-Z]+)\b/);
-			if (place) {
-				item.place = ZU.capitalizeTitle(place[0], true);
-			}
-		}
+		// The URL and abstract don't update when you move from issue to article and it dupplicates the hostname
+		item.url = doc.location.href.replace(/\?.+./, "");
+		item.abstractNote = text(doc, '.index_article_lede');
 		
 		let byline = text(doc, '#byline_content').replace(/^\s*by\b/gi, '');
 		for (let author of byline.split(/ and |, /)) {
@@ -95,6 +92,7 @@ function scrape(doc, url) {
 			}];
 		}
 		
+		item.ISSN = '0362-4331';
 		item.libraryCatalog = 'TimesMachine';
 		item.publicationTitle = 'The New York Times';
 		
