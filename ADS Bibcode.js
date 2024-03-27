@@ -8,8 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 8,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-22 03:34:00"
+	"lastUpdated": "2023-06-09 17:04:40"
 }
 
 /*
@@ -35,6 +34,9 @@
 	***** END LICENSE BLOCK *****
 */
 
+const preprintType = ZU.fieldIsValidForType('title', 'preprint')
+	? 'preprint'
+	: 'report';
 
 // https://github.com/yymao/adstex/blob/64989c9e75d7401ea2b33b546664cbc34cce6a27/adstex.py
 const bibcodeRe = /^\d{4}\D\S{13}[A-Z.:]$/;
@@ -78,7 +80,7 @@ function getTypeFromId(id) {
 		return "thesis";
 	}
 	else if (bibstem.startsWith("arXiv")) {
-		return "report"; // preprint
+		return preprintType;
 	}
 	else {
 		// now scan past the bibstem and find the volume number/type abbrev.
@@ -126,7 +128,9 @@ function scrape(ids) {
 				item.extra = (item.extra || '') + `\nADS Bibcode: ${id}`;
 
 				if (id.slice(4).startsWith('arXiv')) {
-					item.extra += '\nType: article'; // will map to preprint
+					if (preprintType == "report") {
+						item.extra += '\nType: article'; // will map to preprint
+					}
 				}
 
 				if (item.pages && item.pages.startsWith('arXiv:')) {
@@ -403,6 +407,143 @@ var testCases = [
 					}
 				],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"adsBibcode": "2023arXiv230604024S"
+		},
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "The FLAMINGO project: cosmological hydrodynamical simulations for large-scale structure and galaxy cluster surveys",
+				"creators": [
+					{
+						"lastName": "Schaye",
+						"firstName": "Joop",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kugel",
+						"firstName": "Roi",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Schaller",
+						"firstName": "Matthieu",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Helly",
+						"firstName": "John C.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Braspenning",
+						"firstName": "Joey",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Elbers",
+						"firstName": "Willem",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "McCarthy",
+						"firstName": "Ian G.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "van Daalen",
+						"firstName": "Marcel P.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Vandenbroucke",
+						"firstName": "Bert",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Frenk",
+						"firstName": "Carlos S.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kwan",
+						"firstName": "Juliana",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Salcido",
+						"firstName": "Jaime",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bahé",
+						"firstName": "Yannick M.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Borrow",
+						"firstName": "Josh",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Chaikin",
+						"firstName": "Evgenii",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Hahn",
+						"firstName": "Oliver",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Huško",
+						"firstName": "Filip",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Jenkins",
+						"firstName": "Adrian",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Lacey",
+						"firstName": "Cedric G.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Nobels",
+						"firstName": "Folkert S. J.",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-06-01",
+				"DOI": "10.48550/arXiv.2306.04024",
+				"abstractNote": "We introduce the Virgo Consortium's FLAMINGO suite of hydrodynamical simulations for cosmology and galaxy cluster physics. To ensure the simulations are sufficiently realistic for studies of large-scale structure, the subgrid prescriptions for stellar and AGN feedback are calibrated to the observed low-redshift galaxy stellar mass function and cluster gas fractions. The calibration is performed using machine learning, separately for three resolutions. This approach enables specification of the model by the observables to which they are calibrated. The calibration accounts for a number of potential observational biases and for random errors in the observed stellar masses. The two most demanding simulations have box sizes of 1.0 and 2.8 Gpc and baryonic particle masses of $1\\times10^8$ and $1\\times10^9 \\text{M}_\\odot$, respectively. For the latter resolution the suite includes 12 model variations in a 1 Gpc box. There are 8 variations at fixed cosmology, including shifts in the stellar mass function and/or the cluster gas fractions to which we calibrate, and two alternative implementations of AGN feedback (thermal or jets). The remaining 4 variations use the unmodified calibration data but different cosmologies, including different neutrino masses. The 2.8 Gpc simulation follows $3\\times10^{11}$ particles, making it the largest ever hydrodynamical simulation run to $z=0$. Lightcone output is produced on-the-fly for up to 8 different observers. We investigate numerical convergence, show that the simulations reproduce the calibration data, and compare with a number of galaxy, cluster, and large-scale structure observations, finding very good agreement with the data for converged predictions. Finally, by comparing hydrodynamical and `dark-matter-only' simulations, we confirm that baryonic effects can suppress the halo mass function and the matter power spectrum by up to $\\approx20$ per cent.",
+				"extra": "ADS Bibcode: 2023arXiv230604024S",
+				"libraryCatalog": "NASA ADS",
+				"shortTitle": "The FLAMINGO project",
+				"url": "https://ui.adsabs.harvard.edu/abs/2023arXiv230604024S",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Astrophysics - Astrophysics of Galaxies"
+					},
+					{
+						"tag": "Astrophysics - Cosmology and Nongalactic Astrophysics"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}

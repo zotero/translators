@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-12-15 15:34:27"
+	"lastUpdated": "2024-02-17 03:02:30"
 }
 
 /*
@@ -283,8 +283,8 @@ function scrape(doc, url, type) {
 				creatorType = (enLabel == 'Author') ? 'author' : 'editor';
 				
 				// Use titles of a tags if they exist, since these don't include
-				// affiliations
-				value = ZU.xpathText(rows[i].childNodes[1], "a/@title", null, "; ") || value;
+				// affiliations; don't include links to ORCID profiles
+				value = ZU.xpathText(rows[i].childNodes[1], "a[not(@id='orcidLink')]/@title", null, "; ") || value;
 
 				value = value.replace(/^by\s+/i, '')	// sometimes the authors begin with "By"
 							.split(/\s*;\s*|\s+and\s+/i);
@@ -498,10 +498,11 @@ function scrape(doc, url, type) {
 		item.tags = altKeywords.join(',').split(/\s*(?:,|;)\s*/);
 	}
 	
-	if (doc.getElementById('downloadPDFLink')) {
+	let pdfLink = doc.querySelector('[id^="downloadPDFLink"]');
+	if (pdfLink) {
 		item.attachments.push({
 			title: 'Full Text PDF',
-			url: doc.getElementById('downloadPDFLink').href,
+			url: pdfLink.href,
 			mimeType: 'application/pdf',
 			proxy: false
 		});

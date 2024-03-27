@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-02 14:47:46"
+	"lastUpdated": "2023-09-24 03:17:24"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -37,6 +36,7 @@
 */
 
 function detectWeb(doc, url) {
+	Zotero.monitorDOMChanges(doc.querySelector('.global-content-wrapper'));
 	if (doc.defaultView !== null && doc.defaultView !== doc.defaultView.top) return false;
 	
 	if (/[?&]arnumber=(\d+)/i.test(url) || /\/document\/\d+/i.test(url)) {
@@ -111,28 +111,25 @@ function fixUrl(url) {
 	}
 }
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc), function (items) {
-			if (!items) {
-				return;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
+
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else if (url.includes("/search/") || url.includes("/stamp/") || url.includes("/ielx4/") || url.includes("/ielx5/")) {
-		ZU.processDocuments([fixUrl(url)], scrape);
+		await scrape(await requestDocument([fixUrl(url)]));
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
-function scrape(doc, url) {
+
+async function scrape(doc, url = doc.location.href) {
 	var arnumber = (url.match(/arnumber=(\d+)/) || url.match(/\/document\/(\d+)/))[1];
 	var pdf = "/stamp/stamp.jsp?tp=&arnumber=" + arnumber;
 	// Z.debug("arNumber = " + arnumber);
@@ -151,97 +148,100 @@ function scrape(doc, url) {
 	}
 	
 	
-	var post = "recordIds=" + arnumber + "&fromPage=&citations-format=citation-abstract&download-format=download-bibtex";
-	ZU.doPost('/xpl/downloadCitations', post, function (text) {
-		text = ZU.unescapeHTML(text.replace(/(&[^\s;]+) and/g, '$1;'));
-		// remove empty tag - we can take this out once empty tags are ignored
-		text = text.replace(/(keywords=\{.+);\}/, "$1}");
-		var earlyaccess = false;
-		if (text.search(/^@null/) != -1) {
-			earlyaccess = true;
-			text = text.replace(/^@null/, "@article");
+	let bibtexURL = "/rest/search/citation/format?recordIds=" + arnumber + "&fromPage=&citations-format=citation-abstract&download-format=download-bibtex";
+	Z.debug(bibtexURL);
+	// metadata is downloaded in a JSON data field
+	let bibtex = await requestJSON(bibtexURL, { headers: { Referer: url} });
+	bibtex = bibtex.data;
+	bibtex = ZU.unescapeHTML(bibtex.replace(/(&[^\s;]+) and/g, '$1;'));
+	// remove empty tag - we can take this out once empty tags are ignored
+	bibtex = bibtex.replace(/(keywords=\{.+);\}/, "$1}");
+	var earlyaccess = false;
+	if (/^@null/.test(bibtex)) {
+		earlyaccess = true;
+		bibtex = text.replace(/^@null/, "@article");
+	}
+	var translator = Zotero.loadTranslator("import");
+	// Calling the BibTeX translator
+	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+	translator.setString(bibtex);
+	translator.setHandler("itemDone", function (obj, item) {
+		item.notes = [];
+		var res;
+		// Rearrange titles, per http://forums.zotero.org/discussion/8056
+		// If something has a comma or a period, and the text after comma ends with
+		// "of", "IEEE", or the like, then we switch the parts. Prefer periods.
+		if (item.publicationTitle.includes(".")) {
+			res = item.publicationTitle.trim().match(/^(.*)\.(.*(?:of|on|IEE|IEEE|IET|IRE))$/);
 		}
-		var translator = Zotero.loadTranslator("import");
-		// Calling the BibTeX translator
-		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
-		translator.setString(text);
-		translator.setHandler("itemDone", function (obj, item) {
-			item.notes = [];
-			var res;
-			// Rearrange titles, per http://forums.zotero.org/discussion/8056
-			// If something has a comma or a period, and the text after comma ends with
-			// "of", "IEEE", or the like, then we switch the parts. Prefer periods.
-			if (item.publicationTitle.includes(".")) {
-				res = item.publicationTitle.trim().match(/^(.*)\.(.*(?:of|on|IEE|IEEE|IET|IRE))$/);
-			}
-			else {
-				res = item.publicationTitle.trim().match(/^(.*),(.*(?:of|on|IEE|IEEE|IET|IRE))$/);
-			}
-			if (res) {
-				item.publicationTitle = res[2] + " " + res[1];
-			}
-			item.proceedingsTitle = item.conferenceName = item.publicationTitle;
-			if (earlyaccess) {
-				item.volume = "Early Access Online";
-				item.issue = "";
-				item.pages = "";
-			}
+		else {
+			res = item.publicationTitle.trim().match(/^(.*),(.*(?:of|on|IEE|IEEE|IET|IRE))$/);
+		}
+		if (res) {
+			item.publicationTitle = res[2] + " " + res[1];
+		}
+		item.proceedingsTitle = item.conferenceName = item.publicationTitle;
+		if (earlyaccess) {
+			item.volume = "Early Access Online";
+			item.issue = "";
+			item.pages = "";
+		}
 			
-			if (data && data.authors && data.authors.length == item.creators.length) {
-				item.creators = [];
-				for (let author of data.authors) {
-					item.creators.push({
-						firstName: author.firstName,
-						lastName: author.lastName,
-						creatorType: "author"
+		if (data && data.authors && data.authors.length == item.creators.length) {
+			item.creators = [];
+			for (let author of data.authors) {
+				item.creators.push({
+					firstName: author.firstName,
+					lastName: author.lastName,
+					creatorType: "author"
+				});
+			}
+		}
+			
+		if (!item.ISSN && data && data.issn) {
+			item.ISSN = data.issn.map(el => el.value).join(", ");
+		}
+		if (item.ISSN && !ZU.fieldIsValidForType('ISSN', item.itemType)) {
+			item.extra = "ISSN: " + item.ISSN;
+		}
+		item.url = url;
+		item.attachments.push({
+			document: doc,
+			title: "IEEE Xplore Abstract Record"
+		});
+			
+		if (pdf) {
+			ZU.doGet(pdf, function (src) {
+				// Either the PDF is embedded in the page, or (e.g. for iOS)
+				// the page has a redirect to the full-page PDF
+				//
+				// As of 3/2020, embedded PDFs via a web-based proxy are
+				// being served as getPDF.jsp, so support that in addition
+				// to direct .pdf URLs.
+				var m = /<i?frame src="([^"]+\.pdf\b[^"]*|[^"]+\/getPDF\.jsp\b[^"]*)"|<meta HTTP-EQUIV="REFRESH" content="0; url=([^\s"]+\.pdf\b[^\s"]*)"/.exec(src);
+				var pdfUrl = m && (m[1] || m[2]);
+				if (pdfUrl) {
+					item.attachments.unshift({
+						url: pdfUrl,
+						title: "IEEE Xplore Full Text PDF",
+						mimeType: "application/pdf"
 					});
 				}
-			}
-			
-			if (!item.ISSN && data && data.issn) {
-				item.ISSN = data.issn.map(el => el.value).join(", ");
-			}
-			if (item.ISSN && !ZU.fieldIsValidForType('ISSN', item.itemType)) {
-				item.extra = "ISSN: " + item.ISSN;
-			}
-			
-			item.attachments.push({
-				document: doc,
-				title: "IEEE Xplore Abstract Record"
-			});
-			
-			if (pdf) {
-				ZU.doGet(pdf, function (src) {
-					// Either the PDF is embedded in the page, or (e.g. for iOS)
-					// the page has a redirect to the full-page PDF
-					//
-					// As of 3/2020, embedded PDFs via a web-based proxy are
-					// being served as getPDF.jsp, so support that in addition
-					// to direct .pdf URLs.
-					var m = /<i?frame src="([^"]+\.pdf\b[^"]*|[^"]+\/getPDF\.jsp\b[^"]*)"|<meta HTTP-EQUIV="REFRESH" content="0; url=([^\s"]+\.pdf\b[^\s"]*)"/.exec(src);
-					var pdfUrl = m && (m[1] || m[2]);
-					if (pdfUrl) {
-						item.attachments.unshift({
-							url: pdfUrl,
-							title: "IEEE Xplore Full Text PDF",
-							mimeType: "application/pdf"
-						});
-					}
-					item.complete();
-				}, null);
-			}
-			else {
 				item.complete();
-			}
-		});
+			}, null);
+		}
+		else {
+			item.complete();
+		}
+	});
 
-		translator.getTranslatorObject(function (trans) {
-			trans.setKeywordSplitOnSpace(false);
-			trans.setKeywordDelimRe('\\s*;\\s*', '');
-			trans.doImport();
-		});
+	translator.getTranslatorObject(function (trans) {
+		trans.setKeywordSplitOnSpace(false);
+		trans.setKeywordDelimRe('\\s*;\\s*', '');
+		trans.doImport();
 	});
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [

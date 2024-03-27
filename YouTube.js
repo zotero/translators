@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-01-17 19:11:42"
+	"lastUpdated": "2024-02-05 18:28:26"
 }
 
 /*
@@ -129,7 +129,7 @@ function scrape(doc, url) {
 	) || jsonLD.uploadDate; // Mobile on initial page load
 
 	var author = text(doc, '#meta-contents #text-container .ytd-channel-name') // Desktop
-		|| text(doc, '#text-container .ytd-channel-name')
+		|| text(doc, '#upload-info #text-container .ytd-channel-name')
 		|| text(doc, '.slim-owner-channel-name'); // Mobile
 	if (author) {
 		item.creators.push({

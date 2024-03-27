@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2023-01-03 10:30:59"
+	"lastUpdated": "2023-11-05 21:29:00"
 }
 
 /*
@@ -319,7 +319,7 @@ function doExport() {
 		
 		// Don't include access date for journals with no URL
 		if (item.accessDate && !(item.itemType == 'journalArticle' && !item.url)) {
-			properties.accessdate = formatDate(item.accessDate);
+			properties["access-date"] = formatDate(item.accessDate);
 		}
 		
 		if (item.date) {

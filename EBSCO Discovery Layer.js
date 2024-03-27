@@ -2,14 +2,14 @@
 	"translatorID": "660fcf3e-3414-41b8-97a5-e672fc2e491d",
 	"label": "EBSCO Discovery Layer",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://discovery\\.ebsco\\.com/",
+	"target": "^https?://(discovery|research)\\.ebsco\\.com/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-02-12 03:36:07"
+	"lastUpdated": "2024-02-04 04:24:48"
 }
 
 /*
@@ -35,14 +35,14 @@
 	***** END LICENSE BLOCK *****
 */
 
-const itemRegex = /\/c\/([^/]+)\/(?:details|viewer\/pdf)\/([^?]+)/;
+const itemRegex = /\/c\/([^/]+)(?:\/search)?\/(?:details|viewer\/pdf)\/([^?]+)/;
 function detectWeb(doc, url) {
 	if (itemRegex.test(url)) {
 		if (url.includes("/viewer/pdf")) {
 			return "journalArticle";
 		}
 		Z.monitorDOMChanges(doc.querySelector('#page-container'));
-		let type = text(doc, 'div.article-type');
+		let type = text(doc, 'div[class*="article-type"]');
 		if (type) {
 			return getType(type);
 		}
@@ -60,7 +60,9 @@ function detectWeb(doc, url) {
 
 function getType(type) {
 	// This can probably be fine-tuned, but it'll work for 90% of results
-	if (type.toLowerCase().includes("article")) {
+	type = type.toLowerCase();
+	// Z.debug(type)
+	if (type.includes("article") || type.includes("artikel")) {
 		return "journalArticle";
 	}
 	else {
@@ -73,6 +75,9 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 
 	var rows = doc.querySelectorAll('h2.result-item-title > a');
+	if (!rows.length) {
+		rows = doc.querySelectorAll('div[class*="result-item-title"]>a');
+	}
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -138,6 +143,5 @@ async function scrape(doc, url = doc.location.href) {
 }
 
 /** BEGIN TEST CASES **/
-var testCases = [
-]
+
 /** END TEST CASES **/

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-02-27 16:31:58"
+	"lastUpdated": "2024-03-11 17:59:13"
 }
 
 /*
@@ -88,6 +88,10 @@ function getResultList(doc) {
 	// the h3 link actually points to other volumes, so we're making sure we're in the right li element first
 	if (!results.length) {
 		results = doc.querySelectorAll('li[data-test="chapter"] h4.c-card__title > a, li[data-test="chapter"] h3.c-card__title > a');
+	}
+	// https://link.springer.com/journal/11192/volumes-and-issues/129-1
+	if (!results.length) {
+		results = doc.querySelectorAll('section ol article.c-card-open h3 > a');
 	}
 	return results;
 }
@@ -632,6 +636,16 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://link.springer.com/book/10.1007/978-3-031-04248-5",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/journal/11192/volumes-and-issues/129-1",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/journal/10473/volumes-and-issues/44-3",
 		"items": "multiple"
 	}
 ]

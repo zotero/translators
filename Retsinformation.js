@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-07 19:48:42"
+	"lastUpdated": "2024-01-15 18:52:34"
 }
 
 /*
@@ -51,7 +51,7 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Z.selectItems(getSearchResults(doc, url), function (selectedItems) {
 			if (!selectedItems) return;
@@ -63,7 +63,7 @@ function doWeb(doc, url) {
 		});
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
@@ -80,56 +80,65 @@ function getSearchResults(doc, url, checkOnly) {
 	return items;
 }
 
-function scrape(doc, url) {
-	ZU.doGet(url.replace(/\/dan.*/, '').replace('/eli', '/api/document/eli'), function (respText) {
-		let json = JSON.parse(respText)[0];
-		let item = new Zotero.Item(getType(json.shortName));
-		
-		let signingDate;
-		let admissionDate;
-		let firstAdmissionDate;
+async function scrape(doc, url) {
+	let jsonURL = url.replace(/\/dan.*/, '').replace('/eli', '/api/document/eli');
+	// Z.debug(jsonURL)
 
-		for (let { displayName: name, displayValue: value } of json.metadata) {
-			if (name == 'Dato for underskrift') {
-				signingDate = value;
-			}
-			else if (name == 'Dato for indlæggelse') {
-				admissionDate = value;
-			}
-			else if (name == 'Dato for førstegangsindlæggelse') {
-				firstAdmissionDate = value;
-			}
-		}
+	let post = '{"isRawHtml":false}';
+	let headers = {
+		'Content-Type': 'application/json',
+		Referer: url
+	};
+	let apiJSON = await requestJSON(jsonURL, { method: 'POST', headers: headers, body: post });
+	//Z.debug(apiJSON)
 
-		item.title = json.title;
-		item.shortTitle = json.popularTitle;
+	let json = apiJSON[0];
+	let item = new Zotero.Item(getType(json.shortName));
 		
-		let number = json.shortName;
-		let date = ZU.strToISO(signingDate || admissionDate || firstAdmissionDate);
+	let signingDate;
+	let admissionDate;
+	let firstAdmissionDate;
 
-		if (item.itemType == 'statute') {
-			item.codeNumber = number;
-			item.dateEnacted = date;
+	for (let { displayName: name, displayValue: value } of json.metadata) {
+		if (name == 'Dato for underskrift') {
+			signingDate = value;
 		}
-		else if (item.itemType == 'case') {
-			item.docketNumber = number;
-			item.dateDecided = date;
+		else if (name == 'Dato for indlæggelse') {
+			admissionDate = value;
 		}
-		else if (item.itemType == 'bill') {
-			item.billNumber = number;
-			item.date = date;
+		else if (name == 'Dato for førstegangsindlæggelse') {
+			firstAdmissionDate = value;
 		}
+	}
+
+	item.title = json.title;
+	item.shortTitle = json.popularTitle;
 		
-		if (json.ressort) {
-			item.creators.push({
-				creatorType: 'author',
-				lastName: json.ressort,
-				fieldMode: 1
-			});
-		}
-		item.url = url;
-		item.complete();
-	});
+	let number = json.shortName;
+	let date = ZU.strToISO(signingDate || admissionDate || firstAdmissionDate);
+
+	if (item.itemType == 'statute') {
+		item.codeNumber = number;
+		item.dateEnacted = date;
+	}
+	else if (item.itemType == 'case') {
+		item.docketNumber = number;
+		item.dateDecided = date;
+	}
+	else if (item.itemType == 'bill') {
+		item.billNumber = number;
+		item.date = date;
+	}
+		
+	if (json.ressort) {
+		item.creators.push({
+			creatorType: 'author',
+			lastName: json.ressort,
+			fieldMode: 1
+		});
+	}
+	item.url = url;
+	item.complete();
 }
 
 function getType(documentType) {
@@ -335,4 +344,5 @@ var testCases = [
 		"items": "multiple"
 	}
 ]
+
 /** END TEST CASES **/

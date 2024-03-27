@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-12 01:46:07"
+	"lastUpdated": "2023-10-18 11:11:59"
 }
 
 /*
@@ -151,7 +151,7 @@ function detectWeb(doc, url) {
 	return "journalArticle"; // A decent guess
 }
 
-function retrieveDOIs(doiOrDOIs) {
+async function retrieveDOIs(doiOrDOIs) {
 	let showSelect = Array.isArray(doiOrDOIs);
 	let dois = showSelect ? doiOrDOIs : [doiOrDOIs];
 	let items = {};
@@ -214,14 +214,14 @@ function retrieveDOIs(doiOrDOIs) {
 		// Don't throw on error
 		translate.setHandler("error", function () {});
 	
-		translate.translate();
+		await translate.translate();
 	}
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	let doiOrDOIs = getDOIs(doc, url);
 	Z.debug(doiOrDOIs);
-	retrieveDOIs(doiOrDOIs);
+	await retrieveDOIs(doiOrDOIs);
 }
 
 /** BEGIN TEST CASES **/

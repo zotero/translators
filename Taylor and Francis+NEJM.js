@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-19 15:27:10"
+	"lastUpdated": "2024-02-22 19:17:30"
 }
 
 /*
@@ -38,7 +38,7 @@
 
 
 function detectWeb(doc, url) {
-	if (url.match(/\/doi\/(abs|full|figure)\/10\./)) {
+	if (url.match(/\/doi(\/(abs|full|figure))?\/10\./)) {
 		return "journalArticle";
 	}
 	else if ((url.includes('/action/doSearch?') || url.includes('/toc/')) && getSearchResults(doc, true)) {
@@ -88,7 +88,7 @@ function doWeb(doc, url) {
 
 
 function scrape(doc, url) {
-	var match = url.match(/\/doi\/(?:abs|full|figure)\/(10\.[^?#]+)/);
+	var match = url.match(/\/doi(?:\/(?:abs|full|figure))?\/(10\.[^?#]+)/);
 	var doi = match[1];
 
 	var baseUrl = url.match(/https?:\/\/[^/]+/)[0];
@@ -152,8 +152,12 @@ function scrape(doc, url) {
 
 
 function finalizeItem(item, doc, doi, baseUrl) {
+	var subtitle = text(doc, 'h1 + .sub-title > h2');
+	if (subtitle && !item.title.toLowerCase().includes(subtitle.toLowerCase())) {
+		item.title = item.title.replace(/:$/, '') + ': ' + subtitle;
+	}
+
 	var pdfurl = baseUrl + '/doi/pdf/';
-	var absurl = baseUrl + '/doi/abs/';
 	
 	// add keywords
 	var keywords = ZU.xpath(doc, '//div[contains(@class, "abstractKeywords")]//a');
@@ -574,6 +578,86 @@ var testCases = [
 				"publicationTitle": "Accounting and Business Research",
 				"url": "https://doi.org/10.1080/00014788.2016.1157680",
 				"volume": "46",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nejm.org/doi/10.1056/NEJMcibr2307735",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "A Holy Grail — The Prediction of Protein Structure",
+				"creators": [
+					{
+						"lastName": "Altman",
+						"firstName": "Russ B.",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-10-12",
+				"DOI": "10.1056/NEJMcibr2307735",
+				"ISSN": "0028-4793",
+				"extra": "PMID: 37732608",
+				"issue": "15",
+				"itemID": "doi:10.1056/NEJMcibr2307735",
+				"libraryCatalog": "Taylor and Francis+NEJM",
+				"pages": "1431-1434",
+				"publicationTitle": "New England Journal of Medicine",
+				"url": "https://doi.org/10.1056/NEJMcibr2307735",
+				"volume": "389",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.tandfonline.com/doi/abs/10.1300/J150v03n04_02",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Service Value Determination: An Integrative Perspective",
+				"creators": [
+					{
+						"lastName": "Jayanti",
+						"firstName": "Rama K.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Ghosh",
+						"firstName": "Amit K.",
+						"creatorType": "author"
+					}
+				],
+				"date": "1996-05-10",
+				"DOI": "10.1300/J150v03n04_02",
+				"ISSN": "1050-7051",
+				"abstractNote": "The authors investigate the efficacy of an integrated perspective on perceived service value, derived out of bringing together two consumer behavior research streams, those of utilitarian and behavioral theories. Theoretical, arguments and empirical evidence are used to show that the integrative perspective provides a better representation of perceived value than either the utilitarian or the behavioral perspective alone. Additionally, acquisition utility is shown to be similar to perceived quality, suggesting that a more parsimonious representation of perceived value entails the use of transaction utility and perceived quality as predictor variables. Finally, the authors argue that within a service encounter context, perceived quality of the service assumes more importance than price perceptions in explaining perceived value. Managerial implications and future research directions are discussed.",
+				"issue": "4",
+				"itemID": "doi:10.1300/J150v03n04\\_02",
+				"libraryCatalog": "Taylor and Francis+NEJM",
+				"pages": "5-25",
+				"publicationTitle": "Journal of Hospitality & Leisure Marketing",
+				"shortTitle": "Service Value Determination",
+				"url": "https://doi.org/10.1300/J150v03n04_02",
+				"volume": "3",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
