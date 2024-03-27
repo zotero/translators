@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-16 15:18:29"
+	"lastUpdated": "2024-03-27 05:46:40"
 }
 
 /*
@@ -693,7 +693,8 @@ function addLowQualityMetadata(doc, newItem) {
 			Array.from(doc.querySelectorAll('meta[name="author" i], meta[property="author" i]'))
 				.map(authorNode => authorNode.content)
 				.filter(content => content && /[^\s,-.;]/.test(content)));
-		if (w3authors.size) {
+		// Condé Nast is a company, not an author
+		if (w3authors.size && !w3authors.has("Condé Nast")) {
 			for (let author of w3authors) {
 				newItem.creators.push(ZU.cleanAuthor(author, "author"));
 			}
