@@ -694,7 +694,7 @@ function addLowQualityMetadata(doc, newItem) {
 				.map(authorNode => authorNode.content)
 				.filter(content => content && /[^\s,-.;]/.test(content)));
 		// Condé Nast is a company, not an author
-		if (w3authors.size && !w3authors.has("Condé Nast")) {
+		if (w3authors.size && !(w3authors.size == 1 && w3authors.has("Condé Nast"))) {
 			for (let author of w3authors) {
 				newItem.creators.push(ZU.cleanAuthor(author, "author"));
 			}
