@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 8,
-	"lastUpdated": "2023-09-22 09:54:11"
+	"lastUpdated": "2024-03-25 16:57:39"
 }
 
 /*
@@ -64,18 +64,20 @@ async function doSearch(items) {
 }
 
 async function processDOI(doi) {
-	let response = await requestText(
+	let response = await request(
 		`https://doi.org/${encodeURIComponent(doi)}`,
 		{ headers: { Accept: "application/vnd.datacite.datacite+json, application/vnd.crossref.unixref+xml, application/vnd.citationstyles.csl+json" } }
 	);
+	let { headers, body } = response;
 	// by content negotiation we asked for datacite or crossref format, or CSL JSON
-	if (!response) return;
-	Z.debug(response);
+	if (!body) return;
+	Z.debug(body);
 
 	let trans = Zotero.loadTranslator('import');
-	trans.setString(response);
+	trans.setString(body);
 
-	if (response.includes("<crossref")) {
+	let contentType = headers['content-type'] || '';
+	if (contentType.startsWith('application/vnd.crossref.unixref+xml')) {
 		// Crossref Unixref
 		trans.setTranslator('93514073-b541-4e02-9180-c36d2f3bb401');
 		trans.setHandler('itemDone', function (obj, item) {
@@ -83,11 +85,7 @@ async function processDOI(doi) {
 			item.complete();
 		});
 	}
-	else if (response.includes("http://datacite.org/schema")
-		// TEMP
-		// https://github.com/zotero/translators/issues/2018#issuecomment-616491407
-		|| response.includes('"agency": "DataCite"')
-		|| response.includes('"providerId": ')) {
+	else if (contentType.startsWith('application/vnd.datacite.datacite+json')) {
 		// Datacite JSON
 		trans.setTranslator('b5b5808b-1c61-473d-9a02-e1f5ba7b8eef');
 		trans.setHandler('itemDone', function (obj, item) {
