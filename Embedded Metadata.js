@@ -618,8 +618,7 @@ function processHighwireCreators(creatorNodes, role, doc) {
 
 			if (libraryCatalog == "cyberleninka.ru") {
 				let creatorBySpace = creator.split(/\s* \s*/);
-				// Z.debug(creatorBySpace[0])
-				creator = creatorBySpace.slice(1).join(" ") + " " + creatorBySpace[0]
+				creator = creatorBySpace.slice(1).join(" ") + " " + creatorBySpace[0];
 			}
 
 			lastCreator = creator;
