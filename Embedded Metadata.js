@@ -1,15 +1,15 @@
 {
 	"translatorID": "951c027d-74ac-47d4-a107-9c3069ab7b48",
-	"label": "Embedded Metadata",
-	"creator": "Simon Kornblith and Avram Lyon",
-	"target": "",
-	"minVersion": "3.0.4",
-	"maxVersion": "",
-	"priority": 320,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-28 14:45:36"
+		"label": "Embedded Metadata",
+			"creator": "Simon Kornblith and Avram Lyon",
+				"target": "",
+					"minVersion": "3.0.4",
+						"maxVersion": "",
+							"priority": 320,
+								"inRepository": true,
+									"translatorType": 4,
+										"browserSupport": "gcsibv",
+											"lastUpdated": "2024-03-28 14:45:36"
 }
 
 /*
@@ -63,21 +63,21 @@ var HIGHWIRE_MAPPINGS = {
 	citation_public_url: "url",
 	citation_language: "language"
 
-/* the following are handled separately in addHighwireMetadata()
-	"citation_author"
-	"citation_authors"
-	"citation_firstpage"
-	"citation_lastpage"
-	"citation_issn"
-	"citation_eIssn"
-	"citation_pdf_url"
-	"citation_abstract_html_url"
-	"citation_fulltext_html_url"
-	"citation_pmid"
-	"citation_online_date"
-	"citation_year"
-	"citation_keywords"
-*/
+	/* the following are handled separately in addHighwireMetadata()
+		"citation_author"
+		"citation_authors"
+		"citation_firstpage"
+		"citation_lastpage"
+		"citation_issn"
+		"citation_eIssn"
+		"citation_pdf_url"
+		"citation_abstract_html_url"
+		"citation_fulltext_html_url"
+		"citation_pmid"
+		"citation_online_date"
+		"citation_year"
+		"citation_keywords"
+	*/
 };
 
 /* eslint-enable */
@@ -477,7 +477,7 @@ function addHighwireMetadata(doc, newItem, hwType) {
 
 	// sometimes RDF has more info, let's not drop it
 	var rdfPages = (newItem.pages) ? newItem.pages.split(/\s*-\s*/) : [];
-	
+
 	// matches hyphens and en-dashes
 	let dashRe = /[-\u2013]/g;
 	var firstpage = getContentText(doc, 'citation_firstpage');
@@ -502,18 +502,18 @@ function addHighwireMetadata(doc, newItem, hwType) {
 		newItem.pages = firstpage
 			+ ((lastpage && (lastpage = lastpage.trim())) ? '-' + lastpage : '');
 	}
-	
+
 	// swap in hwType for itemType
 	if (hwType && hwType != newItem.itemType) {
 		newItem.itemType = hwType;
 	}
-	
-	
+
+
 	// fall back to some other date options
 	if (!newItem.date) {
 		var onlineDate = getContentText(doc, 'citation_online_date');
 		var citationYear = getContentText(doc, 'citation_year');
-		
+
 		if (onlineDate && citationYear) {
 			onlineDate = ZU.strToISO(onlineDate);
 			if (citationYear < onlineDate.substr(0, 4)) {
@@ -531,8 +531,8 @@ function addHighwireMetadata(doc, newItem, hwType) {
 
 	// prefer ISSN over eISSN
 	var issn = getContentText(doc, 'citation_issn', null, true)
-			|| getContentText(doc, 'citation_ISSN', null, true)
-			|| getContentText(doc, 'citation_eIssn', null, true);
+		|| getContentText(doc, 'citation_ISSN', null, true)
+		|| getContentText(doc, 'citation_eIssn', null, true);
 
 	if (issn) newItem.ISSN = issn;
 
@@ -588,12 +588,12 @@ function processHighwireCreators(creatorNodes, role, doc) {
 		let creators = creatorNode.nodeValue.split(/\s*;\s*/);
 		if (creators.length == 1 && creatorNodes.length == 1) {
 			var authorsByComma = creators[0].split(/\s*,\s*/);
-	
+
 			/* If there is only one author node and
 			we get nothing when splitting by semicolon, there are at least two
 			words on either side of a comma, and it doesn't appear to be a
 			two-word Spanish surname, we split by comma. */
-			
+
 			let lang = getContentText(doc, 'citation_language');
 			let twoWordName = authorsByComma.length == 2
 				&& ['es', 'spa', 'Spanish', 'español'].includes(lang)
@@ -604,9 +604,8 @@ function processHighwireCreators(creatorNodes, role, doc) {
 				&& !twoWordName) creators = authorsByComma;
 		}
 
-		libraryCatalog = doc.location.host
-		// Z.debug(libraryCatalog)
-		
+		let libraryCatalog = doc.location.host;
+
 		for (let creator of creators) {
 			creator = creator.trim();
 			// Zotero.debug(creator)
@@ -616,7 +615,7 @@ function processHighwireCreators(creatorNodes, role, doc) {
 
 			// Skip adjacent repeated authors
 			if (lastCreator && creator == lastCreator) continue;
-			
+
 			if (libraryCatalog == "cyberleninka.ru") {
 				let creatorBySpace = creator.split(/\s* \s*/);
 				// Z.debug(creatorBySpace[0])
@@ -644,7 +643,7 @@ function addOtherMetadata(doc, newItem) {
 		try {
 			var parsely = JSON.parse(parselyJSON);
 		}
-		catch (e) {}
+		catch (e) { }
 
 		if (parsely) {
 			if (!newItem.title && parsely.title) {
@@ -730,7 +729,7 @@ function addLowQualityMetadata(doc, newItem) {
 	if (!newItem.url) {
 		newItem.url = ZU.xpathText(doc, '//head/link[@rel="canonical"]/@href') || doc.location.href;
 	}
-	
+
 	if (!newItem.language) {
 		newItem.language = attr(doc, 'meta[name="language" i]', 'content')
 			|| ZU.xpathText(doc, '//x:meta[@name="lang"]/@content', namespaces)
@@ -872,7 +871,7 @@ function getAuthorFromByline(doc, newItem) {
 				child.parentNode.removeChild(child);
 			}
 		}
-		
+
 		byline = ZU.trimInternal(actualByline.innerText);
 		Z.debug("Extracting author(s) from byline: " + byline);
 		var li = actualByline.getElementsByTagName('li');
@@ -967,7 +966,7 @@ function finalDataCleanup(doc, newItem) {
 			newItem.extra = "DOI: " + newItem.DOI;
 		}
 	}
-	
+
 	// URLs in meta tags can technically be relative (see the ccc.de test for
 	// an example), so we need to handle that
 	if (newItem.url) {
@@ -986,7 +985,7 @@ function relativeToAbsolute(doc, url) {
 	if (ZU.resolveURL) {
 		return ZU.resolveURL(url);
 	}
-	
+
 	// adapted from Nuclear Receptor Signaling translator
 
 	if (!url) {
@@ -1009,7 +1008,7 @@ function relativeToAbsolute(doc, url) {
 				+ url;
 		}
 	}
-	
+
 	// relative to current directory
 	let location = doc.location.href;
 	if (location.includes('?')) {
