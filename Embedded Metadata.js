@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-27 05:49:28"
+	"lastUpdated": "2024-03-28 14:45:36"
 }
 
 /*
@@ -424,6 +424,7 @@ function addHighwireMetadata(doc, newItem, hwType) {
 	// save rdfCreators for later
 	var rdfCreators = newItem.creators;
 	newItem.creators = processHighwireCreators(authorNodes, "author", doc).concat(processHighwireCreators(editorNodes, "editor", doc));
+	// Zotero.debug(newItem.creators)
 
 
 	if (!newItem.creators.length) {
@@ -602,15 +603,25 @@ function processHighwireCreators(creatorNodes, role, doc) {
 				&& authorsByComma[1].includes(" ")
 				&& !twoWordName) creators = authorsByComma;
 		}
+
+		libraryCatalog = doc.location.host
+		// Z.debug(libraryCatalog)
 		
 		for (let creator of creators) {
 			creator = creator.trim();
+			// Zotero.debug(creator)
 
 			// skip empty authors. Try to match something other than punctuation
 			if (!creator || !creator.match(/[^\s,-.;]/)) continue;
 
 			// Skip adjacent repeated authors
 			if (lastCreator && creator == lastCreator) continue;
+			
+			if (libraryCatalog == "cyberleninka.ru") {
+				let creatorBySpace = creator.split(/\s* \s*/);
+				// Z.debug(creatorBySpace[0])
+				creator = creatorBySpace.slice(1).join(" ") + " " + creatorBySpace[0]
+			}
 
 			lastCreator = creator;
 
@@ -693,8 +704,7 @@ function addLowQualityMetadata(doc, newItem) {
 			Array.from(doc.querySelectorAll('meta[name="author" i], meta[property="author" i]'))
 				.map(authorNode => authorNode.content)
 				.filter(content => content && /[^\s,-.;]/.test(content)));
-		// Condé Nast is a company, not an author
-		if (w3authors.size && !(w3authors.size == 1 && w3authors.has("Condé Nast"))) {
+		if (w3authors.size) {
 			for (let author of w3authors) {
 				newItem.creators.push(ZU.cleanAuthor(author, "author"));
 			}
@@ -735,6 +745,7 @@ function addLowQualityMetadata(doc, newItem) {
 
 
 	newItem.libraryCatalog = doc.location.host;
+	// Zotero.debug(newItem.libraryCatalog)
 
 	// add access date
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
@@ -2050,27 +2061,230 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.tatler.com/article/clodagh-mckenna-hon-harry-herbert-wedding-george-osborne-highclere-castle",
+		"url": "https://cyberleninka.ru/article/n/redkiy-sluchay-koklyusha-oslozhnennogo-entsefalitom-u-neprivitogo-rebenka",
 		"items": [
 			{
-				"itemType": "webpage",
-				"title": "The Queen’s godson married glamorous Irish chef Clodagh McKenna at Highclere this weekend",
+				"itemType": "journalArticle",
+				"title": "Редкий случай коклюша, осложненного энцефалитом, у непривитого ребенка",
 				"creators": [
 					{
-						"firstName": "Annabel",
-						"lastName": "Sampson",
+						"firstName": "И. В.",
+						"lastName": "Николаева",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "В. А.",
+						"lastName": "Анохин",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Г. С.",
+						"lastName": "Шайхиева",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "А. Х.",
+						"lastName": "Шайдуллина",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Д. С.",
+						"lastName": "Шагиахметова",
 						"creatorType": "author"
 					}
 				],
-				"date": "2021-08-16T09:54:36.000Z",
-				"abstractNote": "The Hon Harry Herbert, son of the 7th Earl of Carnarvon, married Clodagh McKenna in a fairytale wedding attended by everyone from George Osborne and his fiancée, Thea Rogers, to Laura Whitmore",
-				"language": "en-GB",
-				"url": "https://www.tatler.com/article/clodagh-mckenna-hon-harry-herbert-wedding-george-osborne-highclere-castle",
-				"websiteTitle": "Tatler",
+				"date": "2019",
+				"ISSN": "2072-1757",
+				"abstractNote": "The article describes a rare case of whooping cough complicated by encephalitis in an unvaccinated infant, confirmed by magnetic resonance imaging of the brain. Key words: whooping cough, children, encephalitis, encephalopathy.",
+				"issue": "8",
+				"libraryCatalog": "cyberleninka.ru",
+				"pages": "133-135",
+				"publicationTitle": "Практическая медицина",
+				"url": "https://cyberleninka.ru/article/n/redkiy-sluchay-koklyusha-oslozhnennogo-entsefalitom-u-neprivitogo-rebenka",
+				"volume": "17",
 				"attachments": [
 					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://cyberleninka.ru/article/n/kliniko-laboratornye-osobennosti-koklyushnoy-infektsii-u-privityh-detey",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Клинико-лабораторные особенности коклюшной инфекции у привитых детей",
+				"creators": [
+					{
+						"firstName": "И. В.",
+						"lastName": "Бабаченко",
+						"creatorType": "author"
+					}
+				],
+				"date": "2006",
+				"ISSN": "2072-8107",
+				"abstractNote": "Приведены данные заболеваемости коклюшем и привитости вакциной АКДС в Санкт-Петербурге, а также показатели высеваемости В. pertussis и подтверждаемости коклюша. Представлены клинико-лабораторные особенности коклюша у привитых на основании сравнения двух групп детей с лабораторно подтвержденным коклюшем: 41 привитого и 60 непривитых. Показано достоверное преобладание детей старше 7 лет (49 %) среди привитых и первого года жизни (60 %) среди непривитых заболевших. У привитых от коклюша чаще отмечаются легкие и атипичные формы заболевания (по 12,2 %), тяжелые формы регистрируются в 2,4 %. Гематологические изменения выражены слабо и выявляются у 20 % больных; специфические осложнения редки и не носят угрожающего жизни характера. У привитых бактериологический метод оказался неэффективным. С помощью ПЦР диагноз подтверждался у 20,9 % детей, PA у 57,1 %. Сравнение эффективности серологических реакций PA и ИФА подтвердило преимущества ИФА. Показана необходимость оценки серологических реакций у привитых без учета диагностического титра в динамике, а также комплексного применения лабораторных методов подтверждения коклюша.",
+				"issue": "2",
+				"libraryCatalog": "cyberleninka.ru",
+				"pages": "22-26",
+				"publicationTitle": "Детские инфекции",
+				"url": "https://cyberleninka.ru/article/n/kliniko-laboratornye-osobennosti-koklyushnoy-infektsii-u-privityh-detey",
+				"volume": "5",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://cyberleninka.ru/article/n/problemy-kliniko-laboratornoy-diagnostiki-koklyusha-u-detey",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Проблемы клинико-лабораторной диагностики коклюша у детей",
+				"creators": [
+					{
+						"firstName": "Татьяна Анатольевна",
+						"lastName": "Каплина",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Владимир Николаевич",
+						"lastName": "Тимченко",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Галина Яковлевна",
+						"lastName": "Ценева",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Регина Анатольевна",
+						"lastName": "Иванова",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Наталья Николаевна",
+						"lastName": "Курова",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Екатерина Константиновна",
+						"lastName": "Ховайко",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Наталья Эдуардовна",
+						"lastName": "Ярв",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Марина Викторовна",
+						"lastName": "Тихонова",
+						"creatorType": "author"
+					}
+				],
+				"date": "2010",
+				"ISSN": "2079-7850",
+				"abstractNote": "Коклюш достаточно распространенное заболевание особенно среди детей раннего, дошкольного возраста, а так же подростков. Представлены результаты клинико-лабораторного анализа проведенного у 126 больных коклюшем детей в возрасте от 1 мес до 16 лет. В статье показана разная диагностическая ценность различных методов лабораторной диагностики в разных возрастных группах больных. Обсуждается роль и практическое значение ПЦР в диагностике коклюша.",
+				"issue": "2",
+				"libraryCatalog": "cyberleninka.ru",
+				"pages": "55-60",
+				"publicationTitle": "Педиатр",
+				"url": "https://cyberleninka.ru/article/n/problemy-kliniko-laboratornoy-diagnostiki-koklyusha-u-detey",
+				"volume": "1",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://cyberleninka.ru/article/n/rasprostranennost-koklyusha-u-dlitelno-kashlyayuschih-detey-6-17-let-privityh-v-rannem-vozraste-akds-vaktsinoy",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Распространенность коклюша у длительно кашляющих детей 6 - 17 лет, привитых в раннем возрасте АКДС-вакциной",
+				"creators": [
+					{
+						"firstName": "О. В.",
+						"lastName": "Иозефович",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "С. М.",
+						"lastName": "Харит",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "С. П.",
+						"lastName": "Каплина",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "В. В.",
+						"lastName": "Гостев",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "С. В.",
+						"lastName": "Сидоренко",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "О. С.",
+						"lastName": "Калиногорская",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "А. С.",
+						"lastName": "Кветная",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Е. В.",
+						"lastName": "Тимофеева",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "М. А.",
+						"lastName": "Окунева",
+						"creatorType": "author"
+					}
+				],
+				"date": "2012",
+				"ISSN": "2073-3046",
+				"abstractNote": "The pertussis infection is a general world problem. About 195 thousand deaths are diagnosed in the each year, mostly among unvaccinated children 1st year of life. The presents data on the incidence of pertussis in 109 long coughing children, aged 6 to 17 years old, previously vaccinated with DTP according to the national immunization schedule. According to Federal Service on Customers 1 Rights Protection and Human Well-Being in St. Petersburg, the incidence of pertussis among vaccinated children up to the age of 2 years 79.7 to 100 thousand, unvaccinated 4173.4 to 100 thousand. It is shown that preschool and school-age dominated by light and erased forms of the disease, not giving the bacteriological confirmation of the diagnosis due to late treatment and/or preventative antibiotics. The diagnosis of pertussis infection were registered in 20.2% children by PCR. Appointment antibacterial therapy with pertussis infection had no significance to confirm the diagnosis (χ 2 = 0.71, which is less than critical at P < 0.05), and the use of macrolides had no effect on the disease (χ 2 = 0.24, which is less than the critical at P < 0.05). PCR as a mass screening method for pertussis will increase the frequency of diagnosis and will need to use revaccination.",
+				"issue": "5 (66)",
+				"libraryCatalog": "cyberleninka.ru",
+				"pages": "56-59",
+				"publicationTitle": "Эпидемиология и вакцинопрофилактика",
+				"url": "https://cyberleninka.ru/article/n/rasprostranennost-koklyusha-u-dlitelno-kashlyayuschih-detey-6-17-let-privityh-v-rannem-vozraste-akds-vaktsinoy",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
