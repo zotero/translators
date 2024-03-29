@@ -7,9 +7,9 @@
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 4,
+	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-15 21:06:17"
+	"lastUpdated": "2024-03-29 00:58:16"
 }
 
 /*
@@ -44,6 +44,14 @@ function detectWeb(doc, url) {
 		return 'multiple';
 	}
 	return false;
+}
+
+function detectSearch(item) {
+	return !!item.openalex;
+}
+
+async function doSearch(item) {
+	await scrape([item.openalex]);
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -119,6 +127,7 @@ var testCases = [
 				"date": "1973-10-01",
 				"DOI": "10.2307/2525981",
 				"ISSN": "1468-2354,0020-6598",
+				"extra": "openalex: https://openalex.org/W2029394297",
 				"issue": "3",
 				"language": "en",
 				"libraryCatalog": "OpenAlex",
@@ -164,6 +173,7 @@ var testCases = [
 				"date": "1951-09-01",
 				"DOI": "10.1007/bf02310555",
 				"ISSN": "0033-3123,1860-0980",
+				"extra": "openalex: https://openalex.org/W2159306398",
 				"issue": "3",
 				"language": "en",
 				"libraryCatalog": "OpenAlex",
@@ -185,6 +195,103 @@ var testCases = [
 					},
 					{
 						"tag": "tests"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"openalex": "W2741809807"
+		},
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The state of OA: a large-scale analysis of the prevalence and impact of Open Access articles",
+				"creators": [
+					{
+						"firstName": "Heather",
+						"lastName": "Piwowar",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jason",
+						"lastName": "Priem",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Vincent",
+						"lastName": "Larivière",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Juan Pablo",
+						"lastName": "Alperín",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Lisa",
+						"lastName": "Matthias",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Bree",
+						"lastName": "Norlander",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ashley",
+						"lastName": "Farley",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jevin D.",
+						"lastName": "West",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Stefanie",
+						"lastName": "Haustein",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018-02-13",
+				"DOI": "10.7717/peerj.4375",
+				"ISSN": "2167-8359",
+				"extra": "openalex: https://openalex.org/W2741809807",
+				"language": "en",
+				"libraryCatalog": "OpenAlex",
+				"pages": "e4375",
+				"publicationTitle": "PeerJ",
+				"shortTitle": "The state of OA",
+				"volume": "6",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "access"
+					},
+					{
+						"tag": "articles"
+					},
+					{
+						"tag": "large-scale"
+					},
+					{
+						"tag": "oa"
+					},
+					{
+						"tag": "open"
+					},
+					{
+						"tag": "prevalence"
 					}
 				],
 				"notes": [],

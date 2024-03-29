@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2024-03-09 04:00:37"
+	"lastUpdated": "2024-03-28 20:54:09"
 }
 
 /*
@@ -165,6 +165,7 @@ function parseIndividual(data) {
 	for (let tag of tags) {
 		item.tags.push(tag.keyword);
 	}
+	item.extra = "openalex: " + data.ids.openalex;
 	item.complete();
 }
 
@@ -186,9 +187,11 @@ var testCases = [
 					}
 				],
 				"date": "1982-11-01",
-				"DOI": "https://doi.org/10.2307/1885099",
+				"DOI": "10.2307/1885099",
 				"ISSN": "0033-5533,1531-4650",
+				"extra": "openalex: https://openalex.org/W2099326003",
 				"issue": "4",
+				"language": "en",
 				"pages": "543",
 				"publicationTitle": "The Quarterly Journal of Economics",
 				"volume": "97",
@@ -229,9 +232,11 @@ var testCases = [
 					}
 				],
 				"date": "2004-09-01",
-				"DOI": "https://doi.org/10.1257/0002828042002561",
+				"DOI": "10.1257/0002828042002561",
 				"ISSN": "1944-7981,0002-8282",
+				"extra": "openalex: https://openalex.org/W3123223998",
 				"issue": "4",
+				"language": "en",
 				"pages": "991-1013",
 				"publicationTitle": "The American Economic Review",
 				"volume": "94",
@@ -275,6 +280,8 @@ var testCases = [
 				],
 				"date": "1999-01-01",
 				"bookTitle": "Springer eBooks",
+				"extra": "openalex: https://openalex.org/W2105705711",
+				"language": "en",
 				"pages": "7-48",
 				"publisher": "Springer Nature",
 				"attachments": [
@@ -319,6 +326,7 @@ var testCases = [
 					}
 				],
 				"date": "2014-01-01",
+				"extra": "openalex: https://openalex.org/W4234549826",
 				"publisher": "Duke University Press",
 				"attachments": [],
 				"tags": [
@@ -349,6 +357,7 @@ var testCases = [
 					}
 				],
 				"date": "2017-08-09",
+				"extra": "openalex: https://openalex.org/W2257674859",
 				"language": "en",
 				"university": "University of Virginia",
 				"attachments": [
@@ -393,6 +402,7 @@ var testCases = [
 				"date": "1965-07-01",
 				"DOI": "10.1109/tau.1965.1161805",
 				"ISSN": "1558-2663,0096-1620",
+				"extra": "openalex: https://openalex.org/W2046245907",
 				"issue": "4",
 				"language": "en",
 				"pages": "99",
@@ -417,6 +427,7 @@ var testCases = [
 				"date": "1983-01-13",
 				"DOI": "10.1056/nejm198301133080228",
 				"ISSN": "0028-4793,1533-4406",
+				"extra": "openalex: https://openalex.org/W4237963058",
 				"issue": "2",
 				"pages": "112",
 				"publicationTitle": "The New England Journal of Medicine",
@@ -443,6 +454,7 @@ var testCases = [
 				],
 				"date": "2020-11-27",
 				"bookTitle": "IGI Global eBooks",
+				"extra": "openalex: https://openalex.org/W4239223537",
 				"language": "en",
 				"pages": "2027-2057",
 				"publisher": "IGI Global",
@@ -480,6 +492,7 @@ var testCases = [
 				],
 				"date": "1966-08-01",
 				"ISSN": "1820-6069,0534-0012",
+				"extra": "openalex: https://openalex.org/W78857221",
 				"language": "de",
 				"publicationTitle": "Genetika",
 				"attachments": [],
@@ -508,6 +521,7 @@ var testCases = [
 					}
 				],
 				"date": "2012-01-01",
+				"extra": "openalex: https://openalex.org/W2358372115",
 				"language": "en",
 				"publicationTitle": "Journal of Shangqiu Vocational and Technical College",
 				"attachments": [],
@@ -525,5 +539,4 @@ var testCases = [
 		]
 	}
 ]
-
 /** END TEST CASES **/
