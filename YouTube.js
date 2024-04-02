@@ -1,7 +1,7 @@
 {
 	"translatorID": "d3b1d34c-f8a1-43bb-9dd6-27aa6403b217",
 	"label": "YouTube",
-	"creator": "Sean Takats, Michael Berkowitz, Matt Burton and Rintze Zelle",
+	"creator": "Sean Takats, Michael Berkowitz, Matt Burton, Rintze Zelle,  and Geoff Banh",
 	"target": "^https?://([^/]+\\.)?youtube\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-02-05 18:28:26"
+	"lastUpdated": "2024-04-02 07:24:25"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2015-2019 Sean Takats, Michael Berkowitz, Matt Burton and Rintze Zelle
+	Copyright © 2015-2024 Sean Takats, Michael Berkowitz, Matt Burton, Rintze Zelle, and Geoff Banh
 	
 	This file is part of Zotero.
 
@@ -36,7 +36,7 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.search(/\/watch\?(?:.*)\bv=[0-9a-zA-Z_-]+/) != -1) {
+	if (/\/watch\?(?:.*)\bv=[0-9a-zA-Z_-]+/.test(url)) {
 		return "videoRecording";
 	}
 	// Search results
@@ -86,17 +86,19 @@ function doWeb(doc, url) {
 		});
 	}
 }
-
 function scrape(doc, url) {
 	var item = new Zotero.Item("videoRecording");
-
 	let jsonLD;
 	try {
 		jsonLD = JSON.parse(text(doc, 'script[type="application/ld+json"]'));
 	}
+
 	catch (e) {
 		jsonLD = {};
 	}
+
+	// required for translator server, which doesn't load the page's JS
+	let microformat = JSON.parse('{' + text(doc, 'body').match(/"microformat":\{.*\}(?=,"cards")/)[0] + '}').microformat.playerMicroformatRenderer;
 
 	/* YouTube won't update the meta tags for the user,
 	 * if they open e.g. a suggested video in the same tab.
@@ -105,13 +107,14 @@ function scrape(doc, url) {
 
 	item.title = text(doc, '#info-contents h1.title') // Desktop
 		|| text(doc, '#title')
-		|| text(doc, '.slim-video-information-title'); // Mobile
+		|| text(doc, '.slim-video-information-title') // Mobile
+		|| microformat.title.simpleText; // translator server
 	// try to scrape only the canonical url, excluding additional query parameters
 	item.url = url.replace(/^(.+\/watch\?v=[0-9a-zA-Z_-]+).*/, "$1").replace('m.youtube.com', 'www.youtube.com');
 	item.runningTime = text(doc, '#movie_player .ytp-time-duration') // Desktop
 		|| text(doc, '.ytm-time-display .time-second'); // Mobile after unmute
-	if (!item.runningTime && jsonLD.duration) { // Mobile before unmute
-		let duration = parseInt(jsonLD.duration.substring(2));
+	if (!item.runningTime && (jsonLD.duration || microformat.lengthSeconds)) { // Mobile before unmute
+		let duration = parseInt(jsonLD.duration ? jsonLD.duration.substring(2) : microformat.lengthSeconds); // Remove PT prefix if using JSON-LD
 		let hours = String(Math.floor(duration / 3600)).padStart(2, '0');
 		let minutes = String(Math.floor(duration % 3600 / 60)).padStart(2, '0');
 		let seconds = String(duration % 60).padStart(2, '0');
@@ -125,12 +128,14 @@ function scrape(doc, url) {
 
 	item.date = ZU.strToISO(
 		text(doc, '#info-strings yt-formatted-string') // Desktop
-			|| attr(doc, 'ytm-factoid-renderer:last-child > div', 'aria-label') // Mobile if description has been opened
-	) || jsonLD.uploadDate; // Mobile on initial page load
+		|| attr(doc, 'ytm-factoid-renderer:last-child > div', 'aria-label') // Mobile if description has been opened
+	) || jsonLD.uploadDate // Mobile on initial page load
+		|| microformat.uploadDate; // Translator server
 
 	var author = text(doc, '#meta-contents #text-container .ytd-channel-name') // Desktop
 		|| text(doc, '#upload-info #text-container .ytd-channel-name')
-		|| text(doc, '.slim-owner-channel-name'); // Mobile
+		|| text(doc, '.slim-owner-channel-name') // Mobile
+		|| microformat.ownerChannelName; // Translator server
 	if (author) {
 		item.creators.push({
 			lastName: author,
@@ -140,7 +145,8 @@ function scrape(doc, url) {
 	}
 	var description = text(doc, '#description .content')
 		|| text(doc, '#description')
-		|| text(doc, 'ytm-expandable-video-description-body-renderer .collapsed-string-container');
+		|| text(doc, 'ytm-expandable-video-description-body-renderer .collapsed-string-container')
+		|| microformat.description.simpleText; // Translator server
 	if (description) {
 		item.abstractNote = description;
 	}
