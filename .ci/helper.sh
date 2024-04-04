@@ -39,7 +39,8 @@ get_translators_to_check() {
 	# Push to master
 	if [ "${GITHUB_REF:-}" = "refs/heads/master" ]; then
 		before_commit=$(jq -r '.before' $(echo $GITHUB_EVENT_PATH))
-		TRANSLATORS_TO_CHECK=$(git diff $before_commit --name-only | { grep -e "^[^/]*.js$" || true; })
+		# --diff-filter=d: Exclude deleted files
+		TRANSLATORS_TO_CHECK=$(git diff $before_commit --name-only --diff-filter=d | { grep -e "^[^/]*.js$" || true; })
 	# Pull request
 	else
 		# Gets parent commits. Either one or two hashes
