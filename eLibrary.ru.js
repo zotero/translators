@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-20 20:02:47"
+	"lastUpdated": "2024-04-06 20:14:16"
 }
 
 /*
@@ -103,6 +103,9 @@ function getDocType(doc) {
 		case "публикация в сборнике трудов конференции":
 			itemType = "conferencePaper";
 			break;
+		case "тезисы доклада на конференции":
+			itemType = "conferencePaper";
+			break;
 		default:
 			Zotero.debug("Unknown type: " + docType + ". Using 'journalArticle'");
 			itemType = "journalArticle";
@@ -119,9 +122,9 @@ function scrape(doc, url) {
 	
 	var rightPart = doc.getElementById("leftcol").nextSibling;
 	var centralColumn = ZU.xpath(rightPart, './table/tbody/tr[2]/td[@align="left"]');
-	var datablock = ZU.xpath(centralColumn, './div[1]');
+	var datablock = ZU.xpath(centralColumn, './div[2]');
 	
-	var authors = ZU.xpath(datablock, './/table[1]//b');
+	var authors = ZU.xpath(datablock, './/table[1]/tbody/tr/td[2]//b');
 	// Zotero.debug('authors.length: ' + authors.length);
 	
 	for (let i = 0; i < authors.length; i++) {
@@ -182,6 +185,7 @@ function scrape(doc, url) {
 		Номер: "issue",
 		ISSN: "ISSN",
 		"Число страниц": "pages", // e.g. "83"
+		Страницы: "pages",
 		Язык: "language",
 		"Место издания": "place"
 	};
@@ -269,7 +273,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Иноязычные заимствования в художественной прозе на иврите в XX в",
+				"title": "Иноязычные заимствования в художественной прозе на иврите в XX в.",
 				"creators": [
 					{
 						"firstName": "М. В.",
@@ -301,27 +305,27 @@ var testCases = [
 				"title": "Использование Молекулярно-Генетических Методов Установления Закономерностей Наследования Для Выявления Доноров Значимых Признаков Яблони",
 				"creators": [
 					{
-						"firstName": "Иван Иванович",
+						"firstName": "И. И.",
 						"lastName": "Супрун",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Елена Владимировна",
+						"firstName": "Е. В.",
 						"lastName": "Ульяновская",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Евгений Николаевич",
+						"firstName": "Е. Н.",
 						"lastName": "Седов",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Галина Алексеевна",
+						"firstName": "Г. А.",
 						"lastName": "Седышева",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Зоя Михайловна",
+						"firstName": "З. М.",
 						"lastName": "Серова",
 						"creatorType": "author"
 					}
@@ -455,14 +459,14 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://elibrary.ru/item.asp?id=20028198",
+		"url": "https://www.elibrary.ru/item.asp?id=20028198",
 		"items": [
 			{
 				"itemType": "book",
 				"title": "Аппарат издания и правила оформления",
 				"creators": [
 					{
-						"firstName": "Людмила Павловна",
+						"firstName": "Л. П.",
 						"lastName": "Стычишина",
 						"creatorType": "author"
 					},
@@ -475,7 +479,7 @@ var testCases = [
 				"language": "ru",
 				"libraryCatalog": "eLibrary.ru",
 				"publisher": "Изд-во Политехнического университета",
-				"url": "https://elibrary.ru/item.asp?id=20028198",
+				"url": "https://www.elibrary.ru/item.asp?id=20028198",
 				"attachments": [],
 				"tags": [
 					{
@@ -537,7 +541,7 @@ var testCases = [
 				"date": "2019",
 				"DOI": "10.31857/S0869-56524863275-279",
 				"ISSN": "0869-5652",
-				"abstractNote": "Для классов графиков -отображений нильпотентных градуированных групп доказана формула площади на сублоренцевых структурах произвольной глубины с многомерным временем.",
+				"abstractNote": "Для классов графиков - отображений нильпотентных градуированных групп доказана формула площади на сублоренцевых структурах произвольной глубины с многомерным временем.",
 				"issue": "3",
 				"language": "ru",
 				"libraryCatalog": "eLibrary.ru",
@@ -547,27 +551,6 @@ var testCases = [
 				"volume": "486",
 				"attachments": [],
 				"tags": [
-					{
-						"tag": "Contact Mapping"
-					},
-					{
-						"tag": "Graph-Mapping"
-					},
-					{
-						"tag": "Intrinsic Basis"
-					},
-					{
-						"tag": "Multidimensional Time"
-					},
-					{
-						"tag": "Nilpotent Graded Group"
-					},
-					{
-						"tag": "Sub-Lorentzian Structure"
-					},
-					{
-						"tag": "Surface Area"
-					},
 					{
 						"tag": "Внутренний Базис"
 					},
@@ -736,7 +719,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.elibrary.ru/item.asp?id=22208210",
+		"url": "https://elibrary.ru/item.asp?id=22208210",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -750,15 +733,32 @@ var testCases = [
 				],
 				"date": "2013",
 				"ISSN": "0025-2344",
+				"abstractNote": "The present study extends the findings of Lynn (2010), who reported higher mean IQ in northern than southern Italy and of Templer (2012), who found biological correlates of IQ in the Italian regions. The present study found that murder and attempted murder rates were associated with Mediterranean/Mideastern characteristics (lower IQ, black hair, black eyes) and that lower murder rates were associated with central/northern European characteristics (higher cephalic index, blond hair, blue eyes, and higher multiple sclerosis and schizophrenia rates). The eye and hair color findings are consistent with the human and animal literature finding of darker coloration associated with greater aggression. © Copyright 2013.",
 				"issue": "1",
 				"language": "en",
 				"libraryCatalog": "eLibrary.ru",
 				"pages": "26-48",
 				"publicationTitle": "Mankind Quarterly",
-				"url": "https://www.elibrary.ru/item.asp?id=22208210",
+				"url": "https://elibrary.ru/item.asp?id=22208210",
 				"volume": "54",
 				"attachments": [],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Eye Color"
+					},
+					{
+						"tag": "Hair Color"
+					},
+					{
+						"tag": "Iq"
+					},
+					{
+						"tag": "Italy"
+					},
+					{
+						"tag": "Murder"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -766,7 +766,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://elibrary.ru/item.asp?id=35209757",
+		"url": "https://www.elibrary.ru/item.asp?id=35209757",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -778,7 +778,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Галина Георгиевна",
+						"firstName": "Г. Г.",
 						"lastName": "Харсеева",
 						"creatorType": "author"
 					},
@@ -802,7 +802,7 @@ var testCases = [
 				"libraryCatalog": "eLibrary.ru",
 				"pages": "375-378",
 				"publicationTitle": "Клиническая Лабораторная Диагностика",
-				"url": "https://elibrary.ru/item.asp?id=35209757",
+				"url": "https://www.elibrary.ru/item.asp?id=35209757",
 				"volume": "63",
 				"attachments": [],
 				"tags": [
