@@ -37,7 +37,7 @@
 // set a global for spacing purposes under the references key of a citation.cff file
 var referencesSpacing = '    ';
 
-function writeKeywords(tags) {
+function writeArray(tags) {
 	if (!tags.length) return false;
 	let keywords = "\n";
 	for (let tag of tags) {
@@ -52,10 +52,15 @@ function writeDOI(itemDOI) {
 	return doi;
 }
 
-function writeAuthors(itemCreators) {
+function writeCreators(itemCreators, creatorType="") {
 	let itemAuthors = [];
 	for (let creator of itemCreators) {
-		itemAuthors.push(creator);
+		if (creatorType != "" && ZU.getCreatorsForType(creator.itemType)[0] == creatorType) {
+			itemAuthors.push(creator);
+		}
+		else {
+			itemAuthors.push(creator);
+		}
 	}
 	if (!itemAuthors.length) return false;
 	let authors = "\n";
@@ -82,9 +87,43 @@ function doExport() {
 		cff.type = item.itemType;
 		cff.license = item.rights;
 		cff.version = item.versionNumber;
+
+		// Referenced from:
+		// https://github.com/zotero/zotero/blob/65db66eb339fc2bab4a78f9955f9e5197de3d028/chrome/locale/en-GB/zotero/zotero.properties#L491
+		cff.collection_title = item.collections
+		cff.conference = item.conferenceName;
+		cff.copyright = item.rights;
+		cff.date_accessed = item.accessDate;
+		cff.edition = item.edition;
+		cff.editors = writeCreators(item.creators, "editor");
+		cff.editors_series = item.series
+		cff.recipients = writeCreators(item.creators, "recipient");
+		cff.translators = writeCreators(item.creators, "translator");
+		cff.format = item.format;
+		cff.institution = item.institution;
+		cff.isbn = item.ISBN;
+		cff.issn = item.ISSN;
+		cff.issue = item.issue;
+		cff.issue_date = item.issueDate;
+		cff.journal = item.journalAbbreviation;
+		cff.languages = writeArray(item.language)
+		cff.location = item.archiveLocation;
+		cff.medium = item.medium;
+		cff.number = item.number;
+		cff.number_volumes = item.numberOfVolumes;
+		cff.pages = item.pages;
+		// match for pmcid within extras content
+		if (item.extra && /^pmcid:/i.test(item.extra)) {
+			cff.pmcid = item.extra.match(/pmcid:\s*(\S+)/);
+		}
+		cff.publisher = item.publisher;
+		cff.repository = cff.repository;
+		cff.section = item.section;
+		cff.thesis_type = item.thesisType;
+		cff.volume = item.volume;
 		cff.url = item.url;
-		cff.keywords = writeKeywords(item.tags);
-		cff.authors = writeAuthors(item.creators);
+		cff.keywords = writeArray(item.tags);
+		cff.authors = writeCreators(item.creators, "author");
 		if (item.date) {
 			// if we have a dataset or software, use date-released field
 			if (item.itemType == "dataset" || item.itemType == "computerProgram") {
@@ -117,7 +156,7 @@ function doExport() {
 				Zotero.write(referencesSpacing + field + ": " + cff[field]);
 			}
 			else {
-				Zotero.write(referencesSpacing + field + ": " + cff[field] + "\n");
+				Zotero.write(referencesSpacing + field.replace("_", "-") + ": " + cff[field] + "\n");
 			}
 		}
 	}
