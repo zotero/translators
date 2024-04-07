@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-04-06 20:14:16"
+	"lastUpdated": "2024-04-07 18:59:45"
 }
 
 /*
@@ -739,7 +739,7 @@ var testCases = [
 				"libraryCatalog": "eLibrary.ru",
 				"pages": "26-48",
 				"publicationTitle": "Mankind Quarterly",
-				"url": "https://elibrary.ru/item.asp?id=22208210",
+				"url": "https://www.elibrary.ru/item.asp?id=22208210",
 				"volume": "54",
 				"attachments": [],
 				"tags": [
