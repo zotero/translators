@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-04-10 09:34:12"
+	"lastUpdated": "2024-04-10 09:40:19"
 }
 
 /*
@@ -89,6 +89,8 @@ if (ZU.xpathText(doc, '//i[@class="icon-availability_open"]/@title') != null) {
 				i.notes.push({note: "orcid:" + orcid + ' | ' + author});
 			}
 		}
+        // Do away with old scheme DOI URLs
+		i.url = i.url.match(/dx.doi.org/) && i.DOI ? "" : i.url;
 		i.complete();
 	});
 	translator.translate();
