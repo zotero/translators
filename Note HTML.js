@@ -14,7 +14,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2024-02-13 18:47:05"
+	"lastUpdated": "2024-04-10 19:44:00"
 }
 
 /*
@@ -103,9 +103,11 @@ function doExport() {
 						linkText = 'snapshot';
 					}
 					else {
-						openURI += '?page=' + (position.pageIndex + 1)
-							+ (annotation.annotationKey ? '&annotation=' + annotation.annotationKey : '');
+						openURI += '?page=' + (position.pageIndex + 1);
 						linkText = 'pdf';
+					}
+					if (annotation.annotationKey) {
+						openURI += '&annotation=' + annotation.annotationKey;
 					}
 
 					let a = doc.createElement('a');
