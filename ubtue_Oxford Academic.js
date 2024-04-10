@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-08 10:31:59"
+	"lastUpdated": "2024-04-10 09:34:12"
 }
 
 /*
@@ -64,13 +64,9 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 	translator.setHandler("itemDone", function (t, i) {
 		// update abstract from the webpage as the embedded data is often incomplete
 		var abstractText = ZU.xpathText(doc, '//section[@class="abstract"]');
-		if (abstractText) i.abstractNote = abstractText;
-		
+		i.abstractNote = abstractText ?  abstractText : "";
 		let tagreview = ZU.xpathText(doc, '//*[(@id = "ContentTab")]//a');
 		if (tagreview.match(/Reviews+|Book Reviews+/i)) i.tags.push('Book Review');
-		// if the article are review article, then the full text extract is scraped from the HTML
-		let extractText = ZU.xpathText(doc, '//p[@class="chapter-para"]');
-		if (tagreview.match(/Reviews+|Book Reviews+/i) && extractText) i.abstractNote = extractText
 		// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
 		let openAccessTag = ZU.xpathText(doc, '//*[@class="icon-availability_open"]//@title'); Z.debug(openAccessTag)
 		if (openAccessTag && openAccessTag.match(/open\s+access/gi)) i.notes.push('LF:');
