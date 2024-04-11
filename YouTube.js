@@ -86,9 +86,11 @@ function doWeb(doc, url) {
 		});
 	}
 }
+
 function getMetaContent(doc, attrName, value) {
 	return attr(doc, 'meta[' + attrName + '="' + value + '"]', 'content');
 }
+
 function scrape(doc, url) {
 	var item = new Zotero.Item("videoRecording");
 	if (!Zotero.isServer) {
