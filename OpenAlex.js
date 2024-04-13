@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-29 00:58:16"
+	"lastUpdated": "2024-04-13 18:27:11"
 }
 
 /*
@@ -126,13 +126,13 @@ var testCases = [
 				],
 				"date": "1973-10-01",
 				"DOI": "10.2307/2525981",
-				"ISSN": "1468-2354,0020-6598",
-				"extra": "openalex: https://openalex.org/W2029394297",
+				"ISSN": "0020-6598,1468-2354",
+				"extra": "OpenAlex: https://openalex.org/W2029394297",
 				"issue": "3",
 				"language": "en",
 				"libraryCatalog": "OpenAlex",
 				"pages": "693",
-				"publicationTitle": "International Economic Review",
+				"publicationTitle": "International economic review",
 				"volume": "14",
 				"attachments": [
 					{
@@ -173,7 +173,7 @@ var testCases = [
 				"date": "1951-09-01",
 				"DOI": "10.1007/bf02310555",
 				"ISSN": "0033-3123,1860-0980",
-				"extra": "openalex: https://openalex.org/W2159306398",
+				"extra": "OpenAlex: https://openalex.org/W2159306398",
 				"issue": "3",
 				"language": "en",
 				"libraryCatalog": "OpenAlex",
@@ -188,13 +188,7 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "alpha"
-					},
-					{
-						"tag": "internal structure"
-					},
-					{
-						"tag": "tests"
+						"tag": "Reliability Estimation"
 					}
 				],
 				"notes": [],
@@ -261,7 +255,7 @@ var testCases = [
 				"date": "2018-02-13",
 				"DOI": "10.7717/peerj.4375",
 				"ISSN": "2167-8359",
-				"extra": "openalex: https://openalex.org/W2741809807",
+				"extra": "OpenAlex: https://openalex.org/W2741809807",
 				"language": "en",
 				"libraryCatalog": "OpenAlex",
 				"pages": "e4375",
