@@ -76,7 +76,7 @@ async function doWeb(doc, url) {
 
 async function scrape(doc, url = doc.location.href) {
 	const abstract = ZU.trimInternal(text(doc, "#content"));
-	const titre = ZU.trimInternal(text(doc, "h2"))
+	const titre = ZU.trimInternal(text(doc, "h2"));
 	const numero = text(doc, ".release-title .num").replace("N°", "");
 	const linkURL = doc.querySelectorAll(".documentsAssocies a")[0].href;
 	const auteurs = text(doc, ".article-author").split(", ");
@@ -90,12 +90,13 @@ async function scrape(doc, url = doc.location.href) {
 			lastName: auteurNames[1],
 			creatorType: "author",
 			fieldMode: true
-		})
+		});
 	}
 
 	newItem.title = titre;
 	newItem.issue = numero;
 	newItem.abstractNote = abstract;
+	newItem.url = url;
 
 	newItem.attachments = [{
 		url: linkURL,
@@ -105,8 +106,3 @@ async function scrape(doc, url = doc.location.href) {
 
 	newItem.complete();
 }
-
-/** BEGIN TEST CASES **/
-var testCases = [
-]
-/** END TEST CASES **/

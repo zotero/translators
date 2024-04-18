@@ -15,7 +15,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2024 YOUR_NAME <- TODO
+	Copyright © 2024 Alexandre Mimms
 
 	This file is part of Zotero.
 

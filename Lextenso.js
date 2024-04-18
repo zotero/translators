@@ -15,7 +15,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2022 Alexandre Mimms
+	Copyright © 2024 Alexandre Mimms
 
 	This file is part of Zotero.
 
@@ -51,7 +51,7 @@ async function scrapeJournalArticle(doc, url) {
 	newItem.title = titre;
 	
 	for (let auteur of auteurs) {
-		auteurNames = auteur.innerText.split(" ");
+		const auteurNames = auteur.innerText.split(" ");
 		newItem.creators.push({
 			firstName: auteurNames[0],
 			lastName: auteurNames[1],
@@ -72,7 +72,7 @@ async function scrapeJournalArticle(doc, url) {
 
 async function scrapeBook(doc, url) {
 	// weirdly enough no real information is displayed on the book summary page, but
-	// some info, like ISBN, is shown on individual pages. 
+	// some info, like ISBN, is shown on individual pages.
 	// So, we get the first url to one of those individual pages, then request it so we
 	// can fetch the information.
 	// I did not yet find a way to fetch the number of page or edition.
@@ -97,7 +97,7 @@ async function scrapeBook(doc, url) {
 	newItem.title = titre;
 	
 	for (let auteur of auteurs) {
-		auteurNames = auteur.innerText.split(" ");
+		const auteurNames = auteur.innerText.split(" ");
 		newItem.creators.push({
 			firstName: auteurNames[0],
 			lastName: auteurNames[1],
@@ -132,12 +132,12 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	// TODO: adjust the CSS selector
+
 	var rows = doc.querySelectorAll('h2 > a.title[href*="/article/"]');
 	for (let row of rows) {
-		// TODO: check and maybe adjust
+
 		let href = row.href;
-		// TODO: check and maybe adjust
+
 		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -168,7 +168,6 @@ async function scrape(doc, url = doc.location.href, docType) {
 	else if (docType == "book") {
 		scrapeBook(doc, url);
 	}
-
 }
 
 /** BEGIN TEST CASES **/
