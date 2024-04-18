@@ -41,7 +41,7 @@ function detectWeb(doc, url) {
 		return 'book';
 	}
 	else if (url.includes('/recherche')) {
-		return 'multiple'
+		return 'multiple';
 	}
 	return false;
 }
@@ -81,7 +81,7 @@ async function scrape(doc, url = doc.location.href) {
 	const collection = ZU.trimInternal(text(doc, ".notice-header-grid-item.css-1o256gd.e4d31s30:not(.first-item) .notice-header-link", 0));
 	const isbn = ZU.trimInternal(text(doc, ".notice-header-grid-item.css-leol38.e4d31s30 .notice-header-link", 0));
 	let marque = ZU.trimInternal(text(doc, ".notice-header-grid-item.css-xc5jw0.e4d31s30 .notice-header-link", 0));
-	marque = marque.substring(0,1) + marque.substring(1).toLowerCase();
+	marque = marque.substring(0, 1) + marque.substring(1).toLowerCase();
 	const auteurs = ZU.trimInternal(text(doc, ".notice-header-grid-item.css-2bwjgy.e4d31s30 .notice-header-link", 0)).split(" • ");
 	const titre = ZU.trimInternal(text(doc, ".title", 0));
 	const abstract = ZU.trimInternal(text(doc, ".description", 0)).replace("Description", "");
@@ -89,13 +89,13 @@ async function scrape(doc, url = doc.location.href) {
 	let newItem = new Z.Item("book");
 
 	for (let auteur of auteurs) {
-		auteurNames = auteur.split(" ");
+		const auteurNames = auteur.split(" ");
 		newItem.creators.push({
 			firstName: auteurNames[0],
 			lastName: auteurNames[1],
 			creatorType: "author",
 			fieldMode: true
-			});
+		});
 	}
 
 	newItem.title = titre;
@@ -111,7 +111,3 @@ async function scrape(doc, url = doc.location.href) {
 	newItem.complete();
 }
 
-/** BEGIN TEST CASES **/
-var testCases = [
-]
-/** END TEST CASES **/
