@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-04-17 12:42:44"
+	"lastUpdated": "2024-04-18 09:22:40"
 }
 
 /*
@@ -76,15 +76,108 @@ function idStartsWithKey(string) {
 		if (key.startsWith(string.substring(0, 2))) {
 			return true;
 		}
-    }
-    return false;
+	}
+	return false;
 }
+
+function scrapeJournalArticle(doc, url = doc.location.href) {
+	// Since searches trigger a "< >" markup around the searched words, we have to edit that away before storing the values.
+	const titre = ZU.trimInternal(text(doc, ".chronTITRE", 0)).replace(/[<>]/g, ""); // gets the title of the document
+	const abstract = ZU.trimInternal(text(doc, "#RESUFRAN")).replace(/[<>]/g, ""); // gets the abstract
+	let refDoc = ZU.trimInternal(text(doc, ".refDoc", 0).replace(/[<>]/g, "")); // gets the reference
+
+	let page, revue, numRevue, date;
+	const signatures = doc.querySelectorAll(".chronSIGNATURE");
+	let auteurs = [];
+
+	// Loop over the "signatures" of the document, and store the author in the list.
+	for (let signature of signatures) {
+		auteurs.push(signature.innerText.replace(/[<>]/g, "").split(',')[0]);
+	}
+
+	if (citationAvecNumero.test(refDoc)) {
+		refDoc = refDoc.split(citationAvecNumero);
+	}
+	else if (citationSansNumero.test(refDoc)) {
+		refDoc = refDoc.split(citationSansNumero);
+	}
+
+	for (let item of refDoc) {
+		if (item.startsWith("p")) {
+			page = item.replace("p.", "");
+		}
+		else if (item.startsWith("n")) {
+			numRevue = item.replace("n°", "");
+		}
+		else if (regAnnee.test(item)) {
+			date = item;
+		}
+		else if (item !== "") {
+			revue = item;
+		}
+	}
+
+	let newItem = new Z.Item("journalArticle");
+
+	newItem.title = titre;
+	for (let auth of auteurs) { // loop over the list of authors and set them as authors.
+		let authNames = auth.split(" ");
+		newItem.creators.push({
+			firstName: authNames[0],
+			lastName: authNames[1],
+			creatorType: "author",
+			fieldMode: true
+		});
+	}
+
+	newItem.publicationTitle = revue;
+	newItem.abstractNote = abstract;
+	if (numRevue !== "") newItem.issue = numRevue;
+	newItem.pages = page;
+	newItem.date = date;
+	newItem.url = url;
+	newItem.language = "french";
+	newItem.complete();
+}
+
+function scrapeCase(doc, url = doc.location.href) {
+	let juridiction;
+
+	if (url.includes("LEBON")) {
+		juridiction = "Conseil d'État";
+	}
+
+	// Since searches trigger a "< >" markup around the searched words, we have to edit that away before storing the values.
+	const titre = ZU.trimInternal(text(doc, ".jurisJURI", 0)).replace(/[<>]/g, ""); // gets the title of the document
+	const abstract = ZU.trimInternal(text(doc, ".jurisSOMMAIRE")).replace(/[<>]/g, ""); // gets the abstract
+	const formation = ZU.trimInternal(text(doc, ".jurisCHAM", 0).replace(/[<>]/g, "")); // gets the reference
+	const date = ZU.trimInternal(text(doc, ".jurisDATE", 0).replace(/[<>]/g, ""));
+	const volume = date.split("-")[2];
+	const mentionPublication = ZU.trimInternal(text(doc, ".commentPopupNDC b", 0).replace(/[<>]/g, ""));
+	const numeroAffaire = ZU.trimInternal(text(doc, ".jurisNAAF", 0).replace(/[<>]/g, "").replace("n° ", ""));
+
+	let newItem = new Z.Item("case");
+	newItem.caseName = titre;
+	newItem.reporter = mentionPublication;
+	newItem.abstractNote = abstract.replace("Sommaire : ", "");
+	newItem.court = juridiction;
+	newItem.dateDecided = date;
+	newItem.reporterVolume = volume;
+	newItem.docketNumber = numeroAffaire;
+	newItem.language = "french";
+	newItem.url = url;
+	newItem.extra = formation;
+	newItem.complete();
+}
+
+// function scrapeBlog(doc, url = doc.location.href) {
+
+// }
 
 function detectWeb(doc, url) {
 	if (url.includes('/documentation/Document')) { // Checks if the page is a document.
 		let id = url.match(docTypeId);
 		id = id[1].substring(0, 4);
-		Z.debug(id);
 		if (idStartsWithKey(id)) {
 			if (codeDocument.get(id)) { // If there is a corresponding ID.
 				return codeDocument.get(id);
@@ -117,7 +210,10 @@ function getSearchResults(doc, checkOnly) {
 
 // Nothing changed here neither.
 async function doWeb(doc, url) {
-	if (detectWeb(doc, url) == 'multiple') {
+	const docType = detectWeb(doc, url); // calling detectWeb once and passing it to scrape function,
+	// so we don't have to call it multiple times to check in the scrape function what type of document it is.
+
+	if (docType == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
 		for (let url of Object.keys(items)) {
@@ -125,67 +221,18 @@ async function doWeb(doc, url) {
 		}
 	}
 	else {
-		await scrape(doc, url);
-    }
+		await scrape(doc, url, docType);
+	}
 }
 
-
-// Since searches trigger a "< >" markup around the searched words, we have to edit that away before storing the values.
-async function scrape(doc, url = doc.location.href) {
-	const titre = ZU.trimInternal(text(doc, ".chronTITRE", 0)).replace(/[<>]/g, ""); // gets the title of the document
-	const abstract = ZU.trimInternal(text(doc, "#RESUFRAN")).replace(/[<>]/g, ""); // gets the abstract
-	let refDoc = ZU.trimInternal(text(doc, ".refDoc", 0).replace(/[<>]/g, "")); // gets the reference
-
-	let page, revue, numRevue, date;
-	const signatures = doc.querySelectorAll(".chronSIGNATURE");
-	let auteurs = [];
-
-	// Loop over the "signatures" of the document, and store the author in the list.
-	for (let signature of signatures) {
-		auteurs.push(signature.innerText.replace(/[<>]/g, "").split(',')[0]);
+async function scrape(doc, url = doc.location.href, docType) {
+	if (docType == "journalArticle") {
+		scrapeJournalArticle(doc, url);
 	}
-
-	if (citationAvecNumero.test(refDoc)) {
-		refDoc = refDoc.split(citationAvecNumero);
+	else if (docType == "case") {
+		scrapeCase(doc, url);
 	}
-	else if (citationSansNumero.test(refDoc)) {
-		refDoc = refDoc.split(citationSansNumero);
-	}
-
-	for (let item of refDoc) {
-		if (item.startsWith("p")) {
-			page = item.replace("p.", "");
-        }
-		else if (item.startsWith("n")) {
-			numRevue = item.replace("n°", "");
-		}
-		else if (regAnnee.test(item)) {
-			date = item;
-		}
-		else if (item !== "") {
-			revue = item;
-		}
-	}
-
-	let newItem = new Z.Item("journalArticle");
-
-	newItem.title = titre;
-	for (let auth of auteurs) { // loop over the list of authors and set them as authors.
-		let authNames = auth.split(" ");
-		newItem.creators.push({
-			firstName: authNames[0],
-			lastName: authNames[1],
-			creatorType: "author",
-			fieldMode: true
-		});
-	}
-
-	newItem.publicationTitle = revue;
-    newItem.abstractNote = abstract;
-	if (numRevue !== "") newItem.issue = numRevue;
-	newItem.pages = page;
-	newItem.date = date;
-	newItem.url = url;
-	newItem.complete();
+	// else if (docType == "blogPost") {
+	// 	scrapeBlog(doc, url);
+	// }
 }
-
