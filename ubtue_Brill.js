@@ -176,7 +176,11 @@ function postProcess(doc, item) {
 		}
 	}
 	if (is_LF) item.notes.push('LF:');
-	
+
+    // Additional Title
+ 	let additionalTitle = text(doc, '.title ~ div .typography-body ')
+	item.notes.push( { note: "additional_title:" + additionalTitle });
+
 	if (!item.itemType)	item.itemType = "journalArticle";
 }
 
