@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-25 11:37:27"
+	"lastUpdated": "2024-04-22 07:59:55"
 }
 
 /*
@@ -177,9 +177,10 @@ function postProcess(doc, item) {
 	}
 	if (is_LF) item.notes.push('LF:');
 
-    // Additional Title
+	// Additional Title
  	let additionalTitle = text(doc, '.title ~ div .typography-body ')
-	item.notes.push( { note: "additional_title:" + additionalTitle });
+	if (additionalTitle)
+	    item.notes.push( { note: "additional_title:" + additionalTitle });
 
 	if (!item.itemType)	item.itemType = "journalArticle";
 }
