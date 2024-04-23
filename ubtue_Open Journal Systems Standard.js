@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-04-23 06:49:31"
+	"lastUpdated": "2024-04-23 07:33:03"
 }
 
 /*
@@ -162,6 +162,8 @@ function getOrcids(doc, ISSN) {
   		}
   	}
 	
+	if (notes.length)
+	    return notes;
 	// kein Beispiel gefunden
   	/*if (orcidAuthorEntryCaseC) {
   		for (let c of orcidAuthorEntryCaseC) {
@@ -183,6 +185,20 @@ function getOrcids(doc, ISSN) {
 			}
 		}
 	}*/
+
+	// e.g. https://sotrap.psychopen.eu/index.php/sotrap/article/view/9965
+    let orcidAuthorEntryCaseD = ZU.xpath(doc, '//ul[contains(@class, "article-details-authors")]');
+	if (orcidAuthorEntryCaseD.length) {
+		for (let o of ZU.xpath(orcidAuthorEntryCaseD[0], './/li[contains(@class, "list-group-item")]')) {
+			let orcidCandidates = ZU.xpath(o, './/a[contains(@href, "orcid")]');
+			if (orcidCandidates) {
+				let orcid = orcidElement[0].href;
+				let author = ZU.xpathText(o, './/strong');
+				notes.push({note: author + ' | orcid:' + orcid.replace(/https?:\/\/orcid\.org\//g, '')});
+			}
+		}
+	}
+
 	return notes;
 }
 
