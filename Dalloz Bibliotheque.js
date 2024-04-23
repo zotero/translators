@@ -40,7 +40,7 @@ function detectWeb(doc, url) {
 	if (url.includes('/ouvrage/')) {
 		return 'book';
 	}
-	else if (url.includes('/recherche')) {
+	else if (url.includes('/recherche') && getSearchResults(doc, true)) {
 		return 'multiple';
 	}
 	return false;
