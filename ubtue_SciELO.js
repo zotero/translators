@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-12-21 13:25:28"
+	"lastUpdated": "2024-04-23 13:39:09"
 }
 
 /*
@@ -203,6 +203,17 @@ function scrape(doc, url) {
 		if (!item.abstractNote) {
 			item.url = item.url.replace('sci_abstract', 'sci_arttext');
 		}
+
+		//ORICDs
+		let authorsAndOrcids = ZU.xpath(doc, '//p[contains(@class, "author")]');
+		for (let authorAndOrcid of authorsAndOrcids) {
+			let orcid = ZU.xpathText(authorAndOrcid, './/span[contains(@class, "contribid")]');
+			let author = ZU.xpathText(authorAndOrcid, './/span[contains(@class, "author-name")]');
+			if (orcid && author) {
+				item.notes.push({note: "orcid:" + orcid + ' | ' + author});
+			}
+		}
+
 		item.complete();
 		});
 	}
