@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-04-18 12:12:00"
+	"lastUpdated": "2024-04-19 13:42:32"
 }
 
 /*
@@ -82,16 +82,33 @@ function idStartsWithKey(string) {
 
 function scrapeJournalArticle(doc, url = doc.location.href) {
 	// Since searches trigger a "< >" markup around the searched words, we have to edit that away before storing the values.
-	const titre = ZU.trimInternal(text(doc, ".chronTITRE", 0)).replace(/[<>]/g, ""); // gets the title of the document
-	const abstract = ZU.trimInternal(text(doc, "#RESUFRAN")).replace(/[<>]/g, ""); // gets the abstract
+	
+	const xhr = new XMLHttpRequest();
+	xhr.open("POST", "https://www-dalloz-fr.docelec-u-paris2.idm.oclc.org/api/toolsAction/Document.html");
+	xhr.setRequestHeader("Content-Type", "application/json;charset=utf-8");
+	const body = JSON.stringify({
+		title: "Hello World",
+		body: "My POST request",
+		userId: 900,
+	});
+	xhr.onload = () => {
+	if (xhr.readyState == 4 && xhr.status == 201) {
+		Z.debug(JSON.parse(xhr.responseText));
+	} else {
+		Z.debug(`Error: ${xhr.status}`);
+	}
+	};
+	xhr.send(body);
+	
+	
+	
+	
 	let refDoc = ZU.trimInternal(text(doc, ".refDoc", 0).replace(/[<>]/g, "")); // gets the reference
-
 	let page, revue, numRevue, date;
-	const signatures = doc.querySelectorAll(".chronSIGNATURE");
 	let auteurs = [];
 
 	// Loop over the "signatures" of the document, and store the author in the list.
-	for (let signature of signatures) {
+	for (let signature of doc.querySelectorAll(".chronSIGNATURE")) {
 		auteurs.push(signature.innerText.replace(/[<>]/g, "").split(',')[0]);
 	}
 
@@ -119,7 +136,7 @@ function scrapeJournalArticle(doc, url = doc.location.href) {
 
 	let newItem = new Z.Item("journalArticle");
 
-	newItem.title = titre;
+	newItem.title = ZU.trimInternal(text(doc, ".chronTITRE", 0)).replace(/[<>]/g, "");
 	for (let auth of auteurs) { // loop over the list of authors and set them as authors.
 		let authNames = auth.split(" ");
 		newItem.creators.push({
@@ -131,7 +148,7 @@ function scrapeJournalArticle(doc, url = doc.location.href) {
 	}
 
 	newItem.publicationTitle = revue;
-	newItem.abstractNote = abstract;
+	newItem.abstractNote = ZU.trimInternal(text(doc, "#RESUFRAN")).replace(/[<>]/g, "");
 	if (numRevue !== "") newItem.issue = numRevue;
 	newItem.pages = page;
 	newItem.date = date;
