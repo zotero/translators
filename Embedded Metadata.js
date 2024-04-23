@@ -484,8 +484,8 @@ function addHighwireMetadata(doc, newItem, hwType) {
 				}
 			}
 		}
-        if (newItem.tags.length <= 1)
-            newItem.tags = old_tags
+        if (newItem.tags.length <= 1 && old_tag)
+            newItem.tags = old_tag;
 
 	}
 
