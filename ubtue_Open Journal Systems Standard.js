@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-11 09:49:32"
+	"lastUpdated": "2024-04-23 06:43:47"
 }
 
 /*
@@ -202,10 +202,10 @@ function joinTitleAndSubtitle (doc, item) {
 		return item.title;
 	}
 
-    let subtitle = ZU.xpathText(doc, '//article[@class="article-details"]/header/h2/small').trim()
-    if (subtitle)
-        item.title = item.title + " " + subtitle;
-    return item.title;
+	let subtitle = ZU.xpathText(doc, '//article[@class="article-details"]/header/h2/small')
+	if (subtitle)
+		item.title = item.title + " " + subtitle.trim();
+	return item.title;
 }
 
 
