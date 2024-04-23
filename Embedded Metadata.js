@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-09 09:15:32"
+	"lastUpdated": "2024-03-11 11:45:12"
 }
 
 /*
@@ -418,7 +418,7 @@ function addHighwireMetadata(doc, newItem, hwType) {
 				&& authorsByComma[0].includes(" ")
 				&& authorsByComma[1].includes(" ")
 				&& !LAST_NAME_PREFIX.test(authorsByComma[0]))
-			    authors = authorsByComma;
+				authors = authorsByComma;
 		}
 
 		for (var j = 0, m = authors.length; j < m; j++) {
@@ -470,7 +470,8 @@ function addHighwireMetadata(doc, newItem, hwType) {
 
 	// Deal with tags in a string
 	// we might want to look at the citation_keyword metatag later
-	if (!newItem.tags || !newItem.tags.length) {
+	if (!newItem.tags || !newItem.tags.length || newItem.tags.length == 1 /* e.g. for Journal of Deradicalization */) {
+        var old_tag = newItem.tags;
 		var tags = getContent(doc, 'citation_keywords');
 		newItem.tags = [];
 		for (let i = 0; i < tags.length; i++) {
@@ -483,6 +484,9 @@ function addHighwireMetadata(doc, newItem, hwType) {
 				}
 			}
 		}
+        if (newItem.tags.length <= 1)
+            newItem.tags = old_tags
+
 	}
 
 	// sometimes RDF has more info, let's not drop it
