@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-04-23 08:45:48"
+	"lastUpdated": "2024-04-23 08:52:18"
 }
 
 /*
@@ -276,7 +276,7 @@ function invokeEMTranslator(doc) {
 		}
 		
 		if (['2617-3697', '2660-4418', '2748-6419', '1988-3269', '2699-8440',
-			 '1804-6444', '2627-6062', '2504-5156'].includes(i.ISSN)) {
+			 '1804-6444', '2627-6062', '2504-5156', '2413-3108'].includes(i.ISSN)) {
 			if (ZU.xpath(doc, '//meta[@name="DC.Type.articleType"]')) {
 				if (ZU.xpath(doc, '//meta[@name="DC.Type.articleType"]')[0].content.match(/(Media reviews)|(Rezensionen)|(Reseñas)|(Book Reviews?)/i)) {
 					i.tags.push("Book Review");
