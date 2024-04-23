@@ -8,7 +8,7 @@
 	"priority": 98,
 	"inRepository": true,
 	"translatorType": 8,
-	"lastUpdated": "2024-01-23 08:54:03"
+	"lastUpdated": "2024-04-23 18:44:30"
 }
 
 /*
@@ -58,6 +58,11 @@ async function doSearch(item) {
 	let translator = Zotero.loadTranslator('import');
 	translator.setTranslator('edd87d07-9194-42f8-b2ad-997c4c7deefd');
 	translator.setString(marcXml);
+	translator.setHandler('itemDone', (_obj, item) => {
+		// Yes, it is a book
+		item.tags = item.tags.filter(tag => (tag.tag || tag) !== 'Bok');
+		item.complete();
+	});
 	translator.translate();
 }
 
