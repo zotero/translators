@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-04-23 12:18:01"
+	"lastUpdated": "2024-04-23 12:20:52"
 }
 
 /*
@@ -103,7 +103,7 @@ function scrapeRapport(doc, url) {
 	}];
 
 	for (let tag of tags) {
-		newItem.tags.push(tag.innerText);
+		newItem.tags.push({ tag: tag.innerText });
 	}
 
 	newItem.complete();
