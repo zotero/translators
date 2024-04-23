@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-04-23 07:33:03"
+	"lastUpdated": "2024-04-23 07:51:59"
 }
 
 /*
@@ -163,7 +163,7 @@ function getOrcids(doc, ISSN) {
   	}
 	
 	if (notes.length)
-	    return notes;
+		return notes;
 	// kein Beispiel gefunden
   	/*if (orcidAuthorEntryCaseC) {
   		for (let c of orcidAuthorEntryCaseC) {
@@ -187,12 +187,12 @@ function getOrcids(doc, ISSN) {
 	}*/
 
 	// e.g. https://sotrap.psychopen.eu/index.php/sotrap/article/view/9965
-    let orcidAuthorEntryCaseD = ZU.xpath(doc, '//ul[contains(@class, "article-details-authors")]');
+	let orcidAuthorEntryCaseD = ZU.xpath(doc, '//ul[contains(@class, "article-details-authors")]');
 	if (orcidAuthorEntryCaseD.length) {
 		for (let o of ZU.xpath(orcidAuthorEntryCaseD[0], './/li[contains(@class, "list-group-item")]')) {
 			let orcidCandidates = ZU.xpath(o, './/a[contains(@href, "orcid")]');
-			if (orcidCandidates) {
-				let orcid = orcidElement[0].href;
+			if (orcidCandidates.length) {
+				let orcid = orcidCandidates[0].href;
 				let author = ZU.xpathText(o, './/strong');
 				notes.push({note: author + ' | orcid:' + orcid.replace(/https?:\/\/orcid\.org\//g, '')});
 			}
@@ -276,7 +276,7 @@ function invokeEMTranslator(doc) {
 		}
 		
 		if (['2617-3697', '2660-4418', '2748-6419', '1988-3269', '2699-8440',
-		     '1804-6444', '2627-6062', '2504-5156'].includes(i.ISSN)) {
+			 '1804-6444', '2627-6062', '2504-5156'].includes(i.ISSN)) {
 			if (ZU.xpath(doc, '//meta[@name="DC.Type.articleType"]')) {
 				if (ZU.xpath(doc, '//meta[@name="DC.Type.articleType"]')[0].content.match(/(Media reviews)|(Rezensionen)|(Reseñas)|(Book Reviews?)/i)) {
 					i.tags.push("Book Review");
