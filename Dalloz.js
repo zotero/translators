@@ -2,14 +2,14 @@
 	"translatorID": "a59e99a6-42b0-4be6-bb0c-1ff688c3a8b3",
 	"label": "Dalloz",
 	"creator": "Alexandre Mimms",
-	"target": "https?://(?:www[.-])?dalloz(?:[.-]fr)?",
+	"target": "https?://(www\\.)?dalloz\\.fr",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-04-19 13:42:32"
+	"lastUpdated": "2024-04-23 09:45:03"
 }
 
 /*
@@ -38,10 +38,10 @@
 // - Make sure that the case report are correctly saved.
 // - PDF import : needs reverse engineering the internal api of the service. Seems like a quite complex one.
 
-const citationAvecNumero = new RegExp(/^([\D]+)\s*(\d{4}),?\s?(n°\s?\d+) *,?\s*(p\.\s?\d+)*/);
-const citationSansNumero = new RegExp(/^([\D]+)\s*(\d{4}),?\s*(p\.\d+)?/);
-const regAnnee = new RegExp(/\d{4}/);
-const docTypeId = new RegExp(/id=([^%]+)(?:%2F)?/);
+const citationAvecNumero = /^([\D]+)\s*(\d{4}),?\s?(n°\s?\d+) *,?\s*(p\.\s?\d+)*/;
+const citationSansNumero = /^([\D]+)\s*(\d{4}),?\s*(p\.\d+)?/;
+const regAnnee = /\d{4}/;
+const docTypeId = /id=([^%_]+)(?:%2F|_)?/;
 
 const codeDocument = new Map([
 	["ENCY", "dictionary-entry"],
@@ -49,7 +49,8 @@ const codeDocument = new Map([
 	["AJ", "journalArticle"],
 	["ACTU", "blogPost"],
 	["RFDA", "journalArticle"],
-	["CONS", "journalArticle"],
+	["CONSCONST", "case"],
+	["CONSTIT", "journalArticle"],
 	["DIPI", "journalArticle"],
 	["DS", "journalArticle"],
 	["JA", "journalArticle"],
@@ -67,8 +68,25 @@ const codeDocument = new Map([
 	["RSC", "journalArticle"],
 	["RTD", "journalArticle"],
 	["RPR", "journalArticle"],
-	["RCJ", "journalArticle"]
+	["RCJ", "journalArticle"],
+
 ]);
+
+
+
+function detectWeb(doc, url) {
+	if (url.includes('/documentation/Document')) { // Checks if the page is a document.
+		let id = url.match(docTypeId)[1];
+		Z.debug(id);
+		if (codeDocument.get(id)) { return codeDocument.get(id) }
+		else if (idStartsWithKey(id)) { return codeDocument.get(id.substring(0, 2)); }  // Gets the value of the key if it is a shorthand.
+			// Returns the type of the document according to the ID - refer to the const Map declared.
+	}
+	else if (url.includes('/documentation/Liste') && getSearchResults(doc, true)) { // Checks if the page is a list of results.
+		return 'multiple';
+	}
+	return false;
+}
 
 // The following function checks if the ID passed as argument has an associated key (some IDs start with the same letters - easier than filing all available IDs).
 function idStartsWithKey(string) {
@@ -82,28 +100,7 @@ function idStartsWithKey(string) {
 
 function scrapeJournalArticle(doc, url = doc.location.href) {
 	// Since searches trigger a "< >" markup around the searched words, we have to edit that away before storing the values.
-	
-	const xhr = new XMLHttpRequest();
-	xhr.open("POST", "https://www-dalloz-fr.docelec-u-paris2.idm.oclc.org/api/toolsAction/Document.html");
-	xhr.setRequestHeader("Content-Type", "application/json;charset=utf-8");
-	const body = JSON.stringify({
-		title: "Hello World",
-		body: "My POST request",
-		userId: 900,
-	});
-	xhr.onload = () => {
-	if (xhr.readyState == 4 && xhr.status == 201) {
-		Z.debug(JSON.parse(xhr.responseText));
-	} else {
-		Z.debug(`Error: ${xhr.status}`);
-	}
-	};
-	xhr.send(body);
-	
-	
-	
-	
-	let refDoc = ZU.trimInternal(text(doc, ".refDoc", 0).replace(/[<>]/g, "")); // gets the reference
+	let refDoc = ZU.trimInternal(text(doc, ".refDoc").replace(/[<>]/g, "")); // gets the reference
 	let page, revue, numRevue, date;
 	let auteurs = [];
 
@@ -136,15 +133,9 @@ function scrapeJournalArticle(doc, url = doc.location.href) {
 
 	let newItem = new Z.Item("journalArticle");
 
-	newItem.title = ZU.trimInternal(text(doc, ".chronTITRE", 0)).replace(/[<>]/g, "");
+	newItem.title = ZU.trimInternal(text(doc, ".chronTITRE")).replace(/[<>]/g, "");
 	for (let auth of auteurs) { // loop over the list of authors and set them as authors.
-		let authNames = auth.split(" ");
-		newItem.creators.push({
-			firstName: authNames[0],
-			lastName: authNames[1],
-			creatorType: "author",
-			fieldMode: true
-		});
+		newItem.creators.push(ZU.cleanAuthor(auth, "author"));
 	}
 
 	newItem.publicationTitle = revue;
@@ -153,61 +144,51 @@ function scrapeJournalArticle(doc, url = doc.location.href) {
 	newItem.pages = page;
 	newItem.date = date;
 	newItem.url = url;
-	newItem.language = "french";
+	newItem.language = "fr";
 	newItem.complete();
 }
 
 function scrapeCase(doc, url = doc.location.href) {
-	let juridiction;
+	let juridiction, titre, abstract, formation, date, volume, mentionPublication, numeroAffaire;
 
 	if (url.includes("LEBON")) {
 		juridiction = "Conseil d'État";
+		// Since searches trigger a "< >" markup around the searched words, we have to edit that away before storing the values.
+		titre = ZU.trimInternal(text(doc, ".jurisJURI")).replace(/[<>]/g, ""); // gets the title of the document
+		abstract = ZU.trimInternal(text(doc, ".jurisSOMMAIRE")).replace(/[<>]/g, ""); // gets the abstract
+		formation = ZU.trimInternal(text(doc, ".jurisCHAM").replace(/[<>]/g, "")); // gets the reference
+		date = ZU.trimInternal(text(doc, ".jurisDATE").replace(/[<>]/g, ""));
+		volume = date.split("-")[2];
+		mentionPublication = ZU.trimInternal(text(doc, ".commentPopupNDC b").replace(/[<>]/g, ""));
+		numeroAffaire = ZU.trimInternal(text(doc, ".jurisNAAF").replace(/[<>]/g, "").replace("n° ", ""));
+	}
+	else {
+		juridiction = ZU.trimInternal(text(doc, ".book-header-title-caselaw__juridiction"));
+		date = ZU.trimInternal(text(doc, ".book-header-title-caselaw__date"));
+		numeroAffaire = ZU.trimInternal(text(doc, ".book-header-title-caselaw__references"));
+		abstract = "";
+
+		if (juridiction == "Conseil constitutionnel") { titre = `Cons. constit., ${numeroAffaire}, ${date}`; }
+		else { titre = `${juridiction}, ${date}, ${numeroAffaire}`; }
+
 	}
 
-	// Since searches trigger a "< >" markup around the searched words, we have to edit that away before storing the values.
-	const titre = ZU.trimInternal(text(doc, ".jurisJURI", 0)).replace(/[<>]/g, ""); // gets the title of the document
-	const abstract = ZU.trimInternal(text(doc, ".jurisSOMMAIRE")).replace(/[<>]/g, ""); // gets the abstract
-	const formation = ZU.trimInternal(text(doc, ".jurisCHAM", 0).replace(/[<>]/g, "")); // gets the reference
-	const date = ZU.trimInternal(text(doc, ".jurisDATE", 0).replace(/[<>]/g, ""));
-	const volume = date.split("-")[2];
-	const mentionPublication = ZU.trimInternal(text(doc, ".commentPopupNDC b", 0).replace(/[<>]/g, ""));
-	const numeroAffaire = ZU.trimInternal(text(doc, ".jurisNAAF", 0).replace(/[<>]/g, "").replace("n° ", ""));
-
 	let newItem = new Z.Item("case");
+
 	newItem.caseName = titre;
+	newItem.court = juridiction;
 	newItem.reporter = mentionPublication;
 	newItem.abstractNote = abstract.replace("Sommaire : ", "");
 	newItem.court = juridiction;
 	newItem.dateDecided = date;
-	newItem.reporterVolume = volume;
+	newItem.reporterVolume = volume || "";
 	newItem.docketNumber = numeroAffaire;
-	newItem.language = "french";
+	newItem.language = "fr";
 	newItem.url = url;
 	newItem.extra = formation;
 	newItem.complete();
 }
 
-// function scrapeBlog(doc, url = doc.location.href) {
-
-// }
-
-function detectWeb(doc, url) {
-	if (url.includes('/documentation/Document')) { // Checks if the page is a document.
-		let id = url.match(docTypeId);
-		id = id[1].substring(0, 4);
-		if (idStartsWithKey(id)) {
-			if (codeDocument.get(id)) { // If there is a corresponding ID.
-				return codeDocument.get(id);
-			}
-			return codeDocument.get(id.substring(0, 2)); // Gets the value of the key if it is a shorthand.
-			// Returns the type of the document according to the ID - refer to the const Map declared.
-		}
-	}
-	else if (url.includes('/documentation/Liste')) { // Checks if the page is a list of results.
-		return 'multiple';
-	}
-	return false;
-}
 
 // This function is basically as it was set by the template. I modified it so it is specific to Dalloz.
 function getSearchResults(doc, checkOnly) {
@@ -215,8 +196,8 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	var rows = doc.querySelectorAll('.result-content');
 	for (let row of rows) {
-		let href = attr(row, "a", "href", 0);
-		let title = ZU.trimInternal(text(row, "a", 0));
+		let href = attr(row, "a", "href");
+		let title = ZU.trimInternal(text(row, "a"));
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -249,11 +230,41 @@ async function scrape(doc, url = doc.location.href, docType) {
 	else if (docType == "case") {
 		scrapeCase(doc, url);
 	}
-	// else if (docType == "blogPost") {
-	// 	scrapeBlog(doc, url);
-	// }
 }
+
+
 /** BEGIN TEST CASES **/
 var testCases = [
+
+]
+/** END TEST CASES **/
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.dalloz.fr/dalloz",
+		"detectedItemType": false,
+		"items": []
+	},
+	{
+		"type": "web",
+		"url": "https://www.dalloz.fr/documentation/Document?ctxt=0_YSR0MD1jb25zdGl0dXRpb27Cp3gkc2Y9c2ltcGxlLXNlYXJjaA%3D%3D&ctxtl=0_cyRwYWdlTnVtPTHCp3MkdHJpZGF0ZT1GYWxzZcKncyRzb3J0PSNkZWZhdWx0X0Rlc2PCp3Mkc2xOYlBhZz0yMMKncyRpc2Fibz1UcnVlwqdzJHBhZ2luZz1UcnVlwqdzJG9uZ2xldD3Cp3MkZnJlZXNjb3BlPVRydWXCp3Mkd29JUz1GYWxzZcKncyR3b1NQQ0g9RmFsc2XCp3MkZmxvd01vZGU9RmFsc2XCp3MkYnE9wqdzJHNlYXJjaExhYmVsPcKncyRzZWFyY2hDbGFzcz3Cp3Mkej0wREJGQzhEQi8xOEUwNjY0Mw%3D%3D&id=CONSCONST_LIEUVIDE_2024-01-18_20231076QPC",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "Cons. constit., n° 2023-1076 QPC, 18 janvier 2024",
+				"creators": [],
+				"dateDecided": "18 janvier 2024",
+				"court": "Conseil constitutionnel",
+				"docketNumber": "n° 2023-1076 QPC",
+				"language": "fr",
+				"url": "https://www.dalloz.fr/documentation/Document?ctxt=0_YSR0MD1jb25zdGl0dXRpb27Cp3gkc2Y9c2ltcGxlLXNlYXJjaA%3D%3D&ctxtl=0_cyRwYWdlTnVtPTHCp3MkdHJpZGF0ZT1GYWxzZcKncyRzb3J0PSNkZWZhdWx0X0Rlc2PCp3Mkc2xOYlBhZz0yMMKncyRpc2Fibz1UcnVlwqdzJHBhZ2luZz1UcnVlwqdzJG9uZ2xldD3Cp3MkZnJlZXNjb3BlPVRydWXCp3Mkd29JUz1GYWxzZcKncyR3b1NQQ0g9RmFsc2XCp3MkZmxvd01vZGU9RmFsc2XCp3MkYnE9wqdzJHNlYXJjaExhYmVsPcKncyRzZWFyY2hDbGFzcz3Cp3Mkej0wREJGQzhEQi8xOEUwNjY0Mw%3D%3D&id=CONSCONST_LIEUVIDE_2024-01-18_20231076QPC",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
 ]
 /** END TEST CASES **/

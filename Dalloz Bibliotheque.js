@@ -2,14 +2,14 @@
 	"translatorID": "2ea86ad9-71ca-410c-9126-9d7d98722acf",
 	"label": "Dalloz Bibliothèque",
 	"creator": "Alexandre Mimms",
-	"target": "https?://(www\\.)?bibliotheque\\.lefebvre\\.dalloz\\.fr",
+	"target": "https?://(www\\.)?bibliotheque\\.lefebvre-dalloz\\.fr",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-04-19 13:07:42"
+	"lastUpdated": "2024-04-23 10:41:20"
 }
 
 /*
@@ -76,42 +76,96 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url = doc.location.href) {
-	const edition = ZU.trimInternal(text(doc, ".editions-edition.css-p7sjbi", 0)).split(" ")[0];
-	const date = ZU.trimInternal(text(doc, ".editions-date.css-p7sjbi", 0)).replace(/Edition\s?:\s?/, "");
-	const collection = ZU.trimInternal(text(doc, ".notice-header-grid-item.css-1o256gd.e4d31s30:not(.first-item) .notice-header-link", 0));
-	const isbn = ZU.trimInternal(text(doc, ".notice-header-grid-item.css-leol38.e4d31s30 .notice-header-link", 0));
-	let marque = ZU.trimInternal(text(doc, ".notice-header-grid-item.css-xc5jw0.e4d31s30 .notice-header-link", 0));
-	marque = marque.substring(0, 1) + marque.substring(1).toLowerCase();
-	const auteurs = ZU.trimInternal(text(doc, ".notice-header-grid-item.css-2bwjgy.e4d31s30 .notice-header-link", 0)).split(" • ");
-	const titre = ZU.trimInternal(text(doc, ".title", 0));
-	const abstract = ZU.trimInternal(text(doc, ".description", 0)).replace("Description", "");
+	let edition, date, marque, collection, isbn, auteurs;
+	const editions = doc.querySelectorAll(".editions-box");
+	for (let ed of editions) {
+		if (ed.querySelectorAll("a")[0].href == url) {
+			edition = text(ed, ".editions-edition");
+			date = text(ed, ".editions-date");
+		 }
+	}
+
+	const infoGen = doc.querySelectorAll(".notice-header-grid-item");
+	for (let infoBox of infoGen) {
+
+		const value = ZU.trimInternal(infoBox.innerText);
+
+		if (infoBox.querySelector(".auteurs")) { 
+			auteurs = ZU.trimInternal(infoBox.querySelector(".auteurs").innerText).split(" • ");
+			Z.debug(auteurs);
+			}
+
+		if (value.startsWith("Collection")) { collection = value.split(" : ")[1]; }
+		else if (value.startsWith("Marque")) { marque = value.split(" : ")[1]; }
+		else if (value.startsWith("ISBN")) { isbn = value.split(" : ")[1]; }
+	}
+
+	const titre = ZU.trimInternal(text(doc, ".title"));
+	const abstract = ZU.trimInternal(text(doc, ".description")).replace("Description", "");
 
 	let newItem = new Z.Item("book");
 
 	for (let auteur of auteurs) {
-		const auteurNames = auteur.split(" ");
-		newItem.creators.push({
-			firstName: auteurNames[0],
-			lastName: auteurNames[1],
-			creatorType: "author",
-			fieldMode: true
-		});
+		newItem.creators.push(ZU.cleanAuthor(auteur, "author"));
 	}
 
 	newItem.title = titre;
 	newItem.date = date;
 	newItem.abstractNote = abstract;
-	newItem.ISBN = isbn;
+	newItem.ISBN = ZU.cleanISBN(isbn);
 	newItem.edition = edition;
 	newItem.publisher = marque;
-	newItem.language = "french";
+	newItem.language = "fr";
 	newItem.series = collection;
-	newItem.url = url;
 
 	newItem.complete();
 }
 
 /** BEGIN TEST CASES **/
 var testCases = [
+	{
+		"type": "web",
+		"url": "https://bibliotheque.lefebvre-dalloz.fr/recherche?query=livre",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://bibliotheque.lefebvre-dalloz.fr/ouvrage/grands-arrets/grands-arrets-jurisprudence-civile-t1_9782247154579",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Les grands arrêts de la jurisprudence civile T1",
+				"creators": [
+					{
+						"firstName": "Henri",
+						"lastName": "Capitant",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yves",
+						"lastName": "Lequette",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "François",
+						"lastName": "Terré",
+						"creatorType": "author"
+					}
+				],
+				"date": "Avril 2015",
+				"ISBN": "9782247154579",
+				"abstractNote": "La 13e édition des Grands arrêts de la jurisprudence civile coïncide avec le quatre-vingtième anniversaire de leur parution sous la signature de Henri Capitant. C'est dire que cet ouvrage est le précurseur de tous les recueils de Grands arrêts actuellement existants. Jamais démenti, son succès vient de ce qu'il offre un accès direct aux grandes décisions qui ont permis au Code civil de s'adapter à la réalité sociale contemporaine.L'ouvrage est scindé en deux tomes.Le premier volume réunit la totalité des matières étudiées, d'une université à l'autre, en licence 1 : Introduction, mais aussi droit des personnes, droit de la famille et droit des biens.S'y ajoutent le droit des régimes matrimoniaux et celui des successions et des libéralités qui, situés au confluent du droit de la famille et du droit du patrimoine, sont le prolongement naturel des disciplines précédentes.Le second volume rassemble la théorie générale des obligations (acte juridique, responsabilité, quasi-contrats, régime général) ainsi que les disciplines qui évoluent dans son orbite : contrats spéciaux, sûretés. Il correspond aux matières généralement enseignées en licence 2 et en licence 3.À l'occasion de cette 13e édition, les auteurs ont procédé à une importante mise à jour : nombre de commentaires ont été partiellement ou totalement réécrits pour prendre en compte les évolutions survenues depuis la précédente édition, il y a huit ans.",
+				"edition": "13e édition",
+				"language": "fr",
+				"libraryCatalog": "Dalloz Bibliothèque",
+				"publisher": "DALLOZ",
+				"series": "Grands arrêts",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
 ]
 /** END TEST CASES **/

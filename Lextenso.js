@@ -2,14 +2,14 @@
 	"translatorID": "3243d081-22c0-452c-8298-9d8a9fb5de2f",
 	"label": "Lextenso",
 	"creator": "Alexandre Mimms",
-	"target": "https?://(?:www[.-])?labase[.-]lextenso[.-](?:[.-]fr)?",
+	"target": "https?://(www\\.)?labase-lextenso\\.fr/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-04-18 16:17:04"
+	"lastUpdated": "2024-04-23 11:30:31"
 }
 
 /*
@@ -36,6 +36,20 @@
 */
 
 
+function detectWeb(doc, url) {
+	if (url.includes('/lextenso/rechercher') && getSearchResults(doc, true)) {
+		return 'multiple';
+	}
+	else if (doc.querySelector(".node-type-ouvrage")) {
+		return 'book';
+	}
+	else if (doc.querySelector(".lextenso-document-article")) {
+		return 'journalArticle';
+	}
+	return false;
+}
+
+
 async function scrapeJournalArticle(doc, url) {
 	const references = ZU.trimInternal(text(doc, ".document-metadata-origin").replace("Issu de ", "")).split(" - ");
 	const revue = references[0];
@@ -43,30 +57,21 @@ async function scrapeJournalArticle(doc, url) {
 	const page = references[2];
 	const titre = ZU.trimInternal(text(doc, "#page-title"));
 	const auteurs = doc.querySelectorAll(".document-metadata-authors-name");
-	const abstract = ZU.trimInternal(text(doc, ".cChapeau", 0));
-	const date = ZU.trimInternal(text(doc, ".document-metadata-date", 0).replace("Date de parution : ", ""));
-
+	const abstract = ZU.trimInternal(text(doc, ".cChapeau"));
+	const date = ZU.trimInternal(text(doc, ".document-metadata-date").replace("Date de parution : ", ""));
 
 	let newItem = new Z.Item("journalArticle");
 	newItem.title = titre;
-	
+
 	for (let auteur of auteurs) {
-		const auteurNames = auteur.innerText.split(" ");
-		newItem.creators.push({
-			firstName: auteurNames[0],
-			lastName: auteurNames[1],
-			creatorType: "author",
-			fieldMode: true,
-		});
+		newItem.creators.push(ZU.cleanAuthor(auteur.innerText, "author"));
 	}
 
 	newItem.date = date;
 	newItem.abstractNote = abstract;
 	newItem.publicationTitle = revue;
-	newItem.issue = numeroRevue.replace(/n°[0]?/, "");
-	newItem.pages = page.replace(/page\s?/, "");
-	newItem.url = url;
-	newItem.language = "french";
+	if (numeroRevue) { newItem.issue = numeroRevue.replace(/n°[0]?/, ""); }
+	if (page) { newItem.pages = page.replace(/page\s?/, ""); }
 	newItem.complete();
 }
 
@@ -97,48 +102,27 @@ async function scrapeBook(doc, url) {
 	newItem.title = titre;
 	
 	for (let auteur of auteurs) {
-		const auteurNames = auteur.innerText.split(" ");
-		newItem.creators.push({
-			firstName: auteurNames[0],
-			lastName: auteurNames[1],
-			creatorType: "author",
-			fieldMode: true,
-		});
+		newItem.creators.push(ZU.cleanAuthor(auteur.innerText, "author"));
 	}
 
 	newItem.date = date;
 	newItem.publisher = publisher;
 	newItem.ISBN = isbn;
-	// newItem.pages = page.replace(/page\s?/, "");
+	newItem.pages = page.replace(/page\s?/, "");
 	newItem.url = url;
-	newItem.language = "french";
+	newItem.language = "fr";
 	newItem.complete();
 }
 
-function detectWeb(doc, url) {
-	// TODO: adjust the logic here
-	if (url.includes('/lextenso/rechercher')) {
-		return 'multiple';
-	}
-	else if (doc.querySelectorAll(".node-type-ouvrage").length > 0) {
-		return 'book';
-	}
-	else if (doc.querySelectorAll(".lextenso-document-article").length > 0) {
-		return 'journalArticle';
-	}
-	return false;
-}
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 
-	var rows = doc.querySelectorAll('h2 > a.title[href*="/article/"]');
+	var rows = doc.querySelectorAll('.hit');
 	for (let row of rows) {
-
-		let href = row.href;
-
-		let title = ZU.trimInternal(row.textContent);
+		let href = row.querySelectorAll("a")[0].href;
+		let title = ZU.trimInternal(row.querySelectorAll("h3")[0].innerText);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -174,9 +158,32 @@ async function scrape(doc, url = doc.location.href, docType) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www-labase-lextenso-fr.docelec-u-paris2.idm.oclc.org/",
+		"url": "https://www.labase-lextenso.fr/",
 		"detectedItemType": false,
 		"items": []
+	},
+	{
+		"type": "web",
+		"url": "https://www.labase-lextenso.fr/revue-generale-du-droit-des-assurances/RGA201v5",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "La priorité du tiers lésé sur l'indemnité d'assurance",
+				"creators": [
+					{
+						"firstName": "James",
+						"lastName": "Landel",
+						"creatorType": "author"
+					}
+				],
+				"abstractNote": "Action directe ; C. assur., art. L. 124-3 ; Somme versée par l’assureur du responsable à la personne indiquée comme « preneur d'assurance / assuré » et « conducteur » sur le constat amiable ; Condamnation de l’assureur envers le tiers lésé, propriétaire du véhicule ; Montant ; Cour d’appel : soustraction des sommes payées au tiers lésé une somme versée à un tiers ; Cassation",
+				"libraryCatalog": "Lextenso",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
