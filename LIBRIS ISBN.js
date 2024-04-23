@@ -93,11 +93,7 @@ var testCases = [
 				"publisher": "Hexa",
 				"shortTitle": "Så fungerar Wikipedia",
 				"attachments": [],
-				"tags": [
-					{
-						"tag": "Bok"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
