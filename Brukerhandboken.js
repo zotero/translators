@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-04-09 16:56:26"
+	"lastUpdated": "2024-05-01 11:15:16"
 }
 
 /**
@@ -229,3 +229,122 @@ function filterTags(root, allowSelector) {
 		}
 	}
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://brukerhandboken.miraheze.org/wiki/Brukermedvirkning",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "Brukermedvirkning",
+				"creators": [],
+				"date": "2024-05-01T08:31:53Z",
+				"abstractNote": "Informasjon om brukermedvirkning her.",
+				"encyclopediaTitle": "Brukerhåndboken",
+				"extra": "Page Version ID: 912",
+				"language": "nb",
+				"libraryCatalog": "Brukerhåndboken",
+				"rights": "Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International",
+				"url": "https://brukerhandboken.miraheze.org/wiki/Brukermedvirkning?oldid=912",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://brukerhandboken.miraheze.org/wiki/Bruker:Sstraume97",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "Bruker:Sstraume97",
+				"creators": [],
+				"date": "2024-04-01T14:58:27Z",
+				"encyclopediaTitle": "Brukerhåndboken",
+				"extra": "Page Version ID: 103",
+				"language": "nb",
+				"libraryCatalog": "Brukerhåndboken",
+				"rights": "Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International",
+				"shortTitle": "Bruker",
+				"url": "https://brukerhandboken.miraheze.org/wiki/Bruker:Sstraume97?oldid=103",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://brukerhandboken.miraheze.org/wiki/Forside",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "Forside",
+				"creators": [],
+				"date": "2024-04-11T07:32:19Z",
+				"encyclopediaTitle": "Brukerhåndboken",
+				"extra": "Page Version ID: 888",
+				"language": "nb",
+				"libraryCatalog": "Brukerhåndboken",
+				"rights": "Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International",
+				"url": "https://brukerhandboken.miraheze.org/wiki/Forside?oldid=888",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://brukerhandboken.miraheze.org/wiki/Ord_og_forkortelser",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "Ord og forkortelser",
+				"creators": [],
+				"date": "2024-04-11T07:41:44Z",
+				"abstractNote": "Ord og forkortelser er en ordbok for brukerrepresentanter i helsetjenesten. Den inneholder ord og forkortelser som brukes hyppig i helsevesenet, og som er som er nyttig å kunne for brukerrepresentanter i helse- og omsorgstjenesten. Innholdet er kurert fra ulike nettsider, dokumenter og liknende. Det er altså ikke jeg som har skrevet alle forklaringene. Henvisning til kildene for tekstene (hvor de er hentet fra) ble når jeg startet på listen ikke tatt med da jeg ikke planla å gjøre den offentlig. Jeg tar nå med kilde i nye oppføringer der det er relevant.\n\nListen er sortert alfabetisk og ment brukt elektronisk da det finnes lenker i tekstene.\nVed forslag til nye ord og forkortelser bruk dette skjemaet: Send inn nytt ord (Airtable) eller e-post. \nVed forslag til endringer eller du har spørsmål ta gjerne kontakt med meg på e-post.\n\nLista er sortert alfabetisk og ment brukt elektronisk da det finnes lenker i tekstene. Noen forkortelser er det brukt punktum.\nLast ned som PDF her.",
+				"encyclopediaTitle": "Brukerhåndboken",
+				"extra": "Page Version ID: 889",
+				"language": "nb",
+				"libraryCatalog": "Brukerhåndboken",
+				"rights": "Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International",
+				"url": "https://brukerhandboken.miraheze.org/wiki/Ord_og_forkortelser?oldid=889",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
