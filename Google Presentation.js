@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-02 16:55:40"
+	"lastUpdated": "2024-02-19 09:33:28"
 }
 
 /*
@@ -64,7 +64,7 @@ function doWeb(doc, url) {
 	urlparts.splice(6);
 	var baseUrl = urlparts.join('/');
 	item.url = baseUrl;
-	var pdfUrl = baseUrl + '/export/pdf?id=' + id;
+	var pdfUrl = baseUrl + '/export?format=pdf';
 	//Z.debug(pdfUrl);
 	item.attachments.push({
 		url: pdfUrl,

@@ -1,13 +1,11 @@
 {
 	"translatorID": "b6e39b57-8942-4d11-8259-342c46ce395f",
-	"translatorType": 2,
 	"label": "BibLaTeX",
 	"creator": "Simon Kornblith, Richard Karnesky and Anders Johansson",
 	"target": "bib",
 	"minVersion": "2.1.9",
-	"maxVersion": "null",
+	"maxVersion": "",
 	"priority": 100,
-	"inRepository": true,
 	"configOptions": {
 		"getCollections": true
 	},
@@ -17,7 +15,9 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2022-10-12 19:26:00"
+	"inRepository": true,
+	"translatorType": 2,
+	"lastUpdated": "2024-03-25 14:49:42"
 }
 
 /*
@@ -371,7 +371,7 @@ var numberRe = /^[0-9]+/;
 // it includes the indefinite articles of English, German, French and Spanish, as well as a small set of English prepositions whose
 // force is more grammatical than lexical, i.e. which are likely to strike many as 'insignificant'.
 // The assumption is that most who want a title word in their key would prefer the first word of significance.
-var citeKeyTitleBannedRe = /\b(a|an|the|some|from|on|in|to|of|do|with|der|die|das|ein|eine|einer|eines|einem|einen|un|une|la|le|l'|el|las|los|al|uno|una|unos|unas|de|des|del|d')(\s+|\b)|(<\/?(i|b|sup|sub|sc|span style="small-caps"|span)>)/g;
+var citeKeyTitleBannedRe = /\b(a|an|the|some|from|on|in|to|of|do|with|der|die|das|ein|eine|einer|eines|einem|einen|un|une|la|le|l'|les|el|las|los|al|uno|una|unos|unas|de|des|del|d')(\s+|\b)|(<\/?(i|b|sup|sub|sc|span style="small-caps"|span)>)/g;
 var citeKeyConversionsRe = /%([a-zA-Z])/;
 
 var citeKeyConversions = {
@@ -882,3 +882,7 @@ function doExport() {
 
 	Zotero.write("\n");
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+]
+/** END TEST CASES **/

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-20 21:34:23"
+	"lastUpdated": "2024-02-29 20:21:02"
 }
 
 /**
@@ -29,11 +29,6 @@
 	License along with this program. If not, see
 	<http://www.gnu.org/licenses/>.
 */
-
-
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 // mimetype map for supplementary attachments
 var suppTypeMap = {
@@ -682,6 +677,9 @@ function scrape(doc, url) {
 		if (item.journalAbbreviation == item.publicationTitle) {
 			delete item.journalAbbreviation;
 		}
+		if (item.issue && item.number && item.issue == item.number) {
+			delete item.number;
+		}
 		var hasPDF = false;
 		for (let attach of item.attachments) {
 			if (attach.mimeType && attach.mimeType == "application/pdf") {
@@ -1211,10 +1209,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -1293,17 +1287,13 @@ var testCases = [
 				"libraryCatalog": "www.nature.com",
 				"pages": "341-343",
 				"publicationTitle": "Nature",
-				"rights": "2012 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
+				"rights": "2012 Springer Nature Limited",
 				"url": "https://www.nature.com/articles/nature10669",
 				"volume": "481",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -1336,17 +1326,13 @@ var testCases = [
 				"libraryCatalog": "www.nature.com",
 				"pages": "237-237",
 				"publicationTitle": "Nature",
-				"rights": "2012 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
+				"rights": "2012 Springer Nature Limited",
 				"url": "https://www.nature.com/articles/481237a",
 				"volume": "481",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -1400,17 +1386,13 @@ var testCases = [
 				"libraryCatalog": "www.nature.com",
 				"pages": "335-340",
 				"publicationTitle": "Nature",
-				"rights": "2011 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
+				"rights": "2011 Springer Nature Limited",
 				"url": "https://www.nature.com/articles/nature10728",
 				"volume": "481",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -1544,17 +1526,13 @@ var testCases = [
 				"libraryCatalog": "www.nature.com",
 				"pages": "1289-1297",
 				"publicationTitle": "Nature Genetics",
-				"rights": "2006 Nature Publishing Group",
+				"rights": "2006 Springer Nature America, Inc.",
 				"url": "https://www.nature.com/articles/ng1901",
 				"volume": "38",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -1815,10 +1793,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -1882,17 +1856,13 @@ var testCases = [
 				"libraryCatalog": "www.nature.com",
 				"pages": "177-182",
 				"publicationTitle": "Nature Structural & Molecular Biology",
-				"rights": "2008 Nature Publishing Group",
+				"rights": "2008 Springer Nature America, Inc.",
 				"url": "https://www.nature.com/articles/nsmb.1371",
 				"volume": "15",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -1981,17 +1951,13 @@ var testCases = [
 				"libraryCatalog": "www.nature.com",
 				"pages": "341-343",
 				"publicationTitle": "Nature",
-				"rights": "2012 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
+				"rights": "2012 Springer Nature Limited",
 				"url": "https://www.nature.com/articles/nature10669",
 				"volume": "481",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -2087,10 +2053,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -2151,17 +2113,13 @@ var testCases = [
 				"libraryCatalog": "www.nature.com",
 				"pages": "260-264",
 				"publicationTitle": "Nature",
-				"rights": "2013 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
+				"rights": "2013 Springer Nature Limited",
 				"url": "https://www.nature.com/articles/nature11899",
 				"volume": "495",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -2402,17 +2360,13 @@ var testCases = [
 				"libraryCatalog": "www.nature.com",
 				"pages": "174-180",
 				"publicationTitle": "Nature",
-				"rights": "2011 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
+				"rights": "2011 Springer Nature Limited",
 				"url": "https://www.nature.com/articles/nature09944",
 				"volume": "473",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -2462,17 +2416,13 @@ var testCases = [
 				"libraryCatalog": "www.nature.com",
 				"pages": "337-345",
 				"publicationTitle": "Nature Protocols",
-				"rights": "2006 Nature Publishing Group",
+				"rights": "2006 Springer Nature Limited",
 				"url": "https://www.nature.com/articles/nprot.2006.52",
 				"volume": "1",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -2572,17 +2522,13 @@ var testCases = [
 				"libraryCatalog": "www.nature.com",
 				"pages": "6186",
 				"publicationTitle": "Nature Communications",
-				"rights": "2015 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
+				"rights": "2015 Springer Nature Limited",
 				"url": "https://www.nature.com/articles/ncomms7186",
 				"volume": "6",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -2897,10 +2843,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -3097,10 +3039,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -3190,24 +3128,22 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2021-10-20",
+				"date": "2022-01",
 				"DOI": "10.1038/s41586-021-03972-8",
 				"ISSN": "1476-4687",
 				"abstractNote": "Transatlantic exploration took place centuries before the crossing of Columbus. Physical evidence for early European presence in the Americas can be found in Newfoundland, Canada1,2. However, it has thus far not been possible to determine when this activity took place3–5. Here we provide evidence that the Vikings were present in Newfoundland in ad 1021. We overcome the imprecision of previous age estimates by making use of the cosmic-ray-induced upsurge in atmospheric radiocarbon concentrations in ad 993 (ref. 6). Our new date lays down a marker for European cognisance of the Americas, and represents the first known point at which humans encircled the globe. It also provides a definitive tie point for future research into the initial consequences of transatlantic activity, such as the transference of knowledge, and the potential exchange of genetic information, biota and pathologies7,8.",
+				"issue": "7893",
 				"language": "en",
 				"libraryCatalog": "www.nature.com",
-				"pages": "1-4",
+				"pages": "388-391",
 				"publicationTitle": "Nature",
 				"rights": "2021 The Author(s)",
 				"url": "https://www.nature.com/articles/s41586-021-03972-8",
+				"volume": "601",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -3219,6 +3155,99 @@ var testCases = [
 					},
 					{
 						"tag": "Plant physiology"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nature.com/articles/s41586-023-05742-0",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "RETRACTED ARTICLE: Evidence of near-ambient superconductivity in a N-doped lutetium hydride",
+				"creators": [
+					{
+						"firstName": "Nathan",
+						"lastName": "Dasenbrock-Gammon",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Elliot",
+						"lastName": "Snider",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Raymond",
+						"lastName": "McBride",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hiranya",
+						"lastName": "Pasan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Dylan",
+						"lastName": "Durkee",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nugzari",
+						"lastName": "Khalvashi-Sutter",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sasanka",
+						"lastName": "Munasinghe",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sachith E.",
+						"lastName": "Dissanayake",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Keith V.",
+						"lastName": "Lawler",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ashkan",
+						"lastName": "Salamat",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ranga P.",
+						"lastName": "Dias",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-03",
+				"DOI": "10.1038/s41586-023-05742-0",
+				"ISSN": "1476-4687",
+				"abstractNote": "The absence of electrical resistance exhibited by superconducting materials would have enormous potential for applications if it existed at ambient temperature and pressure conditions. Despite decades of intense research efforts, such a state has yet to be realized1,2. At ambient pressures, cuprates are the material class exhibiting superconductivity to the highest critical superconducting transition temperatures (Tc), up to about 133 K (refs. 3–5). Over the past decade, high-pressure ‘chemical precompression’6,7 of hydrogen-dominant alloys has led the search for high-temperature superconductivity, with demonstrated Tc approaching the freezing point of water in binary hydrides at megabar pressures8–13. Ternary hydrogen-rich compounds, such as carbonaceous sulfur hydride, offer an even larger chemical space to potentially improve the properties of superconducting hydrides14–21. Here we report evidence of superconductivity on a nitrogen-doped lutetium hydride with a maximum Tc of 294 K at 10 kbar, that is, superconductivity at room temperature and near-ambient pressures. The compound was synthesized under high-pressure high-temperature conditions and then—after full recoverability—its material and superconducting properties were examined along compression pathways. These include temperature-dependent resistance with and without an applied magnetic field, the magnetization (M) versus magnetic field (H) curve, a.c. and d.c. magnetic susceptibility, as well as heat-capacity measurements. X-ray diffraction (XRD), energy-dispersive X-ray (EDX) and theoretical simulations provide some insight into the stoichiometry of the synthesized material. Nevertheless, further experiments and simulations are needed to determine the exact stoichiometry of hydrogen and nitrogen, and their respective atomistic positions, in a greater effort to further understand the superconducting state of the material.",
+				"issue": "7951",
+				"language": "en",
+				"libraryCatalog": "www.nature.com",
+				"pages": "244-250",
+				"publicationTitle": "Nature",
+				"rights": "2023 The Author(s), under exclusive licence to Springer Nature Limited",
+				"shortTitle": "RETRACTED ARTICLE",
+				"url": "https://www.nature.com/articles/s41586-023-05742-0",
+				"volume": "615",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Superconducting properties and materials"
 					}
 				],
 				"notes": [],

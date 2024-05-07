@@ -2,14 +2,14 @@
 	"translatorID": "31659710-d04e-45d0-84ba-8e3f5afc4a54",
 	"label": "Twitter",
 	"creator": "Bo An, Dan Stillman",
-	"target": "^https?://([^/]+\\.)?twitter\\.com/",
+	"target": "^https?://([^/]+\\.)?(twitter|x)\\.com/",
 	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-17 18:35:48"
+	"lastUpdated": "2024-04-05 08:16:53"
 }
 
 /*
