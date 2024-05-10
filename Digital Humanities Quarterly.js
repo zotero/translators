@@ -66,7 +66,18 @@ function scrape(articles){
 		while (aut = authors.iterateNext()) {
 			item.creators.push(Zotero.Utilities.cleanAuthor(xpathtext(newDoc, './a[1]', aut), "author"));
 		}
-		item.attachments = [{url:item.url, title:"DHQ Snapshot", mimeType:"text/html"}];
+		var tokens = newDoc.location.href.split('/');
+		var itemId = tokens[tokens.length - 2];
+		item.attachments.push({
+			url:item.url,
+			title:"DHQ Snapshot",
+			mimeType:"text/html"
+		});
+		item.attachments.push({
+			url: `https://dhq-static.digitalhumanities.org/pdf/${itemId}.pdf`,
+			title: "PDF Full Text", 
+			mimeType: "application/pdf"
+		});
 		item.complete();
 	}, function() {});}/** BEGIN TEST CASES **/
 var testCases = [
@@ -91,6 +102,11 @@ var testCases = [
 						"url": "http://www.digitalhumanities.org/dhq/vol/5/2/000094/000094.html",
 						"title": "DHQ Snapshot",
 						"mimeType": "text/html"
+					},
+					{
+						"url": "https://dhq-static.digitalhumanities.org/pdf/000094.pdf",
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"url": "http://www.digitalhumanities.org/dhq/vol/5/2/000094/000094.html",
