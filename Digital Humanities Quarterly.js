@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-05-10 19:15:14"
+	"lastUpdated": "2024-05-11 20:24:59"
 }
 
 /*
@@ -45,7 +45,7 @@ function detectWeb(doc, _url) {
 	return false;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	const type = detectWeb(doc, url);
 	Zotero.debug(type);
 	if (type === "journalArticle") {
@@ -91,15 +91,15 @@ function scrape(doc, url) {
 	item.creators = [...authors].map((author) => {
 		return ZU.cleanAuthor(text(author, 'a:first-child'), "author");
 	});
-	item.year = year;
+	item.publicationTitle = "Digital Humanities Quarterly";
+	item.ISSN = "1938-4122";
+	item.date = year;
 	item.volume = volume;
 	item.issue = issue;
 	item.abstractNote = abstract;
 	item.rights = license;
-
 	const pdfLink = main.querySelector('.toolbar > a[href $= "pdf"]');
 	if (pdfLink) {
-		Zotero.debug(pdfLink.href);
 		item.attachments.push({
 			url: pdfLink.href,
 			title: "Full Text PDF",
