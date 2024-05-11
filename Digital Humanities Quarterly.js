@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-05-11 20:24:59"
+	"lastUpdated": "2024-05-11 20:26:38"
 }
 
 /*
@@ -145,9 +145,12 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2023",
+				"ISSN": "1938-4122",
 				"abstractNote": "This introduction to the Project Resiliency issue argues that we have work to do in getting projects to the point of being done and archivable. The Endings Project, a collaboration between three developers, three humanities scholars, and three librarians, arose from the maintenance burden accrued by the Humanities Computing and Media Centre at the University of Victoria and our desire to design projects that, from their inception, are ready for long-term archiving. After describing the events leading up to the Endings Symposium and briefly summarizing the articles in this issue, we discuss the necessity of a culture of constraint if we wish to preserve digital humanities projects in the same way that libraries preserve books.",
 				"issue": "1",
 				"libraryCatalog": "Digital Humanities Quarterly",
+				"publicationTitle": "Digital Humanities Quarterly",
 				"rights": "Creative Commons Attribution-NoDerivatives 4.0 International License",
 				"shortTitle": "Introduction to Special Issue",
 				"url": "https://www.digitalhumanities.org/dhq/vol/17/1/000671/000671.html",
@@ -178,9 +181,12 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2023",
+				"ISSN": "1938-4122",
 				"abstractNote": "In this article, I discuss my project “Ancestral Code”, which consists of an integrated development environment (IDE) and the Nehiyaw (Plains Cree) based programming languages called Cree# (pronounced: Cree-Sharp) and ᐊᒋᒧ (âcimow). These languages developed in response to western perspectives on human-computer relationships, which I challenge and reframe in Nehiyaw/Indigenous contexts.",
 				"issue": "2",
 				"libraryCatalog": "Digital Humanities Quarterly",
+				"publicationTitle": "Digital Humanities Quarterly",
 				"rights": "Creative Commons Attribution-NoDerivatives 4.0 International License",
 				"shortTitle": "ᐊᒐᐦᑭᐯᐦᐃᑲᓇ ᒫᒥᑐᓀᔨᐦᐃᒋᑲᓂᐦᑳᓂᕽ | acahkipehikana mâmitoneyihicikanihkânihk | Programming with Cree# and Ancestral Code",
 				"url": "https://www.digitalhumanities.org/dhq/vol/17/2/000699/000699.html",
