@@ -97,7 +97,7 @@ function scrape(doc, url = doc.location.href) {
 	item.issue = issue;
 	item.abstractNote = abstract;
 	item.rights = license;
-	const pdfLink = main.querySelector('.toolbar > a[href $= "pdf"]');
+	const pdfLink = main.querySelector('.toolbar > a[href$=".pdf"]');
 	if (pdfLink) {
 		item.attachments.push({
 			url: pdfLink.href,
@@ -107,13 +107,14 @@ function scrape(doc, url = doc.location.href) {
 	}
 	else {
 		item.attachments.push({
-			url,
-			title: "DHQ Snapshot",
-			mimeType: "text/html"
+			document: doc,
+			title: "Snapshot"
 		});
 	}
 	item.complete();
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
