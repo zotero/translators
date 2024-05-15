@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-05-11 20:26:38"
+	"lastUpdated": "2024-05-15 15:07:13"
 }
 
 /*
@@ -39,43 +39,42 @@ function detectWeb(doc, _url) {
 	if (doc.querySelector('.DHQarticle')) {
 		return "journalArticle";
 	}
-	if (doc.querySelector('#toc')) {
+	if (doc.querySelector('#toc') && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	return false;
 }
 
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('#toc .articleInfo > a:first-of-type');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
 async function doWeb(doc, url) {
-	const type = detectWeb(doc, url);
-	Zotero.debug(type);
-	if (type === "journalArticle") {
-		return scrape(doc, url);
-	}
-	if (type === "multiple") {
-	// Otherwise, we found multiple
-		const allItems = doc.querySelectorAll('#toc .articleInfo > a:first-of-type');
-		if (!allItems) {
-			return false;
+	if (detectWeb(doc, url) == "multiple") {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			scrape(await requestDocument(url));
 		}
-		// Reduce the links into an object
-		const choices = [...allItems].reduce((obj, { href, innerText }) => {
-			return { ...obj, ...{
-				[href]: innerText
-			} };
-		}, {});
-		Zotero.selectItems(choices, function (items) {
-			if (!items) {
-				return false;
-			}
-			const urls = Object.keys(items);
-			return ZU.processDocuments(urls, scrape);
-		});
 	}
-	return false;
+	else {
+		scrape(doc, url);
+	}
 }
 
 
-function scrape(doc, url) {
+function scrape(doc, url = doc.location.href) {
 	// Get the metadata
 	const main = doc.querySelector('#mainContent');
 	// Of the form "YYYY Volume.Issue"
