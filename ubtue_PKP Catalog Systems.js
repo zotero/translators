@@ -1,12 +1,12 @@
 {
-	"translatorID": "99b62ba4-065c-4e83-a5c0-d8cc0c75d388",
-	"label": "PKP Catalog Systems",
+	"translatorID": "99b62ba4-065c-4e83-a5c0-d8cc0c75d387",
+	"label": "ubtue PKP Catalog Systems",
 	"creator": "Aurimas Vinckevicius and Abe Jellinek",
 	"target": "/(article|preprint|issue)/view/|/catalog/book/|/search/search|/index\\.php/default",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
-	"priority": 200,
-	"inRepository": true,
+	"priority": 199,
+	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
 	"lastUpdated": "2024-03-06 16:34:47"
@@ -41,7 +41,7 @@ function detectWeb(doc, url) {
 	if (!generator && doc.body.id.includes('openJournalSystems')) {
 		generator = 'Open Journal Systems';
 	}
-	
+
 	if (generator.startsWith('Open ')
 		&& (url.includes('/search/search')
 			|| doc.querySelector('.obj_issue_toc .cmp_article_list')
@@ -111,11 +111,11 @@ function scrape(doc, url) {
 			// preprint
 			item.extra = (item.extra || '') + `\ntype: article\n`;
 		}
-		
+
 		if (!item.title) {
 			item.title = text(doc, '#articleTitle');
 		}
-		
+
 		if (item.creators.length == 0) {
 			var authorString = doc.getElementById("authorString");
 			if (authorString) {
@@ -125,7 +125,7 @@ function scrape(doc, url) {
 				}
 			}
 		}
-		
+
 		// OJS journal abbreviations are rarely correct. sometimes they're
 		// generated from the journal's URL slug, other times they're just the
 		// number "1", or the full name of the journal, or an abbreviation that
@@ -138,7 +138,7 @@ function scrape(doc, url) {
 		if (!item.DOI && doiNode) {
 			item.DOI = doiNode.textContent;
 		}
-		
+
 		if (item.itemType == 'journalArticle') {
 			// abstract is supplied in DC:description, so it ends up in extra
 			// abstractNote is pulled from description, which is same as title
@@ -151,7 +151,7 @@ function scrape(doc, url) {
 			item.abstractNote = ZU.xpathText(doc, '//div[@id="articleAbstract"]/div[1]')
 				|| ZU.xpathText(doc, '//div[contains(@class, "main_entry")]/div[contains(@class, "abstract")]');
 		}
-		
+
 		if (item.abstractNote) {
 			item.abstractNote = item.abstractNote.trim().replace(/^Abstract:?\s*/, '');
 		}
@@ -163,7 +163,7 @@ function scrape(doc, url) {
 		if (!item.ISBN) {
 			item.ISBN = ZU.cleanISBN(text(doc, '.identification_code .value'));
 		}
-		
+
 		if (item.date) {
 			item.date = ZU.strToISO(item.date);
 		}
@@ -173,17 +173,17 @@ function scrape(doc, url) {
 					|| attr(doc, 'meta[name="DC.Date.created"]', 'content')
 			);
 		}
-		
+
 		if (item.volume == '0') {
 			item.volume = '';
 		}
-		
+
 		if (item.institution) {
 			item.institution = '';
 		}
-		
+
 		var pdfAttachment = false;
-		
+
 		// some journals link to a PDF view page in the header, not the PDF itself
 		for (let i = 0; i < item.attachments.length; i++) {
 			if (item.attachments[i].mimeType == 'application/pdf') {
@@ -194,7 +194,7 @@ function scrape(doc, url) {
 				item.attachments.splice(i--, 1); // delete it
 			}
 		}
-		
+
 		var pdfUrl = doc.querySelector("a.pdf");
 		// add linked PDF if there isn't one listed in the header
 		if (!pdfAttachment && pdfUrl) {
@@ -205,7 +205,7 @@ function scrape(doc, url) {
 				url: pdfUrl.href.replace('/view/', '/download/')
 			});
 		}
-		
+
 		// add linked PDF if there isn't one listed in the header
 		if (!pdfAttachment) {
 			for (let link of doc.querySelectorAll("a.obj_galley_link")) {
@@ -224,7 +224,11 @@ function scrape(doc, url) {
 		let additional_title = ZU.xpathText(doc, '//article[@class="article-details"]/header/h2/small')
 		if (additional_title)
 		    item.title = item.title + " " + additional_title.trim();
-		
+
+        let article_type = ZU.xpathText(doc, '//meta[@name="DC.Type.articleType"]/@content')
+        if (article_type.match(/(Recensioni)|(Recensiones)/))
+            item.tags.push("Book Review");
+
 		item.complete();
 	});
 
