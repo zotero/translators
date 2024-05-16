@@ -1,15 +1,15 @@
 {
 	"translatorID": "99b62ba4-065c-4e83-a5c0-d8cc0c75d387",
-	"label": "ubtue PKP Catalog Systems",
+	"label": "ubtue_PKP Catalog Systems",
 	"creator": "Aurimas Vinckevicius and Abe Jellinek",
 	"target": "/(article|preprint|issue)/view/|/catalog/book/|/search/search|/index\\.php/default",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 199,
-	"inRepository": false,
+	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-06 16:34:47"
+	"lastUpdated": "2024-05-16 07:52:02"
 }
 
 /*
@@ -220,10 +220,6 @@ function scrape(doc, url) {
 				}
 			}
 		}
-
-		let additional_title = ZU.xpathText(doc, '//article[@class="article-details"]/header/h2/small')
-		if (additional_title)
-		    item.title = item.title + " " + additional_title.trim();
 
         let article_type = ZU.xpathText(doc, '//meta[@name="DC.Type.articleType"]/@content')
         if (article_type.match(/(Recensioni)|(Recensiones)/))
