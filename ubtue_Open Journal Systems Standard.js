@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-05-16 13:08:18"
+	"lastUpdated": "2024-05-16 13:26:00"
 }
 
 /*
@@ -265,7 +265,7 @@ function invokeUbtuePKPTranslator(doc) {
 
         // Fix/remove erroneous abstracts
 		if (i.ISSN == '2340-0080') {
-			i.abstractNote = i.abstractNote.replace(/&nbsp;/g, "");
+			i.abstractNote = i.abstractNote ? i.abstractNote.replace(/&nbsp;/g, "") : "";
 			j = 0;
 			for (let note of i.notes) {
 				if (note.match(/^abs:.*(?:(Translator|&nbsp;))/))
