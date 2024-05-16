@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-05-16 08:03:13"
+	"lastUpdated": "2024-05-16 13:08:18"
 }
 
 /*
@@ -248,7 +248,7 @@ function invokeUbtuePKPTranslator(doc) {
 		if (i.abstractNote) {
 			let absNr = 0;
 			for (let abs of i.abstractNote.split(abstractRegex).filter(str => ! /^\s*$/.test(str))) {
-				absNr == 0 ? i.abstractNote = abs : i.notes.push('abs:' + abs);
+				absNr == 0 ? i.abstractNote = abs : i.notes.push('abs:' + ZU.trimInternal(abs));
 				++absNr;
 			}
 		}
@@ -259,9 +259,22 @@ function invokeUbtuePKPTranslator(doc) {
 			}
 			if (i.abstractNote && !(i.abstractNote.trim().substring(0, 20) == abs.textContent.trim().replace(abstractRegex, '').substring(0, 20)) && !found) {
 				if (abs.textContent.length)
-					i.notes.push('abs:' + abs.textContent);
+					i.notes.push('abs:' + ZU.trimInternal(abs.textContent));
 			}
 		}
+
+        // Fix/remove erroneous abstracts
+		if (i.ISSN == '2340-0080') {
+			i.abstractNote = i.abstractNote.replace(/&nbsp;/g, "");
+			j = 0;
+			for (let note of i.notes) {
+				if (note.match(/^abs:.*(?:(Translator|&nbsp;))/))
+				    i.notes[j] = ZU.trimInternal(i.notes[j].replace(/Translator|&nbsp;/g, ""));
+				++j;
+			}
+			i.notes = i.notes.filter(a => !a.match(/^abs:$/));
+		}
+
 		i.tags = splitDotSeparatedKeywords(i);
 		i.title = joinTitleAndSubtitle(doc, i);
 		// some journal assigns the volume to the date
@@ -279,14 +292,14 @@ function invokeUbtuePKPTranslator(doc) {
 		}
 
 		if (['2617-3697', '2660-4418', '2748-6419', '1988-3269', '2699-8440',
-		     '1804-6444', '2627-6062', '2504-5156', '2413-3108'].includes(i.ISSN)) {
-            if (ZU.xpath(doc, '//meta[@name="DC.Type.articleType"]')) {
-                if (ZU.xpath(doc, '//meta[@name="DC.Type.articleType"]')[0].content.match(
-                            /(Media reviews)|(Rezensionen)|(Reseñas)|(Book Reviews?)/i)) {
-                                i.tags.push("Book Review");
-            	}
-            }
-        }
+			 '1804-6444', '2627-6062', '2504-5156', '2413-3108'].includes(i.ISSN)) {
+			if (ZU.xpath(doc, '//meta[@name="DC.Type.articleType"]')) {
+				if (ZU.xpath(doc, '//meta[@name="DC.Type.articleType"]')[0].content.match(
+							/(Media reviews)|(Rezensionen)|(Reseñas)|(Book Reviews?)/i)) {
+								i.tags.push("Book Review");
+				}
+			}
+		}
 
 		let orcids = getOrcids(doc, i.ISSN);
 		if (orcids.length)
