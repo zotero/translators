@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-04 03:46:18"
+	"lastUpdated": "2023-02-08 08:42:04"
 }
 
 /*
@@ -151,18 +151,20 @@ function scrapeAndParse(doc, url) {
 		}
 
 		// 出版社
-		pattern = /<span [^>]*?>出版社:<\/span>(.*?)<br\/>/;
+		// 018(lyb018@gmail)：修复出版社，去掉HTML标签。
+		pattern = /<span [^>]*?>出版社:<\/span>(.*?)<br\/?>/;
 		if (pattern.test(page)) {
-			var publisher = pattern.exec(page)[1];
+			var publisher = trimTags(pattern.exec(page)[1]);
 			newItem.publisher = Zotero.Utilities.trim(publisher);
 			// Zotero.debug("publisher: "+publisher);
 		}
 
 		// 丛书
-		pattern = /<span [^>]*?>丛书:<\/span>(.*?)<br\/>/;
+		// 018(lyb018@gmail)：修复丛书，去掉内容前面的 &nbsp;
+		pattern = /<span [^>]*?>丛书:<\/span>(.*?)<br\/?>/;
 		if (pattern.test(page)) {
 			var series = trimTags(pattern.exec(page)[1]);
-			newItem.series = Zotero.Utilities.trim(series);
+			newItem.series = Zotero.Utilities.trim(Zotero.Utilities.unescapeHTML(series));
 			// Zotero.debug("series: "+series);
 		}
 
