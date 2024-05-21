@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-05-21 13:40:58"
+	"lastUpdated": "2024-05-21 15:53:35"
 }
 
 /*
@@ -43,33 +43,36 @@ function detectWeb(doc, url) {
 function getOrcids(doc) {
 	let notes = [];
 	let authorsNode = ZU.xpath(doc, '//img[@alt="Orcid-ID"]/parent::a/parent::div');
-	let allAuthorNames = ZU.xpathText(authorsNode, '.');
-	if (!allAuthorNames)
-	    return [];
-
-	let orcidCandidates = ZU.xpathText(authorsNode, '//@onclick');
-	let ORCID_MATCHER = /https:\/\/orcid.org\/([\d-]+)/g;
-	let orcid;
-	let orcids = [];
-	while ((orcid = ORCID_MATCHER.exec(orcidCandidates)))
-	    orcids.push(orcid[1]);
-	orcids = [...new Set(orcids)];
-
-	// Currently there is no example for several ORCIDs, only handle the cases for
-	// one author or take the last one in the author list
-	if (!orcids.length)
-		return [];
-
-	if (orcids.length > 1) {
-		Z.debug("Too many candidates");
+	if (authorsNode.length != 1) {
+        Z.debug("More than one authorsNode candidate");
 		return [];
 	}
 
-    let allAuthorNamesSplit = allAuthorNames.split(",").map(n => n.trim());
-	let orcidAuthor = (allAuthorNamesSplit.length > 1) ? allAuthorNamesSplit.slice(-1) :
-	                   allAuthorNamesSplit[0];
+	let orcidNodes = ZU.xpath(authorsNode[0], './child::a');
+	let allAuthorNames = authorsNode[0].innerHTML;
+	let ORCID_INDICATOR = "|||";
+	for (orcidNode of orcidNodes) {
+	     allAuthorNames = allAuthorNames.replace(orcidNode.outerHTML, ORCID_INDICATOR);
 
-		notes.push({note: "orcid:" + orcids[0] + ' | ' + orcidAuthor});
+		if (!allAuthorNames)
+			continue;
+
+		let orcidCandidate = ZU.xpathText(orcidNode, '//@onclick');
+		let ORCID_MATCHER = /https:\/\/orcid.org\/([\d-]+)/g;
+		let orcid = ORCID_MATCHER.exec(orcidCandidate);
+
+		if (!orcid)
+		    continue;
+
+        orcid = orcid[1]; /* only the match */
+
+		let allAuthorNamesSplit = allAuthorNames.split(",").map(n => n.trim());
+		let orcidAuthor = allAuthorNamesSplit.filter(n => n.endsWith(ORCID_INDICATOR))[0].
+		                  replace(ORCID_INDICATOR, "");
+
+		notes.push({note: "orcid:" + orcid + ' | '
+		            + orcidAuthor});
+	}
 	return notes;
 }
 
@@ -81,7 +84,7 @@ function invokeEmbeddedMetadataTranslator(doc) {
 		i.itemType = "journalArticle";
 		let orcids = getOrcids(doc);
 		if (orcids.length)
-            i.notes.push(...orcids);
+			i.notes.push(...orcids);
 		i.complete();
 	});
 	translator.translate();
