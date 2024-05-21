@@ -1,15 +1,15 @@
 {
-	"translatorID": "5e3f67c9-f4e5-4dc6-ad9a-93bf263a585a",
-	"label": "Philosophy Documentation Center",
+	"translatorID": "2d4da035-c81a-424b-a9ec-700e0d3aced5",
+	"label": "ubtue_Philosophy Documentation Center",
 	"creator": "Madeesh Kannan",
 	"target": "^https://www.pdcnet.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
-	"inRepository": false,
+	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-20 15:40:06"
+	"lastUpdated": "2024-05-21 13:40:58"
 }
 
 /*
@@ -40,12 +40,48 @@ function detectWeb(doc, url) {
 		return "journalArticle";
 }
 
+function getOrcids(doc) {
+	let notes = [];
+	let authorsNode = ZU.xpath(doc, '//img[@alt="Orcid-ID"]/parent::a/parent::div');
+	let allAuthorNames = ZU.xpathText(authorsNode, '.');
+	if (!allAuthorNames)
+	    return [];
+
+	let orcidCandidates = ZU.xpathText(authorsNode, '//@onclick');
+	let ORCID_MATCHER = /https:\/\/orcid.org\/([\d-]+)/g;
+	let orcid;
+	let orcids = [];
+	while ((orcid = ORCID_MATCHER.exec(orcidCandidates)))
+	    orcids.push(orcid[1]);
+	orcids = [...new Set(orcids)];
+
+	// Currently there is no example for several ORCIDs, only handle the cases for
+	// one author or take the last one in the author list
+	if (!orcids.length)
+		return [];
+
+	if (orcids.length > 1) {
+		Z.debug("Too many candidates");
+		return [];
+	}
+
+    let allAuthorNamesSplit = allAuthorNames.split(",").map(n => n.trim());
+	let orcidAuthor = (allAuthorNamesSplit.length > 1) ? allAuthorNamesSplit.slice(-1) :
+	                   allAuthorNamesSplit[0];
+
+		notes.push({note: "orcid:" + orcids[0] + ' | ' + orcidAuthor});
+	return notes;
+}
+
 function invokeEmbeddedMetadataTranslator(doc) {
 	var translator = Zotero.loadTranslator("web");
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function (t, i) {
 		i.itemType = "journalArticle";
+		let orcids = getOrcids(doc);
+		if (orcids.length)
+            i.notes.push(...orcids);
 		i.complete();
 	});
 	translator.translate();
@@ -63,3 +99,7 @@ function doWeb(doc, url) {
 
 	Zotero.wait();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+]
+/** END TEST CASES **/
