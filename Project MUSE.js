@@ -2,14 +2,14 @@
 	"translatorID": "c54d1932-73ce-dfd4-a943-109380e06574",
 	"label": "Project MUSE",
 	"creator": "Sebastian Karcher and Abe Jellinek",
-	"target": "^https?://[^/]*muse\\.jhu\\.edu/(book/|article/|issue/|search\\?)",
+	"target": "^https?://[^/]*muse\\.jhu\\.edu/(book/|pub/|article/|issue/|search\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-18 20:04:42"
+	"lastUpdated": "2024-05-22 09:05:58"
 }
 
 /*
@@ -84,6 +84,13 @@ function doWeb(doc, url) {
 	}
 }
 
+function isOpenAccess(doc) {
+	let openAccessInfo = ZU.xpathText(doc,
+		'//div[@id = "info_wrap"]//*[contains(text(), "Open Access")]/parent::div');
+	if (!openAccessInfo)
+		return false;
+	return /Open Access Yes/i.test(ZU.trimInternal(openAccessInfo));
+}
 
 function scrape(doc) {
 	let citationURL = ZU.xpathText(doc, '//li[@class="view_citation"]//a/@href');
@@ -121,6 +128,10 @@ function scrape(doc) {
 					mimeType: 'application/pdf'
 				});
 			}
+			
+			if (isOpenAccess(doc))
+			    item.notes.push('LF:');
+
 			item.complete();
 		});
 		translator.translate();
@@ -412,6 +423,36 @@ var testCases = [
 						"tag": "Nostra Aetate"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://muse.jhu.edu/pub/1/article/872469",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Rethinking the Novel of Education",
+				"creators": [
+					{
+						"lastName": "Selbin",
+						"firstName": "Jesse Cordes",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022",
+				"ISSN": "1080-6547",
+				"abstractNote": "This essay proposes re-taxonomizing the Bildungsroman as one subgenre of a long, diverse, still-vital tradition of education novels. Though first celebrated for representing a protagonist's education while promoting the education of readers, the Bildungsroman quickly acquired a negative reputation for its purported (but rarely manifested) ideological pathologies. Yet in the same era and well before, women produced more subversive novels of education that taught readers to navigate inequity while slave narratives worked pedagogically to activate political engagement. This more capacious history of educative fiction helps explain why many modern authors use the novel to convey ill-understood experiences and perspectives.",
+				"issue": "4",
+				"libraryCatalog": "Project MUSE",
+				"pages": "987-1018",
+				"publicationTitle": "ELH",
+				"url": "https://muse.jhu.edu/pub/1/article/872469",
+				"volume": "89",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
