@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-04-22 07:59:55"
+	"lastUpdated": "2024-05-22 08:21:35"
 }
 
 /*
@@ -35,9 +35,9 @@
 
 
 function detectWeb(doc, url) {
-	if (url.match(/article-.+\.xml$/)) {
+	if (url.match(/article-.+\.xml(\?.+)?$/)) {
 		return "journalArticle";
-	} else if (url.match(/issue-\d+(-\d+)?\.xml$/)) {
+	} else if (url.match(/issue-\d+(-\d+)?\.xml(\?.+)?$/)) {
 		return "multiple";
 	}
 	return false;
@@ -180,7 +180,7 @@ function postProcess(doc, item) {
 	// Additional Title
  	let additionalTitle = text(doc, '.title ~ div .typography-body ')
 	if (additionalTitle)
-	    item.notes.push( { note: "additional_title:" + additionalTitle });
+		item.notes.push( { note: "additional_title:" + additionalTitle });
 
 	if (!item.itemType)	item.itemType = "journalArticle";
 }
