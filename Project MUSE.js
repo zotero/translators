@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-05-22 09:05:58"
+	"lastUpdated": "2024-05-28 15:12:27"
 }
 
 /*
@@ -101,9 +101,9 @@ function scrape(doc) {
 			var doi = doiEntry.split('doi:')[1].replace(/.$/, '');
 		}
 		// RIS translator
-		let translator = Zotero.loadTranslator("import");
-		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		translator.setString(risEntry);
+		let translator = Zotero.loadTranslator("web");
+		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+		translator.setDocument(doc);
 		translator.setHandler("itemDone", function (obj, item) {
 			if (doi) item.DOI = doi;
 			let abstract = ZU.xpathText(doc, '//div[@class="abstract"][1]/p');
@@ -130,7 +130,7 @@ function scrape(doc) {
 			}
 			
 			if (isOpenAccess(doc))
-			    item.notes.push('LF:');
+				item.notes.push('LF:');
 
 			item.complete();
 		});
