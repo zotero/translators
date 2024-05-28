@@ -2,14 +2,14 @@
 	"translatorID": "cabfb36f-3b4c-4d42-ac79-90eeeeaec3c6",
 	"label": "ubtue_Project MUSE",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://[^/]*muse\\.jhu\\.edu/(book/|article/|issue/|search|pub/article\\?)",
+	"target": "^https?://[^/]*muse\\.jhu\\.edu/(book/|article/|issue/|pub/|search\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 99,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-06 13:24:05"
+	"lastUpdated": "2024-05-28 13:33:55"
 }
 
 /*
@@ -98,6 +98,14 @@ function isSupplement(item) {
 	return false;
 }
 
+function isOpenAccess(doc) {
+    let openAccessInfo = ZU.xpathText(doc,
+        '//div[@id = "info_wrap"]//*[contains(text(), "Open Access")]/parent::div');
+    if (!openAccessInfo)
+        return false;
+    return /Open Access Yes/i.test(ZU.trimInternal(openAccessInfo));
+}
+
 
 function scrape(doc) {
 	// Embedded Metadata
@@ -122,6 +130,9 @@ function scrape(doc) {
 		}
 		if (item.pages && item.pages.match(/([ivx]+)-\1/i))
 			item.pages = item.pages.split('-')[0];
+
+		if (isOpenAccess(doc))
+            item.notes.push('LF:');
 
 		let citationURL = ZU.xpathText(doc, '//li[@class="view_citation"]//a/@href');
 		ZU.processDocuments(citationURL, function (citation_page_doc) {
