@@ -57,12 +57,12 @@ function scrape(doc, _url) {
 	translator.setHandler('itemDone', function (obj, item) {
 		// Add data for fields that are not covered by Embedded Metadata
 		// Author name is stored as firstname lastname
-		const authorName = getMetaTag(doc, "property", "cXenseParse:author", "content");
+		const authorName = getMetaTag(doc, "name", "lead:author", "content");
 		if (authorName) {
 			item.creators = [ZU.cleanAuthor(authorName, "author", false)];
 		}
 		// Date is stored as a timestamp like 2020-09-07T17:37:00+07:00, just extract the YYYY-MM-DD at start
-		const date = getMetaTag(doc, "name", "cXenseParse:recs:publishtime", "content");
+		const date = getMetaTag(doc, "name", "lead:published_at", "content");
 		if (date) {
 			item.date = date.substr(0, 10);
 		}
