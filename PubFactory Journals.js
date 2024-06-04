@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-29 11:01:36"
+	"lastUpdated": "2024-06-04 18:11:19"
 }
 
 /*
@@ -43,7 +43,8 @@ function detectWeb(doc) {
 	// because there are multiple items that match the rows selector in getSearchResults and
 	// haven't found a way to write a querySelectorAll() that only matches the main article on single pages
 	// with related items.
-	if (doc.querySelector('meta[property="og:type"][content="article"]')) {
+	if (doc.querySelector('meta[property="og:type"][content="article"]')
+			&& text(doc, '#footerWrap').includes('PubFactory')) {
 		return "journalArticle";
 	}
 	else if (getSearchResults(doc, true)) {
@@ -130,12 +131,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://avmajournals.avma.org/view/journals/javma/javma-overview.xml?_gl=1*1mk7zsf*_ga*MTI2MDA0NjE4NS4xNjc5NTc4NzIy*_ga_L7SBEK6H36*MTY3OTU3ODcyMS4xLjEuMTY3OTU3ODg0NS4wLjAuMA..",
+		"url": "https://avmajournals.avma.org/view/journals/javma/javma-overview.xml",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "https://journals.humankinetics.com/view/journals/ijsnem/33/2/ijsnem.2022-0142.xml",
+		"url": "https://journals.humankinetics.com/view/journals/ijsnem/33/2/article-p73.xml",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -172,7 +173,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2023/03/01",
+				"date": "2022/12/26",
 				"DOI": "10.1123/ijsnem.2022-0142",
 				"ISSN": "1543-2742, 1526-484X",
 				"abstractNote": "Endurance training in fasted conditions (FAST) induces favorable skeletal muscle metabolic adaptations compared with carbohydrate feeding (CHO), manifesting in improved exercise performance over time. Sprint interval training (SIT) is a potent metabolic stimulus, however nutritional strategies to optimize adaptations to SIT are poorly characterized. Here we investigated the efficacy of FAST versus CHO SIT (4–6 × 30-s Wingate sprints interspersed with 4-min rest) on muscle metabolic, serum metabolome and exercise performance adaptations in a double-blind parallel group design in recreationally active males. Following acute SIT, we observed exercise-induced increases in pan-acetylation and several genes associated with mitochondrial biogenesis, fatty acid oxidation, and NAD+-biosynthesis, along with favorable regulation of PDK4 (p = .004), NAMPT (p = .0013), and NNMT (p = .001) in FAST. Following 3 weeks of SIT, NRF2 (p = .029) was favorably regulated in FAST, with augmented pan-acetylation in CHO but not FAST (p = .033). SIT induced increases in maximal citrate synthase activity were evident with no effect of nutrition, while 3-hydroxyacyl-CoA dehydrogenase activity did not change. Despite no difference in the overall serum metabolome, training-induced changes in C3:1 (p = .013) and C4:1 (p = .010) which increased in FAST, and C16:1 (p = .046) and glutamine (p = .021) which increased in CHO, were different between groups. Training-induced increases in anaerobic (p = .898) and aerobic power (p = .249) were not influenced by nutrition. These findings suggest some beneficial muscle metabolic adaptations are evident in FAST versus CHO SIT following acute exercise and 3 weeks of SIT. However, this stimulus did not manifest in differential exercise performance adaptations.",
@@ -181,7 +182,7 @@ var testCases = [
 				"libraryCatalog": "journals.humankinetics.com",
 				"pages": "73-83",
 				"publicationTitle": "International Journal of Sport Nutrition and Exercise Metabolism",
-				"url": "https://journals.humankinetics.com/view/journals/ijsnem/33/2/ijsnem.2022-0142.xml",
+				"url": "https://journals.humankinetics.com/view/journals/ijsnem/33/2/article-p73.xml",
 				"volume": "33",
 				"attachments": [
 					{
