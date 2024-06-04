@@ -56,7 +56,7 @@ function detectWeb(doc) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	let linkSelector = 'a.c-Button--link[href^="/"][href*=".xml"]';
+	let linkSelector = 'a[href^="/"][href*=".xml"]';
 	let rows = doc.querySelectorAll(`#searchContent ${linkSelector}, .issue-toc ${linkSelector}`);
 	for (let row of rows) {
 		let href = row.href;
