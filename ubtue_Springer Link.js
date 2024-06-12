@@ -8,8 +8,8 @@
 	"priority": 99,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2023-11-15 09:29:21"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2024-06-12 12:37:09"
 }
 
 /*
@@ -164,9 +164,9 @@ function complementItem(doc, item) {
 			item.journalAbbreviation = ZU.xpathText(doc, '//meta[@name="citation_journal_abbrev"]/@content');
 		}
 		if (isOpenAccess(doc,item))
-		    item.notes.push({note: 'LF:'});
+			item.notes.push({note: 'LF:'});
 	}
-	
+
 	if (itemType == 'bookSection' || itemType == "conferencePaper") {
 		// look for editors
 		var editors = ZU.xpath(doc, '//ul[@class="editors"]/li[@itemprop="editor"]/a[@class="person"]');
@@ -252,8 +252,14 @@ function complementItem(doc, item) {
 	// Trim and deduplicate
 	item.tags = [...new Set(item.tags.map(keyword => keyword.trim()))];
 
+    // Review
 	let docType = ZU.xpathText(doc, '//meta[@name="citation_article_type"]/@content');
-	if (docType.match(/(Book R|reviews?)|(Review P|paper)/)) item.tags.push("Book Reviews");
+	// c.f Issue #2129
+	let dcType = ZU.xpathText(doc, '//meta[@name="dc.type"]/@content');
+	reviewRegex = new RegExp(/(book\s*reviews?)|(review paper)/i);
+	if (reviewRegex.test(docType) || reviewRegex.test(dcType))
+		item.tags.push("Book Reviews");
+
 	// ORCID
 	getORCID(doc, item);
 	return item;
