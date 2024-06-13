@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-27 05:49:28"
+	"lastUpdated": "2024-06-13 15:58:28"
 }
 
 /*
@@ -179,12 +179,8 @@ function getContentText(doc, name, strict, all) {
 }
 
 function getContent(doc, name, strict) {
-	var xpath = '/x:html/'
-		+ (
-			exports.searchForMetaTagsInBody
-				? '*[local-name() = "head" or local-name() = "body"]'
-				: 'x:head' // default
-		)
+	var xpath = '/x:html'
+		+ '/*[local-name() = "head" or local-name() = "body"]'
 		+ '/x:meta['
 		+ (strict ? '@name' : 'substring(@name, string-length(@name)-' + (name.length - 1) + ')')
 		+ '="' + name + '"]/';
@@ -240,23 +236,10 @@ function detectWeb(doc, url) {
 function init(doc, url, callback, forceLoadRDF) {
 	getPrefixes(doc);
 
-	let metaSelector
-		= exports.searchForMetaTagsInBody
-			? "head > meta, body > meta"
-			: "head > meta"; // default
-	var metaTags = doc.querySelectorAll(metaSelector);
+	var metaTags = doc.querySelectorAll("head > meta, body > meta");
 	Z.debug("Embedded Metadata: found " + metaTags.length + " meta tags.");
 	if (forceLoadRDF /* check if this is called from doWeb */ && !metaTags.length) {
-		if (!exports.searchForMetaTagsInBody && doc.head) {
-			Z.debug(doc.head.innerHTML
-				.replace(/<style[^<]+(?:<\/style>|\/>)/ig, '')
-				.replace(/<link[^>]+>/ig, '')
-				.replace(/(?:\s*[\r\n]\s*)+/g, '\n')
-			);
-		}
-		else {
-			Z.debug("Embedded Metadata: No <meta> tag found in body or head tag");
-		}
+		Z.debug("Embedded Metadata: No <meta> tag found in body or head tag");
 	}
 
 	var hwType, hwTypeGuess, generatorType, statements = [];
@@ -1012,9 +995,6 @@ var exports = {
 	detectWeb: detectWeb,
 	addCustomFields: addCustomFields,
 	itemType: false,
-	// workaround for meta tags in body caused by parsing invalid HTML; only
-	// use as a last resort
-	searchForMetaTagsInBody: false,
 	// activate/deactivate splitting tags in final data cleanup when they contain commas or semicolons
 	splitTags: true,
 	fixSchemaURI: setPrefixRemap
