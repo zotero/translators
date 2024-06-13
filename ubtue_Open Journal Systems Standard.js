@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-05-16 13:26:00"
+	"lastUpdated": "2024-06-13 09:41:15"
 }
 
 /*
@@ -60,6 +60,14 @@ function splitDotSeparatedKeywords(item) {
 		item.tags = split_tags;
 	}
 	return item.tags;
+}
+
+
+function assignCommaSeparatedKeywords(doc, item) {
+	let keywordLine = ZU.xpathText(doc, '//section[@class="item keywords"]//span[@class="value"]');
+	if (!keywordLine)
+	    return [];
+	return keywordLine.split(",").map(item => item.trim());
 }
 
 
@@ -263,19 +271,23 @@ function invokeUbtuePKPTranslator(doc) {
 			}
 		}
 
-        // Fix/remove erroneous abstracts
+		// Fix/remove erroneous abstracts
 		if (i.ISSN == '2340-0080') {
 			i.abstractNote = i.abstractNote ? i.abstractNote.replace(/&nbsp;/g, "") : "";
 			j = 0;
 			for (let note of i.notes) {
 				if (note.match(/^abs:.*(?:(Translator|&nbsp;))/))
-				    i.notes[j] = ZU.trimInternal(i.notes[j].replace(/Translator|&nbsp;/g, ""));
+					i.notes[j] = ZU.trimInternal(i.notes[j].replace(/Translator|&nbsp;/g, ""));
 				++j;
 			}
 			i.notes = i.notes.filter(a => !a.match(/^abs:$/));
 		}
 
 		i.tags = splitDotSeparatedKeywords(i);
+        if (!i.tags || !i.tags.length) {
+		    i.tags = assignCommaSeparatedKeywords(doc, i);
+		}
+
 		i.title = joinTitleAndSubtitle(doc, i);
 		// some journal assigns the volume to the date
 		if (i.ISSN == '1983-2850') {
