@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-06-13 19:08:28"
+	"lastUpdated": "2024-06-13 19:43:00"
 }
 
 function detectWeb(doc, url) {
@@ -273,7 +273,7 @@ function attachSupplementary(doc, item) {
 }
 
 
-async function processRIS(doc, text) {
+async function processRIS(doc, text, isSearchResult = false) {
 	let pdfURL = await getPDFLink(doc);
 
 	// T2 doesn't appear to hold the short title anymore.
@@ -350,10 +350,12 @@ async function processRIS(doc, text) {
 		if (item.abstractNote) {
 			item.abstractNote = item.abstractNote.replace(/^(Abstract|Summary)[\s:\n]*/, "");
 		}
-		item.attachments.push({
-			title: "ScienceDirect Snapshot",
-			document: doc
-		});
+		if (!isSearchResult) {
+			item.attachments.push({
+				title: "ScienceDirect Snapshot",
+				document: doc
+			});
+		}
 
 		// attach supplementary data
 		if (Z.getHiddenPref && Z.getHiddenPref("attachSupplementary")) {
@@ -444,7 +446,7 @@ async function doWeb(doc, url) {
 		let selectedItems = await Zotero.selectItems(items);
 		if (!selectedItems) return;
 		for (let url of Object.keys(selectedItems)) {
-			await scrape(await requestDocument(url));
+			await scrape(await requestDocument(url), url, true);
 		}
 	}
 	else {
@@ -477,7 +479,7 @@ function formValuesToPostData(values) {
 	return s.substr(1);
 }
 
-async function scrape(doc, url) {
+async function scrape(doc, url, isSearchResult = false) {
 	// On most page the export form uses the POST method
 	var form = ZU.xpath(doc, '//form[@name="exportCite"]')[0];
 	if (form) {
@@ -488,7 +490,7 @@ async function scrape(doc, url) {
 		let text = await requestText(form.action, {
 			body: formValuesToPostData(values)
 		});
-		await processRIS(doc, text);
+		await processRIS(doc, text, isSearchResult);
 		return;
 	}
 
@@ -514,7 +516,7 @@ async function scrape(doc, url) {
 			let risUrl = '/sdfe/arp/cite?pii=' + pii + '&format=application%2Fx-research-info-systems&withabstract=true';
 			Z.debug('Fetching RIS using PII: ' + risUrl);
 			let text = await requestText(risUrl);
-			await processRIS(doc, text);
+			await processRIS(doc, text, isSearchResult);
 			return;
 		}
 	}
@@ -528,7 +530,7 @@ async function scrape(doc, url) {
 		let risUrl = form.action
 			+ '?export-format=RIS&export-content=cite-abs';
 		let text = await requestText(risUrl);
-		await processRIS(doc, text);
+		await processRIS(doc, text, isSearchResult);
 		return;
 	}
 
