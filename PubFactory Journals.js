@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-06-04 18:11:19"
+	"lastUpdated": "2024-06-13 17:11:59"
 }
 
 /*
@@ -109,11 +109,6 @@ async function scrape(doc, url = doc.location.href) {
 
 	let em = await translator.getTranslatorObject();
 	em.itemType = 'journalArticle';
-	// fix when meta elements are incorrectly placed in body on journal pages
-	// https://github.com/zotero/translators/pull/3009#discussion_r1268956903
-	if (doc.querySelector("body > meta")) {
-		em.searchForMetaTagsInBody = true;
-	}
 	await em.doWeb(doc, url);
 }
 
