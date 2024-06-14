@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-06-13 18:18:22"
+	"lastUpdated": "2024-06-14 15:36:55"
 }
 
 /*
@@ -120,7 +120,7 @@ function scrape(doc, url) {
 		}
 
 		if (!item.publisher) {
-			item.published = 'Brill';
+			item.publisher = 'Brill';
 		}
 		
 		if (!item.creators.length) {
