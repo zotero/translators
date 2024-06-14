@@ -169,7 +169,7 @@ async function getPDFLink(doc) {
 	if (intermediateURL) {
 		return parseIntermediatePDFPage(intermediateURL);
 	}
-	return;
+	return false;
 }
 
 
