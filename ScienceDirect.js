@@ -68,7 +68,7 @@ async function getPDFLink(doc) {
 	// No PDF access ("Get Full Text Elsewhere" or "Check for this article elsewhere")
 	if (doc.querySelector('.accessContent') || doc.querySelector('.access-options-link-text') || doc.querySelector('#check-access-popover')) {
 		Zotero.debug("PDF is not available");
-		return;
+		return false;
 	}
 	
 	// Some pages still have the PDF link available
