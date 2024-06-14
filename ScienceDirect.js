@@ -164,7 +164,7 @@ async function getPDFLink(doc) {
 	var url = doc.location.href;
 	Zotero.debug("Refetching HTML for PDF link");
 	let reloadedDoc = await requestDocument(url);
-	var intermediateURL = attr(reloadedDoc, '.pdf-download-btn-link', 'href');
+	intermediateURL = attr(reloadedDoc, '.pdf-download-btn-link', 'href');
 	// Zotero.debug("Intermediate PDF URL: " + intermediateURL);
 	if (intermediateURL) {
 		return parseIntermediatePDFPage(intermediateURL);
