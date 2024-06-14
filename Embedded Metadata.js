@@ -236,10 +236,10 @@ function detectWeb(doc, url) {
 function init(doc, url, callback, forceLoadRDF) {
 	getPrefixes(doc);
 
-	var metaTags = doc.querySelectorAll("head > meta, body > meta");
-	Z.debug("Embedded Metadata: found " + metaTags.length + " meta tags.");
+	var metaTags = doc.querySelectorAll("meta");
+	Z.debug("Embedded Metadata: found " + metaTags.length + " meta tags");
 	if (forceLoadRDF /* check if this is called from doWeb */ && !metaTags.length) {
-		Z.debug("Embedded Metadata: No <meta> tag found in body or head tag");
+		Z.debug("Embedded Metadata: No meta tags found");
 	}
 
 	var hwType, hwTypeGuess, generatorType, statements = [];
