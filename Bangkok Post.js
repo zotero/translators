@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-06-18 20:39:20"
+	"lastUpdated": "2024-06-18 20:46:45"
 }
 
 /*
@@ -41,13 +41,7 @@ function detectWeb(_doc, _url) {
 function doWeb(doc, url) {
 	scrape(doc, url);
 }
-function getMetaTag(doc, attr, value, contentattr) {
-	const tag = Array.from(doc.getElementsByTagName("meta")).filter(m => m.attributes[attr] && m.attributes[attr].value == value)[0];
-	if (tag && tag.attributes[contentattr]) {
-		return tag.attributes[contentattr].value;
-	}
-	return null;
-}
+
 function scrape(doc, _url) {
 	const translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
@@ -57,12 +51,15 @@ function scrape(doc, _url) {
 	translator.setHandler('itemDone', function (obj, item) {
 		// Add data for fields that are not covered by Embedded Metadata
 		// Author name is stored as firstname lastname
-		const authorName = getMetaTag(doc, "name", "lead:author", "content");
+		let authorName = attr(doc, "meta[name='lead:author']", "content");
+		if (!authorName) {
+			authorName = text(doc, '.info-opinion .columnnist-name a');
+		}
 		if (authorName) {
 			item.creators = [ZU.cleanAuthor(authorName, "author", false)];
 		}
 		// Date is stored as a timestamp like 2020-09-07T17:37:00+07:00, just extract the YYYY-MM-DD at start
-		const date = getMetaTag(doc, "name", "lead:published_at", "content");
+		const date = attr(doc, "meta[name='lead:published_at']", "content");
 		if (date) {
 			item.date = date.substr(0, 10);
 		}
@@ -179,8 +176,8 @@ var testCases = [
 				"title": "Tech is key to rebooting tourism",
 				"creators": [
 					{
-						"firstName": "Bangkok Post Public Company",
-						"lastName": "Limited",
+						"firstName": "Jeff",
+						"lastName": "Paine",
 						"creatorType": "author"
 					}
 				],
