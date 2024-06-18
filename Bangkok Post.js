@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-05-31 15:27:00"
+	"lastUpdated": "2024-06-18 20:39:20"
 }
 
 /*
@@ -73,7 +73,9 @@ function scrape(doc, _url) {
 		item.complete();
 	});
 	translator.translate();
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -91,6 +93,7 @@ var testCases = [
 				],
 				"date": "2020-09-07",
 				"abstractNote": "A general debate without a vote in the House of Representatives has been scheduled for Wednesday for MPs to question the government on the current economic and political crises and suggest ways of solving related problems.",
+				"language": "en",
 				"libraryCatalog": "www.bangkokpost.com",
 				"publicationTitle": "Bangkok Post",
 				"url": "https://www.bangkokpost.com/thailand/politics/1981267/house-general-debate-set-for-wednesday",
@@ -121,7 +124,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.bangkokpost.com/tech/1979315/air-force-satellite-napa-1-launched",
+		"url": "https://www.bangkokpost.com/life/tech/1979315/air-force-satellite-napa-1-launched",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -135,9 +138,10 @@ var testCases = [
 				],
 				"date": "2020-09-03",
 				"abstractNote": "The Royal Thai Air Force’s first security satellite, Napa-1, was successfully launched on a European rocket from French Guiana on Thursday morning.",
+				"language": "en",
 				"libraryCatalog": "www.bangkokpost.com",
 				"publicationTitle": "Bangkok Post",
-				"url": "https://www.bangkokpost.com/tech/1979315/air-force-satellite-napa-1-launched",
+				"url": "https://www.bangkokpost.com/life/tech/1979315/air-force-satellite-napa-1-launched",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -175,13 +179,14 @@ var testCases = [
 				"title": "Tech is key to rebooting tourism",
 				"creators": [
 					{
-						"firstName": "Jeff",
-						"lastName": "Paine",
+						"firstName": "Bangkok Post Public Company",
+						"lastName": "Limited",
 						"creatorType": "author"
 					}
 				],
 				"date": "2020-09-08",
-				"abstractNote": "Southeast Asia relies heavily on tourism. In 2019, the travel and tourism industry contributed 12.1% of the region's GDP and approximately one in 10 people are employed within and around it, according to the World Travel and Tourism Council (WTTC).",
+				"abstractNote": "Southeast Asia relies heavily on tourism. In 2019, the travel and tourism industry contributed 12.1% of the region",
+				"language": "en",
 				"libraryCatalog": "www.bangkokpost.com",
 				"publicationTitle": "Bangkok Post",
 				"url": "https://www.bangkokpost.com/opinion/opinion/1981587/tech-is-key-to-rebooting-tourism",
