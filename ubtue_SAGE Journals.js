@@ -1,15 +1,15 @@
 {
-	"translatorID": "1f7dc3ef-761d-445c-8f49-efdf3d7bc978",
+	"translatorID": "8733528c-e083-4797-8709-a9dc335b8669",
 	"label": "ubtue_SAGE Journals",
 	"creator": "Sebastian Karcher",
 	"target": "^https?://journals\\.sagepub\\.com(/doi/((abs|full|pdf)/)?10\\.|/action/doSearch\\?|/toc/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 99,
+	"priority": 95,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-07 17:31:18"
+	"lastUpdated": "2024-06-18 13:26:44"
 }
 
 /*
@@ -187,7 +187,9 @@ function scrape(doc, url) {
 			if (ZU.xpathText(doc, '//div[@class="meta-panel__type"]') && ZU.xpathText(doc, '//div[@class="meta-panel__type"]').match(/book\s+review/i)) item.tags.push("Book Review");
 			//ubtue: add tag "Book Review" in every issue 5 of specific journals if the dc.Type is "others"
 			let reviewType = ZU.xpathText(doc, '//meta[@name="dc.Type"]/@content');
-			if (item.ISSN === '0142-064X' || item.ISSN === '0309-0892') {
+			if (reviewType.match(/product-review/i))
+                item.tags.push('Book Review');
+			else if (item.ISSN === '0142-064X' || item.ISSN === '0309-0892') {
 				if (reviewType && reviewType.match(/other/i) && item.issue === '5') {
 					item.tags.push('Book Review');
 					item.notes.push({note: "Booklist:" + item.date.match(/\d{4}$/)});
