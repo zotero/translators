@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-24 03:17:24"
+	"lastUpdated": "2024-06-19 07:53:06"
 }
 
 /*
@@ -37,7 +37,6 @@
 
 function detectWeb(doc, url) {
 	Zotero.monitorDOMChanges(doc.querySelector('.global-content-wrapper'));
-	if (doc.defaultView !== null && doc.defaultView !== doc.defaultView.top) return false;
 	
 	if (/[?&]arnumber=(\d+)/i.test(url) || /\/document\/\d+/i.test(url)) {
 		var firstBreadcrumb = ZU.xpathText(doc, '(//div[contains(@class, "breadcrumbs")]//a)[1]');
