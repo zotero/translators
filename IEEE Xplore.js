@@ -37,7 +37,6 @@
 
 function detectWeb(doc, url) {
 	Zotero.monitorDOMChanges(doc.querySelector('.global-content-wrapper'));
-	if (doc.defaultView !== null && doc.defaultView !== doc.defaultView.top) return false;
 	
 	if (/[?&]arnumber=(\d+)/i.test(url) || /\/document\/\d+/i.test(url)) {
 		var firstBreadcrumb = ZU.xpathText(doc, '(//div[contains(@class, "breadcrumbs")]//a)[1]');
