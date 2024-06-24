@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-04-07 18:59:45"
+	"lastUpdated": "2024-06-24 19:34:39"
 }
 
 /*
@@ -46,31 +46,28 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-function doWeb(doc, url) {
-	var articles = [];
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var results = ZU.xpath(doc, '//table[@id="restab"]/tbody/tr[starts-with(@id, "arw")]/td[2]');
 		// Zotero.debug('results.length: ' + results.length);
 		var items = {};
 		for (let i = 0; i < results.length; i++) {
 			// Zotero.debug('result [' + i + '] text: ' + results[i].textContent);
-			var title = ZU.xpathText(results[i], './a');
-			var uri = ZU.xpathText(results[i], ' ./a/@href');
+			var title = ZU.xpathText(results[i], './/a');
+			var uri = ZU.xpathText(results[i], ' .//a/@href');
 			if (!title || !uri) continue;
 			items[uri] = fixCasing(title);
 		}
-		Zotero.selectItems(items, function (items) {
-			if (!items) {
-				return;
-			}
-			for (let i in items) {
-				articles.push(i);
-			}
-			Zotero.Utilities.processDocuments(articles, scrape);
-		});
+		items = await Zotero.selectItems(items);
+		if (!items) {
+			return;
+		}
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
@@ -114,7 +111,29 @@ function getDocType(doc) {
 	return itemType;
 }
 
-function scrape(doc, url) {
+async function scrape(doc, url = doc.location.href) {
+	if (doc.querySelector('.help.pointer') && !doc.querySelector('.help.pointer[title]')) {
+		// Full author names are in the HTML at page load but are stripped and replaced with
+		// JS tooltips. Try to reload the page and see if we can get the tooltips. If we
+		// still get a page without tooltips, we might've hit a captcha (seems to commonly
+		// happen when requesting from a US IP), so don't worry about it.
+		Zotero.debug('Re-requesting to get original HTML');
+		try {
+			let newDoc = await requestDocument(url, {
+				headers: { Referer: url }
+			});
+			if (newDoc.querySelector('.help.pointer[title]')) {
+				doc = newDoc;
+			}
+			else {
+				Zotero.debug('Hit a captcha? ' + newDoc.location.href);
+			}
+		}
+		catch (e) {
+			Zotero.debug('Failed: ' + e);
+		}
+	}
+
 	var item = new Zotero.Item();
 	item.itemType = getDocType(doc);
 	item.title = fixCasing(doc.title);
@@ -127,8 +146,22 @@ function scrape(doc, url) {
 	var authors = ZU.xpath(datablock, './/table[1]/tbody/tr/td[2]//b');
 	// Zotero.debug('authors.length: ' + authors.length);
 	
-	for (let i = 0; i < authors.length; i++) {
-		var dirty = authors[i].textContent;
+	for (let author of authors) {
+		let dirty = author.textContent;
+		try {
+			let tooltipParent = author.closest('.help.pointer[title]');
+			if (tooltipParent) {
+				let tooltipHTML = tooltipParent.getAttribute('title');
+				let tooltipAuthorName = text(new DOMParser().parseFromString(tooltipHTML, 'text/html'), 'font');
+				if (tooltipAuthorName) {
+					dirty = tooltipAuthorName;
+				}
+			}
+		}
+		catch (e) {
+			Zotero.debug(e);
+		}
+
 		// Zotero.debug('author[' + i + '] text: ' + dirty);
 		
 		/* Common author field formats are:
@@ -258,7 +291,6 @@ function scrape(doc, url) {
 
 	item.complete();
 }
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
