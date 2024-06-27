@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-04-11 15:37:21"
+	"lastUpdated": "2024-06-27 14:34:30"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2022 YOUR_NAME <- TODO
+	Copyright © 2024 Dae
 
 	This file is part of Zotero.
 
@@ -37,7 +37,6 @@
 
 
 function detectWeb(doc, url) {
-	// TODO: adjust the logic here
 	if (url.includes('/article/')) {
 		return 'journalArticle';
 	}
@@ -53,9 +52,7 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	var rows = ZU.xpath(doc,'//div[@class="col m10 s12"]/a');
 	for (let row of rows) {
-		// TODO: check and maybe adjust
 		let href = row.href;
-		// TODO: check and maybe adjust
 		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -85,9 +82,16 @@ async function scrape(doc, url = doc.location.href) {
 	translator.setDocument(doc);
 	
 	translator.setHandler('itemDone', (_obj, item) => {
-		Z.debug(_obj)
+		if (item.abstractNote.length < 20) {
+			let abstractNEU = text(doc, 'div.card-content h2~p'); 
+			if (abstractNEU.length > 20) {
+				item.abstractNote = abstractNEU; 
+			} 
+			else {
+				item.abstractNote = "";
+			}
+		}
 		for (orcid_tag of ZU.xpath(doc, '//meta[@name="citation_author_orcid"]')){
-		//for (orcid_tag of doc.querySelectorAll('meta[name="citation_author_orcid"]')){
 			let previous_author_tag = orcid_tag.previousElementSibling;
 			if (previous_author_tag.name == 'citation_author') {
 				let author_name = previous_author_tag.content;
@@ -95,13 +99,11 @@ async function scrape(doc, url = doc.location.href) {
 				item.notes.push({note: "orcid:" + orcid + ' | ' + author_name});
 			}
 		}
-		for (card_title of ZU.xpath(doc, '//span[@class="card-title"]/div/small')){
-			//Z.debug(card_title)
-			if (card_title.innerText == 'Reviews'){
-				item.tags.push("RezensionstagPica");
-				break;
-			}
+			
+		if (text(doc, 'span.card-title div small') == 'Reviews'){
+			item.tags.push("RezensionstagPica");
 		}
+		
 		item.complete();
 	});
 
