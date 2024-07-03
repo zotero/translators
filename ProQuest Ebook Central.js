@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-07-03 17:12:26"
+	"lastUpdated": "2024-07-03 17:15:06"
 }
 
 /*
@@ -41,8 +41,11 @@ function detectWeb(doc, url) {
 	if (url.includes('/detail.action?') || url.includes('/reader.action?')) {
 		return "book";
 	}
-	else if ((url.includes('search.action?') || url.includes('search?')) && getSearchResults(doc, true)) {
-		return "multiple";
+	else if (url.includes('search.action?') || url.includes('search?')) {
+		if (getSearchResults(doc, true)) {
+			return "multiple";
+		}
+		Z.monitorDOMChanges(doc.querySelector('app-root'), { childList: true, subtree: true });
 	}
 	return false;
 }
