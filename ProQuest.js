@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-02-17 03:02:30"
+	"lastUpdated": "2024-07-05 11:54:27"
 }
 
 /*
@@ -102,7 +102,7 @@ function getSearchResults(doc, checkOnly, extras) {
 	var elements = doc.getElementsByClassName('resultListContainer');
 	
 	for (let i = 0; i < elements.length; i++) {
-		if (elements[i] && elements[i].offsetHeight > 0) {
+		if (elements[i] && elements[i].childElementCount) {
 			root = elements[i];
 			break;
 		}
@@ -1302,7 +1302,6 @@ var fieldNames = {
 		"Journal subject": '期刊主題'
 	}
 };
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
