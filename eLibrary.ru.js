@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-06-24 19:34:39"
+	"lastUpdated": "2024-07-14 15:27:57"
 }
 
 /*
@@ -88,20 +88,18 @@ function getDocType(doc) {
 		case "научная статья":
 		case "статья в журнале":
 		case "статья в открытом архиве":
+		case "сборник трудов конференции":
+		case "статья в журнале - разное":
 			itemType = "journalArticle";
 			break;
 		case "статья в сборнике трудов конференции":
+		case "публикация в сборнике трудов конференции":
+		case "тезисы доклада на конференции":
 			itemType = "conferencePaper";
 			break;
 		case "учебное пособие":
 		case "монография":
 			itemType = "book";
-			break;
-		case "публикация в сборнике трудов конференции":
-			itemType = "conferencePaper";
-			break;
-		case "тезисы доклада на конференции":
-			itemType = "conferencePaper";
 			break;
 		default:
 			Zotero.debug("Unknown type: " + docType + ". Using 'journalArticle'");
