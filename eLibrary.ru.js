@@ -201,8 +201,8 @@ async function scrape(doc, url = doc.location.href) {
 			cleaned.lastName = dirty;
 		}
 		
-		cleaned.lastName = fixCasing(cleaned.lastName, true);
-		
+		cleaned.lastName = fixCasing(cleaned.lastName);
+
 		// Skip entries with an @ sign-- email addresses slip in otherwise
 		if (!cleaned.lastName.includes("@")) item.creators.push(cleaned);
 	}
