@@ -204,7 +204,7 @@ async function scrape(doc, url = doc.location.href) {
 		
 		if (cleaned.firstName === undefined) {
 			// Unable to parse. Restore punctuation.
-			cleaned.fieldMode = true;
+			cleaned.fieldMode = 1;
 			cleaned.lastName = dirty;
 		}
 		
@@ -683,7 +683,7 @@ var testCases = [
 					{
 						"lastName": "Де Щулф А.",
 						"creatorType": "author",
-						"fieldMode": true
+						"fieldMode": 1
 					},
 					{
 						"firstName": "Эдуард Павлович",
@@ -698,7 +698,7 @@ var testCases = [
 					{
 						"lastName": "Ван Хооф Л.",
 						"creatorType": "author",
-						"fieldMode": true
+						"fieldMode": 1
 					},
 					{
 						"firstName": "С.",
@@ -708,7 +708,7 @@ var testCases = [
 					{
 						"lastName": "Де Лангхе К.",
 						"creatorType": "author",
-						"fieldMode": true
+						"fieldMode": 1
 					},
 					{
 						"firstName": "А.",
@@ -718,7 +718,7 @@ var testCases = [
 					{
 						"lastName": "Ван Де Керчове Р.",
 						"creatorType": "author",
-						"fieldMode": true
+						"fieldMode": 1
 					},
 					{
 						"firstName": "Р.",
@@ -728,7 +728,7 @@ var testCases = [
 					{
 						"lastName": "Те Киефте Д.",
 						"creatorType": "author",
-						"fieldMode": true
+						"fieldMode": 1
 					}
 				],
 				"date": "2009",
