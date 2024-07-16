@@ -110,6 +110,7 @@ var allPassed = false;
 		driver = new selenium.Builder()
 			.forBrowser('chrome')
 			.setChromeOptions(options)
+			.setCapability('goog:loggingPrefs', { browser: 'ALL' })
 			.build();
 
 		// We got the test URL, let's test
@@ -118,9 +119,7 @@ var allPassed = false;
 		await new Promise((resolve) => setTimeout(() => resolve(driver.get(testUrl)), 500));
 		await driver.wait(until.elementLocated({id: 'translator-tests-complete'}), 30*60*1000);
 		testResults = await driver.executeScript('return window.seleniumOutput');
-		console.log('Results:', testResults)
-		console.log(await driver.executeScript('return document.querySelector("#output-box").textContent'));
-		console.log(await driver.executeScript('return document.querySelector("#translator-box").textContent'))
+		console.log(await driver.manage().logs().get(selenium.logging.Type.BROWSER))
 
 		allPassed = report(testResults);
 	}
