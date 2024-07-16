@@ -120,7 +120,7 @@ var allPassed = false;
 		testResults = await driver.executeScript('return window.seleniumOutput');
 		console.log('Results:', testResults)
 		if (!Object.keys(testResults).length) {
-			console.log(driver.executeScript('return document.querySelector("#output-box").textContent'));
+			console.log(await driver.executeScript('return document.querySelector("#output-box").textContent'));
 		}
 
 		allPassed = report(testResults);
