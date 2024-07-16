@@ -118,6 +118,7 @@ var allPassed = false;
 		await new Promise((resolve) => setTimeout(() => resolve(driver.get(testUrl)), 500));
 		await driver.wait(until.elementLocated({id: 'translator-tests-complete'}), 30*60*1000);
 		testResults = await driver.executeScript('return window.seleniumOutput');
+		console.log('Results:', testResults)
 
 		allPassed = report(testResults);
 	}
