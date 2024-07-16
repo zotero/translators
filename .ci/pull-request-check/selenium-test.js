@@ -119,6 +119,9 @@ var allPassed = false;
 		await driver.wait(until.elementLocated({id: 'translator-tests-complete'}), 30*60*1000);
 		testResults = await driver.executeScript('return window.seleniumOutput');
 		console.log('Results:', testResults)
+		if (!Object.keys(testResults).length) {
+			console.log(driver.executeScript('return document.querySelector("#output-box").textContent'));
+		}
 
 		allPassed = report(testResults);
 	}
