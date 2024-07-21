@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-07-14 14:14:33"
+	"lastUpdated": "2024-07-21 13:48:22"
 }
 
 /*
@@ -96,7 +96,16 @@ async function scrape(doc, url = doc.location.href) {
 	var authors = doc.querySelectorAll(authorsSelector);
 	authors = [...authors].map(author => author.content);
 
-	var abstr = ZU.xpathText(doc, abstractXPath);
+	// Pages use MathJax lazy typesetting, which affects tests (content is missing as typesetting isn't being done).
+	// Work around by pulling the abstract from the OG tag in that case.
+	let abstr = "";
+	if (doc.querySelector('mjx-lazy')) {
+		abstr = attr(doc, 'meta[property="og:description"]', 'content');
+	}
+	else {
+		abstr = ZU.xpathText(doc, abstractXPath);
+	}
+
 	// Remove surplus whitespace, but preserve paragraphs, denoted in the page markup by double newlines with some spaces in between
 	if (abstr) abstr = abstr.replace(/\n\s+\n/g, "\n\n").replace(/[ \t]+/g, " ").trim();
 
@@ -261,7 +270,7 @@ var testCases = [
 					}
 				],
 				"date": "2005",
-				"abstractNote": "This paper describes an adaptive-chosen-ciphertext attack on the Cipher Feedback (CFB) mode of encryption as used in OpenPGP. In most circumstances it will allow an attacker to determine 16 bits of any block of plaintext with about 215 oracle queries for the initial\nsetup work and 215 oracle queries for each block. Standard CFB mode encryption does not appear to be affected by this attack. It applies to a particular variation of CFB used by OpenPGP. In particular it exploits an ad-hoc integrity check feature in OpenPGP which was meant as a \"quick check\" to determine the correctness of the decrypting symmetric key.",
+				"abstractNote": "This paper describes an adaptive-chosen-ciphertext attack on the Cipher Feedback (CFB) mode of encryption as used in OpenPGP. In most circumstances it will allow an attacker to determine 16 bits of any block of plaintext with about $2^{15}$ oracle queries for the initial\nsetup work and $2^{15}$ oracle queries for each block. Standard CFB mode encryption does not appear to be affected by this attack. It applies to a particular variation of CFB used by OpenPGP. In particular it exploits an ad-hoc integrity check feature in OpenPGP which was meant as a \"quick check\" to determine the correctness of the decrypting symmetric key.",
 				"archive": "Cryptology ePrint Archive",
 				"archiveID": "2005/033",
 				"extra": "Publication info: Published elsewhere. Unknown where it was published",
@@ -269,8 +278,8 @@ var testCases = [
 				"url": "https://eprint.iacr.org/2005/033",
 				"attachments": [
 					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"mimeType": "application/pdf",
+						"title": "Full Text PDF"
 					}
 				],
 				"tags": [
@@ -311,7 +320,7 @@ var testCases = [
 					}
 				],
 				"date": "2011",
-				"abstractNote": "We show that homomorphic evaluation of (wide enough) arithmetic circuits can be accomplished with only polylogarithmic overhead. Namely, we present a construction of fully homomorphic encryption (FHE) schemes that for security parameter \\secparam can evaluate any width-Ω(\\secparam) circuit with t gates in time t⋅polylog(\\secparam).\n\nTo get low overhead, we use the recent batch homomorphic evaluation techniques of Smart-Vercauteren and Brakerski-Gentry-Vaikuntanathan, who showed that homomorphic operations can be applied to \"packed\" ciphertexts that encrypt vectors of plaintext elements. In this work, we introduce permuting/routing techniques to move plaintext elements across\nthese vectors efficiently. Hence, we are able to implement general arithmetic circuit in a batched fashion without ever needing to \"unpack\" the plaintext vectors.\n\nWe also introduce some other optimizations that can speed up homomorphic evaluation in certain cases. For example, we show how to use the Frobenius map to raise plaintext elements to powers of~p at the \"cost\" of a linear operation.",
+				"abstractNote": "We show that homomorphic evaluation of (wide enough) arithmetic circuits can be accomplished with only polylogarithmic overhead. Namely, we present a construction of fully homomorphic encryption (FHE) schemes that for security parameter $\\secparam$ can evaluate any width-$\\Omega(\\secparam)$ circuit with $t$ gates in time $t\\cdot polylog(\\secparam)$.\n\nTo get low overhead, we use the recent batch homomorphic evaluation techniques of Smart-Vercauteren and Brakerski-Gentry-Vaikuntanathan, who showed that homomorphic operations can be applied to \"packed\" ciphertexts that encrypt vectors of plaintext elements. In this work, we introduce permuting/routing techniques to move plaintext elements across\nthese vectors efficiently. Hence, we are able to implement general arithmetic circuit in a batched fashion without ever needing to \"unpack\" the plaintext vectors.\n\nWe also introduce some other optimizations that can speed up homomorphic evaluation in certain cases. For example, we show how to use the Frobenius map to raise plaintext elements to powers of~$p$ at the \"cost\" of a linear operation.",
 				"archive": "Cryptology ePrint Archive",
 				"archiveID": "2011/566",
 				"extra": "Publication info: Published elsewhere. extended abstract in Eurocrypt 2012",
@@ -319,8 +328,8 @@ var testCases = [
 				"url": "https://eprint.iacr.org/2011/566",
 				"attachments": [
 					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"mimeType": "application/pdf",
+						"title": "Full Text PDF"
 					}
 				],
 				"tags": [
@@ -445,7 +454,7 @@ var testCases = [
 					}
 				],
 				"date": "2019",
-				"abstractNote": "Bent functions are optimal combinatorial objects and have been attracted\ntheir research for four decades. Secondary constructions play a central role\nin constructing bent functions since a complete classification of this class\nof functions is elusive. This paper is devoted to establish a relationship\nbetween the secondary constructions and the composition of Boolean\nfunctions. We firstly prove that some well-known secondary constructions of\nbent functions, can be described by the composition of a plateaued Boolean\nfunction and some bent functions. Then their dual functions can be\ncalculated by the Lagrange interpolation formula. By following this\nobservation, two secondary constructions of\nbent functions are presented. We show that they are inequivalent to the known ones, and\nmay generate bent functions outside the primary classes M and PS. These results show that the method we present in this paper\nis genetic and unified and therefore can be applied to the constructions of Boolean\nfunctions with other cryptographical criteria.",
+				"abstractNote": "Bent functions are optimal combinatorial objects and have been attracted\ntheir research for four decades. Secondary constructions play a central role\nin constructing bent functions since a complete classification of this class\nof functions is elusive. This paper is devoted to establish a relationship\nbetween the secondary constructions and the composition of Boolean\nfunctions. We firstly prove that some well-known secondary constructions of\nbent functions, can be described by the composition of a plateaued Boolean\nfunction and some bent functions. Then their dual functions can be\ncalculated by the Lagrange interpolation formula. By following this\nobservation, two secondary constructions of\nbent functions are presented. We show that they are inequivalent to the known ones, and\nmay generate bent functions outside the primary classes $\\mathcal{M}$ and $%\n\\mathcal{PS}$. These results show that the method we present in this paper\nis genetic and unified and therefore can be applied to the constructions of Boolean\nfunctions with other cryptographical criteria.",
 				"archive": "Cryptology ePrint Archive",
 				"archiveID": "2019/430",
 				"extra": "Publication info: Preprint. MINOR revision.",
