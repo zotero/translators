@@ -1,4 +1,4 @@
-74  # Increment number when modifying file
+75  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -126,3 +126,4 @@ ba10b5bc-562f-11e1-b20d-a3084924019b # Nuclear Receptor Signaling no longer exis
 fe39e97d-7397-4f3f-a5f3-396a1a79213c # OpenJudis: New site just lists PDFs without metadata
 fc410e64-0252-4cd3-acb1-25e584775fa2 # National Library of Australia: Old site defunct as of 2019
 c0e6fda6-0ecd-e4f4-39ca-37a4de436e15 # Library Catalog (GEAC): No instances of this catalog system are still online as of 2021
+1c5b122c-7e58-4cd5-932b-93f5ca0b7e1a # National Post - renamed to and covered by Postmedia
