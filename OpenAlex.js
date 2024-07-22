@@ -47,11 +47,11 @@ function detectWeb(doc, url) {
 }
 
 function detectSearch(item) {
-	return !!item.openalex;
+	return !!item.openAlex;
 }
 
 async function doSearch(item) {
-	await scrape([item.openalex]);
+	await scrape([item.openAlex]);
 }
 
 function getSearchResults(doc, checkOnly) {

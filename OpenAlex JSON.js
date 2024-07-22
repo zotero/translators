@@ -37,12 +37,12 @@
 // copied from CSL JSON
 function parseInput() {
 	var str, json = "";
-	
+
 	// Read in the whole file at once, since we can't easily parse a JSON stream. The
 	// chunk size here is pretty arbitrary, although larger chunk sizes may be marginally
 	// faster. We set it to 1MB.
 	while ((str = Z.read(1048576)) !== false) json += str;
-	
+
 	try {
 		return JSON.parse(json);
 	}
@@ -55,10 +55,10 @@ function parseInput() {
 function detectImport() {
 	var parsedData = parseInput();
 	// Z.debug(parsedData.ids)
-	if (parsedData && parsedData.ids && parsedData.ids.openalex) {
+	if (parsedData && parsedData.ids && parsedData.ids.openAlex) {
 		return true;
 	}
-	else if (parsedData && parsedData.results && parsedData.results[0].ids && parsedData.results[0].ids.openalex) {
+	else if (parsedData && parsedData.results && parsedData.results[0].ids && parsedData.results[0].ids.openAlex) {
 		return true;
 	}
 	return false;
@@ -165,7 +165,7 @@ function parseIndividual(data) {
 	for (let tag of tags) {
 		item.tags.push(tag.keyword);
 	}
-	item.extra = "OpenAlex: " + data.ids.openalex;
+	item.extra = "OpenAlex: " + data.ids.openAlex;
 	item.complete();
 }
 
