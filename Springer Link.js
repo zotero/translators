@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-05-09 16:39:27"
+	"lastUpdated": "2024-07-22 20:08:47"
 }
 
 /*
@@ -279,7 +279,6 @@ function scrape(doc, url) {
 		translator.translate();
 	});
 }
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -661,6 +660,36 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://link.springer.com/book/10.1007/978-3-476-05742-6",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/book/10.1007/978-3-319-63324-4",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/book/10.1007/978-94-6209-482-6",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/book/10.1007/b137952",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/book/10.1007/978-3-658-11545-6",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/book/10.1007/978-3-642-33191-6",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/book/10.1007/978-3-030-04759-7",
 		"items": "multiple"
 	}
 ]
