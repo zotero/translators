@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-17 15:05:49"
+	"lastUpdated": "2024-07-24 20:02:01"
 }
 
 /*
@@ -157,29 +157,29 @@ async function scrape([domain, id]) {
 		for (let creator of json.contribution) {
 			let metadata;
 			if (creator.agent) {
-				if (creator.agent.preferred_name) {
+				if (creator.agent.preferred_name || creator.agent.authorized_access_point) {
 					metadata = creator.agent;
 				}
-				else {
+				else if (creator.agent.$ref) {
 					metadata = (await requestJSON(creator.agent.$ref)).metadata;
 				}
 			}
 			else if (creator.entity) {
-				if (creator.entity.preferred_name) {
+				if (creator.entity.preferred_name || creator.entity.authorized_access_point) {
 					metadata = creator.entity;
 				}
-				else {
+				else if (creator.entity.$ref) {
 					metadata = (await requestJSON(creator.entity.$ref)).metadata;
 				}
 			}
-			else {
+			if (!metadata) {
 				Zotero.debug('Invalid creator');
 				Zotero.debug(creator);
 				continue;
 			}
 			let type = CREATOR_MAPPING[creator.role[0]] || 'author';
 			if (type === 'SKIP') continue;
-			let name = metadata.preferred_name;
+			let name = metadata.preferred_name || metadata.authorized_access_point;
 			if (metadata.type == 'bf:Organisation') {
 				item.creators.push({
 					lastName: name,
@@ -194,6 +194,12 @@ async function scrape([domain, id]) {
 
 		if (item.creators.every(c => c.creatorType == 'contributor')) {
 			for (let creator of item.creators) {
+				// If everyone is a contributor, make them authors, besides
+				// institutional contributors on multi-author works
+				// (This is a rough heuristic)
+				if (creator.fieldMode === 1 && item.creators.length > 1) {
+					continue;
+				}
 				creator.creatorType = 'author';
 			}
 		}
@@ -694,6 +700,52 @@ var testCases = [
 				"attachments": [],
 				"tags": [],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://bib.rero.ch/rbnj/documents/828338",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Eseoj memore al Ivo Lapenna",
+				"creators": [
+					{
+						"firstName": "Ivo",
+						"lastName": "Lapenna",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Carlo",
+						"lastName": "Minnaja",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Internacia scienca instituto Ivo Lapenna",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					}
+				],
+				"date": "2001",
+				"ISBN": "9788787089098",
+				"callNumber": "R004666230",
+				"language": "epo",
+				"libraryCatalog": "Library Catalog (RERO ILS)",
+				"numPages": "417",
+				"place": "Kopenhago?",
+				"publisher": "T. Kehlet",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "ill., portr."
+					},
+					{
+						"note": "1 CD-ROM"
+					}
+				],
 				"seeAlso": []
 			}
 		]
