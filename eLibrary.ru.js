@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-06-24 19:34:39"
+	"lastUpdated": "2024-07-14 15:27:57"
 }
 
 /*
@@ -88,20 +88,18 @@ function getDocType(doc) {
 		case "научная статья":
 		case "статья в журнале":
 		case "статья в открытом архиве":
+		case "сборник трудов конференции":
+		case "статья в журнале - разное":
 			itemType = "journalArticle";
 			break;
 		case "статья в сборнике трудов конференции":
+		case "публикация в сборнике трудов конференции":
+		case "тезисы доклада на конференции":
 			itemType = "conferencePaper";
 			break;
 		case "учебное пособие":
 		case "монография":
 			itemType = "book";
-			break;
-		case "публикация в сборнике трудов конференции":
-			itemType = "conferencePaper";
-			break;
-		case "тезисы доклада на конференции":
-			itemType = "conferencePaper";
 			break;
 		default:
 			Zotero.debug("Unknown type: " + docType + ". Using 'journalArticle'");
@@ -167,19 +165,26 @@ async function scrape(doc, url = doc.location.href) {
 		/* Common author field formats are:
 			(1) "LAST FIRST PATRONIMIC"
 			(2) "LAST F. P." || "LAST F.P." || "LAST F.P" || "LAST F."
+			(3) "LAST (MAIDEN) FIRST PATRONYMIC"
 			
 		   In all these cases, we put comma after LAST for `ZU.cleanAuthor()` to work.
 		   Other formats are rare, but possible, e.g. "ВАН ДЕ КЕРЧОВЕ Р." == "Van de Kerchove R.".
 		   They go to single-field mode (assuming they got no comma). */
 		var nameFormat1RE = new ZU.XRegExp("^\\p{Letter}+\\s\\p{Letter}+\\s\\p{Letter}+$");
 		var nameFormat2RE = new ZU.XRegExp("^\\p{Letter}+\\s\\p{Letter}\\.(\\s?\\p{Letter}\\.?)?$");
-		
+		var nameFormat3RE = new ZU.XRegExp("^\\p{Letter}+\\s\\(\\p{Letter}+\\)\\s\\p{Letter}+\\s\\p{Letter}+$");
+
 		var isFormat1 = ZU.XRegExp.test(dirty, nameFormat1RE);
 		var isFormat2 = ZU.XRegExp.test(dirty, nameFormat2RE);
+		var isFormat3 = ZU.XRegExp.test(dirty, nameFormat3RE);
 		
 		if (isFormat1 || isFormat2) {
 			// add comma before the first space
 			dirty = dirty.replace(/^([^\s]*)(\s)/, '$1, ');
+		}
+		else if (isFormat3) {
+			// add comma after the parenthesized maiden name
+			dirty = dirty.replace(/^(.+\))(\s)/, '$1, ');
 		}
 		
 		var cleaned = ZU.cleanAuthor(dirty, "author", true);
@@ -192,19 +197,19 @@ async function scrape(doc, url = doc.location.href) {
 		   for example, "S. V." -> "S. v.", but "S. K." -> "S. K.".
 		   Thus, we can only apply it to Format1 . */
 		
-		if (isFormat1) {
+		if (isFormat1 || isFormat3) {
 			// "FIRST PATRONIMIC" -> "First Patronimic"
 			cleaned.firstName = fixCasing(cleaned.firstName);
 		}
 		
 		if (cleaned.firstName === undefined) {
 			// Unable to parse. Restore punctuation.
-			cleaned.fieldMode = true;
+			cleaned.fieldMode = 1;
 			cleaned.lastName = dirty;
 		}
 		
-		cleaned.lastName = fixCasing(cleaned.lastName, true);
-		
+		cleaned.lastName = fixCasing(cleaned.lastName);
+
 		// Skip entries with an @ sign-- email addresses slip in otherwise
 		if (!cleaned.lastName.includes("@")) item.creators.push(cleaned);
 	}
@@ -337,27 +342,27 @@ var testCases = [
 				"title": "Использование Молекулярно-Генетических Методов Установления Закономерностей Наследования Для Выявления Доноров Значимых Признаков Яблони",
 				"creators": [
 					{
-						"firstName": "И. И.",
+						"firstName": "Иван Иванович",
 						"lastName": "Супрун",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Е. В.",
-						"lastName": "Ульяновская",
+						"firstName": "Елена Владимировна",
+						"lastName": "Ульяновская (Колосова)",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Е. Н.",
+						"firstName": "Евгений Николаевич",
 						"lastName": "Седов",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Г. А.",
+						"firstName": "Галина Алексеевна",
 						"lastName": "Седышева",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "З. М.",
+						"firstName": "Зоя Михайловна",
 						"lastName": "Серова",
 						"creatorType": "author"
 					}
@@ -393,29 +398,29 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.elibrary.ru/item.asp?id=21640363",
+		"url": "https://elibrary.ru/item.asp?id=21640363",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "На пути к верификации C программ. Часть 3. Перевод из языка C-light в язык C-light-kernel и его формальное обоснование",
 				"creators": [
 					{
-						"firstName": "В. А.",
+						"firstName": "Валерий Александрович",
 						"lastName": "Непомнящий",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "И. С.",
+						"firstName": "Игорь Сергеевич",
 						"lastName": "Ануреев",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "И. Н.",
+						"firstName": "Иван Николаевич",
 						"lastName": "Михайлов",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "А. В.",
+						"firstName": "Алексей Владимирович",
 						"lastName": "Промский",
 						"creatorType": "author"
 					}
@@ -426,7 +431,7 @@ var testCases = [
 				"language": "ru",
 				"libraryCatalog": "eLibrary.ru",
 				"pages": "83",
-				"url": "https://www.elibrary.ru/item.asp?id=21640363",
+				"url": "https://elibrary.ru/item.asp?id=21640363",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -443,7 +448,7 @@ var testCases = [
 				"title": "Информационно-поисковая полнотекстовая система \"Боярские списки XVIII века\"",
 				"creators": [
 					{
-						"firstName": "А. В.",
+						"firstName": "Андрей Викторович",
 						"lastName": "Захаров",
 						"creatorType": "author"
 					}
@@ -491,19 +496,19 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.elibrary.ru/item.asp?id=20028198",
+		"url": "https://elibrary.ru/item.asp?id=20028198",
 		"items": [
 			{
 				"itemType": "book",
 				"title": "Аппарат издания и правила оформления",
 				"creators": [
 					{
-						"firstName": "Л. П.",
+						"firstName": "Людмила Павловна",
 						"lastName": "Стычишина",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "А. В.",
+						"firstName": "Александр Викторович",
 						"lastName": "Хохлов",
 						"creatorType": "author"
 					}
@@ -511,7 +516,7 @@ var testCases = [
 				"language": "ru",
 				"libraryCatalog": "eLibrary.ru",
 				"publisher": "Изд-во Политехнического университета",
-				"url": "https://www.elibrary.ru/item.asp?id=20028198",
+				"url": "https://elibrary.ru/item.asp?id=20028198",
 				"attachments": [],
 				"tags": [
 					{
@@ -565,7 +570,7 @@ var testCases = [
 				"title": "Графики негладких контактных отображений на группах карно с сублоренцевой структурой",
 				"creators": [
 					{
-						"firstName": "М. Б.",
+						"firstName": "Мария Борисовна",
 						"lastName": "Карманова",
 						"creatorType": "author"
 					}
@@ -654,7 +659,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.elibrary.ru/item.asp?id=18310800",
+		"url": "https://elibrary.ru/item.asp?id=18310800",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -677,21 +682,23 @@ var testCases = [
 					},
 					{
 						"lastName": "Де Щулф А.",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					},
 					{
-						"firstName": "Е.",
+						"firstName": "Эдуард Павлович",
 						"lastName": "Дворников",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "А. В.",
-						"lastName": "Ебел",
+						"firstName": "Александр Викторович",
+						"lastName": "Эбель",
 						"creatorType": "author"
 					},
 					{
 						"lastName": "Ван Хооф Л.",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					},
 					{
 						"firstName": "С.",
@@ -700,7 +707,8 @@ var testCases = [
 					},
 					{
 						"lastName": "Де Лангхе К.",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					},
 					{
 						"firstName": "А.",
@@ -709,7 +717,8 @@ var testCases = [
 					},
 					{
 						"lastName": "Ван Де Керчове Р.",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					},
 					{
 						"firstName": "Р.",
@@ -718,7 +727,8 @@ var testCases = [
 					},
 					{
 						"lastName": "Те Киефте Д.",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
 				"date": "2009",
@@ -728,7 +738,7 @@ var testCases = [
 				"libraryCatalog": "eLibrary.ru",
 				"pages": "10-20",
 				"publicationTitle": "Мир Евразии",
-				"url": "https://www.elibrary.ru/item.asp?id=18310800",
+				"url": "https://elibrary.ru/item.asp?id=18310800",
 				"attachments": [],
 				"tags": [
 					{
@@ -771,7 +781,7 @@ var testCases = [
 				"libraryCatalog": "eLibrary.ru",
 				"pages": "26-48",
 				"publicationTitle": "Mankind Quarterly",
-				"url": "https://www.elibrary.ru/item.asp?id=22208210",
+				"url": "https://elibrary.ru/item.asp?id=22208210",
 				"volume": "54",
 				"attachments": [],
 				"tags": [
@@ -798,29 +808,29 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.elibrary.ru/item.asp?id=35209757",
+		"url": "https://elibrary.ru/item.asp?id=35209757",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Факторы Патогенности Недифтерийных Коринебактерий, Выделенных От Больных С Патологией Респираторного Тракта",
 				"creators": [
 					{
-						"firstName": "А. А.",
-						"lastName": "Алиева",
+						"firstName": "Анна Александровна",
+						"lastName": "Алиева (Чепурова)",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Г. Г.",
+						"firstName": "Галина Георгиевна",
 						"lastName": "Харсеева",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Э. О.",
+						"firstName": "Эрдем Очанович",
 						"lastName": "Мангутов",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "С. Н.",
+						"firstName": "Сергей Николаевич",
 						"lastName": "Головин",
 						"creatorType": "author"
 					}
@@ -834,7 +844,7 @@ var testCases = [
 				"libraryCatalog": "eLibrary.ru",
 				"pages": "375-378",
 				"publicationTitle": "Клиническая Лабораторная Диагностика",
-				"url": "https://www.elibrary.ru/item.asp?id=35209757",
+				"url": "https://elibrary.ru/item.asp?id=35209757",
 				"volume": "63",
 				"attachments": [],
 				"tags": [
