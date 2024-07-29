@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2024-07-29 14:03:58"
+	"lastUpdated": "2024-07-29 14:16:09"
 }
 
 /*
@@ -71,6 +71,7 @@ var PDFversionMap = {
 	publishedVersion: "Full Text PDF"
 };
 /* eslint-disable camelcase*/
+/* https://docs.openalex.org/api-entities/works/work-object#type */
 var mappingTypes = {
 	article: "journalArticle",
 	book: "book",
@@ -86,7 +87,12 @@ var mappingTypes = {
 	letter: "journalArticle",
 	"peer-review": "document", // up for debate
 	erratum: "journalArticle",
-	grant: "manuscript" // up for debate
+	grant: "manuscript", // up for debate
+	preprint: "preprint",
+	review: "journalArticle",
+	libguides: "encyclopediaArticle",
+	"supplementary-materials": "journalArticle",
+	retraction: "journalArticle",
 };
 
 function doImport() {
@@ -129,7 +135,24 @@ function parseIndividual(data) {
 			item.publicationTitle = sourceName;
 			item.publisher = data.primary_location.source.host_organization_name;
 		}
-		item.ISSN = data.primary_location.source.issn;
+		if (typeof data.primary_location.source.issn === 'string') {
+			item.ISSN = data.primary_location.source.issn;
+		}
+		else if (Array.isArray(data.primary_location.source.issn)) {
+			item.ISSN = data.primary_location.source.issn[0];
+		}
+		if (data.primary_location.source.type == "journal") {
+			Zotero.debug(`Item type was ${item.itemType} -- changing to journalArticle because source.type == 'journal'`);
+			item.itemType = "journalArticle";
+		}
+		else if (data.primary_location.source.type == "conference") {
+			Zotero.debug(`Item type was ${item.itemType} -- changing to conferencePaper because source.type == 'conference'`);
+			item.itemType = "conferencePaper";
+		}
+		if (data.primary_location.version == "submittedVersion") {
+			Zotero.debug(`Item type was ${item.itemType} -- changing to preprint because version == 'submittedVersion'`);
+			item.itemType = "preprint";
+		}
 	}
 
 
@@ -163,7 +186,7 @@ function parseIndividual(data) {
 	}
 	let tags = data.keywords;
 	for (let tag of tags) {
-		item.tags.push(tag.keyword);
+		item.tags.push(tag.display_name || tag.keyword);
 	}
 	item.extra = "OpenAlex: " + data.ids.openalex;
 	item.complete();
@@ -187,7 +210,7 @@ var testCases = [
 				],
 				"date": "1982-11-01",
 				"DOI": "10.2307/1885099",
-				"ISSN": "0033-5533,1531-4650",
+				"ISSN": "0033-5533",
 				"extra": "OpenAlex: https://openalex.org/W2099326003",
 				"issue": "4",
 				"language": "en",
@@ -232,7 +255,7 @@ var testCases = [
 				],
 				"date": "2004-09-01",
 				"DOI": "10.1257/0002828042002561",
-				"ISSN": "1944-7981,0002-8282",
+				"ISSN": "1944-7981",
 				"extra": "OpenAlex: https://openalex.org/W3123223998",
 				"issue": "4",
 				"language": "en",
@@ -400,7 +423,7 @@ var testCases = [
 				],
 				"date": "1965-07-01",
 				"DOI": "10.1109/tau.1965.1161805",
-				"ISSN": "1558-2663,0096-1620",
+				"ISSN": "1558-2663",
 				"extra": "OpenAlex: https://openalex.org/W2046245907",
 				"issue": "4",
 				"language": "en",
@@ -425,7 +448,7 @@ var testCases = [
 				"creators": [],
 				"date": "1983-01-13",
 				"DOI": "10.1056/nejm198301133080228",
-				"ISSN": "0028-4793,1533-4406",
+				"ISSN": "0028-4793",
 				"extra": "OpenAlex: https://openalex.org/W4237963058",
 				"issue": "2",
 				"pages": "112",
@@ -490,7 +513,7 @@ var testCases = [
 					}
 				],
 				"date": "1966-08-01",
-				"ISSN": "1820-6069,0534-0012",
+				"ISSN": "1820-6069",
 				"extra": "OpenAlex: https://openalex.org/W78857221",
 				"language": "de",
 				"publicationTitle": "Genetika",
@@ -530,6 +553,182 @@ var testCases = [
 					},
 					{
 						"tag": "preventions"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "{\"id\":\"https://openalex.org/W2962935454\",\"doi\":null,\"title\":\"Generalizing to Unseen Domains via Adversarial Data Augmentation\",\"display_name\":\"Generalizing to Unseen Domains via Adversarial Data Augmentation\",\"publication_year\":2018,\"publication_date\":\"2018-05-01\",\"ids\":{\"openalex\":\"https://openalex.org/W2962935454\",\"mag\":\"2962935454\"},\"language\":\"en\",\"primary_location\":{\"is_oa\":false,\"landing_page_url\":\"https://papers.nips.cc/paper/7779-generalizing-to-unseen-domains-via-adversarial-data-augmentation.pdf\",\"pdf_url\":null,\"source\":{\"id\":\"https://openalex.org/S4306420609\",\"display_name\":\"Neural Information Processing Systems\",\"issn_l\":null,\"issn\":null,\"is_oa\":false,\"is_in_doaj\":false,\"is_core\":false,\"host_organization\":null,\"host_organization_name\":null,\"host_organization_lineage\":[],\"host_organization_lineage_names\":[],\"type\":\"conference\"},\"license\":null,\"license_id\":null,\"version\":null,\"is_accepted\":false,\"is_published\":false},\"type\":\"article\",\"type_crossref\":\"proceedings-article\",\"indexed_in\":[],\"open_access\":{\"is_oa\":false,\"oa_status\":\"closed\",\"oa_url\":null,\"any_repository_has_fulltext\":false},\"authorships\":[{\"author_position\":\"first\",\"author\":{\"id\":\"https://openalex.org/A5087171315\",\"display_name\":\"Riccardo Volpi\",\"orcid\":\"https://orcid.org/0000-0003-4485-9573\"},\"institutions\":[{\"id\":\"https://openalex.org/I30771326\",\"display_name\":\"Italian Institute of Technology\",\"ror\":\"https://ror.org/042t93s57\",\"country_code\":\"IT\",\"type\":\"facility\",\"lineage\":[\"https://openalex.org/I30771326\"]}],\"countries\":[\"IT\"],\"is_corresponding\":false,\"raw_author_name\":\"Riccardo Volpi\",\"raw_affiliation_strings\":[],\"affiliations\":[]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5008595840\",\"display_name\":\"Hongseok Namkoong\",\"orcid\":\"https://orcid.org/0000-0002-5708-4044\"},\"institutions\":[{\"id\":\"https://openalex.org/I78577930\",\"display_name\":\"Columbia University\",\"ror\":\"https://ror.org/00hj8s172\",\"country_code\":\"US\",\"type\":\"education\",\"lineage\":[\"https://openalex.org/I78577930\"]}],\"countries\":[\"US\"],\"is_corresponding\":false,\"raw_author_name\":\"Hongseok Namkoong\",\"raw_affiliation_strings\":[],\"affiliations\":[]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5026399398\",\"display_name\":\"Ozan \\u015eener\",\"orcid\":\"https://orcid.org/0000-0002-1542-7547\"},\"institutions\":[{\"id\":\"https://openalex.org/I205783295\",\"display_name\":\"Cornell University\",\"ror\":\"https://ror.org/05bnh6r87\",\"country_code\":\"US\",\"type\":\"education\",\"lineage\":[\"https://openalex.org/I205783295\"]}],\"countries\":[\"US\"],\"is_corresponding\":false,\"raw_author_name\":\"Ozan Sener\",\"raw_affiliation_strings\":[],\"affiliations\":[]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5061331093\",\"display_name\":\"John C. Duchi\",\"orcid\":\"https://orcid.org/0000-0003-0045-7185\"},\"institutions\":[{\"id\":\"https://openalex.org/I97018004\",\"display_name\":\"Stanford University\",\"ror\":\"https://ror.org/00f54p054\",\"country_code\":\"US\",\"type\":\"education\",\"lineage\":[\"https://openalex.org/I97018004\"]}],\"countries\":[\"US\"],\"is_corresponding\":false,\"raw_author_name\":\"John C. Duchi\",\"raw_affiliation_strings\":[],\"affiliations\":[]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5007242502\",\"display_name\":\"Vittorio Murino\",\"orcid\":\"https://orcid.org/0000-0002-8645-2328\"},\"institutions\":[{\"id\":\"https://openalex.org/I30771326\",\"display_name\":\"Italian Institute of Technology\",\"ror\":\"https://ror.org/042t93s57\",\"country_code\":\"IT\",\"type\":\"facility\",\"lineage\":[\"https://openalex.org/I30771326\"]}],\"countries\":[\"IT\"],\"is_corresponding\":false,\"raw_author_name\":\"Vittorio Murino\",\"raw_affiliation_strings\":[],\"affiliations\":[]},{\"author_position\":\"last\",\"author\":{\"id\":\"https://openalex.org/A5042646536\",\"display_name\":\"Silvio Savarese\",\"orcid\":null},\"institutions\":[{\"id\":\"https://openalex.org/I97018004\",\"display_name\":\"Stanford University\",\"ror\":\"https://ror.org/00f54p054\",\"country_code\":\"US\",\"type\":\"education\",\"lineage\":[\"https://openalex.org/I97018004\"]}],\"countries\":[\"US\"],\"is_corresponding\":false,\"raw_author_name\":\"Silvio Savarese\",\"raw_affiliation_strings\":[],\"affiliations\":[]}],\"countries_distinct_count\":2,\"institutions_distinct_count\":4,\"corresponding_author_ids\":[],\"corresponding_institution_ids\":[],\"apc_list\":null,\"apc_paid\":null,\"fwci\":11.363,\"has_fulltext\":false,\"cited_by_count\":142,\"cited_by_percentile_year\":{\"min\":99,\"max\":100},\"biblio\":{\"volume\":\"31\",\"issue\":null,\"first_page\":\"5334\",\"last_page\":\"5344\"},\"is_retracted\":false,\"is_paratext\":false,\"primary_topic\":{\"id\":\"https://openalex.org/T11307\",\"display_name\":\"Advances in Transfer Learning and Domain Adaptation\",\"score\":0.9932,\"subfield\":{\"id\":\"https://openalex.org/subfields/1702\",\"display_name\":\"Artificial Intelligence\"},\"field\":{\"id\":\"https://openalex.org/fields/17\",\"display_name\":\"Computer Science\"},\"domain\":{\"id\":\"https://openalex.org/domains/3\",\"display_name\":\"Physical Sciences\"}},\"topics\":[{\"id\":\"https://openalex.org/T11307\",\"display_name\":\"Advances in Transfer Learning and Domain Adaptation\",\"score\":0.9932,\"subfield\":{\"id\":\"https://openalex.org/subfields/1702\",\"display_name\":\"Artificial Intelligence\"},\"field\":{\"id\":\"https://openalex.org/fields/17\",\"display_name\":\"Computer Science\"},\"domain\":{\"id\":\"https://openalex.org/domains/3\",\"display_name\":\"Physical Sciences\"}},{\"id\":\"https://openalex.org/T11689\",\"display_name\":\"Adversarial Robustness in Deep Learning Models\",\"score\":0.9897,\"subfield\":{\"id\":\"https://openalex.org/subfields/1702\",\"display_name\":\"Artificial Intelligence\"},\"field\":{\"id\":\"https://openalex.org/fields/17\",\"display_name\":\"Computer Science\"},\"domain\":{\"id\":\"https://openalex.org/domains/3\",\"display_name\":\"Physical Sciences\"}},{\"id\":\"https://openalex.org/T11775\",\"display_name\":\"Applications of Deep Learning in Medical Imaging\",\"score\":0.9777,\"subfield\":{\"id\":\"https://openalex.org/subfields/2741\",\"display_name\":\"Radiology, Nuclear Medicine and Imaging\"},\"field\":{\"id\":\"https://openalex.org/fields/27\",\"display_name\":\"Medicine\"},\"domain\":{\"id\":\"https://openalex.org/domains/4\",\"display_name\":\"Health Sciences\"}}],\"keywords\":[{\"id\":\"https://openalex.org/keywords/domain-adaptation\",\"display_name\":\"Domain Adaptation\",\"score\":0.6031},{\"id\":\"https://openalex.org/keywords/unsupervised-learning\",\"display_name\":\"Unsupervised Learning\",\"score\":0.565551},{\"id\":\"https://openalex.org/keywords/adversarial-examples\",\"display_name\":\"Adversarial Examples\",\"score\":0.563401},{\"id\":\"https://openalex.org/keywords/transfer-learning\",\"display_name\":\"Transfer Learning\",\"score\":0.559807},{\"id\":\"https://openalex.org/keywords/representation-learning\",\"display_name\":\"Representation Learning\",\"score\":0.526564}],\"concepts\":[{\"id\":\"https://openalex.org/C41008148\",\"wikidata\":\"https://www.wikidata.org/wiki/Q21198\",\"display_name\":\"Computer science\",\"level\":0,\"score\":0.6881822},{\"id\":\"https://openalex.org/C2776135515\",\"wikidata\":\"https://www.wikidata.org/wiki/Q17143721\",\"display_name\":\"Regularization (linguistics)\",\"level\":2,\"score\":0.67249304},{\"id\":\"https://openalex.org/C188441871\",\"wikidata\":\"https://www.wikidata.org/wiki/Q7554146\",\"display_name\":\"Softmax function\",\"level\":3,\"score\":0.6059211},{\"id\":\"https://openalex.org/C154945302\",\"wikidata\":\"https://www.wikidata.org/wiki/Q11660\",\"display_name\":\"Artificial intelligence\",\"level\":1,\"score\":0.5804972},{\"id\":\"https://openalex.org/C75553542\",\"wikidata\":\"https://www.wikidata.org/wiki/Q178161\",\"display_name\":\"A priori and a posteriori\",\"level\":2,\"score\":0.56781113},{\"id\":\"https://openalex.org/C36503486\",\"wikidata\":\"https://www.wikidata.org/wiki/Q11235244\",\"display_name\":\"Domain (mathematical analysis)\",\"level\":2,\"score\":0.47703072},{\"id\":\"https://openalex.org/C89600930\",\"wikidata\":\"https://www.wikidata.org/wiki/Q1423946\",\"display_name\":\"Segmentation\",\"level\":2,\"score\":0.4638946},{\"id\":\"https://openalex.org/C77618280\",\"wikidata\":\"https://www.wikidata.org/wiki/Q1155772\",\"display_name\":\"Scheme (mathematics)\",\"level\":2,\"score\":0.45647982},{\"id\":\"https://openalex.org/C204323151\",\"wikidata\":\"https://www.wikidata.org/wiki/Q905424\",\"display_name\":\"Range (aeronautics)\",\"level\":2,\"score\":0.42658007},{\"id\":\"https://openalex.org/C2776401178\",\"wikidata\":\"https://www.wikidata.org/wiki/Q12050496\",\"display_name\":\"Feature (linguistics)\",\"level\":2,\"score\":0.42016298},{\"id\":\"https://openalex.org/C153180895\",\"wikidata\":\"https://www.wikidata.org/wiki/Q7148389\",\"display_name\":\"Pattern recognition (psychology)\",\"level\":2,\"score\":0.41843256},{\"id\":\"https://openalex.org/C83665646\",\"wikidata\":\"https://www.wikidata.org/wiki/Q42139305\",\"display_name\":\"Feature vector\",\"level\":2,\"score\":0.41224036},{\"id\":\"https://openalex.org/C159694833\",\"wikidata\":\"https://www.wikidata.org/wiki/Q2321565\",\"display_name\":\"Iterative method\",\"level\":2,\"score\":0.41180462},{\"id\":\"https://openalex.org/C11413529\",\"wikidata\":\"https://www.wikidata.org/wiki/Q8366\",\"display_name\":\"Algorithm\",\"level\":1,\"score\":0.40941933},{\"id\":\"https://openalex.org/C119857082\",\"wikidata\":\"https://www.wikidata.org/wiki/Q2539\",\"display_name\":\"Machine learning\",\"level\":1,\"score\":0.3678398},{\"id\":\"https://openalex.org/C80444323\",\"wikidata\":\"https://www.wikidata.org/wiki/Q2878974\",\"display_name\":\"Theoretical computer science\",\"level\":1,\"score\":0.3276114},{\"id\":\"https://openalex.org/C108583219\",\"wikidata\":\"https://www.wikidata.org/wiki/Q197536\",\"display_name\":\"Deep learning\",\"level\":2,\"score\":0.2830665},{\"id\":\"https://openalex.org/C33923547\",\"wikidata\":\"https://www.wikidata.org/wiki/Q395\",\"display_name\":\"Mathematics\",\"level\":0,\"score\":0.20898846},{\"id\":\"https://openalex.org/C134306372\",\"wikidata\":\"https://www.wikidata.org/wiki/Q7754\",\"display_name\":\"Mathematical analysis\",\"level\":1,\"score\":0.0},{\"id\":\"https://openalex.org/C138885662\",\"wikidata\":\"https://www.wikidata.org/wiki/Q5891\",\"display_name\":\"Philosophy\",\"level\":0,\"score\":0.0},{\"id\":\"https://openalex.org/C41895202\",\"wikidata\":\"https://www.wikidata.org/wiki/Q8162\",\"display_name\":\"Linguistics\",\"level\":1,\"score\":0.0},{\"id\":\"https://openalex.org/C192562407\",\"wikidata\":\"https://www.wikidata.org/wiki/Q228736\",\"display_name\":\"Materials science\",\"level\":0,\"score\":0.0},{\"id\":\"https://openalex.org/C111472728\",\"wikidata\":\"https://www.wikidata.org/wiki/Q9471\",\"display_name\":\"Epistemology\",\"level\":1,\"score\":0.0},{\"id\":\"https://openalex.org/C159985019\",\"wikidata\":\"https://www.wikidata.org/wiki/Q181790\",\"display_name\":\"Composite material\",\"level\":1,\"score\":0.0}],\"mesh\":[],\"locations_count\":1,\"locations\":[{\"is_oa\":false,\"landing_page_url\":\"https://papers.nips.cc/paper/7779-generalizing-to-unseen-domains-via-adversarial-data-augmentation.pdf\",\"pdf_url\":null,\"source\":{\"id\":\"https://openalex.org/S4306420609\",\"display_name\":\"Neural Information Processing Systems\",\"issn_l\":null,\"issn\":null,\"is_oa\":false,\"is_in_doaj\":false,\"is_core\":false,\"host_organization\":null,\"host_organization_name\":null,\"host_organization_lineage\":[],\"host_organization_lineage_names\":[],\"type\":\"conference\"},\"license\":null,\"license_id\":null,\"version\":null,\"is_accepted\":false,\"is_published\":false}],\"best_oa_location\":null,\"sustainable_development_goals\":[],\"grants\":[],\"datasets\":[],\"versions\":[],\"referenced_works_count\":0,\"referenced_works\":[],\"related_works\":[\"https://openalex.org/W2981368934\",\"https://openalex.org/W2970119729\",\"https://openalex.org/W2963838962\",\"https://openalex.org/W2963826681\",\"https://openalex.org/W2963118547\",\"https://openalex.org/W2963043696\",\"https://openalex.org/W2958360136\",\"https://openalex.org/W2894728917\",\"https://openalex.org/W2889965839\",\"https://openalex.org/W2798658180\",\"https://openalex.org/W2763549966\",\"https://openalex.org/W2593768305\",\"https://openalex.org/W2335728318\",\"https://openalex.org/W2194775991\",\"https://openalex.org/W2155858138\",\"https://openalex.org/W2112796928\",\"https://openalex.org/W2108598243\",\"https://openalex.org/W2104094955\",\"https://openalex.org/W1920962657\",\"https://openalex.org/W1731081199\"],\"ngrams_url\":\"https://api.openalex.org/works/W2962935454/ngrams\",\"abstract_inverted_index\":{\"We\":[0,13,63],\"are\":[1,22],\"concerned\":[2],\"with\":[3,49],\"learning\":[4],\"models\":[5,120],\"that\":[6,21,45,56,65,88,96,102],\"generalize\":[7],\"well\":[8],\"to\":[9],\"different\":[10],\"unseen\":[11],\"domains.\":[12,131],\"consider\":[14],\"a\":[15,36,52,92,124,127],\"worst-case\":[16],\"formulation\":[17],\"over\":[18],\"data\":[19,34,72],\"distributions\":[20],\"near\":[23],\"the\":[24,28,47,60],\"source\":[25,38],\"domain\":[26,55],\"in\":[27],\"feature\":[29],\"space.\":[30],\"Only\":[31],\"using\":[32],\"training\":[33],\"from\":[35,51,99],\"single\":[37],\"distribution,\":[39],\"we\":[40,76,86],\"propose\":[41],\"an\":[42,70],\"iterative\":[43,67],\"procedure\":[44],\"augments\":[46],\"dataset\":[48],\"examples\":[50,79],\"fictitious\":[53],\"target\":[54,130],\"is\":[57,69,91],\"hard\":[58],\"under\":[59],\"current\":[61],\"model.\":[62],\"show\":[64,87],\"our\":[66,89,117],\"scheme\":[68,95],\"adaptive\":[71],\"augmentation\":[73],\"method\":[74,90,118],\"where\":[75],\"append\":[77],\"adversarial\":[78],\"at\":[80],\"each\":[81],\"iteration.\":[82],\"For\":[83],\"softmax\":[84],\"losses,\":[85],\"data-dependent\":[93],\"regularization\":[94],\"behaves\":[97],\"differently\":[98],\"classical\":[100],\"regularizers\":[101],\"regularize\":[103],\"towards\":[104],\"zero\":[105],\"(e.g.,\":[106],\"ridge\":[107],\"or\":[108],\"lasso).\":[109],\"On\":[110],\"digit\":[111],\"recognition\":[112],\"and\":[113],\"semantic\":[114],\"segmentation\":[115],\"tasks,\":[116],\"learns\":[119],\"improve\":[121],\"performance\":[122],\"across\":[123],\"range\":[125],\"of\":[126],\"priori\":[128],\"unknown\":[129]},\"cited_by_api_url\":\"https://api.openalex.org/works?filter=cites:W2962935454\",\"counts_by_year\":[{\"year\":2022,\"cited_by_count\":1},{\"year\":2021,\"cited_by_count\":72},{\"year\":2020,\"cited_by_count\":43},{\"year\":2019,\"cited_by_count\":24},{\"year\":2018,\"cited_by_count\":2},{\"year\":2017,\"cited_by_count\":1}],\"updated_date\":\"2024-07-16T08:42:24.812785\",\"created_date\":\"2019-07-30\"}\n",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "Generalizing to Unseen Domains via Adversarial Data Augmentation",
+				"creators": [
+					{
+						"firstName": "Riccardo",
+						"lastName": "Volpi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hongseok",
+						"lastName": "Namkoong",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ozan",
+						"lastName": "Şener",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "John C.",
+						"lastName": "Duchi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Vittorio",
+						"lastName": "Murino",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Silvio",
+						"lastName": "Savarese",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018-05-01",
+				"extra": "OpenAlex: https://openalex.org/W2962935454",
+				"language": "en",
+				"pages": "5334-5344",
+				"proceedingsTitle": "Neural Information Processing Systems",
+				"volume": "31",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Adversarial Examples"
+					},
+					{
+						"tag": "Domain Adaptation"
+					},
+					{
+						"tag": "Representation Learning"
+					},
+					{
+						"tag": "Transfer Learning"
+					},
+					{
+						"tag": "Unsupervised Learning"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "{\"id\":\"https://openalex.org/W2101234009\",\"doi\":\"https://doi.org/10.48550/arxiv.1201.0490\",\"title\":\"Scikit-learn: Machine Learning in Python\",\"display_name\":\"Scikit-learn: Machine Learning in Python\",\"publication_year\":2012,\"publication_date\":\"2012-01-01\",\"ids\":{\"openalex\":\"https://openalex.org/W2101234009\",\"doi\":\"https://doi.org/10.48550/arxiv.1201.0490\",\"mag\":\"2101234009\"},\"language\":\"en\",\"primary_location\":{\"is_oa\":true,\"landing_page_url\":\"https://arxiv.org/abs/1201.0490\",\"pdf_url\":null,\"source\":{\"id\":\"https://openalex.org/S4306400194\",\"display_name\":\"arXiv (Cornell University)\",\"issn_l\":null,\"issn\":null,\"is_oa\":true,\"is_in_doaj\":false,\"is_core\":false,\"host_organization\":\"https://openalex.org/I205783295\",\"host_organization_name\":\"Cornell University\",\"host_organization_lineage\":[\"https://openalex.org/I205783295\"],\"host_organization_lineage_names\":[\"Cornell University\"],\"type\":\"repository\"},\"license\":\"other-oa\",\"license_id\":\"https://openalex.org/licenses/other-oa\",\"version\":null,\"is_accepted\":false,\"is_published\":false},\"type\":\"preprint\",\"type_crossref\":\"journal-article\",\"indexed_in\":[\"datacite\"],\"open_access\":{\"is_oa\":true,\"oa_status\":\"green\",\"oa_url\":\"https://arxiv.org/abs/1201.0490\",\"any_repository_has_fulltext\":true},\"authorships\":[{\"author_position\":\"first\",\"author\":{\"id\":\"https://openalex.org/A5066572762\",\"display_name\":\"Fabi\\u00e1n Pedregosa\",\"orcid\":\"https://orcid.org/0000-0003-4025-3953\"},\"institutions\":[{\"id\":\"https://openalex.org/I4210128565\",\"display_name\":\"CEA Saclay\",\"ror\":\"https://ror.org/03n15ch10\",\"country_code\":\"FR\",\"type\":\"government\",\"lineage\":[\"https://openalex.org/I2738703131\",\"https://openalex.org/I4210127723\",\"https://openalex.org/I4210128565\"]},{\"id\":\"https://openalex.org/I2738703131\",\"display_name\":\"Commissariat \\u00e0 l'\\u00c9nergie Atomique et aux \\u00c9nergies Alternatives\",\"ror\":\"https://ror.org/00jjx8s55\",\"country_code\":\"FR\",\"type\":\"government\",\"lineage\":[\"https://openalex.org/I2738703131\"]}],\"countries\":[\"FR\"],\"is_corresponding\":false,\"raw_author_name\":\"Fabian Pedregosa\",\"raw_affiliation_strings\":[\"LNAO - Laboratoire de Neuroimagerie Assist\\u00e9e par Ordinateur (France)\",\"PARIETAL - Modelling brain structure, function and variability based on high-field MRI data (Neurospin, CEA Saclay, B\\u00e2timent 145, 91191 Gif-sur-Yvette Cedex - France)\"],\"affiliations\":[{\"raw_affiliation_string\":\"PARIETAL - Modelling brain structure, function and variability based on high-field MRI data (Neurospin, CEA Saclay, B\\u00e2timent 145, 91191 Gif-sur-Yvette Cedex - France)\",\"institution_ids\":[\"https://openalex.org/I4210128565\",\"https://openalex.org/I2738703131\"]},{\"raw_affiliation_string\":\"LNAO - Laboratoire de Neuroimagerie Assist\\u00e9e par Ordinateur (France)\",\"institution_ids\":[]}]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5074733625\",\"display_name\":\"Ga\\u00ebl Varoquaux\",\"orcid\":\"https://orcid.org/0000-0003-1076-5122\"},\"institutions\":[{\"id\":\"https://openalex.org/I2738703131\",\"display_name\":\"Commissariat \\u00e0 l'\\u00c9nergie Atomique et aux \\u00c9nergies Alternatives\",\"ror\":\"https://ror.org/00jjx8s55\",\"country_code\":\"FR\",\"type\":\"government\",\"lineage\":[\"https://openalex.org/I2738703131\"]},{\"id\":\"https://openalex.org/I4210128565\",\"display_name\":\"CEA Saclay\",\"ror\":\"https://ror.org/03n15ch10\",\"country_code\":\"FR\",\"type\":\"government\",\"lineage\":[\"https://openalex.org/I2738703131\",\"https://openalex.org/I4210127723\",\"https://openalex.org/I4210128565\"]}],\"countries\":[\"FR\"],\"is_corresponding\":false,\"raw_author_name\":\"Ga\\u00ebl Varoquaux\",\"raw_affiliation_strings\":[\"LNAO - Laboratoire de Neuroimagerie Assist\\u00e9e par Ordinateur (France)\",\"PARIETAL - Modelling brain structure, function and variability based on high-field MRI data (Neurospin, CEA Saclay, B\\u00e2timent 145, 91191 Gif-sur-Yvette Cedex - France)\"],\"affiliations\":[{\"raw_affiliation_string\":\"LNAO - Laboratoire de Neuroimagerie Assist\\u00e9e par Ordinateur (France)\",\"institution_ids\":[]},{\"raw_affiliation_string\":\"PARIETAL - Modelling brain structure, function and variability based on high-field MRI data (Neurospin, CEA Saclay, B\\u00e2timent 145, 91191 Gif-sur-Yvette Cedex - France)\",\"institution_ids\":[\"https://openalex.org/I2738703131\",\"https://openalex.org/I4210128565\"]}]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5018256474\",\"display_name\":\"Alexandre Gramfort\",\"orcid\":\"https://orcid.org/0000-0001-9791-4404\"},\"institutions\":[{\"id\":\"https://openalex.org/I2738703131\",\"display_name\":\"Commissariat \\u00e0 l'\\u00c9nergie Atomique et aux \\u00c9nergies Alternatives\",\"ror\":\"https://ror.org/00jjx8s55\",\"country_code\":\"FR\",\"type\":\"government\",\"lineage\":[\"https://openalex.org/I2738703131\"]},{\"id\":\"https://openalex.org/I4210128565\",\"display_name\":\"CEA Saclay\",\"ror\":\"https://ror.org/03n15ch10\",\"country_code\":\"FR\",\"type\":\"government\",\"lineage\":[\"https://openalex.org/I2738703131\",\"https://openalex.org/I4210127723\",\"https://openalex.org/I4210128565\"]}],\"countries\":[\"FR\"],\"is_corresponding\":false,\"raw_author_name\":\"Alexandre Gramfort\",\"raw_affiliation_strings\":[\"LNAO - Laboratoire de Neuroimagerie Assist\\u00e9e par Ordinateur (France)\",\"PARIETAL - Modelling brain structure, function and variability based on high-field MRI data (Neurospin, CEA Saclay, B\\u00e2timent 145, 91191 Gif-sur-Yvette Cedex - France)\"],\"affiliations\":[{\"raw_affiliation_string\":\"PARIETAL - Modelling brain structure, function and variability based on high-field MRI data (Neurospin, CEA Saclay, B\\u00e2timent 145, 91191 Gif-sur-Yvette Cedex - France)\",\"institution_ids\":[\"https://openalex.org/I2738703131\",\"https://openalex.org/I4210128565\"]},{\"raw_affiliation_string\":\"LNAO - Laboratoire de Neuroimagerie Assist\\u00e9e par Ordinateur (France)\",\"institution_ids\":[]}]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5027430303\",\"display_name\":\"Vincent Michel\",\"orcid\":\"https://orcid.org/0000-0002-7025-4343\"},\"institutions\":[{\"id\":\"https://openalex.org/I2738703131\",\"display_name\":\"Commissariat \\u00e0 l'\\u00c9nergie Atomique et aux \\u00c9nergies Alternatives\",\"ror\":\"https://ror.org/00jjx8s55\",\"country_code\":\"FR\",\"type\":\"government\",\"lineage\":[\"https://openalex.org/I2738703131\"]},{\"id\":\"https://openalex.org/I4210128565\",\"display_name\":\"CEA Saclay\",\"ror\":\"https://ror.org/03n15ch10\",\"country_code\":\"FR\",\"type\":\"government\",\"lineage\":[\"https://openalex.org/I2738703131\",\"https://openalex.org/I4210127723\",\"https://openalex.org/I4210128565\"]}],\"countries\":[\"FR\"],\"is_corresponding\":false,\"raw_author_name\":\"Vincent Michel\",\"raw_affiliation_strings\":[\"LNAO - Laboratoire de Neuroimagerie Assist\\u00e9e par Ordinateur (France)\",\"PARIETAL - Modelling brain structure, function and variability based on high-field MRI data (Neurospin, CEA Saclay, B\\u00e2timent 145, 91191 Gif-sur-Yvette Cedex - France)\"],\"affiliations\":[{\"raw_affiliation_string\":\"LNAO - Laboratoire de Neuroimagerie Assist\\u00e9e par Ordinateur (France)\",\"institution_ids\":[]},{\"raw_affiliation_string\":\"PARIETAL - Modelling brain structure, function and variability based on high-field MRI data (Neurospin, CEA Saclay, B\\u00e2timent 145, 91191 Gif-sur-Yvette Cedex - France)\",\"institution_ids\":[\"https://openalex.org/I2738703131\",\"https://openalex.org/I4210128565\"]}]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5026762833\",\"display_name\":\"Bertrand Thirion\",\"orcid\":\"https://orcid.org/0000-0001-5018-7895\"},\"institutions\":[{\"id\":\"https://openalex.org/I2738703131\",\"display_name\":\"Commissariat \\u00e0 l'\\u00c9nergie Atomique et aux \\u00c9nergies Alternatives\",\"ror\":\"https://ror.org/00jjx8s55\",\"country_code\":\"FR\",\"type\":\"government\",\"lineage\":[\"https://openalex.org/I2738703131\"]},{\"id\":\"https://openalex.org/I4210128565\",\"display_name\":\"CEA Saclay\",\"ror\":\"https://ror.org/03n15ch10\",\"country_code\":\"FR\",\"type\":\"government\",\"lineage\":[\"https://openalex.org/I2738703131\",\"https://openalex.org/I4210127723\",\"https://openalex.org/I4210128565\"]}],\"countries\":[\"FR\"],\"is_corresponding\":false,\"raw_author_name\":\"Bertrand Thirion\",\"raw_affiliation_strings\":[\"LNAO - Laboratoire de Neuroimagerie Assist\\u00e9e par Ordinateur (France)\",\"PARIETAL - Modelling brain structure, function and variability based on high-field MRI data (Neurospin, CEA Saclay, B\\u00e2timent 145, 91191 Gif-sur-Yvette Cedex - France)\"],\"affiliations\":[{\"raw_affiliation_string\":\"LNAO - Laboratoire de Neuroimagerie Assist\\u00e9e par Ordinateur (France)\",\"institution_ids\":[]},{\"raw_affiliation_string\":\"PARIETAL - Modelling brain structure, function and variability based on high-field MRI data (Neurospin, CEA Saclay, B\\u00e2timent 145, 91191 Gif-sur-Yvette Cedex - France)\",\"institution_ids\":[\"https://openalex.org/I2738703131\",\"https://openalex.org/I4210128565\"]}]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5033960843\",\"display_name\":\"Olivier Grisel\",\"orcid\":\"https://orcid.org/0009-0006-0406-5989\"},\"institutions\":[{\"id\":\"https://openalex.org/I4210131947\",\"display_name\":\"Nuxe (France)\",\"ror\":\"https://ror.org/02m7qby09\",\"country_code\":\"FR\",\"type\":\"company\",\"lineage\":[\"https://openalex.org/I4210131947\"]}],\"countries\":[\"FR\"],\"is_corresponding\":false,\"raw_author_name\":\"Olivier Grisel\",\"raw_affiliation_strings\":[\"Nuxeo (18-20 rue Soleillet 75020 Paris - France)\"],\"affiliations\":[{\"raw_affiliation_string\":\"Nuxeo (18-20 rue Soleillet 75020 Paris - France)\",\"institution_ids\":[\"https://openalex.org/I4210131947\"]}]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5049123454\",\"display_name\":\"Mathieu Blondel\",\"orcid\":\"https://orcid.org/0000-0002-2366-2993\"},\"institutions\":[{\"id\":\"https://openalex.org/I65837984\",\"display_name\":\"Kobe University\",\"ror\":\"https://ror.org/03tgsfw79\",\"country_code\":\"JP\",\"type\":\"education\",\"lineage\":[\"https://openalex.org/I65837984\"]}],\"countries\":[\"JP\"],\"is_corresponding\":false,\"raw_author_name\":\"Mathieu Blondel\",\"raw_affiliation_strings\":[\"Kobe University (Japan)\"],\"affiliations\":[{\"raw_affiliation_string\":\"Kobe University (Japan)\",\"institution_ids\":[\"https://openalex.org/I65837984\"]}]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5088660184\",\"display_name\":\"Peter Prettenhofer\",\"orcid\":null},\"institutions\":[{\"id\":\"https://openalex.org/I51441396\",\"display_name\":\"Bauhaus-Universit\\u00e4t Weimar\",\"ror\":\"https://ror.org/033bb5z47\",\"country_code\":\"DE\",\"type\":\"education\",\"lineage\":[\"https://openalex.org/I51441396\"]}],\"countries\":[\"DE\"],\"is_corresponding\":false,\"raw_author_name\":\"Peter Prettenhofer\",\"raw_affiliation_strings\":[\"Bauhaus-Universit\\u00e4t Weimar (Geschwister-Scholl-Stra\\u00dfe 8 99423 Weimar - Germany)\"],\"affiliations\":[{\"raw_affiliation_string\":\"Bauhaus-Universit\\u00e4t Weimar (Geschwister-Scholl-Stra\\u00dfe 8 99423 Weimar - Germany)\",\"institution_ids\":[\"https://openalex.org/I51441396\"]}]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5103273436\",\"display_name\":\"Ron J. Weiss\",\"orcid\":\"https://orcid.org/0000-0003-2010-4053\"},\"institutions\":[{\"id\":\"https://openalex.org/I4210148186\",\"display_name\":\"Google (Canada)\",\"ror\":\"https://ror.org/04d06q394\",\"country_code\":\"CA\",\"type\":\"company\",\"lineage\":[\"https://openalex.org/I1291425158\",\"https://openalex.org/I4210128969\",\"https://openalex.org/I4210148186\"]}],\"countries\":[\"CA\"],\"is_corresponding\":false,\"raw_author_name\":\"Ron Weiss\",\"raw_affiliation_strings\":[\"Google Inc (Toronto - Canada)\"],\"affiliations\":[{\"raw_affiliation_string\":\"Google Inc (Toronto - Canada)\",\"institution_ids\":[\"https://openalex.org/I4210148186\"]}]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5087957070\",\"display_name\":\"Vincent Dubourg\",\"orcid\":null},\"institutions\":[],\"countries\":[\"FR\"],\"is_corresponding\":false,\"raw_author_name\":\"Vincent Dubourg\",\"raw_affiliation_strings\":[\"LAMI - Laboratoire de M\\u00e9canique et Ing\\u00e9nieries (IFMA. Campus des C\\u00e9zeaux BP 265 63175 Aubi\\u00e8re Cedex - France)\"],\"affiliations\":[{\"raw_affiliation_string\":\"LAMI - Laboratoire de M\\u00e9canique et Ing\\u00e9nieries (IFMA. Campus des C\\u00e9zeaux BP 265 63175 Aubi\\u00e8re Cedex - France)\",\"institution_ids\":[]}]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5038304150\",\"display_name\":\"Jake Vanderplas\",\"orcid\":\"https://orcid.org/0000-0002-9623-3401\"},\"institutions\":[{\"id\":\"https://openalex.org/I201448701\",\"display_name\":\"University of Washington\",\"ror\":\"https://ror.org/00cvxb145\",\"country_code\":\"US\",\"type\":\"education\",\"lineage\":[\"https://openalex.org/I201448701\"]}],\"countries\":[\"US\"],\"is_corresponding\":false,\"raw_author_name\":\"Jake Vanderplas\",\"raw_affiliation_strings\":[\"University of Washington [Seattle] (Seattle, Washington 98105 - United States)\"],\"affiliations\":[{\"raw_affiliation_string\":\"University of Washington [Seattle] (Seattle, Washington 98105 - United States)\",\"institution_ids\":[\"https://openalex.org/I201448701\"]}]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5034029772\",\"display_name\":\"Alexandre Passos\",\"orcid\":null},\"institutions\":[{\"id\":\"https://openalex.org/I177605424\",\"display_name\":\"Amherst College\",\"ror\":\"https://ror.org/028vqfs63\",\"country_code\":\"US\",\"type\":\"education\",\"lineage\":[\"https://openalex.org/I177605424\"]},{\"id\":\"https://openalex.org/I24603500\",\"display_name\":\"University of Massachusetts Amherst\",\"ror\":\"https://ror.org/0072zz521\",\"country_code\":\"US\",\"type\":\"education\",\"lineage\":[\"https://openalex.org/I24603500\"]}],\"countries\":[\"US\"],\"is_corresponding\":false,\"raw_author_name\":\"Alexandre Passos\",\"raw_affiliation_strings\":[\"Department of Mechanical and Industrial Engineering [UMass] (UMass Amherst College of Engineering Department of Mechanical and Industrial Engineering, 220 ELAB, University of Massachusetts Amherst, MA 01003-2210 - United States)\"],\"affiliations\":[{\"raw_affiliation_string\":\"Department of Mechanical and Industrial Engineering [UMass] (UMass Amherst College of Engineering Department of Mechanical and Industrial Engineering, 220 ELAB, University of Massachusetts Amherst, MA 01003-2210 - United States)\",\"institution_ids\":[\"https://openalex.org/I177605424\",\"https://openalex.org/I24603500\"]}]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5023051838\",\"display_name\":\"David Cournapeau\",\"orcid\":null},\"institutions\":[{\"id\":\"https://openalex.org/I4210121859\",\"display_name\":\"Enthought (United States)\",\"ror\":\"https://ror.org/02xfc1977\",\"country_code\":\"US\",\"type\":\"company\",\"lineage\":[\"https://openalex.org/I4210121859\"]}],\"countries\":[\"US\"],\"is_corresponding\":false,\"raw_author_name\":\"David Cournapeau\",\"raw_affiliation_strings\":[\"Enthought Inc (515 Congress Avenue Suite 2100 Austin, TX 78701 - United States)\"],\"affiliations\":[{\"raw_affiliation_string\":\"Enthought Inc (515 Congress Avenue Suite 2100 Austin, TX 78701 - United States)\",\"institution_ids\":[\"https://openalex.org/I4210121859\"]}]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5050910015\",\"display_name\":\"Matthieu Brucher\",\"orcid\":null},\"institutions\":[{\"id\":\"https://openalex.org/I103084370\",\"display_name\":\"Total (France)\",\"ror\":\"https://ror.org/04sk34n56\",\"country_code\":\"FR\",\"type\":\"company\",\"lineage\":[\"https://openalex.org/I103084370\"]}],\"countries\":[\"FR\"],\"is_corresponding\":false,\"raw_author_name\":\"Matthieu Brucher\",\"raw_affiliation_strings\":[\"TOTAL S.A. (France)\"],\"affiliations\":[{\"raw_affiliation_string\":\"TOTAL S.A. (France)\",\"institution_ids\":[\"https://openalex.org/I103084370\"]}]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5051111217\",\"display_name\":\"Marc de Perrot\",\"orcid\":\"https://orcid.org/0000-0003-2000-9427\"},\"institutions\":[],\"countries\":[\"FR\"],\"is_corresponding\":false,\"raw_author_name\":\"Matthieu Perrot\",\"raw_affiliation_strings\":[\"LNAO (France)\"],\"affiliations\":[{\"raw_affiliation_string\":\"LNAO (France)\",\"institution_ids\":[]}]},{\"author_position\":\"last\",\"author\":{\"id\":\"https://openalex.org/A5007095962\",\"display_name\":\"\\u00c9douard Duchesnay\",\"orcid\":\"https://orcid.org/0000-0002-4073-3490\"},\"institutions\":[],\"countries\":[\"FR\"],\"is_corresponding\":false,\"raw_author_name\":\"\\u00c9douard Duchesnay\",\"raw_affiliation_strings\":[\"LNAO - Laboratoire de Neuroimagerie Assist\\u00e9e par Ordinateur (France)\"],\"affiliations\":[{\"raw_affiliation_string\":\"LNAO - Laboratoire de Neuroimagerie Assist\\u00e9e par Ordinateur (France)\",\"institution_ids\":[]}]}],\"countries_distinct_count\":5,\"institutions_distinct_count\":11,\"corresponding_author_ids\":[],\"corresponding_institution_ids\":[],\"apc_list\":null,\"apc_paid\":null,\"fwci\":null,\"has_fulltext\":false,\"cited_by_count\":39943,\"cited_by_percentile_year\":{\"min\":99,\"max\":100},\"biblio\":{\"volume\":null,\"issue\":null,\"first_page\":null,\"last_page\":null},\"is_retracted\":false,\"is_paratext\":false,\"primary_topic\":{\"id\":\"https://openalex.org/T13650\",\"display_name\":\"Scientific Computing and Data Analysis with Python\",\"score\":0.9945,\"subfield\":{\"id\":\"https://openalex.org/subfields/1702\",\"display_name\":\"Artificial Intelligence\"},\"field\":{\"id\":\"https://openalex.org/fields/17\",\"display_name\":\"Computer Science\"},\"domain\":{\"id\":\"https://openalex.org/domains/3\",\"display_name\":\"Physical Sciences\"}},\"topics\":[{\"id\":\"https://openalex.org/T13650\",\"display_name\":\"Scientific Computing and Data Analysis with Python\",\"score\":0.9945,\"subfield\":{\"id\":\"https://openalex.org/subfields/1702\",\"display_name\":\"Artificial Intelligence\"},\"field\":{\"id\":\"https://openalex.org/fields/17\",\"display_name\":\"Computer Science\"},\"domain\":{\"id\":\"https://openalex.org/domains/3\",\"display_name\":\"Physical Sciences\"}},{\"id\":\"https://openalex.org/T12535\",\"display_name\":\"Learning with Noisy Labels in Machine Learning\",\"score\":0.9859,\"subfield\":{\"id\":\"https://openalex.org/subfields/1702\",\"display_name\":\"Artificial Intelligence\"},\"field\":{\"id\":\"https://openalex.org/fields/17\",\"display_name\":\"Computer Science\"},\"domain\":{\"id\":\"https://openalex.org/domains/3\",\"display_name\":\"Physical Sciences\"}},{\"id\":\"https://openalex.org/T11512\",\"display_name\":\"Anomaly Detection in High-Dimensional Data\",\"score\":0.9749,\"subfield\":{\"id\":\"https://openalex.org/subfields/1702\",\"display_name\":\"Artificial Intelligence\"},\"field\":{\"id\":\"https://openalex.org/fields/17\",\"display_name\":\"Computer Science\"},\"domain\":{\"id\":\"https://openalex.org/domains/3\",\"display_name\":\"Physical Sciences\"}}],\"keywords\":[{\"id\":\"https://openalex.org/keywords/python\",\"display_name\":\"Python\",\"score\":0.532244},{\"id\":\"https://openalex.org/keywords/robust-learning\",\"display_name\":\"Robust Learning\",\"score\":0.507829}],\"concepts\":[{\"id\":\"https://openalex.org/C519991488\",\"wikidata\":\"https://www.wikidata.org/wiki/Q28865\",\"display_name\":\"Python (programming language)\",\"level\":2,\"score\":0.87480295},{\"id\":\"https://openalex.org/C56666940\",\"wikidata\":\"https://www.wikidata.org/wiki/Q788790\",\"display_name\":\"Documentation\",\"level\":2,\"score\":0.834846},{\"id\":\"https://openalex.org/C41008148\",\"wikidata\":\"https://www.wikidata.org/wiki/Q21198\",\"display_name\":\"Computer science\",\"level\":0,\"score\":0.7323823},{\"id\":\"https://openalex.org/C174183944\",\"wikidata\":\"https://www.wikidata.org/wiki/Q334661\",\"display_name\":\"MIT License\",\"level\":3,\"score\":0.5501255},{\"id\":\"https://openalex.org/C154945302\",\"wikidata\":\"https://www.wikidata.org/wiki/Q11660\",\"display_name\":\"Artificial intelligence\",\"level\":1,\"score\":0.51199156},{\"id\":\"https://openalex.org/C119857082\",\"wikidata\":\"https://www.wikidata.org/wiki/Q2539\",\"display_name\":\"Machine learning\",\"level\":1,\"score\":0.43965548},{\"id\":\"https://openalex.org/C199360897\",\"wikidata\":\"https://www.wikidata.org/wiki/Q9143\",\"display_name\":\"Programming language\",\"level\":1,\"score\":0.39753842},{\"id\":\"https://openalex.org/C2780560020\",\"wikidata\":\"https://www.wikidata.org/wiki/Q79719\",\"display_name\":\"License\",\"level\":2,\"score\":0.35676372},{\"id\":\"https://openalex.org/C115903868\",\"wikidata\":\"https://www.wikidata.org/wiki/Q80993\",\"display_name\":\"Software engineering\",\"level\":1,\"score\":0.34812212},{\"id\":\"https://openalex.org/C111919701\",\"wikidata\":\"https://www.wikidata.org/wiki/Q9135\",\"display_name\":\"Operating system\",\"level\":1,\"score\":0.18154305}],\"mesh\":[],\"locations_count\":4,\"locations\":[{\"is_oa\":true,\"landing_page_url\":\"https://arxiv.org/abs/1201.0490\",\"pdf_url\":null,\"source\":{\"id\":\"https://openalex.org/S4306400194\",\"display_name\":\"arXiv (Cornell University)\",\"issn_l\":null,\"issn\":null,\"is_oa\":true,\"is_in_doaj\":false,\"is_core\":false,\"host_organization\":\"https://openalex.org/I205783295\",\"host_organization_name\":\"Cornell University\",\"host_organization_lineage\":[\"https://openalex.org/I205783295\"],\"host_organization_lineage_names\":[\"Cornell University\"],\"type\":\"repository\"},\"license\":\"other-oa\",\"license_id\":\"https://openalex.org/licenses/other-oa\",\"version\":null,\"is_accepted\":false,\"is_published\":false},{\"is_oa\":true,\"landing_page_url\":\"https://inria.hal.science/hal-00650905\",\"pdf_url\":\"https://inria.hal.science/hal-00650905/document\",\"source\":{\"id\":\"https://openalex.org/S4306402512\",\"display_name\":\"HAL (Le Centre pour la Communication Scientifique Directe)\",\"issn_l\":null,\"issn\":null,\"is_oa\":true,\"is_in_doaj\":false,\"is_core\":false,\"host_organization\":\"https://openalex.org/I1294671590\",\"host_organization_name\":\"Centre National de la Recherche Scientifique\",\"host_organization_lineage\":[\"https://openalex.org/I1294671590\"],\"host_organization_lineage_names\":[\"Centre National de la Recherche Scientifique\"],\"type\":\"repository\"},\"license\":null,\"license_id\":null,\"version\":\"submittedVersion\",\"is_accepted\":false,\"is_published\":false},{\"is_oa\":true,\"landing_page_url\":\"https://orbi.uliege.be/handle/2268/225787\",\"pdf_url\":\"https://orbi.uliege.be/bitstream/2268/225787/1/1201.0490.pdf\",\"source\":{\"id\":\"https://openalex.org/S4306400651\",\"display_name\":\"Open Repository and Bibliography (University of Li\\u00e8ge)\",\"issn_l\":null,\"issn\":null,\"is_oa\":true,\"is_in_doaj\":false,\"is_core\":false,\"host_organization\":\"https://openalex.org/I157674565\",\"host_organization_name\":\"University of Li\\u00e8ge\",\"host_organization_lineage\":[\"https://openalex.org/I157674565\"],\"host_organization_lineage_names\":[\"University of Li\\u00e8ge\"],\"type\":\"repository\"},\"license\":null,\"license_id\":null,\"version\":\"submittedVersion\",\"is_accepted\":false,\"is_published\":false},{\"is_oa\":false,\"landing_page_url\":\"https://api.datacite.org/dois/10.48550/arxiv.1201.0490\",\"pdf_url\":null,\"source\":{\"id\":\"https://openalex.org/S4393179698\",\"display_name\":\"DataCite API\",\"issn_l\":null,\"issn\":null,\"is_oa\":true,\"is_in_doaj\":false,\"is_core\":false,\"host_organization\":\"https://openalex.org/I4210145204\",\"host_organization_name\":\"DataCite\",\"host_organization_lineage\":[\"https://openalex.org/I4210145204\"],\"host_organization_lineage_names\":[\"DataCite\"],\"type\":\"metadata\"},\"license\":null,\"license_id\":null,\"version\":null}],\"best_oa_location\":{\"is_oa\":true,\"landing_page_url\":\"https://arxiv.org/abs/1201.0490\",\"pdf_url\":null,\"source\":{\"id\":\"https://openalex.org/S4306400194\",\"display_name\":\"arXiv (Cornell University)\",\"issn_l\":null,\"issn\":null,\"is_oa\":true,\"is_in_doaj\":false,\"is_core\":false,\"host_organization\":\"https://openalex.org/I205783295\",\"host_organization_name\":\"Cornell University\",\"host_organization_lineage\":[\"https://openalex.org/I205783295\"],\"host_organization_lineage_names\":[\"Cornell University\"],\"type\":\"repository\"},\"license\":\"other-oa\",\"license_id\":\"https://openalex.org/licenses/other-oa\",\"version\":null,\"is_accepted\":false,\"is_published\":false},\"sustainable_development_goals\":[{\"display_name\":\"Quality education\",\"id\":\"https://metadata.un.org/sdg/4\",\"score\":0.44}],\"grants\":[],\"datasets\":[],\"versions\":[],\"referenced_works_count\":13,\"referenced_works\":[\"https://openalex.org/W1496508106\",\"https://openalex.org/W1571024744\",\"https://openalex.org/W2024933578\",\"https://openalex.org/W2035776949\",\"https://openalex.org/W2040387238\",\"https://openalex.org/W2047804403\",\"https://openalex.org/W2063978378\",\"https://openalex.org/W2097360283\",\"https://openalex.org/W2097850441\",\"https://openalex.org/W2118585731\",\"https://openalex.org/W2146292423\",\"https://openalex.org/W2152799677\",\"https://openalex.org/W2153635508\"],\"related_works\":[\"https://openalex.org/W4392173297\",\"https://openalex.org/W4311683883\",\"https://openalex.org/W4221030787\",\"https://openalex.org/W4212902261\",\"https://openalex.org/W2790811106\",\"https://openalex.org/W2546377002\",\"https://openalex.org/W2207495067\",\"https://openalex.org/W2132241624\",\"https://openalex.org/W2036021480\",\"https://openalex.org/W1906486629\"],\"ngrams_url\":\"https://api.openalex.org/works/W2101234009/ngrams\",\"abstract_inverted_index\":{\"Scikit-learn\":[0],\"is\":[1,35,51],\"a\":[2,6,30],\"Python\":[3],\"module\":[4],\"integrating\":[5],\"wide\":[7],\"range\":[8],\"of\":[9,39],\"state-of-the-art\":[10],\"machine\":[11,25],\"learning\":[12,26],\"algorithms\":[13],\"for\":[14],\"medium-scale\":[15],\"supervised\":[16],\"and\":[17,43,50,64,70],\"unsupervised\":[18],\"problems.\":[19],\"This\":[20],\"package\":[21],\"focuses\":[22],\"on\":[23,37],\"bringing\":[24],\"to\":[27],\"non-specialists\":[28],\"using\":[29],\"general-purpose\":[31],\"high-level\":[32],\"language.\":[33],\"Emphasis\":[34],\"put\":[36],\"ease\":[38],\"use,\":[40],\"performance,\":[41],\"documentation,\":[42],\"API\":[44],\"consistency.\":[45],\"It\":[46],\"has\":[47],\"minimal\":[48],\"dependencies\":[49],\"distributed\":[52],\"under\":[53],\"the\":[54],\"simplified\":[55],\"BSD\":[56],\"license,\":[57],\"encouraging\":[58],\"its\":[59],\"use\":[60],\"in\":[61],\"both\":[62],\"academic\":[63],\"commercial\":[65],\"settings.\":[66],\"Source\":[67],\"code,\":[68],\"binaries,\":[69],\"documentation\":[71],\"can\":[72],\"be\":[73],\"downloaded\":[74],\"from\":[75],\"http://scikit-learn.org.\":[76]},\"cited_by_api_url\":\"https://api.openalex.org/works?filter=cites:W2101234009\",\"counts_by_year\":[{\"year\":2024,\"cited_by_count\":2991},{\"year\":2023,\"cited_by_count\":5425},{\"year\":2022,\"cited_by_count\":4906},{\"year\":2021,\"cited_by_count\":5734},{\"year\":2020,\"cited_by_count\":4486},{\"year\":2019,\"cited_by_count\":3155},{\"year\":2018,\"cited_by_count\":2112},{\"year\":2017,\"cited_by_count\":1343},{\"year\":2016,\"cited_by_count\":957},{\"year\":2015,\"cited_by_count\":675},{\"year\":2014,\"cited_by_count\":394},{\"year\":2013,\"cited_by_count\":173},{\"year\":2012,\"cited_by_count\":45}],\"updated_date\":\"2024-07-24T02:32:32.187119\",\"created_date\":\"2016-06-24\"}\n",
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "Scikit-learn: Machine Learning in Python",
+				"creators": [
+					{
+						"firstName": "Fabián",
+						"lastName": "Pedregosa",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Gaël",
+						"lastName": "Varoquaux",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alexandre",
+						"lastName": "Gramfort",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Vincent",
+						"lastName": "Michel",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Bertrand",
+						"lastName": "Thirion",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Olivier",
+						"lastName": "Grisel",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mathieu",
+						"lastName": "Blondel",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peter",
+						"lastName": "Prettenhofer",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ron J.",
+						"lastName": "Weiss",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Vincent",
+						"lastName": "Dubourg",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jake",
+						"lastName": "Vanderplas",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alexandre",
+						"lastName": "Passos",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Cournapeau",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Matthieu",
+						"lastName": "Brucher",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marc de",
+						"lastName": "Perrot",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Édouard",
+						"lastName": "Duchesnay",
+						"creatorType": "author"
+					}
+				],
+				"date": "2012-01-01",
+				"DOI": "10.48550/arxiv.1201.0490",
+				"extra": "OpenAlex: https://openalex.org/W2101234009",
+				"language": "en",
+				"repository": "Cornell University",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Python"
+					},
+					{
+						"tag": "Robust Learning"
 					}
 				],
 				"notes": [],

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-07-29 14:03:50"
+	"lastUpdated": "2024-07-29 14:16:50"
 }
 
 /*
@@ -126,7 +126,7 @@ var testCases = [
 				],
 				"date": "1973-10-01",
 				"DOI": "10.2307/2525981",
-				"ISSN": "0020-6598,1468-2354",
+				"ISSN": "0020-6598",
 				"extra": "OpenAlex: https://openalex.org/W2029394297",
 				"issue": "3",
 				"language": "en",
@@ -140,7 +140,14 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Gender Pay Gap"
+					},
+					{
+						"tag": "Job Polarization"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -162,7 +169,7 @@ var testCases = [
 				],
 				"date": "1951-09-01",
 				"DOI": "10.1007/bf02310555",
-				"ISSN": "0033-3123,1860-0980",
+				"ISSN": "0033-3123",
 				"extra": "OpenAlex: https://openalex.org/W2159306398",
 				"issue": "3",
 				"language": "en",
@@ -176,7 +183,11 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Reliability Estimation"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -254,7 +265,176 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Open Access Publishing"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://openalex.org/works/w2964121744",
+		"detectedItemType": "journalArticle",
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "Adam: A Method for Stochastic Optimization",
+				"creators": [
+					{
+						"firstName": "Diederik P.",
+						"lastName": "Kingma",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jimmy",
+						"lastName": "Ba",
+						"creatorType": "author"
+					}
+				],
+				"date": "2014-01-01",
+				"DOI": "10.48550/arxiv.1412.6980",
+				"extra": "OpenAlex: https://openalex.org/W2964121744",
+				"language": "en",
+				"libraryCatalog": "OpenAlex",
+				"repository": "Cornell University",
+				"shortTitle": "Adam",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Approximation Algorithms"
+					},
+					{
+						"tag": "Convex Optimization"
+					},
+					{
+						"tag": "Global Optimization"
+					},
+					{
+						"tag": "Optimization Software"
+					},
+					{
+						"tag": "Stochastic Gradient Descent"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://openalex.org/works/W2962935454",
+		"detectedItemType": "journalArticle",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "Generalizing to Unseen Domains via Adversarial Data Augmentation",
+				"creators": [
+					{
+						"firstName": "Riccardo",
+						"lastName": "Volpi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hongseok",
+						"lastName": "Namkoong",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ozan",
+						"lastName": "Şener",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "John C.",
+						"lastName": "Duchi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Vittorio",
+						"lastName": "Murino",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Silvio",
+						"lastName": "Savarese",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018-05-01",
+				"extra": "OpenAlex: https://openalex.org/W2962935454",
+				"language": "en",
+				"libraryCatalog": "OpenAlex",
+				"pages": "5334-5344",
+				"proceedingsTitle": "Neural Information Processing Systems",
+				"volume": "31",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Adversarial Examples"
+					},
+					{
+						"tag": "Domain Adaptation"
+					},
+					{
+						"tag": "Representation Learning"
+					},
+					{
+						"tag": "Transfer Learning"
+					},
+					{
+						"tag": "Unsupervised Learning"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://openalex.org/works/w2979586175",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Two-Way Fixed Effects Estimators with Heterogeneous Treatment Effects",
+				"creators": [
+					{
+						"firstName": "Clément de",
+						"lastName": "Chaisemartin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Xavier",
+						"lastName": "D’Haultfœuille",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020-09-01",
+				"DOI": "10.1257/aer.20181169",
+				"ISSN": "0002-8282",
+				"extra": "OpenAlex: https://openalex.org/W2979586175",
+				"issue": "9",
+				"language": "en",
+				"libraryCatalog": "OpenAlex",
+				"pages": "2964-2996",
+				"publicationTitle": "American Economic Review",
+				"volume": "110",
+				"attachments": [
+					{
+						"title": "Submitted Version PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Treatment Effects"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
