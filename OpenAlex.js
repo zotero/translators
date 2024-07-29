@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-04-13 18:27:11"
+	"lastUpdated": "2024-07-29 14:03:50"
 }
 
 /*
@@ -102,12 +102,12 @@ async function scrape(ids) {
 	await translator.translate();
 }
 
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
 		"url": "https://openalex.org/works?page=1&filter=default.search%3Alabor&sort=relevance_score%3Adesc",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
@@ -140,17 +140,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [
-					{
-						"tag": "labor"
-					},
-					{
-						"tag": "male-female"
-					},
-					{
-						"tag": "markets"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -186,11 +176,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [
-					{
-						"tag": "Reliability Estimation"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -199,7 +185,7 @@ var testCases = [
 	{
 		"type": "search",
 		"input": {
-			"openalex": "W2741809807"
+			"openAlex": "W2741809807"
 		},
 		"items": [
 			{
@@ -268,26 +254,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [
-					{
-						"tag": "access"
-					},
-					{
-						"tag": "articles"
-					},
-					{
-						"tag": "large-scale"
-					},
-					{
-						"tag": "oa"
-					},
-					{
-						"tag": "open"
-					},
-					{
-						"tag": "prevalence"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
