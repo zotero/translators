@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-22 22:36:15"
+	"lastUpdated": "2024-07-30 14:56:12"
 }
 
 /*
@@ -76,10 +76,11 @@ function getSearchResults(doc, checkOnly) {
 
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) return ZU.processDocuments(Object.keys(items), scrape);
-			return true;
-		});
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else {
 		await scrape(doc, url);
