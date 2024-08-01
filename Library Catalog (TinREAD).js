@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-07-30 14:56:12"
+	"lastUpdated": "2024-08-01 14:15:46"
 }
 
 /*
@@ -98,7 +98,14 @@ async function scrape(doc, url = doc.location.href) {
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("edd87d07-9194-42f8-b2ad-997c4c7deefd"); // MARCXML
 	translator.setString(marcText);
-	await translator.translate();
+
+	// Sometimes the MARC contains a dummy record for the book's series,
+	// so just complete the item with the most creators
+	translator.setHandler("itemDone", () => {});
+	let items = await translator.translate();
+	if (!items.length) return;
+	items.sort((i1, i2) => i2.creators.length - i1.creators.length);
+	items[0].complete();
 }
 
 /** BEGIN TEST CASES **/
@@ -166,19 +173,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://tinread.biblioteca.ct.ro/opac/bibliographic_view/238969?pn=opac/Search&amp;q=educatie+fizica#level=all&amp;location=0&amp;ob=asc&amp;q=educatie+fizica&amp;sb=relevance&amp;start=0&amp;view=CONTENT",
-		"detectedItemType": "book",
 		"items": [
-			{
-				"itemType": "book",
-				"title": "Cursus. Educaţie fizică",
-				"creators": [],
-				"language": "rum",
-				"libraryCatalog": "Library Catalog (TinREAD)",
-				"attachments": [],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			},
 			{
 				"itemType": "book",
 				"title": "Metodica predării educaţiei fizice şi sportului",
