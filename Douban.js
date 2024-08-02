@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-04 03:46:18"
+	"lastUpdated": "2022-07-02 05:38:57"
 }
 
 /*
@@ -52,6 +52,15 @@
 // #### Local utility functions ####
 // #################################
 
+
+function getTextInaTag(text) {
+	var aTag = /<a [^>]*?>(.*?)<\/a>/;
+	if (aTag.test(text)) {
+		return aTag.exec(text)[1];
+	} else {
+		return text
+	}
+}
 function trimTags(text) {
 	return text.replace(/(<.*?>)/g, "");
 }
@@ -62,8 +71,9 @@ function trimTags(text) {
 
 function scrapeAndParse(doc, url) {
 	// Z.debug({ url })
-	Zotero.Utilities.HTTP.doGet(url, function (page) {
-		// Z.debug(page)
+
+	ZU.doGet(url, function (page) {
+		
 		var pattern;
 
 		// 类型 & URL
@@ -72,27 +82,35 @@ function scrapeAndParse(doc, url) {
 		// Zotero.debug(itemType);
 		newItem.url = url;
 
-		// 标题
+		// 主标题（短标题）
 		pattern = /<h1>([\s\S]*?)<\/h1>/;
 		if (pattern.test(page)) {
-			var title = pattern.exec(page)[1];
-			newItem.title = Zotero.Utilities.trim(trimTags(title));
-			// Zotero.debug("title: "+title);
-		}
-
-		// 又名
-		pattern = /<span [^>]*?>又名:(.*?)<\/span>/;
-		if (pattern.test(page)) {
 			var shortTitle = pattern.exec(page)[1];
-			newItem.shortTitle = Zotero.Utilities.trim(shortTitle);
+			newItem.shortTitle = (trimTags(shortTitle)).trim();
 			// Zotero.debug("shortTitle: "+shortTitle);
 		}
-
-		// 作者
-
+		
 		page = page.replace(/\n/g, "");
 		// Z.debug(page)
+		
+		// 标题 = 主标题: 副标题
+		pattern = /<span [^>]*?>副标题:<\/span>(.*?)<br/;
+		if (pattern.test(page)) {
+			var subTitle = pattern.exec(page)[1];
+			// Zotero.debug("subTitle: "+subTitle);
+			newItem.title = newItem.shortTitle + ": " + subTitle.trim();
+		} 
+		else {
+			newItem.title = newItem.shortTitle;
+		}
+		// Zotero.debug("title: "+title);
+		
+
+		// 作者
 		pattern = /<span>\s*<span[^>]*?>\s*作者<\/span>:(.*?)<\/span>/;
+		if (!pattern.test(page)) {
+			pattern = /<span [^>]*?>作者:<\/span>(.*?)<br/;
+		}
 		if (pattern.test(page)) {
 			var authorNames = trimTags(pattern.exec(page)[1]);
 			pattern = /(\[.*?\]|\(.*?\)|（.*?）)/g;
@@ -108,19 +126,22 @@ function scrapeAndParse(doc, url) {
 						useComma = false;
 					}
 				}
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(
-					Zotero.Utilities.trim(authorNames[i]),
+				newItem.creators.push(ZU.cleanAuthor(
+					(authorNames[i]).trim(),
 					"author", useComma));
 			}
 		}
 
 		// 译者
-		pattern = /<span>\s*<span [^>]*?>\s*译者<\/span>:(.*?)<\/span>/;
+		pattern = /<span>\s*<span [^>]*?>\s*译者<\/span>:?(.*?)<\/span>/;
+		if (!pattern.test(page)) {
+			pattern = /<span [^>]*?>译者:<\/span>(.*?)<br/;
+		}
 		if (pattern.test(page)) {
 			var translatorNames = trimTags(pattern.exec(page)[1]);
 			pattern = /(\[.*?\])/g;
 			translatorNames = translatorNames.replace(pattern, "").split("/");
-			//		Zotero.debug(translatorNames);
+			
 			for (let i = 0; i < translatorNames.length; i++) {
 				let useComma = true;
 				pattern = /[A-Za-z]/;
@@ -128,49 +149,60 @@ function scrapeAndParse(doc, url) {
 				// 外文名
 					useComma = false;
 				}
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(
-					Zotero.Utilities.trim(translatorNames[i]),
+				newItem.creators.push(ZU.cleanAuthor(
+					ZU.trim(translatorNames[i]),
 					"translator", useComma));
 			}
-		}
+		} 
 
 		// ISBN
-		pattern = /<span [^>]*?>ISBN:<\/span>(.*?)<br\/>/;
+		pattern = /<span [^>]*?>ISBN:<\/span>(.*?)<br/;
 		if (pattern.test(page)) {
 			var isbn = pattern.exec(page)[1];
-			newItem.ISBN = Zotero.Utilities.trim(isbn);
+			newItem.ISBN = ZU.trim(isbn);
 			// Zotero.debug("isbn: "+isbn);
 		}
 
 		// 页数
-		pattern = /<span [^>]*?>页数:<\/span>(.*?)<br\/>/;
+		pattern = /<span [^>]*?>页数:<\/span>(.*?)<br/;
 		if (pattern.test(page)) {
 			var numPages = pattern.exec(page)[1];
-			newItem.numPages = Zotero.Utilities.trim(numPages);
+			numPages = numPages.replace(/页/g, "");
+			newItem.numPages = ZU.trim(numPages);
 			// Zotero.debug("numPages: "+numPages);
 		}
 
 		// 出版社
-		pattern = /<span [^>]*?>出版社:<\/span>(.*?)<br\/>/;
+		pattern = /<span [^>]*?>出版社:<\/span>(.*?)<br/;
 		if (pattern.test(page)) {
-			var publisher = pattern.exec(page)[1];
-			newItem.publisher = Zotero.Utilities.trim(publisher);
+			var publisher = getTextInaTag(pattern.exec(page)[1]);
+			newItem.publisher = ZU.trim(publisher);
 			// Zotero.debug("publisher: "+publisher);
 		}
 
-		// 丛书
-		pattern = /<span [^>]*?>丛书:<\/span>(.*?)<br\/>/;
+		// 原作名
+		pattern = /<span [^>]*?>原作名:<\/span>(.*?)<br/;
 		if (pattern.test(page)) {
-			var series = trimTags(pattern.exec(page)[1]);
-			newItem.series = Zotero.Utilities.trim(series);
+			var originalTitle = pattern.exec(page)[1];
+			newItem.extra = "Original Title: " + ZU.trim(originalTitle);
+			// Zotero.debug("originalTitle: "+originalTitle);
+		}
+		
+		// 丛书
+		pattern = /<span [^>]*?>丛书:<\/span>(.*?)<br/;
+		if (pattern.test(page)) {
+			var series = getTextInaTag(pattern.exec(page)[1]);
+			newItem.series = ZU.trim(series);
 			// Zotero.debug("series: "+series);
 		}
 
 		// 出版年
-		pattern = /<span [^>]*?>出版年:<\/span>(.*?)<br\/>/;
+		pattern = /<span [^>]*?>出版年:<\/span>(.*?)<br/;
 		if (pattern.test(page)) {
 			var date = pattern.exec(page)[1];
-			newItem.date = Zotero.Utilities.trim(date);
+			date = date.replace(/[年月日]$/g, "");
+			date = date.replace(/[年月日]/g, "-");
+			newItem.date = ZU.strToISO(ZU.trim(date));
 			// Zotero.debug("date: "+date);
 		}
 
@@ -179,7 +211,7 @@ function scrapeAndParse(doc, url) {
 		for (let i in tags) {
 			newItem.tags.push(tags[i].textContent);
 		}
-		newItem.abstractNote = ZU.xpathText(doc, '//span[@class="short"]/div[@class="intro"]/p');
+		newItem.abstractNote = ZU.xpathText(doc, '(//div[@id="link-report"]//div[@class="intro"])[last()]');
 
 		newItem.complete();
 	});
@@ -234,7 +266,7 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, scrapeAndParse);
+			ZU.processDocuments(articles, scrapeAndParse);
 		});
 	}
 	else {
@@ -242,61 +274,38 @@ function doWeb(doc, url) {
 	}
 }
 
+
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://book.douban.com/subject/1355643/",
+		"url": "https://book.douban.com/subject/35315153/",
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Norwegian Wood",
+				"title": "克拉拉与太阳",
 				"creators": [
 					{
-						"firstName": "Haruki",
-						"lastName": "Murakami",
+						"lastName": "石黑一雄",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jay",
-						"lastName": "Rubin",
+						"lastName": "宋佥",
 						"creatorType": "translator"
 					}
 				],
-				"date": "2003",
-				"ISBN": "9780099448822",
-				"abstractNote": "When he hears her favourite Beatles song, Toru Watanabe recalls his first love Naoko, the girlfriend of his best friend Kizuki. Immediately he is transported back almost twenty years to his student days in Tokyo, adrift in a world of uneasy friendships, casual sex, passion, loss and desire - to a time when an impetuous young woman called Midori marches into his life and he has ..., (展开全部)",
+				"date": "2021-03",
+				"ISBN": "9787532786831",
+				"abstractNote": "“太阳总有办法照到我们，不管我们在哪里。”    ~    克拉拉是一个专为陪伴儿童而设计的太阳能人工智能机器人（AF），具有极高的观察、推理与共情能力。她坐在商店展示橱窗里，注视着街头路人以及前来浏览橱窗的孩子们的一举一动。她始终期待着很快就会有人挑中她，不过，当这种永久改变境遇的可能性出现时，克拉拉却被提醒不要过分相信人类的诺言。    在《克拉拉与太阳》这部作品中，石黑一雄通过一位令人难忘的叙述者的视角，观察千变万化的现代社会，探索了一个根本性的问题：究竟什么是爱？    ~    “你相信有‘人心’这回事吗？    我不仅仅是指那个器官，当然喽。    我说的是这个词的文学意义。    人心。你相信有这样东西吗？    某种让我们每个人成为独特个体的东西？”",
+				"extra": "Original Title: Klara and the Sun",
 				"libraryCatalog": "Douban",
-				"numPages": "389",
-				"publisher": "Vintage",
-				"url": "https://book.douban.com/subject/1355643/",
+				"numPages": "392",
+				"publisher": "上海译文出版社",
+				"series": "石黑一雄作品",
+				"url": "https://book.douban.com/subject/35315153/",
 				"attachments": [],
-				"tags": [
-					{
-						"tag": "HarukiMurakami"
-					},
-					{
-						"tag": "小说"
-					},
-					{
-						"tag": "挪威森林英文版"
-					},
-					{
-						"tag": "日本"
-					},
-					{
-						"tag": "日本文学"
-					},
-					{
-						"tag": "村上春树"
-					},
-					{
-						"tag": "英文原版"
-					},
-					{
-						"tag": "英文版"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
