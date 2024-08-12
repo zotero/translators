@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-05-29 17:10:18"
+	"lastUpdated": "2024-08-12 21:42:53"
 }
 
 /*
@@ -124,18 +124,38 @@ function scrape(doc, url) {
 			delete item.bookTitle;
 		}
 		
-		if (item.bookTitle && !item.bookTitle.includes(': ')) {
+		if (item.itemType == 'bookSection') {
+			delete item.publicationTitle;
+			delete item.abstractNote;
+			delete item.rights; // AI training disclaimer!
+
 			let risURL = attr(doc, 'a[title="Download in RIS format"]', 'href');
 			if (!risURL) {
 				risURL = url.replace(/\/html([?#].*)$/, '/machineReadableCitation/RIS');
 			}
 			
 			ZU.doGet(risURL, function (risText) {
-				let bookTitle = risText.match(/^\s*T1\s*-\s*(.*)$/m);
-				if (bookTitle) {
-					item.bookTitle = bookTitle[1];
+				// De Gruyter uses TI for the container title and T2 for the subtitle
+				// Seems nonstandard! So we'll just handle it here
+				let titleMatch = risText.match(/^\s*TI\s*-\s*(.+)/m);
+				let subtitleMatch = risText.match(/^\s*T2\s*-\s*(.+)/m);
+				if (titleMatch) {
+					item.bookTitle = titleMatch[1];
+					if (subtitleMatch) {
+						item.bookTitle = item.bookTitle.trim() + ': ' + subtitleMatch[1];
+					}
 				}
-				item.complete();
+
+				let translator = Zotero.loadTranslator('import');
+				translator.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7');
+				translator.setString(risText);
+				translator.setHandler('itemDone', (_obj, risItem) => {
+					if (!item.creators.some(c => c.creatorType == 'editor')) {
+						item.creators.push(...risItem.creators.filter(c => c.creatorType == 'editor'));
+					}
+					item.complete();
+				});
+				translator.translate();
 			});
 		}
 		else {
@@ -196,7 +216,12 @@ var testCases = [
 				"shortTitle": "Homosexuelle im modernen Deutschland",
 				"url": "https://www.degruyter.com/document/doi/10.1515/vfzg-2021-0028/html",
 				"volume": "69",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [
 					{
 						"tag": "Emancipation"
@@ -313,13 +338,11 @@ var testCases = [
 				],
 				"date": "2021-07-30",
 				"ISBN": "9781487518806",
-				"abstractNote": "5 Serving the Public Good: Reform, Prestige, and the Productive Criminal Body in Amsterdam was published in Picturing Punishment on page 135.",
-				"bookTitle": "Picturing Punishment",
+				"bookTitle": "Picturing Punishment: The Spectacle and Material Afterlife of the Criminal Body in the Dutch Republic",
 				"language": "en",
 				"libraryCatalog": "www.degruyter.com",
 				"pages": "135-157",
 				"publisher": "University of Toronto Press",
-				"rights": "De Gruyter expressly reserves the right to use all content for commercial text and data mining within the meaning of Section 44b of the German Copyright Act.",
 				"shortTitle": "5 Serving the Public Good",
 				"url": "https://www.degruyter.com/document/doi/10.3138/9781487518806-008/html",
 				"attachments": [],
@@ -445,6 +468,55 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.degruyter.com/journal/key/mt/html",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.degruyter.com/document/doi/10.1515/9783110773712-010/html",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "10 Skaldic Poetry – Encrypted Communication",
+				"creators": [
+					{
+						"firstName": "Jon Gunnar",
+						"lastName": "Jørgensen",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Engh",
+						"firstName": "Line Cecilie",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Gullbekk",
+						"firstName": "Svein Harald",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Orning",
+						"firstName": "Hans Jacob",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2024-08-19",
+				"ISBN": "9783110773712",
+				"bookTitle": "Standardization in the Middle Ages: Volume 1: The North",
+				"language": "en",
+				"libraryCatalog": "www.degruyter.com",
+				"pages": "229-250",
+				"publisher": "De Gruyter",
+				"url": "https://www.degruyter.com/document/doi/10.1515/9783110773712-010/html",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
