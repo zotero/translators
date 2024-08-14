@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-06-27 14:34:30"
+	"lastUpdated": "2024-08-14 09:22:27"
 }
 
 /*
@@ -80,7 +80,7 @@ async function scrape(doc, url = doc.location.href) {
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
-	
+
 	translator.setHandler('itemDone', (_obj, item) => {
 		if (item.abstractNote.length < 20) {
 			let abstractNEU = text(doc, 'div.card-content h2~p'); 
@@ -103,7 +103,9 @@ async function scrape(doc, url = doc.location.href) {
 		if (text(doc, 'span.card-title div small') == 'Reviews'){
 			item.tags.push("RezensionstagPica");
 		}
-		
+
+		if (!item.pages && ZU.xpathText(doc, '//th[text()="Pages"]/following-sibling::td/text()')) item.pages = ZU.xpathText(doc, '//th[text()="Pages"]/following-sibling::td/text()');
+
 		item.complete();
 	});
 
@@ -114,7 +116,84 @@ async function scrape(doc, url = doc.location.href) {
 }
 
 
+
 /** BEGIN TEST CASES **/
 var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.zygonjournal.org/article/id/14964/",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "A BROADER PERSPECTIVE ON “HUMANS”: ANALYSIS OF INSĀN IN TWELVER SHĪʿĪ PHILOSOPHY AND IMPLICATIONS FOR ASTROTHEOLOGY",
+				"creators": [
+					{
+						"firstName": "Abdullah",
+						"lastName": "Ansar",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Shahbaz",
+						"lastName": "Haider",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-12-01",
+				"DOI": "10.1111/zygo.12926",
+				"ISSN": "1467-9744",
+				"abstractNote": "This article explores the essence of the human (insān) as it is understood in Twelver Shīʿī philosophy and mysticism. It presents a Shīʿī philosophical elucidation regarding the possible existence of extraterrestrial intelligent lifeforms and what their relationship with “humanhood” might be. This line of reasoning is presented with a general sketch of how, in Shīʿī Islamic thought, a “human being” is characterized by specific traits and the relationship of human beings with the archetype of the Perfect Human (al‐Insān al‐Kāmil). Following this is a review of Shīʿī Imāmī traditions regarding extraterrestrial intelligent life and the plurality of worlds. This sequence ultimately allows for a unique analysis of humanhood according to the Shīʿī philosophical viewpoint and helps determine if the term “human” can be used for other intelligent beings with similar ontological features and intelligence levels.",
+				"issue": "4",
+				"language": "None",
+				"libraryCatalog": "www.zygonjournal.org",
+				"pages": "838–859",
+				"publicationTitle": "Zygon: Journal of Religion and Science",
+				"shortTitle": "A BROADER PERSPECTIVE ON “HUMANS”",
+				"url": "https://www.zygonjournal.org/article/id/14964/",
+				"volume": "58",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Perfect Human"
+					},
+					{
+						"tag": "Shīʿī Ḥadīth"
+					},
+					{
+						"tag": "al‐Insān al‐Kāmil"
+					},
+					{
+						"tag": "astrotheology"
+					},
+					{
+						"tag": "extraterrestrial intelligent life"
+					},
+					{
+						"tag": "human–extraterrestrial interaction (HEI)"
+					},
+					{
+						"tag": "noncarbon‐based lifeforms"
+					},
+					{
+						"tag": "plurality of worlds"
+					}
+				],
+				"notes": [
+					{
+						"note": "orcid:0000-0001-8195-7530 | Abdullah Ansar"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	}
 ]
 /** END TEST CASES **/
