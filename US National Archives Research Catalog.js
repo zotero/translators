@@ -123,7 +123,7 @@ var testCases = [
 					{
 						"lastName": "Supreme Commander for the Allied Powers. Economic and Scientific Section. Director for Labor. Labor Division",
 						"creatorType": "author",
-						"fieldMode": true
+						"fieldMode": 1
 					}
 				],
 				"date": "1945",
@@ -150,7 +150,7 @@ var testCases = [
 					{
 						"lastName": "Department of Justice. Immigration and Naturalization Service",
 						"creatorType": "author",
-						"fieldMode": true
+						"fieldMode": 1
 					}
 				],
 				"abstractNote": "This file consists of an alien case file for Francisca Torre Vda De Garcia.  Date of birth is listed as 10/10/1901.  Country is listed as Cuba.  Port of Entry is Miami, Florida.  Date of entry is 03/08/1973.  Father is listed as Zotero.  Mother is listed as Candita.  Alias name is listed as Francisca Torres.",
