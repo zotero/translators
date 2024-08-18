@@ -106,7 +106,7 @@ async function doWeb(doc, url) {
 	}
 	item.archiveLocation = json.localIdentifier;
 	item.extra = (item.extra || '') + '\nNational Archives Identifier: ' + json.naId;
-	item.url = url
+	item.url = url;
 	item.complete();
 }
 
@@ -135,7 +135,7 @@ var testCases = [
 				"tags": [],
 				"notes": [],
 				"seeAlso": [],
-				"url":"https://catalog.archives.gov/id/486076"
+				"url": "https://catalog.archives.gov/id/486076"
 			}
 		]
 	},
@@ -190,7 +190,7 @@ var testCases = [
 				"tags": [],
 				"notes": [],
 				"seeAlso": [],
-				"url": "https://catalog.archives.gov/id/603604",
+				"url": "https://catalog.archives.gov/id/603604"
 			}
 		]
 	}
