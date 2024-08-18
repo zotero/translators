@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-01-17 18:26:20"
+	"lastUpdated": "2024-08-17 18:26:20"
 }
 
 /*
@@ -51,7 +51,7 @@ function detectWeb(doc, url) {
 async function doWeb(doc, url) {
 	let position = url.indexOf('/id/');
 	let id = url.substr(position + 4);
-	let jsonURL = `https://catalog.archives.gov/proxy/advanced-search?naId_is=${id}&allowLegacyOrgNames=true`;
+	let jsonURL = `https://catalog.archives.gov/proxy/records/search?naId_is=${id}&allowLegacyOrgNames=true`;
 	let json = (await requestJSON(jsonURL)).body.hits.hits[0]._source.record;
 
 	let item = new Zotero.Item("book");
@@ -106,7 +106,7 @@ async function doWeb(doc, url) {
 	}
 	item.archiveLocation = json.localIdentifier;
 	item.extra = (item.extra || '') + '\nNational Archives Identifier: ' + json.naId;
-	
+	item.url = url
 	item.complete();
 }
 
@@ -134,7 +134,8 @@ var testCases = [
 				"attachments": [],
 				"tags": [],
 				"notes": [],
-				"seeAlso": []
+				"seeAlso": [],
+				"url":"https://catalog.archives.gov/id/486076"
 			}
 		]
 	},
@@ -161,7 +162,8 @@ var testCases = [
 				"attachments": [],
 				"tags": [],
 				"notes": [],
-				"seeAlso": []
+				"seeAlso": [],
+				"url": "https://catalog.archives.gov/id/5496901"
 			}
 		]
 	},
@@ -187,7 +189,8 @@ var testCases = [
 				"attachments": [],
 				"tags": [],
 				"notes": [],
-				"seeAlso": []
+				"seeAlso": [],
+				"url": "https://catalog.archives.gov/id/603604",
 			}
 		]
 	}
