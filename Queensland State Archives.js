@@ -2,14 +2,14 @@
 	"translatorID": "214505fc-fa92-4b35-b323-5f12a4b157cb",
 	"label": "Queensland State Archives",
 	"creator": "Tim Sherratt (tim@timsherratt.au)",
-	"target": "https?://www\\.archivessearch\\.qld\\.gov\\.au/(items|search)*",
+	"target": "https?://www\\.archivessearch\\.qld\\.gov\\.au/(items|search)",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-08-21 02:38:36"
+	"lastUpdated": "2024-08-21 19:39:55"
 }
 
 /*
@@ -36,7 +36,7 @@
 */
 
 async function detectWeb(doc, url) {
-	if (/\/search\?*/.test(url)) {
+	if (/\/search\?/.test(url)) {
 		if (getSearchResults(doc, true)) {
 			return "multiple";
 		}
@@ -56,7 +56,7 @@ function getSearchResults(doc, checkOnly) {
 	let found = false;
 	let rows = doc.querySelectorAll("div.result-left-pane a");
 	for (let row of rows) {
-		let href = "https://www.archivessearch.qld.gov.au/" + row.href;
+		let href = row.href;
 		href = /\/items\//.test(href) ? href : null;
 		let title = row.innerText;
 		if (!href || !title) continue;
