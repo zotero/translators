@@ -2,14 +2,14 @@
 	"translatorID": "214505fc-fa92-4b35-b323-5f12a4b157cb",
 	"label": "Queensland State Archives",
 	"creator": "Tim Sherratt (tim@timsherratt.au)",
-	"target": "https?://www\\.archivessearch\\.qld\\.gov\\.au/(items|search)",
+	"target": "^https?://www\\.archivessearch\\.qld\\.gov\\.au/(items|search)",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-08-21 19:39:55"
+	"lastUpdated": "2024-08-21 19:41:51"
 }
 
 /*
