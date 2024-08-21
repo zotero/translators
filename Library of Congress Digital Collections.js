@@ -48,11 +48,11 @@ function detectWeb(doc, url) {
 
 
 async function doWeb(doc, url) {
-	let jsonURL = `${url}&fo=json`
+	let jsonURL = `${url}&fo=json`;
 	//let position = url.indexOf('/resource/');
 	//let id = url.substr(position + 4);
 	//let jsonURL = `https://catalog.archives.gov/proxy/records/search?naId_is=${id}&allowLegacyOrgNames=true`;
-	let json = (await requestJSON(jsonURL))
+	let json = (await requestJSON(jsonURL));
 
 	if (json.item.original_format[0].toUpperCase() == "NEWSPAPER") {
 		let item = new Zotero.Item("newspaperArticle");
@@ -68,12 +68,12 @@ async function doWeb(doc, url) {
 		item.rights = json.item.rights;
 		item.title = json.item.title;
 		item.url = json.resource.url;
-		item.attachments.push ({
+		item.attachments.push({
 			title: `${json.item.title}, Page ${json.pagination.current}`,
 			url: json.resource.pdf,
 			mimeType: "application/pdf",
 			proxy: false
-		})
+		});
 		item.complete();
 	}
 }
