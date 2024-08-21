@@ -37,7 +37,7 @@
 
 
 function detectWeb(doc, url) {
-	if (url.includes('/resource/')) {
+	if (url.includes('/resource/') && doc.querySelector('.format-label[data-format="newspaper"]')) {
 		return "newspaperArticle";
 	}
 	// See https://www.loc.gov/apis/json-and-yaml/requests/endpoints/ - "resources" contain information about the segments of a resource
