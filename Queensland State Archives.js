@@ -122,12 +122,14 @@ async function scrape(url) {
 		let mimeType;
 		if (image.file_type == "JPEG") {
 			mimeType = "image/jpeg";
+			imageTitle = "Image " + imageID;
 		}
 		else if (image.file_type == "PDF") {
 			mimeType = "application/pdf";
+			imageTitle = "PDF " + imageID;
 		}
 		item.attachments = [{
-			title: "Item Representation ID " + imageID,
+			title: imageTitle,
 			url: "https://www.archivessearch.qld.gov.au/api/download_file/" + imageID,
 			mimeType: mimeType,
 			snapshot: true
