@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-23 04:55:10"
+	"lastUpdated": "2024-08-21 01:51:41"
 }
 
 /*
@@ -89,7 +89,6 @@ async function scrape(url) {
 	item.type = record.category;
 	item.archive = "Public Record Office Victoria";
 	item.archiveLocation = record.citation;
-	item.libraryCatalog = "Public Record Office Victoria API";
 	item.url = url;
 	item.rights = record.rights_status.join(", ");
 	item.abstractNote = record["description.aggregate"];
@@ -162,7 +161,9 @@ async function scrape(url) {
 	}
 
 	item.complete();
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -187,7 +188,7 @@ var testCases = [
 				"archive": "Public Record Office Victoria",
 				"archiveLocation": "VPRS 10742/P0000, B1324",
 				"extra": "Archive Place: North Melbourne, Online\nArchive Collection: VPRS10742, Photographic Negatives [1956 Melbourne Olympics Photograph Collection]",
-				"libraryCatalog": "Public Record Office Victoria API",
+				"libraryCatalog": "Public Record Office Victoria",
 				"manuscriptType": "Item",
 				"rights": "Open",
 				"url": "https://prov.vic.gov.au/archive/0C7B792B-F7F4-11E9-AE98-39C0B3AF8E48?image=1",
@@ -236,7 +237,7 @@ var testCases = [
 				"archive": "Public Record Office Victoria",
 				"archiveLocation": "VPRS 5467/P0002, Rabbit Processing",
 				"extra": "Issued: 1977-11-07/1982-10-20\nArchive Place: North Melbourne\nArchive Collection: VPRS5467, Minute Books",
-				"libraryCatalog": "Public Record Office Victoria API",
+				"libraryCatalog": "Public Record Office Victoria",
 				"manuscriptType": "Item",
 				"rights": "Open",
 				"url": "https://prov.vic.gov.au/archive/8B8A4428-F4D0-11E9-AE98-D598FD7FCBF4",
