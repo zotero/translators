@@ -1,7 +1,7 @@
 {
 	"translatorID": "11614156-f421-4e89-1111-a5e69ce3ebed",
 	"label": "Library of Congress Digital Collections",
-	"creator": "Adam Bravo",
+	"creator": "Adam Bravo and Abe Jellinek",
 	"target": "^https?://www\\.loc\\.gov/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-08-21 19:32:55"
+	"lastUpdated": "2024-08-21 19:34:34"
 }
 
 /*
@@ -127,7 +127,7 @@ async function scrape(doc, url, imageURL = null) {
 		item.pages = json.pagination.current;
 	}
 	item.language = first(json.item.language);
-	item.rights = ZU.cleanTags(first(json.item.rights));
+	item.rights = ZU.unescapeHTML(ZU.cleanTags(first(json.item.rights)));
 	if (item.rights.length > 1500) {
 		// Maybe don't include rights info for every single item in the entire collection
 		item.rights = item.rights.substring(0, 1500) + '…';
@@ -486,7 +486,7 @@ var testCases = [
 				"archiveLocation": "Portfolio 244, Folder 45",
 				"language": "english",
 				"libraryCatalog": "Library of Congress Digital Collections",
-				"rights": "The Library of Congress is providing access to these materials for  educational and research purposes and makes no warranty with regard to their use  for other purposes. Responsibility for making an independent legal assessment of  an item and securing any necessary permissions ultimately rests with persons  desiring to use the item. The written permission of the copyright owners and/or  other rights holders (such as publicity and/or privacy rights) is required for  distribution, reproduction, or other use of protected items beyond that allowed  by fair use or other statutory exemptions.\n\n\r\nWith a few exceptions, the Library is not aware of any U.S. copyright  protection (see Title 17, U.S.C.) or any other restrictions in the materials in the  Printed Ephemera Collection. There may be content that is protected as  \"works for hire\" (copyright may be held by the party that commissioned the  original work) and/or under the copyright or neighboring-rights laws of other  nations. A few items in this online presentation are subject to copyright and  are made available here with permission of the copyright owners. Copyright  information is provided with these specific items.\n\n\r\nIn all cases, responsibility for making an independent legal  assessment of an item and securing any necessary permissions ultimately  rests with persons desiring to use the item.\n\n\r\nItems included here with the permission of rights holders are listed  below, and permission is noted in the catalog record for …",
+				"rights": "The Library of Congress is providing access to these materials for educational and research purposes and makes no warranty with regard to their use for other purposes. Responsibility for making an independent legal assessment of an item and securing any necessary permissions ultimately rests with persons desiring to use the item. The written permission of the copyright owners and/or other rights holders (such as publicity and/or privacy rights) is required for distribution, reproduction, or other use of protected items beyond that allowed by fair use or other statutory exemptions.\n\n\nWith a few exceptions, the Library is not aware of any U.S. copyright protection (see Title 17, U.S.C.) or any other restrictions in the materials in the Printed Ephemera Collection. There may be content that is protected as \"works for hire\" (copyright may be held by the party that commissioned the original work) and/or under the copyright or neighboring-rights laws of other nations. A few items in this online presentation are subject to copyright and are made available here with permission of the copyright owners. Copyright information is provided with these specific items.\n\n\nIn all cases, responsibility for making an independent legal assessment of an item and securing any necessary permissions ultimately rests with persons desiring to use the item.\n\n\nItems included here with the permission of rights holders are listed below, and permission is noted in the catalog record for each item. In some c…",
 				"url": "https://www.loc.gov/resource/rbpe.24404500/",
 				"attachments": [
 					{
@@ -760,7 +760,7 @@ var testCases = [
 				"callNumber": "2017762891",
 				"language": "english",
 				"libraryCatalog": "Library of Congress Digital Collections",
-				"rights": "The contents of the Library of Congress Farm Security Administration/Office of War Information Black-and-White Negatives are in the public domain and are free to use and reuse.\n\n\r\n Credit Line: Library of Congress, Prints &amp; Photographs Division, Farm Security Administration/Office of War Information Black-and-White Negatives.\n\n\r\nFor information about reproducing, publishing, and citing material from this collection, as well as access to the original items, see: U.S. Farm Security Administration/Office of War Information Black &amp; White Photographs - Rights and Restrictions Information\r\n\n\n\r\nMore about Copyright and other Restrictions \n\n\r\nFor guidance about compiling full citations consult Citing Primary Sources.",
+				"rights": "The contents of the Library of Congress Farm Security Administration/Office of War Information Black-and-White Negatives are in the public domain and are free to use and reuse.\n\n\n Credit Line: Library of Congress, Prints & Photographs Division, Farm Security Administration/Office of War Information Black-and-White Negatives.\n\n\nFor information about reproducing, publishing, and citing material from this collection, as well as access to the original items, see: U.S. Farm Security Administration/Office of War Information Black & White Photographs - Rights and Restrictions Information\n\n\n\nMore about Copyright and other Restrictions \n\n\nFor guidance about compiling full citations consult Citing Primary Sources.",
 				"url": "https://www.loc.gov/resource/fsa.8b29516/",
 				"attachments": [],
 				"tags": [
