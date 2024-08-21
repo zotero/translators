@@ -1,7 +1,7 @@
 {
 	"translatorID": "11614156-f421-4e89-1111-a5e69ce3ebed",
 	"label": "Library of Congress Digital Collections",
-	"creator": "Adam Bravo and Abe Jellinek",
+	"creator": "Abe Jellinek and Adam Bravo",
 	"target": "^https?://www\\.loc\\.gov/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -15,7 +15,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2024 Adam Bravo
+	Copyright © 2024 Abe Jellinek
 	
 	This file is part of Zotero.
 
