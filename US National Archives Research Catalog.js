@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-08-17 18:26:20"
+	"lastUpdated": "2024-08-21 17:40:40"
 }
 
 /*
@@ -69,6 +69,9 @@ async function doWeb(doc, url) {
 	}
 	for (var i = 0; i < creators.length; i++) {
 		creators[i] = creators[i].heading.replace('(Most Recent)', '');
+		// TODO: Update and simplify this. We should be able to clean authors like:
+		//   Veterans Administration. (7/21/1930 - 3/15/1989)
+		// and probably don't need two branches for the cleaning.
 		if (creators[i].includes(", ")) {
 			creators[i] = creators[i].replace(/, \d{4}\s*-\s*(\d{4})?$/, '').replace(/\([^(]+\)/, '');
 			item.creators.push(ZU.cleanAuthor(creators[i], "author", true));
@@ -81,6 +84,25 @@ async function doWeb(doc, url) {
 			item.creators.push({ lastName: creators[i].trim(), creatorType: 'author', fieldMode: 1 });
 		}
 	}
+
+	if (doc.querySelector('#preview.digital-objects')) {
+		item.url = url;
+	}
+
+	let resourcesHeading = doc.querySelector('h2#resources');
+	if (resourcesHeading) {
+		for (let resource of resourcesHeading.parentElement.querySelectorAll('a[role="link"]')) {
+			let href = resource.title.match(/Go to (https:\/\/[^\s]+)/);
+			if (!href) continue;
+			item.attachments.push({
+				title: resource.textContent,
+				url: href[1],
+				mimeType: 'text/html',
+				snapshot: false
+			});
+		}
+	}
+
 	if (json.coverageStartDate) {
 		item.date = json.coverageStartDate.logicalDate.replace('-01-01', '');
 		// Use issued if we have a date range
@@ -106,7 +128,6 @@ async function doWeb(doc, url) {
 	}
 	item.archiveLocation = json.localIdentifier;
 	item.extra = (item.extra || '') + '\nNational Archives Identifier: ' + json.naId;
-	item.url = url;
 	item.complete();
 }
 
@@ -134,8 +155,7 @@ var testCases = [
 				"attachments": [],
 				"tags": [],
 				"notes": [],
-				"seeAlso": [],
-				"url": "https://catalog.archives.gov/id/486076"
+				"seeAlso": []
 			}
 		]
 	},
@@ -162,8 +182,7 @@ var testCases = [
 				"attachments": [],
 				"tags": [],
 				"notes": [],
-				"seeAlso": [],
-				"url": "https://catalog.archives.gov/id/5496901"
+				"seeAlso": []
 			}
 		]
 	},
@@ -189,8 +208,45 @@ var testCases = [
 				"attachments": [],
 				"tags": [],
 				"notes": [],
-				"seeAlso": [],
-				"url": "https://catalog.archives.gov/id/603604"
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://catalog.archives.gov/id/115728212",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Approved Pension Application File for Lucy Test, Mother of Joseph R Test, Company C, 11th Ohio Infantry Regiment (Application No. WC46539)",
+				"creators": [
+					{
+						"lastName": "Veterans Administration. (7/21/1930 - 3/15/1989)",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Department of the Interior. Bureau of Pensions. 1849-1930",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"archive": "National Archives at Washington, DC - Textual Reference",
+				"extra": "National Archives Identifier: 115728212",
+				"libraryCatalog": "US National Archives Research Catalog",
+				"series": "Records of the Department of Veterans Affairs",
+				"url": "https://catalog.archives.gov/id/115728212",
+				"attachments": [
+					{
+						"title": "Fold3",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
