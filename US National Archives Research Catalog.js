@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-08-21 17:40:40"
+	"lastUpdated": "2024-08-21 17:42:27"
 }
 
 /*
@@ -88,6 +88,13 @@ async function doWeb(doc, url) {
 	if (doc.querySelector('#preview.digital-objects')) {
 		item.url = url;
 	}
+	else {
+		item.attachments.push({
+			title: 'Catalog Page',
+			url,
+			mimeType: 'text/html'
+		});
+	}
 
 	let resourcesHeading = doc.querySelector('h2#resources');
 	if (resourcesHeading) {
@@ -152,7 +159,12 @@ var testCases = [
 				"extra": "issued: 1945/1952\nNational Archives Identifier: 486076",
 				"libraryCatalog": "US National Archives Research Catalog",
 				"series": "Records of Allied Operational and Occupation Headquarters, World War II",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Catalog Page",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -179,7 +191,12 @@ var testCases = [
 				"extra": "National Archives Identifier: 5496901",
 				"libraryCatalog": "US National Archives Research Catalog",
 				"series": "Records of U.S. Citizenship and Immigration Services",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Catalog Page",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -205,7 +222,12 @@ var testCases = [
 				"extra": "National Archives Identifier: 603604",
 				"libraryCatalog": "US National Archives Research Catalog",
 				"series": "Harriet Connor Brown Papers",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Catalog Page",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
