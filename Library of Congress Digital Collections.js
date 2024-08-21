@@ -48,11 +48,9 @@ function detectWeb(doc, url) {
 
 
 async function doWeb(doc, url) {
-	let jsonURL = `${url}&fo=json`;
-	//let position = url.indexOf('/resource/');
-	//let id = url.substr(position + 4);
-	//let jsonURL = `https://catalog.archives.gov/proxy/records/search?naId_is=${id}&allowLegacyOrgNames=true`;
-	let json = (await requestJSON(jsonURL));
+	let jsonURL = new URL(url);
+	jsonURL.searchParams.set('fo', 'json');
+	let json = (await requestJSON(jsonURL.toString()));
 
 	if (json.item.original_format[0].toUpperCase() == "NEWSPAPER") {
 		let item = new Zotero.Item("newspaperArticle");
