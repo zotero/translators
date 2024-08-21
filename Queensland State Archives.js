@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-08-20 06:45:46"
+	"lastUpdated": "2024-08-21 02:38:36"
 }
 
 /*
@@ -55,7 +55,6 @@ function getSearchResults(doc, checkOnly) {
 	let items = {};
 	let found = false;
 	let rows = doc.querySelectorAll("div.result-left-pane a");
-	//Z.debug(rows);
 	for (let row of rows) {
 		let href = "https://www.archivessearch.qld.gov.au/" + row.href;
 		href = /\/items\//.test(href) ? href : null;
@@ -119,7 +118,7 @@ async function scrape(url) {
 	if (data.digital_representations.length > 0) {
 		let image = data.digital_representations[0];
 		let imageID = image.qsa_id_prefixed;
-		let mimeType;
+		let mimeType, imageTitle;
 		if (image.file_type == "JPEG") {
 			mimeType = "image/jpeg";
 			imageTitle = "Image " + imageID;
@@ -164,7 +163,7 @@ var testCases = [
 				"url": "https://www.archivessearch.qld.gov.au/items/ITM3872594",
 				"attachments": [
 					{
-						"title": "Item Representation ID DR173618",
+						"title": "PDF DR173618",
 						"mimeType": "application/pdf",
 						"snapshot": true
 					}
@@ -227,7 +226,7 @@ var testCases = [
 				"url": "https://www.archivessearch.qld.gov.au/items/ITM1523915",
 				"attachments": [
 					{
-						"title": "Item Representation ID DR173204",
+						"title": "Image DR173204",
 						"mimeType": "image/jpeg",
 						"snapshot": true
 					}
