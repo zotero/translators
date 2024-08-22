@@ -1,5 +1,5 @@
 {
-	"translatorID": "11614156-f421-4e89-1111-a5e69ce3ebed",
+	"translatorID": "79c14aee-b91f-46ed-8285-d83fed1f0b32",
 	"label": "Library of Congress Digital Collections",
 	"creator": "Abe Jellinek and Adam Bravo",
 	"target": "^https?://www\\.loc\\.gov/",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-08-21 19:34:34"
+	"lastUpdated": "2024-08-22 14:22:18"
 }
 
 /*
