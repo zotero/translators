@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-08-26 01:32:21"
+	"lastUpdated": "2024-08-26 01:58:30"
 }
 
 /*
@@ -243,7 +243,8 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.archivessearch.qld.gov.au/search?f[]=keywords&has_digital=false&op[]=AND&open=false&q[]=wragge&sort=relevance&type[]=archival_object",
-		"items": "multiple"
+		"items": "multiple",
+		"defer": true
 	}
 ]
 /** END TEST CASES **/
