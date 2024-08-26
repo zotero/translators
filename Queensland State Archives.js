@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-08-21 19:41:51"
+	"lastUpdated": "2024-08-26 01:32:21"
 }
 
 /*
@@ -88,7 +88,10 @@ async function scrape(url) {
 	let item = new Zotero.Item("manuscript");
 	item.title = data.title;
 	if ("record_type" in data.subject_terms) {
-		item.type = data.subject_terms.record_type.join("; ");
+		let recordTypes = data.subject_terms.record_type.map(
+			term => term.term
+		);
+		item.type = recordTypes.join("; ");
 	}
 	item.archive = "Queensland State Archives";
 	item.archiveLocation = data.qsa_id_prefixed;
