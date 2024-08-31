@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-08-31 11:49:02"
+	"lastUpdated": "2024-08-31 13:32:20"
 }
 
 /*
@@ -42,15 +42,16 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.includes('/record/t') ) {
+	if (url.includes('/record/t')) {
 		return "case";
-	} else if (url.includes('record/OA') ) {
-		return "book";
-//	} else if (url.includes('/search/') && getSearchResults(doc, true)) {
-//		return 'multiple';
-//	}
-	// multiples  skipped as search isn't working right now...?
 	}
+	else if (url.includes('record/OA')) {
+		return "book";
+	//	} else if (url.includes('/search/') && getSearchResults(doc, true)) {
+	//		return 'multiple';
+	//	}
+	}
+	// multiples  skipped as search isn't working right now...?
 	return false;
 }
 
@@ -77,48 +78,47 @@ async function doWeb(doc, url) {
 	// "Date" works for both t and OA
 	let niceDate = ZU.xpathText(mTable, '//tr[contains(th, "Date")]/td[1]');
 
-
-	if (url.includes('/record/t1')  ) {
+	if (url.includes('/record/t1')) {
 		var item = new Zotero.Item("case");
-		var sessDate = id.substring(1,5) + "/" + id.substring(5,7) + "/" + id.substring(7,9);
+		
+		var sessDate = id.substring(1, 5) + "/" + id.substring(5, 7) + "/" + id.substring(7, 9);
 	
 		var offencesList = ZU.xpathText(mTable, '//tr[contains(th, "Offences")]/td[1]');
 		var offences = ZU.xpath(mTable, '//tr[contains(th, "Offences")]/td[1]/a');
-		for (let o of offences){
-			item.tags.push(o.textContent)
+		for (let o of offences) {
+			item.tags.push(o.textContent);
 		}
 		var verdicts = ZU.xpath(mTable, '//tr[contains(th, "Verdicts")]/td[1]/a');
-		for (let v of verdicts){
-			item.tags.push(v.textContent)
+		for (let v of verdicts) {
+			item.tags.push(v.textContent);
 		}
 
 		var sentences = ZU.xpath(mTable, '//tr[contains(th, "Punishments")]/td[1]/a');
-		for (let s of sentences){
-			item.tags.push(s.textContent)
+		for (let s of sentences) {
+			item.tags.push(s.textContent);
 		}
 
 		var itemTitle = "Trial of " + namesCleaned + ": " + offencesList + ", " + niceDate;
-
+		item.title = itemTitle;
+		item.date = ZU.strToISO(sessDate);
 		item.docketNumber = json.idkey;
-		item.court = "Central Criminal Court, London" // 1834 change...?
-	} 
-	
-	else if (url.includes('record/OA1') ) {
-		var item = new Zotero.Item("book");
-		var sessDate = id.substring(2,6) + "/" + id.substring(6,8) + "/" + id.substring(8,10);
-		var itemTitle = "Ordinary's Account, " + niceDate;
+		item.court = "Central Criminal Court, London";
 	}
 	
-	item.title = itemTitle ;
+	else if (url.includes('record/OA1')) {
+		var item = new Zotero.Item("book");
+		
+		var oaDate = id.substring(2, 6) + "/" + id.substring(6, 8) + "/" + id.substring(8, 10);
+		var oaTitle = "Ordinary's Account, " + niceDate;
 
-	item.date = ZU.strToISO(sessDate);
+		item.date = ZU.strToISO(oaDate);
+		item.title = oaTitle;
+	}
 
-	item.extra = "Reference Number: " + json.idkey; 
+	item.extra = "Reference Number: " + json.idkey;
 
 	item.url = url;
 	
-	//item.notes = "Names: " + namesCleaned; // do something with these maybe?
-
 	item.complete();
 }
 
@@ -133,9 +133,11 @@ var testCases = [
 				"caseName": "Trial of Judith Cupid: Theft > Theft from place, 11th September 1734",
 				"creators": [],
 				"dateDecided": "1734-09-11",
+				"court": "Central Criminal Court, London",
 				"docketNumber": "t17340911-7",
 				"extra": "Reference Number: t17340911-7",
 				"shortTitle": "Trial of Judith Cupid",
+				"url": "https://www.oldbaileyonline.org/record/t17340911-7",
 				"attachments": [],
 				"tags": [
 					{
@@ -170,6 +172,7 @@ var testCases = [
 				"date": "1711-04-21",
 				"extra": "Reference Number: OA17110421",
 				"libraryCatalog": "Old Bailey Online",
+				"url": "https://www.oldbaileyonline.org/record/OA17110421",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -186,9 +189,11 @@ var testCases = [
 				"caseName": "Trial of Peter Asterbawd, Andrew Forsman: Theft > Burglary, 15th January 1800",
 				"creators": [],
 				"dateDecided": "1800-01-15",
+				"court": "Central Criminal Court, London",
 				"docketNumber": "t18000115-12",
 				"extra": "Reference Number: t18000115-12",
 				"shortTitle": "Trial of Peter Asterbawd, Andrew Forsman",
+				"url": "https://www.oldbaileyonline.org/record/t18000115-12",
 				"attachments": [],
 				"tags": [
 					{
