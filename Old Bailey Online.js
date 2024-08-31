@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-08-31 13:32:20"
+	"lastUpdated": "2024-08-31 13:46:15"
 }
 
 /*
@@ -62,6 +62,8 @@ function getSearchResults(doc, checkOnly) {
 }*/
 
 async function doWeb(doc, url) {
+	var item = new Zotero.Item();
+
 	let rgx = /(\bt1[^-]+-[0-9]+[a-z]?|OA1[0-9]+[a-z]?)/;
 	let id = url.match(rgx)[0];
 
@@ -79,7 +81,7 @@ async function doWeb(doc, url) {
 	let niceDate = ZU.xpathText(mTable, '//tr[contains(th, "Date")]/td[1]');
 
 	if (url.includes('/record/t1')) {
-		var item = new Zotero.Item("case");
+		item.itemType = "case";
 		
 		var sessDate = id.substring(1, 5) + "/" + id.substring(5, 7) + "/" + id.substring(7, 9);
 	
@@ -106,7 +108,7 @@ async function doWeb(doc, url) {
 	}
 	
 	else if (url.includes('record/OA1')) {
-		var item = new Zotero.Item("book");
+		item.itemType = "book";
 		
 		var oaDate = id.substring(2, 6) + "/" + id.substring(6, 8) + "/" + id.substring(8, 10);
 		var oaTitle = "Ordinary's Account, " + niceDate;
