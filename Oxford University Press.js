@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-08 15:58:04"
+	"lastUpdated": "2022-10-05 01:20:38"
 }
 
 /*
@@ -37,13 +37,15 @@
 
 
 function detectWeb(doc, url) {
-	//The url of books contains the ISBN (i.e. 9 digits) where the 
-	//url of journals contains the ISSN (i.e. 4 digits).
-	if (url.indexOf('/product/')>-1 && url.search(/\d{9}/)>-1) {
+	// The url of books contains the ISBN (i.e. 9 digits) where the
+	// url of journals contains the ISSN (i.e. 4 digits).
+	if (url.includes('/product/') && url.search(/\d{9}/) > -1) {
 		return 'book';
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
@@ -51,7 +53,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//td[contains(@class, "result_biblio")]//a[contains(@href, "/academic/product/")]');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -67,7 +69,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -75,13 +77,13 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
-		scrape(doc, url);
+	}
+	else {
+		scrape(doc);
 	}
 }
 
-
-function scrape(doc, url) {
+function scrape(doc) {
 	var item = new Zotero.Item("book");
 
 	var subTitle = doc.getElementsByClassName('product_biblio_strapline')[0];
@@ -96,16 +98,29 @@ function scrape(doc, url) {
 	}
 
 	var creators = ZU.xpath(doc, '//div[@id="content"]/h3[contains(@class, "product_biblio_author")]/b');
-	var role = "author";//default
-	if (ZU.xpathText(doc, '//div[@id="content"]/h3[contains(@class, "product_biblio_author")]').indexOf("Edited by")>-1) {
+	var role = "author";// default
+	if (ZU.xpathText(doc, '//div[@id="content"]/h3[contains(@class, "product_biblio_author")]').includes("Edited by")) {
 		role = "editor";
 	}
-	for (var i=0; i<creators.length; i++) {
+	for (var i = 0; i < creators.length; i++) {
 		var creator = creators[i].textContent;
 		creator = creator.replace(/^(Prof|Dr)/, '');
 		item.creators.push(ZU.cleanAuthor(creator, role));
 	}
 	
+	if (!item.creators.length) {
+		// In the cc=us version of the site, we somehow lose the defined bold authors and have to parse them
+		// more crudely
+		creators = text(doc, '#content>h3.product_biblio_author');
+		if (creators.length) {
+			creators = creators.split(/,\s|\sand\s/);
+			for (let creator of creators) {
+				creator = creator.replace(/^(Prof|Dr)/, '');
+				item.creators.push(ZU.cleanAuthor(creator, role));
+			}
+		}
+	}
+
 	var date = ZU.xpathText(doc, '//div[contains(@class, "product_sidebar")]/p[starts-with(., "Published:")]');
 	if (date) {
 		item.date = ZU.strToISO(date);
@@ -165,46 +180,8 @@ var testCases = [
 				"series": "Flute Time",
 				"attachments": [
 					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://global.oup.com/academic/product/form-focused-instruction-and-teacher-education-9780194422505?cc=de&lang=en&",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Form-focused Instruction and Teacher Education: Studies in Honour of Rod Ellis",
-				"creators": [
-					{
-						"firstName": "Sandra",
-						"lastName": "Fotos",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Hossein",
-						"lastName": "Nassaji",
-						"creatorType": "author"
-					}
-				],
-				"date": "2007-05-24",
-				"ISBN": "9780194422505",
-				"abstractNote": "An overview of form-focused instruction as an option for second language grammar teaching. It combines theoretical concerns, classroom practices, and teacher education.",
-				"libraryCatalog": "Oxford University Press",
-				"numPages": "296",
-				"place": "Oxford, New York",
-				"publisher": "Oxford University Press",
-				"series": "Oxford Applied Linguistics",
-				"shortTitle": "Form-focused Instruction and Teacher Education",
-				"attachments": [
-					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -252,7 +229,8 @@ var testCases = [
 				"shortTitle": "Education",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -285,7 +263,8 @@ var testCases = [
 				"publisher": "Oxford University Press",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],

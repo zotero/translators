@@ -1,7 +1,7 @@
 {
 	"translatorID": "a30274ac-d3d1-4977-80f4-5320613226ec",
 	"label": "IMDb",
-	"creator": "Philipp Zumstien",
+	"creator": "Philipp Zumstien and Abe Jellinek",
 	"target": "^https?://www\\.imdb\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-16 20:02:57"
+	"lastUpdated": "2023-03-31 22:02:24"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017 Philipp Zumstein
-	
+	Copyright © 2021 Philipp Zumstein and Abe Jellinek
+
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -35,21 +35,27 @@
 	***** END LICENSE BLOCK *****
 */
 
-
 function detectWeb(doc, url) {
-	if (url.indexOf('/title/tt')>-1) {
-		return "film";
-	} else if (url.indexOf('/find?')>-1 && getSearchResults(doc, true)) {
+	if (url.includes('/title/tt') && doc.querySelector('script[type="application/ld+json"]')) {
+		let json = JSON.parse(text(doc, 'script[type="application/ld+json"]'));
+		if (json['@type'] == 'TVEpisode') {
+			return 'tvBroadcast';
+		}
+		else {
+			return "film";
+		}
+	}
+	else if (url.includes('/find?') && getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
-
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//td[contains(@class, "result_text")]');
-	for (var i=0; i<rows.length; i++) {
+	for (let i = 0; i < rows.length; i++) {
 		var href = ZU.xpathText(rows[i], './a/@href');
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -60,12 +66,11 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -73,71 +78,77 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
 
+function scrape(doc, _url) {
+	let json = JSON.parse(text(doc, 'script[type="application/ld+json"]'));
+	var item = new Zotero.Item(
+		json['@type'] == 'TVEpisode'
+			? 'tvBroadcast'
+			: 'film');
 
-function scrape(doc, url) {
-	var translator = Zotero.loadTranslator('web');
-	// Embedded Metadata
-	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-	//translator.setDocument(doc);
-	
-	translator.setHandler('itemDone', function (obj, item) {
-		var titleWrapper = ZU.xpath(doc, '//div[contains(@class, "title_wrapper")]');
-		var title = ZU.xpathText(titleWrapper, './h1/text()[1]');
-		if (title) {
-			item.title = title;
+	let title = json.name;
+	if (title.includes("&apos;")) {
+		title = title.replace("&apos;", "'");
+	}
+
+	item.title = title; // note that json only has the original title
+	var transTitle = ZU.trimInternal(ZU.xpathText(doc, "//h1//text()"));
+	if (transTitle && transTitle !== item.title) addExtra(item, "Translated title: " + transTitle);
+
+	item.programTitle = doc.title.match(/(?:"([^"]+)")?/)[1];
+	let episodeNumberParts = doc.querySelectorAll('[class*="EpisodeNavigationForTVEpisode__SeasonEpisodeNumbersItem"]');
+	item.episodeNumber = [...episodeNumberParts].map(el => el.textContent.trim()).join(' ');
+
+	item.date = json.datePublished;
+	item.runningTime = "duration" in json ? json.duration.replace("PT", "").toLowerCase() : "";
+	item.genre = Array.isArray(json.genre) ? json.genre.join(", ") : json.genre;
+	item.abstractNote = json.description;
+	var creatorsMapping = {
+		director: "director",
+		creator: "scriptwriter",
+		actor: ZU.fieldIsValidForType("castMember", item.itemType)
+			? "castMember"
+			: "contributor"
+	};
+	for (var role in creatorsMapping) {
+		if (!json[role]) continue;
+		var creators = json[role];
+		if (!Array.isArray(creators)) {
+			item.creators.push(ZU.cleanAuthor(creators.name, creatorsMapping[role]));
 		}
-		item.date = ZU.xpathText(titleWrapper, './/meta[@itemprop="datePublished"]/@content');
-		item.runningTime = ZU.xpathText(titleWrapper, './/time[@itemprop="duration"]');
-		item.genre = ZU.xpathText(titleWrapper, './/span[@itemprop="genre"]');
-		var origTitle = ZU.xpathText(titleWrapper, './/div[contains(@class, "originalTitle")]/text()[1]');
-		if (origTitle) {
-			addExtra(item, "original-title: "+origTitle);
-		}
-		var pageId = ZU.xpathText(doc, '//meta[@property="pageId"]/@content');
-		if (pageId) {
-			addExtra(item, "IMDb ID: "+pageId);
-		}
-		
-		var summary = ZU.xpath(doc, '//div[contains(@class, "plot_summary_wrapper")]');
-		var creatorsMapping = {
-			"director": "director",
-			"creator": "scriptwriter",
-			"actors": "contributor"
-		};
-		for (var role in creatorsMapping) {
-			var creators = ZU.xpath(summary, './/span[@itemprop="'+role+'"]//span[@itemprop="name"]');
-			for (var i=0; i<creators.length; i++) {
-				item.creators.push(ZU.cleanAuthor(creators[i].textContent, creatorsMapping[role]));
+		else {
+			for (var i = 0; i < creators.length; i++) {
+				if (creators[i]["@type"] == "Person") item.creators.push(ZU.cleanAuthor(creators[i].name, creatorsMapping[role]));
 			}
 		}
-		
-		//the keywords in the meta tags are very generic
-		item.tags = [];
-		var tags = ZU.xpath(doc, '//div[@itemprop="keywords"]/a');
-		for (var i=0; i<tags.length; i++) {
-			item.tags.push(tags[i].textContent);
-		}
-		
-		item.complete();
-		
-	});
-
-	translator.getTranslatorObject(function(trans) {
-		trans.itemType = "film";
-		trans.doWeb(doc, url);
-	});
+	}
+	let companyNodes = doc.querySelectorAll('a[href*="/company/"]');
+	let companies = [];
+	for (let company of companyNodes) {
+		companies.push(company.textContent);
+	}
+	item.distributor = companies.join(', ');
+	var pageId = attr(doc, 'meta[property="imdb:pageConst"]', 'content');
+	if (pageId) {
+		addExtra(item, "IMDb ID: " + pageId);
+	}
+	let locationLinks = doc.querySelectorAll('a[href*="title/?country_of_origin"]');
+	addExtra(item, "event-location: "
+		+ [...locationLinks].map(a => a.innerText).join(', '));
+	item.tags = "keywords" in json ? json.keywords.split(",") : [];
+	item.complete();
 }
-
 
 function addExtra(item, value) {
 	if (!item.extra) {
 		item.extra = '';
-	} else {
+	}
+	else {
 		item.extra += "\n";
 	}
 	item.extra += value;
@@ -147,11 +158,11 @@ function addExtra(item, value) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.imdb.com/title/tt0089276/",
+		"url": "https://www.imdb.com/title/tt0089276/",
 		"items": [
 			{
 				"itemType": "film",
-				"title": "The Official Story",
+				"title": "La historia oficial",
 				"creators": [
 					{
 						"firstName": "Luis",
@@ -185,23 +196,29 @@ var testCases = [
 					}
 				],
 				"date": "1985-11-08",
-				"abstractNote": "Directed by Luis Puenzo.  With Norma Aleandro, Héctor Alterio, Chunchuna Villafañe, Hugo Arana. After the end of the Dirty War, a high school teacher sets out to find out who the mother of her adopted daughter is.",
-				"extra": "original-title: La historia oficial\nIMDb ID: tt0089276",
-				"genre": "Drama, History, War",
-				"libraryCatalog": "www.imdb.com",
-				"runningTime": "1h 52min",
-				"url": "http://www.imdb.com/title/tt0089276/",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
+				"abstractNote": "During the final months of Argentinian Military Dictatorship in 1983, a high school teacher sets out to find out who the mother of her adopted daughter is.",
+				"distributor": "Historias Cinematograficas, Progress Communications",
+				"extra": "Translated title: The Official Story\nIMDb ID: tt0089276\nevent-location: Argentina",
+				"genre": "Drama, History",
+				"libraryCatalog": "IMDb",
+				"runningTime": "1h52m",
+				"attachments": [],
 				"tags": [
-					" adopted daughter",
-					" high school teacher",
-					" lawyer",
-					" professor",
-					" school"
+					{
+						"tag": "bigotry"
+					},
+					{
+						"tag": "military"
+					},
+					{
+						"tag": "military junta"
+					},
+					{
+						"tag": "teacher"
+					},
+					{
+						"tag": "torture victim"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -210,16 +227,16 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.imdb.com/find?q=shakespeare&s=tt",
+		"url": "https://www.imdb.com/find?q=shakespeare&s=tt",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.imdb.com/title/tt0060613/",
+		"url": "https://www.imdb.com/title/tt0060613/",
 		"items": [
 			{
 				"itemType": "film",
-				"title": "Skin, Skin",
+				"title": "Käpy selän alla",
 				"creators": [
 					{
 						"firstName": "Mikko",
@@ -252,24 +269,360 @@ var testCases = [
 						"creatorType": "contributor"
 					}
 				],
-				"date": "1967-08-18",
-				"abstractNote": "Directed by Mikko Niskanen.  With Eero Melasniemi, Kristiina Halkola, Pekka Autiovuori, Kirsti Wallasvaara. Depiction of four urban youths and their excursion to the countryside.",
-				"extra": "original-title: Käpy selän alla\nIMDb ID: tt0060613",
+				"date": "1966-10-21",
+				"abstractNote": "Two student couples go camping in the Finnish countryside; partner swapping and interpersonal dynamics - with a touch of their philosophy - between them all arise.",
+				"distributor": "FJ-Filmi",
+				"extra": "IMDb ID: tt0060613\nevent-location: Finland",
 				"genre": "Drama",
-				"libraryCatalog": "www.imdb.com",
-				"runningTime": "1h 29min",
-				"url": "http://www.imdb.com/title/tt0060613/",
-				"attachments": [
+				"libraryCatalog": "IMDb",
+				"runningTime": "1h29m",
+				"attachments": [],
+				"tags": [
 					{
-						"title": "Snapshot"
+						"tag": "countryside"
+					},
+					{
+						"tag": "dance"
+					},
+					{
+						"tag": "female topless nudity"
+					},
+					{
+						"tag": "film star"
+					},
+					{
+						"tag": "snakebite"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.imdb.com/title/tt6142646/",
+		"items": [
+			{
+				"itemType": "tvBroadcast",
+				"title": "Islands",
+				"creators": [
+					{
+						"firstName": "Elizabeth",
+						"lastName": "White",
+						"creatorType": "director"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Attenborough",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Pete",
+						"lastName": "McCowen",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Jerome",
+						"lastName": "Poncet",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2017-02-18",
+				"abstractNote": "Wildlife documentary series with David Attenborough, beginning with a look at the remote islands which offer sanctuary to some of the planet&apos;s rarest creatures.",
+				"extra": "IMDb ID: tt6142646\nevent-location: United Kingdom",
+				"libraryCatalog": "IMDb",
+				"programTitle": "Planet Earth II",
+				"runningTime": "51m",
+				"attachments": [],
 				"tags": [
-					" countryside",
-					" dance",
-					" drunk",
-					" topless",
-					" youth"
+					{
+						"tag": "documentary episode"
+					},
+					{
+						"tag": "earth"
+					},
+					{
+						"tag": "impossible"
+					},
+					{
+						"tag": "impressed"
+					},
+					{
+						"tag": "planet"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.imdb.com/title/tt9060452/?ref_=ttep_ep7",
+		"items": [
+			{
+				"itemType": "tvBroadcast",
+				"title": "That's a Wrap",
+				"creators": [
+					{
+						"firstName": "Alex",
+						"lastName": "Hall",
+						"creatorType": "director"
+					},
+					{
+						"firstName": "George",
+						"lastName": "Pelecanos",
+						"creatorType": "scriptwriter"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Simon",
+						"creatorType": "scriptwriter"
+					},
+					{
+						"firstName": "Will",
+						"lastName": "Ralston",
+						"creatorType": "scriptwriter"
+					},
+					{
+						"firstName": "James",
+						"lastName": "Franco",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Maggie",
+						"lastName": "Gyllenhaal",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Chris",
+						"lastName": "Bauer",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2019-10-21",
+				"abstractNote": "A struggling Lori turns to Candy for help before revisiting The Deuce; Candy makes a deal to secure funding for her film; Abby takes a stand against the latest phase of Midtown redevelopment; Tommy explains the new world order to ...",
+				"extra": "IMDb ID: tt9060452\nevent-location: United States",
+				"libraryCatalog": "IMDb",
+				"programTitle": "The Deuce",
+				"runningTime": "1h5m",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "greyhound bus"
+					},
+					{
+						"tag": "minneapolis saint paul minnesota"
+					},
+					{
+						"tag": "redevelopment"
+					},
+					{
+						"tag": "twin cities minnesota"
+					},
+					{
+						"tag": "yellow cab"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.imdb.com/title/tt0759475/?ref_=fn_al_tt_5",
+		"items": [
+			{
+				"itemType": "film",
+				"title": "'Til Death",
+				"creators": [
+					{
+						"firstName": "Josh",
+						"lastName": "Goldsmith",
+						"creatorType": "scriptwriter"
+					},
+					{
+						"firstName": "Cathy",
+						"lastName": "Yuspa",
+						"creatorType": "scriptwriter"
+					},
+					{
+						"firstName": "Brad",
+						"lastName": "Garrett",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Joely",
+						"lastName": "Fisher",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Kat",
+						"lastName": "Foster",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2006-09-07",
+				"abstractNote": "A pair of newlyweds move in next door to a veteran married couple of 25 years.",
+				"distributor": "Impact Zone Productions, Sony Pictures Television",
+				"extra": "IMDb ID: tt0759475\nevent-location: United States",
+				"genre": "Comedy, Romance",
+				"libraryCatalog": "IMDb",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "big breasts"
+					},
+					{
+						"tag": "breast"
+					},
+					{
+						"tag": "brother brother relationship"
+					},
+					{
+						"tag": "columbia tristar"
+					},
+					{
+						"tag": "death in title"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.imdb.com/title/tt0759475/?ref_=fn_al_tt_5",
+		"items": [
+			{
+				"itemType": "film",
+				"title": "'Til Death",
+				"creators": [
+					{
+						"firstName": "Josh",
+						"lastName": "Goldsmith",
+						"creatorType": "scriptwriter"
+					},
+					{
+						"firstName": "Cathy",
+						"lastName": "Yuspa",
+						"creatorType": "scriptwriter"
+					},
+					{
+						"firstName": "Brad",
+						"lastName": "Garrett",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Joely",
+						"lastName": "Fisher",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Kat",
+						"lastName": "Foster",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2006-09-07",
+				"abstractNote": "A pair of newlyweds move in next door to a veteran married couple of 25 years.",
+				"distributor": "Impact Zone Productions, Sony Pictures Television",
+				"extra": "IMDb ID: tt0759475\nevent-location: United States",
+				"genre": "Comedy, Romance",
+				"libraryCatalog": "IMDb",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "big breasts"
+					},
+					{
+						"tag": "breast"
+					},
+					{
+						"tag": "brother brother relationship"
+					},
+					{
+						"tag": "columbia tristar"
+					},
+					{
+						"tag": "death in title"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.imdb.com/title/tt19402762/?ref_=tt_eps_top",
+		"items": [
+			{
+				"itemType": "tvBroadcast",
+				"title": "Seventeen Seconds",
+				"creators": [
+					{
+						"firstName": "Jonathan",
+						"lastName": "Frakes",
+						"creatorType": "director"
+					},
+					{
+						"firstName": "Jane",
+						"lastName": "Maggs",
+						"creatorType": "scriptwriter"
+					},
+					{
+						"firstName": "Cindy",
+						"lastName": "Appel",
+						"creatorType": "scriptwriter"
+					},
+					{
+						"firstName": "Akiva",
+						"lastName": "Goldsman",
+						"creatorType": "scriptwriter"
+					},
+					{
+						"firstName": "Patrick",
+						"lastName": "Stewart",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Jeri",
+						"lastName": "Ryan",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Michelle",
+						"lastName": "Hurd",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2023-03-02",
+				"abstractNote": "Picard grapples with a life-altering revelation as the crew of the Titan attempt to outmaneuver Vadic, while Raffi and Worf uncover a plot by a vengeful enemy.",
+				"extra": "IMDb ID: tt19402762\nevent-location:",
+				"libraryCatalog": "IMDb",
+				"programTitle": "Star Trek: Picard",
+				"runningTime": "56m",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "bar"
+					},
+					{
+						"tag": "female medical doctor"
+					},
+					{
+						"tag": "human in outer space"
+					},
+					{
+						"tag": "nebula"
+					},
+					{
+						"tag": "starship"
+					}
 				],
 				"notes": [],
 				"seeAlso": []

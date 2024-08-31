@@ -12,6 +12,29 @@
 	"lastUpdated": "2017-01-01 15:47:15"
 }
 
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2017-2019 Michael Berkowitz and Aurimas Vinckevicius
+	
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
 function scrape(doc) {
 	var translator = Zotero.loadTranslator('web');
 	//use Embedded Metadata
@@ -43,10 +66,10 @@ function detectWeb(doc, url) {
 	//discard the empty page
 	if ( !Zotero.Utilities.xpath(doc,'//body/*[not(self::iframe) and not(self::script)]').length ) return null;
 
-	if (url.indexOf('/showToc') != -1 || 
-		( url.indexOf('/search/results') != -1 && Zotero.Utilities.xpath(doc, '//tr[td/a[2]]').length ) ) {
+	if (url.includes('/showToc') || 
+		( url.includes('/search/results') && Zotero.Utilities.xpath(doc, '//tr[td/a[2]]').length ) ) {
 		return "multiple";
-	} else if (url.indexOf('/article/viewArticle/') != -1) {
+	} else if (url.includes('/article/viewArticle/')) {
 		return "journalArticle";
 	}
 }
@@ -56,9 +79,9 @@ function doWeb(doc, url) {
 		var items = new Object();
 		var itemx = '//tr[td/a[2]]';
 		var linkx = './/a[text()="Abstract"]/@href';
-		if ( url.indexOf('/showToc') != -1 ) {
+		if ( url.includes('/showToc') ) {
 			var titlex = './td[1]/em';
-		} else if (url.indexOf('/search/results') != -1) {
+		} else if (url.includes('/search/results')) {
 			var titlex = './td[2]';
 		}
 
@@ -145,5 +168,5 @@ var testCases = [
 		"url": "http://socpvs.org/journals/index.php/wbp/search/results?query=habitat",
 		"items": "multiple"
 	}
-]
+];
 /** END TEST CASES **/

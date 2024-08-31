@@ -36,14 +36,14 @@
 */
 
 function detectWeb(doc, url) {
-	if ( (url.indexOf("full_record.do") !== -1
-		|| url.indexOf("CitedFullRecord.do") !== -1
-		|| url.indexOf("InboundService.do") != -1)
+	if ( (url.includes("full_record.do")
+		|| url.includes("CitedFullRecord.do")
+		|| url.includes("InboundService.do") )
 		&& getSingleItemId(doc)
 	) {
 		return "journalArticle";
-	} else if (((doc.title.indexOf(" Results") !== -1) 
-		|| url.indexOf("search_mode=") !== -1)
+	} else if (((doc.title.includes(" Results"))
+		|| url.includes("search_mode="))
 		&& getRecords(doc).length) {
 		return "multiple";
 	}
@@ -188,7 +188,7 @@ function fetchIds(ids, doc) {
 		
 		//otherwise we have an intermediate page (maybe... it just kind of went away one day)
 		//everything it mostly the same as above except for a few fields
-		var postData2 = {}
+		var postData2 = {};
 		postData2['locale'] = postData['locale'];
 		postData2['colName'] = postData['colName'];
 		postData2['sortBy'] = postData['sortBy'];

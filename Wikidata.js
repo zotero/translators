@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-06 12:03:00"
+	"lastUpdated": "2023-08-19 09:56:11"
 }
 
 /*
@@ -36,46 +36,50 @@
 */
 
 
-//see also https://github.com/UB-Mannheim/zotkat/blob/master/Wikidata%20QuickStatements.js
+// see also https://github.com/UB-Mannheim/zotkat/blob/master/Wikidata%20QuickStatements.js
 var typeMapping = {
-	"Q838948" : "artwork",
-	"Q30070318" : "audioRecording",
-	"Q686822" : "bill",
-	"Q17928402" : "blogPost",
-	"Q571" : "book",
-	"Q3331189" : "book", // Edition
-	"Q1980247" : "bookSection",
-	"Q2334719" : "case",
-	"Q40056" : "computerProgram",
-	"Q23927052" : "conferencePaper",
-	"Q30070414" : "dictionaryEntry",
-	"Q49848" : "document",
-	"Q30070439" : "email",
-	"Q17329259" : "encyclopediaArticle",
-	"Q11424" : "film",
-	"Q7216866" : "forumPost",
-	"Q30070550" : "hearing",
-	"Q30070565" : "instantMessage",
-	"Q178651" : "interview",
-	"Q13442814" : "journalArticle",
-	"Q133492" : "letter",
-	"Q30070590" : "magazineArticle",
-	"Q87167" : "manuscript",
-	"Q4006" : "map",
-	"Q5707594" : "newspaperArticle",
-	"Q253623" : "patent",
-	"Q24634210" : "podcast",
-	"Q604733" : "presentation",
-	"Q1555508" : "radioBroadcast",
-	"Q10870555" : "report",
-	"Q820655" : "statute",
-	"Q1266946" : "thesis",
-	"Q15416" : "tvBroadcast",
-	"Q30070675" : "videoRecording",
-	"Q36774" : "webpage"
+	Q838948: "artwork",
+	Q30070318: "audioRecording",
+	Q686822: "bill",
+	Q17928402: "blogPost",
+	Q571: "book",
+	Q3331189: "book", // Edition
+	Q47461344: "book", // written work
+	Q1980247: "bookSection",
+	Q2334719: "case",
+	Q40056: "computerProgram",
+	Q23927052: "conferencePaper",
+	Q30070414: "dictionaryEntry",
+	Q49848: "document",
+	Q30070439: "email",
+	Q13433827: "encyclopediaArticle",
+	Q17329259: "encyclopediaArticle", // merged into Q13433827
+	Q11424: "film",
+	Q7216866: "forumPost",
+	Q30070550: "hearing",
+	Q30070565: "instantMessage",
+	Q178651: "interview",
+	Q13442814: "journalArticle",
+	Q133492: "letter",
+	Q30070590: "magazineArticle",
+	Q87167: "manuscript",
+	Q4006: "map",
+	Q5707594: "newspaperArticle",
+	Q253623: "patent",
+	Q24634210: "podcast",
+	Q604733: "presentation",
+	Q1555508: "radioBroadcast",
+	Q10870555: "report",
+	Q820655: "statute",
+	Q1266946: "thesis",
+	Q187685: "thesis", // doctoral thesis
+	Q15416: "tvBroadcast",
+	Q30070675: "videoRecording",
+	Q36774: "webpage",
+	Q1172284: "document" // dataset
 };
 
-//see also https://www.wikidata.org/wiki/Template:Bibliographical_properties
+// see also https://www.wikidata.org/wiki/Template:Bibliographical_properties
 var mapping = {
 	'wdt:P1476': 'title',
 	'wdt:P1680': 'subtitle',
@@ -84,7 +88,7 @@ var mapping = {
 	'wdt:P356': 'DOI',
 	'wdt:P407': 'language',
 	'wdt:P1433': 'publicationTitle',
-	'wdt:P921': 'tagString', 
+	'wdt:P921': 'tagString',
 	'wdt:P50': 'creator',
 	'wdt:P2093': 'creator',
 	'wdt:P98': 'creator',
@@ -105,10 +109,12 @@ var mapping = {
 	'wdt:P136': 'genre',
 	'wdt:P275': 'rights',
 	'wdt:P2047': 'runningTime',
-	'wdt:P750': 'distributor'
+	'wdt:P750': 'distributor',
+	'wdt:P698': 'PMID',
+	'wdt:P932': 'PMCID'
 };
 
-//creators with no special role here are treated as contributor
+// creators with no special role here are treated as contributor
 var creatorMapping = {
 	'wdt:P50': 'author',
 	'wdt:P2093': 'author',
@@ -118,53 +124,54 @@ var creatorMapping = {
 	'wdt:P57': 'director',
 	'wdt:P58': 'scriptwriter',
 	'wdt:P162': 'producer'
-}
-
-
-var namespaces = {
-	"rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-	"xsd": "http://www.w3.org/2001/XMLSchema#",
-	"rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-	"owl": "http://www.w3.org/2002/07/owl#",
-	"wikibase": "http://wikiba.se/ontology-beta#",
-	"wdata": "https://www.wikidata.org/wiki/Special:EntityData/",
-	"wd": "http://www.wikidata.org/entity/",
-	"wds": "http://www.wikidata.org/entity/statement/",
-	"wdref": "http://www.wikidata.org/reference/",
-	"wdv": "http://www.wikidata.org/value/",
-	"wdt": "http://www.wikidata.org/prop/direct/",
-	"p": "http://www.wikidata.org/prop/",
-	"ps": "http://www.wikidata.org/prop/statement/",
-	"psv": "http://www.wikidata.org/prop/statement/value/",
-	"psn": "http://www.wikidata.org/prop/statement/value-normalized/",
-	"pq": "http://www.wikidata.org/prop/qualifier/",
-	"pqv": "http://www.wikidata.org/prop/qualifier/value/",
-	"pqn": "http://www.wikidata.org/prop/qualifier/value-normalized/",
-	"pr": "http://www.wikidata.org/prop/reference/",
-	"prv": "http://www.wikidata.org/prop/reference/value/",
-	"prn": "http://www.wikidata.org/prop/reference/value-normalized/",
-	"wdno": "http://www.wikidata.org/prop/novalue/",
-	"skos": "http://www.w3.org/2004/02/skos/core#",
-	"schema": "http://schema.org/",
-	"cc": "http://creativecommons.org/ns#",
-	"geo": "http://www.opengis.net/ont/geosparql#",
-	"prov": "http://www.w3.org/ns/prov#",
-	//usually the defintion of the xml namespace is not needed, but
-	//here we have to explicitely define it before using ZU.xpath
-	"xml": "http://www.w3.org/XML/1998/namespace"
 };
 
 
-function detectWeb(doc, url) {
+var namespaces = {
+	rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+	xsd: "http://www.w3.org/2001/XMLSchema#",
+	rdfs: "http://www.w3.org/2000/01/rdf-schema#",
+	owl: "http://www.w3.org/2002/07/owl#",
+	wikibase: "http://wikiba.se/ontology-beta#",
+	wdata: "https://www.wikidata.org/wiki/Special:EntityData/",
+	wd: "http://www.wikidata.org/entity/",
+	wds: "http://www.wikidata.org/entity/statement/",
+	wdref: "http://www.wikidata.org/reference/",
+	wdv: "http://www.wikidata.org/value/",
+	wdt: "http://www.wikidata.org/prop/direct/",
+	p: "http://www.wikidata.org/prop/",
+	ps: "http://www.wikidata.org/prop/statement/",
+	psv: "http://www.wikidata.org/prop/statement/value/",
+	psn: "http://www.wikidata.org/prop/statement/value-normalized/",
+	pq: "http://www.wikidata.org/prop/qualifier/",
+	pqv: "http://www.wikidata.org/prop/qualifier/value/",
+	pqn: "http://www.wikidata.org/prop/qualifier/value-normalized/",
+	pr: "http://www.wikidata.org/prop/reference/",
+	prv: "http://www.wikidata.org/prop/reference/value/",
+	prn: "http://www.wikidata.org/prop/reference/value-normalized/",
+	wdno: "http://www.wikidata.org/prop/novalue/",
+	skos: "http://www.w3.org/2004/02/skos/core#",
+	schema: "http://schema.org/",
+	cc: "http://creativecommons.org/ns#",
+	geo: "http://www.opengis.net/ont/geosparql#",
+	prov: "http://www.w3.org/ns/prov#",
+	// usually the defintion of the xml namespace is not needed, but
+	// here we have to explicitely define it before using ZU.xpath
+	xml: "http://www.w3.org/XML/1998/namespace"
+};
+
+
+function detectWeb(doc) {
 	var p31statement = doc.getElementById("P31");
 	if (p31statement) {
 		var p31values = ZU.xpath(p31statement, './/div[contains(@class, "wikibase-statementlistview")]//div[contains(@class, "wikibase-snakview-value")]/a/@title');
-		for (var i=0; i<p31values.length; i++) {
+		for (var i = 0; i < p31values.length; i++) {
 			if (p31values[i] && typeMapping[p31values[i].textContent]) {
 				return typeMapping[p31values[i].textContent];
 			}
 		}
 	}
+	return false;
 }
 
 
@@ -179,17 +186,19 @@ function scrape(doc, url) {
 	var qposition = url.indexOf('Q');
 	var qnumber = url.substr(qposition);
 	var xmlUrl = ZU.xpathText(doc, '//link[@rel="alternate" and @type="application/rdf+xml"]/@href');
-	ZU.doGet(xmlUrl, function(data) {
+	ZU.doGet(xmlUrl, function (data) {
 		var parser = new DOMParser();
 		var xml = parser.parseFromString(data, "application/xml");
 		
 		var item = new Zotero.Item(type);
+		item.extra = 'QID: ' + qnumber;
 		var nodes = ZU.xpath(xml, '//rdf:Description', namespaces);
-		for (var i=0; i<nodes.length; i++) {
+		var creatorsArray = [];
+		for (var i = 0; i < nodes.length; i++) {
 			var rdfabout = nodes[i].getAttribute("rdf:about");
 			if (rdfabout) {
-				var id = rdfabout.substr(rdfabout.length-qnumber.length);
-				if (id==qnumber) {
+				var id = rdfabout.substr(rdfabout.length - qnumber.length);
+				if (id == qnumber) {
 					for (var prop in nodes[i].childNodes) {
 						var propstatement = nodes[i].childNodes[prop];
 						var tagname = propstatement.tagName;
@@ -198,18 +207,41 @@ function scrape(doc, url) {
 							var value = propstatement.textContent;
 							var resource = propstatement.getAttribute("rdf:resource");
 							if (!value && resource) {
-								//Z.debug("Internal look up resource: " + resource);
-								value = ZU.xpathText(xml, '//rdf:Description[@rdf:about="'+resource+'"]/rdfs:label[contains(@xml:lang, "en")][1]', namespaces)
-									|| ZU.xpathText(xml, '//rdf:Description[@rdf:about="'+resource+'"]/rdfs:label[1]', namespaces);
-								//Z.debug(value);
+								// Z.debug("Internal look up resource: " + resource);
+								value = ZU.xpathText(xml, '//rdf:Description[@rdf:about="' + resource + '"]/rdfs:label[contains(@xml:lang, "en")][1]', namespaces)
+									|| ZU.xpathText(xml, '//rdf:Description[@rdf:about="' + resource + '"]/rdfs:label[1]', namespaces);
+								if (!value) { continue; }
+								// Z.debug(value);
 							}
-							if (zprop=="creator") {
+							if (zprop == "creator") {
+								var seriesOrdinal = ZU.xpathText(xml, '//rdf:Description[ps:P50[@rdf:resource="' + resource + '"]]/pq:P1545[1]', namespaces)
+									|| ZU.xpathText(xml, '//rdf:Description[ps:P2093[text()="' + value + '"]]/pq:P1545[1]', namespaces);
 								var func = creatorMapping[tagname] || 'contributor';
-								item.creators.push(ZU.cleanAuthor(value, func));
-							} else if (item[zprop]) {
+								creatorsArray.push([value, func, seriesOrdinal]);
+							}
+							else if (zprop == "tagString") {
+								for (let tag of value.split(', ')) {
+									item.tags.push(tag);
+								}
+							}
+							else if (["PMID", "PMCID"].includes(zprop)) {
+								Z.debug(`Property added to extra: ${zprop}`);
+								if (zprop == "PMCID") {
+									value = `PMC${value.trim()}`;
+								}
+								item.extra += `\n${zprop}: ${value}`;
+							}
+							else if (item[zprop]) {
 								item[zprop] += ', ' + value;
-							} else {
+							}
+							else {
 								item[zprop] = value;
+							}
+						}
+						else if (tagname == 'wdt:P31') {
+							let resource = propstatement.getAttribute('rdf:resource');
+							if (resource.endsWith('/Q1172284')) {
+								item.extra += '\nType: dataset';
 							}
 						}
 					}
@@ -220,18 +252,17 @@ function scrape(doc, url) {
 			item.title += ': ' + item.subtitle;
 			delete item.subtitle;
 		}
-		//in Zotero we cannot allow multiple DOIs
-		if (item.DOI && item.DOI.indexOf(', ')>-1) {
+		creatorsArray.sort(function (a, b) {
+			return a[2] - b[2];
+		});
+		for (let aut of creatorsArray) {
+			item.creators.push(ZU.cleanAuthor(aut[0], aut[1]));
+		}
+		// in Zotero we cannot allow multiple DOIs
+		if (item.DOI && item.DOI.includes(', ')) {
 			item.DOI = ZU.xpathText(xml, '(//rdf:Description[wikibase:rank[contains(@rdf:resource, "#PreferredRank")]]/ps:P356)[1]', namespaces)
 				|| ZU.xpathText(xml, '(//rdf:Description[wikibase:rank[contains(@rdf:resource, "#NormalRank")]]/ps:P356)[1]', namespaces)
 				|| ZU.xpathText(xml, '(//rdf:Description[wikibase:rank[contains(@rdf:resource, "#DeprecatedRank")]]/ps:P356)[1]', namespaces);
-		}
-		if (item.tagString) {
-			var tags = item.tagString.split(', ');
-			for (var j=0; j<tags.length; j++) {
-				item.tags.push(tags[j]);
-			}
-			delete item.tagString;
 		}
 
 		item.complete();
@@ -254,34 +285,40 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Enrico",
-						"lastName": "Zammarchi",
-						"creatorType": "author"
-					},
-					{
 						"firstName": "Rossana De",
 						"lastName": "Leo",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Donato",
-						"lastName": "Civitareale",
+						"firstName": "Enrico",
+						"lastName": "Zammarchi",
 						"creatorType": "author"
 					},
 					{
 						"firstName": "Pier Giorgio",
 						"lastName": "Natali",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Donato",
+						"lastName": "Civitareale",
+						"creatorType": "author"
 					}
 				],
 				"date": "2002-04-01T00:00:00Z",
 				"DOI": "10.1210/MEND.16.4.0808",
+				"extra": "QID: Q30000000\nPMID: 11923479",
+				"issue": "4",
 				"language": "English",
 				"libraryCatalog": "Wikidata",
+				"pages": "837-846",
 				"publicationTitle": "Molecular Endocrinology",
+				"volume": "16",
 				"attachments": [],
 				"tags": [
-					"transcription"
+					{
+						"tag": "transcription"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -307,6 +344,11 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
+						"firstName": "Christina",
+						"lastName": "Lioma",
+						"creatorType": "author"
+					},
+					{
 						"firstName": "Birger",
 						"lastName": "Larsen",
 						"creatorType": "author"
@@ -314,11 +356,6 @@ var testCases = [
 					{
 						"firstName": "Henrik L.",
 						"lastName": "Jørgensen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ole",
-						"lastName": "Winther",
 						"creatorType": "author"
 					},
 					{
@@ -332,18 +369,19 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Christina",
-						"lastName": "Lioma",
+						"firstName": "Peter",
+						"lastName": "Ingwersen",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Peter",
-						"lastName": "Ingwersen",
+						"firstName": "Ole",
+						"lastName": "Winther",
 						"creatorType": "author"
 					}
 				],
 				"date": "2013-06-01T00:00:00Z",
 				"DOI": "10.1016/J.IJMEDINF.2013.01.005",
+				"extra": "QID: Q29121277\nPMID: 23462700",
 				"issue": "6",
 				"libraryCatalog": "Wikidata",
 				"pages": "528-538",
@@ -352,8 +390,12 @@ var testCases = [
 				"volume": "82",
 				"attachments": [],
 				"tags": [
-					"rare disease",
-					"search engine"
+					{
+						"tag": "rare disease"
+					},
+					{
+						"tag": "search engine"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -525,7 +567,8 @@ var testCases = [
 					}
 				],
 				"date": "1974-08-30T00:00:00Z",
-				"genre": "comedy film, parody film, swashbuckler film, film adaptation",
+				"extra": "QID: Q470573",
+				"genre": "comedy film, parody film, swashbuckler film, film based on a novel",
 				"libraryCatalog": "Wikidata",
 				"runningTime": "+75",
 				"shortTitle": "Les Charlots en folie",
@@ -550,15 +593,23 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "1963-01-01T00:00:00Z",
+				"date": "1963-01-01T00:00:00Z, 2000-01-01T00:00:00Z",
+				"extra": "QID: Q480743",
+				"language": "English",
 				"libraryCatalog": "Wikidata",
 				"publisher": "Viking Press",
 				"shortTitle": "Eichmann in Jerusalem",
 				"attachments": [],
 				"tags": [
-					"Adolf Eichmann",
-					"the Holocaust",
-					"war crimes trial"
+					{
+						"tag": "Adolf Eichmann"
+					},
+					{
+						"tag": "The Holocaust"
+					},
+					{
+						"tag": "war crimes trial"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -567,7 +618,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.wikidata.org/wiki/Q30051491",
+		"url": "https://www.wikidata.org/wiki/Q28294211",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -610,8 +661,9 @@ var testCases = [
 					}
 				],
 				"date": "1999-01-01T00:00:00Z",
-				"DOI": "10.1210/MEND.13.1.0223",
+				"extra": "QID: Q28294211\nPMID: 9892020",
 				"issue": "1",
+				"language": "English",
 				"libraryCatalog": "Wikidata",
 				"pages": "148-155",
 				"publicationTitle": "Molecular Endocrinology",
@@ -620,6 +672,238 @@ var testCases = [
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.wikidata.org/wiki/Q15892061",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "Ancile",
+				"creators": [
+					{
+						"firstName": "Paul",
+						"lastName": "Habel",
+						"creatorType": "author"
+					}
+				],
+				"date": "1894-01-01T00:00:00Z",
+				"encyclopediaTitle": "Pauly-Wissowa vol. I,2",
+				"extra": "QID: Q15892061",
+				"language": "German",
+				"libraryCatalog": "Wikidata",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "ancile"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.wikidata.org/wiki/Q30000000",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The Synergistic Activity of Thyroid Transcription Factor 1 and Pax 8 Relies on the Promoter/Enhancer Interplay",
+				"creators": [
+					{
+						"firstName": "Stefania",
+						"lastName": "Miccadei",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rossana De",
+						"lastName": "Leo",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Enrico",
+						"lastName": "Zammarchi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Pier Giorgio",
+						"lastName": "Natali",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Donato",
+						"lastName": "Civitareale",
+						"creatorType": "author"
+					}
+				],
+				"date": "2002-04-01T00:00:00Z",
+				"DOI": "10.1210/MEND.16.4.0808",
+				"extra": "QID: Q30000000\nPMID: 11923479",
+				"issue": "4",
+				"language": "English",
+				"libraryCatalog": "Wikidata",
+				"pages": "837-846",
+				"publicationTitle": "Molecular Endocrinology",
+				"volume": "16",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "transcription"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.wikidata.org/wiki/Q58732106",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Practical Medicine and Therapeutics",
+				"creators": [],
+				"date": "1837-04-01T00:00:00Z",
+				"extra": "QID: Q58732106\nPMID: 30161437\nPMCID: PMC5589313",
+				"issue": "6",
+				"language": "English",
+				"libraryCatalog": "Wikidata",
+				"pages": "548-556",
+				"volume": "3",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.wikidata.org/wiki/Q107586230",
+		"items": [
+			{
+				"itemType": "document",
+				"title": "Camptochaeta luxemburgensis Heller, Hippa and Vilkamaa spec. nov. (Diptera: Sciaridae), a new cavernicolous species from Luxembourg",
+				"creators": [
+					{
+						"firstName": "Dieter",
+						"lastName": "Weber",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alain C.",
+						"lastName": "Frantz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Heikki",
+						"lastName": "Hippa",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Pekka",
+						"lastName": "Vilkamaa",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Björn",
+						"lastName": "Rulik",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kai",
+						"lastName": "Heller",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018-01-01T00:00:00Z",
+				"extra": "QID: Q107586230\nType: dataset",
+				"libraryCatalog": "Wikidata",
+				"publisher": "Barcode of Life Data Systems",
+				"shortTitle": "Camptochaeta luxemburgensis Heller, Hippa and Vilkamaa spec. nov. (Diptera",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.wikidata.org/wiki/Q30834230",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Nicola",
+						"lastName": "Francesca",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Cláudia",
+						"lastName": "Carvalho",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ciro",
+						"lastName": "Sannino",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marco Alexandre",
+						"lastName": "Guerreiro",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Pedro",
+						"lastName": "Almeida",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Luca",
+						"lastName": "Settanni",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "José Paulo",
+						"lastName": "Sampaio",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Bruno",
+						"lastName": "Massa",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Giancarlo",
+						"lastName": "Moschetti",
+						"creatorType": "author"
+					}
+				],
+				"tags": [
+					{
+						"tag": "species nova",
+						"type": 1
+					},
+					{
+						"tag": "species nova",
+						"type": 1
+					}
+				],
+				"extra": "QID: Q30834230\nPMID: 24981278",
+				"date": "2014-07-28T00:00:00Z",
+				"issue": "6",
+				"publicationTitle": "FEMS Yeast Research, FEMS Yeast Research",
+				"DOI": "10.1111/1567-1364.12179",
+				"volume": "14",
+				"title": "Yeasts vectored by migratory birds collected in the Mediterranean island of Ustica and description of Phaffomyces usticensis f.a. sp. nov., a new species related to the cactus ecoclade",
+				"pages": "910-921",
+				"libraryCatalog": "Wikidata"
 			}
 		]
 	}

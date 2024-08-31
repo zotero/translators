@@ -2,68 +2,88 @@
 	"translatorID": "b61c224b-34b6-4bfd-8a76-a476e7092d43",
 	"label": "SSRN",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://papers\\.ssrn\\.com/",
+	"target": "^https?://(www|papers|hq)\\.ssrn\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-02-16 06:39:03"
+	"lastUpdated": "2022-04-04 18:26:02"
 }
 
 /*
-	SSRN Translator
-   Copyright (C) 2013 Sebastian Karcher
+	***** BEGIN LICENSE BLOCK *****
 
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU Affero General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+	Copyright © 2013-2022 Sebastian Karcher and Abe Jellinek
+	
+	This file is part of Zotero.
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU Affero General Public License for more details.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-   You should have received a copy of the GNU Affero General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
 */
 
-function detectWeb(doc,url) {
-	var xpath='//meta[@name="citation_title"]';		
-	if (ZU.xpath(doc, xpath).length > 0) {
-		return "report";
+
+const preprintType = ZU.fieldIsValidForType('title', 'preprint')
+	? 'preprint'
+	: 'report';
+
+function detectWeb(doc, _url) {
+	if (doc.querySelector('meta[name="citation_title"]')) {
+		return preprintType;
 	}
-	if (url.search(/AbsByAuth\.cfm\?|results\.cfm\?/i)!=-1) {
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
-
 	return false;
 }
 
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, "//tr/td//strong/a[(@class='textlink' or @class='textLink') and contains(@href, 'papers.cfm?abstract_id')]");
+	if (!rows.length) {
+		rows = ZU.xpath(doc, "//div[contains(@class, 'trow')]//a[contains(@class, 'title') and contains(@href, 'ssrn.com/abstract=')]");
+	}
+	if (!rows.length) {
+		rows = doc.querySelectorAll('h3 a.title:not([href*="javascript:"])');
+	}
+	if (!rows.length) {
+		rows = doc.querySelectorAll('.title > a:not([href*="javascript:"])');
+	}
+	if (!rows.length) {
+		rows = doc.querySelectorAll('a.paper-title');
+	}
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
 
-function doWeb(doc,url) {
+function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		var hits = {};
-		var urls = [];
-		//this one is for publication series:
-		var results = ZU.xpath(doc, "//tr/td//strong/a[(@class='textlink' or @class='textLink') and contains(@href, 'papers.cfm?abstract_id')]");
-		//otherwise, this is an author page or searches
-		if (results.length<1){
-			results = ZU.xpath(doc,"//div[contains(@class, 'trow')]//a[contains(@class, 'title') and contains(@href, 'ssrn.com/abstract=')]");
-		}
-		for (var i=0, n=results.length; i<n; i++) {
-			hits[results[i].href] = results[i].textContent;
-		}
-		Z.selectItems(hits, function(items) {
-			if (!items) return true;
-			for (var j in items) {
-				urls.push(j);
-			}
-			ZU.processDocuments(urls, scrape);
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -74,27 +94,38 @@ function scrape(doc, url) {
 	var translator = Zotero.loadTranslator("web");
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
-	translator.setHandler("itemDone", function(obj, item) {
-		item.itemType = "report";
-		item.type = "SSRN Scholarly Paper";
-		item.institution = "Social Science Research Network";
+	translator.setHandler("itemDone", function (obj, item) {
+		if (item.date) {
+			item.date = ZU.strToISO(item.date);
+		}
+		
+		item.itemType = preprintType;
 		var number = url.match(/abstract_id=(\d+)/);
-		if (number) item.reportNumber= "ID " + number[1];
+		if (preprintType == 'preprint') {
+			item.genre = "SSRN Scholarly Paper";
+			item.repository = "Social Science Research Network";
+			if (number) item.archiveID = number[1];
+		}
+		else {
+			item.reportType = "SSRN Scholarly Paper";
+			item.institution = "Social Science Research Network";
+			if (number) item.reportNumber = number[1];
+		}
 		item.place = "Rochester, NY";
-		if (abstract) item.abstractNote = abstract.trim(); 
-		//The pdfurl in the meta tag 'citation_pdf_url' is just pointing
-		//to the entry itself --> Delete this non-working attachment.
-		for (var i=0; i<item.attachments.length; i++) {
-			if (item.attachments[i].title=="Full Text PDF") {
+		if (abstract) item.abstractNote = abstract.trim();
+		// The pdfurl in the meta tag 'citation_pdf_url' is just pointing
+		// to the entry itself --> Delete this non-working attachment.
+		for (var i = 0; i < item.attachments.length; i++) {
+			if (item.attachments[i].title == "Full Text PDF") {
 				item.attachments.splice(i, 1);
 			}
 		}
-		//Extract the correct PDF URL from the download button
-		var download_xpath = ZU.xpath(doc, '//a[@id="downloadPdf"]');
-		if (download_xpath.length > 0) {
+		// Extract the correct PDF URL from the download button
+		var pdfURL = attr(doc, 'a.primary[data-abstract-id]', 'href');
+		if (pdfURL) {
 			item.attachments.push({
 				title: "Full Text PDF",
-				url: download_xpath[0].href,
+				url: pdfURL,
 				mimeType: "application/pdf"
 			});
 		}
@@ -103,11 +134,13 @@ function scrape(doc, url) {
 	});
 	translator.translate();
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://papers.ssrn.com/sol3/JELJOUR_Results.cfm?form_name=journalBrowse&journal_id=1747960",
+		"url": "https://www.ssrn.com/index.cfm/en/mit-political-science-dept/",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
@@ -120,7 +153,7 @@ var testCases = [
 		"url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1450387",
 		"items": [
 			{
-				"itemType": "report",
+				"itemType": "preprint",
 				"title": "Who Doesn't Support the Genocide Convention? A Nested Analysis",
 				"creators": [
 					{
@@ -136,17 +169,17 @@ var testCases = [
 				],
 				"date": "2009",
 				"abstractNote": "What explains the large variation in the time taken by different countries to ratify the 1948 Genocide Convention? The costs of ratiﬁcation would appear to be relatively low, yet many countries have waited for years, and even decades, before ratifying this symbolically important treaty. This study employs a \"nested analysis\" that combines a large-n event history analysis with a detailed study of an important outlying case in order to explain the main sources of this variation. The initial event history history produces a puzzling ﬁnding: countries appear to be less likely to ratify the treaty if relevant peer countries have already done so. We use the case of Japan -- which has not yet ratiﬁed the Genocide Convention, despite the predictions of the event history model -- to explore the proposed causes of ratiﬁcation in more detail. Based on these ﬁndings, we suggest that once the norms embodied in a treaty take on a sufﬁciently \"taken-for-granted\" character, many countries decide that the costs of ratiﬁcation outweigh its marginal beneﬁts. The pattern of ratiﬁcation of the Genocide Convention therefore does not appear to ﬁt the classic model of the \"norm cascade\" that has been used to explain the adoption of other human rights norms. We conclude with suggestions for how the validity of our theory could be tested through a combination of further large-n and small-n analysis.",
-				"institution": "Social Science Research Network",
+				"archiveID": "1450387",
+				"genre": "SSRN Scholarly Paper",
 				"language": "en",
-				"libraryCatalog": "papers.ssrn.com",
+				"libraryCatalog": "Social Science Research Network",
 				"place": "Rochester, NY",
-				"reportNumber": "ID 1450387",
-				"reportType": "SSRN Scholarly Paper",
 				"shortTitle": "Who Doesn't Support the Genocide Convention?",
 				"url": "https://papers.ssrn.com/abstract=1450387",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					},
 					{
 						"title": "Full Text PDF",
@@ -192,6 +225,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://papers.ssrn.com/sol3/JELJOUR_Results.cfm?form_name=journalBrowse&journal_id=3671899",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

@@ -8,18 +8,37 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2018-08-19 11:39:42"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2024-07-22 20:08:47"
 }
 
+/*
+   SpringerLink Translator
+   Copyright (C) 2020 Aurimas Vinckevicius and Sebastian Karcher
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 function detectWeb(doc, url) {
-	var action = url.match(/^https?:\/\/[^\/]+\/([^\/?#]+)/);
-	if (!action) return;
+	var action = getAction(url);
+	// Z.debug(action)
+	if (!action) return false;
 	if (!doc.head || !doc.head.getElementsByTagName('meta').length) {
 		Z.debug("Springer Link: No head or meta tags");
-		return;
+		return false;
 	}
-	switch (action[1]) {
+	switch (action) {
 		case "search":
 		case "journal":
 		case "book":
@@ -35,10 +54,16 @@ function detectWeb(doc, url) {
 		case "protocol":
 			if (ZU.xpathText(doc, '//meta[@name="citation_conference_title"]/@content')) {
 				return "conferencePaper";
-			} else {
+			}
+			else {
 				return "bookSection";
 			}
 	}
+	return false;
+}
+
+function getAction(url) {
+	return (url.match(/^https?:\/\/[^/]+\/([^/?#]+)/) || [])[1];
 }
 
 function getResultList(doc) {
@@ -53,10 +78,25 @@ function getResultList(doc) {
 			'//div[@class="book-toc-container"]/ol//div[contains(@class,"content-type-list__meta")]/div/a');
 	}
 	if (!results.length) {
-		results = ZU.xpath(doc,
-			'//div[@class="toc"]/ol\
-			//li[contains(@class,"toc-item")]/p[@class="title"]/a'
-		);
+		results = ZU.xpath(doc, '//div[@class="toc"]/ol//li[contains(@class,"toc-item")]/p[@class="title"]/a');
+	}
+	// https://link.springer.com/journal/10344/volumes-and-issues/66-5
+	if (!results.length) {
+		results = ZU.xpath(doc, '//li[@class="c-list-group__item"]//h3/a');
+	}
+	// e.g. https://link.springer.com/book/10.1007/978-3-031-04248-5 -- Springer uses both h3 and h4 and sometimes
+	// the h3 link actually points to other volumes, so we're making sure we're in the right li element first
+	if (!results.length) {
+		results = doc.querySelectorAll('li[data-test="chapter"] h4.c-card__title > a, li[data-test="chapter"] h3.c-card__title > a');
+	}
+	// https://link.springer.com/book/10.1007/978-3-476-05742-6
+	// https://link.springer.com/book/10.1007/978-3-319-63324-4
+	if (!results.length) {
+		results = doc.querySelectorAll('li[data-test="chapter"] [data-test^="chapter-title"] > a');
+	}
+	// https://link.springer.com/journal/11192/volumes-and-issues/129-1
+	if (!results.length) {
+		results = doc.querySelectorAll('section ol article.c-card-open h3 > a');
 	}
 	return results;
 }
@@ -66,34 +106,43 @@ function doWeb(doc, url) {
 	if (type == "multiple") {
 		var list = getResultList(doc);
 		var items = {};
+		if (getAction(url) == 'book') {
+			items[url] = '[Full Book] ' + text(doc, 'header h1');
+		}
 		for (var i = 0, n = list.length; i < n; i++) {
 			items[list[i].href] = list[i].textContent;
 		}
-		Zotero.selectItems(items, function(selectedItems) {
-			if (!selectedItems) return true;
-			for (var i in selectedItems) {
+		Zotero.selectItems(items, function (selectedItems) {
+			if (!selectedItems) return;
+			for (let i in selectedItems) {
 				ZU.processDocuments(i, scrape);
 			}
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
 
 function complementItem(doc, item) {
 	var itemType = detectWeb(doc, doc.location.href);
-	//in case we're missing something, we can try supplementing it from page
+	// in case we're missing something, we can try supplementing it from page
 	if (!item.DOI) {
-		item.DOI = ZU.xpathText(doc,
-			'//dd[@id="abstract-about-book-chapter-doi"\
-					or @id="abstract-about-doi"][1]'
-		);
+		item.DOI = ZU.xpathText(doc, '//meta[@name="citation_doi"]/@content');
 	}
 	if (!item.language) {
 		item.language = ZU.xpathText(doc, '//meta[@name="citation_language"]/@content');
-	}	
+	}
 	if (!item.publisher) {
 		item.publisher = ZU.xpathText(doc, '//dd[@id="abstract-about-publisher"]');
+	}
+	if (item.publisher && item.place) {
+		// delete places in publisher's name
+		// e.g. Springer Berlin Heidelberg
+		var places = item.place.split(/[\s,;]/);
+		for (let place of places) {
+			item.publisher = item.publisher.replace(place, '');
+		}
 	}
 	if (!item.date) {
 		item.date = ZU.xpathText(doc, '//dd[@id="abstract-about-cover-date"]') || ZU.xpathText(
@@ -102,7 +151,7 @@ function complementItem(doc, item) {
 	if (item.date) {
 		item.date = ZU.strToISO(item.date);
 	}
-	//copyright
+	// copyright
 	if (!item.rights) {
 		item.rights = ZU.xpathText(doc,
 			'//dd[@id="abstract-about-book-copyright-holder"]');
@@ -112,35 +161,30 @@ function complementItem(doc, item) {
 			item.rights = '©' + year + ' ' + item.rights;
 		}
 	}
-	
+
 	if (itemType == "journalArticle") {
 		if (!item.ISSN) {
-			item.ISSN = ZU.xpathText(doc,
-				'//dd[@id="abstract-about-issn" or\
-						@id="abstract-about-electronic-issn"]'
-			);
+			item.ISSN = ZU.xpathText(doc, '//dd[@id="abstract-about-issn" or @id="abstract-about-electronic-issn"]');
 		}
 		if (!item.journalAbbreviation || item.publicationTitle == item.journalAbbreviation) {
 			item.journalAbbreviation = ZU.xpathText(doc, '//meta[@name="citation_journal_abbrev"]/@content');
 		}
 	}
 	if (itemType == 'bookSection' || itemType == "conferencePaper") {
-		//look for editors
-		var editors = ZU.xpath(doc,
-			'//ul[@class="editors"]/li[@itemprop="editor"]\
-					/a[@class="person"]');
+		// look for editors
+		var editors = ZU.xpath(doc, '//ul[@class="editors"]/li[@itemprop="editor"]/a[@class="person"]');
 		var m = item.creators.length;
 		for (var i = 0, n = editors.length; i < n; i++) {
 			var editor = ZU.cleanAuthor(editors[i].textContent.replace(/\s+Ph\.?D\.?/,
 				''), 'editor');
-			//make sure we don't already have this person in the list
+			// make sure we don't already have this person in the list
 			var haveEditor = false;
 			for (var j = 0; j < m; j++) {
 				var creator = item.creators[j];
 				if (creator.creatorType == "editor" && creator.lastName == editor.lastName) {
-					/* we should also check first name, but this could get
-					   messy if we only have initials in one case but not
-					   the other. */
+					// we should also check first name, but this could get
+					// messy if we only have initials in one case but not
+					// the other.
 					haveEditor = true;
 					break;
 				}
@@ -153,64 +197,90 @@ function complementItem(doc, item) {
 			item.ISBN = ZU.xpathText(doc, '//dd[@id="abstract-about-book-print-isbn" or @id="abstract-about-book-online-isbn"]')
 				|| ZU.xpathText(doc, '//span[@id="print-isbn" or @id="electronic-isbn"]');
 		}
-		//series/seriesNumber
+		// series/seriesNumber
 		if (!item.series) {
 			item.series = ZU.xpathText(doc, '//dd[@id="abstract-about-book-series-title"]')
-				|| ZU.xpathText(doc, '//div[contains(@class, "ArticleHeader")]//a[contains(@href, "/bookseries/")]');
+				|| ZU.xpathText(doc, '//div[contains(@class, "ArticleHeader")]//a[contains(@href, "/bookseries/")]')
+				|| text(doc, '.c-chapter-book-series > a');
 		}
 		if (!item.seriesNumber) {
 			item.seriesNumber = ZU.xpathText(doc, '//dd[@id="abstract-about-book-series-volume"]');
 		}
 	}
-	//add the DOI to extra for non journal articles
+	// add the DOI to extra for non journal articles
 	if (item.itemType != "journalArticle" && item.itemType != "conferencePaper" && item.DOI) {
 		item.extra = "DOI: " + item.DOI;
 		item.DOI = "";
 	}
-	//series numbers get mapped to volume; fix this
+	// series numbers get mapped to volume; fix this
 	if (item.volume == item.seriesNumber) {
 		item.volume = "";
 	}
-	//add abstract
+	// add abstract
 	var abs = ZU.xpathText(doc, '//div[contains(@class,"abstract-content")][1]');
 	if (!abs) {
 		abs = ZU.xpathText(doc, '//section[@class="Abstract" and @lang="en"]');
 	}
 	if (abs) item.abstractNote = ZU.trimInternal(abs).replace(/^Abstract[:\s]*/, "");
-	//add tags
+	// add tags
 	var tags = ZU.xpathText(doc, '//span[@class="Keyword"]');
 	if (tags && (!item.tags || item.tags.length === 0)) {
 		item.tags = tags.split(',');
+	}
+	tags = doc.querySelectorAll('.c-article-subject-list__subject');
+	if (tags.length && !item.tags.length) {
+		item.tags = [...tags].map(el => el.innerText);
 	}
 	return item;
 }
 
 function scrape(doc, url) {
-	var itemType = detectWeb(doc, doc.location.href);
-
 	var DOI = url.match(/\/(10\.[^#?]+)/)[1];
-	var risURL = "https://citation-needed.springer.com/v2/references/" + DOI + "?format=refman&flavour=citation";
-	//Z.debug("risURL" + risURL);
 	var pdfURL = "/content/pdf/" + encodeURIComponent(DOI) + ".pdf";
-	//Z.debug("pdfURL: " + pdfURL);
-	ZU.doGet(risURL, function(text) {
-		//Z.debug(text)
+	// Z.debug("pdfURL: " + pdfURL);
+
+	if (getAction(url) == 'book') {
+		let search = Zotero.loadTranslator('search');
+		search.setSearch({ DOI });
+		search.setHandler('translators', (obj, translators) => {
+			search.setTranslator(translators);
+			search.setHandler('itemDone', (obj, item) => {
+				item = complementItem(doc, item);
+				item.attachments.push({
+					url: pdfURL,
+					title: "Full Text PDF",
+					mimeType: "application/pdf"
+				});
+				item.complete();
+			});
+			search.translate();
+		});
+		search.getTranslators();
+		return;
+	}
+
+	var risURL = "https://citation-needed.springer.com/v2/references/" + DOI + "?format=refman&flavour=citation";
+	// Z.debug("risURL" + risURL);
+	ZU.doGet(risURL, function (text) {
+		// Z.debug(text)
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
-		translator.setHandler("itemDone", function(obj, item) {
+		translator.setHandler("itemDone", function (obj, item) {
 			item = complementItem(doc, item);
-			
+
 			item.attachments.push({
 				url: pdfURL,
-				title: "Springer Full Text PDF",
+				title: "Full Text PDF",
 				mimeType: "application/pdf"
 			});
 			item.complete();
 		});
 		translator.translate();
 	});
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -242,17 +312,19 @@ var testCases = [
 					}
 				],
 				"date": "2008",
+				"DOI": "10.1007/978-3-540-88682-2_1",
 				"ISBN": "9783540886822",
 				"abstractNote": "My first paper of a “Computer Vision” signature (on invariants related to optic flow) dates from 1975. I have published in Computer Vision (next to work in cybernetics, psychology, physics, mathematics and philosophy) till my retirement earlier this year (hence the slightly blue feeling), thus my career roughly covers the history of the field. “Vision” has diverse connotations. The fundamental dichotomy is between “optically guided action” and “visual experience”. The former applies to much of biology and computer vision and involves only concepts from science and engineering (e.g., “inverse optics”), the latter involves intention and meaning and thus additionally involves concepts from psychology and philosophy. David Marr’s notion of “vision” is an uneasy blend of the two: On the one hand the goal is to create a “representation of the scene in front of the eye” (involving intention and meaning), on the other hand the means by which this is attempted are essentially “inverse optics”. Although this has nominally become something of the “Standard Model” of CV, it is actually incoherent. It is the latter notion of “vision” that has always interested me most, mainly because one is still grappling with basic concepts. It has been my aspiration to turn it into science, although in this I failed. Yet much has happened (something old) and is happening now (something new). I will discuss some of the issues that seem crucial to me, mostly illustrated through my own work, though I shamelessly borrow from friends in the CV community where I see fit.",
 				"language": "en",
 				"libraryCatalog": "Springer Link",
 				"pages": "1-1",
+				"place": "Berlin, Heidelberg",
 				"proceedingsTitle": "Computer Vision – ECCV 2008",
-				"publisher": "Springer Berlin Heidelberg",
+				"publisher": "Springer",
 				"series": "Lecture Notes in Computer Science",
 				"attachments": [
 					{
-						"title": "Springer Full Text PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -293,7 +365,7 @@ var testCases = [
 				"url": "https://doi.org/10.1007/978-0-387-79061-9_5173",
 				"attachments": [
 					{
-						"title": "Springer Full Text PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -337,58 +409,58 @@ var testCases = [
 				"url": "https://doi.org/10.1007/978-1-60761-839-3_22",
 				"attachments": [
 					{
-						"title": "Springer Full Text PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
 					{
-						"tag": " ANOVA "
+						"tag": "ANOVA"
 					},
 					{
-						"tag": " AUC "
+						"tag": "AUC"
 					},
 					{
-						"tag": " Central Limit Theorem "
+						"tag": "Central Limit Theorem"
 					},
 					{
-						"tag": " Confidence limits "
+						"tag": "Confidence limits"
 					},
 					{
-						"tag": " Correlation "
+						"tag": "Correlation"
 					},
 					{
-						"tag": " Enrichment "
+						"tag": "Enrichment"
 					},
 					{
-						"tag": " Error bars "
+						"tag": "Error bars"
 					},
 					{
-						"tag": " Propagation of error "
+						"tag": "Propagation of error"
 					},
 					{
-						"tag": " ROC curves "
+						"tag": "ROC curves"
 					},
 					{
-						"tag": " Standard deviation "
+						"tag": "Standard deviation"
 					},
 					{
-						"tag": " Student’s t-test "
+						"tag": "Statistics"
 					},
 					{
-						"tag": " Variance "
+						"tag": "Student’s t-test"
 					},
 					{
-						"tag": " Virtual screening "
+						"tag": "Variance"
 					},
 					{
-						"tag": " logit transform "
+						"tag": "Virtual screening"
 					},
 					{
-						"tag": " p-Values "
+						"tag": "logit transform"
 					},
 					{
-						"tag": "Statistics "
+						"tag": "p-Values"
 					}
 				],
 				"notes": [],
@@ -460,25 +532,25 @@ var testCases = [
 				"volume": "17",
 				"attachments": [
 					{
-						"title": "Springer Full Text PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
 					{
-						"tag": " Analytical solutions "
+						"tag": "Analytical solutions"
 					},
 					{
-						"tag": " Elastic storage "
+						"tag": "Coastal aquifers"
 					},
 					{
-						"tag": " Submarine outlet-capping "
+						"tag": "Elastic storage"
 					},
 					{
-						"tag": " Tidal loading efficiency "
+						"tag": "Submarine outlet-capping"
 					},
 					{
-						"tag": "Coastal aquifers "
+						"tag": "Tidal loading efficiency"
 					}
 				],
 				"notes": [],
@@ -534,31 +606,91 @@ var testCases = [
 				"url": "https://doi.org/10.1007/0-387-24250-3_4",
 				"attachments": [
 					{
-						"title": "Springer Full Text PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
 					{
-						"tag": " peer interaction "
+						"tag": "Social mediation"
 					},
 					{
-						"tag": " revision "
+						"tag": "peer interaction"
 					},
 					{
-						"tag": " whole-class interaction "
+						"tag": "revision"
 					},
 					{
-						"tag": " writing "
+						"tag": "whole-class interaction"
 					},
 					{
-						"tag": "Social mediation "
+						"tag": "writing"
 					}
 				],
 				"notes": [],
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/journal/10344/volumes-and-issues/66-5",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/book/10.1007/978-3-031-04248-5",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/journal/11192/volumes-and-issues/129-1",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/journal/10473/volumes-and-issues/44-3",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/book/10.1007/978-3-319-63324-4",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/book/10.1007/978-3-476-05742-6",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/book/10.1007/978-3-319-63324-4",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/book/10.1007/978-94-6209-482-6",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/book/10.1007/b137952",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/book/10.1007/978-3-658-11545-6",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/book/10.1007/978-3-642-33191-6",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/book/10.1007/978-3-030-04759-7",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

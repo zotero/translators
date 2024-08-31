@@ -2,14 +2,14 @@
 	"translatorID": "879d738c-bbdd-4fa0-afce-63295764d3b7",
 	"label": "FreePatentsOnline",
 	"creator": "Adam Crymble, Philipp Zumstein",
-	"target": "^https?://www\\.freepatentsonline\\.com",
+	"target": "^https?://www\\.freepatentsonline\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-05 18:54:31"
+	"lastUpdated": "2022-12-13 17:39:29"
 }
 
 /*
@@ -36,14 +36,10 @@
 */
 
 
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
-
 function detectWeb(doc, url) {
 	if (url.includes("result.html") && getSearchResults(doc, true)) {
 		return "multiple";
-	} else if (text(doc, 'div.disp_doc2>div')) {
+	} else if (text(doc, 'div.disp_doc2 > div') || url.includes(".pdf")) {
 		return "patent";
 	}
 }
@@ -52,10 +48,10 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('table.listing_table>tbody>tr>td>a');
-	for (let i=0; i<rows.length; i++) {
-		let href = rows[i].href;
-		let title = ZU.trimInternal(rows[i].textContent);
+	var rows = doc.querySelectorAll('table.listing_table > tbody > tr > td > a');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -68,22 +64,22 @@ function getSearchResults(doc, checkOnly) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
 
 
-function scrape(doc, url) {
+function scrape(doc, url, pdfUrl = null) {
+	if (url.includes('.pdf')) {
+		ZU.processDocuments(url.replace('.pdf', '.html'),
+			(catalogDoc, catalogUrl) => scrape(catalogDoc, catalogUrl, getPDFURL(doc)));
+		return;
+	}
+
 	var newItem = new Zotero.Item("patent");
 	
 	var fieldtitles = ZU.xpath(doc, '//div[@class="disp_doc2"]/div[@class="disp_elm_title"]');
@@ -128,7 +124,7 @@ function scrape(doc, url) {
 						newItem.creators.push(ZU.cleanAuthor(name, "attorneyAgent", true));
 					} else {
 						newItem.creators.push({
-							firstName: name, 
+							lastName: name, 
 							creatorType: "attorneyAgent",
 							fieldMode: 1
 						});
@@ -155,18 +151,38 @@ function scrape(doc, url) {
 	
 	newItem.attachments.push({
 		document: doc,
-		title: "Snaptshot"
+		title: "Snapshot"
 	});
 	
-	var pdfUrl = ZU.xpathText(doc, "//a[contains(@href, '.pdf')]/@href");
 	if (pdfUrl) {
 		newItem.attachments.push({
 			url: pdfUrl,
-			title: "Fulltext PDF"
+			mimeType: "application/pdf",
+			title: "Full Text PDF"
 		});
+		newItem.complete();
 	}
+	else {
+		let pdfWrapperUrl = attr(doc, 'a[href*=".pdf"]', 'href');
+		if (pdfWrapperUrl) {
+			ZU.processDocuments(pdfWrapperUrl, (pdfWrapperDoc) => {
+				newItem.attachments.push({
+					url: getPDFURL(pdfWrapperDoc),
+					mimeType: "application/pdf",
+					title: "Full Text PDF"
+				});
+				newItem.complete();
+			});
+		}
+		else {
+			newItem.complete();
+		}
+	}
+}
 
-	newItem.complete();
+
+function getPDFURL(doc) {
+	return doc.querySelector("center > iframe[src*='s3']").src.replace(/#.*/, '');
 }
 
 
@@ -189,7 +205,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.freepatentsonline.com/7751561.html",
+		"url": "https://www.freepatentsonline.com/7751561.html",
 		"items": [
 			{
 				"itemType": "patent",
@@ -216,14 +232,9 @@ var testCases = [
 						"creatorType": "contributor"
 					},
 					{
-						"firstName": "Miller Patent Services",
+						"lastName": "Miller Patent Services",
 						"creatorType": "attorneyAgent",
 						"fieldMode": 1
-					},
-					{
-						"firstName": "Jerry A.",
-						"lastName": "Miller",
-						"creatorType": "attorneyAgent"
 					}
 				],
 				"issueDate": "2010-07-06",
@@ -233,13 +244,15 @@ var testCases = [
 				"country": "United States",
 				"filingDate": "2007-12-12",
 				"patentNumber": "7751561",
-				"url": "http://www.freepatentsonline.com/7751561.html",
+				"url": "https://www.freepatentsonline.com/7751561.html",
 				"attachments": [
 					{
-						"title": "Snaptshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					},
 					{
-						"title": "Fulltext PDF"
+						"mimeType": "application/pdf",
+						"title": "Full Text PDF"
 					}
 				],
 				"tags": [],

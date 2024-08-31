@@ -16,9 +16,10 @@
 		"exportFileData": false
 	},
 	"inRepository": true,
-	"lastUpdated": "2016-06-21 08:45:20"
+	"lastUpdated": "2021-01-25 06:49:57"
 }
 
+var addedCollections = new Set();
 var item;
 var rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 
@@ -36,10 +37,14 @@ var n = {
 	z:"http://www.zotero.org/namespaces/export#"
 };
 
-function generateSeeAlso(resource, seeAlso) {
-	for (var i in seeAlso) {
-		if (itemResources[seeAlso[i]]) {
-			Zotero.RDF.addStatement(resource, n.dc+"relation", itemResources[seeAlso[i]], false);
+function generateRelations(resource, relations) {
+	for (let predicate in relations) {
+		if (predicate == 'dc:relation') {
+			for (let uri of relations[predicate]) {
+				if (itemResources[uri]) {
+					Zotero.RDF.addStatement(resource, n.dc + "relation", itemResources[uri], false);
+				}
+			}
 		}
 	}
 }
@@ -73,6 +78,7 @@ function generateCollection(collection) {
 		// add child list items
 		if (child.type == "collection") {
 			Zotero.RDF.addStatement(collectionResource, n.dcterms+"hasPart", "#collection_"+child.id, false);
+			addedCollections.add(child.id);
 			// do recursive processing of collections
 			generateCollection(child);
 		} else if (itemResources[child.id]) {
@@ -291,7 +297,7 @@ function generateItem(item, zoteroType, resource) {
 			// standardized in it. oh well. using them anyway.
 			Zotero.RDF.addStatement(creator, n.foaf+"surname", item.creators[j].lastName, true);
 			if (item.creators[j].firstName) {
-				Zotero.RDF.addStatement(creator, n.foaf+"givenname", item.creators[j].firstName, true);
+				Zotero.RDF.addStatement(creator, n.foaf+"givenName", item.creators[j].firstName, true);
 			}
 			
 			if (biblioCreatorTypes.indexOf(item.creators[j].creatorType) != -1) {
@@ -313,19 +319,19 @@ function generateItem(item, zoteroType, resource) {
 	
 	// notes
 	if (item.notes && Zotero.getOption("exportNotes")) {
-		for (var j in item.notes) {
-			var noteResource = itemResources[item.notes[j].itemID];
+		for (let note of item.notes) {
+			let noteResource = itemResources[note.itemID];
 			
 			// add note tag
 			Zotero.RDF.addStatement(noteResource, rdf+"type", n.bib+"Memo", false);
 			// add note item.notes
-			Zotero.RDF.addStatement(noteResource, rdf+"value", item.notes[j].note, true);
+			Zotero.RDF.addStatement(noteResource, rdf + "value", note.note, true);
 			// add relationship between resource and note
 			Zotero.RDF.addStatement(resource, n.dcterms+"isReferencedBy", noteResource, false);
 			
-			// Add see also info to RDF
-			generateSeeAlso(noteResource, item.notes[j].seeAlso);
-			generateTags(noteResource, item.notes[j].tags);
+			// Add note relations to RDF
+			if (note.relations) generateRelations(noteResource, note.relations);
+			generateTags(noteResource, note.tags);
 		}
 	}
 	
@@ -347,8 +353,8 @@ function generateItem(item, zoteroType, resource) {
 		Zotero.RDF.addStatement(resource, rdf+"resource", item.path, false);
 	}
     
-	// seeAlso and tags
-	if (item.seeAlso) generateSeeAlso(resource, item.seeAlso);
+	// Related items and tags
+	if (item.relations) generateRelations(resource, item.relations);
 	if (item.tags) generateTags(resource, item.tags);
 	
 	for (var property in item.uniqueFields) {
@@ -534,19 +540,19 @@ function doExport() {
 		
 		var testISBN = "urn:isbn:"+encodeURI(item.ISBN);
 		if (item.ISBN && !usedResources[testISBN]) {
-			itemResources[item.itemID] = testISBN;
+			itemResources[item.itemID] = itemResources[item.uri] = testISBN;
 			usedResources[itemResources[item.itemID]] = true;
 		} else if (item.itemType != "attachment" && item.url && !usedResources[item.url]) {
-			itemResources[item.itemID] = item.url;
+			itemResources[item.itemID] = itemResources[item.uri] = item.url;
 			usedResources[itemResources[item.itemID]] = true;
 		} else {
 			// just specify a node ID
-			itemResources[item.itemID] = "#item_"+item.itemID;
+			itemResources[item.itemID] = itemResources[item.uri] = "#item_" + item.itemID;
 		}
 		
 		if (item.notes) {
 			for (var j in item.notes) {
-				itemResources[item.notes[j].itemID] = "#item_"+item.notes[j].itemID;
+				itemResources[item.notes[j].itemID] = itemResources[item.notes[j].uri] = "#item_" + item.notes[j].itemID;
 			}
 		}
 		
@@ -554,7 +560,7 @@ function doExport() {
 			for (var i=0; i<item.attachments.length; i++) {
 				var attachment = item.attachments[i];
 				// just specify a node ID
-				itemResources[attachment.itemID] = "#item_"+attachment.itemID;
+				itemResources[attachment.itemID] = itemResources[attachment.uri] = "#item_" + attachment.itemID;
 			}
 		}
 	}
@@ -568,6 +574,10 @@ function doExport() {
 	/** RDF COLLECTION STRUCTURE **/
 	var collection;
 	while (collection = Zotero.nextCollection()) {
+		// Skip collections already added via recursion in generateCollection()
+		// TODO: Remove after everyone has 5.0.96, which fixes this with b3220e83b
+		if (addedCollections.has(collection.id)) continue;
+		
 		generateCollection(collection);
 	}
 }

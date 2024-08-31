@@ -2,100 +2,128 @@
 	"translatorID": "8df4f61b-0881-4c85-9186-05f457edb4d3",
 	"label": "PhilPapers",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://philpapers\\.org",
+	"target": "^https?://phil(papers|archive)\\.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-09-25 00:35:34"
+	"lastUpdated": "2023-09-16 03:30:01"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
-	
-	Copyright © 2012 Sebastian Karcher 
+
+	Copyright © 2023 Sebastian Karcher
+
 	This file is part of Zotero.
-	
+
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
-	
+
 	Zotero is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 	GNU Affero General Public License for more details.
-	
+
 	You should have received a copy of the GNU Affero General Public License
-	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-	
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
 	***** END LICENSE BLOCK *****
 */
 
+
 function detectWeb(doc, url) {
-	if (url.search(/\/s|pub\//)!=-1) return "multiple";
-	if (url.indexOf("/browse/")!=-1 && ZU.xpathText(doc, '//ol[@class="entryList"]/li/@id')!= null) return "multiple";
-	if (url.indexOf("/rec/")!=-1) return "journalArticle";
+	if (url.includes('/rec/')) {
+		return 'journalArticle';
+	}
+	else if (getSearchResults(doc, true)) {
+		return 'multiple';
+	}
+	return false;
 }
-	
 
-function doWeb(doc, url){
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('.entryList .citation>a');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
 
-	var ids = new Array();
-	if (detectWeb(doc, url) == "multiple") { 
-		var items = {};
-		var titles = ZU.xpath(doc, '//li/span[@class="citation"]//span[contains (@class, "articleTitle")]');
-		var identifiers = ZU.xpath(doc, '//ol[@class="entryList"]/li/@id');
-		for (var i in titles) {
-			items[identifiers[i].textContent] = titles[i].textContent;
+function idFromUrl(url) {
+	return url.match(/\/rec\/([A-Z-\d]+)/)[1];
+}
+async function doWeb(doc, url) {
+	let isPhilArchive = /^https?:\/\/philarchive\.org\//.test(url);
+	var ids = [];
+
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			let id = idFromUrl(url);
+			ids.push(id);
 		}
-		Zotero.selectItems(items, function (items) {
-			if (!items) {
-				return true;
-			}
-			for (var i in items) {
-				ids.push(i.replace(/^e/, ""));
-			}
-			scrape(ids);
-		});
-	} else {
-		var identifier = url.match(/(\/rec\/)([A-Z-\d]+)/)[2]
-		//Z.debug(identifier)
-		scrape([identifier]);
+		await scrape(ids, isPhilArchive);
+	}
+	else {
+		let identifier = idFromUrl(url);
+		// Z.debug(identifier)
+		await scrape([identifier], isPhilArchive);
 	}
 }
 
-function scrape(identifier){
-	Z.debug(identifier)
-	for (var i =0; i<identifier.length; i++){
-		var bibtexurl= "http://philpapers.org/export.html?__format=bib&eId="+identifier[i]+"&formatName=BibTeX";
-		//Z.debug(bibtexurl);
-		Zotero.Utilities.HTTP.doGet(bibtexurl, function (text) {
-		//Z.debug(text);
-		//remove line breaks, then match match the bibtex.
-		bibtex = text.replace(/\n/g, "").match(/<pre class='export'>.+<\/pre>/)[0];
-		//Zotero.debug(bibtex)
-	 	var url = "http://philpapers.org/rec/" + identifier[i];
-			var translator = Zotero.loadTranslator("import");
-			translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
-			translator.setString(bibtex);
-			translator.setHandler("itemDone", function(obj, item) {
-				item.attachments = [{url:url, title: "PhilPapers - Snapshot", mimeType: "text/html"}];
-				item.complete();
-				});	
-			translator.translate();
-			});
-	}	
-}/** BEGIN TEST CASES **/
+
+async function scrape(identifiers, isPhilArchive) {
+	let baseUrl = isPhilArchive ? "https://philarchive.org" : "https://philpapers.org";
+	for (let id of identifiers) {
+		let bibUrl = `${baseUrl}/item.pl?eId=${id}&format=bib`;
+		let bibText = await requestText(bibUrl);
+		let url = "/rec/" + id;
+		let translator = Zotero.loadTranslator("import");
+		translator.setTranslator('9cb70025-a888-4a29-a210-93ec52da40d4');
+		translator.setString(bibText);
+		translator.setHandler('itemDone', (_obj, item) => {
+			if (isPhilArchive) {
+				item.libraryCatalog = 'PhilArchive';
+				item.url = `https://philarchive.org/rec/${id}`; // full-text
+				item.attachments.push({
+					title: 'Full Text PDF',
+					mimeType: 'application/pdf',
+					url: `/archive/${id}`
+				});
+			}
+			else {
+				item.attachments.push({ url,
+					title: 'Snapshot',
+					mimeType: 'text/html' });
+			}
+			item.complete();
+		});
+		await translator.translate();
+	}
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://philpapers.org/rec/COROCA-4",
+		"url": "https://philpapers.org/rec/COROCA-4",
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Observation, Character, and a Purely First-Person Point of View",
 				"creators": [
 					{
 						"firstName": "Josep E.",
@@ -103,40 +131,119 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2011",
+				"DOI": "10.1007/s12136-011-0124-2",
+				"issue": "4",
+				"itemID": "Corbi2011-COROCA-4",
+				"libraryCatalog": "PhilPapers",
+				"pages": "311–328",
+				"publicationTitle": "Acta Analytica",
+				"volume": "26",
 				"attachments": [
 					{
-						"title": "PhilPapers - Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"itemID": "Corbi2011-COROCA-4",
-				"volume": "26",
-				"issue": "4",
-				"title": "Observation, Character, and A Purely First-Person Point of View",
-				"publicationTitle": "Acta Analytica",
-				"date": "2011",
-				"pages": "311–328",
-				"libraryCatalog": "PhilPapers"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://philpapers.org/browse/causal-realism",
+		"url": "https://philpapers.org/browse/causal-realism",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://philpapers.org/pub/6",
+		"url": "https://philpapers.org/pub/6",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://philpapers.org/s/solipsism",
+		"url": "https://philpapers.org/s/solipsism",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://philarchive.org/rec/RAYNGF",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Norm-Based Governance for a New Era: Lessons From Climate Change and Covid-19",
+				"creators": [
+					{
+						"firstName": "Leigh",
+						"lastName": "Raymond",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Daniel",
+						"lastName": "Kelly",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Erin",
+						"lastName": "Hennes",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021",
+				"itemID": "Raymond2021-RAYNGF",
+				"libraryCatalog": "PhilArchive",
+				"pages": "1–14",
+				"publicationTitle": "Perspectives on Politics",
+				"shortTitle": "Norm-Based Governance for a New Era",
+				"url": "https://philarchive.org/rec/RAYNGF",
+				"volume": "1",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://philarchive.org/rec/LANTEO-39",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The Ethics of Partiality",
+				"creators": [
+					{
+						"firstName": "Benjamin",
+						"lastName": "Lange",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022",
+				"DOI": "10.1111/phc3.12860",
+				"issue": "8",
+				"itemID": "Lange2022-LANTEO-39",
+				"libraryCatalog": "PhilArchive",
+				"pages": "1–15",
+				"publicationTitle": "Philosophy Compass",
+				"url": "https://philarchive.org/rec/LANTEO-39",
+				"volume": "1",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

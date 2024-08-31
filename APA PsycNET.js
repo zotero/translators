@@ -1,21 +1,21 @@
 {
 	"translatorID": "1e1e35be-6264-45a0-ad2e-7212040eb984",
-	"label": "APA PsycNET",
+	"label": "APA PsycNet",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://psycnet\\.apa\\.org/",
+	"target": "^https?://(psycnet|doi)\\.apa\\.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-08 19:12:21"
+	"lastUpdated": "2023-08-22 10:02:55"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017 Philipp Zumstein
+	Copyright © 2017-2021 Philipp Zumstein
 	
 	This file is part of Zotero.
 
@@ -46,46 +46,35 @@
 // to avoid some automatic download detection.
 
 
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
-
 function detectWeb(doc, url) {
-	url = (doc.location && doc.location.href) ? doc.location.href : url;
-	
-	// the dection will only work if the page is load completely,
-	// thus we have to hardcode some test cases
-	if (url.includes('://psycnet.apa.org/record/1992-98221-010')) return "bookSection";
-	if (url.includes('://psycnet.apa.org/record/2004-16329-000')) return "book";
-	if (url.includes('://psycnet.apa.org/buy/2004-16329-002')) return "bookSection";
-	if (url.includes('://psycnet.apa.org/buy/2010-19350-001')) return "journalArticle";
-	if (url.includes('://psycnet.apa.org/record/2010-09295-002')) return "bookSection";
-	
-	// normal cases
-	// It seems that the url sometimes changes after Zotero has inspected it,
-	// which leads to the wrong Zotero icon. However, saving will still do the
-	// correct action. Reload the page might also solve some edge cases.
-	if (url.includes('/PsycBOOKS/')) {
-		return "book";
-	}
-	if (url.includes('/search/display?') || url.includes('/record/') || url.includes('/doiLanding?doi=')) {
+	if (url.includes('/search/display?')
+			|| url.includes('/record/')
+			|| url.includes('/fulltext/')
+			|| url.includes('/buy/')
+			|| url.includes('/doiLanding?doi=')) {
 		if (doc.getElementById('bookchapterstoc')) {
+			return "book";
+		}
+		else if (attr(doc, 'meta[property="og:type"]', 'content') == 'Chapter') {
 			return "bookSection";
-		} else {
+		}
+		else {
 			return "journalArticle";
 		}
 	}
-	if (url.includes('/search/results?') || url.includes('/journal/')) {// && getSearchResults(doc, true)) {
+	if (url.includes('/search/results?') || url.includes('/journal/')) { // && getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('a.article-title');
-	for (var i=0; i<rows.length; i++) {
-		var href = attr(rows[i].parentNode, '#buy, a.fullTextHTMLLink, a.fullTextLink', 'href') ;
+	for (var i = 0; i < rows.length; i++) {
+		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -96,77 +85,83 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
-	} else {
-		scrape(doc, url);
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) {
+			return;
+		}
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url), url);
+		}
+	}
+	else {
+		await scrape(doc, url);
 	}
 }
 
 
-function scrape(doc, url) {
-	var uid = getIds(doc, url.replace(/[?#].*$/, ''));
+async function scrape(doc, url) {
+	var uid = await getIds(doc, url.replace(/#.*$/, ''));
+	if (!uid) {
+		throw new Error("ID not found");
+	}
 	
 	var productCode;
-	var db = doc.getElementById('database');
+	var db = doc.getElementById('database') || doc.querySelector('doi-landing .meta span');
 	if (db) {
-		db = db.parentNode.textContent;
-		if (db.includes('PsycARTICLES')) {
+		db = db.parentNode.textContent.toLowerCase();
+		if (db.includes('psycarticles')) {
 			productCode = 'PA';
-		} else if (db.includes('PsycBOOKS')) {
+		}
+		else if (db.includes('psycbooks')) {
 			productCode = 'PB';
-		} else if (db.includes('PsycINFO')) {
+		}
+		else if (db.includes('psycinfo')) {
 			productCode = 'PI';
-		} else if (db.includes('PsycEXTRA')) {
+		}
+		else if (db.includes('psycextra')) {
 			productCode = 'PE';
 		}
-	} else {
+	}
+	else {
 		// default, e.g. if page is not completely loaded
 		productCode = 'PI';
 	}
 	
-	var postData = '{"api":"record.exportRISFile","params":{"UIDList":[{"UID":"'+uid+'","ProductCode":"'+productCode+'"}],"exportType":"zotero"}}';
+	var postData = JSON.stringify({
+		api: "record.exportRISFile",
+		params: {
+			UIDList: [{ UID: uid, ProductCode: productCode }],
+			exportType: "zotero"
+		}
+	});
 	var headers = {
 		'Content-Type': 'application/json',
-		'Referer': url
+		Referer: url
 	};
 
-	// 1. We have to set the uid, product code and format with a post request
-	ZU.doPost('/api/request/record.exportRISFile', postData, function(apiReturnMessage) {
-		var apiReturnData;
-		try {
-			apiReturnData = JSON.parse(apiReturnMessage);
-		} catch(e) {
-			Z.debug('POST request did not result in valid JSON');
-			Z.debug(apiReturnMessage);
+	let apiReturnData = await requestJSON('/api/request/record.exportRISFile', {
+		method: 'POST',
+		headers: headers,
+		body: postData,
+	});
+
+	if (apiReturnData && apiReturnData.isRisExportCreated) {
+		// 2. Download the requested data (after step 1)
+		let data = await requestText('/ris/download');
+		if (data.includes('Content: application/x-research-info-systems')) {
+			processRIS(data, doc);
 		}
-		
-		if (apiReturnData && apiReturnData.isRisExportCreated) {
-			// 2. Download the requested data (after step 1)
-			ZU.doGet('/ris/download', function(data) {
-				if (data.includes('Content: application/x-research-info-systems')) {
-					processRIS(data, doc);
-				} else {
-					// sometimes (e.g. during testing) the data is not loaded
-					// but a meta redirect to a captcha page mentioning
-					Z.debug("The APA anomaly detection think we are doing " +
-						"something unusual (sigh). Please reload any APA page e.g. " +
-						"http://psycnet.apa.org/ in your browser and try again.");
-					Z.debug(data);
-				}
-			});
+		else {
+			// sometimes (e.g. during testing) the data is not loaded
+			// but a meta redirect to a captcha page mentioning
+			Z.debug("The APA anomaly detection think we are doing "
+				+ "something unusual (sigh). Please reload any APA page e.g. "
+				+ "http://psycnet.apa.org/ in your browser and try again.");
+			Z.debug(data);
 		}
-	}, headers);
+	}
 }
 
 
@@ -174,13 +169,14 @@ function processRIS(text, doc) {
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 	translator.setString(text);
-	translator.setHandler("itemDone", function(obj, item) {
+	translator.setHandler("itemDone", function (obj, item) {
 		item.title = cleanTitle(item.title);
 		if (item.publication) item.publication = cleanTitle(item.publication);
 		if (item.bookTitle) item.bookTitle = cleanTitle(item.bookTitle);
 		if (item.series) item.series = cleanTitle(item.series);
 		if (item.place) item.place = item.place.replace(/\s+/g, ' ');
-		for (var i=0; i<item.tags.length; i++) {
+		if (item.ISSN) item.ISSN = ZU.cleanISSN(item.ISSN);
+		for (var i = 0; i < item.tags.length; i++) {
 			item.tags[i] = item.tags[i].replace(/^\*/, '');
 		}
 		var pdfURL = attr(doc, 'a[href*="/fulltext"]', 'href');
@@ -201,23 +197,32 @@ function processRIS(text, doc) {
 }
 
 
-//try to figure out ids that we can use for fetching RIS
-function getIds(doc, url) {
-	//try to extract uid from the table
+// try to figure out ids that we can use for fetching RIS
+async function getIds(doc, url) {
+	Z.debug('Finding IDs in ' + url);
+	// try to extract uid from the table
 	var uid = text(doc, '#uid + dd') || text(doc, '#bookUID');
 	if (uid) {
 		return uid;
 	}
 
-	//try to extract uid from the url
-	if (url.includes('/record/')) {
-		let m = url.match(/\/record\/([\d\-]*)/);
+	// try to extract uid from the url
+	if (url.includes('/record/') || url.includes('/fulltext/')) {
+		let m = url.match(/\/(?:record|fulltext)\/([\d-]*)/);
+		if (m && m[1]) {
+			return m[1];
+		}
+	}
+
+	// DOI landing pages include a link to the /record/ page
+	if (url.includes('/doiLanding') && doc.querySelector('.title > a')) {
+		let m = attr(doc, '.title > a', 'href').match(/\/record\/([\d-]*)/);
 		if (m && m[1]) {
 			return m[1];
 		}
 	}
 	
-	/**on the book pages, we can find the UID in
+	/** on the book pages, we can find the UID in
 	 * the Front matter and Back matter links
 	 */
 	if (url.includes('/PsycBOOKS/')) {
@@ -230,12 +235,12 @@ function getIds(doc, url) {
 		}
 	}
 
-	/**for pages with buy.optionToBuy
+	/** for pages with buy.optionToBuy
 	 * we can fetch the id from the url
 	 * alternatively, the id is in a javascript section (this is messy)
 	 */
 	if (url.includes('/buy/')) {
-		let m = url.match(/\/buy\/([\d\-]*)/);
+		let m = url.match(/\/buy\/([\d-]*)/);
 		if (m) {
 			return m[1];
 		}
@@ -246,14 +251,50 @@ function getIds(doc, url) {
 		}
 	}
 	
-	/**last option: check for a purchase link
+	/** check for a purchase link
 	 */
 	var purchaseLink = attr(doc, 'a.purchase[href*="/buy/"]', 'href');
 	if (purchaseLink) {
-		let m = purchaseLink.match(/\/buy\/([\d\-]*)/);
+		let m = purchaseLink.match(/\/buy\/([\d-]*)/);
 		return m[1];
 	}
 
+	// Worst-case fallback if we're on a search result page: make some requests
+	if (url.includes('/search/display?')) {
+		let searchParams = new URL(url).searchParams;
+		let id = searchParams.get('id');
+		if (id) {
+			let searchObj = await requestJSON('/api/request/recentSearch.get', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					api: 'recentSearch.get',
+					params: {
+						id
+					}
+				})
+			});
+			let recordId = parseInt(searchParams.get('recordId'));
+			let recordWithCount = await requestJSON('/api/request/search.recordWithCount', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					api: 'search.recordWithCount',
+					params: {
+						...searchObj,
+						responseParameters: {
+							...searchObj.responseParameters,
+							start: recordId - 1,
+							rows: 1
+						}
+					}
+				})
+			});
+			return recordWithCount.results.result.doc[0].UID;
+		}
+	}
+	
+	return false;
 }
 
 
@@ -262,7 +303,8 @@ function cleanTitle(title) {
 	// except it looks like an abbreviation
 	if (/\b\w\.$/.test(title)) {
 		return title;
-	} else {
+	}
+	else {
 		return title.replace(/\.$/, '');
 	}
 }
@@ -502,6 +544,95 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"url": "https://psycnet.apa.org/fulltext/2022-40433-002.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Expertise in emotion: A scoping review and unifying framework for individual differences in the mental representation of emotional experience",
+				"creators": [
+					{
+						"lastName": "Hoemann",
+						"firstName": "Katie",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Nielson",
+						"firstName": "Catie",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Yuen",
+						"firstName": "Ashley",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Gurera",
+						"firstName": "J. W.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Quigley",
+						"firstName": "Karen S.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Barrett",
+						"firstName": "Lisa Feldman",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021",
+				"DOI": "10.1037/bul0000327",
+				"ISSN": "1939-1455",
+				"abstractNote": "Expertise refers to outstanding skill or ability in a particular domain. In the domain of emotion, expertise refers to the observation that some people are better at a range of competencies related to understanding and experiencing emotions, and these competencies may help them lead healthier lives. These individual differences are represented by multiple constructs including emotional awareness, emotional clarity, emotional complexity, emotional granularity, and emotional intelligence. These constructs derive from different theoretical perspectives, highlight different competencies, and are operationalized and measured in different ways. The full set of relationships between these constructs has not yet been considered, hindering scientific progress and the translation of findings to aid mental and physical well-being. In this article, we use a scoping review procedure to integrate these constructs within a shared conceptual space. Scoping reviews provide a principled means of synthesizing large and diverse literature in a transparent fashion, enabling the identification of similarities as well as gaps and inconsistencies across constructs. Using domain-general accounts of expertise as a guide, we build a unifying framework for expertise in emotion and apply this to constructs that describe how people understand and experience their own emotions. Our approach offers opportunities to identify potential mechanisms of expertise in emotion, encouraging future research on those mechanisms and on educational or clinical interventions. (PsycInfo Database Record (c) 2023 APA, all rights reserved)",
+				"issue": "11",
+				"libraryCatalog": "APA PsycNet",
+				"pages": "1159-1183",
+				"publicationTitle": "Psychological Bulletin",
+				"shortTitle": "Expertise in emotion",
+				"volume": "147",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Alexithymia"
+					},
+					{
+						"tag": "Awareness"
+					},
+					{
+						"tag": "Conceptual Imagery"
+					},
+					{
+						"tag": "Creativity"
+					},
+					{
+						"tag": "Emotional Intelligence"
+					},
+					{
+						"tag": "Emotions"
+					},
+					{
+						"tag": "Experience Level"
+					},
+					{
+						"tag": "Experiences (Events)"
+					},
+					{
+						"tag": "Individual Differences"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
 		"url": "http://psycnet.apa.org/buy/2004-16329-002",
 		"items": [
 			{
@@ -658,6 +789,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://psycnet.apa.org/search/results?id=e6cd5430-40d2-11ee-9aa2-b3e92ca9fef3",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

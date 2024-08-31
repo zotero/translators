@@ -8,8 +8,8 @@
 	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2015-06-10 10:51:29"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2021-12-28 04:42:55"
 }
 
 function detectWeb(doc, url) {
@@ -263,15 +263,17 @@ function doWeb(doc, url) {
 				i++;
 			}
 			
-			items = Zotero.selectItems(items);
-			
-			if (!items) {
-				return true;
-			}
-			
-			for (var i in items) {
-				extractCitation(uris[i], elmts[i], items[i]);
-			}
+			Zotero.selectItems(items, function (items) {
+				if (!items) {
+					return true;
+				}
+				
+				for (var i in items) {
+					extractCitation(uris[i], elmts[i], items[i]);
+				}
+			});
 		}	
 	}
-}
+}/** BEGIN TEST CASES **/
+var testCases = []
+/** END TEST CASES **/
