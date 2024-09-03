@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-08-21 19:41:51"
+	"lastUpdated": "2024-08-28 06:00:51"
 }
 
 /*
@@ -88,7 +88,10 @@ async function scrape(url) {
 	let item = new Zotero.Item("manuscript");
 	item.title = data.title;
 	if ("record_type" in data.subject_terms) {
-		item.type = data.subject_terms.record_type.join("; ");
+		let recordTypes = data.subject_terms.record_type.map(
+			term => term.term
+		);
+		item.type = recordTypes.join("; ");
 	}
 	item.archive = "Queensland State Archives";
 	item.archiveLocation = data.qsa_id_prefixed;
@@ -115,8 +118,7 @@ async function scrape(url) {
 		});
 	}
 	// Add digital representation
-	if (data.digital_representations.length > 0) {
-		let image = data.digital_representations[0];
+	for (let image of data.digital_representations) {
 		let imageID = image.qsa_id_prefixed;
 		let mimeType, imageTitle;
 		if (image.file_type == "JPEG") {
@@ -127,12 +129,12 @@ async function scrape(url) {
 			mimeType = "application/pdf";
 			imageTitle = "PDF " + imageID;
 		}
-		item.attachments = [{
+		item.attachments.push({
 			title: imageTitle,
 			url: "https://www.archivessearch.qld.gov.au/api/download_file/" + imageID,
 			mimeType: mimeType,
 			snapshot: true
-		}];
+		});
 	}
 	item.complete();
 }
@@ -240,7 +242,62 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.archivessearch.qld.gov.au/search?f[]=keywords&has_digital=false&op[]=AND&open=false&q[]=wragge&sort=relevance&type[]=archival_object",
+		"defer": true,
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.archivessearch.qld.gov.au/items/ITM276520",
+		"items": [
+			{
+				"itemType": "manuscript",
+				"title": "Criminal files - Supreme Court, Northern District, Townsville",
+				"creators": [
+					{
+						"lastName": "A267, Supreme Court, Northern District, Townsville",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					}
+				],
+				"archive": "Queensland State Archives",
+				"archiveLocation": "ITM276520",
+				"extra": "Issued: 1875/1876\nArchive Collection: S7833, Criminal Files - Supreme Court, Northern District, Townsville",
+				"libraryCatalog": "Queensland State Archives",
+				"manuscriptType": "Depositions and indictments",
+				"rights": "Copyright State of Queensland",
+				"url": "https://www.archivessearch.qld.gov.au/items/ITM276520",
+				"attachments": [
+					{
+						"title": "PDF DR87978",
+						"mimeType": "application/pdf",
+						"snapshot": true
+					},
+					{
+						"title": "PDF DR87979",
+						"mimeType": "application/pdf",
+						"snapshot": true
+					},
+					{
+						"title": "PDF DR87980",
+						"mimeType": "application/pdf",
+						"snapshot": true
+					},
+					{
+						"title": "PDF DR87981",
+						"mimeType": "application/pdf",
+						"snapshot": true
+					},
+					{
+						"title": "PDF DR87982",
+						"mimeType": "application/pdf",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
