@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2024-02-27 01:41:07"
+	"lastUpdated": "2024-04-04 15:46:05"
 }
 
 /*
@@ -368,7 +368,10 @@ function stripAuthor(str) {
 		.replace(/\s*:\s+/, " ")
 		// National Library of Russia adds metadata at the end of the author name,
 		// prefixed by 'NLR10::'. Remove it.
-		.replace(/\bNLR10::.*/, '');
+		.replace(/\bNLR10::.*/, '')
+		// Austrian Libraries add authority data at the end of the author name,
+		// prefixed by '$$0'. Remove it.
+		.replace(/\$\$0.*/, '');
 }
 
 function fetchCreators(item, creators, type, splitGuidance) {
@@ -817,6 +820,45 @@ var testCases = [
 					},
 					{
 						"tag": "Water"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<record xmlns=\"http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib\" xmlns:sear=\"http://www.exlibrisgroup.com/xsd/jaguar/search\">\n  <control>\n    <sourcerecordid>2174645960003337</sourcerecordid>\n    <sourceid>WUW_alma</sourceid>\n    <recordid>WUW_alma2174645960003337</recordid>\n    <addsrcrecordid>AC03437319</addsrcrecordid>\n    <sourceformat>MARC21</sourceformat>\n    <sourcesystem>Alma</sourcesystem>\n    <almaid>43ACC_WUW:2174645960003337</almaid>\n  </control>\n  <display>\n    <type>book</type>\n    <title>Theory of economic dynamics : an essay on cyclical and long-run changes in capitalist economy</title>\n    <creator>Kalecki, Michał [VerfasserIn]$$QKalecki, Michał$$0(DE-588)118559494$$G(uri)http://d-nb.info/gnd/118559494</creator>\n    <edition>1. publ.</edition>\n    <publisher>London : Allen &amp; Unwin</publisher>\n    <creationdate>1954</creationdate>\n    <format>178 S., graph. Darst.</format>\n    <subject>Kapitalismus ; Konjunkturzyklus ; Wirtschaftsentwicklung</subject>\n    <description>Hier auch spätere, unveränderte Nachdrucke (1956)</description>\n    <language>eng</language>\n    <source>WU Bibliothekskatalog</source>\n    <availlibrary>$$IWUW$$LWUW_B_JHB$$1Closed Stacks$$2503328-G$$Savailable$$X43ACC_WUW$$YJHB$$ZMG$$P1</availlibrary>\n    <availlibrary>$$IWUW$$LWUW_B_JHB$$1Level -2 Books$$2320083-M$$Savailable$$X43ACC_WUW$$YJHB$$ZMAG$$P2</availlibrary>\n    <availlibrary>$$IWUW$$LWUW_B_JHB$$1Steindl Collection$$2S/335.5/K14 T3$$Savailable$$X43ACC_WUW$$YJHB$$ZSST$$P3</availlibrary>\n    <lds14>503328-G</lds14>\n    <lds14>320083-M</lds14>\n    <lds14>S/335.5/K14 T3</lds14>\n    <lds16>by M. Kalecki</lds16>\n    <lds30>AC03437319</lds30>\n    <lds33>https://permalink.obvsg.at/wuw/AC03437319</lds33>\n    <lds53>Kapitalismus | Konjunkturzyklus | Wirtschaftsentwicklung</lds53>\n    <lds55>Theory of economic dynamics: an essay on cyclical and long-run changes in capitalist economy</lds55>\n    <lds56>Allen &amp; Unwin</lds56>\n    <lds58>WU Bibliothekszentrum LC, Signatur: 503328-G</lds58>\n    <lds58>WU Bibliothekszentrum LC, Signatur: 320083-M</lds58>\n    <lds58>WU Bibliothekszentrum LC, Signatur: S/335.5/K14 T3</lds58>\n    <lds60>eng</lds60>\n    <lds61>Kalecki, Michał</lds61>\n    <availinstitution>$$IWUW$$Savailable</availinstitution>\n    <availpnx>available</availpnx>\n    <version>2</version>\n  </display>\n  <search>\n    <creatorcontrib>Kalecki, Michał [VerfasserIn]</creatorcontrib>\n    <creatorcontrib>Michał</creatorcontrib>\n    <creatorcontrib>Kalecki  1899-1970 VerfasserIn</creatorcontrib>\n    <creatorcontrib>M.</creatorcontrib>\n    <creatorcontrib>Kalecki  1899-1970</creatorcontrib>\n    <creatorcontrib>Michal</creatorcontrib>\n    <creatorcontrib>Kaletskii  1899-1970</creatorcontrib>\n    <creatorcontrib>Michel</creatorcontrib>\n    <creatorcontrib>http://d-nb.info/gnd/118559494</creatorcontrib>\n    <creatorcontrib>Kalecki, Michał 1899-1970 VerfasserIn</creatorcontrib>\n    <creatorcontrib>Kalecki, M. 1899-1970</creatorcontrib>\n    <creatorcontrib>Kaletskii, Michal 1899-1970</creatorcontrib>\n    <creatorcontrib>Kalecki, Michal 1899-1970</creatorcontrib>\n    <creatorcontrib>Kalecki, Michel 1899-1970</creatorcontrib>\n    <creatorcontrib>Kalecki, M</creatorcontrib>\n    <creatorcontrib>Kaletskii, M</creatorcontrib>\n    <creatorcontrib>(uri)http://d-nb.info/gnd/118559494</creatorcontrib>\n    <title>Theory of economic dynamics an essay on cyclical and long-run changes in capitalist economy</title>\n    <description>Hier auch spätere, unveränderte Nachdrucke (1956)</description>\n    <subject>Kapitalismus ; Konjunkturzyklus ; Wirtschaftsentwicklung</subject>\n    <subject>Kapitalismus</subject>\n    <subject>Konjunkturzyklus</subject>\n    <subject>Wirtschaftsentwicklung</subject>\n    <subject>Wirtschaftliche Entwicklung</subject>\n    <subject>Wirtschaftsdynamik</subject>\n    <subject>Wirtschaftswandel</subject>\n    <subject>Wirtschaftlicher Wandel</subject>\n    <subject>Ökonomische Entwicklung</subject>\n    <subject>http://d-nb.info/gnd/4066438-7</subject>\n    <subject>Zyklus</subject>\n    <subject>Wachstumszyklus</subject>\n    <subject>Konjunkturschwankung</subject>\n    <subject>4032134-4</subject>\n    <subject>Kapitalistische Gesellschaft</subject>\n    <subject>Kapitalistische Wirtschaft</subject>\n    <subject>Kapitalistisches Gesellschaftssystem</subject>\n    <subject>Kapitalistisches Wirtschaftssystem</subject>\n    <subject>Gesellschaftsordnung</subject>\n    <subject>Antikapitalismus</subject>\n    <subject>4029577-1</subject>\n    <subject>(DE-588)4029577-1</subject>\n    <subject>(DE-588)4032134-4</subject>\n    <subject>(DE-588)4066438-7</subject>\n    <general>1. publ.</general>\n    <general>Allen &amp; Unwin</general>\n    <sourceid>WUW_alma</sourceid>\n    <recordid>WUW_alma2174645960003337</recordid>\n    <rsrctype>book</rsrctype>\n    <creationdate>1954</creationdate>\n    <startdate>19540101</startdate>\n    <enddate>19541231</enddate>\n    <addsrcrecordid>AC03437319</addsrcrecordid>\n    <addsrcrecordid>990006667950203337</addsrcrecordid>\n    <searchscope>WUW_alma</searchscope>\n    <searchscope>WUW_SST</searchscope>\n    <searchscope>WUW</searchscope>\n    <scope>WUW_alma</scope>\n    <scope>WUW_SST</scope>\n    <scope>WUW</scope>\n    <alttitle>1956</alttitle>\n    <lsr09>Allen &amp; Unwin</lsr09>\n    <lsr14>503328-G</lsr14>\n    <lsr14>320083-M</lsr14>\n    <lsr14>S/335.5/K14 T3</lsr14>\n    <lsr16>by M. Kalecki</lsr16>\n    <lsr33>https://permalink.obvsg.at/wuw/AC03437319</lsr33>\n    <lsr35>AC03437319</lsr35>\n  </search>\n  <sort>\n    <title>THEORY OF ECONOMIC DYNAMICS AN ESSAY ON CYCLICAL AND LONGRUN CHANGES IN CAPITALIST ECONOMY</title>\n    <creationdate>1954</creationdate>\n    <author>Kalecki, Michał VerfasserIn</author>\n    <lso01>1954</lso01>\n  </sort>\n  <facets>\n    <language>eng</language>\n    <creationdate>1954</creationdate>\n    <topic>Kapitalismus</topic>\n    <topic>Konjunkturzyklus</topic>\n    <topic>Wirtschaftsentwicklung</topic>\n    <toplevel>available</toplevel>\n    <prefilter>books</prefilter>\n    <rsrctype>books</rsrctype>\n    <creatorcontrib>Kalecki, Michał</creatorcontrib>\n    <library>WUW_B_JHB</library>\n    <atoz>T</atoz>\n    <lfc06>Ohne Angabe</lfc06>\n    <newrecords>20170815_785</newrecords>\n    <frbrgroupid>706492797</frbrgroupid>\n    <frbrtype>5</frbrtype>\n  </facets>\n  <dedup>\n    <t>99</t>\n    <c3>WUWAC03437319</c3>\n    <c4>1954</c4>\n    <c5>WUW990006667950203337</c5>\n    <f5>WUWAC03437319</f5>\n    <f6>WUW_1954</f6>\n    <f7>WUWAC03437319</f7>\n    <f8>WUW_</f8>\n    <f9>WUW_178 S.</f9>\n    <f10>WUW_allen unwin</f10>\n    <f11>WUW_kalecki michal 1899 1970</f11>\n    <f20>WUW_990006667950203337</f20>\n  </dedup>\n  <frbr>\n    <t>1</t>\n    <k1>$$Kwuwwuwwuwkalecki michal$$AA</k1>\n    <k3>$$Kwuwwuwwuwtheory of economic dynamics an essay on cyclical and long run changes in capitalist economy$$AT</k3>\n  </frbr>\n  <delivery>\n    <institution>WUW</institution>\n    <delcategory>Alma-P</delcategory>\n  </delivery>\n  <ranking>\n    <booster1>1</booster1>\n    <booster2>1</booster2>\n  </ranking>\n  <addata>\n    <aulast>Kalecki</aulast>\n    <au>Kalecki, Michał</au>\n    <creatorfull>$$NKalecki, Michał$$LKalecki$$FMichał$$Rauthor</creatorfull>\n    <creatorfull>$$NKalecki, M$$LKalecki$$FM</creatorfull>\n    <creatorfull>$$NKaletskii, Michal$$LKaletskii$$FMichal</creatorfull>\n    <creatorfull>$$NKalecki, Michal$$LKalecki$$FMichal</creatorfull>\n    <creatorfull>$$NKalecki, Michel$$LKalecki$$FMichel</creatorfull>\n    <creatorfull>$$Nhttp://d-nb.info/gnd/118559494$$Lhttp://d-nb.info/gnd/118559494$$F</creatorfull>\n    <btitle>Theory of economic dynamics: an essay on cyclical and long-run changes in capitalist economy</btitle>\n    <stitle>Theory of economic dynami</stitle>\n    <addtitle>1956</addtitle>\n    <date>1954</date>\n    <risdate>1954</risdate>\n    <spage>178 S.</spage>\n    <format>book</format>\n    <ristype>BOOK</ristype>\n    <cop>London</cop>\n    <pub>Allen &amp; Unwin</pub>\n    <mis1>2174645960003337</mis1>\n    <url>https://permalink.obvsg.at/wuw/AC03437319</url>\n    <lad06>000666795</lad06>\n    <lad24>-WUW-</lad24>\n    <lad24>GND: 4029577-1 689 SSS TOP</lad24>\n    <lad24>GND: 4032134-4 689 SSS TOP</lad24>\n    <lad24>GND: 4066438-7 689 SSS TOP</lad24>\n    <lad24>GND: 118559494 100 XXX CRE</lad24>\n  </addata>\n  <browse>\n    <author>$$DKalecki, Michał, 1899-1970$$EKalecki, Michał, 1899-1970</author>\n    <author>$$DKalecki, M., 1899-1970$$EKalecki, M., 1899-1970</author>\n    <author>$$DKaletskii, Michal, 1899-1970$$EKaletskii, Michal, 1899-1970</author>\n    <author>$$DKalecki, Michal, 1899-1970$$EKalecki, Michal, 1899-1970</author>\n    <author>$$DKalecki, Michel, 1899-1970$$EKalecki, Michel, 1899-1970</author>\n    <title>$$DTheory of economic dynamics an essay on cyclical and long-run changes in capitalist economy$$ETheory of economic dynamics an essay on cyclical and long-run changes in capitalist economy</title>\n    <title>$$D1956$$E1956</title>\n    <subject>$$TGND$$EKapitalismus$$DKapitalismus</subject>\n    <subject>$$TGND$$EKonjunkturzyklus$$DKonjunkturzyklus</subject>\n    <subject>$$TGND$$EWirtschaftsentwicklung$$DWirtschaftsentwicklung</subject>\n    <subject>$$TGND$$EWirtschaftliche Entwicklung$$DWirtschaftliche Entwicklung</subject>\n    <subject>$$TGND$$EWirtschaftsdynamik$$DWirtschaftsdynamik</subject>\n    <subject>$$TGND$$EWirtschaftswandel$$DWirtschaftswandel</subject>\n    <subject>$$TGND$$EWirtschaftlicher Wandel$$DWirtschaftlicher Wandel</subject>\n    <subject>$$TGND$$EÖkonomische Entwicklung$$DÖkonomische Entwicklung</subject>\n    <subject>$$TGND$$Ehttp://d-nb.info/gnd/4066438-7$$Dhttp://d-nb.info/gnd/4066438-7</subject>\n    <subject>$$TGND$$EZyklus$$DZyklus</subject>\n    <subject>$$TGND$$EWachstumszyklus$$DWachstumszyklus</subject>\n    <subject>$$TGND$$EKonjunkturschwankung$$DKonjunkturschwankung</subject>\n    <subject>$$TGND$$E4032134-4$$D4032134-4</subject>\n    <subject>$$TGND$$EKapitalistische Gesellschaft$$DKapitalistische Gesellschaft</subject>\n    <subject>$$TGND$$EKapitalistische Wirtschaft$$DKapitalistische Wirtschaft</subject>\n    <subject>$$TGND$$EKapitalistisches Gesellschaftssystem$$DKapitalistisches Gesellschaftssystem</subject>\n    <subject>$$TGND$$EKapitalistisches Wirtschaftssystem$$DKapitalistisches Wirtschaftssystem</subject>\n    <subject>$$TGND$$EGesellschaftsordnung$$DGesellschaftsordnung</subject>\n    <subject>$$TGND$$EAntikapitalismus$$DAntikapitalismus</subject>\n    <subject>$$TGND$$E4029577-1$$D4029577-1</subject>\n    <callnumber>$$IWUW$$D503328-G$$E503328-g$$T</callnumber>\n    <callnumber>$$IWUW$$D320083-M$$E320083-m$$T</callnumber>\n    <callnumber>$$IWUW$$DS/335.5/K14 T3$$Es/335.5/k14 t3$$T8</callnumber>\n  </browse>\n</record>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Theory of economic dynamics: an essay on cyclical and long-run changes in capitalist economy",
+				"creators": [
+					{
+						"firstName": "Michał",
+						"lastName": "Kalecki",
+						"creatorType": "author"
+					}
+				],
+				"date": "1954",
+				"abstractNote": "Hier auch spätere, unveränderte Nachdrucke (1956)",
+				"callNumber": "503328-G, 320083-M, S/335.5/K14 T3",
+				"edition": "1. publ.",
+				"language": "eng",
+				"numPages": "178",
+				"place": "London",
+				"publisher": "Allen & Unwin",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Kapitalismus"
+					},
+					{
+						"tag": "Konjunkturzyklus"
+					},
+					{
+						"tag": "Wirtschaftsentwicklung"
 					}
 				],
 				"notes": [],

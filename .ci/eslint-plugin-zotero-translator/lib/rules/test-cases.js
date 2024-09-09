@@ -55,8 +55,8 @@ module.exports = {
 					});
 				}
 
-				const nodes = declaration.declarations[0].init.elements || [];
-				if (!nodes.length) {
+				const nodes = declaration.declarations[0].init.elements;
+				if (!Array.isArray(nodes)) {
 					context.report({
 						node: declaration,
 						message: 'testCases must be an array',
@@ -113,7 +113,7 @@ module.exports = {
 						});
 					}
 					else if (testCase.type === 'search') {
-						const expected = ['DOI', 'ISBN', 'PMID', 'identifiers', 'contextObject', 'adsBibcode', 'ericNumber'];
+						const expected = ['DOI', 'ISBN', 'PMID', 'identifiers', 'contextObject', 'adsBibcode', 'ericNumber', 'openAlex'];
 						const keys = Array.isArray(testCase.input) ? testCase.input.flatMap(Object.keys) : Object.keys(testCase.input);
 
 						if (!keys.every(key => expected.includes(key))) {

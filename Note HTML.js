@@ -14,7 +14,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2022-10-26 10:47:11"
+	"lastUpdated": "2024-07-10 15:30:00"
 }
 
 /*
@@ -67,8 +67,8 @@ function doExport() {
 	}
 
 	if (Zotero.getOption("includeAppLinks")) {
-		// Insert a PDF link for highlight and image annotation nodes
-		doc.querySelectorAll('span[class="highlight"], img[data-annotation]').forEach(function (node) {
+		// Insert a PDF link for highlight, underline and image annotation nodes
+		doc.querySelectorAll('span[class="highlight"], span[class="underline"], img[data-annotation]').forEach(function (node) {
 			try {
 				var annotation = JSON.parse(decodeURIComponent(node.getAttribute('data-annotation')));
 			}
@@ -93,12 +93,26 @@ function doExport() {
 						openURI = 'zotero://open-pdf/groups/' + groupID + '/items/' + key;
 					}
 
-					openURI += '?page=' + (position.pageIndex + 1)
-						+ (annotation.annotationKey ? '&annotation=' + annotation.annotationKey : '');
+					let linkText;
+					if (position.type === 'FragmentSelector') {
+						openURI += '?cfi=' + encodeURIComponent(position.value);
+						linkText = 'epub';
+					}
+					else if (position.type === 'CssSelector') {
+						openURI += '?sel=' + encodeURIComponent(position.value);
+						linkText = 'snapshot';
+					}
+					else {
+						openURI += '?page=' + (position.pageIndex + 1);
+						linkText = 'pdf';
+					}
+					if (annotation.annotationKey) {
+						openURI += '&annotation=' + annotation.annotationKey;
+					}
 
 					let a = doc.createElement('a');
 					a.href = openURI;
-					a.append('pdf');
+					a.append(linkText);
 					let fragment = doc.createDocumentFragment();
 					fragment.append(' (', a, ') ');
 

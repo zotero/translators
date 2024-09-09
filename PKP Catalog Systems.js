@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-24 00:00:56"
+	"lastUpdated": "2024-03-21 19:10:24"
 }
 
 /*
@@ -60,7 +60,7 @@ function detectWeb(doc, url) {
 		return 'book';
 	}
 	if (generator.startsWith('Open Preprint Systems')) {
-		return 'report';
+		return 'preprint';
 	}
 	return false;
 }
@@ -68,8 +68,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('.title a[href*="/view/"], .title a[href*="/catalog/"], \
-		.tocTitle a[href*="/view/"], .tocTitle a[href*="/catalog/"]');
+	var rows = doc.querySelectorAll('.title a[href*="/view/"], .title a[href*="/catalog/"], .tocTitle a[href*="/view/"], .tocTitle a[href*="/catalog/"]');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -107,11 +106,6 @@ function scrape(doc, url) {
 	trans.setDocument(doc);
 
 	trans.setHandler('itemDone', function (obj, item) {
-		if (item.itemType == 'report') {
-			// preprint
-			item.extra = (item.extra || '') + `\ntype: article\n`;
-		}
-		
 		if (!item.title) {
 			item.title = text(doc, '#articleTitle');
 		}
@@ -1381,7 +1375,7 @@ var testCases = [
 		"url": "https://preprints.scielo.org/index.php/scielo/preprint/view/2577",
 		"items": [
 			{
-				"itemType": "report",
+				"itemType": "preprint",
 				"title": "RETRATO DAS NARRATIVAS DE MAES UNIVERSITARIAS NO CONTEXTO ACADÊMICO",
 				"creators": [
 					{
@@ -1406,11 +1400,11 @@ var testCases = [
 					}
 				],
 				"date": "2021-07-05",
+				"DOI": "10.1590/SciELOPreprints.2577",
 				"abstractNote": "SciELO Preprints Collection is an integral part of SciELO, an international cooperation program aiming at the development of open access scientific communication covering all areas of knowledge. It operates as a collection of non-peer-reviewed manuscripts within the SciELO Network of national and thematic collection of journals.",
-				"extra": "DOI: 10.1590/SciELOPreprints.2577\ntype: article",
-				"institution": "SciELO Preprints",
 				"language": "pt",
 				"libraryCatalog": "preprints.scielo.org",
+				"repository": "SciELO Preprints",
 				"url": "https://preprints.scielo.org/index.php/scielo/preprint/view/2577",
 				"attachments": [
 					{

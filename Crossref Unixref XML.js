@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2024-02-22 19:17:41"
+	"lastUpdated": "2024-03-23 02:00:53"
 }
 
 /*
@@ -231,7 +231,7 @@ function doImport() {
 		// Reference book entry
 		// Example: doi: 10.1002/14651858.CD002966.pub3
 		
-		// Entire edite book. This should _not_ be imported as bookSection
+		// Entire edited book. This should _not_ be imported as bookSection
 		// Example: doi: 10.4135/9781446200957
 		
 		var bookType = itemXML[0].hasAttribute("book_type") ? itemXML[0].getAttribute("book_type") : null;
@@ -287,7 +287,7 @@ function doImport() {
 		item.place = ZU.xpathText(metadataXML, 'publisher/publisher_place');
 	}
 	else if ((itemXML = ZU.xpath(doiRecord, 'crossref/standard')).length) {
-		item = new Zotero.Item("report");
+		item = new Zotero.Item('standard');
 		refXML = ZU.xpath(itemXML, 'standard_metadata');
 		metadataXML = ZU.xpath(itemXML, 'standard_metadata');
 	}
@@ -303,11 +303,9 @@ function doImport() {
 	}
 
 	else if ((itemXML = ZU.xpath(doiRecord, 'crossref/database')).length) {
-		item = new Zotero.Item("report"); // should be dataset
+		item = new Zotero.Item('dataset');
 		refXML = ZU.xpath(itemXML, 'dataset');
-		item.extra = "Type: dataset";
 		metadataXML = ZU.xpath(itemXML, 'database_metadata');
-		
 		var pubDate = ZU.xpath(refXML, 'database_date/publication_date');
 		if (!pubDate.length) pubDate = ZU.xpath(metadataXML, 'database_date/publication_date');
 		item.date = parseDate(pubDate);
@@ -330,9 +328,15 @@ function doImport() {
 	}
 	
 	else if ((itemXML = ZU.xpath(doiRecord, 'crossref/posted_content')).length) {
-		item = new Zotero.Item("report"); // should be preprint
-		item.type = ZU.xpathText(itemXML, "./@type");
-		item.institution = ZU.xpathText(itemXML, "group_title");
+		let type = ZU.xpathText(itemXML, "./@type");
+		if (type == "preprint") {
+			item = new Zotero.Item("preprint");
+			item.repository = ZU.xpathText(itemXML, "group_title");
+		}
+		else {
+			item = new Zotero.Item("blogPost");
+			item.blogTitle = ZU.xpathText(itemXML, "institution/institution_name");
+		}
 		item.date = parseDate(ZU.xpath(itemXML, "posted_date"));
 	}
 	
@@ -425,6 +429,9 @@ function doImport() {
 			item.extra = "DOI: " + item.DOI;
 		}
 	}
+	// I think grabbing the first license will usually make the most sense;
+	// not sure how many different options they are and how well labelled they are
+	item.rights = ZU.xpathText(refXML, 'program/license_ref[1]');
 	item.url = ZU.xpathText(refXML, 'doi_data/resource');
 	var title = ZU.xpath(refXML, 'titles[1]/title[1]')[0];
 	if (!title && metadataXML) {
@@ -635,7 +642,7 @@ var testCases = [
 		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<doi_records>\n  <doi_record owner=\"10.31219\" timestamp=\"2018-11-13 07:19:46\">\n    <crossref>\n      <posted_content type=\"preprint\">\n        <group_title>Open Science Framework</group_title>\n        <contributors>\n          <person_name contributor_role=\"author\" sequence=\"first\">\n            <given_name>Steve</given_name>\n            <surname>Haroz</surname>\n          </person_name>\n        </contributors>\n        <titles>\n          <title>Open Practices in Visualization Research</title>\n        </titles>\n        <posted_date>\n          <month>07</month>\n          <day>03</day>\n          <year>2018</year>\n        </posted_date>\n        <item_number>osf.io/8ag3w</item_number>\n        <abstract>\n          <p>Two fundamental tenants of scientific research are that it can be scrutinized and built-upon. Both require that the collected data and supporting materials be shared, so others can examine, reuse, and extend them. Assessing the accessibility of these components and the paper itself can serve as a proxy for the reliability, replicability, and applicability of a field’s research. In this paper, I describe the current state of openness in visualization research and provide suggestions for authors, reviewers, and editors to improve open practices in the field. A free copy of this paper, the collected data, and the source code are available at https://osf.io/qf9na/</p>\n        </abstract>\n        <program>\n          <license_ref start_date=\"2018-07-03\">https://creativecommons.org/licenses/by/4.0/legalcode</license_ref>\n        </program>\n        <doi_data>\n          <doi>10.31219/osf.io/8ag3w</doi>\n          <resource>https://osf.io/8ag3w</resource>\n        </doi_data>\n      </posted_content>\n    </crossref>\n  </doi_record>\n</doi_records>\n",
 		"items": [
 			{
-				"itemType": "report",
+				"itemType": "preprint",
 				"title": "Open Practices in Visualization Research",
 				"creators": [
 					{
@@ -645,10 +652,10 @@ var testCases = [
 					}
 				],
 				"date": "2018-07-03",
+				"DOI": "10.31219/osf.io/8ag3w",
 				"abstractNote": "Two fundamental tenants of scientific research are that it can be scrutinized and built-upon. Both require that the collected data and supporting materials be shared, so others can examine, reuse, and extend them. Assessing the accessibility of these components and the paper itself can serve as a proxy for the reliability, replicability, and applicability of a field’s research. In this paper, I describe the current state of openness in visualization research and provide suggestions for authors, reviewers, and editors to improve open practices in the field. A free copy of this paper, the collected data, and the source code are available at https://osf.io/qf9na/",
-				"extra": "DOI: 10.31219/osf.io/8ag3w",
-				"institution": "Open Science Framework",
-				"reportType": "preprint",
+				"repository": "Open Science Framework",
+				"rights": "https://creativecommons.org/licenses/by/4.0/legalcode",
 				"url": "https://osf.io/8ag3w",
 				"attachments": [],
 				"tags": [],
@@ -756,6 +763,7 @@ var testCases = [
 				"language": "en",
 				"pages": "1-9",
 				"publisher": "Wiley",
+				"rights": "http://doi.wiley.com/10.1002/tdm_license_1.1",
 				"url": "https://onlinelibrary.wiley.com/doi/10.1002/9781119011071.iemp0172",
 				"attachments": [],
 				"tags": [],
@@ -863,6 +871,33 @@ var testCases = [
 				"publicationTitle": "Journal of Hospitality & Leisure Marketing",
 				"url": "https://www.tandfonline.com/doi/full/10.1300/J150v03n04_02",
 				"volume": "3",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<doi_records>\r\n  <doi_record owner=\"10.59350\" timestamp=\"2023-10-25 13:27:18\">\r\n    <crossref>\r\n      <posted_content type=\"other\" language=\"en\">\r\n        <group_title>Social sciences</group_title>\r\n        <contributors>\r\n          <person_name contributor_role=\"author\" sequence=\"first\">\r\n            <given_name>Sebastian</given_name>\r\n            <surname>Karcher</surname>\r\n          </person_name>\r\n        </contributors>\r\n        <titles>\r\n          <title>QDR Creates New Course on Data Management for CITI</title>\r\n        </titles>\r\n        <posted_date>\r\n          <month>3</month>\r\n          <day>31</day>\r\n          <year>2023</year>\r\n        </posted_date>\r\n        <institution>\r\n          <institution_name>QDR Blog</institution_name>\r\n        </institution>\r\n        <item_number item_number_type=\"uuid\">e1574118b63a40b0b56a605bf5e99c48</item_number>\r\n        <program name=\"AccessIndicators\">\r\n          <license_ref applies_to=\"vor\">https://creativecommons.org/licenses/by/4.0/legalcode</license_ref>\r\n          <license_ref applies_to=\"tdm\">https://creativecommons.org/licenses/by/4.0/legalcode</license_ref>\r\n        </program>\r\n        <doi_data>\r\n          <doi>10.59350/5znft-x4j11</doi>\r\n          <resource>https://qdr.syr.edu/qdr-blog/qdr-creates-new-course-data-management-citi</resource>\r\n          <collection property=\"text-mining\">\r\n            <item>\r\n              <resource mime_type=\"text/html\">https://qdr.syr.edu/qdr-blog/qdr-creates-new-course-data-management-citi</resource>\r\n            </item>\r\n          </collection>\r\n        </doi_data>\r\n        <citation_list />\r\n      </posted_content>\r\n    </crossref>\r\n  </doi_record>\r\n</doi_records>",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "QDR Creates New Course on Data Management for CITI",
+				"creators": [
+					{
+						"creatorType": "author",
+						"firstName": "Sebastian",
+						"lastName": "Karcher"
+					}
+				],
+				"date": "2023-3-31",
+				"blogTitle": "QDR Blog",
+				"extra": "DOI: 10.59350/5znft-x4j11",
+				"language": "en",
+				"rights": "https://creativecommons.org/licenses/by/4.0/legalcode",
+				"url": "https://qdr.syr.edu/qdr-blog/qdr-creates-new-course-data-management-citi",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
