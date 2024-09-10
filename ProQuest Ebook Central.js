@@ -2,14 +2,14 @@
 	"translatorID": "f2d965fa-5acb-4ba7-90a4-8ecb6cf0c795",
 	"label": "ProQuest Ebook Central",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://ebookcentral\\.proquest\\.com/lib/",
+	"target": "^https?://ebookcentral\\.proquest\\.com/(ebc/)?lib/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-11-19 21:23:37"
+	"lastUpdated": "2024-07-03 17:15:06"
 }
 
 /*
@@ -36,17 +36,18 @@
 */
 
 
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
-
 function detectWeb(doc, url) {
 	//reader.action is for chapter, but metadata only for books
 	if (url.includes('/detail.action?') || url.includes('/reader.action?')) {
 		return "book";
-	} else if (url.includes('search.action?') && getSearchResults(doc, true)) {
-		return "multiple";
 	}
+	else if (url.includes('search.action?') || url.includes('search?')) {
+		if (getSearchResults(doc, true)) {
+			return "multiple";
+		}
+		Z.monitorDOMChanges(doc.querySelector('app-root'), { childList: true, subtree: true });
+	}
+	return false;
 }
 
 
@@ -60,9 +61,16 @@ function getSearchResults(doc, checkOnly) {
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
-		items[href] = title;
+		items[fixSearchResultHref(href)] = title;
 	}
 	return found ? items : false;
+}
+
+function fixSearchResultHref(href) {
+	// Skip a JS redirect page
+	//    /ebc/lib/berkeley-ebooks/#/detail?docID=1000629&query=test
+	// -> /lib/berkeley-ebooks/detail.action?docID=1000629&query=test
+	return href.replace(/\/ebc\/lib\/([^/]+)\/#\/detail/, '/lib/$1/detail.action');
 }
 
 
@@ -106,6 +114,7 @@ function scrape(doc, url) {
 		translator.translate();
 	});
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{

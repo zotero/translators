@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-02 21:52:03"
+	"lastUpdated": "2024-08-12 21:42:53"
 }
 
 /*
@@ -37,23 +37,20 @@
 
 
 function detectWeb(doc, url) {
-	let title = attr(doc, 'meta[name="citation_title"]', 'content');
-	if (title) {
-		if (doc.querySelector('meta[name="citation_isbn"]')) {
-			let bookTitle = attr(doc, 'meta[name="citation_inbook_title"]', 'content');
-			if (!bookTitle || title == bookTitle) {
-				return "book";
+	let pageCategory = doc.body.getAttribute('data-pagecategory');
+	switch (pageCategory) {
+		case 'book':
+			return 'book';
+		case 'chapter':
+			return 'bookSection';
+		case 'article':
+			return 'journalArticle';
+		case 'search':
+		case 'journal':
+		default:
+			if (getSearchResults(doc, true)) {
+				return "multiple";
 			}
-			else {
-				return "bookSection";
-			}
-		}
-		else {
-			return "journalArticle";
-		}
-	}
-	else if (getSearchResults(doc, true)) {
-		return "multiple";
 	}
 	return false;
 }
@@ -127,18 +124,38 @@ function scrape(doc, url) {
 			delete item.bookTitle;
 		}
 		
-		if (item.bookTitle && !item.bookTitle.includes(': ')) {
+		if (item.itemType == 'bookSection') {
+			delete item.publicationTitle;
+			delete item.abstractNote;
+			delete item.rights; // AI training disclaimer!
+
 			let risURL = attr(doc, 'a[title="Download in RIS format"]', 'href');
 			if (!risURL) {
 				risURL = url.replace(/\/html([?#].*)$/, '/machineReadableCitation/RIS');
 			}
 			
 			ZU.doGet(risURL, function (risText) {
-				let bookTitle = risText.match(/^\s*T1\s*-\s*(.*)$/m);
-				if (bookTitle) {
-					item.bookTitle = bookTitle[1];
+				// De Gruyter uses TI for the container title and T2 for the subtitle
+				// Seems nonstandard! So we'll just handle it here
+				let titleMatch = risText.match(/^\s*TI\s*-\s*(.+)/m);
+				let subtitleMatch = risText.match(/^\s*T2\s*-\s*(.+)/m);
+				if (titleMatch) {
+					item.bookTitle = titleMatch[1];
+					if (subtitleMatch) {
+						item.bookTitle = item.bookTitle.trim() + ': ' + subtitleMatch[1];
+					}
 				}
-				item.complete();
+
+				let translator = Zotero.loadTranslator('import');
+				translator.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7');
+				translator.setString(risText);
+				translator.setHandler('itemDone', (_obj, risItem) => {
+					if (!item.creators.some(c => c.creatorType == 'editor')) {
+						item.creators.push(...risItem.creators.filter(c => c.creatorType == 'editor'));
+					}
+					item.complete();
+				});
+				translator.translate();
 			});
 		}
 		else {
@@ -147,7 +164,17 @@ function scrape(doc, url) {
 	});
 
 	translator.getTranslatorObject(function (trans) {
-		if (detectWeb(doc, url) == 'bookSection') {
+		let detectedType = detectWeb(doc, url);
+		if (detectedType == 'book') {
+			// Delete citation_inbook_title if this is actually a book, not a book section
+			// Prevents EM from mis-detecting as a bookSection in a way that even setting
+			// trans.itemType can't override
+			let bookTitleMeta = doc.querySelector('meta[name="citation_inbook_title"]');
+			if (bookTitleMeta) {
+				bookTitleMeta.remove();
+			}
+		}
+		else if (detectedType == 'bookSection') {
 			trans.itemType = 'bookSection';
 		}
 		trans.addCustomFields({
@@ -181,10 +208,11 @@ var testCases = [
 				"ISSN": "2196-7121",
 				"abstractNote": "Die Geschichte homosexueller Menschen im modernen Deutschland besteht nicht nur aus Verfolgung und Diskriminierung, obschon sie oft als solche erinnert wird. Wohl haben homosexuelle Männer unter massiver Verfolgung gelitten, und auch lesbische Frauen waren vielen Diskriminierungen ausgesetzt. Doch die Geschichte der letzten 200 Jahre weist nicht nur jene Transformation im Umgang mit Homosexualität auf, die ab den 1990er Jahren zur Gleichberechtigung führte, sondern mehrere, inhaltlich sehr verschiedene Umbrüche. Wir haben es weder mit einem Kontinuum der Repression noch mit einer linearen Emanzipationsgeschichte zu tun, sondern mit einer höchst widersprüchlichen langfristigen Entwicklung.",
 				"issue": "3",
-				"language": "de",
+				"language": "en",
 				"libraryCatalog": "www.degruyter.com",
 				"pages": "377-414",
 				"publicationTitle": "Vierteljahrshefte für Zeitgeschichte",
+				"rights": "De Gruyter expressly reserves the right to use all content for commercial text and data mining within the meaning of Section 44b of the German Copyright Act.",
 				"shortTitle": "Homosexuelle im modernen Deutschland",
 				"url": "https://www.degruyter.com/document/doi/10.1515/vfzg-2021-0028/html",
 				"volume": "69",
@@ -230,12 +258,13 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2021-08-25",
+				"date": "2021-07-30",
 				"ISBN": "9781487518806",
 				"abstractNote": "Bringing together themes in the history of art, punishment, religion, and the history of medicine, Picturing Punishment provides new insights into the wider importance of the criminal to civic life.",
 				"language": "en",
 				"libraryCatalog": "www.degruyter.com",
 				"publisher": "University of Toronto Press",
+				"rights": "De Gruyter expressly reserves the right to use all content for commercial text and data mining within the meaning of Section 44b of the German Copyright Act.",
 				"shortTitle": "Picturing Punishment",
 				"url": "https://www.degruyter.com/document/doi/10.3138/9781487518806/html",
 				"attachments": [
@@ -307,9 +336,8 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2021-08-25",
+				"date": "2021-07-30",
 				"ISBN": "9781487518806",
-				"abstractNote": "5 Serving the Public Good: Reform, Prestige, and the Productive Criminal Body in Amsterdam was published in Picturing Punishment on page 135.",
 				"bookTitle": "Picturing Punishment: The Spectacle and Material Afterlife of the Criminal Body in the Dutch Republic",
 				"language": "en",
 				"libraryCatalog": "www.degruyter.com",
@@ -362,6 +390,7 @@ var testCases = [
 				"libraryCatalog": "www.degruyter.com",
 				"pages": "1101-1103",
 				"publicationTitle": "Zeitschrift für Kristallographie - New Crystal Structures",
+				"rights": "De Gruyter expressly reserves the right to use all content for commercial text and data mining within the meaning of Section 44b of the German Copyright Act.",
 				"url": "https://www.degruyter.com/document/doi/10.1515/ncrs-2021-0236/html",
 				"volume": "236",
 				"attachments": [
@@ -414,6 +443,7 @@ var testCases = [
 				"libraryCatalog": "www.degruyter.com",
 				"pages": "1101-1103",
 				"publicationTitle": "Zeitschrift für Kristallographie - New Crystal Structures",
+				"rights": "De Gruyter expressly reserves the right to use all content for commercial text and data mining within the meaning of Section 44b of the German Copyright Act.",
 				"url": "https://www.degruyter.com/document/doi/10.1515/ncrs-2021-0236/html",
 				"volume": "236",
 				"attachments": [
@@ -431,12 +461,62 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.degruyter.com/search?query=test",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "https://www.degruyter.com/journal/key/mt/html",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.degruyter.com/document/doi/10.1515/9783110773712-010/html",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "10 Skaldic Poetry – Encrypted Communication",
+				"creators": [
+					{
+						"firstName": "Jon Gunnar",
+						"lastName": "Jørgensen",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Engh",
+						"firstName": "Line Cecilie",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Gullbekk",
+						"firstName": "Svein Harald",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Orning",
+						"firstName": "Hans Jacob",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2024-08-19",
+				"ISBN": "9783110773712",
+				"bookTitle": "Standardization in the Middle Ages: Volume 1: The North",
+				"language": "en",
+				"libraryCatalog": "www.degruyter.com",
+				"pages": "229-250",
+				"publisher": "De Gruyter",
+				"url": "https://www.degruyter.com/document/doi/10.1515/9783110773712-010/html",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

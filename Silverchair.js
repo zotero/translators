@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-08-23 13:00:08"
+	"lastUpdated": "2024-07-13 18:25:34"
 }
 
 /*
@@ -58,7 +58,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	// First one is issue, 2nd one search results
-	var rows = doc.querySelectorAll('#ArticleList h5.item-title>a, .al-title a[href*="article"], .al-article-items > .customLink > a[href*="article"], a[class="tocLink"]');
+	var rows = doc.querySelectorAll('#ArticleList h5.item-title>a, .al-title a[href*="article"], .al-article-items > .customLink > a[href*="article"], a.tocLink');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -70,14 +70,16 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) ZU.processDocuments(Object.keys(items), scrape);
-		});
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
@@ -93,7 +95,7 @@ function getArticleId(doc) {
 	return id;
 }
 
-function scrape(doc, url) {
+async function scrape(doc, url) {
 	let id = getArticleId(doc);
 	let type = attr(doc, '.citation-download-wrap input[name="resourceType"]', "value");
 	// Z.debug(type)
@@ -109,41 +111,41 @@ function scrape(doc, url) {
 	var risURL = "/Citation/Download?resourceId=" + id + "&resourceType=" + type + "&citationFormat=0";
 	// Z.debug(risURL);
 
-	var pdfURL = attr(doc, 'a.article-pdfLink', 'href');
+	let pdfURL = attr(doc, 'a.article-pdfLink', 'href');
+	// e.g. all JAMA journals
+	if (!pdfURL) pdfURL = attr(doc, 'a#pdf-link', 'data-article-url');
 	// Z.debug("pdfURL: " + pdfURL);
-	ZU.doGet(risURL, function (text) {
-		if (text.includes('We are sorry, but we are experiencing unusual traffic at this time.')) {
-			throw new Error('Rate-limited');
+	let risText = await requestText(risURL);
+	if (risText.includes('We are sorry, but we are experiencing unusual traffic at this time.')) {
+		throw new Error('Rate-limited');
+	}
+	// Z.debug(text);
+	var translator = Zotero.loadTranslator("import");
+	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+	translator.setString(risText);
+	translator.setHandler('itemDone', (_obj, item) => {
+		if (item.pages) {
+			// if item.pages only spans one page (4-4), replace the range
+			// with a single page number (4).
+			item.pages = item.pages.trim().replace(/^([^-]+)-\1$/, '$1');
 		}
-		
-		// Z.debug(text);
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		translator.setString(text);
-		translator.setHandler("itemDone", function (obj, item) {
-			if (item.pages) {
-				// if item.pages only spans one page (4-4), replace the range
-				// with a single page number (4).
-				item.pages = item.pages.trim().replace(/^([^-]+)-\1$/, '$1');
-			}
-			if (item.itemType == "bookSection" && chapterTitle) {
-				item.title = chapterTitle;
-			}
-			if (pdfURL) {
-				item.attachments.push({
-					url: pdfURL,
-					title: "Full Text PDF",
-					mimeType: "application/pdf"
-				});
-			}
+		if (item.itemType == "bookSection" && chapterTitle) {
+			item.title = chapterTitle;
+		}
+		if (pdfURL) {
 			item.attachments.push({
-				title: "Snapshot",
-				document: doc
+				url: pdfURL,
+				title: "Full Text PDF",
+				mimeType: "application/pdf"
 			});
-			item.complete();
+		}
+		item.attachments.push({
+			title: "Snapshot",
+			document: doc
 		});
-		translator.translate();
+		item.complete();
 	});
+	await translator.translate();
 }
 
 /** BEGIN TEST CASES **/

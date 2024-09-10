@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-22 15:29:56"
+	"lastUpdated": "2024-07-21 13:48:22"
 }
 
 /*
@@ -79,6 +79,7 @@ async function scrape(doc, url = doc.location.href) {
 	var noteXPath = "//h5[starts-with(text(),'Abstract')]/following-sibling::p[2]/strong[starts-with(text(), 'Note:')]/..";
 	var keywordsSelector = ".keywords > .keyword";
 	var publicationInfoSelector = "//div[@id='metadata']/dl/dt[starts-with(text(), 'Publication info')]/following-sibling::dd[1]";
+	var availableFormatsSelector = "//div[@id='metadata']/dl/dt[contains(text(), 'Available format(s)')]/following-sibling::dd[1]/a";
 	var paperIDSelector = "#eprintContent h4";
 	var paperID = text(doc, paperIDSelector);
 	// The year is always 4 digits, the paper number is canonicalized (3 or 4 digits) before calling scrape()
@@ -95,7 +96,16 @@ async function scrape(doc, url = doc.location.href) {
 	var authors = doc.querySelectorAll(authorsSelector);
 	authors = [...authors].map(author => author.content);
 
-	var abstr = ZU.xpathText(doc, abstractXPath);
+	// Pages use MathJax lazy typesetting, which affects tests (content is missing as typesetting isn't being done).
+	// Work around by pulling the abstract from the OG tag in that case.
+	let abstr = "";
+	if (doc.querySelector('mjx-lazy')) {
+		abstr = attr(doc, 'meta[property="og:description"]', 'content');
+	}
+	else {
+		abstr = ZU.xpathText(doc, abstractXPath);
+	}
+
 	// Remove surplus whitespace, but preserve paragraphs, denoted in the page markup by double newlines with some spaces in between
 	if (abstr) abstr = abstr.replace(/\n\s+\n/g, "\n\n").replace(/[ \t]+/g, " ").trim();
 
@@ -114,7 +124,6 @@ async function scrape(doc, url = doc.location.href) {
 
 	let urlComponents = url.match(/^https:\/\/([^/]+)/);
 	let eprintFQDN = urlComponents[1];
-	// TODO: Do we want to differentiate Archive and Library Catalog like this (the latter has FQDN appended)? Do we want to populate both or just one of them? The translator population has all possible approaches.
 	newItem.archive = archiveName;
 	newItem.libraryCatalog = `${archiveName} (${eprintFQDN})`;
 	newItem.archiveID = paperID;
@@ -132,9 +141,30 @@ async function scrape(doc, url = doc.location.href) {
 		newItem.tags.push(keywords[i]);
 	}
 
-	newItem.attachments = [
-		{ url: newItem.url + ".pdf", title: "Full Text PDF", mimeType: "application/pdf" }
-	];
+	let formats = ZU.xpath(doc, availableFormatsSelector);
+	for (const format of formats) {
+		let formatName = format.textContent.trim();
+		let attachment = {};
+		switch (formatName.toLowerCase()) {
+			case "pdf":
+				// There are entries where a format button is present, but the URL points to the ePrint home page
+				if (format.href.slice(-4) != ".pdf") continue;
+				attachment.mimeType = "application/pdf";
+				break;
+			case "ps":
+				// There are entries where a format button is present, but the URL points to the ePrint home page
+				if (format.href.slice(-3) != ".ps") continue;
+				attachment.mimeType = "application/ps";
+				break;
+			default:
+				// For security reasons, avoid adding unknown formats (allowlist approach)
+				Z.debug("Unknown format, skipping: " + formatName);
+				continue;
+		}
+		attachment.url = format.href;
+		attachment.title = "Full Text " + formatName;
+		newItem.attachments.push(attachment);
+	}
 
 	if (note) newItem.notes.push({ note: note });
 
@@ -240,7 +270,7 @@ var testCases = [
 					}
 				],
 				"date": "2005",
-				"abstractNote": "This paper describes an adaptive-chosen-ciphertext attack on the Cipher Feedback (CFB) mode of encryption as used in OpenPGP. In most circumstances it will allow an attacker to determine 16 bits of any block of plaintext with about 215 oracle queries for the initial\nsetup work and 215 oracle queries for each block. Standard CFB mode encryption does not appear to be affected by this attack. It applies to a particular variation of CFB used by OpenPGP. In particular it exploits an ad-hoc integrity check feature in OpenPGP which was meant as a \"quick check\" to determine the correctness of the decrypting symmetric key.",
+				"abstractNote": "This paper describes an adaptive-chosen-ciphertext attack on the Cipher Feedback (CFB) mode of encryption as used in OpenPGP. In most circumstances it will allow an attacker to determine 16 bits of any block of plaintext with about $2^{15}$ oracle queries for the initial\nsetup work and $2^{15}$ oracle queries for each block. Standard CFB mode encryption does not appear to be affected by this attack. It applies to a particular variation of CFB used by OpenPGP. In particular it exploits an ad-hoc integrity check feature in OpenPGP which was meant as a \"quick check\" to determine the correctness of the decrypting symmetric key.",
 				"archive": "Cryptology ePrint Archive",
 				"archiveID": "2005/033",
 				"extra": "Publication info: Published elsewhere. Unknown where it was published",
@@ -248,8 +278,8 @@ var testCases = [
 				"url": "https://eprint.iacr.org/2005/033",
 				"attachments": [
 					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"mimeType": "application/pdf",
+						"title": "Full Text PDF"
 					}
 				],
 				"tags": [
@@ -290,7 +320,7 @@ var testCases = [
 					}
 				],
 				"date": "2011",
-				"abstractNote": "We show that homomorphic evaluation of (wide enough) arithmetic circuits can be accomplished with only polylogarithmic overhead. Namely, we present a construction of fully homomorphic encryption (FHE) schemes that for security parameter \\secparam can evaluate any width-Ω(\\secparam) circuit with t gates in time t⋅polylog(\\secparam).\n\nTo get low overhead, we use the recent batch homomorphic evaluation techniques of Smart-Vercauteren and Brakerski-Gentry-Vaikuntanathan, who showed that homomorphic operations can be applied to \"packed\" ciphertexts that encrypt vectors of plaintext elements. In this work, we introduce permuting/routing techniques to move plaintext elements across\nthese vectors efficiently. Hence, we are able to implement general arithmetic circuit in a batched fashion without ever needing to \"unpack\" the plaintext vectors.\n\nWe also introduce some other optimizations that can speed up homomorphic evaluation in certain cases. For example, we show how to use the Frobenius map to raise plaintext elements to powers of~p at the \"cost\" of a linear operation.",
+				"abstractNote": "We show that homomorphic evaluation of (wide enough) arithmetic circuits can be accomplished with only polylogarithmic overhead. Namely, we present a construction of fully homomorphic encryption (FHE) schemes that for security parameter $\\secparam$ can evaluate any width-$\\Omega(\\secparam)$ circuit with $t$ gates in time $t\\cdot polylog(\\secparam)$.\n\nTo get low overhead, we use the recent batch homomorphic evaluation techniques of Smart-Vercauteren and Brakerski-Gentry-Vaikuntanathan, who showed that homomorphic operations can be applied to \"packed\" ciphertexts that encrypt vectors of plaintext elements. In this work, we introduce permuting/routing techniques to move plaintext elements across\nthese vectors efficiently. Hence, we are able to implement general arithmetic circuit in a batched fashion without ever needing to \"unpack\" the plaintext vectors.\n\nWe also introduce some other optimizations that can speed up homomorphic evaluation in certain cases. For example, we show how to use the Frobenius map to raise plaintext elements to powers of~$p$ at the \"cost\" of a linear operation.",
 				"archive": "Cryptology ePrint Archive",
 				"archiveID": "2011/566",
 				"extra": "Publication info: Published elsewhere. extended abstract in Eurocrypt 2012",
@@ -298,8 +328,8 @@ var testCases = [
 				"url": "https://eprint.iacr.org/2011/566",
 				"attachments": [
 					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"mimeType": "application/pdf",
+						"title": "Full Text PDF"
 					}
 				],
 				"tags": [
@@ -393,6 +423,186 @@ var testCases = [
 		"type": "web",
 		"url": "https://eprint.iacr.org/complete/",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://eprint.iacr.org/2019/430",
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "Composition of Boolean Functions: An Application to the Secondary Constructions of Bent Functions",
+				"creators": [
+					{
+						"firstName": "Guangpu",
+						"lastName": "Gao",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Dongdai",
+						"lastName": "Lin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Wenfen",
+						"lastName": "Liu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yongjuan",
+						"lastName": "Wang",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019",
+				"abstractNote": "Bent functions are optimal combinatorial objects and have been attracted\ntheir research for four decades. Secondary constructions play a central role\nin constructing bent functions since a complete classification of this class\nof functions is elusive. This paper is devoted to establish a relationship\nbetween the secondary constructions and the composition of Boolean\nfunctions. We firstly prove that some well-known secondary constructions of\nbent functions, can be described by the composition of a plateaued Boolean\nfunction and some bent functions. Then their dual functions can be\ncalculated by the Lagrange interpolation formula. By following this\nobservation, two secondary constructions of\nbent functions are presented. We show that they are inequivalent to the known ones, and\nmay generate bent functions outside the primary classes $\\mathcal{M}$ and $%\n\\mathcal{PS}$. These results show that the method we present in this paper\nis genetic and unified and therefore can be applied to the constructions of Boolean\nfunctions with other cryptographical criteria.",
+				"archive": "Cryptology ePrint Archive",
+				"archiveID": "2019/430",
+				"extra": "Publication info: Preprint. MINOR revision.",
+				"libraryCatalog": "Cryptology ePrint Archive (eprint.iacr.org)",
+				"shortTitle": "Composition of Boolean Functions",
+				"url": "https://eprint.iacr.org/2019/430",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Bent"
+					},
+					{
+						"tag": "Composition of Boolean functions"
+					},
+					{
+						"tag": "Lagrange interpolation formula"
+					},
+					{
+						"tag": "Secondary constructions"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eprint.iacr.org/2002/195",
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "An addition to the paper: A polarisation based visual crypto system and its secret sharing schemes",
+				"creators": [
+					{
+						"firstName": "H. D. L.",
+						"lastName": "Hollmann",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J. H. v",
+						"lastName": "Lint",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "L.",
+						"lastName": "Tolhuizen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "P.",
+						"lastName": "Tuyls",
+						"creatorType": "author"
+					}
+				],
+				"date": "2002",
+				"abstractNote": "An (n,k) pair is a pair of binary nxm matrices (A,B), such that the weight of the modulo-two sum of any i rows, 1\\leq i \\leq k, from A or B is equal to a_i or b_i, respectively, and moreover, a_i=b_i, for 1\\leq i < k, while a_k \\neq b_k. In this note we first show how to construct an (n,k) Threshold Visual Secret Sharing Scheme from an (n,k) pair. Then, we explicitly construct an (n,k)-pair for all n and k with 1 \\leq k <n.",
+				"archive": "Cryptology ePrint Archive",
+				"archiveID": "2002/195",
+				"extra": "Publication info: Published elsewhere. Unknown where it was published",
+				"libraryCatalog": "Cryptology ePrint Archive (eprint.iacr.org)",
+				"shortTitle": "An addition to the paper",
+				"url": "https://eprint.iacr.org/2002/195",
+				"attachments": [
+					{
+						"mimeType": "application/ps",
+						"title": "Full Text PS"
+					}
+				],
+				"tags": [
+					{
+						"tag": "(MDS) codes"
+					},
+					{
+						"tag": "Light Polarisation"
+					},
+					{
+						"tag": "Threshold Visual Secret Sharing Schemes"
+					},
+					{
+						"tag": "XOR"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eprint.iacr.org/2002/163",
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "Man-in-the-Middle in Tunnelled Authentication Protocols",
+				"creators": [
+					{
+						"firstName": "N.",
+						"lastName": "Asokan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Valtteri",
+						"lastName": "Niemi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kaisa",
+						"lastName": "Nyberg",
+						"creatorType": "author"
+					}
+				],
+				"date": "2002",
+				"abstractNote": "Recently new protocols have been proposed in IETF for protecting\nremote client authentication protocols by running them within a\nsecure tunnel. Examples of such protocols are PIC, PEAP and EAP-TTLS.\nOne goal of these new protocols is to enable the migration from legacy\nclient authentication protocols to more secure protocols, e.g., from\nplain EAP type to, say, PEAP. In the new drafts, the security of\nthe subsequent session credentials are based only on keys derived\nduring the unilateral authentication where the network server is\nauthenticated to the client. Client authentication is mentioned as an\noption in PEAP and EAP-TTLS, but is not mandated. Naturally, the PIC\nprotocol does not even offer this option, because the goal of PIC is\nto obtain credentials that can be used for client authentication.\n\nIn addition to running the authentication protocols within such tunnel\nit should also be possible to use them in legacy mode without any\ntunnelling so as to leverage the legacy advantages such as widespread\nuse. In this paper we show that in practical situations, such a mixed\nmode usage opens up the possibility to run a man-in-the-middle attack\nfor impersonating the legitimate client. For those well-designed\nclient authentication protocols that already have a sufficient level\nof security, the use of tunnelling in the proposed form is a step\nbackwards because they introduce a new vulnerability.\n\nThe problem is due to the fact that the legacy client authentication\nprotocol is not aware if it is run in protected or unprotected mode.\nWe propose to solve the discovered problem by using a cryptographic\nbinding between the client authentication protocol and the protection\nprotocol.",
+				"archive": "Cryptology ePrint Archive",
+				"archiveID": "2002/163",
+				"extra": "Publication info: Published elsewhere. Unknown where it was published",
+				"libraryCatalog": "Cryptology ePrint Archive (eprint.iacr.org)",
+				"url": "https://eprint.iacr.org/2002/163",
+				"attachments": [
+					{
+						"mimeType": "application/pdf",
+						"title": "Full Text PDF"
+					},
+					{
+						"mimeType": "application/ps",
+						"title": "Full Text PS"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Internet applications"
+					},
+					{
+						"tag": "authentication protocols"
+					},
+					{
+						"tag": "man-in-the-middle attacks"
+					}
+				],
+				"notes": [
+					{
+						"note": "Draft updated. PS version provided."
+					}
+				],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
