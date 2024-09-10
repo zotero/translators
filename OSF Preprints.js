@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-20 01:58:39"
+	"lastUpdated": "2024-09-10 13:49:30"
 }
 
 /*
@@ -36,7 +36,7 @@
 */
 
 function detectWeb(doc, url) {
-	if (text(doc, 'h1[data-test-preprint-title]')) {
+	if (text(doc, "h1[data-test-preprint-title]")) {
 		return "preprint";
 	}
 	else if (url.includes("search?") && getSearchResults(doc, true)) {
@@ -64,84 +64,58 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) ZU.doGet(constructAPIURL(Object.keys(items)), osfAPIImport);
+		// only work for preprint type like previous code
+		Zotero.selectItems(getSearchResults(doc, false), async function (items) {
+			if (items) {
+				for (let url of Object.keys(items)) {
+					await scrape(doc, url);
+				}
+			}
 		});
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
-
-// takes and array of preprint URLs, extracts the ID and constructs an API call to OSF
-function constructAPIURL(urls) {
-	var ids = [];
-	for (let url of urls) {
-		let id;
-		if (url.match(/\.(io|com|org)\/([a-z0-9]+)/)) {
-			id = url.match(/\.(?:io|com|org)\/([a-z0-9]+)/)[1];
+async function getOSFJSON(url) {
+	try {
+		let osfID;
+		if (url.match(/\/([a-z0-9]+)$/)) {
+			osfID = url.match(/\/([a-z0-9]+)$/)[1];
 		}
-		if (id) {
-			ids.push("https://api.osf.io/v2/preprints/" + id + "/?embed=contributors&embed=provider");
-		}
+		let osfAPIUrl = "https://api.osf.io/v2/preprints/" + osfID + "/?embed=contributors&embed=provider";
+		var json = await ZU.requestJSON(osfAPIUrl);
+	} catch (e) {
+		json = null;
+		Z.debug("Error while fetching JSON: " + e);
 	}
-	return ids;
+	return json;
 }
 
-function osfAPIImport(text) {
-	// Z.debug(text);
-	let json = JSON.parse(text);
-	let attr = json.data.attributes;
-	let embeds = json.data.embeds;
-	var item = new Zotero.Item("preprint");
-	// currently we're just doing preprints, but putting this here in case we'll want to handle different OSF
-	// item types in the future
-	// let type = json.data.type
-	item.title = attr.title;
-	item.abstractNote = attr.description;
-	item.date = attr.date_published;
-	item.publisher = embeds.provider.data.attributes.name;
-	item.DOI = json.data.links.preprint_doi && ZU.cleanDOI(json.data.links.preprint_doi);
-	item.url = json.data.links.html;
-	for (let tag of attr.tags) {
-		item.tags.push(tag);
-	}
+async function scrape(doc, url) {
+	// fetch metadata from OSF API
+	var json = await getOSFJSON(url);
 
-	for (let contributor of embeds.contributors.data) {
-		let author = contributor.embeds.users.data.attributes;
-		if (author.given_name && author.family_name) {
-			// add middle names
-			let givenNames = author.given_name + ' ' + author.middle_names;
-			item.creators.push({ lastName: author.family_name, firstName: givenNames.trim(), creatorType: "author" });
-		}
-		else {
-			item.creators.push({ lastName: author.full_name, creatorType: "author", fieldMode: 1 });
-		}
-	}
-	if (json.data.relationships.primary_file) {
-		let fileID = json.data.relationships.primary_file.links.related.href.replace("https://api.osf.io/v2/files/", "");
-		item.attachments.push({ url: "https://osf.io/download/" + fileID, title: "OSF Preprint", mimeType: "application/pdf" });
-	}
-
-	item.complete();
-}
-
-function scrape(doc, url) {
-	var translator = Zotero.loadTranslator('web');
-	// Embedded Metadata
-	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-
-	translator.setHandler('itemDone', function (obj, item) {
+	// use Embedded metadata translator
+	var translator = Zotero.loadTranslator("web");
+	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+	translator.setHandler("itemDone", function (obj, item) {
 		// remove Snapshot, which is useless for OSF preprints (plus we should always get a PDF)
 		for (let i = item.attachments.length - 1; i >= 0; i--) {
 			if (item.attachments[i].title == "Snapshot") {
 				item.attachments.splice(i, 1);
 			}
 		}
+		item.publisher = json.data.embeds.provider.data.attributes.name;
 		item.libraryCatalog = "OSF Preprints";
+		// attachments
+		if (json.data.relationships.primary_file) {
+			let fileID = json.data.relationships.primary_file.links.related.href.replace("https://api.osf.io/v2/files/", "");
+			item.attachments.push({ url: "https://osf.io/download/" + fileID, title: "OSF Preprint", mimeType: "application/pdf" });
+		}	
 		item.complete();
 	});
 
@@ -150,7 +124,6 @@ function scrape(doc, url) {
 		trans.doWeb(doc, url);
 	});
 }
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
