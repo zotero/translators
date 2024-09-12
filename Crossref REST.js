@@ -4,12 +4,12 @@
 	"creator": "Martynas Bagdonas",
 	"target": "",
 	"minVersion": "5.0.0",
-	"maxVersion": null,
+	"maxVersion": "",
 	"priority": 90,
 	"inRepository": true,
 	"translatorType": 8,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-09-12 14:30:00"
+	"lastUpdated": "2024-09-12 15:10:05"
 }
 
 /*
@@ -298,15 +298,9 @@ function processCrossref(json) {
 			item.date = parseDate(result.issued);
 		}
 
-		if (result.DOI) {
-			if (ZU.fieldIsValidForType('DOI', item.itemType)) {
-				item.DOI = result.DOI;
-			}
-			// Add DOI to extra for unsupported items
-			else {
-				item.extra = (item.extra ? item.extra + '\n' : '') + 'DOI: ' + result.DOI;
-			}
-		}
+		// For item types where DOI isn't supported, it will be automatically added to the Extra field.
+		// However, this won't show up in the translator tests
+		item.DOI = result.DOI;
 
 		item.url = result.resource && result.resource.primary && result.resource.primary.URL;
 
@@ -559,7 +553,6 @@ var testCases = [
 					}
 				],
 				"date": "1958",
-				"extra": "DOI: 10.17077/etd.xnw0xnau",
 				"libraryCatalog": "Crossref",
 				"place": "Iowa City, IA, United States",
 				"rights": "http://rightsstatements.org/vocab/InC/1.0/",
@@ -620,7 +613,6 @@ var testCases = [
 					}
 				],
 				"date": "2016-09-08",
-				"extra": "DOI: 10.21468/scipost.report.10",
 				"libraryCatalog": "Crossref",
 				"manuscriptType": "peer review",
 				"url": "https://scipost.org/SciPost.Report.10",
@@ -703,7 +695,6 @@ var testCases = [
 				"abstractNote": "Entertainment has historically been associated with enjoyment. Yet, many experiences considered under the label of entertainment are not particularly            enjoyable            for viewers, and may instead evoke feelings of sadness, pensiveness, or mixed affect. Attempting to answer the question of why audiences would select media which do not promote hedonic pleasure, researchers have suggested that appreciation may better describe the experience of liking media which provokes mixed affect. Appreciation of media is thought to promote long‐term goals such as life improvement and self‐betterment, in line with the philosophical concept of eudaimonia. This entry examines appreciation‐based responses to media in terms of short‐ and long‐term outcomes.",
 				"bookTitle": "The International Encyclopedia of Media Psychology",
 				"edition": "1",
-				"extra": "DOI: 10.1002/9781119011071.iemp0172",
 				"language": "en",
 				"libraryCatalog": "Crossref",
 				"pages": "1-9",
@@ -846,7 +837,6 @@ var testCases = [
 				],
 				"date": "2023-03-31",
 				"blogTitle": "QDR Blog",
-				"extra": "DOI: 10.59350/5znft-x4j11",
 				"rights": "https://creativecommons.org/licenses/by/4.0/legalcode",
 				"url": "https://qdr.syr.edu/qdr-blog/qdr-creates-new-course-data-management-citi",
 				"attachments": [],
@@ -878,7 +868,6 @@ var testCases = [
 					}
 				],
 				"date": "11/2006",
-				"extra": "DOI: 10.26509/frbc-wp-200614",
 				"institution": "Federal Reserve Bank of Cleveland",
 				"libraryCatalog": "Crossref",
 				"place": "Cleveland, OH",
@@ -929,7 +918,6 @@ var testCases = [
 				],
 				"date": "2020",
 				"ISBN": "9782889660162",
-				"extra": "DOI: 10.3389/978-2-88966-016-2",
 				"libraryCatalog": "Crossref",
 				"publisher": "Frontiers Media SA",
 				"series": "Frontiers Research Topics",
@@ -952,7 +940,6 @@ var testCases = [
 				"itemType": "book",
 				"title": "Index to Proceedings of the Economic and Social Council",
 				"creators": [],
-				"extra": "DOI: 10.18356/31516bf1-en",
 				"libraryCatalog": "Crossref",
 				"publisher": "United Nations",
 				"url": "https://www.un-ilibrary.org/content/periodicals/24124516",
@@ -1031,7 +1018,6 @@ var testCases = [
 				],
 				"ISBN": "9781569005927",
 				"edition": "6",
-				"extra": "DOI: 10.7139/2017.978-1-56900-592-7",
 				"libraryCatalog": "Crossref",
 				"publisher": "AOTA Press",
 				"url": "https://library.aota.org/Occupational-Therapy-Manager-6",
@@ -1055,7 +1041,6 @@ var testCases = [
 				"date": "2022-09-12",
 				"bookTitle": "2022 Global Deep-Sea Capacity Assessment",
 				"edition": "1",
-				"extra": "DOI: 10.21428/cbd17b20.594a8acc",
 				"libraryCatalog": "Crossref",
 				"publisher": "Ocean Discovery League, Saunderstown, USA.",
 				"url": "https://deepseacapacity.oceandiscoveryleague.org/pub/2022-exec-summary-es",
@@ -1083,7 +1068,6 @@ var testCases = [
 					}
 				],
 				"date": "01/2020",
-				"extra": "DOI: 10.11647/obp.0163.08",
 				"libraryCatalog": "Crossref",
 				"publisher": "Open Book Publishers",
 				"rights": "http://creativecommons.org/licenses/by/4.0",
@@ -1120,7 +1104,6 @@ var testCases = [
 				],
 				"date": "2010-02-01",
 				"ISBN": "9780841269927 9780841224674",
-				"extra": "DOI: 10.1021/bk-2009-1027",
 				"libraryCatalog": "Crossref",
 				"place": "Washington DC",
 				"publisher": "American Chemical Society",
@@ -1152,7 +1135,6 @@ var testCases = [
 				"date": "2019-07-05",
 				"ISBN": "9789390083503",
 				"abstractNote": "This book reports the potential plants for human survival, explored medicinal aspects of the ongoing research and development for discovering new molecules, new drugs, new leads, ethnic-traditional applications and nutraceutical values of plants. It provides a baseline data and information on plants and their hidden knowledge for human health. This is build upon based on twenty-five excellent research articles and main focused plant species are Boswellia serrata, Butea monosperma, Colebrookea oppositifolia, Cymbopogon khasianus, Dendrophthe falcata, Dysoxylum binectariferum, Echinacea purpurea, Grewia asiatica, Picrorrhiza kurroa, Saussurea costus, Withania somnifera, Zanthoxylum armatum, different species of Aconitum and Panax, Ashtavarga groups (Habenaria intermedia, Habenaria edgeworthii, Malaxis acuminata, Malaxis muscifera, Lilium polyphyllum, Polygonatum verticillatum, Polygonatum cirrhifolium and Roscoea procera), and hundreds of potential life-saving plants used by different ethnic tribes of Himalaya as food, shelter and medicine in their day-to-day life. Various research studies and clinical trials mentioned in the book will add and contribute a lot in discovering quick leads for medicine formulations and products development. In addition to research suggestions and valuation of plants for humans contained within each of the articles, an introduction section emphasizes particular research avenues for attention in the drug development programmes. As the reader will note, these compilations represent a wide collection of views, reflecting the diversity of sciences and interests of thousands of ideas that enabled thoughtful deliberations from a wide range of scientific perspectives.",
-				"extra": "DOI: 10.59317/9789390083503",
 				"libraryCatalog": "Crossref",
 				"publisher": "NIPA",
 				"url": "https://www.nipaers.com/ebook/9789390083503",
@@ -1186,7 +1168,6 @@ var testCases = [
 				],
 				"date": "2021-07-30",
 				"bookTitle": "Highlights on Medicine and Medical Science Vol. 13",
-				"extra": "DOI: 10.9734/bpi/hmms/v13/2889f",
 				"libraryCatalog": "Crossref",
 				"pages": "108-114",
 				"publisher": "Book Publisher International (a part of SCIENCEDOMAIN International)",
@@ -1210,7 +1191,6 @@ var testCases = [
 				"creators": [],
 				"date": "2010-06-29",
 				"bookTitle": "Bundesgesetzblatt",
-				"extra": "DOI: 10.7328/bgbl_2010_0000231_h34",
 				"libraryCatalog": "Crossref",
 				"pages": "841-845",
 				"publisher": "Recht Fuer Deutschland GmbH",
@@ -1254,7 +1234,6 @@ var testCases = [
 					}
 				],
 				"bookTitle": "High-resolution lidar data for Alaska infrastructure corridors",
-				"extra": "DOI: 10.14509/23007",
 				"libraryCatalog": "Crossref",
 				"publisher": "Alaska Division of Geological & Geophysical Surveys",
 				"url": "http://www.dggs.alaska.gov/pubs/id/23007",
@@ -1288,7 +1267,6 @@ var testCases = [
 				],
 				"date": "2014-04-28",
 				"bookTitle": "Kirk-Othmer Encyclopedia of Chemical Technology",
-				"extra": "DOI: 10.1002/0471238961.0308121519200523.a01.pub2",
 				"libraryCatalog": "Crossref",
 				"pages": "1-9",
 				"place": "Hoboken, NJ, USA",
@@ -1438,7 +1416,6 @@ var testCases = [
 					}
 				],
 				"date": "2002-02-02",
-				"extra": "DOI: 10.14264/105901",
 				"libraryCatalog": "Crossref",
 				"thesisType": "PhD Thesis",
 				"university": "University of Queensland Library",
@@ -1501,7 +1478,6 @@ var testCases = [
 					}
 				],
 				"date": "2024-02-21",
-				"extra": "DOI: 10.32388/tqr2ys",
 				"libraryCatalog": "Crossref",
 				"manuscriptType": "peer review",
 				"shortTitle": "Review of",
@@ -1538,7 +1514,6 @@ var testCases = [
 				],
 				"date": "2007",
 				"ISBN": "9780854042166",
-				"extra": "DOI: 10.1039/9781847557766",
 				"libraryCatalog": "Crossref",
 				"place": "Cambridge",
 				"publisher": "Royal Society of Chemistry",
@@ -1574,7 +1549,6 @@ var testCases = [
 					}
 				],
 				"date": "2017",
-				"extra": "DOI: 10.3133/sir20175014",
 				"institution": "US Geological Survey",
 				"libraryCatalog": "Crossref",
 				"seriesTitle": "Scientific Investigations Report",
@@ -1669,7 +1643,6 @@ var testCases = [
 				"itemType": "document",
 				"title": "Multifunctional Ti3C2Tx MXene/Silver Nanowire Membranes with Excellent Catalytic Antifouling, and Antibacterial Properties for Nitrophenol-Containing Water Purification",
 				"creators": [],
-				"extra": "DOI: 10.1021/acsami.3c09983.s001",
 				"libraryCatalog": "Crossref",
 				"publisher": "American Chemical Society (ACS)",
 				"url": "https://pubs.acs.org/doi/suppl/10.1021/acsami.3c09983/suppl_file/am3c09983_si_001.pdf",
