@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-09-25 04:32:17"
+	"lastUpdated": "2024-09-25 05:59:03"
 }
 
 function detectWeb(doc, url) {
@@ -58,9 +58,11 @@ function scrape(doc, url){
 				tags.push(Zotero.Utilities.trimInternal(kw.textContent));
 			}
 		}
+		//var abstractPath = '//div[@class="abstract"]/p[@class="entry-content"]';
+		var abstractPath = '//div[contains(@class, "abstract")]/p[contains(@class, "entry-content")]';
 		var abstractNote;
-		if (doc.evaluate('//div[@class="abstract"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-			abstractNote = doc.evaluate('//div[@class="abstract"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		if (doc.evaluate(abstractPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			abstractNote = doc.evaluate(abstractPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		}
 		Zotero.Utilities.HTTP.doGet(biblink, function(text) {
 			var trans = Zotero.loadTranslator("import");
@@ -123,6 +125,7 @@ var testCases = [
 				"publicationTitle": "生産研究",
 				"url": "https://cir.nii.ac.jp/crid/1390001204062164736",
 				"volume": "54",
+				"abstractNote": "特集 ERS(耐震構造学)",
 				"attachments": [
 					{
 						"title": "観測用既存鉄骨造モデル構造物を用いたオンライン応答実験 Snapshot",
