@@ -207,8 +207,8 @@ async function getIds(doc, url) {
 	}
 
 	// try to extract uid from the url
-	if (url.includes('/record/')) {
-		let m = url.match(/\/record\/([\d-]*)/);
+	if (url.includes('/record/') || url.includes('/fulltext/')) {
+		let m = url.match(/\/(?:record|fulltext)\/([\d-]*)/);
 		if (m && m[1]) {
 			return m[1];
 		}
@@ -535,6 +535,95 @@ var testCases = [
 				"tags": [
 					{
 						"tag": "Abnormal Psychology"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://psycnet.apa.org/fulltext/2022-40433-002.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Expertise in emotion: A scoping review and unifying framework for individual differences in the mental representation of emotional experience",
+				"creators": [
+					{
+						"lastName": "Hoemann",
+						"firstName": "Katie",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Nielson",
+						"firstName": "Catie",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Yuen",
+						"firstName": "Ashley",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Gurera",
+						"firstName": "J. W.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Quigley",
+						"firstName": "Karen S.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Barrett",
+						"firstName": "Lisa Feldman",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021",
+				"DOI": "10.1037/bul0000327",
+				"ISSN": "1939-1455",
+				"abstractNote": "Expertise refers to outstanding skill or ability in a particular domain. In the domain of emotion, expertise refers to the observation that some people are better at a range of competencies related to understanding and experiencing emotions, and these competencies may help them lead healthier lives. These individual differences are represented by multiple constructs including emotional awareness, emotional clarity, emotional complexity, emotional granularity, and emotional intelligence. These constructs derive from different theoretical perspectives, highlight different competencies, and are operationalized and measured in different ways. The full set of relationships between these constructs has not yet been considered, hindering scientific progress and the translation of findings to aid mental and physical well-being. In this article, we use a scoping review procedure to integrate these constructs within a shared conceptual space. Scoping reviews provide a principled means of synthesizing large and diverse literature in a transparent fashion, enabling the identification of similarities as well as gaps and inconsistencies across constructs. Using domain-general accounts of expertise as a guide, we build a unifying framework for expertise in emotion and apply this to constructs that describe how people understand and experience their own emotions. Our approach offers opportunities to identify potential mechanisms of expertise in emotion, encouraging future research on those mechanisms and on educational or clinical interventions. (PsycInfo Database Record (c) 2023 APA, all rights reserved)",
+				"issue": "11",
+				"libraryCatalog": "APA PsycNet",
+				"pages": "1159-1183",
+				"publicationTitle": "Psychological Bulletin",
+				"shortTitle": "Expertise in emotion",
+				"volume": "147",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Alexithymia"
+					},
+					{
+						"tag": "Awareness"
+					},
+					{
+						"tag": "Conceptual Imagery"
+					},
+					{
+						"tag": "Creativity"
+					},
+					{
+						"tag": "Emotional Intelligence"
+					},
+					{
+						"tag": "Emotions"
+					},
+					{
+						"tag": "Experience Level"
+					},
+					{
+						"tag": "Experiences (Events)"
+					},
+					{
+						"tag": "Individual Differences"
 					}
 				],
 				"notes": [],

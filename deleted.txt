@@ -126,3 +126,5 @@ ba10b5bc-562f-11e1-b20d-a3084924019b # Nuclear Receptor Signaling no longer exis
 fe39e97d-7397-4f3f-a5f3-396a1a79213c # OpenJudis: New site just lists PDFs without metadata
 fc410e64-0252-4cd3-acb1-25e584775fa2 # National Library of Australia: Old site defunct as of 2019
 c0e6fda6-0ecd-e4f4-39ca-37a4de436e15 # Library Catalog (GEAC): No instances of this catalog system are still online as of 2021
+b38a44f4-b8af-4553-9edf-fba4d2598d6a # Springer Books: Site was merged into Springer Link
+9f52911f-e1b5-41f8-be66-b16982269e6a # HLAS (historical): Site moved, now uses Voyager 7

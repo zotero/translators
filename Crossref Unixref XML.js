@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2023-01-12 05:52:38"
+	"lastUpdated": "2024-03-23 02:00:53"
 }
 
 /*
@@ -231,7 +231,7 @@ function doImport() {
 		// Reference book entry
 		// Example: doi: 10.1002/14651858.CD002966.pub3
 		
-		// Entire edite book. This should _not_ be imported as bookSection
+		// Entire edited book. This should _not_ be imported as bookSection
 		// Example: doi: 10.4135/9781446200957
 		
 		var bookType = itemXML[0].hasAttribute("book_type") ? itemXML[0].getAttribute("book_type") : null;
@@ -287,7 +287,7 @@ function doImport() {
 		item.place = ZU.xpathText(metadataXML, 'publisher/publisher_place');
 	}
 	else if ((itemXML = ZU.xpath(doiRecord, 'crossref/standard')).length) {
-		item = new Zotero.Item("report");
+		item = new Zotero.Item('standard');
 		refXML = ZU.xpath(itemXML, 'standard_metadata');
 		metadataXML = ZU.xpath(itemXML, 'standard_metadata');
 	}
@@ -303,11 +303,9 @@ function doImport() {
 	}
 
 	else if ((itemXML = ZU.xpath(doiRecord, 'crossref/database')).length) {
-		item = new Zotero.Item("report"); // should be dataset
+		item = new Zotero.Item('dataset');
 		refXML = ZU.xpath(itemXML, 'dataset');
-		item.extra = "Type: dataset";
 		metadataXML = ZU.xpath(itemXML, 'database_metadata');
-		
 		var pubDate = ZU.xpath(refXML, 'database_date/publication_date');
 		if (!pubDate.length) pubDate = ZU.xpath(metadataXML, 'database_date/publication_date');
 		item.date = parseDate(pubDate);
@@ -330,9 +328,15 @@ function doImport() {
 	}
 	
 	else if ((itemXML = ZU.xpath(doiRecord, 'crossref/posted_content')).length) {
-		item = new Zotero.Item("report"); // should be preprint
-		item.type = ZU.xpathText(itemXML, "./@type");
-		item.institution = ZU.xpathText(itemXML, "group_title");
+		let type = ZU.xpathText(itemXML, "./@type");
+		if (type == "preprint") {
+			item = new Zotero.Item("preprint");
+			item.repository = ZU.xpathText(itemXML, "group_title");
+		}
+		else {
+			item = new Zotero.Item("blogPost");
+			item.blogTitle = ZU.xpathText(itemXML, "institution/institution_name");
+		}
 		item.date = parseDate(ZU.xpath(itemXML, "posted_date"));
 	}
 	
@@ -425,6 +429,9 @@ function doImport() {
 			item.extra = "DOI: " + item.DOI;
 		}
 	}
+	// I think grabbing the first license will usually make the most sense;
+	// not sure how many different options they are and how well labelled they are
+	item.rights = ZU.xpathText(refXML, 'program/license_ref[1]');
 	item.url = ZU.xpathText(refXML, 'doi_data/resource');
 	var title = ZU.xpath(refXML, 'titles[1]/title[1]')[0];
 	if (!title && metadataXML) {
@@ -436,7 +443,7 @@ function doImport() {
 		);
 		var subtitle = ZU.xpath(refXML, 'titles[1]/subtitle[1]')[0];
 		if (subtitle) {
-			item.title += ': ' + ZU.trimInternal(
+			item.title = item.title.replace(/:$/, '') + ': ' + ZU.trimInternal(
 				removeUnsupportedMarkup(innerXML(subtitle))
 			);
 		}
@@ -635,7 +642,7 @@ var testCases = [
 		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<doi_records>\n  <doi_record owner=\"10.31219\" timestamp=\"2018-11-13 07:19:46\">\n    <crossref>\n      <posted_content type=\"preprint\">\n        <group_title>Open Science Framework</group_title>\n        <contributors>\n          <person_name contributor_role=\"author\" sequence=\"first\">\n            <given_name>Steve</given_name>\n            <surname>Haroz</surname>\n          </person_name>\n        </contributors>\n        <titles>\n          <title>Open Practices in Visualization Research</title>\n        </titles>\n        <posted_date>\n          <month>07</month>\n          <day>03</day>\n          <year>2018</year>\n        </posted_date>\n        <item_number>osf.io/8ag3w</item_number>\n        <abstract>\n          <p>Two fundamental tenants of scientific research are that it can be scrutinized and built-upon. Both require that the collected data and supporting materials be shared, so others can examine, reuse, and extend them. Assessing the accessibility of these components and the paper itself can serve as a proxy for the reliability, replicability, and applicability of a field’s research. In this paper, I describe the current state of openness in visualization research and provide suggestions for authors, reviewers, and editors to improve open practices in the field. A free copy of this paper, the collected data, and the source code are available at https://osf.io/qf9na/</p>\n        </abstract>\n        <program>\n          <license_ref start_date=\"2018-07-03\">https://creativecommons.org/licenses/by/4.0/legalcode</license_ref>\n        </program>\n        <doi_data>\n          <doi>10.31219/osf.io/8ag3w</doi>\n          <resource>https://osf.io/8ag3w</resource>\n        </doi_data>\n      </posted_content>\n    </crossref>\n  </doi_record>\n</doi_records>\n",
 		"items": [
 			{
-				"itemType": "report",
+				"itemType": "preprint",
 				"title": "Open Practices in Visualization Research",
 				"creators": [
 					{
@@ -645,10 +652,10 @@ var testCases = [
 					}
 				],
 				"date": "2018-07-03",
+				"DOI": "10.31219/osf.io/8ag3w",
 				"abstractNote": "Two fundamental tenants of scientific research are that it can be scrutinized and built-upon. Both require that the collected data and supporting materials be shared, so others can examine, reuse, and extend them. Assessing the accessibility of these components and the paper itself can serve as a proxy for the reliability, replicability, and applicability of a field’s research. In this paper, I describe the current state of openness in visualization research and provide suggestions for authors, reviewers, and editors to improve open practices in the field. A free copy of this paper, the collected data, and the source code are available at https://osf.io/qf9na/",
-				"extra": "DOI: 10.31219/osf.io/8ag3w",
-				"institution": "Open Science Framework",
-				"reportType": "preprint",
+				"repository": "Open Science Framework",
+				"rights": "https://creativecommons.org/licenses/by/4.0/legalcode",
 				"url": "https://osf.io/8ag3w",
 				"attachments": [],
 				"tags": [],
@@ -756,6 +763,7 @@ var testCases = [
 				"language": "en",
 				"pages": "1-9",
 				"publisher": "Wiley",
+				"rights": "http://doi.wiley.com/10.1002/tdm_license_1.1",
 				"url": "https://onlinelibrary.wiley.com/doi/10.1002/9781119011071.iemp0172",
 				"attachments": [],
 				"tags": [],
@@ -827,6 +835,69 @@ var testCases = [
 				"publicationTitle": "D-Lib Magazine",
 				"url": "http://www.dlib.org/dlib/may16/peng/05peng.html",
 				"volume": "22",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<doi_records>\n\t<doi_record owner=\"10.1300\" timestamp=\"2017-11-02 16:28:36\">\n\t\t<crossref>\n\t\t\t<journal>\n\t\t\t\t<journal_metadata language=\"en\">\n\t\t\t\t\t<full_title>Journal of Hospitality &amp; Leisure Marketing</full_title>\n\t\t\t\t\t<abbrev_title>Journal of Hospitality &amp; Leisure Marketing</abbrev_title>\n\t\t\t\t\t<issn media_type=\"print\">1050-7051</issn>\n\t\t\t\t\t<issn media_type=\"electronic\">1541-0897</issn>\n\t\t\t\t</journal_metadata>\n\t\t\t\t<journal_issue>\n\t\t\t\t\t<publication_date media_type=\"online\">\n\t\t\t\t\t\t<month>10</month>\n\t\t\t\t\t\t<day>25</day>\n\t\t\t\t\t\t<year>2008</year>\n\t\t\t\t\t</publication_date>\n\t\t\t\t\t<publication_date media_type=\"print\">\n\t\t\t\t\t\t<month>05</month>\n\t\t\t\t\t\t<day>10</day>\n\t\t\t\t\t\t<year>1996</year>\n\t\t\t\t\t</publication_date>\n\t\t\t\t\t<journal_volume>\n\t\t\t\t\t\t<volume>3</volume>\n\t\t\t\t\t</journal_volume>\n\t\t\t\t\t<issue>4</issue>\n\t\t\t\t</journal_issue>\n\t\t\t\t<journal_article publication_type=\"full_text\">\n\t\t\t\t\t<titles>\n\t\t\t\t\t\t<title>Service Value Determination:</title>\n\t\t\t\t\t\t<subtitle>An Integrative Perspective</subtitle>\n\t\t\t\t\t</titles>\n\t\t\t\t\t<contributors>\n\t\t\t\t\t\t<person_name sequence=\"first\" contributor_role=\"author\">\n\t\t\t\t\t\t\t<given_name>Rama K.</given_name>\n\t\t\t\t\t\t\t<surname>Jayanti</surname>\n\t\t\t\t\t\t\t<affiliation>a Department of Marketing, James J. Nance College of Business, Cleveland State\n\t\t\t\t\t\t\t\tUniversity, Cleveland, OH, 44115\n\t\t\t\t\t\t\t</affiliation>\n\t\t\t\t\t\t</person_name>\n\t\t\t\t\t\t<person_name sequence=\"additional\" contributor_role=\"author\">\n\t\t\t\t\t\t\t<given_name>Amit K.</given_name>\n\t\t\t\t\t\t\t<surname>Ghosh</surname>\n\t\t\t\t\t\t\t<affiliation>a Department of Marketing, James J. Nance College of Business, Cleveland State\n\t\t\t\t\t\t\t\tUniversity, Cleveland, OH, 44115\n\t\t\t\t\t\t\t</affiliation>\n\t\t\t\t\t\t</person_name>\n\t\t\t\t\t</contributors>\n\t\t\t\t\t<publication_date media_type=\"online\">\n\t\t\t\t\t\t<month>10</month>\n\t\t\t\t\t\t<day>25</day>\n\t\t\t\t\t\t<year>2008</year>\n\t\t\t\t\t</publication_date>\n\t\t\t\t\t<publication_date media_type=\"print\">\n\t\t\t\t\t\t<month>05</month>\n\t\t\t\t\t\t<day>10</day>\n\t\t\t\t\t\t<year>1996</year>\n\t\t\t\t\t</publication_date>\n\t\t\t\t\t<pages>\n\t\t\t\t\t\t<first_page>5</first_page>\n\t\t\t\t\t\t<last_page>25</last_page>\n\t\t\t\t\t</pages>\n\t\t\t\t\t<publisher_item>\n\t\t\t\t\t\t<item_number item_number_type=\"sequence-number\">2</item_number>\n\t\t\t\t\t\t<identifier id_type=\"doi\">10.1300/J150v03n04_02</identifier>\n\t\t\t\t\t</publisher_item>\n\t\t\t\t\t<doi_data>\n\t\t\t\t\t\t<doi>10.1300/J150v03n04_02</doi>\n\t\t\t\t\t\t<resource>https://www.tandfonline.com/doi/full/10.1300/J150v03n04_02</resource>\n\t\t\t\t\t\t<collection property=\"crawler-based\">\n\t\t\t\t\t\t\t<item crawler=\"iParadigms\">\n\t\t\t\t\t\t\t\t<resource>https://www.tandfonline.com/doi/pdf/10.1300/J150v03n04_02</resource>\n\t\t\t\t\t\t\t</item>\n\t\t\t\t\t\t</collection>\n\t\t\t\t\t</doi_data>\n\t\t\t\t</journal_article>\n\t\t\t</journal>\n\t\t</crossref>\n\t</doi_record>\n</doi_records>",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Service Value Determination: An Integrative Perspective",
+				"creators": [
+					{
+						"creatorType": "author",
+						"firstName": "Rama K.",
+						"lastName": "Jayanti"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Amit K.",
+						"lastName": "Ghosh"
+					}
+				],
+				"date": "1996-05-10",
+				"DOI": "10.1300/J150v03n04_02",
+				"ISSN": "1050-7051, 1541-0897",
+				"issue": "4",
+				"journalAbbreviation": "Journal of Hospitality & Leisure Marketing",
+				"language": "en",
+				"pages": "5-25",
+				"publicationTitle": "Journal of Hospitality & Leisure Marketing",
+				"url": "https://www.tandfonline.com/doi/full/10.1300/J150v03n04_02",
+				"volume": "3",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<doi_records>\r\n  <doi_record owner=\"10.59350\" timestamp=\"2023-10-25 13:27:18\">\r\n    <crossref>\r\n      <posted_content type=\"other\" language=\"en\">\r\n        <group_title>Social sciences</group_title>\r\n        <contributors>\r\n          <person_name contributor_role=\"author\" sequence=\"first\">\r\n            <given_name>Sebastian</given_name>\r\n            <surname>Karcher</surname>\r\n          </person_name>\r\n        </contributors>\r\n        <titles>\r\n          <title>QDR Creates New Course on Data Management for CITI</title>\r\n        </titles>\r\n        <posted_date>\r\n          <month>3</month>\r\n          <day>31</day>\r\n          <year>2023</year>\r\n        </posted_date>\r\n        <institution>\r\n          <institution_name>QDR Blog</institution_name>\r\n        </institution>\r\n        <item_number item_number_type=\"uuid\">e1574118b63a40b0b56a605bf5e99c48</item_number>\r\n        <program name=\"AccessIndicators\">\r\n          <license_ref applies_to=\"vor\">https://creativecommons.org/licenses/by/4.0/legalcode</license_ref>\r\n          <license_ref applies_to=\"tdm\">https://creativecommons.org/licenses/by/4.0/legalcode</license_ref>\r\n        </program>\r\n        <doi_data>\r\n          <doi>10.59350/5znft-x4j11</doi>\r\n          <resource>https://qdr.syr.edu/qdr-blog/qdr-creates-new-course-data-management-citi</resource>\r\n          <collection property=\"text-mining\">\r\n            <item>\r\n              <resource mime_type=\"text/html\">https://qdr.syr.edu/qdr-blog/qdr-creates-new-course-data-management-citi</resource>\r\n            </item>\r\n          </collection>\r\n        </doi_data>\r\n        <citation_list />\r\n      </posted_content>\r\n    </crossref>\r\n  </doi_record>\r\n</doi_records>",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "QDR Creates New Course on Data Management for CITI",
+				"creators": [
+					{
+						"creatorType": "author",
+						"firstName": "Sebastian",
+						"lastName": "Karcher"
+					}
+				],
+				"date": "2023-3-31",
+				"blogTitle": "QDR Blog",
+				"extra": "DOI: 10.59350/5znft-x4j11",
+				"language": "en",
+				"rights": "https://creativecommons.org/licenses/by/4.0/legalcode",
+				"url": "https://qdr.syr.edu/qdr-blog/qdr-creates-new-course-data-management-citi",
 				"attachments": [],
 				"tags": [],
 				"notes": [],

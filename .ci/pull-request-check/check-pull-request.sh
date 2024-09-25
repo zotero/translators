@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+echo "::group::Setup"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT_DIR="$( dirname "$DIR" )"
 
@@ -28,10 +29,12 @@ else
 fi
 
 export ZOTERO_REPOSITORY_URL="http://localhost:8085/"
+export CHROME_EXTENSION_KEY="MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDllBS5q+Z9T9tPgYwRN+/8T9wzyjo9tRo03Wy8zP2DQ5Iy+3q0Tjq2vKXGiMCxC/ZVuEMC68Ekv+jNT43VxPbEXI4dzpK1GMBqPJpAcEOB8B1ROBouQMbGGTG7fOdQVlmpdTTPVndVwysJ02CrDMn96IG2ytOq2PO7GR2xleCudQIDAQAB"
 ./build.sh -p b -d
 cd ..
 
 npm explore chromedriver -- npm run install --detect_chromedriver_version
+echo "::endgroup::"
 
 get_translators_to_check
 ./selenium-test.js "$TRANSLATORS_TO_CHECK"

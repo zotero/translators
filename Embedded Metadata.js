@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-16 15:18:29"
+	"lastUpdated": "2024-06-13 15:58:28"
 }
 
 /*
@@ -179,12 +179,8 @@ function getContentText(doc, name, strict, all) {
 }
 
 function getContent(doc, name, strict) {
-	var xpath = '/x:html/'
-		+ (
-			exports.searchForMetaTagsInBody
-				? '*[local-name() = "head" or local-name() = "body"]'
-				: 'x:head' // default
-		)
+	var xpath = '/x:html'
+		+ '/*[local-name() = "head" or local-name() = "body"]'
 		+ '/x:meta['
 		+ (strict ? '@name' : 'substring(@name, string-length(@name)-' + (name.length - 1) + ')')
 		+ '="' + name + '"]/';
@@ -240,23 +236,10 @@ function detectWeb(doc, url) {
 function init(doc, url, callback, forceLoadRDF) {
 	getPrefixes(doc);
 
-	let metaSelector
-		= exports.searchForMetaTagsInBody
-			? "head > meta, body > meta"
-			: "head > meta"; // default
-	var metaTags = doc.querySelectorAll(metaSelector);
-	Z.debug("Embedded Metadata: found " + metaTags.length + " meta tags.");
+	var metaTags = doc.querySelectorAll("meta");
+	Z.debug("Embedded Metadata: found " + metaTags.length + " meta tags");
 	if (forceLoadRDF /* check if this is called from doWeb */ && !metaTags.length) {
-		if (!exports.searchForMetaTagsInBody && doc.head) {
-			Z.debug(doc.head.innerHTML
-				.replace(/<style[^<]+(?:<\/style>|\/>)/ig, '')
-				.replace(/<link[^>]+>/ig, '')
-				.replace(/(?:\s*[\r\n]\s*)+/g, '\n')
-			);
-		}
-		else {
-			Z.debug("Embedded Metadata: No <meta> tag found in body or head tag");
-		}
+		Z.debug("Embedded Metadata: No meta tags found");
 	}
 
 	var hwType, hwTypeGuess, generatorType, statements = [];
@@ -693,7 +676,8 @@ function addLowQualityMetadata(doc, newItem) {
 			Array.from(doc.querySelectorAll('meta[name="author" i], meta[property="author" i]'))
 				.map(authorNode => authorNode.content)
 				.filter(content => content && /[^\s,-.;]/.test(content)));
-		if (w3authors.size) {
+		// Condé Nast is a company, not an author
+		if (w3authors.size && !(w3authors.size == 1 && w3authors.has("Condé Nast"))) {
 			for (let author of w3authors) {
 				newItem.creators.push(ZU.cleanAuthor(author, "author"));
 			}
@@ -1011,9 +995,6 @@ var exports = {
 	detectWeb: detectWeb,
 	addCustomFields: addCustomFields,
 	itemType: false,
-	// workaround for meta tags in body caused by parsing invalid HTML; only
-	// use as a last resort
-	searchForMetaTagsInBody: false,
 	// activate/deactivate splitting tags in final data cleanup when they contain commas or semicolons
 	splitTags: true,
 	fixSchemaURI: setPrefixRemap
@@ -2035,6 +2016,37 @@ var testCases = [
 				"language": "en",
 				"url": "https://www.nhs.uk/conditions/baby/babys-development/behaviour/separation-anxiety/",
 				"websiteTitle": "nhs.uk",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.tatler.com/article/clodagh-mckenna-hon-harry-herbert-wedding-george-osborne-highclere-castle",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "The Queen’s godson married glamorous Irish chef Clodagh McKenna at Highclere this weekend",
+				"creators": [
+					{
+						"firstName": "Annabel",
+						"lastName": "Sampson",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-08-16T09:54:36.000Z",
+				"abstractNote": "The Hon Harry Herbert, son of the 7th Earl of Carnarvon, married Clodagh McKenna in a fairytale wedding attended by everyone from George Osborne and his fiancée, Thea Rogers, to Laura Whitmore",
+				"language": "en-GB",
+				"url": "https://www.tatler.com/article/clodagh-mckenna-hon-harry-herbert-wedding-george-osborne-highclere-castle",
+				"websiteTitle": "Tatler",
 				"attachments": [
 					{
 						"title": "Snapshot",

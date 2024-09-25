@@ -1,7 +1,7 @@
 {
 	"translatorID": "d3b1d34c-f8a1-43bb-9dd6-27aa6403b217",
 	"label": "YouTube",
-	"creator": "Sean Takats, Michael Berkowitz, Matt Burton and Rintze Zelle",
+	"creator": "Sean Takats, Michael Berkowitz, Matt Burton, Rintze Zelle, and Geoff Banh",
 	"target": "^https?://([^/]+\\.)?youtube\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-01-17 19:11:42"
+	"lastUpdated": "2024-04-05 04:04:37"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2015-2019 Sean Takats, Michael Berkowitz, Matt Burton and Rintze Zelle
+	Copyright © 2015-2024 Sean Takats, Michael Berkowitz, Matt Burton, Rintze Zelle, and Geoff Banh
 	
 	This file is part of Zotero.
 
@@ -36,7 +36,7 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.search(/\/watch\?(?:.*)\bv=[0-9a-zA-Z_-]+/) != -1) {
+	if (/\/watch\?(?:.*)\bv=[0-9a-zA-Z_-]+/.test(url)) {
 		return "videoRecording";
 	}
 	// Search results
@@ -87,62 +87,89 @@ function doWeb(doc, url) {
 	}
 }
 
+function getMetaContent(doc, attrName, value) {
+	return attr(doc, 'meta[' + attrName + '="' + value + '"]', 'content');
+}
+
 function scrape(doc, url) {
 	var item = new Zotero.Item("videoRecording");
-
-	let jsonLD;
-	try {
-		jsonLD = JSON.parse(text(doc, 'script[type="application/ld+json"]'));
-	}
-	catch (e) {
-		jsonLD = {};
-	}
-
-	/* YouTube won't update the meta tags for the user,
-	 * if they open e.g. a suggested video in the same tab.
-	 * Thus we scrape them from screen instead.
-	 */
-
-	item.title = text(doc, '#info-contents h1.title') // Desktop
-		|| text(doc, '#title')
-		|| text(doc, '.slim-video-information-title'); // Mobile
-	// try to scrape only the canonical url, excluding additional query parameters
-	item.url = url.replace(/^(.+\/watch\?v=[0-9a-zA-Z_-]+).*/, "$1").replace('m.youtube.com', 'www.youtube.com');
-	item.runningTime = text(doc, '#movie_player .ytp-time-duration') // Desktop
-		|| text(doc, '.ytm-time-display .time-second'); // Mobile after unmute
-	if (!item.runningTime && jsonLD.duration) { // Mobile before unmute
-		let duration = parseInt(jsonLD.duration.substring(2));
-		let hours = String(Math.floor(duration / 3600)).padStart(2, '0');
-		let minutes = String(Math.floor(duration % 3600 / 60)).padStart(2, '0');
-		let seconds = String(duration % 60).padStart(2, '0');
-		if (duration >= 3600) { // Include hours
-			item.runningTime = `${hours}:${minutes}:${seconds}`;
+	if (!Zotero.isServer) {
+		let jsonLD;
+		try {
+			jsonLD = JSON.parse(text(doc, 'script[type="application/ld+json"]'));
 		}
-		else { // Just include minutes and seconds
-			item.runningTime = `${minutes}:${seconds}`;
+		catch (e) {
+			jsonLD = {};
 		}
-	}
 
-	item.date = ZU.strToISO(
-		text(doc, '#info-strings yt-formatted-string') // Desktop
+		/* YouTube won't update the meta tags for the user,
+		 * if they open e.g. a suggested video in the same tab.
+		 * Thus we scrape them from screen instead.
+		 */
+
+		item.title = text(doc, '#info-contents h1.title') // Desktop
+			|| text(doc, '#title')
+			|| text(doc, '.slim-video-information-title'); // Mobile
+		// try to scrape only the canonical url, excluding additional query parameters
+		item.url = url.replace(/^(.+\/watch\?v=[0-9a-zA-Z_-]+).*/, "$1").replace('m.youtube.com', 'www.youtube.com');
+		item.runningTime = text(doc, '#movie_player .ytp-time-duration') // Desktop
+			|| text(doc, '.ytm-time-display .time-second'); // Mobile after unmute
+		if (!item.runningTime && jsonLD.duration) { // Mobile before unmute
+			let duration = parseInt(jsonLD.duration.substring(2));
+			let hours = String(Math.floor(duration / 3600)).padStart(2, '0');
+			let minutes = String(Math.floor(duration % 3600 / 60)).padStart(2, '0');
+			let seconds = String(duration % 60).padStart(2, '0');
+			if (duration >= 3600) { // Include hours
+				item.runningTime = `${hours}:${minutes}:${seconds}`;
+			}
+			else { // Just include minutes and seconds
+				item.runningTime = `${minutes}:${seconds}`;
+			}
+		}
+
+		item.date = ZU.strToISO(
+			text(doc, '#info-strings yt-formatted-string') // Desktop
 			|| attr(doc, 'ytm-factoid-renderer:last-child > div', 'aria-label') // Mobile if description has been opened
-	) || jsonLD.uploadDate; // Mobile on initial page load
+		) || jsonLD.uploadDate; // Mobile on initial page load
 
-	var author = text(doc, '#meta-contents #text-container .ytd-channel-name') // Desktop
-		|| text(doc, '#text-container .ytd-channel-name')
-		|| text(doc, '.slim-owner-channel-name'); // Mobile
-	if (author) {
-		item.creators.push({
-			lastName: author,
-			creatorType: "author",
-			fieldMode: 1
-		});
+		var author = text(doc, '#meta-contents #text-container .ytd-channel-name') // Desktop
+			|| text(doc, '#upload-info #text-container .ytd-channel-name')
+			|| text(doc, '.slim-owner-channel-name'); // Mobile
+		if (author) {
+			item.creators.push({
+				lastName: author,
+				creatorType: "author",
+				fieldMode: 1
+			});
+		}
+		var description = text(doc, '#description .content')
+			|| text(doc, '#description')
+			|| text(doc, 'ytm-expandable-video-description-body-renderer .collapsed-string-container');
+		if (description) {
+			item.abstractNote = description;
+		}
 	}
-	var description = text(doc, '#description .content')
-		|| text(doc, '#description')
-		|| text(doc, 'ytm-expandable-video-description-body-renderer .collapsed-string-container');
-	if (description) {
-		item.abstractNote = description;
+	else {
+		// required for translator server, which doesn't load the page's JS
+		item.title = getMetaContent(doc, 'name', 'title');
+		item.url = getMetaContent(doc, 'property', 'og:url');
+		let isoDuration = getMetaContent(doc, 'itemprop', 'duration');
+		// Convert ISO 8601 duration to HH:MM:SS
+		item.runningTime = isoDuration.replace(/^PT/, '').replace(/H/, ':').replace(/M/, ':')
+.replace(/S/, '');
+		item.date = ZU.strToISO(getMetaContent(doc, 'itemprop', 'uploadDate'));
+		let author = attr(doc, 'link[itemprop="name"]', 'content');
+		if (author) {
+			item.creators.push({
+				lastName: author,
+				creatorType: "author",
+				fieldMode: 1
+			});
+		}
+		let description = getMetaContent(doc, 'name', 'description');
+		if (description) {
+			item.abstractNote = description;
+		}
 	}
 
 	item.complete();

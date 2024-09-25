@@ -2,14 +2,14 @@
 	"translatorID": "4a3820a3-a7bd-44a1-8711-acf7b57d2c37",
 	"label": "Web of Science Nextgen",
 	"creator": "Abe Jellinek",
-	"target": "^https://www\\.webofscience\\.com/",
+	"target": "^https://(www\\.webofscience\\.com|webofscience\\.clarivate\\.cn)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-12 14:55:21"
+	"lastUpdated": "2024-04-03 05:05:34"
 }
 
 /*
@@ -145,8 +145,6 @@ function scrape(doc, url) {
 		);
 	});
 }
-
-
 
 
 function getItemID(url) {
@@ -377,6 +375,97 @@ var testCases = [
 				"url": "https://www.webofscience.com/wos/alldb/full-record/DIIDW:202205717D",
 				"attachments": [],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://webofscience.clarivate.cn/wos/alldb/full-record/WOS:000454372400003",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Histopathology of Alcohol-Related Liver Diseases",
+				"creators": [
+					{
+						"firstName": "Nitzan C.",
+						"lastName": "Roth",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jia",
+						"lastName": "Qin",
+						"creatorType": "author"
+					}
+				],
+				"date": "FEB 2019",
+				"DOI": "10.1016/j.cld.2018.09.001",
+				"ISSN": "1089-3261, 1557-8224",
+				"abstractNote": "Excessive alcohol consumption can lead to a spectrum of liver histopathology, including steatosis, steatohepatitis, foamy degeneration, fatty liver with cholestasis, and cirrhosis. Although variability in sampling and pathologist interpretation are of some concern, liver biopsy remains the gold standard for distinguishing between steatohepatitis and noninflammatory histologic patterns of injury that can also cause the clinical syndrome of alcohol-related hepatitis. Liver biopsy is not routinely recommended to ascertain a diagnosis of alcohol-related liver disease in patients with an uncertain alcohol history, because the histologic features of alcohol-related liver diseases can be found in other diseases, including nonalcoholic steatohepatitis and drug-induced liver injury.",
+				"extra": "Web of Science ID: WOS:000454372400003",
+				"issue": "1",
+				"journalAbbreviation": "Clin. Liver Dis.",
+				"language": "English",
+				"libraryCatalog": "Clarivate Analytics Web of Science",
+				"pages": "11-+",
+				"publicationTitle": "CLINICS IN LIVER DISEASE",
+				"url": "https://linkinghub.elsevier.com/retrieve/pii/S1089326118300771",
+				"volume": "23",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Alcohol-related liver disease"
+					},
+					{
+						"tag": "Alcoholic fatty liver with cholestasis"
+					},
+					{
+						"tag": "Alcoholic foamy degeneration"
+					},
+					{
+						"tag": "Alcoholic hepatitis"
+					},
+					{
+						"tag": "Alcoholic steatohepatitis"
+					},
+					{
+						"tag": "BIOPSY"
+					},
+					{
+						"tag": "CLINICAL-TRIALS"
+					},
+					{
+						"tag": "DIAGNOSIS"
+					},
+					{
+						"tag": "FAILURE"
+					},
+					{
+						"tag": "FATTY LIVER"
+					},
+					{
+						"tag": "FOAMY DEGENERATION"
+					},
+					{
+						"tag": "Histology"
+					},
+					{
+						"tag": "Liver biopsy"
+					},
+					{
+						"tag": "PROGNOSIS"
+					},
+					{
+						"tag": "SAMPLING VARIABILITY"
+					},
+					{
+						"tag": "SCORING SYSTEM"
+					},
+					{
+						"tag": "STEATOHEPATITIS"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}

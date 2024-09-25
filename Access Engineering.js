@@ -2,14 +2,14 @@
 	"translatorID": "d120a8a7-9d45-446e-8c18-ad9ef0a6bf47",
 	"label": "Access Engineering",
 	"creator": "Vinoth K - highwirepress.com",
-	"target": "^https?://www\\.accessengineeringlibrary\\.com/content/(book|chapter|case-study|video|calculator|tutorial)",
+	"target": "^https?://www\\.accessengineeringlibrary\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-07 08:48:13"
+	"lastUpdated": "2023-09-09 09:42:36"
 }
 
 /*
@@ -97,13 +97,16 @@ function scrape(doc, url) {
 		if (edition) item.edition = edition;
 
 		// Author
-		let author = ZU.xpath(doc, '//ul[@class="contributor-list"]//li//a');
-		if (author.length > 0) {
-			// Handled using data attribute
-			for (let i = 0; i < author.length; i++) {
-				item.creators[i].firstName = author[i].getAttribute('data-firstnames');
-				item.creators[i].lastName = author[i].getAttribute('data-surname');
-			}
+		// Some of old pages not having firstname, lastname seperation in markup and ignore if not
+		let author = doc.querySelectorAll("ul.contributor-list > [data-firstnames]");
+		item.creators = [];
+		for (let i = 0; i < author.length; i++) {
+			let creatorData = author[i].dataset;
+			item.creators.push({
+				firstName: creatorData.firstnames,
+				lastName: creatorData.surname,
+				creatorType: creatorData.authortype
+			});
 		}
 
 		// Abstract
@@ -116,12 +119,7 @@ function scrape(doc, url) {
 	translator.getTranslatorObject(function (trans) {
 		// Detect web not get trigger for scape EM translator
 		// - so wll fill those in manually.
-		if (detectWeb(doc, url)) {
-			trans.itemType = detectWeb(doc, url);
-		}
-		trans.addCustomFields({
-			citation_book_title: "bookTitle"
-		});
+		trans.itemType = detectWeb(doc, url);
 		trans.doWeb(doc, url);
 	});
 }
@@ -130,26 +128,51 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.accessengineeringlibrary.com/content/book/9781259860386/",
+		"url": "https://www.accessengineeringlibrary.com/content/book/9781259860225",
 		"items": [
 			{
 				"itemType": "book",
-				"title": "3D Printer Projects for Makerspaces",
+				"title": "Handbook of Environmental Engineering",
 				"creators": [
 					{
-						"firstName": "Lydia Sloan",
-						"lastName": "Cline",
-						"creatorType": "author"
+						"firstName": "Rao Y.",
+						"lastName": "Surampalli",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Tian C.",
+						"lastName": "Zhang",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Satinder Kaur",
+						"lastName": "Brar",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Krishnamoorthy",
+						"lastName": "Hegde",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Rama",
+						"lastName": "Pulicharla",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Mausam",
+						"lastName": "Verma",
+						"creatorType": "editor"
 					}
 				],
-				"date": "2017",
-				"ISBN": "9781259860386",
-				"abstractNote": "Learn to model and print 3D designs—no experience required!This easy-to-follow guide features twenty 3D printing projects for makers of all skill levels to enjoy. Written in a tutorial, step-by-step manner, 3D Printer Projects for Makerspaces shows how to use Fusion 360, SketchUp, Meshmixer, Remake, and Inkscape to create fun and useful things. Scanning, slicers, silicone molds, settings, and build plate orientation are also covered, as well as post-processing methods that will make your prints really pop!Inside, you9ll learn to model, analyze, and print a:• Phone case• Coin bank• Art stencil• Cookie cutter• Cookie dunker• Personalized key fob• Lens cap holder• Lithophane night-light• Pencil cup with applied sketch• Business card with QR code• Bronze pendant• Soap mold• Hanging lampshade• Scanned Buddha charm• And more!",
+				"date": "2018",
+				"ISBN": "9781259860225",
+				"abstractNote": "A complete guide to environmental regulations and remediation.This practical resource offers thorough coverage of current environmental issues and policies along with step-by-step remediation procedures. With contributions from dozens of  industry-recognized experts, Handbook of Environmental Engineering features information on all segments of the market—including water and air quality and hazardous waste—and enables you to ensure compliance with all applicable regulations. You will get details about sensors, monitoring, and toxicity treatment and controls as well as waste management and safe disposal. Real-world examples demonstrate how to apply techniques and achieve compliance, while environmental impact assessments and measurement data enhance the book9s utility.Coverage includes:• Environmental legislation• Environmental impact assessments• Air pollution control and management• Potable water treatment• Wastewater treatment and reuse• Solid waste management• Hazardous waste management• Emerging wastes in the environment• Environmental monitoring and measurements",
 				"edition": "1st Edition",
 				"language": "en",
 				"libraryCatalog": "www.accessengineeringlibrary.com",
 				"publisher": "McGraw-Hill Education",
-				"url": "https://www.accessengineeringlibrary.com/content/book/9781259860386",
+				"url": "https://www.accessengineeringlibrary.com/content/book/9781259860225",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -164,28 +187,61 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.accessengineeringlibrary.com/content/book/9781259860386/chapter/chapter12",
+		"url": "https://www.accessengineeringlibrary.com/content/book/9781259860225/toc-chapter/chapter3/section/section1",
 		"items": [
 			{
 				"itemType": "bookSection",
-				"title": "PROJECT 12: Lithophane Night-Light",
+				"title": "CHAPTER PRELIMINARIES",
 				"creators": [
 					{
-						"firstName": "Lydia Sloan",
-						"lastName": "Cline",
+						"firstName": "Ashok",
+						"lastName": "Kumar",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Hamid",
+						"lastName": "Omidvarborna",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rao Y.",
+						"lastName": "Surampalli",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Tian C.",
+						"lastName": "Zhang",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Satinder Kaur",
+						"lastName": "Brar",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Krishnamoorthy",
+						"lastName": "Hegde",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Rama",
+						"lastName": "Pulicharla",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Mausam",
+						"lastName": "Verma",
+						"creatorType": "editor"
 					}
 				],
-				"date": "2017",
-				"ISBN": "9781259860386",
-				"abstractNote": "Learn to model and print 3D designs—no experience required!This easy-to-follow guide features twenty 3D printing projects for makers of all skill levels to enjoy. Written in a tutorial, step-by-step manner, 3D Printer Projects for Makerspaces shows how to use Fusion 360, SketchUp, Meshmixer, Remake, and Inkscape to create fun and useful things. Scanning, slicers, silicone molds, settings, and build plate orientation are also covered, as well as post-processing methods that will make your prints really pop!Inside, you'll learn to model, analyze, and print a:• Phone case• Coin bank• Art stencil• Cookie cutter• Cookie dunker• Personalized key fob• Lens cap holder• Lithophane night-light• Pencil cup with applied sketch• Business card with QR code• Bronze pendant• Soap mold• Hanging lampshade• Scanned Buddha charm• And more!",
-				"bookTitle": "3D Printer Projects for Makerspaces",
-				"edition": "1st Edition",
+				"date": "2018",
+				"ISBN": "9781259860225",
+				"abstractNote": "A complete guide to environmental regulations and remediation.This practical resource offers thorough coverage of current environmental issues and policies along with step-by-step remediation procedures. With contributions from dozens of  industry-recognized experts, Handbook of Environmental Engineering features information on all segments of the market—including water and air quality and hazardous waste—and enables you to ensure compliance with all applicable regulations. You will get details about sensors, monitoring, and toxicity treatment and controls as well as waste management and safe disposal. Real-world examples demonstrate how to apply techniques and achieve compliance, while environmental impact assessments and measurement data enhance the book's utility.Coverage includes:• Environmental legislation• Environmental impact assessments• Air pollution control and management• Potable water treatment• Wastewater treatment and reuse• Solid waste management• Hazardous waste management• Emerging wastes in the environment• Environmental monitoring and measurements",
+				"bookTitle": "Handbook of Environmental Engineering",
 				"language": "en",
 				"libraryCatalog": "www.accessengineeringlibrary.com",
 				"publisher": "McGraw-Hill Education",
-				"shortTitle": "PROJECT 12",
-				"url": "https://www.accessengineeringlibrary.com/content/book/9781259860386/chapter/chapter12",
+				"url": "https://www.accessengineeringlibrary.com/content/book/9781259860225/toc-chapter/chapter3/section/section1",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -200,24 +256,19 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.accessengineeringlibrary.com/content/video/V4768153299001",
+		"url": "https://www.accessengineeringlibrary.com/content/video/V4005352521001",
 		"items": [
 			{
 				"itemType": "videoRecording",
-				"title": "10% Infill and a Bridge",
-				"creators": [
-					{
-						"firstName": "Lydia",
-						"lastName": "Cline",
-						"creatorType": "author"
-					}
-				],
-				"date": "2016",
-				"abstractNote": "This video shows an item being printed with a 10% infill and includes a bridge.",
+				"title": "123D Design: Cut Text Through a Plane",
+				"creators": [],
+				"date": "2014",
+				"abstractNote": "This video shows how to cut text through a plane with Combine/Subtract.",
 				"language": "en",
 				"libraryCatalog": "www.accessengineeringlibrary.com",
+				"shortTitle": "123D Design",
 				"studio": "McGraw-Hill Education",
-				"url": "https://www.accessengineeringlibrary.com/content/video/V4768153299001",
+				"url": "https://www.accessengineeringlibrary.com/content/video/V4005352521001",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -232,23 +283,23 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.accessengineeringlibrary.com/content/calculator/S0018_Analysis_of_AC_and_DC_Circuits_Basic_Calculations",
+		"url": "https://www.accessengineeringlibrary.com/content/calculator/S0071_Basic_Transformer_Calculations",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Analysis of A.C. and D.C. Circuits - Basic Calculations",
+				"title": "Basic Transformer Calculations",
 				"creators": [
 					{
-						"firstName": "William",
-						"lastName": "Prudhomme",
+						"firstName": "Bhagyalakshmi",
+						"lastName": "Kerekare",
 						"creatorType": "author"
 					}
 				],
-				"date": "2018/12/13/",
-				"abstractNote": "Software simulation programs are generally used for modeling and designing complex electronic circuits and applications, but frequently only a basic calculation is needed to solve an immediate design problem or to calculate the value of a specific circuit element. This Excel workbook addresses this need by automating the calculation of over 70 basic electronics formulas in direct current (d.c.) and alternating current (a.c.) circuits and applications.",
+				"date": "2022/06/25/",
+				"abstractNote": "This Excel workbook contains four worksheets. The first worksheet covers the basic concepts of single phase transformer such as turns ratio, primary current, secondary current, primary voltage, secondary voltage, and transformer ratio calculations. The second worksheet covers the basic concepts of power, efficiency, primary/secondary EMF and transformer rating calculations. The third worksheet covers the basic concepts of three phase transformers, highlighting the star and delta connections. Calculations are done for phase voltage, phase current, line voltage, and line current for star and delta connections. The fourth worksheet covers the basic concepts kVA Ratings, 3-phase primary, and secondary full load current 3-phase voltage calculations.",
 				"language": "en",
 				"libraryCatalog": "www.accessengineeringlibrary.com",
-				"url": "https://www.accessengineeringlibrary.com/content/calculator/S0018_Analysis_of_AC_and_DC_Circuits_Basic_Calculations",
+				"url": "https://www.accessengineeringlibrary.com/content/calculator/S0071_Basic_Transformer_Calculations",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -295,23 +346,23 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.accessengineeringlibrary.com/content/tutorial/T0002_Open_Channel_Flow_Calculations_with_the_Manning_Equation",
+		"url": "https://www.accessengineeringlibrary.com/content/tutorial/T0004_Partially_Full_Pipe_Flow_Calculations_Using_Excel_Spreadsheets",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Open Channel Flow Calculations with the Manning Equation using Excel Spreadsheets",
+				"title": "Partially Full Pipe Flow Calculations Using Excel Spreadsheets",
 				"creators": [
 					{
-						"firstName": "Harlan",
-						"lastName": "H. Bengtson",
+						"firstName": "Harlan H.",
+						"lastName": "Bengtson",
 						"creatorType": "author"
 					}
 				],
-				"date": "2014-02-01",
-				"abstractNote": "This tutorial teaches the Manning equation and its use for uniform open channel flow calculations, including the hydraulic radius, Manning roughness coefficient, and normal depth. There are example problems and illustrations show how to use spreadsheets for the calculations.",
+				"date": "2014/02/01/",
+				"abstractNote": "This tutorial provides discussion of, and illustration by, examples for use of an Excel spreadsheet for making a variety of calculations for the flow of water in a partially full circular pipe using the Manning Equation. Equations for calculating area, wetted perimeter, and hydraulic radius for partially full pipe flow are included in this tutorial along with a brief review of the Manning Equation and discussion of its use to calculate a) the flow rate in a given pipe (given diameter, slope, &amp; Manning roughness) at a specified depth of flow, b) the required diameter for a specified flow rate at a target percent full in a given pipe, and c) the normal depth (depth of flow) for a specified flow rate in a given pipe. This includes presentation and discussion of the equations for the calculations, example calculations, and screenshots of spreadsheets to facilitate the calculations.",
 				"language": "en",
 				"libraryCatalog": "www.accessengineeringlibrary.com",
-				"url": "https://www.accessengineeringlibrary.com/content/tutorial/T0002_Open_Channel_Flow_Calculations_with_the_Manning_Equation",
+				"url": "https://www.accessengineeringlibrary.com/content/tutorial/T0004_Partially_Full_Pipe_Flow_Calculations_Using_Excel_Spreadsheets",
 				"attachments": [
 					{
 						"title": "Snapshot",

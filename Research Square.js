@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-19 15:56:27"
+	"lastUpdated": "2024-04-01 19:07:11"
 }
 
 /*
@@ -37,8 +37,8 @@
 
 
 function detectWeb(doc, url) {
-	if (url.includes('/article/') && doc.querySelector('.page-article')) {
-		return "report";
+	if (url.includes('/article/') && doc.querySelector('[name="citation_title"]')) {
+		return "preprint";
 	}
 	else if (getSearchResults(doc, true)) {
 		return "multiple";
@@ -61,65 +61,69 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) ZU.processDocuments(Object.keys(items), scrape);
-		});
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
-function scrape(doc, url) {
+async function scrape(doc, url = doc.location.href) {
 	let bareURL = url.replace(/[?#].*/, '');
 	let risURL = bareURL
 		.replace('researchsquare.com/article', 'researchsquare.com/api/article')
 		+ '.ris';
 	let pdfURL = bareURL + '.pdf';
 	
-	ZU.doGet(risURL, function (text) {
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		translator.setString(text);
-		translator.setHandler("itemDone", function (obj, item) {
-			if (!item.title) {
-				// ...no title in the RIS sometimes? odd
-				item.title = attr(doc, 'meta[property="og:title"]', 'content');
-			}
+	let text = await requestText(risURL);
+	var translator = Zotero.loadTranslator("import");
+	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+	translator.setString(text);
+	translator.setHandler("itemDone", function (obj, item) {
+		if (!item.title) {
+			// ...no title in the RIS sometimes? odd
+			item.title = attr(doc, 'meta[property="og:title"]', 'content');
+		}
 			
-			item.itemType = 'report';
-			if (!item.extra || !/^type: article/im.test(item.extra)) {
-				item.extra = (item.extra || '') + '\nType: article';
-			}
+		item.itemType = 'preprint';
 			
-			// research square assigns preprints publication titles based on
-			// where they've been submitted to, which isn't really right from
-			// zotero's point of view
-			delete item.publicationTitle;
-			delete item.journalAbbreviation;
-			
-			item.attachments.push({
-				url: pdfURL,
-				title: "Full Text PDF",
-				mimeType: "application/pdf"
-			});
-			
-			for (let creator of item.creators) {
-				if (creator.fieldMode == 1) {
-					delete creator.fieldMode;
-					Object.assign(creator,
-						ZU.cleanAuthor(creator.lastName, creator.creatorType));
-				}
-			}
-			
-			item.url = bareURL;
-			
-			item.complete();
+		// research square assigns preprints publication titles based on
+		// where they've been submitted to, which isn't really right from
+		// zotero's point of view
+		delete item.publicationTitle;
+		delete item.journalAbbreviation;
+		item.repository = "Research Square";
+		item.attachments.push({
+			url: pdfURL,
+			title: "Full Text PDF",
+			mimeType: "application/pdf"
 		});
-		translator.translate();
+			
+		for (let creator of item.creators) {
+			if (creator.fieldMode == 1) {
+				delete creator.fieldMode;
+				Object.assign(creator,
+					ZU.cleanAuthor(creator.lastName, creator.creatorType));
+			}
+		}
+			
+		item.url = bareURL;
+
+		// RIS contains only the DY tag set to the retrieval date, not the publication one
+		let pubDate = attr(doc, "meta[name='citation_publication_date']", "content");
+		if (pubDate) {
+			item.date = pubDate;
+		}
+			
+		item.complete();
 	});
+	translator.translate();
 }
 
 /** BEGIN TEST CASES **/
@@ -129,7 +133,7 @@ var testCases = [
 		"url": "https://www.researchsquare.com/article/rs-629724/v1",
 		"items": [
 			{
-				"itemType": "report",
+				"itemType": "preprint",
 				"title": "Peptide formation as on the early Earth: from amino acid mixtures to peptides in sulphur dioxide",
 				"creators": [
 					{
@@ -163,9 +167,9 @@ var testCases = [
 						"firstName": "Christoph"
 					}
 				],
-				"date": "July 19, 2021",
+				"date": "2021-07-12",
+				"DOI": "10.21203/rs.3.rs-629724/v1",
 				"abstractNote": "The formation of peptide bonds is one of the most important biochemical reaction steps. Without the development of structurally and catalytically active polymers, there would be no life on our planet. Intensive research is being conducted on possible reaction pathways for the formation of complex peptides on the early Earth. Salt-induced peptide formation (SIPF) by metal catalysis is one possible pathway for abiotic peptide synthesis. The high salt concentration supports dehydration in this process. However, the formation of large, complex oligomer systems is prevented by the high thermodynamic barrier of peptide condensation in aqueous solution. Liquid sulphur dioxide proves to be a superior alternative for copper-catalysed peptide condensation. Compared to water, the amino acids are activated in sulphur dioxide, which leads to the incorporation of all 20 proteinogenic amino acids into the resulting proteins and thus to a large variety of products. Strikingly, even extremely low initial reactant concentrations of only 50 mM are sufficient for extensive peptide formation, leading to an overall yield of 2.9% for dialanine in 7 days. The reactions carried out at room temperature and the successful use of the Hadean mineral covellite as a catalyst, suggest a volcanic environment for the formation of the peptide world on early Earth as a likely scenario.",
-				"extra": "Type: article",
 				"libraryCatalog": "Research Square",
 				"shortTitle": "Peptide formation as on the early Earth",
 				"url": "https://www.researchsquare.com/article/rs-629724/v1",
@@ -186,7 +190,7 @@ var testCases = [
 		"url": "https://www.researchsquare.com/article/rs-624370/v1",
 		"items": [
 			{
-				"itemType": "report",
+				"itemType": "preprint",
 				"title": "A dual mechanism of action of AT-527 against SARS-CoV-2 polymerase",
 				"creators": [
 					{
@@ -305,9 +309,9 @@ var testCases = [
 						"firstName": "Adrien"
 					}
 				],
-				"date": "July 19, 2021",
+				"date": "2021-07-19",
+				"DOI": "10.21203/rs.3.rs-624370/v1",
 				"abstractNote": "A worldwide effort is ongoing to discover drugs against the Severe Acute Respiratory Syndrome coronavirus type 2 (SARS-CoV-2), which has so far caused &gt;3.5 million fatalities (https://covid19.who.int/). The virus essential RNA-dependent RNA polymerase complex is targeted by several nucleoside/tide analogues whose mechanisms of action and clinical potential are currently evaluated. The guanosine analogue AT-527, a double prodrug of its 5&#039;-triphosphate AT-9010, is currently in phase III clinical trials as a COVID19 treatment. Here we report the cryo-EM structure at 2.98 Å resolution of the SARS-CoV-2 nsp12-nsp7-(nsp8)2 complex with RNA showing AT-9010 bound at three sites of nsp12. At the RdRp active-site, one AT-9010 is incorporated into the RNA product. Its 2&#039;-methyl group prevents correct alignment of a second AT-9010 occupying the incoming NTP pocket. The 2&#039;-F, 2&#039;-methyl 3&#039;-OH ribose scaffold explains the non-obligate RNA chain-termination potency of this NA series for both HCV NS5 and SARS-CoV RTCs. A third AT-9010 molecule 5&#039;-diphosphate binds to a coronavirus-specific pocket in the nsp12 N-terminus NiRAN domain, a SelO pseudo-kinase structural and functional homologue. This unique binding mode impedes NiRAN-mediated UMPylation of SARS-CoV-2 nsp8 and nsp9 proteins. Our results suggest a mechanism of action for AT-527 in line with a therapeutic use for COVID19.",
-				"extra": "Type: article",
 				"libraryCatalog": "Research Square",
 				"url": "https://www.researchsquare.com/article/rs-624370/v1",
 				"attachments": [
