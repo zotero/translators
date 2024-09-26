@@ -96,6 +96,9 @@ function scrape(doc, _url) {
 			item.attachments = [{ url: item.url, title: item.title + " Snapshot", mimeType: "text/html" }];
 			item.tags = tags;
 			item.abstractNote = abstractNote;
+			if (item.ISSN) {
+				item.ISSN = ZU.cleanISSN(item.ISSN);
+			}
 			item.complete();
 		});
 		trans.translate();
