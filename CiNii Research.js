@@ -9,30 +9,54 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-09-25 05:59:03"
+	"lastUpdated": "2024-09-26 14:21:29"
 }
 
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2024 Michael Berkowitz, Mitsuo Yoshida and Satoshi Ando
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
 function detectWeb(doc, url) {
-//	if (url.match(/crid/)) {
 	if (url.includes("/crid/")) {
 		return "journalArticle";
-	} else if (doc.evaluate('//a[contains(@href, "/crid/")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	}
+	else if (doc.evaluate('//a[contains(@href, "/crid/")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
 	}
+	return false;
 }
 
 function doWeb(doc, url) {
-	var arts = new Array();
+	var arts = [];
 	if (detectWeb(doc, url) == "multiple") {
-		var items = new Object();
+		var items = {};
 		var links = doc.evaluate('//a[contains(@href, "/crid/")]', doc, null, XPathResult.ANY_TYPE, null);
 		var link;
-		while (link = links.iterateNext()) {
+		while ((link = links.iterateNext())) {
 			items[link.href] = Zotero.Utilities.trimInternal(link.textContent);
 		}
-	Zotero.selectItems(items, function (items) {
+		Zotero.selectItems(items, function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			for (var i in items) {
 				arts.push(i);
@@ -40,44 +64,46 @@ function doWeb(doc, url) {
 			Zotero.Utilities.processDocuments(arts, scrape, function () {
 				Zotero.done();
 			});
-			Zotero.wait();	
+			Zotero.wait();
 		});
-	} else {
-		scrape(doc, url)
+	}
+	else {
+		scrape(doc, url);
 	}
 }
-function scrape(doc, url){
-		var newurl = doc.location.href;
-		var biblink = ZU.xpathText(doc, '//li/div/a[contains(text(), "BibTeX")]/@href');
+
+function scrape(doc, _url) {
+	var newurl = doc.location.href;
+	var biblink = ZU.xpathText(doc, '//li/div/a[contains(text(), "BibTeX")]/@href');
 	//Z.debug(biblink)
-	var tags = new Array();
-		if (doc.evaluate('//a[@rel="tag"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-			var kws = doc.evaluate('//a[@rel="tag"]', doc, null, XPathResult.ANY_TYPE, null);
-			var kw;
-			while (kw = kws.iterateNext()) {
-				tags.push(Zotero.Utilities.trimInternal(kw.textContent));
-			}
+	var tags = [];
+	if (doc.evaluate('//a[@rel="tag"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var kws = doc.evaluate('//a[@rel="tag"]', doc, null, XPathResult.ANY_TYPE, null);
+		var kw;
+		while ((kw = kws.iterateNext())) {
+			tags.push(Zotero.Utilities.trimInternal(kw.textContent));
 		}
-		//var abstractPath = '//div[@class="abstract"]/p[@class="entry-content"]';
-		var abstractPath = '//div[contains(@class, "abstract")]/p[contains(@class, "entry-content")]';
-		var abstractNote;
-		if (doc.evaluate(abstractPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-			abstractNote = doc.evaluate(abstractPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		}
-		Zotero.Utilities.HTTP.doGet(biblink, function(text) {
-			var trans = Zotero.loadTranslator("import");
-			trans.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
-			trans.setString(text);
-			trans.setHandler("itemDone", function(obj, item) {
-				item.url = newurl;
-				item.attachments = [{url:item.url, title:item.title + " Snapshot", mimeType:"text/html"}];
-				item.tags = tags;
-				item.abstractNote = abstractNote;
-				item.complete();
-			});
-			trans.translate();
-		});
 	}
+	//var abstractPath = '//div[@class="abstract"]/p[@class="entry-content"]';
+	var abstractPath = '//div[contains(@class, "abstract")]/p[contains(@class, "entry-content")]';
+	var abstractNote;
+	if (doc.evaluate(abstractPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		abstractNote = doc.evaluate(abstractPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	}
+	Zotero.Utilities.HTTP.doGet(biblink, function (text) {
+		var trans = Zotero.loadTranslator("import");
+		trans.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+		trans.setString(text);
+		trans.setHandler("itemDone", function (obj, item) {
+			item.url = newurl;
+			item.attachments = [{ url: item.url, title: item.title + " Snapshot", mimeType: "text/html" }];
+			item.tags = tags;
+			item.abstractNote = abstractNote;
+			item.complete();
+		});
+		trans.translate();
+	});
+}
 
 /** BEGIN TEST CASES **/
 var testCases = [
