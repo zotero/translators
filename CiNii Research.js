@@ -144,14 +144,14 @@ var testCases = [
 				"date": "2002",
 				"DOI": "10.11188/seisankenkyu.54.384",
 				"ISSN": "1881-2058",
+				"abstractNote": "特集 ERS(耐震構造学)",
 				"issue": "6",
 				"itemID": "1390001204062164736",
-				"libraryCatalog": "CiNii",
+				"libraryCatalog": "CiNii Research",
 				"pages": "384-387",
 				"publicationTitle": "生産研究",
 				"url": "https://cir.nii.ac.jp/crid/1390001204062164736",
 				"volume": "54",
-				"abstractNote": "特集 ERS(耐震構造学)",
 				"attachments": [
 					{
 						"title": "観測用既存鉄骨造モデル構造物を用いたオンライン応答実験 Snapshot",
