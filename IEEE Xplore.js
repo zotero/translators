@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-07-05 07:19:04"
+	"lastUpdated": "2024-09-26 13:30:54"
 }
 
 /*
@@ -230,6 +230,10 @@ async function scrape(doc, url = doc.location.href) {
 						title: "IEEE Xplore Full Text PDF",
 						mimeType: "application/pdf"
 					});
+				}
+				else {
+					Zotero.debug("No PDF URL found on PDF page");
+					Zotero.debug(src);
 				}
 				item.complete();
 			}, null);
