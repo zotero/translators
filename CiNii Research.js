@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-09-26 14:21:29"
+	"lastUpdated": "2024-09-26 14:22:20"
 }
 
 /*
@@ -61,10 +61,7 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				arts.push(i);
 			}
-			Zotero.Utilities.processDocuments(arts, scrape, function () {
-				Zotero.done();
-			});
-			Zotero.wait();
+			Zotero.Utilities.processDocuments(arts, scrape);
 		});
 	}
 	else {
