@@ -1,15 +1,15 @@
 {
 	"translatorID": "8bbda047-de7c-463e-82cd-375444afa068",
-	"label": "Kluwer Arbitration",
-	"creator": "Jonas Zaugg",
-	"target": "^https?://(www\\.|arbitrationblog\\.)?kluwerarbitration\\.com/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-27 08:42:26"
+		"label": "Kluwer Arbitration",
+			"creator": "Jonas Zaugg",
+				"target": "^https?://(www\\.|arbitrationblog\\.)?kluwerarbitration\\.com/",
+					"minVersion": "5.0",
+						"maxVersion": "",
+							"priority": 100,
+								"inRepository": true,
+									"translatorType": 4,
+										"browserSupport": "gcsibv",
+											"lastUpdated": "2024-09-27 20:17:02"
 }
 
 /*
@@ -64,9 +64,11 @@ function depthFirstFlatten(index, inputArray, outputArray) {
 	depthFirstFlatten(index + 1, inputArray, outputArray);
 }
 
+const kluwerAPIBaseURL = "https://www.kluwerarbitration.com/apiv1/";
+
 // Get the JSON object describing the publication (i.e., the book for a section or the journal for an article)
 async function getPublicationDetails(documentID) {
-	let detailsURL = "https://www.kluwerarbitration.com/api/publicationdetail?documentId=" + documentID;
+	let detailsURL = kluwerAPIBaseURL + `api/publicationdetail?documentId=${documentID}`;
 	Z.debug("Requesting publication details");
 	Z.debug(detailsURL);
 	return requestJSON(detailsURL);
@@ -74,15 +76,15 @@ async function getPublicationDetails(documentID) {
 
 // Get the JSON object describing the document itself (article, book section, etc.)
 async function getDocumentDetails(documentID) {
-	let detailsURL = "https://www.kluwerarbitration.com/api/Document?id=" + documentID;
+	let detailsURL = kluwerAPIBaseURL + `api/Document?id=${documentID}`;
 	Z.debug("Requesting document details");
 	Z.debug(detailsURL);
-	return requestJSON(detailsURL);
+	return requestJSON(detailsURL).catch(() => Zotero.debug(`No document details available for document ${documentID}`));
 }
 
 // Get the JSON object describing the standalone case (i.e., not contained in a journal)
 async function getCaseDetails(caseID) {
-	let detailsURL = "https://www.kluwerarbitration.com/case/GetDetailsByCaseId?caseId=" + caseID;
+	let detailsURL = kluwerAPIBaseURL + `case/GetDetailsByCaseId?caseId=${caseID}`;
 	Z.debug("Requesting case details");
 	Z.debug(detailsURL);
 	return requestJSON(detailsURL);
@@ -90,14 +92,14 @@ async function getCaseDetails(caseID) {
 
 // Get the JSON object of the case ToC (history)
 async function getCaseToc(caseID) {
-	let detailsURL = "https://www.kluwerarbitration.com/case/" + caseID + "/GetToc";
+	let detailsURL = kluwerAPIBaseURL + `case/${caseID}/GetToc`;
 	Z.debug("Requesting case ToC");
 	Z.debug(detailsURL);
 	return requestJSON(detailsURL);
 }
 
 async function getProceedingDetails(proceedingID) {
-	let detailsURL = "https://www.kluwerarbitration.com/proceeding/" + proceedingID;
+	let detailsURL = kluwerAPIBaseURL + `proceeding/${proceedingID}`;
 	Z.debug("Requesting proceeding details");
 	Z.debug(detailsURL);
 	return requestJSON(detailsURL);
@@ -106,7 +108,7 @@ async function getProceedingDetails(proceedingID) {
 function getDocId(url) {
 	let segments = new URL(url).pathname.split('/');
 	let documentID = segments.pop() || segments.pop(); // Handle potential trailing slash
-	Z.debug("Document ID: " + documentID);
+	Z.debug(`Document ID: ${documentID}`);
 	return documentID;
 }
 
@@ -114,7 +116,7 @@ function getCaseId(url) {
 	let path = new URL(url).pathname;
 	let m = path.match(/case\/(\d+)/);
 	if (m) {
-		Z.debug("Case ID: " + m[1]);
+		Z.debug(`Case ID: ${m[1]}`);
 		return m[1];
 	}
 	return null;
@@ -124,7 +126,7 @@ function getProceedingId(url) {
 	let path = new URL(url).pathname;
 	let m = path.match(/case\/(\d+\/\d+)/);
 	if (m) {
-		Z.debug("Proceeding ID: " + m[1]);
+		Z.debug(`Proceeding ID: ${m[1]}`);
 		return m[1];
 	}
 	return null;
@@ -138,15 +140,15 @@ async function getTypeAndDetails(url) {
 	}
 	else if (url.includes('/document/')) {
 		Z.debug('Found a document');
-		
+
 		let documentID = getDocId(url);
 		let pubDetails = await getPublicationDetails(documentID);
 		let docDetails = await getDocumentDetails(documentID);
-		
+
 		//let pubType = pubDetails.publicationType;
 		let zotType = getType(pubDetails, docDetails);
 		if (zotType) {
-			Z.debug("Document is: " + zotType);
+			Z.debug(`Document is: ${zotType}`);
 			return { type: zotType, pubDetails: pubDetails, docDetails: docDetails };
 		}
 	}
@@ -163,15 +165,23 @@ function getType(pubDetails, docDetails) {
 		return false;
 	}
 	let pubType = pubDetails && pubDetails.publicationType ? pubDetails.publicationType : docDetails.PublicationType;
-	let hasDocument = docDetails !== null;
 
 	Z.debug(`Publication type is ${pubType}`);
 	if (docDetails) Z.debug(`Document type is ${docDetails.Type}`);
 
 	switch (pubType) {
 		case 'book':
-			// Multiple here would show a selection screen with the option to save the book or individual chapters, but we use the selection screen to indicate which items to download as part of the book
-			return hasDocument ? 'bookSection' : 'book';
+			if (docDetails) {
+				switch (docDetails.Type) {
+					case 'Court Decisions':
+					case 'Awards':
+						return 'case';
+					default:
+						return 'bookSection';
+				}
+			}
+			else return 'book';
+		// Multiple here would show a selection screen with the option to save the book or individual chapters, but we use the selection screen to indicate which items to download as part of the book
 		case 'journal':
 			switch (docDetails.Type) {
 				case 'Court Decisions':
@@ -197,6 +207,7 @@ function getType(pubDetails, docDetails) {
 		case 'internet':
 			switch (docDetails.Type) {
 				case 'Awards':
+				case 'Court Decisions':
 					return 'case';
 				case 'Commentary': // For some online insights and commentaries, could be considered blog posts but that would change the logic
 				default:
@@ -206,13 +217,11 @@ function getType(pubDetails, docDetails) {
 			return 'blogPost';
 	}
 
-	Z.debug("Could not match pairing: " + pubType + ", " + docDetails.Type);
+	Z.debug(`Could not match pairing: ${pubType}, ${docDetails.Type}`);
 	return false;
 }
 
 async function detectWeb(doc, url) {
-	Z.debug("STARTING DETECT WEB");
-
 	let result = false;
 	let urlObj = new URL(url);
 
@@ -231,8 +240,8 @@ async function detectWeb(doc, url) {
 	else if (urlObj.pathname.includes('/search')) {
 		// Kluwer Arbitration search
 		Z.debug("Investigating search page");
-		let selector = 'div#vueApp';
-		Z.debug("Monitoring " + selector);
+		let selector = 'div#app';
+		Z.debug(`Monitoring ${selector}`);
 		Z.monitorDOMChanges(doc.querySelector(selector));
 		if (getSearchResults(doc, true)) {
 			result = 'multiple';
@@ -243,7 +252,7 @@ async function detectWeb(doc, url) {
 		result = (await getTypeAndDetails(url)).type;
 	}
 
-	Z.debug("Resulting Zotero type: " + result);
+	Z.debug(`Resulting Zotero type: ${result}`);
 
 	return result;
 }
@@ -254,7 +263,7 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 
 	var searchResults = doc.querySelectorAll('div.search-results div.item-result div.content > div.title > a');
-	Z.debug("Number of results: " + searchResults.length);
+	Z.debug(`Number of results: ${searchResults.length}`);
 
 	for (let result of searchResults) {
 		let href = result.href;
@@ -265,17 +274,15 @@ function getSearchResults(doc, checkOnly) {
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
-		Z.debug('referecing url' + href);
+		Z.debug(`Referencing url ${href}`);
 		items[href] = title;
 	}
 	return found ? items : false;
 }
 
 async function doWeb(doc, url) {
-	Z.debug("STARTING DO WEB");
-
 	let urlObj = new URL(url);
-	
+
 	if (urlObj.hostname.includes('arbitrationblog')) {
 		// Kluwer Arbitration blog
 		let articles = doc.querySelectorAll("article h2.entry-title");
@@ -300,7 +307,7 @@ async function doWeb(doc, url) {
 		if (!items) return;
 		for (let url of Object.keys(items)) {
 			// Scrape each search result's URL. We do not use processDocuments because they are not required for all situations
-			Z.debug("Scraping from search result for: " + url);
+			Z.debug(`Scraping from search result for: ${url}`);
 			await scrape(null, url);
 		}
 	}
@@ -318,7 +325,7 @@ async function scrape(doc, url) {
 	else {
 		let { type: zotType, pubDetails, docDetails } = await getTypeAndDetails(url);
 
-		Z.debug("detection result: " + zotType);
+		Z.debug(`Detection result: ${zotType}`);
 		if (zotType == 'blogPost') {
 			Z.debug("Scraping blog post");
 			// If scrape() was called from the (main) Kluwer Arbitration search results, doc is null and we need to load it before the actual scraping
@@ -344,13 +351,13 @@ function scrapeDoc(url, zotType, pubDetails, docDetails) {
 	if (zotType) {
 		type = zotType;
 	}
-	Z.debug("Creating new item of type: " + type);
+	Z.debug(`Creating new item of type: ${type}`);
 	var item = new Z.Item(type);
 
 	if (pubDetails.publicationInfo) {
 		let publicationInfo = pubDetails.publicationInfo;
 		if (publicationInfo.isbn) {
-			item.ISBN = publicationInfo.isbn;
+			item.ISBN = ZU.cleanISBN(publicationInfo.isbn);
 		}
 		if (publicationInfo.issn) {
 			Z.debug(publicationInfo.issn);
@@ -457,7 +464,7 @@ function scrapeDoc(url, zotType, pubDetails, docDetails) {
 		if (section) Z.debug(`Found matching section in ToC:\n${JSON.stringify(section)}`);
 		if (section.pageRange.first && section.pageRange.last) item.pages = section.pageRange.first + "-" + section.pageRange.last;
 	}
-	else if (type == 'journalArticle' | type == 'case') {
+	else if (type == 'journalArticle' || type == 'case') {
 		let volumeRegex = /Volume\s([a-zA-Z0-9]+)/;
 		let issueRegex = /Issue\s([a-zA-Z0-9]+)/;
 		let pagesRegex = /pp\.\s([a-zA-Z0-9]+)\s-\s([a-zA-Z0-9]+)/;
@@ -478,8 +485,8 @@ function scrapeDoc(url, zotType, pubDetails, docDetails) {
 
 	// Getting PDF
 	let pdfURL = '';
-	if (type == 'case' && docDetails.PublicationType == 'internet') pdfURL = "https://www.kluwerarbitration.com/document/GetPdf/" + docDetails.Id;
-	else pdfURL = "https://www.kluwerarbitration.com/document/print?title=PDF&ids=" + docDetails.Id;
+	if (type == 'case' && docDetails.PublicationType == 'internet') pdfURL = `https://www.kluwerarbitration.com/document/GetPdf/${docDetails.Id}`;
+	else pdfURL = `https://www.kluwerarbitration.com/document/print?title=PDF&ids=${docDetails.Id}`;
 	Z.debug(pdfURL);
 	item.attachments.push({
 		title: "Full Text PDF",
@@ -501,7 +508,7 @@ function scrapeBook(url, pubDetails) {
 	var item = new Z.Item('book');
 
 	if (pubDetails && pubDetails.publicationInfo) {
-		if (pubDetails.publicationInfo.isbn) item.ISBN = pubDetails.publicationInfo.isbn;
+		if (pubDetails.publicationInfo.isbn) item.ISBN = ZU.cleanISBN(pubDetails.publicationInfo.isbn);
 		else if (pubDetails.publicationInfo.publicationTitle) item.title = pubDetails.publicationInfo.publicationTitle;
 	}
 
@@ -521,7 +528,7 @@ function scrapeBook(url, pubDetails) {
 
 	search.setHandler("error", function (error) {
 		// If ISBN search failed for some reason, use the publication details from Kluwer
-		Z.debug("ISBN search for " + item.ISBN + " failed: " + error);
+		Z.debug(`ISBN search for ${item.ISBN} failed: ${error}`);
 		Z.debug("Using publication details from Kluwer instead.");
 
 		if (pubDetails) {
@@ -567,7 +574,7 @@ function completeBookScrape(url, pubDetails, item) {
 		}
 
 		for (let [sectionID, sectionLabel] of Object.entries(items)) {
-			let pdfURL = "https://www.kluwerarbitration.com/document/print?title=PDF&ids=" + sectionID;
+			let pdfURL = `https://www.kluwerarbitration.com/document/print?title=PDF&ids=${sectionID}`;
 			Z.debug(pdfURL);
 			item.attachments.push({
 				title: sectionLabel,
@@ -587,7 +594,7 @@ async function scrapeBlog(doc, url = doc.location.href) {
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
-	
+
 	translator.setHandler('itemDone', (_obj, item) => {
 		// Add tags from blog header
 		for (let tag of doc.querySelectorAll("div.entry-category > a[rel~='tag']")) {
@@ -605,9 +612,9 @@ async function scrapeCase(url) {
 	let caseID = getCaseId(url);
 	let documentID = getDocId(url);
 	let proceedingID = getProceedingId(url);
-	Z.debug("Scraping standalone case: " + caseID);
-	Z.debug("Proceeding: " + proceedingID);
-	Z.debug("Matching document: " + documentID);
+	Z.debug(`Scraping standalone case: ${caseID}`);
+	Z.debug(`Proceeding: ${proceedingID}`);
+	Z.debug(`Matching document: ${documentID}`);
 
 	var item = new Z.Item('case');
 	let caseDetails = await getCaseDetails(caseID);
@@ -640,8 +647,8 @@ async function scrapeCase(url) {
 
 	if (docDetails) {
 		let pdfURL = '';
-		if (docDetails.PublicationType == 'internet') pdfURL = "https://www.kluwerarbitration.com/document/GetPdf/" + docDetails.Id;
-		else pdfURL = "https://www.kluwerarbitration.com/document/print?title=PDF&ids=" + docDetails.Id;
+		if (docDetails.PublicationType == 'internet') pdfURL = `https://www.kluwerarbitration.com/document/GetPdf/${docDetails.Id}`;
+		else pdfURL = `https://www.kluwerarbitration.com/document/print?title=PDF&ids=${docDetails.Id}`;
 		Z.debug(pdfURL);
 		item.attachments.push({
 			title: "Full Text PDF",
@@ -655,7 +662,7 @@ async function scrapeCase(url) {
 		let items = await Z.selectItems(Object.fromEntries(docs));
 		if (items) {
 			for (let [docId, docLabel] of Object.entries(items)) {
-				let pdfURL = "https://www.kluwerarbitration.com/document/GetPdf/" + docId + ".pdf";
+				let pdfURL = `https://www.kluwerarbitration.com/document/GetPdf/${docId}.pdf`;
 				Z.debug(pdfURL);
 				item.attachments.push({
 					title: docLabel,
@@ -679,7 +686,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
-				"title": "Chapter 1: Overview of International Commercial Arbitration",
+				"title": "Chapter 1: Overview of International Commercial Arbitration (Updated November 2023)",
 				"creators": [
 					{
 						"firstName": "Gary B.",
@@ -708,7 +715,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Bibliographic reference: 'Chapter 1: Overview of International Commercial Arbitration', in Gary B. Born, International Commercial Arbitration (Third Edition),  (© Kluwer Law International; Kluwer Law International 2021)."
+						"note": "Bibliographic reference: 'Chapter 1: Overview of International Commercial Arbitration (Updated November 2023)', in Gary B. Born, International Commercial Arbitration (Third Edition),  (© Kluwer Law International; Kluwer Law International 2021)."
 					}
 				],
 				"seeAlso": []
@@ -927,11 +934,6 @@ var testCases = [
 						"creatorType": "counsel"
 					},
 					{
-						"firstName": "Christopher",
-						"lastName": "Boog",
-						"creatorType": "counsel"
-					},
-					{
 						"firstName": "Elliott",
 						"lastName": "Geisinger",
 						"creatorType": "counsel"
@@ -942,8 +944,28 @@ var testCases = [
 						"creatorType": "counsel"
 					},
 					{
+						"firstName": "Michael",
+						"lastName": "Hwang",
+						"creatorType": "author"
+					},
+					{
 						"firstName": "Charles",
 						"lastName": "Poncet",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Boaz",
+						"lastName": "Moselle",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Dean G.",
+						"lastName": "Acheson",
+						"creatorType": "counsel"
+					},
+					{
+						"firstName": "Daniel",
+						"lastName": "George",
 						"creatorType": "author"
 					},
 					{
@@ -965,6 +987,41 @@ var testCases = [
 						"firstName": "Marney L.",
 						"lastName": "Cheek",
 						"creatorType": "counsel"
+					},
+					{
+						"firstName": "William B.",
+						"lastName": "Cline",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Clovis J.",
+						"lastName": "Trevino",
+						"creatorType": "counsel"
+					},
+					{
+						"firstName": "Anne-Carole",
+						"lastName": "Cremades",
+						"creatorType": "counsel"
+					},
+					{
+						"firstName": "Anne-Carole",
+						"lastName": "Cremades",
+						"creatorType": "counsel"
+					},
+					{
+						"firstName": "Mikhail",
+						"lastName": "Vinogradov",
+						"creatorType": "counsel"
+					},
+					{
+						"firstName": "Elena Sergeevna",
+						"lastName": "Burova",
+						"creatorType": "counsel"
+					},
+					{
+						"firstName": "Irina",
+						"lastName": "Paliashvili",
+						"creatorType": "author"
 					}
 				],
 				"dateDecided": "2023-12-04",
@@ -1036,6 +1093,40 @@ var testCases = [
 		"type": "web",
 		"url": "https://arbitrationblog.kluwerarbitration.com/",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.kluwerarbitration.com/document/kli-ka-1252105-n",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "Sulamérica Cia Nacional de Seguros S.A. et al. v. Enesa Engenharia S.A. et al., Court of Appeal of England and Wales, Civil Division, A3/2012/0249, 16 May 2012",
+				"creators": [],
+				"dateDecided": "2012-05-16",
+				"court": "Court of Appeal of England and Wales, Civil Division",
+				"docketNumber": "A3/2012/0249",
+				"firstPage": "464",
+				"reporter": "ICCA Yearbook Commercial Arbitration 2012 - Volume XXXVII",
+				"reporterVolume": "XXXVII",
+				"url": "https://www.kluwerarbitration.com/document/kli-ka-1252105-n",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "Bibliographic reference: 'Sulamérica Cia Nacional de Seguros S.A. et al. v. Enesa Engenharia S.A. et al., Court of Appeal of England and Wales, Civil Division, A3/2012/0249, 16 May 2012', in Albert Jan van den Berg (ed), ICCA Yearbook Commercial Arbitration 2012 - Volume XXXVII, Yearbook Commercial Arbitration, Volume 37 (© Kluwer Law International; ICCA & Kluwer Law International 2012), pp. 464 - 467."
+					},
+					{
+						"note": "Parties: Claimant, Sulamérica Cia Nacional de Seguros S.A. et al.<br/>Defendant-Appellant, Enesa Engenharia S.A. et al."
+					}
+				],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
