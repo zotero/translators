@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-11-17 12:37:11"
+	"lastUpdated": "2024-09-30 17:33:26"
 }
 
 /*
@@ -225,6 +225,7 @@ function generateCopyRefFor(event) {
   }, 2000);
 }
 */
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -236,7 +237,7 @@ var testCases = [
 				"caseName": "AEC v. TDIC, Hyflux and MCB",
 				"creators": [],
 				"dateDecided": "2023",
-				"court": "Arrêt de la Cour d'appel de Paris 21/07296",
+				"court": "Arrêt de la Cour d'appel de Paris (Pôle 5 - Chambre 16) 21/07296",
 				"extra": "tex.parties: Algerian Energy Company SPA v. (1) Tlemcen Desalination Investment Company SAS, (2) Hyflux Limited and (3) Malakoff Corporation Berhad",
 				"history": "ICC Case No. 24250/DDA",
 				"url": "https://jusmundi.com/fr/document/decision/fr-algerian-energy-company-spa-v-1-tlemcen-desalination-investment-company-sas-2-hyflux-limited-and-3-malakoff-corporation-berhad-arret-de-la-cour-dappel-de-paris-21-07296-tuesday-13th-june-2023#decision_51845",
