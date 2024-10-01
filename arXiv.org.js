@@ -2,7 +2,7 @@
 	"translatorID": "ecddda2e-4fc6-4aea-9f17-ef3b56d7377a",
 	"label": "arXiv.org",
 	"creator": "Sean Takats and Michael Berkowitz",
-	"target": "^https?://([^\\.]+\\.)?(arxiv\\.org|xxx\\.lanl\\.gov)/(find|catchup|list/\\w|abs/|pdf/)",
+	"target": "^https?://([^\\.]+\\.)?(arxiv\\.org|xxx\\.lanl\\.gov)/(search|find|catchup|list/\\w|abs/|pdf/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -240,10 +240,10 @@ var arxivDOI;
 
 
 function detectWeb(doc, url) {
-	var searchRe = /^https?:\/\/(?:([^.]+\.))?(?:arxiv\.org|xxx\.lanl\.gov)\/(?:find|list|catchup)/;
+	var searchRe = /^https?:\/\/(?:([^.]+\.))?(?:arxiv\.org|xxx\.lanl\.gov)\/(?:search|find|list|catchup)\b/;
 	var relatedDOI = text(doc, '.doi>a');
 	if (searchRe.test(url)) {
-		return "multiple";
+		return getSearchResults(doc, true/* checkOnly */) && "multiple";
 	}
 	else if (relatedDOI) {
 		return "journalArticle";
@@ -253,7 +253,62 @@ function detectWeb(doc, url) {
 	}
 }
 
-async function doWeb(doc, url) {
+function getSearchResults(doc, checkOnly = false) {
+	if (/^\/search\//.test(doc.location.pathname)) {
+		return getSearchResultsNew(doc, checkOnly);
+	}
+	else {
+		return getSearchResultsLegacy(doc, checkOnly);
+	}
+}
+
+// New search results at https://arxiv.org/search/[advanced]
+function getSearchResultsNew(doc, checkOnly = false) {
+	let items = {};
+	let found = false;
+	let rows = doc.querySelectorAll("li.arxiv-result");
+	for (let row of rows) {
+		let id = text(row, ".list-title a").trim().replace(/^arXiv:/, "");
+		let title = ZU.trimInternal(text(row, "p.title"));
+		if (!id || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[id] = title;
+	}
+	return found && items;
+}
+
+// Listings, catchup, and legacy search results (at https://arxiv.org/find/)
+function getSearchResultsLegacy(doc, checkOnly = false) {
+	let items = {};
+	let found = false;
+	let root = doc.querySelector("#dlpage");
+	if (!root) return false;
+	// Alternating rows of <dt> and <dd> elements
+	// NOTE: For listing and legacy search, there's one <dl> per page and the
+	// <dt>/<dd> elements are direct children. For catchup, there is a <dl> for
+	// each item with a pair of <dt>/<dd> children.
+	let dts = root.querySelectorAll("dl > dt");
+	let dds = root.querySelectorAll("dl > dd");
+	if (dts.length !== dds.length) {
+		Z.debug(`Warning: unexpected number of <dt> and <dd> elements: ${dts.length} !== ${dds.length}`);
+	}
+	let length = Math.min(dts.length, dds.length);
+	for (let i = 0; i < length; i++) {
+		let id = text(dts[i], "a[title='Abstract']")
+			.trim()
+			.replace(/^arXiv:/, "");
+		let title = ZU.trimInternal(text(dds[i], ".list-title"))
+			.replace(/^Title:\s*/, "");
+		if (!id || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[id] = title;
+	}
+	return found && items;
+}
+
+function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
 		var rows = ZU.xpath(doc, '//div[@id="dlpage"]/dl/dt');
 		var getTitleId;
@@ -283,19 +338,26 @@ async function doWeb(doc, url) {
 		else {
 			throw new Error("Unrecognized multiples format");
 		}
-
+		
 		var items = {};
 		for (let i = 0; i < rows.length; i++) {
 			var row = getTitleId(rows[i]);
 			items[row.id] = row.title;
 		}
-
-		let selectedItems = await Z.selectItems(items);
-		if (selectedItems) {
-			let apiURL = `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(Object.keys(selectedItems).join(','))}`;
-			let document = await requestDocument(apiURL);
-			parseAtom(document);
-		}
+		
+		Z.selectItems(items, function (items) {
+			if (!items) return;
+			
+			var urls = [];
+			for (var id in items) {
+				urls.push('http://export.arxiv.org/oai2'
+					+ '?verb=GetRecord&metadataPrefix=oai_dc'
+					+ '&identifier=oai%3AarXiv.org%3A' + encodeURIComponent(id)
+				);
+			}
+			
+			ZU.doGet(urls, parseXML);
+		});
 	}
 	else {
 		var id;
@@ -1057,6 +1119,68 @@ var testCases = [
 				"notes": [
 					{
 						"note": "Comment: 7 pages, 4 figures. Fixed typos in address"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://arxiv.org/search/advanced?advanced=&terms-0-operator=AND&terms-0-term=%22desire+production%22&terms-0-field=all&classification-physics_archives=all&classification-include_cross_list=exclude&date-year=&date-filter_by=date_range&date-from_date=2005-01-01&date-to_date=2008-12-31&date-date_type=submitted_date&abstracts=show&size=50&order=-announced_date_first",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://arxiv.org/search/?query=australopithecus&searchtype=title&abstracts=show&order=-announced_date_first&size=25",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "search",
+		"input": {
+			"arXiv": "math/0211159"
+		},
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "The entropy formula for the Ricci flow and its geometric applications",
+				"creators": [
+					{
+						"firstName": "Grisha",
+						"lastName": "Perelman",
+						"creatorType": "author"
+					}
+				],
+				"date": "2002-11-11",
+				"abstractNote": "We present a monotonic expression for the Ricci flow, valid in all dimensions and without curvature assumptions. It is interpreted as an entropy for a certain canonical ensemble. Several geometric applications are given. In particular, (1) Ricci flow, considered on the space of riemannian metrics modulo diffeomorphism and scaling, has no nontrivial periodic orbits (that is, other than fixed points); (2) In a region, where singularity is forming in finite time, the injectivity radius is controlled by the curvature; (3) Ricci flow can not quickly turn an almost euclidean region into a very curved one, no matter what happens far away. We also verify several assertions related to Richard Hamilton's program for the proof of Thurston geometrization conjecture for closed three-manifolds, and give a sketch of an eclectic proof of this conjecture, making use of earlier results on collapsing with local lower curvature bound.",
+				"archiveID": "arXiv:math/0211159",
+				"extra": "arXiv:math/0211159",
+				"libraryCatalog": "arXiv.org",
+				"repository": "arXiv",
+				"url": "http://arxiv.org/abs/math/0211159",
+				"attachments": [
+					{
+						"title": "arXiv Fulltext PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "arXiv.org Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "53C"
+					},
+					{
+						"tag": "Mathematics - Differential Geometry"
+					}
+				],
+				"notes": [
+					{
+						"note": "Comment: 39 pages"
 					}
 				],
 				"seeAlso": []
