@@ -1,15 +1,15 @@
 {
 	"translatorID": "8bbda047-de7c-463e-82cd-375444afa068",
-		"label": "Kluwer Arbitration",
-			"creator": "Jonas Zaugg",
-				"target": "^https?://(www\\.|arbitrationblog\\.)?kluwerarbitration\\.com/",
-					"minVersion": "5.0",
-						"maxVersion": "",
-							"priority": 100,
-								"inRepository": true,
-									"translatorType": 4,
-										"browserSupport": "gcsibv",
-											"lastUpdated": "2024-09-27 20:17:02"
+	"label": "Kluwer Arbitration",
+	"creator": "Jonas Zaugg",
+	"target": "^https?://(www\\.|arbitrationblog\\.)?kluwerarbitration\\.com/",
+	"minVersion": "5.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2024-10-01 21:29:59"
 }
 
 /*
@@ -69,46 +69,35 @@ const kluwerAPIBaseURL = "https://www.kluwerarbitration.com/apiv1/";
 // Get the JSON object describing the publication (i.e., the book for a section or the journal for an article)
 async function getPublicationDetails(documentID) {
 	let detailsURL = kluwerAPIBaseURL + `api/publicationdetail?documentId=${documentID}`;
-	Z.debug("Requesting publication details");
-	Z.debug(detailsURL);
 	return requestJSON(detailsURL);
 }
 
 // Get the JSON object describing the document itself (article, book section, etc.)
 async function getDocumentDetails(documentID) {
 	let detailsURL = kluwerAPIBaseURL + `api/Document?id=${documentID}`;
-	Z.debug("Requesting document details");
-	Z.debug(detailsURL);
 	return requestJSON(detailsURL).catch(() => Zotero.debug(`No document details available for document ${documentID}`));
 }
 
 // Get the JSON object describing the standalone case (i.e., not contained in a journal)
 async function getCaseDetails(caseID) {
 	let detailsURL = kluwerAPIBaseURL + `case/GetDetailsByCaseId?caseId=${caseID}`;
-	Z.debug("Requesting case details");
-	Z.debug(detailsURL);
 	return requestJSON(detailsURL);
 }
 
 // Get the JSON object of the case ToC (history)
 async function getCaseToc(caseID) {
 	let detailsURL = kluwerAPIBaseURL + `case/${caseID}/GetToc`;
-	Z.debug("Requesting case ToC");
-	Z.debug(detailsURL);
 	return requestJSON(detailsURL);
 }
 
 async function getProceedingDetails(proceedingID) {
 	let detailsURL = kluwerAPIBaseURL + `proceeding/${proceedingID}`;
-	Z.debug("Requesting proceeding details");
-	Z.debug(detailsURL);
 	return requestJSON(detailsURL);
 }
 
 function getDocId(url) {
 	let segments = new URL(url).pathname.split('/');
 	let documentID = segments.pop() || segments.pop(); // Handle potential trailing slash
-	Z.debug(`Document ID: ${documentID}`);
 	return documentID;
 }
 
@@ -116,7 +105,6 @@ function getCaseId(url) {
 	let path = new URL(url).pathname;
 	let m = path.match(/case\/(\d+)/);
 	if (m) {
-		Z.debug(`Case ID: ${m[1]}`);
 		return m[1];
 	}
 	return null;
@@ -126,7 +114,6 @@ function getProceedingId(url) {
 	let path = new URL(url).pathname;
 	let m = path.match(/case\/(\d+\/\d+)/);
 	if (m) {
-		Z.debug(`Proceeding ID: ${m[1]}`);
 		return m[1];
 	}
 	return null;
@@ -134,13 +121,9 @@ function getProceedingId(url) {
 
 async function getTypeAndDetails(url) {
 	if (url.includes('document/case')) {
-		Z.debug('Found a case');
-
 		return { type: 'case', pubDetails: null, docDetails: null };
 	}
 	else if (url.includes('/document/')) {
-		Z.debug('Found a document');
-
 		let documentID = getDocId(url);
 		let pubDetails = await getPublicationDetails(documentID);
 		let docDetails = await getDocumentDetails(documentID);
@@ -148,7 +131,6 @@ async function getTypeAndDetails(url) {
 		//let pubType = pubDetails.publicationType;
 		let zotType = getType(pubDetails, docDetails);
 		if (zotType) {
-			Z.debug(`Document is: ${zotType}`);
 			return { type: zotType, pubDetails: pubDetails, docDetails: docDetails };
 		}
 	}
@@ -161,13 +143,9 @@ async function getTypeAndDetails(url) {
 
 function getType(pubDetails, docDetails) {
 	if (!pubDetails && !docDetails) {
-		Z.debug("Cannot get type when there are no publication and document details! Check if requests succeed.");
 		return false;
 	}
 	let pubType = pubDetails && pubDetails.publicationType ? pubDetails.publicationType : docDetails.PublicationType;
-
-	Z.debug(`Publication type is ${pubType}`);
-	if (docDetails) Z.debug(`Document type is ${docDetails.Type}`);
 
 	switch (pubType) {
 		case 'book':
@@ -217,7 +195,7 @@ function getType(pubDetails, docDetails) {
 			return 'blogPost';
 	}
 
-	Z.debug(`Could not match pairing: ${pubType}, ${docDetails.Type}`);
+	throw new Error(`Could not match pairing: ${pubType}, ${docDetails.Type}`);
 	return false;
 }
 
@@ -239,9 +217,7 @@ async function detectWeb(doc, url) {
 	}
 	else if (urlObj.pathname.includes('/search')) {
 		// Kluwer Arbitration search
-		Z.debug("Investigating search page");
 		let selector = 'div#app';
-		Z.debug(`Monitoring ${selector}`);
 		Z.monitorDOMChanges(doc.querySelector(selector));
 		if (getSearchResults(doc, true)) {
 			result = 'multiple';
@@ -251,30 +227,21 @@ async function detectWeb(doc, url) {
 		// Any other page
 		result = (await getTypeAndDetails(url)).type;
 	}
-
-	Z.debug(`Resulting Zotero type: ${result}`);
-
 	return result;
 }
 
 function getSearchResults(doc, checkOnly) {
-	Z.debug("Checking search results");
 	var items = {};
 	var found = false;
 
 	var searchResults = doc.querySelectorAll('div.search-results div.item-result div.content > div.title > a');
-	Z.debug(`Number of results: ${searchResults.length}`);
 
 	for (let result of searchResults) {
 		let href = result.href;
-		Z.debug(href);
-
 		let title = ZU.trimInternal(result.textContent);
-		Z.debug(title);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
-		Z.debug(`Referencing url ${href}`);
 		items[href] = title;
 	}
 	return found ? items : false;
@@ -293,21 +260,22 @@ async function doWeb(doc, url) {
 				await scrapeBlog(doc);
 				return;
 			default: // Multiple articles
-				Z.debug(`Found ${articles.length} blog posts.`);
-				Z.selectItems(ZU.getItemArray(doc, articles), (items) => {
-					if (items) ZU.processDocuments(Object.keys(items), scrapeBlog);
-				});
+				let items = await Z.selectItems(ZU.getItemArray(doc, articles));
+				if (items) {    
+    				await Promise.all(Object.keys(items).map(async (url) => {
+        				const doc = await requestDocument(url);
+        				await scrapeBlog(doc, url);
+    				}));
+				}
 		}
 	}
 	else if (urlObj.pathname.includes('/search')) {
 		// Kluwer Arbitration search page
-		Z.debug('Scraping search results');
 
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
 		for (let url of Object.keys(items)) {
 			// Scrape each search result's URL. We do not use processDocuments because they are not required for all situations
-			Z.debug(`Scraping from search result for: ${url}`);
 			await scrape(null, url);
 		}
 	}
@@ -319,25 +287,20 @@ async function doWeb(doc, url) {
 // This function calls the adequate scraper based on the URL or doc
 async function scrape(doc, url) {
 	if (url.includes('/document/case/')) {
-		Z.debug('Scraping standalone case');
 		await scrapeCase(url);
 	}
 	else {
 		let { type: zotType, pubDetails, docDetails } = await getTypeAndDetails(url);
 
-		Z.debug(`Detection result: ${zotType}`);
 		if (zotType == 'blogPost') {
-			Z.debug("Scraping blog post");
 			// If scrape() was called from the (main) Kluwer Arbitration search results, doc is null and we need to load it before the actual scraping
 			if (!doc) doc = await requestDocument(url);
 			await scrapeBlog(doc);
 		}
 		else if (zotType == 'book') {
-			Z.debug("Scraping full book");
 			scrapeBook(url, pubDetails);
 		}
 		else {
-			Z.debug("Scraping document");
 			scrapeDoc(url, zotType, pubDetails, docDetails);
 		}
 	}
@@ -351,7 +314,7 @@ function scrapeDoc(url, zotType, pubDetails, docDetails) {
 	if (zotType) {
 		type = zotType;
 	}
-	Z.debug(`Creating new item of type: ${type}`);
+
 	var item = new Z.Item(type);
 
 	if (pubDetails.publicationInfo) {
@@ -360,7 +323,6 @@ function scrapeDoc(url, zotType, pubDetails, docDetails) {
 			item.ISBN = ZU.cleanISBN(publicationInfo.isbn);
 		}
 		if (publicationInfo.issn) {
-			Z.debug(publicationInfo.issn);
 			item.ISSN = publicationInfo.issn;
 		}
 		if (publicationInfo.publisher) {
@@ -461,7 +423,6 @@ function scrapeDoc(url, zotType, pubDetails, docDetails) {
 		//let sectionNodes = pubDetails.tocNodes.flatMap((node) => (node.children ? node.children : node));
 		let sectionNodes = flattenNodes(pubDetails.tocNodes);
 		let section = sectionNodes.find(node => (node.docId.toLowerCase() == documentID.toLowerCase()));
-		if (section) Z.debug(`Found matching section in ToC:\n${JSON.stringify(section)}`);
 		if (section.pageRange.first && section.pageRange.last) item.pages = section.pageRange.first + "-" + section.pageRange.last;
 	}
 	else if (type == 'journalArticle' || type == 'case') {
@@ -485,21 +446,19 @@ function scrapeDoc(url, zotType, pubDetails, docDetails) {
 
 	// Getting PDF
 	let pdfURL = '';
-	if (type == 'case' && docDetails.PublicationType == 'internet') pdfURL = `https://www.kluwerarbitration.com/document/GetPdf/${docDetails.Id}`;
-	else pdfURL = `https://www.kluwerarbitration.com/document/print?title=PDF&ids=${docDetails.Id}`;
-	Z.debug(pdfURL);
+	if (type == 'case' && docDetails.PublicationType == 'internet') { 
+		pdfURL = `https://www.kluwerarbitration.com/document/GetPdf/${docDetails.Id}`;
+	}
+	else {
+		pdfURL = `https://www.kluwerarbitration.com/document/print?title=PDF&ids=${docDetails.Id}`;
+	}
+
+	// Snapshots are not added as they provide only marginally better hyperlinks to footnotes
 	item.attachments.push({
 		title: "Full Text PDF",
 		mimeType: "application/pdf",
 		url: pdfURL
 	});
-
-	// Snapshots are not added as they provide only marginally better hyperlinks to footnotes
-	/*item.attachments.push({
-		title: "Snapshot",
-		document: doc,
-		mimeType: "text/html",
-	});*/
 
 	item.complete();
 }
@@ -511,9 +470,6 @@ function scrapeBook(url, pubDetails) {
 		if (pubDetails.publicationInfo.isbn) item.ISBN = ZU.cleanISBN(pubDetails.publicationInfo.isbn);
 		else if (pubDetails.publicationInfo.publicationTitle) item.title = pubDetails.publicationInfo.publicationTitle;
 	}
-
-	Z.debug("Searching book with item: ");
-	Z.debug(item);
 
 	var search = Zotero.loadTranslator("search");
 
@@ -567,7 +523,7 @@ function completeBookScrape(url, pubDetails, item) {
 	let sectionNodes = flattenNodes(pubDetails.tocNodes);
 	let sectionList = sectionNodes.map(node => ([node.docId, node.label]));
 	let sections = Object.fromEntries(sectionList);
-	Z.debug(`Found ${sectionNodes.length} sections in book to choose from for download.`);
+
 	Z.selectItems(sections, function (items) {
 		if (!items) {
 			return;
@@ -575,7 +531,7 @@ function completeBookScrape(url, pubDetails, item) {
 
 		for (let [sectionID, sectionLabel] of Object.entries(items)) {
 			let pdfURL = `https://www.kluwerarbitration.com/document/print?title=PDF&ids=${sectionID}`;
-			Z.debug(pdfURL);
+
 			item.attachments.push({
 				title: sectionLabel,
 				mimeType: "application/pdf",
@@ -612,20 +568,12 @@ async function scrapeCase(url) {
 	let caseID = getCaseId(url);
 	let documentID = getDocId(url);
 	let proceedingID = getProceedingId(url);
-	Z.debug(`Scraping standalone case: ${caseID}`);
-	Z.debug(`Proceeding: ${proceedingID}`);
-	Z.debug(`Matching document: ${documentID}`);
 
 	var item = new Z.Item('case');
 	let caseDetails = await getCaseDetails(caseID);
 	let caseToc = await getCaseToc(caseID);
 	let docDetails = await getDocumentDetails(documentID);
 	let procDetails = proceedingID ? await getProceedingDetails(proceedingID) : null;
-
-	/*Z.debug(caseDetails);
-	Z.debug(caseToc);
-	Z.debug(docDetails);
-	Z.debug(procDetails);*/
 
 	item.docketNumber = caseDetails.caseNo;
 	item.court = caseDetails.institutionLong;
@@ -649,7 +597,7 @@ async function scrapeCase(url) {
 		let pdfURL = '';
 		if (docDetails.PublicationType == 'internet') pdfURL = `https://www.kluwerarbitration.com/document/GetPdf/${docDetails.Id}`;
 		else pdfURL = `https://www.kluwerarbitration.com/document/print?title=PDF&ids=${docDetails.Id}`;
-		Z.debug(pdfURL);
+
 		item.attachments.push({
 			title: "Full Text PDF",
 			mimeType: "application/pdf",
@@ -663,7 +611,7 @@ async function scrapeCase(url) {
 		if (items) {
 			for (let [docId, docLabel] of Object.entries(items)) {
 				let pdfURL = `https://www.kluwerarbitration.com/document/GetPdf/${docId}.pdf`;
-				Z.debug(pdfURL);
+
 				item.attachments.push({
 					title: docLabel,
 					mimeType: "application/pdf",
