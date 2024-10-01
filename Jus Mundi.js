@@ -2,14 +2,14 @@
 	"translatorID": "1897d02f-a359-4a29-a5fe-2b9e0a42b70c",
 	"label": "Jus Mundi",
 	"creator": "Jonas Zaugg",
-	"target": "jusmundi.com",
+	"target": "^https://jusmundi\\.com/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-09-30 17:33:26"
+	"lastUpdated": "2024-10-01 21:56:51"
 }
 
 /*
@@ -37,7 +37,6 @@
 
 
 function detectWeb(doc, url) {
-	// TODO: adjust the logic here
 	if (url.includes('/document/decision')) {
 		return 'case';
 	}
@@ -50,13 +49,11 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	// TODO: adjust the CSS selector
-	var rows = doc.querySelectorAll('h2 > a.title[href*="/article/"]');
+	var rows = doc.querySelectorAll('.result');
+
 	for (let row of rows) {
-		// TODO: check and maybe adjust
-		let href = row.href;
-		// TODO: check and maybe adjust
-		let title = ZU.trimInternal(row.textContent);
+		let href = attr(row, 'h2 > a', 'href');
+		let title = text(row, 'h2 > a') + " - " + text(row, 'h4');
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -69,9 +66,10 @@ async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
-		for (let url of Object.keys(items)) {
-			await scrape(await requestDocument(url));
-		}
+		await Promise.all(Object.keys(items).map(async (url) => {
+			let doc = await requestDocument(url);
+			scrape(doc, url);
+		}));
 	}
 	else {
 		await scrape(doc, url);
@@ -79,6 +77,9 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url = doc.location.href) {
+	// As Jus Mundi is heavily paywalled, the only type that can be scraped, for now, is decisions
+	if (!url.includes('/document/decision')) return;
+
 	let item = new Z.Item('case');
 
 	let title = text(doc, '#generalTitle');
@@ -86,11 +87,6 @@ async function scrape(doc, url = doc.location.href) {
 	let caseRef = attr(doc, '#generalTitle', 'data-copyrefnum');
 	let date = ZU.strToISO(attr(doc, '#listDocuments .listofdoc-level.active', 'data-copyrefdate'));
 	let docTitle = attr(doc, 'div[data-title-in-locale]', 'data-title-in-locale');
-	Z.debug(title);
-	Z.debug(parties);
-	Z.debug(caseRef);
-	Z.debug(date);
-	Z.debug(docTitle);
 
 	item.caseName = title;
 	item.extra = "tex.parties: " + parties;
@@ -98,17 +94,13 @@ async function scrape(doc, url = doc.location.href) {
 	item.dateDecided = date;
 	item.court = docTitle;
 
-	let info = text(doc, 'dl.metadata-group__info');
-	Z.debug(info);
+	//let info = text(doc, 'dl.metadata-group__info');
 
 	let originalPDF = attr(doc, '#a-pdf-tab', 'href');
 	let jusMundiPDF = attr(doc, 'a.btn-pdf-creator-icon', 'href');
-	Z.debug(originalPDF);
-	Z.debug(jusMundiPDF);
 
-	let docItems = doc.querySelectorAll('#listDocuments > li');
-	let relatedDocs = ZU.getItemArray(doc, docItems);
-	Z.debug(relatedDocs);
+	//let docItems = doc.querySelectorAll('#listDocuments > li');
+	//let relatedDocs = ZU.getItemArray(doc, docItems);
 
 	item.attachments.push({
 		title: "Original PDF",
@@ -122,109 +114,10 @@ async function scrape(doc, url = doc.location.href) {
 		url: jusMundiPDF
 	});
 
-	item.attachments.push({
-		title: "Snapshot",
-		document: doc
-	});
-
 	item.url = url;
-
-	//Z.debug(item);
 
 	item.complete();
 }
-
-/*
-function generateCopyRefFor(event) {
-  var _window;
-
-  if (!userConnected() && !isUserPremium() && !isIccPremium()) {
-	event.preventDefault();
-	jquery__WEBPACK_IMPORTED_MODULE_0___default()('#callToActionPremium').modal('show');
-	return;
-  }
-
-  var title = "";
-  var subtitle = "";
-  var caseRef = "";
-  var date = "";
-  var currentElement = null;
-  var contentToCopy = "";
-
-  if (jquery__WEBPACK_IMPORTED_MODULE_0___default()('#iconbar').hasClass('iconbar--pin')) {
-	currentElement = jquery__WEBPACK_IMPORTED_MODULE_0___default.a.trim(jquery__WEBPACK_IMPORTED_MODULE_0___default()('#elmntforcopyref').text());
-  }
-
-  if ((_window = window) !== null && _window !== void 0 && _window.documentPublicationReference) {
-	var _window2;
-
-	var $buttonClicked = jquery__WEBPACK_IMPORTED_MODULE_0___default()(event.currentTarget);
-	var contentJson = (_window2 = window) === null || _window2 === void 0 ? void 0 : _window2.documentPublicationReference;
-	contentToCopy = contentJson.main;
-	var number = contentJson.number;
-	var numberPrefix = contentJson.numberPrefix;
-	var docNumber = jquery__WEBPACK_IMPORTED_MODULE_0___default()('#documentContainer .pa-title-document-managed-by-page').first().text().trim();
-
-	if (docNumber) {
-	  number = docNumber;
-	}
-
-	if ($buttonClicked.hasClass('gtm_document_element_copy_ref')) {
-	  var $title = null;
-	  var $active = jquery__WEBPACK_IMPORTED_MODULE_0___default()('#documentContainer').find('.elemcnt.is-current-active').parents('.entity');
-
-	  if ($active.find('.pa-title-document-managed-by-page').length > 0) {
-		$title = $active.find('.pa-title-document-managed-by-page');
-	  } else if ($active.find('.pa-title').text().trim().length > 0) {
-		$title = $active.find('.pa-title');
-	  } else {
-		jquery__WEBPACK_IMPORTED_MODULE_0___default.a.each($active.prevAll(), function (value) {
-		  if (jquery__WEBPACK_IMPORTED_MODULE_0___default()(value).find('.pa-title-document-managed-by-page').length > 0) {
-			$title = jquery__WEBPACK_IMPORTED_MODULE_0___default()(value).find('.pa-title-document-managed-by-page');
-			return false; // breaks
-		  }
-		});
-	  }
-
-	  if ($title) {
-		number = $title.text().trim();
-	  }
-	} else {
-	  var docNumber = jquery__WEBPACK_IMPORTED_MODULE_0___default()('#documentContainer .pa-title-document-managed-by-page').first().text().trim();
-
-	  if (docNumber) {
-		number = docNumber;
-	  }
-	}
-
-	if (number) {
-	  contentToCopy = contentToCopy + ', ' + numberPrefix + ' ' + number;
-	}
-
-	contentToCopy = contentToCopy + '.';
-	contentToCopy = contentToCopy.replace('..', '.');
-  } else if (jquery__WEBPACK_IMPORTED_MODULE_0___default()(".metadata").hasClass('metadata--treaty') || jquery__WEBPACK_IMPORTED_MODULE_0___default()(".metadata").hasClass('metadata--rule')) {
-	date = jquery__WEBPACK_IMPORTED_MODULE_0___default()('#copyrefdate').data('copyrefdate');
-	subtitle = jquery__WEBPACK_IMPORTED_MODULE_0___default()('.metadata-title .metadata-title__subtitle');
-	subtitle = subtitle !== undefined ? subtitle.text().trim() : "";
-	title = jquery__WEBPACK_IMPORTED_MODULE_0___default()('#generalTitle').text();
-	contentToCopy = (subtitle !== "" ? subtitle : title) + (date !== undefined ? ", " + date : "") + (currentElement != null ? ", " + currentElement : "");
-  } else {
-	var titleOfDocActivate = jquery__WEBPACK_IMPORTED_MODULE_0___default()('div[data-title-in-locale]').data('title-in-locale');
-	var generalTitle = jquery__WEBPACK_IMPORTED_MODULE_0___default()('#generalTitle');
-	caseRef = generalTitle.data('copyrefnum');
-	title = generalTitle.data('copyreftitre');
-	date = jquery__WEBPACK_IMPORTED_MODULE_0___default()('#listDocuments .listofdoc-level.active').data('copyrefdate');
-	contentToCopy = "<i>" + title + "</i>, " + (caseRef === "" ? "" : caseRef + ", ") + titleOfDocActivate + (date !== undefined ? ", " + date : "") + (currentElement != null && currentElement !== 'para .' ? ", " + currentElement : "");
-  }
-
-  putFormattedRefToClipboard(contentToCopy);
-  jquery__WEBPACK_IMPORTED_MODULE_0___default()('.notifyrefcopied').fadeIn('fast');
-  setTimeout(function () {
-	jquery__WEBPACK_IMPORTED_MODULE_0___default()('.notifyrefcopied').fadeOut('slow');
-  }, 2000);
-}
-*/
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -249,10 +142,6 @@ var testCases = [
 					{
 						"title": "Jus Mundi PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -281,10 +170,6 @@ var testCases = [
 					{
 						"title": "Jus Mundi PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -315,10 +200,6 @@ var testCases = [
 					{
 						"title": "Jus Mundi PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -326,6 +207,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://jusmundi.com/en/search?query=sulamerica&page=1&lang=en",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
