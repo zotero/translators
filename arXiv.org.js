@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-10-01 17:25:23"
+	"lastUpdated": "2024-10-01 18:07:21"
 }
 
 /*
@@ -36,6 +36,16 @@
 */
 
 const arXivCategories = {
+	// Technically not categories, but added here to allow tags with "Archive - Sub-Field" structure
+	cs: "Computer Science",
+	econ: "Economics",
+	eess: "Electrical Engineering and Systems Science",
+	math: "Mathematics",
+	nlin: "Nonlinear Sciences",
+	physics: "Physics",
+	"q-fin": "Quantitative Finance",
+	stat: "Statistics",
+
 	"acc-phys": "Accelerator Physics",
 	"adap-org": "Adaptation, Noise, and Self-Organizing Systems",
 	"alg-geom": "Algebraic Geometry",
@@ -395,7 +405,15 @@ function parseSingleEntry(entry) {
 
 	let categories = Array.from(entry.querySelectorAll("category"))
 		.map(el => el.getAttribute("term"))
-		.map(sub => arXivCategories[sub])
+		.map((sub) => {
+			let mainCat = sub.split('.')[0];
+			if (mainCat !== sub && arXivCategories[mainCat]) {
+				return arXivCategories[mainCat] + " - " + arXivCategories[sub];
+			}
+			else {
+				return arXivCategories[sub];
+			}
+		})
 		.filter(Boolean);
 	newItem.tags.push(...categories);
 
@@ -404,9 +422,7 @@ function parseSingleEntry(entry) {
 	if (doi) {
 		newItem.DOI = doi;
 	}
-	else {
-		newItem.url = arxivURL;
-	}
+	newItem.url = arxivURL;
 
 	let articleID = arxivURL.replace(/https?:\/\/arxiv.org\/abs\//, ''); // Trim off http://arxiv.org/abs/
 
@@ -703,7 +719,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Properties of the $\\delta$ Scorpii Circumstellar Disk from Continuum Modeling",
+				"title": "Properties of the $δ$ Scorpii Circumstellar Disk from Continuum Modeling",
 				"creators": [
 					{
 						"firstName": "A. C.",
