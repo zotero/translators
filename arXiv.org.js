@@ -222,7 +222,7 @@ const arXivCategories = {
 	"stat.OT": "Other Statistics",
 	"stat.TH": "Statistics Theory",
 	"supr-con": "Superconductivity",
-	"test": "Test",
+	test: "Test",
 	"test.dis-nn": "Test Disruptive Networks",
 	"test.mes-hall": "Test Hall",
 	"test.mtrl-sci": "Test Mtrl-Sci",
@@ -231,7 +231,7 @@ const arXivCategories = {
 	"test.str-el": "Test Electrons",
 	"test.supr-con": "Test Superconductivity",
 	"bad-arch.bad-cat": "Invalid Category"
-}
+};
 
 var version;
 var arxivDOI;
@@ -347,8 +347,12 @@ function parseSingleEntry(entry) {
 
 	let arxivURL = text(entry, "id").replace(/v\d+/, '');
 	let doi = text(entry, "doi");
-	if (doi) { newItem.DOI = doi }
-	else { newItem.url = arxivURL }
+	if (doi) {
+		newItem.DOI = doi;
+	}
+	else {
+		newItem.url = arxivURL;
+	}
 
 	let articleID = arxivURL.replace(/https?:\/\/arxiv.org\/abs\//, ''); // Trim off http://arxiv.org/abs/
 
