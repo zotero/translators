@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-10-01 15:49:12"
+	"lastUpdated": "2024-10-01 17:25:23"
 }
 
 /*
@@ -34,16 +34,6 @@
 
 	***** END LICENSE BLOCK *****
 */
-
-function detectSearch(item) {
-	return !!item.arXiv;
-}
-
-async function doSearch(item) {
-	let url = `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(item.arXiv)}&max_results=1`;
-	let doc = await ZU.requestDocument(url);
-	parseAtom(doc);
-}
 
 const arXivCategories = {
 	"acc-phys": "Accelerator Physics",
@@ -238,6 +228,15 @@ var arxivDOI;
 // these variables will be set in doWeb and
 // can be used then afterwards in the parseXML
 
+function detectSearch(item) {
+	return !!item.arXiv;
+}
+
+async function doSearch(item) {
+	let url = `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(item.arXiv)}&max_results=1`;
+	let doc = await ZU.requestDocument(url);
+	parseAtom(doc);
+}
 
 function detectWeb(doc, url) {
 	var searchRe = /^https?:\/\/(?:([^.]+\.))?(?:arxiv\.org|xxx\.lanl\.gov)\/(?:search|find|list|catchup)\b/;
@@ -249,7 +248,7 @@ function detectWeb(doc, url) {
 		return "journalArticle";
 	}
 	else {
-		return "report";
+		return "preprint";
 	}
 }
 
@@ -308,7 +307,7 @@ function getSearchResultsLegacy(doc, checkOnly = false) {
 	return found && items;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
 		var rows = ZU.xpath(doc, '//div[@id="dlpage"]/dl/dt');
 		var getTitleId;
@@ -345,19 +344,12 @@ function doWeb(doc, url) {
 			items[row.id] = row.title;
 		}
 		
-		Z.selectItems(items, function (items) {
-			if (!items) return;
-			
-			var urls = [];
-			for (var id in items) {
-				urls.push('http://export.arxiv.org/oai2'
-					+ '?verb=GetRecord&metadataPrefix=oai_dc'
-					+ '&identifier=oai%3AarXiv.org%3A' + encodeURIComponent(id)
-				);
-			}
-			
-			ZU.doGet(urls, parseXML);
-		});
+		let selectedItems = await Z.selectItems(items);
+		if (selectedItems) {
+			let apiURL = `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(Object.keys(selectedItems).join(','))}`;
+			let document = await requestDocument(apiURL);
+			parseAtom(document);
+		}
 	}
 	else {
 		var id;
@@ -389,7 +381,7 @@ function parseSingleEntry(entry) {
 	let newItem = new Zotero.Item("preprint");
 
 	newItem.title = ZU.trimInternal(text(entry, "title"));
-	newItem.date = text(entry, "updated");
+	newItem.date = ZU.strToISO(text(entry, "updated"));
 	entry.querySelectorAll(`author > name`).forEach(node => newItem.creators.push(ZU.cleanAuthor(node.textContent, 'author', false)));
 
 	newItem.abstractNote = ZU.trimInternal(text(entry, "summary"));
@@ -892,7 +884,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2014-02-06T22:20:30Z",
+				"date": "2014-02-06",
 				"abstractNote": "We construct a dual pair associated to the Hamiltonian geometric formulation of perfect fluids with free boundaries. This dual pair is defined on the cotangent bundle of the space of volume preserving embeddings of a manifold with boundary into a boundaryless manifold of the same dimension. The dual pair properties are rigorously verified in the infinite dimensional Fr\\'echet manifold setting. It provides an example of a dual pair associated to actions that are not completely mutually orthogonal.",
 				"archiveID": "arXiv:1402.1516",
 				"extra": "arXiv:1402.1516 [math]",
