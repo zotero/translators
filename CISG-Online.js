@@ -2,14 +2,14 @@
 	"translatorID": "045d1f03-d17b-4437-9290-d3a4203c4cbc",
 	"label": "CISG-Online",
 	"creator": "Jonas Zaugg",
-	"target": "^https?://cisg-online.org/search-for-cases",
+	"target": "^https?://cisg-online\\.org/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-09-27 20:28:58"
+	"lastUpdated": "2024-10-01 16:50:52"
 }
 
 /*
@@ -37,13 +37,12 @@
 
 
 function detectWeb(doc, url) {
-	// TODO: adjust the logic here
 	if (url.includes('caseId=')) {
 		return 'case';
 	}
 	else if (url.includes('search-for-cases')) {
 		// Only present on search form, not on top 50 pages
-		let searchResultsContainer = doc.querySelector('div#searchCaseResult');
+		let searchResultsContainer = doc.querySelector('#searchCaseResult');
 		if (searchResultsContainer) Z.monitorDOMChanges(searchResultsContainer);
 		if (getSearchResults(doc, true)) {
 			return 'multiple';
@@ -55,12 +54,10 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	let selector = 'div.search-result div.col-md-10 a.search-result-link';
+	let selector = '.search-result a.search-result-link';
 	var rows = doc.querySelectorAll(selector);
 	for (let row of rows) {
-		// TODO: check and maybe adjust
 		let href = row.href;
-		// TODO: check and maybe adjust
 		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -87,7 +84,6 @@ async function doWeb(doc, url) {
 function labellize(row) {
 	let segments = row.querySelectorAll("div");
 	if (segments.length != 2) {
-		Z.debug("Row does not contain exactly 2 elements but " + segments.length);
 		return null;
 	}
 
@@ -99,7 +95,7 @@ function getRow(doc, sectionName, rowName) {
 	let selector = `div.${sectionName}-rows div.row:not([data-has-content]):not([data-is-content])`;
 	let rows = doc.querySelectorAll(selector);
 	let result;
-	for (let row of rows.values()) {
+	for (let row of rows) {
 		if (row.textContent.includes(rowName)) return row.children[1];
 	}
 	return result;
@@ -117,25 +113,22 @@ function getDataBlock(doc, selector, label) {
 	if (!blocks.length) return null;
 
 	let result = "";
-	for (let block of blocks.values()) {
+	for (let block of blocks) {
 		result += `<h2>${label}</h2><ul>`;
-		// TODO: check fragility
 		let rows = block.querySelectorAll("div.row > div > div.row");
-		for (let row of rows.values()) result += `<li>${labellize(row)}</li>`;
+		for (let row of rows) result += `<li>${labellize(row)}</li>`;
 		result += "</ul>\n";
 	}
-	Z.debug(result);
 	return result;
 }
 
-// For sellers, buyers, claimants, respondents but not history
+// For case history
 function getCaseHistory(doc) {
 	let cases = doc.querySelectorAll(`div[data-is-content='history'] div.is-content-history`);
 	if (!cases.length) return null;
 
 	let result = "<h2>Case History</h2><ul>";
-	for (let cisgCase of cases.values()) {
-		//result += `<li>${labellize(row)}</li>`;
+	for (let cisgCase of cases) {
 		if (cisgCase.classList.contains('is-this-case')) result += "<li><b>Present decision</b></li>";
 		else {
 			let caseName = ZU.trimInternal(text(cisgCase, 'div.row'));
@@ -145,30 +138,28 @@ function getCaseHistory(doc) {
 		}
 	}
 	result += "</ul>\n";
-	Z.debug(result);
 	return result;
 }
 
 function getInfoBlock(doc, selector, label) {
-	let rows = doc.querySelectorAll(`div.${selector}-rows > div.row:not([data-has-content]):not([data-is-content])`);
+	let rows = doc.querySelectorAll(`.${selector}-rows > .row:not([data-has-content]):not([data-is-content])`);
 	if (!rows.length) return null;
 
 	let result = `<h1>${label}</h1><ul>`;
-	for (let row of rows.values()) result += `<li>${labellize(row)}</li>`;
+	for (let row of rows) result += `<li>${labellize(row)}</li>`;
 	result += "</ul>";
 	return result;
 }
 
 function getContentCases(doc, selector) {
-	return doc.querySelectorAll(`div[data-is-content='${selector}'] div.is-content-cases`);
+	return doc.querySelectorAll(`div[data-is-content='${selector}'] .is-content-cases`);
 }
 
 function addPDFs(doc, item) {
 	// Decision or abstract in PDF
 	let caseFiles = getContentCases(doc, 'fullTextTranslationFiles');
-	for (let caseFile of caseFiles.values()) {
+	for (let caseFile of caseFiles) {
 		let caseFileName = ZU.trimInternal(caseFile.textContent);
-		Z.debug("Adding case file: " + caseFileName);
 		let caseFileAnchor = caseFile.querySelector("a");
 		if (caseFileAnchor) {
 			item.attachments.push({
@@ -182,12 +173,11 @@ function addPDFs(doc, item) {
 
 function getCISGCases(doc, selector, label) {
 	let cases = getContentCases(doc, selector);
-	Z.debug(`${label} ${cases.length} CISG-Online decisions.`);
 	if (!cases.length) return null;
 
 	let note = `<h1>${label} ${cases.length} case(s)</h1><ul>`;
 
-	for (let cisgCase of cases.values()) {
+	for (let cisgCase of cases) {
 		let caseName = ZU.trimInternal(text(cisgCase, 'div.row'));
 		let caseID = cisgCase.getAttribute('id').replace('searchCaseRow_', '');
 		let caseURL = `https://cisg-online.org/search-for-cases?caseId=${caseID}`;
@@ -203,7 +193,7 @@ function getCommentExtras(doc, item, selector, label) {
 	if (!extras.length) return null;
 
 	let note = `<h2>${label}</h2><ul>`;
-	for (let extra of extras.values()) {
+	for (let extra of extras) {
 		let extraText = ZU.trimInternal(extra.textContent);
 		let extraAnchor = extra.querySelector("a");
 		
