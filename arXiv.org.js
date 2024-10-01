@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-10-01 18:07:21"
+	"lastUpdated": "2024-10-01 20:31:44"
 }
 
 /*
@@ -275,7 +275,7 @@ function getSearchResults(doc, checkOnly = false) {
 function getSearchResultsNew(doc, checkOnly = false) {
 	let items = {};
 	let found = false;
-	let rows = doc.querySelectorAll("li.arxiv-result");
+	let rows = doc.querySelectorAll(".arxiv-result");
 	for (let row of rows) {
 		let id = text(row, ".list-title a").trim().replace(/^arXiv:/, "");
 		let title = ZU.trimInternal(text(row, "p.title"));
@@ -319,40 +319,7 @@ function getSearchResultsLegacy(doc, checkOnly = false) {
 
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
-		var rows = ZU.xpath(doc, '//div[@id="dlpage"]/dl/dt');
-		var getTitleId;
-		if (rows.length) {
-			// arXiv.org format
-			getTitleId = function (row) {
-				var id = ZU.xpathText(row, './/a[@title="Abstract"]').trim().substr(6); // Trim off arXiv:
-				var title = ZU.trimInternal(
-					ZU.xpathText(row, './following-sibling::dd[1]//div[contains(@class, "list-title")]/text()[last()]'));
-				return {
-					title: title,
-					id: id
-				};
-			};
-		}
-		else if ((rows = ZU.xpath(doc, '//table/tbody/tr[./td[@class="lti"]]')).length) {
-			// eprintweb.org format
-			getTitleId = function (row) {
-				var title = ZU.trimInternal(ZU.xpathText(row, './td'));
-				var id = ZU.xpathText(row, './following-sibling::tr[.//a][1]/td/b').trim().substr(6);
-				return {
-					title: title,
-					id: id
-				};
-			};
-		}
-		else {
-			throw new Error("Unrecognized multiples format");
-		}
-		
-		var items = {};
-		for (let i = 0; i < rows.length; i++) {
-			var row = getTitleId(rows[i]);
-			items[row.id] = row.title;
-		}
+		var items = getSearchResults(doc);
 		
 		let selectedItems = await Z.selectItems(items);
 		if (selectedItems) {
@@ -362,21 +329,21 @@ async function doWeb(doc, url) {
 		}
 	}
 	else {
-		var id;
-		var versionMatch = url.match(/v(\d+)(\.pdf)?([?#].+)?$/);
+		let id = url.match(/(?:pdf|abs)\/(.+)(?:\.pdf)?/)[1];
+		let versionMatch = url.match(/v(\d+)(\.pdf)?([?#].+)?$/);
 		if (versionMatch) {
 			version = versionMatch[1];
 		}
 		arxivDOI = text(doc, '.arxivdoi>a');
-		if (url.includes("/pdf/")) {
-			id = url.match(/pdf\/(.+)(?:\.pdf)?/)[1];
+
+		if (!id) { // Honestly not sure where this might still be needed
+			id = text(doc, 'span.arxivid > a');
 		}
-		else {
-			id = ZU.xpathText(doc, '(//span[@class="arxivid"]/a)[1]')
-				|| ZU.xpathText(doc, '//b[starts-with(normalize-space(text()),"arXiv:")]');
-		}
+
 		if (!id) throw new Error('Could not find arXiv ID on page.');
-		id = id.trim().replace(/^arxiv:\s*|v\d+|\s+.*$/ig, '');
+		// Do not trim version
+		//id = id.trim().replace(/^arxiv:\s*|v\d+|\s+.*$/ig, '');
+		id = id.trim().replace(/^arxiv:\s*|\s+.*$/ig, '');
 		let apiURL = `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(id)}&max_results=1`;
 		await ZU.requestDocument(apiURL).then(parseAtom);
 	}
@@ -485,157 +452,6 @@ function parseSingleEntry(entry) {
 		if (arxivDOI) newItem.DOI = ZU.cleanDOI(arxivDOI);
 		newItem.archiveID = "arXiv:" + articleID;
 		newItem.complete();
-	}
-}
-
-function parseXML(text) {
-	/* eslint camelcase: ["error", { allow: ["oai_dc"] }] */
-	var ns = {
-		oai_dc: 'http://www.openarchives.org/OAI/2.0/oai_dc/',
-		dc: 'http://purl.org/dc/elements/1.1/',
-		xsi: 'http://www.w3.org/2001/XMLSchema-instance',
-		n: 'http://www.openarchives.org/OAI/2.0/' // Default
-	};
-	var hasPreprint;
-	if (ZU.fieldIsValidForType('title', 'preprint')) {
-		hasPreprint = true;
-	}
-	var newItem;
-	if (hasPreprint) {
-		newItem = new Zotero.Item("preprint");
-	}
-	else {
-		newItem = new Zotero.Item("report");
-	}
-	var xml = (new DOMParser()).parseFromString(text, "text/xml");
-	var dcMeta = ZU.xpath(xml, '//n:GetRecord/n:record/n:metadata/oai_dc:dc', ns)[0];
-
-	newItem.title = getXPathNodeTrimmed(dcMeta, "dc:title", ns);
-	getCreatorNodes(dcMeta, "dc:creator", newItem, "author", ns);
-	var dates = ZU.xpath(dcMeta, './dc:date', ns)
-		.map(element => element.textContent)
-		.sort();
-	if (dates.length > 0) {
-		if (version && version < dates.length) {
-			newItem.date = dates[version - 1];
-		}
-		else {
-			// take the latest date
-			newItem.date = dates[dates.length - 1];
-		}
-	}
-
-
-	var descriptions = ZU.xpath(dcMeta, "./dc:description", ns);
-
-	// Put the first description into abstract, all other into notes.
-	if (descriptions.length > 0) {
-		newItem.abstractNote = ZU.trimInternal(descriptions[0].textContent);
-		for (let j = 1; j < descriptions.length; j++) {
-			var noteStr = ZU.trimInternal(descriptions[j].textContent);
-			newItem.notes.push({ note: noteStr });
-		}
-	}
-	var subjects = ZU.xpath(dcMeta, "./dc:subject", ns);
-	for (let j = 0; j < subjects.length; j++) {
-		var subject = ZU.trimInternal(subjects[j].textContent);
-		newItem.tags.push(subject);
-	}
-
-	var identifiers = ZU.xpath(dcMeta, "./dc:identifier", ns);
-	for (let j = 0; j < identifiers.length; j++) {
-		var identifier = ZU.trimInternal(identifiers[j].textContent);
-		if (identifier.substr(0, 4) == "doi:") {
-			newItem.DOI = identifier.substr(4);
-		}
-		else if (identifier.substr(0, 7) == "http://") {
-			newItem.url = identifier;
-		}
-	}
-
-	var articleID = ZU.xpath(xml, "//n:GetRecord/n:record/n:header/n:identifier", ns)[0];
-	if (articleID) articleID = ZU.trimInternal(articleID.textContent).substr(14); // Trim off oai:arXiv.org:
-
-	var articleField = ZU.xpathText(xml, '//n:GetRecord/n:record/n:header/n:setSpec', ns);
-	if (articleField) articleField = "[" + articleField.replace(/^.+?:/, "") + "]";
-
-	if (articleID && articleID.includes("/")) {
-		newItem.extra = "arXiv:" + articleID;
-	}
-	else {
-		newItem.extra = "arXiv:" + articleID + " " + articleField;
-	}
-
-	var pdfUrl = "https://arxiv.org/pdf/" + articleID + (version ? "v" + version : "") + ".pdf";
-	newItem.attachments.push({
-		title: "arXiv Fulltext PDF",
-		url: pdfUrl,
-		mimeType: "application/pdf"
-	});
-	newItem.attachments.push({
-		title: "arXiv.org Snapshot",
-		url: newItem.url,
-		mimeType: "text/html"
-	});
-
-	// retrieve and supplement publication data for published articles via DOI
-	if (newItem.DOI) {
-		var translate = Zotero.loadTranslator("search");
-		// CrossRef
-		translate.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
-
-		var item = { itemType: "journalArticle", DOI: newItem.DOI };
-		translate.setSearch(item);
-		translate.setHandler("itemDone", function (obj, item) {
-			newItem.itemType = item.itemType;
-			newItem.volume = item.volume;
-			newItem.issue = item.issue;
-			newItem.pages = item.pages;
-			newItem.date = item.date;
-			newItem.ISSN = item.ISSN;
-			if (item.publicationTitle) {
-				newItem.publicationTitle = item.publicationTitle;
-				newItem.journalAbbreviation = item.journalAbbreviation;
-			}
-			newItem.date = item.date;
-		});
-		translate.setHandler("done", function () {
-			newItem.complete();
-		});
-		translate.setHandler("error", function () { });
-		translate.translate();
-	}
-	else {
-		newItem.publisher = "arXiv";
-		newItem.number = "arXiv:" + articleID;
-		if (version) {
-			newItem.extra += '\nversion: ' + version;
-		}
-		if (arxivDOI) newItem.DOI = ZU.cleanDOI(arxivDOI);
-		// only for Zotero versions without preprint
-		if (!hasPreprint) {
-			newItem.extra += '\ntype: article';
-		}
-		else newItem.archiveID = "arXiv:" + articleID;
-		newItem.complete();
-	}
-}
-
-
-function getXPathNodeTrimmed(dcMeta, name, ns) {
-	var node = ZU.xpath(dcMeta, './' + name, ns);
-	if (node.length) {
-		return ZU.trimInternal(node[0].textContent);
-	}
-	return '';
-}
-
-function getCreatorNodes(dcMeta, name, newItem, creatorType, ns) {
-	var nodes = ZU.xpath(dcMeta, './' + name, ns);
-	for (var i = 0; i < nodes.length; i++) {
-		newItem.creators.push(
-			ZU.cleanAuthor(nodes[i].textContent, creatorType, true)
-		);
 	}
 }
 
@@ -922,10 +738,10 @@ var testCases = [
 						"tag": "Mathematical Physics"
 					},
 					{
-						"tag": "Mathematical Physics"
+						"tag": "Mathematics - Mathematical Physics"
 					},
 					{
-						"tag": "Symplectic Geometry"
+						"tag": "Mathematics - Symplectic Geometry"
 					}
 				],
 				"notes": [
@@ -966,8 +782,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2018-10-10",
-				"abstractNote": "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful. It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE score to 80.5% (7.7% point absolute improvement), MultiNLI accuracy to 86.7% (4.6% absolute improvement), SQuAD v1.1 question answering Test F1 to 93.2 (1.5 point absolute improvement) and SQuAD v2.0 Test F1 to 83.1 (5.1 point absolute improvement).",
+				"date": "2018-10-11",
+				"DOI": "10.48550/arXiv.1810.04805",
+				"abstractNote": "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT representations can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful. It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE benchmark to 80.4% (7.6% absolute improvement), MultiNLI accuracy to 86.7 (5.6% absolute improvement) and the SQuAD v1.1 question answering Test F1 to 93.2 (1.5% absolute improvement), outperforming human performance by 2.0%.",
 				"archiveID": "arXiv:1810.04805",
 				"extra": "arXiv:1810.04805 [cs]\nversion: 1",
 				"libraryCatalog": "arXiv.org",
@@ -989,7 +806,11 @@ var testCases = [
 						"tag": "Computer Science - Computation and Language"
 					}
 				],
-				"notes": [],
+				"notes": [
+					{
+						"note": "Comment: 13 pages"
+					}
+				],
 				"seeAlso": []
 			}
 		]
@@ -1024,6 +845,7 @@ var testCases = [
 					}
 				],
 				"date": "2019-05-24",
+				"DOI": "10.48550/arXiv.1810.04805",
 				"abstractNote": "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful. It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE score to 80.5% (7.7% point absolute improvement), MultiNLI accuracy to 86.7% (4.6% absolute improvement), SQuAD v1.1 question answering Test F1 to 93.2 (1.5 point absolute improvement) and SQuAD v2.0 Test F1 to 83.1 (5.1 point absolute improvement).",
 				"archiveID": "arXiv:1810.04805",
 				"extra": "arXiv:1810.04805 [cs]\nversion: 2",
@@ -1095,11 +917,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2022-01-07",
+				"date": "2023-02-07",
 				"DOI": "10.48550/arXiv.2201.00738",
 				"abstractNote": "Dark matter is five times more abundant than ordinary visible matter in our Universe. While laboratory searches hunting for dark matter have traditionally focused on the electroweak scale, theories of low mass hidden sectors motivate new detection techniques. Extending these searches to lower mass ranges, well below 1 GeV/c$^2$, poses new challenges as rare interactions with standard model matter transfer progressively less energy to electrons and nuclei in detectors. Here, we propose an approach based on phonon-assisted quantum evaporation combined with quantum sensors for detection of desorption events via tracking of spin coherence. The intent of our proposed dark matter sensors is to extend the parameter space to energy transfers in rare interactions to as low as a few meV for detection of dark matter particles in the keV/c$^2$ mass range.",
 				"archiveID": "arXiv:2201.00738",
-				"extra": "arXiv:2201.00738 [cond-mat, physics:hep-ex, physics:quant-ph]",
+				"extra": "arXiv:2201.00738 [hep-ex]",
 				"libraryCatalog": "arXiv.org",
 				"repository": "arXiv",
 				"url": "http://arxiv.org/abs/2201.00738",
@@ -1126,7 +948,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "Comment: 7 pages, 4 figures. Fixed typos in address"
+						"note": "Comment: 8 pages, 3 figures. Updated various parts"
 					}
 				],
 				"seeAlso": []
@@ -1179,9 +1001,6 @@ var testCases = [
 					}
 				],
 				"tags": [
-					{
-						"tag": "53C"
-					},
 					{
 						"tag": "Mathematics - Differential Geometry"
 					}
