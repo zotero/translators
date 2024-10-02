@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-06-18 13:26:44"
+	"lastUpdated": "2024-10-02 12:12:48"
 }
 
 /*
@@ -184,20 +184,25 @@ function scrape(doc, url) {
 					}
 				}
 			}
-			if (ZU.xpathText(doc, '//div[@class="meta-panel__type"]') && ZU.xpathText(doc, '//div[@class="meta-panel__type"]').match(/book\s+review/i)) item.tags.push("Book Review");
-			//ubtue: add tag "Book Review" in every issue 5 of specific journals if the dc.Type is "others"
+			if (ZU.xpathText(doc, '//div[@class="meta-panel__type"]') && ZU.xpathText(doc, '//div[@class="meta-panel__type"]').match(/book\s+review/i)) {
+				item.tags.push("Book Review");
+			}
+
 			let reviewType = ZU.xpathText(doc, '//meta[@name="dc.Type"]/@content');
-			if (reviewType.match(/product-review/i))
-                item.tags.push('Book Review');
-			else if (item.ISSN === '0142-064X' || item.ISSN === '0309-0892') {
-				if (reviewType && reviewType.match(/other/i) && item.issue === '5') {
-					item.tags.push('Book Review');
-					item.notes.push({note: "Booklist:" + item.date.match(/\d{4}$/)});
-					if (item.abstractNote && item.abstractNote.match(/,(?!\s\w)/g)) {
-						item.abstractNote = '';	
-					}
+			if (reviewType?.match(/(product|book)-review/i))
+				item.tags.push('Book Review');
+			// Special handling for JSNT + JSOT:
+			// The special handling of every 5th edition with type "other" has proven to be unrealible
+			// As of end of 2024 the dc.Type seems to be correct for JSNT (and hopefully JSOT in the future), so the general dc.Type handling above applies
+			if (item.ISSN.match(/0142-064X|0309-0892/i) && item.issue == 5) {
+				item.notes.push({note: "Booklist:" + item.date.match(/\d{4}/)});
+				if (item.abstractNote && item.abstractNote.match(/,(?!\s\w)/g)) {
+					item.abstractNote = '';
 				}
 			}
+
+			// Deduplicate
+			item.tags = [...new Set(item.tags)];
 
 			// numbering issues with slash, e.g. in case of  double issue "1-2" > "1/2"
 			if (item.issue) item.issue = item.issue.replace('-', '/');
