@@ -2,7 +2,7 @@
 	"translatorID": "2ea86ad9-71ca-410c-9126-9d7d98722acf",
 	"label": "Dalloz Bibliothèque",
 	"creator": "Alexandre Mimms",
-	"target": "https?://(www\\.)?bibliotheque\\.lefebvre-dalloz\\.fr",
+	"target": "https?://(www\\.)?bibliotheque\\.lefebvre\\.dalloz\\.fr",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
