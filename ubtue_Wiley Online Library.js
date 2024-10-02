@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-22 13:20:09"
+	"lastUpdated": "2024-10-02 14:19:55"
 }
 
 /*
@@ -94,6 +94,15 @@ function normalizeIssue(doc, item) {
 
 function normalizeTitle(item) {
 	item.title = item.title.replace(/[☆*]+$/, '');
+}
+
+function handleErroneousReviewTitles(doc, item) {
+	if (item.tags?.some(e => e == "Book Review" )) {
+		websiteTitle = ZU.xpathText(doc,'//*[@class="citation__title"]');
+		if (!websiteTitle)
+		    return;
+	    item.title = websiteTitle
+	}
 }
 
 function scrapeBook(doc, url) {
@@ -300,7 +309,8 @@ function scrapeBibTeX(doc, url) {
 			if (item.title && item.title.toUpperCase() == item.title) {
 				item.title = ZU.capitalizeTitle(item.title, true);
 			}
-			//subtitle
+
+            //subtitle
 			let citationSubtitle = ZU.xpathText(doc, '//*[@class="citation__subtitle"]');
 			if (item.title && citationSubtitle) item.title = item.title + ': ' + citationSubtitle;
 			
@@ -388,6 +398,8 @@ function scrapeBibTeX(doc, url) {
 			addFreeAccessTag(doc, item);
 			getORCID(doc, item);
 			normalizeIssue(doc, item);
+			// Workaround for erroneous Bibtex and RIS information for reviews
+			handleErroneousReviewTitles(doc, item);
 			normalizeTitle(item);
 			item.complete();
 		});
@@ -403,6 +415,7 @@ function addFreeAccessTag(doc, item) {
 		item.notes.push('LF:');
 	};
 }
+
 
 function getORCID(doc, item) {
 	let authorOrcidEntries = doc.querySelectorAll('#sb-1 span');
@@ -562,8 +575,6 @@ function doWeb(doc, url) {
 		}
 	}
 }
-
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
