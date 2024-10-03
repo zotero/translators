@@ -3,13 +3,13 @@
 	"label": "NASA ADS",
 	"creator": "Tim Hostetler, Abe Jellinek, and Zoë C. Ma",
 	"target": "^https://ui\\.adsabs\\.harvard\\.edu/(search|abs)/",
-	"minVersion": "3.0",
+	"minVersion": "6.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-09 17:06:21"
+	"lastUpdated": "2023-10-25 13:21:08"
 }
 
 /*
@@ -35,70 +35,91 @@
 	***** END LICENSE BLOCK *****
 */
 
-const preprintType = ZU.fieldIsValidForType('title', 'preprint')
-	? 'preprint'
-	: 'report';
-
-function getSearchResults(doc) {
-	const results = doc.querySelectorAll("a[href$=abstract]");
-	const entries = {};
-	for (let el of results) {
-		const titleEl = el.querySelector(":scope h3");
-		if (!titleEl) {
-			continue;
-		}
-		const hrefParts = el.getAttribute("href").split("/");
-		if (hrefParts.length > 2) {
-			const identifier = hrefParts[hrefParts.length - 2];
-			entries[identifier] = ZU.trimInternal(titleEl.textContent);
-		}
+function getSearchResults(doc, checkOnly = false) {
+	let entries = {};
+	let found = false;
+	for (let row of doc.querySelectorAll(".results-list > li")) {
+		let id = text(row, ".identifier").trim();
+		let title = ZU.trimInternal(text(row, ".s-results-title"));
+		if (!id || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		entries[id] = title;
 	}
-	return entries;
+	return found && entries;
 }
 
 function extractId(url) {
-	return decodeURIComponent(/\/abs\/([^/]+)/.exec(url)[1]);
+	let m = url.match(/\/abs\/([^/]+)/);
+	return m && decodeURIComponent(m[1]);
 }
 
+// "Snoop" the item type from the page itself - this is used for displaying the
+// connector icon. The actual itemType will handled a lot better by 'ADS
+// Bibcode.js' search translator using more information that becomes available
+// only after querying the API. For the UI, we don't have to be super precise.
+// Ref: https://adsabs.harvard.edu/abs_doc/journals1.html
+// https://adsabs.harvard.edu/abs_doc/conferences1.html
 function getTypeFromId(id) {
-	// bibcodes always start with 4 digit year, then bibstem
-	const bibstem = id.slice(4);
-	if (bibstem.startsWith("MsT") || bibstem.startsWith("PhDT")) {
+	let bibstem = id.slice(4);
+	if (/^(MsT|PhDT)/.test(bibstem)) {
 		return "thesis";
 	}
-	else if (bibstem.startsWith("arXiv")) {
-		return preprintType;
+	if (/^(arXiv|gr_qc|hep_|math_ph|math|nucl_|physics)/.test(bibstem)) {
+		return "preprint";
 	}
-	else {
-		// now scan past the bibstem and find the volume number/type abbrev.
-		const volume = bibstem.substring(5, 9);
-		if (volume == "conf" || volume == "meet" || volume == "coll"
-			|| volume == "proc" || volume == "book") {
-			return "book";
-		}
-		else if (volume == "rept") {
-			return "report";
-		}
+
+	let volume = bibstem.substring(5, 9);
+	if (volume === "rept") {
+		return "report";
 	}
-	return "journalArticle";
+
+	// determine whether the special "volumes" refer to a container (book,
+	// incl. proceedings book) or a component (chapter, conference paper)
+	// If the "page number" does not look like wdigits, it's likely a
+	// container.
+	let pages = bibstem.slice(10, 14).replace(/^\.*/, "");
+	let isNumbered = /^\d+$/.test(pages);
+	if (volume === "book") {
+		return isNumbered ? "bookSection" : "book";
+	}
+	if (["coll", "conf", "cong", "meet", "symp", "work"].includes(volume)) {
+		return isNumbered ? "conferencePaper" : "book";
+	}
+
+	return "journalArticle"; // fallback
 }
 
 function detectWeb(doc, url) {
-	if (url.includes("/search/")) {
-		return "multiple";
+	let path = new URL(url).pathname;
+	if (path.startsWith("/search/")) { // search page
+		// Prefer watching the AJAX-generated container for search results to
+		// watching its high-level parent defined in the static HTML source
+		let root = doc.getElementById("results-middle-column") || doc.getElementById("body-template-container");
+		if (root) Z.monitorDOMChanges(root);
+		return getSearchResults(doc, true) && "multiple";
 	}
-	else if (url.includes("/abs/")) {
+
+	if (/^\/abs\/[^/]+\/(references|similar|coreads|citations|toc)$/.test(path)) {
+		// List of articles related to the current article ("subview")
+		let root = doc.getElementById("current-subview");
+		if (root) Z.monitorDOMChanges(root);
+		if (getSearchResults(doc, true)) return "multiple";
+	}
+
+	// If the related-article list is empty, this will fall back to the current
+	// single article
+	if (path.startsWith("/abs/")) {
 		return getTypeFromId(extractId(url));
 	}
 	return false;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) === "multiple") {
-		Zotero.selectItems(getSearchResults(doc), function (items) {
-			if (!items) return true;
-			return scrape(Object.keys(items));
-		});
+		let items = await Zotero.selectItems(getSearchResults(doc));
+		if (!items) return;
+		scrape(Object.keys(items));
 	}
 	else {
 		scrape([extractId(url)]);
@@ -375,6 +396,7 @@ var testCases = [
 				"abstractNote": "Many real-world applications require the prediction of long sequence time-series, such as electricity consumption planning. Long sequence time-series forecasting (LSTF) demands a high prediction capacity of the model, which is the ability to capture precise long-range dependency coupling between output and input efficiently. Recent studies have shown the potential of Transformer to increase the prediction capacity. However, there are several severe issues with Transformer that prevent it from being directly applicable to LSTF, including quadratic time complexity, high memory usage, and inherent limitation of the encoder-decoder architecture. To address these issues, we design an efficient transformer-based model for LSTF, named Informer, with three distinctive characteristics: (i) a $ProbSparse$ self-attention mechanism, which achieves $O(L \\log L)$ in time complexity and memory usage, and has comparable performance on sequences' dependency alignment. (ii) the self-attention distilling highlights dominating attention by halving cascading layer input, and efficiently handles extreme long input sequences. (iii) the generative style decoder, while conceptually simple, predicts the long time-series sequences at one forward operation rather than a step-by-step way, which drastically improves the inference speed of long-sequence predictions. Extensive experiments on four large-scale datasets demonstrate that Informer significantly outperforms existing methods and provides a new solution to the LSTF problem.",
 				"extra": "ADS Bibcode: 2020arXiv201207436Z",
 				"libraryCatalog": "NASA ADS",
+				"repository": "arXiv",
 				"shortTitle": "Informer",
 				"url": "https://ui.adsabs.harvard.edu/abs/2020arXiv201207436Z",
 				"attachments": [
@@ -461,6 +483,18 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://ui.adsabs.harvard.edu/abs/2011PhRvA..84f3834P/coreads",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://ui.adsabs.harvard.edu/abs/2020jsrs.conf.....B/toc",
+		"defer": true,
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
