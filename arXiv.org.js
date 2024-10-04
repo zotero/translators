@@ -3,13 +3,13 @@
 	"label": "arXiv.org",
 	"creator": "Sean Takats and Michael Berkowitz",
 	"target": "^https?://([^\\.]+\\.)?(arxiv\\.org|xxx\\.lanl\\.gov)/(search|find|catchup|list/\\w|abs/|pdf/)",
-	"minVersion": "3.0",
+	"minVersion": "6.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-10-04 06:45:31"
+	"lastUpdated": "2024-10-04 14:55:12"
 }
 
 /*
