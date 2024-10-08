@@ -8,8 +8,8 @@
 	"priority": 248,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsb",
-	"lastUpdated": "2021-03-03 10:06:49"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2024-09-20 15:05:33"
 }
 
 /*
@@ -167,7 +167,7 @@ function scrape(doc, url) {
 				// sudoc has authors on separate lines and with different format - use this
 				var authors;
 				var author;
-				if (url.search(/sudoc\.(abes\.)?fr/) != -1) {
+				if (/sudoc\.(abes\.)?fr/.test(url)) {
 					authors = ZU.xpath(tableRow, './td[2]/div');
 					for (i in authors) {
 						var authorText = authors[i].textContent;
@@ -211,7 +211,7 @@ function scrape(doc, url) {
 				else {
 					authors = value.split(/\s*;\s*/);
 					for (i in authors) {
-						if (role == "author") if (authors[i].search(/[[()]Hrsg\.?[\])]/) != -1) role = "editor";
+						if (role == "author") if (/[[()]Hrsg\.?[\])]/.test(authors[i])) role = "editor";
 						author = authors[i].replace(/[*([].+[)*\]]/, "");
 						var comma = author.includes(",");
 						newItem.creators.push(Zotero.Utilities.cleanAuthor(author, role, comma));
@@ -427,7 +427,7 @@ function scrape(doc, url) {
 					if (!pub) break; // not sure what this would be or look like without publisher
 					pub = pub.replace(/\[.*?\]/g, '')	// drop bracketted info, which looks to be publisher role
 									.split(',');
-					if (pub[pub.length - 1].search(/\D\d{4}\b/) != -1) {	// this is most likely year, we can drop it
+					if (/\D\d{4}\b/.test(pub[pub.length - 1])) {	// this is most likely year, we can drop it
 						pub.pop();
 					}
 					if (pub.length) newItem.publisher = pub.join(',');	// in case publisher contains commas
@@ -554,7 +554,7 @@ function scrape(doc, url) {
 				for (i in isbns) {
 					m = isbns[i].match(/[-x\d]{10,}/i);	// this is necessary until 3.0.12
 					if (!m) continue;
-					if (m[0].replace(/-/g, '').search(/^(?:\d{9}|\d{12})[\dx]$/i) != -1) {
+					if (/^(?:\d{9}|\d{12})[\dx]$/i.test(m[0].replace(/-/g, ''))) {
 						isbn.push(m[0]);
 					}
 				}
@@ -619,7 +619,7 @@ function scrape(doc, url) {
 	// switch institutional authors to single field;
 	for (i = 0; i < newItem.creators.length; i++) {
 		if (!newItem.creators[i].firstName) {
-			newItem.creators[i].fieldMode = true;
+			newItem.creators[i].fieldMode = 1;
 		}
 	}
 	if (permalink) {
@@ -653,8 +653,10 @@ function doWeb(doc, url) {
 	var type = detectWeb(doc, url);
 	if (type == "multiple") {
 		var newUrl = doc.evaluate('//base/@href', doc, null, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-		// fix for sudoc, see #1529
-		newUrl = newUrl.replace(/sudoc\.abes\.fr\/cbs\/\/?DB=/, 'sudoc.abes.fr/cbs/xslt/DB=');
+		// fix for sudoc, see #1529 and #2022
+		if (/sudoc\.(abes\.)?fr/.test(url)) {
+			newUrl = newUrl.replace(/cbs\/\/?DB=/, 'cbs/xslt/DB=');
+		}
 		var elmts = getSearchResults(doc);
 		var elmt = elmts.iterateNext();
 
@@ -861,7 +863,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.abes.fr/cbs/xslt/DB=2.1//SRCH?IKT=12&TRM=127261664",
+		"url": "https://www.sudoc.abes.fr/cbs/xslt/DB=2.1/SRCH?IKT=12&TRM=127261664",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -896,18 +898,18 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Communes rurales -- Et la technique -- Aspect social -- Inde"
+						"tag": "Communes rurales -- Technique -- Société -- Inde"
 					},
 					{
 						"tag": "Conditions sociales -- Inde -- 20e siècle"
 					},
 					{
-						"tag": "Téléphonie mobile -- Aspect social -- Inde"
+						"tag": "Téléphonie mobile -- Société -- Inde"
 					}
 				],
 				"notes": [
 					{
-						"note": "<div><span>Contient un résumé en anglais et en français. - in Journal of the Royal Anthropological Institute, vol. 14, no. 3 (Septembre 2008)</span></div>"
+						"note": "\n<div><span>Contient un résumé en anglais et en français. - in Journal of the Royal Anthropological Institute, vol. 14, no. 3 (Septembre 2008)</span></div>\n<div><span>&nbsp;</span></div>\n<div><span>&nbsp;</span></div>\n"
 					}
 				],
 				"seeAlso": []
@@ -916,7 +918,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.abes.fr/cbs/xslt/DB=2.1//SRCH?IKT=12&TRM=128661828",
+		"url": "https://www.sudoc.abes.fr/cbs/xslt/DB=2.1/SRCH?IKT=12&TRM=128661828",
 		"items": [
 			{
 				"itemType": "film",
@@ -1003,7 +1005,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "<div><span>Les différents films qui composent ce DVD sont réalisés avec des prises de vue réelles, ou des images microcinématographiques ou des images de synthèse, ou des images fixes tirées de livres. La bande son est essentiellement constituée de commentaires en voix off et d'interviews (les commentaires sont en anglais et les interviews sont en langue originales : anglais, français ou allemand, sous-titrée en anglais). - Discovering the cell : participation de Paul Nurse (Rockefeller university, New York), Claude Debru (ENS : Ecole normale supérieure, Paris) et Werner Franke (DKFZ : Deutsches Krebsforschungszentrum, Heidelberg) ; Membrane : participation de Kai Simons, Soizig Le Lay et Lucas Pelkmans (MPI-CBG : Max Planck institute of molecular cell biology and genetics, Dresden) ; Signals and calcium : participation de Christian Sardet et Alex Mc Dougall (CNRS / UPMC : Centre national de la recherche scientifique / Université Pierre et Marie Curie, Villefrance-sur-Mer) ; Membrane traffic : participation de Thierry Galli et Phillips Alberts (Inserm = Institut national de la santé et de la recherche médicale, Paris) ; Mitochondria : participation de Michael Duchen, Rémi Dumollard et Sean Davidson (UCL : University college of London) ; Microfilaments : participation de Cécile Gauthier Rouvière et Alexandre Philips (CNRS-CRBM : CNRS-Centre de recherche de biochimie macromoléculaire, Montpellier) ; Microtubules : participation de Johanna Höög, Philip Bastiaens et Jonne Helenius (EMBL : European molecular biology laboratory, Heidelberg) ; Centrosome : participation de Michel Bornens et Manuel Théry (CNRS-Institut Curie, Paris) ; Proteins : participation de Dino Moras et Natacha Rochel-Guiberteau (IGBMC : Institut de génétique et biologie moléculaire et cellulaire, Strasbourg) ; Nocleolus and nucleus : participation de Daniele Hernandez-Verdun, Pascal Rousset, Tanguy Lechertier (CNRS-UPMC / IJM : Institut Jacques Monod, Paris) ; The cell cycle : participation de Paul Nurse (Rockefeller university, New York) ; Mitosis and chromosomes : participation de Jan Ellenberg, Felipe Mora-Bermudez et Daniel Gerlich (EMBL, Heidelberg) ; Mitosis and spindle : participation de Eric Karsenti, Maiwen Caudron et François Nedelec (EMBL, Heidelberg) ; Cleavage : participation de Pierre Gönczy, Marie Delattre et Tu Nguyen Ngoc (Isrec : Institut suisse de recherche expérimentale sur le cancer, Lausanne) ; Cellules souches : participation de Göran Hermerén (EGE : European group on ethics in science and new technologies, Brussels) ; Cellules libres : participation de Jean-Jacques Kupiec (ENS, Paris) ; Cellules et évolution : participation de Paule Nurse (Rockefeller university, New York)</span></div>"
+						"note": "\n<div><span>Les différents films qui composent ce DVD sont réalisés avec des prises de vue réelles, ou des images microcinématographiques ou des images de synthèse, ou des images fixes tirées de livres. La bande son est essentiellement constituée de commentaires en voix off et d'interviews (les commentaires sont en anglais et les interviews sont en langue originales : anglais, français ou allemand, sous-titrée en anglais). - Discovering the cell : participation de Paul Nurse (Rockefeller university, New York), Claude Debru (ENS : Ecole normale supérieure, Paris) et Werner Franke (DKFZ : Deutsches Krebsforschungszentrum, Heidelberg) ; Membrane : participation de Kai Simons, Soizig Le Lay et Lucas Pelkmans (MPI-CBG : Max Planck institute of molecular cell biology and genetics, Dresden) ; Signals and calcium : participation de Christian Sardet et Alex Mc Dougall (CNRS / UPMC : Centre national de la recherche scientifique / Université Pierre et Marie Curie, Villefrance-sur-Mer) ; Membrane traffic : participation de Thierry Galli et Phillips Alberts (Inserm = Institut national de la santé et de la recherche médicale, Paris) ; Mitochondria : participation de Michael Duchen, Rémi Dumollard et Sean Davidson (UCL : University college of London) ; Microfilaments : participation de Cécile Gauthier Rouvière et Alexandre Philips (CNRS-CRBM : CNRS-Centre de recherche de biochimie macromoléculaire, Montpellier) ; Microtubules : participation de Johanna Höög, Philip Bastiaens et Jonne Helenius (EMBL : European molecular biology laboratory, Heidelberg) ; Centrosome : participation de Michel Bornens et Manuel Théry (CNRS-Institut Curie, Paris) ; Proteins : participation de Dino Moras et Natacha Rochel-Guiberteau (IGBMC : Institut de génétique et biologie moléculaire et cellulaire, Strasbourg) ; Nocleolus and nucleus : participation de Daniele Hernandez-Verdun, Pascal Rousset, Tanguy Lechertier (CNRS-UPMC / IJM : Institut Jacques Monod, Paris) ; The cell cycle : participation de Paul Nurse (Rockefeller university, New York) ; Mitosis and chromosomes : participation de Jan Ellenberg, Felipe Mora-Bermudez et Daniel Gerlich (EMBL, Heidelberg) ; Mitosis and spindle : participation de Eric Karsenti, Maiwen Caudron et François Nedelec (EMBL, Heidelberg) ; Cleavage : participation de Pierre Gönczy, Marie Delattre et Tu Nguyen Ngoc (Isrec : Institut suisse de recherche expérimentale sur le cancer, Lausanne) ; Cellules souches : participation de Göran Hermerén (EGE : European group on ethics in science and new technologies, Brussels) ; Cellules libres : participation de Jean-Jacques Kupiec (ENS, Paris) ; Cellules et évolution : participation de Paule Nurse (Rockefeller university, New York)</span></div>\n<div><span>&nbsp;</span></div>\n<div><span>&nbsp;</span></div>\n"
 					}
 				],
 				"seeAlso": []
@@ -1064,7 +1066,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.abes.fr/cbs/xslt/DB=2.1//SRCH?IKT=12&TRM=05625248X",
+		"url": "https://www.sudoc.abes.fr/cbs/xslt/DB=2.1/SRCH?IKT=12&TRM=05625248X",
 		"items": [
 			{
 				"itemType": "audioRecording",
@@ -1118,7 +1120,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "\n<div><span>Modern notation. - \"Critical apparatus\": p. 174-243</span></div>\n<div><span>&nbsp;</span></div>\n"
+						"note": "\n<div><span>Modern notation. - \"Critical apparatus\": p. 174-243</span></div>\n<div><span>&nbsp;</span></div>\n<div><span>&nbsp;</span></div>\n<div><span>&nbsp;</span></div>\n<div><span>&nbsp;</span></div>\n"
 					}
 				],
 				"seeAlso": []
@@ -1127,159 +1129,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://gso.gbv.de/DB=2.1/PPNSET?PPN=732443563",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "A new method to obtain a consensus ranking of a region's vintages' quality",
-				"creators": [
-					{
-						"firstName": "José",
-						"lastName": "Borges",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "António C.",
-						"lastName": "Real",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "J. Sarsfield",
-						"lastName": "Cabral",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Gregory V.",
-						"lastName": "Jones",
-						"creatorType": "author"
-					}
-				],
-				"date": "2012",
-				"ISSN": "1931-4361",
-				"issue": "1",
-				"libraryCatalog": "Library Catalog - kxp.k10plus.de",
-				"pages": "88-107",
-				"publicationTitle": "Journal of wine economics / American Association of Wine Economists",
-				"volume": "7",
-				"attachments": [
-					{
-						"title": "Link to Library Catalog Entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Library Catalog Entry Snapshot",
-						"mimeType": "text/html",
-						"snapshot": true
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://gso.gbv.de/DB=2.1/PPNSET?PPN=731519299",
-		"items": [
-			{
-				"itemType": "bookSection",
-				"title": "'The truth against the world': spectrality and the mystic past in late twentieth-century Cornwall",
-				"creators": [
-					{
-						"firstName": "Carl",
-						"lastName": "Phillips",
-						"creatorType": "author"
-					}
-				],
-				"date": "2013",
-				"ISBN": "9780415628686 9780415628693 9780203080184",
-				"bookTitle": "Mysticism, myth and Celtic identity / Gibson, Marion *1970-*",
-				"libraryCatalog": "Library Catalog - kxp.k10plus.de",
-				"pages": "70-83",
-				"shortTitle": "'The truth against the world'",
-				"attachments": [
-					{
-						"title": "Link to Library Catalog Entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Library Catalog Entry Snapshot",
-						"mimeType": "text/html",
-						"snapshot": true
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://gso.gbv.de/DB=2.1/PPNSET?PPN=729937798",
-		"items": [
-			{
-				"itemType": "bookSection",
-				"title": "Noise reduction potential of an engine oil pan",
-				"creators": [
-					{
-						"firstName": "Tommy",
-						"lastName": "Luft",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Stefan",
-						"lastName": "Ringwelski",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ulrich",
-						"lastName": "Gabbert",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Wilfried",
-						"lastName": "Henze",
-						"creatorType": "editor"
-					},
-					{
-						"firstName": "Helmut",
-						"lastName": "Tschöke",
-						"creatorType": "editor"
-					}
-				],
-				"date": "2013",
-				"ISBN": "9783642338328",
-				"bookTitle": "Proceedings of the FISITA 2012 World Automotive Congress ; Vol. 13:Noise, vibration and harshness (NVH) / Zhongguo qi che gong cheng xue hui",
-				"libraryCatalog": "Library Catalog - kxp.k10plus.de",
-				"pages": "291-304",
-				"series": "Lecture notes in electrical engineering",
-				"seriesNumber": "201",
-				"url": "http://dx.doi.org/10.1007/978-3-642-33832-8_23",
-				"attachments": [
-					{
-						"title": "Link to Library Catalog Entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Library Catalog Entry Snapshot",
-						"mimeType": "text/html",
-						"snapshot": true
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.sudoc.abes.fr/cbs/xslt/DB=2.1//SRCH?IKT=12&TRM=013979922",
+		"url": "https://www.sudoc.abes.fr/cbs/xslt/DB=2.1/SRCH?IKT=12&TRM=013979922",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1287,8 +1137,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Organisation mondiale de la santé",
-						"creatorType": "editor",
-						"fieldMode": true
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
 				"date": "1992",
@@ -1331,66 +1181,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://gso.gbv.de/DB=2.1/PPNSET?PPN=600530787",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Lehrbuch der Bodenkunde",
-				"creators": [
-					{
-						"firstName": "Fritz",
-						"lastName": "Scheffer",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Paul",
-						"lastName": "Schachtschabel",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Hans-Peter",
-						"lastName": "Blume",
-						"creatorType": "editor"
-					},
-					{
-						"firstName": "Sören",
-						"lastName": "Thiele",
-						"creatorType": "editor"
-					}
-				],
-				"date": "2010",
-				"ISBN": "978-3-8274-1444-1",
-				"edition": "16",
-				"libraryCatalog": "Library Catalog - gso.gbv.de",
-				"numPages": "xiv+569",
-				"place": "Heidelberg",
-				"publisher": "Spektrum,  Akad.-Verl.",
-				"attachments": [
-					{
-						"title": "Link to Library Catalog Entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Library Catalog Entry Snapshot",
-						"mimeType": "text/html",
-						"snapshot": true
-					}
-				],
-				"tags": [
-					"Bodenkunde / Lehrbuch"
-				],
-				"notes": [
-					{
-						"note": "\n<div><span>Literaturangaben</span></div>\n<div style=\"display:none\" title=\"optional\" id=\"ANNOTATIE\"><span>Hier auch später ersch. unveränd. Nachdr.</span></div>\n"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://opac.tib.eu/DB=1/XMLPRS=N/PPN?PPN=620088028",
 		"items": [
 			{
@@ -1398,7 +1188,7 @@ var testCases = [
 				"title": "Phönix auf Asche: von Wäldern und Wandel in der Dübener Heide und Bitterfeld",
 				"creators": [
 					{
-						"firstName": "Caroline",
+						"firstName": "Caroline Bleymüller",
 						"lastName": "Möhring",
 						"creatorType": "editor"
 					}
@@ -1425,7 +1215,10 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Waldsterben / Schadstoffimmission / Dübener Heide / Bitterfeld <Region>"
+						"tag": "*Dübener Heide / Regionalentwicklung / Landschaftsentwicklung / Forstwirtschaft"
+					},
+					{
+						"tag": "*Waldsterben / Schadstoffimmission / Dübener Heide / Bitterfeld Region"
 					}
 				],
 				"notes": [
@@ -1453,6 +1246,7 @@ var testCases = [
 				],
 				"date": "2008",
 				"ISBN": "9783793095262",
+				"abstractNote": "Verlagstext: Viele vermuten inzwischen richtig: Das Waldsterben, die schwere Schädigung der südwestdeutschen Wälder um 1983, war nicht von Luftschadstoffen verursacht.Vielmehr hatte ein Zusammentreffen natürlicher Waldkrankheiten zu jenem miserablen Aussehen der Bäume geführt. Das vorliegende Buch beschreibt erstmals diese Zusammenhänge in einfacher, übersichtlicher und für jeden Naturfreund leicht verständlicher Weise. Dabei lernt der Leser, die natürlichen Bedrohungen der Waldbäume mit ihren potentiellen Gefährdungen in den verschiedenen Jahreszeiten zu verstehen. In spannender, teilweise auch sehr persönlicher Darstellung wird er angeleitet, im Wald genauer hinzusehen, unter anderem die damaligen, zum Teil äußerst selten auftretenden, oft auch schwer erkennbaren Phänomene wahrzunehmen.Darüber hinaus wird deutlich, wie sehr der Mensch dazu neigt, natürliche, jedoch noch unverstandene Phänomene zu Angstszenarien zu stilisieren, und wie die öffentliche Meinung daraus politisch hoch wirksame Umweltthemen aufbauen kann. Für Waldbesitzer und Förster ist die Lektüre des Buches nahezu eine Pflicht, für Waldfreunde eine angenehme Kür.Betr. auch Schwarzwald",
 				"callNumber": "48 Kle",
 				"edition": "1",
 				"libraryCatalog": "Library Catalog - opac.sub.uni-goettingen.de",
@@ -1478,133 +1272,24 @@ var testCases = [
 						"tag": "*Baumkrankheit"
 					},
 					{
+						"tag": "*Waldschaden"
+					},
+					{
 						"tag": "*Waldsterben"
 					},
 					{
 						"tag": "*Waldsterben / Geschichte"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://lhclz.gbv.de/DB=1/XMLPRS=N/PPN?PPN=08727342X",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Geschichten, die die Forschung schreibt: ein Umweltlesebuch des Deutschen Forschungsdienstes",
-				"creators": [
-					{
-						"firstName": "Bettina",
-						"lastName": "Reckter",
-						"creatorType": "editor"
 					},
 					{
-						"firstName": "Rolf H.",
-						"lastName": "Simen",
-						"creatorType": "editor"
-					},
-					{
-						"firstName": "Karl-Heinz",
-						"lastName": "Preuß",
-						"creatorType": "editor"
-					}
-				],
-				"date": "1990",
-				"ISBN": "9783923120260",
-				"abstractNote": "Bettina Reckter, Rolf H. Simen, Karl-Heinz Preuß (Hrsg.): Geschichten, die die Forschung schreibt. Ein Umweltlesebuch des Deutschen Forschungsdienstes. Verlag Deutscher Forschungsdienst, Bonn-Bad Godesberg 1990, 320 Seiten, 29,80 Mark",
-				"callNumber": "CL 13 : IfW13 40 W 2",
-				"libraryCatalog": "Library Catalog - lhclz.gbv.de",
-				"numPages": "319",
-				"place": "Bonn - Bad Godesberg",
-				"publisher": "Verlag Deutscher Forschungsdienst",
-				"shortTitle": "Geschichten, die die Forschung schreibt",
-				"attachments": [
-					{
-						"title": "Link to Library Catalog Entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Library Catalog Entry Snapshot",
-						"mimeType": "text/html",
-						"snapshot": true
-					}
-				],
-				"tags": [
-					{
-						"tag": "Algenpest"
-					},
-					{
-						"tag": "Aufsatzsammlung"
-					},
-					{
-						"tag": "Aufsatzsammlung / Umweltschutz"
-					},
-					{
-						"tag": "Bienen"
-					},
-					{
-						"tag": "Gewässerverschmutzung"
-					},
-					{
-						"tag": "Gleichgewicht"
-					},
-					{
-						"tag": "Lebensräume"
-					},
-					{
-						"tag": "Mülldeponie"
-					},
-					{
-						"tag": "Perlmuscheln"
-					},
-					{
-						"tag": "Saurer Regen"
-					},
-					{
-						"tag": "Schmetterlinge"
-					},
-					{
-						"tag": "Sonnenenergie"
-					},
-					{
-						"tag": "Süßwasserfische"
-					},
-					{
-						"tag": "Tiere"
-					},
-					{
-						"tag": "Trinkwasser"
-					},
-					{
-						"tag": "Umweltgifte"
-					},
-					{
-						"tag": "Umweltschaden"
-					},
-					{
-						"tag": "Umweltschutz"
-					},
-					{
-						"tag": "Umweltsignale"
-					},
-					{
-						"tag": "Vogelarten"
+						"tag": "Schwarzwald"
 					},
 					{
 						"tag": "Waldsterben"
-					},
-					{
-						"tag": "Ökomonie"
 					}
 				],
 				"notes": [
 					{
-						"note": "<div>Institutsbestand, deshalb nähere Informationen im Inst. f. Wirtschaftswissenschaft (IfW13)</div>"
+						"note": "<div>Archivierung/Langzeitarchivierung gewährleistet 2021 ; Forst (Rechtsgrundlage SLG). Hochschule für Forstwirtschaft</div><div>Archivierung prüfen 20240324 ; 1 (Rechtsgrundlage DE-4165</div>"
 					}
 				],
 				"seeAlso": []
@@ -1668,18 +1353,11 @@ var testCases = [
 			{
 				"itemType": "book",
 				"title": "Daten- und Identitätsschutz in Cloud Computing, E-Government und E-Commerce",
-				"creators": [
-					{
-						"firstName": "Georg",
-						"lastName": "Borges",
-						"creatorType": "editor"
-					}
-				],
-				"ISBN": "978-3-642-30102-5",
-				"abstractNote": "Fuer neue und kuenftige Gesch ftsfelder von E-Commerce und E-Government stellen der Datenschutz und der Identit tsschutz wichtige Herausforderungen dar. Renommierte Autoren aus Wissenschaft und Praxis widmen sich in dem Band aktuellen Problemen des Daten- und Identit tsschutzes aus rechtlicher und technischer Perspektive. Sie analysieren aktuelle Problemf lle aus der Praxis und bieten Handlungsempfehlungen an. Das Werk richtet sich an Juristen und technisch Verantwortliche in Beh rden und Unternehmen sowie an Rechtsanw lte und Wissenschaftler.",
+				"creators": [],
+				"ISBN": "9783642301025",
+				"edition": "1st ed. 2012",
 				"libraryCatalog": "Library Catalog - cbsopac.rz.uni-frankfurt.de",
-				"numPages": "x+187",
-				"series": "SpringerLink: Springer e-Books",
+				"url": "https://doi.org/10.1007/978-3-642-30102-5",
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
@@ -1692,28 +1370,15 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"tags": [
-					"Cloud Computing",
-					"Datenschutz",
-					"Deutschland",
-					"Electronic Commerce",
-					"Electronic Government",
-					"Persönlichkeitsrecht",
-					"f Aufsatzsammlung",
-					"f Online-Publikation"
-				],
-				"notes": [
-					{
-						"note": "<div>Description based upon print version of record </div>"
-					}
-				],
+				"tags": [],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://stabikat.de/DB=1/XMLPRS=N/PPN?PPN=717966224",
+		"url": "https://lbssbb.gbv.de/DB=1/XMLPRS=N/PPN?PPN=717966224",
 		"items": [
 			{
 				"itemType": "book",

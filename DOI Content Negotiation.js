@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 8,
-	"lastUpdated": "2024-09-14 20:03:55"
+	"lastUpdated": "2024-09-27 14:35:38"
 }
 
 /*
@@ -64,33 +64,6 @@ async function doSearch(items) {
 }
 
 async function processDOI(doi) {
-	// TEMP: Use Crossref REST for Crossref DOIs during Crossref 2024-09-16 outage
-	let currentDate = new Date();
-	let startDate = new Date(Date.UTC(2024, 8, 16, 20, 0, 0)); // 16 September 2024, 20:00 UTC (1 hour before outage)
-	let endDate = new Date(Date.UTC(2024, 8, 17, 23, 0, 0));   // 17 September 2024, 23:00 UTC (2 hours after outage)
-	if (currentDate >= startDate && currentDate <= endDate) {
-		try {
-			let raJSON = await requestJSON(
-				`https://doi.org/ra/${encodeURIComponent(doi)}`
-			);
-			if (raJSON.length) {
-				let ra = raJSON[0].RA;
-				if (ra == 'Crossref') {
-					let translate = Zotero.loadTranslator('search');
-					// Crossref REST
-					translate.setTranslator("0a61e167-de9a-4f93-a68a-628b48855909");
-					let item = { itemType: "journalArticle", DOI: doi };
-					translate.setSearch(item);
-					translate.translate();
-					return;
-				}
-			}
-		}
-		catch (e) {
-			Z.debug(e);
-		}
-	}
-
 	let response = await requestText(
 		`https://doi.org/${encodeURIComponent(doi)}`,
 		{ headers: { Accept: "application/vnd.datacite.datacite+json, application/vnd.crossref.unixref+xml, application/vnd.citationstyles.csl+json" } }
@@ -223,6 +196,7 @@ var testCases = [
 				"libraryCatalog": "DOI.org (Crossref)",
 				"pages": "69-78",
 				"publicationTitle": "Academicus International Scientific Journal",
+				"rights": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
 				"url": "https://www.medra.org/servlet/MREngine?hdl=10.7336/academicus.2014.09.05",
 				"volume": "9",
 				"attachments": [],
@@ -302,6 +276,7 @@ var testCases = [
 				"libraryCatalog": "DOI.org (Crossref)",
 				"pages": "394-410",
 				"publicationTitle": "IEEE Transactions on Plasma Science",
+				"rights": "https://ieeexplore.ieee.org/Xplorehelp/downloads/license-information/IEEE.html",
 				"url": "http://ieeexplore.ieee.org/document/4316723/",
 				"volume": "15",
 				"attachments": [],
