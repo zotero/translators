@@ -128,3 +128,4 @@ fc410e64-0252-4cd3-acb1-25e584775fa2 # National Library of Australia: Old site d
 c0e6fda6-0ecd-e4f4-39ca-37a4de436e15 # Library Catalog (GEAC): No instances of this catalog system are still online as of 2021
 b38a44f4-b8af-4553-9edf-fba4d2598d6a # Springer Books: Site was merged into Springer Link
 9f52911f-e1b5-41f8-be66-b16982269e6a # HLAS (historical): Site moved, now uses Voyager 7
+3aedd2ab-113b-4bb0-8c74-ccb47b3b9deb # arXiv Vanity is defunct
