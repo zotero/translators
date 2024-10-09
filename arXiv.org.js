@@ -230,6 +230,14 @@ function parseXML(text) {
 		url: pdfUrl,
 		mimeType: "application/pdf"
 	});
+	
+	var htmlUrl = "https://ar5iv.labs.arxiv.org/html/" + articleID + (version ? "v" + version : "");
+	newItem.attachments.push({
+		title: "arXiv Responsive HTML",
+		url: htmlUrl,
+		mimeType: "text/html"
+	});
+	
 	newItem.attachments.push({
 		title: "arXiv.org Snapshot",
 		url: newItem.url,
