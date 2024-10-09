@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2022-08-18 11:23:00"
+	"lastUpdated": "2023-11-28 11:43:16"
 }
 
 /*
@@ -93,7 +93,7 @@ var typeMapping = {
 	UnpublishedWork: "report" // Graue Literatur / Bericht / Report
 };
 
-async function importItems({ references, doc, citaviVersion, rememberTags, itemIdList, unfinishedReferences, progress }) {
+async function importItems({ references, doc, citaviVersion, rememberTags, rememberCustomFields, itemIdList, unfinishedReferences, progress }) {
 	for (var i = 0, n = references.length; i < n; i++) {
 		var type = ZU.xpathText(references[i], 'ReferenceType');
 		let item;
@@ -124,6 +124,7 @@ async function importItems({ references, doc, citaviVersion, rememberTags, itemI
 		item.numberOfVolumes = ZU.xpathText(references[i], './NumberOfVolumes');
 
 		addExtraLine(item, "PMID", ZU.xpathText(references[i], './PubMedID'));
+		addExtraLine(item, "Citation Key", ZU.xpathText(references[i], './BibTeXKey'));
 
 		item.pages = extractPages(ZU.xpathText(references[i], './PageRange'));
 		item.numPages = extractPages(ZU.xpathText(references[i], './PageCount'));
@@ -137,6 +138,14 @@ async function importItems({ references, doc, citaviVersion, rememberTags, itemI
 			var note = ZU.xpathText(references[i], './' + field);
 			if (note) {
 				item.notes.push({ note: note, tags: ["#" + field] });
+			}
+		}
+
+		for (field in rememberCustomFields) {
+			var label = rememberCustomFields[field];
+			var customField = ZU.xpathText(references[i], './' + field);
+			if (customField) {
+				item.notes.push({ note: label + ": " + customField, tags: ["#CustomField"] });
 			}
 		}
 
@@ -173,8 +182,11 @@ async function importItems({ references, doc, citaviVersion, rememberTags, itemI
 		if (keywords && keywords.length > 0) {
 			item.tags = attachName(doc, keywords);
 		}
+		else {
+			item.tags = [];
+		}
 		if (rememberTags[item.itemID]) {
-			for (var j = 0; j < rememberTags[item.itemID].length; j++) {
+			for (let j = 0; j < rememberTags[item.itemID].length; j++) {
 				item.tags.push(rememberTags[item.itemID][j]);
 			}
 		}
@@ -183,24 +195,7 @@ async function importItems({ references, doc, citaviVersion, rememberTags, itemI
 		// the information of it.
 		var citations = ZU.xpath(doc, '//KnowledgeItem[ReferenceID="' + item.itemID + '"]');
 		for (let j = 0; j < citations.length; j++) {
-			var noteObject = {};
-			noteObject.id = ZU.xpathText(citations[j], '@id');
-			var title = ZU.xpathText(citations[j], 'CoreStatement');
-			var text = ZU.xpathText(citations[j], 'Text');
-			var pages = extractPages(ZU.xpathText(citations[j], 'PageRange'));
-			noteObject.note = '';
-			if (title) {
-				noteObject.note += '<h1>' + title + "</h1>\n";
-			}
-			if (text) {
-				noteObject.note += "<p>" + ZU.xpathText(citations[j], 'Text') + "</p>\n";
-			}
-			if (pages) {
-				noteObject.note += "<i>" + pages + "</i>";
-			}
-			if (rememberTags[noteObject.id]) {
-				noteObject.tags = rememberTags[noteObject.id];
-			}
+			var noteObject = extractNote(doc, citations[j], rememberTags);
 			if (noteObject.note != "") {
 				item.notes.push(noteObject);
 			}
@@ -343,6 +338,22 @@ async function importTasks({ tasks, progress }) {
 	}
 }
 
+// Standalone notes are the ones with no ReferenceID property
+async function importStandalonNotes(doc, rememberTags, progress) {
+	var knowledgeItems = ZU.xpath(doc, '//KnowledgeItem[not(ReferenceID)]');
+	for (let knowledgeItem of knowledgeItems) {
+		let noteObject = extractNote(doc, knowledgeItem, rememberTags);
+		if (noteObject.note != "") {
+			let item = new Zotero.Item("note");
+			for (let key in noteObject) {
+				item[key] = noteObject[key];
+			}
+			await item.complete();
+			Z.setProgress(++progress.current / progress.total * 100);
+		}
+	}
+}
+
 function addHierarchyNumberRecursive(collections, level = null) {
 	let index = 1;
 	for (const collection of collections) {
@@ -436,6 +447,19 @@ async function doImport() {
 			}
 		}
 	}
+	var rememberCustomFields = {};
+	var customFields = ZU.xpath(doc, '//CustomFields/CustomFieldSettings');
+	for (let customField of customFields) {
+		let customFieldLabel = ZU.xpathText(customField, './LabelText');
+		let customFieldName = ZU.xpathText(customField, './PropertyName');
+		if (customFieldName) {
+			if (!customFieldLabel) {
+				customFieldLabel = customFieldName;
+			}
+			rememberCustomFields[customFieldName] = customFieldLabel;
+		}
+	}
+
 	var tasks = ZU.xpath(doc, '//TaskItems/TaskItem');
 	var categories = ZU.xpath(doc, '//Categories/Category');
 
@@ -449,10 +473,43 @@ async function doImport() {
 	const totalProgress = references.length + tasks.length + categories.length;
 	const progress = { total: totalProgress * 2, current: 0 };
 
-	await importItems({ references, doc, citaviVersion, rememberTags, itemIdList, progress, unfinishedReferences });
+	await importItems({ references, doc, citaviVersion, rememberTags, rememberCustomFields, itemIdList, progress, unfinishedReferences });
 	await importUnfinished({ doc, itemIdList, unfinishedReferences, progress });
 	await importTasks({ tasks, progress });
+	await importStandalonNotes(doc, rememberTags, progress);
 	importCategories({ categories, doc, progress });
+}
+
+function extractNote(doc, noteXML, rememberTags) {
+	var noteObject = {};
+	noteObject.id = ZU.xpathText(noteXML, '@id');
+	var title = ZU.xpathText(noteXML, 'CoreStatement');
+	var text = ZU.xpathText(noteXML, 'Text');
+	var pages = extractPages(ZU.xpathText(noteXML, 'PageRange'));
+	noteObject.note = '';
+	if (title) {
+		noteObject.note += '<h1>' + title + "</h1>\n";
+	}
+	if (text) {
+		text = text.split(/\r?\n/).join("<br />");
+		noteObject.note += "<p>" + text + "</p>\n";
+	}
+	if (pages) {
+		noteObject.note += "<i>" + pages + "</i>";
+	}
+	var keywords = ZU.xpathText(doc, '//KnowledgeItemKeywords/OnetoN[starts-with(text(), "' + noteObject.id + '")]');
+	if (keywords && keywords.length > 0) {
+		noteObject.tags = attachName(doc, keywords);
+	}
+	else {
+		noteObject.tags = [];
+	}
+	if (rememberTags[noteObject.id]) {
+		for (let j = 0; j < rememberTags[noteObject.id]; j++) {
+			noteObject.tags.append(rememberTags[noteObject.id][j]);
+		}
+	}
+	return noteObject;
 }
 
 function attachName(doc, ids) {
@@ -465,8 +522,16 @@ function attachName(doc, ids) {
 	var idList = ids.split(';');
 	// skip the first element which is the id of reference
 	for (var j = 1; j < idList.length; j++) {
-		var author = doc.getElementById(idList[j]);
-		valueList.push(ZU.xpathText(author, 'Name'));
+		// sometimes the id is appended by the a (rank?) number,
+		// which needs to be cleaned first
+		let id = idList[j].split(":")[0];
+		var author = doc.getElementById(id);
+		if (author) {
+			valueList.push(ZU.xpathText(author, 'Name'));
+		}
+		else {
+			Z.debug("Can't find this id:", id);
+		}
 	}
 	return valueList;
 }
