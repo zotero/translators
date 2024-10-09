@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-10-04 15:04:18"
+	"lastUpdated": "2024-10-09 13:54:06"
 }
 
 /*
@@ -244,13 +244,13 @@ function detectSearch(item) {
 
 async function doSearch(item) {
 	let url = `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(item.arXiv)}&max_results=1`;
-	let doc = await ZU.requestDocument(url);
+	let doc = await requestDocument(url);
 	parseAtom(doc);
 }
 
 function detectWeb(doc, url) {
 	var searchRe = /^https?:\/\/(?:([^.]+\.))?(?:arxiv\.org|xxx\.lanl\.gov)\/(?:search|find|list|catchup)\b/;
-	var relatedDOI = text(doc, '.doi>a');
+	var relatedDOI = text(doc, '.doi > a');
 	if (searchRe.test(url)) {
 		return getSearchResults(doc, true/* checkOnly */) && "multiple";
 	}
@@ -263,7 +263,7 @@ function detectWeb(doc, url) {
 }
 
 function getSearchResults(doc, checkOnly = false) {
-	if (/^\/search\//.test(doc.location.pathname)) {
+	if (doc.location.pathname.startsWith('/search/')) {
 		return getSearchResultsNew(doc, checkOnly);
 	}
 	else {
@@ -334,7 +334,7 @@ async function doWeb(doc, url) {
 		if (versionMatch) {
 			version = versionMatch[1];
 		}
-		arxivDOI = text(doc, '.arxivdoi>a');
+		arxivDOI = text(doc, '.arxivdoi > a');
 
 		if (!id) { // Honestly not sure where this might still be needed
 			id = text(doc, 'span.arxivid > a');
@@ -345,7 +345,7 @@ async function doWeb(doc, url) {
 		//id = id.trim().replace(/^arxiv:\s*|v\d+|\s+.*$/ig, '');
 		id = id.trim().replace(/^arxiv:\s*|\s+.*$/ig, '');
 		let apiURL = `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(id)}&max_results=1`;
-		await ZU.requestDocument(apiURL).then(parseAtom);
+		await requestDocument(apiURL).then(parseAtom);
 	}
 }
 
