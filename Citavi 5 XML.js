@@ -1,7 +1,7 @@
 {
 	"translatorID": "e7243cef-a709-4a46-ba46-1b1318051bec",
 	"label": "Citavi 5 XML",
-	"creator": "Philipp Zumstein, Tomasz Najdek",
+	"creator": "Philipp Zumstein, Tomasz Najdek, Jacob Klink",
 	"target": "xml",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2022-08-18 11:23:00"
+	"lastUpdated": "2024-10-10 15:50:00"
 }
 
 /*
@@ -45,6 +45,7 @@ TEST DATA can be found here:
  - Larger project (1221 KB): https://gist.github.com/zuphilip/76ce89ebbdac0386507b36cff3fd499a
  - Other project (1,11 MB): https://gist.github.com/anonymous/10fc363b6d79dae897e296a4327aa707
  - Citavi 6 project (935 KB): https://gist.github.com/zuphilip/00a4ec6df58ac24b68366e32531bae4b
+ - Citavi 6 project with BibTex-Keys (948 KB): https://gist.github.com/JAC28/49e23958f3ae13118f97225a9d405284
  - Nested categories: (34 KB): https://gist.github.com/tnajdek/b2375e52b48c7bf82f9f592b4f2122f5
 */
 
@@ -124,6 +125,9 @@ async function importItems({ references, doc, citaviVersion, rememberTags, itemI
 		item.numberOfVolumes = ZU.xpathText(references[i], './NumberOfVolumes');
 
 		addExtraLine(item, "PMID", ZU.xpathText(references[i], './PubMedID'));
+
+		// Workaround to match Better BibTex Plugin (https://retorque.re/zotero-better-bibtex/citing/)
+		addExtraLine(item, "Citation Key", ZU.xpathText(references[i], './BibTeXKey')); 
 
 		item.pages = extractPages(ZU.xpathText(references[i], './PageRange'));
 		item.numPages = extractPages(ZU.xpathText(references[i], './PageCount'));
