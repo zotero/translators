@@ -127,7 +127,7 @@ async function importItems({ references, doc, citaviVersion, rememberTags, itemI
 		addExtraLine(item, "PMID", ZU.xpathText(references[i], './PubMedID'));
 
 		// Workaround to match Better BibTex Plugin (https://retorque.re/zotero-better-bibtex/citing/)
-		addExtraLine(item, "Citation Key", ZU.xpathText(references[i], './BibTeXKey')); 
+		addExtraLine(item, "Citation Key", ZU.xpathText(references[i], './BibTeXKey'));
 
 		item.pages = extractPages(ZU.xpathText(references[i], './PageRange'));
 		item.numPages = extractPages(ZU.xpathText(references[i], './PageCount'));
