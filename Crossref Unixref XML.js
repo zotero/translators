@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2024-10-16 12:43:44"
+	"lastUpdated": "2024-10-19 07:22:57"
 }
 
 /*
@@ -447,7 +447,7 @@ function doImport() {
 				removeUnsupportedMarkup(innerXML(subtitle))
 			);
 		}
-		item.title = item.title.replace(/\s+<(sub|sup)>/g, "$1")
+		item.title = item.title.replace(/\s+<(sub|sup)>/g, "$1");
 	}
 	if (!item.title || item.title == "") {
 		item.title = "[No title found]";
