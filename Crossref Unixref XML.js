@@ -447,7 +447,7 @@ function doImport() {
 				removeUnsupportedMarkup(innerXML(subtitle))
 			);
 		}
-		item.title = item.title.replace(/\s+<(sub|sup)>/, "$1")
+		item.title = item.title.replace(/\s+<(sub|sup)>/g, "$1")
 	}
 	if (!item.title || item.title == "") {
 		item.title = "[No title found]";
