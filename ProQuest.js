@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-07-16 17:42:05"
+	"lastUpdated": "2024-10-22 16:06:36"
 }
 
 /*
@@ -242,6 +242,10 @@ function doWeb(doc, url, noFollow) {
 			Zotero.debug("new Abstract view");
 			scrape(doc, url, type);
 		}
+		else if (doc.querySelector('.docViewFullCitation .display_record_indexing_row')) {
+			Zotero.debug("Full citation view");
+			scrape(doc, url, type);
+		}
 		else if (noFollow) {
 			Z.debug('Not following link again. Attempting to scrape');
 			scrape(doc, url, type);
@@ -431,6 +435,7 @@ function scrape(doc, url, type) {
 			// more complete dates are preferred
 			case 'Date':
 			case 'Publication date':
+			case 'Degree date':
 				dates[2] = value;
 				break;
 			case 'Publication year':
@@ -460,7 +465,11 @@ function scrape(doc, url, type) {
 		}
 	}
 
-	item.url = url.replace(/\baccountid=[^&#]*&?/, '').replace(/\?(?:#|$)/, '');
+	if (!item.title) {
+		item.title = text(doc, '#documentTitle');
+	}
+
+	item.url = url.replace(/&?(accountid|parentSessionId)=[^&#]*/g, '').replace(/\?(?:#|$)/, '').replace('?&', '?');
 	if (item.itemType == "thesis" && place.schoolLocation) {
 		item.place = place.schoolLocation;
 	}
@@ -505,7 +514,8 @@ function scrape(doc, url, type) {
 		&& ZU.fieldIsValidForType('publicationTitle', item.itemType)) {
 		var pubTitle = ZU.xpathText(byline, './/a[@id="lateralSearch"]');
 		if (!pubTitle) {
-			pubTitle = text(doc, '#authordiv .newspaperArticle strong');
+			pubTitle = text(doc, '#authordiv .newspaperArticle .pub-tooltip-trigger')
+				|| text(doc, '#authordiv .newspaperArticle strong');
 		}
 		// remove date range
 		if (pubTitle) item.publicationTitle = pubTitle.replace(/\s*\(.+/, '');
@@ -520,6 +530,16 @@ function scrape(doc, url, type) {
 		&& (!item.date
 			|| (item.date.length <= 4 && date.length > item.date.length))) {
 		item.date = date;
+	}
+
+	// Historical Newspapers: date and page are in title
+	if (item.itemType == 'newspaperArticle') {
+		let matches = item.title.match(/^(\w+ \d{1,2}, \d{4}) \(Page (\d+)/);
+		if (matches) {
+			let [, date, pageNumber] = matches;
+			item.date = ZU.strToISO(date);
+			item.pages = pageNumber;
+		}
 	}
 
 	item.abstractNote = ZU.xpath(doc, '//div[contains(@id, "abstractSummary_")]//p')
@@ -1467,7 +1487,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://search.proquest.com/hnpnewyorktimes/docview/122485317/abstract/1357D8A4FC136DF28E3/11",
+		"url": "https://www.proquest.com/hnpnewyorktimes/docview/122485317/abstract/1357D8A4FC136DF28E3/11?sourcetype=Newspapers",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -1484,7 +1504,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "1984",
+				"date": "Aug 22, 1984",
 				"ISSN": "03624331",
 				"abstractNote": "For some months now, a gradual thaw has been in the making between East Germany and West Germany. So far, the United States has paid scant attention -- an attitude very much in keeping with our neglect of East Germany throughout the postwar period. We should reconsider this policy before things much further -- and should in particular begin to look more closely at what is going on in East Germany.",
 				"libraryCatalog": "ProQuest",
@@ -1492,7 +1512,7 @@ var testCases = [
 				"place": "New York, N.Y., United States",
 				"publicationTitle": "New York Times",
 				"rights": "Copyright New York Times Company Aug 22, 1984",
-				"url": "https://search.proquest.com/hnpnewyorktimes/docview/122485317/abstract/1357D8A4FC136DF28E3/11",
+				"url": "https://www.proquest.com/hnpnewyorktimes/docview/122485317/abstract/1357D8A4FC136DF28E3/11?sourcetype=Newspapers",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -2088,6 +2108,35 @@ var testCases = [
 						"note": "Contents of repository: 38,000,000 items\n\nRepository date coverage: 17th century - present\n\nRepository materials: All areas of American history and culture. Will also accept photographic copies of collections located elsewhere but within the scope of solicitation.\n\nHoldings: The Manuscript Division's holdings, more than fifty million items in eleven thousand separate collections, include some of the greatest manuscript treasures of American history and culture and support scholarly research in many aspects of political, cultural, and scientific history."
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.proquest.com/docview/1857162562/1CFAA6FD31BB4E64PQ/5?sourcetype=Historical%20Newspapers&parentSessionId=abcxyz",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "March 25, 1958 (Page 17 of 30)",
+				"creators": [],
+				"date": "1958-03-25",
+				"language": "English",
+				"libraryCatalog": "ProQuest",
+				"pages": "17",
+				"place": "Pittsburgh, United States",
+				"publicationTitle": "Pittsburgh Post-Gazette",
+				"rights": "Copyright Pittsburgh Post Gazette Mar 25, 1958",
+				"url": "https://www.proquest.com/docview/1857162562/1CFAA6FD31BB4E64PQ/5?sourcetype=Historical%20Newspapers",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf",
+						"proxy": false
+					}
+				],
+				"tags": [],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
