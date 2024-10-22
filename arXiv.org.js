@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-10-09 13:54:06"
+	"lastUpdated": "2024-10-22 16:12:31"
 }
 
 /*
@@ -329,7 +329,7 @@ async function doWeb(doc, url) {
 		}
 	}
 	else {
-		let id = url.match(/(?:pdf|abs)\/(.+)(?:\.pdf)?/)[1];
+		let id = url.match(/(?:pdf|abs)\/([^?#]+)(?:\.pdf)?/)[1];
 		let versionMatch = url.match(/v(\d+)(\.pdf)?([?#].+)?$/);
 		if (versionMatch) {
 			version = versionMatch[1];
@@ -1008,6 +1008,80 @@ var testCases = [
 				"notes": [
 					{
 						"note": "Comment: 39 pages"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://arxiv.org/abs/2305.16311#",
+		"detectedItemType": "journalArticle",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "Break-A-Scene: Extracting Multiple Concepts from a Single Image",
+				"creators": [
+					{
+						"firstName": "Omri",
+						"lastName": "Avrahami",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kfir",
+						"lastName": "Aberman",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ohad",
+						"lastName": "Fried",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Daniel",
+						"lastName": "Cohen-Or",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Dani",
+						"lastName": "Lischinski",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-12-10",
+				"DOI": "10.1145/3610548.3618154",
+				"abstractNote": "Text-to-image model personalization aims to introduce a user-provided concept to the model, allowing its synthesis in diverse contexts. However, current methods primarily focus on the case of learning a single concept from multiple images with variations in backgrounds and poses, and struggle when adapted to a different scenario. In this work, we introduce the task of textual scene decomposition: given a single image of a scene that may contain several concepts, we aim to extract a distinct text token for each concept, enabling fine-grained control over the generated scenes. To this end, we propose augmenting the input image with masks that indicate the presence of target concepts. These masks can be provided by the user or generated automatically by a pre-trained segmentation model. We then present a novel two-phase customization process that optimizes a set of dedicated textual embeddings (handles), as well as the model weights, striking a delicate balance between accurately capturing the concepts and avoiding overfitting. We employ a masked diffusion loss to enable handles to generate their assigned concepts, complemented by a novel loss on cross-attention maps to prevent entanglement. We also introduce union-sampling, a training strategy aimed to improve the ability of combining multiple concepts in generated images. We use several automatic metrics to quantitatively compare our method against several baselines, and further affirm the results using a user study. Finally, we showcase several applications of our method. Project page is available at: https://omriavrahami.com/break-a-scene/",
+				"extra": "arXiv:2305.16311 [cs]",
+				"libraryCatalog": "arXiv.org",
+				"pages": "1-12",
+				"proceedingsTitle": "SIGGRAPH Asia 2023 Conference Papers",
+				"shortTitle": "Break-A-Scene",
+				"url": "http://arxiv.org/abs/2305.16311",
+				"attachments": [
+					{
+						"title": "Preprint PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Computer Science - Computer Vision and Pattern Recognition"
+					},
+					{
+						"tag": "Computer Science - Graphics"
+					},
+					{
+						"tag": "Computer Science - Machine Learning"
+					}
+				],
+				"notes": [
+					{
+						"note": "Comment: SIGGRAPH Asia 2023. Project page: at: https://omriavrahami.com/break-a-scene/ Video: https://www.youtube.com/watch?v=-9EA-BhizgM"
 					}
 				],
 				"seeAlso": []
