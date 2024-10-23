@@ -66,15 +66,11 @@ function scrape(doc, url) {
 	newItem.postType = "LinkedIn Post";
 	newItem.websiteType = "Social Media";
 	
-	// Add snapshot using a callback approach
-	ZU.processDocuments(url, function(doc) {
-		newItem.attachments.push({
-			title: "Snapshot",
-			document: doc,
-			mimeType: "text/html"
-		});
-		newItem.complete();
+	newItem.attachments.push({
+		title: "Snapshot",
+		document: doc
 	});
+	newItem.complete();
 }
 
 /** BEGIN TEST CASES **/
