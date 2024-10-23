@@ -2,7 +2,7 @@
 	"translatorID": "797eb77d-9596-450e-a589-1621dc34a057",
 	"label": "LinkedIn",
 	"creator": "Liz Lawley",
-	"target": "^https?://(?:www\\.)?linkedin\\.com/posts/",
+	"target": "^https://www\\.linkedin\\.com/posts/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
