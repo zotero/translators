@@ -36,7 +36,7 @@ function scrape(doc, url) {
 		newItem.title = title + (words.length > 20 ? '...' : '');
 	}
 	
-	newItem.url = url;
+	newItem.url = url.replace(/[#?].*$/, '');
 	
 	// Extract author name from page title
 	var pageTitle = ZU.xpathText(doc, "//title");
