@@ -56,7 +56,8 @@ function scrape(doc, url) {
 			if (data.datePublished) {
 				newItem.date = ZU.strToISO(data.datePublished);
 			}
-		} catch (e) {
+		}
+		catch (e) {
 			Zotero.debug("Failed to parse JSON-LD: " + e);
 		}
 	}
