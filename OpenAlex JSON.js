@@ -217,7 +217,6 @@ function parseWithDOITranslator(item) {
 		let oldTags = item.tags;
 		delete doiItem.libraryCatalog;
 		Object.assign(item, doiItem);
-		//item.libraryCatalog = 'Semantic Scholar';
 		item.itemType = originalItemType;
 		if (!item.attachments.length) {
 			item.attachments = oldAttachments;

@@ -121,7 +121,6 @@ async function doWeb(doc, url) {
 
 
 async function scrape(ids) {
-	// We request only certain fiels to reduce the size of the response in case of multiple items
 	let apiURL = `https://api.openalex.org/works?filter=openalex:${ids.join("|")}`;
 	// Z.debug(apiURL);
 	let apiJSON = await requestText(apiURL);
