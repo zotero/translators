@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-10-24 04:02:00"
+	"lastUpdated": "2024-10-24 19:22:51"
 }
 
 function getSearchResults(doc) {
@@ -102,7 +102,7 @@ function makeItem(doc, url) {
 
 function detectSearch(items) {
 	// Disabled -- no longer working
-	if (false) return false;
+	if (true) return false;
 
 	if (items.ISBN) return true;
 	
