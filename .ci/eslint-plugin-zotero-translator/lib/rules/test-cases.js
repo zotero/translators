@@ -114,7 +114,7 @@ module.exports = {
 					}
 					else if (testCase.type === 'search') {
 						// console.log(JSON.stringify(testCase.input))
-						const expected = ['DOI', 'ISBN', 'PMID', 'arXiv', 'identifiers', 'contextObject', 'adsBibcode', 'ericNumber', 'openAlex'];
+						const expected = ['DOI', 'ISBN', 'PMID', 'arXiv', 'identifiers', 'contextObject', 'adsBibcode', 'ericNumber', 'OpenAlex'];
 						let keys;
 						if (Array.isArray(testCase.input)) {
 							keys = testCase.input.flatMap(Object.keys);
