@@ -2,14 +2,14 @@
 	"translatorID": "22dd8e35-02da-4968-b306-6efe0779a48d",
 	"label": "newspapers.com",
 	"creator": "Peter Binkley",
-	"target": "^https?://[^/]+\\.newspapers\\.com/article/",
+	"target": "^https?://[^/]+\\.newspapers\\.com/(article|image)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-10-24 14:54:45"
+	"lastUpdated": "2024-10-29 15:14:42"
 }
 
 /*
@@ -35,15 +35,49 @@
 	***** END LICENSE BLOCK *****
 */
 
-function detectWeb(_doc, _url) {
-	return "newspaperArticle";
+function detectWeb(doc, url) {
+	if (url.includes('/article/')) {
+		return 'newspaperArticle';
+	}
+	else if (url.includes('/image/')) {
+		if (new URL(url).searchParams.has('clipping_id')) {
+			return 'newspaperArticle';
+		}
+		else {
+			return 'multiple';
+		}
+	}
+	return false;
 }
 
-function doWeb(doc, url) {
-	scrape(doc, url);
+async function getClippings(url) {
+	let id = url.match(/\/image\/(\d+)/)[1];
+	let json = await requestJSON(`/api/clipping/page?page_id=${id}&start=0&count=25`);
+	let clippings = {};
+	for (let clipping of json.clippings) {
+		clippings[clipping.url] = clipping.title || '[Untitled]';
+	}
+	return clippings;
 }
 
-function scrape(doc, url) {
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(await getClippings(url));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			scrape(await requestDocument(url));
+		}
+	}
+	else if (url.includes('/image/')) {
+		let clippingID = new URL(url).searchParams.get('clipping_id');
+		scrape(await requestDocument('/article/' + clippingID));
+	}
+	else {
+		scrape(doc, url);
+	}
+}
+
+function scrape(doc, url = doc.location.href) {
 	let item = new Zotero.Item('newspaperArticle');
 	let json = JSON.parse(text(doc, 'script[type="application/ld+json"]'));
 
@@ -292,6 +326,47 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.newspapers.com/image/53697455",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.newspapers.com/image/53697455/?clipping_id=138120775",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Lorenzo POW Release",
+				"creators": [],
+				"date": "1945-05-31",
+				"abstractNote": "attended Army St. by IT art son 76th Mrs. 47 LOCAL 61s I FREED FROM JAP AND NAZI CAMPS Washington. May 31 The War Department has made public the names of 1.211 soldiers liberated from German and Japanese prison camps. The following 47 Brooklyn, Queens and Long Island men are Included: A1ELLO. Staff Sgt. Loul T.. son of Mrs. Christina Aiello, 118-01 19th St., St. Albans. BAILEY. Pvt. John J . son of Wil- I liaor N. Bailey, 869 St, John's place. BARANII K, Capt. Jerry M son of Mrs. Marv L. Baranluk, S3 Haw- ley St., Babylon. BAl'ER, Pfc. Harold C. Jr., husband of Mrs. Mary A. Bauer, 89 India tCer St.. Greentiolnt. I, BERMAN, Pfc. Martin, son of Mrs. Anne Berman, 609 Logan Si. Hospital BE8SER, Pvt. Louis L., brother of .Sunday Harold Besser. 3070 66th St. M1CELI, Mrs. 1115 ROCCO, of BLASS, Pfc. Louis, son of Mrs. Jennie Blass, 271 Oakley, Ave., H-mont. BOAS, Pfc. Ross P., son of Mrs. Doris P. Boas, 101 Rugby Road. DIPPOLD, Sgt. Christian, son of Mrs. Edna J. Bent, 8829 Fort Hamilton Parkway. GRAY, Staff Sgt. John A., son of John T. Gray, 22-17 19th St., Astoria. HARRIS, Tech. Sgt. Morton G.. son of Mrs. Sylvia R. Harris, 650 Ocean Ave. HOLLAND, Tech. Sgt. Dennis A husband of Mrs. Virginia Holland, 158-10 Sanford Ave., Flushing. HYMAN, Staff Sgt. Milton, son of Mrs. Gussie Hyman. 381 Jericho Turnpike, Floral Park. KAMINETSKY, Pfc. Sol, son of Sam Kaminetsky, 238 Dumonti Avenue. I KEANE. Pfc. Francis L., son of Mrs. Delia Keane, 319 Lincoln Place. KILL. AN, Tech. Sgt. William R..! son of Mrs. Mary E. Killlan, 503 J 6th St. LANE, Sgt. Charles C. husband of, Mrs. Marie Lane, 167 Bushwick j Avenue. i LA ROCCO, Staff Sgt. Guy W.. son of Mrs. Fanny La Rocco, 801 Sheridan Boulevard. Inwood. I LORENZO, Ptc. William E., son! of Mrs. Jennie Lorenzo, 178 j Jackson St. PAPPAS, Pfc. Demetrios. son of. George Pappas, 1357 43d St. !",
+				"libraryCatalog": "newspapers.com",
+				"pages": "7",
+				"place": "Brooklyn, New York",
+				"publicationTitle": "Brooklyn Eagle",
+				"url": "https://www.newspapers.com/article/brooklyn-eagle-lorenzo-pow-release/138120775/",
+				"attachments": [
+					{
+						"title": "Image",
+						"mimeType": "image/jpeg"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://bklyn.newspapers.com/image/541712415/",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
