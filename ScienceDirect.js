@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-06-13 19:43:00"
+	"lastUpdated": "2024-10-03 14:17:12"
 }
 
 function detectWeb(doc, url) {
@@ -134,7 +134,7 @@ async function getPDFLink(doc) {
 			let md5 = urlMetadata.queryParams.md5;
 			let pid = urlMetadata.queryParams.pid;
 			if (path && pdfExtension && pii && md5 && pid){
-				pdfURL = `/${path}/${pii}${pdfExtension}?md5=${md5}&pid=${pid}&isDTMRedir=Y`;
+				pdfURL = `/${path}/${pii}${pdfExtension}?md5=${md5}&pid=${pid}`;
 				Zotero.debug("Created PDF URL from JSON data: " + pdfURL);
 				return pdfURL;
 			}
@@ -153,7 +153,7 @@ async function getPDFLink(doc) {
 	// enough to get us through even without those parameters.
 	pdfURL = attr(doc, 'link[rel="canonical"]', 'href');
 	if (pdfURL) {
-		pdfURL = pdfURL + '/pdfft?isDTMRedir=true&download=true';
+		pdfURL = pdfURL + '/pdfft?download=true';
 		Zotero.debug("Trying to construct PDF URL from canonical link: " + pdfURL);
 		return pdfURL;
 	}

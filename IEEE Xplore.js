@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-07-05 07:19:04"
+	"lastUpdated": "2024-09-30 13:40:38"
 }
 
 /*
@@ -133,7 +133,6 @@ async function doWeb(doc, url) {
 
 async function scrape(doc, url = doc.location.href) {
 	var arnumber = (url.match(/arnumber=(\d+)/) || url.match(/\/document\/(\d+)/))[1];
-	var pdf = "/stamp/stamp.jsp?tp=&arnumber=" + arnumber;
 	// Z.debug("arNumber = " + arnumber);
 	
 	var script = ZU.xpathText(doc, '//script[@type="text/javascript" and contains(., "global.document.metadata")]');
@@ -163,6 +162,27 @@ async function scrape(doc, url = doc.location.href) {
 		earlyaccess = true;
 		bibtex = text.replace(/^@null/, "@article");
 	}
+
+	let pdfGatewayURL = "/stamp/stamp.jsp?tp=&arnumber=" + arnumber;
+	let pdfURL;
+	try {
+		let src = await requestDocument(pdfGatewayURL);
+		// Either the PDF is embedded in the page, or (e.g. for iOS)
+		// the page has a redirect to the full-page PDF
+		//
+		// As of 3/2020, embedded PDFs via a web-based proxy are
+		// being served as getPDF.jsp, so support that in addition
+		// to direct .pdf URLs.
+		let m = /<i?frame src="([^"]+\.pdf\b[^"]*|[^"]+\/getPDF\.jsp\b[^"]*)"|<meta HTTP-EQUIV="REFRESH" content="0; url=([^\s"]+\.pdf\b[^\s"]*)"/.exec(src);
+		pdfURL = m && (m[1] || m[2]);
+	}
+	catch (e) {
+	}
+
+	if (!pdfURL) {
+		pdfURL = "/stampPDF/getPDF.jsp?tp=&arnumber=" + arnumber + "&ref=";
+	}
+
 	var translator = Zotero.loadTranslator("import");
 	// Calling the BibTeX translator
 	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
@@ -213,30 +233,12 @@ async function scrape(doc, url = doc.location.href) {
 			document: doc,
 			title: "IEEE Xplore Abstract Record"
 		});
-			
-		if (pdf) {
-			ZU.doGet(pdf, function (src) {
-				// Either the PDF is embedded in the page, or (e.g. for iOS)
-				// the page has a redirect to the full-page PDF
-				//
-				// As of 3/2020, embedded PDFs via a web-based proxy are
-				// being served as getPDF.jsp, so support that in addition
-				// to direct .pdf URLs.
-				var m = /<i?frame src="([^"]+\.pdf\b[^"]*|[^"]+\/getPDF\.jsp\b[^"]*)"|<meta HTTP-EQUIV="REFRESH" content="0; url=([^\s"]+\.pdf\b[^\s"]*)"/.exec(src);
-				var pdfUrl = m && (m[1] || m[2]);
-				if (pdfUrl) {
-					item.attachments.unshift({
-						url: pdfUrl,
-						title: "IEEE Xplore Full Text PDF",
-						mimeType: "application/pdf"
-					});
-				}
-				item.complete();
-			}, null);
-		}
-		else {
-			item.complete();
-		}
+		item.attachments.push({
+			url: pdfURL,
+			title: "Full Text PDF",
+			mimeType: "application/pdf"
+		});
+		item.complete();
 	});
 
 	translator.getTranslatorObject(function (trans) {
