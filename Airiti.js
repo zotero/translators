@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-11-01 13:43:42"
+	"lastUpdated": "2024-11-02 09:31:17"
 }
 
 /*
@@ -39,15 +39,17 @@
 function detectWeb(doc, url) {
 	if (/\/Detail(\/|\?)/.test(url)) {
 		const typeTag = text(doc, '.preTag.journal > span:last-child');
-		switch (typeTag) {
-			case '期刊':
-				return 'journalArticle';
-			case '学位论文':
-				return 'thesis';
-			case '会议论文':
-				return 'conferencePaper';
-			default:
-				return 'book';
+		if (['期刊', 'Journals'].includes(typeTag)) {
+			return 'journalArticle';
+		}
+		else if (['學位論文', 'Theses', '学位论文'].includes(typeTag)) {
+			return 'thesis';
+		}
+		else if (['會議論文', 'Proceedings', '会议论文'].includes(typeTag)) {
+			return 'conferencePaper';
+		}
+		else {
+			return 'book';
 		}
 	}
 	else if (getSearchResults(doc, true)) {
