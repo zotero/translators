@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-10-22 16:12:31"
+	"lastUpdated": "2024-11-02 12:09:39"
 }
 
 /*
@@ -234,9 +234,6 @@ const arXivCategories = {
 };
 
 var version;
-var arxivDOI;
-// these variables will be set in doWeb and
-// can be used then afterwards in the parseXML
 
 function detectSearch(item) {
 	return !!item.arXiv;
@@ -449,7 +446,6 @@ function parseSingleEntry(entry) {
 		if (version) {
 			newItem.extra += '\nversion: ' + version;
 		}
-		if (arxivDOI) newItem.DOI = ZU.cleanDOI(arxivDOI);
 		newItem.archiveID = "arXiv:" + articleID;
 		newItem.complete();
 	}
@@ -783,7 +779,6 @@ var testCases = [
 					}
 				],
 				"date": "2018-10-11",
-				"DOI": "10.48550/arXiv.1810.04805",
 				"abstractNote": "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT representations can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful. It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE benchmark to 80.4% (7.6% absolute improvement), MultiNLI accuracy to 86.7 (5.6% absolute improvement) and the SQuAD v1.1 question answering Test F1 to 93.2 (1.5% absolute improvement), outperforming human performance by 2.0%.",
 				"archiveID": "arXiv:1810.04805",
 				"extra": "arXiv:1810.04805 [cs]\nversion: 1",
@@ -845,7 +840,6 @@ var testCases = [
 					}
 				],
 				"date": "2019-05-24",
-				"DOI": "10.48550/arXiv.1810.04805",
 				"abstractNote": "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful. It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE score to 80.5% (7.7% point absolute improvement), MultiNLI accuracy to 86.7% (4.6% absolute improvement), SQuAD v1.1 question answering Test F1 to 93.2 (1.5 point absolute improvement) and SQuAD v2.0 Test F1 to 83.1 (5.1 point absolute improvement).",
 				"archiveID": "arXiv:1810.04805",
 				"extra": "arXiv:1810.04805 [cs]\nversion: 2",
@@ -918,7 +912,6 @@ var testCases = [
 					}
 				],
 				"date": "2023-02-07",
-				"DOI": "10.48550/arXiv.2201.00738",
 				"abstractNote": "Dark matter is five times more abundant than ordinary visible matter in our Universe. While laboratory searches hunting for dark matter have traditionally focused on the electroweak scale, theories of low mass hidden sectors motivate new detection techniques. Extending these searches to lower mass ranges, well below 1 GeV/c$^2$, poses new challenges as rare interactions with standard model matter transfer progressively less energy to electrons and nuclei in detectors. Here, we propose an approach based on phonon-assisted quantum evaporation combined with quantum sensors for detection of desorption events via tracking of spin coherence. The intent of our proposed dark matter sensors is to extend the parameter space to energy transfers in rare interactions to as low as a few meV for detection of dark matter particles in the keV/c$^2$ mass range.",
 				"archiveID": "arXiv:2201.00738",
 				"extra": "arXiv:2201.00738 [hep-ex]",
