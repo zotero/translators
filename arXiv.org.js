@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-11-02 12:09:39"
+	"lastUpdated": "2024-11-02 12:14:40"
 }
 
 /*
@@ -331,7 +331,6 @@ async function doWeb(doc, url) {
 		if (versionMatch) {
 			version = versionMatch[1];
 		}
-		arxivDOI = text(doc, '.arxivdoi > a');
 
 		if (!id) { // Honestly not sure where this might still be needed
 			id = text(doc, 'span.arxivid > a');
