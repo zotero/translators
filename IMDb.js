@@ -45,7 +45,7 @@ function detectWeb(doc, url) {
 			return "film";
 		}
 	}
-	else if (url.includes('/find?') && getSearchResults(doc, true)) {
+	else if (url.includes('/find') && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	return false;
