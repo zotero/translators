@@ -164,6 +164,7 @@ var testCases = [
 			{
 				"itemType": "film",
 				"title": "La historia oficial",
+				"url": "https://www.imdb.com/title/tt0089276/",
 				"creators": [
 					{
 						"firstName": "Luis",
@@ -238,6 +239,7 @@ var testCases = [
 			{
 				"itemType": "film",
 				"title": "Käpy selän alla",
+				"url": "https://www.imdb.com/title/tt0060613/",
 				"creators": [
 					{
 						"firstName": "Mikko",
@@ -307,6 +309,7 @@ var testCases = [
 			{
 				"itemType": "tvBroadcast",
 				"title": "Islands",
+				"url": "https://www.imdb.com/title/tt6142646/",
 				"creators": [
 					{
 						"firstName": "Elizabeth",
@@ -365,6 +368,7 @@ var testCases = [
 			{
 				"itemType": "tvBroadcast",
 				"title": "That's a Wrap",
+				"url": "https://www.imdb.com/title/tt9060452/",
 				"creators": [
 					{
 						"firstName": "Alex",
@@ -438,6 +442,7 @@ var testCases = [
 			{
 				"itemType": "film",
 				"title": "'Til Death",
+				"url": "https://www.imdb.com/title/tt0759475/",
 				"creators": [
 					{
 						"firstName": "Josh",
@@ -501,6 +506,7 @@ var testCases = [
 			{
 				"itemType": "film",
 				"title": "'Til Death",
+				"url": "https://www.imdb.com/title/tt0759475/",
 				"creators": [
 					{
 						"firstName": "Josh",
@@ -564,6 +570,7 @@ var testCases = [
 			{
 				"itemType": "tvBroadcast",
 				"title": "Seventeen Seconds",
+				"url": "https://www.imdb.com/title/tt19402762/",
 				"creators": [
 					{
 						"firstName": "Jonathan",
