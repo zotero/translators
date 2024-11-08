@@ -56,7 +56,7 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	var rows = ZU.xpath(doc, '//li[contains(@class, "find-result-item")]');
 	for (let i = 0; i < rows.length; i++) {
-		var href = ZU.xpathText(rows[i], './a/@href');
+		var href = ZU.xpathText(rows[i], '//a/@href');
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
