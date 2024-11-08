@@ -471,7 +471,7 @@ var testCases = [
 					}
 				],
 				"date": "2006-09-07",
-				"abstractNote": "A pair of newlyweds move in next door to a veteran married couple of 25 years.",
+				"abstractNote": "Newlyweds move in next door to a veteran married couple of 25 years.",
 				"distributor": "Impact Zone Productions, Sony Pictures Television",
 				"extra": "IMDb ID: tt0759475\nevent-location: United States",
 				"genre": "Comedy, Romance",
@@ -482,16 +482,16 @@ var testCases = [
 						"tag": "big breasts"
 					},
 					{
-						"tag": "breast"
-					},
-					{
 						"tag": "brother brother relationship"
 					},
 					{
-						"tag": "columbia tristar"
+						"tag": "death in title"
 					},
 					{
-						"tag": "death in title"
+						"tag": "principal"
+					},
+					{
+						"tag": "schoolteacher"
 					}
 				],
 				"notes": [],
@@ -535,7 +535,7 @@ var testCases = [
 					}
 				],
 				"date": "2006-09-07",
-				"abstractNote": "A pair of newlyweds move in next door to a veteran married couple of 25 years.",
+				"abstractNote": "Newlyweds move in next door to a veteran married couple of 25 years.",
 				"distributor": "Impact Zone Productions, Sony Pictures Television",
 				"extra": "IMDb ID: tt0759475\nevent-location: United States",
 				"genre": "Comedy, Romance",
@@ -546,16 +546,16 @@ var testCases = [
 						"tag": "big breasts"
 					},
 					{
-						"tag": "breast"
-					},
-					{
 						"tag": "brother brother relationship"
 					},
 					{
-						"tag": "columbia tristar"
+						"tag": "death in title"
 					},
 					{
-						"tag": "death in title"
+						"tag": "principal"
+					},
+					{
+						"tag": "schoolteacher"
 					}
 				],
 				"notes": [],
@@ -610,7 +610,7 @@ var testCases = [
 				],
 				"date": "2023-03-02",
 				"abstractNote": "Picard grapples with a life-altering revelation as the crew of the Titan attempt to outmaneuver Vadic, while Raffi and Worf uncover a plot by a vengeful enemy.",
-				"extra": "IMDb ID: tt19402762\nevent-location:",
+				"extra": "IMDb ID: tt19402762\nevent-location: United States",
 				"libraryCatalog": "IMDb",
 				"programTitle": "Star Trek: Picard",
 				"runningTime": "56m",
