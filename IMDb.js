@@ -141,6 +141,7 @@ function scrape(doc, _url) {
 	addExtra(item, "event-location: "
 		+ [...locationLinks].map(a => a.innerText).join(', '));
 	item.tags = "keywords" in json ? json.keywords.split(",") : [];
+	item.url = json.url;
 	item.complete();
 }
 
