@@ -54,7 +54,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//td[contains(@class, "result_text")]');
+	var rows = ZU.xpath(doc, '//li[contains(@class, "find-result-item")]');
 	for (let i = 0; i < rows.length; i++) {
 		var href = ZU.xpathText(rows[i], './a/@href');
 		var title = ZU.trimInternal(rows[i].textContent);
