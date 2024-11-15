@@ -3,7 +3,7 @@
 	"label": "TIND Repository",
 	"creator": "Thomas Rambø",
 	"target": "/record/[0-9]+",
-	"minVersion": "7.0",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 250,
 	"inRepository": true,
@@ -30,7 +30,7 @@
 */
 
 const SCHEMA_ORG_ZOTERO_TYPE_MAPPING = {
-	"CreativeWork": "document",
+    "CreativeWork": "document",
     "Article": "journalArticle",
     "Book": "book",
     "Chapter": "bookSection"
