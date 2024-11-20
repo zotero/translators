@@ -2,14 +2,14 @@
 	"translatorID": "5ed5ab01-899f-4a3b-a74c-290fb2a1c9a4",
 	"label": "AustLII and NZLII",
 	"creator": "Justin Warren, Philipp Zumstein",
-	"target": "^https?://www\\d?\\.(austlii\\.edu\\.au|nzlii\\.org)",
+	"target": "^https?://(www\\d?|classic)\\.(austlii\\.edu\\.au|nzlii\\.org)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-03 04:51:32"
+	"lastUpdated": "2024-11-20 16:01:22"
 }
 
 /*
@@ -53,6 +53,9 @@ function detectWeb(doc, url) {
 	if (url.includes('austlii.edu.au/cgi-bin/sinodisp/au/cases/') && url.includes('.html')) {
 		return "case";
 	}
+	if (url.includes('classic.austlii.edu.au') && url.includes('.html')) {
+		return "case";
+	}
 	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
@@ -77,42 +80,24 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
-function doWeb(doc, url) {
-	var type = detectWeb(doc, url);
-	if (type == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-			return true;
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "multiple") {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			scrape(await requestDocument(url), url);
 		}
-		);
+	}
+	else if (new URL(url).hostname === 'classic.austlii.edu.au') {
+		let urlObj = new URL(url);
+		urlObj.hostname = 'www.austlii.edu.au';
+		url = urlObj.toString();
+		scrape(await requestDocument(url), url);
 	}
 	else {
 		scrape(doc, url);
 	}
-	return false;
 }
-
-/*
- * Convert full court names to standard abbreviations.
- * If the name of the court is in the map, return the abbreviation
- * else return the original full name (i.e. leave it unchanged)
- * The Australian Guide to Legal Citation covers this in Rule 2.2.3
- * legal Reports in Appendix A, but I've not been able to locate
- * a copy with the appendix intact yet.
-*/
-var courtAbbrev = {
-	"Federal Court of Australia": "FCA",
-	"High Court of Australia": "HCA",
-	"Family Court of Australia": "FamCA",
-	"Australian Information Commissioner": "AICmr"
-};
 
 /*
  * Adjust some jurisdiction abbreviations
@@ -169,8 +154,8 @@ function parseActName(nameOfAct) {
 function scrape(doc, url) {
 	var type = detectWeb(doc, url);
 	var newItem = new Zotero.Item(type);
-	var full_jurisdiction = text(doc, 'li.ribbon-jurisdiction>a>span');
-	var jurisdiction = jurisdictionAbbrev[full_jurisdiction] || full_jurisdiction;
+	var fullJurisdiction = text(doc, 'li.ribbon-jurisdiction > a > span');
+	var jurisdiction = jurisdictionAbbrev[fullJurisdiction] || fullJurisdiction;
 	if (jurisdiction) {
 		newItem.code = jurisdiction;
 	}
@@ -192,8 +177,14 @@ function scrape(doc, url) {
 			else {
 				newItem.dateDecided = text(doc, 'li.ribbon-year>a>span');
 			}
-			var full_court = text(doc, 'li.ribbon-database>a>span');
-			newItem.court = courtAbbrev[full_court] || full_court;
+			var courtAbbrevInURL = url.match(/\/cases\/[^/]+\/([^/]+)\//);
+			if (courtAbbrevInURL) {
+				newItem.court = decodeURIComponent(courtAbbrevInURL[1]);
+			}
+			else {
+				// Full court name
+				newItem.court = text(doc, 'li.ribbon-database > a > span');
+			}
 			if (citation) {
 				var lastNumber = citation.match(/(\d+)$/);
 				if (lastNumber) {
@@ -245,7 +236,9 @@ function scrape(doc, url) {
 		}
 	}
 
-	newItem.url = url;
+	newItem.url = url
+		.replace(/^http:\/\//, 'https://')
+		.replace(/^(https:\/\/www)\d/, '$1');
 	newItem.attachments = [{
 		document: doc,
 		title: "Snapshot",
@@ -574,6 +567,30 @@ var testCases = [
 				"dateEnacted": "2002",
 				"code": "NSW",
 				"url": "https://www.austlii.edu.au/cgi-bin/viewdb/au/legis/nsw/consol_act/leara2002451/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www8.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/FedCFamC1A/2024/214.html",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "Dimitrova & Carman",
+				"creators": [],
+				"dateDecided": "2024-11-15",
+				"court": "FedCFamC1A",
+				"docketNumber": "214",
+				"url": "https://www.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/FedCFamC1A/2024/214.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
