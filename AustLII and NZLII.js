@@ -258,10 +258,9 @@ var testCases = [
 				"caseName": "C & M",
 				"creators": [],
 				"dateDecided": "2006-01-20",
-				"code": "Cth",
 				"court": "FamCA",
 				"docketNumber": "212",
-				"url": "http://www.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/FamCA/2006/212.html",
+				"url": "https://www.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/FamCA/2006/212.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -283,10 +282,9 @@ var testCases = [
 				"caseName": "Yeo, in the matter of AES Services (Aust) Pty Ltd (ACN 111 306 543) (Administrators Appointed)",
 				"creators": [],
 				"dateDecided": "2010-01-05",
-				"code": "Cth",
 				"court": "FCA",
 				"docketNumber": "1",
-				"url": "http://www.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/FCA/2010/1.html",
+				"url": "https://www.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/FCA/2010/1.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -310,7 +308,7 @@ var testCases = [
 				"dateDecided": "2008-02-08",
 				"court": "NZSC",
 				"docketNumber": "1",
-				"url": "http://www.nzlii.org/nz/cases/NZSC/2008/1.html",
+				"url": "https://www.nzlii.org/nz/cases/NZSC/2008/1.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -337,10 +335,9 @@ var testCases = [
 				"caseName": "'NM' and Department of Human Services (Freedom of information)",
 				"creators": [],
 				"dateDecided": "2017-12-08",
-				"code": "Cth",
 				"court": "AICmr",
 				"docketNumber": "134",
-				"url": "http://www.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/AICmr/2017/134.html",
+				"url": "https://www.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/AICmr/2017/134.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -364,7 +361,7 @@ var testCases = [
 				"dateEnacted": "1982",
 				"code": "Cth",
 				"section": "24AB",
-				"url": "http://www.austlii.edu.au/cgi-bin/viewdoc/au/legis/cth/consol_act/foia1982222/s24ab.html",
+				"url": "https://www.austlii.edu.au/cgi-bin/viewdoc/au/legis/cth/consol_act/foia1982222/s24ab.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -387,7 +384,7 @@ var testCases = [
 				"creators": [],
 				"dateEnacted": "1982",
 				"code": "Cth",
-				"url": "http://www.austlii.edu.au/cgi-bin/viewdb/au/legis/cth/consol_act/foia1982222/",
+				"url": "https://www.austlii.edu.au/cgi-bin/viewdb/au/legis/cth/consol_act/foia1982222/",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -468,7 +465,7 @@ var testCases = [
 				"date": "2010",
 				"libraryCatalog": "AustLII and NZLII",
 				"publicationTitle": "Administrative Review Council - Admin Review",
-				"url": "http://www.austlii.edu.au/cgi-bin/viewdoc/au/journals/AdminRw//2010/9.html",
+				"url": "https://www.austlii.edu.au/cgi-bin/viewdoc/au/journals/AdminRw//2010/9.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -488,7 +485,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.austlii.edu.au/cgi-bin/sinodisp/au/cases/cth/AICmr/2017/20.html",
+		"url": "http://www6.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/AICmr/2017/20.html",
 		"items": [
 			{
 				"itemType": "case",
@@ -497,7 +494,7 @@ var testCases = [
 				"dateDecided": "2017-03-10",
 				"court": "AICmr",
 				"docketNumber": "20",
-				"url": "http://www8.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/AICmr/2017/20.html",
+				"url": "https://www.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/AICmr/2017/20.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
