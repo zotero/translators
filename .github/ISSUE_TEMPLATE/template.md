@@ -1,5 +1,5 @@
 ---
-name: Report confirmed issue with details
+name: Report confirmed bug with technical details
 about: If you’re sure you’ve identified a bug in a specific Zotero translator and can provide technical details, you can open an issue here.
 ---
 
