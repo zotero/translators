@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-11-20 16:01:22"
+	"lastUpdated": "2024-11-21 18:54:11"
 }
 
 /*
@@ -156,7 +156,7 @@ function scrape(doc, url) {
 	var newItem = new Zotero.Item(type);
 	var fullJurisdiction = text(doc, 'li.ribbon-jurisdiction > a > span');
 	var jurisdiction = jurisdictionAbbrev[fullJurisdiction] || fullJurisdiction;
-	if (jurisdiction) {
+	if (jurisdiction && ZU.fieldIsValidForType('code', type)) {
 		newItem.code = jurisdiction;
 	}
 	var citation = text(doc, 'li.ribbon-citation>a>span');
