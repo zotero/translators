@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-11-19 20:53:18"
+	"lastUpdated": "2024-11-21 18:50:09"
 }
 
 /*
@@ -135,7 +135,7 @@ function scrape(doc, url) {
 		trans.setHandler('itemDone', function (obj, item) {
 			// scrape abstract from page
 			item.abstractNote = ZU.trimInternal(cleanMath(
-				text(doc, '#abstract-section-content')
+				text(doc, '#abstract-section-content p')
 			));
 			
 			item.attachments.push({
@@ -214,7 +214,7 @@ var testCases = [
 				],
 				"date": "2011-10-21",
 				"DOI": "10.1103/PhysRevD.84.077701",
-				"abstractNote": "We reconsider Higgs boson invisible decays into Dark Matter in the light of recent Higgs searches at the LHC. Present hints in the Compact Muon Solenoid and ATLAS data favor a nonstandard Higgs boson with approximately 50% invisible branching ratio, and mass around 143 GeV. This situation can be realized within the simplest thermal scalar singlet Dark Matter model, predicting a Dark Matter mass around 50 GeV and direct detection cross section just below present bound. The present runs of the Xenon100 and LHC experiments can test this possibility. locked icon locked icon locked icon locked icon",
+				"abstractNote": "We reconsider Higgs boson invisible decays into Dark Matter in the light of recent Higgs searches at the LHC. Present hints in the Compact Muon Solenoid and ATLAS data favor a nonstandard Higgs boson with approximately 50% invisible branching ratio, and mass around 143 GeV. This situation can be realized within the simplest thermal scalar singlet Dark Matter model, predicting a Dark Matter mass around 50 GeV and direct detection cross section just below present bound. The present runs of the Xenon100 and LHC experiments can test this possibility.",
 				"issue": "7",
 				"journalAbbreviation": "Phys. Rev. D",
 				"libraryCatalog": "APS",
@@ -289,7 +289,7 @@ var testCases = [
 				],
 				"date": "2015-03-04",
 				"DOI": "10.1103/PhysRevLett.114.098105",
-				"abstractNote": "Cellular aggregates (spheroids) are widely used in biophysics and tissue engineering as model systems for biological tissues. In this Letter we propose novel methods for molding stem-cell spheroids, deforming them, and measuring their interfacial and elastic properties with a single method based on cell tagging with magnetic nanoparticles and application of a magnetic field gradient. Magnetic molding yields spheroids of unprecedented sizes (up to a few mm in diameter) and preserves tissue integrity. On subjecting these spheroids to magnetic flattening (over ), we observed a size-dependent elastocapillary transition with two modes of deformation: liquid-drop-like behavior for small spheroids, and elastic-sphere-like behavior for larger spheroids, followed by relaxation to a liquidlike drop. locked icon locked icon locked icon locked icon locked icon locked icon",
+				"abstractNote": "Cellular aggregates (spheroids) are widely used in biophysics and tissue engineering as model systems for biological tissues. In this Letter we propose novel methods for molding stem-cell spheroids, deforming them, and measuring their interfacial and elastic properties with a single method based on cell tagging with magnetic nanoparticles and application of a magnetic field gradient. Magnetic molding yields spheroids of unprecedented sizes (up to a few mm in diameter) and preserves tissue integrity. On subjecting these spheroids to magnetic flattening (over ), we observed a size-dependent elastocapillary transition with two modes of deformation: liquid-drop-like behavior for small spheroids, and elastic-sphere-like behavior for larger spheroids, followed by relaxation to a liquidlike drop.",
 				"issue": "9",
 				"journalAbbreviation": "Phys. Rev. Lett.",
 				"libraryCatalog": "APS",
@@ -349,7 +349,7 @@ var testCases = [
 				],
 				"date": "2015-03-17",
 				"DOI": "10.1103/PhysRevX.5.011029",
-				"abstractNote": "Based on first-principle calculations, we show that a family of nonmagnetic materials including TaAs, TaP, NbAs, and NbP are Weyl semimetals (WSM) without inversion centers. We find twelve pairs of Weyl points in the whole Brillouin zone (BZ) for each of them. In the absence of spin-orbit coupling (SOC), band inversions in mirror-invariant planes lead to gapless nodal rings in the energy-momentum dispersion. The strong SOC in these materials then opens full gaps in the mirror planes, generating nonzero mirror Chern numbers and Weyl points off the mirror planes. The resulting surface-state Fermi arc structures on both (001) and (100) surfaces are also obtained, and they show interesting shapes, pointing to fascinating playgrounds for future experimental studies.This article is available under the terms of the Creative Commons Attribution 3.0 License. Further distribution of this work must maintain attribution to the author(s) and the published article’s title, journal citation, and DOI.",
+				"abstractNote": "Based on first-principle calculations, we show that a family of nonmagnetic materials including TaAs, TaP, NbAs, and NbP are Weyl semimetals (WSM) without inversion centers. We find twelve pairs of Weyl points in the whole Brillouin zone (BZ) for each of them. In the absence of spin-orbit coupling (SOC), band inversions in mirror-invariant planes lead to gapless nodal rings in the energy-momentum dispersion. The strong SOC in these materials then opens full gaps in the mirror planes, generating nonzero mirror Chern numbers and Weyl points off the mirror planes. The resulting surface-state Fermi arc structures on both (001) and (100) surfaces are also obtained, and they show interesting shapes, pointing to fascinating playgrounds for future experimental studies.",
 				"issue": "1",
 				"journalAbbreviation": "Phys. Rev. X",
 				"libraryCatalog": "APS",
@@ -409,7 +409,7 @@ var testCases = [
 				],
 				"date": "2015-03-17",
 				"DOI": "10.1103/PhysRevX.5.011029",
-				"abstractNote": "Based on first-principle calculations, we show that a family of nonmagnetic materials including TaAs, TaP, NbAs, and NbP are Weyl semimetals (WSM) without inversion centers. We find twelve pairs of Weyl points in the whole Brillouin zone (BZ) for each of them. In the absence of spin-orbit coupling (SOC), band inversions in mirror-invariant planes lead to gapless nodal rings in the energy-momentum dispersion. The strong SOC in these materials then opens full gaps in the mirror planes, generating nonzero mirror Chern numbers and Weyl points off the mirror planes. The resulting surface-state Fermi arc structures on both (001) and (100) surfaces are also obtained, and they show interesting shapes, pointing to fascinating playgrounds for future experimental studies.This article is available under the terms of the Creative Commons Attribution 3.0 License. Further distribution of this work must maintain attribution to the author(s) and the published article’s title, journal citation, and DOI.",
+				"abstractNote": "Based on first-principle calculations, we show that a family of nonmagnetic materials including TaAs, TaP, NbAs, and NbP are Weyl semimetals (WSM) without inversion centers. We find twelve pairs of Weyl points in the whole Brillouin zone (BZ) for each of them. In the absence of spin-orbit coupling (SOC), band inversions in mirror-invariant planes lead to gapless nodal rings in the energy-momentum dispersion. The strong SOC in these materials then opens full gaps in the mirror planes, generating nonzero mirror Chern numbers and Weyl points off the mirror planes. The resulting surface-state Fermi arc structures on both (001) and (100) surfaces are also obtained, and they show interesting shapes, pointing to fascinating playgrounds for future experimental studies.",
 				"issue": "1",
 				"journalAbbreviation": "Phys. Rev. X",
 				"libraryCatalog": "APS",
@@ -469,7 +469,7 @@ var testCases = [
 				],
 				"date": "2015-01-20",
 				"DOI": "10.1103/PhysRevX.5.011003",
-				"abstractNote": "We report on a stringent test of the nonclassicality of the motion of a massive quantum particle, which propagates on a discrete lattice. Measuring temporal correlations of the position of single atoms performing a quantum walk, we observe a 6σ violation of the Leggett-Garg inequality. Our results rigorously excludes (i.e., falsifies) any explanation of quantum transport based on classical, well-defined trajectories. We use so-called ideal negative measurements—an essential requisite for any genuine Leggett-Garg test—to acquire information about the atom’s position, yet avoiding any direct interaction with it. The interaction-free measurement is based on a novel atom transport system, which allows us to directly probe the absence rather than the presence of atoms at a chosen lattice site. Beyond the fundamental aspect of this test, we demonstrate the application of the Leggett-Garg correlation function as a witness of quantum superposition. Here, we employ the witness to discriminate different types of walks spanning from merely classical to wholly quantum dynamics.This article is available under the terms of the Creative Commons Attribution 3.0 License. Further distribution of this work must maintain attribution to the author(s) and the published article’s title, journal citation, and DOI.",
+				"abstractNote": "We report on a stringent test of the nonclassicality of the motion of a massive quantum particle, which propagates on a discrete lattice. Measuring temporal correlations of the position of single atoms performing a quantum walk, we observe a 6σ violation of the Leggett-Garg inequality. Our results rigorously excludes (i.e., falsifies) any explanation of quantum transport based on classical, well-defined trajectories. We use so-called ideal negative measurements—an essential requisite for any genuine Leggett-Garg test—to acquire information about the atom’s position, yet avoiding any direct interaction with it. The interaction-free measurement is based on a novel atom transport system, which allows us to directly probe the absence rather than the presence of atoms at a chosen lattice site. Beyond the fundamental aspect of this test, we demonstrate the application of the Leggett-Garg correlation function as a witness of quantum superposition. Here, we employ the witness to discriminate different types of walks spanning from merely classical to wholly quantum dynamics.",
 				"issue": "1",
 				"journalAbbreviation": "Phys. Rev. X",
 				"libraryCatalog": "APS",
