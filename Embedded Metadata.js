@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-06-13 15:58:28"
+	"lastUpdated": "2024-11-22 19:32:47"
 }
 
 /*
@@ -947,8 +947,13 @@ function finalDataCleanup(doc, newItem) {
 	}
 
 
-	// remove itemID - comes from RDF translator, doesn't make any sense for online data
+	// Remove itemID - comes from RDF translator, doesn't make any sense for online data
 	newItem.itemID = "";
+
+	// Clean up unnecessarily long ISO datetimes
+	if (newItem.date) {
+		newItem.date = newItem.date.replace(/^(\d{4}-\d{2}-\d{2})(?:T|\s)\d.+/, '$1');
+	}
 
 	// worst case, if this is not called from another translator, use URL for title
 	if (!newItem.title && !Zotero.parentTranslator) newItem.title = newItem.url;
@@ -2047,6 +2052,37 @@ var testCases = [
 				"language": "en-GB",
 				"url": "https://www.tatler.com/article/clodagh-mckenna-hon-harry-herbert-wedding-george-osborne-highclere-castle",
 				"websiteTitle": "Tatler",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://medium.com/voyagertoujours/how-i-organise-my-references-and-papers-to-read-with-zotero-917f0a61a309",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "How I organise my references and papers to read with Zotero",
+				"creators": [
+					{
+						"firstName": "Lavisha",
+						"lastName": "Parab",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-08-27",
+				"abstractNote": "A short summary of how I use Zotero to track papers I read and save those which are relevant to my work (current, past or future)",
+				"language": "en",
+				"url": "https://medium.com/voyagertoujours/how-i-organise-my-references-and-papers-to-read-with-zotero-917f0a61a309",
+				"websiteTitle": "Medium",
 				"attachments": [
 					{
 						"title": "Snapshot",
