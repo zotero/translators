@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-10-24 16:21:45"
+	"lastUpdated": "2024-11-22 08:54:40"
 }
 
 /*
@@ -119,7 +119,6 @@ async function doWeb(doc, url) {
 	}
 }
 
-
 async function scrape(ids) {
 	let apiURL = `https://api.openalex.org/works?filter=openalex:${ids.join("|")}`;
 	// Z.debug(apiURL);
@@ -130,7 +129,7 @@ async function scrape(ids) {
 	translator.setHandler('itemDone', (_obj, item) => {
 		item.complete();
 	});
-	translator.setHandler('error', (_, error) => Z.debug(error));
+
 	await translator.translate();
 }
 
