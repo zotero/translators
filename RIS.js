@@ -17,7 +17,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2024-11-25 17:25:54"
+	"lastUpdated": "2024-11-25 17:28:41"
 }
 
 /*
@@ -1780,6 +1780,9 @@ function completeItem(item) {
 			item.journalAbbreviation = item.backupJournalAbbreviation;
 		}
 		delete item.backupJournalAbbreviation;
+	}
+	else if (item.journalAbbreviation && !item.publicationTitle) {
+		item.publicationTitle = item.journalAbbreviation;
 	}
 
 	// Hack for Endnote exports missing full title
