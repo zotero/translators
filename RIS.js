@@ -17,7 +17,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2023-07-28 09:46:04"
+	"lastUpdated": "2024-11-25 17:25:54"
 }
 
 /*
@@ -1392,6 +1392,12 @@ function processTag(item, tagValue, risEntry, allowDeprecated) {
 				zField = ['extra'];
 			}
 			break;
+		case "JA":
+		case "JO":
+			if (item.journalAbbreviation) {
+				zField = ['backupJournalAbbreviation'];
+			}
+			break;
 	}
 
 	//zField based manipulations
@@ -1764,9 +1770,16 @@ function completeItem(item) {
 		if (cleanDOI) item.DOI = cleanDOI;
 	}
 
-	// hack for sites like Nature, which only use JA, journal abbreviation
-	if (item.journalAbbreviation && !item.publicationTitle) {
-		item.publicationTitle = item.journalAbbreviation;
+	// Use the shorter journal abbreviation, and move the longer one to
+	// publicationTitle if not yet set
+	if (item.backupJournalAbbreviation) {
+		if (item.backupJournalAbbreviation.length < item.journalAbbreviation.length) {
+			if (!item.publicationTitle) {
+				item.publicationTitle = item.journalAbbreviation;
+			}
+			item.journalAbbreviation = item.backupJournalAbbreviation;
+		}
+		delete item.backupJournalAbbreviation;
 	}
 
 	// Hack for Endnote exports missing full title
@@ -2196,7 +2209,6 @@ var exports = {
 	doImport: doImport,
 	options: exportedOptions
 };
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -7256,6 +7268,42 @@ var testCases = [
 						"tag": "Tag"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "TY  - JOUR\nAU  - Howl, R.\nAU  - Fuentes, I.\nT1  - Quantum frequency interferometry: With applications ranging from gravitational wave detection to dark matter searches\nPY  - 2023\nY1  - 2023/01/23\nDO  - 10.1116/5.0084821\nJO  - AVS Quantum Science\nJA  - AVS Quantum Sci.\nVL  - 5\nIS  - 1\nSP  - 014402\nSN  - 2639-0213\nAB  - We introduce a quantum interferometric scheme that uses states that are sharp in frequency and delocalized in position. The states are frequency modes of a quantum field that is trapped at all times in a finite volume potential, such as a small box potential. This allows for significant miniaturization of interferometric devices. Since the modes are in contact at all times, it is possible to estimate physical parameters of global multimode channels. As an example, we introduce a three-mode scheme and calculate precision bounds in the estimation of parameters of two-mode Gaussian channels. This scheme can be implemented in several systems, including superconducting circuits, cavity-QED, and cold atoms. We consider a concrete implementation using the ground state and two phononic modes of a trapped Bose–Einstein condensate. We apply this to show that frequency interferometry can improve the sensitivity of phononic gravitational waves detectors by several orders of magnitude, even in the case that squeezing is much smaller than assumed previously, and that the system suffers from short phononic lifetimes. Other applications range from magnetometry, gravimetry, and gradiometry to dark matter/energy searches.\nY2  - 11/25/2024\nUR  - https://doi.org/10.1116/5.0084821\nER  - \n",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Quantum frequency interferometry: With applications ranging from gravitational wave detection to dark matter searches",
+				"creators": [
+					{
+						"lastName": "Howl",
+						"firstName": "R.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Fuentes",
+						"firstName": "I.",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-01-23",
+				"DOI": "10.1116/5.0084821",
+				"ISSN": "2639-0213",
+				"abstractNote": "We introduce a quantum interferometric scheme that uses states that are sharp in frequency and delocalized in position. The states are frequency modes of a quantum field that is trapped at all times in a finite volume potential, such as a small box potential. This allows for significant miniaturization of interferometric devices. Since the modes are in contact at all times, it is possible to estimate physical parameters of global multimode channels. As an example, we introduce a three-mode scheme and calculate precision bounds in the estimation of parameters of two-mode Gaussian channels. This scheme can be implemented in several systems, including superconducting circuits, cavity-QED, and cold atoms. We consider a concrete implementation using the ground state and two phononic modes of a trapped Bose–Einstein condensate. We apply this to show that frequency interferometry can improve the sensitivity of phononic gravitational waves detectors by several orders of magnitude, even in the case that squeezing is much smaller than assumed previously, and that the system suffers from short phononic lifetimes. Other applications range from magnetometry, gravimetry, and gradiometry to dark matter/energy searches.",
+				"issue": "1",
+				"journalAbbreviation": "AVS Quantum Sci.",
+				"pages": "014402",
+				"publicationTitle": "AVS Quantum Science",
+				"url": "https://doi.org/10.1116/5.0084821",
+				"volume": "5",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
