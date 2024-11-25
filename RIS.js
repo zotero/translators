@@ -17,7 +17,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2024-11-25 17:28:41"
+	"lastUpdated": "2024-11-25 18:57:30"
 }
 
 /*
@@ -1770,19 +1770,17 @@ function completeItem(item) {
 		if (cleanDOI) item.DOI = cleanDOI;
 	}
 
-	// Use the shorter journal abbreviation, and move the longer one to
-	// publicationTitle if not yet set
-	if (item.backupJournalAbbreviation) {
-		if (item.backupJournalAbbreviation.length < item.journalAbbreviation.length) {
-			if (!item.publicationTitle) {
-				item.publicationTitle = item.journalAbbreviation;
-			}
+	// If we have a journalAbbreviation, use it to fill publicationTitle if missing
+	if (item.journalAbbreviation) {
+		if (!item.publicationTitle) {
+			item.publicationTitle = item.journalAbbreviation;
+		}
+		// If we got multiple potential journalAbbreviations, keep the longest one
+		if (item.backupJournalAbbreviation
+				&& item.backupJournalAbbreviation.length < item.journalAbbreviation.length) {
 			item.journalAbbreviation = item.backupJournalAbbreviation;
 		}
 		delete item.backupJournalAbbreviation;
-	}
-	else if (item.journalAbbreviation && !item.publicationTitle) {
-		item.publicationTitle = item.journalAbbreviation;
 	}
 
 	// Hack for Endnote exports missing full title
