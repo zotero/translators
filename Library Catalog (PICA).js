@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-09-20 15:05:33"
+	"lastUpdated": "2024-11-26 15:26:20"
 }
 
 /*
@@ -55,7 +55,15 @@ function detectWeb(doc, _url) {
 
 			return "multiple";
 		}
-		else if ((content == "Notice détaillée") || (content == "title data") || (content == 'Titeldaten') || (content == 'Vollanzeige') || (content == 'Besitznachweis(e)') || (content == 'full title') || (content == 'Titelanzeige' || (content == 'titelgegevens'))) {
+		else if (content == "Notice détaillée"
+				|| content == "title data"
+				|| content == 'Titeldaten'
+				|| content == 'Vollanzeige'
+				|| content == 'Besitznachweis(e)'
+				|| content == 'full title'
+				|| content == 'Titelanzeige'
+				|| content == 'titelgegevens'
+				|| content == 'Detailanzeige') {
 			var xpathimage = "//span[@class='rec_mat_long']/img|//table[contains(@summary, 'presentation')]/tbody/tr/td/img";
 			if ((elt = doc.evaluate(xpathimage, doc, null, XPathResult.ANY_TYPE, null).iterateNext())) {
 				var type = elt.getAttribute('src');
@@ -465,7 +473,7 @@ function scrape(doc, url) {
 				// f., p., and S. are "pages" in various languages
 				// For multi-volume works, we expect formats like:
 				// x-109 p., 510 p. and X, 106 S.; 123 S.
-				var numPagesRE = /\[?((?:[ivxlcdm\d]+[ ,-]*)+)\]?\s+[fps]\b/ig,
+				var numPagesRE = /\[?((?:[ivxlcdm\d]+[ ,-]*)+)\]?\s+([fps]|pages?)\b/ig,
 					numPages = [];
 				while ((m = numPagesRE.exec(value))) {
 					numPages.push(m[1].replace(/ /g, '')
@@ -586,7 +594,9 @@ function scrape(doc, url) {
 			case 'accès en ligne':
 				// Some time links are inside the third cell : https://kxp.k10plus.de/DB=2.1/DB=2.1/PPNSET?PPN=600530787
 				url = doc.evaluate('./td[3]//a | ./td[2]//a', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext();
-				newItem.url = url;
+				if (url) {
+					newItem.url = url.href;
+				}
 				break;
 		}
 	}
@@ -1299,6 +1309,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://swb.bsz-bw.de/DB=2.1/PPNSET?PPN=012099554&INDEXSET=1",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
@@ -1396,13 +1407,12 @@ var testCases = [
 					}
 				],
 				"date": "2012",
-				"ISBN": "2-7056-8274-0, 978-2-7056-8274-3",
-				"callNumber": "1 A 845058 Verfügbarkeit anzeigen / bestellen",
-				"libraryCatalog": "Library Catalog - stabikat.de",
+				"ISBN": "9782705682743",
+				"callNumber": "1 A 845058",
+				"libraryCatalog": "Library Catalog - lbssbb.gbv.de",
 				"numPages": "290",
-				"pages": "290",
 				"place": "Paris",
-				"publisher": "Hermann Ed.",
+				"publisher": "Hermann Éd.",
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
@@ -1416,11 +1426,22 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Gesetzgebung / Rechtsprechung / Komplexes System / Kongress / Paris <2010>Law -- Philosophy -- Congresses / Law -- Political aspects -- Congresses / Rule of law -- Congresses"
+					{
+						"tag": "*Gesetzgebung / Rechtsprechung / Komplexes System"
+					},
+					{
+						"tag": "*Law -- Philosophy -- Congresses"
+					},
+					{
+						"tag": "Law -- Political aspects -- Congresses"
+					},
+					{
+						"tag": "Rule of law -- Congresses"
+					}
 				],
 				"notes": [
 					{
-						"note": "Contient des contributions en anglais<br>Notes bibliogr. Résumés. Index"
+						"note": "<div>Notes bibliogr. Résumés. Index</div><div>Issus du 1er Atelier Complexité &amp; politique publiques, organisé par l'Institut des systèmes complexes, à Paris les 23 et 24 septembre 2010. - Contient des contributions en anglais. - Notes bibliogr. Résumés. Index</div>"
 					}
 				],
 				"seeAlso": []
@@ -1467,115 +1488,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://gso.gbv.de/DB=2.1/PPNSET?PPN=768059798",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Ehetagebücher 1840 - 1844",
-				"creators": [
-					{
-						"firstName": "Robert",
-						"lastName": "Schumann",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Clara",
-						"lastName": "Schumann",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Gerd",
-						"lastName": "Nauhaus",
-						"creatorType": "editor"
-					},
-					{
-						"firstName": "Ingrid",
-						"lastName": "Bodsch",
-						"creatorType": "editor"
-					}
-				],
-				"date": "2013",
-				"ISBN": "978-3-86600-002-5, 978-3-931878-40-5",
-				"abstractNote": "Zum ersten Mal als Einzelausgabe erscheinen die von Robert Schumann und seiner Frau, der Pianistin und Komponistin Clara Schumann, geb. Wieck, in den ersten Jahren ihrer Ehe geführten gemeinsamen Tagebücher. 1987 waren diese in Leipzig und bei Stroemfeld in wissenschaftlich-kritischer Edition von dem Schumannforscher und langjährigen Direktor des Robert-Schumann-Hauses Zwickau, Gerd Nauhaus, vorgelegt worden. Mit der Neupublikation wird die textgetreue, mit Sacherläuterungen sowie Personen-, Werk- und Ortsregistern und ergänzenden Abbildungen versehene Leseausgabe vorgelegt, die einem breiten interessierten Publikum diese einzigartigen Zeugnisse einer bewegenden Künstlerehe nahebringen.",
-				"edition": "2",
-				"libraryCatalog": "Library Catalog - gso.gbv.de",
-				"numPages": "332",
-				"place": "Frankfurt/M.",
-				"publisher": "Stroemfeld",
-				"attachments": [
-					{
-						"title": "Link to Library Catalog Entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Library Catalog Entry Snapshot",
-						"mimeType": "text/html",
-						"snapshot": true
-					}
-				],
-				"tags": [
-					"Schumann, Robert 1810-1856 / Schumann, Clara 1819-1896 / Tagebuch 1840-1844"
-				],
-				"notes": [
-					{
-						"note": "<div><span>Sammlung</span></div>"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://gso.gbv.de/DB=2.1/PPNSET?PPN=770481450",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Religiosidade no Brasil",
-				"creators": [
-					{
-						"firstName": "João Baptista Borges",
-						"lastName": "Pereira",
-						"creatorType": "author"
-					}
-				],
-				"date": "2012",
-				"ISBN": "9788531413742",
-				"libraryCatalog": "Library Catalog - kxp.k10plus.de",
-				"numPages": "397",
-				"place": "São Paulo, SP, Brasil",
-				"publisher": "EDUSP",
-				"url": "http://www.gbv.de/dms/spk/iai/toc/770481450.pdf",
-				"attachments": [
-					{
-						"title": "Link to Library Catalog Entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Library Catalog Entry Snapshot",
-						"mimeType": "text/html",
-						"snapshot": true
-					}
-				],
-				"tags": [
-					{
-						"tag": "Brazil -- Religious life and customs"
-					}
-				],
-				"notes": [
-					{
-						"note": "<div><span>Includes bibliographical references</span></div>"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.sudoc.abes.fr/cbs/xslt/DB=2.1//SRCH?IKT=12&TRM=024630527",
+		"url": "https://www.sudoc.abes.fr/cbs/xslt/DB=2.1/SRCH?IKT=12&TRM=024630527",
 		"items": [
 			{
 				"itemType": "book",
@@ -1591,7 +1504,6 @@ var testCases = [
 				"language": "français",
 				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
 				"numPages": "xii+xxiii+681+540+739",
-				"numberOfVolumes": "3",
 				"place": "Paris, France",
 				"publisher": "Dunod",
 				"attachments": [
@@ -1627,7 +1539,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "\n<div><span>Titre des tomes 2 et 3 : Conférences sur l'administration et le droit administratif faites à l'Ecole des ponts et chaussées</span></div>\n<div><span>&nbsp;</span></div>\n"
+						"note": "\n<div><span>Titre des tomes 2 et 3 : Conférences sur l'administration et le droit administratif faites à l'Ecole des ponts et chaussées</span></div>\n<div><span>&nbsp;</span></div>\n<div><span>&nbsp;</span></div>\n<div><span>&nbsp;</span></div>\n<div><span>&nbsp;</span></div>\n"
 					}
 				],
 				"seeAlso": []
@@ -1636,7 +1548,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.abes.fr/cbs/xslt/DB=2.1//SRCH?IKT=12&TRM=001493817",
+		"url": "https://www.sudoc.abes.fr/cbs/xslt/DB=2.1/SRCH?IKT=12&TRM=001493817",
 		"items": [
 			{
 				"itemType": "book",
@@ -1662,11 +1574,6 @@ var testCases = [
 				"place": "Paris, France",
 				"publisher": "Librairie générale de droit et de jurisprudence",
 				"attachments": [
-					{
-						"title": "Worldcat Link",
-						"mimeType": "text/html",
-						"snapshot": false
-					},
 					{
 						"title": "Link to Library Catalog Entry",
 						"mimeType": "text/html",
@@ -1694,7 +1601,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "<div><span>1, Notions générales et législation comparée, histoire, organisation compétence de la juridiction administrative. 2, Compétence (suite), marchés et autres contrats, dommages, responsabilité de l'état, traitements et pensions, contributions directes, élections, recours pour excés de pouvoir, interprétation, contraventions de grandes voirie</span></div>"
+						"note": "\n<div><span>1, Notions générales et législation comparée, histoire, organisation compétence de la juridiction administrative. 2, Compétence (suite), marchés et autres contrats, dommages, responsabilité de l'état, traitements et pensions, contributions directes, élections, recours pour excés de pouvoir, interprétation, contraventions de grandes voirie</span></div>\n<div><span>&nbsp;</span></div>\n<div><span>&nbsp;</span></div>\n"
 					}
 				],
 				"seeAlso": []
@@ -1703,7 +1610,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.abes.fr/cbs/xslt/DB=2.1//SRCH?IKT=12&TRM=200278649",
+		"url": "https://www.sudoc.abes.fr/cbs/xslt/DB=2.1/SRCH?IKT=12&TRM=200278649",
 		"items": [
 			{
 				"itemType": "book",
@@ -1759,7 +1666,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "<div>\n<span>Table des matières disponible en ligne (</span><span><a class=\"\n\t\t\tlink_gen\n\t\t    \" target=\"\" href=\"http://catdir.loc.gov/catdir/toc/casalini11/13192019.pdf\">http://catdir.loc.gov/catdir/toc/casalini11/13192019.pdf</a></span><span>)</span>\n</div>"
+						"note": "\n<div>\n<span>Table des matières disponible en ligne (</span><span><a class=\"\n\t\t\tlink_gen\n\t\t    \" target=\"\" href=\"http://catdir.loc.gov/catdir/toc/casalini11/13192019.pdf\">http://catdir.loc.gov/catdir/toc/casalini11/13192019.pdf</a></span><span>)</span>\n</div>\n<div><span>&nbsp;</span></div>\n<div><span>&nbsp;</span></div>\n"
 					}
 				],
 				"seeAlso": []
@@ -1768,14 +1675,18 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://stabikat.de/DB=1/XMLPRS=N/PPN?PPN=1748358820",
+		"url": "https://lbssbb.gbv.de/DB=1/XMLPRS=N/PPN?PPN=1748358820",
 		"items": [
 			{
-				"itemType": "webpage",
+				"itemType": "book",
 				"title": "Modern and contemporary Taiwanese philosophy: traditional foundations and new developments",
 				"creators": [],
 				"date": "2021",
+				"ISBN": "9781527562448",
 				"abstractNote": "This collection contains 13 essays on modern and contemporary Taiwanese philosophy, written by outstanding scholars working in this field. It highlights the importance of Taiwanese philosophy in the second half of the 20th century. While the Chinese conceptual tradition (especially Confucianism) fell out of favor from the 1950s onwards and was often banned or at least severely criticized on the mainland, Taiwanese philosophers constantly strove to preserve and develop it. Many of them tried to modernize their own traditions through dialogs with Western thought, especially with the ideas of the European Enlightenment. However, it was not only about preserving tradition; in the second half of the 20th century, several complex and coherent philosophical systems emerged in Taiwan. The creation of these discourses is evidence of the great creativity and innovative power of many Taiwanese theorists, whose work is still largely unknown in the Western world.Intro -- Table of Contents -- Acknowledgements -- Editor's Foreword -- Introduction -- Modern and Contemporary Confucianism -- The Problem of \"Inner Sageliness and Outer Kingliness\" Revisited -- A Debate on Confucian Orthodoxy in Contemporary Taiwanese Confucian Thought -- A Phenomenological Interpretation of Mou Zongsan's Use of \"Transcendence\" and \"Immanence\" -- Modern Confucianism and the Methodology of Chinese Aesthetics -- Research on Daoist Philosophy -- Laozi's View of Presence and Absence, Movement and Stillness, and Essence and Function -- Characteristics of Laozi's \"Complementary Opposition\" Thought Pattern -- A General Survey of Taiwanese Studies on the Philosophy of the Wei-Jin Period in the Last Fifty Years of the 20th Century -- Logic and Methodology -- Qinghua School of Logic and the Origins of Taiwanese Studies in Modern Logic -- Discussing the Functions and Limitations of Conveying \"Concepts\" in Philosophical Thinking -- Taiwanese Philosophy from the East Asian and Global Perspective -- How is it Possible to \"Think from the Point of View of East Asia?\" -- Between Philosophy and Religion -- The Global Significance of Chinese/Taiwanese Philosophy in a Project -- Index of Special Terms and Proper Names.",
+				"libraryCatalog": "Library Catalog - lbssbb.gbv.de",
+				"place": "Newcastle-upon-Tyne",
+				"publisher": "Cambridge Scholars Publishing",
 				"shortTitle": "Modern and contemporary Taiwanese philosophy",
 				"url": "http://erf.sbb.spk-berlin.de/han/872773256/ebookcentral.proquest.com/lib/staatsbibliothek-berlin/detail.action?docID=6416045",
 				"attachments": [
@@ -1803,7 +1714,7 @@ var testCases = [
 						"note": "<div>Description based on publisher supplied metadata and other sources.</div>"
 					},
 					{
-						"note": "<div>Einzelnutzerlizenz</div>"
+						"note": "<div>Einzelnutzungslizenz</div>"
 					}
 				],
 				"seeAlso": []
@@ -1812,7 +1723,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://swb.bsz-bw.de/DB=2.1/PPNSET?PPN=1703871782",
+		"url": "https://swb.bsz-bw.de/DB=2.1/PPNSET?PPN=1703871782",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1828,7 +1739,7 @@ var testCases = [
 				"ISSN": "1361-6455",
 				"issue": "13",
 				"libraryCatalog": "Library Catalog - swb.bsz-bw.de",
-				"publicationTitle": "Journal of physics  B",
+				"publicationTitle": "Journal of physics  : one of the major international journals in atomic, molecular and optical physics, covering the study of atoms, ion, molecules or clusters, their structure and interactions with particles, photons or fields",
 				"url": "http://dx.doi.org/10.1088/1361-6455/ab8834",
 				"volume": "53",
 				"attachments": [
@@ -1892,7 +1803,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "<div>WEEE = Waste Electrical and Electronic Equipment</div><div>Literaturverzeichnis: Seite 39-43</div><div>Archivierung/Langzeitarchivierung gewährleistet ; TIB Hannover</div>"
+						"note": "<div>WEEE = Waste Electrical and Electronic Equipment</div><div>Literaturverzeichnis: Seite 39-43</div><div>Archivierung/Langzeitarchivierung gewährleistet. TIB Hannover</div>"
 					},
 					{
 						"note": "<div>Es gilt deutsches Urheberrecht. Das Werk bzw. der Inhalt darf zum eigenen Gebrauch kostenfrei heruntergeladen, konsumiert, gespeichert oder ausgedruckt, aber nicht im Internet bereitgestellt oder an Außenstehende weitergegeben werden. - German copyright law applies. The work or content may be downloaded, consumed, stored or printed for your own use but it may not be distributed via the internet or passed on to external parties.</div>"
@@ -1919,10 +1830,11 @@ var testCases = [
 				"date": "2021",
 				"ISBN": "9783030568573",
 				"libraryCatalog": "Library Catalog - opac.sub.uni-goettingen.de",
+				"numPages": "337",
 				"place": "Cham",
 				"publisher": "Springer International Publishing AG",
 				"shortTitle": "12 Strokes",
-				"url": "http://han.sub.uni-goettingen.de/han/ebookcentral1/ebookcentral.proquest.com/lib/subgoettingen/detail.action?docID=6454869",
+				"url": "https://ebookcentral.proquest.com/lib/subgoettingen/detail.action?docID=6454869",
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
@@ -1946,62 +1858,6 @@ var testCases = [
 					},
 					{
 						"note": "<div>Im Campus-Netz sowie für Angehörige der Universität Göttingen auch extern über Authentifizierungsmodul zugänglich. Vervielfältigungen (z.B. Kopien, Downloads) sind nur von einzelnen Kapiteln oder Seiten und nur zum eigenen wissenschaftlichen Gebrauch erlaubt. Keine Weitergabe an Dritte. Kein systematisches Downloaden durch Robots.</div>"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://lhclz.gbv.de/DB=1/XMLPRS=N/PPN?PPN=839046855",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Customer Value Generation in Banking: The Zurich Model of Customer-Centricity",
-				"creators": [
-					{
-						"firstName": "Bernhard",
-						"lastName": "Koye",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Axel",
-						"lastName": "Liebetrau",
-						"creatorType": "author"
-					}
-				],
-				"date": "2024",
-				"libraryCatalog": "Library Catalog - lhclz.gbv.de",
-				"numPages": "209",
-				"place": "Cham",
-				"publisher": "Springer International Publishing",
-				"series": "Management for Professionals",
-				"shortTitle": "Customer Value Generation in Banking",
-				"url": "https://ebookcentral.proquest.com/lib/tuclausthal-ebooks/detail.action?docID=3567812",
-				"attachments": [
-					{
-						"title": "Link to Library Catalog Entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Library Catalog Entry Snapshot",
-						"mimeType": "text/html",
-						"snapshot": true
-					}
-				],
-				"tags": [
-					{
-						"tag": "Electronic books"
-					}
-				],
-				"notes": [
-					{
-						"note": "<div>Description based upon print version of record</div>"
-					},
-					{
-						"note": "<div>Campusweiter Zugriff. - Vervielfältigungen (z.B. Kopien, Downloads) sind nur von einzelnen Kapiteln oder Seiten und nur zum eigenen wissenschaftlichen Gebrauch erlaubt. Keine Weitergabe an Dritte. Kein systematisches Downloaden durch Robots.</div>"
 					}
 				],
 				"seeAlso": []
@@ -2034,6 +1890,228 @@ var testCases = [
 				],
 				"tags": [],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.sudoc.abes.fr/cbs/DB=2.1/SRCH?IKT=12&TRM=281455481",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Migrations: une odyssée humaine",
+				"creators": [
+					{
+						"firstName": "Sylvie",
+						"lastName": "Mazzella",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christine",
+						"lastName": "Verna",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Aline",
+						"lastName": "Averbouh",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hassan",
+						"lastName": "Boubakri",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Souleymane Bachir",
+						"lastName": "Diagne",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Adélie",
+						"lastName": "Chevée",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Dana",
+						"lastName": "Diminescu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Florent",
+						"lastName": "Détroit",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Théo",
+						"lastName": "Ducharme",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mustapha",
+						"lastName": "El Miri",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Stéphanie",
+						"lastName": "Garneau",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sébastien",
+						"lastName": "Gökalp",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christian",
+						"lastName": "Grataloup",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "François",
+						"lastName": "Héran",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Julien d'",
+						"lastName": "Huy",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Thomas",
+						"lastName": "Ingicco",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christophe",
+						"lastName": "Lavelle",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hélène",
+						"lastName": "Le Bail",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Antoine",
+						"lastName": "Lourdeau",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nick",
+						"lastName": "Mai",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Claire",
+						"lastName": "Manen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Cléo",
+						"lastName": "Marmié",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nathalie",
+						"lastName": "Mémoire",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marie-France",
+						"lastName": "Mifune",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Swanie",
+						"lastName": "Potot",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nicolas",
+						"lastName": "Puig",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michelle",
+						"lastName": "Salord",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yann",
+						"lastName": "Tephany",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Paul",
+						"lastName": "Verdu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Catherine",
+						"lastName": "Wihtol de Wenden",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Wanda",
+						"lastName": "Zinger",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Frédérique",
+						"lastName": "Chlous-Ducharme",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Gilles Préfacier",
+						"lastName": "Bloch",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Musée de l'Homme",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2024",
+				"ISBN": "9782382790328",
+				"abstractNote": "Les conditions dans lesquelles des humains quittent leur pays soulèvent de nombreuses controverses. Le mot « migrant » ne désigne que rarement le fait brut de la mobilité ; il est chargé de jugements de valeur. Dans les discours politiques et médiatiques, l’omniprésence de certains termes participe à une rhétorique du danger ou de la nuisance : crise, invasion, remplacement, flot migratoire, pression démographique… Prenons un peu de recul. S’il n’y a pas de vie sans installation, il n’y a pas non plus de vie sans déplacement. Cette complémentarité entre stabilité et échanges est l’un des moteurs de la pérennité des espèces. Les migrations, en tant que déplacements des êtres humains dans l’espace, permettent également une diffusion des savoirs, des techniques, des cultures. Elles sont ainsi une part constitutive et fondamentale de nos sociétés, de nous-mêmes. En une vingtaine de chapitres clairs et accessibles, auxquels se mêlent des témoignages recueillis aux quatre coins du monde, ce catalogue invite, en complémentarité avec l’exposition, à adopter un regard critique et citoyen sur cette question d’actualité qui fait écho, aussi, aux premiers temps de l’humanité (site web de l’éditeur)",
+				"language": "français",
+				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
+				"numPages": "228",
+				"place": "Paris, France",
+				"publisher": "Muséum national d'histoire naturelle",
+				"shortTitle": "Migrations",
+				"attachments": [
+					{
+						"title": "Worldcat Link",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Link to Library Catalog Entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [
+					{
+						"tag": "Migrations de peuples"
+					},
+					{
+						"tag": "Préhistoire"
+					}
+				],
+				"notes": [
+					{
+						"note": "<div><span>Autres contributeurs : Adélie Chevée, Dana Diminescu, Florent Détroit, Théo Ducharme, Mustapha El Miri, Stéphanie Garneau, Sébastien Gökalp, Christian Grataloup, François Héran, Julien d'Huy, Thomas Ignicco, Christophe Lavelle, Hélène Le Bail, Antoine Lourdeau, Nick Mai, Claire Manen, Cléo Marmié, Nathalie Mémoire, Marie-France Mifune, Swanie Potot, Nicolas Puig, Michelle Salord Lopez, Yann Téphany, Paul Verdu, Catherine Wihtol de Wenden, Wanda Zinger</span></div><div><span>&nbsp;</span></div><div><span>&nbsp;</span></div>"
+					}
+				],
 				"seeAlso": []
 			}
 		]
