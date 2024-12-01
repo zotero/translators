@@ -2,7 +2,7 @@
 	"translatorID": "825f208c-eb96-4372-9d21-b879c3a910bb",
 	"label": "FNAC",
 	"creator": "César Lizurey",
-	"target": "^https?://(www\\.)?fnac\\.com",
+	"target": "^https?://(www\\.)?fnac\\.com/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -37,15 +37,13 @@
 
 function detectWeb(doc, url) {
 	// Check if the URL matches the desired format
-	var match = url.match(/^https:\/\/www\.fnac\.com\/a(\d+)\/([\w-]+)$/);
+	var match = new URL(url).pathname.match(/^\/a(\d+)\/([\w-]+)$/);
 
 	if (match) {
-		Z.debug("URL OK");
 
 		// Get the second <a> element in the breadcrumb to check the itemType
 		var secondLink = doc.querySelector('nav.f-breadcrumb > ul.f-breadcrumb__list > li:nth-of-type(2)');
 		if (secondLink) {
-			Z.debug("Breadcrumb OK");
 			switch (secondLink.textContent.trim()) {
 				case 'Livre': {
 					return 'book';
@@ -60,26 +58,21 @@ function detectWeb(doc, url) {
 					return 'computerProgram';
 				}
 				default: {
-					Z.debug("Unknown category '" + secondLink.textContent.trim() + "' will be ignored by Zotero");
-					Z.debug("Items in this category will be ignored by Zotero: " + secondLink.textContent.trim());
 					return false;
 				}
 			}
 		}
 
-		Z.debug("Breadcrumb KO");
 		return false;
 	}
 	
-	Z.debug("URL KO");
 	return false;
 }
 
 function doWeb(doc, url) {
-	Z.debug("Scraping from Page");
-	var item = new Zotero.Item(detectWeb(doc, url) || "book");
-	item.URL = url;
-	item.title = doc.querySelector('h1.f-productHeader-Title').textContent.trim();
+	var item = new Zotero.Item(detectWeb(doc, url));
+	item.url = attr(doc, 'link[rel="canonical"]', 'href');
+	item.title = doc.querySelector('section.f-productHeader > h1').textContent.trim();
 
 	var characteristicsSection = doc.querySelector('section#Characteristics');
 	if (characteristicsSection) {
@@ -91,19 +84,13 @@ function doWeb(doc, url) {
 			var value = characteristic.nextElementSibling;
 			const category = characteristic.textContent.trim();
 
-			Z.debug(`${category}: ${value.textContent.trim()}`);
-
 			switch (category) {
 				case 'Auteur': {
 					// Extract the authors
 					var creators = [];
 					var authorElements = value.querySelectorAll('a');
-					for (var j = 0; j < authorElements.length; j++) {
-						creators.push({
-							firstName: authorElements[j].textContent.trim(),
-							lastName: "",
-							creatorType: "author"
-						});
+					for (let authorElement of authorElements) {
+						creators.push(ZU.cleanAuthor(authorElement.textContent, 'author'));
 					}
 					item.creators = creators;
 					break;
@@ -129,7 +116,7 @@ function doWeb(doc, url) {
 					// Loop through the keys in the monthNames object
 					for (var monthName in monthNames) {
 						// Replace any occurrence of the key with the value
-						dateParution = dateParution.replace(new RegExp(monthName, 'g'), `${monthNames[monthName]}/`);
+						dateParution = dateParution.replace(monthName, `${monthNames[monthName]}/`);
 					}
 					// Convert the date
 					item.date = dateParution.split('/').reverse().join('-');
@@ -160,7 +147,11 @@ function doWeb(doc, url) {
 				}
 				case 'Nombre de pages': {
 					// Extract the number of pages
-					item.numPages = +value.textContent.trim();
+					const trimmedValue = value.textContent.trim();
+					const parsedValue = +trimmedValue;
+					if (trimmedValue !== "" && Number.isInteger(parsedValue)) {
+							item.numPages = parsedValue;
+					}
 					break;
 				}
 				case 'Compositeur': {
@@ -173,16 +164,13 @@ function doWeb(doc, url) {
 
 		item.attachments = [
 			{
-				title: "Fnac.com Link",
+				title: "Catalog Page",
 				snapshot: false,
 				mimeType: "text/html"
 			}
 		];
 	}
 
-	Z.debug("===== ITEM =====");
-	Z.debug(item);
-	Z.debug("===== END ITEM =====");
 	item.complete();
 }
 
