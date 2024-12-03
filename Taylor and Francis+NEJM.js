@@ -145,16 +145,11 @@ async function scrape(doc, url = doc.location.href) {
 	var unescapeFields = ['title', 'publicationTitle', 'abstractNote'];
 	for (var i = 0; i < unescapeFields.length; i++) {
 		if (item[unescapeFields[i]]) {
-			Z.debug("checking item fields");
-			Z.debug(unescapeFields[i]);
-			Z.debug(item[unescapeFields[i]]);
 			item[unescapeFields[i]] = ZU.unescapeHTML(item[unescapeFields[i]]);
-			Z.debug(item[unescapeFields[i]]);
 		}
 	}
 	
 	item.bookTitle = item.publicationTitle;
-	Z.debug(item);
 	if (!item.title) item.title = "<no title>";	// RIS title can be even worse, it actually says "null"
 	if (risItem.date) item.date = risItem.date; // More complete
 	if (item.date && /^\d{4}$/.test(item.date)) {
