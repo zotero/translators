@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-07-02 20:00:15"
+	"lastUpdated": "2024-12-03 15:37:21"
 }
 
 /*
@@ -107,9 +107,17 @@ async function scrape(doc, url = doc.location.href) {
 
 	let bibtexText = await requestText(postUrl, { method: 'POST', body: postBody + doi + bibtexFormat });
 	let risText = await requestText(postUrl, { method: 'POST', body: postBody + doi + risFormat });
+
+	// Z.debug(bibtexText)
 	// Y1 is online publication date
 	if (/^DA\s+-\s+/m.test(risText)) {
 		risText = risText.replace(/^Y1(\s+-.*)/gm, '');
+	}
+	// Fix broken BibTeX as in https://github.com/zotero/translators/issues/3398
+	if (/@article\{[^,]+\}/m.test(bibtexText)) {
+		Z.debug("Fixing BibTeX");
+		bibtexText = bibtexText.replace(/(@article\{[^,]+)\}/m, '$1');
+		// Z.debug(bibtexText);
 	}
 
 	var item;
@@ -137,12 +145,16 @@ async function scrape(doc, url = doc.location.href) {
 	var unescapeFields = ['title', 'publicationTitle', 'abstractNote'];
 	for (var i = 0; i < unescapeFields.length; i++) {
 		if (item[unescapeFields[i]]) {
+			Z.debug("checking item fields");
+			Z.debug(unescapeFields[i]);
+			Z.debug(item[unescapeFields[i]]);
 			item[unescapeFields[i]] = ZU.unescapeHTML(item[unescapeFields[i]]);
+			Z.debug(item[unescapeFields[i]]);
 		}
 	}
 	
 	item.bookTitle = item.publicationTitle;
-
+	Z.debug(item);
 	if (!item.title) item.title = "<no title>";	// RIS title can be even worse, it actually says "null"
 	if (risItem.date) item.date = risItem.date; // More complete
 	if (item.date && /^\d{4}$/.test(item.date)) {
