@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-11-20 15:37:18"
+	"lastUpdated": "2024-12-03 15:53:57"
 }
 
 /*
@@ -243,7 +243,7 @@ function detectSearch(item) {
 
 async function doSearch(item) {
 	let url = `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(item.arXiv)}&max_results=1`;
-	let doc = await requestDocument(url);
+	let doc = await requestAtom(url);
 	parseAtom(doc);
 }
 
@@ -323,7 +323,7 @@ async function doWeb(doc, url) {
 		let selectedItems = await Z.selectItems(items);
 		if (selectedItems) {
 			let apiURL = `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(Object.keys(selectedItems).join(','))}`;
-			let document = await requestDocument(apiURL);
+			let document = await requestAtom(apiURL);
 			parseAtom(document);
 		}
 	}
@@ -343,8 +343,14 @@ async function doWeb(doc, url) {
 		//id = id.trim().replace(/^arxiv:\s*|v\d+|\s+.*$/ig, '');
 		id = id.trim().replace(/^arxiv:\s*|\s+.*$/ig, '');
 		let apiURL = `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(id)}&max_results=1`;
-		await requestDocument(apiURL).then(parseAtom);
+		await requestAtom(apiURL).then(parseAtom);
 	}
+}
+
+// Temp workaround for https://github.com/zotero/zotero-connectors/issues/526
+async function requestAtom(url) {
+	let text = await requestText(url);
+	return new DOMParser().parseFromString(text, 'application/xml');
 }
 
 function parseAtom(doc) {
@@ -389,7 +395,7 @@ function parseSingleEntry(entry) {
 	}
 	newItem.url = arxivURL;
 
-	let articleID = arxivURL.replace(/https?:\/\/arxiv.org\/abs\//, ''); // Trim off http://arxiv.org/abs/
+	let articleID = arxivURL.match(/\/abs\/(.+)$/)[1];
 
 	let articleField = attr(entry, "primary_category", "term").replace(/^.+?:/, "").replace(/\..+?$/, "");
 	if (articleField) articleField = "[" + articleField + "]";
