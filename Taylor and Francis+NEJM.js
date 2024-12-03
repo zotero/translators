@@ -114,9 +114,9 @@ async function scrape(doc, url = doc.location.href) {
 		risText = risText.replace(/^Y1(\s+-.*)/gm, '');
 	}
 	// Fix broken BibTeX as in https://github.com/zotero/translators/issues/3398
-	if (/@article\{[^,]+\}/m.test(bibtexText)) {
+	if (/@article\{[^,]+\}/.test(bibtexText)) {
 		Z.debug("Fixing BibTeX");
-		bibtexText = bibtexText.replace(/(@article\{[^,]+)\}/m, '$1');
+		bibtexText = bibtexText.replace(/(@article\{[^,]+)\}/, '$1');
 		// Z.debug(bibtexText);
 	}
 
