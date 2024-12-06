@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-12-06 01:13:45"
+	"lastUpdated": "2024-12-06 20:35:13"
 }
 
 /*
@@ -89,16 +89,14 @@ async function scrapeAPI(doc, url) {
 		// Handle embedded quote records (if any)
 		if (post.embed && post.embed.record && post.embed.record.value) {
 			let embeddedPost = post.embed.record.value;
-			item.notes.push(`Quoting this post by @${post.embed.record.author.handle}: "${embeddedPost.text}"`);
+			item.notes.push(`This post is quoting a post by @${post.embed.record.author.handle}: "${embeddedPost.text}"`);
 		}
 
 		// Handle replies (if any)
 		if (data.thread.replies && data.thread.replies.length > 0) {
-			for (let reply of data.thread.replies) {
-				if (reply.post && reply.post.record) {
-					item.notes.push(`Reply by @${reply.post.author.handle}: "${reply.post.record.text}"`);
-				}
-			}
+			const date = new Date()
+			const utcStr = date.toUTCString()
+			item.notes.push(`This post had ${data.thread.replies.length} direct replies as of ${utcStr}`);
 		}
 		item.attachments.push({ document: doc, title: "Snapshot" });
 		item.complete();
@@ -125,7 +123,7 @@ var testCases = [
 					}
 				],
 				"date": "2024-12-05T16:25:35.749Z",
-				"extra": "Likes: 6 | Reposts: 0 | Quotes: 0",
+				"extra": "Likes: 7 | Reposts: 0 | Quotes: 0",
 				"forumTitle": "Bluesky",
 				"language": "en",
 				"postType": "Skeet",
@@ -138,8 +136,8 @@ var testCases = [
 				],
 				"tags": [],
 				"notes": [
-					"Quoting this post by @ericwickham.ca: \"Told the guy replacing my car window how much I made at my first job in radio and I feel like it deeply changed what he thought about people in media.\"",
-					"Reply by @ericwickham.ca: \"LOOK AT THESE MEDIA ELITES\""
+					"This post is quoting a post by @ericwickham.ca: \"Told the guy replacing my car window how much I made at my first job in radio and I feel like it deeply changed what he thought about people in media.\"",
+					"This post had 1 direct replies as of Fri, 06 Dec 2024 20:31:24 GMT"
 				],
 				"seeAlso": []
 			}
