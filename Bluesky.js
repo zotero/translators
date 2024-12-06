@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-12-06 01:00:42"
+	"lastUpdated": "2024-12-06 01:13:45"
 }
 
 /*
@@ -50,17 +50,17 @@ async function scrapeAPI(doc, url) {
 	const handle = /(?:\/profile\/)(([^/]+))/;
 	const postId = /(?:\/post\/)([a-zA-Z0-9]+)/;
 
-	var foundHandle = url.match(handle)[1];
-	var foundPostId = url.match(postId)[1];
+	let foundHandle = url.match(handle)[1];
+	let foundPostId = url.match(postId)[1];
 
-	var apiUrl = `https://public.api.bsky.app/xrpc/app.bsky.feed.getPostThread?uri=at://${foundHandle}/app.bsky.feed.post/${foundPostId}`;
+	let apiUrl = `https://public.api.bsky.app/xrpc/app.bsky.feed.getPostThread?uri=at://${foundHandle}/app.bsky.feed.post/${foundPostId}`;
 	let data = await ZU.requestJSON(apiUrl);
 	if (data.thread && data.thread.post) {
-		var post = data.thread.post;
-		var item = new Zotero.Item("forumPost");
+		let post = data.thread.post;
+		let item = new Zotero.Item("forumPost");
 		// Main post details
 		// cut off titles longer than 140 characters
-		let title = post.record.text || "Bluesky Skeet"; // Use the post text as the title
+		let title = post.record.text || "Bluesky Skeet";
 		if (title.length < 140) {
 			item.title = title;
 		}
@@ -77,7 +77,7 @@ async function scrapeAPI(doc, url) {
 		
 		// Add author information
 		if (post.author) {
-			var authorName = post.author.displayName || post.author.handle;
+			let authorName = post.author.displayName || post.author.handle;
 			item.creators.push(Zotero.Utilities.cleanAuthor(authorName, "author"));
 		}
 
@@ -86,9 +86,9 @@ async function scrapeAPI(doc, url) {
 		if (post.repostCount !== undefined) item.extra += ` | Reposts: ${post.repostCount}`;
 		if (post.quoteCount !== undefined) item.extra += ` | Quotes: ${post.quoteCount}`;
 
-		// Handle embedded records (if any)
+		// Handle embedded quote records (if any)
 		if (post.embed && post.embed.record && post.embed.record.value) {
-			var embeddedPost = post.embed.record.value;
+			let embeddedPost = post.embed.record.value;
 			item.notes.push(`Quoting this post by @${post.embed.record.author.handle}: "${embeddedPost.text}"`);
 		}
 
@@ -108,7 +108,7 @@ async function scrapeAPI(doc, url) {
 }
 
 /** BEGIN TEST CASES **/
-var testCases = [
+let testCases = [
 	{
 		"type": "web",
 		"url": "https://bsky.app/profile/watershedlab.bsky.social/post/3lcl3glmdx226",
