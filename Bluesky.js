@@ -108,7 +108,7 @@ async function scrapeAPI(doc, url) {
 }
 
 /** BEGIN TEST CASES **/
-let testCases = [
+var testCases = [
 	{
 		"type": "web",
 		"url": "https://bsky.app/profile/watershedlab.bsky.social/post/3lcl3glmdx226",
