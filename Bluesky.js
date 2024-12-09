@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-12-06 20:35:13"
+	"lastUpdated": "2024-12-09 16:47:45"
 }
 
 /*
@@ -59,15 +59,17 @@ async function scrapeAPI(doc, url) {
 		let post = data.thread.post;
 		let item = new Zotero.Item("forumPost");
 		// Main post details
-		// cut off titles longer than 140 characters
-		let title = post.record.text || "Bluesky Skeet";
-		if (title.length < 140) {
-			item.title = title;
+
+		// remove newlines and extra whitespace
+		let title_cleaned = post.record.text.replace(/\s+/g, ' ');
+		// Ensure that full post text is always available
+		item.abstractNote = title_cleaned;
+		// Tidy if necessary
+		if (title_cleaned.length < 140) {
+			item.title = title_cleaned;
 		}
 		else {
-			item.title = ZU.ellipsize(title, 140, true);
-			item.abstractNote = title;
-			// we'll keep the full text in the abstract in this case;
+			item.title = ZU.ellipsize(title_cleaned, 140, true);
 		}
 		item.forumTitle = "Bluesky";
 		item.type = "Skeet";
@@ -123,7 +125,8 @@ var testCases = [
 					}
 				],
 				"date": "2024-12-05T16:25:35.749Z",
-				"extra": "Likes: 7 | Reposts: 0 | Quotes: 0",
+				"abstractNote": "My first and only job in media was as a reporter on a small newspaper in England in 2002. My salary was £8700. Per year.",
+				"extra": "Likes: 8 | Reposts: 0 | Quotes: 0",
 				"forumTitle": "Bluesky",
 				"language": "en",
 				"postType": "Skeet",
@@ -137,7 +140,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					"This post is quoting a post by @ericwickham.ca: \"Told the guy replacing my car window how much I made at my first job in radio and I feel like it deeply changed what he thought about people in media.\"",
-					"This post had 1 direct replies as of Fri, 06 Dec 2024 20:31:24 GMT"
+					"This post had 1 direct replies as of Mon, 09 Dec 2024 16:47:41 GMT"
 				],
 				"seeAlso": []
 			}
