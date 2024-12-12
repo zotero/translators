@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-08-14 09:22:27"
+	"lastUpdated": "2024-12-12 14:48:56"
 }
 
 /*
@@ -96,7 +96,7 @@ async function scrape(doc, url = doc.location.href) {
 			if (previous_author_tag.name == 'citation_author') {
 				let author_name = previous_author_tag.content;
 				let orcid = orcid_tag.content;
-				item.notes.push({note: "orcid:" + orcid + ' | ' + author_name});
+				item.notes.push({note: "orcid:" + orcid + ' | ' + author_name + ' | ' + " taken from website"});
 			}
 		}
 			
@@ -114,8 +114,6 @@ async function scrape(doc, url = doc.location.href) {
 	
 	await em.doWeb(doc, url); 
 }
-
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
