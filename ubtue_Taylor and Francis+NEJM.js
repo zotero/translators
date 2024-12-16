@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-12-12 13:02:20"
+	"lastUpdated": "2024-12-16 16:21:50"
 }
 
 /*
@@ -83,6 +83,16 @@ function doWeb(doc, url) {
 }
 
 
+function fixBibTex(text) {
+    // T & F exports erroneous BibTex with trailing curly braces in the first line
+	text = text.replace(/^\s*[\r\n]+\s*/gm, "");
+	Z.debug(text);
+	if (text.length > 1 && text.match(/^@[^\s{]+\s*\{[^{]+\},\s*$/gm))
+		return text.replace(/\}/, "");
+	return text;
+}
+
+
 function scrape(doc, url) {
 	var match = url.match(/\/doi\/(?:abs|full|figure)\/(10\.[^?#]+)/);
 	var doi = match[1];
@@ -100,7 +110,8 @@ function scrape(doc, url) {
 		var translator = Zotero.loadTranslator("import");
 		// Use BibTeX translator
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
-		translator.setString(text);
+		let text_fixed = fixBibTex(text);
+		translator.setString(text_fixed);
 		translator.setHandler("itemDone", function(obj, item) {
 			// BibTeX content can have HTML entities (e.g. &amp;) in various fields
 			// We'll just try to unescape the most likely fields to contain these entities
@@ -157,7 +168,7 @@ function scrape(doc, url) {
 
 //ubtue: write article number in $y
 function addArticleNumber (doc, item) {
-	if (item.pages.match(/\d{5,}/)) {
+	if (item.pages && item.pages.match(/\d{5,}/)) {
 		item.pages = 'article ' + item.pages;	
 	}
 }
@@ -204,8 +215,6 @@ function finalizeItem(item, doc, doi, baseUrl) {
 	addArticleNumber(doc, item);
 	item.complete();
 }
-
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
