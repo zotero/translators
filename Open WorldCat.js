@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-11-12 16:47:59"
+	"lastUpdated": "2024-12-17 15:40:52"
 }
 
 /*
@@ -118,14 +118,8 @@ const RECORD_MAPPING = {
 };
 
 function detectWeb(doc, url) {
-	let nextData = doc.querySelector('#__NEXT_DATA__');
-	if (url.includes('/title/') && nextData) {
-		try {
-			return getItemType(JSON.parse(nextData.textContent).props.pageProps.record);
-		}
-		catch (e) {
-			return 'book';
-		}
+	if (url.includes('/title/')) {
+		return getPageItemType(doc);
 	}
 	else if (getSearchResults(doc, true)) {
 		return 'multiple';
@@ -137,7 +131,26 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-function getItemType(record) {
+function getPageItemType(doc) {
+	let format = text(doc, 'span[id^="format"]').toLowerCase();
+	if (
+		format.includes('article') // en, fr
+		|| format.includes('článek') // cs
+		|| format.includes('artikel') // de, nl
+		|| format.includes('artículo') // es
+		|| format.includes('articolo') // it
+		|| format.includes('記事') // ja
+		|| format.includes('문서') // ko
+		|| format.includes('artigo') // pt
+		|| format.includes('บทความ') // th
+		|| format.includes('文章') // zh
+	) {
+		return 'journalArticle';
+	}
+	return 'book';
+}
+
+function getRecordItemType(record) {
 	if (record.generalFormat == 'ArtChap') {
 		if (record.specificFormat == 'Artcl') {
 			return 'journalArticle';
@@ -180,20 +193,19 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url = doc.location.href) {
-	let record = null;
-	try {
-		record = JSON.parse(text(doc, '#__NEXT_DATA__')).props.pageProps.record;
-	}
-	catch (e) {}
-	if (!record || !url.includes('/' + record.oclcNumber)) {
-		Zotero.debug('__NEXT_DATA__ is stale; requesting page again');
-		doc = await requestDocument(url);
-		record = JSON.parse(text(doc, '#__NEXT_DATA__')).props.pageProps.record;
-	}
-	scrapeRecord([record]);
+	let oclcNumber = getOCLCNumber(url);
+	let record = await requestJSON('https://search.worldcat.org/api/search-item/' + oclcNumber, {
+		headers: { Referer: url }
+	});
+	scrapeRecords([record]);
 }
 
-function scrapeRecord(records) {
+function getOCLCNumber(url) {
+	let matches = new URL(url).pathname.match(/\/(?:oclc|title)\/(\d+)/);
+	return matches && matches[1];
+}
+
+function scrapeRecords(records) {
 	for (let record of records) {
 		Z.debug(record);
 
@@ -205,7 +217,7 @@ function scrapeRecord(records) {
 			continue;
 		}
 
-		let item = new Zotero.Item(getItemType(record));
+		let item = new Zotero.Item(getRecordItemType(record));
 		for (let [key, mapper] of Object.entries(RECORD_MAPPING)) {
 			if (!record[key]) continue;
 			if (typeof mapper == 'string') {
@@ -275,33 +287,57 @@ async function doSearch(items) {
 	}
 	
 	var ids = [], isbns = [];
-	for (let i = 0; i < items.length; i++) {
-		if (items[i].identifiers && items[i].identifiers.oclc) {
-			ids.push(items[i].identifiers.oclc);
+	for (let item of items) {
+		if (item.identifiers && item.identifiers.oclc) {
+			ids.push(item.identifiers.oclc);
 			continue;
 		}
-		
-		isbns.push(items[i].ISBN);
+		else if (item.ISBN) {
+			isbns.push(item.ISBN);
+		}
 	}
 		
 	let secureToken = await getSecureToken();
 	let cookie = `wc_tkn=${encodeURIComponent(secureToken)}`;
-	ids = await fetchIDs(isbns, ids, cookie);
-	if (!ids.length) {
+
+	let found = false;
+
+	for (let isbn of isbns) {
+		// As of 10/19/2022, WorldCat's API seems to do an unindexed lookup for ISBNs without hyphens,
+		// with requests taking 40+ seconds, so we hyphenate them
+		isbn = wcHyphenateISBN(isbn);
+		let url = "https://search.worldcat.org/api/search?q=bn%3A"
+			+ encodeURIComponent(isbn);
+		let json = await requestJSON(url, {
+			headers: {
+				Referer: 'https://search.worldcat.org/search?q=',
+				Cookie: cookie
+			}
+		}).then(decryptResponse);
+		if (json && json.briefRecords && json.briefRecords.length) {
+			scrapeRecords([json.briefRecords[0]]);
+			found = true;
+		}
+	}
+
+	if (ids.length) {
+		var url = "https://www.worldcat.org/api/search?q=no%3A"
+			+ ids.map(encodeURIComponent).join('+OR+no%3A');
+		let json = await requestJSON(url, {
+			headers: {
+				Referer: 'https://worldcat.org/search?q=',
+				Cookie: cookie
+			}
+		}).then(decryptResponse);
+		if (json.briefRecords && json.briefRecords.length) {
+			scrapeRecords(json.briefRecords);
+			found = true;
+		}
+	}
+
+	if (!found) {
 		Z.debug("Could not retrieve any OCLC IDs");
 		Zotero.done(false);
-		return;
-	}
-	var url = "https://www.worldcat.org/api/search?q=no%3A"
-		+ ids.map(encodeURIComponent).join('+OR+no%3A');
-	let json = await requestJSON(url, {
-		headers: {
-			Referer: 'https://worldcat.org/search?q=',
-			Cookie: cookie
-		}
-	});
-	if (json.briefRecords) {
-		scrapeRecord(json.briefRecords);
 	}
 }
 
@@ -326,27 +362,6 @@ async function getSecureToken() {
 	let { secureToken } = json.pageProps;
 	Z.debug('secureToken: ' + secureToken);
 	return secureToken;
-}
-
-async function fetchIDs(isbns, ids, cookie) {
-	while (isbns.length) {
-		let isbn = isbns.shift();
-		// As of 10/19/2022, WorldCat's API seems to do an unindexed lookup for ISBNs without hyphens,
-		// with requests taking 40+ seconds, so we hyphenate them
-		isbn = wcHyphenateISBN(isbn);
-		let url = "https://www.worldcat.org/api/search?q=bn%3A"
-			+ encodeURIComponent(isbn);
-		let json = await requestJSON(url, {
-			headers: {
-				Referer: 'https://worldcat.org/search?q=',
-				Cookie: cookie
-			}
-		});
-		if (json.briefRecords && json.briefRecords.length) {
-			scrapeRecord([json.briefRecords[0]]);
-		}
-	}
-	return ids;
 }
 
 // Copied from Zotero.Utilities.Internal.hyphenateISBN()
@@ -422,16 +437,127 @@ function wcHyphenateISBN(isbn) {
 	return parts.join('-');
 }
 
+const MODES = {
+	1: ['slice', [[0, 64]], [[64]]],
+	2: ['slice', [[-64]], [[0, -64]]],
+	3: ['slice', [[0, 32], [-32]], [[32, -32]]],
+	4: ['splitInterlaced', true],
+	5: ['splitInterlaced', false],
+	6: ['slice', [[0, 22], [-42]], [[22, -42]]],
+	7: ['slice', [[0, 16], [-48]], [[16, -48]]],
+	8: ['slice', [[0, 48], [-16]], [[48, -16]]],
+	9: ['slice', [[0, 42], [-22]], [[42, -22]]],
+};
+
+const METHODS = {
+	slice(input, secretKeySlices, encryptedDataSlices) {
+		let secretKey = '';
+		let encryptedData = '';
+		for (let sliceArgs of secretKeySlices) {
+			secretKey += input.slice(...sliceArgs);
+		}
+		for (let sliceArgs of encryptedDataSlices) {
+			encryptedData += input.slice(...sliceArgs);
+		}
+		return {
+			secretKey,
+			encryptedData,
+		};
+	},
+
+	splitInterlaced(input, useEvenIndices) {
+		let chars = Array.from(input);
+		let secretKey = '';
+		let encryptedData = '';
+
+		let keyIndices = new Set(Array.from(new Array(64), (_, i) => i * 2 + (useEvenIndices ? 0 : 1))
+			.filter(i => i < input.length));
+		for (let i = 0; i < chars.length; i++) {
+			if (keyIndices.has(i)) {
+				secretKey += chars[i];
+			}
+			else {
+				encryptedData += chars[i];
+			}
+		}
+
+		return {
+			secretKey,
+			encryptedData,
+		};
+	}
+};
+
+function split(input, mode) {
+	let [, flipFlag, index] = mode;
+	Zotero.debug(`Mode: ${mode}`);
+	if (flipFlag === '1') {
+		input = input.split('').reverse().join('');
+	}
+	let [method, ...args] = MODES[index];
+	Zotero.debug(`Running ${method}(input, ${args.map(obj => JSON.stringify(obj)).join(', ')})`);
+	return METHODS[method](input, ...args);
+}
+
+function hexToBytes(hex) {
+	let len = hex.length / 2;
+	let bytes = new Uint8Array(len);
+	for (let i = 0; i < len; i++) {
+		let byte = parseInt(hex[i * 2] + hex[i * 2 + 1], 16);
+		bytes[i] = byte;
+	}
+	return bytes;
+}
+
+async function decrypt(p, x, l) {
+	let ivHex = x.slice(0, -3);
+	let mode = x.slice(-3);
+
+	let { encryptedData, secretKey: keyHex } = split(p, mode);
+
+	let ciphertext1 = hexToBytes(encryptedData);
+	let ciphertext2 = hexToBytes(l);
+	let ciphertext = new Uint8Array(ciphertext1.length + ciphertext2.length);
+	ciphertext.set(ciphertext1);
+	ciphertext.set(ciphertext2, ciphertext1.length);
+
+	let keyBytes = hexToBytes(keyHex);
+	let key = await crypto.subtle.importKey(
+		'raw',
+		keyBytes,
+		{ name: 'AES-GCM' },
+		false,
+		['decrypt']
+	);
+
+	let ivBytes = hexToBytes(ivHex);
+	let cleartextBytes = await crypto.subtle.decrypt({
+		name: 'AES-GCM',
+		iv: ivBytes,
+		tagLength: 128
+	}, key, ciphertext);
+
+	return new TextDecoder().decode(cleartextBytes);
+}
+
+async function decryptResponse(json) {
+	if ('p' in json && 'x' in json && 'l' in json) {
+		return JSON.parse(await decrypt(json.p, json.x, json.l));
+	}
+	return json;
+}
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.worldcat.org/search?qt=worldcat_org_bks&q=argentina&fq=dt%3Abks",
+		"url": "https://search.worldcat.org/search?q=test&offset=1",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "https://www.worldcat.org/title/489605",
+		"url": "https://search.worldcat.org/title/489605",
 		"items": [
 			{
 				"itemType": "book",
@@ -467,6 +593,9 @@ var testCases = [
 						"tag": "Argentina History 1810-"
 					},
 					{
+						"tag": "Argentine"
+					},
+					{
 						"tag": "Argentine Histoire"
 					},
 					{
@@ -483,6 +612,102 @@ var testCases = [
 					},
 					{
 						"tag": "Since 1810"
+					},
+					{
+						"tag": "armed forces"
+					},
+					{
+						"tag": "artículo bibliográfico"
+					},
+					{
+						"tag": "aspect sociologique"
+					},
+					{
+						"tag": "aspecto sociológico"
+					},
+					{
+						"tag": "desarrollo económico"
+					},
+					{
+						"tag": "développement économique"
+					},
+					{
+						"tag": "dirección política"
+					},
+					{
+						"tag": "direction politique"
+					},
+					{
+						"tag": "economic development"
+					},
+					{
+						"tag": "forces armées"
+					},
+					{
+						"tag": "fuerzas armadas"
+					},
+					{
+						"tag": "gobierno"
+					},
+					{
+						"tag": "gouvernement"
+					},
+					{
+						"tag": "government"
+					},
+					{
+						"tag": "histoire"
+					},
+					{
+						"tag": "historia"
+					},
+					{
+						"tag": "history"
+					},
+					{
+						"tag": "immigrant"
+					},
+					{
+						"tag": "independence"
+					},
+					{
+						"tag": "independencia"
+					},
+					{
+						"tag": "indépendance"
+					},
+					{
+						"tag": "inmigrante"
+					},
+					{
+						"tag": "literature survey"
+					},
+					{
+						"tag": "nacionalista"
+					},
+					{
+						"tag": "nationalist"
+					},
+					{
+						"tag": "nationaliste"
+					},
+					{
+						"tag": "political leadership"
+					},
+					{
+						"tag": "political problem"
+					},
+					{
+						"tag": "problema político"
+					},
+					{
+						"tag": "problème politique"
+					},
+					{
+						"tag": "revue de littérature"
+					},
+					{
+						"tag": "sociological aspect"
 					}
 				],
 				"notes": [],
@@ -492,7 +717,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.worldcat.org/title/42854423",
+		"url": "https://search.worldcat.org/title/42854423",
 		"items": [
 			{
 				"itemType": "book",
@@ -520,7 +745,7 @@ var testCases = [
 				"place": "Cambridge, Mass.",
 				"publisher": "MIT Press",
 				"series": "MIT Press/Bradford Books series in cognitive psychology",
-				"url": "http://search.ebscohost.com/login.aspx?direct=true&scope=site&db=nlebk&db=nlabk&AN=1712",
+				"url": "https://search.ebscohost.com/login.aspx?direct=true&scope=site&db=nlebk&db=nlabk&AN=1712",
 				"attachments": [],
 				"tags": [
 					{
@@ -552,9 +777,6 @@ var testCases = [
 					},
 					{
 						"tag": "Developmental psychobiology"
-					},
-					{
-						"tag": "Electronic books"
 					},
 					{
 						"tag": "Enfants"
@@ -618,7 +840,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.worldcat.org/title/60321422",
+		"url": "https://search.worldcat.org/title/60321422",
 		"items": [
 			{
 				"itemType": "book",
@@ -640,7 +862,7 @@ var testCases = [
 				"place": "Cambridge",
 				"publisher": "Cambridge University Press",
 				"series": "Cambridge companions to philosophy",
-				"url": "http://catdir.loc.gov/catdir/toc/ecip0512/2005011910.html",
+				"url": "http://bvbr.bib-bvb.de:8991/F?func=service&doc_library=BVB01&local_base=BVB01&doc_number=014576804&line_number=0002&func_code=DB_RECORDS&service_type=MEDIA",
 				"attachments": [],
 				"tags": [
 					{
@@ -942,7 +1164,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.worldcat.org/title/4933578953",
+		"url": "https://search.worldcat.org/title/4933578953",
+		"detectedItemType": "book",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -968,6 +1191,7 @@ var testCases = [
 				"libraryCatalog": "DOI.org (Crossref)",
 				"pages": "205-224",
 				"publicationTitle": "Journal of Asian Economics",
+				"rights": "https://www.elsevier.com/tdm/userlicense/1.0/",
 				"shortTitle": "Navigating the trilemma",
 				"url": "https://linkinghub.elsevier.com/retrieve/pii/S104900780900013X",
 				"volume": "20",
@@ -980,41 +1204,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.worldcat.org/search?q=isbn%3A7112062314",
-		"defer": true,
-		"items": [
-			{
-				"itemType": "book",
-				"title": "中囯园林假山",
-				"creators": [
-					{
-						"lastName": "毛培琳",
-						"creatorType": "author",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "朱志红",
-						"creatorType": "author",
-						"fieldMode": 1
-					}
-				],
-				"date": "2005",
-				"ISBN": "9787112062317",
-				"extra": "OCLC: 77641948",
-				"language": "Chinese",
-				"libraryCatalog": "Open WorldCat",
-				"place": "北京",
-				"publisher": "中囯建筑工业出版社",
-				"attachments": [],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.worldcat.org/title/994342191",
+		"url": "https://search.worldcat.org/title/994342191",
 		"items": [
 			{
 				"itemType": "book",
@@ -1050,9 +1240,6 @@ var testCases = [
 				"url": "https://www.taylorfrancis.com/books/e/9781315165127",
 				"attachments": [],
 				"tags": [
-					{
-						"tag": "Electronic books"
-					},
 					{
 						"tag": "Encyclopedias"
 					},
