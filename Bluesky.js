@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-12-09 16:47:45"
+	"lastUpdated": "2024-12-12 23:07:38"
 }
 
 /*
@@ -61,15 +61,15 @@ async function scrapeAPI(doc, url) {
 		// Main post details
 
 		// remove newlines and extra whitespace
-		let title_cleaned = post.record.text.replace(/\s+/g, ' ');
+		let titleCleaned = post.record.text.replace(/\s+/g, ' ');
 		// Ensure that full post text is always available
-		item.abstractNote = title_cleaned;
+		item.abstractNote = titleCleaned;
 		// Tidy if necessary
-		if (title_cleaned.length < 140) {
-			item.title = title_cleaned;
+		if (titleCleaned.length < 140) {
+			item.title = titleCleaned;
 		}
 		else {
-			item.title = ZU.ellipsize(title_cleaned, 140, true);
+			item.title = ZU.ellipsize(titleCleaned, 140, true);
 		}
 		item.forumTitle = "Bluesky";
 		item.type = "Skeet";
@@ -96,14 +96,15 @@ async function scrapeAPI(doc, url) {
 
 		// Handle replies (if any)
 		if (data.thread.replies && data.thread.replies.length > 0) {
-			const date = new Date()
-			const utcStr = date.toUTCString()
+			const date = new Date();
+			const utcStr = date.toUTCString();
 			item.notes.push(`This post had ${data.thread.replies.length} direct replies as of ${utcStr}`);
 		}
 		item.attachments.push({ document: doc, title: "Snapshot" });
 		item.complete();
-	} else {
-		Zotero.debug("There was an error saving the Skeet")
+	}
+	else {
+		Zotero.debug("There was an error saving the Skeet");
 	}
 }
 
