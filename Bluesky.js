@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-12-12 23:07:38"
+	"lastUpdated": "2024-12-20 23:42:25"
 }
 
 /*
@@ -36,7 +36,13 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.includes('/post/')) {
+	const handle = /(?:\/profile\/)(([^/]+))/;
+	const postId = /(?:\/post\/)([a-zA-Z0-9]+)/;
+
+	let foundHandle = url.match(handle)[1];
+	let foundPostId = url.match(postId)[1];
+
+	if (url.includes('/post/') && foundHandle && foundPostId) {
 		return 'forumPost';
 	}
 	return false;
@@ -55,7 +61,10 @@ async function scrapeAPI(doc, url) {
 
 	let apiUrl = `https://public.api.bsky.app/xrpc/app.bsky.feed.getPostThread?uri=at://${foundHandle}/app.bsky.feed.post/${foundPostId}`;
 	let data = await ZU.requestJSON(apiUrl);
-	if (data.thread && data.thread.post) {
+	if (!(data.thread && data.thread.post)) {
+		throw new Error("Couldn't save post due to missing metadata");
+	}
+	else {
 		let post = data.thread.post;
 		let item = new Zotero.Item("forumPost");
 		// Main post details
@@ -74,19 +83,29 @@ async function scrapeAPI(doc, url) {
 		item.forumTitle = "Bluesky";
 		item.type = "Post";
 		item.url = url;
-		item.date = post.record.createdAt || post.author.createdAt;
-		item.language = post.record.langs ? post.record.langs.join(", ") : "en";
-		
+		item.date = post.record.createdAt;
 		// Add author information
 		if (post.author) {
-			let authorName = post.author.displayName || post.author.handle;
-			item.creators.push(Zotero.Utilities.cleanAuthor(authorName, "author"));
+			if (post.author.displayName !== "") {
+				item.creators.push(Zotero.Utilities.cleanAuthor(post.author.displayName, "author"));
+			}
+			else if (post.author.handle !== "handle.invalid") {
+				item.creators.push(Zotero.Utilities.cleanAuthor(post.author.handle, "author"));
+			}
+			// we've got a blank display name and an invalid handle, so we can't add an author: bail out
+			else {
+				throw new Error("Couldn't save post due to missing author data: neither display name nor handle are available");
+			}
+			if (post.author.handle !== "handle.invalid") {
+				item.setExtra("handle", post.author.handle);
+			}
+			// DID is the creator's unique id in the ATProto network
+			item.setExtra("DID", post.author.did);
 		}
-
 		// Add metadata for likes, reposts, etc.
-		if (post.likeCount !== undefined) item.extra = `Likes: ${post.likeCount}`;
-		if (post.repostCount !== undefined) item.extra += ` | Reposts: ${post.repostCount}`;
-		if (post.quoteCount !== undefined) item.extra += ` | Quotes: ${post.quoteCount}`;
+		item.setExtra("Likes", post.likeCount);
+		item.setExtra("Reposts", post.repostCount);
+		item.setExtra("Quotes", post.quoteCount);
 
 		// Handle embedded quote records (if any)
 		if (post.embed && post.embed.record && post.embed.record.value) {
@@ -96,15 +115,10 @@ async function scrapeAPI(doc, url) {
 
 		// Handle replies (if any)
 		if (data.thread.replies && data.thread.replies.length > 0) {
-			const date = new Date();
-			const utcStr = date.toUTCString();
-			item.notes.push(`This post had ${data.thread.replies.length} direct replies as of ${utcStr}`);
+			item.notes.push(`This post had ${data.thread.replies.length} direct replies when it was saved`);
 		}
 		item.attachments.push({ document: doc, title: "Snapshot" });
 		item.complete();
-	}
-	else {
-		Zotero.debug("There was an error saving the post");
 	}
 }
 
@@ -127,9 +141,8 @@ var testCases = [
 				],
 				"date": "2024-12-05T16:25:35.749Z",
 				"abstractNote": "My first and only job in media was as a reporter on a small newspaper in England in 2002. My salary was £8700. Per year.",
-				"extra": "Likes: 8 | Reposts: 0 | Quotes: 0",
+				"extra": "handle: watershedlab.bsky.social\nDID: did:plc:ufufhaxc74cfl7fpjccykkyh\nLikes: 8\nReposts: 0\nQuotes: 0",
 				"forumTitle": "Bluesky",
-				"language": "en",
 				"postType": "Post",
 				"url": "https://bsky.app/profile/watershedlab.bsky.social/post/3lcl3glmdx226",
 				"attachments": [
@@ -141,8 +154,41 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					"This post is quoting a post by @ericwickham.ca: \"Told the guy replacing my car window how much I made at my first job in radio and I feel like it deeply changed what he thought about people in media.\"",
-					"This post had 1 direct replies as of Mon, 09 Dec 2024 16:47:41 GMT"
+					"This post had 1 direct replies when it was saved"
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://bsky.app/profile/did:plc:cxq4zxu7soi67juyvxml46zs/post/3ldr6ebdz5c24",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "forumPost",
+				"title": "💚 Site of the Day - Rain Delay Media Love that menu! ⚙️ SplitText 🛠️ Webflow site → raindelaymedia.com showcase → gsap.com/showcase",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "GSAP",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024-12-20T19:59:08.958Z",
+				"abstractNote": "💚 Site of the Day - Rain Delay Media Love that menu! ⚙️ SplitText 🛠️ Webflow site → raindelaymedia.com showcase → gsap.com/showcase",
+				"extra": "DID: did:plc:cxq4zxu7soi67juyvxml46zs\nLikes: 4\nReposts: 0\nQuotes: 0",
+				"forumTitle": "Bluesky",
+				"postType": "Post",
+				"url": "https://bsky.app/profile/did:plc:cxq4zxu7soi67juyvxml46zs/post/3ldr6ebdz5c24",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
