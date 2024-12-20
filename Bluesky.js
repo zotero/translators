@@ -72,7 +72,7 @@ async function scrapeAPI(doc, url) {
 			item.title = ZU.ellipsize(titleCleaned, 140, true);
 		}
 		item.forumTitle = "Bluesky";
-		item.type = "Skeet";
+		item.type = "Post";
 		item.url = url;
 		item.date = post.record.createdAt || post.author.createdAt;
 		item.language = post.record.langs ? post.record.langs.join(", ") : "en";
@@ -104,7 +104,7 @@ async function scrapeAPI(doc, url) {
 		item.complete();
 	}
 	else {
-		Zotero.debug("There was an error saving the Skeet");
+		Zotero.debug("There was an error saving the post");
 	}
 }
 
@@ -130,7 +130,7 @@ var testCases = [
 				"extra": "Likes: 8 | Reposts: 0 | Quotes: 0",
 				"forumTitle": "Bluesky",
 				"language": "en",
-				"postType": "Skeet",
+				"postType": "Post",
 				"url": "https://bsky.app/profile/watershedlab.bsky.social/post/3lcl3glmdx226",
 				"attachments": [
 					{
