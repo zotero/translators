@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-24 03:17:24"
+	"lastUpdated": "2024-09-30 13:40:38"
 }
 
 /*
@@ -36,8 +36,10 @@
 */
 
 function detectWeb(doc, url) {
-	Zotero.monitorDOMChanges(doc.querySelector('.global-content-wrapper'));
-	if (doc.defaultView !== null && doc.defaultView !== doc.defaultView.top) return false;
+	var wrapper = doc.querySelector('.global-content-wrapper');
+	if (wrapper) {
+		Zotero.monitorDOMChanges(wrapper);
+	}
 	
 	if (/[?&]arnumber=(\d+)/i.test(url) || /\/document\/\d+/i.test(url)) {
 		var firstBreadcrumb = ZU.xpathText(doc, '(//div[contains(@class, "breadcrumbs")]//a)[1]');
@@ -121,7 +123,7 @@ async function doWeb(doc, url) {
 		}
 	}
 	else if (url.includes("/search/") || url.includes("/stamp/") || url.includes("/ielx4/") || url.includes("/ielx5/")) {
-		await scrape(await requestDocument([fixUrl(url)]));
+		await scrape(await requestDocument(fixUrl(url)));
 	}
 	else {
 		await scrape(doc, url);
@@ -131,7 +133,6 @@ async function doWeb(doc, url) {
 
 async function scrape(doc, url = doc.location.href) {
 	var arnumber = (url.match(/arnumber=(\d+)/) || url.match(/\/document\/(\d+)/))[1];
-	var pdf = "/stamp/stamp.jsp?tp=&arnumber=" + arnumber;
 	// Z.debug("arNumber = " + arnumber);
 	
 	var script = ZU.xpathText(doc, '//script[@type="text/javascript" and contains(., "global.document.metadata")]');
@@ -161,6 +162,27 @@ async function scrape(doc, url = doc.location.href) {
 		earlyaccess = true;
 		bibtex = text.replace(/^@null/, "@article");
 	}
+
+	let pdfGatewayURL = "/stamp/stamp.jsp?tp=&arnumber=" + arnumber;
+	let pdfURL;
+	try {
+		let src = await requestDocument(pdfGatewayURL);
+		// Either the PDF is embedded in the page, or (e.g. for iOS)
+		// the page has a redirect to the full-page PDF
+		//
+		// As of 3/2020, embedded PDFs via a web-based proxy are
+		// being served as getPDF.jsp, so support that in addition
+		// to direct .pdf URLs.
+		let m = /<i?frame src="([^"]+\.pdf\b[^"]*|[^"]+\/getPDF\.jsp\b[^"]*)"|<meta HTTP-EQUIV="REFRESH" content="0; url=([^\s"]+\.pdf\b[^\s"]*)"/.exec(src);
+		pdfURL = m && (m[1] || m[2]);
+	}
+	catch (e) {
+	}
+
+	if (!pdfURL) {
+		pdfURL = "/stampPDF/getPDF.jsp?tp=&arnumber=" + arnumber + "&ref=";
+	}
+
 	var translator = Zotero.loadTranslator("import");
 	// Calling the BibTeX translator
 	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
@@ -204,35 +226,19 @@ async function scrape(doc, url = doc.location.href) {
 		if (item.ISSN && !ZU.fieldIsValidForType('ISSN', item.itemType)) {
 			item.extra = "ISSN: " + item.ISSN;
 		}
-		item.url = url;
+		item.url = url
+			// Strip session ids
+			.replace(/;jsessionid.+/, '');
 		item.attachments.push({
 			document: doc,
 			title: "IEEE Xplore Abstract Record"
 		});
-			
-		if (pdf) {
-			ZU.doGet(pdf, function (src) {
-				// Either the PDF is embedded in the page, or (e.g. for iOS)
-				// the page has a redirect to the full-page PDF
-				//
-				// As of 3/2020, embedded PDFs via a web-based proxy are
-				// being served as getPDF.jsp, so support that in addition
-				// to direct .pdf URLs.
-				var m = /<i?frame src="([^"]+\.pdf\b[^"]*|[^"]+\/getPDF\.jsp\b[^"]*)"|<meta HTTP-EQUIV="REFRESH" content="0; url=([^\s"]+\.pdf\b[^\s"]*)"/.exec(src);
-				var pdfUrl = m && (m[1] || m[2]);
-				if (pdfUrl) {
-					item.attachments.unshift({
-						url: pdfUrl,
-						title: "IEEE Xplore Full Text PDF",
-						mimeType: "application/pdf"
-					});
-				}
-				item.complete();
-			}, null);
-		}
-		else {
-			item.complete();
-		}
+		item.attachments.push({
+			url: pdfURL,
+			title: "Full Text PDF",
+			mimeType: "application/pdf"
+		});
+		item.complete();
 	});
 
 	translator.getTranslatorObject(function (trans) {
@@ -241,7 +247,6 @@ async function scrape(doc, url = doc.location.href) {
 		trans.doImport();
 	});
 }
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -1118,6 +1123,101 @@ var testCases = [
 		"url": "https://ieeexplore.ieee.org/xpl/tocresult.jsp?isnumber=10045573&punumber=6221021",
 		"defer": true,
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9919149",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Joint UAV Placement and IRS Phase Shift Optimization in Downlink Networks",
+				"creators": [
+					{
+						"firstName": "Hung",
+						"lastName": "Nguyen-Kha",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hieu V.",
+						"lastName": "Nguyen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mai T.",
+						"lastName": "P. Le",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Oh-Soon",
+						"lastName": "Shin",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022",
+				"DOI": "10.1109/ACCESS.2022.3214663",
+				"ISSN": "2169-3536",
+				"abstractNote": "This study investigates the integration of an intelligent reflecting surface (IRS) into an unmanned aerial vehicle (UAV) platform to utilize the advantages of these leading technologies for sixth-generation communications, e.g., improved spectral and energy efficiency, extended network coverage, and flexible deployment. In particular, we investigate a downlink IRS–UAV system, wherein single-antenna ground users (UEs) are served by a multi-antenna base station (BS). To assist the communication between UEs and the BS, an IRS mounted on a UAV is deployed, in which the direct links are obstructed owing to the complex urban channel characteristics. The beamforming at the BS, phase shift at the IRS, and the 3D placement of the UAV are jointly optimized to maximize the sum rate. Because the optimization variables, particularly the beamforming and IRS phase shift, are highly coupled with each other, the optimization problem is naturally non-convex. To effectively solve the formulated problem, we propose an iterative algorithm that employs block coordinate descent and inner approximation methods. Numerical results demonstrate the effectiveness of our proposed approach for a UAV-mounted IRS system on the sum rate performance over the state-of-the-art technology using the terrestrial counterpart.",
+				"itemID": "9919149",
+				"libraryCatalog": "IEEE Xplore",
+				"pages": "111221-111231",
+				"publicationTitle": "IEEE Access",
+				"url": "https://ieeexplore.ieee.org/document/9919149/",
+				"volume": "10",
+				"attachments": [
+					{
+						"title": "IEEE Xplore Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "IEEE Xplore Abstract Record",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Array signal processing"
+					},
+					{
+						"tag": "Autonomous aerial vehicles"
+					},
+					{
+						"tag": "Beamforming"
+					},
+					{
+						"tag": "Downlink"
+					},
+					{
+						"tag": "Iterative methods"
+					},
+					{
+						"tag": "Optimization"
+					},
+					{
+						"tag": "Relays"
+					},
+					{
+						"tag": "Three-dimensional displays"
+					},
+					{
+						"tag": "UAV-mounted IRS"
+					},
+					{
+						"tag": "Wireless communication"
+					},
+					{
+						"tag": "convex optimization"
+					},
+					{
+						"tag": "intelligent reflecting surface (IRS)"
+					},
+					{
+						"tag": "unmanned aerial vehicle (UAV)"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

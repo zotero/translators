@@ -2,14 +2,14 @@
 	"translatorID": "d8341c22-8cf4-428f-be3b-ada9fa8933eb",
 	"label": "Deutsche Nationalbibliothek",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://portal\\.dnb\\.de/opac\\.htm\\?",
+	"target": "^https?://portal\\.dnb\\.de/opac(\\.htm|/(enhancedSearch|simpleSearch|showFullRecord)\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-14 19:08:02"
+	"lastUpdated": "2024-01-15 19:48:46"
 }
 
 /*
@@ -36,51 +36,55 @@
 */
 
 var typeMapping = {
-	//"Blindendrucke" 
-	"Bücher" : "book",
-	//"Elektronische Datenträger" 
-	"Filme/Hörbücher" : "videoRecording",
-	"Karten" : "map",
+	//"Blindendrucke"
+	Bücher: "book",
+	//"Elektronische Datenträger"
+	"Filme/Hörbücher": "videoRecording",
+	Karten: "map",
 	//"Medienkombinationen"
 	//"Mikroformen"
-	"Musiktonträger" : "audioRecording",
-	//"Musiknoten" 
-	"Artikel" : "journalArticle",
+	Musiktonträger: "audioRecording",
+	//"Musiknoten"
+	Artikel: "journalArticle",
 	//"Online Ressourcen"
 	//"Zeitschriften/Serien"
 	//"Ausgaben/Hefte"
-	"archivierte Webseiten" : "webpage",
+	"archivierte Webseiten": "webpage",
 	//"Gesamttitel Sammlung/Nachlass"
-	"Manuskripte" : "manuscript",
-	"Briefe" : "letter",
+	Manuskripte: "manuscript",
+	Briefe: "letter",
 	//"Lebensdokumente"
 	//"Sammlungen"
 	//"Trägermaterialien (Papiere und Einbände)"
-	"Bilder/Grafiken" : "artwork"
+	"Bilder/Grafiken": "artwork"
 	//"Flugblätter"
 };
 
 function detectWeb(doc, url) {
 	if (
-		url.indexOf('method=showFullRecord')>-1 ||
-		(url.indexOf('method=simpleSearch')>-1 && doc.getElementById('fullRecordTable'))
+		(url.includes('method=showFullRecord') || url.includes('/showFullRecord?'))
+		|| ((url.includes('method=simpleSearch') || url.includes('/simpleSearch?') || url.includes('/enhancedSearch?') || url.includes('method=enhancedSearch'))
+		&& doc.getElementById('fullRecordTable'))
 	) {
-		var type=ZU.xpathText(doc, '//table[@id="fullRecordTable"]/tbody/tr/td/img/@alt');
+		var type = ZU.xpathText(doc, '//table[@id="fullRecordTable"]/tbody/tr/td/img/@alt');
 		if (typeMapping[type]) {
 			return typeMapping[type];
-		} else {
+		}
+		else {
 			return "book";
 		}
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//table[@id="searchresult"]//a[contains(@id, "recordLink")]');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].firstChild.textContent);
 		if (!href || !title) continue;
@@ -92,63 +96,57 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
-	} else {
-		scrape(doc, url);
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
+	}
+	else {
+		await scrape(doc);
 	}
 }
 
-function scrape(doc, url) {
+async function scrape(doc) {
 	var marc = ZU.xpath(doc, '//div[@class="link"]//a[contains(@href, "/about/marcxml")]');
 	if (marc.length) {
 		var marcUrl = marc[0].href;
 		
-		ZU.doGet(marcUrl, function(result) {
-			
-			//call MARCXML translator
-			var translator = Zotero.loadTranslator("import");
-			translator.setTranslator("edd87d07-9194-42f8-b2ad-997c4c7deefd");
-			translator.setString(result);
-			translator.setHandler("itemDone", function (obj, item) {
-				finalize(doc, item);
-				item.complete();
-			});
-			translator.translate();
-		});
-		
-	} else {
-		Z.debug("No MARC link found --> Use COinS translator");
-		
-		//call COinS translator
-		var translator = Zotero.loadTranslator("web");
-		translator.setTranslator("05d07af9-105a-4572-99f6-a8e231c0daef");
-		translator.setDocument(doc);
-		translator.setHandler("itemDone", function (obj, item) {
+		let result = await requestText(marcUrl);
+		//call MARCXML translator
+		let translator = Zotero.loadTranslator("import");
+		translator.setTranslator("edd87d07-9194-42f8-b2ad-997c4c7deefd");
+		translator.setString(result);
+		translator.setHandler("itemDone", (_obj, item) => {
 			finalize(doc, item);
 			item.complete();
 		});
-		translator.translate();
-
+		await translator.translate();
 	}
-}	
+	else {
+		Z.debug("No MARC link found --> Use COinS translator");
+		
+		// call COinS translator
+		// eslint-disable-next-line no-redeclare
+		let translator = Zotero.loadTranslator("web");
+		translator.setTranslator("05d07af9-105a-4572-99f6-a8e231c0daef");
+		translator.setDocument(doc);
+		translator.setHandler("itemDone", (_obj, item) => {
+			finalize(doc, item);
+			item.complete();
+		});
+		await translator.translate();
+	}
+}
 
 
 function finalize(doc, item) {
 	var toc = ZU.xpath(doc, '//a[contains(@title, "Inhaltsverzeichnis")]');
 	if (toc.length) {
-		item.attachments.push( {
-			url : toc[0].href,
+		item.attachments.push({
+			url: toc[0].href,
 			title: "Table of Contents PDF",
 			mimeType: "application/pdf"
 		});
@@ -156,8 +154,8 @@ function finalize(doc, item) {
 	
 	var abstract = ZU.xpath(doc, '//a[contains(@title, "Inhaltstext")]');
 	if (abstract.length) {
-		item.attachments.push( {
-			url : abstract[0].href,
+		item.attachments.push({
+			url: abstract[0].href,
 			title: "Abstract",
 			mimeType: "text/html"
 		});
@@ -488,6 +486,106 @@ var testCases = [
 						"note": "Zugl.: Heidelberg, Univ., Diss., 1997"
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://portal.dnb.de/opac/simpleSearch?query=test",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://portal.dnb.de/opac/simpleSearch?query=idn%3D1272086992&cqlMode=true",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Den Netten beißen die Hunde: Wie Sie sich Respekt verschaffen, Grenzen setzen und den verdienten Erfolg erlangen - Mit großem \"Bin ich zu nett?\"-Test",
+				"creators": [
+					{
+						"firstName": "Martin",
+						"lastName": "Wehrle",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024",
+				"ISBN": "9783442179046",
+				"language": "ger",
+				"libraryCatalog": "Deutsche Nationalbibliothek",
+				"numPages": "320",
+				"place": "München",
+				"publisher": "Goldmann",
+				"shortTitle": "Den Netten beißen die Hunde",
+				"attachments": [
+					{
+						"title": "Abstract",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "(Produktform)Paperback / softback"
+					},
+					{
+						"tag": "(VLB-WN)2933: Taschenbuch / Sachbücher/Angewandte Psychologie"
+					},
+					{
+						"tag": "Business"
+					},
+					{
+						"tag": "Büro"
+					},
+					{
+						"tag": "Den Letzten beißen die Hunde"
+					},
+					{
+						"tag": "Durchsetzungsvermögen"
+					},
+					{
+						"tag": "Mental Load"
+					},
+					{
+						"tag": "Nein sagen ohne Schuldgefühle"
+					},
+					{
+						"tag": "Partnerschaft Kommunikation"
+					},
+					{
+						"tag": "Sei einzig nicht artig"
+					},
+					{
+						"tag": "Selbstbewusstsein"
+					},
+					{
+						"tag": "Selbstbewustsein stärken"
+					},
+					{
+						"tag": "Selbstrespekt"
+					},
+					{
+						"tag": "Wenn jeder dich mag nimmt keiner dich ernst"
+					},
+					{
+						"tag": "Wertschätzung"
+					},
+					{
+						"tag": "ausgenutzt werden"
+					},
+					{
+						"tag": "ernst genommen werden"
+					},
+					{
+						"tag": "fehlende Anerkennung"
+					},
+					{
+						"tag": "sich durchsetzen"
+					},
+					{
+						"tag": "spiegel bestseller"
+					}
+				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]

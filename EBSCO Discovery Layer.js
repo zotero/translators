@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-11-27 04:12:52"
+	"lastUpdated": "2024-02-04 04:24:48"
 }
 
 /*
@@ -42,7 +42,7 @@ function detectWeb(doc, url) {
 			return "journalArticle";
 		}
 		Z.monitorDOMChanges(doc.querySelector('#page-container'));
-		let type = text(doc, 'div.article-type');
+		let type = text(doc, 'div[class*="article-type"]');
 		if (type) {
 			return getType(type);
 		}
@@ -60,7 +60,9 @@ function detectWeb(doc, url) {
 
 function getType(type) {
 	// This can probably be fine-tuned, but it'll work for 90% of results
-	if (type.toLowerCase().includes("article")) {
+	type = type.toLowerCase();
+	// Z.debug(type)
+	if (type.includes("article") || type.includes("artikel")) {
 		return "journalArticle";
 	}
 	else {
@@ -73,6 +75,9 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 
 	var rows = doc.querySelectorAll('h2.result-item-title > a');
+	if (!rows.length) {
+		rows = doc.querySelectorAll('div[class*="result-item-title"]>a');
+	}
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -138,6 +143,5 @@ async function scrape(doc, url = doc.location.href) {
 }
 
 /** BEGIN TEST CASES **/
-var testCases = [
-]
+
 /** END TEST CASES **/

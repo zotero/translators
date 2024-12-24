@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-09-22 15:58:08"
+	"lastUpdated": "2024-03-31 15:58:08"
 }
 
 /*
@@ -39,7 +39,7 @@
 
 function detectWeb(doc, url) {
 	// See if this is a search results page or Issue content
-	if (doc.title == "JSTOR: Search Results") {
+	if (doc.title == "Search results | JSTOR") {
 		return "multiple";
 	}
 	// Issues with DOIs can't be identified by URL
