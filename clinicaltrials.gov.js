@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-10-08 18:20:57"
+	"lastUpdated": "2025-01-02 03:21:56"
 }
 
 /*
@@ -107,12 +107,13 @@ function studiesJSONToItem(data) {
 
 	let authorModule = study.protocolSection.sponsorCollaboratorsModule;
 	let firstAuthor = authorModule.responsibleParty;
+	Z.debug(firstAuthor);
 	let leadSponsor = authorModule.leadSponsor;
 
 	let investigatorName;
 	if (firstAuthor && firstAuthor.type !== "SPONSOR") { // a person
 		// Clean up the comma trailing titles such as "First Last, MD, PhD"
-		investigatorName = firstAuthor.investigatorFullName;
+		investigatorName = firstAuthor.investigatorFullName || firstAuthor.oldNameTitle;
 		let cleanName = investigatorName.split(", ")[0];
 		creators.push(ZU.cleanAuthor(cleanName, "author"));
 	}
