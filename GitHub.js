@@ -173,7 +173,6 @@ function scrape(doc, url) {
 		if (canonical) {
 			item.url = canonical;
 		}
-		item.extra = 'a4' + item.url
 
 		ZU.doGet(apiUrl + "repos/" + githubRepository + "/commits/" + commitHash, function (result) {
 			var commitData = JSON.parse(result);
@@ -241,8 +240,8 @@ function completeWithBibTeX(item, bibtex, githubRepository, owner) {
 
 		let tags = [...item.tags];
 		let title = item.title;
-		let versionNumber = item.versionNumber
-		let url = item.url
+		let versionNumber = item.versionNumber;
+		let url = item.url;
 
 		Object.assign(item, bibItem);
 
@@ -253,7 +252,7 @@ function completeWithBibTeX(item, bibtex, githubRepository, owner) {
 			item.title = title;
 			item.versionNumber = versionNumber;
 			item.version = versionNumber;
-			item.url = url
+			item.url = url;
 		}
 
 		ZU.doGet(`https://raw.githubusercontent.com/${path}/HEAD/CITATION.cff`, function (cffText) {
@@ -299,20 +298,6 @@ function completeWithBibTeX(item, bibtex, githubRepository, owner) {
 	translator.translate();
 }
 
-// Parse the YAML and extract keywords
-function extractKeywords(cffText) {
-	// Use a regular expression to extract the `keywords` block
-	const match = cffText.match(/keywords:\s+((?:- .+\s*)+)/);
-	if (!match) return []; // Return an empty array if no keywords found
-
-	// Extract the lines under `keywords` and clean them up
-	const keywordsBlock = match[1];
-	return keywordsBlock
-		.split("\n") // Split into lines
-		.map(line => line.trim().replace(/^- /, "")) // Trim and remove `- `
-		.filter(line => line !== ""); // Remove empty lines
-}
-
 function completeWithAPI(item, owner, githubRepository) {
 	ZU.doGet(apiUrl + "users/" + owner, function (user) {
 		var jsonUser = JSON.parse(user);
@@ -349,35 +334,37 @@ function completeWithAPI(item, owner, githubRepository) {
 }
 
 function parseYAML(yamlText) {
-  const lines = yamlText.split('\n');
-  const result = {};
+	const lines = yamlText.split('\n');
+	const result = {};
 
-  for (let line of lines) {
-    // Trim whitespace and ignore empty lines or comments
-    line = line.trim();
-    if (!line || line.startsWith('#')) continue;
+	for (let line of lines) {
+		// Trim whitespace and ignore empty lines or comments
+		line = line.trim();
+		if (!line || line.startsWith('#')) {
+			continue;
+		}
 
-    // Split key and value at the first colon
-    const [key, ...valueParts] = line.split(':');
-    const value = valueParts.join(':').trim();
+		// Split key and value at the first colon
+		const [key, ...valueParts] = line.split(':');
+		const value = valueParts.join(':').trim();
 
-    // Handle different value types
-    if (value.startsWith('"') && value.endsWith('"')) {
-      // Quoted string
-      result[key.trim()] = value.slice(1, -1);
-    } else if (value === 'true' || value === 'false') {
-      // Boolean
-      result[key.trim()] = value === 'true';
-    } else if (!isNaN(value)) {
-      // Number
-      result[key.trim()] = parseFloat(value);
-    } else {
-      // Unquoted string
-      result[key.trim()] = value;
-    }
-  }
+		// Handle different value types
+		if (value.startsWith('"') && value.endsWith('"')) {
+			// Quoted string
+			result[key.trim()] = value.slice(1, -1);
+		} else if (value === 'true' || value === 'false') {
+			// Boolean
+			result[key.trim()] = value === 'true';
+		} else if (!isNaN(value)) {
+			// Number
+			result[key.trim()] = parseFloat(value);
+		} else {
+			// Unquoted string
+			result[key.trim()] = value;
+		}
+	}
 
-  return result;
+	return result;
 }
 
 /** BEGIN TEST CASES **/
@@ -432,13 +419,13 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"date": "2024-12-05T18:31:38Z",
+				"date": "2024-12-05T18:31:44Z",
 				"abstractNote": "DataCite Metadata Schema Repository",
 				"company": "DataCite",
 				"extra": "original-date: 2011-04-13T07:08:41Z",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "Ruby",
-				"url": "https://github.com/datacite/schema/tree/4.6.0",
+				"url": "https://github.com/datacite/schema/blob/4.6.0",
 				"versionNumber": "4.6.0",
 				"place": "GitHub",
 				"attachments": [],
@@ -462,7 +449,7 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"date": "2024-12-05T18:31:38Z",
+				"date": "2016-08-23T16:42:17Z",
 				"abstractNote": "DataCite Metadata Schema Repository",
 				"company": "DataCite",
 				"extra": "original-date: 2011-04-13T07:08:41Z",
