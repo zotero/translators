@@ -35,10 +35,9 @@ const apiUrl = "https://api.github.com/";
 
 async function detectWeb(doc, url) {
 	if (url.includes("/search?")) {
-		return "multiple";
-// 		if (getSearchResults(doc, true)) {
-// 			return "multiple";
-// 		}
+		if (getSearchResults(doc, true)) {
+			return "multiple";
+		}
 	}
 
 	if (!doc.querySelector('meta[property="og:type"][content="object"]')) {
@@ -65,15 +64,15 @@ async function detectWeb(doc, url) {
 				return resolve("computerProgram");
 			}
 			try {
-				let type = searchFieldValue(cffText, "type")
+				let type = searchFieldValue(cffText, "type");
 				if (type && type === 'dataset') {
 					return resolve(type);
 				}
 			}
 			catch (e) {
-				resolve("computerProgram");
+				// do nothing
 			}
-			resolve("computerProgram");
+			return resolve("computerProgram");
 		}, null, null, { 'X-Requested-With': 'XMLHttpRequest' }, false);
 	});
 }
@@ -299,7 +298,7 @@ function completeWithBibTeX(item, bibtex, githubRepository, owner) {
 				item.place = cffRepository;
 			}
 
-			let cffKeywords = extractKeywords(cffText)
+			let cffKeywords = extractKeywords(cffText);
 			if (cffKeywords && cffKeywords.length > 0) {
 				item.tags = [];
 				item.tags = item.tags.concat(cffKeywords);
@@ -364,7 +363,7 @@ function completeWithAPI(item, owner, githubRepository) {
  * @returns {string|null} - The value of the field if found, or null if not found.
  */
 function searchFieldValue(yamlContent, field) {
-	const regex = new RegExp(`${field}:\\s*(.+)`);
+	const regex = new RegExp(`^${field}:\\s*(.+)`, 'm');
 	const match = yamlContent.match(regex);
 	return match ? match[1].trim() : null;
 }
