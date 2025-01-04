@@ -46,8 +46,8 @@ function detectWeb(doc, url) {
 	}
 
 	// `og:title` is messed up when browsing a file.
-	let ogTitle = attr(doc, 'meta[property="og:url"]', 'content')
-	if (ogTitle.indexOf('/blob/') > -1 || url.startsWith(ogTitle + '/blob/')) {
+	let ogTitle = attr(doc, 'meta[property="og:url"]', 'content');
+	if (ogTitle.includes('/blob/') || url.startsWith(ogTitle + '/blob/')) {
 		return "computerProgram";
 	}
 
@@ -137,7 +137,7 @@ function scrape(doc, url) {
 
 	let latestCommitLink = attr(doc, '[data-testid="latest-commit-html"] a', 'href');
 	let commitHash = false;
-	if (latestCommitLink.indexOf('/') > -1) {
+	if (latestCommitLink.includes('/')) {
 		commitHash = latestCommitLink.split('/').pop();
 	}
 
@@ -153,7 +153,7 @@ function scrape(doc, url) {
 	}
 	else {
 		if (!item.versionNumber) {
-			item.versionNumber = commitHash
+			item.versionNumber = commitHash;
 		}
 
 		let canonical = attr(doc, 'link[rel="canonical"]', 'href');
@@ -166,7 +166,7 @@ function scrape(doc, url) {
 			const commitTime = commitData.commit.author.date; // ISO 8601 format
 			item.date = commitTime;
 			scrapeRepos(item, url, githubRepository);
-		})
+		});
 	}
 }
 
@@ -181,7 +181,7 @@ function scrapeRepos(item, url, githubRepository) {
 		var owner = json.owner.login;
 
 		item.programmingLanguage = json.language;
- 		item.extra = "original-date: " + json.created_at;
+		item.extra = "original-date: " + json.created_at;
 		if (!item.date && json.updated_at) {
 			item.date = json.updated_at;
 		}
@@ -198,7 +198,6 @@ function scrapeRepos(item, url, githubRepository) {
 				let bibtex = attr(doc, '[aria-labelledby="bibtex-tab"] input', 'value');
 
 				if (bibtex && bibtex.trim()) {
-					item.extra = "1"
 					completeWithBibTeX(item, bibtex, githubRepository, owner);
 					return;
 				}
@@ -225,16 +224,16 @@ function completeWithBibTeX(item, bibtex, githubRepository, owner) {
 		delete bibItem.attachments;
 		delete bibItem.itemID;
 
-		let tags = [...item.tags]
-		let title = item.title
+		let tags = [...item.tags];
+		let title = item.title;
 
 		Object.assign(item, bibItem);
 
 		if (item.tags.length === 0 && tags.length > 0) {
-			item.tags = tags
+			item.tags = tags;
 		}
 		if (item.url.includes('/blob/')) {
-			item.title = title
+			item.title = title;
 		}
 
 		if (item.version) {
@@ -266,16 +265,16 @@ function completeWithBibTeX(item, bibtex, githubRepository, owner) {
 				if (repository) {
 					let place = repository[1];
 					if (place.endsWith('"')) {
-						place = place.slice(0, -1)
+						place = place.slice(0, -1);
 					}
 					item.place = place;
 				}
 
-				let keywords = extractKeywords(cffText)
+				let keywords = extractKeywords(cffText);
 				if (keywords.length > 0) {
 					item.tags = [];
- 					item.tags = item.tags.concat(keywords);
- 					item.tags = [...new Set(item.tags)];
+					item.tags = item.tags.concat(keywords);
+					item.tags = [...new Set(item.tags)];
 				}
 
 				if (item.creators.length === 0) {
@@ -293,16 +292,16 @@ function completeWithBibTeX(item, bibtex, githubRepository, owner) {
 
 // Parse the YAML and extract keywords
 function extractKeywords(cffText) {
-  // Use a regular expression to extract the `keywords` block
-  const match = cffText.match(/keywords:\s+((?:- .+\s*)+)/);
-  if (!match) return []; // Return an empty array if no keywords found
+	// Use a regular expression to extract the `keywords` block
+	const match = cffText.match(/keywords:\s+((?:- .+\s*)+)/);
+	if (!match) return []; // Return an empty array if no keywords found
 
-  // Extract the lines under `keywords` and clean them up
-  const keywordsBlock = match[1];
-  return keywordsBlock
-    .split("\n") // Split into lines
-    .map(line => line.trim().replace(/^- /, "")) // Trim and remove `- `
-    .filter(line => line !== ""); // Remove empty lines
+	// Extract the lines under `keywords` and clean them up
+	const keywordsBlock = match[1];
+	return keywordsBlock
+		.split("\n") // Split into lines
+		.map(line => line.trim().replace(/^- /, "")) // Trim and remove `- `
+		.filter(line => line !== ""); // Remove empty lines
 }
 
 function completeWithAPI(item, owner, githubRepository) {
@@ -319,13 +318,13 @@ function completeWithAPI(item, owner, githubRepository) {
 
 		if (item.creators.length === 0) {
 			item.creators.push({
-				"lastName": owner,
+				lastName: owner,
 				fieldMode: 1,
-				"creatorType": "programmer"
-			})
+				creatorType: "programmer"
+			});
 		}
 
-		if (item.url.indexOf('/blob/') === -1) {
+		if (item.url.includes('/blob/')) {
 			ZU.processDocuments(`/${githubRepository}`, function (rootDoc) {
 				let readmeTitle = text(rootDoc, '.markdown-heading h1.heading-element');
 				if (readmeTitle) {
