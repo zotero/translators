@@ -373,6 +373,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://github.com/search?utf8=%E2%9C%93&q=topic%3Ahocr&type=repositories",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
@@ -755,7 +756,7 @@ var testCases = [
 		"url": "https://github.com/pulipulichen/PTS-Local-News-Dataset/tree/20250105-0131",
 		"items": [
 			{
-				"itemType": "computerProgram",
+				"itemType": "dataset",
 				"title": "PTS-Local-News-Dataset",
 				"creators": [
 					{
@@ -768,6 +769,8 @@ var testCases = [
 				"abstractNote": "A dataset containing local news from Taiwan Public Television Service.",
 				"extra": "DOI: 10.5281/zenodo.14598063",
 				"libraryCatalog": "GitHub",
+				"DOI": "10.5281/zenodo.14598063",
+				"rights": "MIT",
 				"url": "https://github.com/pulipulichen/PTS-Local-News-Dataset",
 				"versionNumber": "20250105-0131",
 				"attachments": [],
