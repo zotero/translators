@@ -606,7 +606,7 @@ var testCases = [
 					}
 				],
 				"date": "2021-08",
-				"abstractNote": "The Citation File Format lets you provide citation metadata for software or datasets in plaintext files that are easy to read by both humans and machines.",
+				"abstractNote": "CITATION.cff files are plain text files with human- and machine-readable citation information for software. Code developers can include them in their repositories to let others know how to correctly cite their software. This is the specification for the Citation File Format.",
 				"extra": "DOI: 10.5281/zenodo.5171937",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "Python",
@@ -617,11 +617,15 @@ var testCases = [
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "attribution"
+						"tag": "CFF"
 					},
 					{
-						"tag": "citation"
+						"tag": "YAML"
 					},
+					{
+						"tag": "citation file format"
+					},
+
 					{
 						"tag": "citation-files"
 					},
@@ -629,16 +633,16 @@ var testCases = [
 						"tag": "credit"
 					},
 					{
-						"tag": "format"
+						"tag": "file format"
 					},
 					{
-						"tag": "research-software-engineering"
+						"tag": "research software"
+					},
+					{
+						"tag": "software citation"
 					},
 					{
 						"tag": "software-sustainability"
-					},
-					{
-						"tag": "wssspe"
 					}
 				],
 				"notes": [],
@@ -701,7 +705,7 @@ var testCases = [
 					}
 				],
 				"date": "2021-08",
-				"abstractNote": "The Citation File Format lets you provide citation metadata for software or datasets in plaintext files that are easy to read by both humans and machines.",
+				"abstractNote": "CITATION.cff files are plain text files with human- and machine-readable citation information for software. Code developers can include them in their repositories to let others know how to correctly cite their software. This is the specification for the Citation File Format.",
 				"extra": "DOI: 10.5281/zenodo.5171937",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "Python",
@@ -710,7 +714,36 @@ var testCases = [
 				"versionNumber": "1.1.0",
 				"place": "GitHub",
 				"attachments": [],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "CFF"
+					},
+					{
+						"tag": "YAML"
+					},
+					{
+						"tag": "citation file format"
+					},
+
+					{
+						"tag": "citation-files"
+					},
+					{
+						"tag": "credit"
+					},
+					{
+						"tag": "file format"
+					},
+					{
+						"tag": "research software"
+					},
+					{
+						"tag": "software citation"
+					},
+					{
+						"tag": "software-sustainability"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
