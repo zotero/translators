@@ -118,6 +118,7 @@ function scrape(doc, url) {
 			}
 		}
 	}
+
 	// Do not rely on `og:title` since GitHub isn't consistent with its meta attribute.
 	let githubRepository = item.url.split('/').slice(3, 5).join('/');
 	item.title = githubRepository;
@@ -172,6 +173,7 @@ function scrape(doc, url) {
 		if (canonical) {
 			item.url = canonical;
 		}
+		item.extra = 'a4' + item.url
 
 		ZU.doGet(apiUrl + "repos/" + githubRepository + "/commits/" + commitHash, function (result) {
 			var commitData = JSON.parse(result);
@@ -236,70 +238,62 @@ function completeWithBibTeX(item, bibtex, githubRepository, owner) {
 		delete bibItem.attachments;
 		delete bibItem.itemID;
 
+
 		let tags = [...item.tags];
 		let title = item.title;
+		let versionNumber = item.versionNumber
+		let url = item.url
 
 		Object.assign(item, bibItem);
 
 		if (item.tags.length === 0 && tags.length > 0) {
 			item.tags = tags;
 		}
-		if (item.url.includes('/blob/')) {
+		if (url.includes('/blob/')) {
 			item.title = title;
+			item.versionNumber = versionNumber;
+			item.version = versionNumber;
+			item.url = url
 		}
 
-		if (item.version) {
-			item.complete();
-		}
-		else {
-			ZU.doGet(`https://raw.githubusercontent.com/${path}/HEAD/CITATION.cff`, function (cffText) {
-				let version = cffText.match(/^\s*(?:"version"|version)\s*:\s*"?(.+)"?\s*$/m);
-				if (version) {
-					item.versionNumber = version[1];
-				}
+		ZU.doGet(`https://raw.githubusercontent.com/${path}/HEAD/CITATION.cff`, function (cffText) {
+			let yaml = parseYAML(cffText)
+			if (!item.versionNumber && yaml.version) {
+				item.versionNumber = yaml.version;
+			}
 
-				let type = cffText.match(/^\s*(?:"type"|type)\s*:\s*"?(.+)"?\s*$/m);
-				if (type && type[1] === 'dataset') {
-					item.itemType = type[1];
-				}
+			if (yaml.type && yaml.type === 'dataset') {
+				item.itemType = yaml.type;
+			}
 
-				let abstract = cffText.match(/^\s*(?:"abstract"|abstract)\s*:\s*"?(.+)"?\s*$/m);
-				if (abstract) {
-					item.abstractNote = abstract[1];
-				}
+			if (yaml.abstract) {
+				item.abstractNote = yaml.abstract;
+			}
 
-				let cffUrl = cffText.match(/^\s*(?:"url"|url)\s*:\s*"?(.+)"?\s*$/m);
-				if (cffUrl) {
-					item.url = cffUrl[1];
-				}
+			if (yaml.url && item.url.includes('/blob/') === false) {
+				item.url = yaml.url;
+			}
 
-				let repository = cffText.match(/^\s*(?:"repository"|repository)\s*:\s*"?(.+)"?\s*$/m);
-				if (repository) {
-					let place = repository[1];
-					if (place.endsWith('"')) {
-						place = place.slice(0, -1);
-					}
-					item.place = place;
-				}
+			if (yaml.repository) {
+				item.place = yaml.place;
+			}
 
-				let keywords = extractKeywords(cffText);
-				if (keywords.length > 0) {
-					item.tags = [];
-					item.tags = item.tags.concat(keywords);
-					item.tags = [...new Set(item.tags)];
-				}
+			if (yaml.keywords.length > 0) {
+				item.tags = [];
+				item.tags = item.tags.concat(yaml.keywords);
+				item.tags = [...new Set(item.tags)];
+			}
 
-				if (item.creators.length === 0) {
-					// Delay execution to avoid API rate limiting.
-					setTimeout(function () {
-						completeWithAPI(item, owner, githubRepository);
-					}, 3000);
-				}
-				else {
-					item.complete();
-				}
-			}, null, null, null, false);
-		}
+			if (item.creators.length === 0) {
+				// Delay execution to avoid API rate limiting.
+				setTimeout(function () {
+					completeWithAPI(item, owner, githubRepository);
+				}, 3000);
+			}
+			else {
+				item.complete();
+			}
+		}, null, null, null, false);
 	});
 
 	translator.translate();
@@ -352,6 +346,38 @@ function completeWithAPI(item, owner, githubRepository) {
 			item.complete();
 		}
 	});
+}
+
+function parseYAML(yamlText) {
+  const lines = yamlText.split('\n');
+  const result = {};
+
+  for (let line of lines) {
+    // Trim whitespace and ignore empty lines or comments
+    line = line.trim();
+    if (!line || line.startsWith('#')) continue;
+
+    // Split key and value at the first colon
+    const [key, ...valueParts] = line.split(':');
+    const value = valueParts.join(':').trim();
+
+    // Handle different value types
+    if (value.startsWith('"') && value.endsWith('"')) {
+      // Quoted string
+      result[key.trim()] = value.slice(1, -1);
+    } else if (value === 'true' || value === 'false') {
+      // Boolean
+      result[key.trim()] = value === 'true';
+    } else if (!isNaN(value)) {
+      // Number
+      result[key.trim()] = parseFloat(value);
+    } else {
+      // Unquoted string
+      result[key.trim()] = value;
+    }
+  }
+
+  return result;
 }
 
 /** BEGIN TEST CASES **/
@@ -720,7 +746,7 @@ var testCases = [
 				],
 				"date": "2021-08",
 				"abstractNote": "The Citation File Format lets you provide citation metadata for software or datasets in plaintext files that are easy to read by both humans and machines.",
-				"extra": "DOI: 10.5281/zenodo.4751536",
+				"extra": "DOI: 10.5281/zenodo.5171937",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "Python",
 				"rights": "CC-BY-4.0",
