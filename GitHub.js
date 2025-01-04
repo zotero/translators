@@ -138,7 +138,7 @@ function scrape(doc, url) {
 		item.tags.push(topics[i].textContent.trim());
 	}
 
-	let latestCommitLink = attr(doc, '[data-testid="latest-commit-html"] a', 'href');
+	let latestCommitLink = attr(doc, 'link[rel="canonical"]', 'href');
 	let commitHash = false;
 	if (latestCommitLink.includes('/')) {
 		commitHash = latestCommitLink.split('/').pop();
