@@ -108,7 +108,7 @@ function scrape(doc, url) {
 				item.creators = [];
 				if (authorName.includes(',') && authorName.split(',').length > 2) {
 					authorName = authorName.split(',')[0];
-					item.creators.push(ZU.cleanAuthor(authorName, "author", false));
+					item.creators.push(ZU.cleanAuthor(authorName, "author", true));
 				}
 			}
 		}
