@@ -55,7 +55,6 @@ async function detectWeb(doc, url) {
 	let ogTitle = attr(doc, 'meta[property="og:title"]', 'content');
 	let path = url.split('/').slice(3, 5).join('/');
 	let repo = url.split('/').slice(4, 5)[0];
-	// if (!/^(GitHub - )?[^/\s]+\/[^/\s]+(: .*)?$/.test(attr(doc, 'meta[property="og:title"]', 'content')) && !/^(GitHub - )?[^/\s]+\/[^/\s]+( .*)?$/.test(attr(doc, 'meta[property="og:title"]', 'content'))) {
 	if (!ogTitle.startsWith(path) && !ogTitle.startsWith(repo + '/')) {
 		// and anything without a repo name (abc/xyz) as its og:title.
 		// deals with repo pages that we can't scrape, like GitHub Discussions.
