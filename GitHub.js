@@ -50,7 +50,8 @@ function detectWeb(doc, url) {
 		return "computerProgram";
 	}
 
-	if (!/^(GitHub - )?[^/\s]+\/[^/\s]+(: .*)?$/.test(attr(doc, 'meta[property="og:title"]', 'content'))) {
+	if (!/^(GitHub - )?[^/\s]+\/[^/\s]+(: .*)?$/.test(attr(doc, 'meta[property="og:title"]', 'content')) &&
+			!/^(GitHub - )?[^/\s]+\/[^/\s]+( .*)?$/.test(attr(doc, 'meta[property="og:title"]', 'content'))) {
 		// and anything without a repo name (abc/xyz) as its og:title.
 		// deals with repo pages that we can't scrape, like GitHub Discussions.
 		return false;
@@ -187,6 +188,11 @@ function completeWithBibTeX(item, bibtex) {
 					item.versionNumber = version[1];
 				}
 
+				let title = cffText.match(/^\s*(?:"title"|title)\s*:\s*"?(.+)"?\s*$/m);
+				if (title) {
+					item.title = title[1];
+				}
+
 				let type = cffText.match(/^\s*(?:"type"|type)\s*:\s*"?(.+)"?\s*$/m);
 				if (type && type[1] === 'dataset') {
 					item.itemType = type[1];
@@ -253,10 +259,10 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "computerProgram",
-				"title": "Zotero",
+				"title": "zotero/zotero",
 				"creators": [],
-				"date": "2021-07-29T14:50:36Z",
-				"abstractNote": "Zotero is a free, easy-to-use tool to help you collect, organize, cite, and share your research sources.",
+				"date": "2025-01-04T07:24:46Z",
+				"abstractNote": "Zotero is a free, easy-to-use tool to help you collect, organize, annotate, cite, and share your research sources.",
 				"company": "Zotero",
 				"extra": "original-date: 2011-10-27T07:46:48Z",
 				"libraryCatalog": "GitHub",
@@ -280,9 +286,9 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "computerProgram",
-				"title": "DataCite Schema Repository",
+				"title": "datacite/schema",
 				"creators": [],
-				"date": "2021-07-23T10:14:44Z",
+				"date": "2024-12-05T18:31:44Z",
 				"abstractNote": "DataCite Metadata Schema Repository",
 				"company": "DataCite",
 				"extra": "original-date: 2011-04-13T07:08:41Z",
@@ -298,21 +304,22 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://github.com/mittagessen/kraken",
+		"url": "https://github.com/mittagessen/kraken/tree/4.1.2",
 		"items": [
 			{
 				"itemType": "computerProgram",
-				"title": "mittagessen/kraken",
+				"title": "The Kraken OCR system",
 				"creators": [
 					{
-						"firstName": "",
-						"lastName": "mittagessen",
-						"creatorType": "programmer"
+						"firstName": "Benjamin",
+						"lastName": "Kiessling",
+						"creatorType": "author"
 					}
 				],
 				"date": "2021-07-29T12:26:11Z",
 				"abstractNote": "OCR engine for all the languages",
 				"extra": "original-date: 2015-05-19T09:24:38Z",
+				"version": "4.1.2",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "Python",
 				"rights": "Apache-2.0",
