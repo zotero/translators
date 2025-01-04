@@ -372,7 +372,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://github.com/search?utf8=%E2%9C%93&q=topic%3Ahocr&type=",
+		"url": "https://github.com/search?utf8=%E2%9C%93&q=topic%3Ahocr&type=repositories",
 		"items": "multiple"
 	},
 	{
@@ -755,7 +755,7 @@ var testCases = [
 		"url": "https://github.com/pulipulichen/PTS-Local-News-Dataset/tree/20250105-0131",
 		"items": [
 			{
-				"itemType": "dataset",
+				"itemType": "computerProgram",
 				"title": "PTS-Local-News-Dataset",
 				"creators": [
 					{
