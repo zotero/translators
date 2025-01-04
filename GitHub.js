@@ -145,7 +145,7 @@ function scrape(doc, url) {
 		latestCommitLink = attr(doc, '[data-testid="breadcrumbs-repo-link"]', 'href');
 	}
 	let commitHash = false;
-	if (latestCommitLink.includes('/')) {
+	if (latestCommitLink.includes('/') && latestCommitLink.endsWith(githubRepository) === false) {
 		commitHash = latestCommitLink.split('/').pop();
 	}
 
