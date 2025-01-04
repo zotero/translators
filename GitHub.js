@@ -39,12 +39,12 @@ function detectWeb(doc, url) {
 			return "multiple";
 		}
 	}
-	
+
 	if (!doc.querySelector('meta[property="og:type"][content="object"]')) {
 		// exclude the home page and marketing pages
 		return false;
 	}
-	
+
 	// `og:title` is messed up when browsing a file.
 	if (url.startsWith(attr(doc, 'meta[property="og:url"]', 'content') + '/blob/')) {
 		return "computerProgram";
@@ -55,7 +55,7 @@ function detectWeb(doc, url) {
 		// deals with repo pages that we can't scrape, like GitHub Discussions.
 		return false;
 	}
-	
+
 	return "computerProgram";
 }
 
@@ -97,7 +97,7 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	var item = new Z.Item("computerProgram");
-	
+
 	// basic metadata from the meta tags in the head
 	item.url = attr(doc, 'meta[property="og:url"]', 'content');
 	if (url.includes('/blob/') && !item.url.includes('/blob/')) {
@@ -135,7 +135,7 @@ function scrape(doc, url) {
 			return;
 		}
 		var owner = json.owner.login;
-		
+
 		item.programmingLanguage = json.language;
 		item.extra = "original-date: " + json.created_at;
 		item.date = json.updated_at;
@@ -148,13 +148,13 @@ function scrape(doc, url) {
 			if (xhr.status == 200) {
 				let doc = new DOMParser().parseFromString(respText, 'text/html');
 				let bibtex = attr(doc, '[aria-labelledby="bibtex-tab"] input', 'value');
-				
+
 				if (bibtex && bibtex.trim()) {
 					completeWithBibTeX(item, bibtex);
 					return;
 				}
 			}
-			
+
 			// if there was no CITATION.cff or the response didn't include a
 			// BibTeX representation, we fall back to filling in the title and
 			// authorship using the API.
@@ -168,15 +168,15 @@ function completeWithBibTeX(item, bibtex) {
 	// BibTeX
 	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 	translator.setString(bibtex);
-	
+
 	translator.setHandler("itemDone", function (obj, bibItem) {
 		let path = item.title;
-		
+
 		delete bibItem.itemType;
 		delete bibItem.attachments;
 		delete bibItem.itemID;
 		Object.assign(item, bibItem);
-		
+
 		if (item.version) {
 			item.complete();
 		}
@@ -186,12 +186,42 @@ function completeWithBibTeX(item, bibtex) {
 				if (version) {
 					item.versionNumber = version[1];
 				}
+
+				let type = cffText.match(/^\s*(?:"type"|type)\s*:\s*"?(.+)"?\s*$/m);
+				if (type && type[1] === 'dataset') {
+					item.itemType = type[1];
+				}
+
+				let abstract = cffText.match(/^\s*(?:"abstract"|abstract)\s*:\s*"?(.+)"?\s*$/m);
+				if (abstract) {
+					item.abstractNote = abstract[1];
+				}
+
+				let keywords = extractKeywords(cffText)
+				if (keywords.length > 0) {
+					item.tags = item.tags.concat(keywords)
+				}
+
 				item.complete();
 			}, null, null, null, false);
 		}
 	});
-	
+
 	translator.translate();
+}
+
+// Parse the YAML and extract keywords
+function extractKeywords(cffText) {
+  // Use a regular expression to extract the `keywords` block
+  const match = cffText.match(/keywords:\s+((?:- .+\s*)+)/);
+  if (!match) return []; // Return an empty array if no keywords found
+
+  // Extract the lines under `keywords` and clean them up
+  const keywordsBlock = match[1];
+  return keywordsBlock
+    .split("\n") // Split into lines
+    .map(line => line.trim().replace(/^- /, "")) // Trim and remove `- `
+    .filter(line => line !== ""); // Remove empty lines
 }
 
 function completeWithAPI(item, owner) {
@@ -204,7 +234,7 @@ function completeWithAPI(item, owner) {
 		else {
 			item.company = ownerName;
 		}
-		
+
 		ZU.processDocuments(`/${item.title}`, function (rootDoc) {
 			let readmeTitle = text(rootDoc, '#readme h1');
 			if (readmeTitle) {
