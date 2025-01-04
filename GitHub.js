@@ -219,9 +219,9 @@ function extractKeywords(cffText) {
 	// Extract the lines under `keywords` and clean them up
 	const keywordsBlock = match[1];
 	return keywordsBlock
-	  .split("\n") // Split into lines
-    .map(line => line.trim().replace(/^- /, "")) // Trim and remove `- `
-    .filter(line => line !== ""); // Remove empty lines
+		.split("\n") // Split into lines
+		.map(line => line.trim().replace(/^- /, "")) // Trim and remove `- `
+		.filter(line => line !== ""); // Remove empty lines
 }
 
 function completeWithAPI(item, owner) {
