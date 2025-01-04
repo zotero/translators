@@ -128,7 +128,6 @@ function scrape(doc, url) {
 		}
 		if (fileNameID && fileNameID.trim() !== '') {
 			item.title = fileNameID.trim();
-			item.extra = "a1"
 		}
 	}
 	item.abstractNote = attr(doc, 'meta[property="og:description"]', 'content').split(' - ')[0]
@@ -149,7 +148,6 @@ function scrape(doc, url) {
 		let readmeTitle = text(doc, '.markdown-heading h1.heading-element');
 		if (readmeTitle) {
 			item.title = readmeTitle;
-			item.extra = "a2"
 		}
 	}
 
@@ -243,10 +241,8 @@ function completeWithBibTeX(item, bibtex, githubRepository, owner) {
 		if (item.tags.length === 0 && tags.length > 0) {
 			item.tags = tags;
 		}
-		item.extra = "a3" + item.title
 		if (item.url.includes('/blob/')) {
 			item.title = title;
-			item.extra = "a4"
 		}
 
 		if (item.version) {
@@ -291,7 +287,10 @@ function completeWithBibTeX(item, bibtex, githubRepository, owner) {
 				}
 
 				if (item.creators.length === 0) {
-					completeWithAPI(item, owner, githubRepository);
+					// Delay execution to avoid API rate limiting.
+					setTimeout(function () {
+						completeWithAPI(item, owner, githubRepository);
+					}, 3000);
 				}
 				else {
 					item.complete();
@@ -404,7 +403,7 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"date": "2016-08-23T16:42:17Z",
+				"date": "2024-12-05T18:31:38Z",
 				"abstractNote": "DataCite Metadata Schema Repository",
 				"company": "DataCite",
 				"extra": "original-date: 2011-04-13T07:08:41Z",
@@ -434,13 +433,13 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"date": "2016-08-23T16:42:17Z",
+				"date": "2024-12-05T18:31:38Z",
 				"abstractNote": "DataCite Metadata Schema Repository",
 				"company": "DataCite",
 				"extra": "original-date: 2011-04-13T07:08:41Z",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "Ruby",
-				"url": "https://github.com/datacite/schema/tree/4.6.0",
+				"url": "https://github.com/datacite/schema/tree/4.6.0/.dockerignore",
 				"versionNumber": "4.6.0",
 				"place": "GitHub",
 				"attachments": [],
@@ -629,6 +628,7 @@ var testCases = [
 				"rights": "CC-BY-4.0",
 				"url": "https://github.com/citation-file-format/citation-file-format/tree/1.2.0",
 				"versionNumber": "1.2.0",
+				"place": "GitHub",
 				"attachments": [],
 				"tags": [
 					{
@@ -710,19 +710,20 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Alexander",
+						"firstName": "Olexandr",
 						"lastName": "Konovalov",
 						"creatorType": "author"
 					}
 				],
-				"date": "2021-05",
-				"abstractNote": "A machine-readable and human-readable and -writable format for CITATION files. CITATION files provide reference and citation information for (research/scientific) software.",
+				"date": "2021-08",
+				"abstractNote": "The Citation File Format lets you provide citation metadata for software or datasets in plaintext files that are easy to read by both humans and machines.",
 				"extra": "DOI: 10.5281/zenodo.4751536",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "Python",
 				"rights": "CC-BY-4.0",
-				"url": "https://github.com/citation-file-format/citation-file-format/blob/9879c64a37a9d4f3f18b67594aa3f3bf763fb69a/test/pytest.ini",
+				"url": "https://github.com/citation-file-format/citation-file-format/blob/1.1.0/test/pytest.ini",
 				"versionNumber": "1.1.0",
+				"place": "GitHub",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
