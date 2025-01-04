@@ -365,7 +365,15 @@ function completeWithAPI(item, owner, githubRepository) {
 function searchFieldValue(yamlContent, field) {
 	const regex = new RegExp(`^${field}:\\s*(.+)`, 'm');
 	const match = yamlContent.match(regex);
-	return match ? match[1].trim() : null;
+
+	let value = null;
+	if (match) {
+		value = match[1].trim();
+		if (value.startsWith('"') && value.endsWith('"')) {
+			value = value.slice(1, -1);
+		}
+	}
+	return value;
 }
 
 /**
@@ -825,6 +833,7 @@ var testCases = [
 				"rights": "MIT",
 				"url": "https://github.com/pulipulichen/PTS-Local-News-Dataset",
 				"versionNumber": "20250105-0131",
+				"repositoryLocation": "GitHub",
 				"attachments": [],
 				"tags": [
 					{
