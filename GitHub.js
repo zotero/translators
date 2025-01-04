@@ -143,6 +143,9 @@ function scrape(doc, url) {
 	if (!latestCommitLink) {
 		latestCommitLink = attr(doc, '[data-testid="latest-commit-html"] a', 'href');
 	}
+	if (!latestCommitLink) {
+		latestCommitLink = attr(doc, '[data-testid="breadcrumbs-repo-link"]', 'href');
+	}
 	let commitHash = false;
 	if (latestCommitLink.includes('/')) {
 		commitHash = latestCommitLink.split('/').pop();
@@ -241,6 +244,7 @@ function completeWithBibTeX(item, bibtex, githubRepository, owner) {
 		let tags = [...item.tags];
 		let title = item.title;
 		let versionNumber = item.versionNumber;
+		let version = item.version;
 		let url = item.url;
 
 		Object.assign(item, bibItem);
@@ -251,7 +255,7 @@ function completeWithBibTeX(item, bibtex, githubRepository, owner) {
 		if (url.includes('/blob/')) {
 			item.title = title;
 			item.versionNumber = versionNumber;
-			item.version = versionNumber;
+			item.version = version;
 			item.url = url;
 		}
 
@@ -627,7 +631,7 @@ var testCases = [
 					},
 
 					{
-						"tag": "citation-files"
+						"tag": "citation files"
 					},
 					{
 						"tag": "credit"
@@ -642,7 +646,7 @@ var testCases = [
 						"tag": "software citation"
 					},
 					{
-						"tag": "software-sustainability"
+						"tag": "software sustainability"
 					}
 				],
 				"notes": [],
@@ -726,7 +730,7 @@ var testCases = [
 					},
 
 					{
-						"tag": "citation-files"
+						"tag": "citation files"
 					},
 					{
 						"tag": "credit"
@@ -741,7 +745,7 @@ var testCases = [
 						"tag": "software citation"
 					},
 					{
-						"tag": "software-sustainability"
+						"tag": "software sustainability"
 					}
 				],
 				"notes": [],
