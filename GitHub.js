@@ -13,7 +13,7 @@
 }
 
 /**
-	Copyright (c) 2017-2021 Martin Fenner, Philipp Zumstein
+	Copyright (c) 2017-2025 Martin Fenner, Philipp Zumstein, Yung-Ting Chen
 
 	This program is free software: you can redistribute it and/or
 	modify it under the terms of the GNU Affero General Public License
@@ -141,9 +141,6 @@ function scrape(doc, url) {
 
 	let latestCommitLink = attr(doc, 'link[rel="canonical"]', 'href');
 	if (!latestCommitLink) {
-		latestCommitLink = attr(doc, '[data-testid="latest-commit-html"] a', 'href');
-	}
-	if (!latestCommitLink) {
 		latestCommitLink = attr(doc, '[data-testid="breadcrumbs-repo-link"]', 'href');
 	}
 	let commitHash = false;
@@ -176,7 +173,6 @@ function scrape(doc, url) {
 		if (canonical) {
 			item.url = canonical;
 		}
-
 		ZU.doGet(apiUrl + "repos/" + githubRepository + "/commits/" + commitHash, function (result) {
 			var commitData = JSON.parse(result);
 			const commitTime = commitData.commit.author.date; // ISO 8601 format
@@ -539,7 +535,7 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"date": "2021-07-29T04:53:43Z",
+				"date": "2021-07-28T21:54:41Z",
 				"versionNumber": "eb4f39007e62d3d632448e184b1fd3671b3a1349",
 				"abstractNote": "Zotero Translators",
 				"company": "Zotero",
