@@ -35,9 +35,7 @@ const apiUrl = "https://api.github.com/";
 
 async function detectWeb(doc, url) {
 	if (url.includes("/search?")) {
-		if (getSearchResults(doc, true)) {
-			return "multiple";
-		}
+		return "multiple";
 	}
 
 	if (!doc.querySelector('meta[property="og:type"][content="object"]')) {
