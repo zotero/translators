@@ -197,9 +197,9 @@ function completeWithBibTeX(item, bibtex) {
 					item.abstractNote = abstract[1];
 				}
 
-				let keywords = extractKeywords(cffText)
+				let keywords = extractKeywords(cffText);
 				if (keywords.length > 0) {
-					item.tags = item.tags.concat(keywords)
+					item.tags = item.tags.concat(keywords);
 				}
 
 				item.complete();
@@ -212,14 +212,14 @@ function completeWithBibTeX(item, bibtex) {
 
 // Parse the YAML and extract keywords
 function extractKeywords(cffText) {
-  // Use a regular expression to extract the `keywords` block
-  const match = cffText.match(/keywords:\s+((?:- .+\s*)+)/);
-  if (!match) return []; // Return an empty array if no keywords found
+	// Use a regular expression to extract the `keywords` block
+	const match = cffText.match(/keywords:\s+((?:- .+\s*)+)/);
+	if (!match) return []; // Return an empty array if no keywords found
 
-  // Extract the lines under `keywords` and clean them up
-  const keywordsBlock = match[1];
-  return keywordsBlock
-    .split("\n") // Split into lines
+	// Extract the lines under `keywords` and clean them up
+	const keywordsBlock = match[1];
+	return keywordsBlock
+	  .split("\n") // Split into lines
     .map(line => line.trim().replace(/^- /, "")) // Trim and remove `- `
     .filter(line => line !== ""); // Remove empty lines
 }
