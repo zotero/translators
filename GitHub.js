@@ -33,7 +33,7 @@
 
 const apiUrl = "https://api.github.com/";
 
-function detectWeb(doc, url) {
+async function detectWeb(doc, url) {
 	if (url.includes("/search?")) {
 		return "multiple";
 // 		if (getSearchResults(doc, true)) {
@@ -58,7 +58,19 @@ function detectWeb(doc, url) {
 		return false;
 	}
 
-	return "computerProgram";
+	return new Promise(function (resolve) {
+		let path = url.split('/').slice(3, 5).join('/');
+		ZU.doGet(`https://raw.githubusercontent.com/${path}/HEAD/CITATION.cff`, function (cffText) {
+			let yaml = jsyaml.load(cffText);
+			if (yaml.type && yaml.type === 'dataset') {
+				resolve(yaml.type);
+			}
+			else {
+				resolve("computerProgram");
+			}
+		});
+
+	});
 }
 
 
@@ -78,8 +90,8 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
+async function doWeb(doc, url) {
+	if (await detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return;
