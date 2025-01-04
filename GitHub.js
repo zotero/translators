@@ -60,16 +60,16 @@ async function detectWeb(doc, url) {
 
 	return new Promise(function (resolve) {
 		let path = url.split('/').slice(3, 5).join('/');
-		ZU.doGet(`https://raw.githubusercontent.com/${path}/HEAD/CITATION.cff`, function (cffText) {
+		ZU.doGet(`https://raw.githubusercontent.com/${path}/HEAD/CITATION.cff`, function (cffText, xhr) {
+			if (xhr.status !== 200) {
+				return resolve("computerProgram");
+			}
 			let yaml = jsyaml.load(cffText);
 			if (yaml.type && yaml.type === 'dataset') {
-				resolve(yaml.type);
+				return resolve(yaml.type);
 			}
-			else {
-				resolve("computerProgram");
-			}
-		});
-
+			resolve("computerProgram");
+		}, null, null, { 'X-Requested-With': 'XMLHttpRequest' }, false);
 	});
 }
 
