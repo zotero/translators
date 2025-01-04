@@ -35,9 +35,10 @@ const apiUrl = "https://api.github.com/";
 
 function detectWeb(doc, url) {
 	if (url.includes("/search?")) {
-		if (getSearchResults(doc, true)) {
-			return "multiple";
-		}
+		return "multiple";
+// 		if (getSearchResults(doc, true)) {
+// 			return "multiple";
+// 		}
 	}
 
 	if (!doc.querySelector('meta[property="og:type"][content="object"]')) {
@@ -277,7 +278,7 @@ function completeWithBibTeX(item, bibtex, githubRepository, owner) {
 				item.place = yaml.place;
 			}
 
-			if (yaml.keywords.length > 0) {
+			if (yaml.keywords && yaml.keywords.length > 0) {
 				item.tags = [];
 				item.tags = item.tags.concat(yaml.keywords);
 				item.tags = [...new Set(item.tags)];
@@ -418,7 +419,7 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"date": "2016-08-23T16:42:17Z",
+				"date": "2024-12-05T18:31:38Z",
 				"abstractNote": "DataCite Metadata Schema Repository",
 				"company": "DataCite",
 				"extra": "original-date: 2011-04-13T07:08:41Z",
