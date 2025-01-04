@@ -64,7 +64,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('.repo-list-item .f4 a');
+	var rows = doc.querySelectorAll('[data-testid="results-list"] .search-title a');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -123,8 +123,12 @@ function scrape(doc, url) {
 	item.title = githubRepository;
 	if (url.includes('/blob/')) {
 		let fileNameID = text(doc, '#file-name-id');
+		if (!fileNameID && fileNameID.trim() === '') {
+			fileNameID = text(doc, '#file-name-id-wide');
+		}
 		if (fileNameID && fileNameID.trim() !== '') {
 			item.title = fileNameID.trim();
+			item.extra = "a1"
 		}
 	}
 	item.abstractNote = attr(doc, 'meta[property="og:description"]', 'content').split(' - ')[0]
@@ -145,6 +149,7 @@ function scrape(doc, url) {
 		let readmeTitle = text(doc, '.markdown-heading h1.heading-element');
 		if (readmeTitle) {
 			item.title = readmeTitle;
+			item.extra = "a2"
 		}
 	}
 
@@ -153,7 +158,13 @@ function scrape(doc, url) {
 	}
 	else {
 		if (!item.versionNumber) {
-			item.versionNumber = commitHash;
+			let codeTab = attr(doc, "#code-tab", "href");
+			if (codeTab.includes('/tree/') && codeTab.endsWith(commitHash) === false) {
+				item.versionNumber = codeTab.split('/').pop();
+			}
+			else {
+				item.versionNumber = commitHash;
+			}
 		}
 
 		let canonical = attr(doc, 'link[rel="canonical"]', 'href');
@@ -232,8 +243,10 @@ function completeWithBibTeX(item, bibtex, githubRepository, owner) {
 		if (item.tags.length === 0 && tags.length > 0) {
 			item.tags = tags;
 		}
+		item.extra = "a3" + item.title
 		if (item.url.includes('/blob/')) {
 			item.title = title;
+			item.extra = "a4"
 		}
 
 		if (item.version) {
@@ -324,7 +337,7 @@ function completeWithAPI(item, owner, githubRepository) {
 			});
 		}
 
-		if (item.url.includes('/blob/')) {
+		if (item.url.includes('/blob/') === false) {
 			ZU.processDocuments(`/${githubRepository}`, function (rootDoc) {
 				let readmeTitle = text(rootDoc, '.markdown-heading h1.heading-element');
 				if (readmeTitle) {
@@ -351,7 +364,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "zotero",
-						"creatorType": "author"
+						"creatorType": "programmer",
+						"fieldMode": 1
 					}
 				],
 				"version": "0a6095322668908f243a536a4e43911d80f76b75",
@@ -361,7 +375,9 @@ var testCases = [
 				"extra": "original-date: 2011-10-27T07:46:48Z",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "JavaScript",
-				"url": "https://github.com/zotero/zotero",
+				"url": "https://github.com/zotero/zotero/tree/0a6095322668908f243a536a4e43911d80f76b75",
+				"versionNumber": "0a6095322668908f243a536a4e43911d80f76b75",
+				"place": "GitHub",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -384,17 +400,49 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "datacite",
-						"creatorType": "author"
+						"creatorType": "programmer",
+						"fieldMode": 1
 					}
 				],
-				"version": "29c5068d0c9d41c0e678915273ab487c89497135",
-				"date": "2024-12-05T18:31:38Z",
+				"date": "2016-08-23T16:42:17Z",
 				"abstractNote": "DataCite Metadata Schema Repository",
 				"company": "DataCite",
 				"extra": "original-date: 2011-04-13T07:08:41Z",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "Ruby",
 				"url": "https://github.com/datacite/schema/tree/4.6.0",
+				"versionNumber": "4.6.0",
+				"place": "GitHub",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://github.com/datacite/schema/blob/4.6.0/.dockerignore",
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": ".dockerignore",
+				"creators": [
+					{
+						"lastName": "datacite",
+						"creatorType": "programmer",
+						"fieldMode": 1
+					}
+				],
+				"date": "2016-08-23T16:42:17Z",
+				"abstractNote": "DataCite Metadata Schema Repository",
+				"company": "DataCite",
+				"extra": "original-date: 2011-04-13T07:08:41Z",
+				"libraryCatalog": "GitHub",
+				"programmingLanguage": "Ruby",
+				"url": "https://github.com/datacite/schema/tree/4.6.0",
+				"versionNumber": "4.6.0",
+				"place": "GitHub",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -421,7 +469,8 @@ var testCases = [
 				"extra": "original-date: 2015-05-19T09:24:38Z",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "Python",
-				"version": "4.1.2",
+				"versionNumber": "4.1.2",
+				"place": "GitHub",
 				"rights": "Apache-2.0",
 				"url": "https://kraken.re",
 				"attachments": [],
@@ -470,15 +519,17 @@ var testCases = [
 					{
 						"firstName": "Aurimas",
 						"lastName": "Vinckevicius",
-						"creatorType": "author"
+						"creatorType": "programmer"
 					}
 				],
-				"date": "2022-07-14T16:14:40Z",
+				"date": "2024-12-23T20:52:59Z",
 				"abstractNote": "Zotero extension for creating Zotero to CSL item type and field mappings.",
 				"extra": "original-date: 2012-05-20T07:53:58Z",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "JavaScript",
+				"versionNumber": "5750900e907b6730ccd724e23444ccc79d15f3f3",
 				"url": "https://github.com/aurimasv/z2csl/tree/5750900e907b6730ccd724e23444ccc79d15f3f3",
+				"place": "GitHub",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -496,16 +547,18 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "zotero",
-						"creatorType": "author"
+						"creatorType": "programmer",
+						"fieldMode": 1
 					}
 				],
 				"date": "2021-07-29T04:53:43Z",
-				"version": "eb4f39007e62d3d632448e184b1fd3671b3a1349",
+				"versionNumber": "eb4f39007e62d3d632448e184b1fd3671b3a1349",
 				"abstractNote": "Zotero Translators",
 				"company": "Zotero",
 				"extra": "original-date: 2011-07-03T17:40:38Z",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "JavaScript",
+				"place": "GitHub",
 				"url": "https://github.com/zotero/translators/blob/eb4f39007e62d3d632448e184b1fd3671b3a1349/GitHub.js",
 				"attachments": [],
 				"tags": [],
@@ -696,6 +749,7 @@ var testCases = [
 				"extra": "DOI: 10.5281/zenodo.14598063",
 				"libraryCatalog": "GitHub",
 				"url": "https://github.com/pulipulichen/PTS-Local-News-Dataset",
+				"versionNumber": "20250105-0131",
 				"attachments": [],
 				"tags": [
 					{
