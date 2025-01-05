@@ -33,7 +33,7 @@
 
 const apiUrl = "https://api.github.com/";
 
-async function detectWeb(doc, url) {
+function detectWeb(doc, url) {
 	if (url.includes("/search?")) {
 		var rows = doc.querySelectorAll('[data-testid="results-list"] .search-title a');
 		if (rows.length > 0) {
