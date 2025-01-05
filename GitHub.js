@@ -33,10 +33,10 @@
 
 const apiUrl = "https://api.github.com/";
 
+
 function detectWeb(doc, url) {
 	if (url.includes("/search?")) {
-		var rows = doc.querySelectorAll('[data-testid="results-list"] .search-title a');
-		if (rows.length > 0) {
+		if (getSearchResults(doc, true)) {
 			return "multiple";
 		}
 	}
@@ -47,39 +47,18 @@ function detectWeb(doc, url) {
 	}
 
 	// `og:title` is messed up when browsing a file.
-	let ogURL = attr(doc, 'meta[property="og:url"]', 'content');
-	if (ogURL.includes('/blob/') || url.startsWith(ogURL + '/blob/')) {
+	let ogTitle = attr(doc, 'meta[property="og:url"]', 'content');
+	if (ogTitle.includes('/blob/') || url.startsWith(ogTitle + '/blob/')) {
 		return "computerProgram";
 	}
 
-	let ogTitle = attr(doc, 'meta[property="og:title"]', 'content');
-	let path = url.split('/').slice(3, 5).join('/');
-	let repo = url.split('/').slice(4, 5)[0];
-	if (!ogTitle.startsWith(path) && !ogTitle.startsWith(repo + '/')) {
+	if (!/^(GitHub - )?[^/\s]+\/[^/\s]+(: .*)?$/.test(attr(doc, 'meta[property="og:title"]', 'content')) && !/^(GitHub - )?[^/\s]+\/[^/\s]+( .*)?$/.test(attr(doc, 'meta[property="og:title"]', 'content'))) {
 		// and anything without a repo name (abc/xyz) as its og:title.
 		// deals with repo pages that we can't scrape, like GitHub Discussions.
 		return false;
 	}
 
-	return new Promise(function (resolve) {
-		ZU.doGet(`https://raw.githubusercontent.com/${path}/HEAD/CITATION.cff`, function (cffText, xhr) {
-			if (xhr.status !== 200) {
-				return resolve("computerProgram");
-			}
-			try {
-				let type = searchFieldValue(cffText, "type");
-				if (type && type === 'dataset') {
-					return resolve(type);
-				}
-			}
-			catch (e) {
-				console.error(`CITATION.cff format is invalid:
-
-${cffText}`);
-			}
-			return resolve("computerProgram");
-		}, null, null, { 'X-Requested-With': 'XMLHttpRequest' }, false);
-	});
+	return "computerProgram";
 }
 
 
