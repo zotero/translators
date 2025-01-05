@@ -78,7 +78,6 @@ function detectWeb(doc, url) {
 	if (!ogTitle.startsWith(path) && !ogTitle.startsWith(repo + '/')) {
 		// and anything without a repo name (abc/xyz) as its og:title.
 		// deals with repo pages that we can't scrape, like GitHub Discussions.
-		console.error(JSON.stringify({ogTitle, path, repo}, null, 2));
 		return false;
 	}
 
@@ -431,6 +430,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://github.com/zotero/zotero/tree/0a6095322668908f243a536a4e43911d80f76b75",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -445,7 +445,7 @@ var testCases = [
 				"version": "0a6095322668908f243a536a4e43911d80f76b75",
 				"date": "2024-12-06T09:38:01Z",
 				"abstractNote": "Zotero is a free, easy-to-use tool to help you collect, organize, annotate, cite, and share your research sources.",
-				"company": "ZoteroAAA",
+				"company": "Zotero",
 				"extra": "original-date: 2011-10-27T07:46:48Z",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "JavaScript",
@@ -469,7 +469,6 @@ var testCases = [
 		"type": "web",
 		"url": "https://github.com/datacite/schema/tree/4.6.0",
 		"defer": true,
-		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -532,7 +531,6 @@ var testCases = [
 		"type": "web",
 		"url": "https://github.com/mittagessen/kraken/tree/4.1.2",
 		"defer": true,
-		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -592,7 +590,6 @@ var testCases = [
 		"type": "web",
 		"url": "https://github.com/aurimasv/z2csl/tree/5750900e907b6730ccd724e23444ccc79d15f3f3",
 		"defer": true,
-		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -654,7 +651,6 @@ var testCases = [
 		"type": "web",
 		"url": "https://github.com/citation-file-format/citation-file-format/tree/1.2.0",
 		"defer": true,
-		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -855,7 +851,6 @@ var testCases = [
 		"type": "web",
 		"url": "https://github.com/pulipulichen/PTS-Local-News-Dataset/tree/20250105-0131",
 		"defer": true,
-		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "dataset",
