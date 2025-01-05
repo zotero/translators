@@ -34,8 +34,14 @@
 const apiUrl = "https://api.github.com/";
 
 function detectWeb(doc, url) {
+	// if (url.includes("/search?")) {
+	// 	if (getSearchResults(doc, true)) {
+	// 		return "multiple";
+	// 	}
+	// }
 	if (url.includes("/search?")) {
-		if (getSearchResults(doc, true)) {
+		var rows = doc.querySelectorAll('[data-testid="results-list"] .search-title a');
+		if (rows.length > 0) {
 			return "multiple";
 		}
 	}
@@ -46,8 +52,13 @@ function detectWeb(doc, url) {
 	}
 
 	// `og:title` is messed up when browsing a file.
-	let ogTitle = attr(doc, 'meta[property="og:url"]', 'content');
-	if (ogTitle.includes('/blob/') || url.startsWith(ogTitle + '/blob/')) {
+	// let ogTitle = attr(doc, 'meta[property="og:url"]', 'content');
+	// if (ogTitle.includes('/blob/') || url.startsWith(ogTitle + '/blob/')) {
+	// 	return "computerProgram";
+	// }
+	// `og:title` is messed up when browsing a file.
+	let ogURL = attr(doc, 'meta[property="og:url"]', 'content');
+	if (ogURL.includes('/blob/') || url.startsWith(ogURL + '/blob/')) {
 		return "computerProgram";
 	}
 
