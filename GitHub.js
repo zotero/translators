@@ -410,7 +410,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://github.com/zotero/zotero/tree/0a6095322668908f243a536a4e43911d80f76b75",
-		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "computerProgram",
