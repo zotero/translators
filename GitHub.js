@@ -483,7 +483,6 @@ var testCases = [
 		"type": "web",
 		"url": "https://github.com/datacite/schema/blob/4.6.0/.dockerignore",
 		"defer": true,
-		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -606,7 +605,6 @@ var testCases = [
 		"type": "web",
 		"url": "https://github.com/zotero/translators/blob/eb4f39007e62d3d632448e184b1fd3671b3a1349/GitHub.js",
 		"defer": true,
-		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -739,7 +737,6 @@ var testCases = [
 		"type": "web",
 		"url": "https://github.com/citation-file-format/citation-file-format/blob/1.1.0/test/pytest.ini",
 		"defer": true,
-		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "computerProgram",
