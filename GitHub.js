@@ -33,7 +33,7 @@
 
 const apiUrl = "https://api.github.com/";
 
-function detectWeb(doc, url) {
+async function detectWeb(doc, url) {
 	if (url.includes("/search?")) {
 		var rows = doc.querySelectorAll('[data-testid="results-list"] .search-title a');
 		if (rows.length > 0) {
@@ -61,27 +61,25 @@ function detectWeb(doc, url) {
 		return false;
 	}
 
-	return "computerProgram";
+	return new Promise(function (resolve) {
+		ZU.doGet(`https://raw.githubusercontent.com/${path}/HEAD/CITATION.cff`, function (cffText, xhr) {
+			if (xhr.status !== 200) {
+				return resolve("computerProgram");
+			}
+			try {
+				let type = searchFieldValue(cffText, "type");
+				if (type && type === 'dataset') {
+					return resolve(type);
+				}
+			}
+			catch (e) {
+				console.error(`CITATION.cff format is invalid:
 
-// 	return new Promise(function (resolve) {
-// 		ZU.doGet(`https://raw.githubusercontent.com/${path}/HEAD/CITATION.cff`, function (cffText, xhr) {
-// 			if (xhr.status !== 200) {
-// 				return resolve("computerProgram");
-// 			}
-// 			try {
-// 				let type = searchFieldValue(cffText, "type");
-// 				if (type && type === 'dataset') {
-// 					return resolve(type);
-// 				}
-// 			}
-// 			catch (e) {
-// 				console.error(`CITATION.cff format is invalid:
-
-// ${cffText}`);
-// 			}
-// 			return resolve("computerProgram");
-// 		}, null, null, { 'X-Requested-With': 'XMLHttpRequest' }, false);
-// 	});
+${cffText}`);
+			}
+			return resolve("computerProgram");
+		}, null, null, { 'X-Requested-With': 'XMLHttpRequest' }, false);
+	});
 }
 
 
@@ -411,8 +409,8 @@ function extractKeywords(yamlContent) {
 var testCases = [
 	{
 		"type": "web",
-		"defer": true,
 		"url": "https://github.com/zotero/zotero/tree/0a6095322668908f243a536a4e43911d80f76b75",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -436,6 +434,434 @@ var testCases = [
 				"place": "GitHub",
 				"attachments": [],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://github.com/search?utf8=%E2%9C%93&q=topic%3Ahocr&type=repositories",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://github.com/datacite/schema/tree/4.6.0",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": "DataCite Schema Repository",
+				"creators": [
+					{
+						"lastName": "datacite",
+						"creatorType": "programmer",
+						"fieldMode": 1
+					}
+				],
+				"date": "2024-12-05T18:31:38Z",
+				"abstractNote": "DataCite Metadata Schema Repository",
+				"company": "DataCite",
+				"extra": "original-date: 2011-04-13T07:08:41Z",
+				"libraryCatalog": "GitHub",
+				"programmingLanguage": "Ruby",
+				"url": "https://github.com/datacite/schema/tree/4.6.0",
+				"versionNumber": "4.6.0",
+				"place": "GitHub",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://github.com/datacite/schema/blob/4.6.0/.dockerignore",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": ".dockerignore",
+				"creators": [
+					{
+						"lastName": "datacite",
+						"creatorType": "programmer",
+						"fieldMode": 1
+					}
+				],
+				"date": "2024-12-05T18:31:38Z",
+				"abstractNote": "DataCite Metadata Schema Repository",
+				"company": "DataCite",
+				"extra": "original-date: 2011-04-13T07:08:41Z",
+				"libraryCatalog": "GitHub",
+				"programmingLanguage": "Ruby",
+				"url": "https://github.com/datacite/schema/blob/4.6.0/.dockerignore",
+				"versionNumber": "4.6.0",
+				"place": "GitHub",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://github.com/mittagessen/kraken/tree/4.1.2",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": "The Kraken OCR system",
+				"creators": [
+					{
+						"firstName": "Benjamin",
+						"lastName": "Kiessling",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022-04",
+				"abstractNote": "OCR engine for all the languages",
+				"extra": "original-date: 2015-05-19T09:24:38Z",
+				"libraryCatalog": "GitHub",
+				"programmingLanguage": "Python",
+				"versionNumber": "4.1.2",
+				"place": "GitHub",
+				"rights": "Apache-2.0",
+				"url": "https://kraken.re",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "alto-xml"
+					},
+					{
+						"tag": "handwritten-text-recognition"
+					},
+					{
+						"tag": "hocr"
+					},
+					{
+						"tag": "htr"
+					},
+					{
+						"tag": "layout-analysis"
+					},
+					{
+						"tag": "optical-character-recognition"
+					},
+					{
+						"tag": "neural-networks"
+					},
+					{
+						"tag": "ocr"
+					},
+					{
+						"tag": "page-xml"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://github.com/aurimasv/z2csl/tree/5750900e907b6730ccd724e23444ccc79d15f3f3",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": "z2csl - Zotero to CSL extension and mappings",
+				"creators": [
+					{
+						"firstName": "Aurimas",
+						"lastName": "Vinckevicius",
+						"creatorType": "programmer"
+					}
+				],
+				"date": "2022-07-14T16:14:40Z",
+				"abstractNote": "Zotero extension for creating Zotero to CSL item type and field mappings.",
+				"extra": "original-date: 2012-05-20T07:53:58Z",
+				"libraryCatalog": "GitHub",
+				"programmingLanguage": "JavaScript",
+				"versionNumber": "5750900e907b6730ccd724e23444ccc79d15f3f3",
+				"url": "https://github.com/aurimasv/z2csl/tree/5750900e907b6730ccd724e23444ccc79d15f3f3",
+				"place": "GitHub",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://github.com/zotero/translators/blob/eb4f39007e62d3d632448e184b1fd3671b3a1349/GitHub.js",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": "GitHub.js",
+				"creators": [
+					{
+						"lastName": "zotero",
+						"creatorType": "programmer",
+						"fieldMode": 1
+					}
+				],
+				"date": "2021-07-28T21:54:41Z",
+				"versionNumber": "eb4f39007e62d3d632448e184b1fd3671b3a1349",
+				"abstractNote": "Zotero Translators",
+				"company": "Zotero",
+				"extra": "original-date: 2011-07-03T17:40:38Z",
+				"libraryCatalog": "GitHub",
+				"programmingLanguage": "JavaScript",
+				"place": "GitHub",
+				"url": "https://github.com/zotero/translators/blob/eb4f39007e62d3d632448e184b1fd3671b3a1349/GitHub.js",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://github.com/citation-file-format/citation-file-format/tree/1.2.0",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": "Citation File Format",
+				"creators": [
+					{
+						"firstName": "Stephan",
+						"lastName": "Druskat",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jurriaan H.",
+						"lastName": "Spaaks",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Neil",
+						"lastName": "Chue Hong",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Robert",
+						"lastName": "Haines",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "James",
+						"lastName": "Baker",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Spencer",
+						"lastName": "Bliven",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Egon",
+						"lastName": "Willighagen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Pérez-Suárez",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Olexandr",
+						"lastName": "Konovalov",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-08",
+				"abstractNote": "CITATION.cff files are plain text files with human- and machine-readable citation information for software. Code developers can include them in their repositories to let others know how to correctly cite their software. This is the specification for the Citation File Format.",
+				"extra": "DOI: 10.5281/zenodo.5171937",
+				"libraryCatalog": "GitHub",
+				"programmingLanguage": "Python",
+				"rights": "CC-BY-4.0",
+				"url": "https://github.com/citation-file-format/citation-file-format/tree/1.2.0",
+				"versionNumber": "1.2.0",
+				"place": "GitHub",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "CFF"
+					},
+					{
+						"tag": "YAML"
+					},
+					{
+						"tag": "citation file format"
+					},
+
+					{
+						"tag": "citation files"
+					},
+					{
+						"tag": "credit"
+					},
+					{
+						"tag": "file format"
+					},
+					{
+						"tag": "research software"
+					},
+					{
+						"tag": "software citation"
+					},
+					{
+						"tag": "software sustainability"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://github.com/citation-file-format/citation-file-format/blob/1.1.0/test/pytest.ini",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": "pytest.ini",
+				"creators": [
+					{
+						"firstName": "Stephan",
+						"lastName": "Druskat",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jurriaan H.",
+						"lastName": "Spaaks",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Neil",
+						"lastName": "Chue Hong",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Robert",
+						"lastName": "Haines",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "James",
+						"lastName": "Baker",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Spencer",
+						"lastName": "Bliven",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Egon",
+						"lastName": "Willighagen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Pérez-Suárez",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Olexandr",
+						"lastName": "Konovalov",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-08",
+				"abstractNote": "CITATION.cff files are plain text files with human- and machine-readable citation information for software. Code developers can include them in their repositories to let others know how to correctly cite their software. This is the specification for the Citation File Format.",
+				"extra": "DOI: 10.5281/zenodo.5171937",
+				"libraryCatalog": "GitHub",
+				"programmingLanguage": "Python",
+				"rights": "CC-BY-4.0",
+				"url": "https://github.com/citation-file-format/citation-file-format/blob/1.1.0/test/pytest.ini",
+				"versionNumber": "1.1.0",
+				"place": "GitHub",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "CFF"
+					},
+					{
+						"tag": "YAML"
+					},
+					{
+						"tag": "citation file format"
+					},
+
+					{
+						"tag": "citation files"
+					},
+					{
+						"tag": "credit"
+					},
+					{
+						"tag": "file format"
+					},
+					{
+						"tag": "research software"
+					},
+					{
+						"tag": "software citation"
+					},
+					{
+						"tag": "software sustainability"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://github.com/pulipulichen/PTS-Local-News-Dataset/tree/20250105-0131",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "dataset",
+				"title": "PTS-Local-News-Dataset",
+				"creators": [
+					{
+						"firstName": "Yung-Ting",
+						"lastName": "Chen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025-01-04T17:28:41Z",
+				"abstractNote": "A dataset containing local news from Taiwan Public Television Service.",
+				"extra": "DOI: 10.5281/zenodo.14598063",
+				"libraryCatalog": "GitHub",
+				"DOI": "10.5281/zenodo.14598063",
+				"rights": "MIT",
+				"url": "https://github.com/pulipulichen/PTS-Local-News-Dataset",
+				"versionNumber": "20250105-0131",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "dataset"
+					},
+					{
+						"tag": "news"
+					},
+					{
+						"tag": "PTS"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
