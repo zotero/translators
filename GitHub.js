@@ -13,7 +13,7 @@
 }
 
 /**
-	Copyright (c) 2017-2021 Martin Fenner, Philipp Zumstein
+	Copyright (c) 2017-2025 Martin Fenner, Philipp Zumstein, Yung-Ting Chen
 
 	This program is free software: you can redistribute it and/or
 	modify it under the terms of the GNU Affero General Public License
@@ -35,7 +35,8 @@ const apiUrl = "https://api.github.com/";
 
 function detectWeb(doc, url) {
 	if (url.includes("/search?")) {
-		if (getSearchResults(doc, true)) {
+		var rows = doc.querySelectorAll('[data-testid="results-list"] .search-title a');
+		if (rows.length > 0) {
 			return "multiple";
 		}
 	}
@@ -46,18 +47,39 @@ function detectWeb(doc, url) {
 	}
 
 	// `og:title` is messed up when browsing a file.
-	let ogTitle = attr(doc, 'meta[property="og:url"]', 'content');
-	if (ogTitle.includes('/blob/') || url.startsWith(ogTitle + '/blob/')) {
+	let ogURL = attr(doc, 'meta[property="og:url"]', 'content');
+	if (ogURL.includes('/blob/') || url.startsWith(ogURL + '/blob/')) {
 		return "computerProgram";
 	}
 
-	if (!/^(GitHub - )?[^/\s]+\/[^/\s]+(: .*)?$/.test(attr(doc, 'meta[property="og:title"]', 'content')) && !/^(GitHub - )?[^/\s]+\/[^/\s]+( .*)?$/.test(attr(doc, 'meta[property="og:title"]', 'content'))) {
+	let ogTitle = attr(doc, 'meta[property="og:title"]', 'content');
+	let path = url.split('/').slice(3, 5).join('/');
+	let repo = url.split('/').slice(4, 5)[0];
+	if (!ogTitle.startsWith(path) && !ogTitle.startsWith(repo + '/')) {
 		// and anything without a repo name (abc/xyz) as its og:title.
 		// deals with repo pages that we can't scrape, like GitHub Discussions.
 		return false;
 	}
 
-	return "computerProgram";
+	return new Promise(function (resolve) {
+		ZU.doGet(`https://raw.githubusercontent.com/${path}/HEAD/CITATION.cff`, function (cffText, xhr) {
+			if (xhr.status !== 200) {
+				return resolve("computerProgram");
+			}
+			try {
+				let type = searchFieldValue(cffText, "type");
+				if (type && type === 'dataset') {
+					return resolve(type);
+				}
+			}
+			catch (e) {
+				console.error(`CITATION.cff format is invalid:
+
+${cffText}`);
+			}
+			return resolve("computerProgram");
+		}, null, null, { 'X-Requested-With': 'XMLHttpRequest' }, false);
+	});
 }
 
 
@@ -77,8 +99,8 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
+async function doWeb(doc, url) {
+	if (await detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return;
@@ -140,11 +162,14 @@ function scrape(doc, url) {
 	}
 
 	let latestCommitLink = attr(doc, 'link[rel="canonical"]', 'href');
-	if (!latestCommitLink) {
+	if (!latestCommitLink && url.includes('/blob/') === false) {
 		latestCommitLink = attr(doc, '[data-testid="latest-commit-html"] a', 'href');
 	}
+	if (!latestCommitLink) {
+		latestCommitLink = attr(doc, '[data-testid="breadcrumbs-repo-link"]', 'href');
+	}
 	let commitHash = false;
-	if (latestCommitLink.includes('/')) {
+	if (latestCommitLink.includes('/') && latestCommitLink.endsWith(githubRepository) === false) {
 		commitHash = latestCommitLink.split('/').pop();
 	}
 
@@ -173,7 +198,6 @@ function scrape(doc, url) {
 		if (canonical) {
 			item.url = canonical;
 		}
-
 		ZU.doGet(apiUrl + "repos/" + githubRepository + "/commits/" + commitHash, function (result) {
 			var commitData = JSON.parse(result);
 			const commitTime = commitData.commit.author.date; // ISO 8601 format
@@ -241,6 +265,7 @@ function completeWithBibTeX(item, bibtex, githubRepository, owner) {
 		let tags = [...item.tags];
 		let title = item.title;
 		let versionNumber = item.versionNumber;
+		let version = item.version;
 		let url = item.url;
 
 		Object.assign(item, bibItem);
@@ -251,35 +276,40 @@ function completeWithBibTeX(item, bibtex, githubRepository, owner) {
 		if (url.includes('/blob/')) {
 			item.title = title;
 			item.versionNumber = versionNumber;
-			item.version = versionNumber;
+			item.version = version;
 			item.url = url;
 		}
 
 		ZU.doGet(`https://raw.githubusercontent.com/${path}/HEAD/CITATION.cff`, function (cffText) {
-			let yaml = parseYAML(cffText)
-			if (!item.versionNumber && yaml.version) {
-				item.versionNumber = yaml.version;
+			let cffVersion = searchFieldValue(cffText, "version");
+			if (!item.versionNumber && cffVersion) {
+				item.versionNumber = cffVersion;
 			}
 
-			if (yaml.type && yaml.type === 'dataset') {
-				item.itemType = yaml.type;
+			let cffType = searchFieldValue(cffText, "type");
+			if (cffType && cffType === 'dataset') {
+				item.itemType = cffType;
 			}
 
-			if (yaml.abstract) {
-				item.abstractNote = yaml.abstract;
+			let cffAbstract = searchFieldValue(cffText, "abstract");
+			if (cffAbstract) {
+				item.abstractNote = cffAbstract;
 			}
 
-			if (yaml.url && item.url.includes('/blob/') === false) {
-				item.url = yaml.url;
+			let cffURL = searchFieldValue(cffText, "url");
+			if (cffURL && item.url.includes('/blob/') === false) {
+				item.url = cffURL;
 			}
 
-			if (yaml.repository) {
-				item.place = yaml.place;
+			let cffRepository = searchFieldValue(cffText, "repository");
+			if (cffRepository) {
+				item.place = cffRepository;
 			}
 
-			if (yaml.keywords.length > 0) {
+			let cffKeywords = extractKeywords(cffText);
+			if (cffKeywords && cffKeywords.length > 0) {
 				item.tags = [];
-				item.tags = item.tags.concat(yaml.keywords);
+				item.tags = item.tags.concat(cffKeywords);
 				item.tags = [...new Set(item.tags)];
 			}
 
@@ -333,38 +363,46 @@ function completeWithAPI(item, owner, githubRepository) {
 	});
 }
 
-function parseYAML(yamlText) {
-	const lines = yamlText.split('\n');
-	const result = {};
+/**
+ * Searches for the value of a specified field in YAML content.
+ *
+ * @param {string} yamlContent - The YAML content as a string.
+ * @param {string} field - The field name to search for.
+ * @returns {string|null} - The value of the field if found, or null if not found.
+ */
+function searchFieldValue(yamlContent, field) {
+	const regex = new RegExp(`^${field}:\\s*(.+)`, 'm');
+	const match = yamlContent.match(regex);
 
-	for (let line of lines) {
-		// Trim whitespace and ignore empty lines or comments
-		line = line.trim();
-		if (!line || line.startsWith('#')) {
-			continue;
-		}
-
-		// Split key and value at the first colon
-		const [key, ...valueParts] = line.split(':');
-		const value = valueParts.join(':').trim();
-
-		// Handle different value types
+	let value = null;
+	if (match) {
+		value = match[1].trim();
 		if (value.startsWith('"') && value.endsWith('"')) {
-			// Quoted string
-			result[key.trim()] = value.slice(1, -1);
-		} else if (value === 'true' || value === 'false') {
-			// Boolean
-			result[key.trim()] = value === 'true';
-		} else if (!isNaN(value)) {
-			// Number
-			result[key.trim()] = parseFloat(value);
-		} else {
-			// Unquoted string
-			result[key.trim()] = value;
+			value = value.slice(1, -1);
 		}
 	}
+	return value;
+}
 
-	return result;
+/**
+ * Extracts the keywords from YAML content.
+ *
+ * @param {string} yamlContent - The YAML content as a string.
+ * @returns {string[]|null} - An array of keywords if found, or null if not found.
+ */
+function extractKeywords(yamlContent) {
+	const regex = /keywords:\s*\n([\s\S]*?)(\n\w+:|$)/; // Matches the "keywords" field and its list
+	const match = yamlContent.match(regex);
+
+	if (match && match[1]) {
+		return match[1]
+			.split('\n')							// Split the content by lines
+			.map(keyword => keyword.trim()) // Remove extra spaces
+			.filter(keyword => keyword.startsWith('- ')) // Only include list items
+			.map(keyword => keyword.slice(2)); // Remove the "- " prefix
+	}
+
+	return null; // Return null if "keywords" not found
 }
 
 /** BEGIN TEST CASES **/
@@ -372,6 +410,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://github.com/zotero/zotero/tree/0a6095322668908f243a536a4e43911d80f76b75",
+		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -386,7 +425,7 @@ var testCases = [
 				"version": "0a6095322668908f243a536a4e43911d80f76b75",
 				"date": "2024-12-06T09:38:01Z",
 				"abstractNote": "Zotero is a free, easy-to-use tool to help you collect, organize, annotate, cite, and share your research sources.",
-				"company": "Zotero",
+				"company": "ZoteroAAA",
 				"extra": "original-date: 2011-10-27T07:46:48Z",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "JavaScript",
@@ -402,12 +441,16 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://github.com/search?utf8=%E2%9C%93&q=topic%3Ahocr&type=",
+		"url": "https://github.com/search?utf8=%E2%9C%93&q=topic%3Ahocr&type=repositories",
+		"defer": true,
+		"detectedItemType": false,
 		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "https://github.com/datacite/schema/tree/4.6.0",
+		"defer": true,
+		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -419,13 +462,13 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"date": "2024-12-05T18:31:44Z",
+				"date": "2024-12-05T18:31:38Z",
 				"abstractNote": "DataCite Metadata Schema Repository",
 				"company": "DataCite",
 				"extra": "original-date: 2011-04-13T07:08:41Z",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "Ruby",
-				"url": "https://github.com/datacite/schema/blob/4.6.0",
+				"url": "https://github.com/datacite/schema/tree/4.6.0",
 				"versionNumber": "4.6.0",
 				"place": "GitHub",
 				"attachments": [],
@@ -438,6 +481,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://github.com/datacite/schema/blob/4.6.0/.dockerignore",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -449,13 +493,13 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"date": "2016-08-23T16:42:17Z",
+				"date": "2024-12-05T18:31:38Z",
 				"abstractNote": "DataCite Metadata Schema Repository",
 				"company": "DataCite",
 				"extra": "original-date: 2011-04-13T07:08:41Z",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "Ruby",
-				"url": "https://github.com/datacite/schema/tree/4.6.0/.dockerignore",
+				"url": "https://github.com/datacite/schema/blob/4.6.0/.dockerignore",
 				"versionNumber": "4.6.0",
 				"place": "GitHub",
 				"attachments": [],
@@ -468,6 +512,8 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://github.com/mittagessen/kraken/tree/4.1.2",
+		"defer": true,
+		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -526,6 +572,8 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://github.com/aurimasv/z2csl/tree/5750900e907b6730ccd724e23444ccc79d15f3f3",
+		"defer": true,
+		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -537,7 +585,7 @@ var testCases = [
 						"creatorType": "programmer"
 					}
 				],
-				"date": "2024-12-23T20:52:59Z",
+				"date": "2022-07-14T16:14:40Z",
 				"abstractNote": "Zotero extension for creating Zotero to CSL item type and field mappings.",
 				"extra": "original-date: 2012-05-20T07:53:58Z",
 				"libraryCatalog": "GitHub",
@@ -555,6 +603,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://github.com/zotero/translators/blob/eb4f39007e62d3d632448e184b1fd3671b3a1349/GitHub.js",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -566,7 +615,7 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"date": "2021-07-29T04:53:43Z",
+				"date": "2021-07-28T21:54:41Z",
 				"versionNumber": "eb4f39007e62d3d632448e184b1fd3671b3a1349",
 				"abstractNote": "Zotero Translators",
 				"company": "Zotero",
@@ -585,6 +634,8 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://github.com/citation-file-format/citation-file-format/tree/1.2.0",
+		"defer": true,
+		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -631,13 +682,13 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Alexander",
+						"firstName": "Olexandr",
 						"lastName": "Konovalov",
 						"creatorType": "author"
 					}
 				],
 				"date": "2021-08",
-				"abstractNote": "The Citation File Format lets you provide citation metadata for software or datasets in plaintext files that are easy to read by both humans and machines.",
+				"abstractNote": "CITATION.cff files are plain text files with human- and machine-readable citation information for software. Code developers can include them in their repositories to let others know how to correctly cite their software. This is the specification for the Citation File Format.",
 				"extra": "DOI: 10.5281/zenodo.5171937",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "Python",
@@ -648,28 +699,32 @@ var testCases = [
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "attribution"
+						"tag": "CFF"
 					},
 					{
-						"tag": "citation"
+						"tag": "YAML"
 					},
 					{
-						"tag": "citation-files"
+						"tag": "citation file format"
+					},
+
+					{
+						"tag": "citation files"
 					},
 					{
 						"tag": "credit"
 					},
 					{
-						"tag": "format"
+						"tag": "file format"
 					},
 					{
-						"tag": "research-software-engineering"
+						"tag": "research software"
 					},
 					{
-						"tag": "software-sustainability"
+						"tag": "software citation"
 					},
 					{
-						"tag": "wssspe"
+						"tag": "software sustainability"
 					}
 				],
 				"notes": [],
@@ -680,6 +735,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://github.com/citation-file-format/citation-file-format/blob/1.1.0/test/pytest.ini",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -732,7 +788,7 @@ var testCases = [
 					}
 				],
 				"date": "2021-08",
-				"abstractNote": "The Citation File Format lets you provide citation metadata for software or datasets in plaintext files that are easy to read by both humans and machines.",
+				"abstractNote": "CITATION.cff files are plain text files with human- and machine-readable citation information for software. Code developers can include them in their repositories to let others know how to correctly cite their software. This is the specification for the Citation File Format.",
 				"extra": "DOI: 10.5281/zenodo.5171937",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "Python",
@@ -741,7 +797,36 @@ var testCases = [
 				"versionNumber": "1.1.0",
 				"place": "GitHub",
 				"attachments": [],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "CFF"
+					},
+					{
+						"tag": "YAML"
+					},
+					{
+						"tag": "citation file format"
+					},
+
+					{
+						"tag": "citation files"
+					},
+					{
+						"tag": "credit"
+					},
+					{
+						"tag": "file format"
+					},
+					{
+						"tag": "research software"
+					},
+					{
+						"tag": "software citation"
+					},
+					{
+						"tag": "software sustainability"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -750,6 +835,8 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://github.com/pulipulichen/PTS-Local-News-Dataset/tree/20250105-0131",
+		"defer": true,
+		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "dataset",
@@ -765,6 +852,8 @@ var testCases = [
 				"abstractNote": "A dataset containing local news from Taiwan Public Television Service.",
 				"extra": "DOI: 10.5281/zenodo.14598063",
 				"libraryCatalog": "GitHub",
+				"DOI": "10.5281/zenodo.14598063",
+				"rights": "MIT",
 				"url": "https://github.com/pulipulichen/PTS-Local-News-Dataset",
 				"versionNumber": "20250105-0131",
 				"attachments": [],
