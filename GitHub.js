@@ -61,25 +61,27 @@ async function detectWeb(doc, url) {
 		return false;
 	}
 
-	return new Promise(function (resolve) {
-		ZU.doGet(`https://raw.githubusercontent.com/${path}/HEAD/CITATION.cff`, function (cffText, xhr) {
-			if (xhr.status !== 200) {
-				return resolve("computerProgram");
-			}
-			try {
-				let type = searchFieldValue(cffText, "type");
-				if (type && type === 'dataset') {
-					return resolve(type);
-				}
-			}
-			catch (e) {
-				console.error(`CITATION.cff format is invalid:
+	return "computerProgram";
 
-${cffText}`);
-			}
-			return resolve("computerProgram");
-		}, null, null, { 'X-Requested-With': 'XMLHttpRequest' }, false);
-	});
+// 	return new Promise(function (resolve) {
+// 		ZU.doGet(`https://raw.githubusercontent.com/${path}/HEAD/CITATION.cff`, function (cffText, xhr) {
+// 			if (xhr.status !== 200) {
+// 				return resolve("computerProgram");
+// 			}
+// 			try {
+// 				let type = searchFieldValue(cffText, "type");
+// 				if (type && type === 'dataset') {
+// 					return resolve(type);
+// 				}
+// 			}
+// 			catch (e) {
+// 				console.error(`CITATION.cff format is invalid:
+
+// ${cffText}`);
+// 			}
+// 			return resolve("computerProgram");
+// 		}, null, null, { 'X-Requested-With': 'XMLHttpRequest' }, false);
+// 	});
 }
 
 
