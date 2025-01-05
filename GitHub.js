@@ -73,7 +73,9 @@ async function detectWeb(doc, url) {
 				}
 			}
 			catch (e) {
-				// do nothing
+				console.error(`CITATION.cff format is invalid:
+
+${cffText}`)
 			}
 			return resolve("computerProgram");
 		}, null, null, { 'X-Requested-With': 'XMLHttpRequest' }, false);
