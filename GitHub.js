@@ -75,7 +75,7 @@ async function detectWeb(doc, url) {
 			catch (e) {
 				console.error(`CITATION.cff format is invalid:
 
-${cffText}`)
+${cffText}`);
 			}
 			return resolve("computerProgram");
 		}, null, null, { 'X-Requested-With': 'XMLHttpRequest' }, false);
@@ -162,6 +162,9 @@ function scrape(doc, url) {
 	}
 
 	let latestCommitLink = attr(doc, 'link[rel="canonical"]', 'href');
+	if (!latestCommitLink && url.includes('/blob/') === false) {
+		latestCommitLink = attr(doc, '[data-testid="latest-commit-html"] a', 'href');
+	}
 	if (!latestCommitLink) {
 		latestCommitLink = attr(doc, '[data-testid="breadcrumbs-repo-link"]', 'href');
 	}
