@@ -439,12 +439,12 @@ var testCases = [
 			}
 		]
 	},
-	// {
-	// 	"type": "web",
-	// 	"url": "https://github.com/search?utf8=%E2%9C%93&q=topic%3Ahocr&type=repositories",
-	// 	"defer": true,
-	// 	"items": "multiple"
-	// },
+	{
+		"type": "web",
+		"url": "https://github.com/search?utf8=%E2%9C%93&q=topic%3Ahocr&type=repositories",
+		"defer": true,
+		"items": "multiple"
+	}
 	// {
 	// 	"type": "web",
 	// 	"defer": true,
