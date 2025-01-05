@@ -467,6 +467,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"url": "https://github.com/zotero/translators/pulls",
+		"items": false
+	},
+	{
+		"type": "web",
 		"url": "https://github.com/datacite/schema/tree/4.6.0",
 		"defer": true,
 		"items": [
