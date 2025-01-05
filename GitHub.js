@@ -57,6 +57,7 @@ function detectWeb(doc, url) {
 		return false;
 	}
 
+	let path = url.split('/').slice(3, 5).join('/');
 	return new Promise(function (resolve) {
 		ZU.doGet(`https://raw.githubusercontent.com/${path}/HEAD/CITATION.cff`, function (cffText, xhr) {
 			if (xhr.status !== 200) {
