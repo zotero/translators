@@ -411,6 +411,7 @@ var testCases = [
 		"type": "web",
 		"url": "https://github.com/zotero/zotero/tree/0a6095322668908f243a536a4e43911d80f76b75",
 		"defer": true,
+		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -443,12 +444,14 @@ var testCases = [
 		"type": "web",
 		"url": "https://github.com/search?utf8=%E2%9C%93&q=topic%3Ahocr&type=repositories",
 		"defer": true,
+		"detectedItemType": false,
 		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "https://github.com/datacite/schema/tree/4.6.0",
 		"defer": true,
+		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -480,6 +483,7 @@ var testCases = [
 		"type": "web",
 		"url": "https://github.com/datacite/schema/blob/4.6.0/.dockerignore",
 		"defer": true,
+		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -511,6 +515,7 @@ var testCases = [
 		"type": "web",
 		"url": "https://github.com/mittagessen/kraken/tree/4.1.2",
 		"defer": true,
+		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -570,6 +575,7 @@ var testCases = [
 		"type": "web",
 		"url": "https://github.com/aurimasv/z2csl/tree/5750900e907b6730ccd724e23444ccc79d15f3f3",
 		"defer": true,
+		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -600,6 +606,7 @@ var testCases = [
 		"type": "web",
 		"url": "https://github.com/zotero/translators/blob/eb4f39007e62d3d632448e184b1fd3671b3a1349/GitHub.js",
 		"defer": true,
+		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -631,6 +638,7 @@ var testCases = [
 		"type": "web",
 		"url": "https://github.com/citation-file-format/citation-file-format/tree/1.2.0",
 		"defer": true,
+		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -731,6 +739,7 @@ var testCases = [
 		"type": "web",
 		"url": "https://github.com/citation-file-format/citation-file-format/blob/1.1.0/test/pytest.ini",
 		"defer": true,
+		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -831,6 +840,7 @@ var testCases = [
 		"type": "web",
 		"url": "https://github.com/pulipulichen/PTS-Local-News-Dataset/tree/20250105-0131",
 		"defer": true,
+		"detectedItemType": false,
 		"items": [
 			{
 				"itemType": "dataset",
