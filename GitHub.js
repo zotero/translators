@@ -410,6 +410,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://github.com/zotero/zotero/tree/0a6095322668908f243a536a4e43911d80f76b75",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -446,6 +447,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://github.com/datacite/schema/tree/4.6.0",
 		"items": [
 			{
@@ -476,6 +478,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://github.com/datacite/schema/blob/4.6.0/.dockerignore",
 		"items": [
 			{
@@ -506,6 +509,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://github.com/mittagessen/kraken/tree/4.1.2",
 		"items": [
 			{
@@ -564,6 +568,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://github.com/aurimasv/z2csl/tree/5750900e907b6730ccd724e23444ccc79d15f3f3",
 		"items": [
 			{
@@ -593,6 +598,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://github.com/zotero/translators/blob/eb4f39007e62d3d632448e184b1fd3671b3a1349/GitHub.js",
 		"items": [
 			{
@@ -623,6 +629,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://github.com/citation-file-format/citation-file-format/tree/1.2.0",
 		"items": [
 			{
@@ -722,6 +729,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://github.com/citation-file-format/citation-file-format/blob/1.1.0/test/pytest.ini",
 		"items": [
 			{
@@ -821,6 +829,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://github.com/pulipulichen/PTS-Local-News-Dataset/tree/20250105-0131",
 		"items": [
 			{
