@@ -410,7 +410,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://github.com/zotero/zotero/tree/0a6095322668908f243a536a4e43911d80f76b75",
-		"defer": true,
 		"detectedItemType": false,
 		"items": [
 			{
@@ -426,7 +425,7 @@ var testCases = [
 				"version": "0a6095322668908f243a536a4e43911d80f76b75",
 				"date": "2024-12-06T09:38:01Z",
 				"abstractNote": "Zotero is a free, easy-to-use tool to help you collect, organize, annotate, cite, and share your research sources.",
-				"company": "Zoteroaaaaa",
+				"company": "Zotero",
 				"extra": "original-date: 2011-10-27T07:46:48Z",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "JavaScript",
