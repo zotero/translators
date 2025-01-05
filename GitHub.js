@@ -70,6 +70,9 @@ function detectWeb(doc, url) {
 	// let path = url.split('/').slice(3, 5).join('/');
 
 	let ogTitle = attr(doc, 'meta[property="og:title"]', 'content');
+	if (ogTitle.startsWith('GitHub - ')) {
+		ogTitle = ogTitle.substring(9);
+	}
 	let path = url.split('/').slice(3, 5).join('/');
 	let repo = url.split('/').slice(4, 5)[0];
 	if (!ogTitle.startsWith(path) && !ogTitle.startsWith(repo + '/')) {
