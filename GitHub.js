@@ -410,7 +410,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://github.com/zotero/zotero/tree/0a6095322668908f243a536a4e43911d80f76b75",
-		"defer": true,
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -422,7 +421,6 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"version": "0a6095322668908f243a536a4e43911d80f76b75",
 				"date": "2024-12-06T09:38:01Z",
 				"abstractNote": "Zotero is a free, easy-to-use tool to help you collect, organize, annotate, cite, and share your research sources.",
 				"company": "Zotero",
@@ -439,43 +437,42 @@ var testCases = [
 			}
 		]
 	},
-	{
-		"type": "web",
-		"url": "https://github.com/search?utf8=%E2%9C%93&q=topic%3Ahocr&type=repositories",
-		"defer": true,
-		"items": "multiple"
-	}
 	// {
 	// 	"type": "web",
+	// 	"url": "https://github.com/search?utf8=%E2%9C%93&q=topic%3Ahocr&type=repositories",
 	// 	"defer": true,
-	// 	"url": "https://github.com/datacite/schema/tree/4.6.0",
-	// 	"items": [
-	// 		{
-	// 			"itemType": "computerProgram",
-	// 			"title": "DataCite Schema Repository",
-	// 			"creators": [
-	// 				{
-	// 					"lastName": "datacite",
-	// 					"creatorType": "programmer",
-	// 					"fieldMode": 1
-	// 				}
-	// 			],
-	// 			"date": "2024-12-05T18:31:38Z",
-	// 			"abstractNote": "DataCite Metadata Schema Repository",
-	// 			"company": "DataCite",
-	// 			"extra": "original-date: 2011-04-13T07:08:41Z",
-	// 			"libraryCatalog": "GitHub",
-	// 			"programmingLanguage": "Ruby",
-	// 			"url": "https://github.com/datacite/schema/tree/4.6.0",
-	// 			"versionNumber": "4.6.0",
-	// 			"place": "GitHub",
-	// 			"attachments": [],
-	// 			"tags": [],
-	// 			"notes": [],
-	// 			"seeAlso": []
-	// 		}
-	// 	]
+	// 	"items": "multiple"
 	// },
+	{
+		"type": "web",
+		"url": "https://github.com/datacite/schema/tree/4.6.0",
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": "DataCite Schema Repository",
+				"creators": [
+					{
+						"lastName": "datacite",
+						"creatorType": "programmer",
+						"fieldMode": 1
+					}
+				],
+				"date": "2024-12-05T18:31:38Z",
+				"abstractNote": "DataCite Metadata Schema Repository",
+				"company": "DataCite",
+				"extra": "original-date: 2011-04-13T07:08:41Z",
+				"libraryCatalog": "GitHub",
+				"programmingLanguage": "Ruby",
+				"url": "https://github.com/datacite/schema/tree/4.6.0",
+				"versionNumber": "4.6.0",
+				"place": "GitHub",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
 	// {
 	// 	"type": "web",
 	// 	"defer": true,
