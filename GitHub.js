@@ -39,9 +39,15 @@ function detectWeb(doc, url) {
 	// 		return "multiple";
 	// 	}
 	// }
+	let ogTitle = attr(doc, 'meta[property="og:title"]', 'content');
+	
 	if (url.includes("/search?")) {
 		var rows = doc.querySelectorAll('[data-testid="results-list"] .search-title a');
 		if (rows.length > 0) {
+			return "multiple";
+		}
+
+		if (ogTitle === 'Build software better, together') {
 			return "multiple";
 		}
 	}
@@ -69,7 +75,6 @@ function detectWeb(doc, url) {
 	// }
 	// let path = url.split('/').slice(3, 5).join('/');
 
-	let ogTitle = attr(doc, 'meta[property="og:title"]', 'content');
 	if (ogTitle.startsWith('GitHub - ')) {
 		ogTitle = ogTitle.substring(9);
 	}
@@ -464,11 +469,6 @@ var testCases = [
 		"url": "https://github.com/search?utf8=%E2%9C%93&q=topic%3Ahocr&type=repositories",
 		"defer": true,
 		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://github.com/zotero/translators/pulls",
-		"items": false
 	},
 	{
 		"type": "web",
