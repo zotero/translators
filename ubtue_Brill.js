@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-01-07 16:28:17"
+	"lastUpdated": "2025-01-08 10:06:30"
 }
 
 /*
@@ -180,7 +180,7 @@ function postProcess(doc, item) {
 	// Additional Title
 	let additionalTitle = text(doc, '.title ~ div .typography-body ');
 	// Add optional additional subtitle
-	additionalTitle += text(doc, '.title ~ div > h5')?.replace(/^/, ": ");
+	additionalTitle += text(doc, '.title ~ div > h5').replace(/^(?=.)/, ": ");
 	if (additionalTitle)
 		item.notes.push( { note: "additional_title:" + additionalTitle });
 
