@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-10-02 14:19:55"
+	"lastUpdated": "2025-01-08 11:41:14"
 }
 
 /*
@@ -67,7 +67,7 @@ function getAuthorName(text) {
 
 function addBookReviewTag(doc, item) {
 	var primaryHeading = ZU.xpathText(doc, '//span[@class="primary-heading"]');
-	if (primaryHeading.match(/Book Review\b|Review Essays?|Reviews?\b/i)) {
+	if (primaryHeading.match(/Book Review\b|Review Essays?|Reviews?\b|Book Discussion\b/i)) {
 		item.tags.push('Book Review');
 	}
 }
@@ -100,8 +100,8 @@ function handleErroneousReviewTitles(doc, item) {
 	if (item.tags?.some(e => e == "Book Review" )) {
 		websiteTitle = ZU.xpathText(doc,'//*[@class="citation__title"]');
 		if (!websiteTitle)
-		    return;
-	    item.title = websiteTitle
+			return;
+		item.title = websiteTitle
 	}
 }
 
@@ -310,7 +310,7 @@ function scrapeBibTeX(doc, url) {
 				item.title = ZU.capitalizeTitle(item.title, true);
 			}
 
-            //subtitle
+			//subtitle
 			let citationSubtitle = ZU.xpathText(doc, '//*[@class="citation__subtitle"]');
 			if (item.title && citationSubtitle) item.title = item.title + ': ' + citationSubtitle;
 			
