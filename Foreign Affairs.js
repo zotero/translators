@@ -5,11 +5,11 @@
 	"target": "^https?://www\\.foreignaffairs\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 200,
+	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-01-08 08:08:54"
+	"lastUpdated": "2025-01-08 12:21:03"
 }
 
 /*
@@ -139,6 +139,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"url": "https://www.foreignaffairs.com/search/arkansas",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
 		"url": "https://www.foreignaffairs.com/reviews/capsule-review/2003-05-01/history-argentina-twentieth-century",
 		"items": [
 			{
@@ -146,9 +152,9 @@ var testCases = [
 				"title": "A History of Argentina in the Twentieth Century",
 				"creators": [
 					{
-						"firstName":"Kenneth",
-						"lastName":"Maxwell",
-						"creatorType":"author"
+						"firstName": "Kenneth",
+						"lastName": "Maxwell",
+						"creatorType": "author"
 					}
 				],
 				"extra": "Volume Title: May/June 2003",
@@ -471,12 +477,6 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.foreignaffairs.com/search/argentina",
-		"defer": true,
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
