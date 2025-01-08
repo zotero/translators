@@ -1,15 +1,15 @@
 {
 	"translatorID": "4ab6d49c-d94e-4a9c-ae9a-3310c44ba612",
 	"label": "Foreign Affairs",
-	"creator": "Sebastian Karcher, Philipp Zumstein",
+	"creator": "Sebastian Karcher, Philipp Zumstein, Wenzhi Dave Ding",
 	"target": "^https?://www\\.foreignaffairs\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-23 12:37:06"
+	"lastUpdated": "2025-01-08 08:08:54"
 }
 
 /*
@@ -37,7 +37,7 @@
 
 
 function detectWeb(doc, _url) {
-	if (doc.getElementsByClassName('article-body-text').length) {
+	if (doc.getElementsByClassName('article').length) {
 		return "magazineArticle";
 	}
 	else if (getSearchResults(doc, true)) {
@@ -47,19 +47,23 @@ function detectWeb(doc, _url) {
 }
 
 function getSearchResults(doc, checkOnly) {
-	let isIssues = /^https:\/\/[^/]+\/issues\/.+/.test(doc.location.href);
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('article.article-card > a, div.article-data > h2.title > a');
+
+	let isIssues = /^https:\/\/[^/]+\/issues\/.+/.test(doc.location.href);
+	let isSearch = /^https:\/\/[^/]+\/search\/.+/.test(doc.location.href);
+
+	let rows = [];
+	if (isIssues) {
+		rows = doc.querySelectorAll('h3 > a');
+	}
+	if (isSearch) {
+		rows = doc.querySelectorAll('h2 > a');
+	}
+
 	for (let row of rows) {
 		let href = row.href;
-		let title;
-		if (isIssues) {
-			title = text(row, ".article-card-title");
-		}
-		else {
-			title = ZU.trimInternal(row.textContent);
-		}
+		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -83,21 +87,20 @@ async function doWeb(doc, url) {
 
 async function scrape(doc, url = doc.location.href) {
 	var item = new Zotero.Item("magazineArticle");
-	var author = text(doc, '.article-byline-author');
-	var tags = doc.querySelectorAll('.article-footer--tag-item');
-	let issueNode = doc.querySelector(".article-header--metadata-date > a");
+
+	let issueNode = doc.querySelector(".topper__issue");
 	if (issueNode) {
 		var volumeTitle = ZU.trimInternal(issueNode.textContent.trim());
-		// the digits are yyyy/vol/num
-		let issueMatch = issueNode.href.match(/\/issues\/\d+\/(\d+)\/(\d+)$/);
+		if (volumeTitle) {
+			if (!item.extra) item.extra = "";
+			item.extra += `\nVolume Title: ${volumeTitle}`;
+		}
+
+		let issueMatch = issueNode.parentNode.href.match(/\/issues\/\d+\/(\d+)\/(\d+)$/);
 		if (issueMatch) {
 			item.volume = issueMatch[1];
 			item.issue = issueMatch[2];
 		}
-	}
-	if (volumeTitle) {
-		if (!item.extra) item.extra = "";
-		item.extra += `\nVolume Title: ${volumeTitle}`;
 	}
 
 	item.date = attr(doc, 'meta[property="article:published_time"]', 'content');
@@ -107,22 +110,24 @@ async function scrape(doc, url = doc.location.href) {
 		item.date = ZU.strToISO(item.date);
 	}
 
+	var author = doc.querySelector('.topper__byline').textContent.trim();
+	author = author.replace("Reviewed by ", "");
 	let authors = author.split(/, and|and |, /);
 	for (let aut of authors) {
 		item.creators.push(ZU.cleanAuthor(aut, "author"));
 	}
 
+	var tags = doc.querySelectorAll('.mr-15');
 	for (let tag of tags) {
 		item.tags.push(tag.textContent);
 	}
-	item.url = url;
+	item.url = url.split('?')[0];
 	item.attachments.push({ document: doc, title: "Snapshot" });
 	item.publicationTitle = "Foreign Affairs";
 	item.ISSN = "0015-7120";
 	item.language = "en-US";
 	item.complete();
 }
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -141,21 +146,21 @@ var testCases = [
 				"title": "A History of Argentina in the Twentieth Century",
 				"creators": [
 					{
-						"firstName": "Kenneth",
-						"lastName": "Maxwell",
-						"creatorType": "author"
+						"firstName":"Kenneth",
+						"lastName":"Maxwell",
+						"creatorType":"author"
 					}
 				],
+				"extra": "Volume Title: May/June 2003",
+				"volume": "82",
+				"issue": "3",
 				"date": "2003-05-01",
 				"ISSN": "0015-7120",
 				"abstractNote": "A fascinating and well-translated account of Argentina's misadventures over the last century by one of that country's brightest historians. Absorbing vast amounts of British capital and tens of thousands of European immigrants, Argentina began the century with great promise. In 1914, with half of its population still foreign, a dynamic society had emerged that was both open and mobile.",
-				"extra": "Volume Title: May/June 2003",
-				"issue": "3",
 				"language": "en-US",
 				"libraryCatalog": "Foreign Affairs",
 				"publicationTitle": "Foreign Affairs",
 				"url": "https://www.foreignaffairs.com/reviews/capsule-review/2003-05-01/history-argentina-twentieth-century",
-				"volume": "82",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -164,10 +169,13 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Argentina"
+						"tag": " Americas"
 					},
 					{
-						"tag": "Western Hemisphere"
+						"tag": " Argentina"
+					},
+					{
+						"tag": " South America"
 					}
 				],
 				"notes": [],
@@ -210,6 +218,9 @@ var testCases = [
 						"tag": "Arms Control & Disarmament"
 					},
 					{
+						"tag": "Intelligence"
+					},
+					{
 						"tag": "Defense & Military"
 					},
 					{
@@ -228,10 +239,13 @@ var testCases = [
 						"tag": "Nuclear Weapons & Proliferation"
 					},
 					{
-						"tag": "Obama Administration"
+						"tag": "Barack Obama Administration"
 					},
 					{
 						"tag": "Persian Gulf"
+					},
+					{
+						"tag": "Sanctions"
 					},
 					{
 						"tag": "Security"
@@ -303,6 +317,21 @@ var testCases = [
 						"tag": "North America"
 					},
 					{
+						"tag": "World"
+					},
+					{
+						"tag": "Globalization"
+					},
+					{
+						"tag": "Finance"
+					},
+					{
+						"tag": "Politics & Society"
+					},
+					{
+						"tag": "Inequality"
+					},
+					{
 						"tag": "United States"
 					}
 				],
@@ -347,6 +376,21 @@ var testCases = [
 					},
 					{
 						"tag": "South Asia"
+					},
+					{
+						"tag": "Politics & Society"
+					},
+					{
+						"tag": "Demography"
+					},
+					{
+						"tag": "Gender"
+					},
+					{
+						"tag": "Narendra Modi"
+					},
+					{
+						"tag": "Business"
 					}
 				],
 				"notes": [],
