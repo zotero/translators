@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-01-08 12:21:03"
+	"lastUpdated": "2025-01-10 07:28:35"
 }
 
 /*
@@ -50,14 +50,16 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 
-	let isIssues = /^https:\/\/[^/]+\/issues\/.+/.test(doc.location.href);
-	let isSearch = /^https:\/\/[^/]+\/search\/.+/.test(doc.location.href);
+	// let isIssues = /^https:\/\/[^/]+\/issues\/.+/.test(doc.location.href);
+	let isIssues = /^\/issues\/.+/.test(doc.location.pathname);
+	// let isSearch = /^https:\/\/[^/]+\/search\/.+/.test(doc.location.href);
+	let isSearch = /^\/search\/.+/.test(doc.location.pathname);
 
 	let rows = [];
 	if (isIssues) {
 		rows = doc.querySelectorAll('h3 > a');
 	}
-	if (isSearch) {
+	else if (isSearch) {
 		rows = doc.querySelectorAll('h2 > a');
 	}
 
@@ -92,8 +94,9 @@ async function scrape(doc, url = doc.location.href) {
 	if (issueNode) {
 		var volumeTitle = ZU.trimInternal(issueNode.textContent.trim());
 		if (volumeTitle) {
-			if (!item.extra) item.extra = "";
-			item.extra += `\nVolume Title: ${volumeTitle}`;
+			// if (!item.extra) item.extra = "";
+			// item.extra += `\nVolume Title: ${volumeTitle}`;
+			item.setExtra('Volume Title', volumeTitle);
 		}
 
 		let issueMatch = issueNode.parentNode.href.match(/\/issues\/\d+\/(\d+)\/(\d+)$/);
@@ -117,7 +120,12 @@ async function scrape(doc, url = doc.location.href) {
 		item.creators.push(ZU.cleanAuthor(aut, "author"));
 	}
 
-	var tags = doc.querySelectorAll('.mr-15');
+	// var tags = doc.querySelectorAll('.mr-15');
+	var tags = doc.querySelectorAll(
+		'a[href^="/regions/"].text-decoration-none, ' +
+		'a[href^="/topics/"].text-decoration-none, ' +
+		'a[href^="/tags/"].text-decoration-none'
+		);
 	for (let tag of tags) {
 		item.tags.push(tag.textContent);
 	}
