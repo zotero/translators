@@ -15,7 +15,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 	
-	Copyright © 2016-2022 Sebastian Karcher & Philipp Zumstein
+	Copyright © 2016-2025 Sebastian Karcher & Philipp Zumstein & Wenzhi Dave Ding
 	
 	This file is part of Zotero.
 	
