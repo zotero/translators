@@ -117,10 +117,10 @@ async function scrape(doc, url = doc.location.href) {
 	}
 
 	var tags = doc.querySelectorAll(
-		'a[href^="/regions/"].text-decoration-none, ' +
-		'a[href^="/topics/"].text-decoration-none, ' +
-		'a[href^="/tags/"].text-decoration-none'
-		);
+		'a[href^="/regions/"].text-decoration-none, '
+		+ 'a[href^="/topics/"].text-decoration-none, '
+		+ 'a[href^="/tags/"].text-decoration-none'
+	);
 	for (let tag of tags) {
 		item.tags.push(tag.textContent);
 	}
