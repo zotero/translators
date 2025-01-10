@@ -50,9 +50,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 
-	// let isIssues = /^https:\/\/[^/]+\/issues\/.+/.test(doc.location.href);
 	let isIssues = /^\/issues\/.+/.test(doc.location.pathname);
-	// let isSearch = /^https:\/\/[^/]+\/search\/.+/.test(doc.location.href);
 	let isSearch = /^\/search\/.+/.test(doc.location.pathname);
 
 	let rows = [];
@@ -94,8 +92,6 @@ async function scrape(doc, url = doc.location.href) {
 	if (issueNode) {
 		var volumeTitle = ZU.trimInternal(issueNode.textContent.trim());
 		if (volumeTitle) {
-			// if (!item.extra) item.extra = "";
-			// item.extra += `\nVolume Title: ${volumeTitle}`;
 			item.setExtra('Volume Title', volumeTitle);
 		}
 
@@ -120,7 +116,6 @@ async function scrape(doc, url = doc.location.href) {
 		item.creators.push(ZU.cleanAuthor(aut, "author"));
 	}
 
-	// var tags = doc.querySelectorAll('.mr-15');
 	var tags = doc.querySelectorAll(
 		'a[href^="/regions/"].text-decoration-none, ' +
 		'a[href^="/topics/"].text-decoration-none, ' +
