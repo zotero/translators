@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 8,
-	"lastUpdated": "2024-09-27 14:35:38"
+	"lastUpdated": "2025-01-11 08:07:57"
 }
 
 /*
@@ -64,6 +64,34 @@ async function doSearch(items) {
 }
 
 async function processDOI(doi) {
+	// TEMP: Use Crossref REST for Crossref DOIs during Crossref 2025-01-14 outage
+	let currentDate = new Date();
+	let startDate = new Date(Date.UTC(2025, 0, 14, 5, 0, 0)); // Jan 14, 2025, 05:00 UTC (1 hour before outage)
+	let endDate   = new Date(Date.UTC(2025, 0, 14, 13, 0, 0)); // Jan 14, 2025, 13:00 UTC (2 hours after outage)
+	
+	if (currentDate >= startDate && currentDate <= endDate) {
+		try {
+			let raJSON = await requestJSON(
+				`https://doi.org/ra/${encodeURIComponent(doi)}`
+			);
+			if (raJSON.length) {
+				let ra = raJSON[0].RA;
+				if (ra == 'Crossref') {
+					let translate = Zotero.loadTranslator('search');
+					// Crossref REST
+					translate.setTranslator("0a61e167-de9a-4f93-a68a-628b48855909");
+					let item = { itemType: "journalArticle", DOI: doi };
+					translate.setSearch(item);
+					translate.translate();
+					return;
+				}
+			}
+		}
+		catch (e) {
+			Z.debug(e);
+		}
+	}
+
 	let response = await requestText(
 		`https://doi.org/${encodeURIComponent(doi)}`,
 		{ headers: { Accept: "application/vnd.datacite.datacite+json, application/vnd.crossref.unixref+xml, application/vnd.citationstyles.csl+json" } }
