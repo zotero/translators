@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-12-20 23:42:25"
+	"lastUpdated": "2025-01-15 17:54:04"
 }
 
 /*
@@ -97,7 +97,7 @@ async function scrapeAPI(doc, url) {
 				throw new Error("Couldn't save post due to missing author data: neither display name nor handle are available");
 			}
 			if (post.author.handle !== "handle.invalid") {
-				item.setExtra("handle", post.author.handle);
+				item.setExtra("Author Handle", post.author.handle);
 			}
 			// DID is the creator's unique id in the ATProto network
 			item.setExtra("DID", post.author.did);
@@ -110,12 +110,12 @@ async function scrapeAPI(doc, url) {
 		// Handle embedded quote records (if any)
 		if (post.embed && post.embed.record && post.embed.record.value) {
 			let embeddedPost = post.embed.record.value;
-			item.notes.push(`This post is quoting a post by @${post.embed.record.author.handle}: "${embeddedPost.text}"`);
+			item.notes.push({ note: `This post is quoting a post by @${post.embed.record.author.handle}: "${embeddedPost.text}"` });
 		}
 
 		// Handle replies (if any)
 		if (data.thread.replies && data.thread.replies.length > 0) {
-			item.notes.push(`This post had ${data.thread.replies.length} direct replies when it was saved`);
+			item.notes.push({ note: `This post had ${data.thread.replies.length} direct replies when it was saved` });
 		}
 		item.attachments.push({ document: doc, title: "Snapshot" });
 		item.complete();
@@ -141,7 +141,7 @@ var testCases = [
 				],
 				"date": "2024-12-05T16:25:35.749Z",
 				"abstractNote": "My first and only job in media was as a reporter on a small newspaper in England in 2002. My salary was £8700. Per year.",
-				"extra": "handle: watershedlab.bsky.social\nDID: did:plc:ufufhaxc74cfl7fpjccykkyh\nLikes: 8\nReposts: 0\nQuotes: 0",
+				"extra": "Author Handle: watershedlab.bsky.social\nDID: did:plc:ufufhaxc74cfl7fpjccykkyh\nLikes: 8\nReposts: 0\nQuotes: 0",
 				"forumTitle": "Bluesky",
 				"postType": "Post",
 				"url": "https://bsky.app/profile/watershedlab.bsky.social/post/3lcl3glmdx226",
@@ -153,8 +153,12 @@ var testCases = [
 				],
 				"tags": [],
 				"notes": [
-					"This post is quoting a post by @ericwickham.ca: \"Told the guy replacing my car window how much I made at my first job in radio and I feel like it deeply changed what he thought about people in media.\"",
-					"This post had 1 direct replies when it was saved"
+					{
+						"note": "This post is quoting a post by @ericwickham.ca: \"Told the guy replacing my car window how much I made at my first job in radio and I feel like it deeply changed what he thought about people in media.\""
+					},
+					{
+						"note": "This post had 1 direct replies when it was saved"
+					}
 				],
 				"seeAlso": []
 			}
@@ -177,7 +181,7 @@ var testCases = [
 				],
 				"date": "2024-12-20T19:59:08.958Z",
 				"abstractNote": "💚 Site of the Day - Rain Delay Media Love that menu! ⚙️ SplitText 🛠️ Webflow site → raindelaymedia.com showcase → gsap.com/showcase",
-				"extra": "DID: did:plc:cxq4zxu7soi67juyvxml46zs\nLikes: 4\nReposts: 0\nQuotes: 0",
+				"extra": "Author Handle: gsap-greensock.bsky.social\nDID: did:plc:cxq4zxu7soi67juyvxml46zs\nLikes: 6\nReposts: 0\nQuotes: 0",
 				"forumTitle": "Bluesky",
 				"postType": "Post",
 				"url": "https://bsky.app/profile/did:plc:cxq4zxu7soi67juyvxml46zs/post/3ldr6ebdz5c24",
