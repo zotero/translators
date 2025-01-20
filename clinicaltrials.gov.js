@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-10-08 18:20:57"
+	"lastUpdated": "2025-01-10 00:42:22"
 }
 
 /*
@@ -112,7 +112,7 @@ function studiesJSONToItem(data) {
 	let investigatorName;
 	if (firstAuthor && firstAuthor.type !== "SPONSOR") { // a person
 		// Clean up the comma trailing titles such as "First Last, MD, PhD"
-		investigatorName = firstAuthor.investigatorFullName;
+		investigatorName = firstAuthor.investigatorFullName || firstAuthor.oldNameTitle;
 		let cleanName = investigatorName.split(", ")[0];
 		creators.push(ZU.cleanAuthor(cleanName, "author"));
 	}
@@ -291,6 +291,41 @@ var testCases = [
 		"url": "https://www.clinicaltrials.gov/search?term=transgender%20care",
 		"defer": true,
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://clinicaltrials.gov/study/NCT01159457",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Engerix B Versus Sci-B-Vac Immunization in a Celiac Population of Non-responders to Primary Hepatitis B Immunization Series - a Randomized Controlled Trial",
+				"creators": [
+					{
+						"firstName": "Lena",
+						"lastName": "Rachman",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Shaare Zedek Medical Center",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					}
+				],
+				"date": "2011-04-14",
+				"abstractNote": "Celiac disease and infection with hepatitis B virus (HBV) are very prevalent worldwide and carry a high morbidity rate.\nIt has been recently shown that patients with celiac disease very often fail to develop immunity after standard vaccination for HBV during infancy.\nIn this study, we will evaluate whether a second vaccination series with a different vaccine, Sci-B-Vac, results in a better immunological response in celiac patients.\nEligible patients will be randomized to receive a 3-dose vaccination series with Engerix or Sci-B-Vac vaccines.. Rate of responders and level of immunity will be compared.\nThis study will facilitate better protection of celiac patients to this potentially deadly virus.",
+				"extra": "submitted: 2010-07-08",
+				"institution": "clinicaltrials.gov",
+				"libraryCatalog": "clinicaltrials.gov",
+				"reportNumber": "NCT01159457",
+				"reportType": "Clinical trial registration",
+				"shortTitle": "Comparison of Engerix B Vaccine Versus Sci-B-Vac Vaccine in Celiac Patients",
+				"url": "https://clinicaltrials.gov/study/NCT01159457",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
