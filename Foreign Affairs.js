@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-01-10 07:28:35"
+	"lastUpdated": "2025-01-20 15:10:36"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 	
-	Copyright © 2016-2025 Sebastian Karcher & Philipp Zumstein & Wenzhi Dave Ding
+	Copyright © 2016-2022 Sebastian Karcher & Philipp Zumstein
 	
 	This file is part of Zotero.
 	
@@ -117,10 +117,10 @@ async function scrape(doc, url = doc.location.href) {
 	}
 
 	var tags = doc.querySelectorAll(
-		'a[href^="/regions/"].text-decoration-none, '
-		+ 'a[href^="/topics/"].text-decoration-none, '
-		+ 'a[href^="/tags/"].text-decoration-none'
-	);
+		'main > div > div > div > div > ul > li > a[href^="/regions/"], ' +
+		'main > div > div > div > div > ul > li > a[href^="/topics/"], ' +
+		'main > div > div > div > div > ul > li > a[href^="/tags/"]'
+		);
 	for (let tag of tags) {
 		item.tags.push(tag.textContent);
 	}
