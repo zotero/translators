@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-31 00:43:21"
+	"lastUpdated": "2025-01-22 10:38:00"
 }
 
 /*
@@ -79,7 +79,13 @@ function doWeb(doc, url) {
 	}
 }
 
+/**
+ *
+ * @param {Document} doc The page document
+ */
 function scrape(doc, _url) {
+	const schemaOrg = getSchemaOrg(doc);
+
 	let marcXMLURL = attr(doc, 'a[href$="/export/xm"], a[download$=".xml"]', 'href');
 	ZU.doGet(marcXMLURL, function (respText) {
 		var translator = Zotero.loadTranslator("import");
@@ -96,11 +102,88 @@ function scrape(doc, _url) {
 				item.url = erURL;
 			}
 			
+			if (schemaOrg) {
+				enrichItemWithSchemaOrgItemType(item, schemaOrg);
+			}
+
 			item.complete();
 		});
 		
 		translator.translate();
 	});
+}
+
+/**
+ * Enriches the Zotero item with item type found in the Schema.org data.
+ *
+ * @param {Z.Item} item The Zotero item
+ * @param {Object} schemaOrg The parsed Schema.org data
+ */
+function enrichItemWithSchemaOrgItemType(item, schemaOrg) {
+	if (!schemaOrg.hasOwnProperty("@type")) {
+		return;
+	}
+
+	const schemaOrgType = schemaOrg["@type"];
+
+	if (!schemaOrgType) {
+		return;
+	}
+
+	/**
+	 * @type {Map<string, keyof Z.ItemTypes>}
+	 */
+	const schemaOrgType2ZoteroType = new Map([
+		["Thing", "document"],
+		["CreativeWork", "document"],
+		["Article", "journalArticle"],
+		["ScholarlyArticle", "journalArticle"],
+		["Report", "report"],
+		["Thesis", "thesis"],
+		["Manuscript", "manuscript"],
+		["Dataset", "dataset"],
+	]);
+
+	if (schemaOrgType2ZoteroType.has(schemaOrgType)) {
+		item.itemType = schemaOrgType2ZoteroType.get(schemaOrgType);
+	}
+}
+
+/**
+ * Obtains the parsed Schema.org data from the page.
+ *
+ * @param {Document} doc The page document
+ * @returns {?Object} The schema.org JSON-LD object
+ */
+function getSchemaOrg(doc) {
+	const schemaOrgElement = doc.getElementById("detailed-schema-org");
+
+	if (schemaOrgElement === null) {
+		return null;
+	}
+
+	let schemaOrg;
+
+	try {
+		schemaOrg = JSON.parse(schemaOrgElement.innerHTML);
+	}
+	catch (error) {
+		return null;
+	}
+
+	if (typeof schemaOrg !== "object") {
+		return null;
+	}
+
+	if (!schemaOrg.hasOwnProperty("@context")) {
+		return null;
+	}
+
+	if (schemaOrg["@context"] !== "https://schema.org") {
+		return null;
+	}
+
+	return schemaOrg;
 }
 
 /** BEGIN TEST CASES **/
@@ -367,6 +450,38 @@ var testCases = [
 						"note": "Distributed to some depository libraries in microfiche Shipping list no.: 89-175-P \"Serial no. 93.\" Item 1020-A, 1020-B (microfiche)"
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://socialmediaarchive.org/record/60",
+		"detectedItemType": "book",
+		"items": [
+			{
+				"itemType": "dataset",
+				"title": "Not With a Bang But a Tweet: Democracy, Culture Wars, and the Memeification of T.S. Eliot",
+				"creators": [],
+				"abstractNote": "This dataset includes posts from Twitter (now X) from 2006 to early 2022 that mentioned a variation of T.S. Eliot's famous lines \"This is the way the world ends / Not with a bang but a whimper\" (see \"Design\" for specific search terms used).\n<br><br>\nModernist poet T.S. Eliot concluded his 1925 poem \"The Hollow Men\" with the iconic lines: \"This is the way the world ends / Not with a bang but a whimper.\" When Eliot died in 1965, the New York Times claimed in his obituary that these lines were “probably the most quoted lines of any 20th-century poet writing in English.” They may be among the most memed lines, as well. Through a computational analysis of Twitter data, we have found that at least 350,000 tweets have referenced or remixed Eliot’s lines since the beginning of Twitter’s history in 2006. While references to the poem vary widely, we focus on two prominent political usages of the phrase — cases where Twitter users invoke it to warn about the state of modern democracy, often from the left side of the political spectrum, and cases where they use the phrase to critique political correctness and “cancel culture” or to mock people for non-normatized aspects of their identities, often from the right side of the political spectrum. Though some of the tweets cite Eliot directly, most do not, and in many cases the phrase almost seems to be moving from an authored quotation into a common idiom or turn-of-phrase. Linguistics experts increasingly refer to this kind of construction as a “snowclone” —a fixed phrasal template, often with a culturally salient source (e.g., a quotation from a book, TV show, or movie), that has “one or more variable slots” into which users insert various “lexical substitutions\" (Hartmann and Ungerer). This data thus enables researchers to study both the circulation of literature and the evolution of linguistic forms",
+				"libraryCatalog": "Social Media Archive at ICPSR - SOMAR",
+				"shortTitle": "Not With a Bang But a Tweet",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "literature"
+					},
+					{
+						"tag": "presidential election"
+					},
+					{
+						"tag": "social media"
+					},
+					{
+						"tag": "web platform data"
+					}
+				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
