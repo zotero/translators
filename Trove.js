@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-06 04:17:30"
+	"lastUpdated": "2025-01-23 01:35:27"
 }
 
 /*
@@ -137,10 +137,8 @@ function scrapeNewspaper(doc, url) {
 		// Clean up the BibTex results and add some extra stuff.
 		translator.setHandler("itemDone", function (obj, item) {
 			item.itemType = 'newspaperArticle';
-			item.pages = item.numPages;
 			item.publicationTitle = cleanPublicationTitle(item.publicationTitle);
 			item.place = cleanPlace(item.place);
-			delete item.numPages;
 			delete item.type;
 			delete item.itemID;
 
@@ -478,15 +476,9 @@ var testCases = [
 				"date": "7 Feb 1903",
 				"abstractNote": "We have received a copy of the above which is a journal devoted chiefly to the science of meteorology. It is owned and conducted by Mr. Clement ...",
 				"libraryCatalog": "Trove",
-				"place": "Victoria",
-				"publicationTitle": "Sunbury News",
+				"pages": "4",
 				"url": "http://nla.gov.au/nla.news-article70068753",
-				"attachments": [
-					{
-						"title": "Trove newspaper PDF",
-						"mimeType": "application/pdf"
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Meteorology Journal - Clement Wragge"
@@ -494,7 +486,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "<html>\n  <head>\n    <title>07 Feb 1903 - 'WRAGGE.'</title>\n  </head>\n  <body>\n      <p>Sunbury News (Vic. : 1900 - 1927), Saturday 7 February 1903, page 4</p>\n      <hr/>\n    <div class='zone'><p>'WRAGGE' - we have received a copy of the above, which is a journal devoted chiefly to the science of meteorology. It is owned and conducted by Mr. Clement Wragge. </p></div>\n  </body>\n</html>"
+						"note": "<html>\n  <head>\n    <title>07 Feb 1903 - 'WRAGGE.'</title>\n  </head>\n  <body>\n    <div class='zone'><p>'WRAGGE' - we have received a copy of the above, which is a journal devoted chiefly to the science of meteorology. It is owned and conducted by Mr. Clement Wragge. </p></div>\n  </body>\n</html>"
 					}
 				],
 				"seeAlso": []
