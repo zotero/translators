@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-01-22 10:38:00"
+	"lastUpdated": "2025-01-23 07:55:06"
 }
 
 /*
@@ -35,13 +35,38 @@
 	***** END LICENSE BLOCK *****
 */
 
+/**
+ * @type {Map<string, keyof Z.ItemTypes>}
+ */
+const SCHEMA_ORG_TYPE_2_ZOTERO_TYPE = new Map([
+	["Thing", "document"],
+	["CreativeWork", "document"],
+	["Article", "journalArticle"],
+	["ScholarlyArticle", "journalArticle"],
+	["Report", "report"],
+	["Thesis", "thesis"],
+	["Manuscript", "manuscript"],
+	["Dataset", "dataset"],
+]);
 
+/**
+ * @param {Document} doc The page document
+ */
 function detectWeb(doc, url) {
 	if (!doc.querySelector('#tindfooter')) {
 		return false;
 	}
 	
 	if (url.includes('/record/')) {
+		const schemaOrg = getSchemaOrg(doc);
+
+		if (schemaOrg) {
+			const zoteroType = getZoteroTypeFromSchemaOrg(schemaOrg);
+
+			if (zoteroType) {
+				return zoteroType;
+			}
+		}
 		return "book";
 	}
 	else if (getSearchResults(doc, true)) {
@@ -114,38 +139,34 @@ function scrape(doc, _url) {
 }
 
 /**
+ * @param {Object} schemaOrg
+ * @returns {?keyof Z.ItemTypes}
+ */
+function getZoteroTypeFromSchemaOrg(schemaOrg) {
+	const schemaOrgType = schemaOrg["@type"];
+
+	if (!schemaOrgType) {
+		return null;
+	}
+
+	if (SCHEMA_ORG_TYPE_2_ZOTERO_TYPE.has(schemaOrgType)) {
+		return SCHEMA_ORG_TYPE_2_ZOTERO_TYPE.get(schemaOrgType);
+	}
+
+	return null;
+}
+
+/**
  * Enriches the Zotero item with item type found in the Schema.org data.
  *
  * @param {Z.Item} item The Zotero item
  * @param {Object} schemaOrg The parsed Schema.org data
  */
 function enrichItemWithSchemaOrgItemType(item, schemaOrg) {
-	if (!schemaOrg.hasOwnProperty("@type")) {
-		return;
-	}
+	const zoteroType = getZoteroTypeFromSchemaOrg(schemaOrg);
 
-	const schemaOrgType = schemaOrg["@type"];
-
-	if (!schemaOrgType) {
-		return;
-	}
-
-	/**
-	 * @type {Map<string, keyof Z.ItemTypes>}
-	 */
-	const schemaOrgType2ZoteroType = new Map([
-		["Thing", "document"],
-		["CreativeWork", "document"],
-		["Article", "journalArticle"],
-		["ScholarlyArticle", "journalArticle"],
-		["Report", "report"],
-		["Thesis", "thesis"],
-		["Manuscript", "manuscript"],
-		["Dataset", "dataset"],
-	]);
-
-	if (schemaOrgType2ZoteroType.has(schemaOrgType)) {
-		item.itemType = schemaOrgType2ZoteroType.get(schemaOrgType);
+	if (zoteroType) {
+		item.itemType = zoteroType;
 	}
 }
 
@@ -165,17 +186,13 @@ function getSchemaOrg(doc) {
 	let schemaOrg;
 
 	try {
-		schemaOrg = JSON.parse(schemaOrgElement.innerHTML);
+		schemaOrg = JSON.parse(schemaOrgElement.textContent);
 	}
 	catch (error) {
 		return null;
 	}
 
 	if (typeof schemaOrg !== "object") {
-		return null;
-	}
-
-	if (!schemaOrg.hasOwnProperty("@context")) {
 		return null;
 	}
 
@@ -457,7 +474,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://socialmediaarchive.org/record/60",
-		"detectedItemType": "book",
+		"detectedItemType": "dataset",
 		"items": [
 			{
 				"itemType": "dataset",
