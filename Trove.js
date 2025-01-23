@@ -478,7 +478,12 @@ var testCases = [
 				"libraryCatalog": "Trove",
 				"pages": "4",
 				"url": "http://nla.gov.au/nla.news-article70068753",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Trove newspaper PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [
 					{
 						"tag": "Meteorology Journal - Clement Wragge"
