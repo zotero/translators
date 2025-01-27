@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-06-13 09:41:15"
+	"lastUpdated": "2025-01-27 10:35:20"
 }
 
 /*
@@ -66,7 +66,7 @@ function splitDotSeparatedKeywords(item) {
 function assignCommaSeparatedKeywords(doc, item) {
 	let keywordLine = ZU.xpathText(doc, '//section[@class="item keywords"]//span[@class="value"]');
 	if (!keywordLine)
-	    return [];
+		return [];
 	return keywordLine.split(",").map(item => item.trim());
 }
 
@@ -246,8 +246,12 @@ function invokeUbtuePKPTranslator(doc) {
 			i.pages = firstandlastpages[0] + '-' + firstandlastpages[2]; // Z.debug(item.pages)
 		}
 		if (i.ISSN == '2413-3108' && i.pages) {
-			// Fix erroneous firstpage in embedded metadata with issue prefix
-			i.pages  = i.pages.replace(/(?:\d+\/)?(\d+-\d+)/, "$1");
+			// page information is garbled for this journal, get it from DC
+			let dc_page_information = ZU.xpathText(doc, '//meta[@name="DC.Identifier.pageNumber"]/@content');
+			if (dc_page_information?.length)
+			    i.pages = dc_page_information.split(/\s+to\s+/)
+				             .map(page_fragment => page_fragment.replace(/\d+-(\d+)/, "$1"))
+							 .join('-');
 		}
 		if (i.issue === "0") delete i.issue;
 		if (i.abstractNote && i.abstractNote.match(/No abstract available/)) delete i.abstractNote;
@@ -284,8 +288,8 @@ function invokeUbtuePKPTranslator(doc) {
 		}
 
 		i.tags = splitDotSeparatedKeywords(i);
-        if (!i.tags || !i.tags.length) {
-		    i.tags = assignCommaSeparatedKeywords(doc, i);
+		if (!i.tags || !i.tags.length) {
+			i.tags = assignCommaSeparatedKeywords(doc, i);
 		}
 
 		i.title = joinTitleAndSubtitle(doc, i);
@@ -337,10 +341,6 @@ function doWeb(doc, url) {
 		invokeUbtuePKPTranslator(doc, url);
 	}
 }
-
-
-
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
