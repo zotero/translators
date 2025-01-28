@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2023-04-19 14:30:00"
+	"lastUpdated": "2025-01-28 11:11:11"
 }
 
 /*
@@ -386,6 +386,27 @@ var testCases = [
 				"numPages": "629",
 				"place": "Göttingen",
 				"publisher": "Vandenhoeck & Ruprecht",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n<record>\n  <datafield tag=\"245\" ind1=\" \" ind2=\" \">\n    <subfield code=\"a\">Diffusion Time Metrics for Facebook Posts with 100 or More Reshares</subfield>\n  </datafield>\n  <datafield tag=\"720\" ind1=\" \" ind2=\" \">\n    <subfield code=\"a\">Meta Platforms, Inc.</subfield>\n    <subfield code=\"e\">Data Collector</subfield>\n    <subfield code=\"7\">Organizational</subfield>\n  </datafield>\n</record>\n</collection>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Diffusion Time Metrics for Facebook Posts with 100 or More Reshares",
+				"creators": [
+					{
+						"lastName": "Meta Platforms, Inc",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],

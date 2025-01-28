@@ -16,7 +16,7 @@
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2021 Abe Jellinek
-	
+
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -56,7 +56,7 @@ function detectWeb(doc, url) {
 	if (!doc.querySelector('#tindfooter')) {
 		return false;
 	}
-	
+
 	if (url.includes('/record/')) {
 		const schemaOrg = getSchemaOrg(doc);
 
@@ -117,23 +117,23 @@ function scrape(doc, _url) {
 		// MARCXML
 		translator.setTranslator("edd87d07-9194-42f8-b2ad-997c4c7deefd");
 		translator.setString(respText);
-		
+
 		translator.setHandler("itemDone", function (obj, item) {
 			item.libraryCatalog = text(doc, '#headerlogo')
 				|| attr(doc, 'meta[property="og:site_name"]', 'content');
-			
+
 			let erURL = attr(doc, '.er-link', 'href');
 			if (erURL) {
 				item.url = erURL;
 			}
-			
+
 			if (schemaOrg) {
 				enrichItemWithSchemaOrgItemType(item, schemaOrg);
 			}
 
 			item.complete();
 		});
-		
+
 		translator.translate();
 	});
 }
@@ -452,6 +452,52 @@ var testCases = [
 				"notes": [
 					{
 						"note": "Distributed to some depository libraries in microfiche Shipping list number: 89-175-P \"Serial number 93.\" Item 1020-A, 1020-B (microfiche)"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://socialmediaarchive.org/record/70?v=pdf",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Diffusion Time Metrics for Facebook Posts with 100 or More Reshares",
+				"creators": [
+					{
+						"lastName": "Meta Platforms, Inc",
+						"creatorType": "editor",
+						"fieldMode": 1
+					}
+				],
+				"abstractNote": "This dataset contains aggregated information about all content reshared 100 or more times from July 1, 2020 through February 1, 2021. Each row of the dataset corresponds to an individual tree and its size and depth at specific hours and days from initial posting",
+				"libraryCatalog": "Social Media Archive at ICPSR - SOMAR",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "United States"
+					},
+					{
+						"tag": "elections"
+					},
+					{
+						"tag": "political attitudes"
+					},
+					{
+						"tag": "political behavior"
+					},
+					{
+						"tag": "social media"
+					},
+					{
+						"tag": "web platform data"
+					}
+				],
+				"notes": [
+					{
+						"note": "The U.S. 2020 Facebook and Instagram Election Study (US 2020 FIES) is a partnership between Meta and academic researchers to understand the impact of Facebook and Instagram on key political attitudes and behaviors during the US 2020 election"
 					}
 				],
 				"seeAlso": []
