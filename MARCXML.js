@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2025-01-28 11:11:11"
+	"lastUpdated": "2025-01-29 08:45:55"
 }
 
 /*
@@ -51,51 +51,62 @@ function detectImport() {
 }
 
 
-function doImport() {
-	// call MARC translator
-	var translator = Zotero.loadTranslator("import");
+/** Reads the input XML (as an XML object) and yields Marc record objects. */
+async function* parseDocument(xml) {
+	let translator = Zotero.loadTranslator("import");
 	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
-	translator.getTranslatorObject(function (marc) {
-		var xml = Zotero.getXML();
-		// define the marc namespace
-		var ns = {
-			marc: "http://www.loc.gov/MARC21/slim"
-		};
-		var records = ZU.xpath(xml, '//marc:record', ns);
-		for (let rec of records) {
-			if (!ZU.xpath(rec, "./marc:datafield", ns).length) {
-				Zotero.debug('Skipping empty record');
-				continue;
-			}
-
-			// create one new item per record
-			var record = new marc.record();
-			var newItem = new Zotero.Item();
-			record.leader = ZU.xpathText(rec, "./marc:leader", ns);
-			var fields = ZU.xpath(rec, "./marc:datafield", ns);
-			for (let field of fields) {
-				// go through every datafield (corresponds to a MARC field)
-				var subfields = ZU.xpath(field, "./marc:subfield", ns);
-				var tag = "";
-				for (let subfield of subfields) {
-					// get the subfields and their codes...
-					var code = ZU.xpathText(subfield, "./@code", ns);
-					var sf = ZU.xpathText(subfield, "./text()", ns);
-					// delete non-sorting symbols
-					// e.g. &#152;Das&#156; Adam-Smith-Projekt
-					if (sf) {
-						sf = sf.replace(/[\x80-\x9F]/g, "");
-						// concat all subfields in one datafield, with subfield delimiter and code between them
-						tag = tag + marc.subfieldDelimiter + code + sf;
-					}
-				}
-				record.addField(ZU.xpathText(field, "./@tag", ns), ZU.xpathText(field, "./@ind1", ns) + ZU.xpathText(field, "./@ind2"), tag);
-			}
-			record.translate(newItem);
-			newItem.complete();
+	let marc = await translator.getTranslatorObject();
+	// define the marc namespace
+	let ns = {
+		marc: "http://www.loc.gov/MARC21/slim"
+	};
+	let records = ZU.xpath(xml, '//marc:record', ns);
+	for (let rec of records) {
+		if (!ZU.xpath(rec, "./marc:datafield", ns).length) {
+			Zotero.debug('Skipping empty record');
+			continue;
 		}
-	}); // get Translator end
+
+		// create one new item per record
+		let record = new marc.record();
+		record.leader = ZU.xpathText(rec, "./marc:leader", ns);
+		let fields = ZU.xpath(rec, "./marc:datafield", ns);
+		for (let field of fields) {
+			// go through every datafield (corresponds to a MARC field)
+			let subfields = ZU.xpath(field, "./marc:subfield", ns);
+			let tag = "";
+			for (let subfield of subfields) {
+				// get the subfields and their codes...
+				let code = ZU.xpathText(subfield, "./@code", ns);
+				let sf = ZU.xpathText(subfield, "./text()", ns);
+				// delete non-sorting symbols
+				// e.g. &#152;Das&#156; Adam-Smith-Projekt
+				if (sf) {
+					sf = sf.replace(/[\x80-\x9F]/g, "");
+					// concat all subfields in one datafield, with subfield delimiter and code between them
+					tag = tag + marc.subfieldDelimiter + code + sf;
+				}
+			}
+			record.addField(ZU.xpathText(field, "./@tag", ns), ZU.xpathText(field, "./@ind1", ns) + ZU.xpathText(field, "./@ind2"), tag);
+		}
+
+		yield record;
+	}
 }
+
+
+async function doImport() {
+	let xml = Zotero.getXML();
+	for await (let record of parseDocument(xml)) {
+		let newItem = new Zotero.Item();
+		record.translate(newItem);
+		newItem.complete();
+	}
+}
+
+var exports = {
+	parseDocument: parseDocument
+};
 
 /** BEGIN TEST CASES **/
 var testCases = [
