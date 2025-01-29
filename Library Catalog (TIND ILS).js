@@ -93,14 +93,14 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
@@ -108,34 +108,49 @@ function doWeb(doc, url) {
  *
  * @param {Document} doc The page document
  */
-function scrape(doc, _url) {
+async function scrape(doc, _url) {
+	// MARCXML
+	translator.setTranslator("edd87d07-9194-42f8-b2ad-997c4c7deefd");
+
 	const schemaOrg = getSchemaOrg(doc);
 
 	let marcXMLURL = attr(doc, 'a[href$="/export/xm"], a[download$=".xml"]', 'href');
-	ZU.doGet(marcXMLURL, function (respText) {
-		var translator = Zotero.loadTranslator("import");
-		// MARCXML
-		translator.setTranslator("edd87d07-9194-42f8-b2ad-997c4c7deefd");
-		translator.setString(respText);
+	let [respText, marcxml] = await Promise.all([
+		ZU.requestText(marcXMLURL),
+		translator.getTranslatorObject(),
+	]);
 
-		translator.setHandler("itemDone", function (obj, item) {
-			item.libraryCatalog = text(doc, '#headerlogo')
-				|| attr(doc, 'meta[property="og:site_name"]', 'content');
+	const xmlParser = new DOMParser();
+	const xml = xmlParser.parseFromString(respText, "text/xml")
 
-			let erURL = attr(doc, '.er-link', 'href');
-			if (erURL) {
-				item.url = erURL;
-			}
+	for await (let record of marcxml.parseDocument(xml)) {
+		let item = new Zotero.Item();
+		record.translate(item);
+		//// Enhance the item with TIND-specific information
+		// Catalog name
+		item.libraryCatalog = text(doc, '#headerlogo')
+			|| attr(doc, 'meta[property="og:site_name"]', 'content');
 
-			if (schemaOrg) {
-				enrichItemWithSchemaOrgItemType(item, schemaOrg);
-			}
+		// Url
+		let erURL = attr(doc, '.er-link', 'href');
+		if (erURL) {
+			item.url = erURL;
+		}
 
-			item.complete();
-		});
+		// Set the right item type if schemaorg exists
+		if (schemaOrg) {
+			enrichItemWithSchemaOrgItemType(item, schemaOrg);
+		}
 
-		translator.translate();
-	});
+		// Tind-specific date field 269. Assume there's only one.
+		let tindDate = record.getFieldSubfields("269")[0];
+		if (tindDate && tindDate.a && !item.hasOwnProperty("date")) {
+			// Assign the date if it doesn't already exist.
+			item.date = tindDate.a;
+		}
+
+		item.complete();
+	}
 }
 
 /**
@@ -460,7 +475,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://socialmediaarchive.org/record/70?v=pdf",
+		"url": "https://socialmediaarchive.org/record/70",
 		"items": [
 			{
 				"itemType": "book",
@@ -468,7 +483,7 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Meta Platforms, Inc",
-						"creatorType": "editor",
+						"creatorType": "contributor",
 						"fieldMode": 1
 					}
 				],
