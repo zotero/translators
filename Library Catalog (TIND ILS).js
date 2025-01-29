@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-01-25 07:50:38"
+	"lastUpdated": "2025-01-29 18:53:58"
 }
 
 /*
@@ -38,7 +38,7 @@
 /**
  * @type {Map<string, keyof Z.ItemTypes>}
  */
-const SCHEMA_ORG_TYPE_2_ZOTERO_TYPE = new Map([
+const SCHEMA_ORG_TO_ZOTERO = new Map([
 	["Thing", "document"],
 	["CreativeWork", "document"],
 	["Article", "journalArticle"],
@@ -140,17 +140,13 @@ function scrape(doc, _url) {
 
 /**
  * @param {Object} schemaOrg
- * @returns {?keyof Z.ItemTypes}
+ * @returns {keyof Z.ItemTypes | null}
  */
 function getZoteroTypeFromSchemaOrg(schemaOrg) {
 	const schemaOrgType = schemaOrg["@type"];
 
-	if (!schemaOrgType) {
-		return null;
-	}
-
-	if (SCHEMA_ORG_TYPE_2_ZOTERO_TYPE.has(schemaOrgType)) {
-		return SCHEMA_ORG_TYPE_2_ZOTERO_TYPE.get(schemaOrgType);
+	if (SCHEMA_ORG_TO_ZOTERO.has(schemaOrgType)) {
+		return SCHEMA_ORG_TO_ZOTERO.get(schemaOrgType);
 	}
 
 	return null;
@@ -177,22 +173,11 @@ function enrichItemWithSchemaOrgItemType(item, schemaOrg) {
  * @returns {?Object} The schema.org JSON-LD object
  */
 function getSchemaOrg(doc) {
-	const schemaOrgElement = doc.getElementById("detailed-schema-org");
-
-	if (schemaOrgElement === null) {
-		return null;
-	}
-
 	let schemaOrg;
-
 	try {
-		schemaOrg = JSON.parse(schemaOrgElement.textContent);
+		schemaOrg = JSON.parse(text(doc, '#detailed-schema-org'));
 	}
-	catch (error) {
-		return null;
-	}
-
-	if (typeof schemaOrg !== "object") {
+	catch (e) {
 		return null;
 	}
 
