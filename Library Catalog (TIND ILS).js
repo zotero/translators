@@ -461,7 +461,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://socialmediaarchive.org/record/60",
-		"detectedItemType": "dataset",
 		"items": [
 			{
 				"itemType": "dataset",
