@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-12-12 14:48:56"
+	"lastUpdated": "2025-01-30 15:03:34"
 }
 
 /*
@@ -75,6 +75,24 @@ async function doWeb(doc, url) {
 	}
 }
 
+function extractOrcid(doc, item) {
+	for (orcid_tag of ZU.xpath(doc, '//meta[@name="citation_author_orcid"]')){
+		let previous_author_tag = orcid_tag.previousElementSibling;
+		if (previous_author_tag.name == 'citation_author') {
+			let author_name = previous_author_tag.content;
+			let orcid = orcid_tag.content;
+			item.notes.push({note: "orcid:" + orcid + ' | ' + author_name + ' | ' + "taken from website"});
+		}
+	}
+	if (!item.notes.some(obj => obj.note.startsWith('orcid'))) {
+		for (orcid_element of ZU.xpath(doc, '//a[contains(@href, "orcid")]')) {
+			let orcid = orcid_element.href.replace(new RegExp('https?://orcid.org/'), '');
+			let author_name = orcid_element.previousSibling.textContent.trim()
+			item.notes.push({note: "orcid:" + orcid + ' | ' + author_name + ' | ' + "taken from website"});
+		}
+	}
+}
+
 async function scrape(doc, url = doc.location.href) {
 	let translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
@@ -91,14 +109,8 @@ async function scrape(doc, url = doc.location.href) {
 				item.abstractNote = "";
 			}
 		}
-		for (orcid_tag of ZU.xpath(doc, '//meta[@name="citation_author_orcid"]')){
-			let previous_author_tag = orcid_tag.previousElementSibling;
-			if (previous_author_tag.name == 'citation_author') {
-				let author_name = previous_author_tag.content;
-				let orcid = orcid_tag.content;
-				item.notes.push({note: "orcid:" + orcid + ' | ' + author_name + ' | ' + " taken from website"});
-			}
-		}
+
+		extractOrcid(doc, item);
 			
 		if (text(doc, 'span.card-title div small') == 'Reviews'){
 			item.tags.push("RezensionstagPica");
@@ -107,6 +119,7 @@ async function scrape(doc, url = doc.location.href) {
 		if (!item.pages && ZU.xpathText(doc, '//th[text()="Pages"]/following-sibling::td/text()')) item.pages = ZU.xpathText(doc, '//th[text()="Pages"]/following-sibling::td/text()');
 
 		item.complete();
+
 	});
 
 	
