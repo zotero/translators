@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2025-01-28 10:04:06"
+	"lastUpdated": "2025-02-03 08:34:57"
 }
 
 /*
@@ -342,34 +342,43 @@ record.prototype._associateTags = function (item, fieldNo, part) {
 	}
 };
 
-// this function loads a MARC record into our database
-record.prototype.translate = function (item) {
-	// get item type
-	if (this.leader) {
-		var marcType = this.leader.substr(6, 1);
-		if (marcType == "g") {
-			item.itemType = "film";
-		}
-		else if (marcType == "j" || marcType == "i") {
-			item.itemType = "audioRecording";
-		}
-		else if (marcType == "e" || marcType == "f") {
-			item.itemType = "map";
-		}
-		else if (marcType == "k") {
-			item.itemType = "artwork";
-		}
-		else if (marcType == "t" || marcType == "b") {
-			// 20091210: in unimarc, the code for manuscript is b, unused in marc21.
-			item.itemType = "manuscript";
-		}
-		else {
-			item.itemType = "book";
-		}
+function setItemType(record, item) {
+	// Get item type if it does not already exist.
+	// This is because some translators (e.g. TIND ILS) have non-MARC ways to determine item type,
+	// but the MARC translator can return incorrect results for the creators if the item type is book.
+	if (item.itemType) {
+		return;
+	}
+	if (!this.leader) {
+		item.itemType = "book";
+		return;
+	}
+
+	var marcType = record.leader.substr(6, 1);
+	if (marcType == "g") {
+		item.itemType = "film";
+	}
+	else if (marcType == "j" || marcType == "i") {
+		item.itemType = "audioRecording";
+	}
+	else if (marcType == "e" || marcType == "f") {
+		item.itemType = "map";
+	}
+	else if (marcType == "k") {
+		item.itemType = "artwork";
+	}
+	else if (marcType == "t" || marcType == "b") {
+		// 20091210: in unimarc, the code for manuscript is b, unused in marc21.
+		item.itemType = "manuscript";
 	}
 	else {
 		item.itemType = "book";
 	}
+}
+
+// this function loads a MARC record into our database
+record.prototype.translate = function (item) {
+	setItemType(record, item);
 
 	// Starting from there, we try to distinguish between unimarc and other marc flavours.
 	// In unimarc, the title is in the 200 field and this field isn't used in marc-21 (at least)

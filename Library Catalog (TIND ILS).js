@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-01-29 18:53:58"
+	"lastUpdated": "2025-02-03 08:31:38"
 }
 
 /*
@@ -109,6 +109,7 @@ async function doWeb(doc, url) {
  * @param {Document} doc The page document
  */
 async function scrape(doc, _url) {
+	let translator = Zotero.loadTranslator("import");
 	// MARCXML
 	translator.setTranslator("edd87d07-9194-42f8-b2ad-997c4c7deefd");
 
@@ -125,6 +126,12 @@ async function scrape(doc, _url) {
 
 	for await (let record of marcxml.parseDocument(xml)) {
 		let item = new Zotero.Item();
+		
+		// Set the right item type if schemaorg exists
+		if (schemaOrg) {
+			enrichItemWithSchemaOrgItemType(item, schemaOrg);
+		}
+
 		record.translate(item);
 		//// Enhance the item with TIND-specific information
 		// Catalog name
@@ -135,11 +142,6 @@ async function scrape(doc, _url) {
 		let erURL = attr(doc, '.er-link', 'href');
 		if (erURL) {
 			item.url = erURL;
-		}
-
-		// Set the right item type if schemaorg exists
-		if (schemaOrg) {
-			enrichItemWithSchemaOrgItemType(item, schemaOrg);
 		}
 
 		// Tind-specific date field 269. Assume there's only one.
@@ -390,7 +392,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://library.usi.edu/record/1416599",
+		"url": "https://library.usi.edu/record/1416599?v=pdf",
 		"items": [
 			{
 				"itemType": "thesis",
@@ -400,8 +402,24 @@ var testCases = [
 						"firstName": "Sherry",
 						"lastName": "Crawford",
 						"creatorType": "author"
+					},
+					{
+						"lastName": "Wilhelmus, Thomas A",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Sands, Helen R",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Musgrove, Laurence E",
+						"creatorType": "contributor",
+						"fieldMode": 1
 					}
 				],
+				"date": "1996",
 				"abstractNote": "No abstract",
 				"language": "eng",
 				"libraryCatalog": "University of Southern Indiana",
@@ -478,7 +496,7 @@ var testCases = [
 		"url": "https://socialmediaarchive.org/record/70",
 		"items": [
 			{
-				"itemType": "book",
+				"itemType": "dataset",
 				"title": "Diffusion Time Metrics for Facebook Posts with 100 or More Reshares",
 				"creators": [
 					{
@@ -515,7 +533,8 @@ var testCases = [
 						"note": "The U.S. 2020 Facebook and Instagram Election Study (US 2020 FIES) is a partnership between Meta and academic researchers to understand the impact of Facebook and Instagram on key political attitudes and behaviors during the US 2020 election"
 					}
 				],
-				"seeAlso": []
+				"seeAlso": [],
+         		"date": "2024-12-10"
 			}
 		]
 	},
@@ -526,7 +545,19 @@ var testCases = [
 			{
 				"itemType": "dataset",
 				"title": "Not With a Bang But a Tweet: Democracy, Culture Wars, and the Memeification of T.S. Eliot",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Walsh, Melanie",
+						"creatorType": "editor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Preus, Anna",
+						"creatorType": "editor",
+						"fieldMode": 1
+					}
+				],
+				"date": "2024-10-04",
 				"abstractNote": "This dataset includes posts from Twitter (now X) from 2006 to early 2022 that mentioned a variation of T.S. Eliot's famous lines \"This is the way the world ends / Not with a bang but a whimper\" (see \"Design\" for specific search terms used).\n<br><br>\nModernist poet T.S. Eliot concluded his 1925 poem \"The Hollow Men\" with the iconic lines: \"This is the way the world ends / Not with a bang but a whimper.\" When Eliot died in 1965, the New York Times claimed in his obituary that these lines were “probably the most quoted lines of any 20th-century poet writing in English.” They may be among the most memed lines, as well. Through a computational analysis of Twitter data, we have found that at least 350,000 tweets have referenced or remixed Eliot’s lines since the beginning of Twitter’s history in 2006. While references to the poem vary widely, we focus on two prominent political usages of the phrase — cases where Twitter users invoke it to warn about the state of modern democracy, often from the left side of the political spectrum, and cases where they use the phrase to critique political correctness and “cancel culture” or to mock people for non-normatized aspects of their identities, often from the right side of the political spectrum. Though some of the tweets cite Eliot directly, most do not, and in many cases the phrase almost seems to be moving from an authored quotation into a common idiom or turn-of-phrase. Linguistics experts increasingly refer to this kind of construction as a “snowclone” —a fixed phrasal template, often with a culturally salient source (e.g., a quotation from a book, TV show, or movie), that has “one or more variable slots” into which users insert various “lexical substitutions\" (Hartmann and Ungerer). This data thus enables researchers to study both the circulation of literature and the evolution of linguistic forms",
 				"libraryCatalog": "Social Media Archive at ICPSR - SOMAR",
 				"shortTitle": "Not With a Bang But a Tweet",
