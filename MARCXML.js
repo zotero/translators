@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2025-02-04 07:25:30"
+	"lastUpdated": "2025-02-04 07:33:45"
 }
 
 /*
@@ -160,7 +160,7 @@ var testCases = [
 					{
 						"lastName": "White House Web Team",
 						"creatorType": "editor",
-						"fieldMode": true
+						"fieldMode": 1
 					}
 				],
 				"date": "1994",
@@ -213,7 +213,7 @@ var testCases = [
 					{
 						"lastName": "Statistical Office of the European Communities",
 						"creatorType": "editor",
-						"fieldMode": true
+						"fieldMode": 1
 					}
 				],
 				"date": "2012",
@@ -228,36 +228,96 @@ var testCases = [
 				"url": "http://www.ilo.org/public/libdoc/igo/2011/468303.pdf",
 				"attachments": [],
 				"tags": [
-					"EU countries",
-					"EU pub",
-					"ageing population",
-					"calidad de la vida",
-					"cuadros estadísticos",
-					"employment opportunity",
-					"envejecimiento de la población",
-					"jubilado",
-					"older people",
-					"older worker",
-					"oportunidades de empleo",
-					"países de la UE",
-					"pays de l'UE",
-					"personas de edad avanzada",
-					"personnes âgées",
-					"possibilités d'emploi",
-					"pub UE",
-					"pub UE",
-					"qualité de la vie",
-					"quality of life",
-					"retired worker",
-					"seguridad social",
-					"sécurité sociale",
-					"social security",
-					"statistical table",
-					"tableau statistique",
-					"trabajador de edad avanzada",
-					"travailleur âgé",
-					"travailleur retraité",
-					"vieillissement de la population"
+					{
+						"tag": "EU countries"
+					},
+					{
+						"tag": "EU pub"
+					},
+					{
+						"tag": "ageing population"
+					},
+					{
+						"tag": "calidad de la vida"
+					},
+					{
+						"tag": "cuadros estadísticos"
+					},
+					{
+						"tag": "employment opportunity"
+					},
+					{
+						"tag": "envejecimiento de la población"
+					},
+					{
+						"tag": "jubilado"
+					},
+					{
+						"tag": "older people"
+					},
+					{
+						"tag": "older worker"
+					},
+					{
+						"tag": "oportunidades de empleo"
+					},
+					{
+						"tag": "países de la UE"
+					},
+					{
+						"tag": "pays de l'UE"
+					},
+					{
+						"tag": "personas de edad avanzada"
+					},
+					{
+						"tag": "personnes âgées"
+					},
+					{
+						"tag": "possibilités d'emploi"
+					},
+					{
+						"tag": "pub UE"
+					},
+					{
+						"tag": "pub UE"
+					},
+					{
+						"tag": "qualité de la vie"
+					},
+					{
+						"tag": "quality of life"
+					},
+					{
+						"tag": "retired worker"
+					},
+					{
+						"tag": "seguridad social"
+					},
+					{
+						"tag": "sécurité sociale"
+					},
+					{
+						"tag": "social security"
+					},
+					{
+						"tag": "statistical table"
+					},
+					{
+						"tag": "tableau statistique"
+					},
+					{
+						"tag": "trabajador de edad avanzada"
+					},
+					{
+						"tag": "travailleur âgé"
+					},
+					{
+						"tag": "travailleur retraité"
+					},
+					{
+						"tag": "vieillissement de la population"
+					}
 				],
 				"notes": [
 					{
@@ -416,7 +476,7 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Meta Platforms, Inc",
-						"creatorType": "contributor",
+						"creatorType": "editor",
 						"fieldMode": 1
 					}
 				],
