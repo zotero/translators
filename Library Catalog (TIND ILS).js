@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-02-03 08:31:38"
+	"lastUpdated": "2025-02-04 07:37:55"
 }
 
 /*
@@ -117,12 +117,11 @@ async function scrape(doc, _url) {
 
 	let marcXMLURL = attr(doc, 'a[href$="/export/xm"], a[download$=".xml"]', 'href');
 	let [respText, marcxml] = await Promise.all([
-		ZU.requestText(marcXMLURL),
+		requestText(marcXMLURL),
 		translator.getTranslatorObject(),
 	]);
 
-	const xmlParser = new DOMParser();
-	const xml = xmlParser.parseFromString(respText, "text/xml")
+	const xml = new DOMParser().parseFromString(respText, "text/xml")
 
 	for await (let record of marcxml.parseDocument(xml)) {
 		let item = new Zotero.Item();
@@ -534,7 +533,7 @@ var testCases = [
 					}
 				],
 				"seeAlso": [],
-         		"date": "2024-12-10"
+				"date": "2024-12-10"
 			}
 		]
 	},
