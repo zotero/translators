@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2025-01-29 08:45:55"
+	"lastUpdated": "2025-02-04 07:25:30"
 }
 
 /*
@@ -50,8 +50,10 @@ function detectImport() {
 	return false;
 }
 
-
-/** Reads the input XML (as an XML object) and yields Marc record objects. */
+/**
+ * @param {XMLDocument} xml
+ * @returns {AsyncGenerator<any>} An async generator yielding MARC record objects.
+ */
 async function* parseDocument(xml) {
 	let translator = Zotero.loadTranslator("import");
 	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
