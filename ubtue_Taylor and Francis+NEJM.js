@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-12-16 16:21:50"
+	"lastUpdated": "2025-02-05 10:28:03"
 }
 
 /*
@@ -84,7 +84,7 @@ function doWeb(doc, url) {
 
 
 function fixBibTex(text) {
-    // T & F exports erroneous BibTex with trailing curly braces in the first line
+	// T & F exports erroneous BibTex with trailing curly braces in the first line
 	text = text.replace(/^\s*[\r\n]+\s*/gm, "");
 	Z.debug(text);
 	if (text.length > 1 && text.match(/^@[^\s{]+\s*\{[^{]+\},\s*$/gm))
@@ -152,7 +152,10 @@ function scrape(doc, url) {
 					}
 					//ubtue:adding subtitle
 					let subtitle = ZU.xpathText(doc, '//*[@class="NLM_subtitle"]');
-					if (subtitle && subtitle.length) item.title += ': ' + subtitle;
+					if (!subtitle)
+					    subtitle = ZU.xpathText(doc, '//*[@class="sub-title"]');
+                    if (subtitle)
+					    item.title += ': ' + subtitle;
 					//ubtue:item.creators retrieved from ris, because bibtex is adding some unuseful "names"
 					//e.g. corporate bodies "Bill Gaventa and National Collaborative on Faith and Disability, with" https://doi.org/10.1080/23312521.2020.1743223
 					//or title like "Rev." https://www.tandfonline.com/doi/full/10.1080/23312521.2020.1738627
