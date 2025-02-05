@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2025-02-04 07:29:25"
+	"lastUpdated": "2025-02-05 08:11:17"
 }
 
 /*
@@ -533,8 +533,9 @@ record.prototype.translate = function (item) {
 				
 				if (tag == "100" || tag == "700") {
 					creatorObject = ZU.cleanAuthor(datafield.a, "author", true);
-				}
-				else {
+				} else if (tag == "720") {
+					creatorObject = ZU.cleanAuthor(datafield.a, "contributor", true);
+				} else {
 					// same replacements as in the function ZU.cleanAuthor for institutional authors:
 					datafield.a = datafield.a.replace(/^[\s\u00A0.,/[\]:]+/, '')
 						.replace(/[\s\u00A0.,/[\]:]+$/, '')
@@ -1038,9 +1039,9 @@ var testCases = [
 				"title": "Diffusion Time Metrics for Facebook Posts with 100 or More Reshares",
 				"creators": [
 					{
-						"lastName": "Meta Platforms, Inc",
-						"creatorType": "editor",
-						"fieldMode": 1
+						"firstName": "Inc",
+						"lastName": "Meta Platforms",
+						"creatorType": "editor"
 					}
 				],
 				"abstractNote": "This dataset contains aggregated information about all content reshared 100 or more times from July 1, 2020 through February 1, 2021. Each row of the dataset corresponds to an individual tree and its size and depth at specific hours and days from initial posting",
