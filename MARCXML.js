@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2025-02-04 07:33:45"
+	"lastUpdated": "2025-02-08 15:37:46"
 }
 
 /*
@@ -475,9 +475,9 @@ var testCases = [
 				"title": "Diffusion Time Metrics for Facebook Posts with 100 or More Reshares",
 				"creators": [
 					{
-						"lastName": "Meta Platforms, Inc",
-						"creatorType": "editor",
-						"fieldMode": 1
+						"firstName": "Inc",
+						"lastName": "Meta Platforms",
+						"creatorType": "editor"
 					}
 				],
 				"attachments": [],

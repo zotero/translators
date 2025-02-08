@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-02-04 07:37:55"
+	"lastUpdated": "2025-02-08 15:37:28"
 }
 
 /*
@@ -492,18 +492,19 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://socialmediaarchive.org/record/70",
+		"url": "https://socialmediaarchive.org/record/70?v=pdf",
 		"items": [
 			{
 				"itemType": "dataset",
 				"title": "Diffusion Time Metrics for Facebook Posts with 100 or More Reshares",
 				"creators": [
 					{
-						"lastName": "Meta Platforms, Inc",
-						"creatorType": "contributor",
-						"fieldMode": 1
+						"firstName": "Inc",
+						"lastName": "Meta Platforms",
+						"creatorType": "contributor"
 					}
 				],
+				"date": "2024-12-10",
 				"abstractNote": "This dataset contains aggregated information about all content reshared 100 or more times from July 1, 2020 through February 1, 2021. Each row of the dataset corresponds to an individual tree and its size and depth at specific hours and days from initial posting",
 				"libraryCatalog": "Social Media Archive at ICPSR - SOMAR",
 				"attachments": [],
@@ -532,8 +533,7 @@ var testCases = [
 						"note": "The U.S. 2020 Facebook and Instagram Election Study (US 2020 FIES) is a partnership between Meta and academic researchers to understand the impact of Facebook and Instagram on key political attitudes and behaviors during the US 2020 election"
 					}
 				],
-				"seeAlso": [],
-				"date": "2024-12-10"
+				"seeAlso": []
 			}
 		]
 	},
@@ -546,14 +546,14 @@ var testCases = [
 				"title": "Not With a Bang But a Tweet: Democracy, Culture Wars, and the Memeification of T.S. Eliot",
 				"creators": [
 					{
-						"lastName": "Walsh, Melanie",
-						"creatorType": "editor",
-						"fieldMode": 1
+						"firstName": "Melanie",
+						"lastName": "Walsh",
+						"creatorType": "contributor"
 					},
 					{
-						"lastName": "Preus, Anna",
-						"creatorType": "editor",
-						"fieldMode": 1
+						"firstName": "Anna",
+						"lastName": "Preus",
+						"creatorType": "contributor"
 					}
 				],
 				"date": "2024-10-04",
