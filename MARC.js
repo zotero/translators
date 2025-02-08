@@ -533,17 +533,19 @@ record.prototype.translate = function (item) {
 				
 				if (tag == "100" || tag == "700") {
 					creatorObject = ZU.cleanAuthor(datafield.a, "author", true);
-				} else if (tag == "720") {
+				}
+				else if (tag == "720") {
 					creatorObject = ZU.cleanAuthor(datafield.a, "contributor", true);
-				} else {
+				}
+				else {
 					// same replacements as in the function ZU.cleanAuthor for institutional authors:
 					datafield.a = datafield.a.replace(/^[\s\u00A0.,/[\]:]+/, '')
 						.replace(/[\s\u00A0.,/[\]:]+$/, '')
 						.replace(/[\s\u00A0]+/, ' ');
 					creatorObject = { lastName: datafield.a, creatorType: "contributor", fieldMode: 1 };
 				}
-				// some heuristic for the default values:
-				// in a book without any person as a main entry (no 100 field)
+				// Some heuristics for the default values:
+				// In a book without any person as a main entry (no 100 field),
 				// it is likely that all persons (in 700 fields) are editors
 				if (tag == "700" && !this.getFieldSubfields("100")[0] && item.itemType == "book") {
 					creatorObject.creatorType = "editor";
