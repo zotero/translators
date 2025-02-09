@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-02-17 03:02:30"
+	"lastUpdated": "2024-10-22 16:06:36"
 }
 
 /*
@@ -102,7 +102,7 @@ function getSearchResults(doc, checkOnly, extras) {
 	var elements = doc.getElementsByClassName('resultListContainer');
 	
 	for (let i = 0; i < elements.length; i++) {
-		if (elements[i] && elements[i].offsetHeight > 0) {
+		if (elements[i] && elements[i].childElementCount) {
 			root = elements[i];
 			break;
 		}
@@ -242,6 +242,10 @@ function doWeb(doc, url, noFollow) {
 			Zotero.debug("new Abstract view");
 			scrape(doc, url, type);
 		}
+		else if (doc.querySelector('.docViewFullCitation .display_record_indexing_row')) {
+			Zotero.debug("Full citation view");
+			scrape(doc, url, type);
+		}
 		else if (noFollow) {
 			Z.debug('Not following link again. Attempting to scrape');
 			scrape(doc, url, type);
@@ -258,33 +262,46 @@ function scrape(doc, url, type) {
 	// get all rows
 	var rows = doc.getElementsByClassName('display_record_indexing_row');
 	
-	let label, value, enLabel;
 	var dates = [], place = {}, altKeywords = [];
 
 	for (let i = 0, n = rows.length; i < n; i++) {
-		label = rows[i].childNodes[0];
-		value = rows[i].childNodes[1];
+		let labelElem = rows[i].childNodes[0];
+		let valueElem = rows[i].childNodes[1];
 		
-		if (!label || !value) continue;
+		if (!labelElem || !valueElem) continue;
 
-		label = label.textContent.trim();
-		value = value.textContent.trim();	// trimInternal?
+		let label = labelElem.textContent.trim();
+		let value = valueElem.textContent.trim();	// trimInternal?
 
 		// translate label
-		enLabel = L[label] || label;
+		let enLabel = L[label] || label;
 		let creatorType;
 		switch (enLabel) {
 			case 'Title':
 				if (value == value.toUpperCase()) value = ZU.capitalizeTitle(value, true);
 				item.title = value;
 				break;
+			case 'Collection name':
+				if (!item.title) {
+					item.title = value;
+				}
+				break;
 			case 'Author':
 			case 'Editor':	// test case?
-				creatorType = (enLabel == 'Author') ? 'author' : 'editor';
+			case 'People':
+				if (enLabel == 'Author') {
+					creatorType = 'author';
+				}
+				else if (enLabel == 'Editor') {
+					creatorType = 'editor';
+				}
+				else {
+					creatorType = 'contributor';
+				}
 				
 				// Use titles of a tags if they exist, since these don't include
 				// affiliations; don't include links to ORCID profiles
-				value = ZU.xpathText(rows[i].childNodes[1], "a[not(@id='orcidLink')]/@title", null, "; ") || value;
+				value = ZU.xpathText(valueElem, "a[not(@id='orcidLink')]/@title", null, "; ") || value;
 
 				value = value.replace(/^by\s+/i, '')	// sometimes the authors begin with "By"
 							.split(/\s*;\s*|\s+and\s+/i);
@@ -297,7 +314,7 @@ function scrape(doc, url, type) {
 				break;
 			case 'Signator':
 				if (item.itemType == 'letter') {
-					for (let signator of rows[i].childNodes[1].querySelectorAll('a')) {
+					for (let signator of valueElem.querySelectorAll('a')) {
 						let name = signator.textContent;
 						item.creators.push(
 							ZU.cleanAuthor(name, 'author', name.includes(',')));
@@ -306,7 +323,7 @@ function scrape(doc, url, type) {
 				break;
 			case 'Recipient':
 				if (item.itemType == 'letter') {
-					for (let recipient of rows[i].childNodes[1].querySelectorAll('a')) {
+					for (let recipient of valueElem.querySelectorAll('a')) {
 						let name = recipient.textContent;
 						if (/\b(department|bureau|office|director)\b/i.test(name)) {
 							// a general edge case that we handle specifically,
@@ -371,17 +388,34 @@ function scrape(doc, url, type) {
 				break;
 			case 'Publisher':
 			case 'Printer/Publisher':
-				item.publisher = value;
+				item.publisher = valueElem.innerText.split('\n')[0];
+				break;
+			case 'Repository':
+				item.archive = value;
+				break;
+			case 'Accession number/LC reference':
+				item.archiveLocation = value;
 				break;
 
 			case 'Identifier / keyword':
-				item.tags = value.split(/\s*(?:,|;)\s*/);
-				break;
-			// alternative tags
+			case 'NUCMC index term':
 			case 'Subject':
+				if (valueElem.querySelector('a')) {
+					item.tags.push(...Array.from(valueElem.querySelectorAll('a'))
+						.map(a => a.textContent.replace(/\.$/, '')));
+				}
+				else {
+					item.tags.push(...value.split(/\s*(?:,|;)\s*/));
+				}
+				break;
 			case 'Journal subject':
 			case 'Publication subject':
+				// alternative tags
 				altKeywords.push(value);
+				break;
+
+			case 'Publication note':
+				item.notes.push({ note: valueElem.innerText }); // Keep line breaks
 				break;
 
 			// we'll figure out proper location later
@@ -401,6 +435,7 @@ function scrape(doc, url, type) {
 			// more complete dates are preferred
 			case 'Date':
 			case 'Publication date':
+			case 'Degree date':
 				dates[2] = value;
 				break;
 			case 'Publication year':
@@ -430,7 +465,11 @@ function scrape(doc, url, type) {
 		}
 	}
 
-	item.url = url.replace(/\baccountid=[^&#]*&?/, '').replace(/\?(?:#|$)/, '');
+	if (!item.title) {
+		item.title = text(doc, '#documentTitle');
+	}
+
+	item.url = url.replace(/&?(accountid|parentSessionId)=[^&#]*/g, '').replace(/\?(?:#|$)/, '').replace('?&', '?');
 	if (item.itemType == "thesis" && place.schoolLocation) {
 		item.place = place.schoolLocation;
 	}
@@ -474,6 +513,10 @@ function scrape(doc, url, type) {
 	if (!item.publicationTitle
 		&& ZU.fieldIsValidForType('publicationTitle', item.itemType)) {
 		var pubTitle = ZU.xpathText(byline, './/a[@id="lateralSearch"]');
+		if (!pubTitle) {
+			pubTitle = text(doc, '#authordiv .newspaperArticle .pub-tooltip-trigger')
+				|| text(doc, '#authordiv .newspaperArticle strong');
+		}
 		// remove date range
 		if (pubTitle) item.publicationTitle = pubTitle.replace(/\s*\(.+/, '');
 	}
@@ -489,7 +532,17 @@ function scrape(doc, url, type) {
 		item.date = date;
 	}
 
-	item.abstractNote = ZU.xpath(doc, '//div[contains(@id, "abstractSummary_")]/p')
+	// Historical Newspapers: date and page are in title
+	if (item.itemType == 'newspaperArticle') {
+		let matches = item.title.match(/^(\w+ \d{1,2}, \d{4}) \(Page (\d+)/);
+		if (matches) {
+			let [, date, pageNumber] = matches;
+			item.date = ZU.strToISO(date);
+			item.pages = pageNumber;
+		}
+	}
+
+	item.abstractNote = ZU.xpath(doc, '//div[contains(@id, "abstractSummary_")]//p')
 		.map(function (p) {
 			return ZU.trimInternal(p.textContent);
 		}).join('\n');
@@ -499,7 +552,7 @@ function scrape(doc, url, type) {
 	}
 	
 	let pdfLink = doc.querySelector('[id^="downloadPDFLink"]');
-	if (pdfLink) {
+	if (pdfLink && !pdfLink.closest('#suggestedSourcesBelowFullText')) {
 		item.attachments.push({
 			title: 'Full Text PDF',
 			url: pdfLink.href,
@@ -584,6 +637,9 @@ function getItemType(types) {
 		}
 		else if (testString.includes("letter") || testString.includes("cable")) {
 			guessType = "letter";
+		}
+		else if (testString.includes("archival material")) {
+			guessType = "manuscript";
 		}
 	}
 
@@ -1303,12 +1359,11 @@ var fieldNames = {
 	}
 };
 
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://search.proquest.com/dissertations/docview/251755786/abstract/132B8A749B71E82DBA1/1",
+		"url": "https://www.proquest.com/dissertations/docview/251755786/abstract/132B8A749B71E82DBA1/1?sourcetype=Dissertations%20&%20Theses",
 		"items": [
 			{
 				"itemType": "thesis",
@@ -1330,7 +1385,7 @@ var testCases = [
 				"shortTitle": "Beyond Stanislavsky",
 				"thesisType": "Ph.D.",
 				"university": "The Ohio State University",
-				"url": "https://search.proquest.com/dissertations/docview/251755786/abstract/132B8A749B71E82DBA1/1",
+				"url": "https://www.proquest.com/dissertations/docview/251755786/abstract/132B8A749B71E82DBA1/1?sourcetype=Dissertations%20&%20Theses",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1343,9 +1398,6 @@ var testCases = [
 						"tag": "Communication and the arts"
 					},
 					{
-						"tag": "Konstantin"
-					},
-					{
 						"tag": "Konstantin Stanislavsky"
 					},
 					{
@@ -1355,7 +1407,10 @@ var testCases = [
 						"tag": "Russian"
 					},
 					{
-						"tag": "Stanislavsky"
+						"tag": "Stanislavsky, Konstantin"
+					},
+					{
+						"tag": "Theater"
 					},
 					{
 						"tag": "Theater"
@@ -1432,7 +1487,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://search.proquest.com/hnpnewyorktimes/docview/122485317/abstract/1357D8A4FC136DF28E3/11",
+		"url": "https://www.proquest.com/hnpnewyorktimes/docview/122485317/abstract/1357D8A4FC136DF28E3/11?sourcetype=Newspapers",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -1449,7 +1504,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "1984",
+				"date": "Aug 22, 1984",
 				"ISSN": "03624331",
 				"abstractNote": "For some months now, a gradual thaw has been in the making between East Germany and West Germany. So far, the United States has paid scant attention -- an attitude very much in keeping with our neglect of East Germany throughout the postwar period. We should reconsider this policy before things much further -- and should in particular begin to look more closely at what is going on in East Germany.",
 				"libraryCatalog": "ProQuest",
@@ -1457,7 +1512,7 @@ var testCases = [
 				"place": "New York, N.Y., United States",
 				"publicationTitle": "New York Times",
 				"rights": "Copyright New York Times Company Aug 22, 1984",
-				"url": "https://search.proquest.com/hnpnewyorktimes/docview/122485317/abstract/1357D8A4FC136DF28E3/11",
+				"url": "https://www.proquest.com/hnpnewyorktimes/docview/122485317/abstract/1357D8A4FC136DF28E3/11?sourcetype=Newspapers",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1477,7 +1532,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://search.proquest.com/docview/129023293/abstract",
+		"url": "https://www.proquest.com/docview/129023293/abstract?sourcetype=Historical%20Newspapers",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -1492,7 +1547,7 @@ var testCases = [
 				"publicationTitle": "Wall Street Journal (1889-1922)",
 				"rights": "Copyright Dow Jones & Company Inc Dec 5, 1905",
 				"shortTitle": "THE PRESIDENT AND ALDRICH.",
-				"url": "https://search.proquest.com/docview/129023293/abstract",
+				"url": "https://www.proquest.com/docview/129023293/abstract?sourcetype=Historical%20Newspapers",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1736,7 +1791,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://search.proquest.com/docview/1297954386/citation",
+		"url": "https://www.proquest.com/docview/1297954386/citation?sourcetype=Scholarly%20Journals",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1751,12 +1806,11 @@ var testCases = [
 				"date": "Nov 1, 1990",
 				"ISSN": "0275-0392",
 				"issue": "4",
-				"language": "English",
 				"libraryCatalog": "ProQuest",
 				"pages": "486–498",
 				"publicationTitle": "Human Rights Quarterly",
 				"shortTitle": "Women's Rights as Human Rights",
-				"url": "https://search.proquest.com/docview/1297954386/citation",
+				"url": "https://www.proquest.com/docview/1297954386/citation?sourcetype=Scholarly%20Journals",
 				"volume": "12",
 				"attachments": [
 					{
@@ -1796,6 +1850,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.proquest.com/dnsa/docview/1679056926/fulltextPDF/8C1FDDD8E506429BPQ/1",
+		"detectedItemType": "journalArticle",
 		"items": [
 			{
 				"itemType": "letter",
@@ -1849,32 +1904,47 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.proquest.com/dnsa/docview/1679145498/abstract/BA3C959768F54C93PQ/16",
+		"url": "https://www.proquest.com/dnsa/docview/1679145498/abstract/BA3C959768F54C93PQ/16?sourcetype=Government%20&%20Official%20Publications",
 		"items": [
 			{
 				"itemType": "letter",
 				"title": "[Dear Colleague Letter regarding Prosecution of Yasir Arafat; Includes Letter to Edwin Meese, List of Senators Signing Letter, and Washington Times Article Dated February 7, 1986]",
 				"creators": [
 					{
-						"firstName": "Joseph R.",
-						"lastName": "Biden",
-						"creatorType": "recipient"
+						"firstName": "Yasir",
+						"lastName": "Arafat",
+						"creatorType": "contributor"
 					},
 					{
-						"firstName": "Charles E.",
-						"lastName": "Grassley",
-						"creatorType": "author"
+						"firstName": "Edwin III",
+						"lastName": "Meese",
+						"creatorType": "contributor"
 					},
 					{
-						"firstName": "Frank R.",
-						"lastName": "Lautenberg",
+						"firstName": "George Curtis",
+						"lastName": "Moore",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Cleo A.",
+						"lastName": "Noel",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Ronald W.",
+						"lastName": "Reagan",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "United States Congress",
+						"lastName": "Senate",
 						"creatorType": "author"
 					}
 				],
 				"date": "January 24, 1986",
 				"language": "English",
 				"libraryCatalog": "ProQuest",
-				"url": "https://www.proquest.com/dnsa/docview/1679145498/abstract/BA3C959768F54C93PQ/16",
+				"url": "https://www.proquest.com/dnsa/docview/1679145498/abstract/BA3C959768F54C93PQ/16?sourcetype=Government%20&%20Official%20Publications",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1883,6 +1953,9 @@ var testCases = [
 					}
 				],
 				"tags": [
+					{
+						"tag": "Biden, Joseph R., Jr. [et al.]"
+					},
 					{
 						"tag": "Indictments"
 					},
@@ -1896,14 +1969,18 @@ var testCases = [
 						"tag": "Washington Times"
 					}
 				],
-				"notes": [],
+				"notes": [
+					{
+						"note": "Article copyrighted by the Washington Times; used by permission (previously published document)"
+					}
+				],
 				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "https://www.proquest.com/docview/2240944639/citation/DC389F101A924D14PQ/1",
+		"url": "https://www.proquest.com/docview/2240944639/citation/DC389F101A924D14PQ/1?sourcetype=Books",
 		"items": [
 			{
 				"itemType": "book",
@@ -1919,10 +1996,9 @@ var testCases = [
 				"language": "English",
 				"libraryCatalog": "ProQuest",
 				"numPages": "[30], 304 p., [3] leaves of plates :",
-				"place": "London, England",
-				"publisher": "printed by William Godbid, for William Shrowsbury, at the Bible in Duck-Lane",
+				"publisher": "Londonprinted by William Godbid, for William Shrowsbury, at the Bible in Duck-Lane",
 				"shortTitle": "Stereometrie",
-				"url": "https://www.proquest.com/docview/2240944639/citation/DC389F101A924D14PQ/1",
+				"url": "https://www.proquest.com/docview/2240944639/citation/DC389F101A924D14PQ/1?sourcetype=Books",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1932,13 +2008,19 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Gaging - Early works to 1800."
+						"tag": "Agriculture, viticulture, texts on hunting, veterinary science"
 					},
 					{
-						"tag": "Liquors - Gaging and testing - Early works to 1800."
+						"tag": "Gaging - Early works to 1800"
 					},
 					{
-						"tag": "Wine and wine making - Gaging and testing - Early works to 1800."
+						"tag": "Liquors - Gaging and testing - Early works to 1800"
+					},
+					{
+						"tag": "Science and mathematics"
+					},
+					{
+						"tag": "Wine and wine making - Gaging and testing - Early works to 1800"
 					}
 				],
 				"notes": [],
@@ -1948,7 +2030,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.proquest.com/docview/2661071397",
+		"url": "https://www.proquest.com/docview/2661071397?sourcetype=Books",
 		"items": [
 			{
 				"itemType": "book",
@@ -1959,15 +2041,101 @@ var testCases = [
 				"abstractNote": "The National Assessment of Educational Progress (NAEP) -- often called \"The Nation's Report Card\" -- is the largest nationally representative and continuing assessment of what students in public and private schools in the United States know and can do in various subjects and has provided policy makers and the public with invaluable information on U.S. students for more than 50 years. Unique in the information it provides, NAEP is the nation's only mechanism for tracking student achievement over time and comparing trends across states and districts for all students and important student groups (e.g., by race, sex, English learner status, disability status, family poverty status). While the program helps educators, policymakers, and the public understand these educational outcomes, the program has incurred substantially increased costs in recent years and now costs about $175.2 million per year. \"A Pragmatic Future for NAEP: Containing Costs and Updating Technologies\" recommends changes to bolster the future success of the program by identifying areas where federal administrators could take advantage of savings, such as new technological tools and platforms as well as efforts to use local administration and deployment for the tests. Additionally, the report recommends areas where the program should clearly communicate about spending and undertake efforts to streamline management. The report also provides recommendations to increase the visibility and coherence of NAEP's research activities. [Contributors include the Division of Behavioral and Social Sciences and Education; Committee on National Statistics; and Panel on Opportunities for the National Assessment of Educational Progress in an Age of AI and Pervasive Computation: A Pragmatic Vision.]",
 				"language": "English",
 				"libraryCatalog": "ProQuest",
-				"publisher": "National Academies Press500 Fifth Street NW, Washington, DC 20001http://www.nap.eduTel.: 888-624-8373, Fax: 202-334-2793",
+				"publisher": "National Academies Press",
 				"shortTitle": "A Pragmatic Future for NAEP",
-				"url": "https://www.proquest.com/docview/2661071397",
+				"url": "https://www.proquest.com/docview/2661071397?sourcetype=Books",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.proquest.com/archivefinder/docview/2747312572/EC990146E3B1499EPQ/1?sourcetype=Archival%20Materials",
+		"items": [
+			{
+				"itemType": "manuscript",
+				"title": "Stamp Act collection",
+				"creators": [],
+				"date": "1765-1768",
+				"abstractNote": "Two reprints (ca. 1843) of the British Stamp Act of 1765; two photocopies of stamps; transcript of a Northampton County, Va., court declaration (1766 Feb. 11) that the act was not binding; contemporary copies of three letters (1766 Feb. 28, Mar. 18, and June 13) relating to the act from English merchants to the colonies, the second letter addressed to John Hancock; and copybook containing transcriptions of letters (1765-1766) from the Court of St. James documenting the reaction of King George III and his government to the protests of American colonists to the Stamp Act. In part, photocopy (positive) and transcripts (handwritten and typewritten); [S.l.]. Typewritten Copy of Northampton County court document made with permission of Clifford I. Millard,; Washington, D.C. : Library of Congress, Manuscript Division, 1932. Forms part of: Miscellaneous Manuscripts collection.",
+				"language": "English",
+				"libraryCatalog": "ProQuest",
+				"url": "https://www.proquest.com/archivefinder/docview/2747312572/EC990146E3B1499EPQ/1?sourcetype=Archival%20Materials",
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "Elementary Secondary Education"
+						"tag": "Courts; Virginia; Northampton County"
+					},
+					{
+						"tag": "George; III,; King of Great Britain, 1738-1820"
+					},
+					{
+						"tag": "Great Britain; Colonies; America"
+					},
+					{
+						"tag": "Great Britain; Court and courtiers; History; 18th century"
+					},
+					{
+						"tag": "Great Britain; Politics and government; 1760-1789"
+					},
+					{
+						"tag": "Great Britain; Stamp Act (1765)"
+					},
+					{
+						"tag": "Hancock, John, 1737-1793; Correspondence"
+					},
+					{
+						"tag": "Merchants; England; London; History; 18th century"
+					},
+					{
+						"tag": "NUCMC (US Library Of Congress) records"
+					},
+					{
+						"tag": "Northampton County (Va.); History"
+					},
+					{
+						"tag": "United States; Politics and government; To 1775"
+					},
+					{
+						"tag": "Virginia; History; Colonial period, ca. 1600-1775"
 					}
 				],
+				"notes": [
+					{
+						"note": "Contents of repository: 38,000,000 items\n\nRepository date coverage: 17th century - present\n\nRepository materials: All areas of American history and culture. Will also accept photographic copies of collections located elsewhere but within the scope of solicitation.\n\nHoldings: The Manuscript Division's holdings, more than fifty million items in eleven thousand separate collections, include some of the greatest manuscript treasures of American history and culture and support scholarly research in many aspects of political, cultural, and scientific history."
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.proquest.com/docview/1857162562/1CFAA6FD31BB4E64PQ/5?sourcetype=Historical%20Newspapers&parentSessionId=abcxyz",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "March 25, 1958 (Page 17 of 30)",
+				"creators": [],
+				"date": "1958-03-25",
+				"language": "English",
+				"libraryCatalog": "ProQuest",
+				"pages": "17",
+				"place": "Pittsburgh, United States",
+				"publicationTitle": "Pittsburgh Post-Gazette",
+				"rights": "Copyright Pittsburgh Post Gazette Mar 25, 1958",
+				"url": "https://www.proquest.com/docview/1857162562/1CFAA6FD31BB4E64PQ/5?sourcetype=Historical%20Newspapers",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf",
+						"proxy": false
+					}
+				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}

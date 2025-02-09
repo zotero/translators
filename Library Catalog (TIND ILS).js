@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-31 00:43:21"
+	"lastUpdated": "2025-01-29 18:53:58"
 }
 
 /*
@@ -35,13 +35,38 @@
 	***** END LICENSE BLOCK *****
 */
 
+/**
+ * @type {Map<string, keyof Z.ItemTypes>}
+ */
+const SCHEMA_ORG_TO_ZOTERO = new Map([
+	["Thing", "document"],
+	["CreativeWork", "document"],
+	["Article", "journalArticle"],
+	["ScholarlyArticle", "journalArticle"],
+	["Report", "report"],
+	["Thesis", "thesis"],
+	["Manuscript", "manuscript"],
+	["Dataset", "dataset"],
+]);
 
+/**
+ * @param {Document} doc The page document
+ */
 function detectWeb(doc, url) {
 	if (!doc.querySelector('#tindfooter')) {
 		return false;
 	}
 	
 	if (url.includes('/record/')) {
+		const schemaOrg = getSchemaOrg(doc);
+
+		if (schemaOrg) {
+			const zoteroType = getZoteroTypeFromSchemaOrg(schemaOrg);
+
+			if (zoteroType) {
+				return zoteroType;
+			}
+		}
 		return "book";
 	}
 	else if (getSearchResults(doc, true)) {
@@ -79,7 +104,13 @@ function doWeb(doc, url) {
 	}
 }
 
+/**
+ *
+ * @param {Document} doc The page document
+ */
 function scrape(doc, _url) {
+	const schemaOrg = getSchemaOrg(doc);
+
 	let marcXMLURL = attr(doc, 'a[href$="/export/xm"], a[download$=".xml"]', 'href');
 	ZU.doGet(marcXMLURL, function (respText) {
 		var translator = Zotero.loadTranslator("import");
@@ -96,6 +127,10 @@ function scrape(doc, _url) {
 				item.url = erURL;
 			}
 			
+			if (schemaOrg) {
+				enrichItemWithSchemaOrgItemType(item, schemaOrg);
+			}
+
 			item.complete();
 		});
 		
@@ -103,52 +138,114 @@ function scrape(doc, _url) {
 	});
 }
 
+/**
+ * @param {Object} schemaOrg
+ * @returns {keyof Z.ItemTypes | null}
+ */
+function getZoteroTypeFromSchemaOrg(schemaOrg) {
+	const schemaOrgType = schemaOrg["@type"];
+
+	if (SCHEMA_ORG_TO_ZOTERO.has(schemaOrgType)) {
+		return SCHEMA_ORG_TO_ZOTERO.get(schemaOrgType);
+	}
+
+	return null;
+}
+
+/**
+ * Enriches the Zotero item with item type found in the Schema.org data.
+ *
+ * @param {Z.Item} item The Zotero item
+ * @param {Object} schemaOrg The parsed Schema.org data
+ */
+function enrichItemWithSchemaOrgItemType(item, schemaOrg) {
+	const zoteroType = getZoteroTypeFromSchemaOrg(schemaOrg);
+
+	if (zoteroType) {
+		item.itemType = zoteroType;
+	}
+}
+
+/**
+ * Obtains the parsed Schema.org data from the page.
+ *
+ * @param {Document} doc The page document
+ * @returns {?Object} The schema.org JSON-LD object
+ */
+function getSchemaOrg(doc) {
+	let schemaOrg;
+	try {
+		schemaOrg = JSON.parse(text(doc, '#detailed-schema-org'));
+	}
+	catch (e) {
+		return null;
+	}
+
+	if (schemaOrg["@context"] !== "https://schema.org") {
+		return null;
+	}
+
+	return schemaOrg;
+}
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://caltech.tind.io/record/483199?ln=en",
+		"url": "https://lawcat.berkeley.edu/record/1234692",
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Handbook of the engineering sciences",
+				"title": "International maritime dictionary: an encyclopedic dictionary of useful maritime terms and phrases: together with equivalents in French and German",
 				"creators": [
 					{
-						"firstName": "James Harry",
-						"lastName": "Potter",
+						"firstName": "René de",
+						"lastName": "Kerchove",
 						"creatorType": "author"
 					}
 				],
-				"date": "1967",
-				"callNumber": "TA151 .P79",
-				"libraryCatalog": "Caltech Library Catalog",
-				"numPages": "2",
+				"date": "1961",
+				"callNumber": "K4150 .K47 1961",
+				"edition": "2nd ed",
+				"extra": "OCLC: 8350214",
+				"language": "eng fre ger",
+				"libraryCatalog": "Berkeley Law",
+				"numPages": "1018",
 				"place": "Princeton, N.J",
-				"publisher": "Van Nostrand",
+				"publisher": "D. Van Nostrand Co",
+				"shortTitle": "International maritime dictionary",
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "Engineering"
+						"tag": "Dictionaries"
 					},
 					{
-						"tag": "Handbooks, manuals, etc"
-					}
-				],
-				"notes": [
-					{
-						"note": "Housner Earthquake Engineering Collection"
+						"tag": "Dictionaries"
 					},
 					{
-						"note": "v.1. The basic sciences.--v.2. The applied sciences"
+						"tag": "Dictionaries"
+					},
+					{
+						"tag": "Dictionaries, Polyglot"
+					},
+					{
+						"tag": "Naval art and science"
+					},
+					{
+						"tag": "Naval art and science"
+					},
+					{
+						"tag": "Polyglot"
 					}
 				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "https://caltech.tind.io/record/688072?ln=en",
+		"url": "https://library.usi.edu/record/312809",
 		"items": [
 			{
 				"itemType": "book",
@@ -161,26 +258,30 @@ var testCases = [
 					},
 					{
 						"firstName": "Mary",
-						"lastName": "GrandPré",
+						"lastName": "GrandPré",
 						"creatorType": "author"
 					}
 				],
 				"date": "2007",
 				"ISBN": "9780545010221",
 				"abstractNote": "Burdened with the dark, dangerous, and seemingly impossible task of locating and destroying Voldemort's remaining Horcruxes, Harry, feeling alone and uncertain about his future, struggles to find the inner strength he needs to follow the path set out before him",
-				"callNumber": "PR6068.O94 H377 2007",
+				"callNumber": "PZ7.R79835 Hak 2007",
 				"edition": "1st ed",
-				"libraryCatalog": "Caltech Library Catalog",
+				"extra": "OCLC: ocm85443494",
+				"libraryCatalog": "University of Southern Indiana",
 				"numPages": "759",
-				"place": "New York, NY",
+				"place": "New York",
 				"publisher": "Arthur A. Levine Books",
 				"attachments": [],
 				"tags": [
 					{
+						"tag": "Bildungsromans"
+					},
+					{
 						"tag": "England"
 					},
 					{
-						"tag": "Hogwarts School of Witchcraft and Wizardry (Imaginary place)"
+						"tag": "Hogwarts School of Witchcraft and Wizardry (Imaginary organization)"
 					},
 					{
 						"tag": "Juvenile fiction"
@@ -204,7 +305,7 @@ var testCases = [
 						"tag": "Magic"
 					},
 					{
-						"tag": "Potter, Harry"
+						"tag": "Potter, Harry (Fictitious character)"
 					},
 					{
 						"tag": "Schools"
@@ -215,10 +316,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "\"Year 7\"--Spine Sequel to: Harry Potter and the Half-Blood Prince"
-					},
-					{
-						"note": "The Dark Lord ascending -- In memoriam -- The Dursleys departing -- The seven Potters -- Fallen warrior -- The ghoul in pajamas -- The will of Albus Dumbledore -- The wedding -- A place to hide -- Kreacher's tale -- The bribe -- Magic is might -- The Muggle-born Registration Commission -- The thief -- The goblin's revenge -- Godric's Hollow -- Bathilda's secret -- The life and lies of Albus Dumbledore -- The silver doe -- Xenophilius Lovegood -- The tale of the three brothers -- The Deathly Hallows -- Malfoy Manor -- The wandmaker -- Shell Cottage -- Gringotts -- The final hiding place -- The missing mirror -- The lost diadem -- The sacking of Severus Snape -- The Battle of Hogwarts -- The Elder Wand -- The prince's tale -- The forest again -- King's Cross -- The flaw in the plan"
+						"note": "Sequel to: Harry Potter and the Half-Blood Prince"
 					}
 				],
 				"seeAlso": []
@@ -227,85 +325,48 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://caltech.tind.io/record/578424?ln=en",
-		"items": [
-			{
-				"itemType": "thesis",
-				"title": "Vibration tests of a multistory building",
-				"creators": [
-					{
-						"firstName": "Julio Horiuch",
-						"lastName": "Kuroiwa",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "California Institute of Technology",
-						"creatorType": "contributor",
-						"fieldMode": true
-					}
-				],
-				"date": "1967",
-				"callNumber": "THESIS",
-				"libraryCatalog": "Caltech Library Catalog",
-				"numPages": "113",
-				"place": "Pasadena, Calif",
-				"university": "California Institute of Technology",
-				"attachments": [],
-				"tags": [],
-				"notes": [
-					{
-						"note": "Housner Earthquake Engineering Collection"
-					},
-					{
-						"note": "Thesis (Engineer) -- California Institute of Technology, 1967"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://caltech.tind.io/record/666881?ln=en",
+		"url": "https://lawcat.berkeley.edu/record/1301185",
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Asymptotically optimal multistage hypothesis tests",
+				"title": "Constitution of the United States of Brazil, 1946 (as amended)",
 				"creators": [
 					{
-						"firstName": "Jay L.",
-						"lastName": "Bartroff",
-						"creatorType": "author"
+						"lastName": "Brazil",
+						"creatorType": "editor",
+						"fieldMode": 1
 					},
 					{
-						"firstName": "Gary",
-						"lastName": "Lorden",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "California Institute of Technology",
-						"creatorType": "contributor",
-						"fieldMode": true
+						"lastName": "Pan American Union",
+						"creatorType": "editor",
+						"fieldMode": 1
 					}
 				],
-				"date": "2004",
-				"callNumber": "THESIS",
-				"libraryCatalog": "Caltech Library Catalog",
-				"numPages": "181",
-				"place": "Pasadena, Calif",
-				"publisher": "California Institute of Technology",
-				"series": "CIT theses",
-				"seriesNumber": "2004",
-				"url": "http://resolver.caltech.edu/CaltechETD:etd-05202004-133633",
+				"date": "1963",
+				"callNumber": "KHD2914 1946 .A6 1963",
+				"libraryCatalog": "Berkeley Law",
+				"numPages": "1",
+				"place": "Washington, D.C",
+				"publisher": "Pan American Union",
+				"url": "https://libproxy.berkeley.edu/login?qurl=https%3A%2F%2Fwww.llmc.com%2FsearchResultVolumes2.aspx%3Fext%3Dtrue%26catalogSet%3D62858",
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "Electronic dissertations"
+						"tag": "Brazil"
+					},
+					{
+						"tag": "Brazil"
+					},
+					{
+						"tag": "Constitutional law"
+					},
+					{
+						"tag": "Constitutions"
 					}
 				],
 				"notes": [
 					{
-						"note": "Thesis (Ph. D.) PQ #3151340"
+						"note": "\"Published under the direction of the General Legal Division, Department of Legal Affairs, Pan American Union.\" Title page verso"
 					}
 				],
 				"seeAlso": []
@@ -314,12 +375,37 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://caltech.tind.io/search?ln=en&rm=&ln=en&sf=&so=d&rg=25&c=Caltech&of=hb&fct__4=Thesis&fct__4=Thesis&fct__4=Remote%20access&p=test",
+		"url": "https://library.usi.edu/record/1416599",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "Let's talk: a common-sense approach to public speaking",
+				"creators": [
+					{
+						"firstName": "Sherry",
+						"lastName": "Crawford",
+						"creatorType": "author"
+					}
+				],
+				"abstractNote": "No abstract",
+				"language": "eng",
+				"libraryCatalog": "University of Southern Indiana",
+				"shortTitle": "Let's talk",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://library.usi.edu/search?p=test AND 336%3AThesis&fct__3=2017",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "https://pegasus.law.columbia.edu/record/511151?ln=en",
+		"url": "https://pegasus.law.columbia.edu/record/511151",
 		"items": [
 			{
 				"itemType": "book",
@@ -328,15 +414,16 @@ var testCases = [
 					{
 						"lastName": "United States",
 						"creatorType": "editor",
-						"fieldMode": true
+						"fieldMode": 1
 					}
 				],
 				"date": "1989",
 				"callNumber": "KF27 .J847 1987e",
+				"extra": "OCLC: 19420020",
 				"libraryCatalog": "CLS Pegasus Library Catalog",
 				"numPages": "305",
 				"place": "Washington",
-				"publisher": "U.S. G.P.O. : For sale by the Supt. of Docs., Congressional Sales Office, U.S. G.P.O",
+				"publisher": "U.S. G.P.O",
 				"shortTitle": "Sex and race differences on standardized tests",
 				"attachments": [],
 				"tags": [
@@ -364,9 +451,40 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "Distributed to some depository libraries in microfiche Shipping list no.: 89-175-P \"Serial no. 93.\" Item 1020-A, 1020-B (microfiche)"
+						"note": "Distributed to some depository libraries in microfiche Shipping list number: 89-175-P \"Serial number 93.\" Item 1020-A, 1020-B (microfiche)"
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://socialmediaarchive.org/record/60",
+		"items": [
+			{
+				"itemType": "dataset",
+				"title": "Not With a Bang But a Tweet: Democracy, Culture Wars, and the Memeification of T.S. Eliot",
+				"creators": [],
+				"abstractNote": "This dataset includes posts from Twitter (now X) from 2006 to early 2022 that mentioned a variation of T.S. Eliot's famous lines \"This is the way the world ends / Not with a bang but a whimper\" (see \"Design\" for specific search terms used).\n<br><br>\nModernist poet T.S. Eliot concluded his 1925 poem \"The Hollow Men\" with the iconic lines: \"This is the way the world ends / Not with a bang but a whimper.\" When Eliot died in 1965, the New York Times claimed in his obituary that these lines were “probably the most quoted lines of any 20th-century poet writing in English.” They may be among the most memed lines, as well. Through a computational analysis of Twitter data, we have found that at least 350,000 tweets have referenced or remixed Eliot’s lines since the beginning of Twitter’s history in 2006. While references to the poem vary widely, we focus on two prominent political usages of the phrase — cases where Twitter users invoke it to warn about the state of modern democracy, often from the left side of the political spectrum, and cases where they use the phrase to critique political correctness and “cancel culture” or to mock people for non-normatized aspects of their identities, often from the right side of the political spectrum. Though some of the tweets cite Eliot directly, most do not, and in many cases the phrase almost seems to be moving from an authored quotation into a common idiom or turn-of-phrase. Linguistics experts increasingly refer to this kind of construction as a “snowclone” —a fixed phrasal template, often with a culturally salient source (e.g., a quotation from a book, TV show, or movie), that has “one or more variable slots” into which users insert various “lexical substitutions\" (Hartmann and Ungerer). This data thus enables researchers to study both the circulation of literature and the evolution of linguistic forms",
+				"libraryCatalog": "Social Media Archive at ICPSR - SOMAR",
+				"shortTitle": "Not With a Bang But a Tweet",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "literature"
+					},
+					{
+						"tag": "presidential election"
+					},
+					{
+						"tag": "social media"
+					},
+					{
+						"tag": "web platform data"
+					}
+				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]

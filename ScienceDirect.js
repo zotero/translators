@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-31 19:11:09"
+	"lastUpdated": "2024-10-03 14:17:12"
 }
 
 function detectWeb(doc, url) {
@@ -64,12 +64,11 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-function getPDFLink(doc, onDone) {
+async function getPDFLink(doc) {
 	// No PDF access ("Get Full Text Elsewhere" or "Check for this article elsewhere")
 	if (doc.querySelector('.accessContent') || doc.querySelector('.access-options-link-text') || doc.querySelector('#check-access-popover')) {
 		Zotero.debug("PDF is not available");
-		onDone();
-		return;
+		return false;
 	}
 	
 	// Some pages still have the PDF link available
@@ -77,8 +76,7 @@ function getPDFLink(doc, onDone) {
 	if (!pdfURL) pdfURL = attr(doc, '[name="citation_pdf_url"]', 'content');
 	if (pdfURL && pdfURL != '#') {
 		Z.debug('Found intermediate URL in head: ' + pdfURL);
-		parseIntermediatePDFPage(pdfURL, onDone);
-		return;
+		return parseIntermediatePDFPage(pdfURL);
 	}
 	
 	// If intermediate page URL is available, use that directly
@@ -86,12 +84,11 @@ function getPDFLink(doc, onDone) {
 	if (intermediateURL) {
 		Zotero.debug("Found embedded PDF URL: " + intermediateURL);
 		if (/[?&]isDTMRedir=(Y|true)/i.test(intermediateURL)) {
-			onDone(intermediateURL);
+			return intermediateURL;
 		}
 		else {
-			parseIntermediatePDFPage(intermediateURL, onDone);
+			return parseIntermediatePDFPage(intermediateURL);
 		}
-		return;
 	}
 	
 	// Simulate a click on the "Download PDF" button to open the menu containing the link with the URL
@@ -114,8 +111,7 @@ function getPDFLink(doc, onDone) {
 		}
 		if (intermediateURL) {
 			// Zotero.debug("Intermediate PDF URL from drop-down: " + intermediateURL);
-			parseIntermediatePDFPage(intermediateURL, onDone);
-			return;
+			return parseIntermediatePDFPage(intermediateURL);
 		}
 	}
 	
@@ -138,10 +134,9 @@ function getPDFLink(doc, onDone) {
 			let md5 = urlMetadata.queryParams.md5;
 			let pid = urlMetadata.queryParams.pid;
 			if (path && pdfExtension && pii && md5 && pid){
-				pdfURL = `/${path}/${pii}${pdfExtension}?md5=${md5}&pid=${pid}&isDTMRedir=Y`;
+				pdfURL = `/${path}/${pii}${pdfExtension}?md5=${md5}&pid=${pid}`;
 				Zotero.debug("Created PDF URL from JSON data: " + pdfURL);
-				onDone(pdfURL);
-				return;
+				return pdfURL;
 			}
 			else {
 				Zotero.debug("Missing elements in JSON data required for URL creation");
@@ -158,10 +153,9 @@ function getPDFLink(doc, onDone) {
 	// enough to get us through even without those parameters.
 	pdfURL = attr(doc, 'link[rel="canonical"]', 'href');
 	if (pdfURL) {
-		pdfURL = pdfURL + '/pdfft?isDTMRedir=true&download=true';
+		pdfURL = pdfURL + '/pdfft?download=true';
 		Zotero.debug("Trying to construct PDF URL from canonical link: " + pdfURL);
-		onDone(pdfURL);
-		return;
+		return pdfURL;
 	}
 	
 	// If none of that worked for some reason, get the URL from the initial HTML,
@@ -169,42 +163,37 @@ function getPDFLink(doc, onDone) {
 	// never actually used.
 	var url = doc.location.href;
 	Zotero.debug("Refetching HTML for PDF link");
-	ZU.processDocuments(url, function (reloadedDoc) {
-		var intermediateURL = attr(reloadedDoc, '.pdf-download-btn-link', 'href');
-		// Zotero.debug("Intermediate PDF URL: " + intermediateURL);
-		if (intermediateURL) {
-			parseIntermediatePDFPage(intermediateURL, onDone);
-			return;
-		}
-		onDone();
-	});
+	let reloadedDoc = await requestDocument(url);
+	intermediateURL = attr(reloadedDoc, '.pdf-download-btn-link', 'href');
+	// Zotero.debug("Intermediate PDF URL: " + intermediateURL);
+	if (intermediateURL) {
+		return parseIntermediatePDFPage(intermediateURL);
+	}
+	return false;
 }
 
 
-function parseIntermediatePDFPage(url, onDone) {
+async function parseIntermediatePDFPage(url) {
 	// Get the PDF URL from the meta refresh on the intermediate page
 	Z.debug('Parsing intermediate page to find redirect: ' + url);
-	ZU.doGet(url, function (html) {
-		var dp = new DOMParser();
-		var doc = dp.parseFromString(html, 'text/html');
-		var pdfURL = attr(doc, 'meta[HTTP-EQUIV="Refresh"]', 'CONTENT');
-		var otherRedirect = attr(doc, '#redirect-message a', 'href');
-		// Zotero.debug("Meta refresh URL: " + pdfURL);
-		if (pdfURL) {
-			// Strip '0;URL='
-			var matches = pdfURL.match(/\d+;URL=(.+)/);
-			pdfURL = matches ? matches[1] : null;
-		}
-		else if (otherRedirect) {
-			pdfURL = otherRedirect;
-		}
-		else if (url.includes('.pdf')) {
-			// Sometimes we are already on the PDF page here and therefore
-			// can simply use the original url as pdfURL.
-			pdfURL = url;
-		}
-		onDone(pdfURL);
-	});
+	let doc = await requestDocument(url);
+	var pdfURL = attr(doc, 'meta[HTTP-EQUIV="Refresh"]', 'CONTENT');
+	var otherRedirect = attr(doc, '#redirect-message a', 'href');
+	// Zotero.debug("Meta refresh URL: " + pdfURL);
+	if (pdfURL) {
+		// Strip '0;URL='
+		var matches = pdfURL.match(/\d+;URL=(.+)/);
+		pdfURL = matches ? matches[1] : null;
+	}
+	else if (otherRedirect) {
+		pdfURL = otherRedirect;
+	}
+	else if (url.includes('.pdf')) {
+		// Sometimes we are already on the PDF page here and therefore
+		// can simply use the original url as pdfURL.
+		pdfURL = url;
+	}
+	return pdfURL;
 }
 
 
@@ -284,7 +273,9 @@ function attachSupplementary(doc, item) {
 }
 
 
-function processRIS(doc, text) {
+async function processRIS(doc, text, isSearchResult = false) {
+	let pdfURL = await getPDFLink(doc);
+
 	// T2 doesn't appear to hold the short title anymore.
 	// Sometimes has series title, so I'm mapping this to T3,
 	// although we currently don't recognize that in RIS
@@ -359,10 +350,12 @@ function processRIS(doc, text) {
 		if (item.abstractNote) {
 			item.abstractNote = item.abstractNote.replace(/^(Abstract|Summary)[\s:\n]*/, "");
 		}
-		item.attachments.push({
-			title: "ScienceDirect Snapshot",
-			document: doc
-		});
+		if (!isSearchResult) {
+			item.attachments.push({
+				title: "ScienceDirect Snapshot",
+				document: doc
+			});
+		}
 
 		// attach supplementary data
 		if (Z.getHiddenPref && Z.getHiddenPref("attachSupplementary")) {
@@ -395,19 +388,17 @@ function processRIS(doc, text) {
 			item.url = "https:" + item.url;
 		}
 
-		getPDFLink(doc, function (pdfURL) {
-			if (pdfURL) {
-				item.attachments.push({
-					title: 'ScienceDirect Full Text PDF',
-					url: pdfURL,
-					mimeType: 'application/pdf',
-					proxy: false
-				});
-			}
-			item.complete();
-		});
+		if (pdfURL) {
+			item.attachments.push({
+				title: 'ScienceDirect Full Text PDF',
+				url: pdfURL,
+				mimeType: 'application/pdf',
+				proxy: false
+			});
+		}
+		item.complete();
 	});
-	translator.translate();
+	await translator.translate();
 }
 
 
@@ -443,7 +434,7 @@ function getArticleList(doc) {
 	);
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		// search page
 		var itemList = getArticleList(doc);
@@ -452,13 +443,14 @@ function doWeb(doc, url) {
 			items[itemList[i].href] = itemList[i].textContent;
 		}
 
-		Zotero.selectItems(items, function (selectedItems) {
-			if (!selectedItems) return;
-			ZU.processDocuments(Object.keys(selectedItems), scrape);
-		});
+		let selectedItems = await Zotero.selectItems(items);
+		if (!selectedItems) return;
+		for (let url of Object.keys(selectedItems)) {
+			await scrape(await requestDocument(url), url, true);
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
@@ -487,7 +479,7 @@ function formValuesToPostData(values) {
 	return s.substr(1);
 }
 
-function scrape(doc, url) {
+async function scrape(doc, url, isSearchResult = false) {
 	// On most page the export form uses the POST method
 	var form = ZU.xpath(doc, '//form[@name="exportCite"]')[0];
 	if (form) {
@@ -495,9 +487,10 @@ function scrape(doc, url) {
 		var values = getFormInput(form);
 		values['citation-type'] = 'RIS';
 		values.format = 'cite-abs';
-		ZU.doPost(form.action, formValuesToPostData(values), function (text) {
-			processRIS(doc, text);
+		let text = await requestText(form.action, {
+			body: formValuesToPostData(values)
 		});
+		await processRIS(doc, text, isSearchResult);
 		return;
 	}
 
@@ -522,9 +515,8 @@ function scrape(doc, url) {
 		if (pii) {
 			let risUrl = '/sdfe/arp/cite?pii=' + pii + '&format=application%2Fx-research-info-systems&withabstract=true';
 			Z.debug('Fetching RIS using PII: ' + risUrl);
-			ZU.doGet(risUrl, function (text) {
-				processRIS(doc, text);
-			});
+			let text = await requestText(risUrl);
+			await processRIS(doc, text, isSearchResult);
 			return;
 		}
 	}
@@ -537,16 +529,13 @@ function scrape(doc, url) {
 		Z.debug("Fetching RIS via GET form (old)");
 		let risUrl = form.action
 			+ '?export-format=RIS&export-content=cite-abs';
-		ZU.doGet(risUrl, function (text) {
-			processRIS(doc, text);
-		});
+		let text = await requestText(risUrl);
+		await processRIS(doc, text, isSearchResult);
 		return;
 	}
 
 	throw new Error("Could not scrape metadata via known methods");
 }
-
-
 
 /** BEGIN TEST CASES **/
 var testCases = [

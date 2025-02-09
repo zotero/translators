@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 8,
-	"lastUpdated": "2023-09-22 09:54:11"
+	"lastUpdated": "2025-01-11 08:07:57"
 }
 
 /*
@@ -64,6 +64,34 @@ async function doSearch(items) {
 }
 
 async function processDOI(doi) {
+	// TEMP: Use Crossref REST for Crossref DOIs during Crossref 2025-01-14 outage
+	let currentDate = new Date();
+	let startDate = new Date(Date.UTC(2025, 0, 14, 5, 0, 0)); // Jan 14, 2025, 05:00 UTC (1 hour before outage)
+	let endDate   = new Date(Date.UTC(2025, 0, 14, 13, 0, 0)); // Jan 14, 2025, 13:00 UTC (2 hours after outage)
+	
+	if (currentDate >= startDate && currentDate <= endDate) {
+		try {
+			let raJSON = await requestJSON(
+				`https://doi.org/ra/${encodeURIComponent(doi)}`
+			);
+			if (raJSON.length) {
+				let ra = raJSON[0].RA;
+				if (ra == 'Crossref') {
+					let translate = Zotero.loadTranslator('search');
+					// Crossref REST
+					translate.setTranslator("0a61e167-de9a-4f93-a68a-628b48855909");
+					let item = { itemType: "journalArticle", DOI: doi };
+					translate.setSearch(item);
+					translate.translate();
+					return;
+				}
+			}
+		}
+		catch (e) {
+			Z.debug(e);
+		}
+	}
+
 	let response = await requestText(
 		`https://doi.org/${encodeURIComponent(doi)}`,
 		{ headers: { Accept: "application/vnd.datacite.datacite+json, application/vnd.crossref.unixref+xml, application/vnd.citationstyles.csl+json" } }
@@ -132,13 +160,13 @@ var testCases = [
 				"title": "Code criminel de l'empereur Charles V vulgairement appellé la Caroline contenant les loix qui sont suivies dans les jurisdictions criminelles de l'Empire et à l'usage des conseils de guerre des troupes suisses.",
 				"creators": [
 					{
-						"firstName": "",
 						"lastName": "Heiliges Römisches Reich Deutscher Nation",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					},
 					{
-						"firstName": "Franz Adam. Éditeur Scientifique",
 						"lastName": "Vogel",
+						"firstName": "Franz Adam. Éditeur Scientifique",
 						"creatorType": "contributor"
 					},
 					{
@@ -147,26 +175,29 @@ var testCases = [
 						"creatorType": "contributor"
 					},
 					{
-						"firstName": "",
 						"lastName": "Université De Lorraine-Direction De La Documentation Et De L'Edition",
-						"creatorType": "contributor"
+						"creatorType": "contributor",
+						"fieldMode": 1
 					}
 				],
 				"date": "1734",
-				"DOI": "10.12763/ona1045",
-				"accessDate": "2019-02-02T02:31:57Z",
-				"language": "fre",
+				"DOI": "10.12763/ONA1045",
+				"language": "fr",
 				"libraryCatalog": "DOI.org (Datacite)",
 				"pages": "39.79 MB, 402 pages",
-				"relations": [],
 				"url": "http://docnum.univ-lorraine.fr/pulsar/RCR_543952102_NA1045.pdf",
 				"attachments": [],
 				"tags": [
-					"Droit"
+					{
+						"tag": "Droit"
+					}
 				],
 				"notes": [
-					"<h2>Other</h2>\nLe code est accompagné de commentaires de F. A. Vogel, qui signe l'épitre dédicatoire<h2>Other</h2>\nReliure 18è siècle<h2>Other</h2>\nEx-libris manuscrit \"Ex libris Dufour\""
-				]
+					{
+						"note": "<h2>Other</h2>\nLe code est accompagné de commentaires de F. A. Vogel, qui signe l'épitre dédicatoire<h2>Other</h2>\nReliure 18è siècle<h2>Other</h2>\nEx-libris manuscrit \"Ex libris Dufour\""
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	},
@@ -181,24 +212,25 @@ var testCases = [
 				"title": "Second world war, communism and post-communism in Albania, an equilateral triangle of a tragic trans-Adriatic story. The Eftimiadi’s Saga",
 				"creators": [
 					{
-						"firstName": "Muner",
-						"lastName": "Paolo",
-						"creatorType": "author"
+						"creatorType": "author",
+						"firstName": "Paolo",
+						"lastName": "Muner"
 					}
 				],
 				"date": "01/2014",
 				"DOI": "10.7336/academicus.2014.09.05",
-				"ISSN": "20793715",
-				"accessDate": "2019-02-02T03:28:48Z",
+				"ISSN": "20793715, 23091088",
+				"abstractNote": "The complicated, troubled and tragic events of a wealthy family from Vlorë, Albania, which a century ago expanded its business to Italy, in Brindisi and Trieste, and whose grand land tenures and financial properties in Albania were nationalized by Communism after the Second World War. Hence the life-long solitary and hopeless fight of the last heir of the family to reconquer his patrimony that had been nationalized by Communism. Such properties would have been endowed to a planned foundation, which aims at perpetuating the memory of his brother, who was active in the resistance movement during the war and therefore hung by the Germans. His main institutional purpose is to help students from the Vlorë area to attend the University of Trieste. The paper is a travel in time through history, sociology and the consolidation of a state’s fundamentals, by trying to read the past aiming to understand the presence and save the future. The paper highlights the need to consider past models of social solidarity meanwhile renewing the actual one. This as a re-establishment of rule and understanding, a strategy to cope with pressures to renegotiate the social contract, as a universal need, by considering the past’s experiences as a firm base for successful social interaction. All this, inside a story which in the first look seems to be too personal and narrow, meanwhile it highlights the present and the past in a natural organic connection, dedicated to a nation in continuous struggle for its social reconstruction.",
 				"libraryCatalog": "DOI.org (Crossref)",
 				"pages": "69-78",
 				"publicationTitle": "Academicus International Scientific Journal",
-				"relations": [],
-				"url": "http://academicus.edu.al/?subpage=volumes&nr=9",
+				"rights": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+				"url": "https://www.medra.org/servlet/MREngine?hdl=10.7336/academicus.2014.09.05",
 				"volume": "9",
 				"attachments": [],
 				"tags": [],
-				"notes": []
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -272,6 +304,7 @@ var testCases = [
 				"libraryCatalog": "DOI.org (Crossref)",
 				"pages": "394-410",
 				"publicationTitle": "IEEE Transactions on Plasma Science",
+				"rights": "https://ieeexplore.ieee.org/Xplorehelp/downloads/license-information/IEEE.html",
 				"url": "http://ieeexplore.ieee.org/document/4316723/",
 				"volume": "15",
 				"attachments": [],

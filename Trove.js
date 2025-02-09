@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-06 04:17:30"
+	"lastUpdated": "2025-01-27 20:40:35"
 }
 
 /*
@@ -137,12 +137,15 @@ function scrapeNewspaper(doc, url) {
 		// Clean up the BibTex results and add some extra stuff.
 		translator.setHandler("itemDone", function (obj, item) {
 			item.itemType = 'newspaperArticle';
-			item.pages = item.numPages;
 			item.publicationTitle = cleanPublicationTitle(item.publicationTitle);
 			item.place = cleanPlace(item.place);
-			delete item.numPages;
 			delete item.type;
 			delete item.itemID;
+
+			if (!item.pages) {
+				item.pages = item.numPages;
+				delete item.numPages;
+			}
 
 			// doc is null during multiple call
 			if (doc) {
@@ -192,7 +195,7 @@ function cleanPublicationTitle(pubTitle) {
 	if (!pubTitle) return pubTitle;
 	// Australian Worker (Sydney, NSW : 1913 - 1950) -> Australian Worker
 	// the place info is duplicated in the place field
-	return pubTitle.replace(/\([^)]+\)/, '');
+	return pubTitle.replace(/\([^)]+\)?/, '');
 }
 
 
@@ -394,11 +397,18 @@ function scrapeWork(doc, url, docContext) {
 			}
 
 			if (thumbnailURL) {
-				item.attachments.push({
-					url: thumbnailURL,
-					title: 'Trove thumbnail image',
-					mimeType: 'image/jpeg'
-				});
+				try {
+					// Thumbnail URL can sometimes be invalid, so check first
+					// eslint-disable-next-line no-new
+					new URL(thumbnailURL);
+
+					item.attachments.push({
+						url: thumbnailURL,
+						title: 'Trove thumbnail image',
+						mimeType: 'image/jpeg'
+					});
+				}
+				catch (e) {}
 			}
 			item.complete();
 		});
@@ -478,6 +488,7 @@ var testCases = [
 				"date": "7 Feb 1903",
 				"abstractNote": "We have received a copy of the above which is a journal devoted chiefly to the science of meteorology. It is owned and conducted by Mr. Clement ...",
 				"libraryCatalog": "Trove",
+				"pages": "4",
 				"place": "Victoria",
 				"publicationTitle": "Sunbury News",
 				"url": "http://nla.gov.au/nla.news-article70068753",
@@ -494,7 +505,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "<html>\n  <head>\n    <title>07 Feb 1903 - 'WRAGGE.'</title>\n  </head>\n  <body>\n      <p>Sunbury News (Vic. : 1900 - 1927), Saturday 7 February 1903, page 4</p>\n      <hr/>\n    <div class='zone'><p>'WRAGGE' - we have received a copy of the above, which is a journal devoted chiefly to the science of meteorology. It is owned and conducted by Mr. Clement Wragge. </p></div>\n  </body>\n</html>"
+						"note": "<html>\n  <head>\n    <title>07 Feb 1903 - 'WRAGGE.'</title>\n  </head>\n  <body>\n      <p>Sunbury News (Vic. : 1900 - 1927, Saturday 7 February 1903, page 4</p>\n      <hr/>\n    <div class='zone'><p>'WRAGGE' - we have received a copy of the above, which is a journal devoted chiefly to the science of meteorology. It is owned and conducted by Mr. Clement Wragge. </p></div>\n  </body>\n</html>"
 					}
 				],
 				"seeAlso": []
@@ -546,45 +557,6 @@ var testCases = [
 						"mimeType": "text/html",
 						"snapshot": false
 					},
-					{
-						"title": "Trove thumbnail image",
-						"mimeType": "image/jpeg"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://trove.nla.gov.au/work/11424419/version/264796991%20264796992",
-		"defer": true,
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "AUSTRALIA'S WELFARE 1993 Services and Assistance (30 June 1994)",
-				"creators": [
-					{
-						"firstName": "Australian Institute of",
-						"lastName": "Health",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Welfare",
-						"creatorType": "author",
-						"fieldMode": 1
-					}
-				],
-				"date": "1994-06-30",
-				"ISSN": "1321-1455",
-				"issue": "14 of 1994",
-				"itemID": "trove.nla.gov.au/work/11424419",
-				"language": "English",
-				"libraryCatalog": "Trove",
-				"publicationTitle": "Australia's welfare : services and assistance",
-				"attachments": [
 					{
 						"title": "Trove thumbnail image",
 						"mimeType": "image/jpeg"

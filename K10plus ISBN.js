@@ -8,7 +8,7 @@
 	"priority": 99,
 	"inRepository": true,
 	"translatorType": 8,
-	"lastUpdated": "2023-04-17 10:53:59"
+	"lastUpdated": "2024-10-09 14:20:54"
 }
 
 /*
@@ -46,7 +46,7 @@ function doSearch(item) {
 	let url;
 	if (item.ISBN) {
 		var queryISBN = ZU.cleanISBN(item.ISBN);
-		url = "https://sru.k10plus.de/opac-de-627?version=1.1&operation=searchRetrieve&query=pica.isb=" + queryISBN + " AND pica.mat%3DB&maximumRecords=1";
+		url = "https://sru.k10plus.de/opac-de-627?version=1.1&operation=searchRetrieve&query=pica.isb=" + queryISBN + "&maximumRecords=1";
 	}
 	else if (item.query) {
 		url = "https://sru.k10plus.de/opac-de-627?version=1.1&operation=searchRetrieve&query=" + encodeURIComponent(item.query) + "&maximumRecords=50";
@@ -329,6 +329,53 @@ var testCases = [
 				"notes": [
 					{
 						"note": "Many of the papers are based on presentations made at the Second Resilience Engineering Symposium that was held November 8 - 10 2007 in Juan-les-Pins, France. - Complete proceedings from this symposium are availabe for download at http://www.resilience-engineering.org Includes bibliographical references and index"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"ISBN": "9780231545853"
+		},
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Design Thinking for the Greater Good: Innovation in the Social Sector",
+				"creators": [
+					{
+						"firstName": "Jeanne",
+						"lastName": "Liedtka",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Daisy",
+						"lastName": "Azer",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Randy",
+						"lastName": "Salzman",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018",
+				"ISBN": "9780231545853",
+				"abstractNote": "Facing especially wicked problems, social sector organizations are searching for powerful new methods to understand and address them. Design Thinking for the Greater Good goes in depth on both the how of using new tools and the why. As a way to reframe problems, ideate solutions, and iterate toward better answers, design thinking is already well established in the commercial world. Through ten stories of struggles and successes in fields such as health care, education, agriculture, transportation, social services, and security, the authors show how collaborative creativity can shake up even the most entrenched bureaucracies—and provide a practical roadmap for readers to implement these tools.The design thinkers Jeanne Liedtka, Randy Salzman, and Daisy Azer explore how major agencies like the Department of Health and Human Services and the Transportation and Security Administration in the United States, as well as organizations in Canada, Australia, and the United Kingdom, have instituted principles of design thinking. In each case, these groups have used the tools of design thinking to reduce risk, manage change, use resources more effectively, bridge the communication gap between parties, and manage the competing demands of diverse stakeholders. Along the way, they have improved the quality of their products and enhanced the experiences of those they serve. These strategies are accessible to analytical and creative types alike, and their benefits extend throughout an organization. This book will help today's leaders and thinkers implement these practices in their own pursuit of creative solutions that are both innovative and achievable",
+				"language": "eng",
+				"libraryCatalog": "K10plus ISBN",
+				"numPages": "1",
+				"place": "New York Chichester",
+				"publisher": "Columbia University Press",
+				"series": "Columbia Business School Publishing",
+				"shortTitle": "Design Thinking for the Greater Good",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "Frontmatter -- -- CONTENTS -- -- Acknowledgments -- -- Part I. Why Design Thinking? -- -- 1. Catalyzing a Conversation for Change -- -- 2. How Do We Get There from Here? A Tale of Two Managers -- -- Part II. The Stories -- -- 3. Igniting Creative Confidence at US Health and Human Services -- -- 4. Including New Voices at the Kingwood Trust -- -- 5. Scaling Design Thinking at Monash Medical Centre -- -- 6. Turning Debate into Dialogue at the US Food and Drug Administration -- -- 7. Fostering Community Conversations in Iveragh, Ireland -- -- 8. Connecting—and Disconnecting—the Pieces at United Cerebral Palsy -- -- 9. The Power of Local at the Community Transportation Association of America -- -- 10. Bridging Technology and the Human Experience at the Transportation Security Administration -- -- 11. Making Innovation Safe at MasAgro -- -- 12. Integrating Design and Strategy at Children’s Health System of Texas -- -- Part III. Moving into Action: Bringing Design Thinking to Your Organization -- -- 13. The Four-Question Methodology in Action: Laying the Foundation -- -- 14. The Four-Question Methodology in Action: Ideas to Experiments -- -- 15. Building Organizational Capabilities -- -- Notes -- -- Index"
 					}
 				],
 				"seeAlso": []
