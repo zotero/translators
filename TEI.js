@@ -1,5 +1,5 @@
 {
-	"translatorID": "1a043ed7-f15b-4f18-aeae-c793bdc0fa2e",
+	"translatorID": "8104f095-23fb-4323-9141-014fce3e0ed4",
 	"label": "TEI",
 	"creator": "Stefan Majewski",
 	"target": "xml",
@@ -18,7 +18,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2024-01-30 13:09:39"
+	"lastUpdated": "2025-02-09 12:24:09"
 }
 
 /*
@@ -815,6 +815,15 @@ function generateItem(item, teiDoc) {
 	// if analytic, call number is for analytic
 	appendField(monoana, 'idno', item.callNumber, 2, { type: 'callNumber' });
 
+	// copyright
+	if (item.rights) {
+		const availability = teiDoc.createElementNS(ns.tei, "availability");
+		availability.setAttribute("status", "restricted");
+		const p = teiDoc.createElementNS(ns.tei, "p");
+		inlineParse(item.rights, p);
+		availability.append('\n', indent.repeat(3), p, '\n', indent.repeat(2));
+		monoana.append('\n', indent.repeat(2), availability);
+	}
 
 	appendField(monogr, 'edition', item.edition, 2, { n: item.versionNumber });
 	// maybe a software with a version number but no edition name
@@ -951,6 +960,8 @@ function generateItem(item, teiDoc) {
 		const tags = teiDoc.createElementNS(ns.tei, "note");
 		bibl.append("\n", indent, tags);
 		tags.setAttribute("type", "tags");
+		// sort tags to keep order
+		item.tags.sort();
 		for (let tag of item.tags) {
 			let term = teiDoc.createElementNS(ns.tei, "term");
 			term.setAttribute("type", "tag");
@@ -1097,5 +1108,6 @@ function doExport() {
 }
 
 /** BEGIN TEST CASES **/
-
+var testCases = [
+]
 /** END TEST CASES **/
