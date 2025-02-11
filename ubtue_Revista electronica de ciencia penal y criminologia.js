@@ -6,10 +6,10 @@
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
-	"inRepository": false,
+	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-01-21 08:50:04"
+	"lastUpdated": "2025-02-11 08:20:24"
 }
 
 /*
@@ -39,7 +39,7 @@ const entriesXPath = '//p[@class="MsoFooter"]';
 const journalInfoXPath = '//p[@class="MsoNormal"]//span/text()';
 
 const articleNumberPrefix = '^\\s*\\d+-[a-z]?\\d+[a-z]?';
-const quotationMarks = '["”]';
+const quotationMarks = '["”«»]';
 
 function detectWeb(doc, url) {
 	if (getSearchResults(doc, true)) {
@@ -73,7 +73,7 @@ function getIssue(doc) {
 	   if (issue) return issue[1];
 	}
 	// With the new layout there is seemingly no direct class
-	issueExpressions = ZU.xpath(doc, "//span[@style='font-size: 10pt;']");
+	issueExpressions = ZU.xpath(doc, "//span[contains(@style, 'font-size:18.0pt;')]");
 	for (let exp of issueExpressions) {
 		let issue = /Número\s+(\d+)/.exec(exp.innerText);
 		if (issue) return issue[1];
@@ -88,7 +88,7 @@ function getYear(doc) {
 		let year = /Núm\.\s+\d+\s*\((\d+)\)/.exec(exp.nodeValue);
 		if (year) return year[1];
 	}
-	yearExpression = ZU.xpath(doc, "//span[@style='font-size: 10pt;']");
+	yearExpression = ZU.xpath(doc, "//span[contains(@style, 'font-size:18.0pt;')]");
 	for (let exp of yearExpression) {
 		let issue = /Año\s+(\d+).*/.exec(exp.innerText);
 		if (issue) return issue[1];
@@ -155,7 +155,7 @@ function doWeb(doc, url) {
 				let entryXPath = entriesXPath + '[.//a[@href=\'' + key + '\']]';
 				let entry = ZU.xpath(doc, entryXPath);
 				if (Object.keys(entry).length != 1) Z.debug("Warning: more than one matching entry element for " + key + " -- continue with first...");
-				for (let author of extractAuthors(entry[0])) item.creators.push(ZU.cleanAuthor(author));
+				for (let author of extractAuthors(entry[0])) item.creators.push(ZU.cleanAuthor(author, "author"));
 				item.title = extractTitle(entry[0]);
 				item.issue = getIssue(doc);
 				item.date = getYear(doc);
@@ -166,3 +166,8 @@ function doWeb(doc, url) {
 		});
 	}
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+]
+/** END TEST CASES **/
