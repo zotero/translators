@@ -1,7 +1,7 @@
 {
 	"translatorID": "b10bf941-12e9-4188-be04-f6357fa594a0",
 	"label": "Old Bailey Online",
-	"creator": "Adam Crymble & Sharon Howard",
+	"creator": "Sharon Howard and Adam Crymble",
 	"target": "^https?://www\\.oldbaileyonline\\.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,13 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-10-12 23:37:03"
+	"lastUpdated": "2024-09-15 13:03:34"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 	
-	Copyright © 2018 Sharon Howard
+	Copyright © 2024 Sharon Howard
+	
 	This file is part of Zotero.
 	
 	Zotero is free software: you can redistribute it and/or modify
@@ -33,198 +34,201 @@
 	
 	***** END LICENSE BLOCK *****
 */
-// URLs
-// trial: div=t18000115-12
-// session: name=16900430
-// OA: can use either name= or div=  !
-// div/name excludes dir= pages in browse.jsp
+
+/* new URLs
+// trial report: /record/t18000115-12 [case]
+// OA: /record/OA16760705 [book]
+// session: /record/16740429 [book]
+// other div types /record/[afso - anything else?] [book section might work for these]
+// api: https://www.dhi.ac.uk/api/data/oldbailey_record_single?idkey=t17210419-18
+*/
 
 function detectWeb(doc, url) {
-	if (url.includes('browse.jsp')  && ( url.includes('div=OA') || url.includes('name=') ) ) {
-		return "book";
-	} else if (url.includes('browse.jsp')  && ( url.includes('div=') ) ) {
+	if (url.includes('/record/t')) {
 		return "case";
-	} else if ( url.includes("search.jsp") &&  getSearchResults(doc, true)) {
-		return "multiple";
 	}
+	else if (url.includes('/record/1')) {
+		return "book";
+	}
+	else if (url.includes('/record/OA')) {
+		return "book";
+
+	// multiples are not doable at present
+	//	} else if (url.includes('/search/') && getSearchResults(doc, true)) {
+	//		return 'multiple';
+	//	}
+	}
+	return false;
 }
 
-// to do:  not trials...
-// div=f16740429-1 - front matter
-// div=a16860520-1 - advertisements
-// div=s16740717-1 - punishment summary
-// div=o16751208-1 - supplementary material
-
-
-
+/* may be possible to reinstate this in the longer term but not at present.
 function getSearchResults(doc, checkOnly) {
-	var items = {};
-	var found = false;
-	var rows = ZU.xpath(doc, '//li/p[@class="srchtitle"]/a');
-	for (var i=0; i<rows.length; i++) {
-		var href = rows[i].href;
-		var title = ZU.trimInternal(rows[i].textContent);
-		if (!href || !title) continue;
-		if (checkOnly) return true;
-		found = true;
-		items[href] = title;
-	}
-	return found ? items : false;
-}
+	// have to use api endpoint. https://www.dhi.ac.uk/api/data/oldbailey_record?(query string)
+	// several types of search seem not to be accessible via the api (statistics, OAs, associated records)
+	// keyword and name searches need to be able to handle any Proceedings div type, not just trials
+	//	(may be doable, but much more complicated code)
+}*/
 
- 
+async function doWeb(doc, url) {
+	var item = new Zotero.Item();
 
-function scrape(doc, url) {
+	let rgx = /(\bt1[^-]+-[0-9]+[a-z]?|OA1[0-9]+[a-z]?|\b1[0-9]{7}[AE]?$)/;
+	let id = url.match(rgx)[0];
 
-if (url.includes('browse.jsp')  && ( url.includes('div=OA') || url.includes('name=') ) ) {
-		var newItem = new Zotero.Item("book");
-	} else {
-		var newItem = new Zotero.Item("case");
-	}
+	let jsonURL = `https://www.dhi.ac.uk/api/data/oldbailey_record_single?idkey=${id}`;
+	let json = (await requestJSON(jsonURL)).hits.hits[0]._source;
 
+	let metadata = json.metadata;
+	let mParsed = new DOMParser().parseFromString(metadata, 'text/html');
+	let mTable = mParsed.querySelector("table");
+
+	// "Date" works for session, t and OA
+	let niceDate = ZU.xpathText(mTable, '//tr[contains(th, "Date")]/td[1]');
+
+	// text type
+	let textType = ZU.xpathText(mTable, '//tr[contains(th, "Text type")]/td[1]');
+
+	if (url.includes('/record/t1')) {
+		item.itemType = "case";
+		
+		var sessDate = id.substring(1, 5) + "/" + id.substring(5, 7) + "/" + id.substring(7, 9);
 	
-	var trialTitle = ZU.xpathText(doc, '//div[@class="sessionsPaper"]/div[@class="sessions-paper-main-title"]');   // updated @class name
-	
-	
-	
-	newItem.url = url;
-	
-	var sessDate = ZU.xpathText(doc, '//div[@class="sessionsPaper"]/div[@class="sessions-paper-date"]'); // add session date, as the date is now in a gettable node
-	
-	newItem.date = ZU.strToISO(sessDate);
-	
-	if (newItem.itemType == "case" && trialTitle) {
- 		if (trialTitle == trialTitle.toUpperCase()) {
-  			newItem.title = ZU.capitalizeTitle(trialTitle, true);
-   		} else {
-      			newItem.title = trialTitle;
-   		}
-	} else if (newItem.itemType == "book") {
-		newItem.title = trialTitle + " " + sessDate;
-	}
+		// names for trial defendants.
+		var names = ZU.xpathText(mTable, '//tr[contains(th, "Defendant")]/td[1]');
+		var namesCleaned = ZU.capitalizeTitle(names.toLowerCase(), true);
 
-	newItem.title = newItem.title.trim().replace(/[,.]+$/, "");
-	if (!newItem.title) {
-		newItem.title = "[no title]";
-	}
-	
-	var referenceNo = ZU.xpathText(doc, '//div[@class="ob-panel"][1]/table[@class="ob-info-table"][1]/tbody/tr[th[contains(text(),"Reference")]]/td').trim(); // changed fetching Reference number
-	
-	newItem.extra = "Reference Number: " + referenceNo; // putting the ref number in the Extra field had a particular function, was it for Voyant? or the defunct DMCI plugin? retain it at least for now (non trials will want it anyway)
-	
-	if (newItem.itemType == "case") {
-		newItem.docketNumber = referenceNo;
-	}
-	
-	if (newItem.itemType == "book") {
-		newItem.place = "London";
-	}
-
-
-// tags for trials
-
-if (newItem.itemType == "case") {
-
-// offence info is under sessions-paper-sub-title; verdicts/sentences under ob-info-table
-
-	var off = ZU.xpath(doc, '//div[@class="sessionsPaper"]/div[@class="sessions-paper-sub-title"]/a');
-	for (let o of off){
-		newItem.tags.push(o.textContent)
-	}
-
-	var verdict = ZU.xpathText(doc, '//div[@class="ob-panel"]/table[@class="ob-info-table"][1]/tbody/tr[th[contains(text(),"Verdict")]]/td');
-
-	if(verdict) {
-		verdict = verdict.split(';');
-		for (let v of verdict ) {
-			newItem.tags.push(v)
+		var offencesList = ZU.xpathText(mTable, '//tr[contains(th, "Offences")]/td[1]');
+		var offences = ZU.xpath(mTable, '//tr[contains(th, "Offences")]/td[1]/a');
+		for (let o of offences) {
+			item.tags.push(o.textContent);
 		}
-	}
 
-	var sentence = ZU.xpathText(doc, '//div[@class="ob-panel"]/table[@class="ob-info-table"][1]/tbody/tr[th[contains(text(),"Sentence")]]/td');
-
-	if(sentence) {
-		sentence = sentence.split(';');
-		for (let s of sentence ) {
-			newItem.tags.push(s)
+		var verdicts = ZU.xpath(mTable, '//tr[contains(th, "Verdicts")]/td[1]/a');
+		for (let v of verdicts) {
+			item.tags.push(v.textContent);
 		}
+
+		var sentences = ZU.xpath(mTable, '//tr[contains(th, "Punishments")]/td[1]/a');
+		for (let s of sentences) {
+			item.tags.push(s.textContent);
+		}
+
+		var itemTitle = "Trial of " + namesCleaned + ": " + offencesList + ", " + niceDate;
+		item.title = itemTitle;
+		item.date = ZU.strToISO(sessDate);
+		item.docketNumber = json.idkey;
+		item.court = "Central Criminal Court, London";
 	}
-}
+	
+	else if (url.includes('record/OA1')) {
+		item.itemType = "book";
+		
+		var oaDate = id.substring(2, 6) + "/" + id.substring(6, 8) + "/" + id.substring(8, 10);
+		var oaTitle = textType + ", " + niceDate;
 
-// use print-friendly URLs for snapshots
-
-	var attachmentUrl = "https://www.oldbaileyonline.org/print.jsp?div=" + referenceNo;
-	newItem.attachments.push({ url  : attachmentUrl,    title : "OBO Snapshot",    mimeType : "text/html" });
-
-	newItem.complete();
-}
-
-
-
-// todo: replace save result set url
-
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
-	} else if (url.includes('browse.jsp') && ( url.includes('div=') || url.includes('name=') ) )  {
-		scrape(doc, url);
+		item.date = ZU.strToISO(oaDate);
+		item.title = oaTitle;
 	}
+
+	else if (url.includes('record/1')) {
+		item.itemType = "book";
+
+		var sessionDate = id.substring(0, 4) + "/" + id.substring(4, 6) + "/" + id.substring(6, 8);
+		var sessionTitle = textType + ", " + niceDate;
+
+		item.date = ZU.strToISO(sessionDate);
+		item.title = sessionTitle;
+	}
+
+	item.extra = "Reference Number: " + json.idkey;
+
+	item.url = url;
+	
+	item.complete();
 }
-
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.oldbaileyonline.org/search.jsp?form=custom&_divs_fulltext=animal&kwparse=and&_persNames_surname=&_persNames_given=&_persNames_alias=&_persNames_gender=&fromAge=&toAge=&_occupations_value=&_persNames_home=&_offences_offenceCategory_offenceSubcategory=&_offences_offenceDescription=&_verdicts_verdictCategory_verdictSubcategory=&_punishments_punishmentCategory_punishmentSubcategory=&_punishments_punishmentDescription=&_crimeDates_value=&_offences_crimeLocation=&_divs_div0Type_div1Type=&fromMonth=&fromYear=&toMonth=&toYear=&ref=&submit.x=0&submit.y=0",
-		"items": "multiple"
+		"url": "https://www.oldbaileyonline.org/record/OA17110421",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Ordinary's Account, 21st April 1711",
+				"creators": [],
+				"date": "1711-04-21",
+				"extra": "Reference Number: OA17110421",
+				"libraryCatalog": "Old Bailey Online",
+				"url": "https://www.oldbaileyonline.org/record/OA17110421",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	},
 	{
 		"type": "web",
-		"url": "https://www.oldbaileyonline.org/browse.jsp?div=t18000115-12",
+		"url": "https://www.oldbaileyonline.org/record/16740429",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Sessions paper, 29th April 1674",
+				"creators": [],
+				"date": "1674-04-29",
+				"extra": "Reference Number: 16740429",
+				"libraryCatalog": "Old Bailey Online",
+				"url": "https://www.oldbaileyonline.org/record/16740429",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.oldbaileyonline.org/record/t18000115-12",
 		"items": [
 			{
 				"itemType": "case",
-				"caseName": "Peter Asterbawd, Andrew Forsman",
+				"caseName": "Trial of Peter Asterbawd, Andrew Forsman: Theft > Burglary, 15th January 1800",
 				"creators": [],
 				"dateDecided": "1800-01-15",
+				"court": "Central Criminal Court, London",
 				"docketNumber": "t18000115-12",
 				"extra": "Reference Number: t18000115-12",
-				"url": "https://www.oldbaileyonline.org/browse.jsp?div=t18000115-12",
-				"attachments": [
-					{
-						"title": "OBO Snapshot",
-						"mimeType": "text/html"
-					}
-				],
+				"shortTitle": "Trial of Peter Asterbawd, Andrew Forsman",
+				"url": "https://www.oldbaileyonline.org/record/t18000115-12",
+				"attachments": [],
 				"tags": [
 					{
-						"tag": " Miscellaneous > fine"
+						"tag": "Burglary"
 					},
 					{
-						"tag": " Not Guilty"
+						"tag": "Fine"
 					},
 					{
-						"tag": "Guilty > lesser offence"
+						"tag": "Guilty"
 					},
 					{
-						"tag": "Imprisonment > house of correction"
+						"tag": "House of correction"
+					},
+					{
+						"tag": "Imprisonment"
+					},
+					{
+						"tag": "Lesser offence"
+					},
+					{
+						"tag": "Miscellaneous Punishment"
+					},
+					{
+						"tag": "Not guilty"
 					},
 					{
 						"tag": "Theft"
-					},
-					{
-						"tag": "burglary"
 					}
 				],
 				"notes": [],
@@ -234,97 +238,19 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.oldbaileyonline.org/browse.jsp?div=OA17110421",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Ordinary's Account.  21st April 1711",
-				"creators": [],
-				"date": "1711-04-21",
-				"extra": "Reference Number: OA17110421",
-				"libraryCatalog": "Old Bailey Online",
-				"place": "London",
-				"url": "https://www.oldbaileyonline.org/browse.jsp?div=OA17110421",
-				"attachments": [
-					{
-						"title": "OBO Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.oldbaileyonline.org/browse.jsp?name=OA17110421",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Ordinary's Account.  21st April 1711",
-				"creators": [],
-				"date": "1711-04-21",
-				"extra": "Reference Number: OA17110421",
-				"libraryCatalog": "Old Bailey Online",
-				"place": "London",
-				"url": "https://www.oldbaileyonline.org/browse.jsp?name=OA17110421",
-				"attachments": [
-					{
-						"title": "OBO Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.oldbaileyonline.org/browse.jsp?name=17100418",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Old Bailey Proceedings.  18th April 1710",
-				"creators": [],
-				"date": "1710-04-18",
-				"extra": "Reference Number: 17100418",
-				"libraryCatalog": "Old Bailey Online",
-				"place": "London",
-				"url": "https://www.oldbaileyonline.org/browse.jsp?name=17100418",
-				"attachments": [
-					{
-						"title": "OBO Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.oldbaileyonline.org/browse.jsp?id=t16780828-12&div=t16780828-12&terms=hog#highlight",
+		"url": "https://www.oldbaileyonline.org/record/t17340911-7",
 		"items": [
 			{
 				"itemType": "case",
-				"caseName": "[no title]",
+				"caseName": "Trial of Judith Cupid: Theft > Theft from place, 11th September 1734",
 				"creators": [],
-				"dateDecided": "1678-08-28",
-				"docketNumber": "t16780828-12",
-				"extra": "Reference Number: t16780828-12",
-				"url": "https://www.oldbaileyonline.org/browse.jsp?id=t16780828-12&div=t16780828-12&terms=hog#highlight",
-				"attachments": [
-					{
-						"title": "OBO Snapshot",
-						"mimeType": "text/html"
-					}
-				],
+				"dateDecided": "1734-09-11",
+				"court": "Central Criminal Court, London",
+				"docketNumber": "t17340911-7",
+				"extra": "Reference Number: t17340911-7",
+				"shortTitle": "Trial of Judith Cupid",
+				"url": "https://www.oldbaileyonline.org/record/t17340911-7",
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Guilty"
@@ -333,9 +259,53 @@ var testCases = [
 						"tag": "Theft"
 					},
 					{
-						"tag": "animal theft"
+						"tag": "Theft from place"
+					},
+					{
+						"tag": "Theft under 40s"
+					},
+					{
+						"tag": "Transportation"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.oldbaileyonline.org/record/16810117A",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Sessions paper, 17th January 1681",
+				"creators": [],
+				"date": "1681-01-17",
+				"extra": "Reference Number: 16810117A",
+				"libraryCatalog": "Old Bailey Online",
+				"url": "https://www.oldbaileyonline.org/record/16810117A",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.oldbaileyonline.org/record/OA16850506A",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Ordinary's Account, 6th May 1685",
+				"creators": [],
+				"date": "1685-05-06",
+				"extra": "Reference Number: OA16850506",
+				"libraryCatalog": "Old Bailey Online",
+				"url": "https://www.oldbaileyonline.org/record/OA16850506A",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
