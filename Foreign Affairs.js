@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-01-21 16:26:22"
+	"lastUpdated": "2025-02-23 09:16:09"
 }
 
 /*
@@ -95,11 +95,10 @@ async function scrape(doc, url = doc.location.href) {
 			item.setExtra('Volume Title', volumeTitle);
 		}
 
-		let issueMatch = issueNode.parentNode.href.match(/\/issues\/\d+\/(\d+)\/(\d+)$/);
-		if (issueMatch) {
-			item.volume = issueMatch[1];
-			item.issue = issueMatch[2];
-		}
+		const href = issueNode?.parentNode?.href || "";
+		const issueMatch = href.match(/\/issues\/\d+\/(\d+)\/(\d+)$/);
+		item.volume = issueMatch ? issueMatch[1] : "";
+		item.issue = issueMatch ? issueMatch[2] : "";
 	}
 
 	item.date = attr(doc, 'meta[property="article:published_time"]', 'content');
@@ -474,6 +473,72 @@ var testCases = [
 					},
 					{
 						"tag": "World"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.foreignaffairs.com/united-states/real-china-trump-card-brooks-vagle",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "The Real China Trump Card",
+				"creators": [
+					{
+						"firstName": "Stephen G.",
+						"lastName": "Brooks",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ben A.",
+						"lastName": "Vagle",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025-02-20",
+				"ISSN": "0015-7120",
+				"abstractNote": "The hawk’s case against decoupling.",
+				"extra": "Volume Title: March/April 2025",
+				"issue": "",
+				"language": "en-US",
+				"libraryCatalog": "Foreign Affairs",
+				"publicationTitle": "Foreign Affairs",
+				"url": "https://www.foreignaffairs.com/united-states/real-china-trump-card-brooks-vagle",
+				"volume": "",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "China"
+					},
+					{
+						"tag": "Globalization"
+					},
+					{
+						"tag": "Trade"
+					},
+					{
+						"tag": "U.S.-Chinese Relations"
+					},
+					{
+						"tag": "United States"
+					},
+					{
+						"tag": "Sanctions"
+					},
+					{
+						"tag": "Donald Trump Administration"
+					},
+					{
+						"tag": "U.S. Foreign Policy"
 					}
 				],
 				"notes": [],
