@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-04-03 05:05:34"
+	"lastUpdated": "2025-03-06 18:40:32"
 }
 
 /*
@@ -100,10 +100,10 @@ function scrape(doc, url) {
 			}
 			
 			for (let creator of item.creators) {
-				if (creator.firstName.toUpperCase() == creator.firstName) {
+				if (creator.firstName && creator.firstName.toUpperCase() == creator.firstName) {
 					creator.firstName = ZU.capitalizeTitle(creator.firstName, true);
 				}
-				if (creator.lastName.toUpperCase() == creator.lastName) {
+				if (creator.lastName && creator.lastName.toUpperCase() == creator.lastName) {
 					creator.lastName = ZU.capitalizeTitle(creator.lastName, true);
 				}
 			}
@@ -464,6 +464,75 @@ var testCases = [
 					},
 					{
 						"tag": "STEATOHEPATITIS"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.webofscience.com/wos/woscc/full-record/WOS:001308642000003",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Determinants of working poverty in Indonesia",
+				"creators": [
+					{
+						"lastName": "Faharuddin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Darma",
+						"lastName": "Endrawati",
+						"creatorType": "author"
+					}
+				],
+				"date": "AUG 15 2022",
+				"DOI": "10.1108/JED-09-2021-0151",
+				"ISSN": "1859-0020, 2632-5330",
+				"abstractNote": "PurposeThe study's first aim is to estimate the scale of working poverty using a nationwide household survey. The second aim is to answer the following research questions: is working enough to escape poverty, and what are the determinants of working poverty?Design/methodology/approachThe focus is on working people in Indonesia who have per capita household expenditure below the provincial poverty line. The determinant analysis used logistic regression on the first quarter of 2013 Susenas microdata.FindingsThe study found that the scale of the working poverty problem is equivalent to the scale of the poverty, although the in-work poverty rate is lower than the poverty rate in all provinces. The logistic regression results conclude that the three factors, namely individual-level, employment-related and household-level variables, have significant contributions to the incidence of the working poor in Indonesia.Practical implicationsSome practical implications for reducing the incidence of working poverty are increasing labor earnings through productivity growth and improving workers' skills, encouraging the labor participation of the poor and reducing precarious work. This study also suggests the need to continue assisting the working poor, particularly by increasing access to financial credit.Originality/valueResearch aimed at studying working poverty in Indonesia in the peer-reviewed literature is rare until now based on the authors' search. This study will fill the gap and provoke further research on working poverty in Indonesia.",
+				"extra": "Web of Science ID: WOS:001308642000003",
+				"issue": "3",
+				"journalAbbreviation": "J. Econ. Dev.",
+				"language": "English",
+				"libraryCatalog": "Clarivate Analytics Web of Science",
+				"pages": "230-246",
+				"publicationTitle": "JOURNAL OF ECONOMICS AND DEVELOPMENT",
+				"url": "https://www.webofscience.com/wos/woscc/full-record/WOS:001308642000003",
+				"volume": "24",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "EMPLOYMENT"
+					},
+					{
+						"tag": "Employment"
+					},
+					{
+						"tag": "Indonesia"
+					},
+					{
+						"tag": "LABOR-MARKET INSTITUTIONS"
+					},
+					{
+						"tag": "MICROCREDIT"
+					},
+					{
+						"tag": "POOR"
+					},
+					{
+						"tag": "Poverty"
+					},
+					{
+						"tag": "WAGE"
+					},
+					{
+						"tag": "WELFARE"
+					},
+					{
+						"tag": "Working poverty"
 					}
 				],
 				"notes": [],
