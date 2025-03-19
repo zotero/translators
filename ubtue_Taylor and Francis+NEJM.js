@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-02-05 10:28:03"
+	"lastUpdated": "2025-03-19 13:51:21"
 }
 
 /*
@@ -86,7 +86,6 @@ function doWeb(doc, url) {
 function fixBibTex(text) {
 	// T & F exports erroneous BibTex with trailing curly braces in the first line
 	text = text.replace(/^\s*[\r\n]+\s*/gm, "");
-	Z.debug(text);
 	if (text.length > 1 && text.match(/^@[^\s{]+\s*\{[^{]+\},\s*$/gm))
 		return text.replace(/\}/, "");
 	return text;
@@ -135,7 +134,7 @@ function scrape(doc, url) {
 				//ubtue: add tag "Book Review"
 				let dcType = ZU.xpathText(doc, '//meta[@name="dc.Type"]/@content');
 				if (dcType && dcType.match(/book\s?-?review/gi)) item.tags.push("Book Review");
-				
+
 				risTrans = Zotero.loadTranslator("import");
 				risTrans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 				risTrans.setString(text);
@@ -153,13 +152,18 @@ function scrape(doc, url) {
 					//ubtue:adding subtitle
 					let subtitle = ZU.xpathText(doc, '//*[@class="NLM_subtitle"]');
 					if (!subtitle)
-					    subtitle = ZU.xpathText(doc, '//*[@class="sub-title"]');
-                    if (subtitle)
-					    item.title += ': ' + subtitle;
+						subtitle = ZU.xpathText(doc, '//*[@class="sub-title"]');
+					if (subtitle)
+						item.title += ': ' + subtitle;
 					//ubtue:item.creators retrieved from ris, because bibtex is adding some unuseful "names"
 					//e.g. corporate bodies "Bill Gaventa and National Collaborative on Faith and Disability, with" https://doi.org/10.1080/23312521.2020.1743223
 					//or title like "Rev." https://www.tandfonline.com/doi/full/10.1080/23312521.2020.1738627
-					item.creators = risItem.creators;
+					// However, also RIS partly contains erroneous authors...
+					item.creators = risItem.creators.map(function (author) {
+						if (!author.lastName && /,/.test(author.firstName))
+							return ZU.cleanAuthor(author.firstName, author.creatorType, true);
+						return author;
+					});
 					finalizeItem(item, doc, doi, baseUrl);
 				});
 				risTrans.translate();
@@ -172,7 +176,7 @@ function scrape(doc, url) {
 //ubtue: write article number in $y
 function addArticleNumber (doc, item) {
 	if (item.pages && item.pages.match(/\d{5,}/)) {
-		item.pages = 'article ' + item.pages;	
+		item.pages = 'article ' + item.pages;
 	}
 }
 
@@ -193,11 +197,11 @@ function finalizeItem(item, doc, doi, baseUrl) {
 		if (sectionheading.match(/^Book\s+Reviews?$/i))
 			item.tags.push("Book Reviews");
 	}
-	
+
 	// numbering issues with slash, e.g. in case of  double issue "1-2" > "1/2"
 	if (item.issue) item.issue = item.issue.replace('-', '/');
-	
-	//scraping orcid number 
+
+	//scraping orcid number
 	let authorSectionEntries = ZU.xpath(doc, '//*[contains(@class, "contribDegrees")]');//Z.debug(authorSectionEntries)
 	for (let authorSectionEntry of authorSectionEntries) {
 		let authorInfo = authorSectionEntry.querySelector('.entryAuthor');
@@ -210,7 +214,7 @@ function finalizeItem(item, doc, doi, baseUrl) {
 	}
 	//deduplicate
 	item.notes = Array.from(new Set(item.notes.map(JSON.stringify))).map(JSON.parse);
-	
+
 	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
 	let AccessIconLocation = doc.querySelector('.accessIconLocation[alt]');
 	if (AccessIconLocation && AccessIconLocation.alt.match(/open\s+access/gi)) item.notes.push('LF:');
