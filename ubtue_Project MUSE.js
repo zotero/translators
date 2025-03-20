@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-05-28 13:33:55"
+	"lastUpdated": "2025-03-20 08:22:14"
 }
 
 /*
@@ -99,11 +99,13 @@ function isSupplement(item) {
 }
 
 function isOpenAccess(doc) {
-    let openAccessInfo = ZU.xpathText(doc,
-        '//div[@id = "info_wrap"]//*[contains(text(), "Open Access")]/parent::div');
-    if (!openAccessInfo)
-        return false;
-    return /Open Access Yes/i.test(ZU.trimInternal(openAccessInfo));
+	let openAccessInfo = ZU.xpathText(doc,
+		'//div[@id = "info_wrap"]//*[contains(text(), "Open Access")]/parent::div');
+	if (/Open Access Yes/i.test(ZU.trimInternal(openAccessInfo)))
+	    return true;
+    if (ZU.xpathText(doc, '//div[@class="cell label"][contains(text(),"Open Access")]/following-sibling::div[contains(text(),"Yes")]'))
+	    return true;
+	return false;
 }
 
 
@@ -132,7 +134,7 @@ function scrape(doc) {
 			item.pages = item.pages.split('-')[0];
 
 		if (isOpenAccess(doc))
-            item.notes.push('LF:');
+			item.notes.push('LF:');
 
 		let citationURL = ZU.xpathText(doc, '//li[@class="view_citation"]//a/@href');
 		ZU.processDocuments(citationURL, function (citation_page_doc) {
@@ -152,7 +154,9 @@ function scrape(doc) {
 		item.date = ZU.xpathText(doc, '//meta[@name="citation_year"]/@content');
 	});
 	translator.translate();
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
