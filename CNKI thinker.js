@@ -1,6 +1,6 @@
 {
 	"translatorID": "5393921c-d543-4b3a-a874-070b5d73b03a",
-	"label": "CNKI thinker",
+	"label": "CNKI Thinker",
 	"creator": "jiaojiaodubai",
 	"target": "^https?://thinker\\.cnki\\.net",
 	"minVersion": "5.0",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-02-02 14:33:05"
+	"lastUpdated": "2025-03-24 05:53:56"
 }
 
 /*
@@ -83,17 +83,21 @@ async function doWeb(doc, url) {
 
 async function scrape(doc, url = doc.location.href) {
 	const newItem = new Z.Item(detectWeb(doc, url));
-	const proxy = new Proxy({}, {
-		get: (obj, prop) => {
-			const result = obj[prop];
-			return typeof result === 'string' ? result : '';
+	const data = {
+		innerData: { },
+		set: function (key, value) {
+			this.innerData[key] = value;
+		},
+		get: function (key) {
+			const result = this.innerData[key];
+			return result ? result : '';
 		}
-	});
+	};
 	const extra = new Extra();
 	switch (newItem.itemType) {
 		case 'book':
 			doc.querySelectorAll('.bc_a > li').forEach((elm) => {
-				proxy[tryMatch(elm.innerText, /(^.+?):/, 1).replace(/\s*/, '')] = tryMatch(elm.innerText, /:(.+)$/, 1);
+				data.set(tryMatch(elm.innerText, /(^.+?):/, 1).replace(/\s*/, ''), tryMatch(elm.innerText, /:(.+)$/, 1));
 			});
 			newItem.title = text(doc, '#b-name');
 			newItem.abstractNote = ZU.trimInternal(text(doc, '[name="contentDesc"]'));
@@ -102,19 +106,19 @@ async function scrape(doc, url = doc.location.href) {
 			break;
 		case 'bookSection':
 			doc.querySelectorAll('.desc-info > p').forEach((elm) => {
-				proxy[tryMatch(elm.innerText, /(^.+?):/, 1).replace(/\s*/, '')] = tryMatch(elm.innerText, /:(.+)$/, 1);
+				data.set(tryMatch(elm.innerText, /(^.+?):/, 1).replace(/\s*/, ''), tryMatch(elm.innerText, /:(.+)$/, 1));
 			});
 			newItem.title = text(doc, '.art-title > h1');
 			newItem.abstractNote = ZU.trimInternal(text(doc, '#div2 > .desc-content'));
 			newItem.bookTitle = text(doc, '.book-p');
-			newItem.publisher = proxy.出版社;
+			newItem.publisher = data.get('出版社');
 			text(doc, '.art-name').split(/\s/).forEach(name => newItem.creators.push(cleanAuthor(name)));
 			break;
 	}
-	newItem.edition = proxy.版次;
-	newItem.date = ZU.strToISO(proxy.出版时间.replace(/(\d{4})(0?\d{1,2})(\d{1,2})/, '$1-$2-$3'));
+	newItem.edition = data.get('版次');
+	newItem.date = ZU.strToISO(data.get('出版时间').replace(/(\d{4})(0?\d{1,2})(\d{1,2})/, '$1-$2-$3'));
 	newItem.language = 'zh-CN';
-	newItem.ISBN = ZU.cleanISBN(proxy.国际标准书号ISBN || tryMatch(url, /bookcode=(\d{10,13})/, 1));
+	newItem.ISBN = ZU.cleanISBN(data.get('国际标准书号ISBN') || tryMatch(url, /bookcode=(\d{10,13})/, 1));
 	newItem.url = url;
 	extra.set('CNKICite', text(doc, '.book_zb_yy span:last-child'));
 	extra.set('price', text(doc, '#OriginalPrice'));
@@ -125,7 +129,7 @@ async function scrape(doc, url = doc.location.href) {
 
 function tryMatch(string, pattern, index = 0) {
 	if (!string) return '';
-	let match = string.match(pattern);
+	const match = string.match(pattern);
 	return (match && match[index])
 		? match[index]
 		: '';
@@ -208,8 +212,9 @@ var testCases = [
 				"ISBN": "9787111520269",
 				"abstractNote": "本书从社会实际需求出发，根据多年的科研经验和成果，与多年从事测控信息处理、食品等相关专业的研究人员合作，融入许多解决实际问题的研究和实践成果，系统介绍了本课题组基于近红外光谱分析技术在果蔬类农药残留量的检测、食用植物油品质、小麦粉、淀粉的品质检测中的应用研究成",
 				"edition": "1",
+				"extra": "CNKICite: 39\nprice: ￥9999.00",
 				"language": "zh-CN",
-				"libraryCatalog": "CNKI thinker",
+				"libraryCatalog": "CNKI Thinker",
 				"publisher": "机械工业出版社",
 				"url": "https://thinker.cnki.net/bookStore/Book/bookdetail?bookcode=9787111520269000&type=book",
 				"attachments": [],

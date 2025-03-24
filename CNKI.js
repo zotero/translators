@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-02-06 14:24:59"
+	"lastUpdated": "2025-03-24 05:40:30"
 }
 
 /*
@@ -36,63 +36,6 @@ let inMainland = true;
 // Platform of CNKI, default to the National Zong Ku Ping Tai(pinyin of "Total Database Platform").
 // It may be modified when this Translator called by other translators.
 const platform = 'NZKPT';
-
-/*********************
- * search translator *
- *********************/
-
-function detectSearch(items) {
-	return (filterQuery(items).length > 0);
-}
-
-/**
- * @param {*} items items or string.
- * @returns an array of DOIs.
- */
-function filterQuery(items) {
-	if (!items) return [];
-
-	if (typeof items == 'string' || !items.length) items = [items];
-
-	// filter out invalid queries
-	let dois = [], doi;
-	for (let i = 0, n = items.length; i < n; i++) {
-		if (items[i].DOI && /(\/j\.issn|\/[a-z]\.cnki)/i.test(items[i].DOI) && (doi = ZU.cleanDOI(items[i].DOI))) {
-			dois.push(doi);
-		}
-		else if (typeof items[i] == 'string' && /(\/j\.issn|\/[a-z]\.cnki)/i.test(items[i]) && (doi = ZU.cleanDOI(items[i]))) {
-			dois.push(doi);
-		}
-	}
-	return dois;
-}
-
-async function doSearch(items) {
-	const respond = await fetch('https://chn.oversea.cnki.net/kns');
-	if (respond.ok) {
-		inMainland = false;
-	}
-	Z.debug(`inMainland: ${inMainland}`);
-	for (const doi of filterQuery(items)) {
-		const url = `https://doi.org/${encodeURIComponent(doi)}`;
-		let doc = await requestDocument(url);
-		const mainlandLink = doc.querySelector('.feedbackresult tr:last-child a[href*="link.cnki.net"]');
-		const overseaLinnk = doc.querySelector('.feedbackresult tr:last-child a[href*="link.oversea.cnki.net"]');
-		if (mainlandLink && overseaLinnk) {
-			if (inMainland) {
-				doc = await requestDocument(mainlandLink.href);
-			}
-			else {
-				doc = await requestDocument(overseaLinnk.href);
-			}
-		}
-		await doWeb(doc, url);
-	}
-}
-
-/******************
- * web translator *
- ******************/
 
 /**
  * A mapping table of database code to item type.
@@ -275,10 +218,10 @@ function detectWeb(doc, url) {
 		 */
 		/\/KNavi\//i
 	];
-	// #ModuleSearchResult for commom CNKI,
+	// #briefBox for commom search and advanced search,
 	// #contentPanel for journal/yearbook navigation,
 	// .main_sh for old version
-	const searchResult = doc.querySelector('#ModuleSearchResult, #contentPanel, .main_sh');
+	const searchResult = doc.querySelector('#briefBox, #contentPanel, .main_sh');
 	if (searchResult) {
 		Z.monitorDOMChanges(searchResult, { childList: true, subtree: true });
 	}
@@ -457,36 +400,18 @@ async function scrapeMulti(items, doc) {
 			}
 			await scrape(doc, itemKey);
 		}
-		catch (erro1) {
+		catch (error) {
 			Z.debug('Error encountered while scraping one by one:');
-			Z.debug(erro1);
-			try {
-				if (!Object.keys(items).some(itemKey => JSON.parse(itemKey).cookieName)) {
-					throw new Error('This page is not suitable for using batch export API');
-				}
-				const itemKeys = Object.keys(items)
-					.map(element => JSON.parse(element))
-					.filter(element => element.cookieName);
-				await scrapeWithShowExport(itemKeys, doc);
-				// batch export API can request all data at once.
-				break;
+			Z.debug(error);
+			if (!Object.keys(items).some(itemKey => JSON.parse(itemKey).cookieName)) {
+				throw new Error('This page is not suitable for using batch export API');
 			}
-
-			/*
-			Some older versions of CNKI may not support retrieving CookieName from search pages.
-			In these cases, CAPTCHA issue should be handled by the user.
-			*/
-			catch (erro2) {
-				Z.debug(erro2);
-				const debugItem = new Z.Item('webpage');
-				debugItem.title = `❌验证码错误！（CAPTCHA Erro!）❌`;
-				debugItem.url = itemKey.url;
-				debugItem.abstractNote
-					= '原始条目在批量抓取过程中遇到验证码，这通常是您向知网请求过于频繁导致的。原始条目的链接已经保存到本条目中，请考虑随后打开这个链接并重新抓取。\n'
-					+ 'Encountered CAPTCHA during batch scrape process with original item, which is usually caused by your frequent requests to CNKI. The link to original item has been saved to this entry. Please consider opening this link later and re scrap.';
-				debugItem.complete();
-				continue;
-			}
+			const itemKeys = Object.keys(items)
+				.map(element => JSON.parse(element))
+				.filter(element => element.cookieName);
+			await scrapeWithShowExport(itemKeys, doc);
+			// batch export API can request all data at once.
+			break;
 		}
 	}
 }
@@ -811,9 +736,13 @@ async function scrapeDoc(doc, itemKey) {
 				}));
 			extra.set('applyDate', labels.get(['实施日期', '實施日期']), true);
 			break;
-		case 'patent':
-			newItem.patentNumber = labels.get(['申请公布号', '申請公佈號', 'PublicationNo']);
+		case 'patent': {
+			newItem.patentNumber = labels.get(['授權公布号', '授權公佈號', '申请公布号', '申請公佈號', 'PublicationNo']);
 			newItem.applicationNumber = labels.get(['申请\\(专利\\)号', '申請\\(專利\\)號', 'ApplicationNumber']);
+			const translate = Z.loadTranslator('import');
+			// CNKI Refer
+			translate.setTranslator('7b6b135a-ed39-4d90-8e38-65516671c5bc');
+			const { patentCountry } = await translate.getTranslatorObject();
 			newItem.place = newItem.country = patentCountry(newItem.patentNumber || newItem.applicationNumber, newItem.language);
 			newItem.filingDate = labels.get(['申请日', '申請日', 'ApplicationDate']);
 			newItem.issueDate = labels.get(['授权公告日', '授權公告日', 'IssuanceDate']);
@@ -825,6 +754,7 @@ async function scrapeDoc(doc, itemKey) {
 					newItem.creators.push(cleanName(ZU.trimInternal(inventor), 'inventor'));
 				});
 			break;
+		}
 		case 'videoRecording':
 			newItem.abstractNote = labels.get(['视频简介', '視頻簡介']).replace(/\s*更多还原$/, '');
 			newItem.runningTime = labels.get(['时长', '時長']);
@@ -1216,201 +1146,6 @@ async function addPubDetail(item, extra, ids, doc) {
 		Z.debug('Failed to add document details.');
 		Z.debug(error);
 	}
-}
-
-/**
- * Return the country name according to the patent number or patent application number.
- */
-function patentCountry(idNumber, lang = 'zh-CN') {
-	/* eslint-disable camelcase */
-	const country = {
-		AD: { 'zh-CN': '安道尔', 'en-US': 'Andorra', 'zh-TW': '安道爾' },
-		AE: { 'zh-CN': '阿拉伯联合酋长国', 'en-US': 'United Arab Emirates', 'zh-TW': '阿拉伯聯合酋長國' },
-		AF: { 'zh-CN': '阿富汗', 'en-US': 'Afghanistan', 'zh-TW': '阿富汗' },
-		AG: { 'zh-CN': '安提瓜和巴布达', 'en-US': 'Antigua and Barbuda', 'zh-TW': '安提瓜和巴布達' },
-		AI: { 'zh-CN': '安圭拉', 'en-US': 'Anguilla', 'zh-TW': '安圭拉' },
-		AL: { 'zh-CN': '阿尔巴尼亚', 'en-US': 'Albania', 'zh-TW': '阿爾巴尼亞' },
-		AM: { 'zh-CN': '亚美尼亚', 'en-US': 'Armenia', 'zh-TW': '亞美尼亞' },
-		AN: { 'zh-CN': '荷属安的列斯群岛', 'en-US': 'Netherlands Antilles', 'zh-TW': '荷屬安的列斯群島' },
-		AO: { 'zh-CN': '安哥拉', 'en-US': 'Angola', 'zh-TW': '安哥拉' },
-		AR: { 'zh-CN': '阿根廷', 'en-US': 'Argentina', 'zh-TW': '阿根廷' },
-		AT: { 'zh-CN': '奥地利', 'en-US': 'Austria', 'zh-TW': '奧地利' },
-		AU: { 'zh-CN': '澳大利亚', 'en-US': 'Australia', 'zh-TW': '澳大利亞' },
-		AW: { 'zh-CN': '阿鲁巴', 'en-US': 'Aruba', 'zh-TW': '阿魯巴' },
-		AZ: { 'zh-CN': '阿塞拜疆', 'en-US': 'Azerbaijan', 'zh-TW': '亞塞拜然' },
-		BB: { 'zh-CN': '巴巴多斯', 'en-US': 'Barbados', 'zh-TW': '巴貝多' },
-		BD: { 'zh-CN': '孟加拉国', 'en-US': 'Bangladesh', 'zh-TW': '孟加拉' },
-		BE: { 'zh-CN': '比利时', 'en-US': 'Belgium', 'zh-TW': '比利時' },
-		BF: { 'zh-CN': '布基纳法索', 'en-US': 'Burkina Faso', 'zh-TW': '布基納法索' },
-		BG: { 'zh-CN': '保加利亚', 'en-US': 'Bulgaria', 'zh-TW': '保加利亞' },
-		BH: { 'zh-CN': '巴林', 'en-US': 'Bahrain', 'zh-TW': '巴林' },
-		BI: { 'zh-CN': '布隆迪', 'en-US': 'Burundi', 'zh-TW': '布隆迪' },
-		BJ: { 'zh-CN': '贝宁', 'en-US': 'Benin', 'zh-TW': '貝寧' },
-		BM: { 'zh-CN': '百慕大', 'en-US': 'Bermuda', 'zh-TW': '百慕達' },
-		BN: { 'zh-CN': '文莱', 'en-US': 'Brunei', 'zh-TW': '汶萊' },
-		BO: { 'zh-CN': '玻利维亚', 'en-US': 'Bolivia', 'zh-TW': '玻利維亞' },
-		BR: { 'zh-CN': '巴西', 'en-US': 'Brazil', 'zh-TW': '巴西' },
-		BS: { 'zh-CN': '巴哈马', 'en-US': 'Bahamas', 'zh-TW': '巴哈馬' },
-		BT: { 'zh-CN': '不丹', 'en-US': 'Bhutan', 'zh-TW': '不丹' },
-		BW: { 'zh-CN': '博茨瓦纳', 'en-US': 'Botswana', 'zh-TW': '波札那' },
-		BY: { 'zh-CN': '白俄罗斯', 'en-US': 'Belarus', 'zh-TW': '白俄羅斯' },
-		BZ: { 'zh-CN': '伯利兹', 'en-US': 'Belize', 'zh-TW': '貝里斯' },
-		CA: { 'zh-CN': '加拿大', 'en-US': 'Canada', 'zh-TW': '加拿大' },
-		CF: { 'zh-CN': '中非共和国', 'en-US': 'Central African Republic', 'zh-TW': '中非共和國' },
-		CG: { 'zh-CN': '刚果', 'en-US': 'Congo', 'zh-TW': '剛果' },
-		CH: { 'zh-CN': '瑞士', 'en-US': 'Switzerland', 'zh-TW': '瑞士' },
-		CI: { 'zh-CN': '科特迪瓦', 'en-US': "Côte d'Ivoire", 'zh-TW': '科特迪瓦' },
-		CL: { 'zh-CN': '智利', 'en-US': 'Chile', 'zh-TW': '智利' },
-		CM: { 'zh-CN': '喀麦隆', 'en-US': 'Cameroon', 'zh-TW': '喀麥隆' },
-		CN: { 'zh-CN': '中国', 'en-US': 'China', 'zh-TW': '中國' },
-		CO: { 'zh-CN': '哥伦比亚', 'en-US': 'Colombia', 'zh-TW': '哥倫比亞' },
-		CR: { 'zh-CN': '哥斯达黎加', 'en-US': 'Costa Rica', 'zh-TW': '哥斯達黎加' },
-		CU: { 'zh-CN': '古巴', 'en-US': 'Cuba', 'zh-TW': '古巴' },
-		CV: { 'zh-CN': '佛得角', 'en-US': 'Cape Verde', 'zh-TW': '佛得角' },
-		CY: { 'zh-CN': '塞浦路斯', 'en-US': 'Cyprus', 'zh-TW': '塞浦路斯' },
-		DE: { 'zh-CN': '德国', 'en-US': 'Germany', 'zh-TW': '德國' },
-		DJ: { 'zh-CN': '吉布提', 'en-US': 'Djibouti', 'zh-TW': '吉布提' },
-		DK: { 'zh-CN': '丹麦', 'en-US': 'Denmark', 'zh-TW': '丹麥' },
-		DM: { 'zh-CN': '多米尼克', 'en-US': 'Dominica', 'zh-TW': '多米尼克' },
-		DO: { 'zh-CN': '多米尼加共和国', 'en-US': 'Dominican Republic', 'zh-TW': '多明尼加共和國' },
-		DZ: { 'zh-CN': '阿尔及利亚', 'en-US': 'Algeria', 'zh-TW': '阿爾及利亞' },
-		EC: { 'zh-CN': '厄瓜多尔', 'en-US': 'Ecuador', 'zh-TW': '厄瓜多爾' },
-		EE: { 'zh-CN': '爱沙尼亚', 'en-US': 'Estonia', 'zh-TW': '愛沙尼亞' },
-		EG: { 'zh-CN': '埃及', 'en-US': 'Egypt', 'zh-TW': '埃及' },
-		EP: { 'zh-CN': '欧洲专利局', 'en-US': 'European Patent Office', 'zh-TW': '歐洲專利局' },
-		ES: { 'zh-CN': '西班牙', 'en-US': 'Spain', 'zh-TW': '西班牙' },
-		ET: { 'zh-CN': '埃塞俄比亚', 'en-US': 'Ethiopia', 'zh-TW': '衣索比亞' },
-		FI: { 'zh-CN': '芬兰', 'en-US': 'Finland', 'zh-TW': '芬蘭' },
-		FJ: { 'zh-CN': '斐济', 'en-US': 'Fiji', 'zh-TW': '斐濟' },
-		FK: { 'zh-CN': '福克兰群岛', 'en-US': 'Falkland Islands', 'zh-TW': '福克蘭群島' },
-		FR: { 'zh-CN': '法国', 'en-US': 'France', 'zh-TW': '法國' },
-		GA: { 'zh-CN': '加蓬', 'en-US': 'Gabon', 'zh-TW': '加彭' },
-		GB: { 'zh-CN': '英国', 'en-US': 'United Kingdom', 'zh-TW': '英國' },
-		GD: { 'zh-CN': '格林纳达', 'en-US': 'Grenada', 'zh-TW': '格林納達' },
-		GE: { 'zh-CN': '格鲁吉亚', 'en-US': 'Georgia', 'zh-TW': '格魯吉亞' },
-		GH: { 'zh-CN': '加纳', 'en-US': 'Ghana', 'zh-TW': '迦納' },
-		GI: { 'zh-CN': '直布罗陀', 'en-US': 'Gibraltar', 'zh-TW': '直布羅陀' },
-		GM: { 'zh-CN': '冈比亚', 'en-US': 'Gambia', 'zh-TW': '甘比亞' },
-		GN: { 'zh-CN': '几内亚', 'en-US': 'Guinea', 'zh-TW': '幾內亞' },
-		GQ: { 'zh-CN': '赤道几内亚', 'en-US': 'Equatorial Guinea', 'zh-TW': '赤道幾內亞' },
-		GR: { 'zh-CN': '希腊', 'en-US': 'Greece', 'zh-TW': '希臘' },
-		GT: { 'zh-CN': '危地马拉', 'en-US': 'Guatemala', 'zh-TW': '瓜地馬拉' },
-		GW: { 'zh-CN': '几内亚比绍', 'en-US': 'Guinea-Bissau', 'zh-TW': '幾內亞比索' },
-		GY: { 'zh-CN': '圭亚那', 'en-US': 'Guyana', 'zh-TW': '蓋亞那' },
-		HK: { 'zh-CN': '香港特别行政区', 'en-US': 'Hong Kong', 'zh-TW': '香港' },
-		HN: { 'zh-CN': '洪都拉斯', 'en-US': 'Honduras', 'zh-TW': '宏都拉斯' },
-		HR: { 'zh-CN': '克罗地亚', 'en-US': 'Croatia', 'zh-TW': '克羅埃西亞' },
-		HT: { 'zh-CN': '海地', 'en-US': 'Haiti', 'zh-TW': '海地' },
-		HU: { 'zh-CN': '匈牙利', 'en-US': 'Hungary', 'zh-TW': '匈牙利' },
-		ID: { 'zh-CN': '印度尼西亚', 'en-US': 'Indonesia', 'zh-TW': '印尼' },
-		IE: { 'zh-CN': '爱尔兰', 'en-US': 'Ireland', 'zh-TW': '愛爾蘭' },
-		IL: { 'zh-CN': '以色列', 'en-US': 'Israel', 'zh-TW': '以色列' },
-		IN: { 'zh-CN': '印度', 'en-US': 'India', 'zh-TW': '印度' },
-		IQ: { 'zh-CN': '伊拉克', 'en-US': 'Iraq', 'zh-TW': '伊拉克' },
-		IR: { 'zh-CN': '伊朗', 'en-US': 'Iran', 'zh-TW': '伊朗' },
-		IS: { 'zh-CN': '冰岛', 'en-US': 'Iceland', 'zh-TW': '冰島' },
-		IT: { 'zh-CN': '意大利', 'en-US': 'Italy', 'zh-TW': '義大利' },
-		JM: { 'zh-CN': '牙买加', 'en-US': 'Jamaica', 'zh-TW': '牙買加' },
-		JO: { 'zh-CN': '约旦', 'en-US': 'Jordan', 'zh-TW': '約旦' },
-		JP: { 'zh-CN': '日本', 'en-US': 'Japan', 'zh-TW': '日本' },
-		KE: { 'zh-CN': '肯尼亚', 'en-US': 'Kenya', 'zh-TW': '肯亞' },
-		KG: { 'zh-CN': '吉尔吉斯斯坦', 'en-US': 'Kyrgyzstan', 'zh-TW': '吉爾吉斯' },
-		KH: { 'zh-CN': '柬埔寨', 'en-US': 'Cambodia', 'zh-TW': '柬埔寨' },
-		KI: { 'zh-CN': '基里巴斯', 'en-US': 'Kiribati', 'zh-TW': '基里巴斯' },
-		KM: { 'zh-CN': '科摩罗', 'en-US': 'Comoros', 'zh-TW': '科摩羅' },
-		KN: { 'zh-CN': '圣基茨和尼维斯', 'en-US': 'Saint Kitts and Nevis', 'zh-TW': '聖克里斯多福及尼維斯' },
-		KP: { 'zh-CN': '朝鲜', 'en-US': 'North Korea', 'zh-TW': '朝鮮' },
-		KR: { 'zh-CN': '韩国', 'en-US': 'South Korea', 'zh-TW': '韓國' },
-		KW: { 'zh-CN': '科威特', 'en-US': 'Kuwait', 'zh-TW': '科威特' },
-		KY: { 'zh-CN': '开曼群岛', 'en-US': 'Cayman Islands', 'zh-TW': '開曼群島' },
-		KZ: { 'zh-CN': '哈萨克斯坦', 'en-US': 'Kazakhstan', 'zh-TW': '哈薩克' },
-		LA: { 'zh-CN': '老挝', 'en-US': 'Laos', 'zh-TW': '寮國' },
-		LB: { 'zh-CN': '黎巴嫩', 'en-US': 'Lebanon', 'zh-TW': '黎巴嫩' },
-		LC: { 'zh-CN': '圣卢西亚', 'en-US': 'Saint Lucia', 'zh-TW': '聖露西亞' },
-		LI: { 'zh-CN': '列支敦士登', 'en-US': 'Liechtenstein', 'zh-TW': '列支敦斯登' },
-		LK: { 'zh-CN': '斯里兰卡', 'en-US': 'Sri Lanka', 'zh-TW': '斯里蘭卡' },
-		LR: { 'zh-CN': '利比里亚', 'en-US': 'Liberia', 'zh-TW': '賴比瑞亞' },
-		LS: { 'zh-CN': '莱索托', 'en-US': 'Lesotho', 'zh-TW': '賴索托' },
-		LT: { 'zh-CN': '立陶宛', 'en-US': 'Lithuania', 'zh-TW': '立陶宛' },
-		LU: { 'zh-CN': '卢森堡', 'en-US': 'Luxembourg', 'zh-TW': '盧森堡' },
-		LV: { 'zh-CN': '拉脱维亚', 'en-US': 'Latvia', 'zh-TW': '拉脫維亞' },
-		LY: { 'zh-CN': '利比亚', 'en-US': 'Libya', 'zh-TW': '利比亞' },
-		MA: { 'zh-CN': '摩洛哥', 'en-US': 'Morocco', 'zh-TW': '摩洛哥' },
-		MC: { 'zh-CN': '摩纳哥', 'en-US': 'Monaco', 'zh-TW': '摩納哥' },
-		MD: { 'zh-CN': '摩尔多瓦', 'en-US': 'Moldova', 'zh-TW': '摩爾多瓦' },
-		MG: { 'zh-CN': '马达加斯加', 'en-US': 'Madagascar', 'zh-TW': '馬達加斯加' },
-		ML: { 'zh-CN': '马里', 'en-US': 'Mali', 'zh-TW': '馬里' },
-		MN: { 'zh-CN': '蒙古', 'en-US': 'Mongolia', 'zh-TW': '蒙古' },
-		MO: { 'zh-CN': '澳门特别行政区', 'en-US': 'Macau', 'zh-TW': '澳門' },
-		MR: { 'zh-CN': '毛里塔尼亚', 'en-US': 'Mauritania', 'zh-TW': '毛里塔尼亞' },
-		MS: { 'zh-CN': '蒙特塞拉特', 'en-US': 'Montserrat', 'zh-TW': '蒙特塞拉特' },
-		MT: { 'zh-CN': '马耳他', 'en-US': 'Malta', 'zh-TW': '馬爾他' },
-		MU: { 'zh-CN': '毛里求斯', 'en-US': 'Mauritius', 'zh-TW': '毛里求斯' },
-		MV: { 'zh-CN': '马尔代夫', 'en-US': 'Maldives', 'zh-TW': '馬爾地夫' },
-		MW: { 'zh-CN': '马拉维', 'en-US': 'Malawi', 'zh-TW': '馬拉維' },
-		MX: { 'zh-CN': '墨西哥', 'en-US': 'Mexico', 'zh-TW': '墨西哥' },
-		MY: { 'zh-CN': '马来西亚', 'en-US': 'Malaysia', 'zh-TW': '馬來西亞' },
-		MZ: { 'zh-CN': '莫桑比克', 'en-US': 'Mozambique', 'zh-TW': '莫桑比克' },
-		NA: { 'zh-CN': '纳米比亚', 'en-US': 'Namibia', 'zh-TW': '納米比亞' },
-		NE: { 'zh-CN': '尼日尔', 'en-US': 'Niger', 'zh-TW': '尼日' },
-		NG: { 'zh-CN': '尼日利亚', 'en-US': 'Nigeria', 'zh-TW': '奈及利亞' },
-		NI: { 'zh-CN': '尼加拉瓜', 'en-US': 'Nicaragua', 'zh-TW': '尼加拉瓜' },
-		NL: { 'zh-CN': '荷兰', 'en-US': 'Netherlands', 'zh-TW': '荷蘭' },
-		NO: { 'zh-CN': '挪威', 'en-US': 'Norway', 'zh-TW': '挪威' },
-		NP: { 'zh-CN': '尼泊尔', 'en-US': 'Nepal', 'zh-TW': '尼泊爾' },
-		NR: { 'zh-CN': '瑙鲁', 'en-US': 'Nauru', 'zh-TW': '諾魯' },
-		NZ: { 'zh-CN': '新西兰', 'en-US': 'New Zealand', 'zh-TW': '紐西蘭' },
-		OM: { 'zh-CN': '阿曼', 'en-US': 'Oman', 'zh-TW': '阿曼' },
-		PA: { 'zh-CN': '巴拿马', 'en-US': 'Panama', 'zh-TW': '巴拿馬' },
-		PE: { 'zh-CN': '秘鲁', 'en-US': 'Peru', 'zh-TW': '秘魯' },
-		PG: { 'zh-CN': '巴布亚新几内亚', 'en-US': 'Papua New Guinea', 'zh-TW': '巴布亞紐幾內亞' },
-		PH: { 'zh-CN': '菲律宾', 'en-US': 'Philippines', 'zh-TW': '菲律賓' },
-		PK: { 'zh-CN': '巴基斯坦', 'en-US': 'Pakistan', 'zh-TW': '巴基斯坦' },
-		PL: { 'zh-CN': '波兰', 'en-US': 'Poland', 'zh-TW': '波蘭' },
-		PT: { 'zh-CN': '葡萄牙', 'en-US': 'Portugal', 'zh-TW': '葡萄牙' },
-		PY: { 'zh-CN': '巴拉圭', 'en-US': 'Paraguay', 'zh-TW': '巴拉圭' },
-		QA: { 'zh-CN': '卡塔尔', 'en-US': 'Qatar', 'zh-TW': '卡達' },
-		RO: { 'zh-CN': '罗马尼亚', 'en-US': 'Romania', 'zh-TW': '羅馬尼亞' },
-		RU: { 'zh-CN': '俄罗斯', 'en-US': 'Russia', 'zh-TW': '俄羅斯聯邦' },
-		RW: { 'zh-CN': '卢旺达', 'en-US': 'Rwanda', 'zh-TW': '盧安達' },
-		SA: { 'zh-CN': '沙特阿拉伯', 'en-US': 'Saudi Arabia', 'zh-TW': '沙烏地阿拉伯' },
-		SB: { 'zh-CN': '所罗门群岛', 'en-US': 'Solomon Islands', 'zh-TW': '索羅門群島' },
-		SC: { 'zh-CN': '塞舌尔', 'en-US': 'Seychelles', 'zh-TW': '塞席爾' },
-		SD: { 'zh-CN': '苏丹', 'en-US': 'Sudan', 'zh-TW': '蘇丹' },
-		SE: { 'zh-CN': '瑞典', 'en-US': 'Sweden', 'zh-TW': '瑞典' },
-		SG: { 'zh-CN': '新加坡', 'en-US': 'Singapore', 'zh-TW': '新加坡' },
-		SH: { 'zh-CN': '圣赫勒拿', 'en-US': 'Saint Helena', 'zh-TW': '聖赫勒拿島' },
-		SI: { 'zh-CN': '斯洛文尼亚', 'en-US': 'Slovenia', 'zh-TW': '斯洛維尼亞' },
-		SL: { 'zh-CN': '塞拉利昂', 'en-US': 'Sierra Leone', 'zh-TW': '塞拉利昂' },
-		SM: { 'zh-CN': '圣马力诺', 'en-US': 'San Marino', 'zh-TW': '聖馬利諾' },
-		SN: { 'zh-CN': '塞内加尔', 'en-US': 'Senegal', 'zh-TW': '塞內加爾' },
-		SO: { 'zh-CN': '索马里', 'en-US': 'Somalia', 'zh-TW': '索馬利亞' },
-		SR: { 'zh-CN': '苏里南', 'en-US': 'Suriname', 'zh-TW': '蘇里南' },
-		ST: { 'zh-CN': '圣多美和普林西比', 'en-US': 'São Tomé and Príncipe', 'zh-TW': '聖多美和普林西比' },
-		SV: { 'zh-CN': '萨尔瓦多', 'en-US': 'El Salvador', 'zh-TW': '薩爾瓦多' },
-		SY: { 'zh-CN': '叙利亚', 'en-US': 'Syria', 'zh-TW': '敘利亞' },
-		SZ: { 'zh-CN': '斯威士兰', 'en-US': 'Eswatini', 'zh-TW': '史瓦濟蘭' },
-		TD: { 'zh-CN': '乍得', 'en-US': 'Chad', 'zh-TW': '查德' },
-		TG: { 'zh-CN': '多哥', 'en-US': 'Togo', 'zh-TW': '多哥' },
-		TH: { 'zh-CN': '泰国', 'en-US': 'Thailand', 'zh-TW': '泰國' },
-		TJ: { 'zh-CN': '塔吉克斯坦', 'en-US': 'Tajikistan', 'zh-TW': '塔吉克' },
-		TM: { 'zh-CN': '土库曼斯坦', 'en-US': 'Turkmenistan', 'zh-TW': '土庫曼' },
-		TN: { 'zh-CN': '突尼斯', 'en-US': 'Tunisia', 'zh-TW': '突尼西亞' },
-		TO: { 'zh-CN': '汤加', 'en-US': 'Tonga', 'zh-TW': '東加' },
-		TR: { 'zh-CN': '土耳其', 'en-US': 'Turkey', 'zh-TW': '土耳其' },
-		TT: { 'zh-CN': '特立尼达和多巴哥', 'en-US': 'Trinidad and Tobago', 'zh-TW': '千里達及托巴哥' },
-		TV: { 'zh-CN': '图瓦卢', 'en-US': 'Tuvalu', 'zh-TW': '圖瓦盧' },
-		TZ: { 'zh-CN': '坦桑尼亚', 'en-US': 'Tanzania', 'zh-TW': '坦尚尼亞' },
-		UA: { 'zh-CN': '乌克兰', 'en-US': 'Ukraine', 'zh-TW': '烏克蘭' },
-		UG: { 'zh-CN': '乌干达', 'en-US': 'Uganda', 'zh-TW': '烏干達' },
-		US: { 'zh-CN': '美国', 'en-US': 'United States', 'zh-TW': '美國' },
-		UY: { 'zh-CN': '乌拉圭', 'en-US': 'Uruguay', 'zh-TW': '烏拉圭' },
-		UZ: { 'zh-CN': '乌兹别克斯坦', 'en-US': 'Uzbekistan', 'zh-TW': '烏茲別克' }
-	}[idNumber.substring(0, 2).toUpperCase()];
-	/* eslint-enable camelcase */
-	return country
-		? country[lang]
-		: '';
 }
 
 /** add pdf or caj to attachments, default is pdf */

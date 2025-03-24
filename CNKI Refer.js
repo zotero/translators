@@ -8,7 +8,7 @@
 	"priority": 99,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2025-02-06 14:18:50"
+	"lastUpdated": "2025-03-24 05:24:12"
 }
 
 /*
@@ -459,6 +459,11 @@ function detectLanguage(text) {
 			: 'zh-CN'
 		: 'en-US';
 }
+
+var exports = {
+	patentCountry,
+	detectLanguage
+};
 
 /** BEGIN TEST CASES **/
 var testCases = [
