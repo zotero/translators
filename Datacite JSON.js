@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2025-02-27 04:42:21"
+	"lastUpdated": "2025-03-26 15:27:42"
 }
 
 /*
@@ -124,6 +124,7 @@ function doImport() {
 		item.extra = "Type: dataset";
 	}
 	var title = "";
+	var alternateTitle = "";
 	for (let titleElement of data.titles) {
 		if (!titleElement.title) {
 			continue;
@@ -134,8 +135,11 @@ function doImport() {
 		else if (titleElement.titleType.toLowerCase() == "subtitle") {
 			title = title + ": " + titleElement.title;
 		}
+		else if (!alternateTitle) {
+			alternateTitle = titleElement.title;
+		}
 	}
-	item.title = title;
+	item.title = title || alternateTitle;
 	
 	if (data.creators) {
 		for (let creator of data.creators) {
@@ -1121,6 +1125,52 @@ var testCases = [
 						"tag": "Pacific Ocean"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "{\n\t\"id\": \"https://doi.org/10.34769/azkm-y326\",\n\t\"doi\": \"10.34769/AZKM-Y326\",\n\t\"url\": \"http://www2.ite.waw.pl//docs/imif/20210121_M_Mozdzonek_2020.pdf\",\n\t\"types\": {\n\t\t\"ris\": \"GEN\",\n\t\t\"bibtex\": \"misc\",\n\t\t\"citeproc\": \"article\",\n\t\t\"schemaOrg\": \"CreativeWork\",\n\t\t\"resourceTypeGeneral\": \"DataPaper\"\n\t},\n\t\"creators\": [\n\t\t{\n\t\t\"name\": \"Możdżonek, Małgorzata\",\n\t\t\"nameType\": \"Personal\",\n\t\t\"givenName\": \"Małgorzata\",\n\t\t\"familyName\": \"Możdżonek\",\n\t\t\"affiliation\": [\n\t\t\t{\n\t\t\t\"name\": \"Institute of Electronic Materials Technology\",\n\t\t\t\"schemeUri\": \"https://ror.org\",\n\t\t\t\"affiliationIdentifier\": \"https://ror.org/03jp3w522\",\n\t\t\t\"affiliationIdentifierScheme\": \"ROR\"\n\t\t\t}\n\t\t],\n\t\t\"nameIdentifiers\": []\n\t\t},\n\t\t{\n\t\t\"name\": \"Caban, Piotr\",\n\t\t\"nameType\": \"Personal\",\n\t\t\"givenName\": \"Piotr\",\n\t\t\"familyName\": \"Caban\",\n\t\t\"affiliation\": [\n\t\t\t{\n\t\t\t\"name\": \"Institute of Electronic Materials Technology\",\n\t\t\t\"schemeUri\": \"https://ror.org\",\n\t\t\t\"affiliationIdentifier\": \"https://ror.org/03jp3w522\",\n\t\t\t\"affiliationIdentifierScheme\": \"ROR\"\n\t\t\t}\n\t\t],\n\t\t\"nameIdentifiers\": []\n\t\t},\n\t\t{\n\t\t\"name\": \"Gaca, Jarosław\",\n\t\t\"nameType\": \"Personal\",\n\t\t\"givenName\": \"Jarosław\",\n\t\t\"familyName\": \"Gaca\",\n\t\t\"affiliation\": [\n\t\t\t{\n\t\t\t\"name\": \"Institute of Electronic Materials Technology\",\n\t\t\t\"schemeUri\": \"https://ror.org\",\n\t\t\t\"affiliationIdentifier\": \"https://ror.org/03jp3w522\",\n\t\t\t\"affiliationIdentifierScheme\": \"ROR\"\n\t\t\t}\n\t\t],\n\t\t\"nameIdentifiers\": []\n\t\t},\n\t\t{\n\t\t\"name\": \"Wójcik, Marek\",\n\t\t\"nameType\": \"Personal\",\n\t\t\"givenName\": \"Marek\",\n\t\t\"familyName\": \"Wójcik\",\n\t\t\"affiliation\": [\n\t\t\t{\n\t\t\t\"name\": \"Institute of Electronic Materials Technology\",\n\t\t\t\"schemeUri\": \"https://ror.org\",\n\t\t\t\"affiliationIdentifier\": \"https://ror.org/03jp3w522\",\n\t\t\t\"affiliationIdentifierScheme\": \"ROR\"\n\t\t\t}\n\t\t],\n\t\t\"nameIdentifiers\": []\n\t\t},\n\t\t{\n\t\t\"name\": \"Piątkowska, Anna\",\n\t\t\"nameType\": \"Personal\",\n\t\t\"givenName\": \"Anna\",\n\t\t\"familyName\": \"Piątkowska\",\n\t\t\"affiliation\": [\n\t\t\t{\n\t\t\t\"name\": \"Institute of Electronic Materials Technology\",\n\t\t\t\"schemeUri\": \"https://ror.org\",\n\t\t\t\"affiliationIdentifier\": \"https://ror.org/03jp3w522\",\n\t\t\t\"affiliationIdentifierScheme\": \"ROR\"\n\t\t\t}\n\t\t],\n\t\t\"nameIdentifiers\": []\n\t\t}\n\t],\n\t\"titles\": [\n\t\t{\n\t\t\"lang\": \"en\",\n\t\t\"title\": \"Determination of the thickness of BN layers on the Al2O3 substrate by FT-IR spectroscopy\",\n\t\t\"titleType\": \"TranslatedTitle\"\n\t\t}\n\t],\n\t\"publisher\": {\n\t\t\"name\": \"Łukasiewicz Research Network - Institute of Electronic Materials Technology\"\n\t},\n\t\"subjects\": [],\n\t\"contributors\": [],\n\t\"dates\": [],\n\t\"publicationYear\": 2020,\n\t\"language\": \"en\",\n\t\"identifiers\": [],\n\t\"sizes\": [],\n\t\"formats\": [],\n\t\"rightsList\": [],\n\t\"descriptions\": [],\n\t\"geoLocations\": [],\n\t\"fundingReferences\": [],\n\t\"relatedIdentifiers\": [],\n\t\"schemaVersion\": \"http://datacite.org/schema/kernel-4\",\n\t\"providerId\": \"ymju\",\n\t\"clientId\": \"psnc.itme\",\n\t\"agency\": \"datacite\",\n\t\"state\": \"findable\"\n}",
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "Determination of the thickness of BN layers on the Al2O3 substrate by FT-IR spectroscopy",
+				"creators": [
+					{
+						"lastName": "Możdżonek",
+						"firstName": "Małgorzata",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Caban",
+						"firstName": "Piotr",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Gaca",
+						"firstName": "Jarosław",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wójcik",
+						"firstName": "Marek",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Piątkowska",
+						"firstName": "Anna",
+						"creatorType": "author"
+					}
+				],
+				"date": 2020,
+				"DOI": "10.34769/AZKM-Y326",
+				"language": "en",
+				"repository": "Łukasiewicz Research Network - Institute of Electronic Materials Technology",
+				"url": "http://www2.ite.waw.pl//docs/imif/20210121_M_Mozdzonek_2020.pdf",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
