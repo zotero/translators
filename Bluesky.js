@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-01-15 17:54:04"
+	"lastUpdated": "2025-03-26 14:26:25"
 }
 
 /*
@@ -35,14 +35,11 @@
 	***** END LICENSE BLOCK *****
 */
 
+let handleRe = /(?:\/profile\/)(([^/]+))/;
+let postIdRe = /(?:\/post\/)([a-zA-Z0-9]+)/;
+
 function detectWeb(doc, url) {
-	const handle = /(?:\/profile\/)(([^/]+))/;
-	const postId = /(?:\/post\/)([a-zA-Z0-9]+)/;
-
-	let foundHandle = url.match(handle)[1];
-	let foundPostId = url.match(postId)[1];
-
-	if (url.includes('/post/') && foundHandle && foundPostId) {
+	if (url.includes('/post/') && handleRe.test(url) && postIdRe.test(url)) {
 		return 'forumPost';
 	}
 	return false;
@@ -53,11 +50,8 @@ async function doWeb(doc, url) {
 }
 
 async function scrapeAPI(doc, url) {
-	const handle = /(?:\/profile\/)(([^/]+))/;
-	const postId = /(?:\/post\/)([a-zA-Z0-9]+)/;
-
-	let foundHandle = url.match(handle)[1];
-	let foundPostId = url.match(postId)[1];
+	let foundHandle = url.match(handleRe)[1];
+	let foundPostId = url.match(postIdRe)[1];
 
 	let apiUrl = `https://public.api.bsky.app/xrpc/app.bsky.feed.getPostThread?uri=at://${foundHandle}/app.bsky.feed.post/${foundPostId}`;
 	let data = await ZU.requestJSON(apiUrl);
