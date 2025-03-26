@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-26 15:54:04"
+	"lastUpdated": "2025-03-26 17:21:25"
 }
 
 /*
@@ -35,7 +35,12 @@
 	***** END LICENSE BLOCK *****
 */
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
+	if ((doc.location.pathname.startsWith('/Articles/') || doc.location.pathname === '/Search/DoTextSearch')
+			&& getSearchResults(doc, true)) {
+		return 'multiple';
+	}
+
 	if (isNewsItem(doc) || isFeatureArticle(doc) || isGuestArticle(doc)) {
 		return 'newspaperArticle';
 	}
@@ -43,7 +48,43 @@ function detectWeb(doc, url) {
 	return false;
 }
 
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	// Weekly Edition pages
+	var rows = doc.querySelectorAll('.SummaryHL > a[href*="/Articles/"]');
+	if (!rows.length && doc.location.pathname === '/Search/DoTextSearch') {
+		// Issue pages
+		rows = doc.querySelectorAll('.ArticleText > p > a[href*="/Articles/"]');
+	}
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		if (title.startsWith('Welcome to the LWN.net Weekly Edition')) {
+			continue;
+		}
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
 async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			scrape(await requestDocument(url));
+		}
+	}
+	else {
+		scrape(doc, url);
+	}
+}
+
+function scrape(doc, url = doc.location.href) {
 	const title = getTitle(doc);
 	const author = getAuthor(doc);
 	const date = ZU.strToISO(getDate(doc));
@@ -259,6 +300,16 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://lwn.net/Articles/1012147/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://lwn.net/Search/DoTextSearch?words=test&ctype11=yes&ctype8=yes&ctype3=yes&cat_79=yes&cat_271=yes&cat_56=yes&cat_25=yes&cat_21=yes&cat_1=yes&cat_8=yes&cat_2=yes&cat_84=yes&cat_72=yes&cat_3=yes&catsbox=yes&order=relevance&Search=Search",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
