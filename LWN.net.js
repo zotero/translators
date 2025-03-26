@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-26 17:21:25"
+	"lastUpdated": "2025-03-26 17:27:25"
 }
 
 /*
@@ -121,15 +121,15 @@ function scrape(doc, url = doc.location.href) {
  */
 
 function isNewsItem(doc) {
-	return ZU.xpath(doc, '//div[@class="Byline"]').length == 1;
+	return doc.querySelectorAll('.Byline').length == 1;
 }
 
 function isFeatureArticle(doc) {
-	return ZU.xpath(doc, '//div[@class="FeatureByline"]').length == 1;
+	return doc.querySelectorAll('.FeatureByline').length == 1;
 }
 
 function isGuestArticle(doc) {
-	return ZU.xpath(doc, '//div[@class="GAByline"]').length == 1;
+	return doc.querySelectorAll('.GAByline').length == 1;
 }
 
 /*
@@ -137,12 +137,12 @@ function isGuestArticle(doc) {
  */
 
 function getTitle(doc) {
-	return ZU.xpathText(doc, '//div[contains(@class, "PageHeadline")]/h1/text()');
+	return text(doc, '.PageHeadline > h1');
 }
 
 function getAuthor(doc) {
 	if (isNewsItem(doc)) {
-		let author = ZU.xpathText(doc, '//div[@class="Byline"]').match(/\[Posted (.*) by (.*)\]/i)?.[2];
+		let author = text(doc, '.Byline').match(/\[Posted (.*) by (.*)\]/i)?.[2];
 
 		// Regular news items are published with abbreviated author names, so we have to map them back to their full names.
 		// Since regular news items should only be authored by the LWN staff themselves (4 people), this should suffice.
@@ -161,11 +161,11 @@ function getAuthor(doc) {
 	}
 
 	if (isFeatureArticle(doc)) {
-		return ZU.xpathText(doc, '//div[@class="FeatureByline"]/b');
+		return text(doc, '.FeatureByline > b');
 	}
 
 	if (isGuestArticle(doc)) {
-		return ZU.xpathText(doc, '//div[@class="GAByline"]/p[2]').match(/contributed by (.*)/i)?.[1];
+		return text(doc, '.GAByline > p:last-child').match(/contributed by (.*)/i)?.[1];
 	}
 
 	return null; // Error
@@ -173,15 +173,15 @@ function getAuthor(doc) {
 
 function getDate(doc) {
 	if (isNewsItem(doc)) {
-		return ZU.xpathText(doc, '//div[@class="Byline"]').match(/Posted (.*) by (.*)\]/i)?.[1];
+		return text(doc, '.Byline').match(/Posted (.*) by (.*)\]/i)?.[1];
 	}
 
 	if (isFeatureArticle(doc)) {
-		return ZU.trim(ZU.xpathText(doc, '//div[@class="FeatureByline"]/text()[2]'));
+		return doc.querySelector('.FeatureByline').lastElementChild.previousSibling.textContent;
 	}
 
 	if (isGuestArticle(doc)) {
-		return ZU.xpathText(doc, '//div[@class="GAByline"]/p[1]');
+		return text(doc, '.GAByline > p:first-child');
 	}
 
 	return null; // Error
