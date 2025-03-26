@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2025-03-07 16:05:00"
+	"lastUpdated": "2025-03-26 20:00:00"
 }
 
 /*
@@ -178,8 +178,8 @@ async function importItems({ references, doc, citaviVersion, rememberTags, itemI
 			item.tags = [];
 		}
 		if (rememberTags[item.itemID]) {
-			for (let j = 0; j < rememberTags[item.itemID].length; j++) {
-				item.tags.push(rememberTags[item.itemID][j]);
+			for (let tag of rememberTags[item.itemID]) {
+				item.tags.push(tag);
 			}
 		}
 
@@ -204,15 +204,15 @@ async function importItems({ references, doc, citaviVersion, rememberTags, itemI
 				noteObject.note += "<i>" + pages + "</i>";
 			}
 			keywords = ZU.xpathText(doc, '//KnowledgeItemKeywords/OnetoN[starts-with(text(), "' + noteObject.id + '")]');
-			if (keywords && keywords.length > 0) {
+			if (keywords) {
 				noteObject.tags = attachName(doc, keywords);
 			}
 			else {
 				noteObject.tags = [];
 			}
 			if (rememberTags[noteObject.id]) {
-				for (let j = 0; j < rememberTags[noteObject.id]; j++) {
-					noteObject.tags.append(rememberTags[noteObject.id][j]);
+				for (let tag of rememberTags[noteObject.id]) {
+					noteObject.tags.append(tag);
 				}
 			}
 			if (noteObject.note != "") {
@@ -487,7 +487,7 @@ function attachName(doc, ids) {
 			valueList.push(ZU.xpathText(author, 'Name'));
 		}
 		else {
-			Z.debug("Can't find this id:", id);
+			Z.debug("Can't find this id: " + id);
 		}
 	}
 	return valueList;
