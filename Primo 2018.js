@@ -57,7 +57,7 @@ function getSearchResults(doc, checkOnly) {
 		let title = text(row.parentNode, '.item-title')
 			|| row.parentNode.textContent;
 		if (!href || !title) continue;
-		title = title.replace(/^;/, '');
+		title = title.replace(/^;/, '').replace(/(.+).{2}\s\/\s.*/, '$1');
 		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
