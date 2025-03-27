@@ -2,7 +2,7 @@
 	"translatorID": "294f4583-1d91-40aa-8152-230676717241",
 	"label": "CSJN Argentina",
 	"creator": "Ramiro",
-	"target": "https://sjconsulta.csjn.gov.ar/",
+	"target": "^https://sjconsulta\\.csjn\\.gov\\.ar/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
