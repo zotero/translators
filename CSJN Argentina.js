@@ -1,49 +1,19 @@
-
 {
-	"translatorID": "	",
+	"translatorID": "294f4583-1d91-40aa-8152-230676717241",
 	"label": "CSJN Argentina",
-	"creator": "Ramiro Álvarez Ugarte",
-	"target": "^https://sjconsulta\\.csjn\\.gov\\.ar/",
+	"creator": "Ramiro",
+	"target": "https://sjconsulta.csjn.gov.ar/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-25 12:03:22"
+	"lastUpdated": "2025-03-27 22:46:46"
 }
 
-/*
-	***** BEGIN LICENSE BLOCK *****
-
-	Copyright © 2025 Ramiro Álvarez Ugarte
-
-	This file is part of Zotero.
-
-	Zotero is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	Zotero is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-	GNU Affero General Public License for more details.
-
-	You should have received a copy of the GNU Affero General Public License
-	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
-
-	***** END LICENSE BLOCK *****
-*/
-
-/* This translator captures cases from "Sumarios", the page of Argentina's Supreme Court for its own cases and decisions */
-
-function detectWeb(doc, url) {
-	if (url.includes("/sjconsulta/")) {
-		return "case";
-	}
-	return false;
-}
+/* This translator seeks to capture info on cases from Argentina, from the 
+Supreme Court website */
 
 function capitalizeFirstLetters(text) {
 	// First, handle specific cases where certain strings should remain lowercase
@@ -54,6 +24,12 @@ function capitalizeFirstLetters(text) {
 
 	// Now apply capitalization to the rest of the string
 	return text.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+}
+function detectWeb(doc, url) {
+	if (url.includes("sjconsulta")) {
+		return "case";
+	}
+	return false;
 }
 
 function doWeb(doc, url) {
@@ -96,3 +72,14 @@ function doWeb(doc, url) {
 	item.court = "CSJN";
 	item.complete();
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://sjconsulta.csjn.gov.ar/sjconsulta/consultaSumarios/consulta.html",
+		"detectedItemType": false,
+		"items": []
+	}
+]
+/** END TEST CASES **/

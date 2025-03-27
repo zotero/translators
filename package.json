@@ -18,7 +18,7 @@
 		"@zotero/eslint-config": "^1.0.8",
 		"chromedriver": "^122.0.4",
 		"clarinet": "^0.12.6",
-		"eslint": "^8.38.0",
+		"eslint": "^8.57.1",
 		"eslint-plugin-zotero-translator": "file:.ci/eslint-plugin-zotero-translator",
 		"selenium-webdriver": "^4.0.0-alpha.7"
 	}
