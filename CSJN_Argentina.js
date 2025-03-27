@@ -29,7 +29,7 @@ This translator captures cases from "Sumarios", the page of Argentina's Supreme 
 	"translatorID": "b633edce-38de-4def-a893-5fb2ab73d26a",
 	"label": "CSJN_Argentina",
 	"creator": "Ramiro Álvarez Ugarte",
-	"target": "https://sjconsulta.csjn.gov.ar/",
+	"target": "^https://sjconsulta\\.csjn\\.gov\\.ar/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
