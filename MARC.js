@@ -344,9 +344,11 @@ record.prototype._associateTags = function (item, fieldNo, part) {
 
 // this function loads a MARC record into our database
 record.prototype.translate = function (item) {
-	// get item type
-	if (this.leader) {
-		var marcType = this.leader.substr(6, 1);
+	// Set item type if it does not already exist.
+	// This is because some translators (e.g. TIND ILS) have non-MARC ways to determine item type,
+	// but the MARC translator can return incorrect results for the creators if the item type is book.
+	if (!item.itemType && this.leader) {
+		let marcType = this.leader.substr(6, 1);
 		if (marcType == "g") {
 			item.itemType = "film";
 		}
@@ -363,11 +365,8 @@ record.prototype.translate = function (item) {
 			// 20091210: in unimarc, the code for manuscript is b, unused in marc21.
 			item.itemType = "manuscript";
 		}
-		else {
-			item.itemType = "book";
-		}
 	}
-	else {
+	if (!item.itemType) {
 		item.itemType = "book";
 	}
 
