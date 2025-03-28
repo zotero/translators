@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-01-29 18:53:58"
+	"lastUpdated": "2025-03-28 15:14:15"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2021 Abe Jellinek
-	
+
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -56,7 +56,7 @@ function detectWeb(doc, url) {
 	if (!doc.querySelector('#tindfooter')) {
 		return false;
 	}
-	
+
 	if (url.includes('/record/')) {
 		const schemaOrg = getSchemaOrg(doc);
 
@@ -93,14 +93,16 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) ZU.processDocuments(Object.keys(items), scrape);
-		});
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc);
 	}
 }
 
@@ -108,34 +110,50 @@ function doWeb(doc, url) {
  *
  * @param {Document} doc The page document
  */
-function scrape(doc, _url) {
+async function scrape(doc) {
+	let translator = Zotero.loadTranslator("import");
+	// MARCXML
+	translator.setTranslator("edd87d07-9194-42f8-b2ad-997c4c7deefd");
+
 	const schemaOrg = getSchemaOrg(doc);
 
 	let marcXMLURL = attr(doc, 'a[href$="/export/xm"], a[download$=".xml"]', 'href');
-	ZU.doGet(marcXMLURL, function (respText) {
-		var translator = Zotero.loadTranslator("import");
-		// MARCXML
-		translator.setTranslator("edd87d07-9194-42f8-b2ad-997c4c7deefd");
-		translator.setString(respText);
-		
-		translator.setHandler("itemDone", function (obj, item) {
-			item.libraryCatalog = text(doc, '#headerlogo')
-				|| attr(doc, 'meta[property="og:site_name"]', 'content');
-			
-			let erURL = attr(doc, '.er-link', 'href');
-			if (erURL) {
-				item.url = erURL;
-			}
-			
-			if (schemaOrg) {
-				enrichItemWithSchemaOrgItemType(item, schemaOrg);
-			}
+	if (!marcXMLURL) marcXMLURL = attr(doc, 'form[action$="/export/xm"]', 'action');
+	if (!marcXMLURL) {
+		throw new Error('Unable to find MARCXML URL');
+	}
 
-			item.complete();
-		});
-		
-		translator.translate();
-	});
+	let xml = new DOMParser().parseFromString(await requestText(marcXMLURL), "text/xml");
+	let marcxml = await translator.getTranslatorObject();
+	for (let record of await marcxml.parseDocument(xml)) {
+		let item = new Zotero.Item();
+
+		// Set the right item type if schemaorg exists
+		if (schemaOrg) {
+			enrichItemWithSchemaOrgItemType(item, schemaOrg);
+		}
+
+		record.translate(item);
+		//// Enhance the item with TIND-specific information
+		// Catalog name
+		item.libraryCatalog = text(doc, '#headerlogo')
+			|| attr(doc, 'meta[property="og:site_name"]', 'content');
+
+		// Url
+		let erURL = attr(doc, '.er-link', 'href');
+		if (erURL) {
+			item.url = erURL;
+		}
+
+		// Tind-specific date field 269. Assume there's only one.
+		let tindDate = record.getFieldSubfields("269")[0];
+		if (tindDate && tindDate.a && !item.date) {
+			// Assign the date if it doesn't already exist.
+			item.date = tindDate.a;
+		}
+
+		item.complete();
+	}
 }
 
 /**
@@ -375,7 +393,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://library.usi.edu/record/1416599",
+		"url": "https://library.usi.edu/record/1416599?v=pdf",
 		"items": [
 			{
 				"itemType": "thesis",
@@ -385,8 +403,24 @@ var testCases = [
 						"firstName": "Sherry",
 						"lastName": "Crawford",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Thomas A.",
+						"lastName": "Wilhelmus",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Helen R.",
+						"lastName": "Sands",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Laurence E.",
+						"lastName": "Musgrove",
+						"creatorType": "contributor"
 					}
 				],
+				"date": "1996",
 				"abstractNote": "No abstract",
 				"language": "eng",
 				"libraryCatalog": "University of Southern Indiana",
@@ -460,12 +494,71 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"url": "https://socialmediaarchive.org/record/70?v=pdf",
+		"items": [
+			{
+				"itemType": "dataset",
+				"title": "Diffusion Time Metrics for Facebook Posts with 100 or More Reshares",
+				"creators": [
+					{
+						"firstName": "Inc",
+						"lastName": "Meta Platforms",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2024-12-10",
+				"abstractNote": "This dataset contains aggregated information about all content reshared 100 or more times from July 1, 2020 through February 1, 2021. Each row of the dataset corresponds to an individual tree and its size and depth at specific hours and days from initial posting",
+				"libraryCatalog": "Social Media Archive at ICPSR - SOMAR",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "United States"
+					},
+					{
+						"tag": "elections"
+					},
+					{
+						"tag": "political attitudes"
+					},
+					{
+						"tag": "political behavior"
+					},
+					{
+						"tag": "social media"
+					},
+					{
+						"tag": "web platform data"
+					}
+				],
+				"notes": [
+					{
+						"note": "The U.S. 2020 Facebook and Instagram Election Study (US 2020 FIES) is a partnership between Meta and academic researchers to understand the impact of Facebook and Instagram on key political attitudes and behaviors during the US 2020 election"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
 		"url": "https://socialmediaarchive.org/record/60",
 		"items": [
 			{
 				"itemType": "dataset",
 				"title": "Not With a Bang But a Tweet: Democracy, Culture Wars, and the Memeification of T.S. Eliot",
-				"creators": [],
+				"creators": [
+					{
+						"firstName": "Melanie",
+						"lastName": "Walsh",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Anna",
+						"lastName": "Preus",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2024-10-04",
 				"abstractNote": "This dataset includes posts from Twitter (now X) from 2006 to early 2022 that mentioned a variation of T.S. Eliot's famous lines \"This is the way the world ends / Not with a bang but a whimper\" (see \"Design\" for specific search terms used).\n<br><br>\nModernist poet T.S. Eliot concluded his 1925 poem \"The Hollow Men\" with the iconic lines: \"This is the way the world ends / Not with a bang but a whimper.\" When Eliot died in 1965, the New York Times claimed in his obituary that these lines were “probably the most quoted lines of any 20th-century poet writing in English.” They may be among the most memed lines, as well. Through a computational analysis of Twitter data, we have found that at least 350,000 tweets have referenced or remixed Eliot’s lines since the beginning of Twitter’s history in 2006. While references to the poem vary widely, we focus on two prominent political usages of the phrase — cases where Twitter users invoke it to warn about the state of modern democracy, often from the left side of the political spectrum, and cases where they use the phrase to critique political correctness and “cancel culture” or to mock people for non-normatized aspects of their identities, often from the right side of the political spectrum. Though some of the tweets cite Eliot directly, most do not, and in many cases the phrase almost seems to be moving from an authored quotation into a common idiom or turn-of-phrase. Linguistics experts increasingly refer to this kind of construction as a “snowclone” —a fixed phrasal template, often with a culturally salient source (e.g., a quotation from a book, TV show, or movie), that has “one or more variable slots” into which users insert various “lexical substitutions\" (Hartmann and Ungerer). This data thus enables researchers to study both the circulation of literature and the evolution of linguistic forms",
 				"libraryCatalog": "Social Media Archive at ICPSR - SOMAR",
 				"shortTitle": "Not With a Bang But a Tweet",
