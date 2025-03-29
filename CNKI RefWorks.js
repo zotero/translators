@@ -8,7 +8,7 @@
 	"priority": 99,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2025-03-24 05:32:30"
+	"lastUpdated": "2025-03-29 13:32:17"
 }
 
 /*
@@ -63,13 +63,14 @@ function detectImport() {
 async function doImport() {
 	let record = '';
 	let line;
-	const translate = Z.loadTranslator('import');
+	const cnkiRefer = Z.loadTranslator('import');
 	// CNKI Refer
-	translate.setTranslator('7b6b135a-ed39-4d90-8e38-65516671c5bc');
-	const { detectLanguage, patentCountry } = await translate.getTranslatorObject();
+	cnkiRefer.setTranslator('7b6b135a-ed39-4d90-8e38-65516671c5bc');
+	const { detectLanguage, patentCountry } = await cnkiRefer.getTranslatorObject();
+	const refWrorks = Z.loadTranslator('import');
 	// RefWorks Tagged
-	translate.setTranslator('1a3506da-a303-4b0a-a1cd-f216e6138d86');
-	translate.setHandler('itemDone', (_obj, item) => {
+	refWrorks.setTranslator('1a3506da-a303-4b0a-a1cd-f216e6138d86');
+	refWrorks.setHandler('itemDone', (_obj, item) => {
 		const extra = new Extra();
 		item.language = detectLanguage(record);
 		switch (item.itemType) {
@@ -93,7 +94,7 @@ async function doImport() {
 				break;
 			case 'patent':
 				if (item.applicationNumber && !item.applicationNumber.includes('海外专利')) {
-					extra.set('Genre', item.applicationNumber, true);
+					extra.set('genre', item.applicationNumber, true);
 				}
 				item.patentNumber = tryMatch(record, /^ID (.*)/m, 1);
 				delete item.issuingAuthority;
@@ -153,7 +154,7 @@ async function doImport() {
 		}
 		item.url = tryMatch(record, /^LK (.*)/m, 1);
 		item.creators.forEach((creator) => {
-			if (/[\u4e00-\u9fff]/.test(creator.lastName)) {
+			if (/\p{Unified_Ideograph}/u.test(creator.lastName)) {
 				creator.firstName = creator.firstName || '';
 				creator.lastName = creator.firstName + creator.lastName;
 				creator.firstName = '';
@@ -177,16 +178,16 @@ async function doImport() {
 		}
 		if (line.startsWith('RT ')) {
 			record = processRecord(record);
-			translate.setString(record);
-			await translate.translate();
+			refWrorks.setString(record);
+			await refWrorks.translate();
 			record = '';
 		}
 		record += '\n' + line;
 	}
 	if (record) {
 		record = processRecord(record);
-		translate.setString(record);
-		await translate.translate();
+		refWrorks.setString(record);
+		await refWrorks.translate();
 	}
 }
 
@@ -326,66 +327,6 @@ var testCases = [
 		"type": "import",
 		"input": "RT Journal Article\r\nSR 1\r\nA1 薛婉钰;刘娜;苑鑫;张婷婷;曹云娥;陈书霞\r\nAD 西北农林科技大学园艺学院陕西省蔬菜工程技术研究中心;宁夏大学农学院;\r\nT1 黄瓜胚性愈伤组织的诱导保存和再生\r\nJF 西北农林科技大学学报(自然科学版)\r\nYR 2024\r\nIS 07\r\nOP 1-7\r\nK1 黄瓜;遗传转化;胚性愈伤组织;离体保存\r\nAB 【目的】对黄瓜胚性愈伤组织的诱导保存和再生进行研究,为黄瓜高频率遗传转化奠定基础。【方法】以欧洲温室型黄瓜自交系14-1子叶节为外植体,在MS培养基上附加1.5 mg/L 2,4-D,进行25 d的胚性愈伤组织诱导培养后,取胚性愈伤组织在添加30,60,90,100,110,120,130,140和150 g/L蔗糖及1.5 mg/L 2,4-D的MS培养基进行继代培养,每30 d继代1次,观察胚性愈伤组织的褐变情况及胚性分化能力,并用电子天平在超净工作台中记录胚性愈伤组织质量的变化。继代培养60 d后,将保存的胚性愈伤组织和体细胞胚移至含1.5 mg/L 2,4-D的MS培养基上,待出现体细胞胚后移至MS培养基进行萌发,观察再生小植株的生长情况。【结果】将欧洲温室型黄瓜自交系14-1的子叶节,接种到附加1.5 mg/L 2,4-D的MS培养基上进行诱导培养后,子叶节一端的愈伤组织集中聚集于下胚轴处,之后有黄色胚性愈伤组织产生。在继代培养过程中,当培养基中添加的蔗糖为60～150 g/L时,胚性愈伤组织能保持胚性愈伤状态达60 d。之后将继代培养60 d后的胚性愈伤组织转接至附加1.5 mg/L 2,4-D的MS培养基上,在蔗糖质量浓度为60 g/L条件下保存的胚性愈伤组织可诱导出正常胚状体,且能形成健康小植株。【结论】由黄瓜子叶节诱导出的胚性愈伤组织可在MS+60 g/L蔗糖的培养基上保存达60 d,之后能正常萌发形成胚状体,进而形成正常小植株。\r\nSN 1671-9387\r\nDS CNKI\r\nLK https://link.cnki.net/doi/10.13207/j.cnki.jnwafu.2024.07.011\r\nDO 10.13207/j.cnki.jnwafu.2024.07.011\r\n",
 		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "黄瓜胚性愈伤组织的诱导保存和再生",
-				"creators": [
-					{
-						"lastName": "薛婉钰",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "刘娜",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "苑鑫",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "张婷婷",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "曹云娥",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "陈书霞",
-						"creatorType": "author"
-					}
-				],
-				"date": "2024",
-				"DOI": "10.13207/j.cnki.jnwafu.2024.07.011",
-				"ISSN": "1671-9387",
-				"abstractNote": "【目的】对黄瓜胚性愈伤组织的诱导保存和再生进行研究,为黄瓜高频率遗传转化奠定基础。【方法】以欧洲温室型黄瓜自交系14-1子叶节为外植体,在MS培养基上附加1.5 mg/L 2,4-D,进行25 d的胚性愈伤组织诱导培养后,取胚性愈伤组织在添加30,60,90,100,110,120,130,140和150 g/L蔗糖及1.5 mg/L 2,4-D的MS培养基进行继代培养,每30 d继代1次,观察胚性愈伤组织的褐变情况及胚性分化能力,并用电子天平在超净工作台中记录胚性愈伤组织质量的变化。继代培养60 d后,将保存的胚性愈伤组织和体细胞胚移至含1.5 mg/L 2,4-D的MS培养基上,待出现体细胞胚后移至MS培养基进行萌发,观察再生小植株的生长情况。【结果】将欧洲温室型黄瓜自交系14-1的子叶节,接种到附加1.5 mg/L 2,4-D的MS培养基上进行诱导培养后,子叶节一端的愈伤组织集中聚集于下胚轴处,之后有黄色胚性愈伤组织产生。在继代培养过程中,当培养基中添加的蔗糖为60～150 g/L时,胚性愈伤组织能保持胚性愈伤状态达60 d。之后将继代培养60 d后的胚性愈伤组织转接至附加1.5 mg/L 2,4-D的MS培养基上,在蔗糖质量浓度为60 g/L条件下保存的胚性愈伤组织可诱导出正常胚状体,且能形成健康小植株。【结论】由黄瓜子叶节诱导出的胚性愈伤组织可在MS+60 g/L蔗糖的培养基上保存达60 d,之后能正常萌发形成胚状体,进而形成正常小植株。",
-				"issue": "7",
-				"pages": "1-7",
-				"publicationTitle": "西北农林科技大学学报(自然科学版)",
-				"attachments": [
-					{
-						"path": "https://link.cnki.net/doi/10.13207/j.cnki.jnwafu.2024.07.011",
-						"title": "link.cnki.net Link",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [
-					{
-						"tag": "离体保存"
-					},
-					{
-						"tag": "胚性愈伤组织"
-					},
-					{
-						"tag": "遗传转化"
-					},
-					{
-						"tag": "黄瓜"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			},
 			{
 				"itemType": "journalArticle",
 				"title": "黄瓜胚性愈伤组织的诱导保存和再生",
@@ -828,7 +769,7 @@ var testCases = [
 				"abstractNote": "本发明提供不锈钢管的制造方法,包括如下步骤：S1、管坯加工：将管坯加工成坯料,且坯料的化学组成质量百分比计为：C：0.04-0.06%；Cr：15-21%；Ti：0.1-0.3%；Ni：1.5-9%；Mn：0.1～1.3%；Cu：1.5～3.5%；S：0.002-0.004%；余量为Fe以及不可避免的杂质。本发明通过对坯料进行预热处理,将工件加热到预定温度,并保持一定的时间,将预热后的坯料分别采用两种不同的温度进行处理,且两次处理前后衔接,解决了现有的不锈钢管在生产工艺方面,缺乏对不锈钢管强度的提升,强度较低,导致其在使用过程中,局限性较大,在很多高强度的压力下,易出现折断,不仅大大缩短了不锈钢管的使用寿命,而且存在较大安全隐患的问题。",
 				"applicationNumber": "发明公开",
 				"country": "中国",
-				"extra": "Genre: 发明公开",
+				"extra": "genre: 发明公开",
 				"language": "zh-CN",
 				"patentNumber": "CN111020404A",
 				"place": "中国",
