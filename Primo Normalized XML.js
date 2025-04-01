@@ -131,7 +131,7 @@ function doImport() {
 	item.title = ZU.xpathText(doc, '//p:display/p:title', ns);
 	if (item.title) {
 		item.title = ZU.unescapeHTML(item.title);
-		item.title = item.title.replace(/\s*:/, ":");
+		item.title = item.title.replace(/\s*:/, ":").replace(/(.+).{2}\s\/\s.*/, '$1');
 	}
 	var creators = ZU.xpath(doc, '//p:display/p:creator', ns);
 	var contributors = ZU.xpath(doc, '//p:display/p:contributor', ns);
