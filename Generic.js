@@ -160,17 +160,17 @@ function getPotentialTitles(doc) {
 	
 	titles.push(doc.title);
 	
-	let nodes = doc.querySelectorAll('h1');
+	let nodes = doc.querySelectorAll('h1, [role="heading"][aria-level="1"]');
 	for (let node of nodes) {
 		titles.push(node.textContent);
 	}
 	
-	nodes = doc.querySelectorAll('h2');
+	nodes = doc.querySelectorAll('h2, [role="heading"][aria-level="2"], [role="heading"]:not([aria-level])');
 	if (nodes.length === 1) {
 		titles.push(nodes[0].textContent);
 	}
 	
-	nodes = doc.querySelectorAll('h3');
+	nodes = doc.querySelectorAll('h3, [role="heading"][aria-level="3"]');
 	if (nodes.length === 1) {
 		titles.push(nodes[0].textContent);
 	}
