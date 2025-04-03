@@ -9,12 +9,55 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-21 19:44:53"
+	"lastUpdated": "2025-04-03 21:44:13"
 }
 
-function detectWeb(doc, url) {
-	// TODO: Make some kind of item count guessing logic to prevent always returning 'multiple'
-	return 'multiple';
+const TRANSLATOR_IDS = Object.freeze({
+	EM: '951c027d-74ac-47d4-a107-9c3069ab7b48',
+	COINS: '05d07af9-105a-4572-99f6-a8e231c0daef',
+	UNAPI: 'e7e01cac-1e37-4da6-b078-a0e8343b0e98',
+	LM: '02378e28-8a35-440c-b5d2-7eaca74615b6',
+	JSONLD: '5ea2edd6-b836-490a-841f-d9274da308f9',
+});
+
+async function detectWeb(doc, url) {
+	// Get DOIs from the web page URL
+	let urlDois = getUrlDois(url);
+	// Get DOIs from the document HEAD - we trust metadata in the HEAD more than in the BODY
+	let headDois = getHeadDois(doc);
+	// Get DOIs from document text nodes - visible text
+	let visibleDois = getVisibleDois(doc);
+	// If we have DOIs in the HEAD, use those
+	let documentDois = headDois.length ? headDois : visibleDois;
+	
+	// Combine all DOIs and filter the unique ones
+	let allDois = [...new Set([...urlDois, ...documentDois])];
+	
+	// Try to get the main item from the Embedded Metadata translator,
+	// if it has a title (EM translator must not to use document.title
+	// and should only extract quality metadata)
+	let emDetection = await runDetect(TRANSLATOR_IDS.EM, doc);
+	if (emDetection) {
+		return emDetection;
+	}
+	
+	// Try to get the main item by using the DOI in the URL
+	if (urlDois.length === 1) {
+		return 'journalArticle';
+	}
+
+	if (allDois.length) {
+		return allDois.length > 1 ? 'multiple' : 'journalArticle';
+	}
+
+	for (let translatorID of Object.values(TRANSLATOR_IDS).filter(id => id !== TRANSLATOR_IDS.EM)) {
+		let detection = await runDetect(translatorID, doc);
+		if (detection) {
+			return detection;
+		}
+	}
+
+	return false;
 }
 
 /**
@@ -196,90 +239,32 @@ async function getDoiItem(doi) {
 	return null;
 }
 
-// Embedded Metadata
-async function getEmItem(doc) {
+async function runDetect(translatorID, doc) {
+	let translator = Zotero.loadTranslator("web");
+	translator.setTranslator(translatorID);
+	translator.setDocument(doc);
 	try {
-		let translator = Zotero.loadTranslator("web");
-		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
-		translator.setDocument(doc);
-		translator.setHandler("itemDone", function (obj, item) {
-		});
-		translator.setHandler('error', function () {
-		});
-		return (await translator.translate())[0];
+		translator.setHandler('translators', () => {});
+		return (await translator.getTranslators(false, true))[0]
+			?.itemType ?? false;
 	}
 	catch (err) {
-	
+		return false;
 	}
-	return null;
 }
 
-// COinS
-async function getCoinsItems(doc) {
+async function runDo(translatorID, doc) {
 	try {
 		let translator = Zotero.loadTranslator("web");
-		translator.setTranslator("05d07af9-105a-4572-99f6-a8e231c0daef");
+		translator.setTranslator(translatorID);
 		translator.setDocument(doc);
-		translator.setHandler("itemDone", function (obj, item) {
-		});
-		translator.setHandler('error', function () {
-		});
+		translator.setHandler('itemDone', () => {});
+		translator.setHandler('error', () => {});
 		return await translator.translate();
 	}
 	catch (err) {
+		return [];
 	}
-	return [];
-}
-
-// unAPI
-async function getUnapiItems(doc) {
-	try {
-		let translator = Zotero.loadTranslator("web");
-		translator.setTranslator("e7e01cac-1e37-4da6-b078-a0e8343b0e98");
-		translator.setDocument(doc);
-		translator.setHandler("itemDone", function (obj, item) {
-		});
-		translator.setHandler('error', function () {
-		});
-		return await translator.translate();
-	}
-	catch (err) {
-	}
-	return [];
-}
-
-// Linked Metadata
-async function getLmItems(doc) {
-	try {
-		let translator = Zotero.loadTranslator("web");
-		translator.setTranslator("02378e28-8a35-440c-b5d2-7eaca74615b6");
-		translator.setDocument(doc);
-		translator.setHandler("itemDone", function (obj, item) {
-		});
-		translator.setHandler('error', function () {
-		});
-		return await translator.translate();
-	}
-	catch (err) {
-	}
-	return [];
-}
-
-// JSON-LD
-async function getJsonldItems(doc) {
-	try {
-		let translator = Zotero.loadTranslator("web");
-		translator.setTranslator("5ea2edd6-b836-490a-841f-d9274da308f9");
-		translator.setDocument(doc);
-		translator.setHandler("itemDone", function (obj, item) {
-		});
-		translator.setHandler('error', function () {
-		});
-		return await translator.translate();
-	}
-	catch (err) {
-	}
-	return [];
 }
 
 /**
@@ -377,7 +362,6 @@ function matchItemsWithTitles(titles, items) {
 }
 
 async function doWeb(doc, url) {
-	// TODO: Parallelize
 	// Get all potential titles to match the main item
 	let potentialTitles = getPotentialTitles(doc);
 	
@@ -392,6 +376,9 @@ async function doWeb(doc, url) {
 	
 	// Combine all DOIs and filter the unique ones
 	let allDois = [...new Set([...urlDois, ...documentDois])];
+	// Fetch metadata for all DOIs. TODO: Optimize
+	let doiItemsPromise = Promise.all(allDois.map(async doi => await getDoiItem(doi)))
+		.then(doiItems => doiItems.filter(x => x));
 	
 	// Try to get the main item of the page
 	let mainItem;
@@ -399,7 +386,7 @@ async function doWeb(doc, url) {
 	// Try to get the main item from the Embedded Metadata translator,
 	// if it has a title (EM translator must not to use document.title
 	// and should only extract quality metadata)
-	let emItem = await getEmItem(doc);
+	let emItem = (await runDo(TRANSLATOR_IDS.EM, doc))?.[0];
 	if (emItem && emItem.title) {
 		mainItem = emItem;
 	}
@@ -420,20 +407,21 @@ async function doWeb(doc, url) {
 	// But none of them can 100% determine which item is the main item of the page.
 	// Therefore later we are trying to match items with the page title
 	
-	// Fetch metadata for all DOIs. TODO: Optimize
-	let doiItems = (await Promise.all(allDois.map(async doi => await getDoiItem(doi)))).filter(x => x);
-	// COinS translator can fetch DOI metadata by itself,
-	// which results to duplicated requests for some DOIs. TODO: Optimize
-	let coinsItems = await getCoinsItems(doc);
-	let unapiItems = await getUnapiItems(doc);
-	// Linked Metadata translator normally returns single item, but
-	// the translators behind the LM translator are capable for multiple items too.
-	// Therefore we treat it as multiple
-	let lmItems = await getLmItems(doc);
-	// JSON-LD translator can return multiple items and we don't know which one is the main one.
-	// Although, theoretically, schema.org keywords `mainEntity` and `mainEntityOfPage`
-	// can be utilized
-	let jsonldItems = await getJsonldItems(doc);
+	let [doiItems, coinsItems, unapiItems, lmItems, jsonldItems] = await Promise.all([
+		doiItemsPromise,
+		// COinS translator can fetch DOI metadata by itself,
+		// which results to duplicated requests for some DOIs. TODO: Optimize
+		runDo(TRANSLATOR_IDS.COINS, doc),
+		runDo(TRANSLATOR_IDS.UNAPI, doc),
+		// Linked Metadata translator normally returns single item, but
+		// the translators behind the LM translator are capable for multiple items too.
+		// Therefore we treat it as multiple
+		runDo(TRANSLATOR_IDS.LM, doc),
+		// JSON-LD translator can return multiple items and we don't know which one is the main one.
+		// Although, theoretically, schema.org keywords `mainEntity` and `mainEntityOfPage`
+		// can be utilized
+		runDo(TRANSLATOR_IDS.JSONLD, doc),
+	]);
 	
 	// Make item groups from the items returned from different translators
 	let itemGroups = [
@@ -488,10 +476,23 @@ async function doWeb(doc, url) {
 		lmItems,
 		jsonldItems
 	}, null, 2));
-	
-	for (let item of items) {
-		item.complete();
-	}
+
+	switch (items.length) {
+		case 0:
+			return;
+		case 1:
+			items[0].complete();
+			return;
+		default:
+			let itemEntries = items.entries();
+			let selectedItemEntries = await Zotero.selectItems(itemEntries.map(([i, item]) => [i, item.title]));
+			if (selectedItemEntries) {
+				for (let [i] of selectedItemEntries) {
+					items[i].complete();
+				}
+			}
+			return;
+	}	
 }
 
 var exports = {
