@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-15 00:18:40"
+	"lastUpdated": "2025-04-05 04:48:07"
 }
 
 /*
@@ -97,7 +97,7 @@ function scrape(text) {
 	if (redditData.author != '[deleted]') {
 		newItem.creators.push(ZU.cleanAuthor(redditData.author, "author", true));
 	}
-	newItem.url = 'www.reddit.com' + redditData.permalink;
+	newItem.url = 'https://www.reddit.com' + redditData.permalink;
 	var postDate = new Date(redditData.created_utc * 1000);
 	newItem.date = postDate.toISOString();
 	newItem.postType = "Reddit Post";
@@ -120,13 +120,13 @@ function scrapeComment(text) {
 	if (redditData.author != '[deleted]') {
 		newItem.creators.push(ZU.cleanAuthor(redditData.author, "author", true));
 	}
-	newItem.url = 'www.reddit.com' + redditData.permalink;
+	newItem.url = 'https://www.reddit.com' + redditData.permalink;
 	var postDate = new Date(redditData.created_utc * 1000);
 	newItem.date = postDate.toISOString();
 	newItem.postType = "Reddit Comment";
 	newItem.forumTitle = 'r/' + redditData.subreddit;
 	newItem.websiteTitle = "reddit.com";
-	newItem.extra = 'Post URL: www.reddit.com' + parentData.permalink;
+	newItem.extra = 'Post URL: https://www.reddit.com' + parentData.permalink;
 	newItem.attachments.push({
 		url: 'https://www.reddit.com' + redditData.permalink,
 		title: "Reddit Comment Snapshot",
@@ -159,16 +159,11 @@ var testCases = [
 			{
 				"itemType": "forumPost",
 				"title": "Zotero iPad bookmarklet not working",
-				"creators": [
-					{
-						"lastName": "cegmondiale",
-						"creatorType": "author"
-					}
-				],
+				"creators": [],
 				"date": "2020-10-08T18:43:48.000Z",
 				"forumTitle": "r/zotero",
 				"postType": "Reddit Post",
-				"url": "www.reddit.com/r/zotero/comments/j7ityb/zotero_ipad_bookmarklet_not_working/",
+				"url": "https://www.reddit.com/r/zotero/comments/j7ityb/zotero_ipad_bookmarklet_not_working/",
 				"attachments": [
 					{
 						"title": "Reddit Post Snapshot",
@@ -222,7 +217,7 @@ var testCases = [
 				"date": "2021-06-22T15:17:27.000Z",
 				"forumTitle": "r/Professors",
 				"postType": "Reddit Post",
-				"url": "www.reddit.com/r/Professors/comments/o5pixw/for_tt_t_professors_why_exactly_is_vacation_and/",
+				"url": "https://www.reddit.com/r/Professors/comments/o5pixw/for_tt_t_professors_why_exactly_is_vacation_and/",
 				"attachments": [
 					{
 						"title": "Reddit Post Snapshot",
@@ -256,7 +251,7 @@ var testCases = [
 				"date": "2021-09-10T08:34:50.000Z",
 				"forumTitle": "r/zotero",
 				"postType": "Reddit Post",
-				"url": "www.reddit.com/r/zotero/comments/plh1kr/firefox_google_docs_reimplementation/",
+				"url": "https://www.reddit.com/r/zotero/comments/plh1kr/firefox_google_docs_reimplementation/",
 				"attachments": [
 					{
 						"title": "Reddit Post Snapshot",
