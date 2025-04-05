@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-04-05 04:48:07"
+	"lastUpdated": "2025-04-05 08:31:12"
 }
 
 /*
@@ -66,7 +66,10 @@ function getSearchResults(doc, checkOnly) {
 }
 
 function doWeb(doc, url) {
-	var jsonUrl = url.split("?")[0] + '.json';
+	var jsonUrl = url.split("?")[0]
+		// Strip trailing slash before adding .json
+		.replace(/\/$/, '')
+		 + '.json';
 	var commentRegex = /\/r\/[a-z\d_]+\/comments\/[a-z\d]+\/[a-z\d_]+\/[a-z\d]+\//i;
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
