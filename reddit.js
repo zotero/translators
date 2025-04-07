@@ -2,14 +2,14 @@
 	"translatorID": "23bacc11-98e3-4b78-b1ef-cc2c9a04b893",
 	"label": "reddit",
 	"creator": "Lukas Kawerau",
-	"target": "^https?://[^/]+\\.reddit\\.com",
+	"target": "^https?://[^/]+\\.reddit\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-04-05 08:31:12"
+	"lastUpdated": "2025-04-07 14:52:05"
 }
 
 /*
@@ -30,7 +30,7 @@
 */
 
 function detectWeb(doc, url) {
-	var regex = /\/r\/[a-z\d_]+\/comments\//i;
+	var regex = /\/r\/[^/]+\/comments\//i;
 	if (regex.test(url)) {
 		return 'forumPost';
 	}
@@ -45,18 +45,25 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	var rows = ZU.xpath(doc, '//a[div/h3]');
 	if (!rows.length) rows = doc.querySelectorAll('.entry');
+	if (!rows.length) rows = doc.querySelectorAll('shreddit-feed shreddit-post');
 	for (let row of rows) {
 		let href, title;
+		// old.reddit.com
 		if (row.href) {
 			href = row.href;
 			title = ZU.trimInternal(row.textContent);
 		}
+		// sh.reddit.com
+		else if (row.hasAttribute('content-href')) {
+			href = row.getAttribute('content-href');
+			title = row.getAttribute('post-title');
+		}
+		// new.reddit.com
 		else {
 			href = attr(row, '.comments', 'href');
 			title = text(row, '.title > a');
 		}
 		if (!href || !title) continue;
-		href += '.json';
 		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
@@ -65,36 +72,38 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
-	var jsonUrl = url.split("?")[0]
-		// Strip trailing slash before adding .json
-		.replace(/\/$/, '')
-		 + '.json';
-	var commentRegex = /\/r\/[a-z\d_]+\/comments\/[a-z\d]+\/[a-z\d_]+\/[a-z\d]+\//i;
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.doGet(articles, scrape);
-		});
-	}
-	else if (detectWeb(doc, url) == "forumPost" && commentRegex.test(url)) {
-		ZU.doGet(jsonUrl, scrapeComment);
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else {
-		ZU.doGet(jsonUrl, scrape);
+		await scrape(doc, url);
 	}
 }
 
+async function scrape(doc, url = doc.location.href) {
+	// Always get JSON from old., because the "sh." redesign
+	// doesn't support the .json endpoint
+	let jsonUrl = 'https://old.reddit.com'
+		// Strip trailing slash
+		+ doc.location.pathname.replace(/\/$/, '')
+		+ '.json';
+	let json = await requestJSON(jsonUrl);
+	let commentRegex = /\/r\/[^/]+\/comments\/[a-z\d]+\/[a-z\d_]+\/[a-z\d]+\//i;
+	if (commentRegex.test(url)) {
+		scrapeComment(doc, json);
+	}
+	else {
+		scrapePost(doc, json);
+	}
+}
 
-function scrape(text) {
+function scrapePost(doc, redditJson) {
 	var newItem = new Zotero.Item("forumPost");
-	var redditJson = JSON.parse(text);
 	var redditData = redditJson[0].data.children[0].data;
 	newItem.title = redditData.title;
 	if (redditData.author != '[deleted]') {
@@ -105,18 +114,15 @@ function scrape(text) {
 	newItem.date = postDate.toISOString();
 	newItem.postType = "Reddit Post";
 	newItem.forumTitle = 'r/' + redditData.subreddit;
-	newItem.websiteTitle = "reddit.com";
 	newItem.attachments.push({
-		url: 'https://www.reddit.com' + redditData.permalink,
-		title: "Reddit Post Snapshot",
-		mimetype: "text/html"
+		title: "Snapshot",
+		document: doc
 	});
 	newItem.complete();
 }
 
-function scrapeComment(text) {
+function scrapeComment(doc, redditJson) {
 	var newItem = new Zotero.Item("forumPost");
-	var redditJson = JSON.parse(text);
 	var parentData = redditJson[0].data.children[0].data;
 	var redditData = redditJson[1].data.children[0].data;
 	newItem.title = ZU.ellipsize(redditData.body, 20);
@@ -128,12 +134,10 @@ function scrapeComment(text) {
 	newItem.date = postDate.toISOString();
 	newItem.postType = "Reddit Comment";
 	newItem.forumTitle = 'r/' + redditData.subreddit;
-	newItem.websiteTitle = "reddit.com";
 	newItem.extra = 'Post URL: https://www.reddit.com' + parentData.permalink;
 	newItem.attachments.push({
-		url: 'https://www.reddit.com' + redditData.permalink,
-		title: "Reddit Comment Snapshot",
-		mimetype: "text/html"
+		title: "Snapshot",
+		document: doc
 	});
 	newItem.complete();
 }
