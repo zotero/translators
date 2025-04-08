@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-27 07:32:02"
+	"lastUpdated": "2025-04-08 15:00:55"
 }
 
 /*
@@ -103,6 +103,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('.reflist > a');
+	if (!rows.length) rows = doc.querySelectorAll('ol b > a');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -606,13 +607,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://econpapers.repec.org/scripts/search.pf?ft=&adv=true&wp=on&art=on&bkchp=on&pl=&auth=on&online=on&sort=rank&lgc=AND&aus=&ar=on&kw=second+hand+car&jel=&nep=&ni=&nit=epdate",
-		"defer": true,
 		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "https://econpapers.repec.org/scripts/search.pf?jel=C81",
-		"defer": true,
 		"items": "multiple"
 	},
 	{
@@ -651,6 +650,7 @@ var testCases = [
 				],
 				"date": "2020",
 				"DOI": "10.1093/cpe/bzaa009",
+				"ISSN": "0277-5921",
 				"abstractNote": "By Mohamed A El-Erian; Gresham’s Law: The Life and World of Queen Elizabeth I’s Banker",
 				"issue": "1",
 				"libraryCatalog": "EconPapers",
@@ -677,7 +677,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://econpapers.repec.org/RePEc:oup:copoec:v:39:y:2020:i:1:p:91-94.",
+		"url": "https://econpapers.repec.org/article/oupcopoec/v_3a39_3ay_3a2020_3ai_3a1_3ap_3a91-94..htm",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -691,6 +691,7 @@ var testCases = [
 				],
 				"date": "2020",
 				"DOI": "10.1093/cpe/bzaa009",
+				"ISSN": "0277-5921",
 				"abstractNote": "By Mohamed A El-Erian; Gresham’s Law: The Life and World of Queen Elizabeth I’s Banker",
 				"issue": "1",
 				"libraryCatalog": "EconPapers",
