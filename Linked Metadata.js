@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-01 19:46:46"
+	"lastUpdated": "2025-04-08 14:18:26"
 }
 
 /*
@@ -65,14 +65,17 @@ var FORMAT_GUIDS = {
 };
 
 function detectWeb(doc, url) {
-	let nodes = doc.querySelectorAll('link[rel="alternate"');
-	if (nodes.length) {
+	if (!Zotero.parentTranslator) {
+		return false;
+	}
+	if (getLinks(doc, url).length) {
 		return 'multiple';
 	}
+	return false;
 }
 
 function getLinks(doc, url) {
-	let nodes = doc.querySelectorAll('link[rel="alternate"');
+	let nodes = doc.querySelectorAll('link[rel="alternate"]');
 	
 	let results = [];
 	
@@ -177,5 +180,5 @@ var testCases = [
 			}
 		]
 	}
-];
+]
 /** END TEST CASES **/

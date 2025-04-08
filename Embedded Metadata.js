@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-03 16:51:36"
+	"lastUpdated": "2025-04-08 14:18:58"
 }
 
 /*
@@ -223,12 +223,14 @@ function completeItem(doc, newItem, hwType) {
 	newItem.complete();
 }
 
-// eslint-disable-next-line consistent-return
-function detectWeb(doc, url) {
+async function detectWeb(doc, url) {
+	if (!Zotero.parentTranslator) {
+		return false;
+	}
 	// blacklist wordpress jetpack comment plugin so it doesn't override other metadata
 	if (url.includes("jetpack.wordpress.com/jetpack-comment/")) return false;
 	if (exports.itemType) return exports.itemType;
-	init(doc, url, Zotero.done);
+	return new Promise(resolve => init(doc, url, resolve));
 }
 
 function init(doc, url, callback, forceLoadRDF) {

@@ -9,10 +9,13 @@
 	"inRepository": true,
 	"translatorType": 5,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-04 03:25:10"
+	"lastUpdated": "2025-04-08 14:19:16"
 }
 
 function detectWeb(doc, url) {
+	if (!Zotero.parentTranslator) {
+		return false;
+	}
 	let nodes = doc.querySelectorAll('script[type="application/ld+json');
 	if (nodes.length) {
 		return 'multiple';
@@ -483,5 +486,5 @@ var testCases = [
 			}
 		]
 	}
-];
+]
 /** END TEST CASES **/

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-04-03 21:44:13"
+	"lastUpdated": "2025-04-08 14:27:11"
 }
 
 const TRANSLATOR_IDS = Object.freeze({
@@ -38,21 +38,25 @@ async function detectWeb(doc, url) {
 	// and should only extract quality metadata)
 	let emDetection = await runDetect(TRANSLATOR_IDS.EM, doc);
 	if (emDetection) {
+		Zotero.debug(`EM detected ${emDetection}`);
 		return emDetection;
 	}
 	
 	// Try to get the main item by using the DOI in the URL
 	if (urlDois.length === 1) {
+		Zotero.debug('Detected single DOI in URL');
 		return 'journalArticle';
 	}
 
 	if (allDois.length) {
-		return allDois.length > 1 ? 'multiple' : 'journalArticle';
+		Zotero.debug('Detected DOIs in document');
+		return 'multiple';
 	}
 
-	for (let translatorID of Object.values(TRANSLATOR_IDS).filter(id => id !== TRANSLATOR_IDS.EM)) {
+	for (let [key, translatorID] of Object.entries(TRANSLATOR_IDS).filter(([key]) => key !== 'EM')) {
 		let detection = await runDetect(translatorID, doc);
 		if (detection) {
+			Zotero.debug(`${key} detected ${detection}`);
 			return detection;
 		}
 	}
@@ -244,11 +248,11 @@ async function runDetect(translatorID, doc) {
 	translator.setTranslator(translatorID);
 	translator.setDocument(doc);
 	try {
-		translator.setHandler('translators', () => {});
-		return (await translator.getTranslators(false, true))[0]
-			?.itemType ?? false;
+		let translatorObj = await translator.getTranslatorObject();
+		return await translatorObj.detectWeb(doc, doc.location.href);
 	}
 	catch (err) {
+		Zotero.debug(err);
 		return false;
 	}
 }
@@ -481,13 +485,17 @@ async function doWeb(doc, url) {
 		case 0:
 			return;
 		case 1:
-			items[0].complete();
-			return;
+			if (single) {
+				items[0].complete();
+				return;
+			}
 		default:
-			let itemEntries = items.entries();
-			let selectedItemEntries = await Zotero.selectItems(itemEntries.map(([i, item]) => [i, item.title]));
+			let itemEntries = Array.from(items.entries());
+			let selectedItemEntries = await Zotero.selectItems(
+				Object.fromEntries(itemEntries.map(([i, item]) => [i, item.title]))
+			);
 			if (selectedItemEntries) {
-				for (let [i] of selectedItemEntries) {
+				for (let i of Object.keys(selectedItemEntries)) {
 					items[i].complete();
 				}
 			}

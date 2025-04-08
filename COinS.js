@@ -8,8 +8,8 @@
 	"priority": 310,
 	"inRepository": true,
 	"translatorType": 6,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2021-06-01 17:38:46"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2025-04-08 14:19:53"
 }
 
 /*
@@ -36,6 +36,9 @@
 */
 
 function detectWeb(doc, _url) {
+	if (!Zotero.parentTranslator) {
+		return false;
+	}
 	var encounteredType = false;
 	
 	var spans = doc.querySelectorAll('span.Z3988[title]');

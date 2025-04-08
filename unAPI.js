@@ -8,8 +8,8 @@
 	"priority": 300,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2019-06-10 23:11:21"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2025-04-08 14:18:43"
 }
 
 /*
@@ -344,6 +344,9 @@ function getAllItems(ids, callback, items) {
 }
 
 function detectWeb(doc, _url) {
+	if (!Zotero.parentTranslator) {
+		return false;
+	}
 	// get unAPI IDs
 	var ids = getUnAPIIDs(doc);
 	if (!ids.length) return false;
@@ -391,7 +394,6 @@ function doWeb(doc, _url) {
 		}
 	});
 }
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
