@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-10-29 15:14:42"
+	"lastUpdated": "2025-04-15 15:27:16"
 }
 
 /*
@@ -89,7 +89,6 @@ function scrape(doc, url = doc.location.href) {
 	item.pages = json.pageStart && ZU.unescapeHTML(json.pageStart.replace('Page', ''));
 	item.url = attr(doc, 'link[rel="canonical"]', 'href');
 	item.attachments.push(makeImageAttachment(url));
-	item.attachments.push(makePDFAttachment(url));
 
 	/*
 		The user can append the author to the title with a forward slash
@@ -115,14 +114,6 @@ function scrape(doc, url = doc.location.href) {
 
 function getID(url) {
 	return url.match(/\/(\d+)/)[1];
-}
-
-function makePDFAttachment(url) {
-	return {
-		title: 'Full Text PDF',
-		mimeType: 'application/pdf',
-		url: 'https://www.newspapers.com/clippings/download/?id=' + getID(url)
-	};
 }
 
 function makeImageAttachment(url) {
