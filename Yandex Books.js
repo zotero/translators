@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-29 17:52:25"
+	"lastUpdated": "2025-04-17 18:46:00"
 }
 
 /*
@@ -55,29 +55,35 @@ async function scrape(doc, url = doc.location.href) {
 	translator.setDocument(doc);
 
 	translator.setHandler('itemDone', function (obj, item) {
-		const title = text(doc, 'span[data-e2e="content.title.main"]');
+		const title = text(doc, 'span[data-test-id="CONTENT_TITLE_MAIN"]');
 		item.title = title;
 
-		const authors = doc.querySelectorAll('h1[data-e2e="content.title"] a[data-e2e="content.author.name"]');
+		const authors = doc.querySelectorAll('div[data-test-id="CONTENT_TITLE_AUTHOR"] a[data-test-id="CONTENT_AUTHOR_AUTHOR_NAME"]');
 		for (const author of authors) {
 			item.creators.push(ZU.cleanAuthor(author.textContent, "author"));
 		}
 
-		const detailsBlock = doc.querySelector('div[data-e2e="content.details"]');
+		const detailsBlock = doc.querySelector('div[data-test-id="CONTENT_DETAILS"]');
 
-		const abstract = text(detailsBlock, 'div[data-e2e^="content.expandable"] > div > div > span > span');
+		const abstract = text(detailsBlock, 'div[data-test-id="EXPANDABLE_TEXT"] > div > div > span > span');
 		item.abstractNote = abstract;
 
-		const publisher = text(detailsBlock, 'div[data-e2e="content.info.publisher"] a[data-e2e="content.author.name"]');
-		item.publisher = publisher;
+		const contentInfoItems = detailsBlock.querySelectorAll('[data-test-id="CONTENT_INFO"]');
 
-		const yearSpan = detailsBlock.querySelectorAll('div[data-e2e="content.info.publication.year"] span:last-child')[0];
-		if (yearSpan) {
-			item.date = yearSpan.textContent;
-		}
+		contentInfoItems.forEach((it) => {
+			const label = it.querySelector('span').textContent.trim();
+			const valueElement = it.querySelector('span + span');
 
-		const series = text(detailsBlock, 'div[data-e2e="content.info.series"] a');
-		item.series = series;
+			if (label.includes('Год выхода издания')) {
+				item.date = valueElement.textContent.trim();
+			}
+			else if (label.includes('Издательство')) {
+				item.publisher = text(valueElement, 'a[data-test-id="CONTENT_AUTHOR_AUTHOR_NAME"]');
+			}
+			else if (label.includes('Серия')) {
+				item.series = text(valueElement, 'a');
+			}
+		});
 
 		item.complete();
 	});
