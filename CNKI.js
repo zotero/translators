@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-24 05:40:30"
+	"lastUpdated": "2025-04-14 17:16:06"
 }
 
 /*
@@ -218,10 +218,11 @@ function detectWeb(doc, url) {
 		 */
 		/\/KNavi\//i
 	];
-	// #briefBox for commom search and advanced search,
+	// #ModuleSearchResult for commom search and advanced search (mainland China),
+	// #briefBox for commom search and advanced search (Oversea),
 	// #contentPanel for journal/yearbook navigation,
 	// .main_sh for old version
-	const searchResult = doc.querySelector('#briefBox, #contentPanel, .main_sh');
+	const searchResult = doc.querySelector('#ModuleSearchResult, #briefBox, #contentPanel, .main_sh');
 	if (searchResult) {
 		Z.monitorDOMChanges(searchResult, { childList: true, subtree: true });
 	}
@@ -617,7 +618,7 @@ async function scrapeDoc(doc, itemKey) {
 		creators = ZU.trimInternal(doc.querySelector('h3 > span:only-child').textContent)
 			.replace(/\(.+?\)$/, '')
 			// pure Chinese name or English name
-			.match(/[\u4e00-\u9fff]+|[a-z .-]+/ig)
+			.match(/[\p{Unified_Ideograph}+|[a-z .-]+/igu)
 			.filter(string => ![
 				'institute',
 				'institution',
@@ -1212,47 +1213,48 @@ var exports = {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://chn.oversea.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFD&dbname=CJFD2008&filename=CHKD200805001&uniplatform=OVERSEA&v=aJCIt9giejMh3HqbgxgFnxL1OUCfSb1R08awzV9WZSrChW0sc1_6b0HUQIBsZdLk",
+		"url": "https://chn.oversea.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFD&dbname=CJFDLAST2020&filename=ZGYK202012011&v=%25mmd2BHGGqe3MG%25mmd2FiWsTP5sBgemYG4X5LOYXSuyd0Rs%25mmd2FAl1mzrLs%25mmd2F7KNcFfXQMiFAipAgN",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "“北斗一号”监控管理网设计与实现",
+				"title": "多芯片联合分析2型糖尿病发病相关基因及其与阿尔茨海默病的关系",
 				"creators": [
 					{
 						"firstName": "",
-						"lastName": "武丽丽",
+						"lastName": "辛宁",
 						"creatorType": "author",
 						"fieldMode": 1
 					},
 					{
 						"firstName": "",
-						"lastName": "华一新",
+						"lastName": "陈建康",
 						"creatorType": "author",
 						"fieldMode": 1
 					},
 					{
 						"firstName": "",
-						"lastName": "张亚军",
+						"lastName": "陈艳",
 						"creatorType": "author",
 						"fieldMode": 1
 					},
 					{
 						"firstName": "",
-						"lastName": "刘英敏",
+						"lastName": "杨洁",
 						"creatorType": "author",
 						"fieldMode": 1
 					}
 				],
-				"date": "2008",
-				"ISSN": "1009-2307",
-				"abstractNote": "本文分析了北斗用户终端在实际应用中存在的问题,指出指挥型用户终端的监控能力有限、成本相对较高是影响其推广应用的关键。针对该问题,利用现有资源,设计并搭建了监控管理网,在该网络中创造性地设计了虚拟指挥机系统,起到了指挥型用户终端的作用,弥补了北斗用户终端的不足。文章具体阐述了虚拟指挥机系统的工作原理,介绍了其数据模型,并描述了整个监控管理网的网络功能和体系结构设计,该网络已在很多部门得到应用。",
-				"extra": "original-container-title: Science of Surveying and Mapping\ndownload: 226\nalbum: 理工A(数学物理力学天地生)\nCLC: P228.1\nCNKICite: 3\ndbcode: CJFD\ndbname: CJFD2008\nfilename: chkd200805001\nCIF: 2.319\nAIF: 1.443",
-				"issue": "5",
+				"date": "2020",
+				"ISSN": "0258-4646",
+				"abstractNote": "目的利用生物信息学方法探索2型糖尿病发病的相关基因,并研究这些基因与阿尔茨海默病的关系。方法基因表达汇编(GEO)数据库下载GSE85192、GSE95849、GSE97760、GSE85426数据集,获得健康人和2型糖尿病患者外周血的差异基因,利用加权基因共表达网络(WGCNA)分析差异基因和临床性状的关系。使用DAVID数据库分析与2型糖尿病有关的差异基因的功能与相关通路,筛选关键蛋白。根据结果将Toll样受体4 (TLR4)作为关键基因,利用基因集富集分析(GSEA)分析GSE97760中与高表达TLR4基因相关的信号通路。通过GSE85426验证TLR4的表达量。结果富集分析显示,差异基因主要参与的生物学过程包括炎症反应、Toll样受体(TLR)信号通路、趋化因子产生的正向调节等。差异基因主要参与的信号通路有嘧啶代谢通路、TLR信号通路等。ILF2、TLR4、POLR2G、MMP9为2型糖尿病的关键基因。GSEA显示,TLR4上调可通过影响嘧啶代谢及TLR信号通路而导致2型糖尿病及阿尔茨海默病的发生。TLR4在阿尔茨海默病外周血中高表达。结论 ILF2、TLR4、POLR2G、MMP9为2型糖尿病发病的关键基因,TLR4基因上调与2型糖尿病、阿尔茨海默病发生有关。",
+				"extra": "original-container-title: Journal of China Medical University\ndownload: 407\nalbum: 医药卫生科技\nCLC: R587.2;R749.16\nCNKICite: 3\ndbcode: CJFD\ndbname: CJFDLAST2020\nfilename: zgyk202012011\nCIF: 1.156\nAIF: 0.890",
+				"issue": "12",
 				"language": "zh-CN",
 				"libraryCatalog": "CNKI",
-				"pages": "8-9, 7",
-				"publicationTitle": "测绘科学",
-				"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFD&dbname=CJFD2008&filename=chkd200805001",
+				"pages": "1106-1111, 1117",
+				"publicationTitle": "中国医科大学学报",
+				"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFD&dbname=CJFDLAST2020&filename=zgyk202012011",
+				"volume": "49",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1261,19 +1263,19 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "北斗用户终端"
+						"tag": "2型糖尿病"
 					},
 					{
-						"tag": "指挥机"
+						"tag": "基因芯片"
 					},
 					{
-						"tag": "用户机"
+						"tag": "数据挖掘"
 					},
 					{
-						"tag": "监控"
+						"tag": "胰岛炎症反应"
 					},
 					{
-						"tag": "虚拟指挥机"
+						"tag": "阿尔茨海默病"
 					}
 				],
 				"notes": [],
@@ -1283,47 +1285,48 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://tra.oversea.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFD&dbname=CJFD2008&filename=CHKD200805001&uniplatform=OVERSEA&v=aJCIt9giejMh3HqbgxgFnxL1OUCfSb1R08awzV9WZSrChW0sc1_6b9nWToY6oRhF",
+		"url": "https://tra.oversea.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFD&dbname=CJFD2012&filename=QHXB201211002&uniplatform=OVERSEA&v=mHFRnExWYa4LFz1M_R-EDbznu38HtcptZz-0EYf-ysFH9PFH41FafXUWtfsSr6o7",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "“北斗一號”監控管理網設計與實現",
+				"title": "互聯網藥品可信交易環境中主體資質審核備案模式",
 				"creators": [
 					{
 						"firstName": "",
-						"lastName": "武麗麗",
+						"lastName": "于瀟",
 						"creatorType": "author",
 						"fieldMode": 1
 					},
 					{
 						"firstName": "",
-						"lastName": "華一新",
+						"lastName": "劉義",
 						"creatorType": "author",
 						"fieldMode": 1
 					},
 					{
 						"firstName": "",
-						"lastName": "張亞軍",
+						"lastName": "柴躍廷",
 						"creatorType": "author",
 						"fieldMode": 1
 					},
 					{
 						"firstName": "",
-						"lastName": "劉英敏",
+						"lastName": "孫宏波",
 						"creatorType": "author",
 						"fieldMode": 1
 					}
 				],
-				"date": "2008",
-				"ISSN": "1009-2307",
-				"abstractNote": "本文分析了北斗用戶終端在實際應用中存在的問題,指出指揮型用戶終端的監控能力有限、成本相對較高是影響其推廣應用的關鍵。針對該問題,利用現有資源,設計并搭建了監控管理網,在該網絡中創造性地設計了虛擬指揮機系統,起到了指揮型用戶終端的作用,彌補了北斗用戶終端的不足。文章具體闡述了虛擬指揮機系統的工作原理,介紹了其數據模型,并描述了整個監控管理網的網絡功能和體系結構設計,該網絡已在很多部門得到應用。",
-				"extra": "original-container-title: Science of Surveying and Mapping\ndownload: 226\nalbum: 理工A(數學物理力學天地生)\nCLC: P228.1\nCNKICite: 3\ndbcode: CJFD\ndbname: CJFD2008\nfilename: chkd200805001\nCIF: 2.319\nAIF: 1.443",
-				"issue": "5",
+				"date": "2012",
+				"ISSN": "1000-0054",
+				"abstractNote": "經濟全球化和新一輪產業升級為電子商務服務產業發展帶來了新的機遇和挑戰。無法全程、及時、有效監管電子商務市場的主體及其相關行為是電子商務發展過程中面臨的主要問題。尤其對于互聯網藥品市場,電子商務主體資質的審核備案是營造電子商務可信交易環境的一項重要工作。該文通過系統網絡結構分析的方法描述了公共審核備案服務模式和分立審核備案模式的基本原理;建立了兩種模式下的總體交易費用模型,分析了公共模式比分立模式節約總體交易費用的充要條件,以及推廣該公共模式的必要條件。研究發現:市場規模越大、集成成本越小,公共模式越容易推廣。應用案例分析驗證了模型,證實了公共審核備案服務模式節約了總體交易費用的結論。",
+				"extra": "original-container-title: Journal of Tsinghua University(Science and Technology)\ndownload: 657\nalbum: 理工C(機電航空交通水利建筑能源); 醫藥衛生科技; 經濟與管理科學\nCLC: R95;F724.6\nCNKICite: 7\ndbcode: CJFD\ndbname: CJFD2012\nfilename: qhxb201211002\nCIF: 3.010\nAIF: 1.884",
+				"issue": "11",
 				"language": "zh-CN",
 				"libraryCatalog": "CNKI",
-				"pages": "8-9, 7",
-				"publicationTitle": "測繪科學",
-				"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFD&dbname=CJFD2008&filename=chkd200805001",
+				"pages": "1518-1523",
+				"publicationTitle": "清華大學學報（自然科學版）",
+				"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFD&dbname=CJFD2012&filename=qhxb201211002",
+				"volume": "52",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1332,19 +1335,19 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "北斗用戶終端"
+						"tag": "互聯網藥品交易"
 					},
 					{
-						"tag": "指揮機"
+						"tag": "交易主體"
 					},
 					{
-						"tag": "用戶機"
+						"tag": "可信交易環境"
 					},
 					{
-						"tag": "監控"
+						"tag": "資質審核備案"
 					},
 					{
-						"tag": "虛擬指揮機"
+						"tag": "電子商務"
 					}
 				],
 				"notes": [],
@@ -1354,47 +1357,32 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://oversea.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFD&dbname=CJFD2008&filename=CHKD200805001&uniplatform=OVERSEA&v=aJCIt9giejMh3HqbgxgFnxL1OUCfSb1R08awzV9WZSrChW0sc1_6b5IDOH77eina",
+		"url": "https://cnki.net/KCMS/detail/detail.aspx?dbcode=CPFD&dbname=CPFDLAST2017&filename=ZGPX201612002005&uniplatform=OVERSEA&v=wsSg9cXy6pQW_7zGbUyb2yxqQmW7T_GRYnF8Oqi5Eh1a2V96_8YUJdYPGMwq80tTlFps8uiX4AU%3d",
 		"items": [
 			{
-				"itemType": "journalArticle",
-				"title": "The design and implementation of monitoring and management network based on Beidou-1",
+				"itemType": "conferencePaper",
+				"title": "大型铁路运输企业职工教育培训体系的构建与实施——以北京铁路局为例",
 				"creators": [
 					{
 						"firstName": "",
-						"lastName": "武丽丽",
+						"lastName": "任娜",
 						"creatorType": "author",
 						"fieldMode": 1
 					},
 					{
 						"firstName": "",
-						"lastName": "华一新",
-						"creatorType": "author",
-						"fieldMode": 1
-					},
-					{
-						"firstName": "",
-						"lastName": "张亚军",
-						"creatorType": "author",
-						"fieldMode": 1
-					},
-					{
-						"firstName": "",
-						"lastName": "刘英敏",
-						"creatorType": "author",
+						"lastName": "中国职工教育和职业培训协会秘书处",
+						"creatorType": "editor",
 						"fieldMode": 1
 					}
 				],
-				"date": "2008",
-				"ISSN": "1009-2307",
-				"abstractNote": "本文分析了北斗用户终端在实际应用中存在的问题,指出指挥型用户终端的监控能力有限、成本相对较高是影响其推广应用的关键。针对该问题,利用现有资源,设计并搭建了监控管理网,在该网络中创造性地设计了虚拟指挥机系统,起到了指挥型用户终端的作用,弥补了北斗用户终端的不足。文章具体阐述了虚拟指挥机系统的工作原理,介绍了其数据模型,并描述了整个监控管理网的网络功能和体系结构设计,该网络已在很多部门得到应用。",
-				"extra": "original-container-title: 测绘科学\ndownload: 226\nalbum: (A) Mathematics/ Physics/ Mechanics/ Astronomy\nCLC: P228.1\nCNKICite: 3\ndbcode: CJFD\ndbname: CJFD2008\nfilename: chkd200805001\nCIF: 2.319\nAIF: 1.443",
-				"issue": "5",
+				"date": "2016-12",
+				"abstractNote": "北京铁路局是以铁路客货运输为主的特大型国有企业,是全国铁路网的中枢。全局共有职工19.1万人,管内铁路营业里程全长6246公里,其中高速铁路营业里程为1143.3公里。近年来,北京铁路局始终坚持\"主要行车工种做实、高技能人才做精、工班长队伍做强\"工作主线,积极构建并实施由教育培训规范、教育培训组织管理、实训基地及现代化设施、专兼职教育培训师资、",
+				"extra": "download: 80\nalbum: (H) Education ＆ Social Sciences\nCLC: G726\nCNKICite: 0\ndbcode: CPFD\ndbname: CPFDLAST2017\nfilename: zgpx201612002005",
 				"language": "zh-CN",
 				"libraryCatalog": "CNKI",
-				"pages": "8-9, 7",
-				"publicationTitle": "测绘科学",
-				"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFD&dbname=CJFD2008&filename=chkd200805001",
+				"pages": "8",
+				"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CPFD&dbname=CPFDLAST2017&filename=zgpx201612002005",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1403,19 +1391,22 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "北斗用户终端"
+						"tag": "教育培训体系"
 					},
 					{
-						"tag": "指挥机"
+						"tag": "教育培训激励"
 					},
 					{
-						"tag": "用户机"
+						"tag": "构建与实施"
 					},
 					{
-						"tag": "监控"
+						"tag": "职工教育培训"
 					},
 					{
-						"tag": "虚拟指挥机"
+						"tag": "铁路局"
+					},
+					{
+						"tag": "铁路运输企业"
 					}
 				],
 				"notes": [],
@@ -1425,7 +1416,66 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://kns.cnki.net/kcms2/article/abstract?v=uArnVX0ke1Fw-ZqMGbjcx-jCKza5rDPa1QT6Ov_SjZezxxoKGSfu8Ngxm7_oqI5uUZKp8oYAvCWjjiF_F9pvr3umJVMAgJ_iGAFjFeE2xk0VODMbjGNHfIy2IbOTF1sKOYMieqZ4bwzbsCPwwSLfIHUtVxxbCm4fpOqpfvcDHy-lGoyoNTnNLjKKN_A8KHqs&uniplatform=NZKPT",
+		"url": "https://oversea.cnki.net/KCMS/detail/detail.aspx?dbcode=CAPJ&dbname=CAPJLAST&filename=OELJ20240407003&uniplatform=OVERSEA&v=pjMKCMsesac_7YFl-57_GL6t6cGkC6jtRhCTJq6xTVo2jgEy4kPExsIaqC-0Ee5S",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Extraction of weak values in the process of retrieving quantum entanglement state",
+				"creators": [
+					{
+						"firstName": "Du",
+						"lastName": "Shaojiang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Feng",
+						"lastName": "Hairan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Zhang",
+						"lastName": "Lu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yang",
+						"lastName": "Lianwu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peng",
+						"lastName": "Yonggang",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024-04-12",
+				"ISSN": "1673-1905",
+				"abstractNote": "A reversible operation protocol is provided for a weak-measured quantum entanglement state. The evolution of weak values is studied under different parameter conditions. The weak values can be extracted from the entanglement state and the weak-measured quantum entanglement state can be revived to its initial state theoretically by weak measurement and reversibility operation respectively. We demonstrate the reversible operation protocol by taking Bell’s state as an example. The negativity is used to analyze the initial state， the weak-measured state and the reversed state in order to describe the evolution of quantum entanglement degree. Weak values is detected from the quantum entanglement state by weak measurement and the degree of the weak-measured quantum entanglement state can be revived to its initial state through reversible operation. The information of quantum entanglement state would be extracted from weak values detected in the process of the scheme.",
+				"extra": "original-container-title: Optoelectronics Letters\nStatus: advance online publication\ndownload: 10\nalbum: (A) Mathematics/ Physics/ Mechanics/ Astronomy\nCLC: O413\nCNKICite: 0\ndbcode: CJFQ\ndbname: CAPJLAST\nfilename: oelj20240407003\nCIF: 0.330\nAIF: 0.197",
+				"language": "zh-CN",
+				"libraryCatalog": "CNKI",
+				"pages": "1-6",
+				"publicationTitle": "Optoelectronics Letters",
+				"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&dbname=CAPJLAST&filename=oelj20240407003",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Extraction of weak values in the process of retrieving quantum entanglement state"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=sMQVub3UVPhGILJpAKOGh83AcRhGYSRgjDgy9nM13TOCVZF0pSJkEnbjmfB8tUhTS8LJ_RWzlJgcRv1RRK9Jq50xK24Omz1rh-UUpYJcNcDJTfmD9jOvQu1ZFbmeOLLTuuoZMm8XMBCoN6lWvYEhWWAp2BCB2ehojp96uYDdRf1ekk3Okjq_46zCyrqJKzNx&uniplatform=NZKPT",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1548,27 +1598,21 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://kns.cnki.net/kcms2/article/abstract?v=uArnVX0ke1EceldMpiioI82rTipjPAh3AdJmIxtWsdQbHiyyNn9yO1DIAYOU0d2Nf-x6hw_fxXIq-e1CPWSVeJbwxCjCh2eEa7u6n_AY_mUbOV9ryb84H_tQqenxpCWNubuPloMNAIkZtUvy71vWtWZtp_ERgIwKawubt0tQJuS-fb-M9Q63zg==&uniplatform=NZKPT",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=S8jPpdFxNHiery8DXkT083oAvbAx9rgOEcigOFI2MZ_13Vw2PvRBKFn_YSqpi2fcEeJvp73BHlsXABqmXA-6JrgNRrOobwH-TLFr-W-2HLJmq-79RHQxS-bYacMxTadx9jyVX3P1Qojx90fWItiKLTJOEp94azAwKweOUqGKlPFS2Rzm8OTCSg==&uniplatform=NZKPT&language=CHS",
 		"items": [
 			{
 				"itemType": "book",
 				"title": "IMF Terminology Bulletin:Climate &amp; the Environment, Fintech, Gender, and Related Acronyms: English to Arabic",
-				"creators": [
-					{
-						"lastName": "International Monetary Fund",
-						"creatorType": "author",
-						"fieldMode": 1
-					}
-				],
-				"date": "2023",
+				"creators": [],
+				"date": "10/2023",
 				"ISBN": "9798400251245",
-				"abstractNote": "The world has witnessed transformational changes in recent years, not the least in technical parlance. With the massive amount of new and interdisciplinary concepts, the need has emerged to standardize and communicate emerging technical terms in languages other than English. The language Services Division of the IMF's Corporate Services and Facilities Department prepared this thematic bulletin as a contribution to the international effort of linguists and translation experts, for the benefit of topical experts, member countries, professional translators and interpreters, and the general public. It is produced on the occasion of the 2023 Annual Meetings of the World Bank Group and the International Monetary Fund in Marrakesh, Morocco",
-				"language": "ara",
-				"libraryCatalog": "K10plus ISBN",
-				"numPages": "1",
-				"place": "Washington, D.C",
+				"extra": "DOI: 10.5089/9798400251245.073",
+				"language": "ar",
+				"libraryCatalog": "DOI.org (Crossref)",
+				"place": "Washington, D.C.",
 				"publisher": "International Monetary Fund",
 				"shortTitle": "IMF Terminology Bulletin",
+				"url": "https://elibrary.imf.org/openurl?genre=book&isbn=9798400251245&cid=537460-com-dsp-crossref",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -1583,7 +1627,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://kns.cnki.net/kcms2/article/abstract?v=uArnVX0ke1EH4c2BPLcNI9coShrS7t2hao7vW8UF-2K1hcp4XxYiUqzOqeIbIGFtqX5-q9Pggmqfs9PGxV-MfibiX2sbMR9DJOffzLXkuO0aLnGWewIBQa9mtIfZATgfUMjKi_DU-H4uzy2sHLk-MKyMTiy8W4Ql&uniplatform=NZKPT",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=sMQVub3UVPjIvOHHlcF3SNXEUHFPMOg2tYIxi0BfNKtiobSiU1R05at2q-ybyvO63iCJxYjXYt7Ypj6VZ0s9UXo0YEZxqJ8ZFIm_isJNaR-ynyDcFSxXe_3dOb5Jb0RHpgIZhZD72qxNWgLUa-Gw2rU6ln5dCCag&uniplatform=NZKPT",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1618,7 +1662,7 @@ var testCases = [
 				"DOI": "10.13287/j.1001-9332.2000.0212",
 				"ISSN": "1001-9332",
 				"abstractNote": "分别对 30 0mmol·L-1NaCl和 10 0mmol·L-1Na2 CO3 盐碱胁迫下的羊草苗进行以不同方式施加Ca2 +、ABA和H3PO4 等缓解胁迫处理 .结果表明 ,外施Ca2 +、ABA和H3PO4 明显缓解了盐碱对羊草生长的抑制作用 .叶面喷施效果好于根部处理 ;施用Ca(NO3) 2 效果好于施用CaCl2 效果 ;混合施用CaCl2 和ABA的效果比单独施用ABA或CaCl2 的效果好 .",
-				"extra": "foundation: 国家自然科学基金资助项目!(39670 0 83) .；\ndownload: 476\nalbum: 基础科学;农业科技\nCLC: Q945\ndbcode: CJFQ\ndbname: CJFD2000\nfilename: YYSB200006019",
+				"extra": "original-container-title: Chinese Journal of Applied Ecology\nfoundation: 国家自然科学基金资助项目!(39670 0 83) .；\ndownload: 472\nalbum: 基础科学;农业科技\nCLC: Q945\ndbcode: CJFQ\ndbname: CJFD2000\nfilename: YYSB200006019\npublicationTag: 北大核心, CA, JST, Pж(AJ), CSCD, WJCI\nCIF: 4.949\nAIF: 3.435",
 				"issue": "6",
 				"language": "zh-CN",
 				"libraryCatalog": "CNKI",
@@ -1633,7 +1677,7 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Ca2+"
+						"tag": "Ca~(2+)"
 					},
 					{
 						"tag": "盐胁迫"
@@ -1648,10 +1692,10 @@ var testCases = [
 						"tag": "胁迫缓解"
 					},
 					{
-						"tag": "脯氨酸（Pro）"
+						"tag": "脯氨酸(Pro)"
 					},
 					{
-						"tag": "脱落酸（ABA）"
+						"tag": "脱落酸(ABA)"
 					}
 				],
 				"notes": [],
@@ -1661,7 +1705,88 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://kns.cnki.net/kcms2/article/abstract?v=uArnVX0ke1HOrOQU88CQSkNqKA4gqk08nmme1PQD5mxXlUGq3rFSEEFcYOtFDkpzpQ0JjV7LpnS2RWv3vxsrsS-SA1PpflWIWFXXhn-8OuCHMjLw6nEfoJqoy0EJ95wxMPapVfFNnU6fsC9Rifjs-KXE23Y2i_UpBV6ocI1c9_A=&uniplatform=NZKPT",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=sMQVub3UVPhcux9kLv3dlu3HqEnj6v7rkox2d22uoocSttonwOgx_NcK5r9Ri45_5JpY5LDDClDUm7F2zO2qh7tFrxe7CYKah4xjD0RYAGrQvCtgL9iJ9b4EQCE9aW3p6TamVKZUWrsu85jhkHeqVODJOFE3IG05&uniplatform=NZKPT",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "黄瓜胚性愈伤组织的诱导保存和再生",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "薛婉钰",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"firstName": "",
+						"lastName": "刘娜",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"firstName": "",
+						"lastName": "苑鑫",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"firstName": "",
+						"lastName": "张婷婷",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"firstName": "",
+						"lastName": "曹云娥",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"firstName": "",
+						"lastName": "陈书霞",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2024-01-05",
+				"DOI": "10.13207/j.cnki.jnwafu.2024.07.011",
+				"ISSN": "1671-9387",
+				"abstractNote": "【目的】对黄瓜胚性愈伤组织的诱导保存和再生进行研究,为黄瓜高频率遗传转化奠定基础。【方法】以欧洲温室型黄瓜自交系14-1子叶节为外植体,在MS培养基上附加1.5 mg/L 2,4-D,进行25 d的胚性愈伤组织诱导培养后,取胚性愈伤组织在添加30,60,90,100,110,120,130,140和150 g/L蔗糖及1.5 mg/L 2,4-D的MS培养基进行继代培养,每30 d继代1次,观察胚性愈伤组织的褐变情况及胚性分化能力,并用电子天平在超净工作台中记录胚性愈伤组织质量的变化。继代培养60 d后,将保存的胚性愈伤组织和体细胞胚移至含1.5 mg/L 2,4-D的MS培养基上,待出现体细胞胚后移至MS培养基进行萌发,观察再生小植株的生长情况。【结果】将欧洲温室型黄瓜自交系14-1的子叶节,接种到附加1.5 mg/L 2,4-D的MS培养基上进行诱导培养后,子叶节一端的愈伤组织集中聚集于下胚轴处,之后有黄色胚性愈伤组织产生。在继代培养过程中,当培养基中添加的蔗糖为60～150 g/L时,胚性愈伤组织能保持胚性愈伤状态达60 d。之后将继代培养60 d后的胚性愈伤组织转接至附加1.5 mg/L 2,4-D的MS培养基上,在蔗糖质量浓度为60 g/L条件下保存的胚性愈伤组织可诱导出正常胚状体,且能形成健康小植株。【结论】由黄瓜子叶节诱导出的胚性愈伤组织可在MS+60 g/L蔗糖的培养基上保存达60 d,之后能正常萌发形成胚状体,进而形成正常小植株。",
+				"extra": "original-container-title: Journal of Northwest A & F University(Natural Science Edition)\nStatus: advance online publication\nfoundation: 国家自然科学基金项目(32072562;32272748；\ndownload: 422\nalbum: 农业科技\nCLC: S642.2\ndbcode: CAPJ\ndbname: CAPJLAST\nfilename: XBNY20240104006\npublicationTag: 北大核心, JST, Pж(AJ), CSCD, WJCI\nCIF: 2.343\nAIF: 1.657",
+				"issue": "7",
+				"language": "zh-CN",
+				"libraryCatalog": "CNKI",
+				"pages": "1-7",
+				"publicationTitle": "西北农林科技大学学报（自然科学版）",
+				"url": "https://doi.org/10.13207/j.cnki.jnwafu.2024.07.011",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "离体保存"
+					},
+					{
+						"tag": "胚性愈伤组织"
+					},
+					{
+						"tag": "遗传转化"
+					},
+					{
+						"tag": "黄瓜"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=sMQVub3UVPi709MgKyniiJ79ODC3KCFRV10Zq5RZGXXIfHj6BnzFrn-E3M0m12TLotEiKyxahikirQYncVv4zCW0ZtQdfHiTYfEIFVPt8oIXQ23Tokv19roGS3t-Fr-9Tnnx4A0dALUfFdvhF6DN3lHC5M5oUdg2N-_TcfODVmk=&uniplatform=NZKPT",
 		"items": [
 			{
 				"itemType": "thesis",
@@ -1688,7 +1813,7 @@ var testCases = [
 				],
 				"date": "2015",
 				"abstractNote": "黄瓜(Cucumis sativus L.)是我国最大的保护地栽培蔬菜作物,也是植物性别发育和维管束运输研究的重要模式植物。黄瓜基因组序列图谱已经构建完成,并且在此基础上又完成了全基因组SSR标记开发和涵盖330万个变异位点变异组图谱,成为黄瓜功能基因研究的重要平台和工具,相关转录组研究也有很多报道,不过共表达网络研究还是空白。本实验以温室型黄瓜9930为研究对象,选取10个不同组织,进行转录组测序,获得10份转录组原始数据。在对原始数据去除接头与低质量读段后,将高质量读段用Tophat2回贴到已经发表的栽培黄瓜基因组序列上。用Cufflinks对回贴后的数据计算FPKM值,获得10份组织的24274基因的表达量数据。计算结果中的回贴率比较理想,不过有些基因的表达量过低。为了防止表达量低的基因对结果的影响,将10份组织中表达量最大小于5的基因去除,得到16924个基因,进行下一步分析。共表达网络的构建过程是将上步获得的表达量数据,利用R语言中WGCNA(weighted gene co-expression network analysis)包构建共表达网络。结果得到的共表达网络包括1134个模块。这些模块中的基因表达模式类似,可以认为是共表达关系。不过结果中一些模块内基因间相关性同其他模块相比比较低,在分析过程中,将模块中基因相关性平均值低于0.9的模块都去除,最终得到839个模块,一共11,844个基因。共表达的基因因其表达模式类似而聚在一起,这些基因可能与10份组织存在特异性关联。为了计算模块与组织间的相关性,首先要对每个模块进行主成分分析(principle component analysis,PCA),获得特征基因(module eigengene,ME),特征基因可以表示这个模块所有基因共有的表达趋势。通过计算特征基因与组织间的相关性,从而挑选出组织特异性模块,这些模块一共有323个。利用topGO功能富集分析的结果表明这些特异性模块所富集的功能与组织相关。共表达基因在染色体上的物理位置经常是成簇分布的。按照基因间隔小于25kb为标准。分别对839个模块进行分析,结果发现在71个模块中共有220个cluster,这些cluster 一般有2～5个基因,cluster中的基因在功能上也表现出一定的联系。共表达基因可能受到相同的转录调控,这些基因在启动子前2kb可能会存在有相同的motif以供反式作用元...",
-				"extra": "major: 生物化学与分子生物学\ndownload: 308\nalbum: 基础科学;农业科技\nCLC: S642.2;Q943.2\ndbcode: CMFD\ndbname: CMFD201701\nfilename: 1017045605.nh",
+				"extra": "major: 生物化学与分子生物学\ndownload: 306\nalbum: 基础科学;农业科技\nCLC: S642.2;Q943.2\ndbcode: CMFD\ndbname: CMFD201701\nfilename: 1017045605.nh",
 				"language": "zh-CN",
 				"libraryCatalog": "CNKI",
 				"numPages": "69",
@@ -1722,7 +1847,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://kns.cnki.net/kcms2/article/abstract?v=uArnVX0ke1Egk821IN_tibbE-H8cE9cmtj2bvzpaiJSpu9nv1FX7XV44cN1mjqtovKj7C8R0A6ZvTpfL-LC1mrm11l6DSWqk2L1hY2EbrwKH4cNqNDZlMwI11o9f54XdjgMA9M0_XEv16Z069RIf2B72bZbLknjo&uniplatform=NZKPT",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=sMQVub3UVPjLdnZQK0WmJ8u2192HTQIX3W_0-LF2_Hgj0ZNubzv0vrUbvuc58qkLIBNJXHzuM2ZwWyPsoZgrYAuZLhUAFADQPamzJwsK4-dXpgf_XtshP9fFt2D63LRNwTnGsg0OL3hHuBEkQaNFn3ocuvUjBH2s&uniplatform=NZKPT",
 		"items": [
 			{
 				"itemType": "thesis",
@@ -1742,8 +1867,8 @@ var testCases = [
 					}
 				],
 				"date": "2012",
-				"abstractNote": "随着微电子集成技术和组装技术的快速发展，电子元器件和逻辑电路的体积越来越小，而工作频率急剧增加，半导体的环境温度向高温方向变化，为保证电子元器件长时间可靠地正常工作，及时散热能力就成为其使用寿命长短的制约因素。高导热聚合物基复合材料在微电子、航空、航天、军事装备、电机电器等诸多制造业及高科技领域发挥着重要的作用。所以研制综合性能优异的高导热聚合物基复合材料成为了目前研究热点。本论文分别以氧化铝（Al2O3）、石墨烯和氮化硼（BN）纳米片为导热填料，以环氧树脂和聚偏氟乙烯（PVDF）为基体，制备了新型的高导热聚合物基复合材料。首先，采用两步法将超支化聚芳酰胺接枝到纳米Al2O3粒子表面：纳米颗粒先进行硅烷偶联剂处理引入氨基基团，在改性后的纳米粒子上接枝超支化聚合物；再利用X射线衍射、傅立叶红外光谱、核磁共振氢谱和热失重等方法对纳米Al2O3粒子的表面改性进行表征；然后分别将未改性的纳米Al2O3粒子、硅烷接枝的纳米Al2O3粒子（Al2O3-APS）和超支化聚芳酰胺接枝的纳米Al2O3粒子（Al2O3-HBP）与环氧树脂复合，并对三种复合材料的热性能和介电性能进行比较研究。结果表明：（1）从SEM、TEM和动态光散射的实验结果表明，三种纳米颗粒相比之下，Al2O3-HBP纳米粒子在有机溶剂乙醇和环氧树脂中显示出最好的分散性。（2）三种复合材料的导热系数都是随着纳米颗粒含量的增加而增大；在添加相同含量的纳米颗粒时，其导热系数遵循着如下的规律：环氧树脂/Al2O3-HBP复合材料>环氧树脂/Al2O3-APS复合材料>环氧树脂/Al2O3复合材料。而且从DSC、TGA和DMA的实验结果可以得出，与未改性Al2O3和Al2O<s...",
-				"extra": "major: 材料学\nfoundation: 国家自然基金;；\ndownload: 16023\nalbum: 工程科技Ⅰ辑\nCLC: TB332\ndbcode: CDFD\ndbname: CDFD1214\nfilename: 1012034749.nh",
+				"abstractNote": "随着微电子集成技术和组装技术的快速发展，电子元器件和逻辑电路的体积越来越小，而工作频率急剧增加，半导体的环境温度向高温方向变化，为保证电子元器件长时间可靠地正常工作，及时散热能力就成为其使用寿命长短的制约因素。高导热聚合物基复合材料在微电子、航空、航天、军事装备、电机电器等诸多制造业及高科技领域发挥着重要的作用。所以研制综合性能优异的高导热聚合物基复合材料成为了目前研究热点。本论文分别以氧化铝（Al_2O_3）、石墨烯和氮化硼（BN）纳米片为导热填料，以环氧树脂和聚偏氟乙烯（PVDF）为基体，制备了新型的高导热聚合物基复合材料。首先，采用两步法将超支化聚芳酰胺接枝到纳米Al_2O_3粒子表面：纳米颗粒先进行硅烷偶联剂处理引入氨基基团，在改性后的纳米粒子上接枝超支化聚合物；再利用X射线衍射、傅立叶红外光谱、核磁共振氢谱和热失重等方法对纳米Al_2O_3粒子的表面改性进行表征；然后分别将未改性的纳米Al_2O_3粒子、硅烷接枝的纳米Al_2O_3粒子(Al_2O_3-APS)和超支化聚芳酰胺接枝的纳米Al_2O_3粒子(Al_2O_3-HBP)与环氧树脂复合，并对三种复合材料的热性能和介电性能进行比较研究。结果表明：(1)从SEM、TEM和动态光散射的实验结果表明，三种纳米颗粒相比之下，Al_2O_3-HBP纳米粒子在有机溶剂乙醇和环氧树脂中显示出最好的分散性。(2)三种复合材料的导热系数都是随着纳米颗粒含量的增加而增大；在添加相同含量的纳米颗粒时，其导热系数遵循着如下的规律：环氧树脂/Al_2O_3-HBP复合材料>环氧树脂/Al_2O_3-APS复合材料>环氧树脂/Al_2O_3复合材料。而且从DSC、TGA和DMA的实验结果可以得出，与未改性Al_2O_3和Al_2O_3-APS纳米颗粒相比，添加Al_2O_3-HBP纳米颗粒能很好提高复合材料的耐热性。(3)对三种复合材料的介电性能（体积电阻率、介电常数、介电损耗和击穿强度）的研究比较发现，环氧树脂/Al_2O_3-HBP复合材料显示出优异的综合介电性能。其次，采用改进的Hummers法和超声剥离法制备氧化石墨烯，再使用热还原的方法制备石墨烯。系统地研究了石墨烯含量对PVDF复合材料的导热、热稳定和介电性能的影响，阐述了其石墨烯提高PVDF复合材料的导热性能的机理；最后还研究了低石墨烯掺量下对PVDF复合材料热稳定、动态热力学、结晶行为、透...",
+				"extra": "major: 材料学\nfoundation: 国家自然基金;；\ndownload: 15683\nalbum: 工程科技Ⅰ辑\nCLC: TB332\ndbcode: CDFD\ndbname: CDFD1214\nfilename: 1012034749.nh",
 				"language": "zh-CN",
 				"libraryCatalog": "CNKI",
 				"numPages": "148",
@@ -1789,7 +1914,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://kns.cnki.net/kcms2/article/abstract?v=uArnVX0ke1ErlC0Nhw4jy1y2_4gBIr2abJt0NpyI9dyhJ-CRvUhb-4bPU-SCmoAG84kJIbjlBcklyfWwHuqWkYhmiT3us-XhN2KHIvoy_kLzbtITnps1oyXiWh-1Dc740qcONrCLYv11sgiktFE-Bzt8YW3D48gYP9nlUvOBdn0=&uniplatform=NZKPT",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=sMQVub3UVPigDNftdOsKqRLYk606CWR4iKpMAydUwHAvlH8L01z2V5V5PNgdjglAwSLEPF8heJUfvw8Bcywfp-HkXBqojIwPInE3MrVQq2SJNY1TcrUVDCWowJRGRmuR9uaHzlD2ZaFsDG7crRtb-u3iPVCCs4vjZfe9H4K15f4=&uniplatform=NZKPT",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -1800,12 +1925,18 @@ var testCases = [
 						"lastName": "朱延平",
 						"creatorType": "author",
 						"fieldMode": 1
+					},
+					{
+						"firstName": "",
+						"lastName": "内蒙古文物考古研究所",
+						"creatorType": "editor",
+						"fieldMode": 1
 					}
 				],
-				"date": "1990",
+				"date": "1991-09",
 				"abstractNote": "辽西区的范围从大兴安岭南缘到渤海北岸,西起燕山西段,东止辽河平原,基本上包括内蒙古的赤峰市(原昭乌达盟)、哲里木盟西半部,辽宁省西部和河北省的承德、唐山、廊坊及其邻近的北京、天津等地区。这一地区的古人类遗存自旧石器时代晚期起,就与同属东北的辽东区有着明显的不同,在后来的发展中,构成自具特色的一个考古学文化区,对我国东北部起过不可忽视的作用。以下就辽西地区新石器时代的考古学文化序列、编年、谱系及有关问题简要地谈一下自己的认识。",
 				"conferenceName": "内蒙古东部地区考古学术研讨会",
-				"extra": "organizer: 中国社会科学院考古研究所、内蒙古文物考古研究所、赤峰市文化局\ndownload: 668\nalbum: 哲学与人文科学\nCLC: K872\ndbcode: CPFD\ndbname: CPFD9908\nfilename: OYDD199010001004",
+				"extra": "organizer: 中国社会科学院考古研究所、内蒙古文物考古研究所、赤峰市文化局\ndownload: 638\nalbum: 哲学与人文科学\nCLC: K872\ndbcode: CPFD\ndbname: CPFD9908\nfilename: OYDD199010001004",
 				"language": "zh-CN",
 				"libraryCatalog": "CNKI",
 				"pages": "6, 13-18",
@@ -1860,7 +1991,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://kns.cnki.net/kcms2/article/abstract?v=uArnVX0ke1F0U-QEAqfvVIcp8B8EdEMxMYEWwhGFs78jmrWlWmhJOkwyYk-HiZcd4ARwvWZfOsKhX3ofXH2UvUL9gmjXGuYy1uMpSkze7_p5PHCHAd8RmQoLqOJRgqminVQwbSYBiaOgzndN23iaE4h0aFrVsrVdQ2S2_Y6QfoI=&uniplatform=NZKPT",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=8oX70opUeL9Sz6TMDobD54WY2iAv_7oc4EzA0EtCVBtRKS8rH086TmPI_zoEuk0Sr2lJdMsuSEk7qtwhzrhB-jyr-kbcD2lK7S0Xf1-kwkX7ulr9ql3sLhOB-EabHSGkMhP4xipN26g1xB7z7bd4XfVID9f5PVTJ0h4Py2oxZg8=&uniplatform=NZKPT",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -1875,7 +2006,7 @@ var testCases = [
 				],
 				"date": "2023-09-21",
 				"abstractNote": "科技日报北京9月20日电 （记者刘霞）瑞典国家分子生物科学中心科学家首次分离和测序了一个已灭绝物种的RNA分子，从而重建了该灭绝物种（塔斯马尼亚虎）的皮肤和骨骼肌转录组。该项成果对复活塔斯马尼亚虎和毛猛犸象等灭绝物种，以及研究如新冠病毒等RNA病毒具有重要意义。相......",
-				"extra": "DOI: 10.28502/n.cnki.nkjrb.2023.005521\ndownload: 27\nalbum: 基础科学\nCLC: Q343.1\ndbcode: CCND\ndbname: CCNDLAST2023\nfilename: KJRB202309210044",
+				"extra": "DOI: 10.28502/n.cnki.nkjrb.2023.005521\nalbum: 基础科学\nCLC: Q343.1\ndbcode: CCND\ndbname: CCNDLAST2023\nfilename: KJRB202309210044",
 				"language": "zh-CN",
 				"libraryCatalog": "CNKI",
 				"pages": "4",
@@ -1903,7 +2034,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://kns.cnki.net/kcms2/article/fulltext?invoice=GQiJ9iByVW1N8YEyfjizbSwqHKCoCDtB5hpceRKkO9AKDgy3NX0HLG88IQOuX3Yfy312yri1hqwWqsNFgtbyONkA9FquebADmDIJq8NJwob8T%2BGMoiQsSG1nF0jyOMtbQyuiIzEU9Bb66ACX%2F%2BLjIusg3e8GNdhqzKvzFhhtq5g%3D&platform=NZKPT&product=CYFD&filename=N2022040061000062&tablename=cyfd2022&type=ALMANAC&scope=download&cflag=overlay&dflag=&pages=&language=chs&trial=&nonce=92BDC88F8F014456B64B9B845BA8E525",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=sMQVub3UVPh-Ko_j7TrAPDx9LWbcQaN5YkzQpO6PAqVJLgbmo5o3J7ksKEqqsQZN6P0YxslnWf9-Gr-_3iIVf99dBJvHvgEzhnLw4lywSVBekJFTwDz2wqrZLwSW-z_kmRUw8_wZEfE=&uniplatform=NZKPT",
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -1916,10 +2047,8 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"date": "2020-12-30",
-				"ISBN": "9787514445008",
 				"bookTitle": "山西年鉴",
-				"extra": "DOI: 10.41842/y.cnki.ysxnj.2022.000050\ndownload: 29\nCLC: Z9\ndbcode: CYFD\ndbname: cyfd2022\nfilename: N2022040061000062",
+				"extra": "DOI: 10.41842/y.cnki.ysxnj.2022.000050\ndownload: 26\nCLC: Z9\ndbcode: CYFD\ndbname: CYFD2022\nfilename: N2022040061000062",
 				"language": "zh-CN",
 				"libraryCatalog": "CNKI",
 				"pages": "6-23",
@@ -1947,7 +2076,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://kns.cnki.net/kcms2/article/abstract?v=uArnVX0ke1EHl1V4bI1DosoRwvfWRaLERtu97Nsa6hdMwoH5juVWrobRlKUlgRgap8BXtoVtRIszfYqVaiDeqBb0gdqTCuPJFQft49PBCrmN7sYan8DqQRdIc26yvA6C8k_L9joObGYhQaQGEQADXA==&uniplatform=NZKPT",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=sMQVub3UVPiG5mbP5BFYgsf2GVM4Pb3FAJPTQmmkT0VLgqYEWZjuffqXQSO25fYGRR6b8ap_q6BUEx9SorUDJIFGfoVhymByxCHw0NUHnC7Tgk_wHttZ89pJUbGhe_8Uw_i-UKZZWukatGvVDO884g==&uniplatform=NZKPT",
 		"items": [
 			{
 				"itemType": "patent",
@@ -1992,11 +2121,13 @@ var testCases = [
 				],
 				"abstractNote": "本发明公开了一种不锈钢管的制造方法,具有可提高不锈钢管质量的优点。该不锈钢管的制造方法,其特征是包括下述步骤：①将不锈钢液在熔炼炉中进行熔炼；②不锈钢液熔清后进行去渣及脱氧处理；③将不锈钢液浇入旋转的离心浇铸机型筒中进行离心浇铸后在离心力作用下冷却凝固成型为不锈钢管坯料。采用离心浇铸方法制作不锈钢空心管,使得在离心力作用下,离心管坯补缩效果好,组织较致密,气体和非金属夹杂容易排出,缺陷少,有效地提高了不锈钢管的质量,且通过离心浇铸后可直接获得不锈钢空心管,金属的收得率高,且通过采用离心浇铸后,管坯在后续加工中具有工序少、成材率高的特点,尤其适合在高端钢材产品的制造上面推广使用。",
 				"applicationNumber": "CN200710201273.2",
+				"country": "中国",
 				"extra": "Genre: 发明公开\nalbum: 工程科技Ⅰ辑\nCLC: B22D13/02\ndbcode: SCPD\ndbname: SCPD0407\nfilename: CN101091984",
 				"filingDate": "2007-08-03",
 				"language": "zh-CN",
 				"pages": "6",
 				"patentNumber": "CN101091984",
+				"place": "中国",
 				"rights": "1.不锈钢管的制造方法,其特征是包括下述步骤：①、将不锈钢液\n\n\n\n在熔炼炉中进行熔炼；②、不锈钢液熔清后进行去渣及脱氧处理；③、将不锈钢液浇入旋转\n\n\n\n的离心浇铸机型筒中进行离心浇铸后在离心力作用下冷却凝固成型为不锈钢管坯料。",
 				"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=SCPD&dbname=SCPD0407&filename=CN101091984",
 				"attachments": [
@@ -2017,7 +2148,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://kns.cnki.net/kcms2/article/abstract?v=uArnVX0ke1Hbv7yS_LkcTBO-E2V9Z8THpIZcDRH0MW2-5PCdUeE1C8Za8GBxKWXw1irMix8MAWGxhRleeqCA5kn2Wbc7CZ_iTxx0_qhuBOTJ1Dv2_Q_qtiRXtTXZrhNsAp4lYnLxw2HA6JXqjT2HJg==&uniplatform=NZKPT",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=sMQVub3UVPhUJgjC7Qa3I7KM9s9y0tpUeTk1TET0hGqCKwXmGEGJN6c25phYC4UVUOKqFs3LEMuE9HV0i_Q1tfpzYj_mbePzidRWSnNm2iIFBLqthVpUEGEhIrGePFl7zmn7dmm_nEgoIrEN2-lbjg==&uniplatform=NZKPT",
 		"items": [
 			{
 				"itemType": "standard",
@@ -2037,7 +2168,7 @@ var testCases = [
 				"numPages": "16",
 				"number": "GB/T 37510—2019",
 				"status": "现行",
-				"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=SCSF&dbname=SCSF&filename=SCSF00058274",
+				"url": "https://kns.cnki.net/kcms2/article/abstract?v=sMQVub3UVPiowb17CydvU4D0OeNa6fUyv5OBL9DI3IKZep1tneGNFO3SiqiJX0C9QI46GsqnSbarj1Gh0nDUorgpzMyC9aHtNzSNNHSigLTtPdNmeAnZKPRSou_UYz4QUozez_3W_ZMjhu22CZrxYcr0-DCeyvHXObqSHurt7Ym8NNqaBc_J_5jesB75KM3I&uniplatform=NZKPT&language=CHS",
 				"attachments": [
 					{
 						"title": "Full Text CAJ",
@@ -2056,7 +2187,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://kns.cnki.net/kcms2/article/abstract?v=uArnVX0ke1GAHYP4MJg7aOGTXQPnoF8CY8Szbwzov9GTLqRPuB6MNgKejzANbo3CC0DXC3oyvolp7klOvo-rFTH8ALN2KDoYvP0h_cxmLl36qNg-iisALsMDG8o__-VQL5QBPgQ8iW37087uKQyZxqTZPYf0fB1m&uniplatform=NZKPT",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=sMQVub3UVPgHKxUaqGeje4eBG31tefk-g1t1m5K2GD2Nmt1rgXe195otbojRwrL97hQfCLDwMAHfQn9e5Kj_RsCw59sBjBTrO_v5cPjiBVTrkpabiEDeTzlvU4yvtFZ2GdCMFb5eu9_BJDOUH39JWseZru4qhhB9&uniplatform=NZKPT",
 		"items": [
 			{
 				"itemType": "report",
@@ -2191,7 +2322,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://kns.cnki.net/kcms2/article/abstract?v=uArnVX0ke1F8WYbVFvSp8OPJ_NRVoyeBYANFb708Mq6FCNwnfHgmIVwErYOcXmCJmsg0-5BIbeOmLjJZcHmc6udoyRDbowWMXjbBulT8wCfa_-aIPIeCSwRaNcLDAoLnjHmnSiXQcheBx2lFpazKKA==&uniplatform=NZKPT",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=sMQVub3UVPiU0UZfLTdyfrPRSQiI4UbF8G-kxDspb8r4gBh2WY2zIfacmt1UliZdUVXJHOLplkC7UXsu94MxnAHopj7BIhIxmu2yL8YraQ6F6TnWewIC1X5SZDx1zPubVXqEjhpmEIXjY6pU9XMWxA==&uniplatform=NZKPT",
 		"items": [
 			{
 				"itemType": "videoRecording",
@@ -2199,13 +2330,7 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "",
-						"lastName": "贾",
-						"creatorType": "author",
-						"fieldMode": 1
-					},
-					{
-						"firstName": "",
-						"lastName": "康",
+						"lastName": "贾康",
 						"creatorType": "author",
 						"fieldMode": 1
 					},
