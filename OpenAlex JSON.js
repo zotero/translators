@@ -37,12 +37,12 @@
 // copied from CSL JSON
 function parseInput() {
 	var str, json = "";
-	
+
 	// Read in the whole file at once, since we can't easily parse a JSON stream. The
 	// chunk size here is pretty arbitrary, although larger chunk sizes may be marginally
 	// faster. We set it to 1MB.
 	while ((str = Z.read(1048576)) !== false) json += str;
-	
+
 	try {
 		return JSON.parse(json);
 	}
@@ -114,8 +114,14 @@ function parseIndividual(data) {
 	let type = mappingTypes[OAtype] || "document";
 	var item = new Zotero.Item(type);
 	item.title = data.title;
+	let titleCaps = ""
+	try {
+		titleCaps = item.title.toUpperCase();
+	} catch (error){
+		Zotero.debug(`Item Title: ${item.title}`)
+	}
 	// fix all caps titles
-	if (item.title == item.title.toUpperCase()) {
+	if (item.title == titleCaps) {
 		item.title = ZU.capitalizeTitle(item.title, true);
 	}
 	item.date = data.publication_date;
@@ -123,36 +129,55 @@ function parseIndividual(data) {
 	if (data.doi) {
 		item.DOI = ZU.cleanDOI(data.doi);
 	}
-	if (data.primary_location.source) {
-		let sourceName = data.primary_location.source.display_name;
+	if (data.primary_location != null){
+		let sourceName = "";
+		let host_org = "";
+		try {
+			sourceName = data.primary_location.source.display_name;
+		} catch (error) {
+			sourceName = "NA";
+		}
+		try {
+			host_org = data.primary_location.source.host_organization_name;
+		} catch (error) {
+			host_org = "NA";
+		}
+
 		if (item.itemType == "thesis" || item.itemType == "dataset") {
 			item.publisher = sourceName;
 		}
 		else if (item.itemType == "book") {
-			item.publisher = data.primary_location.source.host_organization_name;
+			item.publisher = host_org
 		}
 		else {
 			item.publicationTitle = sourceName;
-			item.publisher = data.primary_location.source.host_organization_name;
+			item.publisher = host_org;
 		}
-		if (typeof data.primary_location.source.issn === 'string') {
-			item.ISSN = data.primary_location.source.issn;
-		}
-		else if (Array.isArray(data.primary_location.source.issn)) {
-			item.ISSN = data.primary_location.source.issn[0];
-		}
-		if (data.primary_location.source.type == "journal") {
-			Zotero.debug(`Item type was ${item.itemType} -- changing to journalArticle because source.type == 'journal'`);
+		try {
+			if (typeof data.primary_location.source.issn === 'string') {
+				item.ISSN = data.primary_location.source.issn;
+			}
+			else if (Array.isArray(data.primary_location.source.issn)) {
+				item.ISSN = data.primary_location.source.issn[0];
+			}
+			if (data.primary_location.source.type == "journal") {
+				Zotero.debug(`Item type was ${item.itemType} -- changing to journalArticle because source.type == 'journal'`);
+				item.itemType = "journalArticle";
+			}
+			else if (data.primary_location.source.type == "conference") {
+				Zotero.debug(`Item type was ${item.itemType} -- changing to conferencePaper because source.type == 'conference'`);
+				item.itemType = "conferencePaper";
+			}
+			if (data.primary_location.version == "submittedVersion") {
+				Zotero.debug(`Item type was ${item.itemType} -- changing to preprint because version == 'submittedVersion'`);
+				item.itemType = "preprint";
+			}
+		} catch (error) {
+			Zotero.debug(`Defaulting Item to journalArticle due to lack of primary_location.source`);
 			item.itemType = "journalArticle";
 		}
-		else if (data.primary_location.source.type == "conference") {
-			Zotero.debug(`Item type was ${item.itemType} -- changing to conferencePaper because source.type == 'conference'`);
-			item.itemType = "conferencePaper";
-		}
-		if (data.primary_location.version == "submittedVersion") {
-			Zotero.debug(`Item type was ${item.itemType} -- changing to preprint because version == 'submittedVersion'`);
-			item.itemType = "preprint";
-		}
+	} else {
+		Zotero.debug(`Item type was ${item.itemType}`)
 	}
 
 
@@ -169,7 +194,7 @@ function parseIndividual(data) {
 
 	let authors = data.authorships;
 	for (let author of authors) {
-		let authorName = author.author.display_name;
+		let authorName = author.author.display_name || author.raw_author_name;
 		item.creators.push(ZU.cleanAuthor(authorName, "author", false));
 	}
 	if (item.itemType == "thesis" && !item.publisher & authors.length) {
@@ -188,7 +213,13 @@ function parseIndividual(data) {
 	for (let tag of tags) {
 		item.tags.push(tag.display_name || tag.keyword);
 	}
-	item.extra = "OpenAlex: " + data.ids.openalex;
+	/** THIS IS THE EXTRAS FIELD. TRY TO HIDE DATA HERE FOR ANALYTICS */
+	item.extra = [];
+	item.extra.push("OpenAlex:" + data.ids.openalex + " ");
+	item.extra.push("CitedBy:" + data.cited_by_count + " ");
+	item.extra.push("Cites:" + data.referenced_works_count + " ");
+	item.extra.push("OpenAccess:" + data.open_access.is_oa + " ");
+	item.extra.push("OALink: " + data.open_access.oa_url + " ");
 	item.complete();
 }
 
