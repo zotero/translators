@@ -37,7 +37,7 @@
 
 
 function detectWeb(doc, url) {
-	if (url.match(/\/books\/.+/)) {
+	if (/\/books\/.+/.test(url)) {
 		return 'book';
 	}
 	return false;
