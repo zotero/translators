@@ -65,7 +65,7 @@ async function scrape(doc, url = doc.location.href) {
 
 		const detailsBlock = doc.querySelector('div[data-test-id="CONTENT_DETAILS"]');
 
-		const abstract = text(detailsBlock, 'div[data-test-id="EXPANDABLE_TEXT"] > div > div > span > span');
+		const abstract = text(detailsBlock, 'div[data-test-id="EXPANDABLE_TEXT"] :only-child');
 		item.abstractNote = abstract;
 
 		const contentInfoItems = detailsBlock.querySelectorAll('[data-test-id="CONTENT_INFO"]');
