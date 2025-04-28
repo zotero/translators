@@ -70,9 +70,9 @@ async function scrape(doc, url = doc.location.href) {
 
 		const contentInfoItems = detailsBlock.querySelectorAll('[data-test-id="CONTENT_INFO"]');
 
-		contentInfoItems.forEach((it) => {
-			const label = it.querySelector('span').textContent.trim();
-			const valueElement = it.querySelector('span + span');
+		for (let item of contentInfoItems) {
+			const [labelElement, valueElement] = item.children;
+			const label = labelElement.textContent;
 
 			if (label.includes('Год выхода издания')) {
 				item.date = valueElement.textContent.trim();
@@ -83,7 +83,7 @@ async function scrape(doc, url = doc.location.href) {
 			else if (label.includes('Серия')) {
 				item.series = text(valueElement, 'a');
 			}
-		});
+		}
 
 		item.complete();
 	});
