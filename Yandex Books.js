@@ -37,7 +37,7 @@
 
 
 function detectWeb(doc, url) {
-	if (/\/books\/.+/.test(url)) {
+	if (/\/books\/.+/.test(url) && doc.querySelector('span[data-test-id="CONTENT_TITLE_MAIN"]')) {
 		return 'book';
 	}
 	return false;
