@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-04-17 18:46:00"
+	"lastUpdated": "2025-04-28 18:54:19"
 }
 
 /*
@@ -75,31 +75,31 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url = doc.location.href) {
-	const translator = Zotero.loadTranslator('web');
+	let translator = Zotero.loadTranslator('web');
 
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
 
 	translator.setHandler('itemDone', function (obj, item) {
-		const title = text(doc, 'span[data-test-id="CONTENT_TITLE_MAIN"]');
+		let title = text(doc, 'span[data-test-id="CONTENT_TITLE_MAIN"]');
 		item.title = title;
 
-		const authors = doc.querySelectorAll('div[data-test-id="CONTENT_TITLE_AUTHOR"] a[data-test-id="CONTENT_AUTHOR_AUTHOR_NAME"]');
-		for (const author of authors) {
+		let authors = doc.querySelectorAll('div[data-test-id="CONTENT_TITLE_AUTHOR"] a[data-test-id="CONTENT_AUTHOR_AUTHOR_NAME"]');
+		for (let author of authors) {
 			item.creators.push(ZU.cleanAuthor(author.textContent, "author"));
 		}
 
-		const detailsBlock = doc.querySelector('div[data-test-id="CONTENT_DETAILS"]');
+		let detailsBlock = doc.querySelector('div[data-test-id="CONTENT_DETAILS"]');
 
-		const abstract = text(detailsBlock, 'div[data-test-id="EXPANDABLE_TEXT"] :only-child');
+		let abstract = text(detailsBlock, 'div[data-test-id="EXPANDABLE_TEXT"] :only-child');
 		item.abstractNote = abstract;
 
-		const contentInfoItems = detailsBlock.querySelectorAll('[data-test-id="CONTENT_INFO"]');
+		let contentInfoItems = detailsBlock.querySelectorAll('[data-test-id="CONTENT_INFO"]');
 
 		for (let item of contentInfoItems) {
-			const [labelElement, valueElement] = item.children;
-			const label = labelElement.textContent;
+			let [labelElement, valueElement] = item.children;
+			let label = labelElement.textContent;
 
 			if (label.includes('Год выхода издания')) {
 				item.date = valueElement.textContent.trim();
@@ -115,7 +115,7 @@ async function scrape(doc, url = doc.location.href) {
 		item.complete();
 	});
 
-	const em = await translator.getTranslatorObject();
+	let em = await translator.getTranslatorObject();
 	em.itemType = 'book';
 	em.doWeb(doc, url);
 }
