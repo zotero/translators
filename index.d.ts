@@ -195,6 +195,18 @@ declare namespace Zotero {
 			url: string,
 			params?: HTTPRequestParameters<"document">
 		): Promise<Document>;
+
+		type NoteVisitors = {
+			visitContainer?: (elem: HTMLElement) => void,
+			visitAnnotation?: (elem: HTMLElement) => void,
+			visitContainer?: (elem: HTMLElement) => void,
+			visitCitation?: (elem: HTMLElement) => void,
+			visitOtherElement?: (elem: HTMLElement) => void,
+			visitDataAttribute?: (attr: string, json: any) => void,
+			visitURI?: (uri: string) => string
+		};
+
+		function walkNoteDOM(note: string, visitors: NoteVisitors)
 	}
 
 	interface Attachment {
