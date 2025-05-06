@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-23 22:08:18"
+	"lastUpdated": "2025-05-06 17:16:16"
 }
 
 /*
@@ -65,33 +65,17 @@ function scrape(doc, url) {
 	newItem.url = url;
 	newItem.publicationTitle = 'The Straits Times';
 	newItem.title = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
-	newItem.abstractNote = (ZU.xpathText(doc, '//meta[@property="og:description"]/@content') || '').replace('\n. Read more at straitstimes.com.', '').trim();
+	newItem.abstractNote = (ZU.xpathText(doc, '//meta[@property="og:description"]/@content') || '').replaceAll('Read more at straitstimes.com.', '').trim();
 	newItem.date = ZU.xpathText(doc, '//meta[@property="article:published_time"]/@content');
 	newItem.place = 'Singapore';
 	newItem.language = 'en';
-	var authors = ZU.xpathText(doc, '//div[contains(@class, "field-byline")]//div[contains(@itemprop, "author")]'); // single author article. https://www.straitstimes.com/singapore/more-employees-eligible-for-covid-19-support-grant-application-start-date-pushed-back-msf
-	if (authors !== null && authors.length) {
-		authors = authors.trim();
-		insertCreator(authors, newItem);
-	}
-	else {
-		authors = ZU.xpathText(doc, '//div[contains(@class, "field-byline")]//span[contains(@itemprop, "author")]'); // multiple authors article. https://www.straitstimes.com/singapore/community/sporeans-going-ahead-with-cny-plans-amid-surge-in-covid-19-cases-as-businesses-see-boost-in-sales
-		if (authors !== null && authors.length) {
-			var authorsArr = authors.split(',');
-			for (var i = 0; i < authorsArr.length; i++) {
-				insertCreator(authorsArr[i], newItem);
-			}
-		}
-	}
 
-	// for opinion/forum contributors. https://www.straitstimes.com/opinion/facebooks-next-frontier-the-metaverse-what-does-that-mean
-	if (authors === null || !authors.length) {
-		var author = ZU.xpathText(doc, '//div[contains(@class, "group-byline-info")]//div[contains(@class, "field-byline")]');
-		if (author !== null && author.length) {
-			var authorArr = author.trim().replace(' For The Straits Times', '').split(' and '); // https://www.straitstimes.com/singapore/environment/science-talk-when-climate-change-impacts-human-health
-			for (var i2 = 0; i2 < authorArr.length; i2++) {
-				insertCreator(authorArr[i2], newItem);
-			}
+	var authors = ZU.xpathText(doc, '//*[contains(@class, "byline-info") or contains(@class, "inline-block")]//*[contains(@class, "byline-name")]');
+	var authorSplitRe = /,| and /;
+	if (authors !== null && authors.length) {
+		var authorsArr = authors.split(authorSplitRe);
+		for (var i = 0; i < authorsArr.length; i++) {
+			insertCreator(authorsArr[i].replace('For The Straits Times', ''), newItem);
 		}
 	}
 	
@@ -133,7 +117,7 @@ function getMultipleItems(doc, url) {
 			return (!!item.match(/^https:\/\/www\.straitstimes.com/));
 		});
 		if (items.length) {
-			ZU.processDocuments(items, scrape);
+			ZU.requestDocument(items, scrape);
 		}
 	}
 }
@@ -157,9 +141,11 @@ function insertCreator(authorName, newItem) {
 		'Cheryl Teh TL': { first: 'Cheryl, TL', last: 'Teh' },
 		'Chew Hui Min': { first: 'Hui Min', last: 'Chew' },
 		'Chin Hui Shan': { first: 'Hui Shan', last: 'Chin' },
+		'Chin Soo Fang': { first: 'Soo Fang', last: 'Chin' },
 		'Chng Choon Hiong': { first: 'Choon Hion', last: 'Chng' },
 		'Chong Jun Liang': { first: 'Jun Liang', last: 'Chong' },
 		'Choo Yun Ting': { first: 'Yun Ting', last: 'Choo' },
+		'Chor Khieng Yuit': { first: 'Khieng Yuit', last: 'Chor' },
 		'Christian de Boisredon': { first: 'Christian', last: 'de Boisredon' },
 		'Chua Mui Hoong': { first: 'Mui Hoong', last: 'Chua' },
 		'Chua Siang Yee': { first: 'Siang Yee', last: 'Chua' },
@@ -174,12 +160,14 @@ function insertCreator(authorName, newItem) {
 		'Joy Pang Minle': { first: 'Joy, Minle', last: 'Pang' },
 		'Kang Wan Chern': { first: 'Wan Chern', last: 'Kang' },
 		'Khoe Wei Jun': { first: 'Wei Jun', last: 'Khoe' },
+		'Kok Yufeng': { first: 'Yufang', last: 'Kok' },
 		'Kok Xing Hui': { first: 'Xing Hui', last: 'Kok' },
 		'Kua Chee Siong': { first: 'Chee Siong', last: 'Kua' },
 		'Lai Shueh Yuan': { first: 'Shueh Yuan', last: 'Lai' },
 		'Lee Chee Chew': { first: 'Chee Chew', last: 'Lee' },
 		'Lee Choo Kiong': { first: 'Choo Kiong', last: 'Lee' },
 		'Lee Jian Xuan': { first: 'Jian Xuan', last: 'Lee' },
+		'Lee Li Ying': { first: 'Li Ying', last: 'Lee' },
 		'Lee Min Kok': { first: 'Min Kok', last: 'Lee' },
 		'Lee Nian Tjoe': { first: 'Nian Tjoe', last: 'Lee' },
 		'Lee Qing Ping': { first: 'Qing Ping', last: 'Lee' },
@@ -199,10 +187,12 @@ function insertCreator(authorName, newItem) {
 		'Lim Yaohui': { first: 'Yaohui', last: 'Lim' },
 		'Lim Yi Han': { first: 'Yi Han', last: 'Lim' },
 		'Lin Yangchen': { first: 'Yangchen', last: 'Lin' },
+		'Lin Suling': { first: 'Suling', last: 'Lin' },
 		'Ling Chang Hong': { first: 'Chang Hong', last: 'Ling' },
 		'Loh Guo Pei': { first: 'Guo Pei', last: 'Loh' },
 		'Loh Keng Fatt': { first: 'Keng Fatt', last: 'Loh' },
 		'Low Lin Fhoong': { first: 'Lin Fhoong', last: 'Low' },
+		'Lu Wei Hoong': { first: 'Wei Hoong', last: 'Lu' },
 		'Mok Qiu Lin': { first: 'Qiu Lin', last: 'Mok' },
 		'Moon Jae-in': { first: 'Jae-in', last: 'Moon' },
 		'Nicholas De Silva': { first: 'Nicholas', last: 'De Silva' },
@@ -210,12 +200,14 @@ function insertCreator(authorName, newItem) {
 		'Ng Huiwen': { first: 'Huiwen', last: 'Ng' },
 		'Ng Wei Kai': { first: 'Wei Kai', last: 'Ng' },
 		'Nur Asyiqin Mohamad Salleh': { first: 'Nur Asyiqin', last: 'Mohamad Salleh' },
+		'Nur Faraha Faeaz': { first: 'Nur Faraha', last: 'Faeaz' },
 		'Ong Sor Fern': { first: 'Sor Fern', last: 'Ong' },
 		'Poon Chian Hui': { first: 'Chain Hui', last: 'Poon' },
 		'Quah Ting Wen': { first: 'Ting Wen', last: 'Quah' },
 		'Raynold Toh YK': { first: 'Raynold, YK', last: 'Toh' },
 		'Rebecca Tan Hui Qing': { first: 'Rebecca, Hui Qing', last: 'Tan' },
 		'Seow Bei Yi': { first: 'Bei Yi', last: 'Seow' },
+		'Sheo Chiong Teng': { first: 'Chiong Teng', last: 'Sheo' },
 		'Siow Li Sen': { first: 'Li Sen', last: 'Siow' },
 		'Tan Dawn Wei': { first: 'Dawn Wei', last: 'Tan' },
 		'Tan Fong Han': { first: 'Fong Han', last: 'Tan' },
@@ -226,13 +218,16 @@ function insertCreator(authorName, newItem) {
 		'Tan Shu Yan': { first: 'Shu Yan', last: 'Tan' },
 		'Tan Tai Yong': { first: 'Tai Yong', last: 'Tan' },
 		'Tan Tam Mei': { first: 'Tam Mei', last: 'Tan' },
+		'Tan Wei Xuan': { first: 'Wei Xuan', last: 'Tan' },
 		'Tan Weizhen': { first: 'Weizhen', last: 'Tan' },
 		'Tang Fan Xi': { first: 'Fan Xi', last: 'Tang' },
 		'Tang Wee Cheow': { first: 'Wee Choew', last: 'Tang' },
 		'Tay Hong Yi': { first: 'Hong Yi', last: 'Tay' },
 		'Tee Zhuo': { first: 'Zhuo', last: 'Tee' },
 		'Teo Cheng Wee': { first: 'Cheng Wee', last: 'Teo' },
+		'Teo Kai Xiang': { first: 'Kai Xiang', last: 'Teo' },
 		'Tham Yuen-C': { first: 'Yuen-C', last: 'Tham' },
+		'Thian Wen Li': { first: 'Wen Li', last: 'Thian' },
 		'Thong Yong Jun': { first: 'Yong Jun', last: 'Thong' },
 		'Toh Wen Li': { first: 'Wen Li', last: 'Toh' },
 		'Toh Ting Wei': { first: 'Ting Wei', last: 'Toh' },
@@ -241,11 +236,14 @@ function insertCreator(authorName, newItem) {
 		'Wang Gungwu': { first: 'Gungwu', last: 'Wang' },
 		'Wong Ah Yoke': { first: 'Ah Yoke', last: 'Wong' },
 		'Wong Kim Hoh': { first: 'Kim Hoh', last: 'Wong' },
+		'Wong Pei Ting': { first: 'Pei Ting', last: 'Wong' },
 		'Wong Shiying': { first: 'Shiying', last: 'Wong' },
 		'Wong Yang': { first: 'Yang', last: 'Wong' },
 		'Yeo Shu Hui': { first: 'Shu Hui', last: 'Yeo' },
+		'Yew Lun Tian': { first: 'Lun Tian', last: 'Yew' },
 		'Yip Wai Yee': { first: 'Wai Yee', last: 'Yip' },
 		'Yuen Sin': { first: 'Sin', last: 'Yuen' },
+		'Zaihan Mohamed Yusof': { first: 'Zaihan', last: 'Mohamed Yusof' },
 		'Zhao Jiayi': { first: 'Jiayi', last: 'Zhao' }
 	};
 	if (authorList[authorName]) {
@@ -367,27 +365,26 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.straitstimes.com/opinion/facebooks-next-frontier-the-metaverse-what-does-that-mean",
+		"url": "https://www.straitstimes.com/opinion/singapore-built-a-nation-underpinned-by-public-health-but-new-threats-loom",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Facebook's next frontier - the metaverse. What does that mean?",
+				"title": "Singapore built a nation underpinned by public health, but new threats loom",
 				"creators": [
 					{
-						"firstName": "Daniel",
-						"lastName": "Broby",
+						"firstName": "Teo Yik",
+						"lastName": "Ying",
 						"creatorType": "author"
 					}
 				],
-				"date": "2021-08-03T05:00:00+08:00",
+				"date": "2025-05-06T05:00:00+08:00",
 				"ISSN": "0585-3923",
-				"abstractNote": "Advertising dominates Facebook's social-networking business model. Zuckerberg's move to create a virtual world raises the possibility of new revenue sources.",
-				"extra": "Straits Times Access: Subscription only",
+				"abstractNote": "Sixty years after independence, Singapore has come a long way from the time it battled malnutrition and poor hygiene.",
 				"language": "en",
 				"libraryCatalog": "The Straits Times",
 				"place": "Singapore",
 				"publicationTitle": "The Straits Times",
-				"url": "https://www.straitstimes.com/opinion/facebooks-next-frontier-the-metaverse-what-does-that-mean",
+				"url": "https://www.straitstimes.com/opinion/singapore-built-a-nation-underpinned-by-public-health-but-new-threats-loom",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -402,8 +399,43 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.straitstimes.com/",
-		"items": "multiple"
+		"url": "https://www.straitstimes.com/asia/east-asia/make-ships-like-chips-us-taps-on-japan-s-korea-to-counter-chinese-naval-dominance",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Is ships war the new chips war? US naval secretary visits Japan, South Korea to counter Chinese naval dominance",
+				"creators": [
+					{
+						"firstName": "Walter",
+						"lastName": "Sim",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Wendy",
+						"lastName": "Teo",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025-05-05T19:23:00+08:00",
+				"ISSN": "0585-3923",
+				"abstractNote": "The US shipbuilding industry has a virtually non-existent global market share of 0.1 per cent.",
+				"language": "en",
+				"libraryCatalog": "The Straits Times",
+				"place": "Singapore",
+				"publicationTitle": "The Straits Times",
+				"shortTitle": "Is ships war the new chips war?",
+				"url": "https://www.straitstimes.com/asia/east-asia/make-ships-like-chips-us-taps-on-japan-s-korea-to-counter-chinese-naval-dominance",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	},
 	{
 		"type": "web",
