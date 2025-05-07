@@ -74,8 +74,8 @@ function scrape(doc, url) {
 	var authorSplitRe = /,| and /;
 	if (authors !== null && authors.length) {
 		var authorsArr = authors.split(authorSplitRe);
-		for (var i = 0; i < authorsArr.length; i++) {
-			insertCreator(authorsArr[i].replace('For The Straits Times', ''), newItem);
+		for (let author of authorsArr) {
+			insertCreator(author.replace('For The Straits Times', ''), newItem);
 		}
 	}
 	
