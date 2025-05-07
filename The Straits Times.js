@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-07 14:19:05"
+	"lastUpdated": "2025-05-07 19:28:09"
 }
 
 /*
@@ -59,7 +59,7 @@ async function doWeb(doc, url) {
 	}
 }
 
-async function scrape(doc, url) {
+async function scrape(doc, url = doc.location.href) {
 	var newItem = new Zotero.Item('newspaperArticle');
 	newItem.ISSN = '0585-3923';
 	newItem.url = url;
