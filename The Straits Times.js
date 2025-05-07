@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-06 17:16:16"
+	"lastUpdated": "2025-05-07 14:19:05"
 }
 
 /*
@@ -50,16 +50,16 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) === "multiple") {
-		getMultipleItems(doc, url);
+		await getMultipleItems(doc, url);
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
-function scrape(doc, url) {
+async function scrape(doc, url) {
 	var newItem = new Zotero.Item('newspaperArticle');
 	newItem.ISSN = '0585-3923';
 	newItem.url = url;
@@ -74,8 +74,8 @@ function scrape(doc, url) {
 	var authorSplitRe = /,| and /;
 	if (authors !== null && authors.length) {
 		var authorsArr = authors.split(authorSplitRe);
-		for (var i = 0; i < authorsArr.length; i++) {
-			insertCreator(authorsArr[i].replace('For The Straits Times', ''), newItem);
+		for (let author of authorsArr) {
+			insertCreator(author.replace('For The Straits Times', ''), newItem);
 		}
 	}
 	
@@ -89,14 +89,13 @@ function scrape(doc, url) {
 	newItem.complete();
 }
 
-function getMultipleItems(doc, url) {
+async function getMultipleItems(doc, url) {
 	var items = [];
 	var rows;
 	if (url.includes('/search?') && url.includes('searchKey')) {
 		rows = ZU.xpath(doc, '//div[@class="queryly_item_row"]');
 		if (rows.length) {
-			for (var i = 0; i < rows.length; i++) {
-				var searchItem = rows[i];
+			for (let searchItem of rows) {
 				var searchItemUrl = attr(searchItem, 'a', 'href');
 				items.push(searchItemUrl);
 			}
@@ -105,8 +104,7 @@ function getMultipleItems(doc, url) {
 	else {
 		rows = ZU.xpath(doc, '//a[@class="block-link"]|//span[@class="story-headline"]/a');
 		if (rows.length) {
-			for (var k = 0; k < rows.length; k++) {
-				var headlineItem = rows[k];
+			for (let headlineItem of rows) {
 				var headlineItemUrl = headlineItem.href;
 				items.push(headlineItemUrl);
 			}
@@ -117,10 +115,13 @@ function getMultipleItems(doc, url) {
 			return (!!item.match(/^https:\/\/www\.straitstimes.com/));
 		});
 		if (items.length) {
-			ZU.requestDocument(items, scrape);
+			for (let url of Object.keys(items)) {
+				await scrape(await requestDocument(url));
+			}
 		}
 	}
 }
+
 
 function insertCreator(authorName, newItem) {
 	// to account for mostly Chinese names in formats of: <last> <first>, <first (typically English)> <last> <first (typically Chinese)>
@@ -544,6 +545,41 @@ var testCases = [
 				"publicationTitle": "The Straits Times",
 				"shortTitle": "Science Talk",
 				"url": "https://www.straitstimes.com/singapore/environment/science-talk-when-climate-change-impacts-human-health",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.straitstimes.com/singapore/politics/ge2025-reactions-quite-positive-so-far-as-patrick-tay-seeks-to-defend-pioneer-smc-seat",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "GE2025: Reactions ‘quite positive’ so far, as Patrick Tay seeks to defend Pioneer SMC seat",
+				"creators": [
+					{
+						"firstName": "Kimberly",
+						"lastName": "Kwek",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025-04-24T19:45:00+08:00",
+				"ISSN": "0585-3923",
+				"abstractNote": "The PAP labour unionist is facing PSP's Stephanie Tan in the May 3 election.",
+				"language": "en",
+				"libraryCatalog": "The Straits Times",
+				"place": "Singapore",
+				"publicationTitle": "The Straits Times",
+				"shortTitle": "GE2025",
+				"url": "https://www.straitstimes.com/singapore/politics/ge2025-reactions-quite-positive-so-far-as-patrick-tay-seeks-to-defend-pioneer-smc-seat",
 				"attachments": [
 					{
 						"title": "Snapshot",
