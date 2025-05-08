@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-08 16:12:37"
+	"lastUpdated": "2025-05-08 16:27:22"
 }
 
 /*
@@ -831,7 +831,9 @@ function getAuthorFromByline(doc, newItem) {
 				}
 
 				if (ZU.xpath(bylineParent, titleXPath).length) {
-					if (actualByline) {
+					if (actualByline
+							&& actualByline.textContent.trim().toLowerCase()
+								!== bylines[i].textContent.trim().toLowerCase()) {
 						// found more than one, bail
 						Z.debug('More than one possible byline found. Will not proceed');
 						return;
