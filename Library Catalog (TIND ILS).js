@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-31 07:34:27"
+	"lastUpdated": "2025-05-08 15:33:05"
 }
 
 /*
@@ -96,18 +96,14 @@ function getSearchResults(doc, checkOnly) {
 
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
-		let selectedItems = await Z.selectItems(getSearchResults(doc, false));
-		if (selectedItems) {
-			let promises = Object.keys(selectedItems).map(async (url) => {
-				let requestedDoc = await ZU.requestDocument(url);
-				return scrape(requestedDoc, url);
-			});
-
-			await Promise.all(promises);
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
 		}
 	}
 	else {
-		await scrape(doc, url);
+		await scrape(doc);
 	}
 }
 
