@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-07-14 03:40:55"
+	"lastUpdated": "2025-01-27 20:23:38"
 }
 
 /*
@@ -109,7 +109,7 @@ async function scrape(doc, url) {
 			}
 		}
 		else {
-			let authors = doc.querySelectorAll('.author-name, [rel="author"]');
+			let authors = doc.querySelectorAll('.author-name:not(a .author-name), [rel="author"]:not(a [rel="author"])');
 			authors = Array.from(authors).map(x => x.textContent.trim());
 			item.creators = ZU.arrayUnique(authors)
 				.map(x => ZU.cleanAuthor(x, "author"));
@@ -398,6 +398,39 @@ var testCases = [
 				"publicationTitle": "Washington Post",
 				"shortTitle": "Is your lamp the right size?",
 				"url": "https://www.washingtonpost.com/home/2024/07/13/tips-choosing-right-size-lamp/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.washingtonpost.com/politics/2025/01/09/republicans-influencers-elections-democrats-trump-campaign/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Republicans won the election’s influencer race. Democrats want to catch up.",
+				"creators": [
+					{
+						"firstName": "Dylan",
+						"lastName": "Wells",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025-01-09",
+				"ISSN": "0190-8286",
+				"abstractNote": "While both parties stepped up their work with creators this cycle, many agree that Donald Trump’s effort helped him make key inroads with young voters, particularly young men.",
+				"language": "en-US",
+				"libraryCatalog": "www.washingtonpost.com",
+				"publicationTitle": "Washington Post",
+				"url": "https://www.washingtonpost.com/politics/2025/01/09/republicans-influencers-elections-democrats-trump-campaign/",
 				"attachments": [
 					{
 						"title": "Snapshot",

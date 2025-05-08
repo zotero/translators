@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2024-04-04 15:46:05"
+	"lastUpdated": "2025-04-03 15:42:25"
 }
 
 /*
@@ -131,7 +131,10 @@ function doImport() {
 	item.title = ZU.xpathText(doc, '//p:display/p:title', ns);
 	if (item.title) {
 		item.title = ZU.unescapeHTML(item.title);
-		item.title = item.title.replace(/\s*:/, ":");
+		item.title = item.title.replace(/\s*:/, ":")
+			// Remove everything after a slash in the title -
+			// generally authorship information
+			.replace(/ \/ [^/]+$/, '');
 	}
 	var creators = ZU.xpath(doc, '//p:display/p:creator', ns);
 	var contributors = ZU.xpath(doc, '//p:display/p:contributor', ns);
@@ -307,14 +310,19 @@ function doImport() {
 			callArray.push(callNumber[i].textContent.match(/\$\$D(.+?)\$/)[1]);
 		}
 	}
+	/* 2024-09 : adding a test on p:delivery/p:bestlocation/p:callnumber to get Callnumber from Primo VE pages like https://bcujas-catalogue.univ-paris1.fr/discovery/fulldisplay?context=L&vid=33CUJAS_INST:33CUJAS_INST&search_scope=MyInstitution&tab=LibraryCatalog&docid=alma990004764520107621 for example */
 	if (!callArray.length) {
-		callNumber = ZU.xpath(doc, '//p:display/p:availlibrary', ns);
+		callNumber = ZU.xpath(doc, '//p:display/p:availlibrary|//p:delivery/p:bestlocation/p:callNumber', ns);
 		for (let i = 0; i < callNumber.length; i++) {
-			if (callNumber[i].textContent.search(/\$\$2.+\$/) != -1) {
-				callArray.push(callNumber[i].textContent.match(/\$\$2\(?(.+?)(?:\s*\))?\$/)[1]);
+			let testCallNumberWithSubfields = callNumber[i].textContent.match(/\$\$2\(?(.+?)(?:\s*\))?\$/);
+			if (testCallNumberWithSubfields) {
+				callArray.push(testCallNumberWithSubfields[1]);
+			} else {
+				callArray.push(callNumber[i].textContent);
 			}
 		}
 	}
+
 	if (callArray.length) {
 		// remove duplicate call numbers
 		callArray = dedupeArray(callArray);
@@ -721,7 +729,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "The promise / Damon Galgut.",
+				"title": "The promise",
 				"creators": [
 					{
 						"firstName": "Damon",
@@ -791,6 +799,7 @@ var testCases = [
 				],
 				"date": "1971",
 				"abstractNote": "Includes bibliographical references.",
+				"callNumber": "TD174 .D95",
 				"language": "eng",
 				"place": "New York",
 				"publisher": "Chelsea House Publishers",
@@ -861,6 +870,114 @@ var testCases = [
 						"tag": "Wirtschaftsentwicklung"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><record xmlns=\"http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib\" xmlns:sear=\"http://www.exlibrisgroup.com/xsd/jaguar/search\"><delivery><availabilityLinks>detailsgetit1</availabilityLinks><displayLocation>true</displayLocation><recordOwner>33CUJAS_INST</recordOwner><physicalServiceId>null</physicalServiceId><sharedDigitalCandidates>null</sharedDigitalCandidates><link><displayLabel>thumbnail</displayLabel><linkURL>https://proxy-euf.hosted.exlibrisgroup.com/exl_rewrite/books.google.com/books?bibkeys=ISBN:1107199956,OCLC:,LCCN:&amp;jscmd=viewapi&amp;callback=updateGBSCover</linkURL><linkType>thumbnail</linkType><id>:_0</id></link><availability>available_in_library</availability><additionalLocations>false</additionalLocations><digitalAuxiliaryMode>false</digitalAuxiliaryMode><holding><matchForHoldings><holdingRecord>852##b</holdingRecord><matchOn>MainLocation</matchOn></matchForHoldings><subLocationCode>MAG2</subLocationCode><volumeFilter>null</volumeFilter><ilsApiId>990004764520107621</ilsApiId><callNumberType>8</callNumberType><libraryCode>CUJ</libraryCode><yearFilter>null</yearFilter><boundWith>false</boundWith><stackMapUrl/><isValidUser>true</isValidUser><translateRelatedTitle>null</translateRelatedTitle><mainLocation>BIU Cujas</mainLocation><callNumber>567.067</callNumber><adaptorid>ALMA_01</adaptorid><organization>33CUJAS_INST</organization><holdingURL>OVP</holdingURL><availabilityStatus>available</availabilityStatus><id>_:0</id><subLocation>Magasin 2ème sous-sol</subLocation><holdId>2262944550007621</holdId><holKey>HoldingResultKey [mid=2262944550007621, libraryId=112237610007621, locationCode=MAG2, callNumber=567.067]</holKey><singleUnavailableItemProcessType>null</singleUnavailableItemProcessType><relatedTitle>null</relatedTitle></holding><bestlocation><matchForHoldings><holdingRecord>852##b</holdingRecord><matchOn>MainLocation</matchOn></matchForHoldings><subLocationCode>MAG2</subLocationCode><volumeFilter>null</volumeFilter><ilsApiId>990004764520107621</ilsApiId><callNumberType>8</callNumberType><libraryCode>CUJ</libraryCode><yearFilter>null</yearFilter><boundWith>false</boundWith><stackMapUrl/><isValidUser>true</isValidUser><translateRelatedTitle>null</translateRelatedTitle><mainLocation>BIU Cujas</mainLocation><callNumber>567.067</callNumber><adaptorid>ALMA_01</adaptorid><organization>33CUJAS_INST</organization><holdingURL>OVP</holdingURL><availabilityStatus>available</availabilityStatus><id>_:0</id><subLocation>Magasin 2ème sous-sol</subLocation><holdId>2262944550007621</holdId><holKey>HoldingResultKey [mid=2262944550007621, libraryId=112237610007621, locationCode=MAG2, callNumber=567.067]</holKey><singleUnavailableItemProcessType>null</singleUnavailableItemProcessType><relatedTitle>null</relatedTitle></bestlocation><electronicServices>null</electronicServices><feDisplayOtherLocations>false</feDisplayOtherLocations><hasD>null</hasD><hideResourceSharing>false</hideResourceSharing><hasFilteredServices>null</hasFilteredServices><physicalItemTextCodes>null</physicalItemTextCodes><quickAccessService>null</quickAccessService><recordInstitutionCode>null</recordInstitutionCode><displayedAvailability>null</displayedAvailability><consolidatedCoverage>null</consolidatedCoverage><additionalElectronicServices>null</additionalElectronicServices><deliveryCategory>Alma-P</deliveryCategory><serviceMode>ovp</serviceMode><filteredByGroupServices>null</filteredByGroupServices><electronicContextObjectId>null</electronicContextObjectId><GetIt1><links><isLinktoOnline>false</isLinktoOnline><displayText>null</displayText><inst4opac>33CUJAS_INST</inst4opac><getItTabText>service_getit</getItTabText><adaptorid>ALMA_01</adaptorid><ilsApiId>990004764520107621</ilsApiId><link>OVP</link><id>_:0</id></links><category>Alma-P</category></GetIt1></delivery><search><creator>Simone Daniela</creator><creationdate>2019</creationdate><sort_title>Copyright and collective authorship locating the authors of collaborative work</sort_title><sort_journal_title>Copyright and collective authorship locating the authors of collaborative work</sort_journal_title><sort_creationdate_full>2019</sort_creationdate_full><subject>Encyclopédies électroniques</subject><subject>Droit</subject><subject>Contenu généré par les utilisateurs</subject><subject>Qualité d&apos;auteur</subject><subject>Droit d&apos;auteur</subject><subject>Electronic encyclopedias</subject><subject>User-generated content Law and legislation</subject><subject>Copyright Art</subject><subject>Authorship</subject><subject>Copyright</subject><subject>Wikipedia</subject><isbn>9781107199958</isbn><isbn>1107199956</isbn><description>La 4e de couverture indique : &quot;As technology makes it easier for people to work together, large-scale collaboration is becoming increasingly prevalent. In this context, the question of how to determine authorship - and hence ownership - of copyright in collaborative works is an important question to which current copyright law fails to provide a coherent or consistent answer. In Copyright and Collective Authorship, Daniela Simone engages with the problem of how to determine the authorship of highly collaborative works. Employing insights from the ways in which collaborators understand and regulate issues of authorship, the book argues that a recalibration of copyright law is necessary, proposing an inclusive and contextual approach to joint authorship that is true to the legal concept of authorship but is also more aligned with creative reality.&quot;</description><language>eng</language><title>Copyright and collective authorship locating the authors of collaborative work</title><startdate>2019</startdate><unimarc_local_fields>990 20190827</unimarc_local_fields><unimarc_local_fields>980 BK</unimarc_local_fields><unimarc_local_fields>935 23749051X</unimarc_local_fields><unimarc_local_fields>930 751052119 567.067 b</unimarc_local_fields><addtitle>001(PPN)148977332 Cambridge intellectual property and information law</addtitle><addtitle>Cambridge intellectual property and information law</addtitle><general>Cambridge University Press</general><general>ALP000476452</general><general>UKMGB019402122</general><general>CHBIS011301756</general><general>CHVBK563491051</general><general>on1057238619</general><general>(OCoLC)1119538850</general><general>(ALP)000476452CUJ01</general><general>CUJ01(PPN)23749051X</general><general>(PPN)23749051X</general><rtype>books</rtype><enddate>2019</enddate><series>001(PPN)148977332 Cambridge intellectual property and information law</series><series>Cambridge intellectual property and information law</series><journal_title>Copyright and collective authorship locating the authors of collaborative work</journal_title><facet_creatorcontrib>Simone, Daniela</facet_creatorcontrib><sort_author>Simone Daniela</sort_author><sort_creationdate>2019</sort_creationdate></search><display><identifier>$$CISBN$$V978-1-107-19995-8;$$CISBN$$V1-107-19995-6;$$CPPN$$V23749051X;$$CMMSID$$V990004764520107621</identifier><creationdate>2019</creationdate><creator>Simone, Daniela$$QSimone Daniela</creator><lds18>&lt;a href=&quot;https://www.sudoc.fr/23749051X&quot; target=&quot;_blank&quot;&gt;Voir la notice&lt;/a&gt;</lds18><subject>Wikipedia</subject><subject>Copyright</subject><subject>Authorship</subject><subject>Copyright  -- Art</subject><subject>User-generated content  -- Law and legislation</subject><subject>Electronic encyclopedias</subject><subject>Droit d&apos;auteur</subject><subject>Qualité d&apos;auteur</subject><subject>Contenu généré par les utilisateurs  -- Droit</subject><subject>Encyclopédies électroniques</subject><format>1 vol. (xxi-300 p.) : couv. ill. en coul. ; 24 cm</format><language>eng</language><source>Alma</source><type>book</type><title>Copyright and collective authorship : locating the authors of collaborative work</title><version>1</version><relation>$$Cmain_series$$VCambridge intellectual property and information law$$QCambridge intellectual property and information law </relation><mms>990004764520107621</mms><series>Cambridge intellectual property and information law$$QCambridge intellectual property and information law</series><publisher>Cambridge etc. : Cambridge University Press</publisher><place>Cambridge [etc.]</place><lds02>CODE_PAYS_GB</lds02><lds01>23749051X</lds01><lds12>1. Copyright law and collective authorship 2. Authorship and joint authorship 3. Wikipedia 4. Australian indigenous art 5. Scientific collaborations 6. Film 7. Characteristics of collective authorship and the role of copyright law 8. An inclusive, contextual approach to the joint authorship test</lds12><lds03>TYPE_SUPPORT_BK</lds03></display><control><recordid>alma990004764520107621</recordid><sourceid>alma</sourceid><score>1.0</score><originalsourceid>000476452-CUJ01</originalsourceid><sourceformat>UNIMARC</sourceformat><sourcerecordid>990004764520107621</sourcerecordid><sourcesystem>ILS</sourcesystem><isDedup>false</isDedup></control><addata><date>2019</date><aulast>Simone</aulast><notes>Bibliogr. p. 273-293. Notes bibliogr. Index</notes><cop>Cambridge [etc</cop><isbn>978-1-107-19995-8</isbn><isbn>1-107-19995-6</isbn><format>book</format><ristype>BOOK</ristype><oclcid>(ocolc)1119538850</oclcid><abstract>La 4e de couverture indique : &quot;As technology makes it easier for people to work together, large-scale collaboration is becoming increasingly prevalent. In this context, the question of how to determine authorship - and hence ownership - of copyright in collaborative works is an important question to which current copyright law fails to provide a coherent or consistent answer. In Copyright and Collective Authorship, Daniela Simone engages with the problem of how to determine the authorship of highly collaborative works. Employing insights from the ways in which collaborators understand and regulate issues of authorship, the book argues that a recalibration of copyright law is necessary, proposing an inclusive and contextual approach to joint authorship that is true to the legal concept of authorship but is also more aligned with creative reality.&quot;</abstract><title>Copyright and collective authorship : locating the authors of collaborative work</title><aufirst>Daniela</aufirst><seriestitle>Cambridge intellectual property and information law</seriestitle><au>Simone Daniela</au><au>Simone,Daniela</au><genre>book</genre><btitle>Copyright and collective authorship : locating the authors of collaborative work</btitle><pub>Cambridge University Press</pub></addata><sort><creationdate>2019</creationdate><author>Simone Daniela</author><title>Copyright and collective authorship locating the authors of collaborative work</title></sort></record>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Copyright and collective authorship: locating the authors of collaborative work",
+				"creators": [
+					{
+						"lastName": "Simone Daniela",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2019",
+				"ISBN": "9781107199958",
+				"abstractNote": "La 4e de couverture indique : \"As technology makes it easier for people to work together, large-scale collaboration is becoming increasingly prevalent. In this context, the question of how to determine authorship - and hence ownership - of copyright in collaborative works is an important question to which current copyright law fails to provide a coherent or consistent answer. In Copyright and Collective Authorship, Daniela Simone engages with the problem of how to determine the authorship of highly collaborative works. Employing insights from the ways in which collaborators understand and regulate issues of authorship, the book argues that a recalibration of copyright law is necessary, proposing an inclusive and contextual approach to joint authorship that is true to the legal concept of authorship but is also more aligned with creative reality.\"",
+				"callNumber": "567.067",
+				"language": "eng",
+				"numPages": "xxi+300",
+				"place": "Cambridge [etc",
+				"publisher": "Cambridge University Press",
+				"series": "Cambridge intellectual property and information law",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Art"
+					},
+					{
+						"tag": "Authorship"
+					},
+					{
+						"tag": "Contenu généré par les utilisateurs"
+					},
+					{
+						"tag": "Copyright"
+					},
+					{
+						"tag": "Copyright"
+					},
+					{
+						"tag": "Droit"
+					},
+					{
+						"tag": "Droit d'auteur"
+					},
+					{
+						"tag": "Electronic encyclopedias"
+					},
+					{
+						"tag": "Encyclopédies électroniques"
+					},
+					{
+						"tag": "Law and legislation"
+					},
+					{
+						"tag": "Qualité d'auteur"
+					},
+					{
+						"tag": "User-generated content"
+					},
+					{
+						"tag": "Wikipedia"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><record xmlns=\"http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib\" xmlns:sear=\"http://www.exlibrisgroup.com/xsd/jaguar/search\"><delivery><availabilityLinks>detailsgetit1</availabilityLinks><displayLocation>true</displayLocation><recordOwner>39UPD_INST</recordOwner><physicalServiceId>null</physicalServiceId><sharedDigitalCandidates>null</sharedDigitalCandidates><link><displayLabel>thumbnail</displayLabel><linkURL>https://proxy-eu.hosted.exlibrisgroup.com/exl_rewrite/books.google.com/books?bibkeys=ISBN:0261102656,OCLC:,LCCN:&amp;jscmd=viewapi&amp;callback=updateGBSCover</linkURL><linkType>thumbnail</linkType><id>:_0</id></link><availability>available_in_library</availability><additionalLocations>false</additionalLocations><digitalAuxiliaryMode>false</digitalAuxiliaryMode><holding><matchForHoldings><holdingRecord>852##b</holdingRecord><matchOn>MainLocation</matchOn></matchForHoldings><subLocationCode>BEAT1</subLocationCode><volumeFilter>null</volumeFilter><ilsApiId>990005230620206046</ilsApiId><callNumberType>8</callNumberType><libraryCode>BEATO</libraryCode><yearFilter>null</yearFilter><boundWith>false</boundWith><stackMapUrl>https://biblio.unipd.it/biblioteche/beatopellegrino</stackMapUrl><isValidUser>true</isValidUser><translateRelatedTitle>null</translateRelatedTitle><mainLocation>Biblioteca Beato Pellegrino</mainLocation><callNumber>IA.I.1955</callNumber><adaptorid>ALMA_01</adaptorid><organization>39UPD_INST</organization><holdingURL>OVP</holdingURL><availabilityStatus>available</availabilityStatus><id>_:0</id><subLocation>Prestabile</subLocation><holdId>22192239290006046</holdId><holKey>HoldingResultKey [mid=22192239290006046, libraryId=202892910006046, locationCode=BEAT1, callNumber=IA.I.1955]</holKey><singleUnavailableItemProcessType>null</singleUnavailableItemProcessType><relatedTitle>null</relatedTitle></holding><bestlocation><matchForHoldings><holdingRecord>852##b</holdingRecord><matchOn>MainLocation</matchOn></matchForHoldings><subLocationCode>BEAT1</subLocationCode><volumeFilter>null</volumeFilter><ilsApiId>990005230620206046</ilsApiId><callNumberType>8</callNumberType><libraryCode>BEATO</libraryCode><yearFilter>null</yearFilter><boundWith>false</boundWith><stackMapUrl>https://biblio.unipd.it/biblioteche/beatopellegrino</stackMapUrl><isValidUser>true</isValidUser><translateRelatedTitle>null</translateRelatedTitle><mainLocation>Biblioteca Beato Pellegrino</mainLocation><callNumber>IA.I.1955</callNumber><adaptorid>ALMA_01</adaptorid><organization>39UPD_INST</organization><holdingURL>OVP</holdingURL><availabilityStatus>available</availabilityStatus><id>_:0</id><subLocation>Prestabile</subLocation><holdId>22192239290006046</holdId><holKey>HoldingResultKey [mid=22192239290006046, libraryId=202892910006046, locationCode=BEAT1, callNumber=IA.I.1955]</holKey><singleUnavailableItemProcessType>null</singleUnavailableItemProcessType><relatedTitle>null</relatedTitle></bestlocation><electronicServices>null</electronicServices><feDisplayOtherLocations>false</feDisplayOtherLocations><hasD>null</hasD><hideResourceSharing>false</hideResourceSharing><hasFilteredServices>null</hasFilteredServices><physicalItemTextCodes>null</physicalItemTextCodes><quickAccessService>null</quickAccessService><recordInstitutionCode>null</recordInstitutionCode><displayedAvailability>null</displayedAvailability><consolidatedCoverage>null</consolidatedCoverage><additionalElectronicServices>null</additionalElectronicServices><deliveryCategory>Alma-P</deliveryCategory><serviceMode>ovp</serviceMode><filteredByGroupServices>null</filteredByGroupServices><electronicContextObjectId>null</electronicContextObjectId><GetIt1><links><isLinktoOnline>false</isLinktoOnline><displayText>null</displayText><inst4opac>39UPD_INST</inst4opac><getItTabText>service_getit</getItTabText><adaptorid>ALMA_01</adaptorid><ilsApiId>990005230620206046</ilsApiId><link>OVP</link><id>_:0</id></links><category>Alma-P</category></GetIt1></delivery><search><creator>Tolkien, J. R. R.</creator><creationdate>1995</creationdate><sort_title>letters of J.R.R. Tolkien</sort_title><sort_journal_title>&lt;&lt;The &gt;&gt;letters of J.R.R. Tolkien</sort_journal_title><sort_creationdate_full>1995</sort_creationdate_full><isbn>9780261102651</isbn><isbn>0261102656</isbn><language>eng</language><title>&lt;&lt;The &gt;&gt;letters of J.R.R. Tolkien</title><startdate>1995</startdate><unimarc_local_fields>994 M</unimarc_local_fields><unimarc_local_fields>993 M</unimarc_local_fields><unimarc_local_fields>992 71</unimarc_local_fields><unimarc_local_fields>991 SBN_BIB</unimarc_local_fields><unimarc_local_fields>900 BK</unimarc_local_fields><general>HarperCollins</general><general>(OCoLC)876045467</general><general>(OCM)876045467</general><general>(SBN)PUV0296693</general><general>(Aleph)000523062SBP01</general><general>SBP01PUV0296693</general><general>PUV0296693</general><rtype>books</rtype><contributor>Carpenter, Humphrey</contributor><contributor>Tolkien, Christopher</contributor><journal_title>&lt;&lt;The &gt;&gt;letters of J.R.R. Tolkien</journal_title><facet_creatorcontrib>Carpenter, Humphrey</facet_creatorcontrib><facet_creatorcontrib>Tolkien, Christopher</facet_creatorcontrib><facet_creatorcontrib>Tolkien,, J. R. R.</facet_creatorcontrib><sort_author>Tolkien, J. R. R.</sort_author><sort_creationdate>1995</sort_creationdate></search><display><identifier>$$CISBN$$V0261102656</identifier><creationdate>1995</creationdate><creator>Tolkien, J. R. R.   $$QTolkien, J. R. R.</creator><lds09>PUV0296693</lds09><format>&amp;#8205;463 p. ; 20 cm.</format><language>eng</language><source>Alma</source><type>book</type><title>The letters of J.R.R. Tolkien / a selection edited by Humphrey Carpenter ; with the assistance of Christopher Tolkien</title><version>0</version><mms>990005230620206046</mms><contributor>Tolkien, Christopher &lt;&amp;#8205;Autore&gt; $$QTolkien, Christopher</contributor><contributor>Carpenter, Humphrey &lt;&amp;#8205;Autore&gt; $$QCarpenter, Humphrey</contributor><lds50>990005230620206046</lds50><publisher>London : HarperCollins</publisher><place>London</place></display><control><recordid>alma990005230620206046</recordid><sourceid>alma</sourceid><score>1.0</score><originalsourceid>000523062-SBP01</originalsourceid><sourceformat>UNIMARC</sourceformat><sourcerecordid>990005230620206046</sourcerecordid><colldiscovery>$$Titem$$D81283465180006046$$I39UPD_INST</colldiscovery><sourcesystem>OTHER</sourcesystem><isDedup>false</isDedup></control><addata><originatingSystemIDContributor>CFIV015811</originatingSystemIDContributor><date>1995</date><aulast>Tolkien</aulast><cop>London</cop><isbn>0261102656</isbn><format>book</format><ristype>BOOK</ristype><oclcid>(ocolc)876045467</oclcid><auinit>J</auinit><title>The letters of J.R.R. Tolkien</title><aufirst>J. R. R.</aufirst><addau>Tolkien, Christopher</addau><addau>Carpenter, Humphrey</addau><au>Tolkien,J. R. R.</au><genre>book</genre><btitle>The letters of J.R.R. Tolkien</btitle><pub>HarperCollins</pub></addata><sort><creationdate>1995</creationdate><author>Tolkien, J. R. R.</author><title>letters of J.R.R. Tolkien</title></sort></record>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "The letters of J.R.R. Tolkien",
+				"creators": [
+					{
+						"firstName": "J. R. R.",
+						"lastName": "Tolkien",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christopher",
+						"lastName": "Tolkien",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Humphrey",
+						"lastName": "Carpenter",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "1995",
+				"ISBN": "0261102656",
+				"callNumber": "IA.I.1955",
+				"language": "eng",
+				"numPages": "463",
+				"place": "London",
+				"publisher": "HarperCollins",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}

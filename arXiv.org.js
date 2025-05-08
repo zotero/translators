@@ -2,14 +2,14 @@
 	"translatorID": "ecddda2e-4fc6-4aea-9f17-ef3b56d7377a",
 	"label": "arXiv.org",
 	"creator": "Sean Takats and Michael Berkowitz",
-	"target": "^https?://([^\\.]+\\.)?(arxiv\\.org|xxx\\.lanl\\.gov)/(find|catchup|list/\\w|abs/|pdf/)",
-	"minVersion": "3.0",
+	"target": "^https?://([^\\.]+\\.)?(arxiv\\.org|xxx\\.lanl\\.gov)/(search|find|catchup|list/\\w|abs/|pdf/)",
+	"minVersion": "6.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-05 12:21:40"
+	"lastUpdated": "2024-12-03 15:53:57"
 }
 
 /*
@@ -35,217 +35,400 @@
 	***** END LICENSE BLOCK *****
 */
 
+const arXivCategories = {
+	// Technically not categories, but added here to allow tags with "Archive - Sub-Field" structure
+	cs: "Computer Science",
+	econ: "Economics",
+	eess: "Electrical Engineering and Systems Science",
+	math: "Mathematics",
+	nlin: "Nonlinear Sciences",
+	physics: "Physics",
+	"q-fin": "Quantitative Finance",
+	stat: "Statistics",
+
+	"acc-phys": "Accelerator Physics",
+	"adap-org": "Adaptation, Noise, and Self-Organizing Systems",
+	"alg-geom": "Algebraic Geometry",
+	"ao-sci": "Atmospheric-Oceanic Sciences",
+	"astro-ph": "Astrophysics",
+	"astro-ph.CO": "Cosmology and Nongalactic Astrophysics",
+	"astro-ph.EP": "Earth and Planetary Astrophysics",
+	"astro-ph.GA": "Astrophysics of Galaxies",
+	"astro-ph.HE": "High Energy Astrophysical Phenomena",
+	"astro-ph.IM": "Instrumentation and Methods for Astrophysics",
+	"astro-ph.SR": "Solar and Stellar Astrophysics",
+	"atom-ph": "Atomic, Molecular and Optical Physics",
+	"bayes-an": "Bayesian Analysis",
+	"chao-dyn": "Chaotic Dynamics",
+	"chem-ph": "Chemical Physics",
+	"cmp-lg": "Computation and Language",
+	"comp-gas": "Cellular Automata and Lattice Gases",
+	"cond-mat": "Condensed Matter",
+	"cond-mat.dis-nn": "Disordered Systems and Neural Networks",
+	"cond-mat.mes-hall": "Mesoscale and Nanoscale Physics",
+	"cond-mat.mtrl-sci": "Materials Science",
+	"cond-mat.other": "Other Condensed Matter",
+	"cond-mat.quant-gas": "Quantum Gases",
+	"cond-mat.soft": "Soft Condensed Matter",
+	"cond-mat.stat-mech": "Statistical Mechanics",
+	"cond-mat.str-el": "Strongly Correlated Electrons",
+	"cond-mat.supr-con": "Superconductivity",
+	"cs.AI": "Artificial Intelligence",
+	"cs.AR": "Hardware Architecture",
+	"cs.CC": "Computational Complexity",
+	"cs.CE": "Computational Engineering, Finance, and Science",
+	"cs.CG": "Computational Geometry",
+	"cs.CL": "Computation and Language",
+	"cs.CR": "Cryptography and Security",
+	"cs.CV": "Computer Vision and Pattern Recognition",
+	"cs.CY": "Computers and Society",
+	"cs.DB": "Databases",
+	"cs.DC": "Distributed, Parallel, and Cluster Computing",
+	"cs.DL": "Digital Libraries",
+	"cs.DM": "Discrete Mathematics",
+	"cs.DS": "Data Structures and Algorithms",
+	"cs.ET": "Emerging Technologies",
+	"cs.FL": "Formal Languages and Automata Theory",
+	"cs.GL": "General Literature",
+	"cs.GR": "Graphics",
+	"cs.GT": "Computer Science and Game Theory",
+	"cs.HC": "Human-Computer Interaction",
+	"cs.IR": "Information Retrieval",
+	"cs.IT": "Information Theory",
+	"cs.LG": "Machine Learning",
+	"cs.LO": "Logic in Computer Science",
+	"cs.MA": "Multiagent Systems",
+	"cs.MM": "Multimedia",
+	"cs.MS": "Mathematical Software",
+	"cs.NA": "Numerical Analysis",
+	"cs.NE": "Neural and Evolutionary Computing",
+	"cs.NI": "Networking and Internet Architecture",
+	"cs.OH": "Other Computer Science",
+	"cs.OS": "Operating Systems",
+	"cs.PF": "Performance",
+	"cs.PL": "Programming Languages",
+	"cs.RO": "Robotics",
+	"cs.SC": "Symbolic Computation",
+	"cs.SD": "Sound",
+	"cs.SE": "Software Engineering",
+	"cs.SI": "Social and Information Networks",
+	"cs.SY": "Systems and Control",
+	"dg-ga": "Differential Geometry",
+	"econ.EM": "Econometrics",
+	"econ.GN": "General Economics",
+	"econ.TH": "Theoretical Economics",
+	"eess.AS": "Audio and Speech Processing",
+	"eess.IV": "Image and Video Processing",
+	"eess.SP": "Signal Processing",
+	"eess.SY": "Systems and Control",
+	"funct-an": "Functional Analysis",
+	"gr-qc": "General Relativity and Quantum Cosmology",
+	"hep-ex": "High Energy Physics - Experiment",
+	"hep-lat": "High Energy Physics - Lattice",
+	"hep-ph": "High Energy Physics - Phenomenology",
+	"hep-th": "High Energy Physics - Theory",
+	"math-ph": "Mathematical Physics",
+	"math.AC": "Commutative Algebra",
+	"math.AG": "Algebraic Geometry",
+	"math.AP": "Analysis of PDEs",
+	"math.AT": "Algebraic Topology",
+	"math.CA": "Classical Analysis and ODEs",
+	"math.CO": "Combinatorics",
+	"math.CT": "Category Theory",
+	"math.CV": "Complex Variables",
+	"math.DG": "Differential Geometry",
+	"math.DS": "Dynamical Systems",
+	"math.FA": "Functional Analysis",
+	"math.GM": "General Mathematics",
+	"math.GN": "General Topology",
+	"math.GR": "Group Theory",
+	"math.GT": "Geometric Topology",
+	"math.HO": "History and Overview",
+	"math.IT": "Information Theory",
+	"math.KT": "K-Theory and Homology",
+	"math.LO": "Logic",
+	"math.MG": "Metric Geometry",
+	"math.MP": "Mathematical Physics",
+	"math.NA": "Numerical Analysis",
+	"math.NT": "Number Theory",
+	"math.OA": "Operator Algebras",
+	"math.OC": "Optimization and Control",
+	"math.PR": "Probability",
+	"math.QA": "Quantum Algebra",
+	"math.RA": "Rings and Algebras",
+	"math.RT": "Representation Theory",
+	"math.SG": "Symplectic Geometry",
+	"math.SP": "Spectral Theory",
+	"math.ST": "Statistics Theory",
+	"mtrl-th": "Materials Theory",
+	"nlin.AO": "Adaptation and Self-Organizing Systems",
+	"nlin.CD": "Chaotic Dynamics",
+	"nlin.CG": "Cellular Automata and Lattice Gases",
+	"nlin.PS": "Pattern Formation and Solitons",
+	"nlin.SI": "Exactly Solvable and Integrable Systems",
+	"nucl-ex": "Nuclear Experiment",
+	"nucl-th": "Nuclear Theory",
+	"patt-sol": "Pattern Formation and Solitons",
+	"physics.acc-ph": "Accelerator Physics",
+	"physics.ao-ph": "Atmospheric and Oceanic Physics",
+	"physics.app-ph": "Applied Physics",
+	"physics.atm-clus": "Atomic and Molecular Clusters",
+	"physics.atom-ph": "Atomic Physics",
+	"physics.bio-ph": "Biological Physics",
+	"physics.chem-ph": "Chemical Physics",
+	"physics.class-ph": "Classical Physics",
+	"physics.comp-ph": "Computational Physics",
+	"physics.data-an": "Data Analysis, Statistics and Probability",
+	"physics.ed-ph": "Physics Education",
+	"physics.flu-dyn": "Fluid Dynamics",
+	"physics.gen-ph": "General Physics",
+	"physics.geo-ph": "Geophysics",
+	"physics.hist-ph": "History and Philosophy of Physics",
+	"physics.ins-det": "Instrumentation and Detectors",
+	"physics.med-ph": "Medical Physics",
+	"physics.optics": "Optics",
+	"physics.plasm-ph": "Plasma Physics",
+	"physics.pop-ph": "Popular Physics",
+	"physics.soc-ph": "Physics and Society",
+	"physics.space-ph": "Space Physics",
+	"plasm-ph": "Plasma Physics",
+	"q-alg": "Quantum Algebra and Topology",
+	"q-bio": "Quantitative Biology",
+	"q-bio.BM": "Biomolecules",
+	"q-bio.CB": "Cell Behavior",
+	"q-bio.GN": "Genomics",
+	"q-bio.MN": "Molecular Networks",
+	"q-bio.NC": "Neurons and Cognition",
+	"q-bio.OT": "Other Quantitative Biology",
+	"q-bio.PE": "Populations and Evolution",
+	"q-bio.QM": "Quantitative Methods",
+	"q-bio.SC": "Subcellular Processes",
+	"q-bio.TO": "Tissues and Organs",
+	"q-fin.CP": "Computational Finance",
+	"q-fin.EC": "Economics",
+	"q-fin.GN": "General Finance",
+	"q-fin.MF": "Mathematical Finance",
+	"q-fin.PM": "Portfolio Management",
+	"q-fin.PR": "Pricing of Securities",
+	"q-fin.RM": "Risk Management",
+	"q-fin.ST": "Statistical Finance",
+	"q-fin.TR": "Trading and Market Microstructure",
+	"quant-ph": "Quantum Physics",
+	"solv-int": "Exactly Solvable and Integrable Systems",
+	"stat.AP": "Applications",
+	"stat.CO": "Computation",
+	"stat.ME": "Methodology",
+	"stat.ML": "Machine Learning",
+	"stat.OT": "Other Statistics",
+	"stat.TH": "Statistics Theory",
+	"supr-con": "Superconductivity",
+	test: "Test",
+	"test.dis-nn": "Test Disruptive Networks",
+	"test.mes-hall": "Test Hall",
+	"test.mtrl-sci": "Test Mtrl-Sci",
+	"test.soft": "Test Soft",
+	"test.stat-mech": "Test Mechanics",
+	"test.str-el": "Test Electrons",
+	"test.supr-con": "Test Superconductivity",
+	"bad-arch.bad-cat": "Invalid Category"
+};
+
+var version;
+// this variable will be set in doWeb and
+// can be used then afterwards in the parseXML
+
 function detectSearch(item) {
 	return !!item.arXiv;
 }
 
-function doSearch(item) {
-	var url = 'https://export.arxiv.org/oai2?verb=GetRecord&metadataPrefix=oai_dc'
-		+ '&identifier=oai%3AarXiv.org%3A' + encodeURIComponent(item.arXiv);
-	ZU.doGet(url, parseXML);
+async function doSearch(item) {
+	let url = `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(item.arXiv)}&max_results=1`;
+	let doc = await requestAtom(url);
+	parseAtom(doc);
 }
 
-
-var version;
-var arxivDOI;
-// these variables will be set in doWeb and
-// can be used then afterwards in the parseXML
-
-
 function detectWeb(doc, url) {
-	var searchRe = /^https?:\/\/(?:([^.]+\.))?(?:arxiv\.org|xxx\.lanl\.gov)\/(?:find|list|catchup)/;
-	var relatedDOI = text(doc, '.doi>a');
+	var searchRe = /^https?:\/\/(?:([^.]+\.))?(?:arxiv\.org|xxx\.lanl\.gov)\/(?:search|find|list|catchup)\b/;
+	var relatedDOI = text(doc, '.doi > a');
 	if (searchRe.test(url)) {
-		return "multiple";
+		return getSearchResults(doc, true/* checkOnly */) && "multiple";
 	}
 	else if (relatedDOI) {
 		return "journalArticle";
 	}
-	else if (ZU.fieldIsValidForType('title', 'preprint')) {
-		return "preprint";
-	}
 	else {
-		return "report";
+		return "preprint";
 	}
 }
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == 'multiple') {
-		var rows = ZU.xpath(doc, '//div[@id="dlpage"]/dl/dt');
-		var getTitleId;
-		if (rows.length) {
-			// arXiv.org format
-			getTitleId = function (row) {
-				var id = ZU.xpathText(row, './/a[@title="Abstract"]').trim().substr(6); // Trim off arXiv:
-				var title = ZU.trimInternal(
-					ZU.xpathText(row, './following-sibling::dd[1]//div[contains(@class, "list-title")]/text()[last()]'));
-				return {
-					title: title,
-					id: id
-				};
-			};
-		}
-		else if ((rows = ZU.xpath(doc, '//table/tbody/tr[./td[@class="lti"]]')).length) {
-			// eprintweb.org format
-			getTitleId = function (row) {
-				var title = ZU.trimInternal(ZU.xpathText(row, './td'));
-				var id = ZU.xpathText(row, './following-sibling::tr[.//a][1]/td/b').trim().substr(6);
-				return {
-					title: title,
-					id: id
-				};
-			};
-		}
-		else {
-			throw new Error("Unrecognized multiples format");
-		}
-		
-		var items = {};
-		for (let i = 0; i < rows.length; i++) {
-			var row = getTitleId(rows[i]);
-			items[row.id] = row.title;
-		}
-		
-		Z.selectItems(items, function (items) {
-			if (!items) return;
-			
-			var urls = [];
-			for (var id in items) {
-				urls.push('https://export.arxiv.org/oai2'
-					+ '?verb=GetRecord&metadataPrefix=oai_dc'
-					+ '&identifier=oai%3AarXiv.org%3A' + encodeURIComponent(id)
-				);
-			}
-			
-			ZU.doGet(urls, parseXML);
-		});
+function getSearchResults(doc, checkOnly = false) {
+	if (doc.location.pathname.startsWith('/search/')) {
+		return getSearchResultsNew(doc, checkOnly);
 	}
 	else {
-		var id;
-		var versionMatch = url.match(/v(\d+)(\.pdf)?([?#].+)?$/);
+		return getSearchResultsLegacy(doc, checkOnly);
+	}
+}
+
+// New search results at https://arxiv.org/search/[advanced]
+function getSearchResultsNew(doc, checkOnly = false) {
+	let items = {};
+	let found = false;
+	let rows = doc.querySelectorAll(".arxiv-result");
+	for (let row of rows) {
+		let id = text(row, ".list-title a").trim().replace(/^arXiv:/, "");
+		let title = ZU.trimInternal(text(row, "p.title"));
+		if (!id || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[id] = title;
+	}
+	return found && items;
+}
+
+// Listings, catchup, and legacy search results (at https://arxiv.org/find/)
+function getSearchResultsLegacy(doc, checkOnly = false) {
+	let items = {};
+	let found = false;
+	let root = doc.querySelector("#dlpage");
+	if (!root) return false;
+	// Alternating rows of <dt> and <dd> elements
+	// NOTE: For listing and legacy search, there's one <dl> per page and the
+	// <dt>/<dd> elements are direct children. For catchup, there is a <dl> for
+	// each item with a pair of <dt>/<dd> children.
+	let dts = root.querySelectorAll("dl > dt");
+	let dds = root.querySelectorAll("dl > dd");
+	if (dts.length !== dds.length) {
+		Z.debug(`Warning: unexpected number of <dt> and <dd> elements: ${dts.length} !== ${dds.length}`);
+	}
+	let length = Math.min(dts.length, dds.length);
+	for (let i = 0; i < length; i++) {
+		let id = text(dts[i], "a[title='Abstract']")
+			.trim()
+			.replace(/^arXiv:/, "");
+		let title = ZU.trimInternal(text(dds[i], ".list-title"))
+			.replace(/^Title:\s*/, "");
+		if (!id || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[id] = title;
+	}
+	return found && items;
+}
+
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		var items = getSearchResults(doc);
+		
+		let selectedItems = await Z.selectItems(items);
+		if (selectedItems) {
+			let apiURL = `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(Object.keys(selectedItems).join(','))}`;
+			let document = await requestAtom(apiURL);
+			parseAtom(document);
+		}
+	}
+	else {
+		let id = url.match(/(?:pdf|abs)\/([^?#]+)(?:\.pdf)?/)[1];
+		let versionMatch = url.match(/v(\d+)(\.pdf)?([?#].+)?$/);
 		if (versionMatch) {
 			version = versionMatch[1];
 		}
-		arxivDOI = text(doc, '.arxivdoi>a');
-		var p = url.indexOf("/pdf/");
-		if (p > -1) {
-			id = url.substring(p + 5, url.length - 4);
+
+		if (!id) { // Honestly not sure where this might still be needed
+			id = text(doc, 'span.arxivid > a');
 		}
-		else {
-			id = ZU.xpathText(doc, '(//span[@class="arxivid"]/a)[1]')
-				|| ZU.xpathText(doc, '//b[starts-with(normalize-space(text()),"arXiv:")]');
-		}
+
 		if (!id) throw new Error('Could not find arXiv ID on page.');
-		id = id.trim().replace(/^arxiv:\s*|v\d+|\s+.*$/ig, '');
-		var apiurl = 'https://export.arxiv.org/oai2?verb=GetRecord&metadataPrefix=oai_dc'
-			+ '&identifier=oai%3AarXiv.org%3A' + encodeURIComponent(id);
-		ZU.doGet(apiurl, parseXML);
+		// Do not trim version
+		//id = id.trim().replace(/^arxiv:\s*|v\d+|\s+.*$/ig, '');
+		id = id.trim().replace(/^arxiv:\s*|\s+.*$/ig, '');
+		let apiURL = `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(id)}&max_results=1`;
+		await requestAtom(apiURL).then(parseAtom);
 	}
 }
 
+// Temp workaround for https://github.com/zotero/zotero-connectors/issues/526
+async function requestAtom(url) {
+	let text = await requestText(url);
+	return new DOMParser().parseFromString(text, 'application/xml');
+}
 
-function parseXML(text) {
-	// Z.debug(text);
-	/* eslint camelcase: ["error", { allow: ["oai_dc"] }] */
-	var ns = {
-		oai_dc: 'http://www.openarchives.org/OAI/2.0/oai_dc/',
-		dc: 'http://purl.org/dc/elements/1.1/',
-		xsi: 'http://www.w3.org/2001/XMLSchema-instance',
-		n: 'http://www.openarchives.org/OAI/2.0/' // Default
-	};
-	var hasPreprint;
-	if (ZU.fieldIsValidForType('title', 'preprint')) {
-		hasPreprint = true;
-	}
-	var newItem;
-	if (hasPreprint) {
-		newItem = new Zotero.Item("preprint");
-	}
-	else {
-		newItem = new Zotero.Item("report");
-	}
-	var xml = (new DOMParser()).parseFromString(text, "text/xml");
-	var dcMeta = ZU.xpath(xml, '//n:GetRecord/n:record/n:metadata/oai_dc:dc', ns)[0];
+function parseAtom(doc) {
+	let entries = doc.querySelectorAll("feed > entry");
+	entries.forEach(parseSingleEntry);
+}
 
-	newItem.title = getXPathNodeTrimmed(dcMeta, "dc:title", ns);
-	getCreatorNodes(dcMeta, "dc:creator", newItem, "author", ns);
-	var dates = ZU.xpath(dcMeta, './dc:date', ns)
-		.map(element => element.textContent)
-		.sort();
-	if (dates.length > 0) {
-		if (version && version < dates.length) {
-			newItem.date = dates[version - 1];
-		}
-		else {
-			// take the latest date
-			newItem.date = dates[dates.length - 1];
-		}
-	}
-	
-	
-	var descriptions = ZU.xpath(dcMeta, "./dc:description", ns);
-	
-	// Put the first description into abstract, all other into notes.
-	if (descriptions.length > 0) {
-		newItem.abstractNote = ZU.trimInternal(descriptions[0].textContent);
-		for (let j = 1; j < descriptions.length; j++) {
-			var noteStr = ZU.trimInternal(descriptions[j].textContent);
-			newItem.notes.push({ note: noteStr });
-		}
-	}
-	var subjects = ZU.xpath(dcMeta, "./dc:subject", ns);
-	for (let j = 0; j < subjects.length; j++) {
-		var subject = ZU.trimInternal(subjects[j].textContent);
-		newItem.tags.push(subject);
-	}
-					
-	var identifiers = ZU.xpath(dcMeta, "./dc:identifier", ns);
-	for (let j = 0; j < identifiers.length; j++) {
-		var identifier = ZU.trimInternal(identifiers[j].textContent);
-		if (identifier.substr(0, 4) == "doi:") {
-			newItem.DOI = identifier.substr(4);
-		}
-		else if (identifier.substr(0, 7) == "http://") {
-			newItem.url = identifier;
-		}
+function parseSingleEntry(entry) {
+	let newItem = new Zotero.Item("preprint");
+
+	newItem.title = ZU.trimInternal(text(entry, "title"));
+	newItem.date = ZU.strToISO(text(entry, "updated"));
+	entry.querySelectorAll(`author > name`).forEach(node => newItem.creators.push(ZU.cleanAuthor(node.textContent, 'author', false)));
+
+	newItem.abstractNote = ZU.trimInternal(text(entry, "summary"));
+
+	let comments = entry.querySelectorAll("comment");
+
+	for (let comment of comments) {
+		let noteStr = ZU.trimInternal(comment.textContent);
+		newItem.notes.push({ note: `Comment: ${noteStr}` });
 	}
 
-	var articleID = ZU.xpath(xml, "//n:GetRecord/n:record/n:header/n:identifier", ns)[0];
-	if (articleID) articleID = ZU.trimInternal(articleID.textContent).substr(14); // Trim off oai:arXiv.org:
-	
-	var articleField = ZU.xpathText(xml, '//n:GetRecord/n:record/n:header/n:setSpec', ns);
-	if (articleField) articleField = "[" + articleField.replace(/^.+?:/, "") + "]";
-	
+	let categories = Array.from(entry.querySelectorAll("category"))
+		.map(el => el.getAttribute("term"))
+		.map((sub) => {
+			let mainCat = sub.split('.')[0];
+			if (mainCat !== sub && arXivCategories[mainCat]) {
+				return arXivCategories[mainCat] + " - " + arXivCategories[sub];
+			}
+			else {
+				return arXivCategories[sub];
+			}
+		})
+		.filter(Boolean);
+	newItem.tags.push(...categories);
+
+	let arxivURL = text(entry, "id").replace(/v\d+/, '');
+	let doi = text(entry, "doi");
+	if (doi) {
+		newItem.DOI = doi;
+	}
+	newItem.url = arxivURL;
+
+	let articleID = arxivURL.match(/\/abs\/(.+)$/)[1];
+
+	let articleField = attr(entry, "primary_category", "term").replace(/^.+?:/, "").replace(/\..+?$/, "");
+	if (articleField) articleField = "[" + articleField + "]";
+
 	if (articleID && articleID.includes("/")) {
 		newItem.extra = "arXiv:" + articleID;
 	}
 	else {
 		newItem.extra = "arXiv:" + articleID + " " + articleField;
 	}
-	
 
-	var pdfUrl = "https://arxiv.org/pdf/" + articleID + (version ? "v" + version : "") + ".pdf";
+	let pdfURL = attr(entry, "link[title='pdf']", "href");
+
 	newItem.attachments.push({
-		title: "arXiv Fulltext PDF",
-		url: pdfUrl,
+		title: "Preprint PDF",
+		url: pdfURL,
 		mimeType: "application/pdf"
 	});
 	newItem.attachments.push({
-		title: "arXiv.org Snapshot",
+		title: "Snapshot",
 		url: newItem.url,
 		mimeType: "text/html"
 	});
-	
+
 	// retrieve and supplement publication data for published articles via DOI
 	if (newItem.DOI) {
 		var translate = Zotero.loadTranslator("search");
-		// CrossRef
+		// DOI Content Negotiation
 		translate.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
-		
+
 		var item = { itemType: "journalArticle", DOI: newItem.DOI };
 		translate.setSearch(item);
 		translate.setHandler("itemDone", function (obj, item) {
-			// Z.debug(item)
 			newItem.itemType = item.itemType;
 			newItem.volume = item.volume;
 			newItem.issue = item.issue;
@@ -261,7 +444,7 @@ function parseXML(text) {
 		translate.setHandler("done", function () {
 			newItem.complete();
 		});
-		translate.setHandler("error", function () {});
+		translate.setHandler("error", function () { });
 		translate.translate();
 	}
 	else {
@@ -270,33 +453,14 @@ function parseXML(text) {
 		if (version) {
 			newItem.extra += '\nversion: ' + version;
 		}
-		if (arxivDOI) newItem.DOI = ZU.cleanDOI(arxivDOI);
-		// only for Zotero versions without preprint
-		if (!hasPreprint) {
-			newItem.extra += '\ntype: article';
-		}
-		else newItem.archiveID = "arXiv:" + articleID;
+		// https://blog.arxiv.org/2022/02/17/new-arxiv-articles-are-now-automatically-assigned-dois/
+		newItem.DOI = "10.48550/arXiv." + articleID;
+		newItem.archiveID = "arXiv:" + articleID;
 		newItem.complete();
 	}
 }
 
-
-function getXPathNodeTrimmed(dcMeta, name, ns) {
-	var node = ZU.xpath(dcMeta, './' + name, ns);
-	if (node.length) {
-		return ZU.trimInternal(node[0].textContent);
-	}
-	return '';
-}
-
-function getCreatorNodes(dcMeta, name, newItem, creatorType, ns) {
-	var nodes = ZU.xpath(dcMeta, './' + name, ns);
-	for (var i = 0; i < nodes.length; i++) {
-		newItem.creators.push(
-			ZU.cleanAuthor(nodes[i].textContent, creatorType, true)
-		);
-	}
-}/** BEGIN TEST CASES **/
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -345,11 +509,11 @@ var testCases = [
 				"volume": "419",
 				"attachments": [
 					{
-						"title": "arXiv Fulltext PDF",
+						"title": "Preprint PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "arXiv.org Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -376,7 +540,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Properties of the $\\delta$ Scorpii Circumstellar Disk from Continuum Modeling",
+				"title": "Properties of the $δ$ Scorpii Circumstellar Disk from Continuum Modeling",
 				"creators": [
 					{
 						"firstName": "A. C.",
@@ -448,11 +612,11 @@ var testCases = [
 				"volume": "652",
 				"attachments": [
 					{
-						"title": "arXiv Fulltext PDF",
+						"title": "Preprint PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "arXiv.org Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -508,11 +672,11 @@ var testCases = [
 				"volume": "125",
 				"attachments": [
 					{
-						"title": "arXiv Fulltext PDF",
+						"title": "Preprint PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "arXiv.org Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -540,10 +704,10 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://arxiv.org/pdf/1402.1516.pdf",
+		"url": "https://arxiv.org/pdf/1402.1516",
 		"items": [
 			{
-				"itemType": "journalArticle",
+				"itemType": "preprint",
 				"title": "A dual pair for free boundary fluids",
 				"creators": [
 					{
@@ -558,24 +722,33 @@ var testCases = [
 					}
 				],
 				"date": "2014-02-06",
+				"DOI": "10.48550/arXiv.1402.1516",
 				"abstractNote": "We construct a dual pair associated to the Hamiltonian geometric formulation of perfect fluids with free boundaries. This dual pair is defined on the cotangent bundle of the space of volume preserving embeddings of a manifold with boundary into a boundaryless manifold of the same dimension. The dual pair properties are rigorously verified in the infinite dimensional Fr\\'echet manifold setting. It provides an example of a dual pair associated to actions that are not completely mutually orthogonal.",
-				"extra": "arXiv: 1402.1516",
+				"archiveID": "arXiv:1402.1516",
+				"extra": "arXiv:1402.1516 [math]",
 				"libraryCatalog": "arXiv.org",
-				"publicationTitle": "arXiv:1402.1516 [math-ph]",
+				"repository": "arXiv",
 				"url": "http://arxiv.org/abs/1402.1516",
 				"attachments": [
 					{
-						"title": "arXiv:1402.1516 PDF",
+						"title": "Preprint PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "arXiv.org Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"Mathematical Physics",
-					"Mathematics - Symplectic Geometry"
+					{
+						"tag": "Mathematical Physics"
+					},
+					{
+						"tag": "Mathematics - Mathematical Physics"
+					},
+					{
+						"tag": "Mathematics - Symplectic Geometry"
+					}
 				],
 				"notes": [
 					{
@@ -615,8 +788,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2018-10-10",
-				"abstractNote": "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful. It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE score to 80.5% (7.7% point absolute improvement), MultiNLI accuracy to 86.7% (4.6% absolute improvement), SQuAD v1.1 question answering Test F1 to 93.2 (1.5 point absolute improvement) and SQuAD v2.0 Test F1 to 83.1 (5.1 point absolute improvement).",
+				"date": "2018-10-11",
+				"DOI": "10.48550/arXiv.1810.04805",
+				"abstractNote": "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT representations can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful. It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE benchmark to 80.4% (7.6% absolute improvement), MultiNLI accuracy to 86.7 (5.6% absolute improvement) and the SQuAD v1.1 question answering Test F1 to 93.2 (1.5% absolute improvement), outperforming human performance by 2.0%.",
 				"archiveID": "arXiv:1810.04805",
 				"extra": "arXiv:1810.04805 [cs]\nversion: 1",
 				"libraryCatalog": "arXiv.org",
@@ -625,11 +799,11 @@ var testCases = [
 				"url": "http://arxiv.org/abs/1810.04805",
 				"attachments": [
 					{
-						"title": "arXiv Fulltext PDF",
+						"title": "Preprint PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "arXiv.org Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -638,7 +812,11 @@ var testCases = [
 						"tag": "Computer Science - Computation and Language"
 					}
 				],
-				"notes": [],
+				"notes": [
+					{
+						"note": "Comment: 13 pages"
+					}
+				],
 				"seeAlso": []
 			}
 		]
@@ -673,6 +851,7 @@ var testCases = [
 					}
 				],
 				"date": "2019-05-24",
+				"DOI": "10.48550/arXiv.1810.04805",
 				"abstractNote": "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful. It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE score to 80.5% (7.7% point absolute improvement), MultiNLI accuracy to 86.7% (4.6% absolute improvement), SQuAD v1.1 question answering Test F1 to 93.2 (1.5 point absolute improvement) and SQuAD v2.0 Test F1 to 83.1 (5.1 point absolute improvement).",
 				"archiveID": "arXiv:1810.04805",
 				"extra": "arXiv:1810.04805 [cs]\nversion: 2",
@@ -682,11 +861,11 @@ var testCases = [
 				"url": "http://arxiv.org/abs/1810.04805",
 				"attachments": [
 					{
-						"title": "arXiv Fulltext PDF",
+						"title": "Preprint PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "arXiv.org Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -744,21 +923,21 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2022-01-07",
+				"date": "2023-02-07",
 				"DOI": "10.48550/arXiv.2201.00738",
 				"abstractNote": "Dark matter is five times more abundant than ordinary visible matter in our Universe. While laboratory searches hunting for dark matter have traditionally focused on the electroweak scale, theories of low mass hidden sectors motivate new detection techniques. Extending these searches to lower mass ranges, well below 1 GeV/c$^2$, poses new challenges as rare interactions with standard model matter transfer progressively less energy to electrons and nuclei in detectors. Here, we propose an approach based on phonon-assisted quantum evaporation combined with quantum sensors for detection of desorption events via tracking of spin coherence. The intent of our proposed dark matter sensors is to extend the parameter space to energy transfers in rare interactions to as low as a few meV for detection of dark matter particles in the keV/c$^2$ mass range.",
 				"archiveID": "arXiv:2201.00738",
-				"extra": "arXiv:2201.00738 [cond-mat, physics:hep-ex, physics:quant-ph]",
+				"extra": "arXiv:2201.00738 [hep-ex]",
 				"libraryCatalog": "arXiv.org",
 				"repository": "arXiv",
 				"url": "http://arxiv.org/abs/2201.00738",
 				"attachments": [
 					{
-						"title": "arXiv Fulltext PDF",
+						"title": "Preprint PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "arXiv.org Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -775,7 +954,141 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "Comment: 7 pages, 4 figures. Fixed typos in address"
+						"note": "Comment: 8 pages, 3 figures. Updated various parts"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://arxiv.org/search/advanced?advanced=&terms-0-operator=AND&terms-0-term=%22desire+production%22&terms-0-field=all&classification-physics_archives=all&classification-include_cross_list=exclude&date-year=&date-filter_by=date_range&date-from_date=2005-01-01&date-to_date=2008-12-31&date-date_type=submitted_date&abstracts=show&size=50&order=-announced_date_first",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://arxiv.org/search/?query=australopithecus&searchtype=title&abstracts=show&order=-announced_date_first&size=25",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "search",
+		"input": {
+			"arXiv": "math/0211159"
+		},
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "The entropy formula for the Ricci flow and its geometric applications",
+				"creators": [
+					{
+						"firstName": "Grisha",
+						"lastName": "Perelman",
+						"creatorType": "author"
+					}
+				],
+				"date": "2002-11-11",
+				"DOI": "10.48550/arXiv.math/0211159",
+				"abstractNote": "We present a monotonic expression for the Ricci flow, valid in all dimensions and without curvature assumptions. It is interpreted as an entropy for a certain canonical ensemble. Several geometric applications are given. In particular, (1) Ricci flow, considered on the space of riemannian metrics modulo diffeomorphism and scaling, has no nontrivial periodic orbits (that is, other than fixed points); (2) In a region, where singularity is forming in finite time, the injectivity radius is controlled by the curvature; (3) Ricci flow can not quickly turn an almost euclidean region into a very curved one, no matter what happens far away. We also verify several assertions related to Richard Hamilton's program for the proof of Thurston geometrization conjecture for closed three-manifolds, and give a sketch of an eclectic proof of this conjecture, making use of earlier results on collapsing with local lower curvature bound.",
+				"archiveID": "arXiv:math/0211159",
+				"extra": "arXiv:math/0211159",
+				"libraryCatalog": "arXiv.org",
+				"repository": "arXiv",
+				"url": "http://arxiv.org/abs/math/0211159",
+				"attachments": [
+					{
+						"title": "Preprint PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Mathematics - Differential Geometry"
+					}
+				],
+				"notes": [
+					{
+						"note": "Comment: 39 pages"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://arxiv.org/abs/2305.16311#",
+		"detectedItemType": "journalArticle",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "Break-A-Scene: Extracting Multiple Concepts from a Single Image",
+				"creators": [
+					{
+						"firstName": "Omri",
+						"lastName": "Avrahami",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kfir",
+						"lastName": "Aberman",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ohad",
+						"lastName": "Fried",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Daniel",
+						"lastName": "Cohen-Or",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Dani",
+						"lastName": "Lischinski",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-12-10",
+				"DOI": "10.1145/3610548.3618154",
+				"abstractNote": "Text-to-image model personalization aims to introduce a user-provided concept to the model, allowing its synthesis in diverse contexts. However, current methods primarily focus on the case of learning a single concept from multiple images with variations in backgrounds and poses, and struggle when adapted to a different scenario. In this work, we introduce the task of textual scene decomposition: given a single image of a scene that may contain several concepts, we aim to extract a distinct text token for each concept, enabling fine-grained control over the generated scenes. To this end, we propose augmenting the input image with masks that indicate the presence of target concepts. These masks can be provided by the user or generated automatically by a pre-trained segmentation model. We then present a novel two-phase customization process that optimizes a set of dedicated textual embeddings (handles), as well as the model weights, striking a delicate balance between accurately capturing the concepts and avoiding overfitting. We employ a masked diffusion loss to enable handles to generate their assigned concepts, complemented by a novel loss on cross-attention maps to prevent entanglement. We also introduce union-sampling, a training strategy aimed to improve the ability of combining multiple concepts in generated images. We use several automatic metrics to quantitatively compare our method against several baselines, and further affirm the results using a user study. Finally, we showcase several applications of our method. Project page is available at: https://omriavrahami.com/break-a-scene/",
+				"extra": "arXiv:2305.16311 [cs]",
+				"libraryCatalog": "arXiv.org",
+				"pages": "1-12",
+				"proceedingsTitle": "SIGGRAPH Asia 2023 Conference Papers",
+				"shortTitle": "Break-A-Scene",
+				"url": "http://arxiv.org/abs/2305.16311",
+				"attachments": [
+					{
+						"title": "Preprint PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Computer Science - Computer Vision and Pattern Recognition"
+					},
+					{
+						"tag": "Computer Science - Graphics"
+					},
+					{
+						"tag": "Computer Science - Machine Learning"
+					}
+				],
+				"notes": [
+					{
+						"note": "Comment: SIGGRAPH Asia 2023. Project page: at: https://omriavrahami.com/break-a-scene/ Video: https://www.youtube.com/watch?v=-9EA-BhizgM"
 					}
 				],
 				"seeAlso": []

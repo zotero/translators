@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2023-07-17 03:09:44"
+	"lastUpdated": "2025-03-06 20:14:30"
 }
 
 /*
@@ -44,6 +44,7 @@ var ITEM_TYPES = {
 	// DT overrides; not including anything already covered by the above.
 	// TODO: Add more implementations for DT values as needed.
 	"PROCEEDINGS PAPER": "conferencePaper",
+	"DATA SET": "dataset",
 };
 
 var FIELD_MAP = {

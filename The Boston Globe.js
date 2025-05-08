@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-29 18:49:20"
+	"lastUpdated": "2025-05-01 14:47:55"
 }
 
 /*
@@ -27,19 +27,10 @@
  */
 
 function detectWeb(doc, url) {
-
-	if (url.match("search.boston.com")) {
-		// Search disabled until cross-domain can be dealt with
-		return false;
-		var results =  doc.evaluate('//div[@class="resultsMain"]//div[@class="regTZ"]/a[@class="titleLink"]', doc, null, XPathResult.ANY_TYPE, null);
-		if (results.iterateNext()) {
-			return "multiple";
-		} else {
-			return false;
-		}
-	} else if (url.match(/(\/[0-9]{4}\/[0-9]{2}\/|[0-9]{4}-[0-9]{2}-[0-9]{2})/)) {
+	if (doc.location.hostname === 'archive.boston.com' && /(\/[0-9]{4}\/[0-9]{2}\/|[0-9]{4}-[0-9]{2}-[0-9]{2})/.test(url)) {
 		return "newspaperArticle";
-	} 
+	}
+	return false;
 }
 
 //Boston Globe and Boston.com Translator. Original code by Adam Crymble
@@ -109,7 +100,7 @@ function scrape (doc, url) {
 		// URL	
 		newItem.url = doc.location.href;
 		// Attachment
-		newItem.attachments.push({url:doc.location.href,mimetype:"text/html",snapshot:true,title:"Boston.com page"});
+		newItem.attachments.push({url:doc.location.href,mimeType:"text/html",snapshot:true,title:"Boston.com page"});
 		// Now try to get some citation details (go ahead, try)
 		var info = magicComment.replace('\n','','g');
 		newItem.title = ZU.xpathText(doc, '//div[@id="headTools"]/h1');
@@ -148,7 +139,7 @@ function scrape (doc, url) {
 		newItem.publicationTitle = "Boston.com";
 		// URL	
 		newItem.url = doc.location.href;
-		newItem.attachments.push({url:doc.location.href,mimetype:"text/html",snapshot:true,title:"Boston.com page"});
+		newItem.attachments.push({url:doc.location.href,mimeType:"text/html",snapshot:true,title:"Boston.com page"});
 
 		// Date
 		var dateElem = infoElem.getElementsByClassName('pubdate');
@@ -219,6 +210,7 @@ function doWeb (doc, url) {
 		scrape(doc, url);
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -241,7 +233,7 @@ var testCases = [
 				"url": "http://archive.boston.com/lifestyle/articles/2011/04/28/anticipation_grows_for_mfas_art_in_bloom_festival/?camp=pm",
 				"attachments": [
 					{
-						"mimetype": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true,
 						"title": "Boston.com page"
 					}
@@ -278,7 +270,7 @@ var testCases = [
 				"url": "http://archive.boston.com/news/nation/washington/articles/2011/05/08/bin_laden_occupied_shrunken_dark_world/",
 				"attachments": [
 					{
-						"mimetype": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true,
 						"title": "Boston.com page"
 					}

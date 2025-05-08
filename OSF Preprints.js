@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-20 01:58:39"
+	"lastUpdated": "2024-11-07 22:14:23"
 }
 
 /*
@@ -91,6 +91,7 @@ function constructAPIURL(urls) {
 	return ids;
 }
 
+// TODO: Unify and use API or EM uniformly
 function osfAPIImport(text) {
 	// Z.debug(text);
 	let json = JSON.parse(text);
@@ -141,6 +142,16 @@ function scrape(doc, url) {
 				item.attachments.splice(i, 1);
 			}
 		}
+		if (!item.attachments.length) {
+			let pdfURL = attr(doc, 'div[class*="download-container"] a[href$="/download/"]', 'href');
+			if (pdfURL) {
+				item.attachments.push({
+					title: 'OSF Preprint',
+					mimeType: 'application/pdf',
+					url: pdfURL
+				});
+			}
+		}
 		item.libraryCatalog = "OSF Preprints";
 		item.complete();
 	});
@@ -150,7 +161,6 @@ function scrape(doc, url) {
 		trans.doWeb(doc, url);
 	});
 }
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -329,9 +339,79 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"defer": true,
 		"url": "https://osf.io/search?activeFilters=%5B%5D&q=metascience&resourceType=Preprint&sort=-relevance&view_only=",
+		"defer": true,
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://osf.io/preprints/psyarxiv/7eb4g",
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "Revisiting the Digital Jukebox: Applying Mood Management Theory to Algorithmically Curated Music Streaming Environments",
+				"creators": [
+					{
+						"firstName": "Alicia",
+						"lastName": "Ernst",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Felix",
+						"lastName": "Dietrich",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Benedikt",
+						"lastName": "Rohr",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Leonard",
+						"lastName": "Reinecke",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael",
+						"lastName": "Scharkow",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024-09-30",
+				"DOI": "10.31234/osf.io/7eb4g",
+				"abstractNote": "Experimental evidence has profoundly contributed to our understanding of Mood Management Theory (MMT) in the context of music. Extant research, however, lacks insights into everyday mood regulation through music listening, especially on music streaming services where selections can be guided by algorithmic recommendations. Hence, we tested MMT in a naturalistic setting by combining experience sampling with logged music streaming data, while accounting for algorithmic curation as a boundary condition to users’ music choices. In a pre-registered study using T = 6,918 observations from N = 144 listeners, results showed that mood, music selection, and algorithmic curation varied substantially from situation to situation. However, we found no effects between mood and music choices that would confirm MMT’s selection hypotheses, yet small mood-congruent music effects on mood. Algorithmic curation did not establish novel MMT-related choice patterns. Our findings suggest re-specifying MMT and related media use theories for daily life.",
+				"language": "en-us",
+				"libraryCatalog": "OSF Preprints",
+				"repository": "OSF",
+				"shortTitle": "Revisiting the Digital Jukebox",
+				"url": "https://osf.io/7eb4g",
+				"attachments": [
+					{
+						"title": "OSF Preprint",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Mood Management Theory"
+					},
+					{
+						"tag": "algorithmic curation"
+					},
+					{
+						"tag": "digital behavioral data"
+					},
+					{
+						"tag": "experience sampling method"
+					},
+					{
+						"tag": "music use"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
