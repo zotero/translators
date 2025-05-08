@@ -848,11 +848,11 @@ function getAuthorFromByline(doc, newItem) {
 		// are any of these actual likely to appear in the real world?
 		// well, no, but things happen:
 		//   https://github.com/zotero/translators/issues/2001
-		let irrelevantTags = 'time, button, textarea, script';
-		if (actualByline.querySelector(irrelevantTags)) {
+		let irrelevantSelector = 'time, button, textarea, script, [class*="email"], [class*="date"]';
+		if (actualByline.querySelector(irrelevantSelector)) {
 			actualByline = actualByline.cloneNode(true);
-			for (let child of actualByline.querySelectorAll(irrelevantTags)) {
-				child.parentNode.removeChild(child);
+			for (let child of [...actualByline.querySelectorAll(irrelevantSelector)]) {
+				child.remove();
 			}
 		}
 		
