@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-08 17:43:01"
+	"lastUpdated": "2025-05-08 17:47:25"
 }
 
 /*
@@ -94,7 +94,7 @@ async function scrape(doc, url = doc.location.href) {
 }
 
 function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 async function getMultipleItems(doc, url) {
