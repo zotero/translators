@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-06-13 15:58:28"
+	"lastUpdated": "2024-11-22 19:32:47"
 }
 
 /*
@@ -947,8 +947,13 @@ function finalDataCleanup(doc, newItem) {
 	}
 
 
-	// remove itemID - comes from RDF translator, doesn't make any sense for online data
+	// Remove itemID - comes from RDF translator, doesn't make any sense for online data
 	newItem.itemID = "";
+
+	// Clean up unnecessarily long ISO datetimes
+	if (newItem.date) {
+		newItem.date = newItem.date.replace(/^(\d{4}-\d{2}-\d{2})(?:T|\s)\d.+/, '$1');
+	}
 
 	// worst case, if this is not called from another translator, use URL for title
 	if (!newItem.title && !Zotero.parentTranslator) newItem.title = newItem.url;
@@ -1051,7 +1056,7 @@ var testCases = [
 				"ISSN": "1821-9241",
 				"abstractNote": "The synergistic interaction between Human Immunodeficiency virus (HIV) disease and Malaria makes it mandatory for patients with HIV to respond appropriately in preventing and treating malaria. Such response will help to control the two diseases. This study assessed the knowledge of 495 patients attending the HIV clinic, in Lagos University Teaching Hospital, Nigeria.&nbsp; Their treatment seeking, preventive practices with regards to malaria, as well as the impact of socio &ndash; demographic / socio - economic status were assessed. Out of these patients, 245 (49.5 %) used insecticide treated bed nets; this practice was not influenced by socio &ndash; demographic or socio &ndash; economic factors.&nbsp; However, knowledge of the cause, knowledge of prevention of malaria, appropriate use of antimalarial drugs and seeking treatment from the right source increased with increasing level of education (p &lt; 0.05). A greater proportion of the patients, 321 (64.9 %) utilized hospitals, pharmacy outlets or health centres when they perceived an attack of malaria. Educational intervention may result in these patients seeking treatment from the right place when an attack of malaria fever is perceived.",
 				"issue": "4",
-				"journalAbbreviation": "1",
+				"journalAbbreviation": "Tanzania J Hlth Res",
 				"language": "en",
 				"libraryCatalog": "www.ajol.info",
 				"publicationTitle": "Tanzania Journal of Health Research",
@@ -1072,168 +1077,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34/",
-		"items": [
-			{
-				"itemType": "conferencePaper",
-				"title": "Session F: Contributed Oral Papers – F2: Energy, Climate, Nuclear Medicine: Reducing Energy Consumption and CO2 One Street Lamp at a Time",
-				"creators": [
-					{
-						"firstName": "Peter",
-						"lastName": "Somssich",
-						"creatorType": "author"
-					}
-				],
-				"date": "2011",
-				"abstractNote": "Why wait for federal action on incentives to reduce energy use and address  Greenhouse Gas (GHG) reductions (e.g. CO2), when we can take personal  actions right now in our private lives and in our communities? One such  initiative by private citizens working with Portsmouth NH officials resulted  in the installation of energy reducing lighting products on Court St. and  the benefits to taxpayers are still coming after over 4 years of operation.  This citizen initiative to save money and reduce CO2 emissions, while only  one small effort, could easily be duplicated in many towns and cities.  Replacing old lamps in just one street fixture with a more energy efficient  (Non-LED) lamp has resulted after 4 years of operation ($\\sim $15,000 hr.  life of product) in real electrical energy savings of $>$ {\\$}43. and CO2  emission reduction of $>$ 465 lbs. The return on investment (ROI) was less  than 2 years. This is much better than any financial investment available  today and far safer. Our street only had 30 such lamps installed; however,  the rest of Portsmouth (population 22,000) has at least another 150 street  lamp fixtures that are candidates for such an upgrade. The talk will also  address other energy reduction measures that green the planet and also put  more green in the pockets of citizens and municipalities.",
-				"conferenceName": "Climate Change and the Future of Nuclear Power",
-				"language": "en",
-				"libraryCatalog": "scholarworks.umass.edu",
-				"shortTitle": "Session F",
-				"url": "https://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://scholarworks.umass.edu/lov/vol2/iss1/2/",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Wabanaki Resistance and Healing: An Exploration of the Contemporary Role of an Eighteenth Century Bounty Proclamation in an Indigenous Decolonization Process",
-				"creators": [
-					{
-						"firstName": "Bonnie D.",
-						"lastName": "Newsom",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Jamie",
-						"lastName": "Bissonette-Lewey",
-						"creatorType": "author"
-					}
-				],
-				"date": "2012",
-				"DOI": "10.7275/R5KW5CXB",
-				"ISSN": "1947-508X",
-				"abstractNote": "The purpose of this paper is to examine the contemporary role of an eighteenth century bounty proclamation issued on the Penobscot Indians of Maine. We focus specifically on how the changing cultural context of the 1755 Spencer Phips Bounty Proclamation has transformed the document from serving as a tool for sanctioned violence to a tool of decolonization for the Indigenous peoples of Maine. We explore examples of the ways indigenous and non-indigenous people use the Phips Proclamation to illustrate past violence directed against Indigenous peoples. This exploration is enhanced with an analysis of the re-introduction of the Phips Proclamation using concepts of decolonization theory.",
-				"issue": "1",
-				"language": "en",
-				"libraryCatalog": "scholarworks.umass.edu",
-				"pages": "2",
-				"publicationTitle": "Landscapes of Violence",
-				"shortTitle": "Wabanaki Resistance and Healing",
-				"url": "https://scholarworks.umass.edu/lov/vol2/iss1/2",
-				"volume": "2",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://scholarworks.umass.edu/open_access_dissertations/508/",
-		"items": [
-			{
-				"itemType": "thesis",
-				"title": "Decision-Theoretic Meta-reasoning in Partially Observable and Decentralized Settings",
-				"creators": [
-					{
-						"firstName": "Alan Scott",
-						"lastName": "Carlin",
-						"creatorType": "author"
-					}
-				],
-				"date": "2012",
-				"abstractNote": "This thesis examines decentralized meta-reasoning. For a single agent or multiple agents, it may not be enough for agents to compute correct decisions if they do not do so in a timely or resource efficient fashion. The utility of agent decisions typically increases with decision quality, but decreases with computation time. The reasoning about one's computation process is referred to as meta-reasoning. Aspects of meta-reasoning considered in this thesis include the reasoning about how to allocate computational resources, including when to stop one type of computation and begin another, and when to stop all computation and report an answer. Given a computational model, this translates into computing how to schedule the basic computations that solve a problem. This thesis constructs meta-reasoning strategies for the purposes of monitoring and control in multi-agent settings, specifically settings that can be modeled by the Decentralized Partially Observable Markov Decision Process (Dec-POMDP). It uses decision theory to optimize computation for efficiency in time and space in communicative and non-communicative decentralized settings. Whereas base-level reasoning describes the optimization of actual agent behaviors, the meta-reasoning strategies produced by this thesis dynamically optimize the computational resources which lead to the selection of base-level behaviors.",
-				"extra": "DOI: 10.7275/n8e9-xy93",
-				"language": "en",
-				"libraryCatalog": "scholarworks.umass.edu",
-				"university": "University of Massachusetts Amherst",
-				"url": "https://scholarworks.umass.edu/open_access_dissertations/508",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://scielosp.org/article/rsp/2007.v41suppl2/94-100/en/",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Perceptions of HIV rapid testing among injecting drug users in Brazil",
-				"creators": [
-					{
-						"firstName": "P. R.",
-						"lastName": "Telles-Dias",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "S.",
-						"lastName": "Westman",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "A. E.",
-						"lastName": "Fernandez",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "M.",
-						"lastName": "Sanchez",
-						"creatorType": "author"
-					}
-				],
-				"date": "2007-12",
-				"DOI": "10.1590/S0034-89102007000900015",
-				"ISSN": "0034-8910, 0034-8910, 1518-8787",
-				"abstractNote": "OBJETIVO: Descrever as impressões, experiências, conhecimentos, crenças e a receptividade de usuários de drogas injetáveis para participar das estratégias de testagem rápida para HIV. MÉTODOS: Estudo qualitativo exploratório foi conduzido entre usuários de drogas injetáveis, de dezembro de 2003 a fevereiro de 2004, em cinco cidades brasileiras, localizadas em quatro regiões do País. Um roteiro de entrevista semi-estruturado contendo questões fechadas e abertas foi usado para avaliar percepções desses usuários sobre procedimentos e formas alternativas de acesso e testagem. Foram realizadas 106 entrevistas, aproximadamente 26 por região. RESULTADOS: Características da população estudada, opiniões sobre o teste rápido e preferências por usar amostras de sangue ou saliva foram apresentadas junto com as vantagens e desvantagens associadas a cada opção. Os resultados mostraram a viabilidade do uso de testes rápidos entre usuários de drogas injetáveis e o interesse deles quanto à utilização destes métodos, especialmente se puderem ser equacionadas questões relacionadas à confidencialidade e confiabilidade dos testes. CONCLUSÕES: Os resultados indicam que os testes rápidos para HIV seriam bem recebidos por essa população. Esses testes podem ser considerados uma ferramenta valiosa, ao permitir que mais usuários de drogas injetáveis conheçam sua sorologia para o HIV e possam ser referidos para tratamento, como subsidiar a melhoria das estratégias de testagem entre usuários de drogas injetáveis.",
-				"journalAbbreviation": "Rev. Saúde Pública",
-				"language": "en",
-				"libraryCatalog": "scielosp.org",
-				"pages": "94-100",
-				"publicationTitle": "Revista de Saúde Pública",
-				"url": "https://scielosp.org/article/rsp/2007.v41suppl2/94-100/en/",
-				"volume": "41",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.hindawi.com/journals/mpe/2013/868174/",
+		"url": "https://onlinelibrary.wiley.com/doi/10.1155/2013/868174",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1255,14 +1099,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2013/2/20",
+				"date": "2013/01/01",
 				"DOI": "10.1155/2013/868174",
-				"ISSN": "1024-123X",
-				"abstractNote": "The problem of network-based robust filtering for stochastic systems with sensor nonlinearity is investigated in this paper. In the network environment, the effects of the sensor saturation, output quantization, and network-induced delay are taken into simultaneous consideration, and the output measurements received in the filter side are incomplete. The random delays are modeled as a linear function of the stochastic variable described by a Bernoulli random binary distribution. The derived criteria for performance analysis of the filtering-error system and filter design are proposed which can be solved by using convex optimization method. Numerical examples show the effectiveness of the design method.",
+				"ISSN": "1563-5147",
+				"abstractNote": "The problem of network-based robust filtering for stochastic systems with sensor nonlinearity is investigated in this paper. In the network environment, the effects of the sensor saturation, output q...",
+				"issue": "1",
 				"language": "en",
-				"libraryCatalog": "www.hindawi.com",
+				"libraryCatalog": "onlinelibrary.wiley.com",
+				"pages": "868174",
 				"publicationTitle": "Mathematical Problems in Engineering",
-				"url": "https://www.hindawi.com/journals/mpe/2013/868174/",
+				"url": "https://onlinelibrary.wiley.com/doi/10.1155/2013/868174",
 				"volume": "2013",
 				"attachments": [
 					{
@@ -1290,7 +1136,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2013-12-22T16:58:34+00:00",
+				"date": "2013-12-22",
 				"abstractNote": "Northwestern University recently condemned the American Studies Association boycott of Israel. Unlike some other schools that quit their institutional membership in the ASA over the boycott, Northwestern has not. Many of my Northwestern colleagues were about to start urging a similar withdrawal. Then we learned from our administration that despite being listed as in institutional […]",
 				"blogTitle": "The Volokh Conspiracy",
 				"language": "en-US",
@@ -1331,7 +1177,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2015-08-05T12:05:17Z",
+				"date": "2015-08-05",
 				"abstractNote": "New research finds creativity benefits.",
 				"url": "https://hbr.org/2015/08/how-to-do-walking-meetings-right",
 				"websiteTitle": "Harvard Business Review",
@@ -1373,6 +1219,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "olh.openlibhums.org",
 				"publicationTitle": "Open Library of Humanities",
+				"rights": "Copyright: © 2015 The Author(s). This is an open-access article distributed under the terms of the Creative Commons Attribution 3.0 Unported License (CC-BY 3.0), which permits unrestricted use, distribution, and reproduction in any medium, provided the original author and source are credited. See http://creativecommons.org/licenses/by/3.0/.",
 				"url": "https://olh.openlibhums.org/article/id/4400/",
 				"volume": "1",
 				"attachments": [
@@ -1401,9 +1248,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2016-01-07T08:20:02-05:00",
+				"date": "2016-01-07",
 				"abstractNote": "Excluding female characters in merchandise is an ongoing pattern.",
-				"language": "en",
+				"language": "en-US",
 				"url": "https://www.vox.com/2016/1/7/10726296/wheres-rey-star-wars-monopoly",
 				"websiteTitle": "Vox",
 				"attachments": [
@@ -1420,7 +1267,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=5057",
+		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=2087",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -1493,7 +1340,7 @@ var testCases = [
 				"language": "eng",
 				"libraryCatalog": "www.diva-portal.org",
 				"shortTitle": "Mobility modeling for transport efficiency",
-				"url": "http://urn.kb.se/resolve?urn=urn:nbn:se:liu:diva-112443",
+				"url": "https://urn.kb.se/resolve?urn=urn:nbn:se:liu:diva-112443",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1563,12 +1410,13 @@ var testCases = [
 				"DOI": "10.1353/kri.2008.0061",
 				"ISSN": "1538-5000",
 				"issue": "4",
+				"journalAbbreviation": "kri",
 				"language": "en",
 				"libraryCatalog": "muse.jhu.edu",
 				"pages": "627-656",
 				"publicationTitle": "Kritika: Explorations in Russian and Eurasian History",
 				"shortTitle": "Serfs on the Move",
-				"url": "https://muse.jhu.edu/article/234097",
+				"url": "https://muse.jhu.edu/pub/28/article/234097",
 				"volume": "1",
 				"attachments": [
 					{
@@ -1596,7 +1444,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2018-12-27 01:00:00 +0100",
+				"date": "2018-12-27",
 				"abstractNote": "This talk will teach you the fundamentals of machine learning and give you a sneak peek into the internals of the mystical black box. You...",
 				"language": "en",
 				"libraryCatalog": "media.ccc.de",
@@ -1651,7 +1499,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.pewresearch.org/fact-tank/2019/12/12/u-s-children-more-likely-than-children-in-other-countries-to-live-with-just-one-parent/",
+		"url": "https://www.pewresearch.org/short-reads/2019/12/12/u-s-children-more-likely-than-children-in-other-countries-to-live-with-just-one-parent/",
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -1663,10 +1511,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2019-12-12",
 				"abstractNote": "Almost a quarter of U.S. children under 18 live with one parent and no other adults, more than three times the share of children around the world who do so.",
 				"blogTitle": "Pew Research Center",
 				"language": "en-US",
-				"url": "https://www.pewresearch.org/fact-tank/2019/12/12/u-s-children-more-likely-than-children-in-other-countries-to-live-with-just-one-parent/",
+				"url": "https://www.pewresearch.org/short-reads/2019/12/12/u-s-children-more-likely-than-children-in-other-countries-to-live-with-just-one-parent/",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -1779,10 +1628,10 @@ var testCases = [
 				"DOI": "10.3765/plsa.v4i1.4468",
 				"ISSN": "2473-8689",
 				"abstractNote": "Forced alignment automatically aligns audio recordings of spoken language with transcripts at the segment level, greatly reducing the time required to prepare data for phonetic analysis. However, existing algorithms are mostly trained on a few well-documented languages. We test the performance of three algorithms against manually aligned data. For at least some tasks, unsupervised alignment (either based on English or trained from a small corpus) is sufficiently reliable for it to be used on legacy data for low-resource languages. Descriptive phonetic work on vowel inventories and prosody can be accurately captured by automatic alignment with minimal training data. Consonants provided significantly more challenges for forced alignment.",
-				"issue": "1",
+				"journalAbbreviation": "Proc Ling Soc Amer",
 				"language": "en",
 				"libraryCatalog": "journals.linguisticsociety.org",
-				"pages": "3-12",
+				"pages": "3:1-12",
 				"publicationTitle": "Proceedings of the Linguistic Society of America",
 				"rights": "Copyright (c) 2019 Sarah Babinski, Rikker Dockum, J. Hunter Craft, Anelisa Fergus, Dolly Goldenberg, Claire Bowern",
 				"shortTitle": "A Robin Hood approach to forced alignment",
@@ -1802,7 +1651,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.swr.de/wissen/1000-antworten/kultur/woher-kommt-redensart-ueber-die-wupper-gehen-100.html",
+		"url": "https://www.swr.de/wissen/1000-antworten/woher-kommt-redensart-ueber-die-wupper-gehen-102.html",
 		"items": [
 			{
 				"itemType": "webpage",
@@ -1814,11 +1663,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2019-04-11",
-				"abstractNote": "Es gibt eine Vergleichsredensart: \"Der ist über den Jordan gegangen.“ Das heißt, er ist gestorben. Das bezieht sich auf die alten Grenzen Israels. In Wuppertal jedoch liegt jenseits des Flusses das Gefängnis.",
+				"date": "2024-03-05",
+				"abstractNote": "Es gibt eine Vergleichsredensart: \"Der ist über den Jordan gegangen.\" Das heißt, er ist gestorben. Das bezieht sich auf die alten Grenzen Israels. In Wuppertal jedoch liegt jenseits des Flusses das Gefängnis. Von Rolf-Bernhard Essig",
 				"language": "de",
-				"url": "https://www.swr.de/wissen/1000-antworten/woher-kommt-redensart-ueber-die-wupper-gehen-100.html",
-				"websiteTitle": "swr.online",
+				"url": "https://www.swr.de/wissen/1000-antworten/woher-kommt-redensart-ueber-die-wupper-gehen-102.html",
+				"websiteTitle": "SWR",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -1871,12 +1720,12 @@ var testCases = [
 				"title": "Windows Privilege Escalation: Kernel Exploit",
 				"creators": [
 					{
-						"firstName": "Raj",
-						"lastName": "Chandel",
+						"firstName": "",
+						"lastName": "Raj",
 						"creatorType": "author"
 					}
 				],
-				"date": "2021-12-30T17:41:33+00:00",
+				"date": "2021-12-30",
 				"abstractNote": "As this series was dedicated to Windows Privilege escalation thus I’m writing this Post to explain command practice for kernel-mode exploitation. Table of Content What",
 				"blogTitle": "Hacking Articles",
 				"language": "en",
@@ -2042,11 +1891,42 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2021-08-16T09:54:36.000Z",
+				"date": "2021-08-16",
 				"abstractNote": "The Hon Harry Herbert, son of the 7th Earl of Carnarvon, married Clodagh McKenna in a fairytale wedding attended by everyone from George Osborne and his fiancée, Thea Rogers, to Laura Whitmore",
 				"language": "en-GB",
 				"url": "https://www.tatler.com/article/clodagh-mckenna-hon-harry-herbert-wedding-george-osborne-highclere-castle",
 				"websiteTitle": "Tatler",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://medium.com/voyagertoujours/how-i-organise-my-references-and-papers-to-read-with-zotero-917f0a61a309",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "How I organise my references and papers to read with Zotero",
+				"creators": [
+					{
+						"firstName": "Lavisha",
+						"lastName": "Parab",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-08-27",
+				"abstractNote": "A short summary of how I use Zotero to track papers I read and save those which are relevant to my work (current, past or future)",
+				"language": "en",
+				"url": "https://medium.com/voyagertoujours/how-i-organise-my-references-and-papers-to-read-with-zotero-917f0a61a309",
+				"websiteTitle": "Medium",
 				"attachments": [
 					{
 						"title": "Snapshot",
