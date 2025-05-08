@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-08 16:27:22"
+	"lastUpdated": "2025-05-08 17:20:56"
 }
 
 /*
@@ -752,7 +752,7 @@ function getAuthorFromByline(doc, newItem) {
 				: doc.querySelectorAll(`[class*="${bylineClass}" i]`);
 			Z.debug(`Found ${byline.length} elements with '${bylineClass}' class (strict: ${isStrict})`);
 			for (let bylineElement of byline) {
-				if (!bylineElement.innerText.trim()) continue;
+				if (!bylineElement.innerText?.trim()) continue;
 				bylines.push(bylineElement);
 			}
 
