@@ -178,9 +178,7 @@ async function importItems({ references, doc, citaviVersion, rememberTags, itemI
 			item.tags = [];
 		}
 		if (rememberTags[item.itemID]) {
-			for (let tag of rememberTags[item.itemID]) {
-				item.tags.push(tag);
-			}
+			item.tags.push(...rememberTags[item.itemID]);
 		}
 
 		// For all corresponding knowledge items attach a note containing
@@ -211,9 +209,7 @@ async function importItems({ references, doc, citaviVersion, rememberTags, itemI
 				noteObject.tags = [];
 			}
 			if (rememberTags[noteObject.id]) {
-				for (let tag of rememberTags[noteObject.id]) {
-					noteObject.tags.append(tag);
-				}
+				noteObject.tags.push(...rememberTags[noteObject.id]);
 			}
 			if (noteObject.note != "") {
 				item.notes.push(noteObject);
