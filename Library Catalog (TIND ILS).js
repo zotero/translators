@@ -141,9 +141,8 @@ async function scrape(doc) {
 		item.libraryCatalog = text(doc, '#headerlogo')
 			|| attr(doc, 'meta[property="og:site_name"]', 'content');
 
-		// Url
-		let openGraphUrl = getOpenGraphUrl(doc);
-		if (openGraphUrl) item.url = openGraphUrl;
+		// URL
+		item.url = attr(doc, 'meta[property="og:url"]', 'content') || item.url;
 
 		// Attachments
 		if (fileInformation) {
@@ -214,20 +213,6 @@ function enrichItemWithAttachments(item, fileInformation) {
 			url: file.url,
 		});
 	}
-}
-
-/**
- * @param {Document} doc The page document
- * @returns {?string} The page url
- */
-function getOpenGraphUrl(doc) {
-	let openGraphUrlElement = doc.querySelector('meta[property="og:url"]');
-
-	if (openGraphUrlElement === null) {
-		return null;
-	}
-
-	return openGraphUrlElement.getAttribute("content");
 }
 
 /**
