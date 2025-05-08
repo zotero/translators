@@ -722,6 +722,9 @@ var testCases = [
 						"tag": "DISSOLUTION"
 					},
 					{
+						"tag": "Forces démocratiques de libération du Rwanda"
+					},
+					{
 						"tag": "HUMAN RIGHTS IN ARMED CONFLICTS"
 					},
 					{
@@ -732,6 +735,9 @@ var testCases = [
 					},
 					{
 						"tag": "MAPS"
+					},
+					{
+						"tag": "Mouvement du 23 mars (Democratic Republic of the Congo)"
 					},
 					{
 						"tag": "PEACEKEEPING OPERATIONS"
@@ -746,12 +752,18 @@ var testCases = [
 						"tag": "RULE OF LAW"
 					},
 					{
+						"tag": "RWANDA"
+					},
+					{
+						"tag": "STAFF SECURITY"
+					},
+					{
 						"tag": "UN Organization Stabilization Mission in the Democratic Republic of the Congo"
 					}
 				],
 				"notes": [
 					{
-						"note": "Includes UN map no. 4412 Rev. 59: MONUSCO March 2025 (Mar. 2025) Submitted pursuant to para. 47 of Security Council resolution 2765 (2024)); covers major developments since the previous report of 29 Nov. 2024"
+						"note": "Includes UN map no. 4412 Rev. 59: MONUSCO March 2025 (Mar. 2025) Submitted pursuant to para. 47 of Security Council resolution 2765 (2024); covers major developments since the previous report of 29 Nov. 2024"
 					}
 				],
 				"seeAlso": []
