@@ -242,10 +242,9 @@ function init(doc, url, callback, forceLoadRDF) {
 		Z.debug("Embedded Metadata: No meta tags found");
 	}
 
-	var hwType, hwTypeGuess, generatorType, statements = [];
+	var hwType, hwTypeGuess, generatorType, heuristicType, statements = [];
 
-	for (let i = 0; i < metaTags.length; i++) {
-		let metaTag = metaTags[i];
+	for (let metaTag of metaTags) {
 		// Two formats allowed:
 		// 	<meta name="..." content="..." />
 		//	<meta property="..." content="..." />
@@ -327,6 +326,11 @@ function init(doc, url, callback, forceLoadRDF) {
 		}
 	}
 
+	// WordPress indicators:
+	if (doc.getElementById("wp-block-library-css") || doc.getElementsByClassName("yoast-schema-graph").length) {
+		heuristicType = "blogPost";
+	}
+
 	if (statements.length || forceLoadRDF) {
 		// load RDF translator, so that we don't need to replicate import code
 		var translator = Zotero.loadTranslator("import");
@@ -343,7 +347,7 @@ function init(doc, url, callback, forceLoadRDF) {
 				rdf.Zotero.RDF.addStatement(statement[0], statement[1], statement[2], true);
 			}
 			var nodes = rdf.getNodes(true);
-			rdf.defaultUnknownType = hwTypeGuess || generatorType
+			rdf.defaultUnknownType = hwTypeGuess || generatorType || heuristicType
 				// if we have RDF data, then default to webpage
 				|| (nodes.length ? "webpage" : false);
 
