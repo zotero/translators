@@ -166,35 +166,30 @@ async function scrape(doc) {
  * @returns {?Promise<Array<Object>>} The file information object
  */
 async function getFileInformation(doc) {
-	let fileApiArgsElement = doc.getElementById("detailed-file-api-args");
-
-	if (fileApiArgsElement === null) {
-		return null;
-	}
-
 	let fileApiArgs;
 
 	try {
-		fileApiArgs = JSON.parse(fileApiArgsElement.innerText);
+		fileApiArgs = JSON.parse(text(doc, "#detailed-file-api-args"));
 	}
-	catch (error) {
+	catch (e) {
 		return null;
 	}
 
 	// eslint camelcase is disabled because the API requires snake case.
-	let urlParams = new URLSearchParams(Object.entries({
+	let urlParams = new URLSearchParams({
 		recid: fileApiArgs.recid,
 		file_types: fileApiArgs.file_types, // eslint-disable-line camelcase
 		hidden_types: fileApiArgs.hidden_types, // eslint-disable-line camelcase
 		ln: fileApiArgs.ln,
 		hr: fileApiArgs.hr,
 		hide_transcripts: fileApiArgs.hide_transcripts, // eslint-disable-line camelcase
-	}));
+	});
 
 	try {
-		return await ZU.requestJSON(`/api/v1/file?${urlParams}`);
+		return await requestJSON(`/api/v1/file?${urlParams}`);
 	}
-	catch (error) {
+	catch (e) {
+		Zotero.debug(e);
 		return null;
 	}
 }
