@@ -157,6 +157,10 @@ async function scrape(doc) {
 			item.date = tindDate.a;
 		}
 
+		if (item.abstractNote === 'No abstract') {
+			delete item.abstractNote;
+		}
+
 		item.complete();
 	}
 }
@@ -537,7 +541,6 @@ var testCases = [
 					}
 				],
 				"date": "1996",
-				"abstractNote": "No abstract",
 				"language": "eng",
 				"libraryCatalog": "University of Southern Indiana",
 				"shortTitle": "Let's talk",
