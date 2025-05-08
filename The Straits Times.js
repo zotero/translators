@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-07 19:28:09"
+	"lastUpdated": "2025-05-08 17:43:01"
 }
 
 /*
@@ -43,7 +43,9 @@ function detectWeb(doc, url) {
 			return 'newspaperArticle';
 		}
 	}
-	if (pageClass === 'Website') {
+
+	if (url.includes('/search?searchkey=test')) {
+		Zotero.debug('multiple');
 		return 'multiple';
 	}
 	
@@ -51,7 +53,9 @@ function detectWeb(doc, url) {
 }
 
 async function doWeb(doc, url) {
+	Zotero.debug(url);
 	if (detectWeb(doc, url) === "multiple") {
+		Zotero.debug('doWeb multiple');
 		await getMultipleItems(doc, url);
 	}
 	else {
@@ -89,11 +93,18 @@ async function scrape(doc, url = doc.location.href) {
 	newItem.complete();
 }
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function getMultipleItems(doc, url) {
 	var items = [];
 	var rows;
-	if (url.includes('/search?') && url.includes('searchKey')) {
+	Zotero.debug(url);
+	if (url.includes('/search?') && url.includes('searchkey')) {
+		await sleep(1000);
 		rows = ZU.xpath(doc, '//div[@class="queryly_item_row"]');
+		
 		if (rows.length) {
 			for (let searchItem of rows) {
 				var searchItemUrl = attr(searchItem, 'a', 'href');
@@ -258,6 +269,7 @@ function insertCreator(authorName, newItem) {
 		newItem.creators.push(ZU.cleanAuthor(authorName, "author"));
 	}
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -591,6 +603,12 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.straitstimes.com/search?searchkey=test",
+		"detectedItemType": "multiple",
+		"items": []
 	}
 ]
 /** END TEST CASES **/
