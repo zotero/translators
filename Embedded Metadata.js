@@ -745,13 +745,20 @@ function getAuthorFromByline(doc, newItem) {
 	var bylineClasses = ['byline', 'bylines', 'vcard', 'article-byline'];
 	Z.debug("Looking for authors in " + bylineClasses.join(', '));
 	var bylines = [], byline;
-	for (var i = 0; i < bylineClasses.length; i++) {
-		byline = doc.getElementsByClassName(bylineClasses[i]);
-		Z.debug("Found " + byline.length + " elements with '" + bylineClasses[i] + "' class");
-		for (var j = 0; j < byline.length; j++) {
-			if (!byline[j].innerText.trim()) continue;
+	for (let isStrict of [true, false]) {
+		for (let bylineClass of bylineClasses) {
+			byline = isStrict
+				? doc.getElementsByClassName(bylineClass)
+				: doc.querySelectorAll(`[class*="${bylineClass}" i]`);
+			Z.debug(`Found ${byline.length} elements with '${bylineClass}' class (strict: ${isStrict})`);
+			for (let bylineElement of byline) {
+				if (!bylineElement.innerText.trim()) continue;
+				bylines.push(bylineElement);
+			}
 
-			bylines.push(byline[j]);
+			if (isStrict && bylines.length) {
+				break;
+			}
 		}
 	}
 
