@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-31 02:26:52"
+	"lastUpdated": "2025-05-08 16:30:30"
 }
 
 /*
@@ -83,20 +83,25 @@ async function scrape(doc, url = doc.location.href) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.timesofisrael.com/a-global-anti-depressant-gaza-strip-gets-its-first-cat-cafe/",
+		"url": "https://www.timesofisrael.com/israel-shutters-unrwa-schools-in-east-jerusalem-in-line-with-ban-on-aid-agency/",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "A ‘global anti-depressant’: Gaza Strip gets its first cat cafe",
-				"creators": [],
-				"date": "2023-08-19",
+				"title": "Israel shutters UNRWA schools in East Jerusalem, in line with ban on aid agency",
+				"creators": [
+					{
+						"firstName": "Nurit",
+						"lastName": "Yohanan",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025-05-08",
 				"ISSN": "0040-7909",
-				"abstractNote": "Psychologist says Meow Cafe can be a source of therapy for Palestinians scarred by wars and other hardships, citing 'positive psychological impact' from interacting with animals",
+				"abstractNote": "Police close six schools serving 550 students in Shuafat camp and other neighborhoods; Palestinian Authority condemns 'violation of children's right to education'",
 				"language": "en-US",
 				"libraryCatalog": "www.timesofisrael.com",
 				"publicationTitle": "The Times of Israel",
-				"shortTitle": "A ‘global anti-depressant’",
-				"url": "https://www.timesofisrael.com/a-global-anti-depressant-gaza-strip-gets-its-first-cat-cafe/",
+				"url": "https://www.timesofisrael.com/israel-shutters-unrwa-schools-in-east-jerusalem-in-line-with-ban-on-aid-agency/",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -118,8 +123,8 @@ var testCases = [
 				"title": "In biggest exit in Israeli history, Google buys cyber unicorn Wiz for $32 billion",
 				"creators": [
 					{
-						"firstName": "Sharon Wrobel NEW! Get email alerts when this author publishes a new article You will receive email alerts from this author Manage alert preferences on your profile page You will no longer receive email alerts from this author Manage alert preferences on your profile",
-						"lastName": "page",
+						"firstName": "Sharon",
+						"lastName": "Wrobel",
 						"creatorType": "author"
 					}
 				],
