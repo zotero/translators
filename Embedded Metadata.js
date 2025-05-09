@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-08 17:20:56"
+	"lastUpdated": "2025-05-09 18:24:39"
 }
 
 /*
@@ -578,16 +578,24 @@ function processHighwireCreators(creatorNodes, role, doc) {
 			/* If there is only one author node and
 			we get nothing when splitting by semicolon, there are at least two
 			words on either side of a comma, and it doesn't appear to be a
-			two-word Spanish surname, we split by comma. */
+			Spanish surname, we split by comma. */
 			
 			let lang = getContentText(doc, 'citation_language');
-			let twoWordName = authorsByComma.length == 2
+			let spanishName = authorsByComma.length == 2
 				&& ['es', 'spa', 'Spanish', 'español'].includes(lang)
-				&& authorsByComma[0].split(' ').length == 2;
+				&& (
+					// If it's a Spanish-language item and the text before the comma
+					// has exactly two words, this is very probably a single Spanish name
+					authorsByComma[0].split(' ').length == 2
+					// If the text before the comma has more than two words, we can't be
+					// sure, but we'll take it if there's an accented character or a
+					// "de" particle (this is not great)
+					|| authorsByComma[0].split(' ').length > 2 && /[À-ú]|\b[Dd]e\b/u.test(authorsByComma[0])
+				);
 			if (authorsByComma.length > 1
 				&& authorsByComma[0].includes(" ")
 				&& authorsByComma[1].includes(" ")
-				&& !twoWordName) creators = authorsByComma;
+				&& !spanishName) creators = authorsByComma;
 		}
 		
 		for (let creator of creators) {
@@ -1856,6 +1864,37 @@ var testCases = [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://minerva.usc.gal/entities/publication/9a4fd001-4717-428f-96a5-44812f8f3805",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Contribución del análisis del líquido pleural al diagnóstico de los derrames pleurales",
+				"creators": [
+					{
+						"firstName": "María Esther",
+						"lastName": "San José Capilla",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016-05-13",
+				"abstractNote": "El derrame pleural es una complicación común en numerosas enfermedades, y el diagnóstico diferencial es frecuentemente difícil de obtener sin la utilización de técnicas invasivas, lo que se intenta evitar. Aunque hay una amplia variedad de pruebas de laboratorio, un porcentaje significativo de pacientes con derrame pleural permanecen sin diagnosticar, o el diagnóstico se basa exclusivamente en evidencias clínicas, como son la experiencia del clínico o la respuesta al tratamiento empírico; por lo que son necesarios estudiar nuevos parámetros que permitan un diagnóstico diferencial más preciso. El trabajo actual consiste en estudiar cómo podemos mejorar el diagnóstico de líquido pleural a partir de la toracocentesis diagnóstica y de una muestra de sangre periférica extraída en el mismo momento de la punción pleural. El punto inicial de la diferenciación de la patología pleural es la diferenciación trasudado/exudado, que se realiza tradicionalmente mediante los clásicos criterios de Light. No obstante, esta diferenciación sigue siendo objeto de controversia, por lo que estudiamos para dicho fin nuevos parámetros, como son las fracciones de Colesterol, la determinación de Triglicéridos o de N-terminal del propéptido natriurético cerebral. Una vez clasificado el derrame como exudado, los pasos siguientes incluyen la diferenciación de las distintas patologías que pueden estar implicadas en su desarrollo. Para ello, se utilizan los parámetros clásicos en líquido pleural y suero de Adenosina Desaminasa, Lactato Deshidrogenasa, pH, Glucosa, recuento total y diferencial de células nucleadas,…. . Después del despistaje habitual de las diferentes entidades, aún permanece un 5-10% de los derrames pleurales sin diagnosticar, por lo que intentamos estudiar nuevos enfoques, como son la determinación de citoquinas proinflamatorias para el estudio de derrames de causa infecciosa, así como el intento de diagnóstico de tuberculosis pleural mediante un estudio de regresión aplicando datos clínicos y de laboratorio para el diagnóstico de esta entidad en pacientes menores de 40 años, grupo de pacientes donde la incidencia de esta enfermedad es muy elevada. Asimismo, intentamos comprobar la utilidad de un método sencillo como es el recuento diferencial de las células nucleadas para clarificar las distintas patologías que acompañan al derrame pleural, y un estudio estadístico de rendimiento del análisis del líquido pleural, junto con los datos clínicos y radiográficos, como ayuda para el diagnóstico de esta patología, fundamentalmente orientado hacia el origen neoplásico del derrame pleural. Nuestra finalidad es facilitar el diagnóstico de las distintas patologías implicadas en la patogenia del derrame pleural, sin necesidad de tener que recurrir a procedimientos invasivos, como son la biopsia pleural, la videotoracoscopia,.., y evitar lo máximo posible las posibles complicaciones que conlleva un diagnóstico tardío de estos procesos.",
+				"language": "spa",
+				"libraryCatalog": "minerva.usc.gal",
+				"url": "http://hdl.handle.net/10347/14743",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
