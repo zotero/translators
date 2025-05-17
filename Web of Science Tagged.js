@@ -1,14 +1,18 @@
 {
 	"translatorID": "594ebe3c-90a0-4830-83bc-9502825a6810",
 	"label": "Web of Science Tagged",
-	"creator": "Michael Berkowitz, Avram Lyon, and contributors",
+	"creator": "Michael Berkowitz, Avram Lyon, jiaojiaodubai, and contributors",
 	"target": "txt",
-	"minVersion": "2.1",
+	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
+	"displayOptions": {
+		"exportCharset": "UTF-8",
+		"exportNotes": true
+	},
 	"inRepository": true,
-	"translatorType": 1,
-	"lastUpdated": "2025-03-06 20:14:30"
+	"translatorType": 3,
+	"lastUpdated": "2025-05-17 10:17:27"
 }
 
 /*
@@ -34,57 +38,154 @@
 	***** END LICENSE BLOCK *****
 */
 
-// Lookup tables
-var ITEM_TYPES = {
-	// PT values
-	J: "journalArticle",
-	S: "bookSection", // Not sure
-	P: "patent",
-	B: "book",
+/* References */
+// Export Records
+// https://webofscience.help.clarivate.com/en-us/Content/export-records.htm
+
+// Web of Science Core Collection: List of field tags in output
+// https://support.clarivate.com/ScientificandAcademicResearch/s/article/Web-of-Science-Core-Collection-List-of-field-tags-in-output?language=en_US
+
+const PUBLICATION_TYPE_MAP = {
+	B: 'book',
+	S: 'bookSection',
+	J: 'journalArticle',
+	P: 'patent'
+};
+
+// Web of Science Core Collection: Document Type Descriptions
+// https://support.clarivate.com/ScientificandAcademicResearch/s/article/Web-of-Science-Core-Collection-Document-Type-Descriptions?language=en_US
+const DOCUMENT_TYPE_MAP = {
 	// DT overrides; not including anything already covered by the above.
 	// TODO: Add more implementations for DT values as needed.
-	"PROCEEDINGS PAPER": "conferencePaper",
-	"DATA SET": "dataset",
+	Book: 'book',
+	'Book Chapter': 'bookSection',
+	'Proceedings Paper': 'conferencePaper',
+	Review: 'journalArticle'
 };
 
-var FIELD_MAP = {
-	AE: "assignee",
-	AB: "abstractNote",
-	AR: "pages", // article number
-	AW: "url",
-	BN: "ISBN",
-	BP: "pages", // start page
-	CE: "edition",
-	CL: "place", // conference location
-	CT: "conferenceName",
-	// NOTE: CY is conference date, not "issued" (published) date
-	DI: "DOI",
-	FN: "libraryCatalog", // almost always the database name
-	// XXX: what is "GT: Time"?
-	IO: "issuingAuthority",
-	IS: "issue",
-	JI: "journalAbbreviation",
-	LA: "language",
-	PA: "place",
-	PC: "country", // patent country
-	PD: "date",
-	PG: "numPages",
-	PI: "place", // publisher city
-	PN: "patentNumber",
-	PS: "pages",
-	PU: "publisher",
-	PV: "place", // place of publication
-	PY: "date", // publication year
-	UR: "url",
-	VL: "volume",
-	VN: "versionNumber", // NOTE: "VR" is the version of the export format
-	// Title fields,
-	SE: "seriesTitle",
-	SO: "publicationTitle",
-	TI: "title",
+
+// A Zotero field may correspond to multiple tags,
+// which are placed in array according to the priority order
+const IMPORT_FIELD_MAP = {
+	abstractNote: [
+		'AB',
+		'MA',
+		'TF',
+		'A2',
+		'MI',
+		'AK',
+		'X4',
+		'Y4',
+		'Z4'
+	],
+	accessDate: ['DA', 'EY'],
+	applicationNumber: ['OP'],
+	assignee: ['AE'],
+	conferenceName: ['CT'],
+	country: ['PC', 'OC'],
+	date: [
+		'PD',
+		'PY',
+		'CY'
+	],
+	issueDate: [
+		'PD',
+		'PY'
+	],
+	DOI: ['DI', 'D2'],
+	edition: ['CE'],
+	filingDate: ['DF'],
+	ISBN: ['BN'],
+	ISSN: [
+		'SN',
+		'EI'
+	],
+	issue: ['IS', 'SI'],
+	journalAbbreviation: ['JI', 'J9'],
+	language: ['LA', 'LS'],
+	number: ['AR'],
+	numPages: ['PG'],
+	// BP: begin page
+	// EP: end page
+	pages: ['PS'],
+	patentNumber: ['PN'],
+	place: [
+		'CL',
+		'PI',
+		'PA',
+		'PV'
+	],
+	proceedingsTitle: ['SO', 'Z3'],
+	publicationTitle: ['SO', 'Z3'],
+	publisher: ['PU'],
+	reference: ['CR'],
+	series: ['SE'],
+	title: ['TI', 'Y1'],
+	type: ['DY'],
+	url: [
+		'DL',
+		'UR',
+		'AW',
+		'UC'
+	],
+	version: ['VN'],
+	volume: ['VL'],
+	
 };
 
-// Translator detect/do functions
+const IMPORT_EXTRA_MAP = {
+	organizer: ['HO'],
+	'original-container-title': ['S1'],
+	'original-title': [
+		'X1',
+		'X2',
+		'Z1',
+		'FT'
+	],
+	status: ['SA'],
+	'Web of Science ID': ['UT'],
+};
+
+const ITEM_TAGS = [
+	'BD',
+	'DE',
+	'ID',
+	'IP',
+	'MC',
+	'MQ',
+	'OR',
+	'WC',
+	'Y5',
+	'Z5',
+	'X5',
+	'ZK'
+];
+
+const ITEM_NOTES = {
+	NT: 'Notes',
+	NO: 'Comments, Corrections, Erratum',
+	TN: 'Taxa Notes'
+};
+
+const IMPORT_CREATOR_MAP = {
+	author: [
+		'AF',
+		'AU',
+		'IV',
+		'GP'
+	],
+	bookAuthor: [
+		'BF',
+		'BA'
+	],
+	creator: ['AA'],
+	editor: [
+		'ED',
+		'BE'
+	],
+	inventor: ['AU'],
+	translator: ['TR']
+};
 
 function detectImport() {
 	// If we don't find item type (PT or DT) within first 10 non-empty lines,
@@ -92,416 +193,394 @@ function detectImport() {
 	let line;
 	let i = 0;
 	while ((line = Zotero.read()) !== false && i < 10) {
-		let lineData = splitLine(line);
-		if (lineData) {
-			i += 1;
-			if (["PT", "DT"].includes(lineData[0])) {
-				return true;
-			}
+		// It has been confirmed that these two tags do not conflict with Refworks Tagged Format
+		if (/PT|DT/.test(line)) {
+			return true;
 		}
+		i++;
 	}
 	return false;
 }
 
 function doImport() {
-	let map = new ItemMap();
+	let line, tag, content;
+	let record = {};
+	while ((line = Zotero.read()) !== false) {
+		line = line.replace(/\uFEFF/g, '');
+		if (line == '') continue;
 
-	let line;
-	while (!map.terminate && ((line = Z.read()) !== false)) {
-		map.scanLine(line);
+		// End of record
+		if (line == 'ER') {
+			saveRecord(record);
+			// Reset to prepare for the next record that may exist
+			record = {};
+		}
+		// End of file
+		else if (line == 'EF') {
+			break;
+		}
+		// Regular Tag
+		else if (/^[A-Z][A-Z1-9] .*$/.test(line)) {
+			tag = line.slice(0, 2);
+			content = line.slice(3).trim();
+			if (Object.values(IMPORT_CREATOR_MAP).flat().includes(tag)) {
+				record[tag] = [content];
+			}
+			else {
+				record[tag] = content;
+			}
+		}
+		// Line continuation
+		else if (tag) {
+			content = line.trim();
+			if (Object.values(IMPORT_CREATOR_MAP).flat().includes(tag)) {
+				record[tag].push(content);
+			}
+			else {
+				record[tag] += ` ${content}`;
+			}
+		}
 	}
-	// Try saving any leftover fields as an item; this can happen when the last
-	// record lacks ER or EF. In that case, we shouldn't throw away the data
-	// simply because the file didn't properly end.
-	map.save();
 	return false;
 }
 
-// Utilities
+function saveRecord(record) {
+	const itemType = DOCUMENT_TYPE_MAP[record.DT] || PUBLICATION_TYPE_MAP[record.PT];
+	if (!itemType) {
+		Z.debug(`Unknow item type, PT: ${record.PT}, DT: ${record.DT}`);
+		return;
+	}
+	const item = new Z.Item(itemType);
+
+	/* Creators */
+	for (const [creatorType, tags] of Object.entries(IMPORT_CREATOR_MAP)) {
+		const tag = tags.find(tag => tag in record);
+		if (tag && ZU.getCreatorsForType(itemType).includes(creatorType)) {
+			record[tag].forEach((name) => {
+				let nameWithComma = name.replace(/\(.*\)/g, '');
+				// as "LAST F", rather than "Last, F"
+				if (!nameWithComma.includes(', ')) {
+					// replace first space
+					nameWithComma = nameWithComma.replace(' ', ', ');
+				}
+				item.creators.push(ZU.cleanAuthor(nameWithComma, creatorType, true));
+			});
+		}
+	}
+	
+	/* Notes */
+	for (const [tag, title] of Object.entries(ITEM_NOTES)) {
+		if (tag in record) {
+			item.notes.push(`<h1>${title}</h1>\n${record[tag]}`);
+		}
+	}
+
+	/* Tags */
+	for (const tag of ITEM_TAGS) {
+		if (tag in record) {
+			record[tag].split('; ').forEach(itemTag => item.tags.push(itemTag));
+		}
+	}
+
+	/* Other valid fields */
+	for (const [field, tags] of Object.entries(IMPORT_FIELD_MAP)) {
+		const tag = tags.find(tag => tag in record);
+		if (!tag) continue;
+
+		let value = record[tag];
+		if (['title', 'publicationTitle', 'proceedingsTitle'].includes(field)) {
+			value = capitalizetitle(value);
+		}
+		else if (field == 'date') {
+			if (tag == 'PD') {
+				// If the year is missing, add it
+				if (record.PY && !record.PD.includes(record.PY)) {
+					value = `${record.PD} ${record.PY}`;
+				}
+				// Season cannot be formatted as yyyy-MM-dd format
+				if (!['SPR', 'SUM', 'FAL', 'WIN'].some(season => value.includes(season))) {
+					value = ZU.strToISO(value);
+				}
+			}
+		}
+		else if (field == 'filingDate') {
+			value = ZU.strToISO(value);
+		}
+		else if (field == 'place') {
+			value = ZU.capitalizeTitle(value, true);
+		}
+		else if (field == 'ISSN') {
+			value = tags.map(key => record[key]).filter(Boolean).join(', ');
+		}
+		else if (['assignee', 'conferenceName', 'publisher'].includes(field)) {
+			value = capitalizetitle(value, true);
+		}
+		else if (['volume', 'issue', 'pages'].includes(field)) {
+			value = value.replace(/\b0*(\d+)/g, '$1');
+		}
+		else if (field == 'language') {
+			value = {
+				English: 'en'
+			}[value] || value;
+		}
+
+		if (ZU.fieldIsValidForType(field, itemType)) {
+			item[field] = value;
+		}
+		// Some general fields can be considered for extra
+		else if (['DOI', 'numPages', 'publisher'].includes(field)) {
+			item.setExtra(field, value);
+		}
+	}
+
+	/* Extra fields */
+	for (const [field, tags] of Object.entries(IMPORT_EXTRA_MAP)) {
+		for (const tag of tags) {
+			if (tag in record) {
+				item.setExtra(field, record[tag]);
+				break;
+			}
+		}
+	}
+
+	/* Corrections */
+	if (
+		ZU.fieldIsValidForType('pages', itemType)
+		&& !item.pages
+		&& 'BP' in record
+	) {
+		item.pages = `${record.BP}${record.EP ? '-' : ''}${record.EP || ''}`;
+	}
+	if (itemType == 'conferencePaper') {
+		for (const tag of IMPORT_FIELD_MAP.place) {
+			if (tag != 'CL' && tag in record) {
+				item.setExtra('pubisher-palce', capitalizetitle(record[tag], true));
+				break;
+			}
+		}
+	}
+
+	item.complete();
+}
 
 /**
- * Utility for mapping tagged data to item fields
- *
- * @constructor
+ * like ZU.capitalizeTitle but mindful of some words that are often encountered
+ * in conference or publisher names. This is most useful for cleaning all-cap
+ * fields that are not titles.
  */
-function ItemMap() {
-	// Hold the property => value map for an item.
-	this.records = new Map();
-	// Cursor to current property
-	this.currentKey = null;
-	this.terminate = false;
+function capitalizetitle(string, force) {
+	const allCaps = ['ACM', 'AIP', 'BMC', 'BMJ', 'CRC', 'IEEE', 'JAMA', 'MDPI', 'SAGE', 'USA'];
+	const wordForms = { IOP: 'IoP', PEERJ: 'PeerJ', PLOS: 'PLoS' };
+	allCaps.forEach(word => wordForms[word] = word);
+
+	let title = ZU.capitalizeTitle(ZU.trimInternal(string), force);
+	for (const [word, form] of Object.entries(wordForms)) {
+		title = title.replace(new RegExp(`\\b${word}\\b`, 'gi'), form);
+	}
+	return title;
 }
 
-ItemMap.prototype = {
-
-	/**
-	 * Validate a line and push it into the item map record if it's valid data
-	 * line, or do an action if it is one of the special tags (ER and EF).
-	 *
-	 * This function is strictly concerned with the form of the lines and
-	 * converting the line data to key-value pairs. It does not apply any
-	 * semantics to the data.
-	 *
-	 * @param {string} line
-	 * @throws {Error} When line fails validation
-	 */
-	scanLine: function (line) {
-		let lineRecord = splitLine(line);
-		if (!lineRecord) {
-			return;
-		}
-		let [head, content] = lineRecord;
-
-		if (head === "  ") { // two spaces for line continuation
-			if (!this.currentKey) {
-				throw new Error(`Dangling line continuation; the rest of line is ${content}`);
-			}
-
-			let currentValueArray = this.records.get(this.currentKey);
-
-			if (!Array.isArray(currentValueArray)) {
-				// Continued line can be traced to a tag but the tag's field is
-				// not initialized. This should not happen and is an internal
-				// error.
-				throw new Error(`Unexpected uninitialized field at ${this.currentKey} found while handling line continuation`);
-			}
-
-			// Add the continued line, if non-empty, into the container for the
-			// field value
-			if (content) {
-				currentValueArray.push(content);
-			}
-		}
-		else { // Not line continuation; a new tag begins.
-			if (head === "ER") {
-				// End of Record; Save this item and reset for any subsequent
-				// items.
-				this.save();
-				this.reset();
-				return;
-			}
-
-			if (head === "EF") {
-				// End of File; Simply signal the end of processing.
-				this.terminate = true;
-				return;
-			}
-
-			// Double check if there is duplicate tag
-			if (this.records.has(head)) {
-				// TODO: should it throw?
-				Z.debug(`Warning: duplicate tag ${head}; new input field value is ${content}; old value was ${this.records.get(head).toString()}`);
-			}
-
-			// Initialize the tag field with a new array to accommodate
-			// continued lines
-			this.records.set(head, content ? [content] : []);
-			this.currentKey = head;
-		}
+const EXPORT_FIELD_MAP = {
+	abstractNote: 'AB',
+	accessDate: 'DA',
+	applicationNumber: 'OP',
+	assignee: 'AE',
+	bookTitle: 'SO',
+	conferenceName: 'CT',
+	country: 'PC',
+	date: 'PD',
+	DOI: {
+		book: 'D2',
+		default: 'DI'
 	},
-
-	/**
-	 * Create a new Zotero item, populate it using this item map after
-	 * normalization, and complete the Zotero item.
-	 */
-	save: function () {
-		this.normalize();
-
-		// Pop the type string from the normalized record
-		let type = this.records.get("DT");
-		this.records.delete("DT");
-
-		let item = new Z.Item(type);
-		let extra = []; // temporary array for holding lines in the extra
-		let tagMissed = 0; // number of tags unhandled
-
-		for (let [wosTag, tagValueArray] of this.records) {
-			// The array content concatenated into a single string
-			let tagValueString = ZU.trimInternal(tagValueArray.join(" "));
-
-			switch (wosTag) {
-				// Main authors. After normalization, AF and AU cannot both
-				// exist.
-				case "AF":
-				case "AU":
-					addCreator(item, tagValueArray,
-						type === "patent" ? "inventor" : "author");
-					break;
-				// Other types of creators
-				case "BE": // Book editor
-				case "ED": // Editors
-					addCreator(item, tagValueArray, "editor");
-					break;
-				case "TR":
-					addCreator(item, tagValueArray, "translator");
-					break;
-				case "AA": // Additional Authors
-					addCreator(item, tagValueArray, "contributor");
-					break;
-
-				// Keywords, ontology terms, etc. as item tags
-				case "BD": // broad terms, like DE below
-				case "DE": // author-defined keywords
-				case "ID": // keywords
-				case "IP": // patent category
-				case "MC": // Major Concepts or Derwent Manual Code(s)
-				case "MQ": // methods, supplies
-				case "OR": // organism descriptors
-					item.tags.push(...tagValueString.split("; "));
-					break;
-
-				// Additional information that becomes lines in the extra field
-				case "NO":
-					extra.push(`Comments, Corrections, Erratum: ${tagValueString}`);
-					break;
-				case "NT":
-					extra.push(`Notes: ${tagValueString}`);
-					break;
-				case "UT":
-					extra.push(`Web of Science ID: ${tagValueString}`);
-					break;
-
-				// ISSN
-				case "SN":
-					item.ISSN = tagValueArray.join(", ") || undefined;
-					break;
-
-				// Title fields (often in all-caps) are turned into Title Case
-				// if the pref "capitalizeTitles" is true (default false)
-				case "SE":
-				case "SO":
-				case "TI":
-					tagValueString = selectiveTitleCase(tagValueString);
-					item[FIELD_MAP[wosTag]] = tagValueString;
-					break;
-				// The following non-title fields are converted to Title Case
-				case "AE": // patent assignee
-				case "CT": // conference name
-				case "PU": // publisher
-					tagValueString = selectiveTitleCase(tagValueString, true/* force */);
-					/* NOTE: FALL THROUGH */
-				default:
-				{
-					let itemField = FIELD_MAP[wosTag];
-					if (!itemField) { // unknown tag
-						Z.debug(`Unhandled tag ${wosTag} => ${tagValueArray}`);
-						tagMissed += 1;
-					}
-					else {
-						item[itemField] = tagValueString;
-					}
-				}
-			} // bottom of the switch statement
-		}
-
-		if (tagMissed === this.records.size) { // item is not populated
-			return;
-		}
-
-		if (extra.length) {
-			item.extra = extra.join("\n");
-		}
-
-		item.complete();
+	edition: 'CE',
+	filingDate: 'DF',
+	ISBN: 'BN',
+	ISSN: 'SN',
+	issue: 'IS',
+	issueDate: 'PD',
+	journalAbbreviation: 'J9',
+	language: 'LA',
+	numPages: 'PG',
+	number: 'AR',
+	pages: 'PS',
+	patentNumber: 'PN',
+	place: {
+		book: 'PI',
+		bookSection: 'PI',
+		conferencePaper: 'CL',
+		patent: 'C1'
 	},
-
-	/**
-	 * Reset the internal state of the item map
-	 */
-	reset: function () {
-		this.records.clear();
-		this.currentKey = null;
-		this.terminate = false;
-	},
-
-	/**
-	 * Normalize the content of internal records. This must be called only
-	 * after all the fields of an item is populated.
-	 */
-	normalize: function () {
-		let r = this.records; // for ergonomics
-
-		// Normalize type. Turn the field value into a Zotero item-type string
-		// for convenience because it is always used in a special way, unlike
-		// other tags. DT takes precedence over PT.
-		// NOTE: After we identify the Zotero type, DT is set and PT deleted.
-		let wosType = r.get("DT"); // If DT present, begin with it
-		let zoteroType = wosToZoteroType(wosType, "DT");
-		if (!zoteroType) {
-			wosType = r.get("PT"); // Try PT next if DT not useable
-			zoteroType = wosToZoteroType(wosType, "PT");
-		}
-		if (!zoteroType) {
-			Z.debug("Warning: No type found for item; falling back to journal article");
-			zoteroType = "journalArticle";
-		}
-		// Delete PT and set DT to Zotero type
-		r.delete("PT");
-		r.set("DT", zoteroType);
-
-		// Authors. Use AF in preference to AU.
-		if (r.has("AF") && r.has("AU")) {
-			r.delete("AU");
-		}
-
-		// Normalize pages. If page range present, use it.
-		if (r.has("PS")) {
-			r.delete("BP"); // begin page
-			r.delete("EP"); // end page
-		}
-		else { // no page range
-			let begin = r.get("BP");
-			let end = r.get("EP");
-			// If BP exists, try construct a page range like "begin-end" if EP
-			// exists, or without the "-end" suffix if EP is missing.
-			if (begin) {
-				let suffix = (end && end[0]) ? `-${end[0]}` : "";
-				r.set("PS", [`${begin[0]}${suffix}`]);
-				r.delete("BP");
-				r.delete("EP");
-			}
-		}
-
-		// Most electronic journals use article number (AR), but if both
-		// article number and pages present, ignore article number.
-		if (r.has("AR") && (r.has("PS") || r.has("BP"))) {
-			r.delete("AR");
-		}
-
-		// Normalize dates. PY refers to the year, and PD is the more detailed
-		// date, like month-day ("JAN 1"), month ("JAN"), season ("SPR"),
-		// possibly with redundant year.
-		if (r.has("PY")) { // year
-			if (!r.has("PD")) { // but without PD
-				Z.debug(`Using PY ${r.get("PY")} verbatim as date`);
-				r.set("PD", r.get("PY"));
-			}
-			else {
-				let year = r.get("PY")[0];
-				let pd = r.get("PD")[0];
-				if (!pd.includes(year)) { // PD doesn't have redundant year
-					Z.debug(`Adding PY ${year} to PD ${pd}`);
-					pd += ` ${year}`;
-					r.set("PD", [pd]);
-				}
-			}
-			// We have put whatever date details we have into PD, and PY is now
-			// redundant
-			r.delete("PY");
-		}
-
-		// Publisher address; don't use full address if PI (city) is available
-		if (r.has("PI")) {
-			let city = r.get("PI")[0];
-			r.set("PI", [ZU.capitalizeTitle(city, true/* force */)]);
-			r.delete("PA");
-		}
-
-		// ISSN; consolidate EI (eISSN) into SN
-		let issn = [...(r.get("SN") || []), ...(r.get("EI") || [])]
-			.filter(Boolean);
-		if (issn.length) {
-			r.set("SN", issn);
-			r.delete("EI");
-		}
-	},
+	proceedingsTitle: 'SO',
+	publicationTitle: 'SO',
+	publisher: 'PU',
+	series: 'SE',
+	seriesTitle: 'SE',
+	title: 'TI',
+	type: 'DY',
+	url: 'UR',
+	version: 'VN',
+	volume: 'VL'
 };
 
-// split line into an array of [tag, tag value] (the latter optional).
-function splitLine(line) {
-	// First trim line end and strip the line of BOM (U+FEFF) if any, as
-	// show in a test case
-	// TODO: Use trimEnd() once Z6 support is dropped
-	line = line.replace(/\s*$/, '');
-	line = line.replace(/\uFEFF/g, "");
+const EXPORT_CREATOR_MAP = {
+	author: 'AU',
+	bookAuthor: 'BA',
+	creator: 'AA',
+	editor: {
+		book: 'BE',
+		bookSection: 'BE',
+		default: 'ED'
+	},
+	inventor: 'AU',
+	translator: 'TR'
+};
 
-	// skip empty line
-	if (!line.length) {
-		return null;
-	}
-
-	// Split line into tag and "content" that comes after the tag.
-	// NOTE: When the file doesn't use explicit line-continuation (three
-	// spaces), there's ambiguity when the line meant to be continued data
-	// happens to match the pattern of a tag-value line.
-	let m = line.match(/^( {2}|[A-Z][A-Z0-9])( .+)?$/);
-	if (!m) {
-		// Z.debug(`Possible continued-line without explicit line continuation: ${line.slice(0, 5)}...`);
-		return ["  "/* two spaces */, line];
-	}
-
-	return [m[1]/* tag */, m[2] && m[2].trim()/* tag content, or undefined */];
-}
-
-// Convenience functions
-
-function addCreator(item, authorArray, authorType) {
-	for (let author of authorArray) {
-		item.creators.push(stringToCreator(author, authorType));
-	}
-}
-
-function wosToZoteroType(wosType, debugTag) {
-	let zoteroType;
-	if (wosType) {
-		// case-normalized WoS type string
-		let wosTypeNormalized = wosType[0].toUpperCase();
-
-		if (ITEM_TYPES[wosTypeNormalized]) { // value is understood
-			Z.debug(`Using ${debugTag} ${wosType} for item type`);
-			zoteroType = ITEM_TYPES[wosTypeNormalized];
+function doExport() {
+	let lines = [];
+	function writeLine(tag, content) {
+		if (tag && content) {
+			lines.push(`${tag} ${content}`);
 		}
-		else {
-			Z.debug(`Ignoring unimplemented ${debugTag} value ${wosType}`);
+		else if (tag && content === undefined) {
+			lines.push(tag);
 		}
 	}
-	return zoteroType;
+	let item;
+	while ((item = Zotero.nextItem())) {
+		lines = [];
+
+		/* Publication type */
+		for (const key in PUBLICATION_TYPE_MAP) {
+			if (PUBLICATION_TYPE_MAP[key] == item.itemType) {
+				writeLine('PT', key);
+				break;
+			}
+		}
+		if (!lines.length) {
+			Z.debug(`Unsupported item type: ${item.itemType}`);
+			continue;
+		}
+
+		/* Document type */
+		writeLine('DT', {
+			book: 'Book',
+			bookSection: 'Book Chapter',
+			conferencePaper: 'Proceedings Paper',
+			journalArticle: 'Article',
+			patent: 'Patent'
+		}[item.itemType]);
+
+		/* Creators */
+		for (const creatorType in EXPORT_CREATOR_MAP) {
+			let tag = EXPORT_CREATOR_MAP[creatorType];
+			const creators = item.creators.filter(creator => creator.creatorType == creatorType);
+			if (!creators.length) continue;
+			if (typeof tag == 'object') {
+				tag = tag[item.itemType] || tag.default;
+			}
+			creators.forEach((creator, index) => {
+				const name = creator.firstName
+					? `${creator.lastName}, ${creator.firstName}`
+					: creator.lastName || creator.name;
+				writeLine(index == 0 ? tag : '  ', name);
+			});
+		}
+
+		/* Other valid fields */
+		for (const field in EXPORT_FIELD_MAP) {
+			let tag = EXPORT_FIELD_MAP[field];
+			let value;
+			if (ZU.fieldIsValidForType(field, item.itemType) && (value = item[field])) {
+				if (typeof tag == 'object') {
+					tag = tag[item.itemType] || tag.default;
+				}
+				if (['date', 'filingDate', 'issueDate'].includes(field)) {
+					const yearMatch = value.match(/\d{4}/);
+					if (yearMatch && ['date', 'issueDate'].includes(field)) {
+						writeLine('PY', yearMatch[0]);
+					}
+					writeLine(tag, isoToWosDate(value));
+				}
+				else {
+					writeLine(tag, value);
+				}
+			}
+		}
+		if (item.pages) {
+			if (item.pages.includes('-')) {
+				const [start, end] = item.pages.split('-');
+				writeLine('BP', start);
+				writeLine('EP', end);
+			}
+			else {
+				writeLine('BP', item.pages);
+			}
+		}
+
+		/* Tags */
+		writeLine('ID', item.tags.map(tag => tag.tag).join('; '));
+
+		/* Notes */
+		if (Zotero.getOption('exportNotes')) {
+			item.notes.forEach((note) => {
+				writeLine('NT', note);
+			});
+		}
+
+		/* Further corrections */
+		switch (item.itemType) {
+			case 'book':
+			case 'bookSection':
+				writeLine('D2', getExtra(item, 'DOI'));
+				break;
+			case 'conferencePaper':
+				writeLine('HO', getExtra(item, 'origanizer'));
+				writeLine('PI', getExtra(item, 'publisher-place'));
+				break;
+			case 'journalArticle':
+				writeLine('AR', getExtra(item, 'number'));
+				writeLine('X1', getExtra(item, 'original-title'));
+				writeLine('S1', getExtra(item, 'original-container-title'));
+				break;
+		}
+		writeLine('UT', getExtra(item, 'Web of Science ID'));
+		writeLine('ER');
+		Zotero.write(`${lines.join('\n')}\n\n`);
+	}
+	Zotero.write('EF');
 }
 
-function stringToCreator(author, type) {
-	// Strip any parenthesized text
-	author = author.replace(/\(.*\)/g, "");
-	if (!author.includes(",")) { // as "LAST F", rather than "Last, F"
-		author = author.replace(" ", ", "); // replace first space
-	}
-	return ZU.cleanAuthor(author, type, true/* useComma */);
-}
-
-// like ZU.capitalizeTitle but mindful of some words that are often encountered
-// in conference or publisher names. This is most useful for cleaning all-cap
-// fields that are not titles.
-function selectiveTitleCase(string, force) {
-	let allCaps = ["ACM", "AIP", "BMC", "BMJ", "CRC"/* CRC Press */, "IEEE", "JAMA", "MDPI", "SAGE", "USA"];
-	let wordForms = { IOP: "IoP", PEERJ: "PeerJ", PLOS: "PLoS" };
-	for (let word of allCaps) {
-		wordForms[word] = word;
-	}
-
-	let cleanInput = ZU.trimInternal(string);
-	let cleanInputArray = cleanInput.split(" ");
-
-	let arrayLocations = new Map();
-
-	for (let [word, form] of Object.entries(wordForms)) {
-		for (let index of indexOfAll(cleanInputArray, word)) {
-			arrayLocations.set(index, form);
+function getExtra(item, field) {
+	const extra = item.extra;
+	if (extra) {
+		for (const line of extra.split('\n')) {
+			const match = line.match(/^([^:]+): (.*)$/);
+			if (match && match[1] && match[2]) {
+				// Expected field pattern: /\S+([_ -].+)*/, /\S*([^A-Z][A-Z])*/
+				const kebabField = match[1]
+					.replace(/[_ ]/g, '-')
+					.replace(/([^A-Z-])([A-Z])/g, (_, m1, m2) => `${m1}-${m2}`)
+					.toLowerCase();
+				if (field == kebabField) {
+					return match[2];
+				}
+			}
 		}
 	}
-
-	let outputArray = ZU.capitalizeTitle(cleanInput, force).split(" ");
-
-	for (let [index, form] of arrayLocations.entries()) {
-		outputArray[index] = form;
-	}
-	return outputArray.join(" ");
+	return '';
 }
 
-// Search array for searchElement. Returns an array of indices where
-// searchElement appears, or empty array if searchElement is missing.
-function indexOfAll(array, searchElement) {
-	return array
-		.map((elem, index) => (elem === searchElement ? index : null))
-		.filter(x => x !== null);
+function isoToWosDate(date) {
+	if (!date) return '';
+	const monthAbbrs = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+	if (/\d{4}-\d{1,2}(-\d{1,2})?/.test(date)) {
+		const [year, month, day] = date.split('-');
+		if (month) {
+			return `${monthAbbrs[parseInt(month) - 1]}${day ? ` ${day.replace(/^0/, '')}` : ''} ${year}`;
+		}
+	}
+	return date;
 }
 
 /** BEGIN TEST CASES **/
@@ -535,13 +614,12 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "FEB 2011",
+				"date": "2011-02",
 				"DOI": "10.1128/AEM.02132-10",
 				"ISSN": "0099-2240",
 				"abstractNote": "Malic enzyme catalyzes the reversible oxidative decarboxylation of malate to pyruvate and CO(2). The Saccharomyces cerevisiae MAE1 gene encodes a mitochondrial malic enzyme whose proposed physiological roles are related to the oxidative, malate-decarboxylating reaction. Hitherto, the inability of pyruvate carboxylase-negative (Pyc(-)) S. cerevisiae strains to grow on glucose suggested that Mae1p cannot act as a pyruvate-carboxylating, anaplerotic enzyme. In this study, relocation of malic enzyme to the cytosol and creation of thermodynamically favorable conditions for pyruvate carboxylation by metabolic engineering, process design, and adaptive evolution, enabled malic enzyme to act as the sole anaplerotic enzyme in S. cerevisiae. The Escherichia coli NADH-dependent sfcA malic enzyme was expressed in a Pyc(-) S. cerevisiae background. When PDC2, a transcriptional regulator of pyruvate decarboxylase genes, was deleted to increase intracellular pyruvate levels and cells were grown under a CO(2) atmosphere to favor carboxylation, adaptive evolution yielded a strain that grew on glucose (specific growth rate, 0.06 +/- 0.01 h(-1)). Growth of the evolved strain was enabled by a single point mutation (Asp336Gly) that switched the cofactor preference of E. coli malic enzyme from NADH to NADPH. Consistently, cytosolic relocalization of the native Mae1p, which can use both NADH and NADPH, in a pyc1,2 Delta pdc2 Delta strain grown under a CO(2) atmosphere, also enabled slow-growth on glucose. Although growth rates of these strains are still low, the higher ATP efficiency of carboxylation via malic enzyme, compared to the pyruvate carboxylase pathway, may contribute to metabolic engineering of S. cerevisiae for anaerobic, high-yield C(4)-dicarboxylic acid production.",
 				"extra": "Web of Science ID: WOS:000286597100004",
 				"issue": "3",
-				"libraryCatalog": "Thomson Reuters Web of Knowledge",
 				"pages": "732-738",
 				"publicationTitle": "APPLIED AND ENVIRONMENTAL MICROBIOLOGY",
 				"volume": "77",
@@ -580,7 +658,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "AUG 2010",
+				"date": "2010-08",
 				"DOI": "10.1128/AEM.01077-10",
 				"ISSN": "0099-2240",
 				"abstractNote": "Pyruvate carboxylase is the sole anaplerotic enzyme in glucose-grown cultures of wild-type Saccharomyces cerevisiae. Pyruvate carboxylase-negative (Pyc(-)) S. cerevisiae strains cannot grow on glucose unless media are supplemented with C(4) compounds, such as aspartic acid. In several succinate-producing prokaryotes, phosphoenolpyruvate carboxykinase (PEPCK) fulfills this anaplerotic role. However, the S. cerevisiae PEPCK encoded by PCK1 is repressed by glucose and is considered to have a purely decarboxylating and gluconeogenic function. This study investigates whether and under which conditions PEPCK can replace the anaplerotic function of pyruvate carboxylase in S. cerevisiae. Pyc(-) S. cerevisiae strains constitutively overexpressing the PEPCK either from S. cerevisiae or from Actinobacillus succinogenes did not grow on glucose as the sole carbon source. However, evolutionary engineering yielded mutants able to grow on glucose as the sole carbon source at a maximum specific growth rate of ca. 0.14 h(-1), one-half that of the (pyruvate carboxylase-positive) reference strain grown under the same conditions. Growth was dependent on high carbon dioxide concentrations, indicating that the reaction catalyzed by PEPCK operates near thermodynamic equilibrium. Analysis and reverse engineering of two independently evolved strains showed that single point mutations in pyruvate kinase, which competes with PEPCK for phosphoenolpyruvate, were sufficient to enable the use of PEPCK as the sole anaplerotic enzyme. The PEPCK reaction produces one ATP per carboxylation event, whereas the original route through pyruvate kinase and pyruvate carboxylase is ATP neutral. This increased ATP yield may prove crucial for engineering of efficient and low-cost anaerobic production of C(4) dicarboxylic acids in S. cerevisiae.",
@@ -624,7 +702,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "FEB 2010",
+				"date": "2010-02",
 				"DOI": "10.1128/AEM.02396-09",
 				"ISSN": "0099-2240",
 				"abstractNote": "A recent effort to improve malic acid production by Saccharomyces cerevisiae by means of metabolic engineering resulted in a strain that produced up to 59 g liter(-1) of malate at a yield of 0.42 mol (mol glucose)(-1) in calcium carbonate-buffered shake flask cultures. With shake flasks, process parameters that are important for scaling up this process cannot be controlled independently. In this study, growth and product formation by the engineered strain were studied in bioreactors in order to separately analyze the effects of pH, calcium, and carbon dioxide and oxygen availability. A near-neutral pH, which in shake flasks was achieved by adding CaCO(3), was required for efficient C(4) dicarboxylic acid production. Increased calcium concentrations, a side effect of CaCO(3) dissolution, had a small positive effect on malate formation. Carbon dioxide enrichment of the sparging gas (up to 15% [vol/vol]) improved production of both malate and succinate. At higher concentrations, succinate titers further increased, reaching 0.29 mol (mol glucose)(-1), whereas malate formation strongly decreased. Although fully aerobic conditions could be achieved, it was found that moderate oxygen limitation benefitted malate production. In conclusion, malic acid production with the engineered S. cerevisiae strain could be successfully transferred from shake flasks to 1-liter batch bioreactors by simultaneous optimization of four process parameters (pH and concentrations of CO(2), calcium, and O(2)). Under optimized conditions, a malate yield of 0.48 +/- 0.01 mol (mol glucose)(-1) was obtained in bioreactors, a 19% increase over yields in shake flask experiments.",
@@ -663,7 +741,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "DEC 2009",
+				"date": "2009-12",
 				"DOI": "10.1111/j.1567-1364.2009.00537.x",
 				"ISSN": "1567-1356",
 				"abstractNote": "To meet the demands of future generations for chemicals and energy and to reduce the environmental footprint of the chemical industry, alternatives for petrochemistry are required. Microbial conversion of renewable feedstocks has a huge potential for cleaner, sustainable industrial production of fuels and chemicals. Microbial production of organic acids is a promising approach for production of chemical building blocks that can replace their petrochemically derived equivalents. Although Saccharomyces cerevisiae does not naturally produce organic acids in large quantities, its robustness, pH tolerance, simple nutrient requirements and long history as an industrial workhorse make it an excellent candidate biocatalyst for such processes. Genetic engineering, along with evolution and selection, has been successfully used to divert carbon from ethanol, the natural endproduct of S. cerevisiae, to pyruvate. Further engineering, which included expression of heterologous enzymes and transporters, yielded strains capable of producing lactate and malate from pyruvate. Besides these metabolic engineering strategies, this review discusses the impact of transport and energetics as well as the tolerance towards these organic acids. In addition to recent progress in engineering S. cerevisiae for organic acid production, the key limitations and challenges are discussed in the context of sustainable industrial production of organic acids from renewable feedstocks.",
@@ -732,7 +810,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "MAY 2008",
+				"date": "2008-05",
 				"DOI": "10.1128/AEM.02591-07",
 				"ISSN": "0099-2240",
 				"abstractNote": "Malic acid is a potential biomass-derivable \"building block\" for chemical synthesis. Since wild-type Saccharomyces cerevisiae strains produce only low levels of malate, metabolic engineering is required to achieve efficient malate production with this yeast. A promising pathway for malate production from glucose proceeds via carboxylation of pyruvate, followed by reduction of oxaloacetate to malate. This redox- and ATP-neutral, CO2-fixing pathway has a theoretical maximum yield of 2 mol malate (mol glucose)(-1). A previously engineered glucose-tolerant, C-2-independent pyruvate decarboxylase-negative S. cerevisiae strain was used as the platform to evaluate the impact of individual and combined introduction of three genetic modifications: (i) overexpression of the native pyruvate carboxylase encoded by PYC2, (ii) high-level expression of an allele of the MDH3 gene, of which the encoded malate dehydrogenase was retargeted to the cytosol by deletion of the C-terminal peroxisomal targeting sequence, and (iii) functional expression of the Schizosaccharomyces pombe malate transporter gene SpMAE1. While single or double modifications improved malate production, the highest malate yields and titers were obtained with the simultaneous introduction of all three modifications. In glucose-grown batch cultures, the resulting engineered strain produced malate at titers of up to 59 g liter(-1) at a malate yield of 0.42 mol (mol glucose)(-1). Metabolic flux analysis showed that metabolite labeling patterns observed upon nuclear magnetic resonance analyses of cultures grown on C-13-labeled glucose were consistent with the envisaged nonoxidative, fermentative pathway for malate production. The engineered strains still produced substantial amounts of pyruvate, indicating that the pathway efficiency can be further improved.",
@@ -791,8 +869,7 @@ var testCases = [
 				"ISSN": "0161-3499",
 				"extra": "Web of Science ID: CABI:19982209000",
 				"issue": "2",
-				"language": "English",
-				"libraryCatalog": "Thomson Reuters Web of Knowledge",
+				"language": "en",
 				"pages": "170",
 				"publicationTitle": "Veterinary Surgery",
 				"volume": "27",
@@ -865,15 +942,18 @@ var testCases = [
 				],
 				"date": "SPR 2011",
 				"ISSN": "0015-0630",
-				"extra": "Web of Science ID: WOS:000290115300030",
+				"extra": "numPages: 1\npublisher: Univ New Brunswick\nWeb of Science ID: WOS:000290115300030",
 				"issue": "247",
 				"journalAbbreviation": "Fiddlehead",
-				"language": "English",
-				"libraryCatalog": "Thomson Reuters Web of Knowledge",
+				"language": "en",
 				"pages": "82-82",
 				"publicationTitle": "FIDDLEHEAD",
 				"attachments": [],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Literary Reviews"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -884,7 +964,7 @@ var testCases = [
 		"input": "﻿FN Thomson Reuters Web of Knowledge\nVR 1.0\nPT S\nAU McCormick, MC\n   Litt, JS\n   Smith, VC\n   Zupancic, JAF\nAF McCormick, Marie C.\n   Litt, Jonathan S.\n   Smith, Vincent C.\n   Zupancic, John A. F.\nBE Fielding, JE\n   Brownson, RC\n   Green, LW\nTI Prematurity: An Overview and Public Health Implications\nSO ANNUAL REVIEW OF PUBLIC HEALTH, VOL 32\nSE Annual Review of Public Health\nLA English\nDT Review\nDE infant mortality; childhood morbidity; prevention\nID LOW-BIRTH-WEIGHT; NEONATAL INTENSIVE-CARE; QUALITY-OF-LIFE; EXTREMELY\n   PRETERM BIRTH; YOUNG-ADULTS BORN; AGE 8 YEARS; CHILDREN BORN;\n   BRONCHOPULMONARY DYSPLASIA; LEARNING-DISABILITIES; EXTREME PREMATURITY\nAB The high rate of premature births in the United States remains a public\n   health concern. These infants experience substantial morbidity and\n   mortality in the newborn period, which translate into significant\n   medical costs. In early childhood, survivors are characterized by a\n   variety of health problems, including motor delay and/or cerebral palsy,\n   lower IQs, behavior problems, and respiratory illness, especially\n   asthma. Many experience difficulty with school work, lower\n   health-related quality of life, and family stress. Emerging information\n   in adolescence and young adulthood paints a more optimistic picture,\n   with persistence of many problems but with better adaptation and more\n   positive expectations by the young adults. Few opportunities for\n   prevention have been identified; therefore, public health approaches to\n   prematurity include assurance of delivery in a facility capable of\n   managing neonatal complications, quality improvement to minimize\n   interinstitutional variations, early developmental support for such\n   infants, and attention to related family health issues.\nC1 [McCormick, MC] Harvard Univ, Dept Soc Human Dev & Hlth, Sch Publ Hlth, Boston, MA 02115 USA\n   [McCormick, MC; Litt, JS; Smith, VC; Zupancic, JAF] Beth Israel Deaconess Med Ctr, Dept Neonatol, Boston, MA 02215 USA\n   [Litt, JS] Childrens Hosp Boston, Div Newborn Med, Boston, MA 02115 USA\nRP McCormick, MC (reprint author), Harvard Univ, Dept Soc Human Dev & Hlth, Sch Publ Hlth, Boston, MA 02115 USA\nEM mmccormi@hsph.harvard.edu\n   vsmith1@bidmc.harvard.edu\n   jzupanci@bidmc.harvard.edu\n   Jonathan.Litt@childrens.harvard.edu\nNR 91\nTC 1\nZ9 1\nPU ANNUAL REVIEWS\nPI PALO ALTO\nPA 4139 EL CAMINO WAY, PO BOX 10139, PALO ALTO, CA 94303-0897 USA\nSN 0163-7525\nBN 978-0-8243-2732-3\nJ9 ANNU REV PUBL HEALTH\nJI Annu. Rev. Public Health\nPY 2011\nVL 32\nBP 367\nEP 379\nDI 10.1146/annurev-publhealth-090810-182459\nPG 13\nGA BUZ33\nUT WOS:000290776200020\nER\n\nEF",
 		"items": [
 			{
-				"itemType": "bookSection",
+				"itemType": "journalArticle",
 				"title": "Prematurity: An Overview and Public Health Implications",
 				"creators": [
 					{
@@ -924,15 +1004,15 @@ var testCases = [
 					}
 				],
 				"date": "2011",
-				"ISBN": "978-0-8243-2732-3",
+				"DOI": "10.1146/annurev-publhealth-090810-182459",
+				"ISSN": "0163-7525",
 				"abstractNote": "The high rate of premature births in the United States remains a public health concern. These infants experience substantial morbidity and mortality in the newborn period, which translate into significant medical costs. In early childhood, survivors are characterized by a variety of health problems, including motor delay and/or cerebral palsy, lower IQs, behavior problems, and respiratory illness, especially asthma. Many experience difficulty with school work, lower health-related quality of life, and family stress. Emerging information in adolescence and young adulthood paints a more optimistic picture, with persistence of many problems but with better adaptation and more positive expectations by the young adults. Few opportunities for prevention have been identified; therefore, public health approaches to prematurity include assurance of delivery in a facility capable of managing neonatal complications, quality improvement to minimize interinstitutional variations, early developmental support for such infants, and attention to related family health issues.",
-				"bookTitle": "ANNUAL REVIEW OF PUBLIC HEALTH, VOL 32",
-				"extra": "Web of Science ID: WOS:000290776200020",
-				"language": "English",
-				"libraryCatalog": "Thomson Reuters Web of Knowledge",
+				"extra": "numPages: 13\npublisher: Annual Reviews\nWeb of Science ID: WOS:000290776200020",
+				"journalAbbreviation": "Annu. Rev. Public Health",
+				"language": "en",
 				"pages": "367-379",
-				"place": "Palo Alto",
-				"publisher": "Annual Reviews",
+				"publicationTitle": "ANNUAL REVIEW OF PUBLIC HEALTH, VOL 32",
+				"series": "Annual Review of Public Health",
 				"volume": "32",
 				"attachments": [],
 				"tags": [
@@ -1015,7 +1095,7 @@ var testCases = [
 				"assignee": "Medtronic Inc",
 				"country": "USA",
 				"extra": "Web of Science ID: BIOSIS:PREV201100469175",
-				"language": "English",
+				"language": "en",
 				"patentNumber": "US 07967789",
 				"attachments": [],
 				"tags": [
@@ -1054,7 +1134,6 @@ var testCases = [
 				"date": "2011",
 				"ISBN": "978-90-8585933-8",
 				"extra": "Web of Science ID: CABI:20113178956",
-				"libraryCatalog": "Thomson Reuters Web of Knowledge",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -1070,7 +1149,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "1998, thesis publ. 1997",
+				"date": "1998",
 				"ISSN": "0419-4217",
 				"extra": "Web of Science ID: FSTA:1998-09-Sn1570",
 				"issue": "9",
@@ -1146,13 +1225,12 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "JAN 2013",
+				"date": "2013-01",
 				"DOI": "10.1007/s10750-012-1232-8",
 				"ISSN": "0018-8158, 1573-5117",
 				"abstractNote": "Microbial processing of detritus is known to be important to benthic invertebrate nutrition, but the role of dissolved (DOC) versus particulate organic carbon (POC), and pathways by which those resources are obtained, are poorly understood. We used stable isotopes to determine the importance of DOC, POC, and CH4-derived carbon to benthic invertebrate consumers from arctic Alaskan Lakes. Intact sediment cores from Lake GTH 112 were enriched with C-13-labeled organic matter, including algal detritus, algal-derived DOC, methyl-labeled acetate, and carboxyl-labeled acetate, and incubated for 1 month with either caddisflies (Grensia praeterita ) or fingernail clams (Sphaerium nitidum), two invertebrate species that are important to fish nutrition. Both species used basal resources derived from POC and DOC. Results generally suggest greater reliance on POC. Differential assimilation from acetate treatments suggests Sphaerium assimilated CH4-derived carbon, which likely occurred through deposit-feeding. Grensia assimilated some microbially processed acetate, although its survivorship was poor in acetate treatments. Our data extend previous studies reporting use of CH4-derived carbon by Chironomidae and oligochaetes. Taken together, these results suggest that the use of CH4-derived carbon is common among deposit-feeding benthic invertebrates.",
 				"extra": "Web of Science ID: BCI:BCI201300112663",
 				"issue": "1",
-				"libraryCatalog": "Thomson Reuters Web of Knowledge",
 				"pages": "221-230",
 				"publicationTitle": "Hydrobiologia",
 				"volume": "700",
@@ -1211,15 +1289,23 @@ var testCases = [
 				"DOI": "10.1109/ICACT.2005.245926",
 				"abstractNote": "Increased speeds of PCs and networks have made video conferencing systems possible in Internet. The proposed conference control protocol suits small scale video conferencing systems which employ full mesh conferencing architecture and loosely coupled conferencing mode. The protocol can ensure the number of conference member is less than the maximum value. Instant message services are used to do member authentication and notification. The protocol is verified in 32 concurrent conferencing scenarios and implemented in DigiParty which is a small scale video conferencing add-in application for MSN Messenger.",
 				"conferenceName": "7th International Conference on Advanced Communication Technology",
-				"extra": "Web of Science ID: WOS:000230445900101",
-				"language": "English",
-				"libraryCatalog": "Clarivate Analytics Web of Science",
+				"extra": "numPages: 6\nWeb of Science ID: WOS:000230445900101\npubisher-palce: New York",
+				"language": "en",
 				"pages": "532-537",
-				"place": "New York",
+				"place": "Phoenix Pk, SOUTH KOREA",
 				"proceedingsTitle": "7TH INTERNATIONAL CONFERENCE ON ADVANCED COMMUNICATION TECHNOLOGY, VOLS 1 AND 2, PROCEEDINGS",
 				"publisher": "IEEE",
 				"attachments": [],
 				"tags": [
+					{
+						"tag": "Computer Science, Artificial Intelligence"
+					},
+					{
+						"tag": "Computer Science, Information Systems"
+					},
+					{
+						"tag": "Telecommunications"
+					},
 					{
 						"tag": "conference control protocol"
 					},
