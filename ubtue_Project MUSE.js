@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-20 08:22:14"
+	"lastUpdated": "2025-05-19 11:08:58"
 }
 
 /*
@@ -53,7 +53,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//li[@class="title"]//a[contains(@href, "/article/") or contains(@href, "/book/")]');
+	var rows = ZU.xpath(doc, '//*[@class="title"]//a[contains(@href, "/article/") or contains(@href, "/book/")]');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -101,10 +101,10 @@ function isSupplement(item) {
 function isOpenAccess(doc) {
 	let openAccessInfo = ZU.xpathText(doc,
 		'//div[@id = "info_wrap"]//*[contains(text(), "Open Access")]/parent::div');
-	if (/Open Access Yes/i.test(ZU.trimInternal(openAccessInfo)))
-	    return true;
-    if (ZU.xpathText(doc, '//div[@class="cell label"][contains(text(),"Open Access")]/following-sibling::div[contains(text(),"Yes")]'))
-	    return true;
+	if (openAccessInfo && /Open Access Yes/i.test(ZU.trimInternal(openAccessInfo)))
+		return true;
+	if (ZU.xpathText(doc, '//div[@class="cell label"][contains(text(),"Open Access")]/following-sibling::div[contains(text(),"Yes")]'))
+		return true;
 	return false;
 }
 
