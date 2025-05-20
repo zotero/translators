@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-20 19:14:41"
+	"lastUpdated": "2025-05-20 19:36:48"
 }
 
 /*
@@ -40,11 +40,38 @@ function detectWeb(doc, url) {
 	if (url.includes('/book/')) {
 		return 'book';
 	}
+	else if (url.includes('/search/')) {
+		return 'multiple';
+	}
 	return false;
 }
 
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('div[data-testid="search__content--wrapper"] a[data-testid="art__title"][href*="/book/"]');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
 async function doWeb(doc, url) {
-	await scrape(doc, url);
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
+	}
+	else {
+		await scrape(doc, url);
+	}
 }
 
 async function scrape(doc, url = doc.location.href) {
@@ -198,6 +225,12 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.litres.ru/search/?q=%D0%97%D0%B5%D0%BC%D0%BD%D0%BE%D0%BC%D0%BE%D1%80%D1%8C%D0%B5&art_types=text_book",
+		"defer": true,
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
