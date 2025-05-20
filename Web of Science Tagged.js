@@ -290,7 +290,7 @@ function saveRecord(record) {
 
 		let value = record[tag];
 		if (['title', 'publicationTitle', 'proceedingsTitle'].includes(field)) {
-			value = capitalizetitle(value);
+			value = capitalizeTitleWithAbbreviations(value);
 		}
 		else if (field == 'date') {
 			if (tag == 'PD') {
@@ -314,7 +314,7 @@ function saveRecord(record) {
 			value = tags.map(key => record[key]).filter(Boolean).join(', ');
 		}
 		else if (['assignee', 'conferenceName', 'publisher'].includes(field)) {
-			value = capitalizetitle(value, true);
+			value = capitalizeTitleWithAbbreviations(value, true);
 		}
 		else if (['volume', 'issue', 'pages'].includes(field)) {
 			value = value.replace(/\b0*(\d+)/g, '$1');
@@ -355,7 +355,7 @@ function saveRecord(record) {
 	if (itemType == 'conferencePaper') {
 		for (const tag of IMPORT_FIELD_MAP.place) {
 			if (tag != 'CL' && tag in record) {
-				item.setExtra('pubisher-palce', capitalizetitle(record[tag], true));
+				item.setExtra('publisher-place', capitalizeTitleWithAbbreviations(record[tag], true));
 				break;
 			}
 		}
@@ -369,7 +369,7 @@ function saveRecord(record) {
  * in conference or publisher names. This is most useful for cleaning all-cap
  * fields that are not titles.
  */
-function capitalizetitle(string, force) {
+function capitalizeTitleWithAbbreviations(string, force) {
 	const allCaps = ['ACM', 'AIP', 'BMC', 'BMJ', 'CRC', 'IEEE', 'JAMA', 'MDPI', 'SAGE', 'USA'];
 	const wordForms = { IOP: 'IoP', PEERJ: 'PeerJ', PLOS: 'PLoS' };
 	allCaps.forEach(word => wordForms[word] = word);
@@ -1296,7 +1296,7 @@ var testCases = [
 				"DOI": "10.1109/ICACT.2005.245926",
 				"abstractNote": "Increased speeds of PCs and networks have made video conferencing systems possible in Internet. The proposed conference control protocol suits small scale video conferencing systems which employ full mesh conferencing architecture and loosely coupled conferencing mode. The protocol can ensure the number of conference member is less than the maximum value. Instant message services are used to do member authentication and notification. The protocol is verified in 32 concurrent conferencing scenarios and implemented in DigiParty which is a small scale video conferencing add-in application for MSN Messenger.",
 				"conferenceName": "7th International Conference on Advanced Communication Technology",
-				"extra": "numPages: 6\nWeb of Science ID: WOS:000230445900101\npubisher-palce: New York",
+				"extra": "numPages: 6\nWeb of Science ID: WOS:000230445900101\npublisher-place: New York",
 				"language": "en",
 				"libraryCatalog": "Clarivate Analytics Web of Science",
 				"pages": "532-537",
