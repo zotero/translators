@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2025-05-17 10:17:27"
+	"lastUpdated": "2025-07-04 14:41:41"
 }
 
 /*
@@ -195,7 +195,7 @@ function detectImport() {
 	let i = 0;
 	while ((line = Zotero.read()) !== false && i < 10) {
 		// It has been confirmed that these two tags do not conflict with Refworks Tagged Format
-		if (/PT|DT/.test(line)) {
+		if (/^(PT|DT)/.test(line)) {
 			return true;
 		}
 		i++;
@@ -383,7 +383,6 @@ function capitalizeTitleWithAbbreviations(string, force) {
 
 const EXPORT_FIELD_MAP = {
 	abstractNote: 'AB',
-	accessDate: 'DA',
 	applicationNumber: 'OP',
 	assignee: 'AE',
 	bookTitle: 'SO',
@@ -517,6 +516,9 @@ function doExport() {
 			else {
 				writeLine('BP', item.pages);
 			}
+		}
+		if (item.accessDate) {
+			writeLine('DA', ZU.strToISO(item.accessDate));
 		}
 
 		/* Tags */
