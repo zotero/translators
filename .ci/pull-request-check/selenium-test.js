@@ -117,6 +117,12 @@ var allPassed = false;
 		
 		let testUrl = `chrome-extension://${ZOTERO_CONNECTOR_EXTENSION_ID}/tools/testTranslators/testTranslators.html#translators=${translatorsToTest.join(',')}`;
 		await driver.get(testUrl);
+
+		if ((await driver.getTitle()).trim() !== 'Zotero Translator Tester') {
+			console.error('Failed to load Translator Tester extension page');
+			return;
+		}
+
 		await driver.wait(until.elementLocated(By.id('translator-tests-complete')), 5 * 60 * 1000);
 		testResults = await driver.executeScript('return window.seleniumOutput');
 
