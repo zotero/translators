@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-20 19:36:48"
+	"lastUpdated": "2025-05-21 14:38:11"
 }
 
 /*
@@ -40,7 +40,7 @@ function detectWeb(doc, url) {
 	if (url.includes('/book/')) {
 		return 'book';
 	}
-	else if (url.includes('/search/')) {
+	else if (url.includes('/search/') && getSearchResults(doc, true)) {
 		return 'multiple';
 	}
 	return false;
