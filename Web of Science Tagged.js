@@ -195,7 +195,7 @@ function detectImport() {
 	let i = 0;
 	while ((line = Zotero.read()) !== false && i < 10) {
 		// It has been confirmed that these two tags do not conflict with Refworks Tagged Format
-		if (/PT|DT/.test(line)) {
+		if (/^(PT|DT)/.test(line)) {
 			return true;
 		}
 		i++;
