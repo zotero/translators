@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 8,
-	"lastUpdated": "2025-05-16 07:12:38"
+	"lastUpdated": "2025-05-22 14:50:04"
 }
 
 /*
@@ -68,8 +68,10 @@ async function processDOI(doi) {
 	let currentDate = new Date();
 	// Outage: 17 May 2025, 14:00–15:00 UTC
 	// Start 1 hour before (13:00 UTC) and end 2 hours after (17:00 UTC)
-	let startDate = new Date(Date.UTC(2025, 4, 17, 13, 0, 0));
-	let endDate   = new Date(Date.UTC(2025, 4, 17, 17, 0, 0));
+	// TEMP for May 22 outage
+	let startDate = new Date(Date.UTC(2025, 4, 22, 00, 0, 0));
+	let endDate   = new Date(Date.UTC(2025, 4, 24, 0, 0, 0));
+
 	if (currentDate >= startDate && currentDate <= endDate) {
 		try {
 			let raJSON = await requestJSON(
