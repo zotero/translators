@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-07-29 14:16:50"
+	"lastUpdated": "2025-06-03 20:31:50"
 }
 
 /*
@@ -119,7 +119,7 @@ var testCases = [
 				"title": "Male-Female Wage Differentials in Urban Labor Markets",
 				"creators": [
 					{
-						"firstName": "Ronald L.",
+						"firstName": "Ronald",
 						"lastName": "Oaxaca",
 						"creatorType": "author"
 					}
