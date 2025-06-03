@@ -18,7 +18,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2024-03-25 14:51:02"
+	"lastUpdated": "2025-06-03 20:29:37"
 }
 
 /*
@@ -3086,7 +3086,9 @@ var reversemappingTable = {
 	"{\\~y}"                          : "\u1EF9", // LATIN SMALL LETTER Y WITH TILDE
 	"{\\~}"                           : "\u223C", // TILDE OPERATOR
 	"~"                               : "\u00A0" // NO-BREAK SPACE
-};/** BEGIN TEST CASES **/
+};
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "import",
@@ -3097,7 +3099,7 @@ var testCases = [
 				"title": "The physical volcanology of the 1600 eruption of Huaynaputina, southern Peru",
 				"creators": [
 					{
-						"firstName": "Nancy K",
+						"firstName": "Nancy",
 						"lastName": "Adams",
 						"creatorType": "author"
 					},

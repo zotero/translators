@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-06-27 16:03:43"
+	"lastUpdated": "2025-06-03 20:29:25"
 }
 
 /*
@@ -72,7 +72,7 @@ var testCases = [
 				"title": "Brukermedvirkning",
 				"creators": [],
 				"date": "2024-05-01T08:31:53Z",
-				"abstractNote": "Informasjon om brukermedvirkning her.",
+				"abstractNote": "Informasjon om her.",
 				"encyclopediaTitle": "Brukerhåndboken",
 				"extra": "Page Version ID: 912",
 				"language": "nb",
