@@ -12,7 +12,7 @@ const translatorServer = require('./translator-server');
 const chromeExtensionDir = path.join(__dirname, 'connectors', 'build', 'manifestv3');
 const KEEP_BROWSER_OPEN = 'KEEP_BROWSER_OPEN' in process.env;
 const CI = 'CI' in process.env;
-const ZOTERO_CONNECTOR_EXTENSION_ID = 'noadpmpcjagenlgkmdgffkabnlbhcbgd';
+const ZOTERO_CONNECTOR_EXTENSION_ID = 'ekhagklcjbdpajgpjgmbionohlpdbjgc';
 
 async function getTranslatorsToTest() {
 	const translatorFilenames = process.argv[2].split('\n').filter(filename => filename.trim().length > 0);
