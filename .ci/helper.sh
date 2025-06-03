@@ -20,7 +20,9 @@ get_translator_id() {
 
 get_translators_to_check() {
 	# Get the last commit on the target branch before this branch diverged
-	local fork_point=$(git merge-base --fork-point ${GITHUB_BASE_REF:-upstream/master} HEAD)
+    # Fall back to translators changed on the last commit in case there's no GITHUB_BASE_REF
+    # and no upstream/master (CI runs on push)
+	local fork_point=$(git merge-base --fork-point ${GITHUB_BASE_REF:-upstream/master} HEAD 2>/dev/null || echo HEAD~)
 	# Get translator scripts changed between that commit and now, excluding deleted files
 	local all_translator_scripts="$(git rev-parse --show-toplevel)"/*.js
 	git diff --name-only --diff-filter=d $fork_point -- $all_translator_scripts
