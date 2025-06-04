@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-01-27 10:35:20"
+	"lastUpdated": "2025-06-04 07:42:30"
 }
 
 /*
@@ -226,6 +226,13 @@ function joinTitleAndSubtitle (doc, item) {
 		return item.title;
 	}
 
+	if (item.ISSN == '2961-6492') {
+        let subtitle = ZU.xpathText(doc, '//h1[@class="page_title"]//following-sibling::h2[@class="subtitle"]')?.trim();
+		if (subtitle) {
+		    item.title = item.title + (item.title.slice(-1) == ':' ? '' : ': ') + subtitle;
+		}
+	}
+
 	let subtitle = ZU.xpathText(doc, '//article[@class="article-details"]/header/h2/small')
 	if (subtitle)
 		item.title = item.title + " " + subtitle.trim();
@@ -249,8 +256,8 @@ function invokeUbtuePKPTranslator(doc) {
 			// page information is garbled for this journal, get it from DC
 			let dc_page_information = ZU.xpathText(doc, '//meta[@name="DC.Identifier.pageNumber"]/@content');
 			if (dc_page_information?.length)
-			    i.pages = dc_page_information.split(/\s+to\s+/)
-				             .map(page_fragment => page_fragment.replace(/\d+-(\d+)/, "$1"))
+				i.pages = dc_page_information.split(/\s+to\s+/)
+							 .map(page_fragment => page_fragment.replace(/\d+-(\d+)/, "$1"))
 							 .join('-');
 		}
 		if (i.issue === "0") delete i.issue;
