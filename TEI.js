@@ -451,7 +451,7 @@ const cslCreators = {
  * Syntax, one property by line
  *
  * known-propertie: value
- * Othe Known: value
+ * Other Known: value
  *
  *
  * This: could be a free note.
@@ -466,7 +466,7 @@ function parseExtraFields(item) {
 		delete item.extra;
 		return;
 	}
-	// loop on extra, extract known properties as a dictionary, let unknown lines as
+	// loop on extra, extract known properties as a dictionary, let unknown lines as is
 	let note = extra.replace(/^([A-Za-z\- ]+)[\s\u00A0]*:\s*(.+)/gum, function (_, label, value) {
 		value = value.trim();
 		if (!value) { // keep line as is
