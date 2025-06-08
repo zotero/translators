@@ -27,8 +27,8 @@ async function scrape(doc, url) {
 	try {
 		let item = new Zotero.Item("newspaperArticle");
 
-		item.url = url;
-		item.language = "en";
+		let urlMatch = url.match(/^(https?:\/\/www\.nli\.org\.il\/(?:en|he|ar)\/newspapers\/[a-z]+\/\d{4}\/\d{2}\/\d{2}\/\d{2}\/article\/\d{1,3}\/)/);
+		item.url = urlMatch ? urlMatch[1] : url;
 
 		// Fallback values
 		item.title = "Untitled";
