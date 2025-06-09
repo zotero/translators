@@ -2,22 +2,23 @@
 	"translatorID": "74008780-5d19-411c-b2e2-d56b7154fe74",
 	"label": "JSON-LD",
 	"creator": "Frédéric Glorieux",
-	"target": "",
+	"target": "json",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2025-06-08 17:15:48"
+	"lastUpdated": "2025-06-09 12:18:52"
 }
 
 function doExport() {
 	const ldList = [];
+	let zotItem;
 	while (zotItem = Zotero.nextItem()) {
-		parseExtraFields(zotItem); // parse extra field as 
+		// Skip standalone notes
+		if (zotItem.itemType == 'note') continue;
+		parseExtraFields(zotItem); // parse extra field 
 		ldList.push(zot2ldItem(zotItem));
-
-		Zotero.write(JSON.stringify(zotItem, null, "\t"));
 	}
 	Zotero.write(JSON.stringify(ldList, null, "\t"))
 }
@@ -28,112 +29,163 @@ function doExport() {
  */
 function zot2ldItem(zotItem)
 {
+	const tag2text = [
+		[/<i>/g, "“"],             // “Title”
+		[/<\/i>/g, "”"],           // “Title”
+		[/<sup>st<\/sup>/g, "ˢᵗ"], // 1ˢᵗ
+		[/<sup>nd<\/sup>/g, "ⁿᵈ"], // 2ⁿᵈ
+		[/<sup>rd<\/sup>/g, "ʳᵈ"], // 3ʳᵈ
+		[/<sup>th<\/sup>/g, "ᵗʰ"], // 4ᵗʰ
+		[/<sup>er<\/sup>/g, "ᵉʳ"], // 1ᵉʳ
+		[/<sup>e<\/sup>/g, "ᵉ"],   // 2ᵉ
+		[/<\/?sup>/g, ""], // default superscript, remove
+		[/<span style="font-variant:small-caps;">([^<]*)<\/span>/g, (match, word) => word.toUpperCase()], // small caps, to CAPS
+		[/<[^>]+>/g, ""] // default strip alltags
+	];
 	// source list for zotero document types https://aurimasv.github.io/z2csl/typeMap.xml
 	const zot2ldType = {
 		"artwork": "VisualArtwork",
-		"attachment": "Message",
+		"attachment": "DigitalDocument",
 		"audioRecording": "AudioObject",
 		"bill": "Legislation",
-		"blogPost": "Blog",
-		"book": "Book",	
+		"blogPost": "BlogPosting",
+		"book": "Book",
 		"bookSection": "Chapter",
 		"case": "Legislation",
 		"computerProgram": "SoftwareApplication",
 		"conferencePaper": "ScholarlyArticle",
 		"dictionaryEntry": "Article",
 		"document": "ArchiveComponent",
-		"email": "email",
+		"email": "EmailMessage",
 		"encyclopediaArticle": "Article",
 		"film": "Movie",
 		"forumPost": "DiscussionForumPosting",
-		"hearing": "",
-		"instantMessage": "DiscussionForumPosting",
-		"interview": "",
+		"hearing": "Legislation",
+		"instantMessage": "Message",
+		"interview": "Article",
 		"journalArticle": "ScholarlyArticle",
-		"letter": "",
-		"magazineArticle": "NewsArticle",
-		"manuscript": "Manuscript",	
+		"letter": "Message", // or ArchiveComponent ?
+		"magazineArticle": "Article",
+		"manuscript": "Manuscript",
 		"map": "Map",
 		"newspaperArticle": "NewsArticle",
-		"note": "",
-		"patent": "",
-		"podcast": "",
-		"preprint": "",
-		"presentation": "PresentationDigitalDocument",
-		"radioBroadcast": "",
+		"note": "DigitalDocument", // ask to Zotero experts
+ 		"patent": "Legislation",
+		"podcast": "PodcastEpisode",
+		"preprint": "ScholarlyArticle",
+		"presentation": "DigitalDocument",
+		"radioBroadcast": "RadioEpisode",
 		"report": "Report",
 		"statute": "Legislation",
 		"thesis": "Thesis",
-		"tvBroadcast": "",
-		"videoRecording": "",
-		"webpage":	"WebPage"
-
-    };
+		"tvBroadcast": "TVEpisode",
+		"videoRecording": "VideoObject",
+		"webpage": "WebPage"
+	};
 	let ldItem = {
-        "@context": "https://schema.org",
-        "@type": typeMap[zotItem.itemType] || "ScholarlyArticle"  // Default zotero item is a cited article 
-    };
+		"@context": "https://schema.org",
+		"@type": zot2ldType[zotItem.itemType] || "ScholarlyArticle"  // Default zotero item is a cited article 
+	};
 	if (zotItem.url) {
-        ldItem["@id"] = zotItem.url;
-        ldItem["sameAs"] = zotItem.url;
-    }
-	if (zotItem.title) ldItem["name"] = zotItem.title;
+		ldItem["@id"] = zotItem.url;
+		ldItem["sameAs"] = zotItem.url;
+	}
+	if (zotItem.title) ldItem["name"] = regexReplaceAll(zotItem.title, tag2text);
+	if (zotItem.creators && zotItem.creators.length) {
+		let authors = zotItem.creators.filter(c => c.creatorType === 'author');
+		if (authors.length === 1) {
+			ldItem["author"] = zot2ldPers(authors[0]);
+		} else if (authors.length > 1) {
+			ldItem["author"] = authors.map(zot2ldPers);
+		}
+	}
+	if (zotItem.date) ldItem["datePublished"] = ZU.strToISO(zotItem.date);
+	if (zotItem.language) ldItem["inLanguage"] = zotItem.language;
+	if (zotItem.citationKey) ldItem["citation"] = zotItem.citationKey;
+	if (zotItem.rights) {
+		if (zotItem.rights.startsWith("http")) {
+			ldItem["license"] = zotItem.rights;
+		} else {
+			ldItem["copyrightNotice"] =  zotItem.rights;
+		}
+	}
 
-	// first test if it’s a chapter, because work 
+	let editors = [];
+	if (zotItem.creators && zotItem.creators.length) {
+		editors = zotItem.creators.filter(c => (c.creatorType === 'editor' || c.creatorType === 'bookAuthor'));
+	}
+	if (zotItem.bookTitle || zotItem.publicationTitle || editors.length > 0) {
+		let container = {};
+		if (zotItem.bookTitle) container["@type"] = "Book";
+		else if (zotItem.type == "newspaperArticle") container["@type"] = "Newspaper";
+		else if (zotItem.publicationTitle) container["@type"] = "Periodical";
+		else container["@type"] =  "CreativeWorkSeries";
 
+		if (zotItem.bookTitle || zotItem.publicationTitle)
+			container["name"] = zotItem.bookTitle || zotItem.publicationTitle;
+		if (zotItem.ISSN) container["issn"] = zotItem.ISSN;
+		if (editors.length === 1) {
+			container["editor"] = zot2ldPers(editors[0]);
+		} else if (editors.length > 1) {
+			container["editor"] = editors.map(zot2ldPers);
+		}
 
-    if (zotItem.creators && zotItem.creators.length) {
-        let authors = zotItem.creators.filter(c => c.creatorType === 'author');
-        if (authors.length === 1) {
-            ldItem["author"] = zot2ldPers(authors[0]);
-        } else if (authors.length > 1) {
-            ldItem["author"] = authors.map(zot2ldPers);
-        }
-    }
+		if (zotItem.date) container["datePublished"] = ZU.strToISO(zotItem.date);
+		if (zotItem.volume) container["volumeNumber"] = zotItem.volume;
+		if (zotItem.issue) container["issueNumber"] = zotItem.volume;
+		if (zotItem.publisher) {
+			container["publisher"] = {
+				"@type": "Organization",
+				"name": zotItem.publisher
+			};
+		}
+		if (zotItem.place) container["locationCreated"] = zotItem.place;
 
-    let editors = zotItem.creators.filter(c => c.creatorType === 'editor');
-    if (zotItem.bookTitle || zotItem.publicationTitle || editors.length > 0) {
-        let container = {
-            "@type": "Book"
-        };
-        if (zotItem.bookTitle || zotItem.publicationTitle)
-            container["name"] = zotItem.bookTitle || zotItem.publicationTitle;
-
-        if (editors.length === 1) {
-            container["editor"] = zot2ldPers(editors[0]);
-        } else if (editors.length > 1) {
-            container["editor"] = editors.map(zot2ldPers);
-        }
-
-        if (zotItem.publisher) {
-            container["publisher"] = {
-                "@type": "Organization",
-                "name": zotItem.publisher
-            };
-        }
-
-        if (zotItem.place) container["locationCreated"] = zotItem.place;
-        if (zotItem.date) {
-            let yearMatch = zotItem.date.match(/^(\d{4})/);
-            if (yearMatch) container["datePublished"] = yearMatch[1];
-        }
-
-        ldItem["isPartOf"] = container;
-    }
-
-    if (zotItem.pages) ldItem["pagination"] = zotItem.pages;
-    if (zotItem.language) ldItem["inLanguage"] = zotItem.language;
-    if (zotItem.citationKey) ldItem["citation"] = zotItem.citationKey;
+		ldItem["isPartOf"] = container;
+	}
+	if (zotItem.pages) ldItem["pagination"] = zotItem.pages;
 
 	return ldItem;
 }
 
 function zot2ldPers(pers) {
-    return {
-        "@type": "Person",
-        "givenName": pers.firstName || "",
-        "familyName": pers.lastName || ""
-    };
+	if (pers.firstName || pers.lastName) {
+		return {
+			"@type": "Person",
+			"givenName": pers.firstName || "",
+			"familyName": pers.lastName || ""
+		};
+	}
+	else if (pers.name) {
+		return {
+			"@type": "Organization",
+			"name": pers.name
+		};
+	}
+}
+
+/**
+ * Applies a sequence of regex replacements to a string, similar to PHP's preg_replace.
+ *
+ * @param {string} str - The input string to be transformed.
+ * @param {Array<[RegExp, string | ((substring: string, ...args: any[]) => string)]>} replacements - 
+ *        An array of tuples, each containing a regex and a replacement string or function.
+ * @returns {string} - The transformed string after applying all replacements sequentially.
+ *
+ * @example
+ * regexReplaceAll("Have you read <i>1984</i> ?", 
+ *   [
+ *     [/<i>/g, '“']
+ *     [/</i>/g, '”'],
+ *   ]
+ * );
+ * returns: "Have you read “1984” ?"
+ */
+function regexReplaceAll(str, replacements) {
+  return replacements.reduce(
+	(currentStr, [regex, replacement]) => currentStr.replace(regex, replacement),
+	str
+  );
 }
 
 /**
@@ -148,7 +200,7 @@ function zot2ldPers(pers) {
  *
  * This: could be a free note.
  * [2024-01 FG]
- * @param {*} item
+ * @param {*} zotItem
  * @returns
  */
 function parseExtraFields(zotItem) {
