@@ -1,5 +1,5 @@
 {
-	"translatorID": "8104f095-23fb-4323-9141-014fce3e0ed4",
+	"translatorID": "e0d6c5bd-ad9a-4b28-b53d-e1355979ca02",
 	"label": "TEI",
 	"creator": "Stefan Majewski",
 	"target": "xml",
@@ -18,7 +18,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2025-02-09 12:24:09"
+	"lastUpdated": "2025-06-09 10:51:06"
 }
 
 /*
@@ -331,120 +331,6 @@ function domWalk(srcParent, dstParent) {
 }
 
 /**
- * For a parser of zot:extra field,
- * List of CSL properties with zotero key if available.
- * These properties are unique for a record and override
- * values from zotero form.
- * References https://aurimasv.github.io/z2csl/typeMap.xml
- */
-const cslScalars = {
-	abstract: "abstractNote",
-	accessed: "accessDate",
-	annote: "annote", // not zot
-	archive: "archive",
-	"archive-collection": "seriesTitle", // not zot
-	"archive-location": "archiveLocation",
-	"archive-place": "place", // not zot
-	authority: "authority", // zot:legislativeBody, zot:court, zot:issuingAuthority
-	"available-date": "available-date", // not zot
-	"call-number": "callNumber",
-	chair: "chair",
-	"chapter-number": "session", // legal, audio
-	"citation-label": "citationKey",
-	"citation-number": "citationKey",
-	"collection-number": "seriesNumber",
-	"collection-title": "seriesTitle",
-	container: "container",
-	"container-title": "container-title", // zot:bookTitle, zot:proceedingsTitle, zot:encyclopediaTitle, zot:dictionaryTitle, zot:publicationTitle, zot:websiteTitle
-	"container-title-short": "journalAbbreviation",
-	dimensions: "dimensions", // zot:artworkSize, zot:runningTime
-	division: "division", // not zot
-	doi: "DOI",
-	edition: "edition",
-	// "event": "event", // Deprecated legacy variant of event-title
-	"event-date": "date",
-	"event-place": "place",
-	"event-title": "event-title", // zot:conferenceName, zot:meetingName
-	"first-reference-note-number": "first-reference-note-number", // not zot
-	genre: "genre", // zot:websiteType, zot:programmingLanguage, zot:genre, zot:postType, zot:letterType, zot:manuscriptType, zot:mapType, zot:presentationType, zot:reportType, zot:thesisType
-	isbn: "ISBN",
-	issn: "ISSN",
-	issue: "issue",
-	issued: "date", // zot:dateDecided, zot:dateEnacted
-	jurisdiction: "jurisdiction", // not zot
-	language: "language",
-	license: "rights",
-	locator: "locator", // not zot
-	medium: "medium", // zot:artworkMedium, zot:audioRecordingFormat, zot:system, zot:videoRecordingFormat, zot:interviewMedium, zot:audioFileType
-	note: "extra",
-	number: "number", // zot:billNumber
-	"number-of-pages": "numPages",
-	"number-of-volumes": "numberOfVolumes",
-	"original-date": "original-date", // not zot
-	"original-publisher": "original-publisher", // not zot
-	"original-publisher-place": "original-publisher-place", // not zot
-	"original-title": "original-title", // not zot
-	page: "page", // zot:page, zot:codePage
-	// "page-first": "page-first", // not zot
-	"part-number": "part-number", // not zot
-	"part-title": "part-title", // not zot
-	pmcid: "PMCID",
-	pmid: "PMID",
-	publisher: "publisher",
-	"publisher-place": "place",
-	references: "references", // zot:history, zot:references
-	"reviewed-genre": "reviewed-genre", // not zot
-	"reviewed-title": "reviewed-title", // not zot
-	scale: "scale",
-	section: "section", // zot:section, zot:committee
-	source: "libraryCatalog",
-	status: "legalStatus",
-	submitted: "filingDate",
-	"supplement-number": "supplement-number", // not zot
-	title: "title",
-	"title-short": "shortTitle",
-	url: "URL",
-	version: "versionNumber",
-	volume: "volume",
-	"year-suffix": "year-suffix", // not zot
-};
-
-/**
- * For a parser of zot:extra field,
- * List of CSL properties with zotero key if available.
- * These properties are repeatable and are appended.
- * References https://aurimasv.github.io/z2csl/typeMap.xml
- */
-const cslCreators = {
-	author: "author",
-	chair: "chair", // not zot
-	"collection-editor": "seriesEditor",
-	compiler: "compiler", // not zot
-	composer: "composer",
-	"container-author": "container-author",
-	contributor: "contributor",
-	curator: "curator", // not zot
-	director: "author", // cinema
-	editor: "editor",
-	"editor-translator": "editorial-translator", // not zot
-	"editorial-director": "editorial-director", // not zot
-	"executive-producer": "executive-producer", // not zot
-	guest: "guest",
-	host: "host", // not zot
-	illustrator: "illustrator", // not zot
-	interviewer: "interviewer",
-	narrator: "narrator", // not zot
-	organizer: "organizer", // not zot
-	"original-author": "original-author", // not zot
-	performer: "performer",
-	recipient: "recipient",
-	"reviewed-author": "reviewedAuthor",
-	"script-writer": "scriptWriter",
-	translator: "translator",
-};
-
-
-/**
  * Parse the “extra” field to get “extra fields”.
  * Adaptation of Zotero.Utilities.Item.extraToCSL()
  * https://github.com/zotero/utilities/blob/9c89b23153ce621ed0f1d581a5e32248704c6fb7/utilities_item.js#L614
@@ -456,14 +342,129 @@ const cslCreators = {
  *
  * This: could be a free note.
  * [2024-01 FG]
- * @param {*} item
+ * @param {*} zotItem
  * @returns
  */
-function parseExtraFields(item) {
-	if (!item.extra) return;
-	const extra = item.extra.trim();
+function parseExtraFields(zotItem) {
+	if (!zotItem.extra) return;
+
+	/**
+	 * For a parser of zot:extra field,
+	 * List of CSL properties with zotero key if available.
+	 * These properties are unique for a record and override
+	 * values from zotero form.
+	 * References https://aurimasv.github.io/z2csl/typeMap.xml
+	 */
+	const cslScalars = {
+		abstract: "abstractNote",
+		accessed: "accessDate",
+		annote: "annote", // not zot
+		archive: "archive",
+		"archive-collection": "seriesTitle", // not zot
+		"archive-location": "archiveLocation",
+		"archive-place": "place", // not zot
+		authority: "authority", // zot:legislativeBody, zot:court, zot:issuingAuthority
+		"available-date": "available-date", // not zot
+		"call-number": "callNumber",
+		chair: "chair",
+		"chapter-number": "session", // legal, audio
+		"citation-label": "citationKey",
+		"citation-number": "citationKey",
+		"collection-number": "seriesNumber",
+		"collection-title": "seriesTitle",
+		container: "container",
+		"container-title": "container-title", // zot:bookTitle, zot:proceedingsTitle, zot:encyclopediaTitle, zot:dictionaryTitle, zot:publicationTitle, zot:websiteTitle
+		"container-title-short": "journalAbbreviation",
+		dimensions: "dimensions", // zot:artworkSize, zot:runningTime
+		division: "division", // not zot
+		doi: "DOI",
+		edition: "edition",
+		// "event": "event", // Deprecated legacy variant of event-title
+		"event-date": "date",
+		"event-place": "place",
+		"event-title": "event-title", // zot:conferenceName, zot:meetingName
+		"first-reference-note-number": "first-reference-note-number", // not zot
+		genre: "genre", // zot:websiteType, zot:programmingLanguage, zot:genre, zot:postType, zot:letterType, zot:manuscriptType, zot:mapType, zot:presentationType, zot:reportType, zot:thesisType
+		isbn: "ISBN",
+		issn: "ISSN",
+		issue: "issue",
+		issued: "date", // zot:dateDecided, zot:dateEnacted
+		jurisdiction: "jurisdiction", // not zot
+		language: "language",
+		license: "rights",
+		locator: "locator", // not zot
+		medium: "medium", // zot:artworkMedium, zot:audioRecordingFormat, zot:system, zot:videoRecordingFormat, zot:interviewMedium, zot:audioFileType
+		note: "extra",
+		number: "number", // zot:billNumber
+		"number-of-pages": "numPages",
+		"number-of-volumes": "numberOfVolumes",
+		"original-date": "original-date", // not zot
+		"original-publisher": "original-publisher", // not zot
+		"original-publisher-place": "original-publisher-place", // not zot
+		"original-title": "original-title", // not zot
+		page: "page", // zot:page, zot:codePage
+		// "page-first": "page-first", // not zot
+		"part-number": "part-number", // not zot
+		"part-title": "part-title", // not zot
+		pmcid: "PMCID",
+		pmid: "PMID",
+		publisher: "publisher",
+		"publisher-place": "place",
+		references: "references", // zot:history, zot:references
+		"reviewed-genre": "reviewed-genre", // not zot
+		"reviewed-title": "reviewed-title", // not zot
+		scale: "scale",
+		section: "section", // zot:section, zot:committee
+		source: "libraryCatalog",
+		status: "legalStatus",
+		submitted: "filingDate",
+		"supplement-number": "supplement-number", // not zot
+		title: "title",
+		"title-short": "shortTitle",
+		url: "URL",
+		version: "versionNumber",
+		volume: "volume",
+		"year-suffix": "year-suffix", // not zot
+	};
+
+	/**
+	 * For a parser of zot:extra field,
+	 * List of CSL properties with zotero key if available.
+	 * These properties are repeatable and are appended.
+	 * References https://aurimasv.github.io/z2csl/typeMap.xml
+	 */
+	const cslCreators = {
+		author: "author",
+		chair: "chair", // not zot
+		"collection-editor": "seriesEditor",
+		compiler: "compiler", // not zot
+		composer: "composer",
+		"container-author": "container-author",
+		contributor: "contributor",
+		curator: "curator", // not zot
+		director: "author", // cinema
+		editor: "editor",
+		"editor-translator": "editorial-translator", // not zot
+		"editorial-director": "editorial-director", // not zot
+		"executive-producer": "executive-producer", // not zot
+		guest: "guest",
+		host: "host", // not zot
+		illustrator: "illustrator", // not zot
+		interviewer: "interviewer",
+		narrator: "narrator", // not zot
+		organizer: "organizer", // not zot
+		"original-author": "original-author", // not zot
+		performer: "performer",
+		recipient: "recipient",
+		"reviewed-author": "reviewedAuthor",
+		"script-writer": "scriptWriter",
+		translator: "translator",
+	};
+
+
+	const extra = zotItem.extra.trim();
 	if (!extra) {
-		delete item.extra;
+		delete zotItem.extra;
 		return;
 	}
 	// loop on extra, extract known properties as a dictionary, let unknown lines as is
@@ -472,16 +473,16 @@ function parseExtraFields(item) {
 		if (!value) { // keep line as is
 			return _;
 		}
-		const csl = label.toLowerCase().replace(/ /g, '-');
-		const zot = cslScalars[csl];
-		if (zot) { // Standard or Number property
-			item[zot] = value;
+		const cslKey = label.toLowerCase().replace(/ /g, '-');
+		const zotKey = cslScalars[cslKey];
+		if (zotKey) { // Standard or Number property
+			zotItem[zotKey] = value;
 			return "";
 		}
-		const creatorType = cslCreators[csl];
+		const creatorType = cslCreators[cslKey];
 		if (creatorType) { // a name to append
-			if (!Array.isArray(item.creators)) {
-				item.creators = [];
+			if (!Array.isArray(zotItem.creators)) {
+				zotItem.creators = [];
 			}
 			const creator = {};
 			const i = value.indexOf('||');
@@ -493,15 +494,15 @@ function parseExtraFields(item) {
 				creator.firstName = value.slice(i + 2).trim();
 			}
 			creator.creatorType = creatorType;
-			item.creators.push(creator);
+			zotItem.creators.push(creator);
 			return "";
 		}
 		const field = "keyword";
-		if (csl == field) {
-			if (!Array.isArray(item[field])) {
-				item[field] = [];
+		if (cslKey == "keyword") {
+			if (!Array.isArray(zotItem["keyword"])) {
+				zotItem["keyword"] = [];
 			}
-			item[field].push(value);
+			zotItem["keyword"].push(value);
 			return "";
 		}
 		// default, append to note
@@ -509,10 +510,10 @@ function parseExtraFields(item) {
 	});
 	note = note.trim();
 	if (!note) {
-		delete item.extra;
+		delete zotItem.extra;
 	}
 	else {
-		item.extra = note.replace(/\n\n+/g, "\n\n");
+		zotItem.extra = note.replace(/\n\n+/g, "\n\n");
 	}
 }
 
@@ -807,7 +808,7 @@ function generateItem(item, teiDoc) {
 	if (item.url) {
 		const ptr = teiDoc.createElementNS(ns.tei, "ptr");
 		ptr.setAttribute("target", item.url);
-		monogr.append('\n', indent.repeat(2), ptr);
+		monoana.append('\n', indent.repeat(2), ptr);
 	}
 	// Other canonical ref nos come right after the title(s)
 	appendField(monogr, 'idno', item.ISBN, 2, { type: 'ISBN' });
