@@ -3,12 +3,12 @@
 	"label": "ADS Bibcode",
 	"creator": "Abe Jellinek",
 	"target": "",
-	"minVersion": "4.0",
+	"minVersion": "6.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 8,
-	"lastUpdated": "2023-06-09 17:04:40"
+	"lastUpdated": "2025-04-29 03:02:00"
 }
 
 /*
@@ -34,9 +34,23 @@
 	***** END LICENSE BLOCK *****
 */
 
-const preprintType = ZU.fieldIsValidForType('title', 'preprint')
-	? 'preprint'
-	: 'report';
+// Logic for accurate type detection. In general, the type in the RIS export is
+// fairly accurate. However, it may misidentify a proceedings book as JOUR (but
+// usually identifies conference papers fine). Theses are also identified as
+// JOUR in the RIS file. Preprints are usually correctly identified.
+function getRealType(bibStem, exportType) {
+	if (/^(PhDT|MsT)/.test(bibStem)) {
+		return "thesis";
+	}
+
+	// Fix misidentifying full proceedings book as JOUR
+	let volume = bibStem.substring(5, 9);
+	if (volume === "conf" && exportType === "journalArticle") {
+		return "book";
+	}
+
+	return exportType;
+}
 
 // https://github.com/yymao/adstex/blob/64989c9e75d7401ea2b33b546664cbc34cce6a27/adstex.py
 const bibcodeRe = /^\d{4}\D\S{13}[A-Z.:]$/;
@@ -45,10 +59,10 @@ function detectSearch(items) {
 	return !!filterQuery(items).length;
 }
 
-function doSearch(items) {
+async function doSearch(items) {
 	let bibcodes = filterQuery(items);
 	if (!bibcodes.length) return;
-	scrape(bibcodes);
+	await scrape(bibcodes);
 }
 
 function filterQuery(items) {
@@ -70,95 +84,93 @@ function filterQuery(items) {
 }
 
 function extractId(url) {
-	return /\/abs\/([^/]+)/.exec(url)[1];
-}
-
-function getTypeFromId(id) {
-	// bibcodes always start with 4 digit year, then bibstem
-	const bibstem = id.slice(4);
-	if (bibstem.startsWith("MsT") || bibstem.startsWith("PhDT")) {
-		return "thesis";
-	}
-	else if (bibstem.startsWith("arXiv")) {
-		return preprintType;
-	}
-	else {
-		// now scan past the bibstem and find the volume number/type abbrev.
-		const volume = bibstem.substring(5, 9);
-		if (volume == "conf" || volume == "meet" || volume == "coll"
-			|| volume == "proc" || volume == "book") {
-			return "book";
-		}
-		else if (volume == "rept") {
-			return "report";
-		}
-	}
-	return "journalArticle";
+	let m = url.match(/\/abs\/([^/]+)/);
+	return m && decodeURIComponent(m[1]);
 }
 
 function makePdfUrl(id) {
 	return "https://ui.adsabs.harvard.edu/link_gateway/" + id + "/ARTICLE";
 }
 
-function scrape(ids) {
-	ZU.doGet('https://api.adsabs.harvard.edu/v1/accounts/bootstrap', function (respText) {
-		let json = JSON.parse(respText);
-		let token = json.access_token;
+// Detect if an item is from arXiv. This is necessary because bibcodes of older
+// arXiv preprints don't start with "arXiv"
+function isArXiv(item, bibStem) {
+	if (item.DOI && item.DOI.startsWith("10.48550/")) return true;
+	if (bibStem.startsWith("arXiv")) return true;
+	return false;
+}
 
-		let exportUrl = "https://ui.adsabs.harvard.edu/v1/export/ris";
-		let body = JSON.stringify({
-			bibcode: ids,
-			sort: ['date desc, bibcode desc']
+async function scrape(ids) {
+	let bootstrap = await requestJSON("https://api.adsabs.harvard.edu/v1/accounts/bootstrap");
+	if (!bootstrap || !bootstrap.access_token) {
+		throw new Error("ADS Bibcode: cannot obtain access token");
+	}
+	let body = JSON.stringify({ bibcode: ids, sort: ['no sort'] });
+	let response = await requestJSON("https://api.adsabs.harvard.edu/v1/export/ris", {
+		method: "POST",
+		body,
+		headers: {
+			Accept: "application/json",
+			Authorization: `Bearer ${bootstrap.access_token}`,
+			"Content-Type": "application/json",
+		},
+	});
+
+	let translator = Zotero.loadTranslator("import");
+	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7"); // RIS
+	translator.setString(response.export);
+	translator.setHandler("itemDone", function (obj, item) {
+		let id = extractId(item.url);
+		let bibStem = id.slice(4);
+
+		let type = getRealType(bibStem, item.itemType);
+		if (type !== item.itemType) {
+			Z.debug(`ADS Bibcode: changing item type: ${item.itemType} -> ${type}`);
+			item.itemType = type;
+		}
+
+		if (isArXiv(item, bibStem)) {
+			item.itemType = "preprint";
+			item.publisher = "arXiv";
+			delete item.pages;
+			delete item.publicationTitle;
+			delete item.journalAbbreviation;
+		}
+
+		item.extra = (item.extra || '') + `\nADS Bibcode: ${id}`;
+
+		// for thesis-type terminology, see
+		// https://adsabs.harvard.edu/abs_doc/journals1.html
+		if (item.itemType === "thesis") {
+			if (bibStem.startsWith("PhDT")) {
+				item.thesisType = "Ph.D. thesis";
+			}
+			else if (bibStem.startsWith("MsT")) {
+				item.thesisType = "Masters thesis";
+			}
+			delete item.journalAbbreviation; // from spurious JO tag
+			delete item.publicationTitle;
+		}
+
+		item.attachments.push({
+			url: makePdfUrl(id),
+			title: "Full Text PDF",
+			mimeType: "application/pdf"
 		});
 
-		ZU.doPost(exportUrl, body, function (respText) {
-			let json = JSON.parse(respText);
+		if (item.journalAbbreviation == item.publicationTitle) {
+			delete item.journalAbbreviation;
+		}
 
-			const translator = Zotero.loadTranslator("import");
-			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7"); // RIS
-			translator.setString(json.export);
-			translator.setHandler("itemDone", function (obj, item) {
-				const id = extractId(item.url);
-				let detectedType = getTypeFromId(id);
-				if (detectedType != item.itemType) {
-					Z.debug(`Changing item type: ${item.itemType} -> ${detectedType}`);
-					item.itemType = detectedType;
-				}
+		if (item.date) {
+			item.date = ZU.strToISO(item.date);
+		}
 
-				item.extra = (item.extra || '') + `\nADS Bibcode: ${id}`;
+		item.libraryCatalog = 'NASA ADS';
 
-				if (id.slice(4).startsWith('arXiv')) {
-					if (preprintType == "report") {
-						item.extra += '\nType: article'; // will map to preprint
-					}
-				}
-
-				if (item.pages && item.pages.startsWith('arXiv:')) {
-					// not sure why this ends up in the SP tag
-					delete item.pages;
-				}
-				
-				item.attachments.push({
-					url: makePdfUrl(id),
-					title: "Full Text PDF",
-					mimeType: "application/pdf"
-				});
-
-				if (item.journalAbbreviation == item.publicationTitle) {
-					item.journalAbbreviation = '';
-				}
-
-				if (item.date) {
-					item.date = ZU.strToISO(item.date);
-				}
-
-				item.libraryCatalog = 'NASA ADS';
-
-				item.complete();
-			});
-			translator.translate();
-		}, { Authorization: 'Bearer:' + token });
+		item.complete();
 	});
+	await translator.translate();
 }
 
 /** BEGIN TEST CASES **/
@@ -253,6 +265,7 @@ var testCases = [
 				"abstractNote": "Gravitational-wave astronomy is now a reality. During my time at Caltech, the Advanced LIGO and Virgo observatories have detected gravitational waves from dozens of compact binary coalescences. All of these gravitational-wave events occurred in the relatively local Universe. In the first part of this thesis, I will instead look towards the remote Universe, investigating what LIGO and Virgo may be able to learn about cosmologically-distant compact binaries via observation of the stochastic gravitational-wave background. The stochastic gravitational-wave background is composed of the incoherent superposition of all distant, individually-unresolvable gravitational-wave sources. I explore what we learn from study of the gravitational-wave background, both about the astrophysics of compact binaries and the fundamental nature of gravitational waves. Of course, before we can study the gravitational-wave background we must first detect it. I therefore present searches for the gravitational-wave background using data from Advanced LIGO's first two observing runs, obtaining the most stringent upper limits to date on strength of the stochastic background. Finally, I consider how one might validate an apparent detection of the gravitational-wave background, confidently distinguishing a true astrophysical signal from spurious terrestrial artifacts. The second part of this thesis concerns the search for electromagnetic counterparts to gravitational-wave events. The binary neutron star merger GW170817 was accompanied by a rich set of electromagnetic counterparts spanning nearly the entire electromagnetic spectrum. Beyond these counterparts, compact binaries may additionally generate powerful radio transients at or near their time of merger. First, I consider whether there is a plausible connection between this so-called \"prompt radio emission\" and fast radio bursts — enigmatic radio transients of unknown origin. Next, I present the first direct search for prompt radio emission from a compact binary merger using the Owens Valley Radio Observatory Long Wavelength Array (OVRO-LWA). While no plausible candidates are identified, this effort successfully demonstrates the prompt radio follow-up of a gravitational-wave source, providing a blueprint for LIGO and Virgo follow-up in their O3 observing run and beyond.",
 				"extra": "ADS Bibcode: 2021PhDT.........5C",
 				"libraryCatalog": "NASA ADS",
+				"thesisType": "Ph.D. thesis",
 				"url": "https://ui.adsabs.harvard.edu/abs/2021PhDT.........5C",
 				"attachments": [
 					{
@@ -415,121 +428,67 @@ var testCases = [
 	{
 		"type": "search",
 		"input": {
-			"adsBibcode": "2023arXiv230604024S"
+			"adsBibcode": "2020jsrs.conf..209S"
 		},
 		"items": [
 			{
-				"itemType": "preprint",
-				"title": "The FLAMINGO project: cosmological hydrodynamical simulations for large-scale structure and galaxy cluster surveys",
+				"itemType": "conferencePaper",
+				"title": "Atmospheric angular momentum related to Earth rotation studies: history and modern developments",
 				"creators": [
 					{
-						"lastName": "Schaye",
-						"firstName": "Joop",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Kugel",
-						"firstName": "Roi",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Schaller",
-						"firstName": "Matthieu",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Helly",
-						"firstName": "John C.",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Braspenning",
-						"firstName": "Joey",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Elbers",
-						"firstName": "Willem",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "McCarthy",
-						"firstName": "Ian G.",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "van Daalen",
-						"firstName": "Marcel P.",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Vandenbroucke",
-						"firstName": "Bert",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Frenk",
-						"firstName": "Carlos S.",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Kwan",
-						"firstName": "Juliana",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Salcido",
-						"firstName": "Jaime",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Bahé",
-						"firstName": "Yannick M.",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Borrow",
-						"firstName": "Josh",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Chaikin",
-						"firstName": "Evgenii",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Hahn",
-						"firstName": "Oliver",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Huško",
-						"firstName": "Filip",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Jenkins",
-						"firstName": "Adrian",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Lacey",
-						"firstName": "Cedric G.",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Nobels",
-						"firstName": "Folkert S. J.",
+						"lastName": "Salstein",
+						"firstName": "D.",
 						"creatorType": "author"
 					}
 				],
-				"date": "2023-06-01",
-				"DOI": "10.48550/arXiv.2306.04024",
-				"abstractNote": "We introduce the Virgo Consortium's FLAMINGO suite of hydrodynamical simulations for cosmology and galaxy cluster physics. To ensure the simulations are sufficiently realistic for studies of large-scale structure, the subgrid prescriptions for stellar and AGN feedback are calibrated to the observed low-redshift galaxy stellar mass function and cluster gas fractions. The calibration is performed using machine learning, separately for three resolutions. This approach enables specification of the model by the observables to which they are calibrated. The calibration accounts for a number of potential observational biases and for random errors in the observed stellar masses. The two most demanding simulations have box sizes of 1.0 and 2.8 Gpc and baryonic particle masses of $1\\times10^8$ and $1\\times10^9 \\text{M}_\\odot$, respectively. For the latter resolution the suite includes 12 model variations in a 1 Gpc box. There are 8 variations at fixed cosmology, including shifts in the stellar mass function and/or the cluster gas fractions to which we calibrate, and two alternative implementations of AGN feedback (thermal or jets). The remaining 4 variations use the unmodified calibration data but different cosmologies, including different neutrino masses. The 2.8 Gpc simulation follows $3\\times10^{11}$ particles, making it the largest ever hydrodynamical simulation run to $z=0$. Lightcone output is produced on-the-fly for up to 8 different observers. We investigate numerical convergence, show that the simulations reproduce the calibration data, and compare with a number of galaxy, cluster, and large-scale structure observations, finding very good agreement with the data for converged predictions. Finally, by comparing hydrodynamical and `dark-matter-only' simulations, we confirm that baryonic effects can suppress the halo mass function and the matter power spectrum by up to $\\approx20$ per cent.",
-				"extra": "ADS Bibcode: 2023arXiv230604024S",
+				"date": "2020-09-01",
+				"abstractNote": "It was noted some time ago that the angular momentum of the atmosphere varies, both regionally as well as in total. Given the conservation of angular momentum in the Earth system, except for known external torques, such variability implies transfer of the angular momentum across the atmosphere's lower boundary. As nearly all is absorbed by the Earth below, the solid Earth changes its overall rotation from this impact. Due to the large difference between in the moments of inertia of the atmosphere and Earth, relatively big differences in the atmosphere are translated as relatively very small differences in the Earth, measurable as changes in Earth rotation rate, and polar motion. The atmospheric angular momentum (AAM) is that due to the motion of the winds and to the changes in mass distribution, closely related to the atmosphere pressure patterns; its variability in the atmosphere is mirrored in the Earth rotation rate and polar motion. This connection between the global solid Earth properties and the global and regional atmosphere on a number of time scales, especially seasonal and interannual, was much appreciated by Barbara Kolaczek, with Jolanta Nastula, at the Space Research Center in Warsaw, and this was a subject of our collaborative studies. Many calculations were made of atmospheric angular momentum, leading to a service under the Global Geophysical Fluids Center of the IERS based on calculations using both operational meteorological series, determined for weather forecasting purposes, and retrospective analyses of the atmosphere. Theoretical development of the connection between the AAM, Earth rotation/polar motion, and also the angular momentum of the other geophysical fluids occurred at the same time that space-based observations and enhanced computer power were allowing improved skills for both weather analysis and forecasting. Hence better determination of the AAM became possible, which could be used as a measure for forecasting Earth rotation. Today we are looking at the atmosphere in combination with the ocean and other fluids, and also assessing the implications of climate variability on Earth rotation through climate model research. According to models of the Earth system, significant changes in winds appear to be a possible result of climate change, with implications for the Earth rotation parameters.",
+				"conferenceName": "Astrometry, Earth Rotation, and Reference Systems in the GAIA era",
+				"extra": "ADS Bibcode: 2020jsrs.conf..209S",
 				"libraryCatalog": "NASA ADS",
-				"shortTitle": "The FLAMINGO project",
-				"url": "https://ui.adsabs.harvard.edu/abs/2023arXiv230604024S",
+				"pages": "209-213",
+				"shortTitle": "Atmospheric angular momentum related to Earth rotation studies",
+				"url": "https://ui.adsabs.harvard.edu/abs/2020jsrs.conf..209S",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": [
+			{
+				"adsBibcode": "2002math.....11159P"
+			},
+			{
+				"adsBibcode": "2003math......3109P"
+			}
+		],
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "The entropy formula for the Ricci flow and its geometric applications",
+				"creators": [
+					{
+						"lastName": "Perelman",
+						"firstName": "Grisha",
+						"creatorType": "author"
+					}
+				],
+				"date": "2002-11-01",
+				"DOI": "10.48550/arXiv.math/0211159",
+				"abstractNote": "We present a monotonic expression for the Ricci flow, valid in all dimensions and without curvature assumptions. It is interpreted as an entropy for a certain canonical ensemble. Several geometric applications are given. In particular, (1) Ricci flow, considered on the space of riemannian metrics modulo diffeomorphism and scaling, has no nontrivial periodic orbits (that is, other than fixed points); (2) In a region, where singularity is forming in finite time, the injectivity radius is controlled by the curvature; (3) Ricci flow can not quickly turn an almost euclidean region into a very curved one, no matter what happens far away. We also verify several assertions related to Richard Hamilton's program for the proof of Thurston geometrization conjecture for closed three-manifolds, and give a sketch of an eclectic proof of this conjecture, making use of earlier results on collapsing with local lower curvature bound.",
+				"extra": "ADS Bibcode: 2002math.....11159P",
+				"libraryCatalog": "NASA ADS",
+				"repository": "arXiv",
+				"url": "https://ui.adsabs.harvard.edu/abs/2002math.....11159P",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -538,10 +497,162 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Astrophysics - Astrophysics of Galaxies"
+						"tag": "53C"
 					},
 					{
-						"tag": "Astrophysics - Cosmology and Nongalactic Astrophysics"
+						"tag": "Differential Geometry"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			},
+			{
+				"itemType": "preprint",
+				"title": "Ricci flow with surgery on three-manifolds",
+				"creators": [
+					{
+						"lastName": "Perelman",
+						"firstName": "Grisha",
+						"creatorType": "author"
+					}
+				],
+				"date": "2003-03-01",
+				"DOI": "10.48550/arXiv.math/0303109",
+				"abstractNote": "This is a technical paper, which is a continuation of math.DG/0211159. Here we construct Ricci flow with surgeries and verify most of the assertions, made in section 13 of that e-print; the exceptions are (1) the statement that manifolds that can collapse with local lower bound on sectional curvature are graph manifolds - this is deferred to a separate paper, since the proof has nothing to do with the Ricci flow, and (2) the claim on the lower bound for the volume of maximal horns and the smoothness of solutions from some time on, which turned out to be unjustified and, on the other hand, irrelevant for the other conclusions.",
+				"extra": "ADS Bibcode: 2003math......3109P",
+				"libraryCatalog": "NASA ADS",
+				"repository": "arXiv",
+				"url": "https://ui.adsabs.harvard.edu/abs/2003math......3109P",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "53C"
+					},
+					{
+						"tag": "Differential Geometry"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"adsBibcode": "1995LNP...463...51E"
+		},
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Observations and Cosmological Models",
+				"creators": [
+					{
+						"lastName": "Ellis",
+						"firstName": "G. F. R.",
+						"creatorType": "author"
+					}
+				],
+				"date": "1995-01-01",
+				"bookTitle": "Galaxies in the Young Universe",
+				"extra": "DOI: 10.1007/BFb0102359\nADS Bibcode: 1995LNP...463...51E",
+				"libraryCatalog": "NASA ADS",
+				"pages": "51",
+				"url": "https://ui.adsabs.harvard.edu/abs/1995LNP...463...51E",
+				"volume": "463",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"adsBibcode": "1997MsT...........B"
+		},
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "Comparative Analysis of Selected Radiation Effects in Medium Earth Orbits",
+				"creators": [
+					{
+						"lastName": "Bolin",
+						"firstName": "Jennifer A.",
+						"creatorType": "author"
+					}
+				],
+				"date": "1997-12-01",
+				"abstractNote": "Satellite design is well developed for the common Low Earth Orbit (LEO) and Geosynchronous Orbit (GEO) and Highly Elliptical Orbits (HEO), i.e., Molniya, cases; Medium Earth Orbit (MEO) satellite design is a relatively new venture. MEO is roughly defined as being altitudes above LEO and below GEO. A primary concern, and a major reason for the delay in exploiting the MEO altitudes, has been the expected radiation environment and corresponding satellite degradation anticipated to occur at MEO altitudes. The presence of the Van Allen belts, a major source of radiation, along with the suitability of GEO and LEO orbits, has conventionally discouraged satellite placement in MEO. As conventional Earth orbits become increasingly crowded, MEO will become further populated. This thesis investigates the major sources of radiation (geomagnetically trapped particles, solar particle events and galactic cosmic radiation) with respect to specific Naval Research Laboratory (NRL) designated MEO (altitudes between 3,000 nautical miles (nmi) and 9,000 nmi; (inclination angle of 15 degrees). The contribution of each of these components to the total radiation experienced in MEO and the effects of the expected radiation on a representative spacecraft are analyzed in comparison to a baseline LEO orbit of 400 nmi and 70 degrees inclination. Dose depth curves are calculated for several configurations, and show that weight gains from necessary expected shielding are not extreme. The radiation effects considered include proton displacement dose and solar cell degradation.",
+				"extra": "ADS Bibcode: 1997MsT...........B",
+				"libraryCatalog": "NASA ADS",
+				"thesisType": "Masters thesis",
+				"url": "https://ui.adsabs.harvard.edu/abs/1997MsT...........B",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Aerospace Environments"
+					},
+					{
+						"tag": "Astrophysics"
+					},
+					{
+						"tag": "Cosmic Rays"
+					},
+					{
+						"tag": "Degradation"
+					},
+					{
+						"tag": "Elliptical Orbits"
+					},
+					{
+						"tag": "Galactic Radiation"
+					},
+					{
+						"tag": "Geosynchronous Orbits"
+					},
+					{
+						"tag": "Low Earth Orbits"
+					},
+					{
+						"tag": "Radiation Belts"
+					},
+					{
+						"tag": "Radiation Effects"
+					},
+					{
+						"tag": "Satellite Design"
+					},
+					{
+						"tag": "Solar Activity"
+					},
+					{
+						"tag": "Solar Cells"
+					},
+					{
+						"tag": "Solar Corpuscular Radiation"
+					},
+					{
+						"tag": "Solar Storms"
+					},
+					{
+						"tag": "Unmanned Spacecraft"
 					}
 				],
 				"notes": [],

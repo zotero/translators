@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-04-03 05:05:34"
+	"lastUpdated": "2025-03-06 20:15:05"
 }
 
 /*
@@ -36,6 +36,10 @@
 */
 
 
+// These always seem to take the form `/wos/woscc/summary/<qid>/<sortBy>/[...]`,
+// but we'll be tolerant
+const SEARCH_RE = /\/wos\/[^/]+\/[^/]+\/((?:[a-z0-9]+-)+[a-z0-9]+)\/([^/?#]+)/;
+
 function detectWeb(doc, url) {
 	if (url.includes('/full-record/') && getItemID(url)) {
 		let docType = text(doc, '#FullRTa-doctype-0').trim().toLowerCase();
@@ -46,7 +50,7 @@ function detectWeb(doc, url) {
 			return "book";
 		}
 		else if (docType == "data set") {
-			return "document"; //change to dataset
+			return "dataset";
 		}
 		else if (text(doc, '#FullRTa-patentNumber-0')) {
 			return "patent";
@@ -55,13 +59,59 @@ function detectWeb(doc, url) {
 			return "journalArticle";
 		}
 	}
-	else if (getSearchResults(doc, true)) {
+	else if (doc.querySelector('app-records-list > app-record') && SEARCH_RE.test(url)
+			|| getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	Z.monitorDOMChanges(doc.querySelector('app-wos'));
 	return false;
 }
 
+// Handle search results on lazy-loaded pages:
+// export the full result set instead of scraping
+// URLs from the DOM
+async function getSearchResultsLazy(doc, url) {
+	let [, qid, sortBy] = url.match(SEARCH_RE);
+	let markFrom = parseInt(text(doc, 'app-records-list > app-record .mat-checkbox-label'));
+	if (isNaN(markFrom)) {
+		markFrom = 1;
+	}
+	let markTo = parseInt(text(doc, '.tab-results-count').replace(/[,.\s]/g, ''));
+	if (isNaN(markTo) || markTo - markFrom > 49) {
+		markTo = markFrom + 49;
+	}
+	Zotero.debug(`Exporting ${markFrom} to ${markTo}`);
+	let taggedText = await requestText('/api/wosnx/indic/export/saveToFile', {
+		method: 'POST',
+		headers: {
+			'X-1P-WOS-SID': await getSessionID(doc)
+		},
+		body: JSON.stringify({
+			parentQid: qid,
+			sortBy,
+			displayTimesCited: 'true',
+			displayCitedRefs: 'true',
+			product: 'UA',
+			colName: 'WOS',
+			displayUsageInfo: 'true',
+			fileOpt: 'othersoftware',
+			action: 'saveToFieldTagged',
+			markFrom: String(markFrom),
+			markTo: String(markTo),
+			view: 'fullrec',
+			isRefQuery: 'false',
+			filters: 'fullRecord'
+		})
+	});
+	let trans = Zotero.loadTranslator('import');
+	// Web of Science Tagged
+	trans.setTranslator('594ebe3c-90a0-4830-83bc-9502825a6810');
+	trans.setString(taggedText);
+	trans.setHandler('itemDone', () => {});
+	return trans.translate();
+}
+
+// Handle author pages and other eagerly loaded result pages
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
@@ -77,73 +127,78 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) ZU.processDocuments(Object.keys(items), scrape);
-		});
+async function doWeb(doc, url) {
+	// If it's a lazy-loaded search page, use getSearchResultsLazy(),
+	// which returns full items
+	if (doc.querySelector('app-records-list > app-record') && SEARCH_RE.test(url)) {
+		let items = await getSearchResultsLazy(doc, url);
+		let filteredItems = await Zotero.selectItems(
+			Object.fromEntries(items.entries())
+		);
+		if (!filteredItems) return;
+		for (let i of Object.keys(filteredItems)) {
+			let item = items[i];
+			applyFixes(item);
+			item.complete();
+		}
+	}
+	// Otherwise, use getSearchResults(), which returns URLs
+	else if (getSearchResults(doc, true)) {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
-function scrape(doc, url) {
-	function processTaggedData(text) {
+async function scrape(doc, url = doc.location.href) {
+	async function processTaggedData(text) {
+		let url = attr(doc, 'a#FRLinkTa-link-1', 'href');
+		if (url) {
+			try {
+				url = await resolveGateway(url);
+			}
+			catch (e) {}
+		}
+
 		let importer = Zotero.loadTranslator("import");
 		// Web of Science Tagged
 		importer.setTranslator("594ebe3c-90a0-4830-83bc-9502825a6810");
 		importer.setString(text);
 		importer.setHandler('itemDone', function (obj, item) {
-			if (item.title.toUpperCase() == item.title) {
-				item.title = ZU.capitalizeTitle(item.title, true);
-			}
-			
-			for (let creator of item.creators) {
-				if (creator.firstName.toUpperCase() == creator.firstName) {
-					creator.firstName = ZU.capitalizeTitle(creator.firstName, true);
-				}
-				if (creator.lastName.toUpperCase() == creator.lastName) {
-					creator.lastName = ZU.capitalizeTitle(creator.lastName, true);
-				}
-			}
-			
-			if (item.url) {
-				item.complete();
-				return;
-			}
-			
-			let gatewayURL = attr(doc, 'a#FRLinkTa-link-1', 'href');
-			resolveGateway(gatewayURL, (url) => {
+			applyFixes(item);
+			if (!item.url) {
 				item.url = url;
-				item.complete();
-			});
+			}
+			item.complete();
 		});
-		importer.translate();
+		await importer.translate();
 	}
 	
 	let id = getItemID(url);
-	getSessionID(doc, (sessionID) => {
-		let postData = {
-			action: 'saveToFieldTagged',
-			colName: 'WOS',
-			displayCitedRefs: 'true',
-			displayTimesCited: 'true',
-			displayUsageInfo: 'true',
-			fileOpt: 'othersoftware',
-			filters: 'fullRecord',
-			product: 'UA',
-			view: 'fullrec',
-			ids: [id]
-		};
-		
-		ZU.doPost(
-			'/api/wosnx/indic/export/saveToFile',
-			JSON.stringify(postData),
-			processTaggedData,
-			{ 'X-1P-WOS-SID': sessionID }
-		);
-	});
+	let sessionID = await getSessionID(doc);
+	let postData = {
+		action: 'saveToFieldTagged',
+		colName: 'WOS',
+		displayCitedRefs: 'true',
+		displayTimesCited: 'true',
+		displayUsageInfo: 'true',
+		fileOpt: 'othersoftware',
+		filters: 'fullRecord',
+		product: 'UA',
+		view: 'fullrec',
+		ids: [id]
+	};
+	
+	await processTaggedData(await requestText('/api/wosnx/indic/export/saveToFile', {
+		method: 'POST',
+		body: JSON.stringify(postData),
+		headers: { 'X-1P-WOS-SID': sessionID }
+	}));
 }
 
 
@@ -153,7 +208,7 @@ function getItemID(url) {
 	return idInURL && idInURL[1];
 }
 
-function getSessionID(doc, callback) {
+async function getSessionID(doc) {
 	const sidRegex = /(?:sid=|"SID":")([a-zA-Z0-9]+)/i;
 	
 	// session ID is embedded in the static page inside an inline <script>
@@ -162,27 +217,39 @@ function getSessionID(doc, callback) {
 	for (let scriptTag of doc.querySelectorAll('script')) {
 		let sid = scriptTag.textContent.match(sidRegex);
 		if (sid) {
-			callback(sid[1]);
-			return;
+			return sid[1];
 		}
 	}
 	
-	resolveGateway('https://www.webofknowledge.com/?mode=Nextgen&action=transfer&path=%2F',
-		function (url) {
-			let sid = url.match(sidRegex);
-			if (sid) {
-				callback(sid[1]);
-			}
-			else {
-				callback(null);
-			}
-		});
+	let url = await resolveGateway('https://www.webofknowledge.com/?mode=Nextgen&action=transfer&path=%2F');
+	let sid = url.match(sidRegex);
+	if (sid) {
+		return sid[1];
+	}
+	else {
+		return null;
+	}
 }
 
-function resolveGateway(gatewayURL, callback) {
-	ZU.doGet(gatewayURL, function (_, xhr) {
-		callback(xhr.responseURL || gatewayURL);
-	}, null, null, null, false);
+async function resolveGateway(gatewayURL) {
+	// TODO: Just use request() once we have responseURL and followRedirects
+	let doc = await requestDocument(gatewayURL);
+	return doc.location.href;
+}
+
+function applyFixes(item) {
+	if (item.title.toUpperCase() == item.title) {
+		item.title = ZU.capitalizeTitle(item.title, true);
+	}
+	
+	for (let creator of item.creators) {
+		if (creator.firstName && creator.firstName.toUpperCase() == creator.firstName) {
+			creator.firstName = ZU.capitalizeTitle(creator.firstName, true);
+		}
+		if (creator.lastName && creator.lastName.toUpperCase() == creator.lastName) {
+			creator.lastName = ZU.capitalizeTitle(creator.lastName, true);
+		}
+	}
 }
 
 /** BEGIN TEST CASES **/
@@ -466,6 +533,179 @@ var testCases = [
 						"tag": "STEATOHEPATITIS"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.webofscience.com/wos/woscc/full-record/WOS:001308642000003",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Determinants of working poverty in Indonesia",
+				"creators": [
+					{
+						"lastName": "Faharuddin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Darma",
+						"lastName": "Endrawati",
+						"creatorType": "author"
+					}
+				],
+				"date": "AUG 15 2022",
+				"DOI": "10.1108/JED-09-2021-0151",
+				"ISSN": "1859-0020, 2632-5330",
+				"abstractNote": "PurposeThe study's first aim is to estimate the scale of working poverty using a nationwide household survey. The second aim is to answer the following research questions: is working enough to escape poverty, and what are the determinants of working poverty?Design/methodology/approachThe focus is on working people in Indonesia who have per capita household expenditure below the provincial poverty line. The determinant analysis used logistic regression on the first quarter of 2013 Susenas microdata.FindingsThe study found that the scale of the working poverty problem is equivalent to the scale of the poverty, although the in-work poverty rate is lower than the poverty rate in all provinces. The logistic regression results conclude that the three factors, namely individual-level, employment-related and household-level variables, have significant contributions to the incidence of the working poor in Indonesia.Practical implicationsSome practical implications for reducing the incidence of working poverty are increasing labor earnings through productivity growth and improving workers' skills, encouraging the labor participation of the poor and reducing precarious work. This study also suggests the need to continue assisting the working poor, particularly by increasing access to financial credit.Originality/valueResearch aimed at studying working poverty in Indonesia in the peer-reviewed literature is rare until now based on the authors' search. This study will fill the gap and provoke further research on working poverty in Indonesia.",
+				"extra": "Web of Science ID: WOS:001308642000003",
+				"issue": "3",
+				"journalAbbreviation": "J. Econ. Dev.",
+				"language": "English",
+				"libraryCatalog": "Clarivate Analytics Web of Science",
+				"pages": "230-246",
+				"publicationTitle": "JOURNAL OF ECONOMICS AND DEVELOPMENT",
+				"url": "https://www.webofscience.com/wos/woscc/full-record/WOS:001308642000003",
+				"volume": "24",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "EMPLOYMENT"
+					},
+					{
+						"tag": "Employment"
+					},
+					{
+						"tag": "Indonesia"
+					},
+					{
+						"tag": "LABOR-MARKET INSTITUTIONS"
+					},
+					{
+						"tag": "MICROCREDIT"
+					},
+					{
+						"tag": "POOR"
+					},
+					{
+						"tag": "Poverty"
+					},
+					{
+						"tag": "WAGE"
+					},
+					{
+						"tag": "WELFARE"
+					},
+					{
+						"tag": "Working poverty"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.webofscience.com/wos/woscc/summary/c3796df2-fc73-4d77-b66e-f088560f7a54-014fa5c4f0/source-title-ascending/2",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.webofscience.com/wos/alldb/full-record/DRCI:DATA2020263019547537",
+		"items": [
+			{
+				"itemType": "dataset",
+				"title": "Bettlachstock, Switzerland (field station): Long-term forest meteorological data from the Long-term Forest Ecosystem Research Programme (LWF), from 1998-2016",
+				"creators": [
+					{
+						"firstName": "Matthias",
+						"lastName": "Haeni",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Georg",
+						"lastName": "Von Arx",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Arthur",
+						"lastName": "Gessler",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Elisabeth",
+						"lastName": "Graf Pannatier",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "John L.",
+						"lastName": "Innes",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peter",
+						"lastName": "Jakob",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marketa",
+						"lastName": "Jetel",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marlen",
+						"lastName": "Kube",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Magdalena",
+						"lastName": "Notzli",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marcus",
+						"lastName": "Schaub",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Maria",
+						"lastName": "Schmitt",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Flurin",
+						"lastName": "Sutter",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Anne",
+						"lastName": "Thimonier",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peter",
+						"lastName": "Waldner",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Martine",
+						"lastName": "Rebetez",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016",
+				"DOI": "10.1594/PANGAEA.868399",
+				"abstractNote": "High quality meteorological data are needed for long-term forest ecosystem research, particularly in the light of global change. The long-term data series published here comprises almost 20 years of two meteorological stations in Bettlachstock in Switzerland where one station is located within a natural mixed forest stand (BTB) with European beech (Fagus sylvatica; 170-190 yrs), European silver fir (Abies alba; 190yrs) and Norway spruce (Picea abies; 200 yrs) as dominant tree species. A second station is situated in the very vicinity outside of the forest (field station, BTF). The meteorological time series are presented in hourly time resolution of air temperature, relative humidity, precipitation, photosynthetically active radiation (PAR), and wind speed. Bettlachstock is part of the Long-term Forest Ecosystem research Programme (LWF) established and maintained by the Swiss Federal Research Institute WSL. For more information see PDF under 'Further Details'. Copyright: CC-BY-3.0 Creative Commons Attribution 3.0 Unported",
+				"extra": "Web of Science ID:",
+				"language": "English",
+				"libraryCatalog": "Clarivate Analytics Web of Science",
+				"shortTitle": "Bettlachstock, Switzerland (field station)",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}

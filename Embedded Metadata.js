@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-06-13 15:58:28"
+	"lastUpdated": "2025-05-09 18:24:39"
 }
 
 /*
@@ -242,10 +242,9 @@ function init(doc, url, callback, forceLoadRDF) {
 		Z.debug("Embedded Metadata: No meta tags found");
 	}
 
-	var hwType, hwTypeGuess, generatorType, statements = [];
+	var hwType, hwTypeGuess, generatorType, heuristicType, statements = [];
 
-	for (let i = 0; i < metaTags.length; i++) {
-		let metaTag = metaTags[i];
+	for (let metaTag of metaTags) {
 		// Two formats allowed:
 		// 	<meta name="..." content="..." />
 		//	<meta property="..." content="..." />
@@ -327,6 +326,11 @@ function init(doc, url, callback, forceLoadRDF) {
 		}
 	}
 
+	// WordPress indicators:
+	if (doc.getElementById("wp-block-library-css") || doc.getElementsByClassName("yoast-schema-graph").length) {
+		heuristicType = "blogPost";
+	}
+
 	if (statements.length || forceLoadRDF) {
 		// load RDF translator, so that we don't need to replicate import code
 		var translator = Zotero.loadTranslator("import");
@@ -343,7 +347,7 @@ function init(doc, url, callback, forceLoadRDF) {
 				rdf.Zotero.RDF.addStatement(statement[0], statement[1], statement[2], true);
 			}
 			var nodes = rdf.getNodes(true);
-			rdf.defaultUnknownType = hwTypeGuess || generatorType
+			rdf.defaultUnknownType = hwTypeGuess || generatorType || heuristicType
 				// if we have RDF data, then default to webpage
 				|| (nodes.length ? "webpage" : false);
 
@@ -574,16 +578,24 @@ function processHighwireCreators(creatorNodes, role, doc) {
 			/* If there is only one author node and
 			we get nothing when splitting by semicolon, there are at least two
 			words on either side of a comma, and it doesn't appear to be a
-			two-word Spanish surname, we split by comma. */
+			Spanish surname, we split by comma. */
 			
 			let lang = getContentText(doc, 'citation_language');
-			let twoWordName = authorsByComma.length == 2
+			let spanishName = authorsByComma.length == 2
 				&& ['es', 'spa', 'Spanish', 'español'].includes(lang)
-				&& authorsByComma[0].split(' ').length == 2;
+				&& (
+					// If it's a Spanish-language item and the text before the comma
+					// has exactly two words, this is very probably a single Spanish name
+					authorsByComma[0].split(' ').length == 2
+					// If the text before the comma has more than two words, we can't be
+					// sure, but we'll take it if there's an accented character or a
+					// "de" particle (this is not great)
+					|| authorsByComma[0].split(' ').length > 2 && /[À-ú]|\b[Dd]e\b/u.test(authorsByComma[0])
+				);
 			if (authorsByComma.length > 1
 				&& authorsByComma[0].includes(" ")
 				&& authorsByComma[1].includes(" ")
-				&& !twoWordName) creators = authorsByComma;
+				&& !spanishName) creators = authorsByComma;
 		}
 		
 		for (let creator of creators) {
@@ -741,13 +753,20 @@ function getAuthorFromByline(doc, newItem) {
 	var bylineClasses = ['byline', 'bylines', 'vcard', 'article-byline'];
 	Z.debug("Looking for authors in " + bylineClasses.join(', '));
 	var bylines = [], byline;
-	for (var i = 0; i < bylineClasses.length; i++) {
-		byline = doc.getElementsByClassName(bylineClasses[i]);
-		Z.debug("Found " + byline.length + " elements with '" + bylineClasses[i] + "' class");
-		for (var j = 0; j < byline.length; j++) {
-			if (!byline[j].innerText.trim()) continue;
+	for (let isStrict of [true, false]) {
+		for (let bylineClass of bylineClasses) {
+			byline = isStrict
+				? doc.getElementsByClassName(bylineClass)
+				: doc.querySelectorAll(`[class*="${bylineClass}" i]`);
+			Z.debug(`Found ${byline.length} elements with '${bylineClass}' class (strict: ${isStrict})`);
+			for (let bylineElement of byline) {
+				if (!bylineElement.innerText?.trim()) continue;
+				bylines.push(bylineElement);
+			}
 
-			bylines.push(byline[j]);
+			if (isStrict && bylines.length) {
+				break;
+			}
 		}
 	}
 
@@ -820,7 +839,9 @@ function getAuthorFromByline(doc, newItem) {
 				}
 
 				if (ZU.xpath(bylineParent, titleXPath).length) {
-					if (actualByline) {
+					if (actualByline
+							&& actualByline.textContent.trim().toLowerCase()
+								!== bylines[i].textContent.trim().toLowerCase()) {
 						// found more than one, bail
 						Z.debug('More than one possible byline found. Will not proceed');
 						return;
@@ -837,11 +858,11 @@ function getAuthorFromByline(doc, newItem) {
 		// are any of these actual likely to appear in the real world?
 		// well, no, but things happen:
 		//   https://github.com/zotero/translators/issues/2001
-		let irrelevantTags = 'time, button, textarea, script';
-		if (actualByline.querySelector(irrelevantTags)) {
+		let irrelevantSelector = 'time, button, textarea, script, [class*="email"], [class*="date"]';
+		if (actualByline.querySelector(irrelevantSelector)) {
 			actualByline = actualByline.cloneNode(true);
-			for (let child of actualByline.querySelectorAll(irrelevantTags)) {
-				child.parentNode.removeChild(child);
+			for (let child of [...actualByline.querySelectorAll(irrelevantSelector)]) {
+				child.remove();
 			}
 		}
 		
@@ -1051,7 +1072,7 @@ var testCases = [
 				"ISSN": "1821-9241",
 				"abstractNote": "The synergistic interaction between Human Immunodeficiency virus (HIV) disease and Malaria makes it mandatory for patients with HIV to respond appropriately in preventing and treating malaria. Such response will help to control the two diseases. This study assessed the knowledge of 495 patients attending the HIV clinic, in Lagos University Teaching Hospital, Nigeria.&nbsp; Their treatment seeking, preventive practices with regards to malaria, as well as the impact of socio &ndash; demographic / socio - economic status were assessed. Out of these patients, 245 (49.5 %) used insecticide treated bed nets; this practice was not influenced by socio &ndash; demographic or socio &ndash; economic factors.&nbsp; However, knowledge of the cause, knowledge of prevention of malaria, appropriate use of antimalarial drugs and seeking treatment from the right source increased with increasing level of education (p &lt; 0.05). A greater proportion of the patients, 321 (64.9 %) utilized hospitals, pharmacy outlets or health centres when they perceived an attack of malaria. Educational intervention may result in these patients seeking treatment from the right place when an attack of malaria fever is perceived.",
 				"issue": "4",
-				"journalAbbreviation": "1",
+				"journalAbbreviation": "Tanzania J Hlth Res",
 				"language": "en",
 				"libraryCatalog": "www.ajol.info",
 				"publicationTitle": "Tanzania Journal of Health Research",
@@ -1072,168 +1093,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34/",
-		"items": [
-			{
-				"itemType": "conferencePaper",
-				"title": "Session F: Contributed Oral Papers – F2: Energy, Climate, Nuclear Medicine: Reducing Energy Consumption and CO2 One Street Lamp at a Time",
-				"creators": [
-					{
-						"firstName": "Peter",
-						"lastName": "Somssich",
-						"creatorType": "author"
-					}
-				],
-				"date": "2011",
-				"abstractNote": "Why wait for federal action on incentives to reduce energy use and address  Greenhouse Gas (GHG) reductions (e.g. CO2), when we can take personal  actions right now in our private lives and in our communities? One such  initiative by private citizens working with Portsmouth NH officials resulted  in the installation of energy reducing lighting products on Court St. and  the benefits to taxpayers are still coming after over 4 years of operation.  This citizen initiative to save money and reduce CO2 emissions, while only  one small effort, could easily be duplicated in many towns and cities.  Replacing old lamps in just one street fixture with a more energy efficient  (Non-LED) lamp has resulted after 4 years of operation ($\\sim $15,000 hr.  life of product) in real electrical energy savings of $>$ {\\$}43. and CO2  emission reduction of $>$ 465 lbs. The return on investment (ROI) was less  than 2 years. This is much better than any financial investment available  today and far safer. Our street only had 30 such lamps installed; however,  the rest of Portsmouth (population 22,000) has at least another 150 street  lamp fixtures that are candidates for such an upgrade. The talk will also  address other energy reduction measures that green the planet and also put  more green in the pockets of citizens and municipalities.",
-				"conferenceName": "Climate Change and the Future of Nuclear Power",
-				"language": "en",
-				"libraryCatalog": "scholarworks.umass.edu",
-				"shortTitle": "Session F",
-				"url": "https://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://scholarworks.umass.edu/lov/vol2/iss1/2/",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Wabanaki Resistance and Healing: An Exploration of the Contemporary Role of an Eighteenth Century Bounty Proclamation in an Indigenous Decolonization Process",
-				"creators": [
-					{
-						"firstName": "Bonnie D.",
-						"lastName": "Newsom",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Jamie",
-						"lastName": "Bissonette-Lewey",
-						"creatorType": "author"
-					}
-				],
-				"date": "2012",
-				"DOI": "10.7275/R5KW5CXB",
-				"ISSN": "1947-508X",
-				"abstractNote": "The purpose of this paper is to examine the contemporary role of an eighteenth century bounty proclamation issued on the Penobscot Indians of Maine. We focus specifically on how the changing cultural context of the 1755 Spencer Phips Bounty Proclamation has transformed the document from serving as a tool for sanctioned violence to a tool of decolonization for the Indigenous peoples of Maine. We explore examples of the ways indigenous and non-indigenous people use the Phips Proclamation to illustrate past violence directed against Indigenous peoples. This exploration is enhanced with an analysis of the re-introduction of the Phips Proclamation using concepts of decolonization theory.",
-				"issue": "1",
-				"language": "en",
-				"libraryCatalog": "scholarworks.umass.edu",
-				"pages": "2",
-				"publicationTitle": "Landscapes of Violence",
-				"shortTitle": "Wabanaki Resistance and Healing",
-				"url": "https://scholarworks.umass.edu/lov/vol2/iss1/2",
-				"volume": "2",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://scholarworks.umass.edu/open_access_dissertations/508/",
-		"items": [
-			{
-				"itemType": "thesis",
-				"title": "Decision-Theoretic Meta-reasoning in Partially Observable and Decentralized Settings",
-				"creators": [
-					{
-						"firstName": "Alan Scott",
-						"lastName": "Carlin",
-						"creatorType": "author"
-					}
-				],
-				"date": "2012",
-				"abstractNote": "This thesis examines decentralized meta-reasoning. For a single agent or multiple agents, it may not be enough for agents to compute correct decisions if they do not do so in a timely or resource efficient fashion. The utility of agent decisions typically increases with decision quality, but decreases with computation time. The reasoning about one's computation process is referred to as meta-reasoning. Aspects of meta-reasoning considered in this thesis include the reasoning about how to allocate computational resources, including when to stop one type of computation and begin another, and when to stop all computation and report an answer. Given a computational model, this translates into computing how to schedule the basic computations that solve a problem. This thesis constructs meta-reasoning strategies for the purposes of monitoring and control in multi-agent settings, specifically settings that can be modeled by the Decentralized Partially Observable Markov Decision Process (Dec-POMDP). It uses decision theory to optimize computation for efficiency in time and space in communicative and non-communicative decentralized settings. Whereas base-level reasoning describes the optimization of actual agent behaviors, the meta-reasoning strategies produced by this thesis dynamically optimize the computational resources which lead to the selection of base-level behaviors.",
-				"extra": "DOI: 10.7275/n8e9-xy93",
-				"language": "en",
-				"libraryCatalog": "scholarworks.umass.edu",
-				"university": "University of Massachusetts Amherst",
-				"url": "https://scholarworks.umass.edu/open_access_dissertations/508",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://scielosp.org/article/rsp/2007.v41suppl2/94-100/en/",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Perceptions of HIV rapid testing among injecting drug users in Brazil",
-				"creators": [
-					{
-						"firstName": "P. R.",
-						"lastName": "Telles-Dias",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "S.",
-						"lastName": "Westman",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "A. E.",
-						"lastName": "Fernandez",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "M.",
-						"lastName": "Sanchez",
-						"creatorType": "author"
-					}
-				],
-				"date": "2007-12",
-				"DOI": "10.1590/S0034-89102007000900015",
-				"ISSN": "0034-8910, 0034-8910, 1518-8787",
-				"abstractNote": "OBJETIVO: Descrever as impressões, experiências, conhecimentos, crenças e a receptividade de usuários de drogas injetáveis para participar das estratégias de testagem rápida para HIV. MÉTODOS: Estudo qualitativo exploratório foi conduzido entre usuários de drogas injetáveis, de dezembro de 2003 a fevereiro de 2004, em cinco cidades brasileiras, localizadas em quatro regiões do País. Um roteiro de entrevista semi-estruturado contendo questões fechadas e abertas foi usado para avaliar percepções desses usuários sobre procedimentos e formas alternativas de acesso e testagem. Foram realizadas 106 entrevistas, aproximadamente 26 por região. RESULTADOS: Características da população estudada, opiniões sobre o teste rápido e preferências por usar amostras de sangue ou saliva foram apresentadas junto com as vantagens e desvantagens associadas a cada opção. Os resultados mostraram a viabilidade do uso de testes rápidos entre usuários de drogas injetáveis e o interesse deles quanto à utilização destes métodos, especialmente se puderem ser equacionadas questões relacionadas à confidencialidade e confiabilidade dos testes. CONCLUSÕES: Os resultados indicam que os testes rápidos para HIV seriam bem recebidos por essa população. Esses testes podem ser considerados uma ferramenta valiosa, ao permitir que mais usuários de drogas injetáveis conheçam sua sorologia para o HIV e possam ser referidos para tratamento, como subsidiar a melhoria das estratégias de testagem entre usuários de drogas injetáveis.",
-				"journalAbbreviation": "Rev. Saúde Pública",
-				"language": "en",
-				"libraryCatalog": "scielosp.org",
-				"pages": "94-100",
-				"publicationTitle": "Revista de Saúde Pública",
-				"url": "https://scielosp.org/article/rsp/2007.v41suppl2/94-100/en/",
-				"volume": "41",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.hindawi.com/journals/mpe/2013/868174/",
+		"url": "https://onlinelibrary.wiley.com/doi/10.1155/2013/868174",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1255,14 +1115,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2013/2/20",
+				"date": "2013/01/01",
 				"DOI": "10.1155/2013/868174",
-				"ISSN": "1024-123X",
-				"abstractNote": "The problem of network-based robust filtering for stochastic systems with sensor nonlinearity is investigated in this paper. In the network environment, the effects of the sensor saturation, output quantization, and network-induced delay are taken into simultaneous consideration, and the output measurements received in the filter side are incomplete. The random delays are modeled as a linear function of the stochastic variable described by a Bernoulli random binary distribution. The derived criteria for performance analysis of the filtering-error system and filter design are proposed which can be solved by using convex optimization method. Numerical examples show the effectiveness of the design method.",
+				"ISSN": "1563-5147",
+				"abstractNote": "The problem of network-based robust filtering for stochastic systems with sensor nonlinearity is investigated in this paper. In the network environment, the effects of the sensor saturation, output q...",
+				"issue": "1",
 				"language": "en",
-				"libraryCatalog": "www.hindawi.com",
+				"libraryCatalog": "onlinelibrary.wiley.com",
+				"pages": "868174",
 				"publicationTitle": "Mathematical Problems in Engineering",
-				"url": "https://www.hindawi.com/journals/mpe/2013/868174/",
+				"url": "https://onlinelibrary.wiley.com/doi/10.1155/2013/868174",
 				"volume": "2013",
 				"attachments": [
 					{
@@ -1331,10 +1193,8 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2015-08-05T12:05:17Z",
-				"abstractNote": "New research finds creativity benefits.",
+				"language": "en",
 				"url": "https://hbr.org/2015/08/how-to-do-walking-meetings-right",
-				"websiteTitle": "Harvard Business Review",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -1373,6 +1233,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "olh.openlibhums.org",
 				"publicationTitle": "Open Library of Humanities",
+				"rights": "Copyright: © 2015 The Author(s). This is an open-access article distributed under the terms of the Creative Commons Attribution 3.0 Unported License (CC-BY 3.0), which permits unrestricted use, distribution, and reproduction in any medium, provided the original author and source are credited. See http://creativecommons.org/licenses/by/3.0/.",
 				"url": "https://olh.openlibhums.org/article/id/4400/",
 				"volume": "1",
 				"attachments": [
@@ -1401,9 +1262,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2016-01-07T08:20:02-05:00",
+				"date": "2016-01-07T13:20:02+00:00",
 				"abstractNote": "Excluding female characters in merchandise is an ongoing pattern.",
-				"language": "en",
+				"language": "en-US",
 				"url": "https://www.vox.com/2016/1/7/10726296/wheres-rey-star-wars-monopoly",
 				"websiteTitle": "Vox",
 				"attachments": [
@@ -1493,7 +1354,7 @@ var testCases = [
 				"language": "eng",
 				"libraryCatalog": "www.diva-portal.org",
 				"shortTitle": "Mobility modeling for transport efficiency",
-				"url": "http://urn.kb.se/resolve?urn=urn:nbn:se:liu:diva-112443",
+				"url": "https://urn.kb.se/resolve?urn=urn:nbn:se:liu:diva-112443",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1563,12 +1424,13 @@ var testCases = [
 				"DOI": "10.1353/kri.2008.0061",
 				"ISSN": "1538-5000",
 				"issue": "4",
+				"journalAbbreviation": "kri",
 				"language": "en",
 				"libraryCatalog": "muse.jhu.edu",
 				"pages": "627-656",
 				"publicationTitle": "Kritika: Explorations in Russian and Eurasian History",
 				"shortTitle": "Serfs on the Move",
-				"url": "https://muse.jhu.edu/article/234097",
+				"url": "https://muse.jhu.edu/pub/28/article/234097",
 				"volume": "1",
 				"attachments": [
 					{
@@ -1651,7 +1513,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.pewresearch.org/fact-tank/2019/12/12/u-s-children-more-likely-than-children-in-other-countries-to-live-with-just-one-parent/",
+		"url": "https://www.pewresearch.org/short-reads/2019/12/12/u-s-children-more-likely-than-children-in-other-countries-to-live-with-just-one-parent/",
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -1663,10 +1525,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2019-12-12",
 				"abstractNote": "Almost a quarter of U.S. children under 18 live with one parent and no other adults, more than three times the share of children around the world who do so.",
 				"blogTitle": "Pew Research Center",
 				"language": "en-US",
-				"url": "https://www.pewresearch.org/fact-tank/2019/12/12/u-s-children-more-likely-than-children-in-other-countries-to-live-with-just-one-parent/",
+				"url": "https://www.pewresearch.org/short-reads/2019/12/12/u-s-children-more-likely-than-children-in-other-countries-to-live-with-just-one-parent/",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -1779,10 +1642,10 @@ var testCases = [
 				"DOI": "10.3765/plsa.v4i1.4468",
 				"ISSN": "2473-8689",
 				"abstractNote": "Forced alignment automatically aligns audio recordings of spoken language with transcripts at the segment level, greatly reducing the time required to prepare data for phonetic analysis. However, existing algorithms are mostly trained on a few well-documented languages. We test the performance of three algorithms against manually aligned data. For at least some tasks, unsupervised alignment (either based on English or trained from a small corpus) is sufficiently reliable for it to be used on legacy data for low-resource languages. Descriptive phonetic work on vowel inventories and prosody can be accurately captured by automatic alignment with minimal training data. Consonants provided significantly more challenges for forced alignment.",
-				"issue": "1",
+				"journalAbbreviation": "Proc Ling Soc Amer",
 				"language": "en",
 				"libraryCatalog": "journals.linguisticsociety.org",
-				"pages": "3-12",
+				"pages": "3:1-12",
 				"publicationTitle": "Proceedings of the Linguistic Society of America",
 				"rights": "Copyright (c) 2019 Sarah Babinski, Rikker Dockum, J. Hunter Craft, Anelisa Fergus, Dolly Goldenberg, Claire Bowern",
 				"shortTitle": "A Robin Hood approach to forced alignment",
@@ -1802,7 +1665,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.swr.de/wissen/1000-antworten/kultur/woher-kommt-redensart-ueber-die-wupper-gehen-100.html",
+		"url": "https://www.swr.de/wissen/1000-antworten/woher-kommt-redensart-ueber-die-wupper-gehen-102.html",
 		"items": [
 			{
 				"itemType": "webpage",
@@ -1814,11 +1677,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2019-04-11",
-				"abstractNote": "Es gibt eine Vergleichsredensart: \"Der ist über den Jordan gegangen.“ Das heißt, er ist gestorben. Das bezieht sich auf die alten Grenzen Israels. In Wuppertal jedoch liegt jenseits des Flusses das Gefängnis.",
+				"date": "2024-03-05",
+				"abstractNote": "Es gibt eine Vergleichsredensart: \"Der ist über den Jordan gegangen.\" Das heißt, er ist gestorben. Das bezieht sich auf die alten Grenzen Israels. In Wuppertal jedoch liegt jenseits des Flusses das Gefängnis. Von Rolf-Bernhard Essig",
 				"language": "de",
-				"url": "https://www.swr.de/wissen/1000-antworten/woher-kommt-redensart-ueber-die-wupper-gehen-100.html",
-				"websiteTitle": "swr.online",
+				"url": "https://www.swr.de/wissen/1000-antworten/woher-kommt-redensart-ueber-die-wupper-gehen-102.html",
+				"websiteTitle": "SWR",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -1871,13 +1734,13 @@ var testCases = [
 				"title": "Windows Privilege Escalation: Kernel Exploit",
 				"creators": [
 					{
-						"firstName": "Raj",
-						"lastName": "Chandel",
+						"firstName": "",
+						"lastName": "Raj",
 						"creatorType": "author"
 					}
 				],
 				"date": "2021-12-30T17:41:33+00:00",
-				"abstractNote": "As this series was dedicated to Windows Privilege escalation thus I’m writing this Post to explain command practice for kernel-mode exploitation. Table of Content What",
+				"abstractNote": "Learn about kernel-mode exploitation techniques for Windows Privilege Escalation with Metasploit, ExploitDB, and more.",
 				"blogTitle": "Hacking Articles",
 				"language": "en",
 				"shortTitle": "Windows Privilege Escalation",
@@ -1886,85 +1749,6 @@ var testCases = [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://opg.optica.org/oe/fulltext.cfm?uri=oe-30-21-39188&id=509758",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Self-calibration interferometric stitching test method for cylindrical surfaces",
-				"creators": [
-					{
-						"firstName": "Hao",
-						"lastName": "Hu",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Zizhou",
-						"lastName": "Sun",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Shuai",
-						"lastName": "Xue",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Chaoliang",
-						"lastName": "Guan",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Yifan",
-						"lastName": "Dai",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Junfeng",
-						"lastName": "Liu",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Xiaoqiang",
-						"lastName": "Peng",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Shanyong",
-						"lastName": "Chen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Yong",
-						"lastName": "Liu",
-						"creatorType": "author"
-					}
-				],
-				"date": "2022/10/10",
-				"DOI": "10.1364/OE.473836",
-				"ISSN": "1094-4087",
-				"abstractNote": "The surface figure accuracy requirement of cylindrical surfaces widely used in rotors of gyroscope, spindles of ultra-precision machine tools and high-energy laser systems is nearly 0.1 µm. Cylindricity measuring instrument that obtains 1-D profile result cannot be utilized for deterministic figuring methods. Interferometric stitching test for cylindrical surfaces utilizes a CGH of which the system error will accumulated to unacceptable extent for large aperture/angular aperture that require many subapertures. To this end, a self-calibration interferometric stitching method for cylindrical surfaces is proposed. The mathematical model of cylindrical surface figure and the completeness condition of self-calibration stitching test of cylindrical surfaces were analyzed theoretically. The effects of shear/stitching motion error and the subapertures lattice on the self-calibration test results were analyzed. Further, a self-calibration interferometric stitching algorithm that can theoretically recover all the necessary components of the system error for testing cylindrical surfaces was proposed. Simulations and experiments on a shaft were conducted to validate the feasibility.",
-				"issue": "21",
-				"journalAbbreviation": "Opt. Express, OE",
-				"language": "EN",
-				"libraryCatalog": "opg.optica.org",
-				"pages": "39188-39206",
-				"publicationTitle": "Optics Express",
-				"rights": "&#169; 2022 Optica Publishing Group",
-				"url": "https://opg.optica.org/oe/abstract.cfm?uri=oe-30-21-39188",
-				"volume": "30",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -2005,7 +1789,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.nhs.uk/conditions/baby/babys-development/behaviour/separation-anxiety/",
+		"url": "https://www.nhs.uk/baby/babys-development/behaviour/separation-anxiety/",
 		"items": [
 			{
 				"itemType": "webpage",
@@ -2014,7 +1798,7 @@ var testCases = [
 				"date": "7 Dec 2020, 4:40 p.m.",
 				"abstractNote": "Separation anxiety is a normal part of your child's development. Find out how to handle the times when your baby or toddler cries or is clingy when you leave them.",
 				"language": "en",
-				"url": "https://www.nhs.uk/conditions/baby/babys-development/behaviour/separation-anxiety/",
+				"url": "https://www.nhs.uk/baby/babys-development/behaviour/separation-anxiety/",
 				"websiteTitle": "nhs.uk",
 				"attachments": [
 					{
@@ -2051,6 +1835,66 @@ var testCases = [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.timesofisrael.com/in-biggest-exit-in-israeli-history-google-buying-cyber-unicorn-wiz-for-32-billion/",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "In biggest exit in Israeli history, Google buys cyber unicorn Wiz for $32 billion",
+				"creators": [
+					{
+						"firstName": "Sharon",
+						"lastName": "Wrobel",
+						"creatorType": "author"
+					}
+				],
+				"abstractNote": "With the acquisition of Wiz, Google's parent company wants to strengthen its cyber offerings to better compete in the cloud computing race against tech giants Amazon and Microsoft",
+				"language": "en-US",
+				"url": "https://www.timesofisrael.com/in-biggest-exit-in-israeli-history-google-buying-cyber-unicorn-wiz-for-32-billion/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://minerva.usc.gal/entities/publication/9a4fd001-4717-428f-96a5-44812f8f3805",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Contribución del análisis del líquido pleural al diagnóstico de los derrames pleurales",
+				"creators": [
+					{
+						"firstName": "María Esther",
+						"lastName": "San José Capilla",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016-05-13",
+				"abstractNote": "El derrame pleural es una complicación común en numerosas enfermedades, y el diagnóstico diferencial es frecuentemente difícil de obtener sin la utilización de técnicas invasivas, lo que se intenta evitar. Aunque hay una amplia variedad de pruebas de laboratorio, un porcentaje significativo de pacientes con derrame pleural permanecen sin diagnosticar, o el diagnóstico se basa exclusivamente en evidencias clínicas, como son la experiencia del clínico o la respuesta al tratamiento empírico; por lo que son necesarios estudiar nuevos parámetros que permitan un diagnóstico diferencial más preciso. El trabajo actual consiste en estudiar cómo podemos mejorar el diagnóstico de líquido pleural a partir de la toracocentesis diagnóstica y de una muestra de sangre periférica extraída en el mismo momento de la punción pleural. El punto inicial de la diferenciación de la patología pleural es la diferenciación trasudado/exudado, que se realiza tradicionalmente mediante los clásicos criterios de Light. No obstante, esta diferenciación sigue siendo objeto de controversia, por lo que estudiamos para dicho fin nuevos parámetros, como son las fracciones de Colesterol, la determinación de Triglicéridos o de N-terminal del propéptido natriurético cerebral. Una vez clasificado el derrame como exudado, los pasos siguientes incluyen la diferenciación de las distintas patologías que pueden estar implicadas en su desarrollo. Para ello, se utilizan los parámetros clásicos en líquido pleural y suero de Adenosina Desaminasa, Lactato Deshidrogenasa, pH, Glucosa, recuento total y diferencial de células nucleadas,…. . Después del despistaje habitual de las diferentes entidades, aún permanece un 5-10% de los derrames pleurales sin diagnosticar, por lo que intentamos estudiar nuevos enfoques, como son la determinación de citoquinas proinflamatorias para el estudio de derrames de causa infecciosa, así como el intento de diagnóstico de tuberculosis pleural mediante un estudio de regresión aplicando datos clínicos y de laboratorio para el diagnóstico de esta entidad en pacientes menores de 40 años, grupo de pacientes donde la incidencia de esta enfermedad es muy elevada. Asimismo, intentamos comprobar la utilidad de un método sencillo como es el recuento diferencial de las células nucleadas para clarificar las distintas patologías que acompañan al derrame pleural, y un estudio estadístico de rendimiento del análisis del líquido pleural, junto con los datos clínicos y radiográficos, como ayuda para el diagnóstico de esta patología, fundamentalmente orientado hacia el origen neoplásico del derrame pleural. Nuestra finalidad es facilitar el diagnóstico de las distintas patologías implicadas en la patogenia del derrame pleural, sin necesidad de tener que recurrir a procedimientos invasivos, como son la biopsia pleural, la videotoracoscopia,.., y evitar lo máximo posible las posibles complicaciones que conlleva un diagnóstico tardío de estos procesos.",
+				"language": "spa",
+				"libraryCatalog": "minerva.usc.gal",
+				"url": "http://hdl.handle.net/10347/14743",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],

@@ -1,11 +1,11 @@
 ---
-name: Report confirmed bug with technical details
+name: Report a confirmed bug with technical details
 about: If you’re sure you’ve identified a bug in a specific Zotero translator and can provide technical details, you can open an issue here.
 ---
 
 **READ THIS BEFORE CREATING AN ISSUE**
 
-Zotero generally does not use GitHub Issues for bug reports or feature requests regarding Zotero software.
+Zotero generally does not use GitHub Issues for bug reports or feature requests in Zotero software.
 
 If you’re sure you’ve identified a bug in a specific Zotero translator, you’re welcome to create an issue here.
 
