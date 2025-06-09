@@ -77,8 +77,8 @@ async function scrape(doc, url) {
 			item.abstractNote = Zotero.Utilities.trimInternal(bodyElement.textContent);
 		}
 
-		// Page number (optional)
-		let scripts = doc.querySelectorAll("script");
+		// Page number (broken)
+		/*let scripts = doc.querySelectorAll("script");
 		for (let script of scripts) {
 			let text = script.textContent || "";
 			let match = text.match(/sectionPageBlockAreas\['\d+\.(\d+)'\]\s*=\s*\[\{pageID:'\d+\.(\d+)'/);
@@ -86,7 +86,7 @@ async function scrape(doc, url) {
 				item.pages = match[2];
 				break;
 			}
-		}
+		}*/
 
 		Zotero.debug(" Finished scraping, calling item.complete()");
 		item.complete();
