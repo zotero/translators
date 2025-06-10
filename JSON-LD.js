@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2025-06-09 12:18:52"
+	"lastUpdated": "2025-06-09 21:57:47"
 }
 
 function doExport() {
@@ -132,7 +132,7 @@ function zot2ldItem(zotItem)
 
 		if (zotItem.date) container["datePublished"] = ZU.strToISO(zotItem.date);
 		if (zotItem.volume) container["volumeNumber"] = zotItem.volume;
-		if (zotItem.issue) container["issueNumber"] = zotItem.volume;
+		if (zotItem.issue) container["issueNumber"] = zotItem.issue;
 		if (zotItem.publisher) {
 			container["publisher"] = {
 				"@type": "Organization",
@@ -152,8 +152,8 @@ function zot2ldPers(pers) {
 	if (pers.firstName || pers.lastName) {
 		return {
 			"@type": "Person",
-			"givenName": pers.firstName || "",
-			"familyName": pers.lastName || ""
+			"familyName": pers.lastName || "",
+			"givenName": pers.firstName || ""
 		};
 	}
 	else if (pers.name) {
