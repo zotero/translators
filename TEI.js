@@ -12,13 +12,11 @@
 	},
 	"displayOptions": {
 		"Export Tags": true,
-		"Export Notes": true,
-		"Generate XML IDs": false,
-		"Full TEI Document": false
+		"Export Notes": true
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2025-06-09 10:51:06"
+	"lastUpdated": "2025-06-10 12:49:06"
 }
 
 /*
@@ -961,8 +959,8 @@ function generateItem(item, teiDoc) {
 		const tags = teiDoc.createElementNS(ns.tei, "note");
 		bibl.append("\n", indent, tags);
 		tags.setAttribute("type", "tags");
-		// sort tags to keep order
-		item.tags.sort();
+		// sort tags to keep order between exports
+		item.tags.sort(function(a,b){return a.tag.localeCompare(b.tag); });
 		for (let tag of item.tags) {
 			let term = teiDoc.createElementNS(ns.tei, "term");
 			term.setAttribute("type", "tag");
