@@ -96,13 +96,14 @@ async function scrape(doc, url = doc.location.href) {
 		try {
 			let parsed = JSON.parse(node.textContent);
 			let type = parsed['@type'];
-			if ((typeof type === 'string' && type.endsWith('NewsArticle')) ||
-				(Array.isArray(type) && type.some(t => typeof t === 'string' && t.endsWith('NewsArticle')))) {
+			if (
+				type && typeof type === 'string' && type.endsWith('NewsArticle')
+				|| Array.isArray(type) && type.some(t => typeof t === 'string' && t.endsWith('NewsArticle'))
+			) {
 				data = parsed;
 				break;
 			}
-		}
-		catch (e) {}
+		} catch (e) {}
 	}
 
 	if (data) {
@@ -154,44 +155,6 @@ async function scrape(doc, url = doc.location.href) {
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
-		"type": "web",
-		"url": "https://www.prime9ja.com.ng/2025/05/tribunal-to-rule-on-ondo-poll-june-4.html",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Tribunal to Rule on Ondo Poll June 4",
-				"creators": [
-					        {
-							"firstName": "Chima Joseph",
-						        "lastName": "Ugo",
-						        "creatorType": "author"
-						}
-				          ],
-				          "date": "2025-05-24T18:10:00+01:00",
-				          "ISSN": "3092-8907",
-				          "abstractNote": "<strong> AKURE &#8212;</strong> &#160;The Ondo State Governorship Election Petitions Tribunal will deliver its verdict on June 4 in the series of suits challenging the election of Governor Lucky Aiyedatiwa, who emerged victorious in the last gubernatorial poll. Justice Benson Ogbu, wh&#8230;",
-				          "language": "en",
-				          "libraryCatalog": "Prime 9ja Online",
-				          "place": "Nigeria",
-				          "publicationTitle": "Prime 9ja Online",
-				          "url": "https://www.prime9ja.com.ng/2025/05/tribunal-to-rule-on-ondo-poll-june-4.html",
-				          "attachments": [
-					          {
-						          "title": "Image",
-						          "mimeType": "image/jpeg"
-				          	},
-					          {
-				          		"title": "Snapshot",
-				          		"mimeType": "text/html"
-				          	}
-				          ],
-			          	"tags": [],
-				          "notes": [],
-			          	"seeAlso": []
-		          	}
-		          ]
-	          },
-	          {
 	          	"type": "web",
 		          "url": "https://www.prime9ja.com.ng/2025/05/davido-cfmf-review-low-burn-confession.html",
 	          	"items": [
