@@ -46,7 +46,8 @@ function detectWeb(doc, _url) {
 			if (Array.isArray(type) && type.some(t => typeof t === 'string' && t.endsWith('NewsArticle'))) {
 				return 'newspaperArticle';
 			}
-		} catch (e) {
+		}
+		catch (e) {
 			// ignore JSON parsing errors
 		}
 	}
@@ -80,7 +81,8 @@ async function doWeb(doc, url) {
 		for (let url of Object.keys(items)) {
 			await scrape(await requestDocument(url));
 		}
-	} else {
+	}
+	else {
 		await scrape(doc, url);
 	}
 }
@@ -94,17 +96,13 @@ async function scrape(doc, url = doc.location.href) {
 		try {
 			let parsed = JSON.parse(node.textContent);
 			let type = parsed['@type'];
-			if (
-				type &&
-				((typeof type === 'string' && type.endsWith('NewsArticle')) ||
-				(Array.isArray(type) && type.some(t => typeof t === 'string' && t.endsWith('NewsArticle'))))
-			) {
+			if ((typeof type === 'string' && type.endsWith('NewsArticle')) ||
+				(Array.isArray(type) && type.some(t => typeof t === 'string' && t.endsWith('NewsArticle')))) {
 				data = parsed;
 				break;
 			}
-		} catch (e) {
-			// ignore JSON parsing errors
 		}
+		catch (e) {}
 	}
 
 	if (data) {
@@ -124,10 +122,12 @@ async function scrape(doc, url = doc.location.href) {
 						item.creators.push(ZU.cleanAuthor(author.name, 'author'));
 					}
 				}
-			} else if (data.author.name) {
+			}
+			else if (data.author.name) {
 				item.creators.push(ZU.cleanAuthor(data.author.name, 'author'));
 			}
-		} else {
+		}
+		else {
 			let authorText = ZU.xpathText(doc, '//span[@itemprop="name"]');
 			if (authorText) {
 				item.creators.push(ZU.cleanAuthor(authorText, 'author'));
@@ -153,14 +153,14 @@ async function scrape(doc, url = doc.location.href) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-        {
-		          "type": "web",
-		          "url": "https://www.prime9ja.com.ng/2025/05/tribunal-to-rule-on-ondo-poll-june-4.html",
-		          "items": [
-			          {
-				          "itemType": "newspaperArticle",
-				          "title": "Tribunal to Rule on Ondo Poll June 4",
-				          "creators": [
+	{
+			"type": "web",
+			"url": "https://www.prime9ja.com.ng/2025/05/tribunal-to-rule-on-ondo-poll-june-4.html",
+			"items": [
+				{
+					"itemType": "newspaperArticle",
+					"title": "Tribunal to Rule on Ondo Poll June 4",
+					"creators": [
 					          {
 						          "firstName": "Chima Joseph",
 						          "lastName": "Ugo",
