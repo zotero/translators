@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-07-13 18:25:34"
+	"lastUpdated": "2025-06-13 14:36:48"
 }
 
 /*
@@ -58,10 +58,17 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	// First one is issue, 2nd one search results
-	var rows = doc.querySelectorAll('#ArticleList h5.item-title>a, .al-title a[href*="article"], .al-article-items > .customLink > a[href*="article"], a.tocLink');
+	var rows = doc.querySelectorAll('#ArticleList h5.item-title>a, .al-title a[href*="article"], .al-article-items > .customLink > a[href*="article"]');
+	// Book chapter listings
+	if (!rows.length) {
+		rows = doc.querySelectorAll('a.tocLink');
+		if (rows.length) {
+			items[doc.location.href] = `[Full Book] ${text(doc, 'h1')}`;
+		}
+	}
 	for (let row of rows) {
 		let href = row.href;
-		let title = ZU.trimInternal(row.textContent);
+		let title = ZU.trimInternal(text(row, '.access-title') || row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -803,6 +810,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://academic.oup.com/edited-volume/28005",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://academic.oup.com/book/6077?login=false",
 		"items": "multiple"
 	}
 ]
