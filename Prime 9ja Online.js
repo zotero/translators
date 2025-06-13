@@ -34,7 +34,7 @@
 	***** END LICENSE BLOCK *****
 */
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	let jsonLdNodes = doc.querySelectorAll('script[type="application/ld+json"]');
 	for (let node of jsonLdNodes) {
 		try {
@@ -46,11 +46,15 @@ function detectWeb(doc, url) {
 			if (Array.isArray(type) && type.some(t => typeof t === 'string' && t.endsWith('NewsArticle'))) {
 				return 'newspaperArticle';
 			}
-		} catch (e) {}
+		} catch (e) {
+			// ignore JSON parsing errors
+		}
 	}
+
 	if (getSearchResults(doc, true)) {
 		return 'multiple';
 	}
+
 	return false;
 }
 
@@ -70,7 +74,7 @@ function getSearchResults(doc, checkOnly) {
 }
 
 async function doWeb(doc, url) {
-	if (detectWeb(doc, url) == 'multiple') {
+	if (detectWeb(doc, url) === 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
 		for (let url of Object.keys(items)) {
@@ -90,12 +94,17 @@ async function scrape(doc, url = doc.location.href) {
 		try {
 			let parsed = JSON.parse(node.textContent);
 			let type = parsed['@type'];
-			if ((typeof type === 'string' && type.endsWith('NewsArticle')) ||
-				(Array.isArray(type) && type.some(t => typeof t === 'string' && t.endsWith('NewsArticle')))) {
+			if (
+				type &&
+				((typeof type === 'string' && type.endsWith('NewsArticle')) ||
+				(Array.isArray(type) && type.some(t => typeof t === 'string' && t.endsWith('NewsArticle'))))
+			) {
 				data = parsed;
 				break;
 			}
-		} catch (e) {}
+		} catch (e) {
+			// ignore JSON parsing errors
+		}
 	}
 
 	if (data) {
