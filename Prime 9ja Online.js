@@ -154,18 +154,18 @@ async function scrape(doc, url = doc.location.href) {
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
-			"type": "web",
-			"url": "https://www.prime9ja.com.ng/2025/05/tribunal-to-rule-on-ondo-poll-june-4.html",
-			"items": [
-				{
-					"itemType": "newspaperArticle",
-					"title": "Tribunal to Rule on Ondo Poll June 4",
-					"creators": [
-					          {
-						          "firstName": "Chima Joseph",
-						          "lastName": "Ugo",
-						          "creatorType": "author"
-					          }
+		"type": "web",
+		"url": "https://www.prime9ja.com.ng/2025/05/tribunal-to-rule-on-ondo-poll-june-4.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Tribunal to Rule on Ondo Poll June 4",
+				"creators": [
+					        {
+							"firstName": "Chima Joseph",
+						        "lastName": "Ugo",
+						        "creatorType": "author"
+						}
 				          ],
 				          "date": "2025-05-24T18:10:00+01:00",
 				          "ISSN": "3092-8907",
