@@ -1,14 +1,14 @@
 {
 	"translatorID": "51e5355d-9974-484f-80b9-f84d2b55782e",
 	"label": "Wikidata QuickStatements",
-	"creator": "Philipp Zumstein",
+	"creator": "Philipp Zumstein (with minor edits by Pascal Martinolli)",
 	"target": "txt",
-	"minVersion": "3.0",
+	"minVersion": "3.1",
 	"maxVersion": "",
 	"priority": 100,
-	"inRepository": true,
+	"inRepository": false,
 	"translatorType": 2,
-	"lastUpdated": "2022-12-08 23:00:00"
+	"lastUpdated": "2025-05-21 00:00:00"
 }
 
 
@@ -33,6 +33,30 @@
 	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
 	***** END LICENSE BLOCK *****
+*/
+
+/*
+	***** BEGIN REVISION BLOCK *****
+
+	In 2025, Pascal Martinolli made some revisions to the original code. 
+	
+	They are tagged #PascalMartinolli2025 along the code.
+	
+	They modify the Description of : 
+	   - encyclopedia entries (which encyclopedia), 
+	   - book sections (which book),
+	   - thesis (which university),
+	   - conference papers (which conference).
+	   
+	They add a "default for all languages" Label.
+	
+	They manage the permanent identifiers from : 
+	   - OpenAlex: P10283
+	   - Semantic Scholar CorpusID: P8299
+	   - Web of Science WOS: P8372
+	   - Microsoft Academic Graph MAG: P6366
+
+	***** END REVISION BLOCK *****
 */
 
 
@@ -148,7 +172,11 @@ var identifierMapping = {
 	"Open Library ID": "P648",
 	OCLC: "P243",
 	"IMDb ID": "P345",
-	"Google-Books-ID": "P675"
+	"Google-Books-ID": "P675",
+	OpenAlex: "P10283", // added by #PascalMartinolli2025
+	CorpusID: "P8299", // added by #PascalMartinolli2025
+	WOS: "P8372", // added by #PascalMartinolli2025
+	"MAG": "P6366" // added by #PascalMartinolli2025
 };
 
 
@@ -192,6 +220,18 @@ function zoteroItemToQuickStatements(item) {
 	if (item.publicationTitle && (itemType == "journalArticle" || itemType == "magazineArticle" || itemType == "newspaperArticle")) {
 		description = description + ' from \'' + item.publicationTitle + '\'';
 	}
+	if (item. proceedingsTitle && (itemType == "conferencePaper")) {
+		description = description + ' from \'' + item.proceedingsTitle + '\'';
+	}  // added by #PascalMartinolli2025 
+	if (item. bookTitle && (itemType == "bookSection")) {
+		description = description + ' from \'' + item.bookTitle + '\'';
+	}  // added by #PascalMartinolli2025 
+	if (item. encyclopediaTitle && (itemType == "encyclopediaArticle")) {
+		description = description + ' from \'' + item.encyclopediaTitle + '\'';
+	}  // added by #PascalMartinolli2025 
+	if (item.university && (itemType == "thesis")) {
+		description = description + ' from \'' + item.university + '\'';
+	}  // added by #PascalMartinolli2025 
 	if (item.date) {
 		var year = ZU.strToDate(item.date).year;
 		if (year) {
@@ -260,6 +300,7 @@ function zoteroItemToQuickStatements(item) {
 	if (item.language && (item.language.toLowerCase() in languageMapping)) {
 		let lang = item.language.toLowerCase();
 		addStatement('L' + lang, '"' + item.title + '"');
+		addStatement('Lmul', '"' + item.title + '"');     // added by #PascalMartinolli2025
 		addStatement('P1476', lang + ':"' + item.title + '"');
 		addStatement('P407', languageMapping[lang]);
 	}
