@@ -3,13 +3,13 @@
 	"label": "NASA ADS",
 	"creator": "Tim Hostetler, Abe Jellinek, and Zoë C. Ma",
 	"target": "^https://ui\\.adsabs\\.harvard\\.edu/(search|abs)/",
-	"minVersion": "3.0",
+	"minVersion": "6.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-09 17:06:21"
+	"lastUpdated": "2025-04-29 03:02:00"
 }
 
 /*
@@ -35,70 +35,91 @@
 	***** END LICENSE BLOCK *****
 */
 
-const preprintType = ZU.fieldIsValidForType('title', 'preprint')
-	? 'preprint'
-	: 'report';
-
-function getSearchResults(doc) {
-	const results = doc.querySelectorAll("a[href$=abstract]");
-	const entries = {};
-	for (let el of results) {
-		const titleEl = el.querySelector(":scope h3");
-		if (!titleEl) {
-			continue;
-		}
-		const hrefParts = el.getAttribute("href").split("/");
-		if (hrefParts.length > 2) {
-			const identifier = hrefParts[hrefParts.length - 2];
-			entries[identifier] = ZU.trimInternal(titleEl.textContent);
-		}
+function getSearchResults(doc, checkOnly = false) {
+	let entries = {};
+	let found = false;
+	for (let row of doc.querySelectorAll(".results-list > li")) {
+		let id = text(row, ".identifier").trim();
+		let title = ZU.trimInternal(text(row, ".s-results-title"));
+		if (!id || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		entries[id] = title;
 	}
-	return entries;
+	return found && entries;
 }
 
 function extractId(url) {
-	return decodeURIComponent(/\/abs\/([^/]+)/.exec(url)[1]);
+	let m = url.match(/\/abs\/([^/]+)/);
+	return m && decodeURIComponent(m[1]);
 }
 
+// "Snoop" the item type from the page itself - this is used for displaying the
+// connector icon. The actual itemType will handled a lot better by 'ADS
+// Bibcode.js' search translator using more information that becomes available
+// only after querying the API. For the UI, we don't have to be super precise.
+// Ref: https://adsabs.harvard.edu/abs_doc/journals1.html
+// https://adsabs.harvard.edu/abs_doc/conferences1.html
 function getTypeFromId(id) {
-	// bibcodes always start with 4 digit year, then bibstem
-	const bibstem = id.slice(4);
-	if (bibstem.startsWith("MsT") || bibstem.startsWith("PhDT")) {
+	let bibstem = id.slice(4);
+	if (/^(MsT|PhDT)/.test(bibstem)) {
 		return "thesis";
 	}
-	else if (bibstem.startsWith("arXiv")) {
-		return preprintType;
+	if (/^(arXiv|gr_qc|hep_|math_ph|math|nucl_|physics)/.test(bibstem)) {
+		return "preprint";
 	}
-	else {
-		// now scan past the bibstem and find the volume number/type abbrev.
-		const volume = bibstem.substring(5, 9);
-		if (volume == "conf" || volume == "meet" || volume == "coll"
-			|| volume == "proc" || volume == "book") {
-			return "book";
-		}
-		else if (volume == "rept") {
-			return "report";
-		}
+
+	let volume = bibstem.substring(5, 9);
+	if (volume === "rept") {
+		return "report";
 	}
-	return "journalArticle";
+
+	// determine whether the special "volumes" refer to a container (book,
+	// incl. proceedings book) or a component (chapter, conference paper)
+	// If the "page number" does not look like wdigits, it's likely a
+	// container.
+	let pages = bibstem.slice(10, 14).replace(/^\.*/, "");
+	let isNumbered = /^\d+$/.test(pages);
+	if (volume === "book") {
+		return isNumbered ? "bookSection" : "book";
+	}
+	if (["coll", "conf", "cong", "meet", "symp", "work"].includes(volume)) {
+		return isNumbered ? "conferencePaper" : "book";
+	}
+
+	return "journalArticle"; // fallback
 }
 
 function detectWeb(doc, url) {
-	if (url.includes("/search/")) {
-		return "multiple";
+	let path = new URL(url).pathname;
+	if (path.startsWith("/search/")) { // search page
+		// Prefer watching the AJAX-generated container for search results to
+		// watching its high-level parent defined in the static HTML source
+		let root = doc.getElementById("results-middle-column") || doc.getElementById("body-template-container");
+		if (root) Z.monitorDOMChanges(root);
+		return getSearchResults(doc, true) && "multiple";
 	}
-	else if (url.includes("/abs/")) {
+
+	if (/^\/abs\/[^/]+\/(references|similar|coreads|citations|toc)$/.test(path)) {
+		// List of articles related to the current article ("subview")
+		let root = doc.getElementById("current-subview");
+		if (root) Z.monitorDOMChanges(root);
+		if (getSearchResults(doc, true)) return "multiple";
+	}
+
+	// If the related-article list is empty, this will fall back to the current
+	// single article
+	if (path.startsWith("/abs/")) {
 		return getTypeFromId(extractId(url));
 	}
 	return false;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) === "multiple") {
-		Zotero.selectItems(getSearchResults(doc), function (items) {
-			if (!items) return true;
-			return scrape(Object.keys(items));
-		});
+		let items = await Zotero.selectItems(getSearchResults(doc));
+		if (!items) return;
+		scrape(Object.keys(items));
 	}
 	else {
 		scrape([extractId(url)]);
@@ -208,6 +229,7 @@ var testCases = [
 				"abstractNote": "During the last years, with the evolution of technology enabling the control of nano-mesoscopic systems, the possibility of experimentally implementing a Maxwell's demon has aroused much interest. Its classical version has already been implemented, in photonic and electronic systems, and currently its quantum version is being broadly studied. In this context, the purpose of this work is the development of a protocol for the implementation of the quantum version of an autonomous Maxwell's demon in a system of superconducting qubits. The system is composed of an Asymmetrical Single-Cooper-Pair Transistor, ASCPT, which has its extremities in contact with heat baths, such that the left one has a lower temperature than the right one. And of a device of two interacting Cooper-Pair Boxes, CPB's, named as an ECPB, for Extended Cooper-Pair Box. The ECPB is also in contact with a heat bath and possess a genuine quantum feature, entanglement, being described by its antisymmetric and symmetric states, that couple capacitively to the ASCPT with different strengths. A specific operating regime was found where the spontaneous dynamics of the tunneling of Cooper pairs through the ASCPT, will led to a heat transport from the bath in contact with the left extremity of the ASCPT to the bath at the right. And so, as in Maxwell's original thought experiment, the demon, which is composed by the ECPB and the island of the ASCPT, mediates a heat flux from a cold to a hot bath, without the expense of work. However as expected, the violation of the 2nd law of thermodynamics does not occur, as during the dynamics heat is also released to the bath in contact with the ECPB, compensating the decrease of entropy that occurs in the baths in contact with the ASCPT.",
 				"extra": "ADS Bibcode: 2019MsT.........15M",
 				"libraryCatalog": "NASA ADS",
+				"thesisType": "Masters thesis",
 				"url": "https://ui.adsabs.harvard.edu/abs/2019MsT.........15M",
 				"attachments": [
 					{
@@ -239,6 +261,7 @@ var testCases = [
 				"abstractNote": "Cosmology is the science that studies the Universe as whole, aiming to understand its origin, composition and evolution. During the last decades, cosmology has transitioned from a \"data staved\" to a \"data driven\" science, inaugurating what is known as precision cosmology. This huge observational effort has confirmed and fostered theoretical research, and established the standard model of cosmology: Lambda-Cold Dark Matter (LCDM). This model successfully reproduces most of the observations. However, there are some persistent tensions between experiments that might be smoking guns of new physics beyond this model. Anyways, there is a difference between modeling and understanding, and LCDM is a phenomenological model that, for instance, does not describe the nature of the dark matter or dark energy. This thesis collects part of my research focused on pushing the limits of the standard cosmological model and its assumptions, regarding also existing tensions between experiments. New strategies to optimize the performance of future experiments are also proposed and discussed. The largest existing tension is between the direct measurements of the Hubble constant using the distance ladder in the local Universe and the inferred value obtained from observations of the Cosmic Microwave Background when LCDM is assumed. A model independent reconstruction of the late-time expansion history of the Universe is carried out, which allows us to identify possible sources and solutions of the tension. We also introduce the concept of the low redshift standard ruler, and measure it in a model independent way. Finally, we introduce a statistical methodology to analyze several data sets in a conservative way, no matter the level of discrepancy between them, accounting for the potential presence of systematic errors. The role of primordial black holes as candidates for dark matter is addressed in this thesis, too. Concretely, the impact of an abundant population of primordial black holes in the rest of cosmological parameters is discussed, considering also populations with extended mass distributions. In addition, massive primordial black holes might be the seeds that are needed to explain the origin of the supermassive black holes located in the center of the galaxies. We predict the contribution of a population of massive primordial black holes to the 21 cm radiation from the dark ages. This way, observations of the 21 cm intensity mapping observations of the dark ages could be used to ascertain if the seeds of the supermassive black holes are primordial. Finally, we estimate the potential of radio-continuum galaxy surveys to constrain LCDM. These kind of experiments can survey the sky quicker than spectroscopic and optical photometric surveys and cover much larger volumes. Therefore, they will be specially powerful to constrain physics which has impact on the largest observable scales, such as primordial non Gaussianity. On the other hand, intensity mapping experiments can reach higher redshifts than galaxy surveys, but the cosmological information of this signal is coupled with astrophysics. We propose a methodology to disentangle astrophysics and optimally extract cosmological information from the intensity mapping spectrum. Thanks to this methodology, intensity mapping will constrain the expansion history of the Universe up to reionization, as shown in this thesis.",
 				"extra": "ADS Bibcode: 2019PhDT........69B",
 				"libraryCatalog": "NASA ADS",
+				"thesisType": "Ph.D. thesis",
 				"url": "https://ui.adsabs.harvard.edu/abs/2019PhDT........69B",
 				"attachments": [
 					{
@@ -375,6 +398,7 @@ var testCases = [
 				"abstractNote": "Many real-world applications require the prediction of long sequence time-series, such as electricity consumption planning. Long sequence time-series forecasting (LSTF) demands a high prediction capacity of the model, which is the ability to capture precise long-range dependency coupling between output and input efficiently. Recent studies have shown the potential of Transformer to increase the prediction capacity. However, there are several severe issues with Transformer that prevent it from being directly applicable to LSTF, including quadratic time complexity, high memory usage, and inherent limitation of the encoder-decoder architecture. To address these issues, we design an efficient transformer-based model for LSTF, named Informer, with three distinctive characteristics: (i) a $ProbSparse$ self-attention mechanism, which achieves $O(L \\log L)$ in time complexity and memory usage, and has comparable performance on sequences' dependency alignment. (ii) the self-attention distilling highlights dominating attention by halving cascading layer input, and efficiently handles extreme long input sequences. (iii) the generative style decoder, while conceptually simple, predicts the long time-series sequences at one forward operation rather than a step-by-step way, which drastically improves the inference speed of long-sequence predictions. Extensive experiments on four large-scale datasets demonstrate that Informer significantly outperforms existing methods and provides a new solution to the LSTF problem.",
 				"extra": "ADS Bibcode: 2020arXiv201207436Z",
 				"libraryCatalog": "NASA ADS",
+				"repository": "arXiv",
 				"shortTitle": "Informer",
 				"url": "https://ui.adsabs.harvard.edu/abs/2020arXiv201207436Z",
 				"attachments": [
@@ -461,6 +485,18 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://ui.adsabs.harvard.edu/abs/2011PhRvA..84f3834P/coreads",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://ui.adsabs.harvard.edu/abs/2020jsrs.conf.....B/toc",
+		"defer": true,
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2023-04-19 14:30:00"
+	"lastUpdated": "2025-03-28 15:11:06"
 }
 
 /*
@@ -50,52 +50,63 @@ function detectImport() {
 	return false;
 }
 
-
-function doImport() {
-	// call MARC translator
-	var translator = Zotero.loadTranslator("import");
+/**
+ * @param {XMLDocument} xml
+ * @returns {Promise<any[]>} MARC record objects
+ */
+async function parseDocument(xml) {
+	let translator = Zotero.loadTranslator("import");
 	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
-	translator.getTranslatorObject(function (marc) {
-		var xml = Zotero.getXML();
-		// define the marc namespace
-		var ns = {
-			marc: "http://www.loc.gov/MARC21/slim"
-		};
-		var records = ZU.xpath(xml, '//marc:record', ns);
-		for (let rec of records) {
-			if (!ZU.xpath(rec, "./marc:datafield", ns).length) {
-				Zotero.debug('Skipping empty record');
-				continue;
-			}
-
-			// create one new item per record
-			var record = new marc.record();
-			var newItem = new Zotero.Item();
-			record.leader = ZU.xpathText(rec, "./marc:leader", ns);
-			var fields = ZU.xpath(rec, "./marc:datafield", ns);
-			for (let field of fields) {
-				// go through every datafield (corresponds to a MARC field)
-				var subfields = ZU.xpath(field, "./marc:subfield", ns);
-				var tag = "";
-				for (let subfield of subfields) {
-					// get the subfields and their codes...
-					var code = ZU.xpathText(subfield, "./@code", ns);
-					var sf = ZU.xpathText(subfield, "./text()", ns);
-					// delete non-sorting symbols
-					// e.g. &#152;Das&#156; Adam-Smith-Projekt
-					if (sf) {
-						sf = sf.replace(/[\x80-\x9F]/g, "");
-						// concat all subfields in one datafield, with subfield delimiter and code between them
-						tag = tag + marc.subfieldDelimiter + code + sf;
-					}
-				}
-				record.addField(ZU.xpathText(field, "./@tag", ns), ZU.xpathText(field, "./@ind1", ns) + ZU.xpathText(field, "./@ind2"), tag);
-			}
-			record.translate(newItem);
-			newItem.complete();
+	let marc = await translator.getTranslatorObject();
+	// define the marc namespace
+	let ns = {
+		marc: "http://www.loc.gov/MARC21/slim"
+	};
+	let records = [];
+	for (let recordNode of ZU.xpath(xml, '//marc:record', ns)) {
+		if (!ZU.xpath(recordNode, "./marc:datafield", ns).length) {
+			Zotero.debug('Skipping empty record');
+			continue;
 		}
-	}); // get Translator end
+
+		// create one new item per record
+		let record = new marc.record();
+		record.leader = ZU.xpathText(recordNode, "./marc:leader", ns);
+		let fields = ZU.xpath(recordNode, "./marc:datafield", ns);
+		for (let field of fields) {
+			// go through every datafield (corresponds to a MARC field)
+			let subfields = ZU.xpath(field, "./marc:subfield", ns);
+			let tag = "";
+			for (let subfield of subfields) {
+				// get the subfields and their codes...
+				let code = ZU.xpathText(subfield, "./@code", ns);
+				let sf = ZU.xpathText(subfield, "./text()", ns);
+				// delete non-sorting symbols
+				// e.g. &#152;Das&#156; Adam-Smith-Projekt
+				if (sf) {
+					sf = sf.replace(/[\x80-\x9F]/g, "");
+					// concat all subfields in one datafield, with subfield delimiter and code between them
+					tag = tag + marc.subfieldDelimiter + code + sf;
+				}
+			}
+			record.addField(ZU.xpathText(field, "./@tag", ns), ZU.xpathText(field, "./@ind1", ns) + ZU.xpathText(field, "./@ind2"), tag);
+		}
+		records.push(record);
+	}
+	return records;
 }
+
+
+async function doImport() {
+	let xml = Zotero.getXML();
+	for (let record of await parseDocument(xml)) {
+		let newItem = new Zotero.Item();
+		record.translate(newItem);
+		newItem.complete();
+	}
+}
+
+var exports = { parseDocument };
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -147,7 +158,7 @@ var testCases = [
 					{
 						"lastName": "White House Web Team",
 						"creatorType": "editor",
-						"fieldMode": true
+						"fieldMode": 1
 					}
 				],
 				"date": "1994",
@@ -200,7 +211,7 @@ var testCases = [
 					{
 						"lastName": "Statistical Office of the European Communities",
 						"creatorType": "editor",
-						"fieldMode": true
+						"fieldMode": 1
 					}
 				],
 				"date": "2012",
@@ -215,36 +226,96 @@ var testCases = [
 				"url": "http://www.ilo.org/public/libdoc/igo/2011/468303.pdf",
 				"attachments": [],
 				"tags": [
-					"EU countries",
-					"EU pub",
-					"ageing population",
-					"calidad de la vida",
-					"cuadros estadísticos",
-					"employment opportunity",
-					"envejecimiento de la población",
-					"jubilado",
-					"older people",
-					"older worker",
-					"oportunidades de empleo",
-					"países de la UE",
-					"pays de l'UE",
-					"personas de edad avanzada",
-					"personnes âgées",
-					"possibilités d'emploi",
-					"pub UE",
-					"pub UE",
-					"qualité de la vie",
-					"quality of life",
-					"retired worker",
-					"seguridad social",
-					"sécurité sociale",
-					"social security",
-					"statistical table",
-					"tableau statistique",
-					"trabajador de edad avanzada",
-					"travailleur âgé",
-					"travailleur retraité",
-					"vieillissement de la population"
+					{
+						"tag": "EU countries"
+					},
+					{
+						"tag": "EU pub"
+					},
+					{
+						"tag": "ageing population"
+					},
+					{
+						"tag": "calidad de la vida"
+					},
+					{
+						"tag": "cuadros estadísticos"
+					},
+					{
+						"tag": "employment opportunity"
+					},
+					{
+						"tag": "envejecimiento de la población"
+					},
+					{
+						"tag": "jubilado"
+					},
+					{
+						"tag": "older people"
+					},
+					{
+						"tag": "older worker"
+					},
+					{
+						"tag": "oportunidades de empleo"
+					},
+					{
+						"tag": "países de la UE"
+					},
+					{
+						"tag": "pays de l'UE"
+					},
+					{
+						"tag": "personas de edad avanzada"
+					},
+					{
+						"tag": "personnes âgées"
+					},
+					{
+						"tag": "possibilités d'emploi"
+					},
+					{
+						"tag": "pub UE"
+					},
+					{
+						"tag": "pub UE"
+					},
+					{
+						"tag": "qualité de la vie"
+					},
+					{
+						"tag": "quality of life"
+					},
+					{
+						"tag": "retired worker"
+					},
+					{
+						"tag": "seguridad social"
+					},
+					{
+						"tag": "sécurité sociale"
+					},
+					{
+						"tag": "social security"
+					},
+					{
+						"tag": "statistical table"
+					},
+					{
+						"tag": "tableau statistique"
+					},
+					{
+						"tag": "trabajador de edad avanzada"
+					},
+					{
+						"tag": "travailleur âgé"
+					},
+					{
+						"tag": "travailleur retraité"
+					},
+					{
+						"tag": "vieillissement de la population"
+					}
 				],
 				"notes": [
 					{
@@ -386,6 +457,27 @@ var testCases = [
 				"numPages": "629",
 				"place": "Göttingen",
 				"publisher": "Vandenhoeck & Ruprecht",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n<record>\n  <datafield tag=\"245\" ind1=\" \" ind2=\" \">\n    <subfield code=\"a\">Diffusion Time Metrics for Facebook Posts with 100 or More Reshares</subfield>\n  </datafield>\n  <datafield tag=\"720\" ind1=\" \" ind2=\" \">\n    <subfield code=\"a\">Meta Platforms, Inc.</subfield>\n    <subfield code=\"e\">Data Collector</subfield>\n    <subfield code=\"7\">Organizational</subfield>\n  </datafield>\n</record>\n</collection>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Diffusion Time Metrics for Facebook Posts with 100 or More Reshares",
+				"creators": [
+					{
+						"firstName": "Inc",
+						"lastName": "Meta Platforms",
+						"creatorType": "editor"
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],

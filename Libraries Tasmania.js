@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-07 00:58:32"
+	"lastUpdated": "2025-01-28 03:36:38"
 }
 
 /*
@@ -137,11 +137,11 @@ function addPermalink(doc, item, idType) {
 	}
 	// Archives and Names indexes seem to have a consistent permalink pattern
 	else if (idType == "AI" && archivesId) {
-		item.url = "https://stors.tas.gov.au/" + idType + "/" + archivesId.replace(/\//g, "-");
+		item.url = "https://libraries.tas.gov.au/" + idType + "/" + archivesId.replace(/\//g, "-");
 	}
 	else if (idType == "NI" && namesId) {
 		namesId = ZU.trim(namesId.split(":")[1]);
-		item.url = "https://stors.tas.gov.au/" + idType + "/" + namesId;
+		item.url = "https://libraries.tas.gov.au/" + idType + "/" + namesId;
 	}
 	// Fall back to system url
 	else {
@@ -181,17 +181,15 @@ function addDigitalFiles(doc, item) {
 			// Convict records
 			if (url.includes("image_viewer.htm")) {
 				let urlParts = url.match(/image_viewer\.htm\?([A-Z0-9]+-\d+-\d+),\d+,(\d+)/);
-				// Z.debug(urlParts);
-				url = "https://stors.tas.gov.au/" + urlParts[1] + "p" + urlParts[2];
+				url = "https://libraries.tas.gov.au/Digital/" + urlParts[1] + "p" + urlParts[2];
 				digitalUrls.push(url);
 				digitalLabels[url] = labelParts.join(", ") + ", page " + urlParts[2];
 			}
 			// Other records
 			else if (url.includes("stors.tas.gov.au")) {
-				// Z.debug(url);
 				let initPath = url.match(/\$init=(.+)/);
 				if (initPath) {
-					url = "https://stors.tas.gov.au/" + initPath[1];
+					url = "https://libraries.tas.gov.au/Digital/" + initPath[1];
 				}
 				var page = "";
 				if (url.match(/p(\d+)$/)) {
@@ -206,21 +204,19 @@ function addDigitalFiles(doc, item) {
 	// Links to digital versions have a range of labels in the catalogue
 	// so we'll look for any links that look right.
 	else {
-		let digitalLinks = doc.querySelectorAll("a[href^='https://stors.tas.gov.au'][target='_new'], a[href^='https://stors.tas.gov.au'][target='_blank']");
+		let digitalLinks = doc.querySelectorAll("a[href^='https://libraries.tas.gov.au'][target='_new'], a[href^='https://libraries.tas.gov.au'][target='_blank']");
 		for (let i = 0; i < digitalLinks.length; ++i) {
 			url = digitalLinks[i].href;
 			// If there's an init value we can use this to get the url for a specific page
 			let initPath = url.match(/\$init=(.+)/);
 			if (initPath) {
-				url = "https://stors.tas.gov.au/" + initPath[1];
+				url = "https://libraries.tas.gov.au/" + initPath[1];
 			}
 			digitalUrls.push(url);
 			// Save the link's text to use in the attachment label
 			digitalLabels[url] = digitalLinks[i].textContent;
 		}
 	}
-	// Zotero.debug(digitalUrls);
-	// Zotero.debug(digitalLabels);
 	// Process image viewer links
 	// This will only attach single images or PDFs
 	// The multi-page viewers use iFrames and seem to draw images from a couple of different sources.
@@ -230,20 +226,17 @@ function addDigitalFiles(doc, item) {
 		ZU.processDocuments(digitalUrls, function (digitalDoc) {
 			var mimeType = "image/jpeg";
 			// Find the download link
-			var downloadLink = digitalDoc.querySelector("a[title='Download'], a[id='downloadLink']");
-			// Sometimes the download link opens a modal, if so get the link from the modal code
+			var downloadLink = digitalDoc.querySelector("a[title='Download'], a#downloadLink");
 			if (downloadLink && !downloadLink.href.includes("/download/")) {
 				downloadLink = digitalDoc.querySelector("div.downloadDialog a");
 			}
 			if (downloadLink) {
-				// Z.debug(downloadLink.href);
 				// If the page is using a PDF viewer, set mime type to pdf
 				// Otherwise use default jpeg mimetype
 				let viewer = digitalDoc.querySelector("#viewer");
 				if (viewer && viewer.className.startsWith("pdf")) {
 					mimeType = "application/pdf";
 				}
-				// Zotero.debug(digitalDoc.location.href);
 				// Add file as attachment
 				item.attachments.push({
 					title: 'Libraries Tasmania digital item: ' + digitalLabels[digitalDoc.location.href],
@@ -561,7 +554,7 @@ function scrapeNames(doc) {
 	item = addPermalink(doc, item, "NI");
 	addDigitalFiles(doc, item);
 }
-	
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -583,7 +576,7 @@ var testCases = [
 				"callNumber": "AD940",
 				"libraryCatalog": "Libraries Tasmania",
 				"manuscriptType": "series",
-				"url": "https://stors.tas.gov.au/AI/AD940",
+				"url": "https://libraries.tas.gov.au/Record/Archives/AD940",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -615,7 +608,7 @@ var testCases = [
 				"callNumber": "NS6985/1/1",
 				"libraryCatalog": "Libraries Tasmania",
 				"manuscriptType": "item",
-				"url": "https://stors.tas.gov.au/AI/NS6985-1-1",
+				"url": "https://libraries.tas.gov.au/Record/Archives/NS6985-1-1",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -653,7 +646,7 @@ var testCases = [
 				"numPages": "588",
 				"place": "London : Warne, [187- ]",
 				"shortTitle": "Lives of the most eminent English poets, with critical observations on their works",
-				"url": "https://stors.tas.gov.au/ILS/SD_ILS-491298",
+				"url": "https://libraries.tas.gov.au/Record/Library/SD_ILS-491298",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -726,7 +719,7 @@ var testCases = [
 				"callNumber": "NAME_INDEXES:1384365",
 				"libraryCatalog": "Libraries Tasmania",
 				"manuscriptType": "item",
-				"url": "https://stors.tas.gov.au/NI/1384365",
+				"url": "https://libraries.tas.gov.au/Record/NamesIndex/1384365",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -764,7 +757,7 @@ var testCases = [
 				"callNumber": "NAME_INDEXES:974802",
 				"libraryCatalog": "Libraries Tasmania",
 				"manuscriptType": "item",
-				"url": "https://stors.tas.gov.au/NI/974802",
+				"url": "https://libraries.tas.gov.au/Record/NamesIndex/974802",
 				"attachments": [
 					{
 						"title": "Snapshot",

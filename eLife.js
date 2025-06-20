@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2021-01-28 15:20:33"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2024-03-05 10:52:52"
 }
 
 /*
@@ -85,7 +85,7 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	var risURL = url.replace(/[#?].+/, "") + ".ris";
-	var pdfURL = attr(doc, 'a[data-download-type=pdf-article', 'href');
+	var pdfURL = attr(doc, '.article-download-list a', 'href');
 	// Z.debug("pdfURL: " + pdfURL);
 	ZU.doGet(risURL, function(text) {
 		var translator = Zotero.loadTranslator("import");
@@ -200,7 +200,7 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"date": "July 7, 2016",
+				"date": "2016-07-07",
 				"DOI": "10.7554/eLife.16800",
 				"ISSN": "2050-084X",
 				"abstractNote": "Open access, open data, open source and other open scholarship practices are growing in popularity and necessity. However, widespread adoption of these practices has not yet been achieved. One reason is that researchers are uncertain about how sharing their work will affect their careers. We review literature demonstrating that open research is associated with increases in citations, media attention, potential collaborators, job opportunities and funding opportunities. These findings are evidence that open research practices bring significant benefits to researchers relative to more traditional closed practices.",
@@ -416,7 +416,7 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"date": "June 23, 2020",
+				"date": "2020-06-23",
 				"DOI": "10.7554/eLife.54967",
 				"ISSN": "2050-084X",
 				"abstractNote": "The explosion in population genomic data demands ever more complex modes of analysis, and increasingly, these analyses depend on sophisticated simulations. Recent advances in population genetic simulation have made it possible to simulate large and complex models, but specifying such models for a particular simulation engine remains a difficult and error-prone task. Computational genetics researchers currently re-implement simulation models independently, leading to inconsistency and duplication of effort. This situation presents a major barrier to empirical researchers seeking to use simulations for power analyses of upcoming studies or sanity checks on existing genomic data. Population genetics, as a field, also lacks standard benchmarks by which new tools for inference might be measured. Here, we describe a new resource, stdpopsim, that attempts to rectify this situation. Stdpopsim is a community-driven open source project, which provides easy access to a growing catalog of published simulation models from a range of organisms and supports multiple simulation engine backends. This resource is available as a well-documented python library with a simple command-line interface. We share some examples demonstrating how stdpopsim can be used to systematically compare demographic inference methods, and we encourage a broader community of developers to contribute to this growing resource.",

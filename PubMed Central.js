@@ -2,14 +2,14 @@
 	"translatorID": "27ee5b2c-2a5a-4afc-a0aa-d386642d4eed",
 	"label": "PubMed Central",
 	"creator": "Michael Berkowitz and Rintze Zelle",
-	"target": "^https://(www\\.)?ncbi\\.nlm\\.nih\\.gov/pmc",
+	"target": "^https://(www\\.)?(pmc\\.ncbi\\.nlm\\.nih\\.gov/|ncbi\\.nlm\\.nih\\.gov/pmc)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-08-12 07:27:23"
+	"lastUpdated": "2024-11-21 21:03:01"
 }
 
 /*
@@ -39,7 +39,7 @@ function detectWeb(doc, url) {
 	// Make sure the page have a PMCID and we're on a valid item page,
 	// or looking at a PDF
 	if (getPMCID(url) && (url.includes(".pdf")
-	|| 	doc.getElementsByClassName('fm-ids').length)) {
+	|| 	doc.getElementsByClassName('pmc-header').length)) {
 		return "journalArticle";
 	}
 	
@@ -70,10 +70,11 @@ function doWeb(doc, url) {
 		var pdf = getPDF(doc, '//td[@class="format-menu"]//a[contains(@href,".pdf")]'
 				+ '|//div[@class="format-menu"]//a[contains(@href,".pdf")]'
 				+ '|//aside[@id="jr-alt-p"]/div/a[contains(@href,".pdf")]'
-				+ '|//li[contains(@class, "pdf-link")]/a');
+				+ '|//li[contains(@class, "pdf-link")]/a'
+				+ '|//a[contains(@data-ga-label, "pdf_download_")]');
 		// Z.debug(pdf);
 		// if we're looking at a pdf, just use the current url
-		if (!pdf && url.search(/\/pdf\/.+.pdf/) != -1) {
+		if (!pdf && /\/pdf\/.+.pdf/.test(url)) {
 			pdf = url;
 		}
 		var pdfCollection = {};
@@ -139,6 +140,13 @@ function lookupPMCIDs(ids, doc, pdfLink) {
 		var doc = parser.parseFromString(text, "text/xml");
 
 		var articles = ZU.xpath(doc, '/pmcarticleset/article');
+
+		if (!articles.length) {
+			let error = ZU.xpathText(doc, '/pmcarticleset/error/Message');
+			if (error) {
+				throw new Error(`PMC returned error: ${error}`);
+			}
+		}
 
 		for (var i in articles) {
 			var newItem = new Zotero.Item("journalArticle");
@@ -348,11 +356,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.ncbi.nlm.nih.gov/pmc/?term=anger",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://www.ncbi.nlm.nih.gov/pmc/issues/184700/",
 		"items": "multiple"
 	},
 	{

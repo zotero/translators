@@ -9,16 +9,16 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-01 23:43:42"
+	"lastUpdated": "2025-04-29 03:02:00"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2011-2021 Sebastian Karcher, Abe Jellinek,
-					      and the Center for History and New Media
-					      George Mason University, Fairfax, Virginia, USA
-					      http://zotero.org
+						  and the Center for History and New Media
+						  George Mason University, Fairfax, Virginia, USA
+						  http://zotero.org
 
 	This file is part of Zotero.
 
@@ -60,6 +60,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('.record-container');
+	if (!rows.length) rows = doc.querySelectorAll('article.record');
 	for (let row of rows) {
 		let href = attr(row, 'a[href*="/Record/"]', 'href');
 		let id = (href.match(/\/([0-9]+)/) || [])[1];
@@ -81,6 +82,8 @@ function doWeb(doc, url) {
 	else {
 		let id = extractID(url);
 		if (!id) id = extractID(attr(doc, '.bibLinks a[href*="/Record/"]', 'href'));
+		if (!id) id = extractID(text(doc, 'head > script:first-of-type'));
+		if (!id) id = extractID(attr(doc, '#controls li > a[href*="/Record/"]', 'href'));
 		if (!id) throw new Error('Couldn\'t extract ID from URL: ' + url);
 		scrape([id]);
 	}
@@ -97,17 +100,15 @@ function scrape(ids) {
 		// M1 has only garbage like repeated page number info
 		text = text.replace(/^M1 {2}- .+/m, "");
 		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7"); // RIS
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
 			item.extra = "";
 
-			if (item.place) {
-				item.place = item.place.replace(/[[\]]/g, "");
-			}
-
-			if (item.publisher) {
-				item.publisher = item.publisher.replace(/[[\]]/g, "");
+			// Place/publisher/date fields tend to have errant brackets
+			for (let field of ['place', 'publisher', 'date']) {
+				if (!item[field]) continue;
+				item[field] = item[field].replace(/[[\]]/g, "");
 			}
 
 			if (item.numPages) {
@@ -247,6 +248,59 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<p>English and Yiddish text.</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://babel.hathitrust.org/cgi/pt?id=nyp.33433022848471&seq=11&view=1up",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Letter from the secretary of war, transmitting documents in relation to hostilities of Creek Indians ...",
+				"creators": [
+					{
+						"lastName": "United States",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "1836?",
+				"libraryCatalog": "HathiTrust",
+				"numPages": "413",
+				"place": "Washington",
+				"publisher": "Blair & Rives, printers",
+				"url": "https://catalog.hathitrust.org/Record/103032656",
+				"attachments": [
+					{
+						"title": "Record Page",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					{
+						"tag": "1836"
+					},
+					{
+						"tag": "Creek War"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Lewis Cass, secretary of war.</p>"
+					},
+					{
+						"note": "<p>\"June 6, 1836. Laid upon the table.\"</p>"
+					},
+					{
+						"note": "<p>Caption title.</p>"
+					},
+					{
+						"note": "At head of title: 24th Congress, 1st session, Ho. of Reps. War Dept. <Doc. No. 276>."
 					}
 				],
 				"seeAlso": []

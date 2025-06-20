@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-18 11:11:59"
+	"lastUpdated": "2024-06-04 14:34:03"
 }
 
 /*
@@ -214,7 +214,12 @@ async function retrieveDOIs(doiOrDOIs) {
 		// Don't throw on error
 		translate.setHandler("error", function () {});
 	
-		await translate.translate();
+		try {
+			await translate.translate();
+		}
+		catch (e) {
+			Zotero.debug(`Failed to resolve DOI '${doi}': ${e}`);
+		}
 	}
 }
 
@@ -278,9 +283,10 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/BEJTMI",
+		"detectedItemType": "journalArticle",
 		"items": [
 			{
-				"itemType": "document",
+				"itemType": "dataset",
 				"title": "Transfer of 50 thousand improved genetically improved farmed tilapia (GIFT) fry to Nigeria",
 				"creators": [
 					{
@@ -296,14 +302,14 @@ var testCases = [
 					{
 						"lastName": "WorldFish",
 						"creatorType": "contributor",
-						"fieldMode": true
+						"fieldMode": 1
 					}
 				],
 				"date": "2023",
+				"DOI": "10.7910/DVN/BEJTMI",
 				"abstractNote": "The data contains the list of female broodstock that produced improved GIFT fry sent to Nigeria in three batches in 2022",
-				"extra": "Type: dataset\nDOI: 10.7910/DVN/BEJTMI",
 				"libraryCatalog": "DOI.org (Datacite)",
-				"publisher": "Harvard Dataverse",
+				"repository": "Harvard Dataverse",
 				"url": "https://dataverse.harvard.edu/citation?persistentId=doi:10.7910/DVN/BEJTMI",
 				"attachments": [],
 				"tags": [],

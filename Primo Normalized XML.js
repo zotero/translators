@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2022-02-02 19:34:22"
+	"lastUpdated": "2025-04-03 15:42:25"
 }
 
 /*
@@ -62,6 +62,7 @@ function doImport() {
 		case 'buch':
 		case 'ebook':
 		case 'pbook':
+		case 'pbooks':
 		case 'print_book':
 		case 'books':
 		case 'score':
@@ -130,7 +131,10 @@ function doImport() {
 	item.title = ZU.xpathText(doc, '//p:display/p:title', ns);
 	if (item.title) {
 		item.title = ZU.unescapeHTML(item.title);
-		item.title = item.title.replace(/\s*:/, ":");
+		item.title = item.title.replace(/\s*:/, ":")
+			// Remove everything after a slash in the title -
+			// generally authorship information
+			.replace(/ \/ [^/]+$/, '');
 	}
 	var creators = ZU.xpath(doc, '//p:display/p:creator', ns);
 	var contributors = ZU.xpath(doc, '//p:display/p:contributor', ns);
@@ -306,14 +310,19 @@ function doImport() {
 			callArray.push(callNumber[i].textContent.match(/\$\$D(.+?)\$/)[1]);
 		}
 	}
+	/* 2024-09 : adding a test on p:delivery/p:bestlocation/p:callnumber to get Callnumber from Primo VE pages like https://bcujas-catalogue.univ-paris1.fr/discovery/fulldisplay?context=L&vid=33CUJAS_INST:33CUJAS_INST&search_scope=MyInstitution&tab=LibraryCatalog&docid=alma990004764520107621 for example */
 	if (!callArray.length) {
-		callNumber = ZU.xpath(doc, '//p:display/p:availlibrary', ns);
+		callNumber = ZU.xpath(doc, '//p:display/p:availlibrary|//p:delivery/p:bestlocation/p:callNumber', ns);
 		for (let i = 0; i < callNumber.length; i++) {
-			if (callNumber[i].textContent.search(/\$\$2.+\$/) != -1) {
-				callArray.push(callNumber[i].textContent.match(/\$\$2\(?(.+?)(?:\s*\))?\$/)[1]);
+			let testCallNumberWithSubfields = callNumber[i].textContent.match(/\$\$2\(?(.+?)(?:\s*\))?\$/);
+			if (testCallNumberWithSubfields) {
+				callArray.push(testCallNumberWithSubfields[1]);
+			} else {
+				callArray.push(callNumber[i].textContent);
 			}
 		}
 	}
+
 	if (callArray.length) {
 		// remove duplicate call numbers
 		callArray = dedupeArray(callArray);
@@ -367,7 +376,10 @@ function stripAuthor(str) {
 		.replace(/\s*:\s+/, " ")
 		// National Library of Russia adds metadata at the end of the author name,
 		// prefixed by 'NLR10::'. Remove it.
-		.replace(/\bNLR10::.*/, '');
+		.replace(/\bNLR10::.*/, '')
+		// Austrian Libraries add authority data at the end of the author name,
+		// prefixed by '$$0'. Remove it.
+		.replace(/\$\$0.*/, '');
 }
 
 function fetchCreators(item, creators, type, splitGuidance) {
@@ -717,7 +729,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "The promise / Damon Galgut.",
+				"title": "The promise",
 				"creators": [
 					{
 						"firstName": "Damon",
@@ -764,6 +776,206 @@ var testCases = [
 				"language": "rus",
 				"place": "Санкт-Петербург",
 				"publisher": "С.В. Звонарев",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><record xmlns=\"http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib\" xmlns:sear=\"http://www.exlibrisgroup.com/xsd/jaguar/search\"><delivery><availabilityLinks>detailsgetit1</availabilityLinks><displayLocation>true</displayLocation><recordOwner>01ALLIANCE_NETWORK</recordOwner><physicalServiceId>null</physicalServiceId><sharedDigitalCandidates>null</sharedDigitalCandidates><link><displayLabel>thumbnail</displayLabel><linkURL>https://proxy-na.hosted.exlibrisgroup.com/exl_rewrite/books.google.com/books?bibkeys=ISBN:,OCLC:,LCCN:71093813&amp;jscmd=viewapi&amp;callback=updateGBSCover</linkURL><linkType>thumbnail</linkType><id>:_0</id></link><availability>available_in_library</availability><additionalLocations>false</additionalLocations><digitalAuxiliaryMode>false</digitalAuxiliaryMode><holding><matchForHoldings><holdingRecord>852##b</holdingRecord><matchOn>MainLocation</matchOn></matchForHoldings><subLocationCode>pgst1</subLocationCode><volumeFilter>null</volumeFilter><ilsApiId>9933348101867</ilsApiId><callNumberType>0</callNumberType><libraryCode>WHITMAN</libraryCode><yearFilter>null</yearFilter><boundWith>false</boundWith><stackMapUrl> https://penroselib-php.herokuapp.com/apps/map/locate.php?loc=pgst1&amp;callno=TD174+.D95&amp;title=Pollution+%2F+Leonard+B.+Dworsky+%3B+with+an+introduction+by+Stewart+L.+Udall.</stackMapUrl><isValidUser>true</isValidUser><translateRelatedTitle>null</translateRelatedTitle><mainLocation>Whitman College Library</mainLocation><callNumber>TD174 .D95</callNumber><adaptorid>ALMA_01</adaptorid><organization>01ALLIANCE_WHITC</organization><holdingURL>OVP</holdingURL><availabilityStatus>available</availabilityStatus><id>_:0</id><subLocation>1st Floor Books</subLocation><holdId>2288279530001867</holdId><holKey>HoldingResultKey [mid=2288279530001867, libraryId=170730510001867, locationCode=pgst1, callNumber=TD174 .D95]</holKey><singleUnavailableItemProcessType>null</singleUnavailableItemProcessType><relatedTitle>null</relatedTitle></holding><bestlocation><matchForHoldings><holdingRecord>852##b</holdingRecord><matchOn>MainLocation</matchOn></matchForHoldings><subLocationCode>pgst1</subLocationCode><volumeFilter>null</volumeFilter><ilsApiId>9933348101867</ilsApiId><callNumberType>0</callNumberType><libraryCode>WHITMAN</libraryCode><yearFilter>null</yearFilter><boundWith>false</boundWith><stackMapUrl> https://penroselib-php.herokuapp.com/apps/map/locate.php?loc=pgst1&amp;callno=TD174+.D95&amp;title=Pollution+%2F+Leonard+B.+Dworsky+%3B+with+an+introduction+by+Stewart+L.+Udall.</stackMapUrl><isValidUser>true</isValidUser><translateRelatedTitle>null</translateRelatedTitle><mainLocation>Whitman College Library</mainLocation><callNumber>TD174 .D95</callNumber><adaptorid>ALMA_01</adaptorid><organization>01ALLIANCE_WHITC</organization><holdingURL>OVP</holdingURL><availabilityStatus>available</availabilityStatus><id>_:0</id><subLocation>1st Floor Books</subLocation><holdId>2288279530001867</holdId><holKey>HoldingResultKey [mid=2288279530001867, libraryId=170730510001867, locationCode=pgst1, callNumber=TD174 .D95]</holKey><singleUnavailableItemProcessType>null</singleUnavailableItemProcessType><relatedTitle>null</relatedTitle></bestlocation><electronicServices>null</electronicServices><feDisplayOtherLocations>false</feDisplayOtherLocations><hasD>null</hasD><hideResourceSharing>false</hideResourceSharing><hasFilteredServices>null</hasFilteredServices><physicalItemTextCodes>null</physicalItemTextCodes><almaInstitutionsList><instId>1857</instId><instCode>01ALLIANCE_UPORT</instCode><availabilityStatus>available_in_institution</availabilityStatus><instName>University of Portland</instName><envURL/><getitLink><displayText>Alma-P</displayText><linkRecordId>99177171740001451</linkRecordId></getitLink></almaInstitutionsList><almaInstitutionsList><instId>1856</instId><instCode>01ALLIANCE_WOU</instCode><availabilityStatus>available_in_institution</availabilityStatus><instName>Western Oregon University</instName><envURL/><getitLink><displayText>Alma-P</displayText><linkRecordId>99177171740001451</linkRecordId></getitLink></almaInstitutionsList><almaInstitutionsList><instId>1844</instId><instCode>01ALLIANCE_LCC</instCode><availabilityStatus>available_in_institution</availabilityStatus><instName>Lewis &amp; Clark</instName><envURL/><getitLink><displayText>Alma-P</displayText><linkRecordId>99177171740001451</linkRecordId></getitLink></almaInstitutionsList><almaInstitutionsList><instId>1855</instId><instCode>01ALLIANCE_SOU</instCode><availabilityStatus>available_in_institution</availabilityStatus><instName>Southern Oregon University</instName><envURL/><getitLink><displayText>Alma-P</displayText><linkRecordId>99177171740001451</linkRecordId></getitLink></almaInstitutionsList><almaInstitutionsList><instId>1865</instId><instCode>01ALLIANCE_OSU</instCode><availabilityStatus>available_in_institution</availabilityStatus><instName>Oregon State University Libraries and Press</instName><envURL/><getitLink><displayText>Alma-P</displayText><linkRecordId>99177171740001451</linkRecordId></getitLink></almaInstitutionsList><almaInstitutionsList><instId>1453</instId><instCode>01ALLIANCE_WWU</instCode><availabilityStatus>available_in_institution</availabilityStatus><instName>Western Washington University</instName><envURL/><getitLink><displayText>Alma-P</displayText><linkRecordId>99177171740001451</linkRecordId></getitLink></almaInstitutionsList><almaInstitutionsList><instId>1871</instId><instCode>01ALLIANCE_CHEMEK</instCode><availabilityStatus>available_in_institution</availabilityStatus><instName>Chemeketa Community College</instName><envURL/><getitLink><displayText>Alma-P</displayText><linkRecordId>99177171740001451</linkRecordId></getitLink></almaInstitutionsList><almaInstitutionsList><instId>1842</instId><instCode>01ALLIANCE_WSU</instCode><availabilityStatus>available_in_institution</availabilityStatus><instName>Washington State University</instName><envURL/><getitLink><displayText>Alma-P</displayText><linkRecordId>99177171740001451</linkRecordId></getitLink></almaInstitutionsList><almaInstitutionsList><instId>1875</instId><instCode>01ALLIANCE_WW</instCode><availabilityStatus>available_in_institution</availabilityStatus><instName>Whitworth University</instName><envURL/><getitLink><displayText>Alma-P</displayText><linkRecordId>99177171740001451</linkRecordId></getitLink></almaInstitutionsList><almaInstitutionsList><instId>1852</instId><instCode>01ALLIANCE_UO</instCode><availabilityStatus>available_in_institution</availabilityStatus><instName>University of Oregon</instName><envURL/><getitLink><displayText>Alma-P</displayText><linkRecordId>99177171740001451</linkRecordId></getitLink></almaInstitutionsList><almaInstitutionsList><instId>1851</instId><instCode>01ALLIANCE_UID</instCode><availabilityStatus>available_in_institution</availabilityStatus><instName>University of Idaho</instName><envURL/><getitLink><displayText>Alma-P</displayText><linkRecordId>99177171740001451</linkRecordId></getitLink></almaInstitutionsList><almaInstitutionsList><instId>1454</instId><instCode>01ALLIANCE_WU</instCode><availabilityStatus>available_in_institution</availabilityStatus><instName>Willamette University</instName><envURL/><getitLink><displayText>Alma-P</displayText><linkRecordId>99177171740001451</linkRecordId></getitLink></almaInstitutionsList><quickAccessService>null</quickAccessService><recordInstitutionCode>null</recordInstitutionCode><displayedAvailability>null</displayedAvailability><consolidatedCoverage>null</consolidatedCoverage><additionalElectronicServices>null</additionalElectronicServices><deliveryCategory>Alma-P</deliveryCategory><serviceMode>ovp</serviceMode><filteredByGroupServices>null</filteredByGroupServices><electronicContextObjectId>null</electronicContextObjectId><GetIt1><links><isLinktoOnline>false</isLinktoOnline><displayText>null</displayText><inst4opac>01ALLIANCE_WHITC</inst4opac><getItTabText>service_getit</getItTabText><adaptorid>ALMA_01</adaptorid><ilsApiId>9933348101867</ilsApiId><link>OVP</link><id>_:0</id></links><category>Alma-P</category></GetIt1></delivery><search><creationdate>1971</creationdate><creator>Dworsky, Leonard B., compiler.</creator><sort_journal_title>Pollution /</sort_journal_title><sort_title>Pollution /</sort_title><sort_creationdate_full>1971</sort_creationdate_full><subject>United States</subject><subject>Water Pollution</subject><subject>Environmental policy</subject><subject>Environmental law</subject><subject>Air Pollution</subject><subject>Environnement Politique gouvernementale États-Unis.</subject><subject>Environmental law United States.</subject><subject>Environmental policy United States.</subject><subject>Air Pollution.</subject><subject>Water Pollution.</subject><local_fields>973 pbooks</local_fields><local_fields>994 92 OCACL</local_fields><toc>Introduction -- Toward a Collective Conscience for Conservation -- Water Pollution -- Historical Prologue -- Water pollution: A Major Social Problem -- water and health: American Experience until 1900 -- Initial Efforts in Science and Public Policy: 1900-1919 -- Broadening the Base of Concern: 191-1948 -- Initiating a national water pollution Control Program: 1948-1966 -- Water Pollution Control: An element of multipurpose water resources development -- Interstate Compacts and water Pollution Control -- Water Pollution Control: The International Scene -- water pollution Problems and developments until 1948 -- Early Laws and conditions -- Science, water supply, and Epidemic Disease -- The Pollution of Interstate Waters: initial Investigations -- A Broadening base of concern -- President Franklin Delano Roosevelt and Water Pollution Control -- Developing a national Water pollution Control Program: 1948-1968 -- The water pollution Control Act of 1948 -- A Maturing Program: 1955-1968 -- Interstate agencies -- Sate Pollution Control: A case Study of Pennsylvania -- Air Pollution -- Introduction -- The Atmosphere: An Urgent Challenge -- Some historical Notes -- Tragic Signals: disasters in Europe and America -- Developing a National Air pollution Control program: 1948-1955 -- The First comprehensive Air Pollution Control law -- Developing Sate and Local Programs -- Summary -- Environment and Health -- Efforts to achieve effective legislation: 1954-1955 -- Expanding the sphere of control: 1955-1967 -- The Air Quality Act of 1967 -- New York City: A case Study in Air pollution -- Environmental Quality: A New National priority.</toc><language>eng</language><title>Pollution /</title><startdate>1971</startdate><addtitle>Conservation in the United States.</addtitle><addtitle>Pollution.</addtitle><addtitle>Conservation in the United States</addtitle><general>Chelsea House Publishers,</general><general>1971.</general><general>New York :</general><rtype>pbooks</rtype><contributor>Leonard B. Dworsky ; with an introduction by Stewart L. Udall.</contributor><series>Conservation in the United States.</series><series>Conservation in the United States</series><ocolc>(OCoLC)ocm00145772</ocolc><ocolc>(OCoLC)00145772</ocolc><ocolc>00145772</ocolc><place>United States</place><place>États-Unis.</place><place>United States.</place><journal_title>Pollution /</journal_title><facet_creatorcontrib>Dworsky, Leonard B.,</facet_creatorcontrib><sort_author>Dworsky, Leonard B., compiler.</sort_author><sort_creationdate>1971</sort_creationdate></search><display><creationdate>1971</creationdate><creator>Dworsky, Leonard B., compiler.$$QDworsky, Leonard B.</creator><subject>Water -- Pollution</subject><subject>Air -- Pollution</subject><subject>Environmental policy -- United States</subject><subject>Environmental law -- United States</subject><format>xl, 911 pages ; 24 cm.</format><description>Includes bibliographical references.</description><language>eng</language><source>Alma</source><type>pbooks</type><title>Pollution </title><version>1</version><relation>$$Cform$$VOnline version: Dworsky, Leonard B. Pollution. New York, Chelsea House Publishers, 1971$$QPollution.</relation><mms>9933348101867</mms><contents>Introduction -- Toward a Collective Conscience for Conservation -- Water Pollution -- Historical Prologue -- Water pollution: A Major Social Problem -- water and health: American Experience until 1900 -- Initial Efforts in Science and Public Policy: 1900-1919 -- Broadening the Base of Concern: 191-1948 -- Initiating a national water pollution Control Program: 1948-1966 -- Water Pollution Control: An element of multipurpose water resources development -- Interstate Compacts and water Pollution Control -- Water Pollution Control: The International Scene -- water pollution Problems and developments until 1948 -- Early Laws and conditions -- Science, water supply, and Epidemic Disease -- The Pollution of Interstate Waters: initial Investigations -- A Broadening base of concern -- President Franklin Delano Roosevelt and Water Pollution Control -- Developing a national Water pollution Control Program: 1948-1968 -- The water pollution Control Act of 1948 -- A Maturing Program: 1955-1968 -- Interstate agencies -- Sate Pollution Control: A case Study of Pennsylvania -- Air Pollution -- Introduction -- The Atmosphere: An Urgent Challenge -- Some historical Notes -- Tragic Signals: disasters in Europe and America -- Developing a National Air pollution Control program: 1948-1955 -- The First comprehensive Air Pollution Control law -- Developing Sate and Local Programs -- Summary -- Environment and Health -- Efforts to achieve effective legislation: 1954-1955 -- Expanding the sphere of control: 1955-1967 -- The Air Quality Act of 1967 -- New York City: A case Study in Air pollution -- Environmental Quality: A New National priority.</contents><series>Conservation in the United States$$QConservation in the United States</series><series>Conservation in the United States.$$QConservation in the United States.</series><lds100>00145772</lds100><publisher>New York : Chelsea House Publishers</publisher><lds88>Leonard B. Dworsky ; with an introduction by Stewart L. Udall</lds88><place>New York :</place></display><control><recordid>alma9933348101867</recordid><sourceid>alma</sourceid><score>5.1</score><originalsourceid>ocm00145772-01alliance_network</originalsourceid><sourceformat>MARC21</sourceformat><sourcerecordid>9933348101867</sourcerecordid><sourcesystem>OCLC</sourcesystem><isDedup>false</isDedup></control><addata><date>1971</date><aulast>Dworsky</aulast><notes>Includes bibliographical references.</notes><cop>New York</cop><ristype>GEN</ristype><oclcid>(ocolc)145772</oclcid><auinit>L</auinit><aufirst>Leonard B.</aufirst><lccn>71093813</lccn><seriestitle>Conservation in the United States</seriestitle><creatorfull>$$NDworsky, Leonard B.$$LDworsky$$FLeonard B.$$Rauthor</creatorfull><au>Dworsky, Leonard B.</au><originatingSystemIDAuthor>n82013408</originatingSystemIDAuthor><btitle>Pollution</btitle><pub>Chelsea House Publishers</pub></addata><sort><creationdate>1971</creationdate><author>Dworsky, Leonard B., compiler.</author><title>Pollution /</title></sort></record>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Pollution",
+				"creators": [
+					{
+						"firstName": "Leonard B.",
+						"lastName": "Dworsky",
+						"creatorType": "author"
+					}
+				],
+				"date": "1971",
+				"abstractNote": "Includes bibliographical references.",
+				"callNumber": "TD174 .D95",
+				"language": "eng",
+				"place": "New York",
+				"publisher": "Chelsea House Publishers",
+				"series": "Conservation in the United States",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Air"
+					},
+					{
+						"tag": "Environmental law"
+					},
+					{
+						"tag": "Environmental policy"
+					},
+					{
+						"tag": "Pollution"
+					},
+					{
+						"tag": "Pollution"
+					},
+					{
+						"tag": "United States"
+					},
+					{
+						"tag": "United States"
+					},
+					{
+						"tag": "Water"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<record xmlns=\"http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib\" xmlns:sear=\"http://www.exlibrisgroup.com/xsd/jaguar/search\">\n  <control>\n    <sourcerecordid>2174645960003337</sourcerecordid>\n    <sourceid>WUW_alma</sourceid>\n    <recordid>WUW_alma2174645960003337</recordid>\n    <addsrcrecordid>AC03437319</addsrcrecordid>\n    <sourceformat>MARC21</sourceformat>\n    <sourcesystem>Alma</sourcesystem>\n    <almaid>43ACC_WUW:2174645960003337</almaid>\n  </control>\n  <display>\n    <type>book</type>\n    <title>Theory of economic dynamics : an essay on cyclical and long-run changes in capitalist economy</title>\n    <creator>Kalecki, Michał [VerfasserIn]$$QKalecki, Michał$$0(DE-588)118559494$$G(uri)http://d-nb.info/gnd/118559494</creator>\n    <edition>1. publ.</edition>\n    <publisher>London : Allen &amp; Unwin</publisher>\n    <creationdate>1954</creationdate>\n    <format>178 S., graph. Darst.</format>\n    <subject>Kapitalismus ; Konjunkturzyklus ; Wirtschaftsentwicklung</subject>\n    <description>Hier auch spätere, unveränderte Nachdrucke (1956)</description>\n    <language>eng</language>\n    <source>WU Bibliothekskatalog</source>\n    <availlibrary>$$IWUW$$LWUW_B_JHB$$1Closed Stacks$$2503328-G$$Savailable$$X43ACC_WUW$$YJHB$$ZMG$$P1</availlibrary>\n    <availlibrary>$$IWUW$$LWUW_B_JHB$$1Level -2 Books$$2320083-M$$Savailable$$X43ACC_WUW$$YJHB$$ZMAG$$P2</availlibrary>\n    <availlibrary>$$IWUW$$LWUW_B_JHB$$1Steindl Collection$$2S/335.5/K14 T3$$Savailable$$X43ACC_WUW$$YJHB$$ZSST$$P3</availlibrary>\n    <lds14>503328-G</lds14>\n    <lds14>320083-M</lds14>\n    <lds14>S/335.5/K14 T3</lds14>\n    <lds16>by M. Kalecki</lds16>\n    <lds30>AC03437319</lds30>\n    <lds33>https://permalink.obvsg.at/wuw/AC03437319</lds33>\n    <lds53>Kapitalismus | Konjunkturzyklus | Wirtschaftsentwicklung</lds53>\n    <lds55>Theory of economic dynamics: an essay on cyclical and long-run changes in capitalist economy</lds55>\n    <lds56>Allen &amp; Unwin</lds56>\n    <lds58>WU Bibliothekszentrum LC, Signatur: 503328-G</lds58>\n    <lds58>WU Bibliothekszentrum LC, Signatur: 320083-M</lds58>\n    <lds58>WU Bibliothekszentrum LC, Signatur: S/335.5/K14 T3</lds58>\n    <lds60>eng</lds60>\n    <lds61>Kalecki, Michał</lds61>\n    <availinstitution>$$IWUW$$Savailable</availinstitution>\n    <availpnx>available</availpnx>\n    <version>2</version>\n  </display>\n  <search>\n    <creatorcontrib>Kalecki, Michał [VerfasserIn]</creatorcontrib>\n    <creatorcontrib>Michał</creatorcontrib>\n    <creatorcontrib>Kalecki  1899-1970 VerfasserIn</creatorcontrib>\n    <creatorcontrib>M.</creatorcontrib>\n    <creatorcontrib>Kalecki  1899-1970</creatorcontrib>\n    <creatorcontrib>Michal</creatorcontrib>\n    <creatorcontrib>Kaletskii  1899-1970</creatorcontrib>\n    <creatorcontrib>Michel</creatorcontrib>\n    <creatorcontrib>http://d-nb.info/gnd/118559494</creatorcontrib>\n    <creatorcontrib>Kalecki, Michał 1899-1970 VerfasserIn</creatorcontrib>\n    <creatorcontrib>Kalecki, M. 1899-1970</creatorcontrib>\n    <creatorcontrib>Kaletskii, Michal 1899-1970</creatorcontrib>\n    <creatorcontrib>Kalecki, Michal 1899-1970</creatorcontrib>\n    <creatorcontrib>Kalecki, Michel 1899-1970</creatorcontrib>\n    <creatorcontrib>Kalecki, M</creatorcontrib>\n    <creatorcontrib>Kaletskii, M</creatorcontrib>\n    <creatorcontrib>(uri)http://d-nb.info/gnd/118559494</creatorcontrib>\n    <title>Theory of economic dynamics an essay on cyclical and long-run changes in capitalist economy</title>\n    <description>Hier auch spätere, unveränderte Nachdrucke (1956)</description>\n    <subject>Kapitalismus ; Konjunkturzyklus ; Wirtschaftsentwicklung</subject>\n    <subject>Kapitalismus</subject>\n    <subject>Konjunkturzyklus</subject>\n    <subject>Wirtschaftsentwicklung</subject>\n    <subject>Wirtschaftliche Entwicklung</subject>\n    <subject>Wirtschaftsdynamik</subject>\n    <subject>Wirtschaftswandel</subject>\n    <subject>Wirtschaftlicher Wandel</subject>\n    <subject>Ökonomische Entwicklung</subject>\n    <subject>http://d-nb.info/gnd/4066438-7</subject>\n    <subject>Zyklus</subject>\n    <subject>Wachstumszyklus</subject>\n    <subject>Konjunkturschwankung</subject>\n    <subject>4032134-4</subject>\n    <subject>Kapitalistische Gesellschaft</subject>\n    <subject>Kapitalistische Wirtschaft</subject>\n    <subject>Kapitalistisches Gesellschaftssystem</subject>\n    <subject>Kapitalistisches Wirtschaftssystem</subject>\n    <subject>Gesellschaftsordnung</subject>\n    <subject>Antikapitalismus</subject>\n    <subject>4029577-1</subject>\n    <subject>(DE-588)4029577-1</subject>\n    <subject>(DE-588)4032134-4</subject>\n    <subject>(DE-588)4066438-7</subject>\n    <general>1. publ.</general>\n    <general>Allen &amp; Unwin</general>\n    <sourceid>WUW_alma</sourceid>\n    <recordid>WUW_alma2174645960003337</recordid>\n    <rsrctype>book</rsrctype>\n    <creationdate>1954</creationdate>\n    <startdate>19540101</startdate>\n    <enddate>19541231</enddate>\n    <addsrcrecordid>AC03437319</addsrcrecordid>\n    <addsrcrecordid>990006667950203337</addsrcrecordid>\n    <searchscope>WUW_alma</searchscope>\n    <searchscope>WUW_SST</searchscope>\n    <searchscope>WUW</searchscope>\n    <scope>WUW_alma</scope>\n    <scope>WUW_SST</scope>\n    <scope>WUW</scope>\n    <alttitle>1956</alttitle>\n    <lsr09>Allen &amp; Unwin</lsr09>\n    <lsr14>503328-G</lsr14>\n    <lsr14>320083-M</lsr14>\n    <lsr14>S/335.5/K14 T3</lsr14>\n    <lsr16>by M. Kalecki</lsr16>\n    <lsr33>https://permalink.obvsg.at/wuw/AC03437319</lsr33>\n    <lsr35>AC03437319</lsr35>\n  </search>\n  <sort>\n    <title>THEORY OF ECONOMIC DYNAMICS AN ESSAY ON CYCLICAL AND LONGRUN CHANGES IN CAPITALIST ECONOMY</title>\n    <creationdate>1954</creationdate>\n    <author>Kalecki, Michał VerfasserIn</author>\n    <lso01>1954</lso01>\n  </sort>\n  <facets>\n    <language>eng</language>\n    <creationdate>1954</creationdate>\n    <topic>Kapitalismus</topic>\n    <topic>Konjunkturzyklus</topic>\n    <topic>Wirtschaftsentwicklung</topic>\n    <toplevel>available</toplevel>\n    <prefilter>books</prefilter>\n    <rsrctype>books</rsrctype>\n    <creatorcontrib>Kalecki, Michał</creatorcontrib>\n    <library>WUW_B_JHB</library>\n    <atoz>T</atoz>\n    <lfc06>Ohne Angabe</lfc06>\n    <newrecords>20170815_785</newrecords>\n    <frbrgroupid>706492797</frbrgroupid>\n    <frbrtype>5</frbrtype>\n  </facets>\n  <dedup>\n    <t>99</t>\n    <c3>WUWAC03437319</c3>\n    <c4>1954</c4>\n    <c5>WUW990006667950203337</c5>\n    <f5>WUWAC03437319</f5>\n    <f6>WUW_1954</f6>\n    <f7>WUWAC03437319</f7>\n    <f8>WUW_</f8>\n    <f9>WUW_178 S.</f9>\n    <f10>WUW_allen unwin</f10>\n    <f11>WUW_kalecki michal 1899 1970</f11>\n    <f20>WUW_990006667950203337</f20>\n  </dedup>\n  <frbr>\n    <t>1</t>\n    <k1>$$Kwuwwuwwuwkalecki michal$$AA</k1>\n    <k3>$$Kwuwwuwwuwtheory of economic dynamics an essay on cyclical and long run changes in capitalist economy$$AT</k3>\n  </frbr>\n  <delivery>\n    <institution>WUW</institution>\n    <delcategory>Alma-P</delcategory>\n  </delivery>\n  <ranking>\n    <booster1>1</booster1>\n    <booster2>1</booster2>\n  </ranking>\n  <addata>\n    <aulast>Kalecki</aulast>\n    <au>Kalecki, Michał</au>\n    <creatorfull>$$NKalecki, Michał$$LKalecki$$FMichał$$Rauthor</creatorfull>\n    <creatorfull>$$NKalecki, M$$LKalecki$$FM</creatorfull>\n    <creatorfull>$$NKaletskii, Michal$$LKaletskii$$FMichal</creatorfull>\n    <creatorfull>$$NKalecki, Michal$$LKalecki$$FMichal</creatorfull>\n    <creatorfull>$$NKalecki, Michel$$LKalecki$$FMichel</creatorfull>\n    <creatorfull>$$Nhttp://d-nb.info/gnd/118559494$$Lhttp://d-nb.info/gnd/118559494$$F</creatorfull>\n    <btitle>Theory of economic dynamics: an essay on cyclical and long-run changes in capitalist economy</btitle>\n    <stitle>Theory of economic dynami</stitle>\n    <addtitle>1956</addtitle>\n    <date>1954</date>\n    <risdate>1954</risdate>\n    <spage>178 S.</spage>\n    <format>book</format>\n    <ristype>BOOK</ristype>\n    <cop>London</cop>\n    <pub>Allen &amp; Unwin</pub>\n    <mis1>2174645960003337</mis1>\n    <url>https://permalink.obvsg.at/wuw/AC03437319</url>\n    <lad06>000666795</lad06>\n    <lad24>-WUW-</lad24>\n    <lad24>GND: 4029577-1 689 SSS TOP</lad24>\n    <lad24>GND: 4032134-4 689 SSS TOP</lad24>\n    <lad24>GND: 4066438-7 689 SSS TOP</lad24>\n    <lad24>GND: 118559494 100 XXX CRE</lad24>\n  </addata>\n  <browse>\n    <author>$$DKalecki, Michał, 1899-1970$$EKalecki, Michał, 1899-1970</author>\n    <author>$$DKalecki, M., 1899-1970$$EKalecki, M., 1899-1970</author>\n    <author>$$DKaletskii, Michal, 1899-1970$$EKaletskii, Michal, 1899-1970</author>\n    <author>$$DKalecki, Michal, 1899-1970$$EKalecki, Michal, 1899-1970</author>\n    <author>$$DKalecki, Michel, 1899-1970$$EKalecki, Michel, 1899-1970</author>\n    <title>$$DTheory of economic dynamics an essay on cyclical and long-run changes in capitalist economy$$ETheory of economic dynamics an essay on cyclical and long-run changes in capitalist economy</title>\n    <title>$$D1956$$E1956</title>\n    <subject>$$TGND$$EKapitalismus$$DKapitalismus</subject>\n    <subject>$$TGND$$EKonjunkturzyklus$$DKonjunkturzyklus</subject>\n    <subject>$$TGND$$EWirtschaftsentwicklung$$DWirtschaftsentwicklung</subject>\n    <subject>$$TGND$$EWirtschaftliche Entwicklung$$DWirtschaftliche Entwicklung</subject>\n    <subject>$$TGND$$EWirtschaftsdynamik$$DWirtschaftsdynamik</subject>\n    <subject>$$TGND$$EWirtschaftswandel$$DWirtschaftswandel</subject>\n    <subject>$$TGND$$EWirtschaftlicher Wandel$$DWirtschaftlicher Wandel</subject>\n    <subject>$$TGND$$EÖkonomische Entwicklung$$DÖkonomische Entwicklung</subject>\n    <subject>$$TGND$$Ehttp://d-nb.info/gnd/4066438-7$$Dhttp://d-nb.info/gnd/4066438-7</subject>\n    <subject>$$TGND$$EZyklus$$DZyklus</subject>\n    <subject>$$TGND$$EWachstumszyklus$$DWachstumszyklus</subject>\n    <subject>$$TGND$$EKonjunkturschwankung$$DKonjunkturschwankung</subject>\n    <subject>$$TGND$$E4032134-4$$D4032134-4</subject>\n    <subject>$$TGND$$EKapitalistische Gesellschaft$$DKapitalistische Gesellschaft</subject>\n    <subject>$$TGND$$EKapitalistische Wirtschaft$$DKapitalistische Wirtschaft</subject>\n    <subject>$$TGND$$EKapitalistisches Gesellschaftssystem$$DKapitalistisches Gesellschaftssystem</subject>\n    <subject>$$TGND$$EKapitalistisches Wirtschaftssystem$$DKapitalistisches Wirtschaftssystem</subject>\n    <subject>$$TGND$$EGesellschaftsordnung$$DGesellschaftsordnung</subject>\n    <subject>$$TGND$$EAntikapitalismus$$DAntikapitalismus</subject>\n    <subject>$$TGND$$E4029577-1$$D4029577-1</subject>\n    <callnumber>$$IWUW$$D503328-G$$E503328-g$$T</callnumber>\n    <callnumber>$$IWUW$$D320083-M$$E320083-m$$T</callnumber>\n    <callnumber>$$IWUW$$DS/335.5/K14 T3$$Es/335.5/k14 t3$$T8</callnumber>\n  </browse>\n</record>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Theory of economic dynamics: an essay on cyclical and long-run changes in capitalist economy",
+				"creators": [
+					{
+						"firstName": "Michał",
+						"lastName": "Kalecki",
+						"creatorType": "author"
+					}
+				],
+				"date": "1954",
+				"abstractNote": "Hier auch spätere, unveränderte Nachdrucke (1956)",
+				"callNumber": "503328-G, 320083-M, S/335.5/K14 T3",
+				"edition": "1. publ.",
+				"language": "eng",
+				"numPages": "178",
+				"place": "London",
+				"publisher": "Allen & Unwin",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Kapitalismus"
+					},
+					{
+						"tag": "Konjunkturzyklus"
+					},
+					{
+						"tag": "Wirtschaftsentwicklung"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><record xmlns=\"http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib\" xmlns:sear=\"http://www.exlibrisgroup.com/xsd/jaguar/search\"><delivery><availabilityLinks>detailsgetit1</availabilityLinks><displayLocation>true</displayLocation><recordOwner>33CUJAS_INST</recordOwner><physicalServiceId>null</physicalServiceId><sharedDigitalCandidates>null</sharedDigitalCandidates><link><displayLabel>thumbnail</displayLabel><linkURL>https://proxy-euf.hosted.exlibrisgroup.com/exl_rewrite/books.google.com/books?bibkeys=ISBN:1107199956,OCLC:,LCCN:&amp;jscmd=viewapi&amp;callback=updateGBSCover</linkURL><linkType>thumbnail</linkType><id>:_0</id></link><availability>available_in_library</availability><additionalLocations>false</additionalLocations><digitalAuxiliaryMode>false</digitalAuxiliaryMode><holding><matchForHoldings><holdingRecord>852##b</holdingRecord><matchOn>MainLocation</matchOn></matchForHoldings><subLocationCode>MAG2</subLocationCode><volumeFilter>null</volumeFilter><ilsApiId>990004764520107621</ilsApiId><callNumberType>8</callNumberType><libraryCode>CUJ</libraryCode><yearFilter>null</yearFilter><boundWith>false</boundWith><stackMapUrl/><isValidUser>true</isValidUser><translateRelatedTitle>null</translateRelatedTitle><mainLocation>BIU Cujas</mainLocation><callNumber>567.067</callNumber><adaptorid>ALMA_01</adaptorid><organization>33CUJAS_INST</organization><holdingURL>OVP</holdingURL><availabilityStatus>available</availabilityStatus><id>_:0</id><subLocation>Magasin 2ème sous-sol</subLocation><holdId>2262944550007621</holdId><holKey>HoldingResultKey [mid=2262944550007621, libraryId=112237610007621, locationCode=MAG2, callNumber=567.067]</holKey><singleUnavailableItemProcessType>null</singleUnavailableItemProcessType><relatedTitle>null</relatedTitle></holding><bestlocation><matchForHoldings><holdingRecord>852##b</holdingRecord><matchOn>MainLocation</matchOn></matchForHoldings><subLocationCode>MAG2</subLocationCode><volumeFilter>null</volumeFilter><ilsApiId>990004764520107621</ilsApiId><callNumberType>8</callNumberType><libraryCode>CUJ</libraryCode><yearFilter>null</yearFilter><boundWith>false</boundWith><stackMapUrl/><isValidUser>true</isValidUser><translateRelatedTitle>null</translateRelatedTitle><mainLocation>BIU Cujas</mainLocation><callNumber>567.067</callNumber><adaptorid>ALMA_01</adaptorid><organization>33CUJAS_INST</organization><holdingURL>OVP</holdingURL><availabilityStatus>available</availabilityStatus><id>_:0</id><subLocation>Magasin 2ème sous-sol</subLocation><holdId>2262944550007621</holdId><holKey>HoldingResultKey [mid=2262944550007621, libraryId=112237610007621, locationCode=MAG2, callNumber=567.067]</holKey><singleUnavailableItemProcessType>null</singleUnavailableItemProcessType><relatedTitle>null</relatedTitle></bestlocation><electronicServices>null</electronicServices><feDisplayOtherLocations>false</feDisplayOtherLocations><hasD>null</hasD><hideResourceSharing>false</hideResourceSharing><hasFilteredServices>null</hasFilteredServices><physicalItemTextCodes>null</physicalItemTextCodes><quickAccessService>null</quickAccessService><recordInstitutionCode>null</recordInstitutionCode><displayedAvailability>null</displayedAvailability><consolidatedCoverage>null</consolidatedCoverage><additionalElectronicServices>null</additionalElectronicServices><deliveryCategory>Alma-P</deliveryCategory><serviceMode>ovp</serviceMode><filteredByGroupServices>null</filteredByGroupServices><electronicContextObjectId>null</electronicContextObjectId><GetIt1><links><isLinktoOnline>false</isLinktoOnline><displayText>null</displayText><inst4opac>33CUJAS_INST</inst4opac><getItTabText>service_getit</getItTabText><adaptorid>ALMA_01</adaptorid><ilsApiId>990004764520107621</ilsApiId><link>OVP</link><id>_:0</id></links><category>Alma-P</category></GetIt1></delivery><search><creator>Simone Daniela</creator><creationdate>2019</creationdate><sort_title>Copyright and collective authorship locating the authors of collaborative work</sort_title><sort_journal_title>Copyright and collective authorship locating the authors of collaborative work</sort_journal_title><sort_creationdate_full>2019</sort_creationdate_full><subject>Encyclopédies électroniques</subject><subject>Droit</subject><subject>Contenu généré par les utilisateurs</subject><subject>Qualité d&apos;auteur</subject><subject>Droit d&apos;auteur</subject><subject>Electronic encyclopedias</subject><subject>User-generated content Law and legislation</subject><subject>Copyright Art</subject><subject>Authorship</subject><subject>Copyright</subject><subject>Wikipedia</subject><isbn>9781107199958</isbn><isbn>1107199956</isbn><description>La 4e de couverture indique : &quot;As technology makes it easier for people to work together, large-scale collaboration is becoming increasingly prevalent. In this context, the question of how to determine authorship - and hence ownership - of copyright in collaborative works is an important question to which current copyright law fails to provide a coherent or consistent answer. In Copyright and Collective Authorship, Daniela Simone engages with the problem of how to determine the authorship of highly collaborative works. Employing insights from the ways in which collaborators understand and regulate issues of authorship, the book argues that a recalibration of copyright law is necessary, proposing an inclusive and contextual approach to joint authorship that is true to the legal concept of authorship but is also more aligned with creative reality.&quot;</description><language>eng</language><title>Copyright and collective authorship locating the authors of collaborative work</title><startdate>2019</startdate><unimarc_local_fields>990 20190827</unimarc_local_fields><unimarc_local_fields>980 BK</unimarc_local_fields><unimarc_local_fields>935 23749051X</unimarc_local_fields><unimarc_local_fields>930 751052119 567.067 b</unimarc_local_fields><addtitle>001(PPN)148977332 Cambridge intellectual property and information law</addtitle><addtitle>Cambridge intellectual property and information law</addtitle><general>Cambridge University Press</general><general>ALP000476452</general><general>UKMGB019402122</general><general>CHBIS011301756</general><general>CHVBK563491051</general><general>on1057238619</general><general>(OCoLC)1119538850</general><general>(ALP)000476452CUJ01</general><general>CUJ01(PPN)23749051X</general><general>(PPN)23749051X</general><rtype>books</rtype><enddate>2019</enddate><series>001(PPN)148977332 Cambridge intellectual property and information law</series><series>Cambridge intellectual property and information law</series><journal_title>Copyright and collective authorship locating the authors of collaborative work</journal_title><facet_creatorcontrib>Simone, Daniela</facet_creatorcontrib><sort_author>Simone Daniela</sort_author><sort_creationdate>2019</sort_creationdate></search><display><identifier>$$CISBN$$V978-1-107-19995-8;$$CISBN$$V1-107-19995-6;$$CPPN$$V23749051X;$$CMMSID$$V990004764520107621</identifier><creationdate>2019</creationdate><creator>Simone, Daniela$$QSimone Daniela</creator><lds18>&lt;a href=&quot;https://www.sudoc.fr/23749051X&quot; target=&quot;_blank&quot;&gt;Voir la notice&lt;/a&gt;</lds18><subject>Wikipedia</subject><subject>Copyright</subject><subject>Authorship</subject><subject>Copyright  -- Art</subject><subject>User-generated content  -- Law and legislation</subject><subject>Electronic encyclopedias</subject><subject>Droit d&apos;auteur</subject><subject>Qualité d&apos;auteur</subject><subject>Contenu généré par les utilisateurs  -- Droit</subject><subject>Encyclopédies électroniques</subject><format>1 vol. (xxi-300 p.) : couv. ill. en coul. ; 24 cm</format><language>eng</language><source>Alma</source><type>book</type><title>Copyright and collective authorship : locating the authors of collaborative work</title><version>1</version><relation>$$Cmain_series$$VCambridge intellectual property and information law$$QCambridge intellectual property and information law </relation><mms>990004764520107621</mms><series>Cambridge intellectual property and information law$$QCambridge intellectual property and information law</series><publisher>Cambridge etc. : Cambridge University Press</publisher><place>Cambridge [etc.]</place><lds02>CODE_PAYS_GB</lds02><lds01>23749051X</lds01><lds12>1. Copyright law and collective authorship 2. Authorship and joint authorship 3. Wikipedia 4. Australian indigenous art 5. Scientific collaborations 6. Film 7. Characteristics of collective authorship and the role of copyright law 8. An inclusive, contextual approach to the joint authorship test</lds12><lds03>TYPE_SUPPORT_BK</lds03></display><control><recordid>alma990004764520107621</recordid><sourceid>alma</sourceid><score>1.0</score><originalsourceid>000476452-CUJ01</originalsourceid><sourceformat>UNIMARC</sourceformat><sourcerecordid>990004764520107621</sourcerecordid><sourcesystem>ILS</sourcesystem><isDedup>false</isDedup></control><addata><date>2019</date><aulast>Simone</aulast><notes>Bibliogr. p. 273-293. Notes bibliogr. Index</notes><cop>Cambridge [etc</cop><isbn>978-1-107-19995-8</isbn><isbn>1-107-19995-6</isbn><format>book</format><ristype>BOOK</ristype><oclcid>(ocolc)1119538850</oclcid><abstract>La 4e de couverture indique : &quot;As technology makes it easier for people to work together, large-scale collaboration is becoming increasingly prevalent. In this context, the question of how to determine authorship - and hence ownership - of copyright in collaborative works is an important question to which current copyright law fails to provide a coherent or consistent answer. In Copyright and Collective Authorship, Daniela Simone engages with the problem of how to determine the authorship of highly collaborative works. Employing insights from the ways in which collaborators understand and regulate issues of authorship, the book argues that a recalibration of copyright law is necessary, proposing an inclusive and contextual approach to joint authorship that is true to the legal concept of authorship but is also more aligned with creative reality.&quot;</abstract><title>Copyright and collective authorship : locating the authors of collaborative work</title><aufirst>Daniela</aufirst><seriestitle>Cambridge intellectual property and information law</seriestitle><au>Simone Daniela</au><au>Simone,Daniela</au><genre>book</genre><btitle>Copyright and collective authorship : locating the authors of collaborative work</btitle><pub>Cambridge University Press</pub></addata><sort><creationdate>2019</creationdate><author>Simone Daniela</author><title>Copyright and collective authorship locating the authors of collaborative work</title></sort></record>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Copyright and collective authorship: locating the authors of collaborative work",
+				"creators": [
+					{
+						"lastName": "Simone Daniela",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2019",
+				"ISBN": "9781107199958",
+				"abstractNote": "La 4e de couverture indique : \"As technology makes it easier for people to work together, large-scale collaboration is becoming increasingly prevalent. In this context, the question of how to determine authorship - and hence ownership - of copyright in collaborative works is an important question to which current copyright law fails to provide a coherent or consistent answer. In Copyright and Collective Authorship, Daniela Simone engages with the problem of how to determine the authorship of highly collaborative works. Employing insights from the ways in which collaborators understand and regulate issues of authorship, the book argues that a recalibration of copyright law is necessary, proposing an inclusive and contextual approach to joint authorship that is true to the legal concept of authorship but is also more aligned with creative reality.\"",
+				"callNumber": "567.067",
+				"language": "eng",
+				"numPages": "xxi+300",
+				"place": "Cambridge [etc",
+				"publisher": "Cambridge University Press",
+				"series": "Cambridge intellectual property and information law",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Art"
+					},
+					{
+						"tag": "Authorship"
+					},
+					{
+						"tag": "Contenu généré par les utilisateurs"
+					},
+					{
+						"tag": "Copyright"
+					},
+					{
+						"tag": "Copyright"
+					},
+					{
+						"tag": "Droit"
+					},
+					{
+						"tag": "Droit d'auteur"
+					},
+					{
+						"tag": "Electronic encyclopedias"
+					},
+					{
+						"tag": "Encyclopédies électroniques"
+					},
+					{
+						"tag": "Law and legislation"
+					},
+					{
+						"tag": "Qualité d'auteur"
+					},
+					{
+						"tag": "User-generated content"
+					},
+					{
+						"tag": "Wikipedia"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><record xmlns=\"http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib\" xmlns:sear=\"http://www.exlibrisgroup.com/xsd/jaguar/search\"><delivery><availabilityLinks>detailsgetit1</availabilityLinks><displayLocation>true</displayLocation><recordOwner>39UPD_INST</recordOwner><physicalServiceId>null</physicalServiceId><sharedDigitalCandidates>null</sharedDigitalCandidates><link><displayLabel>thumbnail</displayLabel><linkURL>https://proxy-eu.hosted.exlibrisgroup.com/exl_rewrite/books.google.com/books?bibkeys=ISBN:0261102656,OCLC:,LCCN:&amp;jscmd=viewapi&amp;callback=updateGBSCover</linkURL><linkType>thumbnail</linkType><id>:_0</id></link><availability>available_in_library</availability><additionalLocations>false</additionalLocations><digitalAuxiliaryMode>false</digitalAuxiliaryMode><holding><matchForHoldings><holdingRecord>852##b</holdingRecord><matchOn>MainLocation</matchOn></matchForHoldings><subLocationCode>BEAT1</subLocationCode><volumeFilter>null</volumeFilter><ilsApiId>990005230620206046</ilsApiId><callNumberType>8</callNumberType><libraryCode>BEATO</libraryCode><yearFilter>null</yearFilter><boundWith>false</boundWith><stackMapUrl>https://biblio.unipd.it/biblioteche/beatopellegrino</stackMapUrl><isValidUser>true</isValidUser><translateRelatedTitle>null</translateRelatedTitle><mainLocation>Biblioteca Beato Pellegrino</mainLocation><callNumber>IA.I.1955</callNumber><adaptorid>ALMA_01</adaptorid><organization>39UPD_INST</organization><holdingURL>OVP</holdingURL><availabilityStatus>available</availabilityStatus><id>_:0</id><subLocation>Prestabile</subLocation><holdId>22192239290006046</holdId><holKey>HoldingResultKey [mid=22192239290006046, libraryId=202892910006046, locationCode=BEAT1, callNumber=IA.I.1955]</holKey><singleUnavailableItemProcessType>null</singleUnavailableItemProcessType><relatedTitle>null</relatedTitle></holding><bestlocation><matchForHoldings><holdingRecord>852##b</holdingRecord><matchOn>MainLocation</matchOn></matchForHoldings><subLocationCode>BEAT1</subLocationCode><volumeFilter>null</volumeFilter><ilsApiId>990005230620206046</ilsApiId><callNumberType>8</callNumberType><libraryCode>BEATO</libraryCode><yearFilter>null</yearFilter><boundWith>false</boundWith><stackMapUrl>https://biblio.unipd.it/biblioteche/beatopellegrino</stackMapUrl><isValidUser>true</isValidUser><translateRelatedTitle>null</translateRelatedTitle><mainLocation>Biblioteca Beato Pellegrino</mainLocation><callNumber>IA.I.1955</callNumber><adaptorid>ALMA_01</adaptorid><organization>39UPD_INST</organization><holdingURL>OVP</holdingURL><availabilityStatus>available</availabilityStatus><id>_:0</id><subLocation>Prestabile</subLocation><holdId>22192239290006046</holdId><holKey>HoldingResultKey [mid=22192239290006046, libraryId=202892910006046, locationCode=BEAT1, callNumber=IA.I.1955]</holKey><singleUnavailableItemProcessType>null</singleUnavailableItemProcessType><relatedTitle>null</relatedTitle></bestlocation><electronicServices>null</electronicServices><feDisplayOtherLocations>false</feDisplayOtherLocations><hasD>null</hasD><hideResourceSharing>false</hideResourceSharing><hasFilteredServices>null</hasFilteredServices><physicalItemTextCodes>null</physicalItemTextCodes><quickAccessService>null</quickAccessService><recordInstitutionCode>null</recordInstitutionCode><displayedAvailability>null</displayedAvailability><consolidatedCoverage>null</consolidatedCoverage><additionalElectronicServices>null</additionalElectronicServices><deliveryCategory>Alma-P</deliveryCategory><serviceMode>ovp</serviceMode><filteredByGroupServices>null</filteredByGroupServices><electronicContextObjectId>null</electronicContextObjectId><GetIt1><links><isLinktoOnline>false</isLinktoOnline><displayText>null</displayText><inst4opac>39UPD_INST</inst4opac><getItTabText>service_getit</getItTabText><adaptorid>ALMA_01</adaptorid><ilsApiId>990005230620206046</ilsApiId><link>OVP</link><id>_:0</id></links><category>Alma-P</category></GetIt1></delivery><search><creator>Tolkien, J. R. R.</creator><creationdate>1995</creationdate><sort_title>letters of J.R.R. Tolkien</sort_title><sort_journal_title>&lt;&lt;The &gt;&gt;letters of J.R.R. Tolkien</sort_journal_title><sort_creationdate_full>1995</sort_creationdate_full><isbn>9780261102651</isbn><isbn>0261102656</isbn><language>eng</language><title>&lt;&lt;The &gt;&gt;letters of J.R.R. Tolkien</title><startdate>1995</startdate><unimarc_local_fields>994 M</unimarc_local_fields><unimarc_local_fields>993 M</unimarc_local_fields><unimarc_local_fields>992 71</unimarc_local_fields><unimarc_local_fields>991 SBN_BIB</unimarc_local_fields><unimarc_local_fields>900 BK</unimarc_local_fields><general>HarperCollins</general><general>(OCoLC)876045467</general><general>(OCM)876045467</general><general>(SBN)PUV0296693</general><general>(Aleph)000523062SBP01</general><general>SBP01PUV0296693</general><general>PUV0296693</general><rtype>books</rtype><contributor>Carpenter, Humphrey</contributor><contributor>Tolkien, Christopher</contributor><journal_title>&lt;&lt;The &gt;&gt;letters of J.R.R. Tolkien</journal_title><facet_creatorcontrib>Carpenter, Humphrey</facet_creatorcontrib><facet_creatorcontrib>Tolkien, Christopher</facet_creatorcontrib><facet_creatorcontrib>Tolkien,, J. R. R.</facet_creatorcontrib><sort_author>Tolkien, J. R. R.</sort_author><sort_creationdate>1995</sort_creationdate></search><display><identifier>$$CISBN$$V0261102656</identifier><creationdate>1995</creationdate><creator>Tolkien, J. R. R.   $$QTolkien, J. R. R.</creator><lds09>PUV0296693</lds09><format>&amp;#8205;463 p. ; 20 cm.</format><language>eng</language><source>Alma</source><type>book</type><title>The letters of J.R.R. Tolkien / a selection edited by Humphrey Carpenter ; with the assistance of Christopher Tolkien</title><version>0</version><mms>990005230620206046</mms><contributor>Tolkien, Christopher &lt;&amp;#8205;Autore&gt; $$QTolkien, Christopher</contributor><contributor>Carpenter, Humphrey &lt;&amp;#8205;Autore&gt; $$QCarpenter, Humphrey</contributor><lds50>990005230620206046</lds50><publisher>London : HarperCollins</publisher><place>London</place></display><control><recordid>alma990005230620206046</recordid><sourceid>alma</sourceid><score>1.0</score><originalsourceid>000523062-SBP01</originalsourceid><sourceformat>UNIMARC</sourceformat><sourcerecordid>990005230620206046</sourcerecordid><colldiscovery>$$Titem$$D81283465180006046$$I39UPD_INST</colldiscovery><sourcesystem>OTHER</sourcesystem><isDedup>false</isDedup></control><addata><originatingSystemIDContributor>CFIV015811</originatingSystemIDContributor><date>1995</date><aulast>Tolkien</aulast><cop>London</cop><isbn>0261102656</isbn><format>book</format><ristype>BOOK</ristype><oclcid>(ocolc)876045467</oclcid><auinit>J</auinit><title>The letters of J.R.R. Tolkien</title><aufirst>J. R. R.</aufirst><addau>Tolkien, Christopher</addau><addau>Carpenter, Humphrey</addau><au>Tolkien,J. R. R.</au><genre>book</genre><btitle>The letters of J.R.R. Tolkien</btitle><pub>HarperCollins</pub></addata><sort><creationdate>1995</creationdate><author>Tolkien, J. R. R.</author><title>letters of J.R.R. Tolkien</title></sort></record>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "The letters of J.R.R. Tolkien",
+				"creators": [
+					{
+						"firstName": "J. R. R.",
+						"lastName": "Tolkien",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christopher",
+						"lastName": "Tolkien",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Humphrey",
+						"lastName": "Carpenter",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "1995",
+				"ISBN": "0261102656",
+				"callNumber": "IA.I.1955",
+				"language": "eng",
+				"numPages": "463",
+				"place": "London",
+				"publisher": "HarperCollins",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
