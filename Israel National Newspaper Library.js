@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-06-08 07:51:10"
+	"lastUpdated": "2025-06-23 10:58:37"
 }
 
 /*
@@ -46,54 +46,42 @@ async function doWeb(doc, url) {
 	await scrape(doc, url);
 }
 
-async function scrape(doc, url) {
-	try {
-		let item = new Zotero.Item("newspaperArticle");
+function scrape(doc, url) {
+	const item = new Zotero.Item("newspaperArticle");
 
-		let urlMatch = url.match(/^(https?:\/\/www\.nli\.org\.il\/(?:en|he|ar)\/newspapers\/[a-z]+\/\d{4}\/\d{2}\/\d{2}\/\d{2}\/article\/\d{1,3}\/)/);
-		item.url = urlMatch ? urlMatch[1] : url;
+	// Title
+	const titleNode = doc.querySelector("#sectionleveltabtitlearea h2");
+	if (titleNode) item.title = titleNode.textContent.trim();
 
-		// Fallback values
-		item.title = "Untitled";
-		item.publicationTitle = "Unknown";
-		item.date = "Unknown";
+	// Persistent link
+	const linkNode = doc.querySelector("#sectionleveltabpersistentlinkarea .persistentlinkurl");
+	item.url = linkNode ? linkNode.textContent.trim() : url;
 
-		// Extract from document title
-		let rawTitle = doc.title;
-		let parts = rawTitle.split("|").map(p => p.trim());
-		if (parts.length >= 3) {
-			item.title = parts[0].replace(/[\u200E\u2068\u2069]/g, "");
-			item.publicationTitle = parts[1].replace(/[\u200E\u2068\u2069]/g, "");
-			let parsed = Zotero.Utilities.strToDate(parts[2]);
-			item.date = parsed.date || parts[2];
-		} else {
-			Zotero.debug(" Unexpected title format: " + rawTitle);
-			item.title = rawTitle;
-		}
+	// Date from <title>
+	const pubMatch = doc.title.match(/\|\s*(\d{1,2} April \d{4})\s*\|/);
+	if (pubMatch) item.date = pubMatch[1];
 
-		// Extract article body
-		let bodyElement = doc.querySelector("#pagesectionstextcontainer");
-		if (bodyElement) {
-			item.abstractNote = Zotero.Utilities.trimInternal(bodyElement.textContent);
-		}
-
-		// Page number (broken)
-		/*let scripts = doc.querySelectorAll("script");
-		for (let script of scripts) {
-			let text = script.textContent || "";
-			let match = text.match(/sectionPageBlockAreas\['\d+\.(\d+)'\]\s*=\s*\[\{pageID:'\d+\.(\d+)'/);
-			if (match) {
-				item.pages = match[2];
-				break;
-			}
-		}*/
-
-		Zotero.debug(" Finished scraping, calling item.complete()");
-		item.complete();
-	} catch (e) {
-		Zotero.debug(" Error in scrape(): " + e);
-		throw e;
+	// Abstract + Full Text
+	const paragraphs = Array.from(doc.querySelectorAll("#pagesectionstextcontainer p"))
+		.map(p => p.textContent.trim())
+		.filter(Boolean);
+	if (paragraphs.length) {
+		item.abstractNote = paragraphs[0];
+		item.extra = "Full Text:\n" + paragraphs.join("\n\n");
 	}
+
+	// Language from <html lang>
+	item.language = doc.documentElement.lang || "he";
+
+	// Newspaper title from <title>
+	const parts = doc.title.split("|").map(part => part.trim());
+	if (parts.length >= 4) {
+		item.publicationTitle = parts[parts.length - 4];
+	}
+
+	item.libraryCatalog = "National Library of Israel";
+
+	item.complete();
 }
 
 /** BEGIN TEST CASES **/
