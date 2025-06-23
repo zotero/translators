@@ -53,7 +53,7 @@ function detectLanguageFromText(text) {
 	return null;
 }
 
-function scrape(doc, url) {
+async function scrape(doc, url) {
 	const item = new Zotero.Item("newspaperArticle");
 
 	// Title
@@ -91,11 +91,6 @@ function scrape(doc, url) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "about:blank",
-		"detectedItemType": false,
-		"items": []
-	}
+	
 ]
 /** END TEST CASES **/
