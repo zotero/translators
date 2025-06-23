@@ -49,47 +49,41 @@ async function doWeb(doc, url) {
 function detectLanguageFromText(text) {
 	if (/[\u0590-\u05FF]/.test(text)) return "he"; // Hebrew range
 	if (/[\u0600-\u06FF]/.test(text)) return "ar"; // Arabic range
-	if (/[a-zA-Z]/.test(text)) return "en";         // Basic Latin letters
+	if (/[a-zA-Z]/.test(text)) return "en"; // Basic Latin letters
 	return null;
 }
 
 function scrape(doc, url) {
 	const item = new Zotero.Item("newspaperArticle");
 
-// Title
-const titleNode = doc.querySelector("#sectionleveltabtitlearea h2");
-if (titleNode) item.title = titleNode.textContent.trim();
+	// Title
+	const titleNode = doc.querySelector("#sectionleveltabtitlearea h2");
+	if (titleNode) item.title = titleNode.textContent.trim();
 
-// Persistent link
-const linkNode = doc.querySelector("#sectionleveltabpersistentlinkarea .persistentlinkurl");
-item.url = linkNode ? linkNode.textContent.trim() : url;
+	// Persistent link
+	const linkNode = doc.querySelector("#sectionleveltabpersistentlinkarea .persistentlinkurl");
+	item.url = linkNode ? linkNode.textContent.trim() : url;
 
-// Date from <title>
-const pubMatch = doc.title.match(/\|\s*(\d{1,2} (January|February|March|April|May|June|July|August|September|October|November|December) \d{4})\s*\|/);
-if (pubMatch) item.date = pubMatch[1];
+	// Date from <title>
+	const pubMatch = doc.title.match(/\|\s*(\d{1,2} (January|February|March|April|May|June|July|August|September|October|November|December) \d{4})\s*\|/);
+	if (pubMatch) item.date = pubMatch[1];
 
-// Abstract + Full Text
-const paragraphs = Array.from(doc.querySelectorAll("#pagesectionstextcontainer p"))
-	.map(p => p.textContent.trim())
-	.filter(Boolean);
-if (paragraphs.length) {
-	item.abstractNote = paragraphs[0];
-	item.extra = "Full Text:\n" + paragraphs.join("\n\n");
-}
+	// Abstract + Full Text
+	const paragraphs = Array.from(doc.querySelectorAll("#pagesectionstextcontainer p")).map(p => p.textContent.trim()).filter(Boolean);
+	if (paragraphs.length) {
+		item.abstractNote = paragraphs[0];
+		item.extra = "Full Text:\n" + paragraphs.join("\n\n");
+	}
 
-// Publication from <title>
-const parts = doc.title.split("|").map(part => part.trim());
-if (parts.length >= 4) {
-	item.publicationTitle = parts[parts.length - 4];
-}
+	// Publication from <title>
+	const parts = doc.title.split("|").map(part => part.trim());
+	if (parts.length >= 4) {
+		item.publicationTitle = parts[parts.length - 4];
+	}
 
-// Language detection
-const sampleText = paragraphs.join(" ").slice(0, 1000); // Analyze first 1000 characters
-item.language = detectLanguageFromText(sampleText);
-
-
-
-
+	// Language detection
+	const sampleText = paragraphs.join(" ").slice(0, 1000); // Analyze first 1000 characters
+	item.language = detectLanguageFromText(sampleText);
 	item.libraryCatalog = "National Library of Israel";
 
 	item.complete();
@@ -97,6 +91,11 @@ item.language = detectLanguageFromText(sampleText);
 
 /** BEGIN TEST CASES **/
 var testCases = [
-	
+	{
+		"type": "web",
+		"url": "about:blank",
+		"detectedItemType": false,
+		"items": []
+	}
 ]
 /** END TEST CASES **/
