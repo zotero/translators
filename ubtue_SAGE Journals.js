@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-10-02 13:38:46"
+	"lastUpdated": "2025-06-26 10:44:19"
 }
 
 /*
@@ -143,7 +143,7 @@ function scrape(doc, url) {
 					let orcid = ZU.xpathText(authorSectionEntry, './a[contains(@href, "orcid")]').replace(/https?:\/\/orcid.org\//, '');
 					let authorName = ZU.xpathText(authorSectionEntry, './/span[@property="givenName"]') + ' ' + ZU.xpathText(authorSectionEntry, './/span[@property="familyName"]');
 					item.notes.push({"note": "orcid:" + orcid + ' | ' + authorName});
-				}	
+				}
 			}
 			//scrape ORCID at the bottom of text and split firstName and lastName for deduplicate notes. E.g. most of cases by reviews https://journals.sagepub.com/doi/10.1177/15423050211028189
 			let ReviewAuthorSectionEntries = doc.querySelectorAll('.NLM_fn p');
@@ -156,14 +156,14 @@ function scrape(doc, url) {
 					let	firstName = fullName.split(' ').slice(0, -1).join(' ');
 					let	lastName = fullName.split(' ').slice(-1).join(' ');
 					item.notes.push({note: "orcid:" + entryInnerText.match(regexOrcid)[0] + ' | ' + lastName + ', ' + firstName});
-				}				
+				}
 			}
-			 
+
 			// Workaround to address address weird incorrect multiple extraction by both querySelectorAll and xpath
 			// So, let's deduplicate...
 			item.notes = Array.from(new Set(item.notes.map(JSON.stringify))).map(JSON.parse);
 			let absNr = 0;
-			
+
 			for (let abstract of ZU.xpath(doc, '//section[contains(@id,"abstract") and not(contains(@id,"abstracts"))]')) {
 					if (absNr == 0) item.abstractNote = abstract.textContent.replace(/^(Abstract|Résumé)/i, '');
 					else item.notes.push('abs:' + abstract.textContent.replace(/^(Abstract|Résumé)/i, ''));
@@ -226,7 +226,7 @@ function scrape(doc, url) {
 			}
 			// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
 			if (doc.querySelector('.accessIcon[alt]')?.alt?.match(/open\s+access/gi) ||
-			    ZU.xpathText(doc, '//i[@class="icon-open_access"]/@data-original-title')?.match(/open\s+access/i) ||
+				ZU.xpathText(doc, '//i[@class="icon-open_access"]/@data-original-title')?.match(/open\s+access/i) ||
 				ZU.xpathText(doc, '//i[@class="icon-open_access"]/@title')?.match(/open\s+access/i)) {
 					item.notes.push({note: 'LF:'});
 			}
@@ -236,6 +236,10 @@ function scrape(doc, url) {
 				title: "SAGE PDF Full Text",
 				mimeType: "application/pdf"
 			});
+			// Remove erroneous URL provided by the publisher RIS
+			if (item.url == 'https://journals.sagepub.com/action/showAbstract');
+			    item.url = "";
+
 			item.complete();
 		});
 		translator.translate();
