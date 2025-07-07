@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 8,
-	"lastUpdated": "2025-05-22 14:50:04"
+	"lastUpdated": "2025-07-07 05:56:06"
 }
 
 /*
@@ -72,7 +72,10 @@ async function processDOI(doi) {
 	let startDate = new Date(Date.UTC(2025, 4, 22, 00, 0, 0));
 	let endDate   = new Date(Date.UTC(2025, 4, 24, 0, 0, 0));
 
-	if (currentDate >= startDate && currentDate <= endDate) {
+	// At least for now, always use REST API for Crossref DOIs
+	// due to better reliability
+	//if (currentDate >= startDate && currentDate <= endDate) {
+	if (true) {
 		try {
 			let raJSON = await requestJSON(
 				`https://doi.org/ra/${encodeURIComponent(doi)}`
