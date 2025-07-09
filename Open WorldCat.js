@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-12-17 15:40:52"
+	"lastUpdated": "2025-07-09 19:22:44"
 }
 
 /*
@@ -321,11 +321,11 @@ async function doSearch(items) {
 	}
 
 	if (ids.length) {
-		var url = "https://www.worldcat.org/api/search?q=no%3A"
+		var url = "https://search.worldcat.org/api/search?q=no%3A"
 			+ ids.map(encodeURIComponent).join('+OR+no%3A');
 		let json = await requestJSON(url, {
 			headers: {
-				Referer: 'https://worldcat.org/search?q=',
+				Referer: 'https://search.worldcat.org/search?q=',
 				Cookie: cookie
 			}
 		}).then(decryptResponse);
@@ -344,21 +344,15 @@ async function doSearch(items) {
 async function getSecureToken() {
 	let doc;
 	try {
-		doc = await requestDocument('https://www.worldcat.org/');
+		doc = await requestDocument('https://search.worldcat.org/');
 	}
 	catch (e) {
-		Z.debug('Initial request to homepage failed; trying latest Google cache');
-		try {
-			doc = await requestDocument('https://webcache.googleusercontent.com/search?q=cache%3Aworldcat.org');
-		}
-		catch (e) {
-			Z.debug('Request to Google cache failed; trying archive.org');
-			doc = await requestDocument('https://web.archive.org/web/https://worldcat.org/');
-		}
+		Z.debug('Initial request to homepage failed; trying archive.org');
+		doc = await requestDocument('https://web.archive.org/web/https://search.worldcat.org/');
 	}
 	let buildID = JSON.parse(text(doc, '#__NEXT_DATA__')).buildId;
 	Z.debug('buildID: ' + buildID);
-	let json = await requestJSON(`https://www.worldcat.org/_next/data/${buildID}/en/search.json`);
+	let json = await requestJSON(`https://search.worldcat.org/_next/data/${buildID}/en/search.json`);
 	let { secureToken } = json.pageProps;
 	Z.debug('secureToken: ' + secureToken);
 	return secureToken;
