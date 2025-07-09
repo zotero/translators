@@ -102,11 +102,11 @@ function scrape(doc, url) {
 				item.abstractNote = abstractFromDOM.replace(/^Abstract/,'').replace(/\w\.,\s/, '.\\n4207 ');
 
 			item.attachments = [];
-			
+
 			let docType = ZU.xpathText(doc, '//meta[@name="dc.Type"]/@content | //*[contains(concat( " ", @class, " " ), concat( " ", "abs", " " ))]');
 			if (docType === "book-review" || docType === "review-article" || docType === "First Page")
-				item.tags.push("RezensionstagPica");
-			
+				item.tags.push("Book Review");
+
 			if (ZU.xpathText(doc, '//img[contains(@title, "Free Access") or contains(@title, "Open Access")]') !== null) {
 				item.notes.push({'note': 'LF'});
 			}
