@@ -205,7 +205,7 @@ function scrape(doc, url) {
 		for (let i = 0; i < passedBy.length; i++) {
 			passedByArray.push(passedBy[i].getAttribute("resource").split("/").pop());
 		}
-		item.legislativeBody = passedByArray.join(", ");
+		item.authority = passedByArray.join(", ");
 		
 		item.url = attr(doc, 'meta[typeOf="eli:LegalResource"]', "about") + "/" + language.toLowerCase();
 	}
