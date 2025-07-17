@@ -1,15 +1,15 @@
 {
-	"translatorID": "af178ee7-0feb-485d-9cba-3312daf7ebad",
+	"translatorID": "9d8099b7-1c50-4159-9a67-f9fc1fb3b463",
 	"label": "Israel National Newspaper Library",
 	"creator": "Anonymus",
-	"target": "^https:\\/\\/www\\.nli\\.org\\.il\\/(en|he|ar)\\/newspapers\\/[a-z]+\\/\\d{4}\\/\\d{2}\\/\\d{2}\\/\\d{2}\\/article\\/\\d{1,3}\\/?(\\?.*)?$",
+	"target": "^https:\\/\\/www\\.nli\\.org\\.il\\/(en|he|ar)\\/newspapers\\/[a-z]+\\/\\d{4}\\/\\d{2}\\/\\d{2}\\/\\d{2}\\/(article|page)\\/\\d{1,3}\\/?(\\?.*)?$",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-06-23 14:49:30"
+	"lastUpdated": "2025-07-17 14:01:16"
 }
 
 /*
@@ -36,7 +36,7 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.includes("/article/")) {
+	if (url.includes("/article/") || url.includes("/page/")) {
 		return "newspaperArticle";
 	}
 	return false;
@@ -56,34 +56,59 @@ function detectLanguageFromText(text) {
 async function scrape(doc, url) {
 	const item = new Zotero.Item("newspaperArticle");
 
-	// Title
-	const titleNode = doc.querySelector("#sectionleveltabtitlearea h2");
-	if (titleNode) item.title = titleNode.textContent.trim();
+	if (url.includes("/article/")){
 
-	// Persistent link
-	const linkNode = doc.querySelector("#sectionleveltabpersistentlinkarea .persistentlinkurl");
-	item.url = linkNode ? linkNode.textContent.trim() : url;
+		// Title
+		const titleNode = doc.querySelector("#sectionleveltabtitlearea h2");
+		if (titleNode) item.title = titleNode.textContent.trim();
+
+		// Persistent link
+		const linkNode = doc.querySelector("#sectionleveltabpersistentlinkarea .persistentlinkurl");
+		item.url = linkNode ? linkNode.textContent.trim() : url;
+
+		// Abstract + Full Text
+		const paragraphs = Array.from(doc.querySelectorAll("#pagesectionstextcontainer p")).map(p => p.textContent.trim()).filter(Boolean);
+		if (paragraphs.length) {
+			item.abstractNote = paragraphs[0];
+			item.extra = "Full Text:\n" + paragraphs.join("\n\n");
+		}
+
+		// Language detection
+		const sampleText = paragraphs.join(" ").slice(0, 1000); // Analyze first 1000 characters
+		item.language = detectLanguageFromText(sampleText);
+	}
 
 	// Date from <title>
 	const pubMatch = doc.title.match(/\|\s*(\d{1,2} (January|February|March|April|May|June|July|August|September|October|November|December) \d{4})\s*\|/);
 	if (pubMatch) item.date = pubMatch[1];
 
-	// Abstract + Full Text
-	const paragraphs = Array.from(doc.querySelectorAll("#pagesectionstextcontainer p")).map(p => p.textContent.trim()).filter(Boolean);
-	if (paragraphs.length) {
-		item.abstractNote = paragraphs[0];
-		item.extra = "Full Text:\n" + paragraphs.join("\n\n");
+	// Get publication
+	const nliScript = doc.querySelector('script#nlijs');
+	if (nliScript) {
+		const rawJSON = nliScript.getAttribute('data-nli-data-json');
+		try {
+			const json = JSON.parse(rawJSON.replace(/&quot;/g, '"'));
+			if (json.publicationTitle) {
+				item.publicationTitle = json.publicationTitle;
+			}
+		} catch (e) {
+			Zotero.debug("Failed to parse data-nli-data-json: " + e);
+		}
 	}
 
-	// Publication from <title>
-	const parts = doc.title.split("|").map(part => part.trim());
-	if (parts.length >= 4) {
-		item.publicationTitle = parts[parts.length - 4];
+
+
+	if (url.includes("/page/")) {
+		const match = url.match(/\/page\/(\d+)(?:\/|$)/);
+		if (match) {
+			item.pages = match[1];
+		}
+		item.url = url //regular URL because the 
+		item.title = item.publicationTitle +  " newspaper";
+		item.url = url.trim(); // No persistent link, just the original URL
 	}
 
-	// Language detection
-	const sampleText = paragraphs.join(" ").slice(0, 1000); // Analyze first 1000 characters
-	item.language = detectLanguageFromText(sampleText);
+
 	item.libraryCatalog = "National Library of Israel";
 
 	item.complete();
@@ -91,6 +116,5 @@ async function scrape(doc, url) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-	
 ]
 /** END TEST CASES **/
