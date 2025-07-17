@@ -86,7 +86,7 @@ async function scrape(doc, url) {
 			}
 		}
 		catch (e) {
-		    Zotero.debug("Failed to parse data-nli-data-json: " + e);
+			Zotero.debug("Failed to parse data-nli-data-json: " + e);
 		}
 	}
 
@@ -99,9 +99,7 @@ async function scrape(doc, url) {
 		item.url = url.trim(); // No persistent link, just the original URL
 	}
 
-
 	item.libraryCatalog = "National Library of Israel";
-
 	item.complete();
 }
 
