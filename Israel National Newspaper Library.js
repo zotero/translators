@@ -9,31 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-07-17 14:01:16"
+	"lastUpdated": "2025-07-17 21:11:44"
 }
-
-/*
-	***** BEGIN LICENSE BLOCK *****
-
-	Copyright © 2015 Philipp Zumstein
-
-	This file is part of Zotero.
-
-	Zotero is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	Zotero is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-	GNU Affero General Public License for more details.
-
-	You should have received a copy of the GNU Affero General Public License
-	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
-
-	***** END LICENSE BLOCK *****
-*/
 
 function detectWeb(doc, url) {
 	if (url.includes("/article/") || url.includes("/page/")) {
@@ -56,7 +33,7 @@ function detectLanguageFromText(text) {
 async function scrape(doc, url) {
 	const item = new Zotero.Item("newspaperArticle");
 
-	if (url.includes("/article/")){
+	if (url.includes("/article/")) {
 
 		// Title
 		const titleNode = doc.querySelector("#sectionleveltabtitlearea h2");
@@ -91,20 +68,18 @@ async function scrape(doc, url) {
 			if (json.publicationTitle) {
 				item.publicationTitle = json.publicationTitle;
 			}
-		} catch (e) {
+		} 
+		catch (e) {
 			Zotero.debug("Failed to parse data-nli-data-json: " + e);
 		}
 	}
-
-
 
 	if (url.includes("/page/")) {
 		const match = url.match(/\/page\/(\d+)(?:\/|$)/);
 		if (match) {
 			item.pages = match[1];
 		}
-		item.url = url //regular URL because the 
-		item.title = item.publicationTitle +  " newspaper";
+		item.title = item.publicationTitle + " newspaper";
 		item.url = url.trim(); // No persistent link, just the original URL
 	}
 
