@@ -9,17 +9,35 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-07-18 10:59:49"
+	"lastUpdated": "2025-07-18 11:18:17"
 }
 
+/*
+	***** BEGIN LICENSE BLOCK *****
+ 
+	This file is part of Zotero.
+ 
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
 function detectWeb(doc, url) {
-	// This function determines if the translator should be active on the current page.
-	// It checks if the URL matches the JTA archive pattern and if a main article title
-	// element (h1 with class "entry-title") is present, indicating an article page.
 	if (url.match(/^https?:\/\/www\.jta\.org\/archive\//) && ZU.xpathText(doc, '//h1[@class="entry-title"]')) {
-		return "newspaperArticle"; // Returns the Zotero item type
+		return "newspaperArticle";
 	}
-	return false; // Translator should not be active
+	return false;
 }
 
 async function doWeb(doc, url) {
@@ -27,7 +45,6 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url) {
-	// This function performs the actual scraping and creates a Zotero item.
 	const item = new Zotero.Item("newspaperArticle");
 
 	// 1. Extract Title: Scrapes the main headline of the article.
@@ -36,16 +53,11 @@ async function scrape(doc, url) {
 		item.title = titleNode.textContent.trim();
 	}
 
-	// 2. Set Publication Title: The publication is consistently "Jewish Telegraphic Agency" for this archive.
 	item.publicationTitle = "Jewish Telegraphic Agency";
 
-	// 3. Set URL: Prefers the canonical URL found in the HTML head for consistency,
-	//    falling back to the current page URL if the canonical link is not found.
 	item.url = url.split('?')[0].split('#')[0];
 
-	// 4. Extract Date:
-	//    First, attempts to extract the date from the JSON-LD schema embedded in the HTML.
-	//    This is generally the most reliable method as it provides a standardized date format.
+	// Extract Date:
 	const dateElem = doc.querySelector('.post-pdf__date');
 	item.date = dateElem.textContent.trim();
 
@@ -54,7 +66,7 @@ async function scrape(doc, url) {
 	document: doc
 	})
 
-	item.libraryCatalog = "Jewish Telegraphic Agency Archive"; // Specific catalog for JTA
+	item.libraryCatalog = "Jewish Telegraphic Agency Archive";
 	item.complete();
 }
 
