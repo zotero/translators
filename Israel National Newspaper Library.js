@@ -95,8 +95,8 @@ async function scrape(doc, url) {
 		if (match) {
 			item.pages = match[1];
 		}
-		item.title = item.publicationTitle + " newspaper";
-		item.url = url.trim(); // No persistent link, just the original URL
+		item.title = item.publicationTitle + ", " + item.date;
+		item.url = url.split('?')[0].split('#')[0]; // No persistent link, just the original URL
 	}
 
 	item.libraryCatalog = "National Library of Israel";
