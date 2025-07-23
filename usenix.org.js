@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-07-23 15:57:59"
+	"lastUpdated": "2025-07-23 16:12:34"
 }
 
 /*
@@ -46,7 +46,7 @@ function stripAllUnescapedBraces(s) {
 }
 
 
-async function scrape(doc, url = doc.location.href) {
+async function scrape(doc) {
 	let translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
