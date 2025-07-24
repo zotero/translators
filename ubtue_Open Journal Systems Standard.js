@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-06-04 07:42:30"
+	"lastUpdated": "2025-07-24 07:49:44"
 }
 
 /*
@@ -311,6 +311,20 @@ function invokeUbtuePKPTranslator(doc) {
 						i.date = itemDate[1];
 					}
 				} else i.date = '';
+			}
+		}
+
+		// some journal doesn't supply the issue numbers for older articles directly
+		if (i.ISSN == '2328-9902') {
+			if (!i.volume) {
+				let volumePath = doc.querySelector('.item.citation .csl-entry');
+
+				if (volumePath) {
+					let itemVolume = volumePath.innerHTML.match(/, <i>(\d+)<\/i>/);
+					if (itemVolume.length >= 2) {
+						i.volume = itemVolume[1];
+					}
+				} else i.volume = '';
 			}
 		}
 
