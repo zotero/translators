@@ -2,14 +2,14 @@
 	"translatorID": "a14ac3eb-64a0-4179-970c-92ecc2fec992",
 	"label": "Scopus",
 	"creator": "Michael Berkowitz, Rintze Zelle and Avram Lyon",
-	"target": "^https?://www\\.scopus\\.com[^/]*",
+	"target": "^https?://www\\.scopus\\.com/",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-02-19 17:52:55"
+	"lastUpdated": "2025-07-25 15:16:30"
 }
 
 /*
@@ -34,14 +34,27 @@ function detectWeb(doc, url) {
 	if (url.includes("/results/") && getSearchResults(doc, true)) {
 		return "multiple";
 	}
-	else if (url.includes("/record/")) {
-		return "journalArticle";
+	else if (url.includes("/pages/publications/")) {
+		if (!doc.querySelector(".export-dropdown")) {
+			// If this element never appears, the user isn't logged in, so export will fail
+			Z.monitorDOMChanges(doc.body);
+			return false;
+		}
+		switch (text(doc, '[data-testid="publication-document-type"]').trim()) {
+			case 'Book Chapter':
+				return 'bookSection';
+			case 'Book':
+				return 'book';
+			default:
+				return 'journalArticle';
+		}
 	}
 	return false;
 }
 
-function getEID(url) {
-	return url.match(/eid=([^&]+)/)[1];
+function getEID(doc, url) {
+	return text(doc, 'dd[data-testid="document-info-eid"]')
+		|| '2-s2.0-' + url.match(/\/publications\/([^?#]+)/)[1];
 }
 
 
@@ -78,18 +91,22 @@ async function doWeb(doc, url) {
 
 
 async function scrape(doc, url) {
-	// ISBN, language, and ISSN are not in the export data - get them from the page
-	var ISSN = ZU.xpathText(doc, '//div[contains(@class, "meta-text")]//dl[dt[contains(text(), "ISSN")]]/dd');
-	var ISBN = ZU.xpathText(doc, '//div[contains(@class, "meta-text")]//dl[dt[contains(text(), "ISBN")]]/dd');
-	var language = ZU.xpathText(doc, '//div[contains(@class, "meta-text")]//dl[dt[contains(text(), "Original language")]]/dd');
-	var prefix = url.match(/^https?:\/\//)[0];
-	var baseUrl = prefix + doc.location.host
-		+ '/onclick/export.uri?oneClickExport=%7b%22Format%22%3a%22RIS%22%2c%22View%22%3a%22CiteAbsKeyws%22%7d&origin=recordpage&eid=';
-		// this is the encoded version of oneClickExport={"Format":"RIS","View":"CiteAbsKeyws"} but since it's always the same, no need to run encodeURL
-	var eid = getEID(url);
-	var rislink = baseUrl + eid + "&zone=recordPageHeader&outputType=export&txGid=0";
-	Z.debug(rislink);
-	let text = await requestText(rislink);
+	let exportURL = "/gateway/export-service/export";
+	let eid = getEID(doc, url);
+
+	let body = JSON.stringify({
+		eids: [eid],
+		fileType: "RIS",
+	});
+	Z.debug(body);
+
+	let text = await requestText(exportURL, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body,
+	});
 	// load translator for RIS
 	// Z.debug(text)
 	if (/T2 {2}-/.test(text) && /JF {2}-/.test(text)) {
@@ -117,13 +134,25 @@ async function scrape(doc, url) {
 			if (item.creators[i].fieldMode == 1 && item.creators[i].lastName.includes(" ")) {
 				item.creators[i].firstName = item.creators[i].lastName.match(/\s(.+)/)[1];
 				item.creators[i].lastName = item.creators[i].lastName.replace(/\s.+/, "");
-				item.creators[i].fieldMode = 2;
+				delete item.creators[i].fieldMode;
 			}
 		}
 		item.attachments.push({ document: doc, title: "Snapshot" });
-		if (ISSN) item.ISSN = ZU.cleanISSN(ISSN);
-		if (ISBN) item.ISBN = ZU.cleanISBN(ISBN);
-		if (language) item.language = language.trim();
+		if (item.ISSN) item.ISSN = ZU.cleanISSN(item.ISSN);
+		if (item.ISBN) item.ISBN = ZU.cleanISBN(item.ISBN);
+		if (item.itemType == "book") {
+			if (item.pages) {
+				item.numPages = item.pages;
+				delete item.pages;
+			}
+			delete item.publicationTitle;
+		}
+		if (item.itemType == "book" || item.itemType == "bookSection") {
+			delete item.journalAbbreviation;
+		}
+		if (item.archive == "Scopus") {
+			delete item.archive;
+		}
 		item.complete();
 	});
 	await translator.translate();
