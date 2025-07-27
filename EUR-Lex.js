@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-31 02:00:49"
+	"lastUpdated": "2025-07-27 17:49:49"
 }
 
 /*
@@ -208,7 +208,8 @@ function scrape(doc, url) {
 		
 		if (type == "statute") {
 			item.authority = passedByArray.join(", ");
-		} else {
+		}
+		else {
 			item.legislativeBody = passedByArray.join(", ");
 		}
 		
