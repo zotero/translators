@@ -1,6 +1,6 @@
 {
 	"translatorID": "b97462fa-f20b-4a1e-8a73-3a434a81518b",
-	"label": "usenix.org",
+	"label": "USENIX",
 	"creator": "Tim Leonhard Storm",
 	"target": "^https://www\\.usenix\\.org/conference/.*/presentation",
 	"minVersion": "5.0",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-07-23 16:12:34"
+	"lastUpdated": "2025-07-29 16:45:18"
 }
 
 /*
@@ -35,6 +35,7 @@
 	***** END LICENSE BLOCK *****
 */
 /* Remove pairs of unescaped braces (note that braces in title are quite unlikely anyway) */
+
 function stripAllUnescapedBraces(s) {
 	let prev;
 	do {
@@ -66,19 +67,11 @@ function detectWeb(doc, url) {
 }
 
 async function doWeb(doc, url) {
-	if (detectWeb(doc, url)) {
-		await scrape(await requestDocument(url));
-	}
+	await scrape(await requestDocument(url));
 }
 
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "https://google.com/",
-		"detectedItemType": false,
-		"items": []
-	},
 	{
 		"type": "web",
 		"url": "https://www.usenix.org/conference/pepr25/presentation/sharma",
