@@ -39,7 +39,8 @@ function getVariant(url) {
 	let hostname = new URL(url).hostname;
 	if (hostname === "ui.adsabs.harvard.edu") {
 		return "ads";
-	} else {
+	}
+	else {
 		return "scix";
 	}
 }
