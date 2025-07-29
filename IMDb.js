@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-31 22:02:24"
+	"lastUpdated": "2025-07-29 17:25:50"
 }
 
 /*
@@ -45,7 +45,7 @@ function detectWeb(doc, url) {
 			return "film";
 		}
 	}
-	else if (url.includes('/find?') && getSearchResults(doc, true)) {
+	else if (url.includes('/find/?') && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	return false;
@@ -54,10 +54,10 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//td[contains(@class, "result_text")]');
-	for (let i = 0; i < rows.length; i++) {
-		var href = ZU.xpathText(rows[i], './a/@href');
-		var title = ZU.trimInternal(rows[i].textContent);
+	var rows = doc.querySelectorAll('.ipc-metadata-list-summary-item__t');
+	for (let row of rows) {
+		var href = row.href;
+		var title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -462,7 +462,7 @@ var testCases = [
 					}
 				],
 				"date": "2006-09-07",
-				"abstractNote": "A pair of newlyweds move in next door to a veteran married couple of 25 years.",
+				"abstractNote": "Newlyweds move in next door to a veteran married couple of 25 years.",
 				"distributor": "Impact Zone Productions, Sony Pictures Television",
 				"extra": "IMDb ID: tt0759475\nevent-place: United States",
 				"libraryCatalog": "IMDb",
@@ -472,78 +472,16 @@ var testCases = [
 						"tag": "big breasts"
 					},
 					{
-						"tag": "breast"
-					},
-					{
 						"tag": "brother brother relationship"
 					},
 					{
-						"tag": "columbia tristar"
-					},
-					{
 						"tag": "death in title"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.imdb.com/title/tt0759475/?ref_=fn_al_tt_5",
-		"items": [
-			{
-				"itemType": "film",
-				"title": "'Til Death",
-				"creators": [
-					{
-						"firstName": "Josh",
-						"lastName": "Goldsmith",
-						"creatorType": "scriptwriter"
 					},
 					{
-						"firstName": "Cathy",
-						"lastName": "Yuspa",
-						"creatorType": "scriptwriter"
+						"tag": "principal"
 					},
 					{
-						"firstName": "Brad",
-						"lastName": "Garrett",
-						"creatorType": "contributor"
-					},
-					{
-						"firstName": "Joely",
-						"lastName": "Fisher",
-						"creatorType": "contributor"
-					},
-					{
-						"firstName": "Kat",
-						"lastName": "Foster",
-						"creatorType": "contributor"
-					}
-				],
-				"date": "2006-09-07",
-				"abstractNote": "A pair of newlyweds move in next door to a veteran married couple of 25 years.",
-				"distributor": "Impact Zone Productions, Sony Pictures Television",
-				"extra": "IMDb ID: tt0759475\nevent-place: United States",
-				"libraryCatalog": "IMDb",
-				"attachments": [],
-				"tags": [
-					{
-						"tag": "big breasts"
-					},
-					{
-						"tag": "breast"
-					},
-					{
-						"tag": "brother brother relationship"
-					},
-					{
-						"tag": "columbia tristar"
-					},
-					{
-						"tag": "death in title"
+						"tag": "schoolteacher"
 					}
 				],
 				"notes": [],
@@ -597,7 +535,7 @@ var testCases = [
 				],
 				"date": "2023-03-02",
 				"abstractNote": "Picard grapples with a life-altering revelation as the crew of the Titan attempt to outmaneuver Vadic, while Raffi and Worf uncover a plot by a vengeful enemy.",
-				"extra": "IMDb ID: tt19402762\nevent-place:",
+				"extra": "IMDb ID: tt19402762\nevent-place: United States",
 				"libraryCatalog": "IMDb",
 				"programTitle": "Star Trek: Picard",
 				"runningTime": "56m",
