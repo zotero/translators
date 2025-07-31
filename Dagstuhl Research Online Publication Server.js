@@ -3,19 +3,19 @@
 	"label": "Dagstuhl Research Online Publication Server",
 	"creator": "Philipp Zumstein",
 	"target": "^https?://(www\\.)?drops\\.dagstuhl\\.de/",
-	"minVersion": "3.0",
+	"minVersion": "6.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-11-30 08:38:44"
+	"lastUpdated": "2025-07-19 19:20:18"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2016 Philipp Zumstein
+	Copyright © 2016-2025 Philipp Zumstein and Zotero contributors
 
 	This file is part of Zotero.
 
@@ -37,7 +37,7 @@
 
 function detectWeb(doc, url) {
 	if (url.includes('/entities/document/')) {
-		var bibtexEntry = ZU.xpathText(doc, "//pre[contains(@class, 'bibtex')]");
+		let bibtexEntry = text(doc, 'pre.bibtex');
 		if (bibtexEntry.includes("@InCollection")) {
 			return "bookSection";
 		}
@@ -56,10 +56,10 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, "//a[contains(@href, '/entities/document/')]");//
-	for (var i = 0; i < rows.length; i++) {
-		var href = rows[i].href;
-		var title = ZU.trimInternal(rows[i].textContent);
+	var rows = doc.querySelectorAll('a[href*="/entities/document/"]');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -68,36 +68,34 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
-function scrape(doc, _) {
-	var bibtexEntry = ZU.xpathText(doc, "//pre[contains(@class, 'bibtex')]");
-	//Z.debug(bibtexEntry);
-	var pdfurl = ZU.xpathText(doc, "//section[contains(@class, 'files')]//a[contains(@href, 'pdf')]/@href");
+async function scrape(doc, _url = doc.location.href) {
+	let bibtexEntry = text(doc, 'pre.bibtex');
+	let pdfUrl = attr(doc, 'meta[name="citation_pdf_url"]', 'content');
+	// One more try in case the meta tag didn't work, there are other tags with the PDF link
+	if (!pdfUrl) {
+		Z.debug("PDF URL extraction from the meta tag failed, trying other sources.");
+		pdfUrl = attr(doc, 'section.files a[href$=".pdf"]', 'href');
+	}
 
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 	translator.setString(bibtexEntry);
 	translator.setHandler("itemDone", function (obj, item) {
-		//if a note is just a list of keywords, then save them as tags
-		//and delete this note
+		// If a note is just a list of keywords, then save them as tags
+		// and delete this note
 		for (var i = 0; i < item.notes.length; i++) {
 			var note = item.notes[i].note;
 			if (note.includes('Keywords:')) {
@@ -115,9 +113,9 @@ function scrape(doc, _) {
 			document: doc
 		});
 
-		if (pdfurl) {
+		if (pdfUrl) {
 			item.attachments.push({
-				url: pdfurl,
+				url: pdfUrl,
 				title: "Full Text PDF",
 				mimeType: "application/pdf"
 			});
@@ -125,7 +123,7 @@ function scrape(doc, _) {
 
 		item.complete();
 	});
-	translator.translate();
+	await translator.translate();
 }
 
 /** BEGIN TEST CASES **/
