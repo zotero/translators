@@ -14,9 +14,9 @@
 
 /*
 	***** BEGIN LICENSE BLOCK *****
- 
+
 	This file is part of Zotero.
- 
+
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -41,7 +41,7 @@ function detectWeb(doc, url) {
 }
 
 async function doWeb(doc, url) {
-	await scrape(doc, url)
+	await scrape(doc, url);
 }
 
 async function scrape(doc, url) {
@@ -62,9 +62,9 @@ async function scrape(doc, url) {
 	item.date = dateElem.textContent.trim();
 
 	item.attachments.push({
-	title: "Snapshot",
-	document: doc
-	})
+		title: "Snapshot",
+		document: doc
+	});
 
 	item.libraryCatalog = "Jewish Telegraphic Agency Archive";
 	item.complete();
@@ -96,6 +96,5 @@ var testCases = [
 			}
 		]
 	}
-]
+];
 /** END TEST CASES **/
-
