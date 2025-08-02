@@ -46,8 +46,7 @@ function doWeb(doc, url) {
 			if (!items) return;
 			ZU.processDocuments(Object.keys(items), scrape);
 		});
-	}
-	else {
+	} else {
 		scrape(doc, url);
 	}
 }
@@ -151,11 +150,6 @@ function scrape(doc, url) {
 	for (let p of paragraphs) {
 		articleText += p.textContent + "\n\n";
 	}
-	if (articleText) {
-		item.notes.push({
-			note: "<h1>" + item.title + "</h1>\n" + articleText
-		});
-	}
 
 	item.language = "en";
 
@@ -171,7 +165,7 @@ function scrape(doc, url) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
+		{
 		"type": "web",
 		"url": "https://www.jpost.com/middle-east/iran-news/article-861478#353653gsrdvydsfsdg",
 		"items": [
@@ -284,6 +278,6 @@ var testCases = [
 			}
 		]
 	}
-
 ]
 /** END TEST CASES **/
+
