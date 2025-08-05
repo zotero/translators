@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-20 16:46:08"
+	"lastUpdated": "2025-08-05 07:25:05"
 }
 
 /*
@@ -98,6 +98,8 @@ function scrape(doc, url) {
 			}
 			item.abstractNote = ZU.xpathText(doc, '//meta[@name="dc.Description"]/@content');
 			let abstractFromDOM = ZU.xpathText(doc, '//div[contains(@class, "abstractInFull")]//p[not(@class="summary-title")]');
+			if (!abstractFromDOM)
+			    abstractFromDOM =  ZU.xpathText(doc, '//section[@id="abstract"]');
 			if (abstractFromDOM && item.abstractNote.length < abstractFromDOM.length)
 				item.abstractNote = abstractFromDOM.replace(/^Abstract/,'').replace(/\w\.,\s/, '.\\n4207 ');
 
