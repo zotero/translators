@@ -9,8 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-07-18 14:31:18",
-	"skipTest": true
+	"lastUpdated": "2025-07-18 14:31:18"
 }
 
 /*
@@ -83,7 +82,8 @@ function scrape(doc, url) {
 	if (author) {
 		let authorName = author.textContent.trim();
 		// Convert to title case (e.g., "ELIAV BREUER" to "Eliav Breuer")
-		let normalizedName = authorName.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+		let normalizedName = authorName.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1))
+		.join(' ');
 		let nameParts = normalizedName.split(' ').filter(part => part);
 		if (nameParts.length === 2) {
 			// Exactly two words: split into first and last name
