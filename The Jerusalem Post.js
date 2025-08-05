@@ -46,7 +46,8 @@ function doWeb(doc, url) {
 			if (!items) return;
 			ZU.processDocuments(Object.keys(items), scrape);
 		});
-	} else {
+	}
+    else {
 		scrape(doc, url);
 	}
 }
@@ -280,4 +281,3 @@ var testCases = [
 	}
 ]
 /** END TEST CASES **/
-
