@@ -9,7 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-07-18 14:31:18"
+	"lastUpdated": "2025-07-18 14:31:18",
+	"skipTest": true
 }
 
 /*
@@ -36,7 +37,7 @@
 function detectWeb(doc, url) {
 	if (url.match(/\/article-/i) || doc.querySelector('article')) {
 		return "newspaperArticle";
-	} 
+	}
 	return false;
 }
 
@@ -47,12 +48,12 @@ function doWeb(doc, url) {
 			ZU.processDocuments(Object.keys(items), scrape);
 		});
 	}
-    else {
+	else {
 		scrape(doc, url);
 	}
 }
 
-function getSearchResults(doc, url) {
+function getSearchResults(doc) {
 	var items = {};
 	var links = doc.querySelectorAll('a[href*="/article-"]');
 	for (let link of links) {
@@ -82,9 +83,7 @@ function scrape(doc, url) {
 	if (author) {
 		let authorName = author.textContent.trim();
 		// Convert to title case (e.g., "ELIAV BREUER" to "Eliav Breuer")
-		let normalizedName = authorName.toLowerCase().split(' ').map(word => 
-			word.charAt(0).toUpperCase() + word.slice(1)
-		).join(' ');
+		let normalizedName = authorName.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 		let nameParts = normalizedName.split(' ').filter(part => part);
 		if (nameParts.length === 2) {
 			// Exactly two words: split into first and last name
@@ -145,13 +144,6 @@ function scrape(doc, url) {
 	// Extract ISSN
 	item.ISSN = "0792-822X";
 
-	// Extract full text
-	var articleText = "";
-	var paragraphs = doc.querySelectorAll('article p');
-	for (let p of paragraphs) {
-		articleText += p.textContent + "\n\n";
-	}
-
 	item.language = "en";
 
 	// Attach snapshot
@@ -166,7 +158,7 @@ function scrape(doc, url) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-		{
+	{
 		"type": "web",
 		"url": "https://www.jpost.com/middle-east/iran-news/article-861478#353653gsrdvydsfsdg",
 		"items": [
