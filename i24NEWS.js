@@ -35,9 +35,8 @@
 	***** END LICENSE BLOCK *****
 */
 
-function detectWeb(doc, url) {
-	if (doc.querySelector('meta[property="og:type"][content="article"]') || doc.querySelector('article'))
-		{
+function detectWeb(doc) {
+	if (doc.querySelector('meta[property="og:type"][content="article"]') || doc.querySelector('article')) {
 		return "newspaperArticle";
 	}
 	return false;
@@ -76,7 +75,7 @@ function doWeb(doc, url) {
 	for (let tag of tagLinks) {
 		let tagText = tag.textContent.trim();
 		if (tagText) {
-		item.tags.push(tagText);
+			item.tags.push(tagText);
 		}
 	}
 
