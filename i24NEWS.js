@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-08-06 14:55:49",
+	"lastUpdated": "2025-08-06 18:15:16",
 	"skipTest": true
 }
 
@@ -36,8 +36,9 @@
 	***** END LICENSE BLOCK *****
 */
 
-function detectWeb(doc) {
-	if (doc.querySelector('meta[property="og:type"][content="article"]') || doc.querySelector('article')) {
+function detectWeb(doc, url) {
+	if (doc.querySelector('meta[property="og:type"][content="article"]') || doc.querySelector('article'))
+		{
 		return "newspaperArticle";
 	}
 	return false;
@@ -60,11 +61,14 @@ function doWeb(doc, url) {
 	let author = textOrNull(doc, '.author__name') || "i24NEWS";
 	item.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
 
-	// Date
-	let dateMeta = doc.querySelector('meta[property="article:published_time"]');
-	if (dateMeta) {
-		item.date = dateMeta.content.split("T")[0];
+	let timeEl = doc.querySelector('time[datetime]');
+	if (timeEl) {
+		let datetime = timeEl.getAttribute('datetime');
+		if (datetime && datetime.includes("T")) {
+			item.date = datetime.split("T")[0];
+		}
 	}
+
 
 	// Abstract
 	let desc = doc.querySelector('meta[name="description"]');
@@ -76,7 +80,7 @@ function doWeb(doc, url) {
 	for (let tag of tagLinks) {
 		let tagText = tag.textContent.trim();
 		if (tagText) {
-			item.tags.push(tagText);
+		item.tags.push(tagText);
 		}
 	}
 
@@ -94,6 +98,8 @@ function textOrNull(doc, selector) {
 	let el = doc.querySelector(selector);
 	return el ? el.textContent.trim() : null;
 }
+
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -232,6 +238,145 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"abstractNote": "وقعت حادثة غير عادية في سانت لويس بعد وقت قصير من وصول مواطن أمريكي-إسرائيلي لزيارة عائلته. • تضمنت الإهانات التي تم رشها تهديدات شخصية ومعادية",
+				"language": "ar",
+				"libraryCatalog": "i24NEWS",
+				"publicationTitle": "i24NEWS",
+				"shortTitle": "\"الموت للجيش الإسرائيلي\" وإحراق سيارات",
+				"url": "https://www.i24news.tv/ar/%D8%A3%D8%AE%D8%A8%D8%A7%D8%B1/%D8%AF%D9%88%D9%84%D9%8A/%D8%A7%D9%85%D8%B1%D9%8A%D9%83%D8%A7/artc-40d078de",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "israel"
+					},
+					{
+						"tag": "israelatwar"
+					},
+					{
+						"tag": "إسرائيل"
+					},
+					{
+						"tag": "إسرائيل / غزة"
+					},
+					{
+						"tag": "الجيش الإسرائيلي"
+					},
+					{
+						"tag": "الولايات المتحدة"
+					},
+					{
+						"tag": "دونالد ترامب"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.i24news.tv/fr/actu/france/artc-elie-barnavi-et-vincent-lemire-pressent-emmanuel-macron-de-sanctionner-israel",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Elie Barnavi et Vincent Lemire pressent Emmanuel Macron de sanctionner Israël",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "i24NEWS",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025-08-06",
+				"abstractNote": "« Monsieur le Président, sans sanctions immédiates, vous reconnaîtrez un cimetière. Il faut agir maintenant pour que nourriture et soins affluent massivement à Gaza »",
+				"language": "fr",
+				"libraryCatalog": "i24NEWS",
+				"publicationTitle": "i24NEWS",
+				"url": "https://www.i24news.tv/fr/actu/france/artc-elie-barnavi-et-vincent-lemire-pressent-emmanuel-macron-de-sanctionner-israel",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Elie Barnavi"
+					},
+					{
+						"tag": "Israël"
+					},
+					{
+						"tag": "Sanctions"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.i24news.tv/he/news/science-and-technology/artc-480a381d",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "ללא צורך באפליקציה: הפיצ'ר החדש שיגיע לוואטסאפ",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "i24NEWS",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025-08-06",
+				"abstractNote": "יישומון המסרים המיידיים הפופולרי עשוי לקבל עדכון מיוחד שיאפשר להתכתב עם אנשים שאינם משתמשים בו • לא ברור מתי הוא יגיע לכלל המשתמשים",
+				"language": "he",
+				"libraryCatalog": "i24NEWS",
+				"publicationTitle": "i24NEWS",
+				"shortTitle": "ללא צורך באפליקציה",
+				"url": "https://www.i24news.tv/he/news/science-and-technology/artc-480a381d",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "וואטסאפ"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.i24news.tv/ar/%D8%A3%D8%AE%D8%A8%D8%A7%D8%B1/%D8%AF%D9%88%D9%84%D9%8A/%D8%A7%D9%85%D8%B1%D9%8A%D9%83%D8%A7/artc-40d078de",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "\"الموت للجيش الإسرائيلي\" وإحراق سيارات: اعتداء غير عادي ضد عائلة جندي إسرائيلي في الولايات المتحدة",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "i24NEWS",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025-08-06",
 				"abstractNote": "وقعت حادثة غير عادية في سانت لويس بعد وقت قصير من وصول مواطن أمريكي-إسرائيلي لزيارة عائلته. • تضمنت الإهانات التي تم رشها تهديدات شخصية ومعادية",
 				"language": "ar",
 				"libraryCatalog": "i24NEWS",
