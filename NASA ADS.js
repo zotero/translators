@@ -57,7 +57,8 @@ function getSearchResults(variant, doc, checkOnly = false) {
 			found = true;
 			entries[id] = title;
 		}
-	} else {
+	}
+	else {
 		for (let row of doc.querySelectorAll("section#results article")) {
 			let id = row.id;
 			let title = ZU.trimInternal(text(row, ".article-title"));
