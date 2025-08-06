@@ -99,8 +99,6 @@ function textOrNull(doc, selector) {
 	return el ? el.textContent.trim() : null;
 }
 
-
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
