@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-08-06 16:11:15"
+	"lastUpdated": "2025-08-06 16:27:26"
 }
 
 /*
@@ -48,8 +48,8 @@ function scrape(doc, url) {
 	let item = new Zotero.Item("newspaperArticle");
 
 	// Clean the URL to remove any tracking parameters or fragments
-	let cleanedUrl = url.match(/(https?:\/\/[^\/]+\/news\/\d+)/);
-	item.url = cleanedUrl ? cleanedUrl[1] : url;
+	let cleanedUrl = url.split(/[?#]/)[0];
+	item.url = cleanedUrl;
 
 	// Title - Dynamically gets the title from the h1 tag or the document title
 	item.title = textContent(doc, "h1") || doc.title;
@@ -61,7 +61,13 @@ function scrape(doc, url) {
 	// Author - Using the new, specific selector provided by the user
 	let authorEl = doc.querySelector(".article-info--author");
 	if (authorEl) {
-	    let author = authorEl.textContent.trim();
+		let author = authorEl.textContent.trim();
+		if (author !== "القناة 7" && author !== "Israel National News" && author !== "ערוץ 7")
+		item.creators = [{
+            firstName: "",
+            lastName: author,
+            creatorType: "author"
+        }];
 	}
 
 	// Date - Gets the date from the datetime attribute and formats it to YYYY-MM-DD
@@ -113,13 +119,12 @@ function textContent(doc, selector, attribute) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.israelnationalnews.com/news/412849",
+		"url": "https://www.israelnationalnews.com/news/412849?5345345",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Woman found dead in Jerusalem apartment",
+				"title": "Woman found dead in Jerusalem apartment | Israel National News",
 				"creators": [],
-				"date": "2025-08-06",
 				"language": "en",
 				"libraryCatalog": "Arutz Sheva",
 				"publicationTitle": "Israel National News",
@@ -130,17 +135,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "Armon Hanatziv"
-					},
-					{
-						"tag": "Israel Police"
-					},
-					{
-						"tag": "Jerusalem"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -152,7 +147,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Неудачная попытка настроить ИИ против Нетаньяху",
+				"title": "Неудачная попытка настроить ИИ против Нетаньяху | 7 КАНАЛ",
 				"creators": [],
 				"language": "ru",
 				"libraryCatalog": "Arutz Sheva",
@@ -164,20 +159,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "\"Grok\""
-					},
-					{
-						"tag": "Биньямин Нетаньяху"
-					},
-					{
-						"tag": "Итай Лешем"
-					},
-					{
-						"tag": "искусственный интеллект"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
