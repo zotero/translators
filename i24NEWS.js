@@ -12,64 +12,87 @@
 	"lastUpdated": "2025-08-06 14:55:49"
 }
 
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Free license for any purpose
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
 function detectWeb(doc, url) {
-    if (doc.querySelector('meta[property="og:type"][content="article"]') || doc.querySelector('article'))
-	{
-        return "newspaperArticle";
-    }
-    return false;
+	if (doc.querySelector('meta[property="og:type"][content="article"]') || doc.querySelector('article'))
+		{
+		return "newspaperArticle";
+	}
+	return false;
 }
 
 function doWeb(doc, url) {
-    let item = new Zotero.Item("newspaperArticle");
+	let item = new Zotero.Item("newspaperArticle");
 
-    item.title = textOrNull(doc, 'h1');
-    item.url = url;
-    item.publicationTitle = "i24NEWS";
+	item.title = textOrNull(doc, 'h1');
+	item.url = url;
+	item.publicationTitle = "i24NEWS";
 
-    // Language based on visible <span>
-    let lang = textOrNull(doc, 'span.LanguageSelector_locale__lrrnE');
-    if (lang) {
-        item.language = lang.toLowerCase();
-    }
+	// Language based on visible <span>
+	let lang = textOrNull(doc, 'span.LanguageSelector_locale__lrrnE');
+	if (lang) {
+		item.language = lang.toLowerCase();
+	}
 
-    // Author
-    let author = textOrNull(doc, '.author__name') || "i24NEWS";
-    item.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
+	// Author
+	let author = textOrNull(doc, '.author__name') || "i24NEWS";
+	item.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
 
-    // Date
-    let dateMeta = doc.querySelector('meta[property="article:published_time"]');
-    if (dateMeta) {
-        item.date = dateMeta.content.split("T")[0];
-    }
+	// Date
+	let dateMeta = doc.querySelector('meta[property="article:published_time"]');
+	if (dateMeta) {
+		item.date = dateMeta.content.split("T")[0];
+	}
 
-    // Abstract
-    let desc = doc.querySelector('meta[name="description"]');
-    if (desc) {
-        item.abstractNote = desc.content;
-    }
+	// Abstract
+	let desc = doc.querySelector('meta[name="description"]');
+	if (desc) {
+		item.abstractNote = desc.content;
+	}
 
 	let tagLinks = doc.querySelectorAll('div.tags a');
 	for (let tag of tagLinks) {
-    	let tagText = tag.textContent.trim();
-    	if (tagText) {
-        item.tags.push(tagText);
-    	}
+		let tagText = tag.textContent.trim();
+		if (tagText) {
+		item.tags.push(tagText);
+		}
 	}
 
-    item.attachments.push({
-        document: doc,
-        title: "Snapshot",
-        mimeType: "text/html"
-    });
+	item.attachments.push({
+		document: doc,
+		title: "Snapshot",
+		mimeType: "text/html"
+	});
 
-    item.complete();
+	item.complete();
 }
 
 // Helper
 function textOrNull(doc, selector) {
-    let el = doc.querySelector(selector);
-    return el ? el.textContent.trim() : null;
+	let el = doc.querySelector(selector);
+	return el ? el.textContent.trim() : null;
 }
 
 /** BEGIN TEST CASES **/
