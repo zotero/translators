@@ -79,10 +79,11 @@ async function scrape(doc, url) {
 		// Extract Date:
 		const dateElem = doc.querySelector('.post-pdf__date');
 		item.date = dateElem.textContent.trim();
-		// Check if Daily news bulletin
+		
 		item.publicationTitle = "Daily news bulletin";
 		item.ISSN = "1538-4918";
 		item.place = "United States";
+		item.libraryCatalog = "Jewish Telegraphic Agency Archive";
 		const pdfURL = doc.querySelector('div.post-pdf')?.href;
 		item.attachments.push({
 			url: pdfURL,
@@ -101,8 +102,7 @@ async function scrape(doc, url) {
 	title: "Snapshot",
 	document: doc
 	})
-
-	item.libraryCatalog = "Jewish Telegraphic Agency Archive";
+	
 	item.complete();
 }
 
