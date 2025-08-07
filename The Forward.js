@@ -9,7 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-08-07 10:44:43"
+	"lastUpdated": "2025-08-07 11:17:46",
+	"skipTest": true
 }
 
 function detectWeb(doc, url) {
@@ -17,13 +18,12 @@ function detectWeb(doc, url) {
   const isArticle =
 	doc.querySelector('meta[property="og:type"][content="article"]');
 
-  if (isArticle && url !== "https://forward.com/yiddish/") {
+  if (isArticle) {
 	return "newspaperArticle";
-  } // The main page in yiddish is an "article" for some reason
+  }
 
   return false;
 }
-
 
 function doWeb(doc, url) {
 	const item = new Zotero.Item("newspaperArticle");
@@ -39,7 +39,6 @@ function doWeb(doc, url) {
 	else {
 		item.language = "en";
 	}
-
 
 	// Dynamic metadata
 	item.title = doc.querySelector('meta[property="og:title"]')?.content || doc.title;
