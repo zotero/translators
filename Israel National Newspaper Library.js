@@ -103,6 +103,13 @@ async function scrape(doc, url) {
 		item.title = item.publicationTitle + ", " + item.date;
 		item.url = url.split('?')[0].split('#')[0]; // No persistent link, just the original URL
 	}
+	else {
+		const pageLabel = doc.querySelector('span.pagelabel.current b');
+		if (pageLabel) {
+			const split = pageLabel.textContent.split(" ");
+			item.pages = split[1];
+		}
+	}
 
 	item.libraryCatalog = "National Library of Israel";
 	item.complete();
