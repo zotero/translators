@@ -101,7 +101,7 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.premiumtimesng.com/business/business-news/800867-mrs-oil-nigeria-announces-resignation-of-non-executive-director.html",
+		"url": "https://www.premiumtimesng.com/business/business-news/800867-mrs-oil-nigeria-announces-resignation-of-non-executive-director.html?tztc=1",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -120,7 +120,7 @@ var testCases = [
 				"libraryCatalog": "Premium Times",
 				"place": "Nigeria",
 				"publicationTitle": "Premium Times",
-				"url": "https://www.premiumtimesng.com/business/business-news/800867-mrs-oil-nigeria-announces-resignation-of-non-executive-director.html",
+				"url": "https://www.premiumtimesng.com/business/business-news/800867-mrs-oil-nigeria-announces-resignation-of-non-executive-director.html?tztc=1",
 				"attachments": [
 					{
 						"title": "Snapshot",
