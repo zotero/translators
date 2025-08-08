@@ -108,9 +108,9 @@ async function scrape(doc, url = doc.location.href) {
 	}
 
 	if (data) {
-		item.title = data.headline || ZU.xpathText(doc, '//h1[contains(@class, "entry-title")]');
+		item.title = ZU.unescapeHTML(data.headline || ZU.xpathText(doc, '//h1[contains(@class, "entry-title")]'));
 		item.ISSN = '3092-8907';
-		item.abstractNote = data.description || '';
+		item.abstractNote = ZU.cleanTags(data.description || '');
 		item.date = data.datePublished || '';
 		item.language = data.inLanguage || 'en';
 		item.url = data.url || url;
@@ -134,14 +134,6 @@ async function scrape(doc, url = doc.location.href) {
 			if (authorText) {
 				item.creators.push(ZU.cleanAuthor(authorText, 'author'));
 			}
-		}
-
-		if (data.thumbnailUrl) {
-			item.attachments.push({
-				title: 'Image',
-				mimeType: 'image/jpeg',
-				url: data.thumbnailUrl
-			});
 		}
 	}
 
