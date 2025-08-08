@@ -35,64 +35,64 @@
 */
 
 function detectWeb(doc, _url) {
-  const jsonLdNodes = doc.querySelectorAll('script[type="application/ld+json"]');
-  for (const node of jsonLdNodes) {
-    try {
-      const data = JSON.parse(node.textContent);
-      const graph = Array.isArray(data['@graph']) ? data['@graph'] : [data];
-      for (const entry of graph) {
-        if (typeof entry['@type'] === 'string' && entry['@type'].includes('Article')) {
-          return 'newspaperArticle';
-        }
-      }
-    } catch (_) {}
-  }
-  return false;
+	const jsonLdNodes = doc.querySelectorAll('script[type="application/ld+json"]');
+	for (const node of jsonLdNodes) {
+		try {
+			const data = JSON.parse(node.textContent);
+			const graph = Array.isArray(data['@graph']) ? data['@graph'] : [data];
+			for (const entry of graph) {
+				if (typeof entry['@type'] === 'string' && entry['@type'].includes('Article')) {
+					return 'newspaperArticle';
+				}
+			}
+		} catch (_) {}
+	}
+	return false;
 }
 
 function doWeb(doc, url) {
-  scrape(doc, url);
+	scrape(doc, url);
 }
 
 function scrape(doc, url) {
-  const jsonLdNodes = doc.querySelectorAll('script[type="application/ld+json"]');
-  let data = null;
+	const jsonLdNodes = doc.querySelectorAll('script[type="application/ld+json"]');
+	let data = null;
 
-  for (const node of jsonLdNodes) {
-    try {
-      const parsed = JSON.parse(node.textContent);
-      const graph = Array.isArray(parsed['@graph']) ? parsed['@graph'] : [parsed];
-      for (const entry of graph) {
-        if (typeof entry['@type'] === 'string' && entry['@type'].includes('Article')) {
-          data = entry;
-          break;
-        }
-      }
-      if (data) break;
-    } catch (_) {}
-  }
+	for (const node of jsonLdNodes) {
+		try {
+			const parsed = JSON.parse(node.textContent);
+			const graph = Array.isArray(parsed['@graph']) ? parsed['@graph'] : [parsed];
+			for (const entry of graph) {
+				if (typeof entry['@type'] === 'string' && entry['@type'].includes('Article')) {
+					data = entry;
+					break;
+				}
+			}
+			if (data) break;
+		} catch (_) {}
+	}
 
-  const item = new Zotero.Item('newspaperArticle');
-  item.title = data?.headline || text(doc, 'h1.jeg_post_title');
-  item.abstractNote = data?.description || text(doc, 'h2.jeg_post_subtitle');
-  item.date = data?.datePublished || text(doc, 'div.jeg_meta_date a');
-  item.language = data?.inLanguage || 'en';
-  item.url = url;
-  item.publicationTitle = 'Premium Times';
-  item.ISSN = '2360-7688';
-  item.place = 'Nigeria';
+	const item = new Zotero.Item('newspaperArticle');
+	item.title = data?.headline || text(doc, 'h1.jeg_post_title');
+	item.abstractNote = data?.description || text(doc, 'h2.jeg_post_subtitle');
+	item.date = data?.datePublished || text(doc, 'div.jeg_meta_date a');
+	item.language = data?.inLanguage || 'en';
+	item.url = url;
+	item.publicationTitle = 'Premium Times';
+	item.ISSN = '2360-7688';
+	item.place = 'Nigeria';
 
-  const authorName = text(doc, 'div.jeg_meta_author a');
-  if (authorName) {
-    item.creators.push(ZU.cleanAuthor(authorName, 'author'));
-  }
+	const authorName = text(doc, 'div.jeg_meta_author a');
+	if (authorName) {
+		item.creators.push(ZU.cleanAuthor(authorName, 'author'));
+	}
 
-  item.attachments.push({
-    document: doc,
-    title: 'Snapshot'
-  });
+	item.attachments.push({
+		document: doc,
+		title: 'Snapshot'
+	});
 
-  item.complete();
+	item.complete();
 }
 
 /** BEGIN TEST CASES **/
