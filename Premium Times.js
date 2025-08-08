@@ -74,26 +74,17 @@ function scrape(doc, url) {
 
   const item = new Zotero.Item('newspaperArticle');
   item.title = data?.headline || text(doc, 'h1.jeg_post_title');
-  item.abstractNote = data?.description || ZU.xpathText(doc, '//h2[contains(@class, "jeg_post_subtitle")]');
-  item.date = data?.datePublished || ZU.xpathText(doc, '//div[contains(@class, "jeg_meta_date")]//a');
+  item.abstractNote = data?.description || text(doc, 'h2.jeg_post_subtitle');
+  item.date = data?.datePublished || text(doc, 'div.jeg_meta_date a');
   item.language = data?.inLanguage || 'en';
   item.url = url;
   item.publicationTitle = 'Premium Times';
   item.ISSN = '2360-7688';
   item.place = 'Nigeria';
 
-  const authorName = ZU.xpathText(doc, '//div[contains(@class,"jeg_meta_author")]//a');
+  const authorName = text(doc, 'div.jeg_meta_author a');
   if (authorName) {
     item.creators.push(ZU.cleanAuthor(authorName, 'author'));
-  }
-
-  const imgUrl = data?.thumbnailUrl;
-  if (imgUrl) {
-    item.attachments.push({
-      title: 'Image',
-      mimeType: 'image/jpeg',
-      url: imgUrl
-    });
   }
 
   item.attachments.push({
@@ -130,10 +121,6 @@ var testCases = [
 				"url": "https://www.premiumtimesng.com/business/business-news/800867-mrs-oil-nigeria-announces-resignation-of-non-executive-director.html",
 				"attachments": [
 					{
-						"title": "Image",
-						"mimeType": "image/jpeg"
-					},
-					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
@@ -167,10 +154,6 @@ var testCases = [
 				"publicationTitle": "Premium Times",
 				"url": "https://www.premiumtimesng.com/news/headlines/801229-over-6000-displaced-in-renewed-benue-attacks-says-nema.html",
 				"attachments": [
-					{
-						"title": "Image",
-						"mimeType": "image/jpeg"
-					},
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
