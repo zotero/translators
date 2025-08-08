@@ -142,9 +142,6 @@ function scrape(doc, url) {
 		item.section = section.content;
 	}
 
-	// Extract ISSN
-	item.ISSN = "0792-822X";
-
 	item.language = "en";
 
 	// Attach snapshot
