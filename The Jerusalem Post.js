@@ -171,7 +171,6 @@ var testCases = [
 					}
 				],
 				"date": "2025-07-18",
-				"ISSN": "0792-822X",
 				"abstractNote": "Despite the denials from Tehran, there is mounting evidence that Iran continues to send military aid to these groups, demonstrating its determination to retain influence over its militia allies.",
 				"language": "en",
 				"libraryCatalog": "The Jerusalem Post",
@@ -238,7 +237,6 @@ var testCases = [
 					}
 				],
 				"date": "2025-07-17",
-				"ISSN": "0792-822X",
 				"abstractNote": "Editor's Notes: I’ve been pretty quiet since I was released from house arrest and received tremendous support from Israelis. But on Friday, I almost lost it.",
 				"language": "en",
 				"libraryCatalog": "The Jerusalem Post",
