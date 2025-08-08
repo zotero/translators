@@ -108,9 +108,9 @@ async function scrape(doc, url = doc.location.href) {
 	}
 
 	if (data) {
-		item.title = ZU.unescapeHTML(data.headline || ZU.xpathText(doc, '//h1[contains(@class, "entry-title")]'));
+		item.title = ZU.unescapeHTML(data.headline || text(doc, 'h1.entry-title'));
 		item.ISSN = '3092-8907';
-		item.abstractNote = ZU.cleanTags(data.description || '');
+		item.abstractNote = ZU.unescapeHTML(data.description || '');
 		item.date = data.datePublished || '';
 		item.language = data.inLanguage || 'en';
 		item.url = data.url || url;
@@ -130,7 +130,7 @@ async function scrape(doc, url = doc.location.href) {
 			}
 		}
 		else {
-			let authorText = ZU.xpathText(doc, '//span[@itemprop="name"]');
+			let authorText = text(doc, 'span[itemprop="name"]');
 			if (authorText) {
 				item.creators.push(ZU.cleanAuthor(authorText, 'author'));
 			}
@@ -163,17 +163,13 @@ var testCases = [
 				],
 				"date": "2025-05-24T18:10:00+01:00",
 				"ISSN": "3092-8907",
-				"abstractNote": "<strong> AKURE &#8212;</strong> &#160;The Ondo State Governorship Election Petitions Tribunal will deliver its verdict on June 4 in the series of suits challenging the election of Governor Lucky Aiyedatiwa, who emerged victorious in the last gubernatorial poll. Justice Benson Ogbu, wh&#8230;",
+				"abstractNote": "AKURE —  The Ondo State Governorship Election Petitions Tribunal will deliver its verdict on June 4 in the series of suits challenging the election of Governor Lucky Aiyedatiwa, who emerged victorious in the last gubernatorial poll. Justice Benson Ogbu, wh…",
 				"language": "en",
 				"libraryCatalog": "Prime 9ja Online",
 				"place": "Nigeria",
 				"publicationTitle": "Prime 9ja Online",
 				"url": "https://www.prime9ja.com.ng/2025/05/tribunal-to-rule-on-ondo-poll-june-4.html",
 				"attachments": [
-					{
-						"title": "Image",
-						"mimeType": "image/jpeg"
-					},
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
@@ -191,7 +187,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Davido &#8211; &#8220;CFMF&#8221; Review: A Low-Burn Confession in Afro-R&B Silhouettes",
+				"title": "Davido – “CFMF” Review: A Low-Burn Confession in Afro-R&B Silhouettes",
 				"creators": [
 					{
 						"firstName": "Chima Joseph",
@@ -201,18 +197,14 @@ var testCases = [
 				],
 				"date": "2025-05-27T01:11:00+01:00",
 				"ISSN": "3092-8907",
-				"abstractNote": "On <em> &#8220;CFMF&#8221;</em>  &#8212; the fourth track from Davido&#8217;s 2025 album <em> 5ive</em>  &#8212;\n  the artist trades club-ready bravado for inward reflection. Featuring\n  songwriting contributions from DIENDE and Victony, the track is a slow,\n  measured entry in the Afro-R&amp;B lane, b&#8230;",
+				"abstractNote": "On “CFMF” — the fourth track from Davido’s 2025 album 5ive —\n the artist trades club-ready bravado for inward reflection. Featuring\n songwriting contributions from DIENDE and Victony, the track is a slow,\n measured entry in the Afro-R&B lane, b…",
 				"language": "en",
 				"libraryCatalog": "Prime 9ja Online",
 				"place": "Nigeria",
 				"publicationTitle": "Prime 9ja Online",
-				"shortTitle": "Davido &#8211; &#8220;CFMF&#8221; Review",
+				"shortTitle": "Davido – “CFMF” Review",
 				"url": "https://www.prime9ja.com.ng/2025/05/davido-cfmf-review-low-burn-confession.html",
 				"attachments": [
-					{
-						"title": "Image",
-						"mimeType": "image/jpeg"
-					},
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
@@ -240,7 +232,7 @@ var testCases = [
 				],
 				"date": "2025-05-23T22:38:00+01:00",
 				"ISSN": "3092-8907",
-				"abstractNote": "<strong> ABUJA &#8212;</strong>  A major network of cybercriminals allegedly responsible for infiltrating the Computer-Based Testing (CBT) infrastructure of Nigeria&#8217;s national examinations has been dismantled, with over 20 suspects currently in custody, security officials have c&#8230;",
+				"abstractNote": "ABUJA — A major network of cybercriminals allegedly responsible for infiltrating the Computer-Based Testing (CBT) infrastructure of Nigeria’s national examinations has been dismantled, with over 20 suspects currently in custody, security officials have c…",
 				"language": "en",
 				"libraryCatalog": "Prime 9ja Online",
 				"place": "Nigeria",
@@ -248,10 +240,6 @@ var testCases = [
 				"shortTitle": "JAMB Server Hack",
 				"url": "https://www.prime9ja.com.ng/2025/05/jamb-server-hack-over-20-arrested.html",
 				"attachments": [
-					{
-						"title": "Image",
-						"mimeType": "image/jpeg"
-					},
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
@@ -279,17 +267,13 @@ var testCases = [
 				],
 				"date": "2025-03-24T16:58:00+01:00",
 				"ISSN": "3092-8907",
-				"abstractNote": "A newly developed mRNA vaccine for tuberculosis, created in China, has entered clinical trials at Beijing Chest Hospital. The trial, which commenced on Monday, marks a significant step in the country&#8217;s efforts to combat tuberculosis, according to the Bei&#8230;",
+				"abstractNote": "A newly developed mRNA vaccine for tuberculosis, created in China, has entered clinical trials at Beijing Chest Hospital. The trial, which commenced on Monday, marks a significant step in the country’s efforts to combat tuberculosis, according to the Bei…",
 				"language": "en",
 				"libraryCatalog": "Prime 9ja Online",
 				"place": "Nigeria",
 				"publicationTitle": "Prime 9ja Online",
 				"url": "https://www.prime9ja.com.ng/2025/03/china-begins-trial-of-mrna-tb-vaccine.html",
 				"attachments": [
-					{
-						"title": "Image",
-						"mimeType": "image/jpeg"
-					},
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
