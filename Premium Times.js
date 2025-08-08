@@ -73,7 +73,7 @@ function scrape(doc, url) {
   }
 
   const item = new Zotero.Item('newspaperArticle');
-  item.title = data?.headline || ZU.xpathText(doc, '//h1[contains(@class, "jeg_post_title")]');
+  item.title = data?.headline || text(doc, 'h1.jeg_post_title');
   item.abstractNote = data?.description || ZU.xpathText(doc, '//h2[contains(@class, "jeg_post_subtitle")]');
   item.date = data?.datePublished || ZU.xpathText(doc, '//div[contains(@class, "jeg_meta_date")]//a');
   item.language = data?.inLanguage || 'en';
