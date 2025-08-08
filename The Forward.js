@@ -14,11 +14,11 @@
 }
 
 function detectWeb(doc, url) {
-  // Check for article type
-  const isArticle =
-	doc.querySelector('meta[property="og:type"][content="article"]');
+	// Check for article type
+	const isArticle =
+		doc.querySelector('meta[property="og:type"][content="article"]');
 
-  if (isArticle) {
+	if (isArticle) {
 	return "newspaperArticle";
   }
 
@@ -30,7 +30,6 @@ function doWeb(doc, url) {
 
 	// Hardcoded values
 	item.publicationTitle = "The Forward";
-	item.ISSN = "1051-340X";
 
 	// Set language based on URL
 	if (url.includes("/yiddish/")) {
@@ -84,7 +83,6 @@ var testCases = [
 					}
 				],
 				"date": "2025-07-30",
-				"ISSN": "1051-340X",
 				"abstractNote": "זונטיק, דעם 20סטן יולי, האָבן זיך פֿאַרזאַמלט מיטגלידער פֿון „די הלכהשע לינקע“ — אַ גרופּע פֿרומע פֿון לינקן פּאָליטישן פֿליגל, כּדי זיך צוצוהערן צו תּורה־ און פֿאָרשונג־רעפֿעראַטן מיט אַ שײַכות צו דער ברענענדיקער טעמע װאָס האָט די גרופּע אױספֿאָרמירט: די מאַסן־הריגות פֿון דער ציװילער באַפֿעלקערונג אין עזה. די גרופּע, װאָס איז געגרינדעט געװאָרן אין 2024,...",
 				"language": "yi",
 				"libraryCatalog": "The Forward",
@@ -118,7 +116,6 @@ var testCases = [
 					}
 				],
 				"date": "2025-08-06",
-				"ISSN": "1051-340X",
 				"abstractNote": "Judge Trevor McFadden rejected arguments that the Israeli flag represents the state of Israel, rather than “the Jewish race.”",
 				"language": "en",
 				"libraryCatalog": "The Forward",
