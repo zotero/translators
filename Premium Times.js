@@ -45,7 +45,8 @@ function detectWeb(doc, _url) {
 					return 'newspaperArticle';
 				}
 			}
-		} catch (_) {}
+		}
+		catch (_) {}
 	}
 	return false;
 }
@@ -69,7 +70,8 @@ function scrape(doc, url) {
 				}
 			}
 			if (data) break;
-		} catch (_) {}
+		}
+		catch (_) {}
 	}
 
 	const item = new Zotero.Item('newspaperArticle');
