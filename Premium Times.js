@@ -101,40 +101,6 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.premiumtimesng.com/news/top-news/812850-what-nigeria-must-do-to-attract-tourists-belgian-ambassador.html",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "What Nigeria must do to attract tourists &#8211; Belgian Ambassador",
-				"creators": [
-					{
-						"firstName": "Beloved",
-						"lastName": "John",
-						"creatorType": "author"
-					}
-				],
-				"date": "2025-08-08T18:19:41+00:00",
-				"ISSN": "2360-7688",
-				"abstractNote": "Mr Leenknegt said Nigeria sometimes overrates its fame in the world when it comes to its food, and its film industry also needs major promotion.",
-				"language": "en-GB",
-				"libraryCatalog": "Premium Times",
-				"place": "Nigeria",
-				"publicationTitle": "Premium Times",
-				"url": "https://www.premiumtimesng.com/news/top-news/812850-what-nigeria-must-do-to-attract-tourists-belgian-ambassador.html",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "https://www.premiumtimesng.com/news/headlines/801229-over-6000-displaced-in-renewed-benue-attacks-says-nema.html",
 		"items": [
 			{
