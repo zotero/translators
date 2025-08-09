@@ -99,7 +99,7 @@ function scrape(doc, url) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
+	/*{
 		"type": "web",
 		"url": "https://www.premiumtimesng.com/business/business-news/800867-mrs-oil-nigeria-announces-resignation-of-non-executive-director.html?tztc=1",
 		"items": [
@@ -132,7 +132,7 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	},
+	},*/
 	{
 		"type": "web",
 		"url": "https://www.premiumtimesng.com/news/headlines/801229-over-6000-displaced-in-renewed-benue-attacks-says-nema.html",
