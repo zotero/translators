@@ -99,28 +99,28 @@ function scrape(doc, url) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-	/*{
+	{
 		"type": "web",
-		"url": "https://www.premiumtimesng.com/business/business-news/800867-mrs-oil-nigeria-announces-resignation-of-non-executive-director.html?tztc=1",
+		"url": "https://www.premiumtimesng.com/news/top-news/812850-what-nigeria-must-do-to-attract-tourists-belgian-ambassador.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "MRS Oil Nigeria announces resignation of non-executive director",
+				"title": "What Nigeria must do to attract tourists &#8211; Belgian Ambassador",
 				"creators": [
 					{
-						"firstName": "Ayodeji",
-						"lastName": "Adegboyega",
+						"firstName": "Beloved",
+						"lastName": "John",
 						"creatorType": "author"
 					}
 				],
-				"date": "2025-06-14T17:20:21+00:00",
+				"date": "2025-08-08T18:19:41+00:00",
 				"ISSN": "2360-7688",
-				"abstractNote": "“Over the years, she spearheaded numerous strategic initiatives and led teams through critical milestones.”",
+				"abstractNote": "Mr Leenknegt said Nigeria sometimes overrates its fame in the world when it comes to its food, and its film industry also needs major promotion.",
 				"language": "en-GB",
 				"libraryCatalog": "Premium Times",
 				"place": "Nigeria",
 				"publicationTitle": "Premium Times",
-				"url": "https://www.premiumtimesng.com/business/business-news/800867-mrs-oil-nigeria-announces-resignation-of-non-executive-director.html?tztc=1",
+				"url": "https://www.premiumtimesng.com/news/top-news/812850-what-nigeria-must-do-to-attract-tourists-belgian-ambassador.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -132,7 +132,7 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	},*/
+	},
 	{
 		"type": "web",
 		"url": "https://www.premiumtimesng.com/news/headlines/801229-over-6000-displaced-in-renewed-benue-attacks-says-nema.html",
