@@ -1,9 +1,9 @@
 {
 	"translatorID": "51e5355d-9974-484f-80b9-f84d2b55782e",
 	"label": "Wikidata QuickStatements",
-	"creator": "Philipp Zumstein (with minor edits by Pascal Martinolli)",
+	"creator": "Philipp Zumstein and contributors",
 	"target": "txt",
-	"minVersion": "3.1",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
@@ -15,7 +15,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017 Philipp Zumstein
+	Copyright © 2017-2025 Philipp Zumstein and contributors
 
 	This file is part of Zotero.
 
@@ -34,29 +34,6 @@
 
 	***** END LICENSE BLOCK *****
 */
-
-/*
-	***** BEGIN REVISION BLOCK *****
-
-	In 2025, Pascal Martinolli made some revisions to the original code.
-	
-	They modify the Description of :
-	   - encyclopedia entries (which encyclopedia),
-	   - book sections (which book),
-	   - thesis (which university),
-	   - conference papers (which conference).
-	   
-	They add a "default for all languages" Label.
-	
-	They manage the permanent identifiers from :
-	   - OpenAlex: P10283
-	   - Semantic Scholar CorpusID: P8299
-	   - Web of Science WOS: P8372
-	   - Microsoft Academic Graph MAG: P6366
-
-	***** END REVISION BLOCK *****
-*/
-
 
 var typeMapping = {
 	// Zotero types
@@ -295,10 +272,10 @@ function zoteroItemToQuickStatements(item) {
 		}
 	}
 
+	addStatement('Lmul', '"' + item.title + '"');
 	if (item.language && (item.language.toLowerCase() in languageMapping)) {
 		let lang = item.language.toLowerCase();
 		addStatement('L' + lang, '"' + item.title + '"');
-		addStatement('Lmul', '"' + item.title + '"');
 		addStatement('P1476', lang + ':"' + item.title + '"');
 		addStatement('P407', languageMapping[lang]);
 	}
