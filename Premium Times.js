@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2025-06-17 08:30:24"
+	"lastUpdated": "2025-08-12 17:42:24"
 }
 
 /*
@@ -58,7 +58,6 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	const jsonLdNodes = doc.querySelectorAll('script[type="application/ld+json"]');
 	let data = null;
-
 	for (const node of jsonLdNodes) {
 		try {
 			const parsed = JSON.parse(node.textContent);
@@ -75,20 +74,28 @@ function scrape(doc, url) {
 	}
 
 	const item = new Zotero.Item('newspaperArticle');
+	// Title
 	item.title = data?.headline || text(doc, 'h1.jeg_post_title');
+	// Abstract (use JSON-LD if present, else subtitle element)
 	item.abstractNote = data?.description || text(doc, 'h2.jeg_post_subtitle');
-	item.date = data?.datePublished || text(doc, 'div.jeg_meta_date a');
-	item.language = data?.inLanguage || 'en';
+	// Date published (ISO format from JSON-LD or parsed from page)
+	const dateText = text(doc, 'div.jeg_meta_date a');
+	item.date = data?.datePublished || (dateText ? ZU.strToISO(dateText) : undefined);
+	// Language (use JSON-LD or default to British English)
+	item.language = data?.inLanguage || 'en-GB';
 	item.url = url;
 	item.publicationTitle = 'Premium Times';
+	item.libraryCatalog = 'Premium Times';
 	item.ISSN = '2360-7688';
 	item.place = 'Nigeria';
 
+	// Author
 	const authorName = text(doc, 'div.jeg_meta_author a');
 	if (authorName) {
 		item.creators.push(ZU.cleanAuthor(authorName, 'author'));
 	}
 
+	// Attach a snapshot of the page
 	item.attachments.push({
 		document: doc,
 		title: 'Snapshot'
@@ -101,26 +108,26 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.premiumtimesng.com/news/headlines/801229-over-6000-displaced-in-renewed-benue-attacks-says-nema.html",
+		"url": "https://www.premiumtimesng.com/business/business-news/800867-mrs-oil-nigeria-announces-resignation-of-non-executive-director.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Over 6,000 displaced in renewed Benue attacks, says NEMA",
+				"title": "MRS Oil Nigeria announces resignation of non-executive director",
 				"creators": [
 					{
-						"firstName": "Yakubu",
-						"lastName": "Mohammed",
+						"firstName": "Ayodeji",
+						"lastName": "Adegboyega",
 						"creatorType": "author"
 					}
 				],
-				"date": "2025-06-16T18:20:53+00:00",
+				"date": "2025-06-14T17:20:21+00:00",
 				"ISSN": "2360-7688",
-				"abstractNote": "NEMA says more than 3,000 displaced persons including children and women were in urgent need of food, non-food items, potable water, and essential medical supplies.",
+				"abstractNote": "“Over the years, she spearheaded numerous strategic initiatives and led teams through critical milestones.”",
 				"language": "en-GB",
 				"libraryCatalog": "Premium Times",
 				"place": "Nigeria",
 				"publicationTitle": "Premium Times",
-				"url": "https://www.premiumtimesng.com/news/headlines/801229-over-6000-displaced-in-renewed-benue-attacks-says-nema.html",
+				"url": "https://www.premiumtimesng.com/business/business-news/800867-mrs-oil-nigeria-announces-resignation-of-non-executive-director.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
