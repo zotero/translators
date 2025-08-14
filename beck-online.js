@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-11 15:41:33"
+	"lastUpdated": "2025-07-09 13:33:45"
 }
 
 /*
@@ -588,7 +588,7 @@ function finalize(doc, url, item) {
 		document: doc
 	}];
 	
-	var perma = ZU.xpathText(doc, '//div[@class="doc-link"]/a/@href');
+	var perma = attr(doc, '.doc-link > a', 'href');
 	if (perma) {
 		// not clear that this case ever comes up - permalinks appear always
 		// to be relative now. but just in case it's absolute, we want to strip
@@ -607,11 +607,12 @@ function finalize(doc, url, item) {
 		
 		item.url = perma;
 	}
+	else {
+		item.url = url;
+	}
 	
 	item.complete();
 }
-
-
 
 /** BEGIN TEST CASES **/
 var testCases = [

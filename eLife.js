@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-05 10:52:52"
+	"lastUpdated": "2025-07-10 18:26:20"
 }
 
 /*
@@ -84,7 +84,7 @@ function doWeb(doc, url) {
 
 
 function scrape(doc, url) {
-	var risURL = url.replace(/[#?].+/, "") + ".ris";
+	var risURL = url.replace(/[#?].+/, "").replace(/v\d+$/, '') + ".ris";
 	var pdfURL = attr(doc, '.article-download-list a', 'href');
 	// Z.debug("pdfURL: " + pdfURL);
 	ZU.doGet(risURL, function(text) {
@@ -104,6 +104,7 @@ function scrape(doc, url) {
 		translator.translate();
 	});
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
