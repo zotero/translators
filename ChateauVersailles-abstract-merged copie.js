@@ -15,7 +15,7 @@
 
 {
 	"translatorID": "7ae64474-9f23-4d2c-9995-dfe8c5010c4b",
-	"label": "Château de Versailles",
+	"label": "ChateauVersailles",
 	"creator": "OpenAI / Alexandre MENISSEZ",
 	"target": "^https://collections\\.chateauversailles\\.fr/\\#/query/.*",
 	"minVersion": "3.0",
