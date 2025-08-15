@@ -1,21 +1,21 @@
 {
 	"translatorID": "51e5355d-9974-484f-80b9-f84d2b55782e",
 	"label": "Wikidata QuickStatements",
-	"creator": "Philipp Zumstein",
+	"creator": "Philipp Zumstein with contributors",
 	"target": "txt",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2022-12-08 23:00:00"
+	"lastUpdated": "2025-08-11 00:00:00"
 }
 
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017 Philipp Zumstein
+	Copyright © 2017-2025 Philipp Zumstein with contributors
 
 	This file is part of Zotero.
 
@@ -148,7 +148,11 @@ var identifierMapping = {
 	"Open Library ID": "P648",
 	OCLC: "P243",
 	"IMDb ID": "P345",
-	"Google-Books-ID": "P675"
+	"Google-Books-ID": "P675",
+	OpenAlex: "P10283",
+	CorpusID: "P8299",
+	WOS: "P8372",
+	MAG: "P6366"
 };
 
 
@@ -191,6 +195,18 @@ function zoteroItemToQuickStatements(item) {
 	});
 	if (item.publicationTitle && (itemType == "journalArticle" || itemType == "magazineArticle" || itemType == "newspaperArticle")) {
 		description = description + ' from \'' + item.publicationTitle + '\'';
+	}
+	if (item.proceedingsTitle && (itemType == "conferencePaper")) {
+		description = description + ' from \'' + item.proceedingsTitle + '\'';
+	}
+	if (item.bookTitle && (itemType == "bookSection")) {
+		description = description + ' from \'' + item.bookTitle + '\'';
+	}
+	if (item.encyclopediaTitle && (itemType == "encyclopediaArticle")) {
+		description = description + ' from \'' + item.encyclopediaTitle + '\'';
+	}
+	if (item.university && (itemType == "thesis")) {
+		description = description + ' from \'' + item.university + '\'';
 	}
 	if (item.date) {
 		var year = ZU.strToDate(item.date).year;
@@ -256,6 +272,8 @@ function zoteroItemToQuickStatements(item) {
 			addStatement('P957', '"' + item.ISBN + '"');
 		}
 	}
+
+	addStatement('Lmul', '"' + item.title + '"');
 
 	if (item.language && (item.language.toLowerCase() in languageMapping)) {
 		let lang = item.language.toLowerCase();
