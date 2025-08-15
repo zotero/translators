@@ -22,20 +22,18 @@ async function getTranslatorsToTest() {
 		toTestTranslatorIDs.add(translatorInfo.translatorID);
 		toTestTranslatorNames.add(translatorInfo.label);
 	}
+
 	// Find all translators that use the changed translators and add them to list/check them too
+	let changedTranslatorIDRe = new RegExp(changedTranslatorIDs.join('|'));
 	let tooManyTranslators = false;
 	for (let translator of translatorServer.translators) {
-		for (let translatorID of changedTranslatorIDs) {
-			if (!translator.content.includes(translatorID)) continue;
-
-			toTestTranslatorIDs.add(translator.metadata.translatorID);
-			toTestTranslatorNames.add(translator.metadata.label);
-			if (toTestTranslatorIDs.size >= 10) {
-				tooManyTranslators = true;
-				break;
-			}
+		if (!changedTranslatorIDRe.test(translator.content)) continue;
+		toTestTranslatorIDs.add(translator.metadata.translatorID);
+		toTestTranslatorNames.add(translator.metadata.label);
+		if (toTestTranslatorIDs.size >= 10) {
+			tooManyTranslators = true;
+			break;
 		}
-		if (tooManyTranslators) break;
 	}
 	if (tooManyTranslators) {
 		console.log(
