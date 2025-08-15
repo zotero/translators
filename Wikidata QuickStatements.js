@@ -273,10 +273,11 @@ function zoteroItemToQuickStatements(item) {
 		}
 	}
 
+	addStatement('Lmul', '"' + item.title + '"');
+
 	if (item.language && (item.language.toLowerCase() in languageMapping)) {
 		let lang = item.language.toLowerCase();
 		addStatement('L' + lang, '"' + item.title + '"');
-		addStatement('Lmul', '"' + item.title + '"');
 		addStatement('P1476', lang + ':"' + item.title + '"');
 		addStatement('P407', languageMapping[lang]);
 	}
