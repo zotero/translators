@@ -1,15 +1,12 @@
-#!/usr/bin/env node
+import chalk from 'chalk';
+import path from 'path';
+import process from 'process';
+import { Builder, By } from 'selenium-webdriver';
+import * as chrome from 'selenium-webdriver/chrome.js';
+import * as until from 'selenium-webdriver/lib/until.js';
+import * as translatorServer from './translator-server.mjs';
 
-const path = require('path');
-const process = require('process');
-const { Builder, By } = require('selenium-webdriver');
-const chrome = require('selenium-webdriver/chrome');
-const until = require('selenium-webdriver/lib/until');
-const chalk = require('chalk');
-
-const translatorServer = require('./translator-server');
-
-const chromeExtensionDir = path.join(__dirname, 'connectors', 'build', 'manifestv3');
+const chromeExtensionDir = path.join(import.meta.dirname, 'connectors', 'build', 'manifestv3');
 const KEEP_BROWSER_OPEN = 'KEEP_BROWSER_OPEN' in process.env;
 const CI = 'CI' in process.env;
 const ZOTERO_CONNECTOR_EXTENSION_ID = 'ekhagklcjbdpajgpjgmbionohlpdbjgc';
@@ -92,56 +89,54 @@ function report(results) {
 
 var allPassed = false;
 
-(async function() {
-	let driver;
-	try {
-		await translatorServer.serve();
+let driver;
+try {
+	await translatorServer.serve();
 
-		let options = new chrome.Options();
-		options.addArguments('--disable-features=DisableLoadExtensionCommandLineSwitch');
-		options.addArguments(`load-extension=${chromeExtensionDir}`);
-		if (CI) {
-			options.addArguments('headless=new');
-		}
-		if ('BROWSER_EXECUTABLE' in process.env) {
-			console.log(`Using BROWSER_EXECUTABLE=${process.env['BROWSER_EXECUTABLE']}`);
-			options.setChromeBinaryPath(process.env['BROWSER_EXECUTABLE']);
-		}
-
-		driver = await new Builder()
-			.forBrowser('chrome')
-			.setChromeOptions(options)
-			.build();
-
-		const translatorsToTest = await getTranslatorsToTest();
-		await new Promise(resolve => setTimeout(resolve, 500));
-		
-		let testUrl = `chrome-extension://${ZOTERO_CONNECTOR_EXTENSION_ID}/tools/testTranslators/testTranslators.html#translators=${translatorsToTest.join(',')}`;
-		await driver.get(testUrl);
-
-		if ((await driver.getTitle()).trim() !== 'Zotero Translator Tester') {
-			console.error('Failed to load Translator Tester extension page');
-			return;
-		}
-
-		await driver.wait(until.elementLocated(By.id('translator-tests-complete')), 5 * 60 * 1000);
-		testResults = await driver.executeScript('return window.seleniumOutput');
-
-		allPassed = report(testResults);
+	let options = new chrome.Options();
+	options.addArguments('--disable-features=DisableLoadExtensionCommandLineSwitch');
+	options.addArguments(`load-extension=${chromeExtensionDir}`);
+	if (CI) {
+		options.addArguments('headless=new');
 	}
-	catch (e) {
-		console.error(e);
+	if ('BROWSER_EXECUTABLE' in process.env) {
+		console.log(`Using BROWSER_EXECUTABLE=${process.env['BROWSER_EXECUTABLE']}`);
+		options.setChromeBinaryPath(process.env['BROWSER_EXECUTABLE']);
 	}
-	finally {
-		if (!KEEP_BROWSER_OPEN) {
-			await driver.quit();
-		}
-		translatorServer.stopServing();
-		if (allPassed) {
-			console.log(chalk.green("All translator tests passed"));
-		} else {
-			console.log(chalk.red("Some translator tests failed"));
-		}
-		process.exit(allPassed ? 0 : 1);
+
+	driver = await new Builder()
+		.forBrowser('chrome')
+		.setChromeOptions(options)
+		.build();
+
+	const translatorsToTest = await getTranslatorsToTest();
+	await new Promise(resolve => setTimeout(resolve, 500));
+
+	let testUrl = `chrome-extension://${ZOTERO_CONNECTOR_EXTENSION_ID}/tools/testTranslators/testTranslators.html#translators=${translatorsToTest.join(',')}`;
+	await driver.get(testUrl);
+
+	if ((await driver.getTitle()).trim() !== 'Zotero Translator Tester') {
+		console.error('Failed to load Translator Tester extension page');
+		process.exit(2);
 	}
-})();
+
+	await driver.wait(until.elementLocated(By.id('translator-tests-complete')), 5 * 60 * 1000);
+
+	let testResults = await driver.executeScript('return window.seleniumOutput');
+	allPassed = report(testResults);
+}
+catch (e) {
+	console.error(e);
+}
+finally {
+	if (!KEEP_BROWSER_OPEN) {
+		await driver.quit();
+	}
+	translatorServer.stopServing();
+	if (allPassed) {
+		console.log(chalk.green("All translator tests passed"));
+	} else {
+		console.log(chalk.red("Some translator tests failed"));
+	}
+	process.exit(allPassed ? 0 : 1);
+}
