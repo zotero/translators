@@ -17,10 +17,30 @@ async function getTranslatorsToTest() {
 	let toTestTranslatorIDs = new Set();
 	let toTestTranslatorNames = new Set();
 	for (const translatorFilename of translatorFilenames) {
-		let translatorInfo = translatorServer.filenameToTranslator[translatorFilename].metadata;
-		changedTranslatorIDs.push(translatorInfo.translatorID);
-		toTestTranslatorIDs.add(translatorInfo.translatorID);
-		toTestTranslatorNames.add(translatorInfo.label);
+		let translator = translatorServer.filenameToTranslator[translatorFilename];
+		if (!translator) {
+			console.error(chalk.yellow(`Translator '${translatorFilename}' not found`));
+			continue;
+		}
+		else if (translator.metadata === null) {
+			console.error(chalk.red(`
+Translator '${translatorFilename}' is not correctly formatted.
+
+Please use Scaffold (Tools → Translator Editor) to create translators, and test
+that your translator works before opening a PR.
+
+AI tools may help with drafting code to add to your translator, but you should
+never use an AI tool to generate its overall structure without using Scaffold
+first. LLMs have very little Zotero translator code in their training sets and
+generally fail to generate translator code with a valid layout (or even a real
+UUID).
+				`.trim()));
+			continue;
+		}
+		let metadata = translator.metadata;
+		changedTranslatorIDs.push(metadata.translatorID);
+		toTestTranslatorIDs.add(metadata.translatorID);
+		toTestTranslatorNames.add(metadata.label);
 	}
 
 	// Find all translators that use the changed translators and add them to list/check them too

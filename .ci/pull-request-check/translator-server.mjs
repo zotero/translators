@@ -19,11 +19,17 @@ async function loadTranslators() {
 			const fullPath = path.join(rootPath, file);
 			if (!fullPath.endsWith('.js') || !(await fs.stat(fullPath)).isFile()) continue;
 			let content = await fs.readFile(fullPath);
-			let translatorInfo = JSON.parse(infoRe.exec(content)[0]);
-			let translator = { metadata: translatorInfo, content };
+			let translator;
+			try {
+				let translatorInfo = JSON.parse(infoRe.exec(content)[0]);
+				translator = { metadata: translatorInfo, content };
+				idToTranslator[translatorInfo.translatorID] = translator;
+			}
+			catch (e) {
+				translator = { metadata: null, content };
+			}
 			translators.push(translator);
 			filenameToTranslator[file] = translator;
-			idToTranslator[translatorInfo.translatorID] = translator;
 		}
 	}
 }
