@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-08-18 17:09:30"
+	"lastUpdated": "2025-08-18 17:12:57"
 }
 
 /*
@@ -41,12 +41,7 @@
 const SEARCH_RE = /\/(?<qid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?:-[0-9a-f]+)?)\/(?:[0-9a-f-]+\/)?(?<sortBy>[^#?/]+)/;
 
 function detectWeb(doc, url) {
-	if (url.includes('/full-record/') && getItemID(url)) {
-		if (!doc.querySelector('app-full-record-export-option')) {
-			// Unauthenticated - export will fail
-			return false;
-		}
-
+	if (url.includes('/full-record/') && getItemID(url) && doc.querySelector('app-full-record-export-option')) {
 		let docType = text(doc, '#FullRTa-doctype-0').trim().toLowerCase();
 		if (docType == 'proceedings paper') {
 			return "conferencePaper";
