@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-06 20:15:05"
+	"lastUpdated": "2025-08-18 17:09:30"
 }
 
 /*
@@ -36,12 +36,17 @@
 */
 
 
-// These always seem to take the form `/wos/woscc/summary/<qid>/<sortBy>/[...]`,
+// These always seem to take the form `/wos/woscc/summary/<qid>/[<unused id>/]<sortBy>/[...]`,
 // but we'll be tolerant
-const SEARCH_RE = /\/wos\/[^/]+\/[^/]+\/((?:[a-z0-9]+-)+[a-z0-9]+)\/([^/?#]+)/;
+const SEARCH_RE = /\/(?<qid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?:-[0-9a-f]+)?)\/(?:[0-9a-f-]+\/)?(?<sortBy>[^#?/]+)/;
 
 function detectWeb(doc, url) {
 	if (url.includes('/full-record/') && getItemID(url)) {
+		if (!doc.querySelector('app-full-record-export-option')) {
+			// Unauthenticated - export will fail
+			return false;
+		}
+
 		let docType = text(doc, '#FullRTa-doctype-0').trim().toLowerCase();
 		if (docType == 'proceedings paper') {
 			return "conferencePaper";
@@ -52,7 +57,7 @@ function detectWeb(doc, url) {
 		else if (docType == "data set") {
 			return "dataset";
 		}
-		else if (text(doc, '#FullRTa-patentNumber-0')) {
+		else if (text(doc, '#FullRTa-patentNumber-0, #FullRTa-assigneeName-0')) {
 			return "patent";
 		}
 		else {
@@ -72,6 +77,8 @@ function detectWeb(doc, url) {
 // URLs from the DOM
 async function getSearchResultsLazy(doc, url) {
 	let [, qid, sortBy] = url.match(SEARCH_RE);
+	Z.debug('Export params:');
+	Z.debug({ qid, sortBy });
 	let markFrom = parseInt(text(doc, 'app-records-list > app-record .mat-checkbox-label'));
 	if (isNaN(markFrom)) {
 		markFrom = 1;
@@ -87,20 +94,20 @@ async function getSearchResultsLazy(doc, url) {
 			'X-1P-WOS-SID': await getSessionID(doc)
 		},
 		body: JSON.stringify({
-			parentQid: qid,
-			sortBy,
-			displayTimesCited: 'true',
-			displayCitedRefs: 'true',
-			product: 'UA',
+			action: 'saveToFieldTagged',
 			colName: 'WOS',
+			displayCitedRefs: 'true',
+			displayTimesCited: 'true',
 			displayUsageInfo: 'true',
 			fileOpt: 'othersoftware',
-			action: 'saveToFieldTagged',
+			filters: 'fullRecord',
+			isRefQuery: 'false',
 			markFrom: String(markFrom),
 			markTo: String(markTo),
-			view: 'fullrec',
-			isRefQuery: 'false',
-			filters: 'fullRecord'
+			parentQid: qid,
+			product: 'UA',
+			sortBy,
+			view: 'summary',
 		})
 	});
 	let trans = Zotero.loadTranslator('import');
@@ -128,26 +135,28 @@ function getSearchResults(doc, checkOnly) {
 }
 
 async function doWeb(doc, url) {
-	// If it's a lazy-loaded search page, use getSearchResultsLazy(),
-	// which returns full items
-	if (doc.querySelector('app-records-list > app-record') && SEARCH_RE.test(url)) {
-		let items = await getSearchResultsLazy(doc, url);
-		let filteredItems = await Zotero.selectItems(
-			Object.fromEntries(items.entries())
-		);
-		if (!filteredItems) return;
-		for (let i of Object.keys(filteredItems)) {
-			let item = items[i];
-			applyFixes(item);
-			item.complete();
+	if (detectWeb(doc, url) == 'multiple') {
+		// If it's a lazy-loaded search page, use getSearchResultsLazy(),
+		// which returns full items
+		if (doc.querySelector('app-records-list > app-record') && SEARCH_RE.test(url)) {
+			let items = await getSearchResultsLazy(doc, url);
+			let filteredItems = await Zotero.selectItems(
+				Object.fromEntries(items.entries())
+			);
+			if (!filteredItems) return;
+			for (let i of Object.keys(filteredItems)) {
+				let item = items[i];
+				applyFixes(item);
+				item.complete();
+			}
 		}
-	}
-	// Otherwise, use getSearchResults(), which returns URLs
-	else if (getSearchResults(doc, true)) {
-		let items = await Zotero.selectItems(getSearchResults(doc, false));
-		if (!items) return;
-		for (let url of Object.keys(items)) {
-			await scrape(await requestDocument(url));
+		// Otherwise, use getSearchResults(), which returns URLs
+		else {
+			let items = await Zotero.selectItems(getSearchResults(doc, false));
+			if (!items) return;
+			for (let url of Object.keys(items)) {
+				await scrape(await requestDocument(url));
+			}
 		}
 	}
 	else {
@@ -183,7 +192,7 @@ async function scrape(doc, url = doc.location.href) {
 	let sessionID = await getSessionID(doc);
 	let postData = {
 		action: 'saveToFieldTagged',
-		colName: 'WOS',
+		colName: id.split(':')[0] || 'WOS',
 		displayCitedRefs: 'true',
 		displayTimesCited: 'true',
 		displayUsageInfo: 'true',
@@ -232,6 +241,13 @@ async function getSessionID(doc) {
 }
 
 async function resolveGateway(gatewayURL) {
+	if (gatewayURL.includes('/api/gateway?')) {
+		let url = new URL(gatewayURL);
+		if (url.searchParams.get('DestApp') == 'DOI') {
+			// Just a DOI redirect
+			return '';
+		}
+	}
 	// TODO: Just use request() once we have responseURL and followRedirects
 	let doc = await requestDocument(gatewayURL);
 	return doc.location.href;
@@ -240,6 +256,10 @@ async function resolveGateway(gatewayURL) {
 function applyFixes(item) {
 	if (item.title.toUpperCase() == item.title) {
 		item.title = ZU.capitalizeTitle(item.title, true);
+	}
+
+	if (item.publicationTitle && item.publicationTitle.toUpperCase() == item.publicationTitle) {
+		item.publicationTitle = ZU.capitalizeTitle(item.publicationTitle, true);
 	}
 	
 	for (let creator of item.creators) {
@@ -257,6 +277,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.webofscience.com/wos/woscc/full-record/WOS:000454372400003",
+		"defer": 2,
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -275,16 +296,15 @@ var testCases = [
 				],
 				"date": "FEB 2019",
 				"DOI": "10.1016/j.cld.2018.09.001",
-				"ISSN": "1089-3261",
+				"ISSN": "1089-3261, 1557-8224",
 				"abstractNote": "Excessive alcohol consumption can lead to a spectrum of liver histopathology, including steatosis, steatohepatitis, foamy degeneration, fatty liver with cholestasis, and cirrhosis. Although variability in sampling and pathologist interpretation are of some concern, liver biopsy remains the gold standard for distinguishing between steatohepatitis and noninflammatory histologic patterns of injury that can also cause the clinical syndrome of alcohol-related hepatitis. Liver biopsy is not routinely recommended to ascertain a diagnosis of alcohol-related liver disease in patients with an uncertain alcohol history, because the histologic features of alcohol-related liver diseases can be found in other diseases, including nonalcoholic steatohepatitis and drug-induced liver injury.",
-				"extra": "WOS:000454372400003",
+				"extra": "Web of Science ID: WOS:000454372400003",
 				"issue": "1",
 				"journalAbbreviation": "Clin. Liver Dis.",
 				"language": "English",
-				"libraryCatalog": "Web of Science Nextgen",
+				"libraryCatalog": "Clarivate Analytics Web of Science",
 				"pages": "11-+",
 				"publicationTitle": "Clinics in Liver Disease",
-				"url": "https://www.webofscience.com/wos/woscc/full-record/WOS:000454372400003",
 				"volume": "23",
 				"attachments": [],
 				"tags": [
@@ -292,10 +312,7 @@ var testCases = [
 						"tag": "Alcohol-related liver disease"
 					},
 					{
-						"tag": "Alcoholic   steatohepatitis"
-					},
-					{
-						"tag": "Alcoholic fatty liver   with cholestasis"
+						"tag": "Alcoholic fatty liver with cholestasis"
 					},
 					{
 						"tag": "Alcoholic foamy degeneration"
@@ -304,40 +321,43 @@ var testCases = [
 						"tag": "Alcoholic hepatitis"
 					},
 					{
+						"tag": "Alcoholic steatohepatitis"
+					},
+					{
+						"tag": "BIOPSY"
+					},
+					{
+						"tag": "CLINICAL-TRIALS"
+					},
+					{
+						"tag": "DIAGNOSIS"
+					},
+					{
+						"tag": "FAILURE"
+					},
+					{
+						"tag": "FATTY LIVER"
+					},
+					{
+						"tag": "FOAMY DEGENERATION"
+					},
+					{
 						"tag": "Histology"
 					},
 					{
 						"tag": "Liver biopsy"
 					},
 					{
-						"tag": "biopsy"
+						"tag": "PROGNOSIS"
 					},
 					{
-						"tag": "clinical-trials"
+						"tag": "SAMPLING VARIABILITY"
 					},
 					{
-						"tag": "diagnosis"
+						"tag": "SCORING SYSTEM"
 					},
 					{
-						"tag": "failure"
-					},
-					{
-						"tag": "fatty liver"
-					},
-					{
-						"tag": "foamy degeneration"
-					},
-					{
-						"tag": "prognosis"
-					},
-					{
-						"tag": "sampling variability"
-					},
-					{
-						"tag": "scoring system"
-					},
-					{
-						"tag": "steatohepatitis"
+						"tag": "STEATOHEPATITIS"
 					}
 				],
 				"notes": [],
@@ -348,6 +368,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.webofscience.com/wos/woscc/full-record/WOS:A1957WH65000008",
+		"defer": 2,
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -361,15 +382,14 @@ var testCases = [
 				],
 				"date": "1957",
 				"DOI": "10.1103/RevModPhys.29.205",
-				"ISSN": "0034-6861",
-				"extra": "WOS:A1957WH65000008",
+				"ISSN": "0034-6861, 1539-0756",
+				"extra": "Web of Science ID: WOS:A1957WH65000008",
 				"issue": "2",
 				"journalAbbreviation": "Rev. Mod. Phys.",
 				"language": "English",
-				"libraryCatalog": "Web of Science Nextgen",
+				"libraryCatalog": "Clarivate Analytics Web of Science",
 				"pages": "205-212",
 				"publicationTitle": "Reviews of Modern Physics",
-				"url": "https://journals.aps.org/rmp/abstract/10.1103/RevModPhys.29.205",
 				"volume": "29",
 				"attachments": [],
 				"tags": [],
@@ -402,18 +422,18 @@ var testCases = [
 				"date": "2005",
 				"DOI": "10.1109/ICACT.2005.245926",
 				"abstractNote": "Increased speeds of PCs and networks have made video conferencing systems possible in Internet. The proposed conference control protocol suits small scale video conferencing systems which employ full mesh conferencing architecture and loosely coupled conferencing mode. The protocol can ensure the number of conference member is less than the maximum value. Instant message services are used to do member authentication and notification. The protocol is verified in 32 concurrent conferencing scenarios and implemented in DigiParty which is a small scale video conferencing add-in application for MSN Messenger.",
-				"extra": "WOS:000230445900101",
+				"conferenceName": "7th International Conference on Advanced Communication Technology",
+				"extra": "Web of Science ID: WOS:000230445900101",
 				"language": "English",
-				"libraryCatalog": "Web of Science Nextgen",
+				"libraryCatalog": "Clarivate Analytics Web of Science",
 				"pages": "532-537",
 				"place": "New York",
 				"proceedingsTitle": "7th International Conference on Advanced Communication Technology, Vols 1 and 2, Proceedings",
-				"publisher": "Ieee",
-				"url": "https://ieeexplore.ieee.org/document/1461931/",
+				"publisher": "IEEE",
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "conference control   protocol"
+						"tag": "conference control protocol"
 					},
 					{
 						"tag": "full mesh"
@@ -433,15 +453,116 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.webofscience.com/wos/alldb/full-record/DIIDW:202205717D",
+		"defer": 2,
 		"items": [
 			{
 				"itemType": "patent",
-				"title": "Preparing fibrous distillation membrane useful for anti-scaling pleated membrane distillation comprises preparing super-hydrophobic layer casting film liquid and base film by electrostatic spinning, spraying, cutting, and heating",
-				"creators": [],
-				"language": "English",
-				"url": "https://www.webofscience.com/wos/alldb/full-record/DIIDW:202205717D",
+				"title": "Preparing fibrous distillation membrane useful for anti-scaling pleated membrane distillation comprises preparing super-hydrophobic layer casting film liquid and base film by electrostatic spinning, spraying, cutting, and heating.",
+				"creators": [
+					{
+						"firstName": "G.",
+						"lastName": "Tan",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "X.",
+						"lastName": "Tan",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "D.",
+						"lastName": "Lei",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "Z.",
+						"lastName": "Zhu",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "Q.",
+						"lastName": "Yang",
+						"creatorType": "inventor"
+					}
+				],
+				"issueDate": "CN113750805-A 07 Dec 2021 B01D-061/36 202211 Chinese",
+				"abstractNote": "NOVELTY - Preparing fibrous distillation membrane comprises (i) adding polymer and hydrophobic additive into solvent under the condition of 80&#176;C in water bath, heating and stirring for 2 hours to obtain base film casting film liquid; (ii) adding polymer and hydrophobic additive into solvent, heating and stirring at 80&#176;C for 2 hours to obtain super-hydrophobic layer casting film liquid; and (iii) preparing base film by electrostatic spinning, spraying the super-hydrophobic layer on basis of base film by electrostatic spraying to obtain double-layer film with a super-hydrophobic, cutting the size about 7*7 cm double-layer film into oven, heating for 1 hour under the condition of 130&#176;C. USE - The method is useful for preparing fibrous distillation membrane useful for anti-scaling pleated membrane distillation.",
+				"assignee": "Univ Nanjing Sci & Technology (unsc-C)",
+				"extra": "Web of Science ID: DIIDW:202205717D",
+				"patentNumber": "CN113750805-A",
+				"place": "CN11154664 29 Sep 2021",
 				"attachments": [],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "A04-E10B"
+					},
+					{
+						"tag": "A04-E10D"
+					},
+					{
+						"tag": "A08-S02"
+					},
+					{
+						"tag": "A08-S08"
+					},
+					{
+						"tag": "A10-E04A"
+					},
+					{
+						"tag": "A11-A05C"
+					},
+					{
+						"tag": "A11-B04C"
+					},
+					{
+						"tag": "A11-B15"
+					},
+					{
+						"tag": "A12-S05L"
+					},
+					{
+						"tag": "A12-S05R"
+					},
+					{
+						"tag": "A12-W11A"
+					},
+					{
+						"tag": "A12-W11J"
+					},
+					{
+						"tag": "B01D-061/36"
+					},
+					{
+						"tag": "B01D-067/00"
+					},
+					{
+						"tag": "B01D-069/12"
+					},
+					{
+						"tag": "C02F-001/44"
+					},
+					{
+						"tag": "C02F-103/08"
+					},
+					{
+						"tag": "D04-A01A"
+					},
+					{
+						"tag": "D04-A01E"
+					},
+					{
+						"tag": "D04-A01P1"
+					},
+					{
+						"tag": "D04-A03A"
+					},
+					{
+						"tag": "D04-B07F"
+					},
+					{
+						"tag": "X25-H03"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -450,6 +571,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://webofscience.clarivate.cn/wos/alldb/full-record/WOS:000454372400003",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -476,8 +598,7 @@ var testCases = [
 				"language": "English",
 				"libraryCatalog": "Clarivate Analytics Web of Science",
 				"pages": "11-+",
-				"publicationTitle": "CLINICS IN LIVER DISEASE",
-				"url": "https://linkinghub.elsevier.com/retrieve/pii/S1089326118300771",
+				"publicationTitle": "Clinics in Liver Disease",
 				"volume": "23",
 				"attachments": [],
 				"tags": [
@@ -541,6 +662,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.webofscience.com/wos/woscc/full-record/WOS:001308642000003",
+		"defer": 2,
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -566,8 +688,7 @@ var testCases = [
 				"language": "English",
 				"libraryCatalog": "Clarivate Analytics Web of Science",
 				"pages": "230-246",
-				"publicationTitle": "JOURNAL OF ECONOMICS AND DEVELOPMENT",
-				"url": "https://www.webofscience.com/wos/woscc/full-record/WOS:001308642000003",
+				"publicationTitle": "Journal of Economics and Development",
 				"volume": "24",
 				"attachments": [],
 				"tags": [
@@ -616,6 +737,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.webofscience.com/wos/alldb/full-record/DRCI:DATA2020263019547537",
+		"defer": 2,
 		"items": [
 			{
 				"itemType": "dataset",
@@ -700,7 +822,7 @@ var testCases = [
 				"date": "2016",
 				"DOI": "10.1594/PANGAEA.868399",
 				"abstractNote": "High quality meteorological data are needed for long-term forest ecosystem research, particularly in the light of global change. The long-term data series published here comprises almost 20 years of two meteorological stations in Bettlachstock in Switzerland where one station is located within a natural mixed forest stand (BTB) with European beech (Fagus sylvatica; 170-190 yrs), European silver fir (Abies alba; 190yrs) and Norway spruce (Picea abies; 200 yrs) as dominant tree species. A second station is situated in the very vicinity outside of the forest (field station, BTF). The meteorological time series are presented in hourly time resolution of air temperature, relative humidity, precipitation, photosynthetically active radiation (PAR), and wind speed. Bettlachstock is part of the Long-term Forest Ecosystem research Programme (LWF) established and maintained by the Swiss Federal Research Institute WSL. For more information see PDF under 'Further Details'. Copyright: CC-BY-3.0 Creative Commons Attribution 3.0 Unported",
-				"extra": "Web of Science ID:",
+				"extra": "Web of Science ID: DRCI:DATA2020263019547537",
 				"language": "English",
 				"libraryCatalog": "Clarivate Analytics Web of Science",
 				"shortTitle": "Bettlachstock, Switzerland (field station)",
