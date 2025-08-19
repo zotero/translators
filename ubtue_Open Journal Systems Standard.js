@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-06-04 07:42:30"
+	"lastUpdated": "2025-08-19 15:08:11"
 }
 
 /*
@@ -227,10 +227,16 @@ function joinTitleAndSubtitle (doc, item) {
 	}
 
 	if (item.ISSN == '2961-6492') {
-        let subtitle = ZU.xpathText(doc, '//h1[@class="page_title"]//following-sibling::h2[@class="subtitle"]')?.trim();
+		let subtitle = ZU.xpathText(doc, '//h1[@class="page_title"]//following-sibling::h2[@class="subtitle"]')?.trim();
 		if (subtitle) {
-		    item.title = item.title + (item.title.slice(-1) == ':' ? '' : ': ') + subtitle;
+			item.title = item.title + (item.title.slice(-1) == ':' ? '' : ': ') + subtitle;
 		}
+	}
+
+	if (item.ISSN == '2616-1591') {
+		let subtitleCandidate = ZU.xpathText(doc, '//h2[@class="subtitle"]')?.trim();
+		if (subtitleCandidate && !item.title.toLowerCase().includes(subtitleCandidate))
+		    item.title = item.title + ' ' + subtitleCandidate;
 	}
 
 	let subtitle = ZU.xpathText(doc, '//article[@class="article-details"]/header/h2/small')
