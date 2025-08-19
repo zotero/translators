@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-19 11:08:58"
+	"lastUpdated": "2025-08-19 14:31:02"
 }
 
 /*
@@ -151,6 +151,14 @@ function scrape(doc) {
 			ris_translator.translate();
 
 		});
+
+		// Issue is missing in the metadata e.g. for 2153-9650
+		if (!item.issue) {
+			designation = ZU.xpathText(doc, '//*[@class="designation"]');
+			let issueMatch = /(?:Number\s+)(?<issue>\d+)/i;
+			item.issue = issueMatch.exec(designation)?.groups?.issue;
+		}
+
 		item.date = ZU.xpathText(doc, '//meta[@name="citation_year"]/@content');
 	});
 	translator.translate();
