@@ -55,7 +55,7 @@ function detectLanguageFromText(text) {
 async function scrape(doc, url) {
 	const item = new Zotero.Item("newspaperArticle");
 
-	if (url.includes("/article/")) {
+	if (url.includes("/article/")) { // If article is an article and not just a page
 		// Title
 		const titleNode = doc.querySelector("#sectionleveltabtitlearea h2");
 		if (titleNode) item.title = titleNode.textContent.trim();
@@ -74,6 +74,13 @@ async function scrape(doc, url) {
 		// Language detection
 		const sampleText = paragraphs.join(" ").slice(0, 1000); // Analyze first 1000 characters
 		item.language = detectLanguageFromText(sampleText);
+
+		// Page number
+		const pageLabel = doc.querySelector('span.pagelabel.current b');
+		if (pageLabel) {
+			const split = pageLabel.textContent.split(" ");
+			item.pages = split[1];
+		}
 	}
 
 	// Date from <title>
@@ -95,20 +102,13 @@ async function scrape(doc, url) {
 		}
 	}
 
-	if (url.includes("/page/")) {
+	if (url.includes("/page/")) { // If article is just a page
 		const match = url.match(/\/page\/(\d+)(?:\/|$)/);
 		if (match) {
 			item.pages = match[1];
 		}
 		item.title = item.publicationTitle + ", " + item.date;
 		item.url = url.split('?')[0].split('#')[0]; // No persistent link, just the original URL
-	}
-	else {
-		const pageLabel = doc.querySelector('span.pagelabel.current b');
-		if (pageLabel) {
-			const split = pageLabel.textContent.split(" ");
-			item.pages = split[1];
-		}
 	}
 
 	item.libraryCatalog = "National Library of Israel";
