@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2022-12-08 23:00:00"
+	"lastUpdated": "2023-01-01 02:56:00"
 }
 
 
@@ -148,7 +148,8 @@ var identifierMapping = {
 	"Open Library ID": "P648",
 	OCLC: "P243",
 	"IMDb ID": "P345",
-	"Google-Books-ID": "P675"
+	"Google-Books-ID": "P675",
+	"HAL ID": "P7864"
 };
 
 
