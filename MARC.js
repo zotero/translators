@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2024-03-15 21:14:09"
+	"lastUpdated": "2025-03-28 15:43:42"
 }
 
 /*
@@ -344,9 +344,11 @@ record.prototype._associateTags = function (item, fieldNo, part) {
 
 // this function loads a MARC record into our database
 record.prototype.translate = function (item) {
-	// get item type
-	if (this.leader) {
-		var marcType = this.leader.substr(6, 1);
+	// Set item type if it does not already exist.
+	// This is because some translators (e.g. TIND ILS) have non-MARC ways to determine item type,
+	// but the MARC translator can return incorrect results for the creators if the item type is book.
+	if (!item.itemType && this.leader) {
+		let marcType = this.leader.substr(6, 1);
 		if (marcType == "g") {
 			item.itemType = "film";
 		}
@@ -363,11 +365,8 @@ record.prototype.translate = function (item) {
 			// 20091210: in unimarc, the code for manuscript is b, unused in marc21.
 			item.itemType = "manuscript";
 		}
-		else {
-			item.itemType = "book";
-		}
 	}
-	else {
+	if (!item.itemType) {
 		item.itemType = "book";
 	}
 
@@ -516,36 +515,44 @@ record.prototype.translate = function (item) {
 			trl: "translator"
 		};
 
-		var creatorFields = ["100", "110", "700", "710"];// "111", "711" are meeting name
-		for (let i = 0; i < creatorFields.length; i++) {
-			var authorTab = this.getFieldSubfields(creatorFields[i]);
-			for (let j in authorTab) {
-				if (authorTab[j]['4'] && RELATERM[authorTab[j]['4']] && RELATERM[authorTab[j]['4']] == "SKIP") {
+		let creatorFields = ["100", "110", "700", "710", "720"];// "111", "711" are meeting name
+		for (let tag of creatorFields) {
+			let authorTab = this.getFieldSubfields(tag);
+			for (let authorField of Object.values(authorTab)) {
+				// Skip if there is no $a subfield, aka a name
+				if (!authorField.a) {
 					continue;
 				}
-				var creatorObject = {};
-				if (authorTab[j].a) {
-					if (creatorFields[i] == "100" || creatorFields[i] == "700") {
-						creatorObject = ZU.cleanAuthor(authorTab[j].a, "author", true);
-					}
-					else {
-						// same replacements as in the function ZU.cleanAuthor for institutional authors:
-						authorTab[j].a = authorTab[j].a.replace(/^[\s\u00A0.,/[\]:]+/, '')
-							.replace(/[\s\u00A0.,/[\]:]+$/, '')
-							.replace(/[\s\u00A0]+/, ' ');
-						creatorObject = { lastName: authorTab[j].a, creatorType: "contributor", fieldMode: 1 };
-					}
-					// some heuristic for the default values:
-					// in a book without any person as a main entry (no 100 field)
-					// it is likely that all persons (in 700 fields) are editors
-					if (creatorFields[i] == "700" && !this.getFieldSubfields("100")[0] && item.itemType == "book") {
-						creatorObject.creatorType = "editor";
-					}
-					if (authorTab[j]['4'] && RELATERM[authorTab[j]['4']]) {
-						creatorObject.creatorType = RELATERM[authorTab[j]['4']];
-					}
-					item.creators.push(creatorObject);
+
+				// Skip "SKIP" fields
+				if (authorField['4'] && RELATERM[authorField['4']] && RELATERM[authorField['4']] == "SKIP") {
+					continue;
 				}
+				
+				let creatorObject;
+				if (tag == "100" || tag == "700") {
+					creatorObject = ZU.cleanAuthor(authorField.a, "author", true);
+				}
+				else if (tag == "720") {
+					creatorObject = ZU.cleanAuthor(authorField.a, "contributor", true);
+				}
+				else {
+					// same replacements as in the function ZU.cleanAuthor for institutional authors:
+					authorField.a = authorField.a.replace(/^[\s\u00A0.,/[\]:]+/, '')
+						.replace(/[\s\u00A0.,/[\]:]+$/, '')
+						.replace(/[\s\u00A0]+/, ' ');
+					creatorObject = { lastName: authorField.a, creatorType: "contributor", fieldMode: 1 };
+				}
+				// Some heuristics for the default values:
+				// In a book without any person as a main entry (no 100 field),
+				// it is likely that all persons (in 700 fields) are editors
+				if (tag == "700" && !this.getFieldSubfields("100")[0] && item.itemType == "book") {
+					creatorObject.creatorType = "editor";
+				}
+				if (authorField['4'] && RELATERM[authorField['4']]) {
+					creatorObject.creatorType = RELATERM[authorField['4']];
+				}
+				item.creators.push(creatorObject);
 			}
 		}
 
@@ -1020,6 +1027,51 @@ var testCases = [
 					"(VLB-WN)1632: HC/Informatik, EDV/Informatik"
 				],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "03613    a2200469   4500001000300000005001700003024004300020037001000063245007200073251000700145269001500152336001200167500024700179510021700426520026800643536002500911540051800936650001701454650002401471650002301495650001401518651001801532655002201550720005701572791014401629856013801773856019701911856017102108906002702279908001302306910002702319912022802346914007202574924022402646926000602870927013602876930006803012980001303080980001303093980001103106981002603117\u001e70\u001e20241218140557.0\u001e70\u001fahttps://doi.org/10.3886/qkqw-yg74\u001f2DOI\u001e  \u001faADMIN\u001e  \u001faDiffusion Time Metrics for Facebook Posts with 100 or More Reshares\u001e  \u001fav1\u001e  \u001fa2024-12-10\u001e  \u001faDataset\u001e  \u001faThe U.S. 2020 Facebook and Instagram Election Study (US 2020 FIES) is a partnership between Meta and academic researchers to understand the impact of Facebook and Instagram on key political attitudes and behaviors during the US 2020 election.\u001e  \u001faMeta Platforms, Inc. Diffusion Time Metrics for Facebook Posts with 100 or More Reshares. Inter-university Consortium for Political and Social Research [distributor], 2024-12-10. https://doi.org/10.3886/qkqw-yg74\u001e  \u001faThis dataset contains aggregated information about all content reshared 100 or more times from July 1, 2020 through February 1, 2021. Each row of the dataset corresponds to an individual tree and its size and depth at specific hours and days from initial posting.\u001e  \u001foMeta Platforms, Inc.\u001e  \u001faThis dataset has two levels of access: Public and Restricted.\n<ul>\n<li>Public files can be downloaded directly from the dataset record. Typically, documentation files such as READMEs and codebooks are made public.</li>\n\n<li>Restricted data files require a Restricted Data Application and will be accessed through a secure virtual data enclave. <a href=\"https://docs.google.com/document/d/1NcohZjrhh_F_GpbdArI7DvHBB1adZ80ojFzhy7zvBM4/edit?usp=sharing \">Learn more about applying for restricted data.</a></li>\n</ul>\u001e  \u001fasocial media\u001e  \u001fapolitical attitudes\u001e  \u001fapolitical behavior\u001e  \u001faelections\u001e  \u001fzUnited States\u001e  \u001faweb platform data\u001e  \u001faMeta Platforms, Inc.\u001feData Collector\u001f7Organizational\u001e  \u001ftThe Diffusion and Reach of (Mis)Information on Facebook during the US 2020 Election\u001faJournal Article\u001fwhttps://doi.org/10.15195/v11.a41\u001f2DOI\u001e4 \u001fuhttps://socialmediaarchive.org/record/70/files/US2020_Glossary_v1.csv\u001fyGlossary of terms\u001f98a2f2464-fb91-47f4-8bb1-30943b39ae53\u001fs37282\u001e4 \u001fuhttps://socialmediaarchive.org/record/70/files/data_dictionary_diffusion_time_metrics_facebook_posts_with_100_or_more_reshares.csv\u001fyData dictionary\u001f9b7b7b1e4-b130-4671-af00-1d885d273132\u001fs32034\u001e4 \u001fuhttps://socialmediaarchive.org/record/70/files/US2020_FB%26IG_Elections_External_Codebook_v3.pdf\u001fyProject-level codebook\u001f984602a60-15eb-4955-ae57-feaa347b1699\u001fs848845\u001e  \u001fa2020-07-01\u001fb2021-02-01\u001e  \u001faFacebook\u001e  \u001fauser behavior tracking\u001e  \u001faThis table is used to analyze the spread of different types of content on Facebook before and after the 2020 election, as part of the U.S. 2020 Facebook and Instagram Election Study. See the codebook for additional details.\u001e  \u001faDownload the data dictionary for variables present in this dataset.\u001e  \u001faThe data in this study were analyzed using R (version 4.4.1). The analysis code imports several R packages available on CRAN, including renv (1.0.11), dplyr (1.1.4), ggplot2 (3.5.1), xtable (1.8-4), and quantreg (5.98).\u001e  \u001faR\u001e  \u001faR 4.4.1\u001fdR packages available on CRAN, including renv (1.0.11), dplyr (1.1.4), ggplot2 (3.5.1), xtable (1.8-4), and quantreg (5.98)\u001e  \u001fahttps://somar.infoready4.com/#freeformCompetitionDetail/1910437\u001e  \u001faFacebook\u001e  \u001faDatasets\u001e  \u001faUS2020\u001e  \u001faPublished\u001fb2024-12-10\u001e\u001d",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Diffusion Time Metrics for Facebook Posts with 100 or More Reshares",
+				"creators": [
+					{
+						"firstName": "Inc",
+						"lastName": "Meta Platforms",
+						"creatorType": "editor"
+					}
+				],
+				"abstractNote": "This dataset contains aggregated information about all content reshared 100 or more times from July 1, 2020 through February 1, 2021. Each row of the dataset corresponds to an individual tree and its size and depth at specific hours and days from initial posting",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "United States"
+					},
+					{
+						"tag": "elections"
+					},
+					{
+						"tag": "political attitudes"
+					},
+					{
+						"tag": "political behavior"
+					},
+					{
+						"tag": "social media"
+					},
+					{
+						"tag": "web platform data"
+					}
+				],
+				"notes": [
+					{
+						"note": "The U.S. 2020 Facebook and Instagram Election Study (US 2020 FIES) is a partnership between Meta and academic researchers to understand the impact of Facebook and Instagram on key political attitudes and behaviors during the US 2020 election"
+					}
+				],
 				"seeAlso": []
 			}
 		]

@@ -2,14 +2,14 @@
 	"translatorID": "07890a30-866e-452a-ac3e-c19fcb39b597",
 	"label": "CourtListener",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.courtlistener\\.com",
+	"target": "^https?://www\\.courtlistener\\.com/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-02-04 05:00:08"
+	"lastUpdated": "2025-04-29 03:02:00"
 }
 
 /*
@@ -75,15 +75,16 @@ async function doWeb(doc, url) {
 
 async function scrape(doc, url = doc.location.href) {
 	var item = new Zotero.Item('case');
-	let citeString = text(doc, 'h2');
+
+	let citations = ZU.xpath(doc, '//li/strong[contains(text(), "Citations:")]/following-sibling::span')
+		.map(el => el.textContent.trim());
 	
-	let title = citeString.match(/^(.+?),\s\d+/);
-	item.caseName = title ? title[1] : citation;
-	item.court = text(doc, 'article h3');
+	let citation = text(doc, 'center b .citation');
+	item.caseName = text(doc, '#caption');
+	item.court = text(doc, '.case-court');
 	item.reporter = text(doc, '.citation .reporter');
 	item.reporterVolume = text(doc, '.citation .volume');
 	item.firstPage = text(doc, '.citation .page');
-	let citation = text(doc, 'center b .citation');
 	if (!item.reporter && !item.reporterVolume) {
 		// the reporter elements aren't always tagged. We might have to parse them
 		// the best version is in the top of the opinion (we always want that for history matching,
@@ -91,7 +92,7 @@ async function scrape(doc, url = doc.location.href) {
 
 		// if that's not there, we're parsing from the title of the case
 		if (!citation) {
-			citation = citeString.match(/^.+?,\s(\d+.+)/)[1].replace(/\(.+?\)$/, "");
+			citation = citations[0];
 		}
 		let citeExpr = citation.trim().match(/^(\d+)\s((?:[A-Z][a-z]?\.\s?)+(?:[2-3]d)?(?:Supp\.)?)\s(\d{1,4})(,|$)/);
 		if (citeExpr) {
@@ -106,22 +107,14 @@ async function scrape(doc, url = doc.location.href) {
 	}
 
 	if (!item.history) {
-		// if we haven't already written case history, write the part that's not already included in the citation
-		// there are often stray spaces in either citation, so we need to check for the version without it.
-		let caseHistory = ZU.xpathText(doc, '//span[@class="meta-data-header" and contains(text(), "Citations:")]/following-sibling::span');
-		// Z.debug(caseHistory);
-		if (caseHistory.replace(/\s/g, "").startsWith(citation.replace(/\s/g, ""))
-		&& !(caseHistory.replace(/\s/g, "") == citation.replace(/\s/g, ""))) {
-			item.history = caseHistory.trim().replace(/^.+?,/, "");
-		}
+		item.history = citations.slice(1).join(', ');
 	}
 	
-	// no good selctor for date, author, and docket number, so
-	let date = ZU.xpathText(doc, '//span[@class="meta-data-header" and contains(text(), "Filed:")]/following-sibling::span');
-	item.dateDecided = date ? date.trim() : "";
-	let docket = ZU.xpathText(doc, '//span[@class="meta-data-header" and contains(text(), "Docket Number:")]/following-sibling::span');
+	item.dateDecided = text(doc, ".case-date-new");
+	// No good selectors for docket number and authors
+	let docket = ZU.xpathText(doc, '//li[strong[contains(text(), "Docket Number:")]]/text()[1]');
 	item.docketNumber = docket ? docket.trim() : "";
-	let authors = ZU.xpath(doc, '//span[@class="meta-data-header" and contains(text(), "Author:")]/following-sibling::span');
+	let authors = doc.querySelectorAll(".opinion-section-title > a[href*='/person/']");
 	for (let author of authors) {
 		item.creators.push(ZU.cleanAuthor(author.textContent.trim(), "author", false));
 	}
@@ -141,10 +134,11 @@ var testCases = [
 				"itemType": "case",
 				"caseName": "Gibson v. Bossier City General Hosp.",
 				"creators": [],
-				"dateDecided": "November 26th, 1991",
+				"dateDecided": "Nov. 26, 1991",
 				"court": "Louisiana Court of Appeal",
 				"docketNumber": "22693-CA, 23002-CA",
 				"firstPage": "1332",
+				"history": "1991 La. App. LEXIS 3211, 1991 WL 249791",
 				"reporter": "So.2d",
 				"reporterVolume": "594",
 				"url": "https://www.courtlistener.com/opinion/1872757/gibson-v-bossier-city-general-hosp",
@@ -174,10 +168,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"dateDecided": "August 19th, 1981",
+				"dateDecided": "Aug. 19, 1981",
 				"court": "District Court, D. New Jersey",
 				"docketNumber": "Civ. A. 80-2227",
 				"firstPage": "802",
+				"history": "1981 U.S. Dist. LEXIS 10126",
 				"reporter": "F.Supp.",
 				"reporterVolume": "540",
 				"url": "https://www.courtlistener.com/opinion/1611405/blackwell-v-power-test-corp",
@@ -207,11 +202,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"dateDecided": "March 8th, 1971",
+				"dateDecided": "March 8, 1971",
 				"court": "Supreme Court of the United States",
 				"docketNumber": "124",
 				"firstPage": "424",
-				"history": "91 S. Ct. 849, 28 L. Ed. 2d 158, 1971 U.S. LEXIS 134",
+				"history": "91 S. Ct. 849, 28 L. Ed. 2d 158, 3 Empl. Prac. Dec. (CCH) 8137, 3 Fair Empl. Prac. Cas. (BNA) 175, 1971 U.S. LEXIS 134",
 				"reporter": "U.S.",
 				"reporterVolume": "401",
 				"url": "https://www.courtlistener.com/opinion/108284/griggs-v-duke-power-co",
@@ -246,11 +241,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"dateDecided": "February 9th, 1983",
+				"dateDecided": "Feb. 9, 1983",
 				"court": "Ohio Court of Appeals",
 				"docketNumber": "C-820238",
 				"firstPage": "717",
-				"history": "20 Ohio App. 3d 172",
+				"history": "20 Ohio App. 3d 172, 20 Ohio B. 215, 1983 Ohio App. LEXIS 16057",
 				"reporter": "N.E.2d",
 				"reporterVolume": "485",
 				"url": "https://www.courtlistener.com/opinion/3959231/state-v-martin",
@@ -267,5 +262,4 @@ var testCases = [
 		]
 	}
 ]
-
 /** END TEST CASES **/

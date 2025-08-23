@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-10-29 15:14:42"
+	"lastUpdated": "2025-04-29 03:02:00"
 }
 
 /*
@@ -89,7 +89,6 @@ function scrape(doc, url = doc.location.href) {
 	item.pages = json.pageStart && ZU.unescapeHTML(json.pageStart.replace('Page', ''));
 	item.url = attr(doc, 'link[rel="canonical"]', 'href');
 	item.attachments.push(makeImageAttachment(url));
-	item.attachments.push(makePDFAttachment(url));
 
 	/*
 		The user can append the author to the title with a forward slash
@@ -117,14 +116,6 @@ function getID(url) {
 	return url.match(/\/(\d+)/)[1];
 }
 
-function makePDFAttachment(url) {
-	return {
-		title: 'Full Text PDF',
-		mimeType: 'application/pdf',
-		url: 'https://www.newspapers.com/clippings/download/?id=' + getID(url)
-	};
-}
-
 function makeImageAttachment(url) {
 	return {
 		title: 'Image',
@@ -150,7 +141,7 @@ var testCases = [
 					}
 				],
 				"date": "1939-10-30",
-				"abstractNote": "My Day -\"1 T - i! Mrs. Roosevelt BIRMINGHAM, Ala., Sunday Limited space prevented my telling you about several interest-lnc things which I did-in Youngstown, O., last jpnaay. loaay a sn&amp;u try to tell you a little more about this city, which seems to exist primarily for the production of steel. There is a certain majesty to this Industry which catches one's imagination. We came out from a street to find ourselves looking down over what seemed to be an almost limitless array of factory buildings and chimneys. The driver of our car said: \"That is the U. S. Steel Co. and it covers six miles. Think of. an investment renresented and of the stake which the people working here have in the success or failure of that business, not to mention the innumerable people who own a part of the invested capital. It takes your breath away Just to think that any human beings are responsible for anything so vast and far reaching. Visits Newspaper Indexing Project . , I saw two WPA projects during the morning. One. a visual education project in a school, was turning out extremely good material such a posters, pictures of birds, v samples of grass, trees, bugs, etc, for use in schools throughout the district. The other, an Ohio state project being carried on in several big cities, I have never happened to come across anywhere else, though .it is doubtless being done in many places. Newspapers in the various cities are being indexed and microfilms of the pages are being made. These films can be stored and lent with ease, and the Indexing material will make available information on ths news for the By Eleanor Roosevelt years which these projects cover. It takes several weeks to train a man for work on these projects which requires Intelligence and accuracy. I was interested to see that men and women of various ages and nationalities, including two colored men, were working on it. After lunch at one of the clubs in the city. I had an opportunity to talk with a number of WPA and NYA groups. In Industrial centers there is a pick-up in employment which is felt on both WPA and NYA projects, but this is not, the case as yet in small towns or rural areas. Beys Start Symphony Youngstown has a symphony orchestra which is entirely self-supporting and which was started by two young Italian boys. Many workers in the steel mill play in it, for among our American citizens of foreign nationalities we are more apt to find artistic ability one of their contributions for which we should be grateful. I visited a slum clearance project in the after noon which covers a large area and which they tell me replaces some long condemned buildings, which had been a blot on the city and a danger to the health of the people. I also had a glimpse of the park, which la one of the most .beautiful natural parKs I nave ever seen. We left Youngstown immediately after my lec- ture, spent a few hours in cohimous, u yesterday and found ourselves engulfed in a football crowd. We were tempted to stay over to see the Cornell-Ohio State game so as to be able to cheer our own state college. : . Now, after part of a day and another night on the train, we are in Birmingham, Ala. This country Is a big country when you start to criss-cross Itl",
+				"abstractNote": "My Day Roosevelt BIRMINGHAM, telling you about Limited several space interest- preing things which I did- in Youngstown, O., last Friday. Today I shall try to tell you a little more about this city. which seems to exist primarily for the production of steel. There is a certain majesty to this industry which catches one's imagination. We came out from a street to find ourselves looking down over what seemed to be an almost limitless array of factory buildings and chimneys. The driver of our car said: \"That is the U.S. Steel Co. and it covers six miles.\" Think of an investMrs. Roosevelt ment represented and of the stake which the people working here have in the success or failure of that business, not to mention the innumerable people who own a part of the invested capital. It takes your breath away just to think that any human beings are responsible for anything so vast and far reaching. Visits Newspaper Indexing Projeet I say two WPA projects during the morning. One, a visual education project in a school, was turning out extremely good material such as posters, pictures of birds, samples of grass, the trees, bugs, etc., for use in schools throughout district. The other, an Ohio state project being carried on in several big cities, I have never happened to come across anywhere else, though it is doubtless being done in many places. Newspapere in the various cities are being indexed and microfilms of the pages are being made. These films can be stored and lent with ease, and the indexing material will make available information on the news for the By Eleanor Roosevelt years which these projects cover. It takes several weeks to train a man for work on these projects which requires intelligence and accuracy. I was interested to see that men and women of various ages and nationalities, including two colored men, were working on it. After lunch at one of the clubs in the city, I had an opportunity to talk with a number of WPA and NYA groups. In industrial centers there is a pick-up in employment which is felt on both WPA and NYA projects, but this is not the case as yet in small towns or rural areas. Boys Start Symphony Youngstown has a symphony orchestra which is entirely self-supporting and which was started by two young Italian boys. Many workers in the steel mill play in it, for among our American citizens of foreign nationalities we are more apt to find artistic ability one of their contributions for which we should be grateful. I visited a slum clearance project in the afternoon which covers a large area and which they tell me replaces some long condemned buildings, which had been a blot on the city and a danger to the health of the people. I also had a glimpse of the park, which is one of the most beautiful natural parks I have ever seen. We left Youngstown immediately after my lecture, spent a few hours in Columbus, O, yesterday and found ourselves engulfed in a football crowd. We were tempted to stay over to see the CornellOhio State game so as to be able to cheer our own state college. Now, after part of a day and another night on the train, we are in Birmingham, Ala. This it! country is a big country when you start to criss-cross",
 				"libraryCatalog": "newspapers.com",
 				"pages": "15",
 				"place": "Akron, Ohio",
@@ -160,10 +151,6 @@ var testCases = [
 					{
 						"title": "Image",
 						"mimeType": "image/jpeg"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -191,10 +178,6 @@ var testCases = [
 					{
 						"title": "Image",
 						"mimeType": "image/jpeg"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -222,10 +205,6 @@ var testCases = [
 					{
 						"title": "Image",
 						"mimeType": "image/jpeg"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -253,10 +232,6 @@ var testCases = [
 					{
 						"title": "Image",
 						"mimeType": "image/jpeg"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -284,10 +259,6 @@ var testCases = [
 					{
 						"title": "Image",
 						"mimeType": "image/jpeg"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -305,7 +276,7 @@ var testCases = [
 				"title": "John Applegate released from draft due to physical disability",
 				"creators": [],
 				"date": "1865-03-13",
-				"abstractNote": "defence-was M' II 13 1 It A F T. Work ett the Froyoet-Marshala Offices. iuibd Din-raujT. Cok Kowlerie office presents the nanal bneg tola morning, end tk loo gnene ef epplloanu for exemption honors does not norm to lone In length or la toe heterogeneonaaeea of It el omen to. About 00 min ere bow required lor the Third Dtotrirt. Home very amusing scenes occur it tb office, aad tho change ol faore which occur with too majority ol recruits before rod alter their entrance Into tho doer which admit them into the awful presence of the examining board are remarks -Me. Ae a general thing every man In tbe line profome to think that be will aorely be exempted ea eooo hie story I told. Thoogh mnch witticism prevail, there t on moat face an Ill-concealed look of anxiety . which belie tbe assertions of their poaneeaore aa to tketr eertaldty of retting elf. Each tnne face le econned oa he eomee ant with a look of eager curiosity by those who have not been examined, end there ere few who have ooch command of their tarn a to eoneeel the toot of their eucce. or failure. The man who has been let off makes hi exit with a polite bow to the eeeembled draft official tnd a Jennty elr. He casts a look of mingled benevolence end pity on those outside, end If be bee a friend In tbe crowd eltp him oo tb back, tell him of hi good fortune, tnd take him If he be any message to convey, or whether ha dont feel peckish or feint from long etandlng, or whether ha would not Ilka to try B little eometblng for bit ttomtch'e sake. Yonr Jolly exempt man to lor the time tbe picture .of benerolenoe and benignity, tnd If the rale or the office permitted would be glad to take Colonel Fowler and hie toff ont to refreshment. He pet by tb ornamental broker who lounge around the front of tbe building with at mnch of a teowl aa hie good humor will permit, for be to e man thongh be be exempt, end be cannot forget that if be hadnt been exempted theee merry gentlemen would have the handling of e larger amount of hie money tnn he cere to spare. He take a parting look at tbe building in which be ha spent tome anxtone end unpleasant boar, and trot off home to ell his wife, mother, sweetheart, listers, tnd friends tnd relatives generally that Code Samuel doesnt want klm Just yot. ' 1 be reverse to this picture In that of tbe exceedingly robnet and healthy kind of gentleman whom Unde Samuel dellghU to honor, but who think that the little rheumatism he sometimes baa would eerioualy Impair hln efficiency In a military point of vtow-au opinion In which the draft authorities do net at all coincide, foe after a few questions he to pronounced eligtnle for service, end the word held entered opposite bis name. All into before he he bad e ebnnco to tell tbe offlctolsabouthls occasional lameness, and according to his temperament he either come out of the office with e seowUe sickly smile, or en anxious hoe. or the fin bat gone torth, end been re- eortefi, ewff-'kv-wrent, -ae sporting men say, ploy or pa y- play soldier or pay for a substitute; He Is generally found out hy the writing ones ontalde, who relieve their own misery and uncertainty by. va-rleus Inquiries ue whether hed seen hie uncle, ue lotto health, why he looks no pale, and other sue!! question ae their humor may suggest, Ue meets hie tormentors with more or less philosophy, end to seen soon after In consultation with n broker. The following la the list ol cases examined since onr Itet report : . , Utld.-c. Berk, W. Mosey, I-Veupel, Joe. Lock, Jr,, v ifrhmd EL R. Btylee. H. Wbecjer, He Hiller ? homes, E. Shane, . Spaulding, H. Walks, L.Htein-bern, C. Demerger, J. Schuyler. H. Mdler, C. Harper, W. faster, W. Knapp, A. Mayer, J. Ray, C. Flnehant. , Ao-Aerioit-J. Connor, IHS.fth. i fumithtd SubtlUuta m but Drqfl. A. Saunders, J. Mott, W. Phelps, G. Hartshorne. , f-alol Cfirnmnlorios. It. Fleet. , Until it abie Agk-4. Hhnrdlow, Jr., 8. Botto, M. Kee- rirCdiePrtg.r ton in ; j!Byrne, 7 fioum Beventh: A. Geiek M Grand. uhabmtv J . Wegener, Jo. Wilkinson, H. Baldwin. J. McKay, J. Lawrence, 8. Merrlt, 0. baton, L. Uartleon, J. haven, K. Bmtth, K. Roach, E. Heme, C. HeidengAb, H. Scnultn, O. Griffith, A. Young, M. Bonavirn, 8. Mills, T . Fhelan, C. Gregory. tiirnitked Subtiiiuttt. d-Wicker, J. freed, fl. Track J Hergeant, 8 McKenzie, H. Wheeler, I. Lo-mas J. WebbTB. Clark. D. McCnrley, J Cereoe, 8. Eenrney, W . D. Hart. G. Hawkehurat, J. AMinun, Q. Tyler, K Sumner, and B. Van Buran. THH 6E00SD DISTRICT. The following to the record of Saturday's work at tba headquarters of this district. No. S8 Grand street : Htid to Stnia. Thos. Coyne, Orlando Pearsall, Helb B ColT John B. Smlthl John Ilickey, Jam.; Borne, and bietnck HorBcnpiug, all of the Tenth Ward; Geo -Grafing, Ai jV-eS1fner d gar V. Lawrence, ill (rf Ae Nlnlh WAid, Phtical Dituiiiiiy John Applegate, John 'V. BrnM?m. D. Camp, Francia Hu,Co wm \" iin' bonne? Mark Allen, fiylvauus Whlte.Wm. In. Pslriek Hamlin, Micbael Fahey, Atox. 8. B fiorith, Leopold Voelhe, Theo. Ferguson, Joseph McGawey, A. hLWaldler, George C. White, Adam Bnvder, Jo-eon Beeihe . Edmund Decon, Joseph White, L. K. Wen- Charivs Kode, Thompson Odlen, Benj. P. Coffin i kepiaB dark Hirttn R Dwimrwt, Wo, KwUor, Ohael Frann, liorrisOOonnor, JosephVletory, Dani L.Calkina, fcaacF. Holmea, Goufred Sptudle, John Bjfln Joseph Talbot, Chris. McDonald, Wm. H. Smith Owvn Lynch James Ooodove Ph A Dolman, Wm Grail, and Thos. Muidoom all of tho IfOARrrideriee. Samuel Latorge and Daniel Rem- tk Seme. Lawrence Jtoblnsan, L. Bowers, and BubttUuU 1b Adiwnoft Go. H. Stolner, A. W.Burtls, Wui. Melvin, H. J. Brooks, Charles O. Heary T. Parson, 8. H. wtS?FnIok BHowSid. Thomas E. MarshThso. A Hottf John J. Price. Edeo SproeL Owen Manrijk, Charles Do herty, George R. Stone, a,?e? John Demmarls, bharies Louts, James Walsb, Joeepk , an on the of of the year et",
+				"abstractNote": "E DR A F FT . Work at the Provost Offices. THIRD DISTRICT, Col. Fowler's office presents the arcal busy scene this morning, and the long, queue of appifcante ex• for honors does not seem to lose in length or In emption the of Ita elementa. About 800 men are now required for the Third Dietrict. Some very amusing scenes occur at the office, the changes of faces which occur with and the majority of recruits before and after their entrance doer- which admits them into the into the of the examining board are remarkaawful presence bie. Ann general thing every man in the line profesece to think that be will surely be exempted as soon A6 his story is told. Though much witticiem prevalle, there 16 on most faces an ill-concealed look of which belles the assertions of their anxiety to their certainty of getting man's face is ecanned as he comes out with off. Each of eager curiosity by those who have not been a look and there are few who have such command examined, of their faces as to conceal the fact of their success or failure. The man who has been let off makes his with a polite bow to the assembled draft officials exit and Jaunty air. He caste look of mingled and pity on those outside, and iF benevolence has friend in the crowd slaps him on the be telle him of his good fortune, and asks him if back, has any message to convey, or whether he don't he faint from long standing, or whether he feel peckieh or not like to try little something for hie would stomach's take. Your Jolly exempt man is for the time the picture of benevolence and benignity, and if the rules of the office permitbe glad to take Colonel Fowler and hie ted would staff' out to refreshments. He passes by the ornamental brokers who lounge around the front of the building with as much of a scowl as hie good humor will perhe le a man though he be exempt, and he canmit, for not forget that if he hadn't been exempted these merry would have the handling of a larger amount gentlemen of his money than he cares to spare. He takes a partlook at the building in which he has spent some ing and unpleasant hours, and trots off home to anxious mother, sweetheart, sisters, and friends tell his wife, and relatives generally that Uncle Samuel doesn't want him just yot. The reverse to this picture is that of the exceedingand healthy kind of gentleman whom Uncle ly robust delights to honor, but who thinks that the Samuel little, rheumatism he sometimes has would seriously his efficiency in a military point of view-an impair in which the draft authorities do net at all opinion coincide, for after a few questions he is pronounced eligible for service, and the word ** held\" entered ophis name. All this before he has had a chance posite officials about his occasional lameness, and to tell the his temperament he either comes ont of according to with a scowl, a sickly smile, or an anxious the office face, tor the flat has gone torth, and been recorded, and be must, sporting men say, pas--play soldier or pay for a substitute. He play or is generally found out by the waiting ones outside, who relieve their own misery and uncertainty by. vaas whether he'd seen his uncle, as rieue inquiries to his health, why he looks so pale, and other such their hamor may suggest. He meete hie questions as tormentors with more or less philosophy, and is seen after in consultation with a broKer. soon The following is the list of cases examined our since last report: Held. Bark, W. Mosey, L. Vaupel, Jos. Lock, Miller, F. Jr. F. Thomas, Sched. E. H. Shane, E. Spaulding, H. Walke, L. SteinR. Styles, Wheeler, H. W. bern, C. Haster, W. Mentezger, Knapp, A. Mayer, J. Ray, C. Finchant. J. Schuyler, H. Muller, C. Harper, Resident. -J. Connor, on Last 12 9. 7th. Draft.-A. Saunders, Furniehed Substitutes J. Mott, W. Phelps, G. Hartshorne. Unsuitable Age. -J. Shardlow, Jr., S. Bottz, M. Paid Commutation. -R. Fleet. Kensel, C. Phillips, C. Bertram, E. Morris, P. Mayer, R. Kearney, Ryan, J. Shardler, C. Sweeny, J. Augustine, J. Aliens. Salz, 51 Grand; C. Fielder, 280 WashingSmith, C. Schermerhorn. ton Byrne, -J. 7 Wagenar, M. Wilkinson, H. BaldSouth Seventh; A. Gesset, 17 Grand. win. Martieon, J. J, McKay, haven, J. E. Lawrence, Smith, E. Roach, E. Harris, S. Merrit, 0. Eaton, Schultz, O. Griffith, A. Young, M. Donavan, Seidengabb, S. H. Mille, T. Phelan, C. Gregory. Furnished Substitutes. J. Wicker, H. J. Wheeler, Creed, I. Lo- G. mas, Traek, J. Webb, Sergeant, 6. Clark, S D. McCarley, J. Camberson, J McKenzie, M. Kearney, W. Sumner, D. Hart, and G. R. Van Hawkshurst, Buren. Ashman, J. C. Tyler, k. THE SECOND DISTRICT. The following is the record of Saturday's work at of this district, No. 96 Grand street: the headquarters Held to Service. -Thos. Coyne, Orlando Pearsall, Seth B. and Cole, Dietrick John Hasseupflug, all of the Tenth B. Smith, John Hickey, James Burne, Geo Grating, A. W. Schemithenner, and Edgar V. Lawrence, all of the Ninth Ward. Ward; Brueh, Physical Wm. D. Camp, Francis Hurger, Cornelias NewDisability John Applegate, John •V. house, Mark Allen, Sylvanus Alex. White, Wm. B. Irwin, Patrick Hamlin, Michael Fahey, 8. Smith, A. M. Leopold Waldler, Voelke, George Theo. C. White, Adam Snyder, Joseph Ferguson, Joseph McGawer, Edmund Decon, Joseph White, L. K. WenBeathe garton, Henry Age. Barson. Mason, Labin Russell, John Unsuitable Homfayer. John S. Wheeler, Wm. Cline McReady, Christopher James C. McDonnell, W. Hicks, P. Rode, Thompson Galen, Beaj. P. Coffin, Clark, Martin R. Demarest, Joseph Victory, Wm. Keller, Dan') Charles Chas. Franz, Morris O'Connor, Godfred Spindle, John L. Calkins, Isaac F. Holmes, Rickey. Talbot, Chris, McDonald, Wm. H. Aliens. -Joeeph James Goodove, Ph. Fride, A. G. Smith, Owen Wm. Graft, and Thos. Muldoon, all of the Lynch, Dalman, Non- Residence.- -Samuel Lafarge and Daniel RemTenth Ward sch. -Lawrence Robinson, L. Bowers, and In the Service. 8. J. Furnished Holley. Substitutes in Advance. -Geo. H. Stainer, Burtie, Wm. Melvin, H. J. Brooks, Charles 0. A. W. Morris. T. Parson, S. H. Furnished H. Howland, Thomas E. Marsh, Theo. A. Weeks, Mott, Frank John J. Price, Eden Sprout, Owen Marvin, John Charles Demmarie, Doherty, Charles George Leuts, James Walsh, Joseph R. Stone, James Mitchell, Crickey, John Schenwald. up. er on on the of of the act",
 				"libraryCatalog": "newspapers.com",
 				"pages": "1",
 				"place": "Brooklyn, New York",
@@ -315,10 +286,6 @@ var testCases = [
 					{
 						"title": "Image",
 						"mimeType": "image/jpeg"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -341,7 +308,7 @@ var testCases = [
 				"title": "Lorenzo POW Release",
 				"creators": [],
 				"date": "1945-05-31",
-				"abstractNote": "attended Army St. by IT art son 76th Mrs. 47 LOCAL 61s I FREED FROM JAP AND NAZI CAMPS Washington. May 31 The War Department has made public the names of 1.211 soldiers liberated from German and Japanese prison camps. The following 47 Brooklyn, Queens and Long Island men are Included: A1ELLO. Staff Sgt. Loul T.. son of Mrs. Christina Aiello, 118-01 19th St., St. Albans. BAILEY. Pvt. John J . son of Wil- I liaor N. Bailey, 869 St, John's place. BARANII K, Capt. Jerry M son of Mrs. Marv L. Baranluk, S3 Haw- ley St., Babylon. BAl'ER, Pfc. Harold C. Jr., husband of Mrs. Mary A. Bauer, 89 India tCer St.. Greentiolnt. I, BERMAN, Pfc. Martin, son of Mrs. Anne Berman, 609 Logan Si. Hospital BE8SER, Pvt. Louis L., brother of .Sunday Harold Besser. 3070 66th St. M1CELI, Mrs. 1115 ROCCO, of BLASS, Pfc. Louis, son of Mrs. Jennie Blass, 271 Oakley, Ave., H-mont. BOAS, Pfc. Ross P., son of Mrs. Doris P. Boas, 101 Rugby Road. DIPPOLD, Sgt. Christian, son of Mrs. Edna J. Bent, 8829 Fort Hamilton Parkway. GRAY, Staff Sgt. John A., son of John T. Gray, 22-17 19th St., Astoria. HARRIS, Tech. Sgt. Morton G.. son of Mrs. Sylvia R. Harris, 650 Ocean Ave. HOLLAND, Tech. Sgt. Dennis A husband of Mrs. Virginia Holland, 158-10 Sanford Ave., Flushing. HYMAN, Staff Sgt. Milton, son of Mrs. Gussie Hyman. 381 Jericho Turnpike, Floral Park. KAMINETSKY, Pfc. Sol, son of Sam Kaminetsky, 238 Dumonti Avenue. I KEANE. Pfc. Francis L., son of Mrs. Delia Keane, 319 Lincoln Place. KILL. AN, Tech. Sgt. William R..! son of Mrs. Mary E. Killlan, 503 J 6th St. LANE, Sgt. Charles C. husband of, Mrs. Marie Lane, 167 Bushwick j Avenue. i LA ROCCO, Staff Sgt. Guy W.. son of Mrs. Fanny La Rocco, 801 Sheridan Boulevard. Inwood. I LORENZO, Ptc. William E., son! of Mrs. Jennie Lorenzo, 178 j Jackson St. PAPPAS, Pfc. Demetrios. son of. George Pappas, 1357 43d St. !",
+				"abstractNote": "son 76th Mrs. MICELI. Mrs. 1115 ROCCO, of volunteer by Hospital Sunday attended Army St. by IT 3 47 LOCAL GIs FREED FROM JAP AND NAZI CAMPS Washington, May 31-The War Department has made public the names of 1,271 soldiers liberated from German Japanese prison camps. The following 47 Brooklyn, Queens and Long Island men are included: AIELLO, Staff Sgt. Louis T., son of Mars. Christina Aiello, 118-01 196th St. Albans. BAILEY, Pvt. John J., son of William N. Bailey, 869 St. John's Place. BARANIUK, Capt. Jerry M., son of Mrs. L. Barantuk, 33 Hawley St., Babylon. Mary, BAUER, Pfc. Harold C. Jr., husband of Mrs. Mary A. Bauer, 89 India St., Greenpoint. BERMAN, Pfc. Martin, son of Mrs. Anne Berman, 609 Logan St. BESSER, Pvt. Louis L., brother of Harold Besser, 2070 65th St. BLASS, Pfc. Louis, son of Mrs. Jennie Blass, 271 Oakley, Ave., Elmont. BOAS, Pfc. Ross P., son of Mrs. Doris P. Boas, 101 Rugby Road. DIPPOLD. Sgt. Christian, son Mrs. Edna J. Bent, 8829 Fort n Hamilton Parkway. GRAY, Staff Sgt. John A., son of John F. Gray, 22-17 19th St., Astoria. HE HARRIS, Tech. Sgt. Morton G., son of Mrs. Sylvia R. Harris, 650 H Ocean HOLLAND, Ave. Tech. Sgt. Dennis A.. husband of Mrs. Virginia Holland, 158-10 Sanford Ave., Flushing. HYMAN, Staff Sgt. Milton, son of Mrs. Gussie Hyman, 381 Jericho Turnpike, Floral Park. KAMINETSKY, Pfc. Sol, son of Sam Kaminetsky, 238 Dumont Avenue. KEANE, Pic. Francis L., Mrs. Della Keane, 319 Lincoln Place. KILLIAN, Tech. Sgt. William R., of Mrs. Mary E. Killian, 503 6th St. LANE, Sgt. Charles C., husband of Marie Lane, 167 Bushwick Avenue. LA ROCCO, Staff Sgt. Guy W.. son of Mrs. Fanny La Rocco, 80 Sheridan Boulevard. Inwood. LORENZO, Pic. William E., son of Mrs. Jennie Lorenzo, 178 Jackson St. PAPPAS, Pfc. Demetrios, son of George Pappas, 1357 43d St.",
 				"libraryCatalog": "newspapers.com",
 				"pages": "7",
 				"place": "Brooklyn, New York",
@@ -351,10 +318,6 @@ var testCases = [
 					{
 						"title": "Image",
 						"mimeType": "image/jpeg"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],

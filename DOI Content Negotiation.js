@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 8,
-	"lastUpdated": "2025-01-11 08:07:57"
+	"lastUpdated": "2025-07-27 04:51:26"
 }
 
 /*
@@ -64,12 +64,20 @@ async function doSearch(items) {
 }
 
 async function processDOI(doi) {
-	// TEMP: Use Crossref REST for Crossref DOIs during Crossref 2025-01-14 outage
+	// TEMP: Use Crossref REST for Crossref DOIs during Crossref outage
 	let currentDate = new Date();
-	let startDate = new Date(Date.UTC(2025, 0, 14, 5, 0, 0)); // Jan 14, 2025, 05:00 UTC (1 hour before outage)
-	let endDate   = new Date(Date.UTC(2025, 0, 14, 13, 0, 0)); // Jan 14, 2025, 13:00 UTC (2 hours after outage)
-	
-	if (currentDate >= startDate && currentDate <= endDate) {
+	// Outage: 17 May 2025, 14:00–15:00 UTC
+	// Start 1 hour before (13:00 UTC) and end 2 hours after (17:00 UTC)
+	// TEMP for May 22 outage
+	let startDate = new Date(Date.UTC(2025, 4, 22, 00, 0, 0));
+	let endDate   = new Date(Date.UTC(2025, 4, 24, 0, 0, 0));
+
+	// At least for now, always use REST API for Crossref DOIs
+	// due to better reliability
+	// TEMP: Except don't, because some REST API requests are really slow
+	// https://forums.zotero.org/discussion/comment/496121/#Comment_496121
+	//if (currentDate >= startDate && currentDate <= endDate) {
+	if (false) {
 		try {
 			let raJSON = await requestJSON(
 				`https://doi.org/ra/${encodeURIComponent(doi)}`

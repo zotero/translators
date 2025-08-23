@@ -15,11 +15,10 @@
 		"url": "https://github.com/zotero/translators/blob/master/.ci/"
 	},
 	"devDependencies": {
-		"@zotero/eslint-config": "^1.0.5",
-		"chromedriver": "^122.0.4",
+		"@zotero/eslint-config": "^1.0.8",
+		"clarinet": "^0.12.6",
 		"eslint": "^8.38.0",
 		"eslint-plugin-zotero-translator": "file:.ci/eslint-plugin-zotero-translator",
-		"selenium-webdriver": "^4.0.0-alpha.7",
-		"clarinet": "^0.12.6"
+		"selenium-webdriver": "^4.34.0"
 	}
 }

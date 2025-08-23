@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-04-05 04:04:37"
+	"lastUpdated": "2025-06-12 16:10:09"
 }
 
 /*
@@ -144,7 +144,8 @@ function scrape(doc, url) {
 		}
 		var description = text(doc, '#description .content')
 			|| text(doc, '#description')
-			|| text(doc, 'ytm-expandable-video-description-body-renderer .collapsed-string-container');
+			|| text(doc, 'ytm-expandable-video-description-body-renderer .collapsed-string-container')
+			|| text(doc, '#snippet span');
 		if (description) {
 			item.abstractNote = description;
 		}

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-07-13 18:25:34"
+	"lastUpdated": "2025-07-29 16:31:34"
 }
 
 /*
@@ -58,10 +58,17 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	// First one is issue, 2nd one search results
-	var rows = doc.querySelectorAll('#ArticleList h5.item-title>a, .al-title a[href*="article"], .al-article-items > .customLink > a[href*="article"], a.tocLink');
+	var rows = doc.querySelectorAll('#ArticleList h5.item-title>a, .al-title a[href*="article"], .al-article-items > .customLink > a[href*="article"]');
+	// Book chapter listings
+	if (!rows.length) {
+		rows = doc.querySelectorAll('a.tocLink');
+		if (rows.length) {
+			items[doc.location.href] = `[Full Book] ${text(doc, 'h1')}`;
+		}
+	}
 	for (let row of rows) {
 		let href = row.href;
-		let title = ZU.trimInternal(row.textContent);
+		let title = ZU.trimInternal(text(row, '.access-title') || row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -119,7 +126,8 @@ async function scrape(doc, url) {
 	if (risText.includes('We are sorry, but we are experiencing unusual traffic at this time.')) {
 		throw new Error('Rate-limited');
 	}
-	// Z.debug(text);
+	risText = risText.replace(/^JO\s+-/m, 'T2 -');
+	// Z.debug(risText);
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 	translator.setString(risText);
@@ -169,12 +177,12 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "March 1, 2013",
+				"date": "2013-03-01",
 				"DOI": "10.1111/isqu.12001",
 				"ISSN": "0020-8833",
 				"abstractNote": "Why do countries open their economies to global capital markets? A number of recent articles have found that two types of factors encourage politicians to liberalize their capital accounts: strong macroeconomic fundamentals and political pressure from proponents of open capital markets. However, these conclusions need to be re-evaluated because the most commonly used measure of capital account openness, Chinn and Ito's (2002) Kaopen index, suffers from systematic measurement error. We modify the Chinn–Ito variable and replicate two studies (Brooks and Kurtz 2007; Chwieroth 2007) to demonstrate that our improved measure overturns some prior findings. Some political variables have stronger effects on capital account policy than previously recognized, while macroeconomic fundamentals are less important than previous research suggests.",
 				"issue": "1",
-				"journalAbbreviation": "International Studies Quarterly",
+				"journalAbbreviation": "Int Stud Q",
 				"libraryCatalog": "Silverchair",
 				"pages": "128-137",
 				"publicationTitle": "International Studies Quarterly",
@@ -212,12 +220,12 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "June 1, 2020",
+				"date": "2020-06-01",
 				"DOI": "10.1093/isq/sqaa017",
 				"ISSN": "0020-8833",
 				"abstractNote": "The United Nations Security Council (UNSC) can respond to a civil conflict only if that conflict first enters the Council's agenda. Some conflicts reach the Council's agenda within days after they start, others after years (or even decades), and some never make it. So far, only a few studies have looked at the crucial UNSC agenda-setting stage, and none have examined agenda-setting speed. To fill this important gap, we develop and test a novel theoretical framework that combines insights from realist and constructivist theory with lessons from institutionalist theory and bargaining theory. Applying survival analysis to an original dataset, we show that the parochial interests of the permanent members (P-5) matter, but they do not determine the Council's agenda-setting speed. Rather, P-5 interests are constrained by normative considerations and concerns for the Council's organizational mission arising from the severity of a conflict (in terms of spillover effects and civilian casualties); by the interests of the widely ignored elected members (E-10); and by the degree of preference heterogeneity among both the P-5 and the E-10. Our findings contribute to a better understanding of how the United Nations (UN) works, and they have implications for the UN's legitimacy.",
 				"issue": "2",
-				"journalAbbreviation": "International Studies Quarterly",
+				"journalAbbreviation": "Int Stud Q",
 				"libraryCatalog": "Silverchair",
 				"pages": "419-430",
 				"publicationTitle": "International Studies Quarterly",
@@ -253,16 +261,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "November 23, 2020",
+				"date": "2021-03-08",
 				"DOI": "10.1093/isq/sqaa085",
 				"ISSN": "0020-8833",
 				"abstractNote": "Why do states build new international organizations (IOs) in issue areas where many institutions already exist? Prevailing theories of institutional creation emphasize their ability to resolve market failures, but adding new IOs can increase uncertainty and rule inconsistency. I argue that institutional proliferation occurs when existing IOs fail to adapt to shifts in state power. Member states expect decision-making rules to reflect their underlying power; when it does not, they demand greater influence in the organization. Subsequent bargaining over the redistribution of IO influence often fails due to credibility and information problems. As a result, under-represented states construct new organizations that provide them with greater institutional control. To test this argument, I examine the proliferation of multilateral development banks since 1944. I leverage a novel identification strategy rooted in the allocation of World Bank votes at Bretton Woods to show that the probability of institutional proliferation is higher when power is misaligned in existing institutions. My results suggest that conflict over shifts in global power contribute to the fragmentation of global governance.",
-				"issue": "sqaa085",
-				"journalAbbreviation": "International Studies Quarterly",
+				"issue": "1",
+				"journalAbbreviation": "Int Stud Q",
 				"libraryCatalog": "Silverchair",
+				"pages": "95-108",
 				"publicationTitle": "International Studies Quarterly",
 				"shortTitle": "Angling for Influence",
 				"url": "https://doi.org/10.1093/isq/sqaa085",
+				"volume": "65",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -339,17 +349,22 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "December 2, 2020",
+				"date": "2020-12-02",
 				"DOI": "10.1083/jcb.202004184",
 				"ISSN": "0021-9525",
 				"abstractNote": "Mechanoreceptor cells develop a specialized cytoskeleton that plays structural and sensory roles at the site of mechanotransduction. However, little is known about how the cytoskeleton is organized and formed. Using electron tomography and live-cell imaging, we resolve the 3D structure and dynamics of the microtubule-based cytoskeleton in fly campaniform mechanosensory cilia. Investigating the formation of the cytoskeleton, we find that katanin p60-like 1 (kat-60L1), a neuronal type of microtubule-severing enzyme, serves two functions. First, it amplifies the mass of microtubules to form the dense microtubule arrays inside the sensory cilia. Second, it generates short microtubules that are required to build the nanoscopic cytoskeleton at the mechanotransduction site. Additional analyses further reveal the functional roles of Patronin and other potential factors in the local regulatory network. In all, our results characterize the specialized cytoskeleton in fly external mechanosensory cilia at near-molecular resolution and provide mechanistic insights into how it is formed.",
-				"issue": "e202004184",
-				"journalAbbreviation": "Journal of Cell Biology",
+				"issue": "1",
+				"journalAbbreviation": "J Cell Biol",
 				"libraryCatalog": "Silverchair",
+				"pages": "e202004184",
 				"publicationTitle": "Journal of Cell Biology",
 				"url": "https://doi.org/10.1083/jcb.202004184",
 				"volume": "220",
 				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
@@ -367,7 +382,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Preleukemic and Leukemic Evolution at the Stem Cell Level",
+				"title": "Preleukemic and leukemic evolution at the stem cell level",
 				"creators": [
 					{
 						"lastName": "Stauber",
@@ -376,7 +391,7 @@ var testCases = [
 					},
 					{
 						"lastName": "Greally",
-						"firstName": "John",
+						"firstName": "John M.",
 						"creatorType": "author"
 					},
 					{
@@ -385,16 +400,22 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "December 4, 2020",
+				"date": "2021-02-25",
 				"DOI": "10.1182/blood.2019004397",
 				"ISSN": "0006-4971",
-				"abstractNote": "Hematological malignancies are an aggregate of diverse populations of cells that arise following a complex process of clonal evolution and selection. Recent approaches have facilitated the study of clonal populations and their evolution over time across multiple phenotypic cell populations. In this review, we present current concepts on the role of clonal evolution in leukemic initiation, disease progression, and relapse. We highlight recent advances and unanswered questions on the contribution of the hemopoietic stem cell population on these processes.",
-				"issue": "blood.2019004397",
+				"abstractNote": "Hematological malignancies are an aggregate of diverse populations of cells that arise following a complex process of clonal evolution and selection. Recent approaches have facilitated the study of clonal populations and their evolution over time across multiple phenotypic cell populations. In this review, we present current concepts on the role of clonal evolution in leukemic initiation, disease progression, and relapse. We highlight recent advances and unanswered questions about the contribution of the hematopoietic stem cell population to these processes.",
+				"issue": "8",
 				"journalAbbreviation": "Blood",
 				"libraryCatalog": "Silverchair",
+				"pages": "1013-1018",
 				"publicationTitle": "Blood",
 				"url": "https://doi.org/10.1182/blood.2019004397",
+				"volume": "137",
 				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
@@ -582,6 +603,10 @@ var testCases = [
 				"url": "https://doi.org/10.1001/jama.2017.8334",
 				"volume": "318",
 				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
@@ -804,6 +829,58 @@ var testCases = [
 		"type": "web",
 		"url": "https://academic.oup.com/edited-volume/28005",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://academic.oup.com/book/6077?login=false",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://pubs.aip.org/avs/aqs/article/5/1/014402/2879064/Quantum-frequency-interferometry-With-applications",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Quantum frequency interferometry: With applications ranging from gravitational wave detection to dark matter searches",
+				"creators": [
+					{
+						"lastName": "Howl",
+						"firstName": "R.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Fuentes",
+						"firstName": "I.",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-01-23",
+				"DOI": "10.1116/5.0084821",
+				"ISSN": "2639-0213",
+				"abstractNote": "We introduce a quantum interferometric scheme that uses states that are sharp in frequency and delocalized in position. The states are frequency modes of a quantum field that is trapped at all times in a finite volume potential, such as a small box potential. This allows for significant miniaturization of interferometric devices. Since the modes are in contact at all times, it is possible to estimate physical parameters of global multimode channels. As an example, we introduce a three-mode scheme and calculate precision bounds in the estimation of parameters of two-mode Gaussian channels. This scheme can be implemented in several systems, including superconducting circuits, cavity-QED, and cold atoms. We consider a concrete implementation using the ground state and two phononic modes of a trapped Bose–Einstein condensate. We apply this to show that frequency interferometry can improve the sensitivity of phononic gravitational waves detectors by several orders of magnitude, even in the case that squeezing is much smaller than assumed previously, and that the system suffers from short phononic lifetimes. Other applications range from magnetometry, gravimetry, and gradiometry to dark matter/energy searches.",
+				"issue": "1",
+				"journalAbbreviation": "AVS Quantum Sci.",
+				"libraryCatalog": "Silverchair",
+				"pages": "014402",
+				"publicationTitle": "AVS Quantum Science",
+				"shortTitle": "Quantum frequency interferometry",
+				"url": "https://doi.org/10.1116/5.0084821",
+				"volume": "5",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

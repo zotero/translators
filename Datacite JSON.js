@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2024-03-23 00:20:22"
+	"lastUpdated": "2025-04-29 03:02:00"
 }
 
 /*
@@ -111,7 +111,9 @@ function doImport() {
 	if (data.types.citeproc && mappingTypes[data.types.citeproc]) {
 		type = mappingTypes[data.types.citeproc];
 	}
-	if (["softwaresourcecode", "softwareapplication", "mobileapplication", "videogame", "webapplication"].includes(data.types.schemaOrg.toLowerCase())) {
+	if (data.types.schemaOrg
+			&& ["softwaresourcecode", "softwareapplication", "mobileapplication", "videogame", "webapplication"]
+				.includes(data.types.schemaOrg.toLowerCase())) {
 		type = "computerProgram";
 	}
 	if (data.types.resourceTypeGeneral == "BookChapter") {
@@ -124,6 +126,7 @@ function doImport() {
 		item.extra = "Type: dataset";
 	}
 	var title = "";
+	var alternateTitle = "";
 	for (let titleElement of data.titles) {
 		if (!titleElement.title) {
 			continue;
@@ -134,8 +137,11 @@ function doImport() {
 		else if (titleElement.titleType.toLowerCase() == "subtitle") {
 			title = title + ": " + titleElement.title;
 		}
+		else if (!alternateTitle) {
+			alternateTitle = titleElement.title;
+		}
 	}
-	item.title = title;
+	item.title = title || alternateTitle;
 	
 	if (data.creators) {
 		for (let creator of data.creators) {
@@ -157,8 +163,8 @@ function doImport() {
 	if (data.contributors) {
 		for (let contributor of data.contributors) {
 			let role = "contributor";
-			if (contributor.contributorRole) {
-				switch (contributor.contributorRole.toLowerCase()) {
+			if (contributor.contributorType) {
+				switch (contributor.contributorType.toLowerCase()) {
 					case "editor":
 						role = "editor";
 						break;
@@ -200,14 +206,7 @@ function doImport() {
 	
 	item.DOI = data.doi;
 	//add DOI to extra for unsupported items
-	if (item.DOI && !ZU.fieldIsValidForType("DOI", item.itemType)) {
-		if (item.extra) {
-			item.extra += "\nDOI: " + item.DOI;
-		}
-		else {
-			item.extra = "DOI: " + item.DOI;
-		}
-	}
+
 	item.url = data.url;
 	item.language = data.language;
 	if (data.subjects) {
@@ -398,7 +397,6 @@ var testCases = [
 				"date": "2017-02-25",
 				"abstractNote": "Ruby gem and command-line utility for conversion of DOI metadata from and to different metadata formats, including schema.org.",
 				"company": "DataCite",
-				"extra": "DOI: 10.5438/n138-z3mk",
 				"url": "https://github.com/datacite/bolognese",
 				"attachments": [],
 				"tags": [
@@ -802,7 +800,6 @@ var testCases = [
 				"ISBN": "978-0-367-85639-7",
 				"abstractNote": "The study of the pragmatics of Irish English is a recent endeavour. Since its beginnings, a substantial amount of scholarship has been conducted in a cross-varietal design with the aim of highlighting shared and specific features of Irish English vis-à-vis other varieties of English. A particular focus of such variational pragmatic research has been on speech act realisations. Cross-varietal studies on apologies in Irish English remain, however, limited. The present chapter addresses this research gap in the study of apologies in Irish English. It takes a variational pragmatic approach to the study of remedial apologies, contrasting apologies in Irish English and in English English empirically using comparable data . Specifically, production questionnaire data is investigated and norms of appropriate verbal apologetic behaviour contrasted. The analysis centres on the apology strategies and modification employed across varieties and on their linguistic realisations, and a particular focus is placed on the cross-varietal use of alerters and vocatives in apologising. Findings point to the universality of apology strategies, while also revealing variety-preferential pragmatic differences. Specifically, the Irish English data reveals a higher use of vocatives, many playing a relational function in the data, and thus suggesting higher levels of relational orientation in the Irish English data relative to the English English data. In addition, a higher use of upgrading strategies and explanations, many communicating an active speaker role, is recorded in the Irish English data pointing to a comparatively higher redress of speakers’ loss of positive face.",
 				"bookTitle": "Expanding the Landscapes of Irish English Research",
-				"extra": "DOI: 10.48548/PUBDATA-155",
 				"language": "en",
 				"pages": "109-128",
 				"publisher": "Medien- und Informationszentrum, Leuphana Universität Lüneburg",
@@ -848,7 +845,6 @@ var testCases = [
 				"ISBN": "978-3-7815-6043-7",
 				"abstractNote": "Reconstructive research into teacher knowledge has established the crucial role of implicit knowledge. This line of enquiry uses sociological theories and interpretative methods to establish the impact of a-theoretical knowledge or narrative knowledge on teachers’ actions. In this paper we use the praxeological concepts of habitus and norm alongside the systemtheoretical notion of decision-making in order to conceptualize how individuals act in organizational contexts. We exemplify this with first data from our project Professionalisation of Teachers of Maths and English (ProME). This project examines, how teachers of Maths and English navigate the tensions between habitus, organizational norms, and identity-norms in their dairly decision-making. (DIPF/Orig.)",
 				"bookTitle": "Professionalität und Professionalisierung von Lehrpersonen. Perspektiven, theoretische Rahmungen und empirische Zugänge",
-				"extra": "DOI: 10.25656/01:28324",
 				"language": "de",
 				"pages": "179-196",
 				"publisher": "Verlag Julius Klinkhardt : Bad Heilbrunn",
@@ -978,7 +974,6 @@ var testCases = [
 				],
 				"date": "2023",
 				"bookTitle": "Luxus in Seide",
-				"extra": "DOI: 10.11588/ARTHISTORICUM.1141.C16127",
 				"language": "de",
 				"publisher": "arthistoricum.net",
 				"url": "https://books.ub.uni-heidelberg.de//arthistoricum/catalog/book/1141/chapter/16127",
@@ -994,6 +989,190 @@ var testCases = [
 						"tag": "gnd/4054289-0"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "{\n  \"id\": \"https://doi.org/10.26021/15688\",\n  \"doi\": \"10.26021/15688\",\n  \"url\": \"https://ir.canterbury.ac.nz/handle/10092/108154\",\n  \"types\": {\n    \"ris\": \"CHAP\",\n    \"bibtex\": \"misc\",\n    \"citeproc\": \"article\",\n    \"schemaOrg\": \"Chapter\",\n    \"resourceType\": \"Chapters\",\n    \"resourceTypeGeneral\": \"BookChapter\"\n  },\n  \"creators\": [\n    {\n      \"name\": \"Iese, Viliamu\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Viliamu\",\n      \"familyName\": \"Iese\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Muliaina, Tolu\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Tolu\",\n      \"familyName\": \"Muliaina\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Prasad, Rahul\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Rahul\",\n      \"familyName\": \"Prasad\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Nand, Moleen\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Moleen\",\n      \"familyName\": \"Nand\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Pill, Melanie\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Melanie\",\n      \"familyName\": \"Pill\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Michael, Sivendra\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Sivendra\",\n      \"familyName\": \"Michael\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Dass-Nand, Roslyn\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Roslyn\",\n      \"familyName\": \"Dass-Nand\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Soko, Vasiti\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Vasiti\",\n      \"familyName\": \"Soko\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Nelson, Filomena\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Filomena\",\n      \"familyName\": \"Nelson\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Veisa, Filipe\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Filipe\",\n      \"familyName\": \"Veisa\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Rarokolutu, Ratu Tevita\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Ratu Tevita\",\n      \"familyName\": \"Rarokolutu\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Nasalo, Salote\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Salote\",\n      \"familyName\": \"Nasalo\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Navunicagi, Otto\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Otto\",\n      \"familyName\": \"Navunicagi\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Amato-Ali, Christian Yves\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Christian Yves\",\n      \"familyName\": \"Amato-Ali\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Ha’apio, Michael\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Michael\",\n      \"familyName\": \"Ha’apio\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Wairiu, Morgan\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Morgan\",\n      \"familyName\": \"Wairiu\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Holland, Elisabeth\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Elisabeth\",\n      \"familyName\": \"Holland\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Malaki-Faaofo, Louise Marie\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Louise Marie\",\n      \"familyName\": \"Malaki-Faaofo\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Roko, Nasoni\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Nasoni\",\n      \"familyName\": \"Roko\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Ward, Alastair\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Alastair\",\n      \"familyName\": \"Ward\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    }\n  ],\n  \"titles\": [\n    {\n      \"lang\": \"\",\n      \"title\": \"Loss and Damage: Save the Pacific, Save the World\",\n      \"titleType\": null\n    }\n  ],\n  \"publisher\": {\n    \"name\": \"The Macmillan Brown Centre for Pacific Studies Press and the Pacific Centre for Environment and Sustainable Development\"\n  },\n  \"container\": {},\n  \"subjects\": [\n    {\n      \"subject\": \"Climate Change\"\n    },\n    {\n      \"subject\": \"Pacific Ocean\"\n    }\n  ],\n  \"contributors\": [\n    {\n      \"name\": \"University Of Canterbury\",\n      \"nameType\": null,\n      \"givenName\": null,\n      \"familyName\": null,\n      \"affiliation\": [],\n      \"contributorType\": \"DataManager\",\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"University Of Canterbury\",\n      \"nameType\": null,\n      \"givenName\": null,\n      \"familyName\": null,\n      \"affiliation\": [],\n      \"contributorType\": \"HostingInstitution\",\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Ratuva, Steven\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Steven\",\n      \"familyName\": \"Ratuva\",\n      \"affiliation\": [\n        {\n          \"name\": null,\n          \"schemeUri\": null,\n          \"affiliationIdentifier\": null,\n          \"affiliationIdentifierScheme\": null\n        }\n      ],\n      \"contributorType\": \"Editor\",\n      \"nameIdentifiers\": [\n        {\n          \"schemeUri\": null,\n          \"nameIdentifier\": null,\n          \"nameIdentifierScheme\": null\n        }\n      ]\n    }\n  ],\n  \"dates\": [\n    {\n      \"date\": \"2025-02-25\",\n      \"dateType\": \"Accepted\",\n      \"dateInformation\": null\n    },\n    {\n      \"date\": \"2025-02-25\",\n      \"dateType\": \"Available\",\n      \"dateInformation\": null\n    },\n    {\n      \"date\": \"2024\",\n      \"dateType\": \"Issued\",\n      \"dateInformation\": null\n    }\n  ],\n  \"publicationYear\": 2024,\n  \"identifiers\": [\n    {\n      \"identifier\": \"https://hdl.handle.net/10092/108154\",\n      \"identifierType\": \"uri\"\n    }\n  ],\n  \"sizes\": [],\n  \"formats\": [\n    \"application/pdf\"\n  ],\n  \"rightsList\": [\n    {\n      \"rights\": \"All rights reserved. This book is in copyright. No part must be republished without permission of the publishers.\"\n    }\n  ],\n  \"descriptions\": [],\n  \"geoLocations\": [\n    {\n      \"geoLocationPlace\": \"Pacific Ocean\"\n    }\n  ],\n  \"fundingReferences\": [],\n  \"relatedIdentifiers\": [\n    {\n      \"schemeUri\": null,\n      \"schemeType\": null,\n      \"relationType\": \"IsPartOf\",\n      \"relatedIdentifier\": \"https://doi.org/10.26021/15556\",\n      \"resourceTypeGeneral\": \"Book\",\n      \"relatedIdentifierType\": \"DOI\",\n      \"relatedMetadataScheme\": null\n    }\n  ],\n  \"relatedItems\": [\n    {\n      \"titles\": [\n        {\n          \"title\": \"Voices of the Pacific Climate Crisis Adaptation and Resilience: Pacific Ocean and Climate Crisis Assessment Report Volume 1\"\n        }\n      ],\n      \"relationType\": \"IsPublishedIn\",\n      \"publicationYear\": \"2024\",\n      \"relatedItemType\": \"Book\",\n      \"relatedItemIdentifier\": {\n        \"relatedItemIdentifier\": \"https://doi.org/10.26021/15556\",\n        \"relatedItemIdentifierType\": \"DOI\"\n      }\n    }\n  ],\n  \"schemaVersion\": \"http://datacite.org/schema/kernel-4\",\n  \"providerId\": \"nzcu\",\n  \"clientId\": \"nzcu.ucrr\",\n  \"agency\": \"datacite\",\n  \"state\": \"findable\"\n}",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Loss and Damage: Save the Pacific, Save the World",
+				"creators": [
+					{
+						"lastName": "Iese",
+						"firstName": "Viliamu",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Muliaina",
+						"firstName": "Tolu",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Prasad",
+						"firstName": "Rahul",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Nand",
+						"firstName": "Moleen",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Pill",
+						"firstName": "Melanie",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Michael",
+						"firstName": "Sivendra",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Dass-Nand",
+						"firstName": "Roslyn",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Soko",
+						"firstName": "Vasiti",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Nelson",
+						"firstName": "Filomena",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Veisa",
+						"firstName": "Filipe",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Rarokolutu",
+						"firstName": "Ratu Tevita",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Nasalo",
+						"firstName": "Salote",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Navunicagi",
+						"firstName": "Otto",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Amato-Ali",
+						"firstName": "Christian Yves",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Ha’apio",
+						"firstName": "Michael",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wairiu",
+						"firstName": "Morgan",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Holland",
+						"firstName": "Elisabeth",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Malaki-Faaofo",
+						"firstName": "Louise Marie",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Roko",
+						"firstName": "Nasoni",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Ward",
+						"firstName": "Alastair",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "University Of Canterbury",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Ratuva",
+						"firstName": "Steven",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2024",
+				"bookTitle": "Voices of the Pacific Climate Crisis Adaptation and Resilience: Pacific Ocean and Climate Crisis Assessment Report Volume 1",
+				"publisher": "The Macmillan Brown Centre for Pacific Studies Press and the Pacific Centre for Environment and Sustainable Development",
+				"rights": "All rights reserved. This book is in copyright. No part must be republished without permission of the publishers.",
+				"url": "https://ir.canterbury.ac.nz/handle/10092/108154",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Climate Change"
+					},
+					{
+						"tag": "Pacific Ocean"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "{\n\t\"id\": \"https://doi.org/10.34769/azkm-y326\",\n\t\"doi\": \"10.34769/AZKM-Y326\",\n\t\"url\": \"http://www2.ite.waw.pl//docs/imif/20210121_M_Mozdzonek_2020.pdf\",\n\t\"types\": {\n\t\t\"ris\": \"GEN\",\n\t\t\"bibtex\": \"misc\",\n\t\t\"citeproc\": \"article\",\n\t\t\"schemaOrg\": \"CreativeWork\",\n\t\t\"resourceTypeGeneral\": \"DataPaper\"\n\t},\n\t\"creators\": [\n\t\t{\n\t\t\"name\": \"Możdżonek, Małgorzata\",\n\t\t\"nameType\": \"Personal\",\n\t\t\"givenName\": \"Małgorzata\",\n\t\t\"familyName\": \"Możdżonek\",\n\t\t\"affiliation\": [\n\t\t\t{\n\t\t\t\"name\": \"Institute of Electronic Materials Technology\",\n\t\t\t\"schemeUri\": \"https://ror.org\",\n\t\t\t\"affiliationIdentifier\": \"https://ror.org/03jp3w522\",\n\t\t\t\"affiliationIdentifierScheme\": \"ROR\"\n\t\t\t}\n\t\t],\n\t\t\"nameIdentifiers\": []\n\t\t},\n\t\t{\n\t\t\"name\": \"Caban, Piotr\",\n\t\t\"nameType\": \"Personal\",\n\t\t\"givenName\": \"Piotr\",\n\t\t\"familyName\": \"Caban\",\n\t\t\"affiliation\": [\n\t\t\t{\n\t\t\t\"name\": \"Institute of Electronic Materials Technology\",\n\t\t\t\"schemeUri\": \"https://ror.org\",\n\t\t\t\"affiliationIdentifier\": \"https://ror.org/03jp3w522\",\n\t\t\t\"affiliationIdentifierScheme\": \"ROR\"\n\t\t\t}\n\t\t],\n\t\t\"nameIdentifiers\": []\n\t\t},\n\t\t{\n\t\t\"name\": \"Gaca, Jarosław\",\n\t\t\"nameType\": \"Personal\",\n\t\t\"givenName\": \"Jarosław\",\n\t\t\"familyName\": \"Gaca\",\n\t\t\"affiliation\": [\n\t\t\t{\n\t\t\t\"name\": \"Institute of Electronic Materials Technology\",\n\t\t\t\"schemeUri\": \"https://ror.org\",\n\t\t\t\"affiliationIdentifier\": \"https://ror.org/03jp3w522\",\n\t\t\t\"affiliationIdentifierScheme\": \"ROR\"\n\t\t\t}\n\t\t],\n\t\t\"nameIdentifiers\": []\n\t\t},\n\t\t{\n\t\t\"name\": \"Wójcik, Marek\",\n\t\t\"nameType\": \"Personal\",\n\t\t\"givenName\": \"Marek\",\n\t\t\"familyName\": \"Wójcik\",\n\t\t\"affiliation\": [\n\t\t\t{\n\t\t\t\"name\": \"Institute of Electronic Materials Technology\",\n\t\t\t\"schemeUri\": \"https://ror.org\",\n\t\t\t\"affiliationIdentifier\": \"https://ror.org/03jp3w522\",\n\t\t\t\"affiliationIdentifierScheme\": \"ROR\"\n\t\t\t}\n\t\t],\n\t\t\"nameIdentifiers\": []\n\t\t},\n\t\t{\n\t\t\"name\": \"Piątkowska, Anna\",\n\t\t\"nameType\": \"Personal\",\n\t\t\"givenName\": \"Anna\",\n\t\t\"familyName\": \"Piątkowska\",\n\t\t\"affiliation\": [\n\t\t\t{\n\t\t\t\"name\": \"Institute of Electronic Materials Technology\",\n\t\t\t\"schemeUri\": \"https://ror.org\",\n\t\t\t\"affiliationIdentifier\": \"https://ror.org/03jp3w522\",\n\t\t\t\"affiliationIdentifierScheme\": \"ROR\"\n\t\t\t}\n\t\t],\n\t\t\"nameIdentifiers\": []\n\t\t}\n\t],\n\t\"titles\": [\n\t\t{\n\t\t\"lang\": \"en\",\n\t\t\"title\": \"Determination of the thickness of BN layers on the Al2O3 substrate by FT-IR spectroscopy\",\n\t\t\"titleType\": \"TranslatedTitle\"\n\t\t}\n\t],\n\t\"publisher\": {\n\t\t\"name\": \"Łukasiewicz Research Network - Institute of Electronic Materials Technology\"\n\t},\n\t\"subjects\": [],\n\t\"contributors\": [],\n\t\"dates\": [],\n\t\"publicationYear\": 2020,\n\t\"language\": \"en\",\n\t\"identifiers\": [],\n\t\"sizes\": [],\n\t\"formats\": [],\n\t\"rightsList\": [],\n\t\"descriptions\": [],\n\t\"geoLocations\": [],\n\t\"fundingReferences\": [],\n\t\"relatedIdentifiers\": [],\n\t\"schemaVersion\": \"http://datacite.org/schema/kernel-4\",\n\t\"providerId\": \"ymju\",\n\t\"clientId\": \"psnc.itme\",\n\t\"agency\": \"datacite\",\n\t\"state\": \"findable\"\n}",
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "Determination of the thickness of BN layers on the Al2O3 substrate by FT-IR spectroscopy",
+				"creators": [
+					{
+						"lastName": "Możdżonek",
+						"firstName": "Małgorzata",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Caban",
+						"firstName": "Piotr",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Gaca",
+						"firstName": "Jarosław",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wójcik",
+						"firstName": "Marek",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Piątkowska",
+						"firstName": "Anna",
+						"creatorType": "author"
+					}
+				],
+				"date": 2020,
+				"DOI": "10.34769/AZKM-Y326",
+				"language": "en",
+				"repository": "Łukasiewicz Research Network - Institute of Electronic Materials Technology",
+				"url": "http://www2.ite.waw.pl//docs/imif/20210121_M_Mozdzonek_2020.pdf",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}

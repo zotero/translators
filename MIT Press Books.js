@@ -2,14 +2,14 @@
 	"translatorID": "ac277fbe-000c-46da-b145-fbe799d17eda",
 	"label": "MIT Press Books",
 	"creator": "Guy Aglionby",
-	"target": "https://(www\\.)?mitpress\\.mit\\.edu/(mit-press-open|contributors|search|series|distribution|topics|forthcoming|best-sellers|books)",
+	"target": "https://(www\\.)?mitpress\\.mit\\.edu/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-28 22:21:37"
+	"lastUpdated": "2025-08-05 20:50:04"
 }
 
 /*
@@ -34,8 +34,8 @@
 	***** END LICENSE BLOCK *****
 */
 
-function detectWeb(doc, url) {
-	if (url.includes('/books/') && !url.includes('/series/') && !url.includes('/distribution/') && !url.includes('/imprint/')) {
+function detectWeb(doc, _url) {
+	if (doc.body.classList.contains('book-details')) {
 		return 'book';
 	}
 	else if (getSearchResults(doc, true)) {
@@ -44,86 +44,101 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) === 'multiple') {
-		Zotero.selectItems(getSearchResults(doc, false), function (selected) {
-			if (selected) {
-				ZU.processDocuments(Object.keys(selected), scrape);
-			}
-		});
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('.book-wrapper a, .upt-author-page__book-carousel--cover a');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.title);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else {
-		scrape(doc);
+		await scrape(doc, url);
 	}
 }
 
-function scrape(doc, url) {
+async function scrape(doc, url) {
 	let item = new Zotero.Item('book');
-	item.url = url;
+	item.title = [text(doc, '.book-wrapper__info h1'), text(doc, '.book-wrapper__info h2')]
+		.filter(Boolean)
+		.join(': ');
 	item.place = 'Cambridge, MA, USA';
 	item.language = 'en';
-	item.date = ZU.xpathText(doc, '(//time[@property = "publishDate"]/@content)[1]');
-	item.ISBN = ZU.xpathText(doc, '(//span[@property = "isbn"])[1]');
-	item.numPages = ZU.xpathText(doc, '(//span[@property = "numPages"])[1]');
-	
-	let abstract = doc.querySelector('div.book__blurb');
-	if (abstract) {
-		item.abstractNote = abstract.textContent.trim();
+
+	let infoBlocks = doc.querySelector('.etextbook-content__right').querySelectorAll('p');
+	for (let info of infoBlocks) {
+		if (info.classList.contains('sp__details')) {
+			item.numPages = text(info, '.sp__the-pages').match(/\d+/)?.[0];
+			continue;
+		}
+
+		let [field, value] = info.textContent.split(': ');
+		switch (field) {
+			case 'ISBN':
+				item.ISBN = ZU.cleanISBN(value);
+				break;
+			case 'Pub date':
+				item.date = ZU.strToISO(value);
+				break;
+			case 'Publisher':
+				if (value === 'The MIT Press') {
+					value = 'MIT Press';
+				}
+				item.publisher = value;
+				break;
+		}
 	}
 	
-	let title = ZU.xpathText(doc, '//h1[@class = "book__title"]').trim();
+	item.abstractNote = text(doc, '.book-summary');
 	
-	let editionRegex = /, (([\w ]+) edition( [\w ]+)?)/i;
-	let matchedEdition = title.match(editionRegex);
+	let editionRegex = /(([\w ]+) edition( [\w ]+)?)/i;
+	let matchedEdition = text(doc, '.sp__the-edition').match(editionRegex);
 	if (matchedEdition) {
 		item.edition = cleanEdition(matchedEdition[1]);
-		title = title.replace(matchedEdition[0], '');
 	}
 	
-	let volumeRegex = /, volume (\d+)/i;
-	let matchedVolume = title.match(volumeRegex);
+	let volumeRegex = /volume (\d+)/i;
+	let matchedVolume = text(doc, '.sp__the-volume').match(volumeRegex);
 	if (matchedVolume) {
 		item.volume = matchedVolume[1];
-		title = title.replace(matchedVolume[0], '');
 	}
 	
-	let subtitle = ZU.xpathText(doc, '//h2[@class = "book__subtitle"]');
-	if (subtitle) {
-		subtitle = subtitle.trim();
-		item.title = [title, subtitle].join(': ');
-	}
-	else {
-		item.title = title;
-	}
-	
-	const contributorTypes = [['By', 'author'], ['Translated by', 'translator'], ['Edited by', 'editor']];
-	let allContributors = ZU.xpath(doc, '//span[@class = "book__authors"]/p');
-	allContributors.forEach(function (contributorLine) {
+	const contributorTypes = [[/^by /i, 'author'], [/^translated by/i, 'translator'], [/^edited by/i, 'editor']];
+	for (let contributorLine of doc.querySelectorAll('.sp__the-author')) {
 		contributorLine = contributorLine.textContent;
-		contributorTypes.forEach(function (contributorType) {
-			if (contributorLine.startsWith(contributorType[0])) {
-				let contributors = contributorLine.replace(contributorType[0], '').split(/ and |,/);
-				contributors.forEach(function (contributorName) {
-					item.creators.push(ZU.cleanAuthor(contributorName, contributorType[1]));
-				});
+		for (let [prefix, creatorType] of contributorTypes) {
+			if (prefix.test(contributorLine)) {
+				let contributors = contributorLine.replace(prefix, '').split(/ and |,/);
+				for (let contributorName of contributors) {
+					item.creators.push(ZU.cleanAuthor(contributorName, creatorType));
+				}
+				break;
 			}
-		});
-	});
-	
-	let series = ZU.xpathText(doc, '//p[@class = "book__series"]/a[contains(@href, "/series/")]');
-	if (series) {
-		item.series = series.trim();
+		}
 	}
 	
-	let publisher = ZU.xpathText(doc, '//p[@class = "book__series"]/a[contains(@href, "/imprint/") or contains(@href, "/distribution/")]');
-	if (publisher) {
-		item.publisher = publisher.trim();
-	}
-	else {
-		item.publisher = 'MIT Press';
+	let seriesLink = doc.querySelector('.book-wrapper__info a[href*="/series/"]');
+	if (seriesLink) {
+		// Remove name of imprint/publisher from series
+		item.series = seriesLink.textContent.replace(/.+ \/ (.+)/, '$1');
 	}
 	
-	let openAccessUrl = ZU.xpathText(doc, '//div[contains(@class, "open-access")]/a/@href');
+	let openAccessUrl = attr(doc, '.oa__link a', 'href');
 	if (openAccessUrl) {
 		if (openAccessUrl.endsWith('.pdf') || openAccessUrl.endsWith('.pdf?dl=1')) {
 			item.attachments.push({
@@ -139,37 +154,18 @@ function scrape(doc, url) {
 				mimeType: 'text/html'
 			});
 		}
+		item.url = url;
 	}
 	
-	let seriesURL = attr(doc, '.book__series a', 'href');
-	if (seriesURL) {
-		ZU.processDocuments(seriesURL, function (seriesDoc) {
-			let seriesEditors = text(seriesDoc, '.series__editors')
-				.split(/,| and /);
-			for (let seriesEditor of seriesEditors) {
-				let creator = ZU.cleanAuthor(seriesEditor, 'seriesEditor');
-				
-				// sometimes series editors are also editors of individual
-				// volumes, and it doesn't make sense to include the same name
-				// twice. not an efficient approach but we're dealing with 4-5
-				// contributors max.
-				let duplicate = false;
-				for (let other of item.creators) {
-					if (other.firstName == creator.firstName && other.lastName == creator.lastName) {
-						duplicate = true;
-					}
-				}
-				
-				if (!duplicate) {
-					item.creators.push(creator);
-				}
-			}
-			item.complete();
-		});
+	if (seriesLink) {
+		let seriesDoc = await requestDocument(seriesLink.href);
+		let seriesEditors = (seriesDoc.querySelector('main p strong')?.nextSibling?.textContent ?? '')
+			.split(/,| and /);
+		for (let seriesEditor of seriesEditors) {
+			item.creators.push(ZU.cleanAuthor(seriesEditor, 'seriesEditor'));
+		}
 	}
-	else {
-		item.complete();
-	}
+	item.complete();
 }
 
 function cleanEdition(text) {
@@ -205,20 +201,6 @@ function cleanEdition(text) {
 	}
 }
 
-function getSearchResults(doc, checkOnly) {
-	let rows = ZU.xpath(doc, '//ul[contains(@class, "results__list")]//a[@property = "name"]');
-	
-	if (checkOnly) {
-		return rows.length > 0;
-	}
-	
-	let items = {};
-	for (let i = 0; i < rows.length; i++) {
-		items[rows[i].href] = rows[i].text.trim();
-	}
-	return items;
-}
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -228,17 +210,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://mitpress.mit.edu/contributors/ian-goodfellow",
+		"url": "https://mitpress.mit.edu/author/joelle-m-abi-rached-34017/",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "https://mitpress.mit.edu/books/series/adaptive-computation-and-machine-learning-series",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://mitpress.mit.edu/books/imprint/bradford-book",
 		"items": "multiple"
 	},
 	{
@@ -285,6 +262,7 @@ var testCases = [
 				"publisher": "MIT Press",
 				"series": "Adaptive Computation and Machine Learning series",
 				"shortTitle": "Elements of Causal Inference",
+				"url": "https://mitpress.mit.edu/9780262037310/elements-of-causal-inference/",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -314,7 +292,7 @@ var testCases = [
 				"date": "2019-08-13",
 				"ISBN": "9780262537537",
 				"abstractNote": "Herbert Simon's classic work on artificial intelligence in the expanded and updated third edition from 1996, with a new introduction by John E. Laird.",
-				"edition": "Reissue Of The Third Edition With A New Introduction By John Laird",
+				"edition": "reissue of the third edition with a new introduction by John Laird",
 				"language": "en",
 				"libraryCatalog": "MIT Press Books",
 				"numPages": "256",
@@ -393,7 +371,7 @@ var testCases = [
 				"numPages": "288",
 				"place": "Cambridge, MA, USA",
 				"publisher": "Semiotext(e)",
-				"series": "Semiotext(e) / Native Agents",
+				"series": "Native Agents",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -440,6 +418,7 @@ var testCases = [
 				"place": "Cambridge, MA, USA",
 				"publisher": "MIT Press",
 				"series": "Adaptive Computation and Machine Learning series",
+				"url": "https://mitpress.mit.edu/9780262039406/foundations-of-machine-learning/",
 				"attachments": [
 					{
 						"title": "Open Access",
@@ -464,6 +443,11 @@ var testCases = [
 						"firstName": "Robin",
 						"lastName": "Mackay",
 						"creatorType": "editor"
+					},
+					{
+						"firstName": "Robin",
+						"lastName": "Mackay",
+						"creatorType": "seriesEditor"
 					}
 				],
 				"date": "2018-10-23",
@@ -474,7 +458,7 @@ var testCases = [
 				"numPages": "1020",
 				"place": "Cambridge, MA, USA",
 				"publisher": "Urbanomic",
-				"series": "Urbanomic / Collapse",
+				"series": "Collapse",
 				"shortTitle": "Collapse",
 				"volume": "8",
 				"attachments": [],
@@ -516,9 +500,10 @@ var testCases = [
 				"libraryCatalog": "MIT Press Books",
 				"numPages": "552",
 				"place": "Cambridge, MA, USA",
-				"publisher": "A Bradford Book",
+				"publisher": "MIT Press",
 				"series": "Adaptive Computation and Machine Learning series",
 				"shortTitle": "Reinforcement Learning",
+				"url": "https://mitpress.mit.edu/9780262039246/reinforcement-learning/",
 				"attachments": [
 					{
 						"title": "Open Access",
@@ -610,6 +595,37 @@ var testCases = [
 				"publisher": "MIT Press",
 				"series": "Food, Health, and the Environment",
 				"shortTitle": "Acquired Tastes",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://mitpress.mit.edu/9781915983169/building-solidarity-architectures/",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Building Solidarity Architectures: Collective Care in Times of Crisis",
+				"creators": [
+					{
+						"firstName": "Elisavet",
+						"lastName": "Hasa",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025-12-02",
+				"ISBN": "9781915983169",
+				"abstractNote": "On the spatial politics underlying the strategies of state abandonment in cities today.",
+				"language": "en",
+				"libraryCatalog": "MIT Press Books",
+				"numPages": "248",
+				"place": "Cambridge, MA, USA",
+				"publisher": "Goldsmiths Press",
+				"series": "Spatial Politics",
+				"shortTitle": "Building Solidarity Architectures",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
