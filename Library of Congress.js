@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-08-23 18:51:50"
+	"lastUpdated": "2025-08-26 16:36:31"
 }
 
 /*
@@ -36,10 +36,11 @@
 */
 
 
+const KNOWN_OKAPI_TENANT = 'ltl1000001';
+
 function detectWeb(doc, url) {
-	if (url.includes('/instances/')) {
-		let type = text(doc, 'div[class*="__metadata-type"]')
-		Z.debug(type)
+	if (getRecordID(url)) {
+		let type = text(doc, 'div[class*="__metadata-type"]');
 		switch (type) {
 			case "Book":
 				return "book";
@@ -72,46 +73,48 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
+function getRecordID(url) {
+	return new URL(url).pathname.match(/\/instances\/([^/]+)/)?.[1];
+}
 
-function getLCCN(doc){
-	let lccn = text(doc, '[data-auto="record-lccn-content"]');
-	return lccn;
+async function getOkapiTenant(doc) {
+	let scriptURL = attr(doc, 'script[type="module"][src*="/index-"]', 'src');
+	if (!scriptURL) return KNOWN_OKAPI_TENANT;
+	let scriptText = await requestText(scriptURL);
+	let okapiTenant = scriptText.match(/"X-Okapi-Tenant":("[^"]+")/)?.[1];
+	if (!okapiTenant) return KNOWN_OKAPI_TENANT;
+	return JSON.parse(okapiTenant);
 }
 
 async function doWeb(doc, url) {
+	let okapiTenant = await getOkapiTenant(doc);
 	if (detectWeb(doc, url) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
 		for (let url of Object.keys(items)) {
-			// There's an internal API, but I'm getting consistent 401 responses
-			// url = url.replace("/instances/", "/api/opac-inventory/instances/").replace(/\?.*/, "");
-			// Z.debug(url)
-			await scrape(await requestDocument(url));
+			await scrape(getRecordID(url), okapiTenant);
 		}
 	}
 	else {
-		let lccn = getLCCN(doc);
-		let marcxmlurl = "https://lccn.loc.gov/" + lccn + "/marcxml"
-		await scrapeMARC(marcxmlurl);
+		await scrape(getRecordID(url), okapiTenant);
 	}
 }
 
-async function scrapeMARC(marcxmlurl) {
-	let marcxml = await requestText(marcxmlurl);
-	Z.debug(marcxml)
-	let translate = Zotero.loadTranslator('import');
-		translate.setTranslator('edd87d07-9194-42f8-b2ad-997c4c7deefd');
-		translate.setString(marcxml);
-		translate.setHandler('itemDone', (_, item) => {});
-		[item] = await translate.translate();
-		// item.itemType = detectWeb(doc, url);
-		item.complete();
-}
+async function scrape(recordID, okapiTenant) {
+	let marcURL = `/api/opac-inventory/download-instance/${recordID}?utf=true`;
+	let marcText = await requestText(marcURL, {
+		headers: {
+			Accept: 'application/json',
+			'X-Okapi-Tenant': okapiTenant
+		}
+	});
 
-async function scrape(doc) {
-	let lccn = getLCCN(doc);
-	let marcxmlurl = "https://lccn.loc.gov/" + lccn + "/marcxml"
-	await scrapeMARC(marcxmlurl);
+	let translate = Zotero.loadTranslator('import');
+	translate.setTranslator('a6ee60df-1ddc-4aae-bb25-45e0537be973'); // MARC
+	translate.setString(marcText);
+	translate.setHandler('itemDone', () => {});
+	let [item] = await translate.translate();
+	item.complete();
 }
 
 /** BEGIN TEST CASES **/
@@ -119,7 +122,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://search.catalog.loc.gov/instances/5f9c256e-151d-5615-ad15-3d2749318cac?option=keyword&query=karcher",
-		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
@@ -151,6 +153,12 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://search.catalog.loc.gov/search?option=keyword&pageNumber=1&query=karcher&recordsPerPage=25",
+		"defer": true,
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
