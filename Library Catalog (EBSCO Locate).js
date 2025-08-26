@@ -5,7 +5,7 @@
 	"target": "/search\\?|/instances/[^/]+\\?",
 	"minVersion": "5.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 260,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
