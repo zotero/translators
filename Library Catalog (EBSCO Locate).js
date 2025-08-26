@@ -271,6 +271,71 @@ var testCases = [
 		"url": "https://usu.locate.ebsco.com/search?option=keyword&pageNumber=1&query=test&recordsPerPage=25",
 		"defer": true,
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://nalis.locate.ebsco.com/instances/0cf96b8b-80ee-5c06-94bf-23240ee6b0ef?option=keyword&pageNumber=1&query=dracula&recordsPerPage=25",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Dracula and Frankenstein are friends",
+				"creators": [
+					{
+						"firstName": "Katherine Brown",
+						"lastName": "Tegen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Doug",
+						"lastName": "Cushman",
+						"creatorType": "author"
+					}
+				],
+				"date": "2003",
+				"ISBN": "9780060001155 9780060001162",
+				"abstractNote": "Dracula and Frankenstein are friends until they both decide to have a Halloween party and Dracula misplaces Frankenstein's invitations",
+				"edition": "1st ed",
+				"libraryCatalog": "Library Catalog (EBSCO Locate)",
+				"numPages": "1",
+				"place": "New York",
+				"publisher": "HarperCollins",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Fiction"
+					},
+					{
+						"tag": "Fiction"
+					},
+					{
+						"tag": "Fiction"
+					},
+					{
+						"tag": "Fiction"
+					},
+					{
+						"tag": "Friendship"
+					},
+					{
+						"tag": "Halloween"
+					},
+					{
+						"tag": "Monsters"
+					},
+					{
+						"tag": "Parties"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://nalis.locate.ebsco.com/search?option=keyword&pageNumber=1&query=dracula&recordsPerPage=25",
+		"defer": true,
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
