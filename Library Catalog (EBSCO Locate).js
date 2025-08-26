@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-08-26 17:18:36"
+	"lastUpdated": "2025-08-26 17:21:01"
 }
 
 /*
@@ -194,7 +194,7 @@ var testCases = [
 				],
 				"date": "1952",
 				"callNumber": "TA681 .K25",
-				"libraryCatalog": "Library of Congress",
+				"libraryCatalog": "Library Catalog (EBSCO Locate)",
 				"numPages": "200",
 				"place": "Stuttgart",
 				"publisher": "Franckh",
