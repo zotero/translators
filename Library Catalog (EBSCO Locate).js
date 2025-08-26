@@ -2,14 +2,14 @@
 	"translatorID": "86c090c5-ad3f-4c54-a1f3-9870942014ac",
 	"label": "Library Catalog (EBSCO Locate)",
 	"creator": "Sebastian Karcher and Abe Jellinek",
-	"target": "",
+	"target": "/search\\?|/instances/[^/]+\\?",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-08-26 17:21:01"
+	"lastUpdated": "2025-08-26 17:23:47"
 }
 
 /*
@@ -36,6 +36,9 @@
 */
 
 function detectWeb(doc, url) {
+	if (attr(doc, 'meta[name="description"]', 'content') !== 'EBSCO Locate') {
+		return false;
+	}
 	if (getRecordID(url)) {
 		let type = text(doc, 'div[class*="__metadata-type"]');
 		switch (type) {
