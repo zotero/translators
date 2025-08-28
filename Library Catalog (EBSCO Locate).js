@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-08-26 17:23:47"
+	"lastUpdated": "2025-08-28 03:43:21"
 }
 
 /*
@@ -48,6 +48,14 @@ function detectWeb(doc, url) {
 				return "map";
 			case "Audio":
 				return "audioRecording";
+			case "Video":
+			case "Films, Videos":
+				return "videoRecording";
+			case "Image":
+				return "artwork";
+			case "Archive/Manuscript":
+			case "Textual Manuscript":
+				return "manuscript";
 			default:
 				return "book";
 		}
