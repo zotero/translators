@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "All other translator issues and requests: Post to the Zotero Forums"
+    url: https://forums.zotero.org/post/discussion
+    about: Please do not use GitHub Issues to report problems saving webpages or to request a new translator. Post to the Zotero Forums. Zotero developers will create issues as necessary in the relevant repositories.
