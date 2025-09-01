@@ -1,5 +1,5 @@
 {
-	"translatorID": "c87fcd2b-b81b-4ca5-af15-d2fe4d254b5c",
+	"translatorID": "0f81e575-3910-4ea2-8367-1077ba92719d",
 	"label": "JADE.io (Australia)",
 	"creator": "Russell Brenner",
 	"target": "^https?://([^/]+\\.)?jade\\.io/.*",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-08-31 03:25:32"
+	"lastUpdated": "2025-09-01 03:07:52"
 }
 
 /*
@@ -23,11 +23,11 @@
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
-
+i
 	Zotero is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-	GNU Affero General Public License for more details.
+	GNU Affero General Public License foriui more details.
 
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
@@ -717,6 +717,29 @@ var testCases = [
 				"docketNumber": "231",
 				"extra": "neutralCitation: [2006] NSWCA 231\nfullNeutralCitation: Australian Broadcasting Corporation v Obeid [2006] NSWCA 231",
 				"url": "https://jade.io/article/1370",
+				"attachments": [
+					{
+						"title": "JADE snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://jade.io/article/282664",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Surveying Act 2004 (Vic)",
+				"creators": [],
+				"dateEnacted": "2004",
+				"code": "AU VIC",
+				"url": "https://jade.io/article/282664",
 				"attachments": [
 					{
 						"title": "JADE snapshot",
