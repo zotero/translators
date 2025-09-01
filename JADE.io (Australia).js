@@ -1,4 +1,4 @@
-var translatorMetadata = {
+{
 	"translatorID": "c87fcd2b-b81b-4ca5-af15-d2fe4d254b5c",
 	"label": "JADE.io (Australia)",
 	"creator": "Russell Brenner",
@@ -10,7 +10,7 @@ var translatorMetadata = {
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
 	"lastUpdated": "2025-08-31 03:25:32"
-};
+}
 
 /*
 	***** BEGIN LICENSE BLOCK *****
