@@ -531,7 +531,8 @@ function scrapeCase(doc, url) {
 		// Prefer dateDecided over generic date for case items. If no full date available yet,
 		// keep the year as a fallback in dateDecided and try to improve it below.
 		if (!item.dateDecided && parsed.year) item.dateDecided = parsed.year;
-	} else {
+	}
+	else {
 		// Try to find MNC elsewhere on the page
 		parsed = findNeutralCitation(doc);
 		if (parsed) {
@@ -541,11 +542,13 @@ function scrapeCase(doc, url) {
 			item.docketNumber = parsed.number;
 			ncBareStr = `[${parsed.year}] ${parsed.courtAcronym} ${parsed.number}`;
 			item.dateDecided = item.dateDecided || parsed.year;
-		} else {
+		}
+		else {
 			const fromPage = extractCaseName(doc);
 			if (fromPage && !isGenericCaseTitle(fromPage)) {
 				item.caseName = fromPage;
-			} else {
+			}
+			else {
 				// Last resort: use URL article number
 				const urlMatch = (url || '').match(/\/article\/(\d+)/i);
 				item.caseName = urlMatch ? `JADE Article ${urlMatch[1]}` : 'Unknown Case';
@@ -555,25 +558,26 @@ function scrapeCase(doc, url) {
 		}
 	}
 
-item.url = canonical || url;
-item.abstractNote = ogDesc || "";
+	item.url = canonical || url;
+	item.abstractNote = ogDesc || "";
 
 	// Detect parallel law report citation and map to reporter fields
-const citationsHere = findLawReportCitations(doc);
-function applyParallel(prc, allList) {
-	if (!prc) return;
-	item.reporterVolume = prc.volume;
-	item.reporter = prc.reporter;
-	item.firstPage = prc.page;
-	const toAppend = (allList && allList.length) ? allList : [prc];
-	for (const c of toAppend) {
+	const citationsHere = findLawReportCitations(doc);
+	function applyParallel(prc, allList) {
+		if (!prc) return;
+		item.reporterVolume = prc.volume;
+		item.reporter = prc.reporter;
+		item.firstPage = prc.page;
+		const toAppend = (allList && allList.length) ? allList : [prc];
+		for (const c of toAppend) {
 			const seg = `${c.volume} ${c.reporter} ${c.page}`;
 			if (!parallelSegments.includes(seg)) parallelSegments.push(seg);
+		}
 	}
-}
-if (citationsHere && citationsHere.length) {
-	applyParallel(pickBestLawReport(citationsHere), citationsHere);
-	} else {
+	if (citationsHere && citationsHere.length) {
+		applyParallel(pickBestLawReport(citationsHere), citationsHere);
+	}
+	else {
 		const summaryURL = findSummaryURL(doc, url);
 		if (summaryURL) {
 			ZU.processDocuments(summaryURL, function (sd) {
