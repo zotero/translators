@@ -509,11 +509,6 @@ function scrapeCase(doc, url) {
 	const ogDesc = getMeta(doc, "og:description", "property");
 	const canonical = getCanonicalURL(doc);
 
-	Zotero.debug("JADE: OG title: " + getMeta(doc, 'og:title', 'property'));
-	Zotero.debug("JADE: Citation title: " + getMeta(doc, 'citation_title'));
-	Zotero.debug("JADE: DC.title: " + getMeta(doc, 'DC.title'));
-	Zotero.debug("JADE: First H1: " + (doc.querySelector('h1') ? doc.querySelector('h1').textContent : 'none'));
-	Zotero.debug("JADE: Body text sample: " + (doc.body ? doc.body.textContent.substring(0, 200) : 'no body'));
 
 	// Try to get better title from meta tags first
 	const betterTitle = getMeta(doc, 'citation_title') || getMeta(doc, 'DC.title') || title;
