@@ -1,15 +1,15 @@
 {
-	"translatorID": "0f81e575-3910-4ea2-8367-1077ba92719d",
+	"translatorID": "9797bd04-629f-4c3b-a1a7-5b020975d8eb",
 	"label": "JADE.io (Australia)",
 	"creator": "Russell Brenner",
-	"target": "^https?://([^/]+\\.)?jade\\.io/.*",
+	"target": "^https?://([^/]+\\\\.)?jade\\\\.io/.*",
 	"minVersion": "5.0",
 	"maxVersion": "",
-	"priority": 200,
+	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-09-01 03:07:52"
+	"lastUpdated": "2025-09-01 03:27:48"
 }
 
 /*
@@ -23,15 +23,14 @@
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
-i
+
 	Zotero is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-	GNU Affero General Public License foriui more details.
+	GNU Affero General Public License for more details.
 
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
-
 	***** END LICENSE BLOCK *****
 */
 
@@ -53,7 +52,7 @@ i
  * Author: Russell Brenner
  * Version: 1.0
  * Last Updated: 2025-08-31
- */
+*/
 
 /**
  * Normalises whitespace in text strings
@@ -740,6 +739,59 @@ var testCases = [
 				"dateEnacted": "2004",
 				"code": "AU VIC",
 				"url": "https://jade.io/article/282664",
+				"attachments": [
+					{
+						"title": "JADE snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://jade.io/article/253888",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "Lithgow City Council v Jackson",
+				"creators": [],
+				"dateDecided": "2011",
+				"court": "HCA",
+				"docketNumber": "36",
+				"extra": "neutralCitation: [2011] HCA 36\nfullNeutralCitation: Lithgow City Council v Jackson [2011] HCA 36",
+				"url": "https://jade.io/article/253888",
+				"attachments": [
+					{
+						"title": "JADE snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://jade.io/article/282518",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Residential Tenancies Act 1997 (Vic)",
+				"creators": [],
+				"dateEnacted": "1997",
+				"code": "AU VIC",
+				"url": "https://jade.io/article/282518",
 				"attachments": [
 					{
 						"title": "JADE snapshot",
