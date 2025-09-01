@@ -2,7 +2,7 @@
 	"translatorID": "9797bd04-629f-4c3b-a1a7-5b020975d8eb",
 	"label": "JADE.io (Australia)",
 	"creator": "Russell Brenner",
-	"target": "^https?://([^/]+\\\\.)?jade\\\\.io/.*",
+	"target": "^https?://([^/]+\\.)?jade\\.io/.*",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -750,12 +750,7 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	}
-]
-/** END TEST CASES **/
-
-/** BEGIN TEST CASES **/
-var testCases = [
+	},
 	{
 		"type": "web",
 		"url": "https://jade.io/article/253888",
