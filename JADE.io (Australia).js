@@ -1,4 +1,4 @@
-{
+var translatorMetadata = {
 	"translatorID": "c87fcd2b-b81b-4ca5-af15-d2fe4d254b5c",
 	"label": "JADE.io (Australia)",
 	"creator": "Russell Brenner",
@@ -10,7 +10,7 @@
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
 	"lastUpdated": "2025-08-31 03:25:32"
-}
+};
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -395,7 +395,7 @@ function extractCaseName(doc) {
 	// 3) Fallback: og:title/doc.title but cleaned
 	const title = getTitle(doc);
 	if (title) {
-		const t = getTitle(doc) || "";
+		const parsed = parseNeutralCitationFromTitle(title);
 		if (parsed && parsed.caseName) return parsed.caseName;
 		return textTrim(title.replace(/^\s*BarNet\s+Jade\s*-\s*/i, '').replace(/\s*-\s*BarNet\s+Jade.*$/i, ''));
 	}
@@ -536,27 +536,25 @@ function scrapeCase(doc, url) {
 		// Try to find MNC elsewhere on the page
 		parsed = findNeutralCitation(doc);
 		if (parsed) {
-				item.caseName = extractCaseName(doc) || title.replace(/^\s*BarNet\s+Jade\s*-\s*/i, '').replace(/\s*-\s*BarNet\s+Jade.*$/i, "");
-				caseNameStr = item.caseName;
-				item.court = parsed.courtAcronym;
+			item.caseName = extractCaseName(doc) || title.replace(/^\s*BarNet\s+Jade\s*-\s*/i, '').replace(/\s*-\s*BarNet\s+Jade.*$/i, "");
+			caseNameStr = item.caseName;
+			item.court = parsed.courtAcronym;
 			item.docketNumber = parsed.number;
 			ncBareStr = `[${parsed.year}] ${parsed.courtAcronym} ${parsed.number}`;
 			item.dateDecided = item.dateDecided || parsed.year;
-	}
-	else {
+		} else {
 			const fromPage = extractCaseName(doc);
 			if (fromPage && !isGenericCaseTitle(fromPage)) {
 				item.caseName = fromPage;
-			}
-			else {
-					// Last resort: use URL article number
+			} else {
+				// Last resort: use URL article number
 				const urlMatch = (url || '').match(/\/article\/(\d+)/i);
 				item.caseName = urlMatch ? `JADE Article ${urlMatch[1]}` : 'Unknown Case';
 			}
 			caseNameStr = item.caseName;
 			item.court = "";
+		}
 	}
-}
 
 item.url = canonical || url;
 item.abstractNote = ogDesc || "";
@@ -576,12 +574,11 @@ function applyParallel(prc, allList) {
 }
 if (citationsHere && citationsHere.length) {
 	applyParallel(pickBestLawReport(citationsHere), citationsHere);
-}
-else {
-	const summaryURL = findSummaryURL(doc, url);
-	if (summaryURL) {
+	} else {
+		const summaryURL = findSummaryURL(doc, url);
+		if (summaryURL) {
 			ZU.processDocuments(summaryURL, function (sd) {
-					// Capture MNC if still missing
+				// Capture MNC if still missing
 				if (!parsed) {
 					const nc2 = findNeutralCitation(sd);
 					if (nc2) {
@@ -591,7 +588,7 @@ else {
 						if (!item.dateDecided) item.dateDecided = nc2.year;
 					}
 				}
-					// Update case name from summary if missing/generic
+				// Update case name from summary if missing/generic
 				const cn2 = extractCaseName(sd);
 				if (cn2 && (!caseNameStr || isGenericCaseTitle(caseNameStr) || !/(?:\bv\.?\b|\bversus\b)/i.test(caseNameStr))) {
 					item.caseName = cn2;
@@ -632,23 +629,23 @@ else {
 			}
 		}
 
-			if (d) {
-				const nd = normaliseDate(d);
-				// If we have an MNC year, require the same year to avoid site publish dates
-				const yFromMNC = (parsed && parsed.year) ? String(parsed.year) : null;
-				const yFromDate = (nd && nd.match(/^(\d{4})/)) ? RegExp.$1 : null;
-				if (!yFromMNC || (yFromDate && yFromDate === yFromMNC)) {
-					item.dateDecided = nd;
-				}
+		if (d) {
+			const nd = normaliseDate(d);
+			// If we have an MNC year, require the same year to avoid site publish dates
+			const yFromMNC = (parsed && parsed.year) ? String(parsed.year) : null;
+			const yFromDate = (nd && nd.match(/^(\d{4})/)) ? RegExp.$1 : null;
+			if (!yFromMNC || (yFromDate && yFromDate === yFromMNC)) {
+				item.dateDecided = nd;
 			}
+		}
 	})();
 
 	function finalize() {
 		// Build Extra using the collected case name, MNC, and parallels
 		if (ncBareStr) {
-				const cn = (caseNameStr && !isGenericCaseTitle(caseNameStr)) ? caseNameStr : (item.caseName || '');
-				const segs = parallelSegments.length ? `; ${parallelSegments.join('; ')}` : '';
-				item.extra = `neutralCitation: ${ncBareStr}\nfullNeutralCitation: ${cn ? `${cn} ${ncBareStr}` : ncBareStr}${segs}`;
+			const cn = (caseNameStr && !isGenericCaseTitle(caseNameStr)) ? caseNameStr : (item.caseName || '');
+			const segs = parallelSegments.length ? `; ${parallelSegments.join('; ')}` : '';
+			item.extra = `neutralCitation: ${ncBareStr}\nfullNeutralCitation: ${cn ? `${cn} ${ncBareStr}` : ncBareStr}${segs}`;
 		}
 		item.attachments.push({ title: "JADE snapshot", document: doc });
 		const pdf = findPDFLink(doc);
