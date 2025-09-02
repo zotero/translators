@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-09-01 03:27:48"
+	"lastUpdated": "2025-09-02 06:34:21"
 }
 
 /*
@@ -431,6 +431,18 @@ function detectWeb(doc, url) {
 		// Default JADE article pages to case if uncertain
 		if (/\/article\/\d+/.test(url)) return "case";
 		return "case";
+	}
+
+	// Broader fallback for any jade.io page that might contain legal content
+	if (url && url.includes('jade.io')) {
+		const t = getTitle(doc) || "";
+		if (parseNeutralCitationFromTitle(t)) return "case";
+		if (/\bv\b/i.test(t)) return "case";
+		if (looksLikeLegislationTitle(t)) return "statute";
+		// Check for legal content indicators
+		if (/\b(?:court|judgment|decision|case|act|regulation|statute)\b/i.test(t)) {
+			return /\b(?:act|regulation|statute)\b/i.test(t) ? "statute" : "case";
+		}
 	}
 
 	return false;
