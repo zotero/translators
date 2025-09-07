@@ -1,7 +1,7 @@
 {
 	"translatorID": "67b93a38-5182-45e5-ab35-3b95764f6979",
 	"label": "Győr Plusz",
-	"creator": "Gemini/homope",
+	"creator": "Gemini",
 	"target": "^https?://(www\\.)?gyorplusz\\.hu",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -47,18 +47,35 @@ function scrape(doc, url) {
 	item.title = ZU.cleanString(doc.querySelector('div.content-header h1').textContent);
 	item.publicationTitle = "Győr Plusz";
 
-	const authorMeta = doc.querySelector('meta[name="author"]');
-	if (authorMeta) {
-		const authorName = authorMeta.getAttribute('content');
+	// Extract author from the new HTML structure, and fall back to the old one
+	const newAuthorElement = doc.querySelector('.author .name');
+	if (newAuthorElement) {
+		const authorName = ZU.cleanString(newAuthorElement.textContent);
 		item.creators.push(ZU.cleanAuthor(authorName, 'author'));
+	} else {
+		const authorMeta = doc.querySelector('meta[name="author"]');
+		if (authorMeta) {
+			const authorName = authorMeta.getAttribute('content');
+			item.creators.push(ZU.cleanAuthor(authorName, 'author'));
+		}
 	}
-
-	const timeElement = doc.querySelector('.article-info .time');
-	if (timeElement) {
-		const dateString = ZU.cleanString(timeElement.textContent);
+	
+	// Extract the date from the new HTML structure, and fall back to the old one
+	const newTimeElement = doc.querySelector('.author .date');
+	if (newTimeElement) {
+		const dateString = ZU.cleanString(newTimeElement.textContent);
+		// Example date string: "2025.09.05. 12:42"
 		const formattedDate = dateString.replace(/(\d{4})\.\s*(\d{2})\.\s*(\d{2})\.\s*(\d{2}:\d{2})/, '$1-$2-$3T$4:00');
 		item.date = formattedDate;
+	} else {
+		const timeElement = doc.querySelector('.article-info .time');
+		if (timeElement) {
+			const dateString = ZU.cleanString(timeElement.textContent);
+			const formattedDate = dateString.replace(/(\d{4})\.\s*(\d{2})\.\s*(\d{2})\.\s*(\d{2}:\d{2})/, '$1-$2-$3T$4:00');
+			item.date = formattedDate;
+		}
 	}
+
 
 	const leadParagraph = doc.querySelector('p.lead');
 	const abstractMeta = doc.querySelector('meta[property="og:description"]');
@@ -96,11 +113,11 @@ var testCases = [
 				"title": "Közösségi pavilont építettek Székelyföldön a győri egyetem hallgatói",
 				"creators": [
 					{
-						"lastName": "gyorplusz.hu",
+						"lastName": "Győr+",
 						"creatorType": "author"
 					}
 				],
-				"date": "2024-04-24T13:42:00",
+				"date": "2025-09-05T12:42:00",
 				"abstractNote": "A székelyföldi Abásfalván tartottak építőtábort a Pannónia Ösztöndíjprogram támogatásával a Széchenyi István Egyetem Winkler Gábor Mérnöki Szakkollégiumának hallgatói, akik egy nyitott közösségi pavilont valósítottak meg a Hargita megyei kisfaluban. A győri intézmény Építész-, Építő- és Közlekedésmérnöki Karának fiataljai nagy sikert arattak a hagyományos népi stílusból ihletődött, mégis kortárs megjelenésű faépítményükkel.",
 				"publicationTitle": "Győr Plusz",
 				"url": "https://www.gyorplusz.hu/gyor/kozossegi-pavilont-epitettek-szekelyfoldon-a-gyori-egyetem-hallgatoi/",
