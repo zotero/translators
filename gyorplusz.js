@@ -1,7 +1,7 @@
 {
 	"translatorID": "67b93a38-5182-45e5-ab35-3b95764f6979",
 	"label": "Győr Plusz",
-	"creator": "Gemini/homope",
+	"creator": "Gemini",
 	"target": "^https?://(www\\.)?gyorplusz\\.hu",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -148,4 +148,3 @@ var testCases = [
 	}
 ]
 /** END TEST CASES **/
-
