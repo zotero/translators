@@ -8,8 +8,7 @@
 	"priority": 90,
 	"inRepository": true,
 	"translatorType": 8,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-09-12 15:10:05"
+	"lastUpdated": "2025-08-03 05:38:26"
 }
 
 /*
@@ -244,7 +243,9 @@ function processCrossref(json) {
 		}
 
 		item.abstractNote = result.abstract && removeUnsupportedMarkup(result.abstract);
-		item.pages = result.page;
+		// Fall back to article number if no page number
+		// https://www.crossref.org/documentation/schema-library/markup-guide-metadata-segments/article-ids/
+		item.pages = result.page || result['article-number'];
 		item.ISBN = result.ISBN && result.ISBN.join(', ');
 		item.ISSN = result.ISSN && result.ISSN.join(', ');
 		item.issue = result.issue;
@@ -1695,6 +1696,56 @@ var testCases = [
 				"place": "Rourkela, Odisha, India",
 				"publisher": "ACM Press",
 				"url": "http://portal.acm.org/citation.cfm?doid=1947940",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"DOI": "10.1103/PhysRevB.110.245108"
+		},
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Floquet Schrieffer-Wolff transform based on Sylvester equations",
+				"creators": [
+					{
+						"creatorType": "author",
+						"firstName": "Xiao",
+						"lastName": "Wang"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Fabio Pablo Miguel",
+						"lastName": "Méndez-Córdoba"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Dieter",
+						"lastName": "Jaksch"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Frank",
+						"lastName": "Schlawin"
+					}
+				],
+				"date": "2024-12-03",
+				"DOI": "10.1103/physrevb.110.245108",
+				"ISSN": "2469-9950, 2469-9969",
+				"abstractNote": "We present a Floquet Schrieffer-Wolff transform (FSWT) to obtain effective Floquet Hamiltonians and micromotion operators of periodically driven many-body systems for any nonresonant driving frequency. The FSWT perturbatively eliminates the oscillatory components in the driven Hamiltonian by solving operator-valued Sylvester equations with systematic approximations. It goes beyond various high-frequency expansion methods commonly used in Floquet theory, as we demonstrate with the example of the driven Fermi-Hubbard model. In the limit of high driving frequencies, the FSWT Hamiltonian reduces to the widely used Floquet-Magnus result. We anticipate this method will be useful for designing Rydberg multiqubit gates, controlling correlated hopping in quantum simulations in optical lattices, and describing multiorbital and long-range interacting systems driven in-gap.                                                                Published by the American Physical Society                2024",
+				"issue": "24",
+				"journalAbbreviation": "Phys. Rev. B",
+				"language": "en",
+				"libraryCatalog": "Crossref",
+				"publicationTitle": "Physical Review B",
+				"rights": "https://creativecommons.org/licenses/by/4.0/",
+				"url": "https://link.aps.org/doi/10.1103/PhysRevB.110.245108",
+				"volume": "110",
 				"attachments": [],
 				"tags": [],
 				"notes": [],

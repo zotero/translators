@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-09 18:24:39"
+	"lastUpdated": "2025-06-10 14:42:15"
 }
 
 /*
@@ -765,6 +765,18 @@ function getAuthorFromByline(doc, newItem) {
 			}
 
 			if (isStrict && bylines.length) {
+				break;
+			}
+		}
+	}
+
+	if (!bylines.length) {
+		let otherSelectors = ['a[rel="author"]'];
+		
+		for (let selector of otherSelectors) {
+			selector += ':not(:empty)';
+			if (doc.querySelectorAll(selector).length == 1) {
+				bylines.push(doc.querySelector(selector));
 				break;
 			}
 		}
@@ -1895,6 +1907,38 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.statista.com/chart/13139/estimated-worldwide-mobile-e-commerce-sales/",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Infographic: Global Mobile E-Commerce Worth $2.2 Trillion in 2023",
+				"creators": [
+					{
+						"firstName": "Katharina",
+						"lastName": "Buchholz",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-08-10",
+				"abstractNote": "This chart shows estimated worldwide mobile e-commerce sales and their share in all e-commerce sales.",
+				"language": "en",
+				"shortTitle": "Infographic",
+				"url": "https://www.statista.com/chart/13139/estimated-worldwide-mobile-e-commerce-sales",
+				"websiteTitle": "Statista Daily Data",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],

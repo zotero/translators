@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-08 15:33:05"
+	"lastUpdated": "2025-05-30 08:40:02"
 }
 
 /*
@@ -53,8 +53,7 @@ const SCHEMA_ORG_TO_ZOTERO = new Map([
  * @param {Document} doc The page document
  */
 function detectWeb(doc, url) {
-	// Some TIND ILS sites hide the tind footer, so check if a unique tind-only component exists as well
-	if (!doc.querySelector('#tindfooter') && !doc.querySelector("#detailed-file-api-args")) {
+	if (!doc.querySelector("#tind-shibboleth")) {
 		return false;
 	}
 
@@ -388,7 +387,7 @@ var testCases = [
 				"ISBN": "9780545010221",
 				"abstractNote": "Burdened with the dark, dangerous, and seemingly impossible task of locating and destroying Voldemort's remaining Horcruxes, Harry, feeling alone and uncertain about his future, struggles to find the inner strength he needs to follow the path set out before him",
 				"callNumber": "PZ7.R79835 Hak 2007",
-				"edition": "1st ed",
+				"edition": "First edition",
 				"extra": "OCLC: ocm85443494",
 				"libraryCatalog": "University of Southern Indiana",
 				"numPages": "759",
@@ -428,7 +427,7 @@ var testCases = [
 						"tag": "Magic"
 					},
 					{
-						"tag": "Potter, Harry (Fictitious character)"
+						"tag": "Potter, Harry"
 					},
 					{
 						"tag": "Schools"

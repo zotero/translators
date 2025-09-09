@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-08-23 02:00:49"
+	"lastUpdated": "2025-06-20 17:11:32"
 }
 
 /*
@@ -78,7 +78,7 @@ function extractQueryValues(url) {
 }
 
 // Not all pages have a downloadable PDF
-function translateRIS(ris, pdfURL) {
+async function translateRIS(ris, pdfURL) {
 	var trans = Zotero.loadTranslator('import');
 	trans.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7');// https://github.com/zotero/translators/blob/master/RIS.js
 	trans.setString(ris);
@@ -92,12 +92,11 @@ function translateRIS(ris, pdfURL) {
 		}
 		item.complete();
 	});
-	trans.getTranslatorObject(function (transObject) {
-		transObject.options.fieldMap = {
-			VO: "volume"
-		};
-		transObject.doImport();
-	});
+	let transObject = await trans.getTranslatorObject();
+	transObject.options.fieldMap = {
+		VO: "volume"
+	};
+	await transObject.doImport();
 }
 
 function translateCOinS(COinS) {
@@ -107,53 +106,45 @@ function translateCOinS(COinS) {
 }
 
 // Build URL for RIS, and for PDF if available
-function scrapePage(doc, url) {
+async function scrapePage(doc, url) {
 	// We need the id= and the handle= of the current target item.
 	// From that, we can build URL for RIS.
 
 	// Check for an RIS popup link in the page.
-	var risPopupLink = getXPathStr("href", doc, '//form[@id="pagepicker"]//a[contains(@href, "PrintRequest")][1]');
-	if (risPopupLink) {
-		// Get the id from pageSelect.
-		var pageID = doc.getElementById("pageSelect").value;
-		// Get other parameters from the page URL.
-		var docParams = extractQueryValues(url);
-		// Compose the RIS link.
+	var risLink = doc.querySelector('a[href*="CitationFile?kind=ris"]');
+	if (risLink) {
+		let risURL = risLink.href;
+		let ris = await requestText(risURL);
 
-		var risURL = docParams.base
-			+ "CitationFile?kind=ris&handle=" + docParams.handle
-			+ "&id=" + pageID
-			+ "&base=js";
-		ZU.doGet(risURL, function (ris) {
-			// the PDF URL gives us a page that will refresh itself to the PDF.
-			var pdfPageURL = attr(doc, '[data-original-title*="Download PDF"]', 'href');
-			if (pdfPageURL) {
-				pdfPageURL = docParams.base + pdfPageURL;
-				// Z.debug(pdfPageURL)
-				ZU.processDocuments(pdfPageURL, function (pdfDoc) {
-					// Call to pdfPageURL prepares PDF for download via META refresh URL
-					var pdfURL = null;
-					var m = pdfDoc.querySelector('meta[http-equiv="Refresh"]');
-					// Z.debug(pdfPage)
-					// Z.debug(m)
-					if (m) {
-						var refreshURL;
-						var parts = m.getAttribute('content').split(/;\s*url=/);
-						if (parts.length === 2) {
-							refreshURL = parts[1].trim().replace(/^'(.+)'/, '$1');
-						}
-						else {
-							refreshURL = m.getAttribute('url');
-						}
-						pdfURL = docParams.base + refreshURL;
+		let pdfURL = null;
+		// the PDF URL gives us a page that will refresh itself to the PDF.
+		let pdfPageURL = doc.querySelector('[data-original-title*="Download PDF"]')?.href; // Resolve relative to current page
+		if (pdfPageURL) {
+			try {
+				let pdfDoc = await requestDocument(pdfPageURL);
+
+				// Call to pdfPageURL prepares PDF for download via META refresh URL
+				let m = pdfDoc.querySelector('meta[http-equiv="Refresh"]');
+				// Z.debug(pdfPage)
+				// Z.debug(m)
+				if (m) {
+					let refreshURL;
+					let parts = m.getAttribute('content').split(/;\s*url=/);
+					if (parts.length === 2) {
+						refreshURL = parts[1].trim().replace(/^'(.+)'/, '$1');
 					}
-					translateRIS(ris, pdfURL);
-				});
+					else {
+						refreshURL = m.getAttribute('url');
+					}
+					pdfURL = new URL(refreshURL, pdfPageURL).toString();
+					Z.debug('PDF URL ' + pdfURL);
+				}
 			}
-			else {
-				translateRIS(ris);
+			catch (e) {
+				Zotero.debug(e);
 			}
-		}, null);
+		}
+		await translateRIS(ris, pdfURL);
 	}
 	else {
 		// No RIS available in page, try COinS
@@ -184,21 +175,16 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) === "multiple") {
-		Zotero.selectItems(getSearchResults(doc), function (items) {
-			if (!items) {
-				return;
-			}
-			var urls = [];
-			for (var i in items) {
-				urls.push(i);
-			}
-			ZU.processDocuments(urls, scrapePage);
-		});
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrapePage(await requestDocument(url));
+		}
 	}
 	else {
-		scrapePage(doc, url);
+		await scrapePage(doc, url);
 	}
 }
 
