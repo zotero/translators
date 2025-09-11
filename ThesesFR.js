@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-09-11 14:41:48"
+	"lastUpdated": "2025-09-11 15:43:56"
 }
 
 /*
@@ -158,12 +158,13 @@ async function scrape(doc, url = doc.location.href) {
 		newItem.tags.push(tag);
 	});
 
-	// Try to get a PDF
-	// This will work if the /document/ endpoint redirects straight to a PDF
-	// (but it doesn't always)
+	// Try to get a PDF link from the page, fall back to API endpoint
+	// that will usually (but not always) work
+	let pdfURL = attr(doc, 'a.thesis-access-buttons[href$=".pdf"]', 'href')
+		|| '/api/v1/document' + pathname;
 	newItem.attachments.push({
 		title: 'Full Text PDF',
-		url: '/api/v1/document/' + pathname,
+		url: pdfURL,
 		mimeType: 'application/pdf',
 	});
 
@@ -339,6 +340,60 @@ var testCases = [
 					},
 					{
 						"tag": "World Trade Organization (WTO)"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://theses.fr/2005REIMS006",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "Quelques aspects de la nucléation des bulles de Champagne dans une flûte et de leur ascension à petits nombres de Reynolds",
+				"creators": [
+					{
+						"firstName": "Cédric",
+						"lastName": "Voisin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Philippe",
+						"lastName": "Jeandet",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2005-01-01",
+				"abstractNote": "Ce travail de trois ans s'est focalisé sur la genèse et les premiers instants des bulles de Champagne en conditions de consommation, c'est-à-dire dans une flûte. Cette thèse suit chronologiquement la naissance de la bulle. Après un court chapitre (chapitre 2) consacré au matériel et aux méthodes utilisés, la naissance des bulles est présentée en détail (chapitre 3). Ce chapitre amène sous les projecteurs de petits objets solides, les fibres, dans lesquels la formation de la bulle a lieu. L'étude de cette formation dans certains cas simples fait l'objet du chapitre 4 et montre l'importance de la connaissance de la forme des fibres, qui est donc étudiée au chapitre 5. Lorsque la bulle est mûre pour sortir de sa fibre, elle éclot et se libère soudainement. Cette éjection de la bulle est décrite en détail au chapitre 6. Enfin, après sa libération, la bulle commence son ascension vers la surface du verre. Il apparaît que les tout débuts de cette ascension sont marqués par la proximité d'un environnement perturbant jusqu'ici ignoré. Le chapitre 7 est donc dédié aux deux premiers millimètres de la vie de la bulle sevrée. Le dernier chapitre (chapitre 8) dresse un bilan du travail effectué et des perspectives ouvertes.",
+				"libraryCatalog": "theses.fr",
+				"rights": "Licence Etalab",
+				"thesisType": "These de doctorat",
+				"university": "Reims",
+				"url": "https://theses.fr/2005REIMS006",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Bulles"
+					},
+					{
+						"tag": "Effervescence,interfaces,optique"
+					},
+					{
+						"tag": "Fibres cellulosiques"
+					},
+					{
+						"tag": "Nucléation"
+					},
+					{
+						"tag": "Vin de Champagne"
 					}
 				],
 				"notes": [],
