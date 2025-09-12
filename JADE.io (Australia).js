@@ -1,6 +1,6 @@
 {
 	"translatorID": "9797bd04-629f-4c3b-a1a7-5b020975d8eb",
-	"label": "JADE.io (Australia)",
+	"label": "BarNet Jade",
 	"creator": "Russell Brenner",
 	"target": "^https?://([^/]+\\.)?jade\\.io/.*",
 	"minVersion": "5.0",
