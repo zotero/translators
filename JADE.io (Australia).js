@@ -74,7 +74,7 @@ function textTrim(s) {
  * @returns {string|null} - The content attribute value or null if not found
  */
 function getMeta(doc, name, prop = "name") {
-	return ZU.xpathText(doc, `//meta[@${prop}="${name}"]/@content`) || null;
+	return attr(doc, `meta[${prop}="${name}"]`, "content");
 }
 
 /**
