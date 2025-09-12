@@ -712,7 +712,7 @@ function scrapeStatute(doc, url) {
 	item.attachments.push({ title: "JADE snapshot", document: doc });
 
 	const pdf = findPDFLink(doc);
-	if (pdf) item.attachments.push({ title: "PDF", url: pdf, mimeType: "application/pdf" });
+	if (pdf) item.attachments.push({ title: "Full Text PDF", url: pdf, mimeType: "application/pdf" });
 
 	item.complete();
 }
