@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-11-21 21:03:01"
+	"lastUpdated": "2025-09-17 16:29:28"
 }
 
 /*
@@ -53,15 +53,15 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var results = getSearchResults(doc);
-		Zotero.selectItems(results.ids, function (ids) {
+		Zotero.selectItems(results, function (ids) {
 			if (!ids) {
 				return true;
 			}
 			var pmcids = [];
 			for (var i in ids) {
-				pmcids.push(i);
+				pmcids.push(i.replace("PMC", ""));
 			}
-			lookupPMCIDs(pmcids, doc, results.pdfs);
+			lookupPMCIDs(pmcids);
 			return true;
 		});
 	}
@@ -81,7 +81,7 @@ function doWeb(doc, url) {
 				
 		if (pdf) pdfCollection[pmcid] = pdf;
 			
-		lookupPMCIDs([pmcid], doc, pdfCollection);
+		lookupPMCIDs([pmcid], pdfCollection);
 	}
 }
 
@@ -97,35 +97,24 @@ function getPDF(doc, xpath) {
 }
 
 function getSearchResults(doc, checkOnly) {
-	var articles = doc.getElementsByClassName('rprt'),
-		ids = {},
-		pdfCollection = {},
-		found = false;
-	for (var i = 0; i < articles.length; i++) {
-		var article = articles[i],
-			pmcid = ZU.xpathText(article, './/dl[@class="rprtid"]/dd');
-		if (pmcid) pmcid = pmcid.match(/PMC([\d]+)/);
-		if (pmcid) {
-			if (checkOnly) return true;
-			
-			var title = ZU.xpathText(article, './/div[@class="title"]');
-			var pdf = getPDF(article, './/div[@class="links"]/a'
-				+ '[@class="view" and contains(@href,".pdf")][1]');
-			const cb = article.querySelector('input[type=checkbox]');
-			ids[pmcid[1]] = {
-				title,
-				checked: cb && cb.checked,
-			};
-			
-			found = true;
-			
-			if (pdf) pdfCollection[pmcid[1]] = pdf;
-		}
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('.articles .docsum-link');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		// Prefix with PMC to stop the keys from being sorted numerically...
+		let pmcid = "PMC" + getPMCID(href);
+		if (!pmcid) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[pmcid] = title;
 	}
-	return found ? { ids: ids, pdfs: pdfCollection } : false;
+	return found ? items : false;
 }
 
-function lookupPMCIDs(ids, doc, pdfLink) {
+function lookupPMCIDs(ids, pdfLink) {
 	var newUri = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&retmode=xml&id="
 		+ encodeURIComponent(ids.join(","));
 	Zotero.debug(newUri);
@@ -242,32 +231,27 @@ function lookupPMCIDs(ids, doc, pdfLink) {
 				}
 			}
 
-			var linkurl = "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC" + ids[i] + "/";
+			var linkurl = "https://pmc.ncbi.nlm.nih.gov/articles/PMC" + ids[i] + "/";
 			newItem.url = linkurl;
 			newItem.attachments = [{
 				url: linkurl,
-				title: "PubMed Central Link",
+				title: "Catalog Page",
 				mimeType: "text/html",
 				snapshot: false
 			}];
 			
 			let pdfFileName;
 			if (pdfLink) {
+				Zotero.debug("Got PDF link from page");
 				pdfFileName = pdfLink[ids[i]];
 			}
-			else if (ZU.xpathText(article, 'selfuri/@xlinktitle') == "pdf") {
-				pdfFileName = "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC"
-				+ ids[i] + "/pdf/" + ZU.xpathText(article, 'selfuri/@xlinkhref');
-			}
-			else if (ZU.xpathText(article, 'articleid[@pubidtype="publisherid"]')) {
-				// this should work on most multiples
-				pdfFileName = "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC"
-				+ ids[i] + "/pdf/" + ZU.xpathText(article, 'articleid[@pubidtype="publisherid"]') + ".pdf";
+			else {
+				pdfFileName = `https://pmc.ncbi.nlm.nih.gov/articles/PMC${ids[i]}/pdf`;
 			}
 			
 			if (pdfFileName) {
 				newItem.attachments.push({
-					title: "PubMed Central Full Text PDF",
+					title: "Full Text PDF",
 					mimeType: "application/pdf",
 					url: pdfFileName
 				});
