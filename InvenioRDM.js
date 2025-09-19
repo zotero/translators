@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-20 14:43:12"
+	"lastUpdated": "2025-09-18 15:10:52"
 }
 
 /*
@@ -199,8 +199,8 @@ async function scrape(doc, url) {
 			item.notes.push({ note: item.extra });
 			item.extra = "";
 		}
-		if (!ZU.fieldIsValidForType('DOI', item.itemType) && doi) {
-			item.extra = "DOI: " + doi;
+		if (!item.DOI && doi) {
+			item.DOI = doi;
 		}
 
 		//get PDF attachment, otherwise just snapshot.
@@ -284,7 +284,6 @@ var testCases = [
 				"date": "2016-06-03",
 				"abstractNote": "Modern day manufacturers research and develop vehicles that are equipped\nwith steering assist to help drivers undertake manoeuvres. However the lack of\nresearch for a situation where one tie-rod experiences different strains than the\nopposite one leads to failure in the tie-rod assembly and misalignment in the wheels over time. The performance of the steering system would be improved if this information existed. This bachelor’s dissertation looks into this specific situation and conducts an examination on the tie-rods.\nA simple kinematic model is used to determine how the steering system moves\nwhen there is a steering input. An investigation has been conducted to determine how the system’s geometry affects the strains.\nThe experiment vehicle is a Formula Student car which is designed by the\nstudents of Coventry University. The tests performed show the difference in situations where the two front tyres are on a single surface, two different surfaces – one with high friction, the other with low friction and a situation where there’s an obstacle in the way of one of the tyres.\nThe experiment results show a major difference in strain in the front tie-rods in\nthe different situations. Interesting conclusions can be made due to the results for the different surface situation where one of the tyres receives similar results in bothcompression and tension, but the other one receives results with great difference.\nThis results given in the report can be a starting ground and help with the\nimprovement in steering systems if more research is conducted.",
 				"archive": "Zenodo",
-				"extra": "DOI: 10.5281/zenodo.54766",
 				"libraryCatalog": "Zenodo",
 				"url": "https://zenodo.org/records/54766",
 				"attachments": [
@@ -319,7 +318,6 @@ var testCases = [
 				],
 				"date": "2015-09-17",
 				"abstractNote": "Guides you through important steps in developing relevant visualizations by showcasing the work of PASTEUR4OA to develop visualizations from ROARMAP.",
-				"extra": "DOI: 10.5281/zenodo.54747",
 				"url": "https://zenodo.org/records/54747",
 				"attachments": [
 					{
@@ -344,11 +342,7 @@ var testCases = [
 						"tag": "ROARMAP"
 					}
 				],
-				"notes": [
-					{
-						"note": "Funding by European Commission ROR 00k4n6c32."
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
@@ -374,7 +368,6 @@ var testCases = [
 				],
 				"date": "2002-11-26",
 				"abstractNote": "FIGURES 8-11. Savignia naniplopi sp. nov., female paratype. 8, epigyne, ventral view; 9, epigyne, posterior view; 10, epigyne, lateral view; 11, cleared vulva, ventral view. Scale bar: 8-10, 0.30 mm; 11, 0.13 mm.",
-				"extra": "DOI: 10.5281/zenodo.14837",
 				"libraryCatalog": "Zenodo",
 				"shortTitle": "Figures 8-11 in A new Savignia from Cretan caves (Araneae",
 				"url": "https://zenodo.org/records/14837",
@@ -435,7 +428,6 @@ var testCases = [
 				"date": "2014-09-04",
 				"ISBN": "9783943460728",
 				"abstractNote": "The comparison of sound sequences (words, morphemes) constitutes the core of many techniques and methods in historical linguistics. With the help of these techniques, corresponding sounds can be determined, historically related words can be identified, and the history of languages can be uncovered. So far, the application of traditional techniques for sequence comparison is very tedious and time-consuming, since scholars have to apply them manually, without computational support. In this study, algorithms from bioinformatics are used to develop computational methods for sequence comparison in historical linguistics. The new methods automatize several steps of the traditional comparative method and can thus help to ease the painstaking work of language comparison.",
-				"extra": "DOI: 10.5281/zenodo.11879",
 				"libraryCatalog": "Zenodo",
 				"place": "Düsseldorf",
 				"publisher": "Düsseldorf University Press",
@@ -617,7 +609,6 @@ var testCases = [
 				"date": "2017-11-13",
 				"abstractNote": "an R package for generating and working with codemeta",
 				"company": "Zenodo",
-				"extra": "DOI: 10.5281/zenodo.1048320",
 				"libraryCatalog": "Zenodo",
 				"shortTitle": "ropensci/codemetar",
 				"url": "https://zenodo.org/records/1048320",
@@ -771,8 +762,7 @@ var testCases = [
 					}
 				],
 				"date": "2023-11-28",
-				"abstractNote": "Dieser Datensatz beinhaltet die Rohdaten, die für die Produktion des Lernvideos verwendet wurden. Diese bestehen aus den Videoaufzeichnungen, den Präsentationsfolien und der H5P-Datei. Rohdaten und Lernvideo wurden für Lehrzwecke für die VU Konstruktionswerkstoffe [206.455] erstellt. Im Video wird die Herstellung von Probekörpern (Würfel, Balken) aus Textilbeton gezeigt.",
-				"extra": "DOI: 10.3217/7cqqh-nma57",
+				"abstractNote": "Dieser Datensatz beinhaltet die Rohdaten, die für die Produktion des Lernvideos verwendet wurden. Diese bestehen aus den Videoaufzeichnungen, den Präsentationsfolien und der H5P-Datei. Rohdaten und Lernvideo wurden für Lehrzwecke für die VU Konstruktionswerkstoffe [206.455] erstellt. Im Video wird die Herstellung von Probekörpern (Würfel, Balken) aus Textilbeton gezeigt.\n\nBei diesem Datensatz handelt es sich um eine freie Bildungsressource (Open Educational Ressource - OER).",
 				"language": "deu",
 				"libraryCatalog": "InvenioRDM",
 				"shortTitle": "Rohdaten zum Lernvideo",
@@ -871,8 +861,8 @@ var testCases = [
 				"url": "https://ultraviolet.library.nyu.edu/records/vje3m-6z249",
 				"attachments": [
 					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
