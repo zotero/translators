@@ -15,9 +15,9 @@
 
 /*
 	***** BEGIN LICENSE BLOCK *****
- 
+ 	This code is in the public domain
 	This file is part of Zotero.
- 
+	
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -57,21 +57,15 @@ async function scrape(doc, url) {
 
 	if (url.includes("/article/")) { // If article is an article and not just a page
 		// Title
-		const titleNode = doc.querySelector("#sectionleveltabtitlearea h2");
-		if (titleNode) item.title = titleNode.textContent.trim();
+		headline = JSON.parse(doc.querySelector('script[type="application/ld+json"]').textContent).headline || null;
+		if (headline) item.title = ZU.trimInternal(headline);
 
 		// Persistent link
 		const linkNode = doc.querySelector("#sectionleveltabpersistentlinkarea .persistentlinkurl");
-		item.url = linkNode ? linkNode.textContent.trim() : url;
-
-		// Abstract + Full Text
-		const paragraphs = Array.from(doc.querySelectorAll("#pagesectionstextcontainer p")).map(p => p.textContent.trim()).filter(Boolean);
-		if (paragraphs.length) {
-			item.abstractNote = paragraphs[0];
-			item.extra = "Full Text:\n" + paragraphs.join("\n\n");
-		}
+		item.url = linkNode ? ZU.trimInternal(linkNode.textContent) : url;
 
 		// Language detection
+		const paragraphs = Array.from(doc.querySelectorAll("#pagesectionstextcontainer p")).map(p => p.textContent.trim()).filter(Boolean);
 		const sampleText = paragraphs.join(" ").slice(0, 1000); // Analyze first 1000 characters
 		item.language = detectLanguageFromText(sampleText);
 
@@ -84,8 +78,8 @@ async function scrape(doc, url) {
 	}
 
 	// Date from <title>
-	const pubMatch = doc.title.match(/\|\s*(\d{1,2} (January|February|March|April|May|June|July|August|September|October|November|December) \d{4})\s*\|/);
-	if (pubMatch) item.date = pubMatch[1];
+	const date = ZU.trimInternal(doc.querySelector('li.breadcrumb-item:nth-child(3)').textContent);
+	if (date) item.date = date;
 
 	// Get publication
 	const nliScript = doc.querySelector('script#nlijs');
