@@ -57,7 +57,7 @@ async function scrape(doc, url) {
 
 	if (url.includes("/article/")) { // If article is an article and not just a page
 		// Title
-		headline = JSON.parse(doc.querySelector('script[type="application/ld+json"]').textContent).headline || null;
+		const headline = JSON.parse(doc.querySelector('script[type="application/ld+json"]').textContent).headline || null;
 		if (headline) item.title = ZU.trimInternal(headline);
 
 		// Persistent link
