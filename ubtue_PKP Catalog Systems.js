@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-05-16 07:52:02"
+	"lastUpdated": "2025-10-07 07:40:34"
 }
 
 /*
@@ -124,6 +124,18 @@ function scrape(doc, url) {
 					item.creators.push(ZU.cleanAuthor(authorsList[i], "author"));
 				}
 			}
+		} else if (item.creators.length == 1) {
+			// In some cases the author list in the metadata is incomplete, so double check
+            potentiallyAdditionalAuthorsString = doc.querySelector(".item.authors .authors");
+			if (potentiallyAdditionalAuthorsString) {
+				let authorsList = potentiallyAdditionalAuthorsString.textContent.split(',');
+				if (authorsList.length > item.creators.length) {
+					item.creators = [];
+				    for (let i = 0; i < authorsList.length; i++) {
+					    item.creators.push(ZU.cleanAuthor(authorsList[i], "author"));
+				    }
+				}
+			}
 		}
 
 		// OJS journal abbreviations are rarely correct. sometimes they're
@@ -221,9 +233,9 @@ function scrape(doc, url) {
 			}
 		}
 
-        let article_type = ZU.xpathText(doc, '//meta[@name="DC.Type.articleType"]/@content')
-        if (article_type.match(/(Recensioni)|(Recensiones)/))
-            item.tags.push("Book Review");
+		let article_type = ZU.xpathText(doc, '//meta[@name="DC.Type.articleType"]/@content')
+		if (article_type.match(/(Recensioni)|(Recensiones)/))
+			item.tags.push("Book Review");
 
 		item.complete();
 	});
@@ -233,7 +245,6 @@ function scrape(doc, url) {
 		trans.doWeb(doc, url);
 	});
 }
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
