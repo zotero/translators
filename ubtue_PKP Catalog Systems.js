@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-07 09:24:47"
+	"lastUpdated": "2025-10-07 09:31:42"
 }
 
 /*
@@ -128,7 +128,7 @@ function scrape(doc, url) {
 			// In some cases the author list in the metadata is incomplete, so double check
 			potentiallyAdditionalAuthorsString = doc.querySelector(".item.authors .authors");
 			if (potentiallyAdditionalAuthorsString) {
-				let authorsList = potentiallyAdditionalAuthorsString.textContent.split(/,|und/);
+				let authorsList = potentiallyAdditionalAuthorsString.textContent.split(/,|\s+und\s+/);
 				if (authorsList.length > item.creators.length) {
 					item.creators = [];
 					for (let i = 0; i < authorsList.length; i++) {
