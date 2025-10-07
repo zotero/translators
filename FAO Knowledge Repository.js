@@ -232,13 +232,13 @@ async function addPDFAttachment(item, json) {
 }
 
 function determineItemType(json) {
-	/* Map dc.type to Zotero item types.
-	Mapping scheme:
-	- Book (series); Book (stand-alone); Booklet --> Book
-	- Presentation --> Presentation
-	- Meeting --> Conference paper
-	- Document; Infographic; Poster, banner --> Document
-	- Journal, magazine, bulletin; Brochure, flyer, fact-sheet; Document; Project --> Report */
+	// Map dc.type to Zotero item types.
+	// Mapping scheme:
+	// - Book (series); Book (stand-alone); Booklet --> Book
+	// - Presentation --> Presentation
+	// - Meeting --> Conference paper
+	// - Document; Infographic; Poster, banner --> Document
+	// - Journal, magazine, bulletin; Brochure, flyer, fact-sheet; Document; Project --> Report
 	if (json.metadata['dc.type'] && json.metadata['dc.type'][0]) {
 		let dcType = json.metadata['dc.type'][0].value.toLowerCase();
 		if (dcType.includes('book')) return 'book';
