@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-07 07:40:34"
+	"lastUpdated": "2025-10-07 09:24:47"
 }
 
 /*
@@ -126,14 +126,14 @@ function scrape(doc, url) {
 			}
 		} else if (item.creators.length == 1) {
 			// In some cases the author list in the metadata is incomplete, so double check
-            potentiallyAdditionalAuthorsString = doc.querySelector(".item.authors .authors");
+			potentiallyAdditionalAuthorsString = doc.querySelector(".item.authors .authors");
 			if (potentiallyAdditionalAuthorsString) {
-				let authorsList = potentiallyAdditionalAuthorsString.textContent.split(',');
+				let authorsList = potentiallyAdditionalAuthorsString.textContent.split(/,|und/);
 				if (authorsList.length > item.creators.length) {
 					item.creators = [];
-				    for (let i = 0; i < authorsList.length; i++) {
-					    item.creators.push(ZU.cleanAuthor(authorsList[i], "author"));
-				    }
+					for (let i = 0; i < authorsList.length; i++) {
+						item.creators.push(ZU.cleanAuthor(authorsList[i], "author"));
+					}
 				}
 			}
 		}
