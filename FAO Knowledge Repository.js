@@ -73,19 +73,21 @@ async function scrapeItem(url) {
 		// Connect title and subtitle with '. ' unless the title ends with '?' or '!'.
 		if (json.metadata['dc.title.subtitle']) {
 			let titleLastChar = json.metadata['dc.title'][0].value.slice(-1);
-			if (titleLastChar == '?' || titleLastChar == '!' ) {
+			if (titleLastChar == '?' || titleLastChar == '!') {
 				item.title = json.metadata['dc.title'][0].value + ' ' + json.metadata['dc.title.subtitle'][0].value;
-			} else {
+			}
+			else {
 				item.title = json.metadata['dc.title'][0].value + '. ' + json.metadata['dc.title.subtitle'][0].value;
 			}
-		} else {
+		}
+		else {
 			item.title = json.metadata['dc.title'][0].value;
 		}
 	}
 	
 	if (json.metadata['dc.contributor.author']) {
 		for (let author of json.metadata['dc.contributor.author']) {
-			let authorList = author.value.split(';');	
+			let authorList = author.value.split(';');
 			for (let authorName of authorList) {
 				authorName = authorName.trim();
 				if (!authorName) continue;
@@ -168,7 +170,7 @@ async function scrapeItem(url) {
 	
 	if (json.metadata['dc.description.abstract']) {
 		item.abstractNote = json.metadata['dc.description.abstract'][0].value;
-	}	
+	}
 
 	// Add PDF attachment if available
 	await addPDFAttachment(item, json, uuid);
@@ -188,7 +190,7 @@ async function scrapeItem(url) {
 	}
 
 	if (json.metadata['fao.meetingsessionnumber']) {
-		item.extra = item.extra + 'Meeting Session Number: ' + json.metadata['fao.meetingsessionnumber'][0].value + '\n'; 
+		item.extra = item.extra + 'Meeting Session Number: ' + json.metadata['fao.meetingsessionnumber'][0].value + '\n';
 	}
 
 	if (json.metadata['fao.meetingdate']) {
@@ -202,7 +204,7 @@ async function scrapeItem(url) {
 	item.complete();
 }
 
-async function addPDFAttachment(item, json, uuid) {
+async function addPDFAttachment(item, json) {
 	// Fetch bundles to find PDF
 	let bundlesUrl = json._links.bundles.href;
 	let bundles = await requestJSON(bundlesUrl);
@@ -211,7 +213,7 @@ async function addPDFAttachment(item, json, uuid) {
 		for (let bundle of bundles._embedded.bundles) {
 			if (bundle.name === 'ORIGINAL') {
 				let bitstreamsUrl = bundle._links.bitstreams.href;
-				let bitstreams = await requestJSON(bitstreamsUrl);		
+				let bitstreams = await requestJSON(bitstreamsUrl);
 				if (bitstreams._embedded && bitstreams._embedded.bitstreams) {
 					for (let bitstream of bitstreams._embedded.bitstreams) {
 						if (bitstream.name.toLowerCase().endsWith('.pdf')) {
@@ -230,6 +232,7 @@ async function addPDFAttachment(item, json, uuid) {
 }
 
 function determineItemType(json) {
+
 	/* Map dc.type to Zotero item types.
 	Mapping scheme:
 	- Book (series); Book (stand-alone); Booklet --> Book
