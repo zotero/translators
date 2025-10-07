@@ -9,12 +9,12 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-07 13:16:54"
+	"lastUpdated": "2025-10-07 17:56:08"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
-	Copyright © 2017 Bin Liu
+	Copyright © 2025 Bin Liu
 	This file is part of Zotero.
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
