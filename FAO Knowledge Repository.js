@@ -232,7 +232,6 @@ async function addPDFAttachment(item, json) {
 }
 
 function determineItemType(json) {
-
 	/* Map dc.type to Zotero item types.
 	Mapping scheme:
 	- Book (series); Book (stand-alone); Booklet --> Book
