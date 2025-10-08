@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2025-04-03 15:42:25"
+	"lastUpdated": "2025-09-30 22:45:28"
 }
 
 /*
@@ -73,10 +73,12 @@ function doImport() {
 			item.itemType = "bookSection";
 			break;
 		case 'audio':
+		case 'audios':
 		case 'sound_recording':
 			item.itemType = "audioRecording";
 			break;
 		case 'video':
+		case 'videos':
 		case 'dvd':
 			item.itemType = "videoRecording";
 			break;
@@ -95,25 +97,32 @@ function doImport() {
 			break;
 		case 'thesis':
 		case 'dissertation':
+		case 'dissertations':
 			item.itemType = "thesis";
 			break;
 		case 'archive_manuscript':
+		case 'archival_materials':
+		case 'manuscripts':
+		case 'archival_material_manuscript':
 		case 'object':
 			item.itemType = "manuscript";
 			break;
 		case 'map':
+		case 'maps':
 			item.itemType = "map";
 			break;
 		case 'reference_entry':
 			item.itemType = "encyclopediaArticle";
 			break;
 		case 'image':
+		case 'images':
 			item.itemType = "artwork";
 			break;
 		case 'newspaper_article':
 			item.itemType = "newspaperArticle";
 			break;
 		case 'conference_proceeding':
+		case 'conference_proceedings':
 			item.itemType = "conferencePaper";
 			break;
 		default:
