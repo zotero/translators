@@ -34,6 +34,13 @@
 	***** END LICENSE BLOCK *****
 */
 
+/*
+***** BEGIN ATTRIBUTION BLOCK *****
+This translator was developed by Dandelion Good.
+
+If you do any work on this translator, please add yourself here <3.
+*/
+
 var urlBase = "https://theanarchistlibrary.org/";
 
 function getListItems(doc, url) {
