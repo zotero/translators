@@ -52,7 +52,68 @@ function getSearchItems(doc, url) {
 }
 
 function getLibraryItem(doc, url) {
+	let item = new Zotero.Item('webpage');
+		
+	let itemType = doc.head.querySelector('[property~="og:type"]').content
+	const tagNodeList = doc.head.querySelectorAll(`[property~="og:${itemType}:tag"]`);
+	let description = doc.head.querySelector('[property~="og:description"]').content
+	let author = doc.head.querySelector(`[property~="og:${itemType}:author"]`).content;
+	let authorFirstName = author.substring(0, author.indexOf(' '));
+	let authorLastName = author.substring(author.indexOf(' ') + 1);
+	item.creators.push({"creatorType": "author", "firstName": authorFirstName, "lastName": authorLastName}); 
+	
+	if (description) {
+		item.description = description;
+		// misses https://theanarchistlibrary.org/library/leo-tolstoy-the-complete-works-of-count-tolstoy-volume-12
+		let re = /(?<=[Tt]ranslated(?: +to [Ee]nglish)? +by ).*$/u;
+		let translated_match = description.match(re);
+		if (translated_match) {
+			let translator = {"creatorType": "translator",};
+			if (translated_match[0].match(/ /)) {
+				translator["firstName"] = translated_match[0].substring(0, translated_match.indexOf(' '));
+				translator["lastName"] = translated_match[0].substring(translated_match.indexOf(' ') + 1);
 
+			} else {
+				translator["lastName"] = translated_match[0];
+			}
+			item.creators.push(translator);
+		}
+	}
+	
+	date = getPreambleVal(doc, "textdate");
+	let notes = getPreambleVal(doc, "preamblenotes")
+	// misses link here: https://theanarchistlibrary.org/library/margaret-killjoy-it-s-time-to-build-resilient-communities
+	let source = getPreambleVal(doc, "preamblesrc")
+
+	let tags = []
+	for (let i = 0; i < tagNodeList.length; i++) {
+		tags = tags.concat(tagNodeList[i].content)
+	}
+
+	let title = doc.head.querySelector('[property~="og:title"][content]').content;
+	item.title = title;
+	item.tags = tags;
+	if (notes) {
+		item.notes.push({"note": notes.trim()})
+	}
+	if (source) {
+		item.notes.push({"note": `Source: ${source.trim()}`})
+	}
+	item.attachments = [{
+		"document": doc,
+		"title": "Snapshot",
+		"snapshot": true
+	},
+	{
+		"title": "Epub",
+		"url": `${doc.location.href}.epub`
+	},
+	// ToDo: Do this conditionally
+	{
+		"title": "Latex",
+		"url": `${doc.location.href}.tex`
+	}];
+	return item
 }
 
 var listRe = new RegExp(String.raw`${urlBase}(category/topic/|category/author/|latest|popular)`);
@@ -90,67 +151,7 @@ function doWeb(doc, url) {
 	let language = languageNames.of(attr(doc, "html", "lang"))
 	// ToDo: Error handling
 	if (url.match(libraryRe)) {
-		item = new Zotero.Item('webpage');
-		
-		let itemType = doc.head.querySelector('[property~="og:type"]').content
-		const tagNodeList = doc.head.querySelectorAll(`[property~="og:${itemType}:tag"]`);
-		let description = doc.head.querySelector('[property~="og:description"]').content
-		let author = doc.head.querySelector(`[property~="og:${itemType}:author"]`).content;
-		let authorFirstName = author.substring(0, author.indexOf(' '));
-		let authorLastName = author.substring(author.indexOf(' ') + 1);
-		item.creators.push({"creatorType": "author", "firstName": authorFirstName, "lastName": authorLastName}); 
-		
-		if (description) {
-			item.description = description
-			// misses https://theanarchistlibrary.org/library/leo-tolstoy-the-complete-works-of-count-tolstoy-volume-12
-			let re = /(?<=[Tt]ranslated(?: +to [Ee]nglish)? +by ).*$/u
-			let translated_match = description.match(re)
-			if (translated_match) {
-				let translator = {"creatorType": "translator",}
-				if (translated_match[0].match(/ /)) {
-					translator["firstName"] = translated_match[0].substring(0, translated_match.indexOf(' '));
-					translator["lastName"] = translated_match[0].substring(translated_match.indexOf(' ') + 1);
-
-				} else {
-					translator["lastName"] = translated_match[0]
-				}
-				item.creators.push(translator)
-			}
-		}
-		
-		date = getPreambleVal(doc, "textdate")
-		let notes = getPreambleVal(doc, "preamblenotes")
-		// misses link here: https://theanarchistlibrary.org/library/margaret-killjoy-it-s-time-to-build-resilient-communities
-		let source = getPreambleVal(doc, "preamblesrc")
-
-		let tags = []
-		for (let i = 0; i < tagNodeList.length; i++) {
-			tags = tags.concat(tagNodeList[i].content)
-		}
-
-		let title = doc.head.querySelector('[property~="og:title"][content]').content;
-		item.title = title;
-		item.tags = tags;
-		if (notes) {
-			item.notes.push({"note": notes.trim()})
-		}
-		if (source) {
-			item.notes.push({"note": `Source: ${source.trim()}`})
-		}
-		item.attachments = [{
-			"document": doc,
-			"title": "Snapshot",
-			"snapshot": true
-		},
-		{
-			"title": "Epub",
-			"url": `${doc.location.href}.epub`
-		},
-		// ToDo: Do this conditionally
-		{
-			"title": "Latex",
-			"url": `${doc.location.href}.tex`
-		}];
+		item = getLibraryItem(doc, url)
 	} else if (url.match(listRe) || url.match(searchRe)) {
 		item = new Zotero.Item('multiple');;
 	}
