@@ -12,6 +12,28 @@
 	"lastUpdated": "2025-10-07 11:18:38"
 }
 
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2025 Dandelion Good and the righteous Anti Toil Theologians at Iliff
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
 var urlBase = "https://theanarchistlibrary.org/";
 
 function getListItems(doc, url) {
@@ -137,32 +159,6 @@ function doWeb(doc, url) {
 	 
 }
 
-
-
-
-
-
-/** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "https://theanarchistlibrary.org/library/mohammed-a-bamyeh-the-no-state-solution",
-		"detectedItemType": "website",
-		"items": []
-	},
-	{
-		"type": "web",
-		"url": "https://theanarchistlibrary.org/library/abel-paz-durruti-in-the-spanish-revolution",
-		"detectedItemType": "website",
-		"items": []
-	},
-	{
-		"type": "web",
-		"url": "https://theanarchistlibrary.org/search?query=kropotkin",
-		"items": "multiple"
-	}
-]
-/** END TEST CASES **/
 
 /** BEGIN TEST CASES **/
 var testCases = [
