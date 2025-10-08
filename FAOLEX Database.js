@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-07 15:49:50"
+	"lastUpdated": "2025-10-08 18:49:50"
 }
 
 /*
@@ -33,7 +33,7 @@ function detectWeb(doc, url) {
 	if (/\/faolex\/results\/details\//.test(url)) {
 		// This matches the details page for a law
 		return 'statute';
-	} 
+	}
 	else if (/\/faolex\/results\//.test(url)) {
 		// Results/listing page with multiple laws
 		return 'multiple';
@@ -41,7 +41,7 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-//Multiple items don't work because the site use dynamic elements. Both ZU.processDocuments and requestDocument result in "Error: No title specified for item".
+// Multiple items doesn't work because the site use dynamic elements. Both ZU.processDocuments and requestDocument result in "Error: No title specified for item".
 async function doWeb(doc, url) {
 	// if (detectWeb(doc, url) == 'multiple') {
 	// 	let items = await Z.selectItems(getSearchResults(doc, false));
@@ -55,7 +55,7 @@ async function doWeb(doc, url) {
 	// 	}
 	// }
 	// else {
-		await scrapeItem(doc, url);
+	await scrapeItem(doc, url);
 	// }
 }
 
@@ -133,24 +133,25 @@ async function scrapeItem(doc, url) {
 	item.complete();
 }
 
-function getSearchResults(doc, checkOnly) {
-	let items = {};
-	let found = false;
-	let rows = doc.querySelectorAll('a[href*="/faolex/results/details/"]');
+// Disabled because multiple items doesn't work.
+// function getSearchResults(doc, checkOnly) {
+// 	let items = {};
+// 	let found = false;
+// 	let rows = doc.querySelectorAll('a[href*="/faolex/results/details/"]');
 	
-	for (let row of rows) {
-		let href = row.href;
-		let title = ZU.trimInternal(row.textContent);
+// 	for (let row of rows) {
+// 		let href = row.href;
+// 		let title = ZU.trimInternal(row.textContent);
 		
-		if (!href || !title) continue;
-		if (checkOnly) return true;
+// 		if (!href || !title) continue;
+// 		if (checkOnly) return true;
 		
-		found = true;
-		items[href] = title;
-	}
+// 		found = true;
+// 		items[href] = title;
+// 	}
 	
-	return found ? items : false;
-}
+// 	return found ? items : false;
+// }
 
 // Note on test cases: Because the site use dynamic elements , automatic test in Scaffold doesn't work. New tests must be added manually.
 
