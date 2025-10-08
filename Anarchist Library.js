@@ -102,6 +102,7 @@ function doWeb(doc, url) {
 		
 		if (description) {
 			item.description = description
+			// misses https://theanarchistlibrary.org/library/leo-tolstoy-the-complete-works-of-count-tolstoy-volume-12
 			let re = /(?<=[Tt]ranslated(?: +to [Ee]nglish)? +by ).*$/u
 			let translated_match = description.match(re)
 			if (translated_match) {
@@ -138,10 +139,8 @@ function doWeb(doc, url) {
 		}
 		item.attachments = [{
 			"document": doc,
-			//"url": doc.location.href,
-			"title": "Snapshot"
-			//"mimeType": "text/html",
-			//"snapshot": true
+			"title": "Snapshot",
+			"snapshot": true
 		},
 		{
 			"title": "Epub",
