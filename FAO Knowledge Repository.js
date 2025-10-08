@@ -2,14 +2,14 @@
 	"translatorID": "ca7465ba-049f-471d-8dfe-6a2816134af7",
 	"label": "FAO Knowledge Repository",
 	"creator": "Bin Liu <lieubean@gmail.com>",
-	"target": "^https?://openknowledge\\.fao\\.org/(items/|/search)",
+	"target": "^https?://openknowledge\\.fao\\.org/(items/|search)",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-07 17:56:08"
+	"lastUpdated": "2025-10-08 16:23:58"
 }
 
 /*
