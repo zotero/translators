@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-09 15:05:08"
+	"lastUpdated": "2025-10-09 18:05:08"
 }
 
 /*
@@ -101,8 +101,10 @@ async function scrapeItem(url) {
 						item.creators.push({
 							firstName: cleanedNames.firstName,
 							lastName: cleanedNames.lastName,
-							creatorType: 'editor'});
-					} else {
+							creatorType: 'editor'
+						});
+					}
+					else {
 						item.creators.push(cleanedNames);
 					}
 				}
