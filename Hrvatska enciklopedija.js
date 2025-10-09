@@ -44,19 +44,19 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-		let item = new Zotero.Item("encyclopediaArticle");
-		
-		item.encyclopediaTitle = "Hrvatska enciklopedija";
-		item.publisher = "Leksikografski zavod Miroslav Krleža";
-		item.language = "hr";
-		item.ISBN = "9789532680386";
-		item.url = url.replace(/[?#].*/, "");
-		
-		// Use the document title and strip the suffix
-		let docTitle = doc.title;
-		item.title = docTitle.replace(/ - Hrvatska enciklopedija/, '');
-		
-		item.complete();
+	let item = new Zotero.Item("encyclopediaArticle");
+	
+	item.encyclopediaTitle = "Hrvatska enciklopedija";
+	item.publisher = "Leksikografski zavod Miroslav Krleža";
+	item.language = "hr";
+	item.ISBN = "9789532680386";
+	item.url = url.replace(/[?#].*/, "");
+	
+	// Use the document title and strip the suffix
+	let docTitle = doc.title;
+	item.title = docTitle.replace(/ - Hrvatska enciklopedija/, '');
+	
+	item.complete();
 }
 
 /** BEGIN TEST CASES **/
