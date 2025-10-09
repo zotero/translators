@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-08 16:23:58"
+	"lastUpdated": "2025-10-09 15:05:08"
 }
 
 /*
@@ -91,10 +91,20 @@ async function scrapeItem(url) {
 			for (let authorName of authorList) {
 				authorName = authorName.trim();
 				if (!authorName) continue;
-				// Use ZU.cleanAuthor with comma=true since format is "Last, First"
 				if (authorName.includes(',')) {
-					// Format is "Last, First" - use cleanAuthor with comma=true
-					item.creators.push(ZU.cleanAuthor(authorName, 'author', true));
+					// Format is "Last, First" - use ZU.cleanAuthor with comma=true
+					let cleanedNames = ZU.cleanAuthor(authorName, 'author', true);
+					// Check if firstName contains '(ed )' after cleaning, i.e. '(ed.)' before cleaning; if so, designate as editor
+					if (cleanedNames.firstName && cleanedNames.firstName.includes('(ed )')) {
+						cleanedNames.firstName = cleanedNames.firstName.replace('(ed )', '').trim();
+						// cleanedNames.creatorType = 'editor';
+						item.creators.push({
+							firstName: cleanedNames.firstName,
+							lastName: cleanedNames.lastName,
+							creatorType: 'editor'});
+					} else {
+						item.creators.push(cleanedNames);
+					}
 				}
 				else {
 					// Single name or corporate author - use fieldMode
@@ -169,7 +179,10 @@ async function scrapeItem(url) {
 	}
 	
 	if (json.metadata['dc.description.abstract']) {
-		item.abstractNote = json.metadata['dc.description.abstract'][0].value;
+		let abstract = json.metadata['dc.description.abstract'][0].value;
+		abstract = abstract.replace(/[ \t]+(\n)/g, '$1');
+		abstract = abstract.replace(/\n+/g, '\n');
+		item.abstractNote = abstract;
 	}
 
 	// Add PDF attachment if available
@@ -233,18 +246,19 @@ async function addPDFAttachment(item, json) {
 
 function determineItemType(json) {
 	// Map dc.type to Zotero item types.
+	// Types (except Meeting) are listed at: https://openknowledge.fao.org/handle/20.500.14283/1
 	// Mapping scheme:
-	// - Book (series); Book (stand-alone); Booklet --> Book
+	// - Book (series); Book (stand-alone); Booklet; Journal, magazine, bulletin --> Book
 	// - Presentation --> Presentation
 	// - Meeting --> Conference paper
-	// - Document; Infographic; Poster, banner --> Document
-	// - Journal, magazine, bulletin; Brochure, flyer, fact-sheet; Document; Project --> Report
+	// - Infographic; Poster, banner --> Artwork
+	// - Document; Brochure, flyer, fact-sheet; Project; Newsletter; any other --> Report
 	if (json.metadata['dc.type'] && json.metadata['dc.type'][0]) {
 		let dcType = json.metadata['dc.type'][0].value.toLowerCase();
-		if (dcType.includes('book')) return 'book';
+		if (dcType.includes('book') || dcType.includes('journal')) return 'book';
 		if (dcType.includes('presentation')) return 'presentation';
 		if (dcType.includes('meeting')) return 'conferencePaper';
-		if (dcType.includes('document') || dcType.includes('infographic') || dcType.includes('poster')) return 'document';
+		if (dcType.includes('infographic') || dcType.includes('poster')) return 'artwork';
 	}
 	return 'report';
 }
@@ -409,7 +423,7 @@ var testCases = [
 					}
 				],
 				"date": "2024",
-				"abstractNote": "This brief outlines a rigorous and standardized approach for value chain analysis and design, taking a systems perspective to analyse and influence the behaviour and performance of value chain actors influenced by a complex environment. The brief also covers the design of upgrading strategies and associated development plans, based on the identification of root causes of value chain bottlenecks and using a participatory and multistakeholder approach. The brief is primarily based on FAO’s Sustainable Food Value Chain (SFVC) framework which promotes a systems-based development of agrifood value chains that are economically, socially and environmentally sustainable, as well as resilient to shocks and stressors.   \n\nThe end-product of the application of the methodology is a VC report with four components. The first two components, a functional analysis and a sustainability assessment, make up the VC analysis. The last two components, an upgrading strategy and a development plan, represent the VC design.",
+				"abstractNote": "This brief outlines a rigorous and standardized approach for value chain analysis and design, taking a systems perspective to analyse and influence the behaviour and performance of value chain actors influenced by a complex environment. The brief also covers the design of upgrading strategies and associated development plans, based on the identification of root causes of value chain bottlenecks and using a participatory and multistakeholder approach. The brief is primarily based on FAO’s Sustainable Food Value Chain (SFVC) framework which promotes a systems-based development of agrifood value chains that are economically, socially and environmentally sustainable, as well as resilient to shocks and stressors.\nThe end-product of the application of the methodology is a VC report with four components. The first two components, a functional analysis and a sustainability assessment, make up the VC analysis. The last two components, an upgrading strategy and a development plan, represent the VC design.",
 				"language": "English",
 				"libraryCatalog": "FAO Knowledge Repository",
 				"numPages": "40",
@@ -593,7 +607,7 @@ var testCases = [
 		"detectedItemType": "book",
 		"items": [
 			{
-				"itemType": "document",
+				"itemType": "artwork",
 				"title": "New food sources and production systems. Food safety perspectives and future trends",
 				"creators": [
 					{
@@ -606,7 +620,6 @@ var testCases = [
 				"abstractNote": "New food sources and production systems is a rapidly evolving and innovative sector that covers a range of foods, from plant-based food products, edible insects and seaweeds to products arising from technological innovations such as cell-based food production and precision fermentation. In addition to the nutritional and sustainability aspects of new foods, the associated food safety issues must be identified and addressed to guide the development of relevant standards and other food safety management measures needed to propel the sector forward and instil consumer trust. The Food and Agriculture Organization of the United Nations (FAO) aims to help prepare its Members for the arrival of new foods on the market by providing sufficient information that the Members can leverage to suitably protect the health of consumers and implement fair practices in trade. Using foresight approaches, FAO has been monitoring this emerging sector and evaluating the opportunities and challenges this sector brings for agrifood systems, especially in the context of food safety. Based on this foresight work, three focus areas were selected for a Food Safety Foresight Technical Meeting held at the FAO headquarters in Rome from 13 to 17 November 2023. This infographic accompanies the meeting report, Plant-based food products, precision fermentation and 3D food printing: food safety perspectives and future trends. It visualizes the key food safety issues, nutritional characteristics, environmental aspects, and consumer perceptions related to plant-based food products that mimic animal-derived foods, precision fermentation and 3D food printing.",
 				"language": "English",
 				"libraryCatalog": "FAO Knowledge Repository",
-				"publisher": "FAO",
 				"rights": "FAO",
 				"url": "https://openknowledge.fao.org/handle/20.500.14283/cd2419en",
 				"attachments": [
@@ -675,6 +688,12 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://openknowledge.fao.org/search?query=climate%20change",
+		"defer": true,
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
