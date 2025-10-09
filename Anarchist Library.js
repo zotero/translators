@@ -176,7 +176,7 @@ async function doWeb(doc, url) {
 				if (!items) break;
 				for (let url of Object.keys(items)) {
 					await doLibraryItem(await requestDocument(url));
-  				}
+				}
 			}
 			else {
 				await matcherConfig.do(doc, url);
