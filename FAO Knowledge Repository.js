@@ -2,14 +2,14 @@
 	"translatorID": "ca7465ba-049f-471d-8dfe-6a2816134af7",
 	"label": "FAO Knowledge Repository",
 	"creator": "Bin Liu <lieubean@gmail.com>",
-	"target": "^https?://openknowledge\\.fao\\.org/(items/|search)",
+	"target": "^https?://openknowledge\\.fao\\.org/(items/|search|browse/|collections/)",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-09 18:05:08"
+	"lastUpdated": "2025-10-10 09:55:11"
 }
 
 /*
@@ -34,8 +34,8 @@ function detectWeb(doc, url) {
 	if (url.includes('/items/')) {
 		return 'book'; // temporary assignment; to be refined later based on the dc.type metadata field
 	}
-	// Multiple items (search results)
-	else if (url.includes('/search')) {
+	// Multiple items
+	else if (url.includes('/search') || url.includes('/browse/') || url.includes('/collections/')) {
 		return 'multiple';
 	}
 	return false;
