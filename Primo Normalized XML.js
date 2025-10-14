@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2025-09-30 22:45:28"
+	"lastUpdated": "2025-10-14 18:44:56"
 }
 
 /*
@@ -985,6 +985,25 @@ var testCases = [
 				"numPages": "463",
 				"place": "London",
 				"publisher": "HarperCollins",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><record xmlns=\"http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib\" xmlns:sear=\"http://www.exlibrisgroup.com/xsd/jaguar/search\"><delivery><bestlocation><isValidUser>true</isValidUser><organization>01HVD_INST</organization><libraryCode>HFA</libraryCode><availabilityStatus>check_holdings</availabilityStatus><subLocation>(By appointment only; on-site use only.) Circulating copies may be available in other Harvard Libraries.</subLocation><subLocationCode>GEN</subLocationCode><mainLocation>Harvard Film Archive</mainLocation><callNumber>HFA Item no. 3151</callNumber><callNumberType>8</callNumberType><holdingURL>OVP</holdingURL><adaptorid>ALMA_01</adaptorid><ilsApiId>990105822220203941</ilsApiId><holdId>222201431210003941</holdId><holKey>HoldingResultKey [mid=222201431210003941, libraryId=124018130003941, locationCode=GEN, callNumber=HFA Item no. 3151]</holKey><matchForHoldings><matchOn>MainLocation</matchOn><holdingRecord>852##b</holdingRecord></matchForHoldings><stackMapUrl>http://nrs.harvard.edu/urn-3:hul.ois:HFA</stackMapUrl><relatedTitle/><translateRelatedTitle/><yearFilter/><volumeFilter/><singleUnavailableItemProcessType/><boundWith>false</boundWith></bestlocation><holding><isValidUser>true</isValidUser><organization>01HVD_INST</organization><libraryCode>HFA</libraryCode><availabilityStatus>check_holdings</availabilityStatus><subLocation>(By appointment only; on-site use only.) Circulating copies may be available in other Harvard Libraries.</subLocation><subLocationCode>GEN</subLocationCode><mainLocation>Harvard Film Archive</mainLocation><callNumber>HFA Item no. 3151</callNumber><callNumberType>8</callNumberType><holdingURL>OVP</holdingURL><adaptorid>ALMA_01</adaptorid><ilsApiId>990105822220203941</ilsApiId><holdId>222201431210003941</holdId><holKey>HoldingResultKey [mid=222201431210003941, libraryId=124018130003941, locationCode=GEN, callNumber=HFA Item no. 3151]</holKey><matchForHoldings><matchOn>MainLocation</matchOn><holdingRecord>852##b</holdingRecord></matchForHoldings><stackMapUrl>http://nrs.harvard.edu/urn-3:hul.ois:HFA</stackMapUrl><relatedTitle/><translateRelatedTitle/><yearFilter/><volumeFilter/><singleUnavailableItemProcessType/><boundWith>false</boundWith></holding><electronicServices/><additionalElectronicServices/><filteredByGroupServices/><quickAccessService/><deliveryCategory>Alma-P</deliveryCategory><serviceMode>ovp</serviceMode><availability>check_holdings</availability><availabilityLinks>detailsgetit1</availabilityLinks><availabilityLinksUrl/><displayedAvailability/><displayLocation>true</displayLocation><additionalLocations>false</additionalLocations><physicalItemTextCodes/><feDisplayOtherLocations>false</feDisplayOtherLocations><almaInstitutionsList/><recordInstitutionCode/><recordOwner>01HVD_INST</recordOwner><hasFilteredServices/><digitalAuxiliaryMode>false</digitalAuxiliaryMode><digitalAuxiliaryThumbnail>false</digitalAuxiliaryThumbnail><hideResourceSharing>false</hideResourceSharing><sharedDigitalCandidates/><consolidatedCoverage/><electronicContextObjectId/><almaOpenurl/><GetIt1><category>Alma-P</category><links><isLinktoOnline>false</isLinktoOnline><getItTabText>service_getit</getItTabText><adaptorid>ALMA_01</adaptorid><ilsApiId>990105822220203941</ilsApiId><link>OVP</link><inst4opac>01HVD_INST</inst4opac><displayText/></links>undefined</GetIt1>undefined<physicalServiceId/>undefined<link><linkType>thumbnail</linkType>undefined<linkURL>https://proxy-na.hosted.exlibrisgroup.com/exl_rewrite/books.google.com/books?bibkeys=ISBN:,OCLC:894528838,LCCN:&amp;jscmd=viewapi&amp;callback=updateGBSCover</linkURL>undefined<displayLabel>thumbnail</displayLabel>undefined</link>undefined<hasD/>undefined</delivery><display><source>Alma</source><type>videos</type><language>ger</language><title>Cat and mouse </title><format>[ca. 1 minute] : aspect ratio 1:1.37, sd., b&amp;w : 16 mm. viewing print.</format><creationdate>1970</creationdate><publisher>[1970?]</publisher><mms>990105822220203941</mms><genre>film trailers$$Qfilm trailers</genre><unititle>Kot i mysz (Trailer). 16 mm.$$QKot i mysz (Trailer). 16 mm</unititle><place>1970?]</place><version>1</version><lds01>990105822220203941</lds01><lds03>&lt;a href=&quot;https://id.lib.harvard.edu/alma/990105822220203941/catalog&quot;&gt;Permanent link to HOLLIS record&lt;/a&gt;</lds03><lds04>Grove Press Film Collection (Harvard Film Archive)$$QGrove Press Film Collection (Harvard Film Archive)</lds04><lds11>[1970?]</lds11><lds13>Harvard Film Archive 16mm trailer, HFA item no. 3151, from the Grove Press Collection.</lds13><lds13>Cat and mouse was released in Europe in 1967 and in the United States in 1970.</lds13><lds13>Common title, not from piece.</lds13><lds14>[production company unknown]</lds14></display><control><sourcerecordid>990105822220203941</sourcerecordid><recordid>alma990105822220203941</recordid><sourceid>alma</sourceid><originalsourceid>010582222-HVD01</originalsourceid><sourcesystem>OCLC</sourcesystem><sourceformat>MARC21</sourceformat><score>1.0</score><isDedup>false</isDedup></control><addata><addau>Grove Press Film Collection (Harvard Film Archive)</addau><date>1970</date><cop>1970?</cop><oclcid>(ocolc)894528838</oclcid><format>book</format><genre>unknown</genre><ristype>VIDEO</ristype><btitle>Cat and mouse</btitle></addata><sort><title>Cat and mouse /</title><author>Grove Press Film Collection (Harvard Film Archive)</author><creationdate>1970</creationdate></sort></record>",
+		"items": [
+			{
+				"itemType": "videoRecording",
+				"title": "Cat and mouse",
+				"creators": [],
+				"date": "1970",
+				"callNumber": "HFA Item no. 3151",
+				"language": "ger",
+				"place": "1970?",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
