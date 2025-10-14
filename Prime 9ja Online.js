@@ -336,7 +336,6 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"ISSN": "3092-8907",
 				"abstractNote": "AKURE —  The Ondo State Governorship Election Petitions Tribunal will deliver its verdict on June 4 in the series of suits challenging the e...",
 				"libraryCatalog": "Prime 9ja Online",
 				"place": "Nigeria",
@@ -368,7 +367,6 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"ISSN": "3092-8907",
 				"abstractNote": "On “CFMF”  — the fourth track from Davido’s 2025 album 5ive  —   the artist trades club-ready bravado for inward reflection. Featuri...",
 				"libraryCatalog": "Prime 9ja Online",
 				"place": "Nigeria",
@@ -401,7 +399,6 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"ISSN": "3092-8907",
 				"abstractNote": "ABUJA —  A major network of cybercriminals allegedly responsible for infiltrating the Computer-Based Testing (CBT) infrastructure of Nigeria...",
 				"libraryCatalog": "Prime 9ja Online",
 				"place": "Nigeria",
@@ -428,7 +425,6 @@ var testCases = [
 				"itemType": "newspaperArticle",
 				"title": "China Begins Trial of mRNA TB Vaccine",
 				"creators": [],
-				"ISSN": "3092-8907",
 				"abstractNote": "A newly developed mRNA vaccine for tuberculosis, created in China, has entered clinical trials at Beijing Chest Hospital. The trial, which c...",
 				"libraryCatalog": "Prime 9ja Online",
 				"place": "Nigeria",
@@ -485,8 +481,6 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2025-09-12T18:31:00+01:00",
-				"ISSN": "3092-8907",
 				"abstractNote": "Chef Hilda Baci draw massive crowd for Friday as she yan to cook the biggest pot of Naija Jollof rice wey history don ever see. The event land for Eko Hotel, Victoria Island, to mark World Jollof Day, and people from all corner of Lagos rush come support…",
 				"language": "[object Object]",
 				"libraryCatalog": "Prime 9ja Online",
