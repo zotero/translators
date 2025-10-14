@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-14 17:28:04"
+	"lastUpdated": "2025-10-14 17:29:56"
 }
 
 /*
@@ -1504,14 +1504,12 @@ var testCases = [
 				],
 				"date": "2015-06",
 				"ISBN": "9788460842118",
-				"abstractNote": "Abstracts aceptados sin presentacion / Accepted abstracts without presentation",
 				"conferenceName": "International Conference Arquitectonics Network: Architecture, Education and Society, Barcelona, 3-5 June 2015: Abstracts",
 				"language": "spa",
 				"libraryCatalog": "upcommons.upc.edu",
 				"publisher": "GIRAS. Universitat Politècnica de Catalunya",
-				"rights": "Open Access",
 				"shortTitle": "Necesidad y morfología",
-				"url": "https://upcommons.upc.edu/handle/2117/114657",
+				"url": "https://hdl.handle.net/2117/114657",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1683,17 +1681,11 @@ var testCases = [
 			{
 				"itemType": "webpage",
 				"title": "Woher kommt \"über die Wupper gehen\"?",
-				"creators": [
-					{
-						"firstName": "",
-						"lastName": "SWRWissen",
-						"creatorType": "author"
-					}
-				],
+				"creators": [],
 				"date": "2024-03-05",
 				"abstractNote": "Es gibt eine Vergleichsredensart: \"Der ist über den Jordan gegangen.\" Das heißt, er ist gestorben. Das bezieht sich auf die alten Grenzen Israels. In Wuppertal jedoch liegt jenseits des Flusses das Gefängnis. Von Rolf-Bernhard Essig",
 				"language": "de",
-				"url": "https://www.swr.de/wissen/1000-antworten/woher-kommt-redensart-ueber-die-wupper-gehen-102.html",
+				"url": "https://www.swr.de/kultur/sprache/woher-kommt-redensart-ueber-die-wupper-gehen-102.html",
 				"websiteTitle": "SWR",
 				"attachments": [
 					{
