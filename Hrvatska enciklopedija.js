@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-09 15:41:48"
+	"lastUpdated": "2025-10-14 21:59:26"
 }
 
 /*
@@ -45,6 +45,7 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	let item = new Zotero.Item("encyclopediaArticle");
+	item.attachments.push({ title: 'Snapshot', document: doc });
 	
 	item.encyclopediaTitle = "Hrvatska enciklopedija";
 	item.publisher = "Leksikografski zavod Miroslav Krleža";
@@ -55,7 +56,7 @@ function doWeb(doc, url) {
 	// Use the document title and strip the suffix
 	let docTitle = doc.title;
 	item.title = docTitle.replace(/ - Hrvatska enciklopedija/, '');
-	
+
 	item.complete();
 }
 
@@ -64,7 +65,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.enciklopedija.hr/clanak/manastir",
-		"detectedItemType": "encyclopediaArticle",
 		"items": [
 			{
 				"itemType": "encyclopediaArticle",
@@ -76,7 +76,12 @@ var testCases = [
 				"libraryCatalog": "Hrvatska enciklopedija",
 				"publisher": "Leksikografski zavod Miroslav Krleža",
 				"url": "https://www.enciklopedija.hr/clanak/manastir",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -86,7 +91,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.enciklopedija.hr/clanak/44404",
-		"detectedItemType": "encyclopediaArticle",
 		"items": [
 			{
 				"itemType": "encyclopediaArticle",
@@ -98,7 +102,12 @@ var testCases = [
 				"libraryCatalog": "Hrvatska enciklopedija",
 				"publisher": "Leksikografski zavod Miroslav Krleža",
 				"url": "https://www.enciklopedija.hr/clanak/nulovanje",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
