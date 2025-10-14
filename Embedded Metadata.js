@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-06-10 14:42:15"
+	"lastUpdated": "2025-09-25 08:28:33"
 }
 
 /*
@@ -761,6 +761,7 @@ function getAuthorFromByline(doc, newItem) {
 			Z.debug(`Found ${byline.length} elements with '${bylineClass}' class (strict: ${isStrict})`);
 			for (let bylineElement of byline) {
 				if (!bylineElement.innerText?.trim()) continue;
+				if (bylines.includes(bylineElement)) continue;
 				bylines.push(bylineElement);
 			}
 
@@ -1935,6 +1936,40 @@ var testCases = [
 				"shortTitle": "Infographic",
 				"url": "https://www.statista.com/chart/13139/estimated-worldwide-mobile-e-commerce-sales",
 				"websiteTitle": "Statista Daily Data",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://optimization-online.org/2023/05/maximum-likelihood-probability-measures-over-sets-and-applications-to-data-driven-optimization/",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "Maximum Likelihood Probability Measures over Sets and Applications to Data-Driven Optimization – Optimization Online",
+				"creators": [
+					{
+						"firstName": "Juan",
+						"lastName": "Borrero",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Denis",
+						"lastName": "Saure",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-05-15",
+				"language": "en-US",
+				"url": "https://optimization-online.org/2023/05/maximum-likelihood-probability-measures-over-sets-and-applications-to-data-driven-optimization/",
 				"attachments": [
 					{
 						"title": "Snapshot",
