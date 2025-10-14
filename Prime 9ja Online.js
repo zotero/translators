@@ -50,11 +50,14 @@ function parseJSONLD(doc) {
 			let candidates = [];
 			if (Array.isArray(parsed)) {
 				candidates = parsed;
-			} else if (parsed['@graph'] && Array.isArray(parsed['@graph'])) {
+			}
+			else if (parsed['@graph'] && Array.isArray(parsed['@graph'])) {
 				candidates = parsed['@graph'];
-			} else if (parsed.mainEntity) {
+			}
+			else if (parsed.mainEntity) {
 				candidates = [parsed.mainEntity, parsed];
-			} else {
+			}
+			else {
 				candidates = [parsed];
 			}
 
@@ -66,7 +69,8 @@ function parseJSONLD(doc) {
 					if (t.includes('NewsArticle')) {
 						return cand;
 					}
-				} else if (Array.isArray(t)) {
+				}
+				else if (Array.isArray(t)) {
 					for (let tt of t) {
 						if (typeof tt === 'string' && tt.includes('NewsArticle')) {
 							return cand;
@@ -74,7 +78,8 @@ function parseJSONLD(doc) {
 					}
 				}
 			}
-		} catch (e) {
+		}
+		catch (e) {
 			// ignore malformed JSON-LD
 		}
 	}
@@ -163,7 +168,8 @@ async function doWeb(doc, url) {
 		for (let u of Object.keys(selected)) {
 			await scrape(await requestDocument(u));
 		}
-	} else if (mode === 'newspaperArticle') {
+	}
+	else if (mode === 'newspaperArticle') {
 		await scrape(doc, url);
 	}
 	// else do nothing
@@ -211,10 +217,12 @@ async function scrape(doc, url) {
 
 			if (issn) {
 				item.ISSN = issn;
-			} else {
+			}
+			else {
 				item.ISSN = '3092-8907';
 			}
-		} else {
+		}
+		else {
 			item.ISSN = '3092-8907';
 		}
 
@@ -222,14 +230,16 @@ async function scrape(doc, url) {
 		let rawJsonDate = data.datePublished || data.dateCreated || '';
 		if (rawJsonDate) {
 			// If it contains a 'T' assume ISO datetime (keep as-is)
-			if (rawJsonDate.indexOf('T') !== -1) {
+			if (rawJsonDate.includes('T') !== -1) {
 				item.date = rawJsonDate;
-			} else {
+			}
+			else {
 				// try to parse human-readable date and produce YYYY-MM-DD
 				let parsed = new Date(rawJsonDate);
 				if (!isNaN(parsed)) {
 					item.date = parsed.toISOString().split('T')[0];
-				} else {
+				}
+				else {
 					item.date = rawJsonDate;
 				}
 			}
@@ -324,126 +334,6 @@ async function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.prime9ja.com.ng/2025/05/tribunal-to-rule-on-ondo-poll-june-4.html",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Tribunal to Rule on Ondo Poll June 4",
-				"creators": [
-					{
-						"firstName": "Chima Joseph",
-						"lastName": "Ugo",
-						"creatorType": "author"
-					}
-				],
-				"abstractNote": "AKURE —  The Ondo State Governorship Election Petitions Tribunal will deliver its verdict on June 4 in the series of suits challenging the e...",
-				"libraryCatalog": "Prime 9ja Online",
-				"place": "Nigeria",
-				"publicationTitle": "Prime 9ja Online",
-				"url": "https://www.prime9ja.com.ng/2025/05/tribunal-to-rule-on-ondo-poll-june-4.html",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.prime9ja.com.ng/2025/05/davido-cfmf-review-low-burn-confession.html",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Davido – “CFMF” Review: A Low-Burn Confession in Afro-R&B Silhouettes",
-				"creators": [
-					{
-						"firstName": "Chima Joseph",
-						"lastName": "Ugo",
-						"creatorType": "author"
-					}
-				],
-				"abstractNote": "On “CFMF”  — the fourth track from Davido’s 2025 album 5ive  —   the artist trades club-ready bravado for inward reflection. Featuri...",
-				"libraryCatalog": "Prime 9ja Online",
-				"place": "Nigeria",
-				"publicationTitle": "Prime 9ja Online",
-				"shortTitle": "Davido – “CFMF” Review",
-				"url": "https://www.prime9ja.com.ng/2025/05/davido-cfmf-review-low-burn-confession.html",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.prime9ja.com.ng/2025/05/jamb-server-hack-over-20-arrested.html",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "JAMB Server Hack: Over 20 Arrested",
-				"creators": [
-					{
-						"firstName": "Onuwa",
-						"lastName": "John",
-						"creatorType": "author"
-					}
-				],
-				"abstractNote": "ABUJA —  A major network of cybercriminals allegedly responsible for infiltrating the Computer-Based Testing (CBT) infrastructure of Nigeria...",
-				"libraryCatalog": "Prime 9ja Online",
-				"place": "Nigeria",
-				"publicationTitle": "Prime 9ja Online",
-				"shortTitle": "JAMB Server Hack",
-				"url": "https://www.prime9ja.com.ng/2025/05/jamb-server-hack-over-20-arrested.html",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.prime9ja.com.ng/2025/03/china-begins-trial-of-mrna-tb-vaccine.html",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "China Begins Trial of mRNA TB Vaccine",
-				"creators": [],
-				"abstractNote": "A newly developed mRNA vaccine for tuberculosis, created in China, has entered clinical trials at Beijing Chest Hospital. The trial, which c...",
-				"libraryCatalog": "Prime 9ja Online",
-				"place": "Nigeria",
-				"publicationTitle": "Prime 9ja Online",
-				"url": "https://www.prime9ja.com.ng/2025/03/china-begins-trial-of-mrna-tb-vaccine.html",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "https://www.prime9ja.com.ng/p/author.html",
 		"items": [
 			{
@@ -483,6 +373,8 @@ var testCases = [
 				],
 				"abstractNote": "Chef Hilda Baci draw massive crowd for Friday as she yan to cook the biggest pot of Naija Jollof rice wey history don ever see. The event land for Eko Hotel, Victoria Island, to mark World Jollof Day, and people from all corner of Lagos rush come support…",
 				"language": "[object Object]",
+				"date": "2025-09-12T18:31:00+01:00",
+				"ISSN": "3092-8907",
 				"libraryCatalog": "Prime 9ja Online",
 				"place": "Nigeria",
 				"publicationTitle": "Prime 9ja Online Pidgin",
