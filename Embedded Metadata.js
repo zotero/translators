@@ -761,9 +761,8 @@ function getAuthorFromByline(doc, newItem) {
 			Z.debug(`Found ${byline.length} elements with '${bylineClass}' class (strict: ${isStrict})`);
 			for (let bylineElement of byline) {
 				if (!bylineElement.innerText?.trim()) continue;
-				if (!bylines.includes(bylineElement)) {
-					bylines.push(bylineElement);
-				}
+				if (bylines.includes(bylineElement)) continue;
+				bylines.push(bylineElement);
 			}
 
 			if (isStrict && bylines.length) {
