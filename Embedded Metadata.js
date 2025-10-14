@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-09-25 08:28:33"
+	"lastUpdated": "2025-10-14 17:28:04"
 }
 
 /*
@@ -713,7 +713,7 @@ function addLowQualityMetadata(doc, newItem) {
 	}
 
 	if (!newItem.url) {
-		newItem.url = ZU.xpathText(doc, '//head/link[@rel="canonical"]/@href') || doc.location.href;
+		newItem.url = attr(doc, 'head > link[rel="canonical"]', 'href') || doc.location.href;
 	}
 	
 	if (!newItem.language) {
