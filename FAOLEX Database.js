@@ -1,7 +1,7 @@
 {
 	"translatorID": "3b163469-3e62-46d8-82a1-4f31e86bf6f4",
 	"label": "FAOLEX Database",
-	"creator": "Bin Liu <lieubean@gmail.com>",
+	"creator": "Bin Liu",
 	"target": "^https?://www\\.fao\\.org/faolex/results/",
 	"minVersion": "5.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-08 18:49:50"
+	"lastUpdated": "2025-10-15 18:27:50"
 }
 
 /*
@@ -153,7 +153,7 @@ async function scrapeItem(doc, url) {
 // 	return found ? items : false;
 // }
 
-// Note on test cases: Because the site use dynamic elements , automatic test in Scaffold doesn't work. New tests must be added manually.
+// Note on test cases: Because the site use dynamic elements, "defer": true must be added.
 
 /** BEGIN TEST CASES **/
 var testCases = [
