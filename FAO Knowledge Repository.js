@@ -1,7 +1,7 @@
 {
-	"translatorID": "ca7465ba-049f-471d-8dfe-6a2816134af7",
+	"translatorID": "4883f662-29df-44ad-959e-27c9d036d165",
 	"label": "FAO Knowledge Repository",
-	"creator": "Bin Liu <lieubean@gmail.com>",
+	"creator": "Bin Liu",
 	"target": "^https?://openknowledge\\.fao\\.org/(items/|search|browse/|collections/)",
 	"minVersion": "5.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-10 09:55:11"
+	"lastUpdated": "2025-10-15 14:43:11"
 }
 
 /*
@@ -32,7 +32,31 @@
 function detectWeb(doc, url) {
 	// Single item page pattern
 	if (url.includes('/items/')) {
-		return 'book'; // temporary assignment; to be refined later based on the dc.type metadata field
+
+		// The text "Prodct type" can be in various languages
+		const productTypeLabels = [
+			'نوع المنتج', // Arabic
+			'出版物类型', // Chinese
+			'Product type', // English
+			'Type de produit', // French
+			'Тип продукта', // Russian
+			'Tipo de producto', // Spanish
+		];
+		const productTypeLabelsPredicate = productTypeLabels.map(l => `contains(text(), '${l}')`).join(' or ');
+		const productTypeRaw = ZU.xpathText(doc, `//*[${productTypeLabelsPredicate}]/following::text()[1]`) || '';
+		const productType = productTypeRaw.toLowerCase();
+
+		// Product type --> Zotero item type mapping scheme:
+		// - Book (series); Book (stand-alone); Booklet; Journal, magazine, bulletin --> Book
+		// - Presentation --> Presentation
+		// - Meeting --> Conference paper
+		// - Infographic; Poster, banner --> Artwork
+		// - Document; Brochure, flyer, fact-sheet; Project; Newsletter; any other --> Report
+		if (/book|journal/.test(productType)) return 'book';
+		if (/presentation/.test(productType)) return 'presentation';
+		if (/meeting/.test(productType)) return 'conferencePaper';
+		if (/infographic|poster/.test(productType)) return 'artwork';
+		return 'report';
 	}
 	// Multiple items
 	else if (url.includes('/search') || url.includes('/browse/') || url.includes('/collections/')) {
@@ -67,7 +91,7 @@ async function scrapeItem(url) {
 	
 	// Create a new Zotero item
 	let item = new Z.Item(determineItemType(json));
-	
+
 	// Map metadata fields
 	if (json.metadata['dc.title']) {
 		// Connect title and subtitle with '. ' unless the title ends with '?' or '!'.
@@ -97,7 +121,6 @@ async function scrapeItem(url) {
 					// Check if firstName contains '(ed )' after cleaning, i.e. '(ed.)' before cleaning; if so, designate as editor
 					if (cleanedNames.firstName && cleanedNames.firstName.includes('(ed )')) {
 						cleanedNames.firstName = cleanedNames.firstName.replace('(ed )', '').trim();
-						// cleanedNames.creatorType = 'editor';
 						item.creators.push({
 							firstName: cleanedNames.firstName,
 							lastName: cleanedNames.lastName,
@@ -165,7 +188,7 @@ async function scrapeItem(url) {
 	}
 
 	if (json.metadata['dc.identifier.isbn']) {
-		item.ISBN = ZU.cleanISBN(json.metadata['dc.identifier.isbn'][0].value, false);
+		item.ISBN = ZU.cleanISBN(json.metadata['dc.identifier.isbn'][0].value, true);
 	}
 
 	if (json.metadata['dc.identifier.uri']) {
@@ -177,7 +200,7 @@ async function scrapeItem(url) {
 	}
 	
 	if (json.metadata['fao.identifier.doi']) {
-		item.DOI = json.metadata['fao.identifier.doi'][0].value.match(/https:\/\/doi\.org\/(.+)/i)[1];
+		item.DOI = ZU.cleanDOI(json.metadata['fao.identifier.doi'][0].value);
 	}
 	
 	if (json.metadata['dc.description.abstract']) {
@@ -188,7 +211,11 @@ async function scrapeItem(url) {
 	}
 
 	// Add PDF attachment if available
-	await addPDFAttachment(item, json, uuid);
+	try {
+		await addPDFAttachment(item, json, uuid);
+	} catch (e) {
+		Z.debug("Error adding PDF attachment: " + e);
+	}
 	
 	if (json.metadata['fao.subject.agrovoc']) {
 		for (let subject of json.metadata['fao.subject.agrovoc']) {
@@ -249,7 +276,7 @@ async function addPDFAttachment(item, json) {
 function determineItemType(json) {
 	// Map dc.type to Zotero item types.
 	// Types (except Meeting) are listed at: https://openknowledge.fao.org/handle/20.500.14283/1
-	// Mapping scheme:
+	// Mapping scheme (same as Product type):
 	// - Book (series); Book (stand-alone); Booklet; Journal, magazine, bulletin --> Book
 	// - Presentation --> Presentation
 	// - Meeting --> Conference paper
@@ -257,10 +284,10 @@ function determineItemType(json) {
 	// - Document; Brochure, flyer, fact-sheet; Project; Newsletter; any other --> Report
 	if (json.metadata['dc.type'] && json.metadata['dc.type'][0]) {
 		let dcType = json.metadata['dc.type'][0].value.toLowerCase();
-		if (dcType.includes('book') || dcType.includes('journal')) return 'book';
-		if (dcType.includes('presentation')) return 'presentation';
-		if (dcType.includes('meeting')) return 'conferencePaper';
-		if (dcType.includes('infographic') || dcType.includes('poster')) return 'artwork';
+		if (/(book|journal)/.test(dcType)) return 'book';
+		if (/presentation/.test(dcType)) return 'presentation';
+		if (/meeting/.test(dcType)) return 'conferencePaper';
+		if (/(infographic|poster)/.test(dcType)) return 'artwork';
 	}
 	return 'report';
 }
@@ -290,6 +317,7 @@ var testCases = [
 		"type": "web",
 		"url": "https://openknowledge.fao.org/items/75a7f18a-3e96-4857-a3ab-37f9d3193604",
 		"defer": true,
+		"detectedItemType": "report",
 		"items": [
 			{
 				"itemType": "book",
@@ -408,6 +436,7 @@ var testCases = [
 		"type": "web",
 		"url": "https://openknowledge.fao.org/items/28fe3916-ad18-481d-92f5-42572165dae6",
 		"defer": true,
+		"detectedItemType": "report",
 		"items": [
 			{
 				"itemType": "book",
@@ -465,6 +494,7 @@ var testCases = [
 		"type": "web",
 		"url": "https://openknowledge.fao.org/items/3b13b1e7-28e9-443d-b431-8e6062730f1b",
 		"defer": true,
+		"detectedItemType": "report",
 		"items": [
 			{
 				"itemType": "book",
@@ -526,7 +556,6 @@ var testCases = [
 		"type": "web",
 		"url": "https://openknowledge.fao.org/items/40085e60-2d17-4c74-b4bc-78c2edbb0d3c",
 		"defer": true,
-		"detectedItemType": "book",
 		"items": [
 			{
 				"itemType": "report",
@@ -575,7 +604,7 @@ var testCases = [
 		"type": "web",
 		"url": "https://openknowledge.fao.org/items/1ca5357e-a044-4d20-8eb3-79f4148f5ab8",
 		"defer": true,
-		"detectedItemType": "book",
+		"detectedItemType": "report",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -606,7 +635,7 @@ var testCases = [
 		"type": "web",
 		"url": "https://openknowledge.fao.org/items/874a4dfa-0a98-4a2d-b3df-b08a48fee504",
 		"defer": true,
-		"detectedItemType": "book",
+		"detectedItemType": "report",
 		"items": [
 			{
 				"itemType": "artwork",
@@ -640,7 +669,7 @@ var testCases = [
 		"type": "web",
 		"url": "https://openknowledge.fao.org/items/3513ab01-f55f-4b23-9cbd-ed268aa8bc54",
 		"defer": true,
-		"detectedItemType": "book",
+		"detectedItemType": "report",
 		"items": [
 			{
 				"itemType": "presentation",
