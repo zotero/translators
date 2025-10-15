@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-15 19:39:38"
+	"lastUpdated": "2025-10-15 19:49:02"
 }
 
 /*
@@ -38,7 +38,7 @@
 /* Description
  **************
  *
- * The ChatGPT Translator can get a private conversation (standard), shared conversation, or conversations from a project. 
+ * The ChatGPT Translator can get a private conversation (standard), shared conversation, or conversations from a project.
  * As there is no specic "AI" source, instantMessages seemed to be the closest, but ChatGPT is set as the first "author" (Although, hesitantly, but this is done for transparency)
  *
  * For a private conversation, the translator attempts to use the internal API so data is cleanest, and some data such as date is only available via API
@@ -48,11 +48,11 @@
  *
  * Projects allow for multiple grabbing of conversations, utilizing the individual grabs for most of the code.
  *
- * Please note, much of this was vibe coded by OpenAi's Codex, so there is likely a lot of bloat that can be removed.  
+ * Please note, much of this was vibe coded by OpenAi's Codex, so there is likely a lot of bloat that can be removed.
  * I did several refactors to try and reduce Codex's bad habit of overengineering stuff, but I have run out of time to complete this, and in my tests it works well.
  *
  *
- * Only a single automated test is included, as most testing is on private conversations.  
+ * Only a single automated test is included, as most testing is on private conversations.
  * But to try and at least provide some info on my private testing, in the test share conversation, I included a log of getting that conversation when it was private.
  *
  */
