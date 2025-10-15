@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-14 22:06:20"
+	"lastUpdated": "2025-10-15 17:56:46"
 }
 
 /*
@@ -37,24 +37,24 @@
 
 /* Description
  **************
- * 
- * The ChatGPT Translator can get a private conversation (standard), shared conversation, or conversations from a project. 
+ *
+ * The ChatGPT Translator can get a private conversation (standard), shared conversation, or conversations from a project.
  * As there is no specic "AI" source, instantMessages seemed to be the closest, but ChatGPT is set as the first "author" (Although, hesitantly, but this is done for transparency)
- * 
+ *
  * For a private conversation, the translator attempts to use the internal API so data is cleanest, and some data such as date is only available via API
  * Since a private conversation that is cited cannot be accessed, if the private conversation has had a public share created, it will put this URL in, and its date
- * 
+ *
  * Shared conversations that have not yet been used by a new user have a share URL, but do not have API access to it and limited DOM information, so only a little metadata is filled in
- * 
+ *
  * Projects allow for multiple grabbing of conversations, utilizing the individual grabs for most of the code.
- * 
- * Please note, much of this was vibe coded by OpenAi's Codex, so there is likely a lot of bloat that can be removed.  
+ *
+ * Please note, much of this was vibe coded by OpenAi's Codex, so there is likely a lot of bloat that can be removed.
  * I did several refactors to try and reduce Codex's bad habit of overengineering stuff, but I have run out of time to complete this, and in my tests it works well.
- * 
- * 
- * Only a single automated test is included, as most testing is on private conversations.  
+ *
+ *
+ * Only a single automated test is included, as most testing is on private conversations.
  * But to try and at least provide some info on my private testing, in the test share conversation, I included a log of getting that conversation when it was private.
- * 
+ *
  */
 
 
@@ -191,17 +191,17 @@ function detectWeb(doc, url) {
 			: (doc && doc.location && typeof doc.location.href === 'string' ? doc.location.href : null);
 
 		if (!result && typeof pageURL === 'string'
-	  && CONVERSATION_URL_REGEX.test(pageURL)) {
+		&& CONVERSATION_URL_REGEX.test(pageURL)) {
 			result = itemType;
 		}
 
 		if (!result && typeof pageURL === 'string'
-	  && SHARED_URL_REGEX.test(pageURL)) {
+		&& SHARED_URL_REGEX.test(pageURL)) {
 			result = itemType;
 		}
 
 		if (!result && typeof pageURL === 'string'
-	  && PROJECT_URL_REGEX.test(pageURL)) {
+		&& PROJECT_URL_REGEX.test(pageURL)) {
 			result = 'multiple';
 		}
 		return result;
@@ -290,9 +290,9 @@ async function doWeb(doc, url) {
 							return direct;
 						}
 						return projectEntries.find(candidate => candidate
-			  && candidate.conversationID
-			  && typeof selectionKey === 'string'
-			  && selectionKey.toLowerCase().includes(candidate.conversationID));
+						&& candidate.conversationID
+						&& typeof selectionKey === 'string'
+						&& selectionKey.toLowerCase().includes(candidate.conversationID));
 					})();
 					if (entry) {
 						if (entry.projectID) {
@@ -999,7 +999,7 @@ async function apiGetAuth(doc, ids, _source) {
 	let userEmail = null;
 	if (data && typeof data === 'object') {
 		token = data.accessToken || data.access_token
-	  || (data.user && (data.user.accessToken || data.user.access_token)) || null;
+		|| (data.user && (data.user.accessToken || data.user.access_token)) || null;
 		if (data.user && typeof data.user.name === 'string') {
 			userName = data.user.name.trim() || null;
 		}
@@ -1948,9 +1948,9 @@ function cleanTitle(value) {
 			? trim(DEFAULT_ITEM_OBJECT.title).toLowerCase()
 			: null;
 		if (!lowered
-	  || (defaultsTitle && lowered === defaultsTitle)
-	  || lowered === 'chatgpt'
-	  || lowered === 'chatgpt conversation') {
+		|| (defaultsTitle && lowered === defaultsTitle)
+		|| lowered === 'chatgpt'
+		|| lowered === 'chatgpt conversation') {
 			result = null;
 		}
 		else {
@@ -2154,7 +2154,6 @@ function cleanDate(value) {
 	return result;
 }
 
-//#endregion
 //#endregion
 
 
