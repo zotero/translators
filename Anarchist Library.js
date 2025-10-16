@@ -2,7 +2,7 @@
 	"translatorID": "1a31e4c5-22ed-4b5b-a75f-55476db29a44",
 	"label": "Anarchist Library",
 	"creator": "Sister Baæ'l",
-	"target": "https://theanarchistlibrary.org/(latest|library|stats/popular|category/topic|category/author|special/index|search)",
+	"target": "https://theanarchistlibrary\\.org/(latest|library|stats/popular|category/topic|category/author|special/index|search)",
 	"minVersion": "7.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -98,12 +98,10 @@ async function doLibraryItem(doc, url = doc.location.href) {
 	item.language = language;
 
 	let itemType = attr(doc, '[property~="og:type"]', 'content');
-	const tagNodeList = doc.querySelectorAll(`[property~="og:${itemType}:tag"]`);
+	let tagNodeList = doc.querySelectorAll(`[property~="og:${itemType}:tag"]`);
 	let description = attr(doc, '[property~="og:description"]', 'content');
 	let author = attr(doc, `[property~="og:${itemType}:author"]`, 'content');
-	let authorFirstName = author.substring(0, author.indexOf(' '));
-	let authorLastName = author.substring(author.indexOf(' ') + 1);
-	item.creators.push({ creatorType: "author", firstName: authorFirstName, lastName: authorLastName });
+	item.creators.push(ZU.cleanAuthor(author, "author"));
 
 	if (description) {
 		item.description = description;
