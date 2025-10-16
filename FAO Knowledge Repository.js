@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-15 14:43:11"
+	"lastUpdated": "2025-10-16 16:05:06"
 }
 
 /*
@@ -43,6 +43,13 @@ function detectWeb(doc, url) {
 		];
 		const productTypeLabelsPredicate = productTypeLabels.map(l => `contains(text(), '${l}')`).join(' or ');
 		const productTypeRaw = ZU.xpathText(doc, `//*[${productTypeLabelsPredicate}]/following::text()[1]`) || '';
+
+		if (!productTypeRaw) {
+			// Wait for page to populate
+			Z.monitorDOMChanges(doc.body);
+			return false;
+		}
+
 		const productType = productTypeRaw.toLowerCase();
 
 		// Product type --> Zotero item type mapping scheme:
@@ -316,8 +323,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://openknowledge.fao.org/items/75a7f18a-3e96-4857-a3ab-37f9d3193604",
-		"defer": true,
-		"detectedItemType": "report",
+		"defer": 1,
 		"items": [
 			{
 				"itemType": "book",
@@ -435,8 +441,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://openknowledge.fao.org/items/28fe3916-ad18-481d-92f5-42572165dae6",
-		"defer": true,
-		"detectedItemType": "report",
+		"defer": 1,
 		"items": [
 			{
 				"itemType": "book",
@@ -493,8 +498,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://openknowledge.fao.org/items/3b13b1e7-28e9-443d-b431-8e6062730f1b",
-		"defer": true,
-		"detectedItemType": "report",
+		"defer": 1,
 		"items": [
 			{
 				"itemType": "book",
@@ -555,7 +559,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://openknowledge.fao.org/items/40085e60-2d17-4c74-b4bc-78c2edbb0d3c",
-		"defer": true,
+		"defer": 1,
 		"items": [
 			{
 				"itemType": "report",
@@ -603,8 +607,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://openknowledge.fao.org/items/1ca5357e-a044-4d20-8eb3-79f4148f5ab8",
-		"defer": true,
-		"detectedItemType": "report",
+		"defer": 1,
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -634,8 +637,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://openknowledge.fao.org/items/874a4dfa-0a98-4a2d-b3df-b08a48fee504",
-		"defer": true,
-		"detectedItemType": "report",
+		"defer": 1,
 		"items": [
 			{
 				"itemType": "artwork",
@@ -668,8 +670,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://openknowledge.fao.org/items/3513ab01-f55f-4b23-9cbd-ed268aa8bc54",
-		"defer": true,
-		"detectedItemType": "report",
+		"defer": 1,
 		"items": [
 			{
 				"itemType": "presentation",
