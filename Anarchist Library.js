@@ -46,12 +46,24 @@ var urlBase = "https://theanarchistlibrary.org/";
 // ToDo: Localization
 var languageNames = new Intl.DisplayNames(['en'], { type: 'language' });
 
+var allAttachmentTypes = {
+	"Plain PDF": ".pdf",
+	"A4 PDF": ".a4.pdf",
+	"Letter PDF": ".lt.pdf",
+	EPub: ".eupb",
+	"Printer-friendly HTML": ".html",
+	LaTeX: ".tex",
+	"Plain Text": ".muse",
+	"Source Zip:": ".zip",
+	Snapshot: "snapshot"
+};
+
 function getListItems(doc) {
 	// todo copied from below
 	let items = {};
 	let results = doc.querySelectorAll('a.list-group-item');
 	for (let i = 0; i < results.length; i++) {
-		items[results[i].href] = ZU.triminternal(text(results[i], "strong"));
+		items[results[i].href] = ZU.trimInternal(text(results[i], "strong"));
 	}
 	return items;
 }
@@ -60,7 +72,7 @@ function getSearchItems(doc) {
 	let items = {};
 	let results = doc.querySelectorAll('a.list-group-item');
 	for (let i = 0; i < results.length; i++) {
-		items[results[i].href] = ZU.triminternal(text(results[i], "strong"));
+		items[results[i].href] = ZU.trimInternal(text(results[i], "strong"));
 	}
 	return items;
 }
@@ -70,6 +82,16 @@ async function doLibraryItem(doc, url = doc.location.href) {
 	let item = new Zotero.Item('webpage');
 
 	let language = languageNames.of(attr(doc, "html", "lang"));
+
+	// Since connectors don't currently filter these, make a subset of all
+	// possible
+
+	let attachmentTypes = {
+		PDF: allAttachmentTypes["Plain PDF"],
+		EPub: allAttachmentTypes.EPub,
+		LaTeX: allAttachmentTypes.LaTeX,
+		Snapshot: allAttachmentTypes.Snapshot
+	};
 
 	item.accessed = new Date().toString();
 	item.url = url;
@@ -116,25 +138,29 @@ async function doLibraryItem(doc, url = doc.location.href) {
 	item.tags = tags;
 	item.date = date;
 	if (notes) {
-		item.notes.push({ note: ZU.triminternal(notes) });
+		item.notes.push({ note: ZU.trimInternal(notes) });
 	}
 	if (source) {
-		item.notes.push({ note: `Source: ${ZU.triminternal(source)}` });
+		item.notes.push({ note: `Source: ${ZU.trimInternal(source)}` });
 	}
-	item.attachments = [{
-		document: doc,
-		title: "Snapshot",
-		snapshot: true
-	},
-	{
-		title: "Epub",
-		url: `${doc.location.href}.epub`
-	},
-	// ToDo: Do this conditionally
-	{
-		title: "Latex",
-		url: `${doc.location.href}.tex`
-	}];
+	item.attachments = [];
+
+	for (const [typeName, attachmentExt] of Object.entries(attachmentTypes)) {
+		if (attachmentExt == 'snapshot') {
+			item.attachments.push({
+				document: doc,
+				title: "Snapshot",
+				snapshot: true
+			});
+		}
+		else {
+			item.attachments.push({
+				title: typeName,
+				url: `${doc.location.href}${attachmentExt}`
+			});
+		}
+	}
+
 	return item.complete();
 }
 
@@ -213,15 +239,18 @@ var testCases = [
 				"language": "English",
 				"attachments": [
 					{
+						"title": "PDF"
+					},
+					{
+						"title": "EPub"
+					},
+					{
+						"title": "LaTeX"
+					},
+					{
 						"title": "Snapshot",
 						"mimeType": "text/html",
 						"snapshot": true
-					},
-					{
-						"title": "Epub"
-					},
-					{
-						"title": "Latex"
 					}
 				],
 				"tags": [
@@ -266,15 +295,18 @@ var testCases = [
 				"url": "https://theanarchistlibrary.org/library/jp-o-malley-the-utopia-of-rules-david-graeber-interview",
 				"attachments": [
 					{
+						"title": "PDF"
+					},
+					{
+						"title": "EPub"
+					},
+					{
+						"title": "LaTeX"
+					},
+					{
 						"title": "Snapshot",
 						"mimeType": "text/html",
 						"snapshot": true
-					},
-					{
-						"title": "Epub"
-					},
-					{
-						"title": "Latex"
 					}
 				],
 				"tags": [
@@ -316,15 +348,18 @@ var testCases = [
 				"url": "https://theanarchistlibrary.org/library/errico-malatesta-the-general-strike-and-the-insurrection-in-italy",
 				"attachments": [
 					{
+						"title": "PDF"
+					},
+					{
+						"title": "EPub"
+					},
+					{
+						"title": "LaTeX"
+					},
+					{
 						"title": "Snapshot",
-						"snapshot": true,
-						"mimeType": "text/html"
-					},
-					{
-						"title": "Epub"
-					},
-					{
-						"title": "Latex"
+						"mimeType": "text/html",
+						"snapshot": true
 					}
 				],
 				"tags": [
@@ -372,15 +407,18 @@ var testCases = [
 				"url": "https://theanarchistlibrary.org/library/voltairine-de-cleyre-report-of-the-work-of-the-chicago-mexican-liberal-defense-league",
 				"attachments": [
 					{
+						"title": "PDF"
+					},
+					{
+						"title": "EPub"
+					},
+					{
+						"title": "LaTeX"
+					},
+					{
 						"title": "Snapshot",
-						"snapshot": true,
-						"mimeType": "text/html"
-					},
-					{
-						"title": "Epub"
-					},
-					{
-						"title": "Latex"
+						"mimeType": "text/html",
+						"snapshot": true
 					}
 				],
 				"tags": [
