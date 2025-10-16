@@ -41,61 +41,42 @@ This translator was developed by Dandelion Good.
 If you do any work on this translator, please add yourself here <3.
 */
 
-var urlBase = "https://theanarchistlibrary.org/";
-
-// ToDo: Localization
-var languageNames = new Intl.DisplayNames(['en'], { type: 'language' });
-
 var allAttachmentTypes = {
-	"Plain PDF": ".pdf",
-	"A4 PDF": ".a4.pdf",
-	"Letter PDF": ".lt.pdf",
-	EPub: ".eupb",
-	"Printer-friendly HTML": ".html",
-	LaTeX: ".tex",
-	"Plain Text": ".muse",
-	"Source Zip:": ".zip",
-	Snapshot: "snapshot"
+	"Plain PDF": { ext: ".pdf", mimeType: "application/pdf" },
+	"A4 PDF": { ext: ".a4.pdf", mimeType: "application/pdf" },
+	"Letter PDF": { ext: ".lt.pdf", mimeType: "application/pdf" },
+	EPub: { ext:".eupb", mimeType: "application/epub+zip" },
+	"Printer-friendly HTML": { ext: ".html", mimeType: "text/html" },
+	LaTeX: { ext: ".tex", mimeType: "application/x-tex" },
+	"Plain Text": { ext: ".muse", mimeType: "text/plain" },
+	"Source Zip:": { ext: ".zip", mimeType: "application/zip" },
+	Snapshot: { ext: "snapshot", mimeType: "text/html" }
 };
 
-function getListItems(doc) {
-	// todo copied from below
+function getSearchResults(doc, checkOnly) {
 	let items = {};
 	let results = doc.querySelectorAll('a.list-group-item');
 	for (let i = 0; i < results.length; i++) {
+		if (checkOnly) {
+			return true;
+		}
 		items[results[i].href] = ZU.trimInternal(text(results[i], "strong"));
 	}
 	return items;
 }
 
-function getSearchItems(doc) {
-	let items = {};
-	let results = doc.querySelectorAll('a.list-group-item');
-	for (let i = 0; i < results.length; i++) {
-		items[results[i].href] = ZU.trimInternal(text(results[i], "strong"));
-	}
-	return items;
-}
-
-async function doLibraryItem(doc, url = doc.location.href) {
+async function scrape(doc, url = doc.location.href) {
 	// ToDo: get fancier here, allow other types
 	let item = new Zotero.Item('webpage');
 
-	let language = languageNames.of(attr(doc, "html", "lang"));
-
-	// Since connectors don't currently filter these, make a subset of all
-	// possible
-
+	// These may be expanded on in the future
 	let attachmentTypes = {
 		PDF: allAttachmentTypes["Plain PDF"],
-		EPub: allAttachmentTypes.EPub,
-		LaTeX: allAttachmentTypes.LaTeX,
-		Snapshot: allAttachmentTypes.Snapshot
 	};
 
 	item.accessed = new Date().toString();
 	item.url = url;
-	item.language = language;
+	item.language = attr(doc, "html", "lang");
 
 	let itemType = attr(doc, '[property~="og:type"]', 'content');
 	let tagNodeList = doc.querySelectorAll(`[property~="og:${itemType}:tag"]`);
@@ -126,14 +107,12 @@ async function doLibraryItem(doc, url = doc.location.href) {
 	// misses link here: https://theanarchistlibrary.org/library/margaret-killjoy-it-s-time-to-build-resilient-communities
 	let source = getPreambleVal(doc, "preamblesrc");
 
-	let tags = [];
-	for (let i = 0; i < tagNodeList.length; i++) {
-		tags = tags.concat(tagNodeList[i].content);
+	for (let tagNode of tagNodeList) {
+		item.tags.push({ tag: tagNode.content });
 	}
 
 	let title = attr(doc.head, '[property~="og:title"][content]', 'content');
 	item.title = title;
-	item.tags = tags;
 	item.date = date;
 	if (notes) {
 		item.notes.push({ note: ZU.trimInternal(notes) });
@@ -141,7 +120,6 @@ async function doLibraryItem(doc, url = doc.location.href) {
 	if (source) {
 		item.notes.push({ note: `Source: ${ZU.trimInternal(source)}` });
 	}
-	item.attachments = [];
 
 	for (const [typeName, attachmentExt] of Object.entries(attachmentTypes)) {
 		if (attachmentExt == 'snapshot') {
@@ -162,27 +140,16 @@ async function doLibraryItem(doc, url = doc.location.href) {
 	return item.complete();
 }
 
-var listRe = new RegExp(String.raw`${urlBase}(category/topic/|category/author/|latest|popular)`);
-var searchRe = new RegExp(String.raw`${urlBase}search?`);
 var libraryRe = new RegExp(String.raw`library/`);
 
 
-var matchers = {
-	list: { matcher: listRe, type: "multiple", do: null, get: getListItems },
-	search: { matcher: searchRe, type: "multiple", do: null, get: getSearchItems },
-	document: { matcher: libraryRe, type: "webpage", do: doLibraryItem, get: null }
-};
-
-
 function detectWeb(doc, url) {
-	// ToDo: Error handling
-	// ToDo: let itemType = doc.head.querySelector('[property~="og:type"]').content;
-	for (const matcherConfig of Object.values(matchers)) {
-		if (url.match(matcherConfig.matcher)) {
-			return matcherConfig.type;
-		}
+	if (url.match(libraryRe)) {
+		return 'webpage';
 	}
-
+	else if (getSearchResults(doc, true)) {
+		return 'multiple';
+	}
 	return false;
 }
 
@@ -192,21 +159,15 @@ function getPreambleVal(doc, id) {
 }
 
 async function doWeb(doc, url) {
-	// ToDo: localize this
-	for (const matcherConfig of Object.values(matchers)) {
-		if (url.match(matcherConfig.matcher)) {
-			if (matcherConfig.type == "multiple") {
-				let items = await Zotero.selectItems(matcherConfig.get(doc));
-				if (!items) break;
-				for (let url of Object.keys(items)) {
-					await doLibraryItem(await requestDocument(url));
-				}
-			}
-			else {
-				await matcherConfig.do(doc, url);
-			}
-			break;
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
 		}
+	}
+	else {
+		await scrape(doc, url);
 	}
 }
 
@@ -234,21 +195,10 @@ var testCases = [
 				],
 				"date": "1996",
 				"url": "https://theanarchistlibrary.org/library/abel-paz-durruti-in-the-spanish-revolution",
-				"language": "English",
+				"language": "en",
 				"attachments": [
 					{
 						"title": "PDF"
-					},
-					{
-						"title": "EPub"
-					},
-					{
-						"title": "LaTeX"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html",
-						"snapshot": true
 					}
 				],
 				"tags": [
@@ -289,22 +239,11 @@ var testCases = [
 					}
 				],
 				"date": "1st April 2015",
-				"language": "English",
+				"language": "en",
 				"url": "https://theanarchistlibrary.org/library/jp-o-malley-the-utopia-of-rules-david-graeber-interview",
 				"attachments": [
 					{
 						"title": "PDF"
-					},
-					{
-						"title": "EPub"
-					},
-					{
-						"title": "LaTeX"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html",
-						"snapshot": true
 					}
 				],
 				"tags": [
@@ -347,17 +286,6 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "PDF"
-					},
-					{
-						"title": "EPub"
-					},
-					{
-						"title": "LaTeX"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html",
-						"snapshot": true
 					}
 				],
 				"tags": [
@@ -401,22 +329,11 @@ var testCases = [
 					}
 				],
 				"date": "1912",
-				"language": "English",
+				"language": "en",
 				"url": "https://theanarchistlibrary.org/library/voltairine-de-cleyre-report-of-the-work-of-the-chicago-mexican-liberal-defense-league",
 				"attachments": [
 					{
 						"title": "PDF"
-					},
-					{
-						"title": "EPub"
-					},
-					{
-						"title": "LaTeX"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html",
-						"snapshot": true
 					}
 				],
 				"tags": [
