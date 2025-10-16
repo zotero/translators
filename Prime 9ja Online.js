@@ -2,7 +2,7 @@
 	"translatorID": "eb0bbbf8-7f57-40fa-aec2-45480d396e93",
 	"label": "Prime 9ja Online",
 	"creator": "VWF",
-	"target": "^https?://(www\\.|pidgin\\.)?prime9ja\\.com\\.ng(/.*)?$",
+	"target": "^https?://(www\\.|pidgin\\.)?prime9ja\\.com\\.ng/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
