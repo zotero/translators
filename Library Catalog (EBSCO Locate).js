@@ -2,14 +2,14 @@
 	"translatorID": "86c090c5-ad3f-4c54-a1f3-9870942014ac",
 	"label": "Library Catalog (EBSCO Locate)",
 	"creator": "Sebastian Karcher and Abe Jellinek",
-	"target": "/search\\?|/instances/[^/]+\\?",
+	"target": "/search\\?|/instances/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 260,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-08-28 03:43:21"
+	"lastUpdated": "2025-10-16 15:04:23"
 }
 
 /*
@@ -85,41 +85,41 @@ function getRecordID(url) {
 	return new URL(url).pathname.match(/\/instances\/([^/]+)/)?.[1];
 }
 
-async function getOkapiTenant(doc) {
+async function getAPIParams(doc) {
 	let scriptURL = attr(doc, 'script[type="module"][src*="/index-"]', 'src');
 	if (!scriptURL) return null;
 	let scriptText = await requestText(scriptURL);
-	let okapiTenant = scriptText.match(/"X-Okapi-Tenant":("[^"]+")/)?.[1];
-	if (!okapiTenant) return null;
-	return JSON.parse(okapiTenant);
+	let matches = scriptText.match(/baseURL:("[^"]+").+"X-Okapi-Tenant":("[^"]+")/);
+	if (!matches) return null;
+	let [, baseURL, okapiTenant] = matches;
+	return {
+		baseURL: JSON.parse(baseURL),
+		okapiTenant: JSON.parse(okapiTenant),
+	};
 }
 
 async function doWeb(doc, url) {
-	let okapiTenant = await getOkapiTenant(doc);
-	if (!okapiTenant) {
-		throw new Error('Unable to generate Okapi tenant');
+	let apiParams = await getAPIParams(doc);
+	if (!apiParams) {
+		throw new Error('Unable to generate API params');
 	}
 
 	if (detectWeb(doc, url) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
 		for (let url of Object.keys(items)) {
-			await scrape(url, okapiTenant);
+			await scrape(url, apiParams);
 		}
 	}
 	else {
-		await scrape(url, okapiTenant);
+		await scrape(url, apiParams);
 	}
 }
 
-async function scrape(url, okapiTenant) {
-	url = new URL(url);
-	const BASE_URL = url.hostname.includes('locate.ebsco.com')
-		? `https://okapi-${url.hostname}`
-		: `https://${url.hostname}/api`;
+async function scrape(url, { baseURL, okapiTenant }) {
 	let recordID = getRecordID(url);
 
-	let marcURL = `${BASE_URL}/opac-inventory/download-instance/${recordID}?utf=true`;
+	let marcURL = `${baseURL}/opac-inventory/download-instance/${recordID}?utf=true`;
 	let headers = {
 		Accept: 'application/json',
 		'X-Okapi-Tenant': okapiTenant
@@ -133,8 +133,9 @@ async function scrape(url, okapiTenant) {
 	}
 	catch {
 		Z.debug('Instance requires X-Okapi-Token - getting one');
-		let guestTokenURL = `${BASE_URL}/opac-auth/guest-token`;
+		let guestTokenURL = `${baseURL}/opac-auth/guest-token`;
 		let guestTokenResponse = await request(guestTokenURL, { headers });
+		Z.debug(guestTokenResponse.headers)
 		headers['x-okapi-token'] = guestTokenResponse.headers['x-okapi-token'];
 		Z.debug('New headers:');
 		Z.debug(headers);
@@ -144,7 +145,7 @@ async function scrape(url, okapiTenant) {
 		}
 		catch {
 			Z.debug('Instance disallows MARC downloads - parsing MARC from record JSON');
-			let recordURL = `${BASE_URL}/opac-inventory/source-records/${recordID}`;
+			let recordURL = `${baseURL}/opac-inventory/source-records/${recordID}`;
 			let recordJSON = await requestJSON(recordURL, { headers });
 			marcRecordJSON = recordJSON.parsedRecord.content;
 		}
@@ -342,6 +343,98 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://nalis.locate.ebsco.com/search?option=keyword&pageNumber=1&query=dracula&recordsPerPage=25",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://covenant.searchmobius.org/instances/2eabe9c2-d8c7-5bf1-87f5-cb9dc47b70ea",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "The Oxford annotated Mishnah: a new translation of the Mishnah with introductions and notes",
+				"creators": [
+					{
+						"firstName": "Shaye J. D.",
+						"lastName": "Cohen",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Robert",
+						"lastName": "Goldenberg",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Hayim",
+						"lastName": "Lapin",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2023",
+				"ISBN": "9780198894186 9780198894193 9780198894209 9780198894216",
+				"abstractNote": "\"The Mishnah is the foundational document of rabbinic law and, one could say, of rabbinic Judaism itself. It is overwhelmingly technical and focused on matters of practice, custom, and law. The Oxford Annotated Mishnah is the first annotated translation of this work, making the text accessible to all. With explanations of all technical terms and expressions, The Oxford Annotated Mishnah brings together an expert group of translators and annotators to assemble a version of the Mishnah that requires no specialist knowledge.\"",
+				"callNumber": "BM497.5.E5 O946 2023",
+				"extra": "OCLC: 1406341265",
+				"language": "eng",
+				"libraryCatalog": "Library Catalog (EBSCO Locate)",
+				"numPages": "3",
+				"place": "Oxford, United Kingdom ; New York, NY",
+				"publisher": "Oxford University Press",
+				"shortTitle": "The Oxford annotated Mishnah",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Commentaries"
+					},
+					{
+						"tag": "Commentaries"
+					},
+					{
+						"tag": "Commentaries"
+					},
+					{
+						"tag": "Droit juif"
+					},
+					{
+						"tag": "Jewish law"
+					},
+					{
+						"tag": "Jewish law"
+					},
+					{
+						"tag": "Mishnah"
+					},
+					{
+						"tag": "Mishnah"
+					},
+					{
+						"tag": "Mishnah"
+					},
+					{
+						"tag": "Mishnah"
+					},
+					{
+						"tag": "Versions"
+					},
+					{
+						"tag": "commentaries"
+					}
+				],
+				"notes": [
+					{
+						"note": "First published 2022 in hardcover Third volume includes indexes"
+					},
+					{
+						"note": "Shaye J.D. Cohen and Hayim Lapin -- Richard S. Sarason -- Gregg E. Gardner -- Richard S. Sarason -- Michael Rosenberg -- Yair Furstenberg -- William Friedman and Matthew Hass -- Joshua Kulp -- Joshua Kulp -- Joshua Kulp -- Joshua Kulp -- Naftali S. Cohn. -- Shaye J.D. Cohen -- Charlotte Elisheva Fonrobert -- Jonathan Klawans -- Miriam-Simma Walfish -- Yonatan S. Miller -- Jeffrey L. Rubenstein -- Judith Hauptman -- Steven D. Fraade -- David Levine -- Alyssa Gray -- Gail Labovitz -- Michal Bar-Asher Siegal. -- Introduction / The Mishnah. ORDER OF ZERA'IM. Tractate Berakhot / Tractate Pe'ah / Tractate Demai / Tractate Kilayim / Tractate Shevi'it / Tractate Terumot / Tractate Ma'aserot / Tractate Ma'aser Sheni / Tractate Hallah / Tractate Orlah / Tractate Bikkurim / ORDER OF MO'ED. Tractate Shabbat / Tractate Eruvin / Tractate Pesahim / Tractate Sheqalim / Tractate Yoma / Tractate Sukkah / Tractate Betsah / Tractate Rosh Hashanah / Tractate Ta'anit / Tractate Megillah / Tractate Mo'ed Qatan / Tractate Hagigah Tal Ilan -- Robert Brody -- Robert Goldenberg -- Robert Goldenberg -- Ishay Rosen-Zvi and Orr Scharf -- David Brodsky -- Gail Labovitz. -- Hayim Lapin -- Hayim Lapin -- Hayim Lapin -- Beth Berkowitz -- David C. Flatto -- Elizabeth Shanks Alexander -- Shaye J.D. Cohen -- Christine Hayes -- Martin S. Jaffee -- Alyssa Gray. -- ORDER OF NASHIM. Tractate Yevamot / Tractate Ketubbot / Tractate Nedarim / Tractate Nazir / Tractate Sotah / Tractate Gittin / Tractate Qiddushin / ORDER OF NEZIQIN. Tractate Bava Qamma / Tractate Bava Metsi'a / Tractate Bava Batra / Tractate Sanhedrin / Tractate Makkot / Tractate Shevu'ot / Tractate Eduyot / Tractate Avodah Zarah / Tractate Avot / Tractate Horayot Aryeh Cohen -- Dvora Weisberg -- Jordan D. Rosenblum -- Chaya Halberstam -- Jonah Steinberg -- Tzvi Novick -- Moulie Vidas -- Sarra Lev -- Naftali S. Cohn -- Naftali S. Cohn -- Dalia Marx. -- Michael Chernick -- Yehudah Cohn -- Mira Balberg -- Marcus Mordecai Schwartz -- Yair Furstenberg -- Yonatan Adler -- Charlotte Elisheva Fonrobert -- Hannah Harrington -- Shlomo Zuckier -- David Levine -- Leib Moscovitz -- Richard Hidary. -- ORDER OF QODASHIM. Tractate Zevahim / Tractate Menahot / Tractate Hullin / Tractate Bekhorot / Tractate Arakhin / Tractate Temurah / Tractate Keritot / Tractate Me'ilah / Tractate Tamid / Tractate Middot / Tractate Qinnim / ORDER OF TOHOROT. Tractate Kelim / Tractate Oholot / Tractate Nega'im / Tractate Parah / Tractate Tohorot / Tractate Miqva'ot / Tractate Niddah / Tractate Makhshirin / Tractate Zavim / Tractate Tevul Yom / Tractate Yadayim / Tractate Uqtsin / Appendix: Money, weights, and measures -- Glossary of untranslated Hebrew terms -- Index of Biblical passages -- Index of names and subjects"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://covenant.searchmobius.org/search?option=keyword&pageNumber=1&query=robert%20alter&recordsPerPage=25",
 		"defer": true,
 		"items": "multiple"
 	}
