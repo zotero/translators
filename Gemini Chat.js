@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-16 17:43:53"
+	"lastUpdated": "2025-10-16 17:50:44"
 }
 
 /*
@@ -2927,40 +2927,40 @@ async function callAPI(doc, apiOptions = {}) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-  {
-    "type": "web",
-    "url": "https://gemini.google.com/share/88994295fbe1",
-    "items": [
-      {
-        "itemType": "instantMessage",
-        "title": "Zotero Connector Test Case",
-        "creators": [
-          {
-            "creatorType": "author",
-            "lastName": "Google Gemini",
-            "fieldMode": 1
-          },
-          {
-            "creatorType": "author",
-            "lastName": "Anonymous",
-            "fieldMode": 1
-          }
-        ],
-        "date": "2025-10-16",
-        "extra": "Model: 2.5 Flash\nCreated: 2025-10-16",
-        "url": "https://gemini.google.com/share/88994295fbe1",
-        "attachments": [
-          {
-            "title": "Gemini Chat Conversation Snapshot",
-            "snapshot": true,
-            "mimeType": "text/html"
-          }
-        ],
-        "tags": [],
-        "notes": [],
-        "seeAlso": []
-      }
-    ]
-  }
+	{
+		"type": "web",
+		"url": "https://gemini.google.com/share/88994295fbe1",
+		"items": [
+			{
+				"itemType": "instantMessage",
+				"title": "Zotero Connector Test Case",
+				"creators": [
+					{
+						"creatorType": "author",
+						"lastName": "Google Gemini",
+						"fieldMode": 1
+					},
+					{
+						"creatorType": "author",
+						"lastName": "Anonymous",
+						"fieldMode": 1
+					}
+				],
+				"date": "2025-10-16",
+				"extra": "Model: 2.5 Flash\nCreated: 2025-10-16",
+				"url": "https://gemini.google.com/share/88994295fbe1",
+				"attachments": [
+					{
+						"title": "Gemini Chat Conversation Snapshot",
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
 ]
 /** END TEST CASES **/
