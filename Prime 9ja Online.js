@@ -86,20 +86,20 @@ function parseJSONLD(doc) {
 	return null;
 }
 
-function countListingAnchors(doc) {
-	const sel = [
-		'h3.entry-title a',
-		'h4.entry-title a',
-		'h5.entry-title a',
-		'a.p-url',
-		'a.p-flink',
-		'a.entry-title'
-	];
-	let count = 0;
-	for (let s of sel) {
-		count += doc.querySelectorAll(s).length;
+function getSearchResults(doc, checkOnly) {
+	let items = {};
+	let found = false;
+	// generic year pattern in path for article links
+	let rows = doc.querySelectorAll('a[href*="/20"]');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent || row.title || '');
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
 	}
-	return count;
+	return found ? items : false;
 }
 
 function isIndexURL(url) {
@@ -120,15 +120,13 @@ function detectWeb(doc, url) {
 		return 'multiple';
 	}
 
-	// 3) conservative listing detection
-	let listingCount = countListingAnchors(doc);
-	if (listingCount >= 4) {
-		if (!meta(doc, 'article:published_time')
-			&& !meta(doc, 'og:type')
-			&& !doc.querySelector('article.post')
-			&& !doc.querySelector('[itemprop="articleBody"]')) {
-			return 'multiple';
+	// 3) Use the standard getSearchResults() heuristic for listing pages
+	if (getSearchResults(doc, true)) {
+		// If page also clearly looks like an article, prefer article
+		if (meta(doc, 'article:published_time') || meta(doc, 'og:type') || text(doc, 'h1.entry-title') || doc.querySelector('[itemprop="articleBody"]')) {
+			return 'newspaperArticle';
 		}
+		return 'multiple';
 	}
 
 	// 4) meta-based hints
@@ -155,14 +153,8 @@ async function doWeb(doc, url) {
 	url = url || doc.location.href;
 	let mode = detectWeb(doc, url);
 	if (mode === 'multiple') {
-		let items = {};
-		let rows = doc.querySelectorAll('a.p-url, a.p-flink, a.entry-title, h3.entry-title a, h4.entry-title a, h5.entry-title a');
-		for (let row of rows) {
-			let href = row.href;
-			let title = ZU.trimInternal(row.textContent);
-			if (!href || !title) continue;
-			items[href] = title;
-		}
+		let items = getSearchResults(doc, false);
+		if (!items) return;
 		let selected = await Zotero.selectItems(items);
 		if (!selected) return;
 		for (let u of Object.keys(selected)) {
@@ -204,46 +196,22 @@ async function scrape(doc, url) {
 
 		item.publicationTitle = (data.publisher && (data.publisher.name || data.publisher.title)) || 'Prime 9ja Online';
 
-		// --- handle ISSN safely (lint-friendly formatting) ---
-		if (data.publisher) {
-			let pub = data.publisher;
-			let issn
-				= pub.issn
-				|| (pub.identifier && /\d{4}-\d{3}[\dxX]/.test(pub.identifier)
-					? pub.identifier.match(/\d{4}-\d{3}[\dxX]/)[0]
-					: null)
-				|| (pub.sourceOrganization && pub.sourceOrganization.issn)
-				|| null;
+		item.ISSN = '3092-8907';
 
-			if (issn) {
-				item.ISSN = issn;
-			}
-			else {
-				item.ISSN = '3092-8907';
-			}
-		}
-		else {
-			item.ISSN = '3092-8907';
-		}
-
-		// --- date: prefer JSON-LD verbatim when it looks like an ISO datetime ---
+		// --- date: use ZU.strToISO() to normalize if possible ---
 		let rawJsonDate = data.datePublished || data.dateCreated || '';
 		if (rawJsonDate) {
-			// If it contains a 'T' assume ISO datetime (keep as-is)
-			if (rawJsonDate.includes('T') !== -1) {
-				item.date = rawJsonDate;
+			// Prefer Zotero's normalization (handles many formats and keeps timezone when present)
+			let isoFromZU = ZU.strToISO(rawJsonDate);
+			if (isoFromZU) {
+				item.date = isoFromZU;
 			}
 			else {
-				// try to parse human-readable date and produce YYYY-MM-DD
-				let parsed = new Date(rawJsonDate);
-				if (!isNaN(parsed)) {
-					item.date = parsed.toISOString().split('T')[0];
-				}
-				else {
-					item.date = rawJsonDate;
-				}
+				// if ZU couldn't parse, keep raw (often already ISO with TZ)
+				item.date = rawJsonDate;
 			}
 		}
+
 		// --- authors from JSON-LD (skip organisations) ---
 		if (data.author) {
 			let authors = Array.isArray(data.author) ? data.author : [data.author];
@@ -253,7 +221,8 @@ async function scrape(doc, url) {
 					let lower = name.toString().toLowerCase();
 					if (/news agency|agency|news desk|publish desk|prime 9ja|prime9ja|online media|media|staff|bureau/i.test(lower)) {
 						// skip org-like bylines
-					} else {
+					}
+					else {
 						item.creators.push(ZU.cleanAuthor(name.toString(), 'author'));
 					}
 				}
@@ -284,14 +253,16 @@ async function scrape(doc, url) {
 	if (!item.date || !item.date.trim()) {
 		let metaDate = meta(doc, 'article:published_time') || '';
 		if (metaDate) {
-			// meta often already ISO with timezone; keep it
+			// meta often already ISO with timezone; keep it, else use ZU.strToISO
 			if (metaDate.indexOf('T') !== -1) {
 				item.date = metaDate;
-			} else {
-				let parsed = new Date(metaDate);
-				if (!isNaN(parsed)) {
-					item.date = parsed.toISOString().split('T')[0];
-				} else {
+			}
+			else {
+				let isoMeta = ZU.strToISO(metaDate);
+				if (isoMeta) {
+					item.date = isoMeta;
+				}
+				else {
 					item.date = metaDate;
 				}
 			}
@@ -306,6 +277,10 @@ async function scrape(doc, url) {
 		item.publicationTitle = 'Prime 9ja Online';
 	}
 
+	if (!item.ISSN) {
+		item.ISSN = '3092-8907';
+	}
+	
 	// If no creators yet, try common DOM byline selectors (skip org-like)
 	if (item.creators.length === 0) {
 		let cand = meta(doc, 'article:author')
@@ -332,6 +307,39 @@ async function scrape(doc, url) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.prime9ja.com.ng/2025/05/tribunal-to-rule-on-ondo-poll-june-4.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Tribunal to Rule on Ondo Poll June 4",
+				"creators": [
+					{
+						"firstName": "Chima Joseph",
+						"lastName": "Ugo",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025-05-24T18:10:00+01:00",
+				"ISSN": "3092-8907",
+				"abstractNote": "AKURE —  The Ondo State Governorship Election Petitions Tribunal will deliver its verdict on June 4 in the series of suits challenging the e...",
+				"libraryCatalog": "Prime 9ja Online",
+				"place": "Nigeria",
+				"publicationTitle": "Prime 9ja Online",
+				"url": "https://www.prime9ja.com.ng/2025/05/tribunal-to-rule-on-ondo-poll-june-4.html",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
 	{
 		"type": "web",
 		"url": "https://www.prime9ja.com.ng/p/author.html",
