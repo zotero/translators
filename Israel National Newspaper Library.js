@@ -2,15 +2,14 @@
 	"translatorID": "9d8099b7-1c50-4159-9a67-f9fc1fb3b463",
 	"label": "Israel National Newspaper Library",
 	"creator": "Anonymus",
-	"target": "^https:\\/\\/www\\.nli\\.org\\.il\\/(en|he|ar)\\/newspapers\\/[a-z]+\\/\\d{4}\\/\\d{2}\\/\\d{2}\\/\\d{2}\\/(article|page)\\/\\d{1,3}\\/?(\\?.*)?$",
-	"minVersion": "5.0",
+	"target": "^https:\\/\\/www\\.nli\\.org\\.il\\/(en|he|ar)\\/newspapers\\/.*",
+	"minVersion": "6.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-07-17 21:22:49",
-	"skipTest": true
+	"lastUpdated": "2025-07-17 21:22:49"
 }
 
 /*
@@ -35,7 +34,7 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.includes("/article/") || url.includes("/page/")) {
+	if (url.includes("newspapers")) {
 		return "newspaperArticle";
 	}
 	return false;
