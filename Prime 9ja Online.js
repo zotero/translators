@@ -342,17 +342,26 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.prime9ja.com.ng/p/author.html",
+		"url": "https://www.prime9ja.com.ng/2025/05/davido-cfmf-review-low-burn-confession.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Authors and Contributors",
-				"creators": [],
-				"abstractNote": "Chima Joseph Ugo   ...",
+				"title": "Davido – “CFMF” Review: A Low-Burn Confession in Afro-R&B Silhouettes",
+				"creators": [
+					{
+						"firstName": "Chima Joseph",
+						"lastName": "Ugo",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025-05-27T01:11:00+01:00",
+				"ISSN": "3092-8907",
+				"abstractNote": "On “CFMF”  — the fourth track from Davido’s 2025 album 5ive  —   the artist trades club-ready bravado for inward reflection. Featuri...",
 				"libraryCatalog": "Prime 9ja Online",
 				"place": "Nigeria",
 				"publicationTitle": "Prime 9ja Online",
-				"url": "https://www.prime9ja.com.ng/p/author.html",
+				"shortTitle": "Davido – “CFMF” Review",
+				"url": "https://www.prime9ja.com.ng/2025/05/davido-cfmf-review-low-burn-confession.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -367,26 +376,26 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://pidgin.prime9ja.com.ng/2025/09/20000-jam-hilda-baci-cookathon-for-eko.html",
+		"url": "https://www.prime9ja.com.ng/2025/05/jamb-server-hack-over-20-arrested.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "20,000 Pipo Jam Hilda Baci Cookathon for Eko Hotel Celebrate World Jollof Day",
+				"title": "JAMB Server Hack: Over 20 Arrested",
 				"creators": [
 					{
-						"firstName": "Chima Joseph",
-						"lastName": "Ugo",
+						"firstName": "Onuwa",
+						"lastName": "John",
 						"creatorType": "author"
 					}
 				],
-				"abstractNote": "Chef Hilda Baci draw massive crowd for Friday as she yan to cook the biggest pot of Naija Jollof rice wey history don ever see. The event land for Eko Hotel, Victoria Island, to mark World Jollof Day, and people from all corner of Lagos rush come support…",
-				"language": "[object Object]",
-				"date": "2025-09-12T18:31:00+01:00",
+				"date": "2025-05-23T22:38:00+01:00",
 				"ISSN": "3092-8907",
+				"abstractNote": "ABUJA —  A major network of cybercriminals allegedly responsible for infiltrating the Computer-Based Testing (CBT) infrastructure of Nigeria...",
 				"libraryCatalog": "Prime 9ja Online",
 				"place": "Nigeria",
-				"publicationTitle": "Prime 9ja Online Pidgin",
-				"url": "https://pidgin.prime9ja.com.ng/2025/09/20000-jam-hilda-baci-cookathon-for-eko.html",
+				"publicationTitle": "Prime 9ja Online",
+				"shortTitle": "JAMB Server Hack",
+				"url": "https://www.prime9ja.com.ng/2025/05/jamb-server-hack-over-20-arrested.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
