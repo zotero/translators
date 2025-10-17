@@ -54,54 +54,84 @@ function detectLanguageFromText(text) {
 async function scrape(doc, url) {
 	const item = new Zotero.Item("newspaperArticle");
 
-	if (url.includes("/article/")) { // If article is an article and not just a page
-		// Title
-		const headline = JSON.parse(doc.querySelector('script[type="application/ld+json"]').textContent).headline || null;
-		if (headline) item.title = ZU.trimInternal(headline);
-
-		// Persistent link
-		const linkNode = doc.querySelector("#sectionleveltabpersistentlinkarea .persistentlinkurl");
-		item.url = linkNode ? ZU.trimInternal(linkNode.textContent) : url;
-
-		// Language detection
-		const paragraphs = Array.from(doc.querySelectorAll("#pagesectionstextcontainer p")).map(p => p.textContent.trim()).filter(Boolean);
-		const sampleText = paragraphs.join(" ").slice(0, 1000); // Analyze first 1000 characters
-		item.language = detectLanguageFromText(sampleText);
-
-		// Page number
-		const pageLabel = doc.querySelector('span.pagelabel.current b');
-		if (pageLabel) {
-			const split = pageLabel.textContent.split(" ");
-			item.pages = split[1];
+	// Get JSON-LD data
+	let jsonLDData = null;
+	const jsonLD = doc.querySelector('script[type="application/ld+json"]');
+	if (jsonLD) {
+		try {
+			jsonLDData = JSON.parse(jsonLD.textContent);
+			const headline = ZU.trimInternal(jsonLDData.headline);
+			if (headline) item.title = headline;
+		} catch (e) {
+			ZU.debug("Error parsing JSON-LD for newspaper: " + e);
 		}
 	}
 
-	// Date from <title>
-	const date = ZU.trimInternal(doc.querySelector('li.breadcrumb-item:nth-child(3)').textContent);
-	if (date) item.date = date;
+	// Persistent link
+	const linkNode = doc.querySelector("#sectionleveltabpersistentlinkarea .persistentlinkurl");
+	item.url = linkNode ? ZU.trimInternal(linkNode.textContent) : url;
 
-	// Get publication
+	// Abstract + Full Text
+	const paragraphs = Array.from(doc.querySelectorAll("#pagesectionstextcontainer p"))
+		.map(p => ZU.trimInternal(p.textContent))
+		.filter(Boolean);
+
+	if (paragraphs.length) {
+		item.abstractNote = paragraphs[0];
+		item.extra = "Full Text:\n" + paragraphs.join("\n\n");
+		
+		// Language detection
+		const sampleText = paragraphs.join(" ").slice(0, 1000);
+		const detectedLang = detectLanguageFromText(sampleText);
+		if (detectedLang) {
+			const langMap = { he: "heb", ar: "ara", en: "eng" };
+			item.language = langMap[detectedLang] || detectedLang;
+		}
+	}
+
+	// Date from breadcrumb
+	const dateNode = doc.querySelector('li.breadcrumb-item:nth-child(3)');
+	if (dateNode) {
+		item.date = ZU.trimInternal(dateNode.textContent);
+	}
+
+	// Get publication from NLI script data
 	const nliScript = doc.querySelector('script#nlijs');
 	if (nliScript) {
 		const rawJSON = nliScript.getAttribute('data-nli-data-json');
-		try {
-			const json = JSON.parse(rawJSON.replace(/&quot;/g, '"'));
-			if (json.publicationTitle) {
-				item.publicationTitle = json.publicationTitle;
+		if (rawJSON) {
+			try {
+				const json = JSON.parse(rawJSON.replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
+				if (json.publicationTitle) {
+					item.publicationTitle = ZU.trimInternal(json.publicationTitle);
+				}
+			} catch (e) {
+				ZU.debug("Failed to parse data-nli-data-json: " + e);
 			}
-		}
-		catch (e) {
-			Zotero.debug("Failed to parse data-nli-data-json: " + e);
 		}
 	}
 
-	if (url.includes("/page/")) { // If article is just a page
+	// Page number handling
+	if (url.includes("/page/")) {
 		const match = url.match(/\/page\/(\d+)(?:\/|$)/);
 		if (match) {
 			item.pages = match[1];
 		}
-		item.title = item.publicationTitle + ", " + item.date;
-		item.url = url.split('?')[0].split('#')[0]; // No persistent link, just the original URL
+		// Clean URL for citation
+		item.url = url.split('?')[0].split('#')[0];
+	} else {
+		const pageLabel = doc.querySelector('span.pagelabel.current b');
+		if (pageLabel) {
+			const split = pageLabel.textContent.split(" ");
+			if (split[1]) {
+				item.pages = ZU.trimInternal(split[1]);
+			}
+		}
+	}
+
+	// Fallback title if no headline found
+	if (!item.title && item.publicationTitle && item.date) {
+		item.title = `${item.publicationTitle}, ${item.date}`;
 	}
 
 	item.libraryCatalog = "National Library of Israel";
