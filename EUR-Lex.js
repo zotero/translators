@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-31 02:00:49"
+	"lastUpdated": "2025-07-27 17:49:49"
 }
 
 /*
@@ -205,7 +205,13 @@ function scrape(doc, url) {
 		for (let i = 0; i < passedBy.length; i++) {
 			passedByArray.push(passedBy[i].getAttribute("resource").split("/").pop());
 		}
-		item.legislativeBody = passedByArray.join(", ");
+		
+		if (type == "statute") {
+			item.authority = passedByArray.join(", ");
+		}
+		else {
+			item.legislativeBody = passedByArray.join(", ");
+		}
 		
 		item.url = attr(doc, 'meta[typeOf="eli:LegalResource"]', "about") + "/" + language.toLowerCase();
 	}
