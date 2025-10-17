@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-07-17 21:22:49"
+	"lastUpdated": "2025-10-17 21:22:49"
 }
 
 /*
@@ -34,7 +34,7 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.includes("newspapers")) {
+	if (url.includes("/article/") || url.includes("/page/")) {
 		return "newspaperArticle";
 	}
 	return false;
