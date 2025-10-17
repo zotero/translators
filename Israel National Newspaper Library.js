@@ -78,7 +78,6 @@ async function scrape(doc, url) {
 
 	if (paragraphs.length) {
 		item.abstractNote = paragraphs[0];
-		item.extra = "Full Text:\n" + paragraphs.join("\n\n");
 		
 		// Language detection
 		const sampleText = paragraphs.join(" ").slice(0, 1000);
