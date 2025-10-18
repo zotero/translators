@@ -133,7 +133,7 @@ async function scrape(doc, url = doc.location.href) {
 	item.complete();
 }
 
-var libraryRe = new RegExp(String.raw`library/`);
+var libraryRe = /library\//;
 
 
 function detectWeb(doc, url) {
