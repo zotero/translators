@@ -254,7 +254,7 @@ async function scrape(doc, url) {
 		let metaDate = meta(doc, 'article:published_time') || '';
 		if (metaDate) {
 			// meta often already ISO with timezone; keep it, else use ZU.strToISO
-			if (metaDate.indexOf('T') !== -1) {
+			if (metaDate.includes('T') !== -1) {
 				item.date = metaDate;
 			}
 			else {
