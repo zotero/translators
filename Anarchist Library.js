@@ -214,7 +214,8 @@ var testCases = [
 						"note": "Source: Published by AK Press in 2006 (please support the publisher!). Retrieved on 19th September 2020 from https://libcom.org/library/durruti-spanish-revolution"
 					}
 				],
-				"seeAlso": []
+				"seeAlso": [],
+				"libraryCatalog": "Anarchist Library"
 			}
 		]
 	},
@@ -236,6 +237,7 @@ var testCases = [
 				"date": "1914",
 				"language": "en",
 				"url": "https://theanarchistlibrary.org/library/errico-malatesta-the-general-strike-and-the-insurrection-in-italy",
+				"libraryCatalog": "Anarchist Library",
 				"attachments": [
 					{
 						"title": "PDF",
@@ -297,6 +299,7 @@ var testCases = [
 				],
 				"date": "2018-03-08",
 				"seeAlso": [],
+				"libraryCatalog": "Anarchist Library",
 				"attachments": [
 					{
 						"title": "PDF",
@@ -338,6 +341,7 @@ var testCases = [
 				],
 				"date": "1933",
 				"seeAlso": [],
+				"libraryCatalog": "Anarchist Library",
 				"attachments": [
 					{
 						"title": "PDF",
