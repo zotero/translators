@@ -137,7 +137,7 @@ var libraryRe = new RegExp(String.raw`library/`);
 
 
 function detectWeb(doc, url) {
-	if (url.match(libraryRe)) {
+	if (libraryRe.test(url)) {
 		return 'webpage';
 	}
 	else if (getSearchResults(doc, true)) {
