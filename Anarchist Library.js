@@ -54,15 +54,18 @@ var allAttachmentTypes = {
 };
 
 function getSearchResults(doc, checkOnly) {
-	let items = {};
-	let results = doc.querySelectorAll('a.list-group-item');
-	for (let i = 0; i < results.length; i++) {
-		if (checkOnly) {
-			return true;
-		}
-		items[results[i].href] = ZU.trimInternal(text(results[i], "strong"));
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll("a.list-group-item");
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(text(row, "strong"));
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
 	}
-	return items;
+	return found ? items : false;
 }
 
 async function scrape(doc, url = doc.location.href) {
