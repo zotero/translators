@@ -115,7 +115,7 @@ async function scrape(doc, url = doc.location.href) {
 		item.notes.push({ note: `Source: ${ZU.trimInternal(source)}` });
 	}
 
-	for (const [typeName, typeInfo] of Object.entries(attachmentTypes)) {
+	for (let [typeName, typeInfo] of Object.entries(attachmentTypes)) {
 		let attachment = {
 			title: typeName,
 			url: `${doc.location.href}${typeInfo.ext}`,
