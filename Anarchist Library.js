@@ -130,7 +130,7 @@ async function scrape(doc, url = doc.location.href) {
 		item.attachments.push(attachment);
 	}
 
-	return item.complete();
+	item.complete();
 }
 
 var libraryRe = new RegExp(String.raw`library/`);
