@@ -70,14 +70,13 @@ function getSearchResults(doc, checkOnly) {
 
 async function scrape(doc, url = doc.location.href) {
 	// ToDo: get fancier here, allow other types
-	let item = new Zotero.Item('webpage');
+	let item = new Zotero.Item('manuscript');
 
 	// These may be expanded on in the future
 	let attachmentTypes = {
 		PDF: allAttachmentTypes["Plain PDF"],
 	};
 
-	item.accessed = new Date().toString();
 	item.url = url;
 	item.language = attr(doc, "html", "lang");
 
@@ -124,7 +123,7 @@ async function scrape(doc, url = doc.location.href) {
 		};
 
 		if (typeInfo.ext == "snapshot") {
-			attachment.snapshot = true;
+			attachment.document = doc;
 		}
 
 		item.attachments.push(attachment);
@@ -138,7 +137,7 @@ var libraryRe = /library\//;
 
 function detectWeb(doc, url) {
 	if (libraryRe.test(url)) {
-		return 'webpage';
+		return 'manuscript';
 	}
 	else if (getSearchResults(doc, true)) {
 		return 'multiple';
@@ -164,97 +163,6 @@ async function doWeb(doc, url) {
 	}
 }
 
-/*
-var unusedTestCases = [
-	// fails tests because Voltairine de Cleyre parses to Cleyre, Voltairine de
-	{
-		"type": "web",
-		"url": "https://theanarchistlibrary.org/library/voltairine-de-cleyre-report-of-the-work-of-the-chicago-mexican-liberal-defense-league",
-		"items": [
-			{
-				"itemType": "webpage",
-				"title": "Report of the Work of the Chicago Mexican Liberal Defense League",
-				"creators": [
-					{
-						"creatorType": "author",
-						"firstName": "Voltairine",
-						"lastName": "de Cleyre"
-					}
-				],
-				"date": "1912",
-				"language": "en",
-				"url": "https://theanarchistlibrary.org/library/voltairine-de-cleyre-report-of-the-work-of-the-chicago-mexican-liberal-defense-league",
-				"attachments": [
-					{
-						"title": "PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Mexican revolution"
-					},
-					{
-						"tag": "history"
-					}
-				],
-				"notes": [
-					{
-						"note": "From ‘Mother Earth’, April 1912, New York City, published by Emma Goldman, edited by Alexander Berkman."
-					},
-					{
-						"note": "Source: Retrieved on 2024-02-02 from <mgouldhawke.wordpress.com/2024/02/01/report-of-the-work-of-the-chicago-mexican-liberal-defense-league-voltairine-de-cleyre-1912>"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	// fails tests because JP O' Malley gets parsed as first name JP O, last name Malley
-		{
-		"type": "web",
-		"url": "https://theanarchistlibrary.org/library/jp-o-malley-the-utopia-of-rules-david-graeber-interview",
-		"items": [
-			{
-				"itemType": "webpage",
-				"title": "The Utopia of Rules, David Graeber Interview",
-				"creators": [
-					{
-						"creatorType": "author",
-						"firstName": "JP",
-						"lastName": "O’ Malley"
-					}
-				],
-				"date": "1st April 2015",
-				"language": "en",
-				"url": "https://theanarchistlibrary.org/library/jp-o-malley-the-utopia-of-rules-david-graeber-interview",
-				"attachments": [
-					{
-						"title": "PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [
-					{
-						"tag": "bureaucracy"
-					},
-					{
-						"tag": "interview"
-					}
-				],
-				"notes": [
-					{
-						"note": "JP O’ Malley interviews anthropologist, activist, anarchist and author, David Graeber, who was one of the early organisers of Occupy Wall Street."
-					},
-					{
-						"note": "Source: Retrieved on 15th October 2024 from bellacaledonia.org.uk"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	}
-] */
 
 /** BEGIN TEST CASES **/
 
@@ -264,7 +172,7 @@ var testCases = [
 		"url": "https://theanarchistlibrary.org/library/abel-paz-durruti-in-the-spanish-revolution",
 		"items": [
 			{
-				"itemType": "webpage",
+				"itemType": "manuscript",
 				"title": "Durruti in the Spanish Revolution",
 				"creators": [
 					{
@@ -316,7 +224,7 @@ var testCases = [
 		"url": "https://theanarchistlibrary.org/library/errico-malatesta-the-general-strike-and-the-insurrection-in-italy",
 		"items": [
 			{
-				"itemType": "webpage",
+				"itemType": "manuscript",
 				"title": "The General Strike and the Insurrection in Italy",
 				"creators": [
 					{
@@ -366,7 +274,7 @@ var testCases = [
 		"items": [
 			{
 				"title": "Britta Gröndahl",
-				"itemType": "webpage",
+				"itemType": "manuscript",
 				"creators": [
 					{
 						"firstName": "Ulrika",
@@ -405,7 +313,7 @@ var testCases = [
 		"url": "https://theanarchistlibrary.org/library/emile-armand-the-forerunners-of-anarchism",
 		"items": [
 			{
-				"itemType": "webpage",
+				"itemType": "manuscript",
 				"title": "The Forerunners of Anarchism",
 				"creators": [
 					{
