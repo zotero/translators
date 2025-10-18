@@ -45,7 +45,7 @@ var allAttachmentTypes = {
 	"Plain PDF": { ext: ".pdf", mimeType: "application/pdf" },
 	"A4 PDF": { ext: ".a4.pdf", mimeType: "application/pdf" },
 	"Letter PDF": { ext: ".lt.pdf", mimeType: "application/pdf" },
-	EPub: { ext: ".eupb", mimeType: "application/epub+zip" },
+	EPub: { ext: ".epub", mimeType: "application/epub+zip" },
 	"Printer-friendly HTML": { ext: ".html", mimeType: "text/html" },
 	LaTeX: { ext: ".tex", mimeType: "application/x-tex" },
 	"Plain Text": { ext: ".muse", mimeType: "text/plain" },
