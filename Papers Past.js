@@ -5,11 +5,11 @@
 	"target": "^https?://(www\\.)?paperspast\\.natlib\\.govt\\.nz/",
 	"minVersion": "5.0",
 	"maxVersion": "",
-	"priority": 200,
+	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-09-30 06:00:00"
+	"lastUpdated": "2025-10-20 10:00:00"
 }
 
 /*
@@ -35,30 +35,13 @@
 	***** END LICENSE BLOCK *****
 */
 
-/*
-	Papers Past Translator
-	
-	Enhanced metadata extraction for newspaper articles using structured data sources
-	(JSON-LD, Highwire Press, Dublin Core) with fallbacks to screen scraping.
-	Legacy scraping maintained for other collection types (periodicals, manuscripts, parliamentary papers). 
-*/
-
-// ============================================================================
-// Detection and Routing
-// ============================================================================
-
 function detectWeb(doc, url) {
-	// Check for newspaper article
-	if (isNewspaperArticle(doc, url)) {
+	if (isNewspaperArticle(url)) {
 		return "newspaperArticle";
 	}
-
-	// Handle search results
 	if (/[?&]query=/.test(url) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
-	
-	// Handle other collection types
 	else if (ZU.xpathText(doc, '//h3[@itemprop="headline"]')) {
 		if (url.includes('/periodicals/')) {
 			return "journalArticle";
@@ -74,115 +57,106 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var detectedType = detectWeb(doc, url);
-
-	if (detectedType == "newspaperArticle") {
+	if (detectWeb(doc, url) == "newspaperArticle") {
 		scrapeNewspaper(doc, url);
 	}
-	else if (detectedType == "multiple") {
+	else if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return;
+			if (items) {
+				ZU.processDocuments(Object.keys(items), scrape);
 			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrapeLegacy);
 		});
 	}
 	else {
-		scrapeLegacy(doc, url);
+		scrape(doc, url);
 	}
 }
 
-// ============================================================================
-// Newspaper Article Scraper
-// ============================================================================
-
-function isNewspaperArticle(doc, url) {
-	// Check URL pattern
-	if (/\/newspapers\/.+\.\d+\.\d+/.test(url)) return true;
-	
-	// Check for NewsArticle schema
-	const hasNews = getJSONLD(doc)?.some(o => /NewsArticle|Article/i.test(o['@type']));
-	if (hasNews) return true;
-	
-	return false;
+function isNewspaperArticle(url) {
+	return /\/newspapers\/.+\.\d+\.\d+/.test(url);
 }
 
 function scrapeNewspaper(doc, url) {
-	const item = new Zotero.Item("newspaperArticle");
-	const ld = getJSONLD(doc);
-	const news = ld && ld.find(o => /NewsArticle|Article/i.test(o['@type'])) || null;
-	const meta = collectMeta(doc);
+	var item = new Zotero.Item("newspaperArticle");
+	var ld = getJSONLD(doc);
+	var news = null;
+	for (var i = 0; i < ld.length; i++) {
+		if (/NewsArticle|Article/i.test(ld[i]['@type'])) {
+			news = ld[i];
+			break;
+		}
+	}
+	var meta = collectMeta(doc);
 
-	// Extract title from multiple sources
-	const titles = [];
-	if (news?.headline) titles.push(clean(news.headline));
-	if (meta.hw.citation_title) titles.push(clean(meta.hw.citation_title));
-	if (meta.dc["DC.title"]) titles.push(clean(meta.dc["DC.title"]));
-	item.title = fixTitleCase(dedupeFirst(titles));
+	// Title
+	var titles = [];
+	if (news && news.headline) {
+		titles.push(ZU.trimInternal(news.headline));
+	}
+	if (meta.hw.citation_title) {
+		titles.push(ZU.trimInternal(meta.hw.citation_title));
+	}
+	if (meta.dc["DC.title"]) {
+		titles.push(ZU.trimInternal(meta.dc["DC.title"]));
+	}
+	var rawTitle = dedupeFirst(titles);
+	item.title = fixTitleCase(rawTitle);
 
-	// Publication name
+	// Publication
 	item.publicationTitle =
-		news?.isPartOf?.name ||
+		(news && news.isPartOf && news.isPartOf.name) ||
 		meta.hw.citation_journal_title ||
 		meta.dc["DC.publisher"] ||
 		meta.dc["DC.source"] || "";
 
-	// Publication date
-	item.date =
-		normalizeDate(news?.datePublished) ||
-		normalizeDate(meta.hw.citation_date) ||
-		normalizeDate(meta.dc["DC.date"]) || "";
+	// Date
+	item.date = ZU.strToISO((news && news.datePublished) || meta.hw.citation_date || meta.dc["DC.date"] || "");
 
-	// Page numbers
-	const pageStart = news?.pageStart || meta.hw.citation_firstpage || "";
-	const pageEnd = news?.pageEnd || meta.hw.citation_lastpage || "";
-	const pagesMeta = meta.hw.citation_pages || "";
+	// Pages
+	var pageStart = (news && news.pageStart) || meta.hw.citation_firstpage || "";
+	var pageEnd = (news && news.pageEnd) || meta.hw.citation_lastpage || "";
+	var pagesMeta = meta.hw.citation_pages || "";
 	item.pages = pagesFrom(pageStart, pageEnd, pagesMeta);
 
 	// Language and rights
-	item.language = news?.inLanguage || meta.hw.citation_language || meta.dc["DC.language"] || "";
-	item.rights = news?.copyrightNotice || meta.dc["DC.rights"] || "";
+	item.language = (news && news.inLanguage) || meta.hw.citation_language || meta.dc["DC.language"] || "";
+	item.rights = (news && news.copyrightNotice) || meta.dc["DC.rights"] || "";
 
-	// Clean URL
-	item.url = canonicalURL(doc) || news?.url || meta.hw.citation_fulltext_html_url || meta.dc["DC.source"] || url;
-	item.url = stripQueryAndHash(item.url);
+	// URL
+	var cleanUrl = canonicalURL(doc) || (news && news.url) || meta.hw.citation_fulltext_html_url || meta.dc["DC.source"] || url;
+	item.url = cleanUrl.split('?')[0].split('#')[0];
 
-	// Fallback to on-page citation if metadata missing
-	const bib = parseBibliographicDetails(doc);
-	if (!item.publicationTitle && bib.publicationTitle) item.publicationTitle = bib.publicationTitle;
-	if (!item.date && bib.date) item.date = normalizeDate(bib.date);
-	if (!item.pages && bib.pages) item.pages = bib.pages;
+	// Fallback to on-page citation
+	var bib = parseBibliographicDetails(doc);
+	if (!item.publicationTitle && bib.publicationTitle) {
+		item.publicationTitle = bib.publicationTitle;
+	}
+	if (!item.date && bib.date) {
+		item.date = ZU.strToISO(bib.date);
+	}
+	if (!item.pages && bib.pages) {
+		item.pages = bib.pages;
+	}
 
-	// Store volume/issue in Extra field
-	const vol = (news?.isPartOf?.volumeNumber ? String(news.isPartOf.volumeNumber) : "") || meta.hw.citation_volume || bib.volume || "";
-	const iss = (news?.isPartOf?.issueNumber ? String(news.isPartOf.issueNumber) : "") || meta.hw.citation_issue || bib.issue || "";
+	// Volume/Issue in Extra field
+	var vol = (news && news.isPartOf && news.isPartOf.volumeNumber ? String(news.isPartOf.volumeNumber) : "") || meta.hw.citation_volume || bib.volume || "";
+	var iss = (news && news.isPartOf && news.isPartOf.issueNumber ? String(news.isPartOf.issueNumber) : "") || meta.hw.citation_issue || bib.issue || "";
 
-	const extraParts = [];
-	if (vol) extraParts.push(`Volume: ${vol}`);
-	if (iss) extraParts.push(`Issue: ${iss}`);
+	var extraParts = [];
+	if (vol) extraParts.push("Volume: " + vol);
+	if (iss) extraParts.push("Issue: " + iss);
 	if (extraParts.length > 0) {
 		item.extra = extraParts.join("\n");
 	}
 
-	// Most historical newspaper articles don't have bylines
 	item.creators = [];
-	
 	item.attachments = [{
 		title: "Snapshot",
 		document: doc
 	}];
-	
 	item.libraryCatalog = "Papers Past";
 	item.complete();
 }
-
-// ============================================================================
-// Legacy Scraper for Other Collections
-// ============================================================================
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
@@ -199,15 +173,11 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function scrapeLegacy(doc, url) {
+function scrape(doc, url) {
 	var type = detectWeb(doc, url);
-	if (!type) return false;
-	
 	var item = new Zotero.Item(type);
 	var title = ZU.xpathText(doc, '//h3[@itemprop="headline"]/text()[1]');
-	if (title) {
-		item.title = ZU.capitalizeTitle(title.toLowerCase(), true);
-	}
+	item.title = fixTitleCase(title);
 	
 	if (type == "journalArticle" || type == "newspaperArticle") {
 		var nav = doc.querySelectorAll('#breadcrumbs .breadcrumbs__crumb');
@@ -218,10 +188,7 @@ function scrapeLegacy(doc, url) {
 			item.date = ZU.strToISO(nav[2].textContent);
 		}
 		if (nav.length > 3) {
-			var pageMatch = nav[3].textContent.match(/\d+/);
-			if (pageMatch) {
-				item.pages = pageMatch[0];
-			}
+			item.pages = nav[3].textContent.match(/\d+/)[0];
 		}
 	}
 	
@@ -252,10 +219,10 @@ function scrapeLegacy(doc, url) {
 		item.language = ZU.xpathText(doc, '//div[@id="researcher-tools-tab"]//tr[td[.="Language"]]/td[2]');
 	}
 	
-	item.abstractNote = ZU.xpathText(doc, '//div[@id="tab-english"]');
+	item.abstractNote = text(doc, '#tab-english');
 	item.url = ZU.xpathText(doc, '//div[@id="researcher-tools-tab"]/input/@value');
 	if (!item.url) {
-		item.url = ZU.xpathText(doc, '//div[@id="researcher-tools-tab"]//p');
+		item.url = text(doc, '#researcher-tools-tab p');
 	}
 	if (!item.url || !item.url.startsWith('http')) {
 		item.url = url;
@@ -266,13 +233,13 @@ function scrapeLegacy(doc, url) {
 		document: doc
 	});
 	
-	var imagePageURL = ZU.xpathText(doc, '//div[@class="imagecontainer"]//a/@href');
+	let imagePageURL = attr(doc, '.imagecontainer a', 'href');
 	if (imagePageURL) {
 		ZU.processDocuments(imagePageURL, function (imageDoc) {
 			item.attachments.push({
 				title: 'Image',
 				mimeType: 'image/jpeg',
-				url: ZU.xpathText(imageDoc, '//div[@class="imagecontainer"]//img/@src')
+				url: attr(imageDoc, '.imagecontainer img', 'src')
 			});
 			item.complete();
 		});
@@ -282,144 +249,121 @@ function scrapeLegacy(doc, url) {
 	}
 }
 
-// ============================================================================
-// Helper Functions
-// ============================================================================
+function text(doc, selector) {
+	var elem = doc.querySelector(selector);
+	return elem ? elem.textContent : null;
+}
 
-// Parse JSON-LD structured data from the page
+function attr(doc, selector, attribute) {
+	var elem = doc.querySelector(selector);
+	return elem ? elem.getAttribute(attribute) : null;
+}
+
 function getJSONLD(doc) {
-	const out = [];
-	const nodes = doc.querySelectorAll('script[type="application/ld+json"]');
-	for (const n of nodes) {
+	var out = [];
+	var nodes = doc.querySelectorAll('script[type="application/ld+json"]');
+	for (var i = 0; i < nodes.length; i++) {
 		try {
-			const data = JSON.parse(n.textContent);
-			if (Array.isArray(data)) data.forEach(d => out.push(d));
-			else if (data) out.push(data);
-		} catch (e) {}
+			var data = JSON.parse(nodes[i].textContent);
+			if (Array.isArray(data)) {
+				for (var j = 0; j < data.length; j++) {
+					out.push(data[j]);
+				}
+			}
+			else if (data) {
+				out.push(data);
+			}
+		}
+		catch (e) {}
 	}
 	return out;
 }
 
-// Collect Highwire Press and Dublin Core metadata tags
 function collectMeta(doc) {
-	const hw = {}, dc = {};
-	const metas = doc.querySelectorAll("meta[name]");
-	for (const m of metas) {
-		const name = m.getAttribute("name");
-		const content = m.getAttribute("content") || "";
+	var hw = {};
+	var dc = {};
+	var metas = doc.querySelectorAll("meta[name]");
+	for (var i = 0; i < metas.length; i++) {
+		var name = metas[i].getAttribute("name");
+		var content = metas[i].getAttribute("content") || "";
 		if (!name) continue;
 		
-		// Highwire Press tags (citation_*)
 		if (/^citation_/i.test(name)) {
 			if (name === "citation_author") {
 				if (!hw[name]) hw[name] = [];
 				hw[name].push(content);
-			} else {
+			}
+			else {
 				hw[name] = content;
 			}
 			continue;
 		}
 		
-		// Dublin Core tags (DC.*)
 		if (/^DC\./.test(name) || /^dc\./.test(name)) {
 			dc[name.replace(/^dc\./, "DC.")] = content;
 		}
 	}
-	return { hw, dc };
+	return { hw: hw, dc: dc };
 }
 
-// Parse bibliographic details from the on-page citation text
 function parseBibliographicDetails(doc) {
-	const cite = doc.querySelector('#researcher-tools-tab .citation, .tabs-panel .citation, p.citation');
-	const text = cite ? cite.textContent : "";
-	const out = { publicationTitle: "", volume: "", issue: "", date: "", pages: "" };
-	if (!text) return out;
+	var textContent = text(doc, '#researcher-tools-tab .citation, .tabs-panel .citation, p.citation') || "";
+	var out = { publicationTitle: "", volume: "", issue: "", date: "", pages: "" };
+	if (!textContent) return out;
 
-	const pubMatch = text.match(/^\s*([^,]+),/);
-	if (pubMatch) out.publicationTitle = clean(pubMatch[1]);
+	var pubMatch = textContent.match(/^\s*([^,]+),/);
+	if (pubMatch) out.publicationTitle = ZU.trimInternal(pubMatch[1]);
 
-	const volMatch = text.match(/Volume\s+([^,]+),/i);
-	if (volMatch) out.volume = clean(volMatch[1]);
+	var volMatch = textContent.match(/Volume\s+([^,]+),/i);
+	if (volMatch) out.volume = ZU.trimInternal(volMatch[1]);
 
-	const issMatch = text.match(/Issue\s+([^,]+),/i);
-	if (issMatch) out.issue = clean(issMatch[1]);
+	var issMatch = textContent.match(/Issue\s+([^,]+),/i);
+	if (issMatch) out.issue = ZU.trimInternal(issMatch[1]);
 
-	const dateMatch = text.match(/Issue\s+[^,]+,\s*([^,]+),\s*Page/i) || text.match(/,\s*([^,]+),\s*Page/i);
-	if (dateMatch) out.date = clean(dateMatch[1]);
+	var dateMatch = textContent.match(/Issue\s+[^,]+,\s*([^,]+),\s*Page/i) || textContent.match(/,\s*([^,]+),\s*Page/i);
+	if (dateMatch) out.date = ZU.trimInternal(dateMatch[1]);
 
-	const pageMatch = text.match(/Page\s+([0-9A-Za-z\-]+)/i);
-	if (pageMatch) out.pages = clean(pageMatch[1]);
+	var pageMatch = textContent.match(/Page\s+([0-9A-Za-z\-]+)/i);
+	if (pageMatch) out.pages = ZU.trimInternal(pageMatch[1]);
 
 	return out;
 }
 
-// Trim and normalize whitespace
-function clean(s) {
-	return s ? s.replace(/\s+/g, " ").trim() : "";
-}
-
-// Return first non-duplicate value from array
 function dedupeFirst(arr) {
-	const seen = new Set();
-	for (const v of arr) {
-		if (!v) continue;
-		const k = v.toLowerCase();
-		if (!seen.has(k)) {
-			seen.add(k);
-			return v;
-		}
+	for (var i = 0; i < arr.length; i++) {
+		if (arr[i]) return arr[i];
 	}
-	return arr.find(Boolean) || "";
+	return "";
 }
 
-// Fix all-caps titles to title case, avoiding issues with apostrophes
 function fixTitleCase(str) {
 	if (!str) return str;
-	const letters = str.replace(/[^A-Za-z]/g, "");
+	var letters = str.replace(/[^A-Za-z]/g, "");
 	if (!letters) return str;
-	const uppers = (letters.match(/[A-Z]/g) || []).length;
-	const upperRatio = uppers / letters.length;
+	var uppers = (letters.match(/[A-Z]/g) || []).length;
+	var upperRatio = uppers / letters.length;
 	
-	// If more than 60% uppercase, convert to title case
 	if (upperRatio > 0.6) {
-		// Only capitalize after spaces or at start, not after apostrophes
-		return str.toLowerCase().replace(/(^|\s)\w/g, c => c.toUpperCase());
+		return ZU.capitalizeTitle(str.toLowerCase(), true);
 	}
 	return str;
 }
 
-// Normalize date format
-function normalizeDate(s) {
-	return s ? s.replace(/\//g, "-").trim() : "";
-}
-
-// Construct page range from start/end or use existing format
 function pagesFrom(start, end, meta) {
-	const s = clean(start), e = clean(end), m = clean(meta);
+	var s = ZU.trimInternal(start);
+	var e = ZU.trimInternal(end);
+	var m = ZU.trimInternal(meta);
 	if (m) return m;
-	if (s && e && s !== e) return `${s}-${e}`;
+	if (s && e && s !== e) return s + "-" + e;
 	if (s) return s;
 	return "";
 }
 
-// Remove query parameters and hash from URL
-function stripQueryAndHash(u) {
-	try {
-		const x = new URL(u);
-		x.search = "";
-		x.hash = "";
-		return x.toString();
-	} catch (e) {
-		return u;
-	}
-}
-
-// Get canonical URL from page metadata
 function canonicalURL(doc) {
-	const link = doc.querySelector('link[rel="canonical"]');
-	if (link?.href) return link.href;
-	const og = doc.querySelector('meta[property="og:url"]');
-	if (og?.content) return og.content;
+	var link = doc.querySelector('link[rel="canonical"]');
+	if (link && link.href) return link.href;
+	var og = doc.querySelector('meta[property="og:url"]');
+	if (og && og.content) return og.content;
 	return "";
 }
 
@@ -429,6 +373,31 @@ var testCases = [
 		"type": "web",
 		"url": "https://paperspast.natlib.govt.nz/newspapers?items_per_page=10&snippet=true&query=argentina",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://paperspast.natlib.govt.nz/newspapers/EP19440218.2.61",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Coup in Argentina",
+				"creators": [],
+				"date": "1944-02-18",
+				"libraryCatalog": "Papers Past",
+				"pages": "5",
+				"publicationTitle": "Evening Post",
+				"url": "https://paperspast.natlib.govt.nz/newspapers/EP19440218.2.61",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	},
 	{
 		"type": "web",
