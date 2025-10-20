@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-20 10:00:00"
+	"lastUpdated": "2025-10-02 12:00:00"
 }
 
 /*
@@ -103,11 +103,10 @@ function scrapeNewspaper(doc, url) {
 	item.title = fixTitleCase(rawTitle);
 
 	// Publication
-	item.publicationTitle =
-		(news && news.isPartOf && news.isPartOf.name) ||
-		meta.hw.citation_journal_title ||
-		meta.dc["DC.publisher"] ||
-		meta.dc["DC.source"] || "";
+	item.publicationTitle = (news && news.isPartOf && news.isPartOf.name)
+		|| meta.hw.citation_journal_title
+		|| meta.dc["DC.publisher"]
+		|| meta.dc["DC.source"] || "";
 
 	// Date
 	item.date = ZU.strToISO((news && news.datePublished) || meta.hw.citation_date || meta.dc["DC.date"] || "");
@@ -219,10 +218,10 @@ function scrape(doc, url) {
 		item.language = ZU.xpathText(doc, '//div[@id="researcher-tools-tab"]//tr[td[.="Language"]]/td[2]');
 	}
 	
-	item.abstractNote = text(doc, '#tab-english');
+	item.abstractNote = getText(doc, '#tab-english');
 	item.url = ZU.xpathText(doc, '//div[@id="researcher-tools-tab"]/input/@value');
 	if (!item.url) {
-		item.url = text(doc, '#researcher-tools-tab p');
+		item.url = getText(doc, '#researcher-tools-tab p');
 	}
 	if (!item.url || !item.url.startsWith('http')) {
 		item.url = url;
@@ -233,13 +232,13 @@ function scrape(doc, url) {
 		document: doc
 	});
 	
-	let imagePageURL = attr(doc, '.imagecontainer a', 'href');
+	var imagePageURL = getAttr(doc, '.imagecontainer a', 'href');
 	if (imagePageURL) {
 		ZU.processDocuments(imagePageURL, function (imageDoc) {
 			item.attachments.push({
 				title: 'Image',
 				mimeType: 'image/jpeg',
-				url: attr(imageDoc, '.imagecontainer img', 'src')
+				url: getAttr(imageDoc, '.imagecontainer img', 'src')
 			});
 			item.complete();
 		});
@@ -249,12 +248,12 @@ function scrape(doc, url) {
 	}
 }
 
-function text(doc, selector) {
+function getText(doc, selector) {
 	var elem = doc.querySelector(selector);
 	return elem ? elem.textContent : null;
 }
 
-function attr(doc, selector, attribute) {
+function getAttr(doc, selector, attribute) {
 	var elem = doc.querySelector(selector);
 	return elem ? elem.getAttribute(attribute) : null;
 }
@@ -307,7 +306,7 @@ function collectMeta(doc) {
 }
 
 function parseBibliographicDetails(doc) {
-	var textContent = text(doc, '#researcher-tools-tab .citation, .tabs-panel .citation, p.citation') || "";
+	var textContent = getText(doc, '#researcher-tools-tab .citation, .tabs-panel .citation, p.citation') || "";
 	var out = { publicationTitle: "", volume: "", issue: "", date: "", pages: "" };
 	if (!textContent) return out;
 
@@ -323,7 +322,7 @@ function parseBibliographicDetails(doc) {
 	var dateMatch = textContent.match(/Issue\s+[^,]+,\s*([^,]+),\s*Page/i) || textContent.match(/,\s*([^,]+),\s*Page/i);
 	if (dateMatch) out.date = ZU.trimInternal(dateMatch[1]);
 
-	var pageMatch = textContent.match(/Page\s+([0-9A-Za-z\-]+)/i);
+	var pageMatch = textContent.match(/Page\s+([0-9A-Za-z-]+)/i);
 	if (pageMatch) out.pages = ZU.trimInternal(pageMatch[1]);
 
 	return out;
