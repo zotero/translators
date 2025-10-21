@@ -1,16 +1,16 @@
-var translator = {
-	"translatorID": "1b052690-16dd-431d-9828-9dc675eb55f6",
-	"label": "Papers Past",
-	"creator": "Philipp Zumstein, Abe Jellinek, and Jason Murphy",
-	"target": "^https?://(www\\.)?paperspast\\.natlib\\.govt\\.nz/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-20 20:19:53"
-};
+{
+	translatorID: "1b052690-16dd-431d-9828-9dc675eb55f6",
+	label: "Papers Past",
+	creator: "Philipp Zumstein, Abe Jellinek, and Jason Murphy",
+	target: "^https?://(www\\.)?paperspast\\.natlib\\.govt\\.nz/",
+	minVersion: "5.0",
+	maxVersion: "",
+	priority: 100,
+	inRepository: true,
+	translatorType: 4,
+	browserSupport: "gcsibv",
+	lastUpdated: "2025-10-20 20:19:53"
+}
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -365,151 +365,151 @@ function canonicalURL(doc) {
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
-		"type": "web",
-		"url": "https://paperspast.natlib.govt.nz/newspapers?items_per_page=10&snippet=true&query=argentina",
-		"items": "multiple"
+		type: "web",
+		url: "https://paperspast.natlib.govt.nz/newspapers?items_per_page=10&snippet=true&query=argentina",
+		items: "multiple"
 	},
 	{
-		"type": "web",
-		"url": "https://paperspast.natlib.govt.nz/newspapers/EP19440218.2.61",
-		"items": [
+		type: "web",
+		url: "https://paperspast.natlib.govt.nz/newspapers/EP19440218.2.61",
+		items: [
 			{
-				"itemType": "newspaperArticle",
-				"title": "Coup in Argentina",
-				"creators": [],
-				"date": "1944-02-18",
-				"libraryCatalog": "Papers Past",
-				"pages": "5",
-				"publicationTitle": "Evening Post",
-				"url": "https://paperspast.natlib.govt.nz/newspapers/EP19440218.2.61",
-				"attachments": [
+				itemType: "newspaperArticle",
+				title: "Coup in Argentina",
+				creators: [],
+				date: "1944-02-18",
+				libraryCatalog: "Papers Past",
+				pages: "5",
+				publicationTitle: "Evening Post",
+				url: "https://paperspast.natlib.govt.nz/newspapers/EP19440218.2.61",
+				attachments: [
 					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
+						title: "Snapshot",
+						mimeType: "text/html"
 					}
 				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": [],
-				"rights": "Stuff Ltd is the copyright owner for the Evening Post. You can reproduce in-copyright material from this newspaper for non-commercial use under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International licence (CC BY-NC-SA 4.0). This newspaper is not available for commercial use without the consent of Stuff Ltd. For advice on reproduction of out-of-copyright material from this newspaper, please refer to the Copyright guide.",
-				"extra": "Volume: CXXXVII\nIssue: 41"
+				tags: [],
+				notes: [],
+				seeAlso: [],
+				rights: "Stuff Ltd is the copyright owner for the Evening Post. You can reproduce in-copyright material from this newspaper for non-commercial use under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International licence (CC BY-NC-SA 4.0). This newspaper is not available for commercial use without the consent of Stuff Ltd. For advice on reproduction of out-of-copyright material from this newspaper, please refer to the Copyright guide.",
+				extra: "Volume: CXXXVII\nIssue: 41"
 			}
 		]
 	},
 	{
-		"type": "web",
-		"url": "https://paperspast.natlib.govt.nz/newspapers/MT19390701.2.6.3",
-		"items": [
+		type: "web",
+		url: "https://paperspast.natlib.govt.nz/newspapers/MT19390701.2.6.3",
+		items: [
 			{
-				"itemType": "newspaperArticle",
-				"title": "Inter-School Basketball And Rugby Football",
-				"creators": [],
-				"date": "1939-07-01",
-				"extra": "Volume: 64\nIssue: 153",
-				"libraryCatalog": "Papers Past",
-				"pages": "2",
-				"publicationTitle": "Manawatu Times",
-				"url": "https://paperspast.natlib.govt.nz/newspapers/MT19390701.2.6.3",
-				"attachments": [
+				itemType: "newspaperArticle",
+				title: "Inter-School Basketball And Rugby Football",
+				creators: [],
+				date: "1939-07-01",
+				extra: "Volume: 64\nIssue: 153",
+				libraryCatalog: "Papers Past",
+				pages: "2",
+				publicationTitle: "Manawatu Times",
+				url: "https://paperspast.natlib.govt.nz/newspapers/MT19390701.2.6.3",
+				attachments: [
 					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
+						title: "Snapshot",
+						mimeType: "text/html"
 					}
 				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": [],
-				"rights": "Stuff Ltd is the copyright owner for the Manawatu Times. You can reproduce in-copyright material from this newspaper for non-commercial use under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International licence (CC BY-NC-SA 4.0). This newspaper is not available for commercial use without the consent of Stuff Ltd. For advice on reproduction of out-of-copyright material from this newspaper, please refer to the Copyright guide."
+				tags: [],
+				notes: [],
+				seeAlso: [],
+				rights: "Stuff Ltd is the copyright owner for the Manawatu Times. You can reproduce in-copyright material from this newspaper for non-commercial use under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International licence (CC BY-NC-SA 4.0). This newspaper is not available for commercial use without the consent of Stuff Ltd. For advice on reproduction of out-of-copyright material from this newspaper, please refer to the Copyright guide."
 			}
 		]
 	},
 	{
-		"type": "web",
-		"url": "https://paperspast.natlib.govt.nz/periodicals/FRERE18831101.2.2",
-		"items": [
+		type: "web",
+		url: "https://paperspast.natlib.govt.nz/periodicals/FRERE18831101.2.2",
+		items: [
 			{
-				"itemType": "journalArticle",
-				"title": "\"The Law Within the Law.\"",
-				"creators": [],
-				"date": "1883-11-01",
-				"issue": "2",
-				"libraryCatalog": "Papers Past",
-				"pages": "3",
-				"publicationTitle": "Freethought Review",
-				"url": "https://paperspast.natlib.govt.nz/periodicals/FRERE18831101.2.2",
-				"volume": "I",
-				"attachments": [
+				itemType: "journalArticle",
+				title: "\"The Law Within the Law.\"",
+				creators: [],
+				date: "1883-11-01",
+				issue: "2",
+				libraryCatalog: "Papers Past",
+				pages: "3",
+				publicationTitle: "Freethought Review",
+				url: "https://paperspast.natlib.govt.nz/periodicals/FRERE18831101.2.2",
+				volume: "I",
+				attachments: [
 					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
+						title: "Snapshot",
+						mimeType: "text/html"
 					}
 				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
+				tags: [],
+				notes: [],
+				seeAlso: []
 			}
 		]
 	},
 	{
-		"type": "web",
-		"url": "https://paperspast.natlib.govt.nz/manuscripts/MCLEAN-1024774.2.1",
-		"items": [
+		type: "web",
+		url: "https://paperspast.natlib.govt.nz/manuscripts/MCLEAN-1024774.2.1",
+		items: [
 			{
-				"itemType": "letter",
-				"title": "1 Page Written 19 Jun 1873 by James Mackay in Hamilton City to Sir Donald Mclean in Wellington",
-				"creators": [
+				itemType: "letter",
+				title: "1 Page Written 19 Jun 1873 by James Mackay in Hamilton City to Sir Donald Mclean in Wellington",
+				creators: [
 					{
-						"firstName": "Mackay",
-						"lastName": "James",
-						"creatorType": "author"
+						firstName: "Mackay",
+						lastName: "James",
+						creatorType: "author"
 					},
 					{
-						"firstName": "McLean",
-						"lastName": "Donald",
-						"creatorType": "recipient"
+						firstName: "McLean",
+						lastName: "Donald",
+						creatorType: "recipient"
 					}
 				],
-				"date": "1873-06-19",
-				"language": "English",
-				"libraryCatalog": "Papers Past",
-				"url": "https://paperspast.natlib.govt.nz/manuscripts/MCLEAN-1024774.2.1",
-				"attachments": [
+				date: "1873-06-19",
+				language: "English",
+				libraryCatalog: "Papers Past",
+				url: "https://paperspast.natlib.govt.nz/manuscripts/MCLEAN-1024774.2.1",
+				attachments: [
 					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
+						title: "Snapshot",
+						mimeType: "text/html"
 					},
 					{
-						"title": "Image",
-						"mimeType": "image/jpeg"
+						title: "Image",
+						mimeType: "image/jpeg"
 					}
 				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
+				tags: [],
+				notes: [],
+				seeAlso: []
 			}
 		]
 	},
 	{
-		"type": "web",
-		"url": "https://paperspast.natlib.govt.nz/parliamentary/AJHR1899-I.2.4.2.3",
-		"items": [
+		type: "web",
+		url: "https://paperspast.natlib.govt.nz/parliamentary/AJHR1899-I.2.4.2.3",
+		items: [
 			{
-				"itemType": "report",
-				"title": "Rabbits And Rabbitskins, Exported From Colony During Years 1894 To 1898, And Number And Value Thereof.",
-				"creators": [],
-				"libraryCatalog": "Papers Past",
-				"url": "https://paperspast.natlib.govt.nz/parliamentary/AJHR1899-I.2.4.2.3",
-				"attachments": [
+				itemType: "report",
+				title: "Rabbits And Rabbitskins, Exported From Colony During Years 1894 To 1898, And Number And Value Thereof.",
+				creators: [],
+				libraryCatalog: "Papers Past",
+				url: "https://paperspast.natlib.govt.nz/parliamentary/AJHR1899-I.2.4.2.3",
+				attachments: [
 					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
+						title: "Snapshot",
+						mimeType: "text/html"
 					}
 				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
+				tags: [],
+				notes: [],
+				seeAlso: []
 			}
 		]
 	}
-]
+];
 /** END TEST CASES **/
