@@ -1,4 +1,4 @@
-{
+var translator = {
 	"translatorID": "1b052690-16dd-431d-9828-9dc675eb55f6",
 	"label": "Papers Past",
 	"creator": "Philipp Zumstein, Abe Jellinek, and Jason Murphy",
@@ -9,8 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-02 12:00:00"
-}
+	"lastUpdated": "2025-10-20 20:19:53"
+};
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -57,18 +57,29 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "newspaperArticle") {
+	var detectedType = detectWeb(doc, url);
+	if (detectedType == "newspaperArticle") {
 		scrapeNewspaper(doc, url);
 	}
-	else if (detectWeb(doc, url) == "multiple") {
+	else if (detectedType == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (items) {
-				ZU.processDocuments(Object.keys(items), scrape);
+				ZU.processDocuments(Object.keys(items), routeScrape);
 			}
 		});
 	}
 	else {
-		scrape(doc, url);
+		scrapeLegacy(doc, url);
+	}
+}
+
+function routeScrape(doc, url) {
+	var type = detectWeb(doc, url);
+	if (type == "newspaperArticle") {
+		scrapeNewspaper(doc, url);
+	}
+	else if (type) {
+		scrapeLegacy(doc, url);
 	}
 }
 
@@ -88,7 +99,6 @@ function scrapeNewspaper(doc, url) {
 	}
 	var meta = collectMeta(doc);
 
-	// Title
 	var titles = [];
 	if (news && news.headline) {
 		titles.push(ZU.trimInternal(news.headline));
@@ -102,30 +112,25 @@ function scrapeNewspaper(doc, url) {
 	var rawTitle = dedupeFirst(titles);
 	item.title = fixTitleCase(rawTitle);
 
-	// Publication
 	item.publicationTitle = (news && news.isPartOf && news.isPartOf.name)
 		|| meta.hw.citation_journal_title
 		|| meta.dc["DC.publisher"]
-		|| meta.dc["DC.source"] || "";
+		|| meta.dc["DC.source"]
+		|| "";
 
-	// Date
 	item.date = ZU.strToISO((news && news.datePublished) || meta.hw.citation_date || meta.dc["DC.date"] || "");
 
-	// Pages
 	var pageStart = (news && news.pageStart) || meta.hw.citation_firstpage || "";
 	var pageEnd = (news && news.pageEnd) || meta.hw.citation_lastpage || "";
 	var pagesMeta = meta.hw.citation_pages || "";
 	item.pages = pagesFrom(pageStart, pageEnd, pagesMeta);
 
-	// Language and rights
 	item.language = (news && news.inLanguage) || meta.hw.citation_language || meta.dc["DC.language"] || "";
 	item.rights = (news && news.copyrightNotice) || meta.dc["DC.rights"] || "";
 
-	// URL
 	var cleanUrl = canonicalURL(doc) || (news && news.url) || meta.hw.citation_fulltext_html_url || meta.dc["DC.source"] || url;
 	item.url = cleanUrl.split('?')[0].split('#')[0];
 
-	// Fallback to on-page citation
 	var bib = parseBibliographicDetails(doc);
 	if (!item.publicationTitle && bib.publicationTitle) {
 		item.publicationTitle = bib.publicationTitle;
@@ -137,7 +142,6 @@ function scrapeNewspaper(doc, url) {
 		item.pages = bib.pages;
 	}
 
-	// Volume/Issue in Extra field
 	var vol = (news && news.isPartOf && news.isPartOf.volumeNumber ? String(news.isPartOf.volumeNumber) : "") || meta.hw.citation_volume || bib.volume || "";
 	var iss = (news && news.isPartOf && news.isPartOf.issueNumber ? String(news.isPartOf.issueNumber) : "") || meta.hw.citation_issue || bib.issue || "";
 
@@ -172,7 +176,7 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function scrape(doc, url) {
+function scrapeLegacy(doc, url) {
 	var type = detectWeb(doc, url);
 	var item = new Zotero.Item(type);
 	var title = ZU.xpathText(doc, '//h3[@itemprop="headline"]/text()[1]');
@@ -218,27 +222,29 @@ function scrape(doc, url) {
 		item.language = ZU.xpathText(doc, '//div[@id="researcher-tools-tab"]//tr[td[.="Language"]]/td[2]');
 	}
 	
-	item.abstractNote = getText(doc, '#tab-english');
+	item.abstractNote = text(doc, '#tab-english');
 	item.url = ZU.xpathText(doc, '//div[@id="researcher-tools-tab"]/input/@value');
 	if (!item.url) {
-		item.url = getText(doc, '#researcher-tools-tab p');
+		item.url = text(doc, '#researcher-tools-tab p');
 	}
 	if (!item.url || !item.url.startsWith('http')) {
 		item.url = url;
 	}
+	
+	item.libraryCatalog = "Papers Past";
 	
 	item.attachments.push({
 		title: "Snapshot",
 		document: doc
 	});
 	
-	var imagePageURL = getAttr(doc, '.imagecontainer a', 'href');
+	var imagePageURL = attr(doc, '.imagecontainer a', 'href');
 	if (imagePageURL) {
 		ZU.processDocuments(imagePageURL, function (imageDoc) {
 			item.attachments.push({
 				title: 'Image',
 				mimeType: 'image/jpeg',
-				url: getAttr(imageDoc, '.imagecontainer img', 'src')
+				url: attr(imageDoc, '.imagecontainer img', 'src')
 			});
 			item.complete();
 		});
@@ -246,16 +252,6 @@ function scrape(doc, url) {
 	else {
 		item.complete();
 	}
-}
-
-function getText(doc, selector) {
-	var elem = doc.querySelector(selector);
-	return elem ? elem.textContent : null;
-}
-
-function getAttr(doc, selector, attribute) {
-	var elem = doc.querySelector(selector);
-	return elem ? elem.getAttribute(attribute) : null;
 }
 
 function getJSONLD(doc) {
@@ -306,7 +302,7 @@ function collectMeta(doc) {
 }
 
 function parseBibliographicDetails(doc) {
-	var textContent = getText(doc, '#researcher-tools-tab .citation, .tabs-panel .citation, p.citation') || "";
+	var textContent = text(doc, '#researcher-tools-tab .citation, .tabs-panel .citation, p.citation') || "";
 	var out = { publicationTitle: "", volume: "", issue: "", date: "", pages: "" };
 	if (!textContent) return out;
 
@@ -394,7 +390,9 @@ var testCases = [
 				],
 				"tags": [],
 				"notes": [],
-				"seeAlso": []
+				"seeAlso": [],
+				"rights": "Stuff Ltd is the copyright owner for the Evening Post. You can reproduce in-copyright material from this newspaper for non-commercial use under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International licence (CC BY-NC-SA 4.0). This newspaper is not available for commercial use without the consent of Stuff Ltd. For advice on reproduction of out-of-copyright material from this newspaper, please refer to the Copyright guide.",
+				"extra": "Volume: CXXXVII\nIssue: 41"
 			}
 		]
 	},
@@ -420,7 +418,8 @@ var testCases = [
 				],
 				"tags": [],
 				"notes": [],
-				"seeAlso": []
+				"seeAlso": [],
+				"rights": "Stuff Ltd is the copyright owner for the Manawatu Times. You can reproduce in-copyright material from this newspaper for non-commercial use under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International licence (CC BY-NC-SA 4.0). This newspaper is not available for commercial use without the consent of Stuff Ltd. For advice on reproduction of out-of-copyright material from this newspaper, please refer to the Copyright guide."
 			}
 		]
 	},
