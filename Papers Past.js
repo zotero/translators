@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-20 20:19:53"
+	"lastUpdated": "2025-10-21 16:34:21"
 }
 
 /*
@@ -171,7 +171,7 @@ function scrapeNewspaper(doc, url) {
 function scrapeLegacy(doc, url) {
 	var type = detectWeb(doc, url);
 	var item = new Zotero.Item(type);
-	var title = ZU.xpathText(doc, '//h3[@itemprop="headline"]/text()[1]');
+	var title = doc.querySelector('[itemprop="headline"]').firstChild.textContent;
 	item.title = fixTitleCase(title);
 	
 	if (type == "journalArticle" || type == "newspaperArticle") {
@@ -317,10 +317,7 @@ function parseBibliographicDetails(doc) {
 }
 
 function dedupeFirst(arr) {
-	for (var i = 0; i < arr.length; i++) {
-		if (arr[i]) return arr[i];
-	}
-	return "";
+	return arr.find(Boolean) || "";
 }
 
 function fixTitleCase(str) {
@@ -370,9 +367,11 @@ var testCases = [
 				"title": "Coup in Argentina",
 				"creators": [],
 				"date": "1944-02-18",
+				"extra": "Volume: CXXXVII\nIssue: 41",
 				"libraryCatalog": "Papers Past",
 				"pages": "5",
 				"publicationTitle": "Evening Post",
+				"rights": "Stuff Ltd is the copyright owner for the Evening Post. You can reproduce in-copyright material from this newspaper for non-commercial use under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International licence (CC BY-NC-SA 4.0). This newspaper is not available for commercial use without the consent of Stuff Ltd. For advice on reproduction of out-of-copyright material from this newspaper, please refer to the Copyright guide.",
 				"url": "https://paperspast.natlib.govt.nz/newspapers/EP19440218.2.61",
 				"attachments": [
 					{
@@ -382,9 +381,7 @@ var testCases = [
 				],
 				"tags": [],
 				"notes": [],
-				"seeAlso": [],
-				"rights": "Stuff Ltd is the copyright owner for the Evening Post. You can reproduce in-copyright material from this newspaper for non-commercial use under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International licence (CC BY-NC-SA 4.0). This newspaper is not available for commercial use without the consent of Stuff Ltd. For advice on reproduction of out-of-copyright material from this newspaper, please refer to the Copyright guide.",
-				"extra": "Volume: CXXXVII\nIssue: 41"
+				"seeAlso": []
 			}
 		]
 	},
@@ -401,6 +398,7 @@ var testCases = [
 				"libraryCatalog": "Papers Past",
 				"pages": "2",
 				"publicationTitle": "Manawatu Times",
+				"rights": "Stuff Ltd is the copyright owner for the Manawatu Times. You can reproduce in-copyright material from this newspaper for non-commercial use under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International licence (CC BY-NC-SA 4.0). This newspaper is not available for commercial use without the consent of Stuff Ltd. For advice on reproduction of out-of-copyright material from this newspaper, please refer to the Copyright guide.",
 				"url": "https://paperspast.natlib.govt.nz/newspapers/MT19390701.2.6.3",
 				"attachments": [
 					{
@@ -410,8 +408,7 @@ var testCases = [
 				],
 				"tags": [],
 				"notes": [],
-				"seeAlso": [],
-				"rights": "Stuff Ltd is the copyright owner for the Manawatu Times. You can reproduce in-copyright material from this newspaper for non-commercial use under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International licence (CC BY-NC-SA 4.0). This newspaper is not available for commercial use without the consent of Stuff Ltd. For advice on reproduction of out-of-copyright material from this newspaper, please refer to the Copyright guide."
+				"seeAlso": []
 			}
 		]
 	},
@@ -428,7 +425,7 @@ var testCases = [
 				"libraryCatalog": "Papers Past",
 				"pages": "3",
 				"publicationTitle": "Freethought Review",
-				"url": "https://paperspast.natlib.govt.nz/periodicals/FRERE18831101.2.6.3",
+				"url": "https://paperspast.natlib.govt.nz/periodicals/FRERE18831101.2.2",
 				"volume": "I",
 				"attachments": [
 					{
@@ -448,7 +445,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "letter",
-				"title": "1 Page Written 19 Jun 1873 by James Mackay in Hamilton City to Sir Donald Mclean in Wellington",
+				"title": "1 page written 19 Jun 1873 by James Mackay in Hamilton City to Sir Donald McLean in Wellington",
 				"creators": [
 					{
 						"firstName": "Mackay",
@@ -462,6 +459,7 @@ var testCases = [
 					}
 				],
 				"date": "1873-06-19",
+				"abstractNote": "(For His Excellency's information)\n(Signed) Donald McLean\n19th. June 1873\n\n\nNEW ZEALAND TELEGRAPH.\nHamilton\nTo:- Hon. D. McLean \nWellington\n18th. June 1873\nNo news to-day from anywhere I am waiting arrival of Dr. Pollen here this evening. General feeling in Waikato is calming down. The establishments of the Outposts has given confidence against attack and the settlers are quietly attending to their usual business. I do not think many anticipate an agressive movement by the King Party. It, however, the almost unanimous opinion that the murderers of Sullivan should be taken at any cost, no one believes the murderers will be given up for reward.\n(Signed) \nJames Mackay Jnr.",
 				"language": "English",
 				"libraryCatalog": "Papers Past",
 				"url": "https://paperspast.natlib.govt.nz/manuscripts/MCLEAN-1024774.2.1",
@@ -487,7 +485,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "report",
-				"title": "Rabbits And Rabbitskins, Exported From Colony During Years 1894 To 1898, And Number And Value Thereof.",
+				"title": "Rabbits and Rabbitskins, Exported from Colony During Years 1894 to 1898, and Number and Value Thereof.",
 				"creators": [],
 				"libraryCatalog": "Papers Past",
 				"url": "https://paperspast.natlib.govt.nz/parliamentary/AJHR1899-I.2.4.2.3",
@@ -495,6 +493,10 @@ var testCases = [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
+					},
+					{
+						"title": "Image",
+						"mimeType": "image/jpeg"
 					}
 				],
 				"tags": [],
