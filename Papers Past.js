@@ -154,8 +154,8 @@ function scrapeNewspaper(doc, url) {
 
 	item.creators = [];
 	item.attachments = [{
-		"title": "Snapshot",
-		"document": doc
+		title: "Snapshot",
+		document: doc
 	}];
 	item.libraryCatalog = "Papers Past";
 	item.complete();
@@ -234,17 +234,17 @@ function scrapeLegacy(doc, url) {
 	item.libraryCatalog = "Papers Past";
 	
 	item.attachments.push({
-		"title": "Snapshot",
-		"document": doc
+		title: "Snapshot",
+		document: doc
 	});
 	
 	var imagePageURL = attr(doc, '.imagecontainer a', 'href');
 	if (imagePageURL) {
 		ZU.processDocuments(imagePageURL, function (imageDoc) {
 			item.attachments.push({
-				"title": "Image",
-				"mimeType": "image/jpeg",
-				"url": attr(imageDoc, '.imagecontainer img', 'src')
+				title: "Image",
+				mimeType: "image/jpeg",
+				url: attr(imageDoc, '.imagecontainer img', 'src')
 			});
 			item.complete();
 		});
@@ -298,12 +298,12 @@ function collectMeta(doc) {
 			dc[name.replace(/^dc\./, "DC.")] = content;
 		}
 	}
-	return { "hw": hw, "dc": dc };
+	return { hw: hw, dc: dc };
 }
 
 function parseBibliographicDetails(doc) {
 	var textContent = text(doc, '#researcher-tools-tab .citation, .tabs-panel .citation, p.citation') || "";
-	var out = { "publicationTitle": "", "volume": "", "issue": "", "date": "", "pages": "" };
+	var out = { publicationTitle: "", volume: "", issue: "", date: "", pages: "" };
 	if (!textContent) return out;
 
 	var pubMatch = textContent.match(/^\s*([^,]+),/);
@@ -511,5 +511,5 @@ var testCases = [
 			}
 		]
 	}
-];
+]
 /** END TEST CASES **/
