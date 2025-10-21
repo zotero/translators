@@ -36,7 +36,7 @@
 */
 
 function detectWeb(doc, url) {
-	if (isNewspaperArticle(url)) {
+	if (/\/newspapers\/.+\.\d+\.\d+/.test(url)) {
 		return "newspaperArticle";
 	}
 	if (/[?&]query=/.test(url) && getSearchResults(doc, true)) {
@@ -56,24 +56,35 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-function doWeb(doc, url) {
-	var detectedType = detectWeb(doc, url);
-	if (detectedType == "newspaperArticle") {
-		scrapeNewspaper(doc, url);
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('.search-results .article-preview__title a');
+	for (let row of rows) {
+		var href = row.href;
+		var title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
 	}
-	else if (detectedType == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) {
-				ZU.processDocuments(Object.keys(items), routeScrape);
-			}
-		});
+	return found ? items : false;
+}
+
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "multiple") {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			scrape(await requestDocument(url));
+		}
 	}
 	else {
-		scrapeLegacy(doc, url);
+		scrape(doc, url);
 	}
 }
 
-function routeScrape(doc, url) {
+function scrape(doc, url = doc.location.href) {
 	var type = detectWeb(doc, url);
 	if (type == "newspaperArticle") {
 		scrapeNewspaper(doc, url);
@@ -81,10 +92,6 @@ function routeScrape(doc, url) {
 	else if (type) {
 		scrapeLegacy(doc, url);
 	}
-}
-
-function isNewspaperArticle(url) {
-	return /\/newspapers\/.+\.\d+\.\d+/.test(url);
 }
 
 function scrapeNewspaper(doc, url) {
@@ -159,21 +166,6 @@ function scrapeNewspaper(doc, url) {
 	}];
 	item.libraryCatalog = "Papers Past";
 	item.complete();
-}
-
-function getSearchResults(doc, checkOnly) {
-	var items = {};
-	var found = false;
-	var rows = doc.querySelectorAll('.search-results .article-preview__title a');
-	for (var i = 0; i < rows.length; i++) {
-		var href = rows[i].href;
-		var title = ZU.trimInternal(rows[i].textContent);
-		if (!href || !title) continue;
-		if (checkOnly) return true;
-		found = true;
-		items[href] = title;
-	}
-	return found ? items : false;
 }
 
 function scrapeLegacy(doc, url) {
