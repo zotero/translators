@@ -34,7 +34,7 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.includes("/article/") || url.includes("/page/")) {
+	if (url.includes("/newspapers/") && (url.includes("/article/") || url.includes("/page/"))) {
 		return "newspaperArticle";
 	}
 	return false;
