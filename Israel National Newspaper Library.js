@@ -68,7 +68,7 @@ async function scrape(doc, url) {
 	}
 
 	// Persistent link
-	const linkNode = doc.querySelector("#sectionleveltabpersistentlinkarea .persistentlinkurl");
+	const linkNode = doc.querySelector(".persistentlinkurl");
 	item.url = linkNode ? ZU.trimInternal(linkNode.textContent) : url;
 
 	// Abstract + Full Text
