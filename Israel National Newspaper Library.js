@@ -2,7 +2,7 @@
 	"translatorID": "9d8099b7-1c50-4159-9a67-f9fc1fb3b463",
 	"label": "Israel National Newspaper Library",
 	"creator": "Anonymus",
-	"target": "^https:\\/\\/www\\.nli\\.org\\.il\\/(en|he|ar)\\/newspapers\\/.*",
+	"target": "^https:\\/\\/www\\.nli\\.org\\.il\\/",
 	"minVersion": "6.0",
 	"maxVersion": "",
 	"priority": 100,
