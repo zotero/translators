@@ -252,12 +252,20 @@ async function scrape(doc, url) {
 	// If date still empty, try article:published_time meta (often ISO)
 	if (!item.date || !item.date.trim()) {
 		let metaDate = meta(doc, 'article:published_time') || '';
-		let isoMeta = ZU.strToISO(metaDate);
-		if (isoMeta) {
-			item.date = isoMeta;
-		}
-		else {
-			item.date = metaDate;
+		if (metaDate) {
+			// meta often already ISO with timezone; keep it, else use ZU.strToISO
+			if (metaDate.includes('T') !== -1) {
+				item.date = metaDate;
+			}
+			else {
+				let isoMeta = ZU.strToISO(metaDate);
+				if (isoMeta) {
+					item.date = isoMeta;
+				}
+				else {
+					item.date = metaDate;
+				}
+			}
 		}
 	}
 
@@ -265,6 +273,14 @@ async function scrape(doc, url) {
 		item.url = meta(doc, 'og:url') || url;
 	}
 
+	if (!item.publicationTitle) {
+		item.publicationTitle = 'Prime 9ja Online';
+	}
+
+	if (!item.ISSN) {
+		item.ISSN = '3092-8907';
+	}
+	
 	// If no creators yet, try common DOM byline selectors (skip org-like)
 	if (item.creators.length === 0) {
 		let cand = meta(doc, 'article:author')
