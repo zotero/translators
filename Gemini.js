@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-24 21:47:26"
+	"lastUpdated": "2025-10-24 21:49:24"
 }
 
 /*
@@ -53,10 +53,12 @@ async function doWeb(doc, url) {
 	item.websiteType = 'Generative AI chat';
 
 	if (url.includes('/share/')) {
+		item.url = url;
+
 		let headline = doc.querySelector('.title-link');
 		if (headline) {
-			item.title = text(headline, 'h1 strong');
-			item.url = attr(headline, '.share-link', 'href') || url;
+			item.title = text(headline, 'h1 strong') || item.title;
+			item.url = attr(headline, '.share-link', 'href') || item.url;
 			item.date = ZU.strToISO(text(headline, '.publish-time-mode > :last-child'));
 			// This may break! But it isn't crucial and we don't have much to match on here.
 			item.websiteTitle += ' ' + text(headline, '.publish-time-mode > span:first-child > strong:only-child');
