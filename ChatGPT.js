@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-24 15:21:11"
+	"lastUpdated": "2025-10-24 16:06:16"
 }
 
 /*
@@ -53,14 +53,17 @@ async function doWeb(doc, url) {
 	let item = new Zotero.Item('webpage');
 	item.title = doc.title;
 	item.websiteTitle = 'ChatGPT';
+	item.websiteType = 'Generative AI chat';
 
 	if (url.includes('/share/')) {
 		item.url = url;
 	}
-	else {
-		item.websiteType = 'Private AI conversation';
-	}
 	
+	item.creators.push({
+		creatorType: 'author',
+		lastName: 'OpenAI',
+		fieldMode: 1
+	});
 	item.attachments.push({
 		title: 'Snapshot',
 		document: doc
@@ -115,7 +118,7 @@ async function enrichItemWithAPI(doc, url, item) {
 	item.title = json.title;
 	item.date = ZU.strToISO(new Date((json.update_time || json.create_time) * 1000).toISOString());
 	if (json.model) {
-		item.websiteType = `Conversation with ${json.model.title}`;
+		item.creators[0].lastName += ` ${json.model.title}`;
 	}
 }
 
@@ -128,11 +131,17 @@ var testCases = [
 			{
 				"itemType": "webpage",
 				"title": "Write Zotero translator",
-				"creators": [],
+				"creators": [
+					{
+						"creatorType": "author",
+						"lastName": "OpenAI GPT-5",
+						"fieldMode": 1
+					}
+				],
 				"date": "2025-10-24",
 				"url": "https://chatgpt.com/share/68fa640b-9fc8-8013-a803-3d5241df6556",
 				"websiteTitle": "ChatGPT",
-				"websiteType": "Conversation with GPT-5",
+				"websiteType": "Generative AI chat",
 				"attachments": [
 					{
 						"title": "Snapshot",
