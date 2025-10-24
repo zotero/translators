@@ -194,10 +194,6 @@ async function scrape(doc, url) {
 
 		item.language = data.inLanguage || meta(doc, 'og:locale') || 'en';
 
-		item.publicationTitle = (data.publisher && (data.publisher.name || data.publisher.title)) || 'Prime 9ja Online';
-
-		item.ISSN = '3092-8907';
-
 		// --- date: use ZU.strToISO() to normalize if possible ---
 		let rawJsonDate = data.datePublished || data.dateCreated || '';
 		if (rawJsonDate) {
