@@ -272,14 +272,6 @@ async function scrape(doc, url) {
 	if (!item.url || !item.url.trim()) {
 		item.url = meta(doc, 'og:url') || url;
 	}
-
-	if (!item.publicationTitle) {
-		item.publicationTitle = 'Prime 9ja Online';
-	}
-
-	if (!item.ISSN) {
-		item.ISSN = '3092-8907';
-	}
 	
 	// If no creators yet, try common DOM byline selectors (skip org-like)
 	if (item.creators.length === 0) {
