@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-24 16:06:16"
+	"lastUpdated": "2025-10-24 21:25:43"
 }
 
 /*
@@ -118,7 +118,7 @@ async function enrichItemWithAPI(doc, url, item) {
 	item.title = json.title;
 	item.date = ZU.strToISO(new Date((json.update_time || json.create_time) * 1000).toISOString());
 	if (json.model) {
-		item.creators[0].lastName += ` ${json.model.title}`;
+		item.websiteTitle += ` (${json.model.title})`;
 	}
 }
 
@@ -134,13 +134,13 @@ var testCases = [
 				"creators": [
 					{
 						"creatorType": "author",
-						"lastName": "OpenAI GPT-5",
+						"lastName": "OpenAI",
 						"fieldMode": 1
 					}
 				],
 				"date": "2025-10-24",
 				"url": "https://chatgpt.com/share/68fa640b-9fc8-8013-a803-3d5241df6556",
-				"websiteTitle": "ChatGPT",
+				"websiteTitle": "ChatGPT (GPT-5)",
 				"websiteType": "Generative AI chat",
 				"attachments": [
 					{
