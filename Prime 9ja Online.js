@@ -311,7 +311,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2025-05-24T18:10:00+01:00",
+				"date": "2025-05-24",
 				"ISSN": "3092-8907",
 				"abstractNote": "AKURE —  The Ondo State Governorship Election Petitions Tribunal will deliver its verdict on June 4 in the series of suits challenging the e...",
 				"libraryCatalog": "Prime 9ja Online",
@@ -344,7 +344,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2025-05-27T01:11:00+01:00",
+				"date": "2025-05-27",
 				"ISSN": "3092-8907",
 				"abstractNote": "On “CFMF”  — the fourth track from Davido’s 2025 album 5ive  —   the artist trades club-ready bravado for inward reflection. Featuri...",
 				"libraryCatalog": "Prime 9ja Online",
@@ -378,7 +378,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2025-05-23T22:38:00+01:00",
+				"date": "2025-05-23",
 				"ISSN": "3092-8907",
 				"abstractNote": "ABUJA —  A major network of cybercriminals allegedly responsible for infiltrating the Computer-Based Testing (CBT) infrastructure of Nigeria...",
 				"libraryCatalog": "Prime 9ja Online",
