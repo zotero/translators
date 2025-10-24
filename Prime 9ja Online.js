@@ -2,13 +2,13 @@
 	"translatorID": "eb0bbbf8-7f57-40fa-aec2-45480d396e93",
 	"label": "Prime 9ja Online",
 	"creator": "VWF",
-	"target": "^https?://(www\\.)?prime9ja\\.com\\.ng/\\d{4}/\\d{2}/[^/]+\\.html",
+	"target": "^https?://(www\\.|pidgin\\.)?prime9ja\\.com\\.ng/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2025-06-13 22:24:24"
+	"lastUpdated": "2025-10-17 16:00:00"
 }
 
 /*
@@ -34,38 +34,66 @@
 	***** END LICENSE BLOCK *****
 */
 
-function detectWeb(doc, _url) {
-	let jsonLdNodes = doc.querySelectorAll('script[type="application/ld+json"]');
-	for (let node of jsonLdNodes) {
+function meta(doc, nameOrProp) {
+	let m = doc.querySelector('meta[property="' + nameOrProp + '"]')
+		|| doc.querySelector('meta[name="' + nameOrProp + '"]');
+	return m ? m.getAttribute('content') : '';
+}
+
+function parseJSONLD(doc) {
+	let nodes = doc.querySelectorAll('script[type="application/ld+json"]');
+	for (let node of nodes) {
+		let txt = node.textContent.trim();
+		if (!txt) continue;
 		try {
-			let data = JSON.parse(node.textContent);
-			let type = data['@type'];
-			if (typeof type === 'string' && type.endsWith('NewsArticle')) {
-				return 'newspaperArticle';
+			let parsed = JSON.parse(txt);
+			let candidates = [];
+			if (Array.isArray(parsed)) {
+				candidates = parsed;
 			}
-			if (Array.isArray(type) && type.some(t => typeof t === 'string' && t.endsWith('NewsArticle'))) {
-				return 'newspaperArticle';
+			else if (parsed['@graph'] && Array.isArray(parsed['@graph'])) {
+				candidates = parsed['@graph'];
+			}
+			else if (parsed.mainEntity) {
+				candidates = [parsed.mainEntity, parsed];
+			}
+			else {
+				candidates = [parsed];
+			}
+
+			for (let cand of candidates) {
+				if (!cand) continue;
+				let t = cand['@type'] || cand.type;
+				if (!t) continue;
+				if (typeof t === 'string') {
+					if (t.includes('NewsArticle')) {
+						return cand;
+					}
+				}
+				else if (Array.isArray(t)) {
+					for (let tt of t) {
+						if (typeof tt === 'string' && tt.includes('NewsArticle')) {
+							return cand;
+						}
+					}
+				}
 			}
 		}
 		catch (e) {
-			// ignore JSON parsing errors
+			// ignore malformed JSON-LD
 		}
 	}
-
-	if (getSearchResults(doc, true)) {
-		return 'multiple';
-	}
-
-	return false;
+	return null;
 }
 
 function getSearchResults(doc, checkOnly) {
 	let items = {};
 	let found = false;
-	let rows = doc.querySelectorAll('a.entry-title[href*="/202"]');
+	// generic year pattern in path for article links
+	let rows = doc.querySelectorAll('a[href*="/20"]');
 	for (let row of rows) {
 		let href = row.href;
-		let title = ZU.trimInternal(row.textContent);
+		let title = ZU.trimInternal(row.textContent || row.title || '');
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -74,66 +102,186 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-async function doWeb(doc, url) {
-	if (detectWeb(doc, url) === 'multiple') {
-		let items = await Zotero.selectItems(getSearchResults(doc, false));
-		if (!items) return;
-		for (let url of Object.keys(items)) {
-			await scrape(await requestDocument(url));
-		}
-	}
-	else {
-		await scrape(doc, url);
-	}
+function isIndexURL(url) {
+	return url && url.includes('/search/label/');
 }
 
-async function scrape(doc, url = doc.location.href) {
-	let item = new Zotero.Item('newspaperArticle');
-	let jsonLdNodes = doc.querySelectorAll('script[type="application/ld+json"]');
-	let data = null;
+function detectWeb(doc, url) {
+	url = url || doc.location.href;
 
-	for (let node of jsonLdNodes) {
-		try {
-			let parsed = JSON.parse(node.textContent);
-			let type = parsed['@type'];
-			if (
-				type && typeof type === 'string' && type.endsWith('NewsArticle')
-				|| Array.isArray(type) && type.some(t => typeof t === 'string' && t.endsWith('NewsArticle'))
-			) {
-				data = parsed;
-				break;
-			}
-		}
-		catch (e) {}
+	// 1) JSON-LD NewsArticle -> single article
+	let j = parseJSONLD(doc);
+	if (j) {
+		return 'newspaperArticle';
 	}
 
-	if (data) {
-		item.title = ZU.unescapeHTML(data.headline || text(doc, 'h1.entry-title'));
-		item.ISSN = '3092-8907';
-		item.abstractNote = ZU.unescapeHTML(data.description || '');
-		item.date = data.datePublished || '';
-		item.language = data.inLanguage || 'en';
-		item.url = data.url || url;
-		item.publicationTitle = (data.publisher && data.publisher.name) || 'Prime 9ja Online';
-		item.place = 'Nigeria';
+	// 2) explicit index/list URL
+	if (isIndexURL(url)) {
+		return 'multiple';
+	}
 
+	// 3) Use the standard getSearchResults() heuristic for listing pages
+	if (getSearchResults(doc, true)) {
+		// If page also clearly looks like an article, prefer article
+		if (meta(doc, 'article:published_time') || meta(doc, 'og:type') || text(doc, 'h1.entry-title') || doc.querySelector('[itemprop="articleBody"]')) {
+			return 'newspaperArticle';
+		}
+		return 'multiple';
+	}
+
+	// 4) meta-based hints
+	if (meta(doc, 'article:published_time')) {
+		return 'newspaperArticle';
+	}
+	let ogType = (meta(doc, 'og:type') || '').toLowerCase();
+	if (ogType === 'article') {
+		return 'newspaperArticle';
+	}
+
+	// 5) fallback selectors
+	if (text(doc, 'h1.entry-title')
+		|| text(doc, 'h1.s-title')
+		|| doc.querySelector('[itemprop="articleBody"]')
+		|| doc.querySelector('article.post')) {
+		return 'newspaperArticle';
+	}
+
+	return false;
+}
+
+async function doWeb(doc, url) {
+	url = url || doc.location.href;
+	let mode = detectWeb(doc, url);
+	if (mode === 'multiple') {
+		let items = getSearchResults(doc, false);
+		if (!items) return;
+		let selected = await Zotero.selectItems(items);
+		if (!selected) return;
+		for (let u of Object.keys(selected)) {
+			await scrape(await requestDocument(u));
+		}
+	}
+	else if (mode === 'newspaperArticle') {
+		await scrape(doc, url);
+	}
+	// else do nothing
+}
+
+async function scrape(doc, url) {
+	url = url || doc.location.href;
+	let item = new Zotero.Item('newspaperArticle');
+
+	let data = parseJSONLD(doc);
+
+	// If JSON-LD present, prefer it
+	if (data) {
+		item.title = ZU.unescapeHTML(
+			data.headline
+			|| data.name
+			|| meta(doc, 'og:title')
+			|| text(doc, 'h1.entry-title')
+			|| text(doc, 'h1.s-title')
+			|| ''
+		);
+
+		item.abstractNote = ZU.unescapeHTML(
+			data.description
+			|| meta(doc, 'og:description')
+			|| ''
+		);
+
+		item.url = data.url || meta(doc, 'og:url') || url;
+
+		item.language = data.inLanguage || meta(doc, 'og:locale') || 'en';
+
+		// --- date: use ZU.strToISO() to normalize if possible ---
+		let rawJsonDate = data.datePublished || data.dateCreated || '';
+		if (rawJsonDate) {
+			// Prefer Zotero's normalization (handles many formats and keeps timezone when present)
+			let isoFromZU = ZU.strToISO(rawJsonDate);
+			if (isoFromZU) {
+				item.date = isoFromZU;
+			}
+			else {
+				// if ZU couldn't parse, keep raw (often already ISO with TZ)
+				item.date = rawJsonDate;
+			}
+		}
+
+		// --- authors from JSON-LD (skip organisations) ---
 		if (data.author) {
-			if (Array.isArray(data.author)) {
-				for (let author of data.author) {
-					if (author.name) {
-						item.creators.push(ZU.cleanAuthor(author.name, 'author'));
+			let authors = Array.isArray(data.author) ? data.author : [data.author];
+			for (let a of authors) {
+				let name = (a && (a.name || a['@name'] || a)) || '';
+				if (name) {
+					let lower = name.toString().toLowerCase();
+					if (/news agency|agency|news desk|publish desk|prime 9ja|prime9ja|online media|media|staff|bureau/i.test(lower)) {
+						// skip org-like bylines
+					}
+					else {
+						item.creators.push(ZU.cleanAuthor(name.toString(), 'author'));
 					}
 				}
 			}
-			else if (data.author.name) {
-				item.creators.push(ZU.cleanAuthor(data.author.name, 'author'));
+		}
+	}
+
+	// DOM/meta fallbacks for anything missing
+	if (!item.title || !item.title.trim()) {
+		item.title = ZU.unescapeHTML(
+			meta(doc, 'og:title')
+			|| text(doc, 'h1.entry-title')
+			|| text(doc, 'h1.s-title')
+			|| text(doc, 'title')
+			|| ''
+		);
+	}
+
+	if (!item.abstractNote || !item.abstractNote.trim()) {
+		item.abstractNote = ZU.unescapeHTML(
+			meta(doc, 'og:description')
+			|| meta(doc, 'description')
+			|| ''
+		);
+	}
+
+	// If date still empty, try article:published_time meta (often ISO)
+	if (!item.date || !item.date.trim()) {
+		let metaDate = meta(doc, 'article:published_time');
+		if (metaDate) {
+			let isoDate = ZU.strToISO(metaDate);
+			if (isoDate) {
+				item.date = isoDate;
+			}
+			else {
+				item.date = metaDate;
 			}
 		}
-		else {
-			let authorText = text(doc, 'span[itemprop="name"]');
-			if (authorText) {
-				item.creators.push(ZU.cleanAuthor(authorText, 'author'));
-			}
+	}
+
+	if (!item.url || !item.url.trim()) {
+		item.url = meta(doc, 'og:url') || url;
+	}
+
+	if (!item.publicationTitle) {
+		item.publicationTitle = 'Prime 9ja Online';
+	}
+
+	if (!item.ISSN) {
+		item.ISSN = '3092-8907';
+	}
+	
+	// If no creators yet, try common DOM byline selectors (skip org-like)
+	if (item.creators.length === 0) {
+		let cand = meta(doc, 'article:author')
+			|| text(doc, '.meta-author-author')
+			|| text(doc, '.meta-author')
+			|| text(doc, '.author-name')
+			|| text(doc, '.byline a')
+			|| text(doc, '.meta-el.meta-author a');
+
+		if (cand && !/news agency|agency|news desk|publish desk|prime 9ja|prime9ja|online media|media|staff|bureau/i.test(cand.toLowerCase())) {
+			item.creators.push(ZU.cleanAuthor(cand, 'author'));
 		}
 	}
 
@@ -141,6 +289,8 @@ async function scrape(doc, url = doc.location.href) {
 		document: doc,
 		title: 'Snapshot'
 	});
+
+	item.place = 'Nigeria';
 
 	item.complete();
 }
@@ -161,10 +311,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2025-05-24T18:10:00+01:00",
+				"date": "2025-05-24",
 				"ISSN": "3092-8907",
-				"abstractNote": "AKURE —  The Ondo State Governorship Election Petitions Tribunal will deliver its verdict on June 4 in the series of suits challenging the election of Governor Lucky Aiyedatiwa, who emerged victorious in the last gubernatorial poll. Justice Benson Ogbu, wh…",
-				"language": "en",
+				"abstractNote": "AKURE —  The Ondo State Governorship Election Petitions Tribunal will deliver its verdict on June 4 in the series of suits challenging the e...",
 				"libraryCatalog": "Prime 9ja Online",
 				"place": "Nigeria",
 				"publicationTitle": "Prime 9ja Online",
@@ -195,10 +344,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2025-05-27T01:11:00+01:00",
+				"date": "2025-05-27",
 				"ISSN": "3092-8907",
-				"abstractNote": "On “CFMF” — the fourth track from Davido’s 2025 album 5ive —\n the artist trades club-ready bravado for inward reflection. Featuring\n songwriting contributions from DIENDE and Victony, the track is a slow,\n measured entry in the Afro-R&B lane, b…",
-				"language": "en",
+				"abstractNote": "On “CFMF”  — the fourth track from Davido’s 2025 album 5ive  —   the artist trades club-ready bravado for inward reflection. Featuri...",
 				"libraryCatalog": "Prime 9ja Online",
 				"place": "Nigeria",
 				"publicationTitle": "Prime 9ja Online",
@@ -230,49 +378,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2025-05-23T22:38:00+01:00",
+				"date": "2025-05-23",
 				"ISSN": "3092-8907",
-				"abstractNote": "ABUJA — A major network of cybercriminals allegedly responsible for infiltrating the Computer-Based Testing (CBT) infrastructure of Nigeria’s national examinations has been dismantled, with over 20 suspects currently in custody, security officials have c…",
-				"language": "en",
+				"abstractNote": "ABUJA —  A major network of cybercriminals allegedly responsible for infiltrating the Computer-Based Testing (CBT) infrastructure of Nigeria...",
 				"libraryCatalog": "Prime 9ja Online",
 				"place": "Nigeria",
 				"publicationTitle": "Prime 9ja Online",
 				"shortTitle": "JAMB Server Hack",
 				"url": "https://www.prime9ja.com.ng/2025/05/jamb-server-hack-over-20-arrested.html",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.prime9ja.com.ng/2025/03/china-begins-trial-of-mrna-tb-vaccine.html",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "China Begins Trial of mRNA TB Vaccine",
-				"creators": [
-					{
-						"firstName": "News Agency of",
-						"lastName": "Nigeria",
-						"creatorType": "author"
-					}
-				],
-				"date": "2025-03-24T16:58:00+01:00",
-				"ISSN": "3092-8907",
-				"abstractNote": "A newly developed mRNA vaccine for tuberculosis, created in China, has entered clinical trials at Beijing Chest Hospital. The trial, which commenced on Monday, marks a significant step in the country’s efforts to combat tuberculosis, according to the Bei…",
-				"language": "en",
-				"libraryCatalog": "Prime 9ja Online",
-				"place": "Nigeria",
-				"publicationTitle": "Prime 9ja Online",
-				"url": "https://www.prime9ja.com.ng/2025/03/china-begins-trial-of-mrna-tb-vaccine.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
