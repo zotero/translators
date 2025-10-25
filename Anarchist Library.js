@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-07 11:18:38"
+	"lastUpdated": "2025-10-25 01:31:43"
 }
 
 /*
@@ -163,9 +163,7 @@ async function doWeb(doc, url) {
 	}
 }
 
-
 /** BEGIN TEST CASES **/
-
 var testCases = [
 	{
 		"type": "web",
@@ -219,7 +217,6 @@ var testCases = [
 			}
 		]
 	},
-
 	{
 		"type": "web",
 		"url": "https://theanarchistlibrary.org/library/errico-malatesta-the-general-strike-and-the-insurrection-in-italy",
@@ -290,12 +287,20 @@ var testCases = [
 					}
 				],
 				"notes": [
-					{ "note": "Translated by Alexia Grosjean." },
-					{ "note": "Source: Retrieved on 11th March 2025 from www.skbl.se" }
+					{
+						"note": "Translated by Alexia Grosjean."
+					},
+					{
+						"note": "Source: Retrieved on 11th March 2025 from www.skbl.se"
+					}
 				],
 				"tags": [
-					{ "tag": "Sweden" },
-					{ "tag": "biography" }
+					{
+						"tag": "Sweden"
+					},
+					{
+						"tag": "biography"
+					}
 				],
 				"date": "2018-03-08",
 				"seeAlso": [],
@@ -331,13 +336,23 @@ var testCases = [
 					}
 				],
 				"notes": [
-					{ "note": "Translated by Reddebrek." },
-					{ "note": "Source: Provided by the translator." }
+					{
+						"note": "Translated by Reddebrek."
+					},
+					{
+						"note": "Source: Provided by the translator."
+					}
 				],
 				"tags": [
-					{ "tag": "history" },
-					{ "tag": "individualism" },
-					{ "tag": "proto-anarchism" }
+					{
+						"tag": "history"
+					},
+					{
+						"tag": "individualism"
+					},
+					{
+						"tag": "proto-anarchism"
+					}
 				],
 				"date": "1933",
 				"seeAlso": [],
