@@ -2,7 +2,7 @@
 	"translatorID": "69cddf9e-884e-433f-8967-d9afb6f9e94c",
 	"label": "The Nation (Nigeria)",
 	"creator": "VWF",
-	"target": "^https?://(www\\.)?thenationonlineng\\.net/",
+	"target": "^https?://thenationonlineng\\.net/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -123,7 +123,7 @@ function detectWeb(doc, url) {
 	// 3) Use the standard getSearchResults() heuristic for listing pages
 	if (getSearchResults(doc, true)) {
 		// If page also clearly looks like an article, prefer article
-		if (meta(doc, 'article:published_time') || meta(doc, 'og:type') || text(doc, 'div.article__title>h1')) {
+		if (meta(doc, 'article:published_time') || meta(doc, 'og:type') || text(doc, 'div.article__title h1')) {
 			return 'newspaperArticle';
 		}
 		return 'multiple';
