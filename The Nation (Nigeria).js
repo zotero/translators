@@ -2,7 +2,7 @@
 	"translatorID": "69cddf9e-884e-433f-8967-d9afb6f9e94c",
 	"label": "The Nation (Nigeria)",
 	"creator": "VWF",
-	"target": "^https?://(www\.)?thenationonlineng\.net/",
+	"target": "^https?://(www\\.)?thenationonlineng\\.net/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
