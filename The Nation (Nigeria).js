@@ -152,7 +152,7 @@ async function doWeb(doc, url) {
 	if (mode === 'multiple') {
 		let items = getSearchResults(doc, false);
 		if (!items) return;
-		let selected = Zotero.selectItems(items);
+		let selected = await Zotero.selectItems(items);
 		if (!selected) return;
 		for (let u of Object.keys(selected)) {
 			await scrape(await requestDocument(u));
