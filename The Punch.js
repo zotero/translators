@@ -326,7 +326,7 @@ async function scrape(doc, url) {
 
 	// If no creators yet, try common DOM byline selectors (skip org-like)
 	if (item.creators.length === 0) {
-		let cand = text(doc, 'div.col-lg-12.desktop-onlyy>span.post-author');
+		let cand = text(doc, 'div.col-lg-12.desktop-onlyy>span.post-author') || text(doc, 'div.tdb-block-inner.td-fix-index p');
 		if (cand) {
 			// Remove unwanted keywords
 			if (!/agency|news desk|agency reporter|the punch|our reporter|punchng|punch|nigeria|staff|bureau/i.test(cand.toLowerCase())) {
