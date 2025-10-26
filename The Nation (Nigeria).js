@@ -174,7 +174,6 @@ async function scrape(doc, url) {
 	if (data) {
 		item.title = ZU.unescapeHTML(
 			data.headline
-			|| data.name
 			|| meta(doc, 'og:title')
 			|| text(doc, 'div.article__title>h1')
 			|| ''
@@ -326,7 +325,7 @@ async function scrape(doc, url) {
 	item.complete();
 }
 
-/** BEGIN TEST CASES **/
+/** BEGIN TEST CASES 
 var testCases = [
 	{
 		"type": "web",
