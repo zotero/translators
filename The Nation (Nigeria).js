@@ -399,9 +399,7 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	}
-]
-/** TRY LATER
+	},
 	{
 		"type": "web",
 		"url": "https://thenationonlineng.net/capitalsage-announces-ude-as-new-ceo/",
@@ -424,40 +422,6 @@ var testCases = [
 				"place": "Nigeria",
 				"publicationTitle": "The Nation",
 				"url": "https://thenationonlineng.net/capitalsage-announces-ude-as-new-ceo/",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://thenationonlineng.net/fulham-lose-to-newcastle-as-iwobi-marks-300-appearances-in-epl/",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Fulham lose to Newcastle as Iwobi marks 300 appearances in EPL",
-				"creators": [
-					{
-						"firstName": "Adedamola",
-						"lastName": "Ogunbewon",
-						"creatorType": "author"
-					}
-				],
-				"date": "2025-10-25",
-				"ISSN": "2449-1497",
-				"abstractNote": "The Nation Newspaper Fulham lose to Newcastle as Iwobi marks 300 appearances in EPL",
-				"language": "en-US",
-				"libraryCatalog": "The Nation",
-				"place": "Nigeria",
-				"publicationTitle": "The Nation",
-				"url": "https://thenationonlineng.net/fulham-lose-to-newcastle-as-iwobi-marks-300-appearances-in-epl/",
 				"attachments": [
 					{
 						"title": "Snapshot",
