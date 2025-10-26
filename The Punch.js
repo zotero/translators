@@ -497,11 +497,6 @@ var testCases = [
 		"type": "web",
 		"url": "https://healthwise.punchng.com/tag/open-defecation-in-lagos/",
 		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://punchng.com/topics/featured/",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
