@@ -2,7 +2,7 @@
 	"translatorID": "cb173332-8fb1-444d-84c9-9f12f3817d34",
 	"label": "The Punch",
 	"creator": "VWF",
-	"target": "^https?://((www|healthwise)\\\\.)?punchng\\\\.com/",
+	"target": "^https?://((www|healthwise)\\.)?punchng\\.com/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
