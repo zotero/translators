@@ -300,7 +300,7 @@ async function scrape(doc, url) {
 	if (!item.publicationTitle) {
 		if (url.includes('healthwise.punchng.com')) {
 			item.publicationTitle = 'The Punch Healthwise';
-		} 
+		}
 		else {
 			item.publicationTitle = 'The Punch';
 		}
