@@ -34,7 +34,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-
 /**
  * Scrapes the data for the article.
  * @param {Document} doc
@@ -64,7 +63,7 @@ function scrape(doc, _url) {
 	// 2. Extract Date (Checking for both new and old date element selectors)
 	let dateString = null;
 	// Combine potential date element selectors
-	let dateElements = doc.querySelectorAll('.author .date, .article-info .time'); 
+	let dateElements = doc.querySelectorAll('.author .date, .article-info .time');
 	
 	for (let el of dateElements) {
 		dateString = ZU.text(el);
