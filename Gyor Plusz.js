@@ -15,7 +15,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2025 homope	
+	Copyright © 2025 homope
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -51,9 +51,9 @@ function detectWeb(doc, url) {
 /**
  * Scrapes the data for the article.
  * @param {Document} doc
- * @param {string} url
+ * @param {string} _url Renamed from 'url' to satisfy linting rules for unused arguments.
  */
-function scrape(doc, url) {
+function scrape(doc, _url) {
 	let item = new Zotero.Item('magazineArticle');
 	
 	// Title: Use the first H1 found, as it's typically the title
@@ -107,13 +107,18 @@ function scrape(doc, url) {
 		}
 	}
 
-	item.url = url;
+	item.url = _url;
 	item.attachments.push({ document: doc, title: 'Snapshot' });
 	item.complete();
 }
 
-function doWeb(doc, url) {
-	scrape(doc, url);
+/**
+ * Executes the scraping process.
+ * @param {Document} doc
+ * @param {string} _url Renamed from 'url' to satisfy linting rules for unused arguments.
+ */
+function doWeb(doc, _url) {
+	scrape(doc, _url);
 }
 
 /** BEGIN TEST CASES **/
