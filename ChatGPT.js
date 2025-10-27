@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-24 21:25:43"
+	"lastUpdated": "2025-10-27 15:38:43"
 }
 
 /*
@@ -95,12 +95,13 @@ async function enrichItemWithAPI(doc, url, item) {
 	let accessToken = extract('accessToken');
 	let clientVersion = doc.documentElement.dataset.build;
 
+	let id = url.match(/\/(?:c|share)\/([^#?/]+)/)[1];
 	let apiSlug;
 	if (url.includes('/c/')) {
-		apiSlug = 'conversation/' + url.match(/\/c\/([^#?/]+)/)[1];
+		apiSlug = 'conversation/' + id;
 	}
 	else {
-		apiSlug = 'share/' + url.match(/\/share\/([^#?/]+)/)[1];
+		apiSlug = 'share/' + id;
 	}
 
 	let apiURL = '/backend-api/' + apiSlug;
@@ -114,11 +115,37 @@ async function enrichItemWithAPI(doc, url, item) {
 	}
 	
 	let json = await requestJSON(apiURL, { headers });
-
 	item.title = json.title;
-	item.date = ZU.strToISO(new Date((json.update_time || json.create_time) * 1000).toISOString());
+	let date = new Date((json.update_time || json.create_time) * 1000);
+	item.date = ZU.strToISO(date.toISOString());
 	if (json.model) {
 		item.websiteTitle += ` (${json.model.title})`;
+	}
+
+	if (url.includes('/c/')) {
+		// Private conversation: Add existing share URL if available
+		try {
+			let { items: shares }
+				= await requestJSON('/backend-api/shared_conversations?order=created', { headers });
+			let share = shares.find(share => share.conversation_id === id);
+			if (share) {
+				Zotero.debug('Conversation has been shared as ' + share.id);
+				if (new Date(share.update_time) >= date) {
+					Zotero.debug('Share is up to date');
+					item.url = `https://chatgpt.com/share/${share.id}`;
+				}
+				else {
+					Zotero.debug(`Out of date: ${share.update_time} < ${date}`);
+				}
+			}
+			else {
+				Zotero.debug('Not yet shared');
+			}
+		}
+		catch (e) {
+			Zotero.debug('Unable to find share');
+			Zotero.debug(e);
+		}
 	}
 }
 
