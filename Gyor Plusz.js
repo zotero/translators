@@ -9,14 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-27 06:45:00"
+	"lastUpdated": "2025-10-27 08:11:00"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2025 hompe
-	
+	Copyright © 2025 homope	
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -163,5 +162,3 @@ var testCases = [
 	}
 ]
 /** END TEST CASES **/
-
-
