@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-27 11:22:00"
+	"lastUpdated": "2025-10-27 12:15:00"
 }
 
 /*
@@ -37,12 +37,13 @@
 /**
  * Detects if the current page is a single article based on OpenGraph metadata.
  * @param {Document} doc
+ * @param {string} url
  * @returns {string|boolean}
  */
-function detectWeb(doc) {
+function detectWeb(doc, url) {
 	// A more specific check: look for the OpenGraph type "article"
 	if (doc.querySelector('meta[property="og:type"][content="article"]')) {
-		return "magazineArticle";
+		return "blogPost";
 	}
 	return false;
 }
@@ -53,12 +54,13 @@ function detectWeb(doc) {
  * @param {string} _url Renamed from 'url' to satisfy linting rules for unused arguments.
  */
 function scrape(doc, _url) {
-	let item = new Zotero.Item('magazineArticle');
+	let item = new Zotero.Item('blogPost');
 	
 	// Title: Use the first H1 found, as it's typically the title
 	let titleElement = doc.querySelector('h1');
 	if (titleElement) {
-		item.title = ZU.text(titleElement); // ZU.text() replaces ZU.cleanString(el.textContent)
+		// Reverting to ZU.cleanString(el.textContent) for broader compatibility
+		item.title = ZU.cleanString(titleElement.textContent);
 	}
 
 	item.publicationTitle = "Győr Plusz";
@@ -79,7 +81,8 @@ function scrape(doc, _url) {
 	let dateElements = doc.querySelectorAll('.author .date, .article-info .time');
 	
 	for (let el of dateElements) {
-		dateString = ZU.text(el);
+		// Use cleanString and textContent for compatibility
+		dateString = ZU.cleanString(el.textContent);
 		if (dateString) break;
 	}
 
@@ -92,17 +95,20 @@ function scrape(doc, _url) {
 	let leadParagraph = doc.querySelector('p.lead');
 	let abstractMeta = doc.querySelector('meta[property="og:description"]');
 	
-	if (leadParagraph && ZU.text(leadParagraph).length > 0) {
-		item.abstractNote = ZU.text(leadParagraph);
+	// Use cleanString and textContent for paragraph
+	if (leadParagraph && ZU.cleanString(leadParagraph.textContent).length > 0) {
+		item.abstractNote = ZU.cleanString(leadParagraph.textContent);
+	// Use cleanString and getAttribute('content') for meta tag
 	} else if (abstractMeta) {
-		item.abstractNote = ZU.text(abstractMeta);
+		item.abstractNote = ZU.cleanString(abstractMeta.getAttribute('content'));
 	}
 
 	// 4. Tags
 	let tagLinks = doc.querySelectorAll('.tags-container a');
 	if (tagLinks.length > 0) {
 		for (let link of tagLinks) {
-			item.tags.push({ tag: ZU.text(link).replace(/#/g, '') });
+			// Use cleanString and textContent for link text
+			item.tags.push({ tag: ZU.cleanString(link.textContent).replace(/#/g, '') });
 		}
 	}
 
@@ -127,16 +133,17 @@ var testCases = [
 		"url": "https://www.gyorplusz.hu/gyor/kozossegi-pavilont-epitettek-szekelyfoldon-a-gyori-egyetem-hallgatoi/",
 		"items": [
 			{
-				"itemType": "magazineArticle",
-				"title": "Students of the University of Győr built a community pavilion in Székely Land",
+				"itemType": "blogPost",
+				"title": "Közösségi pavilont építettek Székelyföldön a győri egyetem hallgatói",
 				"creators": [
 					{
-						"lastName": "Győr+",
+						"firstName": "Erika",
+						"lastName": "Baksa",
 						"creatorType": "author"
 					}
 				],
-				"date": "2025-09-05T12:42:00",
-				"abstractNote": "Students of the Gábor Winkler Engineering College of the Széchenyi István University held a construction camp in Abásfalva, Székely Land, supported by the Pannónia Scholarship Program, where they realized an open community pavilion in the small village of Harghita County. The young people from the Faculty of Architecture, Civil Engineering and Transportation Engineering of the Győr institution achieved great success with their contemporary-looking wooden structure, inspired by traditional folk style.",
+				"date": "2025-09-05T10:42:23+00:00",
+				"abstractNote": "A székelyföldi Abásfalván tartottak építőtábort a Pannónia Ösztöndíjprogram támogatásával a Széchenyi István Egyetem Winkler Gábor Mérnöki Szakkollégiumának hallgatói, akik egy nyitott közösségi pavilont valósítottak meg a Hargita megyei kisfaluban. A győri intézmény Építész-, Építő- és Közlekedésmérnöki Karának fiataljai nagy sikert arattak a hagyományos népi stílusból ihletődött, mégis kortárs megjelenésű faépítményükkel.",
 				"publicationTitle": "Győr Plusz",
 				"url": "https://www.gyorplusz.hu/gyor/kozossegi-pavilont-epitettek-szekelyfoldon-a-gyori-egyetem-hallgatoi/",
 				"attachments": [
