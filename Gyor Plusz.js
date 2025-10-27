@@ -34,19 +34,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-/**
- * Detects if the current page is a single article based on OpenGraph metadata.
- * @param {Document} doc
- * @param {string} url
- * @returns {string|boolean}
- */
-function detectWeb(doc, url) {
-	// A more specific check: look for the OpenGraph type "article"
-	if (doc.querySelector('meta[property="og:type"][content="article"]')) {
-		return "magazineArticle";
-	}
-	return false;
-}
 
 /**
  * Scrapes the data for the article.
