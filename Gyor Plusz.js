@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-27 10:35:00"
+	"lastUpdated": "2025-10-27 11:06:00"
 }
 
 /*
@@ -33,6 +33,19 @@
 
 	***** END LICENSE BLOCK *****
 */
+
+/**
+ * Detects if the current page is a single article based on OpenGraph metadata.
+ * @param {Document} doc
+  * @returns {string|boolean}
+ */
+function detectWeb(doc) {
+	// A more specific check: look for the OpenGraph type "article"
+	if (doc.querySelector('meta[property="og:type"][content="article"]')) {
+		return "magazineArticle";
+	}
+	return false;
+}
 
 /**
  * Scrapes the data for the article.
