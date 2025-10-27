@@ -1,6 +1,6 @@
 {
 	"translatorID": "8a0e0cde-0d21-43f6-915b-d1aab9dd0520",
-	"label": "Gemini",
+	"label": "Google Gemini",
 	"creator": "Abe Jellinek",
 	"target": "^https://gemini\\.google\\.com/",
 	"minVersion": "5.0",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-24 21:49:24"
+	"lastUpdated": "2025-10-27 15:55:46"
 }
 
 /*
