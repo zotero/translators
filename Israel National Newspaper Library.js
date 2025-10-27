@@ -50,11 +50,10 @@ async function scrape(doc, url) {
 	const item = new Zotero.Item("newspaperArticle");
 
 	// Get JSON-LD data
-	let jsonLDData = null;
 	const jsonLD = doc.querySelector('script[type="application/ld+json"]');
 	if (jsonLD) {
 		try {
-			jsonLDData = JSON.parse(jsonLD.textContent);
+			let jsonLDData = JSON.parse(jsonLD.textContent);
 			const headline = ZU.trimInternal(jsonLDData.headline);
 			if (headline) item.title = headline;
 			const abstract = ZU.trimInternal(jsonLDData.description);
