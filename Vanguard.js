@@ -185,7 +185,7 @@ async function scrape(doc, url) {
 		name = name.trim();
 		name = name.replace(/^\s*by\s+/i, '').trim();
 		if (name.split(/\s+/).length === 1) return true;
-		if (/^[A-Z0-9-]{2,}$/.test(name) && name.indexOf(' ') === -1) return true;
+		if (/^[A-Z0-9-]{2,}$/.test(name) && name.includes(' ') === -1) return true;
 		return false;
 	}
 
@@ -197,7 +197,7 @@ async function scrape(doc, url) {
 		s = s.replace(/,\s*[A-Z][a-z]+(?:[\s-][A-Z][a-z]+)*$/, '').trim();
 		if (s.includes('|')) s = s.split('|')[0].trim();
 		let parts = s.split(/\s+(?:and|&)\s+|;\s*/i);
-		if (parts.length === 1 && s.indexOf(',') !== -1) {
+		if (parts.length === 1 && s.includes(',') !== -1) {
 			parts = s.split(/\s*,\s*/).map(p => p.trim()).filter(Boolean);
 		}
 		let cleaned = [];
@@ -343,7 +343,7 @@ async function scrape(doc, url) {
 				// If contains a <br>, take only the part before <br>
 				if (rawHTML.includes('<br')) {
 					txt = rawHTML.split(/<br\s*\/?>/i)[0].replace(/<[^>]+>/g, '').trim();
-				} 
+				}
 				else {
 					txt = firstP.textContent.trim();
 				}
