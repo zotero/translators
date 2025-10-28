@@ -103,7 +103,7 @@ function getSearchResults(doc, checkOnly) {
 }
 
 function isIndexURL(url) {
-	return /\/(category|tag)\//i.test(url);
+	return url && (url.includes('/tag/') || url.includes('/category/'));
 }
 
 function detectWeb(doc, url) {
