@@ -109,52 +109,37 @@ function isIndexURL(url) {
 function detectWeb(doc, url) {
 	url = url || doc.location.href;
 
-	let j = parseJSONLD(doc);
-	if (j) {
-		if (url && url.includes('allure.vanguardngr.com')) {
-			return 'magazineArticle';
-		}
-		return 'newspaperArticle';
-	}
-
 	if (isIndexURL(url)) {
 		return 'multiple';
 	}
 
-	if (getSearchResults(doc, true)) {
-		if (meta(doc, 'article:published_time') || meta(doc, 'og:type') || text(doc, 'div.entry-heading-wrapper>h2.entry-heading')) {
-			if (url && url.includes('allure.vanguardngr.com')) {
-				if (meta(doc, 'article:published_time') || meta(doc, 'og:type') || text(doc, 'div.s-post-header>h1')) {
-					return 'magazineArticle';
-				}
-			}
-			return 'newspaperArticle';
+	let j = parseJSONLD(doc);
+	if (j) {
+		if (url.includes('allure.vanguardngr.com')) {
+			return 'magazineArticle';
 		}
+		return 'newspaperArticle';
+	}
+
+	if (meta(doc, 'article:published_time') || meta(doc, 'og:type') === 'article') {
+		if (url.includes('allure.vanguardngr.com')) {
+			return 'magazineArticle';
+		}
+		return 'newspaperArticle';
+	}
+
+	if (url.includes('allure.vanguardngr.com')) {
+		if (text(doc, 'div.s-post-header>h1') || text(doc, 'div.article-content h1, div.article-content h2')) {
+			return 'magazineArticle';
+		}
+	}
+	else if (text(doc, 'div.entry-heading-wrapper>h2.entry-heading')) {
+		return 'newspaperArticle';
+	}
+
+	// Explicit fallback ONLY for category/tag pages
+	if (getSearchResults(doc, true) && isIndexURL(url)) {
 		return 'multiple';
-	}
-
-	if (meta(doc, 'article:published_time')) {
-		if (url && url.includes('allure.vanguardngr.com')) {
-			return 'magazineArticle';
-		}
-		return 'newspaperArticle';
-	}
-	let ogType = (meta(doc, 'og:type') || '').toLowerCase();
-	if (ogType === 'article') {
-		if (url && url.includes('allure.vanguardngr.com')) {
-			return 'magazineArticle';
-		}
-		return 'newspaperArticle';
-	}
-
-	if (text(doc, 'div.entry-heading-wrapper>h2.entry-heading')) {
-		return 'newspaperArticle';
-	}
-
-	if (url && url.includes('allure.vanguardngr.com')) {
-		if (text(doc, 'div.s-post-header>h1')) {
-			return 'magazineArticle';
-		}
 	}
 
 	return false;
