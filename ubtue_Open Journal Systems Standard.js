@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-08-19 15:08:11"
+	"lastUpdated": "2025-10-28 16:34:04"
 }
 
 /*
@@ -114,7 +114,7 @@ function getOrcids(doc, ISSN) {
   	 // e.g. https://jeac.de/ojs/index.php/jeac/article/view/844
   	 // e.g. https://jebs.eu/ojs/index.php/jebs/article/view/336
   	 // e.g. https://bildungsforschung.org/ojs/index.php/beabs/article/view/783
-	 if (['2627-6062', '1804-6444', '2748-6419', '1018-1539'].includes(ISSN)) {
+	 if (['2627-6062', '1804-6444', '2748-6419', '1018-1539', '2698-5446'].includes(ISSN)) {
   	 	let orcidAuthorEntryCaseA = doc.querySelectorAll('.authors');
   	 	if (orcidAuthorEntryCaseA) {
   		for (let a of orcidAuthorEntryCaseA) {
@@ -236,7 +236,7 @@ function joinTitleAndSubtitle (doc, item) {
 	if (item.ISSN == '2616-1591') {
 		let subtitleCandidate = ZU.xpathText(doc, '//h2[@class="subtitle"]')?.trim();
 		if (subtitleCandidate && !item.title.toLowerCase().includes(subtitleCandidate))
-		    item.title = item.title + ' ' + subtitleCandidate;
+			item.title = item.title + ' ' + subtitleCandidate;
 	}
 
 	let subtitle = ZU.xpathText(doc, '//article[@class="article-details"]/header/h2/small')
@@ -335,7 +335,7 @@ function invokeUbtuePKPTranslator(doc) {
 		}
 
 		if (['2617-3697', '2660-4418', '2748-6419', '1988-3269', '2699-8440',
-			 '1804-6444', '2627-6062', '2504-5156', '2413-3108'].includes(i.ISSN)) {
+			 '1804-6444', '2627-6062', '2504-5156', '2413-3108', '3105-3742'].includes(i.ISSN)) {
 			if (ZU.xpath(doc, '//meta[@name="DC.Type.articleType"]')) {
 				if (ZU.xpath(doc, '//meta[@name="DC.Type.articleType"]')[0].content.match(
 							/(Media reviews)|(Rezensionen)|(Reseñas)|(Book Reviews?)/i)) {
