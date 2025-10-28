@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-28 21:08:17"
+	"lastUpdated": "2025-10-28 21:09:38"
 }
 
 /*
@@ -41,9 +41,14 @@ function detectWeb(doc, url) {
 		// This matches the details page for a law
 		return 'statute';
 	}
-	else if (/\/faolex\/results\//.test(url) && getSearchResults(doc, true)) {
-		// Results/listing page with multiple laws
-		return 'multiple';
+	else if (/\/faolex\/results\//.test(url)) {
+		if (getSearchResults(doc, true)) {
+			// Results/listing page with multiple laws
+			return 'multiple';
+		}
+		else {
+			Z.monitorDOMChanges(doc.body);
+		}
 	}
 	return false;
 }
