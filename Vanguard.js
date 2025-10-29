@@ -2,7 +2,7 @@
 	"translatorID": "3d3ab047-f5c2-430a-ac10-a6aec5448bb0",
 	"label": "Vanguard",
 	"creator": "VWF",
-	"target": "^https?://((www|allure)\\\\.)?vanguardngr\\\\.com/",
+	"target": "^https?://((www|allure)\\.)?vanguardngr\\.com/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
