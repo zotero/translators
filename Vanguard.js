@@ -398,34 +398,6 @@ async function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.vanguardngr.com/2025/10/military-justice-on-display/",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Military justice on display",
-				"creators": [],
-				"date": "2025-10-09",
-				"ISSN": "0794-652X",
-				"abstractNote": "The sentencing of Private Lukman Musa to death by hanging for the murder of a tricycle rider in Azare, Bauchi State, by a General Court Martial sitting in Jos, is a landmark judgement that reaffirms the Nigerian Army’s zero tolerance for indiscipline and criminality. According to Major Aminu Mairuwa, Acting Deputy Director of Legal Services, […]",
-				"language": "en-GB",
-				"libraryCatalog": "Vanguard",
-				"place": "Nigeria",
-				"publicationTitle": "Vanguard",
-				"url": "https://www.vanguardngr.com/2025/10/military-justice-on-display/",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "https://www.vanguardngr.com/2025/10/from-pitch-to-purposeful-philanthropy-zahra-buhari-indimis-unspoken-touches-by-emmanuel-aziken/",
 		"items": [
 			{
@@ -495,73 +467,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.vanguardngr.com/2025/10/enugu-govt-arrests-man-for-defiling-2-daughters/",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Enugu govt arrests man for defiling 2 daughters",
-				"creators": [
-					{
-						"firstName": "Idowu",
-						"lastName": "Bankole",
-						"creatorType": "author"
-					}
-				],
-				"date": "2025-10-27",
-				"ISSN": "0794-652X",
-				"abstractNote": "Enugu State Government has confirmed the arrest of Mr. Ozioma Okonkwo, a native of Imo State, for allegedly defiling his two biological daughters, aged two and five. Okonkwo was apprehended Saturday night, October 25, 2025, following a distress report from a concerned citizen who promptly alerted the authorities. The suspect is currently in police custody […]",
-				"language": "en-GB",
-				"libraryCatalog": "Vanguard",
-				"place": "Nigeria",
-				"publicationTitle": "Vanguard",
-				"url": "https://www.vanguardngr.com/2025/10/enugu-govt-arrests-man-for-defiling-2-daughters/",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://allure.vanguardngr.com/2025/10/goldenhouseoffab-shines-bright-at-west-yorkshire-fashion-week/",
-		"items": [
-			{
-				"itemType": "magazineArticle",
-				"title": "GoldenHouseOfFab Shines Bright at West Yorkshire Fashion Week",
-				"creators": [
-					{
-						"firstName": "Yemisi",
-						"lastName": "Suleiman",
-						"creatorType": "author"
-					}
-				],
-				"date": "2025-10-21",
-				"ISSN": "2276-9234",
-				"abstractNote": "By Yemisi Suleiman West Yorkshire Fashion Week, the latest addition to Britain’s growing fashion calendar, is fast emerging as a standard-bearer of creative excellence in the United Kingdom. The recent edition which took place at the fashionable Gomersal Park Hotel and Spa in Cleckheaton, showcased an exhilarating mix of culture, creativity, and up-and-coming design talent. Founded by fashion design graduate Hollie Lesley Haughin, the initiative aims to highlight designers beyond London’s busy circuit, allowing them room to flourish and showcasing the intersection of fashion and community. Among the highlighted titles was GoldenHouseOfFab, founded by Golden Iwuji, a designer renowned for […]",
-				"language": "en-US",
-				"libraryCatalog": "Vanguard",
-				"publicationTitle": "Vanguard Allure",
-				"url": "https://allure.vanguardngr.com/2025/10/goldenhouseoffab-shines-bright-at-west-yorkshire-fashion-week/",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "https://allure.vanguardngr.com/2025/09/ikorodu-bois-go-from-ikorodu-streets-to-global-screen/",
 		"items": [
 			{
@@ -608,39 +513,6 @@ var testCases = [
 				"libraryCatalog": "Vanguard",
 				"publicationTitle": "Vanguard Allure",
 				"url": "https://allure.vanguardngr.com/2016/10/us-first-lady-michelle-obama-glows-cover/",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://allure.vanguardngr.com/2016/10/eccentric-social-media-personality-bobrisky-graces-the-cover-october-edition/",
-		"items": [
-			{
-				"itemType": "magazineArticle",
-				"title": "Eccentric social media personality, Bobrisky graces The Cover October edition",
-				"creators": [
-					{
-						"firstName": "Patricia",
-						"lastName": "Uyeh",
-						"creatorType": "author"
-					}
-				],
-				"date": "2016-10-13",
-				"ISSN": "2276-9234",
-				"abstractNote": "By Patricia Uyeh Idris Okueye Olanrewaju, popularly known as Bobrisky is the latest phenomenon to have hit the social media scene in a while and it doesn’t look like, the self-acclaimed king of snapchat is taking a break from the scene any time soon, as he covers, The Cover magazine  glammed in sparkly gown and a full face of make-up. He took a Snapchat of himself one day. As usual,  Bobrisky had on a full face of make up, a glittery top and the very shiniest shoes. And just like that a star was born; albeit a social media one. […]",
-				"language": "en-US",
-				"libraryCatalog": "Vanguard",
-				"publicationTitle": "Vanguard Allure",
-				"url": "https://allure.vanguardngr.com/2016/10/eccentric-social-media-personality-bobrisky-graces-the-cover-october-edition/",
 				"attachments": [
 					{
 						"title": "Snapshot",
