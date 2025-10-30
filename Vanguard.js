@@ -312,11 +312,11 @@ async function scrape(doc, url) {
 	if (!item.url || !item.url.trim()) item.url = meta(doc, 'og:url') || url;
 	if (!item.publicationTitle) item.publicationTitle = (url && url.includes('allure.vanguardngr.com')) ? 'Vanguard Allure' : 'Vanguard';
 
-	// --- Unified Allure fallback with "name-likeness" + selector and pipe handling ---
+	// --- Allure.Vanguardngr.Com fallback with "name-likeness" + selector and pipe handling ---
 	if (item.creators.length === 0) {
 		let found = false;
 
-		// --- Allure-specific enhanced author detection ---
+		// --- Allure-specific author detection ---
 		if (url.includes('allure.vanguardngr.com')) {
 			let txt = '';
 			
@@ -387,6 +387,112 @@ async function scrape(doc, url) {
 			}
 		}
 	}
+
+	// --- CSS-author extraction routine that OVERRIDES other authors when present ---
+	(function() {
+		function cleanCandidateText(t) {
+			if (!t) return '';
+			let raw = t.trim();
+			raw = raw.replace(/^\s*(By|Written by)\s+/i, '').trim();
+			raw = raw.replace(/\s*\|.*$/, '').trim();
+			raw = raw.replace(/\s*,\s*$/, '').trim();
+			raw = raw.replace(/\s*\(.*\)\s*$/, '').trim();
+			return raw;
+		}
+
+		function isNameLike(t) {
+			if (!t) return false;
+			if (t.length > 60) return false;
+			if (t.split(/\s+/).length > 6) return false;
+			if (/[.!?]\s/.test(t)) return false;
+			if (!/^[A-Z][a-z.'-]+(?:\s+[A-Z][a-z.'-]+){0,3}$/.test(t)) return false;
+			if (/agency|news desk|agency reporter|vanguard|our reporter|allure|editorial|nigeria|staff|bureau/i.test(t.toLowerCase())) return false;
+			return true;
+		}
+
+		let cssAuthors = [];
+
+		// Try Allure first (keeps your existing selectors/priority)
+		if (url && url.includes('allure.vanguardngr.com')) {
+			// 1) first <p>
+			let firstP = doc.querySelector('div.article-content > p:first-of-type');
+			let cand = '';
+			if (firstP) {
+				let rawHTML = firstP.innerHTML.trim();
+				if (rawHTML.includes('<br')) {
+					cand = rawHTML.split(/<br\s*\/?>/i)[0].replace(/<[^>]+>/g, '').trim();
+				} 
+				else {
+					cand = firstP.textContent.trim();
+				}
+				cand = cleanCandidateText(cand);
+
+				if (/^(?:\.{3}|…)\s*/.test(cand)) {
+					cand = ''; // clear candidate so next <p> will be checked
+				}
+			}
+
+			// If first p looks like a headline/spillover (too long / not name-like) then check second <p>
+			if (!isNameLike(cand)) {
+				let secondP = doc.querySelector('div.article-content > p:nth-of-type(2)');
+				if (secondP) {
+					let rawHTML2 = secondP.innerHTML.trim();
+					if (rawHTML2.includes('<br')) {
+						cand = rawHTML2.split(/<br\s*\/?>/i)[0].replace(/<[^>]+>/g, '').trim();
+					} 
+					else {
+						cand = secondP.textContent.trim();
+					}
+					cand = cleanCandidateText(cand);
+				}
+			}
+
+			// If still not name-like, try the second child div)
+			if (!isNameLike(cand)) {
+				let secondDiv = doc.querySelector('div.article-content > div:nth-of-type(2)');
+				if (secondDiv) {
+					let t = secondDiv.textContent.trim();
+					cand = cleanCandidateText(t);
+				}
+			}
+
+			// If candidate is name-like, split and collect
+			if (isNameLike(cand)) {
+				let parts = splitAuthors(cand);
+				for (let p of parts) {
+					if (!isSingleName(p)) cssAuthors.push(ZU.cleanAuthor(p, 'author'));
+				}
+			}
+		}
+
+		// If no CSS result from Allure (or for www.), try general selectors (www.)
+		if (cssAuthors.length === 0) {
+			let cand = text(doc, 'div.entry-content-inner-wrapper p') || text(doc, 'div.article-content>p:first-of-type') || text(doc, 'div.byline, span.author, div.author-name');
+			if (cand) {
+				cand = cleanCandidateText(cand);
+				if (isNameLike(cand)) {
+					let parts = splitAuthors(cand);
+					for (let p of parts) {
+						if (!isSingleName(p)) cssAuthors.push(ZU.cleanAuthor(p, 'author'));
+					}
+				} 
+				else {
+					// also handle very short cases like "By Rita Chioma," which may have trailing comma and be short
+					if (cand && cand.length <= 60 && cand.split(/\s+/).length <= 6) {
+						let parts = splitAuthors(cand);
+						for (let p of parts) {
+							if (!isSingleName(p)) cssAuthors.push(ZU.cleanAuthor(p, 'author'));
+						}
+					}
+				}
+			}
+		}
+
+		// If we found CSS authors, OVERRIDE whatever was set earlier (JSON-LD/meta/heuristics)
+		if (cssAuthors.length > 0) {
+			item.creators = cssAuthors;
+		}
+	})();
 
 	item.attachments.push({ document: doc, title: 'Snapshot' });
 	item.place = 'Nigeria';
