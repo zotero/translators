@@ -67,6 +67,34 @@ function scrape(doc, url) {
 		item.title = shortTitle;
 	}
 	
+	// Find authors from metadata field
+	var authorField = doc.querySelector('.metadata-field--authorList');
+	if (authorField) {
+		var authorLinks = authorField.querySelectorAll('a[href]');
+		for (var i = 0; i < authorLinks.length; i++) {
+			var authorName = authorLinks[i].textContent.trim();
+			if (authorName) {
+				// Try to parse the name into first/last
+				var lastSpaceIndex = authorName.lastIndexOf(' ');
+				if (lastSpaceIndex > 0) {
+					// Has a space, assume "First Last"
+					item.creators.push({
+						firstName: authorName.substring(0, lastSpaceIndex),
+						lastName: authorName.substring(lastSpaceIndex + 1),
+						creatorType: 'author'
+					});
+				} else {
+					// No space, single field
+					item.creators.push({
+						lastName: authorName,
+						creatorType: 'author',
+						fieldMode: 1
+					});
+				}
+			}
+		}
+	}
+	
 	// Find the review status badge
 	var reviewBadge = doc.querySelector('#badge-button');
 	var extraInfo = [];
@@ -84,21 +112,10 @@ function scrape(doc, url) {
 		item.extra = extraInfo.join('\n');
 	}
 	
-	// Placeholder fields for document type - all optional.
-	// I've kept these here in case I want to populate any later.
 	
-	// item.abstractNote = '';  // Maps to CSL 'abstract': Summary or abstract of the document
 	// item.accessDate = '';  // Maps to CSL 'accessed': Date when the document was accessed - Automatically added by Zotero
 	// item.archive = '';  // Maps to CSL 'archive': Archive where the document is stored
 	// item.archiveLocation = '';  // Maps to CSL 'archiveLocation': Location within the archive
-	// item.callNumber = '';  // Maps to CSL 'callNumber': Call number for library documents
-	// item.creators = [];  // Maps to CSL 'author': Authors, contributors, editors, translators, or reviewed authors
-	// item.date = '';  // Maps to CSL 'issued': Date of publication or issuance
-	// item.extra = '';  // Maps to CSL 'note': Additional notes or information
-	// item.language = '';  // Maps to CSL 'language': Language in which the document is written
-	// item.publisher = '';  // Maps to CSL 'publisher': Name of the publisher
-	// item.rights = '';  // Maps to CSL 'license': Information about rights or licensing
-
 	
 	item.complete();
 }
