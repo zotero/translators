@@ -389,7 +389,7 @@ async function scrape(doc, url) {
 	}
 
 	// --- CSS-author extraction routine that OVERRIDES other authors when present ---
-	(function() {
+	(function () {
 		function cleanCandidateText(t) {
 			if (!t) return '';
 			let raw = t.trim();
@@ -421,7 +421,7 @@ async function scrape(doc, url) {
 				let rawHTML = firstP.innerHTML.trim();
 				if (rawHTML.includes('<br')) {
 					cand = rawHTML.split(/<br\s*\/?>/i)[0].replace(/<[^>]+>/g, '').trim();
-				} 
+				}
 				else {
 					cand = firstP.textContent.trim();
 				}
@@ -439,7 +439,7 @@ async function scrape(doc, url) {
 					let rawHTML2 = secondP.innerHTML.trim();
 					if (rawHTML2.includes('<br')) {
 						cand = rawHTML2.split(/<br\s*\/?>/i)[0].replace(/<[^>]+>/g, '').trim();
-					} 
+					}
 					else {
 						cand = secondP.textContent.trim();
 					}
@@ -475,15 +475,12 @@ async function scrape(doc, url) {
 					for (let p of parts) {
 						if (!isSingleName(p)) cssAuthors.push(ZU.cleanAuthor(p, 'author'));
 					}
-				} 
-				else {
-					// also handle very short cases like "By Rita Chioma," which may have trailing comma and be short
-					if (cand && cand.length <= 60 && cand.split(/\s+/).length <= 6) {
+				} // also handle very short cases like "By Rita Chioma," which may have trailing comma and be short
+				else if (cand && cand.length <= 60 && cand.split(/\s+/).length <= 6) {
 						let parts = splitAuthors(cand);
 						for (let p of parts) {
 							if (!isSingleName(p)) cssAuthors.push(ZU.cleanAuthor(p, 'author'));
 						}
-					}
 				}
 			}
 		}
