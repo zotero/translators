@@ -67,13 +67,28 @@ function scrape(doc, url) {
 		item.title = shortTitle;
 	}
 	
+	// Find the review status badge
+	var reviewBadge = doc.querySelector('#badge-button');
+	var extraInfo = [];
+	if (reviewBadge) {
+		var reviewText = reviewBadge.textContent.trim();
+		if (reviewText) {
+			extraInfo.push('Review status: ' + reviewText);
+		}
+	}
+	
 	item.libraryCatalog = 'Benchling';
 	item.url = url;
 	
-	// Placeholder fields for document type - all optional
+	if (extraInfo.length > 0) {
+		item.extra = extraInfo.join('\n');
+	}
+	
+	// Placeholder fields for document type - all optional.
+	// I've kept these here in case I want to populate any later.
 	
 	// item.abstractNote = '';  // Maps to CSL 'abstract': Summary or abstract of the document
-	// item.accessDate = '';  // Maps to CSL 'accessed': Date when the document was accessed
+	// item.accessDate = '';  // Maps to CSL 'accessed': Date when the document was accessed - Automatically added by Zotero
 	// item.archive = '';  // Maps to CSL 'archive': Archive where the document is stored
 	// item.archiveLocation = '';  // Maps to CSL 'archiveLocation': Location within the archive
 	// item.callNumber = '';  // Maps to CSL 'callNumber': Call number for library documents
