@@ -3,14 +3,21 @@
 	"label": "Benchling",
 	"creator": "Ken Robbins",
 	"target": "^https?://[^/]*\\.benchling\\.com/.*etr_.*/edit",
-	"minVersion": "2.1.9",  // Inherited from sample code. Developed and tested on Zotero 7.0.29.
+	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 4,  // 4 = Web translator
-	"browserSupport": "gcsibv",  // I'm guessing this means Chrome, Firefox, Safari, Edge, bookmarklets, and standalone
+	"translatorType": 4,
+	"browserSupport": "gcsibv",
 	"lastUpdated": "2025-10-30 01:00:22"
 }
+
+/*
+Metadata notes
+        "minVersion": "2.1.9", // Inherited from sample code. Developed and tested on Zotero 7.0.29.
+        "translatorType": 4, // 4 = Web translator
+        "browserSupport": "gcsibv", // I'm guessing this means Chrome, Firefox, Safari, Edge, bookmarklets, and standalone
+*/
 
 /**
 	Copyright (c) 2025 Ken Robbins
@@ -46,7 +53,7 @@ If this happens, feel free to reach out to me on the Benchling Community Forum
 https://community.benchling.com
 */
 
-function detectWeb(doc, url) {
+function detectWeb(_doc, _url) {
 	// Always return document since the target already restricts to ELN entries
 	return "document";
 }
@@ -79,7 +86,8 @@ function scrape(doc, url) {
 	// If we found an EXP ID, add it to the title
 	if (expId) {
 		item.title = shortTitle + ' [' + expId + ']';
-	} else {
+	}
+	else {
 		item.title = shortTitle;
 	}
 	
@@ -99,7 +107,8 @@ function scrape(doc, url) {
 						lastName: authorName.substring(lastSpaceIndex + 1),
 						creatorType: 'author'
 					});
-				} else {
+				}
+				else {
 					// No space, single field
 					item.creators.push({
 						lastName: authorName,
