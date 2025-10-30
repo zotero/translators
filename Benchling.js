@@ -3,12 +3,12 @@
 	"label": "Benchling",
 	"creator": "Ken Robbins",
 	"target": "^https?://[^/]*\\.benchling\\.com/.*etr_.*/edit",
-	"minVersion": "2.1.9",
+	"minVersion": "2.1.9",  // Inherited from sample code. Developed and tested on Zotero 7.0.29.
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
+	"translatorType": 4,  // 4 = Web translator
+	"browserSupport": "gcsibv",  // I'm guessing this means Chrome, Firefox, Safari, Edge, bookmarklets, and standalone
 	"lastUpdated": "2025-10-30 01:00:22"
 }
 
@@ -28,6 +28,22 @@
 	You should have received a copy of the GNU Affero General Public
 	License along with this program. If not, see
 	<http://www.gnu.org/licenses/>.
+*/
+
+/*
+This is a Zotero Web Translator for capturing metadata from Benchling ELN entries.
+It is a simple translator that captures the URL, title, experiment ID, authors, review status, and project folder.
+Authors and Project Folder are only captured if the Metadata tab of the ELN entry is visible.
+
+The date accessed is automatically added by Zotero.
+No other Benchling dates such as created, updated, or reviewed are captured.
+Notebook entry schema metadata is not captured either.
+This is meant to provide handy references, not to duplicate Benchling metadata.
+If additional metadata is required, click on the link and view directly in Benchling.
+
+As with any scraper, this might break over time if Benchling changes their HTML structure.
+If this happens, feel free to reach out to me on the Benchling Community Forum
+https://community.benchling.com
 */
 
 function detectWeb(doc, url) {
