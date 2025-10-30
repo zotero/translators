@@ -153,8 +153,7 @@ async function doWeb(doc, url) {
 		let selected = await Zotero.selectItems(items);
 		if (!selected) return;
 		for (let u of Object.keys(selected)) {
-			let subDoc = await requestDocument(u);
-			await scrape(subDoc, u);
+			await scrape(await requestDocument(u));
 		}
 	}
 	else if (mode === 'newspaperArticle' || mode === 'magazineArticle') {
