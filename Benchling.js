@@ -67,7 +67,7 @@ function scrape(doc, url) {
 		item.title = shortTitle;
 	}
 	
-	// Find authors from metadata field
+	// Find authors from metadata field. Only works if the Metadata tab is visible.
 	var authorField = doc.querySelector('.metadata-field--authorList');
 	if (authorField) {
 		var authorLinks = authorField.querySelectorAll('a[href]');
@@ -105,6 +105,18 @@ function scrape(doc, url) {
 		}
 	}
 	
+	// Find the project folder. Only works if the Metadata tab is visible.
+	var parentLink = doc.querySelector('[data-test-component="ParentLink"]');
+	if (parentLink) {
+		// Get the text content, which should be the folder name
+		var folderText = parentLink.textContent.trim();
+		// Remove any SVG icons or other elements by getting just the text node
+		var folderName = folderText.split('\n')[0].trim();
+		if (folderName) {
+			item.archiveLocation = 'Project folder: ' + folderName;
+		}
+	}
+	
 	item.libraryCatalog = 'Benchling';
 	item.url = url;
 	
@@ -112,10 +124,7 @@ function scrape(doc, url) {
 		item.extra = extraInfo.join('\n');
 	}
 	
-	
 	// item.accessDate = '';  // Maps to CSL 'accessed': Date when the document was accessed - Automatically added by Zotero
-	// item.archive = '';  // Maps to CSL 'archive': Archive where the document is stored
-	// item.archiveLocation = '';  // Maps to CSL 'archiveLocation': Location within the archive
 	
 	item.complete();
 }
