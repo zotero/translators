@@ -75,6 +75,7 @@ function scrape(doc, url) {
 	}
 	
 	item.libraryCatalog = 'Benchling';
+	item.url = url;
 	
 	item.complete();
 }
