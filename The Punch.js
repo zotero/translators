@@ -1,14 +1,15 @@
 {
-	"translatorID": "69cddf9e-884e-433f-8967-d9afb6f9e94c",
-	"label": "The Nation (Nigeria)",
+	"translatorID": "cb173332-8fb1-444d-84c9-9f12f3817d34",
+	"label": "The Punch",
 	"creator": "VWF",
-	"target": "^https?://thenationonlineng\\.net/",
+	"target": "^https?://((www|healthwise)\\\\.)?punchng\\\\.com/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2025-10-26 00:42:24"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2025-10-26 19:45:30"
 }
 
 /*
@@ -66,13 +67,13 @@ function parseJSONLD(doc) {
 				let t = cand['@type'] || cand.type;
 				if (!t) continue;
 				if (typeof t === 'string') {
-					if (t.includes('Article')) {
+					if (t.includes('WebPage')) {
 						return cand;
 					}
 				}
 				else if (Array.isArray(t)) {
 					for (let tt of t) {
-						if (typeof tt === 'string' && tt.includes('Article')) {
+						if (typeof tt === 'string' && tt.includes('WebPage')) {
 							return cand;
 						}
 					}
@@ -103,7 +104,7 @@ function getSearchResults(doc, checkOnly) {
 }
 
 function isIndexURL(url) {
-	return url && url.includes('/tag/');
+	return /\/(category|tag|topics)\//i.test(url);
 }
 
 function detectWeb(doc, url) {
@@ -123,7 +124,7 @@ function detectWeb(doc, url) {
 	// 3) Use the standard getSearchResults() heuristic for listing pages
 	if (getSearchResults(doc, true)) {
 		// If page also clearly looks like an article, prefer article
-		if (meta(doc, 'article:published_time') || meta(doc, 'og:type') || text(doc, 'div.article__title h1')) {
+		if (meta(doc, 'article:published_time') || meta(doc, 'og:type') || text(doc, 'article.single-article>h1.post-title')) {
 			return 'newspaperArticle';
 		}
 		return 'multiple';
@@ -139,7 +140,7 @@ function detectWeb(doc, url) {
 	}
 
 	// 5) fallback selectors
-	if (text(doc, 'div.article__title>h1')) {
+	if (text(doc, 'article.single-article>h1.post-title')) {
 		return 'newspaperArticle';
 	}
 
@@ -175,7 +176,7 @@ async function scrape(doc, url) {
 		item.title = ZU.unescapeHTML(
 			data.headline
 			|| meta(doc, 'og:title')
-			|| text(doc, 'div.article__title>h1')
+			|| text(doc, 'article.single-article>h1.post-title')
 			|| ''
 		);
 
@@ -255,7 +256,7 @@ async function scrape(doc, url) {
 				name = name.replace(/,\s*[A-Z][a-z]+(?:[\s-][A-Z][a-z]+)*$/, '').trim();
 
 				// Skip agency or anonymous authors
-				if (name && !/agency|news desk|agency reporter|the nation|our reporter|thenation|nigeria|staff|bureau/i.test(name.toLowerCase())) {
+				if (name && !/agency|news desk|agency reporter|the punch|our reporter|punchng|punch|nigeria|staff|bureau/i.test(name.toLowerCase())) {
 					item.creators.push(ZU.cleanAuthor(name, 'author'));
 				}
 			}
@@ -266,7 +267,7 @@ async function scrape(doc, url) {
 	if (!item.title || !item.title.trim()) {
 		item.title = ZU.unescapeHTML(
 			meta(doc, 'og:title')
-			|| text(doc, 'div.article__title>h1')
+			|| text(doc, 'article.single-article>h1.post-title')
 			|| ''
 		);
 	}
@@ -274,7 +275,6 @@ async function scrape(doc, url) {
 	if (!item.abstractNote || !item.abstractNote.trim()) {
 		item.abstractNote = ZU.unescapeHTML(
 			meta(doc, 'og:description')
-			|| meta(doc, 'description')
 			|| ''
 		);
 	}
@@ -298,20 +298,49 @@ async function scrape(doc, url) {
 	}
 
 	if (!item.publicationTitle) {
-		item.publicationTitle = 'The Nation';
+		if (url.includes('healthwise.punchng.com')) {
+			item.publicationTitle = 'The Punch Healthwise';
+		} else {
+			item.publicationTitle = 'The Punch';
+		}
 	}
 
 	if (!item.ISSN) {
-		item.ISSN = '2449-1497';
+		item.ISSN = '0331-2666';
 	}
-	
+
+	// Extra fallback for Healthwise (different HTML structure)
+	if (item.creators.length === 0) {
+		let hwAuthors = doc.querySelectorAll('.tdb-author-name-wrap a.tdb-author-name');
+		if (hwAuthors.length) {
+			for (let el of hwAuthors) {
+				let name = el.textContent.trim();
+				if (name.includes('|')) name = name.split('|')[0].trim();
+				if (name && !/agency|news desk|agency reporter|the punch|our reporter|punchng|punch|nigeria|staff|bureau/i.test(name.toLowerCase())) {
+					item.creators.push(ZU.cleanAuthor(name, 'author'));
+				}
+			}
+		}
+	}
+
 	// If no creators yet, try common DOM byline selectors (skip org-like)
 	if (item.creators.length === 0) {
-		let cand = meta(doc, 'author')
-			|| text(doc, 'div.article__date>p>span>a.author.url.fn');
+		let cand = text(doc, 'div.col-lg-12.desktop-onlyy>span.post-author');
+		if (cand) {
+			// Remove unwanted keywords
+			if (!/agency|news desk|agency reporter|the punch|our reporter|punchng|punch|nigeria|staff|bureau/i.test(cand.toLowerCase())) {
+				// Split on " and ", "&", or commas
+				let authorParts = cand
+					.split(/\s+(?:and|&)\s+|,\s*/i)
+					.map(a => a.trim())
+					.filter(a => a.length > 0);
 
-		if (cand && !/agency|news desk|agency reporter|the nation|our reporter|thenation|nigeria|staff|bureau/i.test(cand.toLowerCase())) {
-			item.creators.push(ZU.cleanAuthor(cand, 'author'));
+				for (let name of authorParts) {
+					// Keep only part before pipe if any
+					if (name.includes('|')) name = name.split('|')[0].trim();
+					item.creators.push(ZU.cleanAuthor(name, 'author'));
+				}
+			}
 		}
 	}
 
@@ -329,26 +358,31 @@ async function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://thenationonlineng.net/ngf-hails-nigerias-exit-from-financial-action-task-forces-grey-list/",
+		"url": "https://punchng.com/lamido-wike-camps-reject-consensus-deal-for-pdp-chairmanship/",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "NGF hails Nigeria’s exit from Financial Action Task Force’s grey list",
+				"title": "Lamido, Wike camps reject consensus deal for PDP chairmanship",
 				"creators": [
 					{
-						"firstName": "Eric",
-						"lastName": "Ikhilae",
+						"firstName": "Abdulrahman",
+						"lastName": "Zakariyau",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nathaniel",
+						"lastName": "Shaibu",
 						"creatorType": "author"
 					}
 				],
 				"date": "2025-10-25",
-				"ISSN": "2449-1497",
-				"abstractNote": "The Nation Newspaper NGF hails Nigeria's exit from Financial Action Task Force's grey list",
+				"ISSN": "0331-2666",
+				"abstractNote": "The endorsement of a former Minister of Special Duties and Intergovernmental Affairs, Tanimu Turaki (SAN) as National Chairman of the Peoples Democratic",
 				"language": "en-US",
-				"libraryCatalog": "The Nation (Nigeria)",
+				"libraryCatalog": "The Punch",
 				"place": "Nigeria",
-				"publicationTitle": "The Nation",
-				"url": "https://thenationonlineng.net/ngf-hails-nigerias-exit-from-financial-action-task-forces-grey-list/",
+				"publicationTitle": "The Punch",
+				"url": "https://punchng.com/lamido-wike-camps-reject-consensus-deal-for-pdp-chairmanship/",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -363,31 +397,26 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://thenationonlineng.net/nigeria-edges-closer-to-exiting-fatfs-grey-list/",
+		"url": "https://punchng.com/resident-doctors-begin-indefinite-strike-friday/",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Nigeria edges closer to exiting FATF’s grey list",
+				"title": "Resident doctors begin indefinite strike Friday",
 				"creators": [
 					{
-						"firstName": "Nduka",
-						"lastName": "Chiejina",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Sarah",
-						"lastName": "Bolaji",
+						"firstName": "Samuel",
+						"lastName": "Omotere",
 						"creatorType": "author"
 					}
 				],
-				"date": "2024-06-29",
-				"ISSN": "2449-1497",
-				"abstractNote": "The Nation Newspaper Nigeria edges closer to exiting FATF's grey list",
+				"date": "2025-10-26",
+				"ISSN": "0331-2666",
+				"abstractNote": "The Nigerian Association of Resident Doctors has declared a total, comprehensive, and indefinite strike scheduled to commence at 11:59 p.m. on Friday,",
 				"language": "en-US",
-				"libraryCatalog": "The Nation (Nigeria)",
+				"libraryCatalog": "The Punch",
 				"place": "Nigeria",
-				"publicationTitle": "The Nation",
-				"url": "https://thenationonlineng.net/nigeria-edges-closer-to-exiting-fatfs-grey-list/",
+				"publicationTitle": "The Punch",
+				"url": "https://punchng.com/resident-doctors-begin-indefinite-strike-friday/",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -399,6 +428,79 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://punchng.com/hisbah-cancels-court-ordered-tiktok-celebrities-wedding-in-kano/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Hisbah cancels court-ordered TikTok celebrities' wedding in Kano",
+				"creators": [],
+				"date": "2025-10-26",
+				"ISSN": "0331-2666",
+				"abstractNote": "Sharia-enforcing police in Nigeria's northern city of Kano have cancelled a wedding of two TikTok celebrities that was ordered by a court after a viral",
+				"language": "en-US",
+				"libraryCatalog": "The Punch",
+				"place": "Nigeria",
+				"publicationTitle": "The Punch",
+				"url": "https://punchng.com/hisbah-cancels-court-ordered-tiktok-celebrities-wedding-in-kano/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://healthwise.punchng.com/open-defecation-lagos-to-build-10000-public-toilets-after-punch-healthwise-report/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Open defecation: Lagos to build 10,000 public toilets after PUNCH Healthwise report - Healthwise",
+				"creators": [
+					{
+						"firstName": "Idowu",
+						"lastName": "Abdullahi",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025-08-22",
+				"ISSN": "0331-2666",
+				"abstractNote": "The Lagos State Government has announced plans to build 10,000 public toilets across the state to eliminate open defecation.",
+				"language": "en-US",
+				"libraryCatalog": "The Punch",
+				"place": "Nigeria",
+				"publicationTitle": "The Punch Healthwise",
+				"shortTitle": "Open defecation",
+				"url": "https://healthwise.punchng.com/open-defecation-lagos-to-build-10000-public-toilets-after-punch-healthwise-report/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://healthwise.punchng.com/tag/open-defecation-in-lagos/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://punchng.com/topics/featured/",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
