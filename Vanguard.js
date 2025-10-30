@@ -477,10 +477,10 @@ async function scrape(doc, url) {
 					}
 				} // also handle very short cases like "By Rita Chioma," which may have trailing comma and be short
 				else if (cand && cand.length <= 60 && cand.split(/\s+/).length <= 6) {
-						let parts = splitAuthors(cand);
-						for (let p of parts) {
-							if (!isSingleName(p)) cssAuthors.push(ZU.cleanAuthor(p, 'author'));
-						}
+					let parts = splitAuthors(cand);
+					for (let p of parts) {
+						if (!isSingleName(p)) cssAuthors.push(ZU.cleanAuthor(p, 'author'));
+					}
 				}
 			}
 		}
