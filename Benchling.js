@@ -41,12 +41,17 @@ Metadata notes
 This is a Zotero Web Translator for capturing metadata from Benchling ELN entries.
 It is a simple translator that captures the URL, title, experiment ID, authors, review status, and project folder.
 Authors and Project Folder are only captured if the Metadata tab of the ELN entry is visible.
+Review status is only captured if the Notes tab of the ELN entry is visible.
 
-The date accessed is automatically added by Zotero.
+The accessDate is automatically added by Zotero.
 No other Benchling dates such as created, updated, or reviewed are captured.
 Notebook entry schema metadata is not captured either.
 This is meant to provide handy references, not to duplicate Benchling metadata.
 If additional metadata is required, click on the link and view directly in Benchling.
+
+It's not awesome that different metadata is captured depending on which tab is active.
+However, it's not worth the effort and additional time for API requests to capture all
+metadata uniformly. As noted above, the title and URL are what's important, the other metadata is just a bonus.
 
 As with any scraper, this might break over time if Benchling changes their HTML structure.
 If this happens, feel free to reach out to me on the Benchling Community Forum
@@ -81,6 +86,17 @@ function scrape(doc, url) {
 	var humanId = doc.querySelector('#human-id');
 	if (humanId) {
 		expId = humanId.textContent.trim();
+	}
+	
+	// Fallback: If not found, maybe the metadata tab is active and the ID is in a different location.
+	if (!expId) {
+		var metadataIdSection = doc.querySelector('[data-test-element="humanIdSection"]');
+		if (metadataIdSection) {
+			// Get the text content after the "ID" header
+			var sectionText = metadataIdSection.textContent.trim();
+			// Remove "ID" from the beginning if present
+			expId = sectionText.replace(/^ID\s*/, '').trim();
+		}
 	}
 	
 	// If we found an EXP ID, add it to the title
@@ -120,7 +136,7 @@ function scrape(doc, url) {
 		}
 	}
 	
-	// Find the review status badge
+	// Find the review status badge. Only works if the Notes tab of the ELN entry is visible.
 	var reviewBadge = doc.querySelector('#badge-button');
 	var extraInfo = [];
 	if (reviewBadge) {
