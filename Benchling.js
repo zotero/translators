@@ -31,16 +31,8 @@
 */
 
 function detectWeb(doc, url) {
-	// Always return document for now to test
+	// Always return document since the target already restricts to ELN entries
 	return "document";
-	
-	// This is already part of the URL target match, but we'll check it anyway.
-	// Update if we change the target regex to be more generic.
-	// if (url.includes("/edit")) {
-	// 	return "document";
-	// }
-	
-	// return false;
 }
 
 function doWeb(doc, url) {
@@ -52,15 +44,16 @@ function scrape(doc, url) {
 	
 	// Get title from page title tag as fallback
 	var pageTitle = doc.querySelector('title');
-	var title = pageTitle ? pageTitle.textContent.split('·')[0].trim() : 'Untitled Document';
+	var shortTitle = pageTitle ? pageTitle.textContent.split('·')[0].trim() : 'Untitled Benchling ELN Entry';
 	
 	// Find the title from the TitleEditor
 	var titleEditable = doc.querySelector('.mediocre-titleEditor-titleEditable');
 	if (titleEditable) {
-		title = titleEditable.textContent.trim();
+		shortTitle = titleEditable.textContent.trim();
 	}
+	item.shortTitle = shortTitle;
 	
-	// Find the EXP ID from the human-id span
+	// Find the Display experiment ID from the human-id span
 	var expId = '';
 	var humanId = doc.querySelector('#human-id');
 	if (humanId) {
@@ -69,13 +62,28 @@ function scrape(doc, url) {
 	
 	// If we found an EXP ID, add it to the title
 	if (expId) {
-		item.title = title + ' (' + expId + ')';
+		item.title = shortTitle + ' [' + expId + ']';
 	} else {
-		item.title = title;
+		item.title = shortTitle;
 	}
 	
 	item.libraryCatalog = 'Benchling';
 	item.url = url;
+	
+	// Placeholder fields for document type - all optional
+	
+	// item.abstractNote = '';  // Maps to CSL 'abstract': Summary or abstract of the document
+	// item.accessDate = '';  // Maps to CSL 'accessed': Date when the document was accessed
+	// item.archive = '';  // Maps to CSL 'archive': Archive where the document is stored
+	// item.archiveLocation = '';  // Maps to CSL 'archiveLocation': Location within the archive
+	// item.callNumber = '';  // Maps to CSL 'callNumber': Call number for library documents
+	// item.creators = [];  // Maps to CSL 'author': Authors, contributors, editors, translators, or reviewed authors
+	// item.date = '';  // Maps to CSL 'issued': Date of publication or issuance
+	// item.extra = '';  // Maps to CSL 'note': Additional notes or information
+	// item.language = '';  // Maps to CSL 'language': Language in which the document is written
+	// item.publisher = '';  // Maps to CSL 'publisher': Name of the publisher
+	// item.rights = '';  // Maps to CSL 'license': Information about rights or licensing
+
 	
 	item.complete();
 }
