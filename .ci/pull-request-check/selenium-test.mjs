@@ -134,11 +134,14 @@ try {
 	await driver.get(testUrl);
 
 	for (let i = 0; i <= 3; i++) {
-		if ((await driver.getTitle()).trim() === 'Zotero Translator Tester') {
+		let title = (await driver.getTitle()).trim();
+		if (title === 'Zotero Translator Tester') {
 			break;
 		}
 		if (i === 3) {
+			let url = await driver.getCurrentUrl();
 			console.error('Failed to load Translator Tester extension page');
+			console.log(`Current page: ${title} (${url})`)
 			process.exit(2);
 		}
 		await new Promise(resolve => setTimeout(resolve, 100));
