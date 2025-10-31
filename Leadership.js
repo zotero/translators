@@ -2,14 +2,13 @@
 	"translatorID": "17d8d3c1-f968-4bc8-b7c7-9a223b014bc8",
 	"label": "Leadership",
 	"creator": "VWF",
-	"target": "^https?://(www\\\\.|hausa\\\\.|levogue\\\\.|conferences\\\\.)?leadership\\\\.ng/",
+	"target": "^https?://(www\\.|hausa\\.|levogue\\.|conferences\\.)?leadership\\.ng/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-31 16:05:10"
+	"lastUpdated": "2025-10-31 16:15:01"
 }
 
 /*
@@ -67,10 +66,7 @@ function parseJSONLD(doc) {
 				let t = cand['@type'] || cand.type;
 				if (!t) continue;
 				const typesToCheck = Array.isArray(t) ? t : [t];
-				const isArticleOrBlogPosting = typesToCheck.some(tt =>
-					typeof tt === 'string' && (tt.includes('Article') || tt.includes('BlogPosting'))
-				);
-
+				const isArticleOrBlogPosting = typesToCheck.some(tt => typeof tt === 'string' && (tt.includes('Article') || tt.includes('BlogPosting')));
 				if (isArticleOrBlogPosting) {
 					return cand;
 				}
@@ -99,40 +95,43 @@ function getSearchResults(doc, checkOnly) {
 }
 
 function isCollectionPage(doc) {
-    let nodes = doc.querySelectorAll('script[type="application/ld+json"]');
-    for (let node of nodes) {
-        let txt = node.textContent.trim();
-        if (!txt) continue;
-        try {
-            let parsed = JSON.parse(txt);
-            let candidates = [];
+	let nodes = doc.querySelectorAll('script[type="application/ld+json"]');
+	for (let node of nodes) {
+		let txt = node.textContent.trim();
+		if (!txt) continue;
+		try {
+			let parsed = JSON.parse(txt);
+			let candidates = [];
 
-            if (Array.isArray(parsed)) {
-                candidates = parsed;
-            } else if (parsed['@graph'] && Array.isArray(parsed['@graph'])) {
-                candidates = parsed['@graph'];
-            } else {
-                candidates = [parsed];
-            }
+			if (Array.isArray(parsed)) {
+				candidates = parsed;
+			}
+			else if (parsed['@graph'] && Array.isArray(parsed['@graph'])) {
+				candidates = parsed['@graph'];
+			}
+			else {
+				candidates = [parsed];
+			}
+			
+			for (let cand of candidates) {
+				if (!cand) continue;
+				let t = cand['@type'] || cand.type;
 
-            for (let cand of candidates) {
-                if (!cand) continue;
-                let t = cand['@type'] || cand.type;
+				if (t) {
+					const types = Array.isArray(t) ? t : [t];
 
-                if (t) {
-                    const types = Array.isArray(t) ? t : [t];
+					if (types.some(typeStr => typeof typeStr === 'string' && typeStr === 'CollectionPage')) {
+						return true;
+					}
+				}
+			}
+		}
+		catch (e) {
+			// ignore malformed JSON-LD
+		}
+	}
 
-                    if (types.some(typeStr => typeof typeStr === 'string' && typeStr === 'CollectionPage')) {
-                        return true;
-                    }
-                }
-            }
-        }
-        catch (e) {
-            // ignore malformed JSON-LD
-        }
-    }
-    return false;
+	return false;
 }
 
 function detectWeb(doc, url) {
@@ -338,11 +337,9 @@ async function scrape(doc, url) {
 	}
 
 	if (!item.url || !item.url.trim()) item.url = meta(doc, 'og:url') || url;
+	
 	if (!item.publicationTitle) {
-		item.publicationTitle = (url && url.includes('levogue.leadership.ng')) ? 'LeVogue Magazine' :
-		(url && url.includes('hausa.leadership.ng')) ? 'Leadership Hausa' :
-		(url && url.includes('conferences.leadership.ng')) ? 'Leadership Conferences' :
-		'Leadership';
+		item.publicationTitle = (url && url.includes('levogue.leadership.ng')) ? 'LeVogue Magazine' : (url && url.includes('hausa.leadership.ng')) ? 'Leadership Hausa' : (url && url.includes('conferences.leadership.ng')) ? 'Leadership Conferences' : 'Leadership';
 	}
 	
 	item.attachments.push({ document: doc, title: 'Snapshot' });
