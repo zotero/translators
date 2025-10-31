@@ -2,7 +2,7 @@
 	"translatorID": "17d8d3c1-f968-4bc8-b7c7-9a223b014bc8",
 	"label": "Leadership",
 	"creator": "VWF",
-	"target": "^https?://(www\\\\.|hausa\\\\.|levogue\\\\.|conferences\\\\.)?leadership\\\\.ng/",
+	"target": "^https?://(www\\.|hausa\\.|levogue\\.|conferences\\.)?leadership\\.ng/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
