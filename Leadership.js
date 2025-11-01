@@ -230,6 +230,105 @@ async function scrape(doc, url) {
 	let item = new Zotero.Item(itype);
 	let data = parseJSONLD(doc);
 
+	// 1. Collect meta-based author (highest priority)
+	let metaAuthors = [];
+	let metaSelectors = [
+		'meta[name="author"]',
+		'meta[property="og:author"]',
+		'meta[property="article:author"]'
+	];
+
+	for (let sel of metaSelectors) {
+		let nodes = doc.querySelectorAll(sel);
+		for (let node of nodes) {
+			let content = node.getAttribute('content');
+			if (content) {
+				let parts = splitAuthors(content);
+				for (let part of parts) {
+					part = part.trim();
+					if (
+						part
+						&& !/^(agency|correspondent|news desk|agency reporter|leadership|our reporter|levogue|editorial|nigeria|staff|bureau)$/i.test(part)
+						&& !isSingleName(part)
+					) {
+						metaAuthors.push(part);
+					}
+				}
+			}
+		}
+	}
+
+	// 2. Collect JSON-LD authors (lower priority, only if no meta authors)
+	let jsonAuthors = [];
+	if (!metaAuthors.length && data && data.author) {
+		let authors = Array.isArray(data.author) ? data.author : [data.author];
+		let graph = [];
+
+		try {
+			let nodes = doc.querySelectorAll('script[type="application/ld+json"]');
+			for (let node of nodes) {
+				let txt = node.textContent.trim();
+				if (!txt) continue;
+				let parsed = JSON.parse(txt);
+				if (parsed['@graph'] && Array.isArray(parsed['@graph'])) {
+					graph = parsed['@graph'];
+					break;
+				}
+			}
+		}
+		catch (e) {}
+
+		for (let a of authors) {
+			let name = '';
+			if (typeof a === 'string') {
+				name = a;
+			}
+			else if (a && typeof a === 'object') {
+				if (a.name) {
+					name = a.name;
+				}
+				else if (a['@id']) {
+					let match = graph.find(obj => obj['@id'] === a['@id']);
+					if (match && match.name) name = match.name;
+				}
+			}
+
+			name = (name || '')
+				.trim()
+				.replace(/^\s*by\s+/i, '')
+				.replace(/\|.*$/, '')
+				.replace(/,\s*[A-Z][a-z]+(?:[\s-][A-Z][a-z]+)*$/, '')
+				.trim();
+
+			if (
+				name
+				&& !/agency|correspondent|news desk|agency reporter|leadership|our reporter|levogue|editorial|nigeria|staff|bureau/i.test(name.toLowerCase())
+				&& !isSingleName(name)
+			) {
+				let authorParts = splitAuthors(name);
+				for (let realName of authorParts) {
+					realName = realName.trim();
+					if (realName && !isSingleName(realName)) jsonAuthors.push(realName);
+				}
+			}
+		}
+	}
+
+	// 3. Prioritise meta authors over JSON-LD authors, and remove duplicates
+	let finalAuthors = metaAuthors.length ? metaAuthors : jsonAuthors;
+	finalAuthors = [...new Set(finalAuthors)]; // remove duplicates
+
+	// 4. Add only valid human authors to item.creators
+	for (let auth of finalAuthors) {
+		let lname = auth.toLowerCase();
+		if (
+			!/agency|correspondent|news desk|agency reporter|leadership|our reporter|levogue|editorial|nigeria|staff|bureau/i.test(lname)
+			&& !isSingleName(auth)
+		) {
+			item.creators.push(ZU.cleanAuthor(auth, 'author'));
+		}
+	}
+
 	if (data) {
 		item.title = ZU.unescapeHTML(
 			data.headline
