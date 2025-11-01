@@ -353,47 +353,6 @@ async function scrape(doc, url) {
 			item.date = isoFromZU || rawJsonDate;
 		}
 
-		if (data.author) {
-			let authors = Array.isArray(data.author) ? data.author : [data.author];
-			let graph = [];
-			try {
-				let nodes = doc.querySelectorAll('script[type="application/ld+json"]');
-				for (let node of nodes) {
-					let txt = node.textContent.trim();
-					if (!txt) continue;
-					let parsed = JSON.parse(txt);
-					if (parsed['@graph'] && Array.isArray(parsed['@graph'])) {
-						graph = parsed['@graph'];
-						break;
-					}
-				}
-			}
-			catch (e) {}
-
-			for (let a of authors) {
-				let name = '';
-				if (typeof a === 'string') name = a;
-				else if (a && typeof a === 'object') {
-					if (a.name) name = a.name;
-					else if (a['@id']) {
-						let match = graph.find(obj => obj['@id'] === a['@id']);
-						if (match && match.name) name = match.name;
-					}
-				}
-				name = (name || '').trim().replace(/^\s*by\s+/i, '').trim();
-				if (name.includes('|')) name = name.split('|')[0].trim();
-				name = name.replace(/,\s*[A-Z][a-z]+(?:[\s-][A-Z][a-z]+)*$/, '').trim();
-
-				let lname = name.toLowerCase();
-				if (name && !/agency|news desk|agency reporter|leadership|our reporter|levogue|editorial|nigeria|staff|bureau/i.test(lname) && !isSingleName(name)) {
-					let authorParts = splitAuthors(name);
-					for (let realName of authorParts) {
-						if (!isSingleName(realName)) item.creators.push(ZU.cleanAuthor(realName, 'author'));
-					}
-				}
-			}
-		}
-
 		if (data.articleSection) {
 			let section = Array.isArray(data.articleSection)
 				? data.articleSection.map(s => s.toLowerCase())
