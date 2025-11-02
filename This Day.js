@@ -12,7 +12,7 @@
 	"lastUpdated": "2025-11-02 22:51:31"
 }
 
-/*  
+/*
 	***** BEGIN LICENSE BLOCK *****
 	Copyright © 2025 VWF
 	This file is part of Zotero.
@@ -124,10 +124,7 @@ async function scrape(doc, url) {
 	item.url = canonical ? canonical.href : url;
 
 	// Title
-	item.title =
-		ZU.unescapeHTML(meta(doc, "og:title")) ||
-		doc.querySelector("h1.article-title.mb-2")?.textContent.trim() ||
-		"";
+	item.title = ZU.unescapeHTML(meta(doc, "og:title")) || doc.querySelector("h1.article-title.mb-2")?.textContent.trim() || "";
 
 	// Date (from URL)
 	item.date = extractDateFromURL(item.url || url);
