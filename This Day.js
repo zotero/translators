@@ -124,10 +124,7 @@ async function scrape(doc, url) {
 	item.url = canonical ? canonical.href : url;
 
 	// Title
-	item.title =
-		ZU.unescapeHTML(meta(doc, "og:title")) ||
-		doc.querySelector("h1.article-title.mb-2")?.textContent.trim() ||
-		"";
+	item.title = ZU.unescapeHTML(meta(doc, "og:title")) || doc.querySelector("h1.article-title.mb-2")?.textContent.trim() || "";
 
 	// Date (from URL)
 	item.date = extractDateFromURL(item.url || url);
@@ -196,10 +193,10 @@ async function scrape(doc, url) {
 
 		// Ignore overly long <p> tags unless they start with allowed author formats
 		if (
-			txt.length > 150 && // arbitrary safety length threshold
-			!/^by\s+[A-Z]/i.test(txt) && // not starting with "By ..."
-			!/[A-Z][a-z]+.*\sin\s+[A-Z]/.test(txt) && // not "Name in City"
-			!/[A-Z].*\sreports?/i.test(txt) // not ending with "reports"
+			txt.length > 150 // arbitrary safety length threshold
+			&& !/^by\s+[A-Z]/i.test(txt) // not starting with "By ..."
+			&& !/[A-Z][a-z]+.*\sin\s+[A-Z]/.test(txt) // not "Name in City"
+			&& !/[A-Z].*\sreports?/i.test(txt) // not ending with "reports"
 		) {
 			continue; // skip long irrelevant paragraphs
 		}
