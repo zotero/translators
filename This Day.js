@@ -237,18 +237,18 @@ async function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.thisdaylive.com/2025/11/02/the-anambra-governorship-poll/",
+		"url": "https://www.thisdaylive.com/2016/04/06/rccg-donates-computers-to-lagos-technical-school/",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "THE ANAMBRA GOVERNORSHIP POLL",
+				"title": "RCCG Donates Computers to Lagos Technical School",
 				"creators": [],
-				"date": "2025-11-02",
+				"date": "2016-04-06",
 				"language": "en",
 				"libraryCatalog": "This Day",
 				"place": "Nigeria",
 				"publicationTitle": "This Day",
-				"url": "https://www.thisdaylive.com/2025/11/02/the-anambra-governorship-poll/",
+				"url": "https://www.thisdaylive.com/2016/04/06/rccg-donates-computers-to-lagos-technical-school/",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -282,6 +282,38 @@ var testCases = [
 				"publicationTitle": "This Day",
 				"shortTitle": "Tinubu to Service Chiefs",
 				"url": "https://www.thisdaylive.com/2025/10/30/tinubu-to-service-chiefs-its-time-to-defeat-terrorists-bandits/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.thisdaylive.com/2024/09/11/nse-inaugurates-data-analytics-software-training-for-young-engineers/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "NSE Inaugurates Data Analytics, Software Training for Young Engineers",
+				"creators": [
+					{
+						"firstName": "Funmi",
+						"lastName": "Ogundare",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024-09-11",
+				"language": "en",
+				"libraryCatalog": "This Day",
+				"place": "Nigeria",
+				"publicationTitle": "This Day",
+				"url": "https://www.thisdaylive.com/2024/09/11/nse-inaugurates-data-analytics-software-training-for-young-engineers/",
 				"attachments": [
 					{
 						"title": "Snapshot",
