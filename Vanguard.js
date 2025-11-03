@@ -113,14 +113,6 @@ function detectWeb(doc, url) {
 		return 'multiple';
 	}
 
-	let j = parseJSONLD(doc);
-	if (j) {
-		if (url.includes('allure.vanguardngr.com')) {
-			return 'magazineArticle';
-		}
-		return 'newspaperArticle';
-	}
-
 	if (meta(doc, 'article:published_time') || meta(doc, 'og:type') === 'article') {
 		if (url.includes('allure.vanguardngr.com')) {
 			return 'magazineArticle';
