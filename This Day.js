@@ -124,7 +124,10 @@ async function scrape(doc, url) {
 	item.url = canonical ? canonical.href : url;
 
 	// Title
-	item.title = ZU.unescapeHTML(meta(doc, "og:title")) || doc.querySelector("h1.article-title.mb-2")?.textContent.trim() || "";
+	item.title =
+		ZU.unescapeHTML(meta(doc, "og:title")) ||
+		doc.querySelector("h1.article-title.mb-2")?.textContent.trim() ||
+		"";
 
 	// Date (from URL)
 	item.date = extractDateFromURL(item.url || url);
@@ -150,25 +153,33 @@ async function scrape(doc, url) {
 		if (!text) return [];
 		text = text.trim();
 
-		// Only accept if it looks like an author line (starts with By, or contains 'in City' or 'reports')
-		if (!/^(by\s+[A-Z]|[A-Z][a-z]+.*\sin\s+[A-Z]|[A-Z].*\sreports?)/i.test(text)) {
-			return [];
-		}
+		// Normalise punctuation
+		text = text.replace(/\.\s*$/, "").trim();
 
-		// Remove trailing punctuation and leading markers
-		text = text.replace(/^\s*by\s+/i, "").replace(/\.\s*$/, "").trim();
-
-		// Split authors by " and ", commas, or both
-		let parts = text.split(/\s*(?:,|and)\s+/i);
 		let authors = [];
 
-		for (let part of parts) {
-			let m = part.match(/[A-Z][a-zA-Z'-]+(?:\s+[A-Z][a-zA-Z'-]+){0,3}/g);
-			if (m) {
-				let name = cleanAuthor(m[0]);
-				if (name && !isSingleName(name)) {
-					authors.push(name);
+		// Case 1: lines beginning with "By", "in City", or "reports"
+		if (/^(by\s+[A-Z]|[A-Z][a-z]+.*\sin\s+[A-Z]|[A-Z].*\sreports?)/i.test(text)) {
+			text = text.replace(/^\s*by\s+/i, "").trim();
+			let parts = text.split(/\s*(?:,|and)\s+/i);
+			for (let part of parts) {
+				let m = part.match(/[A-Z][a-zA-Z'-]+(?:\s+[A-Z][a-zA-Z'-]+){0,3}/g);
+				if (m) {
+					let name = cleanAuthor(m[0]);
+					if (name && !isSingleName(name)) authors.push(name);
 				}
+			}
+		}
+
+		// Case 2: plain names (no "by", "in", or "reports")
+		else if (
+			/^[A-Z][a-zA-Z'-]+(?:\s+[A-Z][a-zA-Z'-]+)*(?:\s*(?:,|and)\s*[A-Z][a-zA-Z'-]+(?:\s+[A-Z][a-zA-Z'-]+)*)+$/i.test(text)
+			|| /^[A-Z][a-zA-Z'-]+(?:\s+[A-Z][a-zA-Z'-]+){1,3}$/.test(text)
+		) {
+			let parts = text.split(/\s*(?:,|and)\s+/i);
+			for (let part of parts) {
+				let name = cleanAuthor(part.trim());
+				if (name && !isSingleName(name)) authors.push(name);
 			}
 		}
 
@@ -178,10 +189,20 @@ async function scrape(doc, url) {
 	let ps = doc.querySelectorAll("div.col-xs-12.col-sm-12.col-md-11 > p");
 	let authorCandidates = [];
 
-	// Check first three <p> tags, skipping invalid headline spillovers
+	// Check first three <p> tags, applying new long-text rule
 	for (let i = 0; i < Math.min(ps.length, 3); i++) {
 		let txt = ps[i].textContent.trim();
 		if (!txt) continue;
+
+		// Ignore overly long <p> tags unless they start with allowed author formats
+		if (
+			txt.length > 150 && // arbitrary safety length threshold
+			!/^by\s+[A-Z]/i.test(txt) && // not starting with "By ..."
+			!/[A-Z][a-z]+.*\sin\s+[A-Z]/.test(txt) && // not "Name in City"
+			!/[A-Z].*\sreports?/i.test(txt) // not ending with "reports"
+		) {
+			continue; // skip long irrelevant paragraphs
+		}
 
 		let found = extractAuthorsFromParagraph(txt);
 		if (found.length) {
@@ -194,7 +215,10 @@ async function scrape(doc, url) {
 	if (!authorCandidates.length) {
 		let metaAuthor = meta(doc, "author") || meta(doc, "article:author");
 		if (metaAuthor) {
-			authorCandidates = metaAuthor.split(/\s*(?:,|and)\s+/i).map(a => a.trim()).filter(Boolean);
+			authorCandidates = metaAuthor
+				.split(/\s*(?:,|and)\s+/i)
+				.map(a => a.trim())
+				.filter(Boolean);
 		}
 	}
 
