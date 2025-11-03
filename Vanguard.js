@@ -41,50 +41,9 @@ function meta(doc, nameOrProp) {
 	return m ? m.getAttribute('content') : '';
 }
 
-function parseJSONLD(doc) {
-	let nodes = doc.querySelectorAll('script[type="application/ld+json"]');
-	for (let node of nodes) {
-		let txt = node.textContent.trim();
-		if (!txt) continue;
-		try {
-			let parsed = JSON.parse(txt);
-			let candidates = [];
-			if (Array.isArray(parsed)) {
-				candidates = parsed;
-			}
-			else if (parsed['@graph'] && Array.isArray(parsed['@graph'])) {
-				candidates = parsed['@graph'];
-			}
-			else if (parsed.mainEntity) {
-				candidates = [parsed.mainEntity, parsed];
-			}
-			else {
-				candidates = [parsed];
-			}
-
-			for (let cand of candidates) {
-				if (!cand) continue;
-				let t = cand['@type'] || cand.type;
-				if (!t) continue;
-				if (typeof t === 'string') {
-					if (t.includes('Article')) {
-						return cand;
-					}
-				}
-				else if (Array.isArray(t)) {
-					for (let tt of t) {
-						if (typeof tt === 'string' && tt.includes('Article')) {
-							return cand;
-						}
-					}
-				}
-			}
-		}
-		catch (e) {
-			// ignore malformed JSON-LD
-		}
-	}
-	return null;
+// Identify article URL pattern
+function isArticleURL(url) {
+	return /vanguardngr\.com\/\d{4}\/\d{2}\//.test(url);
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -113,19 +72,11 @@ function detectWeb(doc, url) {
 		return 'multiple';
 	}
 
-	if (meta(doc, 'article:published_time') || meta(doc, 'og:type') === 'article') {
+	let j = isArticleURL(url);
+	if (j) {
 		if (url.includes('allure.vanguardngr.com')) {
 			return 'magazineArticle';
 		}
-		return 'newspaperArticle';
-	}
-
-	if (url.includes('allure.vanguardngr.com')) {
-		if (text(doc, 'div.s-post-header>h1') || text(doc, 'div.article-content h1, div.article-content h2')) {
-			return 'magazineArticle';
-		}
-	}
-	else if (text(doc, 'div.entry-heading-wrapper>h2.entry-heading')) {
 		return 'newspaperArticle';
 	}
 
@@ -192,7 +143,7 @@ async function scrape(doc, url) {
 
 	let itype = (url && url.includes('allure.vanguardngr.com')) ? 'magazineArticle' : 'newspaperArticle';
 	let item = new Zotero.Item(itype);
-	let data = parseJSONLD(doc);
+	let data = isArticleURL(url);
 
 	if (data) {
 		item.title = ZU.unescapeHTML(
@@ -219,48 +170,7 @@ async function scrape(doc, url) {
 			item.date = isoFromZU || rawJsonDate;
 		}
 
-		if (data.author) {
-			let authors = Array.isArray(data.author) ? data.author : [data.author];
-			let graph = [];
-			try {
-				let nodes = doc.querySelectorAll('script[type="application/ld+json"]');
-				for (let node of nodes) {
-					let txt = node.textContent.trim();
-					if (!txt) continue;
-					let parsed = JSON.parse(txt);
-					if (parsed['@graph'] && Array.isArray(parsed['@graph'])) {
-						graph = parsed['@graph'];
-						break;
-					}
-				}
-			}
-			catch (e) {}
-
-			for (let a of authors) {
-				let name = '';
-				if (typeof a === 'string') name = a;
-				else if (a && typeof a === 'object') {
-					if (a.name) name = a.name;
-					else if (a['@id']) {
-						let match = graph.find(obj => obj['@id'] === a['@id']);
-						if (match && match.name) name = match.name;
-					}
-				}
-				name = (name || '').trim().replace(/^\s*by\s+/i, '').trim();
-				if (name.includes('|')) name = name.split('|')[0].trim();
-				name = name.replace(/,\s*[A-Z][a-z]+(?:[\s-][A-Z][a-z]+)*$/, '').trim();
-
-				let lname = name.toLowerCase();
-				if (name && !/agency|news desk|agency reporter|vanguard|our reporter|allure|editorial|nigeria|staff|bureau/i.test(lname) && !isSingleName(name)) {
-					let authorParts = splitAuthors(name);
-					for (let realName of authorParts) {
-						if (!isSingleName(realName)) item.creators.push(ZU.cleanAuthor(realName, 'author'));
-					}
-				}
-			}
-		}
-
-		if (data.articleSection) {
+        if (data.articleSection) {
 			let section = Array.isArray(data.articleSection)
 				? data.articleSection.map(s => s.toLowerCase())
 				: [data.articleSection.toLowerCase()];
