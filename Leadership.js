@@ -343,7 +343,12 @@ async function scrape(doc, url) {
 			|| ''
 		);
 
-		item.url = data.url || meta(doc, 'og:url') || url;
+		if (url && url.includes('hausa.leadership.ng')) {
+			item.language = 'ha';
+		}
+		else {
+			item.url = data.url || meta(doc, 'og:url') || url;
+		}
 		item.language = data.inLanguage || meta(doc, 'og:locale') || 'en';
 		item.ISSN = '0331-328X';
 
