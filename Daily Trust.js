@@ -79,9 +79,7 @@ function parseJSONLD(doc, url) {
 				const typesInSchema = Array.isArray(t) ? t : [t];
 
 				// 2. Check if any type in the schema matches an allowed type for the current site
-				const typeMatchesSite = typesInSchema.some(schemaType => 
-					typeof schemaType === 'string' && 
-					allowedTypes.some(allowed => schemaType.includes(allowed))
+				const typeMatchesSite = typesInSchema.some(schemaType => typeof schemaType === 'string' && allowedTypes.some(allowed => schemaType.includes(allowed))
 				);
 
 				if (typeMatchesSite) {
@@ -155,39 +153,6 @@ async function doWeb(doc, url) {
 async function scrape(doc, url) {
 	url = url || doc.location.href;
 
-	function isSingleName(name) {
-		if (!name) return true;
-		name = name.trim();
-		name = name.replace(/^\s*by\s+/i, '').trim();
-		if (name.split(/\s+/).length === 1) return true;
-		if (/^[A-Z0-9-]{2,}$/.test(name) && name.includes(' ') === -1) return true;
-		return false;
-	}
-
-	function splitAuthors(nameStr) {
-		if (!nameStr) return [];
-		let s = nameStr.trim();
-		s = s.replace(/^\s*by\s+/i, '').trim();
-		s = s.replace(/\s*\([^)]*\)\s*$/, '').trim();
-		s = s.replace(/,\s*[A-Z][a-z]+(?:[\s-][A-Z][a-z]+)*$/, '').trim();
-		if (s.includes('|')) s = s.split('|')[0].trim();
-		let parts = s.split(/\s+(?:and|&)\s+|;\s*/i);
-		if (parts.length === 1 && s.includes(',') !== -1) {
-			parts = s.split(/\s*,\s*/).map(p => p.trim()).filter(Boolean);
-		}
-		let cleaned = [];
-		for (let p of parts) {
-			let np = (p || '').trim();
-			np = np.replace(/^\s*by\s+/i, '').trim();
-			np = np.replace(/\s*\([^)]*\)\s*$/, '').trim();
-			np = np.replace(/,\s*[A-Z][a-z]+(?:[\s-][A-Z][a-z]+)*$/, '').trim();
-			if (np && !/^(agency|news desk|agency reporter|daily trust|our reporter|aminiya|correspond|editorial|nigeria|staff|bureau)$/i.test(np)) {
-				cleaned.push(np);
-			}
-		}
-		return cleaned;
-	}
-
 	let itype = 'newspaperArticle';
 	let item = new Zotero.Item(itype);
 	let data = parseJSONLD(doc, url);
@@ -214,11 +179,7 @@ async function scrape(doc, url) {
 			item.title = item.title.replace(/\s*[-–—]\s*Daily\s*Trust\s*$/i, '').trim();
 
 			item.language = data.inLanguage || meta(doc, 'og:locale') || 'en';
-			item.url =
-				data.url
-				|| meta(doc, 'og:url')
-				|| (data['@type'] === 'WebPage' && data['@id'])
-				|| url;
+			item.url = data.url || meta(doc, 'og:url') || (data['@type'] === 'WebPage' && data['@id']) || url;
 		}
 		else {
 			item.title = ZU.unescapeHTML(
@@ -286,6 +247,7 @@ async function scrape(doc, url) {
 		function isSingleName(name) {
 			if (!name) return true;
 			name = name.trim();
+			name = name.replace(/^\s*by\s+/i, '').trim();
 			if (name.split(/\s+/).length === 1) return true;
 			if (/^[A-Z0-9-]+$/.test(name)) return true;
 			return false;
