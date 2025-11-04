@@ -280,7 +280,7 @@ async function scrape(doc, url) {
 		}
 
 		// --- 2. CSS author overrides JSON-LD if valid ---
-		let cssAuthors = [...doc.querySelectorAll('section.post-author a')]
+		let cssAuthors = [...doc.querySelectorAll('section.post-author>div>ul>span, section.post-author>div>ul>a')]
 			.map(a => a.textContent.trim())
 			.filter(Boolean);
 		if (cssAuthors.length) {
