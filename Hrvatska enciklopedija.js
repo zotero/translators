@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-14 21:59:26"
+	"lastUpdated": "2025-11-06 14:16:30"
 }
 
 /*
@@ -36,8 +36,7 @@
 */
 
 function detectWeb(doc, url) {
-	// New Single Entry detection: /clanak/some-thing
-	if (url.includes('/clanak/')) {
+	if (url.includes("/clanak/")) {
 		return "encyclopediaArticle";
 	}
 	return false;
@@ -45,7 +44,7 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	let item = new Zotero.Item("encyclopediaArticle");
-	item.attachments.push({ title: 'Snapshot', document: doc });
+	item.attachments.push( {title: "Snapshot", document: doc} );
 	
 	item.encyclopediaTitle = "Hrvatska enciklopedija";
 	item.publisher = "Leksikografski zavod Miroslav Krleža";
@@ -53,9 +52,7 @@ function doWeb(doc, url) {
 	item.ISBN = "9789532680386";
 	item.url = url.replace(/[?#].*/, "");
 	
-	// Use the document title and strip the suffix
-	let docTitle = doc.title;
-	item.title = docTitle.replace(/ - Hrvatska enciklopedija/, '');
+	item.title = doc.title.replace(" - Hrvatska enciklopedija", "");
 
 	item.complete();
 }
