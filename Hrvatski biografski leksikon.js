@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-11-06 14:15:43"
+	"lastUpdated": "2025-11-06 15:03:24"
 }
 
 /*
@@ -35,8 +35,8 @@
 	***** END LICENSE BLOCK *****
 */
 
-function detectWeb(doc, url) {
-	if ( doc.querySelector("div.clanak") ) {
+function detectWeb(doc, _) {
+	if (doc.querySelector("div.clanak")) {
 		return "encyclopediaArticle";
 	}
 	return false;
@@ -44,7 +44,7 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	let item = new Zotero.Item("encyclopediaArticle");
-	item.attachments.push( {title: "Snapshot", document: doc} );
+	item.attachments.push({ title: "Snapshot", document: doc });
 	
 	item.encyclopediaTitle = "Hrvatski biografski leksikon";
 	item.publisher = "Leksikografski zavod Miroslav Krleža";
@@ -53,7 +53,7 @@ function doWeb(doc, url) {
 	item.url = url.replace(/[?#].*/, "");
 	
 	item.title = doc.title.replace(" - Hrvatski biografski leksikon", "");
-	item.date = ZU.strToISO( attr(doc, "time.published", "datetime") );
+	item.date = ZU.strToISO(attr(doc, "time.published", "datetime"));
 
 	item.complete();
 }

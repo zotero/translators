@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-11-06 14:16:30"
+	"lastUpdated": "2025-11-06 14:58:36"
 }
 
 /*
@@ -44,7 +44,7 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	let item = new Zotero.Item("encyclopediaArticle");
-	item.attachments.push( {title: "Snapshot", document: doc} );
+	item.attachments.push({ title: "Snapshot", document: doc });
 	
 	item.encyclopediaTitle = "Hrvatska enciklopedija";
 	item.publisher = "Leksikografski zavod Miroslav Krleža";
