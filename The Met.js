@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-07-21 18:22:01"
+	"lastUpdated": "2025-11-06 16:00:28"
 }
 
 /*
@@ -35,9 +35,10 @@
 	***** END LICENSE BLOCK *****
 */
 
-// eslint-disable-next-line no-unused-vars
+const ID_RE = /\/search\/(\d+)/;
+
 function detectWeb(doc, url) {
-	if (doc.querySelector('.artwork-details')) {
+	if (ID_RE.test(url)) {
 		return 'artwork';
 	}
 	else if (getSearchResults(doc, true)) {
@@ -79,56 +80,28 @@ async function doWeb(doc, url) {
 
 // eslint-disable-next-line no-unused-vars
 async function scrape(doc, url = doc.location.href) {
+	let id = url.match(ID_RE)[1];
+	let json = await requestJSON(`https://collectionapi.metmuseum.org/public/collection/v1/objects/${id}`);
+
 	let item = new Zotero.Item('artwork');
-	item.title = text(doc, '.artwork__title--text');
-	
-	let meta = doc.querySelectorAll('.artwork-tombstone--item');
-	for (let elem of meta) {
-		let heading = text(elem, '.artwork-tombstone--label');
-		heading = heading.toLowerCase().substr(0, heading.length - 1);
-		let content = text(elem, '.artwork-tombstone--value');
-		// Z.debug(heading + content);
-
-		switch (heading) {
-			case 'date':
-			case 'medium':
-				item[heading] = content;
-				break;
-			case 'dimensions':
-				item.artworkSize = content;
-				break;
-			case 'accession number':
-				item.callNumber = content;
-				break;
-			case 'classification':
-			case 'period':
-			case 'culture':
-				item.tags.push(content);
-				break;
-			case 'artist': {
-				let cleaned = content.replace(/\(.*\)$/, '').trim();
-				if (cleaned.split(' ').length > 2) {
-					item.creators.push({ lastName: content, creatorType: 'artist', fieldMode: 1 });
-				}
-				else {
-					item.creators.push(ZU.cleanAuthor(cleaned, "artist"));
-				}
-				break;
-			}
-		}
-	}
-
-	item.abstractNote = text(doc, '.artwork__intro__desc');
+	item.title = json.title;
+	item.date = json.objectDate;
+	item.artworkMedium = json.medium;
+	item.artworkSize = json.dimensions;
+	item.callNumber = json.accessionNumber;
+	item.tags = [json.classification, json.period, json.culture]
+		.filter(Boolean)
+		.map(tag => ({ tag }));
+	item.creators.push(ZU.cleanAuthor(json.artistAlphaSort, 'artist', true));
+	item.abstractNote = text(doc, '[class^="object-overview_label"] span');
 	item.libraryCatalog = 'The Metropolitan Museum of Art';
-	item.url = attr(doc, 'link[rel="canonical"]', 'href');
+	item.url = `https://www.metmuseum.org/art/collection/search/${id}`;
 
-	// Non-open-access items still have the (invisible) download button with seemingly valid, but 404-ing, URL.
-	// Filter those out via the "not-openaccess" class set on the <section/> containing the button.
-	let download = attr(doc, 'section:not(.artwork--not-openaccess) .artwork__interaction--download a', 'href');
-	if (download) {
+	if (json.primaryImage) {
 		item.attachments.push({
-			title: 'Met Image',
-			url: download
+			title: 'Image',
+			mimeType: 'image/jpeg',
+			url: json.primaryImage
 		});
 	}
 	item.attachments.push({
@@ -158,7 +131,8 @@ var testCases = [
 				"url": "https://www.metmuseum.org/art/collection/search/328877",
 				"attachments": [
 					{
-						"title": "Met Image"
+						"title": "Image",
+						"mimeType": "image/jpeg"
 					},
 					{
 						"title": "Snapshot",
@@ -195,7 +169,8 @@ var testCases = [
 				"url": "https://www.metmuseum.org/art/collection/search/328877",
 				"attachments": [
 					{
-						"title": "Met Image"
+						"title": "Image",
+						"mimeType": "image/jpeg"
 					},
 					{
 						"title": "Snapshot",
@@ -238,7 +213,8 @@ var testCases = [
 				"url": "https://www.metmuseum.org/art/collection/search/436243",
 				"attachments": [
 					{
-						"title": "Met Image"
+						"title": "Image",
+						"mimeType": "image/jpeg"
 					},
 					{
 						"title": "Snapshot",
