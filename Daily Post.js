@@ -87,6 +87,22 @@ function parseJSONLD(doc) {
 	return null;
 }
 
+function getSearchResults(doc, checkOnly) {
+	let items = {};
+	let found = false;
+	// generic pattern in path for links
+	let rows = doc.querySelectorAll('a[href*="/"]');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent || row.title || '');
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
 function isIndexURL(url) {
 	if (!url) return true;
 	const hasDatePattern = /\/\d{4}\/\d{2}\//.test(url);
