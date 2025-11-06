@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-11-06 21:50:55"
+	"lastUpdated": "2025-11-06 22:47:06"
 }
 
 /*
@@ -39,17 +39,19 @@
 function detectWeb(doc, url) {
 	if (url.includes('/article/')) {
 		return "newspaperArticle";
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//a[contains(@href, "/article/")]');
-	for (var i=0; i<rows.length; i++) {
+	var rows = doc.querySelectorAll('a.teaser__link[href*="/article/"]');
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -61,25 +63,20 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
-	} else {
-		scrape(doc, url);
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
+	}
+	else {
+		await scrape(doc, url);
 	}
 }
 
-function scrape(doc, url) {
-
+function scrape(doc, _) {
 	let jsonLD = text(doc, 'script[type="application/ld+json"]');
 	let schema = JSON.parse(jsonLD);
 
@@ -91,7 +88,7 @@ function scrape(doc, url) {
 	item.publicationTitle = schema.publisher.name;
 	item.abstractNote = schema.description;
 	item.ISSN = "1950-6244";
-	item.language = "fr"
+	item.language = "fr";
 
 	for (let author of (schema.author || [])) {
 		if (author["@type"] !== "Person") continue;
