@@ -143,7 +143,7 @@ function isCollectionPage(doc) {
 	return false;
 }
 
-function detectWeb(doc, url) {
+function detectWeb(doc) {
 	// 1) JSON-LD Article -> single article
 	let j = parseJSONLD(doc);
 	if (j) {
