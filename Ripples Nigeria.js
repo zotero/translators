@@ -145,6 +145,7 @@ function isCollectionPage(doc) {
 
 function detectWeb(doc, url) {
 	url = url || doc.location.href;
+	void url;
 
 	// 1) JSON-LD Article -> single article
 	let j = parseJSONLD(doc);
@@ -398,7 +399,7 @@ var testCases = [
 			}
 		]
 	},
-  {
+	{
 		"type": "web",
 		"url": "https://www.ripplesnigeria.com/gumi-calls-trump-a-known-liar-and-racist-berates-nigerian-christians-for-allegedly-inviting-him/",
 		"items": [
