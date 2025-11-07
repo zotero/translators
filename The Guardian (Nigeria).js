@@ -201,6 +201,32 @@ async function doWeb(doc, url) {
 
 async function scrape(doc, url) {
 	url = url || doc.location.href;
+
+	// Support splitting multiple author names from meta tags
+	function splitAuthors(nameStr) {
+		if (!nameStr) return [];
+		let s = nameStr.trim();
+		s = s.replace(/^\s*by\s+/i, '').trim();
+		s = s.replace(/\s*\([^)]*\)\s*$/, '').trim();
+		s = s.replace(/,\s*[A-Z][a-z]+(?:[\s-][A-Z][a-z]+)*$/, '').trim();
+		if (s.includes('|')) s = s.split('|')[0].trim();
+		let parts = s.split(/\s+(?:and|&)\s+|;\s*/i);
+		if (parts.length === 1 && s.includes(',') !== -1) {
+			parts = s.split(/\s*,\s*/).map(p => p.trim()).filter(Boolean);
+		}
+		let cleaned = [];
+		for (let p of parts) {
+			let np = (p || '').trim();
+			np = np.replace(/^\s*by\s+/i, '').trim();
+			np = np.replace(/\s*\([^)]*\)\s*$/, '').trim();
+			np = np.replace(/,\s*[A-Z][a-z]+(?:[\s-][A-Z][a-z]+)*$/, '').trim();
+			if (np && !/^(agency|news desk|agency reporter|leadership|our reporter|levogue|editorial|nigeria|staff|bureau)$/i.test(np)) {
+				cleaned.push(np);
+			}
+		}
+		return cleaned;
+	}
+	
 	let item = new Zotero.Item('newspaperArticle');
 
 	let data = parseJSONLD(doc);
@@ -325,34 +351,8 @@ async function scrape(doc, url) {
 	
 	// --- Fallback authors in sequence ---
 	if (item.creators.length === 0) {
-		// Support splitting multiple author names from meta tags
-		function splitAuthors(nameStr) {
-			if (!nameStr) return [];
-			let s = nameStr.trim();
-			s = s.replace(/^\s*by\s+/i, '').trim();
-			s = s.replace(/\s*\([^)]*\)\s*$/, '').trim();
-			s = s.replace(/,\s*[A-Z][a-z]+(?:[\s-][A-Z][a-z]+)*$/, '').trim();
-			if (s.includes('|')) s = s.split('|')[0].trim();
-			let parts = s.split(/\s+(?:and|&)\s+|;\s*/i);
-			if (parts.length === 1 && s.includes(',') !== -1) {
-				parts = s.split(/\s*,\s*/).map(p => p.trim()).filter(Boolean);
-			}
-			let cleaned = [];
-			for (let p of parts) {
-				let np = (p || '').trim();
-				np = np.replace(/^\s*by\s+/i, '').trim();
-				np = np.replace(/\s*\([^)]*\)\s*$/, '').trim();
-				np = np.replace(/,\s*[A-Z][a-z]+(?:[\s-][A-Z][a-z]+)*$/, '').trim();
-				if (np && !/^(agency|news desk|agency reporter|leadership|our reporter|levogue|editorial|nigeria|staff|bureau)$/i.test(np)) {
-					cleaned.push(np);
-				}
-			}
-			return cleaned;
-		}
-
 		let cand1 = meta(doc, 'author');
 		let cand2 = text(doc, 'article>div.post-meta>p.post-author a, article>div.post-meta>p.post-author');
-		let selected = '';
 
 		let candidates = [];
 
