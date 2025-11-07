@@ -150,21 +150,12 @@ function detectWeb(doc) {
 		return 'newspaperArticle';
 	}
 
-	// 2) explicit index/list URL
+	// 2) explicit index/list page via JSON-LD
 	if (isCollectionPage(doc)) {
 		return 'multiple';
 	}
 
-	// 3) Use the standard getSearchResults() heuristic for listing pages
-	if (getSearchResults(doc, true)) {
-		// If page also clearly looks like an article, prefer article
-		if (meta(doc, 'article:published_time') || meta(doc, 'og:type') || text(doc, 'header.mvp-post-head h1.mvp-post-title.left.entry-title')) {
-			return 'newspaperArticle';
-		}
-		return 'multiple';
-	}
-
-	// 4) meta-based hints
+	// 3) meta-based hints of an article
 	if (meta(doc, 'article:published_time')) {
 		return 'newspaperArticle';
 	}
@@ -173,9 +164,14 @@ function detectWeb(doc) {
 		return 'newspaperArticle';
 	}
 
-	// 5) fallback selectors
+	// 4) fallback headline selector strongly suggesting article page
 	if (text(doc, 'header.mvp-post-head h1.mvp-post-title.left.entry-title')) {
 		return 'newspaperArticle';
+	}
+
+	// 5) Only at this stage, test for listing
+	if (getSearchResults(doc, true)) {
+		return 'multiple';
 	}
 
 	return false;
