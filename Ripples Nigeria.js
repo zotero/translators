@@ -144,9 +144,6 @@ function isCollectionPage(doc) {
 }
 
 function detectWeb(doc, url) {
-	url = url || doc.location.href;
-	void url;
-
 	// 1) JSON-LD Article -> single article
 	let j = parseJSONLD(doc);
 	if (j) {
