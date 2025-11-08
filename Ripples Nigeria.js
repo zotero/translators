@@ -150,12 +150,7 @@ function detectWeb(doc) {
 		return 'newspaperArticle';
 	}
 
-	// 2) explicit index/list page via JSON-LD
-	if (isCollectionPage(doc)) {
-		return 'multiple';
-	}
-
-	// 3) meta-based hints of an article
+	// 2) meta-based hints of an article
 	if (meta(doc, 'article:published_time')) {
 		return 'newspaperArticle';
 	}
@@ -164,9 +159,14 @@ function detectWeb(doc) {
 		return 'newspaperArticle';
 	}
 
-	// 4) fallback headline selector strongly suggesting article page
+	// 3) fallback headline selector strongly suggesting article page
 	if (text(doc, 'header.mvp-post-head h1.mvp-post-title.left.entry-title')) {
 		return 'newspaperArticle';
+	}
+
+	// 4) explicit index/list page via JSON-LD
+	if (isCollectionPage(doc)) {
+		return 'multiple';
 	}
 
 	// 5) Only at this stage, test for listing
