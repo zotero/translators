@@ -103,47 +103,11 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function isCollectionPage(doc) {
-	let nodes = doc.querySelectorAll('script[type="application/ld+json"]');
-	for (let node of nodes) {
-		let txt = node.textContent.trim();
-		if (!txt) continue;
-		try {
-			let parsed = JSON.parse(txt);
-			let candidates = [];
-
-			if (Array.isArray(parsed)) {
-				candidates = parsed;
-			}
-			else if (parsed['@graph'] && Array.isArray(parsed['@graph'])) {
-				candidates = parsed['@graph'];
-			}
-			else {
-				candidates = [parsed];
-			}
-			
-			for (let cand of candidates) {
-				if (!cand) continue;
-				let t = cand['@type'] || cand.type;
-
-				if (t) {
-					const types = Array.isArray(t) ? t : [t];
-
-					if (types.some(typeStr => typeof typeStr === 'string' && typeStr === 'CollectionPage')) {
-						return true;
-					}
-				}
-			}
-		}
-		catch (e) {
-			// ignore malformed JSON-LD
-		}
-	}
-
-	return false;
+function isIndexURL(url) {
+	return url && (url.includes('/tag/') || url.includes('/category/'));
 }
 
-function detectWeb(doc) {
+function detectWeb(doc, url) {
 	// 1) JSON-LD Article -> single article
 	let j = parseJSONLD(doc);
 	if (j) {
@@ -165,7 +129,7 @@ function detectWeb(doc) {
 	}
 
 	// 4) explicit index/list page via JSON-LD
-	if (isCollectionPage(doc)) {
+	if (isIndexURL(url)) {
 		return 'multiple';
 	}
 
