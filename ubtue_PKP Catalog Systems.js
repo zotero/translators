@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-07 09:31:42"
+	"lastUpdated": "2025-11-11 13:06:38"
 }
 
 /*
@@ -236,6 +236,13 @@ function scrape(doc, url) {
 		let article_type = ZU.xpathText(doc, '//meta[@name="DC.Type.articleType"]/@content')
 		if (article_type.match(/(Recensioni)|(Recensiones)/))
 			item.tags.push("Book Review");
+
+        // The publication date of the issue is erroneously taken from the article upload date
+		if (['2346-2108'].includes(item.ISSN)) {
+			let issue_information = ZU.xpathText(doc, '//ol[contains(@class, "breadcrumb")]/li[contains(@class, "active")]');
+			if (match = issue_information.match(/[(](\d{4})[)]/))
+			    item.date = match[1];
+		}
 
 		item.complete();
 	});
