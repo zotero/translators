@@ -1,7 +1,7 @@
 {
 	"translatorID": "1f75797f-6911-4c4e-82f7-a056b92dede7",
 	"label": "Independent",
-	"creator": "^https?://(?:www\\.)?independent\\.ng/",
+	"creator": "^https?://(www\\.)?independent\\.ng/",
 	"target": "",
 	"minVersion": "5.0",
 	"maxVersion": "",
