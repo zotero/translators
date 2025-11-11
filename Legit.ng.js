@@ -112,6 +112,7 @@ function isIndexPage(doc) {
 	if (ogType === 'website') {
 		return 'multiple';
 	}
+	return false;
 }
 
 function detectWeb(doc) {
