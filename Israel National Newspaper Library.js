@@ -35,7 +35,7 @@
 	***** END LICENSE BLOCK *****
 */
 
-function detectWeb(url) {
+function detectWeb(doc, url) {
 	if (url.includes("/newspapers/") && (url.includes("/article/") || url.includes("/page/"))) {
 		return "newspaperArticle";
 	}
