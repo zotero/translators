@@ -50,19 +50,19 @@ async function scrape(doc, url) {
 	const item = new Zotero.Item("newspaperArticle");
 
 	// Get JSON-LD data
+	let jsonLDData = null;
 	const jsonLD = doc.querySelector('script[type="application/ld+json"]');
 	if (jsonLD) {
 		try {
-			let jsonLDData = JSON.parse(jsonLD.textContent);
+			jsonLDData = JSON.parse(jsonLD.textContent);
 			const headline = ZU.trimInternal(jsonLDData.headline);
 			if (headline) item.title = headline;
 			const abstract = ZU.trimInternal(jsonLDData.description);
 			if (abstract) item.abstractNote = abstract;
-			const date = ZU.trimInternal(jsonLDData.dateModified);
+			const date = ZU.trimInternal(jsonLDData.datePublished);
 			if (date) item.date = ZU.trimInternal(date);
-		}
-		catch (e) {
-			ZU.debug("Error parsing JSON-LD for newspaper: " + e);
+		} catch (e) {
+			Z.debug()("Error parsing JSON-LD for newspaper: " + e);
 		}
 	}
 	else {
@@ -72,15 +72,16 @@ async function scrape(doc, url) {
 		if (headline) item.title = headline;
 
 		// Abstract note
-		const abstract = ZU.trimInternal(doc.querySelector('meta[name="description"]').getAttribute('content'));
+		const abstract = ZU.trimInternal(document.querySelector('meta[name="description"]').getAttribute('content'));
 
 		if (abstract) item.abstractNote = abstract;
 
 		// Date
-		const dateNode = doc.querySelector('li.breadcrumb-item:nth-child(3)');
+		const dateNode = text('li.breadcrumb-item:nth-child(3)');
 		if (dateNode) {
 			item.date = ZU.trimInternal(dateNode.textContent);
 		}
+
 	}
 
 	// Persistent link
@@ -97,9 +98,8 @@ async function scrape(doc, url) {
 				if (json.publicationTitle) {
 					item.publicationTitle = ZU.trimInternal(json.publicationTitle);
 				}
-			}
-			catch (e) {
-				ZU.debug("Failed to parse data-nli-data-json: " + e);
+			} catch (e) {
+				Z.debug()("Failed to parse data-nli-data-json: " + e);
 			}
 		}
 	}
@@ -112,8 +112,7 @@ async function scrape(doc, url) {
 		}
 		// Clean URL for citation
 		item.url = url.split('?')[0].split('#')[0];
-	}
-	else {
+	} else {
 		const pageLabel = doc.querySelector('span.pagelabel.current b');
 		if (pageLabel) {
 			const split = pageLabel.textContent.split(" ");
@@ -131,8 +130,3 @@ async function scrape(doc, url) {
 	item.libraryCatalog = "National Library of Israel";
 	item.complete();
 }
-
-/** BEGIN TEST CASES **/
-var testCases = [
-]
-/** END TEST CASES **/
