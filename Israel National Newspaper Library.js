@@ -84,7 +84,7 @@ async function scrape(doc, url) {
 	}
 
 	// Persistent link
-	const linkNode = doc.querySelector(".persistentlinkurl");
+	const linkNode = doc.querySelector("#sectionleveltabpersistentlinkarea .persistentlinkurl");
 	item.url = linkNode ? ZU.trimInternal(linkNode.textContent) : url;
 
 	// Get publication from NLI script data
