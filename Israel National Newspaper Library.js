@@ -67,7 +67,7 @@ async function scrape(doc, url) {
 	}
 	else {
 		// Headline
-		const headline = ZU.trimInternal(doc.querySelector('#sectionleveltabtitlearea').getAttribute('content'));
+		let headline = text(doc, '#sectionleveltabtitlearea');
 
 		if (headline) item.title = headline;
 
