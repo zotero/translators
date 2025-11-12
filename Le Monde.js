@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-13 11:53:25"
+	"lastUpdated": "2025-11-06 22:47:06"
 }
 
 /*
@@ -39,17 +39,19 @@
 function detectWeb(doc, url) {
 	if (url.includes('/article/')) {
 		return "newspaperArticle";
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//a[contains(@href, "/article/")]');
-	for (var i=0; i<rows.length; i++) {
+	var rows = doc.querySelectorAll('a.teaser__link[href*="/article/"]');
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -61,69 +63,51 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
-	} else {
-		scrape(doc, url);
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
+	}
+	else {
+		await scrape(doc, url);
 	}
 }
 
-function scrape(doc, url) {
+function scrape(doc, _) {
+	let jsonLD = text(doc, 'script[type="application/ld+json"]');
+	let schema = JSON.parse(jsonLD);
 
-	var translator = Zotero.loadTranslator('web');
-	// Embedded Metadata
-	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-	translator.setDocument(doc);
-	
-	translator.setHandler('itemDone', function (obj, item) {
-		delete item.libraryCatalog;
-		//should we delete the issn as well, or can someone confirm that issn?
-		
-		item.date = ZU.xpathText(doc, '//time[@itemprop="datePublished"]/@datetime');
-		if (!item.date) {
-			// The url contain the publication date as well
-			// e.g. http://campus.lemonde.fr/palmares/article/2015/03/13/...
-			item.date = url.replace(/^.*\/article\/(\d\d\d\d)\/(\d\d)\/(\d\d)\/.*$/, '$1-$2-$3');
-		}
-		
-		if (!item.url) {
-			item.url = url;
-		} else if (item.url.indexOf('/') == 0) {
-			// og:url is now relative and we don't currently resolve it
-			item.url = url.match(/^https?:\/\/[^\/]+/i)[0] + item.url;
-		}
-		
-		var author = ZU.xpathText(doc, '//span[@itemprop="author"]');
-		if (author) {
-			item.creators.push( ZU.cleanAuthor(author, "author") );
-		}
-		
-		item.section = ZU.xpathText(doc, '//nav[@id="navigation-generale"]/ul/li[contains(@class,"alt")]/a/@data-rubrique-title');
-		
-		item.complete();
+	let item = new Zotero.Item("newspaperArticle");
+	item.title = schema.headline;
+	item.date = ZU.strToISO(schema.dateModified || schema.datePublished);
+	item.url = schema.mainEntityOfPage["@id"];
+	item.section = schema.articleSection;
+	item.publicationTitle = schema.publisher.name;
+	item.abstractNote = schema.description;
+	item.ISSN = "1950-6244";
+	item.language = "fr";
+
+	for (let author of (schema.author || [])) {
+		if (author["@type"] !== "Person") continue;
+		item.creators.push(ZU.cleanAuthor(author.name, 'author'));
+	}
+
+	item.attachments.push({
+		title: "Snapshot",
+		document: doc
 	});
 
-	translator.getTranslatorObject(function(trans) {
-		trans.itemType = "newspaperArticle";
-		trans.doWeb(doc, url);
-	});
+	item.complete();
 }
 
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.lemonde.fr/elections-departementales-2015/article/2015/03/13/apres-grenoble-les-ecologistes-visent-l-isere_4592922_4572524.html",
+		"url": "https://www.lemonde.fr/elections-departementales-2015/article/2015/03/13/apres-grenoble-les-ecologistes-visent-l-isere_4592922_4572524.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -135,17 +119,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2015-03-13T10:37:46+01:00",
+				"date": "2019-08-19",
 				"ISSN": "1950-6244",
 				"abstractNote": "Victorieuse dans la préfecture aux municipales de 2014, l’alliance Verts-Parti de gauche menace la majorité socialiste dans les cantons.",
 				"language": "fr",
 				"libraryCatalog": "Le Monde",
-				"publicationTitle": "Le Monde.fr",
-				"section": "Politique",
-				"url": "http://www.lemonde.fr/elections-departementales-2015/article/2015/03/13/apres-grenoble-les-ecologistes-visent-l-isere_4592922_4572524.html",
+				"publicationTitle": "Le Monde",
+				"section": "Elections départementales 2015",
+				"url": "https://www.lemonde.fr/elections-departementales-2015/article/2015/03/13/apres-grenoble-les-ecologistes-visent-l-isere_4592922_4572524.html",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -167,18 +152,19 @@ var testCases = [
 				"itemType": "newspaperArticle",
 				"title": "Syrie : un désastre sans précédent",
 				"creators": [],
-				"date": "2015-03-13T11:50:19+01:00",
+				"date": "2019-08-19",
 				"ISSN": "1950-6244",
-				"abstractNote": "Editorial. Après plus de 220 000 morts, le pays s’enfonce toujours plus dans une guerre aux fronts multiples à laquelle les puissances occidentales ne trouvent pas de réponse.",
+				"abstractNote": "Après quatre ans de conflit et plus de 220 000 morts, le pays s’enfonce toujours plus dans une guerre aux fronts multiples à laquelle les puissances occidentales ne trouvent pas de réponse",
 				"language": "fr",
 				"libraryCatalog": "Le Monde",
-				"publicationTitle": "Le Monde.fr",
-				"section": "Idées",
+				"publicationTitle": "Le Monde",
+				"section": "Débats",
 				"shortTitle": "Syrie",
-				"url": "http://www.lemonde.fr/idees/article/2015/03/13/syrie-un-desastre-sans-precedent_4593097_3232.html",
+				"url": "https://www.lemonde.fr/idees/article/2015/03/13/syrie-un-desastre-sans-precedent_4593097_3232.html",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -189,11 +175,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.lemonde.fr/campus/article/2015/03/13/classement-international-les-universites-francaises-en-manque-de-prestige_4593287_4401467.html",
+		"url": "https://www.lemonde.fr/campus/article/2015/03/13/classement-international-les-universites-francaises-en-manque-de-prestige_4593287_4401467.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Classement international : les universités françaises en manque de prestige",
+				"title": "Les universités françaises peinent à soigner leur réputation internationale",
 				"creators": [
 					{
 						"firstName": "Matteo",
@@ -201,18 +187,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2015-03-13T22:03:36+01:00",
+				"date": "2015-03-13",
 				"ISSN": "1950-6244",
 				"abstractNote": "Selon le dernier classement du magazine « Times Higher Education », les universités françaises peinent à obtenir la reconnaissance internationale de leurs pairs.",
 				"language": "fr",
 				"libraryCatalog": "Le Monde",
-				"publicationTitle": "Le Monde.fr",
-				"section": "Campus",
-				"shortTitle": "Classement international",
-				"url": "http://www.lemonde.fr/campus/article/2015/03/13/classement-international-les-universites-francaises-en-manque-de-prestige_4593287_4401467.html",
+				"publicationTitle": "Le Monde",
+				"section": "M Campus",
+				"url": "https://www.lemonde.fr/campus/article/2015/03/13/classement-international-les-universites-francaises-en-manque-de-prestige_4593287_4401467.html",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -223,29 +209,30 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.lemonde.fr/culture/article/2013/09/28/arturo-brachetti-dans-son-repaire-a-turin_3486315_3246.html#meter_toaster",
+		"url": "https://www.lemonde.fr/culture/article/2013/09/28/arturo-brachetti-dans-son-repaire-a-turin_3486315_3246.html#meter_toaster",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
 				"title": "Dans le repaire turinois d'Arturo Brachetti",
 				"creators": [
 					{
-						"firstName": "Sandrine Blanchard (Turin, envoyée",
-						"lastName": "spéciale)",
+						"firstName": "Sandrine",
+						"lastName": "Blanchard",
 						"creatorType": "author"
 					}
 				],
-				"date": "2013-09-28T09:26:28+02:00",
+				"date": "2013-09-29",
 				"ISSN": "1950-6244",
 				"abstractNote": "Visiter la maison de l'artiste, en spectacle à Paris à partir du 3 octobre, c'est entrer dans un monde empli de magie.",
 				"language": "fr",
 				"libraryCatalog": "Le Monde",
-				"publicationTitle": "Le Monde.fr",
+				"publicationTitle": "Le Monde",
 				"section": "Culture",
-				"url": "http://www.lemonde.fr/culture/article/2013/09/28/arturo-brachetti-dans-son-repaire-a-turin_3486315_3246.html",
+				"url": "https://www.lemonde.fr/culture/article/2013/09/28/arturo-brachetti-dans-son-repaire-a-turin_3486315_3246.html",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
