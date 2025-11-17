@@ -2,7 +2,7 @@
 	"translatorID": "3513f12c-f7e7-4bb6-a8a8-9417bf65d9d5",
 	"label": "TheCable",
 	"creator": "VWF",
-	"target": "^https?://((www|lifestyle)\\.)?thecable\\.ng/",
+	"target": "^https?://((www|factcheck|lifestyle)\\.)?thecable\\.ng/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -14,24 +14,18 @@
 
 /*
 	***** BEGIN LICENSE BLOCK *****
-
 	Copyright © 2025 VWF
-
 	This file is part of Zotero.
-
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
-
 	Zotero is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 	GNU Affero General Public License for more details.
-
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
-
 	***** END LICENSE BLOCK *****
 */
 
@@ -190,7 +184,7 @@ async function scrape(doc, url) {
 		}
 		return cleaned;
 	}
-	
+
 	let item = new Zotero.Item('newspaperArticle');
 
 	let data = parseJSONLD(doc);
@@ -309,7 +303,10 @@ async function scrape(doc, url) {
 	}
 
 	if (!item.publicationTitle) {
-		if (url.includes('lifestyle.thecable.ng')) {
+		if (url.includes('factcheck.thecable.ng')) {
+			item.publicationTitle = 'TheCable Fact Check';
+		}
+		else if (url.includes('lifestyle.thecable.ng')) {
 			item.publicationTitle = 'TheCable Lifestyle';
 		}
 		else {
@@ -320,7 +317,7 @@ async function scrape(doc, url) {
 	if (!item.ISSN) {
 		item.ISSN = '3043-5676';
 	}
-	
+
 	// --- Fallback authors in sequence ---
 	if (item.creators.length === 0) {
 		let cand1 = meta(doc, 'author');
@@ -379,6 +376,69 @@ var testCases = [
 				"place": "Nigeria",
 				"publicationTitle": "TheCable",
 				"url": "https://www.thecable.ng/miyetti-allah-seeks-removal-from-us-sanctions-list-says-christian-persecution-claim-flawed/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://factcheck.thecable.ng/anambra-guber-six-misconceptions-about-bvas-irev-voters-should-know/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Anambra guber: Six misconceptions about BVAS, IREV voters should know",
+				"creators": [],
+				"date": "2025-11-07",
+				"ISSN": "3043-5676",
+				"abstractNote": "Elections in Nigeria have always been defined by controversies. Electoral malpractice, ranging from ballot snatching to result sheet manipulations, has persistently plagued our democracy",
+				"language": "en-US",
+				"libraryCatalog": "TheCable",
+				"place": "Nigeria",
+				"publicationTitle": "TheCable Fact Check",
+				"shortTitle": "Anambra guber",
+				"url": "https://factcheck.thecable.ng/anambra-guber-six-misconceptions-about-bvas-irev-voters-should-know/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://factcheck.thecable.ng/finnish-court-no-release-simon-ekpa-give-am-50000-compensation/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Finnish court no release Simon Ekpa, give am $50,000 compensation",
+				"creators": [
+					{
+						"firstName": "Claire",
+						"lastName": "Mom",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025-10-23",
+				"ISSN": "3043-5676",
+				"abstractNote": "Some social media users don claim sey one Finnish court give judgment make dem release Simon Ekpa, pro-Biafra agitator, wey don already...",
+				"language": "en-US",
+				"libraryCatalog": "TheCable",
+				"place": "Nigeria",
+				"publicationTitle": "TheCable Fact Check",
+				"url": "https://factcheck.thecable.ng/finnish-court-no-release-simon-ekpa-give-am-50000-compensation/",
 				"attachments": [
 					{
 						"title": "Snapshot",
