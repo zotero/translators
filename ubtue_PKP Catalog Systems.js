@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-11-11 13:06:38"
+	"lastUpdated": "2025-11-17 13:23:20"
 }
 
 /*
@@ -127,6 +127,11 @@ function scrape(doc, url) {
 		} else if (item.creators.length == 1) {
 			// In some cases the author list in the metadata is incomplete, so double check
 			potentiallyAdditionalAuthorsString = doc.querySelector(".item.authors .authors");
+			// In some cases there is an additional affiliation (c.f. ubtue/DatenProbleme#2367)
+			if (potentiallyAdditionalAuthorsString.querySelector(".name")) {
+			    potentiallyAdditionalAuthorsString = potentiallyAdditionalAuthorsString.querySelector(".name");
+			}
+
 			if (potentiallyAdditionalAuthorsString) {
 				let authorsList = potentiallyAdditionalAuthorsString.textContent.split(/,|\s+und\s+/);
 				if (authorsList.length > item.creators.length) {
@@ -237,11 +242,11 @@ function scrape(doc, url) {
 		if (article_type.match(/(Recensioni)|(Recensiones)/))
 			item.tags.push("Book Review");
 
-        // The publication date of the issue is erroneously taken from the article upload date
+		// The publication date of the issue is erroneously taken from the article upload date
 		if (['2346-2108'].includes(item.ISSN)) {
 			let issue_information = ZU.xpathText(doc, '//ol[contains(@class, "breadcrumb")]/li[contains(@class, "active")]');
 			if (match = issue_information.match(/[(](\d{4})[)]/))
-			    item.date = match[1];
+				item.date = match[1];
 		}
 
 		item.complete();
