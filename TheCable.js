@@ -8,24 +8,29 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
 	"lastUpdated": "2025-11-17 14:25:49"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
+
 	Copyright © 2025 VWF
+
 	This file is part of Zotero.
+
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
+
 	Zotero is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 	GNU Affero General Public License for more details.
+
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
 	***** END LICENSE BLOCK *****
 */
 
@@ -40,49 +45,82 @@ function isMultiWordAuthor(name) {
 }
 
 function parseJSONLD(doc) {
-	let nodes = doc.querySelectorAll('script[type="application/ld+json"]');
-	for (let node of nodes) {
-		let txt = node.textContent.trim();
-		if (!txt) continue;
-		try {
-			let parsed = JSON.parse(txt);
-			let candidates = [];
-			if (Array.isArray(parsed)) {
-				candidates = parsed;
-			}
-			else if (parsed['@graph'] && Array.isArray(parsed['@graph'])) {
-				candidates = parsed['@graph'];
-			}
-			else if (parsed.mainEntity) {
-				candidates = [parsed.mainEntity, parsed];
-			}
-			else {
-				candidates = [parsed];
-			}
-
-			for (let cand of candidates) {
-				if (!cand) continue;
-				let t = cand['@type'] || cand.type;
-				if (!t) continue;
-				if (typeof t === 'string') {
-					if (t.includes('WebPage')) {
-						return cand;
-					}
-				}
-				else if (Array.isArray(t)) {
-					for (let tt of t) {
-						if (typeof tt === 'string' && tt.includes('Article')) {
-							return cand;
-						}
-					}
-				}
-			}
-		}
-		catch (e) {
-			// ignore malformed JSON-LD
-		}
+	let hostname = "";
+	try {
+		hostname = (new URL(doc.location.href)).hostname;
 	}
-	return null;
+	catch (e) {
+		
+	}
+
+	if (hostname.includes("factcheck.thecable.ng")) {
+		let nodes = doc.querySelectorAll('script[type="application/ld+json"]');
+		let articleCandidate = null;
+		let webpageCandidate = null;
+
+		for (let node of nodes) {
+			let txt = node.textContent.trim();
+			if (!txt) continue;
+
+			try {
+				let parsed = JSON.parse(txt);
+				let candidates = [];
+
+				if (Array.isArray(parsed)) {
+					candidates = parsed;
+				}
+				else if (parsed['@graph'] && Array.isArray(parsed['@graph'])) {
+					candidates = parsed['@graph'];
+				}
+				else if (parsed.mainEntity) {
+					candidates = [parsed.mainEntity, parsed];
+				}
+				else {
+					candidates = [parsed];
+				}
+
+				for (let cand of candidates) {
+					if (!cand) continue;
+
+					let t = cand['@type'] || cand.type;
+					if (!t) continue;
+
+					// Normalise @type into array form
+					let types = [];
+					if (typeof t === "string") {
+						types = [t];
+					}
+					else if (Array.isArray(t)) {
+						types = t;
+					}
+
+					if (!articleCandidate && types.some(tt => typeof tt === "string" && tt.includes("Article"))) {
+						articleCandidate = cand;
+					}
+
+					if (!webpageCandidate && types.some(tt => typeof tt === "string" && tt.includes("WebPage"))) {
+						webpageCandidate = cand;
+					}
+				}
+			}
+			catch (e) {
+				// ignore bad JSON
+			}
+		}
+
+		return articleCandidate || webpageCandidate || null;
+	}
+
+	let jsonld = doc.querySelectorAll('script[type="application/ld+json"]');
+	if (!jsonld) return null;
+
+	try {
+		let data = JSON.parse(jsonld);
+		return data;
+	}
+	catch (e) {
+		return null;
+	}
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -184,7 +222,7 @@ async function scrape(doc, url) {
 		}
 		return cleaned;
 	}
-
+	
 	let item = new Zotero.Item('newspaperArticle');
 
 	let data = parseJSONLD(doc);
@@ -317,7 +355,7 @@ async function scrape(doc, url) {
 	if (!item.ISSN) {
 		item.ISSN = '3043-5676';
 	}
-
+	
 	// --- Fallback authors in sequence ---
 	if (item.creators.length === 0) {
 		let cand1 = meta(doc, 'author');
