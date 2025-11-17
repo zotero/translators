@@ -47,12 +47,17 @@ function isMultiWordAuthor(name) {
 
 function parseJSONLD(doc) {
 	let nodes = doc.querySelectorAll('script[type="application/ld+json"]');
+	let articleCandidate = null;
+	let webpageCandidate = null;
+
 	for (let node of nodes) {
 		let txt = node.textContent.trim();
 		if (!txt) continue;
+
 		try {
 			let parsed = JSON.parse(txt);
 			let candidates = [];
+
 			if (Array.isArray(parsed)) {
 				candidates = parsed;
 			}
@@ -68,19 +73,27 @@ function parseJSONLD(doc) {
 
 			for (let cand of candidates) {
 				if (!cand) continue;
+
 				let t = cand['@type'] || cand.type;
 				if (!t) continue;
+
+				// Normalize @type into an array
+				let types = [];
 				if (typeof t === 'string') {
-					if (t.includes('WebPage')) {
-						return cand;
-					}
+					types = [t];
 				}
 				else if (Array.isArray(t)) {
-					for (let tt of t) {
-						if (typeof tt === 'string' && tt.includes('Article')) {
-							return cand;
-						}
-					}
+					types = t;
+				}
+
+				// Priority 1 — Article
+				if (!articleCandidate && types.some(tt => typeof tt === 'string' && tt.includes('Article'))) {
+					articleCandidate = cand;
+				}
+
+				// Priority 2 — WebPage (only if no Article found yet)
+				if (!webpageCandidate && types.some(tt => typeof tt === 'string' && tt.includes('WebPage'))) {
+					webpageCandidate = cand;
 				}
 			}
 		}
@@ -88,7 +101,9 @@ function parseJSONLD(doc) {
 			// ignore malformed JSON-LD
 		}
 	}
-	return null;
+
+	// Return Article if available, otherwise WebPage, otherwise null
+	return articleCandidate || webpageCandidate || null;
 }
 
 function getSearchResults(doc, checkOnly) {
