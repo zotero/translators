@@ -46,64 +46,80 @@ function isMultiWordAuthor(name) {
 }
 
 function parseJSONLD(doc) {
-	let nodes = doc.querySelectorAll('script[type="application/ld+json"]');
-	let articleCandidate = null;
-	let webpageCandidate = null;
+	let hostname = "";
+	try {
+		hostname = (new URL(doc.location.href)).hostname;
+	} catch(e) {}
 
-	for (let node of nodes) {
-		let txt = node.textContent.trim();
-		if (!txt) continue;
+	if (hostname.includes("factcheck.thecable.ng")) {
 
-		try {
-			let parsed = JSON.parse(txt);
-			let candidates = [];
+		let nodes = doc.querySelectorAll('script[type="application/ld+json"]');
+		let articleCandidate = null;
+		let webpageCandidate = null;
 
-			if (Array.isArray(parsed)) {
-				candidates = parsed;
-			}
-			else if (parsed['@graph'] && Array.isArray(parsed['@graph'])) {
-				candidates = parsed['@graph'];
-			}
-			else if (parsed.mainEntity) {
-				candidates = [parsed.mainEntity, parsed];
-			}
-			else {
-				candidates = [parsed];
-			}
+		for (let node of nodes) {
+			let txt = node.textContent.trim();
+			if (!txt) continue;
 
-			for (let cand of candidates) {
-				if (!cand) continue;
+			try {
+				let parsed = JSON.parse(txt);
+				let candidates = [];
 
-				let t = cand['@type'] || cand.type;
-				if (!t) continue;
-
-				// Normalize @type into an array
-				let types = [];
-				if (typeof t === 'string') {
-					types = [t];
+				if (Array.isArray(parsed)) {
+					candidates = parsed;
 				}
-				else if (Array.isArray(t)) {
-					types = t;
+				else if (parsed['@graph'] && Array.isArray(parsed['@graph'])) {
+					candidates = parsed['@graph'];
+				}
+				else if (parsed.mainEntity) {
+					candidates = [parsed.mainEntity, parsed];
+				}
+				else {
+					candidates = [parsed];
 				}
 
-				// Priority 1 — Article
-				if (!articleCandidate && types.some(tt => typeof tt === 'string' && tt.includes('Article'))) {
-					articleCandidate = cand;
-				}
+				for (let cand of candidates) {
+					if (!cand) continue;
 
-				// Priority 2 — WebPage (only if no Article found yet)
-				if (!webpageCandidate && types.some(tt => typeof tt === 'string' && tt.includes('WebPage'))) {
-					webpageCandidate = cand;
+					let t = cand['@type'] || cand.type;
+					if (!t) continue;
+
+					// Normalise @type into array form
+					let types = [];
+					if (typeof t === "string") {
+						types = [t];
+					}
+					else if (Array.isArray(t)) {
+						types = t;
+					}
+
+					if (!articleCandidate && types.some(tt => typeof tt === "string" && tt.includes("Article"))) {
+						articleCandidate = cand;
+					}
+
+					if (!webpageCandidate && types.some(tt => typeof tt === "string" && tt.includes("WebPage"))) {
+						webpageCandidate = cand;
+					}
 				}
+			}
+			catch(e) {
+				// ignore bad JSON
 			}
 		}
-		catch (e) {
-			// ignore malformed JSON-LD
-		}
+
+		return articleCandidate || webpageCandidate || null;
 	}
 
-	// Return Article if available, otherwise WebPage, otherwise null
-	return articleCandidate || webpageCandidate || null;
+	let jsonld = text(doc, '//script[@type="application/ld+json"]');
+	if (!jsonld) return null;
+
+	try {
+		let data = JSON.parse(jsonld);
+		return data;
+	}
+	catch (e) {
+		return null;
+	}
 }
 
 function getSearchResults(doc, checkOnly) {
