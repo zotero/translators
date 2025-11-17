@@ -2,7 +2,7 @@
 	"translatorID": "3513f12c-f7e7-4bb6-a8a8-9417bf65d9d5",
 	"label": "TheCable",
 	"creator": "VWF",
-	"target": "^https?://((www|factcheck|lifestyle)\\.)?thecable\\.ng/",
+	"target": "^https?://((www|lifestyle)\\.)?thecable\\.ng/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -46,82 +46,49 @@ function isMultiWordAuthor(name) {
 }
 
 function parseJSONLD(doc) {
-	let hostname = "";
-	try {
-		hostname = (new URL(doc.location.href)).hostname;
-	}
-	catch (e) {
-		
-	}
-
-	if (hostname.includes("factcheck.thecable.ng")) {
-		let nodes = doc.querySelectorAll('script[type="application/ld+json"]');
-		let articleCandidate = null;
-		let webpageCandidate = null;
-
-		for (let node of nodes) {
-			let txt = node.textContent.trim();
-			if (!txt) continue;
-
-			try {
-				let parsed = JSON.parse(txt);
-				let candidates = [];
-
-				if (Array.isArray(parsed)) {
-					candidates = parsed;
-				}
-				else if (parsed['@graph'] && Array.isArray(parsed['@graph'])) {
-					candidates = parsed['@graph'];
-				}
-				else if (parsed.mainEntity) {
-					candidates = [parsed.mainEntity, parsed];
-				}
-				else {
-					candidates = [parsed];
-				}
-
-				for (let cand of candidates) {
-					if (!cand) continue;
-
-					let t = cand['@type'] || cand.type;
-					if (!t) continue;
-
-					// Normalise @type into array form
-					let types = [];
-					if (typeof t === "string") {
-						types = [t];
-					}
-					else if (Array.isArray(t)) {
-						types = t;
-					}
-
-					if (!articleCandidate && types.some(tt => typeof tt === "string" && tt.includes("Article"))) {
-						articleCandidate = cand;
-					}
-
-					if (!webpageCandidate && types.some(tt => typeof tt === "string" && tt.includes("WebPage"))) {
-						webpageCandidate = cand;
-					}
-				}
+	let nodes = doc.querySelectorAll('script[type="application/ld+json"]');
+	for (let node of nodes) {
+		let txt = node.textContent.trim();
+		if (!txt) continue;
+		try {
+			let parsed = JSON.parse(txt);
+			let candidates = [];
+			if (Array.isArray(parsed)) {
+				candidates = parsed;
 			}
-			catch (e) {
-				// ignore bad JSON
+			else if (parsed['@graph'] && Array.isArray(parsed['@graph'])) {
+				candidates = parsed['@graph'];
+			}
+			else if (parsed.mainEntity) {
+				candidates = [parsed.mainEntity, parsed];
+			}
+			else {
+				candidates = [parsed];
+			}
+
+			for (let cand of candidates) {
+				if (!cand) continue;
+				let t = cand['@type'] || cand.type;
+				if (!t) continue;
+				if (typeof t === 'string') {
+					if (t.includes('WebPage')) {
+						return cand;
+					}
+				}
+				else if (Array.isArray(t)) {
+					for (let tt of t) {
+						if (typeof tt === 'string' && tt.includes('Article')) {
+							return cand;
+						}
+					}
+				}
 			}
 		}
-
-		return articleCandidate || webpageCandidate || null;
+		catch (e) {
+			// ignore malformed JSON-LD
+		}
 	}
-
-	let jsonld = doc.querySelectorAll('script[type="application/ld+json"]');
-	if (!jsonld) return null;
-
-	try {
-		let data = JSON.parse(jsonld);
-		return data;
-	}
-	catch (e) {
-		return null;
-	}
+	return null;
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -342,10 +309,7 @@ async function scrape(doc, url) {
 	}
 
 	if (!item.publicationTitle) {
-		if (url.includes('factcheck.thecable.ng')) {
-			item.publicationTitle = 'TheCable Fact Check';
-		}
-		else if (url.includes('lifestyle.thecable.ng')) {
+		if (url.includes('lifestyle.thecable.ng')) {
 			item.publicationTitle = 'TheCable Lifestyle';
 		}
 		else {
@@ -415,69 +379,6 @@ var testCases = [
 				"place": "Nigeria",
 				"publicationTitle": "TheCable",
 				"url": "https://www.thecable.ng/miyetti-allah-seeks-removal-from-us-sanctions-list-says-christian-persecution-claim-flawed/",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://factcheck.thecable.ng/anambra-guber-six-misconceptions-about-bvas-irev-voters-should-know/",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Anambra guber: Six misconceptions about BVAS, IREV voters should know",
-				"creators": [],
-				"date": "2025-11-07",
-				"ISSN": "3043-5676",
-				"abstractNote": "Elections in Nigeria have always been defined by controversies. Electoral malpractice, ranging from ballot snatching to result sheet manipulations, has persistently plagued our democracy",
-				"language": "en-US",
-				"libraryCatalog": "TheCable",
-				"place": "Nigeria",
-				"publicationTitle": "TheCable Fact Check",
-				"shortTitle": "Anambra guber",
-				"url": "https://factcheck.thecable.ng/anambra-guber-six-misconceptions-about-bvas-irev-voters-should-know/",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://factcheck.thecable.ng/finnish-court-no-release-simon-ekpa-give-am-50000-compensation/",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Finnish court no release Simon Ekpa, give am $50,000 compensation",
-				"creators": [
-					{
-						"firstName": "Claire",
-						"lastName": "Mom",
-						"creatorType": "author"
-					}
-				],
-				"date": "2025-10-23",
-				"ISSN": "3043-5676",
-				"abstractNote": "Some social media users don claim sey one Finnish court give judgment make dem release Simon Ekpa, pro-Biafra agitator, wey don already...",
-				"language": "en-US",
-				"libraryCatalog": "TheCable",
-				"place": "Nigeria",
-				"publicationTitle": "TheCable Fact Check",
-				"url": "https://factcheck.thecable.ng/finnish-court-no-release-simon-ekpa-give-am-50000-compensation/",
 				"attachments": [
 					{
 						"title": "Snapshot",
