@@ -112,7 +112,7 @@ function parseJSONLD(doc) {
 		return articleCandidate || webpageCandidate || null;
 	}
 
-	let jsonld = text(doc, '//script[@type="application/ld+json"]');
+	let jsonld = doc.querySelectorAll('script[type="application/ld+json"]');
 	if (!jsonld) return null;
 
 	try {
