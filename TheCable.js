@@ -49,10 +49,12 @@ function parseJSONLD(doc) {
 	let hostname = "";
 	try {
 		hostname = (new URL(doc.location.href)).hostname;
-	} catch(e) {}
+	}
+	catch (e) {
+		
+	}
 
 	if (hostname.includes("factcheck.thecable.ng")) {
-
 		let nodes = doc.querySelectorAll('script[type="application/ld+json"]');
 		let articleCandidate = null;
 		let webpageCandidate = null;
@@ -102,7 +104,7 @@ function parseJSONLD(doc) {
 					}
 				}
 			}
-			catch(e) {
+			catch (e) {
 				// ignore bad JSON
 			}
 		}
