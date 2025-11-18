@@ -170,7 +170,7 @@ async function scrape(doc, url) {
 			item.date = isoFromZU || rawJsonDate;
 		}
 
-        if (data.articleSection) {
+		if (data.articleSection) {
 			let section = Array.isArray(data.articleSection)
 				? data.articleSection.map(s => s.toLowerCase())
 				: [data.articleSection.toLowerCase()];
