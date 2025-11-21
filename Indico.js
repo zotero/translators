@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-11-20 21:29:44"
+	"lastUpdated": "2025-11-21 07:00:00"
 }
 
 /*
@@ -36,86 +36,12 @@
 */
 
 /**
- * Helper function to convert LaTeX math to Unicode characters
- * Currently handles superscripts like e+e- -> e⁺e⁻
- * @param {string} text - The text to convert
- * @returns {string} - Converted text
- */
-function convertLatexToUnicode(text) {
-	if (!text) return text;
-	
-	// Simple superscript mapping
-	const superscriptMap = {
-		'0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
-		'5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
-		'+': '⁺', '-': '⁻', '=': '⁼', '(': '⁽', ')': '⁾',
-		'n': 'ⁿ', 'i': 'ⁱ'
-	};
-
-	// Subscript mapping
-	const subscriptMap = {
-		'0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄',
-		'5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉',
-		'+': '₊', '-': '₋', '=': '₌', '(': '₍', ')': '₎',
-		'a': 'ₐ', 'e': 'ₑ', 'o': 'ₒ', 'x': 'ₓ', 'h': 'ₕ',
-		'k': 'ₖ', 'l': 'ₗ', 'm': 'ₘ', 'n': 'ₙ', 'p': 'ₚ',
-		's': 'ₛ', 't': 'ₜ'
-	};
-
-	// Helper to replace mapped characters
-	function mapChars(str, map) {
-		return str.split('').map(c => map[c] || c).join('');
-	}
-
-	// Replace inline math $...$ or \(...\)
-	// We focus on common particle physics patterns like e^{+}, e^{-}, J/\psi
-	// Note: This is a basic implementation. Complex LaTeX requires a full parser.
-	
-	return text.replace(/(\$|\\\()([^\$]+?)(\$|\\\))/g, (match, start, content, end) => {
-		let converted = content;
-		
-		// Handle superscripts ^{...} or ^x
-		converted = converted.replace(/\^\{([^}]+)\}/g, (m, p1) => mapChars(p1, superscriptMap));
-		converted = converted.replace(/\^([0-9a-zA-Z\+\-\(\)])/g, (m, p1) => mapChars(p1, superscriptMap));
-		
-		// Handle subscripts _{...} or _x
-		converted = converted.replace(/_\{([^}]+)\}/g, (m, p1) => mapChars(p1, subscriptMap));
-		converted = converted.replace(/_([0-9a-zA-Z\+\-\(\)])/g, (m, p1) => mapChars(p1, subscriptMap));
-		
-		// Remove latex commands commonly used in particle names
-		converted = converted.replace(/\\(psi|phi|rho|omega|pi|eta|mu|tau|nu|lambda|sigma|xi|gamma|delta|alpha|beta)/gi, (m, p1) => {
-			const greekMap = {
-				'alpha': 'α', 'beta': 'β', 'gamma': 'γ', 'delta': 'δ', 'epsilon': 'ε', 'zeta': 'ζ',
-				'eta': 'η', 'theta': 'θ', 'iota': 'ι', 'kappa': 'κ', 'lambda': 'λ', 'mu': 'μ',
-				'nu': 'ν', 'xi': 'ξ', 'omicron': 'ο', 'pi': 'π', 'rho': 'ρ', 'sigma': 'σ',
-				'tau': 'τ', 'upsilon': 'υ', 'phi': 'ϕ', 'chi': 'χ', 'psi': 'ψ', 'omega': 'ω',
-				'Gamma': 'Γ', 'Delta': 'Δ', 'Theta': 'Θ', 'Lambda': 'Λ', 'Xi': 'Ξ',
-				'Pi': 'Π', 'Sigma': 'Σ', 'Phi': 'Φ', 'Psi': 'Ψ', 'Omega': 'Ω'
-			};
-			return greekMap[p1] || greekMap[p1.toLowerCase()] || m;
-		});
-		
-		// Handle \bar{...} -> ... with combining macron? Or just clean it for now?
-		// Simple approach for anti-particles: \bar{p} -> p̅ (combining overline \u0305)
-		converted = converted.replace(/\\bar\{([^}]+)\}/g, '$1\u0305');
-		
-		// Remove whitespace
-		converted = converted.replace(/\s+/g, '');
-		
-		// Remove remaining backslashes for simple commands
-		converted = converted.replace(/\\/g, '');
-		
-		return converted;
-	});
-}
-
-/**
  * Helper function to get text from a CSS selector
  * @param {Document} doc - The document object
  * @param {string} selector - CSS selector
  * @returns {string|null} - Text content or null
  */
-function text(doc, selector) {
+function getText(doc, selector) {
 	let elem = doc.querySelector(selector);
 	return elem ? ZU.trimInternal(elem.textContent) : null;
 }
@@ -140,9 +66,9 @@ function detectWeb(doc, url) {
 		
 		// Fallback: if it looks like an Indico event page (via meta tags), we can likely use the API
 		// Look for Indico signature
-		let isIndico = doc.querySelector('meta[property="og:site_name"][content="Indico"]') || 
-					   doc.querySelector('link[href*="indico.ico"]') ||
-					   (doc.title && doc.title.includes('Indico'));
+		let isIndico = doc.querySelector('meta[property="og:site_name"][content="Indico"]')
+			|| doc.querySelector('link[href*="indico.ico"]')
+			|| (doc.title && doc.title.includes('Indico'));
 					   
 		if (isIndico) {
 			return 'multiple';
@@ -171,10 +97,10 @@ function cleanMathTitle(title) {
 	});
 	// Handle single char superscripts including special chars and commands
 	const superscriptMap = {
-		'0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
-		'5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
+		0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴',
+		5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹',
 		'+': '⁺', '-': '⁻', '=': '⁼', '(': '⁽', ')': '⁾',
-		'n': 'ⁿ', 'i': 'ⁱ'
+		n: 'ⁿ', i: 'ⁱ'
 	};
 	text = text.replace(/\^([0-9a-zA-Z+\-*])|\^\\(pm|mp)/g, (match, char, latex) => {
 		if (char && superscriptMap[char]) return superscriptMap[char];
@@ -191,12 +117,12 @@ function cleanMathTitle(title) {
 	});
 	// Handle single char subscripts including special chars and commands
 	const subscriptMap = {
-		'0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄',
-		'5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉',
+		0: '₀', 1: '₁', 2: '₂', 3: '₃', 4: '₄',
+		5: '₅', 6: '₆', 7: '₇', 8: '₈', 9: '₉',
 		'+': '₊', '-': '₋', '=': '₌', '(': '₍', ')': '₎',
-		'a': 'ₐ', 'e': 'ₑ', 'o': 'ₒ', 'x': 'ₓ', 'h': 'ₕ',
-		'k': 'ₖ', 'l': 'ₗ', 'm': 'ₘ', 'n': 'ₙ', 'p': 'ₚ',
-		's': 'ₛ', 't': 'ₜ'
+		a: 'ₐ', e: 'ₑ', o: 'ₒ', x: 'ₓ', h: 'ₕ',
+		k: 'ₖ', l: 'ₗ', m: 'ₘ', n: 'ₙ', p: 'ₚ',
+		s: 'ₛ', t: 'ₜ'
 	};
 	text = text.replace(/_([0-9a-zA-Z+\-*])|\_\\(pm|mp)/g, (match, char, latex) => {
 		if (char && subscriptMap[char]) return subscriptMap[char];
@@ -262,7 +188,7 @@ function cleanMathTitle(title) {
 		// Apply the same cleaning to content inside $...$
 		// We recurse lightly or just apply same logic
 		let clean = content.replace(/\^\{?\+?\}?/g, '⁺')
-			.replace(/\^\{?\-\}?/g, '⁻')
+			.replace(/\^\{?-?\}?/g, '⁻')
 			.replace(/e\^/g, 'e') // Catch e^+ cases processed above
 			.replace(/\\/g, ''); // Remove remaining backslashes for simple commands
 			
@@ -388,7 +314,8 @@ async function doWeb(doc, url) {
 							}
 						}
 					}
-				} catch (e) {
+				}
+				catch (e) {
 					Zotero.debug("Indico API fallback failed: " + e);
 				}
 			}
@@ -417,7 +344,8 @@ async function doWeb(doc, url) {
 						// which will try JSON/API fetch for that specific item.
 						// The scrape() function already handles fetching JSON for a single item which includes attachments.
 						await scrape(null, itemUrl);
-					} else {
+					}
+					else {
 						await scrape(null, itemUrl);
 					}
 				}
@@ -512,8 +440,9 @@ async function scrape(doc, url) {
 		if (!doc) {
 			try {
 				doc = await requestDocument(url);
-			} catch(e) {
-				Zotero.debug("Could not fetch contribution page: " + e);
+			}
+			catch (e2) {
+				Zotero.debug("Could not fetch contribution page: " + e2);
 				return;
 			}
 		}
@@ -538,7 +467,8 @@ async function scrapeFromContributionJSON(json, doc, url, baseUrl, ids) {
 	// Date
 	if (json.start_dt) {
 		item.date = ZU.strToISO(json.start_dt);
-	} else if (json.date) {
+	}
+	else if (json.date) {
 		item.date = ZU.strToISO(json.date);
 	}
 	
@@ -559,7 +489,8 @@ async function scrapeFromContributionJSON(json, doc, url, baseUrl, ids) {
 						lastName: lastName,
 						creatorType: 'presenter'
 					});
-				} else if (fullName) {
+				}
+				else if (fullName) {
 					item.creators.push(ZU.cleanAuthor(fullName, 'presenter', false));
 				}
 			}
@@ -619,7 +550,8 @@ async function scrapeFromContributionJSON(json, doc, url, baseUrl, ids) {
 			if (eventJson && eventJson.results && eventJson.results[0] && eventJson.results[0].title) {
 				item.meetingName = eventJson.results[0].title;
 			}
-		} catch (e) {
+		}
+		catch (e) {
 			// Ignore
 		}
 	}
@@ -648,7 +580,8 @@ async function scrapeFromContributionJSON(json, doc, url, baseUrl, ids) {
 	if (item.attachments.length === 0 && !doc) {
 		try {
 			doc = await requestDocument(url);
-		} catch (e) {
+		}
+		catch (e) {
 			Zotero.debug("Could not fetch contribution page for attachments: " + e);
 		}
 	}
@@ -667,8 +600,8 @@ async function scrapeFromContributionJSON(json, doc, url, baseUrl, ids) {
 				// Verify it's a contribution attachment (has contribId in URL)
 				// Event attachments: /event/123/attachments/...
 				// Contribution attachments: /event/123/contributions/456/attachments/...
-				if (attachUrl && (attachUrl.includes(`/contributions/${ids.contribId}/`) || attachUrl.includes(`/contribution/${ids.contribId}/`)) && 
-					(attachUrl.includes('.pdf') || attachUrl.includes('/attachments/') || attachUrl.includes('/material/'))) {
+				if (attachUrl && (attachUrl.includes(`/contributions/${ids.contribId}/`) || attachUrl.includes(`/contribution/${ids.contribId}/`))
+					&& (attachUrl.includes('.pdf') || attachUrl.includes('/attachments/') || attachUrl.includes('/material/'))) {
 					
 					// Avoid dupes if possible
 					if (!item.attachments.some(a => a.url === attachUrl)) {
@@ -841,13 +774,13 @@ async function scrapeFromHTML(doc, url, baseUrl, ids) {
 	
 	// Title - try multiple selectors
 	// Priority: Contribution title -> H1 -> Page Title
-	let title = text(doc, 'h1.contribution-title')
-		|| text(doc, '.item-title')
-		|| text(doc, '.contribution-title')
-		|| text(doc, 'h1[itemprop="name"]');
+	let title = getText(doc, 'h1.contribution-title')
+		|| getText(doc, '.item-title')
+		|| getText(doc, '.contribution-title')
+		|| getText(doc, 'h1[itemprop="name"]');
 		
 	if (!title) {
-		let h1 = text(doc, 'h1');
+		let h1 = getText(doc, 'h1');
 		if (h1 && !h1.includes('Indico')) {
 			title = h1;
 		}
@@ -871,7 +804,8 @@ async function scrapeFromHTML(doc, url, baseUrl, ids) {
 				}
 			}
 		}
-	} else {
+	}
+	else {
 		for (let speakerEl of speakerElements) {
 			let name = ZU.trimInternal(speakerEl.textContent);
 			if (name) {
@@ -885,7 +819,8 @@ async function scrapeFromHTML(doc, url, baseUrl, ids) {
 	let dateEl = doc.querySelector('meta[itemprop="startDate"]');
 	if (dateEl) {
 		item.date = ZU.strToISO(dateEl.content);
-	} else {
+	}
+	else {
 		dateEl = doc.querySelector('.contribution-date, .datetime, time, [datetime], .date');
 		if (dateEl) {
 			let dateText = dateEl.getAttribute('datetime') || dateEl.textContent;
@@ -938,9 +873,9 @@ async function scrapeFromHTML(doc, url, baseUrl, ids) {
 		
 		// Only include attachments that belong to this specific contribution
 		// Pattern: .../contributions/{id}/...
-		if (attachUrl && 
-			(attachUrl.includes(`/contributions/${ids.contribId}/`) || attachUrl.includes(`/contribution/${ids.contribId}/`)) &&
-			(attachUrl.includes('.pdf') || attachUrl.includes('/attachments/') || attachUrl.includes('/material/'))) {
+		if (attachUrl
+			&& (attachUrl.includes(`/contributions/${ids.contribId}/`) || attachUrl.includes(`/contribution/${ids.contribId}/`))
+			&& (attachUrl.includes('.pdf') || attachUrl.includes('/attachments/') || attachUrl.includes('/material/'))) {
 			
 			item.attachments.push({
 				title: attachTitle,
@@ -961,29 +896,6 @@ async function scrapeFromHTML(doc, url, baseUrl, ids) {
 	item.url = url;
 	
 	item.complete();
-}
-
-/**
- * Helper to make an HTTP request and return JSON
- * @param {string} url - The URL to request
- * @returns {Object} - The parsed JSON
- */
-async function requestJSON(url) {
-	const response = await Zotero.makeHttpRequest({ url: url, headers: { "Accept": "application/json" } });
-	if (response.status !== 200) throw new Error("HTTP " + response.status);
-	return JSON.parse(response.responseText);
-}
-
-/**
- * Helper to make an HTTP request and return a Document
- * @param {string} url - The URL to request
- * @returns {Document} - The parsed document
- */
-async function requestDocument(url) {
-	let response = await Zotero.makeHttpRequest({ url: url });
-	if (response.status !== 200) throw new Error("HTTP " + response.status);
-	let parser = new DOMParser();
-	return parser.parseFromString(response.responseText, "text/html");
 }
 
 /** BEGIN TEST CASES **/
