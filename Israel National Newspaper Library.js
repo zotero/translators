@@ -61,7 +61,8 @@ async function scrape(doc, url) {
 			if (abstract) item.abstractNote = abstract;
 			const date = ZU.trimInternal(jsonLDData.datePublished);
 			if (date) item.date = ZU.trimInternal(date);
-		} catch (e) {
+		}
+		catch (e) {
 			Z.debug()("Error parsing JSON-LD for newspaper: " + e);
 		}
 	}
@@ -72,7 +73,7 @@ async function scrape(doc, url) {
 		if (headline) item.title = headline;
 
 		// Abstract note
-		const abstract = ZU.trimInternal(document.querySelector('meta[name="description"]').getAttribute('content'));
+		const abstract = ZU.trimInternal(doc.querySelector('meta[name="description"]').getAttribute('content'));
 
 		if (abstract) item.abstractNote = abstract;
 
@@ -81,7 +82,6 @@ async function scrape(doc, url) {
 		if (dateNode) {
 			item.date = ZU.trimInternal(dateNode.textContent);
 		}
-
 	}
 
 	// Persistent link
@@ -98,7 +98,8 @@ async function scrape(doc, url) {
 				if (json.publicationTitle) {
 					item.publicationTitle = ZU.trimInternal(json.publicationTitle);
 				}
-			} catch (e) {
+			}
+			catch (e) {
 				Z.debug()("Failed to parse data-nli-data-json: " + e);
 			}
 		}
@@ -112,7 +113,8 @@ async function scrape(doc, url) {
 		}
 		// Clean URL for citation
 		item.url = url.split('?')[0].split('#')[0];
-	} else {
+	}
+	else {
 		const pageLabel = doc.querySelector('span.pagelabel.current b');
 		if (pageLabel) {
 			const split = pageLabel.textContent.split(" ");
