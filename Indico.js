@@ -78,6 +78,38 @@ function detectWeb(doc, url) {
 }
 
 /**
+ * Process and add a creator to the item
+ * @param {Zotero.Item} item - The item to add the creator to
+ * @param {string} name - The raw name string
+ * @param {string} type - The creator type (e.g., 'presenter')
+ */
+function processCreator(item, name, type) {
+	if (!name) return;
+
+	// 1. Remove parentheses and their content
+	let cleanName = name.replace(/\([^)]*\)/g, '');
+	
+	// 2. Remove titles (Prof., Dr., etc.)
+	// Add more titles if needed. delimiting with word boundaries or spaces.
+	cleanName = cleanName.replace(/\b(Prof|Dr|Mr|Mrs|Ms)\.?\s+/gi, '');
+	
+	cleanName = ZU.trimInternal(cleanName);
+	if (!cleanName) return;
+
+	// 3. Check for Chinese characters
+	// Common CJK range
+	if (/[\u4e00-\u9fa5]/.test(cleanName)) {
+		item.creators.push({
+			lastName: cleanName,
+			creatorType: type,
+			fieldMode: 1
+		});
+	} else {
+		item.creators.push(ZU.cleanAuthor(cleanName, type, false));
+	}
+}
+
+/**
  * Helper to clean LaTeX math in titles
  * @param {string} title - The original title
  * @returns {string} - Title with LaTeX converted to Unicode/Plain text where possible
@@ -483,15 +515,18 @@ async function scrapeFromContributionJSON(json, doc, url, baseUrl, ids) {
 				let lastName = person.last_name || person.lastName;
 				let fullName = person.full_name || person.fullName || person.name;
 				
-				if (firstName && lastName) {
-					item.creators.push({
-						firstName: firstName,
-						lastName: lastName,
-						creatorType: 'presenter'
-					});
+				if (!fullName && firstName && lastName) {
+					fullName = `${firstName} ${lastName}`;
 				}
-				else if (fullName) {
-					item.creators.push(ZU.cleanAuthor(fullName, 'presenter', false));
+				
+				if (fullName) {
+					processCreator(item, fullName, 'presenter');
+				}
+				else if (firstName && lastName) {
+					// Fallback if fullName construction failed for some reason (though above covers it)
+					// or if we want to keep separate fields (but we want to process them)
+					// Constructing full name is safer for uniform processing
+					processCreator(item, `${firstName} ${lastName}`, 'presenter');
 				}
 			}
 		}
@@ -675,13 +710,7 @@ async function scrapeFromAPI(json, url, baseUrl, ids) {
 				}
 				
 				if (name) {
-					// Use cleanAuthor to properly parse the name
-					let creator = ZU.cleanAuthor(name, 'presenter', false);
-					if (!creator.firstName && !creator.lastName) {
-						// If cleanAuthor failed, use the name as lastName
-						creator = { lastName: name, creatorType: 'presenter', fieldMode: 1 };
-					}
-					item.creators.push(creator);
+					processCreator(item, name, 'presenter');
 				}
 			}
 		}
@@ -777,7 +806,12 @@ async function scrapeFromHTML(doc, url, baseUrl, ids) {
 	let title = getText(doc, 'h1.contribution-title')
 		|| getText(doc, '.item-title')
 		|| getText(doc, '.contribution-title')
-		|| getText(doc, 'h1[itemprop="name"]');
+		|| getText(doc, 'h1[itemprop="name"]')
+		// Support for older Indico versions / Standard theme
+		|| getText(doc, '.conference-page .title h2')
+		|| getText(doc, '.title-with-actions h2')
+		|| getText(doc, '.conference-page .title .text')
+		|| getText(doc, '.conference-page .title');
 		
 	if (!title) {
 		let h1 = getText(doc, 'h1');
@@ -800,17 +834,17 @@ async function scrapeFromHTML(doc, url, baseUrl, ids) {
 				let value = label.nextElementSibling || label.parentElement.querySelector('dd, .value');
 				if (value) {
 					let name = ZU.trimInternal(value.textContent);
-					if (name) item.creators.push(ZU.cleanAuthor(name, 'presenter', false));
+					processCreator(item, name, 'presenter');
 				}
 			}
 		}
 	}
 	else {
 		for (let speakerEl of speakerElements) {
+			// For older Indico, .speaker-item might contain "Prof. Name"
+			// We try to extract the name part if possible, but cleanAuthor handles most prefixes
 			let name = ZU.trimInternal(speakerEl.textContent);
-			if (name) {
-				item.creators.push(ZU.cleanAuthor(name, 'presenter', false));
-			}
+			processCreator(item, name, 'presenter');
 		}
 	}
 	
@@ -821,7 +855,7 @@ async function scrapeFromHTML(doc, url, baseUrl, ids) {
 		item.date = ZU.strToISO(dateEl.content);
 	}
 	else {
-		dateEl = doc.querySelector('.contribution-date, .datetime, time, [datetime], .date');
+		dateEl = doc.querySelector('.contribution-date, .datetime, time, [datetime], .date, .time-info');
 		if (dateEl) {
 			let dateText = dateEl.getAttribute('datetime') || dateEl.textContent;
 			if (dateText) {
@@ -837,7 +871,7 @@ async function scrapeFromHTML(doc, url, baseUrl, ids) {
 	}
 	
 	// Meeting/Conference name
-	let eventTitleEl = doc.querySelector('.event-title a, .breadcrumb .event, .page-title .event');
+	let eventTitleEl = doc.querySelector('.event-title a, .breadcrumb .event, .page-title .event, .confTitle .conference-title-link span[itemprop="title"]');
 	if (eventTitleEl) {
 		item.meetingName = ZU.trimInternal(eventTitleEl.textContent);
 	}
@@ -875,7 +909,7 @@ async function scrapeFromHTML(doc, url, baseUrl, ids) {
 		// Pattern: .../contributions/{id}/...
 		if (attachUrl
 			&& (attachUrl.includes(`/contributions/${ids.contribId}/`) || attachUrl.includes(`/contribution/${ids.contribId}/`))
-			&& (attachUrl.includes('.pdf') || attachUrl.includes('/attachments/') || attachUrl.includes('/material/'))) {
+			&& (attachUrl.includes('/attachments/') || attachUrl.includes('/material/'))) {
 			
 			item.attachments.push({
 				title: attachTitle,
@@ -948,6 +982,39 @@ var testCases = [
 		"type": "web",
 		"url": "https://indico.cern.ch/event/1539475/timetable/#20251117.detailed",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://indico.itp.ac.cn/event/324/contributions/2059/",
+		"items": [
+			{
+				"itemType": "presentation",
+				"title": "格点QCD进展综述",
+				"creators": [
+					{
+						"lastName": "川 刘",
+						"creatorType": "presenter",
+						"fieldMode": 1
+					}
+				],
+				"date": "2025-10-10",
+				"meetingName": "第五届中国格点量子色动力学研讨会",
+				"url": "https://indico.itp.ac.cn/event/324/contributions/2059/",
+				"attachments": [
+					{
+						"title": "1.刘川-格点QCD进展综述.pdf",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
