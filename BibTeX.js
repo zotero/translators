@@ -18,7 +18,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2024-03-25 14:51:02"
+	"lastUpdated": "2025-11-28 19:44:26"
 }
 
 /*
@@ -976,7 +976,11 @@ function beginRecord(type, closeChar) {
 					}
 					delete item.backupLocation;
 				}
-				
+				if (item.itemID) {
+					item._extraFields.push({ field: "citation key", value: item.itemID });
+					//item.citationKey = item.itemID;
+				}
+
 				if (!item.date) {
 					item.date = dateFieldsToDate(item.year, item.month, item.day);
 				}
@@ -3133,6 +3137,7 @@ var testCases = [
 					}
 				],
 				"date": "2001",
+				"extra": "citation key: Adams2001",
 				"itemID": "Adams2001",
 				"pages": "493–518",
 				"publicationTitle": "Bulletin of Volcanology",
@@ -3175,6 +3180,7 @@ var testCases = [
 				],
 				"date": "1964",
 				"edition": "ninth Dover printing, tenth GPO printing",
+				"extra": "citation key: abramowitz+stegun",
 				"itemID": "abramowitz+stegun",
 				"place": "New York",
 				"publisher": "Dover",
@@ -3200,6 +3206,7 @@ var testCases = [
 				],
 				"date": "2008",
 				"ISBN": "0385527403",
+				"extra": "citation key: Torre2008",
 				"itemID": "Torre2008",
 				"publisher": "Doubleday",
 				"attachments": [],
@@ -3228,6 +3235,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"extra": "citation key: author:06",
 				"itemID": "author:06",
 				"pages": "330—331",
 				"attachments": [],
@@ -3251,6 +3259,7 @@ var testCases = [
 					}
 				],
 				"date": "2006-10",
+				"extra": "citation key: conference:06",
 				"itemID": "conference:06",
 				"attachments": [],
 				"tags": [],
@@ -3276,6 +3285,7 @@ var testCases = [
 				"date": "2001",
 				"ISBN": "0-69-697269-4",
 				"edition": "1st,",
+				"extra": "citation key: hicks2001",
 				"itemID": "hicks2001",
 				"place": "Palo Alto",
 				"publisher": "Stanford Press",
@@ -3301,6 +3311,7 @@ var testCases = [
 					}
 				],
 				"date": "2009",
+				"extra": "citation key: Oliveira_2009",
 				"issue": "29",
 				"itemID": "Oliveira_2009",
 				"pages": "29",
@@ -3321,6 +3332,7 @@ var testCases = [
 				"itemType": "journalArticle",
 				"title": "non-braking space: ; accented characters: ñ and ñ; tilde operator: ∼",
 				"creators": [],
+				"extra": "citation key: test-ticket1661",
 				"itemID": "test-ticket1661",
 				"attachments": [],
 				"tags": [],
@@ -3355,6 +3367,7 @@ var testCases = [
 				],
 				"date": "2012",
 				"DOI": "10.1007/s13127-011-0069-8",
+				"extra": "citation key: Frit2",
 				"itemID": "Frit2",
 				"pages": "71-80",
 				"publicationTitle": "Actes du 4<sup>ème</sup> Congrès Français d'Acoustique",
@@ -3381,6 +3394,7 @@ var testCases = [
 					}
 				],
 				"date": "2012",
+				"extra": "citation key: american_rights_at_work_public_2012",
 				"itemID": "american_rights_at_work_public_2012",
 				"url": "http://www.americanrightsatwork.org/blogcategory-275/",
 				"attachments": [],
@@ -3398,6 +3412,7 @@ var testCases = [
 				"itemType": "journalArticle",
 				"title": "Zotero: single attachment",
 				"creators": [],
+				"extra": "citation key: zoteroFilePath1",
 				"itemID": "zoteroFilePath1",
 				"attachments": [
 					{
@@ -3414,6 +3429,7 @@ var testCases = [
 				"itemType": "journalArticle",
 				"title": "Zotero: multiple attachments",
 				"creators": [],
+				"extra": "citation key: zoteroFilePaths2",
 				"itemID": "zoteroFilePaths2",
 				"attachments": [
 					{
@@ -3435,6 +3451,7 @@ var testCases = [
 				"itemType": "journalArticle",
 				"title": "Zotero: linked attachments (old)",
 				"creators": [],
+				"extra": "citation key: zoteroFilePaths3",
 				"itemID": "zoteroFilePaths3",
 				"attachments": [],
 				"tags": [],
@@ -3445,6 +3462,7 @@ var testCases = [
 				"itemType": "journalArticle",
 				"title": "Zotero: linked attachments",
 				"creators": [],
+				"extra": "citation key: zoteroFilePaths4",
 				"itemID": "zoteroFilePaths4",
 				"attachments": [
 					{
@@ -3461,6 +3479,7 @@ var testCases = [
 				"itemType": "journalArticle",
 				"title": "Mendeley: single attachment",
 				"creators": [],
+				"extra": "citation key: mendeleyFilePaths1",
 				"itemID": "mendeleyFilePaths1",
 				"url": "https://forums.zotero.org/discussion/28347/unable-to-get-pdfs-stored-on-computer-into-zotero-standalone/",
 				"attachments": [
@@ -3478,6 +3497,7 @@ var testCases = [
 				"itemType": "journalArticle",
 				"title": "Mendeley: escaped characters",
 				"creators": [],
+				"extra": "citation key: mendeleyFilePaths2",
 				"itemID": "mendeleyFilePaths2",
 				"attachments": [
 					{
@@ -3494,6 +3514,7 @@ var testCases = [
 				"itemType": "journalArticle",
 				"title": "Citavi: single attachment",
 				"creators": [],
+				"extra": "citation key: citaviFilePaths1",
 				"itemID": "citaviFilePaths1",
 				"url": "https://forums.zotero.org/discussion/35909/bibtex-import-from-citavi-including-pdf-attachments/",
 				"attachments": [
@@ -3517,6 +3538,7 @@ var testCases = [
 				"itemType": "journalArticle",
 				"title": "extbackslash extbackslash{}: {",
 				"creators": [],
+				"extra": "citation key: BibTeXEscapeTest1",
 				"itemID": "BibTeXEscapeTest1",
 				"attachments": [],
 				"tags": [],
@@ -3637,7 +3659,7 @@ var testCases = [
 				"date": "2013-03",
 				"DOI": "10.1161/CIR.0b013e318288b4dd",
 				"ISSN": "1524-4539",
-				"extra": "PMID: 23439512",
+				"extra": "PMID: 23439512\ncitation key: sasson_increasing_2013",
 				"issue": "12",
 				"itemID": "sasson_increasing_2013",
 				"language": "eng",
@@ -3698,7 +3720,7 @@ var testCases = [
 					}
 				],
 				"DOI": "10.12345/123456",
-				"extra": "LCCN: L123456\nMR: MR123456\nZbl: ZM123456\nPMID: P123456\nPMCID: PMC123456\narXiv: AX123456",
+				"extra": "LCCN: L123456\nMR: MR123456\nZbl: ZM123456\nPMID: P123456\nPMCID: PMC123456\narXiv: AX123456\ncitation key: smith_testing_????",
 				"itemID": "smith_testing_????",
 				"attachments": [],
 				"tags": [],
@@ -3721,7 +3743,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"extra": "DOI: 10.12345/123456\nLCCN: L123456\nMR: MR123456\nZbl: ZM123456\nPMID: P123456\nPMCID: PMC123456\narXiv: AX123456",
+				"extra": "DOI: 10.12345/123456\nLCCN: L123456\nMR: MR123456\nZbl: ZM123456\nPMID: P123456\nPMCID: PMC123456\narXiv: AX123456\ncitation key: smith_testing_????",
 				"itemID": "smith_testing_????",
 				"attachments": [],
 				"tags": [],
@@ -3745,6 +3767,7 @@ var testCases = [
 					}
 				],
 				"date": "2009",
+				"extra": "citation key: DBLP:ms/Hoffmann2008",
 				"itemID": "DBLP:ms/Hoffmann2008",
 				"thesisType": "Master's Thesis",
 				"university": "Diplomarbeit, Universität Trier, FB IV, DBIS/DBLP",
@@ -3765,6 +3788,7 @@ var testCases = [
 					}
 				],
 				"date": "2009",
+				"extra": "citation key: DBLP:phd/Ackermann2009",
 				"itemID": "DBLP:phd/Ackermann2009",
 				"thesisType": "PhD Thesis",
 				"university": "University of Paderborn",
@@ -3808,7 +3832,7 @@ var testCases = [
 				"date": "2007",
 				"DOI": "10.1145/1281192.1281230",
 				"ISBN": "978-1-59593-609-7",
-				"extra": "event-place: San Jose, California, USA",
+				"extra": "event-place: San Jose, California, USA\ncitation key: Giannotti:2007:TPM:1281192.1281230",
 				"itemID": "Giannotti:2007:TPM:1281192.1281230",
 				"pages": "330–339",
 				"place": "New York, NY, USA",
@@ -3856,6 +3880,7 @@ var testCases = [
 				],
 				"date": "2015",
 				"DOI": "10.1515/zfsoz-2015-0604",
+				"extra": "citation key: madoc40756",
 				"issue": "6",
 				"itemID": "madoc40756",
 				"language": "Deutsch",
@@ -3886,7 +3911,7 @@ var testCases = [
 				"date": "2013",
 				"DOI": "10.1016/j.aim.2013.04.020",
 				"ISSN": "0001-8708",
-				"extra": "MR: 3077863",
+				"extra": "MR: 3077863\ncitation key: MR3077863",
 				"itemID": "MR3077863",
 				"journalAbbreviation": "Adv. Math.",
 				"pages": "1–15",
@@ -3915,6 +3940,7 @@ var testCases = [
 					}
 				],
 				"date": "2011",
+				"extra": "citation key: madoc44942",
 				"itemID": "madoc44942",
 				"language": "isl",
 				"pages": "36–44",
@@ -3942,6 +3968,7 @@ var testCases = [
 					}
 				],
 				"date": "2019",
+				"extra": "citation key: example-electronic-string",
 				"itemID": "example-electronic-string",
 				"url": "https://www.zotero.org/",
 				"attachments": [],
@@ -3971,6 +3998,7 @@ var testCases = [
 					}
 				],
 				"date": "1942-03",
+				"extra": "citation key: sweig42",
 				"itemID": "sweig42",
 				"publisher": "D\\ëad Po<sub>eee</sub>t Society",
 				"attachments": [],
@@ -4055,6 +4083,7 @@ var testCases = [
 					}
 				],
 				"date": "2020-12",
+				"extra": "citation key: batsis:rural",
 				"itemID": "batsis:rural",
 				"publicationTitle": "BMC Geriatrics",
 				"rights": "the authors",
@@ -4091,6 +4120,7 @@ var testCases = [
 				],
 				"date": "2021-06-18",
 				"abstractNote": "This document defines methodologies for benchmarking EVPN and PBB- EVPN performance. EVPN is defined in RFC 7432, and is being deployed in Service Provider networks. Specifically, this document defines the methodologies for benchmarking EVPN/PBB-EVPN convergence, data plane performance, and control plane performance.",
+				"extra": "citation key: ietf-bmwg-evpntest-09",
 				"institution": "Internet Engineering Task Force",
 				"itemID": "ietf-bmwg-evpntest-09",
 				"reportNumber": "draft-ietf-bmwg-evpntest-09",
@@ -4157,6 +4187,7 @@ var testCases = [
 					}
 				],
 				"date": "2009",
+				"extra": "citation key: NIPS2009_0188e8b8",
 				"itemID": "NIPS2009_0188e8b8",
 				"proceedingsTitle": "Advances in Neural Information Processing Systems",
 				"publisher": "Curran Associates, Inc.",
@@ -4190,6 +4221,7 @@ var testCases = [
 				],
 				"date": "2023",
 				"DOI": "10.1134/S1063778823010131",
+				"extra": "citation key: Borissov:2855446",
 				"issue": "6",
 				"itemID": "Borissov:2855446",
 				"pages": "970-975",
@@ -4223,6 +4255,7 @@ var testCases = [
 					}
 				],
 				"date": "1998",
+				"extra": "citation key: derbis1998poczucie",
 				"itemID": "derbis1998poczucie",
 				"publisher": "Stowarzyszenie Psychologia i Architektura",
 				"attachments": [],
