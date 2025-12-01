@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-08-19 14:31:02"
+	"lastUpdated": "2025-12-01 12:27:49"
 }
 
 /*
@@ -108,6 +108,18 @@ function isOpenAccess(doc) {
 	return false;
 }
 
+function fixIssue(doc, item) {
+	// Issue is missing in the metadata e.g. for 2153-9650
+	// Issue is partly wron the metadata in 1703-289X
+	designation = ZU.xpathText(doc, '//*[@class="designation"]');
+	let issueMatch = /(?:Number\s+)(?<issue>\d+(?:-\d+))/i;
+	let issue = issueMatch.exec(designation)?.groups?.issue;
+	if (issue?.length > item.issue.length)
+	    return issue.replace('-', '/');
+	return item.issue;	
+}
+
+
 
 function scrape(doc) {
 	// Embedded Metadata
@@ -152,13 +164,7 @@ function scrape(doc) {
 
 		});
 
-		// Issue is missing in the metadata e.g. for 2153-9650
-		if (!item.issue) {
-			designation = ZU.xpathText(doc, '//*[@class="designation"]');
-			let issueMatch = /(?:Number\s+)(?<issue>\d+)/i;
-			item.issue = issueMatch.exec(designation)?.groups?.issue;
-		}
-
+		item.issue = fixIssue(doc, item);
 		item.date = ZU.xpathText(doc, '//meta[@name="citation_year"]/@content');
 	});
 	translator.translate();
