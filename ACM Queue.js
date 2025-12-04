@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-11-10 21:23:08"
+	"lastUpdated": "2025-12-04 18:10:19"
 }
 
 /*
@@ -89,6 +89,9 @@ async function scrape(doc, url = doc.location.href) {
 	// Do nothing on error
 	translate.setHandler("error", () => {});
 	translate.setHandler("itemDone", (obj, item) => {
+		item.publicationTitle = "ACM Queue";
+		item.publisher = "Association for Computing Machinery";
+
 		// 'DOI Content Negotiation' translator does not add attachments
 		let pdfUrl = doc.querySelector('a[href*="/doi/pdf"]');
 		item.attachments.push({
@@ -114,7 +117,8 @@ async function scrape(doc, url = doc.location.href) {
 async function scrapeDocument(doc, url) {
 	let item = new Zotero.Item("journalArticle");
 	item.title = text(doc, "h1");
-	item.publicationTitle = "Queue";
+	item.publicationTitle = "ACM Queue";
+	item.publisher = "Association for Computing Machinery";
 	item.journalAbbreviation = "Queue";
 	item.language = "en";
 	item.ISSN = "1542-7730";
@@ -192,7 +196,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "DOI.org (Crossref)",
 				"pages": "5-14",
-				"publicationTitle": "Queue",
+				"publicationTitle": "ACM Queue",
 				"shortTitle": "Make Two Trips",
 				"url": "https://dl.acm.org/doi/10.1145/3664275",
 				"volume": "22",
@@ -230,7 +234,7 @@ var testCases = [
 				"journalAbbreviation": "Queue",
 				"language": "en",
 				"libraryCatalog": "ACM Queue",
-				"publicationTitle": "Queue",
+				"publicationTitle": "ACM Queue",
 				"url": "https://queue.acm.org/detail.cfm?id=3762991",
 				"volume": "23",
 				"attachments": [
@@ -268,7 +272,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "DOI.org (Crossref)",
 				"pages": "5-13",
-				"publicationTitle": "Queue",
+				"publicationTitle": "ACM Queue",
 				"shortTitle": "I'm Probably Less Deterministic Than I Used to Be",
 				"url": "https://dl.acm.org/doi/10.1145/3546935",
 				"volume": "20",
@@ -321,7 +325,7 @@ var testCases = [
 				"journalAbbreviation": "Queue",
 				"language": "en",
 				"libraryCatalog": "ACM Queue",
-				"publicationTitle": "Queue",
+				"publicationTitle": "ACM Queue",
 				"url": "https://queue.acm.org/detail.cfm?id=3501293",
 				"volume": "19",
 				"attachments": [
@@ -354,11 +358,11 @@ var testCases = [
 				"DOI": "10.1145/3773095",
 				"ISSN": "1542-7730",
 				"abstractNote": "The state of possibility with memory safety today is similar to the state of automobile safety just prior to the widespread adoption of mandatory seat-belt laws. As car manufacturers began to integrate seat belts as a standard feature across their model lines and states began to require that drivers wear seat belts while driving, the rate of traffic fatalities and severity of traffic-related injuries dropped drastically. Seat belts did not solve automobile safety, but they credibly improved it, and at remarkably low cost.",
-				"issue": "4",
+				"issue": "5",
 				"journalAbbreviation": "Queue",
 				"language": "en",
 				"libraryCatalog": "ACM Queue",
-				"publicationTitle": "Queue",
+				"publicationTitle": "ACM Queue",
 				"url": "https://queue.acm.org/detail.cfm?id=3773095",
 				"volume": "23",
 				"attachments": [
