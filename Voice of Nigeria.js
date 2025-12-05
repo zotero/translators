@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-12-05 15:28:44"
+	"lastUpdated": "2025-12-05 15:36:08"
 }
 
 /*
@@ -287,7 +287,7 @@ async function scrape(doc, url) {
 
 	// --- AUTHORS: CSS selector methods first ---
 	if (item.creators.length === 0) {
-		let hwAuthors = doc.querySelectorAll('header.td-post-title p.td-post-sub-title, div.post-header.post-tp-1-header h2.post-subtitle');
+		let hwAuthors = doc.querySelectorAll('header.td-post-title p.td-post-sub-title, div.post-header.post-tp-1-header h2.post-subtitle, div.post-meta.single-post-meta span.post-author-name');
 		if (hwAuthors.length) {
 			for (let el of hwAuthors) {
 				let candidates = splitAuthors(el.textContent);
@@ -476,7 +476,13 @@ var testCases = [
 			{
 				"itemType": "newspaperArticle",
 				"title": "الرئيس تينوبو يؤدي اليمين الدستورية للجنرال موسى وزيراً للدفاع",
-				"creators": [],
+				"creators": [
+					{
+						"firstName": "Abdulwahab",
+						"lastName": "Ilyasu",
+						"creatorType": "author"
+					}
+				],
 				"ISSN": "1118-0811",
 				"abstractNote": "أدى الرئيس بولا أحمد تينوبو اليمين الدستورية للجنرال كريستوفر جوابين موسى (المتقاعد) وزيرًا جديدًا للدفاع في نيجيريا، مما يُمثل نقلة نوعية في الإصلاحات الأمنية الجارية في البلادأدى الرئيس اليمين للجنرال موسى في مكتبه بقصر الرئاسة في أبوجا، مُشيرًا إل",
 				"libraryCatalog": "Voice of Nigeria",
