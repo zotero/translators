@@ -2,7 +2,7 @@
 	"translatorID": "6f259dd0-95c3-4463-8a09-1dac9d063ee3",
 	"label": "Voice of Nigeria",
 	"creator": "VWF",
-	"target": "^https?://((www|arabic)\\.)?von\\.gov\\.ng/",
+	"target": "^https?://((www|arabic|french)\\.)?von\\.gov\\.ng/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
