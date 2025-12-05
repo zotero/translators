@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-09 18:24:39"
+	"lastUpdated": "2025-10-14 17:29:56"
 }
 
 /*
@@ -713,7 +713,7 @@ function addLowQualityMetadata(doc, newItem) {
 	}
 
 	if (!newItem.url) {
-		newItem.url = ZU.xpathText(doc, '//head/link[@rel="canonical"]/@href') || doc.location.href;
+		newItem.url = attr(doc, 'head > link[rel="canonical"]', 'href') || doc.location.href;
 	}
 	
 	if (!newItem.language) {
@@ -761,10 +761,23 @@ function getAuthorFromByline(doc, newItem) {
 			Z.debug(`Found ${byline.length} elements with '${bylineClass}' class (strict: ${isStrict})`);
 			for (let bylineElement of byline) {
 				if (!bylineElement.innerText?.trim()) continue;
+				if (bylines.includes(bylineElement)) continue;
 				bylines.push(bylineElement);
 			}
 
 			if (isStrict && bylines.length) {
+				break;
+			}
+		}
+	}
+
+	if (!bylines.length) {
+		let otherSelectors = ['a[rel="author"]'];
+		
+		for (let selector of otherSelectors) {
+			selector += ':not(:empty)';
+			if (doc.querySelectorAll(selector).length == 1) {
+				bylines.push(doc.querySelector(selector));
 				break;
 			}
 		}
@@ -1491,14 +1504,12 @@ var testCases = [
 				],
 				"date": "2015-06",
 				"ISBN": "9788460842118",
-				"abstractNote": "Abstracts aceptados sin presentacion / Accepted abstracts without presentation",
 				"conferenceName": "International Conference Arquitectonics Network: Architecture, Education and Society, Barcelona, 3-5 June 2015: Abstracts",
 				"language": "spa",
 				"libraryCatalog": "upcommons.upc.edu",
 				"publisher": "GIRAS. Universitat Politècnica de Catalunya",
-				"rights": "Open Access",
 				"shortTitle": "Necesidad y morfología",
-				"url": "https://upcommons.upc.edu/handle/2117/114657",
+				"url": "https://hdl.handle.net/2117/114657",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1670,17 +1681,11 @@ var testCases = [
 			{
 				"itemType": "webpage",
 				"title": "Woher kommt \"über die Wupper gehen\"?",
-				"creators": [
-					{
-						"firstName": "",
-						"lastName": "SWRWissen",
-						"creatorType": "author"
-					}
-				],
+				"creators": [],
 				"date": "2024-03-05",
 				"abstractNote": "Es gibt eine Vergleichsredensart: \"Der ist über den Jordan gegangen.\" Das heißt, er ist gestorben. Das bezieht sich auf die alten Grenzen Israels. In Wuppertal jedoch liegt jenseits des Flusses das Gefängnis. Von Rolf-Bernhard Essig",
 				"language": "de",
-				"url": "https://www.swr.de/wissen/1000-antworten/woher-kommt-redensart-ueber-die-wupper-gehen-102.html",
+				"url": "https://www.swr.de/kultur/sprache/woher-kommt-redensart-ueber-die-wupper-gehen-102.html",
 				"websiteTitle": "SWR",
 				"attachments": [
 					{
@@ -1895,6 +1900,72 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.statista.com/chart/13139/estimated-worldwide-mobile-e-commerce-sales/",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Infographic: Global Mobile E-Commerce Worth $2.2 Trillion in 2023",
+				"creators": [
+					{
+						"firstName": "Katharina",
+						"lastName": "Buchholz",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-08-10",
+				"abstractNote": "This chart shows estimated worldwide mobile e-commerce sales and their share in all e-commerce sales.",
+				"language": "en",
+				"shortTitle": "Infographic",
+				"url": "https://www.statista.com/chart/13139/estimated-worldwide-mobile-e-commerce-sales",
+				"websiteTitle": "Statista Daily Data",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://optimization-online.org/2023/05/maximum-likelihood-probability-measures-over-sets-and-applications-to-data-driven-optimization/",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "Maximum Likelihood Probability Measures over Sets and Applications to Data-Driven Optimization – Optimization Online",
+				"creators": [
+					{
+						"firstName": "Juan",
+						"lastName": "Borrero",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Denis",
+						"lastName": "Saure",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-05-15",
+				"language": "en-US",
+				"url": "https://optimization-online.org/2023/05/maximum-likelihood-probability-measures-over-sets-and-applications-to-data-driven-optimization/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],

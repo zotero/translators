@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-10-03 14:17:12"
+	"lastUpdated": "2025-12-02 18:01:21"
 }
 
 function detectWeb(doc, url) {
@@ -153,7 +153,9 @@ async function getPDFLink(doc) {
 	// enough to get us through even without those parameters.
 	pdfURL = attr(doc, 'link[rel="canonical"]', 'href');
 	if (pdfURL) {
-		pdfURL = pdfURL + '/pdfft?download=true';
+		pdfURL += '/pdfft?download=true';
+		// TEMP: Remove erroneous port from canonical link
+		pdfURL = pdfURL.replace(':5037', '');
 		Zotero.debug("Trying to construct PDF URL from canonical link: " + pdfURL);
 		return pdfURL;
 	}

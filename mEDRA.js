@@ -8,8 +8,8 @@
 	"priority": 105,
 	"inRepository": true,
 	"translatorType": 12,
-	"browserSupport": "g",
-	"lastUpdated": "2014-05-26 03:50:55"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2025-07-14 17:55:30"
 }
 
 function scrapeMasterTable(doc) {
@@ -300,6 +300,13 @@ function sanitizeQueries(queries) {
 }
 
 function detectSearch(queries) {
+	// TEMP: Disable
+	// This translator is broken, and when it doesn't return an item from its processDocuments()
+	// callback, it triggers some kind of gnarly control flow bug in the translation framework.
+	// The easiest thing to do right now is to disable it until it's working again (and asyncified,
+	// which might fix the issue).
+	return false;
+
 	if (!queries) return;
 	
 	return !!sanitizeQueries(queries).length;
@@ -313,7 +320,9 @@ function doSearch(queries) {
 			+ encodeURIComponent(dois[i]));
 	}
 	ZU.processDocuments(urls, doWeb);
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
