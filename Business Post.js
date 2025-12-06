@@ -61,7 +61,7 @@ function doWeb(doc, url) {
 	translator.setDocument(doc);
 
 	translator.setHandler('itemDone', (obj, item) => {
-        item.itemType = detectWeb(doc, url);
+		item.itemType = detectWeb(doc, url);
 
 		// Additional configs for item object
 
