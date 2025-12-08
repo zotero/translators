@@ -47,88 +47,76 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url) {
-	const item = new Zotero.Item("newspaperArticle");
+    const item = new Zotero.Item("newspaperArticle");
 
-	// Get JSON-LD data
-	let jsonLDData = null;
-	const jsonLD = doc.querySelector('script[type="application/ld+json"]');
-	if (jsonLD) {
-		try {
-			jsonLDData = JSON.parse(jsonLD.textContent);
-			const headline = ZU.trimInternal(jsonLDData.headline);
-			if (headline) item.title = headline;
-			const abstract = ZU.trimInternal(jsonLDData.description);
-			if (abstract) item.abstractNote = abstract;
-			const date = ZU.trimInternal(jsonLDData.datePublished);
-			if (date) item.date = ZU.trimInternal(date);
-		}
-		catch (e) {
-			Z.debug()("Error parsing JSON-LD for newspaper: " + e);
-		}
-	}
-	else {
-		// Headline
-		let headline = text(doc, '#sectionleveltabtitlearea');
+    // Get JSON-LD data (preferred source)
+    const jsonLD = doc.querySelector('script[type="application/ld+json"]');
+    if (jsonLD) {
+        try {
+            const jsonLDData = JSON.parse(jsonLD.textContent);
+            if (jsonLDData.headline) {
+                item.title = ZU.trimInternal(jsonLDData.headline);
+            }
+            if (jsonLDData.description) {
+                item.abstractNote = ZU.trimInternal(jsonLDData.description);
+            }
+            if (jsonLDData.datePublished) {
+                item.date = ZU.trimInternal(jsonLDData.datePublished);
+            }
+        }
+        catch (e) {
+            Z.debug("Error parsing JSON-LD: " + e);
+        }
+    } else {
+        // Fallbacks
+        item.title = text(doc, '#sectionleveltabtitlearea') || item.title;
+        item.abstractNote = text(doc, 'meta[name="description"]') || item.abstractNote;
+        const dateStr = text(doc, 'li.breadcrumb-item:nth-child(3)');
+        if (dateStr) {
+            item.date = dateStr;  // Already trimmed by text()
+        }
+    }
 
-		if (headline) item.title = headline;
+    // Canonical URL (persistent link preferred)
+    item.url = text(doc, "#sectionleveltabpersistentlinkarea .persistentlinkurl") || url;
 
-		// Abstract note
-		const abstract = ZU.trimInternal(doc.querySelector('meta[name="description"]').getAttribute('content'));
+    // Get publication from NLI script data
+    const rawJSON = attr(doc, 'script#nlijs', 'data-nli-data-json');
+    if (rawJSON) {
+        try {
+            const json = JSON.parse(rawJSON.replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
+            if (json.publicationTitle) {
+                item.publicationTitle = ZU.trimInternal(json.publicationTitle);
+            }
+        }
+        catch (e) {
+            Z.debug("Failed to parse data-nli-data-json: " + e);
+        }
+    }
 
-		if (abstract) item.abstractNote = abstract;
+    // Page number handling
+    if (url.includes("/page/")) {
+        const match = url.match(/\/page\/(\d+)\//);
+        if (match) {
+            item.pages = match[1];
+        }
+        // Clean the chosen URL (persistent or fallback)
+        item.url = (item.url || url).split('?')[0].split('#')[0];
+    } else {
+        const pageStr = text(doc, 'span.pagelabel.current b');
+        if (pageStr) {
+            const parts = pageStr.split(/\s+/);
+            if (parts[1]) {
+                item.pages = parts[1];  // Already trimmed
+            }
+        }
+    }
 
-		// Date
-		const dateNode = text('li.breadcrumb-item:nth-child(3)');
-		if (dateNode) {
-			item.date = ZU.trimInternal(dateNode.textContent);
-		}
-	}
+    // Fallback title if still missing
+    if (!item.title && item.publicationTitle && item.date) {
+        item.title = `${item.publicationTitle}, ${item.date}`;
+    }
 
-	// Persistent link
-	const linkNode = doc.querySelector("#sectionleveltabpersistentlinkarea .persistentlinkurl");
-	item.url = linkNode ? ZU.trimInternal(linkNode.textContent) : url;
-
-	// Get publication from NLI script data
-	const nliScript = doc.querySelector('script#nlijs');
-	if (nliScript) {
-		const rawJSON = nliScript.getAttribute('data-nli-data-json');
-		if (rawJSON) {
-			try {
-				const json = JSON.parse(rawJSON.replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
-				if (json.publicationTitle) {
-					item.publicationTitle = ZU.trimInternal(json.publicationTitle);
-				}
-			}
-			catch (e) {
-				Z.debug()("Failed to parse data-nli-data-json: " + e);
-			}
-		}
-	}
-
-	// Page number handling
-	if (url.includes("/page/")) {
-		const match = url.match(/\/page\/(\d+)\//);
-		if (match) {
-			item.pages = match[1];
-		}
-		// Clean URL for citation
-		item.url = url.split('?')[0].split('#')[0];
-	}
-	else {
-		const pageLabel = doc.querySelector('span.pagelabel.current b');
-		if (pageLabel) {
-			const split = pageLabel.textContent.split(" ");
-			if (split[1]) {
-				item.pages = ZU.trimInternal(split[1]);
-			}
-		}
-	}
-
-	// Fallback title if no headline found
-	if (!item.title && item.publicationTitle && item.date) {
-		item.title = `${item.publicationTitle}, ${item.date}`;
-	}
-
-	item.libraryCatalog = "National Library of Israel";
-	item.complete();
+    item.libraryCatalog = "National Library of Israel";
+    item.complete();
 }
