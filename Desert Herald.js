@@ -154,10 +154,10 @@ async function scrape(doc, url) {
 
 	// HEADLINE
 	item.title = ZU.unescapeHTML(
-			meta(doc, 'og:title')
-			|| text(doc, 'header.entry-header.clearfix h1.post-title.lg')
-			|| ''
-		);
+		meta(doc, 'og:title')
+		|| text(doc, 'header.entry-header.clearfix h1.post-title.lg')
+		|| ''
+	);
 
 	// ABSTRACT
 	item.abstractNote = ZU.unescapeHTML(
