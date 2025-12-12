@@ -153,8 +153,7 @@ async function scrape(doc, url) {
 	let item = new Zotero.Item('newspaperArticle');
 
 	// HEADLINE
-	item.title =
-		ZU.unescapeHTML(
+	item.title = ZU.unescapeHTML(
 			meta(doc, 'og:title')
 			|| text(doc, 'header.entry-header.clearfix h1.post-title.lg')
 			|| ''
