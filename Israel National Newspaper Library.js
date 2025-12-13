@@ -74,7 +74,7 @@ async function scrape(doc, url) {
 		item.abstractNote = text(doc, 'meta[name="description"]') || item.abstractNote;
 		const dateStr = text(doc, 'li.breadcrumb-item:nth-child(3)');
 		if (dateStr) {
-			item.date = dateStr;  // Already trimmed by text()
+			item.date = dateStr; // Already trimmed by text()
 		}
 	}
 
@@ -91,8 +91,8 @@ async function scrape(doc, url) {
 			}
 		}
 		catch (e) {
-		Z.debug("Failed to parse data-nli-data-json: " + e);
-	}
+			Z.debug("Failed to parse data-nli-data-json: " + e);
+		}
 	}
 
 	// Page number handling
@@ -109,8 +109,8 @@ async function scrape(doc, url) {
 		if (pageStr) {
 			const parts = pageStr.split(/\s+/);
 			if (parts[1]) {
-				item.pages = parts[1];  // Already trimmed
-		}
+				item.pages = parts[1]; // Already trimmed
+			}
 		}
 	}
 
