@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-09-17 16:29:28"
+	"lastUpdated": "2025-11-06 20:33:49"
 }
 
 /*
@@ -59,7 +59,7 @@ function doWeb(doc, url) {
 			}
 			var pmcids = [];
 			for (var i in ids) {
-				pmcids.push(i.replace("PMC", ""));
+				pmcids.push(i);
 			}
 			lookupPMCIDs(pmcids);
 			return true;
@@ -86,7 +86,7 @@ function doWeb(doc, url) {
 }
 
 function getPMCID(url) {
-	var pmcid = url.match(/\/articles\/PMC([\d]+)/);
+	var pmcid = url.match(/\/articles\/(PMC[\d]+)/);
 	return pmcid ? pmcid[1] : false;
 }
 
@@ -104,8 +104,7 @@ function getSearchResults(doc, checkOnly) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
-		// Prefix with PMC to stop the keys from being sorted numerically...
-		let pmcid = "PMC" + getPMCID(href);
+		let pmcid = getPMCID(href);
 		if (!pmcid) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -137,10 +136,11 @@ function lookupPMCIDs(ids, pdfLink) {
 			}
 		}
 
-		for (var i in articles) {
+		var i
+		for (let articleOuter of articles) {
 			var newItem = new Zotero.Item("journalArticle");
 			
-			var journal = ZU.xpath(articles[i], 'front/journalmeta');
+			var journal = ZU.xpath(articleOuter, 'front/journalmeta');
 
 			newItem.journalAbbreviation = ZU.xpathText(journal, 'journalid[@journalidtype="nlmta"]');
 			
@@ -160,14 +160,14 @@ function lookupPMCIDs(ids, pdfLink) {
 				newItem.ISSN = issn;
 			}
 
-			var article = ZU.xpath(articles[i], 'front/articlemeta');
+			var articleMeta = ZU.xpath(articleOuter, 'front/articlemeta');
 
 			var abstract;
-			if ((abstract = ZU.xpathText(article, 'abstract/p'))) {
+			if ((abstract = ZU.xpathText(articleMeta, 'abstract/p'))) {
 				newItem.abstractNote = abstract;
 			}
 			else {
-				var abstractSections = ZU.xpath(article, 'abstract/sec');
+				var abstractSections = ZU.xpath(articleMeta, 'abstract/sec');
 				abstract = [];
 				for (const j in abstractSections) {
 					abstract.push(ZU.xpathText(abstractSections[j], 'title') + "\n" + ZU.xpathText(abstractSections[j], 'p'));
@@ -175,18 +175,20 @@ function lookupPMCIDs(ids, pdfLink) {
 				newItem.abstractNote = abstract.join("\n\n");
 			}
 
-			newItem.DOI = ZU.xpathText(article, 'articleid[@pubidtype="doi"]');
+			newItem.DOI = ZU.xpathText(articleMeta, 'articleid[@pubidtype="doi"]');
 			
-			newItem.extra = "PMID: " + ZU.xpathText(article, 'articleid[@pubidtype="pmid"]') + "\n";
-			newItem.extra = newItem.extra + "PMCID: PMC" + ids[i];
+			newItem.extra = "PMID: " + ZU.xpathText(articleMeta, 'articleid[@pubidtype="pmid"]') + "\n";
 
-			newItem.title = ZU.trim(ZU.xpathText(article, 'titlegroup/articletitle'));
+			var pmcid = ZU.xpathText(articleMeta, 'articleid[@pubidtype="pmcid"]');
+			newItem.extra = newItem.extra + "PMCID: " + pmcid;
+
+			newItem.title = ZU.trim(ZU.xpathText(articleMeta, 'titlegroup/articletitle'));
 			
-			newItem.volume = ZU.xpathText(article, 'volume');
-			newItem.issue = ZU.xpathText(article, 'issue');
+			newItem.volume = ZU.xpathText(articleMeta, 'volume');
+			newItem.issue = ZU.xpathText(articleMeta, 'issue');
 
-			var lastPage = ZU.xpathText(article, 'lpage');
-			var firstPage = ZU.xpathText(article, 'fpage');
+			var lastPage = ZU.xpathText(articleMeta, 'lpage');
+			var firstPage = ZU.xpathText(articleMeta, 'fpage');
 			if (firstPage && lastPage && (firstPage != lastPage)) {
 				newItem.pages = firstPage + "-" + lastPage;
 			}
@@ -195,13 +197,13 @@ function lookupPMCIDs(ids, pdfLink) {
 			}
 			// use elocationid where we don't have itemIDs
 			if (!newItem.pages) {
-				newItem.pages = ZU.xpathText(article, 'elocationid');
+				newItem.pages = ZU.xpathText(articleMeta, 'elocationid');
 			}
 			
 
-			var pubDate = ZU.xpath(article, 'pubdate[@pubtype="ppub"]');
+			var pubDate = ZU.xpath(articleMeta, 'pubdate[@pubtype="ppub"]');
 			if (!pubDate.length) {
-				pubDate = ZU.xpath(article, 'pubdate[@pubtype="epub"]');
+				pubDate = ZU.xpath(articleMeta, 'pubdate[@pubtype="epub"]');
 			}
 			if (pubDate) {
 				if (ZU.xpathText(pubDate, 'day')) {
@@ -215,9 +217,9 @@ function lookupPMCIDs(ids, pdfLink) {
 				}
 			}
 
-			var contributors = ZU.xpath(article, 'contribgroup/contrib');
+			var contributors = ZU.xpath(articleMeta, 'contribgroup/contrib');
 			if (contributors) {
-				var authors = ZU.xpath(article, 'contribgroup/contrib[@contribtype="author"]');
+				var authors = ZU.xpath(articleMeta, 'contribgroup/contrib[@contribtype="author"]');
 				for (const j in authors) {
 					var lastName = ZU.xpathText(authors[j], 'name/surname');
 					var firstName = ZU.xpathText(authors[j], 'name/givennames');
@@ -231,7 +233,7 @@ function lookupPMCIDs(ids, pdfLink) {
 				}
 			}
 
-			var linkurl = "https://pmc.ncbi.nlm.nih.gov/articles/PMC" + ids[i] + "/";
+			var linkurl = "https://pmc.ncbi.nlm.nih.gov/articles/" + pmcid + "/";
 			newItem.url = linkurl;
 			newItem.attachments = [{
 				url: linkurl,
@@ -243,10 +245,10 @@ function lookupPMCIDs(ids, pdfLink) {
 			let pdfFileName;
 			if (pdfLink) {
 				Zotero.debug("Got PDF link from page");
-				pdfFileName = pdfLink[ids[i]];
+				pdfFileName = pdfLink[pmcid];
 			}
 			else {
-				pdfFileName = `https://pmc.ncbi.nlm.nih.gov/articles/PMC${ids[i]}/pdf`;
+				pdfFileName = `https://pmc.ncbi.nlm.nih.gov/articles/${pmcid}/pdf`;
 			}
 			
 			if (pdfFileName) {
@@ -318,16 +320,16 @@ var testCases = [
 				"libraryCatalog": "PubMed Central",
 				"pages": "37",
 				"publicationTitle": "Respiratory Research",
-				"url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2377243/",
+				"url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2377243/",
 				"volume": "9",
 				"attachments": [
 					{
-						"title": "PubMed Central Link",
+						"title": "Catalog Page",
 						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
-						"title": "PubMed Central Full Text PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -406,16 +408,16 @@ var testCases = [
 				"libraryCatalog": "PubMed Central",
 				"pages": "2767-2777",
 				"publicationTitle": "Statistics in medicine",
-				"url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3139813/",
+				"url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3139813/",
 				"volume": "30",
 				"attachments": [
 					{
-						"title": "PubMed Central Link",
+						"title": "Catalog Page",
 						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
-						"title": "PubMed Central Full Text PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -474,16 +476,16 @@ var testCases = [
 				"libraryCatalog": "PubMed Central",
 				"pages": "e8653",
 				"publicationTitle": "PLoS ONE",
-				"url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2801612/",
+				"url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2801612/",
 				"volume": "5",
 				"attachments": [
 					{
-						"title": "PubMed Central Link",
+						"title": "Catalog Page",
 						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
-						"title": "PubMed Central Full Text PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -538,16 +540,16 @@ var testCases = [
 				"pages": "88-102",
 				"publicationTitle": "Immunological Reviews",
 				"shortTitle": "The human immune response to tuberculosis and its treatment",
-				"url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4368415/",
+				"url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4368415/",
 				"volume": "264",
 				"attachments": [
 					{
-						"title": "PubMed Central Link",
+						"title": "Catalog Page",
 						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
-						"title": "PubMed Central Full Text PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
