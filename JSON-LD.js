@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2025-06-09 21:57:47"
+	"lastUpdated": "2025-12-17 11:36:42"
 }
 
 function doExport() {
@@ -20,6 +20,11 @@ function doExport() {
 		parseExtraFields(zotItem); // parse extra field 
 		ldList.push(zot2ldItem(zotItem));
 	}
+	ldList.sort(function(a,b){
+		const ua = a['@id'] ?? '';
+		const ub = b['@id'] ?? '';
+		return ua < ub ? -1 : ua > ub ? 1 : 0;
+	});
 	Zotero.write(JSON.stringify(ldList, null, "\t"))
 }
 
@@ -40,7 +45,8 @@ function zot2ldItem(zotItem)
 		[/<sup>e<\/sup>/g, "ᵉ"],   // 2ᵉ
 		[/<\/?sup>/g, ""], // default superscript, remove
 		[/<span style="font-variant:small-caps;">([^<]*)<\/span>/g, (match, word) => word.toUpperCase()], // small caps, to CAPS
-		[/<[^>]+>/g, ""] // default strip alltags
+		[/<[^>]+>/g, ""], // default strip alltags
+		[/[\u00A0\u202F]/g, ' ']
 	];
 	// source list for zotero document types https://aurimasv.github.io/z2csl/typeMap.xml
 	const zot2ldType = {
@@ -88,9 +94,14 @@ function zot2ldItem(zotItem)
 	};
 	if (zotItem.url) {
 		ldItem["@id"] = zotItem.url;
-		ldItem["sameAs"] = zotItem.url;
+		ldItem["url"] = zotItem.url;
+	}
+	else {
+		ldItem["@id"] = zotItem.uri;
+		ldItem["url"] = zotItem.uri;
 	}
 	if (zotItem.title) ldItem["name"] = regexReplaceAll(zotItem.title, tag2text);
+	// what about items with no title?
 	if (zotItem.creators && zotItem.creators.length) {
 		let authors = zotItem.creators.filter(c => c.creatorType === 'author');
 		if (authors.length === 1) {
@@ -101,7 +112,8 @@ function zot2ldItem(zotItem)
 	}
 	if (zotItem.date) ldItem["datePublished"] = ZU.strToISO(zotItem.date);
 	if (zotItem.language) ldItem["inLanguage"] = zotItem.language;
-	if (zotItem.citationKey) ldItem["citation"] = zotItem.citationKey;
+	// bad inference
+	// if (zotItem.citationKey) ldItem["citation"] = zotItem.citationKey;
 	if (zotItem.rights) {
 		if (zotItem.rights.startsWith("http")) {
 			ldItem["license"] = zotItem.rights;
@@ -110,58 +122,133 @@ function zot2ldItem(zotItem)
 		}
 	}
 
-	let editors = [];
-	if (zotItem.creators && zotItem.creators.length) {
-		editors = zotItem.creators.filter(c => (c.creatorType === 'editor' || c.creatorType === 'bookAuthor'));
-	}
-	if (zotItem.bookTitle || zotItem.publicationTitle || editors.length > 0) {
-		let container = {};
-		if (zotItem.bookTitle) container["@type"] = "Book";
-		else if (zotItem.type == "newspaperArticle") container["@type"] = "Newspaper";
-		else if (zotItem.publicationTitle) container["@type"] = "Periodical";
-		else container["@type"] =  "CreativeWorkSeries";
-
-		if (zotItem.bookTitle || zotItem.publicationTitle)
-			container["name"] = zotItem.bookTitle || zotItem.publicationTitle;
-		if (zotItem.ISSN) container["issn"] = zotItem.ISSN;
-		if (editors.length === 1) {
-			container["editor"] = zot2ldPers(editors[0]);
-		} else if (editors.length > 1) {
-			container["editor"] = editors.map(zot2ldPers);
+	if (zotItem.bookTitle) {
+		let book = {};
+		book["@type"] = "Book";
+		if (zotItem.bookTitle) book["name"] = regexReplaceAll(zotItem.bookTitle, tag2text);
+		if (zotItem.creators && zotItem.creators.length) {
+			let creators = zotItem.creators.filter(c => (c.creatorType === 'editor'));
+			if (creators.length === 1) {
+				book["editor"] = zot2ldPers(creators[0]);
+			} else if (creators.length > 1) {
+				book["editor"] = creators.map(zot2ldPers);
+			}
+			creators = zotItem.creators.filter(c => (c.creatorType === 'bookAuthor'));
+			if (creators.length === 1) {
+				book["author"] = zot2ldPers(creators[0]);
+			} else if (creators.length > 1) {
+				book["author"] = creators.map(zot2ldPers);
+			}
 		}
-
-		if (zotItem.date) container["datePublished"] = ZU.strToISO(zotItem.date);
-		if (zotItem.volume) container["volumeNumber"] = zotItem.volume;
-		if (zotItem.issue) container["issueNumber"] = zotItem.issue;
 		if (zotItem.publisher) {
-			container["publisher"] = {
+			book["publisher"] = {
 				"@type": "Organization",
-				"name": zotItem.publisher
+				"name": regexReplaceAll(zotItem.publisher, tag2text)
 			};
 		}
-		if (zotItem.place) container["locationCreated"] = zotItem.place;
+		if (zotItem.place) book["locationCreated"] = regexReplaceAll(zotItem.place, tag2text);
+		if (zotItem.date) book["datePublished"] = ZU.strToISO(zotItem.date);
+		ldItem["isPartOf"] = book;
+	}
+	else if (zotItem.publicationTitle) {
+		let issue = {};
+		/*
+		if (zotItem.type == "newspaperArticle") container["@type"] = "Newspaper";
+		else if (zotItem.publicationTitle) container["@type"] = "Periodical";
+		else container["@type"] =  "CreativeWorkSeries";
+		*/
+		/*
+		"isPartOf": {
+			"@type": "PublicationIssue",
+			"datePublished": "1933",
+			"isPartOf": {
+				"@type": "PublicationVolume",
+				"volumeNumber": "6",
+				"isPartOf": {
+					"@type": "Periodical",
+					"name": "Revue française de psychanalyse"
+				}
+			}
+		}
+		*/
+		issue["@type"] = "PublicationIssue";
+		if (zotItem.date) issue["datePublished"] = ZU.strToISO(zotItem.date);
+		if (zotItem.issue) issue["issueNumber"] = zotItem.issue;
+		if (zotItem.publicationTitle) {
+			let publication = {};
+			publication["@type"] = "Periodical";
+			publication["name"] = regexReplaceAll(zotItem.publicationTitle, tag2text);
+			if (zotItem.ISSN) publication["issn"] = zotItem.ISSN;
+			if (zotItem.volume) {
+				let volume = {};
+				volume["@type"] = "PublicationVolume";
+				volume["volumeNumber"] = zotItem.volume;
+				volume["isPartOf"] = publication;
+				issue["isPartOf"] = volume;
+			}
+			else {
+				issue["isPartOf"] = publication;
+			}
+		}
+		
 
-		ldItem["isPartOf"] = container;
+		
+		//   "@type": "PublicationVolume", "volumeNumber": "376",
+		// if (zotItem.volume) container["volumeNumber"] = zotItem.volume;
+		// "@type": "PublicationIssue", "issueNumber": "9735"
+
+		ldItem["isPartOf"] = issue;
 	}
 	if (zotItem.pages) ldItem["pagination"] = zotItem.pages;
+
+	if (zotItem.tags && zotItem.tags.length > 0) {
+		const keywords=[];
+		// sort tags to keep order between exports
+		zotItem.tags.sort(function(a,b){return a.tag.localeCompare(b.tag); });
+		for (let oTag of zotItem.tags) {
+			const value = oTag.tag;
+			if (value.startsWith("#")) continue;
+			keywords.push(value);
+		}
+		if (keywords.length > 0) ldItem["keywords"] = keywords;
+		/*
+		const tags = teiDoc.createElementNS(ns.tei, "note");
+		bibl.append("\n", indent, tags);
+		tags.setAttribute("type", "tags");
+		// sort tags to keep order between exports
+		item.tags.sort(function(a,b){return a.tag.localeCompare(b.tag); });
+		for (let tag of item.tags) {
+			let term = teiDoc.createElementNS(ns.tei, "term");
+			term.setAttribute("type", "tag");
+			term.append(tag.tag);
+			tags.append("\n", indent.repeat(2), term);
+		}
+		tags.append("\n", indent);
+		*/
+	}
 
 	return ldItem;
 }
 
 function zot2ldPers(pers) {
+	let out = {};
 	if (pers.firstName || pers.lastName) {
-		return {
-			"@type": "Person",
-			"familyName": pers.lastName || "",
-			"givenName": pers.firstName || ""
-		};
+		out["@type"] = "Person";
+		if (pers.lastName) out.familyName = pers.lastName;
+		if (pers.firstName) out.givenName = pers.firstName;
+		let name = pers.name;
+		if (!name) {
+			name="";
+			if (pers.firstName) name = pers.firstName + " ";
+			name += pers.lastName;
+		}
+		out.name = name;
 	}
 	else if (pers.name) {
-		return {
-			"@type": "Organization",
-			"name": pers.name
-		};
+		out["@type"]= "Organization";
+		out.name = pers.name;
 	}
+	return out;
 }
 
 /**
@@ -361,6 +448,7 @@ function parseExtraFields(zotItem) {
 				zotItem["keyword"] = [];
 			}
 			zotItem["keyword"].push(value);
+			zotItem["keyword"].sort(function(a,b){return a.localeCompare(b); });
 			return "";
 		}
 		// default, append to note
