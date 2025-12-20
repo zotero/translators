@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2025-12-17 11:36:42"
+	"lastUpdated": "2025-12-17 12:22:10"
 }
 
 function doExport() {
@@ -48,6 +48,96 @@ function zot2ldItem(zotItem)
 		[/<[^>]+>/g, ""], // default strip alltags
 		[/[\u00A0\u202F]/g, ' ']
 	];
+
+	// Normalize rich-text (Zotero HTML-ish) to plain text for schema.org.
+	// Rationale: keep JSON-LD stable for exact-match deduplication and indexing.
+	// If you want French typographic spacing, do it at rendering time (HTML/CSS), not inside the data.
+	const normalize = (s) => regexReplaceAll(s, tag2text);
+
+	function asOrganization(name) {
+		if (!name) return null;
+		return { "@type": "Organization", "name": normalize(name) };
+	}
+
+	function asPlace(name) {
+		if (!name) return null;
+		return { "@type": "Place", "name": normalize(name) };
+	}
+
+	// Canonical identifier policy:
+	// - @id and url must be the canonical public URL when available.
+	// - keep Zotero's internal URI as sameAs when it exists and differs.
+	function addCanonicalId(ldItem, zotItem) {
+		const canonical = zotItem.url || zotItem.URL || zotItem.uri;
+		ldItem["@id"] = canonical;
+		ldItem["url"] = canonical;
+		if (zotItem.uri && zotItem.uri !== canonical) {
+			// sameAs can be a string or array later (e.g., to add a DOI URL).
+			ldItem.sameAs = zotItem.uri;
+		}
+	}
+
+	// Pagination: keep free-text `pagination`.
+	// If the string is a simple range, also set pageStart/pageEnd (widely consumed by importers).
+	function addPages(ldItem, pages) {
+		if (!pages) return;
+		ldItem.pagination = pages;
+		// Accept Arabic or Roman numerals; accept hyphen or en-dash.
+		const m = /^\s*([0-9ivxlcdm]+)\s*[-–]\s*([0-9ivxlcdm]+)\s*$/i.exec(pages);
+		if (m) {
+			ldItem.pageStart = m[1];
+			ldItem.pageEnd = m[2];
+		}
+	}
+
+	// Build a journal container chain only to the depth that is actually known.
+	// Periodical → (optional) PublicationVolume → (optional) PublicationIssue.
+	function buildPeriodicalContainer(zotItem) {
+		if (!zotItem.publicationTitle) return null;
+
+		const periodical = { "@type": "Periodical", "name": normalize(zotItem.publicationTitle) };
+		if (zotItem.ISSN) periodical.issn = zotItem.ISSN;
+
+		let container = periodical;
+		if (zotItem.volume) {
+			container = { "@type": "PublicationVolume", "volumeNumber": zotItem.volume, "isPartOf": container };
+		}
+		if (zotItem.issue) {
+			container = { "@type": "PublicationIssue", "issueNumber": zotItem.issue, "isPartOf": container };
+		}
+		return container;
+	}
+
+	// Conference paper support (schema.org-only):
+	// - keep the paper as ScholarlyArticle
+	// - link proceedings via isPartOf (Book)
+	// - attach conference context via `publication` (PublicationEvent) when available
+	function buildProceedings(zotItem) {
+		const title = zotItem.proceedingsTitle || zotItem.bookTitle;
+		if (!title) return null;
+
+		const proc = { "@type": "Book", "name": normalize(title) };
+		if (zotItem.publisher) proc.publisher = asOrganization(zotItem.publisher);
+		if (zotItem.place) proc.locationCreated = asPlace(zotItem.place);
+		if (zotItem.date) proc.datePublished = ZU.strToISO(zotItem.date);
+		if (zotItem.ISBN) proc.isbn = zotItem.ISBN;
+		return proc;
+	}
+
+	function buildPublicationEvent(zotItem) {
+		// Prefer dedicated Zotero fields; fall back to Extra parsing keys when present.
+		const confName = zotItem.conferenceName || zotItem.meetingName || zotItem.eventTitle || zotItem["event-title"];
+		if (!confName) return null;
+
+		const ev = { "@type": "PublicationEvent", "name": normalize(confName) };
+
+		// Only use explicit eventPlace/eventDate to avoid confusing publisher-place with conference-place.
+		if (zotItem.eventPlace) ev.location = asPlace(zotItem.eventPlace);
+		if (zotItem.eventDate) ev.startDate = ZU.strToISO(zotItem.eventDate);
+
+		return ev;
+	}
+
 	// source list for zotero document types https://aurimasv.github.io/z2csl/typeMap.xml
 	const zot2ldType = {
 		"artwork": "VisualArtwork",
@@ -92,14 +182,7 @@ function zot2ldItem(zotItem)
 		"@context": "https://schema.org",
 		"@type": zot2ldType[zotItem.itemType] || "ScholarlyArticle"  // Default zotero item is a cited article 
 	};
-	if (zotItem.url) {
-		ldItem["@id"] = zotItem.url;
-		ldItem["url"] = zotItem.url;
-	}
-	else {
-		ldItem["@id"] = zotItem.uri;
-		ldItem["url"] = zotItem.uri;
-	}
+	addCanonicalId(ldItem, zotItem);
 	if (zotItem.title) ldItem["name"] = regexReplaceAll(zotItem.title, tag2text);
 	// what about items with no title?
 	if (zotItem.creators && zotItem.creators.length) {
@@ -111,6 +194,21 @@ function zot2ldItem(zotItem)
 		}
 	}
 	if (zotItem.date) ldItem["datePublished"] = ZU.strToISO(zotItem.date);
+
+	// DOI: emit both a structured identifier and a resolvable URL.
+	if (zotItem.DOI) {
+		const doi = ("" + zotItem.DOI).trim();
+		if (doi) {
+			ldItem["identifier"] = { "@type": "PropertyValue", "propertyID": "doi", "value": doi };
+			const doiUrl = doi.startsWith("http") ? doi : ("https://doi.org/" + doi);
+			if (ldItem.sameAs) {
+				ldItem.sameAs = Array.isArray(ldItem.sameAs) ? ldItem.sameAs : [ ldItem.sameAs ];
+				if (!ldItem.sameAs.includes(doiUrl)) ldItem.sameAs.push(doiUrl);
+			} else {
+				ldItem.sameAs = doiUrl;
+			}
+		}
+	}
 	if (zotItem.language) ldItem["inLanguage"] = zotItem.language;
 	// bad inference
 	// if (zotItem.citationKey) ldItem["citation"] = zotItem.citationKey;
@@ -122,10 +220,23 @@ function zot2ldItem(zotItem)
 		}
 	}
 
-	if (zotItem.bookTitle) {
+
+	const isConferencePaper = (zotItem.itemType === "conferencePaper");
+
+	if (isConferencePaper) {
+		// Conference paper (proceedings + optional event context)
+		const proceedings = buildProceedings(zotItem);
+		if (proceedings) ldItem["isPartOf"] = proceedings;
+
+		const pubEvent = buildPublicationEvent(zotItem);
+		if (pubEvent) ldItem["publication"] = pubEvent;
+	}
+	else if (zotItem.bookTitle) {
+		// Book chapter / contribution inside a book
 		let book = {};
 		book["@type"] = "Book";
-		if (zotItem.bookTitle) book["name"] = regexReplaceAll(zotItem.bookTitle, tag2text);
+		book["name"] = normalize(zotItem.bookTitle);
+
 		if (zotItem.creators && zotItem.creators.length) {
 			let creators = zotItem.creators.filter(c => (c.creatorType === 'editor'));
 			if (creators.length === 1) {
@@ -140,66 +251,18 @@ function zot2ldItem(zotItem)
 				book["author"] = creators.map(zot2ldPers);
 			}
 		}
-		if (zotItem.publisher) {
-			book["publisher"] = {
-				"@type": "Organization",
-				"name": regexReplaceAll(zotItem.publisher, tag2text)
-			};
-		}
-		if (zotItem.place) book["locationCreated"] = regexReplaceAll(zotItem.place, tag2text);
+		if (zotItem.publisher) book["publisher"] = asOrganization(zotItem.publisher);
+		if (zotItem.place) book["locationCreated"] = asPlace(zotItem.place);
 		if (zotItem.date) book["datePublished"] = ZU.strToISO(zotItem.date);
+
 		ldItem["isPartOf"] = book;
 	}
-	else if (zotItem.publicationTitle) {
-		let issue = {};
-		/*
-		if (zotItem.type == "newspaperArticle") container["@type"] = "Newspaper";
-		else if (zotItem.publicationTitle) container["@type"] = "Periodical";
-		else container["@type"] =  "CreativeWorkSeries";
-		*/
-		/*
-		"isPartOf": {
-			"@type": "PublicationIssue",
-			"datePublished": "1933",
-			"isPartOf": {
-				"@type": "PublicationVolume",
-				"volumeNumber": "6",
-				"isPartOf": {
-					"@type": "Periodical",
-					"name": "Revue française de psychanalyse"
-				}
-			}
-		}
-		*/
-		issue["@type"] = "PublicationIssue";
-		if (zotItem.date) issue["datePublished"] = ZU.strToISO(zotItem.date);
-		if (zotItem.issue) issue["issueNumber"] = zotItem.issue;
-		if (zotItem.publicationTitle) {
-			let publication = {};
-			publication["@type"] = "Periodical";
-			publication["name"] = regexReplaceAll(zotItem.publicationTitle, tag2text);
-			if (zotItem.ISSN) publication["issn"] = zotItem.ISSN;
-			if (zotItem.volume) {
-				let volume = {};
-				volume["@type"] = "PublicationVolume";
-				volume["volumeNumber"] = zotItem.volume;
-				volume["isPartOf"] = publication;
-				issue["isPartOf"] = volume;
-			}
-			else {
-				issue["isPartOf"] = publication;
-			}
-		}
-		
-
-		
-		//   "@type": "PublicationVolume", "volumeNumber": "376",
-		// if (zotItem.volume) container["volumeNumber"] = zotItem.volume;
-		// "@type": "PublicationIssue", "issueNumber": "9735"
-
-		ldItem["isPartOf"] = issue;
+	else {
+		// Journal / periodical container, only to the depth we actually know.
+		const container = buildPeriodicalContainer(zotItem);
+		if (container) ldItem["isPartOf"] = container;
 	}
-	if (zotItem.pages) ldItem["pagination"] = zotItem.pages;
+	addPages(ldItem, zotItem.pages);
 
 	if (zotItem.tags && zotItem.tags.length > 0) {
 		const keywords=[];
@@ -325,9 +388,9 @@ function parseExtraFields(zotItem) {
 		doi: "DOI",
 		edition: "edition",
 		// "event": "event", // Deprecated legacy variant of event-title
-		"event-date": "date",
-		"event-place": "place",
-		"event-title": "event-title", // zot:conferenceName, zot:meetingName
+		"event-date": "eventDate",
+		"event-place": "eventPlace",
+		"event-title": "eventTitle", // zot:conferenceName, zot:meetingName
 		"first-reference-note-number": "first-reference-note-number", // not zot
 		genre: "genre", // zot:websiteType, zot:programmingLanguage, zot:genre, zot:postType, zot:letterType, zot:manuscriptType, zot:mapType, zot:presentationType, zot:reportType, zot:thesisType
 		isbn: "ISBN",
@@ -366,7 +429,7 @@ function parseExtraFields(zotItem) {
 		"supplement-number": "supplement-number", // not zot
 		title: "title",
 		"title-short": "shortTitle",
-		url: "URL",
+		url: "url",
 		version: "versionNumber",
 		volume: "volume",
 		"year-suffix": "year-suffix", // not zot
