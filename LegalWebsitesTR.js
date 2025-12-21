@@ -1,19 +1,21 @@
 {
 	"translatorID": "307787d2-1ec6-4623-90ed-d01ab4f2c51d",
-	"label": "Legal Websites TR",
+	"label": "Turkish Legal Publishers",
 	"creator": "Mehmet Akif Petek",
-	"target": "^https?://(www\.)?(kitapyurdu\.com|hukukmarket\.com|seckin\.com\.tr|yetkin\.com\.tr|filizkitabevi\.com|legal\.com\.tr|adalet\.com\.tr|betayayincilik\.com|onikilevha\.com\.tr)/",
-	"minVersion": "3.0",
+	"target": "^https?://(www\\.)?(hukukmarket\\.com|seckin\\.com\\.tr|yetkin\\.com\\.tr|filizkitabevi\\.com|legal\\.com\\.tr|adalet\\.com\\.tr|betayayincilik\\.com|onikilevha\\.com\\.tr)/",
+	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-06-19 08:50:03"
+	"lastUpdated": "2025-10-16 12:00:00"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2025 Mehmet Akif Petek
 
 	This file is part of Zotero.
 
@@ -33,50 +35,681 @@
 	***** END LICENSE BLOCK *****
 */
 
-
 function detectWeb(doc, url) {
-	if (url.includes('/kitap/') || url.includes('product_id') || url.includes('/medeni-hukuk/') || url.includes('seckin.com.tr') || url.includes('yetkin.com.tr') || url.includes('filizkitabevi.com') || url.includes('legal.com.tr') || url.includes('adalet.com.tr')) {
+	// Check if JSON-LD with Book or Product type exists
+	let jsonLd = doc.querySelectorAll('script[type="application/ld+json"]');
+	for (let script of jsonLd) {
+		try {
+			let data = JSON.parse(script.textContent);
+			if (data['@type'] === 'Book' || data['@type'] === 'Product') {
+				return 'book';
+			}
+		}
+		catch (e) {
+			// Continue checking other scripts
+		}
+	}
+
+	// Check for microdata indicators
+	if (doc.querySelector('[itemtype*="Book"]') || doc.querySelector('[itemtype*="Product"]')) {
 		return 'book';
 	}
-	else if (getSearchResults(doc, true)) {
-		return "multiple";
+
+	// Check for book-specific meta tags
+	if (doc.querySelector('meta[property="og:type"][content="book"]')
+		|| doc.querySelector('meta[property="book:isbn"]')
+		|| doc.querySelector('meta[property="book:author"]')) {
+		return 'book';
 	}
+
+	// Site-specific URL patterns for product pages
+	let path = new URL(url).pathname;
+	if (path.includes('/kitap/') || path.includes('/urun/') || path.includes('/product/')
+		|| path.includes('/book/') || path.includes('/yayin/')) {
+		return 'book';
+	}
+
+	let host = new URL(url).host;
+
+	// yetkin.com.tr: /kira-hukuku-davalari-15081
+	if (host.includes('yetkin.com.tr') && /\/[a-z0-9-]+-\d+$/.test(path)) {
+		return 'book';
+	}
+
+	// filizkitabevi.com: /anayasa-mahkemesi-kararlari-isiginda-infaz-hukuku-4-baski
+	if (host.includes('filizkitabevi.com') && /\/[a-z0-9-]+$/.test(path)) {
+		return 'book';
+	}
+
+	// adalet.com.tr: /tuketici-hukuku-30259
+	if (host.includes('adalet.com.tr') && /\/[a-z0-9-]+-\d+$/.test(path)) {
+		return 'book';
+	}
+
+	// betayayincilik.com: /turk-hukuk-tarihi-p-19561958
+	if (host.includes('betayayincilik.com') && /\/[a-z0-9-]+-p-\d+$/.test(path)) {
+		return 'book';
+	}
+
+	// Check for search results
+	if (getSearchResults(doc, true)) {
+		return 'multiple';
+	}
+
 	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
-	var items = {};
-	var found = false;
-	var rows = ZU.xpath(doc, '//a[contains(@href, "/kitap/")]|//a[contains(@href, "product_id")]|//a[contains(@href, "/medeni-hukuk/")]|//a[contains(@href, "yetkin.com.tr")]|//a[contains(@href, "filizkitabevi.com")]|//a[contains(@href, "legal.com.tr")]|//a[contains(@href, "adalet.com.tr")]');
-	for (var i = 0; i < rows.length; i++) {
-		var href = rows[i].href;
-		var title = ZU.trimInternal(rows[i].textContent);
+	let items = {};
+	let found = false;
+	let rows = [];
+	let host = new URL(doc.location.href).host;
+
+	// Site-specific selectors for search results
+	if (host.includes('hukukmarket.com')) {
+		rows = doc.querySelectorAll('a[href*="/urun/"]');
+	}
+	else if (host.includes('seckin.com.tr')) {
+		rows = doc.querySelectorAll('a[href*="/kitap/"]');
+	}
+	else if (host.includes('yetkin.com.tr')) {
+		rows = doc.querySelectorAll('a[href*="/p/"]');
+	}
+	else if (host.includes('filizkitabevi.com')) {
+		rows = doc.querySelectorAll('a[href*="/"][title]');
+	}
+	else if (host.includes('legal.com.tr')) {
+		rows = doc.querySelectorAll('a[href*="/book/"]');
+	}
+	else if (host.includes('adalet.com.tr')) {
+		rows = doc.querySelectorAll('a[href*="/"][title]');
+	}
+	else if (host.includes('betayayincilik.com')) {
+		rows = doc.querySelectorAll('a[href*="/"][title]');
+	}
+	else if (host.includes('onikilevha.com.tr')) {
+		rows = doc.querySelectorAll('a[href*="/yayin/"]');
+	}
+
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
 	}
+
 	return found ? items : false;
 }
 
-
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) ZU.processDocuments(Object.keys(items), scrape);
-		});
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
+async function scrape(doc, url = doc.location.href) {
+	var item = new Zotero.Item('book');
 
-/*
-remove titles from creators
-*/
+	// Extract JSON-LD data
+	let jsonLd = doc.querySelectorAll('script[type="application/ld+json"]');
+	let productJson = null;
+	let bookJson = null;
+
+	for (let script of jsonLd) {
+		try {
+			let data = JSON.parse(script.textContent);
+			if (data['@type'] === 'Product') {
+				productJson = data;
+			}
+			else if (data['@type'] === 'Book') {
+				bookJson = data;
+			}
+		}
+		catch (e) {
+			// Skip invalid JSON
+		}
+	}
+
+	// Extract from Product JSON-LD
+	if (productJson) {
+		if (productJson.name) {
+			item.title = ZU.unescapeHTML(productJson.name);
+		}
+		if (productJson.brand && productJson.brand.name) {
+			item.publisher = localeCapitalizeTitle(ZU.trimInternal(productJson.brand.name));
+		}
+		if (productJson.gtin13) {
+			item.ISBN = productJson.gtin13;
+		}
+		if (productJson.description) {
+			item.abstractNote = ZU.unescapeHTML(productJson.description);
+		}
+	}
+
+	// Extract from Book JSON-LD
+	if (bookJson) {
+		if (bookJson.name && !item.title) {
+			item.title = ZU.unescapeHTML(bookJson.name);
+		}
+		if (bookJson.isbn && !item.ISBN) {
+			item.ISBN = bookJson.isbn;
+		}
+		if (bookJson.publisher && bookJson.publisher.name && !item.publisher) {
+			item.publisher = bookJson.publisher.name;
+		}
+		if (bookJson.copyrightYear && !item.date) {
+			item.date = bookJson.copyrightYear;
+		}
+		if (bookJson.numberOfPages && !item.numPages) {
+			item.numPages = bookJson.numberOfPages.toString();
+		}
+		if (bookJson.inLanguage) {
+			item.language = bookJson.inLanguage === 'tr-TR' ? 'tr' : bookJson.inLanguage;
+		}
+	}
+
+	// Site-specific extraction
+	let host = new URL(url).host;
+	if (host.includes('seckin.com.tr')) {
+		await scrapeSeckin(doc, item);
+	}
+	else if (host.includes('yetkin.com.tr')) {
+		await scrapeYetkin(doc, item, productJson);
+	}
+	else if (host.includes('filizkitabevi.com')) {
+		await scrapeFiliz(doc, item);
+	}
+	else if (host.includes('adalet.com.tr')) {
+		await scrapeAdalet(doc, item);
+	}
+	else if (host.includes('betayayincilik.com')) {
+		await scrapeBeta(doc, item);
+	}
+	else if (host.includes('legal.com.tr')) {
+		await scrapeLegal(doc, item);
+	}
+	else if (host.includes('onikilevha.com.tr')) {
+		await scrapeOnikilevha(doc, item);
+	}
+	else if (host.includes('hukukmarket.com')) {
+		await scrapeHukukmarket(doc, item);
+	}
+
+	// Add snapshot attachment
+	item.attachments.push({
+		title: 'Snapshot',
+		document: doc
+	});
+
+	item.complete();
+}
+
+// Site-specific scraping functions
+
+async function scrapeSeckin(doc, item) {
+	if (!item.title) {
+		item.title = attr(doc, 'meta[property="og:title"]', 'content');
+	}
+
+	if (!item.ISBN) {
+		item.ISBN = attr(doc, 'meta[property="book:isbn"]', 'content');
+	}
+
+	let authorName = attr(doc, 'meta[property="book:author"]', 'content');
+	if (authorName) {
+		item.creators.push(ZU.cleanAuthor(cleanCreatorTitles(authorName), 'author'));
+	}
+
+	if (!item.abstractNote) {
+		item.abstractNote = attr(doc, 'meta[name="description"]', 'content');
+	}
+
+	// Extract creators from page
+	let authors = doc.querySelectorAll('.hm-product-author-top a');
+	for (let author of authors) {
+		let name = cleanCreatorTitles(text(author));
+		if (name) {
+			item.creators.push(ZU.cleanAuthor(name, 'author'));
+		}
+	}
+
+	// Extract translators
+	let translators = doc.querySelectorAll('.hm-product-cevirmen-top a');
+	for (let translator of translators) {
+		let name = cleanCreatorTitles(text(translator));
+		if (name) {
+			item.creators.push(ZU.cleanAuthor(name, 'translator'));
+		}
+	}
+
+	// Extract editors
+	let editors = doc.querySelectorAll('.hm-product-editor-top a');
+	for (let editor of editors) {
+		let name = cleanCreatorTitles(text(editor));
+		if (name) {
+			item.creators.push(ZU.cleanAuthor(name, 'editor'));
+		}
+	}
+
+	// Extract edition
+	let editionText = text(doc, '.hm-product-baski-top');
+	let editionMatch = editionText.match(/(\d+)\.\s*Baskı/);
+	if (editionMatch && editionMatch[1] && editionMatch[1] !== '1') {
+		item.edition = editionMatch[1];
+	}
+
+	// Extract date
+	let dateText = text(doc, '.hm-product-basim-tarihi-top');
+	let dateMatch = dateText.match(/(\d{4})/);
+	if (dateMatch && dateMatch[1]) {
+		item.date = dateMatch[1];
+	}
+
+	// Extract pages
+	let pagesText = text(doc, '.hm-product-sayfa-top');
+	let pagesMatch = pagesText.match(/(\d+)\s+sayfa/);
+	if (pagesMatch && pagesMatch[1]) {
+		item.numPages = pagesMatch[1];
+	}
+
+	item.language = 'tr';
+}
+
+async function scrapeYetkin(doc, item, productJson) {
+	// Extract from productID in JSON-LD
+	if (productJson && productJson.productID && productJson.productID.includes('ISBN:')) {
+		item.ISBN = productJson.productID.replace('ISBN:', '');
+	}
+
+	// Extract metadata from description
+	if (productJson && productJson.description) {
+		let desc = productJson.description;
+
+		// Extract author
+		let authorMatch = desc.match(/(?:Prof\.|Doç\.|Dr\.)\s*([A-ZÇĞIİÖŞÜ][a-zçğıiöşü]+(?:\s+[A-ZÇĞIİÖŞÜ][a-zçğıiöşü]+)*)/i);
+		if (authorMatch) {
+			item.creators.push(ZU.cleanAuthor(cleanCreatorTitles(authorMatch[0]), 'author'));
+		}
+
+		// Extract edition
+		let editionMatch = desc.match(/(\d+)\.\s*Baskı/);
+		if (editionMatch && editionMatch[1] && editionMatch[1] !== '1') {
+			item.edition = editionMatch[1];
+		}
+
+		// Extract date
+		let dateMatch = desc.match(/(\d{4})\/\d{2}/);
+		if (dateMatch && dateMatch[1]) {
+			item.date = dateMatch[1];
+		}
+
+		// Extract pages
+		let pageMatch = desc.match(/(\d+)\s+Sayfa/);
+		if (pageMatch && pageMatch[1]) {
+			item.numPages = pageMatch[1];
+		}
+	}
+
+	// Fallback to microdata
+	if (!item.title) {
+		item.title = attr(doc, 'meta[itemprop="name"]', 'content');
+	}
+
+	if (!item.ISBN) {
+		item.ISBN = attr(doc, 'meta[itemprop="isbn"]', 'content');
+	}
+
+	if (item.creators.length === 0) {
+		let authorName = attr(doc, 'meta[itemprop="author"]', 'content');
+		if (authorName) {
+			item.creators.push(ZU.cleanAuthor(cleanCreatorTitles(authorName), 'author'));
+		}
+	}
+
+	if (!item.publisher) {
+		item.publisher = attr(doc, 'meta[itemprop="publisher"]', 'content');
+	}
+
+	if (!item.date) {
+		let dateStr = attr(doc, 'meta[itemprop="datePublished"]', 'content');
+		let yearMatch = dateStr.match(/(\d{4})/);
+		if (yearMatch && yearMatch[1]) {
+			item.date = yearMatch[1];
+		}
+	}
+
+	// Extract from table
+	let tableRows = doc.querySelectorAll('table.attribute tbody tr');
+	for (let row of tableRows) {
+		let cells = row.querySelectorAll('td');
+		if (cells.length >= 2) {
+			let label = text(cells[0]);
+			let value = text(cells[1]);
+
+			if (label === 'Yazar' && item.creators.length === 0) {
+				item.creators.push(ZU.cleanAuthor(cleanCreatorTitles(value), 'author'));
+			}
+			else if (label === 'Baskı Tarihi' && !item.date) {
+				let yearMatch = value.match(/(\d{4})/);
+				if (yearMatch && yearMatch[1]) {
+					item.date = yearMatch[1];
+				}
+			}
+			else if (label === 'Baskı Sayısı' && !item.edition && value !== '1') {
+				item.edition = value;
+			}
+			else if (label === 'Sayfa Sayısı' && !item.numPages) {
+				item.numPages = value;
+			}
+		}
+	}
+
+	// Get description from tab
+	if (!item.abstractNote) {
+		item.abstractNote = text(doc, '#tab-description');
+	}
+
+	item.language = 'tr';
+}
+
+async function scrapeFiliz(doc, item) {
+	// Extract from microdata
+	if (!item.title) {
+		item.title = text(doc, '[itemprop="name"]') || text(doc, 'h1.contentHeader.prdHeader');
+	}
+
+	if (!item.ISBN) {
+		item.ISBN = text(doc, '[itemprop="sku"]') || attr(doc, '.prd_view', 'data-prd-barcode');
+	}
+
+	if (!item.publisher) {
+		item.publisher = attr(doc, '[itemprop="brand"] [itemprop="name"]', 'content')
+			|| text(doc, '.prd_brand_box .publisher a');
+	}
+
+	if (!item.abstractNote) {
+		item.abstractNote = text(doc, '[itemprop="description"]')
+			|| attr(doc, 'meta[name="description"]', 'content');
+	}
+
+	// Extract authors
+	let authorElems = doc.querySelectorAll('.prd_brand_box .writer a');
+	for (let author of authorElems) {
+		let name = cleanCreatorTitles(text(author));
+		if (name) {
+			item.creators.push(ZU.cleanAuthor(name, 'author'));
+		}
+	}
+
+	// If no authors found, try .writer span
+	if (item.creators.length === 0) {
+		let writerName = text(doc, '.writer span') || text(doc, '.writer');
+		if (writerName) {
+			item.creators.push(ZU.cleanAuthor(cleanCreatorTitles(writerName), 'author'));
+		}
+	}
+
+	// Extract from custom fields table
+	let customFields = doc.querySelectorAll('.prd_custom_fields .table-row');
+	for (let field of customFields) {
+		let label = text(field, '.prd-features-label');
+		let value = text(field, '.table-cell:last-child');
+
+		if (label === 'Sayfa Sayısı' && !item.numPages) {
+			item.numPages = value;
+		}
+		else if (label === 'Baskı' && !item.edition && value !== '1') {
+			item.edition = value;
+		}
+		else if (label === 'Basım Tarihi' && !item.date) {
+			let yearMatch = value.match(/(\d{4})/);
+			if (yearMatch && yearMatch[1]) {
+				item.date = yearMatch[1];
+			}
+		}
+		else if (label === 'Dili' && !item.language) {
+			item.language = value === 'Türkçe' ? 'tr' : value;
+		}
+	}
+
+	if (!item.language) {
+		item.language = 'tr';
+	}
+}
+
+async function scrapeAdalet(doc, item) {
+	if (!item.title) {
+		item.title = text(doc, '.ProductName h1 span')
+			|| text(doc, '.ProductName h1')
+			|| text(doc, '.ProductName');
+	}
+
+	// Extract from onYaziSablon section
+	let authorName = text(doc, '.onYaziSablon a.yazar');
+	if (authorName) {
+		item.creators.push(ZU.cleanAuthor(cleanCreatorTitles(authorName), 'author'));
+	}
+
+	if (!item.publisher) {
+		item.publisher = text(doc, '.onYaziSablon a.yayinevi');
+	}
+
+	if (!item.ISBN) {
+		item.ISBN = text(doc, '.onYaziSablon span.isbn');
+	}
+
+	if (!item.date) {
+		item.date = text(doc, '.onYaziSablon span.yayin_tarihi');
+	}
+
+	// Extract from productDetailModel JavaScript
+	let scriptContent = doc.documentElement.innerHTML;
+	let productDetailMatch = scriptContent.match(/var productDetailModel = (\{[^;]+\});/);
+	if (productDetailMatch && productDetailMatch[1]) {
+		try {
+			let productData = JSON.parse(productDetailMatch[1]);
+
+			if (productData.productPrice) {
+				item.extra = (item.extra || '') + 'Price: ' + productData.productPrice + ' TL\n';
+			}
+
+			if (productData.brandName && !item.publisher) {
+				item.publisher = productData.brandName;
+			}
+
+			if (productData.barkod && !item.ISBN) {
+				item.ISBN = productData.barkod;
+			}
+		}
+		catch (e) {
+			// Ignore parsing errors
+		}
+	}
+
+	if (!item.abstractNote) {
+		item.abstractNote = attr(doc, 'meta[name="description"]', 'content');
+	}
+
+	item.language = 'tr';
+}
+
+async function scrapeBeta(doc, item) {
+	if (!item.title) {
+		item.title = text(doc, 'h1.product-title') || text(doc, 'h1');
+
+		// Fallback to title tag
+		if (!item.title) {
+			let titleTag = doc.querySelector('title');
+			if (titleTag) {
+				item.title = titleTag.textContent.trim().replace(/ - Beta Yayıncılık$/, '');
+			}
+		}
+	}
+
+	// Extract metadata from various selectors
+	let authorName = text(doc, '.author-info .author') || text(doc, '.author');
+	if (authorName) {
+		item.creators.push(ZU.cleanAuthor(cleanCreatorTitles(authorName), 'author'));
+	}
+
+	if (!item.publisher) {
+		item.publisher = text(doc, '.publisher-info .publisher') || text(doc, '.publisher') || 'Beta Yayıncılık';
+	}
+
+	if (!item.ISBN) {
+		item.ISBN = text(doc, '.isbn-info .isbn') || text(doc, '.isbn');
+	}
+
+	if (!item.date) {
+		item.date = text(doc, '.date-info .date') || text(doc, '.date');
+	}
+
+	if (!item.edition) {
+		let edition = text(doc, '.edition-info .edition') || text(doc, '.edition');
+		if (edition && edition !== '1') {
+			item.edition = edition;
+		}
+	}
+
+	if (!item.numPages) {
+		item.numPages = text(doc, '.pages-info .pages') || text(doc, '.pages');
+	}
+
+	if (!item.abstractNote) {
+		item.abstractNote = text(doc, '.description .abstract')
+			|| text(doc, '.abstract')
+			|| attr(doc, 'meta[name="description"]', 'content');
+	}
+
+	// Extract price
+	let price = text(doc, '.price-info .price') || text(doc, '.price');
+	if (price) {
+		item.extra = (item.extra || '') + 'Price: ' + price + '\n';
+	}
+
+	item.language = 'tr';
+}
+
+async function scrapeLegal(doc, item) {
+	if (!item.title) {
+		item.title = text(doc, '.headline h1');
+	}
+
+	// Extract from MARC record using the MARC translator
+	let marcContent = text(doc, '#divmarc textarea');
+	if (marcContent) {
+		try {
+			// Use the MARC translator to parse the record
+			let translator = Zotero.loadTranslator('import');
+			translator.setTranslator('a6ee60df-1ddc-4aae-bb25-45e0537be973'); // MARC
+			translator.setString(marcContent);
+			let marcItems = await translator.translate();
+
+			if (marcItems && marcItems.length > 0) {
+				let marcItem = marcItems[0];
+
+				// Copy fields from MARC item if not already set
+				if (!item.ISBN && marcItem.ISBN) {
+					item.ISBN = marcItem.ISBN;
+				}
+				if (item.creators.length === 0 && marcItem.creators.length > 0) {
+					for (let creator of marcItem.creators) {
+						creator.lastName = cleanCreatorTitles(creator.lastName || '');
+						creator.firstName = cleanCreatorTitles(creator.firstName || '');
+						item.creators.push(creator);
+					}
+				}
+				if (!item.publisher && marcItem.publisher) {
+					item.publisher = marcItem.publisher;
+				}
+				if (!item.date && marcItem.date) {
+					item.date = marcItem.date;
+				}
+				if (!item.numPages && marcItem.numPages) {
+					item.numPages = marcItem.numPages;
+				}
+				if (!item.language && marcItem.language) {
+					item.language = marcItem.language === 'tur' ? 'tr' : marcItem.language;
+				}
+				if (!item.edition && marcItem.edition) {
+					item.edition = marcItem.edition;
+				}
+			}
+		}
+		catch (e) {
+			// MARC parsing failed, continue without MARC data
+			Zotero.debug('MARC parsing failed: ' + e);
+		}
+	}
+
+	if (!item.abstractNote) {
+		item.abstractNote = attr(doc, 'meta[name="description"]', 'content');
+	}
+}
+
+async function scrapeOnikilevha(doc, item) {
+	// Already handled by Book JSON-LD extraction in main scrape function
+
+	// Extract author from HTML if not in JSON-LD
+	if (item.creators.length === 0) {
+		let authorName = text(doc, '.detail2 a[href*="/yazar/"]');
+		if (authorName) {
+			item.creators.push(ZU.cleanAuthor(cleanCreatorTitles(authorName), 'author'));
+		}
+	}
+
+	if (!item.title) {
+		item.title = text(doc, '.hdr h1');
+	}
+
+	// Extract price
+	let priceText = text(doc, '.detail2');
+	let priceMatch = priceText.match(/([\d,.]+)\s*TL/);
+	if (priceMatch && priceMatch[1]) {
+		item.extra = (item.extra || '') + 'Price: ' + priceMatch[1] + ' TL\n';
+	}
+
+	if (!item.abstractNote) {
+		item.abstractNote = attr(doc, 'meta[name="description"]', 'content');
+
+		// Try detailed description
+		let contentDesc = text(doc, 'div[style*="text-align: justify"]');
+		if (contentDesc && contentDesc.length > (item.abstractNote || '').length) {
+			item.abstractNote = contentDesc;
+		}
+	}
+
+	if (!item.language) {
+		item.language = 'tr';
+	}
+}
+
+async function scrapeHukukmarket(doc, item) {
+	// Extract from common elements
+	if (!item.title) {
+		item.title = text(doc, 'h1') || attr(doc, 'meta[property="og:title"]', 'content');
+	}
+
+	if (!item.abstractNote) {
+		item.abstractNote = attr(doc, 'meta[name="description"]', 'content');
+	}
+
+	item.language = 'tr';
+}
+
+// Helper functions
+
 function cleanCreatorTitles(str) {
-	return str.replace(/Prof.|Doç.|Yrd.|Dr.|Arş.|Öğr.|Gör.|Çevirmen:|Editor:|Derleyici:/g, '');
+	return str.replace(/Prof\.|Doç\.|Yrd\.|Dr\.|Arş\.|Öğr\.|Gör\.|Çevirmen:|Editor:|Derleyici:/g, '');
 }
 
 function localeCapitalizeTitle(name) {
@@ -86,561 +719,25 @@ function localeCapitalizeTitle(name) {
 		.join(' ');
 }
 
-function scrape(doc, _url) {
-	var item = new Zotero.Item("book");
-	
-	// Find the Product JSON-LD data
-	let jsonLd = doc.querySelectorAll('script[type="application/ld+json"]');
-	let json;
-	for (let script of jsonLd) {
-		try {
-			let parsed = JSON.parse(script.textContent);
-			if (parsed["@type"] === "Product") {
-				json = parsed;
-				break;
-			}
-		} catch (e) {
-			// Skip invalid JSON
-		}
-	}
-	
-	if (json) {
-		item.title = ZU.unescapeHTML(json.name);
-		if (json.brand && json.brand.name) {
-			let publisher = ZU.trimInternal(json.brand.name);
-			item.publisher = localeCapitalizeTitle(publisher);
-		}
-		item.ISBN = json.gtin13;
-		item.abstractNote = ZU.unescapeHTML(json.description);
-	}
-	
-	// For seckin.com.tr, extract data from meta tags if JSON-LD doesn't have complete info
-	if (_url.includes('seckin.com.tr')) {
-		// Get title from meta tag if not already set
-		if (!item.title) {
-			var titleMeta = doc.querySelector('meta[property="og:title"]');
-			if (titleMeta) {
-				item.title = ZU.unescapeHTML(titleMeta.getAttribute('content'));
-			}
-		}
-		
-		// Get ISBN from meta tag
-		if (!item.ISBN) {
-			var isbnMeta = doc.querySelector('meta[property="book:isbn"]');
-			if (isbnMeta) {
-				item.ISBN = isbnMeta.getAttribute('content');
-			}
-		}
-		
-		// Get author from meta tag
-		var authorMeta = doc.querySelector('meta[property="book:author"]');
-		if (authorMeta) {
-			var creator = cleanCreatorTitles(authorMeta.getAttribute('content'));
-			item.creators.push(ZU.cleanAuthor(creator, "author"));
-		}
-		
-		// Get description from meta tag if not already set
-		if (!item.abstractNote) {
-			var descMeta = doc.querySelector('meta[name="description"]');
-			if (descMeta) {
-				item.abstractNote = ZU.unescapeHTML(descMeta.getAttribute('content'));
-			}
-		}
-	}
-	
-	// For yetkin.com.tr, extract additional data from JSON-LD and description
-	if (_url.includes('yetkin.com.tr') && json) {
-		// Extract ISBN from productID if available
-		if (json.productID && json.productID.includes('ISBN:')) {
-			item.ISBN = json.productID.replace('ISBN:', '');
-		}
-		
-		// Extract author, edition, and other details from description
-		if (json.description) {
-			let desc = json.description;
-			
-			// Extract author (usually appears after title)
-			let authorMatch = desc.match(/(?:Prof\.|Doç\.|Dr\.)\s*([A-ZÇĞIİÖŞÜ][a-zçğıiöşü]+(?:\s+[A-ZÇĞIİÖŞÜ][a-zçğıiöşü]+)*)/i);
-			if (authorMatch && authorMatch[1]) {
-				let creator = cleanCreatorTitles(authorMatch[0]);
-				item.creators.push(ZU.cleanAuthor(creator, "author"));
-			}
-			
-			// Extract edition
-			let editionMatch = desc.match(/(\d+)\. Baskı/);
-			if (editionMatch && editionMatch[1] && editionMatch[1] !== "1") {
-				item.edition = editionMatch[1];
-			}
-			
-			// Extract publication date
-			let dateMatch = desc.match(/(\d{4})\/(\d{2})/);
-			if (dateMatch && dateMatch[1]) {
-				item.date = dateMatch[1];
-			}
-			
-			// Extract page count
-			let pageMatch = desc.match(/(\d+)\s+Sayfa/);
-			if (pageMatch && pageMatch[1]) {
-				item.numPages = pageMatch[1];
-			}
-		}
-		
-		// Set language to Turkish
-		item.language = "tr";
-	}
-	
-	// For filizkitabevi.com, extract data from HTML structure and data attributes
-	if (_url.includes('filizkitabevi.com')) {
-		// Get title from h1 if not already set
-		if (!item.title) {
-			var titleElem = doc.querySelector('h1.contentHeader.prdHeader');
-			if (titleElem) {
-				item.title = ZU.trimInternal(titleElem.textContent);
-			}
-		}
-		
-		// Get authors from prd_brand_box
-		var authorElems = doc.querySelectorAll('.prd_brand_box .writer a');
-		for (let i = 0; i < authorElems.length; i++) {
-			let creator = cleanCreatorTitles(authorElems[i].textContent);
-			item.creators.push(ZU.cleanAuthor(creator, "author"));
-		}
-		
-		// Get publisher from prd_brand_box
-		var publisherElem = doc.querySelector('.prd_brand_box .publisher a');
-		if (publisherElem) {
-			item.publisher = ZU.trimInternal(publisherElem.textContent);
-		}
-		
-		// Get ISBN from data attribute or custom fields
-		var prdView = doc.querySelector('.prd_view');
-		if (prdView && prdView.getAttribute('data-prd-barcode')) {
-			item.ISBN = prdView.getAttribute('data-prd-barcode');
-		}
-		
-		// Extract metadata from custom fields table
-		var customFields = doc.querySelectorAll('.prd_custom_fields .table-row');
-		for (let i = 0; i < customFields.length; i++) {
-			let label = customFields[i].querySelector('.prd-features-label');
-			let value = customFields[i].querySelector('.table-cell:last-child');
-			if (label && value) {
-				let labelText = label.textContent.trim();
-				let valueText = value.textContent.trim();
-				
-				if (labelText === 'Sayfa Sayısı') {
-					item.numPages = valueText;
-				} else if (labelText === 'Baskı') {
-					if (valueText !== '1') {
-						item.edition = valueText;
-					}
-				} else if (labelText === 'Basım Tarihi') {
-					// Extract year from date like "Haziran 2025"
-					let yearMatch = valueText.match(/(\d{4})/);
-					if (yearMatch && yearMatch[1]) {
-						item.date = yearMatch[1];
-					}
-				} else if (labelText === 'Dili') {
-					if (valueText === 'Türkçe') {
-						item.language = 'tr';
-					}
-				}
-			}
-		}
-		
-		// Get description from meta tag if not already set
-		if (!item.abstractNote) {
-			var descMeta = doc.querySelector('meta[name="description"]');
-			if (descMeta) {
-				item.abstractNote = ZU.unescapeHTML(descMeta.getAttribute('content'));
-			}
-		}
-		
-		// Set default language to Turkish if not set
-		if (!item.language) {
-			item.language = "tr";
-		}
-	}
-	// Handle adalet.com.tr
-	else if (_url.includes('adalet.com.tr')) {
-		// Get title from h1 element
-		var titleElem = doc.querySelector('.ProductName h1 span');
-		if (titleElem) {
-			item.title = titleElem.textContent.trim();
-		}
-
-		// Extract metadata from onYaziSablon section
-		var onYaziSection = doc.querySelector('.onYaziSablon');
-		if (onYaziSection) {
-			// Get author
-			var authorLink = onYaziSection.querySelector('a.yazar');
-			if (authorLink) {
-				var creator = cleanCreatorTitles(authorLink.textContent);
-				item.creators.push(ZU.cleanAuthor(creator, "author"));
-			}
-
-			// Get publisher
-			var publisherLink = onYaziSection.querySelector('a.yayinevi');
-			if (publisherLink) {
-				item.publisher = publisherLink.textContent.trim();
-			}
-
-			// Get ISBN
-			var isbnSpan = onYaziSection.querySelector('span.isbn');
-			if (isbnSpan) {
-				item.ISBN = isbnSpan.textContent.trim();
-			}
-
-			// Get publication date
-			var dateSpan = onYaziSection.querySelector('span.yayin_tarihi');
-			if (dateSpan) {
-				item.date = dateSpan.textContent.trim();
-			}
-		}
-
-		// Extract additional metadata from productDetailModel JavaScript variable
-		var scriptContent = doc.documentElement.innerHTML;
-		var productDetailMatch = scriptContent.match(/var productDetailModel = (\{[^;]+\});/);
-		if (productDetailMatch && productDetailMatch[1]) {
-			try {
-				var productData = JSON.parse(productDetailMatch[1]);
-				
-				// Get price
-				if (productData.productPrice) {
-					item.extra = (item.extra || '') + 'Price: ' + productData.productPrice + ' TL\n';
-				}
-
-				// Get brand name as additional publisher info
-				if (productData.brandName && !item.publisher) {
-					item.publisher = productData.brandName;
-				}
-
-				// Get barcode as ISBN if not already found
-				if (productData.barkod && !item.ISBN) {
-					item.ISBN = productData.barkod;
-				}
-			} catch (e) {
-				// Ignore JSON parsing errors
-			}
-		}
-
-		// Get description from meta tag
-		var descMeta = doc.querySelector('meta[name="description"]');
-		if (descMeta) {
-			item.abstractNote = descMeta.getAttribute('content');
-		}
-
-		// Set default language to Turkish
-		item.language = 'tr';
-	}
-	
-	// Get product description for notes field
-	var descriptionElem = doc.querySelector('.product-description');
-	if (descriptionElem) {
-		item.notes.push({note: descriptionElem.textContent});
-	}
-	
-	// Get authors from the author links
-	var authors = doc.querySelectorAll('.hm-product-author-top a');
-	for (var i = 0; i < authors.length; i++) {
-		var creator = cleanCreatorTitles(authors[i].textContent);
-		item.creators.push(ZU.cleanAuthor(creator, "author"));
-	}
-
-	// Look for translators
-	var translatorSection = doc.querySelector('.hm-product-cevirmen-top');
-	if (translatorSection) {
-		var translators = translatorSection.querySelectorAll('a');
-		for (let i = 0; i < translators.length; i++) {
-			let creator = cleanCreatorTitles(translators[i].textContent);
-			item.creators.push(ZU.cleanAuthor(creator, "translator"));
-		}
-	}
-	
-	// Look for editors
-	var editorSection = doc.querySelector('.hm-product-editor-top');
-	if (editorSection) {
-		var editors = editorSection.querySelectorAll('a');
-		for (let i = 0; i < editors.length; i++) {
-			let creator = cleanCreatorTitles(editors[i].textContent);
-			item.creators.push(ZU.cleanAuthor(creator, "editor"));
-		}
-	}
-	
-	// Get edition
-	var editionElem = doc.querySelector('.hm-product-baski-top');
-	if (editionElem) {
-		let editionText = editionElem.textContent;
-		let match = editionText.match(/(\d+)\. Baskı/);
-		if (match && match[1] && match[1] !== "1") {
-			item.edition = match[1];
-		}
-	}
-	
-	// Set language (default to Turkish)
-	item.language = "tr";
-	
-	// Get publication date
-	var dateElem = doc.querySelector('.hm-product-basim-tarihi-top');
-	if (dateElem) {
-		let dateText = dateElem.textContent;
-		let match = dateText.match(/(\d{4})/);
-		if (match && match[1]) {
-			item.date = match[1];
-		}
-	}
-	
-	// Get number of pages
-	var pagesElem = doc.querySelector('.hm-product-sayfa-top');
-	if (pagesElem) {
-		let pagesText = pagesElem.textContent;
-		let match = pagesText.match(/(\d+)\s+sayfa/);
-		if (match && match[1]) {
-			item.numPages = match[1];
-		}
-	}
-	
-	// Handle legal.com.tr specific extraction
-	if (_url.includes('legal.com.tr')) {
-		// Get title from h1.headline
-		var titleElem = doc.querySelector('.headline h1');
-		if (titleElem) {
-			item.title = titleElem.textContent.trim();
-		}
-
-		// Extract ISBN from MARC record
-		var marcText = doc.querySelector('#divmarc textarea');
-		if (marcText) {
-			var marcContent = marcText.textContent;
-			// Extract ISBN from 020 field
-			var isbnMatch = marcContent.match(/020\s+\[a\]:\s*([0-9-]+)/i);
-			if (isbnMatch && isbnMatch[1]) {
-				item.ISBN = isbnMatch[1].replace(/-/g, '');
-			}
-
-			// Extract author from 100 field
-			var authorMatch = marcContent.match(/100\s+0\s+\[a\]:\s*(.+)/i);
-			if (authorMatch && authorMatch[1]) {
-				var creator = cleanCreatorTitles(authorMatch[1].trim());
-				item.creators.push(ZU.cleanAuthor(creator, "author"));
-			}
-
-			// Extract publisher from 260 field
-			var publisherMatch = marcContent.match(/260\s+\[a\]:[^\n]*\n\s*\[b\]:\s*(.+)/i);
-			if (publisherMatch && publisherMatch[1]) {
-				item.publisher = publisherMatch[1].trim();
-			}
-
-			// Extract publication date from 260 field
-			var dateMatch = marcContent.match(/260\s+\[a\]:[^\n]*\n\s*\[b\]:[^\n]*\n\s*\[c\]:\s*(\d{4})/i);
-			if (dateMatch && dateMatch[1]) {
-				item.date = dateMatch[1];
-			}
-
-			// Extract page count from 300 field
-			var pagesMatch = marcContent.match(/300\s+\[a\]:\s*(\d+)\s*s\./i);
-			if (pagesMatch && pagesMatch[1]) {
-				item.numPages = pagesMatch[1];
-			}
-
-			// Extract language from 041 field
-			var langMatch = marcContent.match(/041\s+\[a\]:\s*(\w+)/i);
-			if (langMatch && langMatch[1]) {
-				if (langMatch[1] === 'tur') {
-					item.language = "tr";
-				} else {
-					item.language = langMatch[1];
-				}
-			}
-
-			// Extract edition from 250 field
-			var editionMatch = marcContent.match(/250\s+\[a\]:\s*(.+)/i);
-			if (editionMatch && editionMatch[1]) {
-				item.edition = editionMatch[1].trim();
-			}
-		}
-
-		// Get description from meta tag
-		var descMeta = doc.querySelector('meta[name="description"]');
-		if (descMeta) {
-			item.abstractNote = descMeta.getAttribute('content');
-		}
-	}
-	
-	item.attachments.push({
-		title: "Snapshot",
-		document: doc
-	});
-		
-	item.complete();
-}
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://hukukmarket.com/medeni-hukuk/kitap/45930-9786254328794-medeni-hukuk.html",
+		"url": "https://www.filizkitabevi.com/anayasa-mahkemesi-kararlari-isiginda-infaz-hukuku-4-baski",
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Medeni Hukuk",
-				"creators": [
-					{
-						"firstName": "M. Kemal",
-						"lastName": "Oğuzman",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Nami",
-						"lastName": "Barlas",
-						"creatorType": "author"
-					}
-				],
-				"date": "2024",
-				"ISBN": "9786254328794",
-				"edition": "30",
-				"language": "tr",
-				"libraryCatalog": "KitapYurdu.com",
-				"numPages": "425",
-				"publisher": "On İki Levha Yayıncılık",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [
-					{
-						"note": "Hocam Prof. Dr. M. Kemal Oğuzman'ın 7. basıyı yaptıktan sonra vefat etmesinin ardından, tarafımdan her baskıda belirli ölçüde genişletilerek, dili sadeleştirilerek ve yeni kanunlara, doktrin kaynaklarına ve yargı içtihatlarına göre güncellenerek 23 baskısı daha yapılan ve bugün 30. basıya ulaşan kitabımızın bu yeni basısında da, son basıdan bu yana geçen kısa süre içinde meydana gelen gelişmeler ve yenilikler kitaba işlenmiştir.(ÖNSÖZDEN)\n \nİÇİNDEKİLER\n \nBirinci Bölüm Genel Bakış §1. Medeni Hukukun Anlamı ve Konusu I. \"Hukuk\" Kavramı II. Kamu Hukuku Özel Hukuk Ayırımı III. Medeni Hukukun Anlamı IV. Medeni Hukukun Konusu §2. Medeni Hukukun Düzenleniş Tarzı Bakımından Çeşitli Sistemler I. Roma Cermen Sisteminin Etkisi Altındaki Hukuk Düzenleri II. İslam Hukukunun Etkisi Altındaki Hukuk Düzenleri III. İngiliz Hukukunun Etkisini Taşıyan Hukuk Düzenleri IV. Sosyalist Prensiplerin Etkisi Altındaki Hukuk Düzenleri V. Avrupa Birliği Hukukunda Durum §3. Bulunduğumuz Grupta Kanunlaştırma Hareketi ve İsviçre Medeni Kanunu'nun Yapılışı I. Genel Bakış II. İsviçre'de Medeni Kanunun Yapılışı §4. Türkiye'de Medeni Hukuk Alanında Kanunlaştırma Hareketleri ve Medeni Kanun I. Osmanlı İmparatorluğu Döneminde Kanunlaştırma II. Türkiye Cumhuriyeti Döneminde Kanunlaştırma Hareketi\n \nİkinci Bölüm Medeni Hukukun Yürürlük Kaynakları ve Uygulanması §1. Hukukta \"Kaynak\" Kavramı ve Medeni Hukukun Yürürlük Kaynaklarına Genel Bakış I. \"Kaynak\" Kavramı II. Medeni Hukukun Yürürlük Kaynaklarına Genel Bakış §2. Kanunlar, Tüzükler, Yönetmelikler I. Kavramlara Genel Bakış II. Yürürlüğe Koyma ve Yürürlükten Kaldırma III. Medeni Hukukla Doğrudan İlgili Temel Düzenlemeler IV. Kanunların Uygulanması §3. Örf ve Adet Hukuku I. Kavram II. Bir Örf ve Adet Hukuku Kuralının Doğumu İçin Gerekli Şartlar III. Örf ve Adet Hukukunun Rolü §4. Hakim Tarafından Yaratılan Hukuk I. Genel Bakış II. Hakimin Hukuk Yaratmasının Şartları III. Hakimin Hukuk Yaratırken Uygulayacağı Yöntem IV. Hakimin Hukuk Yaratırken Yararlanacağı İmkanlar V. Hakimin Yarattığı Hukuk Kuralının Rolü §5. Medeni Hukuk Uygulamasında Bilimsel Görüşlerin ve Yargı Kararlarının Rolü I. Genel Bakış II. Doktrinde Yer Alan Bilimsel Görüşler III. Yargısal İçtihatlar\n \nÜçüncü Bölüm Medeni Hukukun Bazı Temel Kavramları §1. \"Hak\" Kavramı I. Terim II. Hak Kavramını Açıklayan Görüşler §2. Hakların Çeşitleri I. Para ile Ölçülebilen Değeri Bulunup Bulunmaması Açısından: Malvarlığı Hakları Kişi Varlığı Hakları II. İleri Sürülebileceği Çevre Açısından: Mutlak Haklar - Nisbi Haklar III. Kullanılmasının Etkisi Bakımından: Alelade Haklar - Yenilik Doğuran Haklar IV. Kullanma Yetkisi Açısından: Kişiye Sıkı Sıkıya Bağlı Olan ve Olmayan Haklar V. Bağımsız Olup Olmama Açısından: Bağımsız Haklar - Bağlı Haklar §3. Hak Sahibi §4. Hakların Kazanılması ve Kaybedilmesi I. \"Hukuki Olay\", \"Hukuki Fiil\" ve \"Hukuki İşlem\" Kavramları II. Hakların Kazanılma (İktisap) Tarzı III. Hakların Kaybediliş Tarzı §5. Hakların Kazanılmasında İyiniyetin Rolü I. İyiniyet Kavramı II. İyiniyetin Rolü III. İyiniyetin Aranacağı Kişi ve İyiniyetin Aranacağı An IV. İyiniyetin İspatı §6. Hakların Kullanılması ve Dürüstlük Kuralına Uyma Zorunluluğu I. Genel Bakış II. Dürüstlük Kuralı III. Hakkın Kötüye Kullanılması IV. Dürüstlük Kuralı ve Hakkın Kötüye Kullanılması Yasağının Uygulama Alanı V. Medeni Kanunun 2. Maddesi Uygulanırken Göz Önünde Tutulacak Esaslar §7. Hakların Korunması I. Genel Bakış II. Talep III. Dava IV. Cebri İcra V. Hakkını Kendi Gücü ile Koruma VI. Uğranılan Zararı Tazmin Ettirme\n \nKaynaklar Kavram İndeksi Kanun Maddeleri İndeksi"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.seckin.com.tr/kitap/hukuk-davalarinda-hakimin-reddi-yasaklilik-cekinme-cekilme-ret-sebepleri-ve-ret-proseduru-mehmet-akif-tutumlu-s-p-877660362",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Hukuk Davalarında Hakimin Reddi, Mehmet Akif Tutumlu - Kitap",
-				"creators": [
-					{
-						"firstName": "Mehmet Akif",
-						"lastName": "Tutumlu",
-						"creatorType": "author"
-					}
-				],
-				"ISBN": "9789750299605",
-				"abstractNote": "Çalışma, 6100 Sayılı Hukuk Muhakemeleri Kanunun 34-45. maddelerinde düzenlenen hâkimin davaya bakmaktan yasaklılığı ve r",
-				"language": "tr",
-				"libraryCatalog": "KitapYurdu.com",
-				"publisher": "Seçkin Yayıncılık Sanayi ve Ticaret A.ş.",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://yetkin.com.tr/idari-yargilama-hukuku-9932",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "İdari Yargılama Hukuku",
+				"title": "Anayasa Mahkemesi Kararları Işığında İnfaz Hukuku 4.BASKI",
 				"creators": [
 					{
 						"firstName": "",
-						"lastName": "Dr",
+						"lastName": "Mustafa Özen",
 						"creatorType": "author"
 					}
 				],
-				"date": "2025",
-				"ISBN": "9786050522211",
-				"abstractNote": "İdari Yargılama Hukuku Prof. Dr. Ali ULUSOY 2025/06 4. Baskı,252 Sayfa ISBN 9786050522211 \"İdari Yargılama Hukuku\" isimli bu çalışma Ocak 20",
-				"edition": "4",
-				"language": "tr",
-				"libraryCatalog": "KitapYurdu.com",
-				"numPages": "252",
-				"publisher": "Yetkin Yayınları",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.filizkitabevi.com/ortakligin-giderilmesi-davalari-13-baski",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Ortaklığın Giderilmesi Davaları 13.BASKI",
-				"creators": [],
-				"date": "2025",
-				"ISBN": "9786253811136",
-				"abstractNote": "Ortaklığın Giderilmesi Davaları 13.BASKI Ortaklığın giderilmesi davası; hisseli mülkiyette, kısaca paylı veya elbirliği mülkiyetine konu taşınır veya taşınmaz m",
-				"edition": "13",
-				"language": "tr",
-				"libraryCatalog": "KitapYurdu.com",
-				"numPages": "1264",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://legal.com.tr/kitaplar/urun/vergi-hukuku-sempozyumu/369221",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Vergi Hukuku Sempozyumu",
-				"creators": [
-					{
-						"firstName": "Hakan",
-						"lastName": "Üzeltürk",
-						"creatorType": "author"
-					}
-				],
-				"date": "2025",
-				"ISBN": "9786256580923",
-				"abstractNote": "Hukuk Kitapları ve Dergilerine her ortamdan erişin. Online Kitap / Online Dergi / Basılı Yayın",
-				"edition": "1. Baskı",
-				"language": "tr",
-				"libraryCatalog": "KitapYurdu.com",
-				"numPages": "95",
-				"publisher": "Legal Yayınevi",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
+				"publisher": "Adalet Yayınevi",
+				"ISBN": "9786253773670",
+				"language": "tr"
 			}
 		]
 	}
