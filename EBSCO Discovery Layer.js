@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-02-04 04:24:48"
+	"lastUpdated": "2025-12-22 18:11:41"
 }
 
 /*
@@ -117,9 +117,20 @@ async function scrape(doc, url = doc.location.href) {
 	let risURL = `/linkprocessor/v2-ris?recordId=${recordId}&opid=${opid}&lang=en`;
 	// Z.debug(risURL)
 
-	// this won't work always
-	let pdfURL = `/linkprocessor/v2-pdf?recordId=${recordId}&sourceRecordId=${recordId}&profileIdentifier=${opid}&intent=download&lang=en`;
-
+	let pdfURL;
+	try {
+		let [{ result }] = await requestJSON(`/api/viewer/v6/htmlfulltext/${recordId}?opid=${opid}`);
+		let { links } = result;
+		Z.debug('Links:');
+		Z.debug(links);
+		let downloadLink = links['v2-downloadLinks']?.find(link => link.type === 'pdf');
+		if (!downloadLink) downloadLink = links.downloadLinks.find(link => link.type === 'pdf');
+		pdfURL = downloadLink.url;
+	}
+	catch (e) {
+		Zotero.debug('Error while locating PDF download link: ' + e);
+		pdfURL = `/linkprocessor/v2-pdf?recordId=${recordId}&sourceRecordId=${recordId}&profileIdentifier=${opid}&intent=download&lang=en`
+	}
 
 	let risText = await requestText(risURL);
 	// Z.debug(risText)
@@ -143,5 +154,6 @@ async function scrape(doc, url = doc.location.href) {
 }
 
 /** BEGIN TEST CASES **/
-
+var testCases = [
+]
 /** END TEST CASES **/
