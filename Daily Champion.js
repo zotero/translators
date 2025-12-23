@@ -364,7 +364,7 @@ async function scrape(doc, url) {
 			|| ''
 		);
 
-		// Remove trailing "- Tribune Online" or variants
+		// Remove trailing "- Champion Newspapers LTD" or variants
 		item.title = item.title.replace(/\s*[-–—]\s*Champion\s*Newspapers\s*LTD\s*$/i, '').trim();
 
 		item.abstractNote = ZU.unescapeHTML(
