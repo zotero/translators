@@ -2,7 +2,7 @@
 	"translatorID": "769a21e1-be3a-4167-aa18-c00b53b8d7da",
 	"label": "Nigerian Pilot",
 	"creator": "VWF",
-	"target": "^https?://www\\\\.?.nigerianpilot\\\\.net/",
+	"target": "^https?://www\\.?.nigerianpilot\\.net/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
