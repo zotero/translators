@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-12-29 13:36:03"
+	"lastUpdated": "2025-12-29 14:29:32"
 }
 
 /*
@@ -107,6 +107,22 @@ async function doWeb(doc, url) {
 
 async function scrape(doc, url = doc.location.href) {
 	Zotero.debug("PORTALE: Starting scrape for URL: " + url);
+
+	// Extract page number from Mirador viewer navigation element
+	// Format: "124 di 126 • pag. 124" (Italian: "124 of 126 • page 124")
+	let currentPageNumber = null;
+	let miradorNav = doc.querySelector('[class*="mirador-canvas-nav"]');
+	if (miradorNav) {
+		let navText = miradorNav.textContent;
+		Zotero.debug("PORTALE: Found mirador-canvas-nav: " + navText);
+		// Extract the first number (current page position)
+		let match = navText.match(/^(\d+)\s+di\s+\d+/);
+		if (match) {
+			currentPageNumber = parseInt(match[1], 10);
+			Zotero.debug("PORTALE: Extracted current page number: " + currentPageNumber);
+		}
+	}
+
 	let manifestUrl = await extractManifestUrl(doc, url);
 	if (!manifestUrl) {
 		Zotero.debug("PORTALE: No IIIF manifest URL found - falling back to basic scrape");
@@ -135,7 +151,7 @@ async function scrape(doc, url = doc.location.href) {
 		Zotero.debug("Portale Antenati: Manifest fetched successfully");
 		let item = await createItemFromManifest(manifest, url);
 		if (item) {
-			await addImageAttachments(item, manifest, url);
+			await addImageAttachments(item, manifest, url, currentPageNumber);
 			item.complete();
 		}
 	} catch (error) {
@@ -229,7 +245,9 @@ async function createItemFromManifest(manifest, url) {
 
 	// Extract metadata from IIIF manifest
 	if (manifest.metadata) {
+		Zotero.debug("PORTALE: === ALL MANIFEST METADATA FIELDS ===");
 		manifest.metadata.forEach(field => {
+			Zotero.debug("PORTALE: Metadata field: " + field.label + " = " + JSON.stringify(field.value));
 			let label = field.label;
 			let value = Array.isArray(field.value) ? field.value.join('; ') : field.value;
 
@@ -296,6 +314,11 @@ async function createItemFromManifest(manifest, url) {
 			manifest.description.join(' ') : manifest.description;
 	}
 
+	// Extract number of pages from canvas count
+	if (manifest.sequences && manifest.sequences[0] && manifest.sequences[0].canvases) {
+		item.numPages = String(manifest.sequences[0].canvases.length);
+	}
+
 	return item;
 }
 
@@ -313,9 +336,10 @@ function arrayBufferToBase64(buffer) {
 	return btoa(binary);
 }
 
-async function addImageAttachments(item, manifest, baseUrl) {
+async function addImageAttachments(item, manifest, baseUrl, currentPageNumber) {
 	Zotero.debug("PORTALE: Processing attachments. Manifest structure:");
 	Zotero.debug("PORTALE: manifest.sequences exists: " + !!manifest.sequences);
+	Zotero.debug("PORTALE: currentPageNumber from DOM: " + currentPageNumber);
 
 	if (!manifest.sequences || !manifest.sequences[0] || !manifest.sequences[0].canvases) {
 		Zotero.debug("PORTALE: No canvases found in manifest sequences");
@@ -326,11 +350,6 @@ async function addImageAttachments(item, manifest, baseUrl) {
 	Zotero.debug("PORTALE: Found " + canvases.length + " canvases");
 	const downloadedImages = []; // Store downloaded images for embedding in note
 
-	// Extract the page identifier from the URL (last segment after final /)
-	// URL format: https://antenati.cultura.gov.it/ark:/12657/an_ua35417246/5KNvvJQ
-	const pageId = baseUrl.split('/').pop();
-	Zotero.debug("PORTALE: Looking for specific page ID: " + pageId);
-
 	// Headers required to bypass WAF protection (same as Python script)
 	const imageHeaders = {
 		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -339,35 +358,53 @@ async function addImageAttachments(item, manifest, baseUrl) {
 		'Accept-Language': 'en-US,en;q=0.9'
 	};
 
-	// Find the canvas that matches the page ID from the URL
+	// Find the target canvas
 	let targetCanvas = null;
 	let targetIndex = -1;
 	let targetLabel = null;
-	for (let i = 0; i < canvases.length; i++) {
-		const canvas = canvases[i];
-		// Log the first few canvases to understand the structure
-		if (i < 3) {
-			Zotero.debug("PORTALE: Canvas " + i + " properties: @id=" + canvas['@id'] + ", label=" + canvas.label);
-		}
-		if (canvas.images && canvas.images[0] && canvas.images[0].resource) {
-			const imageUrl = canvas.images[0].resource['@id'] || canvas.images[0].resource.id;
-			// Check if the image URL contains the page ID
-			if (imageUrl && imageUrl.includes('/' + pageId + '/')) {
-				targetCanvas = canvas;
-				targetIndex = i;
-				targetLabel = canvas.label;
-				Zotero.debug("PORTALE: Found matching canvas at index " + i + " for page ID " + pageId);
-				Zotero.debug("PORTALE: Canvas label: " + targetLabel);
-				break;
+
+	// If we have a page number from the DOM (Mirador viewer), use it directly
+	if (currentPageNumber && currentPageNumber > 0 && currentPageNumber <= canvases.length) {
+		targetIndex = currentPageNumber - 1; // Convert to 0-based index
+		targetCanvas = canvases[targetIndex];
+		targetLabel = targetCanvas.label;
+		Zotero.debug("PORTALE: Using page number from DOM: " + currentPageNumber + " (canvas index " + targetIndex + ")");
+		Zotero.debug("PORTALE: Canvas label: " + targetLabel);
+
+		// Set the page number on the item
+		item.pages = String(currentPageNumber);
+	}
+	else {
+		// Fallback: try to match by page ID from URL
+		const pageId = baseUrl.split('/').pop();
+		Zotero.debug("PORTALE: No DOM page number, looking for page ID: " + pageId);
+
+		for (let i = 0; i < canvases.length; i++) {
+			const canvas = canvases[i];
+			if (canvas.images && canvas.images[0] && canvas.images[0].resource) {
+				const imageUrl = canvas.images[0].resource['@id'] || canvas.images[0].resource.id;
+				if (imageUrl && imageUrl.includes('/' + pageId + '/')) {
+					targetCanvas = canvas;
+					targetIndex = i;
+					targetLabel = canvas.label;
+					Zotero.debug("PORTALE: Found matching canvas at index " + i + " for page ID " + pageId);
+					break;
+				}
 			}
 		}
-	}
 
-	// If no matching canvas found, fall back to first canvas
-	if (!targetCanvas && canvases.length > 0) {
-		Zotero.debug("PORTALE: No matching canvas found for page ID, using first canvas");
-		targetCanvas = canvases[0];
-		targetIndex = 0;
+		// If no matching canvas found, fall back to first canvas
+		if (!targetCanvas && canvases.length > 0) {
+			Zotero.debug("PORTALE: No matching canvas found for page ID, using first canvas");
+			targetCanvas = canvases[0];
+			targetIndex = 0;
+			targetLabel = canvases[0].label;
+		}
+
+		// Set page number from canvas label if we didn't get it from DOM
+		if (targetLabel) {
+			item.pages = targetLabel;
+		}
 	}
 
 	// Download only the target image
