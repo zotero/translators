@@ -42,21 +42,21 @@ function detectWeb(doc, url) {
 	}
 
 	// Detect gallery pages (contain multiple records)
-	if (doc.querySelector('[data-gallery-id]') ||
-		url.includes('/gallery/') ||
-		doc.querySelector('.gallery-item') ||
-		doc.querySelector('.archival-unit-list')) {
+	if (doc.querySelector('[data-gallery-id]')
+		|| url.includes('/gallery/')
+		|| doc.querySelector('.gallery-item')
+		|| doc.querySelector('.archival-unit-list')) {
 		return "multiple";
 	}
 
 	// Detect individual record pages
-	if (doc.querySelector('[data-manifest-url]') ||
-		url.includes('/view/') ||
-		url.includes('/ark:/') ||
-		doc.querySelector('.iiif-manifest') ||
-		doc.querySelector('.archival-unit-detail') ||
-		doc.querySelector('.document-viewer') ||
-		doc.title.includes('Visualizzatore')) {
+	if (doc.querySelector('[data-manifest-url]')
+		|| url.includes('/view/')
+		|| url.includes('/ark:/')
+		|| doc.querySelector('.iiif-manifest')
+		|| doc.querySelector('.archival-unit-detail')
+		|| doc.querySelector('.document-viewer')
+		|| doc.title.includes('Visualizzatore')) {
 		return "manuscript";
 	}
 
@@ -72,10 +72,10 @@ function getSearchResults(doc, checkOnly) {
 
 	for (let row of rows) {
 		let href = row.href;
-		let title = ZU.trimInternal(row.textContent) ||
-				   row.getAttribute('title') ||
-				   row.querySelector('.title, .archival-title')?.textContent ||
-				   'Archival Record';
+		let title = ZU.trimInternal(row.textContent)
+			|| row.getAttribute('title')
+			|| row.querySelector('.title, .archival-title')?.textContent
+			|| 'Archival Record';
 
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -108,7 +108,7 @@ async function scrape(doc, url = doc.location.href) {
 		// Extract the first number (current page position)
 		let match = navText.match(/^(\d+)\s+di\s+\d+/);
 		if (match) {
-			currentPageNumber = parseInt(match[1], 10);
+			currentPageNumber = parseInt(match[1]);
 		}
 	}
 
@@ -123,15 +123,15 @@ async function scrape(doc, url = doc.location.href) {
 		// Add headers to bypass WAF protection as noted in the Python implementation
 		let manifest = await requestJSON(manifestUrl, {
 			headers: {
-				'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-				'Referer': 'https://antenati.cultura.gov.it/',
-				'Accept': 'application/json, text/plain, */*',
-				'Accept-Language': 'en-US,en;q=0.9',
-				'Accept-Encoding': 'gzip, deflate, br',
-				'Connection': 'keep-alive',
-				'Sec-Fetch-Dest': 'empty',
-				'Sec-Fetch-Mode': 'cors',
-				'Sec-Fetch-Site': 'same-site'
+				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+				Referer: "https://antenati.cultura.gov.it/",
+				Accept: "application/json, text/plain, */*",
+				"Accept-Language": "en-US,en;q=0.9",
+				"Accept-Encoding": "gzip, deflate, br",
+				Connection: "keep-alive",
+				"Sec-Fetch-Dest": "empty",
+				"Sec-Fetch-Mode": "cors",
+				"Sec-Fetch-Site": "same-site"
 			}
 		});
 
@@ -194,7 +194,7 @@ async function extractManifestUrl(doc, url) {
 	}
 
 	// Strategy 5: Original URL construction (kept as final fallback)
-	let urlMatch = url.match(/\/ark:\/([^\/]+)\/([^\/]+)(?:\/([^\/]+))?/);
+	let urlMatch = url.match(/\/ark:\/([^/]+)\/([^/]+)(?:\/([^/]+))?/);
 	if (urlMatch) {
 		let baseUrl = new URL(url);
 		return `${baseUrl.origin}/iiif/ark:/${urlMatch[1]}/${urlMatch[2]}${urlMatch[3] ? '/' + urlMatch[3] : ''}/manifest.json`;
@@ -213,7 +213,7 @@ async function createItemFromManifest(manifest, url) {
 	// Extract metadata from IIIF manifest
 	let titleYear = null; // "Titolo" contains the year (e.g., "1809") for title construction
 	if (manifest.metadata) {
-		manifest.metadata.forEach(field => {
+		manifest.metadata.forEach((field) => {
 			let label = field.label;
 			let value = Array.isArray(field.value) ? field.value.join('; ') : field.value;
 
@@ -329,10 +329,10 @@ async function addImageAttachments(item, manifest, baseUrl, currentPageNumber) {
 
 	// Headers required to bypass WAF protection (same as Python script)
 	const imageHeaders = {
-		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-		'Referer': 'https://antenati.cultura.gov.it/',
-		'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
-		'Accept-Language': 'en-US,en;q=0.9'
+		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+		Referer: "https://antenati.cultura.gov.it/",
+		Accept: "image/webp,image/apng,image/*,*/*;q=0.8",
+		"Accept-Language": "en-US,en;q=0.9"
 	};
 
 	// Find the target canvas
