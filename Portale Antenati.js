@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-12-29 14:29:32"
+	"lastUpdated": "2025-12-29 14:59:14"
 }
 
 /*
@@ -244,6 +244,7 @@ async function createItemFromManifest(manifest, url) {
 	item.libraryCatalog = "Portale Antenati";
 
 	// Extract metadata from IIIF manifest
+	let titleYear = null; // "Titolo" contains the year (e.g., "1809") for title construction
 	if (manifest.metadata) {
 		Zotero.debug("PORTALE: === ALL MANIFEST METADATA FIELDS ===");
 		manifest.metadata.forEach(field => {
@@ -257,14 +258,14 @@ async function createItemFromManifest(manifest, url) {
 			}
 
 			switch(label) {
+				case 'Titolo':
+				case 'Title':
+					titleYear = value;
+					break;
+
 				case 'Contesto archivistico':
 				case 'Archival Context':
 					item.archive = value;
-					break;
-
-				case 'Titolo':
-				case 'Title':
-					item.title = value;
 					break;
 
 				case 'Tipologia':
@@ -274,6 +275,7 @@ async function createItemFromManifest(manifest, url) {
 					break;
 
 				case 'Data':
+				case 'Datazione':
 				case 'Date':
 					item.date = value;
 					break;
@@ -298,13 +300,31 @@ async function createItemFromManifest(manifest, url) {
 		});
 	}
 
-	// Extract title from manifest label if not found in metadata
-	if (!item.title && manifest.label) {
-		item.title = Array.isArray(manifest.label) ? manifest.label.join(' ') : manifest.label;
+	// Construct title from metadata: "year - type - archive"
+	// Example: "1809 - Nati - Archivio di Stato di Lecce > Stato civile della restaurazione > Casamassella"
+	Zotero.debug("PORTALE: titleYear = " + titleYear);
+	Zotero.debug("PORTALE: item.manuscriptType = " + item.manuscriptType);
+	Zotero.debug("PORTALE: item.archive = " + item.archive);
+	let titleParts = [];
+	if (titleYear) {
+		titleParts.push(titleYear);
+	}
+	if (item.manuscriptType) {
+		titleParts.push(item.manuscriptType);
+	}
+	if (item.archive) {
+		titleParts.push(item.archive);
 	}
 
-	// Fallback title
-	if (!item.title) {
+	if (titleParts.length > 0) {
+		item.title = titleParts.join(' - ');
+	}
+	else if (manifest.label) {
+		// Fallback to manifest label
+		item.title = Array.isArray(manifest.label) ? manifest.label.join(' ') : manifest.label;
+	}
+	else {
+		// Final fallback
 		item.title = "Archival Record from Portale Antenati";
 	}
 
