@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-12-29 16:13:32"
+	"lastUpdated": "2025-12-30 11:13:06"
 }
 
 /*
@@ -384,9 +384,15 @@ async function addImageAttachments(item, manifest, baseUrl, currentPageNumber) {
 		let imageUrl = targetCanvas.images[0].resource['@id'] || targetCanvas.images[0].resource.id;
 
 		if (imageUrl) {
-			// Add size parameter for reasonable file size (max width 800px for good quality)
-			if (imageUrl.includes('/full/full/')) {
-				imageUrl = imageUrl.replace('/full/full/', '/full/800,/');
+			// Request high resolution image (2000px max dimension for readable documents)
+			// Uses IIIF !w,h syntax to fit within box while preserving aspect ratio
+			// Note: /full/full/0/ and /full/max/0/ return 403, but !w,h works
+			if (imageUrl.includes('/full/full/0/')) {
+				imageUrl = imageUrl.replace('/full/full/0/', '/full/!2000,2000/0/');
+			}
+			else if (imageUrl.includes('/full/full/')) {
+				// Fallback for slightly different URL patterns
+				imageUrl = imageUrl.replace('/full/full/', '/full/!2000,2000/');
 			}
 
 			try {
