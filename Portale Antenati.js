@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-12-30 11:13:06"
+	"lastUpdated": "2025-12-30 17:32:32"
 }
 
 /*
@@ -384,40 +384,48 @@ async function addImageAttachments(item, manifest, baseUrl, currentPageNumber) {
 		let imageUrl = targetCanvas.images[0].resource['@id'] || targetCanvas.images[0].resource.id;
 
 		if (imageUrl) {
-			// Request high resolution image (2000px max dimension for readable documents)
+			// Try different resolutions with fallback (2000px -> 1200px)
 			// Uses IIIF !w,h syntax to fit within box while preserving aspect ratio
 			// Note: /full/full/0/ and /full/max/0/ return 403, but !w,h works
-			if (imageUrl.includes('/full/full/0/')) {
-				imageUrl = imageUrl.replace('/full/full/0/', '/full/!2000,2000/0/');
-			}
-			else if (imageUrl.includes('/full/full/')) {
-				// Fallback for slightly different URL patterns
-				imageUrl = imageUrl.replace('/full/full/', '/full/!2000,2000/');
-			}
+			const sizes = ['!2000,2000', '!1200,1200'];
+			let downloaded = false;
 
-			try {
-				// Download image with proper headers to bypass 403
-				const response = await request(imageUrl, {
-					headers: imageHeaders,
-					responseType: 'arraybuffer'
-				});
+			for (const size of sizes) {
+				if (downloaded) break;
 
-				if (response.body && response.body.byteLength > 0) {
-					// Convert to base64
-					const base64Data = arrayBufferToBase64(response.body);
-					const dataUri = `data:image/jpeg;base64,${base64Data}`;
-
-					// Store for later use in note
-					downloadedImages.push({
-						index: targetIndex + 1,
-						label: targetLabel,
-						dataUri: dataUri,
-						originalUrl: imageUrl
-					});
+				let sizedUrl = imageUrl;
+				if (sizedUrl.includes('/full/full/0/')) {
+					sizedUrl = sizedUrl.replace('/full/full/0/', `/full/${size}/0/`);
 				}
-			}
-			catch (error) {
-				Zotero.debug("Portale Antenati: Failed to download image: " + error);
+				else if (sizedUrl.includes('/full/full/')) {
+					sizedUrl = sizedUrl.replace('/full/full/', `/full/${size}/`);
+				}
+
+				try {
+					// Download image with proper headers to bypass 403
+					const response = await request(sizedUrl, {
+						headers: imageHeaders,
+						responseType: 'arraybuffer'
+					});
+
+					if (response.body && response.body.byteLength > 0) {
+						// Convert to base64
+						const base64Data = arrayBufferToBase64(response.body);
+						const dataUri = `data:image/jpeg;base64,${base64Data}`;
+
+						// Store for later use in note
+						downloadedImages.push({
+							index: targetIndex + 1,
+							label: targetLabel,
+							dataUri: dataUri,
+							originalUrl: sizedUrl
+						});
+						downloaded = true;
+					}
+				}
+				catch (error) {
+					Zotero.debug(`Portale Antenati: Failed to download image at ${size}: ${error}`);
+				}
 			}
 		}
 	}
