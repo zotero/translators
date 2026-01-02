@@ -2,7 +2,7 @@
 	"translatorID": "429936dd-ad60-4e23-b346-569c85d17e0b",
 	"label": "KiM",
 	"creator": "Ewout ter Hoeven",
-	"target": "^https?://.*kimnet\\\\.nl/document",
+	"target": "^https?://[^/]*kimnet\\.nl/document",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
