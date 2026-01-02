@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-01-02 16:19:22"
+	"lastUpdated": "2026-01-02 16:28:12"
 }
 
 /*
@@ -127,13 +127,12 @@ async function scrape(doc, url = doc.location.href) {
 		}
 
 		// Extract authors - look for entries with commas that aren't file sizes or page counts
-		let authors = metaParts.find(p =>
-			p.includes(',') &&
-			!/\d/.test(p.split(',')[0]) && // First part shouldn't contain numbers
-			!p.includes('pagina') &&
-			!p.includes('pages') &&
-			!p.includes('KB') &&
-			!p.includes('MB')
+		let authors = metaParts.find(p => p.includes(',')
+			&& !/\d/.test(p.split(',')[0]) // First part shouldn't contain numbers
+			&& !p.includes('pagina')
+			&& !p.includes('pages')
+			&& !p.includes('KB')
+			&& !p.includes('MB')
 		);
 
 		if (authors && !item.creators.length) {
