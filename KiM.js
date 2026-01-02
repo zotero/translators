@@ -233,7 +233,7 @@ var testCases = [
 					}
 				],
 				"date": "2025-10-01",
-				"abstractNote": "If the electrification of road transport takes longer than expected, road freight transport can also be made more sustainable in the short to medium term through the (greater) use of (more) renewable fuels. If demand for renewable fuels that are already widely used increases, this could lead to a shortage of biofeedstock, possibly resulting in price increases. Using other renewable fuels means that, depending on the type of fuel, truck engines will have to be modified or new engine types developed. This is one of the findings of the publication 'Renewable fuels in high blends in road freight transport' by the Netherlands Institute for Transport Policy Analysis (KiM) in collaboration with studio GearUp.",
+				"abstractNote": "If the electrification of road transport takes longer than expected, road freight transport can also be made more sustainable in the short to medium term through the (greater) use of (more) renewable fuels. If demand for renewable fuels that are already widely used increases, this could lead to a shortage of biofeedstock, possibly resulting in price increases. Using other renewable fuels means that, depending on the type of fuel, truck engines will have to be modified or new engine types developed. This is one of the findings of the publication 'Renewable fuels in high blends in road freight transport’ by the Netherlands Institute for Transport Policy Analysis (KiM) in collaboration with studio GearUp.",
 				"institution": "Netherlands Institute for Transport Policy Analysis",
 				"language": "en",
 				"libraryCatalog": "KiM",
