@@ -1,16 +1,17 @@
 {
-    "translatorID": "429936dd-ad60-4e23-b346-569c85d17e0b",
-    "label": "KiM",
-    "creator": "Ewout ter Hoeven",
-    "target": "^https?://.*kimnet\\\\.nl/document",
-    "minVersion": "5.0",
-    "maxVersion": "",
-    "priority": 100,
-    "inRepository": true,
-    "translatorType": 4,
-    "browserSupport": "gcsibv",
-    "lastUpdated": "2026-01-02 15:59:22"
+	"translatorID": "429936dd-ad60-4e23-b346-569c85d17e0b",
+	"label": "KiM",
+	"creator": "Ewout ter Hoeven",
+	"target": "^https?://.*kimnet\\\\.nl/document",
+	"minVersion": "5.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2026-01-02 16:19:22"
 }
+
 /*
 	***** BEGIN LICENSE BLOCK *****
 
