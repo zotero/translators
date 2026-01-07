@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-07-30 05:19:59"
+	"lastUpdated": "2026-01-07 17:48:30"
 }
 
 /*
@@ -35,6 +35,10 @@
 */
 
 function detectWeb(doc, url) {
+	if (doc.querySelector('div[aria-label="Export citations (Premium feature)"] > [inert]')) {
+		// Frontend doesn't want us to export citations - honor that
+		return false;
+	}
 	if (isContentUrl(url)) {
 		let subtypeMatch = getItemSubtype(doc);
 		if (!subtypeMatch) {
@@ -58,7 +62,7 @@ function detectWeb(doc, url) {
 			return 'computerProgram';
 		}
 		else if (subtype == 'dataset') {
-			return 'document';
+			return 'dataset';
 		}
 		else if (subtype == 'book') {
 			let bookTypeRegex = /page:string:([\w ]+)/;
@@ -79,16 +83,16 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
-		Zotero.selectItems(getSearchResults(doc), function (selected) {
-			if (selected) {
-				ZU.processDocuments(Object.keys(selected), scrape);
-			}
-		});
+		let results = await Zotero.selectItems(getSearchResults(doc));
+		if (!results) return;
+		for (let url of Object.keys(results)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else {
-		scrape(doc);
+		await scrape(doc);
 	}
 }
 
@@ -105,7 +109,7 @@ function isContentUrl(url) {
 function getSearchResults(doc, checkOnly) {
 	let items = {};
 	let found = false;
-	let results = doc.querySelectorAll('h5.issue-item__title a');
+	let results = doc.querySelectorAll('.issue-item__title a');
 	
 	for (let i = 0; i < results.length; i++) {
 		let url = results[i].href;
@@ -128,110 +132,104 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function scrape(doc) {
-	let doi = attr(doc, 'input[name=doiVal]', 'value');
+async function scrape(doc) {
+	let doi = doc.location.pathname.match(/\/doi\/(?:[^/]+\/)?(10\.[^/]+\/[^/]+)/)[1];
 	let lookupEndpoint = 'https://dl.acm.org/action/exportCiteProcCitation';
 	let postBody = 'targetFile=custom-bibtex&format=bibTex&dois=' + encodeURIComponent(doi);
 	
-	ZU.doPost(lookupEndpoint, postBody, function (returnedText) {
-		let json = JSON.parse(returnedText);
-		let cslItem = json.items[0][doi];
-		cslItem.type = cslItem.type.toLowerCase().replace('_', '-');
-		
-		// Some pages use ARTICLE rather than ARTICLE_JOURNAL
-		// https://github.com/zotero/translators/issues/2162
-		if (cslItem.type == 'article') {
-			cslItem.type = 'article-journal';
-		}
-		else if (cslItem.type == 'thesis') {
-			// The advisor is indicated as an editor in CSL which
-			// ZU.itemFromCSLJSON incorrectly extracts as an author.
-			delete cslItem.editor;
-			// The (co-)chair(s) or supervisor(s) are included in CSL as additional authors.
-			cslItem.author.splice(1);
-		}
-
-		if (cslItem.source && (cslItem.source.includes('19') || cslItem.source.includes('20'))) {
-			// Issue date sometimes goes in source (libraryCatalog)
-			delete cslItem.source;
-		}
-		
-		let item = new Zotero.Item();
-		ZU.itemFromCSLJSON(item, cslItem);
-		
-		item.title = ZU.unescapeHTML(item.title);
-
-		let abstractElements = doc.querySelectorAll('div.article__abstract p, div.abstractSection p');
-		let abstract = Array.from(abstractElements).map(x => x.textContent).join('\n\n');
-		if (abstract.length && abstract.toLowerCase() != 'no abstract available.') {
-			item.abstractNote = ZU.trimInternal(abstract);
-		}
-		
-		let pdfElement = doc.querySelector('a[title="View PDF"]');
-		if (pdfElement) {
-			item.attachments.push({
-				url: pdfElement.href,
-				title: 'Full Text PDF',
-				mimeType: 'application/pdf'
-			});
-			if (item.DOI) {
-				item.url = 'https://dl.acm.org/doi/' + ZU.cleanDOI(item.DOI);
-			}
-		}
-		
-		if (item.itemType == 'journalArticle') {
-			// Publication name in the CSL is shortened; scrape from page to get full title.
-			let expandedTitle = text(doc, 'span.epub-section__title');
-			if (expandedTitle) {
-				item.journalAbbreviation = item.publicationTitle;
-				item.publicationTitle = expandedTitle;
-			}
-			// Article number 46 --> pages = 46:1–46:22
-			if (cslItem.number) {
-				let number = cslItem.number.replace("Article", "").trim();
-				if (item.pages) {
-					item.pages = item.pages.split("–").map(x => number + ":" + x).join("–");
-				}
-				else {
-					item.pages = number;
-				}
-			}
-		}
-		
-		if (!item.creators.length) {
-			// There are cases where authors are not included in the CSL
-			// (for example, a chapter of a book) so we must scrape them.
-			// e.g. https://dl.acm.org/doi/abs/10.5555/3336323.C5474411
-			let authorElements = doc.querySelectorAll('div.citation span.loa__author-name');
-			authorElements.forEach(function (element) {
-				item.creators.push(ZU.cleanAuthor(element.textContent, 'author'));
-			});
-		}
-		
-		if (!item.ISBN && cslItem.ISBN) {
-			let isbnLength = cslItem.ISBN.replace('-', '').length;
-			let isbnText = 'ISBN-' + isbnLength + ': ' + cslItem.ISBN;
-			item.extra = item.extra ? item.extra + '\n' + isbnText : isbnText;
-		}
-		
-		let numPages = text(doc, 'div.pages-info span');
-		if (numPages && !item.numPages) {
-			item.numPages = numPages;
-		}
-		
-		let tagElements = doc.querySelectorAll('div.tags-widget a');
-		tagElements.forEach(function (tag) {
-			item.tags.push(tag.textContent);
-		});
-		
-		if (getItemSubtype(doc) == 'dataset') {
-			item.extra = item.extra ? item.extra + '\nitemType: data' : 'itemType: data';
-		}
-		
-		delete item.callNumber;
-		
-		item.complete();
+	let json = await requestJSON(lookupEndpoint, {
+		method: 'POST',
+		body: postBody,
 	});
+	let cslItem = json.items[0][doi];
+	cslItem.type = cslItem.type.toLowerCase().replace('_', '-');
+	
+	// Some pages use ARTICLE rather than ARTICLE_JOURNAL
+	// https://github.com/zotero/translators/issues/2162
+	if (cslItem.type == 'article') {
+		cslItem.type = 'article-journal';
+	}
+	else if (cslItem.type == 'thesis') {
+		// The advisor is indicated as an editor in CSL which
+		// ZU.itemFromCSLJSON incorrectly extracts as an author.
+		delete cslItem.editor;
+		// The (co-)chair(s) or supervisor(s) are included in CSL as additional authors.
+		cslItem.author.splice(1);
+	}
+
+	if (cslItem.source && (cslItem.source.includes('19') || cslItem.source.includes('20'))) {
+		// Issue date sometimes goes in source (libraryCatalog)
+		delete cslItem.source;
+	}
+	
+	let item = new Zotero.Item();
+	ZU.itemFromCSLJSON(item, cslItem);
+	
+	item.title = ZU.unescapeHTML(item.title);
+
+	let abstractElements = doc.querySelectorAll('div.article__abstract p, div.abstractSection p');
+	let abstract = Array.from(abstractElements).map(x => x.textContent).join('\n\n');
+	if (abstract.length && abstract.toLowerCase() != 'no abstract available.') {
+		item.abstractNote = ZU.trimInternal(abstract);
+	}
+	
+	if (doc.location.pathname.includes('pdf') || doc.querySelector('#downloadPdfUrl')) {
+		item.attachments.push({
+			url: `https://dl.acm.org/doi/pdf/${doi}?download=true`,
+			title: 'Full Text PDF',
+			mimeType: 'application/pdf'
+		});
+		item.url = 'https://dl.acm.org/doi/' + ZU.cleanDOI(doi);
+	}
+	
+	if (item.itemType == 'journalArticle') {
+		// Publication name in the CSL is shortened; scrape from page to get full title.
+		let expandedTitle = text(doc, 'span.epub-section__title');
+		if (expandedTitle) {
+			item.journalAbbreviation = item.publicationTitle;
+			item.publicationTitle = expandedTitle;
+		}
+		// Article number 46 --> pages = 46:1–46:22
+		if (cslItem.number) {
+			let number = cslItem.number.replace("Article", "").trim();
+			if (item.pages) {
+				item.pages = item.pages.split("–").map(x => number + ":" + x).join("–");
+			}
+			else {
+				item.pages = number;
+			}
+		}
+	}
+	
+	if (!item.creators.length) {
+		// There are cases where authors are not included in the CSL
+		// (for example, a chapter of a book) so we must scrape them.
+		// e.g. https://dl.acm.org/doi/abs/10.5555/3336323.C5474411
+		let authorElements = doc.querySelectorAll('div.citation span.loa__author-name');
+		authorElements.forEach(function (element) {
+			item.creators.push(ZU.cleanAuthor(element.textContent, 'author'));
+		});
+	}
+	
+	if (!item.ISBN && cslItem.ISBN) {
+		let isbnLength = cslItem.ISBN.replace('-', '').length;
+		let isbnText = 'ISBN-' + isbnLength + ': ' + cslItem.ISBN;
+		item.extra = item.extra ? item.extra + '\n' + isbnText : isbnText;
+	}
+	
+	let numPages = text(doc, 'div.pages-info span');
+	if (numPages && !item.numPages) {
+		item.numPages = numPages;
+	}
+	
+	let tagElements = doc.querySelectorAll('div.tags-widget a');
+	tagElements.forEach(function (tag) {
+		item.tags.push(tag.textContent);
+	});
+	
+	delete item.callNumber;
+	
+	item.complete();
 }
 
 /** BEGIN TEST CASES **/
