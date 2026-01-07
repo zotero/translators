@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-07-30 05:19:59"
+	"lastUpdated": "2026-01-07 16:45:34"
 }
 
 /*
@@ -167,7 +167,7 @@ function scrape(doc) {
 			item.abstractNote = ZU.trimInternal(abstract);
 		}
 		
-		let pdfElement = doc.querySelector('a[title="View PDF"]');
+		let pdfElement = doc.querySelector('#downloadPdfUrl');
 		if (pdfElement) {
 			item.attachments.push({
 				url: pdfElement.href,
