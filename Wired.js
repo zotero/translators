@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-30 19:51:18"
+	"lastUpdated": "2026-01-13 07:11:08"
 }
 
 /*
@@ -64,12 +64,15 @@ function scrape(doc, url) {
 		} else { // if not wired.co.uk
 			item.publicationTitle = "Wired";
 			item.ISSN = "1059-1028";
-			item.date = attr(doc,'meta[name="DisplayDate"], meta[name="parsely-pub-date"]','content');
+			item.date = ZU.strToISO(text(doc, 'time[data-testid="ContentHeaderPublishDate"]'));			item.creators = [];
 			item.creators = [];
-			var authorMetadata = attr(doc,'meta[name="Author"], meta[name="parsely-author"]','content') || text(doc, 'a[href^="/author"]');
-			if (authorMetadata) {
-				item.creators.push(ZU.cleanAuthor(authorMetadata, "author"));
-			}
+				var authorLinks = doc.querySelectorAll('span[data-testid="BylineName"] a');
+				for (let link of authorLinks) {
+					var name = link.textContent.trim();
+					if (name) {
+						item.creators.push(ZU.cleanAuthor(name, "author"));
+					}
+				}
 			if (item.tags) { // catch volume/issue if in tags
 				var match = null;
 				for (let tag of item.tags) {
@@ -127,6 +130,7 @@ function doWeb(doc, url) {
 		break;
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -244,6 +248,124 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.wired.co.uk/search?q=kickstarter",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.wired.com/story/proposed-legislation-self-driving-cars-in-new-york-state/",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "New Proposed Legislation Would Let Self-Driving Cars Operate in New York State",
+				"creators": [
+					{
+						"firstName": "Aarian",
+						"lastName": "Marshall",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Aarian",
+						"lastName": "Marshall",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Read",
+						"lastName": "More",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-01-12",
+				"ISSN": "1059-1028",
+				"abstractNote": "New York governor Kathy Hochul says she will propose a new law allowing limited autonomous vehicle pilots in smaller cities. Full-blown services could be next.",
+				"language": "en-US",
+				"libraryCatalog": "www.wired.com",
+				"publicationTitle": "Wired",
+				"url": "https://www.wired.com/story/proposed-legislation-self-driving-cars-in-new-york-state/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "autonomous vehicles"
+					},
+					{
+						"tag": "cities"
+					},
+					{
+						"tag": "new york"
+					},
+					{
+						"tag": "regulation"
+					},
+					{
+						"tag": "self-driving cars"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.wired.com/story/proposed-legislation-self-driving-cars-in-new-york-state/",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "New Proposed Legislation Would Let Self-Driving Cars Operate in New York State",
+				"creators": [
+					{
+						"firstName": "Aarian",
+						"lastName": "Marshall",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Aarian",
+						"lastName": "Marshall",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Read",
+						"lastName": "More",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-01-12",
+				"ISSN": "1059-1028",
+				"abstractNote": "New York governor Kathy Hochul says she will propose a new law allowing limited autonomous vehicle pilots in smaller cities. Full-blown services could be next.",
+				"language": "en-US",
+				"libraryCatalog": "www.wired.com",
+				"publicationTitle": "Wired",
+				"url": "https://www.wired.com/story/proposed-legislation-self-driving-cars-in-new-york-state/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "autonomous vehicles"
+					},
+					{
+						"tag": "cities"
+					},
+					{
+						"tag": "new york"
+					},
+					{
+						"tag": "regulation"
+					},
+					{
+						"tag": "self-driving cars"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
