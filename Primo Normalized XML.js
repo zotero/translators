@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2025-10-14 18:44:56"
+	"lastUpdated": "2026-01-15 16:41:44"
 }
 
 /*
@@ -388,13 +388,32 @@ function stripAuthor(str) {
 		.replace(/\bNLR10::.*/, '')
 		// Austrian Libraries add authority data at the end of the author name,
 		// prefixed by '$$0'. Remove it.
-		.replace(/\$\$0.*/, '');
+		.replace(/\$\$0.*/, '')
+		// GalileoDiscovery adds language data at the end of the author name,
+		// prefixed by '$$8'. Remove it.
+		.replace(/\$\$8.*/, '');
 }
 
 function fetchCreators(item, creators, type, splitGuidance) {
+	let filterByLanguage;
 	for (let i = 0; i < creators.length; i++) {
 		var creator = ZU.unescapeHTML(creators[i].textContent).split(/\s*;\s*/);
 		for (var j = 0; j < creator.length; j++) {
+			// Some libraries have multilingual creators, and they
+			// embed a language field ($$8en, etc.) in each creator
+			// name. We want to filter out all but one language. We
+			// don't really know which one the user will want,
+			// but the first is a safe bet:
+			let language = creator[j].match(/\$\$8(\w+)/)?.[1];
+			if (language) {
+				if (!filterByLanguage) {
+					filterByLanguage = language;
+				}
+				else if (filterByLanguage !== language) {
+					continue;
+				}
+			}
+
 			var c = stripAuthor(creator[j]).replace(/\./g, "");
 			c = ZU.cleanAuthor(
 				splitGuidance[c.toLowerCase()] || c,
@@ -477,10 +496,10 @@ var testCases = [
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "Water"
+						"tag": "Chemistry"
 					},
 					{
-						"tag": "Chemistry"
+						"tag": "Water"
 					}
 				],
 				"notes": [],
@@ -701,7 +720,9 @@ var testCases = [
 					}
 				],
 				"date": "2020",
+				"DOI": "10.1007/978-3-030-63396-7_25",
 				"ISBN": "3030633950",
+				"ISSN": "1865-1348",
 				"abstractNote": "The continuously improving Internet penetration in the continent, coupled with the increasing number of smartphone users in Africa has been considered as the reasons for the adoption of social media among students and other adolescents. Even though this development has been recognizing in the literature, only a few studies have investigated the acceptance, use, and retention of social media for academic purposes. However, findings of prior studies suggest that the use of social media has an influence on academic performance. To address the lack of knowledge on the adoption of social media among students, this study aims to explore the factors that are related to students’ acceptance and use of social media. We attempt to extend the Technology Acceptance Model by integrating relational engagement, Perceived Satisfaction, as well as the Perspective of the Use of Social Media in Education. The proposed theoretical model was evaluated using quantitative data collected from 460 students in Cameroon. We applied PLS-SEM technique to test the hypotheses and the theoretical model. Implications of the findings, as well as future research directions, are presented.",
 				"bookTitle": "Information Systems",
 				"language": "eng",
@@ -1004,6 +1025,45 @@ var testCases = [
 				"callNumber": "HFA Item no. 3151",
 				"language": "ger",
 				"place": "1970?",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><record xmlns=\"http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib\" xmlns:sear=\"http://www.exlibrisgroup.com/xsd/jaguar/search\"><delivery><availabilityLinks>detailsgetit1</availabilityLinks><displayLocation>true</displayLocation><recordOwner>39UPD_INST</recordOwner><physicalServiceId>null</physicalServiceId><sharedDigitalCandidates>null</sharedDigitalCandidates><link><displayLabel>thumbnail</displayLabel><linkURL>https://proxy-eu.hosted.exlibrisgroup.com/exl_rewrite/books.google.com/books?bibkeys=ISBN:9788845278051,OCLC:,LCCN:&amp;jscmd=viewapi&amp;callback=updateGBSCover</linkURL><linkType>thumbnail</linkType><id>:_0</id></link><availability>available_in_library</availability><additionalLocations>false</additionalLocations><digitalAuxiliaryMode>false</digitalAuxiliaryMode><holding><matchForHoldings><holdingRecord>852##b</holdingRecord><matchOn>MainLocation</matchOn></matchForHoldings><subLocationCode>UNIV1</subLocationCode><volumeFilter>null</volumeFilter><ilsApiId>990025642920206046</ilsApiId><callNumberType>4</callNumberType><libraryCode>PUV00</libraryCode><yearFilter>null</yearFilter><boundWith>false</boundWith><stackMapUrl>https://biblio.unipd.it/biblioteche/convenzionate/biblioteca-universitaria-ministero-per-i-beni-e-le-attivita-culturali</stackMapUrl><isValidUser>true</isValidUser><translateRelatedTitle>null</translateRelatedTitle><mainLocation>Biblioteca Universitaria</mainLocation><callNumber>L.4.1042</callNumber><adaptorid>ALMA_01</adaptorid><organization>39UPD_INST</organization><holdingURL>OVP</holdingURL><availabilityStatus>available</availabilityStatus><id>_:0</id><subLocation>Prestabile</subLocation><holdId>22131777720006046</holdId><holKey>HoldingResultKey [mid=22131777720006046, libraryId=202896190006046, locationCode=UNIV1, callNumber=L.4.1042]</holKey><singleUnavailableItemProcessType>null</singleUnavailableItemProcessType><relatedTitle>null</relatedTitle></holding><bestlocation><matchForHoldings><holdingRecord>852##b</holdingRecord><matchOn>MainLocation</matchOn></matchForHoldings><subLocationCode>UNIV1</subLocationCode><volumeFilter>null</volumeFilter><ilsApiId>990025642920206046</ilsApiId><callNumberType>4</callNumberType><libraryCode>PUV00</libraryCode><yearFilter>null</yearFilter><boundWith>false</boundWith><stackMapUrl>https://biblio.unipd.it/biblioteche/convenzionate/biblioteca-universitaria-ministero-per-i-beni-e-le-attivita-culturali</stackMapUrl><isValidUser>true</isValidUser><translateRelatedTitle>null</translateRelatedTitle><mainLocation>Biblioteca Universitaria</mainLocation><callNumber>L.4.1042</callNumber><adaptorid>ALMA_01</adaptorid><organization>39UPD_INST</organization><holdingURL>OVP</holdingURL><availabilityStatus>available</availabilityStatus><id>_:0</id><subLocation>Prestabile</subLocation><holdId>22131777720006046</holdId><holKey>HoldingResultKey [mid=22131777720006046, libraryId=202896190006046, locationCode=UNIV1, callNumber=L.4.1042]</holKey><singleUnavailableItemProcessType>null</singleUnavailableItemProcessType><relatedTitle>null</relatedTitle></bestlocation><electronicServices>null</electronicServices><feDisplayOtherLocations>false</feDisplayOtherLocations><hasD>null</hasD><hideResourceSharing>false</hideResourceSharing><hasFilteredServices>null</hasFilteredServices><almaOpenurl>null</almaOpenurl><physicalItemTextCodes>null</physicalItemTextCodes><quickAccessService>null</quickAccessService><recordInstitutionCode>null</recordInstitutionCode><displayedAvailability>null</displayedAvailability><consolidatedCoverage>null</consolidatedCoverage><additionalElectronicServices>null</additionalElectronicServices><deliveryCategory>Alma-P</deliveryCategory><serviceMode>ovp</serviceMode><digitalAuxiliaryThumbnail>false</digitalAuxiliaryThumbnail><filteredByGroupServices>null</filteredByGroupServices><electronicContextObjectId>null</electronicContextObjectId><GetIt1><links><isLinktoOnline>false</isLinktoOnline><displayText>null</displayText><inst4opac>39UPD_INST</inst4opac><getItTabText>service_getit</getItTabText><adaptorid>ALMA_01</adaptorid><ilsApiId>990025642920206046</ilsApiId><link>OVP</link><id>_:0</id></links><category>Alma-P</category></GetIt1></delivery><search><creationdate>2014</creationdate><sort_title>Beowulf traduzione e commento con Racconto meraviglioso</sort_title><sort_journal_title>Beowulf traduzione e commento con Racconto meraviglioso</sort_journal_title><sort_creationdate_full>2014</sort_creationdate_full><isbn>8845278050</isbn><isbn>9788845278051</isbn><language>eng</language><language>ita</language><title>Beowulf.</title><title>Beowulf: A translation and Commentary.</title><title>Beowulf traduzione e commento con Racconto meraviglioso</title><startdate>2014</startdate><unimarc_local_fields>900 BK</unimarc_local_fields><unimarc_local_fields>996 SBN</unimarc_local_fields><unimarc_local_fields>994 M</unimarc_local_fields><unimarc_local_fields>993 M</unimarc_local_fields><unimarc_local_fields>992 51</unimarc_local_fields><unimarc_local_fields>991 SBN_BIB</unimarc_local_fields><general>(SBN)VIA0283141</general><general>Bompiani</general><general>John Ronald Reuel Tolkien edizione a cura di Christopher Tolkien traduzione di Luca Manini</general><general>(Aleph)002564292SBP01</general><general>SBP01VIA0283141</general><general>VIA0283141</general><rtype>books</rtype><contributor>Tolkien, Christopher</contributor><contributor>Manini, Luca</contributor><contributor>Tolkien, J. R. R.</contributor><journal_title>Beowulf traduzione e commento con Racconto meraviglioso</journal_title><facet_creatorcontrib>Tolkien, Christopher</facet_creatorcontrib><facet_creatorcontrib>Manini, Luca</facet_creatorcontrib><facet_creatorcontrib>Tolkien, J. R. R.</facet_creatorcontrib><sort_author>Tolkien, J. R. R.</sort_author><sort_creationdate>2014</sort_creationdate></search><display><lds06>829.3 - LETTERATURA ANGLOSASSONE (INGLESE ANTICO). BEOWULF - ed. 22$$Q829.3 LETTERATURA ANGLOSASSONE (INGLESE ANTICO). BEOWULF</lds06><identifier>$$CISBN$$V9788845278051</identifier><creationdate>2014</creationdate><lds09>VIA0283141</lds09><format>&amp;#8205;542 p. ; 22 cm</format><description>In copertina: I libri di Tolkien</description><language>ita;eng</language><source>Alma</source><type>book</type><title>Beowulf : traduzione e commento con Racconto meraviglioso / John Ronald Reuel Tolkien ; edizione a cura di Christopher Tolkien ; traduzione di Luca Manini</title><version>0</version><mms>990025642920206046</mms><contributor>Tolkien, J. R. R. &lt;Traduttore&gt;$$QTolkien, J. R. R.$$8it</contributor><contributor>Tolkien, J. R. R. &lt;Translator&gt;$$QTolkien, J. R. R.$$8en</contributor><contributor>Manini, Luca &lt;Traduttore&gt;$$QManini, Luca$$8it</contributor><contributor>Manini, Luca &lt;Translator&gt;$$QManini, Luca$$8en</contributor><contributor>Tolkien, Christopher &lt;Curatore&gt;$$QTolkien, Christopher$$8it</contributor><contributor>Tolkien, Christopher &lt;Editor&gt;$$QTolkien, Christopher$$8en</contributor><lds50>990025642920206046</lds50><publisher>Milano : Bompiani</publisher><place>Milano</place><unititle>Beowulf: A translation and Commentary. $$QUBO411381620141204123559.5</unititle><unititle>Beowulf. $$QTO0011166620160610120059.1</unititle><lds14>Beowulf: A translation and Commentary. $$QUBO4113816</lds14><lds14>Beowulf. $$QTO00111666</lds14></display><control><recordid>alma990025642920206046</recordid><sourceid>alma</sourceid><score>1.0</score><originalsourceid>002564292-SBP01</originalsourceid><sourceformat>UNIMARC</sourceformat><sourcerecordid>990025642920206046</sourcerecordid><sourcesystem>ILS</sourcesystem><isDedup>false</isDedup></control><addata><addau>Tolkien,J. R. R.</addau><addau>Manini,Luca</addau><addau>Tolkien,Christopher</addau><date>2014</date><cop>Milano</cop><isbn>9788845278051</isbn><format>book</format><genre>book</genre><ristype>BOOK</ristype><oclcid>via283141</oclcid><oclcid>sbp1via0283141</oclcid><oclcid>(aleph)2564292sbp01</oclcid><oclcid>(sbn)via283141</oclcid><btitle>Beowulf : traduzione e commento con Racconto meraviglioso</btitle><title>Beowulf : traduzione e commento con Racconto meraviglioso</title><pub>Bompiani</pub></addata><sort><creationdate>2014</creationdate><author>Tolkien, J. R. R.</author><title>Beowulf traduzione e commento con Racconto meraviglioso</title></sort></record>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Beowulf: traduzione e commento con Racconto meraviglioso",
+				"creators": [
+					{
+						"firstName": "J. R. R.",
+						"lastName": "Tolkien",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Luca",
+						"lastName": "Manini",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christopher",
+						"lastName": "Tolkien",
+						"creatorType": "author"
+					}
+				],
+				"date": "2014",
+				"ISBN": "9788845278051",
+				"abstractNote": "In copertina: I libri di Tolkien",
+				"callNumber": "L.4.1042",
+				"language": "ita;eng",
+				"numPages": "542",
+				"place": "Milano",
+				"publisher": "Bompiani",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
