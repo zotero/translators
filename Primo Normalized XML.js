@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2026-01-15 16:41:44"
+	"lastUpdated": "2026-01-16 14:30:48"
 }
 
 /*
@@ -404,12 +404,12 @@ function fetchCreators(item, creators, type, splitGuidance) {
 			// name. We want to filter out all but one language. We
 			// don't really know which one the user will want,
 			// but the first is a safe bet:
-			let language = creator[j].match(/\$\$8(\w+)/)?.[1];
+			let language = creator[j].match(/\$\$8(\w+)/);
 			if (language) {
 				if (!filterByLanguage) {
-					filterByLanguage = language;
+					filterByLanguage = language[1];
 				}
-				else if (filterByLanguage !== language) {
+				else if (filterByLanguage !== language[1]) {
 					continue;
 				}
 			}
