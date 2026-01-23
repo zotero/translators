@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-13 13:34:42"
+	"lastUpdated": "2026-01-23 15:59:51"
 }
 
 /*
@@ -36,17 +36,18 @@
 */
 
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	let pageCategory = doc.body.getAttribute('data-pagecategory');
 	switch (pageCategory) {
 		case 'book':
+			if (getSearchResults(doc, true)) {
+				return "multiple";
+			}
 			return 'book';
 		case 'chapter':
 			return 'bookSection';
 		case 'article':
 			return 'journalArticle';
-		case 'search':
-		case 'journal':
 		default:
 			if (getSearchResults(doc, true)) {
 				return "multiple";
@@ -60,11 +61,18 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	var rows = doc.querySelectorAll('.resultTitle > a[href*="/document/"]');
 	if (!rows.length) {
-		rows = doc.querySelectorAll('li a[href*="/document/"][data-doi]');
+		rows = doc.querySelectorAll(':is(.issue-content-list, .tableOfContents) li a[href*="/document/"][data-doi]:not(.downloadPdf)');
+	}
+	// Book with full-text PDF
+	if (doc.querySelector('a.downloadCompletePdfBook')) {
+		items[doc.location.href] = '[Full Book]';
 	}
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
+		if (!title) {
+			title = text(row.parentElement, '.entry-title');
+		}
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -86,8 +94,8 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	// EM is, as a general rule, better than RIS on this site. It's missing a
-	// couple things, though - subtitles, DOIs for books (to the extent that
-	// those are useful) - so we'll fill those in manually.
+	// couple things, though - subtitles, DOIs for books - so we'll fill those
+	// in manually.
 	
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
@@ -109,6 +117,7 @@ function scrape(doc, url) {
 		}
 		
 		item.attachments = [];
+		
 		let pdfURL = attr(doc, 'a.downloadPdf', 'href');
 		if (pdfURL) {
 			item.attachments.push({
@@ -215,6 +224,7 @@ var testCases = [
 				"libraryCatalog": "www.degruyterbrill.com",
 				"pages": "377-414",
 				"publicationTitle": "Vierteljahrshefte für Zeitgeschichte",
+				"publisher": "De Gruyter Oldenbourg",
 				"rights": "De Gruyter expressly reserves the right to use all content for commercial text and data mining within the meaning of Section 44b of the German Copyright Act.",
 				"shortTitle": "Homosexuelle im modernen Deutschland",
 				"url": "https://www.degruyterbrill.com/document/doi/10.1515/vfzg-2021-0028/html",
@@ -250,80 +260,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.degruyterbrill.com/document/doi/10.3138/9781487518806/html",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Picturing Punishment: The Spectacle and Material Afterlife of the Criminal Body in the Dutch Republic",
-				"creators": [
-					{
-						"firstName": "Anuradha",
-						"lastName": "Gobin",
-						"creatorType": "author"
-					}
-				],
-				"date": "2021-07-30",
-				"ISBN": "9781487518806",
-				"abstractNote": "Bringing together themes in the history of art, punishment, religion, and the history of medicine, Picturing Punishment provides new insights into the wider importance of the criminal to civic life.",
-				"language": "en",
-				"libraryCatalog": "www.degruyterbrill.com",
-				"publisher": "University of Toronto Press",
-				"rights": "De Gruyter expressly reserves the right to use all content for commercial text and data mining within the meaning of Section 44b of the German Copyright Act.",
-				"shortTitle": "Picturing Punishment",
-				"url": "https://www.degruyterbrill.com/document/doi/10.3138/9781487518806/html",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Dutch Republic"
-					},
-					{
-						"tag": "Renaissance"
-					},
-					{
-						"tag": "afterlife"
-					},
-					{
-						"tag": "art and crime"
-					},
-					{
-						"tag": "art history"
-					},
-					{
-						"tag": "criminals"
-					},
-					{
-						"tag": "deviance"
-					},
-					{
-						"tag": "early modern"
-					},
-					{
-						"tag": "execution rituals"
-					},
-					{
-						"tag": "gallows"
-					},
-					{
-						"tag": "history of crime"
-					},
-					{
-						"tag": "material culture"
-					},
-					{
-						"tag": "public spectacles"
-					},
-					{
-						"tag": "punishment"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
+		"items": "multiple"
 	},
 	{
 		"type": "web",
@@ -393,6 +330,7 @@ var testCases = [
 				"libraryCatalog": "www.degruyterbrill.com",
 				"pages": "1101-1103",
 				"publicationTitle": "Zeitschrift für Kristallographie - New Crystal Structures",
+				"publisher": "De Gruyter",
 				"rights": "De Gruyter expressly reserves the right to use all content for commercial text and data mining within the meaning of Section 44b of the German Copyright Act.",
 				"url": "https://www.degruyterbrill.com/document/doi/10.1515/ncrs-2021-0236/html",
 				"volume": "236",
@@ -410,60 +348,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.degruyterbrill.com/document/doi/10.1515/ncrs-2021-0236/html",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Crystal structure of (E)-7-fluoro-2-((6-methoxypyridin-3-yl)methylene)-3,4-dihydronaphthalen-1(2H)-one, C17H14FNO2",
-				"creators": [
-					{
-						"firstName": "Xiang-Yi",
-						"lastName": "Su",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Xiao-Fan",
-						"lastName": "Zhang",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Qing-Guo",
-						"lastName": "Meng",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Hong-Juan",
-						"lastName": "Li",
-						"creatorType": "author"
-					}
-				],
-				"date": "2021-09-01",
-				"DOI": "10.1515/ncrs-2021-0236",
-				"ISSN": "2197-4578",
-				"abstractNote": "C 17 H 14 FNO 2 , monoclinic, P 2 1 / c (no. 15), a  = 7.3840(6) Å, b  = 10.9208(8) Å, c  = 16.7006(15) Å, β  = 101.032(9)°, V  = 1321.84(19) Å 3 , Z  = 4, R gt ( F ) = 0.0589, wR ref ( F 2 ) = 0.1561, T = 100.00(18) K.",
-				"issue": "5",
-				"language": "en",
-				"libraryCatalog": "www.degruyterbrill.com",
-				"pages": "1101-1103",
-				"publicationTitle": "Zeitschrift für Kristallographie - New Crystal Structures",
-				"rights": "De Gruyter expressly reserves the right to use all content for commercial text and data mining within the meaning of Section 44b of the German Copyright Act.",
-				"url": "https://www.degruyterbrill.com/document/doi/10.1515/ncrs-2021-0236/html",
-				"volume": "236",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.degruyter.com/search?query=test",
+		"url": "https://www.degruyterbrill.com/search?query=test",
 		"defer": true,
 		"items": "multiple"
 	},
@@ -524,116 +409,12 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.degruyterbrill.com/document/doi/10.3138/9781487552978/html",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Freedoms of Speech: Anthropological Perspectives on Language, Ethics, and Power",
-				"creators": [],
-				"date": "2024-12-16",
-				"ISBN": "9781487552978",
-				"abstractNote": "This collection brings together leading anthropologists and fresh new voices in the discipline to consider freedoms of speech with a wide comparative lens.",
-				"language": "en",
-				"libraryCatalog": "www.degruyterbrill.com",
-				"publisher": "University of Toronto Press",
-				"rights": "De Gruyter expressly reserves the right to use all content for commercial text and data mining within the meaning of Section 44b of the German Copyright Act.",
-				"shortTitle": "Freedoms of Speech",
-				"url": "https://www.degruyterbrill.com/document/doi/10.3138/9781487552978/html",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [
-					{
-						"tag": "censors"
-					},
-					{
-						"tag": "censorship"
-					},
-					{
-						"tag": "defamation"
-					},
-					{
-						"tag": "dissent"
-					},
-					{
-						"tag": "ethics"
-					},
-					{
-						"tag": "fascism"
-					},
-					{
-						"tag": "free speech Islam"
-					},
-					{
-						"tag": "free speech Russia"
-					},
-					{
-						"tag": "freedom of speech"
-					},
-					{
-						"tag": "human rights"
-					},
-					{
-						"tag": "linguistics"
-					},
-					{
-						"tag": "politics of free speech"
-					},
-					{
-						"tag": "press freedom"
-					},
-					{
-						"tag": "speech debates"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
+		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "https://www.degruyterbrill.com/document/doi/10.1515/9783111233758/html",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Internet Lexicography: An Introduction",
-				"creators": [],
-				"date": "2024-11-04",
-				"ISBN": "9783111233758",
-				"abstractNote": "The Internet has become the central publication platform for dictionaries. This profound change in the dictionary landscape gives rise to a whole range of new questions for lexicographic practice and dictionary research. This volume provides for the first time an introduction to the central fields of work in Internet lexicography and presents the current state of scientific research and lexicographic practice. The chapters cover key aspects of dictionary creation, such as the technical framework, data modeling, and lexicographic process, linking dictionary content, access and navigation structures, automatic extraction of lexicographic information, user participation, and research on dictionary use. The aim of this volume is to provide students and teachers (at universities) with an introductory and easy-to-read overview on Internet lexicography, thus anchoring this important and innovative field of research and practice in university teaching. All chapters convey the basic concepts and methods in a comprehensible way and are enriched by references to further and more in-depth reading.",
-				"language": "en",
-				"libraryCatalog": "www.degruyterbrill.com",
-				"publisher": "De Gruyter",
-				"rights": "De Gruyter expressly reserves the right to use all content for commercial text and data mining within the meaning of Section 44b of the German Copyright Act.",
-				"shortTitle": "Internet Lexicography",
-				"url": "https://www.degruyterbrill.com/document/doi/10.1515/9783111233758/html",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Lexicography"
-					},
-					{
-						"tag": "digital language tools"
-					},
-					{
-						"tag": "language documentation"
-					},
-					{
-						"tag": "linguistics"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
+		"items": "multiple"
 	},
 	{
 		"type": "web",
@@ -669,6 +450,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.degruyterbrill.com/document/doi/10.1515/9781400874064/html",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
