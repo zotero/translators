@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-13 13:34:42"
+	"lastUpdated": "2026-01-23 01:28:45"
 }
 
 /*
@@ -84,6 +84,10 @@ function doWeb(doc, url) {
 	}
 }
 
+/**
+ * @param {Document} doc
+ * @param {string} url
+ */
 function scrape(doc, url) {
 	// EM is, as a general rule, better than RIS on this site. It's missing a
 	// couple things, though - subtitles, DOIs for books (to the extent that
@@ -109,13 +113,34 @@ function scrape(doc, url) {
 		}
 		
 		item.attachments = [];
-		let pdfURL = attr(doc, 'a.downloadPdf', 'href');
-		if (pdfURL) {
+		
+		// For literature split into multiple sections (like one PDF per chapter): download each section
+		// For example: https://www.degruyterbrill.com/document/doi/10.1515/9781400874064/html#contents
+		const allChapters = doc.querySelectorAll(".tableOfContents .toc_entry");
+		let matchedAny = false;
+		for (let chapter of allChapters) {
+			const htmlURL = attr(chapter, 'a.entry-anchor', 'href')
+			const pdfURL = htmlURL.replace("/html", "/pdf")
+			const title = text(chapter, ".entry-title")
+			const authors = text(chapter, ".entry-authors")
+			const entryNumber = text(chapter, ".entry-number") // typically the start page number of that chapter
 			item.attachments.push({
-				title: 'Full Text PDF',
+				title: `${title} (${entryNumber})`,
 				mimeType: 'application/pdf',
-				url: pdfURL
-			});
+				url: pdfURL,
+			})
+			matchedAny = true;
+		}
+
+		if (!matchedAny) { // not chapter-based, fall back on old system (just looking for a download button)
+			let pdfURL = attr(doc, 'a.downloadPdf', 'href');
+			if (pdfURL) {
+				item.attachments.push({
+					title: 'Full Text PDF',
+					mimeType: 'application/pdf',
+					url: pdfURL
+				});
+			}
 		}
 		
 		let subtitle = text(doc, 'h2.subtitle');
@@ -272,7 +297,67 @@ var testCases = [
 				"url": "https://www.degruyterbrill.com/document/doi/10.3138/9781487518806/html",
 				"attachments": [
 					{
-						"title": "Full Text PDF",
+						"title": "Frontmatter (i)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Contents (v)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Illustrations (vii)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Acknowledgments (xi)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Introduction (1)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "1 Structures of Power: Constructing and Publicizing the New Amsterdam Town Hall (21)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "2 Procession and Execution Rituals: Moving through the New Amsterdam Town Hall (48)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "3 Disposal and Display: The Criminal Corpse on the Gallows (78)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "4 Subversion and Symbolic Transformation: Recreation, Ambush, and Humour at the Gallows (103)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "5 Serving the Public Good: Reform, Prestige, and the Productive Criminal Body in Amsterdam (135)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "6 The Transformation of Touch: Flayed Skin and the Visual and Material Afterlife of the Criminal Body in the Leiden Anatomical Theatre (158)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "7 The Symbolism of Skin: Illustrating the Flayed Body (181)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Conclusion (211)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Notes (217)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Bibliography (245)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Index (275)",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -348,54 +433,6 @@ var testCases = [
 				"publisher": "University of Toronto Press",
 				"shortTitle": "5 Serving the Public Good",
 				"url": "https://www.degruyterbrill.com/document/doi/10.3138/9781487518806-008/html",
-				"attachments": [],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.degruyterbrill.com/document/doi/10.1515/ncrs-2021-0236/html",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Crystal structure of (E)-7-fluoro-2-((6-methoxypyridin-3-yl)methylene)-3,4-dihydronaphthalen-1(2H)-one, C17H14FNO2",
-				"creators": [
-					{
-						"firstName": "Xiang-Yi",
-						"lastName": "Su",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Xiao-Fan",
-						"lastName": "Zhang",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Qing-Guo",
-						"lastName": "Meng",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Hong-Juan",
-						"lastName": "Li",
-						"creatorType": "author"
-					}
-				],
-				"date": "2021-09-01",
-				"DOI": "10.1515/ncrs-2021-0236",
-				"ISSN": "2197-4578",
-				"abstractNote": "C 17 H 14 FNO 2 , monoclinic, P 2 1 / c (no. 15), a  = 7.3840(6) Å, b  = 10.9208(8) Å, c  = 16.7006(15) Å, β  = 101.032(9)°, V  = 1321.84(19) Å 3 , Z  = 4, R gt ( F ) = 0.0589, wR ref ( F 2 ) = 0.1561, T = 100.00(18) K.",
-				"issue": "5",
-				"language": "en",
-				"libraryCatalog": "www.degruyterbrill.com",
-				"pages": "1101-1103",
-				"publicationTitle": "Zeitschrift für Kristallographie - New Crystal Structures",
-				"rights": "De Gruyter expressly reserves the right to use all content for commercial text and data mining within the meaning of Section 44b of the German Copyright Act.",
-				"url": "https://www.degruyterbrill.com/document/doi/10.1515/ncrs-2021-0236/html",
-				"volume": "236",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -463,7 +500,60 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.degruyter.com/search?query=test",
+		"url": "https://www.degruyterbrill.com/document/doi/10.1515/ncrs-2021-0236/html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Crystal structure of (E)-7-fluoro-2-((6-methoxypyridin-3-yl)methylene)-3,4-dihydronaphthalen-1(2H)-one, C17H14FNO2",
+				"creators": [
+					{
+						"firstName": "Xiang-Yi",
+						"lastName": "Su",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Xiao-Fan",
+						"lastName": "Zhang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Qing-Guo",
+						"lastName": "Meng",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hong-Juan",
+						"lastName": "Li",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-09-01",
+				"DOI": "10.1515/ncrs-2021-0236",
+				"ISSN": "2197-4578",
+				"abstractNote": "C 17 H 14 FNO 2 , monoclinic, P 2 1 / c (no. 15), a  = 7.3840(6) Å, b  = 10.9208(8) Å, c  = 16.7006(15) Å, β  = 101.032(9)°, V  = 1321.84(19) Å 3 , Z  = 4, R gt ( F ) = 0.0589, wR ref ( F 2 ) = 0.1561, T = 100.00(18) K.",
+				"issue": "5",
+				"language": "en",
+				"libraryCatalog": "www.degruyterbrill.com",
+				"pages": "1101-1103",
+				"publicationTitle": "Zeitschrift für Kristallographie - New Crystal Structures",
+				"rights": "De Gruyter expressly reserves the right to use all content for commercial text and data mining within the meaning of Section 44b of the German Copyright Act.",
+				"url": "https://www.degruyterbrill.com/document/doi/10.1515/ncrs-2021-0236/html",
+				"volume": "236",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.degruyterbrill.com/search?query=test",
 		"defer": true,
 		"items": "multiple"
 	},
@@ -540,7 +630,111 @@ var testCases = [
 				"url": "https://www.degruyterbrill.com/document/doi/10.3138/9781487552978/html",
 				"attachments": [
 					{
-						"title": "Full Text PDF",
+						"title": "Frontmatter (i)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Contents (v)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "List of Figures (ix)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Introduction: Anthropologies of Free Speech (1)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "1 Comparing Freedoms: “Liberal Freedom of Speech” in Frontal and Lateral Perspective (33)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "2 When Speech Isn’t Free: Varieties of Metapragmatic Struggle (55)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "3 Speaking for Oneself: Language Reform and the Confucian Legacy in Late Colonial Vietnam (73)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "4 Risking Speech in Islam (94)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "5 Ten-and-a-Half Seconds of God’s Silence: Mormon Parrhesia in the Time of Donald Trump (111)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "6 Fascism, Real or Stuffed: Ordinary Scepticism at Mussolini’s Grave (131)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "7 The Imaginative Power of Language in the Vacated Space of “Free Speech” in Putin-Era Russia (148)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "8 Designing Limits on Public Speaking: The Case of Hungary (167)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "9 Expression Is Transaction: Talk, Freedom, and Authority when Egalitarians Embrace the State (188)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "10 Dissent, Hierarchy, and Value Creation: Liberalism and the Problem of Critique (210)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "11 The People’s Radio between Populism and Bullshit (225)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "12 Environments for Expression on Palestine: Fields, Fear, and the Politics of Movement (239)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "13 Freedom of Speech in Jeju Shamanism (257)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "14 Truth of War: Immersive Fiction Reading and Public Modes of Remembrance in an English Literary Society (267)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "15 As It Were: Narrative Struggles, Historiopraxy, and the Stakes of the Future in the Documentation of the Syrian Uprising (287)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "16 Historical Vertigo: Art, Censorship, and the Contested History of Bangladesh (302)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "17 Free Speech, without Listening? Liberalism and the Problem of Reception (319)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "18 An American Canard: The Freedom of (Therapeutic) Speech (344)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "19 Therapeutic Politics and the Performance of Reparation: A Dialogical Approach to Mental Health Care in the UK (360)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "20 Secrecy, Curse, Psychiatrist, Saint: Scandals of Sexuality and Censorship in Global/Indian Publics (371)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "References (391)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Contributors (443)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Index (449)",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -612,7 +806,59 @@ var testCases = [
 				"url": "https://www.degruyterbrill.com/document/doi/10.1515/9783111233758/html",
 				"attachments": [
 					{
-						"title": "Full Text PDF",
+						"title": "Frontmatter (I)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Preface (V)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Contents (VII)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Introduction (1)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "1 The Technological Context for Internet Lexicography (5)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "2 A Typology of Internet Dictionaries and Portals (31)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "3 The Lexicographic Process (61)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "4 Data Modelling (97)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "5 Linking and Access Structures (133)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "6 The Design of Internet Dictionaries (171)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "7 The Automatic Extraction of Lexicographic Information (191)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "8 User Participation (227)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "9 Research into Dictionary Use (261)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Index (305)",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -665,6 +911,349 @@ var testCases = [
 				"url": "https://www.degruyterbrill.com/document/doi/10.31826/9781463235949-008/html",
 				"attachments": [],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.degruyterbrill.com/document/doi/10.1515/9781400874064/html#contents",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "The Princeton History of Modern Ireland",
+				"creators": [],
+				"date": "2016-01-12",
+				"ISBN": "9781400874064",
+				"abstractNote": "An accessible and innovative look at Irish history by some of today's most exciting historians of Ireland This book brings together some of today's most exciting scholars of Irish history to chart the pivotal events in the history of modern Ireland while providing fresh perspectives on topics ranging from colonialism and nationalism to political violence, famine, emigration, and feminism. The Princeton History of Modern Ireland takes readers from the Tudor conquest in the sixteenth century to the contemporary boom and bust of the Celtic Tiger, exploring key political developments as well as major social and cultural movements. Contributors describe how the experiences of empire and diaspora have determined Ireland’s position in the wider world and analyze them alongside domestic changes ranging from the Irish language to the economy. They trace the literary and intellectual history of Ireland from Jonathan Swift to Seamus Heaney and look at important shifts in ideology and belief, delving into subjects such as religion, gender, and Fenianism. Presenting the latest cutting-edge scholarship by a new generation of historians of Ireland, The Princeton History of Modern Ireland features narrative chapters on Irish history followed by thematic chapters on key topics. The book highlights the global reach of the Irish experience as well as commonalities shared across Europe, and brings vividly to life an Irish past shaped by conquest, plantation, assimilation, revolution, and partition.",
+				"language": "en",
+				"libraryCatalog": "www.degruyterbrill.com",
+				"publisher": "Princeton University Press",
+				"rights": "De Gruyter expressly reserves the right to use all content for commercial text and data mining within the meaning of Section 44b of the German Copyright Act.",
+				"url": "https://www.degruyterbrill.com/document/doi/10.1515/9781400874064/html",
+				"attachments": [
+					{
+						"title": "Frontmatter (i)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "CONTENTS (v)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "ACKNOWLEDGMENTS (vii)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "CONTRIBUTORS (ix)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "INTRODUCTION (1)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Chapter 1. CONQUEST, CIVILIZATION, COLONIZATION: IRELAND, 1540– 1660 (21)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Chapter 2. ASCENDANCY IRELAND, 1660– 1800 (48)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Chapter 3. IRELAND UNDER THE UNION, 1801– 1922 (74)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Chapter 4. INDEPENDENT IRELAND (109)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Chapter 5. NORTHERN IRELAND since 1920 (141)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Chapter 6. TWENTY- FIRST- CENTURY IRELAND (168)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Chapter 7. INTELLECTUAL HISTORY: WILLIAM KING to EDMUND BURKE (193)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Chapter 8. CULTURAL DEVELOPMENTS: YOUNG IRELAND to YEATS (217)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Chapter 9. IRISH MODERNISM and ITS LEGACIES (236)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Chapter 10. MEDIA and CULTURE in IRELAND, 1960– 2008 (253)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Chapter 11. HISTORIOGRAPHY (271)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Chapter 12. RELIGION (292)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Chapter 13 THE IRISH LANGUAGE (320)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Chapter 14. IRELAND and EMPIRE (343)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Chapter 15. WOMEN and GENDER in MODERN IRELAND (361)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Chapter 16. POLITICAL VIOLENCE (382)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Chapter. 17 FAMINE (403)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Chapter 18. ECONOMY in INDEPENDENT IRELAND (425)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Chapter 19. NATIONALISMS (447)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Chapter 20. FEMINISM (470)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Chapter 21. DIASPORA (490)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "INDEX (509)",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Activism"
+					},
+					{
+						"tag": "Anglo-Irish people"
+					},
+					{
+						"tag": "British Empire"
+					},
+					{
+						"tag": "Cambridge University Press"
+					},
+					{
+						"tag": "Catholic emancipation"
+					},
+					{
+						"tag": "Celtic Tiger"
+					},
+					{
+						"tag": "Charles Stewart Parnell"
+					},
+					{
+						"tag": "Church of Ireland"
+					},
+					{
+						"tag": "Clergy"
+					},
+					{
+						"tag": "Confiscation"
+					},
+					{
+						"tag": "Criticism"
+					},
+					{
+						"tag": "Daniel O'Connell"
+					},
+					{
+						"tag": "Dublin Castle"
+					},
+					{
+						"tag": "Economy of the Republic of Ireland"
+					},
+					{
+						"tag": "Emigration"
+					},
+					{
+						"tag": "Employment"
+					},
+					{
+						"tag": "Historiography"
+					},
+					{
+						"tag": "Ideology"
+					},
+					{
+						"tag": "Irish Catholic"
+					},
+					{
+						"tag": "Irish Parliamentary Party"
+					},
+					{
+						"tag": "Irish Rebellion of 1798"
+					},
+					{
+						"tag": "Irish Republican Army (1922–69)"
+					},
+					{
+						"tag": "Irish Republican Brotherhood"
+					},
+					{
+						"tag": "Irish literature"
+					},
+					{
+						"tag": "Irish nationalism"
+					},
+					{
+						"tag": "Irish people"
+					},
+					{
+						"tag": "Irish republicanism"
+					},
+					{
+						"tag": "Land War"
+					},
+					{
+						"tag": "Legislation"
+					},
+					{
+						"tag": "Literature"
+					},
+					{
+						"tag": "Lord Lieutenant"
+					},
+					{
+						"tag": "Modernity"
+					},
+					{
+						"tag": "Narrative"
+					},
+					{
+						"tag": "Nationality"
+					},
+					{
+						"tag": "New Departure (Democrats)"
+					},
+					{
+						"tag": "Newspaper"
+					},
+					{
+						"tag": "Oliver Cromwell"
+					},
+					{
+						"tag": "Orange Order"
+					},
+					{
+						"tag": "Oxford University Press"
+					},
+					{
+						"tag": "Parliament of the United Kingdom"
+					},
+					{
+						"tag": "Patriotism"
+					},
+					{
+						"tag": "Persecution"
+					},
+					{
+						"tag": "Poetry"
+					},
+					{
+						"tag": "Political violence"
+					},
+					{
+						"tag": "Politician"
+					},
+					{
+						"tag": "Politics"
+					},
+					{
+						"tag": "Popular sovereignty"
+					},
+					{
+						"tag": "Post-war"
+					},
+					{
+						"tag": "Protectionism"
+					},
+					{
+						"tag": "Protestantism"
+					},
+					{
+						"tag": "Provisional Irish Republican Army"
+					},
+					{
+						"tag": "Publication"
+					},
+					{
+						"tag": "Republicanism"
+					},
+					{
+						"tag": "Revolutionary generation"
+					},
+					{
+						"tag": "Separatism"
+					},
+					{
+						"tag": "Slavery"
+					},
+					{
+						"tag": "Sovereignty"
+					},
+					{
+						"tag": "Suffrage"
+					},
+					{
+						"tag": "Toleration"
+					},
+					{
+						"tag": "Ulster Unionist Party"
+					},
+					{
+						"tag": "Ulster Volunteer Force"
+					},
+					{
+						"tag": "Unionism in Ireland"
+					},
+					{
+						"tag": "United Kingdom"
+					},
+					{
+						"tag": "University College Dublin"
+					},
+					{
+						"tag": "W. B. Yeats"
+					},
+					{
+						"tag": "War"
+					},
+					{
+						"tag": "Wealth"
+					},
+					{
+						"tag": "Writing"
+					},
+					{
+						"tag": "Young Ireland"
+					},
+					{
+						"tag": "Éamon de Valera"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
