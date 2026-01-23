@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-01-13 07:11:08"
+	"lastUpdated": "2026-01-23 16:11:56"
 }
 
 /*
@@ -37,16 +37,14 @@
 */
 
 
-// attr()/text() v2 per https://github.com/zotero/translators/issues/1277
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
-
 function detectWeb(doc, url) {
 	if (/\/(\d{4}\/\d{2}|story|article)\//.test(url)) {
 		return "magazineArticle";
-	} else if (/\/(category|tag|topic)\/|search\/?\?q=|wired\.com\/?$|wired\.co\.uk\/?$/.test(url) && getSearchResults(doc, true)) {
+	}
+	else if (/\/(category|tag|topic)\/|search\/?\?q=|wired\.com\/?$|wired\.co\.uk\/?$/.test(url) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
@@ -60,19 +58,20 @@ function scrape(doc, url) {
 		if (url.includes("wired.co.uk/article")) {
 			item.publicationTitle = "Wired UK";
 			item.ISSN = "1357-0978";
-			item.date = Zotero.Utilities.strToISO(text(doc,'div.a-author__article-date')); // use LSON-LD when implemented in EM
-		} else { // if not wired.co.uk
+			item.date = Zotero.Utilities.strToISO(text(doc, 'div.a-author__article-date')); // use LSON-LD when implemented in EM
+		}
+		else { // if not wired.co.uk
 			item.publicationTitle = "Wired";
 			item.ISSN = "1059-1028";
 			item.date = ZU.strToISO(text(doc, 'time[data-testid="ContentHeaderPublishDate"]'));			item.creators = [];
 			item.creators = [];
-				var authorLinks = doc.querySelectorAll('span[data-testid="BylineName"] a');
-				for (let link of authorLinks) {
-					var name = link.textContent.trim();
-					if (name) {
-						item.creators.push(ZU.cleanAuthor(name, "author"));
-					}
+			var authorLinks = doc.querySelectorAll('span[data-testid="BylineName"] a');
+			for (let link of authorLinks) {
+				var name = link.textContent.trim();
+				if (name) {
+					item.creators.push(ZU.cleanAuthor(name, "author"));
 				}
+			}
 			if (item.tags) { // catch volume/issue if in tags
 				var match = null;
 				for (let tag of item.tags) {
@@ -80,7 +79,7 @@ function scrape(doc, url) {
 					if (match) {
 						item.volume = match[1];
 						item.issue = parseInt(match[2]);
-						item.tags.splice(item.tags.indexOf(tag),1);
+						item.tags.splice(item.tags.indexOf(tag), 1);
 						break;
 					}
 				}
@@ -88,7 +87,7 @@ function scrape(doc, url) {
 		}
 		item.complete();
 	});
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.doWeb(doc, url);
 	});
 }
@@ -97,11 +96,10 @@ function scrape(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('div.card-component h2, li.archive-item-component h2, section.c-card-section article.c-card h3');
-	var links = doc.querySelectorAll('.card-component__description > a:first-of-type, li.archive-item-component > a:first-of-type, section.c-card-section article.c-card > a');
-	for (let i=0; i<rows.length; i++) {
-		let href = links[i].href;
-		let title = ZU.trimInternal(rows[i].textContent);
+	var rows = doc.querySelectorAll('div.card-component h2, li.archive-item-component, section.c-card-section article.c-card h3, .summary-item__content');
+	for (let row of rows) {
+		let href = attr(row, 'a:first-of-type', 'href');
+		let title = ZU.trimInternal(text(row, 'h3') || row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -113,21 +111,21 @@ function getSearchResults(doc, checkOnly) {
 
 function doWeb(doc, url) {
 	switch (detectWeb(doc, url)) {
-	case "multiple":
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
-		break;
-	case "magazineArticle":
-		scrape(doc, url);
-		break;
+		case "multiple":
+			Zotero.selectItems(getSearchResults(doc, false), function (items) {
+				if (!items) {
+					return;
+				}
+				var articles = [];
+				for (var i in items) {
+					articles.push(i);
+				}
+				ZU.processDocuments(articles, scrape);
+			});
+			break;
+		case "magazineArticle":
+			scrape(doc, url);
+			break;
 	}
 }
 
@@ -147,23 +145,25 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2018-07-04T14:00:00.000Z",
+				"date": "2018-07-04",
 				"ISSN": "1059-1028",
 				"abstractNote": "One carnivore's advice: When a tofu dog snuggles up to your tube steak on the grill, don’t be a jerk about it.",
+				"language": "en-US",
 				"libraryCatalog": "www.wired.com",
 				"publicationTitle": "Wired",
 				"url": "https://www.wired.com/story/in-defense-of-the-vegan-hot-dog/",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
 					{
-						"tag": "Cooking and Recipes"
+						"tag": "cooking and recipes"
 					},
 					{
-						"tag": "Food and Drink"
+						"tag": "food and drink"
 					},
 					{
 						"tag": "grilling"
@@ -261,16 +261,6 @@ var testCases = [
 						"firstName": "Aarian",
 						"lastName": "Marshall",
 						"creatorType": "author"
-					},
-					{
-						"firstName": "Aarian",
-						"lastName": "Marshall",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Read",
-						"lastName": "More",
-						"creatorType": "author"
 					}
 				],
 				"date": "2026-01-12",
@@ -310,35 +300,30 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.wired.com/story/proposed-legislation-self-driving-cars-in-new-york-state/",
+		"url": "https://www.wired.com/story/fbi-agents-sworn-testimony-contradicts-claims-ices-jonathan-ross-made-under-oath/",
 		"items": [
 			{
 				"itemType": "magazineArticle",
-				"title": "New Proposed Legislation Would Let Self-Driving Cars Operate in New York State",
+				"title": "FBI Agent’s Sworn Testimony Contradicts Claims ICE’s Jonathan Ross Made Under Oath",
 				"creators": [
 					{
-						"firstName": "Aarian",
-						"lastName": "Marshall",
+						"firstName": "Matt",
+						"lastName": "Giles",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Aarian",
-						"lastName": "Marshall",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Read",
-						"lastName": "More",
+						"firstName": "Tim",
+						"lastName": "Marchman",
 						"creatorType": "author"
 					}
 				],
 				"date": "2026-01-12",
 				"ISSN": "1059-1028",
-				"abstractNote": "New York governor Kathy Hochul says she will propose a new law allowing limited autonomous vehicle pilots in smaller cities. Full-blown services could be next.",
+				"abstractNote": "The testimony also calls into question whether Ross failed to follow his training during the incident in which he reportedly shot and killed Minnesota citizen Renee Good.",
 				"language": "en-US",
 				"libraryCatalog": "www.wired.com",
 				"publicationTitle": "Wired",
-				"url": "https://www.wired.com/story/proposed-legislation-self-driving-cars-in-new-york-state/",
+				"url": "https://www.wired.com/story/fbi-agents-sworn-testimony-contradicts-claims-ices-jonathan-ross-made-under-oath/",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -347,19 +332,25 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "autonomous vehicles"
+						"tag": "crime"
 					},
 					{
-						"tag": "cities"
+						"tag": "department of homeland security"
 					},
 					{
-						"tag": "new york"
+						"tag": "fbi"
 					},
 					{
-						"tag": "regulation"
+						"tag": "immigration"
 					},
 					{
-						"tag": "self-driving cars"
+						"tag": "immigration and customs enforcement"
+					},
+					{
+						"tag": "minnesota"
+					},
+					{
+						"tag": "police"
 					}
 				],
 				"notes": [],
