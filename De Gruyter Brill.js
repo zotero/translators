@@ -36,7 +36,7 @@
 */
 
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	let pageCategory = doc.body.getAttribute('data-pagecategory');
 	switch (pageCategory) {
 		case 'book':
@@ -119,16 +119,16 @@ function scrape(doc, url) {
 		const allChapters = doc.querySelectorAll(".tableOfContents .toc_entry");
 		let matchedAny = false;
 		for (let chapter of allChapters) {
-			const htmlURL = attr(chapter, 'a.entry-anchor', 'href')
-			const pdfURL = htmlURL.replace("/html", "/pdf")
+			const htmlURL = attr(chapter, 'a.entry-anchor', 'href');
+			const pdfURL = htmlURL.replace("/html", "/pdf");
 			const title = text(chapter, ".entry-title")
-			const authors = text(chapter, ".entry-authors")
-			const entryNumber = text(chapter, ".entry-number") // typically the start page number of that chapter
+			// const authors = text(chapter, ".entry-authors")
+			const entryNumber = text(chapter, ".entry-number"); // typically the start page number of that chapter
 			item.attachments.push({
 				title: `${title} (${entryNumber})`,
 				mimeType: 'application/pdf',
 				url: pdfURL,
-			})
+			});
 			matchedAny = true;
 		}
 
