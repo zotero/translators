@@ -16,7 +16,7 @@
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2021 Abe Jellinek
-
+	
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -92,28 +92,28 @@ function scrape(doc, url) {
 	// EM is, as a general rule, better than RIS on this site. It's missing a
 	// couple things, though - subtitles, DOIs for books (to the extent that
 	// those are useful) - so we'll fill those in manually.
-
+	
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
-
+	
 	translator.setHandler('itemDone', function (obj, item) {
 		if (item.date) {
 			item.date = item.date.replace(/\//g, '-');
 		}
-
+		
 		if (item.section && (item.section == item.publicationTitle || item.section == item.bookTitle)) {
 			delete item.section;
 		}
-
+		
 		let DOI = ZU.cleanDOI(attr(doc, '.doi > a', 'href'));
 		if (DOI) {
 			item.DOI = DOI;
 		}
-
+		
 		item.attachments = [];
-
+		
 		// For literature split into multiple sections (like one PDF per chapter): download each section
 		// For example: https://www.degruyterbrill.com/document/doi/10.1515/9781400874064/html#contents
 		const allChapters = doc.querySelectorAll(".tableOfContents .toc_entry");
@@ -142,16 +142,16 @@ function scrape(doc, url) {
 				});
 			}
 		}
-
+		
 		let subtitle = text(doc, 'h2.subtitle');
 		if (subtitle && !item.title.includes(': ')) {
 			item.title = `${item.title.trim()}: ${subtitle}`;
 		}
-
+		
 		if (item.itemType == 'book' && item.bookTitle) {
 			delete item.bookTitle;
 		}
-
+		
 		if (item.itemType == 'bookSection') {
 			delete item.publicationTitle;
 			delete item.abstractNote;
@@ -161,7 +161,7 @@ function scrape(doc, url) {
 			if (!risURL) {
 				risURL = url.replace(/\/html([?#].*)$/, '/machineReadableCitation/RIS');
 			}
-
+			
 			ZU.doGet(risURL, function (risText) {
 				// De Gruyter uses TI for the container title and T2 for the subtitle
 				// Seems nonstandard! So we'll just handle it here
