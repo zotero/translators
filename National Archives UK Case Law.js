@@ -2,14 +2,14 @@
 	"translatorID": "be076b36-b2ef-41e3-afd9-3ab9da626ff1",
 	"label": "National Archives UK Case Law",
 	"creator": "Michael Veale",
-	"target": "^https?://caselaw\\.nationalarchives\\.gov\\.uk/.*",
+	"target": "^https?://caselaw\\.nationalarchives\\.gov\\.uk/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-02-03 19:38:40"
+	"lastUpdated": "2026-02-03 19:39:24"
 }
 
 /*
