@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-01-26 21:45:32"
+	"lastUpdated": "2026-02-03 19:38:40"
 }
 
 /*
@@ -41,13 +41,45 @@ function detectWeb(doc, _url) {
 		return "case";
 	}
 	// Fallback for older pages
-	if (doc.querySelector(".judgment-header__neutral-citation") || doc.querySelector(".ncn-nowrap")) {
+	else if (doc.querySelector(".judgment-header__neutral-citation") || doc.querySelector(".ncn-nowrap")) {
 		return "case";
+	}
+	else if (getSearchResults(doc, true)) {
+		return 'multiple';
 	}
 	return false;
 }
 
-function doWeb(doc, _url) {
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('.documents-table td > a');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
+	}
+	else {
+		await scrape(doc, url);
+	}
+}
+
+function scrape(doc, _url) {
 	var item = new Zotero.Item("case");
 
 	// 1. CASE NAME
@@ -263,9 +295,8 @@ function doWeb(doc, _url) {
 	// 6. SAVE
 	item.url = _url;
 	item.attachments.push({
-		title: "National Archives Snapshot",
-		document: doc,
-		snapshot: true
+		title: "Snapshot",
+		document: doc
 	});
 
 	item.complete();
@@ -291,8 +322,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "National Archives Snapshot",
-						"snapshot": true,
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -320,8 +350,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "National Archives Snapshot",
-						"snapshot": true,
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -349,8 +378,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "National Archives Snapshot",
-						"snapshot": true,
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -378,8 +406,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "National Archives Snapshot",
-						"snapshot": true,
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -407,8 +434,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "National Archives Snapshot",
-						"snapshot": true,
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -436,8 +462,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "National Archives Snapshot",
-						"snapshot": true,
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -465,8 +490,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "National Archives Snapshot",
-						"snapshot": true,
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -475,6 +499,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://caselaw.nationalarchives.gov.uk/search?query=test",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
