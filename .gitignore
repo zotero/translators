@@ -1,3 +1,4 @@
 node_modules
 .ci/pull-request-check/connectors
+.claude/settings.local.json
 .DS_Store
