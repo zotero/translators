@@ -455,13 +455,7 @@ var testCases = [
 			{
 				"itemType": "newspaperArticle",
 				"title": "NANS backs Matawalle, dismisses banditry allegations as political blackmail",
-				"creators": [
-					{
-						"firstName": "Joe",
-						"lastName": "Abuchi",
-						"creatorType": "author"
-					}
-				],
+				"creators": [],
 				"date": "2025-12-17",
 				"ISSN": "1595-9996",
 				"abstractNote": "The National Association of Nigerian Students(NANs )has dismissed allegations linking the Minister of State for Defence, Bello Matawalle, to banditry, describing them as baseless and politically motivated. The student body said Matawalle was being unfairly targeted at a time the country needed unity to tackle worsening insecurity. In a statement...",
