@@ -380,40 +380,6 @@ async function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.thehopenewspaper.com/ebilebenfad-fc-advance-to-crown-74-semi-final/",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Ebile,Benfad FC advance to Crown 74 semi-final",
-				"creators": [
-					{
-						"firstName": "Femi",
-						"lastName": "Atolagbe",
-						"creatorType": "author"
-					}
-				],
-				"date": "2025-12-16",
-				"ISSN": "2714-3686",
-				"abstractNote": "By Femi Atolagbe Ebile FC on Monday defeated Ijapo Ages Stars in the quarter-finals of the second edition of the Crown 74 Football Competition at the Ondo State Sports Complex, Akure. Ebile FC secured victory with a 5–4 win in a penalty shootout after regulation time ended in a goalless draw. In the second",
-				"language": "en-GB",
-				"libraryCatalog": "The Hope",
-				"place": "Nigeria",
-				"publicationTitle": "The Hope",
-				"url": "https://www.thehopenewspaper.com/ebilebenfad-fc-advance-to-crown-74-semi-final/",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "https://www.thehopenewspaper.com/one-dead-one-hurt-in-osun-lone-motorcycle-crash/",
 		"items": [
 			{
