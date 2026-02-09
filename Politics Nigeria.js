@@ -127,7 +127,7 @@ function isCollectionPage(doc) {
 
 				const types = Array.isArray(t) ? t : [t];
 				if (types.includes('CollectionPage')
-					&& !types.some(typeStr => typeStr.includes('WebPage'))) {
+					&& !types.some(typeStr => typeStr.includes('Article'))) {
 					return true;
 				}
 			}
@@ -392,25 +392,26 @@ async function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://politicsnigeria.com/ecowas-suspends-guinea-bissau-after-coup-orders-immediate-release-of-president/",
+		"url": "https://politicsnigeria.com/2026/02/09/2027-even-if-tinubu-contests-unopposed-hell-fail-kenneth-okonkwo/",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "ECOWAS Suspends Guinea-Bissau After Coup, Orders Immediate Release of President",
+				"title": "2027: “Even if Tinubu contests unopposed he’ll fail” – Kenneth Okonkwo",
 				"creators": [
 					{
-						"firstName": "Mfonobong",
-						"lastName": "Daniel",
+						"firstName": "Mojeed",
+						"lastName": "Oladipupo",
 						"creatorType": "author"
 					}
 				],
-				"date": "2025-11-28",
-				"abstractNote": "West African leaders have placed a suspension on Guinea-Bissau following the military takeover of November 26, saying the action has pushed the country into deeper political uncertainty. The regional bloc stressed that democratic order must return immediately and demanded the release of President Umaro Sissoco Embaló, who was seized during the crisis.This decision came after …",
+				"date": "2026-02-09",
+				"abstractNote": "Kenneth Okonkwo discusses Tinubu's presidential chances for 2027, citing the challenges facing Nigeria and its people.",
 				"language": "en-US",
 				"libraryCatalog": "Politics Nigeria",
 				"place": "Nigeria",
 				"publicationTitle": "Politics Nigeria",
-				"url": "https://politicsnigeria.com/ecowas-suspends-guinea-bissau-after-coup-orders-immediate-release-of-president/",
+				"shortTitle": "2027",
+				"url": "https://politicsnigeria.com/2026/02/09/2027-even-if-tinubu-contests-unopposed-hell-fail-kenneth-okonkwo/",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -425,25 +426,20 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://politicsnigeria.com/more-pdp-defections-coming-but-hope-not-lost-saraki-reveals/",
+		"url": "https://politicsnigeria.com/2026/02/09/expose-how-tompolos-tantita-security-was-created-fejiro-oliver/",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "More PDP defections coming, but hope not lost – Saraki reveals",
-				"creators": [
-					{
-						"firstName": "Oladipupo",
-						"lastName": "Mojeed",
-						"creatorType": "author"
-					}
-				],
-				"date": "2025-06-05",
-				"abstractNote": "Former Senate President, Dr. Bukola Saraki, has disclosed that more defections from the Peoples Democratic Party (PDP) to the ruling All Progressives Congress (APC) are likely, but maintained that hope is not lost for Nigeria’s leading opposition party. Addressing journalists in Ilorin on Wednesday, Saraki acknowledged the internal divisions rocking the PDP but expressed confidence …",
+				"title": "EXPOSE: How Tompolo’s Tantita Security Was Created – Fejiro Oliver",
+				"creators": [],
+				"date": "2026-02-09",
+				"abstractNote": "You all know Tantita Security Services as a company that suddenly appeared in public view in 2022, paraded as a fresh saviour of Nigeria’s pipeline security. That narrative is a lie carefully packaged for public consumption. If pipeline surveillance were awarded through a transparent, competitive bidding process, Tantita would not rank among the first hundred …",
 				"language": "en-US",
 				"libraryCatalog": "Politics Nigeria",
 				"place": "Nigeria",
 				"publicationTitle": "Politics Nigeria",
-				"url": "https://politicsnigeria.com/more-pdp-defections-coming-but-hope-not-lost-saraki-reveals/",
+				"shortTitle": "EXPOSE",
+				"url": "https://politicsnigeria.com/2026/02/09/expose-how-tompolos-tantita-security-was-created-fejiro-oliver/",
 				"attachments": [
 					{
 						"title": "Snapshot",
