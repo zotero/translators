@@ -117,7 +117,7 @@ function isCollectionPage(doc) {
 			let candidates = Array.isArray(parsed)
 				? parsed
 				: (parsed['@graph'] && Array.isArray(parsed['@graph']))
-					? parsed['graph']
+					? parsed['@graph']
 					: [parsed];
 
 			for (let cand of candidates) {
@@ -126,8 +126,8 @@ function isCollectionPage(doc) {
 				if (!t) continue;
 
 				const types = Array.isArray(t) ? t : [t];
-				if (types.includes('CollectionPage') &&
-					!types.some(typeStr => typeStr.includes('WebPage'))) {
+				if (types.includes('CollectionPage')
+					&& !types.some(typeStr => typeStr.includes('WebPage'))) {
 					return true;
 				}
 			}
