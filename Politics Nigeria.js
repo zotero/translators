@@ -114,8 +114,11 @@ function isCollectionPage(doc) {
 		if (!txt) continue;
 		try {
 			let parsed = JSON.parse(txt);
-			let candidates = Array.isArray(parsed) ? parsed :
-				(parsed['@graph'] && Array.isArray(parsed['@graph'])) ? parsed['@graph'] : [parsed];
+			let candidates = Array.isArray(parsed)
+				? parsed
+				: (parsed['@graph'] && Array.isArray(parsed['@graph']))
+					? parsed['graph']
+					: [parsed];
 
 			for (let cand of candidates) {
 				if (!cand) continue;
