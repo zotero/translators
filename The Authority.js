@@ -380,10 +380,6 @@ async function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://authorityngr.com/2025/12/17/nsitfs-rehabilitation-programme-restoring-hope-life-and-dignity-to-injured-workers/"
-	},
-	{
-		"type": "web",
 		"url": "https://authorityngr.com/2025/12/17/nsitfs-rehabilitation-programme-restoring-hope-life-and-dignity-to-injured-workers/",
 		"items": [
 			{
