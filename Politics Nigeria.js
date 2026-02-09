@@ -114,28 +114,18 @@ function isCollectionPage(doc) {
 		if (!txt) continue;
 		try {
 			let parsed = JSON.parse(txt);
-			let candidates = [];
+			let candidates = Array.isArray(parsed) ? parsed :
+				(parsed['@graph'] && Array.isArray(parsed['@graph'])) ? parsed['@graph'] : [parsed];
 
-			if (Array.isArray(parsed)) {
-				candidates = parsed;
-			}
-			else if (parsed['@graph'] && Array.isArray(parsed['@graph'])) {
-				candidates = parsed['@graph'];
-			}
-			else {
-				candidates = [parsed];
-			}
-			
 			for (let cand of candidates) {
 				if (!cand) continue;
 				let t = cand['@type'] || cand.type;
+				if (!t) continue;
 
-				if (t) {
-					const types = Array.isArray(t) ? t : [t];
-
-					if (types.some(typeStr => typeof typeStr === 'string' && typeStr === 'CollectionPage')) {
-						return true;
-					}
+				const types = Array.isArray(t) ? t : [t];
+				if (types.includes('CollectionPage') &&
+					!types.some(typeStr => typeStr.includes('WebPage'))) {
+					return true;
 				}
 			}
 		}
@@ -143,7 +133,6 @@ function isCollectionPage(doc) {
 			// ignore malformed JSON-LD
 		}
 	}
-
 	return false;
 }
 
