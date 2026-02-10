@@ -120,22 +120,13 @@ function detectWeb(doc, url) {
 		return 'multiple';
 	}
 
-	// 3) Use the standard getSearchResults() heuristic for listing pages
-	if (getSearchResults(doc, true)) {
-		// If page also clearly looks like an article, prefer article
-		if (meta(doc, 'og:type') || text(doc, 'header.mvp-post-head h1.mvp-post-title.left.entry-title')) {
-			return 'newspaperArticle';
-		}
-		return 'multiple';
-	}
-
-	// 4) meta-based hints
+	// 3) meta-based hints
 	let ogType = (meta(doc, 'og:type') || '').toLowerCase();
 	if (ogType === 'article') {
 		return 'newspaperArticle';
 	}
 
-	// 5) fallback selectors
+	// 4) fallback selectors
 	if (text(doc, 'header.mvp-post-head h1.mvp-post-title.left.entry-title')) {
 		return 'newspaperArticle';
 	}
