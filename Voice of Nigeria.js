@@ -448,6 +448,11 @@ var testCases = [
 						"firstName": "Timothy",
 						"lastName": "Choji",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Rasaq",
+						"lastName": "Adegbite",
+						"creatorType": "author"
 					}
 				],
 				"ISSN": "1118-0811",
