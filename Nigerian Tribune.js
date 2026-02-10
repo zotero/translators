@@ -404,7 +404,7 @@ var testCases = [
 				],
 				"date": "2025-11-30",
 				"ISSN": "0331-2712",
-				"abstractNote": "Last week, we explored paranoid personality disorder, stepping into Cluster A of personality disorders. We saw how deep mistrust and suspicion shape a person’s life and relationships, often without the individual realizing the effect of their behaviour. This week, we turn to another member of Cluster A: Schizoid Personality Disorder, a condition characterized by detachment, […],
+				"abstractNote": "Last week, we explored paranoid personality disorder, stepping into Cluster A of personality disorders. We saw how deep mistrust and suspicion shape a person’s life and relationships, often without the individual realizing the effect of their behaviour. This week, we turn to another member of Cluster A: Schizoid Personality Disorder, a condition characterized by detachment, […]",
 				"libraryCatalog": "Nigerian Tribune",
 				"place": "Nigeria",
 				"publicationTitle": "Nigerian Tribune",
