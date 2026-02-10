@@ -106,12 +106,16 @@ async function scrape(doc, url) {
 		return false;
 	}
 
+	function isForbiddenName(name) {
+		return /^(agency|news desk|observer|editor|reporter|editorial|nigeria|staff|bureau)$/i.test(name);
+	}
+
 	function cleanAuthor(raw) {
 		if (!raw) return "";
 		let name = raw.replace(/^\s*by\s+/i, "").trim();
 		name = name.replace(/^\s*from\s+/i, "").trim();
 		name = name.replace(/\s+reports?$/i, "").trim();
-		name = name.replace(/\s+in\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*$/i, "").trim();
+		name = name.replace(/\s+in\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*/i, "").trim();
 		name = name.replace(/,\s*[A-Z][a-z]+(?:[\s-][A-Z][a-z]+)*$/i, "").trim();
 		name = name.replace(/\s*[–-]\s*[A-Z][a-z]+$/i, "").trim();
 		if (/^[A-Z\s,.-]+$/.test(name)) {
@@ -136,7 +140,9 @@ async function scrape(doc, url) {
 				let m = part.match(/[A-Z][a-zA-Z'-]+(?:\s+[A-Z][a-zA-Z'-]+){0,3}/);
 				if (m) {
 					let name = cleanAuthor(m[0]);
-					if (name && !isSingleName(name)) authors.push(name);
+					if (name && !isSingleName(name) && !isForbiddenName(name)) {
+						authors.push(name);
+					}
 				}
 			}
 		}
@@ -218,7 +224,7 @@ async function scrape(doc, url) {
 		let byline = doc.querySelector('div.post-meta p.post-author a');
 		if (byline) {
 			let name = cleanAuthor(byline.textContent.trim());
-			if (name && isMultiWordAuthor(name)) {
+			if (name && isMultiWordAuthor(name) && !isForbiddenName(name)) {
 				authorCandidates.push(name);
 			}
 		}
@@ -243,5 +249,67 @@ async function scrape(doc, url) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
+	{
+		"type": "web",
+		"url": "https://nigerianobservernews.com/2026/02/fg-begins-payment-of-asuu-salaries-boosts-academic-allowances/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "FG begins payment of ASUU salaries, boosts academic allowances – Nigerian Observer",
+				"creators": [
+					{
+						"firstName": "The Nigerian",
+						"lastName": "Observer",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-02-10",
+				"ISSN": "0331-2674",
+				"abstractNote": "ABUJA: The Federal Government has commenced the implementation of key welfare agreements with the Academic Staff Union of Universities (ASUU), signalling a major step towards ending the prolonged unrest in the university system.",
+				"language": "en",
+				"libraryCatalog": "The Nigerian Observer",
+				"place": "Nigeria",
+				"publicationTitle": "The Nigerian Observer",
+				"url": "https://nigerianobservernews.com/2026/02/fg-begins-payment-of-asuu-salaries-boosts-academic-allowances/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://nigerianobservernews.com/2026/02/gov-okpebholos-reforms-woo-more-investors-as-edo-gets-10000-capacity-bpd-condensate-refinery/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Gov Okpebholo’s Reforms Woo More Investors As Edo Gets 10,000 Capacity BPD Condensate Refinery – Nigerian Observer",
+				"creators": [],
+				"date": "2026-02-09",
+				"ISSN": "0331-2674",
+				"abstractNote": "Governor Monday Okpebholo’s policy drive, reforms, friendly, conducive and secured environment has continued to woo, motivate and attract more investors to choose the State as an investment destination and they are more confident of return on investment.",
+				"language": "en",
+				"libraryCatalog": "The Nigerian Observer",
+				"place": "Nigeria",
+				"publicationTitle": "The Nigerian Observer",
+				"url": "https://nigerianobservernews.com/2026/02/gov-okpebholos-reforms-woo-more-investors-as-edo-gets-10000-capacity-bpd-condensate-refinery/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
 ]
 /** END TEST CASES **/
