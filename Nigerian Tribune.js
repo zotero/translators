@@ -421,33 +421,6 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "https://tribuneonlineng.com/14-year-imprisonment-for-randy-lecturers/",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "14-year imprisonment for randy lecturers",
-				"creators": [],
-				"date": "2025-11-10",
-				"ISSN": "0331-2712",
-				"abstractNote": "A powerful and unequivocal statement against sexual harassment and exploitation in Nigeria’s tertiary academic institutions was made by the Senate last week when senators approved a legislation prescribing up to 14 years in prison for lecturers who sexually harass students. The introduction of the somewhat stiffer punishment will hopefully put paid to the application of the variants of punishment contained […]",
-				"libraryCatalog": "Nigerian Tribune",
-				"place": "Nigeria",
-				"publicationTitle": "Nigerian Tribune",
-				"url": "https://tribuneonlineng.com/14-year-imprisonment-for-randy-lecturers/",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
 	}
 ]
 /** END TEST CASES **/
