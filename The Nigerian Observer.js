@@ -251,40 +251,6 @@ async function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://nigerianobservernews.com/2026/02/fg-begins-payment-of-asuu-salaries-boosts-academic-allowances/",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "FG begins payment of ASUU salaries, boosts academic allowances – Nigerian Observer",
-				"creators": [
-					{
-						"firstName": "The Nigerian",
-						"lastName": "Observer",
-						"creatorType": "author"
-					}
-				],
-				"date": "2026-02-10",
-				"ISSN": "0331-2674",
-				"abstractNote": "ABUJA: The Federal Government has commenced the implementation of key welfare agreements with the Academic Staff Union of Universities (ASUU), signalling a major step towards ending the prolonged unrest in the university system.",
-				"language": "en",
-				"libraryCatalog": "The Nigerian Observer",
-				"place": "Nigeria",
-				"publicationTitle": "The Nigerian Observer",
-				"url": "https://nigerianobservernews.com/2026/02/fg-begins-payment-of-asuu-salaries-boosts-academic-allowances/",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "https://nigerianobservernews.com/2026/02/gov-okpebholos-reforms-woo-more-investors-as-edo-gets-10000-capacity-bpd-condensate-refinery/",
 		"items": [
 			{
