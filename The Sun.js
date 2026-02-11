@@ -107,9 +107,9 @@ function isIndexURL(url) {
 	return url && (url.includes('/tag/') || url.includes('/category/'));
 }
 
-function detectWeb(doc, url) {
+function detectWeb(doc, url, jsonld) {
 	// 1) JSON-LD Article -> single article
-	let j = parseJSONLD(doc);
+	let j = jsonld || parseJSONLD(doc);
 	if (j) {
 		return 'newspaperArticle';
 	}
@@ -138,7 +138,10 @@ function detectWeb(doc, url) {
 
 async function doWeb(doc, url) {
 	url = url || doc.location.href;
-	let mode = detectWeb(doc, url);
+
+	let jsonld = parseJSONLD(doc);
+	let mode = detectWeb(doc, url, jsonld);
+
 	if (mode === 'multiple') {
 		let items = getSearchResults(doc, false);
 		if (!items) return;
@@ -149,17 +152,16 @@ async function doWeb(doc, url) {
 		}
 	}
 	else if (mode === 'newspaperArticle') {
-		await scrape(doc, url);
+		await scrape(doc, url, jsonld);
 	}
-	// else do nothing
 }
 
-async function scrape(doc, url) {
+async function scrape(doc, url, jsonld) {
 	url = url || doc.location.href;
 	
 	let item = new Zotero.Item('newspaperArticle');
 
-	let data = parseJSONLD(doc);
+	let data = jsonld || parseJSONLD(doc);
 
 	// If JSON-LD present, prefer it
 	if (data) {
@@ -297,7 +299,6 @@ async function scrape(doc, url) {
 
 	// Fallback to JSON-LD/meta author if no valid CSS author found
 	if (!authorCandidates.length) {
-		let data = parseJSONLD(doc);
 		let jsonldAuthors = [];
 
 		if (data && data.author) {
