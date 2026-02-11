@@ -165,6 +165,17 @@ async function doWeb(doc, url) {
 async function scrape(doc, url) {
 	url = url || doc.location.href;
 
+	function addAuthorUnique(item, name) {
+		let clean = ZU.cleanAuthor(name, 'author');
+		let exists = item.creators.some(c =>
+			c.firstName === clean.firstName
+			&& c.lastName === clean.lastName
+		);
+		if (!exists) {
+			item.creators.push(clean);
+		}
+	}
+
 	// Support splitting multiple author names from meta tags
 	function splitAuthors(nameStr) {
 		if (!nameStr) return [];
@@ -223,7 +234,9 @@ async function scrape(doc, url) {
 		}
 
 		// --- JSON-LD authors ---
-		if (data.author) {
+		let jsonAuthorsAdded = false;
+
+		if (data && data.author) {
 			let authors = Array.isArray(data.author) ? data.author : [data.author];
 			let graph = [];
 
@@ -239,9 +252,7 @@ async function scrape(doc, url) {
 					}
 				}
 			}
-			catch (e) {
-				// ignore malformed ld+json
-			}
+			catch (e) {}
 
 			for (let a of authors) {
 				let name = '';
@@ -272,7 +283,8 @@ async function scrape(doc, url) {
 					&& !/agency|news desk|agency reporter|thecable|cable|our reporter|correspond|editorial|nigeria|staff|bureau/i.test(name.toLowerCase())
 					&& isMultiWordAuthor(name)
 				) {
-					item.creators.push(ZU.cleanAuthor(name, 'author'));
+					addAuthorUnique(item, name);
+					jsonAuthorsAdded = true;
 				}
 			}
 		}
@@ -325,17 +337,20 @@ async function scrape(doc, url) {
 	
 	// --- Fallback authors in sequence ---
 	if (item.creators.length === 0) {
+
 		let cand1 = meta(doc, 'author');
 		let cand2 = text(doc, 'span.cs-meta-author-name, div.post-comment, span.meta-el.meta-author>a');
 
-		let candidates = [];
+		let chosen = '';
 
 		if (cand1) {
-			candidates = candidates.concat(splitAuthors(cand1));
+			chosen = cand1;
 		}
-		if (cand2) {
-			candidates = candidates.concat(splitAuthors(cand2));
+		else if (cand2) {
+			chosen = cand2;
 		}
+
+		let candidates = splitAuthors(chosen);
 
 		for (let name of candidates) {
 			if (
@@ -343,7 +358,7 @@ async function scrape(doc, url) {
 				&& !/agency|news desk|agency reporter|thecable|cable|our reporter|correspond|editorial|nigeria|staff|bureau/i.test(name.toLowerCase())
 				&& isMultiWordAuthor(name)
 			) {
-				item.creators.push(ZU.cleanAuthor(name, 'author'));
+				addAuthorUnique(item, name);
 			}
 		}
 	}
