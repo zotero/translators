@@ -45,82 +45,49 @@ function isMultiWordAuthor(name) {
 }
 
 function parseJSONLD(doc) {
-	let hostname = "";
-	try {
-		hostname = (new URL(doc.location.href)).hostname;
-	}
-	catch (e) {
-		
-	}
-
-	if (hostname.includes("factcheck.thecable.ng")) {
-		let nodes = doc.querySelectorAll('script[type="application/ld+json"]');
-		let articleCandidate = null;
-		let webpageCandidate = null;
-
-		for (let node of nodes) {
-			let txt = node.textContent.trim();
-			if (!txt) continue;
-
-			try {
-				let parsed = JSON.parse(txt);
-				let candidates = [];
-
-				if (Array.isArray(parsed)) {
-					candidates = parsed;
-				}
-				else if (parsed['@graph'] && Array.isArray(parsed['@graph'])) {
-					candidates = parsed['@graph'];
-				}
-				else if (parsed.mainEntity) {
-					candidates = [parsed.mainEntity, parsed];
-				}
-				else {
-					candidates = [parsed];
-				}
-
-				for (let cand of candidates) {
-					if (!cand) continue;
-
-					let t = cand['@type'] || cand.type;
-					if (!t) continue;
-
-					// Normalise @type into array form
-					let types = [];
-					if (typeof t === "string") {
-						types = [t];
-					}
-					else if (Array.isArray(t)) {
-						types = t;
-					}
-
-					if (!articleCandidate && types.some(tt => typeof tt === "string" && tt.includes("Article"))) {
-						articleCandidate = cand;
-					}
-
-					if (!webpageCandidate && types.some(tt => typeof tt === "string" && tt.includes("WebPage"))) {
-						webpageCandidate = cand;
-					}
-				}
+	let nodes = doc.querySelectorAll('script[type="application/ld+json"]');
+	for (let node of nodes) {
+		let txt = node.textContent.trim();
+		if (!txt) continue;
+		try {
+			let parsed = JSON.parse(txt);
+			let candidates = [];
+			if (Array.isArray(parsed)) {
+				candidates = parsed;
 			}
-			catch (e) {
-				// ignore bad JSON
+			else if (parsed['@graph'] && Array.isArray(parsed['@graph'])) {
+				candidates = parsed['@graph'];
+			}
+			else if (parsed.mainEntity) {
+				candidates = [parsed.mainEntity, parsed];
+			}
+			else {
+				candidates = [parsed];
+			}
+
+			for (let cand of candidates) {
+				if (!cand) continue;
+				let t = cand['@type'] || cand.type;
+				if (!t) continue;
+				if (typeof t === 'string') {
+					if (t.includes('WebPage')) {
+						return cand;
+					}
+				}
+				else if (Array.isArray(t)) {
+					for (let tt of t) {
+						if (typeof tt === 'string' && tt.includes('Article')) {
+							return cand;
+						}
+					}
+				}
 			}
 		}
-
-		return articleCandidate || webpageCandidate || null;
+		catch (e) {
+			// ignore malformed JSON-LD
+		}
 	}
-
-	let jsonld = doc.querySelectorAll('script[type="application/ld+json"]');
-	if (!jsonld) return null;
-
-	try {
-		let data = JSON.parse(jsonld);
-		return data;
-	}
-	catch (e) {
-		return null;
-	}
+	return null;
 }
 
 function getSearchResults(doc, checkOnly) {
