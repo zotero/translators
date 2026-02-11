@@ -169,11 +169,6 @@ function detectWeb(doc) {
 		return 'multiple';
 	}
 
-	// 5) Only at this stage, test for listing
-	if (getSearchResults(doc, true)) {
-		return 'multiple';
-	}
-
 	return false;
 }
 
