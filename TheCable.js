@@ -167,10 +167,7 @@ async function scrape(doc, url) {
 
 	function addAuthorUnique(item, name) {
 		let clean = ZU.cleanAuthor(name, 'author');
-		let exists = item.creators.some(c =>
-			c.firstName === clean.firstName
-			&& c.lastName === clean.lastName
-		);
+		let exists = item.creators.some(c => c.firstName === clean.firstName && c.lastName === clean.lastName);
 		if (!exists) {
 			item.creators.push(clean);
 		}
@@ -234,8 +231,6 @@ async function scrape(doc, url) {
 		}
 
 		// --- JSON-LD authors ---
-		let jsonAuthorsAdded = false;
-
 		if (data && data.author) {
 			let authors = Array.isArray(data.author) ? data.author : [data.author];
 			let graph = [];
@@ -284,7 +279,6 @@ async function scrape(doc, url) {
 					&& isMultiWordAuthor(name)
 				) {
 					addAuthorUnique(item, name);
-					jsonAuthorsAdded = true;
 				}
 			}
 		}
@@ -337,7 +331,6 @@ async function scrape(doc, url) {
 	
 	// --- Fallback authors in sequence ---
 	if (item.creators.length === 0) {
-
 		let cand1 = meta(doc, 'author');
 		let cand2 = text(doc, 'span.cs-meta-author-name, div.post-comment, span.meta-el.meta-author>a');
 
