@@ -37,7 +37,7 @@ async function fetchItemJSON(url) {
 	let apiUrl = url.replace(/\/items\/.*/, '/server/api/core/items/' + uuid);
 	
 	// Fetch JSON metadata from the API
-	return await requestJSON(apiUrl);
+	return requestJSON(apiUrl);
 }
 
 function determineItemType(json) {
