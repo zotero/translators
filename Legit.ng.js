@@ -138,11 +138,6 @@ function detectWeb(doc) {
 		return 'newspaperArticle';
 	}
 
-	// 5) Only at this stage, test for listing
-	if (getSearchResults(doc, true)) {
-		return 'multiple';
-	}
-
 	return false;
 }
 
