@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-02-09 15:53:01"
+	"lastUpdated": "2026-02-12 14:34:27"
 }
 
 /*
@@ -29,19 +29,46 @@
 	***** END LICENSE BLOCK *****
 */
 
-function detectWeb(doc, url) {
+async function fetchItemJSON(url) {
+	// Extract UUID from the URL
+	let uuid = url.match(/\/items\/([a-f0-9-]+)/)[1];
+	
+	// Construct the DSpace REST API endpoint
+	let apiUrl = url.replace(/\/items\/.*/, '/server/api/core/items/' + uuid);
+	
+	// Fetch JSON metadata from the API
+	return requestJSON(apiUrl);
+}
+
+function determineItemType(json) {
+	// Map dc.type to Zotero item types.
+	// Mapping scheme (same as Product type):
+	// - Book (series); Book (stand-alone); Booklet; Journal, magazine, bulletin --> Book
+	// - Presentation --> Presentation
+	// - Meeting --> Conference paper
+	// - Infographic; Poster, banner --> Artwork
+	// - Document; Brochure, flyer, fact-sheet; Project; Newsletter; any other --> Report
+	if (json.metadata['dc.type'] && json.metadata['dc.type'][0]) {
+		let dcType = json.metadata['dc.type'][0].value.toLowerCase();
+		if (/(book|journal)/.test(dcType)) return 'book';
+		if (/presentation/.test(dcType)) return 'presentation';
+		if (/meeting/.test(dcType)) return 'conferencePaper';
+		if (/(infographic|poster)/.test(dcType)) return 'artwork';
+	}
+	return 'report';
+}
+
+async function detectWeb(doc, url) {
 	// Single item page pattern
 	if (url.includes('/items/')) {
-		if (!doc.querySelector('ds-app > *')) {
-			Z.monitorDOMChanges(doc.body);
-			return false;
+		// Fetch JSON metadata from the API
+		let json = await fetchItemJSON(url);
+		
+		if (json.metadata['dc.type'] && json.metadata['dc.type'][0]) {
+			return determineItemType(json);
 		}
-
-		// Not always accurate! But the main catalog page no longer includes
-		// enough metadata to fully determine the type
-		if (doc.querySelector('meta[name="citation_title"]')) {
-			return 'book';
-		}
+		Z.monitorDOMChanges(doc.body);
+		return false;
 	}
 	// Multiple items
 	else if (url.includes('/search') || url.includes('/browse/') || url.includes('/collections/')) {
@@ -51,7 +78,7 @@ function detectWeb(doc, url) {
 }
 
 async function doWeb(doc, url) {
-	if (detectWeb(doc, url) == 'multiple') {
+	if (await detectWeb(doc, url) == 'multiple') {
 		let items = await Z.selectItems(getSearchResults(doc, false));
 		if (!items) return;
 		
@@ -66,13 +93,7 @@ async function doWeb(doc, url) {
 
 async function scrapeItem(url) {
 	// Extract UUID from the URL
-	let uuid = url.match(/\/items\/([a-f0-9-]+)/)[1];
-	
-	// Construct the DSpace REST API endpoint
-	let apiUrl = url.replace(/\/items\/.*/, '/server/api/core/items/' + uuid);
-	
-	// Fetch JSON metadata from the API
-	let json = await requestJSON(apiUrl);
+	let json = await fetchItemJSON(url);
 	
 	// Create a new Zotero item
 	let item = new Z.Item(determineItemType(json));
@@ -197,7 +218,7 @@ async function scrapeItem(url) {
 
 	// Add PDF attachment if available
 	try {
-		await addPDFAttachment(item, json, uuid);
+		await addPDFAttachment(item, json);
 	}
 	catch (e) {
 		Z.debug("Error adding PDF attachment: " + e);
@@ -259,25 +280,6 @@ async function addPDFAttachment(item, json) {
 	}
 }
 
-function determineItemType(json) {
-	// Map dc.type to Zotero item types.
-	// Types (except Meeting) are listed at: https://openknowledge.fao.org/handle/20.500.14283/1
-	// Mapping scheme (same as Product type):
-	// - Book (series); Book (stand-alone); Booklet; Journal, magazine, bulletin --> Book
-	// - Presentation --> Presentation
-	// - Meeting --> Conference paper
-	// - Infographic; Poster, banner --> Artwork
-	// - Document; Brochure, flyer, fact-sheet; Project; Newsletter; any other --> Report
-	if (json.metadata['dc.type'] && json.metadata['dc.type'][0]) {
-		let dcType = json.metadata['dc.type'][0].value.toLowerCase();
-		if (/(book|journal)/.test(dcType)) return 'book';
-		if (/presentation/.test(dcType)) return 'presentation';
-		if (/meeting/.test(dcType)) return 'conferencePaper';
-		if (/(infographic|poster)/.test(dcType)) return 'artwork';
-	}
-	return 'report';
-}
-
 function getSearchResults(doc, checkOnly) {
 	let items = {};
 	let found = false;
@@ -301,8 +303,127 @@ function getSearchResults(doc, checkOnly) {
 var testCases = [
 	{
 		"type": "web",
+		"url": "https://openknowledge.fao.org/items/6f8af04c-9399-48b1-9112-9c5a4296a325",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "book",
+				"title": "FISH4ACP - Developing sustainable aquatic value chains. Practical guidance for analysis, strategy, and design",
+				"creators": [
+					{
+						"firstName": "D.",
+						"lastName": "Neven",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "C.",
+						"lastName": "Walker",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "A.",
+						"lastName": "Lienert",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "G.",
+						"lastName": "Macfayden",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "B.",
+						"lastName": "Romuld",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "B.",
+						"lastName": "Vilela López",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "H.",
+						"lastName": "Hodzic",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "A.",
+						"lastName": "Kourgansky",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "P.-P.",
+						"lastName": "Blanc",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "K.",
+						"lastName": "Hett",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "A.",
+						"lastName": "del Rio Poza",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025",
+				"DOI": "10.4060/cd2205en",
+				"ISBN": "9789251390771",
+				"abstractNote": "Practical guide for the analysis and development of sustainable aquatic value chains, based on the methodology used by FISH4ACP, a global aquatic value chain development program, to analyse and develop fisheries and aquaculture value chains in 12 African, Caribbean and Pacific countries. It is part of a series of practitioner handbooks on sustainable value chain development within the framework of FAO’s sustainable food value chain (SFVC) approach. This guide provides practical guidance on assessing aquatic value chains, designing and implementing effective upgrading strategies, and strengthening stakeholder collaboration and governance.",
+				"language": "English",
+				"libraryCatalog": "FAO Knowledge Repository",
+				"numPages": "164",
+				"place": "Rome, Italy",
+				"publisher": "FAO",
+				"rights": "FAO",
+				"url": "https://openknowledge.fao.org/handle/20.500.14283/cd2205en",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "aquatic value chains"
+					},
+					{
+						"tag": "development plans"
+					},
+					{
+						"tag": "development policies"
+					},
+					{
+						"tag": "economic analysis"
+					},
+					{
+						"tag": "functional analysis"
+					},
+					{
+						"tag": "learning"
+					},
+					{
+						"tag": "monitoring and evaluation"
+					},
+					{
+						"tag": "social analysis"
+					},
+					{
+						"tag": "stakeholder engagement"
+					},
+					{
+						"tag": "sustainability assessment"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
 		"url": "https://openknowledge.fao.org/items/28fe3916-ad18-481d-92f5-42572165dae6",
-		"defer": 1,
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
@@ -360,7 +481,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://openknowledge.fao.org/items/3b13b1e7-28e9-443d-b431-8e6062730f1b",
-		"defer": 1,
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
@@ -422,8 +543,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://openknowledge.fao.org/items/40085e60-2d17-4c74-b4bc-78c2edbb0d3c",
-		"defer": 1,
-		"detectedItemType": "book",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "report",
@@ -471,8 +591,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://openknowledge.fao.org/items/1ca5357e-a044-4d20-8eb3-79f4148f5ab8",
-		"defer": 1,
-		"detectedItemType": "book",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -502,8 +621,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://openknowledge.fao.org/items/874a4dfa-0a98-4a2d-b3df-b08a48fee504",
-		"defer": 1,
-		"detectedItemType": "book",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "artwork",
@@ -536,8 +654,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://openknowledge.fao.org/items/3513ab01-f55f-4b23-9cbd-ed268aa8bc54",
-		"defer": 1,
-		"detectedItemType": "book",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "presentation",
