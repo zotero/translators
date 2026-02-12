@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-07-09 19:22:44"
+	"lastUpdated": "2026-02-12 16:29:52"
 }
 
 /*
@@ -167,7 +167,7 @@ function getRecordItemType(record) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('.MuiGrid-item a[href*="/title/"]:not([data-testid^="format-link"])');
+	var rows = doc.querySelectorAll('li a[href*="/title/"]:not([data-testid^="format-link"])');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -192,17 +192,10 @@ async function doWeb(doc, url) {
 	}
 }
 
-async function scrape(doc, url = doc.location.href) {
-	let oclcNumber = getOCLCNumber(url);
-	let record = await requestJSON('https://search.worldcat.org/api/search-item/' + oclcNumber, {
-		headers: { Referer: url }
-	});
+async function scrape(doc, _url = doc.location.href) {
+	let json = JSON.parse(text(doc, '#__NEXT_DATA__'));
+	let record = json.props.pageProps.record;
 	scrapeRecords([record]);
-}
-
-function getOCLCNumber(url) {
-	let matches = new URL(url).pathname.match(/\/(?:oclc|title)\/(\d+)/);
-	return matches && matches[1];
 }
 
 function scrapeRecords(records) {
