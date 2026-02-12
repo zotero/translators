@@ -53,14 +53,12 @@ function parseJSONLD(doc) {
 		try {
 			let parsed = JSON.parse(txt);
 			let candidates = [];
+
 			if (Array.isArray(parsed)) {
 				candidates = parsed;
 			}
 			else if (parsed['@graph'] && Array.isArray(parsed['@graph'])) {
 				candidates = parsed['@graph'];
-			}
-			else if (parsed.mainEntity) {
-				candidates = [parsed.mainEntity, parsed];
 			}
 			else {
 				candidates = [parsed];
@@ -70,12 +68,11 @@ function parseJSONLD(doc) {
 				if (!cand) continue;
 				let t = cand['@type'] || cand.type;
 				if (!t) continue;
-				if (typeof t === 'string') {
-					if (t.includes('Article')) {
-						return cand;
-					}
+
+				if (typeof t === 'string' && t.includes('Article')) {
+					return cand;
 				}
-				else if (Array.isArray(t)) {
+				if (Array.isArray(t)) {
 					for (let tt of t) {
 						if (typeof tt === 'string' && tt.includes('Article')) {
 							return cand;
@@ -84,27 +81,27 @@ function parseJSONLD(doc) {
 				}
 			}
 		}
-		catch (e) {
-			// ignore malformed JSON-LD
-		}
+		catch (e) {}
 	}
 	return null;
 }
 
 function getSearchResults(doc, checkOnly) {
 	let items = {};
-	let found = false;
-	// generic pattern in path for links
-	let rows = doc.querySelectorAll('a[href*="/"]');
+	let rows = doc.querySelectorAll('section.l-card-collection-section');
+
+	if (!rows.length) return false;
+
+	if (checkOnly) return true;
+
 	for (let row of rows) {
 		let href = row.href;
-		let title = ZU.trimInternal(row.textContent || row.title || '');
+		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
-		if (checkOnly) return true;
-		found = true;
 		items[href] = title;
 	}
-	return found ? items : false;
+
+	return Object.keys(items).length ? items : false;
 }
 
 function isIndexPage(doc) {
@@ -151,20 +148,22 @@ function detectWeb(doc) {
 
 async function doWeb(doc, url) {
 	url = url || doc.location.href;
-	let mode = detectWeb(doc, url);
+	let mode = detectWeb(doc);
+
 	if (mode === 'multiple') {
 		let items = getSearchResults(doc, false);
 		if (!items) return;
 		let selected = await Zotero.selectItems(items);
 		if (!selected) return;
+
 		for (let u of Object.keys(selected)) {
-			await scrape(await requestDocument(u));
+			let newDoc = await requestDocument(u);
+			await scrape(newDoc, u);
 		}
 	}
 	else if (mode === 'newspaperArticle') {
 		await scrape(doc, url);
 	}
-	// else do nothing
 }
 
 async function scrape(doc, url) {
@@ -315,10 +314,6 @@ async function scrape(doc, url) {
 	if (!item.publicationTitle) {
 		item.publicationTitle = 'Legit.ng';
 	}
-
-	//if (!item.ISSN) {
-	//	item.ISSN = '';
-	//}
 	
 	// --- Fallback authors in sequence ---
 	if (item.creators.length === 0) {
