@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-06 18:53:02"
+	"lastUpdated": "2025-11-20 22:41:12"
 }
 
 /*
@@ -35,6 +35,136 @@
 	***** END LICENSE BLOCK *****
 */
 
+/**
+ * Helper to clean LaTeX math in titles
+ * Added by fkguo 2025-12-07
+ * @param {string} title - The original title
+ * @returns {string} - Title with LaTeX converted to Unicode/Plain text where possible
+ */
+function cleanMathTitle(title) {
+	if (!title) return "";
+	
+	let text = title;
+
+	// Handle explicit LaTeX formatting commands
+	text = text.replace(/\\(text|mathrm|bf|it)\{([^}]+)\}/g, '$2'); // Remove formatting wrappers
+	
+	// Superscripts
+	text = text.replace(/\^\{([^}]+)\}/g, (match, content) => {
+		content = cleanMathTitle(content);
+		return `<sup>${content}</sup>`;
+	});
+	// Handle single char superscripts including special chars and commands
+	const superscriptMap = {
+		'0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
+		'5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
+		'+': '⁺', '-': '⁻', '=': '⁼', '(': '⁽', ')': '⁾',
+		'n': 'ⁿ', 'i': 'ⁱ'
+	};
+	text = text.replace(/\^([0-9a-zA-Z+\-*])|\^\\(pm|mp)/g, (match, char, latex) => {
+		if (char && superscriptMap[char]) return superscriptMap[char];
+		if (char) return `<sup>${char}</sup>`;
+		if (latex === 'pm') return '<sup>±</sup>';
+		if (latex === 'mp') return '<sup>∓</sup>';
+		return match;
+	});
+
+	// Subscripts
+	text = text.replace(/_\{([^}]+)\}/g, (match, content) => {
+		content = cleanMathTitle(content);
+		return `<sub>${content}</sub>`;
+	});
+	// Handle single char subscripts including special chars and commands
+	const subscriptMap = {
+		'0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄',
+		'5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉',
+		'+': '₊', '-': '₋', '=': '₌', '(': '₍', ')': '₎',
+		'a': 'ₐ', 'e': 'ₑ', 'o': 'ₒ', 'x': 'ₓ', 'h': 'ₕ',
+		'k': 'ₖ', 'l': 'ₗ', 'm': 'ₘ', 'n': 'ₙ', 'p': 'ₚ',
+		's': 'ₛ', 't': 'ₜ'
+	};
+	text = text.replace(/_([0-9a-zA-Z+\-*])|\_\\(pm|mp)/g, (match, char, latex) => {
+		if (char && subscriptMap[char]) return subscriptMap[char];
+		if (char) return `<sub>${char}</sub>`;
+		if (latex === 'pm') return '<sub>±</sub>';
+		if (latex === 'mp') return '<sub>∓</sub>';
+		return match;
+	});
+	
+	// Greek letters (add more as needed)
+	const greek = {
+		'\\alpha': 'α', '\\beta': 'β', '\\gamma': 'γ', '\\delta': 'δ', '\\epsilon': 'ε',
+		'\\zeta': 'ζ', '\\eta': 'η', '\\theta': 'θ', '\\iota': 'ι', '\\kappa': 'κ',
+		'\\lambda': 'λ', '\\mu': 'μ', '\\nu': 'ν', '\\xi': 'ξ', '\\pi': 'π',
+		'\\rho': 'ρ', '\\sigma': 'σ', '\\tau': 'τ', '\\upsilon': 'υ', '\\phi': 'φ',
+		'\\chi': 'χ', '\\psi': 'ψ', '\\omega': 'ω',
+		'\\Gamma': 'Γ', '\\Delta': 'Δ', '\\Theta': 'Θ', '\\Lambda': 'Λ', '\\Xi': 'Ξ',
+		'\\Pi': 'Π', '\\Sigma': 'Σ', '\\Upsilon': 'Υ', '\\Phi': 'Φ', '\\Psi': 'Ψ', '\\Omega': 'Ω'
+	};
+	
+	for (let [tex, char] of Object.entries(greek)) {
+		// Replace whole word matches or distinct latex commands
+		let re = new RegExp(tex.replace('\\', '\\\\') + '(?![a-zA-Z])', 'g');
+		text = text.replace(re, char);
+	}
+	
+	// Common particles and arrows
+	text = text.replace(/\\to/g, '→')
+		.replace(/\\rightarrow/g, '→')
+		.replace(/\\leftarrow/g, '←')
+		.replace(/\\longrightarrow/g, '⟶')
+		.replace(/\\longleftarrow/g, '⟵')
+		.replace(/\\infty/g, '∞')
+		.replace(/\\approx/g, '≈')
+		.replace(/\\simeq/g, '≃')
+		.replace(/\\sim/g, '~')
+		.replace(/\\times/g, '×')
+		.replace(/\\pm/g, '±')
+		.replace(/\\mp/g, '∓')
+		.replace(/\\sqrt/g, '√')
+		.replace(/\\partial/g, '∂')
+		.replace(/\\nabla/g, '∇')
+		.replace(/\\cdot/g, '⋅')
+		.replace(/\\neq/g, '≠')
+		.replace(/\\leq/g, '≤')
+		.replace(/\\geq/g, '≥')
+		.replace(/\\ll/g, '≪')
+		.replace(/\\gg/g, '≫')
+		.replace(/\\leftrightarrow/g, '↔')
+		.replace(/\\ell/g, 'ℓ')
+		.replace(/\\hbar/g, 'ℏ')
+		.replace(/\\dagger/g, '†')
+		.replace(/\\bar\{([^}]+)\}/g, '$1\u0304')
+		.replace(/->/g, '→');
+		
+	// Cleanup standard e+e- notation specifically mentioned
+	// e^{+}e^{-} -> e⁺e⁻
+	// Handles $...$ wrappers
+	text = text.replace(/\$([^$]+)\$/g, (match, content) => {
+		// Remove internal spaces in math mode
+		content = content.replace(/\s+/g, '');
+		
+		// Apply the same cleaning to content inside $...$
+		// We recurse lightly or just apply same logic
+		let clean = content.replace(/\^\{?\+?\}?/g, '⁺')
+			.replace(/\^\{?\-\}?/g, '⁻')
+			.replace(/e\^/g, 'e') // Catch e^+ cases processed above
+			.replace(/\\/g, ''); // Remove remaining backslashes for simple commands
+			
+		return clean;
+	});
+
+	// Cleanup generic latex braces and dollars if any remain
+	text = text.replace(/(\$|\\{|\\})/g, '');
+	
+	// Fix specific case: e+ e- usually implies e⁺ e⁻
+	// This regex looks for 'e' followed immediately by + or -
+	// But we already handled ^+ and ^- above. 
+	// Handle explicit "e+" "e-" in text if they weren't latex
+	// Careful not to replace regular words.
+	
+	return ZU.trimInternal(text);
+}
 
 function detectWeb(doc, url) {
 	if (url.includes('/literature')) {
@@ -57,7 +187,7 @@ function getSearchResults(doc, checkOnly) {
 	var rows = doc.querySelectorAll('a.result-item-title[href*="/literature"]');
 	for (let row of rows) {
 		let href = row.href;
-		let title = ZU.trimInternal(row.textContent);
+		let title = cleanMathTitle(ZU.trimInternal(row.textContent));
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -98,6 +228,7 @@ function scrape(doc, url) {
 				}
 			}
 			
+			item.title = cleanMathTitle(item.title);
 			item.complete();
 		});
 		translator.translate();
