@@ -1,13 +1,11 @@
 {
 	"translatorID": "032ae9b7-ab90-9205-a479-baf81f49184a",
-	"translatorType": 2,
 	"label": "TEI",
 	"creator": "Stefan Majewski",
 	"target": "xml",
 	"minVersion": "4.0.27",
-	"maxVersion": null,
+	"maxVersion": "",
 	"priority": 25,
-	"inRepository": true,
 	"configOptions": {
 		"dataMode": "xml/dom",
 		"getCollections": "true"
@@ -19,7 +17,9 @@
 		"Full TEI Document": false,
 		"Export Collections": false
 	},
-	"lastUpdated": "2022-09-30 10:56:50"
+	"inRepository": true,
+	"translatorType": 2,
+	"lastUpdated": "2025-10-24 15:50:31"
 }
 
 // ********************************************************************
@@ -286,6 +286,11 @@ function generateItem(item, teiDoc) {
 		}
 	}
 
+	if (item.url) {
+		note = teiDoc.createElementNS(ns.tei, "ptr");
+		note.setAttribute("target", item.url);
+		monogr.appendChild(note);
+	}
 
 	// add name of conference
 	if (item.conferenceName) {
@@ -498,12 +503,6 @@ function generateItem(item, teiDoc) {
 		note.appendChild(teiDoc.createTextNode(item.accessDate));
 		imprint.appendChild(note);
 	}
-	if (item.url) {
-		note = teiDoc.createElementNS(ns.tei, "note");
-		note.setAttribute("type", "url");
-		note.appendChild(teiDoc.createTextNode(item.url));
-		imprint.appendChild(note);
-	}
 	if (item.thesisType) {
 		note = teiDoc.createElementNS(ns.tei, "note");
 		note.setAttribute("type", "thesisType");
@@ -646,3 +645,8 @@ function doExport() {
 	var serializer = new XMLSerializer();
 	Zotero.write(serializer.serializeToString(outputElement));
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+]
+/** END TEST CASES **/
