@@ -353,5 +353,7 @@ function scrapeDetail(doc, url) {
 }
 
 /** BEGIN TEST CASES **/
-var testCases = []
+// No test cases: ManuscriptCentral (ScholarOne Manuscripts) requires authentication.
+// The site serves all pages from a single URL via JavaScript POST-form navigation,
+// so no public URL is available for automated testing.
 /** END TEST CASES **/
