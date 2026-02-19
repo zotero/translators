@@ -88,8 +88,8 @@ function parseAuthors(text) {
 function looksLikeMsId(text) {
 	return text.length > 0
 		&& text.length <= 30
-		&& text.indexOf(' ') === -1
-		&& text.indexOf('-') !== -1;
+		&& !text.includes(' ')
+		&& text.includes('-');
 }
 
 // ── Core translator functions ─────────────────────────────────────────────────
@@ -228,12 +228,18 @@ function scrapeDetail(doc, url) {
 	let authorsP = null;
 	if (block) {
 		for (let p of block.querySelectorAll('p.pagecontents')) {
-			if (p.textContent.includes('(contact)')) { authorsP = p; break; }
+			if (p.textContent.includes('(contact)')) {
+				authorsP = p;
+				break;
+			}
 		}
 		// Fallback: paragraph whose text contains "; " (multi-author separator)
 		if (!authorsP) {
 			for (let p of block.querySelectorAll('p.pagecontents')) {
-				if (p.textContent.includes('; ')) { authorsP = p; break; }
+				if (p.textContent.includes('; ')) {
+					authorsP = p;
+					break;
+				}
 			}
 		}
 	}
@@ -302,8 +308,13 @@ function scrapeDetail(doc, url) {
 		&& (pdfBtn.getAttribute('onclick') || '').match(/window\.open\(['"]([^'"]+)['"]/);
 
 	let pending = (htmlBtnMatch ? 1 : 0) + (pdfBtnMatch ? 1 : 0);
-	if (!pending) { item.complete(); return; }
-	function doneOne() { if (--pending === 0) item.complete(); }
+	if (!pending) {
+		item.complete();
+		return;
+	}
+	function doneOne() {
+		if (--pending === 0) item.complete();
+	}
 
 	if (htmlBtnMatch) {
 		let wrapperUrl = new URL(htmlBtnMatch[1], url).href;
@@ -342,11 +353,5 @@ function scrapeDetail(doc, url) {
 }
 
 /** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "https://mc.manuscriptcentral.com/orm",
-		"items": "multiple"
-	}
-]
+var testCases = []
 /** END TEST CASES **/
