@@ -1,6 +1,5 @@
 {
 	"translatorID": "14763d24-8ba0-45df-8f52-b8d1108e7ac9",
-	"translatorType": 2,
 	"label": "Zotero RDF",
 	"creator": "Simon Kornblith",
 	"target": "rdf",
@@ -16,7 +15,8 @@
 		"exportFileData": false
 	},
 	"inRepository": true,
-	"lastUpdated": "2021-01-25 06:49:57"
+	"translatorType": 2,
+	"lastUpdated": "2022-11-18 16:59:52"
 }
 
 var addedCollections = new Set();
@@ -348,11 +348,11 @@ function generateItem(item, zoteroType, resource) {
 	// relative file path for attachment items
 	if (item.defaultPath) {	// For Zotero 3.0
 		item.saveFile(item.defaultPath, true);
-		Zotero.RDF.addStatement(resource, rdf+"resource", item.defaultPath, false);
+		Zotero.RDF.addStatement(resource, rdf+"resource", makeValidFileURI(item.defaultPath), false);
 	} else if (item.path) {	// For Zotero 2.1
-		Zotero.RDF.addStatement(resource, rdf+"resource", item.path, false);
+		Zotero.RDF.addStatement(resource, rdf+"resource", makeValidFileURI(item.path), false);
 	}
-    
+	
 	// Related items and tags
 	if (item.relations) generateRelations(resource, item.relations);
 	if (item.tags) generateTags(resource, item.tags);
@@ -518,6 +518,27 @@ function generateItem(item, zoteroType, resource) {
 	if (displayTitle) Zotero.RDF.addStatement(resource, n.z+"displayTitle", displayTitle, true);
 }
 
+function makeValidFileURI(path) {
+	path = path
+		.replace(/#/g, '%23')
+		.replace(/\?/g, '#3F')
+		.replace(/ /g, '%20')
+		.replace(/\\/g, '/');
+
+	// Absolute paths
+	if (path.startsWith('/')) {
+		return 'file://' + path;
+	}
+	// Absolute Windows paths with drive letter
+	else if (/^[a-zA-Z]:\//.test(path)) {
+		return 'file:///' + path[0].toLowerCase() + path.slice(1);
+	}
+	// Relative paths
+	else {
+		return path;
+	}
+}
+
 function doExport() {
 	// add namespaces
 	for (var i in n) {
@@ -581,3 +602,7 @@ function doExport() {
 		generateCollection(collection);
 	}
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+]
+/** END TEST CASES **/
