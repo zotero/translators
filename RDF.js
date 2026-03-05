@@ -484,7 +484,7 @@ function detectType(newItem, node, ret) {
 				// process as file
 				t.zotero = "attachment";
 
-				var path = getFirstResults(node, [rdf + "resource"]);
+				var path = getFirstResults(node, [n.z + "filePath", rdf + "resource"]);
 				if (path) {
 					newItem.path = Zotero.RDF.getResourceURI(path[0]);
 				}

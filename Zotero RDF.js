@@ -348,9 +348,9 @@ function generateItem(item, zoteroType, resource) {
 	// relative file path for attachment items
 	if (item.defaultPath) {	// For Zotero 3.0
 		item.saveFile(item.defaultPath, true);
-		Zotero.RDF.addStatement(resource, rdf+"resource", item.defaultPath, false);
+		Zotero.RDF.addStatement(resource, n.z+"filePath", item.defaultPath, false);
 	} else if (item.path) {	// For Zotero 2.1
-		Zotero.RDF.addStatement(resource, rdf+"resource", item.path, false);
+		Zotero.RDF.addStatement(resource, n.z+"filePath", item.path, false);
 	}
     
 	// Related items and tags
