@@ -1,6 +1,5 @@
 {
 	"translatorID": "14763d24-8ba0-45df-8f52-b8d1108e7ac9",
-	"translatorType": 2,
 	"label": "Zotero RDF",
 	"creator": "Simon Kornblith",
 	"target": "rdf",
@@ -16,7 +15,8 @@
 		"exportFileData": false
 	},
 	"inRepository": true,
-	"lastUpdated": "2021-01-25 06:49:57"
+	"translatorType": 2,
+	"lastUpdated": "2026-03-06 20:32:55"
 }
 
 var addedCollections = new Set();
@@ -581,3 +581,8 @@ function doExport() {
 		generateCollection(collection);
 	}
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+]
+/** END TEST CASES **/
