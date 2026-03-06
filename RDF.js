@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2025-08-06 22:48:30"
+	"lastUpdated": "2026-03-06 20:32:45"
 }
 
 /*
@@ -484,7 +484,7 @@ function detectType(newItem, node, ret) {
 				// process as file
 				t.zotero = "attachment";
 
-				var path = getFirstResults(node, [rdf + "resource"]);
+				var path = getFirstResults(node, [n.z + "filePath", rdf + "resource"]);
 				if (path) {
 					newItem.path = Zotero.RDF.getResourceURI(path[0]);
 				}
