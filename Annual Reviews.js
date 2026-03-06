@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-02-22 13:07:49"
+	"lastUpdated": "2026-03-06 20:37:20"
 }
 
 /**
@@ -175,7 +175,6 @@ function getTOCResults(doc, checkOnly) {
 		if (!title || title.length < 3) continue;
 		if (title.toLowerCase().includes('more') || title.toLowerCase().includes('less')) continue;
 		
-		Zotero.debug("Found article: " + doi + " - " + title.substring(0, 50));
 		if (checkOnly) return true;
 		found = true;
 		items[doi] = title;
