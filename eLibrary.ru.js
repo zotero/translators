@@ -170,13 +170,9 @@ async function scrape(doc, url = doc.location.href) {
 		   In all these cases, we put comma after LAST for `ZU.cleanAuthor()` to work.
 		   Other formats are rare, but possible, e.g. "ВАН ДЕ КЕРЧОВЕ Р." == "Van de Kerchove R.".
 		   They go to single-field mode (assuming they got no comma). */
-		var nameFormat1RE = new ZU.XRegExp("^\\p{Letter}+\\s\\p{Letter}+\\s\\p{Letter}+$");
-		var nameFormat2RE = new ZU.XRegExp("^\\p{Letter}+\\s\\p{Letter}\\.(\\s?\\p{Letter}\\.?)?$");
-		var nameFormat3RE = new ZU.XRegExp("^\\p{Letter}+\\s\\(\\p{Letter}+\\)\\s\\p{Letter}+\\s\\p{Letter}+$");
-
-		var isFormat1 = ZU.XRegExp.test(dirty, nameFormat1RE);
-		var isFormat2 = ZU.XRegExp.test(dirty, nameFormat2RE);
-		var isFormat3 = ZU.XRegExp.test(dirty, nameFormat3RE);
+		var isFormat1 = /^\p{L}+\s\p{L}+\s\p{L}+$/u.test(dirty);
+		var isFormat2 = /^\p{L}+\s\p{L}\.(\s?\p{L}\.?)?$/u.test(dirty);
+		var isFormat3 = /^\p{L}+\s\(\p{L}+\)\s\p{L}+\s\p{L}+$/u.test(dirty);
 		
 		if (isFormat1 || isFormat2) {
 			// add comma before the first space

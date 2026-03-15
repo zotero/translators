@@ -302,9 +302,8 @@ function writeField(field, value, isMacro, noEscape) {
 
 		// Case of words with uppercase characters in non-initial positions is preserved with braces.
 		// we're looking at all unicode letters
-		var protectCaps = new ZU.XRegExp("\\b\\p{Letter}+\\p{Uppercase_Letter}\\p{Letter}*", 'g');
 		if (field != "pages") {
-			value = ZU.XRegExp.replace(value, protectCaps, "{$0}");
+			value = value.replace(/\b\p{L}+\p{Lu}\p{L}*/gu, "{$&}");
 		}
 
 		// Page ranges should use double dash
