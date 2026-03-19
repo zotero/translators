@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-12-02 18:01:21"
+	"lastUpdated": "2026-03-19 20:29:30"
 }
 
 function detectWeb(doc, url) {
@@ -500,7 +500,7 @@ async function scrape(doc, url, isSearchResult = false) {
 	// On newer pages, there is an GET formular which is only there if
 	// the user click on the export button, but we know how the url
 	// in the end will be built.
-	form = ZU.xpath(doc, '//div[@id="export-citation"]//button')[0];
+	form = ZU.xpath(doc, '//div[@id="export-citation"]//button')[0] || doc.querySelector('#export-citation-popover');
 	if (form) {
 		Z.debug("Fetching RIS via GET form (new)");
 		var pii = ZU.xpathText(doc, '//meta[@name="citation_pii"]/@content');
