@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2026-03-20 05:36:39"
+	"lastUpdated": "2026-03-20 05:52:04"
 }
 
 /*
@@ -379,7 +379,7 @@ function doImport() {
 		metadataXML = refXML;
 	}
 
-	var abstractNote = ZU.xpathText(refXML, 'description|abstract', {} , "<!-- mutil-part -->")
+	var abstractNote = ZU.xpathText(refXML, 'description|abstract', {}, "<!-- mutil-part -->");
 	item.abstractNote = ZU.trimInternal(abstractNote).replace(/\s<!-- mutil-part -->\s/, "\n");
 
 	item.language = ZU.xpathText(metadataXML, './@language');
