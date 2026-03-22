@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-05-26 04:11:53"
+	"lastUpdated": "2026-03-22 02:19:40"
 }
 
 /*
@@ -35,16 +35,24 @@
   ***** END LICENSE BLOCK *****
 */
 
-function detectWeb(doc, _url) {
-	if (doc.title.includes("results")) {
+function detectWeb(doc, _url, citation) {
+	let title = (doc.title || "")
+		.replace(/\bpart\s+\d+\s+of\s+\d+\b/ig, "")
+		.replace(/\s{2,}/g, " ")
+		.replace(/\s*,\s*$/, "")
+		.trim();
+	let activeCitation = citation || text(doc, 'span.active-reporter') || "";
+
+	if (title.includes("results")) {
 		return "multiple";
 	}
-	else if (/[a-zA-Z. ]+\s§\s\d+/.test(doc.title)
-	|| /\W(acts?)(\W|$)/i.test(doc.title) // Match: The Airports Acts, Civil Rights Act of 1865
-	|| /p\.l\./i.test(doc.title)) { // Match: ... Tex. Bus. & Com. Code § 26.01 ...
+	else if (/[a-zA-Z. ]+\s§\s\d+/.test(title)
+	|| /\W(acts?)(\W|$)/i.test(title) // Match: The Airports Acts, Civil Rights Act of 1865
+	|| /p\.l\./i.test(title)) { // Match: ... Tex. Bus. & Com. Code § 26.01 ...
 		return "statute";
 	}
-	else if (/\d+\s[a-zA-Z0-9. ]+\s\d+/.test(doc.title)) { // Match: ... 5 U.S. 137 ...
+	else if (/\d+\s[a-zA-Z0-9. ]+\s\d+/.test(title)
+	|| /\d+\s[a-zA-Z0-9. ]+\s\d+/.test(activeCitation)) { // Match: ... 5 U.S. 137 ...
 		return "case";
 	}
 	// TODO secondary sources
@@ -98,8 +106,10 @@ async function doWeb(doc, url) {
 
 async function scrape(doc, url) {
 	var title = text(doc, 'h1#SS_DocumentTitle');
+	let citation = text(doc, 'span.active-reporter');
+	let itemType = detectWeb(doc, url, citation);
 
-	if (detectWeb(doc, url) == "case") {
+	if (itemType == "case") {
 		var newCase = new Zotero.Item("case");
 		//newCase.url = doc.location.href; // Disabled for style reasons
 
@@ -107,7 +117,6 @@ async function scrape(doc, url) {
 
 		newCase.notes.push({ note: "Snapshot: " + newCase.title + doc.getElementById('document-content').innerHTML });
 
-		let citation = text(doc, 'span.active-reporter');
 		newCase.reporterVolume = citation.substring(0, citation.indexOf(' '));
 		newCase.reporter = citation.substring(citation.indexOf(' ') + 1, citation.lastIndexOf(' '));
 		newCase.firstPage = citation.substring(citation.lastIndexOf(' ') + 1);
@@ -125,8 +134,13 @@ async function scrape(doc, url) {
 
 		newCase.complete();
 	}
-	else if (detectWeb(doc, url) == "statute") {
+	else if (itemType == "statute") {
 		var newStatute = new Zotero.Item("statute");
+		title = title
+			.replace(/\bpart\s+\d+\s+of\s+\d+\b/ig, "")
+			.replace(/\s{2,}/g, " ")
+			.replace(/\s*,\s*$/, "")
+			.trim();
 
 		//newStatute.url = doc.location.href; // Disabled for style reasons
 
@@ -257,8 +271,13 @@ async function scrape(doc, url) {
 	}
 }
 
-
 /** BEGIN TEST CASES **/
 var testCases = [
+	{
+		"type": "web",
+		"url": "https://plus.lexis.com/document?pdmfid=1530671&pddocfullpath=%2Fshared%2Fdocument%2Fcases%2Furn%3AcontentItem%3A3S4X-KM50-003B-H00B-00000-00&pdcontentcomponentid=6443&ecomp=b7ttk&earg=pdsf&prid=94e1506b-a61a-4690-8fb2-9c7a5057fb3e&crid=d86ab457-174d-47e7-befa-cc5816563a0d&pdsdr=true#/0f459ab4-7325-42c6-9f62-33f772dc07e8",
+		"detectedItemType": false,
+		"items": []
+	}
 ]
 /** END TEST CASES **/
