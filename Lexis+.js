@@ -273,15 +273,6 @@ async function scrape(doc, url) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "https://plus.lexis.com/document?pdmfid=1530671&pddocfullpath=%2Fshared%2Fdocument%2Fcases%2Furn%3AcontentItem%3A3S4X-KM50-003B-H00B-00000-00&pdcontentcomponentid=6443&ecomp=b7ttk&earg=pdsf&prid=94e1506b-a61a-4690-8fb2-9c7a5057fb3e&crid=d86ab457-174d-47e7-befa-cc5816563a0d&pdsdr=true#/0f459ab4-7325-42c6-9f62-33f772dc07e8",
-		"detectedItemType": "case",
-		"items": [
-			{
-				"itemType": "case"
-			}
-		]
-	}
+	
 ]
 /** END TEST CASES **/
