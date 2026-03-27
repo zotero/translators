@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-11-12 15:42:58"
+	"lastUpdated": "2026-01-16 10:28:11"
 }
 
 /*
@@ -398,7 +398,7 @@ function parseSingleEntry(entry) {
 
 	let articleID = arxivURL.match(/\/abs\/(.+)$/)[1];
 
-	let articleField = attr(entry, "primary_category", "term").replace(/^.+?:/, "").replace(/\..+?$/, "");
+	let articleField = attr(entry, "primary_category", "term");
 	if (articleField) articleField = "[" + articleField + "]";
 
 	if (articleID && articleID.includes("/")) {
@@ -501,7 +501,7 @@ var testCases = [
 				"DOI": "10.1111/j.1365-2966.2011.19851.x",
 				"ISSN": "00358711",
 				"abstractNote": "The upcoming generation of cosmic microwave background (CMB) experiments face a major challenge in detecting the weak cosmic B-mode signature predicted as a product of primordial gravitational waves. To achieve the required sensitivity these experiments must have impressive control of systematic effects and detailed understanding of the foreground emission that will influence the signal. In this paper, we present templates of the intensity and polarisation of emission from one of the main Galactic foregrounds, interstellar dust. These are produced using a model which includes a 3D description of the Galactic magnetic field, examining both large and small scales. We also include in the model the details of the dust density, grain alignment and the intrinsic polarisation of the emission from an individual grain. We present here Stokes parameter template maps at 150GHz and provide an on-line repository (http://www.imperial.ac.uk/people/c.contaldi/fgpol) for these and additional maps at frequencies that will be targeted by upcoming experiments such as EBEX, Spider and SPTpol.",
-				"extra": "arXiv:1107.4612 [astro-ph]",
+				"extra": "arXiv:1107.4612 [astro-ph.CO]",
 				"issue": "2",
 				"libraryCatalog": "arXiv.org",
 				"pages": "1795-1803",
@@ -602,7 +602,7 @@ var testCases = [
 				"date": "12/2006",
 				"DOI": "10.1086/507935",
 				"ISSN": "0004-637X, 1538-4357",
-				"abstractNote": "We present optical $WBVR$ and infrared $JHKL$ photometric observations of the Be binary system $\\delta$ Sco, obtained in 2000--2005, mid-infrared (10 and $18 \\mu$m) photometry and optical ($\\lambda\\lambda$ 3200--10500 \\AA) spectropolarimetry obtained in 2001. Our optical photometry confirms the results of much more frequent visual monitoring of $\\delta$ Sco. In 2005, we detected a significant decrease in the object's brightness, both in optical and near-infrared brightness, which is associated with a continuous rise in the hydrogen line strenghts. We discuss possible causes for this phenomenon, which is difficult to explain in view of current models of Be star disks. The 2001 spectral energy distribution and polarization are succesfully modeled with a three-dimensional non-LTE Monte Carlo code which produces a self-consistent determination of the hydrogen level populations, electron temperature, and gas density for hot star disks. Our disk model is hydrostatically supported in the vertical direction and radially controlled by viscosity. Such a disk model has, essentially, only two free parameters, viz., the equatorial mass loss rate and the disk outer radius. We find that the primary companion is surrounded by a small (7 $R_\\star$), geometrically-thin disk, which is highly non-isothermal and fully ionized. Our model requires an average equatorial mass loss rate of $1.5\\times 10^{-9} M_{\\sun}$ yr$^{-1}$.",
+				"abstractNote": "We present optical $WBVR$ and infrared $JHKL$ photometric observations of the Be binary system $δ$ Sco, obtained in 2000--2005, mid-infrared (10 and $18 μ$m) photometry and optical ($λλ$ 3200--10500 Å) spectropolarimetry obtained in 2001. Our optical photometry confirms the results of much more frequent visual monitoring of $δ$ Sco. In 2005, we detected a significant decrease in the object's brightness, both in optical and near-infrared brightness, which is associated with a continuous rise in the hydrogen line strenghts. We discuss possible causes for this phenomenon, which is difficult to explain in view of current models of Be star disks. The 2001 spectral energy distribution and polarization are succesfully modeled with a three-dimensional non-LTE Monte Carlo code which produces a self-consistent determination of the hydrogen level populations, electron temperature, and gas density for hot star disks. Our disk model is hydrostatically supported in the vertical direction and radially controlled by viscosity. Such a disk model has, essentially, only two free parameters, viz., the equatorial mass loss rate and the disk outer radius. We find that the primary companion is surrounded by a small (7 $R_\\star$), geometrically-thin disk, which is highly non-isothermal and fully ionized. Our model requires an average equatorial mass loss rate of $1.5\\times 10^{-9} M_{\\sun}$ yr$^{-1}$.",
 				"extra": "arXiv:astro-ph/0603274",
 				"issue": "2",
 				"journalAbbreviation": "ApJ",
@@ -663,7 +663,7 @@ var testCases = [
 				"DOI": "10.1086/672573",
 				"ISSN": "00046280, 15383873",
 				"abstractNote": "We have designed, constructed, and tested an InGaAs near-infrared camera to explore whether low-cost detectors can make small (<1 m) telescopes capable of precise (<1 mmag) infrared photometry of relatively bright targets. The camera is constructed around the 640x512 pixel APS640C sensor built by FLIR Electro-Optical Components. We designed custom analog-to-digital electronics for maximum stability and minimum noise. The InGaAs dark current halves with every 7 deg C of cooling, and we reduce it to 840 e-/s/pixel (with a pixel-to-pixel variation of +/-200 e-/s/pixel) by cooling the array to -20 deg C. Beyond this point, glow from the readout dominates. The single-sample read noise of 149 e- is reduced to 54 e- through up-the-ramp sampling. Laboratory testing with a star field generated by a lenslet array shows that 2-star differential photometry is possible to a precision of 631 +/-205 ppm (0.68 mmag) hr^-0.5 at a flux of 2.4E4 e-/s. Employing three comparison stars and de-correlating reference signals further improves the precision to 483 +/-161 ppm (0.52 mmag) hr^-0.5. Photometric observations of HD80606 and HD80607 (J=7.7 and 7.8) in the Y band shows that differential photometry to a precision of 415 ppm (0.45 mmag) hr^-0.5 is achieved with an effective telescope aperture of 0.25 m. Next-generation InGaAs detectors should indeed enable Poisson-limited photometry of brighter dwarfs with particular advantage for late-M and L types. In addition, one might acquire near-infrared photometry simultaneously with optical photometry or radial velocity measurements to maximize the return of exoplanet searches with small telescopes.",
-				"extra": "arXiv:1307.1469 [astro-ph]",
+				"extra": "arXiv:1307.1469 [astro-ph.IM]",
 				"issue": "931",
 				"journalAbbreviation": "Publications of the Astronomical Society of the Pacific",
 				"libraryCatalog": "arXiv.org",
@@ -724,9 +724,9 @@ var testCases = [
 				],
 				"date": "2014-02-06",
 				"DOI": "10.48550/arXiv.1402.1516",
-				"abstractNote": "We construct a dual pair associated to the Hamiltonian geometric formulation of perfect fluids with free boundaries. This dual pair is defined on the cotangent bundle of the space of volume preserving embeddings of a manifold with boundary into a boundaryless manifold of the same dimension. The dual pair properties are rigorously verified in the infinite dimensional Fr\\'echet manifold setting. It provides an example of a dual pair associated to actions that are not completely mutually orthogonal.",
+				"abstractNote": "We construct a dual pair associated to the Hamiltonian geometric formulation of perfect fluids with free boundaries. This dual pair is defined on the cotangent bundle of the space of volume preserving embeddings of a manifold with boundary into a boundaryless manifold of the same dimension. The dual pair properties are rigorously verified in the infinite dimensional Fréchet manifold setting. It provides an example of a dual pair associated to actions that are not completely mutually orthogonal.",
 				"archiveID": "arXiv:1402.1516",
-				"extra": "arXiv:1402.1516 [math]",
+				"extra": "arXiv:1402.1516 [math.SG]",
 				"libraryCatalog": "arXiv.org",
 				"repository": "arXiv",
 				"url": "http://arxiv.org/abs/1402.1516",
@@ -743,9 +743,6 @@ var testCases = [
 				"tags": [
 					{
 						"tag": "Mathematical Physics"
-					},
-					{
-						"tag": "Mathematics - Mathematical Physics"
 					},
 					{
 						"tag": "Mathematics - Symplectic Geometry"
@@ -793,7 +790,7 @@ var testCases = [
 				"DOI": "10.48550/arXiv.1810.04805",
 				"abstractNote": "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT representations can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful. It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE benchmark to 80.4% (7.6% absolute improvement), MultiNLI accuracy to 86.7 (5.6% absolute improvement) and the SQuAD v1.1 question answering Test F1 to 93.2 (1.5% absolute improvement), outperforming human performance by 2.0%.",
 				"archiveID": "arXiv:1810.04805",
-				"extra": "arXiv:1810.04805 [cs]\nversion: 1",
+				"extra": "arXiv:1810.04805 [cs.CL]\nversion: 1",
 				"libraryCatalog": "arXiv.org",
 				"repository": "arXiv",
 				"shortTitle": "BERT",
@@ -855,7 +852,7 @@ var testCases = [
 				"DOI": "10.48550/arXiv.1810.04805",
 				"abstractNote": "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful. It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE score to 80.5% (7.7% point absolute improvement), MultiNLI accuracy to 86.7% (4.6% absolute improvement), SQuAD v1.1 question answering Test F1 to 93.2 (1.5 point absolute improvement) and SQuAD v2.0 Test F1 to 83.1 (5.1 point absolute improvement).",
 				"archiveID": "arXiv:1810.04805",
-				"extra": "arXiv:1810.04805 [cs]\nversion: 2",
+				"extra": "arXiv:1810.04805 [cs.CL]\nversion: 2",
 				"libraryCatalog": "arXiv.org",
 				"repository": "arXiv",
 				"shortTitle": "BERT",
@@ -1060,7 +1057,7 @@ var testCases = [
 				"date": "2023-12-10",
 				"DOI": "10.1145/3610548.3618154",
 				"abstractNote": "Text-to-image model personalization aims to introduce a user-provided concept to the model, allowing its synthesis in diverse contexts. However, current methods primarily focus on the case of learning a single concept from multiple images with variations in backgrounds and poses, and struggle when adapted to a different scenario. In this work, we introduce the task of textual scene decomposition: given a single image of a scene that may contain several concepts, we aim to extract a distinct text token for each concept, enabling fine-grained control over the generated scenes. To this end, we propose augmenting the input image with masks that indicate the presence of target concepts. These masks can be provided by the user or generated automatically by a pre-trained segmentation model. We then present a novel two-phase customization process that optimizes a set of dedicated textual embeddings (handles), as well as the model weights, striking a delicate balance between accurately capturing the concepts and avoiding overfitting. We employ a masked diffusion loss to enable handles to generate their assigned concepts, complemented by a novel loss on cross-attention maps to prevent entanglement. We also introduce union-sampling, a training strategy aimed to improve the ability of combining multiple concepts in generated images. We use several automatic metrics to quantitatively compare our method against several baselines, and further affirm the results using a user study. Finally, we showcase several applications of our method. Project page is available at: https://omriavrahami.com/break-a-scene/",
-				"extra": "arXiv:2305.16311 [cs]",
+				"extra": "arXiv:2305.16311 [cs.CV]",
 				"libraryCatalog": "arXiv.org",
 				"pages": "1-12",
 				"proceedingsTitle": "SIGGRAPH Asia 2023 Conference Papers",
