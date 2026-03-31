@@ -2,14 +2,14 @@
 	"translatorID": "0cdc6a07-38cf-4ec1-b9d5-7a3c0cc89b15",
 	"label": "OSTI Energy Citations",
 	"creator": "Michael Berkowitz",
-	"target": "^https?://www\\.osti\\.gov/(energycitations|scitech)",
+	"target": "^https?://www\\.osti\\.gov/(doecode|energycitations|scitech)",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-27 10:41:29"
+	"lastUpdated": "2018-03-22 10:52:16"
 }
 
 /*
