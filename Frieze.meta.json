@@ -1,0 +1,12 @@
+{
+	"translatorID": "7feb4b6c-05d6-4d61-bf0d-5e7f70c1ef0b",
+	"label": "Frieze",
+	"creator": "czar",
+	"target": "^https?://(www\\.)?frieze\\.com/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

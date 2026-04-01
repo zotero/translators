@@ -1,19 +1,3 @@
-{
-	"translatorID": "fcf41bed-0cbc-3704-85c7-8062a0068a7a",
-	"label": "PubMed XML",
-	"creator": "Simon Kornblith, Michael Berkowitz, Avram Lyon, and Rintze Zelle",
-	"target": "xml",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 100,
-	"configOptions": {
-		"dataMode": "xml/dom"
-	},
-	"inRepository": true,
-	"translatorType": 1,
-	"lastUpdated": "2026-01-22 17:48:12"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

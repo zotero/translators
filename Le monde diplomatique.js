@@ -1,17 +1,3 @@
-{
-	"translatorID": "530cf18c-e80a-4e67-ae9c-9b8c08591610",
-	"label": "Le monde diplomatique",
-	"creator": "Martin Meyerhoff",
-	"target": "^https?://(www\\.)?monde-diplomatique\\.de",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-11-04 22:01:09"
-}
-
 /*
 Le Monde Diplomatique (de) Translator
 Copyright (C) 2011 Martin Meyerhoff

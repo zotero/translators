@@ -1,17 +1,3 @@
-{
-	"translatorID": "658f2707-bb46-44eb-af0a-e73a5387fc90",
-	"label": "DART-Europe",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.dart-europe\\.org",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-05-04 03:09:28"
-}
-
 /**
 	Copyright (c) 2013 Sebastian Karcher
 

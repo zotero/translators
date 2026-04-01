@@ -1,17 +1,3 @@
-{
-	"translatorID": "0de4cddf-be9d-4e1e-9b51-891b7a4bb136",
-	"label": "CQ Press",
-	"creator": "Abe Jellinek",
-	"target": "^https?://library\\.cqpress\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-01 21:06:24"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

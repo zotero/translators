@@ -1,17 +1,3 @@
-{
-	"translatorID": "c4b00da8-420d-4029-9286-0afd766991c1",
-	"label": "Wilson Center Digital Archive",
-	"creator": "Abe Jellinek",
-	"target": "^https?://digitalarchive\\.wilsoncenter\\.org/(document|search-results)/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-05-11 21:19:38"
-}
-
 /*
     ***** BEGIN LICENSE BLOCK *****
 

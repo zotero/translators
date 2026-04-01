@@ -1,0 +1,12 @@
+{
+	"translatorID": "58ae38d2-80d3-4569-81eb-9cefc43ac5b4",
+	"label": "EurasiaNet",
+	"creator": "Avram Lyon",
+	"target": "^https?://www\\.eurasianet\\.org/",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsbv"
+}

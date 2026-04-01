@@ -1,0 +1,12 @@
+{
+	"translatorID": "17b1a93f-b342-4b54-ad50-08ecc26e0ac3",
+	"label": "INSPIRE",
+	"creator": "Abe Jellinek",
+	"target": "^https?://inspirehep\\.net/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

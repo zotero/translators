@@ -1,17 +1,3 @@
-{
-	"translatorID": "0db1c2d0-eaae-4f3d-94ef-d4b3aa61de16",
-	"label": "magazines.russ.ru",
-	"creator": "Avram Lyon",
-	"target": "^https?://magazines\\.russ\\.ru/[a-zA-Z -_]+/[0-9]+/[0-9]+/",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-31 10:22:19"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

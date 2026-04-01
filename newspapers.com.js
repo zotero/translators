@@ -1,17 +1,3 @@
-{
-	"translatorID": "22dd8e35-02da-4968-b306-6efe0779a48d",
-	"label": "newspapers.com",
-	"creator": "Peter Binkley",
-	"target": "^https?://[^/]+\\.newspapers\\.com/(article|image)/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-04-29 03:02:00"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

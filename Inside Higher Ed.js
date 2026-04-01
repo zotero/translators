@@ -1,17 +1,3 @@
-{
-	"translatorID": "ef365b99-3797-4a01-a1d8-9aea9a7e9548",
-	"label": "Inside Higher Ed",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.insidehighered\\.com",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-11 01:45:31"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

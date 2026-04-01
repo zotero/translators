@@ -1,17 +1,3 @@
-{
-	"translatorID": "1a615592-77b0-4715-a509-702b66196ff1",
-	"label": "Colorado State Legislature",
-	"creator": "Andrew Schwartz",
-	"target": "^https?://leg\\.colorado\\.gov/(bills|bill-search)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-18 19:52:53"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

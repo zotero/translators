@@ -1,16 +1,3 @@
-{
-	"translatorID": "59c1a13f-79ec-463e-bb07-a3e74926d211",
-	"label": "Premium Times",
-	"creator": "VWF",
-	"target": "^https?://(www\\.)?premiumtimesng\\.com/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"lastUpdated": "2025-08-12 17:42:24"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

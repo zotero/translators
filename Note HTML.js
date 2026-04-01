@@ -1,22 +1,3 @@
-{
-	"translatorID": "897a81c2-9f60-4bec-ae6b-85a5030b8be5",
-	"label": "Note HTML",
-	"creator": "Martynas Bagdonas",
-	"target": "html",
-	"minVersion": "5.0.97",
-	"maxVersion": "",
-	"priority": 50,
-	"configOptions": {
-		"noteTranslator": true
-	},
-	"displayOptions": {
-		"includeAppLinks": false
-	},
-	"inRepository": true,
-	"translatorType": 2,
-	"lastUpdated": "2024-07-10 15:30:00"
-}
-
 /*
     ***** BEGIN LICENSE BLOCK *****
 

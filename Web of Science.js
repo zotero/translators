@@ -1,17 +1,3 @@
-{
-	"translatorID": "88e11bcb-464d-4b6d-a446-8994e3b865c9",
-	"label": "Web of Science",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://([^/]+\\.)?webofknowledge\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2015-06-04 04:20:22"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

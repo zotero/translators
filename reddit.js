@@ -1,17 +1,3 @@
-{
-	"translatorID": "23bacc11-98e3-4b78-b1ef-cc2c9a04b893",
-	"label": "reddit",
-	"creator": "Lukas Kawerau",
-	"target": "^https?://[^/]+\\.reddit\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-01 14:44:26"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	Copyright © 2020-2021 Lukas Kawerau

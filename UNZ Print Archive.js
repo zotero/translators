@@ -1,17 +1,3 @@
-{
-	"translatorID": "0754db60-3ad1-49e0-8e3f-f4e1210c756c",
-	"label": "UNZ Print Archive",
-	"creator": "czar",
-	"target": "^https?://(www\\.)?unz\\.com/print",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-23 03:39:49"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

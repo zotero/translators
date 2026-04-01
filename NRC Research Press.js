@@ -1,17 +1,3 @@
-{
-	"translatorID": "fc08c878-ac92-40dc-9105-ca36ca20665d",
-	"label": "NRC Research Press",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.nrcresearchpress\\.com",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcbv",
-	"lastUpdated": "2016-05-24 13:18:11"
-}
-
  /*
 	***** BEGIN LICENSE BLOCK *****
 

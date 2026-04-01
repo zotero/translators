@@ -1,17 +1,3 @@
-{
-	"translatorID": "186efdd2-3621-4703-aac6-3b5e286bdd86",
-	"label": "Hindawi Publishers",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.hindawi\\.com/(journals|search)/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2021-03-07 03:48:04"
-}
-
 /*
 	Translator
    Copyright (C) 2021 Sebastian Karcher

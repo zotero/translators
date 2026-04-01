@@ -1,17 +1,3 @@
-{
-	"translatorID": "4f0d0c90-5da0-11df-a08a-0800200c9a66",
-	"label": "FAZ.NET",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://((www\\.)?faz\\.net/.)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-11-11 11:24:04"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

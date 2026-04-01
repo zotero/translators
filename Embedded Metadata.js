@@ -1,17 +1,3 @@
-{
-	"translatorID": "951c027d-74ac-47d4-a107-9c3069ab7b48",
-	"label": "Embedded Metadata",
-	"creator": "Simon Kornblith and Avram Lyon",
-	"target": "",
-	"minVersion": "3.0.4",
-	"maxVersion": "",
-	"priority": 320,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-14 17:29:56"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

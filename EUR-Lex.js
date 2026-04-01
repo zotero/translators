@@ -1,17 +1,3 @@
-{
-	"translatorID": "bf053edc-a8c3-458c-93db-6d04ead2e636",
-	"label": "EUR-Lex",
-	"creator": "Philipp Zumstein, Pieter van der Wees",
-	"target": "^https://eur-lex\\.europa\\.eu/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-30 15:50:58"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

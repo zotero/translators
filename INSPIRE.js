@@ -1,17 +1,3 @@
-{
-	"translatorID": "17b1a93f-b342-4b54-ad50-08ecc26e0ac3",
-	"label": "INSPIRE",
-	"creator": "Abe Jellinek",
-	"target": "^https?://inspirehep\\.net/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-06 18:53:02"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

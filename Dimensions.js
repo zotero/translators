@@ -1,17 +1,3 @@
-{
-	"translatorID": "19409763-fb3c-403f-af1c-c06ff9a9ea0e",
-	"label": "Dimensions",
-	"creator": "Abe Jellinek",
-	"target": "^https?://app\\.dimensions\\.ai/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-12 22:22:43"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

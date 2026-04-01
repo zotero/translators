@@ -1,17 +1,3 @@
-{
-	"translatorID": "27ee5b2c-2a5a-4afc-a0aa-d386642d4eed",
-	"label": "PubMed Central",
-	"creator": "Michael Berkowitz and Rintze Zelle",
-	"target": "^https://(www\\.)?(pmc\\.ncbi\\.nlm\\.nih\\.gov/|ncbi\\.nlm\\.nih\\.gov/pmc)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-11-06 20:33:49"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

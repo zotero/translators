@@ -1,17 +1,3 @@
-{
-	"translatorID": "d2959995-d0a2-4fb7-990f-16b671690e99",
-	"label": "SSOAR",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.ssoar\\.info/",
-	"minVersion": "3",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2016-06-15 21:48:00"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

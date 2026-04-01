@@ -1,17 +1,3 @@
-{
-	"translatorID": "acf93a17-a83b-482b-a45e-0c64cfd49bee",
-	"label": "MDPI Journals",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.mdpi\\.com",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-24 13:33:03"
-}
-
 /*
 	MDPI Translator
 	Copyright (C) 2013 Sebastian Karcher

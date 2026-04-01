@@ -1,17 +1,3 @@
-{
-	"translatorID": "f1aaf4bf-f344-41ee-b960-905255d40d53",
-	"label": "Literary Hub",
-	"creator": "Zoë C. Ma",
-	"target": "^https?://lithub\\.com/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-22 01:23:39"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

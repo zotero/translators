@@ -1,17 +1,3 @@
-{
-	"translatorID": "c3b97a6e-4879-4f77-9dbb-18a3fa2b2b81",
-	"label": "El Pais",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://([^.]\\.)?elpais\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-07 16:59:34"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

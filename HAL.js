@@ -1,17 +1,3 @@
-{
-	"translatorID": "f20f91fe-d875-47e7-9656-0abb928be472",
-	"label": "HAL",
-	"creator": "Sebastian Karcher and Abe Jellinek",
-	"target": "^https://([^/.]+\\.)?hal\\.science/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-23 17:03:48"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	HAL translator

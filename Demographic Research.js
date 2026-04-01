@@ -1,17 +1,3 @@
-{
-	"translatorID": "ed317bdd-0416-4762-856d-435004a9f05c",
-	"label": "Demographic Research",
-	"creator": "Sebatian Karcher",
-	"target": "^https?://www\\.demographic-research\\.org",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-05 11:04:17"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

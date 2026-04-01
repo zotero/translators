@@ -1,17 +1,3 @@
-{
-	"translatorID": "53734210-2284-437f-9896-8ad65917c343",
-	"label": "DOAJ",
-	"creator": "Abe Jellinek",
-	"target": "^https?://(www\\.)?doaj\\.org/(article|search)/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-08-08 16:00:53"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "a14301dc-be1c-4f34-bcaa-1b53b08ce80d",
-	"label": "Emerald Insight",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.emerald\\.com/insight/(publication/|content/|search\\?)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-08-29 15:32:04"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

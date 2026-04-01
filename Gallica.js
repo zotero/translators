@@ -1,17 +1,3 @@
-{
-	"translatorID": "58ab2618-4a25-4b9b-83a7-80cd0259f896",
-	"label": "Gallica",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://gallica\\.bnf\\.fr",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-21 09:49:15"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

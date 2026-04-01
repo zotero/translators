@@ -1,17 +1,3 @@
-{
-	"translatorID": "2c310a37-a4dd-48d2-82c9-bd29c53c1c76",
-	"label": "APS",
-	"creator": "Aurimas Vinckevicius and Abe Jellinek",
-	"target": "^https?://journals\\.aps\\.org/([^/]+/(abstract|supplemental|references|cited-by|issues)/|search(\\?|/))",
-	"minVersion": "3.0.12",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-11-21 18:50:09"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

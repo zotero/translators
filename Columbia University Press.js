@@ -1,17 +1,3 @@
-{
-	"translatorID": "a75e0594-a9e8-466e-9ce8-c10560ea59fd",
-	"label": "Columbia University Press",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?cup\\.columbia\\.edu/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-10 11:35:07"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

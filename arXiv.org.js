@@ -1,17 +1,3 @@
-{
-	"translatorID": "ecddda2e-4fc6-4aea-9f17-ef3b56d7377a",
-	"label": "arXiv.org",
-	"creator": "Sean Takats and Michael Berkowitz",
-	"target": "^https?://([^\\.]+\\.)?(arxiv\\.org|xxx\\.lanl\\.gov)/(search|find|catchup|list/\\w|abs/|pdf/)",
-	"minVersion": "6.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 12,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-11-12 15:42:58"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

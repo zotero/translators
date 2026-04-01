@@ -1,17 +1,3 @@
-{
-	"translatorID": "8efcb7cb-4180-4555-969a-08e8b34066c4",
-	"label": "Trove",
-	"creator": "Tim Sherratt and Abe Jellinek",
-	"target": "^https?://trove\\.nla\\.gov\\.au/(?:newspaper|gazette|work|book|article|picture|music|map|collection|search)/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-01-27 20:40:35"
-}
-
 /*
    Trove Translator
    Copyright (C) 2016-2021 Tim Sherratt (tim@discontents.com.au, @wragge)

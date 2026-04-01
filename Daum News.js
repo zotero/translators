@@ -1,17 +1,3 @@
-{
-	"translatorID": "f2d6c94f-ac75-4862-9364-45fb72c8e1ca",
-	"label": "Daum News",
-	"creator": "Kagami Sascha Rosylight",
-	"target": "^https?://news\\.v\\.daum\\.net/v/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-07 16:41:08"
-}
-
 /*
  * ***** BEGIN LICENSE BLOCK *****
 

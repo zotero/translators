@@ -1,17 +1,3 @@
-{
-	"translatorID": "010e68d1-2794-4e73-b182-40f36768951b",
-	"label": "Open Knowledge Repository",
-	"creator": "Abe Jellinek",
-	"target": "^https?://openknowledge\\.worldbank\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-20 19:05:06"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

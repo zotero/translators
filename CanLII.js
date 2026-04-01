@@ -1,17 +1,3 @@
-{
-	"translatorID": "84799379-7bc5-4e55-9817-baf297d129fe",
-	"label": "CanLII",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://(www\\.)?canlii\\.org/(en|fr)/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-15 05:20:22"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

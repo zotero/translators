@@ -1,17 +1,3 @@
-{
-	"translatorID": "4c272290-7ac4-433e-862d-244884ed285a",
-	"label": "sbn.it",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www|opac)\\.sbn\\.it/opacsbn/opaclib",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-27 16:51:43"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

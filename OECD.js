@@ -1,17 +1,3 @@
-{
-	"translatorID": "8cf74360-e772-4818-8cf1-eda0481c7dfb",
-	"label": "OECD",
-	"creator": "Sebastian Karcher and Abe Jellinek",
-	"target": "^https?://(www\\.)?oecd-ilibrary\\.org/",
-	"minVersion": "2.1",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcs",
-	"lastUpdated": "2021-10-08 04:15:50"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

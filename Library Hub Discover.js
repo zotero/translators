@@ -1,17 +1,3 @@
-{
-	"translatorID": "00d5236c-ce1f-484b-9552-da8e2f10eee4",
-	"label": "Library Hub Discover",
-	"creator": "Vincent Carret",
-	"target": "^https?://(www\\.)?discover\\.libraryhub\\.jisc\\.ac\\.uk/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-14 15:57:12"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

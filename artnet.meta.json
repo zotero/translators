@@ -1,0 +1,12 @@
+{
+	"translatorID": "a6bfb69f-5dd3-4d60-b9ad-d68ef9eb9a26",
+	"label": "artnet",
+	"creator": "Abe Jellinek",
+	"target": "https?://(www\\.)?artnet\\.com/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

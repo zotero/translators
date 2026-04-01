@@ -1,17 +1,3 @@
-{
-	"translatorID": "f2d965fa-5acb-4ba7-90a4-8ecb6cf0c795",
-	"label": "ProQuest Ebook Central",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://ebookcentral\\.proquest\\.com/(ebc/)?lib/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-07-03 17:15:06"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

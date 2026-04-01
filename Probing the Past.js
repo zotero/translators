@@ -1,17 +1,3 @@
-{
-	"translatorID": "095239e7-c18c-4f45-a932-bcf4a9e48c08",
-	"label": "Probing the Past",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://chnm\\.gmu\\.edu/probateinventory/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-28 20:46:55"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,0 +1,12 @@
+{
+	"translatorID": "1f530308-ce67-4b87-a079-e4a8e2a9c623",
+	"label": "Sud Ouest",
+	"creator": "Sylvain Machefert",
+	"target": "^https?://www\\.sudouest\\.fr/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

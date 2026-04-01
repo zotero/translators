@@ -1,17 +1,3 @@
-{
-	"translatorID": "8451431a-895f-4732-8339-79eb6756d2f9",
-	"label": "Civilization.ca",
-	"creator": "Adam Crymble",
-	"target": "^https?://collections\\.civilization\\.ca",
-	"minVersion": "1.0.0b4.r5",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-28 04:38:36"
-}
-
 function detectWeb(doc, url) {
 	if (doc.evaluate('//tr/td[2]/a/font', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";

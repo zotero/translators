@@ -1,17 +1,3 @@
-{
-	"translatorID": "966a7612-900c-42d9-8780-2a3247548588",
-	"label": "eMJA",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.mja\\.com\\.au/",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-18 17:31:29"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

@@ -1,17 +1,3 @@
-{
-	"translatorID": "04e63564-b92b-41cd-a9d5-366a02056d10",
-	"label": "GaleGDC",
-	"creator": "GaleGDC",
-	"target": "/gdc/ncco|/gdc/xsearch|/gdc/artemis",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 270,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsb",
-	"lastUpdated": "2014-08-26 03:45:45"
-}
-
 /*
  * Gale GDC Copyright (C) 2011 Gale GDC
  *

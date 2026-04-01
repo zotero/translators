@@ -1,17 +1,3 @@
-{
-	"translatorID": "60888261-7f17-41bd-95be-6982f05c01b3",
-	"label": "Dreier Neuerscheinungsdienst",
-	"creator": "Denis Maier",
-	"target": "^https?://www\\.dietmardreier\\.de/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-25 08:40:51"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

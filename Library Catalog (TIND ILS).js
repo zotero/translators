@@ -1,17 +1,3 @@
-{
-	"translatorID": "3f50f41c-0a07-49f7-af14-7fcf2ed5887a",
-	"label": "Library Catalog (TIND ILS)",
-	"creator": "Abe Jellinek",
-	"target": "/search.+p=|record/[0-9]+",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 260,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-30 08:40:02"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

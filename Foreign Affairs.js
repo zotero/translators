@@ -1,17 +1,3 @@
-{
-	"translatorID": "4ab6d49c-d94e-4a9c-ae9a-3310c44ba612",
-	"label": "Foreign Affairs",
-	"creator": "Sebastian Karcher, Philipp Zumstein, Wenzhi Dave Ding",
-	"target": "^https?://www\\.foreignaffairs\\.com",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-01-21 16:26:22"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

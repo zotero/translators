@@ -1,17 +1,3 @@
-{
-	"translatorID": "274f2f78-82d6-40d9-a441-ec3935edc0a9",
-	"label": "The Independent",
-	"creator": "Laurence Stevens",
-	"target": "https?://(www\\.)?independent\\.co\\.uk",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-05 08:09:46"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

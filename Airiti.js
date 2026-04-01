@@ -1,17 +1,3 @@
-{
-	"translatorID": "5f0ca39b-898a-4b1e-b98d-8cd0d6ce9801",
-	"label": "Airiti",
-	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://([^/]+\\.)?airitilibrary\\.com/Publication/alDetailedMesh",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 110,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-04 05:04:16"
-}
-
 function detectWeb(doc, url) {
 	// How can we distinguish thesis from journal article??
 	if (ZU.xpathText(doc, '/html/head/meta[@name="citation_title"]/@content')) {

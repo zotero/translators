@@ -1,17 +1,3 @@
-{
-	"translatorID": "96b9f483-c44d-5784-cdad-ce21b984fe01",
-	"label": "Amazon",
-	"creator": "Sean Takats, Michael Berkowitz, and Simon Kornblith",
-	"target": "^https?://((www\\.)|(smile\\.))?amazon",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-20 15:38:12"
-}
-
 function detectWeb(doc, _url) {
 	if (getSearchResults(doc, true)) {
 		return (Zotero.isBookmarklet ? "server" : "multiple");

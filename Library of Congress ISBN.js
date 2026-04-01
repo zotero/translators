@@ -1,16 +1,3 @@
-{
-	"translatorID": "c070e5a2-4bfd-44bb-9b3c-4be20c50d0d9",
-	"label": "Library of Congress ISBN",
-	"creator": "Sebastian Karcher",
-	"target": "",
-	"minVersion": "3.0.9",
-	"maxVersion": "",
-	"priority": 97,
-	"inRepository": true,
-	"translatorType": 8,
-	"lastUpdated": "2023-08-25 05:06:07"
-}
-
 function detectSearch(item) {
 	//re-enable once 
 	/*if (item.ISBN) {

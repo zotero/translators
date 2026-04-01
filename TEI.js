@@ -1,27 +1,3 @@
-{
-	"translatorID": "032ae9b7-ab90-9205-a479-baf81f49184a",
-	"translatorType": 2,
-	"label": "TEI",
-	"creator": "Stefan Majewski",
-	"target": "xml",
-	"minVersion": "4.0.27",
-	"maxVersion": null,
-	"priority": 25,
-	"inRepository": true,
-	"configOptions": {
-		"dataMode": "xml/dom",
-		"getCollections": "true"
-	},
-	"displayOptions": {
-		"exportNotes": false,
-		"Export Tags": false,
-		"Generate XML IDs": true,
-		"Full TEI Document": false,
-		"Export Collections": false
-	},
-	"lastUpdated": "2022-09-30 10:56:50"
-}
-
 // ********************************************************************
 //
 // tei-zotero-translator. Zotero 2 to TEI P5 exporter.

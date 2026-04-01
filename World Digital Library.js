@@ -1,17 +1,3 @@
-{
-	"translatorID": "54d6d465-159b-4631-92fe-4ff0d4664e22",
-	"label": "World Digital Library",
-	"creator": "Abe Jellinek",
-	"target": "^https?://www\\.wdl\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-09 17:07:18"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

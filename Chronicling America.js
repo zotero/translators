@@ -1,17 +1,3 @@
-{
-	"translatorID": "fa8f8274-ada5-415a-96dd-a5c19fce7046",
-	"label": "Chronicling America",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://chroniclingamerica\\.loc\\.gov",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-03-31 23:29:08"
-}
-
 /*
    Chronicling America Translator
    Copyright (C) 2012 Sebastian Karcher

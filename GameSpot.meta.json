@@ -1,0 +1,12 @@
+{
+	"translatorID": "9e0bb440-b68d-4743-870c-d57245cfdbda",
+	"label": "GameSpot",
+	"creator": "czar",
+	"target": "^https?://(www\\.)?gamespot\\.com",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

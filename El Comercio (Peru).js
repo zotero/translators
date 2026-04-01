@@ -1,17 +1,3 @@
-{
-	"translatorID": "e3da3448-db8f-44ad-a650-54110335c4ae",
-	"label": "El Comercio (Perú)",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://elcomercio\\.pe",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 280,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-08-22 02:12:03"
-}
-
 /*
     ***** BEGIN LICENSE BLOCK *****
 

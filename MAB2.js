@@ -1,17 +1,3 @@
-{
-	"translatorID": "91acf493-0de7-4473-8b62-89fd141e6c74",
-	"label": "MAB2",
-	"creator": "Simon Kornblith. Adaptions for MAB2: Leon Krauthausen (FUB)",
-	"target": "mab2",
-	"minVersion": "1.0.0b3.r1",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 1,
-	"browserSupport": "gcs",
-	"lastUpdated": "2014-05-20 17:57:47"
-}
-
 function detectImport() {
 	var mab2RecordRegexp = /^[0-9]{3}[a-z ]{2}[a-z ]{3}$/
 	var read = Zotero.read(8);

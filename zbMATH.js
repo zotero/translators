@@ -1,17 +1,3 @@
-{
-	"translatorID": "1d84c107-9dbb-4b87-8208-e3632b87889f",
-	"label": "zbMATH",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?zbmath\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-10 18:47:46"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

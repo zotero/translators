@@ -1,16 +1,3 @@
-{
-	"translatorID": "59e7e93e-4ef0-4777-8388-d6eddb3261bf",
-	"label": "OVID Tagged",
-	"creator": "Sebastian Karcher",
-	"target": "txt",
-	"minVersion": "4.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 1,
-	"lastUpdated": "2025-03-03 21:50:09"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

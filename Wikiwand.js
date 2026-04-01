@@ -1,17 +1,3 @@
-{
-	"translatorID": "ce093a19-cc6b-4106-b17c-b810dba56daa",
-	"label": "Wikiwand",
-	"creator": "Abe Jellinek",
-	"target": "^https?://www\\.wikiwand\\.com/[^/?]+/[^/?]+",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-13 22:38:44"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

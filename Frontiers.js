@@ -1,17 +1,3 @@
-{
-	"translatorID": "cb9e794e-7a65-47cd-90f6-58cdd191e8b0",
-	"label": "Frontiers",
-	"creator": "Abe Jellinek",
-	"target": "^https?://[^./]+\\.frontiersin\\.org/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-04-03 18:50:17"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

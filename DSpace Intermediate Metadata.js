@@ -1,16 +1,3 @@
-{
-	"translatorID": "2c05e2d1-a533-448f-aa20-e919584864cb",
-	"label": "DSpace Intermediate Metadata",
-	"creator": "Sebastian Karcher",
-	"target": "xml",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 1,
-	"lastUpdated": "2022-12-24 19:29:02"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

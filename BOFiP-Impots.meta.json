@@ -1,0 +1,12 @@
+{
+	"translatorID": "7d03e952-04ad-4d1d-845a-50b9eb545b10",
+	"label": "BOFiP-Impôts",
+	"creator": "Guillaume Adreani",
+	"target": "^https?://bofip\\.impots\\.gouv\\.fr/bofip/",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsib"
+}

@@ -1,17 +1,3 @@
-{
-	"translatorID": "ce5f2849-4500-47cc-8d7d-3fc0a1de9848",
-	"label": "Microbiology Society Journals",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?(\\w)+\\.microbiologyresearch\\.org/(content/journal/|search?)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-01-14 04:26:02"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

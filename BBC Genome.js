@@ -1,17 +1,3 @@
-{
-	"translatorID": "777e5ce0-0b16-4a12-8e6c-5a1a2cb33189",
-	"label": "BBC Genome",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://genome\\.ch\\.bbc\\.co\\.uk/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-09-04 22:38:30"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,0 +1,12 @@
+{
+	"translatorID": "91acf493-0de7-4473-8b62-89fd141e6c74",
+	"label": "MAB2",
+	"creator": "Simon Kornblith. Adaptions for MAB2: Leon Krauthausen (FUB)",
+	"target": "mab2",
+	"minVersion": "1.0.0b3.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 1,
+	"browserSupport": "gcs"
+}

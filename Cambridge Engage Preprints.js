@@ -1,17 +1,3 @@
-{
-	"translatorID": "4338eead-a8b7-431f-8533-ea53062c9f89",
-	"label": "Cambridge Engage Preprints",
-	"creator": "Sebastian Karcher",
-	"target": "/engage/[^/]+/(article-details/|search-dashboard\\?)",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 200,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-23 08:35:07"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

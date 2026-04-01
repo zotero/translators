@@ -1,17 +1,3 @@
-{
-	"translatorID": "2c98b8e6-6138-4b60-a999-15e3a7c8cb4b",
-	"label": "SAE Papers",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://(www|papers)\\.sae\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-07 05:40:25"
-}
-
 /*
 	SAE Technical Papers Translator
 	Copyright (C) 2012-2015 Sebastian Karcher

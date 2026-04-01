@@ -1,17 +1,3 @@
-{
-	"translatorID": "47cbb10a-d6d6-4957-96de-e8b6424c7708",
-	"label": "National Transportation Library ROSA P",
-	"creator": "Abe Jellinek",
-	"target": "^https?://rosap\\.ntl\\.bts\\.gov/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-11 21:32:59"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

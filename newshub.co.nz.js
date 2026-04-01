@@ -1,17 +1,3 @@
-{
-	"translatorID": "a9f7b277-e134-4d1d-ada6-8f7942be71a6",
-	"label": "newshub.co.nz",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.newshub\\.co\\.nz/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-28 20:22:36"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

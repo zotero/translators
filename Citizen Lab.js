@@ -1,17 +1,3 @@
-{
-	"translatorID": "06c372dc-f7e1-454d-b704-401efc78e6eb",
-	"label": "Citizen Lab",
-	"creator": "Abe Jellinek",
-	"target": "^https?://citizenlab\\.ca/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-14 01:28:37"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

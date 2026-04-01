@@ -1,17 +1,3 @@
-{
-	"translatorID": "9575e804-219e-4cd6-813d-9b690cbfc0fc",
-	"label": "PLoS Journals",
-	"creator": "Michael Berkowitz, Rintze Zelle, and Sebastian Karcher",
-	"target": "^https?://(www\\.plos(one|ntds|compbiol|pathogens|genetics|medicine|biology)\\.org|journals\\.plos\\.org(/\\w+)?)/(search|\\w+/article)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-22 19:28:36"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

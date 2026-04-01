@@ -1,17 +1,3 @@
-{
-	"translatorID": "d13eb92e-fb16-41e0-9a24-73bad50f9bb7",
-	"label": "American Archive of Public Broadcasting",
-	"creator": "Abe Jellinek",
-	"target": "^https?://(www\\.)?americanarchive\\.org/catalog",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-28 19:23:21"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

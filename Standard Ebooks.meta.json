@@ -1,0 +1,12 @@
+{
+	"translatorID": "cc27d642-eab0-4c85-aba8-7a01a9b4e779",
+	"label": "Standard Ebooks",
+	"creator": "Brendan O'Connell",
+	"target": "^https?://standardebooks\\.org/",
+	"minVersion": "5.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

@@ -1,17 +1,3 @@
-{
-	"translatorID": "660fcf3e-3414-41b8-97a5-e672fc2e491d",
-	"label": "EBSCO Discovery Layer",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://(discovery|research)\\.ebsco\\.com/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-03-09 16:01:06"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

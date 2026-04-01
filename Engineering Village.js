@@ -1,17 +1,3 @@
-{
-	"translatorID": "1f40baef-eece-43e4-a1cc-27d20c0ce086",
-	"label": "Engineering Village",
-	"creator": "Ben Parr, Sebastian Karcher",
-	"target": "^https?://(www\\.)?engineeringvillage(2)?\\.(com|org)/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-10-04 02:24:06"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

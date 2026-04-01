@@ -1,17 +1,3 @@
-{
-	"translatorID": "2100cedb-0a7d-4166-ab97-5e84e516cd81",
-	"label": "OAPEN",
-	"creator": "Abe Jellinek",
-	"target": "^https?://library\\.oapen\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-22 00:17:40"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

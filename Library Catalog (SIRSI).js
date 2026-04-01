@@ -1,17 +1,3 @@
-{
-	"translatorID": "add7c71c-21f3-ee14-d188-caf9da12728b",
-	"label": "Library Catalog (SIRSI)",
-	"creator": "Sean Takats,  Hicham El Kasmi",
-	"target": "/uhtbin/(cgisirsi|quick_keyword)",
-	"minVersion": "2.1",
-	"maxVersion": "",
-	"priority": 250,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-27 20:16:50"
-}
-
 /*Spanish Libraries:
 No Permalinks, so no tests
 Biblioteca Nacional (Spanish National Library): http://catalogo.bne.es/uhtbin/webcat

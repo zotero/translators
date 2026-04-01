@@ -1,0 +1,12 @@
+{
+	"translatorID": "26ce1cb2-07ec-4d0e-9975-ce2ab35c8343",
+	"label": "Russian State Library",
+	"creator": "PChemGuy",
+	"target": "^https?://(search|favorites|aleph)\\.rsl\\.ru/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

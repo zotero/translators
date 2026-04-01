@@ -1,17 +1,3 @@
-{
-	"translatorID": "131310dc-854c-4629-acad-521319ab9f19",
-	"label": "Vice",
-	"creator": "czar",
-	"target": "^https?://(.+?\\.)?vice\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-03 23:13:44"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

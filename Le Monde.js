@@ -1,17 +1,3 @@
-{
-	"translatorID": "6bc635a4-6823-4f95-acaf-b43e8a158144",
-	"label": "Le Monde",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?(abonnes\\.)?lemonde\\.fr/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-11-06 22:47:06"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,0 +1,12 @@
+{
+	"translatorID": "232e24fe-2f68-44fc-9366-ecd45720ee9e",
+	"label": "Patents - USPTO",
+	"creator": "Bill McKinney",
+	"target": "^https?://(patft|appft1)\\.uspto\\.gov/netacgi/nph-Parser.+",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsbv"
+}

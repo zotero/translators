@@ -1,17 +1,3 @@
-{
-	"translatorID": "954ac3a8-73ab-43e3-88db-9949817ed1e6",
-	"label": "SALT Research Archives",
-	"creator": "Abe Jellinek",
-	"target": "^https?://archives\\.saltresearch\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-13 22:05:16"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

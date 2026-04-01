@@ -1,17 +1,3 @@
-{
-	"translatorID": "a509f675-cf80-4b70-8cbc-2ea8664dd38f",
-	"label": "Bloomberg",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www)?\\.bloomberg\\.com",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-08 20:56:54"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

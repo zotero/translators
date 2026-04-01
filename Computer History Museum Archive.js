@@ -1,17 +1,3 @@
-{
-	"translatorID": "f3b81c4e-28b4-41ae-9824-55739fe9c91a",
-	"label": "Computer History Museum Archive",
-	"creator": "Bo An",
-	"target": "^https?://www\\.computerhistory\\.org/collections/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-07 16:40:38"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	Copyright © 2020-2021 Bo An

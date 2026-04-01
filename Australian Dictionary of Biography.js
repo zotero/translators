@@ -1,17 +1,3 @@
-{
-	"translatorID": "0aea3026-a246-4201-a4b5-265f75b9a6a7",
-	"label": "Australian Dictionary of Biography",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://adb\\.anu\\.edu\\.au/biograph(y|ies)/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-14 04:18:08"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

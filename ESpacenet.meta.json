@@ -1,0 +1,12 @@
+{
+	"translatorID": "176948f7-9df8-4afc-ace7-4c1c7318d426",
+	"label": "ESpacenet",
+	"creator": "Sebastian Karcher, Aurimas Vinckevicius, Philipp Zumstein, and Abe Jellinek",
+	"target": "^https?://(worldwide|[a-z][a-z])\\.espacenet\\.com/",
+	"minVersion": "4.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

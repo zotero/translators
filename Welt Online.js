@@ -1,17 +1,3 @@
-{
-	"translatorID": "f61beec2-1431-4218-a9d3-68063ede6ecd",
-	"label": "Welt Online",
-	"creator": "Martin Meyerhoff, Philipp Zumstein",
-	"target": "^https?://www\\.welt\\.de",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-06-11 13:27:17"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

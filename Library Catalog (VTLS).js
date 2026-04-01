@@ -1,17 +1,3 @@
-{
-	"translatorID": "63a0a351-3131-18f4-21aa-f46b9ac51d87",
-	"label": "Library Catalog (VTLS)",
-	"creator": "Simon Kornblith",
-	"target": "/chameleon(\\?|$)",
-	"minVersion": "1.0.0b3.r1",
-	"maxVersion": "",
-	"priority": 250,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-08-26 04:13:58"
-}
-
 function detectWeb(doc, url) {
 	var node = doc.evaluate('//tr[@class="intrRow"]/td/table/tbody/tr[th]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (node) {

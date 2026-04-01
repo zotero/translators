@@ -1,17 +1,3 @@
-{
-	"translatorID": "d3b1d34c-f8a1-43bb-9dd6-27aa6403b217",
-	"label": "YouTube",
-	"creator": "Sean Takats, Michael Berkowitz, Matt Burton, Rintze Zelle, and Geoff Banh",
-	"target": "^https?://([^/]+\\.)?youtube\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-06-12 16:10:09"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

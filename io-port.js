@@ -1,17 +1,3 @@
-{
-	"translatorID": "1c0c63d9-4a95-44d4-b441-173cdc1b8688",
-	"label": "io-port",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.zentralblatt-math\\.org/ioport/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2014-03-08 16:26:00"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	io-portal translator

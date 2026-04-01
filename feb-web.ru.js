@@ -1,17 +1,3 @@
-{
-	"translatorID": "e92c8359-c3fc-468b-bc6a-107b2744fd17",
-	"label": "feb-web.ru",
-	"creator": "Avram Lyon",
-	"target": "^https?://(www\\.)?feb-web\\.ru/.*cmd=2",
-	"minVersion": "1.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-01 16:09:57"
-}
-
 /*
    FEB-WEB Translator
    Copyright (C) 2011 Avram Lyon, ajlyon@gmail.com

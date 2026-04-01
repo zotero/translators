@@ -1,17 +1,3 @@
-{
-	"translatorID": "4ea89035-3dc4-4ae3-b22d-726bc0d83a64",
-	"label": "Galegroup",
-	"creator": "Sebastian Karcher and Aurimas Vinckevicius",
-	"target": "^https?://(find\\.galegroup\\.com/|go\\.galegroup\\.com/gdsc)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-10-07 16:06:56"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

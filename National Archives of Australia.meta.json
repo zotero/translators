@@ -1,0 +1,12 @@
+{
+	"translatorID": "50a4cf3f-92ef-4e9f-ab15-815229159b16",
+	"label": "National Archives of Australia",
+	"creator": "Tim Sherratt, Aurimas Vinckevicius",
+	"target": "^https?://recordsearch\\.naa\\.gov\\.au/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

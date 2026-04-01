@@ -1,17 +1,3 @@
-{
-	"translatorID": "a127f012-4ea4-4d05-a657-24d47f91b016",
-	"label": "Artforum",
-	"creator": "czar",
-	"target": "^https?://(www\\.)?artforum\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-02 00:33:38"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

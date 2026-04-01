@@ -1,17 +1,3 @@
-{
-	"translatorID": "e40a27bc-0eef-4c50-b78b-37274808d7d2",
-	"label": "J-Stage",
-	"creator": "Sebastian Karcher, Satoshi Ando",
-	"target": "^https?://www\\.jstage\\.jst\\.go\\.jp/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-06 07:23:03"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

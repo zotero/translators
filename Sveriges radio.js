@@ -1,17 +1,3 @@
-{
-	"translatorID": "caa8f42c-9dbf-446e-963b-6ee18e3133d2",
-	"label": "Sveriges radio",
-	"creator": "Sebastian Berlin",
-	"target": "^https?://sverigesradio\\.se/(artikel|sok\\?)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-11 19:10:14"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

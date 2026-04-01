@@ -1,17 +1,3 @@
-{
-	"translatorID": "274284a8-fc91-4f54-be77-bfcb7f9c3d6f",
-	"label": "PC Gamer",
-	"creator": "czar, Bao Trinh",
-	"target": "^https?://(www\\.)?pcgamer\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-15 21:10:04"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

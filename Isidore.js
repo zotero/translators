@@ -1,17 +1,3 @@
-{
-	"translatorID": "43a53465-0354-42fd-aba9-dc1af8be7061",
-	"label": "Isidore",
-	"creator": "Abe Jellinek",
-	"target": "^https?://(www\\.)?isidore\\.science/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-29 03:29:14"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

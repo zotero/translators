@@ -1,17 +1,3 @@
-{
-	"translatorID": "3d180fcf-8005-4a2b-a0cd-1fe31ba1f996",
-	"label": "Open Conf",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://(www\\.)?openconf\\.(com|org)/.+/request\\.php",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-05-26 15:41:56"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

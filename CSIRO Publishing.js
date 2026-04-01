@@ -1,17 +1,3 @@
-{
-	"translatorID": "303c2744-ea37-4806-853d-e1ca67be6818",
-	"label": "CSIRO Publishing",
-	"creator": "Michael Berkowitz",
-	"target": "^https?://(www\\.)?publish\\.csiro\\.au/",
-	"minVersion": "1.0.0b4.r5",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-07 16:46:32"
-}
-
 function detectWeb(doc, url) {
 	if (doc.evaluate('//a[@class="searchBoldBlue"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate('//a[@class="linkjournal"]|//a[@class="journal_title"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";

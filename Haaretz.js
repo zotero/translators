@@ -1,17 +1,3 @@
-{
-	"translatorID": "d6f64d96-aa6f-4fd3-816f-bdef842c7088",
-	"label": "Haaretz",
-	"creator": "Eran Rosenthal",
-	"target": "^https?://www\\.haaretz\\.(co\\.il|com)/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-11-05 08:15:35"
-}
-
 /**
 	Copyright (c) 2015 Eran Rosenthal and contributors
 	

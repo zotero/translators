@@ -1,17 +1,3 @@
-{
-	"translatorID": "5e385e77-2f51-41b4-a29b-908e23d5d3e8",
-	"label": "NCBI Nucleotide",
-	"creator": "Martin Fenner",
-	"target": "^https?://(www\\.)?ncbi\\.nlm\\.nih\\.gov/nuccore/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcs",
-	"lastUpdated": "2021-06-07 11:25:19"
-}
-
 /**
 	Copyright (c) 2014 Martin Fenner
 

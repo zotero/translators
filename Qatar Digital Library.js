@@ -1,17 +1,3 @@
-{
-	"translatorID": "f8c30c62-89a3-45d6-9c48-16c48ad6ba3c",
-	"label": "Qatar Digital Library",
-	"creator": "Abe Jellinek",
-	"target": "^https?://(www\\.)?qdl\\.qa/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-08 23:32:09"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

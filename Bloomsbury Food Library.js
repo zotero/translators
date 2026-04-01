@@ -1,17 +1,3 @@
-{
-	"translatorID": "0524c89b-2a96-4d81-bb05-ed91ed8b2b47",
-	"label": "Bloomsbury Food Library",
-	"creator": "Abe Jellinek",
-	"target": "^https?://(www\\.)?bloomsburyfoodlibrary\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-03 01:17:12"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,0 +1,12 @@
+{
+	"translatorID": "7e56f792-e96b-42a1-913c-40c69cc9ce40",
+	"label": "Journal of Extension",
+	"creator": "John Weis",
+	"target": "^https?://www\\.joe\\.org/",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

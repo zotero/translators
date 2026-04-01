@@ -1,17 +1,3 @@
-{
-	"translatorID": "a0a9a45c-cc9e-497c-962e-a366618df985",
-	"label": "Library Catalog (Amicus)",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://amicus\\.collectionscanada\\.ca/aaweb-bin/aamain",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-08-26 03:47:57"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

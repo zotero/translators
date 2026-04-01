@@ -1,17 +1,3 @@
-{
-	"translatorID": "bc2ec385-e60a-4899-96ae-d4f0d6574ad7",
-	"label": "Juris",
-	"creator": "Reto Mantz",
-	"target": "^https?://(www\\.|testsystem\\.)?juris\\.de/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-08-27 10:42:50"
-}
-
 /*
 ***** BEGIN LICENSE BLOCK *****
 

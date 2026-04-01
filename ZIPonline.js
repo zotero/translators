@@ -1,17 +1,3 @@
-{
-	"translatorID": "5ccc4cf7-8863-4ee2-9772-c9d0b422f028",
-	"label": "ZIPonline",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www)?\\.zip-online\\.de/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-27 16:22:25"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

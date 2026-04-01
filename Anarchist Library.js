@@ -1,17 +1,3 @@
-{
-	"translatorID": "1a31e4c5-22ed-4b5b-a75f-55476db29a44",
-	"label": "Anarchist Library",
-	"creator": "Sister Baæ'l",
-	"target": "https://theanarchistlibrary\\.org/(latest|library|stats/popular|category/topic|category/author|special/index|search)",
-	"minVersion": "7.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-25 01:31:43"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

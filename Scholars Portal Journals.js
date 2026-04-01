@@ -1,17 +1,3 @@
-{
-	"translatorID": "5ac0fd37-5578-4f82-8340-0e135b6336ee",
-	"label": "Scholars Portal Journals",
-	"creator": "Bartek Kawula",
-	"target": "^https?://journals\\.scholarsportal\\.info/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-02-05 18:25:57"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

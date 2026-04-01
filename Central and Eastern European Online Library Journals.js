@@ -1,17 +1,3 @@
-{
-	"translatorID": "19cef926-c5b6-42e2-a91c-6f2722f8b36d",
-	"label": "Central and Eastern European Online Library Journals",
-	"creator": "Timotheus Kim",
-	"target": "^https?://www\\.ceeol\\.com/search",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-22 20:12:37"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

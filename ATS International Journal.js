@@ -1,17 +1,3 @@
-{
-	"translatorID": "ec0628ad-e508-444e-9e4c-e1819766a1ae",
-	"label": "ATS International Journal",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?atsinternationaljournal\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-09-10 19:50:28"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

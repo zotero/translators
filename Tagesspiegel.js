@@ -1,17 +1,3 @@
-{
-	"translatorID": "374ac2a5-dd45-461e-bf1f-bf90c2eb7085",
-	"label": "Tagesspiegel",
-	"creator": "Martin Meyerhoff, Sebastian Karcher, Jaco Lüken",
-	"target": "^https?://www\\.tagesspiegel\\.de",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-18 12:46:30"
-}
-
 /*
 Tagesspiegel Translator
 Copyright (C) 2011 Martin Meyerhoff

@@ -1,17 +1,3 @@
-{
-	"translatorID": "f76afa52-0524-440e-98ba-7c0c10a7b693",
-	"label": "National Academies Press",
-	"creator": "Abe Jellinek",
-	"target": "^https?://nap\\.nationalacademies\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-12-12 19:59:23"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

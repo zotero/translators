@@ -1,17 +1,3 @@
-{
-	"translatorID": "ab961e61-2a8a-4be1-b8a3-044f20d52d78",
-	"label": "BIBSYS",
-	"creator": "Ramesh Srigiriraju",
-	"target": "^https?://ask\\.bibsys\\.no/ask/action",
-	"minVersion": "1.0.0b4.r1",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-28 04:44:52"
-}
-
 function detectWeb(doc, url)	{
 	var multireg=new RegExp("^https?://ask\.bibsys\.no/ask/action/result");
 	if (multireg.test(url))

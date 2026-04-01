@@ -1,24 +1,3 @@
-{
-	"translatorID": "eb7059a4-35ec-4961-a915-3cf58eb9784b",
-	"label": "Endnote XML",
-	"creator": "Sebastian Karcher",
-	"target": "xml",
-	"minVersion": "4.0",
-	"maxVersion": "",
-	"priority": 100,
-	"configOptions": {
-		"async": true,
-		"getCollections": true
-	},
-	"displayOptions": {
-		"exportNotes": true,
-		"exportFileData": false
-	},
-	"inRepository": true,
-	"translatorType": 3,
-	"lastUpdated": "2021-07-14 20:41:42"
-}
-
 function detectImport() {
 
 	var doc = Zotero.getXML().documentElement;

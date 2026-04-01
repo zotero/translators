@@ -1,0 +1,12 @@
+{
+	"translatorID": "7bbef39f-8bb9-44d7-826f-47ce75eb15ae",
+	"label": "FreeCite",
+	"creator": "Philipp Zumstein",
+	"target": "^https?://freecite\\.library\\.brown\\.edu/citations/create",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

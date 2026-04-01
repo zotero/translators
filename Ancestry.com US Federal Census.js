@@ -1,17 +1,3 @@
-{
-	"translatorID": "0dda3f89-15de-4479-987f-cc13f1ba7999",
-	"label": "Ancestry.com US Federal Census",
-	"creator": "Abe Jellinek",
-	"target": "^https?://(www\\.)?ancestry\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcibv",
-	"lastUpdated": "2021-07-22 19:20:28"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "25f28dc9-901f-4920-8b9a-5baefad91493",
-	"label": "PubPub",
-	"creator": "Abe Jellinek",
-	"target": "/pub/[^/]+/release/\\d+|^https?://[^/]+\\.pubpub\\.org/search\\?",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 270,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-14 20:35:00"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "05997944-d1c2-41bf-a399-9932268c81e5",
-	"label": "Bookshop.org",
-	"creator": "Abe Jellinek",
-	"target": "^https://bookshop\\.org/books",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-01 17:14:32"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

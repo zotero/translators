@@ -1,17 +1,3 @@
-{
-	"translatorID": "d71e9b6d-2baa-44ed-acb4-13fe2fe592c0",
-	"label": "Google Patents",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?patents\\.google\\.com/",
-	"minVersion": "4.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-05 17:15:19"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

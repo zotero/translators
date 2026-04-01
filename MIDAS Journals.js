@@ -1,17 +1,3 @@
-{
-	"translatorID": "86c35e86-3f97-4e80-9356-8209c97737c2",
-	"label": "MIDAS Journals",
-	"creator": "Rupert Brooks",
-	"target": "^https?://(www\\.)?(insight-journal|midasjournal|vtkjournal)\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-04-16 11:27:22"
-}
-
 /*
 	Midas Journal Translator
 	(Includes ITKJournal,InsightJournal,VTKJournal)

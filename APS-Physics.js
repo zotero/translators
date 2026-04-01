@@ -1,17 +1,3 @@
-{
-	"translatorID": "f318ab1e-71c6-4f67-8ac3-4b1144e5bf4e",
-	"label": "APS-Physics",
-	"creator": "Will Shanks and Abe Jellinek",
-	"target": "^https?://(www\\.)?(physics)\\.aps\\.org/",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-31 22:13:29"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

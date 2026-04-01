@@ -1,17 +1,3 @@
-{
-	"translatorID": "513a53f5-b95e-4df6-a03e-3348d9ec9f44",
-	"label": "Internet Archive Wayback Machine",
-	"creator": "Sean Takats, Philipp Zumstein",
-	"target": "^https?://web\\.archive\\.org/web/",
-	"minVersion": "1.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-09 19:05:33"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

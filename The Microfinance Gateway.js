@@ -1,17 +1,3 @@
-{
-	"translatorID": "2cd7d362-5fba-423a-887f-579ed343e751",
-	"label": "The Microfinance Gateway",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?microfinancegateway\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-10 15:27:10"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

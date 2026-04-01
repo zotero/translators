@@ -1,17 +1,3 @@
-{
-	"translatorID": "625c6435-e235-4402-a48f-3095a9c1a09c",
-	"label": "DBLP Computer Science Bibliography",
-	"creator": "Sebastian Karcher, Philipp Zumstein, and Abe Jellinek",
-	"target": "^https?://(www\\.)?(dblp\\d?(\\.org|\\.uni-trier\\.de/|\\.dagstuhl\\.de/))",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-20 13:37:43"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

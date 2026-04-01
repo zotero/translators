@@ -1,17 +1,3 @@
-{
-	"translatorID": "1e6d1529-246f-4429-84e2-1f1b180b250d",
-	"label": "The Chronicle of Higher Education",
-	"creator": "Simon Kornblith, Avram Lyon",
-	"target": "^https?://(www\\.)?chronicle\\.com/",
-	"minVersion": "2.1",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2017-06-30 05:37:23"
-}
-
 /*
  This translator works on articles posted in The Chronicle of Higher Education.
 

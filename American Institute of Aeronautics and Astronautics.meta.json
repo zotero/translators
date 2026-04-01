@@ -1,0 +1,12 @@
+{
+	"translatorID": "75edc5a1-6470-465a-a928-ccb77d95eb72",
+	"label": "American Institute of Aeronautics and Astronautics",
+	"creator": "Michael Berkowitz",
+	"target": "^https?://arc\\.aiaa\\.org/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcv"
+}

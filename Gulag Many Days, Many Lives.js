@@ -1,17 +1,3 @@
-{
-	"translatorID": "c41c9c66-8540-4216-b138-7c00532748c9",
-	"label": "Gulag: Many Days, Many Lives",
-	"creator": "Adam Crymble",
-	"target": "^https?://gulaghistory\\.org",
-	"minVersion": "1.0.0b4.r5",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:49:27"
-}
-
 function detectWeb(doc, url) {
 	if (doc.evaluate('//div[@class="field"][@id="citation"]/p', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "book";

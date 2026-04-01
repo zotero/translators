@@ -1,17 +1,3 @@
-{
-	"translatorID": "f8f24699-a23f-4355-8d03-4f03a1112ec4",
-	"label": "Research Square",
-	"creator": "Abe Jellinek",
-	"target": "^https?://www\\.researchsquare\\.com/(article|browse)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-04-01 19:07:11"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

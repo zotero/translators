@@ -1,17 +1,3 @@
-{
-	"translatorID": "b383df35-15e7-43ee-acd9-88fd62669083",
-	"label": "Biblioteca Nacional de Maestros",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.bnm\\.me\\.gov\\.ar/catalogo",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-22 00:23:44"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

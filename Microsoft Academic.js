@@ -1,17 +1,3 @@
-{
-	"translatorID": "91c7b393-af05-476c-ae72-ae244d2347f4",
-	"label": "Microsoft Academic",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://academic\\.microsoft\\.com",
-	"minVersion": "4.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-04 19:36:45"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

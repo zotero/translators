@@ -1,17 +1,3 @@
-{
-	"translatorID": "136d5c30-d8b1-476f-9564-702a41b6126e",
-	"label": "wiso",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.wiso-net\\.de/(document/|dosearch\\?)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2016-06-26 18:54:53"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

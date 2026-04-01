@@ -1,17 +1,3 @@
-{
-	"translatorID": "f4469574-1d96-4a4a-a0ac-1b9f7c49654b",
-	"label": "Informationssystem Medienpaedagogik",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.ism-info\\.de/ism-info\\.html\\?",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-01 16:54:04"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

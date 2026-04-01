@@ -1,17 +1,3 @@
-{
-	"translatorID": "f5c15662-1501-4336-8aa5-bd7dc3cc2a68",
-	"label": "Wiktionary",
-	"creator": "Abe Jellinek",
-	"target": "^https?://[^/]*\\.wiktionary\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-12-05 20:28:20"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

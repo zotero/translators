@@ -1,17 +1,3 @@
-{
-	"translatorID": "36e34937-2ec3-418b-8199-2c8cc3488875",
-	"label": "Huff Post",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.huffingtonpost\\.com",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-10-31 21:35:41"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

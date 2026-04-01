@@ -1,17 +1,3 @@
-{
-	"translatorID": "eef50507-c756-4081-86fd-700ae4ebf22e",
-	"label": "Der Spiegel",
-	"creator": "Martin Meyerhoff and Abe Jellinek",
-	"target": "^https?://www\\.spiegel\\.de/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-05 17:55:21"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,0 +1,12 @@
+{
+	"translatorID": "e969da6b-30c9-4b26-8fcc-c2d78bce685f",
+	"label": "Journal of Religion and Society",
+	"creator": "Vincent Carret",
+	"target": "^https?://(www\\.)?moses\\.creighton\\.edu/JRS",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

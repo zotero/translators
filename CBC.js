@@ -1,17 +1,3 @@
-{
-	"translatorID": "03c4b906-8cb2-4850-a771-697cbd92c2a1",
-	"label": "CBC",
-	"creator": "Geoff Banh",
-	"target": "^https?:\\/\\/www\\.cbc\\.ca/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-14 20:55:10"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

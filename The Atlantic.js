@@ -1,17 +1,3 @@
-{
-	"translatorID": "575ba37f-c871-4ee8-8bdb-3e7f954e4e6a",
-	"label": "The Atlantic",
-	"creator": "Sebastian Karcher",
-	"target": "^https://www\\.theatlantic\\.com/.+",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-16 01:54:13"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,20 +1,3 @@
-{
-	"translatorID": "25f4c5e2-d790-4daa-a667-797619c7e2f2",
-	"label": "CSV",
-	"creator": "Philipp Zumstein and Aurimas Vinckevicius",
-	"target": "csv",
-	"minVersion": "4.0.26",
-	"maxVersion": "",
-	"priority": 100,
-	"displayOptions": {
-		"exportCharset": "UTF-8xBOM",
-		"exportNotes": false
-	},
-	"inRepository": true,
-	"translatorType": 2,
-	"lastUpdated": "2022-06-28 19:45:59"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

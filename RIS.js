@@ -1,25 +1,3 @@
-{
-	"translatorID": "32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7",
-	"label": "RIS",
-	"creator": "Simon Kornblith and Aurimas Vinckevicius",
-	"target": "ris",
-	"minVersion": "3.0.4",
-	"maxVersion": "",
-	"priority": 100,
-	"configOptions": {
-		"async": true,
-		"getCollections": "true"
-	},
-	"displayOptions": {
-		"exportCharset": "UTF-8",
-		"exportNotes": true,
-		"exportFileData": false
-	},
-	"inRepository": true,
-	"translatorType": 3,
-	"lastUpdated": "2026-01-05 18:52:35"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

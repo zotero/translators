@@ -1,17 +1,3 @@
-{
-	"translatorID": "915e3ae2-afa9-4b1d-9780-28ed3defe0ab",
-	"label": "dLibra",
-	"creator": "Pawel Kolodziej <p.kolodziej@gmail.com> and Kamil Gronowski <kgronowski@man.poznan.pl>",
-	"target": "/.*dlibra/(doccontent|docmetadata|collectiondescription|results)|/dlibra/?",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-21 04:23:31"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

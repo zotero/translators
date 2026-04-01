@@ -1,17 +1,3 @@
-{
-	"translatorID": "f4130157-93f7-4493-8f24-a7c85549013d",
-	"label": "BBC",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www|news?)\\.bbc\\.(co\\.uk|com)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-06-10 21:51:43"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

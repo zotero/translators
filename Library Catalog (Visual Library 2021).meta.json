@@ -1,0 +1,12 @@
+{
+	"translatorID": "d23f01f1-6037-439b-87fb-23b8f3b9067f",
+	"label": "Library Catalog (Visual Library 2021)",
+	"creator": "Abe Jellinek",
+	"target": "/search(/quick)?\\?|/nav/index/|/(content|periodical)/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 250,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

@@ -1,17 +1,3 @@
-{
-	"translatorID": "558330ca-3531-467a-8003-86cd9602cc48",
-	"label": "Access Science",
-	"creator": "Vinoth K - highwirepress.com",
-	"target": "^https?://www\\.accessscience\\.com/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-17 20:19:39"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "9b1a3011-af6d-47d8-ac01-ec8c42d5ac58",
-	"label": "Institute of Contemporary Art",
-	"creator": "Abe Jellinek",
-	"target": "^https?://www\\.icaboston\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-16 15:43:34"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

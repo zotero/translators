@@ -1,17 +1,3 @@
-{
-	"translatorID": "0ee623f9-0a5c-4f6a-a5e1-10e2feaa16a7",
-	"label": "Optimization Online",
-	"creator": "Pascal Quach",
-	"target": "^https?://optimization-online\\.org/",
-	"minVersion": "6.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-15 13:50:06"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

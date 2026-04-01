@@ -1,0 +1,12 @@
+{
+	"translatorID": "a7c8b759-6f8a-4875-9d6e-cc0a99fe8f43",
+	"label": "Canadian Letters and Images",
+	"creator": "Philipp Zumstein",
+	"target": "^https?://(www\\.)?canadianletters\\.ca/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

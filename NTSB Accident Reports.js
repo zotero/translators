@@ -1,17 +1,3 @@
-{
-	"translatorID": "fef8575b-da80-40ec-8084-631a08cae2bd",
-	"label": "NTSB Accident Reports",
-	"creator": "Abe Jellinek",
-	"target": "^https?://(www\\.)?ntsb\\.gov/investigations/AccidentReports/Pages/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-26 18:39:23"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

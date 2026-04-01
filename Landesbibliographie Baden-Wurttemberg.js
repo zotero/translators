@@ -1,17 +1,3 @@
-{
-	"translatorID": "d2c0d2f4-42c0-41e0-8021-3b87b52b27d2",
-	"label": "Landesbibliographie Baden-Württemberg",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?(statistik\\.baden-wuerttemberg|statistik-bw)\\.de/LABI",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-12 18:14:55"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

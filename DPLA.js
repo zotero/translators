@@ -1,17 +1,3 @@
-{
-	"translatorID": "117feb72-21bb-4424-a47b-c9ca6b71f979",
-	"label": "DPLA",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://dp\\.la/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcv",
-	"lastUpdated": "2016-09-12 06:17:30"
-}
-
 /**
 	Copyright (c) 2012 Sebastian Karcher
 	

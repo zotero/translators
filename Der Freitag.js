@@ -1,17 +1,3 @@
-{
-	"translatorID": "1ab8b9a4-72b5-4ef4-adc8-4956a50718f7",
-	"label": "Der Freitag",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.freitag\\.de",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-04-15 16:29:59"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

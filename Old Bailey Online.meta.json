@@ -1,0 +1,12 @@
+{
+	"translatorID": "b10bf941-12e9-4188-be04-f6357fa594a0",
+	"label": "Old Bailey Online",
+	"creator": "Sharon Howard and Adam Crymble",
+	"target": "^https?://www\\.oldbaileyonline\\.org/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

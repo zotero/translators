@@ -1,17 +1,3 @@
-{
-	"translatorID": "fa7c37b1-fda4-418a-a8b8-2491929411ab",
-	"label": "Polygon",
-	"creator": "czar",
-	"target": "^https?://(www\\.)?(polygon|heroesneverdie|riftherald|theflyingcourier)\\.com",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-26 20:04:38"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

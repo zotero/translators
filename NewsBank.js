@@ -1,17 +1,3 @@
-{
-	"translatorID": "7fc76bfc-3a1a-47e7-93cc-4deed69bee5f",
-	"label": "NewsBank",
-	"creator": "Reuben Peterkin",
-	"target": "^https?://infoweb\\.newsbank\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-12 02:50:32"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

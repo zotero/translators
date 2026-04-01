@@ -1,17 +1,3 @@
-{
-	"translatorID": "96a92909-f23c-4f16-ae93-1948c2459932",
-	"label": "medes",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?medes\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-27 13:01:58"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

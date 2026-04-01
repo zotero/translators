@@ -1,17 +1,3 @@
-{
-	"translatorID": "80505478-d42e-4920-8c33-4f863d4ce513",
-	"label": "Calisphere",
-	"creator": "Abe Jellinek",
-	"target": "^https://calisphere\\.org/(item/|search/)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-07 21:01:11"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

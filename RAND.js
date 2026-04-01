@@ -1,17 +1,3 @@
-{
-	"translatorID": "4a49257a-035f-4b8b-ba26-6ddfe3b9008d",
-	"label": "RAND",
-	"creator": "Abe Jellinek",
-	"target": "^https://www\\.rand\\.org/(pubs/|search\\.html)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-10 16:23:46"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

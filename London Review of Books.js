@@ -1,17 +1,3 @@
-{
-	"translatorID": "8a00461c-5b42-4632-8048-339b221ac3a2",
-	"label": "London Review of Books",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?lrb\\.co\\.uk",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2021-09-21 16:56:33"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

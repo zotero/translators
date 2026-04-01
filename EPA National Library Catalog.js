@@ -1,17 +1,3 @@
-{
-	"translatorID": "99f11c5d-4413-4f96-9fc7-72fbd40372ef",
-	"label": "EPA National Library Catalog",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://cfpub\\.epa\\.gov/ols",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcv",
-	"lastUpdated": "2016-09-14 10:36:08"
-}
-
 /**
 	Copyright (c) 2014 Sebastian Karcher
 	

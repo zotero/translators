@@ -1,17 +1,3 @@
-{
-	"translatorID": "7e51d3fb-082e-4063-8601-cda08f6004a3",
-	"label": "Education Week",
-	"creator": "Ben Parr",
-	"target": "^https?://(www2?\\.|blogs\\.)?edweek\\.org/",
-	"minVersion": "1.0.0b4.r1",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-01-29 15:47:14"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

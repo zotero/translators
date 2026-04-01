@@ -1,17 +1,3 @@
-{
-	"translatorID": "0fd5beb3-646a-4e01-960b-e7168d9292e1",
-	"label": "Europe PMC",
-	"creator": "Abe Jellinek",
-	"target": "^https?://europepmc\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-23 01:38:15"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

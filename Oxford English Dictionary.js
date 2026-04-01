@@ -1,17 +1,3 @@
-{
-	"translatorID": "d3ee2368-04d7-4b4d-a8f3-c20c3f5234a9",
-	"label": "Oxford English Dictionary",
-	"creator": "Sebastian Karcher and Emiliano Heyns",
-	"target": "^https?://(www\\.)?oed\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-14 21:23:46"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

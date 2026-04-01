@@ -1,17 +1,3 @@
-{
-	"translatorID": "a30274ac-d3d1-4977-80f4-5320613226ec",
-	"label": "IMDb",
-	"creator": "Philipp Zumstien and Abe Jellinek",
-	"target": "^https?://www\\.imdb\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-07-29 17:25:50"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

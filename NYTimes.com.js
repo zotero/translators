@@ -1,17 +1,3 @@
-{
-	"translatorID": "ce7a3727-d184-407f-ac12-52837f3361ff",
-	"label": "NYTimes.com",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(query\\.nytimes\\.com/(search|gst)/|(select\\.|www\\.|mobile\\.|[^\\/.]*\\.blogs\\.)?nytimes\\.com/)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-01-20 19:13:44"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,0 +1,12 @@
+{
+	"translatorID": "1dd21245-29cf-434d-b5b8-49eae0a6912a",
+	"label": "CLASE",
+	"creator": "Sebastian Karcher",
+	"target": "^https?://132\\.248\\.9\\.1\\:",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

@@ -1,17 +1,3 @@
-{
-	"translatorID": "877acbe4-5d71-4de6-8dd7-367a2dcc4c0d",
-	"label": "Scholia",
-	"creator": "Abe Jellinek",
-	"target": "^https?://scholia\\.toolforge\\.org/work/Q",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-29 16:59:07"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

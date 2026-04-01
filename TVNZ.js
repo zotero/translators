@@ -1,17 +1,3 @@
-{
-	"translatorID": "649c2836-a94d-4bbe-8e28-6771f283702f",
-	"label": "TVNZ",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?tvnz\\.co\\.nz/one-news/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-04-07 18:10:37"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

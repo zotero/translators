@@ -1,17 +1,3 @@
-{
-	"translatorID": "e3e57ecd-b278-4b27-b49e-5aa2c76b25fd",
-	"label": "PC Games",
-	"creator": "Matthias Mailänder",
-	"target": "^https?://(www\\.)?pcgames\\.de",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-04-06 11:16:12"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

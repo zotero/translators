@@ -1,17 +1,3 @@
-{
-	"translatorID": "1ffa5e32-a985-49cc-8c74-8b638d2c4142",
-	"label": "Harvard University Press Books",
-	"creator": "Sebastian Karcher",
-	"target": "https://www.hup.harvard.edu/(catalog.php|results-list.php)",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-10-06 14:39:23"
-}
-
 /*
     ***** BEGIN LICENSE BLOCK *****
 

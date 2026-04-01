@@ -1,17 +1,3 @@
-{
-	"translatorID": "cee0cca2-e82a-4618-b6cf-16327970169d",
-	"label": "Gene Ontology",
-	"creator": "Amelia Ireland and Abe Jellinek",
-	"target": "^https?://(amigo\\.)?geneontology\\.org/",
-	"minVersion": "2.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-18 21:31:51"
-}
-
 /*
 	Copyright (C) 2010-2021 girlwithglasses (amelia.ireland@gmail.com)
 							and Abe Jellinek

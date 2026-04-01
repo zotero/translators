@@ -1,16 +1,3 @@
-{
-	"translatorID": "b5b5808b-1c61-473d-9a02-e1f5ba7b8eef",
-	"label": "Datacite JSON",
-	"creator": "Philipp Zumstein",
-	"target": "json",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 1,
-	"lastUpdated": "2025-04-29 03:02:00"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

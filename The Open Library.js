@@ -1,17 +1,3 @@
-{
-	"translatorID": "96b54986-16c7-45ea-b296-fde962d658b2",
-	"label": "The Open Library",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://openlibrary\\.org",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2017-05-25 13:52:51"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

@@ -1,17 +1,3 @@
-{
-	"translatorID": "9346ddef-126b-47ec-afef-8809ed1972ab",
-	"label": "Institute of Physics",
-	"creator": "Michael Berkowitz and Avram Lyon and Sebastian Karcher",
-	"target": "^https?://iopscience\\.iop\\.org/((article/10\\.[^/]+/)?[0-9-X]+/.+|n?search\\?.+)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 99,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2016-11-01 12:54:14"
-}
-
 /*
    IOP Translator
    Copyright (C) 2013-2015 Sebastian Karcher

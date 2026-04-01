@@ -1,17 +1,3 @@
-{
-	"translatorID": "1dd21245-29cf-434d-b5b8-49eae0a6912a",
-	"label": "CLASE",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://132\\.248\\.9\\.1\\:",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-12-07 15:15:58"
-}
-
 function detectWeb(doc, url) {
 	if (url.indexOf("func=full-set") != -1) return "journalArticle"
 	else if (url.indexOf("func=short") != -1 || url.indexOf("func=find") != -1)  return "multiple";

@@ -1,17 +1,3 @@
-{
-	"translatorID": "88915634-1af6-c134-0171-56fd198235ed",
-	"label": "Library Catalog (Voyager)",
-	"creator": "Simon Kornblith",
-	"target": "Pwebrecon\\.cgi",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 250,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-28 04:30:33"
-}
-
 function detectWeb(doc, url) {
 	var export_options = ZU.xpath(doc, '//form[@name="frm"]//*[@name="RD"]|//td/select[@name="RD"]');
 	if (!export_options.length) return false;

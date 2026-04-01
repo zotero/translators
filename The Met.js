@@ -1,17 +1,3 @@
-{
-	"translatorID": "72dbad15-cd1a-4d52-b2ed-7d67f909cada",
-	"label": "The Met",
-	"creator": "Aurimas Vinckevicius, Philipp Zumstein and contributors",
-	"target": "^https?://(?:www\\.)?metmuseum\\.org/art/collection",
-	"minVersion": "6.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-11-06 16:00:28"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

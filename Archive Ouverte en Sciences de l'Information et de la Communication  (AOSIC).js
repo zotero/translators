@@ -1,17 +1,3 @@
-{
-	"translatorID": "dedcae51-073c-48fb-85ce-2425e97f128d",
-	"label": "Archive Ouverte en Sciences de l'Information et de la Communication  (AOSIC)",
-	"creator": "Michael Berkowitz",
-	"target": "^https?://archivesic\\.ccsd\\.cnrs\\.fr/",
-	"minVersion": "1.0.0b4.r5",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-27 20:43:34"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

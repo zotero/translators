@@ -1,17 +1,3 @@
-{
-	"translatorID": "d93c14fb-d327-4540-b60a-327309ea512b",
-	"label": "Journal of Electronic Publishing",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://quod\\.lib\\.umich\\.edu/j/jep",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-31 20:16:13"
-}
-
 /*
    Journal for Electronic Publishing Translator
    Copyright (C) 2012 Sebastian Karcher

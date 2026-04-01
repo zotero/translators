@@ -1,17 +1,3 @@
-{
-	"translatorID": "7f74d823-d2ba-481c-b717-8b12c90ed874",
-	"label": "Bangkok Post",
-	"creator": "Matt Mayer",
-	"target": "^https://www\\.bangkokpost\\.com/[a-z0-9-]+/([a-z0-9-]+/)?[0-9]+",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-06-18 20:46:45"
-}
-
 /*
  * ***** BEGIN LICENSE BLOCK *****
 

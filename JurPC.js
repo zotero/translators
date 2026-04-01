@@ -1,17 +1,3 @@
-{
-	"translatorID": "b662c6eb-e478-46bd- bad4-23cdfd0c9d67",
-	"label": "JurPC",
-	"creator": "Oliver Vivell and Michael Berkowitz",
-	"target": "^https?://www\\.jurpc\\.de/jurpc/show\\?id=",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-07 18:03:03"
-}
-
 function detectWeb(doc, url) {
 	//prevent Zotero from throwing an error here
 	var firstLine =  ZU.xpathText(doc, '//h2[1]');

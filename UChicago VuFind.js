@@ -1,17 +1,3 @@
-{
-	"translatorID": "f9052879-ab4c-4056-84b4-e963dd98cb5d",
-	"label": "UChicago VuFind",
-	"creator": "Matt Teichman",
-	"target": "^https?://([^/]+\\.)?lib\\.uchicago\\.edu/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-08-17 20:16:09"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

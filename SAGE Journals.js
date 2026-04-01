@@ -1,17 +1,3 @@
-{
-	"translatorID": "908c1ca2-59b6-4ad8-b026-709b7b927bda",
-	"label": "SAGE Journals",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://journals\\.sagepub\\.com(/doi/((abs|full|pdf)/)?10\\.|/action/doSearch\\?|/toc/)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-02-24 16:20:02"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

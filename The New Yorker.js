@@ -1,17 +1,3 @@
-{
-	"translatorID": "0fba73bf-f113-4d36-810f-2c654fa985fb",
-	"label": "The New Yorker",
-	"creator": "Philipp Zumstein and Abe Jellinek",
-	"target": "^https?://www\\.newyorker\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-20 11:53:09"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

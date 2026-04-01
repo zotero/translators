@@ -1,16 +1,3 @@
-{
-	"translatorID": "de0eef58-cb39-4410-ada0-6b39f43383f9",
-	"label": "K10plus ISBN",
-	"creator": "Philipp Zumstein",
-	"target": "",
-	"minVersion": "4.0",
-	"maxVersion": "",
-	"priority": 99,
-	"inRepository": true,
-	"translatorType": 8,
-	"lastUpdated": "2024-10-09 14:20:54"
-}
-
 /*
 ***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "2bedae3c-bab5-447f-b127-e9babc0e9cfe",
-	"label": "Legislative Insight",
-	"creator": "Kari Hemdal",
-	"target": "^https?://(preprod\\.)?li\\.proquest\\.com/legislativeinsight/LegHistMain\\.jsp",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-28 04:36:45"
-}
-
 /*
 	ProQuest Legislative Insight
 	

@@ -1,17 +1,3 @@
-{
-	"translatorID": "d9d4822f-f69e-4f31-b094-5324b2a04761",
-	"label": "CIA World Factbook",
-	"creator": "Abe Jellinek",
-	"target": "^https?://www\\.cia\\.gov/the-world-factbook/countries/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-20 03:58:54"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

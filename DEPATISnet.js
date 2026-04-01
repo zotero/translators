@@ -1,17 +1,3 @@
-{
-	"translatorID": "d76fea32-fe20-4c00-b5b9-bea8c688c2b0",
-	"label": "DEPATISnet",
-	"creator": "Klaus Flittner",
-	"target": "^https?://depatisnet\\.dpma\\.de/DepatisNet/depatisnet",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-07 20:44:27"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

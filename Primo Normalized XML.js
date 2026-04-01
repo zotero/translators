@@ -1,19 +1,3 @@
-{
-	"translatorID": "efd737c9-a227-4113-866e-d57fbc0684ca",
-	"label": "Primo Normalized XML",
-	"creator": "Philipp Zumstein",
-	"target": "xml",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"configOptions": {
-		"dataMode": "xml/dom"
-	},
-	"inRepository": true,
-	"translatorType": 1,
-	"lastUpdated": "2026-01-16 14:30:48"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

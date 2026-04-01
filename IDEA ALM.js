@@ -1,17 +1,3 @@
-{
-	"translatorID": "af5e71a1-798f-4b46-bc79-3d6ed83ba8f1",
-	"label": "IDEA ALM",
-	"creator": "Abe Jellinek",
-	"target": "/((notebook(_f?ext)?)|list)\\.asp",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 200,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-22 23:39:19"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

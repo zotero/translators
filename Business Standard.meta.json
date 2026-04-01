@@ -1,0 +1,12 @@
+{
+	"translatorID": "e8d40f4b-c4c9-41ca-a59f-cf4deb3d3dc5",
+	"label": "Business Standard",
+	"creator": "Sebastian Karcher",
+	"target": "^https?://www\\.business-standard\\.com",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

@@ -1,0 +1,12 @@
+{
+	"translatorID": "dbfcaa3e-082a-45a4-9619-9892f49399c1",
+	"label": "La Presse",
+	"creator": "Sebastian Karcher and Abe Jellinek",
+	"target": "^https?://(www|recherche)\\.lapresse\\.ca/",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

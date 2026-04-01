@@ -1,0 +1,14 @@
+{
+	"translatorID": "93514073-b541-4e02-9180-c36d2f3bb401",
+	"label": "Crossref Unixref XML",
+	"creator": "Sebastian Karcher",
+	"target": "xml",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"configOptions": {
+		"dataMode": "xml/dom"
+	},
+	"inRepository": true,
+	"translatorType": 1
+}

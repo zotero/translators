@@ -1,0 +1,12 @@
+{
+	"translatorID": "79c14aee-b91f-46ed-8285-d83fed1f0b32",
+	"label": "Library of Congress Digital Collections",
+	"creator": "Abe Jellinek and Adam Bravo",
+	"target": "^https?://www\\.loc\\.gov/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

@@ -1,0 +1,12 @@
+{
+	"translatorID": "b16d76b4-ce4d-4774-b29c-b6aea71d417b",
+	"label": "IBISWorld",
+	"creator": "Sebastian Karcher",
+	"target": "^https?://clients\\d\\.ibisworld\\.com/(reports|search)",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gc"
+}

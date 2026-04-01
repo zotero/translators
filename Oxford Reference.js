@@ -1,17 +1,3 @@
-{
-	"translatorID": "62415874-b53c-4afd-86e8-814e18a986f6",
-	"label": "Oxford Reference",
-	"creator": "Sonali Gupta",
-	"target": "^https?://www\\.oxfordreference\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-22 13:47:01"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

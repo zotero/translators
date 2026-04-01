@@ -1,0 +1,12 @@
+{
+	"translatorID": "1bfb4748-3925-4de6-bcb4-5de2967f6d3f",
+	"label": "The New Republic",
+	"creator": "Sebastian Karcher",
+	"target": "^https?://(www\\.)?newrepublic\\.com/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

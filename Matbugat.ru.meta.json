@@ -1,0 +1,12 @@
+{
+	"translatorID": "4f7c1422-2eef-4d22-a4be-8e1a78ef7bd2",
+	"label": "Matbugat.ru",
+	"creator": "Avram Lyon",
+	"target": "^https?://(www\\.)?matbugat\\.ru/",
+	"minVersion": "2.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

@@ -1,17 +1,3 @@
-{
-	"translatorID": "ab88d517-d88c-4a73-a0ad-c94c76cca849",
-	"label": "eMedicine",
-	"creator": "William Smith",
-	"target": "^https?://emedicine\\.medscape\\.com/article/",
-	"minVersion": "1.0.0b4.r5",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-15 18:04:37"
-}
-
 // Emedicine.Medscape.com translator.
 // Version 1.00
 // By William Smith, see http://www.willsmith.org/contactme/

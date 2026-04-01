@@ -1,16 +1,3 @@
-{
-	"translatorID": "4e7119e0-02be-4848-86ef-79a64185aad8",
-	"label": "Bookmarks",
-	"creator": "Avram Lyon",
-	"target": "html",
-	"minVersion": "2.1b6",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 3,
-	"lastUpdated": "2022-07-14 20:21:20"
-}
-
 /*
    Browser bookmarks translator
    Copyright (C) 2011 Avram Lyon, ajlyon@gmail.com

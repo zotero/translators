@@ -1,17 +1,3 @@
-{
-	"translatorID": "0b79daa9-96c3-4c75-9e5b-359d02e8f07d",
-	"label": "Tony Blair Institute for Global Change",
-	"creator": "Abe Jellinek",
-	"target": "^https://institute\\.global/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-02 22:24:49"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

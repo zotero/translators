@@ -1,0 +1,12 @@
+{
+	"translatorID": "d76d3c94-ad87-4698-9433-6e31d6b3bf68",
+	"label": "Tatpressa.ru",
+	"creator": "Avram Lyon",
+	"target": "^https?://(www\\.)?tatpressa\\.ru/",
+	"minVersion": "2.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

@@ -1,17 +1,3 @@
-{
-	"translatorID": "5236e1d6-fcf2-4ed5-9165-cc5f345ce33e",
-	"label": "Library Catalog (PICA2)",
-	"creator": "Sean Takats, Michael Berkowitz, Sylvain Machefert, Sebastian Karcher, Aurimas Vinckevicius",
-	"target": "^https?://[^/]+/DB=[\\dA-Z]",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 249,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-08-26 04:07:48"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

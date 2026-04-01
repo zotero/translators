@@ -1,17 +1,3 @@
-{
-	"translatorID": "4e9c34ef-89bb-4c7e-97dd-abb61d8b9254",
-	"label": "Globes",
-	"creator": "Eran Rosenthal",
-	"target": "^https?://(www\\.)?(en\\.)?globes\\.co\\.il/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-21 07:49:34"
-}
-
 /**
 	Copyright (c) 2019 Eran Rosenthal
 	

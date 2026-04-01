@@ -1,17 +1,3 @@
-{
-	"translatorID": "16199bf0-a365-4aad-baeb-225019ae32dc",
-	"label": "DAI-Zenon",
-	"creator": "Philipp Zumstein, Sebastian Karcher",
-	"target": "^https?://zenon\\.dainst\\.org/(Record/|Search/)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-13 15:24:32"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

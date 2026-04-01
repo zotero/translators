@@ -1,17 +1,3 @@
-{
-	"translatorID": "df9c409a-132e-4c9d-8c24-8e3eeee98bf0",
-	"label": "Stanford University Press",
-	"creator": "Abe Jellinek",
-	"target": "^https://www\\.sup\\.org/(books|search)/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-01 17:49:50"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "446764bf-7da6-49ec-b7a7-fefcbafe317f",
-	"label": "Library Catalog (Encore)",
-	"creator": "Sebastian Karcher",
-	"target": "/iii/encore/(record|search)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 270,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-11-25 15:51:49"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

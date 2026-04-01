@@ -1,17 +1,3 @@
-{
-	"translatorID": "ccc23d0e-77ac-42b4-ac54-c606bfb218b8",
-	"label": "Elsevier Pure",
-	"creator": "Abe Jellinek",
-	"target": "/[a-z]{2}/(publications|persons|searchAll)/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 270,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-31 04:08:43"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

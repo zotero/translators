@@ -1,17 +1,3 @@
-{
-	"translatorID": "721a6b6e-d584-4252-b319-7ea46a8b02a7",
-	"label": "Dar Almandumah",
-	"creator": "Abe Jellinek",
-	"target": "^https?://search\\.mandumah\\.com/(Search|Record)/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-30 23:08:33"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "bf6b49e3-9198-4fbc-a559-a81fcfcce908",
-	"label": "World Shakespeare Bibliography Online",
-	"creator": "Matthias Heim",
-	"target": "^https?://(www\\.)?worldshakesbib\\.org",
-	"minVersion": "1.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcs",
-	"lastUpdated": "2014-06-11 22:48:03"
-}
-
 /*
    World Shakespeare Bibliography Online translator
    Copyright (C) 2011 Matthias Heim

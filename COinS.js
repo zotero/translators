@@ -1,17 +1,3 @@
-{
-	"translatorID": "05d07af9-105a-4572-99f6-a8e231c0daef",
-	"label": "COinS",
-	"creator": "Simon Kornblith",
-	"target": "",
-	"minVersion": "2.1",
-	"maxVersion": "",
-	"priority": 310,
-	"inRepository": true,
-	"translatorType": 6,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2021-06-01 17:38:46"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

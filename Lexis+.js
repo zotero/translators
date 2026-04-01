@@ -1,17 +1,3 @@
-{
-	"translatorID": "419638d9-9049-44ad-ba08-fa54ed24b5e6",
-	"label": "Lexis+",
-	"creator": "bfahrenfort",
-	"target": "^https?://plus\\.lexis\\..*/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-05-26 04:11:53"
-}
-
 /*
   ***** BEGIN LICENSE BLOCK *****
 

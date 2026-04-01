@@ -1,17 +1,3 @@
-{
-	"translatorID": "039338fc-d84f-44bf-99e4-693cc91b569f",
-	"label": "WIPO",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://patentscope\\.wipo\\.int",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2017-07-27 10:44:58"
-}
-
 /*
 	WIPO Translator
    Copyright (C) 2012 Sebastian Karcher an Avram Lyon

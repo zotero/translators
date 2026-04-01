@@ -1,17 +1,3 @@
-{
-	"translatorID": "ac3b958f-0581-4117-bebc-44af3b876545",
-	"label": "Substack",
-	"creator": "Abe Jellinek",
-	"target": "^https://([^.]+\\.)?substack\\.com/(p/|archive|home/post/)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-02-03 19:52:49"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "587709d3-80c5-467d-9fc8-ed41c31e20cf",
-	"label": "eLibrary.ru",
-	"creator": "Avram Lyon",
-	"target": "^https?://(www\\.)?elibrary\\.ru/",
-	"minVersion": "2.1",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-07-14 15:27:57"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "e329ec79-397e-4aa5-a06e-1aa32f10a138",
-	"label": "Lapham's Quarterly",
-	"creator": "Zoë C. Ma",
-	"target": "^https?://www\\.laphamsquarterly\\.org/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-11 10:35:51"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	Copyright © 2023 Zoë C. Ma

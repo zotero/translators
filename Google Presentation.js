@@ -1,17 +1,3 @@
-{
-	"translatorID": "c114f9fd-6387-4387-853d-fcfe5ab3ac0a",
-	"label": "Google Presentation",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://docs\\.google\\.com/presentation/d/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-02-19 09:33:28"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

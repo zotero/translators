@@ -1,17 +1,3 @@
-{
-	"translatorID": "3fce237f-8744-4434-b448-4b79eb194ea8",
-	"label": "Library Catalog (Quolto)",
-	"creator": "Sebastian Karcher",
-	"target": "/record/-/record/|results/-/results|^https?://(www\\.)?(mokka\\.hu/|odrportal\\.hu/).+results",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-12 03:27:27"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

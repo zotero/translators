@@ -1,17 +1,3 @@
-{
-	"translatorID": "4608f0e4-40a6-47ac-8467-1955eb8bd708",
-	"label": "Duke University Press Books",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.dukeupress\\.edu/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-23 09:05:55"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

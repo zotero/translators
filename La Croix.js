@@ -1,17 +1,3 @@
-{
-	"translatorID": "f6279abd-ab60-4aad-bdb0-20137279cd19",
-	"label": "La Croix",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.la-croix\\.com",
-	"minVersion": "3.0.4",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-11-03 20:18:42"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

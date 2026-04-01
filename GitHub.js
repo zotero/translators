@@ -1,17 +1,3 @@
-{
-	"translatorID": "a7747ba7-42c6-4a22-9415-1dafae6262a9",
-	"label": "GitHub",
-	"creator": "Martin Fenner, Philipp Zumstein",
-	"target": "^https?://(www\\.)?github\\.com/([^/]+/[^/]+|search\\?)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-29 19:26:28"
-}
-
 /**
 	Copyright (c) 2017-2021 Martin Fenner, Philipp Zumstein
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "0abd577b-ec45-4e9f-9081-448737e2fd34",
-	"label": "UPCommons",
-	"creator": "Sebastian Karcher, Philipp Zumstein",
-	"target": "^https?://upcommons\\.upc\\.edu",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-06-11 13:35:57"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

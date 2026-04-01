@@ -1,17 +1,3 @@
-{
-	"translatorID": "62f46e1a-4c40-4dbb-82aa-71cdeb14f1bc",
-	"label": "Vanity Fair",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.vanityfair\\.com/",
-	"minVersion": "1.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-13 22:24:07"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

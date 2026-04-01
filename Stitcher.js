@@ -1,17 +1,3 @@
-{
-	"translatorID": "406d8800-17b2-498c-8e79-49311caedc5f",
-	"label": "Stitcher",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://(www\\.)?stitcher\\.com/(search|show)/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-10 04:41:29"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

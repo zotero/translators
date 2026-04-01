@@ -1,17 +1,3 @@
-{
-	"translatorID": "b2d07a2a-c8c6-4426-ba6b-35f094a4d916",
-	"label": "Bosworth Toller's Anglo-Saxon Dictionary Online",
-	"creator": "Zoë C. Ma",
-	"target": "^https://bosworthtoller\\.com/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-18 07:39:58"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

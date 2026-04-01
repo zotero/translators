@@ -1,17 +1,3 @@
-{
-	"translatorID": "432d79fe-79e1-4791-b3e1-baf700710163",
-	"label": "OpenAlex",
-	"creator": "Sebastian Karcher",
-	"target": "^https://openalex\\.org/works",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 12,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-07-29 14:16:50"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

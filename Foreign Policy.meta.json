@@ -1,0 +1,12 @@
+{
+	"translatorID": "0e7ab798-bb96-4a3a-9a01-8d1d67153908",
+	"label": "Foreign Policy",
+	"creator": "Sebastian Karcher",
+	"target": "^https?://[^/]*foreignpolicy\\.com",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

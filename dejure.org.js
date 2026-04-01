@@ -1,17 +1,3 @@
-{
-	"translatorID": "16c7d938-5f77-4fb5-99a1-bcec6fdafe84",
-	"label": "dejure.org",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://dejure\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-16 20:00:51"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

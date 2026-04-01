@@ -1,17 +1,3 @@
-{
-	"translatorID": "a81243b5-a9fd-4921-8441-3142a518fdb7",
-	"label": "Library Catalog (Voyager 7)",
-	"creator": "Sean Takats",
-	"target": "/vwebv/(holdingsInfo|search)",
-	"minVersion": "1.0",
-	"maxVersion": "",
-	"priority": 250,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-08-26 04:12:22"
-}
-
 function detectWeb(doc, url) {
 	var bibIdRe = new RegExp("bibId=[0-9]+");
 	if (bibIdRe.test(url)) {

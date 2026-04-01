@@ -1,17 +1,3 @@
-{
-	"translatorID": "a29d22b3-c2e4-4cc0-ace4-6c2326144332",
-	"label": "CABI - CAB Abstracts",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://(www\\.)?cabidirect\\.org/cabdirect",
-	"minVersion": "3.0.4",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-14 03:41:30"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

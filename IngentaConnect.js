@@ -1,17 +1,3 @@
-{
-	"translatorID": "9e306d5d-193f-44ae-9dd6-ace63bf47689",
-	"label": "IngentaConnect",
-	"creator": "Michael Berkowitz",
-	"target": "^https?://(www\\.)?ingentaconnect\\.com",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-12 05:41:32"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

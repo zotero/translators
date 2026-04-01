@@ -1,0 +1,12 @@
+{
+	"translatorID": "b7259652-640b-43f1-94e5-18e2f2268463",
+	"translatorType": 8,
+	"label": "Gemeinsamer Bibliotheksverbund ISBN",
+	"creator": "Philipp Zumstein",
+	"target": null,
+	"minVersion": "4.0",
+	"maxVersion": null,
+	"priority": 99,
+	"inRepository": true,
+	"browserSupport": "gcsibv"
+}

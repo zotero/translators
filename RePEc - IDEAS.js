@@ -1,17 +1,3 @@
-{
-	"translatorID": "bd2e6136-d8e5-4f76-906b-0fbcd888dd63",
-	"label": "RePEc - IDEAS",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://ideas\\.repec\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-05 07:38:26"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

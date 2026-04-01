@@ -1,17 +1,3 @@
-{
-	"translatorID": "20e87da1-e1c9-410d-b400-a1c27272ae19",
-	"label": "Intellixir",
-	"creator": "Maxime Escourbiac",
-	"target": "/intellixir/(afficheliste\\.aspx|liste_articles\\.aspx)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsb",
-	"lastUpdated": "2017-01-01 16:54:26"
-}
-
 /**
  * Licensed to Intellixir under one
  * or more contributor license agreements. Intellixir licenses this

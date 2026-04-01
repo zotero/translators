@@ -1,17 +1,3 @@
-{
-	"translatorID": "87766765-919e-4d3b-9071-3dd7efe984c8",
-	"label": "OpenEdition Journals",
-	"creator": "Aurimas Vinckevicius, Pierre-Alain Mignot, Michael Berkowitz, Hélène Prieto, Jean-François Rivière",
-	"target": "^https?://journals\\.openedition\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-02 00:22:25"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

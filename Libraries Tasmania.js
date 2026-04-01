@@ -1,17 +1,3 @@
-{
-	"translatorID": "44699e59-a196-4716-ae33-141ec605e394",
-	"label": "Libraries Tasmania",
-	"creator": "Tim Sherratt (tim@timsherratt.org)",
-	"target": "^https?://librariestas\\.ent\\.sirsidynix\\.net\\.au/client/en_AU/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-03-04 06:44:20"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

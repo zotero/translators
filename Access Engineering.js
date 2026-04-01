@@ -1,17 +1,3 @@
-{
-	"translatorID": "d120a8a7-9d45-446e-8c18-ad9ef0a6bf47",
-	"label": "Access Engineering",
-	"creator": "Vinoth K - highwirepress.com",
-	"target": "^https?://www\\.accessengineeringlibrary\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-09 09:42:36"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	Copyright © 2020-2021 Vinoth K - highwirepress.com

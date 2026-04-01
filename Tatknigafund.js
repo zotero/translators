@@ -1,17 +1,3 @@
-{
-	"translatorID": "f909cbda-2fac-4700-965f-6c0783b77eeb",
-	"label": "Tatknigafund",
-	"creator": "Avram Lyon",
-	"target": "^https?://www\\.tatknigafund\\.ru/books/",
-	"minVersion": "1.0.0b4.r1",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-08-06 19:23:07"
-}
-
 /*
    Tatknigafund Translator
    Copyright (C) 2009-2011 Avram Lyon, ajlyon@gmail.com

@@ -1,17 +1,3 @@
-{
-	"translatorID": "73be930f-5773-41b2-a7a1-37c0eeade92f",
-	"label": "OZON.ru",
-	"creator": "Mikhail Akimov",
-	"target": "^https?://www\\.ozon\\.ru/(context/detail/id/|\\?context=search)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-04 20:51:33"
-}
-
 /*
 	OZON.ru Translator
 	Copyright (C) 2015 Mikhail Akimov

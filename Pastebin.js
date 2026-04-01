@@ -1,17 +1,3 @@
-{
-	"translatorID": "1d1a51d4-60bf-44b8-ae28-8b154d1ed721",
-	"label": "Pastebin",
-	"creator": "febrezo",
-	"target": "^https?://pastebin\\.com",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-22 12:41:39"
-}
-
 /*
 	Pastebin Translator
 	Copyright (C) 2016 Félix Brezo, felixbrezo@gmail.com

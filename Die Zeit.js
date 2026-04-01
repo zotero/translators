@@ -1,17 +1,3 @@
-{
-	"translatorID": "312bbb0e-bfb6-4563-a33c-085445d391ed",
-	"label": "Die Zeit",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.zeit\\.de/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-25 19:35:23"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

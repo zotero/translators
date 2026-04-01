@@ -1,17 +1,3 @@
-{
-	"translatorID": "f9373e49-e6ac-46f7-aafe-bb24a2fbc3f0",
-	"label": "Bracero History Archive",
-	"creator": "Adam Crymble",
-	"target": "^https?://braceroarchive\\.org",
-	"minVersion": "1.0.0b4.r5",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-28 04:32:48"
-}
-
 function detectWeb(doc, url) {
 	if (doc.title.match("Item")) {
 		return "book";

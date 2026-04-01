@@ -1,17 +1,3 @@
-{
-	"translatorID": "36e28164-afac-42c6-9a99-ed757b640002",
-	"label": "Harper's Magazine",
-	"creator": "Abe Jellinek",
-	"target": "^https?://(www\\.)?harpers\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-22 00:16:38"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

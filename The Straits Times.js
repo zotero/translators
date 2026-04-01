@@ -1,17 +1,3 @@
-{
-	"translatorID": "2de01dfe-9572-4775-bf7e-6b55c95d60b0",
-	"label": "The Straits Times",
-	"creator": "Robert Sim",
-	"target": "^https?:\\/\\/(www.)?straitstimes.com\\/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-23 22:08:18"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

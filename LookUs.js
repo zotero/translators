@@ -1,17 +1,3 @@
-{
-	"translatorID": "f08fe747-e042-49a0-87b3-7bdbbfec1219",
-	"label": "LookUs",
-	"creator": "Abe Jellinek",
-	"target": "/jvi.aspx[^#]*[?&](volume|issue|un)=",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 250,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-14 19:35:09"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

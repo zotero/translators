@@ -1,17 +1,3 @@
-{
-	"translatorID": "56fc13bf-411f-4409-9a61-3d334d76763b",
-	"label": "Victoria & Albert Museum",
-	"creator": "Richard Palmer - V&A Digital Media & Publishing",
-	"target": "^https?://collections\\.vam\\.ac\\.uk",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-04-29 19:15:08"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "db10fe28-b545-408f-a932-5873532f58fc",
-	"label": "Pajhwok Afghan News",
-	"creator": "Abe Jellinek",
-	"target": "^https?://pajhwok\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-16 03:38:53"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,0 +1,12 @@
+{
+	"translatorID": "a354331-981b-43de-a61-bc26dd1be3a9",
+	"label": "AMS MathSciNet (Legacy)",
+	"creator": "Simon Kornblith, Sebastian Karcher",
+	"target": "^https?://(mathscinet\\.)?ams\\.[^/]*/(mathscinet/2006/)?mathscinet(\\-getitem\\?|/search/(publications\\.html|publdoc\\.html))",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

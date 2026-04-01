@@ -1,17 +1,3 @@
-{
-	"translatorID": "75ccea3c-fdb8-4473-8203-ceb27f3395f8",
-	"label": "BioMed Central",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://[^\\.]+\\.(biomedcentral|springeropen)\\.com/(articles|search)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-01 16:45:33"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

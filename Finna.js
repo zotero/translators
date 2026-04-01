@@ -1,17 +1,3 @@
-{
-	"translatorID": "808e29ab-620a-407a-b706-acae6c2c7ad7",
-	"label": "Finna",
-	"creator": "Abe Jellinek",
-	"target": "^https?://([^/]+\\.)?finna\\.fi/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 150,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-04 20:33:47"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

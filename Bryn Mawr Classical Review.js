@@ -1,17 +1,3 @@
-{
-	"translatorID": "635c1246-e0c8-40a0-8799-a73a0b013ad8",
-	"label": "Bryn Mawr Classical Review",
-	"creator": "Michael Berkowitz, John Muccigrosso, and Abe Jellinek",
-	"target": "^https?://bmcr\\.brynmawr\\.edu/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-22 05:27:16"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	Copyright © 2016-2021 Michael Berkowitz, John Muccigrosso, and Abe Jellinek

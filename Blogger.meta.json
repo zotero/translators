@@ -1,0 +1,12 @@
+{
+	"translatorID": "6f9aa90d-6631-4459-81ef-a0758d2e3921",
+	"label": "Blogger",
+	"creator": "Adam Crymble",
+	"target": "\\.blogspot\\.com",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

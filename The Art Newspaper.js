@@ -1,17 +1,3 @@
-{
-	"translatorID": "7ae2681a-185b-4724-8754-f046d96884c8",
-	"label": "The Art Newspaper",
-	"creator": "czar",
-	"target": "^https?://(www\\.)?theartnewspaper\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-13 20:38:46"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

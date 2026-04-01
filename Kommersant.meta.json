@@ -1,0 +1,12 @@
+{
+	"translatorID": "43bc17ed-e994-4fdb-ac28-594c839658ca",
+	"label": "Kommersant",
+	"creator": "Avram Lyon",
+	"target": "^https?://(www\\.)?kommersant\\.ru/",
+	"minVersion": "2.1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

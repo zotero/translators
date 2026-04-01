@@ -1,16 +1,3 @@
-{
-	"translatorID": "5f506a9a-8076-4e1e-950c-f55d32003aae",
-	"label": "LIBRIS ISBN",
-	"creator": "Sebastian Berlin",
-	"target": "",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 98,
-	"inRepository": true,
-	"translatorType": 8,
-	"lastUpdated": "2024-04-23 18:44:30"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

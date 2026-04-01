@@ -1,17 +1,3 @@
-{
-	"translatorID": "5c95b67b-41c5-4f55-b71a-48d5d7183063",
-	"label": "CNKI",
-	"creator": "Aurimas Vinckevicius, Xingzhong Lin, Zoë C. Ma",
-	"target": "^https?://([^/]+\\.)?cnki\\.net",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-11-27 05:30:22"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

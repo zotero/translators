@@ -1,17 +1,3 @@
-{
-	"translatorID": "41c2be3b-eb2f-441e-b987-c98f9318e841",
-	"label": "Internet Archive Scholar",
-	"creator": "Abe Jellinek",
-	"target": "^https://scholar\\.archive\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-22 07:47:04"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

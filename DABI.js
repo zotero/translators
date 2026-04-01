@@ -1,17 +1,3 @@
-{
-	"translatorID": "5cf8bb21-e350-444f-b9b4-f46d9fab7827",
-	"label": "DABI",
-	"creator": "Jens Mittelbach",
-	"target": "^https?://dabi\\.ib\\.hu-berlin\\.de/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-10 18:58:10"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

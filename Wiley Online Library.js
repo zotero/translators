@@ -1,17 +1,3 @@
-{
-	"translatorID": "fe728bc9-595a-4f03-98fc-766f1d8d0936",
-	"label": "Wiley Online Library",
-	"creator": "Sean Takats, Michael Berkowitz, Avram Lyon and Aurimas Vinckevicius",
-	"target": "^https?://([\\w-]+\\.)?onlinelibrary\\.wiley\\.com[^/]*/(book|doi|toc|advanced/search|search-web/cochrane|cochranelibrary/search|o/cochrane/(clcentral|cldare|clcmr|clhta|cleed|clabout)/articles/.+/sect0\\.html)",
-	"minVersion": "3.1",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-06-11 15:32:23"
-}
-
 /*
    Wiley Online Translator
    Copyright (C) 2011-2021 CHNM, Avram Lyon and Aurimas Vinckevicius

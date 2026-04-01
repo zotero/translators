@@ -1,17 +1,3 @@
-{
-	"translatorID": "e1c104ef-9f4d-44fb-bf84-59b99ead7329",
-	"label": "Elicit",
-	"creator": "Abe Jellinek",
-	"target": "^https://elicit\\.org/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-04-28 21:18:17"
-}
-
 /*
     ***** BEGIN LICENSE BLOCK *****
 

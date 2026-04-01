@@ -1,17 +1,3 @@
-{
-	"translatorID": "fcabdbd7-e3e8-4f4a-9d78-25296417bdc5",
-	"label": "CROSBI",
-	"creator": "Abe Jellinek",
-	"target": "^https?://www\\.bib\\.irb\\.hr/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-09 22:29:09"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

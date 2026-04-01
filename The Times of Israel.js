@@ -1,17 +1,3 @@
-{
-	"translatorID": "bd3fc4f7-e8ed-49b5-a243-f3c3ab514a5e",
-	"label": "The Times of Israel",
-	"creator": "Bardi Harborow",
-	"target": "https?://(www\\.)?timesofisrael\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-08 16:30:30"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

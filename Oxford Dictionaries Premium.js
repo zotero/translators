@@ -1,17 +1,3 @@
-{
-	"translatorID": "b55076f2-0c40-4195-9f7d-cc08806178d9",
-	"label": "Oxford Dictionaries Premium",
-	"creator": "Abe Jellinek",
-	"target": "^https?://premium\\.oxforddictionaries\\.com/(translate|definition)/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-13 22:07:32"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

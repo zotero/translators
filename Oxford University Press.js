@@ -1,17 +1,3 @@
-{
-	"translatorID": "e9989043-fcdf-4f33-93b6-0381828aeb41",
-	"label": "Oxford University Press",
-	"creator": "Jingjing Yin and Qiang Fang",
-	"target": "^https?://global\\.oup\\.com/academic/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-10-05 01:20:38"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

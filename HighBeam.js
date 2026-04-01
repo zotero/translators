@@ -1,17 +1,3 @@
-{
-	"translatorID": "9021ee70-1411-45c9-9dd6-f070cc80641a",
-	"label": "HighBeam",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.highbeam\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-07 09:32:09"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

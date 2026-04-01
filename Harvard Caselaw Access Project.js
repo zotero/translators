@@ -1,17 +1,3 @@
-{
-	"translatorID": "2a1cafb9-6f61-48d3-b621-c3265fde9eba",
-	"label": "Harvard Caselaw Access Project",
-	"creator": "Franklin Pezzuti Dyer",
-	"target": "^https://(cite\\.)?case\\.law",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-17 01:22:49"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

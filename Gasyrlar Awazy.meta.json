@@ -1,0 +1,12 @@
+{
+	"translatorID": "8afd6209-ef61-4e64-ae6c-3b2d6f71aa50",
+	"label": "Gasyrlar Awazy",
+	"creator": "Avram Lyon",
+	"target": "^https?://www\\.archive\\.gov\\.tatarstan\\.ru/magazine/go/anonymous/main/\\?path=mg:/",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

@@ -1,17 +1,3 @@
-{
-	"translatorID": "b24ee183-58a6-443d-b8f9-c5cd5a3a0f73",
-	"label": "Paris Review",
-	"creator": "Avram Lyon, Philipp Zumstein",
-	"target": "^https?://www\\.theparisreview\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-22 12:19:22"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

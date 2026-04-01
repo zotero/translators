@@ -1,17 +1,3 @@
-{
-	"translatorID": "d4cccbd1-a92f-4dd8-b636-74eb9e344441",
-	"label": "SIRS Knowledge Source",
-	"creator": "ProQuest PME Team",
-	"target": "^https?://([^/]+\\.)?sks\\.sirs\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2015-02-02 23:47:53"
-}
-
 /*
 SIRS Knowledge Source Translator
 Copyright (C) 2014 ProQuest LLC

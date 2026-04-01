@@ -1,0 +1,12 @@
+{
+	"translatorID": "f098a2db-6bfc-49ef-a6d7-9fc84f3c868c",
+	"label": "University Press Scholarship",
+	"creator": "Abe Jellinek",
+	"target": "^https?://[^/]+\\.universitypressscholarship\\.com/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

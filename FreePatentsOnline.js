@@ -1,17 +1,3 @@
-{
-	"translatorID": "879d738c-bbdd-4fa0-afce-63295764d3b7",
-	"label": "FreePatentsOnline",
-	"creator": "Adam Crymble, Philipp Zumstein",
-	"target": "^https?://www\\.freepatentsonline\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-12-13 17:39:29"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

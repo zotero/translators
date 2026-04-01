@@ -1,17 +1,3 @@
-{
-	"translatorID": "fb12ae9e-f473-cab4-0546-27ab88c64101",
-	"label": "Library Catalog (DRA)",
-	"creator": "Simon Kornblith",
-	"target": "/web2/tramp2\\.exe/(see\\_record/|authority\\_hits/|do_keyword_search|form/|goto/.*\\?.*screen=(MARC)?Record\\.html)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 260,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2016-12-04 12:47:41"
-}
-
 /*
 Sample URLs: 
   http://libraries.nc-pals.org --> not working anymore

@@ -1,19 +1,3 @@
-{
-	"translatorID": "9ec64cfd-bea7-472a-9557-493c0c26b0fb",
-	"label": "MEDLINE/nbib",
-	"creator": "Sebastian Karcher",
-	"target": "txt",
-	"minVersion": "4.0",
-	"maxVersion": "",
-	"priority": 100,
-	"configOptions": {
-		"async": true
-	},
-	"inRepository": true,
-	"translatorType": 1,
-	"lastUpdated": "2025-04-29 03:02:00"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

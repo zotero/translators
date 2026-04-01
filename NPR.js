@@ -1,17 +1,3 @@
-{
-	"translatorID": "bc2fbf38-3061-4335-8644-69ce68580b20",
-	"label": "NPR",
-	"creator": "Abe Jellinek",
-	"target": "^https?://www\\.npr\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-13 21:08:15"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

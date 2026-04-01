@@ -1,17 +1,3 @@
-{
-	"translatorID": "fc9b7700-b3cc-4150-ba89-c7e4443bd96d",
-	"label": "Financial Times",
-	"creator": "Sebastian Karcher and Abe Jellinek",
-	"target": "^https?://www\\.ft\\.com",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-03-27 05:16:52"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

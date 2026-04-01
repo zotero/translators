@@ -1,17 +1,3 @@
-{
-	"translatorID": "a823550b-6475-4b20-8539-a3c416906228",
-	"label": "Notre Dame Philosophical Reviews",
-	"creator": "Emiliano Heyns and Abe Jellinek",
-	"target": "^https?://ndpr\\.nd\\.edu/",
-	"minVersion": "2.1",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-31 17:03:45"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

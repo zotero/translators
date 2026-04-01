@@ -1,16 +1,3 @@
-{
-	"translatorID": "eb0bbbf8-7f57-40fa-aec2-45480d396e93",
-	"label": "Prime 9ja Online",
-	"creator": "VWF",
-	"target": "^https?://(www\\.|pidgin\\.)?prime9ja\\.com\\.ng/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"lastUpdated": "2025-10-17 16:00:00"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "31807458-4c59-4a9c-b78f-e6267aca53be",
-	"label": "Failed Architecture",
-	"creator": "Abe Jellinek",
-	"target": "^https?://failedarchitecture\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-05 21:18:37"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "8e11559d-60f0-4a7f-bb91-99ac0c5a2d63",
-	"label": "The Guardian",
-	"creator": "Philipp Zumstein, Bao Trinh",
-	"target": "^https?://(www\\.)?(guardian\\.co\\.uk|theguardian\\.com)/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-13 21:32:27"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

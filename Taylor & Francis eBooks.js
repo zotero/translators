@@ -1,17 +1,3 @@
-{
-	"translatorID": "71f28f90-764a-42a8-8107-d87252da9b50",
-	"label": "Taylor & Francis eBooks",
-	"creator": "Abe Jellinek",
-	"target": "^https?://(www\\.)?taylorfrancis\\.com/(books|chapters|search)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-02-27 13:57:59"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

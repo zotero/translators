@@ -1,17 +1,3 @@
-{
-	"translatorID": "dcf75e09-7f8a-4d4d-ad6f-363b46f79b13",
-	"label": "NYPL Research Catalog",
-	"creator": "Abe Jellinek",
-	"target": "^https://www\\.nypl\\.org/research/research-catalog/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-26 23:24:00"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

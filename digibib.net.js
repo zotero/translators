@@ -1,17 +1,3 @@
-{
-	"translatorID": "e99bd723-39e6-418c-9524-390dbc583e08",
-	"label": "digibib.net",
-	"creator": "Heiko Jansen (hbz), Ingolf Kuss (hbz), Bernhard Assmann (hbz)",
-	"target": "^https?://.*\\.digibib\\.net/(Digibib|jumpto|metasearch|opensearch|template)",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-05 17:35:41"
-}
-
 /*
    DigiBib Translator - Custom translator for adding metadata records found
    in the DigiBib portal (http://www.digibib.net/) to Zotero

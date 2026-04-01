@@ -1,16 +1,3 @@
-{
-	"translatorID": "a6ee60df-1ddc-4aae-bb25-45e0537be973",
-	"label": "MARC",
-	"creator": "Simon Kornblith, Sylvain Machefert",
-	"target": "marc",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 1,
-	"lastUpdated": "2025-03-28 15:43:42"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "cc4b1ea4-3349-4bb4-af55-cce5e06e4669",
-	"label": "Hispanic-American Periodical Index",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://hapi\\.ucla\\.edu",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-03 18:32:03"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

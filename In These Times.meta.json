@@ -1,0 +1,12 @@
+{
+	"translatorID": "88268d51-dc41-4f98-bb93-d13af50ba1ab",
+	"label": "In These Times",
+	"creator": "Sebastian Karcher",
+	"target": "^https?://(www\\.)?inthesetimes\\.com",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsbv"
+}

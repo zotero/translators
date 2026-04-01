@@ -1,0 +1,11 @@
+{
+	"translatorID": "2c05e2d1-a533-448f-aa20-e919584864cb",
+	"label": "DSpace Intermediate Metadata",
+	"creator": "Sebastian Karcher",
+	"target": "xml",
+	"minVersion": "5.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 1
+}

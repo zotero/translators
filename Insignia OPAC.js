@@ -1,17 +1,3 @@
-{
-	"translatorID": "abd7c626-6913-42d4-a05f-acc6683c69da",
-	"label": "Insignia OPAC",
-	"creator": "Niko",
-	"target": "^https?://[^/]+/(library|crts)/[^/?#]+\\.aspx",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcs",
-	"lastUpdated": "2017-01-01 15:21:20"
-}
-
 /**
  * No tests, but translator can be tested at
  * http://www.insigniasoftware.com/library/WhatIsNew.aspx

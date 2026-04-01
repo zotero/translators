@@ -1,17 +1,3 @@
-{
-	"translatorID": "485cd5f3-9c36-473e-80a7-b36a9c367515",
-	"label": "LIVIVO",
-	"creator": "Abe Jellinek",
-	"target": "^https?://www\\.livivo\\.de/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-31 17:55:33"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

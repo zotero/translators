@@ -1,17 +1,3 @@
-{
-	"translatorID": "e46830a2-1b19-4b6b-9f1a-e5e9760a0f80",
-	"label": "DigiZeitschriften",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.digizeitschriften\\.de/((en/)?dms/|index\\.php\\?id=27[24])",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2018-01-07 09:28:38"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

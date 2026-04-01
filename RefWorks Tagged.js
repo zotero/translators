@@ -1,22 +1,3 @@
-{
-	"translatorID": "1a3506da-a303-4b0a-a1cd-f216e6138d86",
-	"label": "RefWorks Tagged",
-	"creator": "Simon Kornblith, Aurimas Vinckevicius, and Sebastian Karcher",
-	"target": "txt",
-	"minVersion": "3.0.4",
-	"maxVersion": "",
-	"priority": 100,
-	"displayOptions": {
-		"exportCharset": "UTF-8",
-		"exportNotes": true,
-		"exportFileData": true
-	},
-	"inRepository": true,
-	"translatorType": 3,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2016-06-21 08:45:20"
-}
-
 /*This Translator mirrors closely Aurimas Vinckevicius' RIS translator
 It may have several relics from that translator that aren't necessary for Refworks,
 but since the formats are similar and having them in the translator won't hurt, I maintained them. 

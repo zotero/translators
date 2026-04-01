@@ -1,17 +1,3 @@
-{
-	"translatorID": "e7e01cac-1e37-4da6-b078-a0e8343b0e98",
-	"label": "unAPI",
-	"creator": "Simon Kornblith",
-	"target": "",
-	"minVersion": "2.1",
-	"maxVersion": "",
-	"priority": 300,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2019-06-10 23:11:21"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

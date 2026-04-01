@@ -1,17 +1,3 @@
-{
-	"translatorID": "0701696c-3523-47ba-9617-b04eee03b6ba",
-	"label": "Adam Matthew Digital",
-	"creator": "Abe Jellinek",
-	"target": "^https?://www\\.([^.]+)\\.amdigital\\.co\\.uk/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-21 05:00:48"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

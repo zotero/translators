@@ -1,17 +1,3 @@
-{
-	"translatorID": "b8a86e36-c270-48c9-bdd1-22aaa167ef46",
-	"label": "Agencia del ISBN",
-	"creator": "Michael Berkowitz",
-	"target": "^https?://www\\.mcu\\.es/webISBN",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcs",
-	"lastUpdated": "2015-06-10 11:33:38"
-}
-
 function detectWeb(doc, url) {
 	if (doc.evaluate('//div[@class="isbnResultado"]/div[@class="isbnResDescripcion"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";

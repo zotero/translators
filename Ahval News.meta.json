@@ -1,0 +1,12 @@
+{
+	"translatorID": "64f4a2b8-33d8-4303-834a-3b71065cf6c6",
+	"label": "Ahval News",
+	"creator": "Abe Jellinek",
+	"target": "^https?://ahvalnews\\.com/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}
