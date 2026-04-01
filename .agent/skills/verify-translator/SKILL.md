@@ -1,30 +1,52 @@
 ---
 name: verify-translator
-description: Steps that MUST be performed to verify a Zotero translator after every addition or modification, and before submitting a PR.
+description: Verify a Zotero translator after every addition or modification, and before submitting a PR. Runs linting, tests, and metadata updates.
 ---
 
-## Get documentation
+## Fetch documentation
 
-Fetch and ingest https://www.zotero.org/support/_export/raw/dev/translators and https://www.zotero.org/support/_export/raw/dev/translators/coding.
+Fetch and read:
+- https://www.zotero.org/support/_export/raw/dev/translators
+- https://www.zotero.org/support/_export/raw/dev/translators/coding
 
-## `lastUpdated`
+## Update `lastUpdated`
 
-Update the translator's `lastUpdated` to the current time (shell: `date -u +"%Y-%m-%d %H:%M:%S"`).
+**This must be done every time translator code is modified.** Zotero uses `lastUpdated` to determine when to push updates to users.
+
+```
+node .bin/update-metadata.mjs "<translator filename>"
+```
 
 ## Lint
 
-Verify that `npm run lint -- <translator filename>` succeeds without returning any lint errors. Use `--fix` to correct auto-fixable errors, and fix the rest manually.
+```
+npm run lint -- "<translator filename>"
+```
+
+Use `--fix` for auto-fixable errors. Fix any remaining errors manually.
 
 ## Run tests
 
-For web, import, and search translators (check for matching `do` methods, e.g., `function doWeb(...)`), verify that tests succeed. Prompt the user to open Zotero and use Tools → Translator Editor ("Scaffold") to run tests. If they refuse or are unsure of how to use Scaffold, you can run tests using the same tool as we use on GitHub CI. `cd .ci/pull-request-check && ./check-pull-request.sh <translator filename>`.
+```
+node .bin/run-tests.mjs "<translator filename>"
+```
 
-Warn that Zotero maintainers are known to reject translator PRs that appear not to have been tested.
+This launches headless Chromium with the Zotero Connector extension and runs the translator's test cases against live sites.
+
+All tests must pass. If a test fails:
+1. Read the failure output carefully.
+2. Check whether the target site has changed.
+3. Fix the translator code or update the test case (using `create-test` skill).
+4. Re-run tests until all pass.
 
 ## Ensure user is working in a Git branch
 
-If the user is working on `master` or a stale PR branch, prompt them to create a new branch for their translator before pushing. This will make future PRs easier.
+```
+git branch --show-current
+```
+
+If on `master`, create a new branch.
 
 ## Create a PR
 
-Guide the user through the process of creating a PR on https://github.com/zotero/translators. Avoid generating excessively long AI descriptions. Encourage the user to write the description themselves.
+Guide the user through creating a PR on https://github.com/zotero/translators. Keep the description concise. Encourage the user to write/review the description.
