@@ -1,0 +1,12 @@
+{
+	"translatorID": "f16f8542-9038-492d-8669-7ffe40869294",
+	"label": "Current Affairs",
+	"creator": "Abe Jellinek",
+	"target": "^https?://www\\.currentaffairs\\.org/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

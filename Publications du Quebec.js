@@ -1,17 +1,3 @@
-{
-	"translatorID": "22d0bede-8db5-4656-9b9a-7d682ec1335d",
-	"label": "Publications du Québec",
-	"creator": "Marc Lajoie",
-	"target": "^https?://(www\\.)?legisquebec\\.gouv\\.qc\\.ca/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-03 15:38:52"
-}
-
 /*
 Publications du Québec Translator
 Copyright (C) 2014 Marc Lajoie

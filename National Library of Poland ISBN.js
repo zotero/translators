@@ -1,16 +1,3 @@
-{
-	"translatorID": "aa7f310e-10d3-4209-91dc-88301e7070c6",
-	"label": "National Library of Poland ISBN",
-	"creator": "Maciej Nux Jaros",
-	"target": "",
-	"minVersion": "4.0",
-	"maxVersion": "",
-	"priority": 98,
-	"inRepository": true,
-	"translatorType": 8,
-	"lastUpdated": "2023-06-15 02:45:16"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

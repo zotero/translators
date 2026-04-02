@@ -1,17 +1,3 @@
-{
-	"translatorID": "a1a97ad4-493a-45f2-bd46-016069de4162",
-	"label": "Optical Society of America",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://((www\\.)?osapublishing|opg\\.optica)\\.org",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-22 16:05:46"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

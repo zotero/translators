@@ -1,17 +1,3 @@
-{
-	"translatorID": "70dc2609-d6fd-415a-822c-a2c04293cb5a",
-	"label": "UpToDate References",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.uptodate\\.com/contents/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcv",
-	"lastUpdated": "2019-06-11 13:44:39"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

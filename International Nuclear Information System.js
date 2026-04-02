@@ -1,17 +1,3 @@
-{
-	"translatorID": "374c83fa-58ef-47cf-af23-e42630203ce7",
-	"label": "International Nuclear Information System",
-	"creator": "Abe Jellinek",
-	"target": "^https?://inis\\.iaea\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-12 23:15:14"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

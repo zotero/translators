@@ -1,17 +1,3 @@
-{
-	"translatorID": "6f98e6ce-f92f-4f74-beaf-499dccb5cb6c",
-	"label": "Hrvatska enciklopedija",
-	"creator": "Ivo Pletikosić",
-	"target": "^https?://(?:www\\.)?enciklopedija\\.hr/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-14 21:59:26"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

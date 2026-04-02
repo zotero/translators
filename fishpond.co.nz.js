@@ -1,17 +1,3 @@
-{
-	"translatorID": "c436f3c7-4246-4ed3-a227-a538c8113a0e",
-	"label": "fishpond.co.nz",
-	"creator": "Sopheak Hean, Sebastian Karcher",
-	"target": "^https?://www\\.fishpond\\.co\\.nz/",
-	"minVersion": "1.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-07 17:26:42"
-}
-
 /*
 	Fishpond.co.nz Translator- Parses Fishpond.co.nz articles and creates Zotero-based metadata
    Copyright (C) 2011 Sopheak Hean, University of Waikato, Faculty of Education

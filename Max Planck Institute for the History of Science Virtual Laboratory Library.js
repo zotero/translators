@@ -1,17 +1,3 @@
-{
-	"translatorID": "66928fe3-1e93-45a7-8e11-9df6de0a11b3",
-	"label": "Max Planck Institute for the History of Science: Virtual Laboratory Library",
-	"creator": "Sean Takats, Philipp Zumstein",
-	"target": "^https?://vlp\\.mpiwg-berlin\\.mpg\\.de/library/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-31 23:20:18"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

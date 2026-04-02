@@ -1,17 +1,3 @@
-{
-	"translatorID": "5b9511cd-9b0b-4816-812a-6cbb2b685046",
-	"label": "National Technical Reports Library",
-	"creator": "Abe Jellinek",
-	"target": "^https?://ntrl\\.ntis\\.gov/NTRL/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-31 19:24:13"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

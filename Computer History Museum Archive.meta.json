@@ -1,0 +1,12 @@
+{
+	"translatorID": "f3b81c4e-28b4-41ae-9824-55739fe9c91a",
+	"label": "Computer History Museum Archive",
+	"creator": "Bo An",
+	"target": "^https?://www\\.computerhistory\\.org/collections/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

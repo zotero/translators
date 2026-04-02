@@ -1,17 +1,3 @@
-{
-	"translatorID": "4fd6b89b-2316-2dc4-fd87-61a97dd941e8",
-	"label": "Library Catalog (InnoPAC)",
-	"creator": "Simon Kornblith and Michael Berkowitz",
-	"target": "(search~|/search\\?|(a|X|t|Y|w)\\?|\\?(searchtype|searchscope)|frameset&FF|record=[bi]?[0-9]+(~S[0-9])?|/search/q\\?)",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 250,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-04 21:15:52"
-}
-
 function detectWeb(doc, url) {
 
 //***********

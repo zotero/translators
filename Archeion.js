@@ -1,17 +1,3 @@
-{
-	"translatorID": "f6717cbb-2771-4043-bde9-dbae19129bb3",
-	"label": "Archeion",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.(archeion|memorybc|albertaonrecord)\\.ca",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-05 07:08:54"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

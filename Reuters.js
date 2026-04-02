@@ -1,17 +1,3 @@
-{
-	"translatorID": "83979786-44af-494a-9ddb-46654e0486ef",
-	"label": "Reuters",
-	"creator": "Avram Lyon, Michael Berkowitz, Sebastian Karcher",
-	"target": "^https?://\\w+\\.reuters\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-05 16:50:37"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

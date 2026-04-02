@@ -1,17 +1,3 @@
-{
-	"translatorID": "2a5dc3ed-ee5e-4bfb-baad-36ae007e40ce",
-	"label": "De Gruyter Brill",
-	"creator": "Abe Jellinek",
-	"target": "^https?://www\\.degruyterbrill\\.com/",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-01-23 15:59:51"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

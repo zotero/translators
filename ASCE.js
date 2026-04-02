@@ -1,17 +1,3 @@
-{
-	"translatorID": "303bdfc5-11b8-4107-bca1-63ca97701a0f",
-	"label": "ASCE",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://(www\\.)?ascelibrary\\.org/(toc|doi|action)/",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-28 02:29:25"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

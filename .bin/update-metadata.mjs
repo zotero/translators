@@ -1,14 +1,13 @@
 #!/usr/bin/env node
 
 import path from 'node:path';
-import { parseArgs, resolveTranslator, formatZoteroDate, output, REPO_ROOT } from './lib/common.mjs';
+import { parseArgs, resolveTranslator, output, REPO_ROOT } from './lib/common.mjs';
 import { readTranslator, updateHeader } from './lib/translator-io.mjs';
 
 const { values, positionals } = parseArgs({
-	usage: 'node .bin/update-metadata.mjs <translator> [--set key=value] [--no-timestamp]',
+	usage: 'node .bin/update-metadata.mjs <translator> [--set key=value]',
 	options: {
 		set: { type: 'string', multiple: true, short: 's' },
-		'no-timestamp': { type: 'boolean' },
 		json: { type: 'boolean' },
 		help: { type: 'boolean', short: 'h' },
 	},
@@ -24,11 +23,6 @@ const filePath = resolveTranslator(filename);
 
 // Build updates
 const updates = {};
-
-// Default: update lastUpdated unless --no-timestamp
-if (!values['no-timestamp']) {
-	updates.lastUpdated = formatZoteroDate();
-}
 
 // Parse --set key=value pairs
 if (values.set) {
@@ -51,7 +45,7 @@ if (values.set) {
 }
 
 if (Object.keys(updates).length === 0) {
-	console.error('Nothing to update (did you pass --no-timestamp with no --set?)');
+	console.error('Nothing to update');
 	process.exit(2);
 }
 

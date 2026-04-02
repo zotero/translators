@@ -1,17 +1,3 @@
-{
-	"translatorID": "6871e8c5-f935-4ba1-8305-0ba563ce3941",
-	"label": "PEI Archival Information Network",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.archives\\.pe\\.ca/atom/index\\.php/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-22 15:45:20"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

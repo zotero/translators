@@ -1,17 +1,3 @@
-{
-	"translatorID": "5a5b1fcd-8491-4c56-84a7-5dba19fe2c02",
-	"label": "Rock, Paper, Shotgun",
-	"creator": "czar, Bao Trinh",
-	"target": "^https?://(www\\.)?rockpapershotgun\\.(com|de)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-15 21:00:12"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

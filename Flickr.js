@@ -1,17 +1,3 @@
-{
-	"translatorID": "5dd22e9a-5124-4942-9b9e-6ee779f1023e",
-	"label": "Flickr",
-	"creator": "Sean Takats, Rintze Zelle, and Aurimas Vinckevicius",
-	"target": "^https?://(www\\.)?flickr\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-06-27 14:29:20"
-}
-
 function detectWeb(doc, url) {
 	/*
 	if (ZU.xpath(doc,'//h1[@property="dc:title" and starts-with(@id, "title_div")]').length) {

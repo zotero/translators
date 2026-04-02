@@ -1,17 +1,3 @@
-{
-	"translatorID": "7a81d945-7d9c-4f8c-bd7b-4226c1cab40e",
-	"label": "Dryad Digital Repository",
-	"creator": "Nathan Day",
-	"target": "^https?://(www\\.)?datadryad\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-07 02:15:00"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

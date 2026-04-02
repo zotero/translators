@@ -1,17 +1,3 @@
-{
-	"translatorID": "d3f35d5a-55da-4e07-be7d-b4d2a821279f",
-	"label": "KitapYurdu.com",
-	"creator": "Hasan Huseyin DER",
-	"target": "^https?://www\\.kitapyurdu\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-02-08 18:18:10"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

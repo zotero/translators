@@ -1,0 +1,12 @@
+{
+	"translatorID": "162b43d7-e29d-4cf0-9e05-85e472613430",
+	"label": "Data.gov",
+	"creator": "Abe Jellinek",
+	"target": "^https?://catalog\\.data\\.gov/dataset",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

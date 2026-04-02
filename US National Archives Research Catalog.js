@@ -1,17 +1,3 @@
-{
-	"translatorID": "f8b5501a-1acc-4ffa-a0a5-594add5e6bd3",
-	"label": "US National Archives Research Catalog",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://catalog\\.archives\\.gov/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-20 15:44:13"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

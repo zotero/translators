@@ -1,17 +1,3 @@
-{
-	"translatorID": "c73a4a8c-3ef1-4ec8-8229-7531ee384cc4",
-	"label": "Open WorldCat",
-	"creator": "Simon Kornblith, Sebastian Karcher, Abe Jellinek",
-	"target": "^https?://([^/]+\\.)?worldcat\\.org/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 12,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-02-12 16:29:52"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

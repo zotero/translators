@@ -1,0 +1,12 @@
+{
+	"translatorID": "eda36b1d-2395-432d-9780-0e7d2e6cf0de",
+	"label": "SLUB Dresden",
+	"creator": "Abe Jellinek",
+	"target": "^https://katalog\\.slub-dresden\\.de/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

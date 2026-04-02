@@ -1,17 +1,3 @@
-{
-	"translatorID": "eb876bd2-644c-458e-8d05-bf54b10176f3",
-	"label": "Wanfang Data",
-	"creator": "Ace Strong <acestrong@gmail.com>",
-	"target": "^https?://[ds]\\.(g\\.)?wanfangdata\\.com\\.cn",
-	"minVersion": "2.0rc1",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcs",
-	"lastUpdated": "2019-06-10 22:46:01"
-}
-
 /*
    Wanfang Data Translator
    Copyright (C) 2010 TAO Cheng, acestrong@gmail.com

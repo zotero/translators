@@ -1,0 +1,12 @@
+{
+	"translatorID": "e765263c-c211-46a8-892b-d0b0237836a7",
+	"label": "ARTnews",
+	"creator": "czar",
+	"target": "^https?://(www\\.)?artnews\\.com",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

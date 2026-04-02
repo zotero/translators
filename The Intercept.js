@@ -1,17 +1,3 @@
-{
-	"translatorID": "455fe24a-f7e8-4546-81d2-ad4f9aa10487",
-	"label": "The Intercept",
-	"creator": "czar",
-	"target": "^https?://(www\\.)?theintercept\\.com",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-11 16:49:43"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "c3ecf413-ddd6-4d98-86e2-f63054bd2cc8",
-	"label": "Goodreads",
-	"creator": "Abe Jellinek",
-	"target": "^https?://www\\.goodreads\\.com/(book/show/|search\\?)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-12-11 18:50:04"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

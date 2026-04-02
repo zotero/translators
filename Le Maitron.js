@@ -1,17 +1,3 @@
-{
-	"translatorID": "ee016722-5f02-4362-8ffe-c96e06872b3e",
-	"label": "Le Maitron",
-	"creator": "czar",
-	"target": "^https?://maitron\\.fr/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-09-24 22:15:07"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

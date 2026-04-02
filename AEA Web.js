@@ -1,17 +1,3 @@
-{
-	"translatorID": "6044b16f-2452-4ce8-ad02-fab69ef04f13",
-	"label": "AEA Web",
-	"creator": "Sebatian Karcher",
-	"target": "^https?://www\\.aeaweb\\.org/(articles|journals|issues)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-08 17:43:18"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

@@ -1,17 +1,3 @@
-{
-	"translatorID": "e83248bb-caa4-4dd2-a470-11f4cd164083",
-	"label": "ORCID",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://orcid\\.org/",
-	"minVersion": "4.0.29.11",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-10-12 18:52:49"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

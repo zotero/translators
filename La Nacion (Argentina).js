@@ -1,17 +1,3 @@
-{
-	"translatorID": "44017484-f65e-4575-9a6e-d9050c27d18e",
-	"label": "La Nación (Argentina)",
-	"creator": "Sebastian Karcher and Abe Jellinek",
-	"target": "^https://www\\.lanacion\\.com\\.ar/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-23 03:22:23"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

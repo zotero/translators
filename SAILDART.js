@@ -1,17 +1,3 @@
-{
-	"translatorID": "78c29166-3326-4660-92e7-eb1fb1aacda0",
-	"label": "SAILDART",
-	"creator": "Abe Jellinek",
-	"target": "^https?://(www\\.)?saildart\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-26 17:34:38"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "0c31f371-e012-4b1c-b793-f89ab1ae2610",
-	"label": "DBpia",
-	"creator": "Yunwoo Song, Philipp Zumstein",
-	"target": "^https?://[^/]+\\.dbpia\\.co\\.kr/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-14 00:23:40"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

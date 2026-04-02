@@ -1,17 +1,3 @@
-{
-	"translatorID": "82b534ea-abf0-4527-9d5d-48cd98a89ba5",
-	"label": "Sacramento Bee",
-	"creator": "czar",
-	"target": "^https?://(www\\.)?sacbee\\.com",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-09 05:05:18"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "83d2ed27-40a5-4dc7-bd87-baddc8fb35da",
-	"label": "SORA",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://sora\\.unm\\.edu/(node/|search/node/|advancedsearch\\?)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2017-06-24 15:08:40"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

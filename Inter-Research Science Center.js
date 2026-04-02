@@ -1,17 +1,3 @@
-{
-	"translatorID": "0eeb2ac0-fbaf-4994-b98f-203d273eb9fa",
-	"label": "Inter-Research Science Center",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.int-res\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-10-22 20:07:17"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

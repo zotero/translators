@@ -1,17 +1,3 @@
-{
-	"translatorID": "d1bf1c29-4432-4ada-8893-2e29fc88fd9e",
-	"label": "Washington Post",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.washingtonpost\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-01-27 20:23:38"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

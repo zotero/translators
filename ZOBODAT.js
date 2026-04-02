@@ -1,17 +1,3 @@
-{
-	"translatorID": "e94ffd1c-0ff8-4fbc-8b2a-8391ab5a7288",
-	"label": "ZOBODAT",
-	"creator": "Lars Willighagen",
-	"target": "^https?://(www\\.)?zobodat\\.at/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-10-17 11:17:19"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

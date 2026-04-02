@@ -1,17 +1,3 @@
-{
-	"translatorID": "a667ae9e-186f-46d2-b824-d70064614668",
-	"label": "Slate",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://slate\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-13 21:28:22"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

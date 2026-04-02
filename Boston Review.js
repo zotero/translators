@@ -1,17 +1,3 @@
-{
-	"translatorID": "55d28a64-e56e-4d3c-93db-a5fc584776de",
-	"label": "Boston Review",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://(www\\.)?bostonreview\\.net/",
-	"minVersion": "6.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-18 06:17:49"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

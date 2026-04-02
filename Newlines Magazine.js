@@ -1,17 +1,3 @@
-{
-	"translatorID": "33ad4fed-9a2f-4bf6-85a6-7c09a022b573",
-	"label": "Newlines Magazine",
-	"creator": "Abe Jellinek",
-	"target": "^https?://newlinesmag\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-17 03:23:02"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

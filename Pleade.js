@@ -1,17 +1,3 @@
-{
-	"translatorID": "ce68b0ed-3137-4e38-b691-f3bc49bc1497",
-	"label": "Pleade",
-	"creator": "DIA Modou",
-	"target": "(list-results|results|ead)\\.html\\?.*(base=ead|mode=|id=)",
-	"minVersion": "1.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-01-30 15:32:05"
-}
-
 /*
 Pleade: Publishing Tool for finding, authority records
 and a series of digitized images.

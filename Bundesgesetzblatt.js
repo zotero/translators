@@ -1,17 +1,3 @@
-{
-	"translatorID": "e23afbe8-b5cb-42cc-af90-e915b2c00de2",
-	"label": "Bundesgesetzblatt",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.bgbl\\.de/",
-	"minVersion": "4.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-22 20:35:31"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

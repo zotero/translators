@@ -1,17 +1,3 @@
-{
-	"translatorID": "6b4bf64d-2894-48ac-a7cb-d1da7fae7271",
-	"label": "Yandex Books",
-	"creator": "Ilya Zonov",
-	"target": "^https://books\\.yandex\\.ru/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-06 18:15:23"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

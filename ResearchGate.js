@@ -1,17 +1,3 @@
-{
-	"translatorID": "89ae6297-c0c4-45f7-943d-5174cf06339c",
-	"label": "ResearchGate",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.researchgate\\.net/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-18 04:03:07"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

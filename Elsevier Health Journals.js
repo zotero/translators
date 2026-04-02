@@ -1,17 +1,3 @@
-{
-	"translatorID": "b043e7ed-b921-4444-88af-2fcc39881ee2",
-	"label": "Elsevier Health Journals",
-	"creator": "Sebastian Karcher",
-	"target": "/action/doSearch\\?|/article/[^/]+/(abstract|fulltext|references|images)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 250,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2021-11-24 23:10:20"
-}
-
 /*
    Copyright (C) 2013-2021 Sebastian Karcher
 

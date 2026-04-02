@@ -1,17 +1,3 @@
-{
-	"translatorID": "5a697ab5-913a-478a-b4ec-98d019aa5dc6",
-	"label": "NASA NTRS",
-	"creator": "Andrew Bergan and Abe Jellinek",
-	"target": "^https?://ntrs\\.nasa\\.gov/(citations/|search)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-21 20:00:21"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

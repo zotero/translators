@@ -1,17 +1,3 @@
-{
-	"translatorID": "01322929-5782-4612-81f7-d861fb46d9f2",
-	"label": "Atlanta Journal-Constitution",
-	"creator": "Abe Jellinek",
-	"target": "^https?://(www\\.)?ajc\\.com",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-14 19:41:44"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

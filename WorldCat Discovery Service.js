@@ -1,17 +1,3 @@
-{
-	"translatorID": "fd8dc5f6-a6dd-42b2-948f-600f5da844ea",
-	"label": "WorldCat Discovery Service",
-	"creator": "Sebastian Karcher and Abe Jellinek",
-	"target": "^https?://[^/]+\\.worldcat\\.org/",
-	"minVersion": "3.0.9",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-25 18:53:10"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

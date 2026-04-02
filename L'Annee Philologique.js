@@ -1,17 +1,3 @@
-{
-	"translatorID": "e04e4bab-64c2-4b9a-b6c2-7fb186281969",
-	"label": "L'Année Philologique",
-	"creator": "Sebastian Karcher and Abe Jellinek",
-	"target": "^https?://cpps\\.brepolis\\.net/aph/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-13 02:22:54"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

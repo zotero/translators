@@ -1,17 +1,3 @@
-{
-	"translatorID": "7ecb9512-9195-478a-a525-40e71b01f3b0",
-	"label": "Archiv fuer Sozialgeschichte",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://library\\.fes\\.de/jportal/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcbv",
-	"lastUpdated": "2013-05-15 20:05:47"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

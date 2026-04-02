@@ -1,17 +1,3 @@
-{
-	"translatorID": "4363275e-5cc5-4627-9a7f-951fb58a02c3",
-	"label": "Cornell University Press",
-	"creator": "Sebastian Karcer",
-	"target": "^https?://www\\.cornellpress\\.cornell\\.edu/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-10 11:32:31"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

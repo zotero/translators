@@ -1,17 +1,3 @@
-{
-	"translatorID": "b51ac026-ed35-4c68-89bb-b42b1e1ce8f2",
-	"label": "MCV",
-	"creator": "czar and Abe Jellinek",
-	"target": "^https?://(www\\.)?mcvuk\\.com",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-12 00:34:16"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

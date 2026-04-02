@@ -1,17 +1,3 @@
-{
-	"translatorID": "9932d1a7-cc6d-4d83-8462-8f6658b13dc0",
-	"label": "Biblio.com",
-	"creator": "Adam Crymble, Michael Berkowitz, Sebastian Karcher, and Abe Jellinek",
-	"target": "^https?://www\\.biblio\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-14 21:52:42"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

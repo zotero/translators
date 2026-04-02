@@ -1,17 +1,3 @@
-{
-	"translatorID": "d9b57cd5-5a9c-4946-8616-3bdf8edfcbb5",
-	"label": "mEDRA",
-	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://www\\.medra\\.org/servlet/view\\?",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 105,
-	"inRepository": true,
-	"translatorType": 12,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-07-14 17:55:30"
-}
-
 function scrapeMasterTable(doc) {
 	var meta = {};
 	var td = doc.getElementById('contenuto');

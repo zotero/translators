@@ -1,17 +1,3 @@
-{
-	"translatorID": "1c5b122c-7e58-4cd5-932b-93f5ca0b7e1a",
-	"label": "National Post",
-	"creator": "Adam Crymble and Abe Jellinek",
-	"target": "^https://(www\\.)?(national|financial)post\\.com/",
-	"minVersion": "1.0.0b4.r5",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-12 02:31:11"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

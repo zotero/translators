@@ -1,17 +1,3 @@
-{
-	"translatorID": "d4e227c0-cebb-425a-ac8d-a6625c4bfdd2",
-	"label": "ASTIS",
-	"creator": "Abe Jellinek",
-	"target": "^https?://(www\\.)?aina\\.ucalgary\\.ca/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-04 19:44:55"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

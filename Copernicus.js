@@ -1,17 +1,3 @@
-{
-	"translatorID": "8082115d-5bc6-4517-a4e8-abed1b2a784a",
-	"label": "Copernicus",
-	"creator": "Abe Jellinek",
-	"target": "^https?://[^./]+\\.copernicus\\.org/",
-	"minVersion": "2.1",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-01-25 15:59:41"
-}
-
 /*
     ***** BEGIN LICENSE BLOCK *****
 

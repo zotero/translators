@@ -1,17 +1,3 @@
-{
-	"translatorID": "6ec8008d-b206-4a4c-8d0a-8ef33807703b",
-	"label": "The Economist",
-	"creator": "Michael Berkowitz",
-	"target": "^https?://(www\\.)?economist\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-31 11:08:32"
-}
-
 function detectWeb(doc, url) {
 	var m = url.match(/^https?:\/\/[^/]+\/[^/]*\/[^/]*\/\d+/);
 	//Z.debug(m)

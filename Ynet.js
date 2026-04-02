@@ -1,17 +1,3 @@
-{
-	"translatorID": "7f45c3f9-e387-4589-9679-225ddcf6f00e",
-	"label": "Ynet",
-	"creator": "Eran Rosenthal and Abe Jellinek",
-	"target": "^https?://www\\.ynet(\\.co\\.il|news\\.com)/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-03 20:46:38"
-}
-
 /**
 	Copyright (c) 2021 Eran Rosenthal and Abe Jellinek
 	

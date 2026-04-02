@@ -1,17 +1,3 @@
-{
-	"translatorID": "97930de6-8709-409a-a80c-ed64421a842e",
-	"label": "Lippincott Williams and Wilkins",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?journals\\.lww\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-09-01 17:23:56"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,0 +1,12 @@
+{
+	"translatorID": "86c3832a-ccc6-40ab-b5e9-83892423df11",
+	"label": "TimesMachine",
+	"creator": "Abe Jellinek, Sebastian Karcher",
+	"target": "^https?://timesmachine\\.nytimes\\.com/timesmachine/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

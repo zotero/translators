@@ -1,17 +1,3 @@
-{
-	"translatorID": "12541207-ed80-4b59-9d46-fafa3aa61f7f",
-	"label": "Library Catalog (Polaris)",
-	"creator": "Aurimas Vinckevicius",
-	"target": "/polaris/search/(searchresults|title)\\.aspx\\?",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 250,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-02-19 04:55:29"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

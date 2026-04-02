@@ -1,17 +1,3 @@
-{
-	"translatorID": "50d3ca81-3c4c-406b-afb2-0fe8105b9b38",
-	"label": "Champlain Society - Collection",
-	"creator": "Adam Crymble",
-	"target": "^https?://link\\.library\\.utoronto\\.ca",
-	"minVersion": "1.0.0b4.r5",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-28 04:41:28"
-}
-
 function detectWeb(doc, url) {
 	if (doc.location.href.match("search_results")) {
 		return "multiple";

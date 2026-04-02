@@ -1,17 +1,3 @@
-{
-	"translatorID": "cd587058-6125-4b33-a876-8c6aae48b5e8",
-	"label": "WHO",
-	"creator": "Mario Trojan, Philipp Zumstein, and Abe Jellinek",
-	"target": "^https?://apps\\.who\\.int/iris/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 96,
-	"inRepository": true,
-	"translatorType": 12,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-12-06 12:21:28"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

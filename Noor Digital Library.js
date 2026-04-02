@@ -1,17 +1,3 @@
-{
-	"translatorID": "91170c85-7547-4716-b3ae-b82a68d8b19f",
-	"label": "Noor Digital Library",
-	"creator": "Abe Jellinek",
-	"target": "^https?://noorlib\\.ir/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-03 19:35:04"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

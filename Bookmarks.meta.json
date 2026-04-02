@@ -1,0 +1,11 @@
+{
+	"translatorID": "4e7119e0-02be-4848-86ef-79a64185aad8",
+	"label": "Bookmarks",
+	"creator": "Avram Lyon",
+	"target": "html",
+	"minVersion": "2.1b6",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 3
+}

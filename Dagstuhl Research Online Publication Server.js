@@ -1,17 +1,3 @@
-{
-	"translatorID": "0526c18d-8dc8-40c9-8314-399e0b743a4d",
-	"label": "Dagstuhl Research Online Publication Server",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?drops\\.dagstuhl\\.de/",
-	"minVersion": "6.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-07-19 19:20:18"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

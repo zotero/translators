@@ -1,0 +1,12 @@
+{
+	"translatorID": "5978580d-c58c-46c8-9755-9481a3e20f3f",
+	"label": "National Diet Library Catalogue",
+	"creator": "Philipp Zumstein",
+	"target": "^https?://iss\\.ndl\\.go\\.jp/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

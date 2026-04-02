@@ -1,17 +1,3 @@
-{
-	"translatorID": "229d4678-4fa0-44f8-95c4-f4cfdb9b254c",
-	"label": "The National Archives (UK)",
-	"creator": "Sebastian Karcher and Abe Jellinek",
-	"target": "^https?://discovery\\.nationalarchives\\.gov\\.uk/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-12 20:12:57"
-}
-
 /**
 	Copyright (c) 2013-2021 Sebastian Karcher and Abe Jellinek
 	

@@ -1,17 +1,3 @@
-{
-	"translatorID": "c70055c3-a525-45db-8e37-726c6c2ad034",
-	"label": "Wikimedia Commons",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://commons\\.wikimedia\\.org",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-12-06 00:15:52"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

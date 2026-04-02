@@ -1,17 +1,3 @@
-{
-	"translatorID": "dc78e210-31da-4fe5-99d6-1ea1a61874ca",
-	"label": "jurion",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.recht\\.jurion\\.de/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-30 20:15:34"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "6c94ba9a-8639-4f58-bea3-076f774cf3a1",
-	"label": "Brukerhåndboken",
-	"creator": "Sondre Bogen-Straume",
-	"target": "https://brukerhandboken\\.miraheze\\.org/",
-	"minVersion": "5",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-06-27 16:03:43"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

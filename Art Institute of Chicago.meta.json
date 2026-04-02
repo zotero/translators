@@ -1,0 +1,12 @@
+{
+	"translatorID": "8e98b11a-5648-42b2-8542-5f366cb953f6",
+	"label": "Art Institute of Chicago",
+	"creator": "nikhil trivedi, Illya Moskvin",
+	"target": "^https?://(www\\.)?artic\\.edu/(artworks/|collection)",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

@@ -1,0 +1,12 @@
+{
+	"translatorID": "5d506fe3-dbde-4424-90e8-d219c63faf72",
+	"label": "Library Catalog (BiblioCommons)",
+	"creator": "Avram Lyon and Abe Jellinek",
+	"target": "^https?://[^/]+\\.bibliocommons\\.com/",
+	"minVersion": "2.1",
+	"maxVersion": "",
+	"priority": 250,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

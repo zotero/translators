@@ -1,17 +1,3 @@
-{
-	"translatorID": "79c3d292-0afc-42a1-bd86-7e706fc35aa5",
-	"label": "EIDR",
-	"creator": "Aurimas Vinckevicius",
-	"target": "",
-	"minVersion": "1.0",
-	"maxVersion": "",
-	"priority": 80,
-	"inRepository": true,
-	"translatorType": 8,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-03 11:41:00"
-}
-
 var typeMap = {
 //	'Series'
 //	'Season'

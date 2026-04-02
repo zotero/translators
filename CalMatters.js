@@ -1,17 +1,3 @@
-{
-	"translatorID": "64b634ce-3957-4c89-bcce-7603fe552780",
-	"label": "CalMatters",
-	"creator": "Abe Jellinek",
-	"target": "^https?://calmatters\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-07 18:07:46"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "23ba3be6-412d-4dde-9cc1-c4df0cc09378",
-	"label": "Library Catalog (SIRSI eLibrary)",
-	"creator": "Mang Sun",
-	"target": "/uhtbin/(cgisirsi|quick_keyword)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 250,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-27 20:32:49"
-}
-
 /* Based on the SIRSI translator by Simon Kornblith and Michael Berkowitz,
    and the modifications for Rutgers (IRIS) by Chad Mills.
    Includes code for Spanish version, e.g. PUCP: http://biblioteca.pucp.edu.pe/ (no permalink)

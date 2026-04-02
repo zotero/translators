@@ -1,17 +1,3 @@
-{
-	"translatorID": "d2a9e388-5b79-403a-b4ec-e7099ca1bb7f",
-	"label": "CAOD",
-	"creator": "Guy Aglionby",
-	"target": "^https?://caod\\.oriprobe\\.com/articles/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-09-08 13:38:50"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

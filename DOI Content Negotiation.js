@@ -1,16 +1,3 @@
-{
-	"translatorID": "b28d0d42-8549-4c6d-83fc-8382874a5cb9",
-	"label": "DOI Content Negotiation",
-	"creator": "Sebastian Karcher",
-	"target": "",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 8,
-	"lastUpdated": "2025-07-27 04:51:26"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

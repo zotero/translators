@@ -1,17 +1,3 @@
-{
-	"translatorID": "3b978207-5d5c-416f-b15e-2d9da4aa75e9",
-	"label": "OSF Preprints",
-	"creator": "Sebastian Karcher",
-	"target": "^https://osf\\.io/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-28 14:51:21"
-}
-
 /*
     ***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "cde4428-5434-437f-9cd9-2281d14dbf9",
-	"label": "Ovid",
-	"creator": "Simon Kornblith, Michael Berkowitz, and Ovid Technologies",
-	"target": "(gw2|asinghal|sp|ovid)[^/]+/ovidweb\\.cgi",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-03 21:51:19"
-}
-
 /*
    Ovid Zotero Translator
    Copyright (c) 2000-2012 Ovid Technologies, Inc., 2025 Abe Jellinek

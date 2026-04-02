@@ -1,17 +1,3 @@
-{
-	"translatorID": "b7c665ba-173c-4dea-b28e-e866580002a2",
-	"label": "ZoteroBib",
-	"creator": "Dan Stillman",
-	"target": "^https://zbib\\.org/",
-	"minVersion": "4.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-23 02:34:46"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

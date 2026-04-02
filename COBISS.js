@@ -1,17 +1,3 @@
-{
-	"translatorID": "ceace65b-4daf-4200-a617-a6bf24c75607",
-	"label": "COBISS",
-	"creator": "Brendan O'Connell",
-	"target": "^https?://plus\\.cobiss\\.net/cobiss",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-17 18:57:34"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

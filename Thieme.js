@@ -1,17 +1,3 @@
-{
-	"translatorID": "abb72b5b-f807-4ff5-a324-ae1afea8a95a",
-	"label": "Thieme",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?thieme-connect\\.com/products/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-06-10 22:59:37"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

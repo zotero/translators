@@ -1,17 +1,3 @@
-{
-	"translatorID": "cc27d642-eab0-4c85-aba8-7a01a9b4e779",
-	"label": "Standard Ebooks",
-	"creator": "Brendan O'Connell",
-	"target": "^https?://standardebooks\\.org/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-02-24 09:12:54"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	Copyright © 2023 Brendan O'Connell

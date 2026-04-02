@@ -1,16 +1,3 @@
-{
-	"translatorID": "cdb5c893-ab69-4e96-9b5c-f4456d49ddd8",
-	"label": "Câmara Brasileira do Livro ISBN",
-	"creator": "Abe Jellinek",
-	"target": "",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 98,
-	"inRepository": true,
-	"translatorType": 8,
-	"lastUpdated": "2023-09-26 16:11:18"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

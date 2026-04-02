@@ -1,0 +1,12 @@
+{
+	"translatorID": "411f9a8b-64f3-4465-b7df-a3c988b602f3",
+	"label": "RePEc - Econpapers",
+	"creator": "Sebastian Karcher",
+	"target": "^https?://econpapers\\.repec\\.org/",
+	"minVersion": "5.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

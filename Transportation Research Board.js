@@ -1,17 +1,3 @@
-{
-	"translatorID": "a1a5a46b-62e1-49ef-8874-ca07ada35c3a",
-	"label": "Transportation Research Board",
-	"creator": "Abe Jellinek",
-	"target": "^https?://(www|trid)\\.trb\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-12-12 20:11:41"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

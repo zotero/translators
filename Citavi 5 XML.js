@@ -1,20 +1,3 @@
-{
-	"translatorID": "e7243cef-a709-4a46-ba46-1b1318051bec",
-	"label": "Citavi 5 XML",
-	"creator": "Philipp Zumstein, Tomasz Najdek",
-	"target": "xml",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"configOptions": {
-		"dataMode": "xml/dom",
-		"async": true
-	},
-	"inRepository": true,
-	"translatorType": 1,
-	"lastUpdated": "2025-01-04 01:03:00"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

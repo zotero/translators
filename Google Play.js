@@ -1,17 +1,3 @@
-{
-	"translatorID": "abc89357-6185-4ddd-8583-80034b754832",
-	"label": "Google Play",
-	"creator": "Avram Lyon",
-	"target": "^https?://play\\.google\\.com/",
-	"minVersion": "4.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-07 18:01:47"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

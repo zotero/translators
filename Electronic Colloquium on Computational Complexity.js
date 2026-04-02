@@ -1,17 +1,3 @@
-{
-	"translatorID": "09a9599e-c20e-a405-d10d-35ad4130a426",
-	"label": "Electronic Colloquium on Computational Complexity",
-	"creator": "Jonas Schrieb and Morgan Shirley",
-	"target": "^https?://eccc\\.weizmann\\.ac\\.il/(title|year|keyword|report|search)",
-	"minVersion": "1.0.0b3.r1",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-14 06:03:23"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

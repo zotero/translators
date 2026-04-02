@@ -1,17 +1,3 @@
-{
-	"translatorID": "42680c5e-1ae8-4171-ab53-afe1d8e840d4",
-	"label": "scinapse",
-	"creator": "Vincent Carret",
-	"target": "^https?://(www\\.)?scinapse\\.io/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-14 21:01:40"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

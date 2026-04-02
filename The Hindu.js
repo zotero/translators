@@ -1,17 +1,3 @@
-{
-	"translatorID": "06142d59-fa9c-48c3-982b-6e7c67d3d6b8",
-	"label": "The Hindu",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.thehindu\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-05 10:59:44"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

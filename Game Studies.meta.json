@@ -1,0 +1,12 @@
+{
+	"translatorID": "8c2c716c-09ba-421a-ae23-a1590d90a95e",
+	"label": "Game Studies",
+	"creator": "John Weis",
+	"target": "^https?://gamestudies\\.org/\\d",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

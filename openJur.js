@@ -1,17 +1,3 @@
-{
-	"translatorID": "a078c90c-c016-4a15-9b1f-40989b1d153e",
-	"label": "openJur",
-	"creator": "Abe Jellinek",
-	"target": "^https?://openjur\\.de/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-18 20:30:28"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

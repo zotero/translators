@@ -1,24 +1,3 @@
-{
-	"translatorID": "14763d24-8ba0-45df-8f52-b8d1108e7ac9",
-	"label": "Zotero RDF",
-	"creator": "Simon Kornblith",
-	"target": "rdf",
-	"minVersion": "1.0.0b4.r1",
-	"maxVersion": "",
-	"priority": 25,
-	"configOptions": {
-		"getCollections": "true",
-		"dataMode": "rdf/xml"
-	},
-	"displayOptions": {
-		"exportNotes": true,
-		"exportFileData": false
-	},
-	"inRepository": true,
-	"translatorType": 2,
-	"lastUpdated": "2026-03-06 21:33:15"
-}
-
 var addedCollections = new Set();
 var item;
 var rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";

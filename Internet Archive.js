@@ -1,17 +1,3 @@
-{
-	"translatorID": "db0f4858-10fa-4f76-976c-2592c95f029c",
-	"label": "Internet Archive",
-	"creator": "Adam Crymble, Sebastian Karcher",
-	"target": "^https?://(www\\.)?archive\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-16 13:38:10"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

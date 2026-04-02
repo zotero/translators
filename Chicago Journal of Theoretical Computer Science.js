@@ -1,17 +1,3 @@
-{
-	"translatorID": "1e2a9aba-eb04-4398-9e3a-630e6132db13",
-	"label": "Chicago Journal of Theoretical Computer Science",
-	"creator": "Morgan Shirley",
-	"target": "^https?://cjtcs\\.cs\\.uchicago\\.edu/articles",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-14 00:10:19"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "b56f856e-934e-4b46-bc58-d61dccc9f32f",
-	"label": "Mainichi Daily News",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://mainichi\\.jp/(?:english/)?(articles/|search\\?)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-17 20:25:31"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

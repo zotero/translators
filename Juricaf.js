@@ -1,17 +1,3 @@
-{
-	"translatorID": "86168097-0ce0-4c77-ba34-8bd57f47a3d3",
-	"label": "Juricaf",
-	"creator": "Guillaume Adreani and Abe Jellinek",
-	"target": "^https?://(www\\.)?juricaf\\.org/(arret|recherche)/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-12 16:37:43"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

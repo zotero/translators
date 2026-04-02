@@ -1,0 +1,12 @@
+{
+	"translatorID": "e329ec79-397e-4aa5-a06e-1aa32f10a138",
+	"label": "Lapham's Quarterly",
+	"creator": "Zoë C. Ma",
+	"target": "^https?://www\\.laphamsquarterly\\.org/",
+	"minVersion": "5.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

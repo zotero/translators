@@ -1,17 +1,3 @@
-{
-	"translatorID": "72cb2536-3211-41e0-ae8b-974c0385e085",
-	"label": "ARTFL Encyclopedie",
-	"creator": "Sean Takats, Sebastian Karcher, and Abe Jellinek",
-	"target": "^https?://artflsrv\\d+\\.uchicago\\.edu/philologic4/encyclopedie\\d+/(navigate/|query)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-30 19:55:06"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

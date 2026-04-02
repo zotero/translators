@@ -1,17 +1,3 @@
-{
-	"translatorID": "6773a9af-5375-3224-d148-d32793884dec",
-	"label": "InfoTrac",
-	"creator": "Simon Kornblith",
-	"target": "^https?://[^/]+/itw/infomark/",
-	"minVersion": "1.0.0b3.r1",
-	"maxVersion": "",
-	"priority": 250,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-28 04:42:55"
-}
-
 function detectWeb(doc, url) {
 	
 	// ensure that there is an InfoTrac logo

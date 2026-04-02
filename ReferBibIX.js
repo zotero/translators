@@ -1,19 +1,3 @@
-{
-	"translatorID": "881f60f2-0802-411a-9228-ce5f47b64c7d",
-	"label": "Refer/BibIX",
-	"creator": "Simon Kornblith",
-	"target": "txt",
-	"minVersion": "2.1",
-	"maxVersion": "",
-	"priority": 100,
-	"displayOptions": {
-		"exportCharset": "UTF-8"
-	},
-	"inRepository": true,
-	"translatorType": 3,
-	"lastUpdated": "2023-10-27 09:03:42"
-}
-
 function detectImport() {
 	var lineRe = /%[A-Z0-9*$] .+/;
 	var line;

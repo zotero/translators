@@ -1,17 +1,3 @@
-{
-	"translatorID": "2bd6876f-26ce-43ec-a9af-88616a464ed0",
-	"label": "Human Rights Watch",
-	"creator": "Abe Jellinek",
-	"target": "^https?://www\\.hrw\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-14 03:16:54"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

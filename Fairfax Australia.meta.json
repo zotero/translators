@@ -1,0 +1,12 @@
+{
+	"translatorID": "5c7892cb-a19e-4b85-8700-d68b547898f9",
+	"label": "Fairfax Australia",
+	"creator": "Martin Lewis",
+	"target": "^https?://www\\.(theage|smh|brisbanetimes|watoday)\\.com\\.au/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

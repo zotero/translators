@@ -1,0 +1,12 @@
+{
+	"translatorID": "f7262c7d-a11c-4679-899c-bab8c21a19c6",
+	"label": "Regeringskansliet",
+	"creator": "Isak Bergdahl",
+	"target": "^https?://(www\\.)?regeringen\\.se/",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

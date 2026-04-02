@@ -1,17 +1,3 @@
-{
-	"translatorID": "ac9c95f6-7692-47fb-b231-4cc36d1d67f5",
-	"label": "National Gallery of Australia",
-	"creator": "Ben Swift",
-	"target": "^https?://searchthecollection\\.nga\\.gov\\.au/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-25 17:02:37"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

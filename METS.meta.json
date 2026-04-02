@@ -1,0 +1,14 @@
+{
+	"translatorID": "5c6895a1-b6a9-4939-9c65-43f8ae0ef096",
+	"label": "METS",
+	"creator": "Abe Jellinek",
+	"target": "xml",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 50,
+	"configOptions": {
+		"dataMode": "xml/dom"
+	},
+	"inRepository": true,
+	"translatorType": 1
+}

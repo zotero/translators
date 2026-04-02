@@ -1,17 +1,3 @@
-{
-	"translatorID": "283d6b78-d3d7-48d4-8fc0-0bdabef7c4ee",
-	"label": "Baruch Foundation",
-	"creator": "Abe Jellinek",
-	"target": "^https?://baruchfoundation\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-20 18:55:13"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

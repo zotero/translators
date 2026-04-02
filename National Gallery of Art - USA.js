@@ -1,17 +1,3 @@
-{
-	"translatorID": "ed28758b-9c39-4e1c-af89-ce1c9202b70f",
-	"label": "National Gallery of Art - USA",
-	"creator": "Adam Crymble and Abe Jellinek",
-	"target": "^https?://www\\.nga\\.gov/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-08 03:45:09"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

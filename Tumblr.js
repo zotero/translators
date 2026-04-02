@@ -1,17 +1,3 @@
-{
-	"translatorID": "552cdac3-f130-4763-a88e-8e74b92dcb1b",
-	"label": "Tumblr",
-	"creator": "febrezo",
-	"target": "^https?://[^/]+\\.tumblr\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-01 23:04:10"
-}
-
 /*
 	Tumblr Translator
 	Copyright (C) 2020 Félix Brezo, felixbrezo@gmail.com

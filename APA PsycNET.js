@@ -1,17 +1,3 @@
-{
-	"translatorID": "1e1e35be-6264-45a0-ad2e-7212040eb984",
-	"label": "APA PsycNet",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(psycnet|doi)\\.apa\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-10 19:48:42"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "dc879929-ae39-45b3-b49b-dab2c80815ab",
-	"label": "Encyclopedia of Korean Culture",
-	"creator": "jacoblee36251",
-	"target": "^https?://(www\\.)?encykorea\\.aks\\.ac\\.kr/Article/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-15 20:07:33"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

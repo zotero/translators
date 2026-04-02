@@ -1,17 +1,3 @@
-{
-	"translatorID": "66782e6a-a8db-4ed2-9a4f-ce4b30372e22",
-	"label": "University of Wisconsin-Madison Libraries Catalog",
-	"creator": "Philipp Zumstein",
-	"target": "^https://search\\.library\\.wisc\\.edu/(catalog|search)/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-05-31 01:20:34"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "d8337e3a-434c-457a-a35b-b17e6a7fdccd",
-	"label": "Homeland Security Digital Library",
-	"creator": "Abe Jellinek",
-	"target": "^https?://www\\.hsdl\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-26 20:12:30"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

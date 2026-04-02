@@ -1,17 +1,3 @@
-{
-	"translatorID": "7bd82b70-1ed7-4aaf-bea2-bcbe6429a3ee",
-	"label": "National Library of Norway",
-	"creator": "Dan Michael O. Heggø",
-	"target": "^https?://(www\\.)?nb\\.no/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-14 15:58:43"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

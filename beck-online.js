@@ -1,17 +1,3 @@
-{
-	"translatorID": "e8544423-1515-4daf-bb5d-3202bf422b58",
-	"label": "beck-online",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://beck[-.]online\\.beck\\.de/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-07-09 13:33:45"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

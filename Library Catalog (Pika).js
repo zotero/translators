@@ -1,17 +1,3 @@
-{
-	"translatorID": "9ace2311-a958-471d-a8c7-61c647c6d9ae",
-	"label": "Library Catalog (Pika)",
-	"creator": "Abe Jellinek",
-	"target": "/Record/\\.[a-z]|/GroupedWork/[a-z0-9-]+|/Union/Search\\?",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 250,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-17 23:44:24"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "6c61897b-ca44-4ce6-87c1-2da68b44e6f7",
-	"label": "Summon 2",
-	"creator": "Abe Jellinek",
-	"target": "^https?://([^/]+\\.)?summon\\.serialssolutions\\.com/",
-	"minVersion": "4.0",
-	"maxVersion": "",
-	"priority": 150,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2021-07-20 21:07:15"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

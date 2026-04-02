@@ -1,17 +1,3 @@
-{
-	"translatorID": "04a23cbe-5f8b-d6cd-8eb1-2e23bcc8ae8f",
-	"label": "ePrint IACR",
-	"creator": "Jonas Schrieb",
-	"target": "^https://eprint\\.iacr\\.org/",
-	"minVersion": "6.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-19 18:51:24"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "cbed2134-f963-43a0-a8ad-9813e94de9a7",
-	"label": "Cascadilla Proceedings Project",
-	"creator": "Abe Jellinek",
-	"target": "^https?://(www\\.)?lingref\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-29 00:35:04"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

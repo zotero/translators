@@ -1,0 +1,12 @@
+{
+	"translatorID": "e1356ac2-8254-44d5-8ece-4829827d5bc6",
+	"label": "Lagen.nu",
+	"creator": "Isak Bergdahl",
+	"target": "^https?://lagen\\.nu/",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

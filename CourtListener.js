@@ -1,17 +1,3 @@
-{
-	"translatorID": "07890a30-866e-452a-ac3e-c19fcb39b597",
-	"label": "CourtListener",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.courtlistener\\.com/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-04-29 03:02:00"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

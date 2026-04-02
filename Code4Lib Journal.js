@@ -1,17 +1,3 @@
-{
-	"translatorID": "a326fc49-60c2-405b-8f44-607e5d18b9ad",
-	"label": "Code4Lib Journal",
-	"creator": "Michael Berkowitz",
-	"target": "^https?://journal\\.code4lib\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-08-23 11:15:21"
-}
-
 function detectWeb(doc, url) {
 	if (getSearchResults(doc, true)) {
 		return "multiple";

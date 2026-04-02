@@ -1,17 +1,3 @@
-{
-	"translatorID": "3b163469-3e62-46d8-82a1-4f31e86bf6f4",
-	"label": "FAOLEX Database",
-	"creator": "Bin Liu",
-	"target": "^https?://www\\.fao\\.org/faolex/results/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-28 21:09:38"
-}
-
 /*
     ***** BEGIN LICENSE BLOCK *****
 

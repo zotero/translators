@@ -1,0 +1,12 @@
+{
+	"translatorID": "c87a910d-70aa-4f33-9bec-f703d63ba84f",
+	"label": "GameStar/GamePro",
+	"creator": "Matthias Mailänder",
+	"target": "^https?://(www\\.)?game(star|pro)\\.de",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

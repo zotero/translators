@@ -1,17 +1,3 @@
-{
-	"translatorID": "26d2a264-f25d-4898-b40c-e7c83fdbbc34",
-	"label": "Deutsche Fotothek",
-	"creator": "Abe Jellinek",
-	"target": "https?://www\\.deutschefotothek\\.de/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-29 02:40:00"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

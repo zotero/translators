@@ -1,17 +1,3 @@
-{
-	"translatorID": "f054a3d9-d705-4d2e-a96a-258508bebba3",
-	"label": "Wired",
-	"creator": "czar",
-	"target": "^https?://(www\\.)?wired\\.(com|co\\.uk)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-01-23 16:11:56"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

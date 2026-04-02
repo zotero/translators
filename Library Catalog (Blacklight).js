@@ -1,17 +1,3 @@
-{
-	"translatorID": "fc54af5d-736c-4dfc-96ab-182df76b5fa3",
-	"label": "Library Catalog (Blacklight)",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://(catalog\\.libraries\\.psu|clio\\.columbia|searchworks\\.stanford|search\\.library\\.brown)\\.edu/(view|catalog|\\?search)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-03 01:34:52"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

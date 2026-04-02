@@ -1,17 +1,3 @@
-{
-	"translatorID": "271ee1a5-da86-465b-b3a5-eafe7bd3c156",
-	"label": "Idref",
-	"creator": "Sylvain Machefert",
-	"target": "^https?://www\\.idref\\.fr/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-29 09:01:54"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

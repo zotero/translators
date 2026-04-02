@@ -1,17 +1,3 @@
-{
-	"translatorID": "9d0b3532-f3ee-4096-87e6-5c5759a3e9dc",
-	"label": "MPG PuRe",
-	"creator": "Abe Jellinek",
-	"target": "^https?://pure\\.mpg\\.de/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-07 20:00:26"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

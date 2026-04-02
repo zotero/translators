@@ -1,17 +1,3 @@
-{
-	"translatorID": "54c3bec7-c1bc-4ffa-b103-53759845b6c4",
-	"label": "Heise",
-	"creator": "optiprime, ApoB-100",
-	"target": "^https?://www\\.heise\\.de/(suche|select)/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2021-05-27 00:40:31"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

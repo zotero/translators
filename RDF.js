@@ -1,20 +1,3 @@
-{
-	"translatorID": "5e3ad958-ac79-463d-812b-a86a9235c28f",
-	"label": "RDF",
-	"creator": "Simon Kornblith",
-	"target": "rdf",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 100,
-	"configOptions": {
-		"async": true,
-		"dataMode": "rdf/xml"
-	},
-	"inRepository": true,
-	"translatorType": 1,
-	"lastUpdated": "2026-03-06 21:44:09"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

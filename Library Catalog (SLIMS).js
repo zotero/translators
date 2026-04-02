@@ -1,17 +1,3 @@
-{
-	"translatorID": "fc3ac6f7-b461-49fe-879c-dd234f9c101c",
-	"label": "Library Catalog (SLIMS)",
-	"creator": "Sebastian Karcher",
-	"target": "(^https?://makassarlib\\.net|^https?://kit\\.ft\\.ugm\\.ac\\.id/ucs|/libsenayan)/index\\.php",
-	"minVersion": "2.1",
-	"maxVersion": "",
-	"priority": 250,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcv",
-	"lastUpdated": "2014-08-26 04:10:09"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

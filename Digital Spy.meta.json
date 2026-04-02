@@ -1,0 +1,12 @@
+{
+	"translatorID": "d45c50cb-6dee-4cfb-974d-797991f8385b",
+	"label": "Digital Spy",
+	"creator": "czar",
+	"target": "^https?://(www\\.)?digitalspy\\.com",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

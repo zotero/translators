@@ -1,17 +1,3 @@
-{
-	"translatorID": "68a54283-67e0-4e1c-ad3d-5b699868b194",
-	"label": "Antikvarium.hu",
-	"creator": "Velősy Péter Kristóf",
-	"target": "^https?://(www\\.)?antikvarium\\.hu/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-22 19:39:49"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

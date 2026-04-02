@@ -1,17 +1,3 @@
-{
-	"translatorID": "ab077e98-50bd-4fa2-9843-33f28b4b5e2e",
-	"label": "Perceiving Systems",
-	"creator": "Abe Jellinek",
-	"target": "^https?://ps\\.is\\.tuebingen\\.mpg\\.de/publications",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-09 04:00:49"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

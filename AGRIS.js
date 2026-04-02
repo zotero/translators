@@ -1,17 +1,3 @@
-{
-	"translatorID": "48a67d12-1bcf-44ac-a4f4-11457ebfc0bb",
-	"label": "AGRIS",
-	"creator": "Abe Jellinek",
-	"target": "^https?://agris\\.fao\\.org/agris-search/search",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-12 21:34:16"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,0 +1,12 @@
+{
+	"translatorID": "57fd3205-7211-4b9b-ad39-d2747247d0af",
+	"label": "American Prospect",
+	"creator": "Sebastian Karcher",
+	"target": "^https?://(www\\.)?prospect\\.org",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsib"
+}

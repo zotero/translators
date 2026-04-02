@@ -1,26 +1,3 @@
-{
-	"translatorID": "9cb70025-a888-4a29-a210-93ec52da40d4",
-	"label": "BibTeX",
-	"creator": "Simon Kornblith, Richard Karnesky and Emiliano heyns",
-	"target": "bib",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 200,
-	"configOptions": {
-		"async": true,
-		"getCollections": true
-	},
-	"displayOptions": {
-		"exportCharset": "UTF-8",
-		"exportNotes": true,
-		"exportFileData": false,
-		"useJournalAbbreviation": false
-	},
-	"inRepository": true,
-	"translatorType": 3,
-	"lastUpdated": "2024-03-25 14:51:02"
-}
-
 /*
    BibTeX Translator
    Copyright (C) 2019 CHNM, Simon Kornblith, Richard Karnesky and Emiliano heyns

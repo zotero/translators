@@ -1,17 +1,3 @@
-{
-	"translatorID": "e6d9cf77-53e4-47f5-98ae-a69eba6d985f",
-	"label": "WestLaw UK",
-	"creator": "George Gebbett",
-	"target": "^https://uk\\.westlaw\\.com/Document/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-02-13 15:15:03"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

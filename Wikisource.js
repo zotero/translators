@@ -1,17 +1,3 @@
-{
-	"translatorID": "076bd26a-1517-469d-85e9-31316a6f6cb0",
-	"label": "Wikisource",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://en\\.wikisource\\.org/w",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-12-06 00:17:12"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

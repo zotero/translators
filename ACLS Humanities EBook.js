@@ -1,17 +1,3 @@
-{
-	"translatorID": "2553b683-dc1b-4a1e-833a-7a7755326186",
-	"label": "ACLS Humanities EBook",
-	"creator": "Abe Jellinek",
-	"target": "^https?://www\\.fulcrum\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-03 01:54:15"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

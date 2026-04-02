@@ -1,0 +1,12 @@
+{
+	"translatorID": "d8341c22-8cf4-428f-be3b-ada9fa8933eb",
+	"label": "Deutsche Nationalbibliothek",
+	"creator": "Philipp Zumstein",
+	"target": "^https?://portal\\.dnb\\.de/opac(\\.htm|/(enhancedSearch|simpleSearch|showFullRecord)\\?)",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

@@ -1,17 +1,3 @@
-{
-	"translatorID": "4ec51dc9-b949-497e-856b-a7624175d5c6",
-	"label": "La República (Peru)",
-	"creator": "Abe Jellinek",
-	"target": "^https?://larepublica\\.pe/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-14 18:50:45"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

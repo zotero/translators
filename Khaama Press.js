@@ -1,17 +1,3 @@
-{
-	"translatorID": "dfb58faa-d501-4de8-8e03-ea84ef8986cd",
-	"label": "Khaama Press",
-	"creator": "Abe Jellinek",
-	"target": "^https?://www\\.khaama\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-16 03:29:02"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "d522149f-b776-413f-8aa4-ced13f59c759",
-	"label": "Roll Call",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.|blogs\\.)?rollcall\\.com",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-04 17:53:19"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

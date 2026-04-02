@@ -1,17 +1,3 @@
-{
-	"translatorID": "daad5868-6e6a-414e-b2da-14fa013879fc",
-	"label": "Erudit",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?erudit\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-02 22:48:58"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

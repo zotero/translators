@@ -1,17 +1,3 @@
-{
-	"translatorID": "b61c224b-34b6-4bfd-8a76-a476e7092d43",
-	"label": "SSRN",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://(www|papers|hq)\\.ssrn\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-04-04 18:26:02"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

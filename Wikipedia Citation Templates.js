@@ -1,19 +1,3 @@
-{
-	"translatorID": "3f50aaac-7acc-4350-acd0-59cb77faf620",
-	"label": "Wikipedia Citation Templates",
-	"creator": "Simon Kornblith",
-	"target": "txt",
-	"minVersion": "1.0.0b4.r1",
-	"maxVersion": "",
-	"priority": 100,
-	"displayOptions": {
-		"exportCharset": "UTF-8"
-	},
-	"inRepository": true,
-	"translatorType": 2,
-	"lastUpdated": "2023-11-05 21:29:00"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

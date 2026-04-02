@@ -1,17 +1,3 @@
-{
-	"translatorID": "5e1f3e08-ca5f-4196-a662-6cf46b3cdaa7",
-	"label": "YPFS",
-	"creator": "Corey Runkel",
-	"target": "^https?://ypfs\\.som\\.yale\\.edu",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-24 13:06:04"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

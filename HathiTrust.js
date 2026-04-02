@@ -1,17 +1,3 @@
-{
-	"translatorID": "31da33ad-b4d9-4e99-b9ea-3e1ddad284d8",
-	"label": "HathiTrust",
-	"creator": "Sebastian Karcher and Abe Jellinek",
-	"target": "^https?://(catalog|babel)\\.hathitrust\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-04-29 03:02:00"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

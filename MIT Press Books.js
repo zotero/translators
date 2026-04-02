@@ -1,17 +1,3 @@
-{
-	"translatorID": "ac277fbe-000c-46da-b145-fbe799d17eda",
-	"label": "MIT Press Books",
-	"creator": "Guy Aglionby",
-	"target": "https://(www\\.)?mitpress\\.mit\\.edu/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-08-05 20:50:04"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

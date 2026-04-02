@@ -48,7 +48,6 @@
 		"zotero-translator/not-executable": "error",
 		"zotero-translator/header-valid-json": "error",
 		"zotero-translator/header-translator-id": "error",
-		"zotero-translator/header-last-updated": "warn",
 		"zotero-translator/header-translator-type": "warn",
 
 		"zotero-translator/no-for-each": "warn",

@@ -1,17 +1,3 @@
-{
-	"translatorID": "f4a5876a-3e53-40e2-9032-d99a30d7a6fc",
-	"label": "ACLWeb",
-	"creator": "Guy Aglionby",
-	"target": "^https?://(www\\.)?(aclanthology\\.org|aclweb\\.org/anthology)/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-10 10:36:48"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

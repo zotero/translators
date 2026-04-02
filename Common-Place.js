@@ -1,17 +1,3 @@
-{
-	"translatorID": "c3edb423-f267-47a1-a8c2-158c247f87c2",
-	"label": "Common-Place",
-	"creator": "Frederick Gibbs, Philipp Zumstein",
-	"target": "^https?://(www\\.)?(common-place\\.org/|common-place-archives\\.org/)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-10 09:34:34"
-}
-
 function detectWeb(doc, url) {
 	if (getSearchResults(doc, true)) {//multiples works only on search pages
 		return "multiple";

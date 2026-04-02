@@ -1,17 +1,3 @@
-{
-	"translatorID": "d6c6210a-297c-4b2c-8c43-48cb503cc49e",
-	"label": "Springer Link",
-	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://link\\.springer\\.com/(search(/page/\\d+)?\\?|(article|chapter|book|referenceworkentry|protocol|journal|referencework)/.+)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-07-22 20:08:47"
-}
-
 /*
    SpringerLink Translator
    Copyright (C) 2020 Aurimas Vinckevicius and Sebastian Karcher

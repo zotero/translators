@@ -1,17 +1,3 @@
-{
-	"translatorID": "7987b420-e8cb-4bea-8ef7-61c2377cd686",
-	"label": "NASA ADS",
-	"creator": "Tim Hostetler, Abe Jellinek, Zoë C. Ma, Jennifer Chen",
-	"target": "^(https://ui\\.adsabs\\.harvard\\.edu/(search|abs)/)|(^https://scixplorer\\.org/(search|abs/))",
-	"minVersion": "6.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-07-25 19:49:19"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

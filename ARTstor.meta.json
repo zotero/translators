@@ -1,0 +1,12 @@
+{
+	"translatorID": "5278b20c-7c2c-4599-a785-12198ea648bf",
+	"label": "ARTstor",
+	"creator": "Abe Jellinek",
+	"target": "^https?://library\\.artstor\\.org/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

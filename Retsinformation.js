@@ -1,17 +1,3 @@
-{
-	"translatorID": "feef66bf-4b52-498f-a586-8e9a99dc07a0",
-	"label": "Retsinformation",
-	"creator": "Roald Frøsig and Abe Jellinek",
-	"target": "^https?://(www\\.)?retsinformation\\.dk/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-01-15 18:52:34"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

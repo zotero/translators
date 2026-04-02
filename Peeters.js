@@ -1,17 +1,3 @@
-{
-	"translatorID": "c216ae06-da95-4fd0-bce8-38de1f6cf17c",
-	"label": "Peeters",
-	"creator": "Timotheus Kim",
-	"target": "^https?://(www\\.)?poj\\.peeters-leuven\\.be/content\\.php",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-27 05:23:49"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

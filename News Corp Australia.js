@@ -1,17 +1,3 @@
-{
-	"translatorID": "393afc28-212d-47dd-be87-ec51bc7a58a4",
-	"label": "News Corp Australia",
-	"creator": "Michael Berkowitz and Abe Jellinek",
-	"target": "^https?://(www\\.)?(news|theaustralian|couriermail|adelaidenow|heraldsun|dailytelegraph|goldcoastbulletin|themercury|dailymercury|ntnews|northshoretimes|geelongadvertiser|townsvillebulletin|cairnspost|themorningbulletin|gladstoneobserver|sunshinecoastdaily|qt|thechronicle)\\.com\\.au/",
-	"minVersion": "1.0.0b3.r1",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-14 10:46:05"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

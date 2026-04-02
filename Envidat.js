@@ -1,17 +1,3 @@
-{
-	"translatorID": "0f6f5164-b44b-4ef6-9c5e-e3f39637569b",
-	"label": "Envidat",
-	"creator": "Alain Borel",
-	"target": "^https://(www\\.)?envidat.ch/",
-	"minVersion": "6.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-04-29 03:02:00"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

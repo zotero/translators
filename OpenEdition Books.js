@@ -1,17 +1,3 @@
-{
-	"translatorID": "4c6b4c5f-7286-45bb-8e99-0c518d177fa7",
-	"label": "OpenEdition Books",
-	"creator": "Cédric Chatelain",
-	"target": "^https?://books\\.openedition\\.org/",
-	"minVersion": "1.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-03 11:17:56"
-}
-
 function detectWeb(doc, url){
 	//testing if a link to a rdf file exist
 	if (doc.getElementById('zotero_rdf')){

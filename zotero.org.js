@@ -1,17 +1,3 @@
-{
-	"translatorID": "c82c574d-7fe8-49ca-a360-a05d6e34fec0",
-	"label": "zotero.org",
-	"creator": "Dan Stillman, Aurimas Vinckevicius, Tomasz Najdek",
-	"target": "^https?://[^/]*zotero\\.org(:\\d+)?/.+/(items|collections|library|publications|trash|search|item-list|item-details)(/|$)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2021-07-18 22:33:42"
-}
-
 /*
   ***** BEGIN LICENSE BLOCK *****
 

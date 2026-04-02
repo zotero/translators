@@ -1,17 +1,3 @@
-{
-	"translatorID": "327cacea-9603-4554-91a8-ed0587e0d83a",
-	"label": "JISC Historical Texts",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://(data\\.)?[^/]*historicaltexts\\.jisc\\.ac\\.uk/(view|results)\\?",
-	"minVersion": "4.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-07 16:45:40"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

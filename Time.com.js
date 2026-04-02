@@ -1,17 +1,3 @@
-{
-	"translatorID": "d9be934c-edb9-490c-a88d-34e2ee106cd7",
-	"label": "Time.com",
-	"creator": "Michael Berkowitz",
-	"target": "^https?://([^/]*\\.)?time\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2019-10-06 18:12:01"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

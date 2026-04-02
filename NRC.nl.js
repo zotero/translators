@@ -1,17 +1,3 @@
-{
-	"translatorID": "8e708ceb-ce42-446f-bffd-21e2bdeb0742",
-	"label": "NRC.nl",
-	"creator": "Martijn Staal",
-	"target": "^https?://www\\.nrc\\.nl",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-06-20 08:03:28"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

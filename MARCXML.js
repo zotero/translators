@@ -1,16 +1,3 @@
-{
-	"translatorID": "edd87d07-9194-42f8-b2ad-997c4c7deefd",
-	"label": "MARCXML",
-	"creator": "Sebastian Karcher",
-	"target": "xml",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 1,
-	"lastUpdated": "2025-03-28 15:11:06"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

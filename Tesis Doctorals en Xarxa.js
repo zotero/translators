@@ -1,17 +1,3 @@
-{
-	"translatorID": "dd2d7c63-0c4b-4da4-b1d8-e72c7445c1e0",
-	"label": "Tesis Doctorals en Xarxa",
-	"creator": "CSUC",
-	"target": "^https?://(www\\.)?(tdx\\.cat|tesisenred\\.net)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-03-11 20:42:11"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

@@ -9,10 +9,29 @@ const END_TEST_CASES = '/** END TEST CASES **/';
 
 /**
  * Read and parse a translator file into its component parts.
- * Returns { header, headerRaw, headerLineCount, code, testCases, testCasesRaw, raw }
+ * Returns { header, headerRaw, headerLineCount, code, testCases, testCasesRaw, raw, metaJsonPath }
+ *
+ * If a .meta.json sidecar exists, the header is read from it instead of
+ * parsing the top of the .js file.
  */
 export async function readTranslator(filePath) {
 	const raw = await fs.readFile(filePath, 'utf-8');
+	const metaJsonPath = filePath.replace(/\.js$/, '.meta.json');
+	let metaHeader;
+	try {
+		metaHeader = JSON.parse(await fs.readFile(metaJsonPath, 'utf-8'));
+	}
+	catch {
+		// No .meta.json or invalid - fall back to parsing from JS
+	}
+
+	if (metaHeader) {
+		const result = parseTranslator(raw);
+		result.header = metaHeader;
+		result.metaJsonPath = metaJsonPath;
+		return result;
+	}
+
 	return parseTranslator(raw);
 }
 
@@ -123,11 +142,21 @@ export async function updateHeader(filePath, updates) {
 
 	Object.assign(translator.header, updates);
 
-	// Rebuild the file: new header + original code + original test cases block
-	const raw = translator.raw;
-	const newHeader = JSON.stringify(translator.header, null, '\t') + '\n';
-	const rest = raw.substring(translator.headerRaw.length);
-	await fs.writeFile(filePath, newHeader + rest, 'utf-8');
+	if (translator.metaJsonPath) {
+		// Header lives in .meta.json
+		await fs.writeFile(
+			translator.metaJsonPath,
+			JSON.stringify(translator.header, null, '\t') + '\n',
+			'utf-8'
+		);
+	}
+	else {
+		// Header is embedded in the .js file
+		const raw = translator.raw;
+		const newHeader = JSON.stringify(translator.header, null, '\t') + '\n';
+		const rest = raw.substring(translator.headerRaw.length);
+		await fs.writeFile(filePath, newHeader + rest, 'utf-8');
+	}
 
 	return translator.header;
 }

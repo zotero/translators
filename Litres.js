@@ -1,17 +1,3 @@
-{
-	"translatorID": "02bde528-c86d-42d5-904b-e74f85bd45f9",
-	"label": "Litres",
-	"creator": "Ilya Zonov",
-	"target": "^https://(www\\.)?litres\\.ru/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-21 14:38:11"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "fa396dd4-7d04-4f99-95e1-93d6f355441d",
-	"label": "CiteSeer",
-	"creator": "Sebastian Karcher, Guy Aglionby",
-	"target": "^https?://citeseerx?\\.ist\\.psu\\.edu",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-28 16:31:16"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

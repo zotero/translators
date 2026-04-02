@@ -1,17 +1,3 @@
-{
-	"translatorID": "f16931f0-372e-4197-8927-05d2ba7599d8",
-	"label": "Talis Aspire",
-	"creator": "Sebastian Karcher and Abe Jellinek",
-	"target": "^https?://([^/]+\\.)?(((my)?reading|resource|lib|cyprus|)lists|aspire\\.surrey|rl\\.talis)\\..+/(lists|items)/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 270,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-08 16:59:21"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

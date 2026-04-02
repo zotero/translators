@@ -1,17 +1,3 @@
-{
-	"translatorID": "cfbb3e2c-8292-43d0-86d5-e457399107de",
-	"label": "Handelszeitung",
-	"creator": "ibex",
-	"target": "^https?://((www\\.)?(handelszeitung|bilanz|stocks)\\.ch/.)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-10-31 18:41:26"
-}
-
 /*
 	Handelszeitung Translator - Parses Handelszeitung and Bilanz articles
 	and creates Zotero-based metadata.

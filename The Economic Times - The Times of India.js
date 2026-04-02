@@ -1,17 +1,3 @@
-{
-	"translatorID": "1a9a7ecf-01e9-4d5d-aa19-a7aa4010da83",
-	"label": "The Economic Times - The Times of India",
-	"creator": "Sonali Gupta, Sebastian Karcher",
-	"target": "^https?://(economictimes|timesofindia)\\.indiatimes\\.com",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-12 19:47:11"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,0 +1,12 @@
+{
+	"translatorID": "552cdac3-f130-4763-a88e-8e74b92dcb1b",
+	"label": "Tumblr",
+	"creator": "febrezo",
+	"target": "^https?://[^/]+\\.tumblr\\.com/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

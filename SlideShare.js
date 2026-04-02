@@ -1,17 +1,3 @@
-{
-	"translatorID": "0cc8e259-106e-4793-8c26-6ec8114a9160",
-	"label": "SlideShare",
-	"creator": "Michael Berkowitz",
-	"target": "^https?://[^/]*slideshare\\.net/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-01 15:33:29"
-}
-
 function scrape(doc, url) {
 	var item = new Zotero.Item("presentation");
 	item.title = ZU.xpathText(doc, '(//meta[@name="title" or @property="og:title"]/@content)[1]') ||

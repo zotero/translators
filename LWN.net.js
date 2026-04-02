@@ -1,17 +1,3 @@
-{
-	"translatorID": "57517a91-b881-4da3-b205-751f6c7e2cae",
-	"label": "LWN.net",
-	"creator": "Tim Hollmann",
-	"target": "^https?://lwn\\.net/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-08-28 14:37:28"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

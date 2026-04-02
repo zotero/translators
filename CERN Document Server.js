@@ -1,17 +1,3 @@
-{
-	"translatorID": "e4b51f32-bb3f-4d37-a46d-083efe534233",
-	"label": "CERN Document Server",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://cds\\.cern\\.ch/(search\\?|collection/|record/)",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-13 01:12:36"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

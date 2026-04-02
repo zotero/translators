@@ -1,17 +1,3 @@
-{
-	"translatorID": "595f70a0-9f64-459c-a4b1-658c8193bf7f",
-	"label": "Kanopy",
-	"creator": "Abe Jellinek",
-	"target": "^https?://[^/]+\\.kanopy\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-16 23:36:22"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

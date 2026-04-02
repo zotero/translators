@@ -1,17 +1,3 @@
-{
-	"translatorID": "f349954c-9957-4b5f-be24-1a8bb52f7fbd",
-	"label": "BnF ISBN",
-	"creator": "Abe Jellinek",
-	"target": "",
-	"minVersion": "4.0",
-	"maxVersion": "",
-	"priority": 98,
-	"inRepository": true,
-	"translatorType": 8,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-30 21:23:00"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

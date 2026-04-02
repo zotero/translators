@@ -1,17 +1,3 @@
-{
-	"translatorID": "e0234bcf-bc56-4577-aa94-fe86a27f6fd6",
-	"label": "The Globe and Mail",
-	"creator": "Sonali Gupta and Abe Jellinek",
-	"target": "^https?://www\\.theglobeandmail\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-14 21:43:14"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

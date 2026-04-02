@@ -1,17 +1,3 @@
-{
-	"translatorID": "e3748cf3-36dc-4816-bf86-95a0b63feb03",
-	"label": "Gale Databases",
-	"creator": "Abe Jellinek and Jim Miazek",
-	"target": "^https?://[^?&]*(?:gale|galegroup|galetesting|ggtest)\\.com(?:\\:\\d+)?/ps/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-21 04:18:59"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

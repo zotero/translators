@@ -1,17 +1,3 @@
-{
-	"translatorID": "1d82cbdf-703d-4f96-9ae2-246af21bb96e",
-	"label": "Winnipeg Free Press",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.winnipegfreepress\\.com",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-17 17:27:13"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

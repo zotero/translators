@@ -1,17 +1,3 @@
-{
-	"translatorID": "b4c54248-6e78-4afc-b566-45fee8cd43b7",
-	"label": "Habr",
-	"creator": "Ilya Zonov",
-	"target": "^https://habr\\.com/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-29 18:23:31"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

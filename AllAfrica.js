@@ -1,17 +1,3 @@
-{
-	"translatorID": "34B1E0EA-FD02-4069-BAE4-ED4D98674A5E",
-	"label": "AllAfrica",
-	"creator": "Sebastian Karcher and Abe Jellinek",
-	"target": "^https?://(fr\\.)?allafrica\\.com/(stories|search)/",
-	"minVersion": "1.0.0b4.r5",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2021-10-22 19:33:08"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

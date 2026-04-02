@@ -1,17 +1,3 @@
-{
-	"translatorID": "c54d1932-73ce-dfd4-a943-109380e06574",
-	"label": "Project MUSE",
-	"creator": "Sebastian Karcher and Abe Jellinek",
-	"target": "^https?://[^/]*muse\\.jhu\\.edu/(book/|pub/|article/|issue/|search\\?)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-12-08 13:34:54"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

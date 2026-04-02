@@ -1,17 +1,3 @@
-{
-	"translatorID": "fb23f4a4-d1be-4c41-9f74-4a6fe964a5bf",
-	"label": "Herder",
-	"creator": "Abe Jellinek",
-	"target": "^https?://www\\.herder\\.de/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-06 21:21:28"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

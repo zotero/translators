@@ -1,19 +1,3 @@
-{
-	"translatorID": "93514073-b541-4e02-9180-c36d2f3bb401",
-	"label": "Crossref Unixref XML",
-	"creator": "Sebastian Karcher",
-	"target": "xml",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"configOptions": {
-		"dataMode": "xml/dom"
-	},
-	"inRepository": true,
-	"translatorType": 1,
-	"lastUpdated": "2024-10-30 12:58:25"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

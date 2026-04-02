@@ -1,17 +1,3 @@
-{
-	"translatorID": "21f62926-4343-4518-b6f2-a284e650e64a",
-	"label": "Bioconductor",
-	"creator": "Qiang Hu",
-	"target": "https?://(www\\.)?bioconductor\\.org/(packages/.*/bioc/html|help/search)/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-09-17 16:47:07"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

@@ -1,17 +1,3 @@
-{
-	"translatorID": "26ecfee6-535d-4044-89a8-fbda31883642",
-	"label": "Stack Exchange",
-	"creator": "Abe Jellinek",
-	"target": "^https://([^/]+\\.)?(((stack(overflow|exchange)|serverfault|askubuntu|superuser|stackapps)\\.com)|mathoverflow\\.net)/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-04-03 13:21:00"
-}
-
 /*
     ***** BEGIN LICENSE BLOCK *****
 

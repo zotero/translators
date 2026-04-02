@@ -1,17 +1,3 @@
-{
-	"translatorID": "a6f95213-468c-4558-94a3-59b2436cbcdd",
-	"label": "CLACSO",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://biblioteca\\.clacso\\.edu\\.ar/gsdl/cgi-bin/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2013-02-28 14:47:57"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

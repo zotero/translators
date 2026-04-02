@@ -1,17 +1,3 @@
-{
-	"translatorID": "df9dca51-1f66-4dc6-a3e1-09b4c416db23",
-	"label": "NYPL Menus",
-	"creator": "Abe Jellinek",
-	"target": "^https?://menus\\.nypl\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-23 00:03:16"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

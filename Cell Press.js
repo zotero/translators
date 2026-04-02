@@ -1,17 +1,3 @@
-{
-	"translatorID": "f26cfb71-efd7-47ae-a28c-d4d8852096bd",
-	"label": "Cell Press",
-	"creator": "Michael Berkowitz, Sebastian Karcher, Aurimas Vinckevicius",
-	"target": "^https?://([^/]*\\.)?cell\\.com",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-06 22:03:36"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

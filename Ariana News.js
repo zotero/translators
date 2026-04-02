@@ -1,17 +1,3 @@
-{
-	"translatorID": "44552245-d911-4613-8b4f-19f41a5e5b0d",
-	"label": "Ariana News",
-	"creator": "Abe Jellinek",
-	"target": "^https://ariananews\\.af/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-16 15:20:38"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

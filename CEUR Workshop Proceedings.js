@@ -1,17 +1,3 @@
-{
-	"translatorID": "5f88a099-564d-4885-9a2a-e72939be3a8c",
-	"label": "CEUR Workshop Proceedings",
-	"creator": "Abe Jellinek",
-	"target": "https?://ceur-ws\\.org/Vol-",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-25 17:43:52"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

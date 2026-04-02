@@ -1,17 +1,3 @@
-{
-	"translatorID": "e317b4d4-03cf-4356-aa3c-defadc6fd10e",
-	"label": "Air University Journals",
-	"creator": "Sebastian Karcher",
-	"target": "https?://www\\.airuniversity\\.af\\.edu/(ASPJ|SSQ)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-14 19:04:37"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

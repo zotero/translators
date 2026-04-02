@@ -1,17 +1,3 @@
-{
-	"translatorID": "aee2323e-ce00-4fcc-a949-06eb1becc98f",
-	"label": "Epicurious",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.epicurious\\.com/(tools/searchresults|recipes/food/views)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-14 10:54:06"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

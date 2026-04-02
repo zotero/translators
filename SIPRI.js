@@ -1,17 +1,3 @@
-{
-	"translatorID": "3a92a47b-a532-40b8-8e69-c40b4edf56ec",
-	"label": "SIPRI",
-	"creator": "Abe Jellinek",
-	"target": "^https?://(www\\.)?sipri\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-16 23:05:44"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

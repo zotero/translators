@@ -1,17 +1,3 @@
-{
-	"translatorID": "4c164cc8-be7b-4d02-bfbf-37a5622dfd56",
-	"label": "The New York Review of Books",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.nybooks\\.com/",
-	"minVersion": "6.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-03 11:23:30"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

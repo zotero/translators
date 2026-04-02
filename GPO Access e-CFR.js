@@ -1,17 +1,3 @@
-{
-	"translatorID": "dede653d-d1f8-411e-911c-44a0219bbdad",
-	"label": "GPO Access e-CFR",
-	"creator": "Bill McKinney, Sebastian Karcher",
-	"target": "^https?://(www\\.)?ecfr\\.gov/cgi-bin/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 17:38:54"
-}
-
 function detectWeb(doc, url) {
 	var re = new RegExp("^https?://(www\.)?ecfr\.gov/cgi-bin/(text-idx|retrieveECFR\?)");
 	if (re.test(doc.location.href)) {

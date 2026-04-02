@@ -1,17 +1,3 @@
-{
-	"translatorID": "22d17fb9-ae32-412e-bcc4-7650ed3359bc",
-	"label": "Musée du Louvre",
-	"creator": "Philipp Zumstein and Abe Jellinek",
-	"target": "^https?://collections\\.louvre\\.fr/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-11 13:07:46"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

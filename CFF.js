@@ -1,16 +1,3 @@
-{
-	"translatorID": "e782b521-99ed-47c7-b021-62351a0a4f91",
-	"label": "CFF",
-	"creator": "Sebastian Karcher",
-	"target": "cff",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 2,
-	"lastUpdated": "2023-05-04 13:21:10"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

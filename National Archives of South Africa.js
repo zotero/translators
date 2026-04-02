@@ -1,17 +1,3 @@
-{
-	"translatorID": "5b02e8d4-d8fb-4143-af3d-3576d4c1b49c",
-	"label": "National Archives of South Africa",
-	"creator": "Adam Crymble",
-	"target": "^https?://www\\.national\\.archsrch\\.gov\\.za",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsb",
-	"lastUpdated": "2014-03-12 22:00:51"
-}
-
 function detectWeb(doc, url) {
 	if (doc.title.match("Results Summary")) {
 		return "multiple";

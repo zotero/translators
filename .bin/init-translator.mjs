@@ -3,7 +3,7 @@
 import { promises as fs } from 'node:fs';
 import crypto from 'node:crypto';
 import path from 'node:path';
-import { parseArgs, resolveTranslator, formatZoteroDate, output, REPO_ROOT } from './lib/common.mjs';
+import { parseArgs, resolveTranslator, output, REPO_ROOT } from './lib/common.mjs';
 
 const TYPE_BITS = { import: 1, export: 2, web: 4, search: 8 };
 
@@ -64,7 +64,6 @@ const header = {
 	inRepository: true,
 	translatorType,
 	...(isWeb ? { browserSupport: 'gcsibv' } : {}),
-	lastUpdated: formatZoteroDate(),
 };
 
 // Build file content

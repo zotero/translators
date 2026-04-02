@@ -1,17 +1,3 @@
-{
-	"translatorID": "fe85e97b-5e2a-4d9e-976e-c336c5350ce9",
-	"label": "semantics Visual Library",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.(blldb-online\\.de/blldb|bdsl-online\\.de/BDSL-DB)/suche/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 150,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2014-12-29 11:56:09"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "4883f662-29df-44ad-959e-27c9d036d165",
-	"label": "FAO Knowledge Repository",
-	"creator": "Bin Liu",
-	"target": "^https?://openknowledge\\.fao\\.org/(items/|search|browse/|collections/)",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-02-09 15:53:01"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	Copyright © 2025 Bin Liu

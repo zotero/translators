@@ -1,17 +1,3 @@
-{
-	"translatorID": "20d5254c-edfb-4728-94be-67828cdfeee3",
-	"label": "IETF",
-	"creator": "Abe Jellinek",
-	"target": "^https?://(datatracker\\.ietf\\.org/|www\\.ietf\\.org/archive/id/|tools\\.ietf\\.org/pdf/|www\\.rfc-editor\\.org/)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-14 12:11:37"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

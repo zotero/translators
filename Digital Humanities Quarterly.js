@@ -1,17 +1,3 @@
-{
-	"translatorID": "bbad0221-134b-495a-aa56-d77cfaa67ab5",
-	"label": "Digital Humanities Quarterly",
-	"creator": "Michael Berkowitz",
-	"target": "^https?://(www\\.)?digitalhumanities\\.org/(dhq)?",
-	"minVersion": "1.0.0b4.r5",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-05-15 15:07:13"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

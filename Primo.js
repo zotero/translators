@@ -1,17 +1,3 @@
-{
-	"translatorID": "1300cd65-d23a-4bbf-93e5-a3c9e00d1066",
-	"label": "Primo",
-	"creator": "Matt Burton, Avram Lyon, Etienne Cavalié, Rintze Zelle, Philipp Zumstein, Sebastian Karcher, Aurimas Vinckevicius",
-	"target": "/primo_library/|/nebis/|^https?://www\\.recherche-portal\\.ch/zbz/",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 101,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2020-02-04 01:29:32"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	This file is part of Zotero.

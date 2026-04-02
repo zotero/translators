@@ -1,17 +1,3 @@
-{
-	"translatorID": "b0abb562-218c-4bf6-af66-c320fdb8ddd3",
-	"label": "Philosopher's Imprint",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://quod\\.lib\\.umich\\.edu/p/phimp",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-01 04:27:44"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

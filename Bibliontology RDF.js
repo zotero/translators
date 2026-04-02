@@ -1,24 +1,3 @@
-{
-	"translatorID": "14763d25-8ba0-45df-8f52-b8d1108e7ac9",
-	"label": "Bibliontology RDF",
-	"creator": "Simon Kornblith",
-	"target": "rdf",
-	"minVersion": "2.0",
-	"maxVersion": "",
-	"priority": 50,
-	"configOptions": {
-		"getCollections": "true",
-		"dataMode": "rdf/xml"
-	},
-	"displayOptions": {
-		"exportNotes": true
-	},
-	"inRepository": true,
-	"translatorType": 3,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-09-30 10:56:50"
-}
-
 var n = {
 	address:"http://schemas.talis.com/2005/address/schema#",	// could also use vcard?
 	bibo:"http://purl.org/ontology/bibo/",

@@ -1,16 +1,3 @@
-{
-	"translatorID": "51e5355d-9974-484f-80b9-f84d2b55782e",
-	"label": "Wikidata QuickStatements",
-	"creator": "Philipp Zumstein with contributors",
-	"target": "txt",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 2,
-	"lastUpdated": "2025-08-11 00:00:00"
-}
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****

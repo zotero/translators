@@ -1,17 +1,3 @@
-{
-	"translatorID": "850f4c5f-71fb-4669-b7da-7fb7a95500ef",
-	"label": "Cambridge Core",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.cambridge\\.org/core/(search\\?|journals/|books/|.+/listing?)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-11-20 15:43:05"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

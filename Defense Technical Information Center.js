@@ -1,17 +1,3 @@
-{
-	"translatorID": "99be9976-2ff9-40df-96e8-82edfa79d9f3",
-	"label": "Defense Technical Information Center",
-	"creator": "Matt Burton",
-	"target": "^https?://oai\\.dtic\\.mil/oai/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-01-09 15:36:32"
-}
-
 function detectWeb(doc, url) {
 	if (doc.title.indexOf("DTIC OAI Index for") != -1) {
 		return "multiple";

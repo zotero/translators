@@ -1,17 +1,3 @@
-{
-	"translatorID": "97b65138-71b7-424f-b305-4a2161e90661",
-	"label": "AquaDocs",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://aquadocs\\.org/(handle|discover|browse)",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-24 02:41:29"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

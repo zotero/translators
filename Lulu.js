@@ -1,17 +1,3 @@
-{
-	"translatorID": "9a0ecbda-c0e9-4a19-84a9-fc8e7c845afa",
-	"label": "Lulu",
-	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://www\\.lulu\\.com/shop/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 101,
-	"inRepository": true,
-	"translatorType": 12,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-10-24 19:22:51"
-}
-
 function getSearchResults(doc) {
 	return ZU.xpath(doc, '//div[@class="middle-column"]/div[@class="products"]/div//a[@class="title" and @href]');
 }

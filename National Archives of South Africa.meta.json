@@ -1,0 +1,12 @@
+{
+	"translatorID": "5b02e8d4-d8fb-4143-af3d-3576d4c1b49c",
+	"label": "National Archives of South Africa",
+	"creator": "Adam Crymble",
+	"target": "^https?://www\\.national\\.archsrch\\.gov\\.za",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsb"
+}

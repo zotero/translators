@@ -1,17 +1,3 @@
-{
-	"translatorID": "d8a83346-164a-467d-8717-eb96d4dcce6f",
-	"label": "ChatGPT",
-	"creator": "Abe Jellinek",
-	"target": "^https://chatgpt\\.com/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-27 15:38:43"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

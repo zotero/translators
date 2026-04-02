@@ -1,17 +1,3 @@
-{
-	"translatorID": "f27b5031-01fb-4f14-8829-6748f819eac4",
-	"label": "University of California Press Books",
-	"creator": "Abe Jellinek",
-	"target": "^https://www\\.ucpress\\.edu/(book/|search\\.php\\?)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-29 06:45:51"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

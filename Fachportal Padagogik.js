@@ -1,17 +1,3 @@
-{
-	"translatorID": "4b0b42df-76b7-4a61-91aa-b15bc553b77d",
-	"label": "Fachportal Pädagogik",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.fachportal-paedagogik\\.de/literatur/|www\\.pedocs\\.de/)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-10-14 07:01:47"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

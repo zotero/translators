@@ -1,17 +1,3 @@
-{
-	"translatorID": "99f958ab-0732-483d-833f-6bd8e42f6277",
-	"label": "National Bureau of Economic Research",
-	"creator": "Michael Berkowitz, Philipp Zumstein, Abe Jellinek",
-	"target": "^https?://(papers\\.|www2?\\.)?nber\\.org/(system/files/)?(papers|s|new|custom|books-and-chapters|chapters)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-04-04 18:13:34"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "3bba003a-ad42-457e-9ea1-547df39d9d00",
-	"label": "Bluesky",
-	"creator": "Stephan Hügel",
-	"target": "^https://bsky\\.app/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-26 14:26:25"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

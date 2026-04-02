@@ -1,17 +1,3 @@
-{
-	"translatorID": "192a29de-3d6e-4850-984f-943764126429",
-	"label": "Dagens Nyheter",
-	"creator": "Sebastian Berlin",
-	"target": "^https?://www\\.dn\\.se/(nyheter|ekonomi|kultur-noje|sport|sok)/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-19 12:35:38"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

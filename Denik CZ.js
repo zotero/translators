@@ -1,17 +1,3 @@
-{
-	"translatorID": "4ed446ca-b480-43ee-a8fb-5f9730915edc",
-	"label": "Denik CZ",
-	"creator": "Jiří Sedláček, Philipp Zumstein",
-	"target": "^https?://[^/]*denik\\.cz",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-07 09:27:42"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "b937ee25-6686-4975-a5ce-95dcfc01b545",
-	"label": "Mikromarc",
-	"creator": "Abe Jellinek",
-	"target": "^https?://[^/]+\\.mikromarc\\.no/mikromarc3/",
-	"minVersion": "6.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-03-07 21:18:01"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "e391620a-0a33-415b-b08b-521fdbb2c257",
-	"label": "National Agriculture Library",
-	"creator": "Abe Jellinek",
-	"target": "^https?://(pubag|naldc)\\.nal\\.usda\\.gov/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-11 22:01:59"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "3bae3a55-f021-4b59-8a14-43701f336adf",
-	"label": "Silverchair",
-	"creator": "Sebastian Karcher",
-	"target": "/(article|fullarticle|advance-article|advance-article-abstract|article-abstract|book|edited-volume)(/|\\.aspx)|search-results?|\\/issue(/|s\\.aspx|$)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 280,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-07-29 16:31:34"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

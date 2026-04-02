@@ -1,17 +1,3 @@
-{
-	"translatorID": "45ece855-7303-41d2-8c9f-1151f684943c",
-	"label": "Databrary",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://nyu\\.databrary\\.org/(volume|search)",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-19 16:49:05"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

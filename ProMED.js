@@ -1,17 +1,3 @@
-{
-	"translatorID": "3e9dbe21-10f2-40be-a921-f6ec82760927",
-	"label": "ProMED",
-	"creator": "Brandon Minich",
-	"target": "^https?://www\\.promedmail\\.org",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-11-19 00:12:31"
-}
-
 function detectWeb(doc, url)  {
 	if (url.toLowerCase().indexOf("direct.php?id=") != -1)  {
 		return "email";

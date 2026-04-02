@@ -1,17 +1,3 @@
-{
-	"translatorID": "0a84a653-79ea-4c6a-8a68-da933e3b504a",
-	"label": "Alexander Street Press",
-	"creator": "John West and Michael Berkowitz",
-	"target": "^https?://(www\\.)alexanderstreet",
-	"minVersion": "1.0.0b4.r5",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-28 04:42:00"
-}
-
 function detectWeb(doc, url) {
 	if ( url.indexOf("object.details.aspx") != -1 ) {
 		var zitemtype = doc.getElementById("ctl00_ctl00_MasterContentBody_ContentPlaceHolder1_txtZType").value;

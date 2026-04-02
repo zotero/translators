@@ -1,17 +1,3 @@
-{
-	"translatorID": "c6efb3a8-a6c9-4ff2-b1c5-27fb4b5b2935",
-	"label": "IPCC",
-	"creator": "Abe Jellinek",
-	"target": "^https?://www\\.ipcc\\.ch/report/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-18 01:10:08"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

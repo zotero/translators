@@ -1,17 +1,3 @@
-{
-	"translatorID": "12a3b1cb-6bbb-4cf9-904f-8f732ee3d1e3",
-	"label": "govinfo",
-	"creator": "Abe Jellinek",
-	"target": "https?://www\\.govinfo\\.gov/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-10-28 14:47:36"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

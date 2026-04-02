@@ -1,17 +1,3 @@
-{
-	"translatorID": "e16095ae-986c-4117-9cb6-20f3b7a52f64",
-	"label": "Protein Data Bank",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.(pdb|rcsb)\\.org/pdb/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-03 18:51:04"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

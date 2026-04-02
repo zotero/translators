@@ -1,20 +1,3 @@
-{
-	"translatorID": "24d9f058-3eb3-4d70-b78f-1ba1aef2128d",
-	"label": "XML ContextObject",
-	"creator": "Avram Lyon and Simon Kornblith",
-	"target": "ctx",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"configOptions": {
-		"dataMode": "xml/dom"
-	},
-	"inRepository": true,
-	"translatorType": 1,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2015-05-20 00:05:55"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

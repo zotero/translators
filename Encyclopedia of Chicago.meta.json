@@ -1,0 +1,12 @@
+{
+	"translatorID": "0689f3e1-f0b4-4c0c-b795-4aebdfea08e0",
+	"label": "Encyclopedia of Chicago",
+	"creator": "Brodie Austin",
+	"target": "^https?://encyclopedia\\.chicagohistory\\.org/pages",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsbv"
+}

@@ -1,17 +1,3 @@
-{
-	"translatorID": "bdaac15c-b0ee-453f-9f1d-f35d00c7a994",
-	"label": "AMS Journals",
-	"creator": "Michael Berkowitz",
-	"target": "^https?://www\\.ams\\.org/journals/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-03 20:50:31"
-}
-
 function detectWeb(doc, url) {
 	if (url.match(/home\.html|\d{4}[^\/]*\/.+/)) {
 		return "journalArticle";

@@ -1,17 +1,3 @@
-{
-	"translatorID": "c9338ed5-b512-4967-8ffe-ab9c973559ef",
-	"label": "The Hamilton Spectator",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.thespec\\.com",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-10 15:23:44"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

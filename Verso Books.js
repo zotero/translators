@@ -1,17 +1,3 @@
-{
-	"translatorID": "bc517bd2-4835-4621-b775-917253bec93a",
-	"label": "Verso Books",
-	"creator": "Bo An",
-	"target": "^https?://(www\\.)?versobooks\\.com/books/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-30 18:30:46"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

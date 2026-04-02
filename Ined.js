@@ -1,17 +1,3 @@
-{
-	"translatorID": "dd5761aa-4145-4911-b45c-16c78cfc24c8",
-	"label": "Ined",
-	"creator": "Mysciencework",
-	"target": "^https?://archined\\.ined\\.fr/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-12-04 18:32:52"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	Copyright © 2025 Mysciencework

@@ -1,0 +1,12 @@
+{
+	"translatorID": "cfbb3e2c-8292-43d0-86d5-e457399107de",
+	"label": "Handelszeitung",
+	"creator": "ibex",
+	"target": "^https?://((www\\.)?(handelszeitung|bilanz|stocks)\\.ch/.)",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

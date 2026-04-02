@@ -1,17 +1,3 @@
-{
-	"translatorID": "61ffe600-55e0-11df-bed9-0002a5d5c51b",
-	"label": "NZZ.ch",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?nzz\\.ch/",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-04-05 17:23:30"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

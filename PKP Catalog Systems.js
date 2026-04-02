@@ -1,17 +1,3 @@
-{
-	"translatorID": "99b62ba4-065c-4e83-a5c0-d8cc0c75d388",
-	"label": "PKP Catalog Systems",
-	"creator": "Aurimas Vinckevicius and Abe Jellinek",
-	"target": "/(article|preprint|issue)/view/|/catalog/book/|/search/search|/index\\.php/default",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 200,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-21 19:10:24"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

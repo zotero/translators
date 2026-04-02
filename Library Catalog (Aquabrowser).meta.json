@@ -1,0 +1,12 @@
+{
+	"translatorID": "915c326f-06c5-4833-b7b7-54c63f88b135",
+	"label": "Library Catalog (Aquabrowser)",
+	"creator": "Sebastian Karcher",
+	"target": "/fullrecordinnerframe\\.ashx\\?.+id=|/result\\.ashx\\?",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 270,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsbv"
+}

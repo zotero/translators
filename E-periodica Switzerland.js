@@ -1,17 +1,3 @@
-{
-	"translatorID": "dbfd99e3-6925-4b71-92b8-12b02aa875fc",
-	"label": "E-periodica Switzerland",
-	"creator": "Alain Borel",
-	"target": "^https?://(www|news?)\\.e-periodica\\.ch",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-15 20:15:50"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

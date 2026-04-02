@@ -1,17 +1,3 @@
-{
-	"translatorID": "f203db7f-7b7b-4dc4-b018-115b7885fe3b",
-	"label": "Oxford Music and Art Online",
-	"creator": "Michael Berkowitz",
-	"target": "^https?://([^/]+\\.)?www\\.oxford(music|art)online\\.com/",
-	"minVersion": "1.0.0b4.r5",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-02 21:05:15"
-}
-
 function detectWeb(doc, url) {
 	if (url.match(/search_results/)) {
 		return "multiple";

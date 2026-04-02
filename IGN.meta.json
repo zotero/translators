@@ -1,0 +1,12 @@
+{
+	"translatorID": "d210c5a1-73e1-41ad-a3c9-331d5a3ead48",
+	"label": "IGN",
+	"creator": "czar",
+	"target": "^https?://(www\\.)?ign\\.com/articles/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

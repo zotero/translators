@@ -1,17 +1,3 @@
-{
-	"translatorID": "32ad4782-b106-4ccb-8ae1-ff102ba93eef",
-	"label": "PEP Web",
-	"creator": "Akilesh Ayyar",
-	"target": "^https?://www\\.pep-web\\.org",
-	"minVersion": "1.0.0b3.r1",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-03-20 06:07:35"
-}
-
 //Only works for journal articles, and only for single entries.
 //Author names sometimes omit periods after the first initials.
 

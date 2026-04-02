@@ -1,0 +1,12 @@
+{
+	"translatorID": "8df4f61b-0881-4c85-9186-05f457edb4d3",
+	"label": "PhilPapers",
+	"creator": "Sebastian Karcher",
+	"target": "^https?://phil(papers|archive)\\.org/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

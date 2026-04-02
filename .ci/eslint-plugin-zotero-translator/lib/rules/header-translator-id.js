@@ -30,11 +30,25 @@ module.exports = {
 				const translator = parsed(filename);
 				if (!translator || !translator.header.fields) return; // regular js source, or header is invalid
 
-				const translatorID = header(node).properties.find(p => p.key.value === 'translatorID');
+				const headerNode = header(node);
+
+				if (!headerNode) {
+					// Migrated translator: header is in .meta.json, just check for conflicts
+					const conflict = IDconflict(filename);
+					if (conflict) {
+						context.report({
+							loc: { start: { line: 1, column: 0 } },
+							message: `re-uses translator ID of ${conflict.label}`,
+						});
+					}
+					return;
+				}
+
+				const translatorID = headerNode.properties.find(p => p.key.value === 'translatorID');
 
 				if (!translatorID || !translatorID.value.value) {
 					context.report({
-						node: header(node),
+						node: headerNode,
 						message: 'Header has no translator ID',
 					});
 					return;

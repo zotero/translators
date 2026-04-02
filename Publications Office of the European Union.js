@@ -1,17 +1,3 @@
-{
-	"translatorID": "7d8e6337-3f52-4e8c-8915-95a2ec755b6c",
-	"label": "Publications Office of the European Union",
-	"creator": "Abe Jellinek",
-	"target": "^https?://op\\.europa\\.eu/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-08 17:58:08"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

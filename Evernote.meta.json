@@ -1,0 +1,14 @@
+{
+	"translatorID": "18dd188a-9afc-4cd6-8775-1980c3ce0fbf",
+	"label": "Simple Evernote Export",
+	"creator": "Volodymir Skipa",
+	"target": "enex",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 50,
+	"displayOptions": {
+		"exportNotes": true
+	},
+	"inRepository": false,
+	"translatorType": 2
+}

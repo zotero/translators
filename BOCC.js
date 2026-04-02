@@ -1,17 +1,3 @@
-{
-	"translatorID": "ecd1b7c6-8d31-4056-8c15-1807b2489254",
-	"label": "BOCC",
-	"creator": "José Antonio Meira da Rocha",
-	"target": "^https?://[^/]*bocc[^/]*/(_listas|_esp)",
-	"minVersion": "1.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-04-04 10:08:43"
-}
-
 /* Translator for Biblioteca Online de Ciências da Comunicação (BOCC,
 Communication Science Online Library, http://www.bocc.ubi.pt/) */
 

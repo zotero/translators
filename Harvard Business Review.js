@@ -1,17 +1,3 @@
-{
-	"translatorID": "afcd2650-9bdb-4489-b279-ec2274a24962",
-	"label": "Harvard Business Review",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?hbr\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-10-11 17:02:23"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,17 +1,3 @@
-{
-	"translatorID": "53f8d182-4edc-4eab-b5a1-141698a20202",
-	"label": "TalisPrism",
-	"creator": "William Smith and Emma Reisz",
-	"target": "/TalisPrism/(browseResults|doSearch|doOpenURLSearch)",
-	"minVersion": "1.0.0b4.r5",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-02-27 23:48:15"
-}
-
 /* TalisPrism translator.
  Version 1.1
  By William Smith (http://www.willsmith.org/contactme) 

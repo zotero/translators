@@ -1,17 +1,3 @@
-{
-	"translatorID": "6f9aa90d-6631-4459-81ef-a0758d2e3921",
-	"label": "Blogger",
-	"creator": "Adam Crymble",
-	"target": "\\.blogspot\\.com",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-05 23:14:05"
-}
-
 function detectWeb(doc, url) {
 	var result = doc.evaluate('//h3[contains(@class,"post-title") and contains(@class,"entry-title")]', doc, null, XPathResult.ANY_TYPE, null);
 	var entry = result.iterateNext();

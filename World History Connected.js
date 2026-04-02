@@ -1,17 +1,3 @@
-{
-	"translatorID": "0507797c-9bc4-4374-92ca-9e3763b6922b",
-	"label": "World History Connected",
-	"creator": "Frederick Gibbs",
-	"target": "worldhistoryconnected\\.press|historycooperative.*/whc/",
-	"minVersion": "1.0.0b4.r5",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-02-27 23:05:02"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

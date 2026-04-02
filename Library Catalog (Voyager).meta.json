@@ -1,0 +1,12 @@
+{
+	"translatorID": "88915634-1af6-c134-0171-56fd198235ed",
+	"label": "Library Catalog (Voyager)",
+	"creator": "Simon Kornblith",
+	"target": "Pwebrecon\\.cgi",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 250,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

@@ -1,17 +1,3 @@
-{
-	"translatorID": "88473358-39ab-4d08-9873-1ad72cc626c7",
-	"label": "Preprints.org",
-	"creator": "Abe Jellinek",
-	"target": "^https://www\\.preprints\\.org/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-23 07:21:42"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

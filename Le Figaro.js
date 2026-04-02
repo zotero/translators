@@ -1,17 +1,3 @@
-{
-	"translatorID": "80a58db6-7353-4bfa-9f3a-4a44fc903f01",
-	"label": "Le Figaro",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.lefigaro\\.fr/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-05-29 22:56:59"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

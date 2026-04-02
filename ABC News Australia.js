@@ -1,17 +1,3 @@
-{
-	"translatorID": "92d45016-5f7b-4bcf-bb63-193033f02f2b",
-	"label": "ABC News Australia",
-	"creator": "Joyce Chia",
-	"target": "https?://(www\\.)?abc\\.net\\.au/news/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-23 00:29:10"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

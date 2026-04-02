@@ -1,17 +1,3 @@
-{
-	"translatorID": "508e8fb9-8a33-4095-844f-133cba7e7b54",
-	"label": "VoxEU",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://(www\\.)?voxeu\\.org",
-	"minVersion": "1.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-06-12 14:39:41"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -1,19 +1,3 @@
-{
-	"translatorID": "6e372642-ed9d-4934-b5d1-c11ac758ebb7",
-	"translatorType": 2,
-	"label": "Unqualified Dublin Core RDF",
-	"creator": "Simon Kornblith",
-	"target": "rdf",
-	"minVersion": "1.0.0b3.r1",
-	"maxVersion": "",
-	"priority": 100,
-	"configOptions": {
-		"dataMode": "rdf/xml"
-	},
-	"inRepository": true,
-	"lastUpdated": "2019-06-11 13:33:25"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

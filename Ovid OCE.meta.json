@@ -1,0 +1,12 @@
+{
+	"translatorID": "b2285ec2-e454-49dc-b9ce-115035b55325",
+	"label": "Ovid OCE",
+	"creator": "Abe Jellinek",
+	"target": "^https://oce\\.ovid\\.com/",
+	"minVersion": "5.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

@@ -1,0 +1,12 @@
+{
+	"translatorID": "04c0db88-a7fc-4d1a-9cf7-471d0990acb1",
+	"label": "Christian Science Monitor",
+	"creator": "Sebastian Karcher",
+	"target": "^https?://(features\\.csmonitor|www\\.csmonitor)\\.com",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv"
+}

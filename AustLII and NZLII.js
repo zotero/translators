@@ -1,17 +1,3 @@
-{
-	"translatorID": "5ed5ab01-899f-4a3b-a74c-290fb2a1c9a4",
-	"label": "AustLII and NZLII",
-	"creator": "Justin Warren, Philipp Zumstein",
-	"target": "^https?://(www\\d?|classic)\\.(austlii\\.edu\\.au|nzlii\\.org)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-11-21 18:54:11"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

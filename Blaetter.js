@@ -1,17 +1,3 @@
-{
-	"translatorID": "e8e10bd4-fd6f-4297-a060-a8e0a479043f",
-	"label": "Blaetter fuer deutsche und internationale Politik",
-	"creator": "Martin Meyerhoff",
-	"target": "^https?://www\\.blaetter\\.de",
-	"minVersion": "1.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 16:42:18"
-}
-
 /*
 Blätter für deutsche und internationale Politik
 Copyright (C) 2011 Martin Meyerhoff

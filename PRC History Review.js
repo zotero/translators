@@ -1,17 +1,3 @@
-{
-	"translatorID": "56854750-868a-4de0-bfe5-fe075344a121",
-	"label": "PRC History Review",
-	"creator": "Bo An",
-	"target": "^https?://(www\\.)?prchistory\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-30 18:33:59"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

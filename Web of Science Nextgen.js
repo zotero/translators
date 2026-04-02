@@ -1,17 +1,3 @@
-{
-	"translatorID": "4a3820a3-a7bd-44a1-8711-acf7b57d2c37",
-	"label": "Web of Science Nextgen",
-	"creator": "Abe Jellinek",
-	"target": "^https://(www\\.webofscience\\.com|webofscience\\.clarivate\\.cn)/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-01-05 17:45:40"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

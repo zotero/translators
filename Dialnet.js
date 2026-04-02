@@ -1,17 +1,3 @@
-{
-	"translatorID": "938ccabb-e297-4092-aa15-22b6511bbd0f",
-	"label": "Dialnet",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://dialnet\\.unirioja\\.es/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-01-05 20:54:41"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

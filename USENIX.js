@@ -1,17 +1,3 @@
-{
-	"translatorID": "b97462fa-f20b-4a1e-8a73-3a434a81518b",
-	"label": "USENIX",
-	"creator": "Tim Leonhard Storm",
-	"target": "^https://www\\.usenix\\.org/conference/.*/presentation",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-07-29 16:45:18"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

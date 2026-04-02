@@ -1,17 +1,3 @@
-{
-	"translatorID": "e048e70e-8fea-43e9-ac8e-940bc3d71b0b",
-	"label": "LingBuzz",
-	"creator": "Göktuğ Kayaalp and Abe Jellinek",
-	"target": "^https://(ling\\.auf|lingbuzz)\\.net/lingbuzz/(repo/semanticsArchive/article/)?(\\d+|_search)",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-05-04 01:00:37"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

@@ -98,10 +98,7 @@ Include at least one single-item test and one multiple-item test (if supported).
 
 ## Step 6: Verify and submit
 
-**Update `lastUpdated` every time you modify translator code.** Zotero uses it to determine when to push updates to users.
-
 ```
-node .bin/update-metadata.mjs "<Label>.js"
 npm run lint -- "<Label>.js"
 node .bin/run-tests.mjs "<Label>.js"
 ```

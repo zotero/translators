@@ -1,17 +1,3 @@
-{
-	"translatorID": "212ffcc8-927c-4e84-a097-bd24fd4a44b6",
-	"label": "ACM Queue",
-	"creator": "Bogdan Lynn",
-	"target": "^https://queue\\.acm\\.org/",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-12-04 18:10:19"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

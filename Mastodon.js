@@ -1,17 +1,3 @@
-{
-	"translatorID": "98878eeb-84b7-4945-86dd-3d61258ecc1b",
-	"label": "Mastodon",
-	"creator": "Sebastian Karcher",
-	"target": "/@.+/\\d{10}",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 300,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-12-09 02:38:35"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

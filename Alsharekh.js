@@ -1,17 +1,3 @@
-{
-	"translatorID": "70fbaf2f-ba02-426c-8beb-4ddfbbefd14b",
-	"label": "Alsharekh",
-	"creator": "Abe Jellinek",
-	"target": "^https://archive\\.alsharekh\\.org/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-07-24 02:21:59"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

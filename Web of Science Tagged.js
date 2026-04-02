@@ -1,16 +1,3 @@
-{
-	"translatorID": "594ebe3c-90a0-4830-83bc-9502825a6810",
-	"label": "Web of Science Tagged",
-	"creator": "Michael Berkowitz, Avram Lyon, and contributors",
-	"target": "txt",
-	"minVersion": "2.1",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 1,
-	"lastUpdated": "2025-08-18 17:06:42"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

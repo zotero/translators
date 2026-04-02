@@ -1,17 +1,3 @@
-{
-	"translatorID": "d541622d-09c3-4e20-b010-c506b2d01151",
-	"label": "HUDOC",
-	"creator": "Jonas Skorzak",
-	"target": "^https?://hudoc\\.echr\\.coe\\.int",
-	"minVersion": "4.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-19 21:19:21"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

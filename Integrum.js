@@ -1,17 +1,3 @@
-{
-	"translatorID": "570d4c35-a16d-48f9-aa73-6161d067da79",
-	"label": "Integrum",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://aafnet\\.integrum\\.ru/",
-	"minVersion": "3",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-12-05 03:14:12"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

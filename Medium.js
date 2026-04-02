@@ -1,17 +1,3 @@
-{
-	"translatorID": "6c957d6b-a554-474f-81a9-91c178fef65d",
-	"label": "Medium",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://([^.]+\\.)?medium\\.com",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-20 01:55:16"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

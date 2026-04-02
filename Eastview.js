@@ -1,17 +1,3 @@
-{
-	"translatorID": "c59896bc-4beb-43ed-8109-a73a13251828",
-	"label": "Eastview",
-	"creator": "Sebastian Karcher and Abe Jellinek",
-	"target": "^https?://dlib\\.eastview\\.com/(search/(advanced|simple)/|browse/(doc|favorites|issue))",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-21 04:57:23"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

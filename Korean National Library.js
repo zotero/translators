@@ -1,17 +1,3 @@
-{
-	"translatorID": "b077ea16-c6d6-48f8-906a-05a193da4c2f",
-	"label": "Korean National Library",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.nl\\.go\\.kr/(EN|NL)/contents/(eng)?[sS]earch\\.do",
-	"minVersion": "5.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-12-28 02:37:11"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

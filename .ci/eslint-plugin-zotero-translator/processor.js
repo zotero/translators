@@ -24,10 +24,56 @@ function exec(cmd) {
 // have to pre-load everything to test for conflicting headers
 const cache = new Map();
 
+function readMetaJson(filename) {
+	const metaPath = filename.replace(/\.js$/, '.meta.json');
+	try {
+		return JSON.parse(fs.readFileSync(metaPath, 'utf-8'));
+	}
+	catch {
+		return null;
+	}
+}
+
 function updateCache(text, filename) {
-	if (text[0] !== '{') return;
+	const metaFields = readMetaJson(filename);
+
+	if (text[0] !== '{' && !metaFields) return;
 	if (cache.has(filename) && cache.get(filename).text === text) {
 		// No change - no need to re-parse
+		return;
+	}
+
+	if (metaFields) {
+		// Migrated translator: header lives in .meta.json, JS has no header
+		let ast;
+		try {
+			ast = espree.parse(text, { comment: true, loc: true, ecmaVersion: 2023 });
+		}
+		catch (err) {
+			console.log(filename, err.message);
+			process.exit(1); // eslint-disable-line no-process-exit
+		}
+
+		const testcases = ast.body
+			.filter((node, i) => i === ast.body.length - 1)
+			.filter(node => node.type === 'VariableDeclaration' && node.declarations.length === 1).map(node => node.declarations[0])
+			.filter(node => node.type === 'VariableDeclarator' && node.id.type === 'Identifier' && node.id.name === 'testCases')
+			.map(node => node.init)[0];
+
+		const extract = (node) => {
+			if (!node) return {};
+			return {
+				start: node.loc.start.line,
+				end: node.loc.end.line,
+				text: text.substring(node.start, node.end),
+			};
+		};
+
+		cache.set(filename, {
+			text,
+			header: { fields: metaFields },
+			testcases: extract(testcases),
+		});
 		return;
 	}
 
@@ -85,13 +131,6 @@ for (let filename of fs.readdirSync(repo).sort()) {
 	updateCache(text, filename);
 }
 
-for (const lu of exec(`git grep '"lastUpdated"' HEAD~1`).split('\n')) {
-	const m = lu.match(/^HEAD~1:([^:]+):\s*"lastUpdated"\s*:\s*"([-0-9: ]+)"/);
-	if (!m) continue;
-	const [, translator, lastUpdated] = m;
-	const filename = path.join(repo, translator);
-	if (cache.has(filename)) cache.get(filename).lastUpdated = lastUpdated;
-}
 
 function tryJSON(json, offset) {
 	const parser = clarinet.parser();

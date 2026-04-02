@@ -1,17 +1,3 @@
-{
-	"translatorID": "3e375db7-5f6e-4861-ab8b-3ddb0f4accc9",
-	"label": "HCSP",
-	"creator": "Joris Muller",
-	"target": "^https?://(www\\.)?hcsp\\.fr/explore\\.cgi/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-10-31 19:16:45"
-}
-
 /*
 HCSP Translator
 A Zotero's Translator for the website of "Haut Conseil de Santé Publique"

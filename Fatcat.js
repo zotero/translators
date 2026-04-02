@@ -1,17 +1,3 @@
-{
-	"translatorID": "afef9c9d-53a1-49da-9155-1fdf683798c3",
-	"label": "Fatcat",
-	"creator": "Abe Jellinek",
-	"target": "^https://fatcat\\.wiki/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-18 23:05:26"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

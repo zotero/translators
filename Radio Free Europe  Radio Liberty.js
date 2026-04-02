@@ -1,17 +1,3 @@
-{
-	"translatorID": "b1c90b99-2e1a-4374-a03b-92e45f1afc55",
-	"label": "Radio Free Europe / Radio Liberty",
-	"creator": "Avram Lyon and Abe Jellinek",
-	"target": "^https?://((www|gandhara)\\.rferl\\.org/|www\\.azatliq\\.org/|www\\.azattyq\\.org/|rus\\.azattyq\\.org/|da\\.azadiradio\\.com/|pa\\.azadiradio\\.com/|www\\.azattyk\\.org/|www\\.ozodi\\.org/|www\\.ozodlik\\.org/|www\\.evropaelire\\.org/|www\\.slobodnaevropa\\.org/|www\\.makdenes\\.org/|www\\.iraqhurr\\.org/|www\\.radiofarda\\.com/|www\\.azatutyun\\.am/|www\\.azadliq\\.org/|www\\.svaboda\\.org/|www\\.svoboda\\.org/|www\\.tavisupleba\\.org/|www\\.azathabar\\.com/|www\\.svobodanews\\.ru/|(romania|moldova)\\.europalibera\\.org/|www\\.radiosvoboda\\.org/)",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-02 00:12:35"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 

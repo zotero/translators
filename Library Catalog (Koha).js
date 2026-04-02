@@ -1,17 +1,3 @@
-{
-	"translatorID": "8e66aa6d-5b2a-4b44-b384-a838e23b8538",
-	"label": "Library Catalog (Koha)",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://[^/]+/cgi-bin/koha/opac-(detail|search|shelves)\\.pl\\?",
-	"minVersion": "2.1.9",
-	"maxVersion": "",
-	"priority": 260,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-10-17 18:23:11"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 	

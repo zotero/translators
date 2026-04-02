@@ -1,16 +1,3 @@
-{
-	"translatorID": "09bd8037-a9bb-4f9a-b3b9-d18b2564b49e",
-	"label": "ADS Bibcode",
-	"creator": "Abe Jellinek",
-	"target": "",
-	"minVersion": "6.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 8,
-	"lastUpdated": "2025-04-29 03:02:00"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 
