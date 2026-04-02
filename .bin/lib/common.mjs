@@ -64,12 +64,3 @@ export function output(data, jsonMode = false) {
 		}
 	}
 }
-
-/**
- * Format a Date as "YYYY-MM-DD HH:MM:SS" in UTC (Zotero lastUpdated format).
- */
-export function formatZoteroDate(date = new Date()) {
-	const pad = n => String(n).padStart(2, '0');
-	return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} `
-		+ `${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}`;
-}

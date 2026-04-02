@@ -1,6 +1,6 @@
 ---
 name: verify-translator
-description: Verify a Zotero translator after every addition or modification, and before submitting a PR. Runs linting, tests, and metadata updates.
+description: Verify a Zotero translator after every addition or modification, and before submitting a PR. Runs linting and tests.
 ---
 
 ## Fetch documentation
@@ -8,14 +8,6 @@ description: Verify a Zotero translator after every addition or modification, an
 Fetch and read:
 - https://www.zotero.org/support/_export/raw/dev/translators
 - https://www.zotero.org/support/_export/raw/dev/translators/coding
-
-## Update `lastUpdated`
-
-**This must be done every time translator code is modified.** Zotero uses `lastUpdated` to determine when to push updates to users.
-
-```
-node .bin/update-metadata.mjs "<translator filename>"
-```
 
 ## Lint
 

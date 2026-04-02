@@ -38,10 +38,6 @@ module.exports = {
 						holder: properties.creator || 'Zotero Contributors',
 						period: `${(new Date).getFullYear()}`,
 					};
-					if (properties.lastUpdated) {
-						const year = properties.lastUpdated.split('-')[0] || '';
-						if (year && year !== copyright.period) copyright.period = `${year}-${copyright.period}`;
-					}
 
 					const templateFile = fs.existsSync(options.templateFile)
 						? options.templateFile

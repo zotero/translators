@@ -21,15 +21,27 @@ async function loadTranslators() {
 	for (const file of files) {
 		const fullPath = path.join(rootPath, file);
 		if (!fullPath.endsWith('.js') || !(await fs.stat(fullPath)).isFile()) continue;
-		let content = await fs.readFile(fullPath, 'utf-8');
+		let code = await fs.readFile(fullPath, 'utf-8');
 		let translator;
 		try {
-			let translatorInfo = JSON.parse(infoRe.exec(content)[0]);
+			// Try .meta.json sidecar first, then fall back to parsing header from JS
+			const metaPath = path.join(rootPath, file.replace(/\.js$/, '.meta.json'));
+			let translatorInfo;
+			let content;
+			try {
+				translatorInfo = JSON.parse(await fs.readFile(metaPath, 'utf-8'));
+				// Serve with metadata prepended so connectors can parse it
+				content = JSON.stringify(translatorInfo, null, '\t') + '\n' + code;
+			}
+			catch {
+				translatorInfo = JSON.parse(infoRe.exec(code)[0]);
+				content = code;
+			}
 			translator = { metadata: translatorInfo, content };
 			idToTranslator[translatorInfo.translatorID] = translator;
 		}
 		catch (e) {
-			translator = { metadata: null, content };
+			translator = { metadata: null, content: code };
 		}
 		translators.push(translator);
 		filenameToTranslator[file] = translator;

@@ -86,9 +86,6 @@ Export tests are not yet supported by the automated test runner. Test manually b
 
 ## Step 5: Verify and submit
 
-**Update `lastUpdated` every time you modify translator code.**
-
 ```
-node .bin/update-metadata.mjs "<Label>.js"
 npm run lint -- "<Label>.js"
 ```

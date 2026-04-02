@@ -96,10 +96,7 @@ node .bin/create-test.mjs "<Label>.js" --input '<paste example data here>'
 
 ## Step 5: Verify and submit
 
-**Update `lastUpdated` every time you modify translator code.**
-
 ```
-node .bin/update-metadata.mjs "<Label>.js"
 npm run lint -- "<Label>.js"
 node .bin/run-tests.mjs "<Label>.js"
 ```
