@@ -83,12 +83,12 @@ FW.MultiScraper({ itemType  : "multiple",
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.tatpressa.ru/news/search.html?keyword=%D0%A2%D0%9E%D0%A6",
+		"url": "https://www.tatpressa.ru/news/search.html?keyword=%D0%A2%D0%9E%D0%A6",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.tatpressa.ru/news/6675.html",
+		"url": "https://www.tatpressa.ru/news/6675.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -104,7 +104,7 @@ var testCases = [
 				"libraryCatalog": "Tatpressa.ru",
 				"publicationTitle": "Вечерняя Казань",
 				"section": "Общество",
-				"url": "http://www.tatpressa.ru/news/6675.html",
+				"url": "https://www.tatpressa.ru/news/6675.html",
 				"attachments": [
 					{
 						"title": "Tatpressa.ru Snapshot",
