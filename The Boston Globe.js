@@ -1,7 +1,7 @@
 {
 	"translatorID": "1f245496-4c1b-406a-8641-d286b3888231",
 	"label": "The Boston Globe",
-	"creator": "Adam Crymble, Frank Bennett, Sebastian Karcher, Matthew Weymar",
+	"creator": "Matthew Weymar",
 	"target": "^https?://(www\\.|search\\.|articles\\.|archive\\.)?boston(globe)?\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -15,7 +15,6 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2011 Adam Crymble, Frank Bennett
 	Copyright © 2026 Matthew Weymar
 
 	This file is part of Zotero.
@@ -290,13 +289,19 @@ var testCases = [
 					}
 				],
 				"date": "2026-04-13",
+				"abstractNote": "Nantucket homeowners have spent millions trying to hold back rising seas. Does that really make sense?",
 				"ISSN": "0743-1791",
 				"language": "en-US",
 				"libraryCatalog": "The Boston Globe",
 				"publicationTitle": "The Boston Globe",
 				"section": "Editorials",
 				"url": "https://www.bostonglobe.com/2026/04/13/opinion/nantucket-geotubes-sea-level-rise/",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -318,13 +323,19 @@ var testCases = [
 					}
 				],
 				"date": "2026-04-14",
+				"abstractNote": "Governor Maura Healey said Tuesday that she wants \"to take the power away from social media platforms and Big Tech companies and put it back in the hands of our young people and our families.\"",
 				"ISSN": "0743-1791",
 				"language": "en-US",
 				"libraryCatalog": "The Boston Globe",
 				"publicationTitle": "The Boston Globe",
 				"section": "Politics",
 				"url": "https://www.bostonglobe.com/2026/04/14/metro/healey-social-media-restrictions-teen-legislation/",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -346,13 +357,20 @@ var testCases = [
 					}
 				],
 				"date": "2026-04-14",
+				"abstractNote": "Where henchmen once made trouble, there are now $19 espresso martinis.",
+				"shortTitle": "What's now at an old Boston mob haunt?",
 				"ISSN": "0743-1791",
 				"language": "en-US",
 				"libraryCatalog": "The Boston Globe",
 				"publicationTitle": "The Boston Globe",
 				"section": "Cambridge & Somerville",
 				"url": "https://www.bostonglobe.com/2026/04/14/metro/old-mob-haunts-gentrification/",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
