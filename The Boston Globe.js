@@ -323,7 +323,7 @@ var testCases = [
 					}
 				],
 				"date": "2026-04-14",
-				"abstractNote": "Governor Maura Healey said Tuesday that she wants \"to take the power away from social media platforms and Big Tech companies and put it back in the hands of our young people and our families.\"",
+				"abstractNote": "Governor Maura Healey said Tuesday that she wants \"to take the power away from social media platforms and Big Tech companies and put it back in the hands of our young people and our families.\u201d",
 				"ISSN": "0743-1791",
 				"language": "en-US",
 				"libraryCatalog": "The Boston Globe",
