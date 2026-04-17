@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-04-13 04:09:15"
+	"lastUpdated": "2026-04-17 02:46:07"
 }
 
 /*
@@ -297,11 +297,11 @@ function getPdfUrl(digitalData) {
 	return null;
 }
 
-// Get the url of the image with the given file identifier (FL id)
-function getImageUrl(digitalData, fileId) {
+// Get a field value from the image with the given file identifier (FL id)
+function getImageField(digitalData, fileId, field) {
 	for (let [fid, fileData] of Object.entries(digitalData.file)) {
 		if (fid == fileId) {
-			return fileData.url;
+			return fileData[field];
 		}
 	}
 	return null;
@@ -327,7 +327,12 @@ function getFirstImageUrl(digitalData) {
 	// There's only one image, so we'll get it.
 	if (Object.values(digitalData.summary.file)[0].length == 1) {
 		let fileId = getDerivativeId(Object.values(digitalData.file)[0]);
-		return [fileId, getImageUrl(digitalData, fileId)];
+		let label = "";
+		// If this is part of a group, get the file label to use as a subtitle
+		if (digitalData.viewer_md.group_md) {
+			label = getImageField(digitalData, fileId, "label");
+		}
+		return [fileId, getImageField(digitalData, fileId, "url"), label];
 	// Multiple images
 	// Eg: map volumes have multiple pages but no PDF
 	}
@@ -336,7 +341,7 @@ function getFirstImageUrl(digitalData) {
 		for (let fileData of Object.values(digitalData.file)) {
 			if (fileData.label.toLowerCase() == "index") {
 				let fileId = getDerivativeId(fileData);
-				return [fileId, getImageUrl(digitalData, fileId)];
+				return [fileId, getImageField(digitalData, fileId, "url"), ""];
 			}
 		}
 		// Then we'll look for a label that contains the number '1'
@@ -344,7 +349,7 @@ function getFirstImageUrl(digitalData) {
 			let pageNum = fileData.label.match(/\d+$/);
 			if (pageNum && pageNum[0] == "1") {
 				let fileId = getDerivativeId(fileData);
-				return [fileId, getImageUrl(digitalData, fileId)];
+				return [fileId, getImageField(digitalData, fileId, "url"), ""];
 			}
 		}
 	}
@@ -360,19 +365,21 @@ function prepareAttachment(digitalData, url) {
 	// Check for a file id in the url, get that image
 	if (/file=FL\d+/.test(url)) {
 		let fileId = url.match(/file=(FL\d+)/)[1];
-		let imageUrl = getImageUrl(digitalData, fileId);
-		attachment = { title: `Digitised image: ${fileId}`, mimeType: "image/jpeg", url: imageUrl };
+		let imageUrl = getImageField(digitalData, fileId, "url");
+		// This is part of a group, so get the file label to use as a subtitle
+		let label = getImageField(digitalData, fileId, "label");
+		attachment = [{ title: `Digitised image: ${fileId}`, mimeType: "image/jpeg", url: imageUrl }, label];
 	}
 	else {
 		// Check if there's a PDF version
 		let pdfUrl = getPdfUrl(digitalData);
 		if (pdfUrl) {
-			attachment = { title: "PDF", mimeType: "application/pdf", url: pdfUrl };
+			attachment = [{ title: "PDF", mimeType: "application/pdf", url: pdfUrl }, ""];
 		}
 		else {
 			// If there's no PDF, get the first image
-			let [fileId, imageUrl] = getFirstImageUrl(digitalData);
-			attachment = { title: `Digitised image: ${fileId}`, mimeType: "image/jpeg", url: imageUrl };
+			let [fileId, imageUrl, label] = getFirstImageUrl(digitalData);
+			attachment = [{ title: `Digitised image: ${fileId}`, mimeType: "image/jpeg", url: imageUrl }, label];
 		}
 	}
 	return attachment;
@@ -407,7 +414,12 @@ async function scrapeDigital(doc, url) {
 	// Remove any empty entries from the array, then add to item
 	item.abstractNote = notes.filter(n => n).join('. ');
 	// Get digital file details to attach
-	let attachment = prepareAttachment(digitalData, url);
+	let [attachment, label] = prepareAttachment(digitalData, url);
+	// Some images are grouped under a single title,
+	// so add the image label to the title for clarity where necessary
+	if (label) {
+		item.title = `${item.title} (${label})`;
+	}
 	item.attachments.push(attachment);
 	// Add snapshot
 	item.attachments.push({
@@ -470,26 +482,21 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://viewer.slv.vic.gov.au/?entity=IE8819462&mode=browse",
-		"detectedItemType": "artwork",
+		"url": "https://viewer.slv.vic.gov.au/?entity=IE426876&mode=browse",
 		"items": [
 			{
-				"itemType": "map",
-				"title": "South Melbourne plans [cartographic material]. Version 2.",
-				"creators": [
-					{
-						"lastName": "Mahlstedt's (Vic. ) Pty. Ltd",
-						"creatorType": "contributor"
-					}
-				],
-				"date": "1950-1954",
-				"abstractNote": "1 atlas ([36] leaves) : 18 col. maps ; 65 cm",
+				"itemType": "artwork",
+				"title": "A Souvenir of Portsea - 12 Specially Selected Views in Full Color (Image H84.440/342d)",
+				"creators": [],
+				"date": "[ca. 1945-1954]",
+				"abstractNote": "Foldout postcard comprising 12 images. Front cover (from which title is taken) and text inside front cover not captured. Published by NUCOLORVUE PRODUCTIONS, MENTONE, VICTORIA. - OCEAN BEACH, LOOKING TOWARDS PT. LONSDALE-PORTSEA BEACH AND PIER-THE ROAD BETWEEN SORRENTO AND PORTSEA-PICTURESQUE SCENE, PT. KING-THE FRONT BEACH-A SECTION OF LORD MAYOR'S HOLIDAY CAMP-OVERLOOKING THE BEACH AT PORTSEA-SHOPPING CENTRE AND PORTSEA HOTEL-A CLOSE UP VIEW OF LONDON BRIDGE-ENTRANCE TO LORD MAYOR'S HOLIDAY CAMP-THE OCEAN BEACH, LOOKING TOWARDS CAPE SCHANCK-HOTEL NEPEAN, PORTSEA. 1 digital file",
+				"callNumber": "H84.440/342d",
 				"libraryCatalog": "State Library of Victoria",
 				"rights": "This work is out of copyright",
-				"url": "https://viewer.slv.vic.gov.au/?entity=IE8819462&mode=browse",
+				"url": "https://viewer.slv.vic.gov.au/?entity=IE426876&mode=browse",
 				"attachments": [
 					{
-						"title": "Digitised image: FL21664012",
+						"title": "Digitised image: FL21215334",
 						"mimeType": "image/jpeg"
 					},
 					{
@@ -499,28 +506,7 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Buildings"
-					},
-					{
-						"tag": "Buildings"
-					},
-					{
-						"tag": "Fire insurance"
-					},
-					{
-						"tag": "Fire insurance"
-					},
-					{
-						"tag": "Port Melbourne (Vic.)"
-					},
-					{
-						"tag": "Real property"
-					},
-					{
-						"tag": "Real property"
-					},
-					{
-						"tag": "South Melbourne (Vic.)"
+						"tag": "Postcards."
 					}
 				],
 				"notes": [],
@@ -535,7 +521,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "manuscript",
-				"title": "Diary, 1841-1869. [manuscript].",
+				"title": "Diary, 1841-1869. [manuscript]. (Image 4)",
 				"creators": [
 					{
 						"firstName": "Sarah",
