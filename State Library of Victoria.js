@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-04-17 02:46:07"
+	"lastUpdated": "2026-04-28 10:15:53"
 }
 
 /*
@@ -95,33 +95,41 @@ async function doWeb(doc, url) {
 const FORMATS = {
 	article: "journalArticle",
 	audio: "audioRecording",
-	Books: "book",
-	Diaries: "manuscript",
+	book: "book",
+	diaries: "manuscript",
 	dissertation: "thesis",
 	ead: "manuscript",
-	Ephemera: "manuscript",
-	images: "artwork",
+	ephemera: "manuscript",
+	image: "artwork",
 	manuscript: "manuscript",
 	map: "map",
-	Maps: "map",
-	Papers: "manuscript",
-	Photographs: "artwork",
-	Periodicals: "book",
+	paper: "manuscript",
+	photograph: "artwork",
+	periodical: "book",
 	realia: "artwork",
 	video: "videoRecording"
 };
 
+// Check if the specified label is in the format keys
+function checkFormat(label) {
+	if (Object.keys(FORMATS).includes(label)) {
+		return true;
+	}
+	return false;
+}
+
 // Look for values in the specified format field that have mappings in the list above
 // If there's no matches, return the default format
 function getFormat(metadata, formatField, defaultFormat) {
-	let format;
-	if (Object.keys(FORMATS).includes(metadata[formatField][0])) {
-		format = FORMATS[metadata[formatField][0]];
+	let label = metadata[formatField][0].toLowerCase();
+	if (checkFormat(label)) {
+		return FORMATS[label];
 	}
-	else {
-		format = defaultFormat;
+	// try with trailing 's' removed
+	else if (checkFormat(label.replace(/s$/, ""))) {
+		return FORMATS[label.replace(/s$/, "")];
 	}
-	return format;
+	return defaultFormat;
 }
 
 // MAIN CATALOGUE
