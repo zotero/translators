@@ -398,7 +398,7 @@ function parseSingleEntry(entry) {
 
 	let articleID = arxivURL.match(/\/abs\/(.+)$/)[1];
 
-	let articleField = attr(entry, "primary_category", "term").replace(/^.+?:/, "").replace(/\..+?$/, "");
+	let articleField = attr(entry, "primary_category", "term");
 	if (articleField) articleField = "[" + articleField + "]";
 
 	if (articleID && articleID.includes("/")) {
