@@ -724,7 +724,7 @@ var testCases = [
 				],
 				"date": "2014-02-06",
 				"DOI": "10.48550/arXiv.1402.1516",
-				"abstractNote": "We construct a dual pair associated to the Hamiltonian geometric formulation of perfect fluids with free boundaries. This dual pair is defined on the cotangent bundle of the space of volume preserving embeddings of a manifold with boundary into a boundaryless manifold of the same dimension. The dual pair properties are rigorously verified in the infinite dimensional Fr\\'echet manifold setting. It provides an example of a dual pair associated to actions that are not completely mutually orthogonal.",
+				"abstractNote": "We construct a dual pair associated to the Hamiltonian geometric formulation of perfect fluids with free boundaries. This dual pair is defined on the cotangent bundle of the space of volume preserving embeddings of a manifold with boundary into a boundaryless manifold of the same dimension. The dual pair properties are rigorously verified in the infinite dimensional Fréchet manifold setting. It provides an example of a dual pair associated to actions that are not completely mutually orthogonal.",
 				"archiveID": "arXiv:1402.1516",
 				"extra": "arXiv:1402.1516 [math.SG]",
 				"libraryCatalog": "arXiv.org",
@@ -741,6 +741,9 @@ var testCases = [
 					}
 				],
 				"tags": [
+					{
+						"tag": "Mathematical Physics"
+					},
 					{
 						"tag": "Mathematics - Symplectic Geometry"
 					}
