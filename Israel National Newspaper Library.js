@@ -1,7 +1,7 @@
 {
 	"translatorID": "nl",
 	"label": "Israel National Library",
-	"creator": "Anonymus",
+	"creator": "Anonymous",
 	"target": "^https://www\\.nli\\.org\\.il/.*",
 	"minVersion": "6.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-05-04 08:27:06"
+	"lastUpdated": "2026-05-04 14:25:40"
 }
 
 /*
@@ -55,7 +55,8 @@ async function scrape(doc, url) {
 	
 	if (activeTitle && activeTitle.textContent.trim()) {
 		item.title = ZU.trimInternal(activeTitle.textContent);
-	} else if (activeTextP && activeTextP.textContent.trim()) {
+	}
+	else if (activeTextP && activeTextP.textContent.trim()) {
 		item.title = ZU.trimInternal(activeTextP.textContent);
 	}
 
@@ -63,7 +64,8 @@ async function scrape(doc, url) {
 	const activeLink = doc.querySelector("#documentdisplayleftpanesectionlevelpersistentlinkcontainer .persistentlinkurl");
 	if (activeLink && activeLink.textContent.trim()) {
 		item.url = ZU.trimInternal(activeLink.textContent);
-	} else {
+	}
+	else {
 		item.url = url.split('?')[0].split('#')[0];
 	}
 
@@ -85,10 +87,12 @@ async function scrape(doc, url) {
 		const parts = ZU.trimInternal(pageLabel.textContent).split(/\s+/);
 		if (parts.length > 1) {
 			item.pages = parts[1]; // Grabs "3" from "Page 3"
-		} else {
+		}
+		else {
 			item.pages = parts[0];
 		}
-	} else if (url.includes("/page/")) {
+	}
+	else if (url.includes("/page/")) {
 		const match = url.match(/\/page\/(\d+)(?:\/|$)/);
 		if (match) {
 			item.pages = match[1];
