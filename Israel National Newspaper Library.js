@@ -1,15 +1,15 @@
 {
-	"translatorID": "9d8099b7-1c50-4159-9a67-f9fc1fb3b463",
-	"label": "Israel National Newspaper Library",
+	"translatorID": "nl",
+	"label": "Israel National Library",
 	"creator": "Anonymus",
-	"target": "^https://www\\.nli\\.org\\.il/",
+	"target": "^https://www\\.nli\\.org\\.il/.*",
 	"minVersion": "6.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-27 11:48:08"
+	"lastUpdated": "2026-05-04 08:27:06"
 }
 
 /*
@@ -49,72 +49,53 @@ async function doWeb(doc, url) {
 async function scrape(doc, url) {
 	const item = new Zotero.Item("newspaperArticle");
 
-	// Get JSON-LD data (preferred source)
-	const jsonLD = doc.querySelector('script[type="application/ld+json"]');
-	if (jsonLD) {
-		try {
-			const jsonLDData = JSON.parse(jsonLD.textContent);
-			if (jsonLDData.headline) {
-				item.title = ZU.trimInternal(jsonLDData.headline);
-			}
-			if (jsonLDData.description) {
-				item.abstractNote = ZU.trimInternal(jsonLDData.description);
-			}
-			if (jsonLDData.datePublished) {
-				item.date = ZU.trimInternal(jsonLDData.datePublished);
-			}
-		}
-		catch (e) {
-			Z.debug("Error parsing JSON-LD: " + e);
-		}
-	}
-	else {
-		// Fallbacks
-		item.title = text(doc, '#sectionleveltabtitlearea') || item.title;
-		item.abstractNote = text(doc, 'meta[name="description"]') || item.abstractNote;
-		const dateStr = text(doc, 'li.breadcrumb-item:nth-child(3)');
-		if (dateStr) {
-			item.date = dateStr; // Already trimmed by text()
-		}
+	// 1. TITLE: Grab from the active section tab (Changes per article)
+	const activeTitle = doc.querySelector('#sectionleveltabtitlearea h2');
+	const activeTextP = doc.querySelector('#pagesectionstextcontainer p');
+	
+	if (activeTitle && activeTitle.textContent.trim()) {
+		item.title = ZU.trimInternal(activeTitle.textContent);
+	} else if (activeTextP && activeTextP.textContent.trim()) {
+		item.title = ZU.trimInternal(activeTextP.textContent);
 	}
 
-	// Canonical URL (persistent link preferred)
-	item.url = text(doc, "#sectionleveltabpersistentlinkarea .persistentlinkurl") || url;
-
-	// Get publication from NLI script data
-	const rawJSON = attr(doc, 'script#nlijs', 'data-nli-data-json');
-	if (rawJSON) {
-		try {
-			const json = JSON.parse(rawJSON.replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
-			if (json.publicationTitle) {
-				item.publicationTitle = ZU.trimInternal(json.publicationTitle);
-			}
-		}
-		catch (e) {
-			Z.debug("Failed to parse data-nli-data-json: " + e);
-		}
+	// 2. URL: Grab the persistent link for the active section (Changes per article)
+	const activeLink = doc.querySelector("#documentdisplayleftpanesectionlevelpersistentlinkcontainer .persistentlinkurl");
+	if (activeLink && activeLink.textContent.trim()) {
+		item.url = ZU.trimInternal(activeLink.textContent);
+	} else {
+		item.url = url.split('?')[0].split('#')[0];
 	}
 
-	// Page number handling
-	if (url.includes("/page/")) {
-		const match = url.match(/\/page\/(\d+)\//);
+	// 3. PUBLICATION: Grab from Breadcrumb
+	const pubNode = doc.querySelector('li.breadcrumb-item:nth-child(2)');
+	if (pubNode) {
+		item.publicationTitle = ZU.trimInternal(pubNode.textContent);
+	}
+
+	// 4. DATE: Grab from Breadcrumb
+	const dateNode = doc.querySelector('li.breadcrumb-item:nth-child(3)');
+	if (dateNode) {
+		item.date = ZU.trimInternal(dateNode.textContent);
+	}
+
+	// 5. PAGE: Grab the currently active highlighted page tab (Changes if you click across pages)
+	const pageLabel = doc.querySelector('span.pagelabel.current b');
+	if (pageLabel) {
+		const parts = ZU.trimInternal(pageLabel.textContent).split(/\s+/);
+		if (parts.length > 1) {
+			item.pages = parts[1]; // Grabs "3" from "Page 3"
+		} else {
+			item.pages = parts[0];
+		}
+	} else if (url.includes("/page/")) {
+		const match = url.match(/\/page\/(\d+)(?:\/|$)/);
 		if (match) {
 			item.pages = match[1];
 		}
-		// Clean the chosen URL (persistent or fallback)
-		item.url = (item.url || url).split('?')[0].split('#')[0];
-	}
-	else {
-		const pageStr = text(doc, 'span.pagelabel.current b');
-		if (pageStr) {
-			const parts = pageStr.split(/\s+/);
-			if (parts[1]) {
-				item.pages = parts[1]; // Already trimmed
-			}
-		}
 	}
 
-	// Fallback title if still missing
+	// Fallback if title is still totally blank
 	if (!item.title && item.publicationTitle && item.date) {
 		item.title = `${item.publicationTitle}, ${item.date}`;
 	}
@@ -122,3 +103,8 @@ async function scrape(doc, url) {
 	item.libraryCatalog = "National Library of Israel";
 	item.complete();
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+]
+/** END TEST CASES **/
