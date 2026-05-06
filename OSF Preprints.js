@@ -2,61 +2,67 @@
 	"translatorID": "3b978207-5d5c-416f-b15e-2d9da4aa75e9",
 	"label": "OSF Preprints",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://(osf\\.io|psyarxiv\\.com|arabixiv\\.org|biohackrxiv\\.org|eartharxiv\\.org|ecoevorxiv\\.org|ecsarxiv\\.org|edarxiv\\.org|engrxiv\\.org|frenxiv\\.org|indiarxiv\\.org|mediarxiv\\.org|paleorxiv\\.org)",
+	"target": "^https://osf\\.io/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-11-07 22:14:23"
+	"lastUpdated": "2025-10-28 14:51:21"
 }
 
 /*
-	***** BEGIN LICENSE BLOCK *****
+    ***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2020 Sebastian Karcher
+    Copyright © 2025 Abe Jellinek
 
-	This file is part of Zotero.
+    This file is part of Zotero.
 
-	Zotero is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-	Zotero is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-	GNU Affero General Public License for more details.
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU Affero General Public License for more details.
 
-	You should have received a copy of the GNU Affero General Public License
-	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
-	***** END LICENSE BLOCK *****
+    ***** END LICENSE BLOCK *****
 */
 
+
+const API_BASE = `https://api.osf.io/v2`;
+
+let idRe = /(?:\/preprints\/[^#?/]+|^)\/([^#?/]+)/;
+
 function detectWeb(doc, url) {
-	if (text(doc, 'h1[data-test-preprint-title]')) {
-		return "preprint";
+	if (idRe.test(url)) {
+		return 'preprint';
 	}
-	else if (url.includes("search?") && getSearchResults(doc, true)) {
-		return "multiple";
+	else if (getSearchResults(doc, true)) {
+		return 'multiple';
 	}
-	Z.monitorDOMChanges(doc.body);
+	else if (url.includes('/search')) {
+		Zotero.monitorDOMChanges(doc.querySelector('osf-root'));
+	}
 	return false;
 }
-
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	// The Preprint search on OSF includes other preprints such as PeerJ and RePec
-	var supportedSites = /^https?:\/\/(osf\.io|psyarxiv\.com|arabixiv\.org|biohackrxiv\.org|eartharxiv\.org|ecoevorxiv\.org|ecsarxiv\.org|edarxiv\.org|engrxiv\.org|frenxiv\.org|indiarxiv\.org|mediarxiv\.org|paleorxiv\.org)/;
-	var rows = doc.querySelectorAll('div[class*="primary-metadata-container"] h4>a');
+	var rows = doc.querySelectorAll('osf-resource-card h2 a');
 	for (let row of rows) {
+		let type = text(row.closest('osf-resource-card'), '.type');
+		if (type !== 'Preprint') continue;
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
-		if (!href || !title || !supportedSites.test(href)) continue;
+		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
@@ -64,234 +70,142 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) ZU.doGet(constructAPIURL(Object.keys(items)), osfAPIImport);
-		});
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(url);
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(url);
 	}
 }
 
+async function scrape(url) {
+	let id = new URL(url).pathname.match(idRe)[1];
+	let json = (await requestJSON(
+		`${API_BASE}/preprints/${id}/?embed=identifiers`
+	)).data;
 
-// takes and array of preprint URLs, extracts the ID and constructs an API call to OSF
-function constructAPIURL(urls) {
-	var ids = [];
-	for (let url of urls) {
-		let id;
-		if (url.match(/\.(io|com|org)\/([a-z0-9]+)/)) {
-			id = url.match(/\.(?:io|com|org)\/([a-z0-9]+)/)[1];
-		}
-		if (id) {
-			ids.push("https://api.osf.io/v2/preprints/" + id + "/?embed=contributors&embed=provider");
-		}
-	}
-	return ids;
-}
+	let item = new Zotero.Item('preprint');
+	
+	item.archiveID = json.id;
+	item.date = ZU.strToISO(json.attributes.date_published || json.attributes.date_modified);
+	item.DOI = json.attributes.doi;
+	item.title = json.attributes.title;
+	item.abstractNote = json.attributes.description;
+	item.tags = json.attributes.tags.map(tag => ({ tag }));
+	item.url = json.links.html;
 
-// TODO: Unify and use API or EM uniformly
-function osfAPIImport(text) {
-	// Z.debug(text);
-	let json = JSON.parse(text);
-	let attr = json.data.attributes;
-	let embeds = json.data.embeds;
-	var item = new Zotero.Item("preprint");
-	// currently we're just doing preprints, but putting this here in case we'll want to handle different OSF
-	// item types in the future
-	// let type = json.data.type
-	item.title = attr.title;
-	item.abstractNote = attr.description;
-	item.date = attr.date_published;
-	item.publisher = embeds.provider.data.attributes.name;
-	item.DOI = json.data.links.preprint_doi && ZU.cleanDOI(json.data.links.preprint_doi);
-	item.url = json.data.links.html;
-	for (let tag of attr.tags) {
-		item.tags.push(tag);
+	let citation = (await requestJSON(`${API_BASE}/preprints/${id}/citation/`)).data;
+
+	item.creators = citation.attributes.author.map(author => ({
+		lastName: author.family,
+		firstName: author.given,
+		creatorType: 'author',
+	}));
+	item.repository = citation.attributes.publisher;
+
+	if (!item.DOI) {
+		let identifiers = json.embeds.identifiers.data;
+		item.DOI = identifiers.find(id => id.attributes.category === 'doi')
+			?.attributes.value;
 	}
 
-	for (let contributor of embeds.contributors.data) {
-		let author = contributor.embeds.users.data.attributes;
-		if (author.given_name && author.family_name) {
-			// add middle names
-			let givenNames = author.given_name + ' ' + author.middle_names;
-			item.creators.push({ lastName: author.family_name, firstName: givenNames.trim(), creatorType: "author" });
-		}
-		else {
-			item.creators.push({ lastName: author.full_name, creatorType: "author", fieldMode: 1 });
-		}
-	}
-	if (json.data.relationships.primary_file) {
-		let fileID = json.data.relationships.primary_file.links.related.href.replace("https://api.osf.io/v2/files/", "");
-		item.attachments.push({ url: "https://osf.io/download/" + fileID, title: "OSF Preprint", mimeType: "application/pdf" });
+	if (json.relationships.primary_file) {
+		let file = (await requestJSON(json.relationships.primary_file.links.related.href)).data;
+		item.attachments.push({
+			title: 'Preprint PDF',
+			mimeType: 'application/pdf',
+			url: file.links.download,
+		});
 	}
 
 	item.complete();
-}
-
-function scrape(doc, url) {
-	var translator = Zotero.loadTranslator('web');
-	// Embedded Metadata
-	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-
-	translator.setHandler('itemDone', function (obj, item) {
-		// remove Snapshot, which is useless for OSF preprints (plus we should always get a PDF)
-		for (let i = item.attachments.length - 1; i >= 0; i--) {
-			if (item.attachments[i].title == "Snapshot") {
-				item.attachments.splice(i, 1);
-			}
-		}
-		if (!item.attachments.length) {
-			let pdfURL = attr(doc, 'div[class*="download-container"] a[href$="/download/"]', 'href');
-			if (pdfURL) {
-				item.attachments.push({
-					title: 'OSF Preprint',
-					mimeType: 'application/pdf',
-					url: pdfURL
-				});
-			}
-		}
-		item.libraryCatalog = "OSF Preprints";
-		item.complete();
-	});
-
-	translator.getTranslatorObject(function (trans) {
-		trans.itemType = "preprint";
-		trans.doWeb(doc, url);
-	});
 }
 
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://osf.io/preprints/psyarxiv/nx2b4",
-		"defer": true,
-		"items": [
-			{
-				"itemType": "preprint",
-				"title": "The Dutch Auditory & Image Vocabulary Test (DAIVT): A New Dutch Receptive Vocabulary Test for Students",
-				"creators": [
-					{
-						"firstName": "Ibrich",
-						"lastName": "Bousard",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Marc",
-						"lastName": "Brysbaert",
-						"creatorType": "author"
-					}
-				],
-				"date": "2020-05-05",
-				"DOI": "10.31234/osf.io/nx2b4",
-				"abstractNote": "We introduce a new Dutch receptive vocabulary test, the Dutch auditory &amp; image vocabulary test (DAIVT). The test is multiple choice and assesses vocabulary knowledge for spoken words. The measure has an online format, has free access, and allows easy data collection. The test was developed with the intent to enable testing for research purposes with university students. This paper describes the test construction. We cover three phases: 1) collecting stimulus materials and developing the test’s first version, 2) an exploratory item-analysis on the first draft (n= 93), and 3) validating the test (both the second and the final version) by comparing it to two existing tests (n= 270, n= 157). The results indicate that the test is reliable and correlates well with existing Dutch receptive vocabulary tests (convergent validity). The final version of the DAIVT comprises 90 test items and 1 practice item. It can be used freely for research purposes.",
-				"language": "en-us",
-				"libraryCatalog": "OSF Preprints",
-				"repository": "OSF",
-				"shortTitle": "The Dutch Auditory & Image Vocabulary Test (DAIVT)",
-				"url": "https://osf.io/nx2b4",
-				"attachments": [],
-				"tags": [
-					{
-						"tag": "Dutch vocabulary"
-					},
-					{
-						"tag": "individual differences"
-					},
-					{
-						"tag": "receptive vocabulary"
-					},
-					{
-						"tag": "spoken word comprehension"
-					},
-					{
-						"tag": "vocabulary test"
-					},
-					{
-						"tag": "word knowledge"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "https://osf.io/preprints/osf/b2xmp",
-		"defer": true,
 		"items": [
 			{
 				"itemType": "preprint",
 				"title": "‘All In’: A Pragmatic Framework for COVID-19 Testing and Action on a Global Scale",
 				"creators": [
 					{
-						"firstName": "Syril",
 						"lastName": "Pettit",
+						"firstName": "Syril D",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Keith",
 						"lastName": "Jerome",
+						"firstName": "Keith",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "David",
 						"lastName": "Rouquie",
+						"firstName": "David",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Susan",
 						"lastName": "Hester",
+						"firstName": "Susan",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Leah",
 						"lastName": "Wehmas",
+						"firstName": "Leah",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Bernard",
 						"lastName": "Mari",
+						"firstName": "Bernard",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Pascal",
 						"lastName": "Barbry",
+						"firstName": "Pascal",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Yasunari",
 						"lastName": "Kanda",
+						"firstName": "Yasunari",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Mineo",
 						"lastName": "Matsumoto",
+						"firstName": "Mineo",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jason",
 						"lastName": "Botten",
+						"firstName": "Jason",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Emily",
 						"lastName": "Bruce",
+						"firstName": "Emily",
 						"creatorType": "author"
 					}
 				],
 				"date": "2020-04-29",
 				"DOI": "10.31219/osf.io/b2xmp",
 				"abstractNote": "Current demand for SARS-CoV-2 testing is straining material resource and labor capacity around the globe.  As a result, the public health and clinical community are hindered in their ability to monitor and contain the spread of COVID-19.  Despite broad consensus that more testing is needed, pragmatic guidance towards realizing this objective has been limited.  This paper addresses this limitation by proposing a novel and geographically agnostic framework (‘the 4Ps Framework) to guide multidisciplinary, scalable, resource-efficient, and achievable efforts towards enhanced testing capacity.  The 4Ps (Prioritize, Propagate, Partition, and Provide) are described in terms of specific opportunities to enhance the volume, diversity, characterization, and implementation of SARS-CoV-2 testing to benefit public health.  Coordinated deployment of the strategic and tactical recommendations described in this framework have the potential to rapidly expand available testing capacity, improve public health decision-making in response to the COVID-19 pandemic, and/or to be applied in future emergent disease outbreaks.",
-				"language": "en-us",
+				"archiveID": "b2xmp_v1",
 				"libraryCatalog": "OSF Preprints",
-				"repository": "OSF",
+				"repository": "OSF Preprints",
 				"shortTitle": "‘All In’",
-				"url": "https://osf.io/b2xmp",
-				"attachments": [],
+				"url": "https://osf.io/b2xmp_v1/",
+				"attachments": [
+					{
+						"title": "Preprint PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [
 					{
 						"tag": "COVID-19"
@@ -320,18 +234,974 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://osf.io/preprints/socarxiv/j7qta",
-		"defer": true,
 		"items": [
 			{
 				"itemType": "preprint",
-				"title": "SocArXiv Papers | The Reliability of Replications: A Study in Computational Reproductions",
-				"creators": [],
-				"language": "en-us",
+				"title": "The Reliability of Replications: A Study in Computational Reproductions",
+				"creators": [
+					{
+						"lastName": "Breznau",
+						"firstName": "Nate",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Rinke",
+						"firstName": "Eike Mark",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wuttke",
+						"firstName": "Alexander",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Nguyen",
+						"firstName": "Hung H V",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Adem",
+						"firstName": "Muna",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Adriaans",
+						"firstName": "Jule",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Akdeniz",
+						"firstName": "Esra",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Alvarez-Benjumea",
+						"firstName": "Amalia",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Andersen",
+						"firstName": "Henrik K",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Auer",
+						"firstName": "Daniel",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Azevedo",
+						"firstName": "Flavio",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bahnsen",
+						"firstName": "Oke",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bai",
+						"firstName": "Ling",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Balzer",
+						"firstName": "Dave",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bauer",
+						"firstName": "Gerrit",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bauer",
+						"firstName": "Paul",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Baumann",
+						"firstName": "Markus",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Baute",
+						"firstName": "Sharon",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Benoit",
+						"firstName": "Verena",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bernauer",
+						"firstName": "Julian",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Berning",
+						"firstName": "Carl",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Berthold",
+						"firstName": "Anna",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bethke",
+						"firstName": "Felix S",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Biegert",
+						"firstName": "Thomas",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Blinzler",
+						"firstName": "Katharina",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Blumenberg",
+						"firstName": "Johannes",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bobzien",
+						"firstName": "Licia",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bohman",
+						"firstName": "Andrea",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bol",
+						"firstName": "Thijs",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bostic",
+						"firstName": "Amie",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Brzozowska",
+						"firstName": "Zuzanna",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Burgdorf",
+						"firstName": "Katharina",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Burger",
+						"firstName": "Kaspar",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Busch",
+						"firstName": "Kathrin",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Castillo",
+						"firstName": "Juan C",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Chan",
+						"firstName": "Nathan",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Christmann",
+						"firstName": "Pablo",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Connelly",
+						"firstName": "Roxanne",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Czymara",
+						"firstName": "Christian S",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Damian",
+						"firstName": "Elena",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "de Rooij",
+						"firstName": "Eline A",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Ecker",
+						"firstName": "Alejandro",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Edelmann",
+						"firstName": "Achim",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Eder",
+						"firstName": "Christina",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Eger",
+						"firstName": "Maureen A",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Ellerbrock",
+						"firstName": "Simon",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Forke",
+						"firstName": "Anna",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Forster",
+						"firstName": "Andrea G",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Freire",
+						"firstName": "Danilo",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Gaasendam",
+						"firstName": "Chris",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Gavras",
+						"firstName": "Konstantin",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Gayle",
+						"firstName": "Vernon, Professor",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Gessler",
+						"firstName": "Theresa",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Gnambs",
+						"firstName": "Timo",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Godefroidt",
+						"firstName": "Amélie",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Grömping",
+						"firstName": "Max",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Groß",
+						"firstName": "Martin",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Gruber",
+						"firstName": "Stefan",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Gummer",
+						"firstName": "Tobias",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Hadjar",
+						"firstName": "Andreas",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Halbherr",
+						"firstName": "Verena",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Heisig",
+						"firstName": "Jan P",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Hellmeier",
+						"firstName": "Sebastian",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Heyne",
+						"firstName": "Stefanie",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Hirsch",
+						"firstName": "Magdalena",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Hjerm",
+						"firstName": "Mikael",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Hochman",
+						"firstName": "Oshrat",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Höffler",
+						"firstName": "Jan H",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Hövermann",
+						"firstName": "Andreas",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Hunger",
+						"firstName": "Sophia",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Hunkler",
+						"firstName": "Christian",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Huth-Stöckle",
+						"firstName": "Nora",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Ignacz",
+						"firstName": "Zsofia S.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Israel",
+						"firstName": "Sabine",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Jacobs",
+						"firstName": "Laura",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Jacobsen",
+						"firstName": "Jannes",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Jaeger",
+						"firstName": "Bastian",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Jungkunz",
+						"firstName": "Sebastian",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Jungmann",
+						"firstName": "Nils",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kanjana",
+						"firstName": "Jennifer",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kauff",
+						"firstName": "Mathias",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Khan",
+						"firstName": "Salman",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Khatua",
+						"firstName": "Sayak",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kleinert",
+						"firstName": "Manuel",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Klinger",
+						"firstName": "Julia",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kolb",
+						"firstName": "Jan-Philipp",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kołczyńska",
+						"firstName": "Marta",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kuk",
+						"firstName": "John S",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kunißen",
+						"firstName": "Katharina",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Sinatra",
+						"firstName": "Dafina K",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Greinert",
+						"firstName": "Alexander",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Lee",
+						"firstName": "Robin C",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Lersch",
+						"firstName": "Philipp M",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Liu",
+						"firstName": "David",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Löbel",
+						"firstName": "Lea-Maria",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Lutscher",
+						"firstName": "Philipp",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Mader",
+						"firstName": "Matthias",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Madia",
+						"firstName": "Joan E",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Malancu",
+						"firstName": "Natalia",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Maldonado",
+						"firstName": "Luis",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Marahrens",
+						"firstName": "Helge",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Martin",
+						"firstName": "Nicole",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Martinez",
+						"firstName": "Paul",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Mayerl",
+						"firstName": "Jochen",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "MAYORGA",
+						"firstName": "OSCAR J",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "McDonnell",
+						"firstName": "Robert M",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "McManus",
+						"firstName": "Patricia A",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wagner",
+						"firstName": "Kyle",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Meeusen",
+						"firstName": "Cecil",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Meierrieks",
+						"firstName": "Daniel",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Mellon",
+						"firstName": "Jonathan",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Merhout",
+						"firstName": "Friedolin",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Merk",
+						"firstName": "Samuel",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Meyer",
+						"firstName": "Daniel",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Micheli",
+						"firstName": "Leticia",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Mijs",
+						"firstName": "Jonathan J",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Moya",
+						"firstName": "Cristóbal",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Neunhoeffer",
+						"firstName": "Marcel",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Nüst",
+						"firstName": "Daniel",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Nygård",
+						"firstName": "Olav",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Ochsenfeld",
+						"firstName": "Fabian",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Otte",
+						"firstName": "Gunnar",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Pechenkina",
+						"firstName": "Anna",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Pickup",
+						"firstName": "Mark",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Prosser",
+						"firstName": "Christopher",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Raes",
+						"firstName": "Louis",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Ralston",
+						"firstName": "Kevin",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Ramos",
+						"firstName": "Miguel",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Reichert",
+						"firstName": "Frank",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Roets",
+						"firstName": "Arne",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Rogers",
+						"firstName": "Jonathan",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Ropers",
+						"firstName": "Guido",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Samuel",
+						"firstName": "Robin",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Sand",
+						"firstName": "Gergor",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Petrarca",
+						"firstName": "Constanza S",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Schachter",
+						"firstName": "Ariela",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Schaeffer",
+						"firstName": "Merlin",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Schieferdecker",
+						"firstName": "David",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Schlueter",
+						"firstName": "Elmar",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Schmidt",
+						"firstName": "Katja",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Schmidt",
+						"firstName": "Regine",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Schmidt-Catran",
+						"firstName": "Alexander",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Schmiedeberg",
+						"firstName": "Claudia",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Schneider",
+						"firstName": "Jürgen",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Schoonvelde",
+						"firstName": "Martijn",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Schulte-Cloos",
+						"firstName": "Julia",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Schumann",
+						"firstName": "Sandy",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Schunck",
+						"firstName": "Reinhard",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Seuring",
+						"firstName": "Julian",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Silber",
+						"firstName": "Henning",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Sleegers",
+						"firstName": "Willem W A",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Sonntag",
+						"firstName": "Nico",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Staudt",
+						"firstName": "Alexander",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Steiber",
+						"firstName": "Nadia",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Steiner",
+						"firstName": "Nils",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Sternberg",
+						"firstName": "Sebastian",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Stiers",
+						"firstName": "Dieter",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Stojmenovska",
+						"firstName": "Dragana",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Storz",
+						"firstName": "Nora",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Striessnig",
+						"firstName": "Erich",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Stroppe",
+						"firstName": "Anne-Kathrin",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Suchow",
+						"firstName": "Jordan",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Teltemann",
+						"firstName": "Janna",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Tibajev",
+						"firstName": "Andrey",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Tung",
+						"firstName": "Brian B",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Vagni",
+						"firstName": "Giacomo",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Van Assche",
+						"firstName": "Jasper",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "van der Linden",
+						"firstName": "Meta",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "van der Noll",
+						"firstName": "Jolanda",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Van Hootegem",
+						"firstName": "Arno",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Vogtenhuber",
+						"firstName": "Stefan",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Voicu",
+						"firstName": "Bogdan",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wagemans",
+						"firstName": "Fieke",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wehl",
+						"firstName": "Nadja",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Werner",
+						"firstName": "Hannah",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wiernik",
+						"firstName": "Brenton M",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Winter",
+						"firstName": "Fabian",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wolf",
+						"firstName": "Christof",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wu",
+						"firstName": "Cary",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Yamada",
+						"firstName": "Yuki",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Zakula",
+						"firstName": "Björn",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Zhang",
+						"firstName": "Nan",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Ziller",
+						"firstName": "Conrad",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Zins",
+						"firstName": "Stefan",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Żółtak",
+						"firstName": "Tomasz",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-05-18",
+				"DOI": "10.31235/osf.io/j7qta_v1",
+				"abstractNote": "This paper reports findings from a crowdsourced replication. Eighty-five independent teams attempted a computational replication of results reported in an original study of policy preferences and immigration by fitting the same statistical models to the same data. The replication involved an experimental condition. Random assignment put participating teams into either the transparent group that received the original study and code, or the opaque group receiving only a methods section, rough results description and no code. The transparent group mostly verified the numerical results of the original study with the same sign and p-value threshold (95.7%), while the opaque group had less success (89.3%). Exact numerical reproductions to the second decimal place were far less common (76.9% and 48.1%), and the number of teams who verified at least 95% of all effects in all models they ran was 79.5% and 65.2% respectively. Therefore, the reliability we quantify depends on how reliability is defined, but most definitions suggest it would take a minimum of three independent replications to achieve reliability. Qualitative investigation of the teams’ workflows reveals many causes of error including mistakes and procedural variations. Although minor error across researchers is not surprising, we show this occurs where it is least expected in the case of computational reproduction. Even when we curate the results to boost ecological validity, the error remains large enough to undermine reliability between researchers to some extent. The presence of inter-researcher variability may explain some of the current “reliability crisis” in the social sciences because it may be undetected in all forms of research involving data analysis. The obvious implication of our study is more transparency. Broader implications are that researcher variability adds an additional meta-source of error that may not derive from conscious measurement or modeling decisions, and that replications cannot alone resolve this type of uncertainty.",
+				"archiveID": "j7qta_v1",
 				"libraryCatalog": "OSF Preprints",
-				"shortTitle": "SocArXiv Papers | The Reliability of Replications",
-				"url": "https://osf.io/preprints/socarxiv/j7qta",
-				"attachments": [],
-				"tags": [],
+				"repository": "SocArXiv",
+				"shortTitle": "The Reliability of Replications",
+				"url": "https://osf.io/preprints/socarxiv/j7qta_v1/",
+				"attachments": [
+					{
+						"title": "Preprint PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Immigration"
+					},
+					{
+						"tag": "Meta-Reliability"
+					},
+					{
+						"tag": "Noise"
+					},
+					{
+						"tag": "Policy Preferences"
+					},
+					{
+						"tag": "Replication"
+					},
+					{
+						"tag": "Researcher Variability"
+					},
+					{
+						"tag": "Secondary Observer Effect"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -339,55 +1209,49 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://osf.io/search?activeFilters=%5B%5D&q=metascience&resourceType=Preprint&sort=-relevance&view_only=",
-		"defer": true,
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "https://osf.io/preprints/psyarxiv/7eb4g",
 		"items": [
 			{
 				"itemType": "preprint",
-				"title": "Revisiting the Digital Jukebox: Applying Mood Management Theory to Algorithmically Curated Music Streaming Environments",
+				"title": "Revisiting the Digital Jukebox in Daily Life: Applying Mood Management Theory to Algorithmically Curated Music Streaming Environments",
 				"creators": [
 					{
-						"firstName": "Alicia",
 						"lastName": "Ernst",
+						"firstName": "Alicia",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Felix",
 						"lastName": "Dietrich",
+						"firstName": "Felix",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Benedikt",
 						"lastName": "Rohr",
+						"firstName": "Benedikt",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Leonard",
 						"lastName": "Reinecke",
+						"firstName": "Leonard",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Michael",
 						"lastName": "Scharkow",
+						"firstName": "Michael",
 						"creatorType": "author"
 					}
 				],
 				"date": "2024-09-30",
-				"DOI": "10.31234/osf.io/7eb4g",
-				"abstractNote": "Experimental evidence has profoundly contributed to our understanding of Mood Management Theory (MMT) in the context of music. Extant research, however, lacks insights into everyday mood regulation through music listening, especially on music streaming services where selections can be guided by algorithmic recommendations. Hence, we tested MMT in a naturalistic setting by combining experience sampling with logged music streaming data, while accounting for algorithmic curation as a boundary condition to users’ music choices. In a pre-registered study using T = 6,918 observations from N = 144 listeners, results showed that mood, music selection, and algorithmic curation varied substantially from situation to situation. However, we found no effects between mood and music choices that would confirm MMT’s selection hypotheses, yet small mood-congruent music effects on mood. Algorithmic curation did not establish novel MMT-related choice patterns. Our findings suggest re-specifying MMT and related media use theories for daily life.",
-				"language": "en-us",
+				"DOI": "10.31234/osf.io/7eb4g_v1",
+				"abstractNote": "Experimental evidence has profoundly contributed to our understanding of Mood Man-agement Theory (MMT) in the context of music. Extant research, however, lacks insights into everyday mood regulation through music listening, especially on music streaming services where selections can be guided by algorithmic recommendations. Hence, we tested MMT in a naturalistic setting by combining experience sampling with logged music streaming data, while accounting for algorithmic curation as a boundary condition to users’ music choices. In a pre-registered study utilizing T = 6,864 surveys from N = 144 listeners, results showed that mood, music selection, and algorithmic curation varied substantially from situation to situation. How-ever, we found no effects between mood and music choices that would confirm MMT’s selection hypotheses, yet in part, small congruent effects between mood and music. Algorithmic curation did not establish novel MMT-related patterns. Our findings suggest re-specifying MMT and related media use theories for daily life.",
+				"archiveID": "7eb4g_v1",
 				"libraryCatalog": "OSF Preprints",
-				"repository": "OSF",
-				"shortTitle": "Revisiting the Digital Jukebox",
-				"url": "https://osf.io/7eb4g",
+				"repository": "PsyArXiv",
+				"shortTitle": "Revisiting the Digital Jukebox in Daily Life",
+				"url": "https://osf.io/preprints/psyarxiv/7eb4g_v1/",
 				"attachments": [
 					{
-						"title": "OSF Preprint",
+						"title": "Preprint PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -412,6 +1276,12 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://osf.io/search?search=curiosity&tab=5",
+		"defer": true,
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

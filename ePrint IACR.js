@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-07-21 13:48:22"
+	"lastUpdated": "2025-10-19 18:51:24"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2010-2023 Jonas Schrieb and contributors
+	Copyright © 2010-2025 Jonas Schrieb and contributors
 
 	This file is part of Zotero.
 
@@ -154,7 +154,7 @@ async function scrape(doc, url = doc.location.href) {
 			case "ps":
 				// There are entries where a format button is present, but the URL points to the ePrint home page
 				if (format.href.slice(-3) != ".ps") continue;
-				attachment.mimeType = "application/ps";
+				attachment.mimeType = "application/postscript";
 				break;
 			default:
 				// For security reasons, avoid adding unknown formats (allowlist approach)
@@ -520,7 +520,7 @@ var testCases = [
 				"url": "https://eprint.iacr.org/2002/195",
 				"attachments": [
 					{
-						"mimeType": "application/ps",
+						"mimeType": "application/postscript",
 						"title": "Full Text PS"
 					}
 				],
@@ -580,7 +580,7 @@ var testCases = [
 						"title": "Full Text PDF"
 					},
 					{
-						"mimeType": "application/ps",
+						"mimeType": "application/postscript",
 						"title": "Full Text PS"
 					}
 				],

@@ -17,7 +17,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2023-07-28 09:46:04"
+	"lastUpdated": "2026-01-05 18:52:35"
 }
 
 /*
@@ -1544,20 +1544,7 @@ function applyValue(item, zField, value, rawLine) {
 			break;
 		case 'DOI':
 			value = ZU.cleanDOI(value);
-			//add DOI to extra field,
-			if (!ZU.fieldIsValidForType("DOI", item.itemType) && value) {
-				if (item.extra) {
-					if (!(/^DOI:/.test(item.extra))) {
-						item.extra += '\nDOI: ' + value;
-					}
-				}
-				else {
-					item.extra = 'DOI: ' + value;
-				}
-			}
-			else {
-				item[zField] = value;
-			}
+			item[zField] = value;
 			break;
 		default:
 			//check if value already exists. Don't overwrite existing values
@@ -2197,7 +2184,6 @@ var exports = {
 	options: exportedOptions
 };
 
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -2332,12 +2318,14 @@ var testCases = [
 					}
 				],
 				"date": "0000 Year Date",
+				"DOI": "10.1234/123456",
 				"abstractNote": "Abstract",
 				"archive": "Name of Database",
 				"archiveLocation": "Accession Number",
-				"extra": "DOI: 10.1234/123456\nPublication Number",
+				"extra": "Publication Number",
 				"language": "Language",
 				"libraryCatalog": "Database Provider",
+				"place": "Place Published",
 				"publisher": "Publisher",
 				"shortTitle": "Short Title",
 				"url": "URL",
@@ -2396,6 +2384,7 @@ var testCases = [
 				"extra": "Text Number",
 				"language": "Language",
 				"libraryCatalog": "Database Provider",
+				"place": "Place Published",
 				"publisher": "Publisher",
 				"shortTitle": "Short Title",
 				"url": "URL",
@@ -2494,6 +2483,7 @@ var testCases = [
 				"extra": "Number",
 				"language": "Language",
 				"libraryCatalog": "Database Provider",
+				"place": "Place Published",
 				"shortTitle": "Short Title",
 				"url": "URL",
 				"videoRecordingFormat": "Format",
@@ -2821,7 +2811,9 @@ var testCases = [
 				"language": "Language",
 				"libraryCatalog": "Database Provider",
 				"pages": "Pages",
+				"place": "Place Published",
 				"publicationTitle": "Series Title",
+				"publisher": "Publisher",
 				"shortTitle": "Short Title",
 				"url": "URL",
 				"volume": "Volume",
@@ -3320,7 +3312,10 @@ var testCases = [
 				"language": "Language",
 				"libraryCatalog": "Database Provider",
 				"pages": "Pages",
+				"place": "Place Published",
 				"publicationTitle": "Periodical Title",
+				"publisher": "Publisher",
+				"section": "E-Pub Date",
 				"series": "Website Title",
 				"shortTitle": "Short Title",
 				"url": "URL",
@@ -3567,6 +3562,7 @@ var testCases = [
 				"extra": "Number",
 				"language": "Language",
 				"libraryCatalog": "Database Provider",
+				"place": "Place Published",
 				"publisher": "Publisher",
 				"url": "URL",
 				"attachments": [],
@@ -3662,6 +3658,7 @@ var testCases = [
 				"genre": "Genre",
 				"language": "Language",
 				"libraryCatalog": "Database Provider",
+				"place": "Place Published",
 				"runningTime": "Running Time",
 				"shortTitle": "Short Title",
 				"url": "URL",
@@ -3724,7 +3721,10 @@ var testCases = [
 				"language": "Language",
 				"libraryCatalog": "Database Provider",
 				"pages": "Pages",
+				"place": "Place Published",
 				"publicationTitle": "Secondary Title",
+				"publisher": "Publisher",
+				"section": "Section",
 				"series": "Tertiary Title",
 				"shortTitle": "Short Title",
 				"url": "URL",
@@ -3830,7 +3830,10 @@ var testCases = [
 				"language": "Language",
 				"libraryCatalog": "Database Provider",
 				"pages": "Pages",
+				"place": "Activity Location",
 				"publicationTitle": "Periodical Title",
+				"publisher": "Sponsoring Agency",
+				"section": "Duration of Grant",
 				"shortTitle": "Short Title",
 				"url": "URL",
 				"volume": "Amount Requested",
@@ -3923,6 +3926,7 @@ var testCases = [
 				"libraryCatalog": "Database Provider",
 				"pages": "Pages",
 				"publicationTitle": "Journal",
+				"section": "Start Page",
 				"shortTitle": "Short Title",
 				"url": "URL",
 				"volume": "Volume",
@@ -4007,7 +4011,9 @@ var testCases = [
 				"language": "Language",
 				"libraryCatalog": "Database Provider",
 				"pages": "Pages",
+				"place": "Place Published",
 				"publicationTitle": "Magazine",
+				"publisher": "Publisher",
 				"shortTitle": "Short Title",
 				"url": "URL",
 				"volume": "Volume",
@@ -4054,6 +4060,7 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"extra": "Folio Number",
+				"institution": "Library/Archive",
 				"language": "Language",
 				"libraryCatalog": "Database Provider",
 				"manuscriptType": "Type of Work",
@@ -4217,9 +4224,11 @@ var testCases = [
 				"pages": "Pages",
 				"place": "Place Published",
 				"publicationTitle": "Newspaper",
+				"publisher": "Publisher",
 				"section": "Section",
 				"shortTitle": "Short Title",
 				"url": "URL",
+				"volume": "Volume",
 				"attachments": [],
 				"tags": [
 					{
@@ -4362,6 +4371,7 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"extra": "Series Volume\nNumber of Pages",
+				"institution": "Publisher",
 				"language": "Language",
 				"libraryCatalog": "Database Provider",
 				"manuscriptType": "Type of Work",
@@ -4797,7 +4807,9 @@ var testCases = [
 				"language": "Language",
 				"libraryCatalog": "Database Provider",
 				"pages": "Pages",
+				"place": "Place Published",
 				"publicationTitle": "Series Title",
+				"publisher": "Institution",
 				"series": "Department",
 				"shortTitle": "Short Title",
 				"url": "URL",
@@ -4841,6 +4853,8 @@ var testCases = [
 				"date": "0000 Year Last",
 				"abstractNote": "Abstract",
 				"language": "Language",
+				"place": "Place Published",
+				"publisher": "Publisher",
 				"shortTitle": "Short Title",
 				"url": "URL",
 				"websiteTitle": "Periodical Title",
@@ -5059,6 +5073,7 @@ var testCases = [
 				"archiveLocation": "Address/Availability",
 				"callNumber": "Call Number",
 				"distributor": "Publisher Name",
+				"place": "Place of Publication",
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
@@ -5706,6 +5721,7 @@ var testCases = [
 				],
 				"date": "0000 Last",
 				"abstractNote": "Abstract",
+				"publisher": "Publisher Name",
 				"url": "Location/URL",
 				"websiteTitle": "Source",
 				"attachments": [],
@@ -5793,7 +5809,9 @@ var testCases = [
 				"issue": "Issue ID",
 				"journalAbbreviation": "Journal Title",
 				"pages": "Location in Work",
+				"place": "Place of Publication",
 				"publicationTitle": "Monographic Title",
+				"publisher": "Publisher Name",
 				"series": "Series Title",
 				"url": "Location/URL",
 				"volume": "Volume ID",
@@ -5872,7 +5890,9 @@ var testCases = [
 				"callNumber": "Call Number",
 				"issue": "Issue ID",
 				"pages": "Page(s)",
+				"place": "Place of Publication",
 				"publicationTitle": "Magazine Title",
+				"publisher": "Publisher Name",
 				"url": "Location/URL",
 				"volume": "Volume ID",
 				"attachments": [],
@@ -6082,7 +6102,9 @@ var testCases = [
 				"callNumber": "Call Number",
 				"issue": "Issue ID",
 				"pages": "Extent of Work",
+				"place": "Place of Publication",
 				"publicationTitle": "Journal Title",
+				"publisher": "Publisher Name",
 				"url": "Location/URL",
 				"volume": "Volume ID",
 				"attachments": [],
@@ -6427,6 +6449,7 @@ var testCases = [
 				"archiveLocation": "Address/Availability",
 				"callNumber": "Call Number",
 				"extra": "Timing",
+				"place": "Place of Publication",
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
@@ -6483,6 +6506,7 @@ var testCases = [
 				"pages": "Page(s)",
 				"place": "Place of Publication",
 				"publicationTitle": "Newspaper Name",
+				"publisher": "Publisher Name",
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
@@ -6786,6 +6810,8 @@ var testCases = [
 				"archiveLocation": "Address/Availability",
 				"callNumber": "Call Number",
 				"issue": "Catalog Number",
+				"place": "Place of Publication",
+				"publisher": "Publisher Name",
 				"url": "Location/URL",
 				"volume": "Edition",
 				"attachments": [],
@@ -6985,7 +7011,7 @@ var testCases = [
 	},
 	{
 		"type": "import",
-		"input": "TY  - JOUR\nT1  - From Basic to Applied Research to Improve Outcomes for Individuals Who Require Augmentative and Alternative Communication: \u2028Potential Contributions of Eye Tracking Research Methods\nAU  - Light, Janice\nAU  - McNaughton, David\nY1  - 2014/06/01\nPY  - 2014\nDA  - 2014/06/01\nN1  - doi: 10.3109/07434618.2014.906498\nDO  - 10.3109/07434618.2014.906498\nT2  - Augmentative and Alternative Communication\nJF  - Augmentative and Alternative Communication\nJO  - Augment Altern Commun\nSP  - 99\nEP  - 105\nVL  - 30\nIS  - 2\nPB  - Informa Allied Health\nSN  - 0743-4618\nM3  - doi: 10.3109/07434618.2014.906498\nUR  - http://dx.doi.org/10.3109/07434618.2014.906498\nY2  - 2014/12/17\nER  -",
+		"input": "TY  - JOUR\nT1  - From Basic to Applied Research to Improve Outcomes for Individuals Who Require Augmentative and Alternative Communication:  Potential Contributions of Eye Tracking Research Methods\nAU  - Light, Janice\nAU  - McNaughton, David\nY1  - 2014/06/01\nPY  - 2014\nDA  - 2014/06/01\nN1  - doi: 10.3109/07434618.2014.906498\nDO  - 10.3109/07434618.2014.906498\nT2  - Augmentative and Alternative Communication\nJF  - Augmentative and Alternative Communication\nJO  - Augment Altern Commun\nSP  - 99\nEP  - 105\nVL  - 30\nIS  - 2\nPB  - Informa Allied Health\nSN  - 0743-4618\nM3  - doi: 10.3109/07434618.2014.906498\nUR  - http://dx.doi.org/10.3109/07434618.2014.906498\nY2  - 2014/12/17\nER  -",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -7009,6 +7035,7 @@ var testCases = [
 				"journalAbbreviation": "Augment Altern Commun",
 				"pages": "99-105",
 				"publicationTitle": "Augmentative and Alternative Communication",
+				"publisher": "Informa Allied Health",
 				"url": "http://dx.doi.org/10.3109/07434618.2014.906498",
 				"volume": "30",
 				"attachments": [],
@@ -7037,10 +7064,10 @@ var testCases = [
 					}
 				],
 				"date": "2009",
+				"DOI": "10.1007/978-3-642-00230-4",
 				"ISBN": "9783642002304",
 				"abstractNote": "In dem Buch befinden sich einzelne Beiträge zu ...",
 				"callNumber": "300 QN 100 D419",
-				"extra": "DOI: 10.1007/978-3-642-00230-4",
 				"language": "ger",
 				"libraryCatalog": "UB Mannheim",
 				"place": "Berlin, Heidelberg",

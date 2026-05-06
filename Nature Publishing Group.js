@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-02-29 20:21:02"
+	"lastUpdated": "2025-06-12 16:23:14"
 }
 
 /**
@@ -550,8 +550,12 @@ function scrape(doc, url) {
 				}
 			}
 			// for electronic only journals, EM just has 1-page#; we instead get article number from the extra field
-			var electronicOnly = ['Scientific Data', 'Nature Communications', 'Scientific Reports', 'npj Science of Food', 'Light: Science & Applications'];
+			var electronicOnly = ['Scientific Data', 'Nature Communications', 'Scientific Reports', 'npj Science of Food', 'Light: Science & Applications', 'npj Quantum Information', 'Communications Physics'];
 			if (electronicOnly.includes(item.publicationTitle)) {
+				preferredRisFields.push('pages');
+			}
+			else if (doc.querySelector('span[data-test="article-number"]')) {
+				Z.debug('Assuming online-only publication because article number is present');
 				preferredRisFields.push('pages');
 			}
 			
@@ -3248,6 +3252,137 @@ var testCases = [
 				"tags": [
 					{
 						"tag": "Superconducting properties and materials"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nature.com/articles/s41534-024-00839-4",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Hunting for quantum-classical crossover in condensed matter problems",
+				"creators": [
+					{
+						"firstName": "Nobuyuki",
+						"lastName": "Yoshioka",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tsuyoshi",
+						"lastName": "Okubo",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yasunari",
+						"lastName": "Suzuki",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yuki",
+						"lastName": "Koizumi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Wataru",
+						"lastName": "Mizukami",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024-04-29",
+				"DOI": "10.1038/s41534-024-00839-4",
+				"ISSN": "2056-6387",
+				"abstractNote": "The intensive pursuit for quantum advantage in terms of computational complexity has further led to a modernized crucial question of when and how will quantum computers outperform classical computers. The next milestone is undoubtedly the realization of quantum acceleration in practical problems. Here we provide a clear evidence and arguments that the primary target is likely to be condensed matter physics. Our primary contributions are summarized as follows: 1) Proposal of systematic error/runtime analysis on state-of-the-art classical algorithm based on tensor networks; 2) Dedicated and high-resolution analysis on quantum resource performed at the level of executable logical instructions; 3) Clarification of quantum-classical crosspoint for ground-state simulation to be within runtime of hours using only a few hundreds of thousand physical qubits for 2d Heisenberg and 2d Fermi-Hubbard models, assuming that logical qubits are encoded via the surface code with the physical error rate of p = 10−3. To our knowledge, we argue that condensed matter problems offer the earliest platform for demonstration of practical quantum advantage that is order-of-magnitude more feasible than ever known candidates, in terms of both qubit counts and total runtime.",
+				"issue": "1",
+				"journalAbbreviation": "npj Quantum Inf",
+				"language": "en",
+				"libraryCatalog": "www.nature.com",
+				"pages": "45",
+				"publicationTitle": "npj Quantum Information",
+				"rights": "2024 The Author(s)",
+				"url": "https://www.nature.com/articles/s41534-024-00839-4",
+				"volume": "10",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Condensed-matter physics"
+					},
+					{
+						"tag": "Quantum information"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nature.com/articles/s42005-022-00998-w",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Coexistence of solid and liquid phases in shear jammed colloidal drops",
+				"creators": [
+					{
+						"firstName": "Phalguni",
+						"lastName": "Shah",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Srishti",
+						"lastName": "Arora",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michelle M.",
+						"lastName": "Driscoll",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022-09-06",
+				"DOI": "10.1038/s42005-022-00998-w",
+				"ISSN": "2399-3650",
+				"abstractNote": "Complex fluids exhibit a variety of exotic flow behaviours under high stresses, such as shear thickening and shear jamming. Rheology is a powerful tool to characterise these flow behaviours over the bulk of the fluid. However, this technique is limited in its ability to probe fluid behaviour in a spatially resolved way. Here, we utilise high-speed imaging and the free-surface geometry in drop impact to study the flow of colloidal suspensions. Here, we report observations of coexisting solid and liquid phases due to shear jamming caused by impact. In addition to observing Newtonian-like spreading and bulk shear jamming, we observe the transition between these regimes in the form of localised patches of jammed suspension in the spreading drop. We capture shear jamming as it occurs via a solidification front travelling from the impact point, and show that the speed of this front is set by how far the impact conditions are beyond the shear thickening transition.",
+				"issue": "1",
+				"journalAbbreviation": "Commun Phys",
+				"language": "en",
+				"libraryCatalog": "www.nature.com",
+				"pages": "222",
+				"publicationTitle": "Communications Physics",
+				"rights": "2022 The Author(s)",
+				"url": "https://www.nature.com/articles/s42005-022-00998-w",
+				"volume": "5",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Colloids"
+					},
+					{
+						"tag": "Fluid dynamics"
+					},
+					{
+						"tag": "Fluids"
+					},
+					{
+						"tag": "Nonlinear phenomena"
+					},
+					{
+						"tag": "Rheology"
 					}
 				],
 				"notes": [],

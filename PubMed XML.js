@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-07-21 03:05:39"
+	"lastUpdated": "2026-01-22 17:48:12"
 }
 
 /*
@@ -100,7 +100,7 @@ function doImport() {
 	// handle journal articles
 	var articles = ZU.xpath(doc, '/PubmedArticleSet/PubmedArticle');
 	for (let i = 0, n = articles.length; i < n; i++) {
-		var newItem = new Zotero.Item("journalArticle");
+		let newItem = new Zotero.Item("journalArticle");
 
 		var citation = ZU.xpath(articles[i], 'MedlineCitation')[0];
 
@@ -156,6 +156,11 @@ function doImport() {
 			let title = ZU.xpathText(journal, 'Title');
 			if (title) {
 				title = ZU.trimInternal(title);
+				// Move parenthesized place name at end of journal title to place field
+				title = title.replace(/ \(([^)]+)\)$/, (_, place) => {
+					newItem.place = place;
+					return '';
+				});
 				// Fix sentence-cased titles, but be careful...
 				if (!( // of accronyms that could get messed up if we fix case
 					/\b[A-Z]{2}/.test(title) // this could mean that there's an accronym in the title
@@ -1130,6 +1135,102 @@ var testCases = [
 					}
 				],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" ?>\n<!DOCTYPE PubmedArticleSet PUBLIC \"-//NLM//DTD PubMedArticle, 1st January 2025//EN\" \"https://dtd.nlm.nih.gov/ncbi/pubmed/out/pubmed_250101.dtd\">\n<PubmedArticleSet>\n<PubmedArticle><MedlineCitation Status=\"MEDLINE\" Owner=\"NLM\" IndexingMethod=\"Manual\"><PMID Version=\"1\">33760390</PMID><DateCompleted><Year>2021</Year><Month>09</Month><Day>20</Day></DateCompleted><DateRevised><Year>2021</Year><Month>09</Month><Day>20</Day></DateRevised><Article PubModel=\"Print-Electronic\"><Journal><ISSN IssnType=\"Electronic\">2326-5205</ISSN><JournalIssue CitedMedium=\"Internet\"><Volume>73</Volume><Issue>9</Issue><PubDate><Year>2021</Year><Month>Sep</Month></PubDate></JournalIssue><Title>Arthritis &amp; rheumatology (Hoboken, N.J.)</Title><ISOAbbreviation>Arthritis Rheumatol</ISOAbbreviation></Journal><ArticleTitle>Association of Machine Learning-Based Predictions of Medial Knee Contact Force With Cartilage Loss Over 2.5 Years in Knee Osteoarthritis.</ArticleTitle><Pagination><StartPage>1638</StartPage><EndPage>1645</EndPage><MedlinePgn>1638-1645</MedlinePgn></Pagination><ELocationID EIdType=\"doi\" ValidYN=\"Y\">10.1002/art.41735</ELocationID><Abstract><AbstractText Label=\"OBJECTIVE\">The relationship between in vivo knee load predictions and longitudinal cartilage changes has not been investigated. We undertook this study to develop an equation to predict the medial tibiofemoral contact force (MCF) peak during walking in persons with instrumented knee implants, and to apply this equation to determine the relationship between the predicted MCF peak and cartilage loss in patients with knee osteoarthritis (OA).</AbstractText><AbstractText Label=\"METHODS\">In adults with knee OA (39 women, 8 men; mean &#xb1; SD age 61.1 &#xb1; 6.8 years), baseline biomechanical gait analyses were performed, and annualized change in medial tibial cartilage volume (mm<sup>3</sup> /year) over 2.5 years was determined using magnetic resonance imaging. In a separate sample of patients with force-measuring tibial prostheses (3 women, 6 men; mean &#xb1; SD age 70.3 &#xb1; 5.2 years), gait data plus in vivo knee loads were used to develop an equation to predict the MCF peak using machine learning. This equation was then applied to the knee OA group, and the relationship between the predicted MCF peak and annualized cartilage volume change was determined.</AbstractText><AbstractText Label=\"RESULTS\">The MCF peak was best predicted using gait speed, the knee adduction moment peak, and the vertical knee reaction force peak (root mean square error 132.88N; R<sup>2</sup> = 0.81, P &lt; 0.001). In participants with knee OA, the predicted MCF peak was related to cartilage volume change (R<sup>2</sup> = 0.35, &#x3b2; = -0.119, P &lt; 0.001).</AbstractText><AbstractText Label=\"CONCLUSION\">Machine learning was used to develop a novel equation for predicting the MCF peak from external biomechanical parameters. The predicted MCF peak was positively related to medial tibial cartilage volume loss in patients with knee OA.</AbstractText><CopyrightInformation>&#xa9; 2021 The Authors. Arthritis &amp; Rheumatology published by Wiley Periodicals LLC on behalf of American College of Rheumatology.</CopyrightInformation></Abstract><AuthorList CompleteYN=\"Y\"><Author ValidYN=\"Y\"><LastName>Brisson</LastName><ForeName>Nicholas M</ForeName><Initials>NM</Initials><Identifier Source=\"ORCID\">0000-0001-8538-2834</Identifier><AffiliationInfo><Affiliation>Charit&#xe9;-Universit&#xe4;tsmedizin Berlin, Berlin, Germany, and McMaster University, Hamilton, Ontario, Canada.</Affiliation></AffiliationInfo></Author><Author ValidYN=\"Y\"><LastName>Gatti</LastName><ForeName>Anthony A</ForeName><Initials>AA</Initials><AffiliationInfo><Affiliation>McMaster University and NeuralSeg, Hamilton, Ontario, Canada.</Affiliation></AffiliationInfo></Author><Author ValidYN=\"Y\"><LastName>Damm</LastName><ForeName>Philipp</ForeName><Initials>P</Initials><AffiliationInfo><Affiliation>Charit&#xe9;-Universit&#xe4;tsmedizin Berlin, Berlin, Germany.</Affiliation></AffiliationInfo></Author><Author ValidYN=\"Y\"><LastName>Duda</LastName><ForeName>Georg N</ForeName><Initials>GN</Initials><AffiliationInfo><Affiliation>Charit&#xe9;-Universit&#xe4;tsmedizin Berlin, Berlin, Germany.</Affiliation></AffiliationInfo></Author><Author ValidYN=\"Y\"><LastName>Maly</LastName><ForeName>Monica R</ForeName><Initials>MR</Initials><AffiliationInfo><Affiliation>McMaster University, Hamilton, Ontario, Canada, and University of Waterloo, Waterloo, Ontario, Canada.</Affiliation></AffiliationInfo></Author></AuthorList><Language>eng</Language><GrantList CompleteYN=\"Y\"><Grant><GrantID>102643</GrantID><Agency>CIHR</Agency><Country>Canada</Country></Grant></GrantList><PublicationTypeList><PublicationType UI=\"D016428\">Journal Article</PublicationType><PublicationType UI=\"D013485\">Research Support, Non-U.S. Gov't</PublicationType></PublicationTypeList><ArticleDate DateType=\"Electronic\"><Year>2021</Year><Month>08</Month><Day>06</Day></ArticleDate></Article><MedlineJournalInfo><Country>United States</Country><MedlineTA>Arthritis Rheumatol</MedlineTA><NlmUniqueID>101623795</NlmUniqueID><ISSNLinking>2326-5191</ISSNLinking></MedlineJournalInfo><CitationSubset>IM</CitationSubset><MeshHeadingList><MeshHeading><DescriptorName UI=\"D000368\" MajorTopicYN=\"N\">Aged</DescriptorName></MeshHeading><MeshHeading><DescriptorName UI=\"D001696\" MajorTopicYN=\"N\">Biomechanical Phenomena</DescriptorName><QualifierName UI=\"Q000502\" MajorTopicYN=\"N\">physiology</QualifierName></MeshHeading><MeshHeading><DescriptorName UI=\"D002358\" MajorTopicYN=\"N\">Cartilage, Articular</DescriptorName><QualifierName UI=\"Q000000981\" MajorTopicYN=\"Y\">diagnostic imaging</QualifierName><QualifierName UI=\"Q000503\" MajorTopicYN=\"N\">physiopathology</QualifierName></MeshHeading><MeshHeading><DescriptorName UI=\"D005260\" MajorTopicYN=\"N\">Female</DescriptorName></MeshHeading><MeshHeading><DescriptorName UI=\"D005684\" MajorTopicYN=\"N\">Gait</DescriptorName><QualifierName UI=\"Q000502\" MajorTopicYN=\"Y\">physiology</QualifierName></MeshHeading><MeshHeading><DescriptorName UI=\"D006801\" MajorTopicYN=\"N\">Humans</DescriptorName></MeshHeading><MeshHeading><DescriptorName UI=\"D007719\" MajorTopicYN=\"N\">Knee Joint</DescriptorName><QualifierName UI=\"Q000000981\" MajorTopicYN=\"Y\">diagnostic imaging</QualifierName><QualifierName UI=\"Q000503\" MajorTopicYN=\"N\">physiopathology</QualifierName></MeshHeading><MeshHeading><DescriptorName UI=\"D000069550\" MajorTopicYN=\"Y\">Machine Learning</DescriptorName></MeshHeading><MeshHeading><DescriptorName UI=\"D008279\" MajorTopicYN=\"N\">Magnetic Resonance Imaging</DescriptorName></MeshHeading><MeshHeading><DescriptorName UI=\"D008297\" MajorTopicYN=\"N\">Male</DescriptorName></MeshHeading><MeshHeading><DescriptorName UI=\"D008875\" MajorTopicYN=\"N\">Middle Aged</DescriptorName></MeshHeading><MeshHeading><DescriptorName UI=\"D020370\" MajorTopicYN=\"N\">Osteoarthritis, Knee</DescriptorName><QualifierName UI=\"Q000000981\" MajorTopicYN=\"Y\">diagnostic imaging</QualifierName><QualifierName UI=\"Q000503\" MajorTopicYN=\"N\">physiopathology</QualifierName></MeshHeading></MeshHeadingList></MedlineCitation><PubmedData><History><PubMedPubDate PubStatus=\"received\"><Year>2020</Year><Month>7</Month><Day>9</Day></PubMedPubDate><PubMedPubDate PubStatus=\"accepted\"><Year>2021</Year><Month>3</Month><Day>11</Day></PubMedPubDate><PubMedPubDate PubStatus=\"pubmed\"><Year>2021</Year><Month>3</Month><Day>25</Day><Hour>6</Hour><Minute>0</Minute></PubMedPubDate><PubMedPubDate PubStatus=\"medline\"><Year>2021</Year><Month>9</Month><Day>21</Day><Hour>6</Hour><Minute>0</Minute></PubMedPubDate><PubMedPubDate PubStatus=\"entrez\"><Year>2021</Year><Month>3</Month><Day>24</Day><Hour>13</Hour><Minute>15</Minute></PubMedPubDate></History><PublicationStatus>ppublish</PublicationStatus><ArticleIdList><ArticleId IdType=\"pubmed\">33760390</ArticleId><ArticleId IdType=\"doi\">10.1002/art.41735</ArticleId></ArticleIdList><ReferenceList><Title>References</Title><Reference><Citation>Creaby MW. It&#x2019;s not all about the knee adduction moment: the role of the knee flexion moment in medial knee joint loading [editorial]. Osteoarthritis Cartilage 2015;23:1-3.</Citation></Reference><Reference><Citation>Erhart-Hledik JC, Favre J, Andriacchi TP. New insight in the relationship between regional patterns of knee cartilage thickness, osteoarthritis disease severity, and gait mechanics. J Biomech 2015;48:3868-75.</Citation></Reference><Reference><Citation>Chehab EF, Favre J, Erhart-Hledik JC, Andriacchi TP. Baseline knee adduction and flexion moments during walking are both associated with 5 year cartilage changes in patients with medial knee osteoarthritis. Osteoarthritis Cartilage 2014;22:1833-9.</Citation></Reference><Reference><Citation>Chang AH, Moisio KC, Chmiel JS, Eckstein F, Guermazi A, Prasad PV, et al. External knee adduction and flexion moments during gait and medial tibiofemoral disease progression in knee osteoarthritis. Osteoarthritis Cartilage 2015;23:1099-106.</Citation></Reference><Reference><Citation>Miyazaki T, Wada M, Kawahara H, Sato M, Baba H, Shimada S. Dynamic load at baseline can predict radiographic disease progression in medial compartment knee osteoarthritis. Ann Rheum Dis 2002;61:617-22.</Citation></Reference><Reference><Citation>Bennell KL, Bowles KA, Wang Y, Cicuttini F, Davies-Tuck M, Hinman RS. Higher dynamic medial knee load predicts greater cartilage loss over 12 months in medial knee osteoarthritis. Ann Rheum Dis 2011;70:1770-4.</Citation></Reference><Reference><Citation>Brisson NM, Wiebenga EG, Stratford PW, Beattie KA, Totterman S, Tamez-Pe&#xf1;a JG, et al. Baseline knee adduction moment interacts with body mass index to predict loss of medial tibial cartilage volume over 2.5 years in knee osteoarthritis. J Orthop Res 2017;35:2476-83.</Citation></Reference><Reference><Citation>Andriacchi TP, Mundermann A, Smith RL, Alexander EJ, Dyrby CO, Koo S. A framework for the in vivo pathomechanics of osteoarthritis at the knee. Ann Biomed Eng 2004;32:447-57.</Citation></Reference><Reference><Citation>Trepczynski A, Kutzner I, Bergmann G, Taylor WR, Heller MO. Modulation of the relationship between external knee adduction moments and medial joint contact forces across subjects and activities. Arthritis Rheumatol 2014;66:1218-27.</Citation></Reference><Reference><Citation>Meyer AJ, D&#x2019;Lima DD, Besier TF, Lloyd DG, Colwell CW, Fregly BJ. Are external knee load and EMG measures accurate indicators of internal knee contact forces during gait? J Orthop Res 2013;31:921-9.</Citation></Reference><Reference><Citation>Schipplein OD, Andriacchi TP. Interaction between active and passive knee stabilizers during level walking. J Orthop Res 1991;9:113-9.</Citation></Reference><Reference><Citation>Winter DA. Biomechanics and motor control of human movement. 4th ed. Hoboken (New Jersey): John Wiley &amp; Sons; 2009.</Citation></Reference><Reference><Citation>Frederick EC, Hagy JL. Factors affecting peak vertical ground reaction forces in running. Int J Sport Biomech 1986;2:41-9.</Citation></Reference><Reference><Citation>Hall M, Wrigley TV, Metcalf BR, Hinman RS, Cicuttini FM, Dempsey AR, et al. Mechanisms underpinning the peak knee flexion moment increase over 2-years following arthroscopic partial meniscectomy. Clin Biomech 2015;30:1060-5.</Citation></Reference><Reference><Citation>Hunt MA, Birmingham TB, Giffin JR, Jenkyn TR. Associations among knee adduction moment, frontal plane ground reaction force, and lever arm during walking in patients with knee osteoarthritis. J Biomech 2006;39:2213-20.</Citation></Reference><Reference><Citation>Metcalfe AJ, Le Andersson M, Goodfellow R, Thorstensson CA. Is knee osteoarthritis a symmetrical disease? Analysis of a 12 year prospective cohort study. BMC Musculoskelet Disord 2012;13:153.</Citation></Reference><Reference><Citation>Kutzner I, Trepczynski A, Heller MO, Bergmann G. Knee adduction moment and medial contact force: facts about their correlation during gait. PLoS One 2013;8:e81036.</Citation></Reference><Reference><Citation>Walter JP, D&#x2019;Lima DD, Colwell CW, Fregly BJ. Decreased knee adduction moment does not guarantee decreased medial contact force during gait. J Orthop Res 2010;28:1348-54.</Citation></Reference><Reference><Citation>Zhao D, Banks SA, Mitchell KH, D&#x2019;Lima DD, Colwell CW, Fregly BJ. Correlation between the knee adduction torque and medial contact force for a variety of gait patterns. J Orthop Res 2007;25:789-97.</Citation></Reference><Reference><Citation>Messier SP, Beavers DP, Loeser RF, Carr JJ, Khajanchi S, Legault C, et al. Knee-joint loading in knee osteoarthritis: influence of abdominal and thigh fat. Med Sci Sport Exerc 2014;46:1677-83.</Citation></Reference><Reference><Citation>Messier SP, Pater M, Beavers DP, Legault C, Loeser RF, Hunter DJ, et al. Influences of alignment and obesity on knee joint loading in osteoarthritic gait. Osteoarthritis Cartilage 2014;22:912-7.</Citation></Reference><Reference><Citation>Harding GT, Dunbar MJ, Hubley-Kozey CL, Stanish WD, Wilson JL. Obesity is associated with higher absolute tibiofemoral contact and muscle forces during gait with and without knee osteoarthritis. Clin Biomech (Bristol, Avon) 2016;31:79-86.</Citation></Reference><Reference><Citation>Pelletier JP, Raynauld JP, Berthiaume MJ, Abram F, Choquette D, Haraoui B, et al. Risk factors associated with the loss of cartilage volume on weight-bearing areas in knee osteoarthritis patients assessed by quantitative magnetic resonance imaging: a longitudinal study. Arthritis Res Ther 2007;9:R74.</Citation></Reference><Reference><Citation>Altman R, Asch E, Bloch D, Bole G, Borenstein D, Brandt K, et al. Development of criteria for the classification and reporting of osteoarthritis: classification of osteoarthritis of the knee. Arthritis Rheum 1986;29:1039-49.</Citation></Reference><Reference><Citation>Kellgren JH, Lawrence JS. Radiological assessment of osteo-arthrosis. Ann Rheum Dis 1957;16:494-502.</Citation></Reference><Reference><Citation>Kothari M, Guermazi A, von Ingersleben G, Sieffert M, Block JE, Stevens R, et al. Fixed-flexion radiography of the knee provides reproducible joint space width measurements in osteoarthritis. Eur Radiol 2004;14:1568-73.</Citation></Reference><Reference><Citation>Wright RW, Ross JR, Haas AK, Huston LJ, Garofoli EA, Harris D, et al. Osteoarthritis classification scales: interobserver reliability and arthroscopic correlation. J Bone Joint Surg Am 2014;96:1145-51.</Citation></Reference><Reference><Citation>Chang CB, Choi JY, Koh IJ, Seo ES, Seong SC, Kim TK. What should be considered in using standard knee radiographs to estimate mechanical alignment of the knee? Osteoarthritis Cartilage 2010;18:530-8.</Citation></Reference><Reference><Citation>Tamez-Pe&#xf1;a JG, Farber J, Gonz&#xe1;lez PC, Schreyer E, Schneider E, Totterman S. Unsupervised segmentation and quantification of anatomical knee features: data from the Osteoarthritis Initiative. IEEE Trans Biomed Eng 2012;59:1177-86.</Citation></Reference><Reference><Citation>Inglis D, Pui M, Ioannidis G, Beattie K, Boulos P, Adachi JD, et al. Accuracy and test-retest precision of quantitative cartilage morphology on a 1.0 T peripheral magnetic resonance imaging system. Osteoarthritis Cartilage 2007;15:110-5.</Citation></Reference><Reference><Citation>Brisson NM, Stratford PW, Maly MR. Relative and absolute test-retest reliabilities of biomechanical risk factors for knee osteoarthritis progression: benchmarks for meaningful change. Osteoarthritis Cartilage 2018;26:220-6.</Citation></Reference><Reference><Citation>Robertson DG, Dowling JJ. Design and responses of Butterworth and critically damped digital filters. J Electromyogr Kinesiol 2003;13:569-73.</Citation></Reference><Reference><Citation>Wu G, Cavanagh PR. ISB recommendations for standardization in the reporting of kinematic data. J Biomech 1995;28:1257-61.</Citation></Reference><Reference><Citation>Thorp LE, Sumner DR, Block JA, Moisio KC, Shott S, Wimmer MA. Knee joint loading differs in individuals with mild compared with moderate medial knee osteoarthritis. Arthritis Rheum 2006;54:3842-9.</Citation></Reference><Reference><Citation>Bergmann G, Bender A, Graichen F, Dymke J, Rohlmann A, Trepczynski A, et al. Standardized loads acting in knee implants. PLoS One 2014;9:e86035.</Citation></Reference><Reference><Citation>Heinlein B, Graichen F, Bender A, Rohlmann A, Bergmann G. Design, calibration and pre-clinical testing of an instrumented tibial tray. J Biomech 2007;40:S4-10.</Citation></Reference><Reference><Citation>Bergmann G, Graichen F, Rohlmann A, Westerhoff P, Heinlein B, Bender A, et al. Design and calibration of load sensing orthopaedic implants. J Biomech Eng 2008;130:021009.</Citation></Reference><Reference><Citation>Hastie T, Tibshirani R, Friedman J. The elements of statistical learning: data mining, inference, and prediction. 2nd ed. New York: Springer; 2009.</Citation></Reference><Reference><Citation>James G, Witten D, Hastie T, Tibshirani R. An introduction to statistical learning: with applications in R. New York: Springer; 2013.</Citation></Reference><Reference><Citation>Cameron AC, Miller D. A practitioner&#x2019;s guide to cluster-robust inference. J Hum Resour 2015;50:317-72.</Citation></Reference><Reference><Citation>Seabold S, Perktold J. Statsmodels: econometric and statistical modeling with Python [abstract]. Presented at the 9th Python for Scientific Computing Conference, Austin, TX, June 28-July 3, 2010.</Citation></Reference><Reference><Citation>Cohen J. A power primer. Psychol Bull 1992;112:155-9.</Citation></Reference><Reference><Citation>Hulley SB, Newman TB, Cummings SR. Planning the measurements: precision, accuracy, and validity. In: Hulley SB, Cummings SR, Browner WS, Grady DG, Newman TB, editors. Designing Clinical Research. 4th ed. Philadelphia: Lippincott Williams &amp; Wilkins; 2013. p. 32-42.</Citation></Reference><Reference><Citation>Steele KM, DeMers MS, Schwartz MS, Delp SL. Compressive tibiofemoral force during crouch gait. Gait Posture 2012;35:556-60.</Citation></Reference><Reference><Citation>Gerus P, Sartori M, Besier TF, Fregly BJ, Delp SL, Banks SA, et al. Subject-specific knee joint geometry improves predictions of medial tibiofemoral contact forces. J Biomech 2013;46:2778-86.</Citation></Reference><Reference><Citation>Walter JP, Kinney AL, Banks SA, D&#x2019;Lima DD, Besier TF, Lloyd DG, et al. Muscle synergies may improve optimization prediction of knee contact forces during walking. J Biomech Eng 2014;136:0210311-9.</Citation></Reference><Reference><Citation>DeMers MS, Pal S, Delp SL. Changes in tibiofemoral forces due to variations in muscle activity during walking. J Orthop Res 2014;32:769-76.</Citation></Reference></ReferenceList></PubmedData></PubmedArticle></PubmedArticleSet>",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Association of Machine Learning-Based Predictions of Medial Knee Contact Force With Cartilage Loss Over 2.5 Years in Knee Osteoarthritis",
+				"creators": [
+					{
+						"firstName": "Nicholas M.",
+						"lastName": "Brisson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Anthony A.",
+						"lastName": "Gatti",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Philipp",
+						"lastName": "Damm",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Georg N.",
+						"lastName": "Duda",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Monica R.",
+						"lastName": "Maly",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-09",
+				"DOI": "10.1002/art.41735",
+				"ISSN": "2326-5205",
+				"abstractNote": "OBJECTIVE: The relationship between in vivo knee load predictions and longitudinal cartilage changes has not been investigated. We undertook this study to develop an equation to predict the medial tibiofemoral contact force (MCF) peak during walking in persons with instrumented knee implants, and to apply this equation to determine the relationship between the predicted MCF peak and cartilage loss in patients with knee osteoarthritis (OA).\nMETHODS: In adults with knee OA (39 women, 8 men; mean ± SD age 61.1 ± 6.8 years), baseline biomechanical gait analyses were performed, and annualized change in medial tibial cartilage volume (mm3 /year) over 2.5 years was determined using magnetic resonance imaging. In a separate sample of patients with force-measuring tibial prostheses (3 women, 6 men; mean ± SD age 70.3 ± 5.2 years), gait data plus in vivo knee loads were used to develop an equation to predict the MCF peak using machine learning. This equation was then applied to the knee OA group, and the relationship between the predicted MCF peak and annualized cartilage volume change was determined.\nRESULTS: The MCF peak was best predicted using gait speed, the knee adduction moment peak, and the vertical knee reaction force peak (root mean square error 132.88N; R2 = 0.81, P < 0.001). In participants with knee OA, the predicted MCF peak was related to cartilage volume change (R2 = 0.35, β = -0.119, P < 0.001).\nCONCLUSION: Machine learning was used to develop a novel equation for predicting the MCF peak from external biomechanical parameters. The predicted MCF peak was positively related to medial tibial cartilage volume loss in patients with knee OA.",
+				"extra": "PMID: 33760390",
+				"issue": "9",
+				"journalAbbreviation": "Arthritis Rheumatol",
+				"language": "eng",
+				"pages": "1638-1645",
+				"place": "Hoboken, N.J.",
+				"publicationTitle": "Arthritis & Rheumatology",
+				"volume": "73",
+				"attachments": [
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					{
+						"tag": "Aged"
+					},
+					{
+						"tag": "Biomechanical Phenomena"
+					},
+					{
+						"tag": "Cartilage, Articular"
+					},
+					{
+						"tag": "Female"
+					},
+					{
+						"tag": "Gait"
+					},
+					{
+						"tag": "Humans"
+					},
+					{
+						"tag": "Knee Joint"
+					},
+					{
+						"tag": "Machine Learning"
+					},
+					{
+						"tag": "Magnetic Resonance Imaging"
+					},
+					{
+						"tag": "Male"
+					},
+					{
+						"tag": "Middle Aged"
+					},
+					{
+						"tag": "Osteoarthritis, Knee"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}

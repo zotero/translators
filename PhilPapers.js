@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-16 03:30:01"
+	"lastUpdated": "2025-08-19 15:22:16"
 }
 
 /*
@@ -37,10 +37,13 @@
 
 
 function detectWeb(doc, url) {
-	if (url.includes('/rec/')) {
+	let isLoggedIn = doc.querySelector('a[href*="/logout"]');
+	// Some pages include embedded BibTeX
+	// For ones that don't, we need to be authenticated or export will fail
+	if (url.includes('/rec/') && (isLoggedIn || text(doc, '#bibtex'))) {
 		return 'journalArticle';
 	}
-	else if (getSearchResults(doc, true)) {
+	else if (isLoggedIn && getSearchResults(doc, true)) {
 		return 'multiple';
 	}
 	return false;
@@ -61,58 +64,54 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function idFromUrl(url) {
-	return url.match(/\/rec\/([A-Z-\d]+)/)[1];
-}
 async function doWeb(doc, url) {
-	let isPhilArchive = /^https?:\/\/philarchive\.org\//.test(url);
-	var ids = [];
-
 	if (detectWeb(doc, url) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
 		for (let url of Object.keys(items)) {
-			let id = idFromUrl(url);
-			ids.push(id);
+			await scrape(await requestDocument(url));
 		}
-		await scrape(ids, isPhilArchive);
 	}
 	else {
-		let identifier = idFromUrl(url);
-		// Z.debug(identifier)
-		await scrape([identifier], isPhilArchive);
+		await scrape(doc, url);
 	}
 }
 
+function idFromUrl(url) {
+	return url.match(/\/rec\/([A-Z-\d]+)/)[1];
+}
 
-async function scrape(identifiers, isPhilArchive) {
-	let baseUrl = isPhilArchive ? "https://philarchive.org" : "https://philpapers.org";
-	for (let id of identifiers) {
-		let bibUrl = `${baseUrl}/item.pl?eId=${id}&format=bib`;
-		let bibText = await requestText(bibUrl);
-		let url = "/rec/" + id;
-		let translator = Zotero.loadTranslator("import");
-		translator.setTranslator('9cb70025-a888-4a29-a210-93ec52da40d4');
-		translator.setString(bibText);
-		translator.setHandler('itemDone', (_obj, item) => {
-			if (isPhilArchive) {
-				item.libraryCatalog = 'PhilArchive';
-				item.url = `https://philarchive.org/rec/${id}`; // full-text
-				item.attachments.push({
-					title: 'Full Text PDF',
-					mimeType: 'application/pdf',
-					url: `/archive/${id}`
-				});
-			}
-			else {
-				item.attachments.push({ url,
-					title: 'Snapshot',
-					mimeType: 'text/html' });
-			}
-			item.complete();
-		});
-		await translator.translate();
+async function scrape(doc, url) {
+	let id = idFromUrl(url);
+
+	let bibText = text(doc, "#bibtex");
+	if (!bibText) {
+		bibText = await requestText(`/item.pl?id=${id}&format=bib`);
 	}
+	let translator = Zotero.loadTranslator("import");
+	translator.setTranslator('9cb70025-a888-4a29-a210-93ec52da40d4');
+	translator.setString(bibText);
+	translator.setHandler('itemDone', (_obj, item) => {
+		let isPhilArchive = new URL(url).hostname === 'philarchive.org';
+		if (isPhilArchive || doc.querySelector('.download-options a[href*="/archive/"]')) {
+			item.url = url.replace(/[#?].*$/, '');
+			item.attachments.push({
+				title: 'Full Text PDF',
+				mimeType: 'application/pdf',
+				url: `/archive/${id}`,
+			});
+		}
+		else {
+			item.attachments.push({
+				url,
+				title: 'Snapshot',
+				mimeType: 'text/html'
+			});
+		}
+		item.libraryCatalog = isPhilArchive ? 'PhilArchive' : 'PhilPapers';
+		item.complete();
+	});
+	await translator.translate();
 }
 
 /** BEGIN TEST CASES **/
@@ -150,21 +149,6 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "https://philpapers.org/browse/causal-realism",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://philpapers.org/pub/6",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://philpapers.org/s/solipsism",
-		"items": "multiple"
 	},
 	{
 		"type": "web",

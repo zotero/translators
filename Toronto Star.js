@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-13 15:59:47"
+	"lastUpdated": "2025-10-07 15:39:05"
 }
 
 /*
@@ -55,10 +55,10 @@ function detectWeb(doc) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('a[class*="-mediacard"]');
+	var rows = doc.querySelectorAll('h3.tnt-headline > a');
 	for (let row of rows) {
 		let href = row.href;
-		let title = text(row, 'h3');
+		let title = row.textContent;
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -88,31 +88,44 @@ function scrape(doc, url) {
 
 	trans.setHandler('itemDone', function (obj, item) {
 		if (item.itemType == "newspaperArticle") {
+			item.section = text(doc, '#main-nav_menu li.active > a');
 			item.publicationTitle = "The Toronto Star";
 			item.libraryCatalog = "Toronto Star";
 			item.ISSN = "0319-0781";
 		}
+		item.creators = []; // These won't be correct
 		item.language = "en-CA";
 
-		let linkedData = JSON.parse(text(doc, 'script[type="application/ld+json"]'))["@graph"];
-		if (linkedData.length > 0) {
-			let articleData = linkedData.find(x => x["@type"] == "ReportageNewsArticle");
-			if (articleData) {
-				item.title = articleData.headline;
-				item.date = articleData.datePublished;
-				item.abstractNote = articleData.description;
+		for (let script of doc.querySelectorAll('script[type="application/ld+json"]')) {
+			try {
+				let articleData = JSON.parse(script.textContent);
+				if (articleData["@type"] === "NewsArticle") {
+					item.title = ZU.unescapeHTML(articleData.headline);
+					item.date = ZU.strToISO(articleData.datePublished);
+					item.abstractNote = articleData.description;
 
-				if (articleData.author) {
-					if (Array.isArray(articleData.author)) {
-						for (let author of articleData.author) {
-							if (author.name) item.creators.push(ZU.cleanAuthor(author.name, 'author'));
+					if (articleData.author) {
+						if (Array.isArray(articleData.author)) {
+							for (let author of articleData.author) {
+								if (!author.name || author.name === "Unknown") {
+									continue;
+								}
+								for (let name of author.name.split(', ')) {
+									// Remove bureau name
+									name = name.replace(text(doc, '.bylinepub'), '');
+									item.creators.push(ZU.cleanAuthor(name, 'author'));
+								}
+							}
+						}
+						else if (articleData.author.name) {
+							item.creators.push(ZU.cleanAuthor(articleData.author.name, 'author'));
 						}
 					}
-					else if (articleData.author.name) {
-						item.creators.push(ZU.cleanAuthor(articleData.author.name, 'author'));
-					}
+
+					break;
 				}
 			}
+			catch {}
 		}
 
 		for (let tag of doc.querySelectorAll('div.tags a')) {
@@ -146,18 +159,14 @@ var testCases = [
 				"libraryCatalog": "Toronto Star",
 				"publicationTitle": "The Toronto Star",
 				"section": "World",
-				"url": "https://www.thestar.com/news/world/2010/01/26/france_should_ban_muslim_veils_commission_says.html",
+				"url": "https://www.thestar.com/news/world/france-should-ban-muslim-veils-commission-says/article_c5625062-0cb9-5e26-a634-1a1af3bb7544.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "France"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -179,24 +188,20 @@ var testCases = [
 				],
 				"date": "2011-07-29",
 				"ISSN": "0319-0781",
-				"abstractNote": "There&rsquo;s no reason why Ontario can&rsquo;t regain the momentum it once had.",
+				"abstractNote": "There’s no reason why Ontario can’t regain the momentum it once had.",
 				"language": "en-CA",
 				"libraryCatalog": "Toronto Star",
 				"publicationTitle": "The Toronto Star",
-				"section": "Tech News",
+				"section": "Business",
 				"shortTitle": "Hamilton",
-				"url": "https://www.thestar.com/business/tech_news/2011/07/29/hamilton_ontario_should_reconsider_offshore_wind.html",
+				"url": "https://www.thestar.com/business/technology/hamilton-ontario-should-reconsider-offshore-wind/article_6f9933c7-6793-52cb-966e-a7a4c6351404.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "Great Lakes"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -228,33 +233,14 @@ var testCases = [
 				"libraryCatalog": "Toronto Star",
 				"publicationTitle": "The Toronto Star",
 				"section": "Canada",
-				"url": "https://www.thestar.com/news/canada/2012/07/03/bev_oda_resigns_as_international_cooperation_minister_conservative_mp_for_durham.html",
+				"url": "https://www.thestar.com/news/canada/bev-oda-resigns-as-international-co-operation-minister-conservative-mp-for-durham/article_9be7eded-cd3f-5f5e-8c2e-381f65700ae3.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "Bev Oda"
-					},
-					{
-						"tag": "Conservatives"
-					},
-					{
-						"tag": "Durham"
-					},
-					{
-						"tag": "Stephen Harper"
-					},
-					{
-						"tag": "orange juice"
-					},
-					{
-						"tag": "savoy hotel"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -295,33 +281,14 @@ var testCases = [
 				"libraryCatalog": "Toronto Star",
 				"publicationTitle": "The Toronto Star",
 				"section": "Canada",
-				"url": "https://www.thestar.com/news/canada/2021/08/12/yukon-reports-nine-new-cases-of-covid-19-territory-has-45-active-infections.html",
+				"url": "https://www.thestar.com/news/canada/yukon-reports-nine-new-cases-of-covid-19-territory-has-45-active-infections/article_6e7915d9-4fc1-5ccb-9a51-3dbf19dbd9b0.html",
 				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "Canada"
-					},
-					{
-						"tag": "Health"
-					},
-					{
-						"tag": "Whitehorse"
-					},
-					{
-						"tag": "bc"
-					},
-					{
-						"tag": "social"
-					},
-					{
-						"tag": "yukon territory"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}

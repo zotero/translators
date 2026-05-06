@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-26 17:27:25"
+	"lastUpdated": "2025-08-28 14:37:28"
 }
 
 /*
@@ -177,7 +177,7 @@ function getDate(doc) {
 	}
 
 	if (isFeatureArticle(doc)) {
-		return doc.querySelector('.FeatureByline').lastElementChild.previousSibling.textContent;
+		return doc.querySelector('.FeatureByline br').nextSibling.textContent;
 	}
 
 	if (isGuestArticle(doc)) {
@@ -310,6 +310,41 @@ var testCases = [
 		"type": "web",
 		"url": "https://lwn.net/Search/DoTextSearch?words=test&ctype11=yes&ctype8=yes&ctype3=yes&cat_79=yes&cat_271=yes&cat_56=yes&cat_25=yes&cat_21=yes&cat_1=yes&cat_8=yes&cat_2=yes&cat_84=yes&cat_72=yes&cat_3=yes&catsbox=yes&order=relevance&Search=Search",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://lwn.net/Articles/1033373/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Python, tail calls, and performance",
+				"creators": [
+					{
+						"firstName": "Jake",
+						"lastName": "Edge",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025-08-20",
+				"language": "en-US",
+				"libraryCatalog": "LWN.net",
+				"publicationTitle": "LWN.net",
+				"url": "https://lwn.net/Articles/1033373/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Article EPUB",
+						"mimeType": "application/epub+zip"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

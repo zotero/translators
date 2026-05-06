@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-10-03 14:17:12"
+	"lastUpdated": "2026-03-19 20:29:30"
 }
 
 function detectWeb(doc, url) {
@@ -153,7 +153,9 @@ async function getPDFLink(doc) {
 	// enough to get us through even without those parameters.
 	pdfURL = attr(doc, 'link[rel="canonical"]', 'href');
 	if (pdfURL) {
-		pdfURL = pdfURL + '/pdfft?download=true';
+		pdfURL += '/pdfft?download=true';
+		// TEMP: Remove erroneous port from canonical link
+		pdfURL = pdfURL.replace(':5037', '');
 		Zotero.debug("Trying to construct PDF URL from canonical link: " + pdfURL);
 		return pdfURL;
 	}
@@ -498,7 +500,7 @@ async function scrape(doc, url, isSearchResult = false) {
 	// On newer pages, there is an GET formular which is only there if
 	// the user click on the export button, but we know how the url
 	// in the end will be built.
-	form = ZU.xpath(doc, '//div[@id="export-citation"]//button')[0];
+	form = ZU.xpath(doc, '//div[@id="export-citation"]//button')[0] || doc.querySelector('#export-citation-popover');
 	if (form) {
 		Z.debug("Fetching RIS via GET form (new)");
 		var pii = ZU.xpathText(doc, '//meta[@name="citation_pii"]/@content');

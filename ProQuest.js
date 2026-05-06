@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-10-22 16:06:36"
+	"lastUpdated": "2025-07-31 17:15:12"
 }
 
 /*
@@ -172,7 +172,7 @@ function detectWeb(doc, url) {
 
 	// there is not much information about the item type in the pdf/fulltext page
 	let titleRow = text(doc, '.open-access');
-	if (titleRow && doc.getElementById('docview-nav-stick')) { // do not continue if there is no nav to the Abstract, as the translation will fail
+	if (titleRow && doc.getElementById('docview-nav')) { // do not continue if there is no nav to the Abstract, as the translation will fail
 		if (getItemType([titleRow])) {
 			return getItemType([titleRow]);
 		}
@@ -2136,6 +2136,71 @@ var testCases = [
 					}
 				],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.proquest.com/docview/2778644623/fulltextPDF/DE90C00EE80640EDPQ/1?sourcetype=Dissertations%20&%20Theses",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "A Comparison of the Mental Health of Police Officers and Correctional Officers in Rural Appalachia",
+				"creators": [
+					{
+						"firstName": "Sierra",
+						"lastName": "Thomas",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022",
+				"abstractNote": "The purpose of this study was to explore perceptions of mental health among police officers and correctional officers within rural Appalachia. The main goal of this research was to better understand how the occupational demands of working in the criminal justice field can impact one’s mental health over time. Several research questions were explored, including the prevalence of various mental health problems, associated stressors, the structure of support among officers, and the perceptions of mental health treatment services. Data were gathered through semi-structured interviews with 21 police and correctional officers located in rural Appalachia. Results provided a better understanding of the mental health of rural officers as well as the associated stressors and protective factors. Findings also further explored the perceptions and utilization of the available treatment services.",
+				"language": "English",
+				"libraryCatalog": "ProQuest",
+				"numPages": "121",
+				"place": "United States -- Tennessee",
+				"rights": "Database copyright ProQuest LLC; ProQuest does not claim copyright in the individual underlying works.",
+				"thesisType": "M.A.",
+				"university": "East Tennessee State University",
+				"url": "https://www.proquest.com/docview/2778644623/abstract/72FDDD77DA764D43PQ/1",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf",
+						"proxy": false
+					}
+				],
+				"tags": [
+					{
+						"tag": "Clinical psychology"
+					},
+					{
+						"tag": "Correctional personnel"
+					},
+					{
+						"tag": "Law enforcement"
+					},
+					{
+						"tag": "Mental depression"
+					},
+					{
+						"tag": "Mental disorders"
+					},
+					{
+						"tag": "Mental health"
+					},
+					{
+						"tag": "Post traumatic stress disorder"
+					},
+					{
+						"tag": "Psychology"
+					},
+					{
+						"tag": "Suicides & suicide attempts"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
