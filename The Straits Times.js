@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-05-07 03:17:00"
+	"lastUpdated": "2026-05-07 17:25:43"
 }
 
 /*
@@ -45,17 +45,23 @@ function detectWeb(doc, url) {
 	}
 
 	if (url.includes('/search')) {
-		Zotero.monitorDOMChanges(doc.querySelector('.search-result-list'));
+		/*var searchResults = doc.querySelector('.search-result-list');
+		if (searchResults) {
+			Zotero.monitorDOMChanges(doc.querySelector('body'));
+		}*/Zotero.monitorDOMChanges(doc.body);
 		Zotero.debug('multiple search');
 		return 'multiple';
 	}
 
 	if (url.includes('/tags/')) {
 		if (url.includes('?page')) {
-			Zotero.monitorDOMChanges(doc.querySelector('.container'));
+			var container = doc.querySelector('.container');
+			if (container) {
+				Zotero.monitorDOMChanges(container);
+			}
 			Zotero.debug('multiple tags');
 		}
-		return 'multiple'; 
+		return 'multiple';
 	}
 	
 	return false;
@@ -91,6 +97,7 @@ async function scrape(doc, url = doc.location.href) {
 	if (authors !== null && authors.length) {
 		var authorsArr = authors.split(authorSplitRe);
 		for (let author of authorsArr) {
+			author = author.replace(' For The Straits Times', '');
 			insertCreator(author, newItem);
 		}
 	}
@@ -99,39 +106,81 @@ async function scrape(doc, url = doc.location.href) {
 		document: doc,
 		title: "Snapshot",
 	}];
-	if (doc.evaluate('//div[@class="paid-premium st-flag-1"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if (ZU.xpathText(doc, '//p[contains(@class, "font-eyebrow-lg-bold") and contains(normalize-space(.), "For subscribers")]')) {
 		newItem.extra = "Straits Times Access: Subscription only";
 	}
 	newItem.complete();
 }
 
+function delay(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function getMultipleItems(doc, url) {
-	var items = [];
-	var rows;
-	Zotero.debug(url);
-	
+	var items = {};
+	var rows = [];
+
 	if (url.includes('/search')) {
-		rows = ZU.xpath(doc, '//div[contains(@class,"search-result-list")]//a');
+		Zotero.debug('Waiting for async search results...');
+		
+		// allow async-rendered results to load
+		await delay(1500);
+
+		rows = doc.querySelectorAll(
+			'div.search-result-list a[data-testid="custom-link"][href]'
+		);
+
+		Zotero.debug('Rows after delay: ' + rows.length);
 	}
 	else if (url.includes('/tags/')) {
-		rows = ZU.xpath(doc, '//div[contains(@class,"container")]//a')
+		rows = ZU.xpath(doc, '//div[contains(@class,"container")]//a[@href]');
+	}
 
-	}
-	if (rows.length) {
-		for (let searchItem of rows) {
-			var searchItemUrl = attr(searchItem, 'a', 'href');
-			items.push(searchItemUrl);
+	Zotero.debug('Rows found: ' + (rows ? rows.length : 0));
+
+	for (let row of rows) {
+		let href = row.getAttribute('href');
+		if (!href) continue;
+
+		let itemUrl = href.startsWith('http')
+			? href
+			: new URL(href, url).href;
+
+		// filter only Straits Times article URLs
+		if (!/^https:\/\/www\.straitstimes\.com\//.test(itemUrl)) continue;
+
+		// exclude non-article pages
+		if (/\/(authors|tags)(\/|$)/.test(itemUrl)
+			|| /\/search(\?|\/|$)/.test(itemUrl)) {
+			continue;
 		}
+
+		let heading = row.querySelector('[data-testid="heading-test-id"]');
+
+		let title = heading
+			? ZU.trimInternal(heading.textContent)
+			: ZU.trimInternal(row.textContent);
+
+		if (!title) title = itemUrl;
+
+		items[itemUrl] = title;
 	}
-	if (!!items && items.length) {
-		items = items.filter(function (item) {
-			return (!!item.match(/^https:\/\/www\.straitstimes.com/));
-		});
-		if (items.length) {
-			for (let url of Object.keys(items)) {
-				await scrape(await requestDocument(url));
-			}
-		}
+
+	Zotero.debug('Items found: ' + Object.keys(items).length);
+
+	let itemCount = Object.keys(items).length;
+
+	if (!itemCount) {
+		Zotero.debug('No search results found in DOM after delay');
+		return;
+	}
+
+	var selectedItems = await Zotero.selectItems(items);
+
+	if (!selectedItems) return;
+
+	for (let itemUrl of Object.keys(selectedItems)) {
+		await scrape(await requestDocument(itemUrl), itemUrl);
 	}
 }
 
@@ -159,7 +208,7 @@ function insertCreator(authorName, newItem) {
 		'Chew Hui Min': { first: 'Hui Min', last: 'Chew' },
 		'Chin Hui Shan': { first: 'Hui Shan', last: 'Chin' },
 		'Chin Soo Fang': { first: 'Soo Fang', last: 'Chin' },
-		'Chng Choon Hiong': { first: 'Choon Hion', last: 'Chng' },
+		'Chng Choon Hiong': { first: 'Choon Hiong', last: 'Chng' },
 		'Chong Jun Liang': { first: 'Jun Liang', last: 'Chong' },
 		'Choo Yun Ting': { first: 'Yun Ting', last: 'Choo' },
 		'Chor Khieng Yuit': { first: 'Khieng Yuit', last: 'Chor' },
@@ -178,7 +227,7 @@ function insertCreator(authorName, newItem) {
 		'Kang Wan Chern': { first: 'Wan Chern', last: 'Kang' },
 		'Khoe Wei Jun': { first: 'Wei Jun', last: 'Khoe' },
 		'Kok Ping Soon': { first: 'Ping Soon', last: 'Kok' },
-		'Kok Yufeng': { first: 'Yufang', last: 'Kok' },
+		'Kok Yufeng': { first: 'Yufeng', last: 'Kok' },
 		'Kok Xing Hui': { first: 'Xing Hui', last: 'Kok' },
 		'Kua Chee Siong': { first: 'Chee Siong', last: 'Kua' },
 		'Lai Shueh Yuan': { first: 'Shueh Yuan', last: 'Lai' },
@@ -188,13 +237,12 @@ function insertCreator(authorName, newItem) {
 		'Lee Li Ying': { first: 'Li Ying', last: 'Lee' },
 		'Lee Min Kok': { first: 'Min Kok', last: 'Lee' },
 		'Lee Nian Tjoe': { first: 'Nian Tjoe', last: 'Lee' },
-		'Lee Pei Jie': { first: 'Pei Jie', lsat: 'Lee' },
+		'Lee Pei Jie': { first: 'Pei Jie', last: 'Lee' },
 		'Lee Qing Ping': { first: 'Qing Ping', last: 'Lee' },
 		'Lee Seok Hwai': { first: 'Seok Hwai', last: 'Lee' },
-		'Lee Siew Hua': { first: 'Siew Hua', last: 'Lee' },
-		'Lee Su Shyan': {first: 'Su Shyan', last: 'Lee'},
 		'Lee Si Xuan': { first: 'Si Xuan', last: 'Lee' },
 		'Lee Siew Hua': { first: 'Siew Hua', last: 'Lee' },
+		'Lee Su Shyan': {first: 'Su Shyan', last: 'Lee'},
 		'Lee Wei Ling': { first: 'Wei Ling', last: 'Lee' },
 		'Lee Xin En': { first: 'Xin En', last: 'Lee' },
 		'Li Xueying': { first: 'Xueying', last: 'Li' },
@@ -222,12 +270,12 @@ function insertCreator(authorName, newItem) {
 		'Ng Wei Kai': { first: 'Wei Kai', last: 'Ng' },
 		'Ng Weng Chi': { first: 'Weng Chi', last: 'Ng' },
 		'Ng Shin Yi': { first: 'Shin Yi', last: 'Ng' },
-		'Ng Sor Luan': { first: 'Sor Luan': last: 'Ng'},
+		'Ng Sor Luan': { first: 'Sor Luan', last: 'Ng'},
 		'Nur Asyiqin Mohamad Salleh': { first: 'Nur Asyiqin', last: 'Mohamad Salleh' },
 		'Nur Faraha Faeaz': { first: 'Nur Faraha', last: 'Faeaz' },
 		'Ong Hui Fang ': { first: 'Hui Fang', last: 'Ong' },
 		'Ong Sor Fern': { first: 'Sor Fern', last: 'Ong' },
-		'Poon Chian Hui': { first: 'Chain Hui', last: 'Poon' },
+		'Poon Chian Hui': { first: 'Chian Hui', last: 'Poon' },
 		'Quah Ting Wen': { first: 'Ting Wen', last: 'Quah' },
 		'Raynold Toh YK': { first: 'Raynold, YK', last: 'Toh' },
 		'Rebecca Tan Hui Qing': { first: 'Rebecca, Hui Qing', last: 'Tan' },
@@ -249,7 +297,7 @@ function insertCreator(authorName, newItem) {
 		'Tan Wei Xuan': { first: 'Wei Xuan', last: 'Tan' },
 		'Tan Weizhen': { first: 'Weizhen', last: 'Tan' },
 		'Tang Fan Xi': { first: 'Fan Xi', last: 'Tang' },
-		'Tang Wee Cheow': { first: 'Wee Choew', last: 'Tang' },
+		'Tang Wee Cheow': { first: 'Wee Cheow', last: 'Tang' },
 		'Tay Hong Yi': { first: 'Hong Yi', last: 'Tay' },
 		'Tee Zhuo': { first: 'Zhuo', last: 'Tee' },
 		'Teo Cheng Wee': { first: 'Cheng Wee', last: 'Teo' },
@@ -481,11 +529,6 @@ var testCases = [
 				"title": "S'poreans going ahead with CNY plans despite Covid-19 surge, Chinatown businesses see boost in sales",
 				"creators": [
 					{
-						"lastName": "Yeo",
-						"firstName": "Shu Hui",
-						"creatorType": "author"
-					},
-					{
 						"firstName": "Dominic",
 						"lastName": "Low",
 						"creatorType": "author"
@@ -629,8 +672,12 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.straitstimes.com/search?searchkey=election",
-		"detectedItemType": "multiple",
-		"items": []
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.straitstimes.com/tags/infectious-diseases",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
