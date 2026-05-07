@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-08 17:47:25"
+	"lastUpdated": "2026-05-07 03:17:00"
 }
 
 /*
@@ -44,9 +44,18 @@ function detectWeb(doc, url) {
 		}
 	}
 
-	if (url.includes('/search?searchkey=test')) {
-		Zotero.debug('multiple');
+	if (url.includes('/search')) {
+		Zotero.monitorDOMChanges(doc.querySelector('.search-result-list'));
+		Zotero.debug('multiple search');
 		return 'multiple';
+	}
+
+	if (url.includes('/tags/')) {
+		if (url.includes('?page')) {
+			Zotero.monitorDOMChanges(doc.querySelector('.container'));
+			Zotero.debug('multiple tags');
+		}
+		return 'multiple'; 
 	}
 	
 	return false;
@@ -74,12 +83,15 @@ async function scrape(doc, url = doc.location.href) {
 	newItem.place = 'Singapore';
 	newItem.language = 'en';
 
-	var authors = ZU.xpathText(doc, '//*[contains(@class, "byline-info") or contains(@class, "inline-block")]//*[contains(@class, "byline-name")]');
+	var authors = ZU.xpathText(doc, '//meta[@property="article:author"]/@content');
+	if (authors === null ) { // for articles without article:author meta tag
+		authors = ZU.xpathText(doc, '//p[@data-testid="author-byline-default-byline-custom"]')
+	}
 	var authorSplitRe = /,| and /;
 	if (authors !== null && authors.length) {
 		var authorsArr = authors.split(authorSplitRe);
 		for (let author of authorsArr) {
-			insertCreator(author.replace('For The Straits Times', ''), newItem);
+			insertCreator(author, newItem);
 		}
 	}
 	
@@ -93,32 +105,22 @@ async function scrape(doc, url = doc.location.href) {
 	newItem.complete();
 }
 
-function sleep(ms) {
-	return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 async function getMultipleItems(doc, url) {
 	var items = [];
 	var rows;
 	Zotero.debug(url);
-	if (url.includes('/search?') && url.includes('searchkey')) {
-		await sleep(1000);
-		rows = ZU.xpath(doc, '//div[@class="queryly_item_row"]');
-		
-		if (rows.length) {
-			for (let searchItem of rows) {
-				var searchItemUrl = attr(searchItem, 'a', 'href');
-				items.push(searchItemUrl);
-			}
-		}
+	
+	if (url.includes('/search')) {
+		rows = ZU.xpath(doc, '//div[contains(@class,"search-result-list")]//a');
 	}
-	else {
-		rows = ZU.xpath(doc, '//a[@class="block-link"]|//span[@class="story-headline"]/a');
-		if (rows.length) {
-			for (let headlineItem of rows) {
-				var headlineItemUrl = headlineItem.href;
-				items.push(headlineItemUrl);
-			}
+	else if (url.includes('/tags/')) {
+		rows = ZU.xpath(doc, '//div[contains(@class,"container")]//a')
+
+	}
+	if (rows.length) {
+		for (let searchItem of rows) {
+			var searchItemUrl = attr(searchItem, 'a', 'href');
+			items.push(searchItemUrl);
 		}
 	}
 	if (!!items && items.length) {
@@ -141,13 +143,16 @@ function insertCreator(authorName, newItem) {
 		'Alison de Souza': { first: 'Alison', last: 'de Souza' },
 		'Arnoud de Meyer': { first: 'Arnoud', last: 'de Meyer' },
 		'Ang Yiying': { first: 'Yiying', last: 'Ang' },
+		'Ang Yi Zhe': { first: 'Yi Zhe', last: 'Ang' },
 		'Ang Qing': { first: 'Qing', last: 'Ang' },
+		'Anne Chan Min': { first: 'Anne, Min', last: 'Chan' },
 		'Aw Cheng Wei': { first: 'Cheng Wei', last: 'Aw' },
 		'Baey Zo-Er': { first: 'Zo-Er', last: 'Baey' },
 		'Benjamin Lim Kang': { first: 'Benjamin, Kang', last: 'Lim' },
 		'Chang Ai-Lien': { first: 'Ai-Lien', last: 'Chang' },
 		'Chang May Choon': { first: 'May Choon', last: 'Chang' },
 		'Chang Tou Liang': { first: 'Tou Liang', last: 'Chang' },
+		'Cheong Poh Kwan': { first: 'Poh Kwan', last: 'Cheong' },
 		'Cheong Suk-Wai': { first: 'Suk-Wai', last: 'Cheong' },
 		'Cheow Sue-Ann': { first: 'Sue-Ann', last: 'Cheow' },
 		'Cheryl Teh TL': { first: 'Cheryl, TL', last: 'Teh' },
@@ -172,6 +177,7 @@ function insertCreator(authorName, newItem) {
 		'Joy Pang Minle': { first: 'Joy, Minle', last: 'Pang' },
 		'Kang Wan Chern': { first: 'Wan Chern', last: 'Kang' },
 		'Khoe Wei Jun': { first: 'Wei Jun', last: 'Khoe' },
+		'Kok Ping Soon': { first: 'Ping Soon', last: 'Kok' },
 		'Kok Yufeng': { first: 'Yufang', last: 'Kok' },
 		'Kok Xing Hui': { first: 'Xing Hui', last: 'Kok' },
 		'Kua Chee Siong': { first: 'Chee Siong', last: 'Kua' },
@@ -182,8 +188,11 @@ function insertCreator(authorName, newItem) {
 		'Lee Li Ying': { first: 'Li Ying', last: 'Lee' },
 		'Lee Min Kok': { first: 'Min Kok', last: 'Lee' },
 		'Lee Nian Tjoe': { first: 'Nian Tjoe', last: 'Lee' },
+		'Lee Pei Jie': { first: 'Pei Jie', lsat: 'Lee' },
 		'Lee Qing Ping': { first: 'Qing Ping', last: 'Lee' },
 		'Lee Seok Hwai': { first: 'Seok Hwai', last: 'Lee' },
+		'Lee Siew Hua': { first: 'Siew Hua', last: 'Lee' },
+		'Lee Su Shyan': {first: 'Su Shyan', last: 'Lee'},
 		'Lee Si Xuan': { first: 'Si Xuan', last: 'Lee' },
 		'Lee Siew Hua': { first: 'Siew Hua', last: 'Lee' },
 		'Lee Wei Ling': { first: 'Wei Ling', last: 'Lee' },
@@ -211,13 +220,18 @@ function insertCreator(authorName, newItem) {
 		'Ng Kane Gene': { first: 'Kane Gene', last: 'Ng' },
 		'Ng Huiwen': { first: 'Huiwen', last: 'Ng' },
 		'Ng Wei Kai': { first: 'Wei Kai', last: 'Ng' },
+		'Ng Weng Chi': { first: 'Weng Chi', last: 'Ng' },
+		'Ng Shin Yi': { first: 'Shin Yi', last: 'Ng' },
+		'Ng Sor Luan': { first: 'Sor Luan': last: 'Ng'},
 		'Nur Asyiqin Mohamad Salleh': { first: 'Nur Asyiqin', last: 'Mohamad Salleh' },
 		'Nur Faraha Faeaz': { first: 'Nur Faraha', last: 'Faeaz' },
+		'Ong Hui Fang ': { first: 'Hui Fang', last: 'Ong' },
 		'Ong Sor Fern': { first: 'Sor Fern', last: 'Ong' },
 		'Poon Chian Hui': { first: 'Chain Hui', last: 'Poon' },
 		'Quah Ting Wen': { first: 'Ting Wen', last: 'Quah' },
 		'Raynold Toh YK': { first: 'Raynold, YK', last: 'Toh' },
 		'Rebecca Tan Hui Qing': { first: 'Rebecca, Hui Qing', last: 'Tan' },
+		'See Kai Wen': { first: 'Kai Wen', last: 'See' },
 		'Seow Bei Yi': { first: 'Bei Yi', last: 'Seow' },
 		'Sheo Chiong Teng': { first: 'Chiong Teng', last: 'Sheo' },
 		'Siow Li Sen': { first: 'Li Sen', last: 'Siow' },
@@ -226,6 +240,8 @@ function insertCreator(authorName, newItem) {
 		'Tan Hsueh Yun': { first: 'Hsueh Yun', last: 'Tan' },
 		'Tan Hui Yee': { first: 'Hui Yee', last: 'Tan' },
 		'Tan Jia Ning': { first: 'Jia Ning', last: 'Tan' },
+		'Tan Kim Han': { first: 'Kim Han', last: 'Tan' },
+		'Tan Min Lan': { first: 'Min Lan', last: 'Tan' },
 		'Tan Ooi Boon': { first: 'Ooi Boon', last: 'Tan' },
 		'Tan Shu Yan': { first: 'Shu Yan', last: 'Tan' },
 		'Tan Tai Yong': { first: 'Tai Yong', last: 'Tan' },
@@ -245,12 +261,19 @@ function insertCreator(authorName, newItem) {
 		'Toh Ting Wei': { first: 'Ting Wei', last: 'Toh' },
 		'Toh Yong Chuan': { first: 'Yong Chuan', last: 'Toh' },
 		'Tong Ming Chien': { first: 'Ming Chien', last: 'Tong' },
+		'Vera Ang Meixin': { first: 'Vera, Meixin', last: 'Ang' },
 		'Wang Gungwu': { first: 'Gungwu', last: 'Wang' },
+		'Wang Hui Fen': { first: 'Hui Fen', last: 'Wang' },
+		'Whang Yee Ling': {first: 'Yee Ling', last: 'Whang'},
 		'Wong Ah Yoke': { first: 'Ah Yoke', last: 'Wong' },
+		'Wong Chia Peck': { first: 'Chia Peck', last: 'Wong' },
 		'Wong Kim Hoh': { first: 'Kim Hoh', last: 'Wong' },
+		'Wong Man Shun': { first: 'Man Shun', last: 'Wong' },
 		'Wong Pei Ting': { first: 'Pei Ting', last: 'Wong' },
 		'Wong Shiying': { first: 'Shiying', last: 'Wong' },
 		'Wong Yang': { first: 'Yang', last: 'Wong' },
+		'Yap Wei Qiang': { first: 'Wei Qiang', last: 'Yap' },
+		'Yeo Chuen Chuen': {first: 'Chuen Chuen', last: 'Yeo' },
 		'Yeo Shu Hui': { first: 'Shu Hui', last: 'Yeo' },
 		'Yew Lun Tian': { first: 'Lun Tian', last: 'Yew' },
 		'Yip Wai Yee': { first: 'Wai Yee', last: 'Yip' },
@@ -269,7 +292,6 @@ function insertCreator(authorName, newItem) {
 		newItem.creators.push(ZU.cleanAuthor(authorName, "author"));
 	}
 }
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -606,7 +628,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.straitstimes.com/search?searchkey=test",
+		"url": "https://www.straitstimes.com/search?searchkey=election",
 		"detectedItemType": "multiple",
 		"items": []
 	}
