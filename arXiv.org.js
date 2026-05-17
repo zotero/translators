@@ -404,8 +404,11 @@ function parseSingleEntry(entry) {
 	if (articleID && articleID.includes("/")) {
 		newItem.extra = "arXiv:" + articleID;
 	}
-	else {
+	else if (articleField) {
 		newItem.extra = "arXiv:" + articleID + " " + articleField;
+	}
+	else {
+		newItem.extra = "arXiv:" + articleID;
 	}
 
 	let pdfURL = versionedArXivURL.replace("/abs/", "/pdf/");
