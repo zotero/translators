@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-04-28 10:15:53"
+	"lastUpdated": "2026-05-18 05:18:15"
 }
 
 /*
@@ -425,7 +425,7 @@ async function scrapeDigital(doc, url) {
 	let [attachment, label] = prepareAttachment(digitalData, url);
 	// Some images are grouped under a single title,
 	// so add the image label to the title for clarity where necessary
-	if (label) {
+	if (label && !label.includes(item.callNumber)) {
 		item.title = `${item.title} (${label})`;
 	}
 	item.attachments.push(attachment);
@@ -494,7 +494,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "artwork",
-				"title": "A Souvenir of Portsea - 12 Specially Selected Views in Full Color (Image H84.440/342d)",
+				"title": "A Souvenir of Portsea - 12 Specially Selected Views in Full Color",
 				"creators": [],
 				"date": "[ca. 1945-1954]",
 				"abstractNote": "Foldout postcard comprising 12 images. Front cover (from which title is taken) and text inside front cover not captured. Published by NUCOLORVUE PRODUCTIONS, MENTONE, VICTORIA. - OCEAN BEACH, LOOKING TOWARDS PT. LONSDALE-PORTSEA BEACH AND PIER-THE ROAD BETWEEN SORRENTO AND PORTSEA-PICTURESQUE SCENE, PT. KING-THE FRONT BEACH-A SECTION OF LORD MAYOR'S HOLIDAY CAMP-OVERLOOKING THE BEACH AT PORTSEA-SHOPPING CENTRE AND PORTSEA HOTEL-A CLOSE UP VIEW OF LONDON BRIDGE-ENTRANCE TO LORD MAYOR'S HOLIDAY CAMP-THE OCEAN BEACH, LOOKING TOWARDS CAPE SCHANCK-HOTEL NEPEAN, PORTSEA. 1 digital file",
