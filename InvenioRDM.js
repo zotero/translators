@@ -1182,7 +1182,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://aperta.ulakbim.gov.tr/record/252039",
-		"detectedItemType": "dataset",
 		"items": [
 			{
 				"itemType": "dataset",
@@ -1245,6 +1244,51 @@ var testCases = [
 		"url": "https://zenodo.org/communities/oat23/records?q=&l=list&p=1&s=10&sort=newest",
 		"defer": true,
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://repository.cern/records/yskdj-44858",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "Design study of a low-energy extension of the H8 beam-line at the CERN Super Proton Synchrotron",
+				"creators": [
+					{
+						"lastName": "Turner",
+						"firstName": "M",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Turner",
+						"firstName": "M",
+						"creatorType": "author"
+					}
+				],
+				"date": "2014-05-15",
+				"abstractNote": "Design study of a new low-energy beam in the H8 beam-line of CERN SPS to\nprovide 1 to 9 GeV/c electrons, pion and muons. Two layout congurations\nare considered. Layout 1 brings the beam back to the central line after the\nparticle selection. In layout 2 the beam at the experiment is o-axis. Studies\nof particle rates with optimized magnet settings and optics studies for beam\ntransmission and focusing to experiment were performed. Fluka simulations\nof all beam-line options were made to estimate the spot-sizes, the particle\nrates and the backgrounds at the experiments. The results showed that the\nbackground is signicantly lower in layout 2.",
+				"language": "eng",
+				"libraryCatalog": "InvenioRDM",
+				"place": "Graz",
+				"university": "Graz, Tech. U.",
+				"url": "https://repository.cern/records/yskdj-44858",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Detectors and Experimental Techniques"
+					},
+					{
+						"tag": "collection:AIDA"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
