@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-05-11 18:35:08"
+	"lastUpdated": "2026-05-19 15:28:10"
 }
 
 /*
@@ -404,8 +404,11 @@ function parseSingleEntry(entry) {
 	if (articleID && articleID.includes("/")) {
 		newItem.extra = "arXiv:" + articleID;
 	}
-	else {
+	else if (articleField) {
 		newItem.extra = "arXiv:" + articleID + " " + articleField;
+	}
+	else {
+		newItem.extra = "arXiv:" + articleID;
 	}
 
 	let pdfURL = versionedArXivURL.replace("/abs/", "/pdf/");
