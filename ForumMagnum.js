@@ -1,15 +1,15 @@
 {
 	"translatorID": "d9f957ca-6393-48ba-b179-59c384e37a12",
-	"label": "Effective Altruism Forum",
+	"label": "ForumMagnum",
 	"creator": "Federico Stafforini",
-	"target": "^https?://forum\\.effectivealtruism\\.org/(posts|s)/",
+	"target": "^https://(forum\\.effectivealtruism\\.org|www\\.lesswrong\\.com)/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-05-19 15:45:00"
+	"lastUpdated": "2026-05-22 19:00:42"
 }
 
 /*
@@ -36,16 +36,48 @@
 */
 
 
-const GRAPHQL_URL = 'https://forum.effectivealtruism.org/graphql';
+const GRAPHQL_URL = '/graphql';
 
-function detectWeb(_doc, url) {
+function detectWeb(doc, url) {
 	if (getPostId(url) || getCommentId(url)) {
-		return "forumPost";
+		return 'forumPost';
+	}
+	else if (getSearchResults(doc, true)) {
+		return 'multiple';
 	}
 	return false;
 }
 
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('.PostsTitle-root a[href*="/posts/"]');
+	if (!rows.length) rows = doc.querySelectorAll('.ExpandedPostsSearchHit-title > .ExpandedPostsSearchHit-link[href*="/posts/"]');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
 async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
+	}
+	else {
+		await scrape(doc, url);
+	}
+}
+
+async function scrape(doc, url = doc.location.href) {
 	const commentId = getCommentId(url);
 	if (commentId) {
 		await scrapeComment(doc, url, commentId);
@@ -79,7 +111,7 @@ async function scrapeComment(doc, url, commentId) {
 function getBaseItem(url) {
 	const item = new Zotero.Item("forumPost");
 	item.url = url;
-	item.forumTitle = "Effective Altruism Forum";
+	item.forumTitle = url.startsWith('https://forum.effectivealtruism.org/') ? "Effective Altruism Forum" : "LessWrong";
 	return item;
 }
 
@@ -189,14 +221,13 @@ function markdownToText(markdown) {
 function getCommentTitle(commentMarkdown, user) {
 	const titleLine = commentMarkdown.split('\n').find(line => line.trim());
 	if (titleLine) {
-		return markdownToText(titleLine).substring(0, 100);
+		return ZU.ellipsize(markdownToText(titleLine), 100);
 	}
 	if (user && user.displayName) {
 		return `Comment by ${user.displayName}`;
 	}
-	return "Effective Altruism Forum Comment";
+	return "Untitled comment";
 }
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -314,6 +345,96 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.lesswrong.com/posts/nR3DkyivzF4ve97oM/how-go-players-disempower-themselves-to-ai",
+		"items": [
+			{
+				"itemType": "forumPost",
+				"title": "How Go Players Disempower Themselves to AI",
+				"creators": [
+					{
+						"lastName": "Ashe Vazquez Nuñez",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2026-05-01T23:24:27.769Z",
+				"forumTitle": "LessWrong",
+				"url": "https://www.lesswrong.com/posts/nR3DkyivzF4ve97oM/how-go-players-disempower-themselves-to-ai",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "AI"
+					},
+					{
+						"tag": "Gaming (videogames/tabletop)"
+					},
+					{
+						"tag": "MATS Program"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.lesswrong.com/posts/nR3DkyivzF4ve97oM/how-go-players-disempower-themselves-to-ai?commentId=6FiqDnPF5unKX6LQt",
+		"items": [
+			{
+				"itemType": "forumPost",
+				"title": "Really good piece, thanks for writing it. History of X posts like this one are unfortunately rare, a…",
+				"creators": [
+					{
+						"lastName": "LawrenceC",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2026-05-02T07:51:34.362Z",
+				"forumTitle": "LessWrong",
+				"url": "https://www.lesswrong.com/posts/nR3DkyivzF4ve97oM/how-go-players-disempower-themselves-to-ai?commentId=6FiqDnPF5unKX6LQt",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://forum.effectivealtruism.org/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://forum.effectivealtruism.org/search?query=sbf&page=1",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.lesswrong.com/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.lesswrong.com/search?query=2027",
+		"defer": true,
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
