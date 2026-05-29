@@ -6,17 +6,13 @@
 	"minVersion": "4.0.27",
 	"maxVersion": "",
 	"priority": 25,
-	"configOptions": {
-		"dataMode": "xml/dom",
-		"getCollections": "true"
-	},
 	"displayOptions": {
 		"Export Tags": true,
 		"Export Notes": true
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2025-06-10 12:49:06"
+	"lastUpdated": "2026-05-29 13:02:10"
 }
 
 /*
@@ -72,7 +68,6 @@ const ns = {
 
 const exportedXMLIds = {};
 const generatedItems = {};
-const allItems = {};
 
 // build one time
 const xmlParser = new DOMParser();
@@ -496,11 +491,11 @@ function parseExtraFields(zotItem) {
 			return "";
 		}
 		const field = "keyword";
-		if (cslKey == "keyword") {
-			if (!Array.isArray(zotItem["keyword"])) {
-				zotItem["keyword"] = [];
+		if (cslKey == field) {
+			if (!Array.isArray(zotItem[field])) {
+				zotItem[field] = [];
 			}
-			zotItem["keyword"].push(value);
+			zotItem[field].push(value);
 			return "";
 		}
 		// default, append to note
@@ -960,7 +955,9 @@ function generateItem(item, teiDoc) {
 		bibl.append("\n", indent, tags);
 		tags.setAttribute("type", "tags");
 		// sort tags to keep order between exports
-		item.tags.sort(function(a,b){return a.tag.localeCompare(b.tag); });
+		item.tags.sort(function (a, b) {
+			return a.tag.localeCompare(b.tag);
+		});
 		for (let tag of item.tags) {
 			let term = teiDoc.createElementNS(ns.tei, "term");
 			term.setAttribute("type", "tag");
@@ -1003,107 +1000,67 @@ function persName(parent, creator, level = 3) {
 	parent.append("\n", indent.repeat(level - 1));
 }
 
-function generateCollection(collection, teiDoc) {
-	var listBibl;
-	var children = collection.children ? collection.children : collection.descendents;
-
-
-	if (children.length > 0) {
-		listBibl = teiDoc.createElementNS(ns.tei, "listBibl");
-		var colHead = teiDoc.createElementNS(ns.tei, "head");
-		colHead.append(collection.name);
-		listBibl.append(colHead);
-		for (var i = 0; i < children.length; i++) {
-			var child = children[i];
-			if (child.type == "collection") {
-				listBibl.append(generateCollection(child, teiDoc));
-			}
-			else if (allItems[child.id]) {
-				listBibl.append(generateItem(allItems[child.id], teiDoc));
-			}
-		}
-	}
-	return listBibl;
+/**
+ * Ensure a stable order of item export
+ */
+function itemCompare(item1, item2) {
+	return yearCompare(item1.date, item2.date)
+		|| strCompare(item1.citationKey, item2.citationKey)
+		|| strCompare(item1.callNumber, item2.callNumber)
+		|| strCompare(item1.url, item2.url);
 }
 
-function generateTEIDocument(listBibls, teiDoc) {
-	var text = teiDoc.createElementNS(ns.tei, "text");
-	var body = teiDoc.createElementNS(ns.tei, "body");
-	teiDoc.documentElement.append(text);
-	text.append(body);
-	for (var i = 0; i < listBibls.length; i++) {
-		body.append(listBibls[i]);
-	}
-	return teiDoc;
+function strCompare(str1, str2) {
+	str1 = (str1 || "").toLocaleLowerCase();
+	str2 = (str2 || "").toLocaleLowerCase();
+	return str1.localeCompare(str2);
+}
+
+function yearCompare(item1, item2) {
+	const year1 = year();
+	const year2 = year(item2.date);
+	if (year1 === year2) return 0;
+	if (year1 === null) return 1;
+	if (year2 === null) return -1;
+	return year1 - year2;
+}
+
+/**
+ * Get a year as a number from a date String in an item
+ */
+function year(str) {
+	var date = ZU.strToDate(str);
+	if (!date.year) return null;
+	if (!/^-?[0-9]+/.test(date.year)) return null;
+	return Number(date.year);
 }
 
 function doExport() {
 	Zotero.setCharacterSet("utf-8");
-
-
-	// Initialize XML Doc
-	var teiDoc // <TEI/>
-		= xmlParser.parseFromString('<TEI xmlns="http://www.tei-c.org/ns/1.0"><teiHeader><fileDesc><titleStmt><title>Exported from Zotero</title></titleStmt><publicationStmt><p>unpublished</p></publicationStmt><sourceDesc><p>Generated from Zotero database</p></sourceDesc></fileDesc></teiHeader></TEI>', 'application/xml');
-
-	var item = null;
+	
+	const items = [];
+	let item;
 	while (item = Zotero.nextItem()) { // eslint-disable-line no-cond-assign
 		// Skip standalone notes
-		if (item.itemType == 'note') {
+		if (item.itemType == 'note' || item.itemType == "attachment") {
 			continue;
 		}
-		allItems[item.uri] = item;
+		items.push(item);
 	}
+	// Ensure a stable sort order so that changes could be tracked
+	items.sort(itemCompare);
 
-
-	var collection = Zotero.nextCollection();
-	var listBibls = [];
-	if (Zotero.getOption("Export Collections") && collection) {
-		var curListBibl = generateCollection(collection, teiDoc);
-		if (curListBibl) {
-			listBibls.push(curListBibl);
-		}
-		while (collection = Zotero.nextCollection()) { // eslint-disable-line no-cond-assign
-			curListBibl = generateCollection(collection, teiDoc);
-			if (curListBibl) {
-				listBibls.push(curListBibl);
-			}
-		}
+	// Initialize an XML Doc to accclimate nodes
+	var teiDoc // <TEI/>
+		= xmlParser.parseFromString('<TEI xmlns="http://www.tei-c.org/ns/1.0"><teiHeader><fileDesc><titleStmt><title>Exported from Zotero</title></titleStmt><publicationStmt><p>unpublished</p></publicationStmt><sourceDesc><p>Generated from Zotero database</p></sourceDesc></fileDesc></teiHeader></TEI>', 'application/xml');
+	// Do not export the library collections if user has not ask for it
+	const listBibl = teiDoc.createElementNS(ns.tei, "listBibl");
+	for (const item of items) {
+		listBibl.append("\n", generateItem(item, teiDoc), "\n");
 	}
-	else {
-		var listBibl = teiDoc.createElementNS(ns.tei, "listBibl");
-		for (let i in allItems) {
-			item = allItems[i];
-			// skip attachments
-			if (item.itemType == "attachment") {
-				continue;
-			}
-			listBibl.append("\n", generateItem(item, teiDoc), "\n");
-		}
-		listBibls.push(listBibl);
-	}
-
-
-	var outputElement;
-
-	if (Zotero.getOption("Full TEI Document")) {
-		outputElement = generateTEIDocument(listBibls, teiDoc);
-	}
-	else if (listBibls.length > 1) {
-		outputElement = teiDoc.createElementNS(ns.tei, "listBibl");
-		for (let i = 0; i < listBibls.length; i++) {
-			outputElement.append(listBibls[i]);
-		}
-	}
-	else if (listBibls.length == 1) {
-		outputElement = listBibls[0];
-	}
-	else {
-		outputElement = teiDoc.createElement("empty");
-	}
-
 	// write to file.
 	Zotero.write('<?xml version="1.0" encoding="UTF-8"?>\n');
-	Zotero.write(xmlSerializer.serializeToString(outputElement));
+	Zotero.write(xmlSerializer.serializeToString(listBibl));
 }
 
 /** BEGIN TEST CASES **/
