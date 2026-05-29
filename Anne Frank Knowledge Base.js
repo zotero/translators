@@ -387,3 +387,13 @@ function getPublicationDate(type, data) {
 	}
 	return "";
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://research.annefrank.org/en/?page=1&q=test",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
