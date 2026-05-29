@@ -2,7 +2,7 @@
 	"translatorID": "cd29a8b7-1b52-4c8c-b2af-7cfc5cbbecb9",
 	"label": "Anne Frank Knowledge Base",
 	"creator": "Vera de Kok",
-	"target": "^https?://research\\.annefrank\\.org/(?:(?:en|nl)/(?:api/(?:search|events|aw_events|locations|subjects|persons|relations)(?:/[0-9a-f-]+)?|(?:personen|gebeurtenissen|locaties|onderwerpen)/[0-9a-f-]+/?|\\?(?=[^#]*\\bq=))|api/search(?:\\?|$))",
+	"target": "^https?://research\\.annefrank\\.org/(?:en|nl|api)/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
