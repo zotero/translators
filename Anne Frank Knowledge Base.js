@@ -43,17 +43,6 @@ var SLUG_TO_ENDPOINT = {
 	onderwerpen: "subjects"
 };
 
-var TYPE_TO_ENDPOINT = {
-	person: "persons",
-	event: "events",
-	location: "locations",
-	subject: "subjects",
-	relation: "relations",
-	search: "search"
-};
-var awEventType = "aw_event";
-TYPE_TO_ENDPOINT[awEventType] = "aw_events";
-
 var MONTH_NAMES = {
 	en: [
 		"January",
@@ -252,12 +241,7 @@ function fetchJSON(url, callback) {
 }
 
 function endpointToType(endpoint) {
-	for (var type in TYPE_TO_ENDPOINT) {
-		if (TYPE_TO_ENDPOINT[type] == endpoint) {
-			return type;
-		}
-	}
-	return endpoint;
+	return endpoint.replace(/s$/, "");
 }
 
 function translateRecord(type, data, lang, doc) {
@@ -393,6 +377,320 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://research.annefrank.org/en/?page=1&q=test",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://research.annefrank.org/nl/?page=1&q=test",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://research.annefrank.org/en/api/search?q=test&format=json",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://research.annefrank.org/en/onderwerpen/e83fe696-a5d6-4f6a-a7c5-7141996ce5b8/",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "Philosophy of Life, Van Pels couple",
+				"creators": [],
+				"date": "2025-05-19",
+				"abstractNote": "Hermann and Auguste van Pels were registered as belonging to the Jewish religion.",
+				"encyclopediaTitle": "Anne Frank Knowledge Base",
+				"language": "en",
+				"libraryCatalog": "Anne Frank Knowledge Base",
+				"place": "Amsterdam",
+				"publisher": "Anne Frank House",
+				"rights": "CC0",
+				"url": "https://research.annefrank.org/en/onderwerpen/e83fe696-a5d6-4f6a-a7c5-7141996ce5b8/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://research.annefrank.org/nl/onderwerpen/e83fe696-a5d6-4f6a-a7c5-7141996ce5b8/",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "Levensbeschouwing echtpaar van Pels",
+				"creators": [],
+				"date": "2025-05-19",
+				"abstractNote": "Hermann en Auguste van Pels stonden ingeschreven als behorende tot de joodse godsdienst.",
+				"encyclopediaTitle": "Anne Frank Kennisbank",
+				"language": "nl-NL",
+				"libraryCatalog": "Anne Frank Knowledge Base",
+				"place": "Amsterdam",
+				"publisher": "Anne Frank Stichting",
+				"rights": "CC0",
+				"url": "https://research.annefrank.org/nl/onderwerpen/e83fe696-a5d6-4f6a-a7c5-7141996ce5b8/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://research.annefrank.org/en/gebeurtenissen/7580b697-5097-4ee5-8537-44e9928396de/",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "Anne Frank in kindergarten (April 9, 1934 - July 13, 1935)",
+				"creators": [],
+				"date": "2025-10-15",
+				"abstractNote": "Anne attended Preparatory School No. 51, the kindergarten of the 6th Montessori School in Amsterdam, for over a year.",
+				"encyclopediaTitle": "Anne Frank Knowledge Base",
+				"extra": "Event date start: 1934-04-09\nEvent date end: 1935-07-13",
+				"language": "en",
+				"libraryCatalog": "Anne Frank Knowledge Base",
+				"place": "Amsterdam",
+				"publisher": "Anne Frank House",
+				"rights": "CC0",
+				"url": "https://research.annefrank.org/en/gebeurtenissen/7580b697-5097-4ee5-8537-44e9928396de/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://research.annefrank.org/nl/gebeurtenissen/7580b697-5097-4ee5-8537-44e9928396de/",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "Anne Frank op de kleuterschool (9 april 1934 - 13 juli 1935)",
+				"creators": [],
+				"date": "2025-10-15",
+				"abstractNote": "Anne zit ruim een jaar op Voorbereidende school No. 51, de kleuterschool bij de 6e Montessorischool in Amsterdam.",
+				"encyclopediaTitle": "Anne Frank Kennisbank",
+				"extra": "Event date start: 1934-04-09\nEvent date end: 1935-07-13",
+				"language": "nl-NL",
+				"libraryCatalog": "Anne Frank Knowledge Base",
+				"place": "Amsterdam",
+				"publisher": "Anne Frank Stichting",
+				"rights": "CC0",
+				"url": "https://research.annefrank.org/nl/gebeurtenissen/7580b697-5097-4ee5-8537-44e9928396de/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://research.annefrank.org/en/personen/f3aa825e-fa88-4494-8d21-c1e0e6466b1b/",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "Vlieger uit Eindhoven",
+				"creators": [],
+				"date": "2025-05-19",
+				"abstractNote": "An unnamed crew member stationed at the German air base in Eindhoven",
+				"encyclopediaTitle": "Anne Frank Knowledge Base",
+				"language": "en",
+				"libraryCatalog": "Anne Frank Knowledge Base",
+				"place": "Amsterdam",
+				"publisher": "Anne Frank House",
+				"rights": "CC0",
+				"url": "https://research.annefrank.org/en/personen/f3aa825e-fa88-4494-8d21-c1e0e6466b1b/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://research.annefrank.org/nl/personen/f3aa825e-fa88-4494-8d21-c1e0e6466b1b/",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "Vlieger uit Eindhoven",
+				"creators": [],
+				"date": "2025-05-19",
+				"abstractNote": "Een naamloos bemanningslid gestationeerd op de Duitse luchtmachtbasis in Eindhoven",
+				"encyclopediaTitle": "Anne Frank Kennisbank",
+				"language": "nl-NL",
+				"libraryCatalog": "Anne Frank Knowledge Base",
+				"place": "Amsterdam",
+				"publisher": "Anne Frank Stichting",
+				"rights": "CC0",
+				"url": "https://research.annefrank.org/nl/personen/f3aa825e-fa88-4494-8d21-c1e0e6466b1b/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://research.annefrank.org/en/locaties/aa7d60c3-6d94-4f52-a729-96440eeb4d5f/",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "Sixth Montessori school",
+				"creators": [],
+				"date": "2025-11-24",
+				"abstractNote": "The Sixth Montessori School was the primary school attended by Anne Frank.",
+				"encyclopediaTitle": "Anne Frank Knowledge Base",
+				"language": "en",
+				"libraryCatalog": "Anne Frank Knowledge Base",
+				"place": "Amsterdam",
+				"publisher": "Anne Frank House",
+				"rights": "CC0",
+				"url": "https://research.annefrank.org/en/locaties/aa7d60c3-6d94-4f52-a729-96440eeb4d5f/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://research.annefrank.org/nl/locaties/aa7d60c3-6d94-4f52-a729-96440eeb4d5f/",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "Zesde Montessorischool",
+				"creators": [],
+				"date": "2025-11-24",
+				"abstractNote": "De Zesde Montessorischool was de lagere school die door Anne Frank werd bezocht.",
+				"encyclopediaTitle": "Anne Frank Kennisbank",
+				"language": "nl-NL",
+				"libraryCatalog": "Anne Frank Knowledge Base",
+				"place": "Amsterdam",
+				"publisher": "Anne Frank Stichting",
+				"rights": "CC0",
+				"url": "https://research.annefrank.org/nl/locaties/aa7d60c3-6d94-4f52-a729-96440eeb4d5f/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://research.annefrank.org/en/gebeurtenissen/588f6db0-3f3c-4b1f-96d9-26f2134af198/",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "Aäron David van Pels moves to Amsterdam (February 7, 1939 - December 27, 1941)",
+				"creators": [],
+				"date": "2025-05-19",
+				"abstractNote": "Aäron David van Pels was Hermann's father and grandfather of Peter van Pels. He moved to Amsterdam in early 1939.",
+				"encyclopediaTitle": "Anne Frank Knowledge Base",
+				"extra": "Event date start: 1939-02-07\nEvent date end: 1941-12-27",
+				"language": "en",
+				"libraryCatalog": "Anne Frank Knowledge Base",
+				"place": "Amsterdam",
+				"publisher": "Anne Frank House",
+				"rights": "CC0",
+				"url": "https://research.annefrank.org/en/gebeurtenissen/588f6db0-3f3c-4b1f-96d9-26f2134af198/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://research.annefrank.org/en/gebeurtenissen/5cb12a99-f156-4715-9488-d86d4d5f2044/",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "Anne and Margot Frank in Aachen | Monheimsallee 42-44 (September 1, 1933 - February 16, 1934)",
+				"creators": [],
+				"date": "2025-05-19",
+				"abstractNote": "From September 1933, Anne and Margot lived with their grandmother in Aachen. Edith also stayed there a lot. Margot went to Amsterdam at the end of December, Anne on February 16, 1934.",
+				"encyclopediaTitle": "Anne Frank Knowledge Base",
+				"extra": "Event date start: 1933-09-01\nEvent date end: 1934-02-16",
+				"language": "en",
+				"libraryCatalog": "Anne Frank Knowledge Base",
+				"place": "Amsterdam",
+				"publisher": "Anne Frank House",
+				"rights": "CC0",
+				"url": "https://research.annefrank.org/en/gebeurtenissen/5cb12a99-f156-4715-9488-d86d4d5f2044/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://research.annefrank.org/en/?page=1&q=Anne%20Frank",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://research.annefrank.org/nl/?page=1&q=Anne%20Frank",
 		"items": "multiple"
 	}
 ]
