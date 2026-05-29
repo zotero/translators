@@ -387,3 +387,101 @@ function getPublicationDate(type, data) {
 	}
 	return "";
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://research.annefrank.org/en/?page=1&q=test",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://research.annefrank.org/en/onderwerpen/e83fe696-a5d6-4f6a-a7c5-7141996ce5b8/",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "Philosophy of Life, Van Pels couple",
+				"creators": [],
+				"date": "2025-05-19",
+				"abstractNote": "Hermann and Auguste van Pels were registered as belonging to the Jewish religion.",
+				"encyclopediaTitle": "Anne Frank Knowledge Base",
+				"language": "en",
+				"libraryCatalog": "Anne Frank Knowledge Base",
+				"place": "Amsterdam",
+				"publisher": "Anne Frank House",
+				"rights": "CC0",
+				"url": "https://research.annefrank.org/en/onderwerpen/e83fe696-a5d6-4f6a-a7c5-7141996ce5b8/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://research.annefrank.org/nl/gebeurtenissen/7580b697-5097-4ee5-8537-44e9928396de/",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "Anne Frank op de kleuterschool (9 april 1934 - 13 juli 1935)",
+				"creators": [],
+				"date": "2025-10-15",
+				"abstractNote": "Anne zit ruim een jaar op Voorbereidende school No. 51, de kleuterschool bij de 6e Montessorischool in Amsterdam.",
+				"encyclopediaTitle": "Anne Frank Kennisbank",
+				"extra": "Event date start: 1934-04-09\nEvent date end: 1935-07-13",
+				"language": "nl-NL",
+				"libraryCatalog": "Anne Frank Knowledge Base",
+				"place": "Amsterdam",
+				"publisher": "Anne Frank Stichting",
+				"rights": "CC0",
+				"url": "https://research.annefrank.org/nl/gebeurtenissen/7580b697-5097-4ee5-8537-44e9928396de/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://research.annefrank.org/en/personen/f3aa825e-fa88-4494-8d21-c1e0e6466b1b/",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "Vlieger uit Eindhoven",
+				"creators": [],
+				"date": "2025-05-19",
+				"abstractNote": "An unnamed crew member stationed at the German air base in Eindhoven",
+				"encyclopediaTitle": "Anne Frank Knowledge Base",
+				"language": "en",
+				"libraryCatalog": "Anne Frank Knowledge Base",
+				"place": "Amsterdam",
+				"publisher": "Anne Frank House",
+				"rights": "CC0",
+				"url": "https://research.annefrank.org/en/personen/f3aa825e-fa88-4494-8d21-c1e0e6466b1b/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
