@@ -8,41 +8,58 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2025-12-17 12:22:10"
+	"lastUpdated": "2026-05-29 15:00:52"
 }
+
+/**
+	Copyright (c) 2026 Frédéric Glorieux
+	
+	This program is free software: you can redistribute it and/or
+	modify it under the terms of the GNU Affero General Public License
+	as published by the Free Software Foundation, either version 3 of
+	the License, or (at your option) any later version.
+	
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+	Affero General Public License for more details.
+	
+	You should have received a copy of the GNU Affero General Public
+	License along with this program. If not, see
+	<http://www.gnu.org/licenses/>.
+*/
 
 function doExport() {
 	const ldList = [];
 	let zotItem;
-	while (zotItem = Zotero.nextItem()) {
+	while ((zotItem = Zotero.nextItem())) {
 		// Skip standalone notes
 		if (zotItem.itemType == 'note') continue;
-		parseExtraFields(zotItem); // parse extra field 
+		parseExtraFields(zotItem); // parse extra field
 		ldList.push(zot2ldItem(zotItem));
 	}
-	ldList.sort(function(a,b){
+	ldList.sort(function (a, b) {
 		const ua = a['@id'] ?? '';
 		const ub = b['@id'] ?? '';
 		return ua < ub ? -1 : ua > ub ? 1 : 0;
 	});
-	Zotero.write(JSON.stringify(ldList, null, "\t"))
+	Zotero.write(JSON.stringify(ldList, null, "\t"));
 }
 
 /**
  * Parse a native zotero item and transform it
  * in a compatible JSON-LD record.
  */
-function zot2ldItem(zotItem)
-{
+function zot2ldItem(zotItem) {
 	const tag2text = [
-		[/<i>/g, "“"],             // “Title”
-		[/<\/i>/g, "”"],           // “Title”
+		[/<i>/g, "“"], // “Title”
+		[/<\/i>/g, "”"], // “Title”
 		[/<sup>st<\/sup>/g, "ˢᵗ"], // 1ˢᵗ
 		[/<sup>nd<\/sup>/g, "ⁿᵈ"], // 2ⁿᵈ
 		[/<sup>rd<\/sup>/g, "ʳᵈ"], // 3ʳᵈ
 		[/<sup>th<\/sup>/g, "ᵗʰ"], // 4ᵗʰ
 		[/<sup>er<\/sup>/g, "ᵉʳ"], // 1ᵉʳ
-		[/<sup>e<\/sup>/g, "ᵉ"],   // 2ᵉ
+		[/<sup>e<\/sup>/g, "ᵉ"], // 2ᵉ
 		[/<\/?sup>/g, ""], // default superscript, remove
 		[/<span style="font-variant:small-caps;">([^<]*)<\/span>/g, (match, word) => word.toUpperCase()], // small caps, to CAPS
 		[/<[^>]+>/g, ""], // default strip alltags
@@ -52,16 +69,16 @@ function zot2ldItem(zotItem)
 	// Normalize rich-text (Zotero HTML-ish) to plain text for schema.org.
 	// Rationale: keep JSON-LD stable for exact-match deduplication and indexing.
 	// If you want French typographic spacing, do it at rendering time (HTML/CSS), not inside the data.
-	const normalize = (s) => regexReplaceAll(s, tag2text);
+	const normalize = s => regexReplaceAll(s, tag2text);
 
 	function asOrganization(name) {
 		if (!name) return null;
-		return { "@type": "Organization", "name": normalize(name) };
+		return { "@type": "Organization", name: normalize(name) };
 	}
 
 	function asPlace(name) {
 		if (!name) return null;
-		return { "@type": "Place", "name": normalize(name) };
+		return { "@type": "Place", name: normalize(name) };
 	}
 
 	// Canonical identifier policy:
@@ -70,7 +87,7 @@ function zot2ldItem(zotItem)
 	function addCanonicalId(ldItem, zotItem) {
 		const canonical = zotItem.url || zotItem.URL || zotItem.uri;
 		ldItem["@id"] = canonical;
-		ldItem["url"] = canonical;
+		ldItem.url = canonical;
 		if (zotItem.uri && zotItem.uri !== canonical) {
 			// sameAs can be a string or array later (e.g., to add a DOI URL).
 			ldItem.sameAs = zotItem.uri;
@@ -95,15 +112,15 @@ function zot2ldItem(zotItem)
 	function buildPeriodicalContainer(zotItem) {
 		if (!zotItem.publicationTitle) return null;
 
-		const periodical = { "@type": "Periodical", "name": normalize(zotItem.publicationTitle) };
+		const periodical = { "@type": "Periodical", name: normalize(zotItem.publicationTitle) };
 		if (zotItem.ISSN) periodical.issn = zotItem.ISSN;
 
 		let container = periodical;
 		if (zotItem.volume) {
-			container = { "@type": "PublicationVolume", "volumeNumber": zotItem.volume, "isPartOf": container };
+			container = { "@type": "PublicationVolume", volumeNumber: zotItem.volume, isPartOf: container };
 		}
 		if (zotItem.issue) {
-			container = { "@type": "PublicationIssue", "issueNumber": zotItem.issue, "isPartOf": container };
+			container = { "@type": "PublicationIssue", issueNumber: zotItem.issue, isPartOf: container };
 		}
 		return container;
 	}
@@ -116,7 +133,7 @@ function zot2ldItem(zotItem)
 		const title = zotItem.proceedingsTitle || zotItem.bookTitle;
 		if (!title) return null;
 
-		const proc = { "@type": "Book", "name": normalize(title) };
+		const proc = { "@type": "Book", name: normalize(title) };
 		if (zotItem.publisher) proc.publisher = asOrganization(zotItem.publisher);
 		if (zotItem.place) proc.locationCreated = asPlace(zotItem.place);
 		if (zotItem.date) proc.datePublished = ZU.strToISO(zotItem.date);
@@ -129,7 +146,7 @@ function zot2ldItem(zotItem)
 		const confName = zotItem.conferenceName || zotItem.meetingName || zotItem.eventTitle || zotItem["event-title"];
 		if (!confName) return null;
 
-		const ev = { "@type": "PublicationEvent", "name": normalize(confName) };
+		const ev = { "@type": "PublicationEvent", name: normalize(confName) };
 
 		// Only use explicit eventPlace/eventDate to avoid confusing publisher-place with conference-place.
 		if (zotItem.eventPlace) ev.location = asPlace(zotItem.eventPlace);
@@ -140,83 +157,86 @@ function zot2ldItem(zotItem)
 
 	// source list for zotero document types https://aurimasv.github.io/z2csl/typeMap.xml
 	const zot2ldType = {
-		"artwork": "VisualArtwork",
-		"attachment": "DigitalDocument",
-		"audioRecording": "AudioObject",
-		"bill": "Legislation",
-		"blogPost": "BlogPosting",
-		"book": "Book",
-		"bookSection": "Chapter",
-		"case": "Legislation",
-		"computerProgram": "SoftwareApplication",
-		"conferencePaper": "ScholarlyArticle",
-		"dictionaryEntry": "Article",
-		"document": "ArchiveComponent",
-		"email": "EmailMessage",
-		"encyclopediaArticle": "Article",
-		"film": "Movie",
-		"forumPost": "DiscussionForumPosting",
-		"hearing": "Legislation",
-		"instantMessage": "Message",
-		"interview": "Article",
-		"journalArticle": "ScholarlyArticle",
-		"letter": "Message", // or ArchiveComponent ?
-		"magazineArticle": "Article",
-		"manuscript": "Manuscript",
-		"map": "Map",
-		"newspaperArticle": "NewsArticle",
-		"note": "DigitalDocument", // ask to Zotero experts
- 		"patent": "Legislation",
-		"podcast": "PodcastEpisode",
-		"preprint": "ScholarlyArticle",
-		"presentation": "DigitalDocument",
-		"radioBroadcast": "RadioEpisode",
-		"report": "Report",
-		"statute": "Legislation",
-		"thesis": "Thesis",
-		"tvBroadcast": "TVEpisode",
-		"videoRecording": "VideoObject",
-		"webpage": "WebPage"
+		artwork: "VisualArtwork",
+		attachment: "DigitalDocument",
+		audioRecording: "AudioObject",
+		bill: "Legislation",
+		blogPost: "BlogPosting",
+		book: "Book",
+		bookSection: "Chapter",
+		case: "Legislation",
+		computerProgram: "SoftwareApplication",
+		conferencePaper: "ScholarlyArticle",
+		dictionaryEntry: "Article",
+		document: "ArchiveComponent",
+		email: "EmailMessage",
+		encyclopediaArticle: "Article",
+		film: "Movie",
+		forumPost: "DiscussionForumPosting",
+		hearing: "Legislation",
+		instantMessage: "Message",
+		interview: "Article",
+		journalArticle: "ScholarlyArticle",
+		letter: "Message", // or ArchiveComponent ?
+		magazineArticle: "Article",
+		manuscript: "Manuscript",
+		map: "Map",
+		newspaperArticle: "NewsArticle",
+		note: "DigitalDocument", // ask to Zotero experts
+		patent: "Legislation",
+		podcast: "PodcastEpisode",
+		preprint: "ScholarlyArticle",
+		presentation: "DigitalDocument",
+		radioBroadcast: "RadioEpisode",
+		report: "Report",
+		statute: "Legislation",
+		thesis: "Thesis",
+		tvBroadcast: "TVEpisode",
+		videoRecording: "VideoObject",
+		webpage: "WebPage"
 	};
 	let ldItem = {
 		"@context": "https://schema.org",
-		"@type": zot2ldType[zotItem.itemType] || "ScholarlyArticle"  // Default zotero item is a cited article 
+		"@type": zot2ldType[zotItem.itemType] || "ScholarlyArticle" // Default zotero item is a cited article
 	};
 	addCanonicalId(ldItem, zotItem);
-	if (zotItem.title) ldItem["name"] = regexReplaceAll(zotItem.title, tag2text);
+	if (zotItem.title) ldItem.name = regexReplaceAll(zotItem.title, tag2text);
 	// what about items with no title?
 	if (zotItem.creators && zotItem.creators.length) {
 		let authors = zotItem.creators.filter(c => c.creatorType === 'author');
 		if (authors.length === 1) {
-			ldItem["author"] = zot2ldPers(authors[0]);
-		} else if (authors.length > 1) {
-			ldItem["author"] = authors.map(zot2ldPers);
+			ldItem.author = zot2ldPers(authors[0]);
+		}
+		else if (authors.length > 1) {
+			ldItem.author = authors.map(zot2ldPers);
 		}
 	}
-	if (zotItem.date) ldItem["datePublished"] = ZU.strToISO(zotItem.date);
+	if (zotItem.date) ldItem.datePublished = ZU.strToISO(zotItem.date);
 
 	// DOI: emit both a structured identifier and a resolvable URL.
 	if (zotItem.DOI) {
 		const doi = ("" + zotItem.DOI).trim();
 		if (doi) {
-			ldItem["identifier"] = { "@type": "PropertyValue", "propertyID": "doi", "value": doi };
+			ldItem.identifier = { "@type": "PropertyValue", propertyID: "doi", value: doi };
 			const doiUrl = doi.startsWith("http") ? doi : ("https://doi.org/" + doi);
 			if (ldItem.sameAs) {
-				ldItem.sameAs = Array.isArray(ldItem.sameAs) ? ldItem.sameAs : [ ldItem.sameAs ];
+				ldItem.sameAs = Array.isArray(ldItem.sameAs) ? ldItem.sameAs : [ldItem.sameAs];
 				if (!ldItem.sameAs.includes(doiUrl)) ldItem.sameAs.push(doiUrl);
-			} else {
+			}
+			else {
 				ldItem.sameAs = doiUrl;
 			}
 		}
 	}
-	if (zotItem.language) ldItem["inLanguage"] = zotItem.language;
+	if (zotItem.language) ldItem.inLanguage = zotItem.language;
 	// bad inference
-	// if (zotItem.citationKey) ldItem["citation"] = zotItem.citationKey;
+	// if (zotItem.citationKey) ldItem.citation = zotItem.citationKey;
 	if (zotItem.rights) {
 		if (zotItem.rights.startsWith("http")) {
-			ldItem["license"] = zotItem.rights;
-		} else {
-			ldItem["copyrightNotice"] =  zotItem.rights;
+			ldItem.license = zotItem.rights;
+		}
+		else {
+			ldItem.copyrightNotice = zotItem.rights;
 		}
 	}
 
@@ -226,68 +246,58 @@ function zot2ldItem(zotItem)
 	if (isConferencePaper) {
 		// Conference paper (proceedings + optional event context)
 		const proceedings = buildProceedings(zotItem);
-		if (proceedings) ldItem["isPartOf"] = proceedings;
+		if (proceedings) ldItem.isPartOf = proceedings;
 
 		const pubEvent = buildPublicationEvent(zotItem);
-		if (pubEvent) ldItem["publication"] = pubEvent;
+		if (pubEvent) ldItem.publication = pubEvent;
 	}
 	else if (zotItem.bookTitle) {
 		// Book chapter / contribution inside a book
 		let book = {};
 		book["@type"] = "Book";
-		book["name"] = normalize(zotItem.bookTitle);
+		book.name = normalize(zotItem.bookTitle);
 
 		if (zotItem.creators && zotItem.creators.length) {
 			let creators = zotItem.creators.filter(c => (c.creatorType === 'editor'));
 			if (creators.length === 1) {
-				book["editor"] = zot2ldPers(creators[0]);
-			} else if (creators.length > 1) {
-				book["editor"] = creators.map(zot2ldPers);
+				book.editor = zot2ldPers(creators[0]);
+			}
+			else if (creators.length > 1) {
+				book.editor = creators.map(zot2ldPers);
 			}
 			creators = zotItem.creators.filter(c => (c.creatorType === 'bookAuthor'));
 			if (creators.length === 1) {
-				book["author"] = zot2ldPers(creators[0]);
-			} else if (creators.length > 1) {
-				book["author"] = creators.map(zot2ldPers);
+				book.author = zot2ldPers(creators[0]);
+			}
+			else if (creators.length > 1) {
+				book.author = creators.map(zot2ldPers);
 			}
 		}
-		if (zotItem.publisher) book["publisher"] = asOrganization(zotItem.publisher);
-		if (zotItem.place) book["locationCreated"] = asPlace(zotItem.place);
-		if (zotItem.date) book["datePublished"] = ZU.strToISO(zotItem.date);
+		if (zotItem.publisher) book.publisher = asOrganization(zotItem.publisher);
+		if (zotItem.place) book.locationCreated = asPlace(zotItem.place);
+		if (zotItem.date) book.datePublished = ZU.strToISO(zotItem.date);
 
-		ldItem["isPartOf"] = book;
+		ldItem.isPartOf = book;
 	}
 	else {
 		// Journal / periodical container, only to the depth we actually know.
 		const container = buildPeriodicalContainer(zotItem);
-		if (container) ldItem["isPartOf"] = container;
+		if (container) ldItem.isPartOf = container;
 	}
 	addPages(ldItem, zotItem.pages);
 
 	if (zotItem.tags && zotItem.tags.length > 0) {
-		const keywords=[];
+		const keywords = [];
 		// sort tags to keep order between exports
-		zotItem.tags.sort(function(a,b){return a.tag.localeCompare(b.tag); });
+		zotItem.tags.sort(function (a, b) {
+			return a.tag.localeCompare(b.tag);
+		});
 		for (let oTag of zotItem.tags) {
 			const value = oTag.tag;
 			if (value.startsWith("#")) continue;
 			keywords.push(value);
 		}
-		if (keywords.length > 0) ldItem["keywords"] = keywords;
-		/*
-		const tags = teiDoc.createElementNS(ns.tei, "note");
-		bibl.append("\n", indent, tags);
-		tags.setAttribute("type", "tags");
-		// sort tags to keep order between exports
-		item.tags.sort(function(a,b){return a.tag.localeCompare(b.tag); });
-		for (let tag of item.tags) {
-			let term = teiDoc.createElementNS(ns.tei, "term");
-			term.setAttribute("type", "tag");
-			term.append(tag.tag);
-			tags.append("\n", indent.repeat(2), term);
-		}
-		tags.append("\n", indent);
-		*/
+		if (keywords.length > 0) ldItem.keywords = keywords;
 	}
 
 	return ldItem;
@@ -301,14 +311,14 @@ function zot2ldPers(pers) {
 		if (pers.firstName) out.givenName = pers.firstName;
 		let name = pers.name;
 		if (!name) {
-			name="";
+			name = "";
 			if (pers.firstName) name = pers.firstName + " ";
 			name += pers.lastName;
 		}
 		out.name = name;
 	}
 	else if (pers.name) {
-		out["@type"]= "Organization";
+		out["@type"] = "Organization";
 		out.name = pers.name;
 	}
 	return out;
@@ -318,12 +328,12 @@ function zot2ldPers(pers) {
  * Applies a sequence of regex replacements to a string, similar to PHP's preg_replace.
  *
  * @param {string} str - The input string to be transformed.
- * @param {Array<[RegExp, string | ((substring: string, ...args: any[]) => string)]>} replacements - 
+ * @param {Array<[RegExp, string | ((substring: string, ...args: any[]) => string)]>} replacements
  *        An array of tuples, each containing a regex and a replacement string or function.
  * @returns {string} - The transformed string after applying all replacements sequentially.
  *
  * @example
- * regexReplaceAll("Have you read <i>1984</i> ?", 
+ * regexReplaceAll("Have you read <i>1984</i> ?",
  *   [
  *     [/<i>/g, '“']
  *     [/</i>/g, '”'],
@@ -332,10 +342,10 @@ function zot2ldPers(pers) {
  * returns: "Have you read “1984” ?"
  */
 function regexReplaceAll(str, replacements) {
-  return replacements.reduce(
-	(currentStr, [regex, replacement]) => currentStr.replace(regex, replacement),
-	str
-  );
+	return replacements.reduce(
+		(currentStr, [regex, replacement]) => currentStr.replace(regex, replacement),
+		str
+	);
 }
 
 /**
@@ -387,7 +397,7 @@ function parseExtraFields(zotItem) {
 		division: "division", // not zot
 		doi: "DOI",
 		edition: "edition",
-		// "event": "event", // Deprecated legacy variant of event-title
+		// event: "event", // Deprecated legacy variant of event-title
 		"event-date": "eventDate",
 		"event-place": "eventPlace",
 		"event-title": "eventTitle", // zot:conferenceName, zot:meetingName
@@ -505,13 +515,14 @@ function parseExtraFields(zotItem) {
 			zotItem.creators.push(creator);
 			return "";
 		}
-		const field = "keyword";
 		if (cslKey == "keyword") {
-			if (!Array.isArray(zotItem["keyword"])) {
-				zotItem["keyword"] = [];
+			if (!Array.isArray(zotItem.keyword)) {
+				zotItem.keyword = [];
 			}
-			zotItem["keyword"].push(value);
-			zotItem["keyword"].sort(function(a,b){return a.localeCompare(b); });
+			zotItem.keyword.push(value);
+			zotItem.keyword.sort(function (a, b) {
+				return a.localeCompare(b);
+			});
 			return "";
 		}
 		// default, append to note
