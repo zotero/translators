@@ -62,10 +62,6 @@ https://play.google.com/store/books/details/Adam_Smith_The_Wealth_of_Nations?id=
 Play Store Book Searches
 https://play.google.com/store/search?q=doyle+arthur+conan&c=books
 */
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
 
 function detectWeb(doc, url) {
 	if (url.search(/[&?]v?id=/) != -1) {

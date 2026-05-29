@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-06-20 17:11:32"
+	"lastUpdated": "2026-01-09 20:36:33"
 }
 
 /*
@@ -113,8 +113,22 @@ async function scrapePage(doc, url) {
 	// Check for an RIS popup link in the page.
 	var risLink = doc.querySelector('a[href*="CitationFile?kind=ris"]');
 	if (risLink) {
-		let risURL = risLink.href;
-		let ris = await requestText(risURL);
+		let risURL = new URL(risLink.href);
+		let docURLSearchParams = new URLSearchParams(doc.location.search);
+
+		// Work around id and div parameters being swapped(?) in the link URL
+		// embedded in the page's static HTML
+		if (risURL.searchParams.has('div')
+				&& docURLSearchParams.has('div')
+				&& risURL.searchParams.get('div') !== docURLSearchParams.get('div')
+				&& risURL.searchParams.get('id') === docURLSearchParams.get('div')) {
+			let id = risURL.searchParams.get('id');
+			let div = risURL.searchParams.get('div');
+			risURL.searchParams.set('id', div);
+			risURL.searchParams.set('div', id);
+		}
+
+		let ris = await requestText(risURL.toString());
 
 		let pdfURL = null;
 		// the PDF URL gives us a page that will refresh itself to the PDF.

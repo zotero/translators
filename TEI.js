@@ -1,5 +1,5 @@
 {
-	"translatorID": "e0d6c5bd-ad9a-4b28-b53d-e1355979ca02",
+	"translatorID": "032ae9b7-ab90-9205-a479-baf81f49184a",
 	"label": "TEI",
 	"creator": "Stefan Majewski",
 	"target": "xml",

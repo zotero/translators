@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-12-22 18:11:41"
+	"lastUpdated": "2026-03-09 16:01:06"
 }
 
 /*
@@ -123,14 +123,35 @@ async function scrape(doc, url = doc.location.href) {
 		let { links } = result;
 		Z.debug('Links:');
 		Z.debug(links);
-		let downloadLink = links['v2-downloadLinks']?.find(link => link.type === 'pdf');
+		
+		let downloadLink = links?.['v2-downloadLinks']?.find(link => link.type === 'pdf');
 		if (!downloadLink) downloadLink = links.downloadLinks.find(link => link.type === 'pdf');
-		pdfURL = downloadLink.url;
+		
+		let externalLink = links?.['v2-fullTextAndCustomLinks']?.find(link => link.category === 'fullText');
+
+		if (downloadLink) {
+			pdfURL = downloadLink.url;
+			Zotero.debug('Trying v2-downloadLinks[type == pdf]: ' + downloadLink.url);
+		}
+		else if (externalLink) {
+			Zotero.debug('Trying v2-fullTextAndCustomLinks[category == fullText] via web translation: ' + externalLink.url);
+			let translate = Zotero.loadTranslator('web');
+			let externalDoc = await requestDocument(externalLink.url);
+			translate.setDocument(externalDoc);
+			translate.setHandler('translators', () => {});
+			translate.setHandler('itemDone', (_obj, item) => {
+				pdfURL = item.attachments?.[0]?.url;
+			});
+			translate.setHandler('error', () => {});
+			translate.setTranslator(await translate.getTranslators());
+			await translate.translate();
+		}
 	}
 	catch (e) {
 		Zotero.debug('Error while locating PDF download link: ' + e);
-		pdfURL = `/linkprocessor/v2-pdf?recordId=${recordId}&sourceRecordId=${recordId}&profileIdentifier=${opid}&intent=download&lang=en`
 	}
+
+	pdfURL ||= `/linkprocessor/v2-pdf?recordId=${recordId}&sourceRecordId=${recordId}&profileIdentifier=${opid}&intent=download&lang=en`;
 
 	let risText = await requestText(risURL);
 	// Z.debug(risText)

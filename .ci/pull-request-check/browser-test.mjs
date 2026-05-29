@@ -3,11 +3,11 @@ import path from 'path';
 import process from 'process';
 import { chromium } from 'playwright';
 import * as translatorServer from './translator-server.mjs';
+import { EXTENSION_ID } from '../constants.mjs';
 
 const chromeExtensionDir = path.join(import.meta.dirname, 'connectors', 'build', 'manifestv3');
 const KEEP_BROWSER_OPEN = 'KEEP_BROWSER_OPEN' in process.env;
 const CI = 'CI' in process.env;
-const ZOTERO_CONNECTOR_EXTENSION_ID = 'ekhagklcjbdpajgpjgmbionohlpdbjgc';
 
 async function getTranslatorsToTest() {
 	const translatorFilenames = process.argv[2].split('\n').filter(filename => filename.trim().length > 0);
@@ -69,7 +69,12 @@ You may want to consider adding '[ci skip]' in the commit message.`
 	return Array.from(toTestTranslatorIDs);
 }
 
-function report(results) {
+function report(results, translatorsToTest) {
+	if (Object.keys(results).length < translatorsToTest.length) {
+		console.log(chalk.yellow("Tests for some translators did not run"));
+		return false;
+	}
+
 	var allPassed = true;
 	for (let translatorID in results) {
 		let translatorResults = results[translatorID];
@@ -109,7 +114,7 @@ let context;
 try {
 	await translatorServer.serve();
 
-	context = await chromium.launchPersistentContext('/tmp/chromium-user-data-dir', {
+	context = await chromium.launchPersistentContext('', {
 		channel: 'chromium',
 		headless: CI,
 		args: [
@@ -122,7 +127,7 @@ try {
 	const translatorsToTest = await getTranslatorsToTest();
 	await new Promise(resolve => setTimeout(resolve, 500));
 
-	let testUrl = `chrome-extension://${ZOTERO_CONNECTOR_EXTENSION_ID}/tools/testTranslators/testTranslators.html#translators=${translatorsToTest.join(',')}`;
+	let testUrl = `chrome-extension://${EXTENSION_ID}/tools/testTranslators/testTranslators.html#translators=${translatorsToTest.join(',')}`;
 	let page = await context.newPage();
 	await page.goto(testUrl);
 
@@ -145,7 +150,7 @@ try {
 		});
 
 	let testResults = await page.evaluate(() => window.seleniumOutput);
-	allPassed = report(testResults);
+	allPassed = report(testResults, translatorsToTest);
 }
 catch (e) {
 	console.error(e);

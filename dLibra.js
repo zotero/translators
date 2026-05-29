@@ -182,16 +182,6 @@ function addAttachments(doc, item) {
 	item.attachments.push({ document: doc, title: "Snapshot" });
 }
 
-function attr(docOrElem, selector, attr, index) {
-	let elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
-	return elem ? elem.getAttribute(attr) : null;
-}
-
-function text(docOrElem, selector, index) {
-	let elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
-	return elem ? elem.textContent : null;
-}
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{

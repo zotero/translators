@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-01-22 19:34:13"
+	"lastUpdated": "2026-01-20 19:13:44"
 }
 
 /*
@@ -91,17 +91,32 @@ function scrape(doc, url) {
 			item.publicationTitle = "The New York Times";
 			item.ISSN = "0362-4331";
 		}
-		// Multiple authors are (sometimes) just put into the same Metadata field
-		var authors = attr(doc, 'meta[name="author"]', 'content') || attr(doc, 'meta[name="byl"]', 'content') || text(doc, '*[class^="Byline-bylineAuthor--"]');
-		if (authors && item.creators.length <= 1) {
-			authors = authors.replace(/^By /, '');
-			if (authors == authors.toUpperCase()) { // convert to title case if all caps
-				authors = ZU.capitalizeTitle(authors, true);
-			}
+		let authorsArray = doc.querySelectorAll('[class*="byline"] [itemprop="name"], [class*="byline"][itemprop="name"]');
+		if (authorsArray.length) {
 			item.creators = [];
-			var authorsList = authors.split(/,|\band\b/);
-			for (let i = 0; i < authorsList.length; i++) {
-				item.creators.push(ZU.cleanAuthor(authorsList[i], "author"));
+			for (let authorElem of authorsArray) {
+				let author = authorElem.textContent;
+				if (author === author.toUpperCase()) {
+					author = ZU.capitalizeName(author);
+				}
+				item.creators.push(ZU.cleanAuthor(author, 'author'));
+			}
+		}
+		else {
+			// Multiple authors are (sometimes) just put into the same Metadata field
+			let authors = attr(doc, 'meta[name="author"]', 'content')
+				|| attr(doc, 'meta[name="byl"]', 'content')
+				|| text(doc, '*[class^="Byline-bylineAuthor--"]');
+			if (authors) {
+				authors = authors.replace(/^By /, '');
+				if (authors == authors.toUpperCase()) { // convert to title case if all caps
+					authors = ZU.capitalizeTitle(authors, true);
+				}
+				item.creators = [];
+				var authorsList = authors.split(/,|\band\b/);
+				for (let i = 0; i < authorsList.length; i++) {
+					item.creators.push(ZU.cleanAuthor(authorsList[i], "author"));
+				}
 			}
 		}
 		item.url = ZU.xpathText(doc, '//link[@rel="canonical"]/@href') || url;
@@ -317,7 +332,7 @@ var testCases = [
 				"abstractNote": "At their core, are America’s problems primarily economic or moral?",
 				"blogTitle": "Opinionator",
 				"language": "en-US",
-				"url": "https://opinionator.blogs.nytimes.com/2013/06/19/our-broken-social-contract/",
+				"url": "https://archive.nytimes.com/opinionator.blogs.nytimes.com/2013/06/19/our-broken-social-contract/",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -477,7 +492,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Draft Deferment Scored at Rutgers",
+				"title": "DRAFT DEFERMENT SCORED AT RUTGERS",
 				"creators": [],
 				"date": "1966-09-12",
 				"ISSN": "0362-4331",
@@ -498,10 +513,10 @@ var testCases = [
 						"tag": "Colleges and Universities"
 					},
 					{
-						"tag": "Draft and Mobilization of Troops"
+						"tag": "DRAFT AND MOBILIZATION OF TROOPS"
 					},
 					{
-						"tag": "Miscellaneous Section"
+						"tag": "MISCELLANEOUS SECTION"
 					},
 					{
 						"tag": "United States"
@@ -557,7 +572,7 @@ var testCases = [
 						"tag": "Howe, Irving"
 					},
 					{
-						"tag": "Intellectuals"
+						"tag": "INTELLECTUALS"
 					},
 					{
 						"tag": "Kristol, Irving"
@@ -663,12 +678,6 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Anti-Semitism"
-					},
-					{
-						"tag": "Fringe Groups and Movements"
-					},
-					{
 						"tag": "Harvard University"
 					},
 					{
@@ -730,9 +739,6 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "#MeToo Movement"
-					},
-					{
 						"tag": "Besh, John (1968- )"
 					},
 					{
@@ -773,12 +779,6 @@ var testCases = [
 					},
 					{
 						"tag": "Rose, Charlie"
-					},
-					{
-						"tag": "Sex Crimes"
-					},
-					{
-						"tag": "Sexual Harassment"
 					},
 					{
 						"tag": "Simmons, Russell"
@@ -840,13 +840,102 @@ var testCases = [
 						"tag": "Politics and Government"
 					},
 					{
-						"tag": "Terrorism"
-					},
-					{
 						"tag": "Vandalism"
 					},
 					{
 						"tag": "vis-photo"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nytimes.com/2025/12/07/us/politics/biden-immigration-trump.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "How Biden Ignored Warnings and Lost Americans’ Faith in Immigration",
+				"creators": [
+					{
+						"firstName": "Christopher",
+						"lastName": "Flavelle",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025-12-07",
+				"ISSN": "0362-4331",
+				"abstractNote": "The Democratic president and his top advisers rejected recommendations that could have eased the border crisis that helped return Donald Trump to the White House.",
+				"language": "en-US",
+				"libraryCatalog": "NYTimes.com",
+				"publicationTitle": "The New York Times",
+				"section": "U.S.",
+				"url": "https://www.nytimes.com/2025/12/07/us/politics/biden-immigration-trump.html",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Abbott, Gregory W (1957- )"
+					},
+					{
+						"tag": "Asylum, Right of"
+					},
+					{
+						"tag": "Biden, Joseph R Jr"
+					},
+					{
+						"tag": "Border Patrol (US)"
+					},
+					{
+						"tag": "Denver (Colo)"
+					},
+					{
+						"tag": "Deportation"
+					},
+					{
+						"tag": "Harris, Kamala D"
+					},
+					{
+						"tag": "Homeland Security Department"
+					},
+					{
+						"tag": "Illegal Immigration"
+					},
+					{
+						"tag": "Immigration Detention"
+					},
+					{
+						"tag": "Immigration and Customs Enforcement (US)"
+					},
+					{
+						"tag": "Immigration and Emigration"
+					},
+					{
+						"tag": "Johnston, Michael (1974- )"
+					},
+					{
+						"tag": "Murphy, Christopher Scott"
+					},
+					{
+						"tag": "Polls and Public Opinion"
+					},
+					{
+						"tag": "Presidential Election of 2024"
+					},
+					{
+						"tag": "Texas"
+					},
+					{
+						"tag": "Trump, Donald J"
+					},
+					{
+						"tag": "United States Politics and Government"
 					}
 				],
 				"notes": [],

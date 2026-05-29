@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-16 16:05:06"
+	"lastUpdated": "2026-02-09 15:53:01"
 }
 
 /*
@@ -32,37 +32,16 @@
 function detectWeb(doc, url) {
 	// Single item page pattern
 	if (url.includes('/items/')) {
-		// The text "Prodct type" can be in various languages
-		const productTypeLabels = [
-			'نوع المنتج', // Arabic
-			'出版物类型', // Chinese
-			'Product type', // English
-			'Type de produit', // French
-			'Тип продукта', // Russian
-			'Tipo de producto', // Spanish
-		];
-		const productTypeLabelsPredicate = productTypeLabels.map(l => `contains(text(), '${l}')`).join(' or ');
-		const productTypeRaw = ZU.xpathText(doc, `//*[${productTypeLabelsPredicate}]/following::text()[1]`) || '';
-
-		if (!productTypeRaw) {
-			// Wait for page to populate
+		if (!doc.querySelector('ds-app > *')) {
 			Z.monitorDOMChanges(doc.body);
 			return false;
 		}
 
-		const productType = productTypeRaw.toLowerCase();
-
-		// Product type --> Zotero item type mapping scheme:
-		// - Book (series); Book (stand-alone); Booklet; Journal, magazine, bulletin --> Book
-		// - Presentation --> Presentation
-		// - Meeting --> Conference paper
-		// - Infographic; Poster, banner --> Artwork
-		// - Document; Brochure, flyer, fact-sheet; Project; Newsletter; any other --> Report
-		if (/book|journal/.test(productType)) return 'book';
-		if (/presentation/.test(productType)) return 'presentation';
-		if (/meeting/.test(productType)) return 'conferencePaper';
-		if (/infographic|poster/.test(productType)) return 'artwork';
-		return 'report';
+		// Not always accurate! But the main catalog page no longer includes
+		// enough metadata to fully determine the type
+		if (doc.querySelector('meta[name="citation_title"]')) {
+			return 'book';
+		}
 	}
 	// Multiple items
 	else if (url.includes('/search') || url.includes('/browse/') || url.includes('/collections/')) {
@@ -322,124 +301,6 @@ function getSearchResults(doc, checkOnly) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://openknowledge.fao.org/items/75a7f18a-3e96-4857-a3ab-37f9d3193604",
-		"defer": 1,
-		"items": [
-			{
-				"itemType": "book",
-				"title": "FISH4ACP - Developing sustainable aquatic value chains. Practical guidance for analysis, strategy, and design",
-				"creators": [
-					{
-						"firstName": "D.",
-						"lastName": "Neven",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "C.",
-						"lastName": "Walker",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "A.",
-						"lastName": "Lienert",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "G.",
-						"lastName": "Macfayden",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "B.",
-						"lastName": "Romuld",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "B.",
-						"lastName": "Vilela López",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "H.",
-						"lastName": "Hodzic",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "A.",
-						"lastName": "Kourgansky",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "P.-P.",
-						"lastName": "Blanc",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "K.",
-						"lastName": "Hett",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "A.",
-						"lastName": "del Rio Poza",
-						"creatorType": "author"
-					}
-				],
-				"date": "2025",
-				"ISBN": "9789251390771",
-				"abstractNote": "Practical guide for the analysis and development of sustainable aquatic value chains, based on the methodology used by FISH4ACP, a global aquatic value chain development program, to analyse and develop fisheries and aquaculture value chains in 12 African, Caribbean and Pacific countries. It is part of a series of practitioner handbooks on sustainable value chain development within the framework of FAO’s sustainable food value chain (SFVC) approach. This guide provides practical guidance on assessing aquatic value chains, designing and implementing effective upgrading strategies, and strengthening stakeholder collaboration and governance.",
-				"language": "English",
-				"libraryCatalog": "FAO Knowledge Repository",
-				"numPages": "164",
-				"place": "Rome, Italy",
-				"publisher": "FAO",
-				"rights": "FAO",
-				"url": "https://openknowledge.fao.org/handle/20.500.14283/cd2205en",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [
-					{
-						"tag": "aquatic value chains"
-					},
-					{
-						"tag": "development plans"
-					},
-					{
-						"tag": "development policies"
-					},
-					{
-						"tag": "economic analysis"
-					},
-					{
-						"tag": "functional analysis"
-					},
-					{
-						"tag": "learning"
-					},
-					{
-						"tag": "monitoring and evaluation"
-					},
-					{
-						"tag": "social analysis"
-					},
-					{
-						"tag": "stakeholder engagement"
-					},
-					{
-						"tag": "sustainability assessment"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "https://openknowledge.fao.org/items/28fe3916-ad18-481d-92f5-42572165dae6",
 		"defer": 1,
 		"items": [
@@ -459,6 +320,7 @@ var testCases = [
 					}
 				],
 				"date": "2024",
+				"DOI": "10.4060/cc9291en",
 				"abstractNote": "This brief outlines a rigorous and standardized approach for value chain analysis and design, taking a systems perspective to analyse and influence the behaviour and performance of value chain actors influenced by a complex environment. The brief also covers the design of upgrading strategies and associated development plans, based on the identification of root causes of value chain bottlenecks and using a participatory and multistakeholder approach. The brief is primarily based on FAO’s Sustainable Food Value Chain (SFVC) framework which promotes a systems-based development of agrifood value chains that are economically, socially and environmentally sustainable, as well as resilient to shocks and stressors.\nThe end-product of the application of the methodology is a VC report with four components. The first two components, a functional analysis and a sustainability assessment, make up the VC analysis. The last two components, an upgrading strategy and a development plan, represent the VC design.",
 				"language": "English",
 				"libraryCatalog": "FAO Knowledge Repository",
@@ -511,6 +373,7 @@ var testCases = [
 					}
 				],
 				"date": "2025",
+				"DOI": "10.4060/cc9258zh",
 				"ISBN": "9789251400494",
 				"abstractNote": "中国地表水域面积达2060万公顷，水域和水生生物资源不仅是天然渔业生产的来源和基础，而且对基于种群增殖和水产养殖的鱼类生产意义重大。内陆天然捕捞生产主要集中在河流和湖泊，而大多数水库则以增殖渔业为主。2020年，全国淡水捕捞产量146万吨，比2019年下降20.84%。2005年以来，中国淡水捕捞及水产品产值突破200亿元，2018年达到峰值465.77亿元。随着经济不断发展，内陆捕捞业在社会经济中的作用也发生了变化。20世纪90年代以来，水产养殖产量逐渐增加；2010年以来，内陆捕捞产量逐渐减少。2016年以来，随着各项禁渔政策的出台和执法力度的加强，特别是“长江十年禁渔”政策的实施，以及主要湖泊禁渔休渔，内陆捕捞产量大幅下降。随着水域生态保护意识的增强、禁渔政策的实施和执法力度的加大，淡水捕捞产量和产值将进一步下降。然而，尽管水产养殖产量大幅增加，并提供了大部分淡水鱼供应，但来自天然水域的优质水产品仍然深受消费者青睐。",
 				"language": "Chinese",
@@ -560,6 +423,7 @@ var testCases = [
 		"type": "web",
 		"url": "https://openknowledge.fao.org/items/40085e60-2d17-4c74-b4bc-78c2edbb0d3c",
 		"defer": 1,
+		"detectedItemType": "book",
 		"items": [
 			{
 				"itemType": "report",
@@ -608,6 +472,7 @@ var testCases = [
 		"type": "web",
 		"url": "https://openknowledge.fao.org/items/1ca5357e-a044-4d20-8eb3-79f4148f5ab8",
 		"defer": 1,
+		"detectedItemType": "book",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -638,6 +503,7 @@ var testCases = [
 		"type": "web",
 		"url": "https://openknowledge.fao.org/items/874a4dfa-0a98-4a2d-b3df-b08a48fee504",
 		"defer": 1,
+		"detectedItemType": "book",
 		"items": [
 			{
 				"itemType": "artwork",
@@ -671,6 +537,7 @@ var testCases = [
 		"type": "web",
 		"url": "https://openknowledge.fao.org/items/3513ab01-f55f-4b23-9cbd-ed268aa8bc54",
 		"defer": 1,
+		"detectedItemType": "book",
 		"items": [
 			{
 				"itemType": "presentation",
