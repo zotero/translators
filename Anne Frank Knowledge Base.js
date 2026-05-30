@@ -87,20 +87,19 @@ function detectWeb(doc, url) {
 	return "encyclopediaArticle";
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	var parsed = parseAnneFrankURL(url);
 	if (!parsed) {
 		return;
 	}
 
 	if (parsed.kind == "search") {
-		doSearchPage(parsed);
+		await doSearchPage(parsed);
 		return;
 	}
 
-	fetchJSON(buildAPIURL(parsed.lang, parsed.endpoint, parsed.uuid), function (data) {
-		translateRecord(endpointToType(parsed.endpoint), data, parsed.lang, doc);
-	});
+	var data = await fetchJSON(buildAPIURL(parsed.lang, parsed.endpoint, parsed.uuid));
+	translateRecord(endpointToType(parsed.endpoint), data, parsed.lang, doc);
 }
 
 function parseAnneFrankURL(url) {
@@ -172,43 +171,41 @@ function buildSearchAPIURL(lang, query) {
 	return apiURL;
 }
 
-function doSearchPage(parsed) {
-	fetchJSON(buildSearchAPIURL(parsed.lang, parsed.query), function (data) {
-		var results = data.results || [];
-		var exactUUID = getUUIDSearch(parsed.query);
-		var exactResult = exactUUID && findExactUUIDResult(results, exactUUID);
+async function doSearchPage(parsed) {
+	var data = await fetchJSON(buildSearchAPIURL(parsed.lang, parsed.query));
+	var results = data.results || [];
+	var exactUUID = getUUIDSearch(parsed.query);
+	var exactResult = exactUUID && findExactUUIDResult(results, exactUUID);
 
-		if (exactResult) {
-			translateSearchResult(exactResult, parsed.lang);
-			return;
+	if (exactResult) {
+		translateSearchResult(exactResult, parsed.lang);
+		return;
+	}
+
+	if (results.length == 1) {
+		translateSearchResult(results[0], parsed.lang);
+		return;
+	}
+
+	var choices = {};
+	var lookup = {};
+	for (var i = 0; i < results.length; i++) {
+		var result = results[i];
+		if (!result.instance || !result.instance.uuid) {
+			continue;
 		}
+		var key = result.type + "|" + result.instance.uuid;
+		choices[key] = getDisplayTitle(result.type, result.instance, parsed.lang);
+		lookup[key] = result;
+	}
 
-		if (results.length == 1) {
-			translateSearchResult(results[0], parsed.lang);
-			return;
-		}
-
-		var choices = {};
-		var lookup = {};
-		for (var i = 0; i < results.length; i++) {
-			var result = results[i];
-			if (!result.instance || !result.instance.uuid) {
-				continue;
-			}
-			var key = result.type + "|" + result.instance.uuid;
-			choices[key] = getDisplayTitle(result.type, result.instance, parsed.lang);
-			lookup[key] = result;
-		}
-
-		Zotero.selectItems(choices, function (selected) {
-			if (!selected) {
-				return;
-			}
-			for (var key in selected) {
-				translateSearchResult(lookup[key], parsed.lang);
-			}
-		});
-	});
+	var selected = await Zotero.selectItems(choices);
+	if (!selected) {
+		return;
+	}
+	for (var selectedKey in selected) {
+		translateSearchResult(lookup[selectedKey], parsed.lang);
+	}
 }
 
 function getUUIDSearch(query) {
@@ -234,13 +231,11 @@ function translateSearchResult(result, lang) {
 	translateRecord(result.type, result.instance, lang);
 }
 
-function fetchJSON(url, callback) {
-	requestJSON(url, {
+function fetchJSON(url) {
+	return requestJSON(url, {
 		headers: {
 			Accept: "application/json"
 		}
-	}).then(function (data) {
-		callback(data);
 	});
 }
 
