@@ -235,8 +235,12 @@ function translateSearchResult(result, lang) {
 }
 
 function fetchJSON(url, callback) {
-	ZU.doGet(url, function (text) {
-		callback(JSON.parse(text));
+	requestJSON(url, {
+		headers: {
+			Accept: "application/json"
+		}
+	}).then(function (data) {
+		callback(data);
 	});
 }
 
