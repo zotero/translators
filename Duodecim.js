@@ -87,8 +87,8 @@ function parseAuthors(nameString, lang) {
 
 	var nameArray = [];
 
-	nameString = /\n/.test(nameString) ? // two-line author fields,
-		nameString.split('\n')[1] // in which the first line is usually the same as copyright/organization name
+	nameString = /\n/.test(nameString) // two-line author fields,
+		? nameString.split('\n')[1] // in which the first line is usually the same as copyright/organization name
 		: nameString;
 
 	const capitalRegex = /[A-ZÄ-Ö]/; // currently match U+00C4 – U+00D6 (ASCII 192–214)
@@ -101,10 +101,9 @@ function parseAuthors(nameString, lang) {
 			const words = str.toString().split(' ');
 			var nameOnly = '';
 			for (const word of words) {
-				if (capitalRegex.test(word.charAt(0)) &&
-					!(capitalRegex.test(word.charAt(word.length - 1))) // not ending with capital letter
-					&&
-					!(/^TtM-?.*/.test(word))) { // specific title removal: exclude TtM prefix titles
+				if (capitalRegex.test(word.charAt(0)) 
+					&& !(capitalRegex.test(word.charAt(word.length - 1))) // not ending with capital letter
+					&& !(/^TtM-?.*/.test(word))) { // specific title removal: exclude TtM prefix titles
 					nameOnly += word + ' ';
 				}
 			}
@@ -275,7 +274,7 @@ function eurDateToISO(dmy) {
 	if (!dmy) return null;
 	try {
 		const date = dmy.innerText.match(eurDateRegex).groups;
-		const eurISODate = `${date.year}-${ZU.lpad(date.month, '0', 2)}-${ZU.lpad(date.day, '0', 2)}`
+		const eurISODate = `${date.year}-${ZU.lpad(date.month, '0', 2)}-${ZU.lpad(date.day, '0', 2)}`;
 		Zotero.debug(`eurDateToISO(): returning ISO date: ${eurISODate}`);
 		return eurISODate;
 	} catch (e) {}
@@ -312,7 +311,7 @@ function lastDate(div) {
  */
 async function onCampus(path = '/e48243') {
 	const sllTest = await ZU.requestDocument(`https://www.laakarilehti.fi${path}`).then(doc => {
-		return doc.title
+		return doc.title;
 	});
 	if (sllTest.search(/Tiedemaailma/) != -1) {
 		Zotero.debug('onCampus(): on a network with subscription to Lääkärilehti. Downloading the PDF via direct link');
@@ -392,8 +391,8 @@ async function doWeb(doc, url) {
 
 	item.url = (isDTK && isTP) // Keeping non-TP domains
 		? await urlGen(urlObj, tdoi)
-		: (isOP || isTK || isKP) ? 'https://' + urlObj.host + '/' + tdoi // oppiportti and public
-		: url;
+			: (isOP || isTK || isKP) ? 'https://' + urlObj.host + '/' + tdoi // oppiportti and public
+				: url;
 
 	item.language = englishSource(prefix, urlObj) ? 'en' // ISO 639 set 1
 		: ((['khr', 'gvr'].includes(prefix)) ? 'se' : 'fi'); // TODO collect statics // Make Finnish the default language
@@ -401,9 +400,9 @@ async function doWeb(doc, url) {
 	// PARSING AUTHORS
 	var authorClass = doc.querySelector('div.duo-authors-link') ?
 		'div.duo-authors-link' // ykt, ebm
-		: isDLehti ? 'div.dl-article-editors-container'
-		: dClass === '' ? 'div.person'
-		: `div.${dClass}authors`;
+			: isDLehti ? 'div.dl-article-editors-container'
+				: dClass === '' ? 'div.person'
+					: `div.${dClass}authors`;
 	var authorsRaw = doc.querySelector(authorClass) ? innerText(authorClass) : '';
 	Zotero.debug(`Raw author string: ${authorsRaw}`);
 
@@ -469,10 +468,10 @@ async function doWeb(doc, url) {
 	// Constructing option 2: Set archive/call number
 	var archive = isDTK ? text('ul li.nav-item a.nav-link')
 		: isTP ? 'Terveysportti'
-		: isOP ? 'Oppiportti'
-		: isTK ? 'Terveyskirjasto'
-		: isKP ? 'Käypä hoito'
-		: ''; // || getText('div.dbbar'); TODO: legacy: fetch DTK name?
+			: isOP ? 'Oppiportti'
+				: isTK ? 'Terveyskirjasto'
+					: isKP ? 'Käypä hoito'
+						: ''; // || getText('div.dbbar'); TODO: legacy: fetch DTK name?
 
 	if (archive && (archive !== item.bookTitle)) item.archive = archive;
 	item.archiveLocation = sortKey ? sortKey : tdoi;
@@ -562,11 +561,11 @@ async function doWeb(doc, url) {
 						item.abstractNote += `\n\n${p.parentNode.nextElementSibling.innerText}`;
 						item.tags.push('englanti-duodecim-lehti');
 					}
-				})
+				});
 			}
 		}
 
-		var pdfLink = `https://${urlObj.host}/xmedia/duo/${tdoi}.pdf` // doc.querySelector('app-plugin-external-link a');
+		var pdfLink = `https://${urlObj.host}/xmedia/duo/${tdoi}.pdf`; // doc.querySelector('app-plugin-external-link a');
 		// Zotero.debug(`${arguments.callee.name}(): downloading PDF link: ${pdfLink}`); // TODO callee deprecated
 		item.attachments.push({
 			url: pdfLink,
@@ -576,8 +575,8 @@ async function doWeb(doc, url) {
 		}, {
 			url: pdfLink, // If you have arrived at the page, you must have legal cookie for PDF download.
 			title: "PDF",
-			"mimeType": "application/pdf",
-			"proxy": false
+			mimeType: "application/pdf",
+			proxy: false
 		});
 	}
 
@@ -595,8 +594,7 @@ async function doWeb(doc, url) {
 	// PARSING PDF: SLL and Other journals or arbitrary items with PDF
 	var firstLink;
 	if ((!item.attachments.length) // already pushed for d-lehti
-		&&
-		doc.querySelectorAll(`article a.${dClass}anchor:not(.${dClass}article):not(.${dClass}external)`).length) {
+		&& doc.querySelectorAll(`article a.${dClass}anchor:not(.${dClass}article):not(.${dClass}external)`).length) {
 		firstLink = doc.querySelectorAll(`article a.${dClass}anchor:not(.${dClass}article:not(.${dClass}external))`)[0].href;
 		Zotero.debug(`doWeb(): first hyperlink in article ${firstLink}`);
 		if (!/.*\.pdf$/.test(firstLink)) firstLink = null;
@@ -612,7 +610,6 @@ async function doWeb(doc, url) {
 			item.attachments.push({
 				// TODO find if PDF contains own TDOI and whether a match or a supplement path: `${tdoi}-${item.title}`,
 				url: firstLink,
-				title: `PDF`,
 				title: `${isMainPDF ? "PDF" : "Supplementary PDF"}`,
 				mimeType: "application/pdf"
 			});
@@ -727,82 +724,6 @@ async function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.duodecimlehti.fi/duo99748",
-		"defer": true,
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Kaksoispaineventilaatio kroonisessa ventilaatiovajauksessa [Possibilities of bi-level positive pressure ventilation in chronic hypoventilation]",
-				"creators": [
-					{
-						"firstName": "Tarja",
-						"lastName": "Saaresranta",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ulla",
-						"lastName": "Anttalainen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Olli",
-						"lastName": "Polo",
-						"creatorType": "author"
-					}
-				],
-				"date": "2011",
-				"ISSN": "0012-7183, 2242-3281",
-				"abstractNote": "Kajoamaton kaksoispaineventilaatiohoito on viimeisen vuosikymmenen aikana mahdollistanut hengityksen tukemisen tavallisella vuodeosastolla ja potilaan kotona. Kaksoispaineventilaattorilla voidaan usein välttää keinoilmatie ja respiraattorihoito, lyhentää potilaan sairaalassaoloaikaa ja säästää kustannuksia. Kaksoispaineventilaatiohoito vähentää kroonisesta hengitysvajauksesta kärsivän potilaan hengenahdistusta ja väsymystä, jolloin elämänlaatu paranee ja tietyissä tilanteissa myös elinikä pitenee. Hoito vaatii lääkäriltä perustietoja hengitysfysiologiasta ja perehtymistä kaksoispaineventilaattorin säätämiseen. Hoitohenkilökunnalta se edellyttää kokemusta hoidon toteutuksesta ja ohjauksesta.\n\nDuring the last decade, noninvasive bi-level positive pressure ventilation has enabled respiratory support in inpatient wards and at home. In many cases, a bi-level airway pressure ventilator can be used to avoid artificial airway and respirator therapy, and may shorten hospital stay and save costs. The treatment alleviates the patient's dyspnea and fatigue, whereby the quality of life improves, and in certain situations also the life span increases. The implementation of bi-level positive pressure ventilation by the physician requires knowledge of the basics of respiratory physiology and familiarization with the bi-level airway pressure ventilator.",
-				"archiveLocation": "duo99748",
-				"callNumber": "duo99748",
-				"issue": "17",
-				"journalAbbreviation": "Duodecim",
-				"language": "fi",
-				"libraryCatalog": "Duodecim",
-				"pages": "1797-807",
-				"publicationTitle": "Lääketieteellinen Aikakauskirja Duodecim",
-				"publisher": "Duodecim",
-				"section": "Katsaus",
-				"url": "https://www.duodecimlehti.fi/duo99748",
-				"volume": "127",
-				"attachments": [
-					{
-						"title": "Linkki PDF-tiedostoon (duodecimlehti.fi)",
-						"mimeType": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "PDF",
-						"mimeType": "application/pdf",
-						"proxy": false
-					},
-					{
-						"title": "Tilannekuva artikkelista (article snapshot)",
-						"snapshot": true,
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [
-					{
-						"tag": "duodecim"
-					},
-					{
-						"tag": "duodecim-journal"
-					},
-					{
-						"tag": "duodecim-translator"
-					},
-					{
-						"tag": "englanti-duodecim-lehti"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "https://www.terveyskirjasto.fi/dlk00221",
 		"defer": true,
 		"items": [
@@ -864,50 +785,6 @@ var testCases = [
 				"publisher": "Duodecim",
 				"shortTitle": "Monityydyttymättömät rasvahapot lasten ja nuorten ADHD",
 				"url": "https://www.kaypahoito.fi/dnd00039",
-				"attachments": [
-					{
-						"title": "Tilannekuva artikkelista (article snapshot)",
-						"snapshot": true,
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [
-					{
-						"tag": "duodecim"
-					},
-					{
-						"tag": "duodecim-translator"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.kaypahoito.fi/hoi50138",
-		"defer": true,
-		"items": [
-			{
-				"itemType": "bookSection",
-				"title": "Keskenmeno",
-				"creators": [
-					{
-						"lastName": "Suomalaisen Lääkäriseuran Duodecimin ja Suomen Gynekologiyhdistyksen asettama työryhmä",
-						"creatorType": "bookAuthor",
-						"fieldMode": 1
-					}
-				],
-				"date": "2026-05-11",
-				"abstractNote": "Noin 10–15 % havaituista raskauksista päättyy keskenmenoon. Valtaosa keskenmenoista tapahtuu ensimmäisellä raskauskolmanneksella.\nKeskenmenoille on useita eri syitä. Suurin osa yksittäisistä keskenmenoista johtuu alkion kromosomipoikkeavuuksista.\nKeskenmenon riskiä lisäävät esimerkiksi yli 40 vuoden ikä, lihavuus ja tupakointi.\nKeskenmenon tyypillisiä oireita ovat verinen vuoto ja alavatsakipu, mutta se voi olla myös oireeton.\nEnsisijainen diagnostinen tutkimus keskenmenoa epäiltäessä on emättimen kautta tehtävä ultraäänitutkimus. Kliinisen keskenmenon diagnoosi voidaan asettaa, kun raskauden kesto on vähintään 6 viikkoa viimeisistä kuukautisista laskettuna.\nKeskenmenon hoitovaihtoehtoja ovat seuranta, lääkehoito ja kirurginen hoito.\nLääkehoito on ensisijainen, koska se on todettu tehokkaaksi ja turvalliseksi. Hoitovaihtoehdoista, niiden hyödyistä ja haitoista on tärkeää keskustella potilaan kanssa ennen hoidon aloitusta.\nRiittävä kivun hoito sekä potilaan empaattinen kohtaaminen ovat keskeisiä riippumatta valitusta hoitomenetelmästä.\nAlle 10. raskausviikon keskenmenoissa rutiinimainen anti-D-immunoglobuliinisuojaus RhD-negatiivisille ei ole tarpeen.\nKeskenmenon hoidon jälkeen ei ole tarpeen tehdä rutiinimaista ultraäänitutkimusta tai raskaustestiä.\nUuden raskauden onnistumisen todennäköisyys keskenmenon jälkeen on suuri. Valtaosa saa lapsen toistuvankin keskenmenon jälkeen.\nKeskenmenon jälkeen suositellaan jälkitarkastusta neuvolassa. Seurannassa on keskeistä varmistaa sekä fyysinen että psyykkinen toipuminen ja ohjata tarvittaessa tuen piiriin.\nToisen raskauskolmanneksen keskenmenon jälkeen keskenmenon syytä selvitetään erikoissairaanhoidossa.\nYhden tai kahden keskenmenon jälkeen keskenmenon kokeneen ja hänen kumppaninsa mahdollisia sairauksia ja elintapoja arvioidaan perusterveydenhuollossa.\nKolmen peräkkäisen keskenmenon jälkeen tilannetta arvioidaan erikoissairaanhoidossa.",
-				"archiveLocation": "050.138",
-				"bookTitle": "Käypä hoito",
-				"callNumber": "hoi50138",
-				"language": "fi",
-				"libraryCatalog": "Duodecim",
-				"publisher": "Duodecim",
-				"url": "https://www.kaypahoito.fi/hoi50138",
 				"attachments": [
 					{
 						"title": "Tilannekuva artikkelista (article snapshot)",
