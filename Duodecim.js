@@ -387,11 +387,8 @@ async function doWeb(doc, url) {
 	var tdoi = text(`div.${dClass}identifier span`) // TK, legacy
 		|| text(`span.${dClass}identifier`)
 		|| urlMatchRegex.test(url)
-			? url.match(urlMatchRegex)[
-				(isDTK
-					? 1
-					: 0)
-				] : '';
+		? url.match(urlMatchRegex)[isDTK ? 1 : 0]
+		: '';
 
 	Zotero.debug(`doWeb(): ${/^\w{3}\d{5}$/.test(tdoi) ? '' : 'INVALID'}TDOI=${tdoi}`);
 	const prefix = findPrefixTDOI(tdoi);
