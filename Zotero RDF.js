@@ -1,6 +1,5 @@
 {
 	"translatorID": "14763d24-8ba0-45df-8f52-b8d1108e7ac9",
-	"translatorType": 2,
 	"label": "Zotero RDF",
 	"creator": "Simon Kornblith",
 	"target": "rdf",
@@ -16,7 +15,8 @@
 		"exportFileData": false
 	},
 	"inRepository": true,
-	"lastUpdated": "2021-01-25 06:49:57"
+	"translatorType": 2,
+	"lastUpdated": "2026-03-06 21:33:15"
 }
 
 var addedCollections = new Set();
@@ -348,9 +348,9 @@ function generateItem(item, zoteroType, resource) {
 	// relative file path for attachment items
 	if (item.defaultPath) {	// For Zotero 3.0
 		item.saveFile(item.defaultPath, true);
-		Zotero.RDF.addStatement(resource, rdf+"resource", item.defaultPath, false);
+		Zotero.RDF.addStatement(resource, n.z+"path", item.defaultPath, false);
 	} else if (item.path) {	// For Zotero 2.1
-		Zotero.RDF.addStatement(resource, rdf+"resource", item.path, false);
+		Zotero.RDF.addStatement(resource, n.z+"path", item.path, false);
 	}
     
 	// Related items and tags
@@ -581,3 +581,8 @@ function doExport() {
 		generateCollection(collection);
 	}
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+]
+/** END TEST CASES **/

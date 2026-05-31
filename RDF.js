@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2025-08-06 22:48:30"
+	"lastUpdated": "2026-03-06 21:44:09"
 }
 
 /*
@@ -484,7 +484,7 @@ function detectType(newItem, node, ret) {
 				// process as file
 				t.zotero = "attachment";
 
-				var path = getFirstResults(node, [rdf + "resource"]);
+				var path = getFirstResults(node, [n.z + "path", rdf + "resource"]);
 				if (path) {
 					newItem.path = Zotero.RDF.getResourceURI(path[0]);
 				}
@@ -1413,7 +1413,9 @@ function importItem(newItem, node) {
 	var arcs = Zotero.RDF.getArcsOut(node);
 	for (let i = 0; i < arcs.length; i++) {
 		var uri = Zotero.RDF.getResourceURI(arcs[i]);
-		if (uri.substr(0, n.z.length) == n.z) {
+		if (uri.substr(0, n.z.length) == n.z
+				// Skip z:path, handled for attachments above
+				&& uri.substring(n.z.length) !== 'path') {
 			var property = uri.substr(n.z.length);
 			newItem[property] = Zotero.RDF.getTargets(node, n.z + property)[0];
 		}
