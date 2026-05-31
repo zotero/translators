@@ -359,15 +359,17 @@ async function detectWeb(doc, url) {
  */
 async function doWeb(doc, url) {
 	// PAGE LAYOUT INSPECTION
-	const dClass = doc.querySelector('div.date') ? '' // legacy / lääketietokanta
-		: (doc.querySelector('div.d-updated') ? 'd-' // oppiportti / lääketietokanta
-		: 'duo-'); // DTK, CCG (CCG: header element for DTK is present in HTML but is not displayed (display: none in CCG's CSS))
+	const dClass = doc.querySelector('div.date')
+		? '' // legacy / lääketietokanta
+		: (doc.querySelector('div.d-updated')
+			? 'd-' // oppiportti / lääketietokanta
+			: 'duo-'); // DTK, CCG (CCG: header element for DTK is present in HTML but is not displayed (display: none in CCG's CSS))
 	Zotero.debug(`Determined dClass prefix: ${dClass}`);
 
 	var item = new Zotero.Item(await detectWeb(doc, url));
 
 	// PARSING LINK AND TDOI LOCATOR
-	const urlObj = new URL(url, ); // TODO keep hash link
+	const urlObj = new URL(url); // TODO keep hash link
 	const isTP = urlObj.host === 'www.terveysportti.fi';
 	const isDTK = (/^\/apps\/dtk\/.*/.test(urlObj.pathname));
 	// const isYktEbm = doc.querySelector('div.duo-authors-link');
@@ -384,7 +386,12 @@ async function doWeb(doc, url) {
 	var urlMatchRegex = isDTK ? (/\/article\/(.+?)(?:\?|$)/) : (/(?<=\/)\w{3}\d{5}(?![\w\d])/); // TODO legacy DTK, LäKT
 	var tdoi = text(`div.${dClass}identifier span`) // TK, legacy
 		|| text(`span.${dClass}identifier`)
-		|| urlMatchRegex.test(url) ? url.match(urlMatchRegex)[(isDTK ? 1 : 0)] : '';
+		|| urlMatchRegex.test(url)
+			? url.match(urlMatchRegex)[
+				(isDTK
+					? 1
+					: 0)
+				] : '';
 
 	Zotero.debug(`doWeb(): ${/^\w{3}\d{5}$/.test(tdoi) ? '' : 'INVALID'}TDOI=${tdoi}`);
 	const prefix = findPrefixTDOI(tdoi);
@@ -473,11 +480,16 @@ async function doWeb(doc, url) {
 	}
 
 	// Constructing option 2: Set archive/call number
-	var archive = isDTK ? text('ul li.nav-item a.nav-link')
-		: isTP ? 'Terveysportti'
-			: isOP ? 'Oppiportti'
-				: isTK ? 'Terveyskirjasto'
-					: isKP ? 'Käypä hoito'
+	var archive = isDTK
+		? text('ul li.nav-item a.nav-link')
+		: isTP
+			? 'Terveysportti'
+			: isOP
+				? 'Oppiportti'
+				: isTK
+					? 'Terveyskirjasto'
+					: isKP
+						? 'Käypä hoito'
 						: ''; // || getText('div.dbbar'); TODO: legacy: fetch DTK name?
 
 	if (archive && (archive !== item.bookTitle)) item.archive = archive;
@@ -510,9 +522,9 @@ async function doWeb(doc, url) {
 			? journalPage(nlmString)
 			: journalMetadata;
 
-		const genreClass = (urlObj.host === 'www.duodecimlehti.fi')  // e.g. Katsaus [Review], Näin hoidan [This is how I treat]; Teema: XXX (Theme issue)
+		const genreClass = (urlObj.host === 'www.duodecimlehti.fi')
 			? 'div.dl-article-section-title'
-			: `div.${dClass}genre`;
+			: `div.${dClass}genre`; // e.g. Katsaus [Review], Näin hoidan [This is how I treat]; Teema: XXX (Theme issue)
 		journalMetadata.genre = text(genreClass);
 	}
 
