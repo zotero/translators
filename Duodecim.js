@@ -391,24 +391,30 @@ async function doWeb(doc, url) {
 
 	item.url = (isDTK && isTP) // Keeping non-TP domains
 		? await urlGen(urlObj, tdoi)
-			: (isOP || isTK || isKP) ? 'https://' + urlObj.host + '/' + tdoi // oppiportti and public
-				: url;
+		: (isOP || isTK || isKP)
+			? 'https://' + urlObj.host + '/' + tdoi // oppiportti and public
+			: url;
 
-	item.language = englishSource(prefix, urlObj) ? 'en' // ISO 639 set 1
-		: ((['khr', 'gvr'].includes(prefix)) ? 'se' : 'fi'); // TODO collect statics // Make Finnish the default language
+	item.language = englishSource(prefix, urlObj) // ISO 639 set 1
+		? 'en'
+		: ((['khr', 'gvr'].includes(prefix))
+			? 'se'
+			: 'fi'); // TODO collect statics // Make Finnish the default language
 
 	// PARSING AUTHORS
-	var authorClass = doc.querySelector('div.duo-authors-link') ?
-		'div.duo-authors-link' // ykt, ebm
-			: isDLehti ? 'div.dl-article-editors-container'
-				: dClass === '' ? 'div.person'
-					: `div.${dClass}authors`;
+	var authorClass = doc.querySelector('div.duo-authors-link')
+		? 'div.duo-authors-link' // ykt, ebm
+		: isDLehti
+			? 'div.dl-article-editors-container'
+			: dClass === ''
+				? 'div.person'
+				: `div.${dClass}authors`;
 	var authorsRaw = doc.querySelector(authorClass) ? innerText(authorClass) : '';
 	Zotero.debug(`Raw author string: ${authorsRaw}`);
 
 	// Parse authors based on type
 	const ccg = /(^Käypä hoito|.*työryhmä).*/i.test(authorsRaw); // Author handling: Determine if this is a CCG (Käypä hoito) page by a group author (regex: subitems under a main CCG without human authors | group authors)
-	const otherSingleAuthor = (['lab'].includes(prefix)) ? true : false; // TODO statics
+	const otherSingleAuthor = ['lab'].includes(prefix); // TODO statics
 
 	var authors = (ccg || otherSingleAuthor) ? authorsRaw : parseAuthors(authorsRaw, item.language);
 
@@ -433,7 +439,8 @@ async function doWeb(doc, url) {
 
 	// PARSING DATE
 	// Extract updated element or journal metadata
-	var dateSelector = doc.querySelector('div.date') ? 'div.date'
+	var dateSelector = doc.querySelector('div.date')
+		? 'div.date'
 		: `div.${dClass}updated`;
 
 	var dateStr = lastDate(doc.querySelector(dateSelector));
@@ -494,13 +501,13 @@ async function doWeb(doc, url) {
 	// PARSING JOURNALS
 	var journalMetadata = {}; // init container: page and section
 	if (isJournal) {
-		const pageSelector = (urlObj.host === 'www.duodecimlehti.fi') 
-			? 'div.dl-article-bibliographic' 
+		const pageSelector = (urlObj.host === 'www.duodecimlehti.fi')
+			? 'div.dl-article-bibliographic'
 			: `div.${dClass}meta_journal`;
 
 		var nlmString = text(pageSelector);
-		journalMetadata = nlmString 
-			? journalPage(nlmString) 
+		journalMetadata = nlmString
+			? journalPage(nlmString)
 			: journalMetadata;
 
 		const genreClass = (urlObj.host === 'www.duodecimlehti.fi')  // e.g. Katsaus [Review], Näin hoidan [This is how I treat]; Teema: XXX (Theme issue)
