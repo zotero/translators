@@ -62,35 +62,12 @@ function returnProtect(inner) {
 }
 
 /**
- * Wrapping custom cleanstring for Zotero's innerText()
- * 
- */
-/**
- * 
- * @param {*} doc 
- * @param {*} rawInput 
- * @returns 
- */
-function innerClean(doc, rawInput) {
-	// BUG: failsafe always returns null.
-	if (typeof rawInput === 'string') {
-		if (!doc.querySelector(rawInput)) {
-			Zotero.debug(`innerClean: invalid selector ${rawInput}`);
-			Zotero.debug(`innerClean: calling invalid selector ${document.querySelector(rawInput)}`);
-			return ''
-		};
-	}
-
-	return ((rawInput === 'string') ? innerText(document, rawInput).replace(/[\xA0\r\s]+/g, " ") : innerText(rawInput, '*').replace(/[\xA0\r\s]+/g, " ")) || '';
-}
-
-/**
  * Parse author names with title removal (handles Finnish naming conventions)
  * This function might not preserve abbreviated middle names for articles like Cochrane or Dynamed summaries.
  * A complex example and its handling is the first time in testCases with article ID voh00042, see the markdown documentation and the first test case.
- * @param {string} nameString 
+ * @param {string} nameString From doWeb()
  * @param {string} lang 'en' or 'fi'
- * @returns 
+ * @returns string or Array
  */
 function parseAuthors(nameString, lang) {
 	// Zotero.debug('parseAuthors(): parsing authors.');
@@ -101,18 +78,18 @@ function parseAuthors(nameString, lang) {
 	}
 
 	// TODO 260529 EBM bug: cleanAuthor() won't spllit multiple authors
-	// if (lang === 'en') {
-	// 	Zotero.debug('parseAuthors(): Handing over to ZU.cleanAuthor()');
-	// 	const authorZU = ZU.cleanAuthor(nameString, 'author', true); 
-	// 	Zotero.debug(`Returned from ZU.cleanAuthor(): ${JSON.stringify(authorZU)}`);
-	// 	return ZU.cleanAuthor(nameString, 'author', true);}
+	if (lang === 'en') {
+		Zotero.debug('parseAuthors(): Handing over to ZU.cleanAuthor()');
+		const authorZU = ZU.cleanAuthor(nameString, 'author', true);
+		Zotero.debug(`Returned from ZU.cleanAuthor(): ${JSON.stringify(authorZU)}`);
+		return ZU.cleanAuthor(nameString, 'author', true);
+	}
 
 	var nameArray = [];
 
-	nameString = /\n/.test(nameString) ? // two-line author fields, 
+	nameString = /\n/.test(nameString) ? // two-line author fields,
 		nameString.split('\n')[1] // in which the first line is usually the same as copyright/organization name
-		:
-		nameString;
+		: nameString;
 
 	const capitalRegex = /[A-ZÄ-Ö]/; // currently match U+00C4 – U+00D6 (ASCII 192–214)
 
@@ -120,7 +97,7 @@ function parseAuthors(nameString, lang) {
 		if (typeof seg !== 'string') continue;
 		if (seg.toString().split(' ').length < 2) continue; // Removing titles between commas and generic author placeholders
 
-		const toPush = (function titleRemove(str) {
+		const toPush = (function (str) {
 			const words = str.toString().split(' ');
 			var nameOnly = '';
 			for (const word of words) {
@@ -164,16 +141,6 @@ function findPrefixTDOI(tdoi) {
  * @returns {boolean} whether to shorten item.URL
  */
 function urlShortenerStatic(prefix) {
-	// A list of books that can be TDOI redirected, except the following prefixes as they would be redirected to another domain
-	// 
-	// duo > duodecimlehti.fi, Medical Journal Duodecim
-	// hoi/nix > kaypahoito.fi, Current Care Guidelines
-	// ebm > ebm-guidelines.com, a same DTK as ebmg but on dedicated domain for e.g. users. 
-	// 
-	// Oppiportti books are dealt with separately.
-	// 
-	// If a user wishes, they may implement their own urlShortenerStatic and include TDOI redirection for such.
-	// One may also make this a urlTransformer and link to the redirected sites instead.
 	// const tdoiBook = tdoi.match(/^([a-z]{3}|cd)(?=\d)/)[0];
 	// if (typeof tdoiBook !== 'string') return false;
 	const doiLTK = 'pgr ima vid aud shp hpt lab sll yll san mat nla nko pjh pko tul fac lto nak evd ykt'.split(' ');
@@ -196,7 +163,7 @@ function urlShortenerStatic(prefix) {
 
 /**
  * Send a TDOI redirection request and see whether the short link works and where it leads to.
- * @param {string} tdoi 
+ * @param {string} tdoi TDOI
  * @returns {boolean} Whether a TDOI is redirectable
  */
 async function tdoiRedirect(tdoi) {
@@ -218,7 +185,7 @@ async function tdoiRedirect(tdoi) {
 /**
  * Streamlining item.url processing
  * @param {Object} urlObj passing in a URL object as doWeb() relies on URL object
- * @param {string} tdoi 
+ * @param {string} tdoi TDOI
  * @returns {string} generated URL
  */
 async function urlGen(urlObj, tdoi) {
@@ -317,7 +284,7 @@ function eurDateToISO(dmy) {
 
 /**
  * For ykt/ebm articles with two dates
- * @param {HTMLElement} containing date string
+ * @param {HTMLElement} div containing date string
  * @returns {string} ISO date string YYYY-MM-DD
  */
 function lastDate(div) {
@@ -357,18 +324,15 @@ async function onCampus(path = '/e48243') {
 
 /**
  * Main translator function to detect DTK content
- * @param {*} doc 
+ * @param {*} doc document
  * @param {string} url for SIC! detection
  * @returns content type {string} or false {boolean}
  */
 async function detectWeb(doc, url) {
 	if (doc.querySelector('.duo-meta_journal') // DTK journals
-		||
-		doc.querySelector('.dl-article-bibliographic') // duodecimlehti.fi; devtools inline test: document.querySelector('div.dl-article-bibliographic').innerText.match(/(?<year>\d{4});(?<volume>.*?)\((?<issue>.*?)\):(?<pages>.*)/).groups
-		||
-		/article\/sic\d{5}/g.test(url) // Sic! Fimea in vht
-		||
-		/\/sic\d{5}\/artikkeli/g.test(url)) { // Sic! Fimea in lääketietokanta
+		|| doc.querySelector('.dl-article-bibliographic') // duodecimlehti.fi; devtools inline test: document.querySelector('div.dl-article-bibliographic').innerText.match(/(?<year>\d{4});(?<volume>.*?)\((?<issue>.*?)\):(?<pages>.*)/).groups
+		|| /article\/sic\d{5}/g.test(url) // Sic! Fimea in vht
+		|| /\/sic\d{5}\/artikkeli/g.test(url)) { // Sic! Fimea in lääketietokanta
 		return 'journalArticle';
 	} else if (doc.querySelector('.duo-database') || doc.querySelector('.duo-sortkey') || doc.querySelector('h1')) {
 		return 'bookSection';
@@ -377,38 +341,33 @@ async function detectWeb(doc, url) {
 }
 
 /**
- * 
  * doWeb(): Main translator function - extracts metadata from Duodecim page DOM
- * 
  * Parts:
  * Page layout inspection
- * Translator sequence: 
+ * Translator sequence:
  * link and locators,
- * author(s), 
- * date, 
+ * author(s),
+ * date,
  * title,
- * Zotero index options, 
- * abstract, 
+ * Zotero index options,
+ * abstract,
  * publisher,
- * other fields, 
- * journal and PDF attachment specifics, 
+ * other fields,
+ * journal and PDF attachment specifics,
  * webpage snapshot
- * 
  * @param {*} doc document
  * @param {*} url document.URL
  */
 async function doWeb(doc, url) {
 	// PAGE LAYOUT INSPECTION
 	const dClass = doc.querySelector('div.date') ? '' // legacy / lääketietokanta
-		:
-		(doc.querySelector('div.d-updated') ? 'd-' // oppiportti / lääketietokanta
-			:
-			'duo-'); // DTK, CCG (CCG: header element for DTK is present in HTML but is not displayed (display: none in CCG's CSS))
+		: (doc.querySelector('div.d-updated') ? 'd-' // oppiportti / lääketietokanta
+		: 'duo-'); // DTK, CCG (CCG: header element for DTK is present in HTML but is not displayed (display: none in CCG's CSS))
 	Zotero.debug(`Determined dClass prefix: ${dClass}`);
 
 	var item = new Zotero.Item(await detectWeb(doc, url));
 
-	// PARSING LINK AND TDOI LOCATOR 
+	// PARSING LINK AND TDOI LOCATOR
 	const urlObj = new URL(url, ); // TODO keep hash link
 	const isTP = urlObj.host === 'www.terveysportti.fi';
 	const isDTK = (/^\/apps\/dtk\/.*/.test(urlObj.pathname));
@@ -424,31 +383,27 @@ async function doWeb(doc, url) {
 	// const isJournalDTK = (isJournal && isDTK); // removed for multi-site = DTK + LäTK + d-lehti
 
 	var urlMatchRegex = isDTK ? (/\/article\/(.+?)(?:\?|$)/) : (/(?<=\/)\w{3}\d{5}(?![\w\d])/); // TODO legacy DTK, LäKT
-	var tdoi = text(`div.${dClass}identifier span`) || // TK, legacy
-		text(`span.${dClass}identifier`) ||
-		urlMatchRegex.test(url) ? url.match(urlMatchRegex)[(isDTK ? 1 : 0)] : '';
+	var tdoi = text(`div.${dClass}identifier span`) // TK, legacy
+		|| text(`span.${dClass}identifier`)
+		|| urlMatchRegex.test(url) ? url.match(urlMatchRegex)[(isDTK ? 1 : 0)] : '';
 
 	Zotero.debug(`doWeb(): ${/^\w{3}\d{5}$/.test(tdoi) ? '' : 'INVALID'}TDOI=${tdoi}`);
 	const prefix = findPrefixTDOI(tdoi);
 
 	item.url = (isDTK && isTP) // Keeping non-TP domains
-		?
-		await urlGen(urlObj, tdoi) :
-		(isOP || isTK || isKP) ? 'https://' + urlObj.host + '/' + tdoi // oppiportti and public
-		:
-		url;
+		? await urlGen(urlObj, tdoi)
+		: (isOP || isTK || isKP) ? 'https://' + urlObj.host + '/' + tdoi // oppiportti and public
+		: url;
 
 	item.language = englishSource(prefix, urlObj) ? 'en' // ISO 639 set 1
-		:
-		((['khr', 'gvr'].includes(prefix)) ? 'se' : 'fi'); // TODO collect statics // Make Finnish the default language 
+		: ((['khr', 'gvr'].includes(prefix)) ? 'se' : 'fi'); // TODO collect statics // Make Finnish the default language
 
-	// PARSING AUTHORS 
+	// PARSING AUTHORS
 	var authorClass = doc.querySelector('div.duo-authors-link') ?
 		'div.duo-authors-link' // ykt, ebm
-		:
-		isDLehti ? 'div.dl-article-editors-container' :
-		dClass === '' ? 'div.person' :
-		`div.${dClass}authors`;
+		: isDLehti ? 'div.dl-article-editors-container'
+		: dClass === '' ? 'div.person'
+		: `div.${dClass}authors`;
 	var authorsRaw = doc.querySelector(authorClass) ? innerText(authorClass) : '';
 	Zotero.debug(`Raw author string: ${authorsRaw}`);
 
@@ -479,8 +434,8 @@ async function doWeb(doc, url) {
 
 	// PARSING DATE
 	// Extract updated element or journal metadata
-	var dateSelector = doc.querySelector('div.date') ? 'div.date' :
-		`div.${dClass}updated`;
+	var dateSelector = doc.querySelector('div.date') ? 'div.date'
+		: `div.${dClass}updated`;
 
 	var dateStr = lastDate(doc.querySelector(dateSelector));
 	// item.date: final date field determined in journal section
@@ -512,12 +467,12 @@ async function doWeb(doc, url) {
 	}
 
 	// Constructing option 2: Set archive/call number
-	var archive = isDTK ? text('ul li.nav-item a.nav-link') :
-		isTP ? 'Terveysportti' :
-		isOP ? 'Oppiportti' :
-		isTK ? 'Terveyskirjasto' :
-		isKP ? 'Käypä hoito' :
-		''; // || getText('div.dbbar'); TODO: legacy: fetch DTK name?
+	var archive = isDTK ? text('ul li.nav-item a.nav-link')
+		: isTP ? 'Terveysportti'
+		: isOP ? 'Oppiportti'
+		: isTK ? 'Terveyskirjasto'
+		: isKP ? 'Käypä hoito'
+		: ''; // || getText('div.dbbar'); TODO: legacy: fetch DTK name?
 
 	if (archive && (archive !== item.bookTitle)) item.archive = archive;
 	item.archiveLocation = sortKey ? sortKey : tdoi;
@@ -525,14 +480,11 @@ async function doWeb(doc, url) {
 
 	// PARSING ABSTRACT: try primary source, then fallback
 	Zotero.debug('doWeb(): extracting abstract');
-	var abstractRaw = innerText(`div.${dClass}aside`) // getText() removes 
-		||
-		innerText(`.${dClass}body .${dClass}section .${dClass}header`) ||
-		innerText(`.${dClass}body > .${dClass}section em`).replace(/[\xA0\r\s]+/g, " ") // TODO example being?
-		||
-		innerText('em').replace(/[\xA0\r\s]+/g, " ") // duo11158
-		||
-		'';
+	var abstractRaw = innerText(`div.${dClass}aside`)
+		|| innerText(`.${dClass}body .${dClass}section .${dClass}header`)
+		|| innerText(`.${dClass}body > .${dClass}section em`).replace(/[\xA0\r\s]+/g, " ") // TODO example being?
+		|| innerText('em').replace(/[\xA0\r\s]+/g, " ") // duo11158
+		|| '';
 	Zotero.debug(`Duodecim: abstract text: ${abstractRaw}`);
 	if (abstractRaw) item.abstractNote = returnProtect(abstractRaw); // TODO: succeed in Scaffold but mess in Edge? Try FireFox?
 
@@ -607,7 +559,7 @@ async function doWeb(doc, url) {
 				em.forEach(p => {
 					if (/^English summary.*/i.test(p.innerText)) {
 						item.title += ` [${p.innerText.match(/(?<=English summary: ).*$/)[0]}]`;
-						item.abstractNote += `\n\n${innerClean(p.parentNode.nextElementSibling, '*')}`;
+						item.abstractNote += `\n\n${p.parentNode.nextElementSibling.innerText}`;
 						item.tags.push('englanti-duodecim-lehti');
 					}
 				})
@@ -711,22 +663,13 @@ async function doWeb(doc, url) {
 	item.complete();
 }
 
-var exports = {
-	onCampus: onCampus
-};
-
 /**
  * A NOTE ON TEST CASES
- * 
  * For Zotero's automated checks, I kept only publicly available test cases.
- * 
- * All test cases were fetched in May 2026. Actual fetch time should be logged by Zotero at runtime. 
+ * All test cases were fetched in May 2026. Actual fetch time should be logged by Zotero at runtime.
  * I built this translator with APA citation style in mind.
  * Feel free to test in other formats, especially NLM-Vancouver-based formats and their Finnish variants such as `styles/dependent/Suomen Laakarilehti.csl` (also part of Zotero Style Repository)
- * 
  * For terveysportti.fi cases, you should have subscription to each DTK of Terveysportti.
- * The journal case duo99748 is free to access only from duodecimlehti.fi.
- * 
  * Proceed with testing under a network with Terveysportti subsciption TODO or log in first in Scaffold's browser.
  * Free TDOIs:
  * hoi50138
@@ -734,383 +677,466 @@ var exports = {
  * duo11158
  * duo99748
  * AND everything in part 3.1
- * 
  * For each case, pay attention to the following fields. Each case would be referred to by their TDOI.
  * ========================================
  * PART 1: reasons for own helper functions
- * 
  * parseAuthors(): ZU.cleanAuthor() is incapable of either customizing the Finnish 'ja' as divider:
  * ykt01870
- *  
  * nor can it handle complex raw author strings containing titles such as
  * voh00042: sairaanhoitaja (AMK) Eeva-Maija Airas, sairaanhoitaja (AMK) Noora Päivärinta, sairaanhoitaja, TtM, hoitotyön lehtori Merja Jylkkä ja sairaanhoitaja (YAMK), hoitotyön lehtori Outi Lastumäki
- * 
  * Besides, institutional/group authors:
  * lab34165: HUS Diagnostiikkakeskus
  * dnd00039: Käypä hoito -työryhmä ADHD (aktiivisuuden ja tarkkaavuuden häiriö)
  * hoi50138: Suomalaisen Lääkäriseuran Duodecimin ja Suomen Gynekologiyhdistyksen asettama työryhmä
- * 
  * Note: My own helper is not perfect, e.g.
  * shk00004
- * 
+ *
  * innerClean():
  * duo11158 abstract
- * 
+ *
  * PART 2: Journals and PDF download
- * 
+ *
  * sll51576 // TODO SLL own translator
  * duo99748
  * hle00258
  * shk00004
- * 
+ *
  * PART 3: consistency between terveysportti.fi and other site versions
- * 
+ *
  * PART 3.1: with public sites (terveyskirjasto, kaypahoito)
  * dlk00221
  * dnd00039
  * hoi50138
  * nix03607
  * uux30190 * 2
- * 
+ *
  * PART 3.2: with other subscription-based sites
  * duo99748 * 2
  * fys00127 * 3
  * ebm01103 * 2
- * 
+ *
  * PART 4: legacy DTK: To my knowledge, this cannot be accessed with personal accounts
- * tvh00004: part of the only ebook hosted exclusively on the legacy DTK. 
+ * tvh00004: part of the only ebook hosted exclusively on the legacy DTK.
  * fys00127
- * 
+ *
  * PART 5: English content: an example pair with same authors, processing with own and ZU helpers
  * ebm01103 + ykt01870
  */
 
 /** BEGIN TEST CASES **/
-var testCases = [{
+var testCases = [
+	{
 		"type": "web",
 		"url": "https://www.duodecimlehti.fi/duo99748",
 		"defer": true,
-		"items": [{
-			"itemType": "journalArticle",
-			"title": "Kaksoispaineventilaatio kroonisessa ventilaatiovajauksessa [Possibilities of bi-level positive pressure ventilation in chronic hypoventilation]",
-			"creators": [{
-					"firstName": "Tarja",
-					"lastName": "Saaresranta",
-					"creatorType": "author"
-				},
-				{
-					"firstName": "Ulla",
-					"lastName": "Anttalainen",
-					"creatorType": "author"
-				},
-				{
-					"firstName": "Olli",
-					"lastName": "Polo",
-					"creatorType": "author"
-				}
-			],
-			"date": "2011",
-			"ISSN": "0012-7183, 2242-3281",
-			"abstractNote": "Kajoamaton kaksoispaineventilaatiohoito on viimeisen vuosikymmenen aikana mahdollistanut hengityksen tukemisen tavallisella vuodeosastolla ja potilaan kotona. Kaksoispaineventilaattorilla voidaan usein välttää keinoilmatie ja respiraattorihoito, lyhentää potilaan sairaalassaoloaikaa ja säästää kustannuksia. Kaksoispaineventilaatiohoito vähentää kroonisesta hengitysvajauksesta kärsivän potilaan hengenahdistusta ja väsymystä, jolloin elämänlaatu paranee ja tietyissä tilanteissa myös elinikä pitenee. Hoito vaatii lääkäriltä perustietoja hengitysfysiologiasta ja perehtymistä kaksoispaineventilaattorin säätämiseen. Hoitohenkilökunnalta se edellyttää kokemusta hoidon toteutuksesta ja ohjauksesta.\n\nDuring the last decade, noninvasive bi-level positive pressure ventilation has enabled respiratory support in inpatient wards and at home. In many cases, a bi-level airway pressure ventilator can be used to avoid artificial airway and respirator therapy, and may shorten hospital stay and save costs. The treatment alleviates the patient's dyspnea and fatigue, whereby the quality of life improves, and in certain situations also the life span increases. The implementation of bi-level positive pressure ventilation by the physician requires knowledge of the basics of respiratory physiology and familiarization with the bi-level airway pressure ventilator.",
-			"archiveLocation": "duo99748",
-			"callNumber": "duo99748",
-			"issue": "17",
-			"journalAbbreviation": "Duodecim",
-			"language": "fi",
-			"libraryCatalog": "Duodecim",
-			"pages": "1797-807",
-			"publicationTitle": "Lääketieteellinen Aikakauskirja Duodecim",
-			"publisher": "Duodecim",
-			"section": "Katsaus",
-			"url": "https://www.duodecimlehti.fi/duo99748",
-			"volume": "127",
-			"attachments": [{
-					"title": "Linkki PDF-tiedostoon (duodecimlehti.fi)",
-					"mimeType": "text/html",
-					"snapshot": false
-				},
-				{
-					"title": "PDF",
-					"mimeType": "application/pdf",
-					"proxy": false
-				},
-				{
-					"title": "Tilannekuva artikkelista (article snapshot)",
-					"snapshot": true,
-					"mimeType": "text/html"
-				}
-			],
-			"tags": [{
-					"tag": "duodecim"
-				},
-				{
-					"tag": "duodecim-journal"
-				},
-				{
-					"tag": "duodecim-translator"
-				},
-				{
-					"tag": "englanti-duodecim-lehti"
-				}
-			],
-			"notes": [],
-			"seeAlso": []
-		}]
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Kaksoispaineventilaatio kroonisessa ventilaatiovajauksessa [Possibilities of bi-level positive pressure ventilation in chronic hypoventilation]",
+				"creators": [
+					{
+						"firstName": "Tarja",
+						"lastName": "Saaresranta",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ulla",
+						"lastName": "Anttalainen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Olli",
+						"lastName": "Polo",
+						"creatorType": "author"
+					}
+				],
+				"date": "2011",
+				"ISSN": "0012-7183, 2242-3281",
+				"abstractNote": "Kajoamaton kaksoispaineventilaatiohoito on viimeisen vuosikymmenen aikana mahdollistanut hengityksen tukemisen tavallisella vuodeosastolla ja potilaan kotona. Kaksoispaineventilaattorilla voidaan usein välttää keinoilmatie ja respiraattorihoito, lyhentää potilaan sairaalassaoloaikaa ja säästää kustannuksia. Kaksoispaineventilaatiohoito vähentää kroonisesta hengitysvajauksesta kärsivän potilaan hengenahdistusta ja väsymystä, jolloin elämänlaatu paranee ja tietyissä tilanteissa myös elinikä pitenee. Hoito vaatii lääkäriltä perustietoja hengitysfysiologiasta ja perehtymistä kaksoispaineventilaattorin säätämiseen. Hoitohenkilökunnalta se edellyttää kokemusta hoidon toteutuksesta ja ohjauksesta.\n\nDuring the last decade, noninvasive bi-level positive pressure ventilation has enabled respiratory support in inpatient wards and at home. In many cases, a bi-level airway pressure ventilator can be used to avoid artificial airway and respirator therapy, and may shorten hospital stay and save costs. The treatment alleviates the patient's dyspnea and fatigue, whereby the quality of life improves, and in certain situations also the life span increases. The implementation of bi-level positive pressure ventilation by the physician requires knowledge of the basics of respiratory physiology and familiarization with the bi-level airway pressure ventilator.",
+				"archiveLocation": "duo99748",
+				"callNumber": "duo99748",
+				"issue": "17",
+				"journalAbbreviation": "Duodecim",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"pages": "1797-807",
+				"publicationTitle": "Lääketieteellinen Aikakauskirja Duodecim",
+				"publisher": "Duodecim",
+				"section": "Katsaus",
+				"url": "https://www.duodecimlehti.fi/duo99748",
+				"volume": "127",
+				"attachments": [
+					{
+						"title": "Linkki PDF-tiedostoon (duodecimlehti.fi)",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "PDF",
+						"mimeType": "application/pdf",
+						"proxy": false
+					},
+					{
+						"title": "Tilannekuva artikkelista (article snapshot)",
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "duodecim"
+					},
+					{
+						"tag": "duodecim-journal"
+					},
+					{
+						"tag": "duodecim-translator"
+					},
+					{
+						"tag": "englanti-duodecim-lehti"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	},
 	{
 		"type": "web",
 		"url": "https://www.terveyskirjasto.fi/dlk00221",
 		"defer": true,
-		"items": [{
-			"itemType": "bookSection",
-			"title": "Huimaus",
-			"creators": [],
-			"date": "2026-03-18",
-			"archive": "Terveyskirjasto",
-			"archiveLocation": "dlk00221",
-			"bookTitle": "Lääkärikirja Duodecim",
-			"callNumber": "dlk00221",
-			"language": "fi",
-			"libraryCatalog": "Duodecim",
-			"publisher": "Duodecim",
-			"url": "https://www.terveyskirjasto.fi/dlk00221",
-			"attachments": [{
-				"title": "Tilannekuva artikkelista (article snapshot)",
-				"snapshot": true,
-				"mimeType": "text/html"
-			}],
-			"tags": [{
-					"tag": "duodecim"
-				},
-				{
-					"tag": "duodecim-translator"
-				}
-			],
-			"notes": [],
-			"seeAlso": []
-		}]
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Huimaus",
+				"creators": [],
+				"date": "2026-03-18",
+				"archive": "Terveyskirjasto",
+				"archiveLocation": "dlk00221",
+				"bookTitle": "Lääkärikirja Duodecim",
+				"callNumber": "dlk00221",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"publisher": "Duodecim",
+				"url": "https://www.terveyskirjasto.fi/dlk00221",
+				"attachments": [
+					{
+						"title": "Tilannekuva artikkelista (article snapshot)",
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "duodecim"
+					},
+					{
+						"tag": "duodecim-translator"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	},
 	{
 		"type": "web",
 		"url": "https://www.kaypahoito.fi/dnd00039",
-		"items": [{
-			"itemType": "bookSection",
-			"title": "Monityydyttymättömät rasvahapot lasten ja nuorten ADHD:n hoidossa",
-			"creators": [{
-				"lastName": "Käypä hoito -työryhmä ADHD (aktiivisuuden ja tarkkaavuuden häiriö)",
-				"creatorType": "bookAuthor",
-				"fieldMode": 1
-			}],
-			"date": "2025-05-19",
-			"abstractNote": "Älä ilman erityistä perustetta suosittele monityydyttymättömiä rasvahappoja lasten ja nuorten ADHD:n hoitoon.",
-			"archive": "Käypä hoito",
-			"archiveLocation": "050.061",
-			"bookTitle": "Vältä viisaasti",
-			"callNumber": "dnd00039",
-			"language": "fi",
-			"libraryCatalog": "Duodecim",
-			"publisher": "Duodecim",
-			"shortTitle": "Monityydyttymättömät rasvahapot lasten ja nuorten ADHD",
-			"url": "https://www.kaypahoito.fi/dnd00039",
-			"attachments": [{
-				"title": "Tilannekuva artikkelista (article snapshot)",
-				"snapshot": true,
-				"mimeType": "text/html"
-			}],
-			"tags": [{
-					"tag": "duodecim"
-				},
-				{
-					"tag": "duodecim-translator"
-				}
-			],
-			"notes": [],
-			"seeAlso": []
-		}]
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Monityydyttymättömät rasvahapot lasten ja nuorten ADHD:n hoidossa",
+				"creators": [
+					{
+						"lastName": "Käypä hoito -työryhmä ADHD (aktiivisuuden ja tarkkaavuuden häiriö)",
+						"creatorType": "bookAuthor",
+						"fieldMode": 1
+					}
+				],
+				"date": "2025-05-19",
+				"abstractNote": "Älä ilman erityistä perustetta suosittele monityydyttymättömiä rasvahappoja lasten ja nuorten ADHD:n hoitoon.",
+				"archive": "Käypä hoito",
+				"archiveLocation": "050.061",
+				"bookTitle": "Vältä viisaasti",
+				"callNumber": "dnd00039",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"publisher": "Duodecim",
+				"shortTitle": "Monityydyttymättömät rasvahapot lasten ja nuorten ADHD",
+				"url": "https://www.kaypahoito.fi/dnd00039",
+				"attachments": [
+					{
+						"title": "Tilannekuva artikkelista (article snapshot)",
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "duodecim"
+					},
+					{
+						"tag": "duodecim-translator"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	},
 	{
 		"type": "web",
 		"url": "https://www.kaypahoito.fi/hoi50138",
 		"defer": true,
-		"items": [{
-			"itemType": "bookSection",
-			"title": "Keskenmeno",
-			"creators": [{
-				"lastName": "Suomalaisen Lääkäriseuran Duodecimin ja Suomen Gynekologiyhdistyksen asettama työryhmä",
-				"creatorType": "bookAuthor",
-				"fieldMode": 1
-			}],
-			"date": "2026-05-11",
-			"abstractNote": "Noin 10–15 % havaituista raskauksista päättyy keskenmenoon. Valtaosa keskenmenoista tapahtuu ensimmäisellä raskauskolmanneksella.\nKeskenmenoille on useita eri syitä. Suurin osa yksittäisistä keskenmenoista johtuu alkion kromosomipoikkeavuuksista.\nKeskenmenon riskiä lisäävät esimerkiksi yli 40 vuoden ikä, lihavuus ja tupakointi.\nKeskenmenon tyypillisiä oireita ovat verinen vuoto ja alavatsakipu, mutta se voi olla myös oireeton.\nEnsisijainen diagnostinen tutkimus keskenmenoa epäiltäessä on emättimen kautta tehtävä ultraäänitutkimus. Kliinisen keskenmenon diagnoosi voidaan asettaa, kun raskauden kesto on vähintään 6 viikkoa viimeisistä kuukautisista laskettuna.\nKeskenmenon hoitovaihtoehtoja ovat seuranta, lääkehoito ja kirurginen hoito.\nLääkehoito on ensisijainen, koska se on todettu tehokkaaksi ja turvalliseksi. Hoitovaihtoehdoista, niiden hyödyistä ja haitoista on tärkeää keskustella potilaan kanssa ennen hoidon aloitusta.\nRiittävä kivun hoito sekä potilaan empaattinen kohtaaminen ovat keskeisiä riippumatta valitusta hoitomenetelmästä.\nAlle 10. raskausviikon keskenmenoissa rutiinimainen anti-D-immunoglobuliinisuojaus RhD-negatiivisille ei ole tarpeen.\nKeskenmenon hoidon jälkeen ei ole tarpeen tehdä rutiinimaista ultraäänitutkimusta tai raskaustestiä.\nUuden raskauden onnistumisen todennäköisyys keskenmenon jälkeen on suuri. Valtaosa saa lapsen toistuvankin keskenmenon jälkeen.\nKeskenmenon jälkeen suositellaan jälkitarkastusta neuvolassa. Seurannassa on keskeistä varmistaa sekä fyysinen että psyykkinen toipuminen ja ohjata tarvittaessa tuen piiriin.\nToisen raskauskolmanneksen keskenmenon jälkeen keskenmenon syytä selvitetään erikoissairaanhoidossa.\nYhden tai kahden keskenmenon jälkeen keskenmenon kokeneen ja hänen kumppaninsa mahdollisia sairauksia ja elintapoja arvioidaan perusterveydenhuollossa.\nKolmen peräkkäisen keskenmenon jälkeen tilannetta arvioidaan erikoissairaanhoidossa.",
-			"archiveLocation": "050.138",
-			"bookTitle": "Käypä hoito",
-			"callNumber": "hoi50138",
-			"language": "fi",
-			"libraryCatalog": "Duodecim",
-			"publisher": "Duodecim",
-			"url": "https://www.kaypahoito.fi/hoi50138",
-			"attachments": [{
-				"title": "Tilannekuva artikkelista (article snapshot)",
-				"snapshot": true,
-				"mimeType": "text/html"
-			}],
-			"tags": [{
-					"tag": "duodecim"
-				},
-				{
-					"tag": "duodecim-translator"
-				}
-			],
-			"notes": [],
-			"seeAlso": []
-		}]
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Keskenmeno",
+				"creators": [
+					{
+						"lastName": "Suomalaisen Lääkäriseuran Duodecimin ja Suomen Gynekologiyhdistyksen asettama työryhmä",
+						"creatorType": "bookAuthor",
+						"fieldMode": 1
+					}
+				],
+				"date": "2026-05-11",
+				"abstractNote": "Noin 10–15 % havaituista raskauksista päättyy keskenmenoon. Valtaosa keskenmenoista tapahtuu ensimmäisellä raskauskolmanneksella.\nKeskenmenoille on useita eri syitä. Suurin osa yksittäisistä keskenmenoista johtuu alkion kromosomipoikkeavuuksista.\nKeskenmenon riskiä lisäävät esimerkiksi yli 40 vuoden ikä, lihavuus ja tupakointi.\nKeskenmenon tyypillisiä oireita ovat verinen vuoto ja alavatsakipu, mutta se voi olla myös oireeton.\nEnsisijainen diagnostinen tutkimus keskenmenoa epäiltäessä on emättimen kautta tehtävä ultraäänitutkimus. Kliinisen keskenmenon diagnoosi voidaan asettaa, kun raskauden kesto on vähintään 6 viikkoa viimeisistä kuukautisista laskettuna.\nKeskenmenon hoitovaihtoehtoja ovat seuranta, lääkehoito ja kirurginen hoito.\nLääkehoito on ensisijainen, koska se on todettu tehokkaaksi ja turvalliseksi. Hoitovaihtoehdoista, niiden hyödyistä ja haitoista on tärkeää keskustella potilaan kanssa ennen hoidon aloitusta.\nRiittävä kivun hoito sekä potilaan empaattinen kohtaaminen ovat keskeisiä riippumatta valitusta hoitomenetelmästä.\nAlle 10. raskausviikon keskenmenoissa rutiinimainen anti-D-immunoglobuliinisuojaus RhD-negatiivisille ei ole tarpeen.\nKeskenmenon hoidon jälkeen ei ole tarpeen tehdä rutiinimaista ultraäänitutkimusta tai raskaustestiä.\nUuden raskauden onnistumisen todennäköisyys keskenmenon jälkeen on suuri. Valtaosa saa lapsen toistuvankin keskenmenon jälkeen.\nKeskenmenon jälkeen suositellaan jälkitarkastusta neuvolassa. Seurannassa on keskeistä varmistaa sekä fyysinen että psyykkinen toipuminen ja ohjata tarvittaessa tuen piiriin.\nToisen raskauskolmanneksen keskenmenon jälkeen keskenmenon syytä selvitetään erikoissairaanhoidossa.\nYhden tai kahden keskenmenon jälkeen keskenmenon kokeneen ja hänen kumppaninsa mahdollisia sairauksia ja elintapoja arvioidaan perusterveydenhuollossa.\nKolmen peräkkäisen keskenmenon jälkeen tilannetta arvioidaan erikoissairaanhoidossa.",
+				"archiveLocation": "050.138",
+				"bookTitle": "Käypä hoito",
+				"callNumber": "hoi50138",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"publisher": "Duodecim",
+				"url": "https://www.kaypahoito.fi/hoi50138",
+				"attachments": [
+					{
+						"title": "Tilannekuva artikkelista (article snapshot)",
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "duodecim"
+					},
+					{
+						"tag": "duodecim-translator"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	},
 	{
 		"type": "web",
 		"url": "https://www.kaypahoito.fi/nix03607",
 		"defer": true,
-		"items": [{
-			"itemType": "bookSection",
-			"title": "Psykososiaalisten interventioiden vaikuttavuus keskenmenon jälkeen",
-			"creators": [{
-				"firstName": "Katri",
-				"lastName": "Räikkönen",
-				"creatorType": "author"
-			}],
-			"date": "2026-05-11",
-			"abstractNote": "Yhteenveto:",
-			"archive": "Käypä hoito",
-			"archiveLocation": "050.138",
-			"bookTitle": "Lisätietoa aiheesta",
-			"callNumber": "nix03607",
-			"language": "fi",
-			"libraryCatalog": "Duodecim",
-			"publisher": "Duodecim",
-			"url": "https://www.kaypahoito.fi/nix03607",
-			"attachments": [{
-				"title": "Tilannekuva artikkelista (article snapshot)",
-				"snapshot": true,
-				"mimeType": "text/html"
-			}],
-			"tags": [{
-					"tag": "duodecim"
-				},
-				{
-					"tag": "duodecim-translator"
-				}
-			],
-			"notes": [],
-			"seeAlso": []
-		}]
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Psykososiaalisten interventioiden vaikuttavuus keskenmenon jälkeen",
+				"creators": [
+					{
+						"firstName": "Katri",
+						"lastName": "Räikkönen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-05-11",
+				"abstractNote": "Yhteenveto:",
+				"archive": "Käypä hoito",
+				"archiveLocation": "050.138",
+				"bookTitle": "Lisätietoa aiheesta",
+				"callNumber": "nix03607",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"publisher": "Duodecim",
+				"url": "https://www.kaypahoito.fi/nix03607",
+				"attachments": [
+					{
+						"title": "Tilannekuva artikkelista (article snapshot)",
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "duodecim"
+					},
+					{
+						"tag": "duodecim-translator"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.terveysportti.fi/uutiset/23/uux30190",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Nuoret kaupan alalla tekevät kuormittavaa työtä",
+				"creators": [
+					{
+						"firstName": "Saara",
+						"lastName": "Taponen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-05-22",
+				"archive": "Terveysportti",
+				"archiveLocation": "uux30190",
+				"bookTitle": "Uutiset",
+				"callNumber": "uux30190",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"publisher": "Duodecim",
+				"url": "https://www.terveysportti.fi/uutiset/23/uux30190",
+				"attachments": [
+					{
+						"title": "Tilannekuva artikkelista (article snapshot)",
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "duodecim"
+					},
+					{
+						"tag": "duodecim-translator"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	},
 	{
 		"type": "web",
 		"url": "https://www.terveyskirjasto.fi/uux30190",
 		"defer": true,
-		"items": [{
-			"itemType": "bookSection",
-			"title": "Nuoret kaupan alalla tekevät kuormittavaa työtä",
-			"creators": [{
-				"firstName": "Saara",
-				"lastName": "Taponen",
-				"creatorType": "author"
-			}],
-			"date": "2026-05-22",
-			"archive": "Terveyskirjasto",
-			"archiveLocation": "uux30190",
-			"bookTitle": "Uutiset",
-			"callNumber": "uux30190",
-			"language": "fi",
-			"libraryCatalog": "Duodecim",
-			"publisher": "Duodecim",
-			"url": "https://www.terveyskirjasto.fi/uux30190",
-			"attachments": [{
-				"title": "Tilannekuva artikkelista (article snapshot)",
-				"snapshot": true,
-				"mimeType": "text/html"
-			}],
-			"tags": [{
-					"tag": "duodecim"
-				},
-				{
-					"tag": "duodecim-translator"
-				}
-			],
-			"notes": [],
-			"seeAlso": []
-		}]
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Nuoret kaupan alalla tekevät kuormittavaa työtä",
+				"creators": [
+					{
+						"firstName": "Saara",
+						"lastName": "Taponen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-05-22",
+				"archive": "Terveyskirjasto",
+				"archiveLocation": "uux30190",
+				"bookTitle": "Uutiset",
+				"callNumber": "uux30190",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"publisher": "Duodecim",
+				"url": "https://www.terveyskirjasto.fi/uux30190",
+				"attachments": [
+					{
+						"title": "Tilannekuva artikkelista (article snapshot)",
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "duodecim"
+					},
+					{
+						"tag": "duodecim-translator"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	},
 	{
 		"type": "web",
 		"url": "https://www.duodecimlehti.fi/duo11158",
 		"defer": true,
-		"items": [{
-			"itemType": "journalArticle",
-			"title": "Keuhkoputkien kaikutähystys - milloin tarpeen? [Endobronchial ultrasonography - when needed?]",
-			"creators": [{
-					"firstName": "Annamari",
-					"lastName": "Rouhos",
-					"creatorType": "author"
-				},
-				{
-					"firstName": "Milla",
-					"lastName": "Katajisto",
-					"creatorType": "author"
-				},
-				{
-					"firstName": "Maija",
-					"lastName": "Halme",
-					"creatorType": "author"
-				}
-			],
-			"date": "2013",
-			"ISSN": "0012-7183, 2242-3281",
-			"abstractNote": "Keuhkoputkien kaikutähystys (endobronchial ulrasound, EBUS) ja sen avulla otettava neulabiopsianäyte tarjoavat mini-invasiivisen tavan tutkia välikarsinan ja hilusalueiden imusolmukkeita ja kasvaimia. Reaaliaikaisessa kaikukuvausohjauksessa päästään biopsoimaan pieniäkin kohteita hyvällä tarkkuudella. EBUS-bronkoskoopissa on ultraäänianturi ja toimenpidekanava biopsianeulalle. Tutkimus tehdään polikliinisesti paikallispuudutuksessa ja kevyessä sedaatiossa tai anestesiassa ja se on hyvin siedetty. Pääasiallinen aihe on keuhkosyövän levinneisyysselvittely. Tutkimuksen tarkkuus on erittäin hyvä, ja välikarsinan tähystystä suositellaan täydentävänä tutkimuksena vain silloin, jos näytteissä ei todeta syöpää. Menetelmä soveltuu myös etiologialtaan epäselvän mediastinaalisen lymfadenopatian tai sentraalisten kasvainten primaaridiagnostiikkaan. Tutkimuksessa saatavat näytteet ovat usein riittäviä keuhkosyövän diagnostiikassa ja hoidon suunnittelussa tarvittaviin immunohistokemiallisiin värjäyksiin ja mutaatiomäärityksiin.\n\nEndobronchial ultrasonography (EBUS) and associated needle biopsy is a mini-invasive means to study mediastinal and hilar lymph nodes and tumors. Guidance by real-time ultrasound image allows the biopsy of even small targets with high accuracy. The investigation is well tolerated, highly specific and its main indication is the staging of lung cancer. The method is also suitable for primary diagnosis of mediastinal lymphadenopathy of unknown origin or central tumors.",
-			"archiveLocation": "duo11158",
-			"callNumber": "duo11158",
-			"issue": "16",
-			"journalAbbreviation": "Duodecim",
-			"language": "fi",
-			"libraryCatalog": "Duodecim",
-			"pages": "1701-6",
-			"publicationTitle": "Lääketieteellinen Aikakauskirja Duodecim",
-			"publisher": "Duodecim",
-			"section": "Näin tutkin",
-			"shortTitle": "Keuhkoputkien kaikutähystys",
-			"url": "https://www.duodecimlehti.fi/duo11158",
-			"volume": "129",
-			"attachments": [{
-					"title": "Linkki PDF-tiedostoon (duodecimlehti.fi)",
-					"mimeType": "text/html",
-					"snapshot": false
-				},
-				{
-					"title": "PDF",
-					"mimeType": "application/pdf",
-					"proxy": false
-				},
-				{
-					"title": "Tilannekuva artikkelista (article snapshot)",
-					"snapshot": true,
-					"mimeType": "text/html"
-				}
-			],
-			"tags": [{
-					"tag": "duodecim"
-				},
-				{
-					"tag": "duodecim-journal"
-				},
-				{
-					"tag": "duodecim-translator"
-				},
-				{
-					"tag": "englanti-duodecim-lehti"
-				}
-			],
-			"notes": [],
-			"seeAlso": []
-		}]
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Keuhkoputkien kaikutähystys - milloin tarpeen? [Endobronchial ultrasonography - when needed?]",
+				"creators": [
+					{
+						"firstName": "Annamari",
+						"lastName": "Rouhos",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Milla",
+						"lastName": "Katajisto",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Maija",
+						"lastName": "Halme",
+						"creatorType": "author"
+					}
+				],
+				"date": "2013",
+				"ISSN": "0012-7183, 2242-3281",
+				"abstractNote": "Keuhkoputkien kaikutähystys (endobronchial ulrasound, EBUS) ja sen avulla otettava neulabiopsianäyte tarjoavat mini-invasiivisen tavan tutkia välikarsinan ja hilusalueiden imusolmukkeita ja kasvaimia. Reaaliaikaisessa kaikukuvausohjauksessa päästään biopsoimaan pieniäkin kohteita hyvällä tarkkuudella. EBUS-bronkoskoopissa on ultraäänianturi ja toimenpidekanava biopsianeulalle. Tutkimus tehdään polikliinisesti paikallispuudutuksessa ja kevyessä sedaatiossa tai anestesiassa ja se on hyvin siedetty. Pääasiallinen aihe on keuhkosyövän levinneisyysselvittely. Tutkimuksen tarkkuus on erittäin hyvä, ja välikarsinan tähystystä suositellaan täydentävänä tutkimuksena vain silloin, jos näytteissä ei todeta syöpää. Menetelmä soveltuu myös etiologialtaan epäselvän mediastinaalisen lymfadenopatian tai sentraalisten kasvainten primaaridiagnostiikkaan. Tutkimuksessa saatavat näytteet ovat usein riittäviä keuhkosyövän diagnostiikassa ja hoidon suunnittelussa tarvittaviin immunohistokemiallisiin värjäyksiin ja mutaatiomäärityksiin.\n\nEndobronchial ultrasonography (EBUS) and associated needle biopsy is a mini-invasive means to study mediastinal and hilar lymph nodes and tumors. Guidance by real-time ultrasound image allows the biopsy of even small targets with high accuracy. The investigation is well tolerated, highly specific and its main indication is the staging of lung cancer. The method is also suitable for primary diagnosis of mediastinal lymphadenopathy of unknown origin or central tumors.",
+				"archiveLocation": "duo11158",
+				"callNumber": "duo11158",
+				"issue": "16",
+				"journalAbbreviation": "Duodecim",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"pages": "1701-6",
+				"publicationTitle": "Lääketieteellinen Aikakauskirja Duodecim",
+				"publisher": "Duodecim",
+				"section": "Näin tutkin",
+				"shortTitle": "Keuhkoputkien kaikutähystys",
+				"url": "https://www.duodecimlehti.fi/duo11158",
+				"volume": "129",
+				"attachments": [
+					{
+						"title": "Linkki PDF-tiedostoon (duodecimlehti.fi)",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "PDF",
+						"mimeType": "application/pdf",
+						"proxy": false
+					},
+					{
+						"title": "Tilannekuva artikkelista (article snapshot)",
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "duodecim"
+					},
+					{
+						"tag": "duodecim-journal"
+					},
+					{
+						"tag": "duodecim-translator"
+					},
+					{
+						"tag": "englanti-duodecim-lehti"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
