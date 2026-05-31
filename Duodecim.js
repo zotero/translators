@@ -101,7 +101,7 @@ function parseAuthors(nameString, lang) {
 			const words = str.toString().split(' ');
 			var nameOnly = '';
 			for (const word of words) {
-				if (capitalRegex.test(word.charAt(0)) 
+				if (capitalRegex.test(word.charAt(0))
 					&& !(capitalRegex.test(word.charAt(word.length - 1))) // not ending with capital letter
 					&& !(/^TtM-?.*/.test(word))) { // specific title removal: exclude TtM prefix titles
 					nameOnly += word + ' ';
@@ -494,14 +494,18 @@ async function doWeb(doc, url) {
 	// PARSING JOURNALS
 	var journalMetadata = {}; // init container: page and section
 	if (isJournal) {
-		const pageSelector = (urlObj.host === 'www.duodecimlehti.fi') ?
-			'div.dl-article-bibliographic' : `div.${dClass}meta_journal`;
+		const pageSelector = (urlObj.host === 'www.duodecimlehti.fi') 
+			? 'div.dl-article-bibliographic' 
+			: `div.${dClass}meta_journal`;
 
 		var nlmString = text(pageSelector);
-		journalMetadata = nlmString ? journalPage(nlmString) : journalMetadata;
+		journalMetadata = nlmString 
+			? journalPage(nlmString) 
+			: journalMetadata;
 
-		const genreClass = (urlObj.host === 'www.duodecimlehti.fi') ? // e.g. Katsaus [Review], Näin hoidan [This is how I treat]; Teema: XXX (Theme issue)
-			'div.dl-article-section-title' : `div.${dClass}genre`;
+		const genreClass = (urlObj.host === 'www.duodecimlehti.fi')  // e.g. Katsaus [Review], Näin hoidan [This is how I treat]; Teema: XXX (Theme issue)
+			? 'div.dl-article-section-title'
+			: `div.${dClass}genre`;
 		journalMetadata.genre = text(genreClass);
 	}
 
@@ -605,7 +609,7 @@ async function doWeb(doc, url) {
 		Zotero.debug(`doWeb(): handling first hyperlink as PDF`);
 		if (prefix !== 'sll') { // Zotero.debug(`doWeb(): pushing PDF file ${firstLink}`);
 			const pdfTDOI = tdoiRegex.test(firstLink) ? firstLink.match(tdoiRegex)[0] : null;
-			const isMainPDF = (pdfTDOI && pdfTDOI.substring(0, 8) === tdoi) ? true : false;
+			const isMainPDF = pdfTDOI && pdfTDOI.substring(0, 8) === tdoi;
 			Zotero.debug(`Pushing PDF as file: ${firstLink}`);
 			item.attachments.push({
 				// TODO find if PDF contains own TDOI and whether a match or a supplement path: `${tdoi}-${item.title}`,
