@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-05-29 00:00:00"
+	"lastUpdated": "2026-06-01 15:40:31"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -74,82 +73,58 @@ var MONTH_NAMES = {
 	]
 };
 
+var UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 function detectWeb(doc, url) {
-	var parsed = parseAnneFrankURL(url);
-	if (!parsed) {
-		return false;
-	}
-
-	if (parsed.kind == "search") {
-		return "multiple";
-	}
-
-	return "encyclopediaArticle";
+	return parseAnneFrankURL(url).uuid ? "encyclopediaArticle" : "multiple";
 }
 
 async function doWeb(doc, url) {
-	var parsed = parseAnneFrankURL(url);
-	if (!parsed) {
-		return;
-	}
+	if (detectWeb(doc, url) == "multiple") {
+		let { lang, query } = parseAnneFrankURL(url);
+		let data = await fetchJSON(buildSearchAPIURL(lang, query));
+		let results = (data.results || []).filter(result => result.instance && result.instance.uuid);
 
-	if (parsed.kind == "search") {
-		await doSearchPage(parsed);
-		return;
-	}
+		let titles = {};
+		for (let i = 0; i < results.length; i++) {
+			titles[i] = getDisplayTitle(results[i].type, results[i].instance, lang);
+		}
 
-	var data = await fetchJSON(buildAPIURL(parsed.lang, parsed.endpoint, parsed.uuid));
-	translateRecord(endpointToType(parsed.endpoint), data, parsed.lang, doc);
+		let selected = await Zotero.selectItems(titles);
+		if (!selected) return;
+		for (let i of Object.keys(selected)) {
+			translateRecord(results[i].type, results[i].instance, lang);
+		}
+	}
+	else {
+		await scrape(doc, url);
+	}
+}
+
+async function scrape(doc, url = doc.location.href) {
+	let { lang, endpoint, uuid } = parseAnneFrankURL(url);
+	let data = await fetchJSON(buildAPIURL(lang, endpoint, uuid));
+	translateRecord(endpointToType(endpoint), data, lang, doc);
 }
 
 function parseAnneFrankURL(url) {
-	var unlocalizedAPISearchMatch = url.match(/^https?:\/\/research\.annefrank\.org\/api\/search(?:\?|$)/i);
-	if (unlocalizedAPISearchMatch) {
+	let { pathname, searchParams } = new URL(url);
+	let segments = pathname.split("/").filter(Boolean);
+	let lang = segments[0] == "nl" ? "nl" : "en";
+
+	// A detail/API page has a UUID segment preceded by its type slug,
+	// e.g. /en/onderwerpen/<uuid>/ or /en/api/subjects/<uuid>
+	let uuidIndex = segments.findIndex(segment => UUID_RE.test(segment));
+	if (uuidIndex > 0) {
+		let slug = segments[uuidIndex - 1];
 		return {
-			kind: "search",
-			lang: "en",
-			query: getQueryParameter(url, "q") || ""
+			lang,
+			endpoint: SLUG_TO_ENDPOINT[slug] || slug,
+			uuid: segments[uuidIndex].toLowerCase()
 		};
 	}
 
-	var detailMatch = url.match(/^https?:\/\/research\.annefrank\.org\/(en|nl)\/([^/?#]+)\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/?/i);
-	if (detailMatch && SLUG_TO_ENDPOINT[detailMatch[2]]) {
-		return {
-			kind: "record",
-			lang: detailMatch[1],
-			endpoint: SLUG_TO_ENDPOINT[detailMatch[2]],
-			uuid: detailMatch[3].toLowerCase()
-		};
-	}
-
-	var apiRecordMatch = url.match(/^https?:\/\/research\.annefrank\.org\/(en|nl)\/api\/(events|aw_events|locations|subjects|persons|relations)\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
-	if (apiRecordMatch) {
-		return {
-			kind: "record",
-			lang: apiRecordMatch[1],
-			endpoint: apiRecordMatch[2],
-			uuid: apiRecordMatch[3].toLowerCase()
-		};
-	}
-
-	var searchMatch = url.match(/^https?:\/\/research\.annefrank\.org\/(en|nl)\/(?:api\/search)?(?:\?|$)/i);
-	if (searchMatch) {
-		return {
-			kind: "search",
-			lang: searchMatch[1],
-			query: getQueryParameter(url, "q") || ""
-		};
-	}
-
-	return false;
-}
-
-function getQueryParameter(url, name) {
-	var match = url.match(new RegExp("[?&]" + name + "=([^&#]*)", "i"));
-	if (!match) {
-		return "";
-	}
-	return decodeURIComponent(match[1].replace(/\+/g, " "));
+	return { lang, query: searchParams.get("q") || "" };
 }
 
 function buildAPIURL(lang, endpoint, uuid) {
@@ -161,74 +136,11 @@ function buildAPIURL(lang, endpoint, uuid) {
 }
 
 function buildSearchAPIURL(lang, query) {
-	var apiURL = "https://research.annefrank.org/" + lang + "/api/search";
+	var apiURL = "https://research.annefrank.org/" + lang + "/api/search?format=json";
 	if (query) {
-		apiURL += "?q=" + encodeURIComponent(query) + "&format=json";
-	}
-	else {
-		apiURL += "?format=json";
+		apiURL += "&q=" + encodeURIComponent(query);
 	}
 	return apiURL;
-}
-
-async function doSearchPage(parsed) {
-	var data = await fetchJSON(buildSearchAPIURL(parsed.lang, parsed.query));
-	var results = data.results || [];
-	var exactUUID = getUUIDSearch(parsed.query);
-	var exactResult = exactUUID && findExactUUIDResult(results, exactUUID);
-
-	if (exactResult) {
-		translateSearchResult(exactResult, parsed.lang);
-		return;
-	}
-
-	if (results.length == 1) {
-		translateSearchResult(results[0], parsed.lang);
-		return;
-	}
-
-	var choices = {};
-	var lookup = {};
-	for (var i = 0; i < results.length; i++) {
-		var result = results[i];
-		if (!result.instance || !result.instance.uuid) {
-			continue;
-		}
-		var key = result.type + "|" + result.instance.uuid;
-		choices[key] = getDisplayTitle(result.type, result.instance, parsed.lang);
-		lookup[key] = result;
-	}
-
-	var selected = await Zotero.selectItems(choices);
-	if (!selected) {
-		return;
-	}
-	for (var selectedKey in selected) {
-		translateSearchResult(lookup[selectedKey], parsed.lang);
-	}
-}
-
-function getUUIDSearch(query) {
-	var match = (query || "").match(/^uuid:([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i);
-	return match ? match[1].toLowerCase() : false;
-}
-
-function findExactUUIDResult(results, uuid) {
-	for (var i = 0; i < results.length; i++) {
-		if (results[i].instance && results[i].instance.uuid
-			&& results[i].instance.uuid.toLowerCase() == uuid) {
-			return results[i];
-		}
-	}
-	return false;
-}
-
-function translateSearchResult(result, lang) {
-	if (!result.instance) {
-		return;
-	}
-
-	translateRecord(result.type, result.instance, lang);
 }
 
 function fetchJSON(url) {
@@ -255,9 +167,8 @@ function translateRecord(type, data, lang, doc) {
 	item.rights = "CC0";
 	item.accessDate = "CURRENT_TIMESTAMP";
 
-	var publicationDate = getPublicationDate(type, data);
-	if (publicationDate) {
-		item.date = publicationDate;
+	if (data.modified_on) {
+		item.date = data.modified_on.substr(0, 10);
 	}
 
 	if (doc && item.url && doc.location && doc.location.href == item.url) {
@@ -362,13 +273,6 @@ function formatISODate(date, lang) {
 		return day + " " + month + " " + year;
 	}
 	return month + " " + day + ", " + year;
-}
-
-function getPublicationDate(type, data) {
-	if (data.modified_on) {
-		return data.modified_on.substr(0, 10);
-	}
-	return "";
 }
 
 /** BEGIN TEST CASES **/
