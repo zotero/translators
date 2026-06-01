@@ -385,13 +385,12 @@ var testCases = [
 			{
 				"itemType": "encyclopediaArticle",
 				"title": "Philosophy of Life, Van Pels couple",
-				"creators": [
-
-				],
+				"creators": [],
 				"date": "2025-05-19",
 				"abstractNote": "Hermann and Auguste van Pels were registered as belonging to the Jewish religion.",
 				"encyclopediaTitle": "Anne Frank Knowledge Base",
 				"language": "en",
+				"libraryCatalog": "Anne Frank Knowledge Base",
 				"place": "Amsterdam",
 				"publisher": "Anne Frank House",
 				"rights": "CC0",
@@ -402,15 +401,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-
-				],
-				"notes": [
-
-				],
-				"seeAlso": [
-
-				]
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -421,14 +414,13 @@ var testCases = [
 			{
 				"itemType": "encyclopediaArticle",
 				"title": "Anne Frank in kindergarten (April 9, 1934 - July 13, 1935)",
-				"creators": [
-
-				],
+				"creators": [],
 				"date": "2025-10-15",
 				"abstractNote": "Anne attended Preparatory School No. 51, the kindergarten of the 6th Montessori School in Amsterdam, for over a year.",
 				"encyclopediaTitle": "Anne Frank Knowledge Base",
 				"extra": "Event date start: 1934-04-09\nEvent date end: 1935-07-13",
 				"language": "en",
+				"libraryCatalog": "Anne Frank Knowledge Base",
 				"place": "Amsterdam",
 				"publisher": "Anne Frank House",
 				"rights": "CC0",
@@ -439,15 +431,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-
-				],
-				"notes": [
-
-				],
-				"seeAlso": [
-
-				]
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -458,13 +444,12 @@ var testCases = [
 			{
 				"itemType": "encyclopediaArticle",
 				"title": "Vlieger uit Eindhoven",
-				"creators": [
-
-				],
+				"creators": [],
 				"date": "2025-05-19",
 				"abstractNote": "An unnamed crew member stationed at the German air base in Eindhoven",
 				"encyclopediaTitle": "Anne Frank Knowledge Base",
 				"language": "en",
+				"libraryCatalog": "Anne Frank Knowledge Base",
 				"place": "Amsterdam",
 				"publisher": "Anne Frank House",
 				"rights": "CC0",
@@ -475,15 +460,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-
-				],
-				"notes": [
-
-				],
-				"seeAlso": [
-
-				]
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -494,13 +473,12 @@ var testCases = [
 			{
 				"itemType": "encyclopediaArticle",
 				"title": "Sixth Montessori school",
-				"creators": [
-
-				],
+				"creators": [],
 				"date": "2025-11-24",
 				"abstractNote": "The Sixth Montessori School was the primary school attended by Anne Frank.",
 				"encyclopediaTitle": "Anne Frank Knowledge Base",
 				"language": "en",
+				"libraryCatalog": "Anne Frank Knowledge Base",
 				"place": "Amsterdam",
 				"publisher": "Anne Frank House",
 				"rights": "CC0",
@@ -511,15 +489,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-
-				],
-				"notes": [
-
-				],
-				"seeAlso": [
-
-				]
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
