@@ -28,6 +28,8 @@ grep -l "doExport" *.js
 node .bin/init-translator.mjs --label "<Label>" --creator "<Creator>" --type export
 ```
 
+This scaffolds the file from the export translator template at `.bin/templates/export.js`. That file is the canonical structure an export translator should follow — read it when you need to know the expected shape of `doExport`, or when a task asks you to make an existing translator better conform to the template.
+
 If the translator should also import the same format, use `--type import,export` and implement `detectImport()` and `doImport()` as described in the `develop-import-translator` skill.
 
 Export translators have no `target` regex.

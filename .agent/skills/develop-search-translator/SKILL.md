@@ -35,6 +35,8 @@ grep -l "detectSearch\|doSearch" *.js
 node .bin/init-translator.mjs --label "<Label>" --creator "<Creator>" --type search
 ```
 
+This scaffolds the file from the search translator template at `.bin/templates/search.js`. That file is the canonical structure a search translator should follow — read it when you need to know the expected shape of `detectSearch`/`doSearch`, or when a task asks you to make an existing translator better conform to the template.
+
 Search translators have no `target` regex. They're triggered by identifier lookups in Zotero.
 
 ## Step 3: Write the code

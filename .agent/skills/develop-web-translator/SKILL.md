@@ -86,6 +86,8 @@ Check the `inspect-page` meta tags first:
 node .bin/init-translator.mjs --label "<Label>" --creator "<Creator>" --target "<regex>" --type web
 ```
 
+This scaffolds the file from the web translator template at `.bin/templates/web.js`. That file is the canonical structure a web translator should follow — read it when you need to know the expected shape of `detectWeb`/`getSearchResults`/`doWeb`/`scrape`, or when a task asks you to make an existing translator better conform to the template.
+
 Implement `detectWeb(doc, url)`, `getSearchResults(doc, checkOnly)`, `doWeb(doc, url)`, and `scrape(doc, url)`.
 
 ## Step 5: Create tests
