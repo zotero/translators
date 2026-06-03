@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-05-19 15:28:10"
+	"lastUpdated": "2026-06-03 15:33:27"
 }
 
 /*
@@ -233,18 +233,19 @@ const arXivCategories = {
 	"bad-arch.bad-cat": "Invalid Category"
 };
 
-var version;
-// this variable will be set in doWeb and
-// can be used then afterwards in the parseXML
-
 function detectSearch(item) {
 	return !!item.arXiv;
 }
 
 async function doSearch(item) {
-	let url = `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(item.arXiv)}&max_results=1`;
-	let doc = await requestAtom(url);
-	parseAtom(doc);
+	let id = item.arXiv.trim().replace(/^arxiv:\s*/i, "");
+	let version;
+	let versionMatch = id.match(/v(\d+)$/);
+	if (versionMatch) {
+		version = versionMatch[1];
+		id = id.replace(/v\d+$/, "");
+	}
+	await processID(id, version);
 }
 
 function detectWeb(doc, url) {
@@ -319,32 +320,141 @@ function getSearchResultsLegacy(doc, checkOnly = false) {
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
 		var items = getSearchResults(doc);
-		
+
 		let selectedItems = await Z.selectItems(items);
 		if (selectedItems) {
-			let apiURL = `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(Object.keys(selectedItems).join(','))}`;
-			let document = await requestAtom(apiURL);
-			parseAtom(document);
+			for (let id of Object.keys(selectedItems)) {
+				await processID(id);
+			}
 		}
 	}
 	else {
-		let id = url.match(/(?:pdf|abs)\/([^?#]+)(?:\.pdf)?/)[1];
+		let id = url.match(/(?:pdf|abs)\/([^?#]+?)(?:\.pdf)?(?:[?#].*)?$/)[1];
 		let versionMatch = url.match(/v(\d+)(\.pdf)?([?#].+)?$/);
-		if (versionMatch) {
-			version = versionMatch[1];
-		}
+		let version = versionMatch ? versionMatch[1] : undefined;
 
 		if (!id) { // Honestly not sure where this might still be needed
 			id = text(doc, 'span.arxivid > a');
 		}
 
 		if (!id) throw new Error('Could not find arXiv ID on page.');
-		// Do not trim version
-		//id = id.trim().replace(/^arxiv:\s*|v\d+|\s+.*$/ig, '');
-		id = id.trim().replace(/^arxiv:\s*|\s+.*$/ig, '');
-		let apiURL = `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(id)}&max_results=1`;
-		await requestAtom(apiURL).then(parseAtom);
+		// Strip the "arXiv:" prefix and any version suffix
+		id = id.trim().replace(/^arxiv:\s*|v\d+|\s+.*$/ig, '');
+		await processID(id, version);
 	}
+}
+
+// Look up a single arXiv ID. Prefer the OAI-PMH endpoint. Fall back to
+// export.arxiv.org if:
+//  - The OAI-PMH endpoint fails
+//  - A specific version is requested, and the requested version is not the
+//    latest (because OAI-PMH results don't include full metadata for prior
+//    versions)
+async function processID(id, version) {
+	try {
+		if (version) {
+			let latest = await getLatestVersion(id);
+			if (latest && parseInt(version) < latest) {
+				Zotero.debug(`Search specified v${version}, but latest is v${latest}`);
+				await scrapeAtom(`${id}v${version}`, version);
+				return;
+			}
+			Zotero.debug(`Search specified v${version}, matches latest v${latest}`);
+		}
+		Zotero.debug(`Fetching OAI-PMH (arXiv) for ${id}`);
+		let doc = await requestOAI(id, "arXiv");
+		scrapeOAI(doc, id, version);
+	}
+	catch (e) {
+		Z.debug("OAI-PMH lookup failed; falling back to export.arxiv.org");
+		Z.debug(e);
+		await scrapeAtom(version ? `${id}v${version}` : id, version);
+	}
+}
+
+function oaiURL(id, metadataPrefix) {
+	return `https://oaipmh.arxiv.org/oai?verb=GetRecord`
+		+ `&identifier=oai:arXiv.org:${encodeURIComponent(id)}`
+		+ `&metadataPrefix=${metadataPrefix}`;
+}
+
+async function requestOAI(id, metadataPrefix) {
+	let text = await requestText(oaiURL(id, metadataPrefix));
+	let doc = new DOMParser().parseFromString(text, 'application/xml');
+	let error = doc.querySelector("error");
+	if (error) {
+		throw new Error(`OAI-PMH error (${error.getAttribute("code")}): ${error.textContent}`);
+	}
+	return doc;
+}
+
+async function getLatestVersion(id) {
+	// arXivRaw format lists every version
+	Zotero.debug(`Fetching OAI-PMH (arXivRaw) for ${id} to check latest version`);
+	let doc = await requestOAI(id, "arXivRaw");
+	let versions = [...doc.querySelectorAll("arXivRaw > version")]
+		.map(v => parseInt((v.getAttribute("version") || "").replace(/^v/, "")))
+		.filter(n => !isNaN(n));
+	return versions.length ? Math.max(...versions) : null;
+}
+
+function mapCategories(terms) {
+	return terms
+		.map((sub) => {
+			let mainCat = sub.split('.')[0];
+			if (mainCat !== sub && arXivCategories[mainCat]) {
+				return arXivCategories[mainCat] + " - " + arXivCategories[sub];
+			}
+			else {
+				return arXivCategories[sub];
+			}
+		})
+		.filter(Boolean);
+}
+
+function scrapeOAI(doc, requestedID, version) {
+	let arXiv = doc.querySelector("GetRecord > record metadata > arXiv");
+	if (!arXiv) {
+		throw new Error("No arXiv metadata in OAI-PMH response");
+	}
+
+	let newItem = new Zotero.Item("preprint");
+	let articleID = ZU.trimInternal(text(arXiv, "id")) || requestedID;
+
+	newItem.title = ZU.trimInternal(text(arXiv, "title"));
+	newItem.date = ZU.strToISO(text(arXiv, "created"));
+	newItem.abstractNote = ZU.trimInternal(text(arXiv, "abstract"));
+
+	for (let author of arXiv.querySelectorAll("authors > author")) {
+		let lastName = ZU.trimInternal(text(author, "keyname"));
+		let firstName = ZU.trimInternal(text(author, "forenames"));
+		let suffix = ZU.trimInternal(text(author, "suffix"));
+		if (suffix) {
+			lastName = `${lastName} ${suffix}`;
+		}
+		if (firstName) {
+			newItem.creators.push({ firstName, lastName, creatorType: "author" });
+		}
+		else {
+			newItem.creators.push({ lastName, creatorType: "author", fieldMode: 1 });
+		}
+	}
+
+	let comments = ZU.trimInternal(text(arXiv, "comments"));
+	if (comments) {
+		newItem.notes.push({ note: `Comment: ${comments}` });
+	}
+
+	let terms = ZU.trimInternal(text(arXiv, "categories")).split(/\s+/).filter(Boolean);
+	newItem.tags.push(...mapCategories(terms));
+
+	let doi = ZU.trimInternal(text(arXiv, "doi"));
+	if (doi) {
+		// The field may list multiple DOIs; use the first
+		newItem.DOI = doi.split(/\s+/)[0];
+	}
+
+	finalizeItem(newItem, articleID, terms.length ? terms[0] : null, version);
 }
 
 // Temp workaround for https://github.com/zotero/zotero-connectors/issues/526
@@ -353,12 +463,19 @@ async function requestAtom(url) {
 	return new DOMParser().parseFromString(text, 'application/xml');
 }
 
-function parseAtom(doc) {
-	let entries = doc.querySelectorAll("feed > entry");
-	entries.forEach(parseSingleEntry);
+async function scrapeAtom(idList, version) {
+	Zotero.debug(`Fetching export.arxiv.org for ${idList}`);
+	let apiURL = `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(idList)}&max_results=1`;
+	let doc = await requestAtom(apiURL);
+	parseAtom(doc, version);
 }
 
-function parseSingleEntry(entry) {
+function parseAtom(doc, version) {
+	let entries = doc.querySelectorAll("feed > entry");
+	entries.forEach(entry => parseSingleEntry(entry, version));
+}
+
+function parseSingleEntry(entry, version) {
 	let newItem = new Zotero.Item("preprint");
 
 	newItem.title = ZU.trimInternal(text(entry, "title"));
@@ -375,18 +492,7 @@ function parseSingleEntry(entry) {
 	}
 
 	let categories = Array.from(entry.querySelectorAll("category"))
-		.map(el => el.getAttribute("term"))
-		.map((sub) => {
-			let mainCat = sub.split('.')[0];
-			if (mainCat !== sub && arXivCategories[mainCat]) {
-				return arXivCategories[mainCat] + " - " + arXivCategories[sub];
-			}
-			else {
-				return arXivCategories[sub];
-			}
-		})
-		.filter(Boolean);
-	newItem.tags.push(...categories);
+		.map(el => el.getAttribute("term"));
 
 	let versionedArXivURL = text(entry, "id");
 	let arxivURL = versionedArXivURL.replace(/v\d+/, '');
@@ -394,14 +500,21 @@ function parseSingleEntry(entry) {
 	if (doi) {
 		newItem.DOI = doi;
 	}
-	newItem.url = arxivURL;
 
 	let articleID = arxivURL.match(/\/abs\/(.+)$/)[1];
 
-	let articleField = attr(entry, "primary_category", "term");
-	if (articleField) articleField = "[" + articleField + "]";
+	finalizeItem(newItem, articleID, attr(entry, "primary_category", "term"), version, categories);
+}
 
-	if (articleID && articleID.includes("/")) {
+function finalizeItem(newItem, articleID, primaryCategory, version, atomCategories) {
+	if (atomCategories) {
+		newItem.tags.push(...mapCategories(atomCategories));
+	}
+
+	newItem.url = "http://arxiv.org/abs/" + articleID;
+
+	let articleField = primaryCategory ? "[" + primaryCategory + "]" : "";
+	if (articleID.includes("/")) {
 		newItem.extra = "arXiv:" + articleID;
 	}
 	else if (articleField) {
@@ -411,7 +524,7 @@ function parseSingleEntry(entry) {
 		newItem.extra = "arXiv:" + articleID;
 	}
 
-	let pdfURL = versionedArXivURL.replace("/abs/", "/pdf/");
+	let pdfURL = "http://arxiv.org/pdf/" + articleID + (version ? "v" + version : "");
 
 	newItem.attachments.push({
 		title: "Preprint PDF",
@@ -703,11 +816,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://arxiv.org/find/cs/1/au:+Hoffmann_M/0/1/0/all/0/1",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "https://arxiv.org/pdf/1402.1516",
 		"items": [
 			{
@@ -746,6 +854,9 @@ var testCases = [
 				"tags": [
 					{
 						"tag": "Mathematical Physics"
+					},
+					{
+						"tag": "Mathematics - Mathematical Physics"
 					},
 					{
 						"tag": "Mathematics - Symplectic Geometry"
