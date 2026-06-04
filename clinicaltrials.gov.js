@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-06-04 15:06:56"
+	"lastUpdated": "2026-06-04 15:43:48"
 }
 
 /*
@@ -98,6 +98,22 @@ function getClinicalTrialID(url) {
 }
 
 function studiesJSONToItem(data) {
+	function unescapeAllHTML(obj) {
+		if (typeof obj === 'string') {
+			return ZU.unescapeHTML(obj);
+		}
+		else if (Array.isArray(obj)) {
+			return obj.map(unescapeAllHTML);
+		}
+		else if (typeof obj === 'object') {
+			for (let [key, value] of Object.entries(obj)) {
+				obj[key] = unescapeAllHTML(value);
+			}
+		}
+		return obj;
+	}
+	data = unescapeAllHTML(data);
+
 	let item = new Zotero.Item("report");
 
 	let study = data.study;
@@ -143,11 +159,11 @@ function studiesJSONToItem(data) {
 	let idModule = study.protocolSection.identificationModule;
 	let statusModule = study.protocolSection.statusModule;
 
-	item.title = ZU.unescapeHTML(idModule.officialTitle);
+	item.title = idModule.officialTitle;
 	item.date = statusModule.lastUpdateSubmitDate;
 	item.institution = "clinicaltrials.gov"; // publisher
 	item.reportNumber = idModule.nctId;
-	item.shortTitle = ZU.unescapeHTML(idModule.briefTitle);
+	item.shortTitle = idModule.briefTitle;
 	item.abstractNote = ZU.cleanTags(study.protocolSection.descriptionModule.briefSummary);
 	item.url = "https://clinicaltrials.gov/study/" + idModule.nctId;
 	item.reportType = "Clinical trial registration";
@@ -207,7 +223,7 @@ var testCases = [
 					}
 				],
 				"date": "2007-04-25",
-				"abstractNote": "This study will investigate Gastroesophageal Reflux Disease (GERD)as a cause of sleep disturbance.\nPatients with GERD may experience all or some of the following symptoms: stomach acid or partially digested food re-entering the esophagus (which is sometimes referred to as heartburn or regurgitation) and belching.\nEven very small, unnoticeable amounts of rising stomach acid may cause patients to wake up during the night.\n\nThis study will also investigate the effect of Rabeprazole, (brand name Aciphex) on patients with known insomnia.\nRabeprazole is an FDA approved medication already marketed for the treatment of GERD.",
+				"abstractNote": "This study will investigate Gastroesophageal Reflux Disease (GERD)as a cause of sleep disturbance.\nPatients with GERD may experience all or some of the following symptoms: stomach acid or partially digested food re-entering the esophagus (which is sometimes referred to as heartburn or regurgitation) and belching.\nEven very small, unnoticeable amounts of rising stomach acid may cause patients to wake up during the night.This study will also investigate the effect of Rabeprazole, (brand name Aciphex) on patients with known insomnia.\nRabeprazole is an FDA approved medication already marketed for the treatment of GERD.",
 				"extra": "submitted: 2006-02-03",
 				"institution": "clinicaltrials.gov",
 				"libraryCatalog": "clinicaltrials.gov",
@@ -306,13 +322,13 @@ var testCases = [
 				"title": "A Phase 1/2 Open-Label Rolling-Arm Umbrella Platform Design of Investigational Agents With or Without Pembrolizumab or Pembrolizumab Alone in Participants With Melanoma (KEYMAKER-U02): Substudy 02D",
 				"creators": [
 					{
-						"lastName": "Merck Sharp &amp; Dohme LLC",
+						"lastName": "Merck Sharp & Dohme LLC",
 						"creatorType": "author",
 						"fieldMode": 1
 					}
 				],
 				"date": "2025-10-27",
-				"abstractNote": "Substudy 02D is part of a larger research study that is testing experimental treatments for melanoma, a type of skin cancer.\nThe larger study is the umbrella study.\n\nThe goal of substudy 02D is to evaluate the safety and efficacy of investigational treatment arms in programmed cell-death 1 (PD-1) naïve or PD-1 exposed participants with melanoma brain metastasis (MBM) and to identify the investigational agent(s) that, when used in combination, are superior to the current treatment options&#x2F;historical control available.\n\nAs of amendment 2 (effective 01DEC2022) enrollment into the treatment arm of pembrolizumab and lenvatinib has been discontinued.",
+				"abstractNote": "Substudy 02D is part of a larger research study that is testing experimental treatments for melanoma, a type of skin cancer.\nThe larger study is the umbrella study.The goal of substudy 02D is to evaluate the safety and efficacy of investigational treatment arms in programmed cell-death 1 (PD-1) naïve or PD-1 exposed participants with melanoma brain metastasis (MBM) and to identify the investigational agent(s) that, when used in combination, are superior to the current treatment options/historical control available.As of amendment 2 (effective 01DEC2022) enrollment into the treatment arm of pembrolizumab and lenvatinib has been discontinued.",
 				"extra": "submitted: 2021-01-05",
 				"institution": "clinicaltrials.gov",
 				"libraryCatalog": "clinicaltrials.gov",
