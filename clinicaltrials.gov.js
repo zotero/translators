@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-01-10 00:42:22"
+	"lastUpdated": "2026-06-04 15:06:56"
 }
 
 /*
@@ -143,11 +143,11 @@ function studiesJSONToItem(data) {
 	let idModule = study.protocolSection.identificationModule;
 	let statusModule = study.protocolSection.statusModule;
 
-	item.title = idModule.officialTitle;
+	item.title = ZU.unescapeHTML(idModule.officialTitle);
 	item.date = statusModule.lastUpdateSubmitDate;
 	item.institution = "clinicaltrials.gov"; // publisher
 	item.reportNumber = idModule.nctId;
-	item.shortTitle = idModule.briefTitle;
+	item.shortTitle = ZU.unescapeHTML(idModule.briefTitle);
 	item.abstractNote = ZU.cleanTags(study.protocolSection.descriptionModule.briefSummary);
 	item.url = "https://clinicaltrials.gov/study/" + idModule.nctId;
 	item.reportType = "Clinical trial registration";
@@ -258,36 +258,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://clinicaltrials.gov/study/NCT04292899",
-		"items": [
-			{
-				"itemType": "report",
-				"title": "A Phase 3 Randomized Study to Evaluate the Safety and Antiviral Activity of Remdesivir (GS-5734™) in Participants With Severe COVID-19",
-				"creators": [
-					{
-						"lastName": "Gilead Sciences",
-						"creatorType": "author",
-						"fieldMode": 1
-					}
-				],
-				"date": "2020-12-15",
-				"abstractNote": "The primary objective of this study is to evaluate the efficacy of 2 remdesivir (RDV) regimens with respect to clinical status assessed by a 7-point ordinal scale on Day 14.",
-				"extra": "submitted: 2020-02-28",
-				"institution": "clinicaltrials.gov",
-				"libraryCatalog": "clinicaltrials.gov",
-				"reportNumber": "NCT04292899",
-				"reportType": "Clinical trial registration",
-				"shortTitle": "Study to Evaluate the Safety and Antiviral Activity of Remdesivir (GS-5734™) in Participants With Severe Coronavirus Disease (COVID-19)",
-				"url": "https://clinicaltrials.gov/study/NCT04292899",
-				"attachments": [],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "https://www.clinicaltrials.gov/search?term=transgender%20care",
 		"defer": true,
 		"items": "multiple"
@@ -320,6 +290,36 @@ var testCases = [
 				"reportType": "Clinical trial registration",
 				"shortTitle": "Comparison of Engerix B Vaccine Versus Sci-B-Vac Vaccine in Celiac Patients",
 				"url": "https://clinicaltrials.gov/study/NCT01159457",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://clinicaltrials.gov/study/NCT04700072",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "A Phase 1/2 Open-Label Rolling-Arm Umbrella Platform Design of Investigational Agents With or Without Pembrolizumab or Pembrolizumab Alone in Participants With Melanoma (KEYMAKER-U02): Substudy 02D",
+				"creators": [
+					{
+						"lastName": "Merck Sharp &amp; Dohme LLC",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2025-10-27",
+				"abstractNote": "Substudy 02D is part of a larger research study that is testing experimental treatments for melanoma, a type of skin cancer.\nThe larger study is the umbrella study.\n\nThe goal of substudy 02D is to evaluate the safety and efficacy of investigational treatment arms in programmed cell-death 1 (PD-1) naïve or PD-1 exposed participants with melanoma brain metastasis (MBM) and to identify the investigational agent(s) that, when used in combination, are superior to the current treatment options&#x2F;historical control available.\n\nAs of amendment 2 (effective 01DEC2022) enrollment into the treatment arm of pembrolizumab and lenvatinib has been discontinued.",
+				"extra": "submitted: 2021-01-05",
+				"institution": "clinicaltrials.gov",
+				"libraryCatalog": "clinicaltrials.gov",
+				"reportNumber": "NCT04700072",
+				"reportType": "Clinical trial registration",
+				"shortTitle": "Substudy 02D: Safety and Efficacy of Pembrolizumab in Combination With Investigational Agents or Pembrolizumab Alone in Participants With Melanoma Brain Metastasis (MK-3475-02D/KEYMAKER-U02)",
+				"url": "https://clinicaltrials.gov/study/NCT04700072",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
