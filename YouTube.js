@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-06-12 16:10:09"
+	"lastUpdated": "2026-06-04 16:14:22"
 }
 
 /*
@@ -91,6 +91,141 @@ function getMetaContent(doc, attrName, value) {
 	return attr(doc, 'meta[' + attrName + '="' + value + '"]', 'content');
 }
 
+function videoIdFromURL(url) {
+	var m = url.match(/[?&]v=([0-9a-zA-Z_-]+)/);
+	return m ? m[1] : null;
+}
+
+// Depth-first walk over a parsed JSON tree. `visit` returns true to stop;
+// walkJson then unwinds and returns true. JSON.parse already guarantees the
+// tree is acyclic and bounded, so no depth cap is needed.
+function walkJson(node, visit) {
+	if (!node || typeof node !== 'object') return false;
+	if (visit(node)) return true;
+	if (Array.isArray(node)) {
+		for (var item of node) if (walkJson(item, visit)) return true;
+	}
+	else {
+		for (var key of Object.keys(node)) if (walkJson(node[key], visit)) return true;
+	}
+	return false;
+}
+
+// The videoId the ytInitialData payload describes. Read directly from the
+// root `currentVideoEndpoint` rather than walking the tree: that key also
+// appears under recommendation tiles and overlay menus, so a DFS would
+// match whichever one comes first in object-key order.
+function dataVideoId(data) {
+	return (data
+		&& data.currentVideoEndpoint
+		&& data.currentVideoEndpoint.watchEndpoint
+		&& data.currentVideoEndpoint.watchEndpoint.videoId) || null;
+}
+
+// Channel names for the watched video (uploader first, then collaborators).
+// Scoped to videoSecondaryInfoRenderer because sidebar recommendations live
+// under videoCardRenderer, which has an identically-shaped owner.
+//
+// Collaborator names live in a dialogViewModel whose customContent.
+// listViewModel holds one listItem per channel. Each listItem also carries
+// a trailingButtons subtree with a nested subscribe-options sheet ("All",
+// "Personalised", "None", "Unsubscribe"), so we iterate listItems directly
+// rather than walking the dialog subtree — otherwise the menu options get
+// scraped as collaborators.
+//
+// Returns [] for single-owner pages (no dialog) and for pages whose
+// ytInitialData lacks the expected anchor entirely.
+function channelNamesFromData(data) {
+	var vor = null;
+	walkJson(data, function (node) {
+		if (node.videoSecondaryInfoRenderer) {
+			vor = node.videoSecondaryInfoRenderer.owner
+				&& node.videoSecondaryInfoRenderer.owner.videoOwnerRenderer;
+			return true;
+		}
+		return false;
+	});
+	if (!vor) {
+		Zotero.debug('YouTube: no videoSecondaryInfoRenderer.owner.videoOwnerRenderer');
+		return [];
+	}
+
+	var names = [];
+	walkJson(vor, function (node) {
+		var items = node.dialogViewModel
+			&& node.dialogViewModel.customContent
+			&& node.dialogViewModel.customContent.listViewModel
+			&& node.dialogViewModel.customContent.listViewModel.listItems;
+		if (!Array.isArray(items)) return false;
+		for (var item of items) {
+			var name = item.listItemViewModel
+				&& item.listItemViewModel.title
+				&& item.listItemViewModel.title.content;
+			if (name) names.push(name);
+		}
+		return true;
+	});
+	return names;
+}
+
+// Parse `var ytInitialData = {...}` out of a script blob. Returns null on
+// any failure (missing marker, unbalanced braces, JSON parse error) and
+// logs the cause, so the caller can treat ytInitialData as a single signal.
+function extractYtInitialData(raw) {
+	if (!raw) return null;
+	var marker = raw.indexOf('var ytInitialData = {');
+	if (marker === -1) return null;
+	var start = raw.indexOf('{', marker);
+
+	// The script appends statements after the object literal, so JSON.parse
+	// can't be fed the whole blob. Walk to the matching closing brace, tracking
+	// string boundaries so { or } inside string values don't miscount depth.
+	var depth = 0, end = start, inString = false;
+	while (end < raw.length) {
+		var ch = raw[end];
+		if (inString) {
+			if (ch === '\\') end++;
+			else if (ch === '"') inString = false;
+		}
+		else if (ch === '"') inString = true;
+		else if (ch === '{') depth++;
+		else if (ch === '}') {
+			if (--depth === 0) break;
+		}
+		end++;
+	}
+	if (depth !== 0) {
+		Zotero.debug('YouTube: ytInitialData braces unbalanced');
+		return null;
+	}
+	try {
+		return JSON.parse(raw.substring(start, end + 1));
+	}
+	catch (e) {
+		Zotero.debug('YouTube: ytInitialData parse failed: ' + e);
+		return null;
+	}
+}
+
+// Extract channel names for collaborator videos from ytInitialData.
+// Returns [] when the page has a single owner (DOM selectors handle that),
+// when the data describes a different video (SPA navigation preserves the
+// original payload — DOM fallback covers it), or when the data is missing.
+function extractCreatorNames(doc, videoId) {
+	if (!videoId) return [];
+	for (var script of doc.querySelectorAll('script:not([src])')) {
+		var raw = script.textContent;
+		var data = extractYtInitialData(raw);
+		if (!data) continue;
+		if (dataVideoId(data) !== videoId) {
+			Zotero.debug('YouTube: ytInitialData describes a different video (SPA stale)');
+			return [];
+		}
+		return channelNamesFromData(data);
+	}
+	return [];
+}
+
 function scrape(doc, url) {
 	var item = new Zotero.Item("videoRecording");
 	if (!Zotero.isServer) {
@@ -132,15 +267,23 @@ function scrape(doc, url) {
 			|| attr(doc, 'ytm-factoid-renderer:last-child > div', 'aria-label') // Mobile if description has been opened
 		) || jsonLD.uploadDate; // Mobile on initial page load
 
-		var author = text(doc, '#meta-contents #text-container .ytd-channel-name') // Desktop
-			|| text(doc, '#upload-info #text-container .ytd-channel-name')
-			|| text(doc, '.slim-owner-channel-name'); // Mobile
-		if (author) {
-			item.creators.push({
-				lastName: author,
-				creatorType: "author",
-				fieldMode: 1
-			});
+		var creatorNames = extractCreatorNames(doc, videoIdFromURL(url));
+		if (creatorNames.length) {
+			for (var name of creatorNames) {
+				item.creators.push({ lastName: name, creatorType: "author", fieldMode: 1 });
+			}
+		}
+		else {
+			var author = text(doc, '#meta-contents #text-container .ytd-channel-name') // Desktop
+				|| text(doc, '#upload-info #text-container .ytd-channel-name')
+				|| text(doc, '.slim-owner-channel-name'); // Mobile
+			if (author) {
+				item.creators.push({
+					lastName: author,
+					creatorType: "author",
+					fieldMode: 1
+				});
+			}
 		}
 		var description = text(doc, '#description .content')
 			|| text(doc, '#description')
@@ -198,6 +341,37 @@ var testCases = [
 				"libraryCatalog": "YouTube",
 				"runningTime": "2:51",
 				"url": "https://www.youtube.com/watch?v=pq94aBrc0pY",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.youtube.com/watch?v=73Do0OScoOU",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "videoRecording",
+				"title": "The First Entity Component System - An Interview with Marc LeBlanc",
+				"creators": [
+					{
+						"lastName": "Molly Rocket",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Marc \"MAHK\" LeBlanc",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2026-06-01",
+				"libraryCatalog": "YouTube",
+				"runningTime": "2:32:34",
+				"url": "https://www.youtube.com/watch?v=73Do0OScoOU",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
