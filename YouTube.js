@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-06-04 16:14:22"
+	"lastUpdated": "2026-06-04 21:14:01"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2015-2024 Sean Takats, Michael Berkowitz, Matt Burton, Rintze Zelle, and Geoff Banh
-	
+
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -70,9 +70,9 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) != 'multiple') {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 	else {
 		Zotero.selectItems(getSearchResults(doc), function (items) {
@@ -82,7 +82,11 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				ids.push(i);
 			}
-			ZU.processDocuments(ids, scrape);
+			ZU.processDocuments(ids, function (doc) {
+				scrape(doc, doc.location.href).catch(function (e) {
+					Zotero.debug('YouTube: scrape failed: ' + e);
+				});
+			});
 		});
 	}
 }
@@ -94,6 +98,13 @@ function getMetaContent(doc, attrName, value) {
 function videoIdFromURL(url) {
 	var m = url.match(/[?&]v=([0-9a-zA-Z_-]+)/);
 	return m ? m[1] : null;
+}
+
+// Build the canonical watch URL from the video ID so URLs with the v=
+// parameter in any position (e.g. ?list=...&v=ID) normalise the same way.
+function canonicalWatchURL(url) {
+	var videoId = videoIdFromURL(url);
+	return videoId ? 'https://www.youtube.com/watch?v=' + videoId : url;
 }
 
 // Depth-first walk over a parsed JSON tree. `visit` returns true to stop;
@@ -207,26 +218,49 @@ function extractYtInitialData(raw) {
 	}
 }
 
-// Extract channel names for collaborator videos from ytInitialData.
-// Returns [] when the page has a single owner (DOM selectors handle that),
-// when the data describes a different video (SPA navigation preserves the
-// original payload — DOM fallback covers it), or when the data is missing.
-function extractCreatorNames(doc, videoId) {
-	if (!videoId) return [];
+// Returns null if no usable ytInitialData is present in this doc
+// (script absent or all candidates failed to parse) — refetching the
+// same URL won't help, so the caller should fall straight back to DOM.
+// Returns { stale: true } when a ytInitialData was found but describes
+// a different video; refetching the canonical URL may yield fresh data.
+// Returns { names: string[] } when fresh data parsed cleanly (names may
+// be empty for single-owner videos).
+function namesFromDoc(doc, expectedVideoId) {
 	for (var script of doc.querySelectorAll('script:not([src])')) {
 		var raw = script.textContent;
 		var data = extractYtInitialData(raw);
 		if (!data) continue;
-		if (dataVideoId(data) !== videoId) {
+		if (dataVideoId(data) !== expectedVideoId) {
 			Zotero.debug('YouTube: ytInitialData describes a different video (SPA stale)');
-			return [];
+			return { stale: true };
 		}
-		return channelNamesFromData(data);
+		return { names: channelNamesFromData(data) };
 	}
-	return [];
+	return null;
 }
 
-function scrape(doc, url) {
+async function extractCreatorNames(doc, url) {
+	var videoId = videoIdFromURL(url);
+	if (!videoId) return [];
+
+	var result = namesFromDoc(doc, videoId);
+	if (!result) return [];
+	if (!result.stale) return result.names;
+
+	try {
+		var fresh = await requestDocument(canonicalWatchURL(url));
+		var refetched = namesFromDoc(fresh, videoId);
+		if (refetched && !refetched.stale) return refetched.names;
+		Zotero.debug('YouTube: refetch did not yield matching ytInitialData');
+		return [];
+	}
+	catch (e) {
+		Zotero.debug('YouTube: refetch for ytInitialData failed: ' + e);
+		return [];
+	}
+}
+
+async function scrape(doc, url) {
 	var item = new Zotero.Item("videoRecording");
 	if (!Zotero.isServer) {
 		let jsonLD;
@@ -245,8 +279,7 @@ function scrape(doc, url) {
 		item.title = text(doc, '#info-contents h1.title') // Desktop
 			|| text(doc, '#title')
 			|| text(doc, '.slim-video-information-title'); // Mobile
-		// try to scrape only the canonical url, excluding additional query parameters
-		item.url = url.replace(/^(.+\/watch\?v=[0-9a-zA-Z_-]+).*/, "$1").replace('m.youtube.com', 'www.youtube.com');
+		item.url = canonicalWatchURL(url);
 		item.runningTime = text(doc, '#movie_player .ytp-time-duration') // Desktop
 			|| text(doc, '.ytm-time-display .time-second'); // Mobile after unmute
 		if (!item.runningTime && jsonLD.duration) { // Mobile before unmute
@@ -267,7 +300,7 @@ function scrape(doc, url) {
 			|| attr(doc, 'ytm-factoid-renderer:last-child > div', 'aria-label') // Mobile if description has been opened
 		) || jsonLD.uploadDate; // Mobile on initial page load
 
-		var creatorNames = extractCreatorNames(doc, videoIdFromURL(url));
+		var creatorNames = await extractCreatorNames(doc, url);
 		if (creatorNames.length) {
 			for (var name of creatorNames) {
 				item.creators.push({ lastName: name, creatorType: "author", fieldMode: 1 });
