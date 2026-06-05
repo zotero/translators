@@ -2,19 +2,20 @@
 
 import path from 'node:path';
 import process from 'node:process';
-import { chromium } from 'playwright';
 import { parseArgs, resolveTranslator, REPO_ROOT } from './lib/common.mjs';
 import { ensureConnectorBuild, CONNECTOR_BUILD_DIR, EXTENSION_ID } from './lib/connector.mjs';
+import { launchBrowser, resolveHeadless } from './lib/browser.mjs';
 
 const CI_DIR = path.join(REPO_ROOT, '.ci', 'pull-request-check');
 
 const { values, positionals } = parseArgs({
-	usage: 'node .bin/run-tests.mjs <translator...> [--json] [--keep-open] [--no-dependents]',
+	usage: 'node .bin/run-tests.mjs <translator...> [--json] [--keep-open] [--headed] [--no-dependents]',
 	options: {
 		json: { type: 'boolean' },
 		'keep-open': { type: 'boolean' },
 		'no-dependents': { type: 'boolean' },
 		'rebuild-connector': { type: 'boolean' },
+		headed: { type: 'boolean' },
 		help: { type: 'boolean', short: 'h' },
 	},
 });
@@ -73,18 +74,13 @@ if (toTestIDs.size === 0) {
 console.error(`Testing: ${Array.from(toTestNames).join(', ')}`);
 
 // Launch browser with extension
-let context;
+const headless = resolveHeadless(values);
+let session;
 let allPassed = false;
 
 try {
-	context = await chromium.launchPersistentContext('', {
-		channel: 'chromium',
-		headless: !values['keep-open'],
-		args: [
-			`--disable-extensions-except=${extensionDir}`,
-			`--load-extension=${extensionDir}`,
-		],
-	});
+	session = await launchBrowser({ headless, extensionDir });
+	const context = session.context;
 
 	const page = await context.newPage();
 
@@ -97,6 +93,22 @@ try {
 	page.on('pageerror', err => {
 		console.error(`[page exception] ${err.message}`);
 	});
+
+	// Headed only: pre-warm each site in a real tab so a human can solve any
+	// anti-bot challenge. Cookies set here are shared with the connector's own
+	// background requests. (Pointless headless, where nobody can solve a captcha.)
+	if (!headless) {
+		const warmup = await context.newPage();
+		for (const warmupUrl of collectWarmupUrls(positionals, translatorServer)) {
+			try {
+				await session.goto(warmup, warmupUrl);
+			}
+			catch (e) {
+				console.error(`[warmup] ${warmupUrl}: ${e.message}`);
+			}
+		}
+		await warmup.close();
+	}
 
 	const translatorsToTest = Array.from(toTestIDs);
 	await new Promise(resolve => setTimeout(resolve, 500));
@@ -131,13 +143,38 @@ catch (err) {
 }
 finally {
 	if (!values['keep-open']) {
-		if (context) await context.close();
+		if (session) await session.close();
 	}
 	translatorServer.stopServing();
 	if (!values.json) {
 		console.log(allPassed ? '\nAll tests passed' : '\nSome tests failed');
 	}
 	process.exit(allPassed ? 0 : 1);
+}
+
+// Pull one representative test-case URL per origin out of the translators under
+// test, for pre-warming. Capped so multi-site translators don't open dozens of tabs.
+function collectWarmupUrls(filenames, server) {
+	const byOrigin = new Map();
+	for (const filename of filenames) {
+		const basename = path.basename(filename.endsWith('.js') ? filename : filename + '.js');
+		const translator = server.filenameToTranslator[basename];
+		if (!translator) {
+			continue;
+		}
+		for (const [, url] of translator.content.matchAll(/"url":\s*"(https?:\/\/[^"]+)"/g)) {
+			try {
+				const { origin } = new URL(url);
+				if (!byOrigin.has(origin)) {
+					byOrigin.set(origin, url);
+				}
+			}
+			catch {
+				// skip unparseable URLs
+			}
+		}
+	}
+	return [...byOrigin.values()].slice(0, 5);
 }
 
 function report(results, translatorsToTest, jsonMode) {

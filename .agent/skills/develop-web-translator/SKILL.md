@@ -37,6 +37,16 @@ node .bin/inspect-page.mjs "<example url>"
 
 This gives you meta tags, accessibility tree, and screenshot.
 
+### Difficult sites (anti-bot walls)
+
+The browser tools (`capture-har`, `inspect-page`, `create-test`, `run-tests`) run **headless** by default. If a site is behind Cloudflare, a captcha, or another anti-bot wall, add `--headed` to open a visible window where you can solve the challenge by hand; the tool waits until it clears, then continues. (`--interact` and `--keep-open` also run headed.)
+
+A solved challenge is cached in a reused browser profile at `.tmp/browser-profile`, so the next run carries it over. If that cached state goes stale (the site starts failing again) or a run hangs on a profile lock, clear it:
+
+```
+rm -rf .tmp/browser-profile
+```
+
 ## Step 3: Choose an approach
 
 Check the `inspect-page` meta tags first:

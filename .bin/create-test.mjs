@@ -3,10 +3,10 @@
 import path from 'node:path';
 import process from 'node:process';
 import { promises as fs } from 'node:fs';
-import { chromium } from 'playwright';
 import { parseArgs, resolveTranslator, REPO_ROOT } from './lib/common.mjs';
 import { ensureConnectorBuild, CONNECTOR_BUILD_DIR, EXTENSION_ID } from './lib/connector.mjs';
 import { readTranslator } from './lib/translator-io.mjs';
+import { launchBrowser, resolveHeadless } from './lib/browser.mjs';
 
 const CI_DIR = path.join(REPO_ROOT, '.ci', 'pull-request-check');
 const BEGIN_TEST_CASES = '/** BEGIN TEST CASES **/';
@@ -21,6 +21,7 @@ const { values, positionals } = parseArgs({
 		'keep-open': { type: 'boolean' },
 		'no-write': { type: 'boolean' },
 		json: { type: 'boolean' },
+		headed: { type: 'boolean' },
 		help: { type: 'boolean', short: 'h' },
 	},
 });
@@ -65,16 +66,20 @@ await ensureConnectorBuild();
 const translatorServer = await import(path.join(CI_DIR, 'translator-server.mjs'));
 await translatorServer.serve();
 
-let context;
+let session;
 try {
-	context = await chromium.launchPersistentContext('', {
-		channel: 'chromium',
-		headless: !values['keep-open'],
-		args: [
-			`--disable-extensions-except=${CONNECTOR_BUILD_DIR}`,
-			`--load-extension=${CONNECTOR_BUILD_DIR}`,
-		],
-	});
+	const headless = resolveHeadless(values);
+	session = await launchBrowser({ headless, extensionDir: CONNECTOR_BUILD_DIR });
+	const context = session.context;
+
+	// When headed (--headed/--keep-open), pre-warm the target site in a real tab
+	// first: this lets the user clear any anti-bot challenge by hand, and seeds
+	// cookies so the connector's own background fetches get through.
+	if (!headless && values.url) {
+		const warmup = await context.newPage();
+		await session.goto(warmup, values.url);
+		await warmup.close();
+	}
 
 	const page = await context.newPage();
 
@@ -161,6 +166,6 @@ catch (err) {
 	process.exit(1);
 }
 finally {
-	if (!values['keep-open'] && context) await context.close();
+	if (!values['keep-open'] && session) await session.close();
 	translatorServer.stopServing();
 }
