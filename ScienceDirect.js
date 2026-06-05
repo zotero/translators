@@ -2,14 +2,14 @@
 	"translatorID": "b6d0a7a-d076-48ae-b2f0-b6de28b194e",
 	"label": "ScienceDirect",
 	"creator": "Michael Berkowitz and Aurimas Vinckevicius",
-	"target": "^https?://[^/]*science-?direct\\.com[^/]*/((science/)?(article/|(journal|bookseries|book|handbook)/\\d)|search[?/]|journal/[^/]+/vol)",
+	"target": "^https?://[^/]*science-?direct\\.com[^/]*/((science/)?(article/|chapter/|(journal|bookseries|handbook)/\\d|book/(?:[a-z-]+/)?\\d)|search[?/]|journal/[^/]+/vol)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-03-19 20:29:30"
+	"lastUpdated": "2026-06-05 15:27:44"
 }
 
 function detectWeb(doc, url) {
@@ -25,7 +25,9 @@ function detectWeb(doc, url) {
 	if ((url.includes("pdf")
 			&& !url.includes("_ob=ArticleURL")
 			&& !url.includes("/article/"))
-		|| url.search(/\/(?:journal|bookseries|book|handbook)\//) !== -1) {
+		|| (url.search(/\/(?:journal|bookseries|book|handbook)\//) !== -1
+			// Individual articles/chapters have a PII; listing pages don't
+			&& !url.includes("/pii/"))) {
 		if (getArticleList(doc).length > 0) {
 			return "multiple";
 		}
@@ -45,8 +47,8 @@ function detectWeb(doc, url) {
 		}
 	}
 	if (!new URL(url).pathname.includes("pdf")) {
-		// Book sections have the ISBN in the URL
-		if (url.includes("/B978")) {
+		// Book sections have the ISBN in the URL, and chapters are under /science/chapter/
+		if (url.includes("/B978") || url.includes("/chapter/")) {
 			return "bookSection";
 		}
 		else if (getISBN(doc)) {
@@ -278,6 +280,9 @@ function attachSupplementary(doc, item) {
 async function processRIS(doc, text, isSearchResult = false) {
 	let pdfURL = await getPDFLink(doc);
 
+	// Book-series chapters have a series ISSN (tagged SN)
+	let isBookSeriesChapter = /^SN\s+-\s+\d{4}-\d{3}[\dxX]\s*$/m.test(text);
+
 	// T2 doesn't appear to hold the short title anymore.
 	// Sometimes has series title, so I'm mapping this to T3,
 	// although we currently don't recognize that in RIS
@@ -327,6 +332,14 @@ async function processRIS(doc, text, isSearchResult = false) {
 		if (item.issue === 0) delete item.issue;
 
 		if (item.volume) item.volume = item.volume.replace(/^\s*volume\s*/i, '');
+
+		// For book-series chapters, the RIS puts the series name in BT
+		// (mapped to bookTitle) and the specific volume's title in T2
+		// (mapped to series, after our T2 -> T3 rewrite). Swap them so
+		// bookTitle is the volume and series is the ongoing series.
+		if (item.itemType === "bookSection" && item.series && isBookSeriesChapter) {
+			[item.bookTitle, item.series] = [item.series, item.bookTitle];
+		}
 
 		for (var i = 0, n = item.creators.length; i < n; i++) {
 			// add spaces after initials
@@ -428,7 +441,8 @@ function getArticleList(doc) {
 		'//h2//a[contains(@class, "result-list-title-link")]',
 		'//ol[contains(@class, "article-list") or contains(@class, "article-list-items")]//a[contains(@class, "article-content-title")]',
 		'//li[contains(@class, "list-chapter")]//h2//a',
-		'//h4[contains(@class, "chapter-title")]/a'
+		'//h4[contains(@class, "chapter-title")]/a',
+		'//a[starts-with(@id, "chapter-title-")]'
 	];
 	return ZU.xpath(doc, '('
 		+ articlePaths.join('|')
