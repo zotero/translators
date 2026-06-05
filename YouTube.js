@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-06-05 16:06:50"
+	"lastUpdated": "2026-06-05 16:09:20"
 }
 
 /*
@@ -71,23 +71,15 @@ function getSearchResults(doc, checkOnly) {
 }
 
 async function doWeb(doc, url) {
-	if (detectWeb(doc, url) != 'multiple') {
-		await scrape(doc, url);
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else {
-		Zotero.selectItems(getSearchResults(doc), function (items) {
-			if (!items) return;
-
-			var ids = [];
-			for (var i in items) {
-				ids.push(i);
-			}
-			ZU.processDocuments(ids, function (doc) {
-				scrape(doc, doc.location.href).catch(function (e) {
-					Zotero.debug('YouTube: scrape failed: ' + e);
-				});
-			});
-		});
+		await scrape(doc, url);
 	}
 }
 
@@ -260,7 +252,7 @@ async function extractCreatorNames(doc, url) {
 	}
 }
 
-async function scrape(doc, url) {
+async function scrape(doc, url = doc.location.href) {
 	var item = new Zotero.Item("videoRecording");
 	if (!Zotero.isServer) {
 		let jsonLD;
