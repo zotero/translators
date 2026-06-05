@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-06-04 21:14:01"
+	"lastUpdated": "2026-06-05 16:06:50"
 }
 
 /*
@@ -372,7 +372,7 @@ var testCases = [
 				"date": "2007-01-01",
 				"abstractNote": "Zotero is a free, easy-to-use research tool that helps you gather and organize resources (whether bibliography or the full text of articles), and then lets you to annotate, organize, and share the results of your research. It includes the best parts of older reference manager software (like EndNote)—the ability to store full reference information in author, title, and publication fields and to export that as formatted references—and the best parts of modern software such as del.icio.us or iTunes, like the ability to sort, tag, and search in advanced ways. Using its unique ability to sense when you are viewing a book, article, or other resource on the web, Zotero will—on many major research sites—find and automatically save the full reference information for you in the correct fields.",
 				"libraryCatalog": "YouTube",
-				"runningTime": "2:51",
+				"runningTime": "02:53",
 				"url": "https://www.youtube.com/watch?v=pq94aBrc0pY",
 				"attachments": [],
 				"tags": [],
@@ -402,6 +402,7 @@ var testCases = [
 					}
 				],
 				"date": "2026-06-01",
+				"abstractNote": "An interview with Marc LeBlanc on the pioneering entity system work done at Looking Glass for Thief: The Dark Project.\n\nAccompanying article: https://computerenhance.com\nMahk's YouTube:    / @algorithmancytube  \nMahk's Twitch:   / videos  \nMahk's game design website: https://8kindsoffun.com",
 				"libraryCatalog": "YouTube",
 				"runningTime": "2:32:34",
 				"url": "https://www.youtube.com/watch?v=73Do0OScoOU",
