@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-03-09 16:01:06"
+	"lastUpdated": "2026-06-15 16:55:08"
 }
 
 /*
@@ -169,6 +169,8 @@ async function scrape(doc, url = doc.location.href) {
 			}
 		}
 		item.attachments.push({ url: pdfURL, title: "Full text PDF", mimeType: "application/pdf" });
+		// EBSCO now emits N1 tags with taxonomies ("Article", "Academic Journal")
+		item.notes = [];
 		item.complete();
 	});
 	await translator.translate();
