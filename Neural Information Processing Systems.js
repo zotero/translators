@@ -7,9 +7,9 @@
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 4,
+	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-03-28 18:01:24"
+	"lastUpdated": "2026-06-16 21:27:35"
 }
 
 /*
@@ -40,17 +40,20 @@ function detectWeb(doc, url) {
 	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	else if (url.includes('/paper/') && /-Paper\.pdf$|-Abstract-Conference\.html$/.test(url)) {
+		return "conferencePaper";
+	}
 	else if (url.includes('/paper/') && /-Paper\.pdf$|-Abstract\.html$/.test(url)) {
 		return "conferencePaper";
 	}
 	return false;
 }
 
+
 function scrape(doc, url) {
-	// Unfortunately, the abstract isn't semantically marked at all; this is the best we can do
-	let abstract = ZU.xpathText(doc, '//h4[text()="Abstract"]/following-sibling::p[2]');
-	let pdfURL = attr(doc, 'a[href$="-Paper.pdf"]', 'href');
+	let pdfURL = attr(doc, 'meta[name="citation_pdf_url"]', 'content');
 	let bibURL = attr(doc, 'a[href$="-Bibtex.bib"], a[href$="/bibtex"]', 'href');
+	let abstract = text(doc, ".paper-section > p:nth-child(3)");
 	if (bibURL) {
 		ZU.doGet(bibURL, function (text) {
 			let translator = Zotero.loadTranslator("import");
@@ -60,8 +63,8 @@ function scrape(doc, url) {
 			translator.setHandler("itemDone", function (obj, item) {
 				// NeurIPS puts journal/proceedings editors in the BibTeX,
 				// but we don't really want them.
+
 				item.creators = item.creators.filter(c => c.creatorType != 'editor');
-				
 				item.url = url;
 				item.abstractNote = abstract;
 				item.attachments.push({
@@ -69,7 +72,6 @@ function scrape(doc, url) {
 					title: "Full Text PDF",
 					mimeType: "application/pdf"
 				});
-				
 				item.complete();
 			});
 			translator.translate();
@@ -77,6 +79,7 @@ function scrape(doc, url) {
 	}
 	else {
 		// fall back to EM for newer items (pre-conference, typically)
+		// None of the test cases go into the else loop so I don't know how needed this is
 		let translator = Zotero.loadTranslator('web');
 		// Embedded Metadata
 		translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
@@ -110,6 +113,13 @@ function doWeb(doc, url) {
 		let abstractURL = url
 			.replace('/file/', '/hash/')
 			.replace('-Paper.pdf', '-Abstract.html');
+		ZU.processDocuments(abstractURL, scrape);
+	}
+	else if (url.endsWith('-Paper-Conference.pdf')) {
+		let abstractURL = url
+			.replace('/file/', '/hash/')
+			.replace('-Paper-Conference.pdf', '-Abstract-Conference.html');
+		
 		ZU.processDocuments(abstractURL, scrape);
 	}
 	else {
@@ -191,6 +201,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://proceedings.neurips.cc/papers/search?q=richard+zemel",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
@@ -340,6 +351,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://proceedings.neurips.cc/papers/search?q=Lehrach",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
@@ -361,14 +373,115 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2021-12-06",
+				"date": "2021",
 				"abstractNote": "We introduce the forward-backward (FB) representation of the dynamics of a reward-free Markov decision process. It provides explicit near-optimal policies for any reward specified a posteriori. During an unsupervised phase, we use reward-free interactions with the environment to learn two representations via off-the-shelf deep learning methods and temporal difference (TD) learning. In the test phase, a reward representation is estimated either from reward observations or an explicit reward description (e.g., a target state). The optimal policy for thatreward is directly obtained from these representations, with no planning. We assume access to an exploration scheme or replay buffer for the first phase.The corresponding unsupervised loss is well-principled: if training is perfect, the policies obtained are provably optimal for any reward function.  With imperfect training, the sub-optimality is proportional to the unsupervised approximation error. The FB representation learns long-range relationships between states and actions, via a predictive occupancy map, without having to synthesize states as in model-based approaches.This is a step towards learning controllable agents in arbitrary black-box stochastic environments. This approach compares well to goal-oriented RL algorithms on discrete and continuous mazes, pixel-based MsPacman, and the FetchReach virtual robot arm. We also illustrate how the agent can immediately adapt to new tasks beyond goal-oriented RL.",
-				"language": "en",
-				"libraryCatalog": "proceedings.neurips.cc",
+				"itemID": "NEURIPS2021_003dd617",
+				"libraryCatalog": "Neural Information Processing Systems",
+				"pages": "13–23",
 				"proceedingsTitle": "Advances in Neural Information Processing Systems",
 				"publisher": "Curran Associates, Inc.",
 				"url": "https://proceedings.neurips.cc/paper/2021/hash/003dd617c12d444ff9c80f717c3fa982-Abstract.html",
 				"volume": "34",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://papers.nips.cc/paper_files/paper/2022/hash/a98846e9d9cc01cfb87eb694d946ce6b-Abstract.html",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "Elucidating the Design Space of Diffusion-Based Generative Models",
+				"creators": [
+					{
+						"firstName": "Tero",
+						"lastName": "Karras",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Miika",
+						"lastName": "Aittala",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Timo",
+						"lastName": "Aila",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Samuli",
+						"lastName": "Laine",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022",
+				"abstractNote": "We argue that the theory and practice of diffusion-based generative models are currently unnecessarily convoluted and seek to remedy the situation by presenting a design space that clearly separates the concrete design choices. This lets us identify several changes to both the sampling and training processes, as well as preconditioning of the score networks. Together, our improvements yield new state-of-the-art FID of 1.79 for CIFAR-10 in a class-conditional setting and 1.97 in an unconditional setting, with much faster sampling (35 network evaluations per image) than prior designs. To further demonstrate their modular nature, we show that our design changes dramatically improve both the efficiency and quality obtainable with pre-trained score networks from previous work, including improving the FID of a previously trained ImageNet-64 model from 2.07 to near-SOTA 1.55, and after re-training with our proposed improvements to a new SOTA of 1.36.",
+				"itemID": "NEURIPS2022_a98846e9",
+				"libraryCatalog": "Neural Information Processing Systems",
+				"pages": "26565–26577",
+				"proceedingsTitle": "Advances in Neural Information Processing Systems",
+				"publisher": "Curran Associates, Inc.",
+				"url": "https://papers.nips.cc/paper_files/paper/2022/hash/a98846e9d9cc01cfb87eb694d946ce6b-Abstract.html",
+				"volume": "35",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://papers.neurips.cc/paper_files/paper/2022/hash/a98846e9d9cc01cfb87eb694d946ce6b-Abstract-Conference.html",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "Elucidating the Design Space of Diffusion-Based Generative Models",
+				"creators": [
+					{
+						"firstName": "Tero",
+						"lastName": "Karras",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Miika",
+						"lastName": "Aittala",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Timo",
+						"lastName": "Aila",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Samuli",
+						"lastName": "Laine",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022",
+				"abstractNote": "We argue that the theory and practice of diffusion-based generative models are currently unnecessarily convoluted and seek to remedy the situation by presenting a design space that clearly separates the concrete design choices. This lets us identify several changes to both the sampling and training processes, as well as preconditioning of the score networks. Together, our improvements yield new state-of-the-art FID of 1.79 for CIFAR-10 in a class-conditional setting and 1.97 in an unconditional setting, with much faster sampling (35 network evaluations per image) than prior designs. To further demonstrate their modular nature, we show that our design changes dramatically improve both the efficiency and quality obtainable with pre-trained score networks from previous work, including improving the FID of a previously trained ImageNet-64 model from 2.07 to near-SOTA 1.55, and after re-training with our proposed improvements to a new SOTA of 1.36.",
+				"itemID": "NEURIPS2022_a98846e9",
+				"libraryCatalog": "Neural Information Processing Systems",
+				"pages": "26565–26577",
+				"proceedingsTitle": "Advances in Neural Information Processing Systems",
+				"publisher": "Curran Associates, Inc.",
+				"url": "https://papers.neurips.cc/paper_files/paper/2022/hash/a98846e9d9cc01cfb87eb694d946ce6b-Abstract-Conference.html",
+				"volume": "35",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
