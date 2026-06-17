@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-04-05 08:16:53"
+	"lastUpdated": "2024-05-24 17:08:12"
 }
 
 /*
@@ -38,6 +38,7 @@
 
 
 let titleRe = /^(?:\(\d+\) )?(.+) .* (?:Twitter|X): .([\S\s]+). \/ (?:Twitter|X)/;
+let domainRe = /https?:\/\/(?:www\.)?([^/]+)+/;
 
 function detectWeb(doc, url) {
 	if (url.includes('/status/')) {
@@ -61,7 +62,10 @@ function unshortenURLs(doc, str) {
 
 function unshortenURL(doc, tCoURL) {
 	var a = doc.querySelector('a[href*="' + tCoURL + '"]');
-	return (a ? a.textContent.replace(/…$/, '') : false) || tCoURL;
+	if (!a || !domainRe.test(a.textContent)) {
+		return tCoURL;
+	}
+	return a.textContent.replace(/…$/, '');
 }
 
 function extractURLs(doc, str) {
@@ -245,7 +249,7 @@ function scrape(doc, url) {
 			title += " " + (i + 1);
 		}
 		// Include domain in parentheses
-		let domain = url.match(/https?:\/\/(?:www\.)?([^/]+)+/)[1];
+		let domain = url.match(domainRe)[1];
 		if (domain != 't.co') {
 			title += ` (${domain})`;
 		}

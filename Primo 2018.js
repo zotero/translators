@@ -2,14 +2,14 @@
 	"translatorID": "cd669d1f-96b8-4040-aa36-48f843248399",
 	"label": "Primo 2018",
 	"creator": "Philipp Zumstein",
-	"target": "(/primo-explore/|/discovery/(search|fulldisplay|jsearch|dbsearch|npsearch|openurl|jfulldisplay|dbfulldisplay|npfulldisplay|collectionDiscovery)\\?)",
+	"target": "(/primo-explore/|/(discovery|nde)/(search|fulldisplay|jsearch|dbsearch|npsearch|openurl|jfulldisplay|dbfulldisplay|npfulldisplay|collectionDiscovery)\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-05-11 21:32:37"
+	"lastUpdated": "2025-05-20 15:10:00"
 }
 
 /*
@@ -110,102 +110,6 @@ function getPnxElems(doc) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "http://virtuose.uqam.ca/primo-explore/fulldisplay?vid=UQAM&docid=UQAM_BIB000969205&context=L",
-		"defer": true,
-		"items": [
-			{
-				"itemType": "book",
-				"title": "War",
-				"creators": [
-					{
-						"lastName": "Baynes",
-						"firstName": "Ken",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ken",
-						"lastName": "Baynes",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Welsh Arts Council",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "Glynn Vivian Art Gallery",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					}
-				],
-				"date": "1970",
-				"callNumber": "NX650G8B38",
-				"language": "eng",
-				"libraryCatalog": "virtuose.uqam.ca",
-				"place": "Boston",
-				"publisher": "Book and Art Chop",
-				"series": "Art and society 1",
-				"attachments": [],
-				"tags": [
-					{
-						"tag": "ART; GUERRE; WAR"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://bcujas-catalogue.univ-paris1.fr/primo-explore/fulldisplay?vid=CUJAS_V1&docid=33CUJAS_ALEPH000070200&context=L&search_scope=LSCOP_ALL",
-		"defer": true,
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Test pattern for living",
-				"creators": [
-					{
-						"firstName": "Nicholas",
-						"lastName": "Johnson",
-						"creatorType": "author"
-					}
-				],
-				"date": "1972",
-				"callNumber": "203.206",
-				"language": "eng",
-				"libraryCatalog": "bcujas-catalogue.univ-paris1.fr",
-				"numPages": "xx+154",
-				"place": "Toronto New York",
-				"publisher": "Bantam Books",
-				"attachments": [],
-				"tags": [
-					{
-						"tag": "Mass media"
-					},
-					{
-						"tag": "Social aspects"
-					},
-					{
-						"tag": "United States"
-					},
-					{
-						"tag": "United States"
-					},
-					{
-						"tag": "Social conditions"
-					},
-					{
-						"tag": "1960-"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
 	{
 		"type": "web",
 		"url": "https://explore.lib.uliege.be/discovery/collectionDiscovery?vid=32ULG_INST:ULIEGE&collectionId=81129164700002321&lang=fr",

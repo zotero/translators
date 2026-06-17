@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2024-04-04 15:46:05"
+	"lastUpdated": "2026-01-16 14:30:48"
 }
 
 /*
@@ -73,10 +73,12 @@ function doImport() {
 			item.itemType = "bookSection";
 			break;
 		case 'audio':
+		case 'audios':
 		case 'sound_recording':
 			item.itemType = "audioRecording";
 			break;
 		case 'video':
+		case 'videos':
 		case 'dvd':
 			item.itemType = "videoRecording";
 			break;
@@ -95,25 +97,32 @@ function doImport() {
 			break;
 		case 'thesis':
 		case 'dissertation':
+		case 'dissertations':
 			item.itemType = "thesis";
 			break;
 		case 'archive_manuscript':
+		case 'archival_materials':
+		case 'manuscripts':
+		case 'archival_material_manuscript':
 		case 'object':
 			item.itemType = "manuscript";
 			break;
 		case 'map':
+		case 'maps':
 			item.itemType = "map";
 			break;
 		case 'reference_entry':
 			item.itemType = "encyclopediaArticle";
 			break;
 		case 'image':
+		case 'images':
 			item.itemType = "artwork";
 			break;
 		case 'newspaper_article':
 			item.itemType = "newspaperArticle";
 			break;
 		case 'conference_proceeding':
+		case 'conference_proceedings':
 			item.itemType = "conferencePaper";
 			break;
 		default:
@@ -131,7 +140,10 @@ function doImport() {
 	item.title = ZU.xpathText(doc, '//p:display/p:title', ns);
 	if (item.title) {
 		item.title = ZU.unescapeHTML(item.title);
-		item.title = item.title.replace(/\s*:/, ":");
+		item.title = item.title.replace(/\s*:/, ":")
+			// Remove everything after a slash in the title -
+			// generally authorship information
+			.replace(/ \/ [^/]+$/, '');
 	}
 	var creators = ZU.xpath(doc, '//p:display/p:creator', ns);
 	var contributors = ZU.xpath(doc, '//p:display/p:contributor', ns);
@@ -307,14 +319,19 @@ function doImport() {
 			callArray.push(callNumber[i].textContent.match(/\$\$D(.+?)\$/)[1]);
 		}
 	}
+	/* 2024-09 : adding a test on p:delivery/p:bestlocation/p:callnumber to get Callnumber from Primo VE pages like https://bcujas-catalogue.univ-paris1.fr/discovery/fulldisplay?context=L&vid=33CUJAS_INST:33CUJAS_INST&search_scope=MyInstitution&tab=LibraryCatalog&docid=alma990004764520107621 for example */
 	if (!callArray.length) {
-		callNumber = ZU.xpath(doc, '//p:display/p:availlibrary', ns);
+		callNumber = ZU.xpath(doc, '//p:display/p:availlibrary|//p:delivery/p:bestlocation/p:callNumber', ns);
 		for (let i = 0; i < callNumber.length; i++) {
-			if (callNumber[i].textContent.search(/\$\$2.+\$/) != -1) {
-				callArray.push(callNumber[i].textContent.match(/\$\$2\(?(.+?)(?:\s*\))?\$/)[1]);
+			let testCallNumberWithSubfields = callNumber[i].textContent.match(/\$\$2\(?(.+?)(?:\s*\))?\$/);
+			if (testCallNumberWithSubfields) {
+				callArray.push(testCallNumberWithSubfields[1]);
+			} else {
+				callArray.push(callNumber[i].textContent);
 			}
 		}
 	}
+
 	if (callArray.length) {
 		// remove duplicate call numbers
 		callArray = dedupeArray(callArray);
@@ -371,13 +388,32 @@ function stripAuthor(str) {
 		.replace(/\bNLR10::.*/, '')
 		// Austrian Libraries add authority data at the end of the author name,
 		// prefixed by '$$0'. Remove it.
-		.replace(/\$\$0.*/, '');
+		.replace(/\$\$0.*/, '')
+		// GalileoDiscovery adds language data at the end of the author name,
+		// prefixed by '$$8'. Remove it.
+		.replace(/\$\$8.*/, '');
 }
 
 function fetchCreators(item, creators, type, splitGuidance) {
+	let filterByLanguage;
 	for (let i = 0; i < creators.length; i++) {
 		var creator = ZU.unescapeHTML(creators[i].textContent).split(/\s*;\s*/);
 		for (var j = 0; j < creator.length; j++) {
+			// Some libraries have multilingual creators, and they
+			// embed a language field ($$8en, etc.) in each creator
+			// name. We want to filter out all but one language. We
+			// don't really know which one the user will want,
+			// but the first is a safe bet:
+			let language = creator[j].match(/\$\$8(\w+)/);
+			if (language) {
+				if (!filterByLanguage) {
+					filterByLanguage = language[1];
+				}
+				else if (filterByLanguage !== language[1]) {
+					continue;
+				}
+			}
+
 			var c = stripAuthor(creator[j]).replace(/\./g, "");
 			c = ZU.cleanAuthor(
 				splitGuidance[c.toLowerCase()] || c,
@@ -460,10 +496,10 @@ var testCases = [
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "Water"
+						"tag": "Chemistry"
 					},
 					{
-						"tag": "Chemistry"
+						"tag": "Water"
 					}
 				],
 				"notes": [],
@@ -684,7 +720,9 @@ var testCases = [
 					}
 				],
 				"date": "2020",
+				"DOI": "10.1007/978-3-030-63396-7_25",
 				"ISBN": "3030633950",
+				"ISSN": "1865-1348",
 				"abstractNote": "The continuously improving Internet penetration in the continent, coupled with the increasing number of smartphone users in Africa has been considered as the reasons for the adoption of social media among students and other adolescents. Even though this development has been recognizing in the literature, only a few studies have investigated the acceptance, use, and retention of social media for academic purposes. However, findings of prior studies suggest that the use of social media has an influence on academic performance. To address the lack of knowledge on the adoption of social media among students, this study aims to explore the factors that are related to students’ acceptance and use of social media. We attempt to extend the Technology Acceptance Model by integrating relational engagement, Perceived Satisfaction, as well as the Perspective of the Use of Social Media in Education. The proposed theoretical model was evaluated using quantitative data collected from 460 students in Cameroon. We applied PLS-SEM technique to test the hypotheses and the theoretical model. Implications of the findings, as well as future research directions, are presented.",
 				"bookTitle": "Information Systems",
 				"language": "eng",
@@ -721,7 +759,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "The promise / Damon Galgut.",
+				"title": "The promise",
 				"creators": [
 					{
 						"firstName": "Damon",
@@ -791,6 +829,7 @@ var testCases = [
 				],
 				"date": "1971",
 				"abstractNote": "Includes bibliographical references.",
+				"callNumber": "TD174 .D95",
 				"language": "eng",
 				"place": "New York",
 				"publisher": "Chelsea House Publishers",
@@ -861,6 +900,172 @@ var testCases = [
 						"tag": "Wirtschaftsentwicklung"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><record xmlns=\"http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib\" xmlns:sear=\"http://www.exlibrisgroup.com/xsd/jaguar/search\"><delivery><availabilityLinks>detailsgetit1</availabilityLinks><displayLocation>true</displayLocation><recordOwner>33CUJAS_INST</recordOwner><physicalServiceId>null</physicalServiceId><sharedDigitalCandidates>null</sharedDigitalCandidates><link><displayLabel>thumbnail</displayLabel><linkURL>https://proxy-euf.hosted.exlibrisgroup.com/exl_rewrite/books.google.com/books?bibkeys=ISBN:1107199956,OCLC:,LCCN:&amp;jscmd=viewapi&amp;callback=updateGBSCover</linkURL><linkType>thumbnail</linkType><id>:_0</id></link><availability>available_in_library</availability><additionalLocations>false</additionalLocations><digitalAuxiliaryMode>false</digitalAuxiliaryMode><holding><matchForHoldings><holdingRecord>852##b</holdingRecord><matchOn>MainLocation</matchOn></matchForHoldings><subLocationCode>MAG2</subLocationCode><volumeFilter>null</volumeFilter><ilsApiId>990004764520107621</ilsApiId><callNumberType>8</callNumberType><libraryCode>CUJ</libraryCode><yearFilter>null</yearFilter><boundWith>false</boundWith><stackMapUrl/><isValidUser>true</isValidUser><translateRelatedTitle>null</translateRelatedTitle><mainLocation>BIU Cujas</mainLocation><callNumber>567.067</callNumber><adaptorid>ALMA_01</adaptorid><organization>33CUJAS_INST</organization><holdingURL>OVP</holdingURL><availabilityStatus>available</availabilityStatus><id>_:0</id><subLocation>Magasin 2ème sous-sol</subLocation><holdId>2262944550007621</holdId><holKey>HoldingResultKey [mid=2262944550007621, libraryId=112237610007621, locationCode=MAG2, callNumber=567.067]</holKey><singleUnavailableItemProcessType>null</singleUnavailableItemProcessType><relatedTitle>null</relatedTitle></holding><bestlocation><matchForHoldings><holdingRecord>852##b</holdingRecord><matchOn>MainLocation</matchOn></matchForHoldings><subLocationCode>MAG2</subLocationCode><volumeFilter>null</volumeFilter><ilsApiId>990004764520107621</ilsApiId><callNumberType>8</callNumberType><libraryCode>CUJ</libraryCode><yearFilter>null</yearFilter><boundWith>false</boundWith><stackMapUrl/><isValidUser>true</isValidUser><translateRelatedTitle>null</translateRelatedTitle><mainLocation>BIU Cujas</mainLocation><callNumber>567.067</callNumber><adaptorid>ALMA_01</adaptorid><organization>33CUJAS_INST</organization><holdingURL>OVP</holdingURL><availabilityStatus>available</availabilityStatus><id>_:0</id><subLocation>Magasin 2ème sous-sol</subLocation><holdId>2262944550007621</holdId><holKey>HoldingResultKey [mid=2262944550007621, libraryId=112237610007621, locationCode=MAG2, callNumber=567.067]</holKey><singleUnavailableItemProcessType>null</singleUnavailableItemProcessType><relatedTitle>null</relatedTitle></bestlocation><electronicServices>null</electronicServices><feDisplayOtherLocations>false</feDisplayOtherLocations><hasD>null</hasD><hideResourceSharing>false</hideResourceSharing><hasFilteredServices>null</hasFilteredServices><physicalItemTextCodes>null</physicalItemTextCodes><quickAccessService>null</quickAccessService><recordInstitutionCode>null</recordInstitutionCode><displayedAvailability>null</displayedAvailability><consolidatedCoverage>null</consolidatedCoverage><additionalElectronicServices>null</additionalElectronicServices><deliveryCategory>Alma-P</deliveryCategory><serviceMode>ovp</serviceMode><filteredByGroupServices>null</filteredByGroupServices><electronicContextObjectId>null</electronicContextObjectId><GetIt1><links><isLinktoOnline>false</isLinktoOnline><displayText>null</displayText><inst4opac>33CUJAS_INST</inst4opac><getItTabText>service_getit</getItTabText><adaptorid>ALMA_01</adaptorid><ilsApiId>990004764520107621</ilsApiId><link>OVP</link><id>_:0</id></links><category>Alma-P</category></GetIt1></delivery><search><creator>Simone Daniela</creator><creationdate>2019</creationdate><sort_title>Copyright and collective authorship locating the authors of collaborative work</sort_title><sort_journal_title>Copyright and collective authorship locating the authors of collaborative work</sort_journal_title><sort_creationdate_full>2019</sort_creationdate_full><subject>Encyclopédies électroniques</subject><subject>Droit</subject><subject>Contenu généré par les utilisateurs</subject><subject>Qualité d&apos;auteur</subject><subject>Droit d&apos;auteur</subject><subject>Electronic encyclopedias</subject><subject>User-generated content Law and legislation</subject><subject>Copyright Art</subject><subject>Authorship</subject><subject>Copyright</subject><subject>Wikipedia</subject><isbn>9781107199958</isbn><isbn>1107199956</isbn><description>La 4e de couverture indique : &quot;As technology makes it easier for people to work together, large-scale collaboration is becoming increasingly prevalent. In this context, the question of how to determine authorship - and hence ownership - of copyright in collaborative works is an important question to which current copyright law fails to provide a coherent or consistent answer. In Copyright and Collective Authorship, Daniela Simone engages with the problem of how to determine the authorship of highly collaborative works. Employing insights from the ways in which collaborators understand and regulate issues of authorship, the book argues that a recalibration of copyright law is necessary, proposing an inclusive and contextual approach to joint authorship that is true to the legal concept of authorship but is also more aligned with creative reality.&quot;</description><language>eng</language><title>Copyright and collective authorship locating the authors of collaborative work</title><startdate>2019</startdate><unimarc_local_fields>990 20190827</unimarc_local_fields><unimarc_local_fields>980 BK</unimarc_local_fields><unimarc_local_fields>935 23749051X</unimarc_local_fields><unimarc_local_fields>930 751052119 567.067 b</unimarc_local_fields><addtitle>001(PPN)148977332 Cambridge intellectual property and information law</addtitle><addtitle>Cambridge intellectual property and information law</addtitle><general>Cambridge University Press</general><general>ALP000476452</general><general>UKMGB019402122</general><general>CHBIS011301756</general><general>CHVBK563491051</general><general>on1057238619</general><general>(OCoLC)1119538850</general><general>(ALP)000476452CUJ01</general><general>CUJ01(PPN)23749051X</general><general>(PPN)23749051X</general><rtype>books</rtype><enddate>2019</enddate><series>001(PPN)148977332 Cambridge intellectual property and information law</series><series>Cambridge intellectual property and information law</series><journal_title>Copyright and collective authorship locating the authors of collaborative work</journal_title><facet_creatorcontrib>Simone, Daniela</facet_creatorcontrib><sort_author>Simone Daniela</sort_author><sort_creationdate>2019</sort_creationdate></search><display><identifier>$$CISBN$$V978-1-107-19995-8;$$CISBN$$V1-107-19995-6;$$CPPN$$V23749051X;$$CMMSID$$V990004764520107621</identifier><creationdate>2019</creationdate><creator>Simone, Daniela$$QSimone Daniela</creator><lds18>&lt;a href=&quot;https://www.sudoc.fr/23749051X&quot; target=&quot;_blank&quot;&gt;Voir la notice&lt;/a&gt;</lds18><subject>Wikipedia</subject><subject>Copyright</subject><subject>Authorship</subject><subject>Copyright  -- Art</subject><subject>User-generated content  -- Law and legislation</subject><subject>Electronic encyclopedias</subject><subject>Droit d&apos;auteur</subject><subject>Qualité d&apos;auteur</subject><subject>Contenu généré par les utilisateurs  -- Droit</subject><subject>Encyclopédies électroniques</subject><format>1 vol. (xxi-300 p.) : couv. ill. en coul. ; 24 cm</format><language>eng</language><source>Alma</source><type>book</type><title>Copyright and collective authorship : locating the authors of collaborative work</title><version>1</version><relation>$$Cmain_series$$VCambridge intellectual property and information law$$QCambridge intellectual property and information law </relation><mms>990004764520107621</mms><series>Cambridge intellectual property and information law$$QCambridge intellectual property and information law</series><publisher>Cambridge etc. : Cambridge University Press</publisher><place>Cambridge [etc.]</place><lds02>CODE_PAYS_GB</lds02><lds01>23749051X</lds01><lds12>1. Copyright law and collective authorship 2. Authorship and joint authorship 3. Wikipedia 4. Australian indigenous art 5. Scientific collaborations 6. Film 7. Characteristics of collective authorship and the role of copyright law 8. An inclusive, contextual approach to the joint authorship test</lds12><lds03>TYPE_SUPPORT_BK</lds03></display><control><recordid>alma990004764520107621</recordid><sourceid>alma</sourceid><score>1.0</score><originalsourceid>000476452-CUJ01</originalsourceid><sourceformat>UNIMARC</sourceformat><sourcerecordid>990004764520107621</sourcerecordid><sourcesystem>ILS</sourcesystem><isDedup>false</isDedup></control><addata><date>2019</date><aulast>Simone</aulast><notes>Bibliogr. p. 273-293. Notes bibliogr. Index</notes><cop>Cambridge [etc</cop><isbn>978-1-107-19995-8</isbn><isbn>1-107-19995-6</isbn><format>book</format><ristype>BOOK</ristype><oclcid>(ocolc)1119538850</oclcid><abstract>La 4e de couverture indique : &quot;As technology makes it easier for people to work together, large-scale collaboration is becoming increasingly prevalent. In this context, the question of how to determine authorship - and hence ownership - of copyright in collaborative works is an important question to which current copyright law fails to provide a coherent or consistent answer. In Copyright and Collective Authorship, Daniela Simone engages with the problem of how to determine the authorship of highly collaborative works. Employing insights from the ways in which collaborators understand and regulate issues of authorship, the book argues that a recalibration of copyright law is necessary, proposing an inclusive and contextual approach to joint authorship that is true to the legal concept of authorship but is also more aligned with creative reality.&quot;</abstract><title>Copyright and collective authorship : locating the authors of collaborative work</title><aufirst>Daniela</aufirst><seriestitle>Cambridge intellectual property and information law</seriestitle><au>Simone Daniela</au><au>Simone,Daniela</au><genre>book</genre><btitle>Copyright and collective authorship : locating the authors of collaborative work</btitle><pub>Cambridge University Press</pub></addata><sort><creationdate>2019</creationdate><author>Simone Daniela</author><title>Copyright and collective authorship locating the authors of collaborative work</title></sort></record>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Copyright and collective authorship: locating the authors of collaborative work",
+				"creators": [
+					{
+						"lastName": "Simone Daniela",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2019",
+				"ISBN": "9781107199958",
+				"abstractNote": "La 4e de couverture indique : \"As technology makes it easier for people to work together, large-scale collaboration is becoming increasingly prevalent. In this context, the question of how to determine authorship - and hence ownership - of copyright in collaborative works is an important question to which current copyright law fails to provide a coherent or consistent answer. In Copyright and Collective Authorship, Daniela Simone engages with the problem of how to determine the authorship of highly collaborative works. Employing insights from the ways in which collaborators understand and regulate issues of authorship, the book argues that a recalibration of copyright law is necessary, proposing an inclusive and contextual approach to joint authorship that is true to the legal concept of authorship but is also more aligned with creative reality.\"",
+				"callNumber": "567.067",
+				"language": "eng",
+				"numPages": "xxi+300",
+				"place": "Cambridge [etc",
+				"publisher": "Cambridge University Press",
+				"series": "Cambridge intellectual property and information law",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Art"
+					},
+					{
+						"tag": "Authorship"
+					},
+					{
+						"tag": "Contenu généré par les utilisateurs"
+					},
+					{
+						"tag": "Copyright"
+					},
+					{
+						"tag": "Copyright"
+					},
+					{
+						"tag": "Droit"
+					},
+					{
+						"tag": "Droit d'auteur"
+					},
+					{
+						"tag": "Electronic encyclopedias"
+					},
+					{
+						"tag": "Encyclopédies électroniques"
+					},
+					{
+						"tag": "Law and legislation"
+					},
+					{
+						"tag": "Qualité d'auteur"
+					},
+					{
+						"tag": "User-generated content"
+					},
+					{
+						"tag": "Wikipedia"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><record xmlns=\"http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib\" xmlns:sear=\"http://www.exlibrisgroup.com/xsd/jaguar/search\"><delivery><availabilityLinks>detailsgetit1</availabilityLinks><displayLocation>true</displayLocation><recordOwner>39UPD_INST</recordOwner><physicalServiceId>null</physicalServiceId><sharedDigitalCandidates>null</sharedDigitalCandidates><link><displayLabel>thumbnail</displayLabel><linkURL>https://proxy-eu.hosted.exlibrisgroup.com/exl_rewrite/books.google.com/books?bibkeys=ISBN:0261102656,OCLC:,LCCN:&amp;jscmd=viewapi&amp;callback=updateGBSCover</linkURL><linkType>thumbnail</linkType><id>:_0</id></link><availability>available_in_library</availability><additionalLocations>false</additionalLocations><digitalAuxiliaryMode>false</digitalAuxiliaryMode><holding><matchForHoldings><holdingRecord>852##b</holdingRecord><matchOn>MainLocation</matchOn></matchForHoldings><subLocationCode>BEAT1</subLocationCode><volumeFilter>null</volumeFilter><ilsApiId>990005230620206046</ilsApiId><callNumberType>8</callNumberType><libraryCode>BEATO</libraryCode><yearFilter>null</yearFilter><boundWith>false</boundWith><stackMapUrl>https://biblio.unipd.it/biblioteche/beatopellegrino</stackMapUrl><isValidUser>true</isValidUser><translateRelatedTitle>null</translateRelatedTitle><mainLocation>Biblioteca Beato Pellegrino</mainLocation><callNumber>IA.I.1955</callNumber><adaptorid>ALMA_01</adaptorid><organization>39UPD_INST</organization><holdingURL>OVP</holdingURL><availabilityStatus>available</availabilityStatus><id>_:0</id><subLocation>Prestabile</subLocation><holdId>22192239290006046</holdId><holKey>HoldingResultKey [mid=22192239290006046, libraryId=202892910006046, locationCode=BEAT1, callNumber=IA.I.1955]</holKey><singleUnavailableItemProcessType>null</singleUnavailableItemProcessType><relatedTitle>null</relatedTitle></holding><bestlocation><matchForHoldings><holdingRecord>852##b</holdingRecord><matchOn>MainLocation</matchOn></matchForHoldings><subLocationCode>BEAT1</subLocationCode><volumeFilter>null</volumeFilter><ilsApiId>990005230620206046</ilsApiId><callNumberType>8</callNumberType><libraryCode>BEATO</libraryCode><yearFilter>null</yearFilter><boundWith>false</boundWith><stackMapUrl>https://biblio.unipd.it/biblioteche/beatopellegrino</stackMapUrl><isValidUser>true</isValidUser><translateRelatedTitle>null</translateRelatedTitle><mainLocation>Biblioteca Beato Pellegrino</mainLocation><callNumber>IA.I.1955</callNumber><adaptorid>ALMA_01</adaptorid><organization>39UPD_INST</organization><holdingURL>OVP</holdingURL><availabilityStatus>available</availabilityStatus><id>_:0</id><subLocation>Prestabile</subLocation><holdId>22192239290006046</holdId><holKey>HoldingResultKey [mid=22192239290006046, libraryId=202892910006046, locationCode=BEAT1, callNumber=IA.I.1955]</holKey><singleUnavailableItemProcessType>null</singleUnavailableItemProcessType><relatedTitle>null</relatedTitle></bestlocation><electronicServices>null</electronicServices><feDisplayOtherLocations>false</feDisplayOtherLocations><hasD>null</hasD><hideResourceSharing>false</hideResourceSharing><hasFilteredServices>null</hasFilteredServices><physicalItemTextCodes>null</physicalItemTextCodes><quickAccessService>null</quickAccessService><recordInstitutionCode>null</recordInstitutionCode><displayedAvailability>null</displayedAvailability><consolidatedCoverage>null</consolidatedCoverage><additionalElectronicServices>null</additionalElectronicServices><deliveryCategory>Alma-P</deliveryCategory><serviceMode>ovp</serviceMode><filteredByGroupServices>null</filteredByGroupServices><electronicContextObjectId>null</electronicContextObjectId><GetIt1><links><isLinktoOnline>false</isLinktoOnline><displayText>null</displayText><inst4opac>39UPD_INST</inst4opac><getItTabText>service_getit</getItTabText><adaptorid>ALMA_01</adaptorid><ilsApiId>990005230620206046</ilsApiId><link>OVP</link><id>_:0</id></links><category>Alma-P</category></GetIt1></delivery><search><creator>Tolkien, J. R. R.</creator><creationdate>1995</creationdate><sort_title>letters of J.R.R. Tolkien</sort_title><sort_journal_title>&lt;&lt;The &gt;&gt;letters of J.R.R. Tolkien</sort_journal_title><sort_creationdate_full>1995</sort_creationdate_full><isbn>9780261102651</isbn><isbn>0261102656</isbn><language>eng</language><title>&lt;&lt;The &gt;&gt;letters of J.R.R. Tolkien</title><startdate>1995</startdate><unimarc_local_fields>994 M</unimarc_local_fields><unimarc_local_fields>993 M</unimarc_local_fields><unimarc_local_fields>992 71</unimarc_local_fields><unimarc_local_fields>991 SBN_BIB</unimarc_local_fields><unimarc_local_fields>900 BK</unimarc_local_fields><general>HarperCollins</general><general>(OCoLC)876045467</general><general>(OCM)876045467</general><general>(SBN)PUV0296693</general><general>(Aleph)000523062SBP01</general><general>SBP01PUV0296693</general><general>PUV0296693</general><rtype>books</rtype><contributor>Carpenter, Humphrey</contributor><contributor>Tolkien, Christopher</contributor><journal_title>&lt;&lt;The &gt;&gt;letters of J.R.R. Tolkien</journal_title><facet_creatorcontrib>Carpenter, Humphrey</facet_creatorcontrib><facet_creatorcontrib>Tolkien, Christopher</facet_creatorcontrib><facet_creatorcontrib>Tolkien,, J. R. R.</facet_creatorcontrib><sort_author>Tolkien, J. R. R.</sort_author><sort_creationdate>1995</sort_creationdate></search><display><identifier>$$CISBN$$V0261102656</identifier><creationdate>1995</creationdate><creator>Tolkien, J. R. R.   $$QTolkien, J. R. R.</creator><lds09>PUV0296693</lds09><format>&amp;#8205;463 p. ; 20 cm.</format><language>eng</language><source>Alma</source><type>book</type><title>The letters of J.R.R. Tolkien / a selection edited by Humphrey Carpenter ; with the assistance of Christopher Tolkien</title><version>0</version><mms>990005230620206046</mms><contributor>Tolkien, Christopher &lt;&amp;#8205;Autore&gt; $$QTolkien, Christopher</contributor><contributor>Carpenter, Humphrey &lt;&amp;#8205;Autore&gt; $$QCarpenter, Humphrey</contributor><lds50>990005230620206046</lds50><publisher>London : HarperCollins</publisher><place>London</place></display><control><recordid>alma990005230620206046</recordid><sourceid>alma</sourceid><score>1.0</score><originalsourceid>000523062-SBP01</originalsourceid><sourceformat>UNIMARC</sourceformat><sourcerecordid>990005230620206046</sourcerecordid><colldiscovery>$$Titem$$D81283465180006046$$I39UPD_INST</colldiscovery><sourcesystem>OTHER</sourcesystem><isDedup>false</isDedup></control><addata><originatingSystemIDContributor>CFIV015811</originatingSystemIDContributor><date>1995</date><aulast>Tolkien</aulast><cop>London</cop><isbn>0261102656</isbn><format>book</format><ristype>BOOK</ristype><oclcid>(ocolc)876045467</oclcid><auinit>J</auinit><title>The letters of J.R.R. Tolkien</title><aufirst>J. R. R.</aufirst><addau>Tolkien, Christopher</addau><addau>Carpenter, Humphrey</addau><au>Tolkien,J. R. R.</au><genre>book</genre><btitle>The letters of J.R.R. Tolkien</btitle><pub>HarperCollins</pub></addata><sort><creationdate>1995</creationdate><author>Tolkien, J. R. R.</author><title>letters of J.R.R. Tolkien</title></sort></record>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "The letters of J.R.R. Tolkien",
+				"creators": [
+					{
+						"firstName": "J. R. R.",
+						"lastName": "Tolkien",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christopher",
+						"lastName": "Tolkien",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Humphrey",
+						"lastName": "Carpenter",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "1995",
+				"ISBN": "0261102656",
+				"callNumber": "IA.I.1955",
+				"language": "eng",
+				"numPages": "463",
+				"place": "London",
+				"publisher": "HarperCollins",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><record xmlns=\"http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib\" xmlns:sear=\"http://www.exlibrisgroup.com/xsd/jaguar/search\"><delivery><bestlocation><isValidUser>true</isValidUser><organization>01HVD_INST</organization><libraryCode>HFA</libraryCode><availabilityStatus>check_holdings</availabilityStatus><subLocation>(By appointment only; on-site use only.) Circulating copies may be available in other Harvard Libraries.</subLocation><subLocationCode>GEN</subLocationCode><mainLocation>Harvard Film Archive</mainLocation><callNumber>HFA Item no. 3151</callNumber><callNumberType>8</callNumberType><holdingURL>OVP</holdingURL><adaptorid>ALMA_01</adaptorid><ilsApiId>990105822220203941</ilsApiId><holdId>222201431210003941</holdId><holKey>HoldingResultKey [mid=222201431210003941, libraryId=124018130003941, locationCode=GEN, callNumber=HFA Item no. 3151]</holKey><matchForHoldings><matchOn>MainLocation</matchOn><holdingRecord>852##b</holdingRecord></matchForHoldings><stackMapUrl>http://nrs.harvard.edu/urn-3:hul.ois:HFA</stackMapUrl><relatedTitle/><translateRelatedTitle/><yearFilter/><volumeFilter/><singleUnavailableItemProcessType/><boundWith>false</boundWith></bestlocation><holding><isValidUser>true</isValidUser><organization>01HVD_INST</organization><libraryCode>HFA</libraryCode><availabilityStatus>check_holdings</availabilityStatus><subLocation>(By appointment only; on-site use only.) Circulating copies may be available in other Harvard Libraries.</subLocation><subLocationCode>GEN</subLocationCode><mainLocation>Harvard Film Archive</mainLocation><callNumber>HFA Item no. 3151</callNumber><callNumberType>8</callNumberType><holdingURL>OVP</holdingURL><adaptorid>ALMA_01</adaptorid><ilsApiId>990105822220203941</ilsApiId><holdId>222201431210003941</holdId><holKey>HoldingResultKey [mid=222201431210003941, libraryId=124018130003941, locationCode=GEN, callNumber=HFA Item no. 3151]</holKey><matchForHoldings><matchOn>MainLocation</matchOn><holdingRecord>852##b</holdingRecord></matchForHoldings><stackMapUrl>http://nrs.harvard.edu/urn-3:hul.ois:HFA</stackMapUrl><relatedTitle/><translateRelatedTitle/><yearFilter/><volumeFilter/><singleUnavailableItemProcessType/><boundWith>false</boundWith></holding><electronicServices/><additionalElectronicServices/><filteredByGroupServices/><quickAccessService/><deliveryCategory>Alma-P</deliveryCategory><serviceMode>ovp</serviceMode><availability>check_holdings</availability><availabilityLinks>detailsgetit1</availabilityLinks><availabilityLinksUrl/><displayedAvailability/><displayLocation>true</displayLocation><additionalLocations>false</additionalLocations><physicalItemTextCodes/><feDisplayOtherLocations>false</feDisplayOtherLocations><almaInstitutionsList/><recordInstitutionCode/><recordOwner>01HVD_INST</recordOwner><hasFilteredServices/><digitalAuxiliaryMode>false</digitalAuxiliaryMode><digitalAuxiliaryThumbnail>false</digitalAuxiliaryThumbnail><hideResourceSharing>false</hideResourceSharing><sharedDigitalCandidates/><consolidatedCoverage/><electronicContextObjectId/><almaOpenurl/><GetIt1><category>Alma-P</category><links><isLinktoOnline>false</isLinktoOnline><getItTabText>service_getit</getItTabText><adaptorid>ALMA_01</adaptorid><ilsApiId>990105822220203941</ilsApiId><link>OVP</link><inst4opac>01HVD_INST</inst4opac><displayText/></links>undefined</GetIt1>undefined<physicalServiceId/>undefined<link><linkType>thumbnail</linkType>undefined<linkURL>https://proxy-na.hosted.exlibrisgroup.com/exl_rewrite/books.google.com/books?bibkeys=ISBN:,OCLC:894528838,LCCN:&amp;jscmd=viewapi&amp;callback=updateGBSCover</linkURL>undefined<displayLabel>thumbnail</displayLabel>undefined</link>undefined<hasD/>undefined</delivery><display><source>Alma</source><type>videos</type><language>ger</language><title>Cat and mouse </title><format>[ca. 1 minute] : aspect ratio 1:1.37, sd., b&amp;w : 16 mm. viewing print.</format><creationdate>1970</creationdate><publisher>[1970?]</publisher><mms>990105822220203941</mms><genre>film trailers$$Qfilm trailers</genre><unititle>Kot i mysz (Trailer). 16 mm.$$QKot i mysz (Trailer). 16 mm</unititle><place>1970?]</place><version>1</version><lds01>990105822220203941</lds01><lds03>&lt;a href=&quot;https://id.lib.harvard.edu/alma/990105822220203941/catalog&quot;&gt;Permanent link to HOLLIS record&lt;/a&gt;</lds03><lds04>Grove Press Film Collection (Harvard Film Archive)$$QGrove Press Film Collection (Harvard Film Archive)</lds04><lds11>[1970?]</lds11><lds13>Harvard Film Archive 16mm trailer, HFA item no. 3151, from the Grove Press Collection.</lds13><lds13>Cat and mouse was released in Europe in 1967 and in the United States in 1970.</lds13><lds13>Common title, not from piece.</lds13><lds14>[production company unknown]</lds14></display><control><sourcerecordid>990105822220203941</sourcerecordid><recordid>alma990105822220203941</recordid><sourceid>alma</sourceid><originalsourceid>010582222-HVD01</originalsourceid><sourcesystem>OCLC</sourcesystem><sourceformat>MARC21</sourceformat><score>1.0</score><isDedup>false</isDedup></control><addata><addau>Grove Press Film Collection (Harvard Film Archive)</addau><date>1970</date><cop>1970?</cop><oclcid>(ocolc)894528838</oclcid><format>book</format><genre>unknown</genre><ristype>VIDEO</ristype><btitle>Cat and mouse</btitle></addata><sort><title>Cat and mouse /</title><author>Grove Press Film Collection (Harvard Film Archive)</author><creationdate>1970</creationdate></sort></record>",
+		"items": [
+			{
+				"itemType": "videoRecording",
+				"title": "Cat and mouse",
+				"creators": [],
+				"date": "1970",
+				"callNumber": "HFA Item no. 3151",
+				"language": "ger",
+				"place": "1970?",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><record xmlns=\"http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib\" xmlns:sear=\"http://www.exlibrisgroup.com/xsd/jaguar/search\"><delivery><availabilityLinks>detailsgetit1</availabilityLinks><displayLocation>true</displayLocation><recordOwner>39UPD_INST</recordOwner><physicalServiceId>null</physicalServiceId><sharedDigitalCandidates>null</sharedDigitalCandidates><link><displayLabel>thumbnail</displayLabel><linkURL>https://proxy-eu.hosted.exlibrisgroup.com/exl_rewrite/books.google.com/books?bibkeys=ISBN:9788845278051,OCLC:,LCCN:&amp;jscmd=viewapi&amp;callback=updateGBSCover</linkURL><linkType>thumbnail</linkType><id>:_0</id></link><availability>available_in_library</availability><additionalLocations>false</additionalLocations><digitalAuxiliaryMode>false</digitalAuxiliaryMode><holding><matchForHoldings><holdingRecord>852##b</holdingRecord><matchOn>MainLocation</matchOn></matchForHoldings><subLocationCode>UNIV1</subLocationCode><volumeFilter>null</volumeFilter><ilsApiId>990025642920206046</ilsApiId><callNumberType>4</callNumberType><libraryCode>PUV00</libraryCode><yearFilter>null</yearFilter><boundWith>false</boundWith><stackMapUrl>https://biblio.unipd.it/biblioteche/convenzionate/biblioteca-universitaria-ministero-per-i-beni-e-le-attivita-culturali</stackMapUrl><isValidUser>true</isValidUser><translateRelatedTitle>null</translateRelatedTitle><mainLocation>Biblioteca Universitaria</mainLocation><callNumber>L.4.1042</callNumber><adaptorid>ALMA_01</adaptorid><organization>39UPD_INST</organization><holdingURL>OVP</holdingURL><availabilityStatus>available</availabilityStatus><id>_:0</id><subLocation>Prestabile</subLocation><holdId>22131777720006046</holdId><holKey>HoldingResultKey [mid=22131777720006046, libraryId=202896190006046, locationCode=UNIV1, callNumber=L.4.1042]</holKey><singleUnavailableItemProcessType>null</singleUnavailableItemProcessType><relatedTitle>null</relatedTitle></holding><bestlocation><matchForHoldings><holdingRecord>852##b</holdingRecord><matchOn>MainLocation</matchOn></matchForHoldings><subLocationCode>UNIV1</subLocationCode><volumeFilter>null</volumeFilter><ilsApiId>990025642920206046</ilsApiId><callNumberType>4</callNumberType><libraryCode>PUV00</libraryCode><yearFilter>null</yearFilter><boundWith>false</boundWith><stackMapUrl>https://biblio.unipd.it/biblioteche/convenzionate/biblioteca-universitaria-ministero-per-i-beni-e-le-attivita-culturali</stackMapUrl><isValidUser>true</isValidUser><translateRelatedTitle>null</translateRelatedTitle><mainLocation>Biblioteca Universitaria</mainLocation><callNumber>L.4.1042</callNumber><adaptorid>ALMA_01</adaptorid><organization>39UPD_INST</organization><holdingURL>OVP</holdingURL><availabilityStatus>available</availabilityStatus><id>_:0</id><subLocation>Prestabile</subLocation><holdId>22131777720006046</holdId><holKey>HoldingResultKey [mid=22131777720006046, libraryId=202896190006046, locationCode=UNIV1, callNumber=L.4.1042]</holKey><singleUnavailableItemProcessType>null</singleUnavailableItemProcessType><relatedTitle>null</relatedTitle></bestlocation><electronicServices>null</electronicServices><feDisplayOtherLocations>false</feDisplayOtherLocations><hasD>null</hasD><hideResourceSharing>false</hideResourceSharing><hasFilteredServices>null</hasFilteredServices><almaOpenurl>null</almaOpenurl><physicalItemTextCodes>null</physicalItemTextCodes><quickAccessService>null</quickAccessService><recordInstitutionCode>null</recordInstitutionCode><displayedAvailability>null</displayedAvailability><consolidatedCoverage>null</consolidatedCoverage><additionalElectronicServices>null</additionalElectronicServices><deliveryCategory>Alma-P</deliveryCategory><serviceMode>ovp</serviceMode><digitalAuxiliaryThumbnail>false</digitalAuxiliaryThumbnail><filteredByGroupServices>null</filteredByGroupServices><electronicContextObjectId>null</electronicContextObjectId><GetIt1><links><isLinktoOnline>false</isLinktoOnline><displayText>null</displayText><inst4opac>39UPD_INST</inst4opac><getItTabText>service_getit</getItTabText><adaptorid>ALMA_01</adaptorid><ilsApiId>990025642920206046</ilsApiId><link>OVP</link><id>_:0</id></links><category>Alma-P</category></GetIt1></delivery><search><creationdate>2014</creationdate><sort_title>Beowulf traduzione e commento con Racconto meraviglioso</sort_title><sort_journal_title>Beowulf traduzione e commento con Racconto meraviglioso</sort_journal_title><sort_creationdate_full>2014</sort_creationdate_full><isbn>8845278050</isbn><isbn>9788845278051</isbn><language>eng</language><language>ita</language><title>Beowulf.</title><title>Beowulf: A translation and Commentary.</title><title>Beowulf traduzione e commento con Racconto meraviglioso</title><startdate>2014</startdate><unimarc_local_fields>900 BK</unimarc_local_fields><unimarc_local_fields>996 SBN</unimarc_local_fields><unimarc_local_fields>994 M</unimarc_local_fields><unimarc_local_fields>993 M</unimarc_local_fields><unimarc_local_fields>992 51</unimarc_local_fields><unimarc_local_fields>991 SBN_BIB</unimarc_local_fields><general>(SBN)VIA0283141</general><general>Bompiani</general><general>John Ronald Reuel Tolkien edizione a cura di Christopher Tolkien traduzione di Luca Manini</general><general>(Aleph)002564292SBP01</general><general>SBP01VIA0283141</general><general>VIA0283141</general><rtype>books</rtype><contributor>Tolkien, Christopher</contributor><contributor>Manini, Luca</contributor><contributor>Tolkien, J. R. R.</contributor><journal_title>Beowulf traduzione e commento con Racconto meraviglioso</journal_title><facet_creatorcontrib>Tolkien, Christopher</facet_creatorcontrib><facet_creatorcontrib>Manini, Luca</facet_creatorcontrib><facet_creatorcontrib>Tolkien, J. R. R.</facet_creatorcontrib><sort_author>Tolkien, J. R. R.</sort_author><sort_creationdate>2014</sort_creationdate></search><display><lds06>829.3 - LETTERATURA ANGLOSASSONE (INGLESE ANTICO). BEOWULF - ed. 22$$Q829.3 LETTERATURA ANGLOSASSONE (INGLESE ANTICO). BEOWULF</lds06><identifier>$$CISBN$$V9788845278051</identifier><creationdate>2014</creationdate><lds09>VIA0283141</lds09><format>&amp;#8205;542 p. ; 22 cm</format><description>In copertina: I libri di Tolkien</description><language>ita;eng</language><source>Alma</source><type>book</type><title>Beowulf : traduzione e commento con Racconto meraviglioso / John Ronald Reuel Tolkien ; edizione a cura di Christopher Tolkien ; traduzione di Luca Manini</title><version>0</version><mms>990025642920206046</mms><contributor>Tolkien, J. R. R. &lt;Traduttore&gt;$$QTolkien, J. R. R.$$8it</contributor><contributor>Tolkien, J. R. R. &lt;Translator&gt;$$QTolkien, J. R. R.$$8en</contributor><contributor>Manini, Luca &lt;Traduttore&gt;$$QManini, Luca$$8it</contributor><contributor>Manini, Luca &lt;Translator&gt;$$QManini, Luca$$8en</contributor><contributor>Tolkien, Christopher &lt;Curatore&gt;$$QTolkien, Christopher$$8it</contributor><contributor>Tolkien, Christopher &lt;Editor&gt;$$QTolkien, Christopher$$8en</contributor><lds50>990025642920206046</lds50><publisher>Milano : Bompiani</publisher><place>Milano</place><unititle>Beowulf: A translation and Commentary. $$QUBO411381620141204123559.5</unititle><unititle>Beowulf. $$QTO0011166620160610120059.1</unititle><lds14>Beowulf: A translation and Commentary. $$QUBO4113816</lds14><lds14>Beowulf. $$QTO00111666</lds14></display><control><recordid>alma990025642920206046</recordid><sourceid>alma</sourceid><score>1.0</score><originalsourceid>002564292-SBP01</originalsourceid><sourceformat>UNIMARC</sourceformat><sourcerecordid>990025642920206046</sourcerecordid><sourcesystem>ILS</sourcesystem><isDedup>false</isDedup></control><addata><addau>Tolkien,J. R. R.</addau><addau>Manini,Luca</addau><addau>Tolkien,Christopher</addau><date>2014</date><cop>Milano</cop><isbn>9788845278051</isbn><format>book</format><genre>book</genre><ristype>BOOK</ristype><oclcid>via283141</oclcid><oclcid>sbp1via0283141</oclcid><oclcid>(aleph)2564292sbp01</oclcid><oclcid>(sbn)via283141</oclcid><btitle>Beowulf : traduzione e commento con Racconto meraviglioso</btitle><title>Beowulf : traduzione e commento con Racconto meraviglioso</title><pub>Bompiani</pub></addata><sort><creationdate>2014</creationdate><author>Tolkien, J. R. R.</author><title>Beowulf traduzione e commento con Racconto meraviglioso</title></sort></record>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Beowulf: traduzione e commento con Racconto meraviglioso",
+				"creators": [
+					{
+						"firstName": "J. R. R.",
+						"lastName": "Tolkien",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Luca",
+						"lastName": "Manini",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christopher",
+						"lastName": "Tolkien",
+						"creatorType": "author"
+					}
+				],
+				"date": "2014",
+				"ISBN": "9788845278051",
+				"abstractNote": "In copertina: I libri di Tolkien",
+				"callNumber": "L.4.1042",
+				"language": "ita;eng",
+				"numPages": "542",
+				"place": "Milano",
+				"publisher": "Bompiani",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}

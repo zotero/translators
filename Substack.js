@@ -2,14 +2,14 @@
 	"translatorID": "ac3b958f-0581-4117-bebc-44af3b876545",
 	"label": "Substack",
 	"creator": "Abe Jellinek",
-	"target": "^https://[^.]+\\.substack\\.com/(p/|archive)",
+	"target": "^https://([^.]+\\.)?substack\\.com/(p/|archive|home/post/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-10-05 15:16:38"
+	"lastUpdated": "2025-02-03 19:52:49"
 }
 
 /*
@@ -37,7 +37,7 @@
 
 
 function detectWeb(doc, url) {
-	if (url.includes('/p/')) {
+	if (url.includes('/p/') || (url.includes('/home/post/') && doc.querySelector('#post-viewer a[href*="/p/"]'))) {
 		return "blogPost";
 	}
 	else if (getSearchResults(doc, true)) {
@@ -61,18 +61,25 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) ZU.processDocuments(Object.keys(items), scrape);
-		});
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
-function scrape(doc, url) {
+async function scrape(doc, url = doc.location.href) {
+	if (url.includes('/home/post/')) {
+		url = attr(doc, '#post-viewer a[href*="/p/"]', 'href');
+		doc = await requestDocument(url);
+	}
+
 	let jsonText = text(doc, 'script[type="application/ld+json"]');
 
 	if (jsonText) {

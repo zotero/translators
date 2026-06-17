@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-22 04:49:47"
+	"lastUpdated": "2024-07-05 11:56:39"
 }
 
 /*
@@ -131,8 +131,14 @@ async function scrape(doc, url = doc.location.href) {
 		if (DOI) {
 			item.DOI = ZU.cleanDOI(decodeURIComponent(DOI));
 		}
-		if (item.itemType == "journalArticle" && item.publisher == item.publicationTitle) {
-			delete item.publisher; // Publisher & Publication Title are often identical
+		if (item.publisher == item.publicationTitle) {
+			// Publisher & Publication Title are often identical
+			if (item.itemType == "journalArticle") {
+				delete item.publisher;
+			}
+			else if (item.itemType == "report") {
+				delete item.publicationTitle;
+			}
 		}
 
 		item.extra = "ERIC Number: " + ericID;
@@ -221,7 +227,6 @@ async function doSearch(search) {
 	}
 	item.complete();
 }
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -443,10 +448,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -523,10 +524,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -833,7 +830,13 @@ var testCases = [
 				"extra": "ERIC Number: ED616685",
 				"language": "English",
 				"libraryCatalog": "ERIC",
-				"attachments": [],
+				"url": "https://eric.ed.gov/?id=ED616685",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [
 					{
 						"tag": "Cognitive Processes"

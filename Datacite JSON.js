@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2023-07-06 12:34:43"
+	"lastUpdated": "2025-04-29 03:02:00"
 }
 
 /*
@@ -59,7 +59,7 @@ function parseInput() {
 
 function detectImport() {
 	var parsedData = parseInput();
-	if (parsedData && parsedData.schemaVersion && parsedData.schemaVersion.startsWith("http://datacite.org/schema/")) {
+	if (parsedData && (parsedData.schemaVersion && parsedData.schemaVersion.startsWith("http://datacite.org/schema/") || /datacite/i.test(parsedData.agency))) {
 		return true;
 	}
 	return false;
@@ -67,6 +67,7 @@ function detectImport() {
 
 /* eslint-disable camelcase*/
 var mappingTypes = {
+	article: "preprint",
 	book: "book",
 	chapter: "bookSection",
 	"article-journal": "journalArticle",
@@ -106,11 +107,18 @@ function doImport() {
 	var data = parseInput();
 
 	var type = "journalArticle";
+	// we're using the citeproc mapping for pre v4 DataCite Kernel
 	if (data.types.citeproc && mappingTypes[data.types.citeproc]) {
 		type = mappingTypes[data.types.citeproc];
 	}
-	if (["softwaresourcecode", "softwareapplication", "mobileapplication", "videogame", "webapplication"].includes(data.types.schemaOrg.toLowerCase())) {
+	if (data.types.schemaOrg
+			&& ["softwaresourcecode", "softwareapplication", "mobileapplication", "videogame", "webapplication"]
+				.includes(data.types.schemaOrg.toLowerCase())) {
 		type = "computerProgram";
+	}
+	if (data.types.resourceTypeGeneral == "BookChapter") {
+		// for some reason datacite maps some BookChapters to citeproc article
+		type = "bookSection";
 	}
 
 	var item = new Zotero.Item(type);
@@ -118,6 +126,7 @@ function doImport() {
 		item.extra = "Type: dataset";
 	}
 	var title = "";
+	var alternateTitle = "";
 	for (let titleElement of data.titles) {
 		if (!titleElement.title) {
 			continue;
@@ -128,8 +137,11 @@ function doImport() {
 		else if (titleElement.titleType.toLowerCase() == "subtitle") {
 			title = title + ": " + titleElement.title;
 		}
+		else if (!alternateTitle) {
+			alternateTitle = titleElement.title;
+		}
 	}
-	item.title = title;
+	item.title = title || alternateTitle;
 	
 	if (data.creators) {
 		for (let creator of data.creators) {
@@ -151,8 +163,8 @@ function doImport() {
 	if (data.contributors) {
 		for (let contributor of data.contributors) {
 			let role = "contributor";
-			if (contributor.contributorRole) {
-				switch (contributor.contributorRole.toLowerCase()) {
+			if (contributor.contributorType) {
+				switch (contributor.contributorType.toLowerCase()) {
 					case "editor":
 						role = "editor";
 						break;
@@ -178,9 +190,12 @@ function doImport() {
 			}
 		}
 	}
-	
-	item.publisher = data.publisher;
-	
+	if (typeof (data.publisher) == "object") {
+		item.publisher = data.publisher.name;
+	}
+	else {
+		item.publisher = data.publisher;
+	}
 	let dates = {};
 	if (data.dates) {
 		for (let date of data.dates) {
@@ -191,14 +206,7 @@ function doImport() {
 	
 	item.DOI = data.doi;
 	//add DOI to extra for unsupported items
-	if (item.DOI && !ZU.fieldIsValidForType("DOI", item.itemType)) {
-		if (item.extra) {
-			item.extra += "\nDOI: " + item.DOI;
-		}
-		else {
-			item.extra = "DOI: " + item.DOI;
-		}
-	}
+
 	item.url = data.url;
 	item.language = data.language;
 	if (data.subjects) {
@@ -212,7 +220,7 @@ function doImport() {
 	if (data.sizes) {
 		item.pages = item.artworkSize = data.sizes.join(", ");
 	}
-	item.versionNumber = data.version;
+	item.version = data.version;
 	if (data.rightsList) {
 		item.rights = data.rightsList.map(x => x.rights).join(", ");
 	}
@@ -249,7 +257,68 @@ function doImport() {
 			}
 		}
 	}
-	
+	if (data.relatedItems) {
+		for (let container of data.relatedItems) {
+			// For containers following Metadata Kernel 4.4 update
+			if (container.relationType == "IsPublishedIn") {
+				// we only grab the container info for IsPublishedIn, i.e. mostly books for chapter & journals
+				item.volume = container.volume;
+				if (container.titles) {
+					if (Array.isArray(container.titles) && container.titles.length) {
+						item.publicationTitle = container.titles[0].title;
+					}
+					else {
+						item.publicationTitle = container.titles.title;
+					}
+				}
+				if (container.relatedItemIdentifier) {
+					if (container.relatedItemIdentifier.relatedItemIdentifierType == "ISSN") {
+						item.ISSN = container.relatedItemIdentifier.relatedItemIdentifier;
+					}
+					else if (container.relatedItemIdentifier.relatedItemIdentifierType == "ISBN") {
+						item.ISBN = container.relatedItemIdentifier.relatedItemIdentifier;
+					}
+				}
+				item.issue = container.issue;
+				if (container.publicationYear) {
+					item.date = container.publicationYear;
+				}
+				if (container.firstPage && container.lastPage) {
+					item.pages = container.firstPage + "-" + container.lastPage;
+				}
+				else {
+					item.pages = (container.firstPage || "") + (container.lastPage || "");
+				}
+
+				item.edition = container.edition;
+				if (container.contributor && Array.isArray(container.contributor)) {
+					for (let contributor of container.contributor) {
+						let role = "contributor";
+						if (contributor.contributorType == "Editor") {
+							role = "editor";
+						}
+						if (contributor.familyName && contributor.givenName) {
+							item.creators.push({
+								lastName: contributor.familyName,
+								firstName: contributor.givenName,
+								creatorType: role
+							});
+						}
+						else if (contributor.nameType == "Personal") {
+							item.creators.push(ZU.cleanAuthor(contributor.name, role, true));
+						}
+						else {
+							item.creators.push({ lastName: contributor.name, creatorType: role, fieldMode: 1 });
+						}
+					}
+				}
+				break;
+			}
+			else {
+				continue;
+			}
+		}
+	}
 	if (data.relatedIdentifiers) {
 		for (let relates of data.relatedIdentifiers) {
 			if (!item.ISSN && relates.relatedIdentifierType == "ISSN") {
@@ -260,7 +329,9 @@ function doImport() {
 			}
 		}
 	}
-	
+	// remove duplicate creators (they'll have had multiple roles in datacite metadata)
+	let uniqueCreatorSet = new Set(item.creators.map(JSON.stringify));
+	item.creators = Array.from(uniqueCreatorSet).map(JSON.parse);
 	item.complete();
 }
 
@@ -326,7 +397,6 @@ var testCases = [
 				"date": "2017-02-25",
 				"abstractNote": "Ruby gem and command-line utility for conversion of DOI metadata from and to different metadata formats, including schema.org.",
 				"company": "DataCite",
-				"extra": "DOI: 10.5438/n138-z3mk",
 				"url": "https://github.com/datacite/bolognese",
 				"attachments": [],
 				"tags": [
@@ -566,6 +636,544 @@ var testCases = [
 						"note": "<h2>SeriesInformation</h2>\nTremor and Other Hyperkinetic Movements, Tremor and Other Hyperkinetic Movements"
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "{\r\n  \"id\": \"https://doi.org/10.17885/heiup.jts.2018.1-2.23812\",\r\n  \"doi\": \"10.17885/heiup.jts.2018.1-2.23812\",\r\n  \"url\": \"https://heiup.uni-heidelberg.de/journals/index.php/transcultural/article/view/23812\",\r\n  \"types\": {\r\n    \"resourceTypeGeneral\": \"Text\",\r\n    \"resourceType\": \"Article\",\r\n    \"schemaOrg\": \"ScholarlyArticle\",\r\n    \"citeproc\": \"article-journal\",\r\n    \"bibtex\": \"article\",\r\n    \"ris\": \"RPRT\"\r\n  },\r\n  \"creators\": [\r\n    {\r\n      \"nameType\": \"Personal\",\r\n      \"name\": \"Gadkar-Wilcox, Wynn\",\r\n      \"givenName\": \"Wynn\",\r\n      \"familyName\": \"Gadkar-Wilcox\"\r\n    }\r\n  ],\r\n  \"titles\": [\r\n    {\r\n      \"title\": \"Universality, Modernity and Cultural Borrowing Among Vietnamese Intellectuals, 1877–1919\"\r\n    }\r\n  ],\r\n  \"publisher\": \"The Journal of Transcultural Studies\",\r\n  \"container\": {\r\n    \"type\": \"Series\",\r\n    \"title\": \"The Journal of Transcultural Studies\",\r\n    \"firstPage\": \"No 1\",\r\n    \"lastPage\": \"2 (2018)\"\r\n  },\r\n  \"subjects\": [\r\n\r\n  ],\r\n  \"contributors\": [\r\n\r\n  ],\r\n  \"dates\": [\r\n    {\r\n      \"date\": \"2018-07-16\",\r\n      \"dateType\": \"Submitted\"\r\n    },\r\n    {\r\n      \"date\": \"2018-09-27\",\r\n      \"dateType\": \"Accepted\"\r\n    },\r\n    {\r\n      \"date\": \"2019-01-16\",\r\n      \"dateType\": \"Updated\"\r\n    },\r\n    {\r\n      \"date\": \"2018-12-20\",\r\n      \"dateType\": \"Issued\"\r\n    }\r\n  ],\r\n  \"publicationYear\": \"2018\",\r\n  \"language\": \"en\",\r\n  \"identifiers\": [\r\n    {\r\n      \"identifierType\": \"DOI\",\r\n      \"identifier\": \"https://doi.org/10.17885/heiup.jts.2018.1-2.23812\"\r\n    },\r\n    {\r\n      \"identifierType\": \"publisherId\",\r\n      \"identifier\": \"22-2384-23812\"\r\n    }\r\n  ],\r\n  \"sizes\": [\r\n    \"33–52 Pages\"\r\n  ],\r\n  \"formats\": [\r\n\r\n  ],\r\n  \"rightsList\": [\r\n    {\r\n      \"rights\": \"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.\",\r\n      \"rightsUri\": \"http://creativecommons.org/licenses/by-nc/4.0\"\r\n    }\r\n  ],\r\n  \"descriptions\": [\r\n    {\r\n      \"description\": \"After 1897, as the power of the Nguyen Monarchy was increasingly restricted by a centralizing administration in French Indochina, it sought to retain its relevance by grappling with reformist ideas, especially those associated with Xu Jiyu, Tan Sitong, and Liang Qichao. This paper examines the influence of those thinkers on the policy questions of 1877, 1904, and 1919 and proposes that even when the monarchy was defending more traditional ideas against reform, these new conceptions were fundamentally transforming the thinking of even more conservative elites.\",\r\n      \"descriptionType\": \"Abstract\"\r\n    },\r\n    {\r\n      \"description\": \"The Journal of Transcultural Studies, No 1-2 (2018)\",\r\n      \"descriptionType\": \"SeriesInformation\"\r\n    }\r\n  ],\r\n  \"geoLocations\": [\r\n\r\n  ],\r\n  \"fundingReferences\": [\r\n\r\n  ],\r\n  \"relatedIdentifiers\": [\r\n\r\n  ],\r\n  \"schemaVersion\": \"http://datacite.org/schema/kernel-4\",\r\n  \"providerId\": \"gesis\",\r\n  \"clientId\": \"gesis.ubhd\",\r\n  \"agency\": \"DataCite\",\r\n  \"state\": \"findable\"\r\n}",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Universality, Modernity and Cultural Borrowing Among Vietnamese Intellectuals, 1877–1919",
+				"creators": [
+					{
+						"lastName": "Gadkar-Wilcox",
+						"firstName": "Wynn",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018-12-20",
+				"DOI": "10.17885/heiup.jts.2018.1-2.23812",
+				"abstractNote": "After 1897, as the power of the Nguyen Monarchy was increasingly restricted by a centralizing administration in French Indochina, it sought to retain its relevance by grappling with reformist ideas, especially those associated with Xu Jiyu, Tan Sitong, and Liang Qichao. This paper examines the influence of those thinkers on the policy questions of 1877, 1904, and 1919 and proposes that even when the monarchy was defending more traditional ideas against reform, these new conceptions were fundamentally transforming the thinking of even more conservative elites.",
+				"language": "en",
+				"pages": "33–52 Pages",
+				"publicationTitle": "The Journal of Transcultural Studies",
+				"rights": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.",
+				"url": "https://heiup.uni-heidelberg.de/journals/index.php/transcultural/article/view/23812",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<h2>SeriesInformation</h2>\nThe Journal of Transcultural Studies, No 1-2 (2018)"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "{\r\n  \"id\": \"https://doi.org/10.5281/zenodo.5513598\",\r\n  \"doi\": \"10.5281/ZENODO.5513598\",\r\n  \"url\": \"https://zenodo.org/record/5513598\",\r\n  \"types\": {\r\n    \"ris\": \"GEN\",\r\n    \"bibtex\": \"misc\",\r\n    \"citeproc\": \"article\",\r\n    \"schemaOrg\": \"CreativeWork\",\r\n    \"resourceTypeGeneral\": \"Preprint\"\r\n  },\r\n  \"creators\": [\r\n    {\r\n      \"name\": \"Walsh, Michael\",\r\n      \"givenName\": \"Michael\",\r\n      \"familyName\": \"Walsh\",\r\n      \"affiliation\": [\r\n        {\r\n          \"name\": \"Sorbonne University Abu Dhabi\"\r\n        }\r\n      ]\r\n    }\r\n  ],\r\n  \"titles\": [\r\n    {\r\n      \"title\": \"Non-healthcare occupational exposure to SARS-CoV-2 across industries in the United States before March 2020: a dataset generating protocol\"\r\n    }\r\n  ],\r\n  \"publisher\": {\r\n    \"name\": \"Zenodo\"\r\n  },\r\n  \"container\": {\r\n    \"type\": \"Series\",\r\n    \"identifier\": \"https://zenodo.org/communities/covid-19\",\r\n    \"identifierType\": \"URL\"\r\n  },\r\n  \"subjects\": [\r\n    {\r\n      \"subject\": \"applied epidemiology\"\r\n    },\r\n    {\r\n      \"subject\": \"COVID-19\"\r\n    },\r\n    {\r\n      \"subject\": \"SARS-CoV-2\"\r\n    },\r\n    {\r\n      \"subject\": \"emerging infectious disease\"\r\n    },\r\n    {\r\n      \"subject\": \"global health\"\r\n    },\r\n    {\r\n      \"subject\": \"occupational health\"\r\n    },\r\n    {\r\n      \"subject\": \"environmental health\"\r\n    },\r\n    {\r\n      \"subject\": \"pandemic\"\r\n    },\r\n    {\r\n      \"subject\": \"united states\"\r\n    }\r\n  ],\r\n  \"contributors\": [],\r\n  \"dates\": [\r\n    {\r\n      \"date\": \"2021-09-17\",\r\n      \"dateType\": \"Issued\"\r\n    }\r\n  ],\r\n  \"publicationYear\": 2021,\r\n  \"language\": \"en\",\r\n  \"identifiers\": [\r\n    {\r\n      \"identifier\": \"https://zenodo.org/record/5513598\",\r\n      \"identifierType\": \"URL\"\r\n    }\r\n  ],\r\n  \"sizes\": [],\r\n  \"formats\": [],\r\n  \"version\": \"1.0\",\r\n  \"rightsList\": [\r\n    {\r\n      \"rights\": \"Creative Commons Attribution 4.0 International\",\r\n      \"rightsUri\": \"https://creativecommons.org/licenses/by/4.0/legalcode\",\r\n      \"schemeUri\": \"https://spdx.org/licenses/\",\r\n      \"rightsIdentifier\": \"cc-by-4.0\",\r\n      \"rightsIdentifierScheme\": \"SPDX\"\r\n    },\r\n    {\r\n      \"rights\": \"Open Access\",\r\n      \"rightsUri\": \"info:eu-repo/semantics/openAccess\"\r\n    }\r\n  ],\r\n  \"descriptions\": [\r\n    {\r\n      \"description\": \"This dataset generating protocol provides a way to establish baseline measures for non- healthcare occupational exposure to SARS-CoV-2 across Census coded industries in the United States before March 2020. These estimates will be derived from the following data sources. The SARS-CoV-2 Occupational Exposure Risk Matrix (SOEM) will provide baseline estimates for non- healthcare occupational exposure to SARS-CoV-2 across Census coded occupations in the United States before March 2020. The Employed Labor Force Query System (ELFQS) will provide employed worker population estimates for number of civilian workers above 15 years of age per Census occupation code per Census industry code from 2015 to 2019. By way of statistical methods, this dataset will extend the SOEM from the level of occupations to the level of industries. The baseline measures that will be introduced in this dataset should be of immediate use to policymakers, practitioners, and researchers seeking understand the risk of occupational exposure to SARS-CoV-2 across industries in the United States before March 2020. They should also prove useful to individuals and institutions seeking to understand the impact of later interventions designed to mitigate occupational exposure to SARS-CoV-2 across industries in the United States.\",\r\n      \"descriptionType\": \"Abstract\"\r\n    },\r\n    {\r\n      \"description\": \"{\\\"references\\\": [\\\"Getting your workplace ready for COVID-19. World Health Organization website. Accessed on September 5, 2021. URL=https://www.who.int/docs/default-source/coronaviruse/getting- workplace-ready-for-covid-19.pdf.\\\", \\\"Occupational Health Subcommittee Epidemiological Classification of COVID-19 Work- Relatedness and Documentation of Public-Facing Occupations. Council for State and Territorial Epidemiologists Website. Accessed on September 5, 2021. URL= https://www.cste.org/resource/resmgr/occupationalhealth/publications/OH_Docs.zip.\\\", \\\"About O*NET. Occupational Information Network website. Accessed on September 5, 2021. URL=https://www.onetcenter.org/overview.html.\\\", \\\"Technical information. Employed Labor Force (ELF) query system website. Last reviewed on October 2, 2020. Accessed on September 5, 2021. URL=https://wwwn.cdc.gov/Wisards/cps/cps_techinfo.aspx#tic2.\\\", \\\"Walsh M. Measuring non-healthcare occupational exposure to SARS-CoV-2 across occupational groups in the United States: Version 2. Protocols.io. dx.doi.org/10.17504/protocols.io.bw9gph3w.\\\"]}\",\r\n      \"descriptionType\": \"Other\"\r\n    }\r\n  ],\r\n  \"geoLocations\": [],\r\n  \"fundingReferences\": [],\r\n  \"relatedIdentifiers\": [\r\n    {\r\n      \"relationType\": \"IsVersionOf\",\r\n      \"relatedIdentifier\": \"10.5281/zenodo.5513597\",\r\n      \"relatedIdentifierType\": \"DOI\"\r\n    },\r\n    {\r\n      \"relationType\": \"IsPartOf\",\r\n      \"relatedIdentifier\": \"https://zenodo.org/communities/covid-19\",\r\n      \"relatedIdentifierType\": \"URL\"\r\n    }\r\n  ],\r\n  \"relatedItems\": [],\r\n  \"schemaVersion\": \"http://datacite.org/schema/kernel-4\",\r\n  \"providerId\": \"cern\",\r\n  \"clientId\": \"cern.zenodo\",\r\n  \"agency\": \"datacite\",\r\n  \"state\": \"findable\"\r\n}",
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "Non-healthcare occupational exposure to SARS-CoV-2 across industries in the United States before March 2020: a dataset generating protocol",
+				"creators": [
+					{
+						"lastName": "Walsh",
+						"firstName": "Michael",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-09-17",
+				"DOI": "10.5281/ZENODO.5513598",
+				"abstractNote": "This dataset generating protocol provides a way to establish baseline measures for non- healthcare occupational exposure to SARS-CoV-2 across Census coded industries in the United States before March 2020. These estimates will be derived from the following data sources. The SARS-CoV-2 Occupational Exposure Risk Matrix (SOEM) will provide baseline estimates for non- healthcare occupational exposure to SARS-CoV-2 across Census coded occupations in the United States before March 2020. The Employed Labor Force Query System (ELFQS) will provide employed worker population estimates for number of civilian workers above 15 years of age per Census occupation code per Census industry code from 2015 to 2019. By way of statistical methods, this dataset will extend the SOEM from the level of occupations to the level of industries. The baseline measures that will be introduced in this dataset should be of immediate use to policymakers, practitioners, and researchers seeking understand the risk of occupational exposure to SARS-CoV-2 across industries in the United States before March 2020. They should also prove useful to individuals and institutions seeking to understand the impact of later interventions designed to mitigate occupational exposure to SARS-CoV-2 across industries in the United States.",
+				"language": "en",
+				"repository": "Zenodo",
+				"rights": "Creative Commons Attribution 4.0 International, Open Access",
+				"url": "https://zenodo.org/record/5513598",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "COVID-19"
+					},
+					{
+						"tag": "SARS-CoV-2"
+					},
+					{
+						"tag": "applied epidemiology"
+					},
+					{
+						"tag": "emerging infectious disease"
+					},
+					{
+						"tag": "environmental health"
+					},
+					{
+						"tag": "global health"
+					},
+					{
+						"tag": "occupational health"
+					},
+					{
+						"tag": "pandemic"
+					},
+					{
+						"tag": "united states"
+					}
+				],
+				"notes": [
+					{
+						"note": "<h2>Other</h2>\n{\"references\": [\"Getting your workplace ready for COVID-19. World Health Organization website. Accessed on September 5, 2021. URL=https://www.who.int/docs/default-source/coronaviruse/getting- workplace-ready-for-covid-19.pdf.\", \"Occupational Health Subcommittee Epidemiological Classification of COVID-19 Work- Relatedness and Documentation of Public-Facing Occupations. Council for State and Territorial Epidemiologists Website. Accessed on September 5, 2021. URL= https://www.cste.org/resource/resmgr/occupationalhealth/publications/OH_Docs.zip.\", \"About O*NET. Occupational Information Network website. Accessed on September 5, 2021. URL=https://www.onetcenter.org/overview.html.\", \"Technical information. Employed Labor Force (ELF) query system website. Last reviewed on October 2, 2020. Accessed on September 5, 2021. URL=https://wwwn.cdc.gov/Wisards/cps/cps_techinfo.aspx#tic2.\", \"Walsh M. Measuring non-healthcare occupational exposure to SARS-CoV-2 across occupational groups in the United States: Version 2. Protocols.io. dx.doi.org/10.17504/protocols.io.bw9gph3w.\"]}"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "{\r\n  \"id\": \"https://doi.org/10.48648/yhp7-0g75\",\r\n  \"doi\": \"10.48648/YHP7-0G75\",\r\n  \"url\": \"https://zmfp.de/beitraege/mathematikapps-fuer-die-grundschule-analysieren\",\r\n  \"types\": {\r\n    \"ris\": \"JOUR\",\r\n    \"bibtex\": \"article\",\r\n    \"citeproc\": \"article-journal\",\r\n    \"schemaOrg\": \"ScholarlyArticle\",\r\n    \"resourceTypeGeneral\": \"JournalArticle\"\r\n  },\r\n  \"creators\": [\r\n    {\r\n      \"name\": \"Walter, Daniel\",\r\n      \"nameType\": \"Personal\",\r\n      \"givenName\": \"Daniel\",\r\n      \"familyName\": \"Walter\",\r\n      \"affiliation\": [\r\n        {\r\n          \"name\": \"University of Bremen\",\r\n          \"schemeUri\": \"https://ror.org\",\r\n          \"affiliationIdentifier\": \"https://ror.org/04ers2y35\",\r\n          \"affiliationIdentifierScheme\": \"ROR\"\r\n        }\r\n      ],\r\n      \"nameIdentifiers\": []\r\n    },\r\n    {\r\n      \"name\": \"Schwätzer, Ulrich\",\r\n      \"nameType\": \"Personal\",\r\n      \"givenName\": \"Ulrich\",\r\n      \"familyName\": \"Schwätzer\",\r\n      \"affiliation\": [\r\n        {\r\n          \"name\": \"University of Duisburg-Essen\",\r\n          \"schemeUri\": \"https://ror.org\",\r\n          \"affiliationIdentifier\": \"https://ror.org/04mz5ra38\",\r\n          \"affiliationIdentifierScheme\": \"ROR\"\r\n        }\r\n      ],\r\n      \"nameIdentifiers\": []\r\n    }\r\n  ],\r\n  \"titles\": [\r\n    {\r\n      \"lang\": \"de\",\r\n      \"title\": \"Mathematikapps für die Grundschule analysieren\",\r\n      \"titleType\": null\r\n    }\r\n  ],\r\n  \"publisher\": {\r\n    \"name\": \"Gesellschaft für Didaktik der Mathematik e.V.\"\r\n  },\r\n  \"subjects\": [\r\n    {\r\n      \"subject\": \"FOS: Educational sciences\",\r\n      \"valueUri\": \"\",\r\n      \"schemeUri\": \"http://www.oecd.org/science/inno/38235147.pdf\",\r\n      \"subjectScheme\": \"Fields of Science and Technology (FOS)\",\r\n      \"classificationCode\": \"5.3\"\r\n    }\r\n  ],\r\n  \"contributors\": [],\r\n  \"dates\": [],\r\n  \"publicationYear\": 2023,\r\n  \"language\": \"de\",\r\n  \"identifiers\": [],\r\n  \"sizes\": [],\r\n  \"formats\": [],\r\n  \"rightsList\": [\r\n    {\r\n      \"rights\": \"Creative Commons Attribution Share Alike 4.0 International\",\r\n      \"rightsUri\": \"https://creativecommons.org/licenses/by-sa/4.0/legalcode\",\r\n      \"schemeUri\": \"https://spdx.org/licenses/\",\r\n      \"rightsIdentifier\": \"cc-by-sa-4.0\",\r\n      \"rightsIdentifierScheme\": \"SPDX\"\r\n    }\r\n  ],\r\n  \"descriptions\": [\r\n    {\r\n      \"lang\": null,\r\n      \"description\": \"Die Nutzung digitaler Medien ist derzeit nicht nur bezogen auf den Mathematik-unterricht der Grundschule ein Schwerpunktthema der schulischen Bildung. Dabei wird vor allem der Einsatz von Apps kontrovers diskutiert. Während auf der einen Seite von empirisch erprobten Positivbeispielen berichtet wird, so stehen auf der anderen Seite zahlreiche Apps in der Kritik. Dieser Artikel befasst sich mit der Frage, inwiefern eine kriteriengeleitete Analyse des Bestandes von Mathema-tik–apps sowohl Anliegen der Praxis als auch der Forschung unterstützen kann. Hierzu wird im Theorieteil zunächst der Forschungsstand zur Einschätzung von Mathematikapps dargelegt. Nachdem bestehende Forschungserkenntnisse berich-tet und Kriterien zur Analyse von Apps begründet dargelegt werden, erfolgt die Darstellung von Ergebnissen einer Analyse von 227 Mathematikapps. Die Überle-gungen münden in eine kritische Diskussion, die eine Zusammenfassung der Ergebnisse, Konsequenzen für die Praxis und Forschung sowie Ausführungen zu Grenzen des Beitrags enthält. \",\r\n      \"descriptionType\": \"Abstract\"\r\n    }\r\n  ],\r\n  \"geoLocations\": [],\r\n  \"fundingReferences\": [],\r\n  \"relatedIdentifiers\": [],\r\n  \"relatedItems\": [\r\n    {\r\n      \"titles\": [\r\n        {\r\n          \"title\": \"Zeitschrift für Mathematikdidaktik in Forschung und Praxis\"\r\n        }\r\n      ],\r\n      \"volume\": \"4\",\r\n      \"relationType\": \"IsPublishedIn\",\r\n      \"publicationYear\": \"2023\",\r\n      \"relatedItemType\": \"Journal\",\r\n      \"relatedItemIdentifier\": {\r\n        \"relatedItemIdentifier\": \"2701-9012\",\r\n        \"relatedItemIdentifierType\": \"ISSN\"\r\n      }\r\n    }\r\n  ],\r\n  \"schemaVersion\": \"http://datacite.org/schema/kernel-4\",\r\n  \"providerId\": \"uyzi\",\r\n  \"clientId\": \"uyzi.zmfp\",\r\n  \"agency\": \"datacite\",\r\n  \"state\": \"findable\"\r\n}",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Mathematikapps für die Grundschule analysieren",
+				"creators": [
+					{
+						"lastName": "Walter",
+						"firstName": "Daniel",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Schwätzer",
+						"firstName": "Ulrich",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023",
+				"DOI": "10.48648/YHP7-0G75",
+				"ISSN": "2701-9012",
+				"abstractNote": "Die Nutzung digitaler Medien ist derzeit nicht nur bezogen auf den Mathematik-unterricht der Grundschule ein Schwerpunktthema der schulischen Bildung. Dabei wird vor allem der Einsatz von Apps kontrovers diskutiert. Während auf der einen Seite von empirisch erprobten Positivbeispielen berichtet wird, so stehen auf der anderen Seite zahlreiche Apps in der Kritik. Dieser Artikel befasst sich mit der Frage, inwiefern eine kriteriengeleitete Analyse des Bestandes von Mathema-tik–apps sowohl Anliegen der Praxis als auch der Forschung unterstützen kann. Hierzu wird im Theorieteil zunächst der Forschungsstand zur Einschätzung von Mathematikapps dargelegt. Nachdem bestehende Forschungserkenntnisse berich-tet und Kriterien zur Analyse von Apps begründet dargelegt werden, erfolgt die Darstellung von Ergebnissen einer Analyse von 227 Mathematikapps. Die Überle-gungen münden in eine kritische Diskussion, die eine Zusammenfassung der Ergebnisse, Konsequenzen für die Praxis und Forschung sowie Ausführungen zu Grenzen des Beitrags enthält.",
+				"language": "de",
+				"publicationTitle": "Zeitschrift für Mathematikdidaktik in Forschung und Praxis",
+				"rights": "Creative Commons Attribution Share Alike 4.0 International",
+				"url": "https://zmfp.de/beitraege/mathematikapps-fuer-die-grundschule-analysieren",
+				"volume": "4",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "FOS: Educational sciences"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "{\r\n  \"id\": \"https://doi.org/10.48548/pubdata-155\",\r\n  \"doi\": \"10.48548/PUBDATA-155\",\r\n  \"url\": \"https://pubdata.leuphana.de/handle/20.500.14123/175\",\r\n  \"types\": {\r\n    \"ris\": \"CHAP\",\r\n    \"bibtex\": \"inbook\",\r\n    \"citeproc\": \"chapter\",\r\n    \"schemaOrg\": \"Chapter\",\r\n    \"resourceType\": \"BookChapter\",\r\n    \"resourceTypeGeneral\": \"BookChapter\"\r\n  },\r\n  \"creators\": [\r\n    {\r\n      \"name\": \"Barron, Anne\",\r\n      \"nameType\": \"Personal\",\r\n      \"givenName\": \"Anne\",\r\n      \"familyName\": \"Barron\",\r\n      \"affiliation\": [\r\n        {\r\n          \"name\": \"Institute of English Studies (IES), Leuphana Universität Lüneburg\",\r\n          \"affiliationIdentifier\": \"https://ror.org/02w2y2t16\",\r\n          \"affiliationIdentifierScheme\": \"ROR\"\r\n        }\r\n      ],\r\n      \"nameIdentifiers\": [\r\n        {\r\n          \"schemeUri\": \"https://orcid.org\",\r\n          \"nameIdentifier\": \"https://orcid.org/0000-0003-2962-7985\",\r\n          \"nameIdentifierScheme\": \"ORCID\"\r\n        }\r\n      ]\r\n    }\r\n  ],\r\n  \"titles\": [\r\n    {\r\n      \"title\": \"Sorry Miss, I Completely Forgot about It\"\r\n    },\r\n    {\r\n      \"title\": \"Apologies and Vocatives in Ireland and England\",\r\n      \"titleType\": \"Subtitle\"\r\n    }\r\n  ],\r\n  \"publisher\": {\r\n    \"name\": \"Medien- und Informationszentrum, Leuphana Universität Lüneburg\"\r\n  },\r\n  \"container\": {},\r\n  \"subjects\": [],\r\n  \"contributors\": [\r\n    {\r\n      \"name\": \"Medien- Und Informationszentrum\",\r\n      \"nameType\": \"Organizational\",\r\n      \"affiliation\": [\r\n        {\r\n          \"name\": \"Leuphana Universität Lüneburg\",\r\n          \"affiliationIdentifier\": \"https://ror.org/02w2y2t16\",\r\n          \"affiliationIdentifierScheme\": \"ROR\"\r\n        }\r\n      ],\r\n      \"contributorType\": \"DataCurator\",\r\n      \"nameIdentifiers\": []\r\n    },\r\n    {\r\n      \"name\": \"Medien- Und Informationszentrum\",\r\n      \"nameType\": \"Organizational\",\r\n      \"affiliation\": [\r\n        {\r\n          \"name\": \"Leuphana Universität Lüneburg\",\r\n          \"affiliationIdentifier\": \"https://ror.org/02w2y2t16\",\r\n          \"affiliationIdentifierScheme\": \"ROR\"\r\n        }\r\n      ],\r\n      \"contributorType\": \"DataManager\",\r\n      \"nameIdentifiers\": []\r\n    },\r\n    {\r\n      \"name\": \"Medien- Und Informationszentrum\",\r\n      \"nameType\": \"Organizational\",\r\n      \"affiliation\": [\r\n        {\r\n          \"name\": \"Leuphana Universität Lüneburg\",\r\n          \"affiliationIdentifier\": \"https://ror.org/02w2y2t16\",\r\n          \"affiliationIdentifierScheme\": \"ROR\"\r\n        }\r\n      ],\r\n      \"contributorType\": \"HostingInstitution\",\r\n      \"nameIdentifiers\": []\r\n    },\r\n    {\r\n      \"name\": \"Technische Informationsbibliothek (TIB) Hannover\",\r\n      \"nameType\": \"Organizational\",\r\n      \"affiliation\": [\r\n        {\r\n          \"name\": \"Niedersächsische Ministerium für Wissenschaft und Kultur\",\r\n          \"affiliationIdentifier\": \"https://ror.org/0116z8r77\",\r\n          \"affiliationIdentifierScheme\": \"ROR\"\r\n        }\r\n      ],\r\n      \"contributorType\": \"RegistrationAgency\",\r\n      \"nameIdentifiers\": [\r\n        {\r\n          \"schemeUri\": \"https://ror.org\",\r\n          \"nameIdentifier\": \"https://ror.org/04aj4c181\",\r\n          \"nameIdentifierScheme\": \"ROR\"\r\n        }\r\n      ]\r\n    }\r\n  ],\r\n  \"dates\": [\r\n    {\r\n      \"date\": \"2024-02-27\",\r\n      \"dateType\": \"Accepted\"\r\n    },\r\n    {\r\n      \"date\": \"2021-11-30\",\r\n      \"dateType\": \"Issued\"\r\n    },\r\n    {\r\n      \"date\": \"2024-02-27\",\r\n      \"dateType\": \"Submitted\"\r\n    },\r\n    {\r\n      \"date\": \"2024-02-27\",\r\n      \"dateType\": \"Available\"\r\n    }\r\n  ],\r\n  \"publicationYear\": 2024,\r\n  \"language\": \"en\",\r\n  \"identifiers\": [\r\n    {\r\n      \"identifier\": \"https://hdl.handle.net/20.500.14123/175\",\r\n      \"identifierType\": \"Handle\"\r\n    },\r\n    {\r\n      \"identifier\": \"https://nbn-resolving.org/urn:nbn:de:gbv:luen4-dspace-20.500.14123/175-7\",\r\n      \"identifierType\": \"URN\"\r\n    }\r\n  ],\r\n  \"sizes\": [\r\n    \"741001 b\"\r\n  ],\r\n  \"formats\": [\r\n    \"application/pdf\"\r\n  ],\r\n  \"version\": \"1\",\r\n  \"rightsList\": [\r\n    {\r\n      \"rights\": \"Anonymous\"\r\n    },\r\n    {\r\n      \"lang\": \"en-US\",\r\n      \"rights\": \"Creative Commons Attribution 4.0 International\",\r\n      \"rightsUri\": \"https://creativecommons.org/licenses/by/4.0/legalcode\",\r\n      \"schemeUri\": \"https://spdx.org/licenses/\",\r\n      \"rightsIdentifier\": \"cc-by-4.0\",\r\n      \"rightsIdentifierScheme\": \"SPDX\"\r\n    }\r\n  ],\r\n  \"descriptions\": [\r\n    {\r\n      \"description\": \"The study of the pragmatics of Irish English is a recent endeavour. Since its beginnings, a substantial amount of scholarship has been conducted in a cross-varietal design with the aim of highlighting shared and specific features of Irish English vis-à-vis other varieties of English. A particular focus of such variational pragmatic research has been on speech act realisations. Cross-varietal studies on apologies in Irish English remain, however, limited. The present chapter addresses this research gap in the study of apologies in Irish English. It takes a variational pragmatic approach to the study of remedial apologies, contrasting apologies in Irish English and in English English empirically using comparable data . Specifically, production questionnaire data is investigated and norms of appropriate verbal apologetic behaviour contrasted. The analysis centres on the apology strategies and modification employed across varieties and on their linguistic realisations, and a particular focus is placed on the cross-varietal use of alerters and vocatives in apologising. Findings point to the universality of apology strategies, while also revealing variety-preferential pragmatic differences. Specifically, the Irish English data reveals a higher use of vocatives, many playing a relational function in the data, and thus suggesting higher levels of relational orientation in the Irish English data relative to the English English data. In addition, a higher use of upgrading strategies and explanations, many communicating an active speaker role, is recorded in the Irish English data pointing to a comparatively higher redress of speakers’ loss of positive face.\",\r\n      \"descriptionType\": \"Abstract\"\r\n    }\r\n  ],\r\n  \"geoLocations\": [],\r\n  \"fundingReferences\": [],\r\n  \"relatedIdentifiers\": [\r\n    {\r\n      \"relationType\": \"IsVariantFormOf\",\r\n      \"relatedIdentifier\": \"10.4324/9781003025078-6\",\r\n      \"relatedIdentifierType\": \"DOI\"\r\n    },\r\n    {\r\n      \"relationType\": \"IsPublishedIn\",\r\n      \"relatedIdentifier\": \"978-0-367-85639-7\",\r\n      \"relatedIdentifierType\": \"ISBN\"\r\n    }\r\n  ],\r\n  \"relatedItems\": [\r\n    {\r\n      \"titles\": [\r\n        {\r\n          \"title\": \"Expanding the Landscapes of Irish English Research\"\r\n        }\r\n      ],\r\n      \"creators\": [],\r\n      \"lastPage\": \"128\",\r\n      \"firstPage\": \"109\",\r\n      \"publisher\": \"Routledge\",\r\n      \"contributors\": [],\r\n      \"relationType\": \"IsPublishedIn\",\r\n      \"publicationYear\": \"2022\",\r\n      \"relatedItemType\": \"Book\",\r\n      \"relatedItemIdentifier\": {\r\n        \"relatedItemIdentifier\": \"10.4324/9781003025078-6\",\r\n        \"relatedItemIdentifierType\": \"DOI\"\r\n      }\r\n    }\r\n  ],\r\n  \"schemaVersion\": \"http://datacite.org/schema/kernel-4\",\r\n  \"providerId\": \"pvre\",\r\n  \"clientId\": \"pvre.aqmlok\",\r\n  \"agency\": \"datacite\",\r\n  \"state\": \"findable\"\r\n}",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Sorry Miss, I Completely Forgot about It: Apologies and Vocatives in Ireland and England",
+				"creators": [
+					{
+						"lastName": "Barron",
+						"firstName": "Anne",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Medien- Und Informationszentrum",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Technische Informationsbibliothek (TIB) Hannover",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					}
+				],
+				"date": "2022",
+				"ISBN": "978-0-367-85639-7",
+				"abstractNote": "The study of the pragmatics of Irish English is a recent endeavour. Since its beginnings, a substantial amount of scholarship has been conducted in a cross-varietal design with the aim of highlighting shared and specific features of Irish English vis-à-vis other varieties of English. A particular focus of such variational pragmatic research has been on speech act realisations. Cross-varietal studies on apologies in Irish English remain, however, limited. The present chapter addresses this research gap in the study of apologies in Irish English. It takes a variational pragmatic approach to the study of remedial apologies, contrasting apologies in Irish English and in English English empirically using comparable data . Specifically, production questionnaire data is investigated and norms of appropriate verbal apologetic behaviour contrasted. The analysis centres on the apology strategies and modification employed across varieties and on their linguistic realisations, and a particular focus is placed on the cross-varietal use of alerters and vocatives in apologising. Findings point to the universality of apology strategies, while also revealing variety-preferential pragmatic differences. Specifically, the Irish English data reveals a higher use of vocatives, many playing a relational function in the data, and thus suggesting higher levels of relational orientation in the Irish English data relative to the English English data. In addition, a higher use of upgrading strategies and explanations, many communicating an active speaker role, is recorded in the Irish English data pointing to a comparatively higher redress of speakers’ loss of positive face.",
+				"bookTitle": "Expanding the Landscapes of Irish English Research",
+				"language": "en",
+				"pages": "109-128",
+				"publisher": "Medien- und Informationszentrum, Leuphana Universität Lüneburg",
+				"rights": "Anonymous, Creative Commons Attribution 4.0 International",
+				"url": "https://pubdata.leuphana.de/handle/20.500.14123/175",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "{\r\n  \"id\": \"https://doi.org/10.25656/01:28324\",\r\n  \"doi\": \"10.25656/01:28324\",\r\n  \"url\": \"https://www.pedocs.de/frontdoor.php?source_opus=28324\",\r\n  \"types\": {\r\n    \"ris\": \"CHAP\",\r\n    \"bibtex\": \"misc\",\r\n    \"citeproc\": \"article\",\r\n    \"schemaOrg\": \"Chapter\",\r\n    \"resourceTypeGeneral\": \"BookChapter\"\r\n  },\r\n  \"creators\": [\r\n    {\r\n      \"name\": \"Bonnet, Andreas\",\r\n      \"givenName\": \"Andreas\",\r\n      \"familyName\": \"Bonnet\",\r\n      \"nameIdentifiers\": [\r\n        {\r\n          \"schemeUri\": \"https://www.dnb.de/gnd\",\r\n          \"nameIdentifier\": \"122894715\",\r\n          \"nameIdentifierScheme\": \"GND\"\r\n        }\r\n      ]\r\n    },\r\n    {\r\n      \"name\": \"Bakels, Elena\",\r\n      \"givenName\": \"Elena\",\r\n      \"familyName\": \"Bakels\",\r\n      \"nameIdentifiers\": [\r\n        {\r\n          \"schemeUri\": \"https://www.dnb.de/gnd\",\r\n          \"nameIdentifier\": \"1204016224\",\r\n          \"nameIdentifierScheme\": \"GND\"\r\n        }\r\n      ]\r\n    },\r\n    {\r\n      \"name\": \"Hericks, Uwe\",\r\n      \"givenName\": \"Uwe\",\r\n      \"familyName\": \"Hericks\",\r\n      \"nameIdentifiers\": [\r\n        {\r\n          \"schemeUri\": \"https://www.dnb.de/gnd\",\r\n          \"nameIdentifier\": \"129263400\",\r\n          \"nameIdentifierScheme\": \"GND\"\r\n        }\r\n      ]\r\n    }\r\n  ],\r\n  \"titles\": [\r\n    {\r\n      \"lang\": \"de\",\r\n      \"title\": \"Die Professionalisierung von Lehrpersonen aus praxeologischer Perspektive. Professionelles Handeln als Entscheiden\"\r\n    }\r\n  ],\r\n  \"publisher\": {\r\n    \"name\": \"Verlag Julius Klinkhardt : Bad Heilbrunn\"\r\n  },\r\n  \"subjects\": [\r\n    {\r\n      \"lang\": \"en\",\r\n      \"subject\": \"370 Education\",\r\n      \"subjectScheme\": \"DDC\",\r\n      \"classificationCode\": \"370\"\r\n    },\r\n    {\r\n      \"lang\": \"de\",\r\n      \"subject\": \"370 Erziehung, Schul- und Bildungswesen\",\r\n      \"subjectScheme\": \"DDC\",\r\n      \"classificationCode\": \"370\"\r\n    },\r\n    {\r\n      \"lang\": \"de\",\r\n      \"subject\": \"Professionalität\"\r\n    },\r\n    {\r\n      \"lang\": \"de\",\r\n      \"subject\": \"Professionalisierung\"\r\n    },\r\n    {\r\n      \"lang\": \"de\",\r\n      \"subject\": \"Lehrer\"\r\n    },\r\n    {\r\n      \"lang\": \"de\",\r\n      \"subject\": \"Lehramtsstudent\"\r\n    },\r\n    {\r\n      \"lang\": \"de\",\r\n      \"subject\": \"Praxeologie\"\r\n    },\r\n    {\r\n      \"lang\": \"de\",\r\n      \"subject\": \"Entscheidung\"\r\n    },\r\n    {\r\n      \"lang\": \"de\",\r\n      \"subject\": \"Erwartung\"\r\n    },\r\n    {\r\n      \"lang\": \"de\",\r\n      \"subject\": \"Habitus\"\r\n    },\r\n    {\r\n      \"lang\": \"de\",\r\n      \"subject\": \"Norm\"\r\n    },\r\n    {\r\n      \"lang\": \"de\",\r\n      \"subject\": \"Standardisierung\"\r\n    },\r\n    {\r\n      \"lang\": \"de\",\r\n      \"subject\": \"Mathematikunterricht\"\r\n    },\r\n    {\r\n      \"lang\": \"de\",\r\n      \"subject\": \"Englischunterricht\"\r\n    },\r\n    {\r\n      \"lang\": \"de\",\r\n      \"subject\": \"Pädagogisches Handeln\"\r\n    },\r\n    {\r\n      \"lang\": \"en\",\r\n      \"subject\": \"Professionalism\"\r\n    },\r\n    {\r\n      \"lang\": \"en\",\r\n      \"subject\": \"Professionality\"\r\n    },\r\n    {\r\n      \"lang\": \"en\",\r\n      \"subject\": \"Professionalization\"\r\n    },\r\n    {\r\n      \"lang\": \"en\",\r\n      \"subject\": \"Teacher\"\r\n    },\r\n    {\r\n      \"lang\": \"en\",\r\n      \"subject\": \"Student teachers\"\r\n    },\r\n    {\r\n      \"lang\": \"en\",\r\n      \"subject\": \"Expectancy\"\r\n    },\r\n    {\r\n      \"lang\": \"en\",\r\n      \"subject\": \"Habits\"\r\n    },\r\n    {\r\n      \"lang\": \"en\",\r\n      \"subject\": \"Standard setting\"\r\n    },\r\n    {\r\n      \"lang\": \"en\",\r\n      \"subject\": \"Standards\"\r\n    },\r\n    {\r\n      \"lang\": \"en\",\r\n      \"subject\": \"Mathematics lessons\"\r\n    },\r\n    {\r\n      \"lang\": \"en\",\r\n      \"subject\": \"Teaching of mathematics\"\r\n    },\r\n    {\r\n      \"lang\": \"en\",\r\n      \"subject\": \"English language lessons\"\r\n    },\r\n    {\r\n      \"lang\": \"en\",\r\n      \"subject\": \"Teaching of English\"\r\n    },\r\n    {\r\n      \"lang\": \"en\",\r\n      \"subject\": \"Mathematics\"\r\n    },\r\n    {\r\n      \"subject\": \"FOS: Mathematics\",\r\n      \"schemeUri\": \"http://www.oecd.org/science/inno/38235147.pdf\",\r\n      \"subjectScheme\": \"Fields of Science and Technology (FOS)\"\r\n    }\r\n  ],\r\n  \"contributors\": [\r\n    {\r\n      \"name\": \"DIPF | Leibniz-Institut für Bildungsforschung und Bildungsinformation\",\r\n      \"nameType\": \"Organizational\",\r\n      \"contributorType\": \"HostingInstitution\",\r\n      \"nameIdentifiers\": {\r\n        \"schemeUri\": \"https://ror.org\",\r\n        \"nameIdentifier\": \"https://ror.org/0327sr118\",\r\n        \"nameIdentifierScheme\": \"ROR\"\r\n      }\r\n    }\r\n  ],\r\n  \"dates\": [\r\n    {\r\n      \"date\": \"2023\",\r\n      \"dateType\": \"Issued\"\r\n    },\r\n    {\r\n      \"date\": \"2024-02-21\",\r\n      \"dateType\": \"Updated\"\r\n    }\r\n  ],\r\n  \"publicationYear\": 2023,\r\n  \"language\": \"de\",\r\n  \"identifiers\": [\r\n    {\r\n      \"identifier\": \"https://nbn-resolving.org/urn:nbn:de:0111-pedocs-283244\",\r\n      \"identifierType\": \"URN\"\r\n    }\r\n  ],\r\n  \"rightsList\": [\r\n    {\r\n      \"rights\": \"Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International\",\r\n      \"rightsUri\": \"http://creativecommons.org/licenses/by-nc-nd/4.0/deed.de\",\r\n      \"rightsIdentifier\": \"cc by nc nd 4.0 international\"\r\n    }\r\n  ],\r\n  \"descriptions\": [\r\n    {\r\n      \"description\": \"Hinzke, Jan-Hendrik [Hrsg.]; Keller-Schneider, Manuela [Hrsg.]: Professionalität und Professionalisierung von Lehrpersonen. Perspektiven, theoretische Rahmungen und empirische Zugänge. Bad Heilbrunn : Verlag Julius Klinkhardt 2023, S. 179-196. - (Studien zur Professionsforschung und Lehrer:innenbildung)\",\r\n      \"descriptionType\": \"SeriesInformation\"\r\n    },\r\n    {\r\n      \"lang\": \"de\",\r\n      \"description\": \"Insbesondere rekonstruktive Untersuchungen haben die Bedeutsamkeit impliziter Wissensbestände für die Professionalisierung von Lehrpersonen herausgearbeitet. Diese Linie der Professionsforschung untersucht mit Hilfe soziologischer Theorien und rekonstruktiver Methoden, welchen Einfluss sozialisatorisch erworbene Wissensbestände und die Strukturen der Organisation Schule auf das Handeln von Lehrpersonen haben. Im Zentrum dieses Aufsatzes stehen die praxeologisch zentralen Begriffe Habitus und Norm sowie die systemtheoretische Konzeptualisierung von (organisationalem) Handeln als Umgang mit Kontingenz durch das Treffen von Entscheidungen. Die Ausführungen werden an ersten Daten aus dem Projekt Professionalisierung von Lehrpersonen der Fächer Mathematik und Englisch (ProME) illustriert. In diesem Projekt wird untersucht, wie Lehrpersonen der Fächer Mathematik und Englisch im Spannungsfeld von Habitus, Organisations- und Identitätsnormen zu ihren alltäglichen Handlungsentscheidungen kommen. (DIPF/Orig.)\",\r\n      \"descriptionType\": \"Abstract\"\r\n    },\r\n    {\r\n      \"lang\": \"en\",\r\n      \"description\": \"Reconstructive research into teacher knowledge has established the crucial role of implicit knowledge. This line of enquiry uses sociological theories and interpretative methods to establish the impact of a-theoretical knowledge or narrative knowledge on teachers’ actions. In this paper we use the praxeological concepts of habitus and norm alongside the systemtheoretical notion of decision-making in order to conceptualize how individuals act in organizational contexts. We exemplify this with first data from our project Professionalisation of Teachers of Maths and English (ProME). This project examines, how teachers of Maths and English navigate the tensions between habitus, organizational norms, and identity-norms in their dairly decision-making. (DIPF/Orig.)\",\r\n      \"descriptionType\": \"Abstract\"\r\n    }\r\n  ],\r\n  \"relatedIdentifiers\": [\r\n    {\r\n      \"relationType\": \"IsVariantFormOf\",\r\n      \"relatedIdentifier\": \"https://doi.org/10.35468/6043-09\",\r\n      \"resourceTypeGeneral\": \"Text\",\r\n      \"relatedIdentifierType\": \"DOI\"\r\n    },\r\n    {\r\n      \"relationType\": \"IsPublishedIn\",\r\n      \"relatedIdentifier\": \"978-3-7815-6043-7\",\r\n      \"relatedIdentifierType\": \"ISBN\"\r\n    },\r\n    {\r\n      \"relationType\": \"IsPublishedIn\",\r\n      \"relatedIdentifier\": \"978-3-7815-2600-6 \",\r\n      \"relatedIdentifierType\": \"ISBN\"\r\n    }\r\n  ],\r\n  \"relatedItems\": [\r\n    {\r\n      \"issue\": \"\",\r\n      \"titles\": {\r\n        \"title\": \"Professionalität und Professionalisierung von Lehrpersonen. Perspektiven, theoretische Rahmungen und empirische Zugänge\"\r\n      },\r\n      \"volume\": \"Studien zur Professionsforschung und Lehrer:innenbildung\",\r\n      \"lastPage\": \"196\",\r\n      \"firstPage\": \"179\",\r\n      \"publisher\": \"Verlag Julius Klinkhardt : Bad Heilbrunn\",\r\n      \"relationType\": \"IsPublishedIn\",\r\n      \"publicationYear\": \"2023\",\r\n      \"relatedItemType\": \"Book\",\r\n      \"relatedItemIdentifier\": {\r\n        \"relatedItemIdentifier\": \"978-3-7815-6043-7\",\r\n        \"relatedItemIdentifierType\": \"ISBN\"\r\n      }\r\n    }\r\n  ],\r\n  \"schemaVersion\": \"http://datacite.org/schema/kernel-4\",\r\n  \"providerId\": \"mjvh\",\r\n  \"clientId\": \"mjvh.pedocs\",\r\n  \"agency\": \"datacite\",\r\n  \"state\": \"findable\"\r\n}",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Die Professionalisierung von Lehrpersonen aus praxeologischer Perspektive. Professionelles Handeln als Entscheiden",
+				"creators": [
+					{
+						"lastName": "Bonnet",
+						"firstName": "Andreas",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bakels",
+						"firstName": "Elena",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Hericks",
+						"firstName": "Uwe",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "DIPF | Leibniz-Institut für Bildungsforschung und Bildungsinformation",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					}
+				],
+				"date": "2023",
+				"ISBN": "978-3-7815-6043-7",
+				"abstractNote": "Reconstructive research into teacher knowledge has established the crucial role of implicit knowledge. This line of enquiry uses sociological theories and interpretative methods to establish the impact of a-theoretical knowledge or narrative knowledge on teachers’ actions. In this paper we use the praxeological concepts of habitus and norm alongside the systemtheoretical notion of decision-making in order to conceptualize how individuals act in organizational contexts. We exemplify this with first data from our project Professionalisation of Teachers of Maths and English (ProME). This project examines, how teachers of Maths and English navigate the tensions between habitus, organizational norms, and identity-norms in their dairly decision-making. (DIPF/Orig.)",
+				"bookTitle": "Professionalität und Professionalisierung von Lehrpersonen. Perspektiven, theoretische Rahmungen und empirische Zugänge",
+				"language": "de",
+				"pages": "179-196",
+				"publisher": "Verlag Julius Klinkhardt : Bad Heilbrunn",
+				"rights": "Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International",
+				"url": "https://www.pedocs.de/frontdoor.php?source_opus=28324",
+				"volume": "Studien zur Professionsforschung und Lehrer:innenbildung",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "370 Education"
+					},
+					{
+						"tag": "370 Erziehung, Schul- und Bildungswesen"
+					},
+					{
+						"tag": "Englischunterricht"
+					},
+					{
+						"tag": "English language lessons"
+					},
+					{
+						"tag": "Entscheidung"
+					},
+					{
+						"tag": "Erwartung"
+					},
+					{
+						"tag": "Expectancy"
+					},
+					{
+						"tag": "FOS: Mathematics"
+					},
+					{
+						"tag": "Habits"
+					},
+					{
+						"tag": "Habitus"
+					},
+					{
+						"tag": "Lehramtsstudent"
+					},
+					{
+						"tag": "Lehrer"
+					},
+					{
+						"tag": "Mathematics"
+					},
+					{
+						"tag": "Mathematics lessons"
+					},
+					{
+						"tag": "Mathematikunterricht"
+					},
+					{
+						"tag": "Norm"
+					},
+					{
+						"tag": "Praxeologie"
+					},
+					{
+						"tag": "Professionalisierung"
+					},
+					{
+						"tag": "Professionalism"
+					},
+					{
+						"tag": "Professionality"
+					},
+					{
+						"tag": "Professionalität"
+					},
+					{
+						"tag": "Professionalization"
+					},
+					{
+						"tag": "Pädagogisches Handeln"
+					},
+					{
+						"tag": "Standard setting"
+					},
+					{
+						"tag": "Standardisierung"
+					},
+					{
+						"tag": "Standards"
+					},
+					{
+						"tag": "Student teachers"
+					},
+					{
+						"tag": "Teacher"
+					},
+					{
+						"tag": "Teaching of English"
+					},
+					{
+						"tag": "Teaching of mathematics"
+					}
+				],
+				"notes": [
+					{
+						"note": "<h2>SeriesInformation</h2>\nHinzke, Jan-Hendrik [Hrsg.]; Keller-Schneider, Manuela [Hrsg.]: Professionalität und Professionalisierung von Lehrpersonen. Perspektiven, theoretische Rahmungen und empirische Zugänge. Bad Heilbrunn : Verlag Julius Klinkhardt 2023, S. 179-196. - (Studien zur Professionsforschung und Lehrer:innenbildung)"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "{\r\n  \"id\": \"https://doi.org/10.11588/arthistoricum.1141.c16127\",\r\n  \"doi\": \"10.11588/ARTHISTORICUM.1141.C16127\",\r\n  \"url\": \"https://books.ub.uni-heidelberg.de//arthistoricum/catalog/book/1141/chapter/16127\",\r\n  \"types\": {\r\n    \"ris\": \"CHAP\",\r\n    \"bibtex\": \"misc\",\r\n    \"citeproc\": \"article\",\r\n    \"schemaOrg\": \"Chapter\",\r\n    \"resourceType\": \"Chapter\",\r\n    \"resourceTypeGeneral\": \"BookChapter\"\r\n  },\r\n  \"creators\": [\r\n    {\r\n      \"name\": \"Rasche, Adelheid\",\r\n      \"nameType\": \"Personal\",\r\n      \"givenName\": \"Adelheid\",\r\n      \"familyName\": \"Rasche\",\r\n      \"affiliation\": [],\r\n      \"nameIdentifiers\": []\r\n    },\r\n    {\r\n      \"name\": \"Großmann, G. Ulrich\",\r\n      \"nameType\": \"Personal\",\r\n      \"givenName\": \"G. Ulrich\",\r\n      \"familyName\": \"Großmann\",\r\n      \"affiliation\": [],\r\n      \"nameIdentifiers\": []\r\n    }\r\n  ],\r\n  \"titles\": [\r\n    {\r\n      \"title\": \"Luxury in Silk. Eighteenth-Century Fashion: English summary of the book Luxus in Seide\"\r\n    },\r\n    {\r\n      \"title\": \"Luxury in Silk. Eighteenth-Century Fashion: English summary of the book Luxus in Seide\",\r\n      \"titleType\": \"TranslatedTitle\"\r\n    }\r\n  ],\r\n  \"publisher\": {\r\n    \"name\": \"arthistoricum.net\"\r\n  },\r\n  \"container\": {\r\n    \"type\": \"Series\",\r\n    \"identifier\": \"10.11588/arthistoricum.1141\",\r\n    \"identifierType\": \"DOI\"\r\n  },\r\n  \"subjects\": [\r\n    {\r\n      \"subject\": \"gnd/4054289-0\"\r\n    },\r\n    {\r\n      \"subject\": \"gnd/4039792-0\"\r\n    },\r\n    {\r\n      \"subject\": \"gnd/4031011-5\"\r\n    }\r\n  ],\r\n  \"contributors\": [],\r\n  \"dates\": [\r\n    {\r\n      \"date\": \"2023\",\r\n      \"dateType\": \"Issued\"\r\n    }\r\n  ],\r\n  \"publicationYear\": 2023,\r\n  \"language\": \"de\",\r\n  \"identifiers\": [],\r\n  \"sizes\": [],\r\n  \"formats\": [],\r\n  \"rightsList\": [\r\n    {\r\n      \"rightsUri\": \"https://www.ub.uni-heidelberg.de/service/openaccess/lizenzen/freier-zugang.html\"\r\n    }\r\n  ],\r\n  \"descriptions\": [],\r\n  \"geoLocations\": [],\r\n  \"fundingReferences\": [],\r\n  \"relatedIdentifiers\": [\r\n    {\r\n      \"relationType\": \"IsPartOf\",\r\n      \"relatedIdentifier\": \"10.11588/arthistoricum.1141\",\r\n      \"relatedIdentifierType\": \"DOI\"\r\n    }\r\n  ],\r\n  \"relatedItems\": [\r\n    {\r\n      \"titles\": [\r\n        {\r\n          \"title\": \"Luxus in Seide\"\r\n        },\r\n        {\r\n          \"title\": \"Luxus in Seide\",\r\n          \"titleType\": \"TranslatedTitle\"\r\n        }\r\n      ],\r\n      \"creators\": [],\r\n      \"contributors\": [],\r\n      \"relationType\": \"IsPublishedIn\",\r\n      \"relatedItemType\": \"Book\",\r\n      \"relatedItemIdentifier\": {\r\n        \"relatedItemIdentifier\": \"https://books.ub.uni-heidelberg.de//arthistoricum/catalog/book/1141\",\r\n        \"relatedItemIdentifierType\": \"URL\"\r\n      }\r\n    }\r\n  ],\r\n  \"schemaVersion\": \"http://datacite.org/schema/kernel-4\",\r\n  \"providerId\": \"vgzm\",\r\n  \"clientId\": \"gesis.ubhd\",\r\n  \"agency\": \"datacite\",\r\n  \"state\": \"findable\"\r\n}",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Luxury in Silk. Eighteenth-Century Fashion: English summary of the book Luxus in Seide",
+				"creators": [
+					{
+						"lastName": "Rasche",
+						"firstName": "Adelheid",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Großmann",
+						"firstName": "G. Ulrich",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023",
+				"bookTitle": "Luxus in Seide",
+				"language": "de",
+				"publisher": "arthistoricum.net",
+				"url": "https://books.ub.uni-heidelberg.de//arthistoricum/catalog/book/1141/chapter/16127",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "gnd/4031011-5"
+					},
+					{
+						"tag": "gnd/4039792-0"
+					},
+					{
+						"tag": "gnd/4054289-0"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "{\n  \"id\": \"https://doi.org/10.26021/15688\",\n  \"doi\": \"10.26021/15688\",\n  \"url\": \"https://ir.canterbury.ac.nz/handle/10092/108154\",\n  \"types\": {\n    \"ris\": \"CHAP\",\n    \"bibtex\": \"misc\",\n    \"citeproc\": \"article\",\n    \"schemaOrg\": \"Chapter\",\n    \"resourceType\": \"Chapters\",\n    \"resourceTypeGeneral\": \"BookChapter\"\n  },\n  \"creators\": [\n    {\n      \"name\": \"Iese, Viliamu\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Viliamu\",\n      \"familyName\": \"Iese\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Muliaina, Tolu\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Tolu\",\n      \"familyName\": \"Muliaina\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Prasad, Rahul\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Rahul\",\n      \"familyName\": \"Prasad\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Nand, Moleen\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Moleen\",\n      \"familyName\": \"Nand\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Pill, Melanie\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Melanie\",\n      \"familyName\": \"Pill\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Michael, Sivendra\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Sivendra\",\n      \"familyName\": \"Michael\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Dass-Nand, Roslyn\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Roslyn\",\n      \"familyName\": \"Dass-Nand\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Soko, Vasiti\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Vasiti\",\n      \"familyName\": \"Soko\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Nelson, Filomena\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Filomena\",\n      \"familyName\": \"Nelson\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Veisa, Filipe\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Filipe\",\n      \"familyName\": \"Veisa\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Rarokolutu, Ratu Tevita\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Ratu Tevita\",\n      \"familyName\": \"Rarokolutu\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Nasalo, Salote\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Salote\",\n      \"familyName\": \"Nasalo\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Navunicagi, Otto\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Otto\",\n      \"familyName\": \"Navunicagi\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Amato-Ali, Christian Yves\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Christian Yves\",\n      \"familyName\": \"Amato-Ali\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Ha’apio, Michael\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Michael\",\n      \"familyName\": \"Ha’apio\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Wairiu, Morgan\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Morgan\",\n      \"familyName\": \"Wairiu\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Holland, Elisabeth\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Elisabeth\",\n      \"familyName\": \"Holland\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Malaki-Faaofo, Louise Marie\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Louise Marie\",\n      \"familyName\": \"Malaki-Faaofo\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Roko, Nasoni\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Nasoni\",\n      \"familyName\": \"Roko\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Ward, Alastair\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Alastair\",\n      \"familyName\": \"Ward\",\n      \"affiliation\": [],\n      \"nameIdentifiers\": []\n    }\n  ],\n  \"titles\": [\n    {\n      \"lang\": \"\",\n      \"title\": \"Loss and Damage: Save the Pacific, Save the World\",\n      \"titleType\": null\n    }\n  ],\n  \"publisher\": {\n    \"name\": \"The Macmillan Brown Centre for Pacific Studies Press and the Pacific Centre for Environment and Sustainable Development\"\n  },\n  \"container\": {},\n  \"subjects\": [\n    {\n      \"subject\": \"Climate Change\"\n    },\n    {\n      \"subject\": \"Pacific Ocean\"\n    }\n  ],\n  \"contributors\": [\n    {\n      \"name\": \"University Of Canterbury\",\n      \"nameType\": null,\n      \"givenName\": null,\n      \"familyName\": null,\n      \"affiliation\": [],\n      \"contributorType\": \"DataManager\",\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"University Of Canterbury\",\n      \"nameType\": null,\n      \"givenName\": null,\n      \"familyName\": null,\n      \"affiliation\": [],\n      \"contributorType\": \"HostingInstitution\",\n      \"nameIdentifiers\": []\n    },\n    {\n      \"name\": \"Ratuva, Steven\",\n      \"nameType\": \"Personal\",\n      \"givenName\": \"Steven\",\n      \"familyName\": \"Ratuva\",\n      \"affiliation\": [\n        {\n          \"name\": null,\n          \"schemeUri\": null,\n          \"affiliationIdentifier\": null,\n          \"affiliationIdentifierScheme\": null\n        }\n      ],\n      \"contributorType\": \"Editor\",\n      \"nameIdentifiers\": [\n        {\n          \"schemeUri\": null,\n          \"nameIdentifier\": null,\n          \"nameIdentifierScheme\": null\n        }\n      ]\n    }\n  ],\n  \"dates\": [\n    {\n      \"date\": \"2025-02-25\",\n      \"dateType\": \"Accepted\",\n      \"dateInformation\": null\n    },\n    {\n      \"date\": \"2025-02-25\",\n      \"dateType\": \"Available\",\n      \"dateInformation\": null\n    },\n    {\n      \"date\": \"2024\",\n      \"dateType\": \"Issued\",\n      \"dateInformation\": null\n    }\n  ],\n  \"publicationYear\": 2024,\n  \"identifiers\": [\n    {\n      \"identifier\": \"https://hdl.handle.net/10092/108154\",\n      \"identifierType\": \"uri\"\n    }\n  ],\n  \"sizes\": [],\n  \"formats\": [\n    \"application/pdf\"\n  ],\n  \"rightsList\": [\n    {\n      \"rights\": \"All rights reserved. This book is in copyright. No part must be republished without permission of the publishers.\"\n    }\n  ],\n  \"descriptions\": [],\n  \"geoLocations\": [\n    {\n      \"geoLocationPlace\": \"Pacific Ocean\"\n    }\n  ],\n  \"fundingReferences\": [],\n  \"relatedIdentifiers\": [\n    {\n      \"schemeUri\": null,\n      \"schemeType\": null,\n      \"relationType\": \"IsPartOf\",\n      \"relatedIdentifier\": \"https://doi.org/10.26021/15556\",\n      \"resourceTypeGeneral\": \"Book\",\n      \"relatedIdentifierType\": \"DOI\",\n      \"relatedMetadataScheme\": null\n    }\n  ],\n  \"relatedItems\": [\n    {\n      \"titles\": [\n        {\n          \"title\": \"Voices of the Pacific Climate Crisis Adaptation and Resilience: Pacific Ocean and Climate Crisis Assessment Report Volume 1\"\n        }\n      ],\n      \"relationType\": \"IsPublishedIn\",\n      \"publicationYear\": \"2024\",\n      \"relatedItemType\": \"Book\",\n      \"relatedItemIdentifier\": {\n        \"relatedItemIdentifier\": \"https://doi.org/10.26021/15556\",\n        \"relatedItemIdentifierType\": \"DOI\"\n      }\n    }\n  ],\n  \"schemaVersion\": \"http://datacite.org/schema/kernel-4\",\n  \"providerId\": \"nzcu\",\n  \"clientId\": \"nzcu.ucrr\",\n  \"agency\": \"datacite\",\n  \"state\": \"findable\"\n}",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Loss and Damage: Save the Pacific, Save the World",
+				"creators": [
+					{
+						"lastName": "Iese",
+						"firstName": "Viliamu",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Muliaina",
+						"firstName": "Tolu",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Prasad",
+						"firstName": "Rahul",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Nand",
+						"firstName": "Moleen",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Pill",
+						"firstName": "Melanie",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Michael",
+						"firstName": "Sivendra",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Dass-Nand",
+						"firstName": "Roslyn",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Soko",
+						"firstName": "Vasiti",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Nelson",
+						"firstName": "Filomena",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Veisa",
+						"firstName": "Filipe",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Rarokolutu",
+						"firstName": "Ratu Tevita",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Nasalo",
+						"firstName": "Salote",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Navunicagi",
+						"firstName": "Otto",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Amato-Ali",
+						"firstName": "Christian Yves",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Ha’apio",
+						"firstName": "Michael",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wairiu",
+						"firstName": "Morgan",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Holland",
+						"firstName": "Elisabeth",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Malaki-Faaofo",
+						"firstName": "Louise Marie",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Roko",
+						"firstName": "Nasoni",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Ward",
+						"firstName": "Alastair",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "University Of Canterbury",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Ratuva",
+						"firstName": "Steven",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2024",
+				"bookTitle": "Voices of the Pacific Climate Crisis Adaptation and Resilience: Pacific Ocean and Climate Crisis Assessment Report Volume 1",
+				"publisher": "The Macmillan Brown Centre for Pacific Studies Press and the Pacific Centre for Environment and Sustainable Development",
+				"rights": "All rights reserved. This book is in copyright. No part must be republished without permission of the publishers.",
+				"url": "https://ir.canterbury.ac.nz/handle/10092/108154",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Climate Change"
+					},
+					{
+						"tag": "Pacific Ocean"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "{\n\t\"id\": \"https://doi.org/10.34769/azkm-y326\",\n\t\"doi\": \"10.34769/AZKM-Y326\",\n\t\"url\": \"http://www2.ite.waw.pl//docs/imif/20210121_M_Mozdzonek_2020.pdf\",\n\t\"types\": {\n\t\t\"ris\": \"GEN\",\n\t\t\"bibtex\": \"misc\",\n\t\t\"citeproc\": \"article\",\n\t\t\"schemaOrg\": \"CreativeWork\",\n\t\t\"resourceTypeGeneral\": \"DataPaper\"\n\t},\n\t\"creators\": [\n\t\t{\n\t\t\"name\": \"Możdżonek, Małgorzata\",\n\t\t\"nameType\": \"Personal\",\n\t\t\"givenName\": \"Małgorzata\",\n\t\t\"familyName\": \"Możdżonek\",\n\t\t\"affiliation\": [\n\t\t\t{\n\t\t\t\"name\": \"Institute of Electronic Materials Technology\",\n\t\t\t\"schemeUri\": \"https://ror.org\",\n\t\t\t\"affiliationIdentifier\": \"https://ror.org/03jp3w522\",\n\t\t\t\"affiliationIdentifierScheme\": \"ROR\"\n\t\t\t}\n\t\t],\n\t\t\"nameIdentifiers\": []\n\t\t},\n\t\t{\n\t\t\"name\": \"Caban, Piotr\",\n\t\t\"nameType\": \"Personal\",\n\t\t\"givenName\": \"Piotr\",\n\t\t\"familyName\": \"Caban\",\n\t\t\"affiliation\": [\n\t\t\t{\n\t\t\t\"name\": \"Institute of Electronic Materials Technology\",\n\t\t\t\"schemeUri\": \"https://ror.org\",\n\t\t\t\"affiliationIdentifier\": \"https://ror.org/03jp3w522\",\n\t\t\t\"affiliationIdentifierScheme\": \"ROR\"\n\t\t\t}\n\t\t],\n\t\t\"nameIdentifiers\": []\n\t\t},\n\t\t{\n\t\t\"name\": \"Gaca, Jarosław\",\n\t\t\"nameType\": \"Personal\",\n\t\t\"givenName\": \"Jarosław\",\n\t\t\"familyName\": \"Gaca\",\n\t\t\"affiliation\": [\n\t\t\t{\n\t\t\t\"name\": \"Institute of Electronic Materials Technology\",\n\t\t\t\"schemeUri\": \"https://ror.org\",\n\t\t\t\"affiliationIdentifier\": \"https://ror.org/03jp3w522\",\n\t\t\t\"affiliationIdentifierScheme\": \"ROR\"\n\t\t\t}\n\t\t],\n\t\t\"nameIdentifiers\": []\n\t\t},\n\t\t{\n\t\t\"name\": \"Wójcik, Marek\",\n\t\t\"nameType\": \"Personal\",\n\t\t\"givenName\": \"Marek\",\n\t\t\"familyName\": \"Wójcik\",\n\t\t\"affiliation\": [\n\t\t\t{\n\t\t\t\"name\": \"Institute of Electronic Materials Technology\",\n\t\t\t\"schemeUri\": \"https://ror.org\",\n\t\t\t\"affiliationIdentifier\": \"https://ror.org/03jp3w522\",\n\t\t\t\"affiliationIdentifierScheme\": \"ROR\"\n\t\t\t}\n\t\t],\n\t\t\"nameIdentifiers\": []\n\t\t},\n\t\t{\n\t\t\"name\": \"Piątkowska, Anna\",\n\t\t\"nameType\": \"Personal\",\n\t\t\"givenName\": \"Anna\",\n\t\t\"familyName\": \"Piątkowska\",\n\t\t\"affiliation\": [\n\t\t\t{\n\t\t\t\"name\": \"Institute of Electronic Materials Technology\",\n\t\t\t\"schemeUri\": \"https://ror.org\",\n\t\t\t\"affiliationIdentifier\": \"https://ror.org/03jp3w522\",\n\t\t\t\"affiliationIdentifierScheme\": \"ROR\"\n\t\t\t}\n\t\t],\n\t\t\"nameIdentifiers\": []\n\t\t}\n\t],\n\t\"titles\": [\n\t\t{\n\t\t\"lang\": \"en\",\n\t\t\"title\": \"Determination of the thickness of BN layers on the Al2O3 substrate by FT-IR spectroscopy\",\n\t\t\"titleType\": \"TranslatedTitle\"\n\t\t}\n\t],\n\t\"publisher\": {\n\t\t\"name\": \"Łukasiewicz Research Network - Institute of Electronic Materials Technology\"\n\t},\n\t\"subjects\": [],\n\t\"contributors\": [],\n\t\"dates\": [],\n\t\"publicationYear\": 2020,\n\t\"language\": \"en\",\n\t\"identifiers\": [],\n\t\"sizes\": [],\n\t\"formats\": [],\n\t\"rightsList\": [],\n\t\"descriptions\": [],\n\t\"geoLocations\": [],\n\t\"fundingReferences\": [],\n\t\"relatedIdentifiers\": [],\n\t\"schemaVersion\": \"http://datacite.org/schema/kernel-4\",\n\t\"providerId\": \"ymju\",\n\t\"clientId\": \"psnc.itme\",\n\t\"agency\": \"datacite\",\n\t\"state\": \"findable\"\n}",
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "Determination of the thickness of BN layers on the Al2O3 substrate by FT-IR spectroscopy",
+				"creators": [
+					{
+						"lastName": "Możdżonek",
+						"firstName": "Małgorzata",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Caban",
+						"firstName": "Piotr",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Gaca",
+						"firstName": "Jarosław",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wójcik",
+						"firstName": "Marek",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Piątkowska",
+						"firstName": "Anna",
+						"creatorType": "author"
+					}
+				],
+				"date": 2020,
+				"DOI": "10.34769/AZKM-Y326",
+				"language": "en",
+				"repository": "Łukasiewicz Research Network - Institute of Electronic Materials Technology",
+				"url": "http://www2.ite.waw.pl//docs/imif/20210121_M_Mozdzonek_2020.pdf",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
 				"seeAlso": []
 			}
 		]

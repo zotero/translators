@@ -8,102 +8,94 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcisbv",
-	"lastUpdated": "2018-08-13 09:15:36"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2024-06-27 15:32:02"
 }
 
 /*
-	***** BEGIN LICENSE BLOCK *****
+    ***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2018 Sebastian Berlin
-	
-	This file is part of Zotero.
+    Copyright © 2024 Abe Jellinek
 
-	Zotero is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
+    This file is part of Zotero.
 
-	Zotero is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-	GNU Affero General Public License for more details.
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-	You should have received a copy of the GNU Affero General Public License
-	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU Affero General Public License for more details.
 
-	***** END LICENSE BLOCK *****
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+    ***** END LICENSE BLOCK *****
 */
 
 
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
-
 function detectWeb(doc, url) {
-	return "newspaperArticle";
+	if (url.includes('/nyheter/') && doc.querySelector('#root > [data-typename="NewsArticle"]')) {
+		return 'newspaperArticle';
+	}
+	else if (getSearchResults(doc, true)) {
+		return 'multiple';
+	}
+	return false;
 }
 
-
-function doWeb(doc, url) {
-	scrape(doc, url);
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('ul[class^="TeaserFeed"] li article > a');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(text(row, '.nyh_teaser__heading-title'));
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
 }
 
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
+	}
+	else {
+		await scrape(doc, url);
+	}
+}
 
-function scrape(doc, url) {
-	var translator = Zotero.loadTranslator('web');
+async function scrape(doc, url = doc.location.href) {
+	let translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-
-	translator.setHandler('itemDone', function (obj, item) {
-		var nameNodes = ZU.xpath(doc, '//a[@class="nyh_article__author-email"]');
-
-		for (let nameNode of nameNodes) {
-			let nameString = nameNode.textContent;
-			let author = ZU.cleanAuthor(nameString, "author");
-			let firstNames = author.firstName.split(" ");
-			if(firstNames.length > 1) {
-				// Assume that there's only one first name and move any
-				// "extra" name to lastName.
-				author.firstName = firstNames[0];
-				author.lastName = firstNames[1] + " " + author.lastName;
-			}
-			item.creators.push(author);
+	translator.setDocument(doc);
+	
+	translator.setHandler('itemDone', (_obj, item) => {
+		item.date = ZU.strToISO(item.date);
+		item.section = text(doc, 'h1 > a[class^="SectionHeader"]');
+		if (item.section == 'Uutiset' && !url.includes('/svenska/')) {
+			item.language = 'fi';
 		}
-		if (item.creators.length === 0) {
-			// No author was found, look for non-person authors, e.g. TT.
-			var authorString = ZU.xpathText(doc, '//span[@class="nyh_article__author-name"]');
-			var author = ZU.cleanAuthor(authorString, "author");
-			author.firstName = undefined;
-			author.fieldMode = true;
-			item.creators.push(author);
-		}
-
-		item.section =  ZU.xpathText(doc, '//a[@class="nyh_section-header__link"]');
-
-		var dateString = attr(doc, 'meta[property="article:published_time"]', "content");
-		if(dateString) {
-			// The date strings have the format "2018-02-28T02:24:59+01:00".
-			item.date = dateString.split("T")[0];
-		}
-
-		if(url.match(/\/nyheter\/uutiset\/(?!svenska\/)/)) {
-			// Uutiset articles are in Finnish, except when in the Swedish
-			// category.
-			item.language = "fi";
-		}
-
+		item.creators = Array.from(doc.querySelectorAll('footer a > span[itemprop="author"]'))
+			.map(author => ZU.cleanAuthor(author.textContent, 'author'));
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function(trans) {
-		trans.itemType = "newspaperArticle";
-		trans.addCustomFields({
-			'twitter:description': 'abstractNote'
-		});
-		trans.doWeb(doc, url);
-	});
+	let em = await translator.getTranslatorObject();
+	em.itemType = 'newspaperArticle';
+	await em.doWeb(doc, url);
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -129,7 +121,8 @@ var testCases = [
 				"url": "https://www.svt.se/nyheter/lokalt/ost/kronobranneriet",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -140,15 +133,15 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.svt.se/nyheter/utrikes/varldens-morkaste-byggnad-finns-i-sydkorea",
+		"url": "https://www.svt.se/nyheter/utrikes/varldens-morkaste-byggnad-finns-i-sydkorea",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
 				"title": "Världens mörkaste byggnad finns i Sydkorea",
 				"creators": [
 					{
-						"firstName": "Sophia",
-						"lastName": "Garcia Hasselberg",
+						"firstName": "Sophia Garcia",
+						"lastName": "Hasselberg",
 						"creatorType": "author"
 					}
 				],
@@ -161,7 +154,8 @@ var testCases = [
 				"url": "https://www.svt.se/nyheter/utrikes/varldens-morkaste-byggnad-finns-i-sydkorea",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -177,13 +171,7 @@ var testCases = [
 			{
 				"itemType": "newspaperArticle",
 				"title": "”Extremt viktigt” vikingafynd i England",
-				"creators": [
-					{
-						"lastName": "TT",
-						"creatorType": "author",
-						"fieldMode": true
-					}
-				],
+				"creators": [],
 				"date": "2018-02-19",
 				"abstractNote": "På 1970-talet upptäcktes en massgrav som troddes härröra från den stora vikingaarmé som invaderade England i slutet av 800-talet. Men på grund av en felmätning föll fynden i glömska. Nu, mer än 40 år senare, gör massgraven en storstilad återkomst som ett av de viktigaste vikingafynden någonsin.",
 				"language": "sv",
@@ -193,7 +181,8 @@ var testCases = [
 				"url": "https://www.svt.se/nyheter/vetenskap/extremt-viktigt-vikingafynd-i-england",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -231,7 +220,8 @@ var testCases = [
 				"url": "https://www.svt.se/nyheter/inrikes/trafikanter-varnas-vissa-vagar-hala-som-skridskobanor",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -263,7 +253,8 @@ var testCases = [
 				"url": "https://www.svt.se/nyheter/uutiset/meankielen-paivaa-juhlitaan-pajalassa",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -295,7 +286,8 @@ var testCases = [
 				"url": "https://www.svt.se/nyheter/uutiset/svenska/finska-gymnasieelever-flyttar-till-sverige-for-sport",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -327,7 +319,8 @@ var testCases = [
 				"url": "https://www.svt.se/nyheter/utrikes/tyska-bilindustrin-testar-avgaser-pa-apor-och-manniskor",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -335,6 +328,54 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.svt.se/nyheter/lokalt/vasterbotten/per-hakan-och-mahari-dog-efter-sina-pass-pa-northvolt",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Per-Håkan och Mahari dog efter sina pass på Northvolt",
+				"creators": [
+					{
+						"firstName": "Oscar",
+						"lastName": "Hansson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Oskar",
+						"lastName": "Jönsson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Evelina",
+						"lastName": "Dahlberg",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024-06-24",
+				"abstractNote": "Per-Håkan Söderström, 59, Mahari Bakari, 33, och en 19-årig man dog alla efter sina arbetspass på batterifabriken Northvolt. Nu utreder polisen dödsfallen på nytt. – Vågar de som jobbar kvar gå och lägga sig? Det kan ju hända dem med, säger Per-Håkans bror Lars-Erik.",
+				"language": "sv",
+				"libraryCatalog": "www.svt.se",
+				"publicationTitle": "SVT Nyheter",
+				"section": "Västerbotten",
+				"url": "https://www.svt.se/nyheter/lokalt/vasterbotten/per-hakan-och-mahari-dog-efter-sina-pass-pa-northvolt",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.svt.se/nyheter/ekonomi/",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

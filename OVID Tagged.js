@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-10-12 19:51:31"
+	"lastUpdated": "2025-03-03 21:50:09"
 }
 
 /*
@@ -98,6 +98,12 @@ var inputTypeMap = {
 
 function processTag(item, tag, value) {
 	value = Zotero.Utilities.trim(value);
+
+	if (tag == 'DB' && value === 'Books@Ovid') {
+		// Book items in this database don't have any other indication that they're books
+		item.itemType = 'book';
+	}
+
 	if (fieldMap[tag]) {
 		item[fieldMap[tag]] = value;
 	}
@@ -105,7 +111,6 @@ function processTag(item, tag, value) {
 		if (inputTypeMap[value]) { // first check inputTypeMap
 			item.itemType = inputTypeMap[value];
 		}
-	// I don't think FED or ED exist, but let's keep them to be safe
 	}
 	else if (tag == "FA" || tag == "FED") {
 		let type;
@@ -125,10 +130,12 @@ function processTag(item, tag, value) {
 		else if (tag == "ED") {
 			type = "editor";
 		}
-		value = value.replace(/[0-9,+*\s]+$/, "").replace(/ Ph\.?D\.?.*/, "").replace(/\[.+/, "")
-			.replace(/(\b(?:MD|[BM]Sc|[BM]A|MPH|MB)(,\s*)?)+$/gi, "");
-		// Z.debug(value)
-		item.creatorsBackup.push(Zotero.Utilities.cleanAuthor(value, type, value.includes(",")));
+		for (let name of value.split(';')) {
+			name = name.replace(/[0-9,+*\s]+$/, "").replace(/ Ph\.?D\.?.*/, "").replace(/\[.+/, "")
+				.replace(/(\b(?:MD|[BM]Sc|[BM]A|MPH|MB)(,\s*)?)+$/gi, "");
+			// Z.debug(value)
+			item.creatorsBackup.push(Zotero.Utilities.cleanAuthor(name, type, value.includes(",")));
+		}
 	}
 	else if (tag == "UI") {
 		item.PMID = "PMID: " + value;
@@ -330,7 +337,9 @@ function finalizeItem(item) {
 
 	delete item.publishing;
 	delete item.citation;
-	delete item.itemID;
+	if (!Zotero.parentTranslator) {
+		delete item.itemID;
+	}
 	item.complete();
 }
 
@@ -1145,6 +1154,67 @@ var testCases = [
 				"pages": "123-456",
 				"publicationTitle": "A Nonexistent Journal of Marriage and Family Therapy: With a Subtitle",
 				"volume": "1",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<1. >\nVN  - Ovid Technologies\nDB  - Books@Ovid\nSCORE  - *****\nED  - McGarry, John W.;  Elsheikha, Hany M.;  Taylor, Suzanne\nET  - 1st Edition\nTI  - Colour Atlas of Companion Animal Parasites, A: Life Cycles and Morphological Identification\nPU  - CABI Publishing\nLC  - London, UK.\nLG  - ENGLISH\nIB  - 978-1-80062-734-5\nPT  - Text/Reference\nYR  - 2024\nXP  - XL  - https://ovidsp.ovid.com/ovidweb.cgi?T=JS&CSC=Y&NEWS=N&PAGE=booktext&D=books2&AN=02276353%2f1st_Edition%2f22\n\n<2. >\nVN  - Ovid Technologies\nDB  - Books@Ovid\nSCORE  - *****\nED  - DerMarderosian, Ara;  McQueen, Cydney E.\nET  - 2014 Edition\nTI  - Review of Natural Products, The\nPU  - Facts and Comparisons\nLC  - Clinical Drug Information, LLC77 Westport Plaza, Suite 450St. Louis, Missouri 63146-3125Phone 314-392-0000 * 855-633-0577Fax 314-392-0030www.wolterskluwerCDI.com\nLG  - ENGLISH\nIB  - 978-1-57-439368-2\nPT  - Drug Reference\nSB  - Nursing, Clinical Medicine, Pharmacology\nTS  - Alternative & Complementary Medicine\nYR  - 2016\nUP  - 20230608\nXP  - XL  - https://ovidsp.ovid.com/ovidweb.cgi?T=JS&CSC=Y&NEWS=N&PAGE=booktext&D=books6&AN=00140022%2f2014_Edition%2f99",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Colour Atlas of Companion Animal Parasites, A: Life Cycles and Morphological Identification",
+				"creators": [
+					{
+						"firstName": "John W.",
+						"lastName": "McGarry",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Hany M.",
+						"lastName": "Elsheikha",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Suzanne",
+						"lastName": "Taylor",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2024",
+				"ISBN": "9781800627345",
+				"language": "ENGLISH",
+				"libraryCatalog": "Books@Ovid",
+				"publisher": "CABI Publishing",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			},
+			{
+				"itemType": "book",
+				"title": "Review of Natural Products, The",
+				"creators": [
+					{
+						"firstName": "Ara",
+						"lastName": "DerMarderosian",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Cydney E.",
+						"lastName": "McQueen",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2016",
+				"ISBN": "9781574393682",
+				"language": "ENGLISH",
+				"libraryCatalog": "Books@Ovid",
+				"publisher": "Facts and Comparisons",
 				"attachments": [],
 				"tags": [],
 				"notes": [],

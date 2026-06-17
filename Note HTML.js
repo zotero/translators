@@ -14,7 +14,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2024-02-13 18:47:05"
+	"lastUpdated": "2024-07-10 15:30:00"
 }
 
 /*
@@ -67,8 +67,8 @@ function doExport() {
 	}
 
 	if (Zotero.getOption("includeAppLinks")) {
-		// Insert a PDF link for highlight and image annotation nodes
-		doc.querySelectorAll('span[class="highlight"], img[data-annotation]').forEach(function (node) {
+		// Insert a PDF link for highlight, underline and image annotation nodes
+		doc.querySelectorAll('span[class="highlight"], span[class="underline"], img[data-annotation]').forEach(function (node) {
 			try {
 				var annotation = JSON.parse(decodeURIComponent(node.getAttribute('data-annotation')));
 			}
@@ -103,9 +103,11 @@ function doExport() {
 						linkText = 'snapshot';
 					}
 					else {
-						openURI += '?page=' + (position.pageIndex + 1)
-							+ (annotation.annotationKey ? '&annotation=' + annotation.annotationKey : '');
+						openURI += '?page=' + (position.pageIndex + 1);
 						linkText = 'pdf';
+					}
+					if (annotation.annotationKey) {
+						openURI += '&annotation=' + annotation.annotationKey;
 					}
 
 					let a = doc.createElement('a');

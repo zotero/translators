@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-09 20:47:02"
+	"lastUpdated": "2025-08-08 16:00:53"
 }
 
 /*
@@ -79,6 +79,7 @@ function scrape(doc, url) {
 	translator.setDocument(doc);
 	
 	translator.setHandler('itemDone', function (obj, item) {
+		item.abstractNote = text(doc, '.article-details__abstract');
 		item.attachments = [];
 		
 		for (let button of doc.querySelectorAll('.button')) {
@@ -140,7 +141,7 @@ var testCases = [
 				"date": "2015/01/01",
 				"DOI": "10.1371/journal.pone.0127427",
 				"ISSN": "1932-6203",
-				"abstractNote": "DOAJ is a community-curated online directory that indexes and provides access to high quality, open access, peer-reviewed journals.",
+				"abstractNote": "BACKGROUND:Heritable factors are evidently involved in prostate cancer (PrCa) carcinogenesis, but currently, genetic markers are not routinely used in screening or diagnostics of the disease. More precise information is needed for making treatment decisions to distinguish aggressive cases from indolent disease, for which heritable factors could be a useful tool. The genetic makeup of PrCa has only recently begun to be unravelled through large-scale genome-wide association studies (GWAS). The thus far identified Single Nucleotide Polymorphisms (SNPs) explain, however, only a fraction of familial clustering. Moreover, the known risk SNPs are not associated with the clinical outcome of the disease, such as aggressive or metastasised disease, and therefore cannot be used to predict the prognosis. Annotating the SNPs with deep clinical data together with miRNA expression profiles can improve the understanding of the underlying mechanisms of different phenotypes of prostate cancer. RESULTS:In this study microRNA (miRNA) profiles were studied as potential biomarkers to predict the disease outcome. The study subjects were from Finnish high risk prostate cancer families. To identify potential biomarkers we combined a novel non-parametrical test with an importance measure provided from a Random Forest classifier. This combination delivered a set of nine miRNAs that was able to separate cases from controls. The detected miRNA expression profiles could predict the development of the disease years before the actual PrCa diagnosis or detect the existence of other cancers in the studied individuals. Furthermore, using an expression Quantitative Trait Loci (eQTL) analysis, regulatory SNPs for miRNA miR-483-3p that were also directly associated with PrCa were found. CONCLUSION:Based on our findings, we suggest that blood-based miRNA expression profiling can be used in the diagnosis and maybe even prognosis of the disease. In the future, miRNA profiling could possibly be used in targeted screening, together with Prostate Specific Antigene (PSA) testing, to identify men with an elevated PrCa risk.",
 				"issue": "5",
 				"language": "en",
 				"libraryCatalog": "doaj.org",
@@ -214,10 +215,10 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2021/07/01",
+				"date": "2021/09/01",
 				"DOI": "10.1136/bmjoq-2021-001396",
 				"ISSN": "2399-6641",
-				"abstractNote": "DOAJ is a community-curated online directory that indexes and provides access to high quality, open access, peer-reviewed journals.",
+				"abstractNote": "Recent research demonstrates that transfusing whole blood (WB=red blood cells (RBC)+plasma+platelets) rather than just RBC (which is current National Health Service (NHS) practice) may improve outcomes for major trauma patients. As part of a programme to investigate provision of WB, NHS Blood and Transplant undertook a 2-year feasibility study to supply the Royal London Hospital (RLH) with (group O negative, ‘O neg’) leucodepleted red cell and plasma (LD-RCP) for transfusion of trauma patients with major haemorrhage in prehospital settings.Incidents requiring such prehospital transfusion occur randomly, with very high variation. Availability is critical, but O neg LD-RCP is a scarce resource and has a limited shelf life (14 days) after which it must be disposed of. The consequences of wastage are the opportunity cost of loss of overall treatment capacity across the NHS and reputational damage.The context was this feasibility study, set up to assess deliverability to RLH and subsequent wastage levels. Within this, we conducted a quality improvement project, which aimed to reduce the wastage of LD-RCP to no more than 8% (ie, 1 of the 12 units delivered per week).Over this 2-year period, we reduced wastage from a weekly average of 70%–27%. This was achieved over four improvement cycles. The largest improvement came from moving near-expiry LD-RCP to the emergency department (ED) for use with their trauma patients, with subsequent improvements from embedding use in ED as routine practice, introducing a dedicated LD-RCP delivery schedule (which increased the units ≤2 days old at delivery from 42% to 83%) and aligning this delivery schedule to cover two cycles of peak demand (Fridays and Saturdays).",
 				"issue": "3",
 				"language": "en",
 				"libraryCatalog": "doaj.org",

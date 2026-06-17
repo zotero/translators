@@ -3,24 +3,19 @@
 	"label": "RePEc - Econpapers",
 	"creator": "Sebastian Karcher",
 	"target": "^https?://econpapers\\.repec\\.org/",
-	"minVersion": "1.0.0b4.r1",
+	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-27 20:18:46"
+	"lastUpdated": "2025-04-29 03:02:00"
 }
-
-/* FW LINE 59:b820c6d */ function flatten(t){var e=new Array;for(var i in t){var r=t[i];r instanceof Array?e=e.concat(flatten(r)):e.push(r)}return e}var FW={_scrapers:new Array};FW._Base=function(){this.callHook=function(t,e,i,r){if("object"==typeof this.hooks){var n=this.hooks[t];"function"==typeof n&&n(e,i,r)}},this.evaluateThing=function(t,e,i){var r=typeof t;if("object"===r){if(t instanceof Array){var n=this.evaluateThing,a=t.map(function(t){return n(t,e,i)});return flatten(a)}return t.evaluate(e,i)}return"function"===r?t(e,i):t},this.makeItems=function(t,e,i,r,n){n()}},FW.Scraper=function(t){FW._scrapers.push(new FW._Scraper(t))},FW._Scraper=function(t){for(x in t)this[x]=t[x];this._singleFieldNames=["abstractNote","applicationNumber","archive","archiveLocation","artworkMedium","artworkSize","assignee","audioFileType","audioRecordingType","billNumber","blogTitle","bookTitle","callNumber","caseName","code","codeNumber","codePages","codeVolume","committee","company","conferenceName","country","court","date","dateDecided","dateEnacted","dictionaryTitle","distributor","docketNumber","documentNumber","DOI","edition","encyclopediaTitle","episodeNumber","extra","filingDate","firstPage","forumTitle","genre","history","institution","interviewMedium","ISBN","ISSN","issue","issueDate","issuingAuthority","journalAbbreviation","label","language","legalStatus","legislativeBody","letterType","libraryCatalog","manuscriptType","mapType","medium","meetingName","nameOfAct","network","number","numberOfVolumes","numPages","pages","patentNumber","place","postType","presentationType","priorityNumbers","proceedingsTitle","programTitle","programmingLanguage","publicLawNumber","publicationTitle","publisher","references","reportNumber","reportType","reporter","reporterVolume","rights","runningTime","scale","section","series","seriesNumber","seriesText","seriesTitle","session","shortTitle","studio","subject","system","thesisType","title","type","university","url","version","videoRecordingType","volume","websiteTitle","websiteType"],this._makeAttachments=function(t,e,i,r){if(i instanceof Array)i.forEach(function(i){this._makeAttachments(t,e,i,r)},this);else if("object"==typeof i){var n=i.urls||i.url,a=i.types||i.type,s=i.titles||i.title,o=i.snapshots||i.snapshot,u=this.evaluateThing(n,t,e),l=this.evaluateThing(s,t,e),c=this.evaluateThing(a,t,e),h=this.evaluateThing(o,t,e);u instanceof Array||(u=[u]);for(var f in u){var p,m,v,d=u[f];p=c instanceof Array?c[f]:c,m=l instanceof Array?l[f]:l,v=h instanceof Array?h[f]:h,r.attachments.push({url:d,title:m,mimeType:p,snapshot:v})}}},this.makeItems=function(t,e,i,r,n){var a=new Zotero.Item(this.itemType);a.url=e;for(var s in this._singleFieldNames){var o=this._singleFieldNames[s];if(this[o]){var u=this.evaluateThing(this[o],t,e);u instanceof Array?a[o]=u[0]:a[o]=u}}var l=["creators","tags"];for(var c in l){var h=l[c],f=this.evaluateThing(this[h],t,e);if(f)for(var p in f)a[h].push(f[p])}this._makeAttachments(t,e,this.attachments,a),r(a,this,t,e),n()}},FW._Scraper.prototype=new FW._Base,FW.MultiScraper=function(t){FW._scrapers.push(new FW._MultiScraper(t))},FW._MultiScraper=function(t){for(x in t)this[x]=t[x];this._mkSelectItems=function(t,e){var i=new Object;for(var r in t)i[e[r]]=t[r];return i},this._selectItems=function(t,e,i){var r=new Array;Zotero.selectItems(this._mkSelectItems(t,e),function(t){for(var e in t)r.push(e);i(r)})},this._mkAttachments=function(t,e,i){var r=this.evaluateThing(this.attachments,t,e),n=new Object;if(r)for(var a in i)n[i[a]]=r[a];return n},this._makeChoices=function(t,e,i,r,n){if(t instanceof Array)t.forEach(function(t){this._makeTitlesUrls(t,e,i,r,n)},this);else if("object"==typeof t){var a=t.urls||t.url,s=t.titles||t.title,o=this.evaluateThing(a,e,i),u=this.evaluateThing(s,e,i),l=u instanceof Array;o instanceof Array||(o=[o]);for(var c in o){var h,f=o[c];h=l?u[c]:u,n.push(f),r.push(h)}}},this.makeItems=function(t,e,i,r,n){if(this.beforeFilter){var a=this.beforeFilter(t,e);if(a!=e)return void this.makeItems(t,a,i,r,n)}var s=[],o=[];this._makeChoices(this.choices,t,e,s,o);var u=this._mkAttachments(t,e,o),l=this.itemTrans;this._selectItems(s,o,function(t){if(t){var e=function(t){var e=t.documentURI,i=l;void 0===i&&(i=FW.getScraper(t,e)),void 0===i||i.makeItems(t,e,u[e],r,function(){})};Zotero.Utilities.processDocuments(t,e,n)}else n()})}},FW._MultiScraper.prototype=new FW._Base,FW.WebDelegateTranslator=function(t){return new FW._WebDelegateTranslator(t)},FW._WebDelegateTranslator=function(t){for(x in t)this[x]=t[x];this.makeItems=function(t,e,i,r,n){var a=this,s=Zotero.loadTranslator("web");s.setHandler("itemDone",function(i,n){r(n,a,t,e)}),s.setDocument(t),this.translatorId?(s.setTranslator(this.translatorId),s.translate()):(s.setHandler("translators",function(t,e){e.length&&(s.setTranslator(e[0]),s.translate())}),s.getTranslators()),n()}},FW._WebDelegateTranslator.prototype=new FW._Base,FW._StringMagic=function(){this._filters=new Array,this.addFilter=function(t){return this._filters.push(t),this},this.split=function(t){return this.addFilter(function(e){return e.split(t).filter(function(t){return""!=t})})},this.replace=function(t,e,i){return this.addFilter(function(r){return r.match(t)?r.replace(t,e,i):r})},this.prepend=function(t){return this.replace(/^/,t)},this.append=function(t){return this.replace(/$/,t)},this.remove=function(t,e){return this.replace(t,"",e)},this.trim=function(){return this.addFilter(function(t){return Zotero.Utilities.trim(t)})},this.trimInternal=function(){return this.addFilter(function(t){return Zotero.Utilities.trimInternal(t)})},this.match=function(t,e){return e||(e=0),this.addFilter(function(i){var r=i.match(t);return void 0===r||null===r?void 0:r[e]})},this.cleanAuthor=function(t,e){return this.addFilter(function(i){return Zotero.Utilities.cleanAuthor(i,t,e)})},this.key=function(t){return this.addFilter(function(e){return e[t]})},this.capitalizeTitle=function(){return this.addFilter(function(t){return Zotero.Utilities.capitalizeTitle(t)})},this.unescapeHTML=function(){return this.addFilter(function(t){return Zotero.Utilities.unescapeHTML(t)})},this.unescape=function(){return this.addFilter(function(t){return unescape(t)})},this._applyFilters=function(t,e){for(i in this._filters){t=flatten(t),t=t.filter(function(t){return void 0!==t&&null!==t});for(var r=0;r<t.length;r++)try{if(void 0===t[r]||null===t[r])continue;t[r]=this._filters[i](t[r],e)}catch(n){t[r]=void 0,Zotero.debug("Caught exception "+n+"on filter: "+this._filters[i])}t=t.filter(function(t){return void 0!==t&&null!==t})}return flatten(t)}},FW.PageText=function(){return new FW._PageText},FW._PageText=function(){this._filters=new Array,this.evaluate=function(t){var e=[t.documentElement.innerHTML];return e=this._applyFilters(e,t),0==e.length?!1:e}},FW._PageText.prototype=new FW._StringMagic,FW.Url=function(){return new FW._Url},FW._Url=function(){this._filters=new Array,this.evaluate=function(t,e){var i=[e];return i=this._applyFilters(i,t),0==i.length?!1:i}},FW._Url.prototype=new FW._StringMagic,FW.Xpath=function(t){return new FW._Xpath(t)},FW._Xpath=function(t){this._xpath=t,this._filters=new Array,this.text=function(){var t=function(t){return"object"==typeof t&&t.textContent?t.textContent:t};return this.addFilter(t),this},this.sub=function(t){var e=function(e,i){var r=i.evaluate(t,e,null,XPathResult.ANY_TYPE,null);return r?r.iterateNext():void 0};return this.addFilter(e),this},this.evaluate=function(t){var e=t.evaluate(this._xpath,t,null,XPathResult.ANY_TYPE,null),i=e.resultType,r=new Array;if(i==XPathResult.STRING_TYPE)r.push(e.stringValue);else if(i==XPathResult.BOOLEAN_TYPE)r.push(e.booleanValue);else if(i==XPathResult.NUMBER_TYPE)r.push(e.numberValue);else if(i==XPathResult.ORDERED_NODE_ITERATOR_TYPE||i==XPathResult.UNORDERED_NODE_ITERATOR_TYPE)for(var n;n=e.iterateNext();)r.push(n);return r=this._applyFilters(r,t),0==r.length?!1:r}},FW._Xpath.prototype=new FW._StringMagic,FW.detectWeb=function(t,e){for(var i in FW._scrapers){var r=FW._scrapers[i],n=r.evaluateThing(r.itemType,t,e),a=r.evaluateThing(r.detect,t,e);if(a.length>0&&a[0])return n}},FW.getScraper=function(t,e){var i=FW.detectWeb(t,e);return FW._scrapers.filter(function(r){return r.evaluateThing(r.itemType,t,e)==i&&r.evaluateThing(r.detect,t,e)})[0]},FW.doWeb=function(t,e){var i=FW.getScraper(t,e);i.makeItems(t,e,[],function(t,e,i,r){e.callHook("scraperDone",t,i,r),t.title||(t.title=""),t.complete()},function(){Zotero.done()}),Zotero.wait()};
-
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	RePEc Translator
-	Copyright © 2011 Sebastian Karcher
+	Copyright © 2011 Sebastian Karcher and contributors.
 
 	This file is part of Zotero.
 
@@ -40,133 +35,338 @@
 	***** END LICENSE BLOCK *****
 */
 
+// NOTE: EconPapers now implements mostly acceptable metadata, and their own
+// citation export is implemented as entirely client-side JS code that scrapes
+// the metadata.
 
-function detectWeb(doc, url) { return FW.detectWeb(doc, url); }
-function doWeb(doc, url) { return FW.doWeb(doc, url); }
+function detectWeb(doc, url) {
+	let path = new URL(url).pathname;
 
-/**Article */
+	if (isSearch(path) && getSearchResults(doc, true)) {
+		return 'multiple';
+	}
 
-FW.Scraper({
-itemType : 'journalArticle',
-detect : FW.Xpath('//meta[@name="citation_journal_title"]'),
-title : FW.Xpath('//meta[@name="citation_title"]/@content').text().trim(),
-attachments : [{ url: FW.Xpath('//p/a[contains(@href, "scripts/redi") and contains(@href, ".pdf")]').text().trim(),
-  title: "RePEc PDF",
-  type: "application/pdf" },
-  {url: FW.Url(),
-  title: "RePEc Snapshot",
-  type: "text/html"},
-  ],
-creators : FW.Xpath('//meta[@name="citation_authors"]/@content').text().replace(/(;[^A-Za-z0-9]*)$/, "").split(/;/).cleanAuthor("author", true),
-date : FW.Xpath('//meta[@name="citation_date"]/@content|//meta[@name="citation_year"]/@content').text(),
-issue : FW.Xpath('//meta[@name="citation_issue"]/@content').text(),
-volume : FW.Xpath('//meta[@name="citation_volume"]/@content').text(),
-pages : FW.Xpath('concat(//meta[@name="citation_firstpage"]/@content, "-", //meta[@name="citation_lastpage"]/@content)').remove(/^-|-$/),
-ISSN : FW.Xpath('//meta[@name="citation_issn"]/@content').text(),
-abstractNote: FW.Xpath('//meta[@name="citation_abstract"]/@content').text(),
-journalAbbreviation : FW.Xpath('//meta[@name="citation_journal_abbrev"]/@content').text(),
-DOI : FW.Xpath('//meta[@name="citation_doi"]/@content').text(),
-language : FW.Xpath('//meta[@name="DC.Language"]/@content').text(),
-tags :  FW.Xpath('//meta[@name="citation_keywords"]/@content').text().split(/;/),
-publisher: FW.Xpath('//meta[@name="citation_publisher"]/@content').text(),
-publicationTitle : FW.Xpath('//meta[@name="citation_journal_title"]/@content').text(),
-place : FW.Xpath('//meta[@name="citation_publication_place"]/@content').text(),
-hooks : { "scraperDone": function  (item,doc, url) {
-	for (i in item.creators) {
-		if (item.creators[i]  && !item.creators[i].firstName) {
-	   	item.creators[i]= ZU.cleanAuthor(item.creators[i].lastName, "author")
+	if (isListing(path) && getListing(doc, true)) {
+		return 'multiple';
+	}
+
+	let pathMatch = path.match(/\/(\w+)\/.+\/.+/);
+	if (pathMatch) {
+		switch (pathMatch[1]) {
+			case "article":
+				return "journalArticle";
+			case "software":
+				return "computerProgram";
+			case "paper":
+				return "report"; // working papers
+			case "bookchap":
+				return getBookChapType(doc);
 		}
-	}}
+	}
+
+	return false;
 }
-});
 
-
-/** Working Papers*/
-FW.Scraper({
-itemType : 'report',
-detect : FW.Xpath('//meta[@name="dc.Type" and contains(@content, "techreport")]|//meta[contains(@name, "technical_report")]'),
-title : FW.Xpath('//meta[@name="citation_title"]/@content').text().trim(),
-attachments : [{ url: FW.Xpath('//p/a[contains(@href, "scripts/redi") and contains(@href, ".pdf")]').text().trim(),
-  title: "RePEc PDF",
-  type: "application/pdf" },
-  {url: FW.Url(),
-  title: "RePEc Snapshot",
-  type: "text/html"},
-  ],
-//make sure there are no empty authors:
-creators : FW.Xpath('//meta[@name="citation_authors"]/@content').text().replace(/(;[^A-Za-z0-9]*)$/, "").split(/;/).cleanAuthor("author", true),
-date : FW.Xpath('//meta[@name="citation_date"]/@content|//meta[@name="citation_year"]/@content').text(),
-pages : FW.Xpath('concat(//meta[@name="citation_firstpage"]/@content, "-", //meta[@name="citation_lastpage"]/@content)').remove(/^-|-$/),
-ISBN : FW.Xpath('//meta[@name="citation_isbn"]/@content').text(),
-abstractNote: FW.Xpath('//meta[@name="citation_abstract"]/@content').text(),
-DOI : FW.Xpath('//meta[@name="citation_doi"]/@content').text(),
-language : FW.Xpath('//meta[@name="DC.Language"]/@content').text(),
-tags :  FW.Xpath('//meta[@name="citation_keywords"]/@content').text().split(/;/),
-publisher: FW.Xpath('//meta[@name="citation_publisher"]/@content|//meta[@name="citation_technical_report_institution"]/@content').text(),
-reportNumber: FW.Xpath('//meta[@name="citation_technical_report_number"]/@content').text(),
-reportType : FW.Xpath('//meta[@name="series"]/@content').text().replace(/apers$/, "aper"),
-place : FW.Xpath('//meta[@name="citation_publication_place"]/@content').text(),
-numPages : FW.Xpath('//meta[@name="citation_number_of_pages"]/@content').text().remove(/\s\D*/),
-hooks : { "scraperDone": function  (item,doc, url) {
-	for (i in item.creators) {
-		if (item.creators[i]  && !item.creators[i].firstName) {
-	   	item.creators[i]= ZU.cleanAuthor(item.creators[i].lastName, "author")
+// determine whether the type of the item under the path "/bookchap" is a book
+// or bookSection (chapter)
+function getBookChapType(doc) {
+	let type = attr(doc, "meta[name='redif-type']", "content");
+	// fallback when metadata is missing
+	if (!type) {
+		let accessStatisticsLine = ZU.xpathText(doc,
+			'//div[@class = "bodytext"]/p[.//a[contains(@href, "/paperstat.pf")]][1]');
+		if (accessStatisticsLine) {
+			accessStatisticsLine = ZU.trimInternal(accessStatisticsLine);
+			// take last word
+			let components = accessStatisticsLine.split(" ");
+			type = components[components.length - 1];
 		}
-	}}
-}
-});
+	}
 
-FW.Scraper({
-itemType : 'computerProgram',
-detect : FW.Xpath('//meta[@name="dc.Type" and contains(@content, "software")]'),
-title : FW.Xpath('//meta[@name="citation_title"]/@content').text().trim(),
-attachments : [{ url: FW.Xpath('//p/a[contains(@href, "scripts/redi") and contains(@href, ".pdf")]').text().trim(),
-  title: "RePEc PDF",
-  type: "application/pdf" },
-  {url: FW.Url(),
-  title: "RePEc Snapshot",
-  type: "text/html"},
-  ],
-//make sure there are no empty authors:
-creators : FW.Xpath('//meta[@name="citation_authors"]/@content').text().replace(/(;[^A-Za-z0-9]*)$/, "").split(/;/).cleanAuthor("author", "true"),
-date : FW.Xpath('//meta[@name="citation_date"]/@content|//meta[@name="citation_year"]/@content').text(),
-pages : FW.Xpath('concat(//meta[@name="citation_firstpage"]/@content, "-", //meta[@name="citation_lastpage"]/@content)').remove(/^-|-$/),
-ISBN : FW.Xpath('//meta[@name="citation_isbn"]/@content').text(),
-abstractNote: FW.Xpath('//meta[@name="citation_abstract"]/@content').text(),
-DOI : FW.Xpath('//meta[@name="citation_doi"]/@content').text(),
-programmingLanguage: FW.Xpath('//meta[@name="plang"]/@content').text().trim(),
-seriesTitle: FW.Xpath('//meta[@name="series"]/@content').text().trim(),
-language : FW.Xpath('//meta[@name="DC.Language"]/@content').text(),
-tags :  FW.Xpath('//meta[@name="citation_keywords"]/@content').text().split(/;/),
-publisher: FW.Xpath('//meta[@name="citation_publisher"]/@content|//meta[@name="citation_technical_report_institution"]/@content').text(),
-place : FW.Xpath('//meta[@name="citation_publication_place"]/@content').text(),
-version : FW.Xpath('//meta[@name="citation_software_version"]/@content').text(),
-hooks : { "scraperDone": function  (item,doc, url) {
-	for (i in item.creators) {
-		if (item.creators[i]  && !item.creators[i].firstName) {
-	   	item.creators[i]= ZU.cleanAuthor(item.creators[i].lastName, "author")
+	switch (type) {
+		case "book":
+			return "book";
+		case "chapter":
+			return "bookSection";
+		default:
+			Z.debug(`Unknown book or book-section type ${type}`);
+	}
+
+	return false;
+}
+
+function isSearch(path) {
+	return path.startsWith("/scripts/search.pf");
+}
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('.reflist > a');
+	if (!rows.length) rows = doc.querySelectorAll('ol b > a');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+function isListing(path) {
+	return /\/(article|paper|software|bookchap)\/.+\/(default\d+\.htm)?$/.test(path);
+}
+
+function getListing(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('.bodytext dt a');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let path = new URL(url).pathname;
+		let listFunction = isSearch(path) ? getSearchResults : getListing;
+		let items = await Zotero.selectItems(listFunction(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
 		}
-	}}
+	}
+	else {
+		await scrape(doc, url);
+	}
 }
-});
 
+async function scrape(doc, url = doc.location.href) {
+	let type = detectWeb(doc, url);
+	let translator = Zotero.loadTranslator('web');
+	// Embedded Metadata
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	translator.setDocument(doc);
 
+	translator.setHandler('itemDone', (_obj, item) => {
+		cleanItem(item);
 
-//Multi Econpapers - this happens in frames - scaffold fails, regular testing works
-FW.MultiScraper({
-itemType : 'multiple',
-detect : FW.Url().match(/scripts\/a\/abstract\.pf/),
-choices : {
-  titles : FW.Xpath('//div[@class="abstractframe"]//li/a').text().trim(),
-  urls : FW.Xpath('//div[@class="abstractframe"]//li/a').key("href")
+		switch (type) {
+			case "report":
+				item.reportType = "Working paper";
+				break;
+			case "journalArticle":
+				handleJournalArticle(item);
+				break;
+			case "book":
+				handleBook(item, doc);
+				break;
+			case "computerProgram":
+				handleComputerProgram(item, doc);
+				break;
+		}
+
+		finalize(item, doc);
+	});
+
+	let em = await translator.getTranslatorObject();
+	em.itemType = type;
+	em.addCustomFields({
+		book_title: 'bookTitle', // eslint-disable-line camelcase
+		series: 'seriesTitle'
+	});
+	await em.doWeb(doc, url);
 }
-});
+
+function handleJournalArticle(item) {
+	// clean up the seriesTitle that we've EM translator to produce, because
+	// it's redundant with the publicationTitle
+	if (item.publicationTitle && item.publicationTitle === item.seriesTitle) {
+		delete item.seriesTitle;
+	}
+}
+
+function handleBook(item, doc) {
+	let pages = getBoldHeadLineContent(doc, "Pages:");
+	if (pages && !isNaN(parseInt(pages))) {
+		item.numPages = pages;
+	}
+}
+
+function handleComputerProgram(item, doc) {
+	let lang = getBoldHeadLineContent(doc, "Language:");
+	if (lang) {
+		item.programmingLanguage = lang;
+	}
+
+	let date = getBoldHeadLineContent(doc, "Date:");
+	if (date.includes(",")) {
+		let origDate = date.split(",")[0];
+		if (origDate) {
+			addExtraLine(item, `Original Date: ${origDate}`);
+		}
+	}
+	// TODO: "See Also" article for code from article?
+}
+
+function finalize(item, doc) {
+	let jelCodes = ZU.trimInternal(attr(doc, "meta[name='JEL-Codes']", "content"));
+	if (jelCodes) {
+		for (let code of jelCodes.split("; ")) {
+			item.tags.push(code);
+		}
+	}
+
+	let doiElem = paragraphHeadedBy(doc, "DOI:");
+	if (doiElem) {
+		let doi = text(doiElem, "a[href^='/scripts/redir.pf']").trim();
+		Z.debug(`Possible DOI string: ${doi}`, 4);
+		if (/10\.\d{4,}\/.+/.test(doi)) {
+			item.DOI = doi;
+		}
+	}
+
+	let downloadParagraph = paragraphHeadedBy(doc, "Downloads:");
+	if (downloadParagraph) {
+		creatAttachments(
+			downloadParagraph.querySelectorAll("a[href^='/scripts/redir.pf']"),
+			item,
+			item.itemType !== "computerProgram" // don't save links to source code; there can be too many
+		);
+	}
+
+	item.libraryCatalog = "EconPapers"; // their own self-appellation and styling
+
+	item.complete();
+}
+
+// Find paragraph (<p> element) by the text content of the bold heading in it
+// (<b> element)
+function paragraphHeadedBy(doc, heading) {
+	let container = doc.querySelector(".bodytext");
+	if (!container) return null;
+
+	let quotedStr = JSON.stringify(heading);
+	let elem = ZU.xpath(container,
+		`//p[.//b[starts-with(text(), ${quotedStr})][1]]`)[0];
+	return elem || null;
+}
+
+// For a single line (part of the inner html of a <p> element) that starts with
+// a <b> heading, retrieve the text that appears after the heading before the
+// next element
+function getBoldHeadLineContent(doc, heading) {
+	let container = doc.querySelector(".bodytext");
+	if (!container) return null;
+
+	let quotedStr = JSON.stringify(heading);
+	let node = ZU.xpath(container,
+		`//p//b[starts-with(text(), ${quotedStr})]`)[0];
+	if (!node) return null;
+
+	let acc = [];
+	while ((node = node.nextSibling) && node.nodeType === 3/* text node */) {
+		acc.push(node.textContent);
+	}
+	return ZU.trimInternal(acc.join(""));
+}
+
+// Create attachments from the <a> elements
+function creatAttachments(elements, item, keepNonPDF) {
+	for (let elem of elements) {
+		// the site's own redirect facility; we will work around it to save a
+		// redirect
+		if (!elem.href) continue;
+		let redirectURLObj = new URL(elem.href);
+		let targetURL = redirectURLObj.searchParams.get("u") || "";
+		// Remove the redirect script's handle parameter
+		targetURL = targetURL.replace(/;h=repec:.+$/i, "");
+		if (!targetURL) continue;
+		let targetURLObj;
+		try {
+			targetURLObj = new URL(targetURL);
+		}
+		catch (err) {
+			continue;
+		}
+
+		Z.debug(`External link: ${targetURL}`, 4);
+		let doi;
+		if (!item.DOI && (doi = doiFromExtLink(targetURLObj))) {
+			Z.debug(`DOI (from external link): ${doi}`, 4);
+			item.DOI = doi;
+		}
+		// Best-effort try for PDF link; NOTE that even if the page may say
+		// "application/pdf" beside a link, that link could point to a landing
+		// page rather than the PDF file.
+		if (maybePDF(targetURLObj)) {
+			item.attachments.push({
+				title: "RePEc PDF",
+				url: targetURL,
+				mimeType: "application/pdf"
+			});
+		}
+		else if (keepNonPDF) {
+			item.attachments.push({
+				title: "RePEc External Link",
+				url: targetURL,
+				snapshot: false // don't download
+			});
+		}
+	}
+}
+
+// A conservative DOI-extractor that works on the "Downloads" section. Only try
+// to extract if the link's domain is a well-known resolver.
+function doiFromExtLink(urlObj) {
+	if (/^((dx\.)?doi\.org|hdl\.handle\.net)$/.test(urlObj.hostname)) {
+		let m = decodeURIComponent(urlObj.pathname).match(/^\/(10\.\d{4,}\/.+)/);
+		if (m) {
+			return m[1];
+		}
+	}
+	return false;
+}
+
+function maybePDF(urlObj) {
+	return /(\.|\/)pdf$/.test(urlObj.pathname);
+}
+
+// add a string line to the item's extra field
+function addExtraLine(item, line) {
+	if (!item.extra) {
+		item.extra = line;
+	}
+	else {
+		item.extra += item.extra.endsWith("\n") ? line : `\n${line}`;
+	}
+}
+
+// Remove unnecessary and non-informative fields from embedded metadata,
+// especially the DC fields
+var FIELDS_TO_CLEAN = ["label", "distributor", "letterType", "manuscriptType", "mapType", "thesisType", "websiteType", "presentationType", "postType", "audioFileType", "reportType"];
+
+function cleanItem(item) {
+	for (let field of FIELDS_TO_CLEAN) {
+		if (Object.hasOwn(item, field)) {
+			delete item[field];
+		}
+	}
+}
 
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://econpapers.repec.org/paper/nbrnberwo/11309.htm",
+		"url": "https://econpapers.repec.org/paper/nbrnberwo/11309.htm",
 		"items": [
 			{
 				"itemType": "report",
@@ -186,22 +386,30 @@ var testCases = [
 				"date": "2005/05",
 				"abstractNote": "Supporters of touch-screen voting claim it is a highly reliable voting technology, while a growing number of critics argue that paperless electronic voting systems are vulnerable to fraud. In this paper we use county-level data on voting technologies in the 2000 and 2004 presidential elections to test whether voting technology affects electoral outcomes. We first show that there is a positive correlation between use of touch-screen voting and the level of electoral support for George Bush. This is true in models that compare the 2000-2004 changes in vote shares between adopting and non-adopting counties within a state, after controlling for income, demographic composition, and other factors. Although small, the effect could have been large enough to influence the final results in some closely contested states. While on the surface this pattern would appear to be consistent with allegations of voting irregularities, a closer examination suggests this interpretation is incorrect. If irregularities did take place, they would be most likely in counties that could potentially affect statewide election totals, or in counties where election officials had incentives to affect the results. Contrary to this prediction, we find no evidence that touch-screen voting had a larger effect in swing states, or in states with a Republican Secretary of State. Touch-screen voting could also indirectly affect vote shares by influencing the relative turnout of different groups. We find that the adoption of touch-screen voting has a negative effect on estimated turnout rates, controlling for state effects and a variety of county-level controls. This effect is larger in counties with a higher fraction of Hispanic residents (who tend to favor Democrats) but not in counties with more African Americans (who are overwhelmingly Democrat voters). Models for the adoption of touch-screen voting suggest it was more likely to be used in counties with a higher fraction of Hispanic and Black residents, especially in swing states. Nevertheless, the impact of non-random adoption patterns on vote shares is small.",
 				"institution": "National Bureau of Economic Research, Inc",
-				"libraryCatalog": "RePEc - Econpapers",
+				"libraryCatalog": "EconPapers",
 				"reportNumber": "11309",
-				"reportType": "NBER Working Paper",
+				"reportType": "Working paper",
+				"seriesTitle": "NBER Working Papers",
 				"shortTitle": "Does Voting Technology Affect Election Outcomes?",
-				"url": "http://econpapers.repec.org/paper/nbrnberwo/11309.htm",
+				"url": "https://EconPapers.repec.org/RePEc:nbr:nberwo:11309",
 				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
 					{
 						"title": "RePEc PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "RePEc Snapshot",
-						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "H0"
+					},
+					{
+						"tag": "J0"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -209,7 +417,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://econpapers.repec.org/software/bocbocode/s439301.htm",
+		"url": "https://econpapers.repec.org/software/bocbocode/s439301.htm",
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -221,29 +429,37 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2017/02/02",
+				"date": "2023/02/12",
 				"abstractNote": "estout produces a table of regression results from one or several models for use with spreadsheets, LaTeX, HTML, or a word-processor table. eststo stores a quick copy of the active estimation results for later tabulation. esttab is a wrapper for estout. It displays a pretty looking publication-style regression table without much typing. estadd adds additional results to the e()-returns for one or several models previously fitted and stored. This package subsumes the previously circulated esto, esta, estadd, and estadd_plus. An earlier version of estout is available as estout1.",
-				"libraryCatalog": "RePEc - Econpapers",
+				"company": "Boston College Department of Economics",
+				"extra": "Original Date: 2004-07-22",
+				"libraryCatalog": "EconPapers",
+				"programmingLanguage": "Stata",
 				"seriesTitle": "Statistical Software Components",
 				"shortTitle": "ESTOUT",
-				"url": "http://econpapers.repec.org/software/bocbocode/s439301.htm",
+				"url": "https://EconPapers.repec.org/RePEc:boc:bocode:s439301",
 				"attachments": [
 					{
-						"url": false,
-						"title": "RePEc PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "RePEc Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					" HTML",
-					" LaTeX",
-					" output",
-					" word processor",
-					"estimates"
+					{
+						"tag": "HTML"
+					},
+					{
+						"tag": "LaTeX"
+					},
+					{
+						"tag": "estimates"
+					},
+					{
+						"tag": "output"
+					},
+					{
+						"tag": "word processor"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -252,7 +468,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://econpapers.repec.org/article/emerafpps/v_3a9_3ay_3a2010_3ai_3a3_3ap_3a244-263.htm",
+		"url": "https://econpapers.repec.org/article/emerafpps/v_3a9_3ay_3a2010_3ai_3a3_3ap_3a244-263.htm",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -262,37 +478,248 @@ var testCases = [
 						"firstName": "Sharad",
 						"lastName": "Asthana",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Steven",
+						"lastName": "Balsam",
+						"creatorType": "author"
 					}
 				],
 				"date": "2010",
-				"abstractNote": "Purpose - The purpose of this paper is to show that director turnover varies in predictable and intuitive ways with director incentives. Design/methodology/approach - The paper uses a sample of 51,388 observations pertaining to 13,084 directors who served 1,065 firms during the period 1997-2004. The data are obtained from RiskMetrics, Compustat, Execu-Comp, CRSP, IBES, and the Corporate Library databases. Portfolio analysis, logit, and GLIMMIX regression analysis are used for the tests. Findings - The paper provides evidence that directors are more likely to leave when firm performance deteriorates and the firm becomes riskier. While turnover increasing as firm performance deteriorates is consistent with involuntary turnover, directors are also more likely to leave in advance of deteriorating performance. The latter is consistent with directors having inside information and acting on that information to protect their wealth and reputation. When inside and outside director turnover is contrasted, the association between turnover and performance is stronger for inside directors. Research limitations - Since data are obtained from multiple databases, the sample may be biased in favor of larger firms. The results may, therefore, not be applicable to smaller firms. To the extent that the story is unable to differentiate between voluntary and involuntary director turnover, the results should be interpreted with caution. Originality/value - Even though extant research has looked extensively at the determinants of CEO turnover, little has been written on director turnover. Director turnover is an important topic to study, since directors, especially outside directors, possess a significant oversight role in the corporation.",
+				"DOI": "10.1108/14757701011068057",
+				"ISSN": "1475-7702",
+				"abstractNote": "Purpose - The purpose of this paper is to show that director turnover varies in predictable and intuitive ways with director incentives. Design/methodology/approach - The paper uses a sample of 51,388 observations pertaining to 13,084 directors who served 1,065 firms during the period 1997‐2004. The data are obtained from RiskMetrics, Compustat, Execu‐Comp, CRSP, IBES, and the Corporate Library databases. Portfolio analysis, logit, and GLIMMIX regression analysis are used for the tests. Findings - The paper provides evidence that directors are more likely to leave when firm performance deteriorates and the firm becomes riskier. While turnover increasing as firm performance deteriorates is consistent with involuntary turnover, directors are also more likely to leave in advance of deteriorating performance. The latter is consistent with directors having inside information and acting on that information to protect their wealth and reputation. When inside and outside director turnover is contrasted, the association between turnover and performance is stronger for inside directors. Research limitations - Since data are obtained from multiple databases, the sample may be biased in favor of larger firms. The results may, therefore, not be applicable to smaller firms. To the extent that the story is unable to differentiate between voluntary and involuntary director turnover, the results should be interpreted with caution. Originality/value - Even though extant research has looked extensively at the determinants of CEO turnover, little has been written on director turnover. Director turnover is an important topic to study, since directors, especially outside directors, possess a significant oversight role in the corporation.",
 				"issue": "3",
-				"libraryCatalog": "RePEc - Econpapers",
+				"libraryCatalog": "EconPapers",
 				"pages": "244-263",
 				"publicationTitle": "Review of Accounting and Finance",
-				"url": "http://econpapers.repec.org/article/emerafpps/v_3a9_3ay_3a2010_3ai_3a3_3ap_3a244-263.htm",
+				"url": "https://EconPapers.repec.org/RePEc:eme:rafpps:v:9:y:2010:i:3:p:244-263",
 				"volume": "9",
 				"attachments": [
 					{
-						"url": false,
-						"title": "RePEc PDF",
-						"mimeType": "application/pdf"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					},
 					{
-						"title": "RePEc Snapshot",
-						"mimeType": "text/html"
+						"title": "RePEc External Link",
+						"snapshot": false
+					},
+					{
+						"title": "RePEc PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
-					" Directors",
-					" Employee turnover",
-					" Risk analysis",
-					"Company performance"
+					{
+						"tag": "Company performance"
+					},
+					{
+						"tag": "Directors"
+					},
+					{
+						"tag": "Employee turnover"
+					},
+					{
+						"tag": "Risk analysis"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://econpapers.repec.org/bookchap/agshnhavl/207771.htm",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Lecture notes in econometric methods and analysis",
+				"creators": [
+					{
+						"firstName": "Joseph",
+						"lastName": "Havlicek",
+						"creatorType": "author"
+					}
+				],
+				"date": "1980",
+				"abstractNote": "The late Professor Havlicek's Econometrics notes are often cited. But until now they have been very difficult to obtain. Here, you have the complete notes as published in Fall 1976 and in Fall 1980. They are identical in content. However, neither PDF reproduction is perfect. If there is a passage that seems difficult to read in one version, then please try the other!",
+				"libraryCatalog": "EconPapers",
+				"publisher": "AgEcon Search",
+				"url": "https://EconPapers.repec.org/RePEc:ags:hnhavl:207771",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "RePEc PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Teaching/Communication/Extension/Profession"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://econpapers.repec.org/bookchap/bisbisifc/58-24.htm",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "A characterisation of financial assets based on their cash-flow structure",
+				"creators": [
+					{
+						"firstName": "Celestino",
+						"lastName": "Girón",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023",
+				"abstractNote": "By Celestino Girón; A characterisation of financial assets based on their cash-flow structure",
+				"bookTitle": "Post-pandemic landscape for central bank statistics",
+				"libraryCatalog": "EconPapers",
+				"publisher": "Bank for International Settlements",
+				"url": "https://EconPapers.repec.org/RePEc:bis:bisifc:58-24",
+				"volume": "58",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "RePEc PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://econpapers.repec.org/scripts/search.pf?ft=&adv=true&wp=on&art=on&bkchp=on&pl=&auth=on&online=on&sort=rank&lgc=AND&aus=&ar=on&kw=second+hand+car&jel=&nep=&ni=&nit=epdate",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://econpapers.repec.org/scripts/search.pf?jel=C81",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://econpapers.repec.org/software/bocbocode/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://econpapers.repec.org/bookchap/fipfednmo/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://econpapers.repec.org/article/eeemoneco/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://econpapers.repec.org/paper/ehllserod/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://econpapers.repec.org/article/oupcopoec/v_3a39_3ay_3a2020_3ai_3a1_3ap_3a91-94..htm",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Gresham’s Law: The Life and World of Queen Elizabeth I’s Banker",
+				"creators": [
+					{
+						"firstName": "Mohamed A.",
+						"lastName": "El-Erian",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020",
+				"DOI": "10.1093/cpe/bzaa009",
+				"ISSN": "0277-5921",
+				"abstractNote": "By Mohamed A El-Erian; Gresham’s Law: The Life and World of Queen Elizabeth I’s Banker",
+				"issue": "1",
+				"libraryCatalog": "EconPapers",
+				"pages": "91-94",
+				"publicationTitle": "Contributions to Political Economy",
+				"shortTitle": "Gresham’s Law",
+				"url": "https://EconPapers.repec.org/RePEc:oup:copoec:v:39:y:2020:i:1:p:91-94.",
+				"volume": "39",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "RePEc External Link",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://econpapers.repec.org/article/oupcopoec/v_3a39_3ay_3a2020_3ai_3a1_3ap_3a91-94..htm",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Gresham’s Law: The Life and World of Queen Elizabeth I’s Banker",
+				"creators": [
+					{
+						"firstName": "Mohamed A.",
+						"lastName": "El-Erian",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020",
+				"DOI": "10.1093/cpe/bzaa009",
+				"ISSN": "0277-5921",
+				"abstractNote": "By Mohamed A El-Erian; Gresham’s Law: The Life and World of Queen Elizabeth I’s Banker",
+				"issue": "1",
+				"libraryCatalog": "EconPapers",
+				"pages": "91-94",
+				"publicationTitle": "Contributions to Political Economy",
+				"shortTitle": "Gresham’s Law",
+				"url": "https://EconPapers.repec.org/RePEc:oup:copoec:v:39:y:2020:i:1:p:91-94.",
+				"volume": "39",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "RePEc External Link",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://econpapers.repec.org/paper/bisbiswps/default8.htm",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

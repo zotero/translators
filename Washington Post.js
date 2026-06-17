@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-01 19:25:49"
+	"lastUpdated": "2025-01-27 20:23:38"
 }
 
 /*
@@ -37,7 +37,7 @@
 
 
 function detectWeb(doc, url) {
-	if (ZU.xpathText(doc, '//div[@id="topper-headline-wrapper"]//h1')) {
+	if (ZU.xpathText(doc, '//h1[@data-qa="headline"]')) {
 		if (url.includes('/blogs/')) {
 			return "blogPost";
 		}
@@ -45,7 +45,10 @@ function detectWeb(doc, url) {
 			return "newspaperArticle";
 		}
 	}
-	if (ZU.xpathText(doc, '//h1[@data-qa="headline"]')) {
+	if (text(doc, '#default-topper-container h1')) {
+		return "newspaperArticle";
+	}
+	if (text(doc, 'h1') && text(doc, 'header[layout="full_bleed"]')) {
 		return "newspaperArticle";
 	}
 	// For older articles
@@ -75,33 +78,27 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-			return true;
-		});
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
-function scrape(doc, url) {
+
+async function scrape(doc, url) {
 	var type = url.includes('/blogs/') ? 'blogPost' : 'newspaperArticle';
-	var translator = Zotero.loadTranslator('web');
+	let translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-	// translator.setDocument(doc);
-
-	translator.setHandler('itemDone', function (obj, item) {
+	translator.setDocument(doc);
+	translator.setHandler('itemDone', (_obj, item) => {
 		item.itemType = type;
 
 		// Old articles
@@ -112,13 +109,13 @@ function scrape(doc, url) {
 			}
 		}
 		else {
-			let authors = doc.querySelectorAll('.author-name, a[rel="author"]');
+			let authors = doc.querySelectorAll('.author-name:not(a .author-name), [rel="author"]:not(a [rel="author"])');
 			authors = Array.from(authors).map(x => x.textContent.trim());
 			item.creators = ZU.arrayUnique(authors)
 				.map(x => ZU.cleanAuthor(x, "author"));
 		}
 		
-		item.date = attr(doc, 'meta[name="last_updated_date"]', 'content')
+		item.date = attr(doc, 'meta[property="article_published_time"]', 'content')
 			|| ZU.xpathText(doc, '//span[@itemprop="datePublished"]/@content')
 			|| ZU.xpathText(doc, '//meta[@name="DC.date.issued"]/@content');
 		if (item.date) {
@@ -136,9 +133,8 @@ function scrape(doc, url) {
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function (trans) {
-		trans.doWeb(doc, url);
-	});
+	let em = await translator.getTranslatorObject();
+	await em.doWeb(doc, url);
 }
 
 /** BEGIN TEST CASES **/
@@ -195,7 +191,6 @@ var testCases = [
 				"language": "en-US",
 				"libraryCatalog": "www.washingtonpost.com",
 				"publicationTitle": "Washington Post",
-				"section": "National Security",
 				"url": "https://www.washingtonpost.com/world/national-security/aulaqi-killing-reignites-debate-on-limits-of-executive-power/2011/09/30/gIQAx1bUAL_story.html",
 				"attachments": [
 					{
@@ -286,7 +281,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2020-07-08",
+				"date": "2020-07-07",
 				"ISSN": "0190-8286",
 				"abstractNote": "The populist president said he’s taking hydroxychloroquine to treat the infection. The U.S. ambassador to Brazil has tested negative for covid-19.",
 				"language": "en-US",
@@ -331,6 +326,111 @@ var testCases = [
 				"libraryCatalog": "www.washingtonpost.com",
 				"publicationTitle": "Washington Post",
 				"url": "https://www.washingtonpost.com/media/2021/06/09/new-yorker-protest/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.washingtonpost.com/climate-environment/interactive/2024/louisiana-sea-wall-gas-facility-flooding/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "A rising fortress in sinking land",
+				"creators": [
+					{
+						"firstName": "Steven",
+						"lastName": "Mufson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ricky",
+						"lastName": "Carioti",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024-07-05",
+				"ISSN": "0190-8286",
+				"abstractNote": "Rising seas and steel walls test the strength of a Louisiana coastal gas development, raising questions about flooding, climate change and community impacts.",
+				"language": "en-US",
+				"libraryCatalog": "www.washingtonpost.com",
+				"publicationTitle": "Washington Post",
+				"url": "https://www.washingtonpost.com/climate-environment/interactive/2024/louisiana-sea-wall-gas-facility-flooding/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.washingtonpost.com/home/2024/07/13/tips-choosing-right-size-lamp/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Is your lamp the right size? There’s an equation for that.",
+				"creators": [
+					{
+						"firstName": "Laura",
+						"lastName": "Daily",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024-07-13",
+				"ISSN": "0190-8286",
+				"abstractNote": "You don’t need to be a math whiz to choose a lamp. You just need to consider function and know a bit about proportion.",
+				"language": "en-US",
+				"libraryCatalog": "www.washingtonpost.com",
+				"publicationTitle": "Washington Post",
+				"shortTitle": "Is your lamp the right size?",
+				"url": "https://www.washingtonpost.com/home/2024/07/13/tips-choosing-right-size-lamp/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.washingtonpost.com/politics/2025/01/09/republicans-influencers-elections-democrats-trump-campaign/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Republicans won the election’s influencer race. Democrats want to catch up.",
+				"creators": [
+					{
+						"firstName": "Dylan",
+						"lastName": "Wells",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025-01-09",
+				"ISSN": "0190-8286",
+				"abstractNote": "While both parties stepped up their work with creators this cycle, many agree that Donald Trump’s effort helped him make key inroads with young voters, particularly young men.",
+				"language": "en-US",
+				"libraryCatalog": "www.washingtonpost.com",
+				"publicationTitle": "Washington Post",
+				"url": "https://www.washingtonpost.com/politics/2025/01/09/republicans-influencers-elections-democrats-trump-campaign/",
 				"attachments": [
 					{
 						"title": "Snapshot",

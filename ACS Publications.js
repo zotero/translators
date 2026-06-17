@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-16 00:07:05"
+	"lastUpdated": "2024-09-30 13:50:18"
 }
 
 /*
@@ -155,7 +155,7 @@ function detectWeb(doc, url) {
 }
 
 function cleanNumberField(item, field) {
-	if (Object.hasOwn(item, field)) {
+	if (item[field]) {
 		let n = parseInt(item[field]);
 		if (n <= 0 || isNaN(n)) {
 			delete item[field];

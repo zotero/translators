@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-14 20:16:14"
+	"lastUpdated": "2025-05-01 14:50:41"
 }
 
 /*
@@ -155,7 +155,7 @@ function addLink(item, title, url) {
 	item.attachments.push({
 		title: title,
 		snapshot: false,
-		contentType: "text/html",
+		mimeType: "text/html",
 		url: url
 	});
 }
@@ -707,7 +707,6 @@ function getMarcxmlaRSL(doc) {
 	return marcxmlLines.join('\n');
 }
 
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -740,7 +739,7 @@ var testCases = [
 					{
 						"title": "via search",
 						"snapshot": false,
-						"contentType": "text/html"
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -770,7 +769,17 @@ var testCases = [
 			{
 				"itemType": "book",
 				"title": "Труды Международной конференции \"Математика в индустрии\", 29 июня - 3 июля 1998 года",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "ICIM-98",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "международная конф (1998; Таганрог)",
+						"lastName": "\"Математика в индустрии\"",
+						"creatorType": "editor"
+					}
+				],
 				"date": "1998",
 				"ISBN": "9785879761405",
 				"archive": "Книги (изданные с 1831 г. по настоящее время)",
@@ -786,7 +795,7 @@ var testCases = [
 					{
 						"title": "via search",
 						"snapshot": false,
-						"contentType": "text/html"
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -839,7 +848,7 @@ var testCases = [
 					{
 						"title": "via search",
 						"snapshot": false,
-						"contentType": "text/html"
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -869,7 +878,12 @@ var testCases = [
 			{
 				"itemType": "report",
 				"title": "Товары бытовой химии. Метод определения щелочных компонентов: Goods of household chemistry. Method for determination of alkaline components: государственный стандарт Российской Федерации: издание официальное: утвержден и введен в действие Постановлением Госстандарта России от 29 января 1997 г. № 26: введен впервые: введен 1998-01-01",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "ТК 354 \"Бытовая химия\"",
+						"creatorType": "editor"
+					}
+				],
 				"date": "1997",
 				"archive": "Стандарты",
 				"callNumber": "SVT ГОСТ Р 51021-97",
@@ -884,12 +898,12 @@ var testCases = [
 					{
 						"title": "via search",
 						"snapshot": false,
-						"contentType": "text/html"
+						"mimeType": "text/html"
 					},
 					{
 						"title": "E-resource",
 						"snapshot": false,
-						"contentType": "text/html"
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -908,7 +922,7 @@ var testCases = [
 				"creators": [],
 				"date": "1970",
 				"archive": "Книги (изданные с 1831 г. по настоящее время)",
-				"callNumber": "FB Бр 130/952; FB Бр 130/953; FB Арх",
+				"callNumber": "FB Бр 130/952; FB Бр 130/953",
 				"extra": "RSLID: 01007057068",
 				"language": "rus",
 				"libraryCatalog": "Российская Государственная Библиотека",
@@ -922,7 +936,7 @@ var testCases = [
 					{
 						"title": "via search",
 						"snapshot": false,
-						"contentType": "text/html"
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -938,7 +952,17 @@ var testCases = [
 			{
 				"itemType": "book",
 				"title": "Тезисы докладов Межрегиональной научной конференции \"Химия на пути в XXI век\", Ухта, 13-14 марта 2000 г",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Межрегиональная науч. конф. \"Химия на пути в XXI век\"",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "межрегиональная науч конф",
+						"lastName": "\"Химия на пути в XXI век\"",
+						"creatorType": "editor"
+					}
+				],
 				"date": "2000",
 				"ISBN": "9785881792152",
 				"archive": "Книги (изданные с 1831 г. по настоящее время)",
@@ -954,7 +978,7 @@ var testCases = [
 					{
 						"title": "via search",
 						"snapshot": false,
-						"contentType": "text/html"
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -977,7 +1001,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Физическая химия",
+				"title": "Физическая химия. Ч. 1",
 				"creators": [],
 				"date": "2005",
 				"ISBN": "9785812208066",
@@ -988,14 +1012,17 @@ var testCases = [
 				"language": "rus",
 				"libraryCatalog": "Российская Государственная Библиотека",
 				"numPages": "282",
-				"place": "М.",
-				"publisher": "Моск. гос. ун-т печати",
 				"url": "https://search.rsl.ru/ru/record/01002792532",
 				"attachments": [
 					{
 						"title": "via search",
 						"snapshot": false,
-						"contentType": "text/html"
+						"mimeType": "text/html"
+					},
+					{
+						"title": "E-resource",
+						"snapshot": false,
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1034,12 +1061,12 @@ var testCases = [
 					{
 						"title": "via search",
 						"snapshot": false,
-						"contentType": "text/html"
+						"mimeType": "text/html"
 					},
 					{
 						"title": "E-resource",
 						"snapshot": false,
-						"contentType": "text/html"
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -1063,31 +1090,32 @@ var testCases = [
 					{
 						"lastName": "АН СССР",
 						"creatorType": "editor",
-						"fieldMode": true
+						"fieldMode": 1
 					},
 					{
 						"lastName": "СССР",
 						"creatorType": "editor",
-						"fieldMode": true
+						"fieldMode": 1
 					},
 					{
 						"lastName": "РСФСР",
 						"creatorType": "editor",
-						"fieldMode": true
+						"fieldMode": 1
 					},
 					{
 						"lastName": "СССР",
 						"creatorType": "editor",
-						"fieldMode": true
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Российская академия наук",
 						"creatorType": "editor",
-						"fieldMode": true
+						"fieldMode": 1
 					}
 				],
 				"date": "1930",
 				"archive": "Сериальные издания (кроме газет)",
+				"callNumber": "FB 41 6/40; FB 41 6/39; FB XX 63a/33; FB XX 63b/32; FB 41 6/39; FB 41 6/39; FB XX 63b/32",
 				"extra": "RSLID: 01002386114\nType: journal\nBBK: Г5я5",
 				"language": "rus",
 				"libraryCatalog": "Российская Государственная Библиотека",
@@ -1098,7 +1126,7 @@ var testCases = [
 					{
 						"title": "via search",
 						"snapshot": false,
-						"contentType": "text/html"
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -1185,7 +1213,7 @@ var testCases = [
 					{
 						"lastName": "\"Газпром\", российское акционерное общество",
 						"creatorType": "editor",
-						"fieldMode": true
+						"fieldMode": 1
 					}
 				],
 				"date": "2019",
@@ -1202,7 +1230,7 @@ var testCases = [
 					{
 						"title": "via search",
 						"snapshot": false,
-						"contentType": "text/html"
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -1229,7 +1257,7 @@ var testCases = [
 					{
 						"lastName": "Межгосударственный совет по стандартизации, метрологии и сертификации",
 						"creatorType": "editor",
-						"fieldMode": true
+						"fieldMode": 1
 					}
 				],
 				"date": "2015",
@@ -1245,7 +1273,7 @@ var testCases = [
 					{
 						"title": "via search",
 						"snapshot": false,
-						"contentType": "text/html"
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -1297,7 +1325,7 @@ var testCases = [
 				"date": "2020",
 				"ISBN": "9785041079505",
 				"archive": "Карты",
-				"callNumber": "FB Гр Ч518; KGR Ко 169-20/IX-21",
+				"callNumber": "GR Гр Ч518; KGR Ко 169-20/IX-21",
 				"edition": "2-е изд., испр. и доп.",
 				"extra": "RSLID: 01010285501\nBBK: Я23(5Ид)",
 				"language": "rus",
@@ -1312,7 +1340,7 @@ var testCases = [
 					{
 						"title": "via search",
 						"snapshot": false,
-						"contentType": "text/html"
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -1325,7 +1353,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "Авт. указан перед вып. дан Указ. в конце кн"
+						"note": "Авт. указан перед вып. дан"
 					}
 				],
 				"seeAlso": []
@@ -1360,7 +1388,7 @@ var testCases = [
 					{
 						"title": "via search",
 						"snapshot": false,
-						"contentType": "text/html"
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -1408,7 +1436,7 @@ var testCases = [
 					{
 						"title": "via search",
 						"snapshot": false,
-						"contentType": "text/html"
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -1432,31 +1460,32 @@ var testCases = [
 					{
 						"lastName": "АН СССР",
 						"creatorType": "editor",
-						"fieldMode": true
+						"fieldMode": 1
 					},
 					{
 						"lastName": "СССР",
 						"creatorType": "editor",
-						"fieldMode": true
+						"fieldMode": 1
 					},
 					{
 						"lastName": "РСФСР",
 						"creatorType": "editor",
-						"fieldMode": true
+						"fieldMode": 1
 					},
 					{
 						"lastName": "СССР",
 						"creatorType": "editor",
-						"fieldMode": true
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Российская академия наук",
 						"creatorType": "editor",
-						"fieldMode": true
+						"fieldMode": 1
 					}
 				],
 				"date": "1930",
 				"archive": "Сериальные издания (кроме газет)",
+				"callNumber": "FB 41 6/40; FB 41 6/39; FB XX 63a/33; FB XX 63b/32; FB 41 6/39; FB 41 6/39; FB XX 63b/32",
 				"extra": "RSLID: 01002386114\nType: journal\nBBK: Г5я5",
 				"language": "rus",
 				"libraryCatalog": "Российская Государственная Библиотека",
@@ -1467,7 +1496,7 @@ var testCases = [
 					{
 						"title": "via search",
 						"snapshot": false,
-						"contentType": "text/html"
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -1480,32 +1509,6 @@ var testCases = [
 						"note": "Основан Бюро физ.-хим. конф. при НТУ ВСНХ СССР в 1930 г Журнал издается под руководством Отделения химии и наук о материалах РАН 1931-1934 (Т. 5 Вып. 1-3) является \"Серией В Химического журнала\" Изд-во: Т. 1 Гос. изд-во; Т. 2 Гос. науч.-техн. изд-во ; Т. 3-5 (Вып. 1-7) Гос. техн.-теорет. изд-во ; Т. 5 (Вып. 8-12) - 11 (Вып. 1-3) ОНТИ НКТП СССР; Т. 11 (Вып. 4-6) - 38 не указано; Т. 39-66 Наука ; Т. 67-72 МАИК \"Наука\"; Т. 73- Наука: МАИК \"Наука\"/Интерпериодика ; Т. 82- Наука Место изд.: 1930, т. 1, 29- М.; 1931. т. 2-28 М.; Л Изд-во: 2017- Федеральное государственное унитарное предприятие Академический научно-издательский, производственно-полиграфический и книгораспространительский центр \"Наука\" ; 2018- Российская академия наук"
 					}
 				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://search.rsl.ru/ru/record/07000380352",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Журнал физической химии. 2019",
-				"creators": [],
-				"archive": "Книги (изданные с 1831 г. по настоящее время)",
-				"extra": "RSLID: 07000380352",
-				"language": "rus",
-				"libraryCatalog": "Российская Государственная Библиотека",
-				"url": "https://search.rsl.ru/ru/record/07000380352",
-				"attachments": [
-					{
-						"title": "via search",
-						"snapshot": false,
-						"contentType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
 				"seeAlso": []
 			}
 		]

@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2016-09-20 06:21:01"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2025-06-27 14:29:20"
 }
 
 function detectWeb(doc, url) {
@@ -183,6 +183,9 @@ function parseResponse(text) {
 	// We can build the original photo URL manually. See https://www.flickr.com/services/api/misc.urls.html
 	var secret = photo.getAttribute('originalsecret');
 	var originalFormat = photo.getAttribute('originalformat');
+	if (originalFormat == 'jpg') {
+		originalFormat = 'jpeg'; // To construct a valid MIME type
+	}
 	if (secret && originalFormat) { // Both of these appear to be false if the owner disables downloading
 		var fileUrl = 'https://farm' + photo.getAttribute('farm') + '.staticflickr.com/'
 		 + photo.getAttribute('server') + '/'
@@ -192,12 +195,13 @@ function parseResponse(text) {
 		newItem.attachments.push({
 			title: newItem.title,
 			url: fileUrl,
-			mimeType: 'image/' + photo.getAttribute('originalformat') // jpg|gif|png
+			mimeType: 'image/' + originalFormat // jpeg|gif|png
 		});
 	}
 	
 	newItem.complete();
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{

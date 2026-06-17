@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-02-17 18:58:43"
+	"lastUpdated": "2024-11-20 15:43:05"
 }
 
 /*
@@ -108,6 +108,9 @@ async function scrape(doc, url = doc.location.href) {
 		var pdfURL = ZU.xpathText(doc,
 			'//meta[contains(@name, "citation_pdf_url")]/@content'
 		);
+		if (!pdfURL) {
+			pdfURL = attr(doc, '.actions a[target="_blank"][href*=".pdf"]', 'href');
+		}
 		// Z.debug("pdfURL: " + pdfURL);
 		var text = await requestText(risURL);
 		var translator = Zotero.loadTranslator(
@@ -524,7 +527,54 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.cambridge.org/core/journals/american-political-science-review/firstview",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.cambridge.org/core/books/foundations-of-probabilistic-programming/819623B1B5B33836476618AC0621F0EE",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Foundations of Probabilistic Programming",
+				"creators": [
+					{
+						"lastName": "Barthe",
+						"firstName": "Gilles",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Katoen",
+						"firstName": "Joost-Pieter",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Silva",
+						"firstName": "Alexandra",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2020",
+				"ISBN": "9781108488518",
+				"abstractNote": "What does a probabilistic program actually compute? How can one formally reason about such probabilistic programs? This valuable guide covers such elementary questions and more. It provides a state-of-the-art overview of the theoretical underpinnings of modern probabilistic programming and their applications in machine learning, security, and other domains, at a level suitable for graduate students and non-experts in the field. In addition, the book treats the connection between probabilistic programs and mathematical logic, security (what is the probability that software leaks confidential information?), and presents three programming languages for different applications: Excel tables, program testing, and approximate computing. This title is also available as Open Access on Cambridge Core.",
+				"extra": "DOI: 10.1017/9781108770750",
+				"libraryCatalog": "Cambridge University Press",
+				"place": "Cambridge",
+				"publisher": "Cambridge University Press",
+				"url": "https://www.cambridge.org/core/books/foundations-of-probabilistic-programming/819623B1B5B33836476618AC0621F0EE",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
-
 /** END TEST CASES **/

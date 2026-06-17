@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-01-14 04:48:29"
+	"lastUpdated": "2025-10-07 13:31:42"
 }
 
 /*
@@ -39,7 +39,7 @@ function detectWeb(doc, url) {
 	if (url.includes('blogs.wsj.com')) {
 		return "blogPost";
 	}
-	else if (url.includes('articles')) {
+	else if (attr(doc, 'meta[name="page.section"]', 'content') === 'Article') {
 		return "newspaperArticle";
 	}
 	else if (getSearchResults(doc, true)) {
@@ -51,7 +51,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//h3[contains(@class, "headline")]/a');
+	var rows = doc.querySelectorAll('h3 > a[class*="CardLink"]');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -165,7 +165,7 @@ var testCases = [
 				"libraryCatalog": "www.wsj.com",
 				"publicationTitle": "Wall Street Journal",
 				"section": "Careers",
-				"url": "http://online.wsj.com/article/SB10001424052970204517204577046222233016362.html",
+				"url": "https://www.wsj.com/articles/SB10001424052970204517204577046222233016362",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -204,7 +204,7 @@ var testCases = [
 				"libraryCatalog": "www.wsj.com",
 				"publicationTitle": "Wall Street Journal",
 				"section": "Markets",
-				"url": "http://online.wsj.com/article/SB10001424052970203471004577144672783559392.html",
+				"url": "https://www.wsj.com/articles/SB10001424052970203471004577144672783559392",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -219,8 +219,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.wsj.com/search/term.html?KEYWORDS=argentina&mod=DNH_S",
-		"defer": true,
+		"url": "https://www.wsj.com/search?query=argentina&mod=searchresults_viewallresults",
 		"items": "multiple"
 	},
 	{
@@ -288,7 +287,22 @@ var testCases = [
 				],
 				"tags": [
 					{
+						"tag": "Asia"
+					},
+					{
+						"tag": "Asia Pacific"
+					},
+					{
 						"tag": "Crime/Courts"
+					},
+					{
+						"tag": "Developing Economies"
+					},
+					{
+						"tag": "Eastern Asia"
+					},
+					{
+						"tag": "North America"
 					},
 					{
 						"tag": "OASN"
@@ -300,7 +314,13 @@ var testCases = [
 						"tag": "Political/General News"
 					},
 					{
+						"tag": "Pyongyang"
+					},
+					{
 						"tag": "SYND"
+					},
+					{
+						"tag": "United States"
 					},
 					{
 						"tag": "World News"
@@ -378,6 +398,9 @@ var testCases = [
 						"tag": "AAL"
 					},
 					{
+						"tag": "ARCHIVE"
+					},
+					{
 						"tag": "Air Transport"
 					},
 					{
@@ -385,6 +408,12 @@ var testCases = [
 					},
 					{
 						"tag": "American Airlines Group"
+					},
+					{
+						"tag": "Asia"
+					},
+					{
+						"tag": "Asia Pacific"
 					},
 					{
 						"tag": "Automotive"
@@ -408,6 +437,12 @@ var testCases = [
 						"tag": "Delta Air Lines"
 					},
 					{
+						"tag": "East Asia"
+					},
+					{
+						"tag": "Europe"
+					},
+					{
 						"tag": "FDX"
 					},
 					{
@@ -420,13 +455,28 @@ var testCases = [
 						"tag": "JBLU"
 					},
 					{
+						"tag": "Japan"
+					},
+					{
 						"tag": "JetBlue Airways"
+					},
+					{
+						"tag": "LINK|i15-WP-WSJ-0000482693"
+					},
+					{
+						"tag": "LINK|i3-WP-WSJ-0000482693"
+					},
+					{
+						"tag": "LINK|i6-WP-WSJ-0000482693"
 					},
 					{
 						"tag": "LUV"
 					},
 					{
 						"tag": "Low Cost Airlines"
+					},
+					{
+						"tag": "North America"
 					},
 					{
 						"tag": "Passenger Airlines"
@@ -462,7 +512,16 @@ var testCases = [
 						"tag": "United Airlines Holdings"
 					},
 					{
+						"tag": "United Kingdom"
+					},
+					{
+						"tag": "United States"
+					},
+					{
 						"tag": "WSJ-PRO-WSJ.com"
+					},
+					{
+						"tag": "Western Europe"
 					},
 					{
 						"tag": "business"
@@ -514,6 +573,231 @@ var testCases = [
 					},
 					{
 						"tag": "wsjspeeddesk"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.wsj.com/tech/ai/nvidia-ceo-jensen-huang-us-china-relationship-b7d438a7?mod=hp_lead_pos2",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Nvidia’s CEO Walks an AI Tightrope Between the U.S. and China",
+				"creators": [
+					{
+						"firstName": "Amrith",
+						"lastName": "Ramkumar",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Raffaele",
+						"lastName": "Huang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Robbie",
+						"lastName": "Whelan",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025-09-19T01:00:00Z",
+				"ISSN": "0099-9660",
+				"abstractNote": "With the Intel deal, Nvidia’s CEO is signaling support for the Trump administration’s aims while seeking more access to the Chinese chip market.",
+				"language": "en-US",
+				"libraryCatalog": "www.wsj.com",
+				"publicationTitle": "Wall Street Journal",
+				"section": "Tech",
+				"url": "https://www.wsj.com/tech/ai/nvidia-ceo-jensen-huang-us-china-relationship-b7d438a7",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Artificial Intelligence Technologies"
+					},
+					{
+						"tag": "Asia"
+					},
+					{
+						"tag": "Asia Pacific"
+					},
+					{
+						"tag": "C&E Industry News Filter"
+					},
+					{
+						"tag": "China"
+					},
+					{
+						"tag": "Computer Hardware"
+					},
+					{
+						"tag": "Computers/Consumer Electronics"
+					},
+					{
+						"tag": "Computing"
+					},
+					{
+						"tag": "Content Types"
+					},
+					{
+						"tag": "Corporate/Industrial News"
+					},
+					{
+						"tag": "Developing Economies"
+					},
+					{
+						"tag": "Domestic Politics"
+					},
+					{
+						"tag": "East Asia"
+					},
+					{
+						"tag": "Emerging Market Countries"
+					},
+					{
+						"tag": "Factiva Filters"
+					},
+					{
+						"tag": "GCAPI"
+					},
+					{
+						"tag": "Graphics Processing Units"
+					},
+					{
+						"tag": "Greater China"
+					},
+					{
+						"tag": "Industrial Electronics"
+					},
+					{
+						"tag": "Industrial Goods"
+					},
+					{
+						"tag": "Integrated Circuits"
+					},
+					{
+						"tag": "Jensen Huang"
+					},
+					{
+						"tag": "LINK|i1-WP-WSJ-0002955966"
+					},
+					{
+						"tag": "LINK|i10-WP-WSJ-0002955966"
+					},
+					{
+						"tag": "LINK|i2-WP-WSJ-0002955966"
+					},
+					{
+						"tag": "LINK|i3-WP-WSJ-0002955966"
+					},
+					{
+						"tag": "LINK|i4-WP-WSJ-0002955966"
+					},
+					{
+						"tag": "LINK|i5-WP-WSJ-0002955966"
+					},
+					{
+						"tag": "LINK|i6-WP-WSJ-0002955966"
+					},
+					{
+						"tag": "LINK|i7-WP-WSJ-0002955966"
+					},
+					{
+						"tag": "LINK|i8-WP-WSJ-0002955966"
+					},
+					{
+						"tag": "LINK|i9-WP-WSJ-0002955966"
+					},
+					{
+						"tag": "Management"
+					},
+					{
+						"tag": "NVDA"
+					},
+					{
+						"tag": "NVIDIA"
+					},
+					{
+						"tag": "North America"
+					},
+					{
+						"tag": "Political/General News"
+					},
+					{
+						"tag": "Politics/International Relations"
+					},
+					{
+						"tag": "Regulation/Government Policy"
+					},
+					{
+						"tag": "Risk Topics - Artificial Intelligence"
+					},
+					{
+						"tag": "Risk Topics - Geopolitics"
+					},
+					{
+						"tag": "Risk Topics - Regulations & Regulators"
+					},
+					{
+						"tag": "Risk Topics - Sanctions & Trade Controls"
+					},
+					{
+						"tag": "SYND"
+					},
+					{
+						"tag": "Semiconductors"
+					},
+					{
+						"tag": "Senior Level Management"
+					},
+					{
+						"tag": "Technology"
+					},
+					{
+						"tag": "United States"
+					},
+					{
+						"tag": "WSJ-PRO-WSJ.com"
+					},
+					{
+						"tag": "computers"
+					},
+					{
+						"tag": "consumer electronics"
+					},
+					{
+						"tag": "corporate"
+					},
+					{
+						"tag": "general news"
+					},
+					{
+						"tag": "government policy"
+					},
+					{
+						"tag": "industrial news"
+					},
+					{
+						"tag": "international relations"
+					},
+					{
+						"tag": "political"
+					},
+					{
+						"tag": "politics"
+					},
+					{
+						"tag": "regulation"
+					},
+					{
+						"tag": "risk-compliance"
 					}
 				],
 				"notes": [],

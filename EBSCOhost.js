@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2021-10-11 01:07:25"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2024-04-15 01:50:53"
 }
 
 /*
@@ -56,7 +56,7 @@ function detectWeb(doc, url) {
  * given the text of the delivery page, downloads an item
  */
 function downloadFunction(text, url, prefs) {
-	if (text.search(/^TY\s\s?-/m) == -1) {
+	if (!(/^TY\s\s?-/m.test(text))) {
 		text = "\nTY  - JOUR\n" + text;	// this is probably not going to work if there is garbage text in the begining
 	}
 
@@ -87,12 +87,14 @@ function downloadFunction(text, url, prefs) {
 	let subtitle;
 	
 	// EBSCOhost uses nonstandard tags to represent journal titles on some items
+	// Sometimes T2 also just duplicates the journal title across along with JO/JF/J1
 	// no /g flag so we don't create duplicate tags
 	let journalRe = /^(JO|JF|J1)/m;
-	if (journalRe.test(text)) {
+	let journalTitleRe = /^(?:JO|JF|J1)\s\s?-\s?(.*)/m;
+	if (journalTitleRe.test(text)) {
 		let subtitleRe = /^T2\s\s?-\s?(.*)/m;
 		let subtitleMatch = text.match(subtitleRe);
-		if (subtitleMatch) {
+		if (subtitleMatch && subtitleMatch[1] != text.match(journalTitleRe)[1]) {
 			// if there's already something in T2, store it and erase it from the RIS
 			subtitle = subtitleMatch[1];
 			text = text.replace(subtitleRe, '');
@@ -100,7 +102,7 @@ function downloadFunction(text, url, prefs) {
 		
 		text = text.replace(journalRe, 'T2');
 	}
-	
+
 	// Let's try to keep season info
 	// Y1  - 1993///Winter93
 	// Y1  - 2009///Spring2009
@@ -115,7 +117,7 @@ function downloadFunction(text, url, prefs) {
 	translator.setString(text);
 	// eslint-disable-next-line padded-blocks
 	translator.setHandler("itemDone", function (obj, item) {
-		
+
 		/* Fix capitalization issues */
 		// title
 		if (!item.title && prefs.itemTitle) {
@@ -204,7 +206,8 @@ function downloadFunction(text, url, prefs) {
 			item.attachments.push({
 				url: prefs.pdfURL,
 				title: "EBSCO Full Text",
-				mimeType: "application/pdf"
+				mimeType: "application/pdf",
+				proxy: false
 			});
 			item.complete();
 		}
@@ -401,6 +404,8 @@ function findPdfUrl(pdfDoc) {
 /**
  * borrowed from http://www.webtoolkit.info/javascript-base64.html
  */
+// We should have this available now - leaving in the code just in case
+/*
 var base64KeyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
 function utf8Encode(string) {
@@ -450,7 +455,7 @@ function btoa(input) {
 				+ base64KeyStr.charAt(enc3) + base64KeyStr.charAt(enc4);
 	}
 	return output;
-}
+} */
 
 /**
  * end borrowed code

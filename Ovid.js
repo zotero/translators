@@ -8,13 +8,13 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcs",
-	"lastUpdated": "2020-10-14 16:12:32"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2025-03-03 21:51:19"
 }
 
 /*
    Ovid Zotero Translator
-   Copyright (c) 2000-2012 Ovid Technologies, Inc.
+   Copyright (c) 2000-2012 Ovid Technologies, Inc., 2025 Abe Jellinek
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU Affero General Public License as
@@ -30,101 +30,63 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*
-Known "bug": translator will not work on PDF pages if those are accessed from
-	individual item pages. There does not seem to be any way to construct
-	metadata POST data from those views. If PDF is access directly from search
-	results, we can reconstruct necessary data from the URL.
-
-	We could try to go to a different page to fetch metadata
-*/
 
 function detectWeb(doc, url) {
-	if (getSearchResults(doc, true) && getMetadataPost(doc, url, [0])) {
+	if (getSearchResults(doc, true) && getS(doc, url)) {
 		return 'multiple';
 	}
 
-	var id = getIDFromPage(doc) || getIDFromUrl(url);
+	var id = getIDFromUrl(url);
 	Zotero.debug("Found ID: " + id);
-	if (id && getMetadataPost(doc, url, [id])) {
+	if (id && getS(doc, url)) {
 		return 'journalArticle';
 	}
 
 	return false;
 }
 
-function getMetadataPost(doc, url, ids) {
-	var s = doc.getElementById('S');
-	if (s) s = s.value && 'S=' + encodeURIComponent(s.value);
-	if (!s) s = getSFromUrl(url);
-	if (!s || !ids.length) {
-		if (!s) Zotero.debug("Could not find S parameter");
-		if (!ids.length) Zotero.debug("No IDs supplied");
+async function getExportSearchParams(doc, url) {
+	let s = getS(doc, url);
+	if (!s) {
+		Zotero.debug("Could not find S parameter");
 		return false;
 	}
 
-	var post = s
-		+ '&R=' + ids.map(function (id) {
-		return encodeURIComponent(id);
-	}).join('&R=')
-		+ "&jumpstartLink=1&Citation Page=Export Citation"
-		+ "&cmexport=1&exportType=endnote&zoteroRecords=1";
-
-	var action;
-	if (doc.getElementById('OUSRT')) {
-		// For OUS records, need to format UI code for OUS records in endnote format
-		Zotero.debug("For OUS");
-		action = doc.getElementsByName('Datalist')[0];
-		post += "&ousRecords=1";
-	}
-	else { // for MSP records
-		action = doc.getElementsByName('CitManPrev')[0];
-		post += "&cmFields=ALL";
-	}
-
-	if (action) {
-		action = action.value.replace(/\|.*/, "");
-	}
-	else {
-		// Try getting it from URL
-		var m = url.match(/S\.sh\.\d+/);
-		if (m) {
-			Zotero.debug("Using Citation Action parameter from URL: " + m[0]);
-			action = m[0];
-		}
-	}
-
+	let action = (attr(doc, '#Datalist, #CitManPrev', 'value') || url).match(/S\.sh\.\d+/)?.[0];
 	if (!action) {
 		Zotero.debug("Citation Action component not found");
 		return false;
 	}
 
-	post += "&Citation Action=" + encodeURIComponent(action);
+	let { data: { params: { PrintFieldsDataList } } }
+		= await requestJSON(`./ovidweb.cgi?S=${encodeURIComponent(s)}&Export+Initial+Data=${encodeURIComponent(action)}%7Csearch&records_on_page=1-25`);
 
-	return post;
-}
-
-function getIDFromPage(doc) {
-	// E.g. single result in My Projects
-	if (!doc.getElementsByClassName('citation-table').length) return false;
-
-	var checkboxes = doc.getElementsByClassName('bibrecord-checkbox');
-	if (checkboxes.length == 1) {
-		return checkboxes[0].value;
-	}
-	return false;
+	let params = new URLSearchParams();
+	params.set('S', s);
+	params.set('Citation Action', action);
+	params.set('cmexport', '1');
+	params.set('jumpstartLink', '1');
+	params.set('cmFields', 'ALL');
+	params.set('exportType', 'endnote');
+	params.set('PrintFieldsDataList', PrintFieldsDataList);
+	params.set('externalResolverLink', '1');
+	params.set('zoteroRecords', '1');
+	return params.toString().replace(/\+/g, '%20');
 }
 
 function getIDFromUrl(url) {
-	var m = decodeURI(url).match(/=S\.sh\.[^&#|]+\|([1-9]\d*)/);
+	var m = decodeURI(url).match(/=(S\.sh\.[^&#|]+\|[1-9]\d*)/);
 	if (m) return m[1];
 	return false;
 }
 
+function getS(doc, url) {
+	return doc.getElementById('S')?.value
+		|| getSFromUrl(url);
+}
+
 function getSFromUrl(url) {
-	var m = decodeURI(url).match(/\bS=([^&]+)/);
-	if (m) return 'S=' + encodeURIComponent(m[1]);
-	return false;
+	return new URL(url).searchParams.get('S');
 }
 
 // seems like we have to check all of these, because some can be present but empty
@@ -149,10 +111,8 @@ function getSearchResults(doc, checkOnly, extras) {
 	if (!rows.length) return false;
 
 	var items = {}, found = false;
-	for (var i = 0; i < rows.length; i++) {
-		var row = rows[i];
-		var id = row.getElementsByClassName('bibrecord-checkbox')[0];
-		if (id) id = id.value;
+	for (let row of rows) {
+		var id = getIDFromUrl(attr(row, 'a', 'href'));
 		if (!id) continue;
 
 		var title;
@@ -177,7 +137,7 @@ function getSearchResults(doc, checkOnly, extras) {
 		found = true;
 		items[id] = title;
 
-		var checkbox = row.querySelectorAll('input.bibrecord-checkbox')[0];
+		var checkbox = row.querySelector('input.bibrecord-checkbox');
 		if (checkbox) {
 			items[id] = {
 				title: title,
@@ -187,11 +147,9 @@ function getSearchResults(doc, checkOnly, extras) {
 
 		if (extras) {
 			// Look for PDF link
-			var pdfLink = ZU.xpath(row, './/a[starts-with(@name, "PDF")]')[0];
+			var pdfLink = row.querySelector('a > .pdf-icon')?.parentElement;
 			if (pdfLink) {
-				extras[id] = {
-					pdfLink: pdfLink.href
-				};
+				extras[id] = { linkURL: pdfLink.href };
 			}
 		}
 	}
@@ -199,36 +157,28 @@ function getSearchResults(doc, checkOnly, extras) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
-	var extras = {};
+async function doWeb(doc, url) {
+	var extras = {
+		callNumberToID: {},
+		callNumberToPDF: {},
+	};
 	var results = getSearchResults(doc, false, extras);
 	if (results) {
-		Zotero.selectItems(results, function (selectedIds) {
-			if (!selectedIds) return;
-
-			var ids = [];
-			for (var i in selectedIds) {
-				ids.push(i);
-			}
-
-			fetchMetadata(doc, url, ids, extras);
-		});
+		let selectedIds = await Zotero.selectItems(results);
+		if (!selectedIds) return;
+		await fetchMetadata(doc, url, Object.keys(selectedIds), extras);
 	}
 	else {
-		var id = getIDFromPage(doc) || getIDFromUrl(url);
+		var id = getIDFromUrl(url);
 
 		// Look for PDF link on page as well
 		var pdfLink = doc.getElementById('pdf')
-			|| ZU.xpath(doc, '//a[starts-with(@name, "PDF")]')[0];
+			|| doc.querySelector('a > .pdf-icon')?.parentElement;
 		if (pdfLink) {
-			extras[id] = {
-				pdfLink: pdfLink.href
-			};
+			extras[id] = { linkURL: pdfLink.href };
 		}
 		else if ((pdfLink = doc.getElementById('embedded-frame'))) {
-			extras[id] = {
-				resolvedPdfLink: pdfLink.src
-			};
+			extras[id] = { resolvedURL: pdfLink.src };
 		}
 		else {
 			// Attempt to construct it from the URL
@@ -237,19 +187,45 @@ function doWeb(doc, url) {
 			if (s && pdfID) {
 				Zotero.debug("Manually constructing PDF URL. There might not be one available.");
 				extras[id] = {
-					pdfLink: 'ovidweb.cgi?' + s + '&PDFLink=B|' + encodeURIComponent(pdfID[0])
+					linkURL: 'ovidweb.cgi?S=' + encodeURIComponent(s) + '&PDFLink=B|' + encodeURIComponent(pdfID[0])
 				};
 			}
 		}
 
-		fetchMetadata(doc, url, [id], extras);
+		await fetchMetadata(doc, url, [id], extras);
 	}
 }
 
-function fetchMetadata(doc, url, ids, extras) {
-	var postData = getMetadataPost(doc, url, ids);
-	Zotero.debug("POST: " + postData);
-	ZU.doPost('./ovidweb.cgi', postData, function (text) {
+async function fetchMetadata(doc, url, ids, extras) {
+	let s = getS(doc, url);
+
+	// The export API acts on checked search results, which are tracked server-side
+	// So we need to check the results we want to export and uncheck them later
+
+	async function getSelectedCount() {
+		return (await requestJSON(`./ovidweb.cgi?&S=${encodeURIComponent(s)}&View+Current+Selected=1`))
+			.record_count;
+	}
+
+	let selectedCount = await getSelectedCount();
+	Zotero.debug('Selected before: ' + selectedCount);
+	let toDeselect = [];
+	for (let id of ids) {
+		await request(`./ovidweb.cgi?&S=${encodeURIComponent(s)}&Citation+Selection=${id}|Y&on_msp=1&selectall=0`);
+		let newRecordCount = await getSelectedCount();
+		if (newRecordCount > selectedCount) {
+			toDeselect.push(id);
+		}
+		selectedCount = newRecordCount;
+	}
+	Zotero.debug('Selected for export: ' + selectedCount);
+
+	try {
+		let searchParams = await getExportSearchParams(doc, url);
+		Zotero.debug("Params: " + searchParams);
+
+		let taggedText = await requestText('./ovidweb.cgi?' + searchParams);
+
 		// Get rid of some extra HTML fluff from the request if it's there
 		// The section we want starts with something like
 		// --HMvBAmfg|xxEGNm@\<{bVtBLgneqH?vKCw?nsIZhjcjsyRFVQ=
@@ -260,37 +236,49 @@ function fetchMetadata(doc, url, ids, extras) {
 		// and ends with
 		// --HMvBAmfg|xxEGNm@\<{bVtBLgneqH?vKCw?nsIZhjcjsyRFVQ=--
 
-		text = text.replace(/[\s\S]*(--\S+)\s+Content-type:\s*application\/x-bibliographic[^<]+([\s\S]+?)\s*\1[\s\S]*/, '$2');
-		Z.debug(text);
+		taggedText = taggedText.replace(/[\s\S]*(--\S+)\s+Content-type:\s*application\/x-bibliographic[^<]+([\s\S]+?)\s*\1[\s\S]*/, '$2');
+		Z.debug(taggedText);
 
 		var trans = Zotero.loadTranslator('import');
 		// OVID Tagged
 		trans.setTranslator('59e7e93e-4ef0-4777-8388-d6eddb3261bf');
-		trans.setString(text);
+		trans.setString(taggedText);
 		trans.setHandler('itemDone', function (obj, item) {
-			if (item.itemID && extras[item.itemID]) {
-				retrievePdfUrl(item, extras[item.itemID]);
+			let id = ids.find(id => id.endsWith('|' + item.itemID));
+			if (!id) {
+				// Item was checked in Ovid UI but not selected in dialog
+				return;
+			}
+			delete item.itemID;
+			if (extras[id]) {
+				retrievePdfUrl(item, extras[id]);
 			}
 			else {
 				item.complete();
 			}
 		});
-		trans.translate();
-	});
+		await trans.translate();
+	}
+	finally {
+		for (let id of toDeselect) {
+			await request(`./ovidweb.cgi?&S=${encodeURIComponent(s)}&Citation+Selection=${id}|N&on_msp=1&selectall=0`);
+		}
+		Zotero.debug('Selected after: ' + await getSelectedCount());
+	}
 }
 
 function retrievePdfUrl(item, extras) {
-	if (extras.resolvedPdfLink) {
+	if (extras.resolvedURL) {
 		item.attachments.push({
 			title: "Full Text PDF",
-			url: extras.resolvedPdfLink,
+			url: extras.resolvedURL,
 			mimeType: 'application/pdf'
 		});
 		item.complete();
 	}
-	else if (extras.pdfLink) {
-		Zotero.debug("Looking for PDF URL on " + extras.pdfLink);
-		ZU.doGet(extras.pdfLink, function (text) {
+	else if (extras.linkURL) {
+		Zotero.debug("Looking for PDF URL on " + extras.linkURL);
+		ZU.doGet(extras.linkURL, function (text) {
 			var m = text.match(/<iframe [^>]*src\s*=\s*(['"])(.*?)\1/);
 			if (m) {
 				item.attachments.push({
@@ -309,5 +297,6 @@ function retrievePdfUrl(item, extras) {
 }
 
 /** BEGIN TEST CASES **/
-
+var testCases = [
+]
 /** END TEST CASES **/

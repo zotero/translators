@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-01-17 18:34:34"
+	"lastUpdated": "2025-06-11 15:32:23"
 }
 
 /*
@@ -213,16 +213,7 @@ function scrapeBibTeX(doc, url) {
 
 	let fallbackTitle = text(doc, '.citation__title');
 
-	// Use the current domain on Wiley subdomains (e.g., ascpt.) so that the
-	// download works even if third-party cookies are blocked. Otherwise, use
-	// the main domain.
-	let postUrl;
-	if (doc.location.host.endsWith('.onlinelibrary.wiley.com')) {
-		postUrl = 'https://onlinelibrary.wiley.com/action/downloadCitation';
-	}
-	else {
-		postUrl = '/action/downloadCitation';
-	}
+	var postUrl = '/action/downloadCitation';
 	var body = 'direct=direct'
 				+ '&doi=' + encodeURIComponent(doi)
 				+ '&downloadFileName=pericles_14619563AxA'
@@ -499,7 +490,9 @@ function doWeb(doc, url) {
 	else {
 		scrape(doc, url);
 	}
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -1318,6 +1311,99 @@ var testCases = [
 				],
 				"tags": [],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://wires.onlinelibrary.wiley.com/doi/10.1002/wcc.70008",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Four Principles of Transformative Adaptation to Climate Change-Exacerbated Hazards in Informal Settlements",
+				"creators": [
+					{
+						"firstName": "Ben C.",
+						"lastName": "Howard",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Simon",
+						"lastName": "Moulds",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Samuel",
+						"lastName": "Agyei-Mensah",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Khadiza Tul Kobra",
+						"lastName": "Nahin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Zahidul",
+						"lastName": "Quayyum",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Brian E.",
+						"lastName": "Robinson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Wouter",
+						"lastName": "Buytaert",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025",
+				"DOI": "10.1002/wcc.70008",
+				"ISSN": "1757-7799",
+				"abstractNote": "Residents of urban informal settlements are among the most at-risk of climate change-exacerbated hazards. Yet, traditional approaches to adaptation have failed to reduce risk sustainably and equitably. In contrast, transformative adaptation recognizes the inextricable nature of complex climate risk and social inequality, embedding principles of social justice in pathways to societal resilience. Its potential for impact may be greatest in informal settlements, but its application in this context introduces a new set of challenges and remains largely aspirational. To address this missed opportunity, in this focus article we provide clarity on how transformative adaptation can manifest in informal settlements. Although context-dependency precludes the formulation of specific guidelines, we identify four principles which are foundational to its deployment in these settings. Acknowledging constraints, we define levels of achievement of the principles and suggest how they might be reached in practice. Achieving transformative adaptation in informal settlements is complex, but we argue that it is already achievable and could represent a prime opportunity to accelerate the rate of adaptation to build a climate resilient society.",
+				"issue": "3",
+				"itemID": "doi:10.1002/wcc.70008",
+				"language": "en",
+				"libraryCatalog": "Wiley Online Library",
+				"pages": "e70008",
+				"publicationTitle": "WIREs Climate Change",
+				"rights": "© 2025 The Author(s). WIREs Climate Change published by Wiley Periodicals LLC.",
+				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/wcc.70008",
+				"volume": "16",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "climate change adaptation"
+					},
+					{
+						"tag": "disaster risk reduction"
+					},
+					{
+						"tag": "informal settlements"
+					},
+					{
+						"tag": "sustainable development"
+					},
+					{
+						"tag": "transformative adaptation"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>e70008 WCC-1269.R2</p>"
+					}
+				],
 				"seeAlso": []
 			}
 		]

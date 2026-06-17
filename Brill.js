@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-17 20:03:38"
+	"lastUpdated": "2024-06-14 15:36:55"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2021 Abe Jellinek
+	Copyright © 2024 Abe Jellinek
 	
 	This file is part of Zotero.
 
@@ -41,15 +41,15 @@ function detectWeb(doc, url) {
 		if (url.includes('/journals/')) {
 			return 'journalArticle';
 		}
-		else if (url.includes('referenceworks.brillonline.com/entries/')) {
-			return 'encyclopediaArticle';
-		}
 		else {
 			return 'book';
 		}
 	}
-	else if (url.includes('bibliographies.brillonline.com/entries/')
-		&& doc.querySelector('#export-form')) {
+	else if (url.includes('referenceworks.brill.com/display/')) {
+		return 'encyclopediaArticle';
+	}
+	else if (url.includes('bibliographies.brill.com/items/')
+		&& doc.querySelector('form.export-item')) {
 		return 'journalArticle';
 	}
 	else if (getSearchResults(doc, true)) {
@@ -62,9 +62,12 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('#searchContent .text-headline a, .type-article .text-headline a, .result-item .book-title a');
+	if (!rows.length) {
+		rows = doc.querySelectorAll('#bibliography a.item-container');
+	}
 	for (let row of rows) {
 		let href = row.href;
-		let title = ZU.trimInternal(row.textContent);
+		let title = ZU.trimInternal(text(row, '.item-title span:last-child') || row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -85,7 +88,7 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	if (url.includes('bibliographies.brillonline.com/entries/')) {
+	if (url.includes('bibliographies.brill.com/items/')) {
 		scrapeBibliography(doc);
 		return;
 	}
@@ -107,15 +110,38 @@ function scrape(doc, url) {
 		if (item.itemType == 'book' && item.publicationTitle) {
 			delete item.publicationTitle;
 		}
+
+		if (item.itemType == 'encyclopediaArticle' && !item.encyclopediaTitle) {
+			item.encyclopediaTitle = text(doc, '.source-link a');
+		}
 		
 		if (item.abstractNote && item.abstractNote.endsWith('by Brill.')) {
 			delete item.abstractNote;
 		}
+
+		if (!item.publisher) {
+			item.publisher = 'Brill';
+		}
 		
 		if (!item.creators.length) {
-			// editors often don't make it into the EM
-			for (let editor of doc.querySelectorAll('.content-contributor-editor a')) {
-				item.creators.push(ZU.cleanAuthor(editor.textContent, 'editor'));
+			let creatorNames = [];
+			let creatorType = 'author';
+			let line = doc.querySelector('.contributor-line');
+			if (line) {
+				switch (text(line, '.creator-type-label').trim()) {
+					case 'Author:':
+					case 'Authors:':
+						creatorType = 'author';
+						break;
+					case 'Editor:':
+					case 'Editors:':
+						creatorType = 'editor';
+						break;
+				}
+				creatorNames = line.querySelectorAll('.contributor-details .contributor-unlinked, .contributor-details .contributor-details-link');
+			}
+			for (let creatorName of creatorNames) {
+				item.creators.push(ZU.cleanAuthor(creatorName.textContent, creatorType));
 			}
 		}
 		
@@ -128,14 +154,19 @@ function scrape(doc, url) {
 	});
 
 	translator.getTranslatorObject(function (trans) {
-		if (url.includes('referenceworks.brillonline.com/entries/')) {
+		if (url.includes('referenceworks.brill.com/display/entries/')) {
 			trans.itemType = 'encyclopediaArticle';
 		}
-
-		// Brill's HTML is structured incorrectly due to a bug in the
-		// Pubfactory CMS, and it causes some parsers to put the <meta>
-		// tags in the body. We'll fix it by telling EM to work around it.
-		trans.searchForMetaTagsInBody = true;
+		else if (url.includes('brill.com/edcollbook/')) {
+			// Delete citation_inbook_title if this is actually a book, not a book section
+			// Prevents EM from mis-detecting as a bookSection in a way that even setting
+			// trans.itemType can't override
+			let bookTitleMeta = doc.querySelector('meta[name="citation_inbook_title"]');
+			if (bookTitleMeta) {
+				bookTitleMeta.remove();
+			}
+			trans.itemType = 'book';
+		}
 
 		trans.doWeb(doc, url);
 	});
@@ -143,11 +174,10 @@ function scrape(doc, url) {
 
 function scrapeBibliography(doc) {
 	let params = new URLSearchParams({
-		entryId: attr(doc, 'input[name="entryId"]', 'value'),
-		dest: attr(doc, 'input[name="dest"]', 'value')
+		keys: attr(doc, 'input[name="keys"]', 'value'),
 	}).toString();
 	
-	ZU.doPost('/export/exportRis', params, function (ris) {
+	ZU.doGet('/BSLO/export/?' + params, function (ris) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7"); // RIS
 		translator.setString(ris);
@@ -252,7 +282,7 @@ var testCases = [
 				"ISSN": "0085-2376, 1570-064x",
 				"abstractNote": "Abstract The Marquis de Fénelon’s internationally popular didactic narrative, Les aventures de Télémaque, went through a remarkable number of metamorphoses in the Nahḍah, the Arab world’s cultural revival movement of the long nineteenth century. This article examines two early manuscript translations by Syrian Christian writers in the 1810s, the rhymed prose version by Rifāʿah Rāfiʿ al-Ṭahṭāwī in the 1860s; its rewriting by Shāhīn ʿAṭiyyah in 1885; and Saʿdallāh al-Bustānī’s musical drama of 1869, the basis for performances later in the century by the famous actor Salāmah Ḥijāzī. Placing Télémaque’s Arabic trajectory within its global vogue in the Enlightenment suggests ways of reading the Nahḍah between theories of world literature and ‘transnational mass-texts’, and more specific local histories of translation and literary adaptation. The ambiguity of Télémaque, its hybrid and transitional form, was important to its success in milieux facing analogous kinds of hybridity and transition—among them those of the Arab Nahḍah.",
 				"issue": "3",
-				"language": "en",
+				"language": "eng",
 				"libraryCatalog": "brill.com",
 				"pages": "171-203",
 				"publicationTitle": "Journal of Arabic Literature",
@@ -301,7 +331,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://brill.com/view/title/58302",
+		"url": "https://brill.com/edcollbook/title/58302",
 		"items": [
 			{
 				"itemType": "book",
@@ -338,7 +368,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "brill.com",
 				"publisher": "Brill",
-				"url": "https://brill.com/view/title/58302",
+				"url": "https://brill.com/edcollbook/title/58302",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -365,7 +395,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://referenceworks.brillonline.com/entries/encyclopaedia-iranica-online/abaev-vasilii-ivanovich-COM_362360",
+		"url": "https://referenceworks.brill.com/display/entries/EIRO/COM-362360.xml",
 		"items": [
 			{
 				"itemType": "encyclopediaArticle",
@@ -377,12 +407,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2021-05-10",
 				"encyclopediaTitle": "Encyclopaedia Iranica Online",
+				"extra": "DOI: 10.1163/2330-4804_EIRO_COM_362360",
 				"language": "en",
-				"libraryCatalog": "referenceworks.brillonline.com",
-				"publisher": "Brill",
-				"url": "https://referenceworks.brillonline.com/entries/encyclopaedia-iranica-online/abaev-vasilii-ivanovich-COM_362360",
+				"libraryCatalog": "referenceworks.brill.com",
+				"url": "https://referenceworks.brill.com/display/entries/EIRO/COM-362360.xml",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -397,58 +426,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://referenceworks.brillonline.com/browse/encyclopaedia-iranica-online/alpha/e",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://bibliographies.brillonline.com/entries/bibliography-of-slavic-linguistics/perspektive-proucavanja-alhamijado-pismenosti-projekt-transkripcije-i-transliteracije-alhamijado-tekstova-lb900000427509?s.num=0&s.f.s2_parent=s.f.book.bibliography-of-slavic-linguistics&s.keywords=%22Abjad%22",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Perspektive proučavanja alhamijado pismenosti : projekt transkripcije i transliteracije alhamijado tekstova",
-				"creators": [
-					{
-						"lastName": "Kalajdžija",
-						"firstName": "Alen",
-						"creatorType": "author"
-					}
-				],
-				"date": "2014",
-				"language": "English",
-				"libraryCatalog": "Brill",
-				"pages": "421-430",
-				"publicationTitle": "Prilozi za orijentalnu filologiju = Contributions to Oriental Philology = Revue de Philologie Orientale",
-				"shortTitle": "Perspektive proučavanja alhamijado pismenosti",
-				"url": "https://bibliographies.brillonline.com/entries/bibliography-of-slavic-linguistics/perspektive-proucavanja-alhamijado-pismenosti-projekt-transkripcije-i-transliteracije-alhamijado-tekstova-lb900000427509",
-				"volume": "64",
-				"attachments": [],
-				"tags": [
-					{
-						"tag": "Abjad"
-					},
-					{
-						"tag": "Script, orthography"
-					},
-					{
-						"tag": "Serbo-Croatian (Serbian, Croatian, Bosnian)"
-					},
-					{
-						"tag": "Transliteration"
-					}
-				],
-				"notes": [
-					{
-						"note": "<p>E. ab.</p>"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://bibliographies.brillonline.com/search?s.num=0&s.f.s2_parent=s.f.book.bibliography-of-slavic-linguistics&s.keywords=%22Abjad%22",
+		"url": "https://bibliographies.brill.com/BSLO/items/",
+		"defer": true,
 		"items": "multiple"
 	}
 ]

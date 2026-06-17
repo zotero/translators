@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-07 16:44:19"
+	"lastUpdated": "2024-06-18 20:46:45"
 }
 
 /*
@@ -41,13 +41,7 @@ function detectWeb(_doc, _url) {
 function doWeb(doc, url) {
 	scrape(doc, url);
 }
-function getMetaTag(doc, attr, value, contentattr) {
-	const tag = Array.from(doc.getElementsByTagName("meta")).filter(m => m.attributes[attr] && m.attributes[attr].value == value)[0];
-	if (tag && tag.attributes[contentattr]) {
-		return tag.attributes[contentattr].value;
-	}
-	return null;
-}
+
 function scrape(doc, _url) {
 	const translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
@@ -57,12 +51,15 @@ function scrape(doc, _url) {
 	translator.setHandler('itemDone', function (obj, item) {
 		// Add data for fields that are not covered by Embedded Metadata
 		// Author name is stored as firstname lastname
-		const authorName = getMetaTag(doc, "property", "cXenseParse:author", "content");
+		let authorName = attr(doc, "meta[name='lead:author']", "content");
+		if (!authorName) {
+			authorName = text(doc, '.info-opinion .columnnist-name a');
+		}
 		if (authorName) {
 			item.creators = [ZU.cleanAuthor(authorName, "author", false)];
 		}
 		// Date is stored as a timestamp like 2020-09-07T17:37:00+07:00, just extract the YYYY-MM-DD at start
-		const date = getMetaTag(doc, "name", "cXenseParse:recs:publishtime", "content");
+		const date = attr(doc, "meta[name='lead:published_at']", "content");
 		if (date) {
 			item.date = date.substr(0, 10);
 		}
@@ -73,7 +70,9 @@ function scrape(doc, _url) {
 		item.complete();
 	});
 	translator.translate();
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -91,6 +90,7 @@ var testCases = [
 				],
 				"date": "2020-09-07",
 				"abstractNote": "A general debate without a vote in the House of Representatives has been scheduled for Wednesday for MPs to question the government on the current economic and political crises and suggest ways of solving related problems.",
+				"language": "en",
 				"libraryCatalog": "www.bangkokpost.com",
 				"publicationTitle": "Bangkok Post",
 				"url": "https://www.bangkokpost.com/thailand/politics/1981267/house-general-debate-set-for-wednesday",
@@ -121,7 +121,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.bangkokpost.com/tech/1979315/air-force-satellite-napa-1-launched",
+		"url": "https://www.bangkokpost.com/life/tech/1979315/air-force-satellite-napa-1-launched",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -135,9 +135,10 @@ var testCases = [
 				],
 				"date": "2020-09-03",
 				"abstractNote": "The Royal Thai Air Force’s first security satellite, Napa-1, was successfully launched on a European rocket from French Guiana on Thursday morning.",
+				"language": "en",
 				"libraryCatalog": "www.bangkokpost.com",
 				"publicationTitle": "Bangkok Post",
-				"url": "https://www.bangkokpost.com/tech/1979315/air-force-satellite-napa-1-launched",
+				"url": "https://www.bangkokpost.com/life/tech/1979315/air-force-satellite-napa-1-launched",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -181,7 +182,8 @@ var testCases = [
 					}
 				],
 				"date": "2020-09-08",
-				"abstractNote": "Southeast Asia relies heavily on tourism. In 2019, the travel and tourism industry contributed 12.1% of the region's GDP and approximately one in 10 people are employed within and around it, according to the World Travel and Tourism Council (WTTC).",
+				"abstractNote": "Southeast Asia relies heavily on tourism. In 2019, the travel and tourism industry contributed 12.1% of the region",
+				"language": "en",
 				"libraryCatalog": "www.bangkokpost.com",
 				"publicationTitle": "Bangkok Post",
 				"url": "https://www.bangkokpost.com/opinion/opinion/1981587/tech-is-key-to-rebooting-tourism",

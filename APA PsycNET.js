@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-08-22 10:02:55"
+	"lastUpdated": "2025-03-10 19:48:42"
 }
 
 /*
@@ -52,11 +52,11 @@ function detectWeb(doc, url) {
 			|| url.includes('/fulltext/')
 			|| url.includes('/buy/')
 			|| url.includes('/doiLanding?doi=')) {
-		if (doc.getElementById('bookchapterstoc')) {
-			return "book";
-		}
-		else if (attr(doc, 'meta[property="og:type"]', 'content') == 'Chapter') {
+		if (attr(doc, 'meta[name="og:type"]', 'content') == 'Chapter') {
 			return "bookSection";
+		}
+		else if (doc.getElementById('bookchapterstoc')) {
+			return "book";
 		}
 		else {
 			return "journalArticle";
@@ -151,7 +151,7 @@ async function scrape(doc, url) {
 		// 2. Download the requested data (after step 1)
 		let data = await requestText('/ris/download');
 		if (data.includes('Content: application/x-research-info-systems')) {
-			processRIS(data, doc);
+			await processRIS(data, doc);
 		}
 		else {
 			// sometimes (e.g. during testing) the data is not loaded
@@ -165,7 +165,34 @@ async function scrape(doc, url) {
 }
 
 
-function processRIS(text, doc) {
+async function processRIS(text, doc) {
+	let pdfURL = attr(doc, 'a[href*="/fulltext"]', 'href');
+	if (!pdfURL) {
+		Zotero.debug('Fetching institution ID for PDF');
+		try {
+			let uid = doc.location.pathname.match(/\/(?:record|fulltext)\/([^/.]+)/)[1];
+			let { institution } = await requestJSON(
+				'https://psycnet.apa.org/api/request/institution.getInstitutionByIpAddress', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						api: 'institution.getInstitutionByIpAddress',
+						params: { uid }
+					})
+				}
+			);
+			if (institution) {
+				pdfURL = `https://psycnet.apa.org/fulltext/${uid}.pdf?auth_id=${institution.ringGoldId}&returnUrl=${encodeURIComponent(doc.location.href)}`;
+			}
+		}
+		catch (e) {
+			Zotero.debug('Failed to fetch institution ID');
+			Zotero.debug(e);
+		}
+	}
+
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 	translator.setString(text);
@@ -176,10 +203,12 @@ function processRIS(text, doc) {
 		if (item.series) item.series = cleanTitle(item.series);
 		if (item.place) item.place = item.place.replace(/\s+/g, ' ');
 		if (item.ISSN) item.ISSN = ZU.cleanISSN(item.ISSN);
+		if (item.pages && item.pages.includes('No Pagination Specified')) {
+			delete item.pages;
+		}
 		for (var i = 0; i < item.tags.length; i++) {
 			item.tags[i] = item.tags[i].replace(/^\*/, '');
 		}
-		var pdfURL = attr(doc, 'a[href*="/fulltext"]', 'href');
 		if (pdfURL) {
 			item.attachments.push({
 				url: pdfURL,
@@ -187,13 +216,15 @@ function processRIS(text, doc) {
 				mimeType: "application/pdf"
 			});
 		}
-		item.attachments.push({
-			title: "Snapshot",
-			document: doc
-		});
+		else {
+			item.attachments.push({
+				title: "Snapshot",
+				document: doc
+			});
+		}
 		item.complete();
 	});
-	translator.translate();
+	await translator.translate();
 }
 
 
@@ -313,7 +344,7 @@ function cleanTitle(title) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://psycnet.apa.org/record/2004-16644-010",
+		"url": "https://psycnet.apa.org/record/2004-16644-010",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -337,17 +368,18 @@ var testCases = [
 				],
 				"date": "2004",
 				"DOI": "10.1037/0894-4105.18.3.485",
-				"ISSN": "1931-1559(Electronic),0894-4105(Print)",
-				"abstractNote": "A comprehensive, empirically based review of the published studies addressing neuropsychological performance in adults diagnosed with attention-deficit/hyperactivity disorder (ADHD) was conducted to identify patterns of performance deficits. Findings from 33 published studies were submitted to a meta-analytic procedure producing sample-size-weighted mean effect sizes across test measures. Results suggest that neuropsychological deficits are expressed in adults with ADHD across multiple domains of functioning, with notable impairments in attention, behavioral inhibition, and memory, whereas normal performance is noted in simple reaction time. Theoretical and developmental considerations are discussed, including the role of behavioral inhibition and working memory impairment. Future directions for research based on these findings are highlighted, including further exploration of specific impairments and an emphasis on particular tests and testing conditions. (PsycINFO Database Record (c) 2016 APA, all rights reserved)",
+				"ISSN": "1931-1559",
+				"abstractNote": "A comprehensive, empirically based review of the published studies addressing neuropsychological performance in adults diagnosed with attention-deficit/hyperactivity disorder (ADHD) was conducted to identify patterns of performance deficits. Findings from 33 published studies were submitted to a meta-analytic procedure producing sample-size-weighted mean effect sizes across test measures. Results suggest that neuropsychological deficits are expressed in adults with ADHD across multiple domains of functioning, with notable impairments in attention, behavioral inhibition, and memory, whereas normal performance is noted in simple reaction time. Theoretical and developmental considerations are discussed, including the role of behavioral inhibition and working memory impairment. Future directions for research based on these findings are highlighted, including further exploration of specific impairments and an emphasis on particular tests and testing conditions. (PsycInfo Database Record (c) 2022 APA, all rights reserved)",
 				"issue": "3",
-				"libraryCatalog": "APA PsycNET",
+				"libraryCatalog": "APA PsycNet",
 				"pages": "485-503",
 				"publicationTitle": "Neuropsychology",
 				"shortTitle": "Neuropsychology of Adults With Attention-Deficit/Hyperactivity Disorder",
 				"volume": "18",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -364,7 +396,7 @@ var testCases = [
 						"tag": "Experimentation"
 					},
 					{
-						"tag": "Hyperkinesis"
+						"tag": "Hyperactivity"
 					},
 					{
 						"tag": "Inhibition (Personality)"
@@ -386,7 +418,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://psycnet.apa.org/record/1956-05944-001",
+		"url": "https://psycnet.apa.org/record/1956-05944-001",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -405,16 +437,17 @@ var testCases = [
 				],
 				"date": "1955",
 				"DOI": "10.1037/h0043965",
-				"ISSN": "0022-1015(Print)",
+				"ISSN": "0022-1015",
 				"abstractNote": "Two factor analytic studies of meaningful judgments based upon the same sample of 50 bipolar descriptive scales are reported. Both analyses reveal three major connotative factors: evaluation, potency, and activity. These factors appear to be independent dimensions of the semantic space within which the meanings of concepts may be specified. (PsycINFO Database Record (c) 2016 APA, all rights reserved)",
 				"issue": "5",
-				"libraryCatalog": "APA PsycNET",
+				"libraryCatalog": "APA PsycNet",
 				"pages": "325-338",
 				"publicationTitle": "Journal of Experimental Psychology",
 				"volume": "50",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -441,7 +474,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://psycnet.apa.org/record/1992-98221-010",
+		"url": "https://psycnet.apa.org/record/1992-98221-010",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -460,9 +494,9 @@ var testCases = [
 				],
 				"date": "1977",
 				"ISBN": "9780716703686 9780716703679",
-				"abstractNote": "tonic immobility [animal hypnosis] might be a useful laboratory analog or research model for catatonia / we have been collaborating on an interdisciplinary program of research in an effort to pinpoint the behavioral antecedents and biological bases for tonic immobility / attempt to briefly summarize our findings, and . . . discuss the implications of these data in terms of the model  characteristics of tonic immobility / hypnosis / catatonia, catalepsy, and cataplexy / tonic immobility as a model for catatonia / fear potentiation / fear alleviation / fear or arousal / learned helplessness / neurological correlates / pharmacology and neurochemistry / genetic underpinnings / evolutionary considerations / implications for human psychopathology (PsycINFO Database Record (c) 2016 APA, all rights reserved)",
+				"abstractNote": "tonic immobility [animal hypnosis] might be a useful laboratory analog or research model for catatonia / we have been collaborating on an interdisciplinary program of research in an effort to pinpoint the behavioral antecedents and biological bases for tonic immobility / attempt to briefly summarize our findings, and . . . discuss the implications of these data in terms of the model  characteristics of tonic immobility / hypnosis / catatonia, catalepsy, and cataplexy / tonic immobility as a model for catatonia / fear potentiation / fear alleviation / fear or arousal / learned helplessness / neurological correlates / pharmacology and neurochemistry / genetic underpinnings / evolutionary considerations / implications for human psychopathology (PsycInfo Database Record (c) 2022 APA, all rights reserved)",
 				"bookTitle": "Psychopathology: Experimental models",
-				"libraryCatalog": "APA PsycNET",
+				"libraryCatalog": "APA PsycNet",
 				"pages": "334-357",
 				"place": "New York, NY, US",
 				"publisher": "W H Freeman/Times Books/ Henry Holt & Co",
@@ -470,7 +504,8 @@ var testCases = [
 				"shortTitle": "Catatonia",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -506,7 +541,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://psycnet.apa.org/record/2004-16329-000?doi=1",
+		"url": "https://psycnet.apa.org/record/2004-16329-000?doi=1",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
@@ -519,9 +555,9 @@ var testCases = [
 					}
 				],
 				"date": "1948",
-				"abstractNote": "The author's intent is to write about abnormal people in a way that will be valuable and interesting to students new to the subject. A first course in abnormal psychology is not intended to train specialists. Its goal is more general: it should provide the student with the opportunity to whet his interest, expand his horizons, register a certain body of new facts, and relate this to the rest of his knowledge about mankind. I have tried to present the subject in such a way as to emphasize its usefulness to all students of human nature. I have tried the experiment of writing two introductory chapters, one historical and the other clinical. This reflects my desire to set the subject-matter in a broad perspective and at the same time to anchor it in concrete fact. Next comes a block of six chapters designed to set forth the topics of maladjustment and neurosis. The two chapters on psychotherapy complete the more purely psychological or developmental part of the work. In the final chapter the problem of disordered personalities is allowed to expand to its full social dimensions. Treatment, care, and prevention call for social effort and social organization. I have sought to show some of the lines, both professional and nonprofessional, along which this effort can be expended. (PsycINFO Database Record (c) 2016 APA, all rights reserved)",
+				"abstractNote": "The author's intent is to write about abnormal people in a way that will be valuable and interesting to students new to the subject. A first course in abnormal psychology is not intended to train specialists. Its goal is more general: it should provide the student with the opportunity to whet his interest, expand his horizons, register a certain body of new facts, and relate this to the rest of his knowledge about mankind. I have tried to present the subject in such a way as to emphasize its usefulness to all students of human nature. I have tried the experiment of writing two introductory chapters, one historical and the other clinical. This reflects my desire to set the subject-matter in a broad perspective and at the same time to anchor it in concrete fact. Next comes a block of six chapters designed to set forth the topics of maladjustment and neurosis. The two chapters on psychotherapy complete the more purely psychological or developmental part of the work. In the final chapter the problem of disordered personalities is allowed to expand to its full social dimensions. Treatment, care, and prevention call for social effort and social organization. I have sought to show some of the lines, both professional and nonprofessional, along which this effort can be expended. (PsycInfo Database Record (c) 2022 APA, all rights reserved)",
 				"extra": "DOI: 10.1037/10023-000",
-				"libraryCatalog": "APA PsycNET",
+				"libraryCatalog": "APA PsycNet",
 				"numPages": "x, 617",
 				"place": "New York, NY, US",
 				"publisher": "Ronald Press Company",
@@ -529,7 +565,8 @@ var testCases = [
 				"shortTitle": "The abnormal personality",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -634,6 +671,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://psycnet.apa.org/buy/2004-16329-002",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -674,7 +712,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://psycnet.apa.org/buy/2010-19350-001",
+		"url": "https://psycnet.apa.org/record/2010-19350-001",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -708,16 +746,17 @@ var testCases = [
 				],
 				"date": "2010",
 				"DOI": "10.1037/a0020280",
-				"ISSN": "1939-2222(Electronic),0096-3445(Print)",
+				"ISSN": "1939-2222",
 				"abstractNote": "Social scientists often rely on economic experiments such as ultimatum and dictator games to understand human cooperation. Systematic deviations from economic predictions have inspired broader conceptions of self-interest that incorporate concerns for fairness. Yet no framework can describe all of the major results. We take a different approach by asking players directly about their self-interest—defined as what they want to do (pleasure-maximizing options). We also ask players directly about their sense of fairness—defined as what they think they ought to do (fairness-maximizing options). Player-defined measures of self-interest and fairness predict (a) the majority of ultimatum-game and dictator-game offers, (b) ultimatum-game rejections, (c) exiting behavior (i.e., escaping social expectations to cooperate) in the dictator game, and (d) who cooperates more after a positive mood induction. Adopting the players' perspectives of self-interest and fairness permits better predictions about who cooperates, why they cooperate, and when they punish noncooperators. (PsycINFO Database Record (c) 2016 APA, all rights reserved)",
 				"issue": "4",
-				"libraryCatalog": "APA PsycNET",
+				"libraryCatalog": "APA PsycNet",
 				"pages": "743-755",
 				"publicationTitle": "Journal of Experimental Psychology: General",
 				"volume": "139",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -747,7 +786,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://psycnet.apa.org/record/2010-09295-002",
+		"url": "https://psycnet.apa.org/record/2010-09295-002",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -761,17 +801,18 @@ var testCases = [
 				],
 				"date": "2011",
 				"ISBN": "9781433808616 9781433808623",
-				"abstractNote": "In this chapter, I seek to redress vocational psychology’s inattention to the self and address the ambiguity of the meaning of self. To begin, I offer a chronological survey of vocational psychology’s three main views of human singularity. During succeeding historical eras, different aspects of human singularity interested vocational psychologists, so they developed a new set of terms and concepts to deal with shifts in the meaning of individuality. Over time, vocational psychology developed what Kuhn (2000) referred to as language communities, each with its own paradigm for understanding the self and vocational behavior. Because the self is fundamentally ambiguous, adherents to each paradigm describe it with an agreed on language and metaphors. Thus, each paradigm has a textual tradition, or way of talking about the self. As readers shall see, when they talk about individuals, differentialists use the language of personality, developmentalists use the language of personhood, and constructionists use the language of identity. (PsycINFO Database Record (c) 2017 APA, all rights reserved)",
+				"abstractNote": "In this chapter, I seek to redress vocational psychology’s inattention to the self and address the ambiguity of the meaning of self. To begin, I offer a chronological survey of vocational psychology’s three main views of human singularity. During succeeding historical eras, different aspects of human singularity interested vocational psychologists, so they developed a new set of terms and concepts to deal with shifts in the meaning of individuality. Over time, vocational psychology developed what Kuhn (2000) referred to as language communities, each with its own paradigm for understanding the self and vocational behavior. Because the self is fundamentally ambiguous, adherents to each paradigm describe it with an agreed on language and metaphors. Thus, each paradigm has a textual tradition, or way of talking about the self. As readers shall see, when they talk about individuals, differentialists use the language of personality, developmentalists use the language of personhood, and constructionists use the language of identity. (PsycInfo Database Record (c) 2024 APA, all rights reserved)",
 				"bookTitle": "Developing self in work and career: Concepts, cases, and contexts",
 				"extra": "DOI: 10.1037/12348-002",
-				"libraryCatalog": "APA PsycNET",
+				"libraryCatalog": "APA PsycNet",
 				"pages": "17-33",
 				"place": "Washington, DC, US",
 				"publisher": "American Psychological Association",
 				"shortTitle": "The self in vocational psychology",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
@@ -792,8 +833,83 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://psycnet.apa.org/search/results?id=e6cd5430-40d2-11ee-9aa2-b3e92ca9fef3",
-		"items": "multiple"
+		"url": "https://psycnet.apa.org/record/2025-80032-001?doi=1",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Linking adolescent bullying perpetration with adult fertility: Two preliminary studies",
+				"creators": [
+					{
+						"lastName": "Volk",
+						"firstName": "Anthony A.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Brazil",
+						"firstName": "Kristopher J.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Dane",
+						"firstName": "Andrew V.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Vaillancourt",
+						"firstName": "Tracy",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Al-Jbouri",
+						"firstName": "Elizabeth",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Farrell",
+						"firstName": "Ann H.",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025",
+				"DOI": "10.1037/ebs0000374",
+				"ISSN": "2330-2933",
+				"abstractNote": "Researchers have suggested that bullying perpetration is, at least in part, an evolved adaptation. A key prediction of this evolutionary perspective is that bullying facilitates the transmission of genes from one generation to the next. To date, only one study (using a limited measure of bullying) has examined the link between adolescent bullying and adult fertility, showing a positive association between adolescent bullying and number of children in adulthood. We sought to replicate and expand this unique finding using a more robust measure of adolescent bullying and young adults’ parental status in a prospective longitudinal study of Canadians (Study 1), along with an MTurk study of retrospective adolescent bullying and current adult fertility (Study 2). In support of an evolutionary theory of bullying, we found that higher bullying was associated with having children in young adulthood (ages 23 and/or 24 years, Study 1) and that retrospective reports of adolescent bullying were associated with having more children in adulthood (Study 2). Overall, our studies offer additional support for the idea that adolescent bullying is, at least in part, an evolutionary adaptation that may help individuals to later pass on their genes to future generations through enhanced reproductive and perhaps parental effort. Although needing replication, our data highlight the importance of considering reproductive outcomes when designing future bullying research or interventions. (PsycInfo Database Record (c) 2025 APA, all rights reserved)",
+				"libraryCatalog": "APA PsycNet",
+				"publicationTitle": "Evolutionary Behavioral Sciences",
+				"shortTitle": "Linking adolescent bullying perpetration with adult fertility",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Adaptation"
+					},
+					{
+						"tag": "Adolescent Characteristics"
+					},
+					{
+						"tag": "Bullying"
+					},
+					{
+						"tag": "Fertility"
+					},
+					{
+						"tag": "Genes"
+					},
+					{
+						"tag": "Parenthood Status"
+					},
+					{
+						"tag": "Theory of Evolution"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

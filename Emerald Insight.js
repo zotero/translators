@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-25 15:35:07"
+	"lastUpdated": "2024-08-29 15:32:04"
 }
 
 /*
@@ -35,13 +35,11 @@
 	***** END LICENSE BLOCK *****
 */
 
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+let doiRe = /\/(10\.[^#?/]+\/[^#?/]+)\//;
 
 function detectWeb(doc, url) {
 	// ensure that we only detect where scrape will (most likely) work
-	if (url.includes('/content/doi/') && (url.search(/\/(10\.[^#?/]+\/[^#?/]+)\//) != -1 || url.includes("/full"))) {
+	if (url.includes('/content/doi/') && doiRe.test(url)) {
 		if (attr(doc, 'meta[name="dc.Type"]', 'content') == "book-part") {
 			return "bookSection";
 		}
@@ -78,36 +76,47 @@ function getSearchResults(doc, url, checkOnly) {
 }
 
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, url, false), function (items) {
-			if (!items) {
-				return;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
+		let items = await Zotero.selectItems(getSearchResults(doc, url, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			// requestDocument() doesn't yet set doc.cookie, so pass the parent doc's cookie
+			await scrape(await requestDocument(url), url, doc.cookie);
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
-
-function scrape(doc, url) {
-	var DOI = url.match(/\/(10\.[^#?/]+\/[^#?/]+)\//);
-	var risURL;
-	if (DOI) {
-		risURL = "/insight/content/doi/" + DOI[1] + "/full/ris";
+async function scrape(doc, url, cookieFallback) {
+	let response;
+	let DOI = url.match(doiRe)[1];
+	let cookie = doc.cookie || cookieFallback;
+	let xsrfTokenMatch = cookie && cookie.match(/XSRF-TOKEN=([^;]+)/);
+	if (xsrfTokenMatch) {
+		let xsrfToken = xsrfTokenMatch[1];
+		Z.debug('Using new API. XSRF token:');
+		Z.debug(xsrfToken);
+		
+		let risURL = "/insight/api/citations/format/ris?_xsrf=" + xsrfToken; // Already URL-encoded
+		let body = JSON.stringify({ dois: [DOI] });
+		response = await requestText(risURL, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-XSRF-TOKEN': decodeURIComponent(xsrfToken)
+			},
+			body
+		});
 	}
 	else {
-		Z.debug("can't find DOI, trying alternative approach for risURL");
-		risURL = url.replace(/\/full.*/, "/full/ris");
+		Z.debug('Using old API');
+		
+		let risURL = "/insight/content/doi/" + DOI + "/full/ris";
+		response = await requestText(risURL);
 	}
-	// Z.debug(risURL);
 	
 	var pdfURL;
 	// make this works on PDF pages
@@ -118,66 +127,63 @@ function scrape(doc, url) {
 		pdfURL = attr(doc, 'a.intent_pdf_link', 'href');
 	}
 
-	// Z.debug("pdfURL: " + pdfURL);
-	ZU.doGet(risURL, function (response) {
-		// they number authors in their RIS...
-		response = response.replace(/A\d+\s+-/g, "AU  -");
+	// they number authors in their RIS...
+	response = response.replace(/^A\d+\s+-/gm, "AU  -");
 
-		var abstract = doc.getElementById('abstract');
-		var translator = Zotero.loadTranslator("import");
-		var tags = doc.querySelectorAll('li .intent_text');
-		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		translator.setString(response);
-		translator.setHandler("itemDone", function (obj, item) {
-			if (pdfURL) {
-				item.attachments.push({
-					url: pdfURL,
-					title: "Full Text PDF",
-					mimeType: "application/pdf"
+	var abstract = doc.getElementById('abstract');
+	var translator = Zotero.loadTranslator("import");
+	var tags = doc.querySelectorAll('li .intent_text');
+	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+	translator.setString(response);
+	translator.setHandler("itemDone", function (obj, item) {
+		if (pdfURL) {
+			item.attachments.push({
+				url: pdfURL,
+				title: "Full Text PDF",
+				mimeType: "application/pdf"
+			});
+		}
+		else {
+			item.attachments.push({
+				title: "Snapshot",
+				document: doc
+			});
+		}
+		
+		for (let tag of tags) {
+			item.tags.push(tag.textContent);
+		}
+		
+		var authorsNodes = doc.querySelectorAll("div > a.contrib-search");
+		if (authorsNodes.length > 0) {
+			// prefer the authors information from the website as it contains the last and first name separately
+			// where the RIS data does not separate them correctly (it uses a space instead of comma)
+			// but the editors are only part of the RIS data
+			var authors = [];
+			for (let author of authorsNodes) {
+				authors.push({
+					firstName: text(author, "span.given-names"),
+					lastName: text(author, "span.surname"),
+					creatorType: "author"
 				});
 			}
-			else {
-				item.attachments.push({
-					title: "Snapshot",
-					document: doc
-				});
-			}
-			
-			for (let tag of tags) {
-				item.tags.push(tag.textContent);
-			}
-			
-			var authorsNodes = doc.querySelectorAll("div > a.contrib-search");
-			if (authorsNodes.length > 0) {
-				// prefer the authors information from the website as it contains the last and first name separately
-				// where the RIS data does not separate them correctly (it uses a space instead of comma)
-				// but the editors are only part of the RIS data
-				var authors = [];
-				for (let author of authorsNodes) {
-					authors.push({
-						firstName: text(author, "span.given-names"),
-						lastName: text(author, "span.surname"),
-						creatorType: "author"
-					});
-				}
-				var otherContributors = item.creators.filter(creator => creator.creatorType !== "author");
-				item.creators = otherContributors.length !== 0 ? authors.concat(separateNames(otherContributors)) : authors;
-			}
-			else {
-				Z.debug("No tags available for authors");
-				item.creators = separateNames(item.creators);
-			}
+			var otherContributors = item.creators.filter(creator => creator.creatorType !== "author");
+			item.creators = otherContributors.length !== 0 ? authors.concat(separateNames(otherContributors)) : authors;
+		}
+		else {
+			Z.debug("No tags available for authors");
+			item.creators = separateNames(item.creators);
+		}
 
-			if (item.date) {
-				item.date = ZU.strToISO(item.date);
-			}
-			if (abstract) {
-				item.abstractNote = ZU.trimInternal(abstract.textContent).replace(/^Abstract\s*/, "");
-			}
-			item.complete();
-		});
-		translator.translate();
+		if (item.date) {
+			item.date = ZU.strToISO(item.date);
+		}
+		if (abstract) {
+			item.abstractNote = ZU.trimInternal(abstract.textContent).replace(/^Abstract\s*/, "");
+		}
+		item.complete();
 	});
+	await translator.translate();
 }
 
 function separateNames(creators) {
@@ -283,18 +289,18 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Menk",
-						"creatorType": "author",
-						"firstName": "K. Bryan"
+						"firstName": "K. Bryan",
+						"creatorType": "author"
 					},
 					{
 						"lastName": "Malone",
-						"creatorType": "author",
-						"firstName": "Stephanie"
+						"firstName": "Stephanie",
+						"creatorType": "author"
 					}
 				],
 				"date": "2015-01-01",
 				"ISBN": "9781784415877 9781784415884",
-				"abstractNote": "Originality/value This technique creates opportunities for students to have unique assignments encouraging student to student teaching and can be applied to assignments in any accounting course (undergraduate and graduate). This testing method has been used in Intermediate I and II, Individual Taxation, and Corporate Taxation.",
+				"abstractNote": "Purpose The subject area of the assignment is accounting education and testing techniques. Methodology/approach This paper details an effective method to create individualized assignments and testing materials. Using a spreadsheet (Microsoft Excel), the creation of the unique assignments and answer keys can be semi-automated to reduce the grading difficulties of unique assignments. Findings Because students are using a unique data set for each assignment, the students are able to more effectively engage in student to student teaching. This process of unique assignments allows students to collaborate without fear that a single student would provide the answers. As tax laws (e.g., credit and deduction phase-outs, tax rates, and dependents) change depending on the level of income and other factors, an individualized test is ideal in a taxation course. Practical implications The unique assignments allow instructors to create markedly different scenarios for each student. Using this testing method requires that the student thoroughly understands the conceptual processes as the questions cannot be predicted. A list of supplementary materials is included, covering sample questions, conversion to codes, and sample assignment questions. Originality/value This technique creates opportunities for students to have unique assignments encouraging student to student teaching and can be applied to assignments in any accounting course (undergraduate and graduate). This testing method has been used in Intermediate I and II, Individual Taxation, and Corporate Taxation.",
 				"bookTitle": "Advances in Accounting Education: Teaching and Curriculum Innovations",
 				"extra": "DOI: 10.1108/S1085-462220150000016007",
 				"libraryCatalog": "Emerald Insight",
@@ -306,7 +312,8 @@ var testCases = [
 				"volume": "16",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -339,24 +346,24 @@ var testCases = [
 				"title": "The influence of context upon consumer sensory evaluation of chicken‐meat quality",
 				"creators": [
 					{
+						"firstName": "Orla",
 						"lastName": "Kennedy",
-						"creatorType": "author",
-						"firstName": "Orla"
+						"creatorType": "author"
 					},
 					{
+						"firstName": "Barbara",
 						"lastName": "Stewart‐Knox",
-						"creatorType": "author",
-						"firstName": "Barbara"
+						"creatorType": "author"
 					},
 					{
+						"firstName": "Peter",
 						"lastName": "Mitchell",
-						"creatorType": "author",
-						"firstName": "Peter"
+						"creatorType": "author"
 					},
 					{
+						"firstName": "David",
 						"lastName": "Thurnham",
-						"creatorType": "author",
-						"firstName": "David"
+						"creatorType": "author"
 					}
 				],
 				"date": "2004-01-01",
@@ -371,8 +378,8 @@ var testCases = [
 				"volume": "106",
 				"attachments": [
 					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -401,33 +408,33 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Kutz-Flamenbaum",
-						"creatorType": "author",
-						"firstName": "Rachel V."
+						"firstName": "Rachel V.",
+						"creatorType": "author"
 					},
 					{
 						"lastName": "Staggenborg",
-						"creatorType": "author",
-						"firstName": "Suzanne"
+						"firstName": "Suzanne",
+						"creatorType": "author"
 					},
 					{
 						"lastName": "Duncan",
-						"creatorType": "author",
-						"firstName": "Brittany J."
+						"firstName": "Brittany J.",
+						"creatorType": "author"
 					},
 					{
 						"lastName": "Earl",
-						"creatorType": "editor",
-						"firstName": "Jennifer"
+						"firstName": "Jennifer",
+						"creatorType": "editor"
 					},
 					{
-						"lastName": "A. Rohlinger",
-						"creatorType": "editor",
-						"firstName": "Deana"
+						"lastName": "Rohlinger",
+						"firstName": "Deana A.",
+						"creatorType": "editor"
 					}
 				],
 				"date": "2012-01-01",
 				"ISBN": "9781780528816 9781780528809",
-				"abstractNote": "Research implications – We argue that events such as the G-20 meetings provide protesters with opportunities to gain temporary “standing” with the media. During such times, activists can use tactics and frames to alter the balance of power in relations with the media and the state and to attract positive media coverage, particularly when activists develop strategies that are not exclusively focused on the media. We argue that a combination of political opportunities and activist media strategies enabled protest organizers to position themselves as central figures in the G-20 news story and leverage that position to build media interest, develop relationships with reporters, and influence newspaper coverage.",
+				"abstractNote": "Purpose – Movements typically have great difficulty using the mass media to spread their messages to the public, given the media's greater power to impose their frames on movement activities and goals. In this paper, we look at the impact of the political context and media strategies of protesters against the 2009 G-20 meetings in Pittsburgh on media coverage of the protests.Methodology – We employ field observations, interviews with activists and reporters, and a content analysis of print coverage of the demonstrations by the two local daily newspapers, the Pittsburgh Post-Gazette and the Pittsburgh Tribune-Review.Findings – We find that protesters were relatively successful in influencing how they were portrayed in local newspaper stories and in developing a sympathetic image of their groups’ members. Specifically, we find that activist frames were present in newspaper coverage and activists were quoted as frequently as city officials.Research implications – We argue that events such as the G-20 meetings provide protesters with opportunities to gain temporary “standing” with the media. During such times, activists can use tactics and frames to alter the balance of power in relations with the media and the state and to attract positive media coverage, particularly when activists develop strategies that are not exclusively focused on the media. We argue that a combination of political opportunities and activist media strategies enabled protest organizers to position themselves as central figures in the G-20 news story and leverage that position to build media interest, develop relationships with reporters, and influence newspaper coverage.",
 				"bookTitle": "Media, Movements, and Political Change",
 				"extra": "DOI: 10.1108/S0163-786X(2012)0000033008",
 				"libraryCatalog": "Emerald Insight",
@@ -438,7 +445,8 @@ var testCases = [
 				"volume": "33",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -475,29 +483,29 @@ var testCases = [
 				"title": "Tourism research in Spain: The contribution of geography (1960–1995)",
 				"creators": [
 					{
+						"firstName": "Salvador",
 						"lastName": "Antón i Clavé",
-						"creatorType": "author",
-						"firstName": "Salvador"
+						"creatorType": "author"
 					},
 					{
+						"firstName": "Francisco",
 						"lastName": "López Palomeque",
-						"creatorType": "author",
-						"firstName": "Francisco"
+						"creatorType": "author"
 					},
 					{
+						"firstName": "Manuel J.",
 						"lastName": "Marchena Gómez",
-						"creatorType": "author",
-						"firstName": "Manuel J."
+						"creatorType": "author"
 					},
 					{
+						"firstName": "Sevilla",
 						"lastName": "Vera Rebollo",
-						"creatorType": "author",
-						"firstName": "Sevilla"
+						"creatorType": "author"
 					},
 					{
+						"firstName": "J.",
 						"lastName": "Fernando Vera Rebollo",
-						"creatorType": "author",
-						"firstName": "J."
+						"creatorType": "author"
 					}
 				],
 				"date": "1996-01-01",
@@ -513,8 +521,8 @@ var testCases = [
 				"volume": "51",
 				"attachments": [
 					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -541,6 +549,72 @@ var testCases = [
 					},
 					{
 						"tag": "Urban and Coastal Geography"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.emerald.com/insight/content/doi/10.1108/JACPR-02-2022-0685/full/html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "A multi-level, time-series network analysis of the impact of youth peacebuilding on quality peace",
+				"creators": [
+					{
+						"firstName": "Laura K.",
+						"lastName": "Taylor",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Celia",
+						"lastName": "Bähr",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023-01-01",
+				"DOI": "10.1108/JACPR-02-2022-0685",
+				"ISSN": "1759-6599",
+				"abstractNote": "Purpose Over 60% of armed conflicts re-occur; the seed of future conflict is sown even as a peace agreement is signed. The cyclical nature of war calls for a focus on youth who can disrupt this pattern over time. Addressing this concern, the developmental peace-building model calls for a dynamic, multi-level and longitudinal approach. Using an innovative statistical approach, this study aims to investigate the associations among four youth peace-building dimensions and quality peace. Design/methodology/approach Multi-level time-series network analysis of a data set containing 193 countries and spanning the years between 2011 and 2020 was performed. This statistical approach allows for complex modelling that can reveal new patterns of how different youth peace-building dimensions (i.e. education, engagement, information, inclusion), identified through rapid evidence assessment, promote quality peace over time. Such a methodology not only assesses between-country differences but also within-country change. Findings While the within-country contemporaneous network shows positive links for education, the temporal network shows significant lagged effects for all four dimensions on quality peace. The between-country network indicates significant direct effects of education and information, on average, and indirect effects of inclusion and engagement, on quality peace. Originality/value This approach demonstrates a novel application of multi-level time-series network analysis to explore the dynamic development of quality peace, capturing both stability and change. The analysis illustrates how youth peace-building dimensions impact quality peace in the macro-system globally. This investigation of quality peace thus illustrates that the science of peace does not necessitate violent conflict.",
+				"issue": "2",
+				"libraryCatalog": "Emerald Insight",
+				"pages": "109-123",
+				"publicationTitle": "Journal of Aggression, Conflict and Peace Research",
+				"url": "https://doi.org/10.1108/JACPR-02-2022-0685",
+				"volume": "15",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Developmental peace-building model"
+					},
+					{
+						"tag": "Education"
+					},
+					{
+						"tag": "Engagement"
+					},
+					{
+						"tag": "Inclusion"
+					},
+					{
+						"tag": "Information"
+					},
+					{
+						"tag": "Quality peace"
+					},
+					{
+						"tag": "Time-series network analysis"
+					},
+					{
+						"tag": "Youth peacebuilding"
 					}
 				],
 				"notes": [],

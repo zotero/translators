@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-09-27 07:21:09"
+	"lastUpdated": "2025-04-03 18:50:17"
 }
 
 /*
@@ -208,6 +208,8 @@ function finalizeItem(item, doi, supplements) {
 	if (item.date) {
 		item.date = ZU.strToISO(item.date);
 	}
+	// Abstract can contain XML markup (Journal Publishing Tag Set?)
+	item.abstractNote = ZU.cleanTags(item.abstractNote.replace(/<p>/g, '<br>'));
 	item.attachments = []; // delete EM snapshot if any; redundant with PDF
 	if (doi) {
 		item.attachments.push({
@@ -221,7 +223,7 @@ function finalizeItem(item, doi, supplements) {
 }
 
 function getDOI(url) {
-	let m = url.match(/https:\/\/[^/]+\.frontiersin\.org\/articles?\/(10\.\d{4,}\/[^/]+)/);
+	let m = url.match(/https:\/\/[^/]+\.frontiersin\.org\/(?:journals\/[^/]+\/)?articles?\/(10\.\d{4,}\/[^/]+)/);
 	return m && m[1];
 }
 
@@ -280,7 +282,7 @@ async function getSupplements(articleID, asLink) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.frontiersin.org/articles/10.3389/fpsyg.2011.00326/full",
+		"url": "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2011.00326/full",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -300,12 +302,12 @@ var testCases = [
 				"date": "2011-11-15",
 				"DOI": "10.3389/fpsyg.2011.00326",
 				"ISSN": "1664-1078",
-				"abstractNote": "Research progress in machine vision has been very significant in recent years. Robust face detection and identification algorithms are already readily available to consumers, and modern computer vision algorithms for generic object recognition are now coping with the richness and complexity of natural visual scenes. Unlike early vision models of object recognition that emphasized the role of figure-ground segmentation and spatial information between parts, recent successful approaches are based on the computation of loose collections of image features without prior segmentation or any explicit encoding of spatial relations. While these models remain simplistic models of visual processing, they suggest that, in principle, bottom-up activation of a loose collection of image features could support the rapid recognition of natural object categories and provide an initial coarse visual representation before more complex visual routines and attentional mechanisms take place. Focusing on biologically-plausible computational models of (bottom-up) pre-attentive visual recognition, we review some of the key visual features that have been described in the literature. We discuss the consistency of these feature-based representations with classical theories from visual psychology and test their ability to account for human performance on a rapid object categorization task.",
+				"abstractNote": "Research progress in machine vision has been very significant in recent years. Robust face detection and identification algorithms are already readily available to consumers, and modern computer vision algorithms for generic object recognition are now coping with the richness and complexity of natural visual scenes. Unlike early vision models of object recognition that emphasized the role of figure-ground segmentation and spatial information between parts, recent successful approaches are based on the computation of loose collections of image features without prior segmentation or any explicit encoding of spatial relations. While these models remain simplistic models of visual processing, they suggest that, in principle, bottom-up activation of a loose collection of image features could support the rapid recognition of natural object categories and provide an initial coarse visual representation before more complex visual routines and attentional mechanisms take place. Focusing on biologically plausible computational models of (bottom-up) pre-attentive visual recognition, we review some of the key visual features that have been described in the literature. We discuss the consistency of these feature-based representations with classical theories from visual psychology and test their ability to account for human performance on a rapid object categorization task.",
 				"journalAbbreviation": "Front. Psychol.",
 				"language": "English",
 				"libraryCatalog": "Frontiers",
 				"publicationTitle": "Frontiers in Psychology",
-				"url": "https://www.frontiersin.org/articles/10.3389/fpsyg.2011.00326",
+				"url": "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2011.00326/full",
 				"volume": "2",
 				"attachments": [
 					{
@@ -337,7 +339,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.frontiersin.org/articles/10.3389/fmicb.2014.00402/full",
+		"url": "https://www.frontiersin.org/journals/microbiology/articles/10.3389/fmicb.2014.00402/full",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -452,12 +454,12 @@ var testCases = [
 				"date": "2014-08-13",
 				"DOI": "10.3389/fmicb.2014.00402",
 				"ISSN": "1664-302X",
-				"abstractNote": "Efficient microbial conversion of lignocellulosic hydrolysates to biofuels is a key barrier to the economically viable deployment of lignocellulosic biofuels. A chief contributor to this barrier is the impact on microbial processes and energy metabolism of lignocellulose-derived inhibitors, including phenolic carboxylates, phenolic amides (for ammonia-pretreated biomass), phenolic aldehydes, and furfurals. To understand the bacterial pathways induced by inhibitors present in ammonia-pretreated biomass hydrolysates, which are less well studied than acid-pretreated biomass hydrolysates, we developed and exploited synthetic mimics of ammonia-pretreated corn stover hydrolysate (ACSH). To determine regulatory responses to the inhibitors normally present in ACSH, we measured transcript and protein levels in an Escherichia coli ethanologen using RNA-seq and quantitative proteomics during fermentation to ethanol of synthetic hydrolysates containing or lacking the inhibitors. Our study identified four major regulators mediating these responses, the MarA/SoxS/Rob network, AaeR, FrmR, and YqhC. Induction of these regulons was correlated with a reduced rate of ethanol production, buildup of pyruvate, depletion of ATP and NAD(P)H, and an inhibition of xylose conversion. The aromatic aldehyde inhibitor 5-hydroxymethylfurfural appeared to be reduced to its alcohol form by the ethanologen during fermentation whereas phenolic acid and amide inhibitors were not metabolized. Together, our findings establish that the major regulatory responses to lignocellulose-derived inhibitors are mediated by transcriptional rather than translational regulators, suggest that energy consumed for inhibitor efflux and detoxification may limit biofuel production, and identify a network of regulators for future synthetic biology efforts.",
+				"abstractNote": "Efficient microbial conversion of lignocellulosic hydrolysates to biofuels is a key barrier to the economically viable deployment of lignocellulosic biofuels. A chief contributor to this barrier is the impact on microbial processes and energy metabolism of lignocellulose-derived inhibitors, including phenolic carboxylates, phenolic amides (for ammonia-pretreated biomass), phenolic aldehydes, and furfurals. To understand the bacterial pathways induced by inhibitors present in ammonia-pretreated biomass hydrolysates, which are less well studied than acid-pretreated biomass hydrolysates, we developed and exploited synthetic mimics of ammonia-pretreated corn stover hydrolysate (ACSH). To determine regulatory responses to the inhibitors normally present in ACSH, we measured transcript and protein levels in an Escherichia coli ethanologen using RNA-seq and quantitative proteomics during fermentation to ethanol of synthetic hydrolysates containing or lacking the inhibitors. Our study identified four major regulators mediating these responses, the MarA/SoxS/Rob network, AaeR, FrmR, and YqhC. Induction of these regulons was correlated with a reduced rate of ethanol production, buildup of pyruvate, depletion of ATP and NAD(P)H, and an inhibition of xylose conversion. The aromatic aldehyde inhibitor 5-hydroxymethylfurfural appeared to be reduced to its alcohol form by the ethanologen during fermentation, whereas phenolic acid and amide inhibitors were not metabolized. Together, our findings establish that the major regulatory responses to lignocellulose-derived inhibitors are mediated by transcriptional rather than translational regulators, suggest that energy consumed for inhibitor efflux and detoxification may limit biofuel production, and identify a network of regulators for future synthetic biology efforts.",
 				"journalAbbreviation": "Front. Microbiol.",
 				"language": "English",
 				"libraryCatalog": "Frontiers",
 				"publicationTitle": "Frontiers in Microbiology",
-				"url": "https://www.frontiersin.org/articles/10.3389/fmicb.2014.00402",
+				"url": "https://www.frontiersin.org/journals/microbiology/articles/10.3389/fmicb.2014.00402/full",
 				"volume": "5",
 				"attachments": [
 					{
@@ -498,7 +500,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.frontiersin.org/articles/10.3389/fdata.2019.00017/full",
+		"url": "https://www.frontiersin.org/journals/big-data/articles/10.3389/fdata.2019.00017/full",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -538,13 +540,13 @@ var testCases = [
 				"date": "2019-06-25",
 				"DOI": "10.3389/fdata.2019.00017",
 				"ISSN": "2624-909X",
-				"abstractNote": "Social Media platforms in Cyberspace provide communication channels for individuals, businesses, as well as state and non-state actors (i.e., individuals and groups) to conduct messaging campaigns. What are the spheres of influence that arose around the keyword \\textit{\\#Munich} on Twitter following an active shooter event at a Munich shopping mall in July $2016$? To answer that question in this work, we capture tweets utilizing \\textit{\\#Munich} beginning one hour after the shooting was reported, and the data collection ends approximately one month later~\\footnote{The collected dataset will be posted online for public use once the research work is published.}. We construct both daily networks and a cumulative network from this data. We analyze community evolution using the standard Louvain algorithm, and how the communities change over time to study how they both encourage and discourage the effectiveness of an information messaging campaign. We conclude that the large communities observed in the early stage of the data disappear from the \\textit{\\#Munich} conversation within seven days. The politically charged nature of many of these communities suggests their activity is migrated to other Twitter hashtags (i.e., conversation topics). Future analysis of Twitter activity might focus on tracking communities across topics and time.",
+				"abstractNote": "Social Media platforms in Cyberspace provide communication channels for individuals, businesses, as well as state and non-state actors (i.e., individuals and groups) to conduct messaging campaigns. What are the spheres of influence that arose around the keyword #Munich on Twitter following an active shooter event at a Munich shopping mall in July 2016? To answer that question in this work, we capture tweets utilizing #Munich beginning 1 h after the shooting was reported, and the data collection ends approximately 1 month later1. We construct both daily networks and a cumulative network from this data. We analyze community evolution using the standard Louvain algorithm, and how the communities change over time to study how they both encourage and discourage the effectiveness of an information messaging campaign. We conclude that the large communities observed in the early stage of the data disappear from the #Munich conversation within 7 days. The politically charged nature of many of these communities suggests their activity is migrated to other Twitter hashtags (i.e., conversation topics). Future analysis of Twitter activity might focus on tracking communities across topics and time.",
 				"journalAbbreviation": "Front. Big Data",
 				"language": "English",
 				"libraryCatalog": "Frontiers",
 				"publicationTitle": "Frontiers in Big Data",
 				"shortTitle": "Twitter Response to Munich July 2016 Attack",
-				"url": "https://www.frontiersin.org/articles/10.3389/fdata.2019.00017",
+				"url": "https://www.frontiersin.org/journals/big-data/articles/10.3389/fdata.2019.00017/full",
 				"volume": "2",
 				"attachments": [
 					{
@@ -597,6 +599,69 @@ var testCases = [
 		"url": "https://www.frontiersin.org/search?query=ballot+secrecy+election&tab=articles",
 		"defer": true,
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2023.1330238/full",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Meta-analytic evidence on the efficacy of hypnosis for mental and somatic health issues: a 20-year perspective",
+				"creators": [
+					{
+						"firstName": "Jenny",
+						"lastName": "Rosendahl",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Cameron T.",
+						"lastName": "Alldredge",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Antonia",
+						"lastName": "Haddenhorst",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024-01-08",
+				"DOI": "10.3389/fpsyg.2023.1330238",
+				"ISSN": "1664-1078",
+				"abstractNote": "Introduction\nDocumented use and investigation of hypnosis spans centuries and its therapeutic use has received endorsement by multiple medical associations. We conducted a comprehensive overview of meta-analyses examining the efficacy of hypnosis to provide a foundational understanding of hypnosis in evidence-based healthcare, insight into the safety of hypnosis interventions, and identification of gaps in the current research literature.\n\nMethods\nIn our systematic review, meta-analyses of randomized controlled trials on the efficacy of hypnosis in patients with mental or somatic health problems compared to any control condition published after the year 2000 were included. A comprehensive literature search using Medline, Scopus, PsycINFO, The Cochrane Library, HTA Database, Web of Science and a manual search was conducted to identify eligible reviews. Methodological quality of the included meta-analyses was rated using the AMSTAR 2 tool. Effect estimates on various outcomes including at least three comparisons (k ≥ 3) were extracted and transformed into a common effect size metric (Cohen’s d). If available, information on the certainty of evidence for these outcomes (GRADE assessment) was obtained.\n\nResults\nWe included 49 meta-analyses with 261 distinct primary studies. Most robust evidence was reported for hypnosis in patients undergoing medical procedures (12 reviews, 79 distinct primary studies) and in patients with pain (4 reviews, 65 primary studies). There was a considerable overlap of the primary studies across the meta-analyses. Only nine meta-analyses were rated to have high methodological quality. Reported effect sizes comparing hypnosis against control conditions ranged from d = −0.04 to d = 2.72. Of the reported effects, 25.4% were medium (d ≥ 0.5), and 28.8% were large (d ≥ 0.8).\n\nDiscussion\nOur findings underline the potential of hypnosis to positively impact various mental and somatic treatment outcomes, with the largest effects found in patients experiencing pain, patients undergoing medical procedures, and in populations of children/adolescents. Future research should focus on the investigation of moderators of efficacy, on comparing hypnosis to established interventions, on the efficacy of hypnosis for children and adolescents, and on identifying patients who do not benefit from hypnosis.\n\nClinical Trial Registration\nhttps://www.crd.york.ac.uk/prospero/display_record.php?ID=CRD42023395514, identifier CRD42023395514",
+				"journalAbbreviation": "Front. Psychol.",
+				"language": "English",
+				"libraryCatalog": "Frontiers",
+				"publicationTitle": "Frontiers in Psychology",
+				"shortTitle": "Meta-analytic evidence on the efficacy of hypnosis for mental and somatic health issues",
+				"url": "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2023.1330238/full",
+				"volume": "14",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Hypnosis"
+					},
+					{
+						"tag": "Meta-analysis"
+					},
+					{
+						"tag": "efficacy"
+					},
+					{
+						"tag": "hypnotherapy"
+					},
+					{
+						"tag": "randomized controlled trial"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

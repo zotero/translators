@@ -2,20 +2,20 @@
 	"translatorID": "bf053edc-a8c3-458c-93db-6d04ead2e636",
 	"label": "EUR-Lex",
 	"creator": "Philipp Zumstein, Pieter van der Wees",
-	"target": "^https?://(www\\.)?eur-lex\\.europa\\.eu/(legal-content/[A-Z][A-Z]/(TXT|ALL)/|search\\.html\\?)",
+	"target": "^https://eur-lex\\.europa\\.eu/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-31 02:00:49"
+	"lastUpdated": "2025-10-30 15:50:58"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017-2021 Philipp Zumstein, Pieter van der Wees
+	Copyright © 2025 Abe Jellinek
 	
 	This file is part of Zotero.
 
@@ -161,19 +161,14 @@ function scrape(doc, url) {
 	var type = detectWeb(doc, url);
 	var item = new Zotero.Item(type);
 	// determine the language in which we are currently viewing the document
-	var languageUrl = url.split("/")[4].toUpperCase();
-	if (languageUrl == "AUTO") {
-		languageUrl = autoLanguage || "EN";
-	}
-	var language = languageMapping[languageUrl].iso || "eng";
+	var viewingLanguage = (doc.documentElement.lang || "en").toUpperCase();
 	// Cases only return language; discard everything else
-	item.language = languageUrl.toLowerCase();
-	
+	item.language = viewingLanguage.toLowerCase();
 
 	if (eliTypeUri) {
 		// type: everything with ELI (see var typeMapping: bill, statute, report)
-		item.title = attr(doc, 'meta[property="eli:title"][lang=' + languageUrl.toLowerCase() + "]", "content");
-		var uri = attr(doc, "#format_language_table_digital_sign_act_" + languageUrl.toUpperCase(), "href");
+		item.title = attr(doc, 'meta[property="eli:title"][lang=' + viewingLanguage.toLowerCase() + "]", "content");
+		var uri = attr(doc, "#format_language_table_digital_sign_act_" + viewingLanguage.toUpperCase(), "href");
 		if (uri) {
 			var uriParts = uri.split("/").pop().replace("?uri=", "")
 .split(":");
@@ -207,7 +202,7 @@ function scrape(doc, url) {
 		}
 		item.legislativeBody = passedByArray.join(", ");
 		
-		item.url = attr(doc, 'meta[typeOf="eli:LegalResource"]', "about") + "/" + language.toLowerCase();
+		item.url = attr(doc, 'meta[typeOf="eli:LegalResource"]', "about");
 	}
 		
 	else if (item.itemType == "case") {
@@ -215,13 +210,13 @@ function scrape(doc, url) {
 		// pretty hacky stuff, as there's little metadata available
 		var docCourt = docType.substr(0, 1);
 		if (docCourt == "C") {
-			item.court = languageMapping[languageUrl].ECJ || languageMapping.EN.ECJ;
+			item.court = languageMapping[viewingLanguage].ECJ || languageMapping.EN.ECJ;
 		}
 		else if (docCourt == "T") {
-			item.court = languageMapping[languageUrl].GC || languageMapping.EN.GC;
+			item.court = languageMapping[viewingLanguage].GC || languageMapping.EN.GC;
 		}
 		else if (docCourt == "F") {
-			item.court = languageMapping[languageUrl].CST || languageMapping.EN.CST;
+			item.court = languageMapping[viewingLanguage].CST || languageMapping.EN.CST;
 		}
 		item.url = url;
 
@@ -253,10 +248,10 @@ function scrape(doc, url) {
 	}
 	// attachments
 	// type: all
-	var pdfurl = "https://eur-lex.europa.eu/legal-content/" + languageUrl + "/TXT/PDF/?uri=CELEX:" + celex;
-	var htmlurl = "https://eur-lex.europa.eu/legal-content/" + languageUrl + "/TXT/HTML/?uri=CELEX:" + celex;
-	item.attachments = [{ url: pdfurl, title: "EUR-Lex PDF (" + languageUrl + ")", mimeType: "application/pdf" }];
-	item.attachments.push({ url: htmlurl, title: "EUR-Lex HTML (" + languageUrl + ")", mimeType: "text/html", snapshot: true });
+	var pdfurl = "https://eur-lex.europa.eu/legal-content/" + viewingLanguage + "/TXT/PDF/?uri=CELEX:" + celex;
+	var htmlurl = "https://eur-lex.europa.eu/legal-content/" + viewingLanguage + "/TXT/HTML/?uri=CELEX:" + celex;
+	item.attachments = [{ url: pdfurl, title: "EUR-Lex PDF (" + viewingLanguage + ")", mimeType: "application/pdf" }];
+	item.attachments.push({ url: htmlurl, title: "EUR-Lex HTML (" + viewingLanguage + ")", mimeType: "text/html", snapshot: true });
 	
 	item.complete();
 }
@@ -276,7 +271,7 @@ var testCases = [
 				"codeVolume": "281",
 				"language": "en",
 				"legislativeBody": "EP, CONSIL",
-				"url": "http://data.europa.eu/eli/dir/1995/46/oj/eng",
+				"url": "http://data.europa.eu/eli/dir/1995/46/oj",
 				"attachments": [
 					{
 						"title": "EUR-Lex PDF (EN)",
@@ -300,20 +295,20 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "statute",
-				"nameOfAct": "Règlement (CE) n° 2257/94 de la Commission, du 16 septembre 1994, fixant des normes de qualité pour les bananes (Texte présentant de l'intérêt pour l'EEE)",
+				"nameOfAct": "Commission Regulation (EC) No 2257/94 of 16 September 1994 laying down quality standards for bananas (Text with EEA relevance)",
 				"creators": [],
 				"dateEnacted": "1994-09-16",
 				"code": "OJ L",
 				"codeNumber": "245",
-				"language": "fr",
-				"url": "http://data.europa.eu/eli/reg/1994/2257/oj/fra",
+				"language": "en",
+				"url": "http://data.europa.eu/eli/reg/1994/2257/oj",
 				"attachments": [
 					{
-						"title": "EUR-Lex PDF (FR)",
+						"title": "EUR-Lex PDF (EN)",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "EUR-Lex HTML (FR)",
+						"title": "EUR-Lex HTML (EN)",
 						"mimeType": "text/html",
 						"snapshot": true
 					}
@@ -369,15 +364,15 @@ var testCases = [
 				"title": "Bez námitek k navrhovanému spojení (Věc M.10068 — Brookfield/Mansa/Polenergia) (Text s významem pro EHP) 2021/C 14/01",
 				"creators": [],
 				"date": "2021",
-				"language": "cs",
+				"language": "nl",
 				"url": "https://eur-lex.europa.eu/legal-content/CS/TXT/?uri=uriserv%3AOJ.C_.2021.014.01.0001.01.CES&toc=OJ%3AC%3A2021%3A014%3ATOC",
 				"attachments": [
 					{
-						"title": "EUR-Lex PDF (CS)",
+						"title": "EUR-Lex PDF (NL)",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "EUR-Lex HTML (CS)",
+						"title": "EUR-Lex HTML (NL)",
 						"mimeType": "text/html",
 						"snapshot": true
 					}
@@ -398,17 +393,17 @@ var testCases = [
 				"creators": [],
 				"dateDecided": "21 ta' Settembru 2011",
 				"abstractNote": "Trade mark Komunitarja - Proċedimenti għal dikjarazzjoni ta’ invalidità - Trade mark Komunitarja verbali SCOMBER MIX - Raġuni assoluta għal rifjut - Karattru deskrittiv - Artikolu 7(1)(b) u (ċ) tar-Regolament (KE) Nru 40/94 [li sar l-Artikolu 7(1)(b) u (c) tar-Regolament (KE) Nru 207/2009]",
-				"court": "Il-Qorti Ġenerali",
+				"court": "Gerecht EU",
 				"docketNumber": "Kawża T-201/09",
-				"language": "mt",
+				"language": "nl",
 				"url": "https://eur-lex.europa.eu/legal-content/MT/TXT/?uri=CELEX%3A62009TJ0201",
 				"attachments": [
 					{
-						"title": "EUR-Lex PDF (MT)",
+						"title": "EUR-Lex PDF (NL)",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "EUR-Lex HTML (MT)",
+						"title": "EUR-Lex HTML (NL)",
 						"mimeType": "text/html",
 						"snapshot": true
 					}

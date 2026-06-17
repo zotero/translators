@@ -6,9 +6,12 @@
 	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
+	"configOptions": {
+		"async": true
+	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2023-06-09 02:21:30"
+	"lastUpdated": "2025-04-29 03:02:00"
 }
 
 /*
@@ -180,7 +183,7 @@ function processTag(item, tag, value) {
 	}
 }
 
-function doImport() {
+async function doImport() {
 	var line = true;
 	var tag = false;
 	var data = false;
@@ -200,7 +203,7 @@ function doImport() {
 				// unset info
 				tag = data = false;
 				// new item
-				finalizeItem(item);
+				await finalizeItem(item);
 				item = new Zotero.Item();
 				item.creatorsBackup = [];
 			}
@@ -225,7 +228,7 @@ function doImport() {
 	if (tag) { // save any unprocessed tags
 		processTag(item, tag, data);
 		// and finalize with some post-processing
-		finalizeItem(item);
+		await finalizeItem(item);
 	}
 }
 
@@ -305,7 +308,7 @@ function finalizeItem(item) {
 	delete item.itemTypeBackup;
 	// titles for books are mapped to bookTitle
 	if (item.itemType == "book") item.title = item.bookTitle;
-	item.complete();
+	return item.complete();
 }
 
 /** BEGIN TEST CASES **/

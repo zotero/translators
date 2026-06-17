@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2023-07-17 03:09:44"
+	"lastUpdated": "2025-08-18 17:06:42"
 }
 
 /*
@@ -44,6 +44,7 @@ var ITEM_TYPES = {
 	// DT overrides; not including anything already covered by the above.
 	// TODO: Add more implementations for DT values as needed.
 	"PROCEEDINGS PAPER": "conferencePaper",
+	"DATA SET": "dataset",
 };
 
 var FIELD_MAP = {
@@ -257,7 +258,9 @@ ItemMap.prototype = {
 					extra.push(`Notes: ${tagValueString}`);
 					break;
 				case "UT":
-					extra.push(`Web of Science ID: ${tagValueString}`);
+					if (tagValueString.trim()) {
+						extra.push(`Web of Science ID: ${tagValueString}`);
+					}
 					break;
 
 				// ISSN
@@ -272,6 +275,9 @@ ItemMap.prototype = {
 				case "TI":
 					tagValueString = selectiveTitleCase(tagValueString);
 					item[FIELD_MAP[wosTag]] = tagValueString;
+					break;
+				case "DI": // DOI
+					item[FIELD_MAP[wosTag]] = ZU.cleanDOI(tagValueString);
 					break;
 				// The following non-title fields are converted to Title Case
 				case "AE": // patent assignee

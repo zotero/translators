@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-04-27 09:24:18"
+	"lastUpdated": "2024-10-24 19:22:51"
 }
 
 function getSearchResults(doc) {
@@ -102,11 +102,11 @@ function makeItem(doc, url) {
 
 function detectSearch(items) {
 	// Disabled -- no longer working
-	return false;
+	if (true) return false;
 
 	if (items.ISBN) return true;
 	
-	if (!items.length) return;
+	if (!items.length) return false;
 	
 	for (var i=0, n=items.length; i<n; i++) {
 		if (items[i].ISBN && ZU.cleanISBN('' + items[i].ISBN)) {
