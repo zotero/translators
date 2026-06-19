@@ -873,7 +873,8 @@ function importItem(newItem, node) {
 	// preserve the original type in Extra, where it round-trips and can be remapped if
 	// the type is ever added.
 	var unknownItemType = (zoteroType && isNaN(parseInt(zoteroType)) && !ZU.itemTypeExists(zoteroType))
-		? zoteroType : null;
+		? zoteroType
+		: null;
 	newItem.itemType = exports.itemType || itemType;
 	var container = ret.container;
 	var containerPeriodical = ret.containerPeriodical;
