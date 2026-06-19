@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2026-03-06 21:44:09"
+	"lastUpdated": "2026-06-19 20:26:35"
 }
 
 /*
@@ -863,10 +863,17 @@ function detectType(newItem, node, ret) {
 function importItem(newItem, node) {
 	var ret = {};
 	var itemType = detectType(newItem, node, ret);
+	var zoteroType = getFirstResults(node, [n.z + "itemType", n.z + "type"], true);
 	var isZoteroRDF = false;
-	if (getFirstResults(node, [n.z + "itemType", n.z + "type"], true)) {
+	if (zoteroType) {
 		isZoteroRDF = true;
 	}
+	// A z:itemType that doesn't exist in this version (e.g., a Juris-M legal type like
+	// 'treaty'). detectType() ignores it, so we fall back to a generic type below and
+	// preserve the original type in Extra, where it round-trips and can be remapped if
+	// the type is ever added.
+	var unknownItemType = (zoteroType && isNaN(parseInt(zoteroType)) && !ZU.itemTypeExists(zoteroType))
+		? zoteroType : null;
 	newItem.itemType = exports.itemType || itemType;
 	var container = ret.container;
 	var containerPeriodical = ret.containerPeriodical;
@@ -883,7 +890,11 @@ function importItem(newItem, node) {
 		n.og + "title",
 		n.so + "headline"], true);
 	if (!newItem.itemType) {
-		if (!newItem.title) {	// require the title
+		if (unknownItemType) {
+			// Original type is preserved in Extra below
+			newItem.itemType = "document";
+		}
+		else if (!newItem.title) {	// require the title
 			// (if not a known type)
 			return false;
 		}
@@ -1314,6 +1325,10 @@ function importItem(newItem, node) {
 	// extra for Zotero RDF
 	else if (isZoteroRDF) {
 		newItem.extra = getFirstResults(node, [n.dc + "description"], true);
+		// Preserve an item type that doesn't exist in this version (see above)
+		if (unknownItemType) {
+			newItem.extra = (newItem.extra ? newItem.extra + "\n" : "") + "Type: " + unknownItemType;
+		}
 	}
 	else if (!newItem.abstractNote) {
 		newItem.abstractNote = getFirstResults(node, [n.dc + "description", n.dcterms + "description"], true);
@@ -1415,7 +1430,11 @@ function importItem(newItem, node) {
 		var uri = Zotero.RDF.getResourceURI(arcs[i]);
 		if (uri.substr(0, n.z.length) == n.z
 				// Skip z:path, handled for attachments above
-				&& uri.substring(n.z.length) !== 'path') {
+				&& uri.substring(n.z.length) !== 'path'
+				// Skip z:itemType, which is handled above. Copying it here would override the
+				// detected/fallback type with a type that might not exist in this version
+				// (e.g., a Juris-M legal type).
+				&& uri.substring(n.z.length) !== 'itemType') {
 			var property = uri.substr(n.z.length);
 			newItem[property] = Zotero.RDF.getTargets(node, n.z + property)[0];
 		}
@@ -1771,6 +1790,30 @@ var testCases = [
 				"creators": [],
 				"itemID": "#test-report",
 				"reportNumber": "NLR-TP-96-464",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<rdf:RDF\n xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n xmlns:z=\"http://www.zotero.org/namespaces/export#\"\n xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n xmlns:dcterms=\"http://purl.org/dc/terms/\"\n xmlns:bib=\"http://purl.org/net/biblio#\"\n xmlns:foaf=\"http://xmlns.com/foaf/0.1/\"\n xmlns:prism=\"http://prismstandard.org/namespaces/1.2/basic/\">\n    <rdf:Description rdf:about=\"#item_1\">\n        <z:itemType>treaty</z:itemType>\n        <dc:title>International Code for Ships Operating in Polar Waters (Polar Code)</dc:title>\n        <bib:authors>\n            <rdf:Seq>\n                <rdf:li>\n                    <foaf:Person>\n                        <foaf:surname>Int'l Mar. Org.</foaf:surname>\n                    </foaf:Person>\n                </rdf:li>\n            </rdf:Seq>\n        </bib:authors>\n        <prism:volume>34</prism:volume>\n        <bib:pages>243</bib:pages>\n        <dc:date>2017</dc:date>\n    </rdf:Description>\n</rdf:RDF>\n",
+		"items": [
+			{
+				"itemType": "document",
+				"title": "International Code for Ships Operating in Polar Waters (Polar Code)",
+				"creators": [
+					{
+						"creatorType": "author",
+						"lastName": "Int'l Mar. Org.",
+						"fieldMode": 1
+					}
+				],
+				"date": "2017",
+				"extra": "Type: treaty",
+				"itemID": "#item_1",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
