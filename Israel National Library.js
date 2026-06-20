@@ -60,7 +60,8 @@ async function scrape(doc, url = doc.location.href) {
 	let persistentLink = text(doc, '#documentdisplayleftpanesectionlevelpersistentlinkcontainer .persistentlinkurl');
 	if (persistentLink) {
 		item.url = persistentLink;
-	} else {
+	}
+	else {
 		item.url = url.split('?')[0].split('#')[0];
 	}
 
