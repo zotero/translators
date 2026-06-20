@@ -1,15 +1,15 @@
 {
-	"translatorID": "nl",
+	"translatorID": "15f290a3-4203-491b-887f-e76b2d94f8a2",
 	"label": "Israel National Library",
-	"creator": "Anonymous",
-	"target": "^https://www\\.nli\\.org\\.il/.*",
+	"creator": "Anonymus",
+	"target": "^https://www\\.nli\\.org\\.il/",
 	"minVersion": "6.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-05-04 14:25:40"
+	"lastUpdated": "2026-06-20 12:07:54"
 }
 
 /*
@@ -36,76 +36,54 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.includes("/newspapers/") && (url.includes("/article/") || url.includes("/page/"))) {
-		return "newspaperArticle";
+	if (url.includes("/newspapers/") && (url.includes("/article/"))) {
+		return "newspaperArticle"; // Matches valid Zotero item type
 	}
 	return false;
 }
 
-async function doWeb(doc, url) {
+async function doWeb(doc, url = doc.location.href) {
+	// Standard template fallback signature for web translators
 	await scrape(doc, url);
 }
 
-async function scrape(doc, url) {
+async function scrape(doc, url = doc.location.href) {
 	const item = new Zotero.Item("newspaperArticle");
 
-	// 1. TITLE: Grab from the active section tab (Changes per article)
-	const activeTitle = doc.querySelector('#sectionleveltabtitlearea h2');
-	const activeTextP = doc.querySelector('#pagesectionstextcontainer p');
-	
-	if (activeTitle && activeTitle.textContent.trim()) {
-		item.title = ZU.trimInternal(activeTitle.textContent);
-	}
-	else if (activeTextP && activeTextP.textContent.trim()) {
-		item.title = ZU.trimInternal(activeTextP.textContent);
+	// 1. TITLE
+	let title = text(doc, '#sectionleveltabtitlearea h2') || text(doc, '#pagesectionstextcontainer p');
+	if (title) {
+		item.title = title;
 	}
 
-	// 2. URL: Grab the persistent link for the active section (Changes per article)
-	const activeLink = doc.querySelector("#documentdisplayleftpanesectionlevelpersistentlinkcontainer .persistentlinkurl");
-	if (activeLink && activeLink.textContent.trim()) {
-		item.url = ZU.trimInternal(activeLink.textContent);
-	}
-	else {
+	// 2. URL
+	let persistentLink = text(doc, '#documentdisplayleftpanesectionlevelpersistentlinkcontainer .persistentlinkurl');
+	if (persistentLink) {
+		item.url = persistentLink;
+	} else {
 		item.url = url.split('?')[0].split('#')[0];
 	}
 
 	// 3. PUBLICATION: Grab from Breadcrumb
-	const pubNode = doc.querySelector('li.breadcrumb-item:nth-child(2)');
-	if (pubNode) {
-		item.publicationTitle = ZU.trimInternal(pubNode.textContent);
-	}
+	item.publicationTitle = text(doc, 'li.breadcrumb-item:nth-child(2)');
 
 	// 4. DATE: Grab from Breadcrumb
-	const dateNode = doc.querySelector('li.breadcrumb-item:nth-child(3)');
-	if (dateNode) {
-		item.date = ZU.trimInternal(dateNode.textContent);
+	item.date = text(doc, 'li.breadcrumb-item:nth-child(3)');
+
+	// 5. PAGE: Grab the currently active highlighted page tab
+	let pageText = text(doc, 'span.pagelabel.current b');
+	if (pageText) {
+		let parts = pageText.split(/\s+/);
+		item.pages = parts.length > 1 ? parts[1] : parts[0]; // Grabs "3" from "Page 3"
 	}
 
-	// 5. PAGE: Grab the currently active highlighted page tab (Changes if you click across pages)
-	const pageLabel = doc.querySelector('span.pagelabel.current b');
-	if (pageLabel) {
-		const parts = ZU.trimInternal(pageLabel.textContent).split(/\s+/);
-		if (parts.length > 1) {
-			item.pages = parts[1]; // Grabs "3" from "Page 3"
-		}
-		else {
-			item.pages = parts[0];
-		}
-	}
-	else if (url.includes("/page/")) {
-		const match = url.match(/\/page\/(\d+)(?:\/|$)/);
-		if (match) {
-			item.pages = match[1];
-		}
-	}
-
-	// Fallback if title is still totally blank
+	// Fallback if title is completely blank
 	if (!item.title && item.publicationTitle && item.date) {
 		item.title = `${item.publicationTitle}, ${item.date}`;
 	}
 
 	item.libraryCatalog = "National Library of Israel";
-	item.complete();
+	item.complete(); // Finishes translating and saves item
 }
 
 /** BEGIN TEST CASES **/
