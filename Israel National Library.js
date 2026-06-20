@@ -85,8 +85,3 @@ async function scrape(doc, url = doc.location.href) {
 	item.libraryCatalog = "National Library of Israel";
 	item.complete(); // Finishes translating and saves item
 }
-
-/** BEGIN TEST CASES **/
-var testCases = [
-]
-/** END TEST CASES **/
