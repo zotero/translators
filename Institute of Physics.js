@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2016-11-01 12:54:14"
+	"lastUpdated": "2026-06-22 02:05:00"
 }
 
 /*
@@ -30,73 +30,79 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-function detectWeb(doc,url) {
+function detectWeb(doc, url) {
 	if (ZU.xpath(doc, '//meta[@name="citation_journal_title"]').length > 0) {
 		return "journalArticle";
-	} else if (url.indexOf("/pdf/") == -1 && getResults(doc).length){
+	}
+	else if (!url.includes("/pdf/") && getResults(doc).length) {
 		return "multiple";
 	}
 
 	return false;
 }
 
-function getResults(doc){
-	return ZU.xpath(doc, '//div[@class="searchResCol1"]//h4/a|//a[contains(@class, "art-list-item-title")]');	
-}	
+function getResults(doc) {
+	return ZU.xpath(doc, '//div[@class="searchResCol1"]//h4/a|//a[contains(@class, "art-list-item-title")]');
+}
 
-function doWeb(doc,url)
-{
+function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var hits = {};
 		var urls = [];
 		//search results
-			
+
 		//var results = ZU.xpath(doc,"//table[@id='articles-list']//td[@class='article-entry']//p/strong/a");
-	 	var results = getResults(doc)
-		for (var i =0; i<results.length; i++) {
+		var results = getResults(doc);
+		for (var i = 0; i < results.length; i++) {
 			hits[results[i].href] = results[i].textContent.trim();
 		}
-		Z.selectItems(hits, function(items) {
-			if (items == null) return true;
+		Z.selectItems(hits, function (items) {
+			if (!items) return;
 			for (var j in items) {
 				urls.push(j);
 			}
 			ZU.processDocuments(urls, scrape);
-
 		});
-	} else {
-		scrape (doc, url);
+	}
+	else {
+		scrape(doc, url);
 	}
 }
 
-function scrape (doc, url){
+function scrape(doc, url) {
 	//Z.debug(url)
 	var DOI = ZU.xpathText(doc, '//meta[@name="citation_doi"]/@content');
 	var journalAbbr = ZU.xpathText(doc, '//meta[@name="citation_journal_abbrev"]/@content');
 	var ISSN = ZU.xpathText(doc, '//meta[@name="citation_issn"]/@content');
-	var journalAbbr = ZU.xpathText(doc, '//meta[@name="citation_journal_abbrev"]/@content');
-	var language = ZU.xpathText(doc, '//meta[@name="dc.language"]/@content');
-	var pdfURL = url.replace(/(\/meta)?([#?].+)?$/, "") + "/pdf"
+	var language = ZU.xpathText(doc, '//meta[@name="citation_language"]/@content')
+		|| ZU.xpathText(doc, '//meta[@name="dc.language"]/@content');
+	var pdfURL = getPDFURL(doc, url);
 	//Z.debug("pdfURL: " + pdfURL)
-	var bibtexurl = ZU.xpathText(doc, '//a[contains(@class, "btn-cit-abs-bib")]/@href');
+	var bibtexurl = ZU.xpathText(doc, '//a[contains(@class, "btn-cit-abs-bib")]/@href')
+		|| (DOI && 'https://iopscience.iop.org/export?type=article&doi=' + encodeURIComponent(DOI) + '&exportFormat=iopexport_bib&exportType=abs&navsubmit=Export+abstract');
 	//Z.debug(bibtexurl)
 	ZU.doGet(bibtexurl, function (text) {
 	//Z.debug(text)
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 		translator.setString(text);
-		translator.setHandler("itemDone", function(obj, item) {
+		translator.setHandler("itemDone", function (obj, item) {
 			item.DOI = DOI;
 			item.ISSN = ISSN;
 			item.language = language;
 			item.journalAbbreviation = journalAbbr;
-			item.attachments.push({url: pdfURL, title: "IOP Full Text PDF", mimeType: "application/pdf"})
+			item.attachments.push({ url: pdfURL, title: "IOP Full Text PDF", mimeType: "application/pdf" });
 			item.complete();
-		});	
+		});
 		translator.translate();
 	});
-
 }
+
+function getPDFURL(doc, url) {
+	return ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content')
+		|| url.replace(/(\/meta)?([#?].+)?$/, "") + "/pdf";
+}
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -335,6 +341,69 @@ var testCases = [
 		"type": "web",
 		"url": "http://iopscience.iop.org/nsearch?terms=energy&searchType=yourSearch&navsubmit=Search",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://iopscience.iop.org/article/10.1088/1361-665X/ad6812",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Anisotropic mechanical and sensing properties of carbon black-polylactic acid nanocomposites produced by fused filament fabrication",
+				"creators": [
+					{
+						"firstName": "Ludovico",
+						"lastName": "Musenich",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marta",
+						"lastName": "Berardengo",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Massimiliano",
+						"lastName": "Avalle",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rami",
+						"lastName": "Haj-Ali",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mirit",
+						"lastName": "Sharabi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Flavia",
+						"lastName": "Libonati",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024",
+				"DOI": "10.1088/1361-665X/ad6812",
+				"ISSN": "0964-1726",
+				"abstractNote": "3D-printable conductive polymers are gaining remarkable attention for diverse applications, including wearables, pressure sensors, interference shielding, flexible electronics, and damage identification. However, the relationship between the anisotropy of their mechanical and electrical properties remains rather unexplored. This study focuses on characterizing Polylactic Acid/Carbon Black nanocomposites manufactured through fused filament fabrication. It aims to investigate the effect of the orientation of 3D printing layers on the mechanical properties, failure mechanisms, and self-sensing capabilities of the 3D printed material. To this end, we use a coupled health monitoring system in which electrical resistance measurements are applied to diagnose the damage state of 3D-printed samples during tensile testing. The results provide novel insights into the strong dependence of the material behavior on 3D printing pattern orientation, suggesting avenues for optimizing mechanical and electrical anisotropy through a multi-objective approach. Additionally, they offer guidelines for designing self-sensing components for structural health monitoring applications and strain gauge sensors with superior performance.",
+				"issue": "9",
+				"journalAbbreviation": "Smart Mater. Struct.",
+				"language": "en",
+				"libraryCatalog": "Institute of Physics",
+				"pages": "095010",
+				"publicationTitle": "Smart Materials and Structures",
+				"url": "https://doi.org/10.1088/1361-665X/ad6812",
+				"volume": "33",
+				"attachments": [
+					{
+						"title": "IOP Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
