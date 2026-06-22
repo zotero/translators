@@ -342,10 +342,10 @@ function doImport() {
 	}
 
 	// Harvard specific code, requested by Harvard Library:
-	// Getting the library abbreviation properly,
+	// Getting the Alma institution ID,
 	// so it's easy to implement custom code for other libraries, either locally or globally should we want to.
 	var library;
-	var source = ZU.xpathText(doc, '//p:control/p:sourceid', ns);
+	var source = ZU.xpathText(doc, '//p:delivery/p:organization', ns);
 	if (source) {
 		// The HVD library code is now preceded by $$V01 -- not seeing this in other catalogs like Princeton or UQAM
 		// so making it optional
