@@ -319,14 +319,16 @@ function doImport() {
 			callArray.push(callNumber[i].textContent.match(/\$\$D(.+?)\$/)[1]);
 		}
 	}
-	/* 2024-09 : adding a test on p:delivery/p:bestlocation/p:callnumber to get Callnumber from Primo VE pages like https://bcujas-catalogue.univ-paris1.fr/discovery/fulldisplay?context=L&vid=33CUJAS_INST:33CUJAS_INST&search_scope=MyInstitution&tab=LibraryCatalog&docid=alma990004764520107621 for example */
+	// 2024-09 : adding a test on p:delivery/p:bestlocation/p:callnumber to get Callnumber from Primo VE pages like
+	// https://bcujas-catalogue.univ-paris1.fr/discovery/fulldisplay?context=L&vid=33CUJAS_INST:33CUJAS_INST&search_scope=MyInstitution&tab=LibraryCatalog&docid=alma990004764520107621
 	if (!callArray.length) {
 		callNumber = ZU.xpath(doc, '//p:display/p:availlibrary|//p:delivery/p:bestlocation/p:callNumber', ns);
 		for (let i = 0; i < callNumber.length; i++) {
 			let testCallNumberWithSubfields = callNumber[i].textContent.match(/\$\$2\(?(.+?)(?:\s*\))?\$/);
 			if (testCallNumberWithSubfields) {
 				callArray.push(testCallNumberWithSubfields[1]);
-			} else {
+			}
+			else {
 				callArray.push(callNumber[i].textContent);
 			}
 		}
