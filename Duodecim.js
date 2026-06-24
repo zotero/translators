@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-06-24 15:32:25"
+	"lastUpdated": "2026-06-24 16:34:06"
 }
 
 /*
@@ -56,15 +56,16 @@
  * A complex example and its handling: voh00042 (paid article, requires subscription to TP)
  * @param {string} nameString From doWeb()
  * @param {boolean} isSingleString From doWeb()
- * @param {string} lang 'en' or 'fi'
  * @returns Object: Zotero author object
  */
-function parseAuthors(nameString, isSingleAuthor, lang) {
+// function parseAuthors(nameString, isSingleAuthor, lang) { @param {string} lang 'en' or 'fi'
+function parseAuthors(nameString, isSingleAuthor) {
 	// Zotero.debug('parseAuthors(): parsing authors.');
 	// SINGLE, GROUP AUTHOR
 	if (!/\s/.test(nameString)) {
 		Zotero.debug('parseAuthors(): Single-word author.');
-		if (['Toimitus', 'Editors'].includes(nameString)) return null; // e.g. dlk00221, ykt00096, ebm00069
+		if (['Toimitus', 'Editors'].includes(nameString)) return []; // e.g. dlk00221, ykt00096, ebm00069
+		// ESLINT: creators should be an array?
 		// return nameString; // One-word institutions,
 		return [{
 			lastName: nameString,
@@ -105,7 +106,7 @@ function parseAuthors(nameString, isSingleAuthor, lang) {
 		var isGroupAuthor = false;
 
 		const toPush = (function (str) {
-			const words = str.toString().split(' '); // Word-by-word filtering
+			const words = str.toString().split(' ');
 			var nameOnly = '';
 			// for (const word of words) {
 			for (let i = 0; i < words.length; i++) {
@@ -114,13 +115,13 @@ function parseAuthors(nameString, isSingleAuthor, lang) {
 					&& !(/^(TtM|AMK|YAMK)-?.*/.test(words[i]))) { // specific title removal: exclude TtM prefix titles
 					nameOnly += words[i] + ' ';
 				} else {
-					// Zotero.debug(`parseAuthors(): judging exceptional word "${words[i]}" in raw name string. Index from 0: i=${i} of ${words.length - 1}`);
+					Zotero.debug(`parseAuthors(): judging exceptional word "${words[i]}" in raw name string. Index from 0: i=${i} of ${words.length - 1}`);
 					if (i === (words.length - 1)) { // e.g. shk00004
 						nameOnly += words[i];
 						isGroupAuthor = true;
 						// Zotero.debug(`parseAuthors(): toPush group author ${nameOnly}`);
 					} else {
-						nameOnly = '';  // e.g. dlk00084
+						nameOnly = ''; // e.g. dlk00084
 						// Zotero.debug(`parseAuthors(): excluding segment ${str}`);
 					}
 				}
@@ -157,7 +158,7 @@ function parseAuthors(nameString, isSingleAuthor, lang) {
  */
 function returnProtect(inner) {
 	const innerArray = inner.split('\n');
-	Zotero.debug(`returnProtect split:\n${innerArray}`);
+	// Zotero.debug(`returnProtect split:\n${innerArray}`);
 	var output = '';
 	if (innerArray.length === 1) return inner;
 	for (const line of innerArray) {
@@ -165,7 +166,7 @@ function returnProtect(inner) {
 		const cleanLine = line.replace(/[\xA0\r\s]+/g, " "); // ZU.superCleanString only trims; 260623: ZU.superCleanString also trims EOL period dot (.).
 		output += `${cleanLine}\n`;
 	}
-	Zotero.debug(`returnProtect output:\n${output}`);
+	// Zotero.debug(`returnProtect output:\n${output}`);
 	return output.substring(0, output.length - 1);
 }
 
@@ -400,10 +401,10 @@ async function detectWeb(doc, url) {
  * date
  * title
  * index options
- * abstract,
- * publisher,
- * journal-dependent fields and PDF attachment specifics,
+ * publisher
+ * journal-dependent fields and PDF attachment specifics
  * webpage snapshot
+ * abstract
  * @param {*} doc document
  * @param {*} url document.URL
  */
@@ -431,8 +432,10 @@ async function doWeb(doc, url) {
 			: 'duo-'; // DTK, CCG (CCG: header element for DTK is present in HTML but is not displayed (display: none in CCG's CSS))
 	Zotero.debug(`Determined dClass prefix: '${dClass}'`);
 
-	var urlMatchRegex = isDTK ? /\/article\/(\w{2,3}\d{5,6})(?![\w\d])/
-		: isDTKLegacy ? /(?<=avaa\?p_artikkeli=)\w{3}\d{5}(?![\w\d])/
+	var urlMatchRegex = isDTK
+		? /\/article\/(\w{2,3}\d{5,6})(?![\w\d])/
+		: isDTKLegacy
+			? /(?<=avaa\?p_artikkeli=)\w{3}\d{5}(?![\w\d])/
 			: /(?<=\/)\w{3}\d{5}(?![\w\d])/; // TODO , LäKT
 	const tdoi = text(`div.${dClass}identifier span`) // TK, legacy
 		|| text(`span.${dClass}identifier`)
@@ -527,40 +530,10 @@ async function doWeb(doc, url) {
 	item.archiveLocation = sortKey ? sortKey : tdoi;
 	item.callNumber = tdoi; // for Zotero DB search by TDOI
 
-	// PARSING ABSTRACT
-	Zotero.debug('doWeb(): extracting abstract');
-	var abstractRaw = innerText(`div.${dClass}aside`) // A gray box containing usually bulleted lists
-		|| innerText('section[role="main"] aside') // Terveyskirjasto.fi: "Katso myös" is also an <aside>, although it is in the right column.
-		|| innerText('section[role="main"] p').replace(/[\xA0\r\s]+/g, " ") // Terveyskirjasto.fi does not use dClass class prefix. Element tags are used instead for some content elements.
-		|| innerText(`.${dClass}section .${dClass}header`) // removed '.${dClass}body >': In many cases, duo-section does not reside right under a body class TODO examples
-		|| innerText(`.${dClass}section > p > em`).replace(/[\xA0\r\s]+/g, " ") // e.g. duo11158
-		|| innerText(`.${dClass}section > p`).replace(/[\xA0\r\s]+/g, " ") // First paragraph
-		|| null;
-	if (!abstractRaw) { // Manual selection
-		// if (innerText('h2') in [
-		if ([ // TODO statics Keskeistä, Johdanto...
-			'Keskeistä', // ykt, dlk
-			'Essentials', // ebm
-			'Johdanto' // TODO examples
-		].includes(innerText('h2'))) {
-			Zotero.debug('ABSTRACT: extracting designated section');
-			abstractRaw = doc.querySelector('h2').nextElementSibling.innerText;
-		}
-	}
-
-	if (abstractRaw) {
-		// abstractRaw = abstractRaw.replace(/[\xA0\r\s]+/g, " "); DOES NOT apply to multi-line bulleted list: may remove \n
-		Zotero.debug(`doWeb(): abstract text: ${abstractRaw}`);
-		item.abstractNote = returnProtect(abstractRaw); // TODO: succeed in Scaffold but mess in Edge? Try FireFox?
-		if (item.abstractNote.split(' ').length < 10) item.abstractNote = null; // arbitrarily remove texts unlikely to summarize the item.
-	} else {
-		Zotero.debug(`doWeb(): no valid abstract extracted`);
-	}
-
 	// PARSING PUBLISHER
 	const copyrightRaw = text(`div.${dClass}copyrights`) || text(`div.${dClass}copyright`);
 	item.publisher = (isDLehti || isOP || isKP) ? 'Duodecim' : normalizePublisher(copyrightRaw);
-	if (item.creators && item.creators[0].lastName === item.publisher) item.publisher = null; // e.g. shk00004
+	if (item.creators && item.creators.length && item.creators[0].lastName === item.publisher) item.publisher = null; // e.g. shk00004
 
 	// PARSING JOURNALS
 	var journalMetadata = {}; // init container: page and section
@@ -617,16 +590,22 @@ async function doWeb(doc, url) {
 		if (journalMetadata.genre) item.section = journalMetadata.genre;
 	}
 
+	var englishSummary = '';
 	// PARSING duo and sll: possible English title and abstract; PDF as file and hyperlink
 	if (prefix === 'duo' && dbRaw === 'Lääketieteellinen Aikakauskirja Duodecim') {
-		Zotero.debug('PDF for duo...');
 		if (!isDLehti) item.archiveLocation = tdoi; // searching with sortkey in LTK won't find the item.
 
 		// English summary extraction. In recent years, articles on Duodecim and SLL journals no longer feature an English summary.
 		const h2 = doc.querySelectorAll('h2');
 		if (h2 && (/^English summary.*/i).test(h2[0].innerText)) {
-			item.title += ` [${h2[0].innerText.match(/(?<=English summary: ).*$/)[0]}]`;
-			if (item.abstractNote) item.abstractNote += `\n\n${doc.querySelectorAll('em')[1].innerText}`; // Failsafe: no English summary before official Finnish abstract
+			try { // ESLint: duo99748
+				item.title += ` [${h2[0].innerText.match(/(?<=English summary: ).*$/)[0]}]`;
+			}
+			catch (error) {
+				Zotero.debug(`D-Lehti: error on English title addiction: ${error}`)
+			}
+			// if (item.abstractNote) item.abstractNote += `\n\n${doc.querySelectorAll('em')[1].innerText}`; // Failsafe: no English summary before official Finnish abstract
+			englishSummary = `\n\n${doc.querySelectorAll('em')[1].innerText}`; // Failsafe: no English summary before official Finnish abstract
 			item.tags.push('duodecim-englanti-Dlehti');
 		} else { // e.g. duo11158
 			const em = doc.querySelectorAll('p em');
@@ -634,13 +613,14 @@ async function doWeb(doc, url) {
 				em.forEach(p => {
 					if (/^English summary.*/i.test(p.innerText)) {
 						item.title += ` [${p.innerText.match(/(?<=English summary: ).*$/)[0]}]`;
-						if (item.abstractNote) item.abstractNote += `\n\n${p.parentNode.nextElementSibling.innerText}`;
+						englishSummary = `\n\n${p.parentNode.nextElementSibling.innerText}`;
 						item.tags.push('duodecim-englanti-Dlehti');
 					}
 				});
 			}
 		}
 
+		Zotero.debug('PDF for duo...');
 		var pdfLink = `https://${urlObj.host}/xmedia/duo/${tdoi}.pdf`; // doc.querySelector('app-plugin-external-link a');
 		// Zotero.debug(`${arguments.callee.name}(): downloading PDF link: ${pdfLink}`); // TODO callee deprecated
 		item.attachments.push({
@@ -662,7 +642,7 @@ async function doWeb(doc, url) {
 			Zotero.debug(`Current <h2>: ${h2.innerText}`);
 			if ((/^English summary.*/i).test(h2.innerText)) {
 				item.title += ` [${h2.innerText.match(/(?<=English summary: ).*$/)[0]}]`;
-				item.abstractNote += `\n\n${h2.nextElementSibling.innerText.replace(/[\xA0\r\s]+/g, " ")}`;
+				englishSummary = `\n\n${h2.nextElementSibling.innerText.replace(/[\xA0\r\s]+/g, " ")}`;
 				item.tags.push('duodecim-englanti-lääkärilehti');
 			}
 		});
@@ -683,7 +663,7 @@ async function doWeb(doc, url) {
 		if (prefix !== 'sll') { // Generic PDF
 			// Zotero.debug(`doWeb(): pushing PDF file ${firstLink}`);
 			const pdfTDOI = tdoiRegex.test(firstLink) ? firstLink.match(tdoiRegex)[0] : null;
-			const pdfPathname = pdfTDOI? (firstLink.match(/(?<=\/)[^\/]*(?=\.pdf)/)[0]) : null;
+			const pdfPathname = pdfTDOI? (firstLink.match(/(?<=\/)[^/]*(?=\.pdf)/)[0]) : null;
 			const pdfSuffix = (pdfPathname && /[a-z]+$/.test(pdfPathname)) ? pdfPathname.match(/[a-z]+$/)[0] : null;
 			const isMainPDF = pdfTDOI && pdfTDOI.substring(0, 8) === tdoi;
 			const attachmentTitle = isMainPDF ? ((pdfSuffix && pdfSuffix === 'sv') ? 'På svenska' : "PDF") : "Supplementary PDF"; // e.g. nla00004
@@ -726,7 +706,7 @@ async function doWeb(doc, url) {
 		}
 	}
 
-	Zotero.debug(`item.attachments: ${item.attachments.length} attachments before webpage snapshot: ${JSON.stringify(item.attachments)}`);
+	// Zotero.debug(`item.attachments: ${item.attachments.length} attachments before webpage snapshot: ${JSON.stringify(item.attachments)}`);
 
 	// web page snapshot
 	item.attachments.push({
@@ -736,11 +716,76 @@ async function doWeb(doc, url) {
 		snapshot: true
 	});
 
+
+	// PARSING ABSTRACT
+	// Removing hyperlinks from abstract block would alter PDF and snapshot.
+	Zotero.debug('doWeb(): extracting abstract');
+	// var abstractRaw = innerText(`div.${dClass}aside`) // A gray box containing usually bulleted lists
+	// 	|| innerText('section[role="main"] aside') // Terveyskirjasto.fi: "Katso myös" is also an <aside>, although it is in the right column.
+	// 	|| innerText('section[role="main"] p').replace(/[\xA0\r\s]+/g, " ") // Terveyskirjasto.fi does not use dClass class prefix. Element tags are used instead for some content elements.
+	// 	|| innerText(`.${dClass}section .${dClass}header`) // removed '.${dClass}body >': In many cases, duo-section does not reside right under a body class TODO examples
+	// 	|| innerText(`.${dClass}section > p > em`).replace(/[\xA0\r\s]+/g, " ") // e.g. duo11158
+	// 	|| innerText(`.${dClass}section > p`).replace(/[\xA0\r\s]+/g, " ") // First paragraph
+	// 	|| null;
+	// var abstractElement = doc.querySelector(`div.${dClass}aside`) // A gray box containing usually bulleted lists
+	// 	|| doc.querySelector('section[role="main"] aside') // Terveyskirjasto.fi: "Katso myös" is also an <aside>, although it is in the right column.
+	// 	|| doc.querySelector('section[role="main"] p') // Terveyskirjasto.fi does not use dClass class prefix. Element tags are used instead for some content elements.
+	// 	|| doc.querySelector(`.${dClass}section .${dClass}header`) // removed '.${dClass}body >': In many cases, duo-section does not reside right under a body class TODO examples
+	// 	|| doc.querySelector(`.${dClass}section > p > em`) // e.g. duo11158
+	// 	|| doc.querySelector(`.${dClass}section > p`) // First paragraph
+	// 	|| null;
+	const abstractSelectors = [
+		'section[role="main"] aside', // Terveyskirjasto.fi: "Katso myös" is also an <aside>, although it is in the right column.ˆ
+		'section[role="main"] p', // Terveyskirjasto.fi does not use dClass class prefix. Element tags are used instead for some content elements.ˆ
+		`div.${dClass}aside`, // A gray box containing usually bulleted lists
+		`.${dClass}section .${dClass}header`, // removed '.${dClass}body >': In many cases, duo-section does not reside right under a body class TODO examplesˆ
+		`.${dClass}section ul`,	// e.g. shk02235
+		`.${dClass}section > p > em`, // e.g. duo11158ˆ
+		`.${dClass}section > p`, // First paragraphˆ
+	]
+	var abstractElement = (function (selectors) {
+			for (const sel of selectors) {
+				const elementCandidate = doc.querySelector(sel);
+				if (elementCandidate) {
+					Zotero.debug(`abstact: querySelector is ${sel}`);
+					// elementCandidate._querySelector = sel;
+					return elementCandidate;
+				}
+			}
+			return null;
+		})(abstractSelectors);
+	
+	if (!abstractElement) { // Manual selection
+		// if (innerText('h2') in [
+		if ([ // TODO statics Keskeistä, Johdanto...
+			'Keskeistä', // ykt, dlk
+			'Essentials', // ebm
+			'Johdanto' // TODO examples
+		].includes(innerText('h2'))) {
+			Zotero.debug('ABSTRACT: extracting designated section');
+			abstractElement = doc.querySelector('h2').nextElementSibling;
+		}
+	}
+
+	if (abstractElement) {
+		if (abstractElement.querySelector('a')) { // ESLINT: Scaffold's innerText() ignores hyperlink, while ESLINT's does not.
+			abstractElement.querySelectorAll('a').forEach(link => {
+				link.remove();
+			});
+		}
+		item.abstractNote = returnProtect(abstractElement.innerText); // TODO: succeed in Scaffold but mess in Edge? Try FireFox?
+		if (item.abstractNote.split(' ').length < 10) item.abstractNote = null; // arbitrarily remove texts unlikely to summarize the item.
+		else Zotero.debug(`doWeb(): item.abstractNote: ${item.abstractNote}`);
+		if (englishSummary.length) item.abstractNote += englishSummary;
+	} else {
+		Zotero.debug(`doWeb(): no valid abstract extracted`);
+	}
+
 	// Finalize and save item
 	// Zotero.debug(`Complete: item.attachments length: ${Object.keys(item.attachments).length}`);
 	// Zotero.debug(`COMPLETE with ${item.attachments.length} attachments. Adding 'duodecim-translator' tag.`);
 	item.tags.push('duodecim-translator');
-	Zotero.debug(`item.complete(): ${JSON.stringify(item)}`);
+	// Zotero.debug(`item.complete(): ${JSON.stringify(item)}`);
 	item.complete();
 }
 
@@ -787,6 +832,7 @@ var testCases = [
 			{
 				"itemType": "bookSection",
 				"title": "Huimaus",
+				"creators": [],
 				"date": "2026-03-18",
 				"abstractNote": "Huimaus on hyvin yleinen oire, joka ilmenee monin eri tavoin. Huimauksen luonne kertoo lääkärille paljon sen syystä, joten sen kuvailu sanallisesti on tärkeää. Huimaus voi olla esimerkiksi kiertävää, ikään kuin huone pyörisi ympäri. Se voi olla myös keinuvaa kuin olisi veneessä. Sitä voidaan kuvata pyörryttämisen tunteena, silmien pimentymisenä, epämääräisenä tasapainottomuutena tai huterana olona. Jotkut kuvaavat myös epätodellista olotilaa tai selkeästi johonkin liikkeeseen tai ylösnousuun liittyvää huimausta.",
 				"archive": "Terveyskirjasto",
@@ -1011,7 +1057,7 @@ var testCases = [
 					}
 				],
 				"date": "2026-06-02",
-				"abstractNote": "Unettomuudella tarkoitetaan joko unettomuusoireita tai unettomuushäiriötä. Hoitopäätösten kannalta on tärkeää tunnistaa, onko kyseessä unettomuusoire vai sairausasteinen unettomuushäiriö.\nTilapäiset unettomuusoireet kuuluvat elämään. Säännöllinen uni-valverytmi ja unta edistävät nukkumistottumukset ja olosuhteet ehkäisevät unettomuushäiriön kehittymistä.\nPitkäkestoinen (yli 3 kuukautta kestänyt) unettomuushäiriö suurentaa monien sairauksien ja tapaturmien riskiä, heikentää toimintakykyä ja huonontaa elämänlaatua.\nVastikään alkaneen lyhytkestoisen (1–3 kuukautta kestäneen) unettomuushäiriön tunnistamisella ja hyvällä hoidolla on mahdollista ehkäistä pitkäkestoisen unettomuushäiriön kehittyminen.\nJoskus lyhytkestoisetkin unettomuusoireet voivat olla sairausasteisia ja heikentää merkittävästi toimintakykyä.\nUnettomuushäiriön diagnoosi perustuu ensisijaisesti huolelliseen anamneesiin, kliiniseen tutkimukseen ja uni-valvepäiväkirjan (unipäiväkirja) pitämiseen.\nUnettomuusoireiden tarkempi selvitys on tärkeää, jotta potilas saa oikeanlaista hoitoa. Unettomuusoireet eivät automaattisesti tarkoita unettomuushäiriötä.\nUnettomuusoireiden taustalla mahdollisesti olevat ja oireisiin kytkeytyvät sairaudet ja muut tekijät tulee tunnistaa ja hoitaa asianmukaisesti. Tavanomaisimpia sairauksia ovat ahdistuneisuus-, mieliala- ja päihdehäiriöt, levottomat jalat -oireyhtymä (restless legs syndrome, RLS), unenaikaiset hengityshäiriöt, uni-valverytmin häiriöt ja muut unihäiriöt (ICD-11:ssä \"uni-valvehäiriöt\"). Myös vaihdevuosiin liittyy yleisesti unettomuusoireita.\nTilapäisiä unettomuusoireita ei pääsääntöisesti tarvitse hoitaa. Jos potilas kuitenkin hakeutuu hoitoon, on unettomuusoireista kärsivän potilaan tukeminen, taustalla olevien syiden ja laukaisevien tekijöiden käsitteleminen sekä unen huollon ohjaus tärkeää.\nUnettomuuden lyhytkestoista lääkehoitoa voidaan harkita, jos unettomuusoireet ovat vakavia ja heikentävät merkittävästi päiväaikaista vointia ja toimintakykyä.\nUnettomuushäiriön hoidossa kestävimmät tulokset saavutetaan unettomuuden kognitiivisen käyttäytymisterapian (cognitive behavioral therapy for insomnia, CBT-I) menetelmillä.\nCBT-I on osoittautunut tehokkaaksi myös silloin, kun potilaalla on unettomuushäiriön kanssa samanaikaisia sairauksia tai oireita.\nMyös näyttö CBT-I:n tehosta lasten ja nuorten unettomuuden hoidossa on lisääntynyt, ja CBT-I:tä voidaan pitää näytön perusteella lasten ja nuorten unettomuuden ensisijaisena hoitona. Sen sijaan tutkimusnäyttö lasten ja nuorten unettomuuden lääkehoidosta lähes puuttuu lukuun ottamatta melatoniinia, joten suosituksen lääkeohjeistuksia ei voi soveltaa tähän ikäryhmään.\nPerinteisiä unettomuuden hoitoon käytettäviä lääkkeitä (ns. unilääkkeitä) ovat bentsodiatsepiinit (mm. tematsepaami) ja niiden kaltaiset lääkkeet (ns. z-lääkkeet: tsopikloni ja tsolpideemi) 1.\nPerinteiset unilääkkeet pidentävät mutta myös keventävät yöunta, ja muitakin merkittäviä haittavaikutuksia on raportoitu. Siten ne sopivat ensisijaisesti vain lyhytaikaiseen käyttöön.\nPitkäkestoisessa unettomuushäiriössä lääkehoidon tarve tulee arvioida yksilöllisesti ja säännöllisesti. Myös hoitovastetta tulee arvioida säännöllisesti. Etenkin ikääntyneille bentsodiatsepiineista ja niiden kaltaisista lääkkeistä saattaa olla enemmän haittaa kuin hyötyä ja niiden määräämisessä tulee käyttää harkintaa.\nBentsodiatsepiinien kaltaisten unilääkkeiden lyhytaikaisesta käytöstä (alle 2 viikkoa) saattaa olla hyötyä unettomuudesta kärsivän uniapneapotilaan CPAP-hoitoa aloitettaessa.\nUnettomuuden hoidossa käytetään perinteisten unilääkkeiden lisäksi myös muita lääkkeitä, kuten melatoniinia ja pieniannoksista (< 10 mg) doksepiinia sekä eräitä muita vireystilaan, uni-valverytmiin tai muilla tavoin unen neurokemiaan vaikuttavia lääkeaineita, kuten oreksiinireseptoriantagonisteja.\nUnettomuuden hoidossa käytettävät lääkkeet voivat heikentää ajokykyä sekä suoriutumista myös muissa tarkkaavaisuutta vaativissa tehtävissä. Bentsodiatsepiinit ja niiden kaltaiset lääkkeet aiheuttavat eniten haittaa, erityisesti hoidon alkuvaiheessa.\nLiikunnan suotuisasta vaikutuksesta uneen on runsaasti näyttöä.\nUnettomuushäiriöistä kärsivän potilaan hoidon seuranta on välttämätöntä.",
+				"abstractNote": "Unettomuudella tarkoitetaan joko unettomuusoireita tai unettomuushäiriötä. Hoitopäätösten kannalta on tärkeää tunnistaa, onko kyseessä unettomuusoire vai sairausasteinen unettomuushäiriö.\nTilapäiset unettomuusoireet kuuluvat elämään. Säännöllinen uni-valverytmi ja unta edistävät nukkumistottumukset ja olosuhteet ehkäisevät unettomuushäiriön kehittymistä.\nPitkäkestoinen (yli 3 kuukautta kestänyt) unettomuushäiriö suurentaa monien sairauksien ja tapaturmien riskiä, heikentää toimintakykyä ja huonontaa elämänlaatua.\nVastikään alkaneen lyhytkestoisen (1–3 kuukautta kestäneen) unettomuushäiriön tunnistamisella ja hyvällä hoidolla on mahdollista ehkäistä pitkäkestoisen unettomuushäiriön kehittyminen.\nJoskus lyhytkestoisetkin unettomuusoireet voivat olla sairausasteisia ja heikentää merkittävästi toimintakykyä.\nUnettomuushäiriön diagnoosi perustuu ensisijaisesti huolelliseen anamneesiin, kliiniseen tutkimukseen ja uni-valvepäiväkirjan (unipäiväkirja) pitämiseen.\nUnettomuusoireiden tarkempi selvitys on tärkeää, jotta potilas saa oikeanlaista hoitoa. Unettomuusoireet eivät automaattisesti tarkoita unettomuushäiriötä.\nUnettomuusoireiden taustalla mahdollisesti olevat ja oireisiin kytkeytyvät sairaudet ja muut tekijät tulee tunnistaa ja hoitaa asianmukaisesti. Tavanomaisimpia sairauksia ovat ahdistuneisuus-, mieliala- ja päihdehäiriöt, levottomat jalat -oireyhtymä (restless legs syndrome, RLS), unenaikaiset hengityshäiriöt, uni-valverytmin häiriöt ja muut unihäiriöt (ICD-11:ssä \"uni-valvehäiriöt\"). Myös vaihdevuosiin liittyy yleisesti unettomuusoireita.\nTilapäisiä unettomuusoireita ei pääsääntöisesti tarvitse hoitaa. Jos potilas kuitenkin hakeutuu hoitoon, on unettomuusoireista kärsivän potilaan tukeminen, taustalla olevien syiden ja laukaisevien tekijöiden käsitteleminen sekä unen huollon ohjaus tärkeää.\nUnettomuuden lyhytkestoista lääkehoitoa voidaan harkita, jos unettomuusoireet ovat vakavia ja heikentävät merkittävästi päiväaikaista vointia ja toimintakykyä.\nUnettomuushäiriön hoidossa kestävimmät tulokset saavutetaan unettomuuden kognitiivisen käyttäytymisterapian (cognitive behavioral therapy for insomnia, CBT-I) menetelmillä.\nCBT-I on osoittautunut tehokkaaksi myös silloin, kun potilaalla on unettomuushäiriön kanssa samanaikaisia sairauksia tai oireita.\nMyös näyttö CBT-I:n tehosta lasten ja nuorten unettomuuden hoidossa on lisääntynyt, ja CBT-I:tä voidaan pitää näytön perusteella lasten ja nuorten unettomuuden ensisijaisena hoitona. Sen sijaan tutkimusnäyttö lasten ja nuorten unettomuuden lääkehoidosta lähes puuttuu lukuun ottamatta melatoniinia, joten suosituksen lääkeohjeistuksia ei voi soveltaa tähän ikäryhmään.\nPerinteisiä unettomuuden hoitoon käytettäviä lääkkeitä (ns. unilääkkeitä) ovat bentsodiatsepiinit (mm. tematsepaami) ja niiden kaltaiset lääkkeet (ns. z-lääkkeet: tsopikloni ja tsolpideemi) .\nPerinteiset unilääkkeet pidentävät mutta myös keventävät yöunta, ja muitakin merkittäviä haittavaikutuksia on raportoitu. Siten ne sopivat ensisijaisesti vain lyhytaikaiseen käyttöön.\nPitkäkestoisessa unettomuushäiriössä lääkehoidon tarve tulee arvioida yksilöllisesti ja säännöllisesti. Myös hoitovastetta tulee arvioida säännöllisesti. Etenkin ikääntyneille bentsodiatsepiineista ja niiden kaltaisista lääkkeistä saattaa olla enemmän haittaa kuin hyötyä ja niiden määräämisessä tulee käyttää harkintaa.\nBentsodiatsepiinien kaltaisten unilääkkeiden lyhytaikaisesta käytöstä (alle 2 viikkoa) saattaa olla hyötyä unettomuudesta kärsivän uniapneapotilaan CPAP-hoitoa aloitettaessa.\nUnettomuuden hoidossa käytetään perinteisten unilääkkeiden lisäksi myös muita lääkkeitä, kuten melatoniinia ja pieniannoksista (< 10 mg) doksepiinia sekä eräitä muita vireystilaan, uni-valverytmiin tai muilla tavoin unen neurokemiaan vaikuttavia lääkeaineita, kuten oreksiinireseptoriantagonisteja.\nUnettomuuden hoidossa käytettävät lääkkeet voivat heikentää ajokykyä sekä suoriutumista myös muissa tarkkaavaisuutta vaativissa tehtävissä. Bentsodiatsepiinit ja niiden kaltaiset lääkkeet aiheuttavat eniten haittaa, erityisesti hoidon alkuvaiheessa.\nLiikunnan suotuisasta vaikutuksesta uneen on runsaasti näyttöä.\nUnettomuushäiriöistä kärsivän potilaan hoidon seuranta on välttämätöntä.",
 				"archiveLocation": "050.067",
 				"bookTitle": "Käypä hoito",
 				"callNumber": "hoi50067",
