@@ -781,13 +781,13 @@ async function doWeb(doc, url) {
 				link.remove();
 			});
 		}
-		item.abstractNote = returnProtect(abstractElement.innerText); // TODO: succeed in Scaffold but mess in Edge? Try FireFox?
+		item.abstractNote = isJournal ? ZU.superCleanString(abstractElement.innerText) : returnProtect(abstractElement.innerText); // TODO: succeed in Scaffold but mess in Edge? Try FireFox?
 		if (item.abstractNote.split(' ').length < 10) item.abstractNote = null; // arbitrarily remove texts unlikely to summarize the item.
 		else Zotero.debug(`doWeb(): item.abstractNote: ${item.abstractNote}`);
 		if (englishSummary.length) {
-			englishSummary.replace(/[\xA0\r\n\s]+/g, " ");
+			// englishSummary.replace(/[\xA0\r\n\s]+/g, " ");
 			Zotero.debug(`doWeb(): English summary before concatenation: ${englishSummary}`);
-			item.abstractNote += `\n\n${englishSummary}`;
+			item.abstractNote += `\n\n${ZU.superCleanString(englishSummary)}`;
 		}
 	} else {
 		Zotero.debug(`doWeb(): no valid abstract extracted`);
