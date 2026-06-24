@@ -138,8 +138,9 @@ function parseAuthors(nameString, isSingleAuthor) {
 				lastName: parts[parts.length - 1],
 				creatorType: 'author',
 			});
+			Zotero.debug(`parseAuthors(): pushed name object ${JSON.stringify(nameArray[nameArray.length - 1])}`);
 		} else {
-			Zotero.debug(`parseAuthors(): pushing non-CCG group author to nameArray ${toPush}`); // TODO 2606241645 shk00004 500 internal?
+			Zotero.debug(`parseAuthors(): pushing non-CCG group author to nameArray ${toPush}`);
 			nameArray.push({
 				lastName: toPush,
 				creatorType: 'author',
@@ -466,7 +467,13 @@ async function doWeb(doc, url) {
 			: dClass === ''
 				? 'div.person'
 				: `div.${dClass}authors`;
-	var authorsRaw = doc.querySelector(authorClass) ? innerText(authorClass) : null;
+	// var authorsRaw = doc.querySelector(authorClass) ? innerText(authorClass) : null; ESLint: won't make <br> a \n
+	const twoLineAuthor = doc.querySelector(authorClass) ? doc.querySelector(authorClass).querySelector('br') : false;
+	var authorsRaw = doc.querySelector(authorClass)
+		? twoLineAuthor
+			? doc.querySelector(authorClass).innerHTML.split('<br>')[1]
+			: innerText(authorClass)
+		: null;
 	Zotero.debug(`Raw author string: ${authorsRaw}`);
 
 	const singleAuthor = ['lab'].includes(prefix); // TODO statics
@@ -602,7 +609,7 @@ async function doWeb(doc, url) {
 				item.title += ` [${h2[0].innerText.match(/(?<=English summary: ).*$/)[0]}]`;
 			}
 			catch (error) {
-				Zotero.debug(`D-Lehti: error on English title addiction: ${error}`)
+				Zotero.debug(`D-Lehti: error on English title addiction: ${error}`);
 			}
 			// if (item.abstractNote) item.abstractNote += `\n\n${doc.querySelectorAll('em')[1].innerText}`; // Failsafe: no English summary before official Finnish abstract
 			englishSummary = `\n\n${doc.querySelectorAll('em')[1].innerText}`; // Failsafe: no English summary before official Finnish abstract
@@ -739,25 +746,25 @@ async function doWeb(doc, url) {
 		'section[role="main"] p', // Terveyskirjasto.fi does not use dClass class prefix. Element tags are used instead for some content elements.ˆ
 		`div.${dClass}aside`, // A gray box containing usually bulleted lists
 		`.${dClass}section .${dClass}header`, // removed '.${dClass}body >': In many cases, duo-section does not reside right under a body class TODO examplesˆ
-		`.${dClass}section ul`,	// e.g. shk02235
+		// `.${dClass}section ul`,	// e.g. shk02235 TODO limit to the section right next to header
 		`.${dClass}section > p > em`, // e.g. duo11158ˆ
 		`.${dClass}section > p`, // First paragraphˆ
-	]
+	];
 	var abstractElement = (function (selectors) {
-			for (const sel of selectors) {
-				const elementCandidate = doc.querySelector(sel);
-				if (elementCandidate) {
-					Zotero.debug(`abstact: querySelector is ${sel}`);
-					// elementCandidate._querySelector = sel;
-					return elementCandidate;
-				}
+		for (const sel of selectors) {
+			const elementCandidate = doc.querySelector(sel);
+			if (elementCandidate) {
+				Zotero.debug(`abstact: querySelector is ${sel}`);
+				// elementCandidate._querySelector = sel;
+				return elementCandidate;
 			}
-			return null;
-		})(abstractSelectors);
+		}
+		return null;
+	})(abstractSelectors);
 	
 	if (!abstractElement) { // Manual selection
 		// if (innerText('h2') in [
-		if ([ // TODO statics Keskeistä, Johdanto...
+		if ([ // TODO statics
 			'Keskeistä', // ykt, dlk
 			'Essentials', // ebm
 			'Johdanto' // TODO examples
@@ -776,7 +783,11 @@ async function doWeb(doc, url) {
 		item.abstractNote = returnProtect(abstractElement.innerText); // TODO: succeed in Scaffold but mess in Edge? Try FireFox?
 		if (item.abstractNote.split(' ').length < 10) item.abstractNote = null; // arbitrarily remove texts unlikely to summarize the item.
 		else Zotero.debug(`doWeb(): item.abstractNote: ${item.abstractNote}`);
-		if (englishSummary.length) item.abstractNote += englishSummary;
+		if (englishSummary.length) {
+			englishSummary.replace(/\n/, ' ');
+			englishSummary.replace(/\s{2,}/, ' ');
+			item.abstractNote += englishSummary;
+		};
 	} else {
 		Zotero.debug(`doWeb(): no valid abstract extracted`);
 	}
@@ -788,40 +799,6 @@ async function doWeb(doc, url) {
 	// Zotero.debug(`item.complete(): ${JSON.stringify(item)}`);
 	item.complete();
 }
-
-/**
- * A NOTE ON TEST CASES
- * All test cases were fetched in June 2026. Actual fetch time should be logged by Zotero at runtime.
- * I built this translator with APA citation style in mind.
- * Feel free to test in other formats, especially NLM-Vancouver-based formats and their Finnish variants
- * 		such as `styles/dependent/Suomen Laakarilehti.csl` (also part of Zotero Style Repository).
- *
- * For Zotero's automated checks, I kept only publicly available test cases. One free Terveysportti item is included as the last test case.
- * Other Terveysportti (TP) and Oppiportti (OP) test cases are not included in the public version.
- * Proceed with testing under a network with TP/OP subsciption TODO or log in first in Scaffold's browser.
- *
- * EXPLAINING TEST CASES: all cases referred to by their TDOI.
- *
- * TK Terveyskirjasto:
- * dlk00221: handling authors, editor author
- * dlk00084: handling author with title
- * BOTH: differences in extracting abstracts
- *
- * uux30190: should be the same as the version hosted on TP
- *
- * TP DTK:
- * nla00004: two-line author handling
- *
- * KP Käypä hoito (Current Care Guideline, CCG):
- * hoi50067: group author, abstract
- * dnd00039: group author
- * nix03607: addition of the CCG guideline the item belongs to
- *
- * D-lehti (Medical Journal Duodecim):
- * All: section/theme extracted
- * First three items: English titles and summary
- * duo95136: fully monolingual article.
- */
 
 /** BEGIN TEST CASES **/
 var testCases = [
