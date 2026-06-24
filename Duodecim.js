@@ -617,7 +617,7 @@ async function doWeb(doc, url) {
 		if (h2 && (/^English summary.*/i).test(h2[0].innerText)) {
 			try {
 				// item.title += ` [${h2[0].innerText.match(/(?<=English summary: ).*/m)[0].replace(/[\xA0\r\n\s]+/g, ' ')}]`; // ESLint: duo99748: matching null; innerText for innerHTML?
-				item.title += ` [${ultimateOneLiner(innerText('h2'))}]`; // ESLint: duo99748: matching null
+				item.title += ` [${ultimateOneLiner(innerText('h2')).match(/(?<=English summary: ).*/m)[0]}]`; // ESLint: duo99748: matching null
 			}
 			catch (error) {
 				Zotero.debug(`D-Lehti: error on English title addiction: ${error}`);
