@@ -138,7 +138,7 @@ function parseAuthors(nameString, isSingleAuthor) {
 				lastName: parts[parts.length - 1],
 				creatorType: 'author',
 			});
-			Zotero.debug(`parseAuthors(): pushed name object ${JSON.stringify(nameArray[nameArray.length - 1])}`);
+			// Zotero.debug(`parseAuthors(): pushed name object ${JSON.stringify(nameArray[nameArray.length - 1])}`);
 		} else {
 			Zotero.debug(`parseAuthors(): pushing non-CCG group author to nameArray ${toPush}`);
 			nameArray.push({
@@ -597,6 +597,7 @@ async function doWeb(doc, url) {
 		if (journalMetadata.genre) item.section = journalMetadata.genre;
 	}
 
+	// var englishTitle = '';
 	var englishSummary = '';
 	// PARSING duo and sll: possible English title and abstract; PDF as file and hyperlink
 	if (prefix === 'duo' && dbRaw === 'Lääketieteellinen Aikakauskirja Duodecim') {
@@ -605,22 +606,22 @@ async function doWeb(doc, url) {
 		// English summary extraction. In recent years, articles on Duodecim and SLL journals no longer feature an English summary.
 		const h2 = doc.querySelectorAll('h2');
 		if (h2 && (/^English summary.*/i).test(h2[0].innerText)) {
-			try { // ESLint: duo99748
-				item.title += ` [${h2[0].innerText.match(/(?<=English summary: ).*$/)[0]}]`;
+			try { // ESLint: duo99748: matching null
+				item.title += ` [${h2[0].innerText.match(/(?<=English summary: ).*/m)[0].replace(/[\xA0\r\n\s]+/g, ' ')}]`;
 			}
 			catch (error) {
 				Zotero.debug(`D-Lehti: error on English title addiction: ${error}`);
 			}
 			// if (item.abstractNote) item.abstractNote += `\n\n${doc.querySelectorAll('em')[1].innerText}`; // Failsafe: no English summary before official Finnish abstract
-			englishSummary = `\n\n${doc.querySelectorAll('em')[1].innerText}`; // Failsafe: no English summary before official Finnish abstract
+			englishSummary = `${doc.querySelectorAll('em')[1].innerText}`; // Failsafe: no English summary before official Finnish abstract
 			item.tags.push('duodecim-englanti-Dlehti');
 		} else { // e.g. duo11158
 			const em = doc.querySelectorAll('p em');
 			if (em) {
 				em.forEach(p => {
 					if (/^English summary.*/i.test(p.innerText)) {
-						item.title += ` [${p.innerText.match(/(?<=English summary: ).*$/)[0]}]`;
-						englishSummary = `\n\n${p.parentNode.nextElementSibling.innerText}`;
+						item.title += ` [${p.innerText.match(/(?<=English summary: ).*/)[0]}]`;
+						englishSummary = `${p.parentNode.nextElementSibling.innerText}`;
 						item.tags.push('duodecim-englanti-Dlehti');
 					}
 				});
@@ -649,7 +650,7 @@ async function doWeb(doc, url) {
 			Zotero.debug(`Current <h2>: ${h2.innerText}`);
 			if ((/^English summary.*/i).test(h2.innerText)) {
 				item.title += ` [${h2.innerText.match(/(?<=English summary: ).*$/)[0]}]`;
-				englishSummary = `\n\n${h2.nextElementSibling.innerText.replace(/[\xA0\r\s]+/g, " ")}`;
+				englishSummary = `${h2.nextElementSibling.innerText.replace(/[\xA0\r\n\s]+/g, " ")}`;
 				item.tags.push('duodecim-englanti-lääkärilehti');
 			}
 		});
@@ -784,10 +785,10 @@ async function doWeb(doc, url) {
 		if (item.abstractNote.split(' ').length < 10) item.abstractNote = null; // arbitrarily remove texts unlikely to summarize the item.
 		else Zotero.debug(`doWeb(): item.abstractNote: ${item.abstractNote}`);
 		if (englishSummary.length) {
-			englishSummary.replace(/\n/, ' ');
-			englishSummary.replace(/\s{2,}/, ' ');
-			item.abstractNote += englishSummary;
-		};
+			englishSummary.replace(/[\xA0\r\n\s]+/g, " ");
+			Zotero.debug(`doWeb(): English summary before concatenation: ${englishSummary}`);
+			item.abstractNote += `\n\n${englishSummary}`;
+		}
 	} else {
 		Zotero.debug(`doWeb(): no valid abstract extracted`);
 	}
