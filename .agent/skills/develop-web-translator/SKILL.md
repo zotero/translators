@@ -37,6 +37,16 @@ node .bin/inspect-page.mjs "<example url>"
 
 This gives you meta tags, accessibility tree, and screenshot.
 
+### Difficult sites (anti-bot walls)
+
+The browser tools (`capture-har`, `inspect-page`, `create-test`, `run-tests`) run **headless** by default. If a site is behind Cloudflare, a captcha, or another anti-bot wall, add `--headed` to open a visible window where you can solve the challenge by hand; the tool waits until it clears, then continues. (`--interact` and `--keep-open` also run headed.)
+
+A solved challenge is cached in a reused browser profile at `.tmp/browser-profile`, so the next run carries it over. If that cached state goes stale (the site starts failing again) or a run hangs on a profile lock, clear it:
+
+```
+rm -rf .tmp/browser-profile
+```
+
 ## Step 3: Choose an approach
 
 Check the `inspect-page` meta tags first:
@@ -85,6 +95,8 @@ Check the `inspect-page` meta tags first:
 ```
 node .bin/init-translator.mjs --label "<Label>" --creator "<Creator>" --target "<regex>" --type web
 ```
+
+This scaffolds the file from the web translator template at `.bin/templates/web.js`. That file is the canonical structure a web translator should follow — read it when you need to know the expected shape of `detectWeb`/`getSearchResults`/`doWeb`/`scrape`, or when a task asks you to make an existing translator better conform to the template.
 
 Implement `detectWeb(doc, url)`, `getSearchResults(doc, checkOnly)`, `doWeb(doc, url)`, and `scrape(doc, url)`.
 

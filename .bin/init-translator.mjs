@@ -3,7 +3,10 @@
 import { promises as fs } from 'node:fs';
 import crypto from 'node:crypto';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { parseArgs, resolveTranslator, formatZoteroDate, output, REPO_ROOT } from './lib/common.mjs';
+
+const TEMPLATES_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), 'templates');
 
 const TYPE_BITS = { import: 1, export: 2, web: 4, search: 8 };
 
@@ -106,109 +109,18 @@ const licenseBlock = `
 */
 `;
 
-// Template code based on type
-function webTemplate() {
-	return `
-function detectWeb(doc, url) {
-\t// TODO: adjust the logic here
-\tif (url.includes('/article/')) {
-\t\treturn 'journalArticle';
-\t}
-\telse if (getSearchResults(doc, true)) {
-\t\treturn 'multiple';
-\t}
-\treturn false;
-}
-
-function getSearchResults(doc, checkOnly) {
-\tvar items = {};
-\tvar found = false;
-\t// TODO: adjust the CSS selector
-\tvar rows = doc.querySelectorAll('h2 > a[href*="/article/"]');
-\tfor (let row of rows) {
-\t\tlet href = row.href;
-\t\tlet title = ZU.trimInternal(row.textContent);
-\t\tif (!href || !title) continue;
-\t\tif (checkOnly) return true;
-\t\tfound = true;
-\t\titems[href] = title;
-\t}
-\treturn found ? items : false;
-}
-
-async function doWeb(doc, url) {
-\tif (detectWeb(doc, url) == 'multiple') {
-\t\tlet items = await Zotero.selectItems(getSearchResults(doc, false));
-\t\tif (!items) return;
-\t\tfor (let url of Object.keys(items)) {
-\t\t\tawait scrape(await requestDocument(url));
-\t\t}
-\t}
-\telse {
-\t\tawait scrape(doc, url);
-\t}
-}
-
-async function scrape(doc, url = doc.location.href) { // eslint-disable-line no-unused-vars
-\t// TODO: implement - use EM, DOI search, API, or DOM scraping
-\t// See develop-translator skill for approach guidance
-}
-`;
-}
-
-function importTemplate() {
-	return `
-function detectImport() {
-\t// TODO: read first few lines with Zotero.read() and return true if format matches
-\treturn false;
-}
-
-async function doImport() {
-\t// TODO: read full input with Zotero.read(), parse, create items
-\tlet item = new Zotero.Item('journalArticle');
-\t// TODO: populate item fields from parsed input
-\titem.complete();
-}
-`;
-}
-
-function searchTemplate() {
-	return `
-function detectSearch(items) { // eslint-disable-line no-unused-vars
-\t// TODO: check items for valid search input (e.g. DOI, ISBN)
-\treturn false;
-}
-
-async function doSearch(item) { // eslint-disable-line no-unused-vars
-\t// TODO: perform search and create result items
-\tlet newItem = new Zotero.Item('journalArticle');
-\t// TODO: populate item fields
-\tnewItem.complete();
-}
-`;
-}
-
-function exportTemplate() {
-	return `
-function doExport() {
-\tvar item;
-\twhile ((item = Zotero.nextItem())) {
-\t\t// TODO: write item in export format
-\t\tZotero.write('');
-\t}
-}
-`;
+// Load the template code for a given type. Each type's template lives in its
+// own file under templates/ so the develop-*-translator skills can reference
+// them directly (e.g. to conform a translator to the template).
+async function loadTemplate(type) {
+	const body = await fs.readFile(path.join(TEMPLATES_DIR, `${type}.js`), 'utf-8');
+	return '\n' + body.trimEnd() + '\n';
 }
 
 // Assemble template code
 let code = '';
 for (const t of types) {
-	switch (t) {
-		case 'web': code += webTemplate(); break;
-		case 'import': code += importTemplate(); break;
-		case 'search': code += searchTemplate(); break;
-		case 'export': code += exportTemplate(); break;
-	}
+	code += await loadTemplate(t);
 }
 
 // Assemble full file

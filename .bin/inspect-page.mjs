@@ -2,8 +2,8 @@
 
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import { chromium } from 'playwright';
 import { parseArgs, REPO_ROOT } from './lib/common.mjs';
+import { launchBrowser, resolveHeadless } from './lib/browser.mjs';
 
 const { values, positionals } = parseArgs({
 	usage: 'node .bin/inspect-page.mjs <url> [--selector <css>] [--meta] [--screenshot] [--accessibility] [--eval <js>]',
@@ -15,6 +15,7 @@ const { values, positionals } = parseArgs({
 		eval: { type: 'string', short: 'e', multiple: true },
 		wait: { type: 'string', short: 'w' },
 		interact: { type: 'boolean' },
+		headed: { type: 'boolean' },
 		help: { type: 'boolean', short: 'h' },
 	},
 });
@@ -34,16 +35,11 @@ const doAccessibility = values.accessibility || !hasExplicitMode;
 
 const waitMs = parseInt(values.wait ?? '2000', 10);
 
-let browser;
+let session;
 try {
-	browser = await chromium.launch({
-		channel: 'chromium',
-		headless: !values.interact,
-	});
-
-	const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
-	await page.goto(url, { waitUntil: 'networkidle' });
-	await new Promise(r => setTimeout(r, waitMs));
+	session = await launchBrowser({ headless: resolveHeadless(values) });
+	const page = await session.context.newPage();
+	await session.goto(page, url, { settle: waitMs });
 
 	if (values.interact) {
 		console.error('Browser is open. Press Ctrl+C when done inspecting.');
@@ -51,7 +47,7 @@ try {
 			page.on('close', resolve);
 			process.on('SIGINT', resolve);
 		});
-		await browser.close();
+		await session.close();
 		process.exit(0);
 	}
 
@@ -140,7 +136,7 @@ try {
 	}
 }
 finally {
-	if (browser && !values.interact) await browser.close();
+	if (session && !values.interact) await session.close();
 }
 
 function printAccessibilityTree(node, depth) {

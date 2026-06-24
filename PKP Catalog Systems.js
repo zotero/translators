@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-21 19:10:24"
+	"lastUpdated": "2026-06-04 20:37:49"
 }
 
 /*
@@ -68,7 +68,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('.title a[href*="/view/"], .title a[href*="/catalog/"], .tocTitle a[href*="/view/"], .tocTitle a[href*="/catalog/"]');
+	var rows = doc.querySelectorAll('.title a[href*="/view/"], .title a[href*="/catalog/"], .tocTitle a[href*="/view/"], .search-results h4 > a[href*="/view/"], .tocTitle a[href*="/catalog/"]');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -224,67 +224,8 @@ function scrape(doc, url) {
 	});
 }
 
-
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "http://journals.linguisticsociety.org/elanguage/dad/article/view/362.html",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "On Incrementality in Dialogue: Evidence from Compound Contributions",
-				"creators": [
-					{
-						"firstName": "Christine",
-						"lastName": "Howes",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Matthew",
-						"lastName": "Purver",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Patrick G. T.",
-						"lastName": "Healey",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Gregory",
-						"lastName": "Mills",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Eleni",
-						"lastName": "Gregoromichelaki",
-						"creatorType": "author"
-					}
-				],
-				"date": "2011-05-11",
-				"DOI": "10.5087/d&d.v2i1.362",
-				"ISSN": "2152-9620",
-				"abstractNote": "Spoken contributions in dialogue often continue or complete earlier contributions by either the same or a different speaker. These compound contributions (CCs) thus provide a natural context for investigations of incremental processing in dialogue.\n\nWe present a corpus study which confirms that CCs are a key dialogue phenomenon: almost 20% of contributions fit our general definition of CCs, with nearly 3% being the cross-person case most often studied. The results suggest that processing is word-by-word incremental, as splits can occur within syntactic constituents; however, some systematic differences between same- and cross-person cases indicate important dialogue-specific pragmatic effects. An experimental study then investigates these effects by artificially introducing CCs into multi-party text dialogue. Results suggest that CCs affect peoples expectations about who will speak next and whether other participants have formed a coalition or party.\n\nTogether, these studies suggest that CCs require an incremental processing mechanism that can provide a resource for constructing linguistic constituents that span multiple contributions and multiple participants. They also suggest the need to model higher-level dialogue units that have consequences for the organisation of turn-taking and for the development of a shared context.",
-				"issue": "1",
-				"language": "en",
-				"libraryCatalog": "journals.linguisticsociety.org",
-				"pages": "279-311",
-				"publicationTitle": "Dialogue & Discourse",
-				"shortTitle": "On Incrementality in Dialogue",
-				"url": "http://journals.linguisticsociety.org/elanguage/dad/article/view/362.html",
-				"volume": "2",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
 	{
 		"type": "web",
 		"url": "http://www.ijdc.net/index.php/ijdc/article/view/8.2.5/",
@@ -304,17 +245,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2013-11-21",
+				"date": "2013-11-19",
 				"DOI": "10.2218/ijdc.v8i2.263",
 				"ISSN": "1746-8256",
 				"abstractNote": "Academic librarians are increasingly engaging in data curation by providing infrastructure (e.g., institutional repositories) and offering services (e.g., data management plan consultations) to support the management of research data on their campuses. Efforts to develop these resources may benefit from a greater understanding of disciplinary differences in research data management needs. After conducting a survey of data management practices and perspectives at our research university, we categorized faculty members into four research domains—arts and humanities, social sciences, medical sciences, and basic sciences—and analyzed variations in their patterns of survey responses. We found statistically significant differences among the four research domains for nearly every survey item, revealing important disciplinary distinctions in data management actions, attitudes, and interest in support services. Serious consideration of both the similarities and dissimilarities among disciplines will help guide academic librarians and other data curation professionals in developing a range of data-management services that can be tailored to the unique needs of different scholarly researchers.",
 				"issue": "2",
 				"language": "en",
-				"libraryCatalog": "www.ijdc.net",
+				"libraryCatalog": "ijdc.net",
 				"pages": "5-26",
 				"publicationTitle": "International Journal of Digital Curation",
-				"rights": "Copyright (c)",
-				"url": "http://www.ijdc.net/index.php/ijdc/article/view/8.2.5/",
+				"url": "https://ijdc.net/index.php/ijdc/article/view/8.2.5",
 				"volume": "8",
 				"attachments": [
 					{
@@ -434,9 +374,9 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "www.mediaesthetics.org",
 				"publicationTitle": "mediaesthetics – Journal of Poetics of Audiovisual Images",
-				"rights": "Copyright (c) 2016 David Gaertner",
+				"rights": "Copyright (c) 2016",
 				"shortTitle": "World War II in American Movie Theatres from 1942-45",
-				"url": "http://www.mediaesthetics.org/index.php/mae/article/view/50",
+				"url": "https://www.mediaesthetics.org/index.php/mae/article/view/50",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -466,7 +406,7 @@ var testCases = [
 				"date": "2016-07-28",
 				"DOI": "10.17169/fqs-17.3.2477",
 				"ISSN": "1438-5627",
-				"abstractNote": "The application of computer-assisted qualitative data analysis software (CAQDAS) in the field of qualitative sociology is becoming more popular. However, in Polish scientific research, the use of computer software to aid qualitative data analysis is uncommon. Nevertheless, the Polish qualitative research community is turning to CAQDAS software increasingly often. One noticeable result of working with CAQDAS is an increase in methodological awareness, which is reflected in higher accuracy and precision in qualitative data analysis. Our purpose in this article is to describe the qualitative researchers' environment in Poland and to consider the use of computer-assisted qualitative data analysis. In our deliberations, we focus mainly on the social sciences, especially sociology.URN: http://nbn-resolving.de/urn:nbn:de:0114-fqs160344",
+				"abstractNote": "Während in der qualitativen Soziologie insgesamt eine deutliche Zunahme der Nutzung computergestützter Datenanalyse-Software (CDAS) zu verzeichnen ist, bleibt diese in der polnischen Soziologie weiterhin eher moderat. Ein wesentlicher Effekt der Arbeiten, in denen CDAS zum Einsatz kommt, ist eine wachsende methodologische Aufmerksamkeit, gefolgt von einer angemesseneren und genaueren Datenanalyse. In diesem Beitrag beschäftigen wir uns mit den Kontexten, in denen polnische Forscher/innen arbeiten, und zwar mit Blick auf CDAS. Wir fokussieren dabei vor allem die Sozialwissenschaften, im Besonderen qualitative soziologische Forschung.URN: http://nbn-resolving.de/urn:nbn:de:0114-fqs160344",
 				"issue": "3",
 				"language": "en",
 				"libraryCatalog": "www.qualitative-research.net",
@@ -524,7 +464,7 @@ var testCases = [
 				"publicationTitle": "The Journal of Transcultural Studies",
 				"rights": "Copyright (c) 2016 Samuel Thevoz",
 				"shortTitle": "On the Threshold of the \"Land of Marvels",
-				"url": "https://heiup.uni-heidelberg.de/journals/index.php/transcultural/article/view/23541",
+				"url": "https://heiup.uni-heidelberg.de/journals/transcultural/article/view/23541",
 				"volume": "7",
 				"attachments": [
 					{
@@ -533,6 +473,24 @@ var testCases = [
 					}
 				],
 				"tags": [
+					{
+						"tag": "Alexandra David-Neel"
+					},
+					{
+						"tag": "Cultural Globalization"
+					},
+					{
+						"tag": "Himalayan Borderlands"
+					},
+					{
+						"tag": "Modern Buddhism"
+					},
+					{
+						"tag": "Tibetan Buddhism"
+					},
+					{
+						"tag": "Travel Writing"
+					},
 					{
 						"tag": "World Literature"
 					}
@@ -556,7 +514,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2016-03-18",
+				"date": "2015",
 				"ISSN": "0044-2356",
 				"abstractNote": "Der Verfasser setzt mit diesem Beitrag seine Serie, in der Ergänzungen und Korrekturen zur Bio-Bibliographie des großen ungarischen Reisenden und Entdeckers sowie Pioniers der Zentralasienforschung Á. Vámbéry (1832–1913) gegeben wurden, fort. Zudem findet sich im Anhang zum bio-bibliographischen Teil des Beitrags ein Brief Vámbérys an den Ethnologen und Geographen Richard Andree (1835–1912).",
 				"issue": "2",
@@ -564,7 +522,7 @@ var testCases = [
 				"libraryCatalog": "www.zeitschrift-fuer-balkanologie.de",
 				"publicationTitle": "Zeitschrift für Balkanologie",
 				"rights": "Copyright (c) 2016 Harrassowitz Verlag",
-				"url": "http://www.zeitschrift-fuer-balkanologie.de/index.php/zfb/article/view/423",
+				"url": "https://www.zeitschrift-fuer-balkanologie.de/index.php/zfb/article/view/423",
 				"volume": "51",
 				"attachments": [
 					{
@@ -597,11 +555,11 @@ var testCases = [
 				"ISSN": "2363-8087",
 				"abstractNote": "La obra fotográfica del artista puertorriqueño Carlos Ruiz-Valarino plantea un marcado contraste con una de las tradiciones más arraigadas en la historia del arte de esta isla del Caribe, que es la representación de una identidad cultural construida a través de símbolos. Recurriendo a la parodia a través de tres géneros pictóricos, como son el paisaje, el retrato y el objeto (en el marco de la naturaleza muerta), Ruiz-Valarino cuestiona los símbolos que reiteradamente se emplean en la construcción de un concepto tan controvertido como es el de identidad, conversando para ello con la tradición iconográfica de la fotografía antropológica y etnográfica, así como la de la ilustración científica o la caricatura.",
 				"language": "es",
-				"libraryCatalog": "journals.ub.uni-heidelberg.de",
+				"libraryCatalog": "ahnp.ub.uni-heidelberg.de",
 				"pages": "36-49",
 				"publicationTitle": "Miradas - Zeitschrift für Kunst- und Kulturgeschichte der Amérikas und der iberischen Halbinsel",
 				"rights": "Copyright (c) 2015",
-				"url": "https://journals.ub.uni-heidelberg.de/index.php/miradas/article/view/22445",
+				"url": "https://ahnp.ub.uni-heidelberg.de/journals/miradas/article/view/22445",
 				"volume": "2",
 				"attachments": [
 					{
@@ -644,75 +602,6 @@ var testCases = [
 					}
 				],
 				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.querelles.de/index.php/qjb/article/view/29",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Anonymität nach dem Tod: Subjektive Deutungen anonymer Bestattung und genderbezogene Differenzen",
-				"creators": [
-					{
-						"firstName": "Nicole",
-						"lastName": "Sachmerda-Schulz",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Paul Sebastian",
-						"lastName": "Ruppel",
-						"creatorType": "author"
-					}
-				],
-				"date": "2014-04-10",
-				"DOI": "10.15461/29",
-				"ISSN": "2191-9127",
-				"abstractNote": "Anonyme Bestattungen haben in den letzten Jahrzehnten in Deutschland stark zugenommen. Damit hat sich neben traditionellen Formen der Bestattung und Grabgestaltung eine Beisetzungsform etablieren können, bei der das Grab nicht namentlich gekennzeichnet und daher für die Öffentlichkeit sowie häufig auch für Angehörige nicht auffindbar ist. Der Frage, was es bedeutet, bei der Grabwahl auf die Namensnennung und damit auf die Lokalisierung der persönlichen Grabstätte zu verzichten, wird im Beitrag anhand offener Leitfadeninterviews mit Personen, die sich für eine anonyme Bestattung entschieden haben, nachgegangen. In der Analyse der im Rahmen einer Grounded-Theory-Studie erhobenen und ausgewerteten Daten werden Aspekte deutlich, die sich zum Beispiel um Kontrollierbarkeit eigener Belange bis über den Tod hinaus, ein auf Inklusion und Exklusion abzielendes Handeln sowie scheinbar paradoxe Momente von Individualitätsstreben drehen. Zudem zeigen sich hier auffällige Differenzen zwischen Frauen und Männern: Die Präsentation bzw. Repräsentation von Weltanschauungen und Werthaltungen stellt für die Interviewpartner eine Triebfeder für die Entscheidung für eine Anonymbestattung dar. Aussagen der Interviewpartnerinnen indes verweisen darauf, dass diese Entscheidung primär einer pragmatischen und am sozialen Umfeld ausgerichteten Orientierung folgt.",
-				"issue": "0",
-				"language": "de",
-				"libraryCatalog": "www.querelles.de",
-				"publicationTitle": "QJB – Querelles. Jahrbuch für Frauen- und Geschlechterforschung",
-				"rights": "Copyright (c) 2014 Nicole Sachmerda-Schulz, Paul Sebastian Ruppel",
-				"shortTitle": "Anonymität nach dem Tod",
-				"url": "http://www.querelles.de/index.php/qjb/article/view/29",
-				"volume": "17",
-				"attachments": [],
-				"tags": [
-					{
-						"tag": "Anonymität"
-					},
-					{
-						"tag": "Bestattung"
-					},
-					{
-						"tag": "Genderdifferenzen"
-					},
-					{
-						"tag": "Säkularisierung"
-					},
-					{
-						"tag": "Tod"
-					},
-					{
-						"tag": "anonymity"
-					},
-					{
-						"tag": "burial"
-					},
-					{
-						"tag": "death"
-					},
-					{
-						"tag": "gender difference"
-					},
-					{
-						"tag": "secularisation"
-					}
-				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -765,7 +654,7 @@ var testCases = [
 				"date": "2011-10-17",
 				"DOI": "10.4314/thrb.v13i4.63347",
 				"ISSN": "1821-9241",
-				"abstractNote": "The synergistic interaction between Human Immunodeficiency virus (HIV) disease and Malaria makes it mandatory for patients with HIV to respond appropriately in preventing and treating malaria. Such response will help to control the two diseases. This study assessed the knowledge of 495 patients attending the HIV clinic, in Lagos University Teaching Hospital, Nigeria.  Their treatment seeking, preventive practices with regards to malaria, as well as the impact of socio – demographic / socio - economic status were assessed. Out of these patients, 245 (49.5 %) used insecticide treated bed nets; this practice was not influenced by socio – demographic or socio – economic factors.  However, knowledge of the cause, knowledge of prevention of malaria, appropriate use of antimalarial drugs and seeking treatment from the right source increased with increasing level of education (p < 0.05). A greater proportion of the patients, 321 (64.9 %) utilized hospitals, pharmacy outlets or health centres when they perceived an attack of malaria. Educational intervention may result in these patients seeking treatment from the right place when an attack of malaria fever is perceived.",
+				"abstractNote": "The synergistic interaction between Human Immunodeficiency virus (HIV) disease and Malaria makes it mandatory for patients with HIV to respond appropriately in preventing and treating malaria. Such response will help to control the two diseases. This study assessed the knowledge of 495 patients attending the HIV clinic, in Lagos University Teaching Hospital, Nigeria.&nbsp; Their treatment seeking, preventive practices with regards to malaria, as well as the impact of socio &ndash; demographic / socio - economic status were assessed. Out of these patients, 245 (49.5 %) used insecticide treated bed nets; this practice was not influenced by socio &ndash; demographic or socio &ndash; economic factors.&nbsp; However, knowledge of the cause, knowledge of prevention of malaria, appropriate use of antimalarial drugs and seeking treatment from the right source increased with increasing level of education (p &lt; 0.05). A greater proportion of the patients, 321 (64.9 %) utilized hospitals, pharmacy outlets or health centres when they perceived an attack of malaria. Educational intervention may result in these patients seeking treatment from the right place when an attack of malaria fever is perceived.",
 				"issue": "4",
 				"language": "en",
 				"libraryCatalog": "www.ajol.info",
@@ -864,7 +753,7 @@ var testCases = [
 				"publicationTitle": "Journal of Mennonite Studies",
 				"rights": "Copyright (c)",
 				"shortTitle": "Mennonites in Unexpected Places",
-				"url": "http://jms.uwinnipeg.ca/index.php/jms/article/view/1369",
+				"url": "https://jms.uwinnipeg.ca/index.php/jms/article/view/1369",
 				"volume": "28",
 				"attachments": [
 					{
@@ -892,16 +781,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2005",
+				"date": "2005-10-20",
+				"DOI": "10.56645/jmde.v2i3.100",
 				"ISSN": "1556-8180",
+				"abstractNote": "Following an exposition of the ethical dimension, professional role and democratic rationale of standards in the evaluation community, this paper proposes an assessment framework for rating evaluation standards, illustrates its use on a sample of published norms and offers lessons for the participatory elaboration of global evaluation standards.",
+				"archiveLocation": "2005",
 				"issue": "3",
 				"language": "en",
-				"libraryCatalog": "journals.sfu.ca",
+				"libraryCatalog": "jmde.com",
 				"pages": "30-59",
 				"publicationTitle": "Journal of MultiDisciplinary Evaluation",
-				"rights": "Copyright (c)",
+				"rights": "Copyright (c) 2005 Robert Picciotto",
 				"shortTitle": "The Value of Evaluation Standards",
-				"url": "https://journals.sfu.ca/jmde/index.php/jmde_1/article/view/100",
+				"url": "https://jmde.com/index.php/jmde_1/article/view/100",
 				"volume": "2",
 				"attachments": [
 					{
@@ -909,7 +801,11 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "evaluation standards"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -938,7 +834,6 @@ var testCases = [
 				"libraryCatalog": "jecs.pl",
 				"pages": "173-184",
 				"publicationTitle": "Journal of Education Culture and Society",
-				"rights": "Copyright (c) 2019 Ewa Klęczaj-Siara",
 				"url": "https://jecs.pl/index.php/jecs/article/view/551",
 				"volume": "10",
 				"attachments": [
@@ -949,7 +844,22 @@ var testCases = [
 				],
 				"tags": [
 					{
+						"tag": "African American children's literature"
+					},
+					{
+						"tag": "African American children's literature"
+					},
+					{
+						"tag": "picture-books"
+					},
+					{
 						"tag": "political agents"
+					},
+					{
+						"tag": "racism"
+					},
+					{
+						"tag": "text-image relationships"
 					}
 				],
 				"notes": [],
@@ -1204,7 +1114,9 @@ var testCases = [
 					}
 				],
 				"date": "2018-01-08",
+				"DOI": "10.5281/zenodo.2546440",
 				"ISBN": "9783961101276",
+				"ISSN": "2627-8332",
 				"abstractNote": "Advances in Formal Slavic Linguistics 2016&nbsp;initiates a new series of collective volumes on formal Slavic linguistics. It presents a selection of high quality papers authored by young and senior linguists from around the world and contains both empirically oriented work, underpinned by up-to-date experimental methods, as well as more theoretically grounded contributions. The volume covers all major linguistic areas, including morphosyntax, semantics, pragmatics, phonology, and their mutual interfaces. The particular topics discussed include argument structure, word order, case, agreement, tense, aspect, clausal left periphery, or segmental phonology. The topical breadth and analytical depth of the contributions reflect the vitality of the field of formal Slavic linguistics and prove its relevance to the global linguistic endeavour. Early versions of the papers included in this volume were presented at the conference on Formal Description of Slavic Languages 12 or at the satellite Workshop on Formal and Experimental Semantics and Pragmatics, which were held on December 7-10, 2016 in Berlin.",
 				"language": "en",
 				"libraryCatalog": "langsci-press.org",
@@ -1229,7 +1141,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Overgange – anbragte unges veje fra skole til uddannelse",
+				"title": "Overgange – anbragte unges veje fra skole til uddannelse: Publikation nr. 6 fra følgeforskning af læringsprogrammet Lær for Livet",
 				"creators": [
 					{
 						"firstName": "Søren",
@@ -1253,13 +1165,16 @@ var testCases = [
 					}
 				],
 				"date": "2021-06-22",
+				"DOI": "10.7146/aul.421",
 				"ISBN": "9788776845124",
 				"abstractNote": "Dette er den afsluttende rapport om projektet ’Lær for Livet’, som er et projekt initieret af Egmont Fonden. Via blandt andet årlige intensive læringscamps og løbende mentorordninger som supplement til skolens læringsmiljø har projektet haft som overordnet mål at forbedre anbragte børns skolefaglige præstationer og herigennem øge antallet af anbragte unge, der starter på en ungdomsuddannelse efter skolen. I tilknytning til projektet blev etableret et følgeforskningsprojekt, som blev varetaget af DPU, Aarhus Universitet, der fulgte projektet i årene 2014-2020.",
 				"extra": "DOI: 10.7146/aul.421",
 				"language": "da",
-				"libraryCatalog": "ebooks.au.dk",
+				"libraryCatalog": "openbooks.kb.dk",
+				"publisher": "Aarhus Universitet",
 				"rights": "Ophavsret (c) 2021 Søren Langager, Anna Kathrine  Frørup, André   Torre, Charlotte Lange  Hald (Forfatter)",
-				"url": "https://ebooks.au.dk/aul/catalog/book/421",
+				"shortTitle": "Overgange – anbragte unges veje fra skole til uddannelse",
+				"url": "https://openbooks.kb.dk/au/catalog/book/421",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1292,7 +1207,10 @@ var testCases = [
 					}
 				],
 				"date": "2021",
+				"DOI": "10.5817/CZ.MUNI.P210-9882-2021",
+				"ISBN": "9788021098824",
 				"abstractNote": "Tomáškovy dny mladých mikrobiologů jsou konferencí, kterou od roku 1992 každoročně organizuje Mikrobiologický ústav Lékařské fakulty Masarykovy univerzity a Fakultní nemocnice u sv. Anny v Brně ve spolupráci s Československou společností mikrobiologickou. Dalšími oficiálními pořadateli konference jsou Společnost pro mikrobiologii a epidemiologii České lékařské společnosti J. E. Purkyně a Společnost pro lékařskou mikrobiologii ČLS. Jedinou podmínkou konference je, že referující autor (příp. hlavní autor posteru) musí být mladší 35 let.",
+				"extra": "DOI: 10.5817/CZ.MUNI.P210-9882-2021",
 				"language": "cze,eng,slo",
 				"libraryCatalog": "munispace.muni.cz",
 				"publisher": "Masarykova univerzita",
@@ -1305,31 +1223,10 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "E-knihy"
+						"tag": "Microbiology"
 					},
 					{
-						"tag": "Elektronické knihy"
-					},
-					{
-						"tag": "Flipbook"
-					},
-					{
-						"tag": "Knihy"
-					},
-					{
-						"tag": "Masarykova univerzita"
-					},
-					{
-						"tag": "Munipress"
-					},
-					{
-						"tag": "Munispace"
-					},
-					{
-						"tag": "Open Access"
-					},
-					{
-						"tag": "Čítárna"
+						"tag": "Mikrobiologie"
 					}
 				],
 				"notes": [],
@@ -1356,8 +1253,9 @@ var testCases = [
 				"abstractNote": "Aquest volum inclou els onze treballs corresponents a les presentacions realitzades a la cinquena edició de les Jornades del Doctorand. Aquests textos constitueixen una nova mostra de la recerca en Humanitats en els diversos àmbits d’investigació que inclou el nostre programa; així els estudis comprenen qüestions d’història i història de l’art, de llengua i literatura.\n* * *\nSUMARIIntroduccióSalazar y la guerra civil española: la discreta ayuda portuguesa al bando nacional (1936-1939), David Almeida de Andrade Animal Metaphors through Subtitling in Family Guy, Mariazell-Eugènia Bosch Fábregas Hacia una formalización para la detección automática de la violencia lingüística en las redes sociales, Susana Campillo Muñoz Les cultures polítiques del socialisme espanyol en la Transició, Gerard Cintas Hernández La cultura pop a Espanya, exemple de dissidència política i crítica social durant la dictadura franquista, Sara Espinós Ferrer Mujeres y madres de Barcino en los epitafios funerarios. Siglos I-II d.C. , Montse Guallarte Salvat La Teoría de las Funciones Lexicográficas como base para la definición de una app para entrenadores de fútbol, Ángel Huete-García «Furtivament al marge»: corporalitat i abjecció a les poètiques catalanes de la segona dècada del segle XXI, Meritxell Matas Revilla Una època de canvis i continuïtats. Societat i cultura a Tarragona després de la Guerra del Francès (1814-1820) , Carlos Moruno Moyano&nbsp;La huella estilística del traductor: léxico borgiano en la traducción de Orlando de Woolf, Nerea Tera Faba Extravagàncies escèniques i nous formats artístics a Tarragona durant l’últim terç del segle XIX, &nbsp;M. Teresa Velasco Osca&nbsp;",
 				"language": "en",
 				"libraryCatalog": "llibres.urv.cat",
-				"rights": "Copyright (c) 2021 Publicacions URV",
-				"url": "http://llibres.urv.cat/index.php/purv/catalog/book/467",
+				"publisher": "Publicacions URV",
+				"rights": "Drets d'autor (c) 2021 Publicacions URV",
+				"url": "https://llibres.urv.cat/index.php/purv/catalog/book/467",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1401,7 +1299,7 @@ var testCases = [
 				],
 				"date": "2021-07-05",
 				"DOI": "10.1590/SciELOPreprints.2577",
-				"abstractNote": "SciELO Preprints Collection is an integral part of SciELO, an international cooperation program aiming at the development of open access scientific communication covering all areas of knowledge. It operates as a collection of non-peer-reviewed manuscripts within the SciELO Network of national and thematic collection of journals.",
+				"abstractNote": "Questões relacionadas ao gênero, especificamente, sobre o fator maternidade, têm sido documentadas como desafios importantes para serem superados no ambiente acadêmico e precisam ser investigados para que possa ocorrer uma melhor compreensão que gerem possibilidades de apoio e condições favoráveis para o pleno desenvolvimento da formação acadêmica com condições igualitárias. O trabalho teve como objetivo refletir sobre o espaço de mães na universidade pública brasileira, enquanto protagonistas do seu processo educacional, possibilitando assim, a construção de possíveis fatores de proteção que garantam a permanência das mesmas na universidade e em equidade aos demais estudantes. Para a construção do trabalho foi realizada uma revisão de literatura com temática relativa a maternidade na educação superior com enfoque nas diferenças de gênero para dar suporte a pesquisa de campo realizada e compor a discussão dos dados obtidos. A pesquisa de campo foi realizada em uma universidade pública federal brasileira. Os resultados identificaram a ocorrência de múltiplas atribuições das mulheres universitárias, que se somam com as atividades acadêmicas: a maternidade, as atividades domésticas e profissionais extra universidade. Espera-se que os achados contribuam para a construção de um ambiente mais inclusivo, que respeite a maternidade e contribua para a formação de uma sociedade mais igualitária.",
 				"language": "pt",
 				"libraryCatalog": "preprints.scielo.org",
 				"repository": "SciELO Preprints",
@@ -1414,16 +1312,16 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "college education"
+						"tag": "educação superior"
 					},
 					{
-						"tag": "gender"
+						"tag": "gênero"
 					},
 					{
-						"tag": "inclusion"
+						"tag": "inclusão"
 					},
 					{
-						"tag": "maternity"
+						"tag": "maternidade"
 					}
 				],
 				"notes": [],
@@ -1438,17 +1336,13 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://kurdishstudies.net/journal/ks/issue/view/59",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "https://jnp.journals.yorku.ca/index.php/default",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "https://www.journals.aiac.org.au/index.php/IJALEL/issue/view/273",
+		"url": "https://www.ajol.info/index.php/ajol/search/search?query=%22skin+cancer%22+OR+melanoma",
+		"defer": 2,
 		"items": "multiple"
 	}
 ]

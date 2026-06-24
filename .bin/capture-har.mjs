@@ -3,17 +3,18 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { execSync } from 'node:child_process';
-import { chromium } from 'playwright';
 import { parseArgs, REPO_ROOT } from './lib/common.mjs';
+import { launchBrowser, resolveHeadless } from './lib/browser.mjs';
 
 const { values, positionals } = parseArgs({
-	usage: 'node .bin/capture-har.mjs <url> [--output <file>] [--no-openapi] [--interact] [--filter <pattern>]',
+	usage: 'node .bin/capture-har.mjs <url> [--output <file>] [--no-openapi] [--interact] [--headed] [--filter <pattern>]',
 	options: {
 		output: { type: 'string', short: 'o' },
 		'no-openapi': { type: 'boolean' },
 		interact: { type: 'boolean' },
 		filter: { type: 'string', short: 'f' },
 		wait: { type: 'string', short: 'w' },
+		headed: { type: 'boolean' },
 		help: { type: 'boolean', short: 'h' },
 	},
 });
@@ -61,20 +62,16 @@ const waitMs = parseInt(values.wait ?? '2000', 10);
 
 console.error(`Capturing HAR for ${url}...`);
 
-let browser;
+let session;
 try {
-	browser = await chromium.launch({
-		channel: 'chromium',
-		headless: !values.interact,
-	});
-
-	const context = await browser.newContext({
+	session = await launchBrowser({
+		headless: resolveHeadless(values),
 		recordHar: { path: harPath, mode: 'full' },
 	});
+	const context = session.context;
 	const page = await context.newPage();
 
-	await page.goto(url, { waitUntil: 'networkidle' });
-	await new Promise(r => setTimeout(r, waitMs));
+	await session.goto(page, url, { settle: waitMs });
 
 	if (values.interact) {
 		console.error('Browser is open. Navigate the site to capture more requests.');
@@ -85,7 +82,8 @@ try {
 		});
 	}
 
-	await context.close(); // finalizes HAR
+	await session.close(); // closing the context finalizes the HAR
+	session = null;
 
 	console.error(`HAR saved to ${harPath}`);
 
@@ -136,5 +134,5 @@ try {
 	}
 }
 finally {
-	if (browser && !values.interact) await browser.close();
+	if (session && !values.interact) await session.close();
 }

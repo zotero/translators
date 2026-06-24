@@ -28,6 +28,8 @@ grep -l "detectImport\|doImport" *.js
 node .bin/init-translator.mjs --label "<Label>" --creator "<Creator>" --type import
 ```
 
+This scaffolds the file from the import translator template at `.bin/templates/import.js`. That file is the canonical structure an import translator should follow — read it when you need to know the expected shape of `detectImport`/`doImport`, or when a task asks you to make an existing translator better conform to the template.
+
 If the translator should also export the same format, use `--type import,export` and implement `doExport()` as described in the `develop-export-translator` skill.
 
 Import translators have no `target` regex — they match on content via `detectImport()`.
