@@ -172,6 +172,15 @@ function returnProtect(inner) {
 }
 
 /**
+ * More forceful string cleaning
+ * @param {string} raw
+ * @returns one-line, clean string
+ */
+function ultimateOneLiner(raw) {
+	return raw.replace(/[\xA0\r\n\s]+/g, " ");
+}
+
+/**
  * Find book title as part of TDOI
  * Some TDOIs are exclusive to some DTKs.
  * Using prefix to not be confused with `item.bookTitle`.
@@ -606,14 +615,16 @@ async function doWeb(doc, url) {
 		// English summary extraction. In recent years, articles on Duodecim and SLL journals no longer feature an English summary.
 		const h2 = doc.querySelectorAll('h2');
 		if (h2 && (/^English summary.*/i).test(h2[0].innerText)) {
-			try { // ESLint: duo99748: matching null
-				item.title += ` [${h2[0].innerText.match(/(?<=English summary: ).*/m)[0].replace(/[\xA0\r\n\s]+/g, ' ')}]`;
+			try {
+				// item.title += ` [${h2[0].innerText.match(/(?<=English summary: ).*/m)[0].replace(/[\xA0\r\n\s]+/g, ' ')}]`; // ESLint: duo99748: matching null; innerText for innerHTML?
+				item.title += ` [${ultimateOneLiner(innerText('h2'))}]`; // ESLint: duo99748: matching null
 			}
 			catch (error) {
 				Zotero.debug(`D-Lehti: error on English title addiction: ${error}`);
 			}
 			// if (item.abstractNote) item.abstractNote += `\n\n${doc.querySelectorAll('em')[1].innerText}`; // Failsafe: no English summary before official Finnish abstract
-			englishSummary = `${doc.querySelectorAll('em')[1].innerText}`; // Failsafe: no English summary before official Finnish abstract
+			// englishSummary = `${doc.querySelectorAll('em')[1].innerText}`; // Failsafe: no English summary before official Finnish abstract
+			englishSummary = `${ultimateOneLiner(innerText('em', 1))}`; // Failsafe: no English summary before official Finnish abstract
 			item.tags.push('duodecim-englanti-Dlehti');
 		} else { // e.g. duo11158
 			const em = doc.querySelectorAll('p em');
@@ -781,13 +792,13 @@ async function doWeb(doc, url) {
 				link.remove();
 			});
 		}
-		item.abstractNote = isJournal ? ZU.superCleanString(abstractElement.innerText) : returnProtect(abstractElement.innerText); // TODO: succeed in Scaffold but mess in Edge? Try FireFox?
+		item.abstractNote = isJournal ? ultimateOneLiner(abstractElement.innerText) : returnProtect(abstractElement.innerText); // TODO: succeed in Scaffold but mess in Edge? Try FireFox?
 		if (item.abstractNote.split(' ').length < 10) item.abstractNote = null; // arbitrarily remove texts unlikely to summarize the item.
 		else Zotero.debug(`doWeb(): item.abstractNote: ${item.abstractNote}`);
 		if (englishSummary.length) {
 			// englishSummary.replace(/[\xA0\r\n\s]+/g, " ");
 			Zotero.debug(`doWeb(): English summary before concatenation: ${englishSummary}`);
-			item.abstractNote += `\n\n${ZU.superCleanString(englishSummary)}`;
+			item.abstractNote += `\n\n${ultimateOneLiner(englishSummary)}`;
 		}
 	} else {
 		Zotero.debug(`doWeb(): no valid abstract extracted`);
