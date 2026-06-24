@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2016-06-26 18:54:53"
+	"lastUpdated": "2019-11-22 16:51:20"
 }
 
 /*
@@ -54,6 +54,11 @@ function scrape(doc, url) {
 		+ docUid + "&dbShortcut=&query=&source=Document&format=Citavi";
 
 	ZU.doGet(risUrl, function(text) {
+		// the abstract is sometimes saved after the ending tag ER (sic!)
+		// therefore we delete the ER line and add it to the end
+		text = text.replace(/ER\s+-\s*/, '');
+		text = text.replace(/^s*\r?\n$/gm, '');
+		text = text + "\nER  - \n";
 		
 		//author names are messy and not consistently saved
 		//sometimes a list of authors is saved in one field seperated by commas
@@ -90,13 +95,15 @@ function scrape(doc, url) {
 		//Z.debug(text);
 
 		trans.setHandler('itemDone', function (obj, item) {
-			item.date = item.date.replace(/(\d\d)\.(\d\d)\.(\d\d\d\d)/,"$3-$2-$1");//e.g. 02.03.2014 ==> 2014-03-02
+			if (item.date) {
+				item.date = item.date.replace(/(\d\d)\.(\d\d)\.(\d\d\d\d)/,"$3-$2-$1");//e.g. 02.03.2014 ==> 2014-03-02
+			}
 			item.attachments = [{
 				title: "Snapshot",
 				document:doc
 			}];
 			//the url for ebooks is sometimes wrong/incomplete
-			if (item.url.includes("DOKV_DB=&")) {
+			if (item.url && item.url.includes("DOKV_DB=&")) {
 				item.url = ZU.xpathText(doc, '//a[@class="linkifyplus"]');
 			}
 			//Zotero.debug(item);
@@ -104,7 +111,7 @@ function scrape(doc, url) {
 		});
 	
 		trans.translate();
-	} , null , "ISO-8859-1");//the text file is LATIN1 encoded
+	});
 	
 }
 
@@ -184,7 +191,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.wiso-net.de/document/ZECO__AUIN425053660",
+		"url": "https://www.wiso-net.de/document/AUIN__425053660/hitlist/0?all=",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -260,7 +267,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.wiso-net.de/document/ZWIW__BLISED1E880E5071CB2CCEDB0885805C993A",
+		"url": "https://www.wiso-net.de/document/SBRE__011417003/hitlist/0?all=",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -310,5 +317,5 @@ var testCases = [
 		"url": "https://www.wiso-net.de/dosearch?explicitSearch=true&q=mannheim&x=0&y=0&dbShortcut=%3A3%3AALLEQUELLEN&searchMask=5461&TI%2CUT%2CDZ%2CBT%2COT%2CSE=&NN%2CAU%2CMM%2CZ2=&CO%2CC2%2CTA%2CKA%2CVA%2CZ1=&CT%2CDE%2CZ4=&BR%2CGW%2CN1%2CN2%2CNC%2CND%2CSC%2CWZ%2CZ5%2CAI=&Z3=&DT_from=&DT_to=&timeFilterType=selected&timeFilter=NONE",
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/
