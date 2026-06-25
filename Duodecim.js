@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-06-25 15:01:50"
+	"lastUpdated": "2026-06-25 15:06:55"
 }
 
 /*
@@ -40,7 +40,7 @@
 /**
  * ***** COMMENT TYPES *****
  * Some comments are catagorized in the form <category>:? <comment text>
- * 
+ *
  * // e.g.: followed by TDOIs OR a type of content. Some TDOIs require subscription and are not included in public testCases.
  * // Zotero.debug(): optional debug statements. Statements should beging with the member function name or the stages in doWeb().
  * // CAPITAL LETTERS: sections of code
@@ -61,7 +61,7 @@
  * Duodecim: Finnish Medical Society Duodecim; also means Duodecim Publishing Company
  * TDOI: Duodecim uses universal URI. Most such URIs may be accessed in Terveysportti, in the form `https://www.terveysportti.fi/doi/<TDOI>`, hence 'T' starting the name.
  * DTK: Duodecim TietoKanta, 'Duodecim database'.
- * 
+ *
  * Abbreviation list of Duodecim domains:
  * TP: terveysportti.fi, 'health portal'
  * - LäTK: LääkeTietoKanta, 'medicinal database'
@@ -274,10 +274,10 @@ async function urlGen(urlObj, tdoi) {
 	// Determine base URL for item URL construction
 	var genURL = urlObj.href;
 	var divider = /\/article\/empty/.test(genURL) ? 'empty' : tdoi;
-	
+
 	// TODO: LäTK
 	// const isLaake = /apps\/laake\//.test(url) ? true : false;
-	
+
 	try {
 		if (await tdoiRedirect(tdoi)) { // if (urlShortenerStatic(prefix)) {
 			Zotero.debug('urlGen(): TDOI leads to DTK page. Shortening URL.');
@@ -394,7 +394,8 @@ function lastDate(div) {
 			date = !date ? eurDateToISO(spans[0]) : date;
 		}
 		return date;
-	} else {
+	}
+	else {
 		return eurDateToISO(div);
 	}
 }
@@ -432,7 +433,8 @@ async function detectWeb(doc, url) {
 		|| /article\/sic\d{5}/g.test(url) // in vht DTK: Sic! Fimea
 		|| /\/sic\d{5}\/artikkeli/g.test(url)) { // in LäTK: Sic! Fimea
 		return 'journalArticle';
-	} else if (doc.querySelector('.duo-database') || doc.querySelector('.duo-sortkey') || doc.querySelector('h1')) { // TODO generalization
+	}
+	else if (doc.querySelector('.duo-database') || doc.querySelector('.duo-sortkey') || doc.querySelector('h1')) { // TODO generalization
 		return 'bookSection';
 	} // TODO: audio/video?
 	return false;
@@ -512,7 +514,7 @@ async function doWeb(doc, url) {
 			: dClass === ''
 				? 'div.person'
 				: `div.${dClass}authors`;
-	
+
 	// ESLINT-SCAFFOLD: won't make <br> a \n
 	// var authorsRaw = doc.querySelector(authorClass) ? innerText(authorClass) : null;
 	const twoLineAuthor = doc.querySelector(authorClass) ? doc.querySelector(authorClass).querySelector('br') : false;
@@ -525,7 +527,7 @@ async function doWeb(doc, url) {
 
 	const singleAuthor = ['lab'].includes(prefix); // TODO statics
 	// var authors = singleAuthor ? authorsRaw : parseAuthors(authorsRaw, singleAuthor, item.language);
-	if(authorsRaw) item.creators = parseAuthors(authorsRaw, singleAuthor, item.language);
+	if (authorsRaw) item.creators = parseAuthors(authorsRaw, singleAuthor, item.language);
 
 	// PARSING DATE
 	// extract updated element or journal metadata
@@ -544,7 +546,8 @@ async function doWeb(doc, url) {
 			item.title = item.shortTitle; // patient-oriented articles on terveyskirjasto.fi do not feature 'Tietoa potilaalle' in title.
 			// ZU: Zotero would remove shortTitle since the two titles are now the same
 		}
-	} else if (/[-–]/.test(item.title)) { // en dash, Alt + (numpad) 0150 / (macOS) Option + -
+	}
+	else if (/[-–]/.test(item.title)) { // en dash, Alt + (numpad) 0150 / (macOS) Option + -
 		item.shortTitle = item.title.split(/[-–]/)[0];
 	}
 
@@ -610,7 +613,8 @@ async function doWeb(doc, url) {
 	// SET DATE
 	if (isJournal && journalMetadata.year && prefix !== 'sic') {
 		item.date = journalMetadata.year;
-	} else if (dateStr) {
+	}
+	else if (dateStr) {
 		item.date = dateStr;
 		if (prefix === 'sic') {
 			// TODO extract issue number
@@ -658,7 +662,8 @@ async function doWeb(doc, url) {
 			}
 			englishSummary = `${ultimateOneLiner(innerText('em', 1))}`; // Failsafe: no English summary before official Finnish abstract
 			item.tags.push('duodecim-englanti-Dlehti');
-		} else { // e.g. duo11158
+		}
+		else { // e.g. duo11158
 			const em = doc.querySelectorAll('p em');
 			if (em) {
 				em.forEach((p) => {
@@ -676,7 +681,7 @@ async function doWeb(doc, url) {
 		// Zotero.debug(`${arguments.callee.name}(): downloading PDF link: ${pdfLink}`); // TODO callee deprecated
 		item.attachments.push({
 			url: pdfLink,
-			title: `Linkki PDF-tiedostoon (${urlObj.host.replace('www.','')})`,
+			title: `Linkki PDF-tiedostoon (${urlObj.host.replace('www.', '')})`,
 			mimeType: "text/html",
 			snapshot: false
 		}, {
@@ -714,7 +719,7 @@ async function doWeb(doc, url) {
 		if (prefix !== 'sll') { // generic PDF
 			// Zotero.debug(`doWeb(): pushing PDF file ${firstLink}`);
 			const pdfTDOI = tdoiRegex.test(firstLink) ? firstLink.match(tdoiRegex)[0] : null;
-			const pdfPathname = pdfTDOI? (firstLink.match(/(?<=\/)[^/]*(?=\.pdf)/)[0]) : null;
+			const pdfPathname = pdfTDOI ? (firstLink.match(/(?<=\/)[^/]*(?=\.pdf)/)[0]) : null;
 			const pdfSuffix = (pdfPathname && /[a-z]+$/.test(pdfPathname)) ? pdfPathname.match(/[a-z]+$/)[0] : null;
 			const isMainPDF = pdfTDOI && pdfTDOI.substring(0, 8) === tdoi;
 			const attachmentTitle = isMainPDF ? ((pdfSuffix && pdfSuffix === 'sv') ? 'På svenska' : "PDF") : "Supplementary PDF"; // e.g. nla00004
@@ -726,7 +731,8 @@ async function doWeb(doc, url) {
 				title: attachmentTitle,
 				mimeType: "application/pdf"
 			});
-		} else {
+		}
+		else {
 			Zotero.debug('doWeb(): PDF for sll...');
 			const sllPDFPath = firstLink.match(/(?<=laakarilehti\/).*/)[0];
 
@@ -750,7 +756,7 @@ async function doWeb(doc, url) {
 			if (dlDomain) {
 				item.attachments.push({
 					url: dlDomain + sllPDFPath,
-					title: `PDF${directDL ? '':' välityksellä'}`,
+					title: `PDF${directDL ? '' : ' välityksellä'}`,
 					mimeType: "application/pdf",
 				});
 			}
@@ -804,7 +810,7 @@ async function doWeb(doc, url) {
 		}
 		return null;
 	})(abstractSelectors);
-	
+
 	if (!abstractElement) { // manual selection
 		// if (innerText('h2') in [
 		if ([ // TODO statics
@@ -831,7 +837,8 @@ async function doWeb(doc, url) {
 			Zotero.debug(`doWeb(): English summary before concatenation: ${englishSummary}`);
 			item.abstractNote += `\n\n${ultimateOneLiner(englishSummary)}`;
 		}
-	} else {
+	}
+	else {
 		Zotero.debug(`doWeb(): no valid abstract extracted`);
 	}
 
