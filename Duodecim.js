@@ -2,14 +2,14 @@
 	"translatorID": "63ef6a3b-2e64-4d58-aedc-07b31a108928",
 	"label": "Duodecim",
 	"creator": "Shiyu Wang",
-	"target": "https?://(www\\.(terveysportti|terveyskirjasto|kaypahoito|oppiportti|duodecimlehti)\\.fi|www.ebm-guidelines.com)/.*",
+	"target": "https?://(www\\.(terveysportti|terveyskirjasto|kaypahoito|oppiportti|duodecimlehti)\\.fi|www.ebm-guidelines.com)/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-06-25 15:06:55"
+	"lastUpdated": "2026-06-25 18:05:01"
 }
 
 /*
@@ -45,7 +45,8 @@
  * // Zotero.debug(): optional debug statements. Statements should beging with the member function name or the stages in doWeb().
  * // CAPITAL LETTERS: sections of code
  * // JS: JavaScript syntax
- * // ZU: adoption of Zotero.Utilities library functions OR reason why a ZU is not used OR Zotero authomated actions
+ * // ZU: adoption of Zotero.Utilities library functions OR reason why a ZU is not used
+ * // ZOTERO: authomated/stock actions by Zotero connector/client
  * // ESLINT: warning from ESLINT during GitHub pull request test
  * // ESLINT-SCAFFOLD: discrepancies between Scafford (Zotero 9) and the test
  * // CITATION: compliances with / deriviations from standard APA 7th edition
@@ -68,7 +69,7 @@
  * OP: oppiportti.fi, 'learning portal'
  * TK: terveyskirjasto.fi, ' health library'
  * KP: kaypahoito.fi, Käypä hoito -suositus, offical English name Current Care Guideline(s)
- * CCG: Current Care Guideline
+ * - CCG: Current Care Guideline
  * see also:
  * - target URL regex
  * - comment block before testCases
@@ -131,7 +132,7 @@ function parseAuthors(nameString, isSingleAuthor) {
 		const toPush = ((str) => { // ESLINT: Function declared in a loop contains unsafe references to variable(s) 'isGroupAuthor'
 			const words = str.toString().split(' ');
 			var nameOnly = '';
-			for (let i = 0; i < words.length; i++) {
+			for (let i = 0; i < words.length; i++) { // JS: I knew of `word of words` for a `for` loop, but I need the number index. See 8 lines below.
 				if (capitalRegex.test(words[i].charAt(0))
 					&& !(capitalRegex.test(words[i].charAt(words[i].length - 1))) // not ending with capital letter
 					&& !(/^(TtM|AMK|YAMK)-?.*/.test(words[i]))) { // FINNISH: remove titles/degrees of authors
@@ -557,7 +558,7 @@ async function doWeb(doc, url) {
 	if (prefix === 'nix' && isKP) item.bookTitle += `: ${innerText('div.additional-links.kh-noprint a')}`;
 
 	// PARSING INDEX OPTIONS: tags, sortKey, TDOI
-	if (isDTK) item.tags.push('duodecim-dtk');
+	if (isDTK) item.tags.push('duodecim-dtk'); // ZOTERO: tags for easy debugging
 	if (isDTKLegacy) item.tags.push('duodecim-dtk-legacy');
 	// constructing option 1: Get sort key from span.duo-sortkey (text in parentheses)
 	var sortKeyText = text(`.${dClass}sortkey`)
@@ -636,7 +637,7 @@ async function doWeb(doc, url) {
 	journalAbbr.sll = 'Suom Lääkäril';
 
 	if (isJournal) {
-		item.tags.push((isDTK || isDTKLegacy) ? 'duodecim-dtk-journal' : 'duodecim-journal');
+		// item.tags.push((isDTK || isDTKLegacy) ? 'duodecim-dtk-journal' : 'duodecim-journal'); // ZOTERO: searching with libraryCatalog==='Duodecim' && itemType==='journalArticle'
 		item.ISSN = journalISSN[prefix];
 		item.journalAbbreviation = journalAbbr[prefix];
 		if (journalMetadata.volume) item.volume = journalMetadata.volume;
@@ -775,21 +776,8 @@ async function doWeb(doc, url) {
 
 	// PARSING ABSTRACT
 	// ESLINT-SCAFFOLD: removing hyperlinks from abstract block would alter PDF and snapshot. Reason being that innerText during ESLint test won't handle hyperlinks properly.
+	// JS: using .textContent would break abstractNotes
 	Zotero.debug('doWeb(): extracting abstract');
-	// var abstractRaw = innerText(`div.${dClass}aside`) // A gray box containing usually bulleted lists
-	// 	|| innerText('section[role="main"] aside') // Terveyskirjasto.fi: "Katso myös" is also an <aside>, although it is in the right column.
-	// 	|| innerText('section[role="main"] p').replace(/[\xA0\r\s]+/g, " ") // Terveyskirjasto.fi does not use dClass class prefix. Element tags are used instead for some content elements.
-	// 	|| innerText(`.${dClass}section .${dClass}header`) // removed '.${dClass}body >': In many cases, duo-section does not reside right under a body class TODO examples
-	// 	|| innerText(`.${dClass}section > p > em`).replace(/[\xA0\r\s]+/g, " ") // e.g. duo11158
-	// 	|| innerText(`.${dClass}section > p`).replace(/[\xA0\r\s]+/g, " ") // First paragraph
-	// 	|| null;
-	// var abstractElement = doc.querySelector(`div.${dClass}aside`) // A gray box containing usually bulleted lists
-	// 	|| doc.querySelector('section[role="main"] aside') // Terveyskirjasto.fi: "Katso myös" is also an <aside>, although it is in the right column.
-	// 	|| doc.querySelector('section[role="main"] p') // Terveyskirjasto.fi does not use dClass class prefix. Element tags are used instead for some content elements.
-	// 	|| doc.querySelector(`.${dClass}section .${dClass}header`) // removed '.${dClass}body >': In many cases, duo-section does not reside right under a body class TODO examples
-	// 	|| doc.querySelector(`.${dClass}section > p > em`) // e.g. duo11158
-	// 	|| doc.querySelector(`.${dClass}section > p`) // First paragraph
-	// 	|| null;
 	const abstractSelectors = [
 		'section[role="main"] aside', // terveyskirjasto.fi: "Katso myös" is also an <aside>, although it is in the right column.ˆ
 		'section[role="main"] p', // terveyskirjasto.fi does not use dClass class prefix. Element tags are used instead for some content elements.ˆ
@@ -845,7 +833,7 @@ async function doWeb(doc, url) {
 	// Finalize and save item
 	// Zotero.debug(`Complete: item.attachments length: ${Object.keys(item.attachments).length}`);
 	// Zotero.debug(`COMPLETE with ${item.attachments.length} attachments. Adding 'duodecim-translator' tag.`);
-	item.tags.push('duodecim-translator');
+	// item.tags.push('duodecim-translator'); DEPRECATED: Zotero addes automatically a 'Duodecim' to libraryCatalog field
 	// Zotero.debug(`item.complete(): ${JSON.stringify(item)}`);
 	item.complete();
 }
@@ -911,11 +899,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "duodecim-translator"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -952,11 +936,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "duodecim-translator"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -993,11 +973,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "duodecim-translator"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1035,11 +1011,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "duodecim-translator"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1093,9 +1065,6 @@ var testCases = [
 				"tags": [
 					{
 						"tag": "duodecim-dtk"
-					},
-					{
-						"tag": "duodecim-translator"
 					}
 				],
 				"notes": [],
@@ -1133,11 +1102,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "duodecim-translator"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1174,11 +1139,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "duodecim-translator"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1214,11 +1175,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "duodecim-translator"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1284,12 +1241,6 @@ var testCases = [
 				"tags": [
 					{
 						"tag": "duodecim-englanti-Dlehti"
-					},
-					{
-						"tag": "duodecim-journal"
-					},
-					{
-						"tag": "duodecim-translator"
 					}
 				],
 				"notes": [],
@@ -1358,12 +1309,6 @@ var testCases = [
 				"tags": [
 					{
 						"tag": "duodecim-englanti-Dlehti"
-					},
-					{
-						"tag": "duodecim-journal"
-					},
-					{
-						"tag": "duodecim-translator"
 					}
 				],
 				"notes": [],
@@ -1427,12 +1372,6 @@ var testCases = [
 				"tags": [
 					{
 						"tag": "duodecim-englanti-Dlehti"
-					},
-					{
-						"tag": "duodecim-journal"
-					},
-					{
-						"tag": "duodecim-translator"
 					}
 				],
 				"notes": [],
@@ -1493,14 +1432,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "duodecim-journal"
-					},
-					{
-						"tag": "duodecim-translator"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
