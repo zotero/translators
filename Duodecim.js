@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-06-24 16:34:06"
+	"lastUpdated": "2026-06-25 15:01:50"
 }
 
 /*
@@ -35,38 +35,68 @@
 	***** END LICENSE BLOCK *****
 */
 
+// TL;DR: Duodecim platforms do not feature proper metadata.
+
 /**
- * Changelog 260624:
- * - Corrected, more omnipotent sortKey extraction
- * - Changed abstract extraction selector portfolio
- * - Streamlined parseAuthors() returning straight to item.creators
- * - onCampus(): new selector algorithm for network detection amid revamp
+ * ***** COMMENT TYPES *****
+ * Some comments are catagorized in the form <category>:? <comment text>
+ * 
+ * // e.g.: followed by TDOIs OR a type of content. Some TDOIs require subscription and are not included in public testCases.
+ * // Zotero.debug(): optional debug statements. Statements should beging with the member function name or the stages in doWeb().
+ * // CAPITAL LETTERS: sections of code
+ * // JS: JavaScript syntax
+ * // ZU: adoption of Zotero.Utilities library functions OR reason why a ZU is not used OR Zotero authomated actions
+ * // ESLINT: warning from ESLINT during GitHub pull request test
+ * // ESLINT-SCAFFOLD: discrepancies between Scafford (Zotero 9) and the test
+ * // CITATION: compliances with / deriviations from standard APA 7th edition
+ * // CSL: filling in CSL fields
+ * // FINNISH: concerning handling the Finnish language or Finland exclusives
+ * // TYPE: usually CSS selectors for spicific platform/content
+ * // TODO: to-dos
+ * // other comments beginning with lower case letters: line explaination; commented code blocks
  */
 
-// TL;DR: Duodecim (Finnish Medical Society) platforms do not feature proper metadata.
-
-// TODO: determine minimal priority
-// TODO: categorize comments with // <category>: <comment text>
+/**
+ * ***** ABBREVIATIONS / KEY CONCEPTS *****
+ * Duodecim: Finnish Medical Society Duodecim; also means Duodecim Publishing Company
+ * TDOI: Duodecim uses universal URI. Most such URIs may be accessed in Terveysportti, in the form `https://www.terveysportti.fi/doi/<TDOI>`, hence 'T' starting the name.
+ * DTK: Duodecim TietoKanta, 'Duodecim database'.
+ * 
+ * Abbreviation list of Duodecim domains:
+ * TP: terveysportti.fi, 'health portal'
+ * - LäTK: LääkeTietoKanta, 'medicinal database'
+ * OP: oppiportti.fi, 'learning portal'
+ * TK: terveyskirjasto.fi, ' health library'
+ * KP: kaypahoito.fi, Käypä hoito -suositus, offical English name Current Care Guideline(s)
+ * CCG: Current Care Guideline
+ * see also:
+ * - target URL regex
+ * - comment block before testCases
+ *
+ * Abbreviation list of content published by or hosted on Duodecim platforms:
+ * DLehti: Medical Journal Duodecim
+ * SLL: Suomen LääkäriLehti, Finnish Medical Journal
+ * YKT: Lääkärin käsikirja, 'Doctor's manual'
+ * EBM/EBMG: Evidence-Based Medical Guidelines, English translations of YKT.
+ */
 
 // ***** GLOBAL HELPER FUNCITONS *****
 
 /**
  * Parse author names with title removal (handles Finnish naming conventions)
  * This function might not preserve abbreviated middle names for articles like Cochrane or Dynamed summaries.
+ * ZU.cleanAuthor() won't split raw name strings properly.
  * A complex example and its handling: voh00042 (paid article, requires subscription to TP)
  * @param {string} nameString From doWeb()
  * @param {boolean} isSingleString From doWeb()
  * @returns Object: Zotero author object
  */
-// function parseAuthors(nameString, isSingleAuthor, lang) { @param {string} lang 'en' or 'fi'
 function parseAuthors(nameString, isSingleAuthor) {
 	// Zotero.debug('parseAuthors(): parsing authors.');
-	// SINGLE, GROUP AUTHOR
+	// SINGLE-WORD, GROUP AUTHOR
 	if (!/\s/.test(nameString)) {
 		Zotero.debug('parseAuthors(): Single-word author.');
 		if (['Toimitus', 'Editors'].includes(nameString)) return []; // e.g. dlk00221, ykt00096, ebm00069
-		// ESLINT: creators should be an array?
-		// return nameString; // One-word institutions,
 		return [{
 			lastName: nameString,
 			creatorType: 'author',
@@ -74,53 +104,47 @@ function parseAuthors(nameString, isSingleAuthor) {
 		}];
 	}
 
-	// Zotero.debug(`parseAuthors(): automatic by ZU.cleanAuthor(): ${JSON.stringify(ZU.cleanAuthor(nameString, 'author', true))}`);
-	// TODO 260529 EBM bug: cleanAuthor() won't spllit multiple authors. Authors with names beginning with non-capital char like van, von, deXXXX...
-	// if (lang === 'en') {
-	// 	Zotero.debug('parseAuthors(): Handing over to ZU.cleanAuthor()');
-	// 	const authorZU = ZU.cleanAuthor(nameString, 'author', true);
-	// 	Zotero.debug(`Returned from ZU.cleanAuthor(): ${JSON.stringify(authorZU)}`);
-	// 	return ZU.cleanAuthor(nameString, 'author', true);
-	// }
-
-	nameString = /\n/.test(nameString) // two-line author fields,
-		? nameString.split('\n')[1] // in which the first line is usually the same as copyright/organization name, e.g. nla00004
-		: nameString;
-
-	const ccgGroup = /(^Käypä hoito|.*työryhmä).*/i.test(nameString); // Author handling: Determine if this is a CCG (Käypä hoito) page by a group author (regex: subitems under a main CCG without human authors | group authors)
+	// ONE GROUP AUTHOR
+	const ccgGroup = /(^Käypä hoito|.*työryhmä).*/i.test(nameString); // single group author for CCG
 	if (ccgGroup || isSingleAuthor) {
 		return [{
 			lastName: nameString,
-			creatorType: ccgGroup ? 'bookAuthor' : 'author', // APA citing CCG content: Long group author string
-			fieldMode: 1 // cite: via other translators
+			creatorType: ccgGroup ? 'bookAuthor' : 'author', // CITATION: APA citing CCG content: Long group author string
+			fieldMode: 1 // CITATION: via other translators
 		}];
 	}
 
-	// HUMAN AUTHOR(s) or MULTIPLE AUTHORS
+	// TWO-LINE AUTHOR FIELD
+	nameString = /\n/.test(nameString) // in which the first line is usually the same as copyright/organization name
+		? nameString.split('\n')[1] // e.g. nla00004
+		: nameString;
+
+	// HUMAN AUTHOR(s) / MULTIPLE AUTHORS
 	var nameArray = [];
 	const capitalRegex = /[A-ZÄ-Ö]/; // currently matching U+00C4 – U+00D6 (ASCII 192–214)
 
-	for (const seg of nameString.split(/,\s*|\s+(ja|and)\s+/i)) {
+	for (const seg of nameString.split(/,\s*|\s+(ja|and)\s+/i)) { // FINNISH: 'ja' means 'and'
 		if (typeof seg !== 'string') continue;
-		if (seg.toString().split(' ').length < 2) continue; // Removing titles between commas and generic author placeholders
+		if (seg.toString().split(' ').length < 2) continue; // removing titles between commas and generic author placeholders
 		var isGroupAuthor = false;
-
-		const toPush = (function (str) {
+		// JS: anonymous function | I could not think of a better implementation.
+		const toPush = ((str) => { // ESLINT: Function declared in a loop contains unsafe references to variable(s) 'isGroupAuthor'
 			const words = str.toString().split(' ');
 			var nameOnly = '';
-			// for (const word of words) {
 			for (let i = 0; i < words.length; i++) {
 				if (capitalRegex.test(words[i].charAt(0))
 					&& !(capitalRegex.test(words[i].charAt(words[i].length - 1))) // not ending with capital letter
-					&& !(/^(TtM|AMK|YAMK)-?.*/.test(words[i]))) { // specific title removal: exclude TtM prefix titles
+					&& !(/^(TtM|AMK|YAMK)-?.*/.test(words[i]))) { // FINNISH: remove titles/degrees of authors
 					nameOnly += words[i] + ' ';
-				} else {
+				}
+				else {
 					Zotero.debug(`parseAuthors(): judging exceptional word "${words[i]}" in raw name string. Index from 0: i=${i} of ${words.length - 1}`);
 					if (i === (words.length - 1)) { // e.g. shk00004
 						nameOnly += words[i];
 						isGroupAuthor = true;
 						// Zotero.debug(`parseAuthors(): toPush group author ${nameOnly}`);
-					} else {
+					}
+					else {
 						nameOnly = ''; // e.g. dlk00084
 						// Zotero.debug(`parseAuthors(): excluding segment ${str}`);
 					}
@@ -128,7 +152,6 @@ function parseAuthors(nameString, isSingleAuthor) {
 			}
 			return nameOnly.trim();
 		})(seg);
-
 		if (!toPush.length) continue;
 
 		if (!isGroupAuthor) {
@@ -139,8 +162,9 @@ function parseAuthors(nameString, isSingleAuthor) {
 				creatorType: 'author',
 			});
 			// Zotero.debug(`parseAuthors(): pushed name object ${JSON.stringify(nameArray[nameArray.length - 1])}`);
-		} else {
-			Zotero.debug(`parseAuthors(): pushing non-CCG group author to nameArray ${toPush}`);
+		}
+		else {
+			// Zotero.debug(`parseAuthors(): pushing non-CCG group author to nameArray ${toPush}`);
 			nameArray.push({
 				lastName: toPush,
 				creatorType: 'author',
@@ -159,11 +183,10 @@ function parseAuthors(nameString, isSingleAuthor) {
  */
 function returnProtect(inner) {
 	const innerArray = inner.split('\n');
-	// Zotero.debug(`returnProtect split:\n${innerArray}`);
+	// Zotero.debug(`returnProtect() split:\n${innerArray}`);
 	var output = '';
 	if (innerArray.length === 1) return inner;
 	for (const line of innerArray) {
-		// const cleanLine = ZU.superCleanString(line.replace(/[\xA0\r\s]+/g, " ")); // ZU function only trims; 260623: also trims ending period dot (.).
 		const cleanLine = line.replace(/[\xA0\r\s]+/g, " "); // ZU.superCleanString only trims; 260623: ZU.superCleanString also trims EOL period dot (.).
 		output += `${cleanLine}\n`;
 	}
@@ -172,7 +195,7 @@ function returnProtect(inner) {
 }
 
 /**
- * More forceful string cleaning
+ * More forceful string cleaning, especially when ZU.superCleanString() does not work as expected
  * @param {string} raw
  * @returns one-line, clean string
  */
@@ -183,18 +206,19 @@ function ultimateOneLiner(raw) {
 /**
  * Find book title as part of TDOI
  * Some TDOIs are exclusive to some DTKs.
- * Using prefix to not be confused with `item.bookTitle`.
- * @param {string} tdoi Duodecim uses universal URI, Most such URIs may be accessed in Terveysportti, hence the name.
+ * Each prefix refer to one book or one type of resource.
+ * Using 'prefix' to not be confused with `item.bookTitle`.
+ * @param {string} tdoi
  * @returns {string} Prefix
  */
 function findPrefixTDOI(tdoi) {
-	const prefixRegex = /^[a-z]{3}/;
+	const prefixRegex = /^([a-z]{3}|cd)(?![a-z])/;
 	return (prefixRegex.test(tdoi)) ? tdoi.match(prefixRegex)[0] : tdoi;
 }
 
 /**
  * Fallback, static version of tdoiRedirect()
- * Some Terveysportti articles may be accessed with a shorted URL than the final URL under a DTK, i.e. terveysportti.fi/doi/<TDOI>
+ * Collecting prefixes by containing DTKs.
  * @param {string} prefix
  * @returns {boolean} whether to shorten item.URL
  */
@@ -211,37 +235,37 @@ function urlShortenerStatic(prefix) {
 	// const doiOPPI = ''; // Naming: the legacy DTK containing textbook articles from Oppiportti is 'oppi'. Nowadays TDOI redirection goes to oppiportti.fi or specialized DTK
 	// const doiBook = concat(doiLTK,' ',doiAHO,' ',doiTKT,' ',doiHAT,' ',doiSHK,' ',doiVHT,' ',doiVSO,' ',doiOPPI).split(' '); // TODO: also in attachment addiction
 	const doiBook = 'ebm vso'.split(' ').concat(doiLTK, doiAHO, doiHAT, doiSHK).toSorted();
-	if (doiBook.includes(prefix)) {
+	if (doiBook.includes(prefix)) { // JS: array find
 		Zotero.debug('urlShortenerStatic(): Shortening URL.');
 		return true;
-	} // JS: array find
+	}
 	Zotero.debug('urlShortenerStatic(): not shortening URL.');
 	return false;
 }
 
 /**
- * Send a TDOI redirection request and see whether the short link works and where it leads to.
- * @param {string} tdoi TDOI
+ * Sends a TDOI redirection request and checks whether the short link works and where it leads to.
+ * @param {string} tdoi
  * @returns {boolean} Whether a TDOI is redirectable
  */
 async function tdoiRedirect(tdoi) {
 	const tdoiURL = 'https://www.terveysportti.fi/doi/' + tdoi;
-	Zotero.debug(`tdoiRedirect(): fetching TDOI URL`);
-	const tdoiObj = new URL(await ZU.request(tdoiURL).then(response => {
-		Zotero.debug(`tdoiRedirect(): responsing URL: ${response.responseURL}`); // Zotero's response JSON has its own structure.
+	// Zotero.debug(`tdoiRedirect(): fetching TDOI URL`);
+	const tdoiObj = new URL(await ZU.request(tdoiURL).then((response) => {
+		Zotero.debug(`tdoiRedirect(): responsing URL: ${response.responseURL}`); // ZU: response JSON has its own structure.
 		return response.responseURL;
 	}));
 
 	if (tdoiObj.hostname === 'www.terveysportti.fi' && /^\/apps\/dtk\/.*/.test(tdoiObj.pathname)) {
-		Zotero.debug('tdoiRedirect: returning true > shortening item URL');
+		Zotero.debug('tdoiRedirect(): returning true > shortening item URL');
 		return true;
 	}
-	Zotero.debug(`tdoiRedirect(): No TDOI redirect loaded.`);
+	// Zotero.debug(`tdoiRedirect(): No TDOI redirect loaded.`);
 	return false;
 }
 
 /**
- * Streamlining item.url processing
+ * Streamlining item.url processing by domain or by calling tdoiRedirect()
  * @param {Object} urlObj passing in a URL object as doWeb() relies on URL object
  * @param {string} tdoi TDOI
  * @returns {string} generated URL
@@ -250,30 +274,35 @@ async function urlGen(urlObj, tdoi) {
 	// Determine base URL for item URL construction
 	var genURL = urlObj.href;
 	var divider = /\/article\/empty/.test(genURL) ? 'empty' : tdoi;
+	
+	// TODO: LäTK
 	// const isLaake = /apps\/laake\//.test(url) ? true : false;
-	// if (urlShortenerStatic(prefix)) {
+	
 	try {
-		if (await tdoiRedirect(tdoi)) {
+		if (await tdoiRedirect(tdoi)) { // if (urlShortenerStatic(prefix)) {
 			Zotero.debug('urlGen(): TDOI leads to DTK page. Shortening URL.');
 			genURL = 'https://www.terveysportti.fi/doi/' + tdoi;
-		} else if (urlObj.hostname !== 'www.terveysportti.fi') { // Terveyskirjasto, Käypä hoito, D-lehti, Oppiportti
+		}
+		else if (urlObj.hostname !== 'www.terveysportti.fi') {
 			genURL = urlObj.origin + '/';
 		}
-		// else if (isLaake) { // TODO LäTK
+		// else if (isLaake) {
 		// 	baseUrl = doc.url;
 		// }
 		else if (divider) {
 			// Zotero.debug('urlGen(): Constructing URL by source URL concatenation.');
 			genURL = genURL.split(divider)[0] + tdoi;
-		} else {
+		}
+		else {
 			genURL = genURL.split('/article/')[0] + '/article/' + tdoi;
 		}
-	} catch (e) {
+	}
+	catch (e) {
 		Zotero.debug(`urlGen(): encountered error ${e} on line ${e.lineNumber}`);
 		Zotero.debug(`urlGen(): attempting static lookup`);
 		genURL = urlShortenerStatic(findPrefixTDOI(tdoi)) ? 'https://www.terveysportti.fi/doi/' + tdoi : urlObj.href;
 	}
-	if (urlObj.href.includes(tdoi + '/artikkeli')) { // Could be in lääketietokanta.
+	if (urlObj.href.includes(tdoi + '/artikkeli')) { // could be in LäTK.
 		genURL = urlObj.href;
 	}
 	if (typeof genURL !== 'string') { // fallback
@@ -306,7 +335,7 @@ function englishSource(prefix, url) {
 function normalizePublisher(raw) {
 	if (!raw) return '';
 	var s = raw.replace(/[©\u00A9]/g, '').replace(/\(?\d{4}\)?/, '').trim();
-	if (/kustannus oy duodecim/i.test(s) || /duodecim/i.test(s)) return 'Duodecim'; // 'Duodecim Publishing Company' would be verbose in APA style.
+	if (/kustannus oy duodecim/i.test(s) || /duodecim/i.test(s)) return 'Duodecim'; // CITATION: 'Duodecim Publishing Company' would be verbose in APA style.
 	return s;
 }
 
@@ -316,10 +345,13 @@ function normalizePublisher(raw) {
  * @returns {Array} or null
  */
 function journalPage(nlmString) {
-	const nlmRegex = /(?<year>\d{4});(?<volume>.*?)\((?<issue>.*?)\):(?<pages>.*)/; // Also works for duodecimlehti.fi
+	const nlmRegex = /(?<year>\d{4});(?<volume>.*?)\((?<issue>.*?)\):(?<pages>.*)/; // also works for duodecimlehti.fi
 	try {
 		return nlmString.match(nlmRegex).groups;
-	} catch (e) {}
+	}
+	catch (e) {
+		Zotero.debug(`journalPage(): ERROR on line ${e.lineNumber}: ${e}`);
+	}
 	return null;
 }
 
@@ -336,7 +368,10 @@ function eurDateToISO(dmy) {
 		const eurISODate = `${date.year}-${ZU.lpad(date.month, '0', 2)}-${ZU.lpad(date.day, '0', 2)}`;
 		// Zotero.debug(`eurDateToISO(): returning ISO date: ${eurISODate}`);
 		return eurISODate;
-	} catch (e) {}
+	}
+	catch (e) {
+		Zotero.debug(`eurDateToISO(): ERROR on line ${e.lineNumber}: ${e}`);
+	}
 	return null;
 }
 
@@ -349,10 +384,11 @@ function lastDate(div) {
 	if (!div) return '';
 	if (div.hasAttribute('datetime')) return div.getAttribute('datetime');
 
-	if (div.childNodes.length > 1) { // Zotero.debug('lastDate(): retrieving last modified date.');
+	if (div.childNodes.length > 1) {
+		// Zotero.debug('lastDate(): retrieving last modified date.');
 		var date = '';
 		date = eurDateToISO(div.querySelector('var')); //  text in read
-		if (!date) { // e.g. 'Päivitetty kokonaisuudessaan' / two <span>s
+		if (!date) { // e.g. ykt/ebm 'Päivitetty kokonaisuudessaan' / two <span>s
 			const spans = div.querySelectorAll('span');
 			date = eurDateToISO(spans[1]);
 			date = !date ? eurDateToISO(spans[0]) : date;
@@ -370,7 +406,7 @@ function lastDate(div) {
  * @returns {Promise<boolean>} whether the network IP is a subscriber to the url
  */
 async function onCampus(path = '/e48243') {
-	const sllTestDoc = await ZU.requestDocument(`https://www.laakarilehti.fi${path}`).then(doc => {
+	const sllTestDoc = await ZU.requestDocument(`https://www.laakarilehti.fi${path}`).then((doc) => {
 		// return doc.title;
 		return doc;
 	});
@@ -391,10 +427,10 @@ async function onCampus(path = '/e48243') {
  * @returns content type {string} or false {boolean}
  */
 async function detectWeb(doc, url) {
-	if (doc.querySelector('.duo-meta_journal') // DTK journals
+	if (doc.querySelector('.duo-meta_journal') // journals on DTK
 		|| doc.querySelector('.dl-article-bibliographic') // duodecimlehti.fi; devtools inline test: document.querySelector('div.dl-article-bibliographic').innerText.match(/(?<year>\d{4});(?<volume>.*?)\((?<issue>.*?)\):(?<pages>.*)/).groups
-		|| /article\/sic\d{5}/g.test(url) // Sic! Fimea in vht
-		|| /\/sic\d{5}\/artikkeli/g.test(url)) { // Sic! Fimea in lääketietokanta
+		|| /article\/sic\d{5}/g.test(url) // in vht DTK: Sic! Fimea
+		|| /\/sic\d{5}\/artikkeli/g.test(url)) { // in LäTK: Sic! Fimea
 		return 'journalArticle';
 	} else if (doc.querySelector('.duo-database') || doc.querySelector('.duo-sortkey') || doc.querySelector('h1')) { // TODO generalization
 		return 'bookSection';
@@ -413,7 +449,7 @@ async function detectWeb(doc, url) {
  * index options
  * publisher
  * journal-dependent fields and PDF attachment specifics
- * webpage snapshot
+ * snapshot
  * abstract
  * @param {*} doc document
  * @param {*} url document.URL
@@ -421,7 +457,7 @@ async function detectWeb(doc, url) {
 async function doWeb(doc, url) {
 	var item = new Zotero.Item(await detectWeb(doc, url));
 
-	const isJournal = (item.itemType === 'journalArticle'); // Determine item type; ready to extract journal-specific data
+	const isJournal = (item.itemType === 'journalArticle');
 
 	// PARSING LINK AND TDOI LOCATOR
 	const urlObj = new URL(url); // TODO keep hash link
@@ -436,8 +472,8 @@ async function doWeb(doc, url) {
 
 	// LOCATOR: PAGE LAYOUT INSPECTION: determining CSS class selector
 	const dClass = (isDTKLegacy || isDLehti)
-		? '' // legacy doc.querySelector('div.date')/ lääketietokanta
-		: (isOP || isTK || doc.querySelector('div.d-updated')) // + lääketietokanta
+		? '' // legacy doc.querySelector('div.date')/ LäTK
+		: (isOP || isTK || doc.querySelector('div.d-updated')) // also works for some articles on LäTK
 			? 'd-'
 			: 'duo-'; // DTK, CCG (CCG: header element for DTK is present in HTML but is not displayed (display: none in CCG's CSS))
 	Zotero.debug(`Determined dClass prefix: '${dClass}'`);
@@ -446,8 +482,8 @@ async function doWeb(doc, url) {
 		? /\/article\/(\w{2,3}\d{5,6})(?![\w\d])/
 		: isDTKLegacy
 			? /(?<=avaa\?p_artikkeli=)\w{3}\d{5}(?![\w\d])/
-			: /(?<=\/)\w{3}\d{5}(?![\w\d])/; // TODO , LäKT
-	const tdoi = text(`div.${dClass}identifier span`) // TK, legacy
+			: /(?<=\/)\w{3}\d{5}(?![\w\d])/; // TODO LäKT
+	const tdoi = text(`div.${dClass}identifier span`) // TYPE TK, legacy
 		|| text(`span.${dClass}identifier`)
 		|| urlMatchRegex.test(url)
 		? url.match(urlMatchRegex)[isDTK ? 1 : 0]
@@ -456,27 +492,29 @@ async function doWeb(doc, url) {
 	Zotero.debug(`doWeb(): ${/^\w{3}\d{5}$/.test(tdoi) ? '' : 'INVALID'}TDOI=${tdoi}`);
 	const prefix = findPrefixTDOI(tdoi);
 
-	item.url = (isDTK && isTP) // Keeping non-TP domains
+	item.url = (isDTK && isTP) // keeping non-TP domains
 		? await urlGen(urlObj, tdoi)
 		: (isOP || isTK || isKP)
-			? 'https://' + urlObj.host + '/' + tdoi // oppiportti and public
+			? 'https://' + urlObj.host + '/' + tdoi // TYPE: OP and publicly accessible content
 			: url;
 
-	item.language = englishSource(prefix, urlObj) // ISO 639 set 1
+	item.language = englishSource(prefix, urlObj) // CSL: ISO 639 set 1
 		? 'en'
 		: ((['khr', 'gvr'].includes(prefix)) // TODO collect statics
 			? 'se'
-			: 'fi'); // Make Finnish the default language
+			: 'fi'); // make Finnish the default language
 
 	// PARSING AUTHORS
 	var authorClass = doc.querySelector('div.duo-authors-link')
-		? 'div.duo-authors-link' // ykt, ebm
+		? 'div.duo-authors-link' // TYPE ykt, ebm
 		: isDLehti
 			? 'div.dl-article-editors-container'
 			: dClass === ''
 				? 'div.person'
 				: `div.${dClass}authors`;
-	// var authorsRaw = doc.querySelector(authorClass) ? innerText(authorClass) : null; ESLint: won't make <br> a \n
+	
+	// ESLINT-SCAFFOLD: won't make <br> a \n
+	// var authorsRaw = doc.querySelector(authorClass) ? innerText(authorClass) : null;
 	const twoLineAuthor = doc.querySelector(authorClass) ? doc.querySelector(authorClass).querySelector('br') : false;
 	var authorsRaw = doc.querySelector(authorClass)
 		? twoLineAuthor
@@ -490,7 +528,7 @@ async function doWeb(doc, url) {
 	if(authorsRaw) item.creators = parseAuthors(authorsRaw, singleAuthor, item.language);
 
 	// PARSING DATE
-	// Extract updated element or journal metadata
+	// extract updated element or journal metadata
 	var dateSelector = doc.querySelector('div.date') ? 'div.date' : `div.${dClass}updated`;
 
 	var dateStr = lastDate(doc.querySelector(dateSelector));
@@ -499,18 +537,18 @@ async function doWeb(doc, url) {
 	// PARSING TITLE
 	item.title = text('h1').replace(/[\xA0\r\s]+/g, " "); // e.g. hot00013
 	// Zotero.debug(`item.title: ${item.title}`);
-	if (/: /.test(item.title)) { // Finnish language: semicolon in Finnish may be used in inflecting abbreviations, hence ': ' instead of ':'
+	if (/: /.test(item.title)) { // FINNISH: semicolon followed by a suffix in Finnish may be used in inflecting abbreviations, hence ': ' instead of ':'
 		item.shortTitle = item.title.split(': ')[0];
 		if (item.shortTitle === 'Tietoa potilaalle') { // TODO collect statics
 			item.shortTitle = item.title.split(':')[1];
-			// Zotero would remove shortTitle since the two titles are now the same
 			item.title = item.shortTitle; // patient-oriented articles on terveyskirjasto.fi do not feature 'Tietoa potilaalle' in title.
+			// ZU: Zotero would remove shortTitle since the two titles are now the same
 		}
 	} else if (/[-–]/.test(item.title)) { // en dash, Alt + (numpad) 0150 / (macOS) Option + -
-		item.shortTitle = item.title.split('-')[0];
+		item.shortTitle = item.title.split(/[-–]/)[0];
 	}
 
-	const dbRaw = text(`div.${dClass}database`) || (isDLehti ? 'Lääketieteellinen Aikakauskirja Duodecim' : null); // APA requires that journal titles be written in its offical, original form.
+	const dbRaw = text(`div.${dClass}database`) || (isDLehti ? 'Lääketieteellinen Aikakauskirja Duodecim' : null); // CITATION: APA requires that journal titles be written in its offical, original form.
 	if (dbRaw && isJournal) item.publicationTitle = dbRaw;
 	if (dbRaw && !isJournal) item.bookTitle = dbRaw;
 	if (prefix === 'nix' && isKP) item.bookTitle += `: ${innerText('div.additional-links.kh-noprint a')}`;
@@ -518,18 +556,18 @@ async function doWeb(doc, url) {
 	// PARSING INDEX OPTIONS: tags, sortKey, TDOI
 	if (isDTK) item.tags.push('duodecim-dtk');
 	if (isDTKLegacy) item.tags.push('duodecim-dtk-legacy');
-	// Constructing option 1: Get sort key from span.duo-sortkey (text in parentheses)
+	// constructing option 1: Get sort key from span.duo-sortkey (text in parentheses)
 	var sortKeyText = text(`.${dClass}sortkey`)
-		|| text(`div.d-identifier`); // Oppiportti oppikirjat (textbook articles): sortKey goes after a span element containing TDOI.
+		|| text(`div.d-identifier`); // TYPE: OP (textbook articles): sortKey goes after a span element containing TDOI.
 	var sortKey = '';
 	if (sortKeyText) {
 		var match = sortKeyText.match(/(?<=\().*(?=\))/);
 		if (match) sortKey = match[0];
 		if (isDTKLegacy) sortKey = sortKeyText;
+		// Zotero.debug(`sortKey = ${sortKey}`);
 	}
-	// Zotero.debug(`sortKey = ${sortKey}`);
 
-	// Constructing option 2: Set archive/call number
+	// constructing option 2: Set archive/call number
 	var archive = isDTK
 		? text('ul li.nav-item a.nav-link')
 		: isTP
@@ -540,9 +578,9 @@ async function doWeb(doc, url) {
 					? 'Terveyskirjasto'
 					: isKP
 						? 'Käypä hoito'
-						: ''; // || getText('div.dbbar'); TODO: legacy: fetch DTK name?
+						: ''; // || innerText('div.dbbar');
 
-	if (archive && (archive !== item.bookTitle)) item.archive = archive;
+	if (archive && (archive !== item.bookTitle)) item.archive = archive; // CITATION: prevent identical fields, esp. CCG
 	item.archiveLocation = sortKey ? sortKey : tdoi;
 	item.callNumber = tdoi; // for Zotero DB search by TDOI
 
@@ -585,7 +623,7 @@ async function doWeb(doc, url) {
 	// TODO wrap statics
 	// TODO Finna?
 	var journalISSN = {};
-	journalISSN.sll = '0039-5560, 2489-7493'; // Zotero: Using comma per Zotero forum discussion 94009
+	journalISSN.sll = '0039-5560, 2489-7493'; // ZOTERO: Using comma per Zotero forum discussion 94009
 	journalISSN.duo = '0012-7183, 2242-3281';
 	journalISSN.hle = '0786-5686, 2954-2464';
 
@@ -600,36 +638,30 @@ async function doWeb(doc, url) {
 		if (journalMetadata.volume) item.volume = journalMetadata.volume;
 		if (journalMetadata.issue) item.issue = journalMetadata.issue;
 		if (journalMetadata.pages) item.pages = journalMetadata.pages;
-
-		// Duodecim journal's website (duodecimlehti.fi) does not do a good job in searching for themed issue or series titles like 'Näin hoidan' [This is how I treat]
-		// Nevertheless, I have not found a citation style that requires adding this to bibliography list.
-		if (journalMetadata.genre) item.section = journalMetadata.genre;
+		if (journalMetadata.genre) item.section = journalMetadata.genre; // duodecimlehti.fi does not do a good job in searching for themed issue or series titles like 'Näin hoidan' [This is how I treat]
 	}
 
 	// var englishTitle = '';
-	var englishSummary = '';
+	var englishSummary = ''; // English summary extraction for DUO and SLL. In recent years, articles on these journals no longer feature an English summary.
 	// PARSING duo and sll: possible English title and abstract; PDF as file and hyperlink
-	if (prefix === 'duo' && dbRaw === 'Lääketieteellinen Aikakauskirja Duodecim') {
+	if (prefix === 'duo' || dbRaw === 'Lääketieteellinen Aikakauskirja Duodecim') {
 		if (!isDLehti) item.archiveLocation = tdoi; // searching with sortkey in LTK won't find the item.
 
-		// English summary extraction. In recent years, articles on Duodecim and SLL journals no longer feature an English summary.
 		const h2 = doc.querySelectorAll('h2');
 		if (h2 && (/^English summary.*/i).test(h2[0].innerText)) {
 			try {
-				// item.title += ` [${h2[0].innerText.match(/(?<=English summary: ).*/m)[0].replace(/[\xA0\r\n\s]+/g, ' ')}]`; // ESLint: duo99748: matching null; innerText for innerHTML?
-				item.title += ` [${ultimateOneLiner(innerText('h2')).match(/(?<=English summary: ).*/m)[0]}]`; // ESLint: duo99748: matching null
+				// item.title += ` [${h2[0].innerText.match(/(?<=English summary: ).*/m)[0].replace(/[\xA0\r\n\s]+/g, ' ')}]`; // ESLINT-SCAFFOLD: duo99748: matching null; innerText for innerHTML?
+				item.title += ` [${ultimateOneLiner(innerText('h2')).match(/(?<=English summary: ).*/m)[0]}]`; // e.g. duo99748
 			}
 			catch (error) {
-				Zotero.debug(`D-Lehti: error on English title addiction: ${error}`);
+				Zotero.debug(`D-Lehti: error on line ${error.lineNumber} during English title addiction: ${error}`);
 			}
-			// if (item.abstractNote) item.abstractNote += `\n\n${doc.querySelectorAll('em')[1].innerText}`; // Failsafe: no English summary before official Finnish abstract
-			// englishSummary = `${doc.querySelectorAll('em')[1].innerText}`; // Failsafe: no English summary before official Finnish abstract
 			englishSummary = `${ultimateOneLiner(innerText('em', 1))}`; // Failsafe: no English summary before official Finnish abstract
 			item.tags.push('duodecim-englanti-Dlehti');
 		} else { // e.g. duo11158
 			const em = doc.querySelectorAll('p em');
 			if (em) {
-				em.forEach(p => {
+				em.forEach((p) => {
 					if (/^English summary.*/i.test(p.innerText)) {
 						item.title += ` [${p.innerText.match(/(?<=English summary: ).*/)[0]}]`;
 						englishSummary = `${p.parentNode.nextElementSibling.innerText}`;
@@ -655,9 +687,9 @@ async function doWeb(doc, url) {
 		});
 	}
 
-	// sll: English summary (If applicable) comes usually before reference list. Just in case, iterate through all <h2>s.
+	// sll: English summary (If applicable) comes usually before reference list aka the second to the last <h2>. Just in case, iterate through all <h2>s.
 	if (prefix === 'sll' && dbRaw === 'Suomen Lääkärilehti') {
-		doc.querySelectorAll('h2').forEach(h2 => {
+		doc.querySelectorAll('h2').forEach((h2) => {
 			Zotero.debug(`Current <h2>: ${h2.innerText}`);
 			if ((/^English summary.*/i).test(h2.innerText)) {
 				item.title += ` [${h2.innerText.match(/(?<=English summary: ).*$/)[0]}]`;
@@ -667,7 +699,7 @@ async function doWeb(doc, url) {
 		});
 	}
 
-	// PARSING PDF: SLL and Other journals or arbitrary items with PDF
+	// PARSING PDF: SLL and other journals or arbitrary items with PDF
 	var firstLink;
 	if ((!item.attachments.length) // already pushed for d-lehti
 		&& doc.querySelectorAll(`article a.${dClass}anchor:not(.${dClass}article):not(.${dClass}external)`).length) {
@@ -679,7 +711,7 @@ async function doWeb(doc, url) {
 	const tdoiRegex = /\w{3}\d{5}\w*?(?![\w\d])/; // TODO: unified or more universal regex
 	if (firstLink) {
 		Zotero.debug(`doWeb(): handling first hyperlink as PDF: ${firstLink}`);
-		if (prefix !== 'sll') { // Generic PDF
+		if (prefix !== 'sll') { // generic PDF
 			// Zotero.debug(`doWeb(): pushing PDF file ${firstLink}`);
 			const pdfTDOI = tdoiRegex.test(firstLink) ? firstLink.match(tdoiRegex)[0] : null;
 			const pdfPathname = pdfTDOI? (firstLink.match(/(?<=\/)[^/]*(?=\.pdf)/)[0]) : null;
@@ -698,7 +730,7 @@ async function doWeb(doc, url) {
 			Zotero.debug('doWeb(): PDF for sll...');
 			const sllPDFPath = firstLink.match(/(?<=laakarilehti\/).*/)[0];
 
-			if (sllPDFPath) firstLink = 'https://www.laakarilehti.fi/' + sllPDFPath; // Unless you have a FimNet credential, you need proxy to access the PDF on laakarilehti.fi.
+			if (sllPDFPath) firstLink = 'https://www.laakarilehti.fi/' + sllPDFPath; // unless you have a FimNet credential, you need proxy to access the PDF on laakarilehti.fi.
 			Zotero.debug(`sll: Pushing hyperlink to PDF ${firstLink}`);
 			item.attachments.push({
 				url: `https://www.laakarilehti.fi/${sllPDFPath}`,
@@ -707,7 +739,7 @@ async function doWeb(doc, url) {
 				snapshot: false
 			});
 
-			// Unified PDF file push
+			// unified PDF file push
 			const directDL = await onCampus();
 			if (!directDL) Zotero.debug('doWeb() sll PDF: attempting to scrape and push PDF via proxy.');
 			// const metaProxyURL = attr(doc, 'meta[name="translator-proxy"]', 'content'); // NOT an official meta field. Can be configured with, e.g., a userscript injection.
@@ -727,7 +759,7 @@ async function doWeb(doc, url) {
 
 	// Zotero.debug(`item.attachments: ${item.attachments.length} attachments before webpage snapshot: ${JSON.stringify(item.attachments)}`);
 
-	// web page snapshot
+	// PULLING SNAPSHOT
 	item.attachments.push({
 		path: `${tdoi}-${item.title}`, // TODO verify filename
 		title: `${item.language === 'fi' ? 'Tilannekuva artikkelista (article snapshot)' : 'Article snapshot'}`,
@@ -735,9 +767,8 @@ async function doWeb(doc, url) {
 		snapshot: true
 	});
 
-
 	// PARSING ABSTRACT
-	// Removing hyperlinks from abstract block would alter PDF and snapshot.
+	// ESLINT-SCAFFOLD: removing hyperlinks from abstract block would alter PDF and snapshot. Reason being that innerText during ESLint test won't handle hyperlinks properly.
 	Zotero.debug('doWeb(): extracting abstract');
 	// var abstractRaw = innerText(`div.${dClass}aside`) // A gray box containing usually bulleted lists
 	// 	|| innerText('section[role="main"] aside') // Terveyskirjasto.fi: "Katso myös" is also an <aside>, although it is in the right column.
@@ -754,13 +785,13 @@ async function doWeb(doc, url) {
 	// 	|| doc.querySelector(`.${dClass}section > p`) // First paragraph
 	// 	|| null;
 	const abstractSelectors = [
-		'section[role="main"] aside', // Terveyskirjasto.fi: "Katso myös" is also an <aside>, although it is in the right column.ˆ
-		'section[role="main"] p', // Terveyskirjasto.fi does not use dClass class prefix. Element tags are used instead for some content elements.ˆ
-		`div.${dClass}aside`, // A gray box containing usually bulleted lists
+		'section[role="main"] aside', // terveyskirjasto.fi: "Katso myös" is also an <aside>, although it is in the right column.ˆ
+		'section[role="main"] p', // terveyskirjasto.fi does not use dClass class prefix. Element tags are used instead for some content elements.ˆ
+		`div.${dClass}aside`, // a gray box containing usually bulleted lists
 		`.${dClass}section .${dClass}header`, // removed '.${dClass}body >': In many cases, duo-section does not reside right under a body class TODO examplesˆ
 		// `.${dClass}section ul`,	// e.g. shk02235 TODO limit to the section right next to header
 		`.${dClass}section > p > em`, // e.g. duo11158ˆ
-		`.${dClass}section > p`, // First paragraphˆ
+		`.${dClass}section > p`, // first paragraphˆ
 	];
 	var abstractElement = (function (selectors) {
 		for (const sel of selectors) {
@@ -774,7 +805,7 @@ async function doWeb(doc, url) {
 		return null;
 	})(abstractSelectors);
 	
-	if (!abstractElement) { // Manual selection
+	if (!abstractElement) { // manual selection
 		// if (innerText('h2') in [
 		if ([ // TODO statics
 			'Keskeistä', // ykt, dlk
@@ -787,8 +818,8 @@ async function doWeb(doc, url) {
 	}
 
 	if (abstractElement) {
-		if (abstractElement.querySelector('a')) { // ESLINT: Scaffold's innerText() ignores hyperlink, while ESLINT's does not.
-			abstractElement.querySelectorAll('a').forEach(link => {
+		if (abstractElement.querySelector('a')) { // ESLINT-SCAFFOLD: Scaffold's innerText() ignores hyperlink, while ESLint's does not.
+			abstractElement.querySelectorAll('a').forEach((link) => {
 				link.remove();
 			});
 		}
@@ -811,6 +842,40 @@ async function doWeb(doc, url) {
 	// Zotero.debug(`item.complete(): ${JSON.stringify(item)}`);
 	item.complete();
 }
+
+/**
+ * A NOTE ON TEST CASES
+ * All test cases were fetched in June 2026. Actual fetch time should be logged by Zotero at runtime.
+ * I built this translator with APA citation style in mind.
+ * Feel free to test in other formats, especially NLM-Vancouver-based formats and their Finnish variants
+ * 		such as `styles/dependent/Suomen Laakarilehti.csl` (also part of Zotero Style Repository).
+ *
+ * For Zotero's automated checks, I kept only publicly available test cases. One free Terveysportti item is included as the last test case.
+ * Other Terveysportti (TP) and Oppiportti (OP) test cases are not included in the public version.
+ * Proceed with testing under a network with TP/OP subsciption TODO or log in first in Scaffold's browser.
+ *
+ * EXPLAINING TEST CASES: all cases referred to by their TDOI.
+ *
+ * TK Terveyskirjasto:
+ * dlk00221: handling authors, editor author
+ * dlk00084: handling author with title
+ * BOTH: differences in extracting abstracts
+ *
+ * uux30190: should be the same as the version hosted on TP
+ *
+ * TP DTK:
+ * nla00004: two-line author handling
+ *
+ * KP Käypä hoito (Current Care Guideline, CCG):
+ * hoi50067: group author, abstract
+ * dnd00039: group author
+ * nix03607: addition of the CCG guideline the item belongs to
+ *
+ * D-lehti (Medical Journal Duodecim):
+ * All: section/theme extracted
+ * First three items: English titles and summary
+ * duo95136: fully monolingual article.
+ */
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -1045,7 +1110,7 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"date": "2026-06-02",
+				"date": "2026-06-25",
 				"abstractNote": "Unettomuudella tarkoitetaan joko unettomuusoireita tai unettomuushäiriötä. Hoitopäätösten kannalta on tärkeää tunnistaa, onko kyseessä unettomuusoire vai sairausasteinen unettomuushäiriö.\nTilapäiset unettomuusoireet kuuluvat elämään. Säännöllinen uni-valverytmi ja unta edistävät nukkumistottumukset ja olosuhteet ehkäisevät unettomuushäiriön kehittymistä.\nPitkäkestoinen (yli 3 kuukautta kestänyt) unettomuushäiriö suurentaa monien sairauksien ja tapaturmien riskiä, heikentää toimintakykyä ja huonontaa elämänlaatua.\nVastikään alkaneen lyhytkestoisen (1–3 kuukautta kestäneen) unettomuushäiriön tunnistamisella ja hyvällä hoidolla on mahdollista ehkäistä pitkäkestoisen unettomuushäiriön kehittyminen.\nJoskus lyhytkestoisetkin unettomuusoireet voivat olla sairausasteisia ja heikentää merkittävästi toimintakykyä.\nUnettomuushäiriön diagnoosi perustuu ensisijaisesti huolelliseen anamneesiin, kliiniseen tutkimukseen ja uni-valvepäiväkirjan (unipäiväkirja) pitämiseen.\nUnettomuusoireiden tarkempi selvitys on tärkeää, jotta potilas saa oikeanlaista hoitoa. Unettomuusoireet eivät automaattisesti tarkoita unettomuushäiriötä.\nUnettomuusoireiden taustalla mahdollisesti olevat ja oireisiin kytkeytyvät sairaudet ja muut tekijät tulee tunnistaa ja hoitaa asianmukaisesti. Tavanomaisimpia sairauksia ovat ahdistuneisuus-, mieliala- ja päihdehäiriöt, levottomat jalat -oireyhtymä (restless legs syndrome, RLS), unenaikaiset hengityshäiriöt, uni-valverytmin häiriöt ja muut unihäiriöt (ICD-11:ssä \"uni-valvehäiriöt\"). Myös vaihdevuosiin liittyy yleisesti unettomuusoireita.\nTilapäisiä unettomuusoireita ei pääsääntöisesti tarvitse hoitaa. Jos potilas kuitenkin hakeutuu hoitoon, on unettomuusoireista kärsivän potilaan tukeminen, taustalla olevien syiden ja laukaisevien tekijöiden käsitteleminen sekä unen huollon ohjaus tärkeää.\nUnettomuuden lyhytkestoista lääkehoitoa voidaan harkita, jos unettomuusoireet ovat vakavia ja heikentävät merkittävästi päiväaikaista vointia ja toimintakykyä.\nUnettomuushäiriön hoidossa kestävimmät tulokset saavutetaan unettomuuden kognitiivisen käyttäytymisterapian (cognitive behavioral therapy for insomnia, CBT-I) menetelmillä.\nCBT-I on osoittautunut tehokkaaksi myös silloin, kun potilaalla on unettomuushäiriön kanssa samanaikaisia sairauksia tai oireita.\nMyös näyttö CBT-I:n tehosta lasten ja nuorten unettomuuden hoidossa on lisääntynyt, ja CBT-I:tä voidaan pitää näytön perusteella lasten ja nuorten unettomuuden ensisijaisena hoitona. Sen sijaan tutkimusnäyttö lasten ja nuorten unettomuuden lääkehoidosta lähes puuttuu lukuun ottamatta melatoniinia, joten suosituksen lääkeohjeistuksia ei voi soveltaa tähän ikäryhmään.\nPerinteisiä unettomuuden hoitoon käytettäviä lääkkeitä (ns. unilääkkeitä) ovat bentsodiatsepiinit (mm. tematsepaami) ja niiden kaltaiset lääkkeet (ns. z-lääkkeet: tsopikloni ja tsolpideemi) .\nPerinteiset unilääkkeet pidentävät mutta myös keventävät yöunta, ja muitakin merkittäviä haittavaikutuksia on raportoitu. Siten ne sopivat ensisijaisesti vain lyhytaikaiseen käyttöön.\nPitkäkestoisessa unettomuushäiriössä lääkehoidon tarve tulee arvioida yksilöllisesti ja säännöllisesti. Myös hoitovastetta tulee arvioida säännöllisesti. Etenkin ikääntyneille bentsodiatsepiineista ja niiden kaltaisista lääkkeistä saattaa olla enemmän haittaa kuin hyötyä ja niiden määräämisessä tulee käyttää harkintaa.\nBentsodiatsepiinien kaltaisten unilääkkeiden lyhytaikaisesta käytöstä (alle 2 viikkoa) saattaa olla hyötyä unettomuudesta kärsivän uniapneapotilaan CPAP-hoitoa aloitettaessa.\nUnettomuuden hoidossa käytetään perinteisten unilääkkeiden lisäksi myös muita lääkkeitä, kuten melatoniinia ja pieniannoksista (< 10 mg) doksepiinia sekä eräitä muita vireystilaan, uni-valverytmiin tai muilla tavoin unen neurokemiaan vaikuttavia lääkeaineita, kuten oreksiinireseptoriantagonisteja.\nUnettomuuden hoidossa käytettävät lääkkeet voivat heikentää ajokykyä sekä suoriutumista myös muissa tarkkaavaisuutta vaativissa tehtävissä. Bentsodiatsepiinit ja niiden kaltaiset lääkkeet aiheuttavat eniten haittaa, erityisesti hoidon alkuvaiheessa.\nLiikunnan suotuisasta vaikutuksesta uneen on runsaasti näyttöä.\nUnettomuushäiriöistä kärsivän potilaan hoidon seuranta on välttämätöntä.",
 				"archiveLocation": "050.067",
 				"bookTitle": "Käypä hoito",
