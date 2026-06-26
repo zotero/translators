@@ -7,7 +7,7 @@
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 12,
+	"translatorType": 4,
 	"browserSupport": "gcsibv",
 	"lastUpdated": "2026-06-16 21:27:35"
 }
@@ -49,7 +49,6 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-
 function scrape(doc, url) {
 	let pdfURL = attr(doc, 'meta[name="citation_pdf_url"]', 'content');
 	let bibURL = attr(doc, 'a[href$="-Bibtex.bib"], a[href$="/bibtex"]', 'href');
@@ -63,8 +62,8 @@ function scrape(doc, url) {
 			translator.setHandler("itemDone", function (obj, item) {
 				// NeurIPS puts journal/proceedings editors in the BibTeX,
 				// but we don't really want them.
-
 				item.creators = item.creators.filter(c => c.creatorType != 'editor');
+				
 				item.url = url;
 				item.abstractNote = abstract;
 				item.attachments.push({
@@ -72,6 +71,7 @@ function scrape(doc, url) {
 					title: "Full Text PDF",
 					mimeType: "application/pdf"
 				});
+				
 				item.complete();
 			});
 			translator.translate();
@@ -79,7 +79,6 @@ function scrape(doc, url) {
 	}
 	else {
 		// fall back to EM for newer items (pre-conference, typically)
-		// None of the test cases go into the else loop so I don't know how needed this is
 		let translator = Zotero.loadTranslator('web');
 		// Embedded Metadata
 		translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
