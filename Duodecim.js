@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-06-25 18:05:01"
+	"lastUpdated": "2026-06-26 09:32:41"
 }
 
 /*
@@ -96,7 +96,7 @@ function parseAuthors(nameString, isSingleAuthor) {
 	// Zotero.debug('parseAuthors(): parsing authors.');
 	// SINGLE-WORD, GROUP AUTHOR
 	if (!/\s/.test(nameString)) {
-		Zotero.debug('parseAuthors(): Single-word author.');
+		// Zotero.debug('parseAuthors(): Single-word author.');
 		if (['Toimitus', 'Editors'].includes(nameString)) return []; // e.g. dlk00221, ykt00096, ebm00069
 		return [{
 			lastName: nameString,
@@ -123,40 +123,49 @@ function parseAuthors(nameString, isSingleAuthor) {
 	// HUMAN AUTHOR(s) / MULTIPLE AUTHORS
 	var nameArray = [];
 	const capitalRegex = /[A-ZÄ-Ö]/; // currently matching U+00C4 – U+00D6 (ASCII 192–214)
-
+	// Iterating name candidates
 	for (const seg of nameString.split(/,\s*|\s+(ja|and)\s+/i)) { // FINNISH: 'ja' means 'and'
 		if (typeof seg !== 'string') continue;
 		if (seg.toString().split(' ').length < 2) continue; // removing titles between commas and generic author placeholders
 		var isGroupAuthor = false;
 		// JS: anonymous function | I could not think of a better implementation.
-		const toPush = ((str) => { // ESLINT: Function declared in a loop contains unsafe references to variable(s) 'isGroupAuthor'
+		const nameToPush = ((str) => { // ESLINT: Function declared in a loop contains unsafe references to variable(s) 'isGroupAuthor'
 			const words = str.toString().split(' ');
-			var nameOnly = '';
-			for (let i = 0; i < words.length; i++) { // JS: I knew of `word of words` for a `for` loop, but I need the number index. See 8 lines below.
+			var oneName = '';
+			// Iterating words in a name candidate
+			for (let i = 0; i < words.length; i++) { // JS: I knew of `word of words` for a `for` loop (line 127), but I need the number index, e.g. shk00004
+				// FINNISH: remove titles/degrees of authors.
+				if (/(^\(?(TtM|AMK|YAMK)[\(-]?.*|.*(lääkäri|asiantutkija)$)/i.test(words[i])) { // TODO collect statics
+					// Zotero.debug(`parseAuthors(): Skipping author title "${words[i]}" in name candidate "${str}"`);
+					oneName = ''; // e.g. voh00042, dlk00084
+					continue;
+				}
+				// regular name segment
 				if (capitalRegex.test(words[i].charAt(0))
-					&& !(capitalRegex.test(words[i].charAt(words[i].length - 1))) // not ending with capital letter
-					&& !(/^(TtM|AMK|YAMK)-?.*/.test(words[i]))) { // FINNISH: remove titles/degrees of authors
-					nameOnly += words[i] + ' ';
+					&& !(capitalRegex.test(words[i].charAt(words[i].length - 1)))) { // not ending with capital letter
+					oneName += words[i] + ' ';
+					continue;
+				}
+				// handling exceptions
+				// Zotero.debug(`parseAuthors(): on name string '${seg}'. Judging exceptional word "${words[i]}" in raw name string "${str}". Index from 0: i=${i} of ${words.length - 1}`);
+				if (i === (words.length - 1) // e.g. shk00004
+					&& !(/[\W]/.test(words[i]))) { // FINNISH: some organization names in Finnish may end with ry ('rekisteröity yhdistys', meaning 'association'), oy ('osakeyhtiö', like LLC or Ltd. in English), etc.
+					oneName += words[i];
+					isGroupAuthor = true;
+					// Zotero.debug(`parseAuthors(): nameToPush group author ${oneName}`);
 				}
 				else {
-					Zotero.debug(`parseAuthors(): judging exceptional word "${words[i]}" in raw name string. Index from 0: i=${i} of ${words.length - 1}`);
-					if (i === (words.length - 1)) { // e.g. shk00004
-						nameOnly += words[i];
-						isGroupAuthor = true;
-						// Zotero.debug(`parseAuthors(): toPush group author ${nameOnly}`);
-					}
-					else {
-						nameOnly = ''; // e.g. dlk00084
-						// Zotero.debug(`parseAuthors(): excluding segment ${str}`);
-					}
+					// Zotero.debug(`parseAuthors(): Skipping exceptional word "${words[i]}" in name candidate "${str}"`);
+					oneName = ''; // e.g. dlk00084
+					// Zotero.debug(`parseAuthors(): excluding segment ${str}`);
 				}
 			}
-			return nameOnly.trim();
+			return oneName.trim();
 		})(seg);
-		if (!toPush.length) continue;
+		if (!nameToPush.length) continue;
 
 		if (!isGroupAuthor) {
-			var parts = toPush.split(/\s+/);
+			var parts = nameToPush.split(/\s+/);
 			nameArray.push({
 				firstName: parts.slice(0, -1).join(' '),
 				lastName: parts[parts.length - 1],
@@ -165,9 +174,9 @@ function parseAuthors(nameString, isSingleAuthor) {
 			// Zotero.debug(`parseAuthors(): pushed name object ${JSON.stringify(nameArray[nameArray.length - 1])}`);
 		}
 		else {
-			// Zotero.debug(`parseAuthors(): pushing non-CCG group author to nameArray ${toPush}`);
+			// Zotero.debug(`parseAuthors(): pushing non-CCG group author to nameArray ${nameToPush}`);
 			nameArray.push({
-				lastName: toPush,
+				lastName: nameToPush,
 				creatorType: 'author',
 				fieldMode: 1
 			});
@@ -184,14 +193,14 @@ function parseAuthors(nameString, isSingleAuthor) {
  */
 function returnProtect(inner) {
 	const innerArray = inner.split('\n');
-	// Zotero.debug(`returnProtect() split:\n${innerArray}`);
+	// Zotero.debug(`returnProtect() splitting: "${innerArray}"`);
 	var output = '';
 	if (innerArray.length === 1) return inner;
 	for (const line of innerArray) {
 		const cleanLine = line.replace(/[\xA0\r\s]+/g, " "); // ZU.superCleanString only trims; 260623: ZU.superCleanString also trims EOL period dot (.).
 		output += `${cleanLine}\n`;
 	}
-	// Zotero.debug(`returnProtect output:\n${output}`);
+	// Zotero.debug(`returnProtect output: "${output}"`);
 	return output.substring(0, output.length - 1);
 }
 
@@ -258,7 +267,7 @@ async function tdoiRedirect(tdoi) {
 	}));
 
 	if (tdoiObj.hostname === 'www.terveysportti.fi' && /^\/apps\/dtk\/.*/.test(tdoiObj.pathname)) {
-		Zotero.debug('tdoiRedirect(): returning true > shortening item URL');
+		// Zotero.debug('tdoiRedirect(): returning true > shortening item URL');
 		return true;
 	}
 	// Zotero.debug(`tdoiRedirect(): No TDOI redirect loaded.`);
@@ -281,7 +290,7 @@ async function urlGen(urlObj, tdoi) {
 
 	try {
 		if (await tdoiRedirect(tdoi)) { // if (urlShortenerStatic(prefix)) {
-			Zotero.debug('urlGen(): TDOI leads to DTK page. Shortening URL.');
+			Zotero.debug('urlGen(): tdoiRedirect(TDOI) leads to DTK page. Shortening URL.');
 			genURL = 'https://www.terveysportti.fi/doi/' + tdoi;
 		}
 		else if (urlObj.hostname !== 'www.terveysportti.fi') {
@@ -479,7 +488,7 @@ async function doWeb(doc, url) {
 		: (isOP || isTK || doc.querySelector('div.d-updated')) // also works for some articles on LäTK
 			? 'd-'
 			: 'duo-'; // DTK, CCG (CCG: header element for DTK is present in HTML but is not displayed (display: none in CCG's CSS))
-	Zotero.debug(`Determined dClass prefix: '${dClass}'`);
+	Zotero.debug(`doWeb(): Determined selector prefix dClass: '${dClass}'`);
 
 	var urlMatchRegex = isDTK
 		? /\/article\/(\w{2,3}\d{5,6})(?![\w\d])/
@@ -492,7 +501,7 @@ async function doWeb(doc, url) {
 		? url.match(urlMatchRegex)[isDTK ? 1 : 0]
 		: '';
 
-	Zotero.debug(`doWeb(): ${/^\w{3}\d{5}$/.test(tdoi) ? '' : 'INVALID'}TDOI=${tdoi}`);
+	Zotero.debug(`doWeb(): ${/^(\w{3}\d{5}|cd\d{6})$/.test(tdoi) ? '' : 'INVALID '}TDOI=${tdoi}`);
 	const prefix = findPrefixTDOI(tdoi);
 
 	item.url = (isDTK && isTP) // keeping non-TP domains
@@ -524,7 +533,7 @@ async function doWeb(doc, url) {
 			? doc.querySelector(authorClass).innerHTML.split('<br>')[1]
 			: innerText(authorClass)
 		: null;
-	Zotero.debug(`Raw author string: ${authorsRaw}`);
+	Zotero.debug(`doWeb(): Raw author string: ${authorsRaw}`);
 
 	const singleAuthor = ['lab'].includes(prefix); // TODO statics
 	// var authors = singleAuthor ? authorsRaw : parseAuthors(authorsRaw, singleAuthor, item.language);
@@ -539,7 +548,7 @@ async function doWeb(doc, url) {
 
 	// PARSING TITLE
 	item.title = text('h1').replace(/[\xA0\r\s]+/g, " "); // e.g. hot00013
-	// Zotero.debug(`item.title: ${item.title}`);
+	// Zotero.debug(`item.title = ${item.title}`);
 	if (/: /.test(item.title)) { // FINNISH: semicolon followed by a suffix in Finnish may be used in inflecting abbreviations, hence ': ' instead of ':'
 		item.shortTitle = item.title.split(': ')[0];
 		if (item.shortTitle === 'Tietoa potilaalle') { // TODO collect statics
@@ -677,7 +686,7 @@ async function doWeb(doc, url) {
 			}
 		}
 
-		Zotero.debug('PDF for duo...');
+		Zotero.debug('doWeb(): PDF for duo...');
 		var pdfLink = `https://${urlObj.host}/xmedia/duo/${tdoi}.pdf`; // doc.querySelector('app-plugin-external-link a');
 		// Zotero.debug(`${arguments.callee.name}(): downloading PDF link: ${pdfLink}`); // TODO callee deprecated
 		item.attachments.push({
@@ -696,8 +705,8 @@ async function doWeb(doc, url) {
 	// sll: English summary (If applicable) comes usually before reference list aka the second to the last <h2>. Just in case, iterate through all <h2>s.
 	if (prefix === 'sll' && dbRaw === 'Suomen Lääkärilehti') {
 		doc.querySelectorAll('h2').forEach((h2) => {
-			Zotero.debug(`Current <h2>: ${h2.innerText}`);
 			if ((/^English summary.*/i).test(h2.innerText)) {
+				Zotero.debug(`doWeb(): sll: English <h2>: ${h2.innerText}`);
 				item.title += ` [${h2.innerText.match(/(?<=English summary: ).*$/)[0]}]`;
 				englishSummary = `${h2.nextElementSibling.innerText.replace(/[\xA0\r\n\s]+/g, " ")}`;
 				item.tags.push('duodecim-englanti-lääkärilehti');
@@ -725,7 +734,7 @@ async function doWeb(doc, url) {
 			const isMainPDF = pdfTDOI && pdfTDOI.substring(0, 8) === tdoi;
 			const attachmentTitle = isMainPDF ? ((pdfSuffix && pdfSuffix === 'sv') ? 'På svenska' : "PDF") : "Supplementary PDF"; // e.g. nla00004
 
-			Zotero.debug(`Pushing PDF ${pdfPathname} with ${pdfTDOI} and suffix '${pdfSuffix}' (${pdfSuffix === 'sv'}) as file attachment titled: ${attachmentTitle}`);
+			Zotero.debug(`doWeb(): Pushing PDF ${pdfPathname} with ${pdfTDOI} and suffix '${pdfSuffix}' (${pdfSuffix === 'sv'}) as file attachment titled: ${attachmentTitle}`);
 			item.attachments.push({
 				// TODO find if PDF contains own TDOI and whether a match or a supplement path: `${tdoi}-${item.title}`,
 				url: firstLink,
@@ -735,31 +744,32 @@ async function doWeb(doc, url) {
 		}
 		else {
 			Zotero.debug('doWeb(): PDF for sll...');
-			const sllPDFPath = firstLink.match(/(?<=laakarilehti\/).*/)[0];
+			const sllPDFPath = /(?<=laakarilehti\/).*/i.test(firstLink) ? firstLink.match(/(?<=laakarilehti\/).*/)[0] : null;
 
-			if (sllPDFPath) firstLink = 'https://www.laakarilehti.fi/' + sllPDFPath; // unless you have a FimNet credential, you need proxy to access the PDF on laakarilehti.fi.
-			Zotero.debug(`sll: Pushing hyperlink to PDF ${firstLink}`);
-			item.attachments.push({
-				url: `https://www.laakarilehti.fi/${sllPDFPath}`,
-				title: "Linkki PDF-tiedostoon (laakarilehti.fi)",
-				mimeType: "text/html",
-				snapshot: false
-			});
-
-			// unified PDF file push
-			const directDL = await onCampus();
-			if (!directDL) Zotero.debug('doWeb() sll PDF: attempting to scrape and push PDF via proxy.');
-			// const metaProxyURL = attr(doc, 'meta[name="translator-proxy"]', 'content'); // NOT an official meta field. Can be configured with, e.g., a userscript injection.
-			// Zotero.debug(`Experimental: userscript proxy URL from <meta>: ${metaProxyURL?metaProxyURL : 'NOT FOUND'}`);
-			// const dlDomain = directDL ? `https://www.laakarilehti.fi/` : metaProxyURL ? metaProxyURL : null;
-			const dlDomain = directDL ? `https://www.laakarilehti.fi/` : null;
-
-			if (dlDomain) {
+			if (sllPDFPath) {
+				firstLink = 'https://www.laakarilehti.fi/' + sllPDFPath; // unless you have a FimNet credential, you need proxy to access the PDF on laakarilehti.fi.
+				Zotero.debug(`doWeb(): sll: Pushing hyperlink to PDF ${firstLink}`);
 				item.attachments.push({
-					url: dlDomain + sllPDFPath,
-					title: `PDF${directDL ? '' : ' välityksellä'}`,
-					mimeType: "application/pdf",
+					url: `https://www.laakarilehti.fi/${sllPDFPath}`,
+					title: "Linkki PDF-tiedostoon (laakarilehti.fi)",
+					mimeType: "text/html",
+					snapshot: false
 				});
+
+				// unified PDF file push
+				const directDL = await onCampus();
+				if (!directDL) Zotero.debug('doWeb() sll PDF: attempting to scrape and push PDF via proxy.');
+				// const metaProxyURL = attr(doc, 'meta[name="translator-proxy"]', 'content'); // NOT an official meta field. Can be configured with, e.g., a userscript injection.
+				// Zotero.debug(`Experimental: userscript proxy URL from <meta>: ${metaProxyURL?metaProxyURL : 'NOT FOUND'}`);
+				// const dlDomain = directDL ? `https://www.laakarilehti.fi/` : metaProxyURL ? metaProxyURL : null;
+				const dlDomain = directDL ? `https://www.laakarilehti.fi/` : null;
+
+				if (dlDomain) {
+					item.attachments.push({
+						url: dlDomain + sllPDFPath,
+						title: `PDF${directDL ? '' : ' välityksellä'}`,
+						mimeType: "application/pdf",
+					});}
 			}
 		}
 	}
@@ -775,59 +785,79 @@ async function doWeb(doc, url) {
 	});
 
 	// PARSING ABSTRACT
-	// ESLINT-SCAFFOLD: removing hyperlinks from abstract block would alter PDF and snapshot. Reason being that innerText during ESLint test won't handle hyperlinks properly.
+	// abstract block at the end because removing hyperlinks from abstract block would alter PDF and snapshot.
+	// ESLINT-SCAFFOLD: innerText during ESLint test won't handle hyperlinks properly.
 	// JS: using .textContent would break abstractNotes
-	Zotero.debug('doWeb(): extracting abstract');
+	// Zotero.debug('doWeb(): extracting abstract');
 	const abstractSelectors = [
-		'section[role="main"] aside', // terveyskirjasto.fi: "Katso myös" is also an <aside>, although it is in the right column.ˆ
-		'section[role="main"] p', // terveyskirjasto.fi does not use dClass class prefix. Element tags are used instead for some content elements.ˆ
+		'section[role="main"] aside', // terveyskirjasto.fi: "Katso myös" is also an <aside>, although it is in the right column.
+		'section[role="main"] p', // terveyskirjasto.fi does not use dClass class prefix. Element tags are used instead for some content elements.
 		`div.${dClass}aside`, // a gray box containing usually bulleted lists
-		`.${dClass}section .${dClass}header`, // removed '.${dClass}body >': In many cases, duo-section does not reside right under a body class TODO examplesˆ
-		// `.${dClass}section ul`,	// e.g. shk02235 TODO limit to the section right next to header
-		`.${dClass}section > p > em`, // e.g. duo11158ˆ
-		`.${dClass}section > p`, // first paragraphˆ
+		// `div.${dClass}body > div.${dClass}section > ul:first-child`,	// e.g. shk02235
+		`.${dClass}section .${dClass}header`, // removed '.${dClass}body >' before this selector: In many cases, duo-section does not reside right under a body class TODO examples
+		`.${dClass}section > p > em`, // e.g. duo11158
+		`.${dClass}section > p` // first paragraph
 	];
-	var abstractElement = (function (selectors) {
+
+	/**
+	 * picking abstract selector
+	 * @param {Array} abstractSelectors
+	 * @returns Element containing abstract text
+	 */
+	var abstractSelector = (function (selectors) {
 		for (const sel of selectors) {
 			const elementCandidate = doc.querySelector(sel);
 			if (elementCandidate) {
-				Zotero.debug(`abstact: querySelector is ${sel}`);
-				// elementCandidate._querySelector = sel;
+				Zotero.debug(`ABSTRACT: querySelector is ${sel}`);
+				elementCandidate._querySelector = sel;
 				return elementCandidate;
 			}
+		}
+		const ulAbstractSelector = `div.${dClass}body > div.${dClass}section > ul:first-child`; // e.g. shk02235
+		const ulAbstractElement = doc.querySelector(ulAbstractSelector);
+		if (ulAbstractElement && !ulAbstractElement.previousElementSibling) { // should be the <ul> at the beginning of the immediate .${dClass}section
+			ulAbstractElement._querySelector = ulAbstractSelector;
+			return ulAbstractElement;
 		}
 		return null;
 	})(abstractSelectors);
 
-	if (!abstractElement) { // manual selection
+	if (!abstractSelector) { // manual selection
 		// if (innerText('h2') in [
 		if ([ // TODO statics
 			'Keskeistä', // ykt, dlk
 			'Essentials', // ebm
 			'Johdanto' // TODO examples
 		].includes(innerText('h2'))) {
-			Zotero.debug('ABSTRACT: extracting designated section');
-			abstractElement = doc.querySelector('h2').nextElementSibling;
+			// Zotero.debug('ABSTRACT: extracting designated section');
+			abstractSelector = doc.querySelector('h2').nextElementSibling;
 		}
 	}
 
-	if (abstractElement) {
-		if (abstractElement.querySelector('a')) { // ESLINT-SCAFFOLD: Scaffold's innerText() ignores hyperlink, while ESLint's does not.
-			abstractElement.querySelectorAll('a').forEach((link) => {
-				link.remove();
+	if (abstractSelector) {
+		if (abstractSelector.querySelector(`a`)) {
+			abstractSelector.querySelectorAll('a span').forEach((linkSpan) => {
+				linkSpan.remove();
 			});
 		}
-		item.abstractNote = isJournal ? ultimateOneLiner(abstractElement.innerText) : returnProtect(abstractElement.innerText); // TODO: succeed in Scaffold but mess in Edge? Try FireFox?
+		const abstractSelectorType = /(?<= )[\S]+$/.test(abstractSelector._querySelector)
+			? abstractSelector._querySelector.match(/(?<= )[\S]+$/)[0]
+			: null;
+		item.abstractNote = /^(p|em)$/.test(abstractSelectorType)
+			? ultimateOneLiner(abstractSelector.innerText) // e.g. duo11158
+			: returnProtect(abstractSelector.innerText); // TODO: succeed in Scaffold but mess in Edge? Try FireFox?
 		if (item.abstractNote.split(' ').length < 10) item.abstractNote = null; // arbitrarily remove texts unlikely to summarize the item.
-		else Zotero.debug(`doWeb(): item.abstractNote: ${item.abstractNote}`);
+		else {
+			// Zotero.debug(`item.abstractNote: ${item.abstractNote}`)
+		};
 		if (englishSummary.length) {
 			// englishSummary.replace(/[\xA0\r\n\s]+/g, " ");
-			Zotero.debug(`doWeb(): English summary before concatenation: ${englishSummary}`);
+			// Zotero.debug(`ABSTRACT: English summary before concatenation: ${englishSummary}`);
 			item.abstractNote += `\n\n${ultimateOneLiner(englishSummary)}`;
 		}
 	}
 	else {
-		Zotero.debug(`doWeb(): no valid abstract extracted`);
+		Zotero.debug(`ABSTRACT: no valid abstract extracted`);
 	}
 
 	// Finalize and save item
