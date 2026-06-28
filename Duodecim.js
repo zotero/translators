@@ -133,29 +133,29 @@ function parseAuthors(nameString, isSingleAuthor) {
 			const words = str.toString().split(' ');
 			var oneName = '';
 			// Iterating words in a name candidateg
-			for (let i = 0; i < words.length; i++) { // JS: I knew of `word of words` for a `for` loop (line 127), but I need the number index, e.g. shk00004
+			for (const word of words) {
 				// FINNISH: remove titles/degrees of authors.
-				if (/(^\(?(TtM|AMK|YAMK)[(-]?.*|.*(lääkäri|asiantutkija)$)/i.test(words[i])) { // TODO collect statics
-					// Zotero.debug(`parseAuthors(): Skipping author title "${words[i]}" in name candidate "${str}"`);
-					oneName = ''; // e.g. voh00042, dlk00084
+				if (/(^\(?(TtM|AMK|YAMK)[(-]?.*|.*(lääkäri|asiantutkija)$)/i.test(word)) { // TODO collect statics
+					// Zotero.debug(`parseAuthors(): Skipping author title "${word}" in name candidate "${str}"`);
+					oneName = ''; // e.g. dlk00084, voh00042
 					continue;
 				}
 				// regular name segment
-				if (capitalRegex.test(words[i].charAt(0))
-					&& !(capitalRegex.test(words[i].charAt(words[i].length - 1)))) { // not ending with capital letter
-					oneName += words[i] + ' ';
+				if (capitalRegex.test(word.charAt(0))
+					&& !(capitalRegex.test(word.charAt(word.length - 1)))) { // not ending with capital letter
+					oneName += word + ' ';
 					continue;
 				}
 				// handling exceptions
-				// Zotero.debug(`parseAuthors(): on name string '${seg}'. Judging exceptional word "${words[i]}" in raw name string "${str}". Index from 0: i=${i} of ${words.length - 1}`);
-				if (i === (words.length - 1) // e.g. shk00004
-					&& !(/[\W]/.test(words[i]))) { // FINNISH: some organization names in Finnish may end with ry ('rekisteröity yhdistys', meaning 'association'), oy ('osakeyhtiö', like LLC or Ltd. in English), etc.
-					oneName += words[i];
+				// Zotero.debug(`parseAuthors(): on name string '${seg}'. Judging exceptional word "${word}" in raw name string "${str}". Index from 0: i=${i} of ${words.length - 1}`);
+				if (word === words[words.length - 1] // e.g. shk00004
+					&& !(/[\W]/.test(word))) { // FINNISH: some organization names in Finnish may end with ry ('rekisteröity yhdistys', meaning 'association'), oy ('osakeyhtiö', like LLC or Ltd. in English), etc.
+					oneName += word;
 					isGroupAuthor = true;
 					// Zotero.debug(`parseAuthors(): nameToPush group author ${oneName}`);
 				}
 				else {
-					// Zotero.debug(`parseAuthors(): Skipping exceptional word "${words[i]}" in name candidate "${str}"`);
+					// Zotero.debug(`parseAuthors(): Skipping exceptional word "${word}" in name candidate "${str}"`);
 					oneName = ''; // e.g. dlk00084
 					// Zotero.debug(`parseAuthors(): excluding segment ${str}`);
 				}
