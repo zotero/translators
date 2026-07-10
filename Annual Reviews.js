@@ -173,7 +173,6 @@ function getTOCResults(doc, checkOnly) {
 		var title = ZU.trimInternal(link.textContent);
 		
 		if (!title || title.length < 3) continue;
-		if (title.toLowerCase().includes('more') || title.toLowerCase().includes('less')) continue;
 		
 		if (checkOnly) return true;
 		found = true;
