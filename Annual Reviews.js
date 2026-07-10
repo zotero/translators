@@ -2,14 +2,14 @@
 	"translatorID": "5f22bd25-5b70-11e1-bb1d-c4f24aa18c1e",
 	"label": "Annual Reviews",
 	"creator": "Aurimas Vinckevicius and Abe Jellinek",
-	"target": "^https?://[^/]*annualreviews\\.org/(toc|journal|doi|content/journals|search|showMost(Read|Cited)Articles|doSearch)",
+	"target": "^https?://[^/]*annualreviews\\.org/(content/journals|search|page)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 150,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-03-06 20:37:20"
+	"lastUpdated": "2026-07-11 00:20:00"
 }
 
 /**
@@ -62,7 +62,6 @@ function addByBibTex(doi, tags, doc) {
 				let doiMatch = item.DOI.match(/10\.\d+\/(?:annurev[.-])[^/]+/);
 				if (doiMatch) {
 					item.DOI = doiMatch[0];
-					Zotero.debug("Cleaned DOI: " + item.DOI);
 				}
 			}
 			
@@ -105,132 +104,162 @@ function detectWeb(doc, url) {
 		return 'journalArticle';
 	}
 	
-	// Multiple items pages
+	// Listing pages: journal issues/browse/home, search results, and curated
+	// topic collections (/page/...)
 	if (url.match(/\/content\/journals\/[^/]+\/\d+\/\d+/) // volume/issue
-			|| url.match(/\/content\/journals\/[^/]+\/fasttrack/) // fasttrack
+			|| url.match(/\/content\/journals\/[^/]+\/fasttrack/) // early publication
 			|| url.match(/\/content\/journals\/[^/]+\/browse/) // browse
 			|| url.match(/\/content\/journals\/[^/]+$/) // journal home
-			|| url.includes('/toc/') || url.includes('/journal/')
-			|| url.includes('showMost') || url.includes('search')) {
-		// Try TOC results first
-		if (getTOCResults(doc, true)) {
-			return 'multiple';
-		}
-		// Fall back to search results
-		if (getSearchResults(doc, true)) {
+			|| url.includes('/page/') // topic collections
+			|| url.includes('/search')) {
+		if (getListingEntries(doc).some(entry => entry.doi)) {
 			return 'multiple';
 		}
 	}
-	
+
 	return false;
 }
 
-function getSearchResults(doc, checkOnly) {
-	var items = {};
-	var found = false;
-	var links = doc.querySelectorAll('a[href*="10.1146/annurev-"]');
-	
-	for (let link of links) {
-		var row = link.closest('.table-row, [id^="resultItem"]');
-		if (!row) continue;
-		
-		var href = link.getAttribute('href');
-		var doiMatch = href.match(/10\.\d+\/annurev-[^/]+/);
-		if (!doiMatch) continue;
-		
-		var doi = doiMatch[0];
-		var title = ZU.trimInternal(link.textContent);
-		
-		if (!title) {
-			var titleEl = row.querySelector('h2 a, h3 a');
-			if (titleEl) title = ZU.trimInternal(titleEl.textContent);
-		}
-		
-		if (doi && title) {
-			if (checkOnly) return true;
-			found = true;
-			items[doi] = title;
-		}
-	}
-	
-	return found ? items : false;
-}
+// Collect the articles linked from a listing page (TOC, browse, search
+// results, topic collection), in page order. Articles linked through the
+// publisher's arevie.ws URL shortener don't expose their DOI in the DOM;
+// those entries have `shortUrl` set instead of `doi` and are resolved in
+// doWeb (see resolveShortLinks).
+function getListingEntries(doc) {
+	var entries = [];
+	var seenDOIs = {};
+	var links = doc.querySelectorAll('a[href*="10.1146/annurev"], a[href*="//arevie.ws/"]');
 
-function getTOCResults(doc, checkOnly) {
-	var items = {};
-	var found = false;
-	
-	// Look for ANY link that contains an Annual Reviews DOI
-	var links = doc.querySelectorAll('a[href*="10.1146/annurev"]');
-	Zotero.debug("Found " + links.length + " DOI links on page");
-	
+	var seenShortUrls = {};
 	for (let link of links) {
 		var href = link.getAttribute('href');
-		var doiMatch = href.match(/10\.\d+\/(?:annurev[.-])[^/]+/);
-		if (!doiMatch) continue;
-		
-		var doi = doiMatch[0];
+		// Each article also has an external "https://doi.org/..." link with the
+		// same DOI; skip it so the title link (not the DOI URL) is used as the label.
+		if (/doi\.org/.test(href)) continue;
+
 		var title = ZU.trimInternal(link.textContent);
-		
-		if (!title || title.length < 3) continue;
-		
-		if (checkOnly) return true;
-		found = true;
-		items[doi] = title;
+		// Skip anchors whose visible text is itself a URL rather than a title
+		if (/^https?:\/\//.test(title)) continue;
+
+		var entry;
+		if (href.includes('arevie.ws/')) {
+			// Short links may have no usable anchor text (e.g. empty image
+			// tiles); the title is filled in from the resolved article page.
+			// The same short URL can appear both as a text-less tile and as
+			// the article's title link: keep the anchor that has the title.
+			var existing = seenShortUrls[link.href];
+			if (existing) {
+				if (existing.hadText || !title) continue;
+				entries.splice(entries.indexOf(existing), 1);
+			}
+			entry = { title: title, shortUrl: link.href };
+			seenShortUrls[link.href] = entry;
+		}
+		else {
+			if (!title || title.length < 3) continue;
+			var doiMatch = href.match(/10\.\d+\/(?:annurev[.-])[^/]+/);
+			if (!doiMatch || seenDOIs[doiMatch[0]]) continue;
+			seenDOIs[doiMatch[0]] = true;
+			entry = { title: title, doi: doiMatch[0] };
+		}
+		// Remember whether the anchor itself carried a title: promotional
+		// tiles without text shouldn't outrank an article's real title link
+		// when both point to the same article (see doWeb)
+		entry.hadText = !!title;
+
+		// Record the link's rendered position: the markup order of these pages
+		// doesn't always match the visual order, so the entries are sorted by
+		// position below. Links with no layout (hidden document, display:none)
+		// keep their relative markup order at the end.
+		entry.pos = Infinity;
+		var rect = link.getBoundingClientRect ? link.getBoundingClientRect() : null;
+		if (rect && (rect.top || rect.bottom || rect.left || rect.right)) {
+			entry.pos = rect.top + (doc.defaultView ? doc.defaultView.scrollY : 0);
+		}
+		entries.push(entry);
 	}
-	
-	return found ? items : false;
+
+	// Stable sort: entries with equal/unknown positions stay in markup order
+	entries.sort(function (a, b) {
+		if (a.pos === b.pos) return 0;
+		return a.pos < b.pos ? -1 : 1;
+	});
+
+	return entries;
 }
 
-function doWeb(doc, url) {
+// Resolve arevie.ws short links (in parallel) to find the DOI of the article
+// each one points to. The resolved document's URL can still be the short URL
+// in some environments (e.g. the connector), so prefer the DOI declared by
+// the page itself. Entries that don't resolve to an article keep no `doi`
+// and are dropped when the results are assembled.
+function resolveShortLinks(entries) {
+	return Promise.all(entries.filter(entry => entry.shortUrl).map(function (entry) {
+		return ZU.processDocuments(entry.shortUrl, function (resolvedDoc, resolvedUrl) {
+			var doiSource = attr(resolvedDoc, 'meta[name="dc.identifier"]', 'content')
+				|| attr(resolvedDoc, 'meta[property="og:url"]', 'content')
+				|| resolvedUrl;
+			var doiMatch = doiSource.match(/10\.\d+\/(?:annurev[.-])[^/?#]+/);
+			if (doiMatch) {
+				entry.doi = doiMatch[0];
+				var metaTitle = attr(resolvedDoc, 'meta[name="dc.title"]', 'content');
+				if (metaTitle) entry.title = metaTitle;
+			}
+		}, true).catch(function () {});
+	}));
+}
+
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		// Try TOC results first, then fall back to search results
-		var results = getTOCResults(doc, false);
-		if (!results) {
-			results = getSearchResults(doc, false);
+		var entries = getListingEntries(doc);
+		await resolveShortLinks(entries);
+
+		// When several anchors point to the same article (e.g. a text-less
+		// promotional tile plus the real title link), keep the one whose
+		// anchor carried a title, at its own page position
+		var chosen = {};
+		for (let entry of entries) {
+			if (!entry.doi || !entry.title) continue;
+			var current = chosen[entry.doi];
+			if (!current || (!current.hadText && entry.hadText)) {
+				chosen[entry.doi] = entry;
+			}
 		}
-		
-		if (results) {
-			Zotero.selectItems(results, function (items) {
-				if (items) {
-					Object.keys(items).forEach(function (doi) {
-						addByBibTex(doi, [], null);
-					});
-				}
-			});
+		var results = {};
+		for (let entry of entries) {
+			if (entry.doi && chosen[entry.doi] === entry) {
+				results[entry.doi] = entry.title;
+			}
 		}
+		if (!Object.keys(results).length) return;
+		Zotero.selectItems(results, function (items) {
+			if (items) {
+				Object.keys(items).forEach(function (doi) {
+					addByBibTex(doi, [], null);
+				});
+			}
+		});
 	}
 	else {
-		// For single articles, use the scrape function
 		scrape(doc, url);
 	}
 }
 
-// Scrape function for single articles
 function scrape(doc, url) {
-	Zotero.debug("Annual Reviews scrape called with URL: " + url);
-	
-	// Extract DOI from ANY Annual Reviews URL pattern
+	// Extract the DOI from the article URL
 	var doiMatch = url.match(/(10\.\d+\/annurev[^/?#]+)/);
-	
-	if (doiMatch) {
-		var doi = doiMatch[1];
-		Zotero.debug("Annual Reviews: Extracted DOI: " + doi);
-		
-		// Get tags from page metadata
-		var tags = [];
-		var subjectMeta = attr(doc, 'meta[name="dc.Subject"]', 'content');
-		if (subjectMeta) {
-			tags = subjectMeta.split('; ').map(tag => ({ tag }));
-			Zotero.debug("Annual Reviews: Found " + tags.length + " tags");
-		}
-		
-		// Call addByBibTex with the extracted DOI
-		addByBibTex(doi, tags, doc);
+	if (!doiMatch) return;
+
+	var doi = doiMatch[1];
+
+	// Tags from page metadata, when present
+	var tags = [];
+	var subjectMeta = attr(doc, 'meta[name="dc.Subject"]', 'content');
+	if (subjectMeta) {
+		tags = subjectMeta.split('; ').map(tag => ({ tag }));
 	}
-	else {
-		Zotero.debug("Annual Reviews: Could not extract DOI from URL");
-	}
+
+	addByBibTex(doi, tags, doc);
 }
 
 /** BEGIN TEST CASES **/
@@ -242,7 +271,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.annualreviews.org/journal/fluid",
+		"url": "https://www.annualreviews.org/content/journals/fluid",
 		"items": "multiple"
 	},
 	{
@@ -252,12 +281,27 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.annualreviews.org/toc/biophys/40/1",
+		"url": "https://www.annualreviews.org/content/journals/fluid/fasttrack",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "https://www.annualreviews.org/doi/abs/10.1146/annurev.biophys.29.1.545?prevSearch=&searchHistoryKey=",
+		"url": "https://www.annualreviews.org/page/top-2024",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.annualreviews.org/page/climate-behavior",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.annualreviews.org/content/journals/biophys/40/1",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.annualreviews.org/content/journals/10.1146/annurev.biophys.29.1.545",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -308,17 +352,17 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.annualreviews.org/toc/anchem/5/1",
+		"url": "https://www.annualreviews.org/content/journals/anchem/5/1",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "https://www.annualreviews.org/toc/linguistics/current",
+		"url": "https://www.annualreviews.org/content/journals/linguistics/browse",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "https://www.annualreviews.org/doi/abs/10.1146/annurev-linguistics-081720-111352",
+		"url": "https://www.annualreviews.org/content/journals/10.1146/annurev-linguistics-081720-111352",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -360,7 +404,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.annualreviews.org/doi/10.1146/annurev-physchem-040513-103712",
+		"url": "https://www.annualreviews.org/content/journals/10.1146/annurev-physchem-040513-103712",
 		"items": [
 			{
 				"itemType": "journalArticle",
