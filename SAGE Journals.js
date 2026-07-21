@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-07-21 15:25:38"
+	"lastUpdated": "2026-07-21 15:28:37"
 }
 
 /*
@@ -85,7 +85,7 @@ async function scrape(doc, url = doc.location.href) {
 		doi = url.match(/10\.[^?#]+/)[0];
 	}
 	let post = "doi=" + encodeURIComponent(doi) + "&include=abs&format=ris&direct=false&submit=Download+Citation";
-	let pdfurl = "//" + doc.location.host + "/doi/pdf/" + doi;
+	let pdfurl = "/doi/pdf/" + doi;
 	let tags = doc.querySelectorAll('div.abstractKeywords a');
 	// Z.debug(pdfurl);
 	// Z.debug(post);
