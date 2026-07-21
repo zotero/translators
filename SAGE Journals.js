@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-02-24 16:20:02"
+	"lastUpdated": "2026-07-21 15:25:38"
 }
 
 /*
@@ -79,7 +79,7 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url = doc.location.href) {
-	let risURL = "//journals.sagepub.com/action/downloadCitation";
+	let risURL = "/action/downloadCitation";
 	let doi = ZU.xpathText(doc, '//meta[@name="dc.Identifier" and @scheme="doi"]/@content');
 	if (!doi) {
 		doi = url.match(/10\.[^?#]+/)[0];
@@ -138,7 +138,7 @@ async function scrape(doc, url = doc.location.href) {
 		item.language = ZU.xpathText(doc, '//meta[@name="dc.Language"]/@content');
 		item.attachments.push({
 			url: pdfurl,
-			title: "SAGE PDF Full Text",
+			title: "Full Text PDF",
 			mimeType: "application/pdf"
 		});
 		item.complete();
@@ -175,7 +175,7 @@ var testCases = [
 				"volume": "3",
 				"attachments": [
 					{
-						"title": "SAGE PDF Full Text",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -228,7 +228,7 @@ var testCases = [
 				"volume": "229",
 				"attachments": [
 					{
-						"title": "SAGE PDF Full Text",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -312,7 +312,7 @@ var testCases = [
 				"volume": "14",
 				"attachments": [
 					{
-						"title": "SAGE PDF Full Text",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -362,7 +362,7 @@ var testCases = [
 				"volume": "21",
 				"attachments": [
 					{
-						"title": "SAGE PDF Full Text",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -410,7 +410,7 @@ var testCases = [
 				"volume": "66",
 				"attachments": [
 					{
-						"title": "SAGE PDF Full Text",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
