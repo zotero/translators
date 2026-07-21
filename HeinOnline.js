@@ -2,14 +2,14 @@
 	"translatorID": "3dcbb947-f7e3-4bbd-a4e5-717f3701d624",
 	"label": "HeinOnline",
 	"creator": "Frank Bennett",
-	"target": "^https?://(www\\.)?heinonline\\.org/HOL/(LuceneSearch|Page|IFLPMetaData|AuthorProfile)\\?",
+	"target": "^https?://access\\.heinonline\\.com/HOL/(LuceneSearch|Page|IFLPMetaData|AuthorProfile)\\?",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-01-09 20:36:33"
+	"lastUpdated": "2026-07-07 15:53:27"
 }
 
 /*

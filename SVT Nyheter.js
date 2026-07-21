@@ -9,35 +9,35 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-06-27 15:32:02"
+	"lastUpdated": "2026-07-04 10:22:01"
 }
 
 /*
-    ***** BEGIN LICENSE BLOCK *****
+	***** BEGIN LICENSE BLOCK *****
 
-    Copyright © 2024 Abe Jellinek
+	Copyright © 2024 Abe Jellinek
 
-    This file is part of Zotero.
+	This file is part of Zotero.
 
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Affero General Public License for more details.
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
 
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
-    ***** END LICENSE BLOCK *****
+	***** END LICENSE BLOCK *****
 */
 
 
 function detectWeb(doc, url) {
-	if (url.includes('/nyheter/') && doc.querySelector('#root > [data-typename="NewsArticle"]')) {
+	if (url.includes('/nyheter/') && doc.querySelector('[data-page-type="NewsArticle"]')) {
 		return 'newspaperArticle';
 	}
 	else if (getSearchResults(doc, true)) {
@@ -49,10 +49,10 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('ul[class^="TeaserFeed"] li article > a');
+	var rows = doc.querySelectorAll('section[class^="TeaserFeed"] li article > a');
 	for (let row of rows) {
 		let href = row.href;
-		let title = ZU.trimInternal(text(row, '.nyh_teaser__heading-title'));
+		let title = ZU.trimInternal(text(row, '[class^=TeaserHeadline]'));
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -82,11 +82,11 @@ async function scrape(doc, url = doc.location.href) {
 	
 	translator.setHandler('itemDone', (_obj, item) => {
 		item.date = ZU.strToISO(item.date);
-		item.section = text(doc, 'h1 > a[class^="SectionHeader"]');
+		item.section = text(doc, 'a[class^="SectionHeader"]') || text(doc, 'a[aria-current="page"]');
 		if (item.section == 'Uutiset' && !url.includes('/svenska/')) {
 			item.language = 'fi';
 		}
-		item.creators = Array.from(doc.querySelectorAll('footer a > span[itemprop="author"]'))
+		item.creators = Array.from(doc.querySelectorAll('[class*=ArticleFooterAuthor__name]'))
 			.map(author => ZU.cleanAuthor(author.textContent, 'author'));
 		item.complete();
 	});
@@ -171,7 +171,13 @@ var testCases = [
 			{
 				"itemType": "newspaperArticle",
 				"title": "”Extremt viktigt” vikingafynd i England",
-				"creators": [],
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "TT",
+						"creatorType": "author"
+					}
+				],
 				"date": "2018-02-19",
 				"abstractNote": "På 1970-talet upptäcktes en massgrav som troddes härröra från den stora vikingaarmé som invaderade England i slutet av 800-talet. Men på grund av en felmätning föll fynden i glömska. Nu, mer än 40 år senare, gör massgraven en storstilad återkomst som ett av de viktigaste vikingafynden någonsin.",
 				"language": "sv",
