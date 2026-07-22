@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2021-06-07 11:25:19"
+	"lastUpdated": "2026-07-22 16:19:17"
 }
 
 /**
@@ -92,7 +92,7 @@ function getIds(doc) {
 }
 
 function getJSON(ids) {
-	var baseURL = "//eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=nucleotide&retmode=json&id=";
+	var baseURL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=nucleotide&retmode=json&id=";
 	var jsonURL = baseURL + encodeURIComponent(ids.join(","));
 	Z.debug(jsonURL);
 	ZU.doGet(jsonURL, parseJSON);
