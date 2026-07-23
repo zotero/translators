@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2021-10-12 18:13:54"
+	"lastUpdated": "2026-07-22 16:19:17"
 }
 
 /*
@@ -130,7 +130,7 @@ function scrape(doc, url) {
 	// doesn't have a dc:title tag (bad metadata on Google's end).
 	// the Google Books suffix appears consistent across languages.
 	let fallbackTitle = doc.title.replace(/(\s*-\s*)?Google Books/, '');
-	ZU.doGet("//books.google.com/books/feeds/volumes/" + id,
+	ZU.doGet("https://books.google.com/books/feeds/volumes/" + id,
 		text => parseXML(text, fallbackTitle));
 }
 
