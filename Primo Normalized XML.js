@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2026-07-02 14:56:27"
+	"lastUpdated": "2026-07-23 15:49:34"
 }
 
 /*
@@ -347,7 +347,11 @@ function doImport() {
 	// Getting the Alma institution ID,
 	// so it's easy to implement custom code for other libraries, either locally or globally should we want to.
 	var library;
-	var source = ZU.xpathText(doc, '//p:delivery/p:bestlocation/p:organization', ns);
+	// Prefer the Alma institution ID (present on newer Primo VE records, e.g. Harvard
+	// permalink pages), but fall back to the older sourceid selector for records that
+	// don't expose an organization on the delivery location.
+	var source = ZU.xpathText(doc, '//p:delivery/p:bestlocation/p:organization', ns)
+		|| ZU.xpathText(doc, '//p:control/p:sourceid', ns);
 	if (source) {
 		// The HVD library code is now preceded by $$V01 -- not seeing this in other catalogs like Princeton or UQAM
 		// so making it optional
