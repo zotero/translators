@@ -35,10 +35,26 @@
 	***** END LICENSE BLOCK *****
 */
 
+function getReleaseSchema(doc) {
+	let schema = doc.querySelector('script[type="application/ld+json"]#release_schema');
+	if (schema) {
+		return schema;
+	}
+
+	let schemas = doc.querySelectorAll('script[type="application/ld+json"]');
+	for (let schema of schemas) {
+		if (/"@type"\s*:\s*"MusicRelease"/.test(schema.textContent)) {
+			return schema;
+		}
+	}
+
+	return false;
+}
+
 function detectWeb(doc, url) {
 	if (
 		/^https?:\/\/www\.discogs\.com(?:\/[a-z]{2}(?:_[A-Z]{2})?)?\/release\/\d+(?:-[^/?#]+)?(?:[/?#]|$)/.test(url)
-		&& doc.querySelector('script[type="application/ld+json"]#release_schema')
+		&& getReleaseSchema(doc)
 	) {
 		return "audioRecording";
 	}
@@ -49,7 +65,7 @@ function doWeb(doc, url) {
 	// Create a new Zotero item of type "audioRecording"
 	let item = new Zotero.Item("audioRecording");
 
-	let jsonLdScript = doc.querySelector('script[type="application/ld+json"]#release_schema');
+	let jsonLdScript = getReleaseSchema(doc);
 	if (!jsonLdScript) {
 		Zotero.debug("No JSON-LD found on the page.");
 		return;
