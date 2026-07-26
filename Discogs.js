@@ -52,10 +52,7 @@ function getReleaseSchema(doc) {
 }
 
 function detectWeb(doc, url) {
-	if (
-		/^https?:\/\/www\.discogs\.com(?:\/[a-z]{2}(?:_[A-Z]{2})?)?\/release\/\d+(?:-[^/?#]+)?(?:[/?#]|$)/.test(url)
-		&& getReleaseSchema(doc)
-	) {
+	if (/^https?:\/\/www\.discogs\.com(?:\/[a-z]{2}(?:_[A-Z]{2})?)?\/release\/\d+(?:-[^/?#]+)?(?:[/?#]|$)/.test(url)) {
 		return "audioRecording";
 	}
 	return false;
