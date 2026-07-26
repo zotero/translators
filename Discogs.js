@@ -2,35 +2,15 @@
 	"translatorID": "669bb7bd-bc34-46cd-9340-cf8af8187063",
 	"label": "Discogs",
 	"creator": "Michael Z Freeman",
-	"target": "^https://www\\.discogs\\.com/release/[a-z0-9-]+",
+	"target": "^https?://www\\.discogs\\.com(?:/[a-z]{2}(?:_[A-Z]{2})?)?/release/\\d+(?:-[^/?#]+)?(?:[/?#]|$)",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-11-29 12:24:52"
+	"lastUpdated": "2026-07-26 08:30:13"
 }
-
-/*
-HISTORY
-
-This translator was something I've been circling arund for 3 years. I started a BA(Hons) in Creative Music Technology at Falmouth University.
-I became frustrated with the lack of citation tools for music releases and audio recordings in general. Zotero does detect the Discogs page as an
-audio recording but does not fill in the correct details. Other citation tools out there fail to have searches for music releases and seem to have
-no idea that vinyl records can in fact be cited and referenced. All this when as a DJ I am researching releases and writing assessments and dissertations !
-So I hope this translator can improve the situation.
-
-METHOD
-
-This translator accesses the "ld+json" block in the "release" Discogs page. It is not designed to use the "master" page for a release as that will not
-list the record label.
-
-INFO
-
-Some comments in the code below are based on page https://www.discogs.com/release/126504-Micro-Vicious-Vic-Electric-Impact-The-Mixes
-*/
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -56,7 +36,10 @@ Some comments in the code below are based on page https://www.discogs.com/releas
 */
 
 function detectWeb(doc, url) {
-	if (url.match(/release\/\d+/)) {
+	if (
+		/^https?:\/\/www\.discogs\.com(?:\/[a-z]{2}(?:_[A-Z]{2})?)?\/release\/\d+(?:-[^/?#]+)?(?:[/?#]|$)/.test(url)
+		&& doc.querySelector('script[type="application/ld+json"]#release_schema')
+	) {
 		return "audioRecording";
 	}
 	return false;
@@ -66,8 +49,7 @@ function doWeb(doc, url) {
 	// Create a new Zotero item of type "audioRecording"
 	let item = new Zotero.Item("audioRecording");
 
-	// Locate the JSON-LD script tag
-	let jsonLdScript = doc.querySelector('script[type="application/ld+json"]');
+	let jsonLdScript = doc.querySelector('script[type="application/ld+json"]#release_schema');
 	if (!jsonLdScript) {
 		Zotero.debug("No JSON-LD found on the page.");
 		return;
@@ -95,7 +77,7 @@ function doWeb(doc, url) {
 	}
 
 	if (jsonLd.musicReleaseFormat) {
-		item.medium = jsonLd.musicReleaseFormat; // e.g., "Vinyl"
+		item.audioRecordingFormat = jsonLd.musicReleaseFormat; // e.g., "Vinyl"
 	}
 
 	if (jsonLd.datePublished) {
@@ -127,10 +109,10 @@ function doWeb(doc, url) {
 		});
 	}
 
-	// Add the release page URL
+	item.libraryCatalog = "Discogs";
+
 	item.url = url;
 
-	// Complete the item and save it to Zotero
 	item.complete();
 }
 
