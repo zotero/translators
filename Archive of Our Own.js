@@ -40,6 +40,21 @@ function parseIntWithThousandsDelimCommas(text) {
 	return text.split(',').join();
 }
 
+function getCollection(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('li:is(.work,.series).blurb > div.header > h4.heading > a:is([href^="/works/"],[href^="/series/"])');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
 function parseWorkPreface(node, item)
 {
 	let title = ZU.trimInternal(text(node, 'h2.title.heading'));
@@ -130,12 +145,43 @@ function detectWeb(doc, url)
 		Zotero.debug("AO3 work TOC page");
 		return 'book';
 	}
+	else if (/\/series\/[0-9]+/.test(url)) {
+		// paged
+		Zotero.debug("AO3 series TOC page");
+		return 'multiple';
+	}
+	else if (/\/users\/[a-zA-Z0-9_]+(\/pseuds\/([a-zA-Z0-9_\-]|(%[0-9a-fA-F]{2}))+)?\/(works|series|bookmarks|collections)/.test(url)) {
+		// see https://archiveofourown.org/faq/your-account#usernamecharacters,
+		// and https://archiveofourown.org/faq/pseuds#pseudcharacters
+		// paged; list may include series, not just works
+		Zotero.debug("AO3 user collection page");
+		return 'multiple';
+	}
+	else if (/\/works\/search\?work_search\[query\]/.test(url)) {
+		// paged; list only includes works, not series
+		Zotero.debug("AO3 search results page");
+		return 'multiple';
+	}
 	return false;
 }
 
 async function doWeb(doc, url)
 {
 	let detectedType = detectWeb(doc, url);
+
+	if (detectedType == 'multiple') {
+		let items = await Zotero.selectItems(getCollection(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			let doc = await requestDocument(url);
+			// recursively scrape to include titles within series (if any)
+			// (won't be causing DDoS, as it is gated by Z.selectItems())
+			await doWeb(doc, url);
+		}
+
+		// TODO: support paged results?
+		return;
+	}
 
 	// single item
 	let scrapingUrl = new URL(url);
