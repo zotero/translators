@@ -92,6 +92,21 @@ function parseWorkMeta(node, item)
 	return true;
 }
 
+function parseChapterHead(node, item)
+{
+	let title = ZU.trimInternal(text(node, '.title'));
+	item.title = title;
+	if (!title) return false;
+	let href = attr(node, '.title > a[href^="/works/"]', 'href');
+	item.url = new URL(href, baseUrl).toString();
+
+	let summaryElem = node.querySelector('div.summary > blockquote.userstuff');
+	if (summaryElem)
+		item.abstractNote = ZU.cleanTags(ZU.trimInternal(summaryElem.innerHTML)).trim();
+
+	return true;
+}
+
 function detectWeb(doc, url)
 {
 	if (/\/works\/[0-9]+\/chapters\/[0-9]+/.test(url)) {
@@ -125,12 +140,19 @@ async function doWeb(doc, url)
 	// single item
 	let scrapingUrl = new URL(url);
 	let useAltScrapingUrl = false;
-	let item = new Zotero.Item('book');
-	// if TOC page, scrape using content page (metadata not displayed on TOC page)
-	let splitAt = scrapingUrl.pathname.indexOf('/navigate');
-	if (splitAt != -1) {
-		scrapingUrl.pathname = scrapingUrl.pathname.slice(0, splitAt);
-		useAltScrapingUrl = true;
+	let item = null;
+
+	if (detectedType == 'bookSection') {
+		item = new Zotero.Item('bookSection');
+	}
+	else {
+		item = new Zotero.Item('book');
+		// if TOC page, scrape using content page (metadata not displayed on TOC page)
+		let splitAt = scrapingUrl.pathname.indexOf('/navigate');
+		if (splitAt != -1) {
+			scrapingUrl.pathname = scrapingUrl.pathname.slice(0, splitAt);
+			useAltScrapingUrl = true;
+		}
 	}
 
 	// N.B. on any works page with content (chapter or full work, NOT TOC page), a content warning may be displayed instead;
@@ -150,9 +172,17 @@ async function doWeb(doc, url)
 	let metaElem = scrapingDoc.querySelector('dl.work.meta');
 	parseWorkMeta(metaElem, item);
 
-	// normalize URL by re-deriving it via sharing link
-	let href = attr(scrapingDoc, 'ul.work.navigation.actions > li.share > a', 'href').slice(0, -'/share'.length);
-	item.url = new URL(href, baseUrl).toString();
+	if (detectedType == 'bookSection') { // implies body text page
+		item.bookTitle = item.title;
+		item.title = null;
+		let chapterElem = scrapingDoc.querySelector('div#workskin div.chapter.preface');
+		parseChapterHead(chapterElem, item);
+	}
+	else {
+		// normalize URL by re-deriving it via sharing link
+		let href = attr(scrapingDoc, 'ul.work.navigation.actions > li.share > a', 'href').slice(0, -'/share'.length);
+		item.url = new URL(href, baseUrl).toString();
+	}
 
 	item.complete();
 }
