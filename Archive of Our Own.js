@@ -36,6 +36,10 @@
 
 const baseUrl = 'https://archiveofourown.org/';
 
+function parseIntWithThousandsDelimCommas(text) {
+	return text.split(',').join();
+}
+
 function parseWorkPreface(node, item)
 {
 	let title = ZU.trimInternal(text(node, 'h2.title.heading'));
@@ -77,6 +81,13 @@ function parseWorkMeta(node, item)
 	let chapterCountCurrent, chapterCountExpected = text(node, 'dd.chapters').split('/').map((desc) => (desc === '?') ? null : parseInt(desc));
 	let isComplete = (chapterCountCurrent == chapterCountExpected);
 	item.setExtra('Complete', isComplete);
+	if (isComplete) {
+		let chapterCount = parseInt(text(node, 'dd.chapters').split('/')[1].trim());
+		item.setExtra('Chapter-Count', chapterCount);
+		// word count uses commas as thousands-separators
+		let wordCount = parseIntWithThousandsDelimCommas(text(node, 'dd.words').trim());
+		item.setExtra('Word-Count', wordCount);
+	}
 
 	return true;
 }
