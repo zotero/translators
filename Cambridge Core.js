@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-05 18:02:48"
+	"lastUpdated": "2026-08-05 17:31:25"
 }
 
 /*
@@ -208,7 +208,7 @@ var testCases = [
 				"pages": "227-243",
 				"publicationTitle": "Journal of American Studies",
 				"shortTitle": "“SAMO© as an Escape Clause”",
-				"url": "https://www.cambridge.org/core/journals/journal-of-american-studies/article/samo-as-an-escape-clause-jean-michel-basquiats-engagement-with-a-commodified-american-africanism/1E4368D610A957B84F6DA3A58B8BF164",
+				"url": "https://www.cambridge.org/core/journals/journal-of-american-studies/article/abs/samo-as-an-escape-clause-jean-michel-basquiats-engagement-with-a-commodified-american-africanism/1E4368D610A957B84F6DA3A58B8BF164",
 				"volume": "45",
 				"attachments": [
 					{
@@ -254,7 +254,7 @@ var testCases = [
 				"libraryCatalog": "Cambridge University Press",
 				"pages": "437-469",
 				"publicationTitle": "Journal of Fluid Mechanics",
-				"url": "https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/high-resolution-simulations-of-cylindrical-density-currents/30D62864BDED84A6CC81F5823950767B",
+				"url": "https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/abs/high-resolution-simulations-of-cylindrical-density-currents/30D62864BDED84A6CC81F5823950767B",
 				"volume": "590",
 				"attachments": [
 					{
@@ -476,7 +476,7 @@ var testCases = [
 				"pages": "340-347",
 				"publicationTitle": "American Political Science Review",
 				"shortTitle": "Violence in Pre-Modern Societies",
-				"url": "https://www.cambridge.org/core/journals/american-political-science-review/article/violence-in-premodern-societies-rural-colombia/A14B0BB4130A2BA6BE79E2853597526E",
+				"url": "https://www.cambridge.org/core/journals/american-political-science-review/article/abs/violence-in-premodern-societies-rural-colombia/A14B0BB4130A2BA6BE79E2853597526E",
 				"volume": "60",
 				"attachments": [
 					{
@@ -514,7 +514,7 @@ var testCases = [
 				"pages": "449-470",
 				"publicationTitle": "Journal of Public Policy",
 				"shortTitle": "When Consumers Oppose Consumer Protection",
-				"url": "https://www.cambridge.org/core/journals/journal-of-public-policy/article/when-consumers-oppose-consumer-protection-the-politics-of-regulatory-backlash/2C8E6B9BB6881A233B8936D9AD2C6305",
+				"url": "https://www.cambridge.org/core/journals/journal-of-public-policy/article/abs/when-consumers-oppose-consumer-protection-the-politics-of-regulatory-backlash/2C8E6B9BB6881A233B8936D9AD2C6305",
 				"volume": "10",
 				"attachments": [
 					{
