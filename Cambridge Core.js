@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-11-20 15:43:05"
+	"lastUpdated": "2026-08-05 17:31:25"
 }
 
 /*
@@ -146,10 +146,15 @@ async function scrape(doc, url = doc.location.href) {
 		
 		translator.setHandler('itemDone', (_obj, item) => {
 			item.url = url;
-			var abstract = ZU.xpathText(doc,
-				'//div[@class="abstract"]');
-			if (abstract) {
-				item.abstractNote = abstract;
+			// Articles with a graphical abstract have TWO div.abstract nodes:
+			// the first holds only the figure and has no text. xpathText()
+			// joined both with its default ", " delimiter, so those abstracts
+			// began with a stray comma. Use the first node that has text.
+			for (let node of doc.querySelectorAll('div.abstract')) {
+				if (node.textContent.trim()) {
+					item.abstractNote = ZU.trimInternal(node.textContent);
+					break;
+				}
 			}
 			item.title = ZU.unescapeHTML(item.title);
 			item.publisher = ""; // don't grab the publisher
@@ -573,6 +578,87 @@ var testCases = [
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/impact-of-droplets-onto-surfactantladen-thin-liquid-films/03C213289D24A7074987081D659E1DB3",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "C. R.",
+						"lastName": "Constante-Amores",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "L.",
+						"lastName": "Kahouadji",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "S.",
+						"lastName": "Shin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J.",
+						"lastName": "Chergui",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "D.",
+						"lastName": "Juric",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J. R.",
+						"lastName": "Castrejón-Pita",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "O. K.",
+						"lastName": "Matar",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "A. A.",
+						"lastName": "Castrejón-Pita",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					{
+						"tag": "capillary flows"
+					},
+					{
+						"tag": "drops"
+					},
+					{
+						"tag": "multiphase flow"
+					}
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "Impact of droplets onto surfactant-laden thin liquid films",
+				"DOI": "10.1017/jfm.2023.224",
+				"url": "https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/impact-of-droplets-onto-surfactantladen-thin-liquid-films/03C213289D24A7074987081D659E1DB3",
+				"abstractNote": "We study the effect of insoluble surfactants on the impact of surfactant-free droplets onto surfactant-laden thin liquid films via a fully three-dimensional direct numerical simulation approach that employs a hybrid interface-tracking/level-set method, and by taking into account surfactant-induced Marangoni stresses due to gradients in interfacial surfactant concentration. Our numerical predictions for the temporal evolution of the surfactant-free crown are validated against the experimental work by Che & Matar (Langmuir, vol. 33, 2017, pp. 12140–12148). We focus on the ‘crown-splash regime’, and we observe that the crown dynamics evolves through various stages: from the growth of linear modes (through a Rayleigh–Plateau instability) to the development of nonlinearities leading to primary and secondary breakup events (through droplet shedding modulated by an end-pinching mechanism). We show that the addition of surfactants does not affect the wave selection via the Rayleigh–Plateau instability. However, the presence of surfactants plays a key role in the late stages of the dynamics as soon as the ligaments are driven out from the rim. Surfactant-induced Marangoni stresses delay the end-pinching mechanisms to result in longer ligaments prior to their capillary singularity. Our results indicate that Marangoni stresses bridge the gap between adjacent protrusions promoting the adjacent protrusions' collision and the merging of ligaments. Finally, we demonstrate that the addition of surfactants leads to surface rigidification and consequently to the retardation of the flow dynamics.",
+				"date": "2023/04",
+				"publicationTitle": "Journal of Fluid Mechanics",
+				"volume": "961",
+				"pages": "A8",
+				"ISSN": "0022-1120, 1469-7645",
+				"language": "en",
+				"libraryCatalog": "Cambridge University Press"
 			}
 		]
 	}
