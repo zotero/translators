@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-07-11 00:20:00"
+	"lastUpdated": "2026-08-05 16:25:41"
 }
 
 /**
@@ -193,19 +193,26 @@ function getListingEntries(doc) {
 // in some environments (e.g. the connector), so prefer the DOI declared by
 // the page itself. Entries that don't resolve to an article keep no `doi`
 // and are dropped when the results are assembled.
-function resolveShortLinks(entries) {
-	return Promise.all(entries.filter(entry => entry.shortUrl).map(function (entry) {
-		return ZU.processDocuments(entry.shortUrl, function (resolvedDoc, resolvedUrl) {
-			var doiSource = attr(resolvedDoc, 'meta[name="dc.identifier"]', 'content')
-				|| attr(resolvedDoc, 'meta[property="og:url"]', 'content')
-				|| resolvedUrl;
-			var doiMatch = doiSource.match(/10\.\d+\/(?:annurev[.-])[^/?#]+/);
-			if (doiMatch) {
-				entry.doi = doiMatch[0];
-				var metaTitle = attr(resolvedDoc, 'meta[name="dc.title"]', 'content');
-				if (metaTitle) entry.title = metaTitle;
-			}
-		}, true).catch(function () {});
+async function resolveShortLinks(entries) {
+	await Promise.all(entries.filter(entry => entry.shortUrl).map(async function (entry) {
+		var resolvedDoc;
+		try {
+			resolvedDoc = await requestDocument(entry.shortUrl);
+		}
+		catch (e) {
+			// A short link that doesn't resolve leaves the entry without a DOI;
+			// it must not abort the rest of the translation.
+			return;
+		}
+		var doiSource = attr(resolvedDoc, 'meta[name="dc.identifier"]', 'content')
+			|| attr(resolvedDoc, 'meta[property="og:url"]', 'content')
+			|| resolvedDoc.location.href;
+		var doiMatch = doiSource.match(/10\.\d+\/(?:annurev[.-])[^/?#]+/);
+		if (doiMatch) {
+			entry.doi = doiMatch[0];
+			var metaTitle = attr(resolvedDoc, 'meta[name="dc.title"]', 'content');
+			if (metaTitle) entry.title = metaTitle;
+		}
 	}));
 }
 
