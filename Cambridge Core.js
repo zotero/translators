@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-05 17:31:25"
+	"lastUpdated": "2026-08-06 17:19:45"
 }
 
 /*
@@ -146,10 +146,8 @@ async function scrape(doc, url = doc.location.href) {
 		
 		translator.setHandler('itemDone', (_obj, item) => {
 			item.url = url;
-			// Articles with a graphical abstract have TWO div.abstract nodes:
-			// the first holds only the figure and has no text. xpathText()
-			// joined both with its default ", " delimiter, so those abstracts
-			// began with a stray comma. Use the first node that has text.
+			// There may be more than one .abstract element if the paper
+			// has a graphical abstract, so use the first one with text
 			for (let node of doc.querySelectorAll('div.abstract')) {
 				if (node.textContent.trim()) {
 					item.abstractNote = ZU.trimInternal(node.textContent);
