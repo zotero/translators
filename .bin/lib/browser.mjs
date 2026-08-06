@@ -1,3 +1,4 @@
+import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { chromium } from 'playwright';
@@ -35,6 +36,7 @@ export async function launchBrowser({ headless = true, extensionDir, recordHar }
 	const args = extensionDir
 		? [`--disable-extensions-except=${extensionDir}`, `--load-extension=${extensionDir}`]
 		: [];
+	if (extensionDir) await clearExtensionState();
 	const context = await chromium.launchPersistentContext(PROFILE_DIR, {
 		channel: 'chromium',
 		headless,
@@ -46,6 +48,17 @@ export async function launchBrowser({ headless = true, extensionDir, recordHar }
 		goto: (page, url, opts) => navigate(page, url, { headless, ...opts }),
 		close: () => context.close(),
 	};
+}
+
+/**
+ * Remove the extension's cached storage.local and its service worker, which
+ * prevent translator changes (without bumping lastUpdated) and Connector
+ * service worker changes from taking effect.
+ */
+async function clearExtensionState() {
+	await Promise.all(['Local Extension Settings', 'Service Worker'].map(
+		dir => fs.rm(path.join(PROFILE_DIR, 'Default', dir), { recursive: true, force: true })
+	));
 }
 
 async function navigate(page, url, { headless, settle = 1000 }) {
