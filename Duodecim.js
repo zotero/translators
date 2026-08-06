@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-06 14:21:28"
+	"lastUpdated": "2026-08-06 17:11:32"
 }
 
 /*
@@ -226,7 +226,7 @@ async function urlGen(urlObj) {
 		.includes(urlObj.hostname)) return urlObj.origin + '/' + tdoi;
 
 	const tdoiURL = 'https://www.terveysportti.fi/doi/' + tdoi;
-	const tdoiObj = new URL(await ZU.request(tdoiURL).then((response) => {
+	const tdoiObj = new URL(await request(tdoiURL).then((response) => {
 		return response.responseURL;
 	}));
 	Zotero.debug(`TDOI redirection: responding URL: ${tdoiObj.href}`);
@@ -255,7 +255,7 @@ async function urlGen(urlObj) {
  * @returns {Promise<boolean>} whether the network IP is a subscriber
  */
 async function onCampus(ePage = 'e48243') {
-	const sllTestDoc = await ZU.requestDocument(`https://www.laakarilehti.fi/${ePage}`).then((doc) => {
+	const sllTestDoc = await requestDocument(`https://www.laakarilehti.fi/${ePage}`).then((doc) => {
 		return doc;
 	});
 	return !!sllTestDoc.querySelector('div.utils');
@@ -815,10 +815,9 @@ async function doWeb(doc, url) {
 
 	if (type === 'dictionaryEntry') item = await scrapeDict(doc, url);
 
-	if (!Z.Item.prototype.isPrototypeOf(item)
-		&& type?.length) item = await scrape(doc, url, type);
+	if (!item && type) item = await scrape(doc, url, type);
 
-	if (Z.Item.prototype.isPrototypeOf(item)) {
+	if (item) {
 		if (!item.url) item.url = await urlGen(new URL(url));
 		item.attachments.push({ document: doc, snapshot: true });
 		item.complete();
