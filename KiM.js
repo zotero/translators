@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-01-02 16:28:12"
+	"lastUpdated": "2026-07-15 13:55:27"
 }
 
 /*
@@ -88,8 +88,44 @@ async function scrape(doc, url = doc.location.href) {
 	// Detect language from URL for proper institution name
 	var isEnglish = url.includes('english.kimnet.nl');
 
-	// Title from the page heading
-	item.title = text(doc, 'h1.nav-bar__page-title');
+	// Parse #elastic-content (title, author, date)
+	let elastic = {};
+	let elasticEl = doc.querySelector('#elastic-content');
+	if (elasticEl) {
+		try {
+			elastic = JSON.parse(elasticEl.textContent);
+		}
+		catch (e) {
+			Zotero.debug('Failed to parse elastic-content: ' + e);
+		}
+	}
+
+	// Parse JSON-LD, selecting the WebPage node specifically
+	// (the page contains multiple ld+json blocks in unspecified order)
+	let webPage = {};
+	for (let script of doc.querySelectorAll('script[type="application/ld+json"]')) {
+		try {
+			let data = JSON.parse(script.textContent);
+			let graph = data['@graph'] || [data];
+			let page = graph.find(n => n['@type'] === 'WebPage');
+			if (page) {
+				webPage = page;
+				break;
+			}
+		}
+		catch (e) {
+			Zotero.debug('Failed to parse JSON-LD: ' + e);
+		}
+	}
+
+	// Title: prefer JSON-LD, fall back to elastic, then to page heading
+	item.title = webPage.name || elastic.pageTitle || text(doc, 'h1.nav-bar__page-title');
+
+	// Date: prefer datePublished, fall back to publicationDate; keep date only
+	let rawDate = webPage.datePublished || elastic.publicationDate;
+	if (rawDate) {
+		item.date = ZU.strToISO(rawDate);
+	}
 
 	// Abstract from the intro section
 	item.abstractNote = text(doc, '.intro .rich-text');
@@ -106,45 +142,24 @@ async function scrape(doc, url = doc.location.href) {
 	}
 	item.place = 'Den Haag';
 
-	// Language tag
-	item.language = doc.documentElement.lang || (isEnglish ? 'en' : 'nl');
+	// Language
+	item.language = webPage.inLanguage || doc.documentElement.lang || (isEnglish ? 'en' : 'nl');
 
-	// Process downloads to get metadata and attachments
-	var downloads = doc.querySelectorAll('.download-list__item');
-
-	for (let download of downloads) {
-		let metadata = download.querySelector('.meta-data');
-		if (!metadata) continue;
-
-		let metaParts = Array.from(metadata.querySelectorAll('span')).map(s => s.textContent.trim());
-
-		// Extract date (format: DD-MM-YYYY)
-		let dateStr = metaParts.find(p => /^\d{2}-\d{2}-\d{4}$/.test(p));
-		if (dateStr && !item.date) {
-			// Convert from DD-MM-YYYY to YYYY-MM-DD
-			let parts = dateStr.split('-');
-			item.date = `${parts[2]}-${parts[1]}-${parts[0]}`;
-		}
-
-		// Extract authors - look for entries with commas that aren't file sizes or page counts
-		let authors = metaParts.find(p => p.includes(',')
-			&& !/\d/.test(p.split(',')[0]) // First part shouldn't contain numbers
-			&& !p.includes('pagina')
-			&& !p.includes('pages')
-			&& !p.includes('KB')
-			&& !p.includes('MB')
-		);
-
-		if (authors && !item.creators.length) {
-			// Split on comma and add each author
-			let authorList = authors.split(',').map(a => a.trim());
-			for (let author of authorList) {
-				if (!author) continue;
-				item.creators.push(ZU.cleanAuthor(author, 'author', false));
+	// Authors from elastic-content (English pages have this; Dutch typically don't)
+	// Assumes "Firstname Lastname, Firstname Lastname" — a comma separates
+	// distinct authors, NOT a single "Lastname, Firstname" entry.
+	if (elastic.author) {
+		for (let name of elastic.author.split(',')) {
+			name = name.trim();
+			if (name) {
+				item.creators.push(ZU.cleanAuthor(name, 'author', false));
 			}
 		}
+	}
 
-		// Get PDF attachment
+	// PDF attachments from the download list
+	var downloads = doc.querySelectorAll('.download-list__item');
+	for (let download of downloads) {
 		let pdfLink = download.querySelector('a[href$=".pdf"]');
 		if (pdfLink) {
 			let pdfTitle = text(download, '.title');
@@ -242,6 +257,139 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Renewable fuels in high blends in road freight transport",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://english.kimnet.nl/documents/2026/05/21/energy-saving-in-transport-through-avoid-shift-policy-measures",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Energy saving in transport through avoid/shift policy measures",
+				"creators": [
+					{
+						"firstName": "Stefan",
+						"lastName": "Bakker",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Saeda",
+						"lastName": "Moorman",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-05-21",
+				"abstractNote": "Energy demand reduction in the transport sector can be achieved by reducing transport demand (avoid), encouraging the use of alternative modes of transport (shift), and improving vehicle energy efficiency (improve). Research by the KiM Netherlands Institute for Transport Policy Analysis shows that, from a policy perspective, it is difficult to achieve substantial energy savings using the first two strategies (avoid and shift). The importance of energy savings has increased due to geopolitical developments and in light of energy supply security.",
+				"institution": "Netherlands Institute for Transport Policy Analysis",
+				"language": "en",
+				"libraryCatalog": "KiM",
+				"place": "Den Haag",
+				"url": "https://english.kimnet.nl/documents/2026/05/21/energy-saving-in-transport-through-avoid-shift-policy-measures",
+				"attachments": [
+					{
+						"title": "Brochure - Energy saving in transport through avoid/shift policy measures",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Background report - Energy saving in transport through avoid/shift policy measures: an exploratory study into dealing with scarcity",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.kimnet.nl/documenten/2026/05/28/bedrijfseconomische-kostenkengetallen-voor-het-goederenvervoer-update-2026",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Bedrijfseconomische kostenkengetallen voor het goederenvervoer, update 2026",
+				"creators": [],
+				"date": "2026-05-28",
+				"abstractNote": "Om vraagstukken waarvoor bedrijfseconomische kostenkengetallen van het goederenvervoer nodig zijn te kunnen beantwoorden - bijvoorbeeld over de impact van stijgende brandstofkosten op de totale vervoerskosten - is het noodzakelijk om actuele kostengegevens te hebben. Vanuit eerdere edities van dit onderzoek waren kostenkengetallen beschikbaar voor de jaren 2016-2021. Het Kennisinstituut voor Mobiliteitsbeleid (KiM) heeft de kostenkengetallen voor het goederenvervoer nu geactualiseerd tot en met 2024. De kostenkengetallen zijn beschikbaar voor de vervoerwijzen weg, spoor, binnenvaart, zeevaart, luchtvaart, en buisleiding. Kostenkengetallen voor buisleidingen zijn voor het eerst ontwikkeld in deze editie. Het KiM heeft de kostenkengetallen laten verzamelen door de onderzoeksbureaus Panteia en Ecorys.",
+				"institution": "Kennisinstituut voor Mobiliteitsbeleid",
+				"language": "nl",
+				"libraryCatalog": "KiM",
+				"place": "Den Haag",
+				"url": "https://www.kimnet.nl/documenten/2026/05/28/bedrijfseconomische-kostenkengetallen-voor-het-goederenvervoer-update-2026",
+				"attachments": [
+					{
+						"title": "Notitie - Bedrijfseconomische kostenkengetallen voor het goederenvervoer, update 2026",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Achtergrondrapport Panteia - Bedrijfseconomische kostenkengetallen voor het goederenvervoer",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Achtergrondrapport Ecorys - Verkenning bedrijfseconomische kosten van transport via buisleidingen",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Tabel 1 - Kostenkengetallen van de binnenvaart",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Tabel 2 - Kostenkengetallen van de binnenvaart verschijningsvorm",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Tabel 3 - Kostenkengetallen buisleiding",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Tabel 4 - Kostenkengetallen van de luchtvaart",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Tabel 5 - Kostenkengetallen van de luchtvaart verschijningsvorm",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Tabel 6 - Kostenkengetallen overslag containers",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Tabel 7 - Kostenkengetallen van het spoorvervoer",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Tabel 8 - Kostenkengetallen van het spoorvervoer verschijningsvorm",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Tabel 9 - Kostenkengetallen van het wegvervoer",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Tabel 10 - Kostenkengetallen van het wegvervoer verschijningsvorm",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Tabel 11 - Kostenkengetallen van de zeevaart",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Tabel 12 - Kostenkengetallen van de zeevaart verschijningsvorm",
 						"mimeType": "application/pdf"
 					},
 					{
