@@ -2,14 +2,14 @@
 	"translatorID": "63ef6a3b-2e64-4d58-aedc-07b31a108928",
 	"label": "Duodecim",
 	"creator": "Shiyu Wang",
-	"target": "https?://(www\\.(terveysportti|terveyskirjasto|kaypahoito|oppiportti|duodecimlehti)\\.fi|www.ebm-guidelines.com)/",
+	"target": "^https?://(www\\.(terveysportti|terveyskirjasto|kaypahoito|oppiportti|duodecimlehti)\\.fi|www\\.ebm-guidelines\\.com)/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-06 17:11:32"
+	"lastUpdated": "2026-08-06 17:14:28"
 }
 
 /*
