@@ -243,7 +243,7 @@ async function urlGen(urlObj) {
  * Primarily for downloading PDF for *Lääkärilehti*.
  *
  * @param {string} [ePage = '/e48243'] a pathname to an article needing subscription.
- * @returns {Promise<boolean>} whether the network IP is a subscriber
+ * @returns {Promise<boolean>} whether the network IP is a subscriber to SLL / whether the URL is valid
  */
 async function directAccess(ePage = '/e48243') {
 	if (ePage.charAt(0) != '/') ePage = '/' + ePage;

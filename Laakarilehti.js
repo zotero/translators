@@ -44,7 +44,7 @@ const ePageRegex = /^(?:Lehti (?<issue>[\d-]*?): )?(?<section>.*?)\s+Suom Lääk
  * A variant from my own translator `Duodecim.js` (`63ef6a3b-2e64-4d58-aedc-07b31a108928`).
  *
  * @param {string} [ePage = '/e48243'] `/\/e\d+/` or a regular pathname.
- * @returns {Promise<boolean>} whether the network IP is a subscriber to SLL
+ * @returns {Promise<boolean>} whether the network IP is a subscriber / whether the URL is valid
  */
 async function directAccess(ePage = '/e48243') {
 	if (ePage.charAt(0) != '/') ePage = '/' + ePage;
