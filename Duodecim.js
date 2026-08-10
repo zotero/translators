@@ -86,7 +86,7 @@
 
 const tdoiURLRegex = /(?<=(\/|=))(?<TDOI>(?<prefix>(\w{3}|cd))\d{5,6})($|\/|\?)/i;
 const capsRegex = /[A-ZÄ-Ö]/; // Finnish/Swedish U+00C4 – U+00D6 (ASCII 196–214);
-const nimikkeetRegex = /(^\(?(Tt[KLM]|AMK|YAMK|LT)[()-]?.*|.*(lääkäri|asiantuntija|terapeutti|toimitus|tohtori)$)/i; // TODO statics; 260806 use array?
+const nimikkeetRegex = /(^\(?(Tt[KLM]|AMK|YAMK|LT)[()-]?.*|.*(lääkäri|asiantuntija|terapeutti|toimitus|tohtori)$)/i; // TODO statics
 
 const journalISSN = {
 	sll: '0039-5560, 2489-7434',
@@ -185,7 +185,7 @@ function parseCreators(nameString, isSingleAuthor = false, creatorRole = 'author
 		if (!isGroupAuthor) {
 			const parts = nameToPush.split(/\s+/);
 			if (parts.length > 1) nameArray.push({
-				firstName: parts.slice(0, -1).join(' '), // TODY 260810 why?
+				firstName: parts.slice(0, -1).join(' '), // I forgot why I wrote this way.
 				lastName: parts[parts.length - 1],
 				creatorType: creatorRole,
 			});
@@ -251,7 +251,7 @@ async function directAccess(ePage = '/e48243') {
 	const sllResponse = await request(`https://www.laakarilehti.fi${ePage}`);
 	Zotero.debug(`directAccess(): accessed ${ePage}\n> returned ${sllResponse.responseURL}\n> with status ${sllResponse.status}`);
 
-	if (sllResponse.status != 200) return false; // pathname === '/404'
+	if (sllResponse.status != 200) return false;
 	if (sllResponse.headers['content-type'] === 'application/pdf') return true;
 
 	// const sllBody = document.createElement('html'); ESLINT no-restricted-globals
@@ -519,14 +519,14 @@ async function scrape(doc, url, type) {
 		const pdfToPush = {
 			url: pdfLink,
 			title: attachmentTitle,
-			mimeType: asFile ? "application/pdf" : "text/html" // TODO 260810 verify as link instead of file
+			mimeType: asFile ? "application/pdf" : "text/html"
 		};
 		if (!asFile) pdfToPush.snapshot = false; // TODO live test, necessary?
 		item.attachments.push(pdfToPush);
 	}
 
 	var englishSummary = '';
-	if (isJournal) { // PARSING JOURNALS
+	if (isJournal) {
 		item.publicationTitle = bookNameText;
 		var pageSelector = `div.${dClass}meta_journal`;
 		if (isDLehti) pageSelector = 'div.dl-article-bibliographic';
@@ -545,7 +545,7 @@ async function scrape(doc, url, type) {
 
 		const h2s = doc.querySelectorAll('h2');
 		if (prefix === 'duo') {
-			if (!journalMetadata) item.date = dmyToISO(innerText(pageSelector)); // *Verkossa ensin*, Online ahead of print
+			if (!journalMetadata) item.date = dmyToISO(innerText(pageSelector)); // *Verkossa ensin*, Online ahead of print, e.g. duo19390
 
 			if (h2s?.length) {
 				const englishInTitle = /English summary/i.test(h2s[0].innerText);
@@ -568,9 +568,8 @@ async function scrape(doc, url, type) {
 					break;
 				}
 			}
-
 			if (item.title.includes(']')) item.tags.push('duodecim-englanti-Dlehti');
-			// if (!isDLehti) item.archiveLocation = tdoi; TODO 260810
+
 			item.attachments.push({
 				url: `https://${urlObj.host}/xmedia/duo/${tdoi}.pdf`,
 				title: "PDF",
@@ -612,7 +611,6 @@ async function scrape(doc, url, type) {
 		}
 	}
 
-	// PARSING ABSTRACT
 	const abstractSelectors = [
 		'section[role="main"] aside', // TK
 		`div.${dClass}aside`,
@@ -651,7 +649,6 @@ async function scrape(doc, url, type) {
 		}
 	}
 
-	// Zotero.debug(`scrape(): item.shortTitle before return: ${item.shortTitle}`);
 	return item;
 }
 
@@ -842,7 +839,7 @@ async function doWeb(doc, url) {
 /**
  * A NOTE ON TEST CASES
  * For Zotero's automated checks, I kept only publicly available test cases. One free TP item is included as the last test case.
- * Proceed with testing under a network with TP/OP subscription TODO or log in first in Scaffold's browser.
+ * Proceed with testing under a network with TP/OP subscription or log in first in Scaffold's browser.
  * Refer to a commit to my own repo for showcases of such items:
  * > https://github.com/shiyuwang-jamk/zotero-translators/blob/419d41e0f1d444d7a6fd30e1251f0e621fe0e54a/Duodecim.js#L1624
  *
