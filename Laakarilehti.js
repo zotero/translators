@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-09 23:29:42"
+	"lastUpdated": "2026-08-10 18:34:59"
 }
 
 /*
@@ -35,23 +35,20 @@
 	***** END LICENSE BLOCK *****
 */
 
+// Read also comment block before testCases.
+
 const oldMetaRegex = /^(?:Lehti (?<issue1>[\d-]*?): )?(?<section>.*?)\s+(?<issue>[\d-]*?)\/.*vsk (?<volume>\d+) s\.\s*?(?<pages>\d+.*?$)/i;
 const ePageRegex = /^(?:Lehti (?<issue>[\d-]*?): )?(?<section>.*?)\s+Suom Lääkäril \d{4};(?<volume>\d+):(?<archiveLocation>e\d+),\s+(?<eURL>www.laakarilehti.fi.*$)/i;
 
-// const noProxyOptions = {
-// 	headers: { Cookie: '' },
-// 	cookieSandbox: '' // this._translate.cookieSandbox
-// };
-
 /**
- * Adapted from `onCampus(epage)` of my own translator `Duodecim.js` (`63ef6a3b-2e64-4d58-aedc-07b31a108928`).
+ * A variant from my own translator `Duodecim.js` (`63ef6a3b-2e64-4d58-aedc-07b31a108928`).
  *
- * @param {string} [ePage = 'e48243'] `/e\d+/` or a regular pathname.
+ * @param {string} [ePage = '/e48243'] `/\/e\d+/` or a regular pathname.
  * @returns {Promise<boolean>} whether the network IP is a subscriber to SLL
  */
-async function directAccess(ePage = 'e48243') {
-	if (ePage.slice(0) === '/') ePage = ePage.slice(1, -1);
-	const sllTestDoc = await requestDocument(`https://www.laakarilehti.fi/${ePage}`); //, noProxyOptions);
+async function directAccess(ePage = '/e48243') {
+	if (ePage.charAt(0) != '/') ePage = '/' + ePage;
+	const sllTestDoc = await requestDocument(`https://www.laakarilehti.fi${ePage}`); //, noProxyOptions);
 	Zotero.debug(`directAccess(): returned URL ${JSON.parse(JSON.stringify(sllTestDoc)).location}`);
 
 	if (sllTestDoc?.querySelector('div.utils')) {
@@ -63,12 +60,12 @@ async function directAccess(ePage = 'e48243') {
 	return false;
 }
 
-// From `Duodecim.js`: Keep meaningful `\n`'s
+// A variant from `Duodecim.js`: Keep meaningful `\n`'s
 function returnProtect(raw) {
 	let output = '';
 	raw.split(/[\n\r]+/).forEach((lineCandidate) => {
 		const toAppend = ZU.trimInternal(lineCandidate);
-		if (!/[A-ZÄ-Ö]/.test(toAppend.slice(0))) output = output.replace(/\n$/, ' ');
+		if (/[a-zä-ö]/.test(toAppend.charAt(0))) output = output.replace(/\n$/, ' ');
 		output += toAppend + `\n`;
 	});
 	return output;
@@ -85,13 +82,12 @@ async function doWeb(doc, url) {
 	let item = new Zotero.Item('journalArticle');
 	item.publicationTitle = "Suomen Lääkärilehti";
 	item.journalAbbreviation = "Suom Lääkäril";
-	item.publisher = "Suomen lääkäriliitto";
+	item.publisher = "Suomen Lääkäriliitto";
 	item.ISSN = '0039-5560, 2489-7434';
 	item.language = 'fi';
 	item.title = text('article h1') || '';
 	item.date = attr(doc, 'meta[property="article:published_time"]', 'content');
 	item.shortTitle = attr(doc, 'meta[property="og:title"]', 'content');
-	// doc.querySelectorAll('span.authors span')?.forEach((author) => {
 	for (const author of doc.querySelectorAll('span.authors span')) {
 		item.creators.push(ZU.cleanAuthor(author.textContent, 'author'));
 	}
@@ -100,11 +96,14 @@ async function doWeb(doc, url) {
 	const notProxy = urlObj.hostname === 'www.laakarilehti.fi';
 	const isOnCampus = await directAccess() && notProxy;
 	const fullHTML = !doc.querySelector('div.login-container');
+
 	let validPublicKey;
 	const keyMatch = attr(doc, 'div.utils a[title="Jaa sähköpostitse"]', 'href')?.match(/\?public=.*$/);
-	if (fullHTML) validPublicKey = keyMatch[0] || '';
-	if (!fullHTML) item.tags.push('sll-no-access');
-	if (fullHTML && !validPublicKey.length) item.attachments.push({ document: doc, snapshot: true }); // no webpage snapshot in most cases
+	if (fullHTML) {
+		if (keyMatch) validPublicKey = keyMatch[0] || '';
+		if (!validPublicKey.length) item.attachments.push({ document: doc, snapshot: true }); // rare
+	}
+	else item.tags.push('sll-no-access');
 
 	const metaSpan = ZU.trimInternal(innerText('article span.meta.top'));
 	const metaRegex = metaSpan.includes('www.laakarilehti.fi/e') ? ePageRegex : oldMetaRegex;
@@ -121,7 +120,7 @@ async function doWeb(doc, url) {
 		if (!isOnCampus
 			&& Object.keys(metaTopGroups).includes('archiveLocation')
 			&& await directAccess(metaTopGroups.archiveLocation)
-			&& notProxy // TODO request with zero cookie?
+			&& notProxy // TODO request without proxy under proxied page?
 			&& fullHTML) {
 			Zotero.debug(`SLL: eURL ${metaTopGroups.eURL} as item.url`);
 			item.url = 'https://' + metaTopGroups.eURL || undefined; // free to public with eURL
@@ -134,10 +133,8 @@ async function doWeb(doc, url) {
 	const pdfPath = attr(doc, 'div.utils a[title="Lataa PDF"]', 'href');
 	if (pdfPath) {
 		const pdfPageMeta = /SLL(?<issue>\d+(-\d+)?)-?\d{4}-(?<pages>\d+)\.pdf/i.exec(pdfPath)?.groups;
-		if (pdfPageMeta) {
-			for (const key of Object.keys(pdfPageMeta)) if (!item[key]) item[key] = pdfPageMeta[key];
-			if (item.pages === pdfPageMeta.pages) item.pages += '-'; // a user will have to manually seek last page number from fetched PDF
-		}
+		if (!item.issue) item.issue = pdfPageMeta?.issue;
+		if (!item.pages && pdfPageMeta) item.pages = pdfPageMeta.pages + '-'; // a user will have to manually seek last page number from PDF
 
 		const asFile = isOnCampus || !notProxy;
 		const toPush = {
@@ -150,7 +147,7 @@ async function doWeb(doc, url) {
 	}
 	if (!item.pages) item.pages = item.archiveLocation;
 
-	if (/\/en$/.test(urlObj.pathname)) {
+	if (/\/en$/.test(urlObj.pathname)) { // English summary page
 		const finnishTitle = attr(doc, 'meta[property="og:image:alt"]', 'content')
 			|| attr(doc, 'meta[property="og:title"]', 'content');
 		if (item.title) item.title = finnishTitle + ` [${item.title}]`;
@@ -171,8 +168,9 @@ async function doWeb(doc, url) {
 		const labels = doc.querySelectorAll('main article div.label');
 		if (labels) for (const label of labels) if (label.innerText.includes("English summary")) {
 			const englishElement = label.nextElementSibling;
-			const title = text('div.content h3')
-				|| text('div.content h2'); // 2015p2589
+			const title = text('div.content h3') || text('div.content h2'); // 2015p2589
+			if (!title) break;
+
 			const englishTitle = ZU.capitalizeTitle(title.replace('English summary: ', '').toLowerCase(), true);
 			if (englishTitle) item.title += ` [${englishTitle}]`;
 
@@ -196,7 +194,7 @@ async function doWeb(doc, url) {
  *
  * If you happen to be testing via proxy or in a network IP range subscribing to SLL,
  * > you will always get the full URL with validPublicKey and, if applicable, PDF as file.
- * Otherwise, you get PDF as a web link attachment and, for some items, eURL as item.URL for some items.
+ * Otherwise, you get PDF as a web link attachment and, for free items, eURL as item.URL.
  */
 
 /** BEGIN TEST CASES **/
@@ -224,7 +222,7 @@ var testCases = [
 				"libraryCatalog": "Lääkärilehti",
 				"pages": "e48850",
 				"publicationTitle": "Suomen Lääkärilehti",
-				"publisher": "Suomen lääkäriliitto",
+				"publisher": "Suomen Lääkäriliitto",
 				"section": "Terveydenhuolto",
 				"url": "https://www.laakarilehti.fi/e48850",
 				"volume": "81",
@@ -258,7 +256,7 @@ var testCases = [
 				"libraryCatalog": "Lääkärilehti",
 				"pages": "e48581",
 				"publicationTitle": "Suomen Lääkärilehti",
-				"publisher": "Suomen lääkäriliitto",
+				"publisher": "Suomen Lääkäriliitto",
 				"section": "Terveydenhuolto",
 				"url": "https://www.laakarilehti.fi/e48581",
 				"volume": "81",
@@ -313,7 +311,7 @@ var testCases = [
 				"libraryCatalog": "Lääkärilehti",
 				"pages": "691-",
 				"publicationTitle": "Suomen Lääkärilehti",
-				"publisher": "Suomen lääkäriliitto",
+				"publisher": "Suomen Lääkäriliitto",
 				"section": "Katsausartikkeli",
 				"shortTitle": "ADHD:n lääkehoitoa ei tarvitse pelätä",
 				"url": "https://www.laakarilehti.fi/tieteessa/katsausartikkeli/adhd-n-laakehoitoa-ei-tarvitse-pelata-vinkkeja-kaytannon-tyohon/?public=4c37ef1f47541b38827578dc9ff30586",
@@ -359,7 +357,7 @@ var testCases = [
 				"libraryCatalog": "Lääkärilehti",
 				"pages": "2375-2380",
 				"publicationTitle": "Suomen Lääkärilehti",
-				"publisher": "Suomen lääkäriliitto",
+				"publisher": "Suomen Lääkäriliitto",
 				"section": "Katsausartikkeli",
 				"shortTitle": "Opioidiriippuvaisen potilaan kivun hoito",
 				"url": "https://www.laakarilehti.fi/tieteessa/katsausartikkeli/opioidiriippuvaisen-potilaan-kivun-hoito/?public=4338e24d1a50a0ab4d99613ccd1abf11",
@@ -426,7 +424,7 @@ var testCases = [
 				"libraryCatalog": "Lääkärilehti",
 				"pages": "35-",
 				"publicationTitle": "Suomen Lääkärilehti",
-				"publisher": "Suomen lääkäriliitto",
+				"publisher": "Suomen Lääkäriliitto",
 				"section": "Katsaus",
 				"url": "https://www.laakarilehti.fi/lehdet/1-2026/miten-nuorten-itsemurhia-voidaan-ehkaista/?public=0f26edc781cc73cf347108dc23c21703",
 				"volume": "81",
@@ -481,7 +479,7 @@ var testCases = [
 				"libraryCatalog": "Lääkärilehti",
 				"pages": "1483-1487",
 				"publicationTitle": "Suomen Lääkärilehti",
-				"publisher": "Suomen lääkäriliitto",
+				"publisher": "Suomen Lääkäriliitto",
 				"section": "Alkuperäistutkimus",
 				"shortTitle": "Lasten ahdistuneisuushäiriöiden hoito lastenpsykiatrian yksikössä",
 				"url": "https://www.laakarilehti.fi/tieteessa/alkuperaistutkimukset/lasten-ahdistuneisuushairioiden-hoito-lastenpsykiatrian-yksikossasuuri-osa-voitaisiin-hoitaa-jo-perustasolla/?public=2b2f5e60e0afc5da248cbc58107ad1f0",
@@ -538,7 +536,7 @@ var testCases = [
 				"libraryCatalog": "Lääkärilehti",
 				"pages": "898-",
 				"publicationTitle": "Suomen Lääkärilehti",
-				"publisher": "Suomen lääkäriliitto",
+				"publisher": "Suomen Lääkäriliitto",
 				"section": "Alkuperäistutkimus",
 				"shortTitle": "Diagnoosiviiveet ovat syynä viidesosaan korvattavista potilasvahingoista",
 				"url": "https://www.laakarilehti.fi/e48043",
@@ -579,7 +577,7 @@ var testCases = [
 				"libraryCatalog": "Lääkärilehti",
 				"pages": "1389",
 				"publicationTitle": "Suomen Lääkärilehti",
-				"publisher": "Suomen lääkäriliitto",
+				"publisher": "Suomen Lääkäriliitto",
 				"section": "Muut",
 				"url": "https://www.laakarilehti.fi/arkisto/muut/serotoniinioireyhtyma-vaarallinen-laakkeiden-haittavaikutus/?public=298e092254da97080ed6c8aedc0fac24",
 				"volume": "53",
@@ -618,7 +616,7 @@ var testCases = [
 				"libraryCatalog": "Lääkärilehti",
 				"pages": "2853-2858",
 				"publicationTitle": "Suomen Lääkärilehti",
-				"publisher": "Suomen lääkäriliitto",
+				"publisher": "Suomen Lääkäriliitto",
 				"section": "Katsausartikkeli",
 				"shortTitle": "Sarjamagneettistimulaation mahdollisuudet psykiatriassa ja tulevaisuuden näkymät",
 				"url": "https://www.laakarilehti.fi/tieteessa/katsausartikkeli/sarjamagneettistimulaation-mahdollisuudet-psykiatriassa-ja-tulevaisuuden-nakymat/?public=03de9b48d5045c1c691de94a29bb01bd",
@@ -659,7 +657,7 @@ var testCases = [
 				"libraryCatalog": "Lääkärilehti",
 				"pages": "2589-2594",
 				"publicationTitle": "Suomen Lääkärilehti",
-				"publisher": "Suomen lääkäriliitto",
+				"publisher": "Suomen Lääkäriliitto",
 				"section": "Katsausartikkeli",
 				"shortTitle": "Ajokelpoisuuden arviointi",
 				"url": "https://www.laakarilehti.fi/tieteessa/katsausartikkeli/ajokelpoisuuden-arviointi/?public=a5bda457f9701ea63768e707f1264aab",
