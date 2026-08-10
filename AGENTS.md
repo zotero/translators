@@ -13,6 +13,18 @@ A single translator can combine multiple types (e.g. import + export for a round
 
 Run any `.bin/` tool with `--help` for usage.
 
+## Deleting translators
+
+Whenever a translator's ID stops being used — the file is deleted outright, merged into another translator, or replaced — you **must** retire the ID in `deleted.txt`. Zotero reads that file to remove the translator from users' installations; skipping it leaves a dead translator running for everyone.
+
+Two edits, both required:
+
+1. Append the ID and a short reason at the end of the file, e.g.
+   `938ebe32-2b2e-4349-a5b3-b3a05d3de627 # ACS Publications: Now uses Silverchair
+2. Increment the number on the file's first line. It's the file's version marker — clients won't pick up the change without it.
+
+Do this in the same commit as the deletion.
+
 ## Understanding a target site
 
 - **DO NOT** fetch site pages with WebFetch, curl, or any HTTP tool. Modern sites return minified, JS-rendered markup that is useless to parse. You will waste time and get wrong answers.

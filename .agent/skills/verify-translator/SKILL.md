@@ -41,6 +41,10 @@ All tests must pass. If a test fails:
 3. Fix the translator code or update the test case (using `create-test` skill).
 4. Re-run tests until all pass.
 
+## Retire IDs of deleted translators
+
+If this change deletes a translator, or stops using its ID because it was merged into or replaced by another translator, add the ID and a short reason to `deleted.txt` **and** increment the number on the file's first line. Both edits are required — clients don't pick up the change without the increment.
+
 ## Ensure user is working in a Git branch
 
 ```
