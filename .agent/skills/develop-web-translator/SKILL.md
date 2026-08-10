@@ -39,9 +39,13 @@ This gives you meta tags, accessibility tree, and screenshot.
 
 ### Difficult sites (anti-bot walls)
 
-The browser tools (`capture-har`, `inspect-page`, `create-test`, `run-tests`) run **headless** by default. If a site is behind Cloudflare, a captcha, or another anti-bot wall, add `--headed` to open a visible window where you can solve the challenge by hand; the tool waits until it clears, then continues. (`--interact` and `--keep-open` also run headed.)
+The browser tools (`capture-har`, `inspect-page`, `create-test`, `run-tests`) run **headless** by default. If a site is behind Cloudflare, a captcha, or another anti-bot wall, add `--headed`; the tool waits for any challenge to clear, then continues. (`--interact` and `--keep-open` also run headed.)
 
-A solved challenge is cached in a reused browser profile at `.tmp/browser-profile`, so the next run carries it over. If that cached state goes stale (the site starts failing again) or a run hangs on a profile lock, clear it:
+`--headed` is not just a fallback for solving captchas by hand — on Cloudflare-protected publishers it is the only thing that works, because headless Chrome announces itself as `HeadlessChrome` and is refused outright. Headed usually loads those pages with no challenge at all. Reach for it as soon as a site returns "Just a moment…", a "Validate User" page, or content that isn't there.
+
+Do not try to defeat these walls by faking the browser: passing `--user-agent` makes Chrome drop its `Sec-CH-UA` client hints, which is a *worse* signal than the one it hides. Playwright's bundled Chromium can't get through at all, headed or not, which is why the tools drive real Chrome.
+
+A solved challenge is cached in a reused browser profile at `.tmp/browser-profile`, so the next run carries it over. Don't clear that profile routinely — you throw the clearance away and have to solve everything again; the tools already clear the stale *extension* state on their own. Clear it only if a run hangs on a profile lock or the cached state is clearly bad:
 
 ```
 rm -rf .tmp/browser-profile

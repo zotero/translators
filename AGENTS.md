@@ -19,6 +19,7 @@ Run any `.bin/` tool with `--help` for usage.
 - To understand a site's **API**, use the `capture-api` skill.
 - To understand a site's **page structure**, use the `inspect-page` skill.
 - Once you have the API spec and/or page structure, write your translator against those.
+- Add `--headed` to any `.bin/` browser tool for a site behind Cloudflare or a similar wall. Headless Chrome is refused outright there, so a headless run returns a challenge page instead of content, and every test fails "Detection failed". Don't mistake that for a translator bug, and don't try to spoof your way past it.
 
 ## Code tips
 
