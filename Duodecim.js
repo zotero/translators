@@ -56,7 +56,7 @@
 /**
  * ***** ABBREVIATIONS / KEY CONCEPTS *****
  * Duodecim: Finnish Medical Society Duodecim / Duodecim Publishing Company
- * - In this translator Duodecim refers to both.
+ * - In this translator 'Duodecim' refers to both.
  *
  * DTK: possibly Finnish *Duodecim TietoKanta*, 'Duodecim database'.
  *
