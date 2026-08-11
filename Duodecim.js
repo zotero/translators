@@ -12,6 +12,29 @@
 	"lastUpdated": "2026-08-11 11:12:39"
 }
 
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2026 Shiyu Wang
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
 // TL;DR: Duodecim platforms do not feature proper metadata.
 
 /**
@@ -61,7 +84,7 @@
  * See also comment block right before testCases.
  */
 
-const tdoiURLRegex = /(?<=(\/|=))(?<TDOI>(?<prefix>(\w{3}|cd))\d{5,6})($|[\/#\?])/i;
+const tdoiURLRegex = /(?<=(\/|=))(?<TDOI>(?<prefix>(\w{3}|cd))\d{5,6})($|[/#?])/i;
 const capsRegex = /[A-ZÄ-Ö]/; // Finnish/Swedish U+00C4 – U+00D6 (ASCII 196–214);
 const nimikkeetRegex = /(^\(?(Tt[KLM]|AMK|YAMK|LT)[()-]?.*|.*(lääkäri|asiantuntija|terapeutti|toimitus|tohtori)$)/i; // TODO statics
 
