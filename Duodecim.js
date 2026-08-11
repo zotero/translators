@@ -792,7 +792,6 @@ async function scrapeDrug(doc, url) {
 
 	if (tab === "classification") item.ATC = doc.querySelector('p')?.innerText;
 
-	// Zotero.debug(`scrapeDrug() tags: ${JSON.stringify(item.tags)}`);
 	return item;
 }
 
