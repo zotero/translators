@@ -55,6 +55,7 @@ Export tests are not supported by the automated test runner. Test export transla
 
 - `--no-write`: Preview the captured test case without modifying the file.
 - `--json`: Output structured JSON.
+- `--headed`: Open a visible browser. Required for sites behind Cloudflare or a similar anti-bot wall, which refuse headless Chrome outright.
 
 ## Guidelines
 

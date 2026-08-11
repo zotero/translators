@@ -4,17 +4,13 @@ import process from 'node:process';
 import { chromium } from 'playwright';
 import { REPO_ROOT } from './common.mjs';
 
-// Shared Chromium setup for the .bin tools.
-//
-// We run headless by default. Pass `headless: false` (the tools expose this via
-// --headed, and the interactive --interact/--keep-open flags) to get a visible
-// window — the backup for sites behind an anti-bot wall, where you can solve the
-// captcha by hand. The profile is reused across runs so a solved challenge carries
-// over to the next run.
+// Shared browser setup for the .bin tools
 const PROFILE_DIR = path.join(REPO_ROOT, '.tmp', 'browser-profile');
 
-const CHALLENGE_TITLE_RE = /just a moment|attention required|verify you are|checking your browser/i;
+const CHALLENGE_TITLE_RE = /just a moment|attention required|verify you are|checking your browser|validate user/i;
 const CHALLENGE_TIMEOUT = 5 * 60 * 1000;
+
+const STEALTH_ARGS = ['--disable-blink-features=AutomationControlled'];
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -25,7 +21,7 @@ export function resolveHeadless(values = {}) {
 }
 
 /**
- * Launch Chromium and return a session handle:
+ * Launch the browser and return a session handle:
  *   - context: the Playwright BrowserContext
  *   - goto(page, url, { settle }): navigate, waiting out any captcha (headed only)
  *   - close(): shut down
@@ -33,21 +29,66 @@ export function resolveHeadless(values = {}) {
  * Pass `extensionDir` to load an unpacked extension, `recordHar` to capture a HAR.
  */
 export async function launchBrowser({ headless = true, extensionDir, recordHar } = {}) {
-	const args = extensionDir
-		? [`--disable-extensions-except=${extensionDir}`, `--load-extension=${extensionDir}`]
-		: [];
-	if (extensionDir) await clearExtensionState();
-	const context = await chromium.launchPersistentContext(PROFILE_DIR, {
-		channel: 'chromium',
+	const args = [...STEALTH_ARGS];
+	const ignoreDefaultArgs = ['--enable-automation'];
+	if (extensionDir) {
+		// Chrome 137 dropped --load-extension in favour of the CDP call in
+		// installExtension(), which needs these two switches. Playwright also
+		// adds --disable-extensions unless it sees --load-extension, and that
+		// alone makes chrome-extension:// URLs fail ERR_BLOCKED_BY_CLIENT.
+		args.push('--enable-unsafe-extension-debugging', '--remote-debugging-port=0');
+		ignoreDefaultArgs.push('--disable-extensions');
+		await clearExtensionState();
+	}
+	const context = await launch({
 		headless,
+		locale: 'en-US',
 		args,
+		ignoreDefaultArgs,
 		...(recordHar ? { recordHar } : {}),
 	});
+	// Suppressing the flags above doesn't clear navigator.webdriver.
+	await context.addInitScript(() => {
+		Object.defineProperty(Navigator.prototype, 'webdriver', { get: () => undefined, configurable: true });
+	});
+	if (extensionDir) await installExtension(extensionDir);
 	return {
 		context,
 		goto: (page, url, opts) => navigate(page, url, { headless, ...opts }),
 		close: () => context.close(),
 	};
+}
+
+/** Real Chrome where it's installed, Playwright's Chromium otherwise (e.g. CI). */
+async function launch(options) {
+	// Prefer Google Chrome rather than Playwright's bundled Chromium, because
+	// Cloudflare challenges Chromium with a captcha that loops and can never
+	// be cleared by hand; Chrome loads the same pages immediately
+	try {
+		return await chromium.launchPersistentContext(PROFILE_DIR, { ...options, channel: 'chrome' });
+	}
+	catch (e) {
+		console.error(`⚠  Couldn't launch Chrome (${e.message.split('\n')[0]}); falling back to Chromium…`);
+		return chromium.launchPersistentContext(PROFILE_DIR, { ...options, channel: 'chromium' });
+	}
+}
+
+/**
+ * Install the unpacked extension the way Chrome 137+ requires: connect to the
+ * browser's own debugging endpoint and call Extensions.loadUnpacked.
+ */
+async function installExtension(extensionDir) {
+	const portFile = path.join(PROFILE_DIR, 'DevToolsActivePort');
+	let port = null;
+	for (let i = 0; i < 100 && !port; i++) {
+		port = await fs.readFile(portFile, 'utf8').then(text => text.split('\n')[0], () => null);
+		if (!port) await sleep(100);
+	}
+	if (!port) throw new Error('Browser never wrote DevToolsActivePort; cannot load the extension');
+	const browser = await chromium.connectOverCDP(`http://127.0.0.1:${port}`);
+	const session = await browser.newBrowserCDPSession();
+	await session.send('Extensions.loadUnpacked', { path: extensionDir });
+	await session.detach();
 }
 
 /**

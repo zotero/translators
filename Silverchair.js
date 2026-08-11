@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-07-29 16:31:34"
+	"lastUpdated": "2026-08-10 21:08:51"
 }
 
 /*
@@ -98,13 +98,53 @@ function getArticleId(doc) {
 	if (!id) {
 		id = attr(doc, '[data-resource-id]', 'data-resource-id');
 	}
+	if (!id) {
+		id = citationLinkParam(doc, 'resourceId');
+	}
 	// Z.debug(id)
 	return id;
 }
 
+/**
+ * ACS doesn't render the citation download form that other Silverchair sites
+ * use. It still links to the same endpoint, so read the resource ID and type
+ * from the link's query string instead.
+ */
+function citationLinkParam(doc, name) {
+	let link = doc.querySelector('a[href*="/Citation/Download"]');
+	return link ? new URL(link.href).searchParams.get(name) : null;
+}
+
+const SUPPLEMENT_MIME_TYPES = {
+	txt: 'text/plain',
+	csv: 'text/csv',
+	bz2: 'application/x-bzip2',
+	gz: 'application/gzip',
+	zip: 'application/zip',
+	pdf: 'application/pdf',
+	doc: 'application/msword',
+	docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+	xls: 'application/vnd.ms-excel',
+	xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+};
+
+function getSupplements(doc, asLink) {
+	return [...doc.querySelectorAll('.dataSuppLink a[href]')].map((link, i) => {
+		// e.g. /acscii/article-supplement/1282548/pdf/oc3c00243_si_001/, where
+		// the format sits in the path: the link text is just a bare file name.
+		let format = link.getAttribute('href').match(/\/article-supplement\/\d+\/([^/]+)\//);
+		let mimeType = format && SUPPLEMENT_MIME_TYPES[format[1].toLowerCase()];
+		// Only download the file when we know what it is.
+		let attachment = { title: `Supplement ${i + 1}`, url: link.href, snapshot: !asLink && !!mimeType };
+		if (mimeType) attachment.mimeType = mimeType;
+		return attachment;
+	});
+}
+
 async function scrape(doc, url) {
 	let id = getArticleId(doc);
-	let type = attr(doc, '.citation-download-wrap input[name="resourceType"]', "value");
+	let type = attr(doc, '.citation-download-wrap input[name="resourceType"]', "value")
+		|| citationLinkParam(doc, 'resourceType');
 	// Z.debug(type)
 	if (!type) {
 		if (detectWeb(doc, url) == "bookSection") {
@@ -140,6 +180,17 @@ async function scrape(doc, url) {
 		if (item.itemType == "bookSection" && chapterTitle) {
 			item.title = chapterTitle;
 		}
+		if (item.date) {
+			item.date = ZU.strToISO(item.date);
+		}
+		// For scanned back content, the RIS includes (seemingly) the date the
+		// archive was digitized rather than the date of publication. Use the
+		// more accurate publication date on the page if it precedes the RIS
+		// date.
+		let issueDate = ZU.strToISO(text(doc, '.ii-pub-date'));
+		if (issueDate && issueDate < item.date && !(item.date && item.date.startsWith(issueDate))) {
+			item.date = issueDate;
+		}
 		if (pdfURL) {
 			item.attachments.push({
 				url: pdfURL,
@@ -151,6 +202,9 @@ async function scrape(doc, url) {
 			title: "Snapshot",
 			document: doc
 		});
+		if (Z.getHiddenPref && Z.getHiddenPref("attachSupplementary")) {
+			item.attachments.push(...getSupplements(doc, Z.getHiddenPref("supplementaryAsLink")));
+		}
 		item.complete();
 	});
 	await translator.translate();
@@ -164,7 +218,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Assessing the Causes of Capital Account Liberalization: How Measurement Matters1",
+				"title": "Assessing the Causes of Capital Account Liberalization: How Measurement Matters",
 				"creators": [
 					{
 						"lastName": "Karcher",
@@ -261,7 +315,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2021-03-08",
+				"date": "2021-03-01",
 				"DOI": "10.1093/isq/sqaa085",
 				"ISSN": "0020-8833",
 				"abstractNote": "Why do states build new international organizations (IOs) in issue areas where many institutions already exist? Prevailing theories of institutional creation emphasize their ability to resolve market failures, but adding new IOs can increase uncertainty and rule inconsistency. I argue that institutional proliferation occurs when existing IOs fail to adapt to shifts in state power. Member states expect decision-making rules to reflect their underlying power; when it does not, they demand greater influence in the organization. Subsequent bargaining over the redistribution of IO influence often fails due to credibility and information problems. As a result, under-represented states construct new organizations that provide them with greater institutional control. To test this argument, I examine the proliferation of multilateral development banks since 1944. I leverage a novel identification strategy rooted in the allocation of World Bank votes at Bretton Woods to show that the probability of institutional proliferation is higher when power is misaligned in existing institutions. My results suggest that conflict over shifts in global power contribute to the fragmentation of global governance.",
@@ -647,7 +701,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2016-03-11",
+				"date": "2016-01",
 				"DOI": "10.1167/16.2.4",
 				"ISSN": "1534-7362",
 				"abstractNote": "Most of the visual field is peripheral, and the periphery encodes visual input with less fidelity compared to the fovea. What information is encoded, and what is lost in the visual periphery? A systematic way to answer this question is to determine how sensitive the visual system is to different kinds of lossy image changes compared to the unmodified natural scene. If modified images are indiscriminable from the original scene, then the information discarded by the modification is not important for perception under the experimental conditions used. We measured the detectability of modifications of natural image structure using a temporal three-alternative oddity task, in which observers compared modified images to original natural scenes. We consider two lossy image transformations, Gaussian blur and Portilla and Simoncelli texture synthesis. Although our paradigm demonstrates metamerism (physically different images that appear the same) under some conditions, in general we find that humans can be capable of impressive sensitivity to deviations from natural appearance. The representations we examine here do not preserve all the information necessary to match the appearance of natural scenes in the periphery.",
@@ -720,19 +774,15 @@ var testCases = [
 					}
 				],
 				"date": "2015-12-01",
+				"DOI": "10.1093/acprof:oso/9780198743736.003.0001",
 				"ISBN": "9780198743736",
 				"abstractNote": "This chapter introduces graphical models as a powerful tool to derive efficient algorithms for inference problems. When dealing with complex interdependent variables, inference problems may become of huge complexity. In this context, the structure of the variables is of great interest. In this chapter, directed and undirected graphical models are first defined, before some crucial results are stated, such as the Hammersley–Clifford theorem of Markov random fields and the junction tree property aimed at finding groupings under which a graphical model becomes a tree. Taking advantage of the structure of the variables, belief propagation is then described, including two particular instances: the sum–product and max–sum algorithms. In the final section, the learning problem is addressed in three different contexts: parameter learning, graphical model learning, and latent graphical model learning.",
 				"bookTitle": "Statistical Physics, Optimization, Inference, and Message-Passing Algorithms: Lecture Notes of the Les Houches School of Physics: Special Issue, October 2013",
-				"extra": "DOI: 10.1093/acprof:oso/9780198743736.003.0001",
 				"libraryCatalog": "Silverchair",
 				"pages": "0",
 				"publisher": "Oxford University Press",
 				"url": "https://doi.org/10.1093/acprof:oso/9780198743736.003.0001",
 				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
@@ -804,10 +854,10 @@ var testCases = [
 					}
 				],
 				"date": "2019-12-02",
+				"DOI": "10.1144/SP488.7",
 				"ISBN": "9781786204318",
 				"abstractNote": "Two decades of geological modelling have resulted in the ability to study single-well geological models at a sufficiently high resolution to generate synthetic well test responses from numerical simulations in realistic geological models covering a range of fluvial styles. These 3D subsurface models are useful in aiding our understanding and mapping of the geological variation (as quantified by porosity and permeability contrasts) in the near-wellbore region. The building and analysis of these models enables many workflow steps, from matching well test data to improving history-matching. Well testing also has a key potential role in reservoir characterization for an improved understanding of the near-wellbore subsurface architecture in fluvial systems. Developing an understanding of well test responses from simple through increasingly more complex geological scenarios leads to a realistic, real-life challenge: a well test in a small fluvial reservoir. The geological well testing approach explained here, through a recent fluvial case study in South America, is considered to be useful in improving our understanding of reservoir performance. This approach should lead to more geologically and petrophysically consistent models, and to geologically assisted models that are both more correct and quicker to match to history, and thus, ultimately, to more useful reservoir models. It also allows the testing of a more complex geological model through the well test response.",
 				"bookTitle": "River to Reservoir: Geoscience to Engineering",
-				"extra": "DOI: 10.1144/SP488.7",
 				"libraryCatalog": "Silverchair",
 				"pages": "0",
 				"publisher": "Geological Society of London",
@@ -879,6 +929,302 @@ var testCases = [
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://pubs.acs.org/doi/10.1021/es103607c",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Majeau-Bettez",
+						"firstName": "Guillaume",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Hawkins",
+						"firstName": "Troy R.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Strømman",
+						"firstName": "Anders Hammer",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"DOI": "10.1021/es103607c",
+				"pages": "4548-4554",
+				"ISSN": "0013-936X",
+				"abstractNote": "This study presents the life cycle assessment (LCA) of three batteries for plug-in hybrid and full performance battery electric vehicles. A transparent life cycle inventory (LCI) was compiled in a component-wise manner for nickel metal hydride (NiMH), nickel cobalt manganese lithium-ion (NCM), and iron phosphate lithium-ion (LFP) batteries. The battery systems were investigated with a functional unit based on energy storage, and environmental impacts were analyzed using midpoint indicators. On a per-storage basis, the NiMH technology was found to have the highest environmental impact, followed by NCM and then LFP, for all categories considered except ozone depletion potential. We found higher life cycle global warming emissions than have been previously reported. Detailed contribution and structural path analyses allowed for the identification of the different processes and value-chains most directly responsible for these emissions. This article contributes a public and detailed inventory, which can be easily be adapted to any powertrain, along with readily usable environmental performance assessments.",
+				"url": "https://doi.org/10.1021/es103607c",
+				"title": "Life Cycle Environmental Assessment of Lithium-Ion and Nickel Metal Hydride Batteries for Plug-In Hybrid and Battery Electric Vehicles",
+				"date": "2011-04-20",
+				"publicationTitle": "Environmental Science & Technology",
+				"journalAbbreviation": "Environ. Sci. Technol.",
+				"volume": "45",
+				"issue": "10",
+				"libraryCatalog": "Silverchair"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://pubs.acs.org/doi/10.1021/acscentsci.3c00243",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Ortiz",
+						"firstName": "Mayreli",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Jauset-Rubio",
+						"firstName": "Miriam",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Trummer",
+						"firstName": "Olivia",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Foessl",
+						"firstName": "Ines",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kodr",
+						"firstName": "David",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Acero",
+						"firstName": "Josep Lluís",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Botero",
+						"firstName": "Mary Luz",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Biggs",
+						"firstName": "Phil",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Lenartowicz",
+						"firstName": "Daniel",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Trajanoska",
+						"firstName": "Katerina",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Rivadeneira",
+						"firstName": "Fernando",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Hocek",
+						"firstName": "Michal",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Obermayer-Pietsch",
+						"firstName": "Barbara",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "O’Sullivan",
+						"firstName": "Ciara K.",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"DOI": "10.1021/acscentsci.3c00243",
+				"pages": "1591-1602",
+				"ISSN": "2374-7943",
+				"abstractNote": "Osteoporosis is a\nmultifactorial disease influenced by genetic\nand environmental factors, which contributes to an increased risk of bone fracture, but early diagnosis of this disease cannot be achieved using current techniques. We describe a generic platform for the targeted electrochemical genotyping of SNPs identified by genome-wide association studies to be associated with a genetic predisposition to osteoporosis. The platform exploits isothermal solid-phase primer elongation with ferrocene-labeled nucleoside triphosphates. Thiolated reverse primers designed for each SNP were immobilized on individual gold electrodes of an array. These primers are designed to hybridize to the SNP site at their 3′OH terminal, and primer elongation occurs only where\nthere is 100% complementarity, facilitating the identification and heterozygosity of each SNP under interrogation. The platform was applied to real blood samples, which were thermally lysed and directly used without the need for DNA extraction or purification. The results were validated using Taqman SNP genotyping assays and Sanger sequencing. The assay is complete in just 15 min with a total cost of 0.3€\nper electrode. The platform is completely generic and has immense potential for deployment at the point of need in an automated device for targeted SNP genotyping with the only required end-user intervention being sample addition.",
+				"url": "https://doi.org/10.1021/acscentsci.3c00243",
+				"title": "Generic Platform for the Multiplexed Targeted Electrochemical Detection of Osteoporosis-Associated Single Nucleotide Polymorphisms Using Recombinase Polymerase Solid-Phase Primer Elongation and Ferrocene-Modified Nucleoside Triphosphates",
+				"date": "2023-07-19",
+				"publicationTitle": "ACS Central Science",
+				"journalAbbreviation": "ACS Cent. Sci.",
+				"volume": "9",
+				"issue": "8",
+				"libraryCatalog": "Silverchair"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://pubs.acs.org/doi/abs/10.1021/bk-2011-1071.ch005",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"creators": [
+					{
+						"lastName": "Macalady",
+						"firstName": "Donald L.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Walton-Day",
+						"firstName": "Katherine",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Tratnyek",
+						"firstName": "Paul G.",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Grundl",
+						"firstName": "Timothy J.",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Haderlein",
+						"firstName": "Stefan B.",
+						"creatorType": "editor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"pages": "0",
+				"publisher": "American Chemical Society",
+				"abstractNote": "Natural organic matter (NOM) is an inherently complex mixture of polyfunctional organic molecules. Because of their universality and chemical reversibility, oxidation/reductions (redox) reactions of NOM have an especially interesting and important role in geochemistry. Variabilities in NOM composition and chemistry make studies of its redox chemistry particularly challenging, and details of NOM-mediated redox reactions are only partially understood. This is in large part due to the analytical difficulties associated with NOM characterization and the wide range of reagents and experimental systems used to study NOM redox reactions. This chapter provides a summary of the ongoing efforts to provide a coherent comprehension of aqueous redox chemistry involving NOM and of techniques for chemical characterization of NOM. It also describes some attempts to confirm the roles of different structural moieties in redox reactions. In addition, we discuss some of the operational parameters used to describe NOM redox capacities and redox states, and describe nomenclature of NOM redox chemistry. Several relatively facile experimental methods applicable to predictions of the NOM redox activity and redox states of NOM samples are discussed, with special attention to the proposed use of fluorescence spectroscopy to predict relevant redox characteristics of NOM samples.",
+				"ISBN": "9780841226524",
+				"url": "https://doi.org/10.1021/bk-2011-1071.ch005",
+				"title": "Redox Chemistry and Natural Organic Matter (NOM): Geochemists’ Dream, Analytical Chemists’ Nightmare",
+				"date": "2011-01-01",
+				"volume": "1071",
+				"bookTitle": "Aquatic Redox Chemistry",
+				"libraryCatalog": "Silverchair",
+				"shortTitle": "Redox Chemistry and Natural Organic Matter (NOM)"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://pubs.acs.org/jacsat/article/100/1/331/805488/Nonaqueous-reductive-lanthanide-chemistry-1",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Evans",
+						"firstName": "William J.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Engerer",
+						"firstName": "Steven C.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Neville",
+						"firstName": "Anne C.",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"DOI": "10.1021/ja00469a081",
+				"pages": "331-333",
+				"ISSN": "0002-7863",
+				"url": "https://doi.org/10.1021/ja00469a081",
+				"title": "Nonaqueous reductive lanthanide chemistry. 1. Reaction of lanthanide atoms with 1,3-butadienes",
+				"date": "1978-01-01",
+				"publicationTitle": "Journal of the American Chemical Society",
+				"journalAbbreviation": "Journal American Chemical Society",
+				"volume": "100",
+				"issue": "1",
+				"libraryCatalog": "Silverchair"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://pubs.acs.org/jacsat/article/50/1/85/474246/THE-CATALYSIS-OF-ETHYL-FORMATE-BY-MONOCHLORO",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Harned",
+						"firstName": "Herbert S.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Hawkins",
+						"firstName": "J. Erskine",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"DOI": "10.1021/ja01388a011",
+				"pages": "85-93",
+				"ISSN": "0002-7863",
+				"url": "https://doi.org/10.1021/ja01388a011",
+				"title": "THE CATALYSIS OF ETHYL FORMATE BY MONOCHLORO-ACETIC ACID AND ETHYL ACETATE BY DICHLORO-ACETIC ACID IN NEUTRAL SALT SOLUTIONS",
+				"date": "1928-01-01",
+				"publicationTitle": "Journal of the American Chemical Society",
+				"journalAbbreviation": "Journal American Chemical Society",
+				"volume": "50",
+				"issue": "1",
+				"libraryCatalog": "Silverchair"
 			}
 		]
 	}

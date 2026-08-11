@@ -31,13 +31,19 @@ Use `--fix` for auto-fixable errors. Fix any remaining errors manually.
 node .bin/run-tests.mjs "<translator filename>"
 ```
 
-This launches headless Chromium with the Zotero Connector extension and runs the translator's test cases against live sites.
+This launches Chrome with the Zotero Connector extension and runs the translator's test cases against live sites.
+
+Add `--headed` for any site behind Cloudflare or a similar anti-bot wall — headless Chrome identifies itself as `HeadlessChrome` and those sites refuse it outright, so **every** test fails with "Detection failed" for reasons that have nothing to do with the translator. That symptom — all tests failing detection at once, including ones that used to pass — almost always means the wall, not your code. Headed usually loads the same pages with no challenge at all.
 
 All tests must pass. If a test fails:
 1. Read the failure output carefully.
 2. Check whether the target site has changed.
 3. Fix the translator code or update the test case (using `create-test` skill).
 4. Re-run tests until all pass.
+
+## Retire IDs of deleted translators
+
+If this change deletes a translator, or stops using its ID because it was merged into or replaced by another translator, add the ID and a short reason to `deleted.txt` **and** increment the number on the file's first line. Both edits are required — clients don't pick up the change without the increment.
 
 ## Ensure user is working in a Git branch
 
