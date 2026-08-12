@@ -843,3 +843,840 @@ async function doWeb(doc, url) {
 		item.complete();
 	}
 }
+
+/**
+ * A NOTE ON TEST CASES
+ * For Zotero's automated checks, I kept only publicly available test cases. One free TP item is included as the last test case.
+ * Proceed with testing under a network with TP/OP subscription or log in first in Scaffold's browser.
+ * Refer to a commit to my own repo for showcases of such items:
+ * > https://github.com/shiyuwang-jamk/zotero-translators/blob/419d41e0f1d444d7a6fd30e1251f0e621fe0e54a/Duodecim.js#L1624
+ *
+ * I built this translator with APA citation style in mind.
+ * Feel free to test other formats, especially NLM-Vancouver-based formats and their Finnish variants
+ * such as `styles/dependent/Suomen Laakarilehti.csl` (also part of Zotero Style Repository).
+ */
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.terveyskirjasto.fi/ltt01270/icd",
+		"items": [
+			{
+				"itemType": "dictionaryEntry",
+				"title": "ICD",
+				"creators": [],
+				"date": "2016-10-18",
+				"abstractNote": "International Classification of Diseases, kansainvälinen tautiluokitus; Maailman terveysjärjestön (WHO:n) julkaisemia kansainvälisiä tautiluokituksia, esim. ICD-10",
+				"archive": "Terveyskirjasto",
+				"dictionaryTitle": "Lääketieteen sanasto",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"publisher": "Duodecim",
+				"url": "https://www.terveyskirjasto.fi/ltt01270",
+				"attachments": [
+					{
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.terveyskirjasto.fi/dlk00221",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Huimaus",
+				"creators": [
+					{
+						"firstName": "Osmo",
+						"lastName": "Saarelma",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2026-03-18",
+				"abstractNote": "Huimaus on hyvin yleinen oire, joka ilmenee monin eri tavoin. Huimauksen luonne kertoo lääkärille paljon sen syystä, joten sen kuvailu sanallisesti on tärkeää. Huimaus voi olla esimerkiksi kiertävää, ikään kuin huone pyörisi ympäri. Se voi olla myös keinuvaa kuin olisi veneessä. Sitä voidaan kuvata pyörryttämisen tunteena, silmien pimentymisenä, epämääräisenä tasapainottomuutena tai huterana olona. Jotkut kuvaavat myös epätodellista olotilaa tai selkeästi johonkin liikkeeseen tai ylösnousuun liittyvää huimausta.",
+				"archive": "Terveyskirjasto",
+				"archiveLocation": "026.018",
+				"bookTitle": "Lääkärikirja Duodecim",
+				"callNumber": "dlk00221",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"publisher": "Duodecim",
+				"url": "https://www.terveyskirjasto.fi/dlk00221",
+				"attachments": [
+					{
+						"title": "Supplementary PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.terveyskirjasto.fi/dlk00084",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Sydämen vajaatoiminta",
+				"creators": [
+					{
+						"firstName": "Raimo",
+						"lastName": "Kettunen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Markku",
+						"lastName": "Ellonen",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Pertti",
+						"lastName": "Mustajoki",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2023-11-27",
+				"abstractNote": "Keskeistä\nSydämen vajaatoiminta on vakava, lähes aina elinikäistä lääke- ja muuta hoitoa vaativa sairaus, jonka tavallisimmat aiheuttajat ovat kohonnut verenpaine, sepelvaltimotauti ja läppäviat. Näiden sairauksien huolellinen hoito on tärkeää sydämen vajaatoiminnan kehittymisen ehkäisemiseksi.\nVarsinkin nuorilla ja työikäisillä alkavat sydänlihassairaudet (kardiomyopatiat) voivat aiheuttaa jopa vajaatoimintaa.\nLepo- ja rasitussykkeen nousu, rasitushengenahdistus ja suorituskyvyn lasku voivat olla sydämen vajaatoiminnan ensioireita ennen nilkka- tai muiden turvotusten ilmaantumista.\nVerinäytteestä mitattava natriureettinen peptidi ( proBNP) on sydänsähkötutkimuksen (EKG) ohella perusterveydenhuollossakin helposti saatavilla oleva vajaatoiminnan ensitutkimus.\nMuun muassa sydämen ultraäänitutkimuksen perusteella tehdään hoitosuunnitelma, jossa lääkehoidolla on tärkein osa.",
+				"archive": "Terveyskirjasto",
+				"archiveLocation": "002.014",
+				"bookTitle": "Lääkärikirja Duodecim",
+				"callNumber": "dlk00084",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"publisher": "Duodecim",
+				"url": "https://www.terveyskirjasto.fi/dlk00084",
+				"attachments": [
+					{
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.terveyskirjasto.fi/dlk01420",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Maitovalmisteet ja kasvipohjaiset maitovalmisteiden tyyppiset tuotteet",
+				"creators": [
+					{
+						"firstName": "Ursula",
+						"lastName": "Schwab",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025-05-14",
+				"abstractNote": "Keskeistä\nMaitovalmisteet ovat erinomaisia proteiinin, kalsiumin ja jodin lähteitä.\nMaitovalmisteiden rasva on kovaa, joten niistä on hyvä suosia rasvattomia ja vähärasvaisia vaihtoehtoja.\nKasvipohjaisista tuotteista suositellaan kalsiumilla, D-vitamiinilla ja jodilla täydennettyjä tuotteita.",
+				"archive": "Terveyskirjasto",
+				"archiveLocation": "dlk01420",
+				"bookTitle": "Lääkärikirja Duodecim",
+				"callNumber": "dlk01420",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"publisher": "Duodecim",
+				"url": "https://www.terveyskirjasto.fi/dlk01420",
+				"attachments": [
+					{
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.terveyskirjasto.fi/uux30190",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Nuoret kaupan alalla tekevät kuormittavaa työtä",
+				"creators": [
+					{
+						"firstName": "Saara",
+						"lastName": "Taponen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-05-22",
+				"abstractNote": "Kaupan alalla työskentelee paljon työuransa alkupuolella olevia nuoria, joiden työssä yhdistyy fyysisesti kuormittava työ ja psyykkisesti kuormittavat työtilanteet.",
+				"archive": "Terveyskirjasto",
+				"archiveLocation": "uux30190",
+				"bookTitle": "Uutiset",
+				"callNumber": "uux30190",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"publisher": "Duodecim",
+				"url": "https://www.terveyskirjasto.fi/uux30190",
+				"attachments": [
+					{
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.terveysportti.fi/uutiset/23/uux30190",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Nuoret kaupan alalla tekevät kuormittavaa työtä",
+				"creators": [
+					{
+						"firstName": "Saara",
+						"lastName": "Taponen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-05-22",
+				"abstractNote": "Kaupan alalla työskentelee paljon työuransa alkupuolella olevia nuoria, joiden työssä yhdistyy fyysisesti kuormittava työ ja psyykkisesti kuormittavat työtilanteet.",
+				"archive": "Terveysportti",
+				"archiveLocation": "uux30190",
+				"bookTitle": "Uutiset",
+				"callNumber": "uux30190",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"publisher": "Duodecim",
+				"url": "https://www.terveysportti.fi/uutiset/23/uux30190",
+				"attachments": [
+					{
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.kaypahoito.fi/hoi50138",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Keskenmeno",
+				"creators": [
+					{
+						"lastName": "Suomalaisen Lääkäriseuran Duodecimin ja Suomen Gynekologiyhdistyksen asettama työryhmä",
+						"creatorType": "bookAuthor",
+						"fieldMode": 1
+					}
+				],
+				"date": "2026-05-11",
+				"abstractNote": "Noin 10–15 % havaituista raskauksista päättyy keskenmenoon. Valtaosa keskenmenoista tapahtuu ensimmäisellä raskauskolmanneksella.\nKeskenmenoille on useita eri syitä. Suurin osa yksittäisistä keskenmenoista johtuu alkion kromosomipoikkeavuuksista.\nKeskenmenon riskiä lisäävät esimerkiksi yli 40 vuoden ikä, lihavuus ja tupakointi.\nKeskenmenon tyypillisiä oireita ovat verinen vuoto ja alavatsakipu, mutta se voi olla myös oireeton.\nEnsisijainen diagnostinen tutkimus keskenmenoa epäiltäessä on emättimen kautta tehtävä ultraäänitutkimus. Kliinisen keskenmenon diagnoosi voidaan asettaa, kun raskauden kesto on vähintään 6 viikkoa viimeisistä kuukautisista laskettuna.\nKeskenmenon hoitovaihtoehtoja ovat seuranta, lääkehoito ja kirurginen hoito.\nLääkehoito on ensisijainen, koska se on todettu tehokkaaksi ja turvalliseksi. Hoitovaihtoehdoista, niiden hyödyistä ja haitoista on tärkeää keskustella potilaan kanssa ennen hoidon aloitusta.\nRiittävä kivun hoito sekä potilaan empaattinen kohtaaminen ovat keskeisiä riippumatta valitusta hoitomenetelmästä.\nAlle 10. raskausviikon keskenmenoissa rutiinimainen anti-D-immunoglobuliinisuojaus RhD-negatiivisille ei ole tarpeen.\nKeskenmenon hoidon jälkeen ei ole tarpeen tehdä rutiinimaista ultraäänitutkimusta tai raskaustestiä.\nUuden raskauden onnistumisen todennäköisyys keskenmenon jälkeen on suuri. Valtaosa saa lapsen toistuvankin keskenmenon jälkeen.\nKeskenmenon jälkeen suositellaan jälkitarkastusta neuvolassa. Seurannassa on keskeistä varmistaa sekä fyysinen että psyykkinen toipuminen ja ohjata tarvittaessa tuen piiriin.\nToisen raskauskolmanneksen keskenmenon jälkeen keskenmenon syytä selvitetään erikoissairaanhoidossa.\nYhden tai kahden keskenmenon jälkeen keskenmenon kokeneen ja hänen kumppaninsa mahdollisia sairauksia ja elintapoja arvioidaan perusterveydenhuollossa.\nKolmen peräkkäisen keskenmenon jälkeen tilannetta arvioidaan erikoissairaanhoidossa.",
+				"archive": "Käypä hoito -suositus",
+				"archiveLocation": "050.138",
+				"callNumber": "hoi50138",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"publisher": "Duodecim",
+				"url": "https://www.kaypahoito.fi/hoi50138",
+				"attachments": [
+					{
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.kaypahoito.fi/hoi50067",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Unettomuus",
+				"creators": [
+					{
+						"lastName": "Suomalaisen Lääkäriseuran Duodecimin ja Suomen Unitutkimusseura ry:n asettama työryhmä",
+						"creatorType": "bookAuthor",
+						"fieldMode": 1
+					}
+				],
+				"date": "2026-06-25",
+				"abstractNote": "Unettomuudella tarkoitetaan joko unettomuusoireita tai unettomuushäiriötä. Hoitopäätösten kannalta on tärkeää tunnistaa, onko kyseessä unettomuusoire vai sairausasteinen unettomuushäiriö.\nTilapäiset unettomuusoireet kuuluvat elämään. Säännöllinen uni-valverytmi ja unta edistävät nukkumistottumukset ja olosuhteet ehkäisevät unettomuushäiriön kehittymistä.\nPitkäkestoinen (yli 3 kuukautta kestänyt) unettomuushäiriö suurentaa monien sairauksien ja tapaturmien riskiä, heikentää toimintakykyä ja huonontaa elämänlaatua.\nVastikään alkaneen lyhytkestoisen (1–3 kuukautta kestäneen) unettomuushäiriön tunnistamisella ja hyvällä hoidolla on mahdollista ehkäistä pitkäkestoisen unettomuushäiriön kehittyminen.\nJoskus lyhytkestoisetkin unettomuusoireet voivat olla sairausasteisia ja heikentää merkittävästi toimintakykyä.\nUnettomuushäiriön diagnoosi perustuu ensisijaisesti huolelliseen anamneesiin, kliiniseen tutkimukseen ja uni-valvepäiväkirjan (unipäiväkirja) pitämiseen.\nUnettomuusoireiden tarkempi selvitys on tärkeää, jotta potilas saa oikeanlaista hoitoa. Unettomuusoireet eivät automaattisesti tarkoita unettomuushäiriötä.\nUnettomuusoireiden taustalla mahdollisesti olevat ja oireisiin kytkeytyvät sairaudet ja muut tekijät tulee tunnistaa ja hoitaa asianmukaisesti. Tavanomaisimpia sairauksia ovat ahdistuneisuus-, mieliala- ja päihdehäiriöt, levottomat jalat -oireyhtymä (restless legs syndrome, RLS), unenaikaiset hengityshäiriöt, uni-valverytmin häiriöt ja muut unihäiriöt (ICD-11:ssä \"uni-valvehäiriöt\"). Myös vaihdevuosiin liittyy yleisesti unettomuusoireita.\nTilapäisiä unettomuusoireita ei pääsääntöisesti tarvitse hoitaa. Jos potilas kuitenkin hakeutuu hoitoon, on unettomuusoireista kärsivän potilaan tukeminen, taustalla olevien syiden ja laukaisevien tekijöiden käsitteleminen sekä unen huollon ohjaus tärkeää.\nUnettomuuden lyhytkestoista lääkehoitoa voidaan harkita, jos unettomuusoireet ovat vakavia ja heikentävät merkittävästi päiväaikaista vointia ja toimintakykyä.\nUnettomuushäiriön hoidossa kestävimmät tulokset saavutetaan unettomuuden kognitiivisen käyttäytymisterapian (cognitive behavioral therapy for insomnia, CBT-I) menetelmillä.\nCBT-I on osoittautunut tehokkaaksi myös silloin, kun potilaalla on unettomuushäiriön kanssa samanaikaisia sairauksia tai oireita.\nMyös näyttö CBT-I:n tehosta lasten ja nuorten unettomuuden hoidossa on lisääntynyt, ja CBT-I:tä voidaan pitää näytön perusteella lasten ja nuorten unettomuuden ensisijaisena hoitona. Sen sijaan tutkimusnäyttö lasten ja nuorten unettomuuden lääkehoidosta lähes puuttuu lukuun ottamatta melatoniinia, joten suosituksen lääkeohjeistuksia ei voi soveltaa tähän ikäryhmään.\nPerinteisiä unettomuuden hoitoon käytettäviä lääkkeitä (ns. unilääkkeitä) ovat bentsodiatsepiinit (mm. tematsepaami) ja niiden kaltaiset lääkkeet (ns. z-lääkkeet: tsopikloni ja tsolpideemi) 1.\nPerinteiset unilääkkeet pidentävät mutta myös keventävät yöunta, ja muitakin merkittäviä haittavaikutuksia on raportoitu. Siten ne sopivat ensisijaisesti vain lyhytaikaiseen käyttöön.\nPitkäkestoisessa unettomuushäiriössä lääkehoidon tarve tulee arvioida yksilöllisesti ja säännöllisesti. Myös hoitovastetta tulee arvioida säännöllisesti. Etenkin ikääntyneille bentsodiatsepiineista ja niiden kaltaisista lääkkeistä saattaa olla enemmän haittaa kuin hyötyä ja niiden määräämisessä tulee käyttää harkintaa.\nBentsodiatsepiinien kaltaisten unilääkkeiden lyhytaikaisesta käytöstä (alle 2 viikkoa) saattaa olla hyötyä unettomuudesta kärsivän uniapneapotilaan CPAP-hoitoa aloitettaessa.\nUnettomuuden hoidossa käytetään perinteisten unilääkkeiden lisäksi myös muita lääkkeitä, kuten melatoniinia ja pieniannoksista (< 10 mg) doksepiinia sekä eräitä muita vireystilaan, uni-valverytmiin tai muilla tavoin unen neurokemiaan vaikuttavia lääkeaineita, kuten oreksiinireseptoriantagonisteja.\nUnettomuuden hoidossa käytettävät lääkkeet voivat heikentää ajokykyä sekä suoriutumista myös muissa tarkkaavaisuutta vaativissa tehtävissä. Bentsodiatsepiinit ja niiden kaltaiset lääkkeet aiheuttavat eniten haittaa, erityisesti hoidon alkuvaiheessa.\nLiikunnan suotuisasta vaikutuksesta uneen on runsaasti näyttöä.\nUnettomuushäiriöistä kärsivän potilaan hoidon seuranta on välttämätöntä.",
+				"archive": "Käypä hoito -suositus",
+				"archiveLocation": "050.067",
+				"callNumber": "hoi50067",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"publisher": "Duodecim",
+				"url": "https://www.kaypahoito.fi/hoi50067",
+				"attachments": [
+					{
+						"title": "Supplementary PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Supplementary PDF",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Supplementary PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Supplementary PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Supplementary PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.kaypahoito.fi/dnd00039",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Monityydyttymättömät rasvahapot lasten ja nuorten ADHD:n hoidossa",
+				"creators": [
+					{
+						"lastName": "Käypä hoito -työryhmä ADHD (aktiivisuuden ja tarkkaavuuden häiriö)",
+						"creatorType": "bookAuthor",
+						"fieldMode": 1
+					}
+				],
+				"date": "2025-05-19",
+				"archive": "Käypä hoito",
+				"archiveLocation": "050.061",
+				"bookTitle": "Vältä viisaasti",
+				"callNumber": "dnd00039",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"publisher": "Duodecim",
+				"shortTitle": "Monityydyttymättömät rasvahapot lasten ja nuorten ADHD",
+				"url": "https://www.kaypahoito.fi/dnd00039",
+				"attachments": [
+					{
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.kaypahoito.fi/nix03607",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Psykososiaalisten interventioiden vaikuttavuus keskenmenon jälkeen",
+				"creators": [
+					{
+						"firstName": "Katri",
+						"lastName": "Räikkönen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-05-11",
+				"archive": "Käypä hoito",
+				"archiveLocation": "050.138",
+				"bookTitle": "Lisätietoa aiheesta: Keskenmeno",
+				"callNumber": "nix03607",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"publisher": "Duodecim",
+				"url": "https://www.kaypahoito.fi/nix03607",
+				"attachments": [
+					{
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.kaypahoito.fi/nak06071",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Monityydyttymättömät rasvahapot lasten ja nuorten ADHD:n hoidossa",
+				"creators": [
+					{
+						"firstName": "Hertta",
+						"lastName": "Ollikainen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025-05-19",
+				"archive": "Käypä hoito",
+				"archiveLocation": "050.061",
+				"bookTitle": "Näytönastekatsaukset: ADHD (aktiivisuuden ja tarkkaavuuden häiriö)",
+				"callNumber": "nak06071",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"publisher": "Duodecim",
+				"shortTitle": "Monityydyttymättömät rasvahapot lasten ja nuorten ADHD",
+				"url": "https://www.kaypahoito.fi/nak06071",
+				"attachments": [
+					{
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.duodecimlehti.fi/duo19390",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Lasten ja nuorten ADHD-lääkityksen yleisyys vaihtelee alueittain - mistä on kyse?",
+				"creators": [
+					{
+						"firstName": "Riikka",
+						"lastName": "Riihonen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Miika",
+						"lastName": "Vuori",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kirsi",
+						"lastName": "Kakko",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-05-11",
+				"ISSN": "0012-7183, 2242-3281",
+				"archiveLocation": "duo19390",
+				"callNumber": "duo19390",
+				"journalAbbreviation": "Duodecim",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"publicationTitle": "Lääketieteellinen Aikakauskirja Duodecim",
+				"publisher": "Duodecim",
+				"section": "Verkossa ensin",
+				"shortTitle": "Lasten ja nuorten ADHD-lääkityksen yleisyys vaihtelee alueittain",
+				"url": "https://www.duodecimlehti.fi/duo19390",
+				"attachments": [
+					{
+						"title": "PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.duodecimlehti.fi/duo99748",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Kaksoispaineventilaatio kroonisessa ventilaatiovajauksessa [Possibilities of bi-level positive pressure ventilation in chronic hypoventilation]",
+				"creators": [
+					{
+						"firstName": "Tarja",
+						"lastName": "Saaresranta",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ulla",
+						"lastName": "Anttalainen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Olli",
+						"lastName": "Polo",
+						"creatorType": "author"
+					}
+				],
+				"date": "2011",
+				"ISSN": "0012-7183, 2242-3281",
+				"abstractNote": "Kajoamaton kaksoispaineventilaatiohoito on viimeisen vuosikymmenen aikana mahdollistanut hengityksen tukemisen tavallisella vuodeosastolla ja potilaan kotona. Kaksoispaineventilaattorilla voidaan usein välttää keinoilmatie ja respiraattorihoito, lyhentää potilaan sairaalassaoloaikaa ja säästää kustannuksia. Kaksoispaineventilaatiohoito vähentää kroonisesta hengitysvajauksesta kärsivän potilaan hengenahdistusta ja väsymystä, jolloin elämänlaatu paranee ja tietyissä tilanteissa myös elinikä pitenee. Hoito vaatii lääkäriltä perustietoja hengitysfysiologiasta ja perehtymistä kaksoispaineventilaattorin säätämiseen. Hoitohenkilökunnalta se edellyttää kokemusta hoidon toteutuksesta ja ohjauksesta.\n\nDuring the last decade, noninvasive bi-level positive pressure ventilation has enabled respiratory support in inpatient wards and at home. In many cases, a bi-level airway pressure ventilator can be used to avoid artificial airway and respirator therapy, and may shorten hospital stay and save costs. The treatment alleviates the patient's dyspnea and fatigue, whereby the quality of life improves, and in certain situations also the life span increases. The implementation of bi-level positive pressure ventilation by the physician requires knowledge of the basics of respiratory physiology and familiarization with the bi-level airway pressure ventilator.",
+				"archiveLocation": "duo99748",
+				"callNumber": "duo99748",
+				"issue": "17",
+				"journalAbbreviation": "Duodecim",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"pages": "1797-807",
+				"publicationTitle": "Lääketieteellinen Aikakauskirja Duodecim",
+				"publisher": "Duodecim",
+				"section": "Katsaus",
+				"url": "https://www.duodecimlehti.fi/duo99748",
+				"volume": "127",
+				"attachments": [
+					{
+						"title": "PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "duodecim-englanti-Dlehti"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.duodecimlehti.fi/duo11158",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Keuhkoputkien kaikutähystys - milloin tarpeen? [Endobronchial ultrasonography - when needed?]",
+				"creators": [
+					{
+						"firstName": "Annamari",
+						"lastName": "Rouhos",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Milla",
+						"lastName": "Katajisto",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Maija",
+						"lastName": "Halme",
+						"creatorType": "author"
+					}
+				],
+				"date": "2013",
+				"ISSN": "0012-7183, 2242-3281",
+				"abstractNote": "Keuhkoputkien kaikutähystys (endobronchial ulrasound, EBUS) ja sen avulla otettava neulabiopsianäyte tarjoavat mini-invasiivisen tavan tutkia välikarsinan ja hilusalueiden imusolmukkeita ja kasvaimia. Reaaliaikaisessa kaikukuvausohjauksessa päästään biopsoimaan pieniäkin kohteita hyvällä tarkkuudella. EBUS-bronkoskoopissa on ultraäänianturi ja toimenpidekanava biopsianeulalle. Tutkimus tehdään polikliinisesti paikallispuudutuksessa ja kevyessä sedaatiossa tai anestesiassa ja se on hyvin siedetty. Pääasiallinen aihe on keuhkosyövän levinneisyysselvittely. Tutkimuksen tarkkuus on erittäin hyvä, ja välikarsinan tähystystä suositellaan täydentävänä tutkimuksena vain silloin, jos näytteissä ei todeta syöpää. Menetelmä soveltuu myös etiologialtaan epäselvän mediastinaalisen lymfadenopatian tai sentraalisten kasvainten primaaridiagnostiikkaan. Tutkimuksessa saatavat näytteet ovat usein riittäviä keuhkosyövän diagnostiikassa ja hoidon suunnittelussa tarvittaviin immunohistokemiallisiin värjäyksiin ja mutaatiomäärityksiin.\n\nEndobronchial ultrasonography (EBUS) and associated needle biopsy is a mini-invasive means to study mediastinal and hilar lymph nodes and tumors. Guidance by real-time ultrasound image allows the biopsy of even small targets with high accuracy. The investigation is well tolerated, highly specific and its main indication is the staging of lung cancer. The method is also suitable for primary diagnosis of mediastinal lymphadenopathy of unknown origin or central tumors.",
+				"archiveLocation": "duo11158",
+				"callNumber": "duo11158",
+				"issue": "16",
+				"journalAbbreviation": "Duodecim",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"pages": "1701-6",
+				"publicationTitle": "Lääketieteellinen Aikakauskirja Duodecim",
+				"publisher": "Duodecim",
+				"section": "Näin tutkin",
+				"shortTitle": "Keuhkoputkien kaikutähystys",
+				"url": "https://www.duodecimlehti.fi/duo11158",
+				"volume": "129",
+				"attachments": [
+					{
+						"title": "PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "duodecim-englanti-Dlehti"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.duodecimlehti.fi/duo13519",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Akuutin mesenteriaali-iskemian hoitomahdollisuudet parantuneet [Treatment options for acute mesenteric ischemia have improved]",
+				"creators": [
+					{
+						"firstName": "Jussi M.",
+						"lastName": "Kärkkäinen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hannu",
+						"lastName": "Manninen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hannu",
+						"lastName": "Paajanen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2017",
+				"ISSN": "0012-7183, 2242-3281",
+				"abstractNote": "Suolilievevaltimon tukoksesta johtuva akuutti mesenteriaali-iskemia on hengenvaarallinen sydän- ja verisuonisairauksien komplikaatio, jonka oireet vaihtelevat äkillisesti alkaneesta vatsakivusta useita vuorokausia kestäviin epämääräisiin oireisiin. Varjoainetehosteinen tietokonetomografia (TT) on erinomainen diagnostinen tutkimus, mutta taudin toteaminen ajoissa ennen pysyvän suolivaurion kehittymistä on silti vaikeaa. Noin kolmasosalla potilaista iskemialle tyypilliset löydökset puuttuvat kuvantamishetkellä. Tällöinkin TT:llä voidaan usein tunnistaa epäsuoria viitteitä taudin iskeemisestä taustasta. Löydösten tulkinta vaatii päivystävän radiologin ja kliinikon yhteistyötä viiveiden välttämiseksi. Hoidon tavoitteena on nopea suoliston verenkierron palauttaminen, ja erityisesti endovaskulaarinen hoito on osoittautunut tässä tehokkaaksi. Myös krooninen mesenteriaali-iskemia on vakava sairaus, joka vaatii kiireellistä tunnistamista ja hoitoa palautumattoman suoli-iskemian ehkäisemiseksi.\n\nAcute mesenteric ischemia resulting from mesenteric arterial thrombosis is a life-threatening cardiovascular complication with symptoms ranging from sudden-onset abdominal pain to vague symptoms of several days' duration. Although contrast-enhanced computed tomography is an excellent diagnostic tool, detection of the disease before the development of permanent intestinal injury is still difficult. Endovascular treatment is usually successful in restoring intestinal blood flow acutely. Chronic mesenteric ischemia requires urgent detection and therapy in order to prevent irreversible intestinal ischemia.",
+				"archiveLocation": "duo13519",
+				"callNumber": "duo13519",
+				"issue": "2",
+				"journalAbbreviation": "Duodecim",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"pages": "150-8",
+				"publicationTitle": "Lääketieteellinen Aikakauskirja Duodecim",
+				"publisher": "Duodecim",
+				"section": "Katsaus",
+				"url": "https://www.duodecimlehti.fi/duo13519",
+				"volume": "133",
+				"attachments": [
+					{
+						"title": "PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "duodecim-englanti-Dlehti"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.duodecimlehti.fi/duo14888",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Aivo-selkäydinnestenäytteen ottaminen ja siihen liittyvät komplikaatiot [Lumbar puncture and related complications]",
+				"creators": [
+					{
+						"firstName": "Sari",
+						"lastName": "Atula",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Anne",
+						"lastName": "Pesonen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Markus",
+						"lastName": "Färkkilä",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019",
+				"ISSN": "0012-7183, 2242-3281",
+				"abstractNote": "Aivo-selkäydinnestenäytettä käytetään neurologisessa päivystys- ja kiireettömässä diagnostiikassa muun muassa epäiltäessä tulehdustiloja tai keskushermoston akuuttia tai kroonista infektiota sekä lukinkalvon alaisen verenvuodon poissulkemiseen. Ennen lannepistoa tehdään tarvittavat muutokset veren hyytymiseen vaikuttavaan lääkitykseen ja suljetaan pois kohonneen aivopaineen mahdollisuus. Lannepiston onnistumisessa tärkeintä on potilaan huolellinen asettelu oikeaan asentoon toimenpidettä varten sekä riittävän informaation antaminen. Toimenpide on oikein tehtynä hyvin turvallinen. Yleisin jälkikomplikaatio on pystyasennossa tuntuva kova päänsärky, jota hoidetaan ensisijaisesti vuodelevolla, runsaalla juomisella ja särkylääkkeillä. Mikäli postspinaalipäänsärky jatkuu, päivystyspoliklinikassa annetaan suonensisäinen nestehoito ja kofeiinitiputus, ja mikäli nämäkään eivät auta, anestesialääkäri voi tehdä heräämössä veripaikan. Muut toimenpiteeseen liittyvät komplikaatiot ovat hyvin harvinaisia.\n\nLumbar punctures are performed for diagnosing infections and inflammatory diseases of the central nervous system and excluding subarachnoid hemorrhage. Antithrombotic and anticoagulative medication is assessed beforehand, the necessary interruptions for medication are made and increased intracranial pressure is excluded. The most important things for the successful procedure are optimal posturing and good information of the patient. The procedure is very safe when done properly. The most common complication afterwards is postdural puncture headache. It is first treated with bed rest and painkillers, followed by intravenous fluid therapy and caffeine infusion in the hospital, or blood patching in the most severe cases.",
+				"archiveLocation": "duo14888",
+				"callNumber": "duo14888",
+				"issue": "8",
+				"journalAbbreviation": "Duodecim",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"pages": "772-80",
+				"publicationTitle": "Lääketieteellinen Aikakauskirja Duodecim",
+				"publisher": "Duodecim",
+				"section": "Näin hoidan",
+				"url": "https://www.duodecimlehti.fi/duo14888",
+				"volume": "135",
+				"attachments": [
+					{
+						"title": "PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "duodecim-englanti-Dlehti"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.duodecimlehti.fi/duo95136",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Keskuslaskimokatetri-infektioiden ehkäisy",
+				"creators": [
+					{
+						"firstName": "Tero",
+						"lastName": "Ala-Kokko",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hannu",
+						"lastName": "Syrjälä",
+						"creatorType": "author"
+					}
+				],
+				"date": "2005",
+				"ISSN": "0012-7183, 2242-3281",
+				"abstractNote": "Katetriperäiseen sepsikseen liittyy sairastavuuden ja hoitokustannusten merkittävä lisääntyminen. Suurin uhka on katetrin kontaminoituminen terveydenhuoltohenkilöstön käsien välityksellä. Sitä voidaan vähentää aseptisella työskentelyllä katetria asetettaessa ja käsien desinfektiolla sekä suojakäsineitten käytöllä katetria myöhemmin käsiteltäessä. Antiseptisilla aineilla päällystetyt keskuslaskimokatetrit saattavat vähentää viikon kestoisissa hoidoissa katetrisepsiksiä. Niiden käyttöä voidaan harkita, jos katetrisepsisten ilmaantuvuus on suuri (yli 3,3/1-000 katetrivuorokautta) tavanomaisista infektioidentorjuntatoimenpiteistä huolimatta. Esiintyvyyden arvioiminen edellyttää systemaattista seurantaa.",
+				"archiveLocation": "duo95136",
+				"callNumber": "duo95136",
+				"issue": "15",
+				"journalAbbreviation": "Duodecim",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"pages": "1689-93",
+				"publicationTitle": "Lääketieteellinen Aikakauskirja Duodecim",
+				"publisher": "Duodecim",
+				"section": "Teema: Sairaalainfektiot",
+				"url": "https://www.duodecimlehti.fi/duo95136",
+				"volume": "121",
+				"attachments": [
+					{
+						"title": "PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.terveysportti.fi/apps/dtk/nko/article/nla00004?toc=1112237",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Neljän kuukauden ikäisen lapsen laaja terveystarkastus",
+				"creators": [
+					{
+						"firstName": "Merja",
+						"lastName": "Saarinen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tuovi",
+						"lastName": "Hakulinen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jarmo",
+						"lastName": "Salo",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024-10-23",
+				"archive": "NEUKO-tietokanta",
+				"archiveLocation": "400.005",
+				"bookTitle": "Äitiys- ja lastenneuvola",
+				"callNumber": "nla00004",
+				"language": "fi",
+				"libraryCatalog": "Duodecim",
+				"publisher": "Terveyden ja hyvinvoinnin laitos",
+				"url": "https://www.terveysportti.fi/doi/nla00004",
+				"attachments": [
+					{
+						"title": "På svenska",
+						"mimeType": "application/pdf"
+					},
+					{
+						"snapshot": true,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "duodecim-dtk"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
