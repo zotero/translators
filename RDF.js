@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2026-06-19 20:26:35"
+	"lastUpdated": "2026-08-12 16:51:38"
 }
 
 /*
@@ -1435,7 +1435,9 @@ function importItem(newItem, node) {
 				// Skip z:itemType, which is handled above. Copying it here would override the
 				// detected/fallback type with a type that might not exist in this version
 				// (e.g., a Juris-M legal type).
-				&& uri.substring(n.z.length) !== 'itemType') {
+				&& uri.substring(n.z.length) !== 'itemType'
+				// Don't override newItem.creators with RDF nodes that will cause an import error
+				&& uri.substring(n.z.length) !== 'creators') {
 			var property = uri.substr(n.z.length);
 			newItem[property] = Zotero.RDF.getTargets(node, n.z + property)[0];
 		}
@@ -1815,6 +1817,32 @@ var testCases = [
 				"date": "2017",
 				"extra": "Type: treaty",
 				"itemID": "#item_1",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<rdf:RDF\n xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n xmlns:z=\"http://www.zotero.org/namespaces/export#\"\n xmlns:dcterms=\"http://purl.org/dc/terms/\"\n xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n xmlns:bib=\"http://purl.org/net/biblio#\"\n xmlns:foaf=\"http://xmlns.com/foaf/0.1/\"\n xmlns:vcard=\"http://nwalsh.com/rdf/vCard#\"\n xmlns:prism=\"http://prismstandard.org/namespaces/1.2/basic/\">\n    <bib:Recording rdf:about=\"https://example.com/video\">\n        <z:itemType>videoRecording</z:itemType>\n        <z:creators>\n            <rdf:Seq>\n                <rdf:li>\n                    <foaf:Person>\n                        <foaf:surname>Lastname</foaf:surname>\n                        <foaf:givenName>Firstname</foaf:givenName>\n                    </foaf:Person>\n                </rdf:li>\n            </rdf:Seq>\n        </z:creators>\n        <dc:title>Video</dc:title>\n        <dcterms:abstract>Example video</dcterms:abstract>\n        <dc:date>2026-06-17</dc:date>\n        <z:libraryCatalog>Example.com</z:libraryCatalog>\n        <dc:identifier>\n            <dcterms:URI>\n               <rdf:value>https://example.com/video</rdf:value>\n            </dcterms:URI>\n        </dc:identifier>\n    </bib:Recording>\n</rdf:RDF>\n\n",
+		"items": [
+			{
+				"itemType": "videoRecording",
+				"title": "Video",
+				"creators": [
+					{
+						"creatorType": "creator",
+						"lastName": "Lastname",
+						"firstName": "Firstname"
+					}
+				],
+				"date": "2026-06-17",
+				"abstractNote": "Example video",
+				"itemID": "https://example.com/video",
+				"libraryCatalog": "Example.com",
+				"url": "https://example.com/video",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
