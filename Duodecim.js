@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-11 11:12:39"
+	"lastUpdated": "2026-08-12 15:44:49"
 }
 
 /*
@@ -298,7 +298,10 @@ function dmyToISO(dmy) {
 	if (!dmy) return null;
 	const dateText = ZU.trimInternal((typeof dmy === 'string') ? dmy : dmy.textContent);
 
-	const date = /(?<day>\d{1,2})\W(?<month>\d{1,2})\W(?<year>\d{4}$)/.exec(dateText)?.groups;
+	const dmyDate = /(?<day>\d{1,2})\W(?<month>\d{1,2})\W(?<year>\d{4}$)/.exec(dateText)?.groups;
+	const ymdDate = /(?<year>\d{4})\W(?<month>\d{1,2})\W\d{1,2}/.exec(dateText)?.groups;
+
+	const date = dmyDate || ymdDate;
 	if (!date) return null;
 
 	return `${date.year}-${ZU.lpad(date.month, '0', 2)}-${ZU.lpad(date.day, '0', 2)}`;
@@ -357,7 +360,7 @@ async function scrape(doc, url, type) {
 	const isDTKLegacy = isTP && /\?p_artikkeli.*/.test(urlObj.search);
 	const dtkMatch = urlObj.pathname.match(/(?<=^(\/apps)?\/dtk\/)\w+/);
 	const dtk = dtkMatch ? dtkMatch[0] : null;
-	
+
 	const isOP = urlObj.host === 'www.oppiportti.fi' || dtk === 'oppi';
 	const isDLehti = urlObj.host === 'www.duodecimlehti.fi';
 	const isTK = urlObj.host === 'www.terveyskirjasto.fi';
@@ -485,7 +488,7 @@ async function scrape(doc, url, type) {
 		+ `:not(.${dClass}reference):not(.${dClass}references a):not(.refs a)`; // citation; bibliography list
 	doc.querySelectorAll(linkSelector)?.forEach((aLink) => {
 		const linkObj = new URL(aLink);
-		
+
 		// Zotero.debug(`scrape() PDF: on link candidate ${aLink}, link path ${linkObj.pathname}`);
 		if (/(external|extra|internet)$/.test(aLink.classList.value) // internet: SLL PDF
 			&& /\.pdf$/.test(linkObj.pathname)
@@ -675,16 +678,20 @@ async function scrapeDict(doc, url) {
 		const searchKeyword = url.match(/(?<=\/apps\/sanakirjat\/\d+\/).*/);
 		if (searchKeyword) {
 			item.archive = 'Termit ja sanakirjat';
-
-			const firstResultAsTitle = doc.querySelectorAll('span.d-k')?.length === 1
-				|| (!doc.querySelector('div.hit span.d-k') && searchKeyword[0] === text('span.d-k'));
-			item.title = firstResultAsTitle ? text('span.d-k') : searchKeyword[0];
 			item.dictionaryTitle = text('h2');
-			if (/^\w{3}\d{5}$/.test(searchKeyword[0])) item.callNumber = searchKeyword[0]; // TDOI
-			else item.url = url;
 
-			const dateMatch = text('div.duodecim-footer-copyright div')?.match(/\d+/);
-			if (dateMatch) item.date = dateMatch[0];
+			if (/^\w{3}\d{5}$/.test(searchKeyword[0])) { // TDOI
+				item.title = text('span.d-k') || 'Sanakirja'; // TDOI shall never be entry title. TODO e.g.?
+				Zotero.debug(`scrapeDict(): TDOI, item.title=${item.title}`);
+				item.callNumber = searchKeyword[0];
+			}
+			else {
+				const firstResultAsTitle = doc.querySelectorAll('span.d-k')?.length === 1
+				|| (!doc.querySelector('div.hit span.d-k') && searchKeyword[0] === text('span.d-k'));
+				item.title = firstResultAsTitle ? text('span.d-k') : searchKeyword[0];
+				Zotero.debug(`scrapeDict(): item.title=${item.title}`);
+				item.url = url; // If applicable esp. lte-prefix entries, TDOI may be found by searching at "www.terveysportti.fi"
+			}
 		}
 	}
 
@@ -805,6 +812,8 @@ async function detectWeb(doc, url) {
 
 	if (doc.querySelector('.duo-meta_journal') // DTK
 		|| doc.querySelector('.dl-article-bibliographic') // duodecimlehti.fi
+		|| (url.includes('www.duodecimlehti.fi')
+			&& tdoiURLRegex.test(url))
 		|| (Object.keys(journalISSN).includes(tdoiPrefix)
 			&& tdoiPrefix != 'duo')
 		|| journalPage(text('div.date'))) /* legacy DTK */ return 'journalArticle';
@@ -834,18 +843,6 @@ async function doWeb(doc, url) {
 		item.complete();
 	}
 }
-
-/**
- * A NOTE ON TEST CASES
- * For Zotero's automated checks, I kept only publicly available test cases. One free TP item is included as the last test case.
- * Proceed with testing under a network with TP/OP subscription or log in first in Scaffold's browser.
- * Refer to a commit to my own repo for showcases of such items:
- * > https://github.com/shiyuwang-jamk/zotero-translators/blob/419d41e0f1d444d7a6fd30e1251f0e621fe0e54a/Duodecim.js#L1624
- *
- * I built this translator with APA citation style in mind.
- * Feel free to test other formats, especially NLM-Vancouver-based formats and their Finnish variants
- * such as `styles/dependent/Suomen Laakarilehti.csl` (also part of Zotero Style Repository).
- */
 
 /**
  * A NOTE ON TEST CASES
