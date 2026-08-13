@@ -7,7 +7,7 @@ import { REPO_ROOT } from './common.mjs';
 // Shared browser setup for the .bin tools
 const PROFILE_DIR = path.join(REPO_ROOT, '.tmp', 'browser-profile');
 
-const CHALLENGE_TITLE_RE = /just a moment|attention required|verify you are|checking your browser|validate user/i;
+const CHALLENGE_TITLE_RE = /just a moment|attention required|verify you are|checking your browser|validate user|access check/i;
 const CHALLENGE_TIMEOUT = 5 * 60 * 1000;
 
 const STEALTH_ARGS = ['--disable-blink-features=AutomationControlled'];
