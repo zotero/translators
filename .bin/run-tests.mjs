@@ -2,11 +2,14 @@
 
 import path from 'node:path';
 import process from 'node:process';
-import { parseArgs, resolveTranslator, REPO_ROOT } from './lib/common.mjs';
-import { ensureConnectorBuild, CONNECTOR_BUILD_DIR, EXTENSION_ID } from './lib/connector.mjs';
+import { parseArgs, REPO_ROOT } from './lib/common.mjs';
+import { ensureConnectorBuild, EXTENSION_ID } from './lib/connector.mjs';
 import { launchBrowser, resolveHeadless } from './lib/browser.mjs';
 
 const CI_DIR = path.join(REPO_ROOT, '.ci', 'pull-request-check');
+
+const FAILED_TEST_RE = /^Test \d+: failed/m;
+const WALL_SYMPTOM_RE = /^Test \d+: failed: (?:Detection failed|Translator did not return any items|.*(?:Error|timed out))/im;
 
 const { values, positionals } = parseArgs({
 	usage: 'node .bin/run-tests.mjs <translator...> [--json] [--keep-open] [--headed] [--no-dependents]',
@@ -32,11 +35,8 @@ const extensionDir = await ensureConnectorBuild({ rebuild: values['rebuild-conne
 const translatorServer = await import(path.join(CI_DIR, 'translator-server.mjs'));
 await translatorServer.serve();
 
-// Resolve filenames to translator IDs
-let toTestIDs = new Set();
-let toTestNames = new Set();
-let changedIDs = [];
-
+// Resolve filenames to the translators named on the command line
+const named = [];
 for (const filename of positionals) {
 	const basename = path.basename(filename.endsWith('.js') ? filename : filename + '.js');
 	const translator = translatorServer.filenameToTranslator[basename];
@@ -48,30 +48,30 @@ for (const filename of positionals) {
 		console.error(`Error: translator '${basename}' has invalid metadata`);
 		continue;
 	}
-	changedIDs.push(translator.metadata.translatorID);
-	toTestIDs.add(translator.metadata.translatorID);
-	toTestNames.add(translator.metadata.label);
+	named.push(translator);
 }
 
+// Everything we'll test, by ID: the named translators plus their dependents
+const toTest = new Map(named.map(t => [t.metadata.translatorID, t]));
+
 // Find dependent translators (unless --no-dependents)
-if (!values['no-dependents'] && changedIDs.length > 0) {
-	const changedRe = new RegExp(changedIDs.join('|'));
+if (!values['no-dependents'] && named.length > 0) {
+	const changedRe = new RegExp(named.map(t => t.metadata.translatorID).join('|'));
 	for (const translator of translatorServer.translators) {
 		if (!translator.metadata) continue;
 		if (!changedRe.test(translator.content)) continue;
-		toTestIDs.add(translator.metadata.translatorID);
-		toTestNames.add(translator.metadata.label);
-		if (toTestIDs.size >= 10) break;
+		toTest.set(translator.metadata.translatorID, translator);
+		if (toTest.size >= 10) break;
 	}
 }
 
-if (toTestIDs.size === 0) {
+if (toTest.size === 0) {
 	console.error('No translators to test');
 	translatorServer.stopServing();
 	process.exit(2);
 }
 
-console.error(`Testing: ${Array.from(toTestNames).join(', ')}`);
+console.error(`Testing: ${[...toTest.values()].map(t => t.metadata.label).join(', ')}`);
 
 // Launch browser with extension
 const headless = resolveHeadless(values);
@@ -99,7 +99,7 @@ try {
 	// background requests. (Pointless headless, where nobody can solve a captcha.)
 	if (!headless) {
 		const warmup = await context.newPage();
-		for (const warmupUrl of collectWarmupUrls(positionals, translatorServer)) {
+		for (const warmupUrl of collectTestUrls(named)) {
 			try {
 				await session.goto(warmup, warmupUrl);
 			}
@@ -110,7 +110,7 @@ try {
 		await warmup.close();
 	}
 
-	const translatorsToTest = Array.from(toTestIDs);
+	const translatorsToTest = [...toTest.keys()];
 	await new Promise(resolve => setTimeout(resolve, 500));
 
 	const testUrl = `chrome-extension://${EXTENSION_ID}/tools/testTranslators/testTranslators.html#translators=${translatorsToTest.join(',')}`;
@@ -135,8 +135,18 @@ try {
 	if (values.json) {
 		console.log(JSON.stringify(testResults, null, 2));
 	}
+	else {
+		report(testResults, translatorsToTest);
+	}
 
-	allPassed = report(testResults, translatorsToTest, values.json);
+	const failed = Object.keys(testResults).filter(id => FAILED_TEST_RE.test(testResults[id].message));
+	allPassed = failed.length === 0;
+
+	// A headless run can't clear an anti-bot wall, so tests against a walled site
+	// fail as if the translator were broken
+	if (headless && failed.some(id => WALL_SYMPTOM_RE.test(testResults[id].message))) {
+		await reportWalls(session, collectTestUrls(failed.map(id => toTest.get(id)).filter(Boolean)));
+	}
 }
 catch (err) {
 	console.error(err.message || err);
@@ -152,16 +162,11 @@ finally {
 	process.exit(allPassed ? 0 : 1);
 }
 
-// Pull one representative test-case URL per origin out of the translators under
-// test, for pre-warming. Capped so multi-site translators don't open dozens of tabs.
-function collectWarmupUrls(filenames, server) {
+// Pull one representative test-case URL per origin out of the given translators.
+// Capped so multi-site translators don't open dozens of tabs.
+function collectTestUrls(translators) {
 	const byOrigin = new Map();
-	for (const filename of filenames) {
-		const basename = path.basename(filename.endsWith('.js') ? filename : filename + '.js');
-		const translator = server.filenameToTranslator[basename];
-		if (!translator) {
-			continue;
-		}
+	for (const translator of translators) {
 		for (const [, url] of translator.content.matchAll(/"url":\s*"(https?:\/\/[^"]+)"/g)) {
 			try {
 				const { origin } = new URL(url);
@@ -177,18 +182,37 @@ function collectWarmupUrls(filenames, server) {
 	return [...byOrigin.values()].slice(0, 5);
 }
 
-function report(results, translatorsToTest, jsonMode) {
-	if (jsonMode) {
-		return Object.values(results).every(r =>
-			!r.message.match(/^Test \d+: failed/m)
-		);
+/** Load the failing translators' sites in a tab and report any that wall us off. */
+async function reportWalls(session, urls) {
+	if (!urls.length) return;
+	console.error('\nChecking whether the failing sites are behind an anti-bot wall…');
+	const page = await session.context.newPage();
+	const walled = [];
+	for (const url of urls) {
+		const wall = await session.goto(page, url, { quiet: true }).catch(() => null);
+		if (wall?.kind === 'challenge') {
+			walled.push(`${new URL(url).hostname} — ${wall.description}`);
+		}
 	}
+	await page.close();
+	if (!walled.length) {
+		console.error('No challenge found. Failures may indicate actual problems.');
+		return;
+	}
+	console.error('\n⚠  These sites gave headless Chrome a challenge page instead of the'
+		+ ' article,\n   so the failures above may not be the translator\'s fault:\n\n'
+		+ walled.map(site => `     ${site}`).join('\n'));
+	if (!process.env.CI) {
+		console.error('\n   Re-run headed and solve it by hand:\n'
+			+ `\n     node .bin/run-tests.mjs ${process.argv.slice(2).join(' ')} --headed\n`);
+	}
+}
 
+function report(results, translatorsToTest) {
 	if (Object.keys(results).length < translatorsToTest.length) {
 		console.log('Warning: tests for some translators did not run');
 	}
 
-	let allPassed = true;
 	for (const translatorID in results) {
 		const translatorResults = results[translatorID];
 		console.log(`\n=== ${translatorResults.label} (${translatorID}) ===`);
@@ -208,13 +232,10 @@ function report(results, translatorsToTest, jsonMode) {
 			}
 			else if (line.match(/^Test \d+: failed/)) {
 				console.log(`  \x1b[31m${line}\x1b[0m`);
-				allPassed = false;
 			}
 			else if (line.trim()) {
 				console.log(`  ${line}`);
 			}
 		}
 	}
-
-	return allPassed;
 }
