@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-10 18:34:59"
+	"lastUpdated": "2026-08-16 16:30:59"
 }
 
 /*
@@ -51,7 +51,7 @@ async function directAccess(ePage = '/e48243') {
 	const sllTestDoc = await requestDocument(`https://www.laakarilehti.fi${ePage}`); //, noProxyOptions);
 	Zotero.debug(`directAccess(): returned URL ${JSON.parse(JSON.stringify(sllTestDoc)).location}`);
 
-	if (sllTestDoc?.querySelector('div.utils')) {
+	if (sllTestDoc?.querySelector('div[class^="util"]')) {
 		if (ePage != 'e48243') Zotero.debug(`directAccess(): ${ePage} returns full text.`);
 		else Zotero.debug('directAccess(): on a network with subscription to Lääkärilehti.');
 		return true;
@@ -72,7 +72,7 @@ function returnProtect(raw) {
 }
 
 function detectWeb(doc) {
-	if (doc.querySelector('div.util')
+	if (doc.querySelector('div[class^="util"]') // e32580
 		|| doc.querySelector('div.login-container')
 		|| doc.querySelector('span.meta.top')) return 'journalArticle';
 	return false;
@@ -98,14 +98,14 @@ async function doWeb(doc, url) {
 	const fullHTML = !doc.querySelector('div.login-container');
 
 	let validPublicKey;
-	const keyMatch = attr(doc, 'div.utils a[title="Jaa sähköpostitse"]', 'href')?.match(/\?public=.*$/);
+	const keyMatch = attr(doc, 'div[class^="util"] a[title="Jaa sähköpostitse"]', 'href')?.match(/\?public=.*$/);
 	if (fullHTML) {
 		if (keyMatch) validPublicKey = keyMatch[0] || '';
 		if (!validPublicKey.length) item.attachments.push({ document: doc, snapshot: true }); // rare
 	}
 	else item.tags.push('sll-no-access');
 
-	const metaSpan = ZU.trimInternal(innerText('article span.meta.top'));
+	const metaSpan = ZU.trimInternal(innerText('article .meta.top'));
 	const metaRegex = metaSpan.includes('www.laakarilehti.fi/e') ? ePageRegex : oldMetaRegex;
 	const metaTopGroups = metaSpan.match(metaRegex)?.groups;
 	if (metaTopGroups) {
@@ -130,7 +130,7 @@ async function doWeb(doc, url) {
 	if (item.section?.includes('Ledare')) item.language = 'sv';
 	if (!item.url) item.url = `https://www.laakarilehti.fi${urlObj.pathname}${validPublicKey || ''}`;
 
-	const pdfPath = attr(doc, 'div.utils a[title="Lataa PDF"]', 'href');
+	const pdfPath = attr(doc, 'div[class^="util"] a[title="Lataa PDF"]', 'href');
 	if (pdfPath) {
 		const pdfPageMeta = /SLL(?<issue>\d+(-\d+)?)-?\d{4}-(?<pages>\d+)\.pdf/i.exec(pdfPath)?.groups;
 		if (!item.issue) item.issue = pdfPageMeta?.issue;
