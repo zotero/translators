@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-12 15:44:49"
+	"lastUpdated": "2026-08-16 17:03:28"
 }
 
 /*
@@ -56,7 +56,7 @@
 /**
  * ***** ABBREVIATIONS / KEY CONCEPTS *****
  * Duodecim: Finnish Medical Society Duodecim / Duodecim Publishing Company
- * - In this translator 'Duodecim' refers to both.
+ * - In my comments, 'Duodecim' refers to both.
  *
  * DTK: possibly Finnish *Duodecim TietoKanta*, 'Duodecim database'.
  *
@@ -278,13 +278,7 @@ function journalPage(nlmString) {
  */
 function normalizePublisher(raw) {
 	if (!raw || typeof raw !== "string") return null;
-
-	const publisherString = raw.replace(/[©\u00A9]/g, '').replace(/\(?\d{4}\)?/, '').trim();
-
-	// CITATION: 'Duodecim Publishing Company' would be verbose in APA style.
-	if (/(kustannus oy )?duodecim/i.test(publisherString)) return 'Duodecim';
-
-	return publisherString;
+	return raw.replace(/[©\u00A9]/g, '').replace(/\(?\d{4}\)?/, '').trim();
 }
 
 /**
@@ -414,7 +408,7 @@ async function scrape(doc, url, type) {
 			? 'div#footer'
 			: `.${dClass}article-footer`;
 		var contributorsRaw = '';
-		const footerDivs = doc.querySelector(footerSelector)?.querySelectorAll('div');
+		const footerDivs = doc.querySelector(footerSelector)?.querySelectorAll('div:not(.org)');
 		if (footerDivs) for (const divCandidate of footerDivs) {
 			if (divCandidate.classList.value.includes('retired')) {
 				contributorsRaw += ZU.trimInternal(divCandidate.innerText) + ', ';
@@ -692,6 +686,9 @@ async function scrapeDict(doc, url) {
 				Zotero.debug(`scrapeDict(): item.title=${item.title}`);
 				item.url = url; // If applicable esp. lte-prefix entries, TDOI may be found by searching at "www.terveysportti.fi"
 			}
+
+			const dateMatch = text('div.duodecim-footer-copyright div')?.match(/\d+/);
+			if (dateMatch) item.date = dateMatch[0];
 		}
 	}
 
@@ -908,7 +905,7 @@ var testCases = [
 				"callNumber": "dlk00221",
 				"language": "fi",
 				"libraryCatalog": "Duodecim",
-				"publisher": "Duodecim",
+				"publisher": "Kustannus Oy Duodecim",
 				"url": "https://www.terveyskirjasto.fi/dlk00221",
 				"attachments": [
 					{
@@ -958,7 +955,7 @@ var testCases = [
 				"callNumber": "dlk00084",
 				"language": "fi",
 				"libraryCatalog": "Duodecim",
-				"publisher": "Duodecim",
+				"publisher": "Kustannus Oy Duodecim",
 				"url": "https://www.terveyskirjasto.fi/dlk00084",
 				"attachments": [
 					{
@@ -994,7 +991,7 @@ var testCases = [
 				"callNumber": "dlk01420",
 				"language": "fi",
 				"libraryCatalog": "Duodecim",
-				"publisher": "Duodecim",
+				"publisher": "Kustannus Oy Duodecim",
 				"url": "https://www.terveyskirjasto.fi/dlk01420",
 				"attachments": [
 					{
@@ -1030,7 +1027,7 @@ var testCases = [
 				"callNumber": "uux30190",
 				"language": "fi",
 				"libraryCatalog": "Duodecim",
-				"publisher": "Duodecim",
+				"publisher": "Kustannus Oy Duodecim",
 				"url": "https://www.terveyskirjasto.fi/uux30190",
 				"attachments": [
 					{
@@ -1067,7 +1064,7 @@ var testCases = [
 				"callNumber": "uux30190",
 				"language": "fi",
 				"libraryCatalog": "Duodecim",
-				"publisher": "Duodecim",
+				"publisher": "Kustannus Oy Duodecim",
 				"url": "https://www.terveysportti.fi/uutiset/23/uux30190",
 				"attachments": [
 					{
