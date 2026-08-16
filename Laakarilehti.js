@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-16 16:30:59"
+	"lastUpdated": "2026-08-16 18:40:37"
 }
 
 /*
@@ -98,10 +98,10 @@ async function doWeb(doc, url) {
 	const fullHTML = !doc.querySelector('div.login-container');
 
 	let validPublicKey;
-	const keyMatch = attr(doc, 'div[class^="util"] a[title="Jaa sähköpostitse"]', 'href')?.match(/\?public=.*$/);
+	const keyMatch = attr(doc, 'div[class^="util"] a[title="WhatsApp"]', 'href')?.match(/\?public=[a-z0-9]*?($|(?=&))/);
 	if (fullHTML) {
 		if (keyMatch) validPublicKey = keyMatch[0] || '';
-		if (!validPublicKey.length) item.attachments.push({ document: doc, snapshot: true }); // rare
+		if (!validPublicKey?.length) item.attachments.push({ document: doc, snapshot: true }); // rare
 	}
 	else item.tags.push('sll-no-access');
 
@@ -128,7 +128,11 @@ async function doWeb(doc, url) {
 	}
 	if (item.section) item.section = ZU.capitalizeTitle(item.section.toLocaleLowerCase('FI'), true);
 	if (item.section?.includes('Ledare')) item.language = 'sv';
-	if (!item.url) item.url = `https://www.laakarilehti.fi${urlObj.pathname}${validPublicKey || ''}`;
+	if (!item.url) { // no eURL
+		const noNeedKey = fullHTML && notProxy && await directAccess(urlObj.pathname);
+		const keyToFill = noNeedKey ? '' : validPublicKey || '';
+		item.url = `https://www.laakarilehti.fi${urlObj.pathname}${keyToFill}`;
+	}
 
 	const pdfPath = attr(doc, 'div[class^="util"] a[title="Lataa PDF"]', 'href');
 	if (pdfPath) {
@@ -168,7 +172,8 @@ async function doWeb(doc, url) {
 		const labels = doc.querySelectorAll('main article div.label');
 		if (labels) for (const label of labels) if (label.innerText.includes("English summary")) {
 			const englishElement = label.nextElementSibling;
-			const title = text('div.content h3') || text('div.content h2'); // 2015p2589
+			const title = englishElement.querySelector('h3').innerText // e.g. e39223
+				|| englishElement.querySelector('h2').innerText; // e.g. 2015p2589
 			if (!title) break;
 
 			const englishTitle = ZU.capitalizeTitle(title.replace('English summary: ', '').toLowerCase(), true);
@@ -426,7 +431,7 @@ var testCases = [
 				"publicationTitle": "Suomen Lääkärilehti",
 				"publisher": "Suomen Lääkäriliitto",
 				"section": "Katsaus",
-				"url": "https://www.laakarilehti.fi/lehdet/1-2026/miten-nuorten-itsemurhia-voidaan-ehkaista/?public=0f26edc781cc73cf347108dc23c21703",
+				"url": "https://www.laakarilehti.fi/lehdet/1-2026/miten-nuorten-itsemurhia-voidaan-ehkaista/",
 				"volume": "81",
 				"attachments": [
 					{
@@ -482,7 +487,7 @@ var testCases = [
 				"publisher": "Suomen Lääkäriliitto",
 				"section": "Alkuperäistutkimus",
 				"shortTitle": "Lasten ahdistuneisuushäiriöiden hoito lastenpsykiatrian yksikössä",
-				"url": "https://www.laakarilehti.fi/tieteessa/alkuperaistutkimukset/lasten-ahdistuneisuushairioiden-hoito-lastenpsykiatrian-yksikossasuuri-osa-voitaisiin-hoitaa-jo-perustasolla/?public=2b2f5e60e0afc5da248cbc58107ad1f0",
+				"url": "https://www.laakarilehti.fi/tieteessa/alkuperaistutkimukset/lasten-ahdistuneisuushairioiden-hoito-lastenpsykiatrian-yksikossasuuri-osa-voitaisiin-hoitaa-jo-perustasolla/",
 				"volume": "76",
 				"attachments": [
 					{
@@ -662,6 +667,53 @@ var testCases = [
 				"shortTitle": "Ajokelpoisuuden arviointi",
 				"url": "https://www.laakarilehti.fi/tieteessa/katsausartikkeli/ajokelpoisuuden-arviointi/?public=a5bda457f9701ea63768e707f1264aab",
 				"volume": "70",
+				"attachments": [
+					{
+						"title": "Linkki PDF-versioon (laakarilehti.fi)",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.laakarilehti.fi/tieteessa/alkuperaistutkimukset/kehitysvammaisuutta-esiintyy-enemman-pojilla-kuin-tytoilla/",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Kehitysvammaisuutta esiintyy enemmän pojilla kuin tytöillä [Intellectual Disability Is More Common Among Boys Than Among Girls]",
+				"creators": [
+					{
+						"firstName": "Maria",
+						"lastName": "Arvio",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jaana",
+						"lastName": "Lähdetie",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024-04-30T10:18:00+03:00",
+				"ISSN": "0039-5560, 2489-7434",
+				"abstractNote": "Lähtökohdat Kehitysvammaiset ovat suurin yksittäinen vammaisryhmä. Diagnostiset kriteerit ovat olleet samat yli 50 vuoden ajan.\nMenetelmät Selvitimme Kelan etuusrekistereiden avulla kehitysvammadiagnoosin perusteella vammaistukea saavien alle 15-vuotiaiden poikien ja tyttöjen lukumäärät. Autismikirjon häiriö, epilepsia ja CP-vamma ovat yleisiä kehitysvamman liitännäisdiagnooseja, ja kartoitimme myös näihin diagnooseihin liittyviä etuisuuksia.\nTulokset Kehitysvammaisuus oli pojilla lähes kaksi kertaa yleisempi vammaistuen myöntämisperuste kuin tytöillä. Autismikirjon häiriö oli pojilla lähes neljä kertaa tyttöjä yleisempi kehitysvamman liitännäisdiagnoosi.\nPäätelmät X-kromosomissa on kognitiiviseen kehitykseen liittyvää geenejä, mutta ne selittävät vain osin sukupuolien välistä eroa kehitysvamman ja autismikirjon ilmenemisessä. Arvioimme, että poikien yliedustuksen taustalla on useita vielä tuntemattomia geneettisiä ja hankinnaisia tekijöitä sekä näiden yhteisvaikutuksia.\n\n\nBackground People with intellectual disability (ID) are the largest single disability group. The diagnostic criteria of ID have remained the same for over 50 years.\nMethod We used the statistical database of the national insurance institution of Finland and determined the number of individuals aged less than 15 years, who received disability allowance due to an ID diagnosis. Autism spectrum disorder, epilepsy and cerebral palsy are frequent comorbidities in people with ID. We also determined the number of individuals aged less than 15 years, who received disability allowance due to these diagnoses recorded by ICD-10 codes.\nResults ID was almost two times more common as a cause of disability allowance among boys than among girls. Autism spectrum disorder as a co-morbid diagnosis to ID was almost four times more common among boys than among girls.\nDiscussion In the X-chromosome, there are several genes affecting intelligence. Still, only part of the male predominance in ID is caused by X-chromosomal genes. We suppose that gene-gene and gene-environment interactions play a role in creating this sex difference which needs to be studied further.\nMaria Arvio, Jaana Lähdetie",
+				"archiveLocation": "e39223",
+				"issue": "20-21",
+				"journalAbbreviation": "Suom Lääkäril",
+				"language": "fi",
+				"libraryCatalog": "Lääkärilehti",
+				"pages": "863-",
+				"publicationTitle": "Suomen Lääkärilehti",
+				"publisher": "Suomen Lääkäriliitto",
+				"section": "Alkuperäistutkimus",
+				"shortTitle": "Kehitysvammaisuutta esiintyy enemmän pojilla kuin tytöillä",
+				"url": "https://www.laakarilehti.fi/e39223",
+				"volume": "79",
 				"attachments": [
 					{
 						"title": "Linkki PDF-versioon (laakarilehti.fi)",
