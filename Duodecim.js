@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-16 17:03:28"
+	"lastUpdated": "2026-08-17 08:18:48"
 }
 
 /*
@@ -276,7 +276,7 @@ function journalPage(nlmString) {
  * @param {string|null|undefined} raw
  * @returns {string|null}
  */
-function normalizePublisher(raw) {
+function cleanPublisher(raw) {
 	if (!raw || typeof raw !== "string") return null;
 	return raw.replace(/[©\u00A9]/g, '').replace(/\(?\d{4}\)?/, '').trim();
 }
@@ -411,12 +411,14 @@ async function scrape(doc, url, type) {
 		const footerDivs = doc.querySelector(footerSelector)?.querySelectorAll('div:not(.org)');
 		if (footerDivs) for (const divCandidate of footerDivs) {
 			if (divCandidate.classList.value.includes('retired')) {
-				contributorsRaw += ZU.trimInternal(divCandidate.innerText) + ', ';
+				const personDiv = divCandidate.querySelector('.person') || divCandidate;
+				contributorsRaw += ZU.trimInternal(personDiv.innerText) + ', ';
 				break;
 			}
-			// rarer field only in legacy DTK, e.g. shk02235
+			// rarer field only in legacy DTK, e.g. shk02235, shk01028
 			if (divCandidate.classList.value.includes('referees')) {
-				contributorsRaw += ZU.trimInternal(divCandidate.innerText) + ', ';
+				const personDiv = divCandidate.querySelector('.person') || divCandidate;
+				contributorsRaw += ZU.trimInternal(personDiv.innerText) + ', ';
 			}
 		}
 		if (contributorsRaw.length) {
@@ -469,9 +471,13 @@ async function scrape(doc, url, type) {
 	if (!item.archiveLocation
 		|| item.archiveLocation === '000.000') item.archiveLocation = tdoi;
 
-	const copyrightRaw = text(`div.${dClass}copyrights`) || text(`div.${dClass}copyright`);
-	if (isDLehti || isOP || isKP) item.publisher = 'Duodecim';
-	else if (copyrightRaw) item.publisher = normalizePublisher(copyrightRaw);
+	const copyrightRaw = text(`div.${dClass}copyrights`)
+		|| text(`div.${dClass}copyright`)
+		|| text('[class$=footer-copyright]')
+		|| text('[class$=copyright]');
+	if (copyrightRaw) item.publisher = cleanPublisher(copyrightRaw);
+	else if (isOP || isTP) item.publisher = 'Kustannus Oy Duodecim';
+	else if (isKP) item.publisher = 'Suomalainen Lääkäriseura Duodecim';
 
 	if (item.creators?.length
 		&& item.creators[0].lastName === item.publisher) item.publisher = undefined; // e.g. shk00004
@@ -652,7 +658,7 @@ async function scrape(doc, url, type) {
 async function scrapeDict(doc, url) {
 	const item = new Zotero.Item('dictionaryEntry');
 	item.language = 'fi';
-	item.publisher = 'Duodecim';
+	item.publisher = cleanPublisher(text('[class$=copyright]'));
 
 	if (/^https:\/\/www\.terveyskirjasto\.fi\/ltt\d{5}(\D*|\/.*)?$/.test(url)
 		&& text('h1')) {
@@ -737,7 +743,7 @@ async function scrapeDrug(doc, url) {
 
 	item.title = ZU.trimInternal(title.childNodes[0].textContent);
 	item.url = url;
-	item.publisher = 'Duodecim';
+	item.publisher = cleanPublisher(text('[class$=copyright]'));
 	item.archive = 'Lääketietokanta';
 	item.shortTitle = /^[A-ZÄ-Ö ]+/.exec(item.title)[0] || undefined; // brand name
 	item.language = /\/spc\/sv$/.test(urlObj?.pathname) ? 'sv' : "fi";
@@ -869,7 +875,7 @@ var testCases = [
 				"dictionaryTitle": "Lääketieteen sanasto",
 				"language": "fi",
 				"libraryCatalog": "Duodecim",
-				"publisher": "Duodecim",
+				"publisher": "Kustannus Oy Duodecim",
 				"url": "https://www.terveyskirjasto.fi/ltt01270",
 				"attachments": [
 					{
@@ -1099,7 +1105,7 @@ var testCases = [
 				"callNumber": "hoi50138",
 				"language": "fi",
 				"libraryCatalog": "Duodecim",
-				"publisher": "Duodecim",
+				"publisher": "Suomalainen Lääkäriseura Duodecim",
 				"url": "https://www.kaypahoito.fi/hoi50138",
 				"attachments": [
 					{
@@ -1134,7 +1140,7 @@ var testCases = [
 				"callNumber": "hoi50067",
 				"language": "fi",
 				"libraryCatalog": "Duodecim",
-				"publisher": "Duodecim",
+				"publisher": "Suomalainen Lääkäriseura Duodecim",
 				"url": "https://www.kaypahoito.fi/hoi50067",
 				"attachments": [
 					{
@@ -1190,7 +1196,7 @@ var testCases = [
 				"callNumber": "dnd00039",
 				"language": "fi",
 				"libraryCatalog": "Duodecim",
-				"publisher": "Duodecim",
+				"publisher": "Suomalainen Lääkäriseura Duodecim",
 				"shortTitle": "Monityydyttymättömät rasvahapot lasten ja nuorten ADHD",
 				"url": "https://www.kaypahoito.fi/dnd00039",
 				"attachments": [
@@ -1226,7 +1232,7 @@ var testCases = [
 				"callNumber": "nix03607",
 				"language": "fi",
 				"libraryCatalog": "Duodecim",
-				"publisher": "Duodecim",
+				"publisher": "Suomalainen Lääkäriseura Duodecim",
 				"url": "https://www.kaypahoito.fi/nix03607",
 				"attachments": [
 					{
@@ -1261,7 +1267,7 @@ var testCases = [
 				"callNumber": "nak06071",
 				"language": "fi",
 				"libraryCatalog": "Duodecim",
-				"publisher": "Duodecim",
+				"publisher": "Suomalainen Lääkäriseura Duodecim",
 				"shortTitle": "Monityydyttymättömät rasvahapot lasten ja nuorten ADHD",
 				"url": "https://www.kaypahoito.fi/nak06071",
 				"attachments": [
@@ -1309,7 +1315,7 @@ var testCases = [
 				"language": "fi",
 				"libraryCatalog": "Duodecim",
 				"publicationTitle": "Lääketieteellinen Aikakauskirja Duodecim",
-				"publisher": "Duodecim",
+				"publisher": "Suomalainen Lääkäriseura Duodecim",
 				"section": "Verkossa ensin",
 				"shortTitle": "Lasten ja nuorten ADHD-lääkityksen yleisyys vaihtelee alueittain",
 				"url": "https://www.duodecimlehti.fi/duo19390",
@@ -1365,7 +1371,7 @@ var testCases = [
 				"libraryCatalog": "Duodecim",
 				"pages": "1797-807",
 				"publicationTitle": "Lääketieteellinen Aikakauskirja Duodecim",
-				"publisher": "Duodecim",
+				"publisher": "Suomalainen Lääkäriseura Duodecim",
 				"section": "Katsaus",
 				"url": "https://www.duodecimlehti.fi/duo99748",
 				"volume": "127",
@@ -1425,7 +1431,7 @@ var testCases = [
 				"libraryCatalog": "Duodecim",
 				"pages": "1701-6",
 				"publicationTitle": "Lääketieteellinen Aikakauskirja Duodecim",
-				"publisher": "Duodecim",
+				"publisher": "Suomalainen Lääkäriseura Duodecim",
 				"section": "Näin tutkin",
 				"shortTitle": "Keuhkoputkien kaikutähystys",
 				"url": "https://www.duodecimlehti.fi/duo11158",
@@ -1486,7 +1492,7 @@ var testCases = [
 				"libraryCatalog": "Duodecim",
 				"pages": "150-8",
 				"publicationTitle": "Lääketieteellinen Aikakauskirja Duodecim",
-				"publisher": "Duodecim",
+				"publisher": "Suomalainen Lääkäriseura Duodecim",
 				"section": "Katsaus",
 				"url": "https://www.duodecimlehti.fi/duo13519",
 				"volume": "133",
@@ -1546,7 +1552,7 @@ var testCases = [
 				"libraryCatalog": "Duodecim",
 				"pages": "772-80",
 				"publicationTitle": "Lääketieteellinen Aikakauskirja Duodecim",
-				"publisher": "Duodecim",
+				"publisher": "Suomalainen Lääkäriseura Duodecim",
 				"section": "Näin hoidan",
 				"url": "https://www.duodecimlehti.fi/duo14888",
 				"volume": "135",
@@ -1601,7 +1607,7 @@ var testCases = [
 				"libraryCatalog": "Duodecim",
 				"pages": "1689-93",
 				"publicationTitle": "Lääketieteellinen Aikakauskirja Duodecim",
-				"publisher": "Duodecim",
+				"publisher": "Suomalainen Lääkäriseura Duodecim",
 				"section": "Teema: Sairaalainfektiot",
 				"url": "https://www.duodecimlehti.fi/duo95136",
 				"volume": "121",
