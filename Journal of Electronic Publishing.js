@@ -40,11 +40,6 @@ function detectWeb(doc,url) {
 	}
 }
 
-
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
-
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;

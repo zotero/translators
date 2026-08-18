@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-06-04 14:34:03"
+	"lastUpdated": "2026-08-05 20:20:55"
 }
 
 /*
@@ -50,6 +50,26 @@
 const DOIre = /\b10\.[0-9]{4,}\/[^\s&"']*[^\s&"'.,]/g;
 
 /**
+ * Clean up a DOI matched by DOIre, removing trailing characters that came from
+ * the surrounding text or URL rather than the DOI itself.
+ */
+function cleanDOI(doi) {
+	if (doi.endsWith(")") && !doi.includes("(")) {
+		doi = doi.substring(0, doi.length - 1);
+	}
+	if (doi.endsWith("}") && !doi.includes("{")) {
+		doi = doi.substring(0, doi.length - 1);
+	}
+	// A /pdf path segment is virtually always part of the URL that the DOI was
+	// extracted from, not part of the DOI itself. The handful of DOIs that
+	// contain a full URL can legitimately include /pdf/, so leave those alone.
+	if (!/https?:\/\//i.test(doi)) {
+		doi = doi.replace(/\/pdf(?:\/.*)?$/i, '');
+	}
+	return doi;
+}
+
+/**
  * @return {string | string[]} A single string if the URL contains a DOI
  * 		and the document contains no others, or an array of DOIs otherwise
  */
@@ -76,10 +96,11 @@ function getDOIFromURL(url) {
 	// but do allow finding DOIs on either side of them (e.g. a DOI in the URL hash)
 	let urlParts = url.split(/[#?]/);
 	for (let urlPart of urlParts) {
+		DOIre.lastIndex = 0;
 		let match = DOIre.exec(urlPart);
 		if (match) {
 			// Only return a single DOI from the URL
-			return match[0];
+			return cleanDOI(match[0]);
 		}
 	}
 	return null;
@@ -96,13 +117,7 @@ function getDOIsFromDocument(doc) {
 		// Z.debug(node.nodeValue)
 		DOIre.lastIndex = 0;
 		while ((m = DOIre.exec(treeWalker.currentNode.nodeValue))) {
-			DOI = m[0];
-			if (DOI.endsWith(")") && !DOI.includes("(")) {
-				DOI = DOI.substr(0, DOI.length - 1);
-			}
-			if (DOI.endsWith("}") && !DOI.includes("{")) {
-				DOI = DOI.substr(0, DOI.length - 1);
-			}
+			DOI = cleanDOI(m[0]);
 			// only add new DOIs
 			if (!dois.has(DOI)) {
 				dois.add(DOI);
@@ -117,13 +132,7 @@ function getDOIsFromDocument(doc) {
 		DOIre.lastIndex = 0;
 		let m = DOIre.exec(link.href);
 		if (m) {
-			let doi = m[0];
-			if (doi.endsWith(")") && !doi.includes("(")) {
-				doi = doi.substr(0, doi.length - 1);
-			}
-			if (doi.endsWith("}") && !doi.includes("{")) {
-				doi = doi.substr(0, doi.length - 1);
-			}
+			let doi = cleanDOI(m[0]);
 			// only add new DOIs
 			if (!dois.has(doi) && !dois.has(doi.replace(/#.*/, ''))) {
 				dois.add(doi);
