@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-11-20 22:41:12"
+	"lastUpdated": "2026-08-18 16:28:56"
 }
 
 /*
@@ -56,10 +56,10 @@ function cleanMathTitle(title) {
 	});
 	// Handle single char superscripts including special chars and commands
 	const superscriptMap = {
-		'0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
-		'5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
+		0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴',
+		5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹',
 		'+': '⁺', '-': '⁻', '=': '⁼', '(': '⁽', ')': '⁾',
-		'n': 'ⁿ', 'i': 'ⁱ'
+		n: 'ⁿ', i: 'ⁱ'
 	};
 	text = text.replace(/\^([0-9a-zA-Z+\-*])|\^\\(pm|mp)/g, (match, char, latex) => {
 		if (char && superscriptMap[char]) return superscriptMap[char];
@@ -76,14 +76,14 @@ function cleanMathTitle(title) {
 	});
 	// Handle single char subscripts including special chars and commands
 	const subscriptMap = {
-		'0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄',
-		'5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉',
+		0: '₀', 1: '₁', 2: '₂', 3: '₃', 4: '₄',
+		5: '₅', 6: '₆', 7: '₇', 8: '₈', 9: '₉',
 		'+': '₊', '-': '₋', '=': '₌', '(': '₍', ')': '₎',
-		'a': 'ₐ', 'e': 'ₑ', 'o': 'ₒ', 'x': 'ₓ', 'h': 'ₕ',
-		'k': 'ₖ', 'l': 'ₗ', 'm': 'ₘ', 'n': 'ₙ', 'p': 'ₚ',
-		's': 'ₛ', 't': 'ₜ'
+		a: 'ₐ', e: 'ₑ', o: 'ₒ', x: 'ₓ', h: 'ₕ',
+		k: 'ₖ', l: 'ₗ', m: 'ₘ', n: 'ₙ', p: 'ₚ',
+		s: 'ₛ', t: 'ₜ'
 	};
-	text = text.replace(/_([0-9a-zA-Z+\-*])|\_\\(pm|mp)/g, (match, char, latex) => {
+	text = text.replace(/_([0-9a-zA-Z+\-*])|_\\(pm|mp)/g, (match, char, latex) => {
 		if (char && subscriptMap[char]) return subscriptMap[char];
 		if (char) return `<sub>${char}</sub>`;
 		if (latex === 'pm') return '<sub>±</sub>';
@@ -147,7 +147,7 @@ function cleanMathTitle(title) {
 		// Apply the same cleaning to content inside $...$
 		// We recurse lightly or just apply same logic
 		let clean = content.replace(/\^\{?\+?\}?/g, '⁺')
-			.replace(/\^\{?\-\}?/g, '⁻')
+			.replace(/\^\{?-\}?/g, '⁻')
 			.replace(/e\^/g, 'e') // Catch e^+ cases processed above
 			.replace(/\\/g, ''); // Remove remaining backslashes for simple commands
 			
@@ -159,7 +159,7 @@ function cleanMathTitle(title) {
 	
 	// Fix specific case: e+ e- usually implies e⁺ e⁻
 	// This regex looks for 'e' followed immediately by + or -
-	// But we already handled ^+ and ^- above. 
+	// But we already handled ^+ and ^- above.
 	// Handle explicit "e+" "e-" in text if they weren't latex
 	// Careful not to replace regular words.
 	
@@ -187,37 +187,44 @@ function getSearchResults(doc, checkOnly) {
 	var rows = doc.querySelectorAll('a.result-item-title[href*="/literature"]');
 	for (let row of rows) {
 		let href = row.href;
-		let title = cleanMathTitle(ZU.trimInternal(row.textContent));
+		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
-		items[href] = title;
+		items[href] = cleanMathTitle(title);
 	}
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) ZU.processDocuments(Object.keys(items), scrape);
-		});
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+
+		for (let itemUrl of Object.keys(items)) {
+			let itemDoc = await requestDocument(itemUrl);
+			await scrape(itemDoc, itemUrl);
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
-function scrape(doc, url) {
+async function scrape(doc, url) {
 	var bibUrl = url.replace('/literature/', '/api/literature/');
-	ZU.doGet(bibUrl, function (ris) {
-		let translator = Zotero.loadTranslator("import");
-		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
-		translator.setString(ris);
-		translator.setHandler("itemDone", function (obj, item) {
+	let bibtex = await requestText(bibUrl, {
+		headers: { Accept: 'application/x-bibtex' }
+	});
+	let translator = Zotero.loadTranslator("import");
+	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+	translator.setString(bibtex);
+	translator.setHandler("itemDone", function (obj, item) {
+		if (doc) {
 			for (let tag of doc.querySelectorAll('.ant-tag')) {
 				item.tags.push({ tag: tag.textContent.trim() });
 			}
-			
+
 			for (let action of doc.querySelectorAll('.__UserAction__ a')) {
 				if (/\bpdf\b/i.test(action.textContent)) {
 					item.attachments.push({
@@ -227,12 +234,12 @@ function scrape(doc, url) {
 					});
 				}
 			}
-			
-			item.title = cleanMathTitle(item.title);
-			item.complete();
-		});
-		translator.translate();
-	}, null, null, { Accept: 'application/x-bibtex' });
+		}
+
+		item.title = cleanMathTitle(item.title);
+		item.complete();
+	});
+	await translator.translate();
 }
 
 /** BEGIN TEST CASES **/
@@ -246,7 +253,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://inspirehep.net/literature/1284987",
-		"defer": true,		
+		"defer": true,
 		"items": [
 			{
 				"itemType": "journalArticle",

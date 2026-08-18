@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-05-19 15:28:10"
+	"lastUpdated": "2026-08-18 16:29:09"
 }
 
 /*
@@ -232,6 +232,7 @@ const arXivCategories = {
 	"test.supr-con": "Test Superconductivity",
 	"bad-arch.bad-cat": "Invalid Category"
 };
+Object.freeze(arXivCategories);
 
 var version;
 // this variable will be set in doWeb and
@@ -248,12 +249,10 @@ async function doSearch(item) {
 }
 
 function detectWeb(doc, url) {
-	var searchRe = /^https?:\/\/(?:([^.]+\.))?(?:arxiv\.org|xxx\.lanl\.gov)\/(?:search|find|list|catchup)\b/;
-	var relatedDOI = text(doc, '.doi > a');
-	if (searchRe.test(url)) {
-		return getSearchResults(doc, true/* checkOnly */) && "multiple";
+	if (isMultiplePage(url)) {
+		return "multiple";
 	}
-	else if (relatedDOI) {
+	else if (text(doc, '.doi > a')) {
 		return "journalArticle";
 	}
 	else {
@@ -261,8 +260,12 @@ function detectWeb(doc, url) {
 	}
 }
 
-function getSearchResults(doc, checkOnly = false) {
-	if (doc.location.pathname.startsWith('/search/')) {
+function isMultiplePage(url) {
+	return /^\/(?:search|find|list|catchup)(?:\/|$)/.test(new URL(url).pathname);
+}
+
+function getSearchResults(doc, checkOnly = false, url = doc.location.href) {
+	if (new URL(url).pathname.startsWith('/search/')) {
 		return getSearchResultsNew(doc, checkOnly);
 	}
 	else {
@@ -291,10 +294,10 @@ function cleanMathTitle(title) {
 	});
 	// Handle single char superscripts including special chars and commands
 	const superscriptMap = {
-		'0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
-		'5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
+		0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴',
+		5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹',
 		'+': '⁺', '-': '⁻', '=': '⁼', '(': '⁽', ')': '⁾',
-		'n': 'ⁿ', 'i': 'ⁱ'
+		n: 'ⁿ', i: 'ⁱ'
 	};
 	text = text.replace(/\^([0-9a-zA-Z+\-*])|\^\\(pm|mp)/g, (match, char, latex) => {
 		if (char && superscriptMap[char]) return superscriptMap[char];
@@ -311,14 +314,14 @@ function cleanMathTitle(title) {
 	});
 	// Handle single char subscripts including special chars and commands
 	const subscriptMap = {
-		'0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄',
-		'5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉',
+		0: '₀', 1: '₁', 2: '₂', 3: '₃', 4: '₄',
+		5: '₅', 6: '₆', 7: '₇', 8: '₈', 9: '₉',
 		'+': '₊', '-': '₋', '=': '₌', '(': '₍', ')': '₎',
-		'a': 'ₐ', 'e': 'ₑ', 'o': 'ₒ', 'x': 'ₓ', 'h': 'ₕ',
-		'k': 'ₖ', 'l': 'ₗ', 'm': 'ₘ', 'n': 'ₙ', 'p': 'ₚ',
-		's': 'ₛ', 't': 'ₜ'
+		a: 'ₐ', e: 'ₑ', o: 'ₒ', x: 'ₓ', h: 'ₕ',
+		k: 'ₖ', l: 'ₗ', m: 'ₘ', n: 'ₙ', p: 'ₚ',
+		s: 'ₛ', t: 'ₜ'
 	};
-	text = text.replace(/_([0-9a-zA-Z+\-*])|\_\\(pm|mp)/g, (match, char, latex) => {
+	text = text.replace(/_([0-9a-zA-Z+\-*])|_\\(pm|mp)/g, (match, char, latex) => {
 		if (char && subscriptMap[char]) return subscriptMap[char];
 		if (char) return `<sub>${char}</sub>`;
 		if (latex === 'pm') return '<sub>±</sub>';
@@ -382,7 +385,7 @@ function cleanMathTitle(title) {
 		// Apply the same cleaning to content inside $...$
 		// We recurse lightly or just apply same logic
 		let clean = content.replace(/\^\{?\+?\}?/g, '⁺')
-			.replace(/\^\{?\-\}?/g, '⁻')
+			.replace(/\^\{?-\}?/g, '⁻')
 			.replace(/e\^/g, 'e') // Catch e^+ cases processed above
 			.replace(/\\/g, ''); // Remove remaining backslashes for simple commands
 			
@@ -394,7 +397,7 @@ function cleanMathTitle(title) {
 	
 	// Fix specific case: e+ e- usually implies e⁺ e⁻
 	// This regex looks for 'e' followed immediately by + or -
-	// But we already handled ^+ and ^- above. 
+	// But we already handled ^+ and ^- above.
 	// Handle explicit "e+" "e-" in text if they weren't latex
 	// Careful not to replace regular words.
 	
@@ -408,11 +411,11 @@ function getSearchResultsNew(doc, checkOnly = false) {
 	let rows = doc.querySelectorAll(".arxiv-result");
 	for (let row of rows) {
 		let id = text(row, ".list-title a").trim().replace(/^arXiv:/, "");
-		let title = cleanMathTitle(ZU.trimInternal(text(row, "p.title")));
+		let title = getTitleText(row, "p.title");
 		if (!id || !title) continue;
 		if (checkOnly) return true;
 		found = true;
-		items[id] = title;
+		items[id] = cleanMathTitle(title);
 	}
 	return found && items;
 }
@@ -437,21 +440,36 @@ function getSearchResultsLegacy(doc, checkOnly = false) {
 		let id = text(dts[i], "a[title='Abstract']")
 			.trim()
 			.replace(/^arXiv:/, "");
-		let title = cleanMathTitle(ZU.trimInternal(text(dds[i], ".list-title"))
-			.replace(/^Title:\s*/, ""));
+		let title = getTitleText(dds[i], ".list-title");
 		if (!id || !title) continue;
 		if (checkOnly) return true;
 		found = true;
-		items[id] = title;
+		items[id] = cleanMathTitle(title);
 	}
 	return found && items;
 }
 
+function getTitleText(container, selector) {
+	let title = container.querySelector(selector);
+	if (!title) return "";
+
+	let clone = title.cloneNode(true);
+	for (let element of clone.querySelectorAll('.descriptor, .MathJax, .MathJax_Preview, mjx-container')) {
+		element.remove();
+	}
+	return ZU.trimInternal(clone.textContent).replace(/^Title:\s*/, "");
+}
+
 async function doWeb(doc, url) {
-	if (detectWeb(doc, url) == 'multiple') {
-		var items = getSearchResults(doc);
+	if (isMultiplePage(url)) {
+		let items = getSearchResults(doc, false, url);
+		if (!items) {
+			doc = await requestDocument(url);
+			items = getSearchResults(doc, false, url);
+		}
+		if (!items) return;
 		
-		let selectedItems = await Z.selectItems(items);
+		let selectedItems = await Zotero.selectItems(items);
 		if (selectedItems) {
 			let apiURL = `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(Object.keys(selectedItems).join(','))}`;
 			let document = await requestAtom(apiURL);

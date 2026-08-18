@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-11-21 07:00:00"
+	"lastUpdated": "2026-08-18 16:29:09"
 }
 
 /*
@@ -68,8 +68,8 @@ function detectWeb(doc, url) {
 		// Look for Indico signature
 		let isIndico = doc.querySelector('meta[property="og:site_name"][content="Indico"]')
 			|| doc.querySelector('link[href*="indico.ico"]')
-			|| (doc.title && doc.title.includes('Indico'));
-					   
+				|| (doc.title && doc.title.includes('Indico'));
+
 		if (isIndico) {
 			return 'multiple';
 		}
@@ -104,7 +104,8 @@ function processCreator(item, name, type) {
 			creatorType: type,
 			fieldMode: 1
 		});
-	} else {
+	}
+	else {
 		item.creators.push(ZU.cleanAuthor(cleanName, type, false));
 	}
 }
@@ -156,7 +157,7 @@ function cleanMathTitle(title) {
 		k: 'ₖ', l: 'ₗ', m: 'ₘ', n: 'ₙ', p: 'ₚ',
 		s: 'ₛ', t: 'ₜ'
 	};
-	text = text.replace(/_([0-9a-zA-Z+\-*])|\_\\(pm|mp)/g, (match, char, latex) => {
+	text = text.replace(/_([0-9a-zA-Z+\-*])|_\\(pm|mp)/g, (match, char, latex) => {
 		if (char && subscriptMap[char]) return subscriptMap[char];
 		if (char) return `<sub>${char}</sub>`;
 		if (latex === 'pm') return '<sub>±</sub>';
@@ -232,7 +233,7 @@ function cleanMathTitle(title) {
 	
 	// Fix specific case: e+ e- usually implies e⁺ e⁻
 	// This regex looks for 'e' followed immediately by + or -
-	// But we already handled ^+ and ^- above. 
+	// But we already handled ^+ and ^- above.
 	// Handle explicit "e+" "e-" in text if they weren't latex
 	// Careful not to replace regular words.
 	
@@ -251,15 +252,15 @@ function getSearchResults(doc, checkOnly) {
 	
 	// Try multiple selectors to find contribution links
 	let selectors = [
-		'a[href*="/contributions/"]',           // Generic contribution links
-		'.contribution-list a',                  // Contribution list items
-		'.timetable-item a[href*="/contributions/"]',  // Timetable entries
-		'td.contrib-title a',                   // Table-based contribution lists
-		'.contrib-row a',                       // Row-based layouts
-		'article.contribution a',               // Article-based layouts
-		'.session-contrib a[href*="/contributions/"]',  // Session contribution links
-		'.timetable-item .title a',             // Timetable title links
-		'.entry-title a'                        // Generic entry title links
+		'a[href*="/contributions/"]', // Generic contribution links
+		'.contribution-list a', // Contribution list items
+		'.timetable-item a[href*="/contributions/"]', // Timetable entries
+		'td.contrib-title a', // Table-based contribution lists
+		'.contrib-row a', // Row-based layouts
+		'article.contribution a', // Article-based layouts
+		'.session-contrib a[href*="/contributions/"]', // Session contribution links
+		'.timetable-item .title a', // Timetable title links
+		'.entry-title a' // Generic entry title links
 	];
 	
 	for (let selector of selectors) {
@@ -288,9 +289,6 @@ function getSearchResults(doc, checkOnly) {
 			
 			if (!title || title.length < 3) continue;
 
-			// Clean title Math/LaTeX
-			title = cleanMathTitle(title);
-			
 			// Normalize the URL (remove trailing slashes and fragments)
 			let normalizedUrl = href.split('#')[0].replace(/\/$/, '');
 			
@@ -299,7 +297,7 @@ function getSearchResults(doc, checkOnly) {
 			
 			if (checkOnly) return true;
 			found = true;
-			items[normalizedUrl] = title;
+			items[normalizedUrl] = cleanMathTitle(title);
 		}
 		
 		// If we found items with this selector, no need to try others
@@ -326,7 +324,7 @@ async function doWeb(doc, url) {
 			let ids = extractIds(url);
 			if (ids.eventId) {
 				// Use the export API to get all contributions
-				// We also need detailed contribution info (attachments) here if possible, 
+				// We also need detailed contribution info (attachments) here if possible,
 				// but standard export API might not give full file details for all items without heavy payload.
 				// Let's get the list first.
 				let apiUrl = `${getBaseUrl(url)}/export/event/${ids.eventId}.json?detail=contributions`;
@@ -341,7 +339,8 @@ async function doWeb(doc, url) {
 								// Use title and ID to form a selection
 								// URL might be in c.url
 								if (c.url && c.title) {
-									items[c.url] = cleanMathTitle(c.title);
+									let contributionUrl = new URL(c.url, getBaseUrl(url)).href;
+									items[contributionUrl] = cleanMathTitle(c.title);
 								}
 							}
 						}
@@ -364,13 +363,13 @@ async function doWeb(doc, url) {
 					if (eventDataForAttachments && eventDataForAttachments.contributions) {
 						let selectedId = extractIds(itemUrl).contribId;
 						if (selectedId) {
-							cachedContrib = eventDataForAttachments.contributions.find(c => String(c.id) === String(selectedId));
+							cachedContrib = eventDataForAttachments.contributions.find(c => String(c.db_id || c.id) === String(selectedId));
 						}
 					}
 
 					if (cachedContrib) {
 						// If we have cached data, we can potentially use it directly or pass it to scrape
-						// But scrape() is designed to take a URL. 
+						// But scrape() is designed to take a URL.
 						// Let's modify scrape to accept optional pre-loaded data or just let it re-fetch if robust.
 						// To keep it simple and robust (and ensure full details), we call scrape(null, itemUrl)
 						// which will try JSON/API fetch for that specific item.
@@ -637,7 +636,6 @@ async function scrapeFromContributionJSON(json, doc, url, baseUrl, ids) {
 				// Contribution attachments: /event/123/contributions/456/attachments/...
 				if (attachUrl && (attachUrl.includes(`/contributions/${ids.contribId}/`) || attachUrl.includes(`/contribution/${ids.contribId}/`))
 					&& (attachUrl.includes('.pdf') || attachUrl.includes('/attachments/') || attachUrl.includes('/material/'))) {
-					
 					// Avoid dupes if possible
 					if (!item.attachments.some(a => a.url === attachUrl)) {
 						item.attachments.push({
@@ -689,7 +687,7 @@ async function scrapeFromAPI(json, url, baseUrl, ids) {
 	
 	if (event && event.contributions) {
 		// Find the specific contribution by ID (convert both to strings for comparison)
-		contribution = event.contributions.find(c => String(c.id) === String(ids.contribId));
+		contribution = event.contributions.find(c => String(c.db_id || c.id) === String(ids.contribId));
 	}
 	
 	if (contribution) {
@@ -910,7 +908,6 @@ async function scrapeFromHTML(doc, url, baseUrl, ids) {
 		if (attachUrl
 			&& (attachUrl.includes(`/contributions/${ids.contribId}/`) || attachUrl.includes(`/contribution/${ids.contribId}/`))
 			&& (attachUrl.includes('/attachments/') || attachUrl.includes('/material/'))) {
-			
 			item.attachments.push({
 				title: attachTitle,
 				url: attachUrl,
