@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-21 04:18:59"
+	"lastUpdated": "2026-05-20 19:58:42"
 }
 
 /*
@@ -60,7 +60,7 @@ function detectWeb(doc, url) {
 	if (doc.querySelector('a[data-gtm-feature="bookView"]')) {
 		return "bookSection";
 	}
-	else if (doc.body.classList.contains('document-page')) {
+	else if (doc.body.classList.contains('document-page') || doc.querySelector('#documentDisplay')) {
 		// not the greatest fallback... other guesses we could use?
 		return "magazineArticle";
 	}
@@ -140,6 +140,12 @@ function scrape(doc, url) {
 			
 			item.notes = [];
 			item.url = item.url.replace(/u=[^&]+&?/, '');
+
+			// Page number ends up alone in extra
+			if (/^\d+$/.test(item.extra)) {
+				item.extra = '';
+			}
+
 			item.complete();
 		});
 		translator.translate();

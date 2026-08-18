@@ -360,7 +360,7 @@ function getBlankNode(attachToNode, itemPredicate, blankNodePairs, create) {
  * A class representing a Zotero-to-BIBO type mapping
  * @property zoteroType {String} The corresponding Zotero type name
  */
-Type = function(type, typeDefinition) {
+var Type = function(type, typeDefinition) {
 	this.zoteroType = type;
 	this[ITEM] = {"pairs":typeDefinition[0]};
 	this[SUBCONTAINER] = typeDefinition[1] ? {"alwaysAdd":typeDefinition[1][0],
@@ -586,7 +586,7 @@ Type.prototype.createNodes = function(item) {
 /**
  * A class representing a BIBO-to-Zotero literal property mapping
  */
-LiteralProperty = function(field) {
+var LiteralProperty = function(field) {
 	this.field = field;
 	this.mapping = FIELDS[field];
 	if (!this.mapping) {
@@ -642,7 +642,7 @@ LiteralProperty.prototype.mapFromItem = function(item, nodes) {
 /**
  * A class representing a BIBO-to-Zotero creator mapping
  */
-CreatorProperty = function(field) {
+var CreatorProperty = function(field) {
 	this.field = field;
 	this.mapping = CREATORS[field];
 }

@@ -3,20 +3,20 @@
 	"label": "Denik CZ",
 	"creator": "Jiří Sedláček, Philipp Zumstein",
 	"target": "^https?://[^/]*denik\\.cz",
-	"minVersion": "3.0",
+	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-07 09:27:42"
+	"lastUpdated": "2026-08-13 17:04:12"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017 Jiří Sedláček, Philipp Zumstein
-	
+	Copyright © 2017-2026 Jiří Sedláček, Philipp Zumstein
+
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -35,28 +35,23 @@
 	***** END LICENSE BLOCK *****
 */
 
-
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
-
-function detectWeb(doc, url) {
-	var type = ZU.xpathText(doc, '//meta[@property="og:type"]/@content');
-	if (type == "article") {
-		return "newspaperArticle";
-	} else if (getSearchResults(doc, true)) {
-		return "multiple";
+function detectWeb(doc, url) { // eslint-disable-line no-unused-vars
+	if (attr(doc, 'meta[property="og:type"]', 'content') == 'article') {
+		return 'newspaperArticle';
 	}
+	else if (getSearchResults(doc, true)) {
+		return 'multiple';
+	}
+	return false;
 }
-
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('.right h2 a');
-	for (let i=0; i<rows.length; i++) {
-		let href = rows[i].href;
-		let title = ZU.trimInternal(rows[i].textContent);
+	var rows = doc.querySelectorAll('article h2 a');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -65,208 +60,209 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
-	} else {
-		scrape(doc, url);
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url));
+		}
+	}
+	else {
+		await scrape(doc, url);
 	}
 }
 
-
-function scrape(doc, url) {
-	var authorsMeta = ZU.xpathText(doc, '//meta[@property="author"]/@content');
-	
-	var translator = Zotero.loadTranslator('web');
-	// Embedded Metadata
-	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-	// translator.setDocument(doc);
-	
-	translator.setHandler('itemDone', function (obj, item) {
-		if (authorsMeta) {
-			// multiple authors are not handled correctly by EM and
-			// we want to exclude generic names like "Redakce"
-			item.creators = [];
-			let authorsList = authorsMeta.split(/\s*,\s*/);
-			for (let i=0; i<authorsList.length; i++) {
-				let author = authorsList[i];
-				if (author!= "Redakce") {
-					item.creators.push(ZU.cleanAuthor(authorsList[i], "author"));
-				}
+function getJSONLDGraph(doc) {
+	for (let script of doc.querySelectorAll('script[type="application/ld+json"]')) {
+		try {
+			let data = JSON.parse(script.textContent);
+			let graph = data['@graph'] || (Array.isArray(data) ? data : [data]);
+			if (graph.some(node => node['@type'] == 'NewsArticle')) {
+				return graph;
 			}
 		}
-		
+		catch (e) {}
+	}
+	return [];
+}
+
+async function scrape(doc, url = doc.location.href) {
+	let graph = getJSONLDGraph(doc);
+	let article = graph.find(node => node['@type'] == 'NewsArticle');
+	let organization = graph.find(node => node['@type'] == 'NewsMediaOrganization');
+
+	let translator = Zotero.loadTranslator('web');
+	// Embedded Metadata
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	translator.setDocument(doc);
+
+	translator.setHandler('itemDone', (_obj, item) => {
+		if (article) {
+			// exclude generic names like "Redakce"
+			item.creators = [];
+			let authors = Array.isArray(article.author) ? article.author : [article.author];
+			for (let author of authors) {
+				if (author && author.name && author.name != 'Redakce') {
+					item.creators.push(ZU.cleanAuthor(author.name, 'author'));
+				}
+			}
+
+			if (article.datePublished) {
+				item.date = ZU.strToISO(article.datePublished);
+			}
+			if (article.articleSection) {
+				item.section = article.articleSection;
+			}
+			if (Array.isArray(article.keywords)) {
+				item.tags = article.keywords.map(tag => ({ tag }));
+			}
+		}
+		if (organization && organization.name) {
+			// og:site_name is always "www.denik.cz"; the regional edition
+			// name (e.g. "Třebíčský deník") is only in the JSON-LD
+			item.publicationTitle = organization.name;
+		}
+		if (!item.language) {
+			item.language = 'cs';
+		}
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function(trans) {
-		trans.itemType = "newspaperArticle";
-		trans.doWeb(doc, url);
-	});
+	let em = await translator.getTranslatorObject();
+	em.itemType = 'newspaperArticle';
+	await em.doWeb(doc, url);
 }
 
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://trebicsky.denik.cz/zpravy_region/podivejte-se-dalsi-na-miminka-narozena-na-trebicsku-20170123.html",
+		"url": "https://trebicsky.denik.cz/zpravy-region/trebic-bude-mit-nocni-autobus-umozni-spojeni-na-vlak-i-pohodlny-navrat-z-klubu/",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Podívejte se další na miminka narozená na Třebíčsku",
-				"creators": [],
-				"date": "2017-01-23T08:20:00+01:00",
-				"abstractNote": "Třebíčsko - Díky vstřícnosti třebíčské porodnice Vám přinášíme fotografie nejmladších obyvatel. Každý týden naši spolupracovníci objíždí porodnice a fotí nově narozená miminka.",
-				"language": "cs",
-				"libraryCatalog": "trebicsky.denik.cz",
-				"publicationTitle": "Třebíčský deník",
-				"url": "https://trebicsky.denik.cz/zpravy_region/podivejte-se-dalsi-na-miminka-narozena-na-trebicsku-20170123.html",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://trebicsky.denik.cz/zpravy_region/pyrotechniku-pouzivejte-ohleduplne-a-bezpecne-doporucuji-hasici-20171231.html",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Pyrotechniku používejte ohleduplně a bezpečně, doporučují hasiči",
 				"creators": [
 					{
-						"firstName": "Luděk",
-						"lastName": "Mahel",
+						"firstName": "Milan",
+						"lastName": "Krčmář",
 						"creatorType": "author"
 					}
 				],
-				"date": "2017-12-31T10:08:00+01:00",
-				"abstractNote": "Třebíčsko - Přivítání nového roku se neobejde bez petard a rachejtlí. Jak pyrotechniku správně používat? Zde jsou některá doporučení.",
-				"language": "cs",
-				"libraryCatalog": "trebicsky.denik.cz",
-				"publicationTitle": "Třebíčský deník",
-				"url": "https://trebicsky.denik.cz/zpravy_region/pyrotechniku-pouzivejte-ohleduplne-a-bezpecne-doporucuji-hasici-20171231.html",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
 				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.denik.cz/z_domova/silvestr-se-zachrankou-ustrelena-ruka-agrese-i-slzy-zoufalstvi-20180101.html",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Silvestr se záchrankou: Ustřelená ruka, agrese i slzy zoufalství",
-				"creators": [
-					{
-						"firstName": "Jiří",
-						"lastName": "Sejkora",
-						"creatorType": "author"
-					}
-				],
-				"date": "2018-01-01T14:22:00+01:00",
-				"abstractNote": "/FOTOGALERIE, VIDEO/ Silvestrovská noční služba se záchranáři v Pardubicích očima redaktora Deníku. Podívejte se, čím vším si musí projít první den nového roku.",
-				"language": "cs",
-				"libraryCatalog": "www.denik.cz",
-				"publicationTitle": "Deník.cz",
-				"shortTitle": "Silvestr se záchrankou",
-				"url": "https://www.denik.cz/z_domova/silvestr-se-zachrankou-ustrelena-ruka-agrese-i-slzy-zoufalstvi-20180101.html",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
 				"tags": [
 					{
-						"tag": "Pardubice"
+						"tag": "Brno"
 					},
 					{
-						"tag": "silvestr"
+						"tag": "Karlovo náměstí"
 					},
 					{
-						"tag": "záchranná služba"
+						"tag": "Třebíč"
+					},
+					{
+						"tag": "jízdní řád"
+					},
+					{
+						"tag": "sídliště"
+					},
+					{
+						"tag": "čtvrť"
+					},
+					{
+						"tag": "železniční stanice"
 					}
 				],
-				"notes": [],
-				"seeAlso": []
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Třebíč bude mít noční autobus. Umožní spojení na vlak i pohodlný návrat z klubů",
+				"publicationTitle": "Třebíčský deník",
+				"url": "https://trebicsky.denik.cz/zpravy-region/trebic-bude-mit-nocni-autobus-umozni-spojeni-na-vlak-i-pohodlny-navrat-z-klubu/",
+				"abstractNote": "V Třebíči se od 29. června změní jízdní řády městských autobusů. Novinkou je zkušební zavedení noční linky, která má návaznost na noční a ranní vlaky.",
+				"date": "2026-06-24",
+				"language": "cs",
+				"libraryCatalog": "trebicsky.denik.cz",
+				"section": "Třebíčsko"
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "https://www.denik.cz/ze_sveta/co-nas-ceka-v-breznu-prezidentske-volby-v-rusku-sanci-uspet-ma-jen-putin-20180101.html",
+		"url": "https://www.denik.cz/evropa/dalsi-zatmeni-slunce-evropa-cesko-spanelsko-egypt/",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Co nás čeká v březnu? Prezidentské volby v Rusku. Šanci uspět má jen Putin",
 				"creators": [
 					{
-						"firstName": "Michal",
-						"lastName": "Bystrov",
+						"firstName": "Tomáš",
+						"lastName": "Rosa",
 						"creatorType": "author"
-					},
-					{
-						"firstName": "Vojtěch",
-						"lastName": "Žižka",
-						"creatorType": "author"
-					}
-				],
-				"date": "2018-01-02T00:30:00+01:00",
-				"abstractNote": "Na nedávné bilanční konferenci v Moskvě potvrdil vůdce Ruské federace Vladimir Putin, že v březnu 2018 hodlá znovu kandidovat na prezidenta. Poprvé tuto informaci sdělil veřejnosti v první polovině prosince při setkání s pracovníky automobilky GAZ v Nižním Novgorodu.",
-				"language": "cs",
-				"libraryCatalog": "www.denik.cz",
-				"publicationTitle": "Deník.cz",
-				"shortTitle": "Co nás čeká v březnu?",
-				"url": "https://www.denik.cz/ze_sveta/co-nas-ceka-v-breznu-prezidentske-volby-v-rusku-sanci-uspet-ma-jen-putin-20180101.html",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Putin"
-					},
-					{
-						"tag": "Rusko"
 					}
 				],
 				"notes": [],
-				"seeAlso": []
+				"tags": [
+					{
+						"tag": "Egypt"
+					},
+					{
+						"tag": "Evropa"
+					},
+					{
+						"tag": "Evropská kosmická agentura"
+					},
+					{
+						"tag": "Luxor"
+					},
+					{
+						"tag": "Měsíc"
+					},
+					{
+						"tag": "Pyrenejský poloostrov"
+					},
+					{
+						"tag": "Tarifa"
+					},
+					{
+						"tag": "zatmění Slunce"
+					},
+					{
+						"tag": "Česko"
+					},
+					{
+						"tag": "Španělsko"
+					}
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Zatmění Slunce se nad Evropu brzy vrátí. A ne jen jednou",
+				"publicationTitle": "Deník.cz",
+				"url": "https://www.denik.cz/evropa/dalsi-zatmeni-slunce-evropa-cesko-spanelsko-egypt/",
+				"abstractNote": "V následujících dvou letech lidé z Evropy opět uvidí zatmění Slunce. Zatímco na jihozápadě státy zahalí tma, na zbytku kontinentu se obyvatelé dočkají alespoň částečného úkazu. V příštím roce se to bu",
+				"date": "2026-08-13",
+				"language": "cs",
+				"libraryCatalog": "www.denik.cz",
+				"section": "Evropa"
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "https://www.denik.cz/hledani/?q=praha&s=all",
+		"url": "https://trebicsky.denik.cz/zpravy-region/",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "https://www.denik.cz/ze_sveta/",
+		"url": "https://www.denik.cz/hledani/?q=praha",
 		"items": "multiple"
 	}
 ]
