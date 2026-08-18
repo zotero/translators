@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-18 16:28:56"
+	"lastUpdated": "2026-08-18 17:00:28"
 }
 
 /*
@@ -222,7 +222,9 @@ async function scrape(doc, url) {
 	translator.setHandler("itemDone", function (obj, item) {
 		if (doc) {
 			for (let tag of doc.querySelectorAll('.ant-tag')) {
-				item.tags.push({ tag: tag.textContent.trim() });
+				let tagText = tag.textContent.trim();
+				if (!tagText || tagText === 'BETA') continue;
+				item.tags.push({ tag: tagText });
 			}
 
 			for (let action of doc.querySelectorAll('.__UserAction__ a')) {

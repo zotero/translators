@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-18 16:29:09"
+	"lastUpdated": "2026-08-18 17:04:18"
 }
 
 /*
@@ -425,6 +425,19 @@ function getBaseUrl(url) {
 }
 
 /**
+ * Normalize the string and object date formats returned by different Indico versions
+ * @param {string|Object} value - Date value from an Indico API
+ * @returns {string|null} - ISO date or null
+ */
+function normalizeDate(value) {
+	if (!value) return null;
+	if (typeof value === 'object') {
+		value = value.date || value.datetime || value.dateTime;
+	}
+	return value ? ZU.strToISO(value) : null;
+}
+
+/**
  * Scrape contribution data from Indico page or API
  * @param {Document} [doc] - The document object (optional)
  * @param {string} url - The URL to scrape
@@ -496,12 +509,8 @@ async function scrapeFromContributionJSON(json, doc, url, baseUrl, ids) {
 	item.title = cleanMathTitle(json.title);
 	
 	// Date
-	if (json.start_dt) {
-		item.date = ZU.strToISO(json.start_dt);
-	}
-	else if (json.date) {
-		item.date = ZU.strToISO(json.date);
-	}
+	let date = normalizeDate(json.start_dt || json.startDate || json.start_date || json.date);
+	if (date) item.date = date;
 	
 	// Presenters / Authors
 	// Look for persons list
@@ -512,10 +521,12 @@ async function scrapeFromContributionJSON(json, doc, url, baseUrl, ids) {
 			if (person.is_speaker || persons.length === 1 || !persons.some(p => p.is_speaker)) {
 				let firstName = person.first_name || person.firstName;
 				let lastName = person.last_name || person.lastName;
-				let fullName = person.full_name || person.fullName || person.name;
-				
-				if (!fullName && firstName && lastName) {
+				let fullName;
+				if (firstName && lastName) {
 					fullName = `${firstName} ${lastName}`;
+				}
+				else {
+					fullName = person.full_name || person.fullName || person.name;
 				}
 				
 				if (fullName) {
@@ -699,12 +710,15 @@ async function scrapeFromAPI(json, url, baseUrl, ids) {
 		if (speakers && speakers.length > 0) {
 			for (let speaker of speakers) {
 				// Try different name field formats
-				let name = speaker.fullName || speaker.full_name || speaker.name || '';
-				if (!name && speaker.first_name && speaker.last_name) {
+				let name = '';
+				if (speaker.first_name && speaker.last_name) {
 					name = `${speaker.first_name} ${speaker.last_name}`;
 				}
-				if (!name && speaker.firstName && speaker.lastName) {
+				else if (speaker.firstName && speaker.lastName) {
 					name = `${speaker.firstName} ${speaker.lastName}`;
+				}
+				else {
+					name = speaker.fullName || speaker.full_name || speaker.name || '';
 				}
 				
 				if (name) {
@@ -714,10 +728,8 @@ async function scrapeFromAPI(json, url, baseUrl, ids) {
 		}
 		
 		// Date - try multiple field names
-		let dateStr = contribution.startDate || contribution.start_date || contribution.date;
-		if (dateStr) {
-			item.date = ZU.strToISO(dateStr);
-		}
+		let date = normalizeDate(contribution.startDate || contribution.start_date || contribution.date);
+		if (date) item.date = date;
 		
 		// Meeting/Conference name
 		if (event.title) {

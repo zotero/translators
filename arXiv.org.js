@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-18 16:29:09"
+	"lastUpdated": "2026-08-18 17:00:28"
 }
 
 /*
@@ -232,7 +232,6 @@ const arXivCategories = {
 	"test.supr-con": "Test Superconductivity",
 	"bad-arch.bad-cat": "Invalid Category"
 };
-Object.freeze(arXivCategories);
 
 var version;
 // this variable will be set in doWeb and
@@ -523,24 +522,19 @@ function parseSingleEntry(entry) {
 		newItem.notes.push({ note: `Comment: ${noteStr}` });
 	}
 
-	// let categories = Array.from(entry.querySelectorAll("category"))
-	// 	.map(el => el.getAttribute("term"))
-	// 	.map((sub) => {
-	// 		let mainCat = sub.split('.')[0];
-	// 		if (mainCat !== sub && arXivCategories[mainCat]) {
-	// 			return arXivCategories[mainCat] + " - " + arXivCategories[sub];
-	// 		}
-	// 		else {
-	// 			return arXivCategories[sub];
-	// 		}
-	// 	})
-	// 	.filter(Boolean);
-	// newItem.tags.push(...categories);
-
-	let primaryCategory = attr(entry, "primary_category", "term");
-	if (primaryCategory) {
-		newItem.tags.push({ tag: primaryCategory });
-	}
+	let categories = Array.from(entry.querySelectorAll("category"))
+		.map(el => el.getAttribute("term"))
+		.map((sub) => {
+			let mainCat = sub.split('.')[0];
+			if (mainCat !== sub && arXivCategories[mainCat]) {
+				return arXivCategories[mainCat] + " - " + arXivCategories[sub];
+			}
+			else {
+				return arXivCategories[sub];
+			}
+		})
+		.filter(Boolean);
+	newItem.tags.push(...categories);
 
 	let versionedArXivURL = text(entry, "id");
 	let arxivURL = versionedArXivURL.replace(/v\d+/, '');
