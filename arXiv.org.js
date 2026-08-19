@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-19 03:00:53"
+	"lastUpdated": "2026-08-19 03:11:52"
 }
 
 /*
@@ -280,12 +280,12 @@ function getSearchResults(doc, checkOnly = false, url = doc.location.href) {
  */
 function cleanMathTitle(title) {
 	if (!title) return "";
-	
+
 	let text = title;
 
 	// Handle explicit LaTeX formatting commands
 	text = text.replace(/\\(text|mathrm|bf|it)\{([^}]+)\}/g, '$2'); // Remove formatting wrappers
-	
+
 	// Superscripts
 	text = text.replace(/\^\{([^}]+)\}/g, (match, content) => {
 		content = cleanMathTitle(content);
@@ -327,7 +327,7 @@ function cleanMathTitle(title) {
 		if (latex === 'mp') return '<sub>∓</sub>';
 		return match;
 	});
-	
+
 	// Greek letters (add more as needed)
 	const greek = {
 		'\\alpha': 'α', '\\beta': 'β', '\\gamma': 'γ', '\\delta': 'δ', '\\epsilon': 'ε',
@@ -338,13 +338,13 @@ function cleanMathTitle(title) {
 		'\\Gamma': 'Γ', '\\Delta': 'Δ', '\\Theta': 'Θ', '\\Lambda': 'Λ', '\\Xi': 'Ξ',
 		'\\Pi': 'Π', '\\Sigma': 'Σ', '\\Upsilon': 'Υ', '\\Phi': 'Φ', '\\Psi': 'Ψ', '\\Omega': 'Ω'
 	};
-	
+
 	for (let [tex, char] of Object.entries(greek)) {
 		// Replace whole word matches or distinct latex commands
 		let re = new RegExp(tex.replace('\\', '\\\\') + '(?![a-zA-Z])', 'g');
 		text = text.replace(re, char);
 	}
-	
+
 	// Common particles and arrows
 	text = text.replace(/\\to/g, '→')
 		.replace(/\\rightarrow/g, '→')
@@ -373,33 +373,33 @@ function cleanMathTitle(title) {
 		.replace(/\\dagger/g, '†')
 		.replace(/\\bar\{([^}]+)\}/g, '$1\u0304')
 		.replace(/->/g, '→');
-		
+
 	// Cleanup standard e+e- notation specifically mentioned
 	// e^{+}e^{-} -> e⁺e⁻
 	// Handles $...$ wrappers
 	text = text.replace(/\$([^$]+)\$/g, (match, content) => {
 		// Remove internal spaces in math mode
 		content = content.replace(/\s+/g, '');
-		
+
 		// Apply the same cleaning to content inside $...$
 		// We recurse lightly or just apply same logic
 		let clean = content.replace(/\^\{?\+?\}?/g, '⁺')
 			.replace(/\^\{?-\}?/g, '⁻')
 			.replace(/e\^/g, 'e') // Catch e^+ cases processed above
 			.replace(/\\/g, ''); // Remove remaining backslashes for simple commands
-			
+
 		return clean;
 	});
 
 	// Cleanup generic latex braces and dollars if any remain
 	text = text.replace(/(\$|\\{|\\})/g, '');
-	
+
 	// Fix specific case: e+ e- usually implies e⁺ e⁻
 	// This regex looks for 'e' followed immediately by + or -
 	// But we already handled ^+ and ^- above.
 	// Handle explicit "e+" "e-" in text if they weren't latex
 	// Careful not to replace regular words.
-	
+
 	return ZU.trimInternal(text);
 }
 
@@ -467,7 +467,7 @@ async function doWeb(doc, url) {
 			items = getSearchResults(doc, false, url);
 		}
 		if (!items) return;
-		
+
 		let selectedItems = await Zotero.selectItems(items);
 		if (selectedItems) {
 			let apiURL = `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(Object.keys(selectedItems).join(','))}`;

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-19 03:03:20"
+	"lastUpdated": "2026-08-19 03:11:52"
 }
 
 /*
@@ -63,7 +63,7 @@ function detectWeb(doc, url) {
 		if (getSearchResults(doc, true)) {
 			return 'multiple';
 		}
-		
+
 		// Fallback: if it looks like an Indico event page (via meta tags), we can likely use the API
 		// Look for Indico signature
 		let isIndico = doc.querySelector('meta[property="og:site_name"][content="Indico"]')
@@ -88,11 +88,11 @@ function processCreator(item, name, type) {
 
 	// 1. Remove parentheses and their content
 	let cleanName = name.replace(/\([^)]*\)/g, '');
-	
+
 	// 2. Remove titles (Prof., Dr., etc.)
 	// Add more titles if needed. delimiting with word boundaries or spaces.
 	cleanName = cleanName.replace(/\b(Prof|Dr|Mr|Mrs|Ms)\.?\s+/gi, '');
-	
+
 	cleanName = ZU.trimInternal(cleanName);
 	if (!cleanName) return;
 
@@ -117,12 +117,12 @@ function processCreator(item, name, type) {
  */
 function cleanMathTitle(title) {
 	if (!title) return "";
-	
+
 	let text = title;
 
 	// Handle explicit LaTeX formatting commands
 	text = text.replace(/\\(text|mathrm|bf|it)\{([^}]+)\}/g, '$2'); // Remove formatting wrappers
-	
+
 	// Superscripts
 	text = text.replace(/\^\{([^}]+)\}/g, (match, content) => {
 		content = cleanMathTitle(content);
@@ -164,7 +164,7 @@ function cleanMathTitle(title) {
 		if (latex === 'mp') return '<sub>∓</sub>';
 		return match;
 	});
-	
+
 	// Greek letters (add more as needed)
 	const greek = {
 		'\\alpha': 'α', '\\beta': 'β', '\\gamma': 'γ', '\\delta': 'δ', '\\epsilon': 'ε',
@@ -175,13 +175,13 @@ function cleanMathTitle(title) {
 		'\\Gamma': 'Γ', '\\Delta': 'Δ', '\\Theta': 'Θ', '\\Lambda': 'Λ', '\\Xi': 'Ξ',
 		'\\Pi': 'Π', '\\Sigma': 'Σ', '\\Upsilon': 'Υ', '\\Phi': 'Φ', '\\Psi': 'Ψ', '\\Omega': 'Ω'
 	};
-	
+
 	for (let [tex, char] of Object.entries(greek)) {
 		// Replace whole word matches or distinct latex commands
 		let re = new RegExp(tex.replace('\\', '\\\\') + '(?![a-zA-Z])', 'g');
 		text = text.replace(re, char);
 	}
-	
+
 	// Common particles and arrows
 	text = text.replace(/\\to/g, '→')
 		.replace(/\\rightarrow/g, '→')
@@ -210,33 +210,33 @@ function cleanMathTitle(title) {
 		.replace(/\\dagger/g, '†')
 		.replace(/\\bar\{([^}]+)\}/g, '$1\u0304')
 		.replace(/->/g, '→');
-		
+
 	// Cleanup standard e+e- notation specifically mentioned
 	// e^{+}e^{-} -> e⁺e⁻
 	// Handles $...$ wrappers
 	text = text.replace(/\$([^$]+)\$/g, (match, content) => {
 		// Remove internal spaces in math mode
 		content = content.replace(/\s+/g, '');
-		
+
 		// Apply the same cleaning to content inside $...$
 		// We recurse lightly or just apply same logic
 		let clean = content.replace(/\^\{?\+?\}?/g, '⁺')
 			.replace(/\^\{?-?\}?/g, '⁻')
 			.replace(/e\^/g, 'e') // Catch e^+ cases processed above
 			.replace(/\\/g, ''); // Remove remaining backslashes for simple commands
-			
+
 		return clean;
 	});
 
 	// Cleanup generic latex braces and dollars if any remain
 	text = text.replace(/(\$|\\{|\\})/g, '');
-	
+
 	// Fix specific case: e+ e- usually implies e⁺ e⁻
 	// This regex looks for 'e' followed immediately by + or -
 	// But we already handled ^+ and ^- above.
 	// Handle explicit "e+" "e-" in text if they weren't latex
 	// Careful not to replace regular words.
-	
+
 	return ZU.trimInternal(text);
 }
 
@@ -249,7 +249,7 @@ function cleanMathTitle(title) {
 function getSearchResults(doc, checkOnly) {
 	let items = {};
 	let found = false;
-	
+
 	// Try multiple selectors to find contribution links
 	let selectors = [
 		'a[href*="/contributions/"]', // Generic contribution links
@@ -262,20 +262,20 @@ function getSearchResults(doc, checkOnly) {
 		'.timetable-item .title a', // Timetable title links
 		'.entry-title a' // Generic entry title links
 	];
-	
+
 	for (let selector of selectors) {
 		let rows = doc.querySelectorAll(selector);
-		
+
 		for (let row of rows) {
 			let href = row.href;
-			
+
 			// Filter out non-contribution links and ensure valid URL pattern
 			// Also exclude attachments and materials
 			if (!href || !href.match(/\/contributions?\/\d+/) || href.match(/\/attachments\/|\/material\/|\/materials\//)) continue;
-			
+
 			// Get title from link text or nearby elements
 			let title = ZU.trimInternal(row.textContent);
-			
+
 			// If the link itself doesn't have good text, try to find a nearby title
 			if (!title || title.length < 3) {
 				let parentRow = row.closest('tr, li, .contribution, article, .timetable-item, .session-item, .entry, .row');
@@ -286,24 +286,24 @@ function getSearchResults(doc, checkOnly) {
 					}
 				}
 			}
-			
+
 			if (!title || title.length < 3) continue;
 
 			// Normalize the URL (remove trailing slashes and fragments)
 			let normalizedUrl = href.split('#')[0].replace(/\/$/, '');
-			
+
 			// Avoid duplicate entries
 			if (items[normalizedUrl]) continue;
-			
+
 			if (checkOnly) return true;
 			found = true;
 			items[normalizedUrl] = cleanMathTitle(title);
 		}
-		
+
 		// If we found items with this selector, no need to try others
 		if (found) break;
 	}
-	
+
 	return found ? items : false;
 }
 
@@ -316,7 +316,7 @@ async function doWeb(doc, url) {
 	let type = detectWeb(doc, url);
 	if (type == 'multiple') {
 		let items = getSearchResults(doc, false);
-		
+
 		// If we detected 'multiple' but found no items in DOM (e.g. React timetable),
 		// try to fetch from API
 		let eventDataForAttachments = null;
@@ -407,7 +407,7 @@ async function doWeb(doc, url) {
 function extractIds(url) {
 	let eventMatch = url.match(/\/event\/(\d+)/);
 	let contribMatch = url.match(/\/contributions?\/(\d+)/);
-	
+
 	return {
 		eventId: eventMatch ? eventMatch[1] : null,
 		contribId: contribMatch ? contribMatch[1] : null
@@ -445,7 +445,7 @@ function normalizeDate(value) {
 async function scrape(doc, url) {
 	let ids = extractIds(url);
 	let baseUrl = getBaseUrl(url);
-	
+
 	if (!ids.eventId || !ids.contribId) {
 		Zotero.debug("Could not extract event ID or contribution ID from URL: " + url);
 		return;
@@ -454,7 +454,7 @@ async function scrape(doc, url) {
 	// Priority 1: Try direct Contribution JSON (e.g., .../contributions/123.json)
 	// This is most accurate for single contribution metadata
 	let jsonUrl = url.split('#')[0].split('?')[0].replace(/\/$/, '') + '.json';
-	
+
 	try {
 		// When scraping from a list (doc is null), ensure we fetch the full contribution page or JSON
 		// to get attachments if the initial JSON fails or is incomplete.
@@ -468,11 +468,11 @@ async function scrape(doc, url) {
 	catch (e) {
 		Zotero.debug("Direct contribution JSON failed: " + e);
 	}
-	
+
 	// Priority 2: Try old Indico Export API
 	// Indico API endpoint format: /export/event/{event_id}.json?detail=contributions
 	let apiUrl = `${baseUrl}/export/event/${ids.eventId}.json?detail=contributions&pretty=yes`;
-	
+
 	try {
 		let json = await requestJSON(apiUrl);
 		await scrapeFromAPI(json, url, baseUrl, ids);
@@ -504,14 +504,14 @@ async function scrape(doc, url) {
  */
 async function scrapeFromContributionJSON(json, doc, url, baseUrl, ids) {
 	let item = new Zotero.Item('presentation');
-	
+
 	// Title
 	item.title = cleanMathTitle(json.title);
-	
+
 	// Date
 	let date = normalizeDate(json.start_dt || json.startDate || json.start_date || json.date);
 	if (date) item.date = date;
-	
+
 	// Presenters / Authors
 	// Look for persons list
 	let persons = json.persons || json.presenters || json.speakers || [];
@@ -528,7 +528,7 @@ async function scrapeFromContributionJSON(json, doc, url, baseUrl, ids) {
 				else {
 					fullName = person.full_name || person.fullName || person.name;
 				}
-				
+
 				if (fullName) {
 					processCreator(item, fullName, 'presenter');
 				}
@@ -541,24 +541,24 @@ async function scrapeFromContributionJSON(json, doc, url, baseUrl, ids) {
 			}
 		}
 	}
-	
+
 	// Place
 	let placeParts = [];
 	if (json.venue_name) placeParts.push(json.venue_name);
 	if (json.room_name) placeParts.push(json.room_name);
 	if (json.location) placeParts.push(json.location);
 	if (json.address) placeParts.push(json.address);
-	
+
 	if (placeParts.length > 0) {
 		item.place = placeParts.join(', ');
 	}
-	
+
 	// Abstract
 	if (json.description) {
 		// Description often contains HTML
 		item.abstractNote = ZU.cleanTags(json.description);
 	}
-	
+
 	// Meeting Name
 	// Usually not in contribution JSON, try to get from doc or fallback
 	if (doc) {
@@ -586,7 +586,7 @@ async function scrapeFromContributionJSON(json, doc, url, baseUrl, ids) {
 			}
 		}
 	}
-	
+
 	// If still no meeting name, try to fetch basic event info
 	if (!item.meetingName) {
 		try {
@@ -600,7 +600,7 @@ async function scrapeFromContributionJSON(json, doc, url, baseUrl, ids) {
 			// Ignore
 		}
 	}
-	
+
 	// Attachments
 	// The contribution JSON might contain folders/files
 	let folders = json.folders || json.files || [];
@@ -620,7 +620,7 @@ async function scrapeFromContributionJSON(json, doc, url, baseUrl, ids) {
 			}
 		}
 	}
-	
+
 	// If no attachments found in JSON, try to scrape them from HTML page if doc is not provided
 	if (item.attachments.length === 0 && !doc) {
 		try {
@@ -641,7 +641,7 @@ async function scrapeFromContributionJSON(json, doc, url, baseUrl, ids) {
 			for (let link of attachmentLinks) {
 				let attachUrl = link.href;
 				let attachTitle = ZU.trimInternal(link.textContent) || 'Attachment';
-				
+
 				// Verify it's a contribution attachment (has contribId in URL)
 				// Event attachments: /event/123/attachments/...
 				// Contribution attachments: /event/123/contributions/456/attachments/...
@@ -659,7 +659,7 @@ async function scrapeFromContributionJSON(json, doc, url, baseUrl, ids) {
 			}
 		}
 	}
-	
+
 	// Snapshot
 	if (doc) {
 		item.attachments.push({
@@ -668,7 +668,7 @@ async function scrapeFromContributionJSON(json, doc, url, baseUrl, ids) {
 			mimeType: 'text/html'
 		});
 	}
-	
+
 	item.url = url;
 	item.complete();
 }
@@ -682,11 +682,11 @@ async function scrapeFromContributionJSON(json, doc, url, baseUrl, ids) {
  */
 async function scrapeFromAPI(json, url, baseUrl, ids) {
 	let item = new Zotero.Item('presentation');
-	
+
 	// Navigate to the contribution data in the JSON structure
 	let contribution = null;
 	let event = null;
-	
+
 	// Indico API can return different structures
 	if (json.results && json.results.length > 0) {
 		event = json.results[0];
@@ -695,16 +695,16 @@ async function scrapeFromAPI(json, url, baseUrl, ids) {
 		// Sometimes the event is directly in the json object
 		event = json;
 	}
-	
+
 	if (event && event.contributions) {
 		// Find the specific contribution by ID (convert both to strings for comparison)
 		contribution = event.contributions.find(c => String(c.db_id || c.id) === String(ids.contribId));
 	}
-	
+
 	if (contribution) {
 		// Title
 		item.title = cleanMathTitle(contribution.title || '');
-		
+
 		// Presenters/Speakers - try multiple field names
 		let speakers = contribution.speakers || contribution.presenters || contribution.authors || [];
 		if (speakers && speakers.length > 0) {
@@ -720,25 +720,25 @@ async function scrapeFromAPI(json, url, baseUrl, ids) {
 				else {
 					name = speaker.fullName || speaker.full_name || speaker.name || '';
 				}
-				
+
 				if (name) {
 					processCreator(item, name, 'presenter');
 				}
 			}
 		}
-		
+
 		// Date - try multiple field names
 		let date = normalizeDate(contribution.startDate || contribution.start_date || contribution.date);
 		if (date) item.date = date;
-		
+
 		// Meeting/Conference name
 		if (event.title) {
 			item.meetingName = event.title;
 		}
-		
+
 		// Place/Location - combine multiple location fields
 		let locationParts = [];
-		
+
 		if (contribution.location || event.location) {
 			locationParts.push(contribution.location || event.location);
 		}
@@ -748,16 +748,16 @@ async function scrapeFromAPI(json, url, baseUrl, ids) {
 		if (contribution.address || event.address) {
 			locationParts.push(contribution.address || event.address);
 		}
-		
+
 		if (locationParts.length > 0) {
 			item.place = locationParts.join(', ');
 		}
-		
+
 		// Abstract/Description
 		if (contribution.description) {
 			item.abstractNote = ZU.cleanTags(contribution.description);
 		}
-		
+
 		// Attachments - try multiple field names
 		let folders = contribution.folders || contribution.materials || contribution.attachments || [];
 		if (folders && folders.length > 0) {
@@ -768,7 +768,7 @@ async function scrapeFromAPI(json, url, baseUrl, ids) {
 						let attachUrl = attachment.download_url || attachment.url;
 						let attachTitle = attachment.title || attachment.filename || attachment.name || 'Attachment';
 						let mimeType = attachment.content_type || attachment.type || 'application/pdf';
-						
+
 						if (attachUrl) {
 							item.attachments.push({
 								title: attachTitle,
@@ -780,17 +780,17 @@ async function scrapeFromAPI(json, url, baseUrl, ids) {
 				}
 			}
 		}
-		
+
 		// Add snapshot
 		item.attachments.push({
 			title: 'Snapshot',
 			document: await requestDocument(url),
 			mimeType: 'text/html'
 		});
-		
+
 		// URL
 		item.url = url;
-		
+
 		item.complete();
 	}
 	else {
@@ -810,7 +810,7 @@ async function scrapeFromAPI(json, url, baseUrl, ids) {
  */
 async function scrapeFromHTML(doc, url, baseUrl, ids) {
 	let item = new Zotero.Item('presentation');
-	
+
 	// Title - try multiple selectors
 	// Priority: Contribution title -> H1 -> Page Title
 	let title = getText(doc, 'h1.contribution-title')
@@ -822,20 +822,20 @@ async function scrapeFromHTML(doc, url, baseUrl, ids) {
 		|| getText(doc, '.title-with-actions h2')
 		|| getText(doc, '.conference-page .title .text')
 		|| getText(doc, '.conference-page .title');
-		
+
 	if (!title) {
 		let h1 = getText(doc, 'h1');
 		if (h1 && !h1.includes('Indico')) {
 			title = h1;
 		}
 	}
-	
+
 	item.title = cleanMathTitle(title || '');
-	
+
 	// Presenters/Speakers
 	// Look for speaker list specifically to avoid confusion with other names
 	let speakerElements = doc.querySelectorAll('.speaker-list .speaker-item, .speaker-list a, .contribution-speakers .speaker-name, .presenter-list .name');
-	
+
 	if (speakerElements.length === 0) {
 		// Fallback: try searching for "Speaker" label
 		let labels = doc.querySelectorAll('dt, .label, strong');
@@ -857,7 +857,7 @@ async function scrapeFromHTML(doc, url, baseUrl, ids) {
 			processCreator(item, name, 'presenter');
 		}
 	}
-	
+
 	// Date
 	// Try meta tags first, then visible elements
 	let dateEl = doc.querySelector('meta[itemprop="startDate"]');
@@ -873,13 +873,13 @@ async function scrapeFromHTML(doc, url, baseUrl, ids) {
 			}
 		}
 	}
-	
+
 	// Place/Location
 	let locationEl = doc.querySelector('.contribution-location, .location, .room, .venue');
 	if (locationEl) {
 		item.place = ZU.trimInternal(locationEl.textContent);
 	}
-	
+
 	// Meeting/Conference name
 	let eventTitleEl = doc.querySelector('.event-title a, .breadcrumb .event, .page-title .event, .confTitle .conference-title-link span[itemprop="title"]');
 	if (eventTitleEl) {
@@ -902,19 +902,19 @@ async function scrapeFromHTML(doc, url, baseUrl, ids) {
 			}
 		}
 	}
-	
+
 	// Abstract
 	let abstractEl = doc.querySelector('.contribution-description, .description, .abstract, [itemprop="description"]');
 	if (abstractEl) {
 		item.abstractNote = ZU.trimInternal(abstractEl.textContent);
 	}
-	
+
 	// Attachments
 	let attachmentLinks = doc.querySelectorAll('a[href*="/attachments/"], a[href*="/material/"], a.attachment-link, a[href$=".pdf"]');
 	for (let link of attachmentLinks) {
 		let attachUrl = link.href;
 		let attachTitle = ZU.trimInternal(link.textContent) || 'Attachment';
-		
+
 		// Only include attachments that belong to this specific contribution
 		// Pattern: .../contributions/{id}/...
 		if (attachUrl
@@ -927,17 +927,17 @@ async function scrapeFromHTML(doc, url, baseUrl, ids) {
 			});
 		}
 	}
-	
+
 	// Always add snapshot
 	item.attachments.push({
 		title: 'Snapshot',
 		document: doc,
 		mimeType: 'text/html'
 	});
-	
+
 	// URL
 	item.url = url;
-	
+
 	item.complete();
 }
 
