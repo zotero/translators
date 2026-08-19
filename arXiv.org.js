@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-18 17:00:28"
+	"lastUpdated": "2026-08-19 03:00:53"
 }
 
 /*
@@ -692,7 +692,6 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Properties of the $δ$ Scorpii Circumstellar Disk from Continuum Modeling",
 				"creators": [
 					{
 						"firstName": "A. C.",
@@ -750,18 +749,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "12/2006",
-				"DOI": "10.1086/507935",
-				"ISSN": "0004-637X, 1538-4357",
-				"abstractNote": "We present optical $WBVR$ and infrared $JHKL$ photometric observations of the Be binary system $δ$ Sco, obtained in 2000--2005, mid-infrared (10 and $18 μ$m) photometry and optical ($λλ$ 3200--10500 Å) spectropolarimetry obtained in 2001. Our optical photometry confirms the results of much more frequent visual monitoring of $δ$ Sco. In 2005, we detected a significant decrease in the object's brightness, both in optical and near-infrared brightness, which is associated with a continuous rise in the hydrogen line strenghts. We discuss possible causes for this phenomenon, which is difficult to explain in view of current models of Be star disks. The 2001 spectral energy distribution and polarization are succesfully modeled with a three-dimensional non-LTE Monte Carlo code which produces a self-consistent determination of the hydrogen level populations, electron temperature, and gas density for hot star disks. Our disk model is hydrostatically supported in the vertical direction and radially controlled by viscosity. Such a disk model has, essentially, only two free parameters, viz., the equatorial mass loss rate and the disk outer radius. We find that the primary companion is surrounded by a small (7 $R_\\star$), geometrically-thin disk, which is highly non-isothermal and fully ionized. Our model requires an average equatorial mass loss rate of $1.5\\times 10^{-9} M_{\\sun}$ yr$^{-1}$.",
-				"extra": "arXiv:astro-ph/0603274",
-				"issue": "2",
-				"journalAbbreviation": "ApJ",
-				"libraryCatalog": "arXiv.org",
-				"pages": "1617-1625",
-				"publicationTitle": "The Astrophysical Journal",
-				"url": "http://arxiv.org/abs/astro-ph/0603274",
-				"volume": "652",
+				"notes": [
+					{
+						"note": "Comment: 27 pages, 9 figures, submitted to ApJ"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Astrophysics"
+					}
+				],
+				"seeAlso": [],
 				"attachments": [
 					{
 						"title": "Preprint PDF",
@@ -772,17 +770,19 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "Astrophysics"
-					}
-				],
-				"notes": [
-					{
-						"note": "Comment: 27 pages, 9 figures, submitted to ApJ"
-					}
-				],
-				"seeAlso": []
+				"title": "Properties of the δ Scorpii Circumstellar Disk from Continuum Modeling",
+				"date": "12/2006",
+				"abstractNote": "We present optical $WBVR$ and infrared $JHKL$ photometric observations of the Be binary system $δ$ Sco, obtained in 2000--2005, mid-infrared (10 and $18 μ$m) photometry and optical ($λλ$ 3200--10500 Å) spectropolarimetry obtained in 2001. Our optical photometry confirms the results of much more frequent visual monitoring of $δ$ Sco. In 2005, we detected a significant decrease in the object's brightness, both in optical and near-infrared brightness, which is associated with a continuous rise in the hydrogen line strenghts. We discuss possible causes for this phenomenon, which is difficult to explain in view of current models of Be star disks. The 2001 spectral energy distribution and polarization are succesfully modeled with a three-dimensional non-LTE Monte Carlo code which produces a self-consistent determination of the hydrogen level populations, electron temperature, and gas density for hot star disks. Our disk model is hydrostatically supported in the vertical direction and radially controlled by viscosity. Such a disk model has, essentially, only two free parameters, viz., the equatorial mass loss rate and the disk outer radius. We find that the primary companion is surrounded by a small (7 $R_\\star$), geometrically-thin disk, which is highly non-isothermal and fully ionized. Our model requires an average equatorial mass loss rate of $1.5\\times 10^{-9} M_{\\sun}$ yr$^{-1}$.",
+				"DOI": "10.1086/507935",
+				"url": "http://arxiv.org/abs/astro-ph/0603274",
+				"extra": "arXiv:astro-ph/0603274",
+				"volume": "652",
+				"issue": "2",
+				"pages": "1617-1625",
+				"ISSN": "0004-637X, 1538-4357",
+				"publicationTitle": "The Astrophysical Journal",
+				"journalAbbreviation": "ApJ",
+				"libraryCatalog": "arXiv.org"
 			}
 		]
 	},
@@ -851,7 +851,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://arxiv.org/find/cs/1/au:+Hoffmann_M/0/1/0/all/0/1",
+		"url": "https://arxiv.org/search/?query=Hoffmann%2C+M&searchtype=author&abstracts=show&order=-announced_date_first&size=50",
 		"items": "multiple"
 	},
 	{
@@ -1034,7 +1034,6 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "preprint",
-				"title": "Single Phonon Detection for Dark Matter via Quantum Evaporation and Sensing of $^3$Helium",
 				"creators": [
 					{
 						"firstName": "S. A.",
@@ -1072,22 +1071,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2023-02-07",
-				"DOI": "10.48550/arXiv.2201.00738",
-				"abstractNote": "Dark matter is five times more abundant than ordinary visible matter in our Universe. While laboratory searches hunting for dark matter have traditionally focused on the electroweak scale, theories of low mass hidden sectors motivate new detection techniques. Extending these searches to lower mass ranges, well below 1 GeV/c$^2$, poses new challenges as rare interactions with standard model matter transfer progressively less energy to electrons and nuclei in detectors. Here, we propose an approach based on phonon-assisted quantum evaporation combined with quantum sensors for detection of desorption events via tracking of spin coherence. The intent of our proposed dark matter sensors is to extend the parameter space to energy transfers in rare interactions to as low as a few meV for detection of dark matter particles in the keV/c$^2$ mass range.",
-				"archiveID": "arXiv:2201.00738",
-				"extra": "arXiv:2201.00738 [hep-ex]",
-				"libraryCatalog": "arXiv.org",
-				"repository": "arXiv",
-				"url": "http://arxiv.org/abs/2201.00738",
-				"attachments": [
+				"notes": [
 					{
-						"title": "Preprint PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
+						"note": "Comment: 8 pages, 3 figures. Updated various parts"
 					}
 				],
 				"tags": [
@@ -1101,12 +1087,26 @@ var testCases = [
 						"tag": "Quantum Physics"
 					}
 				],
-				"notes": [
+				"seeAlso": [],
+				"attachments": [
 					{
-						"note": "Comment: 8 pages, 3 figures. Updated various parts"
+						"title": "Preprint PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
-				"seeAlso": []
+				"title": "Single Phonon Detection for Dark Matter via Quantum Evaporation and Sensing of ³Helium",
+				"date": "2023-02-07",
+				"abstractNote": "Dark matter is five times more abundant than ordinary visible matter in our Universe. While laboratory searches hunting for dark matter have traditionally focused on the electroweak scale, theories of low mass hidden sectors motivate new detection techniques. Extending these searches to lower mass ranges, well below 1 GeV/c$^2$, poses new challenges as rare interactions with standard model matter transfer progressively less energy to electrons and nuclei in detectors. Here, we propose an approach based on phonon-assisted quantum evaporation combined with quantum sensors for detection of desorption events via tracking of spin coherence. The intent of our proposed dark matter sensors is to extend the parameter space to energy transfers in rare interactions to as low as a few meV for detection of dark matter particles in the keV/c$^2$ mass range.",
+				"url": "http://arxiv.org/abs/2201.00738",
+				"extra": "arXiv:2201.00738 [hep-ex]",
+				"DOI": "10.48550/arXiv.2201.00738",
+				"archiveID": "arXiv:2201.00738",
+				"libraryCatalog": "arXiv.org",
+				"repository": "arXiv"
 			}
 		]
 	},

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-18 17:04:18"
+	"lastUpdated": "2026-08-19 03:03:20"
 }
 
 /*
@@ -954,7 +954,6 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "presentation",
-				"title": "The J/ψJ/ψ-nucleon interaction mechanism: A theoretical study based on  scattering length",
 				"creators": [
 					{
 						"firstName": "Feng-Kun",
@@ -962,16 +961,10 @@ var testCases = [
 						"creatorType": "presenter"
 					}
 				],
-				"date": "2025-11-18",
-				"meetingName": "Quarkonium Working Group Workshop",
-				"place": "CERN, 500/1-001 - Main Auditorium",
-				"shortTitle": "The J/ψJ/ψ-nucleon interaction mechanism",
-				"url": "https://indico.cern.ch/event/1539475/contributions/6775678/",
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
 				"attachments": [
-					{
-						"title": "QWG17 at CERN poster",
-						"mimeType": "application/pdf"
-					},
 					{
 						"title": "JpsiNucleon_QWG_FKGuo.pdf",
 						"mimeType": "application/pdf"
@@ -981,9 +974,12 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
+				"title": "The J/ψJ/ψ-nucleon interaction mechanism: A theoretical study based on scattering length",
+				"date": "2025-11-18",
+				"place": "CERN, 500/1-001 - Main Auditorium",
+				"meetingName": "Quarkonium Working Group Workshop",
+				"url": "https://indico.cern.ch/event/1539475/contributions/6775678/",
+				"shortTitle": "The J/ψJ/ψ-nucleon interaction mechanism"
 			}
 		]
 	},
