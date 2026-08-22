@@ -234,26 +234,34 @@ async function doWeb(doc, url)
 		let href = attr(scrapingDoc, 'ul.work.navigation.actions > li.share > a', 'href').slice(0, -'/share'.length);
 		item.url = new URL(href, baseUrl).toString();
 
-		let getFullTextDownloadUrl = (doc, format) => attr(doc, `ul.work.navigation.actions > li.download a[href*=".${format}"]`, 'href');
-
+		// select download formats
 		item.attachments = [];
-		let standaloneHtmlUrl = getFullTextDownloadUrl(scrapingDoc, 'html');
-		if (standaloneHtmlUrl) {
-			item.attachments.push({
-				url: standaloneHtmlUrl,
-				title: 'Full Text HTML',
-				mimeType: 'text/html',
-				snapshot: true
-			});
-		}
-		let epubUrl = getFullTextDownloadUrl(scrapingDoc, 'epub');
-		if (epubUrl) {
-			item.attachments.push({
-				url: epubUrl,
-				title: 'Full Text ePUB',
-				mimeType: 'application/epub+zip',
-				snapshot: false
-			});
+
+		const fullTextDownloadSupportedFormats = [
+			{extension: 'html', mimeType: 'text/html'},
+			{extension: 'epub', mimeType: 'application/epub+zip'},
+			{extension: 'mobi', mimeType: 'application/x-mobipocket-ebook'},
+			{extension: 'azw3', mimeType: 'application/vnd.amazon.ebook'},
+			{extension: 'pdf', mimeType: 'application/pdf'},
+		];
+
+		let fullTextDownloadFormats = Z.getHiddenPref('AO3.fullTextDownloadFormats');
+		if (!fullTextDownloadFormats || typeof fullTextDownloadFormats !== "string")
+			fullTextDownloadFormats = [];
+		else
+			fullTextDownloadFormats = fullTextDownloadFormats.split(',');
+
+		for (let format of fullTextDownloadSupportedFormats) {
+			let url = attr(scrapingDoc, `ul.work.navigation.actions > li.download a[href*=".${format.extension}"]`, 'href');
+			if (url) {
+				item.attachments.push({
+					url: url,
+					title: `Full Text ${format.extension.toUpperCase()}`,
+					mimeType: format.mimeType,
+					snapshot: fullTextDownloadFormats.includes(format.extension)
+				});
+				Zotero.debug(`x=${format.extension.toUpperCase()}, y=${format.mimeType}`);
+			}
 		}
 	}
 
