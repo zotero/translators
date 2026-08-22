@@ -128,7 +128,7 @@ function detectWeb(doc, url)
 		// single chapter in multi-chapter work
 		// OR only chapter in multi-chapter work (this is rarely used URL likely unreachable otherwise)
 		Zotero.debug("AO3 chapter page");
-		return 'bookSection';
+		return Z.getHiddenPref('AO3.alwaysAddFullWork') ? 'book' : 'bookSection';
 	}
 	else if (/\/works\/[0-9]+\/?$/.test(url)) {
 		// in multi-chapter works, this auto-redirects to first chapter, unless content warning is being displayed
