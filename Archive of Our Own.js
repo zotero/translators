@@ -223,11 +223,38 @@ async function doWeb(doc, url)
 		item.title = null;
 		let chapterElem = scrapingDoc.querySelector('div#workskin div.chapter.preface');
 		parseChapterHead(chapterElem, item);
+
+		item.attachments = [{
+			title: "Snapshot",
+			document: doc
+		}];
 	}
 	else {
 		// normalize URL by re-deriving it via sharing link
 		let href = attr(scrapingDoc, 'ul.work.navigation.actions > li.share > a', 'href').slice(0, -'/share'.length);
 		item.url = new URL(href, baseUrl).toString();
+
+		let getFullTextDownloadUrl = (doc, format) => attr(doc, `ul.work.navigation.actions > li.download a[href*=".${format}"]`, 'href');
+
+		item.attachments = [];
+		let standaloneHtmlUrl = getFullTextDownloadUrl(scrapingDoc, 'html');
+		if (standaloneHtmlUrl) {
+			item.attachments.push({
+				url: standaloneHtmlUrl,
+				title: 'Full Text HTML',
+				mimeType: 'text/html',
+				snapshot: true
+			});
+		}
+		let epubUrl = getFullTextDownloadUrl(scrapingDoc, 'epub');
+		if (epubUrl) {
+			item.attachments.push({
+				url: epubUrl,
+				title: 'Full Text ePUB',
+				mimeType: 'application/epub+zip',
+				snapshot: false
+			});
+		}
 	}
 
 	item.complete();
