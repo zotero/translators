@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-07-29 16:11:13"
+	"lastUpdated": "2026-08-24 18:07:03"
 }
 
 /*
@@ -31,7 +31,7 @@
  */
 
 function detectWeb(doc, url) {
-	if (url.includes("/results/") && getSearchResults(doc, true)) {
+	if (url.includes("/pages/search") && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	else if (url.includes("/pages/publications/")) {
@@ -207,12 +207,6 @@ async function scrape(doc, url) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "https://www.scopus.com/results/results.uri?st1=test&st2=&s=TITLE-ABS-KEY%28test%29&limit=10&origin=searchbasic&sort=plf-f&src=s&sot=b&sdt=b&sessionSearchId=7592dbac900a5db70fa6b88f939cfd9e",
-		"defer": true,
-		"items": "multiple"
-	},
 	{
 		"type": "web",
 		"url": "https://www.scopus.com/pages/publications/105010060351",
