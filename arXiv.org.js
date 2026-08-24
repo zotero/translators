@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-19 03:11:52"
+	"lastUpdated": "2026-08-24 12:41:35"
 }
 
 /*
@@ -468,9 +468,20 @@ async function doWeb(doc, url) {
 		}
 		if (!items) return;
 
-		let selectedItems = await Zotero.selectItems(items);
+		// Numeric keys keep the selector order stable when items pass through
+		// connector messaging. Map them back to arXiv IDs after selection.
+		let ids = Object.keys(items);
+		let selectionItems = {};
+		for (let i = 0; i < ids.length; i++) {
+			selectionItems[i] = items[ids[i]];
+		}
+
+		let selectedItems = await Zotero.selectItems(selectionItems);
 		if (selectedItems) {
-			let apiURL = `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(Object.keys(selectedItems).join(','))}`;
+			let selectedIDs = Object.keys(selectedItems)
+				.map(index => ids[Number(index)])
+				.filter(Boolean);
+			let apiURL = `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(selectedIDs.join(','))}`;
 			let document = await requestAtom(apiURL);
 			parseAtom(document);
 		}
