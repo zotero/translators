@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2019-06-10 23:11:21"
+	"lastUpdated": "2026-08-24 18:45:59"
 }
 
 /*
@@ -344,17 +344,21 @@ function getAllItems(ids, callback, items) {
 }
 
 function detectWeb(doc, _url) {
-	// get unAPI IDs
 	var ids = getUnAPIIDs(doc);
 	if (!ids.length) return false;
-	
-	if (!ids.length === 1) {
-		// Only one item, so we will just get its item type
-		ids[0].getItemType(Zotero.done);
+	var fallbackItemType = ids.length > 1 ? "multiple" : "document";
+
+	try {
+		if (ids.length === 1) {
+			ids[0].getItemType(Zotero.done);
+		}
+		else {
+			determineDetectItemType(ids);
+		}
 	}
-	else {
-		// Several items. We will need to call determineDetectItemType
-		determineDetectItemType(ids);
+	catch (e) {
+		Zotero.debug("unAPI: Could not resolve item type during detection: " + e);
+		return fallbackItemType;
 	}
 	return false;
 }
