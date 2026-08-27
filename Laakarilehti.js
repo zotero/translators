@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-16 18:40:37"
+	"lastUpdated": "2026-08-27 07:23:56"
 }
 
 /*
@@ -41,7 +41,7 @@ const oldMetaRegex = /^(?:Lehti (?<issue1>[\d-]*?): )?(?<section>.*?)\s+(?<issue
 const ePageRegex = /^(?:Lehti (?<issue>[\d-]*?): )?(?<section>.*?)\s+Suom Lääkäril \d{4};(?<volume>\d+):(?<archiveLocation>e\d+),\s+(?<eURL>www.laakarilehti.fi.*$)/i;
 
 /**
- * A variant from my own translator `Duodecim.js` (`63ef6a3b-2e64-4d58-aedc-07b31a108928`).
+ * A variant from my own translator `Duodecim.js`, UID `63ef6a3b-2e64-4d58-aedc-07b31a108928`.
  *
  * @param {string} [ePage = '/e48243'] `/\/e\d+/` or a regular pathname.
  * @returns {Promise<boolean>} whether the network IP is a subscriber / whether the URL is valid
@@ -120,7 +120,7 @@ async function doWeb(doc, url) {
 		if (!isOnCampus
 			&& Object.keys(metaTopGroups).includes('archiveLocation')
 			&& await directAccess(metaTopGroups.archiveLocation)
-			&& notProxy // TODO request without proxy under proxied page?
+			&& notProxy // TODO ZU.request without proxy under proxied page?
 			&& fullHTML) {
 			Zotero.debug(`SLL: eURL ${metaTopGroups.eURL} as item.url`);
 			item.url = 'https://' + metaTopGroups.eURL || undefined; // free to public with eURL
@@ -129,9 +129,9 @@ async function doWeb(doc, url) {
 	if (item.section) item.section = ZU.capitalizeTitle(item.section.toLocaleLowerCase('FI'), true);
 	if (item.section?.includes('Ledare')) item.language = 'sv';
 	if (!item.url) { // no eURL
-		const noNeedKey = fullHTML && notProxy && await directAccess(urlObj.pathname);
+		const noNeedKey = fullHTML && !isOnCampus && await directAccess(urlObj.pathname);
 		const keyToFill = noNeedKey ? '' : validPublicKey || '';
-		item.url = `https://www.laakarilehti.fi${urlObj.pathname}${keyToFill}`;
+		item.url = 'https://www.laakarilehti.fi' + urlObj.pathname + keyToFill;
 	}
 
 	const pdfPath = attr(doc, 'div[class^="util"] a[title="Lataa PDF"]', 'href');
