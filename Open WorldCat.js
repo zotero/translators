@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-07-31 17:36:11"
+	"lastUpdated": "2026-08-28 17:44:19"
 }
 
 /*
@@ -70,7 +70,7 @@ const RECORD_MAPPING = {
 	// genre: 'genre',
 	doi: (item, value) => item.DOI = ZU.cleanDOI(value),
 	mediumOfPerformance: 'medium',
-	issns: (item, value) => item.ISSN = ZU.cleanISSN(value),
+	issns: (item, value) => item.ISSN = Array.isArray(value) ? ZU.cleanISSN(value.join(' ')) : ZU.cleanISSN(value),
 	sourceIssn: (item, value) => item.ISSN = ZU.cleanISSN(value),
 	digitalAccessAndLocations: (item, value) => {
 		if (value.length) {
