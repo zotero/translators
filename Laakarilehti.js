@@ -2,14 +2,14 @@
 	"translatorID": "205879bc-85c2-4a4e-b2db-c37d0e80bc88",
 	"label": "Lääkärilehti",
 	"creator": "Shiyu Wang",
-	"target": "^https?://www\\.laakarilehti\\.fi/",
+	"target": "^https?://www\\.(laakarilehti|potilaanlaakarilehti)\\.fi/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-27 07:23:56"
+	"lastUpdated": "2026-08-29 15:21:51"
 }
 
 /*
@@ -71,120 +71,148 @@ function returnProtect(raw) {
 	return output;
 }
 
-function detectWeb(doc) {
-	if (doc.querySelector('div[class^="util"]') // e32580
+function detectWeb(doc, url) {
+	if (url.includes('potilaanlaakarilehti')
+		&& doc.querySelector('article time.date')) return 'magazineArticle';
+	else if (doc.querySelector('div[class^="util"]') // e32580
 		|| doc.querySelector('div.login-container')
 		|| doc.querySelector('span.meta.top')) return 'journalArticle';
 	return false;
 }
 
 async function doWeb(doc, url) {
-	let item = new Zotero.Item('journalArticle');
-	item.publicationTitle = "Suomen Lääkärilehti";
-	item.journalAbbreviation = "Suom Lääkäril";
+	const urlObj = new URL(url);
+	const notProxy = ['www.laakarilehti.fi', 'www.potilaanlaakarilehti.fi'].includes(urlObj.hostname);
+	const asJournal = !urlObj.hostname.includes('potilaanlaakarilehti');
+
+	let item = new Zotero.Item(`${asJournal ? 'journalArticle' : 'magazineArticle'}`);
 	item.publisher = "Suomen Lääkäriliitto";
-	item.ISSN = '0039-5560, 2489-7434';
 	item.language = 'fi';
 	item.title = text('article h1') || '';
-	item.date = attr(doc, 'meta[property="article:published_time"]', 'content');
 	item.shortTitle = attr(doc, 'meta[property="og:title"]', 'content');
-	for (const author of doc.querySelectorAll('span.authors span')) {
-		item.creators.push(ZU.cleanAuthor(author.textContent, 'author'));
+	if (/\s+[-–]\s+|:\s/.test(item.shortTitle)) item.shortTitle = item.shortTitle.split(/\s+[-–]\s+|:\s/)[0];
+	if (item.shortTitle === item.title) item.shortTitle = undefined;
+	item.date = attr(doc, 'meta[property="article:published_time"]', 'content')
+		|| attr(doc, 'time.date', 'datetime');
+	item.abstractNote = returnProtect(innerText('div.article__ingress')
+		|| doc.querySelector('article h1')?.nextElementSibling?.innerText) // e.g. e46447
+		|| attr(doc, 'meta[property="og:description"]', 'content');
+
+	for (const oneAuthor of doc.querySelectorAll(`${asJournal ? 'span' : 'div'}.authors span`)) {
+		const nameCandidate = ZU.trimInternal(oneAuthor.textContent);
+		if (nameCandidate === "Potilaan Lääkärilehti") break;
+		item.creators.push(ZU.cleanAuthor(nameCandidate, 'author'));
 	}
 
-	const urlObj = new URL(url);
-	const notProxy = urlObj.hostname === 'www.laakarilehti.fi';
-	const isOnCampus = await directAccess() && notProxy;
-	const fullHTML = !doc.querySelector('div.login-container');
-
-	let validPublicKey;
-	const keyMatch = attr(doc, 'div[class^="util"] a[title="WhatsApp"]', 'href')?.match(/\?public=[a-z0-9]*?($|(?=&))/);
-	if (fullHTML) {
-		if (keyMatch) validPublicKey = keyMatch[0] || '';
-		if (!validPublicKey?.length) item.attachments.push({ document: doc, snapshot: true }); // rare
-	}
-	else item.tags.push('sll-no-access');
-
-	const metaSpan = ZU.trimInternal(innerText('article .meta.top'));
-	const metaRegex = metaSpan.includes('www.laakarilehti.fi/e') ? ePageRegex : oldMetaRegex;
-	const metaTopGroups = metaSpan.match(metaRegex)?.groups;
-	if (metaTopGroups) {
-		for (const key of Object.keys(metaTopGroups)) {
-			if (!['issue1', 'eURL'].includes(key)) {
-				item[key] = metaTopGroups[key];
-				if (key != 'section' && item[key]) {
-					item[key] = item[key].replace(/\s/g, '');
-				}
-			}
-		}
-		if (!isOnCampus
-			&& Object.keys(metaTopGroups).includes('archiveLocation')
-			&& await directAccess(metaTopGroups.archiveLocation)
-			&& notProxy // TODO ZU.request without proxy under proxied page?
-			&& fullHTML) {
-			Zotero.debug(`SLL: eURL ${metaTopGroups.eURL} as item.url`);
-			item.url = 'https://' + metaTopGroups.eURL || undefined; // free to public with eURL
-		}
-	}
-	if (item.section) item.section = ZU.capitalizeTitle(item.section.toLocaleLowerCase('FI'), true);
-	if (item.section?.includes('Ledare')) item.language = 'sv';
-	if (!item.url) { // no eURL
-		const noNeedKey = fullHTML && !isOnCampus && await directAccess(urlObj.pathname);
-		const keyToFill = noNeedKey ? '' : validPublicKey || '';
-		item.url = 'https://www.laakarilehti.fi' + urlObj.pathname + keyToFill;
-	}
-
-	const pdfPath = attr(doc, 'div[class^="util"] a[title="Lataa PDF"]', 'href');
-	if (pdfPath) {
-		const pdfPageMeta = /SLL(?<issue>\d+(-\d+)?)-?\d{4}-(?<pages>\d+)\.pdf/i.exec(pdfPath)?.groups;
-		if (!item.issue) item.issue = pdfPageMeta?.issue;
-		if (!item.pages && pdfPageMeta) item.pages = pdfPageMeta.pages + '-'; // a user will have to manually seek last page number from PDF
-
-		const asFile = isOnCampus || !notProxy;
-		const toPush = {
-			url: pdfPath,
-			title: asFile ? 'PDF' : 'Linkki PDF-versioon (laakarilehti.fi)',
-			mimeType: asFile ? 'application/pdf' : 'text/html'
-		};
-		if (!asFile) toPush.snapshot = false;
-		item.attachments.push(toPush);
-	}
-	if (!item.pages) item.pages = item.archiveLocation;
-
-	if (/\/en$/.test(urlObj.pathname)) { // English summary page
-		const finnishTitle = attr(doc, 'meta[property="og:image:alt"]', 'content')
-			|| attr(doc, 'meta[property="og:title"]', 'content');
-		if (item.title) item.title = finnishTitle + ` [${item.title}]`;
-		else item.title = finnishTitle;
-
-		const paragraphs = doc.querySelectorAll('article > p');
-		if (paragraphs) {
-			item.abstractNote = '';
-			paragraphs.forEach(p => item.abstractNote += p.innerText + '\n');
-		}
+	if (!asJournal) {
+		item.publicationTitle = "Potilaan Lääkärilehti";
+		item.ISSN = '2323-9476';
+		item.url = url;
+		for (const tagBtn of doc.querySelectorAll("article > div.flex-auto-columns > a.label")) item.tags.push(tagBtn.innerText);
 	}
 	else {
-		item.abstractNote = returnProtect(innerText('div.article__ingress')
-			|| doc.querySelector('article h1')?.nextElementSibling?.innerText) // e.g. e46447
-			|| attr(doc, 'meta[property="og:description"]', 'content');
-		
-		let englishAbstract = '';
-		const labels = doc.querySelectorAll('main article div.label');
-		if (labels) for (const label of labels) if (label.innerText.includes("English summary")) {
-			const englishElement = label.nextElementSibling;
-			const title = englishElement.querySelector('h3').innerText // e.g. e39223
-				|| englishElement.querySelector('h2').innerText; // e.g. 2015p2589
-			if (!title) break;
+		item.publicationTitle = "Suomen Lääkärilehti";
+		item.journalAbbreviation = "Suom Lääkäril";
+		item.ISSN = '0039-5560, 2489-7434';
 
-			const englishTitle = ZU.capitalizeTitle(title.replace('English summary: ', '').toLowerCase(), true);
-			if (englishTitle) item.title += ` [${englishTitle}]`;
+		const isOnCampus = await directAccess() && notProxy;
+		const fullHTML = !doc.querySelector('div.login-container');
 
-			englishElement.querySelectorAll('p')?.forEach(p => englishAbstract += `${p.innerText}\n`);
-			if (englishAbstract.length) englishAbstract.replace(/\n$/m, '');
-			if (item.abstractNote?.length
-				&& englishAbstract.length) item.abstractNote += `\n\n${englishAbstract}`;
+		let validPublicKey;
+		const keyMatch = (attr(doc, 'div[class^="util"] a[title="WhatsApp"]', 'href'))?.match(/\?public=[a-z0-9]*?($|(?=&))/);
+		if (fullHTML) {
+			if (keyMatch) validPublicKey = keyMatch[0] || '';
+			if (!validPublicKey?.length) item.attachments.push({ document: doc, snapshot: true }); // rare
+		}
+		else item.tags.push('sll-no-access');
 
-			break;
+		const metaSpan = ZU.trimInternal(innerText('article .meta.top'));
+		const metaRegex = metaSpan.includes('www.laakarilehti.fi/e') ? ePageRegex : oldMetaRegex;
+		const metaTopGroups = metaSpan.match(metaRegex)?.groups;
+		if (metaTopGroups) {
+			for (const key of Object.keys(metaTopGroups)) {
+				if (!['issue1', 'eURL'].includes(key)) {
+					item[key] = metaTopGroups[key];
+					if (key != 'section' && item[key]) {
+						item[key] = item[key].replace(/\s/g, '');
+					}
+				}
+			}
+			if (!isOnCampus
+				&& Object.keys(metaTopGroups).includes('archiveLocation')
+				&& await directAccess(metaTopGroups.archiveLocation)
+				&& notProxy // TODO ZU.request without proxy under proxied page?
+				&& fullHTML) {
+				Zotero.debug(`SLL: eURL ${metaTopGroups.eURL} as item.url`);
+				item.url = 'https://' + metaTopGroups.eURL || undefined; // free to public with eURL
+			}
+		}
+		if (item.section) item.section = ZU.capitalizeTitle(item.section.toLocaleLowerCase('FI'), true);
+		if (item.section?.includes('Ledare')) item.language = 'sv';
+		if (!item.url) { // no eURL
+			const noNeedKey = fullHTML && !isOnCampus && notProxy && await directAccess(urlObj.pathname);
+			const keyToFill = noNeedKey ? '' : (validPublicKey || '');
+			item.url = 'https://www.laakarilehti.fi' + urlObj.pathname + keyToFill;
+		}
+
+		const pdfPath = attr(doc, 'div[class^="util"] a[title="Lataa PDF"]', 'href');
+		if (pdfPath) {
+			const pdfPageMeta = /SLL(?<issue>\d+(-\d+)?)-?\d{4}-(?<pages>\d+)\.pdf/i.exec(pdfPath)?.groups;
+			if (!item.issue) item.issue = pdfPageMeta?.issue;
+			if (!item.pages && pdfPageMeta) item.pages = pdfPageMeta.pages + '-'; // a user will have to manually seek last page number from PDF
+
+			const asFile = isOnCampus || !notProxy;
+			const toPush = {
+				url: pdfPath,
+				title: asFile ? 'PDF' : 'Linkki PDF-versioon (laakarilehti.fi)',
+				mimeType: asFile ? 'application/pdf' : 'text/html'
+			};
+			if (!asFile) toPush.snapshot = false;
+			item.attachments.push(toPush);
+		}
+		if (!item.pages) item.pages = item.archiveLocation;
+
+		if (/\/en$/.test(urlObj.pathname)) { // English summary page
+			item.publicationTitle = "Finnish Medical Journal";
+			item.publisher = "Finnish Medical Association";
+			const finnishTitle = attr(doc, 'meta[property="og:image:alt"]', 'content')
+				|| attr(doc, 'meta[property="og:title"]', 'content');
+			if (item.title) item.title = finnishTitle + ` [${item.title}]`;
+			else item.title = finnishTitle;
+
+			const paragraphs = doc.querySelectorAll('article > p');
+			if (paragraphs) {
+				item.abstractNote = '';
+				paragraphs.forEach(p => item.abstractNote += p.innerText + '\n');
+			}
+		}
+		else {
+			const labels = doc.querySelectorAll('main article div.label');
+			if (labels) for (const label of labels) if (label.innerText.includes("English summary")) {
+				const englishElement = label.nextElementSibling;
+				const title = englishElement.querySelector('h3').innerText // e.g. e39223
+					|| englishElement.querySelector('h2').innerText; // e.g. 2015p2589
+				if (!title) break;
+
+				let englishTitle = title.replace('English summary: ', '');
+				if (englishTitle === englishTitle.toUpperCase()) {
+					englishTitle = englishTitle.charAt(0) + englishTitle.slice(1).toLowerCase();
+				}
+				if (englishTitle) item.title += ` [${englishTitle}]`;
+
+				let englishAbstract = '';
+				for (const p of englishElement.querySelectorAll('p')) {
+					const pText = ZU.trimInternal(p.innerText);
+					if (pText === ZU.trimInternal(innerText('span.authors'))) break;
+					englishAbstract += `${pText}\n`;
+				}
+				if (item.abstractNote?.length && englishAbstract.length) {
+					englishAbstract.replace(/\n$/m, '');
+					item.abstractNote += `\n\n${englishAbstract}`;
+				}
+
+				break;
+			}
 		}
 	}
 
@@ -196,6 +224,7 @@ async function doWeb(doc, url) {
  * a) non-journal news items
  * b) online-first journal articles or dedicated online page of them, and
  * c) published journals with volume, issue and page number.
+ * d) patient version (Potilaan Lääkärilehti).
  *
  * If you happen to be testing via proxy or in a network IP range subscribing to SLL,
  * > you will always get the full URL with validPublicKey and, if applicable, PDF as file.
@@ -340,7 +369,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Opioidiriippuvaisen potilaan kivun hoito [Treatment of Pain in Opioid Dependent Patients]",
+				"title": "Opioidiriippuvaisen potilaan kivun hoito [Treatment of pain in opioid dependent patients]",
 				"creators": [
 					{
 						"firstName": "Katri",
@@ -364,7 +393,6 @@ var testCases = [
 				"publicationTitle": "Suomen Lääkärilehti",
 				"publisher": "Suomen Lääkäriliitto",
 				"section": "Katsausartikkeli",
-				"shortTitle": "Opioidiriippuvaisen potilaan kivun hoito",
 				"url": "https://www.laakarilehti.fi/tieteessa/katsausartikkeli/opioidiriippuvaisen-potilaan-kivun-hoito/?public=4338e24d1a50a0ab4d99613ccd1abf11",
 				"volume": "62",
 				"attachments": [
@@ -452,7 +480,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Lasten ahdistuneisuushäiriöiden hoito lastenpsykiatrian yksikössäSuuri osa voitaisiin hoitaa jo perustasolla [Treatment of Paediatric Anxiety Disorders at the Child Psychiatric Evaluation, Acute and Consultation Process]",
+				"title": "Lasten ahdistuneisuushäiriöiden hoito lastenpsykiatrian yksikössäSuuri osa voitaisiin hoitaa jo perustasolla [Treatment of paediatric anxiety disorders at the Child Psychiatric Evaluation, Acute and Consultation Process]",
 				"creators": [
 					{
 						"firstName": "E. Juulia",
@@ -508,7 +536,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Diagnoosiviiveet ovat syynä viidesosaan korvattavista potilasvahingoista [Diagnostic Errors Accounted for 20% of Compensated Patient Injuries in Finland]",
+				"title": "Diagnoosiviiveet ovat syynä viidesosaan korvattavista potilasvahingoista [Diagnostic errors accounted for 20% of compensated patient injuries in Finland]",
 				"creators": [
 					{
 						"firstName": "Eero",
@@ -543,7 +571,6 @@ var testCases = [
 				"publicationTitle": "Suomen Lääkärilehti",
 				"publisher": "Suomen Lääkäriliitto",
 				"section": "Alkuperäistutkimus",
-				"shortTitle": "Diagnoosiviiveet ovat syynä viidesosaan korvattavista potilasvahingoista",
 				"url": "https://www.laakarilehti.fi/e48043",
 				"volume": "81",
 				"attachments": [
@@ -584,6 +611,7 @@ var testCases = [
 				"publicationTitle": "Suomen Lääkärilehti",
 				"publisher": "Suomen Lääkäriliitto",
 				"section": "Muut",
+				"shortTitle": "Serotoniinioireyhtymä",
 				"url": "https://www.laakarilehti.fi/arkisto/muut/serotoniinioireyhtyma-vaarallinen-laakkeiden-haittavaikutus/?public=298e092254da97080ed6c8aedc0fac24",
 				"volume": "53",
 				"attachments": [],
@@ -599,7 +627,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Sarjamagneettistimulaation mahdollisuudet psykiatriassa ja tulevaisuuden näkymät [Repetitive Transcranial Magnetic Stimulation (rtms) in Psychiatry and Future Visions]",
+				"title": "Sarjamagneettistimulaation mahdollisuudet psykiatriassa ja tulevaisuuden näkymät [Repetitive transcranial magnetic stimulation (rTMS) in psychiatry and future visions]",
 				"creators": [
 					{
 						"firstName": "Tero",
@@ -623,7 +651,6 @@ var testCases = [
 				"publicationTitle": "Suomen Lääkärilehti",
 				"publisher": "Suomen Lääkäriliitto",
 				"section": "Katsausartikkeli",
-				"shortTitle": "Sarjamagneettistimulaation mahdollisuudet psykiatriassa ja tulevaisuuden näkymät",
 				"url": "https://www.laakarilehti.fi/tieteessa/katsausartikkeli/sarjamagneettistimulaation-mahdollisuudet-psykiatriassa-ja-tulevaisuuden-nakymat/?public=03de9b48d5045c1c691de94a29bb01bd",
 				"volume": "75",
 				"attachments": [
@@ -645,7 +672,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Ajokelpoisuuden arviointi [Evaluation of Driving Capacity]",
+				"title": "Ajokelpoisuuden arviointi [Evaluation of driving capacity]",
 				"creators": [
 					{
 						"firstName": "Mikael",
@@ -664,7 +691,6 @@ var testCases = [
 				"publicationTitle": "Suomen Lääkärilehti",
 				"publisher": "Suomen Lääkäriliitto",
 				"section": "Katsausartikkeli",
-				"shortTitle": "Ajokelpoisuuden arviointi",
 				"url": "https://www.laakarilehti.fi/tieteessa/katsausartikkeli/ajokelpoisuuden-arviointi/?public=a5bda457f9701ea63768e707f1264aab",
 				"volume": "70",
 				"attachments": [
@@ -686,7 +712,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Kehitysvammaisuutta esiintyy enemmän pojilla kuin tytöillä [Intellectual Disability Is More Common Among Boys Than Among Girls]",
+				"title": "Kehitysvammaisuutta esiintyy enemmän pojilla kuin tytöillä [Intellectual disability is more common among boys than among girls]",
 				"creators": [
 					{
 						"firstName": "Maria",
@@ -711,7 +737,6 @@ var testCases = [
 				"publicationTitle": "Suomen Lääkärilehti",
 				"publisher": "Suomen Lääkäriliitto",
 				"section": "Alkuperäistutkimus",
-				"shortTitle": "Kehitysvammaisuutta esiintyy enemmän pojilla kuin tytöillä",
 				"url": "https://www.laakarilehti.fi/e39223",
 				"volume": "79",
 				"attachments": [
@@ -722,6 +747,81 @@ var testCases = [
 					}
 				],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.potilaanlaakarilehti.fi/uutiset/keuhkokuume-voi-nakya-iakkaalla-sekavuutena/",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "Keuhkokuume voi näkyä iäkkäällä sekavuutena",
+				"creators": [],
+				"date": "2026-05-31",
+				"ISSN": "2323-9476",
+				"abstractNote": "Erityisesti iäkkäillä ihmisillä keuhkokuume voi alkaa ilman korkeaa kuumetta tai voimakkaita hengitystieoireita ja sen ensimmäinen oire on sekavuus.",
+				"language": "fi",
+				"libraryCatalog": "Lääkärilehti",
+				"publicationTitle": "Potilaan Lääkärilehti",
+				"publisher": "Suomen Lääkäriliitto",
+				"url": "https://www.potilaanlaakarilehti.fi/uutiset/keuhkokuume-voi-nakya-iakkaalla-sekavuutena/",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "INFEKTIO"
+					},
+					{
+						"tag": "KEUHKOKUUME"
+					},
+					{
+						"tag": "KEUHKOT"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.potilaanlaakarilehti.fi/kommentit/teho-osaston-frendit/",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "Teho-osaston frendit",
+				"creators": [
+					{
+						"firstName": "Janna",
+						"lastName": "Manninen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025-04-13",
+				"ISSN": "2323-9476",
+				"abstractNote": "Oli jännittävää katsoa, kuinka potilaita sarjassa hoidettiin, kirjoittaa Janna Manninen.",
+				"language": "fi",
+				"libraryCatalog": "Lääkärilehti",
+				"publicationTitle": "Potilaan Lääkärilehti",
+				"publisher": "Suomen Lääkäriliitto",
+				"url": "https://www.potilaanlaakarilehti.fi/kommentit/teho-osaston-frendit/",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "KOLUMNI"
+					},
+					{
+						"tag": "MIELIPIDE"
+					},
+					{
+						"tag": "TEHO-OSASTO"
+					},
+					{
+						"tag": "TELEVISIO"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
