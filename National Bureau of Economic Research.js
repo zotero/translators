@@ -151,6 +151,7 @@ function scrapeWithBib(doc, url, bibURL) {
 			if (item.itemType == 'report' && detected == 'preprint') {
 				item.itemType = 'preprint';
 				item.archiveID = item.reportNumber;
+				item.seriesNumber = item.reportNumber.replace(/^w/, '');
 				delete item.reportNumber;
 			}
 
