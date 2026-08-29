@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-17 08:18:48"
+	"lastUpdated": "2026-08-29 15:40:00"
 }
 
 /*
@@ -36,6 +36,7 @@
 */
 
 // TL;DR: Duodecim platforms do not feature proper metadata.
+// TODO CCG meta; abstract: no \n,\s between lines
 
 /**
  * ***** COMMENT TYPES *****
@@ -219,12 +220,14 @@ async function urlGen(urlObj) {
 		.includes(urlObj.hostname)) return urlObj.origin + '/' + tdoi;
 
 	const tdoiURL = 'https://www.terveysportti.fi/doi/' + tdoi;
-	const tdoiObj = new URL((await request(tdoiURL)).responseURL);
+	const tdoiReturnObj = new URL((await request(tdoiURL)).responseURL);
 	// Zotero.debug(`TDOI redirection: responding URL: ${tdoiObj.href}`);
 
-	if (!tdoiObj.href.includes(tdoiURL) // !404
-		&& tdoiObj.hostname === urlObj.hostname // strict: redirection must return to original domain
-		&& tdoiObj.pathname.includes(tdoi)) return tdoiURL; // async tdoiRedirect(tdoi, ogHost)
+	if (!tdoiReturnObj.href.includes(tdoiURL) // !404
+		&& tdoiReturnObj.pathname.includes(tdoi)) {
+		if (tdoiReturnObj.hostname === urlObj.hostname) return tdoiURL; // strict: redirection must return to original domain
+		// else return 'https://' + tdoiReturnObj.hostname + '/' + tdoi;
+	}
 
 	if (tdoiURLRegex.test(urlObj.pathname)
 		&& /^\/apps\/dtk/.test(urlObj.pathname)) {
@@ -330,7 +333,7 @@ function returnProtect(raw) {
 	let output = '';
 	raw.split(/[\n\r]+/).forEach((lineCandidate) => {
 		const toAppend = ZU.trimInternal(lineCandidate);
-		if (!capsRegex.test(toAppend.charAt(0))) output = output.replace(/\n$/, ' ');
+		// if (!capsRegex.test(toAppend.charAt(0))) output = output.replace(/\n$/, ' '); // e.g. kir00159; TODO TEST
 		output += toAppend + `\n`;
 	});
 	return output;
@@ -394,6 +397,7 @@ async function scrape(doc, url, type) {
 	var authorClass = `div.${dClass}authors`;
 	if (doc.querySelector('div.duo-authors-link')) authorClass = 'div.duo-authors-link'; // e.g. ykt, ebm
 	if (isDLehti) authorClass = 'div.dl-article-editors-container';
+	if (isDTKLegacy && doc.querySelector('div.authors div.person')) authorClass = 'div.authors div.person'; // voh02442
 
 	const twoLineAuthor = doc.querySelector(authorClass)?.querySelector('br');
 	const authorsRaw = ZU.trimInternal(twoLineAuthor
@@ -448,8 +452,9 @@ async function scrape(doc, url, type) {
 	const bookNameText = text(`div.${dClass}database`)
 		|| (isDLehti ? 'Lääketieteellinen Aikakauskirja Duodecim' : null);
 	if (bookNameText && prefix != 'hoi' && !isJournal) item.bookTitle = bookNameText;
-	if (isKP && ['nix', 'nak'].includes(prefix)) {
-		item.bookTitle += `: ${innerText('div.additional-links.kh-noprint a')}`;
+	if (isKP && prefix && prefix != 'hoi') {
+		const mainEntry = innerText('div.additional-links.kh-noprint a');
+		if (mainEntry) item.bookTitle += `: ${mainEntry}`;
 	}
 
 	const archive = (() => {
@@ -497,14 +502,17 @@ async function scrape(doc, url, type) {
 
 	for (const pdfLink of pdfLinks) Zotero.debug(`scrape(): found PDF link: \n${pdfLink}`);
 
-	if (pdfLinks?.length && prefix !== 'sll') for (const pdfLink of pdfLinks) {
+	if (pdfLinks?.length && prefix != 'sll') for (const pdfLink of pdfLinks) {
 		if (!pdfLink.includes(urlObj.host)) continue;
 
 		Zotero.debug(`scrape(): analyzing PDF candidate ${pdfLink}`);
 		const pdfFileName = pdfLink.match(/[^/]*$/)[0];
+		Zotero.debug(`scrape(): pdfFileName=${pdfFileName}`);
+		const pdfLinkObj = new URL(pdfLink);
 
-		const pdfTDOImatch = pdfFileName.match(new RegExp(`${tdoi}\\w*?\\.`, 'i'));
+		const pdfTDOImatch = pdfFileName.match(new RegExp(`[a-z]{3}\\d{5}\\w*?(?=\\.)`, 'i'));
 		const pdfTDOI = pdfTDOImatch ? pdfTDOImatch[0] : null;
+		Zotero.debug(`scrape(): pdfTDOI=${pdfTDOI}`);
 
 		const isMainPDF = pdfTDOI && pdfTDOI.startsWith(tdoi);
 
@@ -514,7 +522,9 @@ async function scrape(doc, url, type) {
 		let attachmentTitle = "Supplementary PDF";
 		if (isMainPDF && pdfSuffix
 			&& pdfSuffix === 'sv') attachmentTitle = "På svenska";
-		if (isMainPDF && !pdfSuffix) attachmentTitle = 'PDF';
+		else if (isMainPDF && !pdfSuffix) attachmentTitle = 'PDF';
+		else if (pdfTDOI) attachmentTitle += ` (${pdfTDOI})`;
+		else if (pdfLinkObj.hostname != urlObj.hostname) attachmentTitle += ` (${pdfLinkObj.hostname})`;
 
 		// Zotero.debug(`scrape(): Pushing PDF ${pdfFileName} with ${pdfTDOI ? 'TDOI=' + pdfTDOI : ''}`
 		//	+ ` ${pdfSuffix ? "and suffix '" + pdfSuffix + "'" : ''} as ${(isMainPDF && !pdfSuffix) ? 'main' : 'supplementary'} PDF attachment`);
@@ -548,7 +558,7 @@ async function scrape(doc, url, type) {
 
 		const h2s = doc.querySelectorAll('h2');
 		if (prefix === 'duo') {
-			if (!journalMetadata) item.date = dmyToISO(innerText(pageSelector)); // *Verkossa ensin*, Online ahead of print, e.g. duo19390
+			if (!journalMetadata) item.date = dmyToISO(innerText(pageSelector)); // *Verkossa ensin*, Online ahead of print
 
 			if (h2s?.length) {
 				const englishInTitle = /English summary/i.test(h2s[0].innerText);
@@ -558,8 +568,13 @@ async function scrape(doc, url, type) {
 						: ''}.*`, 'm'); // e.g. duo99748; duo14888, duo13519, duo14124
 
 					const englishTitleMatch = ZU.trimInternal(innerText('h2'))?.match(englishTitleRegex);
-					if (englishTitleMatch) item.title += ` [${englishTitleMatch[0]}]`;
-					englishSummary = `${ZU.trimInternal(innerText('em', 1))}`;
+					if (englishTitleMatch) {
+						const englishTitleCandidate = englishTitleMatch[0];
+						if (englishTitleCandidate.split(' ').length > 2) { // e.g. !duo18209
+							item.title += ` [${englishTitleMatch[0]}]`;
+							englishSummary = `${ZU.trimInternal(innerText('em', 1))}`;
+						}
+					}
 				}
 			}
 
@@ -634,7 +649,7 @@ async function scrape(doc, url, type) {
 			}
 		}
 
-		if (['Keskeistä', 'Essentials', 'Johdanto'].includes(innerText(`div.${dClass}body h2`))) { // TODO statics
+		if (['Keskeistä', 'Essentials', 'Johdanto', 'Yleista'].includes(innerText(`div.${dClass}body h2`))) { // TODO statics
 			return doc.querySelector(`div.${dClass}body h2`).nextElementSibling;
 		}
 
@@ -672,29 +687,43 @@ async function scrapeDict(doc, url) {
 			item.creators = parseCreators(authorsRaw);
 		}
 
+		// item.callNumber = /(?<tdoi>(?<![\w\d])[a-z]{3}\d{5}(?![\w\d]))/.exec(url)?.groups.tdoi; // TODO 08271330
+		item.callNumber = tdoiURLRegex.exec(url)?.groups.TDOI; // TODO 08271330
 		item.abstractNote = ZU.trimInternal(text('section[role="main"] aside p'));
 	}
 	else {
-		const searchKeyword = url.match(/(?<=\/apps\/sanakirjat\/\d+\/).*/);
+		const searchKeyword = text("#duodecim-summary b")
+			|| url.match(/(?<=\/apps\/sanakirjat\/\d+\/)(?<word>.*)/)?.groups.word;
 		if (searchKeyword) {
+			Zotero.debug(`scrapeDict(): searchKeyword=${searchKeyword}`);
 			item.archive = 'Termit ja sanakirjat';
 			item.dictionaryTitle = text('h2');
+			item.date = text('div.duodecim-footer-copyright div')?.match(/(?<year>\d+)/)?.groups.year;
 
-			if (/^\w{3}\d{5}$/.test(searchKeyword[0])) { // TDOI
-				item.title = text('span.d-k') || 'Sanakirja'; // TDOI shall never be entry title. TODO e.g.?
+			if (/^\w{3}\d{5}$/.test(searchKeyword)) { // TDOI
+				item.title = text('span.d-k') || '[ei sanaa]'; // TDOI shall never be entry title; TODO fallback? e.g.?
 				Zotero.debug(`scrapeDict(): TDOI, item.title=${item.title}`);
-				item.callNumber = searchKeyword[0];
+				item.callNumber = searchKeyword;
+				item.archiveLocation = item.callNumber;
 			}
 			else {
 				const firstResultAsTitle = doc.querySelectorAll('span.d-k')?.length === 1
-				|| (!doc.querySelector('div.hit span.d-k') && searchKeyword[0] === text('span.d-k'));
-				item.title = firstResultAsTitle ? text('span.d-k') : searchKeyword[0];
+					|| (!doc.querySelector('div.hit span.d-k') && searchKeyword === text('span.d-k'));
+				item.title = firstResultAsTitle ? text('span.d-k') : searchKeyword; // TODO 260825 HTML > natural text
 				Zotero.debug(`scrapeDict(): item.title=${item.title}`);
 				item.url = url; // If applicable esp. lte-prefix entries, TDOI may be found by searching at "www.terveysportti.fi"
-			}
 
-			const dateMatch = text('div.duodecim-footer-copyright div')?.match(/\d+/);
-			if (dateMatch) item.date = dateMatch[0];
+				const entryLinks = doc.querySelectorAll('a.d-anchor-term');
+				if (entryLinks.length) for (const linkCandidate of entryLinks) {
+					if (item.title === ZU.trimInternal(linkCandidate.innerText)) {
+						item.callNumber = tdoiURLRegex.exec(linkCandidate.href)?.groups.TDOI; // TODO 08271330
+						item.archiveLocation = item.callNumber;
+						break;
+						// const redirectURL = await urlGen(new URL(linkCandidate.href));
+						// if (redirectURL.includes('terveysportti.fi/doi/')) item.url = redirectURL;
+					}
+				}
+			}
 		}
 	}
 
@@ -842,7 +871,11 @@ async function doWeb(doc, url) {
 
 	if (item) {
 		if (!item.url) item.url = await urlGen(new URL(url));
-		item.attachments.push({ document: doc, snapshot: true });
+		item.attachments.push({ 
+			title: 'Tilannekuva', // FINNISH for snapshot
+			document: doc, 
+			snapshot: true
+		});
 		item.complete();
 	}
 }
@@ -872,6 +905,7 @@ var testCases = [
 				"date": "2016-10-18",
 				"abstractNote": "International Classification of Diseases, kansainvälinen tautiluokitus; Maailman terveysjärjestön (WHO:n) julkaisemia kansainvälisiä tautiluokituksia, esim. ICD-10",
 				"archive": "Terveyskirjasto",
+				"callNumber": "ltt01270",
 				"dictionaryTitle": "Lääketieteen sanasto",
 				"language": "fi",
 				"libraryCatalog": "Duodecim",
@@ -879,6 +913,7 @@ var testCases = [
 				"url": "https://www.terveyskirjasto.fi/ltt01270",
 				"attachments": [
 					{
+						"title": "Tilannekuva",
 						"snapshot": true,
 						"mimeType": "text/html"
 					}
@@ -915,10 +950,11 @@ var testCases = [
 				"url": "https://www.terveyskirjasto.fi/dlk00221",
 				"attachments": [
 					{
-						"title": "Supplementary PDF",
+						"title": "Supplementary PDF (dlk00224)",
 						"mimeType": "application/pdf"
 					},
 					{
+						"title": "Tilannekuva",
 						"snapshot": true,
 						"mimeType": "text/html"
 					}
@@ -965,6 +1001,7 @@ var testCases = [
 				"url": "https://www.terveyskirjasto.fi/dlk00084",
 				"attachments": [
 					{
+						"title": "Tilannekuva",
 						"snapshot": true,
 						"mimeType": "text/html"
 					}
@@ -1001,6 +1038,7 @@ var testCases = [
 				"url": "https://www.terveyskirjasto.fi/dlk01420",
 				"attachments": [
 					{
+						"title": "Tilannekuva",
 						"snapshot": true,
 						"mimeType": "text/html"
 					}
@@ -1037,6 +1075,7 @@ var testCases = [
 				"url": "https://www.terveyskirjasto.fi/uux30190",
 				"attachments": [
 					{
+						"title": "Tilannekuva",
 						"snapshot": true,
 						"mimeType": "text/html"
 					}
@@ -1074,6 +1113,7 @@ var testCases = [
 				"url": "https://www.terveysportti.fi/uutiset/23/uux30190",
 				"attachments": [
 					{
+						"title": "Tilannekuva",
 						"snapshot": true,
 						"mimeType": "text/html"
 					}
@@ -1109,6 +1149,7 @@ var testCases = [
 				"url": "https://www.kaypahoito.fi/hoi50138",
 				"attachments": [
 					{
+						"title": "Tilannekuva",
 						"snapshot": true,
 						"mimeType": "text/html"
 					}
@@ -1144,27 +1185,28 @@ var testCases = [
 				"url": "https://www.kaypahoito.fi/hoi50067",
 				"attachments": [
 					{
-						"title": "Supplementary PDF",
+						"title": "Supplementary PDF (hoi50067a)",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Supplementary PDF",
+						"title": "Supplementary PDF (hoi50088a)",
 						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
-						"title": "Supplementary PDF",
+						"title": "Supplementary PDF (hoi50067b)",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Supplementary PDF",
+						"title": "Supplementary PDF (hoi50067d)",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Supplementary PDF",
+						"title": "Supplementary PDF (hoi50067d)",
 						"mimeType": "application/pdf"
 					},
 					{
+						"title": "Tilannekuva",
 						"snapshot": true,
 						"mimeType": "text/html"
 					}
@@ -1201,6 +1243,7 @@ var testCases = [
 				"url": "https://www.kaypahoito.fi/dnd00039",
 				"attachments": [
 					{
+						"title": "Tilannekuva",
 						"snapshot": true,
 						"mimeType": "text/html"
 					}
@@ -1236,95 +1279,7 @@ var testCases = [
 				"url": "https://www.kaypahoito.fi/nix03607",
 				"attachments": [
 					{
-						"snapshot": true,
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.kaypahoito.fi/nak06071",
-		"items": [
-			{
-				"itemType": "bookSection",
-				"title": "Monityydyttymättömät rasvahapot lasten ja nuorten ADHD:n hoidossa",
-				"creators": [
-					{
-						"firstName": "Hertta",
-						"lastName": "Ollikainen",
-						"creatorType": "author"
-					}
-				],
-				"date": "2025-05-19",
-				"archive": "Käypä hoito",
-				"archiveLocation": "050.061",
-				"bookTitle": "Näytönastekatsaukset: ADHD (aktiivisuuden ja tarkkaavuuden häiriö)",
-				"callNumber": "nak06071",
-				"language": "fi",
-				"libraryCatalog": "Duodecim",
-				"publisher": "Suomalainen Lääkäriseura Duodecim",
-				"shortTitle": "Monityydyttymättömät rasvahapot lasten ja nuorten ADHD",
-				"url": "https://www.kaypahoito.fi/nak06071",
-				"attachments": [
-					{
-						"snapshot": true,
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.duodecimlehti.fi/duo19390",
-		"defer": true,
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Lasten ja nuorten ADHD-lääkityksen yleisyys vaihtelee alueittain - mistä on kyse?",
-				"creators": [
-					{
-						"firstName": "Riikka",
-						"lastName": "Riihonen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Miika",
-						"lastName": "Vuori",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Kirsi",
-						"lastName": "Kakko",
-						"creatorType": "author"
-					}
-				],
-				"date": "2026-05-11",
-				"ISSN": "0012-7183, 2242-3281",
-				"archiveLocation": "duo19390",
-				"callNumber": "duo19390",
-				"journalAbbreviation": "Duodecim",
-				"language": "fi",
-				"libraryCatalog": "Duodecim",
-				"publicationTitle": "Lääketieteellinen Aikakauskirja Duodecim",
-				"publisher": "Suomalainen Lääkäriseura Duodecim",
-				"section": "Verkossa ensin",
-				"shortTitle": "Lasten ja nuorten ADHD-lääkityksen yleisyys vaihtelee alueittain",
-				"url": "https://www.duodecimlehti.fi/duo19390",
-				"attachments": [
-					{
-						"title": "PDF",
-						"mimeType": "application/pdf"
-					},
-					{
+						"title": "Tilannekuva",
 						"snapshot": true,
 						"mimeType": "text/html"
 					}
@@ -1381,6 +1336,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
+						"title": "Tilannekuva",
 						"snapshot": true,
 						"mimeType": "text/html"
 					}
@@ -1442,6 +1398,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
+						"title": "Tilannekuva",
 						"snapshot": true,
 						"mimeType": "text/html"
 					}
@@ -1502,6 +1459,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
+						"title": "Tilannekuva",
 						"snapshot": true,
 						"mimeType": "text/html"
 					}
@@ -1562,6 +1520,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
+						"title": "Tilannekuva",
 						"snapshot": true,
 						"mimeType": "text/html"
 					}
@@ -1617,6 +1576,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
+						"title": "Tilannekuva",
 						"snapshot": true,
 						"mimeType": "text/html"
 					}
@@ -1667,6 +1627,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
+						"title": "Tilannekuva",
 						"snapshot": true,
 						"mimeType": "text/html"
 					}
