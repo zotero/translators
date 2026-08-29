@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-29 15:21:51"
+	"lastUpdated": "2026-08-29 16:00:32"
 }
 
 /*
@@ -108,7 +108,7 @@ async function doWeb(doc, url) {
 		item.publicationTitle = "Potilaan Lääkärilehti";
 		item.ISSN = '2323-9476';
 		item.url = url;
-		for (const tagBtn of doc.querySelectorAll("article > div.flex-auto-columns > a.label")) item.tags.push(tagBtn.innerText);
+		for (const tagBtn of doc.querySelectorAll("article > div.flex-auto-columns > a.label")) item.tags.push(tagBtn.innerText.toLowerCase());
 	}
 	else {
 		item.publicationTitle = "Suomen Lääkärilehti";
@@ -771,13 +771,13 @@ var testCases = [
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "INFEKTIO"
+						"tag": "infektio"
 					},
 					{
-						"tag": "KEUHKOKUUME"
+						"tag": "keuhkokuume"
 					},
 					{
-						"tag": "KEUHKOT"
+						"tag": "keuhkot"
 					}
 				],
 				"notes": [],
@@ -810,16 +810,16 @@ var testCases = [
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "KOLUMNI"
+						"tag": "kolumni"
 					},
 					{
-						"tag": "MIELIPIDE"
+						"tag": "mielipide"
 					},
 					{
-						"tag": "TEHO-OSASTO"
+						"tag": "teho-osasto"
 					},
 					{
-						"tag": "TELEVISIO"
+						"tag": "televisio"
 					}
 				],
 				"notes": [],

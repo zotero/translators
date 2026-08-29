@@ -871,9 +871,9 @@ async function doWeb(doc, url) {
 
 	if (item) {
 		if (!item.url) item.url = await urlGen(new URL(url));
-		item.attachments.push({ 
+		item.attachments.push({
 			title: 'Tilannekuva', // FINNISH for snapshot
-			document: doc, 
+			document: doc,
 			snapshot: true
 		});
 		item.complete();
