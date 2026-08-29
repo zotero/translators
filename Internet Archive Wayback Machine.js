@@ -86,35 +86,52 @@ function doWeb(doc, url) {
 
 
 function scrape(doc, url) {
-	// create new webpage Item from page
-	var newItem = new Zotero.Item("webpage");
-	newItem.title = doc.title;
-	newItem.url = url;
-	// parse date and add
-	var date = url.match(/\/web\/(\d{4})(\d{2})(\d{2})\d{6}\/http/);
-	if (date) {
-		newItem.date = [date[1], date[2], date[3]].join('-');
-	}
-	var pdfUrl = attr('#playback', 'src');
-	// if snapshot is pdf, attach it
-	// e.g. https://web.archive.org/web/20180316005456/https://www.foxtel.com.au/content/dam/foxtel/support/pdf/channel-packs.pdf
-	if (url.endsWith(".pdf") && pdfUrl) {
-		newItem.attachments = [{
-			mimeType: "application/pdf",
-			title: "PDF Snapshot",
-			url: pdfUrl
-		}];
-	}
-	else {
-		// create snapshot
-		newItem.attachments = [{
-			url: doc.location.href,
-			title: "Snapshot",
-			mimeType: "text/html"
-		}];
-	}
+	var translator = Zotero.loadTranslator('web');
+	// Embedded Metadata
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	translator.setDocument(doc);
 
-	newItem.complete();
+	translator.setHandler('itemDone', function (obj, item) {
+		try {
+			// Set access date to the date the website was archived
+			var urlRegEx = url.match(/\/web\/(\d{4})(\d{2})(\d{2})\d{6}\/(http.*)$/);
+			if (urlRegEx) {
+				item.accessDate = [urlRegEx[1], urlRegEx[2], urlRegEx[3]].join('-');
+			}
+			// Set url to original url, not the archived one
+			if (urlRegEx[4]) {
+				item.url = urlRegEx[4];
+			}
+
+			var pdfUrl = attr('#playback', 'src');
+			// if snapshot is pdf, attach it
+			// e.g. https://web.archive.org/web/20180316005456/https://www.foxtel.com.au/content/dam/foxtel/support/pdf/channel-packs.pdf
+			if (url.endsWith(".pdf") && pdfUrl) {
+				item.attachments = [{
+					mimeType: "application/pdf",
+					title: "PDF Snapshot",
+					url: pdfUrl
+				}];
+			}
+			else {
+				// create snapshot
+				item.attachments = [{
+					url: doc.location.href,
+					title: "Snapshot",
+					mimeType: "text/html"
+				}];
+			}
+		}
+		catch (e) {
+			Z.debug(e);
+		}
+
+		item.complete();
+	});
+
+	translator.getTranslatorObject(function (trans) {
+		trans.doWeb(doc, url);
+	});
 }
 
 
@@ -125,20 +142,109 @@ var testCases = [
 		"url": "http://web.archive.org/web/20110310073553/http://www.taz.de/",
 		"items": [
 			{
-				"itemType": "webpage",
+				"creators": [
+					{
+						"firstName": "taz, die",
+						"lastName": "tageszeitung",
+						"creatorType": "author"
+					}
+				],
+				"tags": [
+					{
+						"tag": "taz.de",
+						"type": 1
+					},
+					{
+						"tag": "taz",
+						"type": 1
+					},
+					{
+						"tag": "tageszeitung",
+						"type": 1
+					},
+					{
+						"tag": "Nachrichten",
+						"type": 1
+					},
+					{
+						"tag": "Schlagzeilen",
+						"type": 1
+					}
+				],
+				"url": "http://www.taz.de/",
 				"title": "taz.de",
-				"creators": [],
-				"date": "2011-03-10",
-				"url": "http://web.archive.org/web/20110310073553/http://www.taz.de/",
+				"abstractNote": "Das große linke Nachrichten-Portal der \"tageszeitung\" aus Berlin: Unabhängig dank mehr als 10.000 Genossen.",
+				"language": "de",
+				"accessDate": "2011-03-10",
+				"itemType": "webpage",
 				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
+				]
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://web.archive.org/web/20160325112502/http://www.nytimes.com/2015/12/18/upshot/rich-children-and-poor-ones-are-raised-very-differently.html",
+		"items": [
+			{
+				"itemType": "webpage",
+				"creators": [
+					{
+						"firstName": "Claire Cain",
+						"lastName": "Miller",
+						"creatorType": "author"
+					}
 				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
+				"tags": [
+					{
+						"tag": "Pew Research Center",
+						"type": 1
+					},
+					{
+						"tag": "Children and Childhood",
+						"type": 1
+					},
+					{
+						"tag": "United States",
+						"type": 1
+					},
+					{
+						"tag": "Income Inequality",
+						"type": 1
+					},
+					{
+						"tag": "Parenting",
+						"type": 1
+					},
+					{
+						"tag": "Polls and Public Opinion",
+						"type": 1
+					},
+					{
+						"tag": "Research",
+						"type": 1
+					},
+					{
+						"tag": "Education (K-12)",
+						"type": 1
+					}
+				],
+				"title": "Class Differences in Child-Rearing Are on the Rise",
+				"url": "https://www.nytimes.com/2015/12/18/upshot/rich-children-and-poor-ones-are-raised-very-differently.html",
+				"abstractNote": "Children grow up learning the skills to succeed in their socioeconomic stratum, but not necessarily others, which can deepen class divisions.",
+				"date": "2015-12-17",
+				"language": "en",
+				"accessDate": "2016-03-25",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				]
 			}
 		]
 	},
