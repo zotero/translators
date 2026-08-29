@@ -1,15 +1,15 @@
 {
-	"translatorID": "6f98e6ce-f92f-4f74-beaf-499dccb5cb6c",
-	"label": "Hrvatska enciklopedija",
+	"translatorID": "ed584e60-9373-43c2-b353-5826a12f076b",
+	"label": "Hrvatska tehnička enciklopedija",
 	"creator": "Ivo Pletikosić",
-	"target": "^https?://(?:www\\.)?enciklopedija\\.hr/",
+	"target": "^https?://tehnika\\.lzmk\\.hr/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-11-06 14:58:36"
+	"lastUpdated": "2025-11-06 15:01:36"
 }
 
 /*
@@ -35,8 +35,8 @@
 	***** END LICENSE BLOCK *****
 */
 
-function detectWeb(doc, url) {
-	if (url.includes("/clanak/")) {
+function detectWeb(doc, _) {
+	if (doc.querySelector("div.content")) {
 		return "encyclopediaArticle";
 	}
 	return false;
@@ -46,13 +46,14 @@ function doWeb(doc, url) {
 	let item = new Zotero.Item("encyclopediaArticle");
 	item.attachments.push({ title: "Snapshot", document: doc });
 	
-	item.encyclopediaTitle = "Hrvatska enciklopedija";
+	item.encyclopediaTitle = "Hrvatska tehnička enciklopedija";
 	item.publisher = "Leksikografski zavod Miroslav Krleža";
 	item.language = "hr";
-	item.ISBN = "9789532680386";
+	item.ISBN = "9789532680430";
 	item.url = url.replace(/[?#].*/, "");
 	
-	item.title = doc.title.replace(" - Hrvatska enciklopedija", "");
+	item.title = doc.title.replace(" | Hrvatska tehnička enciklopedija", "");
+	item.date = ZU.strToISO(attr(doc, "time.published", "datetime"));
 
 	item.complete();
 }
@@ -61,44 +62,19 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.enciklopedija.hr/clanak/manastir",
+		"url": "https://tehnika.lzmk.hr/brana/",
 		"items": [
 			{
 				"itemType": "encyclopediaArticle",
-				"title": "manastir",
+				"title": "nasipi i brane",
 				"creators": [],
-				"ISBN": "9789532680386",
-				"encyclopediaTitle": "Hrvatska enciklopedija",
+				"date": "2025-04-16",
+				"ISBN": "9789532680430",
+				"encyclopediaTitle": "Hrvatska tehnička enciklopedija",
 				"language": "hr",
-				"libraryCatalog": "Hrvatska enciklopedija",
+				"libraryCatalog": "Hrvatska tehnička enciklopedija",
 				"publisher": "Leksikografski zavod Miroslav Krleža",
-				"url": "https://www.enciklopedija.hr/clanak/manastir",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.enciklopedija.hr/clanak/44404",
-		"items": [
-			{
-				"itemType": "encyclopediaArticle",
-				"title": "nulovanje",
-				"creators": [],
-				"ISBN": "9789532680386",
-				"encyclopediaTitle": "Hrvatska enciklopedija",
-				"language": "hr",
-				"libraryCatalog": "Hrvatska enciklopedija",
-				"publisher": "Leksikografski zavod Miroslav Krleža",
-				"url": "https://www.enciklopedija.hr/clanak/nulovanje",
+				"url": "https://tehnika.lzmk.hr/brana/",
 				"attachments": [
 					{
 						"title": "Snapshot",
