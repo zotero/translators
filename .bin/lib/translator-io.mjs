@@ -99,8 +99,41 @@ export function serializeTranslator({ header, code, testCases }) {
  * Format test cases as the standard block.
  */
 export function serializeTestCases(testCases) {
-	const json = JSON.stringify(testCases, null, '\t');
+	const json = JSON.stringify(normalizeTestCases(testCases), null, '\t');
 	return `${BEGIN_TEST_CASES}\nvar testCases = ${json}\n${END_TEST_CASES}`;
+}
+
+const LEADING_FIELDS = [
+	'itemType',
+	// title and its type-specific variants
+	'title', 'caseName', 'subject', 'nameOfAct',
+	'creators',
+	// date and its type-specific variants
+	'date', 'dateDecided', 'issueDate', 'dateEnacted',
+];
+const TRAILING_FIELDS = ['attachments', 'tags', 'notes', 'seeAlso'];
+
+/**
+ * Reorder the fields of every item in a set of test cases.
+ */
+export function normalizeTestCases(testCases) {
+	return testCases.map(testCase => (Array.isArray(testCase.items)
+		? { ...testCase, items: testCase.items.map(normalizeTestItem) }
+		: testCase));
+}
+
+function normalizeTestItem(item) {
+	if (!item || typeof item !== 'object' || Array.isArray(item)) return item;
+
+	const middle = Object.keys(item)
+		.filter(field => !LEADING_FIELDS.includes(field) && !TRAILING_FIELDS.includes(field))
+		.sort();
+
+	const ordered = {};
+	for (const field of [...LEADING_FIELDS, ...middle, ...TRAILING_FIELDS]) {
+		if (field in item) ordered[field] = item[field];
+	}
+	return ordered;
 }
 
 /**

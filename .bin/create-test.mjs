@@ -5,8 +5,8 @@ import process from 'node:process';
 import { promises as fs } from 'node:fs';
 import { parseArgs, resolveTranslator, REPO_ROOT } from './lib/common.mjs';
 import { ensureConnectorBuild, CONNECTOR_BUILD_DIR, EXTENSION_ID } from './lib/connector.mjs';
-import { readTranslator } from './lib/translator-io.mjs';
 import { launchBrowser, resolveHeadless } from './lib/browser.mjs';
+import { readTranslator, serializeTestCases, normalizeTestCases } from './lib/translator-io.mjs';
 
 const CI_DIR = path.join(REPO_ROOT, '.ci', 'pull-request-check');
 const BEGIN_TEST_CASES = '/** BEGIN TEST CASES **/';
@@ -121,13 +121,15 @@ try {
 		process.exit(1);
 	}
 
+	const testCase = normalizeTestCases([output])[0];
+
 	// Output the test case
 	if (values.json) {
-		console.log(JSON.stringify(output, null, '\t'));
+		console.log(JSON.stringify(testCase, null, '\t'));
 	}
 	else {
 		console.log('Captured test case:');
-		console.log(JSON.stringify(output, null, '\t'));
+		console.log(JSON.stringify(testCase, null, '\t'));
 	}
 
 	// Write to translator file
@@ -149,12 +151,12 @@ try {
 			}
 
 			// Append new test case
-			testCases.push(output);
+			testCases.push(testCase);
 
 			// Rebuild file
 			const before = raw.substring(0, beginIdx);
 			const after = raw.substring(endIdx + END_TEST_CASES.length);
-			const newTestBlock = `${BEGIN_TEST_CASES}\nvar testCases = ${JSON.stringify(testCases, null, '\t')}\n${END_TEST_CASES}`;
+			const newTestBlock = serializeTestCases(testCases);
 			await fs.writeFile(filePath, before + newTestBlock + after, 'utf-8');
 
 			console.error(`\nTest case appended to ${path.relative(REPO_ROOT, filePath)}`);
