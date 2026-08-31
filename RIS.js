@@ -17,7 +17,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2026-01-05 18:52:35"
+	"lastUpdated": "2026-07-03 11:47:00"
 }
 
 /*
@@ -2049,6 +2049,12 @@ function doExport() {
 			// Z.debug("Unknown item type: " + item.itemType + ". Defaulting to " + type);
 		}
 		addTag("TY", type);
+
+		// Export the Zotero item key as the RIS ID tag.
+		if (item.uri) {
+			var zoteroKey = item.uri.replace(/^.*\//, '');
+			addTag("ID", zoteroKey);
+		}
 
 		//before we begin, pre-sort attachments based on type
 		var attachments = {
