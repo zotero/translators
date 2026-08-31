@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2019-06-10 23:11:21"
+	"lastUpdated": "2026-08-28 06:38:13"
 }
 
 /*
@@ -344,17 +344,21 @@ function getAllItems(ids, callback, items) {
 }
 
 function detectWeb(doc, _url) {
-	// get unAPI IDs
 	var ids = getUnAPIIDs(doc);
 	if (!ids.length) return false;
-	
-	if (!ids.length === 1) {
-		// Only one item, so we will just get its item type
-		ids[0].getItemType(Zotero.done);
+	var fallbackItemType = ids.length > 1 ? "multiple" : "document";
+
+	try {
+		if (ids.length === 1) {
+			ids[0].getItemType(Zotero.done);
+		}
+		else {
+			determineDetectItemType(ids);
+		}
 	}
-	else {
-		// Several items. We will need to call determineDetectItemType
-		determineDetectItemType(ids);
+	catch (e) {
+		Zotero.debug("unAPI: Could not resolve item type during detection: " + e);
+		return fallbackItemType;
 	}
 	return false;
 }
@@ -397,85 +401,67 @@ function doWeb(doc, _url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://search.library.utoronto.ca/search?N=0&Ntk=Anywhere&Ntt=nimni+challenge+of+post-zionism&Ntx=mode%252Bmatchallpartial&Nu=p_work_normalized&Np=1&formName=search_form_simple",
+		"url": "https://gapines.org/eg/opac/record/4599048",
 		"items": [
 			{
-				"itemType": "book",
-				"title": "The challenge of Post-Zionism: alternatives to Israeli fundamentalist politics",
+				"itemType": "audioRecording",
 				"creators": [
 					{
-						"firstName": "Ephraim",
-						"lastName": "Nimni",
-						"creatorType": "editor"
+						"firstName": "Janice May",
+						"lastName": "Udry",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Robert",
+						"lastName": "Ramirez",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Recorded Books, Inc",
+						"creatorType": "contributor",
+						"fieldMode": 1
 					}
 				],
-				"date": "2003",
-				"ISBN": "9781856498937 9781856498944",
-				"callNumber": "DS113.4 .C45 2003",
-				"extra": "OCLC: 50670646",
-				"libraryCatalog": "search.library.utoronto.ca",
-				"numPages": "209",
-				"place": "London ; New York",
-				"publisher": "Zed Books",
-				"series": "Postcolonial encounters",
-				"shortTitle": "The challenge of Post-Zionism",
-				"attachments": [],
+				"notes": [
+					{
+						"note": "Unabridged This recording has page-turn signals Book published: New York : Harper Collins, c1984. ; pictures by Marc Simont"
+					}
+				],
 				"tags": [
 					{
-						"tag": "Israel"
+						"tag": "Audiobooks"
 					},
 					{
-						"tag": "National characteristics, Israeli"
+						"tag": "Fiction"
 					},
 					{
-						"tag": "Philosophy"
+						"tag": "Fiction"
 					},
 					{
-						"tag": "Politics and government"
+						"tag": "Trees"
 					},
 					{
-						"tag": "Post-Zionism"
-					},
-					{
-						"tag": "Zionism"
+						"tag": "Trees"
 					}
 				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://search.library.utoronto.ca/search?N=0&Ntk=Anywhere&Ntt=adam+smith&Ntx=mode%252Bmatchallpartial&Nu=p_work_normalized&Np=1&formName=search_form_simple",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://demo1.orex.es/cgi-bin/koha/opac-detail.pl?biblionumber=3",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Carlota Fainberg",
-				"creators": [
-					{
-						"firstName": "Antonio",
-						"lastName": "Muñoz Molina",
-						"creatorType": "author"
-					}
-				],
-				"date": "1999",
-				"ISBN": "9788420441610",
-				"libraryCatalog": "demo1.orex.es",
-				"numPages": "174",
-				"place": "Madrid",
-				"publisher": "Alfaguara",
+				"seeAlso": [],
 				"attachments": [],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
+				"ISBN": "9781402585890 9780064431477",
+				"abstractNote": "The author celebrates the beauty and joy found in the everyday world and captures the wonder of young children as they discover the simple pleasures trees give to those who take the time to enjoy them",
+				"title": "A tree is nice",
+				"callNumber": "QK475.8 .U36 2001d",
+				"extra": "OCLC: ocm56748348",
+				"place": "Prince Frederick, MD",
+				"date": "2001",
+				"libraryCatalog": "gapines.org",
+				"label": "Recorded Books"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://gapines.org/eg/opac/results?query=alice&qtype=keyword",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
