@@ -300,6 +300,100 @@ var testCases = [
 				"shortTitle": "Funding Mechanisms for Humanitarian Response"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.conceptio.app/document/33199/project-gutenberg-complete-works-of-winston-churchill",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Project Gutenberg Complete Works of Winston Churchill",
+				"creators": [
+					{
+						"firstName": "Winston",
+						"lastName": "Churchill",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Conceptio snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "https://www.gutenberg.org/ebooks/5400.epub.images",
+				"libraryCatalog": "Conceptio",
+				"rights": "Public Domain",
+				"abstractNote": "American fiction",
+				"extra": "Archive: Conceptio Open Knowledge Archive — https://www.conceptio.app/document/33199/project-gutenberg-complete-works-of-winston-churchill\nOfficial source: https://www.gutenberg.org/ebooks/5400.epub.images"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.conceptio.app/document/514330/brailey-v-illinois",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "Brailey v. Illinois",
+				"creators": [
+					{
+						"lastName": "Supreme Court of the United States",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Conceptio snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "https://www.courtlistener.com/opinion/9127094/brailey-v-illinois/",
+				"libraryCatalog": "Conceptio",
+				"rights": "Open Access",
+				"abstractNote": "law, legal, court opinion, united states, case law, scotus, 506, u.s., 954, 506 u.s. 954, 113, s., ct., 410, 113 s. ct. 410, no., 92-413",
+				"extra": "Archive: Conceptio Open Knowledge Archive — https://www.conceptio.app/document/514330/brailey-v-illinois\nOfficial source: https://www.courtlistener.com/opinion/9127094/brailey-v-illinois/"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.conceptio.app/document/31530/rumi27-didal-2025-v1-0-1-zenodo-archive-release",
+		"items": [
+			{
+				"itemType": "dataset",
+				"title": "Rumi27/didal-2025: v1.0.1 — Zenodo Archive Release",
+				"creators": [
+					{
+						"lastName": "Zafar Avzalshoev",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Conceptio snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "https://doi.org/10.5281/zenodo.19657575",
+				"libraryCatalog": "Conceptio",
+				"rights": "Open Access",
+				"abstractNote": "research, open access",
+				"extra": "Archive: Conceptio Open Knowledge Archive — https://www.conceptio.app/document/31530/rumi27-didal-2025-v1-0-1-zenodo-archive-release\nOfficial source: https://doi.org/10.5281/zenodo.19657575",
+				"shortTitle": "Rumi27/didal-2025"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
