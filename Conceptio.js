@@ -161,7 +161,10 @@ function _itemFromJSONLD(doc, url) {
 				var part = parts[p].trim();
 				if (!part) continue;
 				if (part.includes(",")) {
-					item.creators.push(ZU.cleanAuthor(part, "author"));
+					// useComma=true: APA parts are "Last, First" — without the flag
+					// Zotero applies its "last space = last name" heuristic and
+					// inverts them ("Rose, Scott" -> first "Rose", last "Scott").
+					item.creators.push(ZU.cleanAuthor(part, "author", true));
 				}
 				else {
 					item.creators.push({ name: part, creatorType: "author" });
