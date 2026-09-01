@@ -155,7 +155,9 @@ function _itemFromJSONLD(doc, url) {
 			// The corpus stores authors APA-shaped: "Rose, Scott and Borghorst,
 			// Wendy". Split on " and "; comma-parts become person creators,
 			// no-comma names (orgs like "Joint Task Force", "European Union")
-			// become name-type creators so citations render them verbatim.
+			// become single-field (fieldMode=1) creators — lastName-only with
+			// fieldMode 1 is Zotero's canonical single-field creator form and
+			// survives the translator sandbox; a bare {name: ...} doesn't.
 			var parts = author.split(/\s+and\s+/i);
 			for (var p = 0; p < parts.length; p++) {
 				var part = parts[p].trim();
@@ -167,7 +169,7 @@ function _itemFromJSONLD(doc, url) {
 					item.creators.push(ZU.cleanAuthor(part, "author", true));
 				}
 				else {
-					item.creators.push({ name: part, creatorType: "author" });
+					item.creators.push({ lastName: part, creatorType: "author", fieldMode: 1 });
 				}
 			}
 		}
