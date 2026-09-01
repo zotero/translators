@@ -13,6 +13,28 @@
 }
 
 /*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2026 Conceptio
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
+/*
 	Conceptio — Open Knowledge Archive (https://www.conceptio.app)
 
 	Server-rendered document pages (/document/{id}/{slug}) carry a full
@@ -42,25 +64,32 @@
 */
 
 var ITEM_TYPES = {
-	"ScholarlyArticle": "journalArticle",
-	"Book":             "book",
-	"TechArticle":      "report",
-	"Legislation":      "statute",
-	"Dataset":          "dataset",
-	"Report":           "report",
-	"Article":          "document",
-	"Patent":           "patent",
-	"Course":           "document",  // Zotero has no Course type
-	"VisualArtwork":    "artwork",
-	"WebPage":          "webpage"
+	ScholarlyArticle: "journalArticle",
+	Book: "book",
+	TechArticle: "report",
+	Legislation: "statute",
+	Dataset: "dataset",
+	Report: "report",
+	Article: "document",
+	Patent: "patent",
+	Course: "document", // Zotero has no Course type
+	VisualArtwork: "artwork",
+	WebPage: "webpage"
 };
 
 // Case-law source labels rendered in the page meta line. A court ruling
 // saved as "statute" is wrong; these refine Legislation -> case.
-var CASE_LAW_HINTS = ["caselaw", "court", "hudoc", "cassazione", "costituzionale",
-	"dei conti", "giustizia"];
+var CASE_LAW_HINTS = [
+	"caselaw",
+	"court",
+	"hudoc",
+	"cassazione",
+	"costituzionale",
+	"dei conti",
+	"giustizia"
+];
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	var ld = _jsonld(doc);
 	var type = ld ? (ITEM_TYPES[ld["@type"]] || "document") : "document";
 	if (type === "statute" && _isCaseLaw(doc)) {
@@ -95,7 +124,7 @@ function _jsonld(doc) {
 		for (var j = 0; j < nodes.length; j++) {
 			// The page carries one JSON-LD block; be tolerant of any graph
 			// wrapper and pick the node that names this document.
-			if (nodes[j] && (nodes[j]["@type"] || "").indexOf("WebSite") === -1
+			if (nodes[j] && !(nodes[j]["@type"] || "").includes("WebSite")
 					&& !(nodes[j]["@type"] instanceof Array)) {
 				return nodes[j];
 			}
@@ -131,7 +160,7 @@ function _itemFromJSONLD(doc, url) {
 			for (var p = 0; p < parts.length; p++) {
 				var part = parts[p].trim();
 				if (!part) continue;
-				if (part.indexOf(",") !== -1) {
+				if (part.includes(",")) {
 					item.creators.push(ZU.cleanAuthor(part, "author"));
 				}
 				else {
@@ -188,7 +217,7 @@ function _itemFromJSONLD(doc, url) {
 
 /* ---------------------- COinS / XPath fallbacks ---------------------- */
 
-function _itemFromCoins(doc, url) {
+function _itemFromCoins(doc, _url) {
 	var span = doc.querySelector(".Z3988");
 	if (!span) {
 		return null;
@@ -219,7 +248,7 @@ function _isCaseLaw(doc) {
 	line = line || "";
 	line = line.toLowerCase();
 	for (var i = 0; i < CASE_LAW_HINTS.length; i++) {
-		if (line.indexOf(CASE_LAW_HINTS[i]) !== -1) {
+		if (line.includes(CASE_LAW_HINTS[i])) {
 			return true;
 		}
 	}
@@ -237,15 +266,21 @@ function _abstractText(doc) {
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
-		type: "web",
-		url: "https://www.conceptio.app/document/1/the-declaration-of-independence-of-the-united-states-of-america",
-		items: [
+		"type": "web",
+		"url": "https://www.conceptio.app/document/26040/funding-mechanisms-for-humanitarian-response-cerf-country-based-pooled",
+		"items": [
 			{
-				itemType: "book",
-				title: "The Declaration of Independence of the United States of America",
-				libraryCatalog: "Conceptio"
+				"itemType": "journalArticle",
+				"title": "Funding Mechanisms for Humanitarian Response: CERF, Country-Based Pooled Funds, and Donor Trends: An African Union Perspective",
+				"creators": [
+					{
+						"firstName": "Abraham Kuol",
+						"lastName": "Nyuon",
+						"creatorType": "author"
+					}
+				]
 			}
 		]
 	}
-];
+]
 /** END TEST CASES **/
