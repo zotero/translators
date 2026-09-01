@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2026-07-23 15:49:34"
+	"lastUpdated": "2026-09-01 18:46:48"
 }
 
 /*
@@ -368,6 +368,7 @@ function doImport() {
 				item.attachments.push({
 					url: lds03.textContent.match(/href="(.+?)"/)[1],
 					title: "HOLLIS Permalink",
+  					mimeType: "text/html",
 					snapshot: false
 				});
 			}
@@ -1019,7 +1020,6 @@ var testCases = [
 			}
 		]
 	},
-
 	{
 		"type": "import",
 		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><record xmlns=\"http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib\" xmlns:sear=\"http://www.exlibrisgroup.com/xsd/jaguar/search\"><delivery><bestlocation><isValidUser>true</isValidUser><organization>01HVD_INST</organization><libraryCode>HFA</libraryCode><availabilityStatus>check_holdings</availabilityStatus><subLocation>(By appointment only; on-site use only.) Circulating copies may be available in other Harvard Libraries.</subLocation><subLocationCode>GEN</subLocationCode><mainLocation>Harvard Film Archive</mainLocation><callNumber>HFA Item no. 3151</callNumber><callNumberType>8</callNumberType><holdingURL>OVP</holdingURL><adaptorid>ALMA_01</adaptorid><ilsApiId>990105822220203941</ilsApiId><holdId>222201431210003941</holdId><holKey>HoldingResultKey [mid=222201431210003941, libraryId=124018130003941, locationCode=GEN, callNumber=HFA Item no. 3151]</holKey><matchForHoldings><matchOn>MainLocation</matchOn><holdingRecord>852##b</holdingRecord></matchForHoldings></bestlocation><holding><isValidUser>true</isValidUser><organization>01HVD_INST</organization><libraryCode>HFA</libraryCode><availabilityStatus>check_holdings</availabilityStatus><subLocation>(By appointment only; on-site use only.) Circulating copies may be available in other Harvard Libraries.</subLocation><subLocationCode>GEN</subLocationCode><mainLocation>Harvard Film Archive</mainLocation><callNumber>HFA Item no. 3151</callNumber><callNumberType>8</callNumberType><holdingURL>OVP</holdingURL><adaptorid>ALMA_01</adaptorid><ilsApiId>990105822220203941</ilsApiId><holdId>222201431210003941</holdId><matchForHoldings><matchOn>MainLocation</matchOn><holdingRecord>852##b</holdingRecord></matchForHoldings></holding><deliveryCategory>Alma-P</deliveryCategory><serviceMode>ovp</serviceMode><availability>check_holdings</availability><availabilityLinks>detailsgetit1</availabilityLinks><displayLocation>true</displayLocation><additionalLocations>false</additionalLocations><feDisplayOtherLocations>false</feDisplayOtherLocations><recordOwner>01HVD_INST</recordOwner><digitalAuxiliaryMode>false</digitalAuxiliaryMode><digitalAuxiliaryThumbnail>false</digitalAuxiliaryThumbnail><hideResourceSharing>false</hideResourceSharing></delivery><display><source>Alma</source><type>videos</type><language>ger</language><title>Cat and mouse </title><format>[ca. 1 minute] : aspect ratio 1:1.37, sd., b&amp;w : 16 mm. viewing print.</format><creationdate>1970</creationdate><publisher>[1970?]</publisher><mms>990105822220203941</mms><genre>film trailers$$Qfilm trailers</genre><unititle>Kot i mysz (Trailer). 16 mm.$$QKot i mysz (Trailer). 16 mm</unititle><place>1970?]</place><version>1</version><lds01>990105822220203941</lds01><lds03>&lt;a aria-label=&quot;Permanent link to item&quot; href=&quot;https://id.lib.harvard.edu/alma/990105822220203941/catalog&quot;&gt;https://id.lib.harvard.edu/alma/990105822220203941/catalog&lt;/a&gt;</lds03><lds11>[1970?]</lds11><lds13>Harvard Film Archive 16mm trailer, HFA item no. 3151, from the Grove Press Collection.</lds13><lds13>Cat and mouse was released in Europe in 1967 and in the United States in 1970.</lds13><lds13>Common title, not from piece.</lds13><lds14>[production company unknown]</lds14></display><control><sourcerecordid>990105822220203941</sourcerecordid><recordid>alma990105822220203941</recordid><sourceid>alma</sourceid><originalsourceid>010582222-HVD01</originalsourceid><sourcesystem>OCLC</sourcesystem><sourceformat>MARC21</sourceformat><score>1.0</score><isDedup>false</isDedup></control><addata><originatingSystemIDContributor>no2009058682</originatingSystemIDContributor><addau>Grove Press Film Collection (Harvard Film Archive)</addau><date>1970</date><cop>1970?</cop><oclcid>(ocolc)894528838</oclcid><format>book</format><genre>video</genre><ristype>VIDEO</ristype><btitle>Cat and mouse</btitle></addata><sort><title>Cat and mouse /</title><author>Grove Press Film Collection (Harvard Film Archive)</author><creationdate>1970</creationdate></sort></record>",
