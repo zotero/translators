@@ -281,7 +281,23 @@ var testCases = [
 						"lastName": "Nyuon",
 						"creatorType": "author"
 					}
-				]
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Conceptio snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "https://doi.org/10.5281/zenodo.19537026",
+				"libraryCatalog": "Conceptio",
+				"publicationTitle": "Zenodo (CERN)",
+				"rights": "Open Access",
+				"abstractNote": "Humanitarian Response CERF, Response CERF Country-Based, CERF Country-Based Pooled, Country-Based Pooled Funds, African Union Perspective, Funding Mechanisms",
+				"extra": "Archive: Conceptio Open Knowledge Archive — https://www.conceptio.app/document/26040/funding-mechanisms-for-humanitarian-response-cerf-country-based-pooled\nOfficial source: https://doi.org/10.5281/zenodo.19537026",
+				"shortTitle": "Funding Mechanisms for Humanitarian Response"
 			}
 		]
 	}
