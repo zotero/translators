@@ -368,7 +368,7 @@ function doImport() {
 				item.attachments.push({
 					url: lds03.textContent.match(/href="(.+?)"/)[1],
 					title: "HOLLIS Permalink",
-  					mimeType: "text/html",
+					mimeType: "text/html",
 					snapshot: false
 				});
 			}
