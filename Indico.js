@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-19 03:11:52"
+	"lastUpdated": "2026-09-03 20:52:35"
 }
 
 /*
@@ -241,12 +241,228 @@ function cleanMathTitle(title) {
 }
 
 /**
+ * Parse the JSON-like timetable payload emitted by older Indico versions.
+ * Those pages use JavaScript identity escapes (e.g. `\ `) that JSON.parse
+ * rejects, so normalize the string literals without evaluating page code.
+ *
+ * @param {string} text
+ * @returns {string}
+ */
+function normalizeJavaScriptStrings(text) {
+	let output = '';
+	let quoted = false;
+
+	for (let i = 0; i < text.length; i++) {
+		let char = text[i];
+		if (!quoted) {
+			output += char;
+			if (char === '"') quoted = true;
+			continue;
+		}
+
+		if (char === '"') {
+			output += char;
+			quoted = false;
+			continue;
+		}
+		if (char !== '\\') {
+			output += char;
+			continue;
+		}
+
+		let escaped = text[++i];
+		if ('"\\/bfnrt'.includes(escaped)) {
+			output += `\\${escaped}`;
+		}
+		else if (escaped === 'u' && /^[0-9a-fA-F]{4}$/.test(text.slice(i + 1, i + 5))) {
+			output += `\\u${text.slice(i + 1, i + 5)}`;
+			i += 4;
+		}
+		else if (escaped === 'x' && /^[0-9a-fA-F]{2}$/.test(text.slice(i + 1, i + 3))) {
+			output += `\\u00${text.slice(i + 1, i + 3)}`;
+			i += 2;
+		}
+		else if (escaped === 'v') {
+			output += '\\u000b';
+		}
+		else if (escaped === '\n' || escaped === '\r') {
+			if (escaped === '\r' && text[i + 1] === '\n') i++;
+		}
+		else {
+			output += escaped;
+		}
+	}
+
+	return output;
+}
+
+/**
+ * Extract the second `timetableArgs` argument without executing inline code.
+ *
+ * @param {Document} doc
+ * @returns {Object|null}
+ */
+function getEmbeddedTimetableData(doc) {
+	for (let script of doc.querySelectorAll('script')) {
+		let source = script.textContent;
+		let match = source.match(/var\s+timetableArgs\s*=\s*\[\s*null\s*,\s*/);
+		if (!match) continue;
+
+		let start = match.index + match[0].length;
+		let depth = 0;
+		let quoted = false;
+		let escaped = false;
+		let end = -1;
+		for (let i = start; i < source.length; i++) {
+			let char = source[i];
+			if (quoted) {
+				if (escaped) escaped = false;
+				else if (char === '\\') escaped = true;
+				else if (char === '"') quoted = false;
+			}
+			else if (char === '"') {
+				quoted = true;
+			}
+			else if (char === '{') {
+				depth++;
+			}
+			else if (char === '}' && --depth === 0) {
+				end = i + 1;
+				break;
+			}
+		}
+
+		if (end === -1) continue;
+		try {
+			return JSON.parse(normalizeJavaScriptStrings(source.slice(start, end)));
+		}
+		catch (e) {
+			Zotero.debug("Could not parse embedded Indico timetable: " + e);
+		}
+	}
+
+	return null;
+}
+
+/**
+ * Find contribution objects nested in an Indico timetable payload.
+ *
+ * @param {Object} value
+ * @param {string} baseUrl
+ * @param {Array<Object>} items
+ * @param {boolean} checkOnly
+ * @returns {boolean}
+ */
+function collectTimetableContributions(value, baseUrl, items, checkOnly) {
+	if (!value || typeof value !== 'object') return false;
+
+	if (value.entryType === 'Contribution' && value.url && value.title) {
+		let url = new URL(value.url, baseUrl).href;
+		if (checkOnly) return true;
+		items.push({
+			url,
+			title: cleanMathTitle(value.title),
+			startDate: value.startDate,
+			order: items.length
+		});
+	}
+
+	for (let child of Object.values(value)) {
+		if (collectTimetableContributions(child, baseUrl, items, checkOnly)) return true;
+	}
+
+	return false;
+}
+
+/**
+ * Get a sortable time key from either Indico's ISO date string or its older
+ * {date, time, tz} timetable representation.
+ *
+ * @param {string|Object} startDate
+ * @returns {string}
+ */
+function getTimetableStartKey(startDate) {
+	if (startDate && typeof startDate === 'object' && startDate.date) {
+		return `${startDate.date} ${startDate.time || '00:00:00'}`;
+	}
+	return typeof startDate === 'string' ? startDate : '';
+}
+
+/**
+ * Sort timetable contributions chronologically, retaining the source order
+ * for simultaneous contributions or entries without a scheduled time.
+ *
+ * @param {Array<Object>} contributions
+ * @returns {Array<Object>}
+ */
+function sortTimetableContributions(contributions) {
+	let scheduled = contributions
+		.map((contribution, order) => ({
+			contribution,
+			order,
+			startKey: getTimetableStartKey(
+				contribution.startDate || contribution.start_dt || contribution.start_date
+			)
+		}));
+	scheduled.sort((a, b) => {
+		if (a.startKey && b.startKey && a.startKey !== b.startKey) {
+			return a.startKey < b.startKey ? -1 : 1;
+		}
+		if (!!a.startKey !== !!b.startKey) return a.startKey ? -1 : 1;
+		return a.order - b.order;
+	});
+
+	// Safari Connector preserves the order of numeric keys across its selection
+	// dialog, but not the order of arbitrary URL keys.
+	return scheduled.map(({ contribution }) => ({
+		url: contribution.url,
+		title: contribution.title
+	}));
+}
+
+/**
+ * Get contributions embedded in older Indico timetable pages, which display
+ * clickable blocks without contribution links in the DOM.
+ *
+ * @param {Document} doc
+ * @param {boolean} checkOnly
+ * @returns {Object|boolean}
+ */
+function getEmbeddedTimetableResults(doc, checkOnly) {
+	let timetable = getEmbeddedTimetableData(doc);
+	if (!timetable) return false;
+
+	let contributions = [];
+	let found = collectTimetableContributions(timetable, doc.location.href, contributions, checkOnly);
+	if (found) return true;
+	if (!contributions.length) return false;
+
+	// The payload's object order is not necessarily the programme order. Keep
+	// parallel contributions in their source order while sorting sessions by time.
+	// Use numeric keys instead of URL keys: Safari's Connector preserves this
+	// order in its selection dialog.
+	let seenURLs = new Set();
+	let items = {};
+	for (let contribution of sortTimetableContributions(contributions)) {
+		if (seenURLs.has(contribution.url)) continue;
+		seenURLs.add(contribution.url);
+		items[Object.keys(items).length] = contribution;
+	}
+	return items;
+}
+
+/**
  * Get search results from pages with multiple contributions
  * @param {Document} doc - The document object
  * @param {boolean} checkOnly - Only check if results exist
- * @returns {Object|boolean} - Object of {url: title} pairs or boolean
+ * @returns {Object|boolean} - Selection results or boolean
  */
 function getSearchResults(doc, checkOnly) {
+	// The timetable payload carries the programme order, whereas the rendered
+	// DOM may list contributions in an implementation-specific order.
+	let timetableResults = getEmbeddedTimetableResults(doc, checkOnly);
+	if (timetableResults) return timetableResults;
+
 	let items = {};
 	let found = false;
 
@@ -335,7 +551,7 @@ async function doWeb(doc, url) {
 						// Handle different API response structures
 						eventDataForAttachments = json.results ? json.results[0] : json;
 						if (eventDataForAttachments && eventDataForAttachments.contributions) {
-							for (let c of eventDataForAttachments.contributions) {
+							for (let c of sortTimetableContributions(eventDataForAttachments.contributions)) {
 								// Use title and ID to form a selection
 								// URL might be in c.url
 								if (c.url && c.title) {
@@ -355,7 +571,9 @@ async function doWeb(doc, url) {
 		if (items && Object.keys(items).length > 0) {
 			let selected = await Zotero.selectItems(items);
 			if (selected) {
-				for (let itemUrl of Object.keys(selected)) {
+				for (let selectedKey of Object.keys(selected)) {
+					let item = items[selectedKey];
+					let itemUrl = item && typeof item === 'object' ? item.url : selectedKey;
 					// If we have the API data cached and it contains this contribution, use it to avoid extra requests
 					// However, scrapeFromContributionJSON expects specific structure.
 					// The 'eventDataForAttachments' might contain the contribution data we need.
@@ -943,6 +1161,11 @@ async function scrapeFromHTML(doc, url, baseUrl, ids) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
+	{
+		"type": "web",
+		"url": "https://indico.ific.uv.es/event/8521/timetable/#all.detailed",
+		"items": "multiple"
+	},
 	{
 		"type": "web",
 		"url": "https://indico.cern.ch/event/1339154/timetable/#20251110.detailed",
