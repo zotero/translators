@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-12-09 02:38:35"
+	"lastUpdated": "2026-09-24 05:33:41"
 }
 
 /*
@@ -79,11 +79,19 @@ async function scrape(doc) {
 	item.creators.push(name);
 	item.date = ZU.strToISO(text(post, '.detailed-status__datetime'));
 	let posturl = attr(post, 'a.detailed-status__datetime', 'href');
-	if ((posturl.match(/@/g) || []).length == 2) {
-		// We're on a different instance than the poster
-		item.url = "https://" + posturl.replace(/\/(@.+?)@([^/]+)(\/.+)/, "$2/$1$3");
+	// The status ID in the URL is local to the instance we're on, so when
+	// viewing a post from another instance, ask the API for its canonical URL
+	let statusID = (posturl.match(/\/(\d+)\/?$/) || [])[1];
+	if (statusID) {
+		try {
+			let status = await requestJSON(`https://${doc.location.host}/api/v1/statuses/${statusID}`);
+			item.url = status.url;
+		}
+		catch (e) {
+			Z.debug(`Couldn't get status ${statusID} from the API: ${e}`);
+		}
 	}
-	else {
+	if (!item.url) {
 		item.url = "https://" + doc.location.host + posturl;
 	}
 	item.attachments.push({ document: doc, title: "Snapshot" });
