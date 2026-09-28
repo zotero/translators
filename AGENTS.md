@@ -39,6 +39,7 @@ Do this in the same commit as the deletion.
 - XHR and `fetch()` are unavailable in translator code.
 - **DO NOT** use the deprecated `ZU.doGet()`, `ZU.doPost()`, and `ZU.processDocuments()` methods in new code.
 - Instead, make HTTP(S) requests using `request()`, `requestText()`, `requestJSON()`, and `requestDocument()`, which are defined in the global scope. They return promises. `request()` resolves to an object with a `body` property; the rest resolve directly to the body. You pass the URL as the first argument, and (optionally) an options object as the second argument. Relative URLs are resolved against the URL of the page being translated, so there's no need to prepend the hostname manually (e.g. `requestJSON('/api/articles/123')`).
+- `setTimeout()` and `setInterval()` are available, e.g. for polling a request while waiting for the site to generate a remote resource (an export, a PDF, etc.).
 - You can't `click()` elements on the page. You can't run script functions defined on the page. All you have is a static copy of the page HTML. Emulate API calls where necessary.
 - Be concise. You're writing a scraper script, not an enterprise web app. Write robust code where you can, but not everything needs a fallback.
 - Avoid matching on things that seem very likely to change with minor updates to the site, like obfuscated CSS selectors or class names that look presentational (e.g. `.text-bold`).
