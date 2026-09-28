@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-09-26 21:55:42"
+	"lastUpdated": "2026-09-28 08:02:52"
 }
 
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -291,9 +291,9 @@ function parseBMG(xml, id) {
 		if (seriesNumber) extras.push("Series Number: " + seriesNumber);
 	}
 	let audience = value("333", "a");
-	if (audience) extras.push("Audience: " + audience);
+	if (audience) extras.push("Public : " + audience);
 	if (setTitle && setNumber && seriesStatement) {
-		extras.push("Series statement: " + seriesStatement);
+		extras.push("Mention de collection : " + seriesStatement);
 	}
 	if (setTitle && !setNumber) {
 		extras.push("Set: " + setTitle);
@@ -424,7 +424,7 @@ var testCases = [
 				"date": "2023",
 				"ISBN": "9782092595985",
 				"abstractNote": "Pour impressionner sa nouvelle voisine, Toni emprunte un cheval dans un centre équestre mais l'animal s'enfuit. Heureusement, il peut compter sur ses amis pour l'aider à le retrouver. ©Electre 2023",
-				"extra": "Illustrator: ZONK || Zelda\nAudience: A partir de 8 ans\nSeries statement: Nathan poche. Premiers romans\nIllustrations: illustrations en noir et en couleur\nDimensions: 19 x 15 cm",
+				"extra": "Illustrator: ZONK || Zelda\nPublic : A partir de 8 ans\nMention de collection : Nathan poche. Premiers romans\nIllustrations: illustrations en noir et en couleur\nDimensions: 19 x 15 cm",
 				"language": "fre",
 				"libraryCatalog": "Bibliothèques municipales de Genève",
 				"numPages": "152",
@@ -477,7 +477,7 @@ var testCases = [
 				"date": "2018",
 				"abstractNote": "Castro, autrefois star du petit écran, est à présent un animateur sur le déclin. Aujourd’hui, son chauffeur, Manu, le conduit à la pendaison de crémaillère de sa productrice et amie de longue date, Nathalie, qui a emménagé dans une belle maison près de Paris. Hélène, soeur de Nathalie et ex-femme de Castro, est elle aussi invitée. Quand ils étaient jeunes, ils partageaient les mêmes idéaux mais le succès a converti Castro au pragmatisme (ou plutôt au cynisme) tandis qu’Hélène est restée fidèle à ses convictions. Leur fille, Nina, qui a écrit un livre librement inspiré de la vie de ses parents, se joint à eux. Alors que Castro assiste, impuissant, à la chute inexorable de son audimat, Hélène tente désespérément d’imposer dans son émission une réfugiée afghane. Pendant ce temps, la fête bat son plein",
 				"distributor": "Frenetic",
-				"extra": "Audience: Age suggéré : 16 ans\nTechnical details: 16/9, son surround",
+				"extra": "Public : Age suggéré : 16 ans\nTechnical details: 16/9, son surround",
 				"language": "fre",
 				"libraryCatalog": "Bibliothèques municipales de Genève",
 				"place": "[S.l.]",
@@ -520,7 +520,7 @@ var testCases = [
 				"date": "P + cop. 2020",
 				"abstractNote": "Rien n'est simple dans cette famille de six garçons. Les grands, Jean-A. et Jean-B., entrent dans l'adolescence et sont absorbés par la découverte des filles. Leurs parents expédient Jean-A. en Angleterre pour un séjour linguistique et Jean-B. est inscrit de force aux scouts marins. Mais Jean-A. ne s'intéresse qu'à la musique pop et Jean-B. tombe amoureux",
 				"audioRecordingFormat": "MP3",
-				"extra": "Audience: Age suggéré : 10 ans\nSet: Histoires des Jean-Quelque-Chose",
+				"extra": "Public : Age suggéré : 10 ans\nSet: Histoires des Jean-Quelque-Chose",
 				"label": "Gallimard-Jeunesse",
 				"language": "fre",
 				"libraryCatalog": "Bibliothèques municipales de Genève",
