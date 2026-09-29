@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-09-29 04:07:53"
+	"lastUpdated": "2026-09-29 04:13:25"
 }
 
 /*
@@ -119,6 +119,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.e-newspaperarchives.ch/?a=d&d=NZZ19180215-03.2.4&",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -139,6 +140,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.e-newspaperarchives.ch/?a=d&d=DBB18680726-01.2.6.1&",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -159,6 +161,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.e-newspaperarchives.ch/?a=q&hs=1&r=1&results=1&txq=Z%C3%BCrich&dafyq=1918&datyq=1918&laq=&puq=NZZ&txf=txIN&ssnip=img&ccq=&l=en",
+		"defer": true,
 		"items": "multiple"
 	}
 ]
