@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-13 21:08:15"
+	"lastUpdated": "2026-09-29 15:12:59"
 }
 
 /*
@@ -43,7 +43,7 @@ function detectWeb(doc, url) {
 	// page to get it in doWeb.
 	// The JSON-LD also sticks around when you navigate to a non-story page,
 	// which is odd, so we can't use it as a test for a story page at all!
-	if (doc.querySelector('#storytext')) {
+	if (doc.querySelector('#storytext, #main-section > article.story')) {
 		if (doc.querySelector('h1.transcript a')) {
 			if (attr(doc, '.slug a', 'href').includes('npr.org/podcasts/')) {
 				return "podcast";
@@ -52,7 +52,7 @@ function detectWeb(doc, url) {
 				return "radioBroadcast";
 			}
 		}
-		else if (doc.querySelector('#primaryaudio')) {
+		else if (doc.querySelector('#headlineaudio')) {
 			return "multiple";
 		}
 		else {
@@ -119,7 +119,8 @@ function scrapeText(doc, _url) {
 	item.url = json.mainEntityOfPage['@id'];
 	
 	if (json.author) {
-		for (let name of json.author.name) {
+		let names = getAuthorNames(doc, json);
+		for (let name of names) {
 			item.creators.push(ZU.cleanAuthor(name, 'author'));
 		}
 	}
@@ -158,15 +159,15 @@ function scrapeAudio(doc, _url) {
 	let item = new Zotero.Item(itemType);
 	let json = JSON.parse(text(doc, 'script[type="application/ld+json"]'));
 	
-	item.title = text(doc, '#primaryaudio .audio-module-title') || json.headline;
+	item.title = text(doc, '#headlineaudio .audio-module-title') || json.headline;
 	item.abstractNote = ZU.cleanTags(json.description);
 	
 	// strip the time from the date, since we have no way of knowing exactly
 	// what time it aired (and the time on the article is based on when the
 	// transcript was published)
 	let date = (json.dateModified || json.datePublished).replace(/T.+$/, '');
+	item.date = date;
 	if (itemType == 'radioBroadcast') {
-		item.date = date;
 		item.programTitle = text(doc, '.program-block a');
 		if (!item.programTitle) {
 			// transcript pages don't have a .program-block, so we'll use a
@@ -181,39 +182,55 @@ function scrapeAudio(doc, _url) {
 		item.network = 'NPR';
 	}
 	else {
-		// podcasts have no date field
-		item.extra = `issued: ${date}\n`;
 		item.seriesTitle = text(doc, 'h3.slug');
 		item.publisher = 'NPR'; // no good analogue for this, so let it go into extra
 	}
 	
-	item.runningTime = attr(doc, '#primaryaudio .audio-module-duration', 'datetime')
+	item.runningTime = attr(doc, '#headlineaudio .audio-module-duration', 'datetime')
 		.replace(/P(\d+)H,(\d+)M,(\d+)S/, '$1:$2:$3')
 		.replace(/P(\d+)M,(\d+)S/, '$1:$2');
 	item.language = 'en';
 	item.url = json.mainEntityOfPage['@id'];
 	
 	if (json.author) {
-		for (let name of json.author.name) {
+		let names = getAuthorNames(doc, json);
+		for (let name of names) {
 			let creatorType = itemType == 'radioBroadcast' ? 'director' : 'podcaster';
 			item.creators.push(ZU.cleanAuthor(name, creatorType));
 		}
 	}
-	
-	item.attachments.push({
-		title: 'Audio',
-		mimeType: 'audio/mpeg',
-		url: attr(doc, '#primaryaudio .audio-tool-download > a', 'href')
-	});
+
+	let downloadURL = attr(doc, '#headlineaudio .audio-tool-download > a', 'href');
+	if (downloadURL) {
+		item.attachments.push({
+			title: 'Audio',
+			mimeType: 'audio/mpeg',
+			url: downloadURL
+		});
+	}
 	
 	item.attachments.push({
 		title: 'Transcript',
 		mimeType: 'text/html',
-		url: attr(doc, '#primaryaudio .audio-tool-transcript > a', 'href'),
+		url: attr(doc, '#headlineaudio .audio-tool-transcript > a', 'href'),
 		snapshot: true
 	});
 	
 	item.complete();
+}
+
+function getAuthorNames(doc, json) {
+	let fromJSON = [];
+	if (json.author?.name) {
+		fromJSON = (Array.isArray(json.author.name) ? json.author.name : [json.author.name])
+			.filter(Boolean);
+	}
+
+	let fromHTML = attr(doc, 'meta[name="cXenseParse:author"]', 'content')
+		.split('|')
+		.filter(Boolean);
+	
+	return fromJSON.length >= fromHTML.length ? fromJSON : fromHTML;
 }
 
 /** BEGIN TEST CASES **/
@@ -314,17 +331,14 @@ var testCases = [
 						"creatorType": "podcaster"
 					}
 				],
+				"date": "2021-07-07",
 				"abstractNote": "This month on Code Switch, we're talking about books — new and old — that have deepened our understandings of what it means to be free. First up, a conversation with author Kaitlyn Greenidge about her new novel, Libertie, which tells the story of a young woman pushing back against her mother's expectations of what her life should look like.",
-				"extra": "issued: 2021-07-07",
 				"language": "en",
-				"runningTime": "23:33",
+				"publisher": "NPR",
+				"runningTime": "22:39",
 				"seriesTitle": "Code Switch",
 				"url": "https://www.npr.org/2021/06/29/1011289394/egalite-fraternite-and-libertie",
 				"attachments": [
-					{
-						"title": "Audio",
-						"mimeType": "audio/mpeg"
-					},
 					{
 						"title": "Transcript",
 						"mimeType": "text/html",
