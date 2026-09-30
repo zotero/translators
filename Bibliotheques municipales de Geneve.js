@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-09-29 23:50:58"
+	"lastUpdated": "2026-09-30 13:33:58"
 }
 
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -264,12 +264,18 @@ function parseBMG(xml, id) {
 	item.place = value("210", "a");
 	item.publisher = value("210", "c");
 
+	let publicationDate = value("210", "d");
+
 	if (itemType === "film") {
 		let filmDate = value("300", "a").match(/\bFilm de (\d{4})\b/i);
-		item.date = filmDate ? filmDate[1] : value("210", "d");
+		item.date = filmDate ? filmDate[1] : publicationDate;
+	}
+	else if (itemType === "audioRecording") {
+		let year = publicationDate.match(/\b(\d{4})\b/);
+		item.date = year ? year[1] : publicationDate;
 	}
 	else {
-		item.date = value("210", "d");
+		item.date = publicationDate;
 	}
 
 	item.edition = value("205", "a");
@@ -296,6 +302,20 @@ function parseBMG(xml, id) {
 	}
 
 	let extent = value("215", "a");
+
+	if (itemType === "film") {
+		if (format === "DVD") {
+			item.videoRecordingFormat = "DVD";
+		}
+	}
+	else if (itemType === "audioRecording") {
+		let carrier = value("109", "h");
+		let audioFormat = value("215", "c");
+
+		if (carrier === "Disque compact") {
+			item.audioRecordingFormat = audioFormat === "MP3" ? "CD MP3" : "CD";
+		}
+	}
 
 	if (itemType === "film" || itemType === "audioRecording") {
 		let runningTime = /\b(ca\s+)?(\d+)\s*min\.?/i.exec(extent);
@@ -339,10 +359,7 @@ function parseBMG(xml, id) {
 		if (itemType === "film") {
 			extras.push("Technical details: " + physicalDetails);
 		}
-		else if (itemType === "audioRecording") {
-			item.audioRecordingFormat = physicalDetails;
-		}
-		else {
+		else if (itemType !== "audioRecording") {
 			extras.push("Illustrations: " + physicalDetails);
 		}
 	}
@@ -551,6 +568,7 @@ var testCases = [
 				"place": "[S.l.]",
 				"runningTime": "98 min",
 				"url": "https://www.bm-geneve.ch/ark:/75245/caT006624946",
+				"videoRecordingFormat": "DVD",
 				"attachments": [],
 				"tags": [
 					{
@@ -585,9 +603,9 @@ var testCases = [
 						"creatorType": "performer"
 					}
 				],
-				"date": "P + cop. 2020",
+				"date": "2020",
 				"abstractNote": "Rien n'est simple dans cette famille de six garçons. Les grands, Jean-A. et Jean-B., entrent dans l'adolescence et sont absorbés par la découverte des filles. Leurs parents expédient Jean-A. en Angleterre pour un séjour linguistique et Jean-B. est inscrit de force aux scouts marins. Mais Jean-A. ne s'intéresse qu'à la musique pop et Jean-B. tombe amoureux",
-				"audioRecordingFormat": "MP3",
+				"audioRecordingFormat": "CD MP3",
 				"extra": "Public : Age suggéré : 10 ans\nSet: Histoires des Jean-Quelque-Chose",
 				"label": "Gallimard-Jeunesse",
 				"language": "fre",
@@ -674,7 +692,8 @@ var testCases = [
 						"creatorType": "performer"
 					}
 				],
-				"date": "cop. 2005",
+				"date": "2005",
+				"audioRecordingFormat": "CD",
 				"label": "Allegro",
 				"language": "ita",
 				"libraryCatalog": "Bibliothèques municipales de Genève",
