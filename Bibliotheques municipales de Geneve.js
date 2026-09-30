@@ -2,7 +2,7 @@
 	"translatorID": "4f1e51b6-8841-4ba7-b612-7511fae4f37a",
 	"label": "Bibliotheques municipales de Geneve",
 	"creator": "EA Library Project",
-	"target": "^https?://(?:www\\.)?bm-geneve\\.ch/(?:ark:/75245/caT[0-9X]+(?:[/?#]|$)|search/)",
+	"target": "^https?://www\\.bm-geneve\\.ch/(?:ark:/75245/caT[0-9X]+(?:[/?#]|$)|search/)",
 	"minVersion": "7.0",
 	"maxVersion": "",
 	"priority": 100,
