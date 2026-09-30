@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-09-30 13:33:58"
+	"lastUpdated": "2026-09-30 14:14:19"
 }
 
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -261,7 +261,12 @@ function parseBMG(xml, id) {
 	}
 
 	item.ISBN = value("010", "a");
-	item.place = value("210", "a");
+	item.place = value("210", "a")
+		// Strip square brackets around place
+		.replace(/^\[(.+)]$/, '$1');
+	if (item.place === 'S.l.') { // No place
+		item.place = '';
+	}
 	item.publisher = value("210", "c");
 
 	let publicationDate = value("210", "d");
@@ -565,7 +570,6 @@ var testCases = [
 				"extra": "Public : Age suggéré : 16 ans\nTechnical details: 16/9, son surround",
 				"language": "fre",
 				"libraryCatalog": "Bibliothèques municipales de Genève",
-				"place": "[S.l.]",
 				"runningTime": "98 min",
 				"url": "https://www.bm-geneve.ch/ark:/75245/caT006624946",
 				"videoRecordingFormat": "DVD",
@@ -610,7 +614,7 @@ var testCases = [
 				"label": "Gallimard-Jeunesse",
 				"language": "fre",
 				"libraryCatalog": "Bibliothèques municipales de Genève",
-				"place": "[Paris]",
+				"place": "Paris",
 				"runningTime": "ca 150 min",
 				"url": "https://www.bm-geneve.ch/ark:/75245/caT006987035",
 				"attachments": [],
@@ -697,7 +701,6 @@ var testCases = [
 				"label": "Allegro",
 				"language": "ita",
 				"libraryCatalog": "Bibliothèques municipales de Genève",
-				"place": "[S.l.]",
 				"shortTitle": "The marriage of Figaro",
 				"url": "https://www.bm-geneve.ch/ark:/75245/caT004965399",
 				"attachments": [],
