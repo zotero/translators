@@ -8,7 +8,7 @@
 	"priority": 98,
 	"inRepository": true,
 	"translatorType": 8,
-	"lastUpdated": "2026-09-27 11:48:28"
+	"lastUpdated": "2026-09-30 08:23:10"
 }
 
 /*
@@ -35,8 +35,8 @@
 */
 
 
-// SBN (OPAC SBN) has no public MARC/SRU interface; this uses the JSON gateway
-// behind the official OPAC SBN mobile app.
+// SBN exposes Z39.50 and web MARC exports, but Zotero search translators
+// cannot use the Z39.50 TCP service. Use the official mobile app JSON gateway.
 const API = 'https://opac.sbn.it/opacmobilegw';
 
 const LANGUAGES = {
