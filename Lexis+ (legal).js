@@ -6,14 +6,33 @@
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 90,
-	"inRepository": false,
+	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-09-30 02:06:31"
+	"lastUpdated": "2026-09-30 02:40:08"
 }
 
 /*
-	MIT License. Copyright (c) 2026 jnsheff. See LICENSE in the repository.
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2026 jnsheff
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
 */
 
 // ---- shared legal-citation parsing (identical in both translators; edit src/shared.js) ----
@@ -82,8 +101,10 @@ function parseCitation(text) {
 		if (!isCase && NOT_A_CASE_RE.test(out.reporter)) {
 			out.kind = 'article';
 			out.author = '';
-			var t = /^((?:[A-Z][\w.'\u2019\-]+(?: [A-Z][\w.'\u2019\-]*){0,3})(?: (?:&|and) [A-Z][\w.'\u2019\-]+(?: [A-Z][\w.'\u2019\-]*){0,3})*),\s+(.+)$/.exec(out.name);
-			if (t) { out.author = t[1]; out.title = t[2]; }
+			var t = /^((?:[A-Z][\w.'\u2019-]+(?: [A-Z][\w.'\u2019-]*){0,3})(?: (?:&|and) [A-Z][\w.'\u2019-]+(?: [A-Z][\w.'\u2019-]*){0,3})*),\s+(.+)$/.exec(out.name);
+			if (t) {
+				out.author = t[1]; out.title = t[2];
+			}
 			else out.title = out.name;
 		}
 		else out.kind = 'case';
@@ -128,7 +149,9 @@ function fixCase(s) {
 	s = squash(s);
 	var letters = s.replace(/[^A-Za-z]/g, ''), upper = s.replace(/[^A-Z]/g, '');
 	if (letters.length > 3 && upper.length / letters.length > 0.8) {
-		s = ZU.capitalizeTitle(s.toLowerCase(), true).replace(/\s[Vv]\.?\s/g, ' v. ').replace(/\bMc([a-z])/g, function (x, c) { return 'Mc' + c.toUpperCase(); });
+		s = ZU.capitalizeTitle(s.toLowerCase(), true).replace(/\s[Vv]\.?\s/g, ' v. ').replace(/\bMc([a-z])/g, function (x, c) {
+			return 'Mc' + c.toUpperCase();
+		});
 	}
 	return s;
 }
@@ -141,13 +164,6 @@ var STATES = { Alabama: 'Ala.', Alaska: 'Alaska', Arizona: 'Ariz.', Arkansas: 'A
 	Oregon: 'Or.', Pennsylvania: 'Pa.', 'Rhode Island': 'R.I.', 'South Carolina': 'S.C.', 'South Dakota': 'S.D.', Tennessee: 'Tenn.', Texas: 'Tex.',
 	Utah: 'Utah', Vermont: 'Vt.', Virginia: 'Va.', Washington: 'Wash.', 'West Virginia': 'W. Va.', Wisconsin: 'Wis.', Wyoming: 'Wyo.',
 	'Puerto Rico': 'P.R.', Guam: 'Guam' };
-var STATE_CODES = { AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California', CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware',
-	DC: 'District of Columbia', FL: 'Florida', GA: 'Georgia', HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois', IN: 'Indiana', IA: 'Iowa', KS: 'Kansas',
-	KY: 'Kentucky', LA: 'Louisiana', ME: 'Maine', MD: 'Maryland', MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota', MS: 'Mississippi',
-	MO: 'Missouri', MT: 'Montana', NE: 'Nebraska', NV: 'Nevada', NH: 'New Hampshire', NJ: 'New Jersey', NM: 'New Mexico', NY: 'New York',
-	NC: 'North Carolina', ND: 'North Dakota', OH: 'Ohio', OK: 'Oklahoma', OR: 'Oregon', PA: 'Pennsylvania', RI: 'Rhode Island',
-	SC: 'South Carolina', SD: 'South Dakota', TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont', VA: 'Virginia', WA: 'Washington',
-	WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming', PR: 'Puerto Rico' };
 var CIRCUITS = { First: '1st', Second: '2d', Third: '3d', Fourth: '4th', Fifth: '5th', Sixth: '6th', Seventh: '7th', Eighth: '8th', Ninth: '9th',
 	Tenth: '10th', Eleventh: '11th', 'District of Columbia': 'D.C.', Federal: 'Fed.' };
 
@@ -157,7 +173,9 @@ function abbrevCourt(name) {
 	var n = squash(name).replace(/[.,;\s]+$/, ''), m, div, st;
 	if (/^(?:the )?(?:United States|U\.S\.) Supreme Court$|^Supreme Court of the United States$/i.test(n)) return 'U.S.';
 	if ((m = /Court of Appeals(?:,| for the)? (?:the )?(First|Second|Third|Fourth|Fifth|Sixth|Seventh|Eighth|Ninth|Tenth|Eleventh|District of Columbia|Federal) Circuit/i.exec(n))) {
-		return CIRCUITS[m[1].replace(/^./, function (c) { return c.toUpperCase(); })] + ' Cir.';
+		return CIRCUITS[m[1].replace(/^./, function (c) {
+			return c.toUpperCase();
+		})] + ' Cir.';
 	}
 	// Westlaw: "United States District Court, E.D. Texas"; Lexis: "United States District Court for the Eastern District of Texas"
 	if ((m = /District Court,? (?:for the )?((?:[NSEWMC]\.\s?)+D\.|D\.)\s*(.+)$/.exec(n))) {
@@ -174,19 +192,6 @@ function abbrevCourt(name) {
 	return squash(name).split(' ').length > 3 ? n : squash(name);
 }
 
-var CODE_WORDS = { Civil: 'Civ.', Criminal: 'Crim.', Business: 'Bus.', Commerce: 'Com.', Procedure: 'Proc.', Professions: 'Prof.', Practice: 'Prac.',
-	Remedies: 'Rem.', Government: 'Gov\'t', Education: 'Educ.', Insurance: 'Ins.', Labor: 'Lab.', Family: 'Fam.', Public: 'Pub.', Property: 'Prop.',
-	Revenue: 'Rev.', Transportation: 'Transp.', Vehicle: 'Veh.', Corporations: 'Corp.', Corporation: 'Corp.', Agriculture: 'Agric.',
-	Administrative: 'Admin.', Evidence: 'Evid.', Estates: 'Est.', Utilities: 'Util.', Natural: 'Nat.', Resources: 'Res.', Statutes: 'Stat.',
-	Financial: 'Fin.', Human: 'Hum.', Judiciary: 'Jud.', Legislative: 'Legis.', Municipal: 'Mun.', Occupations: 'Occ.', Regulations: 'Regs.',
-	Social: 'Soc.', Services: 'Servs.', Service: 'Serv.', Environmental: 'Envtl.', Conservation: 'Conserv.' };
-
-// "New York" + "Civil Rights Law" -> "N.Y. Civ. Rights Law"
-function stateCodeName(state, titleDesc) {
-	var words = squash(titleDesc).replace(/^Title \d+\.?\s*/i, '').split(' ').map(function (w) { return CODE_WORDS[w] || w; });
-	return squash((STATES[state] || state) + ' ' + words.join(' '));
-}
-
 // A citation with no name or parenthetical, as in a Westlaw header line: "168 F.4th 231", "2025 WL 458520"
 function parseBareCite(text) {
 	text = squash(text);
@@ -199,7 +204,7 @@ function parseBareCite(text) {
 // A Zotero item from a parsed citation; `extra` = fields read from the page that fill any gaps.
 function buildItem(parsed, extra) {
 	extra = extra || {};
-	var item, court, date, m;
+	var item, court, date;
 	if (parsed.kind === 'statute') {
 		item = new Zotero.Item('statute');
 		item.nameOfAct = extra.title || (parsed.rest && !/^\(/.test(parsed.rest) ? parsed.rest.replace(/\s*\([^)]*\d{4}\)\s*$/, '') : '');
@@ -253,7 +258,7 @@ function buildItem(parsed, extra) {
 
 // Docket number in a block of text ("No. 89-1909", "Civil Action No. 1:24-cv-01234", "Nos. 21-1, 21-2")
 function findDocket(text) {
-	var re = /\b((?:Civil Action |Civ\. ?(?:A\. )?|Case |Docket |Cause )?Nos?\.?\s*[A-Za-z0-9][\w:\-\u2013.\/]*(?:\s*(?:,|and|&)\s*\d[\w:\-\u2013.\/]*)*)/gi, m;
+	var re = /\b((?:Civil Action |Civ\. ?(?:A\. )?|Case |Docket |Cause )?Nos?\.?\s*[A-Za-z0-9][\w:\-\u2013./]*(?:\s*(?:,|and|&)\s*\d[\w:\-\u2013./]*)*)/gi, m;
 	text = squash(text);
 	while ((m = re.exec(text))) {
 		if (/\d/.test(m[1])) return m[1].replace(/[,;.]+$/, '');
@@ -314,7 +319,9 @@ function classify(page) {
 		if (parsed.kind === 'case' && parsed.date && /^\d{4}$/.test(parsed.date) && extra.date && extra.date.slice(-4) === parsed.date) parsed.date = extra.date;
 		return { parsed: parsed, extra: extra };
 	}
-	var st = [page.title, page.pageTitle, page.title + ' ' + page.cite].reduce(function (r, t) { return r || (t && parseStatute(t)); }, null);
+	var st = [page.title, page.pageTitle, page.title + ' ' + page.cite].reduce(function (r, t) {
+		return r || (t && parseStatute(t));
+	}, null);
 	return st ? statuteResult(st, page, extra.date) : null;
 }
 
@@ -329,7 +336,7 @@ function statuteResult(st, page, date) {
 	return { parsed: st, extra: { date: date, title: st.rest } };
 }
 
-var TYPE_OF = { 'case': 'case', statute: 'statute', article: 'journalArticle', treatise: 'bookSection' };
+var TYPE_OF = { case: 'case', statute: 'statute', article: 'journalArticle', treatise: 'bookSection' };
 
 // "Author: Jeremy N. Sheff * * Associate Professor..." (Lexis) -> "Jeremy N. Sheff"
 // "Author: JEANNE C. FROMER + & MARK P. MCKENNA ++ + Professor of Law..." -> "JEANNE C. FROMER; MARK P. MCKENNA"
@@ -338,7 +345,7 @@ function findAuthor(text) {
 	var m = /\bAuthors?:\s*(.*)$/.exec(squash(text));
 	if (!m) return '';
 	var rest = m[1].replace(/\s+(?:Text|Length:|Source:)\b.*$/, ''), names = [];
-	var nameRE = /^\s*([A-Za-z][A-Za-z.'\u2019\-]*(?:\s+[A-Za-z][A-Za-z.'\u2019\-]*){1,4}?)\s*(?=[*+\u2020\u2021]|&|\band\b|;|$)/;
+	var nameRE = /^\s*([A-Za-z][A-Za-z.'\u2019-]*(?:\s+[A-Za-z][A-Za-z.'\u2019-]*){1,4}?)\s*(?=[*+\u2020\u2021]|&|\band\b|;|$)/;
 	for (;;) {
 		var n = nameRE.exec(rest);
 		if (!n) break;
@@ -378,7 +385,9 @@ function readPage(doc) {
 	var infos = doc.querySelectorAll(INFO_SEL), info = [];
 	for (var i = 0; i < infos.length; i++) info.push(spacedText(infos[i]));
 	var court = info[0] || '', title = cleanTitle(firstText(doc, TITLE_SEL));
-	var date = cleanDate(firstText(doc, DATE_SEL)) || findDate(info.join(' ')) || (info.filter(function (i) { return /^(?:\w+\.?,? )?\d{4}$|^[A-Z][a-z]+\.?,? \d{4}$/.test(i); })[0] || ''); // articles: "October, 2012"
+	var date = cleanDate(firstText(doc, DATE_SEL)) || findDate(info.join(' ')) || (info.filter(function (i) {
+		return /^(?:\w+\.?,? )?\d{4}$|^[A-Z][a-z]+\.?,? \d{4}$/.test(i);
+	})[0] || ''); // articles: "October, 2012"
 	return {
 		pageTitle: cleanTitle(doc.title),
 		title: title,
@@ -396,9 +405,11 @@ function readPage(doc) {
 function detectWeb(doc, url) {
 	watchForChanges(doc);
 	try {
-		var type = detect(doc, url);
+		var type = detect(doc);
 		Zotero.debug('Lexis (legal): detectWeb -> ' + type + ' for ' + url.replace(/[?#].*$/, ''));
-		if (!type) Zotero.debug('Lexis (legal): page read as ' + JSON.stringify(readPage(doc), function (k, v) { return k === 'body' ? undefined : v; }));
+		if (!type) Zotero.debug('Lexis (legal): page read as ' + JSON.stringify(readPage(doc), function (k, v) {
+			return k === 'body' ? undefined : v;
+		}));
 		return type;
 	}
 	catch (e) {
@@ -423,7 +434,7 @@ function watchForChanges(doc) {
 // Treatise section: h1 "8 Gilson on Trademarks 1207", breadcrumb trail starting with the book title,
 // banner (h2.SS_Banner) "1207 Refusal on Basis of ..."
 function treatiseFromPage(page) {
-	var m = /^(\d{1,3})\s+(.+?)\s+(\d[\w.:\-]*)$/.exec(page.title), b = /^(\S+)\s+(.+)$/.exec(page.banner || '');
+	var m = /^(\d{1,3})\s+(.+?)\s+(\d[\w.:-]*)$/.exec(page.title), b = /^(\S+)\s+(.+)$/.exec(page.banner || '');
 	if (!m || !b || b[1] !== m[3] || /\u00a7/.test(page.title)) return null;
 	return { kind: 'treatise', title: b[2], bookTitle: page.crumb || m[2], volume: m[1], section: m[3], edition: '', date: '', author: '' };
 }
@@ -433,7 +444,7 @@ function classifyLexis(page) {
 	return tr ? { parsed: tr, extra: {} } : classify(page);
 }
 
-function detect(doc, url) {
+function detect(doc) {
 	if (doc.title && /\bresults\b/i.test(doc.title) && getSearchResults(doc, true)) return 'multiple';
 	var c = classifyLexis(readPage(doc));
 	return c ? TYPE_OF[c.parsed.kind] : false;
@@ -458,7 +469,7 @@ async function doWeb(doc, url) {
 		if (!items) return;
 		for (let u of Object.keys(items)) {
 			try {
-				await scrape(await requestDocument(u), u);
+				await scrape(await requestDocument(u));
 			}
 			catch (e) {
 				Zotero.debug('Lexis: skipped ' + u + ': ' + e.message); // news, agency decisions, etc.
@@ -466,11 +477,11 @@ async function doWeb(doc, url) {
 		}
 	}
 	else {
-		await scrape(doc, url);
+		await scrape(doc);
 	}
 }
 
-async function scrape(doc, url) {
+async function scrape(doc) {
 	var c = classifyLexis(readPage(doc));
 	if (!c) throw new Error('Lexis: could not read a citation from this page');
 	var item = buildItem(c.parsed, c.extra);
@@ -479,3 +490,9 @@ async function scrape(doc, url) {
 	addSnapshot(item, doc);
 	item.complete();
 }
+
+
+/** BEGIN TEST CASES **/
+var testCases = [
+]
+/** END TEST CASES **/
