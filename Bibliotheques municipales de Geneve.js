@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-09-28 08:02:52"
+	"lastUpdated": "2026-09-29 23:50:58"
 }
 
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -40,7 +40,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-const BMG_BASE = "https://www.bm-geneve.ch";
 const MARC_NS = "http://www.loc.gov/MARC21/slim";
 
 function recordID(url) {
@@ -130,7 +129,7 @@ async function doWeb(doc, url) {
 }
 
 async function importBMGRecord(id, exportTitle) {
-	let settings = await requestText(BMG_BASE + "/ark:/75245/in/rest/api/settings.js");
+	let settings = await requestText("/ark:/75245/in/rest/api/settings.js");
 	let tokenMatch = /"apiToken"\s*:\s*"([^"]+)"/.exec(settings);
 	if (!tokenMatch) throw new Error("BMG: apiToken not found in settings.js");
 	let apiToken = tokenMatch[1];
@@ -146,7 +145,7 @@ async function importBMGRecord(id, exportTitle) {
 		micrositeId: "mainSite"
 	});
 
-	let result = await requestText(BMG_BASE + "/in/rest/api/exportInstances", {
+	let result = await requestText("/in/rest/api/exportInstances", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
@@ -167,11 +166,11 @@ async function importBMGRecord(id, exportTitle) {
 
 	let uuid = jobID(response);
 
-	// Sequential, bounded polling; no unavailable sandbox timer APIs required.
+	// Poll the export job sequentially, with a short delay between status checks.
 	let finished = false;
 	for (let attempt = 0; attempt < 30; attempt++) {
 		let statusQuery = "?jobId=" + encodeURIComponent(uuid);
-		let status = await requestJSON(BMG_BASE + "/in/rest/api/getJobStatus" + statusQuery, {
+		let status = await requestJSON("/in/rest/api/getJobStatus" + statusQuery, {
 			headers: {
 				"X-InMedia-Authorization": "Bearer null " + apiToken + " " + bmgChecksum(statusQuery),
 				"X-Microsite-Id": "mainSite"
@@ -186,6 +185,7 @@ async function importBMGRecord(id, exportTitle) {
 		if (status.isRunning !== true && status.isRunning !== "true") {
 			throw new Error("BMG: unrecognized export job status");
 		}
+		await new Promise(resolve => setTimeout(resolve, 500));
 	}
 
 	if (!finished) {
@@ -193,7 +193,7 @@ async function importBMGRecord(id, exportTitle) {
 	}
 
 	let xml = await requestText(
-		BMG_BASE + "/in/rest/annotationSVC/getExportFile/" + encodeURIComponent(uuid)
+		"/in/rest/annotationSVC/getExportFile/" + encodeURIComponent(uuid)
 	);
 
 	let item = parseBMG(xml, id);
@@ -202,28 +202,44 @@ async function importBMGRecord(id, exportTitle) {
 
 function parseBMG(xml, id) {
 	let dom = new DOMParser().parseFromString(xml, "text/xml");
-	if (dom.getElementsByTagName("parsererror").length) throw new Error("BMG: invalid XML export");
+	if (dom.getElementsByTagName("parsererror").length) {
+		throw new Error("BMG: invalid XML export");
+	}
+
 	let records = Array.from(dom.getElementsByTagNameNS(MARC_NS, "record"));
-	if (records.length !== 1) throw new Error("BMG: expected exactly one MARCXML record");
+	if (records.length !== 1) {
+		throw new Error("BMG: expected exactly one MARCXML record");
+	}
+
 	let record = records[0];
 	let exportedID = Array.from(record.getElementsByTagNameNS(MARC_NS, "controlfield"))
 		.find(field => field.getAttribute("tag") === "002");
-	if (exportedID && exportedID.textContent.trim() !== id) throw new Error("BMG: exported record ID does not match requested record");
+	if (exportedID && exportedID.textContent.trim() !== id) {
+		throw new Error("BMG: exported record ID does not match requested record");
+	}
+
 	let fields = tag => Array.from(record.getElementsByTagNameNS(MARC_NS, "datafield"))
 		.filter(field => field.getAttribute("tag") === tag);
-	let values = (field, code) => (field
-		? Array.from(field.getElementsByTagNameNS(MARC_NS, "subfield"))
-		.filter(sub => sub.getAttribute("code") === code)
-		.map(sub => sub.textContent
-	.replace(/[\u0098\u009c]/g, "")
-	.replace(/•<([^>]*)>•/g, "$1")
-	.trim())
-.filter(Boolean)
-		: []);
-	let value = (tag, code) => fields(tag).flatMap(field => values(field, code)).join("; ");
+
+	let values = (field, code) => {
+		if (!field) {
+			return [];
+		}
+
+		return Array.from(field.getElementsByTagNameNS(MARC_NS, "subfield"))
+			.filter(sub => sub.getAttribute("code") === code)
+			.map(sub => sub.textContent
+				.replace(/[\u0098\u009c]/g, "")
+				.replace(/•<([^>]*)>•/g, "$1")
+				.trim())
+			.filter(Boolean);
+	};
+
+	let value = (tag, code) => fields(tag)
+		.flatMap(field => values(field, code))
+		.join("; ");
 
 	let format = value("109", "g");
-
 	let itemType = "book";
 
 	if (format === "DVD") {
@@ -237,11 +253,17 @@ function parseBMG(xml, id) {
 
 	item.title = value("200", "a");
 	let subtitle = value("200", "e");
-	if (subtitle) item.title += ": " + subtitle;
-	if (!item.title) throw new Error("BMG: missing UNIMARC 200$a title");
+	if (subtitle) {
+		item.title += ": " + subtitle;
+	}
+	if (!item.title) {
+		throw new Error("BMG: missing UNIMARC 200$a title");
+	}
+
 	item.ISBN = value("010", "a");
 	item.place = value("210", "a");
 	item.publisher = value("210", "c");
+
 	if (itemType === "film") {
 		let filmDate = value("300", "a").match(/\bFilm de (\d{4})\b/i);
 		item.date = filmDate ? filmDate[1] : value("210", "d");
@@ -249,13 +271,15 @@ function parseBMG(xml, id) {
 	else {
 		item.date = value("210", "d");
 	}
+
 	item.edition = value("205", "a");
 	item.language = value("101", "a");
 	item.abstractNote = value("330", "a");
+
 	let seriesStatement = fields("225")
-	.map(field => [...values(field, "a"), ...values(field, "i")].join(". "))
-	.filter(Boolean)
-	.join("; ");
+		.map(field => [...values(field, "a"), ...values(field, "i")].join(". "))
+		.filter(Boolean)
+		.join("; ");
 
 	let setTitle = value("461", "a");
 	let setNumber = value("461", "v");
@@ -281,23 +305,34 @@ function parseBMG(xml, id) {
 	}
 	else {
 		let pages = /(?:^|[\s(])(\d+)\s*p(?:\.|ages?\b)/i.exec(extent);
-		if (pages) item.numPages = pages[1];
+		if (pages) {
+			item.numPages = pages[1];
+		}
 	}
 
 	let extras = [];
+
 	if (itemType === "film" && seriesStatement) {
 		extras.push("Series: " + seriesStatement);
 		let seriesNumber = value("225", "v");
-		if (seriesNumber) extras.push("Series Number: " + seriesNumber);
+		if (seriesNumber) {
+			extras.push("Series Number: " + seriesNumber);
+		}
 	}
+
 	let audience = value("333", "a");
-	if (audience) extras.push("Public : " + audience);
+	if (audience) {
+		extras.push("Public : " + audience);
+	}
+
 	if (setTitle && setNumber && seriesStatement) {
 		extras.push("Mention de collection : " + seriesStatement);
 	}
+
 	if (setTitle && !setNumber) {
 		extras.push("Set: " + setTitle);
 	}
+
 	let physicalDetails = value("215", "c");
 
 	if (physicalDetails) {
@@ -316,28 +351,45 @@ function parseBMG(xml, id) {
 	if (dimensions && itemType !== "film" && itemType !== "audioRecording") {
 		extras.push("Dimensions: " + dimensions);
 	}
+
+	let isAudiobook = itemType === "audioRecording"
+		&& fields("608").some(field => values(field, "a").includes("LIVRE LU"));
+
 	for (let tag of ["700", "701", "702"]) {
 		for (let field of fields(tag)) {
 			let surname = values(field, "a").join(" ");
-			if (!surname) continue;
+			if (!surname) {
+				continue;
+			}
+			surname = ZU.capitalizeName(surname);
 
 			let role = tag === "702" ? "contributor" : "author";
 			let relator = values(field, "4")[0];
-			if (
-				itemType === "audioRecording"
-	&& tag === "700"
-	&& fields("608").some(field => values(field, "a").includes("LIVRE LU"))
-			) {
+
+			if (isAudiobook && tag === "700") {
 				role = "originalCreator";
 			}
 
-			if (relator === "730") role = "translator";
-			if (relator === "340") role = "editor";
-			if (itemType === "film" && relator === "005") role = "castMember";
+			if (relator === "730") {
+				role = "translator";
+			}
+			if (relator === "340") {
+				role = "editor";
+			}
+			if (itemType === "film" && relator === "005") {
+				role = "castMember";
+			}
+
 			if (itemType === "audioRecording") {
-				if (relator === "230") role = "composer";
-				if (relator === "480") role = "wordsBy";
-				if (["250", "545", "550", "721"].includes(relator)) role = "performer";
+				if (relator === "230") {
+					role = "composer";
+				}
+				if (relator === "480") {
+					role = "wordsBy";
+				}
+				if (["250", "545", "550", "721"].includes(relator)) {
+					role = "performer";
+				}
 			}
 
 			let given = values(field, "b").join(" ");
@@ -354,16 +406,23 @@ function parseBMG(xml, id) {
 			}
 		}
 	}
+
 	if (itemType === "audioRecording") {
 		for (let field of fields("712")) {
 			let name = values(field, "a").join(" ");
 			let subdivision = values(field, "b").join(" ");
 			let place = values(field, "c").join(" ");
 
-			if (!name) continue;
+			if (!name) {
+				continue;
+			}
 
-			if (subdivision) name += ". " + subdivision;
-			if (place) name += " (" + place + ")";
+			if (subdivision) {
+				name += ". " + subdivision;
+			}
+			if (place) {
+				name += " (" + place + ")";
+			}
 
 			item.creators.push({
 				lastName: name,
@@ -374,29 +433,38 @@ function parseBMG(xml, id) {
 	}
 
 	item.extra = extras.join("\n");
-	if (itemType === "book"
-	&& !item.creators.some(creator => creator.creatorType === "author")
-	&& value("200", "f")) {
+
+	if (
+		itemType === "book"
+		&& !item.creators.some(creator => creator.creatorType === "author")
+		&& value("200", "f")
+	) {
 		item.creators.push(ZU.cleanAuthor(value("200", "f"), "author"));
 	}
+
 	for (let tag of ["600", "601", "602", "604", "605", "606", "607", "608", "610"]) {
 		for (let field of fields(tag)) {
 			let heading = values(field, "a").join(" ");
-
 			let given = values(field, "b").join(" ");
 
-			if (given) heading += ", " + given;
+			if (given) {
+				heading += ", " + given;
+			}
 
 			let divisions = ["j", "x", "y", "z"].flatMap(code => values(field, code));
+			if (divisions.length) {
+				heading += " -- " + divisions.join(" -- ");
+			}
 
-			if (divisions.length) heading += " -- " + divisions.join(" -- ");
-
-			if (heading) item.tags.push({ tag: heading });
+			if (heading) {
+				item.tags.push({ tag: heading });
+			}
 		}
 	}
 
-	item.url = BMG_BASE + "/ark:/75245/ca" + id;
+	item.url = "https://www.bm-geneve.ch/ark:/75245/ca" + id;
 	item.libraryCatalog = "Bibliothèques municipales de Genève";
+
 	return item;
 }
 
@@ -412,19 +480,19 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Timo",
-						"lastName": "PARVELA",
+						"lastName": "Parvela",
 						"creatorType": "author"
 					},
 					{
 						"firstName": "Johanna",
-						"lastName": "KUNINGAS",
+						"lastName": "Kuningas",
 						"creatorType": "translator"
 					}
 				],
 				"date": "2023",
 				"ISBN": "9782092595985",
 				"abstractNote": "Pour impressionner sa nouvelle voisine, Toni emprunte un cheval dans un centre équestre mais l'animal s'enfuit. Heureusement, il peut compter sur ses amis pour l'aider à le retrouver. ©Electre 2023",
-				"extra": "Illustrator: ZONK || Zelda\nPublic : A partir de 8 ans\nMention de collection : Nathan poche. Premiers romans\nIllustrations: illustrations en noir et en couleur\nDimensions: 19 x 15 cm",
+				"extra": "Illustrator: Zonk || Zelda\nPublic : A partir de 8 ans\nMention de collection : Nathan poche. Premiers romans\nIllustrations: illustrations en noir et en couleur\nDimensions: 19 x 15 cm",
 				"language": "fre",
 				"libraryCatalog": "Bibliothèques municipales de Genève",
 				"numPages": "152",
@@ -455,22 +523,22 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Agnès",
-						"lastName": "JAOUI",
+						"lastName": "Jaoui",
 						"creatorType": "author"
 					},
 					{
 						"firstName": "Jean-Pierre",
-						"lastName": "BACRI",
+						"lastName": "Bacri",
 						"creatorType": "castMember"
 					},
 					{
 						"firstName": "Agnès",
-						"lastName": "JAOUI",
+						"lastName": "Jaoui",
 						"creatorType": "castMember"
 					},
 					{
 						"firstName": "Léa",
-						"lastName": "DRUCKER",
+						"lastName": "Drucker",
 						"creatorType": "castMember"
 					}
 				],
@@ -508,12 +576,12 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Jean-Philippe",
-						"lastName": "ARROU-VIGNOD",
+						"lastName": "Arrou-Vignod",
 						"creatorType": "originalCreator"
 					},
 					{
 						"firstName": "Laurent",
-						"lastName": "STOCKER",
+						"lastName": "Stocker",
 						"creatorType": "performer"
 					}
 				],
@@ -552,47 +620,47 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Wolfgang Amadeus",
-						"lastName": "MOZART",
+						"lastName": "Mozart",
 						"creatorType": "composer"
 					},
 					{
 						"firstName": "Lorenzo",
-						"lastName": "DA PONTE",
+						"lastName": "Da Ponte",
 						"creatorType": "wordsBy"
 					},
 					{
 						"firstName": "José van",
-						"lastName": "DAM",
+						"lastName": "Dam",
 						"creatorType": "performer"
 					},
 					{
 						"firstName": "Tom",
-						"lastName": "KRAUSE",
+						"lastName": "Krause",
 						"creatorType": "performer"
 					},
 					{
 						"firstName": "Elizabeth",
-						"lastName": "HARWOOD",
+						"lastName": "Harwood",
 						"creatorType": "performer"
 					},
 					{
 						"firstName": "Mirella",
-						"lastName": "FRENI",
+						"lastName": "Freni",
 						"creatorType": "performer"
 					},
 					{
 						"firstName": "Frederica von",
-						"lastName": "STADE",
+						"lastName": "Stade",
 						"creatorType": "performer"
 					},
 					{
 						"firstName": "Paolo",
-						"lastName": "MONTARSOLO",
+						"lastName": "Montarsolo",
 						"creatorType": "performer"
 					},
 					{
 						"firstName": "Herbert von",
-						"lastName": "KARAJAN",
+						"lastName": "Karajan",
 						"creatorType": "performer"
 					},
 					{
