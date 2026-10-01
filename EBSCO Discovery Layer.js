@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-06-15 16:55:08"
+	"lastUpdated": "2026-10-01 19:44:01"
 }
 
 /*
@@ -119,7 +119,7 @@ async function scrape(doc, url = doc.location.href) {
 
 	let pdfURL;
 	try {
-		let [{ result }] = await requestJSON(`/api/viewer/v6/htmlfulltext/${recordId}?opid=${opid}`);
+		let [{ result }] = await requestJSON(`/api/viewer/v6/details/${recordId}?opid=${opid}&includeHbrRestrictedLinks=true`);
 		let { links } = result;
 		Z.debug('Links:');
 		Z.debug(links);
@@ -131,7 +131,17 @@ async function scrape(doc, url = doc.location.href) {
 
 		if (downloadLink) {
 			pdfURL = downloadLink.url;
-			Zotero.debug('Trying v2-downloadLinks[type == pdf]: ' + downloadLink.url);
+			if (pdfURL.includes('/api/')) {
+				// Returns JSON with the URL
+				Zotero.debug('Trying to fetch PDF download link');
+				try {
+					pdfURL = (await requestJSON(pdfURL)).url;
+				}
+				catch (e) {
+					Zotero.debug('Error while fetching PDF download link: ' + e);
+				}
+			}
+			Zotero.debug('Trying v2-downloadLinks[type == pdf]: ' + pdfURL);
 		}
 		else if (externalLink) {
 			Zotero.debug('Trying v2-fullTextAndCustomLinks[category == fullText] via web translation: ' + externalLink.url);
