@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-09-25 17:36:28"
+	"lastUpdated": "2026-10-01 22:00:00"
 }
 
 /*
@@ -612,11 +612,12 @@ function fixItem(doc, url, item, parentDoc) {
 			url: pdfUrl
 		});
 	}
-
-	item.attachments.push({
-		title: 'Snapshot',
-		document: doc
-	});
+	else {
+		item.attachments.push({
+			title: 'Snapshot',
+			document: doc
+		});
+	}
 }
 
 /** BEGIN TEST CASES **/
@@ -651,10 +652,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -714,10 +711,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -780,10 +773,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -825,10 +814,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -864,10 +849,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
