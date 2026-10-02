@@ -1439,6 +1439,7 @@ function importItem(newItem, node) {
 				// Don't override newItem.creators with RDF nodes that will cause an import error
 				&& uri.substring(n.z.length) !== 'creators') {
 			var property = uri.substr(n.z.length);
+			if (possibleCreatorTypes.some(type => property === type + 's')) continue;
 			newItem[property] = Zotero.RDF.getTargets(node, n.z + property)[0];
 		}
 	}
@@ -1843,6 +1844,27 @@ var testCases = [
 				"itemID": "https://example.com/video",
 				"libraryCatalog": "Example.com",
 				"url": "https://example.com/video",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<rdf:RDF\n xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n xmlns:z=\"http://www.zotero.org/namespaces/export#\"\n xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n xmlns:foaf=\"http://xmlns.com/foaf/0.1/\"\n xmlns:bib=\"http://purl.org/net/biblio#\">\n    <bib:Legislation rdf:about=\"#item_1\">\n        <z:itemType>bill</z:itemType>\n        <z:sponsors>\n            <rdf:Seq>\n                <rdf:li>\n                    <foaf:Person>\n                        <foaf:surname>Justisnemnda</foaf:surname>\n                    </foaf:Person>\n                </rdf:li>\n            </rdf:Seq>\n        </z:sponsors>\n        <dc:title>Test bill</dc:title>\n    </bib:Legislation>\n</rdf:RDF>\n",
+		"items": [
+			{
+				"itemType": "bill",
+				"title": "Test bill",
+				"creators": [
+					{
+						"creatorType": "sponsor",
+						"lastName": "Justisnemnda"
+					}
+				],
+				"itemID": "#item_1",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
