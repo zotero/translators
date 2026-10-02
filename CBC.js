@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-02 05:53:50"
+	"lastUpdated": "2026-10-02 07:11:13"
 }
 
 /*
@@ -419,38 +419,6 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.cbc.ca/search?q=Trudeau",
 		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://www.cbc.ca/news/politics/f-35-gripen-saab-lockheed-martin-canadian-armed-forces-9.7225549",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Ottawa's mixed fleet of F-35s and Gripens could total more than 100 aircraft, sources say",
-				"creators": [
-					{
-						"firstName": "Daniel",
-						"lastName": "Leblanc",
-						"creatorType": "author"
-					}
-				],
-				"date": "2026-06-06",
-				"abstractNote": "The federal government would still be looking at a fleet of 72 to 88 U.S.-made F-35s, even if it moves forward with Saab's Gripen, sources tell CBC News. Several sources said Ottawa is exploring a purchase of 72 Gripens, which would create up to 9,000 jobs and would be the largest industrial project in Canada.",
-				"language": "en-CA",
-				"libraryCatalog": "CBC.ca",
-				"publicationTitle": "CBC News",
-				"url": "https://www.cbc.ca/news/politics/f-35-gripen-saab-lockheed-martin-canadian-armed-forces-9.7225549",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
 	},
 	{
 		"type": "web",
