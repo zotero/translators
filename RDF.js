@@ -1439,7 +1439,7 @@ function importItem(newItem, node) {
 				// Don't override newItem.creators with RDF nodes that will cause an import error
 				&& uri.substring(n.z.length) !== 'creators') {
 			var property = uri.substr(n.z.length);
-			if (possibleCreatorTypes.some(type => property === type + 's')) continue;
+			if (property.endsWith('s') && possibleCreatorTypes.includes(property.slice(0, -1))) continue;
 			newItem[property] = Zotero.RDF.getTargets(node, n.z + property)[0];
 		}
 	}
