@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-07 09:22:57"
+	"lastUpdated": "2026-10-07 09:37:53"
 }
 
 /*
@@ -195,6 +195,7 @@ function endnoteToRefworks(endnote) {
 		N: 'IS',
 		X: 'AB',
 		P: 'SP',
+		8: 'FD',
 		9: 'CL',
 		'@': 'SN',
 		U: 'UL',
