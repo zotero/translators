@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-07 09:58:15"
+	"lastUpdated": "2026-10-07 10:28:44"
 }
 
 /*
@@ -875,6 +875,181 @@ var testCases = [
 					},
 					{
 						"tag": "工艺优化"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZzfkI2FftlrPbr8PF6YBXgogfhyVYNQZqzIXrd7WZ89rQVSiucQppPXfPB3c7JD8VQXACtdD8_OvMigKKzqybIlLnnmEt10FfdRS6Ads33eD5NuCpyYLWPN4tjrcyCiYA8YxpUJpHUy6ZV7YWw2VxsleA1F_8UmU9FTLw8sg9QFaJw==",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "柏孜克里克石窟法华经变内容补遗",
+				"creators": [
+					{
+						"lastName": "董",
+						"firstName": "俊彦",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026",
+				"DOI": "10.14087/j.cnki.65-1268/k.2026.01.011",
+				"ISSN": "1674-2893",
+				"abstractNote": "柏孜克里克石窟23窟、49窟以及51窟皆绘制有法华经变的内容。自上世纪初，随着西方探险队的新疆探险活动，此三窟逐渐为世人所知。本文对以往学术界的遗漏之处进行了补充，将部分未被关注到的壁画进行了考释，内容涉及《序品》《方便品》《观音普门品》《提婆达多品》《见宝塔品》《药王菩萨本事品》《观音普门品》等内容。柏孜克里克石窟的法华经变体现了法华信仰在高昌回鹘时期的延续，另一方面也反映了高昌回鹘佛教图像对中原图像系统的继承和发展，体现了中原与高昌的频繁交往。",
+				"issue": "1",
+				"libraryCatalog": "CNKI",
+				"pages": "106-116+154-155+173",
+				"publicationTitle": "吐鲁番学研究",
+				"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZzfkI2FftlrPbr8PF6YBXgogfhyVYNQZqzIXrd7WZ89rQVSiucQppPXfPB3c7JD8VQXACtdD8_OvMigKKzqybIlLnnmEt10FfdRS6Ads33eD5NuCpyYLWPN4tjrcyCiYA8YxpUJpHUy6ZV7YWw2VxsleA1F_8UmU9FTLw8sg9QFaJw==",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "高昌回鹘"
+					},
+					{
+						"tag": "柏孜克里克石窟"
+					},
+					{
+						"tag": "法华经变"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZzflAcBJ38DcDk5RCJ9f-Jc688QyTasG4_a6JbLjKtG0ap0X22iQwmAoNYRo-v0lUsf880fXmK7u2pl5EPub8CwbCn5MRj4y-jTXvlflMTC_eYDprTkbwMioYNbQ5cPFoBpZP87YKQUYn7Jy0v1EDQBz448VIQKFndfsu1Ex4vJeIQ4MWigrw9wS",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "吐鲁番高昌回鹘时期药师经变图像艺术研究",
+				"creators": [
+					{
+						"lastName": "万",
+						"firstName": "慧通",
+						"creatorType": "author"
+					}
+				],
+				"date": "2023",
+				"abstractNote": "六朝之初,《药师经》传入中原,到唐代药师信仰才开始进入兴盛期。高昌地区关于药师佛的经典在柏孜克里克石窟、高昌故城、交河故城、吐峪沟都曾出土过,时间跨度为六朝至西州回鹘时期。关于药师的美术作品最早有公元8—9世纪的药师如来幡画,最晚有元刻本藏式版画《三世佛与伎乐天》,虽然高昌地区的药师信仰传入很早,但直到高昌回鹘时期《药师经变》才开始绘制。本文在对高昌地区药师佛绘画作品整理的基础上,考察高昌地区药师信仰、作品遗存以及隋至西夏时期敦煌《药师经变》的绘制情况,对伯西哈石窟和柏孜克里克石窟中的《药师经变》进行探讨,以图像的内容结合经典进行解读,高昌回鹘时期的《药师经变》已不像唐宋时期莫高窟那般详尽表现净土世界的天宫伎乐、宝池莲花等,绘制目的从往生净土的愿望转向供养。柏孜克里克石窟中的《药师经变》受到多种因素的影响,相比伯西哈石窟高昌回鹘时期的《药师经变》更具特点,体现在构图形式的变化、图像志的借用等,揭示了高昌地区的《药师经变》从摹仿到吸收创新的过程。",
+				"libraryCatalog": "CNKI",
+				"thesisType": "硕士",
+				"university": "新疆艺术学院",
+				"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZzflAcBJ38DcDk5RCJ9f-Jc688QyTasG4_a6JbLjKtG0ap0X22iQwmAoNYRo-v0lUsf880fXmK7u2pl5EPub8CwbCn5MRj4y-jTXvlflMTC_eYDprTkbwMioYNbQ5cPFoBpZP87YKQUYn7Jy0v1EDQBz448VIQKFndfsu1Ex4vJeIQ4MWigrw9wS",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "高昌回鹘"
+					},
+					{
+						"tag": "伯西哈石窟"
+					},
+					{
+						"tag": "柏孜克里克石窟"
+					},
+					{
+						"tag": "药师经变"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZzcWpEEYDysxZfcw2BE3GC0b9vfE7s8uYpn44uyAIIACphxvR9a2rE9veuUwcAw5Nh1cFougZmAgawdAyJB5KZY3TI2G0m6FZffCxV85DhTm4mJ13SHY_X3dxpVyky2J-EqF7CrY7NqrBBWOA1vs650IY83J_e3bKMs5IpoytdoSqA==",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "“关铭闻”里藏着什么力量？",
+				"creators": [
+					{
+						"lastName": "朱",
+						"firstName": "子钰",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "杜",
+						"firstName": "一娜",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-09-29",
+				"libraryCatalog": "CNKI",
+				"pages": "005",
+				"publicationTitle": "中国新闻出版广电报",
+				"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZzcWpEEYDysxZfcw2BE3GC0b9vfE7s8uYpn44uyAIIACphxvR9a2rE9veuUwcAw5Nh1cFougZmAgawdAyJB5KZY3TI2G0m6FZffCxV85DhTm4mJ13SHY_X3dxpVyky2J-EqF7CrY7NqrBBWOA1vs650IY83J_e3bKMs5IpoytdoSqA==",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZzdNB1er3w6U7vRJVszOiaXScfrfjsvfvv6s3BsDMaDmsV-oNhnDxDcZYg9UhNXjJe2E-kSJQ-QFl26Ovt2mRzpF2GqfsN6RjzDrRE1t0lyMXyV2rF_AsQHqq2u3Qjk3lNe1I2-OHWHomUTGrOQffaciRlz7ijcMqZYtnJnnT97JB-Y6ysXyr5TO",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "基于图像识别的气象站探测设备环境风险等级判识方法",
+				"creators": [
+					{
+						"lastName": "王",
+						"firstName": "超然",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "白",
+						"firstName": "子诚",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "吴",
+						"firstName": "松",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-10-19",
+				"DOI": "10.26914/c.cnkihy.2026.057598",
+				"abstractNote": "<正>气象站探测环境是保障观测资料代表性、准确性和可比性的基础。雨量筒、百叶箱周边的植被生长、杂物堆积等变化,可能对降水、气温等要素观测产生影响。现有探测环境保护主要依赖人工巡查,难以兼顾巡查频次、覆盖范围和异常响应时效。当前部分野外无人值守地面自动气象观测站(以下简称气象站)配备了安防摄像头,可持续获取观测场实景图像,为探测环境自动监测提供了数据基础。基于此,本研究利用深度学习图像识别技术,自动判识气象站雨量筒和百叶箱的观测环境状态,并依据设备状态组合实现探测环境风险等级划分与提示。",
+				"conferenceName": "第37届中国气象学会年会",
+				"libraryCatalog": "CNKI",
+				"pages": "44",
+				"place": "中国甘肃兰州",
+				"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZzdNB1er3w6U7vRJVszOiaXScfrfjsvfvv6s3BsDMaDmsV-oNhnDxDcZYg9UhNXjJe2E-kSJQ-QFl26Ovt2mRzpF2GqfsN6RjzDrRE1t0lyMXyV2rF_AsQHqq2u3Qjk3lNe1I2-OHWHomUTGrOQffaciRlz7ijcMqZYtnJnnT97JB-Y6ysXyr5TO",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "气象站"
+					},
+					{
+						"tag": "探测环境"
+					},
+					{
+						"tag": "百叶箱"
+					},
+					{
+						"tag": "雨量筒"
+					},
+					{
+						"tag": "判识方法"
+					},
+					{
+						"tag": "探测设备"
+					},
+					{
+						"tag": "风险等级"
+					},
+					{
+						"tag": "图像识别"
 					}
 				],
 				"notes": [],
