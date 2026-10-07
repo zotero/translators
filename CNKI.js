@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-07 10:59:58"
+	"lastUpdated": "2026-10-07 11:05:18"
 }
 
 /*
@@ -390,6 +390,7 @@ async function scrapeExport(exportInfo, doc, url) {
 			body: body,
 			headers: {
 				"Content-Type": "application/x-www-form-urlencoded",
+				Origin: "https://kns.cnki.net",
 				Referer: url
 			}
 		}
