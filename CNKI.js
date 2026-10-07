@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-07 10:43:59"
+	"lastUpdated": "2026-10-07 10:53:19"
 }
 
 /*
@@ -262,6 +262,14 @@ function getElearningValue(elearning, label) {
 	return '';
 }
 
+// New (kns8s) search-result rows carry the export id in the row's selection
+// checkbox, so each result can be exported directly.
+function getExportInfoFromRow(row, url) {
+	var exportId = attr(row, 'input.cbItem', 'value');
+	if (!exportId) return false;
+	return { exportId: exportId, exportUrl: 'https://kns.cnki.net/dm8/API/GetExport', url: url };
+}
+
 function getItemsFromSearchResults(doc, url, itemInfo) {
 	var iframe = doc.getElementById('iframeResult');
 	if (iframe) {
@@ -271,8 +279,11 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 		}
 	}
 	
-	var links = ZU.xpath(doc, '//tr[not(.//tr) and .//a[@class="fz14"]]');
+	var links = ZU.xpath(doc, '//table[contains(@class, "result-table-list")]/tbody/tr');
 	var aXpath = './/a[@class="fz14"]';
+	if (!links.length) {
+		links = ZU.xpath(doc, '//tr[not(.//tr) and .//a[@class="fz14"]]');
+	}
 	if (!links.length) {
 		links = ZU.xpath(doc, '//table[@class="GridTableContent"]/tbody/tr[./td[2]/a]');
 		aXpath = './td[2]/a';
@@ -282,18 +293,15 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 	}
 	var items = {};
 	for (var i = 0, n = links.length; i < n; i++) {
-		// Z.debug(links[i].innerHTML)
 		var a = ZU.xpath(links[i], aXpath)[0];
+		if (!a) continue;
 		var title = ZU.xpathText(a, './node()[not(name()="SCRIPT")]', null, '');
 		if (title) title = ZU.trimInternal(title);
-		var id = getIDFromURL(a.href) || getIDFromSearchRow(links[i]);
-		// pre-released item can not get ID from URL, try to get ID from element.value
-		if (!id) {
-			var td1 = ZU.xpath(links[i], './td')[0];
-			var tmp = td1.value.split('!');
-			id = { dbname: tmp[0], filename: tmp[1], url: a.href };
-		}
-		if (!title || !id) continue;
+		if (!title) continue;
+		var id = getExportInfoFromRow(links[i], a.href)
+			|| getIDFromURL(a.href)
+			|| getIDFromSearchRow(links[i]);
+		if (!id) continue;
 		if (itemInfo) {
 			itemInfo[a.href] = { id: id };
 		}
@@ -310,7 +318,7 @@ function detectWeb(doc, url) {
 	// Z.debug(doc);
 	var id = getIDFromPage(doc, url);
 	var items = getItemsFromSearchResults(doc, url);
-	var searchResult = doc.querySelector("#ModuleSearchResult");
+	var searchResult = doc.querySelector("#gridTable") || doc.querySelector("#ModuleSearchResult");
 	if (searchResult) {
 		Z.monitorDOMChanges(searchResult, { childList: true, subtree: true });
 	}
@@ -337,7 +345,13 @@ async function doWeb(doc, url) {
 		let selectItems = await Z.selectItems(items);
 		if (selectItems) {
 			for (let url in selectItems) {
-				await scrape(itemInfo[url].id, doc, { url: url });
+				let id = itemInfo[url].id;
+				if (id.exportId) {
+					await scrapeExport(id, doc, url);
+				}
+				else {
+					await scrape(id, doc, { url: url });
+				}
 			}
 		}
 	}
