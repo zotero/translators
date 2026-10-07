@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-07 09:37:53"
+	"lastUpdated": "2026-10-07 09:58:15"
 }
 
 /*
@@ -183,18 +183,21 @@ var endnoteTypeMap = {
 	'Web Page': 'Web Page'
 };
 
-// Convert a CNKI EndNote (%X) export record to RefWorks tagged text.
-function endnoteToRefworks(endnote) {
+// Convert a CNKI EndNote (%X) export record to RefWorks tagged text. The
+// E-Study record (`elearning`) is consulted for fields the EndNote record
+// lacks, such as the full date of a conference paper.
+function endnoteToRefworks(endnote, elearning) {
 	var tagMap = {
 		A: 'A1',
 		T: 'T1',
+		B: 'T2',
 		J: 'JF',
+		C: 'U1',
 		I: 'PB',
 		D: 'YR',
 		V: 'VO',
 		N: 'IS',
 		X: 'AB',
-		P: 'SP',
 		8: 'FD',
 		9: 'CL',
 		'@': 'SN',
@@ -214,9 +217,11 @@ function endnoteToRefworks(endnote) {
 	
 	var out = [];
 	var keywords = [];
+	var type = '';
+	var page = '';
 	for (let record of records) {
 		if (record.tag === '0') {
-			let type = record.value.trim();
+			type = record.value.trim();
 			out.push('RT ' + (endnoteTypeMap[type] || type));
 		}
 		else if (record.tag === 'K') {
@@ -225,14 +230,36 @@ function endnoteToRefworks(endnote) {
 				if (keyword) keywords.push(keyword);
 			}
 		}
+		else if (record.tag === 'P') {
+			// CNKI writes the page count first and the actual page(s) last
+			page = record.value.trim();
+		}
 		else if (tagMap[record.tag]) {
 			out.push(tagMap[record.tag] + ' ' + record.value.trim());
 		}
+	}
+	if (page) out.push('SP ' + page);
+	// Conference papers' EndNote record carries only the year; the full date is
+	// in the E-Study record.
+	if (/^Conference/.test(type) && elearning) {
+		let date = getElearningValue(elearning, 'PubTime');
+		if (date) out.push('FD ' + date);
 	}
 	for (let keyword of keywords) {
 		out.push('K1 ' + keyword);
 	}
 	return out.join('\n');
+}
+
+// Read a labelled field from a CNKI E-Study record, e.g. the value of
+// "PubTime-出版时间: 2026-10-19" for label "PubTime".
+function getElearningValue(elearning, label) {
+	var re = new RegExp('^' + label + '-[^:]*:\\s*(.*)$');
+	for (let line of elearning.replace(/<br\s*\/?>/gi, '\n').split(/\r?\n/)) {
+		let match = line.match(re);
+		if (match) return match[1].trim();
+	}
+	return '';
 }
 
 function getItemsFromSearchResults(doc, url, itemInfo) {
@@ -366,7 +393,14 @@ async function scrapeExport(exportInfo, doc, url) {
 		Z.debug('CNKI: no EndNote export data returned');
 		return;
 	}
-	importRefworks(endnoteToRefworks(endnote.value.join('\n')), doc, url);
+	var elearning = data.data.find(entry => entry.mode === 'ELEARNING');
+	importRefworks(
+		endnoteToRefworks(
+			endnote.value.join('\n'),
+			elearning ? elearning.value.join('\n') : ''
+		),
+		doc, url
+	);
 }
 
 // Feed RefWorks tagged text to the bundled RefWorks Tagged importer and clean
