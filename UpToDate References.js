@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcv",
-	"lastUpdated": "2019-06-11 13:44:39"
+	"lastUpdated": "2026-10-07 15:45:07"
 }
 
 /*
@@ -174,11 +174,6 @@ var testCases = [
 				"publicationTitle": "CA: a cancer journal for clinicians",
 				"volume": "61",
 				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					},
 					{
 						"title": "UpToDate Record",
 						"mimeType": "text/html"

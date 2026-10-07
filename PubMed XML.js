@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2026-05-21 14:52:55"
+	"lastUpdated": "2026-10-07 15:45:06"
 }
 
 /*
@@ -259,13 +259,6 @@ function doImport() {
 		var PMCID = ZU.xpathText(articles[i], 'PubmedData/ArticleIdList/ArticleId[@IdType="pmc"]');
 		if (PMID) {
 			newItem.PMID = PMID;
-			// this is a catalog, so we should store links as attachments
-			newItem.attachments.push({
-				title: "PubMed entry",
-				url: "http://www.ncbi.nlm.nih.gov/pubmed/" + PMID,
-				mimeType: "text/html",
-				snapshot: false
-			});
 		}
 
 		if (PMCID) {
@@ -353,14 +346,6 @@ function doImport() {
 		let PMID = ZU.xpathText(citation, 'PMID');
 		if (PMID) {
 			newItem.extra = "PMID: " + PMID;
-
-			// this is a catalog, so we should store links as attachments
-			newItem.attachments.push({
-				title: "PubMed entry",
-				url: "http://www.ncbi.nlm.nih.gov/pubmed/" + PMID,
-				mimeType: "text/html",
-				snapshot: false
-			});
 		}
 
 		newItem.callNumber = ZU.xpathText(citation,
@@ -437,13 +422,7 @@ var testCases = [
 				"pages": "132-142",
 				"publicationTitle": "Nature Chemical Biology",
 				"volume": "4",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Animals"
@@ -519,13 +498,7 @@ var testCases = [
 				"pages": "110-112",
 				"publicationTitle": "Nature Chemical Biology",
 				"volume": "4",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Amino Acid Sequence"
@@ -598,13 +571,7 @@ var testCases = [
 				"publisher": "BIOS Scientific Publishers",
 				"rights": "Copyright © 2001, BIOS Scientific Publishers Limited",
 				"url": "http://www.ncbi.nlm.nih.gov/books/NBK22/",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -671,13 +638,7 @@ var testCases = [
 				"pages": "5194-5210",
 				"publicationTitle": "Journal of Dairy Science",
 				"volume": "98",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Johne’s disease"
@@ -730,13 +691,7 @@ var testCases = [
 				"pages": "693-710",
 				"publicationTitle": "Journal of the Royal Statistical Society. Series C, Applied Statistics",
 				"volume": "64",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Classification"
@@ -792,13 +747,7 @@ var testCases = [
 				"pages": "205-207",
 				"publicationTitle": "Nurse Educator",
 				"volume": "35",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Bibliographies as Topic"
@@ -900,13 +849,7 @@ var testCases = [
 				"pages": "e12516",
 				"publicationTitle": "Genes, Brain, and Behavior",
 				"volume": "17",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Animals"
@@ -1038,13 +981,7 @@ var testCases = [
 				"pages": "e42692",
 				"publicationTitle": "eLife",
 				"volume": "8",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Animals"
@@ -1139,13 +1076,7 @@ var testCases = [
 				"pages": "EWLS",
 				"publicationTitle": "Lakartidningen",
 				"volume": "114",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -1198,13 +1129,7 @@ var testCases = [
 				"place": "Hoboken, N.J.",
 				"publicationTitle": "Arthritis & Rheumatology",
 				"volume": "73",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Aged"
@@ -1313,13 +1238,7 @@ var testCases = [
 				"archiveID": "2023.02.07.527548",
 				"language": "eng",
 				"repository": "bioRxiv: The Preprint Server for Biology",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -1390,13 +1309,7 @@ var testCases = [
 				"archiveID": "arXiv:2304.02112v2",
 				"language": "eng",
 				"repository": "ArXiv",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -1468,13 +1381,7 @@ var testCases = [
 				"archiveID": "rs.3.rs-2960606",
 				"language": "eng",
 				"repository": "Research Square",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-01-10 14:01:49"
+	"lastUpdated": "2026-10-07 15:45:06"
 }
 
 /*
@@ -308,11 +308,10 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2010 Sep-Oct",
+				"date": "2010",
 				"DOI": "10.1097/NNE.0b013e3181ed81e4",
 				"ISSN": "1538-9855",
 				"abstractNote": "Zotero is a powerful free personal bibliographic manager (PBM) for writers. Use of a PBM allows the writer to focus on content, rather than the tedious details of formatting citations and references. Zotero 2.0 (http://www.zotero.org) has new features including the ability to synchronize citations with the off-site Zotero server and the ability to collaborate and share with others. An overview on how to use the software and discussion about the strengths and limitations are included.",
-				"extra": "PMID: 20729678",
 				"issue": "5",
 				"journalAbbreviation": "Nurse Educ",
 				"language": "eng",
@@ -321,13 +320,7 @@ var testCases = [
 				"publicationTitle": "Nurse Educator",
 				"shortTitle": "Zotero",
 				"volume": "35",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Bibliographies as Topic"
@@ -380,13 +373,7 @@ var testCases = [
 				"rights": "Copyright © 2001, BIOS Scientific Publishers Limited.",
 				"shortTitle": "Endocrinology",
 				"url": "http://www.ncbi.nlm.nih.gov/books/NBK22/",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -432,13 +419,7 @@ var testCases = [
 				"publisher": "National Center for Biotechnology Information (US)",
 				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson.",
 				"url": "http://www.ncbi.nlm.nih.gov/books/NBK1825/",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -486,44 +467,77 @@ var testCases = [
 				],
 				"date": "2000",
 				"ISSN": "1366-5278",
-				"abstractNote": "BACKGROUND: In the majority of people with familial hypercholesterolaemia (FH) the disorder is caused by a mutation of the low-density lipoprotein receptor gene that impairs its proper function, resulting in very high levels of plasma cholesterol. Such levels result in early and severe atherosclerosis, and hence substantial excess mortality from coronary heart disease. Most people with FH are undiagnosed or only diagnosed after their first coronary event, but early detection and treatment with hydroxymethylglutaryl-coenzyme (HMG CoA) reductase inhibitors (statins) can reduce morbidity and mortality. The prevalence of FH in the UK population is estimated to be 1 in 500, which means that approximately 110,000 people are affected.\nOBJECTIVES: To evaluate whether screening for FH is appropriate. To determine which system of screening is most acceptable and cost-effective. To assess the deleterious psychosocial effects of genetic and clinical screening for an asymptomatic treatable inherited condition. To assess whether the risks of screening outweigh potential benefits.\nMETHODS: DATA SOURCES: Relevant papers were identified through a search of the electronic databases. Additional papers referenced in the search material were identified and collected. Known researchers in the field were contacted and asked to supply information on unpublished or ongoing studies. INCLUSION/EXCLUSION CRITERIA: SCREENING AND TREATMENT: The review included studies of the mortality and morbidity associated with FH, the effectiveness and cost of treatment (ignoring pre-statin therapies in adults), and of the effectiveness or cost of possible screening strategies for FH. PSYCHOSOCIAL EFFECTS OF SCREENING: The search for papers on the psychological and social effects of screening for a treatable inherited condition was limited to the last 5 years because recent developments in genetic testing have changed the nature and implications of such screening tests. Papers focusing on genetic testing for FH and breast cancer were included. Papers relating to the risk of coronary heart disease with similarly modifiable outcome (non-FH) were also included. DATA EXTRACTION AND ASSESSMENT OF VALIDITY: A data assessment tool was designed to assess the quality and validity of the papers which reported primary data for the social and psychological effects of screening. Available guidelines for systematically reviewing papers concentrated on quantitative methods, and were of limited relevance. An algorithm was developed which could be used for both the qualitative and quantitative literature. MODELLING METHODS: A model was constructed to investigate the relative cost and effectiveness of various forms of population screening (universal or opportunistic) and case-finding screening (screening relatives of known FH cases). All strategies involved a two-stage process: first, identifying those people with cholesterol levels sufficiently elevated to be compatible with a diagnosis of FH, and then either making the diagnosis based on clinical signs and a family history of coronary disease or carrying out genetic tests. Cost-effectiveness has been measured in terms of incremental cost per year of life gained.\nRESULTS: MODELLING COST-EFFECTIVENESS: FH is a life-threatening condition with a long presymptomatic state. Diagnostic tests are reasonably reliable and acceptable, and treatment with statins substantially improves prognosis. Therefore, it is appropriate to consider systematic screening for this condition. Case finding amongst relatives of FH cases was the most cost-effective strategy, and universal systematic screening the least cost-effective. However, when targeted at young people (16 year olds) universal screening was also cost-effective. Screening patients admitted to hospital with premature myocardial infarction was also relatively cost-effective. Screening is least cost-effective in men aged over 35 years, because the gains in life expectancy are small. (ABSTRACT TRUNCA",
-				"extra": "PMID: 11109029",
+				"abstractNote": "BACKGROUND: In the majority of people with familial hypercholesterolaemia (FH) the disorder is caused by a mutation of the low-density lipoprotein receptor gene that impairs its proper function, resulting in very high levels of plasma cholesterol. Such levels result in early and severe atherosclerosis, and hence substantial excess mortality from coronary heart disease. Most people with FH are undiagnosed or only diagnosed after their first coronary event, but early detection and treatment with hydroxymethylglutaryl-coenzyme (HMG CoA) reductase inhibitors (statins) can reduce morbidity and mortality. The prevalence of FH in the UK population is estimated to be 1 in 500, which means that approximately 110,000 people are affected.\nOBJECTIVES: To evaluate whether screening for FH is appropriate. To determine which system of screening is most acceptable and cost-effective. To assess the deleterious psychosocial effects of genetic and clinical screening for an asymptomatic treatable inherited condition. To assess whether the risks of screening outweigh potential benefits.\nDATA SOURCES: Relevant papers were identified through a search of the electronic databases. Additional papers referenced in the search material were identified and collected. Known researchers in the field were contacted and asked to supply information on unpublished or ongoing studies. INCLUSION/EXCLUSION CRITERIA: SCREENING AND TREATMENT: The review included studies of the mortality and morbidity associated with FH, the effectiveness and cost of treatment (ignoring pre-statin therapies in adults), and of the effectiveness or cost of possible screening strategies for FH. PSYCHOSOCIAL EFFECTS OF SCREENING: The search for papers on the psychological and social effects of screening for a treatable inherited condition was limited to the last 5 years because recent developments in genetic testing have changed the nature and implications of such screening tests. Papers focusing on genetic testing for FH and breast cancer were included. Papers relating to the risk of coronary heart disease with similarly modifiable outcome (non-FH) were also included. DATA EXTRACTION AND ASSESSMENT OF VALIDITY: A data assessment tool was designed to assess the quality and validity of the papers which reported primary data for the social and psychological effects of screening. Available guidelines for systematically reviewing papers concentrated on quantitative methods, and were of limited relevance. An algorithm was developed which could be used for both the qualitative and quantitative literature. MODELLING METHODS: A model was constructed to investigate the relative cost and effectiveness of various forms of population screening (universal or opportunistic) and case-finding screening (screening relatives of known FH cases). All strategies involved a two-stage process: first, identifying those people with cholesterol levels sufficiently elevated to be compatible with a diagnosis of FH, and then either making the diagnosis based on clinical signs and a family history of coronary disease or carrying out genetic tests. Cost-effectiveness has been measured in terms of incremental cost per year of life gained.\nRESULTS: MODELLING COST-EFFECTIVENESS: FH is a life-threatening condition with a long presymptomatic state. Diagnostic tests are reasonably reliable and acceptable, and treatment with statins substantially improves prognosis. Therefore, it is appropriate to consider systematic screening for this condition. Case finding amongst relatives of FH cases was the most cost-effective strategy, and universal systematic screening the least cost-effective. However, when targeted at young people (16 year olds) universal screening was also cost-effective. Screening patients admitted to hospital with premature myocardial infarction was also relatively cost-effective. Screening is least cost-effective in men aged over 35 years, because the gains in life expectancy are small. (ABSTRACT TRUNCA",
 				"issue": "29",
 				"journalAbbreviation": "Health Technol Assess",
 				"language": "eng",
 				"libraryCatalog": "PubMed",
 				"pages": "1-123",
-				"publicationTitle": "Health Technology Assessment (Winchester, England)",
+				"publicationTitle": "Health Technology Assessment",
 				"shortTitle": "Screening for hypercholesterolaemia versus case finding for familial hypercholesterolaemia",
 				"volume": "4",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [
-					"Adult",
-					"Aged",
-					"Algorithms",
-					"Attitude to Health",
-					"Child",
-					"Cost-Benefit Analysis",
-					"Decision Trees",
-					"Female",
-					"Humans",
-					"Hyperlipoproteinemia Type II",
-					"Male",
-					"Mass Screening",
-					"Middle Aged",
-					"Models, Econometric",
-					"Morbidity",
-					"Needs Assessment",
-					"Practice Guidelines as Topic",
-					"Research Design",
-					"Technology Assessment, Biomedical",
-					"United Kingdom"
+					{
+						"tag": "Adult"
+					},
+					{
+						"tag": "Aged"
+					},
+					{
+						"tag": "Algorithms"
+					},
+					{
+						"tag": "Attitude to Health"
+					},
+					{
+						"tag": "Child"
+					},
+					{
+						"tag": "Cost-Benefit Analysis"
+					},
+					{
+						"tag": "Decision Trees"
+					},
+					{
+						"tag": "Female"
+					},
+					{
+						"tag": "Humans"
+					},
+					{
+						"tag": "Hyperlipoproteinemia Type II"
+					},
+					{
+						"tag": "Male"
+					},
+					{
+						"tag": "Mass Screening"
+					},
+					{
+						"tag": "Middle Aged"
+					},
+					{
+						"tag": "Models, Econometric"
+					},
+					{
+						"tag": "Morbidity"
+					},
+					{
+						"tag": "Needs Assessment"
+					},
+					{
+						"tag": "Practice Guidelines as Topic"
+					},
+					{
+						"tag": "Research Design"
+					},
+					{
+						"tag": "Technology Assessment, Biomedical"
+					},
+					{
+						"tag": "United Kingdom"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -576,11 +590,6 @@ var testCases = [
 				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson.",
 				"url": "http://www.ncbi.nlm.nih.gov/books/NBK26374/",
 				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					},
 					{
 						"title": "Printable HTML",
 						"mimeType": "text/html",
@@ -640,11 +649,6 @@ var testCases = [
 				"url": "http://www.ncbi.nlm.nih.gov/books/NBK26374/",
 				"attachments": [
 					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					},
-					{
 						"title": "Printable HTML",
 						"mimeType": "text/html",
 						"snapshot": true
@@ -695,13 +699,7 @@ var testCases = [
 				"publisher": "National Center for Biotechnology Information (US)",
 				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson.",
 				"url": "http://www.ncbi.nlm.nih.gov/books/NBK1825/",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -783,11 +781,6 @@ var testCases = [
 				"url": "http://www.ncbi.nlm.nih.gov/books/NBK1826/",
 				"attachments": [
 					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					},
-					{
 						"title": "Printable HTML",
 						"mimeType": "text/html",
 						"snapshot": true
@@ -857,7 +850,6 @@ var testCases = [
 				"DOI": "10.1038/nature09534",
 				"ISSN": "1476-4687",
 				"abstractNote": "The 1000 Genomes Project aims to provide a deep characterization of human genome sequence variation as a foundation for investigating the relationship between genotype and phenotype. Here we present results of the pilot phase of the project, designed to develop and compare different strategies for genome-wide sequencing with high-throughput platforms. We undertook three projects: low-coverage whole-genome sequencing of 179 individuals from four populations; high-coverage sequencing of two mother-father-child trios; and exon-targeted sequencing of 697 individuals from seven populations. We describe the location, allele frequency and local haplotype structure of approximately 15 million single nucleotide polymorphisms, 1 million short insertions and deletions, and 20,000 structural variants, most of which were previously undescribed. We show that, because we have catalogued the vast majority of common variation, over 95% of the currently accessible variants found in any individual are present in this data set. On average, each person is found to carry approximately 250 to 300 loss-of-function variants in annotated genes and 50 to 100 variants previously implicated in inherited disorders. We demonstrate how these results can be used to inform association and functional studies. From the two trios, we directly estimate the rate of de novo germline base substitution mutations to be approximately 10(-8) per base pair per generation. We explore the data with regard to signatures of natural selection, and identify a marked reduction of genetic variation in the neighbourhood of genes, due to selection at linked sites. These methods and public data will support the next phase of human genetic research.",
-				"extra": "PMID: 20981092\nPMCID: PMC3042601",
 				"issue": "7319",
 				"journalAbbreviation": "Nature",
 				"language": "eng",
@@ -865,13 +857,7 @@ var testCases = [
 				"pages": "1061-1073",
 				"publicationTitle": "Nature",
 				"volume": "467",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Calibration"
@@ -1022,7 +1008,6 @@ var testCases = [
 				],
 				"date": "1950-10",
 				"ISSN": "0025-7044",
-				"extra": "PMID: 14779137",
 				"issue": "4",
 				"journalAbbreviation": "J Med Assoc State Ala",
 				"language": "eng",
@@ -1030,13 +1015,7 @@ var testCases = [
 				"pages": "118-128",
 				"publicationTitle": "Journal of the Medical Association of the State of Alabama",
 				"volume": "20",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Humans"
@@ -1097,13 +1076,7 @@ var testCases = [
 				"publisher": "National Center for Biotechnology Information (US)",
 				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson.",
 				"url": "http://www.ncbi.nlm.nih.gov/books/NBK1825/",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -1153,7 +1126,6 @@ var testCases = [
 				"DOI": "10.1136/emermed-2019-208447",
 				"ISSN": "1472-0213",
 				"abstractNote": "Multiple pitfalls can occur with the conduct and analysis of a study of diagnostic tests, resulting in biased accuracy. Our conceptual model includes three stages: patient selection, interpretation of the index test and disease verification. In part 2, we focus on (1) Interpretation bias (or workup bias): where the classification of an indeterminate index test result can bias the accuracy of a test or how lack of blinding can bias a subjective test result, and (2) Disease verification bias: where the index test result is incorporated into the gold standard or when the gold standard is applied only to a select population as the gold standard is an invasive test. In an example with age-adjusted D-dimer for pulmonary embolism, differential verification bias was a limitation due to the use of two gold standards-CT for a high-risk population and follow-up for symptoms in a low-risk population. However, there are circumstances when certain choices in study design are unavoidable, and result in biased test characteristics. In this case, the informed reader will better judge the quality of a study by recognising the potential biases and limitations by being methodical in their approach to understanding the methods, and in turn, better apply studies of diagnostic tests into their clinical practice.",
-				"extra": "PMID: 31221671\nPMCID: PMC6693499",
 				"issue": "8",
 				"journalAbbreviation": "Emerg Med J",
 				"language": "eng",
@@ -1162,13 +1134,7 @@ var testCases = [
 				"publicationTitle": "Emergency medicine journal: EMJ",
 				"shortTitle": "Recognising bias in studies of diagnostic tests part 2",
 				"volume": "36",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Diagnostic Tests, Routine"
@@ -1236,20 +1202,13 @@ var testCases = [
 				"DOI": "10.7554/eLife.51710",
 				"ISSN": "2050-084X",
 				"abstractNote": "Organ growth and size are finely tuned by intrinsic and extrinsic signaling molecules. In Drosophila, the BMP family member Dpp is produced in a limited set of imaginal disc cells and functions as a classic morphogen to regulate pattern and growth by diffusing throughout imaginal discs. However, the role of TGFβ/Activin-like ligands in disc growth control remains ill-defined. Here, we demonstrate that Myoglianin (Myo), an Activin family member, and a close homolog of mammalian Myostatin (Mstn), is a muscle-derived extrinsic factor that uses canonical dSmad2-mediated signaling to regulate wing size. We propose that Myo is a myokine that helps mediate an allometric relationship between muscles and their associated appendages.",
-				"extra": "PMID: 32633716\nPMCID: PMC7371420",
 				"journalAbbreviation": "Elife",
 				"language": "eng",
 				"libraryCatalog": "PubMed",
 				"pages": "e51710",
 				"publicationTitle": "eLife",
 				"volume": "9",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Animals"
