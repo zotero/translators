@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-07 10:28:44"
+	"lastUpdated": "2026-10-07 10:35:19"
 }
 
 /*
@@ -1050,6 +1050,368 @@ var testCases = [
 					},
 					{
 						"tag": "图像识别"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZzcMTohn1RuvNCIKyiPjsHO1RKsu8ljcGXOOrWeRF_TA8W2K_xSs9mQWnRT33BKiiaqt-xrJr-dd2uHi3bgkC-TveLvFWpbIWKrjbd6RjBbyQvSaPnrTZOQ3MtBcydpoPEGpze4EB7YchOunnJgN2eaqSJYhioNsU-qMftQVEe8sHQ==",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "基于小波频域感知的图像去雨Transformer模型",
+				"creators": [
+					{
+						"lastName": "张",
+						"firstName": "凡龙",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "杜",
+						"firstName": "启鲁",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "任",
+						"firstName": "翔宇",
+						"creatorType": "author"
+					}
+				],
+				"ISSN": "1001-9081",
+				"abstractNote": "针对复杂雨滴退化条件下结构恢复与细节保持难以兼顾的问题，本文提出基于Transformer框架的双分支频率感知网络——WASH-Former(Wavelet-Aware Structured Hierarchical Transformer)。该模型通过“频率解耦—差异化增强—动态重建”的三阶段框架，引入离散小波变换将特征分离为低频结构与高频纹理，并分别设计低频去噪块与高频双重残差块进行针对性建模，最后通过自适应融合与逆小波变换实现高保真重建。结合类U-Net的层次化结构，模型在多尺度上协同优化频域与空间域信息，在结构一致性与细节恢复之间取得良好平衡。实验结果表明，WASH-Former在SPA-Data、Rain200L和AGAN-Data等多个去雨数据集上均表现出优越的恢复性能。在SPA-Data数据集上，WASH-Former的PSNR达到48.03dB，相较于Transformer模型Uformer提升0.19dB；在Rain200L数据集上达到40.86dB，分别较SPDNet和IDT提升0.36dB和0.12dB；在AGAN-Data数据集上达到32.19dB，较AWRCP提升0.26dB。综上表明，WASH-Former能够有效提升复杂雨滴退化场景下的图像恢复质量。",
+				"pages": "1-10",
+				"publicationTitle": "计算机应用",
+				"libraryCatalog": "CNKI",
+				"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZzcMTohn1RuvNCIKyiPjsHO1RKsu8ljcGXOOrWeRF_TA8W2K_xSs9mQWnRT33BKiiaqt-xrJr-dd2uHi3bgkC-TveLvFWpbIWKrjbd6RjBbyQvSaPnrTZOQ3MtBcydpoPEGpze4EB7YchOunnJgN2eaqSJYhioNsU-qMftQVEe8sHQ==",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "图像恢复"
+					},
+					{
+						"tag": "小波变换"
+					},
+					{
+						"tag": "图像去雨"
+					},
+					{
+						"tag": "Transformer"
+					},
+					{
+						"tag": "计算机视觉"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZzcR0JjewlKE5Kh-7nlJ6sKxmvbrmmZq6Inuq9kEwMocnVyFVyl4Qvvue4j7qQzkXoFDskzctvi5Esg2_x4WV6xtGiG2V_xF0BxEqFg70usqlQ1UUVFh8mmlJ30EjfA1NylGTUjM2zr1SnFZHV7B1oR1VlELBz_zDnXlvf7pbgQM7w==",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "习近平关于人工智能发展重要论述的生成语境、精髓要义及时代价值",
+				"creators": [
+					{
+						"lastName": "黄",
+						"firstName": "豪楠",
+						"creatorType": "author"
+					}
+				],
+				"ISSN": "1672-4860",
+				"abstractNote": "人工智能是引领新一轮科技革命和产业变革的重要驱动力量。党的十八大以来，习近平结合世情、国情、党情发生的深刻复杂变化，围绕人工智能领域相关问题发表了一系列新思想新观点新论断，形成了习近平关于人工智能发展重要论述。其精髓要义主要体现在战略地位论、目标任务论、主体协同论、发展路径论和方针原则论上。这一重要论述为丰富和发展马克思主义科技观作出了原创性贡献，为推动我国新一代人工智能健康发展提供了理论指导和行动指南，为共创人类社会智能时代贡献了中国智慧和中国方案，具有重要的理论贡献、实践价值和世界意义。",
+				"pages": "1-7",
+				"publicationTitle": "西南科技大学学报(哲学社会科学版)",
+				"libraryCatalog": "CNKI",
+				"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZzcR0JjewlKE5Kh-7nlJ6sKxmvbrmmZq6Inuq9kEwMocnVyFVyl4Qvvue4j7qQzkXoFDskzctvi5Esg2_x4WV6xtGiG2V_xF0BxEqFg70usqlQ1UUVFh8mmlJ30EjfA1NylGTUjM2zr1SnFZHV7B1oR1VlELBz_zDnXlvf7pbgQM7w==",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "习近平"
+					},
+					{
+						"tag": "人工智能"
+					},
+					{
+						"tag": "理论创新"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZze6CEsuF44woRIZFdxJxHPXrMa-vFC3NiwFgcC9i9pBPd468m62Vv8fzG6EpYFN82lkPlunuP4FCMngKcztXet2e7BGaQse2_6UQ3gxjK-FZkoJUpB-z5w428uEs_NyzQVKjFQu9raR6IQSpBFjuJKrCoXMTJzkUQF3yT6ZdPxeEPr6bMGhTrSk",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "人工智能时代高校思想政治教育效果提升研究",
+				"creators": [
+					{
+						"lastName": "刘",
+						"firstName": "歌",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024",
+				"abstractNote": "人工智能是引领新一轮科技革命和产业变革的主要驱动力,正深刻影响着人们的生产、生活方式,也深刻改变着高校思想政治教育的教育内容、模式及方法。推动思想政治教育智能化转型、提升思想政治教育效果,既是党和国家高度重视的理论与实践议题,也是高校思想政治教育的目标。党的十八大以来,以习近平同志为核心的党中央从宏观的发展战略视角出发,对思想政治教育进行了全面部署。在习近平总书记关于人工智能教育相关论述的指导下,高校思想政治教育应该牢牢把握时代脉搏,在崭新的技术背景下完成教育主客体角色调整和重建,进入教育精准化、高效化的新阶段,实现人工智能与高校思想政治教育在创新中优化、在协同中共赢。高校思想政治教育是一项内涵丰富,层次多样的教育实践活动。其深度与广度要求教育工作者必须具备复杂性思维的洞察力、复杂性方法的运用能力以及复杂性工具的应用技巧。为此,思想政治教育工作者需要不断地更新自身的思维模式,精进教育技能,熟练掌握先进技术。通过这样的转变与提升,方能更好地引导学生深入理解思想政治教育的精髓,培养他们的综合素养,以适应不断变化的社会需求。在人工智能时代背景下,探索如何提升高校思想政治教育效果显得尤为重要。人工智能的应用不仅为思想政治教育带来了客观、全面且复杂的视角,而且深化了思想政治教育的实效性。因此,在新时代的高校思想政治教育中,积极推动人工智能与教育的深度融合成为提升教育质量与效果的关键路径。这种融合不仅能促进技术与高校思想政治教育的有机统一,还能显著提升高校思想政治教育的针对性。本论文系统分析人工智能时代高校思想政治教育效果提升的现状,为日后人工智能时代高校思想政治教育效果的实践向度和具体策略提出针对性意见。全文的结构为:首先,本文介绍了马克思主义人学理论、马克思主义技术观及思想政治教育接受理论,为研究人工智能时代高校思想政治教育效果提升提供了理论基础。并阐释了人工智能时代、高校思想政治教育的概念。其次,阐述和说明了人工智能时代高校思想政治教育效果提升的背景与挑战。再次,对在校学生进行问卷调查,通过事实数据检验、访谈等手段,直观地展现了人工智能时代高校思想政治教育效果提升的发展现状和存在问题。最后,本文从人工智能时代高校思想政治教育效果提升的实践导向出发,分析研究了人工智能时代高校思想政治教育实施的方向与具体策略。",
+				"thesisType": "博士",
+				"university": "北京科技大学",
+				"libraryCatalog": "CNKI",
+				"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZze6CEsuF44woRIZFdxJxHPXrMa-vFC3NiwFgcC9i9pBPd468m62Vv8fzG6EpYFN82lkPlunuP4FCMngKcztXet2e7BGaQse2_6UQ3gxjK-FZkoJUpB-z5w428uEs_NyzQVKjFQu9raR6IQSpBFjuJKrCoXMTJzkUQF3yT6ZdPxeEPr6bMGhTrSk",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "人工智能时代"
+					},
+					{
+						"tag": "高校思想政治教育"
+					},
+					{
+						"tag": "效果"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZzfGfIcby7uHCuREuQljLpz3QW_XLY0WQvToQNczxfjRCQeRfn5ksjqgVwvnCwdFI1gY_MUy52bNmf2Wz72RcuQvxDAzI6EC5oQMxKsz5s2M1lQwFs5VIYRHII-hGpiwYma_iK76F7g19KPIF3r8XvzrclEGDeboOkhMH_o0sWqaX9eu6yTGthqA",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "面向大规模MIMO的智能信道估计与预编码技术研究",
+				"creators": [
+					{
+						"lastName": "高",
+						"firstName": "佳宝",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025",
+				"abstractNote": "作为第五代乃至将来第六代移动通信(The Sixth Generation,6G)系统的核心使能技术之一,大规模多输入多输出(Multiple-Input Multiple-Output,MIMO)由于其高谱效、大连接、低时延和广覆盖等特性而被广泛应用于各种场景中。为充分发挥大规模MIMO的性能优势,需有效解决信道估计和预编码两大关键信号处理问题。然而,传统信号处理算法在性能、复杂度、鲁棒性等方面存在诸多不足。近年来,基于人工智能(Artificial Intelligence,AI)的无线通信发展迅猛,已被作为6G的新能力之一。利用AI强大的大数据学习能力,有望获得新的智能算法以解决传统算法的痛点。本学位论文以大规模MIMO系统为基础场景,根据不同传输频段和硬件架构的特点,以AI为主要技术手段,对大规模MIMO的智能信道估计和预编码技术展开研究。论文的主要内容及创新性如下:首先,针对低频段混合模数(Hybrid Analog-Digital,HAD)架构下大规模MIMO的窄带信道估计问题,提出一种基于注意力自编码器的智能算法,将移相矩阵对接收导频信号的压缩过程与信道估计算法对信道的重构过程分别建模为自编码器的编码器与解码器,通过端到端学习进行联合优化。一方面,优化所得编码网络权重对应的移相矩阵可适配信道分布特性,相比传统基于数学性质设计的移相矩阵,显著减少了压缩过程中的信息损失;另一方面,通过在解码网络中引入注意力模块,可自动实现类似分治法的操作以有效利用大规模MIMO信道在角度域的分布可分性,显著提高了信道估计的精度。仿真结果表明,所提算法只具有正交匹配追踪量级的复杂度,但可以取得接近甚至优于稀疏贝叶斯学习(Sparse Bayesian Learning,SBL)的性能。得益于特殊的损失函数设计与注意力机制,训练所得网络还具有良好的鲁棒性与可解释性。其次,针对低频段大规模MIMO的窄带全数字预编码问题,提出一种基于最优解结构参数学习的智能算法。首先,将用户多数据流模型转换为等效的单流模型;然后,用一个深度神经网络(Deep Neural Network,DNN)预测单流模型下最优预编码解结构的少量未知参数。相比直接预测高维预编码矩阵,大大降低了复杂度与学习难度;最后,根据结构参数与最优解结构计算得到各用户的预编码。进一步,HAD架构下的混合预编码则可通过对全数字预编码进行矩阵分解获得。此外,还通过输入降...",
+				"thesisType": "博士",
+				"university": "浙江大学",
+				"libraryCatalog": "CNKI",
+				"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZzfGfIcby7uHCuREuQljLpz3QW_XLY0WQvToQNczxfjRCQeRfn5ksjqgVwvnCwdFI1gY_MUy52bNmf2Wz72RcuQvxDAzI6EC5oQMxKsz5s2M1lQwFs5VIYRHII-hGpiwYma_iK76F7g19KPIF3r8XvzrclEGDeboOkhMH_o0sWqaX9eu6yTGthqA",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "大规模MIMO"
+					},
+					{
+						"tag": "信道估计"
+					},
+					{
+						"tag": "预编码"
+					},
+					{
+						"tag": "人工智能"
+					},
+					{
+						"tag": "数据驱动"
+					},
+					{
+						"tag": "模型驱动"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZzfvw8_S2ypbxfduya0HIr2eS2Hc7Y79wcD5DzKW9uGCAqSswCoukU1q2Tb00JUbReynuqpjJv83x7r1JSLxf3FLosMwcYMDJI9JuCvzZYSwAiFDjfkIHORb-v8xIYKahWwk2v6b3L7XzSIAjzYsHJNrfzsGq_8D1726C-urGqBTFT_ay1_GVUzU",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "“中国持续为金砖合作注入动能”",
+				"creators": [
+					{
+						"lastName": "苑",
+						"firstName": "基荣",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-10-06",
+				"pages": "003",
+				"publicationTitle": "人民日报",
+				"libraryCatalog": "CNKI",
+				"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZzfvw8_S2ypbxfduya0HIr2eS2Hc7Y79wcD5DzKW9uGCAqSswCoukU1q2Tb00JUbReynuqpjJv83x7r1JSLxf3FLosMwcYMDJI9JuCvzZYSwAiFDjfkIHORb-v8xIYKahWwk2v6b3L7XzSIAjzYsHJNrfzsGq_8D1726C-urGqBTFT_ay1_GVUzU",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZzfvw8_S2ypbxfduya0HIr2eS2Hc7Y79wcDNJn-UEBWdu_YapPrUMpdsvUVztWaYZjZTgl2zY5dvzlNCpfpCtZ3oqsKCErt6Ol0nKMpoBqmfaOSnhDQ2xxT9Wn2KRF4J9w-Kgb41ja898NwVVKs1nI3TW7vm6YsVMYTO_mxpQSfTSQZ03to5nMOy",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "AI重塑电子信息制造业",
+				"creators": [
+					{
+						"lastName": "黄",
+						"firstName": "鑫",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "禹",
+						"firstName": "琳",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-10-06",
+				"pages": "006",
+				"publicationTitle": "经济日报",
+				"libraryCatalog": "CNKI",
+				"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZzfvw8_S2ypbxfduya0HIr2eS2Hc7Y79wcDNJn-UEBWdu_YapPrUMpdsvUVztWaYZjZTgl2zY5dvzlNCpfpCtZ3oqsKCErt6Ol0nKMpoBqmfaOSnhDQ2xxT9Wn2KRF4J9w-Kgb41ja898NwVVKs1nI3TW7vm6YsVMYTO_mxpQSfTSQZ03to5nMOy",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZzdjpfpwwBPmqzhdqyyEGCIuWked8NoQ9CWVpWBJY5s5DzpmHHxJxrMMSz6mMDilRgEcnMg4pE2gVZnSkof9J3Xr54qGpCMAytcFc7IeK3-X9cdVcgroS03JQH_9AHUBQNoeHqWygwlSzEwIAA1CSyp6ILy_cNXdwgu04hv9zPnFvFUM3UqGDf-X",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "基于AOV边缘摄像头与轻量化深度学习的智能全天空云观测系统",
+				"creators": [
+					{
+						"lastName": "王",
+						"firstName": "清龙",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "向",
+						"firstName": "立莉",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "成",
+						"firstName": "勤",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "姚",
+						"firstName": "曼",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "王",
+						"firstName": "海",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "乔",
+						"firstName": "木",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-10-19",
+				"DOI": "10.26914/c.cnkihy.2026.057602",
+				"abstractNote": "<正>地面气象观测中云的自动化识别长期面临\"精度-成本-功耗\"三角困境:高精度方案依赖专业全天空成像仪(ASI)与高性能服务器,成本动辄数万元且需稳定供电;低成本方案则受限于模型精度与部署能力,难以满足业务需求。本文提出一种基于AOV(Always-On Vision)低功耗边缘摄像头与瑞芯微RV1126BP高性能嵌入式NPU的智能全天空云观测系统,旨在突破传统方案的瓶颈,为无人值守气象站提供低成本、低功耗的云观测解决方案。",
+				"conferenceName": "第37届中国气象学会年会",
+				"place": "中国甘肃兰州",
+				"pages": "48",
+				"libraryCatalog": "CNKI",
+				"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZzdjpfpwwBPmqzhdqyyEGCIuWked8NoQ9CWVpWBJY5s5DzpmHHxJxrMMSz6mMDilRgEcnMg4pE2gVZnSkof9J3Xr54qGpCMAytcFc7IeK3-X9cdVcgroS03JQH_9AHUBQNoeHqWygwlSzEwIAA1CSyp6ILy_cNXdwgu04hv9zPnFvFUM3UqGDf-X",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "全天空"
+					},
+					{
+						"tag": "摄像头"
+					},
+					{
+						"tag": "AOV"
+					},
+					{
+						"tag": "深度学习"
+					},
+					{
+						"tag": "云观测"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZzc8W13NtV4ZjiejsBzsUMZf-yB5d_AufqxbaoXgN3TObmnmB7SDxslzSY0jLllrKfi15dFSDS1wJ6VA6mZLVdN6DaOqjdsjnifJb7yewySbsBbh0v0-5CQ2dMCMx5H874KWdfKxJamWWkKgRPHwcv7a5KpPs5pAraBIO4HTgAye_lv8zgmg-_ii",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "基于多源卫星资料和深度学习的降水三维雷达反射率重建",
+				"creators": [
+					{
+						"lastName": "叶",
+						"firstName": "霖",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "于",
+						"firstName": "田甜",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "王",
+						"firstName": "皓",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "曾",
+						"firstName": "强宇",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "康",
+						"firstName": "文",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-10-19",
+				"DOI": "10.26914/c.cnkihy.2026.057615",
+				"abstractNote": "<正>三维观测对于理解和分析降水风暴至关重要,极轨卫星的星载降水测量雷达可获取高精度降水垂直结构,但扫描带宽度有限,时空覆盖不连续;地球静止卫星观测频次高,却无法直接表征降水廓线。本研究提出了一种利用地球静止卫星亮温数据重建极轨卫星多高度雷达反射率的深度学习方法。该模型以FY-3G降水测量雷达(PMR)Ku波段二级产品作为监督数据,利用FY-4B先进的静止轨道辐射成像仪(AGRI)红外通道亮温融合ERA5温湿度环境场及数字高程数据(DEM)作为特征。在70°—140°E、15°—55°N区域内构建近地面至9 km共七个高度层(间隔1.5km)的训练数据集,以FY-3G实际观测时间为匹配基准,获取FY-4B的t、t-15和t-30三个时次观测,并通过空间最近邻方法将FY-3G观测配准到FY-4B 4 km网格;匹配距离限制为4 km,当多个FY-3G观测点落入同一网格时采用平均反射率作为监督标签。",
+				"conferenceName": "第37届中国气象学会年会",
+				"place": "中国甘肃兰州",
+				"pages": "61",
+				"libraryCatalog": "CNKI",
+				"url": "https://kns.cnki.net/kcms2/article/abstract?v=qfSY-45OZzc8W13NtV4ZjiejsBzsUMZf-yB5d_AufqxbaoXgN3TObmnmB7SDxslzSY0jLllrKfi15dFSDS1wJ6VA6mZLVdN6DaOqjdsjnifJb7yewySbsBbh0v0-5CQ2dMCMx5H874KWdfKxJamWWkKgRPHwcv7a5KpPs5pAraBIO4HTgAye_lv8zgmg-_ii",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "雷达反射率"
+					},
+					{
+						"tag": "强回波"
+					},
+					{
+						"tag": "多源卫星"
+					},
+					{
+						"tag": "深度学习"
 					}
 				],
 				"notes": [],
