@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2023-11-27 05:30:22"
+	"lastUpdated": "2026-10-07 09:03:11"
 }
 
 /*
@@ -157,6 +157,81 @@ function getTypeFromDBName(dbname) {
 	}
 }
 
+// New (kcms2) detail pages carry the citation export endpoint and the record id
+// as hidden inputs instead of dbname/filename in the URL.
+function getExportInfo(doc, url) {
+	var exportId = attr(doc, '#export-id', 'value');
+	var exportUrl = attr(doc, '#export-url', 'value');
+	if (!exportId || !exportUrl) return false;
+	return { exportId: exportId, exportUrl: exportUrl, url: url };
+}
+
+// EndNote (%X) to RefWorks (RT) reference type names, so the bundled RefWorks
+// Tagged importer can map them back to Zotero item types.
+var endnoteTypeMap = {
+	'Journal Article': 'Journal Article',
+	'Magazine Article': 'Magazine Article',
+	'Newspaper Article': 'Newspaper Article',
+	'Conference Paper': 'Conference Proceedings',
+	'Conference Proceedings': 'Conference Proceedings',
+	Thesis: 'Dissertation',
+	Dissertation: 'Dissertation',
+	Patent: 'Patent',
+	Book: 'Book, Whole',
+	'Book Section': 'Book, Section',
+	Report: 'Report',
+	'Web Page': 'Web Page'
+};
+
+// Convert a CNKI EndNote (%X) export record to RefWorks tagged text.
+function endnoteToRefworks(endnote) {
+	var tagMap = {
+		A: 'A1',
+		T: 'T1',
+		J: 'JF',
+		D: 'YR',
+		V: 'VO',
+		N: 'IS',
+		X: 'AB',
+		P: 'SP',
+		'@': 'SN',
+		U: 'UL',
+		R: 'DO'
+	};
+	var records = [];
+	for (let line of endnote.replace(/<br\s*\/?>/gi, '\n').split(/\r?\n/)) {
+		let match = line.match(/^%(\S)\s?(.*)$/);
+		if (!match) {
+			// continuation of the previous field
+			if (records.length) records[records.length - 1].value += '\n' + line;
+			continue;
+		}
+		records.push({ tag: match[1], value: match[2] });
+	}
+	
+	var out = [];
+	var keywords = [];
+	for (let record of records) {
+		if (record.tag === '0') {
+			let type = record.value.trim();
+			out.push('RT ' + (endnoteTypeMap[type] || type));
+		}
+		else if (record.tag === 'K') {
+			for (let keyword of record.value.split(';')) {
+				keyword = keyword.trim();
+				if (keyword) keywords.push(keyword);
+			}
+		}
+		else if (tagMap[record.tag]) {
+			out.push(tagMap[record.tag] + ' ' + record.value.trim());
+		}
+	}
+	for (let keyword of keywords) {
+		out.push('K1 ' + keyword);
+	}
+	return out.join('\n');
+}
+
 function getItemsFromSearchResults(doc, url, itemInfo) {
 	var iframe = doc.getElementById('iframeResult');
 	if (iframe) {
@@ -198,6 +273,10 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 }
 
 function detectWeb(doc, url) {
+	if (getExportInfo(doc, url)) {
+		var dbcode = attr(doc, '#paramdbcode', 'value');
+		return (dbcode && getTypeFromDBName(dbcode)) || 'journalArticle';
+	}
 	// Z.debug(doc);
 	var id = getIDFromPage(doc, url);
 	var items = getItemsFromSearchResults(doc, url);
@@ -217,6 +296,11 @@ function detectWeb(doc, url) {
 }
 
 async function doWeb(doc, url) {
+	var exportInfo = getExportInfo(doc, url);
+	if (exportInfo) {
+		await scrapeExport(exportInfo, doc, url);
+		return;
+	}
 	if (detectWeb(doc, url) == "multiple") {
 		var itemInfo = {};
 		var items = getItemsFromSearchResults(doc, url, itemInfo);
@@ -232,6 +316,7 @@ async function doWeb(doc, url) {
 	}
 }
 
+// Legacy scheme: POST the dbname/filename pair to the RefWorks export endpoint.
 async function scrape(id, doc, extraData) {
 	var { dbname, filename } = id;
 	var postData = `FileName=${dbname}!${filename}!1!0&DisplayMode=Refworks&OrderParam=0&OrderType=desc&SelectField=&PageIndex=1&PageSize=20&language=&uniplatform=NZKPT&random=0.30585230060685187`;
@@ -246,9 +331,47 @@ async function scrape(id, doc, extraData) {
 			}
 		}
 	);
+	importRefworks(toStdRef(reftext), doc, extraData ? extraData.url : id.url);
+}
+
+// New (kcms2) scheme: request the citation data from the export endpoint carried
+// by the page and use the EndNote record it returns.
+async function scrapeExport(exportInfo, doc, url) {
+	var uniplatform = (url.match(/[?&]uniplatform=([^&#]*)/) || [])[1] || 'NZKPT';
+	var body = `filename=${exportInfo.exportId}&displaymode=GBTREFER,elearning,EndNote&uniplatform=${uniplatform}`;
+	var response = await request(
+		exportInfo.exportUrl,
+		{
+			method: "POST",
+			body: body,
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded",
+				Referer: url
+			}
+		}
+	);
+	var data;
+	try {
+		data = JSON.parse(response.body);
+	}
+	catch (e) {
+		Z.debug('CNKI: could not parse export response');
+		return;
+	}
+	var endnote = data && data.data && data.data.find(entry => entry.mode === 'ENDNOTE');
+	if (!endnote || !endnote.value || !endnote.value.length) {
+		Z.debug('CNKI: no EndNote export data returned');
+		return;
+	}
+	importRefworks(endnoteToRefworks(endnote.value.join('\n')), doc, url);
+}
+
+// Feed RefWorks tagged text to the bundled RefWorks Tagged importer and clean
+// up the resulting items.
+function importRefworks(refText, doc, itemUrl) {
 	var translator = Z.loadTranslator('import');
 	translator.setTranslator('1a3506da-a303-4b0a-a1cd-f216e6138d86'); // RefWorks Tagged
-	translator.setString(toStdRef(reftext));
+	translator.setString(refText);
 	
 	translator.setHandler('itemDone', function (obj, newItem) {
 		// split names
@@ -285,12 +408,7 @@ async function scrape(id, doc, extraData) {
 		}
 		
 		newItem.title = ZU.trimInternal(newItem.title);
-		if (extraData) {
-			newItem.url = extraData.url;
-		}
-		else {
-			newItem.url = id.url;
-		}
+		newItem.url = itemUrl;
 
 		// CN 中国刊物编号，非refworks中的callNumber
 		// CN in CNKI refworks format explains Chinese version of ISSN
@@ -299,7 +417,7 @@ async function scrape(id, doc, extraData) {
 			newItem.callNumber = "";
 		}
 		// don't download PDF/CAJ on searchResult(multiple)
-		var webType = detectWeb(doc, id.url);
+		var webType = detectWeb(doc, itemUrl);
 		if (webType && webType != 'multiple') {
 			newItem.attachments = getAttachments(doc, newItem);
 		}
