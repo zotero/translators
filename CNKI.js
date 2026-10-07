@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-07 10:53:19"
+	"lastUpdated": "2026-10-07 10:59:58"
 }
 
 /*
@@ -280,9 +280,9 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 	}
 	
 	var links = ZU.xpath(doc, '//table[contains(@class, "result-table-list")]/tbody/tr');
-	var aXpath = './/a[@class="fz14"]';
+	var aXpath = './/a[contains(@class, "fz14")]';
 	if (!links.length) {
-		links = ZU.xpath(doc, '//tr[not(.//tr) and .//a[@class="fz14"]]');
+		links = ZU.xpath(doc, '//tr[not(.//tr) and .//a[contains(@class, "fz14")]]');
 	}
 	if (!links.length) {
 		links = ZU.xpath(doc, '//table[@class="GridTableContent"]/tbody/tr[./td[2]/a]');
