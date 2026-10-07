@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-07 10:35:19"
+	"lastUpdated": "2026-10-07 10:43:59"
 }
 
 /*
@@ -411,30 +411,6 @@ function importRefworks(refText, doc, itemUrl) {
 	translator.setString(refText);
 	
 	translator.setHandler('itemDone', function (obj, newItem) {
-		// split names
-		for (var i = 0, n = newItem.creators.length; i < n; i++) {
-			var creator = newItem.creators[i];
-			if (creator.firstName) continue;
-			
-			var lastSpace = creator.lastName.lastIndexOf(' ');
-			var lastMiddleDot = creator.lastName.lastIndexOf('·');
-			if (/[A-Za-z]/.test(creator.lastName) && lastSpace !== -1) {
-				// western name. split on last space
-				creator.firstName = creator.lastName.substring(0, lastSpace);
-				creator.lastName = creator.lastName.substring(lastSpace + 1);
-			}
-			else if (lastMiddleDot !== -1) {
-				// translated western name with · as separator
-				creator.firstName = creator.lastName.substring(0, lastMiddleDot);
-				creator.lastName = creator.lastName.substring(lastMiddleDot + 1);
-			}
-			else {
-				// Chinese name. first character is last name, the rest are first name
-				creator.firstName = creator.lastName.substring(1);
-				creator.lastName = creator.lastName.charAt(0);
-			}
-		}
-		
 		if (newItem.abstractNote) {
 			newItem.abstractNote = newItem.abstractNote.replace(/\s*[\r\n]\s*/g, '\n');
 		}
@@ -524,33 +500,27 @@ var testCases = [
 				"title": "基于部分酸水解-亲水作用色谱-质谱的黄芪多糖结构表征",
 				"creators": [
 					{
-						"lastName": "梁",
-						"firstName": "图",
+						"lastName": "梁图",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "傅",
-						"firstName": "青",
+						"lastName": "傅青",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "辛",
-						"firstName": "华夏",
+						"lastName": "辛华夏",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "李",
-						"firstName": "芳冰",
+						"lastName": "李芳冰",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "金",
-						"firstName": "郁",
+						"lastName": "金郁",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "梁",
-						"firstName": "鑫淼",
+						"lastName": "梁鑫淼",
 						"creatorType": "author"
 					}
 				],
@@ -605,8 +575,7 @@ var testCases = [
 				"title": "黄瓜共表达基因模块的识别及其特点分析",
 				"creators": [
 					{
-						"lastName": "林",
-						"firstName": "行众",
+						"lastName": "林行众",
 						"creatorType": "author"
 					}
 				],
@@ -652,8 +621,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"lastName": "高",
-						"firstName": "一飞",
+						"lastName": "高一飞",
 						"creatorType": "author"
 					}
 				],
@@ -705,8 +673,7 @@ var testCases = [
 				"title": "我国绿色产品认证标识法律制度的路径探析",
 				"creators": [
 					{
-						"lastName": "曹",
-						"firstName": "明德",
+						"lastName": "曹明德",
 						"creatorType": "author"
 					}
 				],
@@ -758,8 +725,7 @@ var testCases = [
 				"title": "环境法典中新污染物环境风险管控的立法思路",
 				"creators": [
 					{
-						"lastName": "严",
-						"firstName": "厚福",
+						"lastName": "严厚福",
 						"creatorType": "author"
 					}
 				],
@@ -811,38 +777,31 @@ var testCases = [
 				"title": "Box-Behnken Design-响应面法优化碱水解人参茎叶三醇皂苷制备人参皂苷Rg2工艺研究",
 				"creators": [
 					{
-						"lastName": "史",
-						"firstName": "大臻",
+						"lastName": "史大臻",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "吴",
-						"firstName": "福林",
+						"lastName": "吴福林",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "谭",
-						"firstName": "璐",
+						"lastName": "谭璐",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "周",
-						"firstName": "柏松",
+						"lastName": "周柏松",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "刘",
-						"firstName": "金平",
+						"lastName": "刘金平",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "李",
-						"firstName": "平亚",
+						"lastName": "李平亚",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "赖",
-						"firstName": "思含",
+						"lastName": "赖思含",
 						"creatorType": "author"
 					}
 				],
@@ -891,8 +850,7 @@ var testCases = [
 				"title": "柏孜克里克石窟法华经变内容补遗",
 				"creators": [
 					{
-						"lastName": "董",
-						"firstName": "俊彦",
+						"lastName": "董俊彦",
 						"creatorType": "author"
 					}
 				],
@@ -931,8 +889,7 @@ var testCases = [
 				"title": "吐鲁番高昌回鹘时期药师经变图像艺术研究",
 				"creators": [
 					{
-						"lastName": "万",
-						"firstName": "慧通",
+						"lastName": "万慧通",
 						"creatorType": "author"
 					}
 				],
@@ -971,13 +928,11 @@ var testCases = [
 				"title": "“关铭闻”里藏着什么力量？",
 				"creators": [
 					{
-						"lastName": "朱",
-						"firstName": "子钰",
+						"lastName": "朱子钰",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "杜",
-						"firstName": "一娜",
+						"lastName": "杜一娜",
 						"creatorType": "author"
 					}
 				],
@@ -1002,18 +957,15 @@ var testCases = [
 				"title": "基于图像识别的气象站探测设备环境风险等级判识方法",
 				"creators": [
 					{
-						"lastName": "王",
-						"firstName": "超然",
+						"lastName": "王超然",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "白",
-						"firstName": "子诚",
+						"lastName": "白子诚",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "吴",
-						"firstName": "松",
+						"lastName": "吴松",
 						"creatorType": "author"
 					}
 				],
@@ -1066,18 +1018,15 @@ var testCases = [
 				"title": "基于小波频域感知的图像去雨Transformer模型",
 				"creators": [
 					{
-						"lastName": "张",
-						"firstName": "凡龙",
+						"lastName": "张凡龙",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "杜",
-						"firstName": "启鲁",
+						"lastName": "杜启鲁",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "任",
-						"firstName": "翔宇",
+						"lastName": "任翔宇",
 						"creatorType": "author"
 					}
 				],
@@ -1119,8 +1068,7 @@ var testCases = [
 				"title": "习近平关于人工智能发展重要论述的生成语境、精髓要义及时代价值",
 				"creators": [
 					{
-						"lastName": "黄",
-						"firstName": "豪楠",
+						"lastName": "黄豪楠",
 						"creatorType": "author"
 					}
 				],
@@ -1156,8 +1104,7 @@ var testCases = [
 				"title": "人工智能时代高校思想政治教育效果提升研究",
 				"creators": [
 					{
-						"lastName": "刘",
-						"firstName": "歌",
+						"lastName": "刘歌",
 						"creatorType": "author"
 					}
 				],
@@ -1193,8 +1140,7 @@ var testCases = [
 				"title": "面向大规模MIMO的智能信道估计与预编码技术研究",
 				"creators": [
 					{
-						"lastName": "高",
-						"firstName": "佳宝",
+						"lastName": "高佳宝",
 						"creatorType": "author"
 					}
 				],
@@ -1239,8 +1185,7 @@ var testCases = [
 				"title": "“中国持续为金砖合作注入动能”",
 				"creators": [
 					{
-						"lastName": "苑",
-						"firstName": "基荣",
+						"lastName": "苑基荣",
 						"creatorType": "author"
 					}
 				],
@@ -1265,13 +1210,11 @@ var testCases = [
 				"title": "AI重塑电子信息制造业",
 				"creators": [
 					{
-						"lastName": "黄",
-						"firstName": "鑫",
+						"lastName": "黄鑫",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "禹",
-						"firstName": "琳",
+						"lastName": "禹琳",
 						"creatorType": "author"
 					}
 				],
@@ -1296,33 +1239,27 @@ var testCases = [
 				"title": "基于AOV边缘摄像头与轻量化深度学习的智能全天空云观测系统",
 				"creators": [
 					{
-						"lastName": "王",
-						"firstName": "清龙",
+						"lastName": "王清龙",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "向",
-						"firstName": "立莉",
+						"lastName": "向立莉",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "成",
-						"firstName": "勤",
+						"lastName": "成勤",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "姚",
-						"firstName": "曼",
+						"lastName": "姚曼",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "王",
-						"firstName": "海",
+						"lastName": "王海",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "乔",
-						"firstName": "木",
+						"lastName": "乔木",
 						"creatorType": "author"
 					}
 				],
@@ -1366,28 +1303,23 @@ var testCases = [
 				"title": "基于多源卫星资料和深度学习的降水三维雷达反射率重建",
 				"creators": [
 					{
-						"lastName": "叶",
-						"firstName": "霖",
+						"lastName": "叶霖",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "于",
-						"firstName": "田甜",
+						"lastName": "于田甜",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "王",
-						"firstName": "皓",
+						"lastName": "王皓",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "曾",
-						"firstName": "强宇",
+						"lastName": "曾强宇",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "康",
-						"firstName": "文",
+						"lastName": "康文",
 						"creatorType": "author"
 					}
 				],
