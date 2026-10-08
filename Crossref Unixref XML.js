@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2024-10-30 12:58:25"
+	"lastUpdated": "2026-10-08 16:27:49"
 }
 
 /*
@@ -242,8 +242,8 @@ function doImport() {
 			|| (bookType == "other"
 				&& ["chapter", "reference_entry"].includes(componentType));
 
-		// for items that are entry in reference books OR edited book types that have some type of a chapter entry.
-		if ((bookType === "edited_book" && componentType) || isReference) {
+		// A content_item is only present when the DOI is for a part of the book
+		if (componentType) {
 			item = new Zotero.Item("bookSection");
 			refXML = ZU.xpath(itemXML, 'content_item');
 
@@ -443,9 +443,10 @@ function doImport() {
 		);
 		var subtitle = ZU.xpath(refXML, 'titles[1]/subtitle[1]')[0];
 		if (subtitle) {
-			item.title = item.title.replace(/:$/, '') + ': ' + ZU.trimInternal(
-				removeUnsupportedMarkup(innerXML(subtitle))
-			);
+			subtitle = ZU.trimInternal(removeUnsupportedMarkup(innerXML(subtitle)));
+		}
+		if (subtitle) {
+			item.title = item.title.replace(/:$/, '') + ': ' + subtitle;
 		}
 		item.title = item.title.replace(/\s+<(sub|sup)>/g, "<$1>");
 	}
@@ -954,6 +955,50 @@ var testCases = [
 				"publicationTitle": "Industrial & Engineering Chemistry Research",
 				"rights": "https://doi.org/10.15223/policy-029",
 				"url": "https://pubs.acs.org/doi/10.1021/acs.iecr.4c03239",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<doi_records>\n  <doi_record owner=\"10.4018\" timestamp=\"2025-03-22 02:21:26\">\n    <crossref>\n      <book book_type=\"monograph\">\n        <book_metadata>\n          <contributors>\n            <person_name sequence=\"first\" contributor_role=\"editor\">\n              <given_name>Chutima</given_name>\n              <surname>Boonthum-Denecke</surname>\n              <affiliation>Hampton University, USA</affiliation>\n            </person_name>\n            <person_name sequence=\"additional\" contributor_role=\"editor\">\n              <given_name>Philip M.</given_name>\n              <surname>McCarthy</surname>\n              <affiliation>The University of Memphis, USA</affiliation>\n            </person_name>\n            <person_name sequence=\"additional\" contributor_role=\"editor\">\n              <given_name>Travis</given_name>\n              <surname>Lamkin</surname>\n              <affiliation>University of Memphis, USA</affiliation>\n            </person_name>\n          </contributors>\n          <titles>\n            <title>Cross-Disciplinary Advances in Applied Natural Language Processing</title>\n            <subtitle>Issues and Approaches</subtitle>\n          </titles>\n          <publication_date>\n            <year>2012</year>\n          </publication_date>\n          <isbn>9781613504475</isbn>\n          <isbn media_type=\"electronic\">9781613504482</isbn>\n          <publisher>\n            <publisher_name>IGI Global</publisher_name>\n          </publisher>\n          <doi_data>\n            <doi>10.4018/978-1-61350-447-5</doi>\n            <resource>http://services.igi-global.com/resolvedoi/resolve.aspx?doi=10.4018/978-1-61350-447-5</resource>\n          </doi_data>\n        </book_metadata>\n        <content_item component_type=\"chapter\">\n          <contributors>\n            <person_name sequence=\"first\" contributor_role=\"author\">\n              <given_name>Scott</given_name>\n              <surname>Jarvis</surname>\n              <affiliation>Ohio University, USA</affiliation>\n            </person_name>\n          </contributors>\n          <titles>\n            <title>Lexical Challenges in the Intersection of Applied Linguistics and ANLP</title>\n            <subtitle />\n          </titles>\n          <abstract>\n            <p>The investigation of natural language processing in the field of Applied Linguistics is pursued with both theoretical and practical aims, such as arriving at a clearer understanding of the nature of language knowledge, the rules that govern its use, how it is acquired, how unique it is to individual speakers, and how it can best be taught to learners. The purpose of this chapter is to draw attention to some of the prominent areas of overlap between Applied Linguistics and ANLP, highlighting the problems they face in relation to the characterization of lexical deployment, and focusing particularly on challenges related to the measurement of lexical diversity and the representation of the unique lexical signatures of individual samples of natural language use. The bulk of the chapter is devoted to describing preliminary solutions to these challenges.</p>\n          </abstract>\n          <component_number>chapter 5</component_number>\n          <pages>\n            <first_page>50</first_page>\n            <last_page>72</last_page>\n          </pages>\n          <doi_data>\n            <doi>10.4018/978-1-61350-447-5.ch005</doi>\n            <resource>http://services.igi-global.com/resolvedoi/resolve.aspx?doi=10.4018/978-1-61350-447-5.ch005</resource>\n            <collection property=\"crawler-based\">\n              <item crawler=\"iParadigms\">\n                <resource>https://www.igi-global.com/viewtitle.aspx?TitleId=64580</resource>\n              </item>\n            </collection>\n          </doi_data>\n        </content_item>\n      </book>\n    </crossref>\n  </doi_record>\n</doi_records>",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Lexical Challenges in the Intersection of Applied Linguistics and ANLP",
+				"creators": [
+					{
+						"creatorType": "editor",
+						"firstName": "Chutima",
+						"lastName": "Boonthum-Denecke"
+					},
+					{
+						"creatorType": "editor",
+						"firstName": "Philip M.",
+						"lastName": "McCarthy"
+					},
+					{
+						"creatorType": "editor",
+						"firstName": "Travis",
+						"lastName": "Lamkin"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Scott",
+						"lastName": "Jarvis"
+					}
+				],
+				"date": "2012",
+				"ISBN": "9781613504475, 9781613504482",
+				"abstractNote": "The investigation of natural language processing in the field of Applied Linguistics is pursued with both theoretical and practical aims, such as arriving at a clearer understanding of the nature of language knowledge, the rules that govern its use, how it is acquired, how unique it is to individual speakers, and how it can best be taught to learners. The purpose of this chapter is to draw attention to some of the prominent areas of overlap between Applied Linguistics and ANLP, highlighting the problems they face in relation to the characterization of lexical deployment, and focusing particularly on challenges related to the measurement of lexical diversity and the representation of the unique lexical signatures of individual samples of natural language use. The bulk of the chapter is devoted to describing preliminary solutions to these challenges.",
+				"bookTitle": "Cross-Disciplinary Advances in Applied Natural Language Processing",
+				"extra": "DOI: 10.4018/978-1-61350-447-5.ch005",
+				"pages": "50-72",
+				"publisher": "IGI Global",
+				"url": "http://services.igi-global.com/resolvedoi/resolve.aspx?doi=10.4018/978-1-61350-447-5.ch005",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
