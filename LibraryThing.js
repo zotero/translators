@@ -2,14 +2,14 @@
 	"translatorID": "5fee8b6c-8208-4be9-8d3e-dda9fe3c8671",
 	"label": "LibraryThing",
 	"creator": "Jan Baykara",
-	"target": "^https?://(www\\.)?librarything\\.com/(catalog\\.php|catalog_bottom\\.php|catalog/)",
+	"target": "^https?://(www\\.)?librarything\\.com/(catalog\\.php|catalog_bottom\\.php|catalog/|work/|isbn/)",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 1,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-30 17:52:52"
+	"lastUpdated": "2026-10-09 10:06:06"
 }
 
 /*
@@ -38,6 +38,7 @@
 /* eslint-disable camelcase */
 
 const API_MAX_BOOKS = 20000;
+const SITE_ORIGIN = 'https://www.librarything.com';
 
 function queryParam(url, name) {
 	try {
@@ -72,15 +73,6 @@ function getCollectionFilter(url) {
 	}
 	catch (e) {}
 	return '';
-}
-
-function originFromUrl(url) {
-	try {
-		return new URL(url).origin;
-	}
-	catch (e) {
-		return 'https://www.librarything.com';
-	}
 }
 
 function slugify(value) {
@@ -145,7 +137,14 @@ function isbnForBook(book) {
 	return String((book && (book.ISBN || book.ISBN_cleaned)) || '').trim();
 }
 
+function isBookPage(url) {
+	return /\/work\/\d+/i.test(url) || /\/isbn\//i.test(url);
+}
+
 function detectWeb(_doc, url) {
+	if (isBookPage(url)) {
+		return 'book';
+	}
 	if (getUserId(url)) {
 		return 'multiple';
 	}
@@ -174,7 +173,7 @@ async function fetchCatalog(url, userid, doc) {
 	let key = widgetKeyFromDoc(doc);
 	if (key) params.set('key', key);
 
-	let data = await requestJSON(`${originFromUrl(url)}/api_getdata.php?${params}`);
+	let data = await requestJSON(`/api_getdata.php?${params}`);
 	let books = booksFromPayload(data);
 	let collectionFilter = getCollectionFilter(url);
 	if (collectionFilter) {
@@ -183,7 +182,7 @@ async function fetchCatalog(url, userid, doc) {
 	return books;
 }
 
-function scrape(book, pageUrl) {
+function scrapeBook(book, pageUrl) {
 	let item = new Zotero.Item('book');
 	item.title = ZU.trimInternal(book.title || '') || 'Untitled';
 	if (book.author_lf) {
@@ -202,9 +201,8 @@ function scrape(book, pageUrl) {
 	if (book.language_main) {
 		item.language = String(book.language_main).trim();
 	}
-	let origin = originFromUrl(pageUrl);
 	if (isbn) {
-		item.url = `${origin}/isbn/${isbn.replace(/-/g, '')}`;
+		item.url = `${SITE_ORIGIN}/isbn/${isbn.replace(/-/g, '')}`;
 	}
 	else {
 		item.url = String(pageUrl).split('#')[0];
@@ -219,27 +217,60 @@ function scrape(book, pageUrl) {
 	item.complete();
 }
 
+async function scrapePage(doc, url = doc.location.href) {
+	let translator = Zotero.loadTranslator('web');
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48'); // Embedded Metadata
+	translator.setDocument(doc);
+	translator.setHandler('itemDone', (_obj, item) => {
+		item.itemType = 'book';
+		item.libraryCatalog = 'LibraryThing';
+		// Page titles are "Title by Author | LibraryThing"
+		if (item.title) {
+			item.title = item.title.replace(/\s*\|\s*LibraryThing\s*$/i, '').trim();
+			let byMatch = item.title.match(/^(.*?)\s+by\s+(.+)$/i);
+			if (byMatch && !item.creators.length) {
+				item.title = byMatch[1].trim();
+				for (let name of byMatch[2].split(/\s+and\s+|,\s+/)) {
+					addCreator(item, name, false);
+				}
+			}
+		}
+		if (!item.url) {
+			item.url = url.split('#')[0];
+		}
+		item.complete();
+	});
+	let em = await translator.getTranslatorObject();
+	em.itemType = 'book';
+	await em.doWeb(doc, url);
+}
+
 async function doWeb(doc, url) {
-	let userid = getUserId(url);
-	if (!userid) return;
-	let books = await fetchCatalog(url, userid, doc);
-	if (!books.length) {
-		Z.debug(`LibraryThing: no books returned for ${userid}`);
-		return;
-	}
-	let items = {};
-	for (let book of books) {
-		let id = book.book_id;
-		if (id) {
-			items[id] = itemLabel(book);
+	if (detectWeb(doc, url) == 'multiple') {
+		let userid = getUserId(url);
+		if (!userid) return;
+		let books = await fetchCatalog(url, userid, doc);
+		if (!books.length) {
+			Z.debug(`LibraryThing: no books returned for ${userid}`);
+			return;
+		}
+		let items = {};
+		for (let book of books) {
+			let id = book.book_id;
+			if (id) {
+				items[id] = itemLabel(book);
+			}
+		}
+		let selected = await Zotero.selectItems(items);
+		if (!selected) return;
+		let byId = new Map(books.map(book => [String(book.book_id), book]));
+		for (let id of Object.keys(selected)) {
+			let book = byId.get(id);
+			if (book) scrapeBook(book, url);
 		}
 	}
-	let selected = await Zotero.selectItems(items);
-	if (!selected) return;
-	let byId = new Map(books.map(book => [String(book.book_id), book]));
-	for (let id of Object.keys(selected)) {
-		let book = byId.get(id);
-		if (book) scrape(book, url);
+	else {
+		await scrapePage(doc, url);
 	}
 }
 
