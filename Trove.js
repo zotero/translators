@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-01-27 20:40:35"
+	"lastUpdated": "2026-10-01 08:07:16"
 }
 
 /*
@@ -159,7 +159,7 @@ function scrapeNewspaper(doc, url) {
 			}
 
 			// I've created a proxy server to generate the PDF and return the URL without locking up the browser.
-			var proxyURL = "https://trove-proxy.herokuapp.com/pdf/" + articleID;
+			var proxyURL = "https://wraggelabs.com/trove-proxy/pdf/" + articleID;
 			ZU.doGet(proxyURL, function (pdfURL) {
 				// With the last argument 'false' passed to doGet
 				// we allow all status codes to continue and reach
