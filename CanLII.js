@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-09 21:15:20"
+	"lastUpdated": "2026-10-09 21:18:01"
 }
 
 /*
@@ -74,6 +74,9 @@ function scrape(doc, url) {
 	var citationMatch = citation.match(/^(.+),\s*((?:18|19|20)\d{2})\s+([A-Za-z][A-Za-z0-9-]*(?:\s+[A-Z]{2})?)\s+(\d+)(?:\s+\(([^)]+)\))?/);
 	var heading = doc.querySelector("#title-container h1, #titleContainer h1, h1");
 	item.caseName = meta(doc, "lbh-title") || (citationMatch ? citationMatch[1] : citation.split(",")[0]) || clean(heading && heading.textContent);
+	if (!item.caseName) {
+		throw new Error("CanLII case metadata is unavailable (page title: " + doc.title + ")");
+	}
 	item.court = metadataValue(doc, ["source", "court", "tribunal"]);
 	if (!item.court) {
 		var crumbs = doc.querySelectorAll('#canlii-breadcrumbs a, #breadcrumbs *[itemprop="name"]');
