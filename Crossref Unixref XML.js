@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2026-10-08 16:27:49"
+	"lastUpdated": "2026-10-09 19:07:22"
 }
 
 /*
@@ -234,36 +234,19 @@ function doImport() {
 		// Entire edited book. This should _not_ be imported as bookSection
 		// Example: doi: 10.4135/9781446200957
 		
-		var bookType = itemXML[0].hasAttribute("book_type") ? itemXML[0].getAttribute("book_type") : null;
 		var componentType = ZU.xpathText(itemXML[0], 'content_item/@component_type');
-		// is this an entry in a reference book?
-		var isReference = (bookType == "reference"
-				&& ["chapter", "reference_entry", "other"].includes(componentType))
-			|| (bookType == "other"
-				&& ["chapter", "reference_entry"].includes(componentType));
 
 		// A content_item is only present when the DOI is for a part of the book
 		if (componentType) {
 			item = new Zotero.Item("bookSection");
 			refXML = ZU.xpath(itemXML, 'content_item');
+			metadataXML = ZU.xpath(itemXML, 'book_metadata');
+			if (!metadataXML.length) metadataXML = ZU.xpath(itemXML, 'book_series_metadata');
+			// TODO: Check book_set_metadata here too, as we do below?
 
-			if (isReference) {
-				metadataXML = ZU.xpath(itemXML, 'book_metadata');
-				if (!metadataXML.length) metadataXML = ZU.xpath(itemXML, 'book_series_metadata');
-				// TODO: Check book_set_metadata here too, as we do below?
-
-				item.bookTitle = ZU.xpathText(metadataXML, 'titles[1]/title[1]');
-				item.seriesTitle = ZU.xpathText(metadataXML, 'series_metadata/titles[1]/title[1]');
-
-				var metadataSeriesXML = ZU.xpath(metadataXML, 'series_metadata');
-				if (metadataSeriesXML.length) parseCreators(metadataSeriesXML, item, { editor: "seriesEditor" });
-			}
-			else {
-				metadataXML = ZU.xpath(itemXML, 'book_series_metadata');
-				if (!metadataXML.length) metadataXML = ZU.xpath(itemXML, 'book_metadata');
-				item.bookTitle = ZU.xpathText(metadataXML, 'series_metadata/titles[1]/title[1]');
-				if (!item.bookTitle) item.bookTitle = ZU.xpathText(metadataXML, 'titles[1]/title[1]');
-			}
+			item.bookTitle = ZU.xpathText(metadataXML, 'titles[1]/title[1]')
+				|| ZU.xpathText(metadataXML, 'series_metadata/titles[1]/title[1]');
+			seriesXML = ZU.xpath(metadataXML, 'series_metadata');
 
 			// Handle book authors
 			parseCreators(metadataXML, item, { author: "bookAuthor" });
@@ -999,6 +982,56 @@ var testCases = [
 				"pages": "50-72",
 				"publisher": "IGI Global",
 				"url": "http://services.igi-global.com/resolvedoi/resolve.aspx?doi=10.4018/978-1-61350-447-5.ch005",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<doi_records>\n  <doi_record owner=\"10.4018\" timestamp=\"2020-05-18 18:35:42\">\n    <crossref>\n      <book book_type=\"monograph\">\n        <book_series_metadata>\n          <series_metadata>\n            <contributors>\n              <person_name sequence=\"first\" contributor_role=\"editor\">\n                <given_name>Patricia</given_name>\n                <surname>Ordóñez de Pablos</surname>\n                <affiliation>Universidad de Oviedo, Spain</affiliation>\n              </person_name>\n            </contributors>\n            <titles>\n              <title>Advances in Business Strategy and Competitive Advantage</title>\n            </titles>\n            <issn media_type=\"print\">2327-3429</issn>\n            <issn media_type=\"electronic\">2327-3437</issn>\n            <doi_data>\n              <doi>10.4018/ABSCA</doi>\n              <resource>http://services.igi-global.com/resolvedoi/resolve.aspx?doi=10.4018/ABSCA</resource>\n            </doi_data>\n          </series_metadata>\n          <contributors>\n            <person_name sequence=\"first\" contributor_role=\"editor\">\n              <given_name>Luísa Cagica</given_name>\n              <surname>Carvalho</surname>\n              <affiliation>Instituto Politécnico de Setúbal, Portugal &amp; CEFAGE - Universidade de Évora, Portugal</affiliation>\n            </person_name>\n            <person_name sequence=\"additional\" contributor_role=\"editor\">\n              <given_name>Ana Dias</given_name>\n              <surname>Daniel</surname>\n              <affiliation>Universidade de Aveiro, Portugal</affiliation>\n            </person_name>\n          </contributors>\n          <titles>\n            <title>Global Considerations in Entrepreneurship Education and Training</title>\n            <subtitle />\n          </titles>\n          <publication_date>\n            <year>2019</year>\n          </publication_date>\n          <isbn>9781522576754</isbn>\n          <isbn media_type=\"electronic\">9781522576761</isbn>\n          <publisher>\n            <publisher_name>IGI Global</publisher_name>\n          </publisher>\n          <doi_data>\n            <doi>10.4018/978-1-5225-7675-4</doi>\n            <resource>http://services.igi-global.com/resolvedoi/resolve.aspx?doi=10.4018/978-1-5225-7675-4</resource>\n          </doi_data>\n        </book_series_metadata>\n        <content_item component_type=\"chapter\">\n          <contributors>\n            <person_name sequence=\"first\" contributor_role=\"author\">\n              <given_name>Selma</given_name>\n              <surname>Mosquera</surname>\n              <affiliation>ISCSP/Lisbon University, Portugal</affiliation>\n              <ORCID authenticated=\"true\">https://orcid.org/0000-0002-7464-8649</ORCID>\n            </person_name>\n            <person_name sequence=\"additional\" contributor_role=\"author\">\n              <given_name>Patrícia</given_name>\n              <surname>Jardim da Palma</surname>\n              <affiliation>ISCSP/Lisbon University, Portugal</affiliation>\n            </person_name>\n          </contributors>\n          <titles>\n            <title>Entrepreneurial Education for Immigrants a Tool for Local Development</title>\n            <subtitle />\n          </titles>\n          <abstract>\n            <p>This chapter talks about the possible contribution that the entrepreneurial education for immigrants can give to local growth. So, the readers will be invited to reflect about the challenges that involves the immigrant entrepreneurship action and your relation with the local development. Next, they will think over the entrepreneurial education paper in this setting, and how your didactic-andragogical assumptions can improve their abilities and the local entrepreneurial ecosystem. So last, a project created by Alto Comissariado Para Migrações (ACM), in Portugal, called Promoção do Empreendedorismo Imigrante (PEI), is described that reinforces the crucial contribution that the entrepreneurial educations for immigrants can give to local development</p>\n          </abstract>\n          <component_number>chapter 2</component_number>\n          <publication_date>\n            <year>2019</year>\n          </publication_date>\n          <pages>\n            <first_page>18</first_page>\n            <last_page>40</last_page>\n          </pages>\n          <doi_data>\n            <doi>10.4018/978-1-5225-7675-4.ch002</doi>\n            <resource>http://services.igi-global.com/resolvedoi/resolve.aspx?doi=10.4018/978-1-5225-7675-4.ch002</resource>\n            <collection property=\"crawler-based\">\n              <item crawler=\"iParadigms\">\n                <resource>https://www.igi-global.com/viewtitle.aspx?TitleId=224124</resource>\n              </item>\n            </collection>\n          </doi_data>\n        </content_item>\n      </book>\n    </crossref>\n  </doi_record>\n</doi_records>",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Entrepreneurial Education for Immigrants a Tool for Local Development",
+				"creators": [
+					{
+						"creatorType": "editor",
+						"firstName": "Luísa Cagica",
+						"lastName": "Carvalho"
+					},
+					{
+						"creatorType": "editor",
+						"firstName": "Ana Dias",
+						"lastName": "Daniel"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Selma",
+						"lastName": "Mosquera"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Patrícia",
+						"lastName": "Jardim Da Palma"
+					},
+					{
+						"creatorType": "seriesEditor",
+						"firstName": "Patricia",
+						"lastName": "Ordóñez De Pablos"
+					}
+				],
+				"date": "2019",
+				"ISBN": "9781522576754, 9781522576761",
+				"abstractNote": "This chapter talks about the possible contribution that the entrepreneurial education for immigrants can give to local growth. So, the readers will be invited to reflect about the challenges that involves the immigrant entrepreneurship action and your relation with the local development. Next, they will think over the entrepreneurial education paper in this setting, and how your didactic-andragogical assumptions can improve their abilities and the local entrepreneurial ecosystem. So last, a project created by Alto Comissariado Para Migrações (ACM), in Portugal, called Promoção do Empreendedorismo Imigrante (PEI), is described that reinforces the crucial contribution that the entrepreneurial educations for immigrants can give to local development",
+				"bookTitle": "Global Considerations in Entrepreneurship Education and Training",
+				"extra": "DOI: 10.4018/978-1-5225-7675-4.ch002",
+				"pages": "18-40",
+				"publisher": "IGI Global",
+				"series": "Advances in Business Strategy and Competitive Advantage",
+				"url": "http://services.igi-global.com/resolvedoi/resolve.aspx?doi=10.4018/978-1-5225-7675-4.ch002",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
