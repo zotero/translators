@@ -1,0 +1,501 @@
+{
+	"translatorID": "3d3ab047-f5c2-430a-ac10-a6aec5448bb0",
+	"label": "Vanguard",
+	"creator": "VWF",
+	"target": "^https?://(www\\.|allure\\.)?vanguardngr\\.com/",
+	"minVersion": "5.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2025-10-28 10:06:29"
+}
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2025 VWF
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
+function meta(doc, nameOrProp) {
+	let m = doc.querySelector('meta[property="' + nameOrProp + '"]')
+		|| doc.querySelector('meta[name="' + nameOrProp + '"]');
+	return m ? m.getAttribute('content') : '';
+}
+
+// Identify article URL pattern
+function isArticleURL(url) {
+	return /vanguardngr\.com\/\d{4}\/\d{2}\//.test(url);
+}
+
+function getSearchResults(doc, checkOnly) {
+	let items = {};
+	let found = false;
+	let rows = doc.querySelectorAll('a[href*="/"]');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent || row.title || '');
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+function isIndexURL(url) {
+	return url && (url.includes('/tag/') || url.includes('/category/'));
+}
+
+function detectWeb(doc, url) {
+	url = url || doc.location.href;
+
+	if (isIndexURL(url)) {
+		return 'multiple';
+	}
+
+	let j = isArticleURL(url);
+	if (j) {
+		if (url.includes('allure.vanguardngr.com')) {
+			return 'magazineArticle';
+		}
+		return 'newspaperArticle';
+	}
+
+	// Explicit fallback ONLY for category/tag pages
+	if (getSearchResults(doc, true) && isIndexURL(url)) {
+		return 'multiple';
+	}
+
+	return false;
+}
+
+async function doWeb(doc, url) {
+	url = url || doc.location.href;
+	let mode = detectWeb(doc, url);
+	if (mode === 'multiple') {
+		let items = getSearchResults(doc, false);
+		if (!items) return;
+		let selected = await Zotero.selectItems(items);
+		if (!selected) return;
+		for (let u of Object.keys(selected)) {
+			await scrape(await requestDocument(u));
+		}
+	}
+	else if (mode === 'newspaperArticle' || mode === 'magazineArticle') {
+		await scrape(doc, url);
+	}
+}
+
+async function scrape(doc, url) {
+	url = url || doc.location.href;
+
+	function isSingleName(name) {
+		if (!name) return true;
+		name = name.trim();
+		name = name.replace(/^\s*by\s+/i, '').trim();
+		if (name.split(/\s+/).length === 1) return true;
+		if (/^[A-Z0-9-]{2,}$/.test(name) && name.includes(' ') === -1) return true;
+		return false;
+	}
+
+	function splitAuthors(nameStr) {
+		if (!nameStr) return [];
+		let s = nameStr.trim();
+		s = s.replace(/^\s*by\s+/i, '').trim();
+		s = s.replace(/\s*\([^)]*\)\s*$/, '').trim();
+		s = s.replace(/,\s*[A-Z][a-z]+(?:[\s-][A-Z][a-z]+)*$/, '').trim();
+		if (s.includes('|')) s = s.split('|')[0].trim();
+		let parts = s.split(/\s+(?:and|&)\s+|;\s*/i);
+		if (parts.length === 1 && s.includes(',') !== -1) {
+			parts = s.split(/\s*,\s*/).map(p => p.trim()).filter(Boolean);
+		}
+		let cleaned = [];
+		for (let p of parts) {
+			let np = (p || '').trim();
+			np = np.replace(/^\s*by\s+/i, '').trim();
+			np = np.replace(/\s*\([^)]*\)\s*$/, '').trim();
+			np = np.replace(/,\s*[A-Z][a-z]+(?:[\s-][A-Z][a-z]+)*$/, '').trim();
+			if (np && !/^(agency|news desk|agency reporter|vanguard|our reporter|allure|editorial|nigeria|staff|bureau)$/i.test(np)) {
+				cleaned.push(np);
+			}
+		}
+		return cleaned;
+	}
+
+	let itype = (url && url.includes('allure.vanguardngr.com')) ? 'magazineArticle' : 'newspaperArticle';
+	let item = new Zotero.Item(itype);
+	let data = isArticleURL(url);
+
+	if (data) {
+		item.title = ZU.unescapeHTML(
+			data.headline
+			|| meta(doc, 'og:title')
+			|| text(doc, 'div.entry-heading-wrapper>h2.entry-heading')
+			|| text(doc, 'div.s-post-header>h1')
+			|| ''
+		);
+
+		item.abstractNote = ZU.unescapeHTML(
+			data.description
+			|| meta(doc, 'og:description')
+			|| ''
+		);
+
+		item.url = data.url || meta(doc, 'og:url') || url;
+		item.language = data.inLanguage || meta(doc, 'og:locale') || 'en';
+		item.ISSN = (url && url.includes('allure.vanguardngr.com')) ? '2276-9234' : '0794-652X';
+
+		let rawJsonDate = data.datePublished || '';
+		if (rawJsonDate) {
+			let isoFromZU = ZU.strToISO(rawJsonDate);
+			item.date = isoFromZU || rawJsonDate;
+		}
+
+		if (data.articleSection) {
+			let section = Array.isArray(data.articleSection)
+				? data.articleSection.map(s => s.toLowerCase())
+				: [data.articleSection.toLowerCase()];
+			if (section.includes('editorial')) {
+				item.creators = [];
+			}
+		}
+	}
+
+	if (item.title) {
+		let m = item.title.match(/,\s*by\s+(.+)$/i);
+		if (m && m[1]) {
+			let colAuthors = splitAuthors(m[1]);
+			if (colAuthors.length) {
+				item.creators = [];
+				for (let ca of colAuthors) {
+					if (!isSingleName(ca)) item.creators.push(ZU.cleanAuthor(ca, 'author'));
+				}
+			}
+			item.title = item.title.replace(/,\s*by\s+(.+)$/i, '').trim();
+		}
+	}
+
+	if (!item.title || !item.title.trim()) {
+		item.title = ZU.unescapeHTML(
+			meta(doc, 'og:title')
+			|| text(doc, 'div.entry-heading-wrapper>h2.entry-heading')
+			|| text(doc, 'div.s-post-header>h1')
+			|| ''
+		);
+	}
+
+	if (!item.abstractNote || !item.abstractNote.trim()) {
+		item.abstractNote = ZU.unescapeHTML(meta(doc, 'og:description') || '');
+	}
+
+	if (!item.date || !item.date.trim()) {
+		let metaDate = meta(doc, 'article:published_time');
+		if (metaDate) item.date = ZU.strToISO(metaDate) || metaDate;
+	}
+
+	if (!item.url || !item.url.trim()) item.url = meta(doc, 'og:url') || url;
+	if (!item.publicationTitle) item.publicationTitle = (url && url.includes('allure.vanguardngr.com')) ? 'Vanguard Allure' : 'Vanguard';
+
+	// --- Allure.Vanguardngr.Com fallback with "name-likeness" + selector and pipe handling ---
+	if (item.creators.length === 0) {
+		let found = false;
+
+		// --- Allure-specific author detection ---
+		if (url.includes('allure.vanguardngr.com')) {
+			let txt = '';
+			
+			// 1) Try first <p> under div.article-content
+			let firstP = doc.querySelector('div.article-content > p:first-of-type');
+			if (firstP) {
+				let rawHTML = firstP.innerHTML.trim();
+				// If contains a <br>, take only the part before <br>
+				if (rawHTML.includes('<br')) {
+					txt = rawHTML.split(/<br\s*\/?>/i)[0].replace(/<[^>]+>/g, '').trim();
+				}
+				else {
+					txt = firstP.textContent.trim();
+				}
+			}
+
+			// 2) If not found or too long, check second child div inside article-content
+			if (!txt || txt.length > 80 || txt.split(/\s+/).length > 8 || /[.!?]\s/.test(txt)) {
+				let secondDiv = doc.querySelector('div.article-content > div:nth-of-type(2)');
+				if (secondDiv) {
+					let t = secondDiv.textContent.trim();
+					if (t && t.length < 60 && t.split(/\s+/).length <= 6) txt = t;
+				}
+			}
+
+			// 3) Clean up extracted candidate
+			if (txt) {
+				txt = txt.replace(/^\s*(By|Written by)\s+/i, '').trim();
+				txt = txt.replace(/\s*\|.*$/, '').trim();
+				txt = txt.replace(/\s*,\s*$/, '').trim(); // handles trailing commas like "Rita Chioma,"
+				txt = txt.replace(/\s*\(.*\)\s*$/, '').trim();
+			}
+
+			// 4) Apply name-likeness tests
+			if (
+				txt
+				&& txt.length <= 60
+				&& txt.split(/\s+/).length <= 6
+				&& /^[A-Z][a-z.'-]+(?:\s+[A-Z][a-z.'-]+){0,3}$/.test(txt)
+				&& !/agency|news desk|agency reporter|vanguard|our reporter|allure|editorial|nigeria|staff|bureau/i.test(txt.toLowerCase())
+			) {
+				let parts = splitAuthors(txt);
+				for (let name of parts) {
+					if (!isSingleName(name)) {
+						item.creators.push(ZU.cleanAuthor(name, 'author'));
+						found = true;
+					}
+				}
+			}
+			else if (txt && (txt.length > 60 || txt.split(/\s+/).length > 6 || /[.!?]\s/.test(txt))) {
+				// Explicitly ignore overly long or sentence-like paragraphs
+				found = true;
+			}
+		}
+		// --- END Allure-specific ---
+
+		// If not found via "name-likeness", fall back to general Vanguard selectors
+		if (!found && item.creators.length === 0) {
+			let cand = text(doc, 'div.entry-content-inner-wrapper p')
+				|| text(doc, 'div.byline, span.author, div.author-name');
+
+			if (cand && !/agency|news desk|agency reporter|vanguard|our reporter|allure|editorial|nigeria|staff|bureau/i.test(cand.toLowerCase())) {
+				cand = cand.split('|')[0].trim(); // remove any role or title after pipe
+				let authorParts = splitAuthors(cand);
+				for (let name of authorParts) {
+					if (!isSingleName(name)) item.creators.push(ZU.cleanAuthor(name, 'author'));
+				}
+			}
+		}
+	}
+
+	// --- CSS-author extraction routine that OVERRIDES other authors when present ---
+	(function () {
+		function cleanCandidateText(t) {
+			if (!t) return '';
+			let raw = t.trim();
+			raw = raw.replace(/^\s*(By|Written by)\s+/i, '').trim();
+			raw = raw.replace(/\s*\|.*$/, '').trim();
+			raw = raw.replace(/\s*,\s*$/, '').trim();
+			raw = raw.replace(/\s*\(.*\)\s*$/, '').trim();
+			return raw;
+		}
+
+		function isNameLike(t) {
+			if (!t) return false;
+			if (t.length > 60) return false;
+			if (t.split(/\s+/).length > 6) return false;
+			if (/[.!?]\s/.test(t)) return false;
+			if (!/^[A-Z][a-z.'-]+(?:\s+[A-Z][a-z.'-]+){0,3}$/.test(t)) return false;
+			if (/agency|news desk|agency reporter|vanguard|our reporter|allure|editorial|nigeria|staff|bureau/i.test(t.toLowerCase())) return false;
+			return true;
+		}
+
+		let cssAuthors = [];
+
+		// Try Allure first (keeps your existing selectors/priority)
+		if (url && url.includes('allure.vanguardngr.com')) {
+			// 1) first <p>
+			let firstP = doc.querySelector('div.article-content > p:first-of-type');
+			let cand = '';
+			if (firstP) {
+				let rawHTML = firstP.innerHTML.trim();
+				if (rawHTML.includes('<br')) {
+					cand = rawHTML.split(/<br\s*\/?>/i)[0].replace(/<[^>]+>/g, '').trim();
+				}
+				else {
+					cand = firstP.textContent.trim();
+				}
+				cand = cleanCandidateText(cand);
+
+				if (/^(?:\.{3}|…)\s*/.test(cand)) {
+					cand = ''; // clear candidate so next <p> will be checked
+				}
+			}
+
+			// If first p looks like a headline/spillover (too long / not name-like) then check second <p>
+			if (!isNameLike(cand)) {
+				let secondP = doc.querySelector('div.article-content > p:nth-of-type(2)');
+				if (secondP) {
+					let rawHTML2 = secondP.innerHTML.trim();
+					if (rawHTML2.includes('<br')) {
+						cand = rawHTML2.split(/<br\s*\/?>/i)[0].replace(/<[^>]+>/g, '').trim();
+					}
+					else {
+						cand = secondP.textContent.trim();
+					}
+					cand = cleanCandidateText(cand);
+				}
+			}
+
+			// If still not name-like, try the second child div)
+			if (!isNameLike(cand)) {
+				let secondDiv = doc.querySelector('div.article-content > div:nth-of-type(2)');
+				if (secondDiv) {
+					let t = secondDiv.textContent.trim();
+					cand = cleanCandidateText(t);
+				}
+			}
+
+			// If candidate is name-like, split and collect
+			if (isNameLike(cand)) {
+				let parts = splitAuthors(cand);
+				for (let p of parts) {
+					if (!isSingleName(p)) cssAuthors.push(ZU.cleanAuthor(p, 'author'));
+				}
+			}
+		}
+
+		// If no CSS result from Allure (or for www.), try general selectors (www.)
+		if (cssAuthors.length === 0) {
+			let cand = text(doc, 'div.entry-content-inner-wrapper p') || text(doc, 'div.article-content>p:first-of-type') || text(doc, 'div.byline, span.author, div.author-name');
+			if (cand) {
+				cand = cleanCandidateText(cand);
+				if (isNameLike(cand)) {
+					let parts = splitAuthors(cand);
+					for (let p of parts) {
+						if (!isSingleName(p)) cssAuthors.push(ZU.cleanAuthor(p, 'author'));
+					}
+				} // also handle very short cases like "By Rita Chioma," which may have trailing comma and be short
+				else if (cand && cand.length <= 60 && cand.split(/\s+/).length <= 6) {
+					let parts = splitAuthors(cand);
+					for (let p of parts) {
+						if (!isSingleName(p)) cssAuthors.push(ZU.cleanAuthor(p, 'author'));
+					}
+				}
+			}
+		}
+
+		// If we found CSS authors, OVERRIDE whatever was set earlier (JSON-LD/meta/heuristics)
+		if (cssAuthors.length > 0) {
+			item.creators = cssAuthors;
+		}
+	})();
+
+	item.attachments.push({ document: doc, title: 'Snapshot' });
+	item.place = 'Nigeria';
+	item.complete();
+}
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.vanguardngr.com/2025/10/from-pitch-to-purposeful-philanthropy-zahra-buhari-indimis-unspoken-touches-by-emmanuel-aziken/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "From Pitch To Purposeful Philanthropy: Zahra Buhari-Indimi’s Unspoken Touches",
+				"creators": [
+					{
+						"firstName": "Emmanuel",
+						"lastName": "Aziken",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025-10-24",
+				"ISSN": "0794-652X",
+				"abstractNote": "This weekend, the eyes of football lovers across the continent will be fixed on Abuja, where glamour meets generosity as some of the most iconic names in world football converge for a cause that transcends sport.  At the magnificent Moshood Abiola National Stadium, the Barcelona Legends will lock horns with the African Legends in a charity exhibition […]",
+				"language": "en-GB",
+				"libraryCatalog": "Vanguard",
+				"place": "Nigeria",
+				"publicationTitle": "Vanguard",
+				"shortTitle": "From Pitch To Purposeful Philanthropy",
+				"url": "https://www.vanguardngr.com/2025/10/from-pitch-to-purposeful-philanthropy-zahra-buhari-indimis-unspoken-touches-by-emmanuel-aziken/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.vanguardngr.com/2025/10/over-20-pdp-lawmakers-threaten-defection-over-controversy-surrounding-national-woman-leader-nominee/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Over 20 PDP lawmakers threaten defection over controversy surrounding national woman leader nominee",
+				"creators": [
+					{
+						"firstName": "Gift",
+						"lastName": "Chapi-Odekina",
+						"creatorType": "author"
+					}
+				],
+				"date": "2025-10-27",
+				"ISSN": "0794-652X",
+				"abstractNote": "The Peoples Democratic Party (PDP) is facing a fresh internal dispute as more than 20 of its federal lawmakers have threatened to defect over an alleged plan by the party leadership to approve a nominee reportedly backed by an All Progressives Congress (APC) governor for the position of PDP National Woman Leader.",
+				"language": "en-GB",
+				"libraryCatalog": "Vanguard",
+				"place": "Nigeria",
+				"publicationTitle": "Vanguard",
+				"url": "https://www.vanguardngr.com/2025/10/over-20-pdp-lawmakers-threaten-defection-over-controversy-surrounding-national-woman-leader-nominee/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://allure.vanguardngr.com/2025/09/ikorodu-bois-go-from-ikorodu-streets-to-global-screen/",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "Ikorodu Bois go from Ikorodu streets to global screen",
+				"creators": [],
+				"date": "2025-09-28",
+				"ISSN": "2276-9234",
+				"abstractNote": "In the densely populated town of Ikorodu in Lagos State, a highly talented group of young creatives have turned daily life into a springboard for the global limelight. Referred to as the Ikorodu Bois, the trio of siblings and their cousin have turned into a cultural force, repackaging how the globe sees African creativity in the digital era. What started as a joke experiments with smartphones and household items has evolved into an art form that commands international attention. The Ikorodu Bois’ signature style low-budget, high-impact recreations of blockbuster trailers and viral music videos is now celebrated far beyond the […]",
+				"language": "en-US",
+				"libraryCatalog": "Vanguard",
+				"publicationTitle": "Vanguard Allure",
+				"url": "https://allure.vanguardngr.com/2025/09/ikorodu-bois-go-from-ikorodu-streets-to-global-screen/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
