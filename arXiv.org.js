@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-05-19 15:28:10"
+	"lastUpdated": "2026-08-24 12:41:35"
 }
 
 /*
@@ -248,12 +248,10 @@ async function doSearch(item) {
 }
 
 function detectWeb(doc, url) {
-	var searchRe = /^https?:\/\/(?:([^.]+\.))?(?:arxiv\.org|xxx\.lanl\.gov)\/(?:search|find|list|catchup)\b/;
-	var relatedDOI = text(doc, '.doi > a');
-	if (searchRe.test(url)) {
-		return getSearchResults(doc, true/* checkOnly */) && "multiple";
+	if (isMultiplePage(url)) {
+		return "multiple";
 	}
-	else if (relatedDOI) {
+	else if (text(doc, '.doi > a')) {
 		return "journalArticle";
 	}
 	else {
@@ -261,13 +259,148 @@ function detectWeb(doc, url) {
 	}
 }
 
-function getSearchResults(doc, checkOnly = false) {
-	if (doc.location.pathname.startsWith('/search/')) {
+function isMultiplePage(url) {
+	return /^\/(?:search|find|list|catchup)(?:\/|$)/.test(new URL(url).pathname);
+}
+
+function getSearchResults(doc, checkOnly = false, url = doc.location.href) {
+	if (new URL(url).pathname.startsWith('/search/')) {
 		return getSearchResultsNew(doc, checkOnly);
 	}
 	else {
 		return getSearchResultsLegacy(doc, checkOnly);
 	}
+}
+
+/**
+ * Helper to clean LaTeX math in titles
+ * Added by fkguo 2025-12-07
+ * @param {string} title - The original title
+ * @returns {string} - Title with LaTeX converted to Unicode/Plain text where possible
+ */
+function cleanMathTitle(title) {
+	if (!title) return "";
+
+	let text = title;
+
+	// Handle explicit LaTeX formatting commands
+	text = text.replace(/\\(text|mathrm|bf|it)\{([^}]+)\}/g, '$2'); // Remove formatting wrappers
+
+	// Superscripts
+	text = text.replace(/\^\{([^}]+)\}/g, (match, content) => {
+		content = cleanMathTitle(content);
+		return `<sup>${content}</sup>`;
+	});
+	// Handle single char superscripts including special chars and commands
+	const superscriptMap = {
+		0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴',
+		5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹',
+		'+': '⁺', '-': '⁻', '=': '⁼', '(': '⁽', ')': '⁾',
+		n: 'ⁿ', i: 'ⁱ'
+	};
+	text = text.replace(/\^([0-9a-zA-Z+\-*])|\^\\(pm|mp)/g, (match, char, latex) => {
+		if (char && superscriptMap[char]) return superscriptMap[char];
+		if (char) return `<sup>${char}</sup>`;
+		if (latex === 'pm') return '<sup>±</sup>';
+		if (latex === 'mp') return '<sup>∓</sup>';
+		return match;
+	});
+
+	// Subscripts
+	text = text.replace(/_\{([^}]+)\}/g, (match, content) => {
+		content = cleanMathTitle(content);
+		return `<sub>${content}</sub>`;
+	});
+	// Handle single char subscripts including special chars and commands
+	const subscriptMap = {
+		0: '₀', 1: '₁', 2: '₂', 3: '₃', 4: '₄',
+		5: '₅', 6: '₆', 7: '₇', 8: '₈', 9: '₉',
+		'+': '₊', '-': '₋', '=': '₌', '(': '₍', ')': '₎',
+		a: 'ₐ', e: 'ₑ', o: 'ₒ', x: 'ₓ', h: 'ₕ',
+		k: 'ₖ', l: 'ₗ', m: 'ₘ', n: 'ₙ', p: 'ₚ',
+		s: 'ₛ', t: 'ₜ'
+	};
+	text = text.replace(/_([0-9a-zA-Z+\-*])|_\\(pm|mp)/g, (match, char, latex) => {
+		if (char && subscriptMap[char]) return subscriptMap[char];
+		if (char) return `<sub>${char}</sub>`;
+		if (latex === 'pm') return '<sub>±</sub>';
+		if (latex === 'mp') return '<sub>∓</sub>';
+		return match;
+	});
+
+	// Greek letters (add more as needed)
+	const greek = {
+		'\\alpha': 'α', '\\beta': 'β', '\\gamma': 'γ', '\\delta': 'δ', '\\epsilon': 'ε',
+		'\\zeta': 'ζ', '\\eta': 'η', '\\theta': 'θ', '\\iota': 'ι', '\\kappa': 'κ',
+		'\\lambda': 'λ', '\\mu': 'μ', '\\nu': 'ν', '\\xi': 'ξ', '\\pi': 'π',
+		'\\rho': 'ρ', '\\sigma': 'σ', '\\tau': 'τ', '\\upsilon': 'υ', '\\phi': 'φ',
+		'\\chi': 'χ', '\\psi': 'ψ', '\\omega': 'ω',
+		'\\Gamma': 'Γ', '\\Delta': 'Δ', '\\Theta': 'Θ', '\\Lambda': 'Λ', '\\Xi': 'Ξ',
+		'\\Pi': 'Π', '\\Sigma': 'Σ', '\\Upsilon': 'Υ', '\\Phi': 'Φ', '\\Psi': 'Ψ', '\\Omega': 'Ω'
+	};
+
+	for (let [tex, char] of Object.entries(greek)) {
+		// Replace whole word matches or distinct latex commands
+		let re = new RegExp(tex.replace('\\', '\\\\') + '(?![a-zA-Z])', 'g');
+		text = text.replace(re, char);
+	}
+
+	// Common particles and arrows
+	text = text.replace(/\\to/g, '→')
+		.replace(/\\rightarrow/g, '→')
+		.replace(/\\leftarrow/g, '←')
+		.replace(/\\longrightarrow/g, '⟶')
+		.replace(/\\longleftarrow/g, '⟵')
+		.replace(/\\infty/g, '∞')
+		.replace(/\\approx/g, '≈')
+		.replace(/\\simeq/g, '≃')
+		.replace(/\\sim/g, '~')
+		.replace(/\\times/g, '×')
+		.replace(/\\pm/g, '±')
+		.replace(/\\mp/g, '∓')
+		.replace(/\\sqrt/g, '√')
+		.replace(/\\partial/g, '∂')
+		.replace(/\\nabla/g, '∇')
+		.replace(/\\cdot/g, '⋅')
+		.replace(/\\neq/g, '≠')
+		.replace(/\\leq/g, '≤')
+		.replace(/\\geq/g, '≥')
+		.replace(/\\ll/g, '≪')
+		.replace(/\\gg/g, '≫')
+		.replace(/\\leftrightarrow/g, '↔')
+		.replace(/\\ell/g, 'ℓ')
+		.replace(/\\hbar/g, 'ℏ')
+		.replace(/\\dagger/g, '†')
+		.replace(/\\bar\{([^}]+)\}/g, '$1\u0304')
+		.replace(/->/g, '→');
+
+	// Cleanup standard e+e- notation specifically mentioned
+	// e^{+}e^{-} -> e⁺e⁻
+	// Handles $...$ wrappers
+	text = text.replace(/\$([^$]+)\$/g, (match, content) => {
+		// Remove internal spaces in math mode
+		content = content.replace(/\s+/g, '');
+
+		// Apply the same cleaning to content inside $...$
+		// We recurse lightly or just apply same logic
+		let clean = content.replace(/\^\{?\+?\}?/g, '⁺')
+			.replace(/\^\{?-\}?/g, '⁻')
+			.replace(/e\^/g, 'e') // Catch e^+ cases processed above
+			.replace(/\\/g, ''); // Remove remaining backslashes for simple commands
+
+		return clean;
+	});
+
+	// Cleanup generic latex braces and dollars if any remain
+	text = text.replace(/(\$|\\{|\\})/g, '');
+
+	// Fix specific case: e+ e- usually implies e⁺ e⁻
+	// This regex looks for 'e' followed immediately by + or -
+	// But we already handled ^+ and ^- above.
+	// Handle explicit "e+" "e-" in text if they weren't latex
+	// Careful not to replace regular words.
+
+	return ZU.trimInternal(text);
 }
 
 // New search results at https://arxiv.org/search/[advanced]
@@ -277,11 +410,11 @@ function getSearchResultsNew(doc, checkOnly = false) {
 	let rows = doc.querySelectorAll(".arxiv-result");
 	for (let row of rows) {
 		let id = text(row, ".list-title a").trim().replace(/^arXiv:/, "");
-		let title = ZU.trimInternal(text(row, "p.title"));
+		let title = getTitleText(row, "p.title");
 		if (!id || !title) continue;
 		if (checkOnly) return true;
 		found = true;
-		items[id] = title;
+		items[id] = cleanMathTitle(title);
 	}
 	return found && items;
 }
@@ -306,23 +439,49 @@ function getSearchResultsLegacy(doc, checkOnly = false) {
 		let id = text(dts[i], "a[title='Abstract']")
 			.trim()
 			.replace(/^arXiv:/, "");
-		let title = ZU.trimInternal(text(dds[i], ".list-title"))
-			.replace(/^Title:\s*/, "");
+		let title = getTitleText(dds[i], ".list-title");
 		if (!id || !title) continue;
 		if (checkOnly) return true;
 		found = true;
-		items[id] = title;
+		items[id] = cleanMathTitle(title);
 	}
 	return found && items;
 }
 
+function getTitleText(container, selector) {
+	let title = container.querySelector(selector);
+	if (!title) return "";
+
+	let clone = title.cloneNode(true);
+	for (let element of clone.querySelectorAll('.descriptor, .MathJax, .MathJax_Preview, mjx-container')) {
+		element.remove();
+	}
+	return ZU.trimInternal(clone.textContent).replace(/^Title:\s*/, "");
+}
+
 async function doWeb(doc, url) {
-	if (detectWeb(doc, url) == 'multiple') {
-		var items = getSearchResults(doc);
-		
-		let selectedItems = await Z.selectItems(items);
+	if (isMultiplePage(url)) {
+		let items = getSearchResults(doc, false, url);
+		if (!items) {
+			doc = await requestDocument(url);
+			items = getSearchResults(doc, false, url);
+		}
+		if (!items) return;
+
+		// Numeric keys keep the selector order stable when items pass through
+		// connector messaging. Map them back to arXiv IDs after selection.
+		let ids = Object.keys(items);
+		let selectionItems = {};
+		for (let i = 0; i < ids.length; i++) {
+			selectionItems[i] = items[ids[i]];
+		}
+
+		let selectedItems = await Zotero.selectItems(selectionItems);
 		if (selectedItems) {
-			let apiURL = `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(Object.keys(selectedItems).join(','))}`;
+			let selectedIDs = Object.keys(selectedItems)
+				.map(index => ids[Number(index)])
+				.filter(Boolean);
+			let apiURL = `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(selectedIDs.join(','))}`;
 			let document = await requestAtom(apiURL);
 			parseAtom(document);
 		}
@@ -361,7 +520,7 @@ function parseAtom(doc) {
 function parseSingleEntry(entry) {
 	let newItem = new Zotero.Item("preprint");
 
-	newItem.title = ZU.trimInternal(text(entry, "title"));
+	newItem.title = cleanMathTitle(ZU.trimInternal(text(entry, "title")));
 	newItem.date = ZU.strToISO(text(entry, "updated"));
 	entry.querySelectorAll(`author > name`).forEach(node => newItem.creators.push(ZU.cleanAuthor(node.textContent, 'author', false)));
 
@@ -544,7 +703,6 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Properties of the $δ$ Scorpii Circumstellar Disk from Continuum Modeling",
 				"creators": [
 					{
 						"firstName": "A. C.",
@@ -602,18 +760,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "12/2006",
-				"DOI": "10.1086/507935",
-				"ISSN": "0004-637X, 1538-4357",
-				"abstractNote": "We present optical $WBVR$ and infrared $JHKL$ photometric observations of the Be binary system $δ$ Sco, obtained in 2000--2005, mid-infrared (10 and $18 μ$m) photometry and optical ($λλ$ 3200--10500 Å) spectropolarimetry obtained in 2001. Our optical photometry confirms the results of much more frequent visual monitoring of $δ$ Sco. In 2005, we detected a significant decrease in the object's brightness, both in optical and near-infrared brightness, which is associated with a continuous rise in the hydrogen line strenghts. We discuss possible causes for this phenomenon, which is difficult to explain in view of current models of Be star disks. The 2001 spectral energy distribution and polarization are succesfully modeled with a three-dimensional non-LTE Monte Carlo code which produces a self-consistent determination of the hydrogen level populations, electron temperature, and gas density for hot star disks. Our disk model is hydrostatically supported in the vertical direction and radially controlled by viscosity. Such a disk model has, essentially, only two free parameters, viz., the equatorial mass loss rate and the disk outer radius. We find that the primary companion is surrounded by a small (7 $R_\\star$), geometrically-thin disk, which is highly non-isothermal and fully ionized. Our model requires an average equatorial mass loss rate of $1.5\\times 10^{-9} M_{\\sun}$ yr$^{-1}$.",
-				"extra": "arXiv:astro-ph/0603274",
-				"issue": "2",
-				"journalAbbreviation": "ApJ",
-				"libraryCatalog": "arXiv.org",
-				"pages": "1617-1625",
-				"publicationTitle": "The Astrophysical Journal",
-				"url": "http://arxiv.org/abs/astro-ph/0603274",
-				"volume": "652",
+				"notes": [
+					{
+						"note": "Comment: 27 pages, 9 figures, submitted to ApJ"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Astrophysics"
+					}
+				],
+				"seeAlso": [],
 				"attachments": [
 					{
 						"title": "Preprint PDF",
@@ -624,17 +781,19 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "Astrophysics"
-					}
-				],
-				"notes": [
-					{
-						"note": "Comment: 27 pages, 9 figures, submitted to ApJ"
-					}
-				],
-				"seeAlso": []
+				"title": "Properties of the δ Scorpii Circumstellar Disk from Continuum Modeling",
+				"date": "12/2006",
+				"abstractNote": "We present optical $WBVR$ and infrared $JHKL$ photometric observations of the Be binary system $δ$ Sco, obtained in 2000--2005, mid-infrared (10 and $18 μ$m) photometry and optical ($λλ$ 3200--10500 Å) spectropolarimetry obtained in 2001. Our optical photometry confirms the results of much more frequent visual monitoring of $δ$ Sco. In 2005, we detected a significant decrease in the object's brightness, both in optical and near-infrared brightness, which is associated with a continuous rise in the hydrogen line strenghts. We discuss possible causes for this phenomenon, which is difficult to explain in view of current models of Be star disks. The 2001 spectral energy distribution and polarization are succesfully modeled with a three-dimensional non-LTE Monte Carlo code which produces a self-consistent determination of the hydrogen level populations, electron temperature, and gas density for hot star disks. Our disk model is hydrostatically supported in the vertical direction and radially controlled by viscosity. Such a disk model has, essentially, only two free parameters, viz., the equatorial mass loss rate and the disk outer radius. We find that the primary companion is surrounded by a small (7 $R_\\star$), geometrically-thin disk, which is highly non-isothermal and fully ionized. Our model requires an average equatorial mass loss rate of $1.5\\times 10^{-9} M_{\\sun}$ yr$^{-1}$.",
+				"DOI": "10.1086/507935",
+				"url": "http://arxiv.org/abs/astro-ph/0603274",
+				"extra": "arXiv:astro-ph/0603274",
+				"volume": "652",
+				"issue": "2",
+				"pages": "1617-1625",
+				"ISSN": "0004-637X, 1538-4357",
+				"publicationTitle": "The Astrophysical Journal",
+				"journalAbbreviation": "ApJ",
+				"libraryCatalog": "arXiv.org"
 			}
 		]
 	},
@@ -703,7 +862,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://arxiv.org/find/cs/1/au:+Hoffmann_M/0/1/0/all/0/1",
+		"url": "https://arxiv.org/search/?query=Hoffmann%2C+M&searchtype=author&abstracts=show&order=-announced_date_first&size=50",
 		"items": "multiple"
 	},
 	{
@@ -886,7 +1045,6 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "preprint",
-				"title": "Single Phonon Detection for Dark Matter via Quantum Evaporation and Sensing of $^3$Helium",
 				"creators": [
 					{
 						"firstName": "S. A.",
@@ -924,22 +1082,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2023-02-07",
-				"DOI": "10.48550/arXiv.2201.00738",
-				"abstractNote": "Dark matter is five times more abundant than ordinary visible matter in our Universe. While laboratory searches hunting for dark matter have traditionally focused on the electroweak scale, theories of low mass hidden sectors motivate new detection techniques. Extending these searches to lower mass ranges, well below 1 GeV/c$^2$, poses new challenges as rare interactions with standard model matter transfer progressively less energy to electrons and nuclei in detectors. Here, we propose an approach based on phonon-assisted quantum evaporation combined with quantum sensors for detection of desorption events via tracking of spin coherence. The intent of our proposed dark matter sensors is to extend the parameter space to energy transfers in rare interactions to as low as a few meV for detection of dark matter particles in the keV/c$^2$ mass range.",
-				"archiveID": "arXiv:2201.00738",
-				"extra": "arXiv:2201.00738 [hep-ex]",
-				"libraryCatalog": "arXiv.org",
-				"repository": "arXiv",
-				"url": "http://arxiv.org/abs/2201.00738",
-				"attachments": [
+				"notes": [
 					{
-						"title": "Preprint PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
+						"note": "Comment: 8 pages, 3 figures. Updated various parts"
 					}
 				],
 				"tags": [
@@ -953,12 +1098,26 @@ var testCases = [
 						"tag": "Quantum Physics"
 					}
 				],
-				"notes": [
+				"seeAlso": [],
+				"attachments": [
 					{
-						"note": "Comment: 8 pages, 3 figures. Updated various parts"
+						"title": "Preprint PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
-				"seeAlso": []
+				"title": "Single Phonon Detection for Dark Matter via Quantum Evaporation and Sensing of ³Helium",
+				"date": "2023-02-07",
+				"abstractNote": "Dark matter is five times more abundant than ordinary visible matter in our Universe. While laboratory searches hunting for dark matter have traditionally focused on the electroweak scale, theories of low mass hidden sectors motivate new detection techniques. Extending these searches to lower mass ranges, well below 1 GeV/c$^2$, poses new challenges as rare interactions with standard model matter transfer progressively less energy to electrons and nuclei in detectors. Here, we propose an approach based on phonon-assisted quantum evaporation combined with quantum sensors for detection of desorption events via tracking of spin coherence. The intent of our proposed dark matter sensors is to extend the parameter space to energy transfers in rare interactions to as low as a few meV for detection of dark matter particles in the keV/c$^2$ mass range.",
+				"url": "http://arxiv.org/abs/2201.00738",
+				"extra": "arXiv:2201.00738 [hep-ex]",
+				"DOI": "10.48550/arXiv.2201.00738",
+				"archiveID": "arXiv:2201.00738",
+				"libraryCatalog": "arXiv.org",
+				"repository": "arXiv"
 			}
 		]
 	},
