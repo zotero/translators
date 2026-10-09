@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-09 09:32:31"
+	"lastUpdated": "2026-10-09 16:16:07"
 }
 
 /*
@@ -74,7 +74,22 @@ async function doWeb(doc, url) {
 	}
 }
 
+function getJSONLD(doc) {
+	for (let script of doc.querySelectorAll('script[type="application/ld+json"]')) {
+		try {
+			let data = JSON.parse(script.textContent);
+			if (data['@type'] === 'NewsArticle') {
+				return data;
+			}
+		}
+		catch (e) {}
+	}
+	return null;
+}
+
 async function scrape(doc, url = doc.location.href) {
+	let json = getJSONLD(doc);
+
 	let translator = Zotero.loadTranslator('web');
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48'); // Embedded Metadata
 	translator.setDocument(doc);
@@ -86,17 +101,19 @@ async function scrape(doc, url = doc.location.href) {
 			item.abstractNote = ZU.unescapeHTML(item.abstractNote);
 		}
 
-		let authors = doc.querySelectorAll('a.po-hr-cn__author-link');
-		if (authors.length) {
+		if (json) {
+			let authors = Array.isArray(json.author) ? json.author : [json.author];
 			item.creators = [];
 			for (let author of authors) {
-				item.creators.push(ZU.cleanAuthor(author.textContent, 'author'));
+				let name = typeof author === 'string' ? author : author?.name;
+				if (name) {
+					item.creators.push(ZU.cleanAuthor(name, 'author'));
+				}
 			}
-		}
 
-		let date = text(doc, 'time.po-hr-fl__date');
-		if (date) {
-			item.date = ZU.strToISO(date) || date;
+			if (json.datePublished) {
+				item.date = ZU.strToISO(json.datePublished) || json.datePublished;
+			}
 		}
 
 		item.complete();
