@@ -16,7 +16,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2021-07-14 20:41:42"
+	"lastUpdated": "2023-12-07 12:38:47"
 }
 
 function detectImport() {
@@ -564,9 +564,13 @@ function importNext(records, index, resolve, reject) {
 						} else {
 							newItem[zfield] = processField(node);
 						}
-					}
-					else {
-						notecache.push(field + ": " + processField(node));
+					} else {
+						if (zfield == 'DOI') {
+							newItem.extra = (newItem.extra || '')
+									+ `DOI: ${node.textContent}\n`;							
+						} else { 
+							notecache.push(field + ": " + processField(node));
+						}
 					}
 				} else if (field == "titles" || field == "periodical" || field == "alt-periodical") {
 					for (var k = 0; k < node.children.length; k++) {
@@ -1114,6 +1118,7 @@ var convertZoteroMarkup = (function() {
 	};
 })();
 
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -1397,6 +1402,61 @@ var testCases = [
 				],
 				"date": "2021",
 				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<xml>\r\n<records>\r\n<record>\r\n<database name=\"TREE_EndNote_Reference_Library.enl\" path=\"T:\\Team\\TREE allgemein\\Literatur\\TREE_EndNote_Reference_Library.enl\">TREE_EndNote_Reference_Library.enl\r\n</database>\r\n<source-app name=\"EndNote\" version=\"19.2\">EndNote\r\n</source-app>\r\n<rec-number>7257\r\n</rec-number>\r\n<foreign-keys>\r\n<key app=\"EN\" db-id=\"d2z5r9dpbeea0cezvek5rewxe0pstdfpp2sp\">7257</key>\r\n</foreign-keys>\r\n<ref-type name=\"Book Section\">5\r\n</ref-type>\r\n<contributors>\r\n<authors>\r\n<author>\r\n<style face=\"normal\" font=\"default\" size=\"100%\">Abele-Brehm, Andrea E.</style>\r\n</author>\r\n</authors>\r\n<secondary-authors>\r\n<author>\r\n<style face=\"normal\" font=\"default\" size=\"100%\">Keller, C. Anita</style>\r\n</author>\r\n<author>\r\n<style face=\"normal\" font=\"default\" size=\"100%\">Samuel, Robin</style>\r\n</author>\r\n<author>\r\n<style face=\"normal\" font=\"default\" size=\"100%\">Bergman, Max Manfred</style>\r\n</author>\r\n<author>\r\n<style face=\"normal\" font=\"default\" size=\"100%\">Semmer, K. Norbert</style>\r\n</author>\r\n</secondary-authors>\r\n</contributors>\r\n<titles>\r\n<title>\r\n<style face=\"normal\" font=\"default\" size=\"100%\">The Influence of Career Success on Subjective Well-Being</style>\r\n</title>\r\n<secondary-title>\r\n<style face=\"normal\" font=\"default\" size=\"100%\">Psychological, Educational, and Sociological Perspectives on Success and Well-Being in Career Development</style>\r\n</secondary-title>\r\n</titles>\r\n<pages>\r\n<style face=\"normal\" font=\"default\" size=\"100%\">7-18</style>\r\n</pages>\r\n<dates>\r\n<year>\r\n<style face=\"normal\" font=\"default\" size=\"100%\">2014</style>\r\n</year>\r\n</dates>\r\n<pub-location>\r\n<style face=\"normal\" font=\"default\" size=\"100%\">Dordrecht</style>\r\n</pub-location>\r\n<publisher>\r\n<style face=\"normal\" font=\"default\" size=\"100%\">Springer</style>\r\n</publisher>\r\n<isbn>\r\n<style face=\"normal\" font=\"default\" size=\"100%\">978-94-017-8911-0</style>\r\n</isbn>\r\n<abstract>\r\n<style face=\"normal\" font=\"default\" size=\"100%\">It is a common assertion that being successful in one’s work and occupational career should enhance a person’s well-being. After introducing the constructs of subjective well-being and of career success studies concerned with their relationship are reviewed. We find that objective measures of career success (income) have a small positive influence on subjective well-being that is, however, moderated and mediated by goals, personality, and an individual’s rank on the income ladder in a country. We further find that the subjective experiencing of career success has an influence on well-being. Finally, the relationship of career success and well-being seems to be reciprocal and the influence of well-being on career success might even be stronger than the reverse influence of career success on well-being. We conclude that striving for career success is one means of enhancing well-being. However, there are still many open questions and further research on the interrelationship of career success and subjective well-being is needed.</style>\r\n</abstract>\r\n<label>\r\n<style face=\"normal\" font=\"default\" size=\"100%\">Abele-Brehm2014</style>\r\n</label>\r\n<urls>\r\n<related-urls>\r\n<url>\r\n<style face=\"normal\" font=\"default\" size=\"100%\">http://dx.doi.org/10.1007/978-94-017-8911-0_2</style>\r\n</url>\r\n</related-urls>\r\n</urls>\r\n<electronic-resource-num>\r\n<style face=\"normal\" font=\"default\" size=\"100%\">10.1007/978-94-017-8911-0_2</style>\r\n</electronic-resource-num>\r\n</record>\r\n</records>\r\n</xml>",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "The Influence of Career Success on Subjective Well-Being",
+				"creators": [
+					{
+						"firstName": "Andrea E.",
+						"lastName": "Abele-Brehm",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "C. Anita",
+						"lastName": "Keller",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Robin",
+						"lastName": "Samuel",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Max Manfred",
+						"lastName": "Bergman",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "K. Norbert",
+						"lastName": "Semmer",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2014",
+				"ISBN": "978-94-017-8911-0",
+				"abstractNote": "It is a common assertion that being successful in one’s work and occupational career should enhance a person’s well-being. After introducing the constructs of subjective well-being and of career success studies concerned with their relationship are reviewed. We find that objective measures of career success (income) have a small positive influence on subjective well-being that is, however, moderated and mediated by goals, personality, and an individual’s rank on the income ladder in a country. We further find that the subjective experiencing of career success has an influence on well-being. Finally, the relationship of career success and well-being seems to be reciprocal and the influence of well-being on career success might even be stronger than the reverse influence of career success on well-being. We conclude that striving for career success is one means of enhancing well-being. However, there are still many open questions and further research on the interrelationship of career success and subjective well-being is needed.",
+				"bookTitle": "Psychological, Educational, and Sociological Perspectives on Success and Well-Being in Career Development",
+				"extra": "Citation Key: \nAbele-Brehm2014\n\nDOI: \n10.1007/978-94-017-8911-0_2",
+				"pages": "7-18",
+				"place": "Dordrecht",
+				"publisher": "Springer",
+				"attachments": [
+					{
+						"title": "978-94-017-8911-0_2",
+						"path": "http://dx.doi.org/10.1007/978-94-017-8911-0_2",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
