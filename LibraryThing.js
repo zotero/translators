@@ -2,7 +2,7 @@
 	"translatorID": "5fee8b6c-8208-4be9-8d3e-dda9fe3c8671",
 	"label": "LibraryThing",
 	"creator": "Jan Baykara",
-	"target": "^https?://(www\\.)?librarything\\.com/(catalog\\.php|catalog_bottom\\.php|catalog/|work/|isbn/)",
+	"target": "^https://www\\.librarything\\.com/(catalog\\.php|catalog_bottom\\.php|catalog/|work/|isbn/)",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 1,
