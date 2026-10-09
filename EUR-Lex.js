@@ -9,8 +9,9 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-30 15:50:58"
+	"lastUpdated": "2026-09-22 18:15:26"
 }
+
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -93,17 +94,8 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
-// we need to remember the language in search page to use the same for
-// individual entry page
-var autoLanguage;
-
-
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		var m = url.match(/\blocale=([a-z][a-z])/);
-		if (m) {
-			autoLanguage = m[1];
-		}
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
@@ -230,8 +222,53 @@ function scrape(doc, url) {
 			}
 		}
 		else { // Orders, summaries, etc.
-			item.caseName = attr(doc, 'meta[name="WT.z_docTitle"]', "content").replace(/#/g, " ");
+			item.caseName = attr(doc, 'meta[name="WT.z_docTitle"]', "content")
+				.replace(/#/g, " ")
+				.replace(/\s+/g, " ")
+				.trim();
 			item.dateDecided = celex.substr(1, 4);
+		}
+		
+		// docket number and decision date, e.g. from the document header
+		// "Beschluss des Gerichts (Fünfte Kammer) vom 4. September 2026.#...#Rechtssache T-131/26."
+		// For opinions (CC) they are only in the document text, e.g. "Rechtssache C‑167/26 RX"
+		// (EUR-Lex uses the non-breaking hyphen U+2011 in the docket numbers)
+		var docText = doc.body.textContent;
+		var caseNumRe = /(?:Rechtssache|[Cc]ase|[Aa]ffaire|[Cc]ausa|[Aa]sunto|[Zz]aak)\s*:?\s*([A-Z]{1,3}\s?[-\u2010-\u2015]\s?\d+\/\d+(?:\s+[A-Z]{1,2}(?:[-\u2010-\u2015][IVX]{1,5})?(?![a-z]))?)/;
+		var caseNumMatch = (item.caseName || "").match(caseNumRe) || docText.match(caseNumRe);
+		if (caseNumMatch && !item.docketNumber) {
+			item.docketNumber = caseNumMatch[1]
+				.replace(/[.\s]+$/, "")
+				.replace(/\u00A0/g, " ")
+				.replace(/[\u2010-\u2015]/g, "-");
+		}
+		var dateRe = /(?:vom|of|du|del|van)\s+(\d{1,2})\.?\s+([A-Za-zÀ-ÿ]+)\s+(\d{4})/;
+		var dateMatch = (item.caseName || "").match(dateRe) || docText.match(dateRe);
+		var months = {
+			januar: '01', january: '01', janvier: '01',
+			februar: '02', february: '02', février: '02', fevrier: '02',
+			märz: '03', maerz: '03', maart: '03', march: '03', mars: '03',
+			april: '04', avril: '04',
+			mai: '05', may: '05',
+			juni: '06', june: '06', juin: '06',
+			juli: '07', july: '07', juillet: '07',
+			august: '08', augustus: '08', août: '08', aout: '08',
+			september: '09', septembre: '09', settembre: '09',
+			oktober: '10', october: '10',
+			november: '11', novembre: '11',
+			dezember: '12', december: '12', décembre: '12', decembre: '12'
+		};
+		// only fall back to the document text if the header has no full date,
+		// otherwise dates of cited cases in the text would be picked up
+		if (dateMatch && months[dateMatch[2].toLowerCase()]
+			&& (!item.dateDecided || /^\d{4}$/.test(item.dateDecided))) {
+			item.dateDecided = dateMatch[3] + '-' + months[dateMatch[2].toLowerCase()] + '-' + ('0' + dateMatch[1]).slice(-2);
+		}
+		
+		// ECLI from the metadata table, e.g. "ECLI:DE:BGH:2014:150514XBZB7113.0"
+		var ecliMatch = doc.body.textContent.match(/ECLI:\s*[A-Za-z]{2}:[^:\s]{1,7}:\d{4}:[^:\s]{1,25}/i);
+		if (ecliMatch) {
+			item.DOI = ecliMatch[0].replace(/\s+/g, '');
 		}
 	}
 	else {
@@ -336,6 +373,7 @@ var testCases = [
 				"abstractNote": "Prejudiciële verwijzing – Richtlijn 2011/16/EU – Administratieve samenwerking op het gebied van de belastingen – Artikelen 1 en 5 – Bevel tot het verstrekken van inlichtingen aan de bevoegde autoriteit van een lidstaat, die handelt naar aanleiding van een verzoek tot uitwisseling van inlichtingen van de bevoegde autoriteit van een andere lidstaat – Persoon die in het bezit is van de informatie waarvan de bevoegde autoriteit van eerstbedoelde lidstaat heeft bevolen dat deze moet worden verstrekt – Belastingplichtige tegen wie het onderzoek loopt dat aanleiding heeft gegeven tot het verzoek van de bevoegde autoriteit van de tweede lidstaat – Derden met wie deze belastingplichtige juridische, bancaire, financiële of, meer in het algemeen, economische banden onderhoudt – Rechtsbescherming – Handvest van de grondrechten van de Europese Unie – Artikel 47 – Recht op een doeltreffende voorziening in rechte – Artikel 52, lid 1 – Beperking – Rechtsgrondslag – Eerbiediging van de wezenlijke inhoud van het recht op een doeltreffende voorziening in rechte – Bestaan van een rechtsmiddel dat de betrokken justitiabelen de mogelijkheid biedt alle relevante feitelijke en juridische kwesties doeltreffend te laten toetsen en een daadwerkelijke rechtsbescherming van hun door het Unierecht gewaarborgde rechten te genieten – Door de Unie erkende doelstelling van algemeen belang – Bestrijding van internationale belastingfraude en ‑ontwijking – Evenredigheid – Criterium dat de informatie waarop het bevel tot het verstrekken van inlichtingen betrekking heeft ‚naar verwachting van belang is’ – Rechterlijke toetsing – Omvang – In aanmerking te nemen persoonlijke, temporele en materiële gegevens",
 				"court": "HvJ EU",
 				"docketNumber": "Gevoegde zaken C-245/19 en C-246/19",
+				"DOI": "ECLI:EU:C:2020:795",
 				"language": "nl",
 				"url": "https://eur-lex.europa.eu/legal-content/NL/TXT/?uri=CELEX:62019CJ0245",
 				"attachments": [
@@ -395,6 +433,7 @@ var testCases = [
 				"abstractNote": "Trade mark Komunitarja - Proċedimenti għal dikjarazzjoni ta’ invalidità - Trade mark Komunitarja verbali SCOMBER MIX - Raġuni assoluta għal rifjut - Karattru deskrittiv - Artikolu 7(1)(b) u (ċ) tar-Regolament (KE) Nru 40/94 [li sar l-Artikolu 7(1)(b) u (c) tar-Regolament (KE) Nru 207/2009]",
 				"court": "Gerecht EU",
 				"docketNumber": "Kawża T-201/09",
+				"DOI": "ECLI:EU:T:2011:505",
 				"language": "nl",
 				"url": "https://eur-lex.europa.eu/legal-content/MT/TXT/?uri=CELEX%3A62009TJ0201",
 				"attachments": [
