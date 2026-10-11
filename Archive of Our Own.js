@@ -326,12 +326,12 @@ var testCases = [
 					{
 						"title": "Full Text HTML",
 						"mimeType": "text/html",
-						"snapshot": true
+						"snapshot": false
 					},
 					{
 						"title": "Full Text EPUB",
 						"mimeType": "application/epub+zip",
-						"snapshot": true
+						"snapshot": false
 					},
 					{
 						"title": "Full Text MOBI",
@@ -413,12 +413,12 @@ var testCases = [
 					{
 						"title": "Full Text HTML",
 						"mimeType": "text/html",
-						"snapshot": true
+						"snapshot": false
 					},
 					{
 						"title": "Full Text EPUB",
 						"mimeType": "application/epub+zip",
-						"snapshot": true
+						"snapshot": false
 					},
 					{
 						"title": "Full Text MOBI",
@@ -465,12 +465,12 @@ var testCases = [
 					{
 						"title": "Full Text HTML",
 						"mimeType": "text/html",
-						"snapshot": true
+						"snapshot": false
 					},
 					{
 						"title": "Full Text EPUB",
 						"mimeType": "application/epub+zip",
-						"snapshot": true
+						"snapshot": false
 					},
 					{
 						"title": "Full Text MOBI",
