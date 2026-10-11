@@ -212,7 +212,7 @@ async function doWeb(doc, url)
 
 	let prefaceElem = scrapingDoc.querySelector('div#workskin > div.preface');
 	if (!parseWorkPreface(prefaceElem, item)) {
-		return false;
+		return;
 	}
 
 	let metaElem = scrapingDoc.querySelector('dl.work.meta');
