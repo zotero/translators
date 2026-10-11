@@ -262,5 +262,229 @@ async function doWeb(doc, url)
 
 /** BEGIN TEST CASES **/
 var testCases = [
+	{
+		"type": "web",
+		"url": "https://archiveofourown.org/works/4817126/chapters/11029061",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Chapter 1: Ronnie",
+				"creators": [
+					{
+						"lastName": "Hyaroo",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2015-11-28",
+				"abstractNote": "Hermione gives a lecture on \"gender-flip fanfiction\"; i.e. fanfiction depicting an AU where one or more characters has been born the opposite sex. Of course, when the ones attending the lecture are Harry and Ron... or should that perhaps be \"Holly\" and \"Ronnie\"?... it might get a little difficult to stay on track. A very meta story.",
+				"bookTitle": "Hermione Granger's Guide To Gender-Flip Fanfiction",
+				"extra": "Issued: 2015-09-17 - 2015-11-28\nComplete: false",
+				"libraryCatalog": "Archive of Our Own",
+				"shortTitle": "Chapter 1",
+				"url": "https://archiveofourown.org/works/4817126/chapters/11029061",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://archiveofourown.org/works/4817126/navigate",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Hermione Granger's Guide To Gender-Flip Fanfiction",
+				"creators": [
+					{
+						"lastName": "Hyaroo",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2015-11-28",
+				"abstractNote": "Hermione gives a lecture on \"gender-flip fanfiction\"; i.e. fanfiction depicting an AU where one or more characters has been born the opposite sex. Of course, when the ones attending the lecture are Harry and Ron... or should that perhaps be \"Holly\" and \"Ronnie\"?... it might get a little difficult to stay on track. A very meta story.",
+				"extra": "Issued: 2015-09-17 - 2015-11-28\nComplete: false",
+				"libraryCatalog": "Archive of Our Own",
+				"url": "https://archiveofourown.org/works/4817126",
+				"attachments": [
+					{
+						"title": "Full Text HTML",
+						"mimeType": "text/html",
+						"snapshot": true
+					},
+					{
+						"title": "Full Text EPUB",
+						"mimeType": "application/epub+zip",
+						"snapshot": true
+					},
+					{
+						"title": "Full Text MOBI",
+						"mimeType": "application/x-mobipocket-ebook",
+						"snapshot": false
+					},
+					{
+						"title": "Full Text AZW3",
+						"mimeType": "application/vnd.amazon.ebook",
+						"snapshot": false
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://archiveofourown.org/works/3721921/chapters/8243602",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Chapter 1: Veronica Weasley",
+				"creators": [
+					{
+						"lastName": "Hyaroo",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2015-04-15",
+				"abstractNote": "This is the first story in the planned Weasley Girl trilogy, an AU in which Ron Weasley was born a girl.\n\nSo many stories have asked the question: \"What if Harry Potter was a girl?\" Few stories, however, seem to bother with the question \"What if Ron Weasley was a girl?\" So, just to be contrary, this story will. Everyone else here is going to be as in canon, but Ron's going to be a girl, and then we'll see how this might change the story. There might be some consequences here you wouldn't have expected.\n\nWe begin the story when Harry has been left at King's Cross by the Dursleys and is looking for Platform Nine-and-three-quarters, just in time for the Weasleys to make the scene...",
+				"bookTitle": "Weasley Girl",
+				"extra": "Issued: 2015-04-11 - 2015-04-15\nComplete: false",
+				"libraryCatalog": "Archive of Our Own",
+				"series": "Weasley Girl",
+				"shortTitle": "Chapter 1",
+				"url": "https://archiveofourown.org/works/3721921/chapters/8243602",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://archiveofourown.org/works/3721921/navigate",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Weasley Girl",
+				"creators": [
+					{
+						"lastName": "Hyaroo",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2015-04-15",
+				"abstractNote": "AU: The first friend Harry Potter made on the Hogwarts express wasn't Ronald \"Ron\" Weasley; it was Veronica \"Ronnie\" Weasley, first-born daughter of the Weasley clan. And all of a sudden, the future looked very different.\n\nJoin the newly-formed \"Potter's Gang\" (consisting of Harry, Ronnie, Hermione and Neville) in their first year at Hogwarts as they get into all kinds of misadventures, and maybe have to face a certain Dark Lord before they're ready for it.\n\nFirst novel in the \"Weasley Girl\" trilogy. Fem!Ron, but not a romance, and not a canon rehash.",
+				"extra": "Issued: 2015-04-11 - 2015-04-15\nComplete: false",
+				"libraryCatalog": "Archive of Our Own",
+				"series": "Weasley Girl",
+				"url": "https://archiveofourown.org/works/3721921",
+				"attachments": [
+					{
+						"title": "Full Text HTML",
+						"mimeType": "text/html",
+						"snapshot": true
+					},
+					{
+						"title": "Full Text EPUB",
+						"mimeType": "application/epub+zip",
+						"snapshot": true
+					},
+					{
+						"title": "Full Text MOBI",
+						"mimeType": "application/x-mobipocket-ebook",
+						"snapshot": false
+					},
+					{
+						"title": "Full Text AZW3",
+						"mimeType": "application/vnd.amazon.ebook",
+						"snapshot": false
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://archiveofourown.org/works/185537",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Monsters Ascendant",
+				"creators": [
+					{
+						"lastName": "urbanAnchorite (t_ZM)",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2011-04-17",
+				"abstractNote": "And what rough beast, its hour come round at last/Slouches towards Skaia to be born?",
+				"extra": "Issued: 2011-04-17\nComplete: false",
+				"libraryCatalog": "Archive of Our Own",
+				"url": "https://archiveofourown.org/works/185537",
+				"attachments": [
+					{
+						"title": "Full Text HTML",
+						"mimeType": "text/html",
+						"snapshot": true
+					},
+					{
+						"title": "Full Text EPUB",
+						"mimeType": "application/epub+zip",
+						"snapshot": true
+					},
+					{
+						"title": "Full Text MOBI",
+						"mimeType": "application/x-mobipocket-ebook",
+						"snapshot": false
+					},
+					{
+						"title": "Full Text AZW3",
+						"mimeType": "application/vnd.amazon.ebook",
+						"snapshot": false
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
 ]
 /** END TEST CASES **/
