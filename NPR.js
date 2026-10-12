@@ -9,8 +9,9 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-09-29 15:12:59"
+	"lastUpdated": "2026-10-09 21:32:31"
 }
+
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -52,6 +53,12 @@ function detectWeb(doc, url) {
 				return "radioBroadcast";
 			}
 		}
+		// NPR now ships a headline audio player on ordinary story pages, so the
+		// player alone no longer means "audio + text". Use the page type.
+		else if (attr(doc, 'meta[property="og:type"]', 'content') === 'article'
+			|| /NewsArticle/.test(text(doc, 'script[type="application/ld+json"]'))) {
+			return "newspaperArticle";
+		}
 		else if (doc.querySelector('#headlineaudio')) {
 			return "multiple";
 		}
@@ -66,6 +73,31 @@ function detectWeb(doc, url) {
 	// we can't really do search results, because each result might be a
 	// multiple and there's no way to tell from the search page
 	return false;
+}
+
+
+/**
+ * NPR serves several ld+json blocks (NewsArticle, WebPage, Organization, ImageObject).
+ * Parsing the concatenation of all of them throws, so pick the news block.
+ */
+function ldBlock(doc) {
+	for (let script of doc.querySelectorAll('script[type="application/ld+json"]')) {
+		let data = script.textContent;
+		if (!data) continue;
+		let parsed;
+		try {
+			parsed = JSON.parse(data);
+		}
+		catch (e) {
+			continue;
+		}
+		for (let node of (Array.isArray(parsed) ? parsed : [parsed])) {
+			if (node && (node.headline || node.datePublished || node.dateModified)) {
+				return node;
+			}
+		}
+	}
+	return {};
 }
 
 
@@ -108,7 +140,7 @@ function scrape(doc, url) {
 
 function scrapeText(doc, _url) {
 	let item = new Zotero.Item('newspaperArticle');
-	let json = JSON.parse(text(doc, 'script[type="application/ld+json"]'));
+	let json = ldBlock(doc);
 	
 	item.title = json.headline;
 	item.abstractNote = ZU.cleanTags(json.description);
@@ -116,7 +148,7 @@ function scrapeText(doc, _url) {
 	item.date = json.dateModified || json.datePublished;
 	item.section = text(doc, 'h3.slug');
 	item.language = 'en';
-	item.url = json.mainEntityOfPage['@id'];
+	item.url = json.mainEntityOfPage?.['@id'] || _url;
 	
 	if (json.author) {
 		let names = getAuthorNames(doc, json);
@@ -165,7 +197,7 @@ function scrapeAudio(doc, _url) {
 	// strip the time from the date, since we have no way of knowing exactly
 	// what time it aired (and the time on the article is based on when the
 	// transcript was published)
-	let date = (json.dateModified || json.datePublished).replace(/T.+$/, '');
+	let date = ((json.dateModified || json.datePublished) || '').replace(/T.+$/, '');
 	item.date = date;
 	if (itemType == 'radioBroadcast') {
 		item.programTitle = text(doc, '.program-block a');
@@ -190,7 +222,7 @@ function scrapeAudio(doc, _url) {
 		.replace(/P(\d+)H,(\d+)M,(\d+)S/, '$1:$2:$3')
 		.replace(/P(\d+)M,(\d+)S/, '$1:$2');
 	item.language = 'en';
-	item.url = json.mainEntityOfPage['@id'];
+	item.url = json.mainEntityOfPage?.['@id'] || _url;
 	
 	if (json.author) {
 		let names = getAuthorNames(doc, json);
@@ -271,7 +303,35 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.npr.org/2021/07/13/1011376403/its-summer-and-that-means-the-mysterious-return-of-glacier-ice-worms",
-		"items": "multiple"
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "It's Summer, And That Means The Mysterious Return Of Glacier Ice Worms",
+				"creators": [
+					{
+						"firstName": "Nell",
+						"lastName": "Greenfieldboyce",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-07-13T05:07:00-04:00",
+				"abstractNote": "On mountaintop glaciers of Alaska, Washington and Oregon, billions of tiny black worms are tunneling upward to the barren, icy surface. What lures them, and how do they survive the frozen depths?",
+				"language": "en",
+				"libraryCatalog": "NPR",
+				"publicationTitle": "NPR",
+				"section": "Science",
+				"url": "https://www.npr.org/2021/07/13/1011376403/its-summer-and-that-means-the-mysterious-return-of-glacier-ice-worms",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	},
 	{
 		"type": "web",
@@ -343,6 +403,39 @@ var testCases = [
 						"title": "Transcript",
 						"mimeType": "text/html",
 						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.npr.org/2026/09/02/nx-s1-5953128/ice-detention-death-lianyong-wei",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "ICE detainee dies just hours after he was admitted into detention",
+				"creators": [
+					{
+						"firstName": "Vanessa",
+						"lastName": "Romo",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-09-02T05:00:00-04:00",
+				"abstractNote": "Lianyong Wei's death marks the 57th death of an immigrant detainee held in the care of the government since the start of President Trump's second term. Twenty-four of those have occurred since Jan. 1.",
+				"language": "en",
+				"libraryCatalog": "NPR",
+				"publicationTitle": "NPR",
+				"section": "Immigration",
+				"url": "https://www.npr.org/2026/09/02/nx-s1-5953128/ice-detention-death-lianyong-wei",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
