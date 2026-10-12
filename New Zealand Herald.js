@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-06-13 22:55:12"
+	"lastUpdated": "2026-10-12 23:35:00"
 }
 
 /*
@@ -43,7 +43,36 @@ function detectWeb(doc, url) {
 	else if (url.includes("/news/article.cfm")) {
 		return "newspaperArticle";
 	}
+	// Modern article URLs are /<section>/<slug>/<hash>/ (and premium ones
+	// /premium/<section>/...); they carry an Article/NewsArticle JSON-LD block.
+	else if (/\/(nz|premium|world|business|sport|lifestyle|entertainment|technology)\//
+		&& getJSONLD(doc)) {
+		return "newspaperArticle";
+	}
 	return false;
+}
+
+function getJSONLD(doc) {
+	for (let script of doc.querySelectorAll('script[type="application/ld+json"]')) {
+		let data;
+		try {
+			data = JSON.parse(script.textContent);
+		}
+		catch (e) {
+			continue;
+		}
+		for (let block of (Array.isArray(data) ? data : [data])) {
+			if (!block || typeof block !== 'object') continue;
+			for (let node of (block['@graph'] ? block['@graph'] : [block])) {
+				let type = node['@type'];
+				if ((type == 'NewsArticle' || type == 'Article' || type == 'ReportageNewsArticle')
+					&& node.headline) {
+					return node;
+				}
+			}
+		}
+	}
+	return null;
 }
 
 
@@ -99,8 +128,30 @@ function scrape(doc, url) {
 				author = firstElement;
 			}
 		}
+		if (!author) {
+			// Modern pages expose the byline as author[].name in JSON-LD
+			// (e.g. "Herald Reporters"); EM does not read those blocks.
+			var data = getJSONLD(doc);
+			if (data && data.author) {
+				let authors = data.author;
+				if (typeof authors == 'object' && !Array.isArray(authors)) {
+					authors = [authors];
+				}
+				author = authors.map(a => (typeof a == 'string' ? a : a.name)).filter(Boolean).join(', ');
+			}
+		}
 		if (author) {
-			item.creators.push(ZU.cleanAuthor(author.replace('By', ''), "author"));
+			author = author.replace(/^By\s*/i, '').replace(/,\s*$/, '');
+			// Collective bylines ("Herald Reporters") are not person names
+			if (author.split(/\s+/).length > 2) {
+				item.creators.push({ lastName: author, creatorType: "author", fieldMode: 1 });
+			}
+			else {
+				item.creators.push(ZU.cleanAuthor(author, "author"));
+			}
+		}
+		if (!item.date && data && data.datePublished) {
+			item.date = data.datePublished;
 		}
 		item.url = attr(doc, 'link[rel=canonical]', 'href');
 		if (item.language) {
@@ -277,6 +328,54 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.nzherald.co.nz/search/hobbits/?type=article,image.gallery,video.other&c_id=2",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.nzherald.co.nz/nz/christchurch-double-homicide-58-year-old-man-appears-in-court-on-murder-charges/6IJP6LCJEBAUFDZVIIZTGKS3RA/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Christchurch double homicide: 58-year-old man appears in court on murder charges",
+				"creators": [
+					{
+						"firstName": "Herald",
+						"lastName": "Reporters",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-10-11T21:47:46.974Z",
+				"ISSN": "1170-0777",
+				"abstractNote": "He is accused of killing two men at the weekend, including a former motorcycle gang boss.",
+				"language": "en-NZ",
+				"libraryCatalog": "www.nzherald.co.nz",
+				"publicationTitle": "NZ Herald",
+				"section": "New Zealand, Crime, Christchurch",
+				"shortTitle": "Christchurch double homicide",
+				"url": "https://www.nzherald.co.nz/nz/christchurch-double-homicide-58-year-old-man-appears-in-court-on-murder-charges/6IJP6LCJEBAUFDZVIIZTGKS3RA/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Canterbury"
+					},
+					{
+						"tag": "Christchurch"
+					},
+					{
+						"tag": "Police"
+					},
+					{
+						"tag": "South Island"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
