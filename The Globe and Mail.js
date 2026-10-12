@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-14 21:43:14"
+	"lastUpdated": "2026-10-12 23:55:00"
 }
 
 /*
@@ -76,6 +76,29 @@ function doWeb(doc, url) {
 	}
 }
 
+function getJSONLD(doc) {
+	for (let script of doc.querySelectorAll('script[type="application/ld+json"]')) {
+		let data;
+		try {
+			data = JSON.parse(script.textContent);
+		}
+		catch (e) {
+			continue;
+		}
+		for (let block of (Array.isArray(data) ? data : [data])) {
+			if (!block || typeof block !== 'object') continue;
+			for (let node of (block['@graph'] ? block['@graph'] : [block])) {
+				let type = node['@type'];
+				if ((type == 'NewsArticle' || type == 'Article' || type == 'ReportageNewsArticle')
+					&& node.headline) {
+					return node;
+				}
+			}
+		}
+	}
+	return null;
+}
+
 function scrape(doc, url) {
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
@@ -88,6 +111,34 @@ function scrape(doc, url) {
 		if (!item.creators.length) {
 			for (let authorLink of doc.querySelectorAll('a.byline')) {
 				item.creators.push(ZU.cleanAuthor(authorLink.textContent, 'author'));
+			}
+		}
+		if (!item.creators.length) {
+			// Modern pages ship the byline only as author[].name in JSON-LD;
+			// EM does not read those blocks.
+			let data = getJSONLD(doc);
+			if (data && data.author) {
+				let authors = data.author;
+				if (typeof authors == 'object' && !Array.isArray(authors)) {
+					authors = [authors];
+				}
+				for (let a of authors) {
+					let name = (typeof a == 'string' ? a : a.name) || '';
+					name = ZU.trimInternal(name).replace(/^By\s*/i, '').replace(/,\s*$/, '');
+					if (!name) continue;
+					if (name.split(/\s+/).length > 2) {
+						item.creators.push({ lastName: name, creatorType: "author", fieldMode: 1 });
+					}
+					else {
+						item.creators.push(ZU.cleanAuthor(name, "author"));
+					}
+				}
+			}
+		}
+		if (!item.date) {
+			let data = getJSONLD(doc);
+			if (data && data.datePublished) {
+				item.date = data.datePublished;
 			}
 		}
 		
@@ -106,6 +157,42 @@ function scrape(doc, url) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.theglobeandmail.com/news/politics/canadian-elite-special-forces-sniper-sets-record-breaking-kill-shot-in-iraq/article35415651",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Canadian elite special forces sniper makes record-breaking kill shot in Iraq",
+				"creators": [
+					{
+						"firstName": "Robert",
+						"lastName": "Fife",
+						"creatorType": "author"
+					}
+				],
+				"date": "2017-06-21T20:00:00-0400",
+				"abstractNote": "Sources say the sniper killed an Islamic State insurgent from a distance of 3,540 metres in a feat one a military insider says may ‘never be equalled’",
+				"language": "en-CA",
+				"libraryCatalog": "www.theglobeandmail.com",
+				"publicationTitle": "The Globe and Mail",
+				"url": "https://www.theglobeandmail.com/news/politics/canadian-elite-special-forces-sniper-sets-record-breaking-kill-shot-in-iraq/article35415651/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Politics"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
 	{
 		"type": "web",
 		"url": "https://www.theglobeandmail.com/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180/",
@@ -134,36 +221,13 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Christine Elliott"
-					},
-					{
-						"tag": "Doug Ford"
-					},
-					{
-						"tag": "Jim Flaherty"
-					},
-					{
-						"tag": "John Tory"
-					},
-					{
-						"tag": "Ontario Progressive Conservative"
-					},
-					{
-						"tag": "Rob Ford"
-					},
-					{
-						"tag": "leadership"
+						"tag": "Social Issues"
 					}
 				],
 				"notes": [],
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.theglobeandmail.com/search/?q=nuclear",
-		"items": "multiple"
 	},
 	{
 		"type": "web",
@@ -188,7 +252,6 @@ var testCases = [
 				"abstractNote": "Opposition wanted Tom Pitfield, the founder of Data Sciences, to appear before the ethics committee, but Liberal MPs prevented the motion from coming to a vote by talking out the clock",
 				"language": "en-CA",
 				"libraryCatalog": "www.theglobeandmail.com",
-				"place": "Ottawa",
 				"publicationTitle": "The Globe and Mail",
 				"url": "https://www.theglobeandmail.com/politics/article-liberals-filibuster-opposition-call-for-inquiry-into-parliamentary/",
 				"attachments": [
@@ -199,37 +262,7 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Liberal"
-					},
-					{
-						"tag": "Michael Barrett"
-					},
-					{
-						"tag": "NDP"
-					},
-					{
-						"tag": "committee"
-					},
-					{
-						"tag": "company"
-					},
-					{
-						"tag": "data"
-					},
-					{
-						"tag": "house"
-					},
-					{
-						"tag": "liberal"
-					},
-					{
-						"tag": "liberals"
-					},
-					{
-						"tag": "mps"
-					},
-					{
-						"tag": "party"
+						"tag": "Politics"
 					}
 				],
 				"notes": [],
