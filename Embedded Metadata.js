@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-04-27 15:11:51"
+	"lastUpdated": "2026-10-13 00:20:00"
 }
 
 /*
@@ -216,6 +216,8 @@ function completeItem(doc, newItem, hwType) {
 	addHighwireMetadata(doc, newItem, hwType);
 	addOtherMetadata(doc, newItem);
 	addLowQualityMetadata(doc, newItem);
+	// Runs last: meta tags win, JSON-LD only fills what is still missing
+	addJSONLDMetadata(doc, newItem);
 	finalDataCleanup(doc, newItem);
 
 	if (CUSTOM_FIELD_MAPPINGS) {
@@ -661,6 +663,133 @@ function addOtherMetadata(doc, newItem) {
 			}
 		}
 	}
+}
+
+/**
+ * Reads JSON-LD (schema.org) blocks and fills in fields the meta tags missed.
+ * Many news sites ship the byline and date only there (they are not in
+ * citation_* or og:* tags), which is why Embedded Metadata alone produced
+ * items without creators on those pages.
+ */
+function addJSONLDMetadata(doc, newItem) {
+	var data = getJSONLDArticle(doc);
+	if (!data) return;
+
+	if (!newItem.title && data.headline) {
+		newItem.title = data.headline;
+	}
+	if (!newItem.abstractNote && data.description) {
+		newItem.abstractNote = ZU.trimInternal(data.description);
+	}
+	if (!newItem.date) {
+		var date = data.datePublished || data.dateCreated;
+		if (typeof date == 'string') {
+			// keep only the date part; Zotero normalizes ISO 8601 itself,
+			// but a bare "2024-11-10T17:27:00Z" would keep the time
+			var match = date.match(/^(\d{4}-\d{2}-\d{2})/);
+			if (match) newItem.date = match[1];
+		}
+	}
+	if (!newItem.url && typeof data.url == 'string') {
+		newItem.url = data.url;
+	}
+
+	if (!newItem.creators.length && data.author) {
+		var authors = Array.isArray(data.author) ? data.author : [data.author];
+		for (var i = 0; i < authors.length; i++) {
+			var author = authors[i];
+			if (!author) continue;
+			// schema.org may give structured names (preferred) or a single
+			// string. A bare name is just as likely to be an organisation
+			// ("RTÉ News") or a collective byline as a person, and there is no
+			// way to tell them apart, so do not guess a first/last split.
+			var first = typeof author == 'object' ? author.givenName : '';
+			var last = typeof author == 'object' ? author.familyName : '';
+			var name = typeof author == 'string' ? author : (author.name || '');
+			name = ZU.trimInternal(name).replace(/^By\s+/i, '');
+			if (first || last) {
+				newItem.creators.push({
+					firstName: ZU.trimInternal(first || ''),
+					lastName: ZU.trimInternal(last || ''),
+					creatorType: 'author'
+				});
+			}
+			else if (name) {
+				newItem.creators.push({ lastName: name, creatorType: 'author', fieldMode: 1 });
+			}
+		}
+	}
+
+	if (!newItem.tags || !newItem.tags.length) {
+		var keywords = data.keywords;
+		if (typeof keywords == 'string') {
+			keywords = keywords.split(/\s*,\s*/);
+		}
+		if (Array.isArray(keywords) && keywords.length) {
+			newItem.tags = keywords.map(function (tag) {
+				return ZU.trimInternal('' + tag);
+			}).filter(Boolean);
+		}
+	}
+
+	// og:title often carries the site name as a suffix ("... - CBS News") while
+	// the JSON-LD headline does not. addLowQualityMetadata() only strips the
+	// publicationTitle, which nothing sets on these pages, so strip the
+	// publisher / og:site_name here with the same separators.
+	if (newItem.title) {
+		var publisher = '';
+		if (data.publisher) {
+			var pubs = Array.isArray(data.publisher) ? data.publisher : [data.publisher];
+			publisher = (pubs[0] && pubs[0].name) || '';
+		}
+		if (!publisher) {
+			publisher = ZU.xpathText(doc, '//meta[@property="og:site_name"]/@content') || '';
+		}
+		if (publisher) {
+			var escape = function (text) {
+				return text.replace(/([()[\]$^*+.?|\\-])/g, '\\$1');
+			};
+			newItem.title = newItem.title.replace(
+				new RegExp('\\s*[-–—=_:|~#]\\s*' + escape(ZU.trimInternal(publisher)) + '\\s*$', 'i'),
+				''
+			);
+		}
+	}
+}
+
+/**
+ * Returns the first Article-like node from the page's JSON-LD blocks.
+ * Blocks can be arrays, wrapped in @graph, or a single object, and a page
+ * commonly ships several (article, video, organization, breadcrumbs).
+ */
+function getJSONLDArticle(doc) {
+	var wanted = ['NewsArticle', 'Article', 'ReportageNewsArticle', 'Report'];
+	var scripts = doc.querySelectorAll('script[type="application/ld+json"]');
+	for (var i = 0; i < scripts.length; i++) {
+		var data;
+		try {
+			data = JSON.parse(scripts[i].textContent);
+		}
+		catch (e) {
+			// a few sites concatenate blocks or use trailing commas; skip those
+			continue;
+		}
+		var blocks = Array.isArray(data) ? data : [data];
+		for (var j = 0; j < blocks.length; j++) {
+			var block = blocks[j];
+			if (!block || typeof block != 'object') continue;
+			var nodes = block['@graph'] ? block['@graph'] : [block];
+			for (var k = 0; k < nodes.length; k++) {
+				var node = nodes[k];
+				if (!node || typeof node != 'object') continue;
+				if (wanted.includes(node['@type'])
+					&& (node.headline || node.name || node.datePublished || node.author)) {
+					return node;
+				}
+			}
+		}
+	}
+	return null;
 }
 
 function addLowQualityMetadata(doc, newItem) {
@@ -1996,6 +2125,37 @@ var testCases = [
 				"language": "en-US",
 				"shortTitle": "Collections",
 				"url": "https://acoup.blog/2026/04/10/collections-raising-carthaginian-armies-part-i-finding-carthaginians/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.cbsnews.com/news/tony-awards-2013-list-of-winners/",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Tony Awards 2013: List of winners",
+				"creators": [
+					{
+						"lastName": "Jessica Derschowitz",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2013-06-10",
+				"abstractNote": "&quot;Kinky Boots&quot; dances off with six awards -- including best musical -- while &quot;Matilda the Musical&quot; and &quot;Pippin&quot; win four prizes each",
+				"language": "en-US",
+				"shortTitle": "Tony Awards 2013",
+				"url": "https://www.cbsnews.com/news/tony-awards-2013-list-of-winners/",
 				"attachments": [
 					{
 						"title": "Snapshot",
