@@ -513,7 +513,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Microbial community changes at a terrestrial volcanic CO <sub>2</sub> vent induced by soil acidification and anaerobic microhabitats within the soil column",
+				"title": "Microbial community changes at a terrestrial volcanic CO<sub>2</sub> vent induced by soil acidification and anaerobic microhabitats within the soil column",
 				"creators": [
 					{
 						"creatorType": "author",
