@@ -2,14 +2,14 @@
 	"translatorID": "649c2836-a94d-4bbe-8e28-6771f283702f",
 	"label": "TVNZ",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?tvnz\\.co\\.nz/one-news/",
+	"target": "^https?://(www\\.)?tvnz\\.co\\.nz/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-04-07 18:10:37"
+	"lastUpdated": "2026-10-12 23:45:00"
 }
 
 /*
@@ -40,6 +40,10 @@ function detectWeb(doc, url) {
 	if (url.includes("/search?") && getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	// The player pages (/player/newsclip/...) are news videos.
+	if (/\/player\//.test(url)) {
+		return "videoRecording";
+	}
 	if (ZU.xpathText(doc, '//meta[@property="og:type"]/@content')) {
 		return "newspaperArticle";
 	}
@@ -47,7 +51,32 @@ function detectWeb(doc, url) {
 }
 
 
+function getJSONLD(doc, type) {
+	for (let script of doc.querySelectorAll('script[type="application/ld+json"]')) {
+		let data;
+		try {
+			data = JSON.parse(script.textContent);
+		}
+		catch (e) {
+			continue;
+		}
+		for (let block of (Array.isArray(data) ? data : [data])) {
+			if (!block || typeof block !== 'object') continue;
+			for (let node of (block['@graph'] ? block['@graph'] : [block])) {
+				if (node['@type'] == type) {
+					return node;
+				}
+			}
+		}
+	}
+	return null;
+}
+
 function scrape(doc, url) {
+	if (/\/player\//.test(url)) {
+		scrapeVideo(doc, url);
+		return;
+	}
 	var item = new Zotero.Item("newspaperArticle");
 	item.title = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
 	item.date = ZU.xpathText(doc, '(//div[contains(@class, "storyPage") and h1]//time)[1]');
@@ -60,6 +89,13 @@ function scrape(doc, url) {
 		}
 		item.date = ZU.strToISO(item.date);
 	}
+	if (!item.date) {
+		// Newer pages publish the date only in the JSON-LD VideoObject
+		let video = getJSONLD(doc, 'VideoObject');
+		if (video && video.uploadDate) {
+			item.date = video.uploadDate;
+		}
+	}
 	item.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]/@content');
 	var tagString = ZU.xpathText(doc, '//meta[@name="news_keywords"]/@content');
 	if (tagString) {
@@ -68,6 +104,41 @@ function scrape(doc, url) {
 	item.section = ZU.xpathText(doc, '//div[@class="colStorySectionHeader"]/div[@class="tagItem"]/h2');
 	item.url = ZU.xpathText(doc, '//link[@rel="canonical"]/@href') || url;
 	item.publicationTitle = "TVNZ";
+	item.language = "en-NZ";
+	item.complete();
+}
+
+function scrapeVideo(doc, url) {
+	var item = new Zotero.Item("videoRecording");
+	var video = getJSONLD(doc, 'VideoObject');
+	if (!video) {
+		return;
+	}
+	item.title = video.name || ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
+	item.abstractNote = video.description
+		|| ZU.xpathText(doc, '//meta[@property="og:description"]/@content');
+	item.date = video.uploadDate;
+	if (video.duration) {
+		// PT3M / PT1M30S / PT2H -> 3:00 / 1:30 / 2:00:00
+		let h = video.duration.match(/(\d+)H/);
+		let mnt = video.duration.match(/(\d+)M/);
+		let sec = video.duration.match(/(\d+)S/);
+		item.runningTime = [
+			(h ? h[1].padStart(2, '0') : null),
+			(mnt || h ? (mnt ? mnt[1] : '0').padStart(2, '0') : null),
+			(sec ? sec[1].padStart(2, '0') : null)
+		].filter(p => p !== null).join(':');
+	}
+	if (Array.isArray(video.keywords)) {
+		item.tags = video.keywords;
+	}
+	else if (video.keywords) {
+		item.tags = video.keywords.split(', ');
+	}
+	item.studio = "TVNZ";
+	let canonical = ZU.xpathText(doc, '//link[@rel="canonical"]/@href') || url;
+	item.url = (video.url && video.url != url) ? video.url : canonical;
+	item.libraryCatalog = "www.tvnz.co.nz";
 	item.language = "en-NZ";
 	item.complete();
 }
@@ -160,6 +231,35 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.tvnz.co.nz/one-news/search?q=storm",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.tvnz.co.nz/player/newsclip/winston-peters-fires-up-over-poll-abortion-questions",
+		"items": [
+			{
+				"itemType": "videoRecording",
+				"title": "Winston Peters fires up over poll, abortion questions",
+				"creators": [],
+				"date": "2026-10-11T18:48:30.802Z",
+				"abstractNote": "New Zealand First's leader was adamant one party would not make it into Parliament, so he wouldn't answer a \"silly question\".",
+				"language": "en-NZ",
+				"libraryCatalog": "www.tvnz.co.nz",
+				"runningTime": "03",
+				"studio": "TVNZ",
+				"url": "https://www.tvnz.co.nz/player/newsclip/winston-peters-fires-up-over-poll-abortion-questions",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "new-zealand-first"
+					},
+					{
+						"tag": "politics"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
