@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2026-10-09 19:07:22"
+	"lastUpdated": "2026-10-12 18:02:00"
 }
 
 /*
@@ -242,7 +242,7 @@ function doImport() {
 			refXML = ZU.xpath(itemXML, 'content_item');
 			metadataXML = ZU.xpath(itemXML, 'book_metadata');
 			if (!metadataXML.length) metadataXML = ZU.xpath(itemXML, 'book_series_metadata');
-			// TODO: Check book_set_metadata here too, as we do below?
+			if (!metadataXML.length) metadataXML = ZU.xpath(itemXML, 'book_set_metadata');
 
 			item.bookTitle = ZU.xpathText(metadataXML, 'titles[1]/title[1]')
 				|| ZU.xpathText(metadataXML, 'series_metadata/titles[1]/title[1]');
@@ -1032,6 +1032,45 @@ var testCases = [
 				"publisher": "IGI Global",
 				"series": "Advances in Business Strategy and Competitive Advantage",
 				"url": "http://services.igi-global.com/resolvedoi/resolve.aspx?doi=10.4018/978-1-5225-7675-4.ch002",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<doi_records>\n  <doi_record owner=\"10.1093\" timestamp=\"2022-07-05 13:13:54\">\n    <crossref>\n      <book book_type=\"edited_book\">\n        <book_set_metadata language=\"en\" metadata_distribution_opts=\"query\" reference_distribution_opts=\"none\">\n          <set_metadata>\n            <titles>\n              <title>The Correspondence of Alexander Pope</title>\n              <original_language_title>The Correspondence of Alexander Pope</original_language_title>\n            </titles>\n            <noisbn reason=\"simple_series\" />\n          </set_metadata>\n          <contributors>\n            <person_name contributor_role=\"editor\" language=\"en\" sequence=\"first\">\n              <given_name>George</given_name>\n              <surname>Sherburn</surname>\n            </person_name>\n            <person_name contributor_role=\"author\" language=\"en\" sequence=\"additional\">\n              <given_name>Alexander</given_name>\n              <surname>Pope</surname>\n            </person_name>\n          </contributors>\n          <titles>\n            <title>The Correspondence of Alexander Pope, Vol. 3: 1729–1735</title>\n            <original_language_title>The Correspondence of Alexander Pope, Vol. 3: 1729–1735</original_language_title>\n          </titles>\n          <volume>3</volume>\n          <publication_date media_type=\"print\">\n            <month>12</month>\n            <day>13</day>\n            <year>1956</year>\n          </publication_date>\n          <publication_date media_type=\"online\">\n            <month>10</month>\n            <day>19</day>\n            <year>2017</year>\n          </publication_date>\n          <isbn>9780198783640</isbn>\n          <publisher>\n            <publisher_name>Oxford University Press</publisher_name>\n          </publisher>\n          <doi_data>\n            <doi>10.1093/actrade/9780198783640.book.1</doi>\n            <resource mime_type=\"text/html\">http://www.oxfordscholarlyeditions.com/view/10.1093/actrade/9780198783640.book.1/actrade-9780198783640-book-1</resource>\n          </doi_data>\n        </book_set_metadata>\n        <content_item component_type=\"chapter\">\n          <contributors>\n            <person_name contributor_role=\"author\" language=\"en\" sequence=\"first\">\n              <given_name>Alexander</given_name>\n              <surname>Pope</surname>\n            </person_name>\n            <person_name contributor_role=\"editor\" language=\"en\" sequence=\"additional\">\n              <given_name>George</given_name>\n              <surname>Sherburn</surname>\n            </person_name>\n          </contributors>\n          <titles>\n            <title>Pope to Philip Miller 19 February [1734/5?]</title>\n            <original_language_title>Pope to Philip Miller 19 February [1734/5?]</original_language_title>\n          </titles>\n          <abstract />\n          <doi_data>\n            <doi>10.1093/oseo/instance.00181205</doi>\n            <resource mime_type=\"text/html\">http://www.oxfordscholarlyeditions.com/view/10.1093/actrade/9780198783640.book.1/actrade-9780198783640-div2-479</resource>\n          </doi_data>\n        </content_item>\n      </book>\n    </crossref>\n  </doi_record>\n</doi_records>",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Pope to Philip Miller 19 February [1734/5?]",
+				"creators": [
+					{
+						"creatorType": "editor",
+						"firstName": "George",
+						"lastName": "Sherburn"
+					},
+					{
+						"creatorType": "bookAuthor",
+						"firstName": "Alexander",
+						"lastName": "Pope"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Alexander",
+						"lastName": "Pope"
+					}
+				],
+				"date": "1956-12-13",
+				"ISBN": "9780198783640",
+				"bookTitle": "The Correspondence of Alexander Pope, Vol. 3: 1729–1735",
+				"extra": "DOI: 10.1093/oseo/instance.00181205",
+				"language": "en",
+				"publisher": "Oxford University Press",
+				"url": "http://www.oxfordscholarlyeditions.com/view/10.1093/actrade/9780198783640.book.1/actrade-9780198783640-div2-479",
+				"volume": "3",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
