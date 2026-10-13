@@ -2,14 +2,14 @@
 	"translatorID": "0b9bd217-49e3-48e6-9759-62651692b1a8",
 	"label": "O Foundation",
 	"creator": "Subhashish Panigrahi",
-	"target": "^https://theofdn\\.org/",
+	"target": "^https://(rtd\\.)?theofdn\\.org/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 7,
+	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-13 17:28:09"
+	"lastUpdated": "2026-10-14 01:00:00"
 }
 
 /*
@@ -198,6 +198,41 @@ var testCases = [
 				"language": "en",
 				"rights": "CC BY-SA 4.0",
 				"url": "https://theofdn.org/blogs/santali-unicode-converter-release/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://rtd.theofdn.org/typefaces/alkatra/",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Alkatra",
+				"creators": [
+					{
+						"firstName": "Subhashish",
+						"lastName": "Panigrahi",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026/08/07",
+				"abstractNote": "A multi-script display typeface by Suman Bhandary covering Bengali, Devanagari, and Odia, released as a Google Font and used in the opening titles of the Netflix film Mission Raniganj.",
+				"institution": "O Foundation",
+				"language": "en",
+				"libraryCatalog": "ark:54728/rtd-t-000052",
+				"place": "Bhubaneswar",
+				"reportNumber": "rtd-t-000052",
+				"rights": "CC BY-SA 4.0",
+				"url": "https://rtd.theofdn.org/typefaces/alkatra/",
 				"attachments": [
 					{
 						"title": "Snapshot",
