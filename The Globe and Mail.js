@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-12 23:55:00"
+	"lastUpdated": "2026-10-14 15:00:00"
 }
 
 /*
@@ -141,7 +141,21 @@ function scrape(doc, url) {
 				item.date = data.datePublished;
 			}
 		}
-		
+		// EM fills tags from <meta property="article:tag">; the longer keyword list
+		// in <meta name="keywords"> never reaches the item because article:tag
+		// pre-populates tags, so EM's keywords fallback line is skipped. Append it.
+		// On G&M the two sets are disjoint.
+		var existingTags = new Set(item.tags.map(tag => typeof tag == 'string' ? tag : tag.tag));
+		for (let metaEl of doc.querySelectorAll('meta[name="keywords" i]')) {
+			for (let kw of (metaEl.content || '').split(',')) {
+				let tag = ZU.trimInternal(kw);
+				if (tag && !existingTags.has(tag)) {
+					item.tags.push(tag);
+					existingTags.add(tag);
+				}
+			}
+		}
+
 		item.complete();
 	});
 
@@ -185,7 +199,34 @@ var testCases = [
 				],
 				"tags": [
 					{
+						"tag": "CF-18 fighter jets"
+					},
+					{
+						"tag": "Canada"
+					},
+					{
+						"tag": "Canadian military"
+					},
+					{
+						"tag": "Canadian sniper system"
+					},
+					{
+						"tag": "Canadian special elite forces"
+					},
+					{
+						"tag": "Iraq"
+					},
+					{
+						"tag": "Islamic State"
+					},
+					{
 						"tag": "Politics"
+					},
+					{
+						"tag": "longest sniper kill shot"
+					},
+					{
+						"tag": "sniper"
 					}
 				],
 				"notes": [],
@@ -221,7 +262,28 @@ var testCases = [
 				],
 				"tags": [
 					{
+						"tag": "Christine Elliott"
+					},
+					{
+						"tag": "Doug Ford"
+					},
+					{
+						"tag": "Jim Flaherty"
+					},
+					{
+						"tag": "John Tory"
+					},
+					{
+						"tag": "Ontario Progressive Conservative"
+					},
+					{
+						"tag": "Rob Ford"
+					},
+					{
 						"tag": "Social Issues"
+					},
+					{
+						"tag": "leadership"
 					}
 				],
 				"notes": [],
@@ -262,7 +324,40 @@ var testCases = [
 				],
 				"tags": [
 					{
+						"tag": "Liberal"
+					},
+					{
+						"tag": "Michael Barrett"
+					},
+					{
+						"tag": "NDP"
+					},
+					{
 						"tag": "Politics"
+					},
+					{
+						"tag": "committee"
+					},
+					{
+						"tag": "company"
+					},
+					{
+						"tag": "data"
+					},
+					{
+						"tag": "house"
+					},
+					{
+						"tag": "liberal"
+					},
+					{
+						"tag": "liberals"
+					},
+					{
+						"tag": "mps"
+					},
+					{
+						"tag": "party"
 					}
 				],
 				"notes": [],
