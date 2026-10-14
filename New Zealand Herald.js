@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-14 20:30:00"
+	"lastUpdated": "2026-10-14 21:15:00"
 }
 
 /*
@@ -147,12 +147,10 @@ function scrape(doc, url) {
 				if (!name || COLLECTIVE_AUTHOR.test(name)) return;
 				if (typeof a == 'object' && a['@type'] == 'Organization') {
 					item.creators.push({ lastName: name, creatorType: "author", fieldMode: 1 });
-					return;
-				}
-				if (name.split(/\s+/).length > 2) {
-					item.creators.push({ lastName: name, creatorType: "author", fieldMode: 1 });
 				}
 				else {
+					// @type Person is authoritative here, so "Amy B Wang" stays a
+					// person rather than becoming a corporate author.
 					item.creators.push(ZU.cleanAuthor(name, "author"));
 				}
 			});
@@ -487,6 +485,123 @@ var testCases = [
 					},
 					{
 						"tag": "Roads"
+					}
+				],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nzherald.co.nz/world/anthropic-warns-of-ai-worms-spreading-across-smart-gadgets/BF34TKTMY5ASHHAGXKTIZZRDAI/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Anthropic warns of AI ‘worms’ spreading across smart gadgets",
+				"creators": [
+					{
+						"lastName": "AFP",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2026-10-13T17:28:00.586Z",
+				"ISSN": "1170-0777",
+				"abstractNote": "The worm could run on cheap, poorly secured gadgets, researchers say.",
+				"language": "en-NZ",
+				"libraryCatalog": "www.nzherald.co.nz",
+				"publicationTitle": "NZ Herald",
+				"section": "World",
+				"url": "https://www.nzherald.co.nz/world/anthropic-warns-of-ai-worms-spreading-across-smart-gadgets/BF34TKTMY5ASHHAGXKTIZZRDAI/",
+				"tags": [
+					{
+						"tag": "Artificial Intelligence (AI)"
+					},
+					{
+						"tag": "Computers"
+					},
+					{
+						"tag": "Cyberattacks"
+					},
+					{
+						"tag": "Cybersecurity"
+					},
+					{
+						"tag": "Gadgets"
+					},
+					{
+						"tag": "IT Security"
+					},
+					{
+						"tag": "Internet"
+					},
+					{
+						"tag": "hacking"
+					}
+				],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nzherald.co.nz/world/confusion-delayed-aid-to-christa-pike-after-botched-execution-911-calls-show/I7NVETKW3FHNDHXAGLNLT6SWMY/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Confusion delayed aid to Christa Pike after botched execution, 911 calls show",
+				"creators": [
+					{
+						"firstName": "Amy B.",
+						"lastName": "Wang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Brady",
+						"lastName": "Dennis",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-10-13T21:06:17.002Z",
+				"ISSN": "1170-0777",
+				"abstractNote": "Washington Post: Dispatchers were twice told calls for help from the prison were false.",
+				"language": "en-NZ",
+				"libraryCatalog": "www.nzherald.co.nz",
+				"publicationTitle": "NZ Herald",
+				"section": "World",
+				"url": "https://www.washingtonpost.com/nation/2026/10/13/confusion-delayed-aid-christa-pike-after-botched-execution-911-calls-show/",
+				"tags": [
+					{
+						"tag": "Department of Corrections"
+					},
+					{
+						"tag": "Prisons"
+					},
+					{
+						"tag": "Tennessee"
+					},
+					{
+						"tag": "The Washington Post"
+					},
+					{
+						"tag": "US Crime"
+					},
+					{
+						"tag": "US News"
 					}
 				],
 				"attachments": [
