@@ -5,10 +5,10 @@
 	"target": "",
 	"minVersion": "5.0",
 	"maxVersion": "",
-	"priority": 110,
+	"priority": 999,
 	"inRepository": true,
 	"translatorType": 8,
-	"lastUpdated": "2026-09-07 12:30:50"
+	"lastUpdated": "2026-10-14 11:14:47"
 }
 
 /*
@@ -141,10 +141,16 @@ async function doSearch(item) {
 	}
 	// Trailing parentheticals are nearly always series names or volume info,
 	// e.g. "Dynamics and Control (Oxford Science Publications)"
+	// For full title, join with colon (English centric), or just a space after
+	// "?" or "!", e.g. "Save the cat! The last book on screenwriting..."
+	// Catalog subtitles are often lowercase, so capitalize the first letter
 	newItem.title = titleParts
 		.map(s => stripTrailingParens(ZU.trimInternal(s)))
 		.filter(Boolean)
-		.join(': '); // For full title, join with colon (English centric)
+		.reduce((title, part) => (title
+			? title + (/[?!]$/.test(title) ? ' ' : ': ') + part.charAt(0).toUpperCase() + part.slice(1)
+			: part
+		), '');
 
 	for (let name of authorNames) {
 		addCreator(newItem, name, 'author');
@@ -472,6 +478,48 @@ var testCases = [
 				"extra": "Open Library ID: OL7400763M",
 				"libraryCatalog": "Open Library ISBN",
 				"shortTitle": "Infectious Diseases of Humans"
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"ISBN": "9781932907001"
+		},
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Blake",
+						"lastName": "Snyder",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "Includes index."
+					}
+				],
+				"tags": [
+					{
+						"tag": "Motion picture authorship"
+					},
+					{
+						"tag": "Motion picture plays -- Technique"
+					}
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Save the cat! The last book on screenwriting you'll ever need",
+				"date": "2005",
+				"publisher": "M. Wiese Productions",
+				"place": "Studio City, CA",
+				"numPages": "195",
+				"ISBN": "9781932907001",
+				"extra": "Open Library ID: OL3291903M",
+				"callNumber": "PN1996 .S65 2005",
+				"libraryCatalog": "Open Library ISBN"
 			}
 		]
 	}
