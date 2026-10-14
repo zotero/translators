@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-14 19:00:00"
+	"lastUpdated": "2026-10-14 19:30:00"
 }
 
 /*
@@ -121,6 +121,12 @@ function fixNameCase(name) {
 		.join(' ');
 }
 
+// Datelines uppercase the city but keep the state mixed-case
+// ("TAMPA, Fla.", "HOUSTON"); title-case the uppercase runs only.
+function fixPlaceCase(place) {
+	return place.replace(/[A-Z]{2,}/g, m => m.charAt(0) + m.slice(1).toLowerCase());
+}
+
 function scrape(doc, url) {
 	var item = new Zotero.Item("newspaperArticle");
 	var data = getJSONLD(doc);
@@ -138,7 +144,7 @@ function scrape(doc, url) {
 	let dateline = doc.querySelector('.dateline');
 	if (dateline) {
 		let place = ZU.trimInternal(dateline.textContent).replace(/[\s\u00a0]*[-–—]\s*$/, '').trim();
-		if (place) item.place = place;
+		if (place) item.place = fixPlaceCase(place);
 	}
 	// The site stopped emitting og:locale; <html lang> carries the real page
 	// language ("es-US" on the Espanol edition, "en-US" otherwise).
@@ -277,7 +283,7 @@ var testCases = [
 				"libraryCatalog": "www.latimes.com",
 				"publicationTitle": "Los Angeles Times",
 				"section": "Educación",
-				"place": "WASHINGTON",
+				"place": "Washington",
 				"url": "https://www.latimes.com/espanol/educacion/articulo/2026-10-13/eeuu-propone-tarifa-de-70-000-dolares-para-estudiantes-internacionales",
 				"attachments": [
 					{
@@ -311,7 +317,7 @@ var testCases = [
 				"libraryCatalog": "www.latimes.com",
 				"publicationTitle": "Los Angeles Times",
 				"section": "Sports",
-				"place": "TAMPA, Fla.",
+				"place": "Tampa, Fla.",
 				"url": "https://www.latimes.com/archives/la-xpm-1986-03-29-sp-1415-story.html",
 				"attachments": [
 					{
