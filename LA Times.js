@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-14 18:30:00"
+	"lastUpdated": "2026-10-14 19:00:00"
 }
 
 /*
@@ -133,6 +133,13 @@ function scrape(doc, url) {
 	item.date = data.datePublished
 		|| ZU.xpathText(doc, '//meta[@property="article:published_time"]/@content');
 	item.section = ZU.xpathText(doc, '//meta[@property="article:section"]/@content');
+	// Archived stories carry the place of writing in a leading dateline
+	// ("TAMPA, Fla. - ..."); newspaperArticle records it as place.
+	let dateline = doc.querySelector('.dateline');
+	if (dateline) {
+		let place = ZU.trimInternal(dateline.textContent).replace(/[\s\u00a0]*[-–—]\s*$/, '').trim();
+		if (place) item.place = place;
+	}
 	// The site stopped emitting og:locale; <html lang> carries the real page
 	// language ("es-US" on the Espanol edition, "en-US" otherwise).
 	let lang = doc.documentElement.lang
@@ -270,6 +277,7 @@ var testCases = [
 				"libraryCatalog": "www.latimes.com",
 				"publicationTitle": "Los Angeles Times",
 				"section": "Educación",
+				"place": "WASHINGTON",
 				"url": "https://www.latimes.com/espanol/educacion/articulo/2026-10-13/eeuu-propone-tarifa-de-70-000-dolares-para-estudiantes-internacionales",
 				"attachments": [
 					{
@@ -287,6 +295,37 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.latimes.com/search?q=nuclear",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.latimes.com/archives/la-xpm-1986-03-29-sp-1415-story.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Accepting Free Ride to Tampa Puts a Finish to Bo Jackson's Athletic Career at Auburn",
+				"creators": [],
+				"date": "1986-03-29T08:00:00.000Z",
+				"ISSN": "0458-3035",
+				"abstractNote": "A quick trip to Florida in the private plane of Tampa Bay Buccaneer owner Hugh Culverhouse ended Bo Jackson's athletic career at Auburn, but the National Football League team said Friday that the Heisman Trophy-winning running back is \"completely blameless.\"",
+				"language": "en-US",
+				"libraryCatalog": "www.latimes.com",
+				"publicationTitle": "Los Angeles Times",
+				"section": "Sports",
+				"place": "TAMPA, Fla.",
+				"url": "https://www.latimes.com/archives/la-xpm-1986-03-29-sp-1415-story.html",
+				"attachments": [
+					{
+						"title": "LA Times Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					"Sports"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
