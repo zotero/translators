@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-14 17:10:00"
+	"lastUpdated": "2026-10-14 18:30:00"
 }
 
 /*
@@ -32,7 +32,7 @@
 
 
 function detectWeb(doc, url) {
-	if (/\/search\//.test(url) && getSearchResults(doc, true)) {
+	if (/\/search(?:[/?#]|$)/.test(url) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	if (ZU.xpathText(doc, '//meta[@property="og:type"]/@content') == 'article'
@@ -66,7 +66,7 @@ function getJSONLD(doc) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	for (let a of doc.querySelectorAll('a[data-element="search-result-title"]')) {
+	for (let a of doc.querySelectorAll('ul.search-results-module-results-menu h3.promo-title a')) {
 		let href = a.href;
 		let title = ZU.trimInternal(a.textContent);
 		if (!href || !title) continue;
@@ -77,12 +77,13 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) return;
-			ZU.requestDocument(Object.keys(items), scrape);
-		});
+		let items = await Z.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		// requestDocument() fetches a single page; processDocuments() walks the
+		// selected result URLs and scrapes each.
+		await ZU.processDocuments(Object.keys(items), scrape);
 	}
 	else {
 		scrape(doc, url);
@@ -281,6 +282,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.latimes.com/search?q=nuclear",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
