@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-14 15:10:00"
+	"lastUpdated": "2026-10-14 16:30:00"
 }
 
 /*
@@ -89,6 +89,37 @@ function doWeb(doc, url) {
 	}
 }
 
+// Wire services and syndication credits are organizations, never people.
+const AGENCY_BYLINE = /^(?:the\s+)?(?:associated press|a\.?p\.?|agence france-presse|efe|afp|bloomberg(?: news)?|reuters|cnn|nbc news|cnbc|getty images|city news service|tribune news service|the new york times|the washington post)$/i;
+const ROLE_ONLY = /^(?:staff writers?|staff|columnists?|contributing writers?|bureau chief|correspondents?|reporters?|editors?)$/i;
+// "Jane Doe, Staff Writer" leaves the role in the name; "Jane Doe - Bureau Chief" too.
+const ROLE_SUFFIX = /(?:[-,]\s*|\s+)(?:staff writers?|staff|columnists?|contributing writers?|bureau chief|correspondents?|reporters?|editors?)$/i;
+// Translated (Espanol) pages join co-authors with " y " (or " e " before i-/hi- sounds).
+const BYLINE_SPLIT = /\s+(?:y|e|and|&)\s+/i;
+
+// A JSON-LD author name can be one person, several co-authors, or a wire service.
+// Return the people only, with roles stripped.
+function cleanBylines(name) {
+	name = ZU.trimInternal(name).replace(/^by\s+/i, '').replace(/[,\s]+$/, '');
+	let previous;
+	do {
+		previous = name;
+		name = name.replace(ROLE_SUFFIX, '');
+	} while (name && name !== previous);
+	return name.split(BYLINE_SPLIT).map(s => fixNameCase(s.trim()))
+		.filter(s => s && !AGENCY_BYLINE.test(s) && !ROLE_ONLY.test(s));
+}
+
+// Staff bylines frequently arrive in ALL CAPS; title-case them, keeping
+// name particles lowercase.
+function fixNameCase(name) {
+	if (!name || name !== name.toUpperCase()) return name;
+	const particle = /^(?:de|del|della|der|den|van|von|la|las|los|da|di|du|bin|al|el|y|e|and)$/i;
+	return name.toLowerCase().split(/\s+/)
+		.map((w, i) => (i > 0 && particle.test(w)) ? w : w.charAt(0).toUpperCase() + w.slice(1))
+		.join(' ');
+}
+
 function scrape(doc, url) {
 	var item = new Zotero.Item("newspaperArticle");
 	var data = getJSONLD(doc);
@@ -101,7 +132,12 @@ function scrape(doc, url) {
 	item.date = data.datePublished
 		|| ZU.xpathText(doc, '//meta[@property="article:published_time"]/@content');
 	item.section = ZU.xpathText(doc, '//meta[@property="article:section"]/@content');
-	item.language = (ZU.xpathText(doc, '//meta[@property="og:locale"]/@content') || 'en_US').replace('_', '-');
+	// The site stopped emitting og:locale; <html lang> carries the real page
+	// language ("es-US" on the Espanol edition, "en-US" otherwise).
+	let lang = doc.documentElement.lang
+		|| ZU.xpathText(doc, '//meta[@property="og:locale"]/@content')
+		|| 'en-US';
+	item.language = lang.replace('_', '-');
 	item.ISSN = "0458-3035";
 	item.publicationTitle = "Los Angeles Times";
 	item.url = ZU.xpathText(doc, '//link[@rel="canonical"]/@href') || url;
@@ -114,24 +150,13 @@ function scrape(doc, url) {
 	for (let author of authors) {
 		let name = typeof author == 'string' ? author : author.name;
 		if (!name) continue;
-		name = ZU.trimInternal(name).replace(/,$/, '');
-		// Wire-service and syndication attributions ("Associated Press",
-		// "Reuters", ...) are organizations, not people - never make them authors.
-		if (/^(?:the\s+)?(?:associated press|a\.?p\.?|agence france-presse|afp|bloomberg(?: news)?|reuters|cnn|nbc news|cnbc|getty images|city news service|tribune news service|the new york times|the washington post)$/i.test(name)) {
-			continue;
-		}
-		// OCR-style and agency attributions ("By <name>, Staff Writer") may keep
-		// the role in the name; split it off before parsing.
-		let role = name.match(/\s*[-,]\s*(Staff Writer|Staff|Columnist|Contributing Writer)$/);
-		if (role) {
-			name = name.slice(0, role.index);
-		}
-		if (!name) continue;
-		if (name.split(/\s+/).length > 3) {
-			item.creators.push({ lastName: name, creatorType: "author", fieldMode: 1 });
-		}
-		else {
-			item.creators.push(ZU.cleanAuthor(name, "author"));
+		for (let person of cleanBylines(name)) {
+			if (person.split(/\s+/).length > 3) {
+				item.creators.push({ lastName: person, creatorType: "author", fieldMode: 1 });
+			}
+			else {
+				item.creators.push(ZU.cleanAuthor(person, "author"));
+			}
 		}
 	}
 
@@ -201,6 +226,45 @@ var testCases = [
 				"publicationTitle": "Los Angeles Times",
 				"section": "Hollywood Inc.",
 				"url": "https://www.latimes.com/business/hollywood/la-fi-ct-youtube-tv-20170405-story.html",
+				"attachments": [
+					{
+						"title": "LA Times Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.latimes.com/espanol/educacion/articulo/2026-10-13/eeuu-propone-tarifa-de-70-000-dolares-para-estudiantes-internacionales",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "EEUU propone tarifa de 70.000 dólares para estudiantes internacionales",
+				"creators": [
+					{
+						"firstName": "Annie",
+						"lastName": "Ma",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Heather",
+						"lastName": "Hollingsworth",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-10-14T05:40:37.916Z",
+				"ISSN": "0458-3035",
+				"abstractNote": "El gobierno estadounidense propuso el miércoles una tarifa de 70.000 dólares para los estudiantes internacionales que buscan trabajar en el país, el más reciente en sus esfuerzos por endurecer las medidas contra la matrícula de extranjeros.",
+				"language": "es-US",
+				"libraryCatalog": "www.latimes.com",
+				"publicationTitle": "Los Angeles Times",
+				"section": "Educación",
+				"url": "https://www.latimes.com/espanol/educacion/articulo/2026-10-13/eeuu-propone-tarifa-de-70-000-dolares-para-estudiantes-internacionales",
 				"attachments": [
 					{
 						"title": "LA Times Snapshot",
