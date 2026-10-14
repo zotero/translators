@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-14 16:10:00"
+	"lastUpdated": "2026-10-14 16:40:00"
 }
 
 /*
@@ -107,7 +107,7 @@ function scrape(doc, url) {
 	translator.setDocument(doc);
 	
 	translator.setHandler('itemDone', function (obj, item) {
-		item.place = ZU.capitalizeTitle(text(doc, '.placeline'), true);
+		item.place = ZU.capitalizeTitle(text(doc, '.c-article-meta__placelines, .placeline'), true);
 		
 		if (!item.creators.length) {
 			for (let authorLink of doc.querySelectorAll('a.byline')) {
@@ -195,6 +195,7 @@ var testCases = [
 				"language": "en-CA",
 				"libraryCatalog": "www.theglobeandmail.com",
 				"publicationTitle": "The Globe and Mail",
+				"place": "Ottawa Bureau Chief",
 				"url": "https://www.theglobeandmail.com/news/politics/canadian-elite-special-forces-sniper-sets-record-breaking-kill-shot-in-iraq/article35415651/",
 				"attachments": [
 					{
@@ -325,6 +326,7 @@ var testCases = [
 				"language": "en-CA",
 				"libraryCatalog": "www.theglobeandmail.com",
 				"publicationTitle": "The Globe and Mail",
+				"place": "Ottawa",
 				"url": "https://www.theglobeandmail.com/politics/article-liberals-filibuster-opposition-call-for-inquiry-into-parliamentary/",
 				"attachments": [
 					{
