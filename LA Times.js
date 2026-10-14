@@ -117,7 +117,7 @@ function fixNameCase(name) {
 	if (!name || name !== name.toUpperCase()) return name;
 	const particle = /^(?:de|del|della|der|den|van|von|la|las|los|da|di|du|bin|al|el|y|e|and)$/i;
 	return name.toLowerCase().split(/\s+/)
-		.map((w, i) => (i > 0 && particle.test(w)) ? w : w.charAt(0).toUpperCase() + w.slice(1))
+		.map((w, i) => ((i > 0 && particle.test(w)) ? w : w.charAt(0).toUpperCase() + w.slice(1)))
 		.join(' ');
 }
 
