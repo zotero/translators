@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-14 16:40:00"
+	"lastUpdated": "2026-10-14 17:10:00"
 }
 
 /*
@@ -100,6 +100,40 @@ function getJSONLD(doc) {
 	return null;
 }
 
+function getTgamMeta(doc) {
+	var script = doc.querySelector('script#tgam-window');
+	if (!script) return null;
+	try {
+		var json = script.textContent.trim()
+			.replace(/^window\.tgam\s*=\s*/, '')
+			.replace(/;\s*$/, '');
+		var data = JSON.parse(json);
+		return data.meta || null;
+	}
+	catch (e) {
+		return null;
+	}
+}
+
+// The site's "placeline" is normally a dateline ("Ottawa"), but some articles
+// (older ones especially) put the byline's role there instead ("Ottawa bureau
+// chief") — that is not a place and must not fill item.place.
+const placeRoleRe = /\b(?:bureau chief|chief|c?orrespondent|reporter|editor|columnist|writer|anchor|host)\b/i;
+
+function placeFromDoc(doc) {
+	var place = ZU.trimInternal(text(doc, '.c-article-meta__placelines, .placeline'));
+	if (!place) {
+		// Fall back to the page-level metadata blob (script#tgam-window),
+		// which carries meta.placeline even when the DOM element is absent.
+		let tgam = getTgamMeta(doc);
+		if (tgam && tgam.placeline) {
+			place = ZU.trimInternal(tgam.placeline);
+		}
+	}
+	if (!place || placeRoleRe.test(place)) return '';
+	return ZU.capitalizeTitle(place, true);
+}
+
 function scrape(doc, url) {
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
@@ -107,7 +141,7 @@ function scrape(doc, url) {
 	translator.setDocument(doc);
 	
 	translator.setHandler('itemDone', function (obj, item) {
-		item.place = ZU.capitalizeTitle(text(doc, '.c-article-meta__placelines, .placeline'), true);
+		item.place = placeFromDoc(doc);
 		
 		if (!item.creators.length) {
 			for (let authorLink of doc.querySelectorAll('a.byline')) {
@@ -195,7 +229,6 @@ var testCases = [
 				"language": "en-CA",
 				"libraryCatalog": "www.theglobeandmail.com",
 				"publicationTitle": "The Globe and Mail",
-				"place": "Ottawa Bureau Chief",
 				"url": "https://www.theglobeandmail.com/news/politics/canadian-elite-special-forces-sniper-sets-record-breaking-kill-shot-in-iraq/article35415651/",
 				"attachments": [
 					{
