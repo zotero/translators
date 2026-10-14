@@ -298,6 +298,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"url": "https://www.theglobeandmail.com/search/?q=nuclear",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
 		"url": "https://www.theglobeandmail.com/politics/article-liberals-filibuster-opposition-call-for-inquiry-into-parliamentary/",
 		"items": [
 			{
@@ -366,11 +371,6 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.theglobeandmail.com/search/?q=nuclear",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
