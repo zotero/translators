@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-14 15:20:00"
+	"lastUpdated": "2026-10-14 16:10:00"
 }
 
 /*
@@ -49,10 +49,11 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('.c-search-results-news a');
+	// Current search results are rendered client-side by Queryly into #resultdata.
+	var rows = doc.querySelectorAll('#resultdata a.c-card__link, .c-search-results-news a');
 	for (let row of rows) {
 		var href = row.href;
-		var title = ZU.trimInternal(text(row, '.c-card__hed-text'));
+		var title = ZU.trimInternal(text(row, '.queryly_item_title, .c-card__hed-text'));
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -365,6 +366,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.theglobeandmail.com/search/?q=nuclear",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
