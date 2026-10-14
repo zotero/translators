@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-14 15:00:00"
+	"lastUpdated": "2026-10-14 15:20:00"
 }
 
 /*
@@ -143,15 +143,19 @@ function scrape(doc, url) {
 		}
 		// EM fills tags from <meta property="article:tag">; the longer keyword list
 		// in <meta name="keywords"> never reaches the item because article:tag
-		// pre-populates tags, so EM's keywords fallback line is skipped. Append it.
-		// On G&M the two sets are disjoint.
-		var existingTags = new Set(item.tags.map(tag => typeof tag == 'string' ? tag : tag.tag));
+		// pre-populates tags, so EM's keywords fallback line is skipped. Append it,
+		// skipping any keyword that already exists as a tag (case-insensitively, so
+		// e.g. "Liberal" and "liberal" do not both land).
+		var existingTags = new Set(item.tags.map(
+			tag => (typeof tag == 'string' ? tag : tag.tag).toLowerCase()
+		));
 		for (let metaEl of doc.querySelectorAll('meta[name="keywords" i]')) {
 			for (let kw of (metaEl.content || '').split(',')) {
 				let tag = ZU.trimInternal(kw);
-				if (tag && !existingTags.has(tag)) {
+				let key = tag.toLowerCase();
+				if (tag && !existingTags.has(key)) {
 					item.tags.push(tag);
-					existingTags.add(tag);
+					existingTags.add(key);
 				}
 			}
 		}
@@ -323,9 +327,6 @@ var testCases = [
 					}
 				],
 				"tags": [
-					{
-						"tag": "Liberal"
-					},
 					{
 						"tag": "Michael Barrett"
 					},
