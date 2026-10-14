@@ -358,8 +358,8 @@ var testCases = [
 				"abstractNote": "Opposition wanted Tom Pitfield, the founder of Data Sciences, to appear before the ethics committee, but Liberal MPs prevented the motion from coming to a vote by talking out the clock",
 				"language": "en-CA",
 				"libraryCatalog": "www.theglobeandmail.com",
-				"publicationTitle": "The Globe and Mail",
 				"place": "Ottawa",
+				"publicationTitle": "The Globe and Mail",
 				"url": "https://www.theglobeandmail.com/politics/article-liberals-filibuster-opposition-call-for-inquiry-into-parliamentary/",
 				"attachments": [
 					{
