@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-14 16:30:00"
+	"lastUpdated": "2026-10-14 17:10:00"
 }
 
 /*
@@ -143,6 +143,11 @@ function scrape(doc, url) {
 	item.url = ZU.xpathText(doc, '//link[@rel="canonical"]/@href') || url;
 	item.libraryCatalog = "www.latimes.com";
 
+	for (let tag of doc.querySelectorAll('.tags a')) {
+		let value = ZU.trimInternal(tag.textContent);
+		if (value) item.tags.push(value);
+	}
+
 	let authors = data.author || [];
 	if (typeof authors == 'object' && !Array.isArray(authors)) {
 		authors = [authors];
@@ -204,7 +209,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": ["California"],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -232,7 +237,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": ["Hollywood Inc."],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -271,7 +276,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": ["Educación", "Noticas-Más", "EEUU", "California", "Vida y Estilo"],
 				"notes": [],
 				"seeAlso": []
 			}
