@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-12 23:35:00"
+	"lastUpdated": "2026-10-14 20:30:00"
 }
 
 /*
@@ -76,6 +76,10 @@ function getJSONLD(doc) {
 }
 
 
+// Staff bylines and agency names are not individual authors
+// ("Herald Reporters", "Staff Reporter", "Reporters, Herald").
+var COLLECTIVE_AUTHOR = /herald\s+reporters?|reporters?\s*,?\s*herald|staff\s+(?:reporters?|writers?)|(?:reporters?|writers?)\s+(?:team|staff)/i;
+
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
@@ -121,6 +125,7 @@ function scrape(doc, url) {
 		// EM looks at byline for author which does not work well here;
 		// thus we delete this and do it here again properly
 		item.creators = [];
+		var data = getJSONLD(doc);
 		var author = text(doc, '.byline.has-author .author');
 		if (!author) {
 			var firstElement = text(doc, '#article-content p.element');
@@ -128,26 +133,40 @@ function scrape(doc, url) {
 				author = firstElement;
 			}
 		}
-		if (!author) {
-			// Modern pages expose the byline as author[].name in JSON-LD
-			// (e.g. "Herald Reporters"); EM does not read those blocks.
-			var data = getJSONLD(doc);
-			if (data && data.author) {
-				let authors = data.author;
-				if (typeof authors == 'object' && !Array.isArray(authors)) {
-					authors = [authors];
+		if (!author && data && data.author) {
+			// Modern pages expose the byline as author[].name in JSON-LD;
+			// JSON-LD marks real people as @type Person and syndication as
+			// @type Organization ("RNZ", "NZ Herald").
+			let authors = data.author;
+			if (typeof authors == 'object' && !Array.isArray(authors)) {
+				authors = [authors];
+			}
+			authors.forEach((a) => {
+				let name = (typeof a == 'string' ? a : a.name) || '';
+				name = name.trim();
+				if (!name || COLLECTIVE_AUTHOR.test(name)) return;
+				if (typeof a == 'object' && a['@type'] == 'Organization') {
+					item.creators.push({ lastName: name, creatorType: "author", fieldMode: 1 });
+					return;
 				}
-				author = authors.map(a => (typeof a == 'string' ? a : a.name)).filter(Boolean).join(', ');
-			}
+				if (name.split(/\s+/).length > 2) {
+					item.creators.push({ lastName: name, creatorType: "author", fieldMode: 1 });
+				}
+				else {
+					item.creators.push(ZU.cleanAuthor(name, "author"));
+				}
+			});
 		}
-		if (author) {
-			author = author.replace(/^By\s*/i, '').replace(/,\s*$/, '');
-			// Collective bylines ("Herald Reporters") are not person names
-			if (author.split(/\s+/).length > 2) {
-				item.creators.push({ lastName: author, creatorType: "author", fieldMode: 1 });
-			}
-			else {
-				item.creators.push(ZU.cleanAuthor(author, "author"));
+		if (author && !item.creators.length) {
+			author = author.replace(/^By\s*/i, '').replace(/,\s*$/, '').trim();
+			if (!COLLECTIVE_AUTHOR.test(author)) {
+				// Collective bylines ("Herald Reporters") are not person names
+				if (author.split(/\s+/).length > 2) {
+					item.creators.push({ lastName: author, creatorType: "author", fieldMode: 1 });
+				}
+				else {
+					item.creators.push(ZU.cleanAuthor(author, "author"));
+				}
 			}
 		}
 		if (!item.date && data && data.datePublished) {
@@ -336,13 +355,7 @@ var testCases = [
 			{
 				"itemType": "newspaperArticle",
 				"title": "Christchurch double homicide: 58-year-old man appears in court on murder charges",
-				"creators": [
-					{
-						"firstName": "Herald",
-						"lastName": "Reporters",
-						"creatorType": "author"
-					}
-				],
+				"creators": [],
 				"date": "2026-10-11T21:47:46.974Z",
 				"ISSN": "1170-0777",
 				"abstractNote": "He is accused of killing two men at the weekend, including a former motorcycle gang boss.",
@@ -370,6 +383,116 @@ var testCases = [
 					},
 					{
 						"tag": "South Island"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nzherald.co.nz/nz/metservice-wind-watch-for-wellington-as-100kmh-gusts-approach/RTZVNJHPSZDAJJT3GGHXGC7274/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Severe wind watch: 100km/h gusts expected across Wellington",
+				"creators": [
+					{
+						"lastName": "RNZ",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2026-10-14T07:13:39.413Z",
+				"ISSN": "1170-0777",
+				"abstractNote": "MetService says the watch has a moderate chance of becoming a warning.",
+				"language": "en-NZ",
+				"libraryCatalog": "www.nzherald.co.nz",
+				"publicationTitle": "NZ Herald",
+				"section": "New Zealand",
+				"shortTitle": "Severe wind watch",
+				"url": "https://www.nzherald.co.nz/nz/metservice-wind-watch-for-wellington-as-100kmh-gusts-approach/RTZVNJHPSZDAJJT3GGHXGC7274/",
+				"tags": [
+					{
+						"tag": "Cook Strait"
+					},
+					{
+						"tag": "Kapiti"
+					},
+					{
+						"tag": "Metservice"
+					},
+					{
+						"tag": "Radio New Zealand"
+					},
+					{
+						"tag": "Weather Watch"
+					},
+					{
+						"tag": "Weather news"
+					},
+					{
+						"tag": "Wellington Region"
+					}
+				],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nzherald.co.nz/nz/53-years-in-the-same-business-and-ive-never-been-so-short-of-work-the-front-page/JGZSLY6H7BDBLMOGXPIC3WI35Q/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "93% of infrastructure respondents rank cross-party agreement top priority",
+				"creators": [
+					{
+						"firstName": "Katie",
+						"lastName": "Bradford",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-10-14T04:00:00Z",
+				"ISSN": "1170-0777",
+				"abstractNote": "'The Pulse' survey shows one key message on repeat from the infrastructure sector.",
+				"language": "en-NZ",
+				"libraryCatalog": "www.nzherald.co.nz",
+				"publicationTitle": "NZ Herald",
+				"section": "New Zealand, Politics",
+				"url": "https://www.nzherald.co.nz/nz/53-years-in-the-same-business-and-ive-never-been-so-short-of-work-the-front-page/JGZSLY6H7BDBLMOGXPIC3WI35Q/",
+				"tags": [
+					{
+						"tag": "Election 2026"
+					},
+					{
+						"tag": "Housing"
+					},
+					{
+						"tag": "Infrastructure"
+					},
+					{
+						"tag": "Podcast - The Front Page"
+					},
+					{
+						"tag": "Podcasts"
+					},
+					{
+						"tag": "Roads"
+					}
+				],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"notes": [],
