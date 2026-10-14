@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-12 21:55:00"
+	"lastUpdated": "2026-10-14 15:10:00"
 }
 
 /*
@@ -81,7 +81,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) return;
-			ZU.processDocuments(Object.keys(items), scrape);
+			ZU.requestDocument(Object.keys(items), scrape);
 		});
 	}
 	else {
@@ -115,6 +115,11 @@ function scrape(doc, url) {
 		let name = typeof author == 'string' ? author : author.name;
 		if (!name) continue;
 		name = ZU.trimInternal(name).replace(/,$/, '');
+		// Wire-service and syndication attributions ("Associated Press",
+		// "Reuters", ...) are organizations, not people - never make them authors.
+		if (/^(?:the\s+)?(?:associated press|a\.?p\.?|agence france-presse|afp|bloomberg(?: news)?|reuters|cnn|nbc news|cnbc|getty images|city news service|tribune news service|the new york times|the washington post)$/i.test(name)) {
+			continue;
+		}
 		// OCR-style and agency attributions ("By <name>, Staff Writer") may keep
 		// the role in the name; split it off before parsing.
 		let role = name.match(/\s*[-,]\s*(Staff Writer|Staff|Columnist|Contributing Writer)$/);
@@ -138,3 +143,75 @@ function scrape(doc, url) {
 
 	item.complete();
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.latimes.com/california/story/2026-10-13/bass-raman-tussle-in-final-televised-la-mayoral-debate",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Bass and Raman tussle in final televised L.A. mayoral debate",
+				"creators": [
+					{
+						"firstName": "Noah",
+						"lastName": "Goldberg",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Zahniser",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-10-14T03:52:38.500Z",
+				"ISSN": "0458-3035",
+				"abstractNote": "Bass portrayed Raman as someone who isn't ready to lead the city, while Raman described the mayor as being \"missing in action\" during fires in Pacific Palisades and Boyle Heights.",
+				"language": "en-US",
+				"libraryCatalog": "www.latimes.com",
+				"publicationTitle": "Los Angeles Times",
+				"section": "California",
+				"url": "https://www.latimes.com/california/story/2026-10-13/bass-raman-tussle-in-final-televised-la-mayoral-debate",
+				"attachments": [
+					{
+						"title": "LA Times Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.latimes.com/business/hollywood/la-fi-ct-youtube-tv-20170405-story.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "YouTube TV launches today. It has some cool features and some big drawbacks",
+				"creators": [],
+				"date": "2017-04-05T18:00:00.000Z",
+				"ISSN": "0458-3035",
+				"abstractNote": "YouTube TV, Google's new streaming package of about 40 television channels, is the tech industry's latest bid to get cable-shunning millennials to pay for live TV over the Internet.",
+				"language": "en-US",
+				"libraryCatalog": "www.latimes.com",
+				"publicationTitle": "Los Angeles Times",
+				"section": "Hollywood Inc.",
+				"url": "https://www.latimes.com/business/hollywood/la-fi-ct-youtube-tv-20170405-story.html",
+				"attachments": [
+					{
+						"title": "LA Times Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
