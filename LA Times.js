@@ -1,7 +1,7 @@
 {
 	"translatorID": "e4fe1596-a8c4-4d09-945f-120c4d83e580",
 	"label": "LA Times",
-	"creator": "Sebastian Karcher",
+	"creator": "Sebastian Karcher, Vera de Kok",
 	"target": "^https?://(www\\.|travel\\.|articles\\.|latimesblogs\\.)?latimes\\.com",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-14 19:30:00"
+	"lastUpdated": "2026-10-15 12:10:00"
 }
 
 /*
