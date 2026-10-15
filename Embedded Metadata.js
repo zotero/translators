@@ -1,7 +1,7 @@
 {
 	"translatorID": "951c027d-74ac-47d4-a107-9c3069ab7b48",
 	"label": "Embedded Metadata",
-	"creator": "Simon Kornblith and Avram Lyon",
+	"creator": "Simon Kornblith, Avram Lyon, and Vera de Kok",
 	"target": "",
 	"minVersion": "3.0.4",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-13 00:20:00"
+	"lastUpdated": "2026-10-15 12:10:00"
 }
 
 /*
