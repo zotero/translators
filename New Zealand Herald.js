@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-15 14:20:00"
+	"lastUpdated": "2026-10-15 14:21:00"
 }
 
 /*
@@ -40,7 +40,7 @@ function detectWeb(doc, url) {
 	if (url.includes("/search") && getSearchResults(doc, true)) {
 		return "multiple";
 	}
-	if (url.includes("/news/article.cfm") || /\/[A-Z0-9]{20,}\/?$/.test(new URL(url).pathname)) {
+	if (/\/[A-Z0-9]{20,}\/?$/.test(new URL(url).pathname)) {
 		return "newspaperArticle";
 	}
 	// Listing pages (including the homepage) have story cards but may also
@@ -85,9 +85,7 @@ var COLLECTIVE_AUTHOR = /herald\s+reporters?|reporters?\s*,?\s*herald|staff\s+(?
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
-	var rows = doc.querySelectorAll(
-		'article.result-item a[href*="/news/article.cfm"], a[data-test-ui="story-card--link--title"]'
-	);
+	var rows = doc.querySelectorAll('a[data-test-ui="story-card--link--title"]');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
