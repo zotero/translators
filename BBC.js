@@ -1,7 +1,7 @@
 {
 	"translatorID": "f4130157-93f7-4493-8f24-a7c85549013d",
 	"label": "BBC",
-	"creator": "Philipp Zumstein",
+	"creator": "Philipp Zumstein, Vera de Kok",
 	"target": "^https?://(www|news?)\\.bbc\\.(co\\.uk|com)",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-12 18:59:28"
+	"lastUpdated": "2026-10-15 12:10:00"
 }
 
 /*
