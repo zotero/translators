@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-15 12:00:00"
+	"lastUpdated": "2026-10-15 13:36:30"
 }
 
 /*
@@ -40,13 +40,15 @@ function detectWeb(doc, url) {
 	if (url.includes("/search") && getSearchResults(doc, true)) {
 		return "multiple";
 	}
-	else if (url.includes("/news/article.cfm")) {
+	if (url.includes("/news/article.cfm") || /\/[A-Z0-9]{20,}\/?$/.test(new URL(url).pathname)) {
 		return "newspaperArticle";
 	}
-	// Modern article URLs are /<section>/<slug>/<hash>/ (and premium ones
-	// /premium/<section>/...); they carry an Article/NewsArticle JSON-LD block.
-	else if (/\/(nz|premium|world|business|sport|lifestyle|entertainment|technology)\//
-		&& getJSONLD(doc)) {
+	// Listing pages (including the homepage) have story cards but may also
+	// carry NewsArticle JSON-LD for their lead story.
+	if (getSearchResults(doc, true)) {
+		return "multiple";
+	}
+	if (getJSONLD(doc)) {
 		return "newspaperArticle";
 	}
 	return false;
@@ -83,17 +85,17 @@ var COLLECTIVE_AUTHOR = /herald\s+reporters?|reporters?\s*,?\s*herald|staff\s+(?
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
-	var found = false;
-	var rows = doc.querySelectorAll('article.result-item a[href*="/news/article.cfm"]');
+	var rows = doc.querySelectorAll(
+		'article.result-item a[href*="/news/article.cfm"], a[data-test-ui="story-card--link--title"]'
+	);
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
-		found = true;
 		items[href] = title;
 	}
-	return found ? items : false;
+	return Object.keys(items).length ? items : false;
 }
 
 
@@ -444,6 +446,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nzherald.co.nz/",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
