@@ -9,8 +9,9 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-15 12:10:00"
+	"lastUpdated": "2026-10-15 16:15:47"
 }
+
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -115,12 +116,13 @@ function getTgamMeta(doc) {
 	}
 }
 
-// The site's "placeline" is normally a dateline ("Ottawa"), but some articles
-// (older ones especially) put the byline's role there instead ("Ottawa bureau
-// chief") — that is not a place and must not fill item.place.
+// The site's "placeline" is where the story was reported from ("Ottawa"), not
+// the publication's place (Zotero's item.place = publication city). Save it as
+// a tag instead. Some older articles put the byline's role there ("Ottawa
+// bureau chief") — that is not a place and must not become a tag.
 const placeRoleRe = /\b(?:bureau chief|chief|c?orrespondent|reporter|editor|columnist|writer|anchor|host)\b/i;
 
-function placeFromDoc(doc) {
+function placelineFromDoc(doc) {
 	var place = ZU.trimInternal(text(doc, '.c-article-meta__placelines, .placeline'));
 	if (!place) {
 		// Fall back to the page-level metadata blob (script#tgam-window),
@@ -134,6 +136,8 @@ function placeFromDoc(doc) {
 	return ZU.capitalizeTitle(place, true);
 }
 
+const PUBLICATION_PLACE = 'Toronto';
+
 function scrape(doc, url) {
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
@@ -141,7 +145,7 @@ function scrape(doc, url) {
 	translator.setDocument(doc);
 	
 	translator.setHandler('itemDone', function (obj, item) {
-		item.place = placeFromDoc(doc);
+		item.place = PUBLICATION_PLACE;
 		
 		if (!item.creators.length) {
 			for (let authorLink of doc.querySelectorAll('a.byline')) {
@@ -195,6 +199,15 @@ function scrape(doc, url) {
 			}
 		}
 
+		let placeline = placelineFromDoc(doc);
+		if (placeline) {
+			let key = placeline.toLowerCase();
+			if (!existingTags.has(key)) {
+				item.tags.push(placeline);
+				existingTags.add(key);
+			}
+		}
+
 		item.complete();
 	});
 
@@ -228,6 +241,7 @@ var testCases = [
 				"abstractNote": "Sources say the sniper killed an Islamic State insurgent from a distance of 3,540 metres in a feat one a military insider says may ‘never be equalled’",
 				"language": "en-CA",
 				"libraryCatalog": "www.theglobeandmail.com",
+				"place": "Toronto",
 				"publicationTitle": "The Globe and Mail",
 				"url": "https://www.theglobeandmail.com/news/politics/canadian-elite-special-forces-sniper-sets-record-breaking-kill-shot-in-iraq/article35415651/",
 				"attachments": [
@@ -291,6 +305,7 @@ var testCases = [
 				"abstractNote": "He says he will decide soon about whether to run for Ontario Tory leadership and does not rule out another attempt at the Toronto mayoralty",
 				"language": "en-CA",
 				"libraryCatalog": "www.theglobeandmail.com",
+				"place": "Toronto",
 				"publicationTitle": "The Globe and Mail",
 				"url": "https://www.theglobeandmail.com/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180/",
 				"attachments": [
@@ -358,7 +373,7 @@ var testCases = [
 				"abstractNote": "Opposition wanted Tom Pitfield, the founder of Data Sciences, to appear before the ethics committee, but Liberal MPs prevented the motion from coming to a vote by talking out the clock",
 				"language": "en-CA",
 				"libraryCatalog": "www.theglobeandmail.com",
-				"place": "Ottawa",
+				"place": "Toronto",
 				"publicationTitle": "The Globe and Mail",
 				"url": "https://www.theglobeandmail.com/politics/article-liberals-filibuster-opposition-call-for-inquiry-into-parliamentary/",
 				"attachments": [
@@ -373,6 +388,9 @@ var testCases = [
 					},
 					{
 						"tag": "NDP"
+					},
+					{
+						"tag": "Ottawa"
 					},
 					{
 						"tag": "Politics"
