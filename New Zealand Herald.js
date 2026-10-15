@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-15 13:36:30"
+	"lastUpdated": "2026-10-15 14:20:00"
 }
 
 /*
@@ -99,25 +99,21 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) return;
-
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let articleURL of Object.keys(items)) {
+			await scrape(await requestDocument(articleURL), articleURL);
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
 
-function scrape(doc, url) {
+async function scrape(doc, url = doc.location.href) {
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
@@ -178,14 +174,13 @@ function scrape(doc, url) {
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function (trans) {
-		trans.itemType = "newspaperArticle";
-		trans.addCustomFields({
-			language: 'language',
-			'article:section': 'section'
-		});
-		trans.doWeb(doc, url);
+	let em = await translator.getTranslatorObject();
+	em.itemType = "newspaperArticle";
+	em.addCustomFields({
+		language: 'language',
+		'article:section': 'section'
 	});
+	await em.doWeb(doc, url);
 }
 
 /** BEGIN TEST CASES **/
