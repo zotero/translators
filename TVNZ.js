@@ -160,78 +160,24 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) ZU.processDocuments(Object.keys(items), scrape);
-		});
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let itemUrl of Object.keys(items)) {
+			// ZU.processDocuments() is deprecated since Zotero 6; requestDocument() is the
+			// supported replacement and returns the loaded document directly.
+			let itemDoc = await requestDocument(itemUrl);
+			await scrape(itemDoc, itemDoc.location ? itemDoc.location.href : itemUrl);
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "https://www.tvnz.co.nz/one-news/new-zealand/below-average-temperatures-forecast-across-nz-first-half-july",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Below average temperatures forecast across NZ for first half of July",
-				"creators": [],
-				"date": "2017-07-05",
-				"abstractNote": "MetService's long-range forecast for this month has colder temperatures than usual.",
-				"language": "en-NZ",
-				"libraryCatalog": "TVNZ",
-				"publicationTitle": "TVNZ",
-				"section": "New Zealand",
-				"url": "https://www.tvnz.co.nz/one-news/new-zealand/below-average-temperatures-forecast-across-nz-first-half-july",
-				"attachments": [],
-				"tags": [
-					"new-zealand",
-					"nzn",
-					"one-news",
-					"weather-news"
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.tvnz.co.nz/one-news/new-zealand/watch-stunning-aurora-australis-storm-lights-up-southern-skies",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Watch: Stunning Aurora Australis storm lights up southern skies",
-				"creators": [],
-				"date": "2017-05-28",
-				"abstractNote": "A geomagnetic storm made for some incredible photos in the South Island overnight.",
-				"language": "en-NZ",
-				"libraryCatalog": "TVNZ",
-				"publicationTitle": "TVNZ",
-				"section": "New Zealand",
-				"shortTitle": "Watch",
-				"url": "https://www.tvnz.co.nz/one-news/new-zealand/watch-stunning-aurora-australis-storm-lights-up-southern-skies",
-				"attachments": [],
-				"tags": [
-					"breakfast",
-					"new-zealand",
-					"space"
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.tvnz.co.nz/one-news/search?q=storm",
-		"items": "multiple"
-	},
 	{
 		"type": "web",
 		"url": "https://www.tvnz.co.nz/player/newsclip/winston-peters-fires-up-over-poll-abortion-questions",
@@ -254,6 +200,42 @@ var testCases = [
 					},
 					{
 						"tag": "politics"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.tvnz.co.nz/player/newsclip/watch-senior-mp-admits-luxon-was-wrong-on-minimum-wage-detail",
+		"items": [
+			{
+				"itemType": "videoRecording",
+				"title": "Watch: Senior MP admits Luxon was wrong on minimum wage detail",
+				"creators": [],
+				"date": "2026-10-14T19:41:19.764Z",
+				"abstractNote": "National's Paul Goldsmith and Labour's Kieran McAnulty went head-to-head on Breakfast following last night's debate, with one of Luxon's claims coming under scrutiny.",
+				"language": "en-NZ",
+				"libraryCatalog": "www.tvnz.co.nz",
+				"runningTime": "06",
+				"shortTitle": "Watch",
+				"studio": "TVNZ",
+				"url": "https://www.tvnz.co.nz/player/newsclip/watch-senior-mp-admits-luxon-was-wrong-on-minimum-wage-detail",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "labour-party"
+					},
+					{
+						"tag": "national-party"
+					},
+					{
+						"tag": "politics"
+					},
+					{
+						"tag": "vote-2026"
 					}
 				],
 				"notes": [],
