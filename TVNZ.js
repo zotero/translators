@@ -1,7 +1,7 @@
 {
 	"translatorID": "649c2836-a94d-4bbe-8e28-6771f283702f",
 	"label": "TVNZ",
-	"creator": "Philipp Zumstein",
+	"creator": "Philipp Zumstein, Vera de Kok",
 	"target": "^https?://(www\\.)?tvnz\\.co\\.nz/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-12 23:45:00"
+	"lastUpdated": "2026-10-15 13:30:00"
 }
 
 /*
