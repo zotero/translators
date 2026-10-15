@@ -1,7 +1,7 @@
 {
 	"translatorID": "c7830593-807e-48cb-99f2-c3bed2b148c2",
 	"label": "New Zealand Herald",
-	"creator": "Philipp Zumstein",
+	"creator": "Philipp Zumstein, Vera de Kok",
 	"target": "^https?://www\\.nzherald\\.co\\.nz",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-15 14:21:00"
+	"lastUpdated": "2026-10-15 14:35:00"
 }
 
 /*
