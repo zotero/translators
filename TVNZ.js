@@ -120,14 +120,11 @@ function scrapeVideo(doc, url) {
 	item.date = video.uploadDate;
 	if (video.duration) {
 		// PT3M / PT1M30S / PT2H -> 3:00 / 1:30 / 2:00:00
-		let h = video.duration.match(/(\d+)H/);
-		let mnt = video.duration.match(/(\d+)M/);
-		let sec = video.duration.match(/(\d+)S/);
-		item.runningTime = [
-			(h ? h[1].padStart(2, '0') : null),
-			(mnt || h ? (mnt ? mnt[1] : '0').padStart(2, '0') : null),
-			(sec ? sec[1].padStart(2, '0') : null)
-		].filter(p => p !== null).join(':');
+		let h = Number((video.duration.match(/(\d+)H/) || [])[1] || 0);
+		let m = Number((video.duration.match(/(\d+)M/) || [])[1] || 0);
+		let s = Number((video.duration.match(/(\d+)S/) || [])[1] || 0);
+		let pad = num => String(num).padStart(2, '0');
+		item.runningTime = h ? h + ':' + pad(m) + ':' + pad(s) : m + ':' + pad(s);
 	}
 	if (Array.isArray(video.keywords)) {
 		item.tags = video.keywords;
@@ -190,7 +187,7 @@ var testCases = [
 				"abstractNote": "New Zealand First's leader was adamant one party would not make it into Parliament, so he wouldn't answer a \"silly question\".",
 				"language": "en-NZ",
 				"libraryCatalog": "www.tvnz.co.nz",
-				"runningTime": "03",
+				"runningTime": "3:00",
 				"studio": "TVNZ",
 				"url": "https://www.tvnz.co.nz/player/newsclip/winston-peters-fires-up-over-poll-abortion-questions",
 				"attachments": [],
@@ -219,7 +216,7 @@ var testCases = [
 				"abstractNote": "National's Paul Goldsmith and Labour's Kieran McAnulty went head-to-head on Breakfast following last night's debate, with one of Luxon's claims coming under scrutiny.",
 				"language": "en-NZ",
 				"libraryCatalog": "www.tvnz.co.nz",
-				"runningTime": "06",
+				"runningTime": "6:00",
 				"shortTitle": "Watch",
 				"studio": "TVNZ",
 				"url": "https://www.tvnz.co.nz/player/newsclip/watch-senior-mp-admits-luxon-was-wrong-on-minimum-wage-detail",
