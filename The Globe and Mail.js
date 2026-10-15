@@ -1,7 +1,7 @@
 {
 	"translatorID": "e0234bcf-bc56-4577-aa94-fe86a27f6fd6",
 	"label": "The Globe and Mail",
-	"creator": "Sonali Gupta and Abe Jellinek",
+	"creator": "Sonali Gupta, Abe Jellinek, and Vera de Kok",
 	"target": "^https?://www\\.theglobeandmail\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-14 17:10:00"
+	"lastUpdated": "2026-10-15 12:10:00"
 }
 
 /*
