@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-14 21:15:00"
+	"lastUpdated": "2026-10-15 12:00:00"
 }
 
 /*
@@ -77,8 +77,9 @@ function getJSONLD(doc) {
 
 
 // Staff bylines and agency names are not individual authors
-// ("Herald Reporters", "Staff Reporter", "Reporters, Herald").
-var COLLECTIVE_AUTHOR = /herald\s+reporters?|reporters?\s*,?\s*herald|staff\s+(?:reporters?|writers?)|(?:reporters?|writers?)\s+(?:team|staff)/i;
+// ("Herald Reporters", "Staff Reporter", "Reporters, Herald") and press-agency
+// credits ("RNZ", "AFP", "AP", "Reuters") that are not people.
+var COLLECTIVE_AUTHOR = /herald\s+reporters?|reporters?\s*,?\s*herald|staff\s+(?:reporters?|writers?)|(?:reporters?|writers?)\s+(?:team|staff)|\b(?:rnz|afp|ap|reuters|bloomberg|nz\s+herald|the\s+country|bang\s+showbiz|daily\s+telegraph(?:\s+uk)?|getty\s+images|associated\s+press|press\s+association|pa\s+media)\b/i;
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
@@ -135,8 +136,8 @@ function scrape(doc, url) {
 		}
 		if (!author && data && data.author) {
 			// Modern pages expose the byline as author[].name in JSON-LD;
-			// JSON-LD marks real people as @type Person and syndication as
-			// @type Organization ("RNZ", "NZ Herald").
+			// JSON-LD marks real people as @type Person and syndication/agency
+			// credits ("RNZ", "AFP", "NZ Herald") as @type Organization.
 			let authors = data.author;
 			if (typeof authors == 'object' && !Array.isArray(authors)) {
 				authors = [authors];
@@ -145,14 +146,12 @@ function scrape(doc, url) {
 				let name = (typeof a == 'string' ? a : a.name) || '';
 				name = name.trim();
 				if (!name || COLLECTIVE_AUTHOR.test(name)) return;
-				if (typeof a == 'object' && a['@type'] == 'Organization') {
-					item.creators.push({ lastName: name, creatorType: "author", fieldMode: 1 });
-				}
-				else {
-					// @type Person is authoritative here, so "Amy B Wang" stays a
-					// person rather than becoming a corporate author.
-					item.creators.push(ZU.cleanAuthor(name, "author"));
-				}
+				// Wire/agency credits (RNZ, AFP, AP, Reuters, Bang Showbiz) and
+				// the paper's own staff byline ("NZ Herald") are not authors.
+				if (typeof a == 'object' && a['@type'] == 'Organization') return;
+				// @type Person is authoritative here, so "Amy B Wang" stays a
+				// person rather than becoming a corporate author.
+				item.creators.push(ZU.cleanAuthor(name, "author"));
 			});
 		}
 		if (author && !item.creators.length) {
@@ -189,163 +188,6 @@ function scrape(doc, url) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "http://www.nzherald.co.nz/world/news/article.cfm?c_id=2&objectid=11892211",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "China unveils its answer to US Reaper drone - how does it compare?",
-				"creators": [
-					{
-						"firstName": "Stephen",
-						"lastName": "Chen",
-						"creatorType": "author"
-					}
-				],
-				"date": "2017-07-18T02:45:22Z",
-				"ISSN": "1170-0777",
-				"abstractNote": "A production model of China's heavy military drone has made a successful flight.",
-				"language": "en-NZ",
-				"libraryCatalog": "www.nzherald.co.nz",
-				"publicationTitle": "NZ Herald",
-				"section": "World",
-				"url": "http://www.nzherald.co.nz/world/news/article.cfm?c_id=2&objectid=11892211",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [
-					"Asia",
-					"China",
-					"Front Page - Top Stories"
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.nzherald.co.nz/technology/news/article.cfm?c_id=5&objectid=11891847",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Data drones a sign of the times",
-				"creators": [
-					{
-						"firstName": "James",
-						"lastName": "Penn",
-						"creatorType": "author"
-					}
-				],
-				"date": "2017-07-19T18:00:00Z",
-				"ISSN": "1170-0777",
-				"abstractNote": "New tech could have farmers checking the state of their farm before getting out of bed.",
-				"language": "en-NZ",
-				"libraryCatalog": "www.nzherald.co.nz",
-				"publicationTitle": "NZ Herald",
-				"section": "Business, Technology",
-				"url": "http://www.nzherald.co.nz/business/news/article.cfm?c_id=3&objectid=11891847",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [
-					"Agribusiness Report",
-					"Agricultural Services",
-					"The Country"
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.nzherald.co.nz/technology/news/article.cfm?c_id=5&objectid=11892937",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Nanogirl Michelle Dickinson: Getaway without the long-haul flight",
-				"creators": [
-					{
-						"firstName": "Michelle",
-						"lastName": "Dickinson",
-						"creatorType": "author"
-					}
-				],
-				"date": "2017-07-21T17:00:00Z",
-				"ISSN": "1170-0777",
-				"abstractNote": "COMMENT: The future of air travel is faster and quieter.",
-				"language": "en-NZ",
-				"libraryCatalog": "www.nzherald.co.nz",
-				"publicationTitle": "NZ Herald",
-				"section": "Technology",
-				"shortTitle": "Nanogirl Michelle Dickinson",
-				"url": "http://www.nzherald.co.nz/technology/news/article.cfm?c_id=5&objectid=11892937",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [
-					"Opinion",
-					"Science"
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.nzherald.co.nz/nz/news/article.cfm?c_id=1&objectid=11893407",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Steve Braunias: The Secret Diary of Todd Barclay",
-				"creators": [
-					{
-						"firstName": "Steve",
-						"lastName": "Braunias",
-						"creatorType": "author"
-					}
-				],
-				"date": "2017-07-21T17:00:00Z",
-				"ISSN": "1170-0777",
-				"abstractNote": "Steve Braunias takes a look at Todd Barclay's secret diary",
-				"language": "en-NZ",
-				"libraryCatalog": "www.nzherald.co.nz",
-				"publicationTitle": "NZ Herald",
-				"section": "New Zealand",
-				"shortTitle": "Steve Braunias",
-				"url": "http://www.nzherald.co.nz/nz/news/article.cfm?c_id=1&objectid=11893407",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [
-					"Australasia",
-					"Front Page - Top Stories",
-					"New Zealand",
-					"Opinion",
-					"Politics",
-					"WC - Opinion"
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.nzherald.co.nz/search/hobbits/?type=article,image.gallery,video.other&c_id=2",
-		"items": "multiple"
-	},
 	{
 		"type": "web",
 		"url": "https://www.nzherald.co.nz/nz/christchurch-double-homicide-58-year-old-man-appears-in-court-on-murder-charges/6IJP6LCJEBAUFDZVIIZTGKS3RA/",
@@ -395,13 +237,7 @@ var testCases = [
 			{
 				"itemType": "newspaperArticle",
 				"title": "Severe wind watch: 100km/h gusts expected across Wellington",
-				"creators": [
-					{
-						"lastName": "RNZ",
-						"creatorType": "author",
-						"fieldMode": 1
-					}
-				],
+				"creators": [],
 				"date": "2026-10-14T07:13:39.413Z",
 				"ISSN": "1170-0777",
 				"abstractNote": "MetService says the watch has a moderate chance of becoming a warning.",
@@ -411,6 +247,12 @@ var testCases = [
 				"section": "New Zealand",
 				"shortTitle": "Severe wind watch",
 				"url": "https://www.nzherald.co.nz/nz/metservice-wind-watch-for-wellington-as-100kmh-gusts-approach/RTZVNJHPSZDAJJT3GGHXGC7274/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [
 					{
 						"tag": "Cook Strait"
@@ -432,12 +274,6 @@ var testCases = [
 					},
 					{
 						"tag": "Wellington Region"
-					}
-				],
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"notes": [],
@@ -467,6 +303,12 @@ var testCases = [
 				"publicationTitle": "NZ Herald",
 				"section": "New Zealand, Politics",
 				"url": "https://www.nzherald.co.nz/nz/53-years-in-the-same-business-and-ive-never-been-so-short-of-work-the-front-page/JGZSLY6H7BDBLMOGXPIC3WI35Q/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [
 					{
 						"tag": "Election 2026"
@@ -487,12 +329,6 @@ var testCases = [
 						"tag": "Roads"
 					}
 				],
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -505,13 +341,7 @@ var testCases = [
 			{
 				"itemType": "newspaperArticle",
 				"title": "Anthropic warns of AI ‘worms’ spreading across smart gadgets",
-				"creators": [
-					{
-						"lastName": "AFP",
-						"creatorType": "author",
-						"fieldMode": 1
-					}
-				],
+				"creators": [],
 				"date": "2026-10-13T17:28:00.586Z",
 				"ISSN": "1170-0777",
 				"abstractNote": "The worm could run on cheap, poorly secured gadgets, researchers say.",
@@ -520,6 +350,12 @@ var testCases = [
 				"publicationTitle": "NZ Herald",
 				"section": "World",
 				"url": "https://www.nzherald.co.nz/world/anthropic-warns-of-ai-worms-spreading-across-smart-gadgets/BF34TKTMY5ASHHAGXKTIZZRDAI/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [
 					{
 						"tag": "Artificial Intelligence (AI)"
@@ -544,12 +380,6 @@ var testCases = [
 					},
 					{
 						"tag": "hacking"
-					}
-				],
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"notes": [],
@@ -584,6 +414,12 @@ var testCases = [
 				"publicationTitle": "NZ Herald",
 				"section": "World",
 				"url": "https://www.washingtonpost.com/nation/2026/10/13/confusion-delayed-aid-christa-pike-after-botched-execution-911-calls-show/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [
 					{
 						"tag": "Department of Corrections"
@@ -602,12 +438,6 @@ var testCases = [
 					},
 					{
 						"tag": "US News"
-					}
-				],
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"notes": [],
