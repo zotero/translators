@@ -36,8 +36,31 @@
 */
 
 
+// The search page is an Angular app: it paints "0 results in search.all" first and only fills
+// the list in after ~10 s, so a DOM scrape cannot see the results in time. Use the CMS search
+// API the page itself calls - the client parameter is required, without it the API answers
+// "Invalid Client". Only newsclip and sportclip results have a page with a VideoObject to
+// scrape; /player/tvseries/ and /player/movie/ pages exist but publish nothing.
+const SEARCH_API = "https://search-cdn.cms-api.tvnz.co.nz/content/search"
+	+ "?mode=detail&st=published&pageNumber=1&pageSize=50&reg=nz&dt=web&client=tvnz-tvnz-web&pf=regular";
+const SEARCH_PATHS = {
+	newsclip: 'https://www.tvnz.co.nz/player/newsclip/',
+	sportclip: 'https://www.tvnz.co.nz/player/sportclip/'
+};
+
+
+function searchTerm(url) {
+	try {
+		return new URL(url).searchParams.get('q') || '';
+	}
+	catch (e) {
+		return '';
+	}
+}
+
+
 function detectWeb(doc, url) {
-	if (url.includes("/search?") && getSearchResults(doc, true)) {
+	if (searchTerm(url) && url.includes('/search')) {
 		return "multiple";
 	}
 	// The player pages (/player/newsclip/...) are news videos.
@@ -141,25 +164,34 @@ function scrapeVideo(doc, url) {
 }
 
 
-function getSearchResults(doc, checkOnly) {
-	var items = {};
-	var found = false;
-	var rows = ZU.xpath(doc, '//div[@class="tileContent"]/a[h3]');
-	for (var i = 0; i < rows.length; i++) {
-		var href = rows[i].href;
-		var title = ZU.trimInternal(rows[i].textContent);
-		if (!href || !title) continue;
-		if (checkOnly) return true;
-		found = true;
-		items[href] = title;
+async function getSearchResults(term) {
+	let json = await requestJSON(SEARCH_API + '&term=' + encodeURIComponent(term));
+	let items = {};
+	for (let hit of (json.data || [])) {
+		let path = SEARCH_PATHS[hit.cty];
+		if (!path || !hit.nu) continue;
+		items[path + hit.nu] = hitName(hit);
 	}
-	return found ? items : false;
+	return items;
+}
+
+
+// The title lives in the localized name fields (lodn is the display name, lon/losd are
+// fallbacks); lod and lold hold the synopsis.
+function hitName(hit) {
+	for (let field of ['lodn', 'lon', 'losd']) {
+		let value = (hit[field] || [])[0];
+		if (value && value.n) {
+			return Array.isArray(value.n) ? value.n[0] : value.n;
+		}
+	}
+	return '';
 }
 
 
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		let items = await Zotero.selectItems(await getSearchResults(searchTerm(url)));
 		if (!items) return;
 		for (let itemUrl of Object.keys(items)) {
 			// ZU.processDocuments() is deprecated since Zotero 6; requestDocument() is the
@@ -239,6 +271,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.tvnz.co.nz/search?q=luxon",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
