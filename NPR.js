@@ -1,7 +1,7 @@
 {
 	"translatorID": "bc2fbf38-3061-4335-8644-69ce68580b20",
 	"label": "NPR",
-	"creator": "Abe Jellinek",
+	"creator": "Abe Jellinek, Vera de Kok",
 	"target": "^https?://www\\.npr\\.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-09 21:32:31"
+	"lastUpdated": "2026-10-15 12:10:00"
 }
 
 
