@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-06-13 17:11:59"
+	"lastUpdated": "2026-09-11 03:55:49"
 }
 
 /*
@@ -83,8 +83,13 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url = doc.location.href) {
-	if (doc.querySelector('meta[name="citation_pdf_url"]')) {
-		var pdfURL = attr(doc, 'meta[name="citation_pdf_url"]', "content");
+	let pdfURL;
+	if (attr('a[data-datatype="pdf"]', 'href')) {
+		pdfURL = attr('a[data-datatype="pdf"]', 'href');
+	}
+	// the meta tag sometimes is a preview with only the first couple of pages
+	else if (doc.querySelector('meta[name="citation_pdf_url"]')) {
+		pdfURL = attr(doc, 'meta[name="citation_pdf_url"]', "content");
 	}
 	let translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
@@ -177,6 +182,8 @@ var testCases = [
 				"libraryCatalog": "journals.humankinetics.com",
 				"pages": "73-83",
 				"publicationTitle": "International Journal of Sport Nutrition and Exercise Metabolism",
+				"publisher": "Human Kinetics",
+				"section": "International Journal of Sport Nutrition and Exercise Metabolism",
 				"url": "https://journals.humankinetics.com/view/journals/ijsnem/33/2/article-p73.xml",
 				"volume": "33",
 				"attachments": [
@@ -367,6 +374,8 @@ var testCases = [
 				"libraryCatalog": "journals.ametsoc.org",
 				"pages": "2902-2928",
 				"publicationTitle": "Journal of the Atmospheric Sciences",
+				"publisher": "American Meteorological Society",
+				"section": "Journal of the Atmospheric Sciences",
 				"url": "https://journals.ametsoc.org/view/journals/atsc/72/8/jas-d-14-0363.1.xml",
 				"volume": "72",
 				"attachments": [
@@ -440,11 +449,13 @@ var testCases = [
 				"abstractNote": "While applying a diagnostic approach (i.e., comparing “clinical” cases with “healthy” controls) is part of our methodological habits as researchers and clinicians, this approach has been particularly criticized in the behavioral addictions research field, in which a lot of studies are conducted on “emerging” conditions. Here we exemplify the pitfalls of using a cut-off-based approach in the context of binge-watching (i.e., watching multiple episodes of series back-to-back) by demonstrating that no reliable cut-off scores could be determined with a widely used assessment instrument measuring binge-watching.",
 				"issue": "2",
 				"language": "en",
-				"libraryCatalog": "akjournals.com",
+				"libraryCatalog": "www.akjournals.com",
 				"pages": "303-308",
 				"publicationTitle": "Journal of Behavioral Addictions",
+				"publisher": "Akadémiai Kiadó",
+				"section": "Journal of Behavioral Addictions",
 				"shortTitle": "Thinking beyond cut-off scores in the assessment of potentially addictive behaviors",
-				"url": "https://akjournals.com/view/journals/2006/12/2/article-p303.xml",
+				"url": "https://www.akjournals.com/view/journals/2006/12/2/article-p303.xml",
 				"volume": "12",
 				"attachments": [
 					{
@@ -509,6 +520,8 @@ var testCases = [
 				"libraryCatalog": "jnccn.org",
 				"pages": "685-686",
 				"publicationTitle": "Journal of the National Comprehensive Cancer Network",
+				"publisher": "National Comprehensive Cancer Network",
+				"section": "Journal of the National Comprehensive Cancer Network",
 				"shortTitle": "Increasing Private Payer and Medicare Coverage of Circulating Tumor DNA Tests",
 				"url": "https://jnccn.org/view/journals/jnccn/21/6/article-p685.xml",
 				"volume": "21",
@@ -569,11 +582,13 @@ var testCases = [
 				"abstractNote": "While applying a diagnostic approach (i.e., comparing “clinical” cases with “healthy” controls) is part of our methodological habits as researchers and clinicians, this approach has been particularly criticized in the behavioral addictions research field, in which a lot of studies are conducted on “emerging” conditions. Here we exemplify the pitfalls of using a cut-off-based approach in the context of binge-watching (i.e., watching multiple episodes of series back-to-back) by demonstrating that no reliable cut-off scores could be determined with a widely used assessment instrument measuring binge-watching.",
 				"issue": "2",
 				"language": "en",
-				"libraryCatalog": "akjournals.com",
+				"libraryCatalog": "www.akjournals.com",
 				"pages": "303-308",
 				"publicationTitle": "Journal of Behavioral Addictions",
+				"publisher": "Akadémiai Kiadó",
+				"section": "Journal of Behavioral Addictions",
 				"shortTitle": "Thinking beyond cut-off scores in the assessment of potentially addictive behaviors",
-				"url": "https://akjournals.com/view/journals/2006/12/2/article-p303.xml",
+				"url": "https://www.akjournals.com/view/journals/2006/12/2/article-p303.xml",
 				"volume": "12",
 				"attachments": [
 					{
@@ -672,6 +687,8 @@ var testCases = [
 				"libraryCatalog": "journals.ametsoc.org",
 				"pages": "2.1-2.55",
 				"publicationTitle": "Meteorological Monographs",
+				"publisher": "American Meteorological Society",
+				"section": "Meteorological Monographs",
 				"url": "https://journals.ametsoc.org/view/journals/amsm/59/1/amsmonographs-d-18-0006.1.xml",
 				"volume": "59",
 				"attachments": [

@@ -69,11 +69,12 @@ try {
 		recordHar: { path: harPath, mode: 'full' },
 	});
 	const context = session.context;
-	const page = await context.newPage();
+	const page = await session.newPage();
 
 	await session.goto(page, url, { settle: waitMs });
 
 	if (values.interact) {
+		await page.bringToFront();
 		console.error('Browser is open. Navigate the site to capture more requests.');
 		console.error('Close the browser window or press Ctrl+C when done.');
 		await new Promise((resolve) => {

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-12-11 15:26:53"
+	"lastUpdated": "2026-10-12 19:07:47"
 }
 
 /*
@@ -232,7 +232,7 @@ function rowFromSearchResult(id, doc) {
 		// starting with number can be fine, but the selector is a pain.
 		let aElem = doc.getElementById(id);
 		let directLink = aElem ? aElem.href : undefined;
-		let attachmentLink = attr(entryElem, ".gs_ggs a", "href");
+		let attachmentLink = attr(entryElem, ".gs_ggs a:not([href^='javascript:'])", "href");
 		let attachmentType = text(entryElem, ".gs_ctg2");
 		if (attachmentType) {
 			// Remove the brackets
@@ -803,7 +803,7 @@ function parseViewArticle(viewArticleDoc) {
 	if (m) {
 		let id = m[1];
 		let directLink = attr(viewArticleDoc, ".gsc_oci_title_link", "href");
-		let attachmentLink = attr(viewArticleDoc, "#gsc_oci_title_gg a", "href");
+		let attachmentLink = attr(viewArticleDoc, "#gsc_oci_title_gg a:not([href^='javascript:'])", "href");
 		let attachmentType = text(viewArticleDoc, ".gsc_vcd_title_ggt");
 		if (attachmentType) {
 			attachmentType = attachmentType.slice(1, -1).toUpperCase();

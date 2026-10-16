@@ -1,15 +1,15 @@
 {
 	"translatorID": "649c2836-a94d-4bbe-8e28-6771f283702f",
 	"label": "TVNZ",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?tvnz\\.co\\.nz/one-news/",
+	"creator": "Philipp Zumstein, Vera de Kok",
+	"target": "^https?://(www\\.)?tvnz\\.co\\.nz/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-04-07 18:10:37"
+	"lastUpdated": "2026-10-15 13:30:00"
 }
 
 /*
@@ -36,9 +36,36 @@
 */
 
 
+// The search page is an Angular app: it paints "0 results in search.all" first and only fills
+// the list in after ~10 s, so a DOM scrape cannot see the results in time. Use the CMS search
+// API the page itself calls - the client parameter is required, without it the API answers
+// "Invalid Client". Only newsclip and sportclip results have a page with a VideoObject to
+// scrape; /player/tvseries/ and /player/movie/ pages exist but publish nothing.
+const SEARCH_API = "https://search-cdn.cms-api.tvnz.co.nz/content/search"
+	+ "?mode=detail&st=published&pageNumber=1&pageSize=50&reg=nz&dt=web&client=tvnz-tvnz-web&pf=regular";
+const SEARCH_PATHS = {
+	newsclip: 'https://www.tvnz.co.nz/player/newsclip/',
+	sportclip: 'https://www.tvnz.co.nz/player/sportclip/'
+};
+
+
+function searchTerm(url) {
+	try {
+		return new URL(url).searchParams.get('q') || '';
+	}
+	catch (e) {
+		return '';
+	}
+}
+
+
 function detectWeb(doc, url) {
-	if (url.includes("/search?") && getSearchResults(doc, true)) {
+	if (searchTerm(url) && url.includes('/search')) {
 		return "multiple";
+	}
+	// The player pages (/player/newsclip/...) are news videos.
+	if (/\/player\//.test(url)) {
+		return "videoRecording";
 	}
 	if (ZU.xpathText(doc, '//meta[@property="og:type"]/@content')) {
 		return "newspaperArticle";
@@ -47,7 +74,32 @@ function detectWeb(doc, url) {
 }
 
 
+function getJSONLD(doc, type) {
+	for (let script of doc.querySelectorAll('script[type="application/ld+json"]')) {
+		let data;
+		try {
+			data = JSON.parse(script.textContent);
+		}
+		catch (e) {
+			continue;
+		}
+		for (let block of (Array.isArray(data) ? data : [data])) {
+			if (!block || typeof block !== 'object') continue;
+			for (let node of (block['@graph'] ? block['@graph'] : [block])) {
+				if (node['@type'] == type) {
+					return node;
+				}
+			}
+		}
+	}
+	return null;
+}
+
 function scrape(doc, url) {
+	if (/\/player\//.test(url)) {
+		scrapeVideo(doc, url);
+		return;
+	}
 	var item = new Zotero.Item("newspaperArticle");
 	item.title = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
 	item.date = ZU.xpathText(doc, '(//div[contains(@class, "storyPage") and h1]//time)[1]');
@@ -59,6 +111,13 @@ function scrape(doc, url) {
 			item.date += " 2017";
 		}
 		item.date = ZU.strToISO(item.date);
+	}
+	if (!item.date) {
+		// Newer pages publish the date only in the JSON-LD VideoObject
+		let video = getJSONLD(doc, 'VideoObject');
+		if (video && video.uploadDate) {
+			item.date = video.uploadDate;
+		}
 	}
 	item.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]/@content');
 	var tagString = ZU.xpathText(doc, '//meta[@name="news_keywords"]/@content');
@@ -72,31 +131,77 @@ function scrape(doc, url) {
 	item.complete();
 }
 
-
-function getSearchResults(doc, checkOnly) {
-	var items = {};
-	var found = false;
-	var rows = ZU.xpath(doc, '//div[@class="tileContent"]/a[h3]');
-	for (var i = 0; i < rows.length; i++) {
-		var href = rows[i].href;
-		var title = ZU.trimInternal(rows[i].textContent);
-		if (!href || !title) continue;
-		if (checkOnly) return true;
-		found = true;
-		items[href] = title;
+function scrapeVideo(doc, url) {
+	var item = new Zotero.Item("videoRecording");
+	var video = getJSONLD(doc, 'VideoObject');
+	if (!video) {
+		return;
 	}
-	return found ? items : false;
+	item.title = video.name || ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
+	item.abstractNote = video.description
+		|| ZU.xpathText(doc, '//meta[@property="og:description"]/@content');
+	item.date = video.uploadDate;
+	if (video.duration) {
+		// PT3M / PT1M30S / PT2H -> 3:00 / 1:30 / 2:00:00
+		let h = Number((video.duration.match(/(\d+)H/) || [])[1] || 0);
+		let m = Number((video.duration.match(/(\d+)M/) || [])[1] || 0);
+		let s = Number((video.duration.match(/(\d+)S/) || [])[1] || 0);
+		let pad = num => String(num).padStart(2, '0');
+		item.runningTime = h ? h + ':' + pad(m) + ':' + pad(s) : m + ':' + pad(s);
+	}
+	if (Array.isArray(video.keywords)) {
+		item.tags = video.keywords;
+	}
+	else if (video.keywords) {
+		item.tags = video.keywords.split(', ');
+	}
+	item.studio = "TVNZ";
+	let canonical = ZU.xpathText(doc, '//link[@rel="canonical"]/@href') || url;
+	item.url = (video.url && video.url != url) ? video.url : canonical;
+	item.libraryCatalog = "www.tvnz.co.nz";
+	item.language = "en-NZ";
+	item.complete();
 }
 
 
-function doWeb(doc, url) {
+async function getSearchResults(term) {
+	let json = await requestJSON(SEARCH_API + '&term=' + encodeURIComponent(term));
+	let items = {};
+	for (let hit of (json.data || [])) {
+		let path = SEARCH_PATHS[hit.cty];
+		if (!path || !hit.nu) continue;
+		items[path + hit.nu] = hitName(hit);
+	}
+	return items;
+}
+
+
+// The title lives in the localized name fields (lodn is the display name, lon/losd are
+// fallbacks); lod and lold hold the synopsis.
+function hitName(hit) {
+	for (let field of ['lodn', 'lon', 'losd']) {
+		let value = (hit[field] || [])[0];
+		if (value && value.n) {
+			return Array.isArray(value.n) ? value.n[0] : value.n;
+		}
+	}
+	return '';
+}
+
+
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) ZU.processDocuments(Object.keys(items), scrape);
-		});
+		let items = await Zotero.selectItems(await getSearchResults(searchTerm(url)));
+		if (!items) return;
+		for (let itemUrl of Object.keys(items)) {
+			// ZU.processDocuments() is deprecated since Zotero 6; requestDocument() is the
+			// supported replacement and returns the loaded document directly.
+			let itemDoc = await requestDocument(itemUrl);
+			await scrape(itemDoc, itemDoc.location ? itemDoc.location.href : itemUrl);
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
@@ -104,25 +209,27 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.tvnz.co.nz/one-news/new-zealand/below-average-temperatures-forecast-across-nz-first-half-july",
+		"url": "https://www.tvnz.co.nz/player/newsclip/winston-peters-fires-up-over-poll-abortion-questions",
 		"items": [
 			{
-				"itemType": "newspaperArticle",
-				"title": "Below average temperatures forecast across NZ for first half of July",
+				"itemType": "videoRecording",
+				"title": "Winston Peters fires up over poll, abortion questions",
 				"creators": [],
-				"date": "2017-07-05",
-				"abstractNote": "MetService's long-range forecast for this month has colder temperatures than usual.",
+				"date": "2026-10-11T18:48:30.802Z",
+				"abstractNote": "New Zealand First's leader was adamant one party would not make it into Parliament, so he wouldn't answer a \"silly question\".",
 				"language": "en-NZ",
-				"libraryCatalog": "TVNZ",
-				"publicationTitle": "TVNZ",
-				"section": "New Zealand",
-				"url": "https://www.tvnz.co.nz/one-news/new-zealand/below-average-temperatures-forecast-across-nz-first-half-july",
+				"libraryCatalog": "www.tvnz.co.nz",
+				"runningTime": "3:00",
+				"studio": "TVNZ",
+				"url": "https://www.tvnz.co.nz/player/newsclip/winston-peters-fires-up-over-poll-abortion-questions",
 				"attachments": [],
 				"tags": [
-					"new-zealand",
-					"nzn",
-					"one-news",
-					"weather-news"
+					{
+						"tag": "new-zealand-first"
+					},
+					{
+						"tag": "politics"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -131,25 +238,34 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.tvnz.co.nz/one-news/new-zealand/watch-stunning-aurora-australis-storm-lights-up-southern-skies",
+		"url": "https://www.tvnz.co.nz/player/newsclip/watch-senior-mp-admits-luxon-was-wrong-on-minimum-wage-detail",
 		"items": [
 			{
-				"itemType": "newspaperArticle",
-				"title": "Watch: Stunning Aurora Australis storm lights up southern skies",
+				"itemType": "videoRecording",
+				"title": "Watch: Senior MP admits Luxon was wrong on minimum wage detail",
 				"creators": [],
-				"date": "2017-05-28",
-				"abstractNote": "A geomagnetic storm made for some incredible photos in the South Island overnight.",
+				"date": "2026-10-14T19:41:19.764Z",
+				"abstractNote": "National's Paul Goldsmith and Labour's Kieran McAnulty went head-to-head on Breakfast following last night's debate, with one of Luxon's claims coming under scrutiny.",
 				"language": "en-NZ",
-				"libraryCatalog": "TVNZ",
-				"publicationTitle": "TVNZ",
-				"section": "New Zealand",
+				"libraryCatalog": "www.tvnz.co.nz",
+				"runningTime": "6:00",
 				"shortTitle": "Watch",
-				"url": "https://www.tvnz.co.nz/one-news/new-zealand/watch-stunning-aurora-australis-storm-lights-up-southern-skies",
+				"studio": "TVNZ",
+				"url": "https://www.tvnz.co.nz/player/newsclip/watch-senior-mp-admits-luxon-was-wrong-on-minimum-wage-detail",
 				"attachments": [],
 				"tags": [
-					"breakfast",
-					"new-zealand",
-					"space"
+					{
+						"tag": "labour-party"
+					},
+					{
+						"tag": "national-party"
+					},
+					{
+						"tag": "politics"
+					},
+					{
+						"tag": "vote-2026"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -158,7 +274,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.tvnz.co.nz/one-news/search?q=storm",
+		"url": "https://www.tvnz.co.nz/search?q=luxon",
 		"items": "multiple"
 	}
 ]
