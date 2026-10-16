@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-07-09 13:33:45"
+	"lastUpdated": "2026-09-22 10:10:00"
 }
 
 /*
@@ -75,9 +75,32 @@ var authorTitlesEtc = ['\\/',
 var authorRegEx = new RegExp(authorTitlesEtc.join('|'), 'g');
 
 
+// the "Gesamte Vorschrift" link or norm classes mark a law (Gesetz)
+function isStatute(doc) {
+	var link = doc.getElementById("dokgesamtansichtlink");
+	if (link && link.textContent.includes("Gesamte Vorschrift")) {
+		return true;
+	}
+	var dok = doc.getElementById("dokument");
+	if (dok && dok.className && /\b(gesparagr|gesetz)\b/i.test(dok.className)) {
+		return true;
+	}
+	var dokcontent = doc.getElementById("dokcontent");
+	if (dokcontent) {
+		var filename = dokcontent.getAttribute("data-filename") || "";
+		if (/[\\/]ges[\\/]/i.test(filename)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 function detectWeb(doc, _url) {
 	var dokument = doc.getElementById("dokument");
 	if (!dokument) {
+		if (isStatute(doc)) {
+			return "statute";
+		}
 		return getSearchResults(doc, true) ? "multiple" : false;
 	}
 	
@@ -85,6 +108,10 @@ function detectWeb(doc, _url) {
 	// Z.debug(dokument.className.toUpperCase());
 	if (type == 'multiple') {
 		return getSearchResults(doc, true) ? "multiple" : false;
+	}
+	
+	if (!type && isStatute(doc)) {
+		return "statute";
 	}
 	
 	return type;
@@ -181,7 +208,17 @@ function scrapeKommentar(doc, url) {
 	
 	var editionText = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="citation"]/text()[preceding-sibling::br]');
 	if (editionText) {
-		if (editionText.search(/\d+/) > -1) {
+		// e.g. "GesamtHrsg: Gsell/Krüger/Lorenz/Reymann Hrsg: Brückner Stand:" -
+		// the GesamtHrsg names are the encyclopedia's editors, the volume
+		// editor (Hrsg) is ignored and there is no edition
+		var gesamtHrsg = editionText.match(/GesamtHrsg:\s*(.+?)(?:\s+Hrsg:|\s+Stand\b|\s*$)/);
+		if (gesamtHrsg) {
+			var gesamtHrsgEditors = gesamtHrsg[1].split("/");
+			for (let i = 0; i < gesamtHrsgEditors.length; i++) {
+				item.creators.push(ZU.cleanAuthor(ZU.trimInternal(gesamtHrsgEditors[i]), 'editor', false));
+			}
+		}
+		else if (/\d+/.test(editionText)) {
 			item.edition = editionText.match(/\d+/)[0];
 		}
 		else {
@@ -189,7 +226,7 @@ function scrapeKommentar(doc, url) {
 		}
 	}
 	item.date = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="stand"]');
-	if (!item.date && editionText.match(/\d{4}$/)) {
+	if (!item.date && editionText && editionText.match(/\d{4}$/)) {
 		item.date = editionText.match(/\d{4}$/)[0];
 	}
 
@@ -371,6 +408,12 @@ function scrapeCase(doc, url) {
 		item.docketNumber = alternativeData[4];
 	}
 	
+	// ECLI from the metadata table, e.g. "ECLI:DE:BGH:2014:150514XBZB7113.0"
+	var ecliMatch = doc.body.textContent.match(/ECLI:\s*[A-Za-z]{2}:[^:\s]{1,7}:\d{4}:[^:\s]{1,25}/i);
+	if (ecliMatch) {
+		item.DOI = ecliMatch[0].replace(/\s+/g, '');
+	}
+	
 	item.title = item.court + ", " + decisionDateStr + " - " + item.docketNumber;
 	if (item.shortTitle) {
 		item.title += " - " + item.shortTitle;
@@ -399,19 +442,24 @@ function scrapeCase(doc, url) {
 	
 	// code to scrape the BeckRS source, if available
 	// example: BeckRS 2013, 06445
-	// Since BeckRS is not suitable for citing, let's push it into the notes instead
 	var beckRSline = ZU.xpathText(doc, '//span[@class="fundstelle"]');
-	if (beckRSline) {
-		note = addNote(note, "<h3>Fundstelle</h3><p>" + ZU.trimInternal(beckRSline) + "</p>");
-		
-		/* commented out, because we cannot use it for the CSL-stylesheet at the moment.
-		 * If we find a better solution later, we can reactivate this code and save the
-		 * information properly
-		 *
-		var beckRSsrc = beckRSline.match(/^([^,]+)\s(\d{4})\s*,\s*(\d+)/);
+	var beckRSsrc = beckRSline && beckRSline.match(/^([^,]+)\s(\d{4})\s*,\s*(\d+)/);
+	if (!beckRSsrc) {
+		// fall back to the citation in the URL,
+		// e.g. vpath=bibdata/ents/beckrs/2022/cont/beckrs.2022.3546.htm
+		var beckRSurl = url.match(/ents(?:%2F|\/)beckrs(?:%2F|\/)\d{4}(?:%2F|\/)cont(?:%2F|\/)beckrs\.(\d{4})\.(\d+)\.htm/i);
+		if (beckRSurl) {
+			beckRSsrc = ["BeckRS " + beckRSurl[1] + ", " + beckRSurl[2], "BeckRS", beckRSurl[1], beckRSurl[2]];
+		}
+	}
+	if (beckRSsrc) {
 		item.reporter = beckRSsrc[1];
-		item.date = beckRSsrc[2];
-		item.pages = beckRSsrc[3];*/
+		item.reporterVolume = beckRSsrc[2];
+		item.firstPage = beckRSsrc[3];
+	}
+	else if (beckRSline) {
+		// Fundstelle that we could not parse — keep it in the notes
+		note = addNote(note, "<h3>Fundstelle</h3><p>" + ZU.trimInternal(beckRSline) + "</p>");
 	}
 
 	var otherCitationsText = ZU.xpathText(doc, '//div[@id="parallelfundstellenNachDokument"]');
@@ -484,6 +532,10 @@ function scrape(doc, url) {
 		scrapeKommentar(doc, url);
 		return;
 	}
+	if (isStatute(doc)) {
+		scrapeStatute(doc, url);
+		return;
+	}
 
 	var item;
 	if (mappingClassNameToItemType[documentClassName]) {
@@ -552,7 +604,7 @@ function scrape(doc, url) {
 
 	if (issueText) {
 		item.issue = issueText.replace(/\([^)]*\)/, "");
-		if (item.issue.search(/\d+/) > -1) {
+		if (/\d+/.test(item.issue)) {
 			item.issue = item.issue.match(/\d+/)[0];
 		}
 	}
@@ -582,11 +634,382 @@ function scrape(doc, url) {
 	finalize(doc, url, item);
 }
 
+function cleanNodeText(node) {
+	if (!node) return "";
+	var clone = node.cloneNode(true);
+	var toRemove = clone.querySelectorAll('.unsichtbar, .comment, .parnrdpk, sup, script, style');
+	for (var i = 0; i < toRemove.length; i++) {
+		toRemove[i].remove();
+	}
+	return ZU.trimInternal(clone.textContent);
+}
+
+function parseGermanDate(str) {
+	if (!str || /ausgewertet bis|Verk[üu]ndungsblatt ausgewertet|Auswertungsstand/i.test(str)) {
+		return null;
+	}
+	var monthMap = {
+		januar: "01", jan: "01",
+		februar: "02", feb: "02",
+		märz: "03", maerz: "03", mrz: "03", mär: "03",
+		april: "04", apr: "04",
+		mai: "05",
+		juni: "06", jun: "06",
+		juli: "07", jul: "07",
+		august: "08", aug: "08",
+		september: "09", sep: "09", sept: "09",
+		oktober: "10", okt: "10",
+		november: "11", nov: "11",
+		dezember: "12", dez: "12"
+	};
+
+	// 1. Date with "vom" or "v." (e.g. "... vom 14. September 2022 ...")
+	var mVom = str.match(/\b(?:vom|v\.)\s+(\d{1,2})\.\s*([A-Za-zäöüÄÖÜß]+)\.?\s*(\d{4})\b/i);
+	if (mVom) {
+		var mStrVom = mVom[2].toLowerCase();
+		if (monthMap[mStrVom]) {
+			var dayVom = mVom[1].length === 1 ? "0" + mVom[1] : mVom[1];
+			return dayVom + "." + monthMap[mStrVom] + "." + mVom[3];
+		}
+	}
+
+	var mVomNum = str.match(/\b(?:vom|v\.)\s+(\d{1,2})\.(\d{1,2})\.(\d{4})\b/);
+	if (mVomNum) {
+		var dV = mVomNum[1].length === 1 ? "0" + mVomNum[1] : mVomNum[1];
+		var mV = mVomNum[2].length === 1 ? "0" + mVomNum[2] : mVomNum[2];
+		return dV + "." + mV + "." + mVomNum[3];
+	}
+
+	// 2. General date with month name (e.g. "20. Mai 2014")
+	var mWord = str.match(/(\d{1,2})\.\s*([A-Za-zäöüÄÖÜß]+)\.?\s*(\d{4})/i);
+	if (mWord) {
+		var mStr = mWord[2].toLowerCase();
+		if (monthMap[mStr]) {
+			var day = mWord[1].length === 1 ? "0" + mWord[1] : mWord[1];
+			return day + "." + monthMap[mStr] + "." + mWord[3];
+		}
+	}
+
+	// 3. General numeric date (e.g. "01.01.2002")
+	var mNum = str.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+	if (mNum) {
+		var d = mNum[1].length === 1 ? "0" + mNum[1] : mNum[1];
+		var m = mNum[2].length === 1 ? "0" + mNum[2] : mNum[2];
+		return d + "." + m + "." + mNum[3];
+	}
+
+	return null;
+}
+
+// laws (Gesetze)
+function scrapeStatute(doc, url) {
+	var item = new Zotero.Item("statute");
+
+	// 1. Name des Erlasses (nameOfAct) and Kurztitel (shortTitle)
+	var h1TitleElem = doc.querySelector('h1.title');
+	var ltitleElem = doc.querySelector('h1.title .ltitle') || doc.querySelector('.ltitle');
+	var regabbrevElem = doc.querySelector('h1.title .regabbrev') || doc.querySelector('.regabbrev');
+
+	var ltitle = ltitleElem ? cleanNodeText(ltitleElem) : null;
+	var regabbrev = regabbrevElem ? cleanNodeText(regabbrevElem) : null;
+
+	// If no explicit .ltitle, check h1.title directly
+	if (!ltitle && h1TitleElem) {
+		var clone = h1TitleElem.cloneNode(true);
+		var regChild = clone.querySelector('.regabbrev');
+		if (regChild) {
+			regChild.remove();
+		}
+		ltitle = cleanNodeText(clone);
+	}
+
+	var nameOfAct = ltitle;
+	var shortTitle = regabbrev;
+
+	// Check norm table in .dk2table
+	var abkElem = doc.querySelector('.dk2table table tr:not(.bf_desc) td:nth-child(1) span.abk')
+		|| doc.querySelector('.dk2table table tr:nth-child(2) td:nth-child(1)');
+	var gesElem = doc.querySelector('.dk2table table tr:not(.bf_desc) td:nth-child(2) span.ges')
+		|| doc.querySelector('.dk2table table tr:nth-child(2) td:nth-child(2)');
+
+	var abk = abkElem ? cleanNodeText(abkElem) : null;
+	var ges = gesElem ? cleanNodeText(gesElem) : null;
+
+	if (!shortTitle && abk) {
+		shortTitle = abk;
+	}
+
+	if (!nameOfAct && ges) {
+		nameOfAct = ges.replace(/^\[\s*|\s*\]$/g, "").trim();
+	}
+
+	if (!nameOfAct) {
+		var titleNode = doc.querySelector('title');
+		if (titleNode && titleNode.textContent) {
+			nameOfAct = ZU.trimInternal(titleNode.textContent.replace(/\s*-\s*beck-online.*$/i, ""));
+		}
+	}
+
+	if (nameOfAct) {
+		item.nameOfAct = nameOfAct;
+		item.title = nameOfAct;
+	}
+	if (shortTitle) {
+		item.shortTitle = shortTitle;
+	}
+
+	// 2. Section (e.g. § 433, § 13, Art. 5)
+	var sectionCandidate = null;
+	var paragrHeading = doc.querySelector('h2.paragr .paragr')
+		|| doc.querySelector('h2.paragr');
+	if (paragrHeading && paragrHeading.textContent) {
+		sectionCandidate = cleanNodeText(paragrHeading);
+	}
+	if (!sectionCandidate) {
+		var parnrElem = doc.querySelector('span.parnr');
+		if (parnrElem && parnrElem.textContent) {
+			sectionCandidate = cleanNodeText(parnrElem);
+		}
+	}
+	if (sectionCandidate) {
+		var mPar = sectionCandidate.match(/(?:§+|Art(?:ikel)?\.?)\s*\d+\s*[a-z]?/i);
+		if (mPar) {
+			item.section = ZU.trimInternal(mPar[0]);
+		}
+		else {
+			item.section = ZU.trimInternal(sectionCandidate.replace(/^[:,\s]+|[:,\s]+$/g, ""));
+		}
+	}
+
+	// 3. Datum des Inkrafttretens / Date Enacted
+	var signdateElem = doc.querySelector('h3.signdate');
+	var dateEnacted = null;
+	if (signdateElem && signdateElem.textContent) {
+		dateEnacted = parseGermanDate(cleanNodeText(signdateElem));
+	}
+
+	// If no signdate, check h1.title (e.g. EU regulations: "... vom 14. September 2022 über ...")
+	if (!dateEnacted && h1TitleElem && h1TitleElem.textContent) {
+		dateEnacted = parseGermanDate(cleanNodeText(h1TitleElem));
+	}
+
+	if (!dateEnacted) {
+		var titleElem = doc.querySelector('title');
+		if (titleElem && titleElem.textContent) {
+			dateEnacted = parseGermanDate(cleanNodeText(titleElem));
+		}
+	}
+
+	// Fallback for dateEnacted: span.ikdate_akt (e.g. "Text gilt ab 01.01.2002" in BGB § 433)
+	// (Note: Do NOT match vkdate or "Verkündungsblatt ausgewertet bis", which is editorial status)
+	if (!dateEnacted) {
+		var ikElem = doc.querySelector('span.ikdate_akt')
+			|| doc.querySelector('span.ikdate');
+		if (ikElem && ikElem.textContent) {
+			dateEnacted = parseGermanDate(cleanNodeText(ikElem));
+		}
+		else {
+			var ikText = ZU.xpathText(doc, '//*[contains(text(), "Text gilt")]');
+			if (ikText) {
+				dateEnacted = parseGermanDate(ikText);
+			}
+		}
+	}
+	if (dateEnacted) {
+		item.dateEnacted = dateEnacted;
+	}
+
+	// 4. Fundstelle / pubref
+	var pubrefElems = doc.querySelectorAll('h4.pubref');
+	var pubrefTarget = null;
+	for (var i = 0; i < pubrefElems.length; i++) {
+		var pText = cleanNodeText(pubrefElems[i]);
+		if (/(?:BGBl|RGBl|BAnz|BStBl|GVBl|GBl|GV\.\s*NRW|BayGVBl|Nds\.\s*GVBl|BWGBl|ABl|BBl|AS|LGBl|S\.\s*\d+)/i.test(pText)) {
+			pubrefTarget = pText;
+			break;
+		}
+	}
+	if (!pubrefTarget && pubrefElems.length > 0) {
+		pubrefTarget = cleanNodeText(pubrefElems[0]);
+	}
+
+	if (pubrefTarget) {
+		var firstPub = pubrefTarget.split(';')[0].trim();
+		firstPub = firstPub.replace(/^\s*\(|\)\s*$/g, '').trim();
+
+		var code = null;
+		var codeNumber = null;
+		var pages = null;
+		var pubYear = null;
+		var publicLawNumber = null;
+
+		var rest = firstPub;
+
+		// BGBl / RGBl / BStBl
+		var mBgbl = rest.match(/^(BGBl|RGBl|BStBl)\.?(?:\s*(\d{4}))?\s*(?:(Teil\s*I{1,3}|I{1,3}))?/i);
+		if (mBgbl && (mBgbl[1] || mBgbl[3])) {
+			var gBase = mBgbl[1].toUpperCase();
+			if (gBase === 'BGBL') {
+				gBase = 'BGBl.';
+			}
+			else if (gBase === 'RGBL') {
+				gBase = 'RGBl.';
+			}
+			else if (gBase === 'BSTBL') {
+				gBase = 'BStBl.';
+			}
+			if (mBgbl[2]) {
+				pubYear = mBgbl[2];
+			}
+			var part = mBgbl[3];
+			code = part ? (gBase + " " + part.toUpperCase()) : gBase;
+			rest = rest.substring(mBgbl[0].length).trim();
+		}
+		else {
+			var mBanz = rest.match(/^(eBAnz\.?|BAnz\.?\s*AT|BAnz\.?)/i);
+			if (mBanz) {
+				var banzName = mBanz[1].trim();
+				if (/AT/i.test(banzName)) {
+					code = 'BAnz. AT';
+				}
+				else if (/^ebanz/i.test(banzName)) {
+					code = 'eBAnz';
+				}
+				else {
+					code = 'BAnz.';
+				}
+				rest = rest.substring(mBanz[0].length).trim();
+			}
+			else {
+				var mAbl = rest.match(/^(ABl\.?\s*(?:EG\s*|EU\s*)?([LCS]))/i);
+				if (mAbl) {
+					code = 'ABl. ' + mAbl[2].toUpperCase();
+					rest = rest.substring(mAbl[0].length).trim();
+				}
+				else {
+					var mOther = rest.match(/^(BayGVBl\.?|Nds\.\s*GVBl\.?|GV\.\s*NRW\.?|BWGBl\.?|GBl\.\s*BW|BBl\.?|AS|LGBl\.?(?:\s*[A-ZÄÖÜa-zäöü.-]+)?|[A-Za-zÄÖÜäöü.]*(?:GVBl|GBl)\.?(?:\s*[A-ZÄÖÜa-zäöü.-]+)?)/i);
+					if (mOther) {
+						code = mOther[1].trim().replace(/\s+(?:Nr\.?|vom)$/i, '');
+						rest = rest.substring(mOther[0].length).trim();
+					}
+					else {
+						var mFb = rest.match(/^([^0-9,;]+)/);
+						if (mFb) {
+							code = mFb[1].trim();
+							rest = rest.substring(mFb[0].length).trim();
+						}
+					}
+				}
+			}
+		}
+
+		if (code) {
+			code = code.replace(/[,;]+$/, '').trim();
+			item.code = code;
+		}
+
+		rest = rest.replace(/^,\s*/, '');
+		var mPage = rest.match(/(?:S\.|Seite)\s*(\d+(?:\s*[-–]\s*\d+)?)/i);
+		if (mPage) {
+			pages = mPage[1].replace(/\s+/g, "");
+			var before = rest.substring(0, mPage.index).trim();
+			before = before.replace(/,\s*$/, "").trim();
+			if (before) {
+				if (/^\d{4}$/.test(before)) {
+					pubYear = before;
+				}
+				else if (/^(?:Nr\.?\s*)?[0-9]+(?:[-/][0-9]+)?$/i.test(before)) {
+					codeNumber = before.replace(/^Nr\.?\s*/i, "");
+				}
+			}
+		}
+		else {
+			var mPageComma = rest.match(/(?:^|,\s*|\s+)(\d{4})?,\s*(\d+(?:\s*[-–]\s*\d+)?)/);
+			if (mPageComma) {
+				if (mPageComma[1]) {
+					pubYear = mPageComma[1];
+				}
+				pages = mPageComma[2].replace(/\s+/g, '');
+			}
+			else {
+				var mNr = rest.match(/Nr\.?\s*([^\s,;]+)/i);
+				if (mNr) {
+					publicLawNumber = mNr[1];
+				}
+				var mTwo = rest.match(/(\d{4})\s+(\d+)/);
+				if (mTwo) {
+					pubYear = mTwo[1];
+					pages = mTwo[2];
+				}
+				else {
+					var mOne = rest.match(/\b(\d+)\b/);
+					if (mOne) {
+						pages = mOne[1];
+					}
+				}
+			}
+		}
+
+		if (pages) {
+			item.pages = pages;
+		}
+		if (codeNumber) {
+			item.codeNumber = codeNumber;
+		}
+		if (publicLawNumber) {
+			item.publicLawNumber = publicLawNumber;
+		}
+		if (pubYear && !item.dateEnacted) {
+			item.dateEnacted = pubYear;
+		}
+	}
+
+	finalize(doc, url, item);
+}
+
+// build the URLs of the export buttons of the Druck- und Export-Manager:
+// a GET form whose hidden inputs carry the document path (vpath); the
+// submit button contributes exportFormat, and the checked "options"
+// checkboxes are submitted after it. without them the server returns
+// the ordinary document view instead of the export
+function buildExportUrls(doc, url) {
+	var htmlButton = doc.getElementById('htmlExportButton');
+	var pdfButton = doc.getElementById('pdfExportButton');
+	var anchor = (htmlButton && htmlButton.getAttribute('formaction')) ? htmlButton : pdfButton;
+	if (!anchor || !anchor.form || !anchor.getAttribute('formaction')) {
+		return null;
+	}
+	var origin = url.match(/^https?:\/\/[^/]+/);
+	if (!origin) {
+		return null;
+	}
+	var parts = [];
+	var inputs = anchor.form.querySelectorAll('input[type="hidden"]');
+	for (var i = 0; i < inputs.length; i++) {
+		var value = inputs[i].value;
+		// the site's JS only fills the timezone when the form is submitted
+		if (inputs[i].name == 'timezone' && !value) {
+			try {
+				value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+			}
+			catch (e) {}
+		}
+		parts.push(encodeURIComponent(inputs[i].name) + '=' + encodeURIComponent(value || ''));
+	}
+	var base = origin[0] + anchor.getAttribute('formaction') + '?' + parts.join('&');
+	var options = '';
+	var checked = anchor.form.querySelectorAll('input[type="checkbox"][name="options"]:checked');
+	for (var j = 0; j < checked.length; j++) {
+		options += '&options=' + encodeURIComponent(checked[j].value);
+	}
+	return {
+		html: htmlButton ? base + '&exportFormat=html' + options : null,
+		pdf: pdfButton ? base + '&exportFormat=pdf' + options : null
+	};
+}
+
 function finalize(doc, url, item) {
-	item.attachments = [{
-		title: "Snapshot",
-		document: doc
-	}];
+	item.attachments = [];
 	
 	var perma = attr(doc, '.doc-link > a', 'href');
 	if (perma) {
@@ -609,6 +1032,26 @@ function finalize(doc, url, item) {
 	}
 	else {
 		item.url = url;
+	}
+	
+	var urls = buildExportUrls(doc, url);
+	// the connector discards translator text/html attachments and captures the
+	// live page via SingleFile instead, which includes the site header. but
+	// attachments without a mimeType are downloaded as-is and accepted with
+	// whatever content type the server returns, so push the site's own HTML
+	// export undeclared - it is saved as a text/html snapshot
+	if (urls && urls.html) {
+		item.attachments.push({
+			title: "Snapshot",
+			url: urls.html
+		});
+	}
+	if (urls && urls.pdf) {
+		item.attachments.push({
+			title: "Fulltext PDF",
+			url: urls.pdf,
+			mimeType: "application/pdf"
+		});
 	}
 	
 	item.complete();
@@ -640,6 +1083,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Fulltext PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -669,6 +1116,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Fulltext PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -716,6 +1167,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Fulltext PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -759,6 +1214,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Fulltext PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -797,6 +1256,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Fulltext PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -830,6 +1293,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Fulltext PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -862,6 +1329,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Fulltext PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -900,6 +1371,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Fulltext PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -930,6 +1405,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Fulltext PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -973,6 +1452,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Fulltext PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -994,16 +1477,23 @@ var testCases = [
 				"court": "OLG Köln",
 				"docketNumber": "6 U 67/11",
 				"extra": "Jurisdiction: de\nGenre: Urt.",
+				"firstPage": "9546",
+				"reporter": "BeckRS",
+				"reporterVolume": "2012",
 				"url": "https://beck-online.beck.de/Bcid/Y-300-Z-BECKRS-B-2012-N-09546",
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Fulltext PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
 				"notes": [
 					{
-						"note": "<h2>Additional Metadata</h2><h3>Fundstelle</h3><p>BeckRS 2012, 9546</p><h3>Parallelfundstellen</h3><p>Parallelfundstellen: Entscheidungen:MMR 2012, 387 (m. Anm. Hoffmann) ◊NJOZ 2013, 365 ◊ZUM 2012, 697 ◊LSK 2012, 250148 (Ls.) Entscheidungsbesprechung:GRUR-Prax 2012, 238 (Dr. Christian Dietrich) Weitere Fundstellen:CR 2012, 397 ◊K & R 2012, 437 (Ls.) ◊MD 2012, 621 ◊WRP 2012, 1007</p><h3>Normen</h3><p>Normenketten: BGB § BGB § 683 S. 1, § 670, § 832 Abs. 1 UrhG § URHG § 19a, § 97 Abs. 2</p>"
+						"note": "<h2>Additional Metadata</h2><h3>Parallelfundstellen</h3><p>Parallelfundstellen: Entscheidungen:MMR 2012, 387 (m. Anm. Hoffmann) ◊NJOZ 2013, 365 ◊ZUM 2012, 697 ◊LSK 2012, 250148 (Ls.) Entscheidungsbesprechung:GRUR-Prax 2012, 238 (Dr. Christian Dietrich) Weitere Fundstellen:CR 2012, 397 ◊K & R 2012, 437 (Ls.) ◊MD 2012, 621 ◊WRP 2012, 1007</p><h3>Normen</h3><p>Normenketten: BGB § BGB § 683 S. 1, § 670, § 832 Abs. 1 UrhG § URHG § 19a, § 97 Abs. 2</p>"
 					}
 				],
 				"seeAlso": []
@@ -1030,6 +1520,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Fulltext PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -1063,6 +1557,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Fulltext PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -1107,6 +1605,63 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Fulltext PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://beck-online.beck.de/?vpath=bibdata%2Fkomm%2FBeckOGK_64_BandBGB%2FBGB%2Fcont%2FBECKOGK%2eBGB%2eP442%2eglA%2eglIII%2egl2%2ehtm",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "BGB § 442 Kenntnis des Käufers",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "Stöber",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "",
+						"lastName": "Gsell",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "",
+						"lastName": "Krüger",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "",
+						"lastName": "Lorenz",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "",
+						"lastName": "Reymann",
+						"creatorType": "editor"
+					}
+				],
+				"date": "01.02.2026",
+				"encyclopediaTitle": "beck-online.GROSSKOMMENTAR",
+				"libraryCatalog": "beck-online",
+				"url": "https://beck-online.beck.de/Bcid/Y-400-W-BECKOGK-G-BGB-P-442-Gl-A-III-2",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "Fulltext PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -1152,6 +1707,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Fulltext PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -1187,6 +1746,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Fulltext PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
