@@ -159,7 +159,7 @@ function scrape(doc, url) {
 
 	for (let tag of doc.querySelectorAll('.tags a')) {
 		let value = ZU.trimInternal(tag.textContent);
-		if (value) item.tags.push(value);
+		if (value) item.tags.push({ tag: value });
 	}
 
 	let authors = data.author || [];
