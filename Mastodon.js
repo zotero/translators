@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-09-24 05:33:41"
+	"lastUpdated": "2026-10-16 16:40:43"
 }
 
 /*
@@ -84,7 +84,7 @@ async function scrape(doc) {
 	let statusID = (posturl.match(/\/(\d+)\/?$/) || [])[1];
 	if (statusID) {
 		try {
-			let status = await requestJSON(`https://${doc.location.host}/api/v1/statuses/${statusID}`);
+			let status = await requestJSON(`/api/v1/statuses/${statusID}`);
 			item.url = status.url;
 		}
 		catch (e) {
