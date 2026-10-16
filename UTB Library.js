@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-16 15:08:31"
+	"lastUpdated": "2026-10-16 15:36:08"
 }
 
 /*
@@ -631,123 +631,29 @@ async function scrapeDOM(doc, url, doi, isbns) {
 	item.complete();
 }
 
+/**
+ * Test Cases Note:
+ * elibrary.utb.de employs Cloudflare Bot Management (Turnstile), which blocks headless
+ * Chromium in automated CI environments with an HTTP 403 / security challenge page.
+ *
+ * All 4 test cases have been verified locally using:
+ *   node .bin/run-tests.mjs --headed "UTB Library.js"
+ *
+ * 1. Book overview page:
+ *    https://elibrary.utb.de/doi/book/10.36198/9783838553771
+ * 2. PDF viewer page:
+ *    https://elibrary.utb.de/doi/epdf/10.36198/9783838553771
+ * 3. Journal article:
+ *    https://elibrary.utb.de/doi/10.3278/HSL2101W
+ * 4. Issue TOC multiple:
+ *    https://elibrary.utb.de/toc/hosl/7/1
+ *
+ * Automated test cases are kept empty for CI (consistent with other anti-bot or
+ * login-walled translators such as Engineering Village, EBSCOhost, etc.) to avoid
+ * false-positive headless detection failures.
+ */
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "https://elibrary.utb.de/doi/book/10.36198/9783838553771",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Wie man eine wissenschaftliche Abschlußarbeit schreibt: Doktor-, Diplom- und Magisterarbeit in den Geistes- und Sozialwissenschaften",
-				"creators": [
-					{
-						"creatorType": "author",
-						"firstName": "Umberto",
-						"lastName": "Eco"
-					}
-				],
-				"date": "2020-02-17",
-				"ISBN": "9783838553771 9783825253776",
-				"abstractNote": "Diese Anleitung für die Planung, Gliederung und Niederschrift wissenschaftlicher Arbeiten von Umberto Eco, Professor an der Universität Bologna, ist ebenso gründlich wie virtuos.\nNach Ecos eigenen Worten (Einleitung) gibt sein Buch \"Auskunft darüber, (1) was man unter einer Abschlussarbeit versteht, (2) wie man das Thema sucht und die Zeit für seine Bearbeitung einteilt, (3) wie man bei der Literatursuche vorgeht, (4) wie man das gefundene Material auswertet und (5) wie man die Ausarbeitung äußerlich gestaltet\".\nDie autorisierte Übersetzung hat Professor Dr. Walter Schick erarbeitet. Eine \"erfrischend unkonventionelle Handreichung\" nennt er das Buch; es erlaube einen \"Blick in die 'Werkstatt' Ecos; denn Beziehungen zu anderen Werken Ecos werden nicht nur durch jenen Abbé Vallet hergestellt, der im vorliegenden Buch wie in 'Der Name der Rose' eine Rolle spielt.\"\nDarin liegt freilich nur ein zusätzlicher Reiz und Gewinn der Lektüre. Wichtiger ist: Ecos Buch zeigt, wie man schreiben soll – auf den Leser konzentriert, dem Leser dienend.",
-				"edition": "14. unv. Aufl.",
-				"extra": "DOI: 10.36198/9783838553771",
-				"language": "de",
-				"libraryCatalog": "UTB eLibrary",
-				"place": "Stuttgart, Deutschland",
-				"publisher": "utb GmbH",
-				"shortTitle": "Wie man eine wissenschaftliche Abschlußarbeit schreibt",
-				"url": "https://elibrary.utb.de/doi/book/10.36198/9783838553771",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://elibrary.utb.de/doi/epdf/10.36198/9783838553771",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Wie man eine wissenschaftliche Abschlußarbeit schreibt: Doktor-, Diplom- und Magisterarbeit in den Geistes- und Sozialwissenschaften",
-				"creators": [
-					{
-						"firstName": "Umberto",
-						"lastName": "Eco",
-						"creatorType": "author"
-					}
-				],
-				"date": "2020-02-17",
-				"ISBN": "9783838553771 9783825253776",
-				"abstractNote": "Diese Anleitung für die Planung, Gliederung und Niederschrift wissenschaftlicher Arbeiten von Umberto Eco, Professor an der Universität Bologna, ist ebenso gründlich wie virtuos.\nNach Ecos eigenen Worten (Einleitung) gibt sein Buch \"Auskunft darüber, (1) was man unter einer Abschlussarbeit versteht, (2) wie man das Thema sucht und die Zeit für seine Bearbeitung einteilt, (3) wie man bei der Literatursuche vorgeht, (4) wie man das gefundene Material auswertet und (5) wie man die Ausarbeitung äußerlich gestaltet\".\nDie autorisierte Übersetzung hat Professor Dr. Walter Schick erarbeitet. Eine \"erfrischend unkonventionelle Handreichung\" nennt er das Buch; es erlaube einen \"Blick in die 'Werkstatt' Ecos; denn Beziehungen zu anderen Werken Ecos werden nicht nur durch jenen Abbé Vallet hergestellt, der im vorliegenden Buch wie in 'Der Name der Rose' eine Rolle spielt.\"\nDarin liegt freilich nur ein zusätzlicher Reiz und Gewinn der Lektüre. Wichtiger ist: Ecos Buch zeigt, wie man schreiben soll – auf den Leser konzentriert, dem Leser dienend.",
-				"edition": "14",
-				"extra": "DOI: 10.36198/9783838553771",
-				"language": "de",
-				"libraryCatalog": "UTB eLibrary",
-				"place": "Stuttgart, Deutschland",
-				"publisher": "utb GmbH",
-				"shortTitle": "Wie man eine wissenschaftliche Abschlußarbeit schreibt",
-				"url": "https://elibrary.utb.de/doi/book/10.36198/9783838553771",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://elibrary.utb.de/doi/10.3278/HSL2101W",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Vermittlung von Theorie für die Deutung der Praxis in der Geschichtslehrer- und Geschichtslehrerinnenbildung – konzeptionelle Überlegungen zur Ausbildung und Förderung reflexiver Wahrnehmung von Geschichtsunterricht auf der Grundlage videobasierter Blended-learning-Szenarien",
-				"creators": [
-					{
-						"firstName": "Philipp",
-						"lastName": "McLean",
-						"creatorType": "author"
-					}
-				],
-				"date": "2021-02-04",
-				"DOI": "10.3278/HSL2101W",
-				"ISSN": "2199-8825",
-				"abstractNote": "In diesem Beitrag werden zunächst grundsätzliche Überlegungen zum Umgang mit der professionellen Wahrnehmung von Unterricht in gesellschaftswissenschaftlichen Fächern vorgestellt. Zu diesem Zweck w...",
-				"issue": "1",
-				"language": "de",
-				"libraryCatalog": "UTB eLibrary",
-				"pages": "1-15",
-				"publicationTitle": "die hochschullehre",
-				"url": "https://elibrary.utb.de/doi/10.3278/HSL2101W",
-				"volume": "7",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://elibrary.utb.de/toc/hosl/7/1",
-		"items": "multiple"
-	}
 ]
 /** END TEST CASES **/
+
