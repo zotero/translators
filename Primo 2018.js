@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-05-20 15:10:00"
+	"lastUpdated": "2026-09-19 17:02:48"
 }
 
 /*
@@ -54,10 +54,15 @@ function getSearchResults(doc, checkOnly) {
 	var rows = getPnxElems(doc);
 	for (let row of rows) {
 		let href = row.dataset.url;
-		let title = text(row.parentNode, '.item-title')
+		// The NDE UI uses .record-title; the classic UI wraps the title in
+		// prm-highlight inside .item-title, next to a hidden delimiter span
+		// whose text would otherwise be prepended to the title.
+		let title = text(row.parentNode, 'a.record-title')
+			|| text(row.parentNode, '.item-title prm-highlight')
+			|| text(row.parentNode, '.item-title')
 			|| row.parentNode.textContent;
 		if (!href || !title) continue;
-		title = title.replace(/^;/, '');
+		title = title.replace(/^;\s*/, '').trim();
 		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
@@ -121,6 +126,51 @@ var testCases = [
 		"url": "https://search.library.berkeley.edu/discovery/search?vid=01UCS_BER:UCB&tab=Default_UCLibrarySearch&search_scope=DN_and_CI&offset=0&query=any,contains,test",
 		"defer": true,
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://zhaw.swisscovery.slsp.ch/discovery/fulldisplay?docid=alma990049503240205510&context=L&vid=41SLSP_ZAW:ZHAW&lang=de",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Organisationsentwicklung",
+				"creators": [
+					{
+						"firstName": "Hans Dietrich",
+						"lastName": "Engelhardt",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Gotthart",
+						"lastName": "Schwarz",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Pedro",
+						"lastName": "Graf",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2000",
+				"ISBN": "9783934214453",
+				"callNumber": "QP 340 E57 (2)",
+				"edition": "2., überarb. Aufl.",
+				"language": "ger",
+				"libraryCatalog": "zhaw.swisscovery.slsp.ch",
+				"numPages": "164",
+				"place": "Augsburg",
+				"publisher": "ZIEL",
+				"series": "Schwerpunkt Management",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Organisationsentwicklung"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
