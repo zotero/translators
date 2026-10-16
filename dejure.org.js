@@ -9,8 +9,9 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-16 20:00:51"
+	"lastUpdated": "2026-09-22 18:18:31"
 }
+
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -37,15 +38,18 @@
 
 
 function detectWeb(doc, url) {
-	if (url.indexOf('/dienste/vernetzung/')>-1) {
+	if (url.includes('/dienste/vernetzung/')) {
 		if (getSearchResults(doc, true)) {
 			return "multiple";
-		} else {
+		}
+		else {
 			return "case";
 		}
-	} else if (url.indexOf('/gesetze/')>-1 && url.indexOf('.html')>-1) {
+	}
+	else if (url.includes('/gesetze/') && url.includes('.html')) {
 		return "statute";
 	}
+	return false;
 }
 
 
@@ -56,7 +60,7 @@ function getSearchResults(doc, checkOnly) {
 	var itemsDoc = [];
 	var found = 0;
 	var rows = ZU.xpath(doc, '//div[contains(@class, "rspr_inhalt")]');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var title = ZU.xpathText(rows[i], './/td[contains(@class, "urteilszeile")]');
 		if (!title) continue;
 		found++;
@@ -64,9 +68,10 @@ function getSearchResults(doc, checkOnly) {
 		itemsDoc[i] = rows[i];
 	}
 	if (checkOnly) {
-		if (found>1) {
+		if (found > 1) {
 			return true;
-		} else {
+		}
+		else {
 			return false;
 		}
 	}
@@ -80,13 +85,14 @@ function doWeb(doc, url) {
 		var results = getSearchResults(doc, false);
 		Zotero.selectItems(results[0], function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			for (var i in items) {
 				scrape(results[1][i], url, "case");
 			}
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url, type);
 	}
 }
@@ -99,18 +105,25 @@ function scrape(doc, url, type) {
 		var headline = ZU.xpathText(doc, './/td[contains(@class, "urteilszeile")]');
 		var posComma = headline.indexOf(",");
 		var posDash = headline.indexOf("-");
-		if (posComma>0) {
+		if (posComma > 0) {
 			item.court = headline.substr(0, posComma);
 		}
 		if (posDash > 0) {
-			item.docketNumber = headline.substr(posDash+2);
+			item.docketNumber = headline.substr(posDash + 2);
 		}
 		item.dateDecided = ZU.strToISO(headline);
 		item.title = headline;
 		
 		var previousDecisions = ZU.xpath(doc, './/div[h4[contains(., "Verfahrensgang")]]/ul/li');
-		item.history = previousDecisions.map(function(li) { return li.textContent; } ).join("; ");
+		item.history = previousDecisions.map(function (li) {
+			return li.textContent;
+		}).join("; ");
 		
+		// ECLI from the decision page, e.g. "ECLI:DE:BGH:2014:150514XBZB7113.0" (doc.body only exists on the detail page, not in multiple mode)
+		var ecliMatch = doc.body && doc.body.textContent.match(/ECLI:\s*[A-Za-z]{2}:[^:\s]{1,7}:\d{4}:[^:\s]{1,25}/i);
+		if (ecliMatch) {
+			item.DOI = ecliMatch[0].replace(/\s+/g, '');
+		}
 	}
 	if (type == "statute") {
 		var headings = ZU.xpath(doc, "//h1/text()");
@@ -140,6 +153,7 @@ function scrape(doc, url, type) {
 	
 	item.complete();
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{

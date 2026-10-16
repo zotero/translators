@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-18 20:30:28"
+	"lastUpdated": "2026-09-15 10:30:00"
 }
 
 /*
@@ -87,6 +87,12 @@ function scrape(doc, url) {
 		item.dateDecided = ZU.strToISO(json.date);
 		item.language = 'de';
 		item.url = json.url;
+		
+		// ECLI from the decision page, e.g. "ECLI:DE:BGH:2014:150514XBZB7113.0"
+		let ecliMatch = doc.body.textContent.match(/ECLI:\s*[A-Za-z]{2}:[^:\s]{1,7}:\d{4}:[^:\s]{1,25}/i);
+		if (ecliMatch) {
+			item.DOI = ecliMatch[0].replace(/\s+/g, '');
+		}
 		
 		item.attachments.push({
 			title: 'Full Text PDF',
