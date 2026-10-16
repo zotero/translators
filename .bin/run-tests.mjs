@@ -82,7 +82,7 @@ try {
 	session = await launchBrowser({ headless, extensionDir });
 	const context = session.context;
 
-	const page = await context.newPage();
+	const page = await session.newPage();
 
 	// Surface browser-side errors
 	page.on('console', msg => {
@@ -98,7 +98,7 @@ try {
 	// anti-bot challenge. Cookies set here are shared with the connector's own
 	// background requests. (Pointless headless, where nobody can solve a captcha.)
 	if (!headless) {
-		const warmup = await context.newPage();
+		const warmup = await session.newPage();
 		for (const warmupUrl of collectTestUrls(named)) {
 			try {
 				await session.goto(warmup, warmupUrl);
@@ -186,7 +186,7 @@ function collectTestUrls(translators) {
 async function reportWalls(session, urls) {
 	if (!urls.length) return;
 	console.error('\nChecking whether the failing sites are behind an anti-bot wall…');
-	const page = await session.context.newPage();
+	const page = await session.newPage();
 	const walled = [];
 	for (const url of urls) {
 		const wall = await session.goto(page, url, { quiet: true }).catch(() => null);
