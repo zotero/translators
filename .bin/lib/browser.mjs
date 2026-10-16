@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
@@ -46,6 +47,7 @@ export function resolveHeadless(values = {}) {
 /**
  * Launch the browser and return a session handle:
  *   - context: the Playwright BrowserContext
+ *   - newPage(): open a tab without bringing the browser to the front
  *   - goto(page, url, { settle, quiet }): navigate, waiting out any captcha
  *     (headed only), and return whatever anti-bot wall hasn't cleared
  *     afterwards (see detectChallenge()) or null if the page came through.
@@ -66,6 +68,7 @@ export async function launchBrowser({ headless = true, extensionDir, recordHar }
 		ignoreDefaultArgs.push('--disable-extensions');
 		await clearExtensionState();
 	}
+	const frontApp = headless ? null : frontAppPid();
 	const context = await launch({
 		headless,
 		locale: 'en-US',
@@ -73,6 +76,8 @@ export async function launchBrowser({ headless = true, extensionDir, recordHar }
 		ignoreDefaultArgs,
 		...(recordHar ? { recordHar } : {}),
 	});
+	// Chrome activates itself when it opens its first window
+	if (frontApp) activateApp(frontApp);
 	// Suppressing the flags above doesn't clear navigator.webdriver.
 	await context.addInitScript(() => {
 		Object.defineProperty(Navigator.prototype, 'webdriver', { get: () => undefined, configurable: true });
@@ -80,9 +85,60 @@ export async function launchBrowser({ headless = true, extensionDir, recordHar }
 	if (extensionDir) await installExtension(extensionDir);
 	return {
 		context,
+		newPage: () => newPage(context),
 		goto: (page, url, opts) => navigate(page, url, { headless, ...opts }),
 		close: () => context.close(),
 	};
+}
+
+/** PID of the frontmost app on macOS, or null */
+function frontAppPid() {
+	if (process.platform !== 'darwin') return null;
+	try {
+		const asn = execFileSync('lsappinfo', ['front'], { encoding: 'utf8' }).trim();
+		return execFileSync('lsappinfo', ['info', '-only', 'pid', asn], { encoding: 'utf8' }).match(/\d+/)?.[0] ?? null;
+	}
+	catch {
+		return null;
+	}
+}
+
+/** Hand focus back to an app. NSRunningApplication needs no Automation permission, unlike AppleScript's activate. */
+function activateApp(pid) {
+	try {
+		execFileSync('osascript', ['-l', 'JavaScript', '-e',
+			`ObjC.import('AppKit'); $.NSRunningApplication.runningApplicationWithProcessIdentifier(${pid}).activateWithOptions(0)`]);
+	}
+	catch {}
+}
+
+// Launch tabs already handed out by newPage()
+const usedPages = new WeakSet();
+
+/**
+ * Open a tab without stealing focus. context.newPage() creates a foreground
+ * target, which on macOS activates headed Chrome over whatever app you're in,
+ * so hand out the tab Chrome opened at launch first, then background targets.
+ */
+async function newPage(context) {
+	const opener = context.pages().find(p => !p.isClosed());
+	if (!opener) return context.newPage();
+	if (!usedPages.has(opener)) {
+		usedPages.add(opener);
+		return opener;
+	}
+	const cdp = await context.newCDPSession(opener);
+	try {
+		const [page] = await Promise.all([
+			context.waitForEvent('page', { predicate: p => p.url() === 'about:blank' && !usedPages.has(p) }),
+			cdp.send('Target.createTarget', { url: 'about:blank', background: true }),
+		]);
+		usedPages.add(page);
+		return page;
+	}
+	finally {
+		await cdp.detach().catch(() => {});
+	}
 }
 
 /** Real Chrome where it's installed, Playwright's Chromium otherwise (e.g. CI). */
