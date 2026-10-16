@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-03-09 12:52:09"
+	"lastUpdated": "2026-10-16 08:05:25"
 }
 
 /*
@@ -141,6 +141,7 @@ async function scrape(doc) {
 		method: 'POST',
 		body: postBody,
 	});
+
 	let cslItem = json.items[0][doi];
 	cslItem.type = cslItem.type.toLowerCase().replace('_', '-');
 	
@@ -165,6 +166,25 @@ async function scrape(doc) {
 	let item = new Zotero.Item();
 	ZU.itemFromCSLJSON(item, cslItem);
 	
+	// Normalize publication date to ISO 8601
+	const parts = cslItem.issued?.["date-parts"]?.[0];
+
+	if (Array.isArray(parts) && Number.isInteger(parts[0])) {
+		const [year, month, day] = parts;
+
+		let isoDate = String(year);
+
+		if (Number.isInteger(month) && month >= 1 && month <= 12) {
+			isoDate += "-" + String(month).padStart(2, "0");
+
+			if (Number.isInteger(day) && day >= 1 && day <= 31) {
+				isoDate += "-" + String(day).padStart(2, "0");
+			}
+		}
+
+		item.date = isoDate;
+	}
+
 	item.title = ZU.unescapeHTML(item.title);
 
 	let abstractElements = doc.querySelectorAll('div.article__abstract p, div.abstractSection p');
