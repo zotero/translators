@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-05 10:59:44"
+	"lastUpdated": "2026-10-17 12:55:00"
 }
 
 /*
@@ -42,9 +42,10 @@ content (pre 2009)
 **/
 
 function detectWeb(doc, url) {
-	if (url.indexOf('.ece')>-1) {
+	// .ece als PAD-suffix (niet ergens in query/fragment)
+	if (/\.ece(?:[?#]|$)/.test(url)) {
 		return "newspaperArticle";
-	} else if (url.indexOf('/search/?') && getSearchResults(doc, true)) {
+	} else if (url.indexOf('/search/?') > -1 && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 }
@@ -89,11 +90,42 @@ function scrape(doc, url) {
 	
 	translator.setHandler('itemDone', function (obj, item) {
 		//fix the authors
-		var authors = ZU.xpath(doc, '//div[contains(@class, "author-container")]/span');
-		if (authors.length>0) {
+		// The Hindu zet de byline server-side in de HTML:
+		//   <div class="author-name"><a class="person-name" href=".../profile/author/<slug>/">Naam</a>
+		// De oude selector (div.author-container) bestaat niet meer en leverde dus niets op.
+		var names = [];
+		var seen = {};
+		var links = ZU.xpath(doc, '//div[contains(@class, "author")]'
+			+ '//a[contains(@class, "person-name") and contains(@href, "/profile/author/")]');
+		for (var i=0; i<links.length; i++) {
+			var name = ZU.trimInternal(links[i].textContent);
+			if (name && !seen[name] && !/^(authors?|contributors?|more)$/i.test(name)) {
+				seen[name] = 1;
+				names.push(name);
+			}
+		}
+		if (!names.length) {
+			// oude structuur (voor 2020-uploads)
+			var oldAuthors = ZU.xpath(doc, '//div[contains(@class, "author-container")]/span');
+			for (var j=0; j<oldAuthors.length; j++) {
+				var oldName = ZU.trimInternal(oldAuthors[j].textContent);
+				if (oldName) {
+					names.push(oldName);
+				}
+			}
+		}
+		if (!names.length) {
+			// bureau-byline ("The Hindu Bureau") staat in de meta
+			var metaAuthor = ZU.xpathText(doc, '//meta[@name="author"]/@content')
+				|| ZU.xpathText(doc, '//meta[@property="article:author"]/@content');
+			if (metaAuthor) {
+				names.push(metaAuthor);
+			}
+		}
+		if (names.length>0) {
 			item.creators = [];
-			for (var i=0; i<authors.length; i++) {
-				insertCreator(authors[i].textContent, item);
+			for (var k=0; k<names.length; k++) {
+				insertCreator(names[k], item);
 			}
 		}
 		if (!item.date) {
