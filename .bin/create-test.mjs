@@ -72,16 +72,17 @@ try {
 	session = await launchBrowser({ headless, extensionDir: CONNECTOR_BUILD_DIR });
 	const context = session.context;
 
+	// Open the tester's tab first, so the warmup below isn't the browser's only tab
+	const page = await session.newPage();
+
 	// When headed (--headed/--keep-open), pre-warm the target site in a real tab
 	// first: this lets the user clear any anti-bot challenge by hand, and seeds
 	// cookies so the connector's own background fetches get through.
 	if (!headless && values.url) {
-		const warmup = await context.newPage();
+		const warmup = await session.newPage();
 		await session.goto(warmup, values.url);
 		await warmup.close();
 	}
-
-	const page = await context.newPage();
 
 	page.on('console', msg => {
 		if (msg.type() === 'error') {

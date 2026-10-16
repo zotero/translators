@@ -1,7 +1,7 @@
 {
 	"translatorID": "c7830593-807e-48cb-99f2-c3bed2b148c2",
 	"label": "New Zealand Herald",
-	"creator": "Philipp Zumstein",
+	"creator": "Philipp Zumstein, Vera de Kok",
 	"target": "^https?://www\\.nzherald\\.co\\.nz",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-06-13 22:55:12"
+	"lastUpdated": "2026-10-15 14:35:00"
 }
 
 /*
@@ -40,48 +40,78 @@ function detectWeb(doc, url) {
 	if (url.includes("/search") && getSearchResults(doc, true)) {
 		return "multiple";
 	}
-	else if (url.includes("/news/article.cfm")) {
+	if (/\/[A-Z0-9]{20,}\/?$/.test(new URL(url).pathname)) {
+		return "newspaperArticle";
+	}
+	// Listing pages (including the homepage) have story cards but may also
+	// carry NewsArticle JSON-LD for their lead story.
+	if (getSearchResults(doc, true)) {
+		return "multiple";
+	}
+	if (getJSONLD(doc)) {
 		return "newspaperArticle";
 	}
 	return false;
 }
 
+function getJSONLD(doc) {
+	for (let script of doc.querySelectorAll('script[type="application/ld+json"]')) {
+		let data;
+		try {
+			data = JSON.parse(script.textContent);
+		}
+		catch (e) {
+			continue;
+		}
+		for (let block of (Array.isArray(data) ? data : [data])) {
+			if (!block || typeof block !== 'object') continue;
+			for (let node of (block['@graph'] ? block['@graph'] : [block])) {
+				let type = node['@type'];
+				if ((type == 'NewsArticle' || type == 'Article' || type == 'ReportageNewsArticle')
+					&& node.headline) {
+					return node;
+				}
+			}
+		}
+	}
+	return null;
+}
+
+
+// Staff bylines and agency names are not individual authors
+// ("Herald Reporters", "Staff Reporter", "Reporters, Herald") and press-agency
+// credits ("RNZ", "AFP", "AP", "Reuters") that are not people.
+var COLLECTIVE_AUTHOR = /herald\s+reporters?|reporters?\s*,?\s*herald|staff\s+(?:reporters?|writers?)|(?:reporters?|writers?)\s+(?:team|staff)|\b(?:rnz|afp|ap|reuters|bloomberg|nz\s+herald|the\s+country|bang\s+showbiz|daily\s+telegraph(?:\s+uk)?|getty\s+images|associated\s+press|press\s+association|pa\s+media)\b/i;
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
-	var found = false;
-	var rows = doc.querySelectorAll('article.result-item a[href*="/news/article.cfm"]');
+	var rows = doc.querySelectorAll('a[data-test-ui="story-card--link--title"]');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
-		found = true;
 		items[href] = title;
 	}
-	return found ? items : false;
+	return Object.keys(items).length ? items : false;
 }
 
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) return;
-
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let articleURL of Object.keys(items)) {
+			await scrape(await requestDocument(articleURL), articleURL);
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
 
-function scrape(doc, url) {
+async function scrape(doc, url = doc.location.href) {
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
@@ -92,6 +122,7 @@ function scrape(doc, url) {
 		// EM looks at byline for author which does not work well here;
 		// thus we delete this and do it here again properly
 		item.creators = [];
+		var data = getJSONLD(doc);
 		var author = text(doc, '.byline.has-author .author');
 		if (!author) {
 			var firstElement = text(doc, '#article-content p.element');
@@ -99,8 +130,40 @@ function scrape(doc, url) {
 				author = firstElement;
 			}
 		}
-		if (author) {
-			item.creators.push(ZU.cleanAuthor(author.replace('By', ''), "author"));
+		if (!author && data && data.author) {
+			// Modern pages expose the byline as author[].name in JSON-LD;
+			// JSON-LD marks real people as @type Person and syndication/agency
+			// credits ("RNZ", "AFP", "NZ Herald") as @type Organization.
+			let authors = data.author;
+			if (typeof authors == 'object' && !Array.isArray(authors)) {
+				authors = [authors];
+			}
+			authors.forEach((a) => {
+				let name = (typeof a == 'string' ? a : a.name) || '';
+				name = name.trim();
+				if (!name || COLLECTIVE_AUTHOR.test(name)) return;
+				// Wire/agency credits (RNZ, AFP, AP, Reuters, Bang Showbiz) and
+				// the paper's own staff byline ("NZ Herald") are not authors.
+				if (typeof a == 'object' && a['@type'] == 'Organization') return;
+				// @type Person is authoritative here, so "Amy B Wang" stays a
+				// person rather than becoming a corporate author.
+				item.creators.push(ZU.cleanAuthor(name, "author"));
+			});
+		}
+		if (author && !item.creators.length) {
+			author = author.replace(/^By\s*/i, '').replace(/,\s*$/, '').trim();
+			if (!COLLECTIVE_AUTHOR.test(author)) {
+				// Collective bylines ("Herald Reporters") are not person names
+				if (author.split(/\s+/).length > 2) {
+					item.creators.push({ lastName: author, creatorType: "author", fieldMode: 1 });
+				}
+				else {
+					item.creators.push(ZU.cleanAuthor(author, "author"));
+				}
+			}
+		}
+		if (!item.date && data && data.datePublished) {
+			item.date = data.datePublished;
 		}
 		item.url = attr(doc, 'link[rel=canonical]', 'href');
 		if (item.language) {
@@ -109,49 +172,53 @@ function scrape(doc, url) {
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function (trans) {
-		trans.itemType = "newspaperArticle";
-		trans.addCustomFields({
-			language: 'language',
-			'article:section': 'section'
-		});
-		trans.doWeb(doc, url);
+	let em = await translator.getTranslatorObject();
+	em.itemType = "newspaperArticle";
+	em.addCustomFields({
+		language: 'language',
+		'article:section': 'section'
 	});
+	await em.doWeb(doc, url);
 }
 
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.nzherald.co.nz/world/news/article.cfm?c_id=2&objectid=11892211",
+		"url": "https://www.nzherald.co.nz/nz/christchurch-double-homicide-58-year-old-man-appears-in-court-on-murder-charges/6IJP6LCJEBAUFDZVIIZTGKS3RA/",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "China unveils its answer to US Reaper drone - how does it compare?",
-				"creators": [
-					{
-						"firstName": "Stephen",
-						"lastName": "Chen",
-						"creatorType": "author"
-					}
-				],
-				"date": "2017-07-18T02:45:22Z",
+				"title": "Christchurch double homicide: 58-year-old man appears in court on murder charges",
+				"creators": [],
+				"date": "2026-10-11T21:47:46.974Z",
 				"ISSN": "1170-0777",
-				"abstractNote": "A production model of China's heavy military drone has made a successful flight.",
+				"abstractNote": "He is accused of killing two men at the weekend, including a former motorcycle gang boss.",
 				"language": "en-NZ",
 				"libraryCatalog": "www.nzherald.co.nz",
 				"publicationTitle": "NZ Herald",
-				"section": "World",
-				"url": "http://www.nzherald.co.nz/world/news/article.cfm?c_id=2&objectid=11892211",
+				"section": "New Zealand, Crime, Christchurch",
+				"shortTitle": "Christchurch double homicide",
+				"url": "https://www.nzherald.co.nz/nz/christchurch-double-homicide-58-year-old-man-appears-in-court-on-murder-charges/6IJP6LCJEBAUFDZVIIZTGKS3RA/",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"Asia",
-					"China",
-					"Front Page - Top Stories"
+					{
+						"tag": "Canterbury"
+					},
+					{
+						"tag": "Christchurch"
+					},
+					{
+						"tag": "Police"
+					},
+					{
+						"tag": "South Island"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -160,113 +227,49 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.nzherald.co.nz/technology/news/article.cfm?c_id=5&objectid=11891847",
+		"url": "https://www.nzherald.co.nz/nz/metservice-wind-watch-for-wellington-as-100kmh-gusts-approach/RTZVNJHPSZDAJJT3GGHXGC7274/",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Data drones a sign of the times",
-				"creators": [
-					{
-						"firstName": "James",
-						"lastName": "Penn",
-						"creatorType": "author"
-					}
-				],
-				"date": "2017-07-19T18:00:00Z",
+				"title": "Severe wind watch: 100km/h gusts expected across Wellington",
+				"creators": [],
+				"date": "2026-10-14T07:13:39.413Z",
 				"ISSN": "1170-0777",
-				"abstractNote": "New tech could have farmers checking the state of their farm before getting out of bed.",
-				"language": "en-NZ",
-				"libraryCatalog": "www.nzherald.co.nz",
-				"publicationTitle": "NZ Herald",
-				"section": "Business, Technology",
-				"url": "http://www.nzherald.co.nz/business/news/article.cfm?c_id=3&objectid=11891847",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [
-					"Agribusiness Report",
-					"Agricultural Services",
-					"The Country"
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.nzherald.co.nz/technology/news/article.cfm?c_id=5&objectid=11892937",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Nanogirl Michelle Dickinson: Getaway without the long-haul flight",
-				"creators": [
-					{
-						"firstName": "Michelle",
-						"lastName": "Dickinson",
-						"creatorType": "author"
-					}
-				],
-				"date": "2017-07-21T17:00:00Z",
-				"ISSN": "1170-0777",
-				"abstractNote": "COMMENT: The future of air travel is faster and quieter.",
-				"language": "en-NZ",
-				"libraryCatalog": "www.nzherald.co.nz",
-				"publicationTitle": "NZ Herald",
-				"section": "Technology",
-				"shortTitle": "Nanogirl Michelle Dickinson",
-				"url": "http://www.nzherald.co.nz/technology/news/article.cfm?c_id=5&objectid=11892937",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [
-					"Opinion",
-					"Science"
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.nzherald.co.nz/nz/news/article.cfm?c_id=1&objectid=11893407",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Steve Braunias: The Secret Diary of Todd Barclay",
-				"creators": [
-					{
-						"firstName": "Steve",
-						"lastName": "Braunias",
-						"creatorType": "author"
-					}
-				],
-				"date": "2017-07-21T17:00:00Z",
-				"ISSN": "1170-0777",
-				"abstractNote": "Steve Braunias takes a look at Todd Barclay's secret diary",
+				"abstractNote": "MetService says the watch has a moderate chance of becoming a warning.",
 				"language": "en-NZ",
 				"libraryCatalog": "www.nzherald.co.nz",
 				"publicationTitle": "NZ Herald",
 				"section": "New Zealand",
-				"shortTitle": "Steve Braunias",
-				"url": "http://www.nzherald.co.nz/nz/news/article.cfm?c_id=1&objectid=11893407",
+				"shortTitle": "Severe wind watch",
+				"url": "https://www.nzherald.co.nz/nz/metservice-wind-watch-for-wellington-as-100kmh-gusts-approach/RTZVNJHPSZDAJJT3GGHXGC7274/",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"Australasia",
-					"Front Page - Top Stories",
-					"New Zealand",
-					"Opinion",
-					"Politics",
-					"WC - Opinion"
+					{
+						"tag": "Cook Strait"
+					},
+					{
+						"tag": "Kapiti"
+					},
+					{
+						"tag": "Metservice"
+					},
+					{
+						"tag": "Radio New Zealand"
+					},
+					{
+						"tag": "Weather Watch"
+					},
+					{
+						"tag": "Weather news"
+					},
+					{
+						"tag": "Wellington Region"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -275,7 +278,171 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.nzherald.co.nz/search/hobbits/?type=article,image.gallery,video.other&c_id=2",
+		"url": "https://www.nzherald.co.nz/nz/53-years-in-the-same-business-and-ive-never-been-so-short-of-work-the-front-page/JGZSLY6H7BDBLMOGXPIC3WI35Q/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "93% of infrastructure respondents rank cross-party agreement top priority",
+				"creators": [
+					{
+						"firstName": "Katie",
+						"lastName": "Bradford",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-10-14T04:00:00Z",
+				"ISSN": "1170-0777",
+				"abstractNote": "'The Pulse' survey shows one key message on repeat from the infrastructure sector.",
+				"language": "en-NZ",
+				"libraryCatalog": "www.nzherald.co.nz",
+				"publicationTitle": "NZ Herald",
+				"section": "New Zealand, Politics",
+				"url": "https://www.nzherald.co.nz/nz/53-years-in-the-same-business-and-ive-never-been-so-short-of-work-the-front-page/JGZSLY6H7BDBLMOGXPIC3WI35Q/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Election 2026"
+					},
+					{
+						"tag": "Housing"
+					},
+					{
+						"tag": "Infrastructure"
+					},
+					{
+						"tag": "Podcast - The Front Page"
+					},
+					{
+						"tag": "Podcasts"
+					},
+					{
+						"tag": "Roads"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nzherald.co.nz/world/anthropic-warns-of-ai-worms-spreading-across-smart-gadgets/BF34TKTMY5ASHHAGXKTIZZRDAI/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Anthropic warns of AI ‘worms’ spreading across smart gadgets",
+				"creators": [],
+				"date": "2026-10-13T17:28:00.586Z",
+				"ISSN": "1170-0777",
+				"abstractNote": "The worm could run on cheap, poorly secured gadgets, researchers say.",
+				"language": "en-NZ",
+				"libraryCatalog": "www.nzherald.co.nz",
+				"publicationTitle": "NZ Herald",
+				"section": "World",
+				"url": "https://www.nzherald.co.nz/world/anthropic-warns-of-ai-worms-spreading-across-smart-gadgets/BF34TKTMY5ASHHAGXKTIZZRDAI/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Artificial Intelligence (AI)"
+					},
+					{
+						"tag": "Computers"
+					},
+					{
+						"tag": "Cyberattacks"
+					},
+					{
+						"tag": "Cybersecurity"
+					},
+					{
+						"tag": "Gadgets"
+					},
+					{
+						"tag": "IT Security"
+					},
+					{
+						"tag": "Internet"
+					},
+					{
+						"tag": "hacking"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nzherald.co.nz/world/confusion-delayed-aid-to-christa-pike-after-botched-execution-911-calls-show/I7NVETKW3FHNDHXAGLNLT6SWMY/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Confusion delayed aid to Christa Pike after botched execution, 911 calls show",
+				"creators": [
+					{
+						"firstName": "Amy B.",
+						"lastName": "Wang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Brady",
+						"lastName": "Dennis",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-10-13T21:06:17.002Z",
+				"ISSN": "1170-0777",
+				"abstractNote": "Washington Post: Dispatchers were twice told calls for help from the prison were false.",
+				"language": "en-NZ",
+				"libraryCatalog": "www.nzherald.co.nz",
+				"publicationTitle": "NZ Herald",
+				"section": "World",
+				"url": "https://www.washingtonpost.com/nation/2026/10/13/confusion-delayed-aid-christa-pike-after-botched-execution-911-calls-show/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Department of Corrections"
+					},
+					{
+						"tag": "Prisons"
+					},
+					{
+						"tag": "Tennessee"
+					},
+					{
+						"tag": "The Washington Post"
+					},
+					{
+						"tag": "US Crime"
+					},
+					{
+						"tag": "US News"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nzherald.co.nz/",
 		"items": "multiple"
 	}
 ]
