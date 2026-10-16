@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-16 15:36:08"
+	"lastUpdated": "2026-10-16 15:40:08"
 }
 
 /*
@@ -407,9 +407,9 @@ function postProcessItem(item, doc, url, doi, isbns) {
 		item.language = doc.documentElement?.lang || 'de';
 	}
 
-	// 7. ISBNs: merge print and electronic ISBNs
+	// 7. ISBNs: merge print and electronic ISBNs if not already provided
 	let currentIsbns = (item.ISBN || '').split(/\s+/).filter(Boolean);
-	if (isbns) {
+	if (!currentIsbns.length && isbns) {
 		if (isbns.isbn && !currentIsbns.includes(isbns.isbn)) {
 			let c = ZU.cleanISBN(isbns.isbn, true);
 			if (c) currentIsbns.push(c);
@@ -503,7 +503,7 @@ function postProcessItem(item, doc, url, doi, isbns) {
 	}
 
 	// 10. Edition (e.g. "14. unv. Aufl.")
-	if (doc && item.itemType !== 'journalArticle') {
+	if (!item.edition && doc && item.itemType !== 'journalArticle') {
 		for (let span of doc.querySelectorAll('.current-issue__details .current-issue__specifics span')) {
 			let t = span.textContent.trim();
 			if (/Aufl\./i.test(t)) {
@@ -654,6 +654,80 @@ async function scrapeDOM(doc, url, doi, isbns) {
  */
 /** BEGIN TEST CASES **/
 var testCases = [
+	{
+		"type": "web",
+		"url": "https://elibrary.utb.de/doi/book/10.36198/9783838553771",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Wie man eine wissenschaftliche Abschlußarbeit schreibt: Doktor-, Diplom- und Magisterarbeit in den Geistes- und Sozialwissenschaften",
+				"creators": [
+					{
+						"creatorType": "author",
+						"firstName": "Umberto",
+						"lastName": "Eco"
+					}
+				],
+				"date": "2020-02-17",
+				"ISBN": "9783838553771",
+				"abstractNote": "Diese Anleitung für die Planung, Gliederung und Niederschrift wissenschaftlicher Arbeiten von Umberto Eco, Professor an der Universität Bologna, ist ebenso gründlich wie virtuos.\nNach Ecos eigenen Worten (Einleitung) gibt sein Buch \"Auskunft darüber, (1) was man unter einer Abschlussarbeit versteht, (2) wie man das Thema sucht und die Zeit für seine Bearbeitung einteilt, (3) wie man bei der Literatursuche vorgeht, (4) wie man das gefundene Material auswertet und (5) wie man die Ausarbeitung äußerlich gestaltet\".\nDie autorisierte Übersetzung hat Professor Dr. Walter Schick erarbeitet. Eine \"erfrischend unkonventionelle Handreichung\" nennt er das Buch; es erlaube einen \"Blick in die 'Werkstatt' Ecos; denn Beziehungen zu anderen Werken Ecos werden nicht nur durch jenen Abbé Vallet hergestellt, der im vorliegenden Buch wie in 'Der Name der Rose' eine Rolle spielt.\"\nDarin liegt freilich nur ein zusätzlicher Reiz und Gewinn der Lektüre. Wichtiger ist: Ecos Buch zeigt, wie man schreiben soll – auf den Leser konzentriert, dem Leser dienend.",
+				"edition": "14",
+				"extra": "DOI: 10.36198/9783838553771",
+				"language": "de",
+				"libraryCatalog": "UTB eLibrary",
+				"place": "Stuttgart, Deutschland",
+				"publisher": "utb GmbH",
+				"shortTitle": "Wie man eine wissenschaftliche Abschlußarbeit schreibt",
+				"url": "https://elibrary.utb.de/doi/book/10.36198/9783838553771",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://elibrary.utb.de/doi/epdf/10.36198/9783838553771",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Wie man eine wissenschaftliche Abschlußarbeit schreibt: Doktor-, Diplom- und Magisterarbeit in den Geistes- und Sozialwissenschaften",
+				"creators": [
+					{
+						"firstName": "Umberto",
+						"lastName": "Eco",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020-02-17",
+				"ISBN": "9783838553771",
+				"abstractNote": "Diese Anleitung für die Planung, Gliederung und Niederschrift wissenschaftlicher Arbeiten von Umberto Eco, Professor an der Universität Bologna, ist ebenso gründlich wie virtuos.\nNach Ecos eigenen Worten (Einleitung) gibt sein Buch \"Auskunft darüber, (1) was man unter einer Abschlussarbeit versteht, (2) wie man das Thema sucht und die Zeit für seine Bearbeitung einteilt, (3) wie man bei der Literatursuche vorgeht, (4) wie man das gefundene Material auswertet und (5) wie man die Ausarbeitung äußerlich gestaltet\".\nDie autorisierte Übersetzung hat Professor Dr. Walter Schick erarbeitet. Eine \"erfrischend unkonventionelle Handreichung\" nennt er das Buch; es erlaube einen \"Blick in die 'Werkstatt' Ecos; denn Beziehungen zu anderen Werken Ecos werden nicht nur durch jenen Abbé Vallet hergestellt, der im vorliegenden Buch wie in 'Der Name der Rose' eine Rolle spielt.\"\nDarin liegt freilich nur ein zusätzlicher Reiz und Gewinn der Lektüre. Wichtiger ist: Ecos Buch zeigt, wie man schreiben soll – auf den Leser konzentriert, dem Leser dienend.",
+				"edition": "14",
+				"extra": "DOI: 10.36198/9783838553771",
+				"language": "de",
+				"libraryCatalog": "UTB eLibrary",
+				"place": "Stuttgart, Deutschland",
+				"publisher": "utb GmbH",
+				"shortTitle": "Wie man eine wissenschaftliche Abschlußarbeit schreibt",
+				"url": "https://elibrary.utb.de/doi/book/10.36198/9783838553771",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
 ]
 /** END TEST CASES **/
 
