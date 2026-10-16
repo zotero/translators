@@ -38,10 +38,11 @@ const waitMs = parseInt(values.wait ?? '2000', 10);
 let session;
 try {
 	session = await launchBrowser({ headless: resolveHeadless(values) });
-	const page = await session.context.newPage();
+	const page = await session.newPage();
 	await session.goto(page, url, { settle: waitMs });
 
 	if (values.interact) {
+		await page.bringToFront();
 		console.error('Browser is open. Press Ctrl+C when done inspecting.');
 		await new Promise((resolve) => {
 			page.on('close', resolve);

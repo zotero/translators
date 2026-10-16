@@ -1,7 +1,7 @@
 {
 	"translatorID": "f4130157-93f7-4493-8f24-a7c85549013d",
 	"label": "BBC",
-	"creator": "Philipp Zumstein",
+	"creator": "Philipp Zumstein, Vera de Kok",
 	"target": "^https?://(www|news?)\\.bbc\\.(co\\.uk|com)",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-06-10 21:51:43"
+	"lastUpdated": "2026-10-15 12:10:00"
 }
 
 /*
@@ -37,6 +37,11 @@
 
 function detectWeb(doc, url) {
 	url = url.replace(/[?#].+/, "");
+	// Modern article pages (/news/articles/<id>). Without this they fall
+	// through to the search-results check and the translator never runs.
+	if (/\/news\/articles\/[a-z0-9]+\/?$/.test(url)) {
+		return "newspaperArticle";
+	}
 	if (/\d{8}$/.test(url) || /\d{7}\.(stm)$/.test(url)) {
 		var pageNode = doc.getElementById("page");
 		if (pageNode) {
@@ -108,9 +113,25 @@ function scrape(doc, url) {
 		// 2. calculate it from the data-seconds attribute
 		// 3. extract it from a nonstandard meta field
 		// 4. for old pages, get from metadata
-		var jsonld = ZU.xpathText(doc, '//script[@type="application/ld+json"]');
-		var data = JSON.parse(jsonld);
-		// Z.debug(data);
+		// Modern pages carry several JSON-LD blocks (article, video, ...), so read
+		// them one by one: parsing the concatenation throws, and a page-level array
+		// would hide the article data.
+		var data = null;
+		for (let node of ZU.xpath(doc, '//script[@type="application/ld+json"]')) {
+			try {
+				let parsed = JSON.parse(node.textContent);
+				if (Array.isArray(parsed)) {
+					parsed = parsed.find(x => x && (x.datePublished || x.author));
+				}
+				if (parsed && (parsed.datePublished || parsed.author)) {
+					data = parsed;
+					break;
+				}
+			}
+			catch (e) {
+				Z.debug("BBC: skipped an unparseable JSON-LD block: " + e);
+			}
+		}
 		if (data && data.datePublished) {
 			item.date = data.datePublished;
 		}
@@ -165,6 +186,26 @@ function scrape(doc, url) {
 			}
 		}
 		
+		// Modern pages no longer use the byline classes scraped above; the
+		// page exposes the byline as cXenseParse:author (pipe-separated) and
+		// as author[].name in the JSON-LD.
+		if (!item.creators.length) {
+			// the tag is written as name= on most pages, property= on others
+			let modern = ZU.xpathText(doc, '//meta[@name="cXenseParse:author"]/@content | //meta[@property="cXenseParse:author"]/@content') || '';
+			let names = modern ? modern.split(/\s*\|\s*/) : [];
+			if (!names.length && data && data.author) {
+				let joined = [].concat(data.author)
+					.map(a => (a && a.name) || '').join(' and ');
+				names = joined.split(/ and /);
+			}
+			for (let name of names) {
+				name = name.trim();
+				if (name) {
+					item.creators.push(ZU.cleanAuthor(name, "author"));
+				}
+			}
+		}
+
 		if (url.includes("/newsbeat/article")) {
 			item.blogTitle = "BBC Newsbeat";
 		}
@@ -193,7 +234,9 @@ function scrape(doc, url) {
 		trans.itemType = itemType;
 		trans.doWeb(doc, url);
 	});
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -201,7 +244,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Spain's stolen babies",
+				"title": "Spain's stolen babies and the families who lived a lie",
 				"creators": [
 					{
 						"firstName": "Katya",
@@ -377,17 +420,39 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"BBC",
-					"BBC News",
-					"British",
-					"Foreign",
-					"International",
-					"News",
-					"News online",
-					"Online",
-					"Service",
-					"Uk",
-					"World"
+					{
+						"tag": "BBC"
+					},
+					{
+						"tag": "BBC News"
+					},
+					{
+						"tag": "British"
+					},
+					{
+						"tag": "Foreign"
+					},
+					{
+						"tag": "International"
+					},
+					{
+						"tag": "News"
+					},
+					{
+						"tag": "News online"
+					},
+					{
+						"tag": "Online"
+					},
+					{
+						"tag": "Service"
+					},
+					{
+						"tag": "Uk"
+					},
+					{
+						"tag": "World"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -418,6 +483,42 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.bbc.com/news/articles/cpvzlj3k8m8o",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Inside Donald Trump's transition as hopefuls flock to Mar-a-Lago",
+				"creators": [
+					{
+						"firstName": "Nada",
+						"lastName": "Tawfik",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Regan",
+						"lastName": "Morris",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024-11-10",
+				"abstractNote": "Political hopefuls flock to Donald Trump's Florida home as the president-elect assembles his cabinet.",
+				"language": "en-GB",
+				"libraryCatalog": "www.bbc.com",
+				"url": "https://www.bbc.com/news/articles/cpvzlj3k8m8o",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
