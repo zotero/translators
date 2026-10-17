@@ -37,9 +37,8 @@
 
 
 function detectWeb(doc, url) {
-	if (isArticleURL(url) || doc.querySelector('h1.article-title')) {
-		return 'newspaperArticle';
-	}
+	let type = pageType(url, doc);
+	if (type) return type;
 	if (getSearchResults(doc, true)) {
 		return 'multiple';
 	}
@@ -47,8 +46,32 @@ function detectWeb(doc, url) {
 }
 
 
+// Press releases are organisation statements, not journalism: Zotero's `report` fits them
+// (Amnesty is the institution, there is no journalist), and so does the repo convention
+// (Citavi 5 XML.js maps PressRelease to report).
+function isPressReleaseURL(url) {
+	return /\/(?:latest\/)?press-releases?\/|for-media\//i.test(url);
+}
+
+
+// /en/documents/ASA13/007/2013/en/ is a report landing page carrying its own date and index
+// number; /en/library/info/ and /en/report/info/ serve the same page shape for older items.
+function isDocumentURL(url) {
+	return /\/(?:documents\/[a-z]{3}\d{2}\/\d{3}\/\d{4}\/|library\/info\/|report\/info\/)/i.test(url);
+}
+
+
 function isArticleURL(url) {
 	return /\/latest\/(?:news|research|impact|campaigns|stories)\/\d{4}\/\d{2}\//.test(url);
+}
+
+
+function pageType(url, doc) {
+	if (isPressReleaseURL(url) || isDocumentURL(url)) return 'report';
+	if (isArticleURL(url) || (doc && doc.querySelector('h1.article-title'))) {
+		return 'newspaperArticle';
+	}
+	return false;
 }
 
 
@@ -59,7 +82,7 @@ function getSearchResults(doc, checkOnly) {
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
-		if (!href || !title || !isArticleURL(href)) continue;
+		if (!href || !title || !pageType(href)) continue;
 		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
@@ -89,7 +112,7 @@ function parseByline(text) {
 
 
 async function doWeb(doc, url) {
-	if (getSearchResults(doc, true) && !isArticleURL(url)) {
+	if (getSearchResults(doc, true) && !pageType(url, doc)) {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (!items) return;
 		for (let itemUrl of Object.keys(items)) {
@@ -102,13 +125,22 @@ async function doWeb(doc, url) {
 }
 
 
+// "Index Number: ASA 13/007/2013" -> "ASA 13/007/2013"; the page also repeats it inline
+function getIndexNumber(doc) {
+	let meta = ZU.xpathText(doc, '//*[contains(@class, "article-meta")]');
+	let m = meta && /Index Number:?\s*([A-Z]{2,4})\s*(\d{2})\/(\d{3,4})\/(\d{4})/.exec(meta.replace(/\u00a0/g, ' '));
+	return m ? `${m[1]} ${m[2]}/${m[3]}/${m[4]}` : '';
+}
+
+
 async function scrape(doc, url = doc.location.href) {
+	let type = pageType(url, doc) || 'newspaperArticle';
 	let translator = Zotero.loadTranslator('web');
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48'); // Embedded Metadata
 	translator.setDocument(doc);
 	translator.setHandler('itemDone', (_obj, item) => {
-		item.itemType = 'newspaperArticle';
-		// EM laat de ISO-tijd staan; Zotero wil bij een krantenartikel alleen de dag.
+		item.itemType = type;
+		// EM laat de ISO-tijd staan; Zotero wil alleen de dag.
 		let m = /^(\d{4}-\d{2}-\d{2})/.exec(item.date || '');
 		if (m) item.date = m[1];
 		// door EM afgeleide korte titel ("Türkiye", "In Mali, ...") is geen echte ondertitel
@@ -129,6 +161,16 @@ async function scrape(doc, url = doc.location.href) {
 			item.creators = [];
 		}
 		item.publicationTitle = 'Amnesty International';
+		if (type === 'report') {
+			// report heeft geen publicationTitle; de organisatie hoort bij institution/publisher.
+			delete item.publicationTitle;
+			item.institution = 'Amnesty International';
+			item.publisher = 'Amnesty International';
+			item.reportType = isPressReleaseURL(url) ? 'Press release' : 'Report';
+			let indexNumber = getIndexNumber(doc);
+			if (indexNumber) item.reportNumber = indexNumber;
+			item.creators = [];
+		}
 		// de site is meertalig: /en/, /fr/, /es/, /ar/ ... -> taal uit <html lang>
 		item.language = attr(doc, 'html', 'lang') || 'en';
 		item.url = attr(doc, 'link[rel="canonical"]', 'href') || url;
@@ -137,8 +179,6 @@ async function scrape(doc, url = doc.location.href) {
 	await translator.translate();
 }
 
-/** BEGIN TEST CASES **/
-var testCases = [
 /*
 	Byline-density check (2026-10-20): of the 60 most recent articles across all five
 	/latest/ sections (news, research, impact, campaigns, education), only ONE carries
@@ -146,6 +186,8 @@ var testCases = [
 	author; the translator must leave creators empty for those rather than letting
 	Embedded Metadata fabricate an organization author from the byline container.
 */
+/** BEGIN TEST CASES **/
+var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.amnesty.org/en/latest/news/2026/10/mali-wagner-impunity/",
@@ -283,6 +325,89 @@ var testCases = [
 				"libraryCatalog": "www.amnesty.org",
 				"publicationTitle": "Amnesty International",
 				"url": "https://www.amnesty.org/ar/latest/news/2026/10/iran-five-protest-related-arbitrary-executions-in-one-week-must-spur-global-action/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.amnesty.org/en/latest/press-release/2021/06/g7-support-for-pharma-monopolies-putting-millions-of-lives-at-risk/",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "G7 support for pharma monopolies is putting millions of lives at risk",
+				"creators": [],
+				"date": "2021-06-10",
+				"abstractNote": "The UK has administered twice as many vaccines as the entire African continent",
+				"institution": "Amnesty International",
+				"language": "en",
+				"libraryCatalog": "www.amnesty.org",
+				"reportType": "Press release",
+				"url": "https://www.amnesty.org/en/latest/press-release/2021/06/g7-support-for-pharma-monopolies-putting-millions-of-lives-at-risk/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.amnesty.org/en/documents/ASA13/007/2013/en/",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Bangladesh: Further information: Detained editor alleges torture",
+				"creators": [],
+				"date": "2013-04-19",
+				"abstractNote": "Detained Bangladeshi newspaper editor Mahmudur Rahman was hospitalised on 18 April 2013. His lawyers say he was tortured in police custody. Blogger Asif Mohiudeen, arrested on 3 April for allegedly posting blasphemous comments online, remains in detention and at risk of torture.",
+				"institution": "Amnesty International",
+				"language": "en",
+				"libraryCatalog": "www.amnesty.org",
+				"reportNumber": "ASA 13/007/2013",
+				"reportType": "Report",
+				"url": "https://www.amnesty.org/en/documents/asa13/007/2013/en/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.amnesty.org/en/library/info/EUR04/005/2008/en",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Georgia/Russia: Civilians in the line of fire: The Georgia-Russia conflict.",
+				"creators": [],
+				"date": "2008-11-18",
+				"abstractNote": "From the onset of the five-day war between Georgia and Russia in the self-proclaimed republic of South Ossetia in August 2008 the conflicting parties failed to take necessary measures to protect civilians from the hostilities. In this report Amnesty International raises concerns that serious violations of both international human rights law and international humanitarian law […]",
+				"institution": "Amnesty International",
+				"language": "en",
+				"libraryCatalog": "www.amnesty.org",
+				"reportNumber": "EUR 04/005/2008",
+				"reportType": "Report",
+				"url": "https://www.amnesty.org/en/documents/eur04/005/2008/en/",
 				"attachments": [
 					{
 						"title": "Snapshot",
