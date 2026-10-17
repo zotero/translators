@@ -139,12 +139,20 @@ async function scrape(doc, url = doc.location.href) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
+/*
+	Byline-density check (2026-10-20): of the 60 most recent articles across all five
+	/latest/ sections (news, research, impact, campaigns, education), only ONE carries
+	a byline (the Mali/Wagner op-ed below). Press releases and reports have no human
+	author; the translator must leave creators empty for those rather than letting
+	Embedded Metadata fabricate an organization author from the byline container.
+*/
 	{
 		"type": "web",
 		"url": "https://www.amnesty.org/en/latest/news/2026/10/mali-wagner-impunity/",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "In Mali, from the Wagner Group to Africa Corps: Will Impunity Continue?",
 				"creators": [
 					{
 						"firstName": "Ousmane",
@@ -152,23 +160,22 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2026-10-14",
+				"abstractNote": "Ousmane Diallo, Sahel researcher at Amnesty International, warns of the ongoing killings, torture, and possible war crimes in Mali.",
+				"extra": "Byline role: Sahel researcher at Amnesty International",
+				"language": "en",
+				"libraryCatalog": "www.amnesty.org",
+				"publicationTitle": "Amnesty International",
+				"url": "https://www.amnesty.org/en/latest/news/2026/10/mali-wagner-impunity/",
 				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"title": "In Mali, from the Wagner Group to Africa Corps: Will Impunity Continue?",
-				"publicationTitle": "Amnesty International",
-				"date": "2026-10-14",
-				"url": "https://www.amnesty.org/en/latest/news/2026/10/mali-wagner-impunity/",
-				"abstractNote": "Ousmane Diallo, Sahel researcher at Amnesty International, warns of the ongoing killings, torture, and possible war crimes in Mali.",
-				"language": "en",
-				"libraryCatalog": "www.amnesty.org",
-				"extra": "Byline role: Sahel researcher at Amnesty International"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -178,6 +185,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Tribune : du groupe Wagner à l’Africa Corps, la continuité de l’impunité ?",
 				"creators": [
 					{
 						"firstName": "Ousmane",
@@ -185,23 +193,22 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2026-10-14",
+				"abstractNote": "Ousmane Diallo, chercheur, alerte sur la persistance des meurtres, tortures et possibles crimes de guerre commis au Mali.",
+				"extra": "Byline role: Chercheur senior sur le Sahel à Amnesty International",
+				"language": "fr",
+				"libraryCatalog": "www.amnesty.org",
+				"publicationTitle": "Amnesty International",
+				"url": "https://www.amnesty.org/fr/latest/news/2026/10/mali-wagner-impunity/",
 				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Tribune : du groupe Wagner à l’Africa Corps, la continuité de l’impunité ?",
-				"publicationTitle": "Amnesty International",
-				"date": "2026-10-14",
-				"url": "https://www.amnesty.org/fr/latest/news/2026/10/mali-wagner-impunity/",
-				"abstractNote": "Ousmane Diallo, chercheur, alerte sur la persistance des meurtres, tortures et possibles crimes de guerre commis au Mali.",
-				"language": "fr",
-				"libraryCatalog": "www.amnesty.org",
-				"extra": "Byline role: Chercheur senior sur le Sahel à Amnesty International"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -211,23 +218,23 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Türkiye: Police raid and state takeover of opposition TV channel ‘a brutal blow to media freedom’",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2026-10-14",
+				"abstractNote": "Reacting to a police raid of the headquarters of Halk TV, one of Türkiye’s few broadcasters not aligned with the government, and the appointment of a trustee manager to oversee it as part of an investigation into alleged corruption, Esther Major, Amnesty International’s Deputy Regional Director for Europe, said:  “This alarming move is a brutal blow to […]",
+				"language": "en",
+				"libraryCatalog": "www.amnesty.org",
+				"publicationTitle": "Amnesty International",
+				"url": "https://www.amnesty.org/en/latest/news/2026/10/turkiye-police-raid-and-state-takeover-of-opposition-tv-channel-a-brutal-blow-to-media-freedom/",
 				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Türkiye: Police raid and state takeover of opposition TV channel ‘a brutal blow to media freedom’",
-				"publicationTitle": "Amnesty International",
-				"date": "2026-10-14",
-				"url": "https://www.amnesty.org/en/latest/news/2026/10/turkiye-police-raid-and-state-takeover-of-opposition-tv-channel-a-brutal-blow-to-media-freedom/",
-				"abstractNote": "Reacting to a police raid of the headquarters of Halk TV, one of Türkiye’s few broadcasters not aligned with the government, and the appointment of a trustee manager to oversee it as part of an investigation into alleged corruption, Esther Major, Amnesty International’s Deputy Regional Director for Europe, said:  “This alarming move is a brutal blow to […]",
-				"language": "en",
-				"libraryCatalog": "www.amnesty.org"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -235,6 +242,58 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.amnesty.org/en/latest/news/",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.amnesty.org/es/latest/news/2026/10/saudi-arabia-yemen-civilians-must-not-pay-the-price-of-escalation-in-hostilities/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Arabia Saudí/Yemen: La población civil no debe pagar el precio de la escalada de las hostilidades Arabia Saudí/Yemen: La población civil no debe pagar el precio de la escalada de las hostilidades",
+				"creators": [],
+				"date": "2026-10-14",
+				"abstractNote": "Ante la brusca escalada de las hostilidades armadas entre las autoridades huzíes de facto, el gobierno yemení y Arabia Saudí en las últimas semanas y el número creciente de víctimas civiles en el contexto de los ataques en curso, Heba Morayef, directora regional de Amnistía Internacional para Oriente Medio y Norte de África, ha afirmado: […]",
+				"language": "es",
+				"libraryCatalog": "www.amnesty.org",
+				"publicationTitle": "Amnesty International",
+				"url": "https://www.amnesty.org/es/latest/news/2026/10/saudi-arabia-yemen-civilians-must-not-pay-the-price-of-escalation-in-hostilities/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.amnesty.org/ar/latest/news/2026/10/iran-five-protest-related-arbitrary-executions-in-one-week-must-spur-global-action/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "إيران: خمس عمليات إعدام تعسفية على خلفية الاحتجاجات خلال أسبوع واحد تستدعي تحرّكًا دوليًا",
+				"creators": [],
+				"date": "2026-10-13",
+				"abstractNote": "تعليقًا على إعدام السلطات الإيرانية خمسة أشخاص تعسّفًا في غضون أسبوع واحد، بين 30 سبتمبر/أيلول و5 أكتوبر/تشرين الأول، على خلفية إدانتهم بتهم تتعلّق باحتجاجات يناير/كانون الثاني 2026، وهم علي همتي سيستاني، وعلي رضا رئيسي، وعلي رضا سباهي، ومجيد نيك أنديش، وسياوش جمشيدي خيرآبادي، وذلك إثر محاكمات فادحة الجور شابها التعذيب، قالت ديانا الطحاوي، نائبة مديرة […]",
+				"language": "ar",
+				"libraryCatalog": "www.amnesty.org",
+				"publicationTitle": "Amnesty International",
+				"url": "https://www.amnesty.org/ar/latest/news/2026/10/iran-five-protest-related-arbitrary-executions-in-one-week-must-spur-global-action/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
