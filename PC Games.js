@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-04-06 11:16:12"
+	"lastUpdated": "2023-12-02 18:20:48"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2021 Matthias Mailänder
+	Copyright © 2021-2023 Matthias Mailänder
 
 	This file is part of Zotero.
 
@@ -61,14 +61,14 @@ function scrape(doc, url) {
 		item.publicationTitle = "PC Games";
 		item.language = "de-DE";
 		item.creators = []; // reset bad author metadata
-		var authorMetadata = doc.querySelectorAll('a[class="editorNameLink "]');
+		var authorMetadata = doc.querySelectorAll('span.authorName');
 		for (let author of authorMetadata) {
-			item.creators.push(ZU.cleanAuthor(author.text, "author"));
+			item.creators.push(ZU.cleanAuthor(author.textContent, "author"));
 		}
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.doWeb(doc, url);
 	});
 }
