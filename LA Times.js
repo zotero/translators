@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-15 12:10:00"
+	"lastUpdated": "2026-10-15 14:58:00"
 }
 
 /*
@@ -123,9 +123,13 @@ function fixNameCase(name) {
 
 // Datelines uppercase the city but keep the state mixed-case
 // ("TAMPA, Fla.", "HOUSTON"); title-case the uppercase runs only.
-function fixPlaceCase(place) {
+function fixDatelineCase(place) {
 	return place.replace(/[A-Z]{2,}/g, m => m.charAt(0) + m.slice(1).toLowerCase());
 }
+
+// item.place is the newspaper's city of publication, not where a story was
+// filed from (Globe and Mail does the same).
+const PUBLICATION_PLACE = 'Los Angeles';
 
 function scrape(doc, url) {
 	var item = new Zotero.Item("newspaperArticle");
@@ -139,13 +143,7 @@ function scrape(doc, url) {
 	item.date = data.datePublished
 		|| ZU.xpathText(doc, '//meta[@property="article:published_time"]/@content');
 	item.section = ZU.xpathText(doc, '//meta[@property="article:section"]/@content');
-	// Archived stories carry the place of writing in a leading dateline
-	// ("TAMPA, Fla. - ..."); newspaperArticle records it as place.
-	let dateline = doc.querySelector('.dateline');
-	if (dateline) {
-		let place = ZU.trimInternal(dateline.textContent).replace(/[\s\u00a0]*[-–—]\s*$/, '').trim();
-		if (place) item.place = fixPlaceCase(place);
-	}
+	item.place = PUBLICATION_PLACE;
 	// The site stopped emitting og:locale; <html lang> carries the real page
 	// language ("es-US" on the Espanol edition, "en-US" otherwise).
 	let lang = doc.documentElement.lang
@@ -160,6 +158,21 @@ function scrape(doc, url) {
 	for (let tag of doc.querySelectorAll('.tags a')) {
 		let value = ZU.trimInternal(tag.textContent);
 		if (value) item.tags.push({ tag: value });
+	}
+
+	// Where the story was filed from is not item.place (that is the
+	// publication city); record an archived story's leading dateline
+	// ("TAMPA, Fla. - ...") as a tag, but not if it is already one.
+	let dateline = doc.querySelector('.dateline');
+	if (dateline) {
+		let place = ZU.trimInternal(dateline.textContent).replace(/[\s\u00a0]*[-–—]\s*$/, '').trim();
+		if (place) {
+			place = fixDatelineCase(place);
+			let existing = new Set(item.tags.map(t => (typeof t == 'string' ? t : t.tag).toLowerCase()));
+			if (!existing.has(place.toLowerCase())) {
+				item.tags.push({ tag: place });
+			}
+		}
 	}
 
 	let authors = data.author || [];
@@ -283,7 +296,7 @@ var testCases = [
 				"libraryCatalog": "www.latimes.com",
 				"publicationTitle": "Los Angeles Times",
 				"section": "Educación",
-				"place": "Washington",
+				"place": "Los Angeles",
 				"url": "https://www.latimes.com/espanol/educacion/articulo/2026-10-13/eeuu-propone-tarifa-de-70-000-dolares-para-estudiantes-internacionales",
 				"attachments": [
 					{
@@ -291,7 +304,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": ["Educación", "Noticas-Más", "EEUU", "California", "Vida y Estilo"],
+				"tags": ["Educación", "Noticas-Más", "EEUU", "California", "Vida y Estilo", "Washington"],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -317,7 +330,7 @@ var testCases = [
 				"libraryCatalog": "www.latimes.com",
 				"publicationTitle": "Los Angeles Times",
 				"section": "Sports",
-				"place": "Tampa, Fla.",
+				"place": "Los Angeles",
 				"url": "https://www.latimes.com/archives/la-xpm-1986-03-29-sp-1415-story.html",
 				"attachments": [
 					{
@@ -326,7 +339,8 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Sports"
+					"Sports",
+					"Tampa, Fla."
 				],
 				"notes": [],
 				"seeAlso": []
