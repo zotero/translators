@@ -95,11 +95,14 @@ function getSearchResults(doc, checkOnly) {
 //   -> naam = "Ousmane Diallo", functietitel = "Sahel researcher at Amnesty International"
 // "Par"/"Por"/"بواسطة" zijn de Franse/Spaanse/Arabische varianten; zonder komma is er geen titel.
 const BYLINE_RE = /^\s*(?:by|par|por|door|von|بواسطة|من)\s+(.+?)(?:\s*,\s*(.+?))?\s*$/i;
-const ORG_RE = /^(?:amnesty international|amnesty|the secretariat|international secretariat)/i;
+// ES/AR-OpEds signeren in de body ("Por NAAM,rol") in plaats van in een byline-container.
+// "من" ("van/uit") opent daar ook gewone zinnen, dus die alleen in de container toestaan.
+const BODY_BYLINE_RE = /^\s*(?:by|par|por|door|von|بقلم|بواسطة)\s+(.+?)(?:\s*,\s*(.+?))?\s*$/i;
+const ORG_RE = /^(?:amnesty international|amnistía internacional|amnesty|the secretariat|international secretariat|العفو الدولية)/i;
 
 
-function parseByline(text) {
-	let m = BYLINE_RE.exec(text);
+function parseByline(text, re) {
+	let m = (re || BYLINE_RE).exec(text);
 	if (!m) return null;
 	let name = ZU.trimInternal(m[1]);
 	let role = m[2] ? ZU.trimInternal(m[2]) : '';
@@ -108,6 +111,35 @@ function parseByline(text) {
 	// bron, en Zotero wil dat als uitgever - laat EM dat zelf zetten.
 	if (ORG_RE.test(name) && !role) return null;
 	return { name, role };
+}
+
+
+// ES/AR hebben geen byline-container: de ondertekenaar staat als korte vette cursiefregel
+// onder de kop, en de rol bevat zelf komma's ("Por NAAM,activista, miembro de ...").
+const NAME_PARTICLES = /^(?:van|von|der|den|de|del|della|di|da|dos|das|bin|ibn|al|el|la|le)$/i;
+// Organisaties ondertekenen ook ("Por Amnistía Internacional", "بواسطة منظمة العفو الدولية, قسم الإعلام").
+const NON_PERSON_RE = /\b(?:منظمة|مؤسسة|قسم|إدارة|international|internacional|association|asociación|foundation|fundación|committee|comité|office|oficina|team|equipo|secretariat|secretaría)\b/i;
+
+function looksLikePersonName(name) {
+	let words = name.split(/\s+/).filter(Boolean);
+	if (words.length < 2 || words.length > 6) return false;
+	if (NON_PERSON_RE.test(name)) return false;
+	// Latijns schrift: elk woord met hoofdletter, op tussenvoegsels na ("Por la mañana" valt af)
+	if (/[A-Za-zÀ-ÿ]/.test(name)) {
+		return words.every(w => /^[A-ZÀ-Þ]/.test(w) || NAME_PARTICLES.test(w));
+	}
+	return name.length >= 5;
+}
+
+
+function parseBodyByline(doc) {
+	for (let p of ZU.xpath(doc, '//p[strong or em]')) {
+		let text = ZU.trimInternal(p.textContent || '');
+		if (!text || text.split(/\s+/).length > 25) continue;
+		let parsed = parseByline(text, BODY_BYLINE_RE);
+		if (parsed && looksLikePersonName(parsed.name)) return parsed;
+	}
+	return null;
 }
 
 
@@ -149,10 +181,13 @@ async function scrape(doc, url = doc.location.href) {
 		// (of weghalen als het echt de organisatie is).
 		let byline = ZU.xpathText(doc, '//div[contains(@class, "bylineContainer")]//span[1]')
 			|| ZU.xpathText(doc, '//div[contains(@class, "authorInfoContainer")]//span[1]');
-		let parsed = byline ? parseByline(byline) : null;
+		let parsed = byline ? parseByline(byline) : parseBodyByline(doc);
 		if (parsed) {
 			item.creators = [Zotero.Utilities.cleanAuthor(parsed.name, 'author', false)];
-			if (parsed.role) {
+			// Alleen de container levert een functietitel. In ES/AR staat de handtekening als
+			// één zin ("Por NAAM,rol ...") in de body; dat als "Byline role" wegzetten zou een
+			// veld suggereren dat de pagina niet heeft, dus daar alleen de naam.
+			if (parsed.role && byline) {
 				item.extra = (item.extra ? item.extra + '\n' : '') + 'Byline role: ' + parsed.role;
 			}
 		}
@@ -268,6 +303,38 @@ var testCases = [
 				"libraryCatalog": "www.amnesty.org",
 				"publicationTitle": "Amnesty International",
 				"url": "https://www.amnesty.org/en/latest/news/2026/10/turkiye-police-raid-and-state-takeover-of-opposition-tv-channel-a-brutal-blow-to-media-freedom/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.amnesty.org/es/latest/news/2026/10/oped-365-dias-sin-respuesta-la-impunidad-como-cicatriz/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "OpEd: 365 días sin respuesta: la impunidad como cicatriz",
+				"creators": [
+					{
+						"firstName": "Yendri",
+						"lastName": "Velásquez",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-10-13",
+				"abstractNote": "Un año después del atentado que casi acaba con su vida, Yendri Velásquez; activista venezolano; sigue preguntándose: ¿Quién intentó matarles y por qué?",
+				"language": "es",
+				"libraryCatalog": "www.amnesty.org",
+				"publicationTitle": "Amnesty International",
+				"url": "https://www.amnesty.org/es/latest/news/2026/10/oped-365-dias-sin-respuesta-la-impunidad-como-cicatriz/",
 				"attachments": [
 					{
 						"title": "Snapshot",
