@@ -3,13 +3,13 @@
 	"label": "Library Catalog (Pika)",
 	"creator": "Abe Jellinek",
 	"target": "/Record/\\.[a-z]|/GroupedWork/[a-z0-9-]+|/Union/Search\\?",
-	"minVersion": "3.0",
+	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-17 23:44:24"
+	"lastUpdated": "2023-10-31 10:50:38"
 }
 
 /*
@@ -82,42 +82,23 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
+	let translator = Zotero.loadTranslator("web");
+	translator.setTranslator("0b7cbf89-c5d8-49c0-99b3-1854e661ba37"); // VuFind
+	translator.setDocument(doc); // necessary for resolving url
+
+	let vuf = await translator.getTranslatorObject();
+	vuf.libraryCatalog = attr(doc, "meta[property='og:site_name']", "content")
+		|| attr(doc, '#header-logo', 'alt');
+
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) ZU.processDocuments(Object.keys(items), scrape);
-		});
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		await vuf.scrapeURLs(Object.keys(items), doc);
 	}
 	else {
-		scrape(doc, url);
+		await vuf.scrapeURLs(url, doc);
 	}
-}
-
-function scrape(doc, _url) {
-	var lines = doc.querySelectorAll('#formattedMarcRecord table tbody tr');
-	
-	var translator = Zotero.loadTranslator("import");
-	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973"); // MARC
-	translator.getTranslatorObject(function (marc) {
-		var record = new marc.record();
-		var item = new Zotero.Item();
-		record.leader = text(lines[0], 'td');
-		for (let line of Array.from(lines).slice(2)) {
-			let fieldTag = text(line, 'th');
-			let indicators = text(line, 'th', 0) + text(line, 'th', 1);
-			let fieldContent = text(line, 'td').replace(/\|/g, marc.subfieldDelimiter);
-
-			record.addField(fieldTag, indicators, fieldContent);
-		}
-		
-		record.translate(item);
-		
-		item.libraryCatalog = attr(doc, 'meta[property="og:site_name"]', 'content')
-			|| attr(doc, '#header-logo', 'alt')
-			|| 'Library Catalog (Pika)';
-		
-		item.complete();
-	});
 }
 
 /** BEGIN TEST CASES **/
@@ -137,16 +118,13 @@ var testCases = [
 					}
 				],
 				"date": "1971",
-				"callNumber": "E183.8.V5  P4 1971",
+				"callNumber": "E183.8.V5 P4 1971",
 				"libraryCatalog": "Colorado Mountain College",
 				"numPages": "810",
 				"place": "New York",
 				"publisher": "Quadrangle Books",
 				"attachments": [],
 				"tags": [
-					{
-						"tag": "Foreign relations"
-					},
 					{
 						"tag": "Foreign relations"
 					},
@@ -163,19 +141,7 @@ var testCases = [
 						"tag": "United States"
 					},
 					{
-						"tag": "United States"
-					},
-					{
 						"tag": "Vietnam"
-					},
-					{
-						"tag": "Vietnam"
-					},
-					{
-						"tag": "Vietnam"
-					},
-					{
-						"tag": "Vietnam War, 1961-1975"
 					},
 					{
 						"tag": "Vietnam War, 1961-1975"
@@ -222,13 +188,14 @@ var testCases = [
 					{
 						"lastName": "Kino Lorber, Inc",
 						"creatorType": "contributor",
-						"fieldMode": true
+						"fieldMode": 1
 					}
 				],
 				"date": "2021",
 				"abstractNote": "The movie follows an interracial couple whose relationship is put to the test after a Black woman is sexually assaulted and her white boyfriend drives her from hospital to hospital in search of a rape kit. Their story reveals the systemic injustices and social conditioning women face when navigating sex and consent within the American patriarchy. Winner of top prizes at the BlackStar and New Orleans Film Festivals, this gripping social thriller offers a unique exploration of institutional racism and sexism from a Black female point of view",
-				"callNumber": "PN1997.2  .T47 2021",
+				"callNumber": "PN1997.2 .T47 2021",
 				"distributor": "Kino Lorber",
+				"extra": "OCLC: 1238036369",
 				"language": "eng",
 				"libraryCatalog": "Aims Community College",
 				"attachments": [],
@@ -237,37 +204,13 @@ var testCases = [
 						"tag": "Drama"
 					},
 					{
-						"tag": "Drama"
-					},
-					{
-						"tag": "Drama"
-					},
-					{
-						"tag": "Drama"
-					},
-					{
-						"tag": "Drama"
-					},
-					{
-						"tag": "Feature films"
-					},
-					{
 						"tag": "Feature films"
 					},
 					{
 						"tag": "Interracial couples"
 					},
 					{
-						"tag": "Interracial couples"
-					},
-					{
 						"tag": "Justice"
-					},
-					{
-						"tag": "Justice"
-					},
-					{
-						"tag": "Rape"
 					},
 					{
 						"tag": "Rape"
@@ -304,12 +247,37 @@ var testCases = [
 				],
 				"date": "2021",
 				"ISBN": "9781538716670",
-				"callNumber": "813.6",
+				"abstractNote": "\"When it comes to personal training, Taylor Powell kicks serious butt. Unfortunately, her bills are piling up, rent is due, and the money situation is dire. Taylor needs more than the support of her new best friends, Samiah and London. She needs a miracle. And Jamar Dixon might just be it. The oh-so-fine former pro athlete wants back into the game, and he wants Taylor to train him. There's just one catch -- no one can know what they're doing. But when they're accidentally outed as a couple, Taylor's plan is turned completely upside down. Is Jamar just playing to win . . . or is he playing for keeps?\"--",
+				"callNumber": "PS3618.O346 D38 2021",
+				"edition": "First edition",
 				"libraryCatalog": "Libraries Online Inc.",
-				"numPages": "367",
+				"numPages": "370",
+				"place": "New York",
 				"publisher": "Forever",
 				"attachments": [],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "African Americans"
+					},
+					{
+						"tag": "Fiction"
+					},
+					{
+						"tag": "Football players"
+					},
+					{
+						"tag": "Man-woman relationships"
+					},
+					{
+						"tag": "Novels"
+					},
+					{
+						"tag": "Personal trainers"
+					},
+					{
+						"tag": "Romance fiction"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -327,7 +295,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://flc.flatironslibrary.org/Record/.b29911680",
+		"url": "https://mln2.marmot.org//Record/.b29911680",
 		"items": [
 			{
 				"itemType": "book",
@@ -349,38 +317,23 @@ var testCases = [
 				"abstractNote": "On Wendy Darling's first night in Chicago, a boy called Peter appears at her window. He's dizzying, captivating, beautiful-- and she agrees to join him for a night on the town. They're soon running in the city's underground. She makes friends: a punk girl named Tinkerbelle and the lost boys Peter watches over. And she makes enemies: the terrifying Detective Hook, and maybe Peter himself, as his sinister secrets start coming to light. Will Wendy survive this night-- and make sure everyone else does, too?",
 				"callNumber": "PZ",
 				"edition": "First edition",
-				"libraryCatalog": "Flatirons Library Consortium",
+				"libraryCatalog": "Marmot Library Network",
 				"numPages": "282",
 				"place": "New York",
 				"publisher": "Imprint",
 				"attachments": [],
 				"tags": [
 					{
+						"tag": "Action and adventure fiction"
+					},
+					{
 						"tag": "Adaptations"
-					},
-					{
-						"tag": "Adventure and adventurers"
-					},
-					{
-						"tag": "Adventure stories"
 					},
 					{
 						"tag": "Chicago (Ill.)"
 					},
 					{
 						"tag": "Darling, Wendy"
-					},
-					{
-						"tag": "Fiction"
-					},
-					{
-						"tag": "Fiction"
-					},
-					{
-						"tag": "Fiction"
-					},
-					{
-						"tag": "Fiction"
 					},
 					{
 						"tag": "Fiction"
@@ -415,17 +368,13 @@ var testCases = [
 						"firstName": "Tamora",
 						"lastName": "Pierce",
 						"creatorType": "author"
-					},
-					{
-						"firstName": "Tamora",
-						"lastName": "Pierce",
-						"creatorType": "author"
 					}
 				],
 				"date": "1999",
 				"ISBN": "9780679889144 9780679989141 9780679889175 9780756904869 9780375829055 9781435233638 9781415553169",
 				"abstractNote": "Ten-year-old Keladry of Mindalen, daughter of nobles, serves as a page but must prove herself to the males around her if she is ever to fulfill her dream of becoming a knight. When Alanna became the King's Champion, it was decided that girls would henceforth be allowed to train for the knighthood. But ten years have passed, and no girls have come forward. Now, however, someone is about to change all that. Her name is Kel. In this first book in a new series from popular children's fantasy writer Tamora Pierce, we are introduced to a strong, adventurous new heroine who will win the hearts and minds of fantasy fans",
-				"callNumber": "PZ7.P61464  Fi 1999",
+				"callNumber": "PZ7.P61464 Fi 1999",
+				"extra": "OCLC: 39724122",
 				"libraryCatalog": "Bemis Public Library",
 				"numPages": "216",
 				"place": "New York",
@@ -440,25 +389,10 @@ var testCases = [
 						"tag": "Fantasy fiction"
 					},
 					{
-						"tag": "Fantasy fiction"
-					},
-					{
-						"tag": "Fantasy fiction"
-					},
-					{
-						"tag": "Fiction"
-					},
-					{
 						"tag": "Fiction"
 					},
 					{
 						"tag": "Knights and knighthood"
-					},
-					{
-						"tag": "Knights and knighthood"
-					},
-					{
-						"tag": "Sex role"
 					},
 					{
 						"tag": "Sex role"
@@ -472,7 +406,7 @@ var testCases = [
 						"note": "Sequel: Page"
 					},
 					{
-						"note": "Decisions --  Not So Welcome --  Practice Courts --  Classrooms --  Kel Backs Away --  Lance --  Kel Takes a Stand --  Winter --  Tests --  Royal Forest --  Spidren Hunt --  Cast of Characters"
+						"note": "Decisions -- Not So Welcome -- Practice Courts -- Classrooms -- Kel Backs Away -- Lance -- Kel Takes a Stand -- Winter -- Tests -- Royal Forest -- Spidren Hunt -- Cast of Characters"
 					}
 				],
 				"seeAlso": []
