@@ -153,19 +153,6 @@ function scrape(doc, url) {
 				}
 			}
 		}
-		var contributors = obj.contributor;
-		if (contributors) {
-			for (i = 0; i < contributors.length; i++) {
-				// authors are lastname, firstname, additional info - only use the first two.
-				var contributor = contributors[i].replace(/(,[^,]+)(,.+)/, "$1");
-				if (contributor.includes(',')) {
-					newItem.creators.push(ZU.cleanAuthor(contributor, "contributor", true));
-				}
-				else {
-					newItem.creators.push({ lastName: contributor, creatorType: "contributor", fieldMode: 1 });
-				}
-			}
-		}
 
 		for (i = 0; i < newItem.creators.length; i++) {
 			if (!newItem.creators[i].firstName) {
@@ -257,11 +244,6 @@ var testCases = [
 						"firstName": "John",
 						"lastName": "Nott",
 						"creatorType": "author"
-					},
-					{
-						"lastName": "University of Pittsburgh Library System",
-						"creatorType": "contributor",
-						"fieldMode": 1
 					}
 				],
 				"date": "1812",
@@ -291,11 +273,6 @@ var testCases = [
 						"firstName":"David",
 						"lastName":"Enrich",
 						"creatorType":"author"
-					},
-					{
-						"lastName":"Internet Archive",
-						"creatorType":"contributor",
-						"fieldMode": 1
 					}
 				],
 				"tags":[
@@ -458,11 +435,6 @@ var testCases = [
 						"firstName": "Peter",
 						"lastName": "Pringle",
 						"creatorType": "author"
-					},
-					{
-						"lastName": "Internet Archive",
-						"creatorType": "contributor",
-						"fieldMode": 1
 					}
 				],
 				"date": "1983",
@@ -489,13 +461,6 @@ var testCases = [
 			{
 				"itemType": "tvBroadcast",
 				"title": "The Rachel Maddow Show : MSNBCW : January 13, 2017 6:00pm-7:01pm PST",
-				"creators": [
-					{
-						"lastName": "MSNBCW",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					}
-				],
 				"date": "2017-01-14",
 				"abstractNote": "Rachel Maddow takes a look at the day's top political news stories.",
 				"language": "eng",
