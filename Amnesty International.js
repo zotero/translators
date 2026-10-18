@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-16 20:26:52"
+	"lastUpdated": "2026-10-18 20:32:01"
 }
 
 /*
@@ -92,11 +92,11 @@ function getSearchResults(doc, checkOnly) {
 
 
 // "By Ousmane Diallo, Sahel researcher at Amnesty International"
-//   -> naam = "Ousmane Diallo", functietitel = "Sahel researcher at Amnesty International"
-// "Par"/"Por"/"بواسطة" zijn de Franse/Spaanse/Arabische varianten; zonder komma is er geen titel.
+//   -> name = "Ousmane Diallo", role = "Sahel researcher at Amnesty International"
+// "Par"/"Por"/"بواسطة" are the French/Spanish/Arabic variants; without a comma there is no role.
 const BYLINE_RE = /^\s*(?:by|par|por|door|von|بواسطة|من)\s+(.+?)(?:\s*,\s*(.+?))?\s*$/i;
-// ES/AR-OpEds signeren in de body ("Por NAAM,rol") in plaats van in een byline-container.
-// "من" ("van/uit") opent daar ook gewone zinnen, dus die alleen in de container toestaan.
+// ES/AR OpEds sign in the body ("Por NAME,role") instead of in a byline container.
+// "من" ("by/from") also opens ordinary sentences there, so allow it only in the container.
 const BODY_BYLINE_RE = /^\s*(?:by|par|por|door|von|بقلم|بواسطة)\s+(.+?)(?:\s*,\s*(.+?))?\s*$/i;
 const ORG_RE = /^(?:amnesty international|amnistía internacional|amnesty|the secretariat|international secretariat|العفو الدولية)/i;
 
@@ -107,24 +107,24 @@ function parseByline(text, re) {
 	let name = ZU.trimInternal(m[1]);
 	let role = m[2] ? ZU.trimInternal(m[2]) : '';
 	if (!name) return null;
-	// "Amnesty International" is geen auteur maar de organisatie: de functietitel is dan de
-	// bron, en Zotero wil dat als uitgever - laat EM dat zelf zetten.
+	// "Amnesty International" is not an author but the organisation: the role is then the
+	// source, and Zotero wants that as publisher - leave that to EM.
 	if (ORG_RE.test(name) && !role) return null;
 	return { name, role };
 }
 
 
-// ES/AR hebben geen byline-container: de ondertekenaar staat als korte vette cursiefregel
-// onder de kop, en de rol bevat zelf komma's ("Por NAAM,activista, miembro de ...").
+// ES/AR have no byline container: the signatory is a short bold-italic line just under
+// the headline, and the role itself contains commas ("Por NAME,activista, miembro de ...").
 const NAME_PARTICLES = /^(?:van|von|der|den|de|del|della|di|da|dos|das|bin|ibn|al|el|la|le)$/i;
-// Organisaties ondertekenen ook ("Por Amnistía Internacional", "بواسطة منظمة العفو الدولية, قسم الإعلام").
+// Organisations sign as well ("Por Amnistía Internacional", "بواسطة منظمة العفو الدولية, قسم الإعلام").
 const NON_PERSON_RE = /\b(?:منظمة|مؤسسة|قسم|إدارة|international|internacional|association|asociación|foundation|fundación|committee|comité|office|oficina|team|equipo|secretariat|secretaría)\b/i;
 
 function looksLikePersonName(name) {
 	let words = name.split(/\s+/).filter(Boolean);
 	if (words.length < 2 || words.length > 6) return false;
 	if (NON_PERSON_RE.test(name)) return false;
-	// Latijns schrift: elk woord met hoofdletter, op tussenvoegsels na ("Por la mañana" valt af)
+	// Latin script: every word capitalised, apart from name particles ("Por la mañana" is rejected)
 	if (/[A-Za-zÀ-ÿ]/.test(name)) {
 		return words.every(w => /^[A-ZÀ-Þ]/.test(w) || NAME_PARTICLES.test(w));
 	}
@@ -172,32 +172,32 @@ async function scrape(doc, url = doc.location.href) {
 	translator.setDocument(doc);
 	translator.setHandler('itemDone', (_obj, item) => {
 		item.itemType = type;
-		// EM laat de ISO-tijd staan; Zotero wil alleen de dag.
+		// EM keeps the ISO time; Zotero wants the day only.
 		let m = /^(\d{4}-\d{2}-\d{2})/.exec(item.date || '');
 		if (m) item.date = m[1];
-		// door EM afgeleide korte titel ("Türkiye", "In Mali, ...") is geen echte ondertitel
+		// the short title EM derives ("Türkiye", "In Mali, ...") is not a real subtitle
 		item.shortTitle = '';
-		// EM zet de volledige bylinetekst als organisatie-auteur; vervangen door de persoon
-		// (of weghalen als het echt de organisatie is).
+		// EM files the whole byline text as an organisation author; replace it with the person
+		// (or drop it when it really is the organisation).
 		let byline = ZU.xpathText(doc, '//div[contains(@class, "bylineContainer")]//span[1]')
 			|| ZU.xpathText(doc, '//div[contains(@class, "authorInfoContainer")]//span[1]');
 		let parsed = byline ? parseByline(byline) : parseBodyByline(doc);
 		if (parsed) {
 			item.creators = [Zotero.Utilities.cleanAuthor(parsed.name, 'author', false)];
-			// Alleen de container levert een functietitel. In ES/AR staat de handtekening als
-			// één zin ("Por NAAM,rol ...") in de body; dat als "Byline role" wegzetten zou een
-			// veld suggereren dat de pagina niet heeft, dus daar alleen de naam.
+			// Only the container yields a role. In ES/AR the signature is one running sentence
+			// ("Por NAME,role ...") in the body; writing that to "Byline role" would assert a
+			// field the page does not have, so there only the name.
 			if (parsed.role && byline) {
 				item.extra = (item.extra ? item.extra + '\n' : '') + 'Byline role: ' + parsed.role;
 			}
 		}
 		else if (!byline) {
-			// geen byline op de pagina -> geen gefabriceerde organisatie-auteur
+			// no byline on the page -> no fabricated organisation author
 			item.creators = [];
 		}
 		item.publicationTitle = 'Amnesty International';
 		if (type === 'report') {
-			// report heeft geen publicationTitle; de organisatie hoort bij institution/publisher.
+			// report has no publicationTitle; the organisation belongs in institution/publisher.
 			delete item.publicationTitle;
 			item.institution = 'Amnesty International';
 			item.publisher = 'Amnesty International';
@@ -206,7 +206,7 @@ async function scrape(doc, url = doc.location.href) {
 			if (indexNumber) item.reportNumber = indexNumber;
 			item.creators = [];
 		}
-		// de site is meertalig: /en/, /fr/, /es/, /ar/ ... -> taal uit <html lang>
+		// the site is multilingual: /en/, /fr/, /es/, /ar/ ... -> language from <html lang>
 		item.language = attr(doc, 'html', 'lang') || 'en';
 		item.url = attr(doc, 'link[rel="canonical"]', 'href') || url;
 		item.complete();
