@@ -132,6 +132,19 @@ function scrape(doc, url) {
 		// link "authors & contributors-menu" is not a person, and article:author is
 		// literally " & " on some pages.
 		var byline = getByline(doc);
+		if (!byline.length) {
+			// Without a byline block, EM's article:author is all there is, and on
+			// agency copy that is the wire service. Keep such credits out of the
+			// authors; anything that looks like a person is left untouched.
+			var emName = ZU.trimInternal(
+				ZU.xpathText(doc, '//meta[@property="article:author"]/@content') || '');
+			// Only replace what EM produced when the value parses into credits and
+			// all of them are agencies or desks; a bare " & " parses to nothing.
+			var emParts = emName ? parseCredit(emName) : [];
+			if (emParts.length && emParts.every(isCredit)) {
+				byline = [emName];
+			}
+		}
 		if (byline.length) {
 			var credits = [];
 			for (var i = 0; i < byline.length; i++) {
@@ -303,13 +316,16 @@ var AGENCIES = {
 };
 
 // The paper's own desks and the role-only byline, which are not people either.
+// Every edition desk ends in "Bureau" (The Hindu Bureau, Sports Bureau,
+// Telangana Bureau), so the shape matters more than the list.
 var DESKS = {
-	'the hindu bureau': 'The Hindu Bureau',
-	'sports bureau': 'Sports Bureau',
 	'team bl': 'Team BL',
 	'team sportstar': 'Team Sportstar',
 	'special correspondent': 'Special Correspondent'
 };
+
+// "<State/beat> Bureau" is a desk, never a person.
+var BUREAU_RE = /\bBureau$/i;
 
 function getByline(doc) {
 	var names = [];
@@ -350,7 +366,14 @@ function parseCredit(text) {
 	if (DESKS[name.toLowerCase()]) {
 		return [{ type: 'desk', value: DESKS[name.toLowerCase()] }];
 	}
+	if (BUREAU_RE.test(name)) {
+		return [{ type: 'desk', value: name }];
+	}
 	return [{ type: 'person', value: name }];
+}
+
+function isCredit(part) {
+	return part.type != 'person';
 }
 
 function hasCredit(credits, value) {
@@ -707,6 +730,70 @@ var testCases = [
 					},
 					{
 						"tag": "school"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.thehindu.com/news/national/education-system-now-an-exclusion-system-designed-to-keep-millions-of-youth-out-rahul/article71599621.ece",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Education system now an exclusion system designed to keep millions of youth out: Rahul",
+				"creators": [
+					{
+						"lastName": "PTI",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					}
+				],
+				"date": "2026-10-18T16:39:57+05:30",
+				"ISSN": "0971-751X",
+				"abstractNote": "Rahul Gandhi calls India\u2019s education system an exclusion system, pushing youth out by class, wealth, or language barriers.",
+				"language": "en-IN",
+				"libraryCatalog": "www.thehindu.com",
+				"place": "Chennai",
+				"publicationTitle": "The Hindu",
+				"section": "India",
+				"url": "https://www.thehindu.com/news/national/education-system-now-an-exclusion-system-designed-to-keep-millions-of-youth-out-rahul/article71599621.ece",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"shortTitle": "Education system now an exclusion system designed to keep millions of youth out",
+				"tags": [
+					{
+						"tag": "Indian National Congress"
+					},
+					{
+						"tag": "New Delhi"
+					},
+					{
+						"tag": "Rahul Gandhi"
+					},
+					{
+						"tag": "congress rahul gandhi"
+					},
+					{
+						"tag": "education"
+					},
+					{
+						"tag": "rahul gandhi instagram"
+					},
+					{
+						"tag": "rahul gandhi instagram comment"
+					},
+					{
+						"tag": "rahul gandhi news"
+					},
+					{
+						"tag": "rahul gandhi on modi"
 					}
 				],
 				"notes": [],
