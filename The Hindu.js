@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-18 19:52:37"
+	"lastUpdated": "2026-10-18 19:57:26"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017 Philipp Zumstein
+	Copyright © 2017 Philipp Zumstein and Vera de Kok
 	
 	This file is part of Zotero.
 
