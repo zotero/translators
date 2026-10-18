@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-18 19:37:13"
+	"lastUpdated": "2026-10-18 19:52:37"
 }
 
 /*
@@ -152,15 +152,12 @@ function scrape(doc, url) {
 		if (!item.date) {
 			item.date = ZU.xpathText(doc, '//meta[@name="publish-date"]/@content');
 		}
-		// The old div.ut-container is gone; the date line now ends in " IST - Place".
-		// It was replaced by a generic .update-publish-time, so anchor on that text
-		// instead of on the container class.
-		var placeText = ZU.xpathText(doc, '//p[contains(@class, "updated-time")]/span')
-			|| ZU.xpathText(doc, '//div[contains(@class, "update-publish-time")]');
-		var place = placeText && placeText.split(/\s+-\s+/).pop();
-		if (place && !/\d/.test(place) && place.length < 60) {
-			item.place = ZU.capitalizeTitle(place.trim(), true);
-		}
+		// The date line now ends in " IST - <place>", but that is the DATELINE:
+		// where the story was filed from (Kolkata, Paris), not where the paper is
+		// published. item.place means the city of publication, so take that from
+		// the publisher address in JSON-LD and keep the dateline as a tag.
+		var dateline = getDateline(doc);
+		item.place = PUBLICATION_PLACE;
 		item.language = "en-IN";
 		item.publicationTitle = "The Hindu";
 		// EM copies the meta description, but that one contains double spaces
@@ -186,21 +183,24 @@ function scrape(doc, url) {
 		// The keywords EM takes from the meta tags are headline variants
 		// ("<title> ratings", "<title> Letterboxd"), so add the site's own
 		// topic list next to them.
-		var topics = getTopics(doc);
-		if (topics.length) {
-			var tagNames = [];
-			for (var t of item.tags || []) {
-				tagNames.push(typeof t == 'string' ? t : t.tag);
+		var tagNames = [];
+		// EM may hand over a bare string when all it found was meta keywords.
+		var existing = typeof item.tags == 'string' ? [item.tags] : (item.tags || []);
+		for (var t of existing) {
+			tagNames.push(typeof t == 'string' ? t : t.tag);
+		}
+		// The dateline is worth keeping, but only as a tag.
+		if (dateline && !hasName(tagNames, dateline)) {
+			tagNames.push(dateline);
+		}
+		for (var topic of getTopics(doc)) {
+			if (!hasName(tagNames, topic)) {
+				tagNames.push(topic);
 			}
-			for (var topic of topics) {
-				if (!hasName(tagNames, topic)) {
-					tagNames.push(topic);
-				}
-			}
-			item.tags = [];
-			for (var name of tagNames) {
-				item.tags.push({ tag: name });
-			}
+		}
+		item.tags = [];
+		for (var name of tagNames) {
+			item.tags.push({ tag: name });
 		}
 		item.complete();
 	});
@@ -209,6 +209,33 @@ function scrape(doc, url) {
 		trans.itemType = "newspaperArticle";
 		trans.doWeb(doc, url);
 	});
+}
+
+
+// item.place is the city of publication, not the dateline. The Hindu is
+// published from Chennai (the address in its own JSON-LD publisher block).
+var PUBLICATION_PLACE = "Chennai";
+
+
+// The dateline trails the publish/update stamp as " IST - <place>". An article
+// carries several stamps and only some of them name a place, so scan them all
+// instead of trusting the first. Only a place name qualifies: the stamp itself
+// contains digits, and role strings such as "New Delhi bureau" are not places.
+function getDateline(doc) {
+	var stamps = ZU.xpath(doc, '//p[contains(@class, "updated-time")]/span')
+		.concat(ZU.xpath(doc, '//div[contains(@class, "update-publish-time")]'));
+	for (var i = 0; i < stamps.length; i++) {
+		var text = ZU.trimInternal(stamps[i].textContent || '');
+		if (!/\bIST\s*-/.test(text)) {
+			continue;
+		}
+		var place = ZU.trimInternal(text.split(/\s+-\s+/).pop() || '');
+		if (!place || /\d/.test(place) || place.length > 60) {
+			continue;
+		}
+		return ZU.capitalizeTitle(place, true);
+	}
+	return null;
 }
 
 
@@ -392,7 +419,7 @@ var testCases = [
 				"abstractNote": "India bids adieu to the telegram after 163 years",
 				"language": "en-IN",
 				"libraryCatalog": "www.thehindu.com",
-				"place": "Kolkata",
+				"place": "Chennai",
 				"publicationTitle": "The Hindu",
 				"section": "India",
 				"url": "https://www.thehindu.com/news/national/telegram-no-more-stop-100-stop/article4914819.ece",
@@ -405,6 +432,9 @@ var testCases = [
 				"tags": [
 					{
 						"tag": "BSNL"
+					},
+					{
+						"tag": "Kolkata"
 					},
 					{
 						"tag": "Telegram"
@@ -461,6 +491,9 @@ var testCases = [
 				"tags": [
 					{
 						"tag": "Cassette tapes"
+					},
+					{
+						"tag": "Chennai"
 					},
 					{
 						"tag": "Dial-up"
@@ -523,7 +556,7 @@ var testCases = [
 				"abstractNote": "This is the fourth increase since June. It was raised by 75 paise on June 1, followed by a Rs. 2 per litre increase on June 16 and a Rs. 1.82 per litre hike on June 29.",
 				"language": "en-IN",
 				"libraryCatalog": "www.thehindu.com",
-				"place": "New Delhi",
+				"place": "Chennai",
 				"publicationTitle": "The Hindu",
 				"section": "Economy",
 				"url": "https://www.thehindu.com/business/Economy/petrol-prices-to-go-up-by-rs-155-per-litre/article4914855.ece",
@@ -534,6 +567,9 @@ var testCases = [
 					}
 				],
 				"tags": [
+					{
+						"tag": "New Delhi"
+					},
 					{
 						"tag": "Petrol price hike"
 					},
@@ -574,6 +610,7 @@ var testCases = [
 				"abstractNote": "Explore the diverse interpretations of Krishna across India, reflecting regional identities, cultural nuances, and spiritual aspirations through history.",
 				"language": "en-IN",
 				"libraryCatalog": "www.thehindu.com",
+				"place": "Chennai",
 				"publicationTitle": "The Hindu",
 				"section": "Columns",
 				"url": "https://www.thehindu.com/opinion/columns/devdutt-pattanaik-column-india-has-many-krishnas-cult-to-culture/article71467898.ece",
@@ -648,6 +685,7 @@ var testCases = [
 				"abstractNote": "Violent protests surge across France as thousands rally, damaging property and clashing with police amid student blockades and rising costs.",
 				"language": "en-IN",
 				"libraryCatalog": "www.thehindu.com",
+				"place": "Chennai",
 				"publicationTitle": "The Hindu",
 				"section": "World",
 				"url": "https://www.thehindu.com/news/international/clashes-and-fires-break-out-as-protesters-rally-across-france-joining-students/article71598941.ece",
@@ -675,6 +713,9 @@ var testCases = [
 					},
 					{
 						"tag": "French youth protests"
+					},
+					{
+						"tag": "Paris"
 					},
 					{
 						"tag": "civil unrest"
@@ -713,6 +754,7 @@ var testCases = [
 				"abstractNote": "The 48th Sharadotsav of South Madras Cultural Association with a pandal themed around \u201cSatyajit Ray\u2019s Magical Creations\u201d is the team work of its members",
 				"language": "en-IN",
 				"libraryCatalog": "www.thehindu.com",
+				"place": "Chennai",
 				"publicationTitle": "The Hindu",
 				"section": "Chennai",
 				"url": "https://www.thehindu.com/news/cities/chennai/rediscover-satyajit-ray-at-this-durga-puja-pandal-in-nandanam/article71597692.ece",
