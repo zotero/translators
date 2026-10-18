@@ -45,16 +45,18 @@ function detectWeb(doc, url) {
 	// .ece als PAD-suffix (niet ergens in query/fragment)
 	if (/\.ece(?:[?#]|$)/.test(url)) {
 		return "newspaperArticle";
-	} else if (url.indexOf('/search/?') > -1 && getSearchResults(doc, true)) {
+	} else if (url.includes('/search/?') && getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//div[contains(@class, "story-card-33-news") or contains(@class, "story-card-news")]//a[contains(@href, ".ece")]');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
+		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -93,33 +95,29 @@ function scrape(doc, url) {
 		// The Hindu zet de byline server-side in de HTML:
 		//   <div class="author-name"><a class="person-name" href=".../profile/author/<slug>/">Naam</a>
 		// De oude selector (div.author-container) bestaat niet meer en leverde dus niets op.
+		// Het byline-blok is de ENIGE betrouwbare bron: de footer bevat een link met
+		// class="authors &amp; contributors-menu" (daar kwam lastName "&" vandaan) en
+		// article:author is op sommige pagina's letterlijk " & ".
 		var names = [];
 		var seen = {};
 		var links = ZU.xpath(doc, '//div[contains(@class, "author")]'
-			+ '//a[contains(@class, "person-name") and contains(@href, "/profile/author/")]');
+			+ '//a[contains(@class, "person-name")]');
 		for (var i=0; i<links.length; i++) {
 			var name = ZU.trimInternal(links[i].textContent);
-			if (name && !seen[name] && !/^(authors?|contributors?|more)$/i.test(name)) {
+			if (name && !seen[name]) {
 				seen[name] = 1;
 				names.push(name);
 			}
 		}
 		if (!names.length) {
-			// oude structuur (voor 2020-uploads)
-			var oldAuthors = ZU.xpath(doc, '//div[contains(@class, "author-container")]/span');
+			// oudere artikelen: <div class="author fL"><span>Naam</span></div>
+			var oldAuthors = ZU.xpath(doc, '//div[contains(@class, "author")]/span');
 			for (var j=0; j<oldAuthors.length; j++) {
 				var oldName = ZU.trimInternal(oldAuthors[j].textContent);
-				if (oldName) {
+				if (oldName && !seen[oldName]) {
+					seen[oldName] = 1;
 					names.push(oldName);
 				}
-			}
-		}
-		if (!names.length) {
-			// bureau-byline ("The Hindu Bureau") staat in de meta
-			var metaAuthor = ZU.xpathText(doc, '//meta[@name="author"]/@content')
-				|| ZU.xpathText(doc, '//meta[@property="article:author"]/@content');
-			if (metaAuthor) {
-				names.push(metaAuthor);
 			}
 		}
 		if (names.length>0) {
@@ -131,13 +129,36 @@ function scrape(doc, url) {
 		if (!item.date) {
 			item.date = ZU.xpathText(doc, '//meta[@name="publish-date"]/@content');
 		}
-		var utcontainer = ZU.xpathText(doc, '(//div[contains(@class, "ut-container")]/span)[1]');
-		//test that we are not already in the date node (name of places should not contain any number)
-		if (utcontainer && !utcontainer.match(/\d/g)) {
-			item.place = ZU.capitalizeTitle(utcontainer.replace(/,\s*$/, ''), true);
+		// De oude div.ut-container is weg; de datumregel eindigt nu op " IST - Plaats".
+		// Daarvoor in de plaats is er een generieke .update-publish-time, dus anker op
+		// die tekst in plaats van op de containerklasse.
+		var placeText = ZU.xpathText(doc, '//p[contains(@class, "updated-time")]/span')
+			|| ZU.xpathText(doc, '//div[contains(@class, "update-publish-time")]');
+		var place = placeText && placeText.split(/\s+-\s+/).pop();
+		if (place && !/\d/.test(place) && place.length < 60) {
+			item.place = ZU.capitalizeTitle(place.trim(), true);
 		}
 		item.language = "en-IN";
 		item.publicationTitle = "The Hindu";
+		// EM neemt de meta-description over, maar de pagina bevat daar dubbele spaties
+		// ("moved aside  so we could embrace") die in de HTML-collapse niet zichtbaar zijn.
+		if (item.abstractNote) {
+			item.abstractNote = ZU.trimInternal(item.abstractNote);
+		}
+		// Sommige artikelen hebben een automatisch gevulde description
+		// ("<Kolom> News:<titel>") in plaats van een echte samenvatting; die is
+		// waardeloos als abstract. Neem dan de eerste (lange) alinea van de body.
+		var ld = getJSONLD(doc);
+		if (!item.abstractNote || isGeneratedDescription(item.abstractNote)) {
+			var lead = getLeadParagraph(doc);
+			if (lead) item.abstractNote = lead;
+		}
+		// De sectie die Embedded Metadata uit de breadcrumb haalt is de rubriek op
+		// het hoogste niveau ("Features", "Business") terwijl JSON-LD de fijnere
+		// rubriek geeft ("Metroplus", "Economy").
+		if (ld && ld.articleSection) {
+			item.section = ZU.trimInternal(String(ld.articleSection));
+		}
 		item.ISSN = "0971-751X";
 		item.complete();
 	});
@@ -146,6 +167,45 @@ function scrape(doc, url) {
 		trans.itemType = "newspaperArticle";
 		trans.doWeb(doc, url);
 	});
+}
+
+
+function getJSONLD(doc) {
+	var scripts = doc.querySelectorAll('script[type="application/ld+json"]');
+	var found = null;
+	for (var i = 0; i < scripts.length; i++) {
+		var data;
+		try {
+			data = JSON.parse(scripts[i].textContent);
+		}
+		catch (e) {
+			continue;
+		}
+		var nodes = Array.isArray(data) ? data : (data['@graph'] || [data]);
+		for (var j = 0; j < nodes.length; j++) {
+			if (/Article/.test(nodes[j]['@type'] || '')) {
+				found = nodes[j];
+			}
+		}
+	}
+	return found;
+}
+
+function isGeneratedDescription(text) {
+	// "<Kolom> News:<titel>" - geen echte samenvatting
+	return /\bNews:\s*/.test(text) || text.length < 40;
+}
+
+function getLeadParagraph(doc) {
+	var paras = ZU.xpath(doc, '//div[contains(@class, "article-section")]'
+		+ '//p[string-length(normalize-space(.)) > 120]');
+	for (var i = 0; i < paras.length; i++) {
+		// fotobijschriften staan in dezelfde body
+		if (/\bcaption\b/.test(paras[i].className || '')) continue;
+		var text = ZU.trimInternal(paras[i].textContent);
+		if (text) return text;
+	}
+	return null;
 }
 
 
@@ -202,11 +262,12 @@ var testCases = [
 				"libraryCatalog": "www.thehindu.com",
 				"place": "Kolkata",
 				"publicationTitle": "The Hindu",
-				"section": "National",
-				"url": "http://www.thehindu.com/news/national/telegram-no-more-stop-100-stop/article4914819.ece",
+				"section": "India",
+				"url": "https://www.thehindu.com/news/national/telegram-no-more-stop-100-stop/article4914819.ece",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -246,11 +307,12 @@ var testCases = [
 				"libraryCatalog": "www.thehindu.com",
 				"place": "Chennai",
 				"publicationTitle": "The Hindu",
-				"section": "Features",
-				"url": "http://www.thehindu.com/features/metroplus/once-favoured-now-forgotten/article4912011.ece",
+				"section": "Metroplus",
+				"url": "https://www.thehindu.com/features/metroplus/once-favoured-now-forgotten/article4912011.ece",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -291,10 +353,11 @@ var testCases = [
 				"place": "New Delhi",
 				"publicationTitle": "The Hindu",
 				"section": "Economy",
-				"url": "http://www.thehindu.com/business/Economy/petrol-prices-to-go-up-by-rs-155-per-litre/article4914855.ece",
+				"url": "https://www.thehindu.com/business/Economy/petrol-prices-to-go-up-by-rs-155-per-litre/article4914855.ece",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -310,41 +373,42 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.thehindu.com/opinion/columns/Chandrasekhar/the-forgotten-software-boom/article4914571.ece",
+		"url": "https://www.thehindu.com/opinion/columns/devdutt-pattanaik-column-india-has-many-krishnas-cult-to-culture/article71467898.ece",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "The forgotten software boom",
+				"title": "Column by Devdutt Pattanaik | India has many Krishnas",
 				"creators": [
 					{
-						"firstName": "C. P.",
-						"lastName": "Chandrasekhar",
+						"firstName": "Devdutt",
+						"lastName": "Pattanaik",
 						"creatorType": "author"
 					}
 				],
-				"date": "2013-07-14T13:57:47+05:30",
+				"date": "2026-09-17T06:06:00+05:30",
 				"ISSN": "0971-751X",
-				"abstractNote": "India’s software and information technology-enabled services (ITeS) exports have lost momentum. Since 2007-08 the Reserve Bank of India has been conducting an annual survey of exports of computer soft",
+				"abstractNote": "Explore the diverse interpretations of Krishna across India, reflecting regional identities, cultural nuances, and spiritual aspirations through history.",
 				"language": "en-IN",
 				"libraryCatalog": "www.thehindu.com",
 				"publicationTitle": "The Hindu",
-				"section": "Chandrasekhar",
-				"url": "http://www.thehindu.com/opinion/columns/Chandrasekhar/the-forgotten-software-boom/article4914571.ece",
+				"section": "Columns",
+				"url": "https://www.thehindu.com/opinion/columns/devdutt-pattanaik-column-india-has-many-krishnas-cult-to-culture/article71467898.ece",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"IT industry",
-					"ITeS",
-					"NASSCOM",
-					"economic slowdown"
+					"Devdutt Pattanaik on India's many Krishnas",
+					"Devdutt Pattanaik's From cult to culture",
+					"India has many Krishnas writes Devdutt Pattanaik",
+					"diverse interpretations of Krishna across India"
 				],
 				"notes": [],
 				"seeAlso": []
 			}
 		]
 	}
-]
+];
 /** END TEST CASES **/
