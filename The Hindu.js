@@ -1,7 +1,7 @@
 {
 	"translatorID": "06142d59-fa9c-48c3-982b-6e7c67d3d6b8",
 	"label": "The Hindu",
-	"creator": "Philipp Zumstein",
+	"creator": "Philipp Zumstein, Vera de Kok",
 	"target": "^https?://www\\.thehindu\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-18 17:39:21"
+	"lastUpdated": "2026-10-18 19:24:47"
 }
 
 /*
