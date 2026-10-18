@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-18 19:24:47"
+	"lastUpdated": "2026-10-18 19:37:13"
 }
 
 /*
@@ -183,6 +183,25 @@ function scrape(doc, url) {
 			item.section = ZU.trimInternal(String(ld.articleSection));
 		}
 		item.ISSN = "0971-751X";
+		// The keywords EM takes from the meta tags are headline variants
+		// ("<title> ratings", "<title> Letterboxd"), so add the site's own
+		// topic list next to them.
+		var topics = getTopics(doc);
+		if (topics.length) {
+			var tagNames = [];
+			for (var t of item.tags || []) {
+				tagNames.push(typeof t == 'string' ? t : t.tag);
+			}
+			for (var topic of topics) {
+				if (!hasName(tagNames, topic)) {
+					tagNames.push(topic);
+				}
+			}
+			item.tags = [];
+			for (var name of tagNames) {
+				item.tags.push({ tag: name });
+			}
+		}
 		item.complete();
 	});
 
@@ -190,6 +209,36 @@ function scrape(doc, url) {
 		trans.itemType = "newspaperArticle";
 		trans.doWeb(doc, url);
 	});
+}
+
+
+// Case-insensitive, because the meta keywords and the topic list overlap in
+// spelling ("Telegram" vs "telegram").
+function hasName(names, wanted) {
+	var lower = wanted.toLowerCase();
+	for (var name of names) {
+		if (name && name.toLowerCase() == lower) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+// The site's own topic list, which is the meaningful one: the meta keywords
+// are headline variants ("<title> ratings"), while these are subject tags
+// ("cinema", "documentary films"). It appears three times in the HTML and once
+// rendered; use the rendered list, it is the only one a translator can read.
+function getTopics(doc) {
+	var topics = [];
+	var links = doc.querySelectorAll('p.related-topics-list a');
+	for (var link of links) {
+		var name = ZU.trimInternal(link.textContent || '');
+		if (name && !topics.includes(name)) {
+			topics.push(name);
+		}
+	}
+	return topics;
 }
 
 
@@ -354,10 +403,21 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"BSNL",
-					"Telegram",
-					"Telegram service discontinuation",
-					"Telegraph service"
+					{
+						"tag": "BSNL"
+					},
+					{
+						"tag": "Telegram"
+					},
+					{
+						"tag": "Telegram service discontinuation"
+					},
+					{
+						"tag": "Telegraph service"
+					},
+					{
+						"tag": "telecommunication service"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -399,15 +459,45 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Cassette tapes",
-					"Dial-up",
-					"Floppy discs",
-					"Gramophone",
-					"Pager",
-					"Roll films",
-					"Transistor radio",
-					"Typewriter",
-					"VCR"
+					{
+						"tag": "Cassette tapes"
+					},
+					{
+						"tag": "Dial-up"
+					},
+					{
+						"tag": "Floppy discs"
+					},
+					{
+						"tag": "Gramophone"
+					},
+					{
+						"tag": "Pager"
+					},
+					{
+						"tag": "Roll films"
+					},
+					{
+						"tag": "The Hindu MetroPlus"
+					},
+					{
+						"tag": "Transistor radio"
+					},
+					{
+						"tag": "Typewriter"
+					},
+					{
+						"tag": "VCR"
+					},
+					{
+						"tag": "arts, culture and entertainment"
+					},
+					{
+						"tag": "human interest"
+					},
+					{
+						"tag": "lifestyle and leisure"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -444,10 +534,21 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Petrol price hike",
-					"Rupee fall",
-					"oil imports",
-					"oil marketing companies"
+					{
+						"tag": "Petrol price hike"
+					},
+					{
+						"tag": "Rupee fall"
+					},
+					{
+						"tag": "oil imports"
+					},
+					{
+						"tag": "oil marketing companies"
+					},
+					{
+						"tag": "petrol"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -483,10 +584,45 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Devdutt Pattanaik on India's many Krishnas",
-					"Devdutt Pattanaik's From cult to culture",
-					"India has many Krishnas writes Devdutt Pattanaik",
-					"diverse interpretations of Krishna across India"
+					{
+						"tag": "Devdutt Pattanaik on India's many Krishnas"
+					},
+					{
+						"tag": "Devdutt Pattanaik's From cult to culture"
+					},
+					{
+						"tag": "India has many Krishnas writes Devdutt Pattanaik"
+					},
+					{
+						"tag": "The Hindu Sunday Magazine"
+					},
+					{
+						"tag": "culture (general)"
+					},
+					{
+						"tag": "diverse interpretations of Krishna across India"
+					},
+					{
+						"tag": "hinduism"
+					},
+					{
+						"tag": "history"
+					},
+					{
+						"tag": "history and culture"
+					},
+					{
+						"tag": "human interest"
+					},
+					{
+						"tag": "religion and belief"
+					},
+					{
+						"tag": "religious books"
+					},
+					{
+						"tag": "society"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -522,11 +658,36 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"France protests",
-					"France unrest",
-					"France violence protests",
-					"French reform protests",
-					"French youth protests"
+					{
+						"tag": "France"
+					},
+					{
+						"tag": "France protests"
+					},
+					{
+						"tag": "France unrest"
+					},
+					{
+						"tag": "France violence protests"
+					},
+					{
+						"tag": "French reform protests"
+					},
+					{
+						"tag": "French youth protests"
+					},
+					{
+						"tag": "civil unrest"
+					},
+					{
+						"tag": "police"
+					},
+					{
+						"tag": "protest"
+					},
+					{
+						"tag": "school"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -562,9 +723,24 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Durga Puja celebrations and chennai",
-					"South Madras Cultural Association and durga puja",
-					"satyajit ray and pandal theme"
+					{
+						"tag": "Chennai Downtown"
+					},
+					{
+						"tag": "Durga Pooja"
+					},
+					{
+						"tag": "Durga Puja celebrations and chennai"
+					},
+					{
+						"tag": "South Madras Cultural Association and durga puja"
+					},
+					{
+						"tag": "arts, culture and entertainment"
+					},
+					{
+						"tag": "satyajit ray and pandal theme"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
