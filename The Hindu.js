@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-17 12:55:00"
+	"lastUpdated": "2026-10-18 14:45:00"
 }
 
 /*
@@ -45,7 +45,8 @@ function detectWeb(doc, url) {
 	// .ece als PAD-suffix (niet ergens in query/fragment)
 	if (/\.ece(?:[?#]|$)/.test(url)) {
 		return "newspaperArticle";
-	} else if (url.includes('/search/?') && getSearchResults(doc, true)) {
+	}
+	if (url.includes('/search/?') && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	return false;
@@ -70,16 +71,15 @@ function getSearchResults(doc, checkOnly) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
+			if (!items) return;
 			var articles = [];
 			for (var i in items) {
 				articles.push(i);
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -91,39 +91,25 @@ function scrape(doc, url) {
 	//translator.setDocument(doc);
 	
 	translator.setHandler('itemDone', function (obj, item) {
-		//fix the authors
-		// The Hindu zet de byline server-side in de HTML:
-		//   <div class="author-name"><a class="person-name" href=".../profile/author/<slug>/">Naam</a>
-		// De oude selector (div.author-container) bestaat niet meer en leverde dus niets op.
-		// Het byline-blok is de ENIGE betrouwbare bron: de footer bevat een link met
-		// class="authors &amp; contributors-menu" (daar kwam lastName "&" vandaan) en
-		// article:author is op sommige pagina's letterlijk " & ".
-		var names = [];
-		var seen = {};
-		var links = ZU.xpath(doc, '//div[contains(@class, "author")]'
-			+ '//a[contains(@class, "person-name")]');
-		for (var i=0; i<links.length; i++) {
-			var name = ZU.trimInternal(links[i].textContent);
-			if (name && !seen[name]) {
-				seen[name] = 1;
-				names.push(name);
-			}
-		}
-		if (!names.length) {
-			// oudere artikelen: <div class="author fL"><span>Naam</span></div>
-			var oldAuthors = ZU.xpath(doc, '//div[contains(@class, "author")]/span');
-			for (var j=0; j<oldAuthors.length; j++) {
-				var oldName = ZU.trimInternal(oldAuthors[j].textContent);
-				if (oldName && !seen[oldName]) {
-					seen[oldName] = 1;
-					names.push(oldName);
+		// Fix the authors. The byline block is the only reliable source: the footer
+		// link "authors & contributors-menu" is not a person, and article:author is
+		// literally " & " on some pages.
+		var byline = getByline(doc);
+		if (byline.length) {
+			var credits = [];
+			for (var i = 0; i < byline.length; i++) {
+				var parts = parseCredit(byline[i]);
+				for (var j = 0; j < parts.length; j++) {
+					if (!hasCredit(credits, parts[j].value)) {
+						credits.push(parts[j]);
+					}
 				}
 			}
-		}
-		if (names.length>0) {
 			item.creators = [];
-			for (var k=0; k<names.length; k++) {
-				insertCreator(names[k], item);
+			for (var k = 0; k < credits.length; k++) {
+				item.creators.push(credits[k].type == 'person'
+					? personCreator(credits[k].value)
+					: corporateCreator(credits[k].value));
 			}
 		}
 		if (!item.date) {
@@ -163,7 +149,7 @@ function scrape(doc, url) {
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.itemType = "newspaperArticle";
 		trans.doWeb(doc, url);
 	});
@@ -209,34 +195,95 @@ function getLeadParagraph(doc) {
 }
 
 
-function insertCreator(authorName, newItem){
-	/*Check for some author name conventions unique to the Hindu*/
-	/*Right now we are using the following: 
-	  
-	  1) PTI, a news agency, is often credited as an author on The
-	  Hindu articles.  We just change the author status to
-	  "contributor", and retain the capitalization.
-	  
-	  2) Some articles are bylined "Special Coresspondent". Again, we
-	  change the author status to "contributor".
-	  
-	*/
-	authorName = ZU.capitalizeTitle(authorName.toLowerCase(), true);
-	if (authorName == "Pti") {
-		newItem.creators.push({
-			lastName: "PTI", 
-			creatorType: 'contributor', 
-			fieldMode: 1
-		});
-	} else if (authorName == "Special Correspondent") {
-		newItem.creators.push({
-			lastName: "Special Correspondent", 
-			creatorType: 'contributor', 
-			fieldMode: 1
-		});
-	} else {
-		newItem.creators.push(ZU.cleanAuthor(authorName, "author"));
+// Wire services The Hindu credits in the byline. A credit, not an author.
+// Wire services The Hindu credits in its bylines. They are credits, not authors.
+var AGENCIES = {
+	pti: 'PTI',
+	'press trust of india': 'PTI',
+	ap: 'AP',
+	'associated press': 'AP',
+	afp: 'AFP',
+	'agence france-presse': 'AFP',
+	reuters: 'Reuters',
+	ians: 'IANS',
+	'indo-asian news service': 'IANS',
+	ani: 'ANI',
+	'asian news international': 'ANI'
+};
+
+// The paper's own desks and the role-only byline, which are not people either.
+var DESKS = {
+	'the hindu bureau': 'The Hindu Bureau',
+	'sports bureau': 'Sports Bureau',
+	'team bl': 'Team BL',
+	'team sportstar': 'Team Sportstar',
+	'special correspondent': 'Special Correspondent'
+};
+
+function getByline(doc) {
+	var names = [];
+	// Only the article byline container counts. A plain contains(@class, "author")
+	// also matches the div.author-name of every "related articles" card in
+	// div.package-list, which would add a dozen unrelated names as authors.
+	var container = '//div[contains(concat(" ", normalize-space(@class), " "), " author ")]';
+	var links = ZU.xpath(doc, container + '//a[contains(@class, "person-name")]');
+	if (!links.length) {
+		// older articles: <div class="author fL"><span>Name</span></div>
+		links = ZU.xpath(doc, container + '/span');
 	}
+	for (var i = 0; i < links.length; i++) {
+		var name = ZU.trimInternal(links[i].textContent);
+		if (name && !names.includes(name)) {
+			names.push(name);
+		}
+	}
+	return names;
+}
+
+// Split one byline entry into typed parts: "PTI", "PTI/AFP" and "Lavpreet Kaur,"
+// all occur, where the trailing comma belongs to the markup.
+function parseCredit(text) {
+	var name = ZU.trimInternal(text || '').replace(/^[\s&,]+|[\s&,]+$/g, '');
+	if (!name) return [];
+	var chunks = name.split(/\s*(?:[/&,]|\band\b)\s*/i);
+	if (chunks.length > 1) {
+		var parts = [];
+		for (var i = 0; i < chunks.length; i++) {
+			parts = parts.concat(parseCredit(chunks[i]));
+		}
+		return parts;
+	}
+	if (AGENCIES[name.toLowerCase()]) {
+		return [{ type: 'corporate', value: AGENCIES[name.toLowerCase()] }];
+	}
+	if (DESKS[name.toLowerCase()]) {
+		return [{ type: 'desk', value: DESKS[name.toLowerCase()] }];
+	}
+	return [{ type: 'person', value: name }];
+}
+
+function hasCredit(credits, value) {
+	for (var i = 0; i < credits.length; i++) {
+		if (credits[i].value === value) {
+			return true;
+		}
+	}
+	return false;
+}
+
+function personCreator(name) {
+	// Some bylines are all caps ("SHARAN APPARAO"); initials such as "G.V.R."
+	// must survive, so only rewrite names that carry no lowercase at all.
+	if (name == name.toUpperCase()) {
+		name = ZU.capitalizeTitle(name.toLowerCase(), true);
+	}
+	return ZU.cleanAuthor(name, 'author');
+}
+
+// Agencies and desks get a contributor in one field, so a credit like
+// "The Hindu Bureau" does not become the persons "The Hindu" and "Bureau".
+function corporateCreator(name) {
+	return { lastName: name, creatorType: 'contributor', fieldMode: 1 };
 }
 
 /** BEGIN TEST CASES **/
@@ -409,6 +456,84 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.thehindu.com/news/international/clashes-and-fires-break-out-as-protesters-rally-across-france-joining-students/article71598941.ece",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Clashes and fires break out as protesters rally across France, joining students",
+				"creators": [
+					{
+						"lastName": "AP",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					}
+				],
+				"date": "2026-10-18T07:05:54+05:30",
+				"ISSN": "0971-751X",
+				"abstractNote": "Violent protests surge across France as thousands rally, damaging property and clashing with police amid student blockades and rising costs.",
+				"language": "en-IN",
+				"libraryCatalog": "www.thehindu.com",
+				"publicationTitle": "The Hindu",
+				"section": "World",
+				"url": "https://www.thehindu.com/news/international/clashes-and-fires-break-out-as-protesters-rally-across-france-joining-students/article71598941.ece",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					"France protests",
+					"France unrest",
+					"France violence protests",
+					"French reform protests",
+					"French youth protests"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.thehindu.com/news/cities/chennai/rediscover-satyajit-ray-at-this-durga-puja-pandal-in-nandanam/article71597692.ece",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Rediscover Satyajit Ray at this Durga Puja pandal in Nandanam",
+				"creators": [
+					{
+						"lastName": "The Hindu Bureau",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					}
+				],
+				"date": "2026-10-17T23:12:19+05:30",
+				"ISSN": "0971-751X",
+				"abstractNote": "The 48th Sharadotsav of South Madras Cultural Association with a pandal themed around \u201cSatyajit Ray\u2019s Magical Creations\u201d is the team work of its members",
+				"language": "en-IN",
+				"libraryCatalog": "www.thehindu.com",
+				"publicationTitle": "The Hindu",
+				"section": "Chennai",
+				"url": "https://www.thehindu.com/news/cities/chennai/rediscover-satyajit-ray-at-this-durga-puja-pandal-in-nandanam/article71597692.ece",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					"Durga Puja celebrations and chennai",
+					"South Madras Cultural Association and durga puja",
+					"satyajit ray and pandal theme"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
-];
+]
 /** END TEST CASES **/
