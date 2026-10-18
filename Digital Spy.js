@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-18 20:55:00"
+	"lastUpdated": "2026-10-18 21:55:00"
 }
 
 /*
@@ -74,6 +74,44 @@ function getJSONLD(doc) {
 function getMeta(doc, prop) {
 	return ZU.xpathText(doc, `//meta[@property="${prop}"]/@content`)
 		|| ZU.xpathText(doc, `//meta[@name="${prop}"]/@content`);
+}
+
+// sailthru.tags is a comma-separated list in which every tag appears twice: once
+// as a slug and once as its display form ("soaps,Soaps,coronation-street,Coronation
+// Street"). The display form can be longer than the slug implies ("news,Latest
+// News", "features,Digital Spy Features", "great-british-bake-off,The Great
+// British Bake Off"), so a pair is recognised by the display form's slug
+// containing the slug's. The list also carries the content type ("news,Latest
+// News") and the site edition ("Digital Spy-GB"), neither of which is a subject.
+const SITE_TAG_MARKER = `${SITE_NAME}-${SITE_LANG.split('-')[1]}`;
+const NOT_TAGS = new Set(['news', 'latestnews', SITE_TAG_MARKER, slugify(SITE_TAG_MARKER)]);
+
+// Lowercasing and stripping punctuation is what makes "coronation-street" and
+// "Coronation Street" compare equal.
+function slugify(tag) {
+	return tag.toLowerCase().replace(/[^a-z0-9]+/g, '');
+}
+
+function displayForm(slug, next) {
+	return next && slugify(next).includes(slugify(slug)) ? next : null;
+}
+
+function getTags(doc) {
+	let raw = getMeta(doc, 'sailthru.tags');
+	if (!raw) return [];
+	let tokens = raw.split(',').map(tag => ZU.trimInternal(tag)).filter(tag => tag);
+	let seen = new Set();
+	let tags = [];
+	for (let i = 0; i < tokens.length; i++) {
+		let display = displayForm(tokens[i], tokens[i + 1]);
+		if (display) i++;
+		let tag = display || tokens[i];
+		let key = slugify(tag);
+		if (!key || NOT_TAGS.has(key) || seen.has(key)) continue;
+		seen.add(key);
+		tags.push(tag);
+	}
+	return tags;
 }
 
 // og:type="article" also appears on migrated pages without a usable Article
@@ -190,6 +228,7 @@ function scrape(doc, url) {
 	item.language = (getMeta(doc, 'og:locale') || SITE_LANG).replace('_', '-');
 	item.publicationTitle = SITE_NAME;
 	item.url = ZU.xpathText(doc, '//link[@rel="canonical"]/@href') || url;
+	item.tags = getTags(doc).map(tag => ({ tag }));
 
 	let creators = authorsFromJSONLD(ld);
 	addCreators(item, creators.length ? creators : authorsFromDOM(doc));
@@ -232,7 +271,15 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+
+					{
+						"tag": "Soaps"
+					},
+					{
+						"tag": "Coronation Street"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -266,7 +313,15 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+
+					{
+						"tag": "Video Games"
+					},
+					{
+						"tag": "Xbox One"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -304,7 +359,18 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+
+					{
+						"tag": "TV"
+					},
+					{
+						"tag": "Exclusives"
+					},
+					{
+						"tag": "Taskmaster"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -336,7 +402,24 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+
+					{
+						"tag": "TV"
+					},
+					{
+						"tag": "This Morning"
+					},
+					{
+						"tag": "Deals"
+					},
+					{
+						"tag": "Digital Spy Features"
+					},
+					{
+						"tag": "The Great British Bake Off"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
