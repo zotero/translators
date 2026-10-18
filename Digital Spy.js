@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-18 21:55:00"
+	"lastUpdated": "2026-10-18 22:20:00"
 }
 
 /*
@@ -74,6 +74,15 @@ function getJSONLD(doc) {
 function getMeta(doc, prop) {
 	return ZU.xpathText(doc, `//meta[@property="${prop}"]/@content`)
 		|| ZU.xpathText(doc, `//meta[@name="${prop}"]/@content`);
+}
+
+// The article's publisher block carries the publication's own address. It is
+// read from there rather than from the first PostalAddress in the document,
+// because parentOrganization (Hearst, New York) has a contrasting one.
+function getPlace(ld) {
+	let address = ld && ld.publisher && ld.publisher.address;
+	if (!address) return undefined;
+	return ZU.trimInternal(address.addressLocality || address.addressRegion || '') || undefined;
 }
 
 // sailthru.tags is a comma-separated list in which every tag appears twice: once
@@ -229,6 +238,7 @@ function scrape(doc, url) {
 	item.publicationTitle = SITE_NAME;
 	item.url = ZU.xpathText(doc, '//link[@rel="canonical"]/@href') || url;
 	item.tags = getTags(doc).map(tag => ({ tag }));
+	item.place = getPlace(ld);
 
 	let creators = authorsFromJSONLD(ld);
 	addCreators(item, creators.length ? creators : authorsFromDOM(doc));
@@ -262,6 +272,7 @@ var testCases = [
 				"abstractNote": "Coronation Street spoilers as Sharon Bentley tricks Dev Alahan in her search for Simon, Nick and Leanne.",
 				"language": "en-GB",
 				"libraryCatalog": "Digital Spy",
+				"place": "London",
 				"publicationTitle": "Digital Spy",
 				"section": "Soaps",
 				"url": "https://www.digitalspy.com/soaps/coronation-street/a36407166/coronation-street-sharon-bentley-tricks-dev-alahan-leanne-search/",
@@ -303,6 +314,7 @@ var testCases = [
 				"abstractNote": "Early reviews applaud the compilation for comprising countless hours of content.",
 				"language": "en-GB",
 				"libraryCatalog": "Digital Spy",
+				"place": "London",
 				"publicationTitle": "Digital Spy",
 				"section": "Video Games",
 				"shortTitle": "Rare Replay review roundup",
@@ -350,6 +362,7 @@ var testCases = [
 				"abstractNote": "Ghosts cast want to see Simon Farnaby on Taskmaster – but he admits \"problem\" with that.",
 				"language": "en-GB",
 				"libraryCatalog": "Digital Spy",
+				"place": "London",
 				"publicationTitle": "Digital Spy",
 				"section": "TV",
 				"url": "https://www.digitalspy.com/tv/a74167077/ghosts-simon-farnaby-taskmaster-problem/",
@@ -393,6 +406,7 @@ var testCases = [
 				"abstractNote": "This Morning and Bake Off star Alison Hammond models some stunning plus-sized fashion looks on our screens. Here's where you can buy some of her best outfits.",
 				"language": "en-GB",
 				"libraryCatalog": "Digital Spy",
+				"place": "London",
 				"publicationTitle": "Digital Spy",
 				"section": "TV",
 				"url": "https://www.digitalspy.com/tv/a46683450/alison-hammond-outfits-buy/",
