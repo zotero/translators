@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-18 19:57:26"
+	"lastUpdated": "2026-10-18 20:16:15"
 }
 
 /*
@@ -182,25 +182,17 @@ function scrape(doc, url) {
 		item.ISSN = "0971-751X";
 		// The keywords EM takes from the meta tags are headline variants
 		// ("<title> ratings", "<title> Letterboxd"), so add the site's own
-		// topic list next to them.
-		var tagNames = [];
-		// EM may hand over a bare string when all it found was meta keywords.
-		var existing = typeof item.tags == 'string' ? [item.tags] : (item.tags || []);
-		for (var t of existing) {
-			tagNames.push(typeof t == 'string' ? t : t.tag);
+		// topic list next to them. The two lists do not overlap.
+		var topics = getTopics(doc);
+		for (var topic of topics) {
+			item.tags.push({ tag: topic });
 		}
-		// The dateline is worth keeping, but only as a tag.
-		if (dateline && !hasName(tagNames, dateline)) {
-			tagNames.push(dateline);
-		}
-		for (var topic of getTopics(doc)) {
-			if (!hasName(tagNames, topic)) {
-				tagNames.push(topic);
-			}
-		}
-		item.tags = [];
-		for (var name of tagNames) {
-			item.tags.push({ tag: name });
+		// The dateline is worth keeping, but only as a tag, and only when the
+		// topic list does not already name that city ("Kolkata", "Mumbai" both
+		// occur as topics).
+		var seen = topics.map(t => t.toLowerCase());
+		if (dateline && !seen.includes(dateline.toLowerCase())) {
+			item.tags.push({ tag: dateline });
 		}
 		item.complete();
 	});
@@ -236,19 +228,6 @@ function getDateline(doc) {
 		return ZU.capitalizeTitle(place, true);
 	}
 	return null;
-}
-
-
-// Case-insensitive, because the meta keywords and the topic list overlap in
-// spelling ("Telegram" vs "telegram").
-function hasName(names, wanted) {
-	var lower = wanted.toLowerCase();
-	for (var name of names) {
-		if (name && name.toLowerCase() == lower) {
-			return true;
-		}
-	}
-	return false;
 }
 
 
