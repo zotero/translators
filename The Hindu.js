@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-18 14:45:00"
+	"lastUpdated": "2026-10-18 17:39:21"
 }
 
 /*
@@ -41,47 +41,84 @@ of the newspaper. The other translator "The Hindu (old)" deals with older
 content (pre 2009)
 **/
 
-function detectWeb(doc, url) {
+async function detectWeb(doc, url) {
 	// .ece als PAD-suffix (niet ergens in query/fragment)
 	if (/\.ece(?:[?#]|$)/.test(url)) {
 		return "newspaperArticle";
 	}
-	if (url.includes('/search/?') && getSearchResults(doc, true)) {
-		return "multiple";
+	if (isSearchPage(url)) {
+		// The results are injected by the search widget after load, so
+		// there is nothing to judge from the document as it arrives.
+		return (await waitForResults(doc)) ? "multiple" : false;
 	}
 	return false;
 }
 
-function getSearchResults(doc, checkOnly) {
-	var items = {};
-	var found = false;
-	var rows = ZU.xpath(doc, '//div[contains(@class, "story-card-33-news") or contains(@class, "story-card-news")]//a[contains(@href, ".ece")]');
-	for (var i = 0; i < rows.length; i++) {
-		var href = rows[i].href;
-		var title = ZU.trimInternal(rows[i].textContent);
-		if (!href || !title) continue;
-		if (checkOnly) return true;
-		found = true;
-		items[href] = title;
+// A search page is only useful once a query is present; /search/ on its own
+// and /search/?q= are empty.
+var SEARCH_QUERY_RE = /[?&#](?:gsc\.)?(?:q|query)=[^&#]+/;
+
+function isSearchPage(url) {
+	return /\/search\/(?:[?#]|$)/.test(url) && SEARCH_QUERY_RE.test(url);
+}
+
+async function waitForResults(doc) {
+	for (var i = 0; i < 20; i++) {
+		if (doc.querySelector('div.gsc-results a.gs-title')) {
+			return true;
+		}
+		await new Promise(resolve => setTimeout(resolve, 250));
 	}
-	return found ? items : false;
+	return false;
 }
 
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) return;
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var rows = doc.querySelectorAll('div.gsc-results a.gs-title');
+	for (var row of rows) {
+		// The link is a google.com redirect; data-ctorig holds the target.
+		// Every result is emitted twice, once per thumbnail layout.
+		var href = row.dataset.ctorig || row.getAttribute('href');
+		var title = cleanSearchTitle(row.textContent);
+		if (!href || !title || !/\.ece(?:[?#]|$)/.test(href) || items[href]) {
+			continue;
+		}
+		if (checkOnly) {
+			return true;
+		}
+		items[href] = title;
+	}
+	return Object.keys(items).length ? items : false;
+}
+
+// The results carry the site name as a suffix.
+function cleanSearchTitle(text) {
+	return ZU.trimInternal(text || '')
+		.replace(/\s*[|-]\s*The Hindu(?: BusinessLine)?$/, '');
+}
+
+
+async function doWeb(doc, url) {
+	if (await detectWeb(doc, url) == "multiple") {
+		var items = getSearchResults(doc, false);
+		var selected = await Zotero.selectItems(items);
+		if (!selected) {
+			return;
+		}
+		// Sequential: a search result set is a few dozen pages at most.
+		for (var article of Object.keys(selected)) {
+			await scrapeDocument(article);
+		}
 	}
 	else {
 		scrape(doc, url);
 	}
+}
+
+// scrape() is callback based, so this promise settles only after the item is done.
+function scrapeDocument(url) {
+	return requestDocument(url).then(doc => scrape(doc, url));
 }
 
 function scrape(doc, url) {
@@ -534,6 +571,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.thehindu.com/search/?q=kerala",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
