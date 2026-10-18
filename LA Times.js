@@ -209,7 +209,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Bass and Raman tussle in final televised L.A. mayoral debate",
+				"title": "Bass and Raman tussle in final L.A. mayoral debate",
 				"creators": [
 					{
 						"firstName": "Noah",
@@ -224,10 +224,11 @@ var testCases = [
 				],
 				"date": "2026-10-14T03:52:38.500Z",
 				"ISSN": "0458-3035",
-				"abstractNote": "Bass portrayed Raman as someone who isn't ready to lead the city, while Raman described the mayor as being \"missing in action\" during fires in Pacific Palisades and Boyle Heights.",
+				"abstractNote": "Bass portrayed Raman as someone who isn't ready to lead the city, while Raman described the mayor as being 'missing in action' during fires in Pacific Palisades and Boyle Heights.",
 				"language": "en-US",
 				"libraryCatalog": "www.latimes.com",
 				"publicationTitle": "Los Angeles Times",
+				"place": "Los Angeles",
 				"section": "California",
 				"url": "https://www.latimes.com/california/story/2026-10-13/bass-raman-tussle-in-final-televised-la-mayoral-debate",
 				"attachments": [
@@ -256,6 +257,7 @@ var testCases = [
 				"language": "en-US",
 				"libraryCatalog": "www.latimes.com",
 				"publicationTitle": "Los Angeles Times",
+				"place": "Los Angeles",
 				"section": "Hollywood Inc.",
 				"url": "https://www.latimes.com/business/hollywood/la-fi-ct-youtube-tv-20170405-story.html",
 				"attachments": [
