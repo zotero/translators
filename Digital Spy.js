@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-18 11:09:59"
+	"lastUpdated": "2026-10-18 20:55:00"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2018 czar
+	Copyright © 2018 czar and Vera de Kok
 	http://en.wikipedia.org/wiki/User_talk:Czar
 
 	This file is part of Zotero.
