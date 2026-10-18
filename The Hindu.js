@@ -42,7 +42,7 @@ content (pre 2009)
 **/
 
 async function detectWeb(doc, url) {
-	// .ece als PAD-suffix (niet ergens in query/fragment)
+	// .ece as a PATH suffix, not somewhere in the query or fragment
 	if (/\.ece(?:[?#]|$)/.test(url)) {
 		return "newspaperArticle";
 	}
@@ -152,9 +152,9 @@ function scrape(doc, url) {
 		if (!item.date) {
 			item.date = ZU.xpathText(doc, '//meta[@name="publish-date"]/@content');
 		}
-		// De oude div.ut-container is weg; de datumregel eindigt nu op " IST - Plaats".
-		// Daarvoor in de plaats is er een generieke .update-publish-time, dus anker op
-		// die tekst in plaats van op de containerklasse.
+		// The old div.ut-container is gone; the date line now ends in " IST - Place".
+		// It was replaced by a generic .update-publish-time, so anchor on that text
+		// instead of on the container class.
 		var placeText = ZU.xpathText(doc, '//p[contains(@class, "updated-time")]/span')
 			|| ZU.xpathText(doc, '//div[contains(@class, "update-publish-time")]');
 		var place = placeText && placeText.split(/\s+-\s+/).pop();
@@ -163,22 +163,22 @@ function scrape(doc, url) {
 		}
 		item.language = "en-IN";
 		item.publicationTitle = "The Hindu";
-		// EM neemt de meta-description over, maar de pagina bevat daar dubbele spaties
-		// ("moved aside  so we could embrace") die in de HTML-collapse niet zichtbaar zijn.
+		// EM copies the meta description, but that one contains double spaces
+		// ("moved aside  so we could embrace") that the HTML collapse hides.
 		if (item.abstractNote) {
 			item.abstractNote = ZU.trimInternal(item.abstractNote);
 		}
-		// Sommige artikelen hebben een automatisch gevulde description
-		// ("<Kolom> News:<titel>") in plaats van een echte samenvatting; die is
-		// waardeloos als abstract. Neem dan de eerste (lange) alinea van de body.
+		// Some articles carry an auto-filled description ("<Section> News:<title>")
+		// instead of a real summary, which is useless as an abstract. Fall back to
+		// the first (long) paragraph of the body.
 		var ld = getJSONLD(doc);
 		if (!item.abstractNote || isGeneratedDescription(item.abstractNote)) {
 			var lead = getLeadParagraph(doc);
 			if (lead) item.abstractNote = lead;
 		}
-		// De sectie die Embedded Metadata uit de breadcrumb haalt is de rubriek op
-		// het hoogste niveau ("Features", "Business") terwijl JSON-LD de fijnere
-		// rubriek geeft ("Metroplus", "Economy").
+		// The section Embedded Metadata takes from the breadcrumb is the top-level
+		// one ("Features", "Business"), while JSON-LD has the finer section
+		// ("Metroplus", "Economy").
 		if (ld && ld.articleSection) {
 			item.section = ZU.trimInternal(String(ld.articleSection));
 		}
@@ -215,7 +215,7 @@ function getJSONLD(doc) {
 }
 
 function isGeneratedDescription(text) {
-	// "<Kolom> News:<titel>" - geen echte samenvatting
+	// "<Section> News:<title>" - not a real summary
 	return /\bNews:\s*/.test(text) || text.length < 40;
 }
 
@@ -223,7 +223,7 @@ function getLeadParagraph(doc) {
 	var paras = ZU.xpath(doc, '//div[contains(@class, "article-section")]'
 		+ '//p[string-length(normalize-space(.)) > 120]');
 	for (var i = 0; i < paras.length; i++) {
-		// fotobijschriften staan in dezelfde body
+		// photo captions live in the same body
 		if (/\bcaption\b/.test(paras[i].className || '')) continue;
 		var text = ZU.trimInternal(paras[i].textContent);
 		if (text) return text;
@@ -232,7 +232,6 @@ function getLeadParagraph(doc) {
 }
 
 
-// Wire services The Hindu credits in the byline. A credit, not an author.
 // Wire services The Hindu credits in its bylines. They are credits, not authors.
 var AGENCIES = {
 	pti: 'PTI',
