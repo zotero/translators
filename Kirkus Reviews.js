@@ -188,7 +188,7 @@ function scrape(doc, url) {
 
 	// the h1 is the reviewed book's title, stored in ALL CAPS
 	let title = ZU.trimInternal(text(reviewBody, 'h1.article-title') || '');
-	item.title = ZU.capitalizeTitle(title, true);
+	item.title = restoreAcronyms(ZU.capitalizeTitle(title, true));
 
 	// series info sits below the title, e.g. "From the Talisman series , Vol. 3"
 	// or "From the Poppy series, volume 3"; normalise it to "Talisman series, Vol. 3"
@@ -530,6 +530,23 @@ function writersCenterBody(doc, authorNames) {
 		if (paragraph) paragraphs.push(paragraph);
 	}
 	return stripContributor(paragraphs, authorNames).join(' ');
+}
+
+/*
+capitalizeTitle lowercases everything but a word's first letter, so an acronym in
+a title set in caps comes out wrong ("THE AGE OF AI" -> "The Age of Ai"). Kirkus
+serves the title in caps in every source it has (h1, og:title and the JSON-LD
+name), so the original spelling cannot be recovered from the page and the
+acronyms common in book titles are restored from a list instead.
+*/
+function restoreAcronyms(title) {
+	// common words that happen to look like acronyms (Us, La) are left out
+	let acronyms = 'AI DNA USA UK EU TV WWII WWI NFL NBA CEO CFO NASA FBI CIA NYC MTV BBC ACLU'.split(' ');
+	for (let acronym of acronyms) {
+		let capitalised = acronym.charAt(0) + acronym.slice(1).toLowerCase();
+		title = title.replace(new RegExp('\\b' + capitalised + '\\b', 'g'), acronym);
+	}
+	return title;
 }
 
 function parseByline(reviewBody) {
@@ -1053,6 +1070,51 @@ var testCases = [
 				"tags": [
 					{
 						"tag": "Writing"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.kirkusreviews.com/book-reviews/henry-kissinger/the-age-of-ai/",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "The Age of AI",
+				"creators": [],
+				"date": "2021-10-12",
+				"ISSN": "1948-7428",
+				"abstractNote": "Kissinger, Schmidt, and Huttenlocher weigh in on the robotic future. When thinking of Kissinger in the context of futurology, one might conjure the image of Stanley Kubrick’s Dr. Strangelove; after all, it’s said that he served as the model for the character. Instead, think of the 1983 film War Games, in which young Matthew Broderick nearly touches off thermonuclear war with his computer tinkering. As that latter film showed, AI involves machines learning to think for themselves—and when they do so while lacking “preprogrammed moves, combinations, or strategies derived from human play,” the machines learn by their own rules. This can be good: One AI routine that the authors discuss figured out a new pharmaceutical formula that humans might never have discovered. But there’s a catch, potentially ominous: “The advent of AI obliges us to confront whether there is a form of logic that humans have not achieved or cannot achieve, exploring aspects of reality we have never known and may never directly know.” The book then spins off into an area Kissinger knows best: how AI might be put to work in the realm of national and international security, developing systems that may keep us all safe—or, alternately, that “will be so responsive that adversaries may attempt to attack before the systems are operational.” All this begs the need for international accords on the use of AI, and we must better understand the machines already showing the promise of outstripping some of our mental processes, an understanding that will allow us to “make peace with them and, in so doing, change the world.” Some parts of this policy paper seem to be mere padding, as with the side tour into Kant’s notion of the Ding an sich, but some will be of interest to students of arms control, future battlespaces, and the like.",
+				"extra": "Book author: Henry A. Kissinger\nBook author: Eric Schmidt\nBook author: Daniel Huttenlocher\nBook publication date: 2021-11-02\nISBN: 978-0-316-27380-0\nPage count: 272\nPublisher: Little, Brown",
+				"issue": "2021-11-01",
+				"language": "en-US",
+				"libraryCatalog": "Kirkus Reviews",
+				"publicationTitle": "Kirkus Reviews",
+				"url": "https://www.kirkusreviews.com/book-reviews/henry-kissinger/the-age-of-ai/",
+				"attachments": [
+					{
+						"title": "Kirkus Reviews snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Current Events & Social Issues"
+					},
+					{
+						"tag": "General Current Events & Social Issues"
+					},
+					{
+						"tag": "Issues & Controversies"
+					},
+					{
+						"tag": "Nonfiction"
+					},
+					{
+						"tag": "Science & Technology"
 					}
 				],
 				"notes": [],
