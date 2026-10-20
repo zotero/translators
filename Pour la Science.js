@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-20 19:31:29"
+	"lastUpdated": "2026-10-20 20:34:13"
 }
 
 /*
@@ -39,7 +39,11 @@ function detectWeb(doc, _url) {
 	if (getSearchResults(doc, true)) {
 		return 'multiple';
 	}
-	else if (doc.querySelector('h1.title, h1') && (doc.querySelector('.infos-article, .chapo, .infos-author') || doc.querySelector('meta[property="og:type"][content="Article"]'))) {
+	else if (doc.querySelector('h1.title, h1') && (
+		doc.querySelector('.infos-article, .chapo, .chapeau, .lead, .infos-author, .infos-authors')
+		|| doc.querySelector('meta[property="og:type" i][content="article" i]')
+		|| doc.querySelector('script[type="application/ld+json"]')
+	)) {
 		return 'magazineArticle';
 	}
 	return false;
@@ -76,7 +80,8 @@ async function doWeb(doc, url) {
 	}
 }
 
-async function scrape(doc, url = doc.location.href) {
+async function scrape(doc, url = doc.location?.href) {
+	url = url || doc.location?.href || '';
 	let item = new Zotero.Item('magazineArticle');
 	item.publicationTitle = 'Pour la Science';
 	item.url = url;
@@ -199,7 +204,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "magazineArticle",
-				"title": "La physique des particules a-t-elle atteint ses limites ?",
+				"title": "La physique des particules a-t-elle atteint ses limites ?",
 				"creators": [
 					{
 						"firstName": "Jean-Philippe",
@@ -208,9 +213,10 @@ var testCases = [
 					}
 				],
 				"date": "21 septembre 2026",
-				"abstractNote": "Les physiciens des hautes énergies sont-ils face au « désert » qu’ils redoutaient depuis longtemps ? Il est possible qu’aucune nouvelle particule ne puisse désormais être découverte dans la gamme d’énergie accessible expérimentalement. Pour dépasser cette limite, il faut changer d’approche, voire repenser la notion même de particule…",
+				"abstractNote": "Les physiciens des hautes énergies sont-ils face au « désert » qu’ils redoutaient depuis longtemps ? Il est possible qu’aucune nouvelle particule ne puisse désormais être découverte dans la gamme d’énergie accessible expérimentalement. Pour dépasser cette limite, il faut changer d’approche, voire repenser la notion même de particule…",
 				"issue": "588",
 				"language": "fr",
+				"libraryCatalog": "Pour la Science",
 				"publicationTitle": "Pour la Science",
 				"url": "https://www.pourlascience.fr/sd/physique-particules/la-physique-des-particules-a-t-elle-atteint-ses-limites-29579.php",
 				"attachments": [
@@ -246,6 +252,53 @@ var testCases = [
 					},
 					{
 						"tag": "ultra-haute énergie"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.pourlascience.fr/sd/astrophysique/3iatlas-cette-comete-venue-d-ailleurs-serait-deux-fois-plus-vieille-que-le-systeme-solaire-29431.php",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "3I/Atlas : cette comète venue d’ailleurs serait deux fois plus vieille que le Système solaire",
+				"creators": [
+					{
+						"firstName": "Sean",
+						"lastName": "Bailly",
+						"creatorType": "author"
+					}
+				],
+				"date": "27 août 2026",
+				"abstractNote": "L’analyse isotopique de la composition de cette visiteuse interstellaire suggère qu’elle serait née il y a 11 à 12 milliards d’années, bien avant le Système solaire, à une période de formation intense d’étoiles dans la Voie lactée.",
+				"issue": "587",
+				"language": "fr",
+				"libraryCatalog": "Pour la Science",
+				"publicationTitle": "Pour la Science",
+				"shortTitle": "3I/Atlas",
+				"url": "https://www.pourlascience.fr/sd/astrophysique/3iatlas-cette-comete-venue-d-ailleurs-serait-deux-fois-plus-vieille-que-le-systeme-solaire-29431.php",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "3I/Atlas"
+					},
+					{
+						"tag": "comètes"
+					},
+					{
+						"tag": "interstellaire"
+					},
+					{
+						"tag": "système solaire"
 					}
 				],
 				"notes": [],
