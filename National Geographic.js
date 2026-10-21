@@ -41,6 +41,13 @@
 var ITEM_TYPE = 'magazineArticle';
 var PUBLICATION_TITLE = 'National Geographic';
 var PLACE = 'Washington, D.C.';
+// The footer dates the two companies, "(c) 1996-2015 National Geographic
+// Society" and "(c) 2015-2026 National Geographic Partners, LLC", and both
+// notices name 2015, so the year alone cannot settle it: the partnership took
+// over on 9 September 2015.
+var PUBLISHER_SOCIETY = 'National Geographic Society';
+var PUBLISHER_PARTNERS = 'National Geographic Partners, LLC';
+var PARTNERS_FROM = '2015-09-09';
 var ISSN = '0027-9358';
 var LANGUAGE = 'en';
 
@@ -130,6 +137,8 @@ async function scrape(doc) {
 		// stores verbatim; the JSON-LD datePublished is a real ISO timestamp.
 		var iso = toISODate(article.datePublished);
 		if (iso) item.date = iso;
+		var publisher = getPublisher(iso);
+		if (publisher) item.publisher = publisher;
 
 		item.creators = getCreators(doc, article);
 
@@ -270,6 +279,18 @@ function jsonldAuthors(doc, article) {
 		if (name) names.push(name);
 	}
 	return names;
+}
+
+
+// Which of the two owning companies published the article, decided by its date.
+// An ISO date compares correctly as a string, and a partial one ("2015" or
+// "2015-09") sorts before the switch-over day, leaving it with the Society.
+// Anything that is not a date, or no date at all, leaves the owner unknown, so
+// no publisher is claimed.
+function getPublisher(isoDate) {
+	var date = String(isoDate || '');
+	if (!/^\d{4}(?:-\d{2}(?:-\d{2})?)?$/.test(date)) return undefined;
+	return date >= PARTNERS_FROM ? PUBLISHER_PARTNERS : PUBLISHER_SOCIETY;
 }
 
 
