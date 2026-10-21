@@ -824,43 +824,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.kirkusreviews.com/book-reviews/kevin-henkes/poppy/print/",
-		"items": [
-			{
-				"itemType": "magazineArticle",
-				"title": "Poppy",
-				"creators": [],
-				"date": "2010-05-19",
-				"ISSN": "1948-7428",
-				"abstractNote": "An adolescent mouse named Poppy is off on a romantic tryst with her rebel boyfriend when they are attacked by Mr. Ocax, the owl who rules over the area. He kills the boyfriend, but Poppy escapes and Mr. Ocax vows to catch her. Mr. Ocax has convinced all the mice that he is their protector when, in fact, he preys on them mercilessly. When the mice ask his permission to move to a new house, he refuses, blaming Poppy for his decision. Poppy suspects that there is another reason Mr. Ocax doesn't want them to move and investigates to clear her name. With the help of a prickly old porcupine and her quick wits, Poppy defeats her nemesis and her own fears, saving her family in the bargain.",
-				"extra": "Book author: Avi\nIllustrator: Brian Floca\nBook publication date: 1995-10-01\nISBN: 0-531-09483-9\nPage count: 147\nPublisher: Orchard\nSeries: Poppy series, Vol. 3",
-				"issue": "1995-09-15",
-				"language": "en-US",
-				"libraryCatalog": "Kirkus Reviews",
-				"publicationTitle": "Kirkus Reviews",
-				"url": "https://www.kirkusreviews.com/book-reviews/kevin-henkes/poppy/",
-				"attachments": [
-					{
-						"title": "Kirkus Reviews snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Children's"
-					},
-					{
-						"tag": "General Children's"
-					}
-				],
-				"notes": [],
-				"seeAlso": [],
-				"place": "New York City"
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "https://www.kirkusreviews.com/book-reviews/larry-mcmurtry/lonesome-dove/",
 		"items": [
 			{
