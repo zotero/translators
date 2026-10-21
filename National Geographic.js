@@ -377,7 +377,9 @@ var testCases = [
 				"extra": "Credits: Video by Russell Laman",
 				"language": "en",
 				"libraryCatalog": "www.nationalgeographic.com",
+				"place": "Washington, D.C.",
 				"publicationTitle": "National Geographic",
+				"publisher": "National Geographic Partners, LLC",
 				"url": "https://www.nationalgeographic.com/animals/article/beginner-bird-photography-tips",
 				"attachments": [
 					{
@@ -433,7 +435,9 @@ var testCases = [
 				"extra": "Credits: Photographs by Marcus Westberg",
 				"language": "en",
 				"libraryCatalog": "www.nationalgeographic.com",
+				"place": "Washington, D.C.",
 				"publicationTitle": "National Geographic",
+				"publisher": "National Geographic Partners, LLC",
 				"url": "https://www.nationalgeographic.com/animals/article/saving-pangolins-endangered-africa",
 				"attachments": [
 					{
@@ -466,7 +470,9 @@ var testCases = [
 				"abstractNote": "Lake Powell’s retreat is revealing a lost world covered in deep piles of sedimentary sludge. A group of adventurers and scientists are teaming up to explore its resurrected canyons, and reveal the fate of this critical reservoir.",
 				"language": "en",
 				"libraryCatalog": "www.nationalgeographic.com",
+				"place": "Washington, D.C.",
 				"publicationTitle": "National Geographic",
+				"publisher": "National Geographic Partners, LLC",
 				"url": "https://www.nationalgeographic.com/environment/article/lake-powell-mudbergs",
 				"attachments": [
 					{
@@ -505,7 +511,9 @@ var testCases = [
 				"extra": "Credits: Photos curated by National Geographic's Photography Department",
 				"language": "en",
 				"libraryCatalog": "www.nationalgeographic.com",
+				"place": "Washington, D.C.",
 				"publicationTitle": "National Geographic",
+				"publisher": "National Geographic Partners, LLC",
 				"url": "https://www.nationalgeographic.com/photography/article/photo-of-the-day-september-2026-birds-bears-farmers-cows-cats",
 				"attachments": [
 					{
@@ -557,7 +565,9 @@ var testCases = [
 				"extra": "Credits: Photographs and video by Paolo Verzone and Massimo Nicolaci",
 				"language": "en",
 				"libraryCatalog": "www.nationalgeographic.com",
+				"place": "Washington, D.C.",
 				"publicationTitle": "National Geographic",
+				"publisher": "National Geographic Partners, LLC",
 				"shortTitle": "'The Entire World Is Glowing in Front of You'",
 				"url": "https://www.nationalgeographic.com/photography/article/mount-vesuvius-pompeii-behind-the-scenes",
 				"attachments": [
