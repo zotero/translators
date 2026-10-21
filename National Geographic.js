@@ -70,10 +70,12 @@ var AUTHOR_LABELS = [
 
 
 function detectWeb(doc, url) {
-	if (/nationalgeographic\.com\/[a-z-]+\/article\//.test(url) && isArticle(doc)) {
-		return ITEM_TYPE;
+	if (/nationalgeographic\.com\/[a-z-]+\/article\//.test(url)) {
+		// An article is never a listing, even when its own metadata is missing;
+		// falling through would offer the "related articles" links instead.
+		return isArticle(doc) ? ITEM_TYPE : false;
 	}
-	if (getSearchResults(doc, true)) {
+	if (getListingResults(doc, true)) {
 		return 'multiple';
 	}
 	return false;
@@ -85,16 +87,30 @@ function isArticle(doc) {
 }
 
 
-function getSearchResults(doc, checkOnly) {
+// The section front pages ("/animals/", "/history/"), topic hubs
+// ("/animals/mammals/", "/science/phenomena/"), the podcast index and the search
+// results all list articles, and each uses different tile markup. They do agree
+// on two things: every card links to ".../article/<slug>", and its title is
+// either a screen-reader span inside the link or the link's aria-label.
+function getListingResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	// The search page renders its cards server side; the title sits in a
-	// screen-reader span inside the card link.
-	var rows = doc.querySelectorAll('a.ResultCard__Link');
+	var rows = doc.querySelectorAll('a[href*="/article/"]');
 	for (var row of rows) {
 		var href = (row.getAttribute('href') || '').split('#')[0];
-		var title = ZU.trimInternal(textOf(row, 'span.sr-only') || row.textContent || '');
-		if (!href || !title || !/\/article\//.test(href) || items[href]) continue;
+		// "/pages/article/masthead" is site chrome, not an article.
+		if (!href || /\/pages\/article\//.test(href)) continue;
+		// Skip the footer, navigation and breadcrumb links that also match.
+		var cls = row.getAttribute('class') || '';
+		if (/GlobalFooter|GlobalNav|Menu__List|Breadcrumb/.test(cls)) continue;
+
+		var title = row.querySelector('span.sr-only');
+		title = ZU.trimInternal(title ? title.textContent : '');
+		if (!title) {
+			title = ZU.trimInternal(row.getAttribute('aria-label') || '');
+		}
+		if (!title || items[href]) continue;
+
 		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
@@ -105,7 +121,7 @@ function getSearchResults(doc, checkOnly) {
 
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
-		var items = getSearchResults(doc, false);
+		var items = getListingResults(doc, false);
 		var selected = await Zotero.selectItems(items);
 		if (!selected) return;
 		await ZU.processDocuments(Object.keys(selected), scrape);
@@ -350,11 +366,6 @@ function allJSONLDNodes(doc) {
 }
 
 
-function textOf(doc, selector) {
-	var el = doc.querySelector(selector);
-	return el ? el.textContent : null;
-}
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -581,6 +592,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nationalgeographic.com/animals/",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
