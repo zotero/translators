@@ -56,20 +56,37 @@ all, so its byline and date are read from the visible sub-heading.
 */
 
 
+/*
+A trailing /print/ asks Kirkus for a stripped-down render of the same page, not
+for a different document: it carries the cover and title but none of the review,
+issue or byline data, so it cannot be scraped. Only the pathname is rewritten -
+a search query can hold "/print/" as text.
+*/
+function canonicalUrl(url) {
+	let u = new URL(url);
+	if (!/\/print\/?$/.test(u.pathname)) return url;
+	u.pathname = u.pathname.replace(/\/print\/?$/, '/');
+	return u.href;
+}
+
+
 function detectWeb(doc, url) {
+	let page = canonicalUrl(url);
+	// a /print/ page is the same review in a render that lacks the elements the
+	// markup checks below look for, so it is recognised by its path alone
+	let print = page != url;
 	// review pages: /book-reviews/<author>/<slug>/ and /audiobook-reviews/<author>/<slug>/
-	// (the /print/ variant has its own stripped-down markup, hence the second check)
-	if (/\/(?:book|audiobook)-reviews\/[^/]+\/[^/]+/.test(new URL(url).pathname)
-		&& (doc.querySelector('#review-body') || doc.querySelector('h1.book_detail_title'))) {
+	if (/\/(?:book|audiobook)-reviews\/[^/]+\/[^/]+/.test(new URL(page).pathname)
+		&& (print || doc.querySelector('#review-body') || doc.querySelector('h1.book_detail_title'))) {
 		return "magazineArticle";
 	}
 	// news and features articles are signed pieces, unlike the reviews
-	if (isArticle(url) && getArticleData(doc)) {
+	if (isArticle(page) && getArticleData(doc)) {
 		return "magazineArticle";
 	}
 	// writers' center pieces have no article JSON-LD, so they are recognised by
 	// their own layout (a sub-heading byline inside a writers-center-article)
-	if (isWritersCenter(url) && doc.querySelector('.writers-center-article .kir-page-sub-heading')) {
+	if (isWritersCenter(page) && doc.querySelector('.writers-center-article .kir-page-sub-heading')) {
 		return "magazineArticle";
 	}
 	if (getSearchResults(doc, true)) {
@@ -153,10 +170,11 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	// the /print/ variant is a stripped-down render without byline roles or
-	// issue data; the canonical review page has everything, so use that
-	if (/\/print\/?$/.test(new URL(url).pathname)) {
-		ZU.processDocuments(url.replace(/\/print\/?$/, '/'), scrape);
+	// the canonical page carries the review, issue and byline data that the /print/
+	// render omits, so fetch it before scraping
+	let canonical = canonicalUrl(url);
+	if (canonical != url) {
+		ZU.processDocuments(canonical, scrape);
 		return;
 	}
 
@@ -646,9 +664,9 @@ function subcategoryName(anchorText, genreName, slug) {
 }
 
 function isStarred(doc, url) {
-	let path = new URL(url).pathname.replace(/\/print\/$/, '/');
+	let path = new URL(canonicalUrl(url)).pathname;
 	for (let star of doc.querySelectorAll('.cover-container.kirkus-star a[href]')) {
-		if (new URL(star.href).pathname.replace(/\/print\/$/, '/') == path) {
+		if (new URL(canonicalUrl(star.href)).pathname == path) {
 			return true;
 		}
 	}
