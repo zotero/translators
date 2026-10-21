@@ -2,14 +2,14 @@
 	"translatorID": "ecddda2e-4fc6-4aea-9f17-ef3b56d7377a",
 	"label": "arXiv.org",
 	"creator": "Sean Takats and Michael Berkowitz",
-	"target": "^https?://([^\\.]+\\.)?(arxiv\\.org|xxx\\.lanl\\.gov)/(search|find|catchup|list/\\w|abs/|pdf/)",
+	"target": "^https?://([^\\.]+\\.)?(arxiv\\.org|xxx\\.lanl\\.gov)/(search|find|catchup|list/\\w|abs/|pdf/|html/)",
 	"minVersion": "6.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-05-19 15:28:10"
+	"lastUpdated": "2026-09-08 16:15:27"
 }
 
 /*
@@ -328,7 +328,7 @@ async function doWeb(doc, url) {
 		}
 	}
 	else {
-		let id = url.match(/(?:pdf|abs)\/([^?#]+)(?:\.pdf)?/)[1];
+		let id = url.match(/(?:pdf|abs|html)\/([^?#]+)(?:\.pdf)?/)[1];
 		let versionMatch = url.match(/v(\d+)(\.pdf)?([?#].+)?$/);
 		if (versionMatch) {
 			version = versionMatch[1];
@@ -1092,6 +1092,164 @@ var testCases = [
 						"note": "Comment: SIGGRAPH Asia 2023. Project page: at: https://omriavrahami.com/break-a-scene/ Video: https://www.youtube.com/watch?v=-9EA-BhizgM"
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://arxiv.org/html/2403.05527v1",
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "GEAR: An Efficient KV Cache Compression Recipefor Near-Lossless Generative Inference of LLM",
+				"creators": [
+					{
+						"firstName": "Hao",
+						"lastName": "Kang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Qingru",
+						"lastName": "Zhang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Souvik",
+						"lastName": "Kundu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Geonhwa",
+						"lastName": "Jeong",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Zaoxing",
+						"lastName": "Liu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tushar",
+						"lastName": "Krishna",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tuo",
+						"lastName": "Zhao",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024-03-08",
+				"DOI": "10.48550/arXiv.2403.05527",
+				"abstractNote": "Key-value (KV) caching has become the de-facto to accelerate generation speed for large language models (LLMs) inference. However, the growing cache demand with increasing sequence length has transformed LLM inference to be a memory bound problem, significantly constraining the system throughput. Existing methods rely on dropping unimportant tokens or quantizing all entries uniformly. Such methods, however, often incur high approximation errors to represent the compressed matrices. The autoregressive decoding process further compounds the error of each step, resulting in critical deviation in model generation and deterioration of performance. To tackle this challenge, we propose GEAR, an efficient KV cache compression framework that achieves near-lossless high-ratio compression. GEAR first applies quantization to majority of entries of similar magnitudes to ultra-low precision. It then employs a low rank matrix to approximate the quantization error, and a sparse matrix to remedy individual errors from outlier entries. By adeptly integrating three techniques, GEAR is able to fully exploit their synergistic potentials. Our experiments demonstrate that compared to alternatives, GEAR achieves near-lossless 4-bit KV cache compression with up to 2.38x throughput improvement, while reducing peak-memory size up to 2.29x. Our code is publicly available at https://github.com/HaoKang-Timmy/GEAR.",
+				"archiveID": "arXiv:2403.05527",
+				"extra": "arXiv:2403.05527 [cs.LG]\nversion: 1",
+				"libraryCatalog": "arXiv.org",
+				"repository": "arXiv",
+				"shortTitle": "GEAR",
+				"url": "http://arxiv.org/abs/2403.05527",
+				"attachments": [
+					{
+						"title": "Preprint PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Computer Science - Artificial Intelligence"
+					},
+					{
+						"tag": "Computer Science - Computation and Language"
+					},
+					{
+						"tag": "Computer Science - Machine Learning"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://arxiv.org/html/2403.05527v1?source=test#S2",
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "GEAR: An Efficient KV Cache Compression Recipefor Near-Lossless Generative Inference of LLM",
+				"creators": [
+					{
+						"firstName": "Hao",
+						"lastName": "Kang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Qingru",
+						"lastName": "Zhang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Souvik",
+						"lastName": "Kundu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Geonhwa",
+						"lastName": "Jeong",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Zaoxing",
+						"lastName": "Liu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tushar",
+						"lastName": "Krishna",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tuo",
+						"lastName": "Zhao",
+						"creatorType": "author"
+					}
+				],
+				"date": "2024-03-08",
+				"DOI": "10.48550/arXiv.2403.05527",
+				"abstractNote": "Key-value (KV) caching has become the de-facto to accelerate generation speed for large language models (LLMs) inference. However, the growing cache demand with increasing sequence length has transformed LLM inference to be a memory bound problem, significantly constraining the system throughput. Existing methods rely on dropping unimportant tokens or quantizing all entries uniformly. Such methods, however, often incur high approximation errors to represent the compressed matrices. The autoregressive decoding process further compounds the error of each step, resulting in critical deviation in model generation and deterioration of performance. To tackle this challenge, we propose GEAR, an efficient KV cache compression framework that achieves near-lossless high-ratio compression. GEAR first applies quantization to majority of entries of similar magnitudes to ultra-low precision. It then employs a low rank matrix to approximate the quantization error, and a sparse matrix to remedy individual errors from outlier entries. By adeptly integrating three techniques, GEAR is able to fully exploit their synergistic potentials. Our experiments demonstrate that compared to alternatives, GEAR achieves near-lossless 4-bit KV cache compression with up to 2.38x throughput improvement, while reducing peak-memory size up to 2.29x. Our code is publicly available at https://github.com/HaoKang-Timmy/GEAR.",
+				"archiveID": "arXiv:2403.05527",
+				"extra": "arXiv:2403.05527 [cs.LG]\nversion: 1",
+				"libraryCatalog": "arXiv.org",
+				"repository": "arXiv",
+				"shortTitle": "GEAR",
+				"url": "http://arxiv.org/abs/2403.05527",
+				"attachments": [
+					{
+						"title": "Preprint PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Computer Science - Artificial Intelligence"
+					},
+					{
+						"tag": "Computer Science - Computation and Language"
+					},
+					{
+						"tag": "Computer Science - Machine Learning"
+					}
+				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
