@@ -40,23 +40,26 @@
 // The Economist are magazine publishers modelled the same way in this repository.
 var ITEM_TYPE = 'magazineArticle';
 var PUBLICATION_TITLE = 'National Geographic';
+var PLACE = 'Washington, D.C.';
 var ISSN = '0027-9358';
 var LANGUAGE = 'en';
 
-// The byline block labels every name with its role. "Photographs by", "Video by"
-// and "Story and video by" credit people who did not write the article, so they
-// are recorded in extra instead of becoming authors.
+// The byline block labels every name with its role, which JSON-LD does not. A
+// label naming photographs, video or illustrations credits someone who did not
+// write the article, so those people are recorded in extra instead of becoming
+// authors. "As told to" and "Interview by" are writing roles and stay authors.
 var AUTHOR_LABELS = [
 	'by',
 	'story by',
 	'words by',
 	'text by',
 	'written by',
+	'as told to',
+	'interview by',
+	'captions written by',
 	'story and video by',
 	'story and photos by',
 ];
-
-var CREDIT_RE = /\b(?:photographs?|photography|photos?|video|videos|illustrations?|curated|reported)\b/i;
 
 
 function detectWeb(doc, url) {
@@ -119,6 +122,7 @@ async function scrape(doc) {
 		// site is the section ("Animals", "History"). That section header is what
 		// used to land in the publication title.
 		item.publicationTitle = PUBLICATION_TITLE;
+		item.place = PLACE;
 		item.language = LANGUAGE;
 		item.ISSN = ISSN;
 
@@ -150,13 +154,32 @@ function getBylineRows(doc) {
 	if (!block) return rows;
 	for (var row of block.querySelectorAll('div')) {
 		var spans = row.children;
-		if (!spans || spans.length != 2) continue;
-		if (spans[0].tagName != 'SPAN' || spans[1].tagName != 'SPAN') continue;
+		if (!spans || spans.length < 2) continue;
+		var labelled = true;
+		for (var span of spans) {
+			if (span.tagName != 'SPAN') labelled = false;
+		}
+		if (!labelled) continue;
 		var label = ZU.trimInternal(spans[0].textContent || '');
-		var name = ZU.trimInternal(spans[1].textContent || '');
-		if (name) rows.push({ label: label, name: name });
+		var names = [];
+		for (var i = 1; i < spans.length; i++) {
+			names = names.concat(splitNames(spans[i].textContent));
+		}
+		if (label && names.length) rows.push({ label: label, names: names });
 	}
 	return rows;
+}
+
+
+// One row can credit several people: "Paolo Verzone and Massimo Nicolaci" is
+// three spans, the label plus one span per person.
+function splitNames(text) {
+	var names = [];
+	for (var part of String(text || '').split(/\s+and\s+/i)) {
+		part = ZU.trimInternal(part);
+		if (part) names.push(part);
+	}
+	return names;
 }
 
 
@@ -167,18 +190,35 @@ function getCreators(doc, article) {
 	var rows = getBylineRows(doc);
 	for (var row of rows) {
 		if (!isAuthorLabel(row.label)) continue;
-		pushCreator(creators, seen, row.name);
+		for (var name of row.names) pushCreator(creators, seen, name);
 	}
 
 	if (creators.length) return creators;
 
-	// No usable byline block. The JSON-LD list is then the only source, and it is
-	// known to carry photo credits, so those entries are dropped by role word.
-	for (var name of jsonldAuthors(doc, article)) {
-		if (CREDIT_RE.test(name)) continue;
-		pushCreator(creators, seen, name);
+	// No writing credit in the byline. JSON-LD lists everyone, writers and
+	// photographers alike, without saying which is which, so the byline is used
+	// to strike off the people it credits to another role. Doing it the other way
+	// round - guessing from the JSON-LD entries themselves - cannot work, since a
+	// photographer's name carries no trace of their job.
+	var credited = [];
+	for (var creditRow of rows) {
+		if (isAuthorLabel(creditRow.label)) continue;
+		credited = credited.concat(creditRow.names);
+	}
+	for (var listed of jsonldAuthors(doc, article)) {
+		if (isCreditedName(credited, listed)) continue;
+		pushCreator(creators, seen, listed);
 	}
 	return creators;
+}
+
+
+function isCreditedName(credited, name) {
+	var key = ZU.trimInternal(name || '').toLowerCase();
+	for (var other of credited) {
+		if (other.toLowerCase() == key) return true;
+	}
+	return false;
 }
 
 
@@ -186,7 +226,7 @@ function getCredits(doc) {
 	var credits = [];
 	for (var row of getBylineRows(doc)) {
 		if (isAuthorLabel(row.label)) continue;
-		credits.push(row.label + ' ' + row.name);
+		credits.push(row.label + ' ' + row.names.join(' and '));
 	}
 	return credits;
 }
@@ -475,6 +515,41 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.nationalgeographic.com/search?q=everest",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.nationalgeographic.com/photography/article/mount-vesuvius-pompeii-behind-the-scenes",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "'The Entire World Is Glowing in Front of You': How Nat Geo Photographers Captured Pompeii",
+				"creators": [
+					{
+						"firstName": "Halley",
+						"lastName": "Brown",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-08-05",
+				"ISSN": "0027-9358",
+				"abstractNote": "Italian visual duo Paolo Verzone and Massimo Nicolaci experimented with movement and light to reveal the ancient Roman ruins as they've never been seen before.",
+				"extra": "Credits: Photographs and video by Paolo Verzone and Massimo Nicolaci",
+				"language": "en",
+				"libraryCatalog": "www.nationalgeographic.com",
+				"publicationTitle": "National Geographic",
+				"shortTitle": "'The Entire World Is Glowing in Front of You'",
+				"url": "https://www.nationalgeographic.com/photography/article/mount-vesuvius-pompeii-behind-the-scenes",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
