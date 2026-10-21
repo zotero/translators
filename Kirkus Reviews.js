@@ -63,7 +63,13 @@ issue or byline data, so it cannot be scraped. Only the pathname is rewritten -
 a search query can hold "/print/" as text.
 */
 function canonicalUrl(url) {
-	let u = new URL(url);
+	let u;
+	try {
+		u = new URL(url);
+	}
+	catch (e) {
+		return url;
+	}
 	if (!/\/print\/?$/.test(u.pathname)) return url;
 	u.pathname = u.pathname.replace(/\/print\/?$/, '/');
 	return u.href;
@@ -143,7 +149,7 @@ function getSearchResults(doc, checkOnly) {
 		+ ' a.lead-name[href*="/writers-center/"], a.lead-text-title[href*="/writers-center/"]'
 	);
 	for (let row of rows) {
-		let href = row.href;
+		let href = canonicalUrl(row.href);
 		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -157,6 +163,8 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) return;
+			// getSearchResults() hands back canonical urls, so nothing here needs
+			// a second fetch to get past a /print/ render
 			let reviewUrls = [];
 			for (let u of Object.keys(items)) {
 				reviewUrls.push(u);
