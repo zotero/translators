@@ -16,6 +16,7 @@
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2008 Michael Berkowitz
+	Copyright © 2026 Vera de Kok
 
 	This file is part of Zotero.
 
