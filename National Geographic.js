@@ -158,8 +158,11 @@ async function scrape(doc) {
 
 		item.creators = getCreators(doc, article);
 
-		// Embedded Metadata turns <meta name="article:section" content="Animals">
-		// into a "Section:" line in extra. That section header is site structure,
+		// NatGeo pages carry <meta name="article:section" content="Animals">, and
+		// a component of the save chain sets it as the item's section field.
+		// magazineArticle has no section field (only journalArticle,
+		// newspaperArticle, bookSection, statute and bill do), so Zotero demotes
+		// the value to a "Section:" line in extra. That header is site structure,
 		// not part of the citation, so drop it before adding our own lines.
 		if (item.extra) {
 			item.extra = item.extra.replace(/^Section: .*(?:\n|$)/gm, '').trim();
