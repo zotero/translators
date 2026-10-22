@@ -124,7 +124,9 @@ async function doWeb(doc, url) {
 		var items = getListingResults(doc, false);
 		var selected = await Zotero.selectItems(items);
 		if (!selected) return;
-		await ZU.processDocuments(Object.keys(selected), scrape);
+		for (url of Object.keys(selected)) {
+			await scrape(await ZU.requestDocument(url));
+		}
 	}
 	else {
 		await scrape(doc);
