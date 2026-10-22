@@ -85,7 +85,9 @@ function roleType(role) {
 async function fetchAuthorNames(refs) {
 	let authors = await Promise.all(refs
 		.filter(ref => ref && ref.key)
-		.map(ref => requestJSON(`https://openlibrary.org${ref.key}.json`)));
+		// A missing author record shouldn't fail the whole lookup;
+		// the name just falls through to the search-API/work fallbacks
+		.map(ref => requestJSON(`https://openlibrary.org${ref.key}.json`).catch(() => ({}))));
 	return authors.map(author => author.name).filter(Boolean);
 }
 
@@ -107,7 +109,16 @@ async function doSearch(item) {
 	if (!isbn) return;
 
 	// https://openlibrary.org/dev/docs/api/books (ISBN API)
-	let edition = await requestJSON(`https://openlibrary.org/isbn/${isbn}.json`);
+	// Unknown ISBNs return 404; a miss should end the search silently
+	// (no completed items) rather than surface as a translation error,
+	// so lower-priority translators still get a chance to run.
+	let edition;
+	try {
+		edition = await requestJSON(`https://openlibrary.org/isbn/${isbn}.json`);
+	}
+	catch (e) {
+		return;
+	}
 
 	// The edition only links author records; fetch each name from there rather
 	// than from the search API's work-level author list, which can include
