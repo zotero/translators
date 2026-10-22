@@ -158,6 +158,15 @@ async function scrape(doc) {
 
 		item.creators = getCreators(doc, article);
 
+		// Embedded Metadata turns <meta name="article:section" content="Animals">
+		// into a "Section:" line in extra. That section header is site structure,
+		// not part of the citation, so drop it before adding our own lines.
+		if (item.extra) {
+			item.extra = item.extra.replace(/^Section: .*(?:\n|$)/gm, '').trim();
+			// An empty extra must not be set at all, or the test comparison fails.
+			if (!item.extra) delete item.extra;
+		}
+
 		var credits = getCredits(doc);
 		if (credits.length) addExtra(item, 'Credits: ' + credits.join('; '));
 
