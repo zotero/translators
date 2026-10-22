@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2019-10-06 18:12:01"
+	"lastUpdated": "2026-10-22 13:20:00"
 }
 
 /*
@@ -77,6 +77,34 @@ function handleAuthors(authors) {
 	return [];
 }
 
+function getJSONLDAuthors(doc) {
+	for (let script of doc.querySelectorAll('script[type="application/ld+json"]')) {
+		let data;
+		try {
+			data = JSON.parse(script.textContent);
+		}
+		catch (e) {
+			continue;
+		}
+		if (data instanceof Array) {
+			data = data[0];
+		}
+		if (!data || data['@type'] != 'NewsArticle' || !data.author) {
+			continue;
+		}
+		var authors = data.author instanceof Array ? data.author : [data.author];
+		var names = [];
+		for (var i = 0, n = authors.length; i < n; i++) {
+			var name = authors[i] && authors[i].name;
+			if (name && names.indexOf(name) == -1) {
+				names.push(name.trim());
+			}
+		}
+		if (names.length) return names;
+	}
+	return [];
+}
+
 function handleKeywords(keywords) {
 	if (keywords && (keywords = keywords.trim())) {
 		return keywords.split(/,\s*/);
@@ -134,6 +162,23 @@ function scrape(doc, url) {
 				|| ZU.xpathText(doc, '//header[@class="article-header"]//ul[@class="article-authors"]//span[@class="byline"]/a')
 				|| ZU.xpathText(doc, '//div[contains(@class, "author-text")]/a');
 			if (authors) item.creators = handleAuthors(authors);
+			// current pages carry the full byline only in NewsArticle JSON-LD;
+			// add authors not already in the byline-derived list
+			var jsonldAuthors = getJSONLDAuthors(doc);
+			if (jsonldAuthors.length) {
+				var have = item.creators.map(function (c) {
+					return (c.lastName + ', ' + c.firstName).toLowerCase();
+				});
+				for (var i = 0, n = jsonldAuthors.length; i < n; i++) {
+					var name = jsonldAuthors[i];
+					var author = ZU.cleanAuthor(name, 'author');
+					var key = (author.lastName + ', ' + author.firstName).toLowerCase();
+					if (have.indexOf(key) == -1) {
+						have.push(key);
+						item.creators.push(author);
+					}
+				}
+			}
 
 			var title = ZU.xpathText(doc, '//h1[@class="entry-title"]');
 			if (!item.title && title) item.title = title;
@@ -548,6 +593,44 @@ var testCases = [
 						"tag": "White House"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://time.com/article/2026/10/16/katie-zacharia-out-as-trump-s-press-secretary-after-1-briefing/",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "Katie Zacharia Out as Trump's Press Secretary After 5 Days",
+				"creators": [
+					{
+						"firstName": "Connor",
+						"lastName": "Greene",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nik",
+						"lastName": "Popli",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-10-16",
+				"ISSN": "0040-781X",
+				"abstractNote": "Trump on Friday said to reporters that he had told Zacharia to \"reconsider\" her role.",
+				"language": "en-US",
+				"libraryCatalog": "time.com",
+				"publicationTitle": "Time",
+				"url": "https://time.com/article/2026/10/16/katie-zacharia-out-as-trump-s-press-secretary-after-1-briefing/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
