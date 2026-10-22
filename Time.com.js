@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2026-10-22 15:40:00"
+	"lastUpdated": "2026-10-22 16:45:00"
 }
 
 /*
@@ -38,15 +38,34 @@
 
 
 function detectWeb(doc, url) {
-	if (/\/article\/|\d{4}\/\d{2}\/\d{2}\//.test(url)) {
+	if (/\/article\/|\d{4}\/\d{2}\/\d{2}\//.test(url)
+			|| getJSONLD(doc)['@type'] == 'NewsArticle') {
 		return "magazineArticle";
 	}
-	// Legacy URLs (/3533556/title/, /5691641/title/) carry no date in the path;
-	// the NewsArticle JSON-LD is what identifies them as articles now.
-	if (getJSONLD(doc)['@type'] == 'NewsArticle') {
-		return "magazineArticle";
+	// Section fronts and the homepage list article links. time.com has no
+	// search page anymore - /search/?q= redirects to the homepage - so the
+	// homepage case is what a search ends up in.
+	if (/^https?:\/\/(www\.)?time\.com\/(section\/[^/]+\/?)?$/.test(url)
+			&& getSearchResults(doc, true)) {
+		return "multiple";
 	}
 	return false;
+}
+
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	// Article cards wrap the headline in the anchor; image-only anchors have
+	// no usable text and are skipped.
+	for (let anchor of doc.querySelectorAll('a[href*="/article/"]')) {
+		let title = ZU.trimInternal(anchor.textContent);
+		if (!title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[anchor.href] = title;
+	}
+	return found ? items : false;
 }
 
 
@@ -149,7 +168,16 @@ async function scrape(doc, url = doc.location.href) {
 
 
 async function doWeb(doc, url) {
-	await scrape(doc, url);
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let link of Object.keys(items)) {
+			await scrape(await requestDocument(link));
+		}
+	}
+	else {
+		await scrape(doc, url);
+	}
 }
 
 
@@ -289,6 +317,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://time.com/section/politics/",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
