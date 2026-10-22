@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2026-10-22 13:20:00"
+	"lastUpdated": "2026-10-22 14:05:00"
 }
 
 /*
@@ -112,7 +112,7 @@ function handleKeywords(keywords) {
 	return [];
 }
 
-function scrape(doc, url) {
+async function scrape(doc, url = doc.location.href) {
 	var article = ZU.xpath(doc, '//section/div[@class="wrapper"]/article[contains(@class, "active")]')[0];
 	var metaUrl = ZU.xpathText(doc, '/html/head/meta[@property="og:url"]/@content');
 	
@@ -200,13 +200,12 @@ function scrape(doc, url) {
 			item.complete();
 		});
 		
-		translator.getTranslatorObject(function (em) {
-			em.addCustomFields({
-				date: 'date'
-			});
+		var em = await translator.getTranslatorObject();
+		em.addCustomFields({
+			date: 'date'
 		});
 
-		translator.translate();
+		await translator.translate();
 	}
 }
 
@@ -227,21 +226,16 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
+		var items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let articleURL of Object.keys(items)) {
+			await scrape(await requestDocument(articleURL), articleURL);
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
