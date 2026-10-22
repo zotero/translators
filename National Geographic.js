@@ -158,17 +158,22 @@ async function scrape(doc) {
 
 		item.creators = getCreators(doc, article);
 
-		// NatGeo pages carry <meta name="article:section" content="Animals">, and
-		// a component of the save chain sets it as the item's section field.
-		// magazineArticle has no section field (only journalArticle,
-		// newspaperArticle, bookSection, statute and bill do), so Zotero demotes
-		// the value to a "Section:" line in extra. That header is site structure,
-		// not part of the citation, so drop it before adding our own lines.
+		// NatGeo pages carry <meta name="article:section" content="Animals">, but
+		// the magazineArticle type has no section field (only journalArticle,
+		// newspaperArticle, bookSection, statute and bill do), so the header
+		// belongs in extra. Take the value from the meta tag, or from a "Section:"
+		// line that the save chain already demoted into extra, and keep exactly
+		// one line, above the Credits line.
+		var sectionMeta = doc.querySelector('meta[name="article:section"]');
+		var section = sectionMeta ? ZU.trimInternal(sectionMeta.getAttribute('content') || '') : '';
 		if (item.extra) {
+			var demoted = item.extra.match(/^Section: (.*)$/m);
+			if (demoted && !section) section = ZU.trimInternal(demoted[1]);
 			item.extra = item.extra.replace(/^Section: .*(?:\n|$)/gm, '').trim();
 			// An empty extra must not be set at all, or the test comparison fails.
 			if (!item.extra) delete item.extra;
 		}
+		if (section) addExtra(item, 'Section: ' + section);
 
 		var credits = getCredits(doc);
 		if (credits.length) addExtra(item, 'Credits: ' + credits.join('; '));
@@ -397,7 +402,7 @@ var testCases = [
 				"date": "2026-10-19",
 				"ISSN": "0027-9358",
 				"abstractNote": "Wildlife photographer and ornithologist Tim Laman shares his advice for getting started—right in your own backyard.",
-				"extra": "Credits: Video by Russell Laman",
+				"extra": "Section: Animals\nCredits: Video by Russell Laman",
 				"language": "en",
 				"libraryCatalog": "www.nationalgeographic.com",
 				"place": "Washington, D.C.",
@@ -455,7 +460,7 @@ var testCases = [
 				"date": "2026-09-08",
 				"ISSN": "0027-9358",
 				"abstractNote": "Relentlessly hunted for its scales, the mysterious armored pangolin is vanishing throughout Africa. Now scientists are trying to unlock the secrets that could help save it.",
-				"extra": "Credits: Photographs by Marcus Westberg",
+				"extra": "Section: Animals\nCredits: Photographs by Marcus Westberg",
 				"language": "en",
 				"libraryCatalog": "www.nationalgeographic.com",
 				"place": "Washington, D.C.",
@@ -505,7 +510,8 @@ var testCases = [
 				],
 				"tags": [],
 				"notes": [],
-				"seeAlso": []
+				"seeAlso": [],
+				"extra": "Section: Environment"
 			}
 		]
 	},
@@ -531,7 +537,7 @@ var testCases = [
 				"date": "2026-10-09",
 				"ISSN": "0027-9358",
 				"abstractNote": "Snoozing bears, spinning mills, and birds of prey. Check out some of the pictures featured in our Photo of the Day.",
-				"extra": "Credits: Photos curated by National Geographic's Photography Department",
+				"extra": "Section: Photography\nCredits: Photos curated by National Geographic's Photography Department",
 				"language": "en",
 				"libraryCatalog": "www.nationalgeographic.com",
 				"place": "Washington, D.C.",
@@ -585,7 +591,7 @@ var testCases = [
 				"date": "2026-08-05",
 				"ISSN": "0027-9358",
 				"abstractNote": "Italian visual duo Paolo Verzone and Massimo Nicolaci experimented with movement and light to reveal the ancient Roman ruins as they've never been seen before.",
-				"extra": "Credits: Photographs and video by Paolo Verzone and Massimo Nicolaci",
+				"extra": "Section: Photography\nCredits: Photographs and video by Paolo Verzone and Massimo Nicolaci",
 				"language": "en",
 				"libraryCatalog": "www.nationalgeographic.com",
 				"place": "Washington, D.C.",
