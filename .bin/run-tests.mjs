@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
 import process from 'node:process';
 import { parseArgs, REPO_ROOT } from './lib/common.mjs';
 import { ensureConnectorBuild, EXTENSION_ID } from './lib/connector.mjs';
@@ -33,7 +32,7 @@ if (positionals.length === 0) {
 const extensionDir = await ensureConnectorBuild({ rebuild: values['rebuild-connector'] });
 
 // Start translator server (serves translator metadata + code on localhost:8085)
-const translatorServer = await import(pathToFileURL(path.join(CI_DIR, 'translator-server.mjs')).href);
+const translatorServer = await import(path.join(CI_DIR, 'translator-server.mjs'));
 await translatorServer.serve();
 
 // Resolve filenames to the translators named on the command line
