@@ -1,7 +1,7 @@
 {
 	"translatorID": "d9be934c-edb9-490c-a88d-34e2ee106cd7",
 	"label": "Time.com",
-	"creator": "Michael Berkowitz",
+	"creator": "Michael Berkowitz, Vera de Kok",
 	"target": "^https?://([^/]*\\.)?time\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
