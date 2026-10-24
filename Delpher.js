@@ -2,20 +2,20 @@
 	"translatorID": "c4008cc5-9243-4d13-8b35-562cdd184558",
 	"label": "Delpher",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://[^\\/]+\\.delpher\\.nl",
+	"target": "^https?:\\/\\/(resolver\\.kb\\.nl\\/resolve\\?urn=[^&]+|[^\\/]+\\.delpher\\.nl)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-09 15:54:31"
+	"lastUpdated": "2026-10-24 14:40:12"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2016 Philipp Zumstein
+	Copyright Â© 2016 Philipp Zumstein
 
 	This file is part of Zotero.
 
@@ -37,6 +37,30 @@
 
 
 const API_URL = 'https://www.delpher.nl/nl/api/resource';
+
+// KB permalinks (https://resolver.kb.nl/resolve?urn=...) are used outside
+// Delpher as well, so accept them as input. The first block of the URN
+// identifies the KB collection; map the ones Delpher serves to the Delpher
+// collection code.
+const RESOLVER_RE = /^https?:\/\/resolver\.kb\.nl\/resolve\?urn=([^&]+)/;
+
+// KB collection code in the URN -> Delpher collection code
+const RESOLVER_COLLECTIONS = {
+	ddd: 'ddd',
+	MMHCO01: 'ddd',
+	dts: 'dts',
+	dpo: 'boeken',
+	MMKB02: 'boeken',
+	anp: 'anp'
+};
+
+// Delpher collection code -> site section of the viewer
+const VIEWER_PATHS = {
+	ddd: 'kranten',
+	dts: 'tijdschriften',
+	boeken: 'boeken',
+	anp: 'radiobulletins'
+};
 
 // Delpher collection code -> Zotero item type
 const ITEM_TYPES = {
@@ -66,6 +90,11 @@ const LANGUAGES = {
 };
 
 function detectWeb(doc, url) {
+	let resolverUrn = url.match(RESOLVER_RE);
+	if (resolverUrn) {
+		let collection = resolverCollection(decodeURIComponent(resolverUrn[1]));
+		return collection ? ITEM_TYPES[collection] : false;
+	}
 	if (url.includes('/view')) {
 		if (url.includes('/boeken/')) return 'book';
 		if (url.includes('/tijdschriften/')) return 'magazineArticle';
@@ -107,6 +136,11 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url = doc.location.href) {
+	let resolverUrn = url.match(RESOLVER_RE);
+	if (resolverUrn) {
+		await scrapePermalink(doc, resolverUrn[1]);
+		return;
+	}
 	let params = parseQuery(url);
 	let collection = params.coll || collectionFromUrl(url);
 	let identifier = params.identifier || objectId(doc);
@@ -148,6 +182,25 @@ async function scrape(doc, url = doc.location.href) {
 	addAttachments(item, doc, data);
 
 	item.complete();
+}
+
+// A KB permalink redirects to the metadata of the object (for newspapers) or
+// to the Delpher viewer (for most other collections), so fetch the viewer
+// page of the object and scrape it like a regular Delpher page.
+async function scrapePermalink(doc, urnParameter) {
+	let urn = decodeURIComponent(urnParameter).replace(/:(pdf|image|ocr)$/, '');
+	let collection = resolverCollection(urn);
+	if (!collection) return;
+	let viewerUrl = `https://www.delpher.nl/nl/${VIEWER_PATHS[collection]}/view?coll=${collection}&identifier=${encodeURIComponent(urn)}`;
+	if (!doc.querySelector('div.js-object-viewer-wrapper')) {
+		doc = await requestDocument(viewerUrl);
+	}
+	await scrape(doc, viewerUrl);
+}
+
+// The first block of the URN identifies the KB collection
+function resolverCollection(urn) {
+	return RESOLVER_COLLECTIONS[String(urn).split(':')[0]] || '';
 }
 
 function itemType(collection, doc, url) {
@@ -309,10 +362,10 @@ function addAttachments(item, doc, data) {
 	item.attachments.push({ title: 'Snapshot', document: doc });
 
 	let pdfLink, imageLink;
-	let links = ZU.xpath(doc, '//a[contains(@class, "object-view-menu__downloads-link")]');
+	let links = doc.querySelectorAll('a.object-view-menu__downloads-link');
 	for (let link of links) {
 		let label = ZU.trimInternal(link.textContent).toLowerCase();
-		let href = link.href;
+		let href = link.href || link.getAttribute('href') || '';
 		if (!href) continue;
 		if (label.includes('pdf') || href.includes(':pdf')) {
 			pdfLink = pdfLink || href;
@@ -568,7 +621,7 @@ var testCases = [
 						"tag": "06.26 boekhandel, boekhandelscatalogi"
 					},
 					{
-						"tag": "7 al Bibliografie; boek- en bibliotheekwetenschap → Bibliografie en bibliotheconomie → Inleiding en algemeen → Tijdschriften → Nederland"
+						"tag": "7 al Bibliografie; boek- en bibliotheekwetenschap â†’ Bibliografie en bibliotheconomie â†’ Inleiding en algemeen â†’ Tijdschriften â†’ Nederland"
 					},
 					{
 						"tag": "Algemeen"
@@ -583,7 +636,7 @@ var testCases = [
 						"tag": "Boekwinkels"
 					},
 					{
-						"tag": "bibliografieën"
+						"tag": "bibliografieÃ«n"
 					},
 					{
 						"tag": "boekhandel"
@@ -658,7 +711,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Neêrland weer vrij!",
+				"title": "NeÃªrland weer vrij!",
 				"creators": [
 					{
 						"firstName": "J.",
@@ -699,7 +752,7 @@ var testCases = [
 						"tag": "1505 bed"
 					},
 					{
-						"tag": "1505 bed Opvoeding en onderwijs; [Kinderlectuur] → Kinderlectuur → Kinderboeken → Nederlands"
+						"tag": "1505 bed Opvoeding en onderwijs; [Kinderlectuur] â†’ Kinderlectuur â†’ Kinderboeken â†’ Nederlands"
 					},
 					{
 						"tag": "Achttiende eeuw"
@@ -748,6 +801,222 @@ var testCases = [
 					}
 				],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://resolver.kb.nl/resolve?urn=ddd:110578678:mpeg21",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Het Cechische volk in deze dagen. Aanpassing in gelatenheid aan den nieuwen toestand. Een bezoek aan Praag.",
+				"creators": [],
+				"date": "1941-02-01",
+				"callNumber": "832675288",
+				"edition": "Avond",
+				"libraryCatalog": "Delpher",
+				"pages": "1",
+				"place": "Amsterdam",
+				"publicationTitle": "De Telegraaf",
+				"url": "https://resolver.kb.nl/resolve?urn=ddd:110578678:mpeg21:p001",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Image",
+						"mimeType": "image/jpeg"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://resolver.kb.nl/resolve?urn=MMHCO01:000079808:mpeg21",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Dit nommer bestaat uit twee bladen",
+				"creators": [],
+				"date": "1903-02-06",
+				"callNumber": "398543062",
+				"edition": "Dag",
+				"libraryCatalog": "Delpher",
+				"pages": "1",
+				"place": "Zwolle",
+				"publicationTitle": "Provinciale Overijsselsche en Zwolsche courant",
+				"url": "https://resolver.kb.nl/resolve?urn=MMHCO01:000079808:mpeg21:p001",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Image",
+						"mimeType": "image/jpeg"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://resolver.kb.nl/resolve?urn=dts:2738036:mpeg21",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "Nieuwsblad voor den boekhandel jrg 91, 1924, no 35",
+				"creators": [],
+				"date": "1924-05-02",
+				"callNumber": "830637982",
+				"issue": "35",
+				"language": "nl",
+				"libraryCatalog": "Koninklijke Bibliotheek",
+				"pages": "1",
+				"publicationTitle": "Nieuwsblad voor den boekhandel",
+				"url": "https://resolver.kb.nl/resolve?urn=dts:2738036:mpeg21:0001",
+				"volume": "91",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Image",
+						"mimeType": "image/jpeg"
+					}
+				],
+				"tags": [
+					{
+						"tag": "0007 al"
+					},
+					{
+						"tag": "06.26 boekhandel, boekhandelscatalogi"
+					},
+					{
+						"tag": "7 al Bibliografie; boek- en bibliotheekwetenschap â†’ Bibliografie en bibliotheconomie â†’ Inleiding en algemeen â†’ Tijdschriften â†’ Nederland"
+					},
+					{
+						"tag": "Algemeen"
+					},
+					{
+						"tag": "Boekhandel"
+					},
+					{
+						"tag": "Boekwezen"
+					},
+					{
+						"tag": "Boekwinkels"
+					},
+					{
+						"tag": "bibliografieÃ«n"
+					},
+					{
+						"tag": "boekhandel"
+					},
+					{
+						"tag": "boekpromotie"
+					},
+					{
+						"tag": "tijdschriften"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://resolver.kb.nl/resolve?urn=MMKB02:100006852",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "NeÃªrland weer vrij!",
+				"creators": [
+					{
+						"firstName": "J.",
+						"lastName": "Stamperius",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "W. K. de",
+						"lastName": "Bruin",
+						"creatorType": "author"
+					}
+				],
+				"date": "[192-?]",
+				"callNumber": "389117609",
+				"language": "nl",
+				"libraryCatalog": "Koninklijke Bibliotheek",
+				"numPages": "95 p., [6] bl. pl",
+				"place": "Alkmaar",
+				"publisher": "Gebr. Kluitman",
+				"series": "Ons genoegen. Serie A. Jongensboeken",
+				"url": "https://resolver.kb.nl/resolve?urn=MMKB02:100006852:00009",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Image",
+						"mimeType": "image/jpeg"
+					}
+				],
+				"tags": [
+					{
+						"tag": "1505 bed"
+					},
+					{
+						"tag": "1505 bed Opvoeding en onderwijs; [Kinderlectuur] â†’ Kinderlectuur â†’ Kinderboeken â†’ Nederlands"
+					},
+					{
+						"tag": "Achttiende eeuw"
+					},
+					{
+						"tag": "Historische verhalen"
+					},
+					{
+						"tag": "Kinderboek"
+					},
+					{
+						"tag": "Napoleontische oorlogen"
+					},
+					{
+						"tag": "Negentiende eeuw"
+					},
+					{
+						"tag": "Oorlogsverhalen"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
