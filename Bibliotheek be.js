@@ -9,10 +9,31 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-24 11:15:00"
+	"lastUpdated": "2026-10-24 11:25:00"
 }
 
-function detectWeb(doc, url) {
+/* ***** BEGIN LICENSE BLOCK *****
+ *
+ * Copyright © 2026 Nyo Dekens
+ *
+ * This file is part of Zotero.
+ *
+ * Zotero is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Zotero is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * ***** END LICENSE BLOCK ***** */
+
+function detectWeb(doc, _url) {
 	if (doc.querySelector('.newspaper-article--title, .block-newspaper-article-detail')) {
 		return "newspaperArticle";
 	}
@@ -23,28 +44,34 @@ function doWeb(doc, url) {
 	var item = new Zotero.Item("newspaperArticle");
 	item.url = url;
 
+	// Title
 	var titleElem = doc.querySelector('.newspaper-article--title');
 	if (titleElem) {
 		item.title = ZU.trimInternal(titleElem.textContent);
-	} else if (doc.title) {
+	}
+	else if (doc.title) {
 		item.title = ZU.trimInternal(doc.title);
 	}
 
+	// Publication / Newspaper
 	var publisherElem = doc.querySelector('.newspaper-article--publisher');
 	if (publisherElem) {
 		item.publicationTitle = ZU.trimInternal(publisherElem.textContent);
 	}
 
+	// Publication Date
 	var dateElem = doc.querySelector('.newspaper-article--publication-date');
 	if (dateElem) {
 		var datetime = dateElem.getAttribute('datetime');
 		if (datetime) {
 			item.date = datetime.split('T')[0];
-		} else {
+		}
+		else {
 			item.date = ZU.trimInternal(dateElem.textContent);
 		}
 	}
 
+	// Author(s)
 	var authorLinks = doc.querySelectorAll('.newspaper-article--author a');
 	if (authorLinks && authorLinks.length > 0) {
 		for (var i = 0; i < authorLinks.length; i++) {
@@ -53,7 +80,8 @@ function doWeb(doc, url) {
 				item.creators.push(ZU.cleanAuthor(name, "author"));
 			}
 		}
-	} else {
+	}
+	else {
 		var authorElem = doc.querySelector('.newspaper-article--author');
 		if (authorElem) {
 			var rawAuthor = authorElem.textContent.replace(/^[\s\-–—]+/, '').trim();
@@ -63,6 +91,7 @@ function doWeb(doc, url) {
 		}
 	}
 
+	// Page number
 	var pageElem = doc.querySelector('.newspaper-article--page-number');
 	if (pageElem) {
 		var pageText = ZU.trimInternal(pageElem.textContent)
@@ -74,12 +103,14 @@ function doWeb(doc, url) {
 		}
 	}
 
+	// Language
 	if (doc.documentElement && doc.documentElement.lang) {
 		item.language = doc.documentElement.lang;
 	}
 
 	item.libraryCatalog = "Bibliotheek.be";
 
+	// Attachments (Snapshot)
 	item.attachments.push({
 		document: doc,
 		title: "Snapshot"
@@ -88,6 +119,7 @@ function doWeb(doc, url) {
 	item.complete();
 }
 
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
