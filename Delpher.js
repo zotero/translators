@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-24 14:40:12"
+	"lastUpdated": "2026-10-24 17:15:30"
 }
 
 /*
@@ -44,15 +44,51 @@ const API_URL = 'https://www.delpher.nl/nl/api/resource';
 // collection code.
 const RESOLVER_RE = /^https?:\/\/resolver\.kb\.nl\/resolve\?urn=([^&]+)/;
 
-// KB collection code in the URN -> Delpher collection code
-const RESOLVER_COLLECTIONS = {
-	ddd: 'ddd',
-	MMHCO01: 'ddd',
-	dts: 'dts',
-	dpo: 'boeken',
-	MMKB02: 'boeken',
-	anp: 'anp'
-};
+// KB collection codes in the URN (lowercased), grouped by the Delpher
+// section they belong to. Sources: the Delpher site classification and
+// the OAI-PMH sets of https://services.kb.nl/mdo/oai, whose hierarchical
+// setSpecs (GGC:Kranten:X, BOEKEN:X, GGC:Tijdschriften:X) are how the
+// resolver identifier urn=<collection>:<object-id>[:<part>] is built.
+const RESOLVER_KRANTEN = [
+	'abcddd ddd kbddd02 kbddd03 kbnrc01 kbpers01 mmarge01 mmba02 mmcc01 mmcc02 mmcoda01 mmcoda02 ',
+	'mmcolo01 mmda03 mmddd02 mmecal02 mmgagm01 mmgahe01 mmgaro01 mmgasl01 mmgavl01 mmgazs01 mmgem01 ',
+	'mmhco01 mmhco02 mmiisg05 mmiisg07 mmiisg18 mmkb04 mmkb08 mmkb09 mmkb12 mmkb15 mmkb19 mmkb23 ',
+	'mmkb27 mmkb32 mmkb38 mmmaas01 mmmhw01 mmnha02 mmnha03 mmniod04 mmniod05 mmpm05 mmranm02 ',
+	'mmranm03 mmranmg01 mmraz02 mmraz03 mmrhce01 mmrhce02 mmrhcg03 mmrhcg04 mmsaa06 mmsab03 mmsab04 ',
+	'mmsab05 mmsadb01 mmsaen01 mmsaen02 mmsak01 mmsaro02 mmsavl02 mmsavl03 mmsfkb03 mmshcl03 ',
+	'mmtele01 mmtres02 mmtres03 mmtres04 mmubge01 mmubl12 mmubtb04 mmubwa01 mmutra04 mmveen01 ',
+	'mmveen02 mmwfa01 ',
+];
+const RESOLVER_BOEKEN = [
+	'dejong dpo edbo gbr02 kbehc01 kbeu7475 kbita01 kbtres01 konb10 konb15 mmatr03 mmatr08 mmcmc01 ',
+	'mmkb02 mmkb02a mmkb02b mmkb05 mmkb06 mmkb11 mmkb18 mmkb18a mmkb18b mmkb18c mmkb18d mmkb21 ',
+	'mmkb22 mmkb24 mmkb25 mmkb28 mmkb29 mmkb31 mmkb33 mmkb35 mmkb36 mmkb39 mmkb45 mmkb46 mmkb47 ',
+	'mmkb48 mmkb50 mmkb52 mmkb53 mmkit03 mmmvc01 mmniod07 mmsfkb02 mmsfuba02 mmsfubu02 mmtres06 ',
+	'mmtsgg01 mmtua01 mmtuk01 mmuba08 mmuba09 mmubl07 mmubvu02 mmubvu05 mulm01 niod02 niod05 nom01 ',
+	'prb01 ros01 sab01 ',
+];
+const RESOLVER_TIJDSCHRIFTEN = [
+	'cbs_ext dts gmdh01 kbdbnl02 kbdbvl02 kbdc001 kbkwg02 kbna001 kbvrnl01 mmad01 mmalet01 mmalet02 ',
+	'mmatr01 mmatr02 mmatr05 mmatr06 mmatr07 mmatr09 mmavb01 mmboy01 mmbph01 mmbzk02 mmcbs01 mmcbs02 ',
+	'mmcbs03 mmcmc03 mmcmc05 mmcss01 mmda04 mmegg01 mmenlk02 mmenlk03 mmenlk04 mmeur03 mmeye01 ',
+	'mmeye02 mmgams01 mmgams02 mmgazs02 mmhcc01 mmhfc01 mmhni01 mmhni03 mmiisg02 mmiisg06 mmiisg08 ',
+	'mmiisg10 mmiisg13 mmiisg15 mmiisg17 mmiisg20 mmiisg21 mmiisg23 mmkb07 mmkb10 mmkb13 mmkb14 ',
+	'mmkb16 mmkb26 mmkb30 mmkb34 mmkb37 mmkdc03 mmkdc04 mmkdc05 mmkdc07 mmkdc09 mmkdc10 mmkdc11 ',
+	'mmkit04 mmkitlv3 mmknau01 mmkngu01 mmknmp01 mmknmp02 mmknrb01 mmkntb01 mmknvb01 mmkpsv01 ',
+	'mmkvlo01 mmkvlo02 mmkwg01 mmlind01 mmmi02 mmna12 mmnat03 mmndr01 mmnfm01 mmnhv01 mmnibg01 ',
+	'mmnimh02 mmniod08 mmnmm02 mmnmm03 mmnpz01 mmnvog01 mmnvog02 mmobdh01 mmohkt01 mmpm02 mmpm03 ',
+	'mmpm04 mmraa02 mmrhcg01 mmrhcg02 mmrkd09 mmrmo02 mmsaro01 mmsaro03 mmsavl01 mmshcl02 mmshcl04 ',
+	'mmspom01 mmtey01 mmtres05 mmtuk02 mmtuk03 mmuba10 mmuba13 mmuba15 mmuba16 mmuba17 mmubg01 ',
+	'mmubl08 mmubl09 mmubl13 mmubma01 mmubma02 mmubn01 mmubtb01 mmubtb02 mmubtb03 mmubu02 mmubvu04 ',
+	'mmubvu06 mmubvu07 mmubvu08 mmubwa02 mmubwa03 mmubwa04 mmubwa05 mmubwa06 mmutra01 mmutra03 ',
+	'mmvred01 mmzah01 mmzah03 mmzb04 mmzend01 mmzend02 mmzou01 niod07 niod09 oba01 ',
+];
+
+const RESOLVER_COLLECTIONS = {};
+for (let line of RESOLVER_KRANTEN) for (let code of line.trim().split(' ')) RESOLVER_COLLECTIONS[code] = 'ddd';
+for (let line of RESOLVER_BOEKEN) for (let code of line.trim().split(' ')) RESOLVER_COLLECTIONS[code] = 'boeken';
+for (let line of RESOLVER_TIJDSCHRIFTEN) for (let code of line.trim().split(' ')) RESOLVER_COLLECTIONS[code] = 'dts';
+RESOLVER_COLLECTIONS.anp = 'anp';
 
 // Delpher collection code -> site section of the viewer
 const VIEWER_PATHS = {
@@ -200,7 +236,8 @@ async function scrapePermalink(doc, urnParameter) {
 
 // The first block of the URN identifies the KB collection
 function resolverCollection(urn) {
-	return RESOLVER_COLLECTIONS[String(urn).split(':')[0]] || '';
+	// the resolver is case-insensitive (urn=DDD:... resolves like ddd)
+	return RESOLVER_COLLECTIONS[String(urn).split(':')[0].toLowerCase()] || '';
 }
 
 function itemType(collection, doc, url) {
