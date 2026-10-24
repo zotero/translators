@@ -15,7 +15,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright Â© 2016 Philipp Zumstein
+	Copyright © 2016 Philipp Zumstein
 
 	This file is part of Zotero.
 
@@ -658,7 +658,7 @@ var testCases = [
 						"tag": "06.26 boekhandel, boekhandelscatalogi"
 					},
 					{
-						"tag": "7 al Bibliografie; boek- en bibliotheekwetenschap â†’ Bibliografie en bibliotheconomie â†’ Inleiding en algemeen â†’ Tijdschriften â†’ Nederland"
+						"tag": "7 al Bibliografie; boek- en bibliotheekwetenschap → Bibliografie en bibliotheconomie → Inleiding en algemeen → Tijdschriften → Nederland"
 					},
 					{
 						"tag": "Algemeen"
@@ -673,7 +673,7 @@ var testCases = [
 						"tag": "Boekwinkels"
 					},
 					{
-						"tag": "bibliografieÃ«n"
+						"tag": "bibliografieën"
 					},
 					{
 						"tag": "boekhandel"
@@ -748,7 +748,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "NeÃªrland weer vrij!",
+				"title": "Neêrland weer vrij!",
 				"creators": [
 					{
 						"firstName": "J.",
@@ -789,7 +789,7 @@ var testCases = [
 						"tag": "1505 bed"
 					},
 					{
-						"tag": "1505 bed Opvoeding en onderwijs; [Kinderlectuur] â†’ Kinderlectuur â†’ Kinderboeken â†’ Nederlands"
+						"tag": "1505 bed Opvoeding en onderwijs; [Kinderlectuur] → Kinderlectuur → Kinderboeken → Nederlands"
 					},
 					{
 						"tag": "Achttiende eeuw"
@@ -954,7 +954,7 @@ var testCases = [
 						"tag": "06.26 boekhandel, boekhandelscatalogi"
 					},
 					{
-						"tag": "7 al Bibliografie; boek- en bibliotheekwetenschap â†’ Bibliografie en bibliotheconomie â†’ Inleiding en algemeen â†’ Tijdschriften â†’ Nederland"
+						"tag": "7 al Bibliografie; boek- en bibliotheekwetenschap → Bibliografie en bibliotheconomie → Inleiding en algemeen → Tijdschriften → Nederland"
 					},
 					{
 						"tag": "Algemeen"
@@ -969,7 +969,7 @@ var testCases = [
 						"tag": "Boekwinkels"
 					},
 					{
-						"tag": "bibliografieÃ«n"
+						"tag": "bibliografieën"
 					},
 					{
 						"tag": "boekhandel"
@@ -992,7 +992,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "NeÃªrland weer vrij!",
+				"title": "Neêrland weer vrij!",
 				"creators": [
 					{
 						"firstName": "J.",
@@ -1033,7 +1033,7 @@ var testCases = [
 						"tag": "1505 bed"
 					},
 					{
-						"tag": "1505 bed Opvoeding en onderwijs; [Kinderlectuur] â†’ Kinderlectuur â†’ Kinderboeken â†’ Nederlands"
+						"tag": "1505 bed Opvoeding en onderwijs; [Kinderlectuur] → Kinderlectuur → Kinderboeken → Nederlands"
 					},
 					{
 						"tag": "Achttiende eeuw"
