@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-06-05 16:09:20"
+	"lastUpdated": "2026-10-15 14:36:40"
 }
 
 /*
@@ -39,34 +39,77 @@ function detectWeb(doc, url) {
 	if (/\/watch\?(?:.*)\bv=[0-9a-zA-Z_-]+/.test(url)) {
 		return "videoRecording";
 	}
-	// Search results
-	/* Testurls:
-	http://www.youtube.com/user/Zoteron
-	http://www.youtube.com/playlist?list=PL793CABDF042A9514
-	http://www.youtube.com/results?search_query=zotero&oq=zotero&aq=f&aqi=g4&aql=&gs_sm=3&gs_upl=60204l61268l0l61445l6l5l0l0l0l0l247l617l1.2.1l4l0
-	*/
-	/* currently not working 2020-11-11
-	if ((url.includes("/results?") || url.includes("/playlist?") || url.includes("/user/"))
-			&& getSearchResults(doc, true)) {
+	if (url.includes("/playlist?") && getSearchResults(doc, true)) {
 		return "multiple";
-	} */
+	}
 	return false;
 }
 
+// Titles/links from the playlist DOM. YouTube's playlist UI now uses
+// yt-lockup-view-model; the ytd-playlist-video-renderer selector covers the
+// older layout.
 function getSearchResults(doc, checkOnly) {
-	var links = doc.querySelectorAll('a.ytd-video-renderer, a.ytd-playlist-video-renderer');
+	var links = doc.querySelectorAll(
+		'yt-lockup-view-model h3 a[href*="/watch?v="], ytd-playlist-video-renderer a#video-title'
+	);
 	var items = {},
 		found = false;
 	for (var i = 0, n = links.length; i < n; i++) {
 		var title = ZU.trimInternal(links[i].textContent);
-		var link = links[i].href;
-		if (!title || !link) continue;
+		var link = canonicalWatchURL(links[i].href);
+		if (!title || !videoIdFromURL(link)) continue;
 
 		if (checkOnly) return true;
 
 		found = true;
 		items[link] = title;
 	}
+	if (found) return items;
+
+	// Fallback before custom elements upgrade: parse ytInitialData
+	for (var script of doc.querySelectorAll('script:not([src])')) {
+		var data = extractYtInitialData(script.textContent);
+		if (!data) continue;
+		var fromData = playlistItemsFromData(data);
+		if (!fromData) continue;
+		if (checkOnly) return true;
+		return fromData;
+	}
+	return false;
+}
+
+// Collect playlist videos from ytInitialData (lockup UI and legacy
+// playlistVideoRenderer). Returns an items map or false.
+function playlistItemsFromData(data) {
+	var items = {};
+	var found = false;
+	walkJson(data, function (node) {
+		if (node.lockupViewModel
+				&& node.lockupViewModel.contentType === 'LOCKUP_CONTENT_TYPE_VIDEO'
+				&& node.lockupViewModel.contentId) {
+			var lockup = node.lockupViewModel;
+			var lockupTitle = lockup.metadata
+				&& lockup.metadata.lockupMetadataViewModel
+				&& lockup.metadata.lockupMetadataViewModel.title
+				&& lockup.metadata.lockupMetadataViewModel.title.content;
+			if (lockupTitle) {
+				found = true;
+				items['https://www.youtube.com/watch?v=' + lockup.contentId] = lockupTitle;
+			}
+			return false;
+		}
+		if (node.playlistVideoRenderer && node.playlistVideoRenderer.videoId) {
+			var renderer = node.playlistVideoRenderer;
+			var rendererTitle = renderer.title
+				&& (renderer.title.simpleText
+					|| (renderer.title.runs && renderer.title.runs[0] && renderer.title.runs[0].text));
+			if (rendererTitle) {
+				found = true;
+				items['https://www.youtube.com/watch?v=' + renderer.videoId] = rendererTitle;
+			}
+		}
+		return false;
+	});
 	return found ? items : false;
 }
 
@@ -85,6 +128,48 @@ async function doWeb(doc, url) {
 
 function getMetaContent(doc, attrName, value) {
 	return attr(doc, 'meta[' + attrName + '="' + value + '"]', 'content');
+}
+
+// Format a total duration in seconds as H:MM:SS or MM:SS.
+function secondsToTime(total) {
+	total = parseInt(total);
+	if (!total && total !== 0) return null;
+	var hours = Math.floor(total / 3600);
+	var minutes = Math.floor((total % 3600) / 60);
+	var seconds = total % 60;
+	function pad(n) {
+		return String(n).padStart(2, '0');
+	}
+	if (hours) {
+		return hours + ':' + pad(minutes) + ':' + pad(seconds);
+	}
+	return pad(minutes) + ':' + pad(seconds);
+}
+
+// Convert a YouTube ISO 8601 duration (PT#H#M#S, sometimes PT#M#S with
+// minutes ≥ 60) to H:MM:SS or MM:SS.
+function isoDurationToTime(iso) {
+	if (!iso) return null;
+	var m = iso.match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/);
+	if (!m) return null;
+	var hours = parseInt(m[1] || '0');
+	var minutes = parseInt(m[2] || '0');
+	var seconds = parseInt(m[3] || '0');
+	return secondsToTime(hours * 3600 + minutes * 60 + seconds);
+}
+
+// Prefer the player clock when it looks right; fall back to (or upgrade to)
+// a parsed ISO duration. The player sometimes reports total minutes for
+// hour-plus videos (e.g. "152:35" instead of "2:32:35") or a near-zero
+// value while the video is still loading.
+function pickRunningTime(playerTime, isoTime) {
+	if (!isoTime) return playerTime || null;
+	if (!playerTime) return isoTime;
+	var playerParts = playerTime.split(':');
+	var isoParts = isoTime.split(':');
+	if (/^0:0?\d$/.test(playerTime)) return isoTime;
+	if (playerParts.length === 2 && isoParts.length === 3) return isoTime;
+	return playerTime;
 }
 
 function videoIdFromURL(url) {
@@ -171,12 +256,11 @@ function channelNamesFromData(data) {
 	return names;
 }
 
-// Parse `var ytInitialData = {...}` out of a script blob. Returns null on
-// any failure (missing marker, unbalanced braces, JSON parse error) and
-// logs the cause, so the caller can treat ytInitialData as a single signal.
-function extractYtInitialData(raw) {
+// Parse `var <name> = {...}` out of a script blob. Returns null on any
+// failure (missing marker, unbalanced braces, JSON parse error).
+function extractYtJsonVar(raw, varName) {
 	if (!raw) return null;
-	var marker = raw.indexOf('var ytInitialData = {');
+	var marker = raw.indexOf('var ' + varName + ' = {');
 	if (marker === -1) return null;
 	var start = raw.indexOf('{', marker);
 
@@ -198,16 +282,35 @@ function extractYtInitialData(raw) {
 		end++;
 	}
 	if (depth !== 0) {
-		Zotero.debug('YouTube: ytInitialData braces unbalanced');
+		Zotero.debug('YouTube: ' + varName + ' braces unbalanced');
 		return null;
 	}
 	try {
 		return JSON.parse(raw.substring(start, end + 1));
 	}
 	catch (e) {
-		Zotero.debug('YouTube: ytInitialData parse failed: ' + e);
+		Zotero.debug('YouTube: ' + varName + ' parse failed: ' + e);
 		return null;
 	}
+}
+
+function extractYtInitialData(raw) {
+	return extractYtJsonVar(raw, 'ytInitialData');
+}
+
+function extractYtInitialPlayerResponse(raw) {
+	return extractYtJsonVar(raw, 'ytInitialPlayerResponse');
+}
+
+// videoDetails from ytInitialPlayerResponse (title, author, shortDescription,
+// lengthSeconds). Present in the static watch-page HTML, so usable when the
+// JS-rendered DOM isn't available.
+function playerDetailsFromDoc(doc) {
+	for (var script of doc.querySelectorAll('script:not([src])')) {
+		var player = extractYtInitialPlayerResponse(script.textContent);
+		if (player && player.videoDetails) return player.videoDetails;
+	}
+	return null;
 }
 
 // Returns null if no usable ytInitialData is present in this doc
@@ -254,6 +357,8 @@ async function extractCreatorNames(doc, url) {
 
 async function scrape(doc, url = doc.location.href) {
 	var item = new Zotero.Item("videoRecording");
+	item.url = canonicalWatchURL(url);
+
 	if (!Zotero.isServer) {
 		let jsonLD;
 		try {
@@ -269,28 +374,22 @@ async function scrape(doc, url = doc.location.href) {
 		 */
 
 		item.title = text(doc, '#info-contents h1.title') // Desktop
+			|| text(doc, '#title yt-formatted-string')
+			|| text(doc, '#title h1')
 			|| text(doc, '#title')
 			|| text(doc, '.slim-video-information-title'); // Mobile
-		item.url = canonicalWatchURL(url);
-		item.runningTime = text(doc, '#movie_player .ytp-time-duration') // Desktop
+		var playerTime = text(doc, '#movie_player .ytp-time-duration') // Desktop
 			|| text(doc, '.ytm-time-display .time-second'); // Mobile after unmute
-		if (!item.runningTime && jsonLD.duration) { // Mobile before unmute
-			let duration = parseInt(jsonLD.duration.substring(2));
-			let hours = String(Math.floor(duration / 3600)).padStart(2, '0');
-			let minutes = String(Math.floor(duration % 3600 / 60)).padStart(2, '0');
-			let seconds = String(duration % 60).padStart(2, '0');
-			if (duration >= 3600) { // Include hours
-				item.runningTime = `${hours}:${minutes}:${seconds}`;
-			}
-			else { // Just include minutes and seconds
-				item.runningTime = `${minutes}:${seconds}`;
-			}
-		}
+		var isoTime = isoDurationToTime(
+			getMetaContent(doc, 'itemprop', 'duration') || jsonLD.duration
+		);
+		item.runningTime = pickRunningTime(playerTime, isoTime);
 
 		item.date = ZU.strToISO(
 			text(doc, '#info-strings yt-formatted-string') // Desktop
 			|| attr(doc, 'ytm-factoid-renderer:last-child > div', 'aria-label') // Mobile if description has been opened
-		) || jsonLD.uploadDate; // Mobile on initial page load
+			|| jsonLD.uploadDate // Mobile on initial page load
+		);
 
 		var creatorNames = await extractCreatorNames(doc, url);
 		if (creatorNames.length) {
@@ -311,6 +410,7 @@ async function scrape(doc, url = doc.location.href) {
 			}
 		}
 		var description = text(doc, '#description .content')
+			|| text(doc, '#description-inline-expander')
 			|| text(doc, '#description')
 			|| text(doc, 'ytm-expandable-video-description-body-renderer .collapsed-string-container')
 			|| text(doc, '#snippet span');
@@ -318,16 +418,27 @@ async function scrape(doc, url = doc.location.href) {
 			item.abstractNote = description;
 		}
 	}
-	else {
-		// required for translator server, which doesn't load the page's JS
-		item.title = getMetaContent(doc, 'name', 'title');
-		item.url = getMetaContent(doc, 'property', 'og:url');
-		let isoDuration = getMetaContent(doc, 'itemprop', 'duration');
-		// Convert ISO 8601 duration to HH:MM:SS
-		item.runningTime = isoDuration.replace(/^PT/, '').replace(/H/, ':').replace(/M/, ':')
-.replace(/S/, '');
+
+	// Fallbacks for translator server (no page JS) and multi-item
+	// requestDocument fetches that don't include the JS-rendered DOM.
+	// Prefer ytInitialPlayerResponse.videoDetails (full description) over
+	// truncated meta tags.
+	var details = playerDetailsFromDoc(doc);
+	if (!item.title) {
+		item.title = (details && details.title)
+			|| getMetaContent(doc, 'name', 'title');
+		item.url = getMetaContent(doc, 'property', 'og:url') || item.url;
+	}
+	if (!item.runningTime) {
+		item.runningTime = isoDurationToTime(getMetaContent(doc, 'itemprop', 'duration'))
+			|| (details && secondsToTime(details.lengthSeconds));
+	}
+	if (!item.date) {
 		item.date = ZU.strToISO(getMetaContent(doc, 'itemprop', 'uploadDate'));
-		let author = attr(doc, 'link[itemprop="name"]', 'content');
+	}
+	if (!item.creators.length) {
+		let author = (details && details.author)
+			|| attr(doc, 'link[itemprop="name"]', 'content');
 		if (author) {
 			item.creators.push({
 				lastName: author,
@@ -335,10 +446,16 @@ async function scrape(doc, url = doc.location.href) {
 				fieldMode: 1
 			});
 		}
-		let description = getMetaContent(doc, 'name', 'description');
-		if (description) {
-			item.abstractNote = description;
-		}
+	}
+	var playerDescription = details && details.shortDescription;
+	var metaDescription = getMetaContent(doc, 'name', 'description');
+	// Prefer the full player shortDescription over a truncated meta/DOM blurb.
+	if (playerDescription
+			&& (!item.abstractNote || item.abstractNote.length < playerDescription.length)) {
+		item.abstractNote = playerDescription;
+	}
+	else if (!item.abstractNote && metaDescription) {
+		item.abstractNote = metaDescription;
 	}
 
 	item.complete();
@@ -394,9 +511,9 @@ var testCases = [
 					}
 				],
 				"date": "2026-06-01",
-				"abstractNote": "An interview with Marc LeBlanc on the pioneering entity system work done at Looking Glass for Thief: The Dark Project.\n\nAccompanying article: https://computerenhance.com\nMahk's YouTube:    / @algorithmancytube  \nMahk's Twitch:   / videos  \nMahk's game design website: https://8kindsoffun.com",
+				"abstractNote": "An interview with Marc LeBlanc on the pioneering entity system work done at Looking Glass for Thief: The Dark Project.\n\nAccompanying article: https://computerenhance.com\nMahk's YouTube: https://www.youtube.com/@algorithmancyTube\nMahk's Twitch: https://www.twitch.tv/algorithmancy/videos\nMahk's game design website: https://8kindsoffun.com",
 				"libraryCatalog": "YouTube",
-				"runningTime": "2:32:34",
+				"runningTime": "2:32:35",
 				"url": "https://www.youtube.com/watch?v=73Do0OScoOU",
 				"attachments": [],
 				"tags": [],
@@ -404,6 +521,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.youtube.com/playlist?list=PL1GBzfniaE7yXy0uRtn-qIwVV5_r3ItRF",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
