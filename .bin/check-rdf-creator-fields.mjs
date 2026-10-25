@@ -39,16 +39,11 @@ try {
 		headless: true,
 		args: [`--disable-extensions-except=${extensionDir}`, `--load-extension=${extensionDir}`],
 	});
-	const matches = worker => worker.url().startsWith(`chrome-extension://${EXTENSION_ID}/`);
-	const worker = context.serviceWorkers().find(matches)
-		?? await context.waitForEvent('serviceworker', { predicate: matches, timeout: 10000 });
-	const deadline = Date.now() + 20000;
-	while (!(await worker.evaluate(() => !!globalThis.Zotero?.initialized))) {
-		assert(Date.now() < deadline, 'Connector initialization timed out');
-		await new Promise(resolve => setTimeout(resolve, 50));
-	}
 	const page = await context.newPage();
 	await page.goto(`chrome-extension://${EXTENSION_ID}/tools/testTranslators/testTranslators.html`);
+	// Imports run from this page; the background worker's global initialization
+	// flag can remain unset even while its translation handlers work.
+	await page.waitForFunction(() => !!globalThis.Zotero?.initialized, null, { timeout: 20000 });
 	const results = await page.evaluate(async ({ translatorID, fixtures }) => {
 		const { TranslatorTester } = await import('./translatorTester.mjs');
 		const { ConnectorNonWebTranslationEnvironment } = await import('./translatorTester_environment.mjs');
