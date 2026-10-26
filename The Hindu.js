@@ -1,7 +1,7 @@
 {
 	"translatorID": "06142d59-fa9c-48c3-982b-6e7c67d3d6b8",
 	"label": "The Hindu",
-	"creator": "Philipp Zumstein",
+	"creator": "Philipp Zumstein, Vera de Kok",
 	"target": "^https?://www\\.thehindu\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-05 10:59:44"
+	"lastUpdated": "2026-10-18 20:16:15"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017 Philipp Zumstein
+	Copyright © 2017 Philipp Zumstein and Vera de Kok
 	
 	This file is part of Zotero.
 
@@ -41,44 +41,84 @@ of the newspaper. The other translator "The Hindu (old)" deals with older
 content (pre 2009)
 **/
 
-function detectWeb(doc, url) {
-	if (url.indexOf('.ece')>-1) {
+async function detectWeb(doc, url) {
+	// .ece as a PATH suffix, not somewhere in the query or fragment
+	if (/\.ece(?:[?#]|$)/.test(url)) {
 		return "newspaperArticle";
-	} else if (url.indexOf('/search/?') && getSearchResults(doc, true)) {
-		return "multiple";
 	}
+	if (isSearchPage(url)) {
+		// The results are injected by the search widget after load, so
+		// there is nothing to judge from the document as it arrives.
+		return (await waitForResults(doc)) ? "multiple" : false;
+	}
+	return false;
 }
+
+// A search page is only useful once a query is present; /search/ on its own
+// and /search/?q= are empty.
+var SEARCH_QUERY_RE = /[?&#](?:gsc\.)?(?:q|query)=[^&#]+/;
+
+function isSearchPage(url) {
+	return /\/search\/(?:[?#]|$)/.test(url) && SEARCH_QUERY_RE.test(url);
+}
+
+async function waitForResults(doc) {
+	for (var i = 0; i < 20; i++) {
+		if (doc.querySelector('div.gsc-results a.gs-title')) {
+			return true;
+		}
+		await new Promise(resolve => setTimeout(resolve, 250));
+	}
+	return false;
+}
+
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
-	var found = false;
-	var rows = ZU.xpath(doc, '//div[contains(@class, "story-card-33-news") or contains(@class, "story-card-news")]//a[contains(@href, ".ece")]');
-	for (var i=0; i<rows.length; i++) {
-		var title = ZU.trimInternal(rows[i].textContent);
-		if (!href || !title) continue;
-		if (checkOnly) return true;
-		found = true;
+	var rows = doc.querySelectorAll('div.gsc-results a.gs-title');
+	for (var row of rows) {
+		// The link is a google.com redirect; data-ctorig holds the target.
+		// Every result is emitted twice, once per thumbnail layout.
+		var href = row.dataset.ctorig || row.getAttribute('href');
+		var title = cleanSearchTitle(row.textContent);
+		if (!href || !title || !/\.ece(?:[?#]|$)/.test(href) || items[href]) {
+			continue;
+		}
+		if (checkOnly) {
+			return true;
+		}
 		items[href] = title;
 	}
-	return found ? items : false;
+	return Object.keys(items).length ? items : false;
+}
+
+// The results carry the site name as a suffix.
+function cleanSearchTitle(text) {
+	return ZU.trimInternal(text || '')
+		.replace(/\s*[|-]\s*The Hindu(?: BusinessLine)?$/, '');
 }
 
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
-	} else {
+async function doWeb(doc, url) {
+	if (await detectWeb(doc, url) == "multiple") {
+		var items = getSearchResults(doc, false);
+		var selected = await Zotero.selectItems(items);
+		if (!selected) {
+			return;
+		}
+		// Sequential: a search result set is a few dozen pages at most.
+		for (var article of Object.keys(selected)) {
+			await scrapeDocument(article);
+		}
+	}
+	else {
 		scrape(doc, url);
 	}
+}
+
+// scrape() is callback based, so this promise settles only after the item is done.
+function scrapeDocument(url) {
+	return requestDocument(url).then(doc => scrape(doc, url));
 }
 
 function scrape(doc, url) {
@@ -88,63 +128,276 @@ function scrape(doc, url) {
 	//translator.setDocument(doc);
 	
 	translator.setHandler('itemDone', function (obj, item) {
-		//fix the authors
-		var authors = ZU.xpath(doc, '//div[contains(@class, "author-container")]/span');
-		if (authors.length>0) {
+		// Fix the authors. The byline block is the only reliable source: the footer
+		// link "authors & contributors-menu" is not a person, and article:author is
+		// literally " & " on some pages.
+		var byline = getByline(doc);
+		if (!byline.length) {
+			// Without a byline block, EM's article:author is all there is, and on
+			// agency copy that is the wire service. Keep such credits out of the
+			// authors; anything that looks like a person is left untouched.
+			var emName = ZU.trimInternal(
+				ZU.xpathText(doc, '//meta[@property="article:author"]/@content') || '');
+			// Only replace what EM produced when the value parses into credits and
+			// all of them are agencies or desks; a bare " & " parses to nothing.
+			var emParts = emName ? parseCredit(emName) : [];
+			if (emParts.length && emParts.every(isCredit)) {
+				byline = [emName];
+			}
+		}
+		if (byline.length) {
+			var credits = [];
+			for (var i = 0; i < byline.length; i++) {
+				var parts = parseCredit(byline[i]);
+				for (var j = 0; j < parts.length; j++) {
+					if (!hasCredit(credits, parts[j].value)) {
+						credits.push(parts[j]);
+					}
+				}
+			}
 			item.creators = [];
-			for (var i=0; i<authors.length; i++) {
-				insertCreator(authors[i].textContent, item);
+			for (var k = 0; k < credits.length; k++) {
+				item.creators.push(credits[k].type == 'person'
+					? personCreator(credits[k].value)
+					: corporateCreator(credits[k].value));
 			}
 		}
 		if (!item.date) {
 			item.date = ZU.xpathText(doc, '//meta[@name="publish-date"]/@content');
 		}
-		var utcontainer = ZU.xpathText(doc, '(//div[contains(@class, "ut-container")]/span)[1]');
-		//test that we are not already in the date node (name of places should not contain any number)
-		if (utcontainer && !utcontainer.match(/\d/g)) {
-			item.place = ZU.capitalizeTitle(utcontainer.replace(/,\s*$/, ''), true);
-		}
+		// The date line now ends in " IST - <place>", but that is the DATELINE:
+		// where the story was filed from (Kolkata, Paris), not where the paper is
+		// published. item.place means the city of publication, so take that from
+		// the publisher address in JSON-LD and keep the dateline as a tag.
+		var dateline = getDateline(doc);
+		item.place = PUBLICATION_PLACE;
 		item.language = "en-IN";
 		item.publicationTitle = "The Hindu";
+		// EM copies the meta description, but that one contains double spaces
+		// ("moved aside  so we could embrace") that the HTML collapse hides.
+		if (item.abstractNote) {
+			item.abstractNote = ZU.trimInternal(item.abstractNote);
+		}
+		// Some articles carry an auto-filled description ("<Section> News:<title>")
+		// instead of a real summary, which is useless as an abstract. Fall back to
+		// the first (long) paragraph of the body.
+		var ld = getJSONLD(doc);
+		if (!item.abstractNote || isGeneratedDescription(item.abstractNote)) {
+			var lead = getLeadParagraph(doc);
+			if (lead) item.abstractNote = lead;
+		}
+		// The section Embedded Metadata takes from the breadcrumb is the top-level
+		// one ("Features", "Business"), while JSON-LD has the finer section
+		// ("Metroplus", "Economy").
+		if (ld && ld.articleSection) {
+			item.section = ZU.trimInternal(String(ld.articleSection));
+		}
 		item.ISSN = "0971-751X";
+		// The keywords EM takes from the meta tags are headline variants
+		// ("<title> ratings", "<title> Letterboxd"), so add the site's own
+		// topic list next to them. The two lists do not overlap.
+		var topics = getTopics(doc);
+		for (var topic of topics) {
+			item.tags.push({ tag: topic });
+		}
+		// The dateline is worth keeping, but only as a tag, and only when the
+		// topic list does not already name that city ("Kolkata", "Mumbai" both
+		// occur as topics).
+		var seen = topics.map(t => t.toLowerCase());
+		if (dateline && !seen.includes(dateline.toLowerCase())) {
+			item.tags.push({ tag: dateline });
+		}
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.itemType = "newspaperArticle";
 		trans.doWeb(doc, url);
 	});
 }
 
 
-function insertCreator(authorName, newItem){
-	/*Check for some author name conventions unique to the Hindu*/
-	/*Right now we are using the following: 
-	  
-	  1) PTI, a news agency, is often credited as an author on The
-	  Hindu articles.  We just change the author status to
-	  "contributor", and retain the capitalization.
-	  
-	  2) Some articles are bylined "Special Coresspondent". Again, we
-	  change the author status to "contributor".
-	  
-	*/
-	authorName = ZU.capitalizeTitle(authorName.toLowerCase(), true);
-	if (authorName == "Pti") {
-		newItem.creators.push({
-			lastName: "PTI", 
-			creatorType: 'contributor', 
-			fieldMode: 1
-		});
-	} else if (authorName == "Special Correspondent") {
-		newItem.creators.push({
-			lastName: "Special Correspondent", 
-			creatorType: 'contributor', 
-			fieldMode: 1
-		});
-	} else {
-		newItem.creators.push(ZU.cleanAuthor(authorName, "author"));
+// item.place is the city of publication, not the dateline. The Hindu is
+// published from Chennai (the address in its own JSON-LD publisher block).
+var PUBLICATION_PLACE = "Chennai";
+
+
+// The dateline trails the publish/update stamp as " IST - <place>". An article
+// carries several stamps and only some of them name a place, so scan them all
+// instead of trusting the first. Only a place name qualifies: the stamp itself
+// contains digits, and role strings such as "New Delhi bureau" are not places.
+function getDateline(doc) {
+	var stamps = ZU.xpath(doc, '//p[contains(@class, "updated-time")]/span')
+		.concat(ZU.xpath(doc, '//div[contains(@class, "update-publish-time")]'));
+	for (var i = 0; i < stamps.length; i++) {
+		var text = ZU.trimInternal(stamps[i].textContent || '');
+		if (!/\bIST\s*-/.test(text)) {
+			continue;
+		}
+		var place = ZU.trimInternal(text.split(/\s+-\s+/).pop() || '');
+		if (!place || /\d/.test(place) || place.length > 60) {
+			continue;
+		}
+		return ZU.capitalizeTitle(place, true);
 	}
+	return null;
+}
+
+
+// The site's own topic list, which is the meaningful one: the meta keywords
+// are headline variants ("<title> ratings"), while these are subject tags
+// ("cinema", "documentary films"). It appears three times in the HTML and once
+// rendered; use the rendered list, it is the only one a translator can read.
+function getTopics(doc) {
+	var topics = [];
+	var links = doc.querySelectorAll('p.related-topics-list a');
+	for (var link of links) {
+		var name = ZU.trimInternal(link.textContent || '');
+		if (name && !topics.includes(name)) {
+			topics.push(name);
+		}
+	}
+	return topics;
+}
+
+
+function getJSONLD(doc) {
+	var scripts = doc.querySelectorAll('script[type="application/ld+json"]');
+	var found = null;
+	for (var i = 0; i < scripts.length; i++) {
+		var data;
+		try {
+			data = JSON.parse(scripts[i].textContent);
+		}
+		catch (e) {
+			continue;
+		}
+		var nodes = Array.isArray(data) ? data : (data['@graph'] || [data]);
+		for (var j = 0; j < nodes.length; j++) {
+			if (/Article/.test(nodes[j]['@type'] || '')) {
+				found = nodes[j];
+			}
+		}
+	}
+	return found;
+}
+
+function isGeneratedDescription(text) {
+	// "<Section> News:<title>" - not a real summary
+	return /\bNews:\s*/.test(text) || text.length < 40;
+}
+
+function getLeadParagraph(doc) {
+	var paras = ZU.xpath(doc, '//div[contains(@class, "article-section")]'
+		+ '//p[string-length(normalize-space(.)) > 120]');
+	for (var i = 0; i < paras.length; i++) {
+		// photo captions live in the same body
+		if (/\bcaption\b/.test(paras[i].className || '')) continue;
+		var text = ZU.trimInternal(paras[i].textContent);
+		if (text) return text;
+	}
+	return null;
+}
+
+
+// Wire services The Hindu credits in its bylines. They are credits, not authors.
+var AGENCIES = {
+	pti: 'PTI',
+	'press trust of india': 'PTI',
+	ap: 'AP',
+	'associated press': 'AP',
+	afp: 'AFP',
+	'agence france-presse': 'AFP',
+	reuters: 'Reuters',
+	ians: 'IANS',
+	'indo-asian news service': 'IANS',
+	ani: 'ANI',
+	'asian news international': 'ANI'
+};
+
+// The paper's own desks and the role-only byline, which are not people either.
+// Every edition desk ends in "Bureau" (The Hindu Bureau, Sports Bureau,
+// Telangana Bureau), so the shape matters more than the list.
+var DESKS = {
+	'team bl': 'Team BL',
+	'team sportstar': 'Team Sportstar',
+	'special correspondent': 'Special Correspondent'
+};
+
+// "<State/beat> Bureau" is a desk, never a person.
+var BUREAU_RE = /\bBureau$/i;
+
+function getByline(doc) {
+	var names = [];
+	// Only the article byline container counts. A plain contains(@class, "author")
+	// also matches the div.author-name of every "related articles" card in
+	// div.package-list, which would add a dozen unrelated names as authors.
+	var container = '//div[contains(concat(" ", normalize-space(@class), " "), " author ")]';
+	var links = ZU.xpath(doc, container + '//a[contains(@class, "person-name")]');
+	if (!links.length) {
+		// older articles: <div class="author fL"><span>Name</span></div>
+		links = ZU.xpath(doc, container + '/span');
+	}
+	for (var i = 0; i < links.length; i++) {
+		var name = ZU.trimInternal(links[i].textContent);
+		if (name && !names.includes(name)) {
+			names.push(name);
+		}
+	}
+	return names;
+}
+
+// Split one byline entry into typed parts: "PTI", "PTI/AFP" and "Lavpreet Kaur,"
+// all occur, where the trailing comma belongs to the markup.
+function parseCredit(text) {
+	var name = ZU.trimInternal(text || '').replace(/^[\s&,]+|[\s&,]+$/g, '');
+	if (!name) return [];
+	var chunks = name.split(/\s*(?:[/&,]|\band\b)\s*/i);
+	if (chunks.length > 1) {
+		var parts = [];
+		for (var i = 0; i < chunks.length; i++) {
+			parts = parts.concat(parseCredit(chunks[i]));
+		}
+		return parts;
+	}
+	if (AGENCIES[name.toLowerCase()]) {
+		return [{ type: 'corporate', value: AGENCIES[name.toLowerCase()] }];
+	}
+	if (DESKS[name.toLowerCase()]) {
+		return [{ type: 'desk', value: DESKS[name.toLowerCase()] }];
+	}
+	if (BUREAU_RE.test(name)) {
+		return [{ type: 'desk', value: name }];
+	}
+	return [{ type: 'person', value: name }];
+}
+
+function isCredit(part) {
+	return part.type != 'person';
+}
+
+function hasCredit(credits, value) {
+	for (var i = 0; i < credits.length; i++) {
+		if (credits[i].value === value) {
+			return true;
+		}
+	}
+	return false;
+}
+
+function personCreator(name) {
+	// Some bylines are all caps ("SHARAN APPARAO"); initials such as "G.V.R."
+	// must survive, so only rewrite names that carry no lowercase at all.
+	if (name == name.toUpperCase()) {
+		name = ZU.capitalizeTitle(name.toLowerCase(), true);
+	}
+	return ZU.cleanAuthor(name, 'author');
+}
+
+// Agencies and desks get a contributor in one field, so a credit like
+// "The Hindu Bureau" does not become the persons "The Hindu" and "Bureau".
+function corporateCreator(name) {
+	return { lastName: name, creatorType: 'contributor', fieldMode: 1 };
 }
 
 /** BEGIN TEST CASES **/
@@ -168,20 +421,35 @@ var testCases = [
 				"abstractNote": "India bids adieu to the telegram after 163 years",
 				"language": "en-IN",
 				"libraryCatalog": "www.thehindu.com",
-				"place": "Kolkata",
+				"place": "Chennai",
 				"publicationTitle": "The Hindu",
-				"section": "National",
-				"url": "http://www.thehindu.com/news/national/telegram-no-more-stop-100-stop/article4914819.ece",
+				"section": "India",
+				"url": "https://www.thehindu.com/news/national/telegram-no-more-stop-100-stop/article4914819.ece",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"BSNL",
-					"Telegram",
-					"Telegram service discontinuation",
-					"Telegraph service"
+					{
+						"tag": "BSNL"
+					},
+					{
+						"tag": "Kolkata"
+					},
+					{
+						"tag": "Telegram"
+					},
+					{
+						"tag": "Telegram service discontinuation"
+					},
+					{
+						"tag": "Telegraph service"
+					},
+					{
+						"tag": "telecommunication service"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -214,23 +482,57 @@ var testCases = [
 				"libraryCatalog": "www.thehindu.com",
 				"place": "Chennai",
 				"publicationTitle": "The Hindu",
-				"section": "Features",
-				"url": "http://www.thehindu.com/features/metroplus/once-favoured-now-forgotten/article4912011.ece",
+				"section": "Metroplus",
+				"url": "https://www.thehindu.com/features/metroplus/once-favoured-now-forgotten/article4912011.ece",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"Cassette tapes",
-					"Dial-up",
-					"Floppy discs",
-					"Gramophone",
-					"Pager",
-					"Roll films",
-					"Transistor radio",
-					"Typewriter",
-					"VCR"
+					{
+						"tag": "Cassette tapes"
+					},
+					{
+						"tag": "Chennai"
+					},
+					{
+						"tag": "Dial-up"
+					},
+					{
+						"tag": "Floppy discs"
+					},
+					{
+						"tag": "Gramophone"
+					},
+					{
+						"tag": "Pager"
+					},
+					{
+						"tag": "Roll films"
+					},
+					{
+						"tag": "The Hindu MetroPlus"
+					},
+					{
+						"tag": "Transistor radio"
+					},
+					{
+						"tag": "Typewriter"
+					},
+					{
+						"tag": "VCR"
+					},
+					{
+						"tag": "arts, culture and entertainment"
+					},
+					{
+						"tag": "human interest"
+					},
+					{
+						"tag": "lifestyle and leisure"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -256,20 +558,35 @@ var testCases = [
 				"abstractNote": "This is the fourth increase since June. It was raised by 75 paise on June 1, followed by a Rs. 2 per litre increase on June 16 and a Rs. 1.82 per litre hike on June 29.",
 				"language": "en-IN",
 				"libraryCatalog": "www.thehindu.com",
-				"place": "New Delhi",
+				"place": "Chennai",
 				"publicationTitle": "The Hindu",
 				"section": "Economy",
-				"url": "http://www.thehindu.com/business/Economy/petrol-prices-to-go-up-by-rs-155-per-litre/article4914855.ece",
+				"url": "https://www.thehindu.com/business/Economy/petrol-prices-to-go-up-by-rs-155-per-litre/article4914855.ece",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"Petrol price hike",
-					"Rupee fall",
-					"oil imports",
-					"oil marketing companies"
+					{
+						"tag": "New Delhi"
+					},
+					{
+						"tag": "Petrol price hike"
+					},
+					{
+						"tag": "Rupee fall"
+					},
+					{
+						"tag": "oil imports"
+					},
+					{
+						"tag": "oil marketing companies"
+					},
+					{
+						"tag": "petrol"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -278,41 +595,270 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.thehindu.com/opinion/columns/Chandrasekhar/the-forgotten-software-boom/article4914571.ece",
+		"url": "https://www.thehindu.com/opinion/columns/devdutt-pattanaik-column-india-has-many-krishnas-cult-to-culture/article71467898.ece",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "The forgotten software boom",
+				"title": "Column by Devdutt Pattanaik | India has many Krishnas",
 				"creators": [
 					{
-						"firstName": "C. P.",
-						"lastName": "Chandrasekhar",
+						"firstName": "Devdutt",
+						"lastName": "Pattanaik",
 						"creatorType": "author"
 					}
 				],
-				"date": "2013-07-14T13:57:47+05:30",
+				"date": "2026-09-17T06:06:00+05:30",
 				"ISSN": "0971-751X",
-				"abstractNote": "India’s software and information technology-enabled services (ITeS) exports have lost momentum. Since 2007-08 the Reserve Bank of India has been conducting an annual survey of exports of computer soft",
+				"abstractNote": "Explore the diverse interpretations of Krishna across India, reflecting regional identities, cultural nuances, and spiritual aspirations through history.",
 				"language": "en-IN",
 				"libraryCatalog": "www.thehindu.com",
+				"place": "Chennai",
 				"publicationTitle": "The Hindu",
-				"section": "Chandrasekhar",
-				"url": "http://www.thehindu.com/opinion/columns/Chandrasekhar/the-forgotten-software-boom/article4914571.ece",
+				"section": "Columns",
+				"url": "https://www.thehindu.com/opinion/columns/devdutt-pattanaik-column-india-has-many-krishnas-cult-to-culture/article71467898.ece",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"IT industry",
-					"ITeS",
-					"NASSCOM",
-					"economic slowdown"
+					{
+						"tag": "Devdutt Pattanaik on India's many Krishnas"
+					},
+					{
+						"tag": "Devdutt Pattanaik's From cult to culture"
+					},
+					{
+						"tag": "India has many Krishnas writes Devdutt Pattanaik"
+					},
+					{
+						"tag": "The Hindu Sunday Magazine"
+					},
+					{
+						"tag": "culture (general)"
+					},
+					{
+						"tag": "diverse interpretations of Krishna across India"
+					},
+					{
+						"tag": "hinduism"
+					},
+					{
+						"tag": "history"
+					},
+					{
+						"tag": "history and culture"
+					},
+					{
+						"tag": "human interest"
+					},
+					{
+						"tag": "religion and belief"
+					},
+					{
+						"tag": "religious books"
+					},
+					{
+						"tag": "society"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.thehindu.com/news/international/clashes-and-fires-break-out-as-protesters-rally-across-france-joining-students/article71598941.ece",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Clashes and fires break out as protesters rally across France, joining students",
+				"creators": [
+					{
+						"lastName": "AP",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					}
+				],
+				"date": "2026-10-18T07:05:54+05:30",
+				"ISSN": "0971-751X",
+				"abstractNote": "Violent protests surge across France as thousands rally, damaging property and clashing with police amid student blockades and rising costs.",
+				"language": "en-IN",
+				"libraryCatalog": "www.thehindu.com",
+				"place": "Chennai",
+				"publicationTitle": "The Hindu",
+				"section": "World",
+				"url": "https://www.thehindu.com/news/international/clashes-and-fires-break-out-as-protesters-rally-across-france-joining-students/article71598941.ece",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "France"
+					},
+					{
+						"tag": "France protests"
+					},
+					{
+						"tag": "France unrest"
+					},
+					{
+						"tag": "France violence protests"
+					},
+					{
+						"tag": "French reform protests"
+					},
+					{
+						"tag": "French youth protests"
+					},
+					{
+						"tag": "Paris"
+					},
+					{
+						"tag": "civil unrest"
+					},
+					{
+						"tag": "police"
+					},
+					{
+						"tag": "protest"
+					},
+					{
+						"tag": "school"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.thehindu.com/news/national/education-system-now-an-exclusion-system-designed-to-keep-millions-of-youth-out-rahul/article71599621.ece",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Education system now an exclusion system designed to keep millions of youth out: Rahul",
+				"creators": [
+					{
+						"lastName": "PTI",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					}
+				],
+				"date": "2026-10-18T16:39:57+05:30",
+				"ISSN": "0971-751X",
+				"abstractNote": "Rahul Gandhi calls India\u2019s education system an exclusion system, pushing youth out by class, wealth, or language barriers.",
+				"language": "en-IN",
+				"libraryCatalog": "www.thehindu.com",
+				"place": "Chennai",
+				"publicationTitle": "The Hindu",
+				"section": "India",
+				"url": "https://www.thehindu.com/news/national/education-system-now-an-exclusion-system-designed-to-keep-millions-of-youth-out-rahul/article71599621.ece",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"shortTitle": "Education system now an exclusion system designed to keep millions of youth out",
+				"tags": [
+					{
+						"tag": "Indian National Congress"
+					},
+					{
+						"tag": "New Delhi"
+					},
+					{
+						"tag": "Rahul Gandhi"
+					},
+					{
+						"tag": "congress rahul gandhi"
+					},
+					{
+						"tag": "education"
+					},
+					{
+						"tag": "rahul gandhi instagram"
+					},
+					{
+						"tag": "rahul gandhi instagram comment"
+					},
+					{
+						"tag": "rahul gandhi news"
+					},
+					{
+						"tag": "rahul gandhi on modi"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.thehindu.com/news/cities/chennai/rediscover-satyajit-ray-at-this-durga-puja-pandal-in-nandanam/article71597692.ece",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Rediscover Satyajit Ray at this Durga Puja pandal in Nandanam",
+				"creators": [
+					{
+						"lastName": "The Hindu Bureau",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					}
+				],
+				"date": "2026-10-17T23:12:19+05:30",
+				"ISSN": "0971-751X",
+				"abstractNote": "The 48th Sharadotsav of South Madras Cultural Association with a pandal themed around \u201cSatyajit Ray\u2019s Magical Creations\u201d is the team work of its members",
+				"language": "en-IN",
+				"libraryCatalog": "www.thehindu.com",
+				"place": "Chennai",
+				"publicationTitle": "The Hindu",
+				"section": "Chennai",
+				"url": "https://www.thehindu.com/news/cities/chennai/rediscover-satyajit-ray-at-this-durga-puja-pandal-in-nandanam/article71597692.ece",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Chennai Downtown"
+					},
+					{
+						"tag": "Durga Pooja"
+					},
+					{
+						"tag": "Durga Puja celebrations and chennai"
+					},
+					{
+						"tag": "South Madras Cultural Association and durga puja"
+					},
+					{
+						"tag": "arts, culture and entertainment"
+					},
+					{
+						"tag": "satyajit ray and pandal theme"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.thehindu.com/search/?q=kerala",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
