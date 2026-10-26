@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-08-27 10:42:50"
+	"lastUpdated": "2026-09-15 10:00:00"
 }
 
 /*
@@ -289,6 +289,19 @@ function scrapeCase(doc, url) {
 	
 	// docketNumber
 	item.docketNumber = scrapeData.Aktenzeichen;
+	
+	// ECLI from the metadata table, e.g. "ECLI:DE:BGH:2014:150514XBZB7113.0"
+	var ecli = null;
+	for (var key in scrapeData) {
+		var ecliMatch = scrapeData[key].match(/ECLI:\s*[A-Za-z]{2}:[^:\s]{1,7}:\d{4}:[^:\s]{1,25}/i);
+		if (ecliMatch) {
+			ecli = ecliMatch[0].replace(/\s+/g, '');
+			break;
+		}
+	}
+	if (ecli) {
+		item.DOI = ecli;
+	}
 	
 	// type of decision. Save this in item.extra according to citeproc-js
 	var decisionType = scrapeData.Dokumenttyp;
