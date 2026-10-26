@@ -2,14 +2,14 @@
 	"translatorID": "c4008cc5-9243-4d13-8b35-562cdd184558",
 	"label": "Delpher",
 	"creator": "Philipp Zumstein",
-	"target": "^https?:\\/\\/(resolver\\.kb\\.nl\\/resolve\\?urn=[^&]+|[^\\/]+\\.delpher\\.nl)",
+	"target": "^https?:\\/\\/(resolver\\.kb\\.nl\\/resolve\\?urn=[^&]+|[^\\/]+\\.delpher\\.nl|services\\.kb\\.nl\\/mdo\\/oai\\?verb=GetRecord&identifier=[^&]+&metadataPrefix=didl)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-24 17:15:30"
+	"lastUpdated": "2026-10-25 19:11:30"
 }
 
 /*
@@ -37,12 +37,21 @@
 
 
 const API_URL = 'https://www.delpher.nl/nl/api/resource';
+const RESULTS_API_URL = 'https://www.delpher.nl/nl/api/results';
 
 // KB permalinks (https://resolver.kb.nl/resolve?urn=...) are used outside
 // Delpher as well, so accept them as input. The first block of the URN
 // identifies the KB collection; map the ones Delpher serves to the Delpher
 // collection code.
 const RESOLVER_RE = /^https?:\/\/resolver\.kb\.nl\/resolve\?urn=([^&]+)/;
+
+// The resolver redirects permalinks of issue-level objects to the OAI-PMH
+// interface (https://services.kb.nl/mdo/oai) instead of the Delpher viewer,
+// which has no page for a whole issue, so accept its GetRecord URLs as input.
+const OAI_RE = /^https?:\/\/services\.kb\.nl\/mdo\/oai\?/;
+
+// Search and browse pages, e.g. /nl/kranten/results?query=buurman&coll=ddd
+const RESULTS_RE = /^https?:\/\/[^/]+\.delpher\.nl\/nl\/[^/]+\/results(?:[?#]|$)/;
 
 // KB collection codes in the URN (lowercased), grouped by the Delpher
 // section they belong to. Sources: the Delpher site classification and
@@ -131,13 +140,26 @@ function detectWeb(doc, url) {
 		let collection = resolverCollection(decodeURIComponent(resolverUrn[1]));
 		return collection ? ITEM_TYPES[collection] : false;
 	}
+	if (OAI_RE.test(url)) {
+		let params = parseQuery(url);
+		if (params.verb != 'GetRecord' || params.metadataPrefix != 'didl' || !params.identifier) return false;
+		// The identifier is "<setSpec(s)>:<urn>", where only the collection-code
+		// blocks identify Delpher content
+		for (let block of params.identifier.split(':')) {
+			let collection = RESOLVER_COLLECTIONS[block.toLowerCase()];
+			if (collection) return ITEM_TYPES[collection];
+		}
+		return false;
+	}
 	if (url.includes('/view')) {
 		if (url.includes('/boeken/')) return 'book';
 		if (url.includes('/tijdschriften/')) return 'magazineArticle';
 		if (url.includes('/kranten/')) return 'newspaperArticle';
 		if (url.includes('/radiobulletins/')) return 'radioBroadcast';
 	}
-	else if (getSearchResults(doc, true)) {
+	// The results are rendered client-side, so the result list may still be
+	// empty when detection runs right after page load
+	else if (RESULTS_RE.test(url) || getSearchResults(doc, true)) {
 		return 'multiple';
 	}
 	return false;
@@ -160,7 +182,12 @@ function getSearchResults(doc, checkOnly) {
 
 async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
-		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		// The results are rendered client-side, so the freshly loaded page the
+		// tester sees may not show any links yet; fall back to the results API
+		let items = getSearchResults(doc, false);
+		if (!items) items = await fetchResultsItems(url);
+		if (!items) return;
+		items = await Zotero.selectItems(items);
 		if (!items) return;
 		for (let itemUrl of Object.keys(items)) {
 			await scrape(await requestDocument(itemUrl), itemUrl);
@@ -171,10 +198,45 @@ async function doWeb(doc, url) {
 	}
 }
 
+// Query the results API the SPA itself uses and map its records to viewer
+// URLs, e.g. https://www.delpher.nl/nl/kranten/view?coll=ddd&identifier=...
+async function fetchResultsItems(url) {
+	let params = parseQuery(url);
+	let collection = params.coll || collectionFromUrl(url);
+	if (!collection || !VIEWER_PATHS[collection]) return false;
+	let query = new URLSearchParams();
+	for (let [key, value] of new URL(url).searchParams) {
+		if (key != 'coll') query.append(key, value);
+	}
+	let records;
+	try {
+		records = (await requestJSON(`${RESULTS_API_URL}?${query}&coll=${collection}`)).records;
+	}
+	catch (e) {
+		Z.debug(`Could not fetch results API: ${e}`);
+		return false;
+	}
+	let items = {};
+	for (let record of records || []) {
+		// the identifier is a resolver permalink, sometimes of just the OCR text
+		let urn = (record.metadataKey
+			|| String(record.identifier || '').match(/urn=([a-zA-Z0-9:%._-]+)/)?.[1] || '')
+			.replace(/:(ocr|pdf|image)$/, '');
+		if (!urn) continue;
+		let viewerUrl = `https://www.delpher.nl/nl/${VIEWER_PATHS[collection]}/view?coll=${collection}&identifier=${encodeURIComponent(urn)}`;
+		items[viewerUrl] = record.title;
+	}
+	return Object.keys(items).length ? items : false;
+}
+
 async function scrape(doc, url = doc.location.href) {
 	let resolverUrn = url.match(RESOLVER_RE);
 	if (resolverUrn) {
 		await scrapePermalink(doc, resolverUrn[1]);
+		return;
+	}
+	if (OAI_RE.test(url)) {
+		await scrapeOaiRecord(doc, url);
 		return;
 	}
 	let params = parseQuery(url);
@@ -232,6 +294,52 @@ async function scrapePermalink(doc, urnParameter) {
 		doc = await requestDocument(viewerUrl);
 	}
 	await scrape(doc, viewerUrl);
+}
+
+// The OAI record lists the permalinks of the object and all its parts; the
+// first one is the permalink of the object itself. The tab usually already
+// shows the record, so try to read its identifiers from the document first.
+// Fall back to the OAI identifier if no permalink can be found.
+async function scrapeOaiRecord(doc, url) {
+	let urns = permalinkUrns(doc);
+	if (!urns.length) {
+		try {
+			let record = await requestText(url);
+			urns = Array.from(record.matchAll(/resolver\.kb\.nl\/resolve\?urn=([a-zA-Z0-9:%._-]+)/g), match => match[1]);
+		}
+		catch (e) {
+			Z.debug(`Could not fetch OAI record: ${e}`);
+		}
+	}
+	for (let urn of urns) {
+		if (/:(pdf|image|ocr|alto)$/.test(urn)) continue;
+		await scrapePermalink(doc, urn);
+		return;
+	}
+	let identifier = parseQuery(url).identifier || '';
+	if (!identifier) return;
+	// The identifier is "<setSpec(s)>:<urn>", e.g. "DDD:ddd:<object>:mpeg21" or
+	// "KRANTEN:MMHCO01:MMHCO01:<object>:mpeg21"; drop the setSpec blocks before
+	// and including the first collection code to get the URN
+	let blocks = identifier.split(':');
+	for (let i = 0; i < blocks.length - 2; i++) {
+		if (RESOLVER_COLLECTIONS[blocks[i].toLowerCase()]) {
+			await scrapePermalink(doc, blocks.slice(i + 1).join(':'));
+			return;
+		}
+	}
+}
+
+// The permalinks of an OAI record as listed in its dc:identifier elements.
+// The XML document is parsed as HTML in the sandbox, but the parser keeps
+// the colon in tag names, so getElementsByTagName still finds them.
+function permalinkUrns(doc) {
+	let urns = [];
+	for (let element of doc.getElementsByTagName('dc:identifier')) {
+		let match = String(element.textContent || '').match(/resolver\.kb\.nl\/resolve\?urn=([a-zA-Z0-9:%._-]+)/);
+		if (match) urns.push(match[1]);
+	}
+	return urns;
 }
 
 // The first block of the URN identifies the KB collection
