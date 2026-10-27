@@ -1,7 +1,7 @@
 {
 	"translatorID": "c4008cc5-9243-4d13-8b35-562cdd184558",
 	"label": "Delpher",
-	"creator": "Philipp Zumstein",
+	"creator": "Philipp Zumstein, Vera de Kok",
 	"target": "^https?:\\/\\/(resolver\\.kb\\.nl\\/resolve\\?urn=[^&]+|[^\\/]+\\.delpher\\.nl|services\\.kb\\.nl\\/mdo\\/oai\\?verb=GetRecord&identifier=[^&]+&metadataPrefix=didl)",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-25 19:11:30"
+	"lastUpdated": "2026-10-27 11:58:32"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2016 Philipp Zumstein
+	Copyright © 2016-2026 Philipp Zumstein, Vera de Kok
 
 	This file is part of Zotero.
 
@@ -416,6 +416,12 @@ function addApiData(item, data, collection, identifier) {
 		item.pages = pageFromIdentifier(identifier);
 		item.libraryCatalog = cleanText(data.source) || 'Delpher';
 	}
+	else if (collection == 'anp') {
+		// Radio bulletins are numbered in sequence within the day (volgnummer),
+		// not by broadcast time, so that number is their only distinct identifier
+		item.episodeNumber = cleanText(data.volgnummer);
+		item.libraryCatalog = cleanText(data.source) || 'Delpher';
+	}
 	else if (collection == 'boeken') {
 		item.publisher = cleanText(firstValue(data.publisherString) || firstValue(data.publisher));
 		let place = cleanText(firstValue(data.publisherSpatial));
@@ -454,6 +460,8 @@ function addPageData(item, doc) {
 	item.pages = detail('Pagina');
 	item.numPages = detail('Omvang');
 	item.callNumber = detail('PPN');
+	let bulletinNumber = detail('Berichtnummer');
+	if (bulletinNumber) item.episodeNumber = bulletinNumber;
 	let language = detail('Taal');
 	if (language) item.language = LANGUAGES[language.toLowerCase()] || language;
 	item.libraryCatalog = detail('Herkomst') || 'Delpher';
@@ -932,6 +940,7 @@ var testCases = [
 				"title": "ANP Nieuwsbericht - 20-02-1950 - 19",
 				"creators": [],
 				"date": "1950-02-20",
+				"episodeNumber": "19",
 				"language": "nl",
 				"libraryCatalog": "Delpher",
 				"url": "https://resolver.kb.nl/resolve?urn=anp:1950:02:20:19",
