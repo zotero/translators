@@ -469,7 +469,7 @@ function addPageData(item, doc) {
 
 	let authors = ZU.xpath(doc, '//dt[contains(@class, "metadata__details-text") and (normalize-space(text())="Auteur" or normalize-space(text())="Coauteur")]/following-sibling::dd[1]');
 	for (let author of authors) {
-		item.creators.push(ZU.cleanAuthor(ZU.trimInternal(author.textContent), 'author', true));
+		item.creators.push(cleanAuthorName(ZU.trimInternal(author.textContent)));
 	}
 }
 
@@ -491,12 +491,30 @@ function addCreators(item, names) {
 		if (!name) continue;
 		name = cleanText(name);
 		if (name.includes(',')) {
-			item.creators.push(ZU.cleanAuthor(name, 'author', true));
+			item.creators.push(cleanAuthorName(name));
 		}
 		else {
 			item.creators.push({ lastName: name, creatorType: 'author' });
 		}
 	}
+}
+
+// Dutch surnames can carry a particle ("de Bruin", "van der Laan"). Delpher lists
+// authors inverted ("Bruin, W. K. de"), which makes cleanAuthor leave the particle
+// at the end of the first name - move it in front of the last name.
+const DUTCH_PARTICLE = "(?:de|den|der|het|ter|tot|te|ten|op|aan|bij|in|onder|over|voor|van|['\u2019]t|['\u2019]s)";
+const TRAILING_PARTICLES = new RegExp(" (" + DUTCH_PARTICLE + "(?: " + DUTCH_PARTICLE + ")*)$");
+
+function cleanAuthorName(name) {
+	let creator = ZU.cleanAuthor(name, 'author', true);
+	if (!creator.firstName) return creator;
+	let particles = creator.firstName.match(TRAILING_PARTICLES);
+	if (particles) {
+		creator.lastName = particles[1] + ' ' + creator.lastName;
+		creator.firstName = creator.firstName.slice(0, particles.index).trim();
+		if (!creator.firstName) delete creator.firstName;
+	}
+	return creator;
 }
 
 function addTags(item, subjects) {
@@ -872,8 +890,8 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "W. K. de",
-						"lastName": "Bruin",
+						"firstName": "W. K.",
+						"lastName": "de Bruin",
 						"creatorType": "author"
 					}
 				],
@@ -1117,8 +1135,8 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "W. K. de",
-						"lastName": "Bruin",
+						"firstName": "W. K.",
+						"lastName": "de Bruin",
 						"creatorType": "author"
 					}
 				],
