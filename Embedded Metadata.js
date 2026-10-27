@@ -2152,7 +2152,7 @@ var testCases = [
 					}
 				],
 				"date": "2013-06-10",
-				"abstractNote": "&quot;Kinky Boots&quot; dances off with six awards -- including best musical -- while &quot;Matilda the Musical&quot; and &quot;Pippin&quot; win four prizes each",
+				"abstractNote": "\"Kinky Boots\" dances off with six awards -- including best musical -- while \"Matilda the Musical\" and \"Pippin\" win four prizes each",
 				"language": "en-US",
 				"shortTitle": "Tony Awards 2013",
 				"url": "https://www.cbsnews.com/news/tony-awards-2013-list-of-winners/",
