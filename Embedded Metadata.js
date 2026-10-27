@@ -665,6 +665,14 @@ function addOtherMetadata(doc, newItem) {
 	}
 }
 
+// A byline such as "1News Reporters" or "Reuters Staff" is typed as a Person by
+// some publishers even though it names a group, so it must not be split.
+var COLLECTIVE_BYLINE_RE = /\b(reporters?|staff|newsroom|desk|team|editors?|wires?|news|correspondents?|bureau)\s*$/i;
+
+function isCollectiveByline(name) {
+	return COLLECTIVE_BYLINE_RE.test(name);
+}
+
 /**
  * Reads JSON-LD (schema.org) blocks and fills in fields the meta tags missed.
  * Many news sites ship the byline and date only there (they are not in
@@ -719,7 +727,8 @@ function addJSONLDMetadata(doc, newItem) {
 				// collective byline, and a wrong first/last split is worse than
 				// a single-field creator.
 				var isPerson = typeof author == 'object'
-					&& ('' + author['@type']).toLowerCase() == 'person';
+					&& ('' + author['@type']).toLowerCase() == 'person'
+					&& !isCollectiveByline(name);
 				if (isPerson) {
 					newItem.creators.push(ZU.cleanAuthor(name, 'author', name.includes(',')));
 				}
