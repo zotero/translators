@@ -700,9 +700,8 @@ function addJSONLDMetadata(doc, newItem) {
 			var author = authors[i];
 			if (!author) continue;
 			// schema.org may give structured names (preferred) or a single
-			// string. A bare name is just as likely to be an organisation
-			// ("RTÉ News") or a collective byline as a person, and there is no
-			// way to tell them apart, so do not guess a first/last split.
+			// string. Prefer givenName/familyName; otherwise a name can only be
+			// split when the node is explicitly typed as a Person.
 			var first = typeof author == 'object' ? author.givenName : '';
 			var last = typeof author == 'object' ? author.familyName : '';
 			var name = typeof author == 'string' ? author : (author.name || '');
@@ -715,7 +714,18 @@ function addJSONLDMetadata(doc, newItem) {
 				});
 			}
 			else if (name) {
-				newItem.creators.push({ lastName: name, creatorType: 'author', fieldMode: 1 });
+				// Only @type: Person guarantees a human, so only then split the
+				// name. Without that hint a bare name may be an organisation or a
+				// collective byline, and a wrong first/last split is worse than
+				// a single-field creator.
+				var isPerson = typeof author == 'object'
+					&& ('' + author['@type']).toLowerCase() == 'person';
+				if (isPerson) {
+					newItem.creators.push(ZU.cleanAuthor(name, 'author', name.includes(',')));
+				}
+				else {
+					newItem.creators.push({ lastName: name, creatorType: 'author', fieldMode: 1 });
+				}
 			}
 		}
 	}
@@ -2146,9 +2156,9 @@ var testCases = [
 				"title": "Tony Awards 2013: List of winners",
 				"creators": [
 					{
-						"lastName": "Jessica Derschowitz",
-						"creatorType": "author",
-						"fieldMode": 1
+						"firstName": "Jessica",
+						"lastName": "Derschowitz",
+						"creatorType": "author"
 					}
 				],
 				"date": "2013-06-10",
