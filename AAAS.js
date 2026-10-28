@@ -271,6 +271,11 @@ function scrape(doc, url) {
 		let date = getDate(doc);
 		if (date) item.date = date;
 
+		// Statement pages use this call to action as og:description.
+		if (item.abstractNote && item.abstractNote.trim() === 'Click to read the full statement.') {
+			item.abstractNote = '';
+		}
+
 		item.publicationTitle = 'American Association for the Advancement of Science';
 		if (!item.language) item.language = 'en';
 
@@ -441,7 +446,6 @@ var testCases = [
 					}
 				],
 				"date": "2026-09-21",
-				"abstractNote": "Click to read the full statement.",
 				"language": "en",
 				"libraryCatalog": "www.aaas.org",
 				"publicationTitle": "American Association for the Advancement of Science",
@@ -674,7 +678,6 @@ var testCases = [
 					}
 				],
 				"date": "2026-06-02",
-				"abstractNote": "Click to read the full statement.",
 				"language": "en",
 				"libraryCatalog": "www.aaas.org",
 				"publicationTitle": "American Association for the Advancement of Science",
@@ -734,7 +737,6 @@ var testCases = [
 					}
 				],
 				"date": "2026-04-26",
-				"abstractNote": "Click to read the full statement.",
 				"language": "en",
 				"libraryCatalog": "www.aaas.org",
 				"publicationTitle": "American Association for the Advancement of Science",
