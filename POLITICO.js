@@ -2,14 +2,14 @@
 	"translatorID": "d4b0f8b4-6de6-4eb0-a7f1-1f7f2e0e3fd1",
 	"label": "POLITICO",
 	"creator": "Vera de Kok",
-	"target": "^https?://([^/]*\\.)?politico\\.com/",
+	"target": "^https?://([^/]*\\.)?politico\\.(com|eu)/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-27 18:40:00"
+	"lastUpdated": "2026-10-29 16:15:00"
 }
 
 /*
@@ -41,7 +41,9 @@
 // publication date live in the NewsArticle JSON-LD block, which upstream EM
 // does not read.
 
+// politico.eu is the European edition and carries its own masthead.
 const PUBLICATION_TITLE = "POLITICO";
+const PUBLICATION_TITLE_EU = "POLITICO Europe";
 
 // Bylines that name an organisation rather than a person. The organisation is
 // already the publisher, so it must not become a creator.
@@ -68,6 +70,10 @@ const ARTICLE_PATH_RE = /\/(?:story|news|newsletters|tipsheets|blogs|interactive
 // only counts when the page also ships article JSON-LD.
 const DATA_ONLY_SECTION_RE = /\/interactives(?:\/[^/]+)*\/\d{4}\/\d{2}/;
 
+function isEuropeanEdition(url) {
+	return /^https?:\/\/(?:[^/]*\.)?politico\.eu\//i.test(url || "");
+}
+
 function detectWeb(doc, url) {
 	if (isArticle(doc, url)) {
 		return "newspaperArticle";
@@ -91,7 +97,9 @@ function isArticle(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	for (let anchor of doc.querySelectorAll('.search-results h3 a, article.story-frag h3 a')) {
+	for (let anchor of doc.querySelectorAll(
+		'.search-results h3 a, article.story-frag h3 a, .article-card .card__title a'
+	)) {
 		let href = anchor.href;
 		let title = ZU.trimInternal(anchor.textContent);
 		if (!href || !title) continue;
@@ -269,7 +277,7 @@ async function scrape(doc, url = doc.location.href) {
 	translator.setDocument(doc);
 	translator.setHandler('itemDone', function (obj, item) {
 		item.itemType = "newspaperArticle";
-		item.publicationTitle = PUBLICATION_TITLE;
+		item.publicationTitle = isEuropeanEdition(url) ? PUBLICATION_TITLE_EU : PUBLICATION_TITLE;
 		// Canonical, because syndicated copies carry the original URL in
 		// og:url while link[rel=canonical] still points at the POLITICO page.
 		item.url = getAttr(doc, 'link[rel="canonical"]', 'href') || url;
@@ -330,13 +338,26 @@ async function doWeb(doc, url) {
 }
 
 /**
- * The article's keyword list. `content_tag` is pipe-separated
- * ("Energy|Texas|Greg Abbott") and is the only usable subject vocabulary on the
- * page: the JSON-LD block carries no keywords and there are no tag links.
+ * The article's keyword list. On politico.com `content_tag` is pipe-separated
+ * ("Energy|Texas|Greg Abbott"); the pages carry no tag links. politico.eu ships
+ * no analytics blob and keeps the same vocabulary in the JSON-LD `keywords`.
  */
 function getTags(doc) {
 	let data = getUtagData(doc);
-	if (!data || !data.content_tag) return [];
+	if (!data || !data.content_tag) {
+		// Embedded Metadata already turns politico.eu's <meta name="keywords"> into tags;
+		// the JSON-LD repeats the same list in lowercase, so only use it when meta is absent.
+		if (doc.querySelector('meta[name="keywords"]')) return [];
+		let keywords = (getJSONLD(doc) || {}).keywords;
+		if (!keywords) return [];
+		let list = Array.isArray(keywords) ? keywords : String(keywords).split(',');
+		let fallback = [];
+		for (let keyword of list) {
+			let tag = ZU.trimInternal(keyword || '');
+			if (tag && !fallback.includes(tag)) fallback.push(tag);
+		}
+		return fallback;
+	}
 	let tags = [];
 	for (let part of String(data.content_tag).split('|')) {
 		let tag = ZU.trimInternal(part);
@@ -760,7 +781,87 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.politico.com/search",
+		"url": "https://www.politico.com/search?q=trump",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.politico.eu/article/ecb-president-lagarde-to-step-down-in-february/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Lagarde’s early exit Le Pen-proofs ECB as France veers toward a debt reckoning",
+				"creators": [
+					{
+						"firstName": "Johanna",
+						"lastName": "Treeck",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-10-29",
+				"abstractNote": "The ECB chief is set to wade back into French politics as her centrist rivals fail to stop the momentum of left- and right-wing populists.",
+				"language": "en-GB",
+				"libraryCatalog": "www.politico.eu",
+				"publicationTitle": "POLITICO Europe",
+				"url": "https://www.politico.eu/article/ecb-president-lagarde-to-step-down-in-february/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Christine Lagarde"
+					},
+					{
+						"tag": "EU27"
+					},
+					{
+						"tag": "Europe’s economic recovery"
+					},
+					{
+						"tag": "Eurozone"
+					},
+					{
+						"tag": "France"
+					},
+					{
+						"tag": "French political crisis"
+					},
+					{
+						"tag": "Growth"
+					},
+					{
+						"tag": "Inflation"
+					},
+					{
+						"tag": "Interest rates"
+					},
+					{
+						"tag": "Isabel Schnabel"
+					},
+					{
+						"tag": "Marine Le Pen"
+					},
+					{
+						"tag": "Monetary Policy"
+					},
+					{
+						"tag": "Philip Lane"
+					},
+					{
+						"tag": "Quantitative easing"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.politico.eu/section/financial-services/",
 		"items": "multiple"
 	}
 ]
