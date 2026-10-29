@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-28 12:00:00"
+	"lastUpdated": "2026-10-29 12:00:00"
 }
 
 /*
@@ -66,17 +66,19 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
-		Zotero.selectItems(getSearchResults(doc, false), (items) => {
-			if (items) ZU.processDocuments(Object.keys(items), doWeb);
-		});
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let itemUrl of Object.keys(items)) {
+			await scrape(await requestDocument(itemUrl));
+		}
 		return;
 	}
-	scrape(doc, url);
+	await scrape(doc, url);
 }
 
-function scrape(doc, _url) {
+async function scrape(doc, _url) {
 	let translator = Zotero.loadTranslator('web');
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
@@ -100,7 +102,7 @@ function scrape(doc, _url) {
 
 		item.complete();
 	});
-	translator.translate();
+	await translator.translate();
 }
 
 function getCreators(doc) {
