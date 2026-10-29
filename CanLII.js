@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-29 16:46:39"
+	"lastUpdated": "2026-10-29 17:33:24"
 }
 
 /*
@@ -122,6 +122,8 @@ async function doWeb(doc, url) {
 	}
 }
 
+// Site language is independent of the document URL language. The French
+// cases below expect the French interface selected in CanLII's language menu.
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -161,14 +163,14 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.canlii.org/fr/ca/csc/doc/2010/2010csc2/2010csc2.html",
+		"url": "https://www.canlii.org/fr/ca/csc/doc/2010/2010csc2/2010csc2.html?noCache=fr",
 		"items": [
 			{
 				"itemType": "case",
 				"caseName": "Mines Alerte Canada c. Canada (Pêches et Océans)",
 				"creators": [],
 				"dateDecided": "2010-01-21",
-				"court": "Supreme Court of Canada",
+				"court": "Cour suprême du Canada",
 				"docketNumber": "32797",
 				"firstPage": "6",
 				"reporter": "RCS",
@@ -229,7 +231,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.canlii.org/fr/ca/cfpi/doc/2011/2011cf119/2011cf119.html",
+		"url": "https://www.canlii.org/fr/ca/cfpi/doc/2011/2011cf119/2011cf119.html?noCache=fr",
 		"items": [
 			{
 				"itemType": "case",
@@ -253,7 +255,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Référence neutre : 2011 CF 119; Tribunal : Federal Court"
+						"note": "Référence neutre : 2011 CF 119; Tribunal : Cour fédérale"
 					}
 				],
 				"seeAlso": []
@@ -334,7 +336,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.canlii.org/fr/qc/qcca/doc/2026/2026qcca1417/2026qcca1417.html",
+		"url": "https://www.canlii.org/fr/qc/qcca/doc/2026/2026qcca1417/2026qcca1417.html?noCache=fr",
 		"items": [
 			{
 				"itemType": "case",
@@ -358,7 +360,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Référence neutre : 2026 QCCA 1417; Tribunal : Quebec Court of Appeal"
+						"note": "Référence neutre : 2026 QCCA 1417; Tribunal : Cour d'appel du Québec"
 					}
 				],
 				"seeAlso": []
