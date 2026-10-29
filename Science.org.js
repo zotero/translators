@@ -178,15 +178,43 @@ function getTags(doc) {
 }
 
 function detectWeb(doc, url) {
+	url = url || '';
 	// /doi/ pages resolve through DOI metadata into a journalArticle; leave them alone
-	if ((url || '').includes('/doi/')) return false;
-	// the hero block only exists on an article page, so this also rejects the
-	// "/news/" and "/content/article/" index listings
+	if (url.includes('/doi/')) return false;
 	if (doc.querySelector('.news-article__hero__title')) return 'journalArticle';
+	// section pages and search results list articles without the hero block
+	if (/\/news\/(all-news|features)|\/action\/doSearch/.test(url)) {
+		return getSearchResults(doc) ? 'multiple' : false;
+	}
 	return false;
 }
 
-function doWeb(doc, url) {
+// Every card on a section page or in a result list links /content/article/...
+function getSearchResults(doc) {
+	let items = {};
+	for (let link of doc.querySelectorAll('a[href*="/content/article/"]')) {
+		let url = link.href || link.getAttribute('href');
+		if (!url || items[url]) continue;
+		let title = ZU.trimInternal(link.textContent)
+			|| ZU.trimInternal(link.getAttribute('title') || '');
+		if (title) items[url] = title;
+	}
+	return Object.keys(items).length ? items : false;
+}
+
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) === 'multiple') {
+		let selected = await Zotero.selectItems(getSearchResults(doc));
+		if (!selected) return;
+		for (let pageURL of Object.keys(selected)) {
+			await scrape(await requestDocument(pageURL), pageURL);
+		}
+		return;
+	}
+	await scrape(doc, url);
+}
+
+function scrape(doc, url) {
 	let translator = Zotero.loadTranslator('web');
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
@@ -223,7 +251,7 @@ function doWeb(doc, url) {
 
 		item.complete();
 	});
-	translator.translate();
+	return translator.translate();
 }
 
 /** BEGIN TEST CASES **/
