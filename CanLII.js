@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-09 21:18:01"
+	"lastUpdated": "2026-10-29 16:46:39"
 }
 
 /*
@@ -69,6 +69,7 @@ function detectWeb(doc, url) {
 
 function scrape(doc, url) {
 	var item = new Zotero.Item("case");
+	var french = /\/fr\//.test(url);
 	var citationNode = doc.querySelector(".documentMeta-citation + div");
 	var citation = citationNode ? clean(citationNode.textContent) : meta(doc, "DC.Title");
 	var citationMatch = citation.match(/^(.+),\s*((?:18|19|20)\d{2})\s+([A-Za-z][A-Za-z0-9-]*(?:\s+[A-Z]{2})?)\s+(\d+)(?:\s+\(([^)]+)\))?/);
@@ -85,10 +86,10 @@ function scrape(doc, url) {
 	item.dateDecided = metadataValue(doc, ["date", "decision date", "date de la décision"]) || meta(doc, "DC.Date").slice(0, 10);
 	item.docketNumber = metadataValue(doc, ["file number", "file numbers", "numéro de dossier", "numéros de dossier"]);
 	var otherCitations = metadataValue(doc, ["other citation", "other citations", "autre citation", "autres citations"]);
-	if (otherCitations) item.notes.push({ note: "Other Citations: " + otherCitations });
+	if (otherCitations) item.notes.push({ note: (french ? "Autres références : " : "Other Citations: ") + otherCitations });
 
-	// Preserve existing reporter citations. For cases without a reporter, CSL
-	// page holds the neutral-citation decision number, not the actual docket.
+	// Preserve existing reporter citations. Store neutral-citation numbers in
+	// the native field so they survive item saving and map to CSL page.
 	var reported = citation.match(/\[\d{4}\]\s+(\d+)\s+([A-Z]+)\s+(\d+)/);
 	if (reported) {
 		item.reporterVolume = reported[1];
@@ -96,10 +97,10 @@ function scrape(doc, url) {
 		item.firstPage = reported[3];
 	}
 	else if (citationMatch && citationMatch[3].toLowerCase() !== "canlii") {
-		item.notes.push({ note: "Neutral citation: " + citationMatch[2] + " " + citationMatch[3] + " " + citationMatch[4]
-			+ (item.court ? "; Court: " + item.court : "") });
+		item.notes.push({ note: (french ? "Référence neutre : " : "Neutral citation: ") + citationMatch[2] + " " + citationMatch[3] + " " + citationMatch[4]
+			+ (item.court ? (french ? "; Tribunal : " : "; Court: ") + item.court : "") });
 		item.court = citationMatch[3];
-		item.extra = "Page: " + citationMatch[4];
+		item.firstPage = citationMatch[4];
 	}
 	var shortURL = doc.querySelector(".documentStaticUrl");
 	item.url = shortURL ? (shortURL.getAttribute("href") || clean(shortURL.textContent)) : url.replace(/[?#].*$/, "");
@@ -186,7 +187,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Other Citations: 315 DLR (4th) 434 — 397 NR 232 — 99 Admin LR (4th) 1 — [2010] SCJ No 2 (QL) — [2010] ACS no 2"
+						"note": "Autres références : 315 DLR (4th) 434 — 397 NR 232 — 99 Admin LR (4th) 1 — [2010] SCJ No 2 (QL) — [2010] ACS no 2"
 					}
 				],
 				"seeAlso": []
@@ -204,7 +205,7 @@ var testCases = [
 				"dateDecided": "2011-02-02",
 				"court": "FC",
 				"docketNumber": "T-1089-10",
-				"extra": "Page: 119",
+				"firstPage": "119",
 				"url": "https://canlii.ca/t/2flrk",
 				"attachments": [
 					{
@@ -237,7 +238,7 @@ var testCases = [
 				"dateDecided": "2011-02-02",
 				"court": "CF",
 				"docketNumber": "T-1089-10",
-				"extra": "Page: 119",
+				"firstPage": "119",
 				"url": "https://canlii.ca/t/fks9z",
 				"attachments": [
 					{
@@ -252,7 +253,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Neutral citation: 2011 CF 119; Court: Federal Court"
+						"note": "Référence neutre : 2011 CF 119; Tribunal : Federal Court"
 					}
 				],
 				"seeAlso": []
@@ -270,7 +271,7 @@ var testCases = [
 				"dateDecided": "2019-03-18",
 				"court": "BCCA",
 				"docketNumber": "CA44845",
-				"extra": "Page: 96",
+				"firstPage": "96",
 				"url": "https://canlii.ca/t/hz4ml",
 				"attachments": [
 					{
@@ -306,7 +307,7 @@ var testCases = [
 				"dateDecided": "2019-03-18",
 				"court": "BCCA",
 				"docketNumber": "CA44845",
-				"extra": "Page: 96",
+				"firstPage": "96",
 				"url": "https://canlii.ca/t/hz4ml",
 				"attachments": [
 					{
@@ -325,6 +326,39 @@ var testCases = [
 					},
 					{
 						"note": "Neutral citation: 2019 BCCA 96; Court: Court of Appeal for British Columbia"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.canlii.org/fr/qc/qcca/doc/2026/2026qcca1417/2026qcca1417.html",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "9052-1170 Québec inc. c. Ville de Montréal",
+				"creators": [],
+				"dateDecided": "2026-10-26",
+				"court": "QCCA",
+				"docketNumber": "500-09-032018-269",
+				"firstPage": "1417",
+				"url": "https://canlii.ca/t/knzzg",
+				"attachments": [
+					{
+						"title": "CanLII Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "CanLII Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "Référence neutre : 2026 QCCA 1417; Tribunal : Quebec Court of Appeal"
 					}
 				],
 				"seeAlso": []
