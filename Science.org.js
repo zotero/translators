@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-27 12:00:00"
+	"lastUpdated": "2026-10-29 13:00:00"
 }
 
 /*
@@ -47,11 +47,14 @@
 	<div class="news-article__hero__bottom-meta">...
 		<span class="news-article__hero__date">12 Feb 2014</span>
 
-	Two traps this translator avoids:
-	- The DOI is NOT the lookup key here. Research articles under /doi/ have a normal
-	  Crossref record, but news pages often have no DOI at all, and the one they expose
-	  ("10.1126/article.NNNNN") is not registered with Crossref (404). The DOIs that
-	  appear on a news page belong to its references and sidebar cards.
+	Traps this translator avoids:
+	- A DOI is a bonus, not the lookup key: the pages print it as plain text in the content
+	  footer, sometimes as a real DOI ("doi: 10.1126/science.abj6980") and sometimes as the
+	  article id AAAS assigned it ("doi: 10.1126/article.23565", which does not resolve at
+	  doi.org at the time of writing). Whatever the footer prints is copied over; nothing is
+	  looked up by it.
+	- A page with a DOI is a journal record, so the item type is journalArticle; the markup is
+	  a news template either way.
 	- pageInfo.pubDate is unreliable: it carries the page-creation date (a March 2026
 	  article reports "2021-08-15"). The visible hero date is the article's own date.
 */
@@ -154,12 +157,32 @@ function getDate(doc) {
 	);
 }
 
+// The DOI is plain text in the content footer -- not a citation_doi meta tag, not a link.
+// Older pages print the article id instead of the science.* form ("10.1126/article.23565"),
+// which is what the page says its DOI is, so it is kept as printed.
+function getDOI(doc) {
+	let match = cleanText(doc, '.news-article-content-footer')
+		.match(/\bdoi:\s*(10\.1126\/[^\s;]+)/i);
+	return match ? match[1].replace(/[.,]+$/, '') : '';
+}
+
+// "Relevant tags" in the same footer, e.g.
+// <a href="/topic/category/biology" title="Biology">Biology</a>
+function getTags(doc) {
+	let tags = [];
+	for (let link of doc.querySelectorAll('.news-article__tags a')) {
+		let name = ZU.trimInternal(link.textContent);
+		if (name && !tags.some(t => t.tag === name)) tags.push({ tag: name });
+	}
+	return tags;
+}
+
 function detectWeb(doc, url) {
 	// /doi/ pages resolve through DOI metadata into a journalArticle; leave them alone
 	if ((url || '').includes('/doi/')) return false;
 	// the hero block only exists on an article page, so this also rejects the
 	// "/news/" and "/content/article/" index listings
-	if (doc.querySelector('.news-article__hero__title')) return 'magazineArticle';
+	if (doc.querySelector('.news-article__hero__title')) return 'journalArticle';
 	return false;
 }
 
@@ -168,7 +191,7 @@ function doWeb(doc, url) {
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
 	translator.setHandler('itemDone', (_obj, item) => {
-		item.itemType = 'magazineArticle';
+		item.itemType = 'journalArticle';
 
 		let seen = {};
 		item.creators = [];
@@ -188,6 +211,12 @@ function doWeb(doc, url) {
 		let date = getDate(doc);
 		if (date) item.date = date;
 
+		let doi = getDOI(doc);
+		if (doi) item.DOI = doi;
+
+		let tags = getTags(doc);
+		if (tags.length) item.tags = tags;
+
 		item.publicationTitle = 'Science';
 		if (!item.language) item.language = 'en';
 		if (!item.url) item.url = url;
@@ -204,7 +233,7 @@ var testCases = [
 		"url": "https://www.science.org/content/article/cities-have-their-own-distinct-microbial-fingerprints",
 		"items": [
 			{
-				"itemType": "magazineArticle",
+				"itemType": "journalArticle",
 				"title": "Cities have their own distinct microbial fingerprints",
 				"creators": [
 					{
@@ -214,6 +243,7 @@ var testCases = [
 					}
 				],
 				"date": "2021-05-26",
+				"DOI": "10.1126/science.abj6980",
 				"abstractNote": "Transit systems in 60 cities show unique microbiomes",
 				"language": "en",
 				"libraryCatalog": "www.science.org",
@@ -225,7 +255,11 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Biology"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -236,7 +270,7 @@ var testCases = [
 		"url": "https://www.science.org/content/article/aaas-launches-open-access-journal",
 		"items": [
 			{
-				"itemType": "magazineArticle",
+				"itemType": "journalArticle",
 				"title": "AAAS Launches Open-Access Journal",
 				"creators": [
 					{
@@ -251,6 +285,7 @@ var testCases = [
 					}
 				],
 				"date": "2014-02-12",
+				"DOI": "10.1126/article.23565",
 				"abstractNote": "Publisher joins many other societies by launching an online-only journal that will be free to read",
 				"language": "en",
 				"libraryCatalog": "www.science.org",
@@ -262,11 +297,18 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "People & Events"
+					},
+					{
+						"tag": "Scientific Community"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
 		]
 	}
 ]
-/** END TEST CASES */
+/** END TEST CASES **/
