@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-29 13:00:00"
+	"lastUpdated": "2026-10-29 14:40:00"
 }
 
 /*
@@ -337,6 +337,134 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.science.org/content/article/ai-shaking-math-can-its-proofs-be-trusted",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "AI is shaking up math. But can its proofs be trusted?",
+				"creators": [
+					{
+						"firstName": "Celina",
+						"lastName": "Zhao",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-10-27",
+				"DOI": "10.1126/science.zij1ww4",
+				"abstractNote": "As AI firms churn out math breakthroughs, researchers question use of Lean software as proof checker",
+				"language": "en",
+				"libraryCatalog": "www.science.org",
+				"publicationTitle": "Science",
+				"url": "https://www.science.org/content/article/ai-shaking-math-can-its-proofs-be-trusted",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Artificial intelligence"
+					},
+					{
+						"tag": "Science\u2019s AI in Science Reporting Initiative"
+					},
+					{
+						"tag": "Technology"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.science.org/content/article/devastating-2004-indian-ocean-tsunami-left-victims-more-prone-obesity-heart-disease",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Devastating 2004 Indian Ocean tsunami left victims more prone to obesity, heart disease",
+				"creators": [
+					{
+						"firstName": "Sara",
+						"lastName": "Reardon",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-10-27",
+				"DOI": "10.1126/science.zw83j58",
+				"abstractNote": "Study adds to mounting evidence that traumatic experiences can negatively impact health years\u2014or even decades\u2014later",
+				"language": "en",
+				"libraryCatalog": "www.science.org",
+				"publicationTitle": "Science",
+				"url": "https://www.science.org/content/article/devastating-2004-indian-ocean-tsunami-left-victims-more-prone-obesity-heart-disease",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Health"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.science.org/content/article/ibm-links-two-quantum-chips-key-step-toward-bigger-computers",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "IBM links two quantum chips in key step toward bigger computers",
+				"creators": [
+					{
+						"firstName": "Adrian",
+						"lastName": "Cho",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-10-27",
+				"DOI": "10.1126/science.zow83t2",
+				"abstractNote": "Superconducting cables connect quantum bits on different chips, but improvements are still needed",
+				"language": "en",
+				"libraryCatalog": "www.science.org",
+				"publicationTitle": "Science",
+				"url": "https://www.science.org/content/article/ibm-links-two-quantum-chips-key-step-toward-bigger-computers",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Technology"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.science.org/news/all-news",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.science.org/news/features",
+		"items": "multiple"
 	}
 ]
+
 /** END TEST CASES **/
