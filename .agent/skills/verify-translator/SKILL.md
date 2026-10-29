@@ -33,6 +33,12 @@ node .bin/run-tests.mjs "<translator filename>"
 
 This launches Chrome with the Zotero Connector extension and runs the translator's test cases against live sites.
 
+For `RDF.js`, also run `node .bin/check-rdf-creator-fields.mjs`. Install its bundled
+Chromium once with `npx playwright install chromium`. The generic tester removes
+unknown fields before comparing items; this additional check compares raw import
+results so creator containers leaking into item fields remain observable. It uses
+an isolated temporary browser profile and does not save items to a library.
+
 Add `--headed` for any site behind Cloudflare or a similar anti-bot wall — headless Chrome identifies itself as `HeadlessChrome` and those sites refuse it outright, so **every** test fails with "Detection failed" for reasons that have nothing to do with the translator. That symptom — all tests failing detection at once, including ones that used to pass — almost always means the wall, not your code. Headed usually loads the same pages with no challenge at all.
 
 All tests must pass. If a test fails:

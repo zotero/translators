@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2026-08-12 16:51:38"
+	"lastUpdated": "2026-10-25 08:47:08"
 }
 
 /*
@@ -1429,16 +1429,20 @@ function importItem(newItem, node) {
 	var arcs = Zotero.RDF.getArcsOut(node);
 	for (let i = 0; i < arcs.length; i++) {
 		var uri = Zotero.RDF.getResourceURI(arcs[i]);
+		var property = uri.substr(n.z.length);
 		if (uri.substr(0, n.z.length) == n.z
 				// Skip z:path, handled for attachments above
-				&& uri.substring(n.z.length) !== 'path'
+				&& property !== 'path'
 				// Skip z:itemType, which is handled above. Copying it here would override the
 				// detected/fallback type with a type that might not exist in this version
 				// (e.g., a Juris-M legal type).
-				&& uri.substring(n.z.length) !== 'itemType'
+				&& property !== 'itemType'
 				// Don't override newItem.creators with RDF nodes that will cause an import error
-				&& uri.substring(n.z.length) !== 'creators') {
-			var property = uri.substr(n.z.length);
+				&& property !== 'creators'
+				// Creator predicates are handled above. Copying their container nodes here
+				// can expose internal blank-node IDs as fields or Extra.
+				&& !(property.endsWith('s')
+					&& possibleCreatorTypes.includes(property.slice(0, -1)))) {
 			newItem[property] = Zotero.RDF.getTargets(node, n.z + property)[0];
 		}
 	}
@@ -1579,6 +1583,7 @@ var exports = {
 	itemType: false
 };
 
+// Raw creator-field regression: node .bin/check-rdf-creator-fields.mjs
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -1843,6 +1848,54 @@ var testCases = [
 				"itemID": "https://example.com/video",
 				"libraryCatalog": "Example.com",
 				"url": "https://example.com/video",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<rdf:RDF\n xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n xmlns:z=\"http://www.zotero.org/namespaces/export#\"\n xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n xmlns:foaf=\"http://xmlns.com/foaf/0.1/\">\n    <rdf:Description rdf:about=\"https://example.com/rdf/bill-3664\">\n        <z:itemType>bill</z:itemType>\n        <dc:title>Example Public Bill</dc:title>\n        <z:billNumber>H.R. 1</z:billNumber>\n        <z:sponsors>\n            <rdf:Seq>\n                <rdf:li>\n                    <foaf:Person>\n                        <foaf:familyName>Sponsor</foaf:familyName>\n                        <foaf:givenName>Sample</foaf:givenName>\n                    </foaf:Person>\n                </rdf:li>\n            </rdf:Seq>\n        </z:sponsors>\n        <z:extra>Internal: keep-bill</z:extra>\n    </rdf:Description>\n</rdf:RDF>\n",
+		"items": [
+			{
+				"itemType": "bill",
+				"title": "Example Public Bill",
+				"creators": [
+					{
+						"creatorType": "sponsor",
+						"lastName": "Sponsor",
+						"firstName": "Sample"
+					}
+				],
+				"billNumber": "H.R. 1",
+				"extra": "Internal: keep-bill",
+				"itemID": "https://example.com/rdf/bill-3664",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<rdf:RDF\n xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n xmlns:z=\"http://www.zotero.org/namespaces/export#\"\n xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n xmlns:foaf=\"http://xmlns.com/foaf/0.1/\">\n    <rdf:Description rdf:about=\"https://example.com/rdf/program-3664\">\n        <z:itemType>computerProgram</z:itemType>\n        <dc:title>Example Public Program</dc:title>\n        <z:versionNumber>1.2.3</z:versionNumber>\n        <z:programmers>\n            <rdf:Seq>\n                <rdf:li>\n                    <foaf:Person>\n                        <foaf:familyName>Programmer</foaf:familyName>\n                        <foaf:givenName>Sample</foaf:givenName>\n                    </foaf:Person>\n                </rdf:li>\n            </rdf:Seq>\n        </z:programmers>\n        <z:extra>Internal: keep-program</z:extra>\n    </rdf:Description>\n</rdf:RDF>\n",
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": "Example Public Program",
+				"creators": [
+					{
+						"creatorType": "programmer",
+						"lastName": "Programmer",
+						"firstName": "Sample"
+					}
+				],
+				"versionNumber": "1.2.3",
+				"extra": "Internal: keep-program",
+				"itemID": "https://example.com/rdf/program-3664",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
