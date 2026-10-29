@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-28 00:18:00"
+	"lastUpdated": "2026-10-29 15:30:00"
 }
 
 /*
@@ -141,6 +141,8 @@ function cleanText(doc, selector) {
 // "AAAS Office of Communications" into a first and a last name.
 const ORG_PATTERN = /\b(AAAS|Office|Communications|Staff|Department|Division|Program|Team|Committee|Board|Center|Centre|Institute|Association|MemberCentral|Editorial)\b/;
 
+const ORG_SIGNATURE = /^AAAS[.,]?$/i;
+
 function isOrganization(name) {
 	// a single token cannot be a "First Last" personal name
 	if (!/\s/.test(name)) return true;
@@ -253,6 +255,9 @@ function scrape(doc, url) {
 		let seen = {};
 		item.creators = [];
 		for (let name of getBylineNames(doc)) {
+			// a statement page signed "AAAS" speaks for the association itself; keeping it
+			// as a creator would file every release under one imaginary person
+			if (ORG_SIGNATURE.test(name)) continue;
 			let key = name.toLowerCase();
 			if (seen[key]) continue;
 			seen[key] = true;
@@ -342,13 +347,7 @@ var testCases = [
 			{
 				"itemType": "magazineArticle",
 				"title": "AAAS Comment on OMB Proposed Rule",
-				"creators": [
-					{
-						"lastName": "AAAS",
-						"creatorType": "author",
-						"fieldMode": 1
-					}
-				],
+				"creators": [],
 				"date": "2026-07-14",
 				"abstractNote": "AAAS submitted a public comment on July 13, 2026 to the U.S. Office of Management and Budget regarding the proposed rule: Regulation for Federal Financial Assistance.",
 				"language": "en",
@@ -523,13 +522,7 @@ var testCases = [
 			{
 				"itemType": "magazineArticle",
 				"title": "AAAS Comment on OMB Proposed Rule",
-				"creators": [
-					{
-						"lastName": "AAAS",
-						"creatorType": "author",
-						"fieldMode": 1
-					}
-				],
+				"creators": [],
 				"date": "2026-07-14",
 				"abstractNote": "AAAS submitted a public comment on July 13, 2026 to the U.S. Office of Management and Budget regarding the proposed rule: Regulation for Federal Financial Assistance.",
 				"language": "en",
@@ -794,13 +787,7 @@ var testCases = [
 			{
 				"itemType": "magazineArticle",
 				"title": "AAAS Comment on OMB Proposed Rule",
-				"creators": [
-					{
-						"lastName": "AAAS",
-						"creatorType": "author",
-						"fieldMode": 1
-					}
-				],
+				"creators": [],
 				"date": "2026-07-14",
 				"abstractNote": "AAAS submitted a public comment on July 13, 2026 to the U.S. Office of Management and Budget regarding the proposed rule: Regulation for Federal Financial Assistance.",
 				"language": "en",
