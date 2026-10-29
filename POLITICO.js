@@ -389,6 +389,7 @@ var testCases = [
 				],
 				"date": "2017-12-06",
 				"abstractNote": "Dupuy said the event occurred after a recount had been called for in a Senate race that Franken would go on to win to gain his seat in Congress.",
+				"language": "en",
 				"libraryCatalog": "www.politico.com",
 				"publicationTitle": "POLITICO",
 				"url": "https://www.politico.com/story/2017/12/06/al-franken-tina-dupuy-sexual-harassment-282894",
@@ -403,10 +404,13 @@ var testCases = [
 						"tag": "Al Franken"
 					},
 					{
-						"tag": "Sexual Harassment"
+						"tag": "Barack Obama"
 					},
 					{
-						"tag": "The Atlantic"
+						"tag": "Ethics Investigations"
+					},
+					{
+						"tag": "Inauguration"
 					},
 					{
 						"tag": "Kirsten Gillibrand"
@@ -415,25 +419,22 @@ var testCases = [
 						"tag": "Leeann Tweeden"
 					},
 					{
-						"tag": "Senate Ethics Committee"
-					},
-					{
-						"tag": "Ethics Investigations"
-					},
-					{
-						"tag": "Senate Democrats"
-					},
-					{
-						"tag": "Barack Obama"
+						"tag": "Media Matters"
 					},
 					{
 						"tag": "Minnesota"
 					},
 					{
-						"tag": "Media Matters"
+						"tag": "Senate Democrats"
 					},
 					{
-						"tag": "Inauguration"
+						"tag": "Senate Ethics Committee"
+					},
+					{
+						"tag": "Sexual Harassment"
+					},
+					{
+						"tag": "The Atlantic"
 					}
 				],
 				"notes": [],
@@ -557,9 +558,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
 				"notes": [],
-				"seeAlso": []
+				"seeAlso": [],
+				"tags": []
 			}
 		]
 	},
@@ -646,6 +647,18 @@ var testCases = [
 				],
 				"tags": [
 					{
+						"tag": "2025 New York City Elections"
+					},
+					{
+						"tag": "Andrew Cuomo"
+					},
+					{
+						"tag": "Charlie King"
+					},
+					{
+						"tag": "Eric Adams"
+					},
+					{
 						"tag": "New York"
 					},
 					{
@@ -655,16 +668,7 @@ var testCases = [
 						"tag": "New York Politics"
 					},
 					{
-						"tag": "Andrew Cuomo"
-					},
-					{
-						"tag": "Eric Adams"
-					},
-					{
-						"tag": "Charlie King"
-					},
-					{
-						"tag": "2025 New York City Elections"
+						"tag": "The Fifty: The Players"
 					},
 					{
 						"tag": "Video"
@@ -734,7 +738,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "How Big Tech and Abbott made Texas the ‘epicenter’ of data centers",
+				"title": "Texas officials huddled with tech companies before grid blitz",
 				"creators": [
 					{
 						"firstName": "Shelby",
@@ -756,22 +760,22 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Energy"
+						"tag": "Data"
 					},
 					{
-						"tag": "Texas"
+						"tag": "Energy"
 					},
 					{
 						"tag": "Greg Abbott"
 					},
 					{
-						"tag": "Data"
+						"tag": "Technology"
+					},
+					{
+						"tag": "Texas"
 					},
 					{
 						"tag": "data centers"
-					},
-					{
-						"tag": "Technology"
 					}
 				],
 				"notes": [],
