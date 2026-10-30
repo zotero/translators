@@ -42,7 +42,10 @@ jobs:
 
       - name: Test pull request
         if: github.event_name == 'pull_request'
-        run: ./check-pull-request.sh
+        run: |
+          sudo -E apt-get update
+          sudo -E apt-get install -y --no-install-recommends librsvg2-bin
+          ./check-pull-request.sh
         working-directory: .ci/pull-request-check
       
       - name: Check deleted.txt
