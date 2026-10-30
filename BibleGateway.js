@@ -9,30 +9,30 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-30 07:06:11"
+	"lastUpdated": "2026-10-30 07:27:09"
 }
 
 /*
-    ***** BEGIN LICENSE BLOCK *****
+	***** BEGIN LICENSE BLOCK *****
 
-    Copyright © 2026 YOUR_NAME <- TODO
+	Copyright © 2026 YOUR_NAME <- TODO
 
-    This file is part of Zotero.
+	This file is part of Zotero.
 
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Affero General Public License for more details.
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
 
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
-    ***** END LICENSE BLOCK *****
+	***** END LICENSE BLOCK *****
 */
 
 
@@ -140,5 +140,28 @@ async function scrape(doc, url = doc.location.href) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.biblegateway.com/passage/?search=Joshua%2013&version=NRSVUE",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Joshua 13 - New Revised Standard Version Updated Edition",
+				"creators": [],
+				"abstractNote": "The Parts of Canaan Still Unconquered - Now Joshua was old and advanced in years, and the LORD said to him, “You are old and advanced in years, and very much of the land still remains to be possessed. This is the land that still remains: all the regions of the Philistines, and all those of the Geshurites (from the Shihor, which is near Egypt, northward to the boundary of Ekron, it is reckoned as Canaanite; there are five rulers of the Philistines, those of Gaza, Ashdod, Ashkelon, Gath, and Ekron), and those of the Avvim in the south; all the land of the Canaanites, and Mearah that belongs to the Sidonians, to Aphek, to the boundary of the Amorites, and the land of the Gebalites, and all Lebanon, toward the east, from Baal-gad below Mount Hermon to Lebo-hamath,",
+				"language": "en",
+				"libraryCatalog": "BibleGateway",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
 ]
 /** END TEST CASES **/
