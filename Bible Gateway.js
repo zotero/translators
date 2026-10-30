@@ -5,13 +5,12 @@
 	"target": "^https?://www\\.biblegateway\\.com/passage/",
 	"minVersion": "5.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-22 20:08:33"
+	"lastUpdated": "2026-10-30 06:39:28"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -47,22 +46,15 @@ function isPassageUrl(url) {
 	return url.includes('/passage/');
 }
 
-function getSearchResults(doc, checkOnly) {
-	var items = {};
-	var found = false;
-	return found ? items: false;
-}
-
-async function scrape(doc, url=doc.location.href) {
-	let item =  new Zotero.Item("bookSection");
-	item.url = url;
-	item.language = attr(doc, "html", "lang");
-
-	item.complete();
-}
-
 
 function detectWeb(doc, url) {
+	Zotero.debug("!!! DETECTWEB TRACE TRIGGERED FOR: " + url);
+	
+	if (!url.includes('biblegateway.com')) {
+		Zotero.debug(`BibleGateway detectWeb quick return ${url}`);
+		return false;
+	}
+	Zotero.debug(`in BibleGateway detectWeb for ${url}`);
 	if (isPassageUrl(url)) {
 		return "bookSection";
 	}
@@ -70,43 +62,61 @@ function detectWeb(doc, url) {
 }
 
 async function doWeb(doc, url) {
-	let detected = detectWeb(doc, url)
+	let detected = detectWeb(doc, url);
+	Zotero.debug(`in doWeb for ${url}, detected ${detected}`);
 	if (detected == 'multiple') {
 		// ToDo
-		Zotero.debug("found multiple, not yet supported!")
-	} else {
-		scrape(doc, url)
+		Zotero.debug("found multiple, not yet supported!");
+	}
+	else {
+		await scrape(doc, url);
 	}
 }
+async function scrape(doc, url = doc.location.href) {
+	let translator = Zotero.loadTranslator('web');
+	// Embedded Metadata
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	translator.setDocument(doc);
+	
+	translator.setHandler('itemDone', (_obj, item) => {
+		// TODO adjust if needed:
+		item.section = 'News';
+		item.complete();
+	});
 
-function scrape(doc, url) {
-	let item = new Zotero.Item('bookSection');
-	item.language = attr(doc, "html", "lang");
-
-	let itemType = attr(doc, '[property~="og:type"]', 'content');
-	let tagNodeList = doc.querySelectorAll(`[property~="og:${itemType}:tag"]`);
-	let description = attr(doc, '[property~="og:description"]', 'content');
-	const titleTag = document.querySelector('meta[property="og:title"]');
-	let title = document.title
-	if (titleTag) {
-		titleText = titleTag.getAttribute('content').split('passage:')[1]?.trim();
-		if (titleText) {
-			title=titleText
-		}
-	}
-	item.title = title
-	//Zotero.HTTP.request({
-    //method: 'GET',
-    //url: url,
-    //success: function(transport) {
-    //    let text = transport.responseText;
-    //    // Handle the response text here
-    //}
-	//});
-	item.complete();
+	let em = await translator.getTranslatorObject();
+	em.itemType = 'newspaperArticle';
+	// TODO map additional meta tags here, or delete completely
+	em.addCustomFields({
+		'twitter:description': 'abstractNote'
+	});
+	await em.doWeb(doc, url);
 }
 
 /** BEGIN TEST CASES **/
 var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.biblegateway.com/passage/?search=Joshua%203&version=NRSVUE",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Joshua 3 - New Revised Standard Version Updated Edition",
+				"creators": [],
+				"abstractNote": "Israel Crosses the Jordan - Early in the morning Joshua rose and set out from Shittim with all the Israelites, and they came to the Jordan. They camped there before crossing over. At the end of three days, the officers went through the camp and commanded the people, “When you see the ark of the covenant of the LORD your God being carried by the Levitical priests, then you shall set out from your place. Follow it, so that you may know the way you should go, for you have not passed this way before. Yet there shall be a space between you and it, a distance of about two thousand cubits; do not come any nearer to it.” Then Joshua said to the people, “Sanctify yourselves, for tomorrow the LORD will do wonders among you.”",
+				"language": "en",
+				"libraryCatalog": "Bible Gateway",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
 ]
 /** END TEST CASES **/
