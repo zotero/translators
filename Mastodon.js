@@ -1,7 +1,7 @@
 {
 	"translatorID": "98878eeb-84b7-4945-86dd-3d61258ecc1b",
 	"label": "Mastodon",
-	"creator": "Sebastian Karcher",
+	"creator": "Sebastian Karcher and omnivorous_narrator",
 	"target": "/@.+/\\d{10}",
 	"minVersion": "5.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-16 16:40:43"
+	"lastUpdated": "2026-10-31 20:40:00"
 }
 
 /*
@@ -37,7 +37,8 @@
 
 
 function detectWeb(doc, _url) {
-	if (text(doc, '#mastodon div.detailed-status__wrapper')) {
+	if (text(doc, '#mastodon div.detailed-status__wrapper')
+		|| text(doc, '#mastodon div._feat_status_redesign__mainStatus')) {
 		return 'forumPost';
 	}
 	return false;
@@ -52,8 +53,15 @@ async function doWeb(doc, _url) {
 
 async function scrape(doc) {
 	var item = new Zotero.Item("forumPost");
-	var post = doc.getElementsByClassName("detailed-status__wrapper")[0];
-	let title = text(post, '.status__content');
+	var isRedesign = false;
+	var post = doc.querySelector(".detailed-status__wrapper");
+	if (post === null) {
+		isRedesign = true;
+		post = doc.querySelector("._feat_status_redesign__mainStatus");
+	}
+	let title = text(post,
+		isRedesign ? '._comp_status_content__text' : '.status__content'
+	);
 
 	// cut off titles longer than 140 characters
 	if (title.length < 140) {
@@ -65,7 +73,13 @@ async function scrape(doc) {
 		// we'll keep the full text in the abstract in this case;
 	}
 
-	let username = text(post, '.display-name__account');
+	let username = text(post,
+		isRedesign ? '._comp_status_header__handle' : '.display-name__account'
+	);
+	// Since v5 redesign, hostname is omitted by default
+	if (isRedesign && (username.split('@').length - 1 < 2)) {
+		username = username + '@' + doc.location.host;
+	}
 	let name = text(post, '.display-name__html');
 	name = ZU.cleanAuthor(name, "author", false);
 	// add the handle to the first name field
@@ -77,8 +91,17 @@ async function scrape(doc) {
 	}
 	// Z.debug(name);
 	item.creators.push(name);
-	item.date = ZU.strToISO(text(post, '.detailed-status__datetime'));
-	let posturl = attr(post, 'a.detailed-status__datetime', 'href');
+
+	// Up to Mastodon 4, '.detailed-status__datetime' contains permalink & full datetime;
+	// In v5 redesign, abbreviated date w/ permalink is now shown next to username,
+	// while full datetime is only found in the edit history button
+	item.date = ZU.strToISO(text(post,
+		isRedesign ? '._comp_status_meta__editedButton' : '.detailed-status__datetime'
+	));
+	let posturl = attr(post,
+		isRedesign ? 'a._comp_status_header__date' : 'a.detailed-status__datetime',
+		'href'
+	);
 	// The status ID in the URL is local to the instance we're on, so when
 	// viewing a post from another instance, ask the API for its canonical URL
 	let statusID = (posturl.match(/\/(\d+)\/?$/) || [])[1];
@@ -95,7 +118,10 @@ async function scrape(doc) {
 		item.url = "https://" + doc.location.host + posturl;
 	}
 	item.attachments.push({ document: doc, title: "Snapshot" });
-	item.language = attr(post, '.status__content__text', 'lang');
+	item.language = attr(post,
+		isRedesign ? '._comp_status_content__text' : '.status__content__text',
+		'lang'
+	);
 	item.forumTitle = "Mastodon";
 	item.type = "Mastodon post";
 	item.complete();
@@ -190,6 +216,39 @@ var testCases = [
 				"language": "de",
 				"postType": "Mastodon post",
 				"url": "https://scholar.social/@Lambo/109450640339409266",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://mastodon.social/@MastodonEngineering/116687020382482250",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "forumPost",
+				"title": "We will soon be publishing a blog post for Mastodon client developers, showcasing the new API and features that are available in this versio…",
+				"creators": [
+					{
+						"firstName": "Mastodon (@MastodonEngineering@mastodon.social)",
+						"lastName": "Engineering",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-06-03",
+				"abstractNote": "We will soon be publishing a blog post for Mastodon client developers, showcasing the new API and features that are available in this version.",
+				"forumTitle": "Mastodon",
+				"language": "en",
+				"postType": "Mastodon post",
+				"url": "https://mastodon.social/@MastodonEngineering/116687020382482250",
 				"attachments": [
 					{
 						"title": "Snapshot",
