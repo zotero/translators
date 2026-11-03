@@ -7,8 +7,9 @@
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 8,
-	"lastUpdated": "2025-04-29 03:02:00"
+	"translatorType": 4,
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2026-11-03 13:31:55"
 }
 
 /*
@@ -559,8 +560,9 @@ var testCases = [
 					}
 				],
 				"date": "1995-01-01",
+				"DOI": "10.1007/BFb0102359",
 				"bookTitle": "Galaxies in the Young Universe",
-				"extra": "DOI: 10.1007/BFb0102359\nADS Bibcode: 1995LNP...463...51E",
+				"extra": "ADS Bibcode: 1995LNP...463...51E",
 				"libraryCatalog": "NASA ADS",
 				"pages": "51",
 				"url": "https://ui.adsabs.harvard.edu/abs/1995LNP...463...51E",
