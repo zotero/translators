@@ -8,7 +8,7 @@ import { EXTENSION_ID } from '../constants.mjs';
 const chromeExtensionDir = path.join(import.meta.dirname, 'connectors', 'build', 'manifestv3');
 const KEEP_BROWSER_OPEN = 'KEEP_BROWSER_OPEN' in process.env;
 const CI = 'CI' in process.env;
-const TruncateSize = 7;
+const truncateSize = 7;
 
 async function getTranslatorsToTest() {
 	const translatorFilenames = process.argv[2].split('\n').filter(filename => filename.trim().length > 0);
