@@ -40,18 +40,17 @@ UUID).
 		toTestTranslatorIDs.add(metadata.translatorID);
 		toTestTranslatorNames.add(metadata.label);
 	}
-	if (changedTranslatorIDs) {
-		// Find all translators that use the changed translators and add them to list/check them too
-		let changedTranslatorIDRe = new RegExp(changedTranslatorIDs.join('|'));
-		let tooManyTranslators = false;
-		for (let translator of translatorServer.translators) {
-			if (!changedTranslatorIDRe.test(translator.content)) continue;
-			toTestTranslatorIDs.add(translator.metadata.translatorID);
-			toTestTranslatorNames.add(translator.metadata.label);
-			if (toTestTranslatorIDs.size >= 10) {
-				tooManyTranslators = true;
-				break;
-			}
+
+	// Find all translators that use the changed translators and add them to list/check them too
+	let changedTranslatorIDRe = new RegExp(changedTranslatorIDs.join('|'));
+	let tooManyTranslators = false;
+	for (let translator of translatorServer.translators) {
+		if (!changedTranslatorIDRe.test(translator.content)) continue;
+		toTestTranslatorIDs.add(translator.metadata.translatorID);
+		toTestTranslatorNames.add(translator.metadata.label);
+		if (toTestTranslatorIDs.size >= 7) {
+			tooManyTranslators = true;
+			break;
 		}
 	}
 	if (tooManyTranslators) {
