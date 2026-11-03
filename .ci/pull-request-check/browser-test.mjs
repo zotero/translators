@@ -8,6 +8,7 @@ import { EXTENSION_ID } from '../constants.mjs';
 const chromeExtensionDir = path.join(import.meta.dirname, 'connectors', 'build', 'manifestv3');
 const KEEP_BROWSER_OPEN = 'KEEP_BROWSER_OPEN' in process.env;
 const CI = 'CI' in process.env;
+const TruncateSize = 7;
 
 async function getTranslatorsToTest() {
 	const translatorFilenames = process.argv[2].split('\n').filter(filename => filename.trim().length > 0);
@@ -48,7 +49,7 @@ UUID).
 		if (!changedTranslatorIDRe.test(translator.content)) continue;
 		toTestTranslatorIDs.add(translator.metadata.translatorID);
 		toTestTranslatorNames.add(translator.metadata.label);
-		if (toTestTranslatorIDs.size >= 7) {
+		if (toTestTranslatorIDs.size >= truncateSize) {
 			tooManyTranslators = true;
 			break;
 		}
@@ -56,7 +57,7 @@ UUID).
 	if (tooManyTranslators) {
 		console.log(
 `Over 10 translators need to be tested, but this will take too long
-and timeout the CI environment. Truncating to 10.
+and timeout the CI environment. Truncating to ${truncateSize}.
 
 This is likely to happen when changing Embedded Metadata which is
 loaded by pretty much every other translator or when a PR contains

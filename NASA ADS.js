@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-07-25 19:49:19"
+	"lastUpdated": "2026-11-03 13:46:12"
 }
 
 /*
@@ -207,6 +207,7 @@ var testCases = [
 				"libraryCatalog": "NASA ADS",
 				"pages": "105014",
 				"publicationTitle": "Communications in Nonlinear Science and Numerical Simulations",
+				"publisher": "Elsevier",
 				"shortTitle": "Modeling excitability in cerebellar stellate cells",
 				"url": "https://ui.adsabs.harvard.edu/abs/2020CNSNS..8205014M",
 				"volume": "82",
@@ -346,6 +347,7 @@ var testCases = [
 				"libraryCatalog": "NASA ADS",
 				"pages": "108010",
 				"publicationTitle": "Mechanical Systems and Signal Processing",
+				"publisher": "Elsevier",
 				"url": "https://ui.adsabs.harvard.edu/abs/2022MSSP..16208010Y",
 				"volume": "162",
 				"attachments": [
@@ -474,6 +476,7 @@ var testCases = [
 				"libraryCatalog": "NASA ADS",
 				"pages": "1",
 				"publicationTitle": "Astronomy and Astrophysics Review",
+				"publisher": "Springer",
 				"url": "https://ui.adsabs.harvard.edu/abs/2023A&ARv..31....1A",
 				"volume": "31",
 				"attachments": [
@@ -514,13 +517,123 @@ var testCases = [
 		"type": "web",
 		"url": "https://ui.adsabs.harvard.edu/abs/2011PhRvA..84f3834P/coreads",
 		"defer": true,
-		"items": "multiple"
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Approaching perfect microwave photodetection in circuit QED",
+				"creators": [
+					{
+						"lastName": "Peropadre",
+						"firstName": "B.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Romero",
+						"firstName": "G.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Johansson",
+						"firstName": "G.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wilson",
+						"firstName": "C. M.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Solano",
+						"firstName": "E.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "García-Ripoll",
+						"firstName": "J. J.",
+						"creatorType": "author"
+					}
+				],
+				"date": "2011-12-01",
+				"DOI": "10.1103/PhysRevA.84.063834",
+				"ISSN": "1050-29470556-2791",
+				"abstractNote": "In order to apply all ideas from quantum optics to the field of quantum circuits, one of the missing ingredients is a high-efficiency single-photon detector. In this work we propose a design for such a device which successfully reaches 100% efficiency with only one absorber. Our photon detector consists of a three-level system (a phase qubit) coupled to a semi-infinite one-dimensional waveguide (a microwave transmission line) which performs highly efficient photodetection in a simplified manner as compared to previous proposals. Using the tools of quantum optics we extensively study the scattering properties of realistic wave packets against this device, thereby computing the efficiency of the detector. We find that the detector has many operating modes, can detect detuned photons, is robust against design imperfections, and can be made broadband by using more than one absorbing element in the design. Many of these ideas could be translated to other single-mode photonic or plasmonic waveguides interacting with three-level atoms or quantum dots.",
+				"extra": "ADS Bibcode: 2011PhRvA..84f3834P",
+				"libraryCatalog": "NASA ADS",
+				"pages": "063834",
+				"publicationTitle": "Physical Review A",
+				"publisher": "APS",
+				"url": "https://ui.adsabs.harvard.edu/abs/2011PhRvA..84f3834P",
+				"volume": "84",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "42.50.Pq"
+					},
+					{
+						"tag": "85.25.Pb"
+					},
+					{
+						"tag": "85.60.Gz"
+					},
+					{
+						"tag": "Cavity quantum electrodynamics"
+					},
+					{
+						"tag": "Condensed Matter - Mesoscale and Nanoscale Physics"
+					},
+					{
+						"tag": "Photodetectors"
+					},
+					{
+						"tag": "Quantum Physics"
+					},
+					{
+						"tag": "Superconducting infrared submillimeter and millimeter wave detectors"
+					},
+					{
+						"tag": "micromasers"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	},
 	{
 		"type": "web",
 		"url": "https://ui.adsabs.harvard.edu/abs/2020jsrs.conf.....B/toc",
 		"defer": true,
-		"items": "multiple"
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Proceedings of the Journées Systèmes de Référence Spatio-temporels 2019 \"Astrometry, Earth Rotation and Reference System in the Gaia era\"",
+				"creators": [
+					{
+						"lastName": "Bizouard",
+						"firstName": "Christian",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020-09-01",
+				"extra": "ADS Bibcode: 2020jsrs.conf.....B",
+				"libraryCatalog": "NASA ADS",
+				"url": "https://ui.adsabs.harvard.edu/abs/2020jsrs.conf.....B",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	},
 	{
 		"type": "web",
@@ -570,6 +683,7 @@ var testCases = [
 				"libraryCatalog": "NASA ADS",
 				"pages": "105014",
 				"publicationTitle": "Communications in Nonlinear Science and Numerical Simulations",
+				"publisher": "Elsevier",
 				"shortTitle": "Modeling excitability in cerebellar stellate cells",
 				"url": "https://ui.adsabs.harvard.edu/abs/2020CNSNS..8205014M",
 				"volume": "82",
@@ -709,6 +823,7 @@ var testCases = [
 				"libraryCatalog": "NASA ADS",
 				"pages": "108010",
 				"publicationTitle": "Mechanical Systems and Signal Processing",
+				"publisher": "Elsevier",
 				"url": "https://ui.adsabs.harvard.edu/abs/2022MSSP..16208010Y",
 				"volume": "162",
 				"attachments": [
@@ -837,6 +952,7 @@ var testCases = [
 				"libraryCatalog": "NASA ADS",
 				"pages": "1",
 				"publicationTitle": "Astronomy and Astrophysics Review",
+				"publisher": "Springer",
 				"url": "https://ui.adsabs.harvard.edu/abs/2023A&ARv..31....1A",
 				"volume": "31",
 				"attachments": [
@@ -877,7 +993,92 @@ var testCases = [
 		"type": "web",
 		"url": "https://scixplorer.org/abs/2011PhRvA..84f3834P/coreads",
 		"defer": true,
-		"items": "multiple"
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Approaching perfect microwave photodetection in circuit QED",
+				"creators": [
+					{
+						"lastName": "Peropadre",
+						"firstName": "B.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Romero",
+						"firstName": "G.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Johansson",
+						"firstName": "G.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wilson",
+						"firstName": "C. M.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Solano",
+						"firstName": "E.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "García-Ripoll",
+						"firstName": "J. J.",
+						"creatorType": "author"
+					}
+				],
+				"date": "2011-12-01",
+				"DOI": "10.1103/PhysRevA.84.063834",
+				"ISSN": "1050-29470556-2791",
+				"abstractNote": "In order to apply all ideas from quantum optics to the field of quantum circuits, one of the missing ingredients is a high-efficiency single-photon detector. In this work we propose a design for such a device which successfully reaches 100% efficiency with only one absorber. Our photon detector consists of a three-level system (a phase qubit) coupled to a semi-infinite one-dimensional waveguide (a microwave transmission line) which performs highly efficient photodetection in a simplified manner as compared to previous proposals. Using the tools of quantum optics we extensively study the scattering properties of realistic wave packets against this device, thereby computing the efficiency of the detector. We find that the detector has many operating modes, can detect detuned photons, is robust against design imperfections, and can be made broadband by using more than one absorbing element in the design. Many of these ideas could be translated to other single-mode photonic or plasmonic waveguides interacting with three-level atoms or quantum dots.",
+				"extra": "ADS Bibcode: 2011PhRvA..84f3834P",
+				"libraryCatalog": "NASA ADS",
+				"pages": "063834",
+				"publicationTitle": "Physical Review A",
+				"publisher": "APS",
+				"url": "https://ui.adsabs.harvard.edu/abs/2011PhRvA..84f3834P",
+				"volume": "84",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "42.50.Pq"
+					},
+					{
+						"tag": "85.25.Pb"
+					},
+					{
+						"tag": "85.60.Gz"
+					},
+					{
+						"tag": "Cavity quantum electrodynamics"
+					},
+					{
+						"tag": "Condensed Matter - Mesoscale and Nanoscale Physics"
+					},
+					{
+						"tag": "Photodetectors"
+					},
+					{
+						"tag": "Quantum Physics"
+					},
+					{
+						"tag": "Superconducting infrared submillimeter and millimeter wave detectors"
+					},
+					{
+						"tag": "micromasers"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	},
 	{
 		"type": "web",
