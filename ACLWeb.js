@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-11-10 10:36:48"
+	"lastUpdated": "2026-11-03 13:28:50"
 }
 
 /*
@@ -264,6 +264,26 @@ var testCases = [
 						"firstName": "Mirella",
 						"lastName": "Lapata",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Lillian",
+						"lastName": "Lee",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Mark",
+						"lastName": "Johnson",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Kristina",
+						"lastName": "Toutanova",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Brian",
+						"lastName": "Roark",
+						"creatorType": "editor"
 					}
 				],
 				"date": "2018",
@@ -271,9 +291,11 @@ var testCases = [
 				"abstractNote": "In this paper we argue that crime drama exemplified in television programs such as CSI: Crime Scene Investigation is an ideal testbed for approximating real-world natural language understanding and the complex inferences associated with it. We propose to treat crime drama as a new inference task, capitalizing on the fact that each episode poses the same basic question (i.e., who committed the crime) and naturally provides the answer when the perpetrator is revealed. We develop a new dataset based on CSI episodes, formalize perpetrator identification as a sequence labeling problem, and develop an LSTM-based model which learns from multi-modal data. Experimental results show that an incremental inference strategy is key to making accurate guesses as well as learning from representations fusing textual, visual, and acoustic input.",
 				"libraryCatalog": "ACLWeb",
 				"pages": "1–15",
+				"place": "Cambridge, MA",
 				"publicationTitle": "Transactions of the Association for Computational Linguistics",
+				"publisher": "MIT Press",
 				"shortTitle": "Whodunnit?",
-				"url": "https://www.aclweb.org/anthology/Q18-1001",
+				"url": "https://aclanthology.org/Q18-1001/",
 				"volume": "6",
 				"attachments": [
 					{
@@ -333,7 +355,7 @@ var testCases = [
 				"place": "Barcelona, Spain",
 				"proceedingsTitle": "Proceedings of SENSEVAL-3, the Third International Workshop on the Evaluation of Systems for the Semantic Analysis of Text",
 				"publisher": "Association for Computational Linguistics",
-				"url": "https://www.aclweb.org/anthology/W04-0801",
+				"url": "https://aclanthology.org/W04-0801/",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -363,14 +385,35 @@ var testCases = [
 						"firstName": "Tal",
 						"lastName": "Linzen",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Gaja",
+						"lastName": "Jarosz",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Max",
+						"lastName": "Nelson",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Brendan",
+						"lastName": "O'Connor",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Joe",
+						"lastName": "Pater",
+						"creatorType": "editor"
 					}
 				],
 				"date": "2019",
 				"DOI": "10.7275/qtbb-9d05",
+				"conferenceName": "SCiL 2019",
 				"libraryCatalog": "ACLWeb",
 				"pages": "1–7",
 				"proceedingsTitle": "Proceedings of the Society for Computation in Linguistics (SCiL) 2019",
-				"url": "https://www.aclweb.org/anthology/W19-0101",
+				"url": "https://aclanthology.org/W19-0101/",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -410,6 +453,26 @@ var testCases = [
 						"firstName": "Chris",
 						"lastName": "Fox",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Rivka",
+						"lastName": "Levitan",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Myle",
+						"lastName": "Ott",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Roger",
+						"lastName": "Levy",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Ani",
+						"lastName": "Nenkova",
+						"creatorType": "editor"
 					}
 				],
 				"date": "2012-06",
@@ -419,7 +482,7 @@ var testCases = [
 				"proceedingsTitle": "Proceedings of the NAACL HLT 2012 Student Research Workshop",
 				"publisher": "Association for Computational Linguistics",
 				"shortTitle": "Finding the Right Supervisor",
-				"url": "https://www.aclweb.org/anthology/N12-2001",
+				"url": "https://aclanthology.org/N12-2001/",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -489,6 +552,21 @@ var testCases = [
 						"firstName": "Yong",
 						"lastName": "Yu",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Marilyn",
+						"lastName": "Walker",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Heng",
+						"lastName": "Ji",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Amanda",
+						"lastName": "Stent",
+						"creatorType": "editor"
 					}
 				],
 				"date": "2018-06",
@@ -500,7 +578,7 @@ var testCases = [
 				"place": "New Orleans, Louisiana",
 				"proceedingsTitle": "Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long Papers)",
 				"publisher": "Association for Computational Linguistics",
-				"url": "https://www.aclweb.org/anthology/N18-1001",
+				"url": "https://aclanthology.org/N18-1001/",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -535,19 +613,89 @@ var testCases = [
 						"firstName": "Massimo",
 						"lastName": "Poesio",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Nicoletta",
+						"lastName": "Calzolari",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Frédéric",
+						"lastName": "Béchet",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Philippe",
+						"lastName": "Blache",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Khalid",
+						"lastName": "Choukri",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Christopher",
+						"lastName": "Cieri",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Thierry",
+						"lastName": "Declerck",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Sara",
+						"lastName": "Goggi",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Hitoshi",
+						"lastName": "Isahara",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Bente",
+						"lastName": "Maegaard",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Joseph",
+						"lastName": "Mariani",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Hélène",
+						"lastName": "Mazo",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Asuncion",
+						"lastName": "Moreno",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Jan",
+						"lastName": "Odijk",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Stelios",
+						"lastName": "Piperidis",
+						"creatorType": "editor"
 					}
 				],
 				"date": "2020-05",
 				"ISBN": "9791095546344",
 				"abstractNote": "Anaphora resolution (coreference) systems designed for the CONLL 2012 dataset typically cannot handle key aspects of the full anaphora resolution task such as the identification of singletons and of certain types of non-referring expressions (e.g., expletives), as these aspects are not annotated in that corpus. However, the recently released dataset for the CRAC 2018 Shared Task can now be used for that purpose. In this paper, we introduce an architecture to simultaneously identify non-referring expressions (including expletives, predicative s, and other types) and build coreference chains, including singletons. Our cluster-ranking system uses an attention mechanism to determine the relative importance of the mentions in the same cluster. Additional classifiers are used to identify singletons and non-referring markables. Our contributions are as follows. First all, we report the first result on the CRAC data using system mentions; our result is 5.8% better than the shared task baseline system, which used gold mentions. Second, we demonstrate that the availability of singleton clusters and non-referring expressions can lead to substantially improved performance on non-singleton clusters as well. Third, we show that despite our model not being designed specifically for the CONLL data, it achieves a score equivalent to that of the state-of-the-art system by Kantor and Globerson (2019) on that dataset.",
 				"conferenceName": "LREC 2020",
-				"language": "English",
+				"language": "eng",
 				"libraryCatalog": "ACLWeb",
 				"pages": "11–20",
 				"place": "Marseille, France",
-				"proceedingsTitle": "Proceedings of the 12th Language Resources and Evaluation Conference",
+				"proceedingsTitle": "Proceedings of the Twelfth Language Resources and Evaluation Conference",
 				"publisher": "European Language Resources Association",
-				"url": "https://www.aclweb.org/anthology/2020.lrec-1.2",
+				"url": "https://aclanthology.org/2020.lrec-1.2/",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -577,13 +725,18 @@ var testCases = [
 						"firstName": "Steve",
 						"lastName": "Pulman",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Yorick",
+						"lastName": "Wilks",
+						"creatorType": "editor"
 					}
 				],
 				"date": "1987",
 				"conferenceName": "TINLAP 1987",
 				"libraryCatalog": "ACLWeb",
 				"proceedingsTitle": "Theoretical Issues in Natural Language Processing 3",
-				"url": "https://www.aclweb.org/anthology/T87-1010",
+				"url": "https://aclanthology.org/T87-1010/",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
