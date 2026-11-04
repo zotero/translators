@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-12-03 15:37:21"
+	"lastUpdated": "2026-11-04 17:14:59"
 }
 
 /*
@@ -105,8 +105,25 @@ async function scrape(doc, url = doc.location.href) {
 	var bibtexFormat = '&format=bibtex';
 	var risFormat = '&format=ris';
 
-	let bibtexText = await requestText(postUrl, { method: 'POST', body: postBody + doi + bibtexFormat });
-	let risText = await requestText(postUrl, { method: 'POST', body: postBody + doi + risFormat });
+	let headers = { Referer: url };
+
+	let bibtexText;
+	let risText;
+	// These requests can intermittently fail with a 403 for unclear reasons,
+	// but a retry might work?
+	for (let i = 0; i < 3; i++) {
+		try {
+			bibtexText = await requestText(postUrl, { method: 'POST', headers, body: postBody + doi + bibtexFormat });
+			risText = await requestText(postUrl, { method: 'POST', headers, body: postBody + doi + risFormat });
+			break;
+		}
+		catch (e) {
+			if (i == 2) {
+				throw e;
+			}
+			Zotero.debug(e);
+		}
+	}
 
 	// Z.debug(bibtexText)
 	// Y1 is online publication date
