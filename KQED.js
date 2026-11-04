@@ -459,6 +459,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.kqed.org/search?q=ddt&site=all",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
