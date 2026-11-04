@@ -188,8 +188,30 @@ function fillPodcast(item, doc, url) {
 	let title = series ? series.name : getAttr(doc, 'meta[property="og:title"]', 'content');
 	item.title = cleanPodcastTitle(title || item.title);
 	if (series && series.description) item.abstractNote = series.description;
+	let creators = getPodcastCreators(doc);
+	if (creators.length) item.creators = creators;
 	item.language = 'en-US';
 	item.url = url;
+}
+
+// the show page's server-rendered team section lists the staff with their role;
+// only host/producer/editor map to podcast creator types, anything else counts as author
+const PODCAST_ROLES = [['producer', 'producer'], ['editor', 'editor'], ['host', 'author']];
+
+function getPodcastCreators(doc) {
+	let creators = [];
+	// member_Names / member_NameAndPosition are container classes, so match the
+	// name span and the position heading by class suffix
+	for (let nameEl of doc.querySelectorAll('[class$="member_Name"]')) {
+		let name = ZU.trimInternal(nameEl.textContent);
+		if (!name) continue;
+		let container = nameEl.closest('[class*="member_NameAndPosition"]');
+		let positionEl = container && container.querySelector('[class$="member_Position"]');
+		let position = positionEl ? ZU.trimInternal(positionEl.textContent).toLowerCase() : '';
+		let role = PODCAST_ROLES.find(([word]) => position.includes(word));
+		creators.push(ZU.cleanAuthor(name, role ? role[1] : 'author', false));
+	}
+	return creators;
 }
 
 function getRunningTime(doc) {
@@ -379,7 +401,23 @@ var testCases = [
 			{
 				"itemType": "podcast",
 				"title": "The Bay",
-				"creators": [],
+				"creators": [
+					{
+						"firstName": "Ericka Cruz",
+						"lastName": "Guevarra",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alan",
+						"lastName": "Montecillo",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Gabriela",
+						"lastName": "Glueck",
+						"creatorType": "producer"
+					}
+				],
 				"abstractNote": "Ericka Cruz Guevarra talks with local journalists about what’s happening in the Bay Area. It’s the context and analysis you need to make sense of the headlines.",
 				"language": "en-US",
 				"url": "https://www.kqed.org/podcasts/thebay",
