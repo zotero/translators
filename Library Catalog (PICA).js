@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-11-26 15:26:20"
+	"lastUpdated": "2026-03-27 21:31:39"
 }
 
 /*
@@ -93,6 +93,10 @@ function detectWeb(doc, _url) {
 				}
 				else if (type.includes('map.')) {
 					return "map";
+				}
+				else if (type.includes('binary.') && (ZU.xpath(doc, '//tr/td[@class="rec_lable" and .//span[starts-with(text(), "Thèse")]]').length)) {
+					// Electronic theses have a binary icon, we can detect them because they contain a field named These like on https://www.sudoc.fr/282427384
+					return "thesis";
 				}
 			}
 			return "book";
