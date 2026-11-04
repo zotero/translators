@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-04 22:35:00"
+	"lastUpdated": "2026-11-04 21:41:03"
 }
 
 /*
@@ -128,6 +128,13 @@ async function scrape(doc, url = doc.location.href) {
 		if (labelHref.includes('/tag/')) {
 			let tag = ZU.trimInternal(label.textContent);
 			if (tag) item.tags.push(tag);
+		}
+
+		let article = getArticleData(doc, url);
+		let schema = article && article.headData && article.headData.schema;
+		if (schema && [].concat(schema['@type'] || []).includes('PodcastEpisode')
+			&& !item.tags.some(tag => (typeof tag == 'string' ? tag : tag.tag).toLowerCase() == 'podcast')) {
+			item.tags.push({ tag: 'podcast' });
 		}
 
 		item.abstractNote = getText(doc, '[class*="mpost_Excerpt"]') || item.abstractNote;
@@ -514,7 +521,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					"podcast"
+				],
 				"notes": [],
 				"seeAlso": []
 			}
