@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-04 15:30:00"
+	"lastUpdated": "2026-11-04 22:35:00"
 }
 
 /*
@@ -256,16 +256,33 @@ function pad(value) {
 	return String(value).padStart(2, '0');
 }
 
-function getSection(doc, url) {
-	let series = doc.querySelector('a[class*="categoryLabel"][href*="/podcasts/"]');
-	if (series) {
-		let name = ZU.trimInternal(series.textContent);
-		if (name) return name;
+function getArticleData(doc, url) {
+	let match = url.match(/kqed\.org\/([a-z]+)\/(\d+)(?:\/|$)/);
+	let script = doc.querySelector('#initial-state');
+	if (!match || !script) return null;
+	let state = script.textContent.match(/window\.__INITIAL_STATE__\s*=\s*(\{[\s\S]*\})\s*;?\s*$/);
+	if (!state) return null;
+	try {
+		let posts = JSON.parse(state[1]).postsReducer;
+		// Related posts share this reducer; only read the current article's key.
+		return posts ? posts[`${match[1]}_${match[2]}`] || null : null;
 	}
-	// Other labels may name a guide or tag rather than the publication section.
+	catch (error) {
+		return null;
+	}
+}
+
+function getSection(doc, url) {
+	let article = getArticleData(doc, url);
+	let series = article && article.headData && article.headData.schema
+		&& article.headData.schema.partOfSeries;
+	for (let name of [series && series.name, article && article.source]) {
+		if (typeof name == 'string' && name.trim()) return ZU.trimInternal(name);
+	}
+	let label = getText(doc, '[class*="__Label__categoryLabel_Text"]');
+	if (label) return label;
 	let segment = url.match(/kqed\.org\/([a-z]+)\//);
-	if (segment) return segment[1][0].toUpperCase() + segment[1].slice(1);
-	return getText(doc, '[class*="categoryLabel_Text"]');
+	return segment ? segment[1][0].toUpperCase() + segment[1].slice(1) : '';
 }
 
 function getCreators(doc) {
@@ -313,7 +330,7 @@ var testCases = [
 				"language": "en-US",
 				"libraryCatalog": "www.kqed.org",
 				"publicationTitle": "KQED",
-				"section": "Arts",
+				"section": "Fall Guide 2026",
 				"url": "https://www.kqed.org/arts/13992952/best-outdoor-festivals-bay-area-fall-2026",
 				"attachments": [
 					{
