@@ -1,21 +1,21 @@
 {
 	"translatorID": "b0abb562-218c-4bf6-af66-c320fdb8ddd3",
-	"label": "Philosopher's Imprint",
+	"label": "Philosophers' Imprint",
 	"creator": "Philipp Zumstein",
 	"target": "^https?://quod\\.lib\\.umich\\.edu/p/phimp",
-	"minVersion": "3.0",
+	"minVersion": "6.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-01 04:27:44"
+	"lastUpdated": "2023-08-25 02:00:20"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017 Philipp Zumstein
+	Copyright © 2017 Philipp Zumstein and contributors
 	
 	This file is part of Zotero.
 
@@ -36,19 +36,22 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.indexOf('/p/phimp?t')>-1 && getSearchResults(doc, true)) {
+	if (getSearchResults(doc, true)) {
 		return "multiple";
-	} else if (url.indexOf('/p/phimp/')>-1) {
+	}
+	else if (/^\/p\/phimp\/\d+\.\d+\.\d+\//.test(new URL(url).pathname)) {
 		return "journalArticle";
 	}
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	//TODO: adjust the xpath
-	var rows = ZU.xpath(doc, '//table[@id="searchresults"]//td[2]/a');
-	for (var i=0; i<rows.length; i++) {
+	var rowsRoot = doc.querySelector("#searchresults, #browselist, #picklistitems");
+	if (!rowsRoot) return false;
+	var rows = rowsRoot.querySelectorAll('td:nth-child(2) > a');
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -60,36 +63,26 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			
-			
-			ZU.processDocuments(articles, scrape);
-		});
-	} else {
+		let items = await Zotero.selectItems(getSearchResults(doc));
+		if (!items) return;
+		for (let url of Object.keys(items)) {
+			await scrape(await requestDocument(url), url);
+		}
+	}
+	else {
 		scrape(doc, url);
 	}
 }
 
-function scrape(doc, url) {
-	// move meta tags to head for EM
-	// this is a fix for some malformed HTML
-	for (let meta of doc.body.querySelectorAll('meta')) {
-		doc.head.appendChild(meta);
-	}
-	
-	var abstract = ZU.xpathText(doc, '//div[contains(@class, "abstract")]/p[1]');
-	var purl = ZU.xpathText(doc, '//div[@id="purl"]/a/@href');
-	var license = ZU.xpathText(doc, '//a[@id="licenseicon"]/@href');
-	var pdfurl = ZU.xpathText(doc, '//li[@id="download-pdf"]/a/@href');
+function scrape(doc, url = doc.location.href) { // eslint-disable-line no-unused-vars
+	var abstract = text(doc, ".abstract p:first-of-type");
+	var purl = attr(doc, "#purl a", "href");
+	var license = attr(doc, "#licenseicon", "href");
+	var pdfurl = attr(doc, "#download-pdf a", "href");
+
+	var dateField = text(doc, ".periodical");
 	
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
@@ -103,15 +96,32 @@ function scrape(doc, url) {
 			item.url = purl;
 		}
 		if (pdfurl) {
+			// Delete the EM-generated snapshot, which is not very useful for
+			// the journal article with VoR already there
+			item.attachments = item.attachments.filter(obj => obj.title !== "Snapshot");
 			item.attachments.push({
 				url: pdfurl,
 				title: "Full Text PDF",
 				mimeType: "application/pdf"
 			});
 		}
+		if (dateField) {
+			let pagesMatch = dateField.match(/.+pp\.\s+(\d+(?:-\d+))$/);
+			if (pagesMatch) {
+				item.pages = pagesMatch[1];
+			}
+		}
 		item.rights = license;
+		// Delete irrelevant fields from EM (which will go into extra but are
+		// still irrelevant there)
+		delete item.institution;
+		delete item.company;
+		delete item.label;
+		delete item.distributor;
 		item.place = "Ann Arbor, MI";
-		item.publisher = "University of Michigan";
+		item.publisher = "Michigan Publishing";
+		// Their metadata about their name is wrong
+		item.publicationTitle = "Philosophers' Imprint";
 		
 		item.complete();
 	});
@@ -145,15 +155,12 @@ var testCases = [
 				"issue": "3",
 				"language": "en",
 				"libraryCatalog": "quod.lib.umich.edu",
-				"publicationTitle": "Philosopher's Imprint",
+				"pages": "1-27",
+				"publicationTitle": "Philosophers' Imprint",
 				"rights": "http://creativecommons.org/licenses/by-nc-nd/3.0/",
 				"url": "http://hdl.handle.net/2027/spo.3521354.0004.003",
 				"volume": "4",
 				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					},
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
@@ -164,6 +171,21 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://quod.lib.umich.edu/p/phimp/3521354.0021?rgn=full+text",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://quod.lib.umich.edu/p/phimp?key=title;page=browse",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://quod.lib.umich.edu/p/phimp?key=author;page=browse",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
