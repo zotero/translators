@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2025-01-04 01:03:00"
+	"lastUpdated": "2025-03-26 20:00:00"
 }
 
 /*
@@ -174,10 +174,11 @@ async function importItems({ references, doc, citaviVersion, rememberTags, itemI
 		if (keywords && keywords.length > 0) {
 			item.tags = attachName(doc, keywords);
 		}
+		else {
+			item.tags = [];
+		}
 		if (rememberTags[item.itemID]) {
-			for (var j = 0; j < rememberTags[item.itemID].length; j++) {
-				item.tags.push(rememberTags[item.itemID][j]);
-			}
+			item.tags.push(...rememberTags[item.itemID]);
 		}
 
 		// For all corresponding knowledge items attach a note containing
@@ -194,13 +195,21 @@ async function importItems({ references, doc, citaviVersion, rememberTags, itemI
 				noteObject.note += '<h1>' + title + "</h1>\n";
 			}
 			if (text) {
-				noteObject.note += "<p>" + ZU.xpathText(citations[j], 'Text') + "</p>\n";
+				text = text.split(/\r?\n/).join("<br />");
+				noteObject.note += "<p>" + text + "</p>\n";
 			}
 			if (pages) {
 				noteObject.note += "<i>" + pages + "</i>";
 			}
+			keywords = ZU.xpathText(doc, '//KnowledgeItemKeywords/OnetoN[starts-with(text(), "' + noteObject.id + '")]');
+			if (keywords) {
+				noteObject.tags = attachName(doc, keywords);
+			}
+			else {
+				noteObject.tags = [];
+			}
 			if (rememberTags[noteObject.id]) {
-				noteObject.tags = rememberTags[noteObject.id];
+				noteObject.tags.push(...rememberTags[noteObject.id]);
 			}
 			if (noteObject.note != "") {
 				item.notes.push(noteObject);
@@ -466,8 +475,16 @@ function attachName(doc, ids) {
 	var idList = ids.split(';');
 	// skip the first element which is the id of reference
 	for (var j = 1; j < idList.length; j++) {
-		var author = doc.getElementById(idList[j]);
-		valueList.push(ZU.xpathText(author, 'Name'));
+		// sometimes the id is appended by the a (rank?) number,
+		// which needs to be cleaned first
+		var id = idList[j].split(":")[0];
+		var author = doc.getElementById(id);
+		if (author) {
+			valueList.push(ZU.xpathText(author, 'Name'));
+		}
+		else {
+			Z.debug("Can't find this id: " + id);
+		}
 	}
 	return valueList;
 }
