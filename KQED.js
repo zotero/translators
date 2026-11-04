@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-28 21:40:00"
+	"lastUpdated": "2026-11-04 14:25:00"
 }
 
 /*
@@ -85,22 +85,24 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	let type = detectWeb(doc, url);
 	if (type == 'multiple') {
-		Zotero.selectItems(getSearchResults(doc, false), (items) => {
-			if (items) ZU.processDocuments(Object.keys(items), doWeb);
-		});
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let link of Object.keys(items)) {
+			await scrape(await requestDocument(link));
+		}
 		return;
 	}
 	if (type == 'videoRecording' || type == 'podcast') {
-		scrapeMedia(doc, url, type);
+		await scrapeMedia(doc, url, type);
 		return;
 	}
-	scrape(doc, url);
+	await scrape(doc, url);
 }
 
-function scrape(doc, url) {
+async function scrape(doc, url = doc.location.href) {
 	let translator = Zotero.loadTranslator('web');
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
@@ -137,10 +139,10 @@ function scrape(doc, url) {
 
 		item.complete();
 	});
-	translator.translate();
+	await translator.translate();
 }
 
-function scrapeMedia(doc, url, itemType) {
+async function scrapeMedia(doc, url, itemType) {
 	let translator = Zotero.loadTranslator('web');
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
@@ -154,7 +156,7 @@ function scrapeMedia(doc, url, itemType) {
 		}
 		item.complete();
 	});
-	translator.translate();
+	await translator.translate();
 }
 
 function fillVideo(item, doc, url) {
