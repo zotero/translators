@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-04 14:25:00"
+	"lastUpdated": "2026-11-04 15:30:00"
 }
 
 /*
@@ -46,8 +46,8 @@
 	airing date and the running time are only in the rendered page, and the canonical
 	link points at pbs.org, so the page URL is kept instead.
 
-	Podcast shows carry a PodcastSeries block in JSON-LD. Their episodes are cards on
-	that page (with a download link), there are no separate episode pages.
+	Podcast shows carry a PodcastSeries block in JSON-LD. Episode pages with written
+	stories are saved as articles, with the podcast name as their section.
 */
 
 const ARTICLE_PATH = /\/(?:arts|culture|education|health|news|politics|science)\/\d{5,}\//;
@@ -257,8 +257,12 @@ function pad(value) {
 }
 
 function getSection(doc, url) {
-	// the section is the first path segment (/arts/13992952/... -> Arts); the visible
-	// label is inconsistent (a series name on guide posts, "News" elsewhere)
+	let series = doc.querySelector('a[class*="categoryLabel"][href*="/podcasts/"]');
+	if (series) {
+		let name = ZU.trimInternal(series.textContent);
+		if (name) return name;
+	}
+	// Other labels may name a guide or tag rather than the publication section.
 	let segment = url.match(/kqed\.org\/([a-z]+)\//);
 	if (segment) return segment[1][0].toUpperCase() + segment[1].slice(1);
 	return getText(doc, '[class*="categoryLabel_Text"]');
@@ -464,6 +468,40 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.kqed.org/search?q=ddt&site=all",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.kqed.org/news/12106596/a-park-for-the-living-rest-for-the-dead-the-shared-space-of-mountain-view-cemetery",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "A Park for the Living, Rest for the Dead: The Shared Space of Mountain View Cemetery",
+				"creators": [
+					{
+						"firstName": "Katherine",
+						"lastName": "Monahan",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-10-29",
+				"abstractNote": "Designed by Central Park architect Frederick Law Olmsted, Oakland’s Mountain View Cemetery serves as both a tranquil public park for living visitors and a final resting place for over 200,000 souls.",
+				"language": "en-US",
+				"libraryCatalog": "www.kqed.org",
+				"publicationTitle": "KQED",
+				"section": "Bay Curious",
+				"shortTitle": "A Park for the Living, Rest for the Dead",
+				"url": "https://www.kqed.org/news/12106596/a-park-for-the-living-rest-for-the-dead-the-shared-space-of-mountain-view-cemetery",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
