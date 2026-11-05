@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-05 08:57:47"
+	"lastUpdated": "2026-11-05 09:13:35"
 }
 
 /*
@@ -87,7 +87,7 @@ async function scrape(doc, url) {
 		for (let entry of article.querySelectorAll('.yle__article__header ul > li, .ydd-author-list [itemprop="name"]')) {
 			let author = entry.querySelector('a[href*="/p/56-"]:not([aria-hidden]), span') || entry;
 			let name = cleanText(author.textContent);
-			if (name && !/^(?:Служба новостей Yle|STT(?:[-–/\s]+AFP)?)$/i.test(name)) names.add(name);
+			if (name && !isNewsroom(name)) names.add(name);
 		}
 		item.creators = Array.from(names, name => (name.includes(' ')
 			? ZU.cleanAuthor(name, 'author')
@@ -129,6 +129,22 @@ async function scrape(doc, url) {
 
 function cleanText(value) {
 	return ZU.trimInternal(value.replace(/\u00ad/g, ''));
+}
+
+function isNewsroom(name) {
+	return [
+		'yle',
+		'yle uutiset',
+		'yle news',
+		'yle news service',
+		'yle news services',
+		'svenska yle',
+		'yle nyheter',
+		'yle novosti',
+		'служба новостей yle',
+		'yle ođđasat',
+		'yle sápmi'
+	].includes(name.normalize('NFC').toLowerCase()) || /^STT(?:[-–/\s]+AFP)?$/i.test(name);
 }
 
 /** BEGIN TEST CASES **/
@@ -645,6 +661,59 @@ var testCases = [
 						"tag": "ulkomaat"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://yle.fi/a/74-20255113",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "PM Orpo's government survives confidence vote by 95-77",
+				"creators": [],
+				"date": "2026-11-04",
+				"abstractNote": "All five of Finland's main opposition parties filed a motion of no confidence in the government over the rising cost of living.",
+				"language": "en",
+				"libraryCatalog": "yle.fi",
+				"publicationTitle": "Yle News",
+				"url": "https://yle.fi/a/74-20255113",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://yle.fi/a/3-12253724",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Yle Sápmi: Min birra",
+				"creators": [],
+				"date": "2022-01-17",
+				"abstractNote": "Dán siiddus gávnnat dieđu Yle Sámi birra ja doaimmahusa oktavuohtadieđuid. | Taan siijđost kaavnah tiäđu Yle Säämist já toimâttuv ohtâvuotâtiäđuid. | Tän seeiʹdast kaaunak teâđ Yle Sääʹm pirr da tååimtõõzz õhttvuõtt-teâđaid.",
+				"language": "se",
+				"libraryCatalog": "yle.fi",
+				"publicationTitle": "Yle Sápmi",
+				"shortTitle": "Yle Sápmi",
+				"url": "https://yle.fi/a/3-12253724",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
