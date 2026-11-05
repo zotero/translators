@@ -17,7 +17,7 @@
 
 	Copyright © 2017 Philipp Zumstein
 	Copyright © 2026 Vera de Kok
-	
+
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
