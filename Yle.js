@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-04 21:55:54"
+	"lastUpdated": "2026-11-05 08:57:47"
 }
 
 /*
@@ -87,13 +87,11 @@ async function scrape(doc, url) {
 		for (let entry of article.querySelectorAll('.yle__article__header ul > li, .ydd-author-list [itemprop="name"]')) {
 			let author = entry.querySelector('a[href*="/p/56-"]:not([aria-hidden]), span') || entry;
 			let name = cleanText(author.textContent);
-			if (name) names.add(name);
+			if (name && !/^(?:Служба новостей Yle|STT(?:[-–/\s]+AFP)?)$/i.test(name)) names.add(name);
 		}
-		if (names.size) {
-			item.creators = Array.from(names, name => (name.includes(' ') && !/^Служба новостей Yle$/i.test(name)
-				? ZU.cleanAuthor(name, 'author')
-				: { lastName: name, creatorType: 'author', fieldMode: 1 }));
-		}
+		item.creators = Array.from(names, name => (name.includes(' ')
+			? ZU.cleanAuthor(name, 'author')
+			: { lastName: name, creatorType: 'author', fieldMode: 1 }));
 
 		let published = article.querySelector('time.yle__article__date--published, [itemprop="datePublished"]');
 		if (published) {
@@ -438,13 +436,7 @@ var testCases = [
 			{
 				"itemType": "newspaperArticle",
 				"title": "Hallitus sai eduskunnan luottamuksen äänin 95-77",
-				"creators": [
-					{
-						"lastName": "STT",
-						"creatorType": "author",
-						"fieldMode": 1
-					}
-				],
+				"creators": [],
 				"date": "2026-11-04",
 				"abstractNote": "Opposition välikysymys koski arjen kustannusten nousua.",
 				"language": "fi",
@@ -483,13 +475,7 @@ var testCases = [
 			{
 				"itemType": "newspaperArticle",
 				"title": "Сокращения в системе соцздрава бьют по детям, инвалидам и пожилым – THL выявил серьёзные проблемы в предоставлении услуг",
-				"creators": [
-					{
-						"lastName": "Служба новостей Yle",
-						"creatorType": "author",
-						"fieldMode": 1
-					}
-				],
+				"creators": [],
 				"date": "2026-11-04",
 				"abstractNote": "Сильные различия между регионами благополучия в финансовом положении и потребностях жителей влияют на всю их деятельность.",
 				"language": "ru",
@@ -612,6 +598,51 @@ var testCases = [
 					},
 					{
 						"tag": "sport"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://yle.fi/uutiset/lyhyesti/74-20255095",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Ranskassa tehtiin kyberhyökkäys pankkiin ja veripankkiin",
+				"creators": [],
+				"date": "2026-11-04",
+				"abstractNote": "Uutiset nopeasti ja luotettavasti.",
+				"language": "fi",
+				"libraryCatalog": "yle.fi",
+				"publicationTitle": "Yle",
+				"url": "https://yle.fi/a/74-20255095",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Kyberhyökkäys"
+					},
+					{
+						"tag": "Ranska"
+					},
+					{
+						"tag": "Veripankit"
+					},
+					{
+						"tag": "pankkitoiminta"
+					},
+					{
+						"tag": "tietoturva"
+					},
+					{
+						"tag": "ulkomaat"
 					}
 				],
 				"notes": [],
