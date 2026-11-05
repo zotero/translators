@@ -544,6 +544,80 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://svenska.yle.fi/artikel/2016/03/31/fotbollsligan-1990-kuusela-ledde-hjk-till-guld",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Fotbollsligan 1990: Kuusela ledde HJK till guld",
+				"creators": [
+					{
+						"firstName": "Antti",
+						"lastName": "Koivukangas",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016-03-31",
+				"abstractNote": "År 1990 föddes Fotbollsligan, på lördag börjar 27:e säsongen",
+				"language": "sv-FI",
+				"libraryCatalog": "yle.fi",
+				"publicationTitle": "Svenska Yle",
+				"section": "Sport",
+				"shortTitle": "Fotbollsligan 1990",
+				"url": "https://yle.fi/a/7-1056274",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "FC Kuusysi"
+					},
+					{
+						"tag": "Fotbollsligan"
+					},
+					{
+						"tag": "HJK Helsingfors"
+					},
+					{
+						"tag": "Jari Litmanen"
+					},
+					{
+						"tag": "Kimmo Tarkkio"
+					},
+					{
+						"tag": "Kokkolan Palloveikot"
+					},
+					{
+						"tag": "Martti Kuusela"
+					},
+					{
+						"tag": "Pasi Rautiainen"
+					},
+					{
+						"tag": "Yle Sporten"
+					},
+					{
+						"tag": "fotboll"
+					},
+					{
+						"tag": "fotbollspelare herrar"
+					},
+					{
+						"tag": "idrottshändelser"
+					},
+					{
+						"tag": "sport"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
