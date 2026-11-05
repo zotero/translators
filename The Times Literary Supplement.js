@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-05 11:56:53"
+	"lastUpdated": "2026-11-05 12:29:04"
 }
 
 /*
@@ -35,9 +35,8 @@
 	***** END LICENSE BLOCK *****
 */
 
-
 function detectWeb(doc) {
-	if (doc.querySelector('.tls-article-intro-primary h1')) return 'newspaperArticle';
+	if (doc.querySelector('.tls-article-intro-primary h1') || getIntro(doc).headline) return 'newspaperArticle';
 	if (getSearchResults(doc, true)) return 'multiple';
 	return false;
 }
@@ -70,28 +69,42 @@ async function doWeb(doc, url) {
 }
 
 async function scrape(doc, url) {
-	let intro = doc.querySelector('.tls-article-intro-primary');
-	if (!intro) throw new Error('TLS article markup is unavailable in the fetched document');
+	let intro = getIntro(doc);
 	let data = getPageData(doc);
 	let translator = Zotero.loadTranslator('web');
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
 	translator.setHandler('itemDone', (_obj, item) => {
 		item.itemType = 'newspaperArticle';
-		let headline = intro.querySelector('h1');
-		if (headline) item.title = cleanText(headline.textContent);
+		let headline = doc.querySelector('.tls-article-intro-primary h1')?.textContent || intro.headline;
+		if (headline) item.title = cleanText(headline);
+		if (intro.standfirst) item.abstractNote = cleanText(intro.standfirst);
 		if (data.datePublished) item.date = data.datePublished.slice(0, 10);
 		let canonical = doc.querySelector('link[rel="canonical"]');
 		item.url = canonical ? canonical.href : url;
 		item.publicationTitle = 'The Times Literary Supplement';
-		item.creators = getCreators(intro);
+		item.place = 'London';
+		item.ISSN = '0307-661X';
+		item.creators = getCreators(doc, intro);
 		let language = data.inLanguage || doc.documentElement.lang;
 		if (language) item.language = language.replace('_', '-');
-		let section = getSection(doc);
+		let section = getSection(doc, intro);
 		if (section) item.section = section;
 		item.complete();
 	});
 	await translator.translate();
+}
+
+function getIntro(doc) {
+	let script = doc.querySelector('#tls-single-article-script-js-extra');
+	let match = script?.textContent.match(/var tlsPageObject = (.+);/);
+	if (match) {
+		try {
+			return JSON.parse(match[1]).articleIntroPrimary || {};
+		}
+		catch (e) { /* Ignore malformed article metadata. */ }
+	}
+	return {};
 }
 
 function getPageData(doc) {
@@ -106,12 +119,23 @@ function getPageData(doc) {
 	return {};
 }
 
-function getCreators(intro) {
+function getCreators(doc, intro) {
+	if (intro.label?.category?.text == 'Poem of the week') {
+		for (let book of intro.bookdetails || []) {
+			let credits = cleanText(book.bookdetails).match(/^A poem by (.+?)(?:;\s*introduced by (.+))?$/i);
+			if (!credits) continue;
+			let creators = [ZU.cleanAuthor(credits[1], 'author')];
+			if (credits[2]) creators.push(ZU.cleanAuthor(credits[2], 'contributor'));
+			return creators;
+		}
+	}
+	// Related-article cards have their own bylines outside this container.
+	let names = Array.from(doc.querySelectorAll('.tls-article-intro-primary .tls-byline__name'), el => el.textContent);
+	if (!names.length && intro.byline?.text) names.push(intro.byline.text);
 	let creators = [];
 	let seen = new Set();
-	// Related-article cards have their own bylines outside this container.
-	for (let author of intro.querySelectorAll('.tls-byline__name')) {
-		let name = cleanText(author.textContent);
+	for (let name of names) {
+		name = cleanText(name);
 		if (!name || seen.has(name.toLowerCase())) continue;
 		seen.add(name.toLowerCase());
 		creators.push(ZU.cleanAuthor(name, 'author'));
@@ -119,7 +143,9 @@ function getCreators(intro) {
 	return creators;
 }
 
-function getSection(doc) {
+function getSection(doc, intro) {
+	let section = intro.label?.category?.text;
+	if (section) return cleanText(section);
 	let crumbs = doc.querySelectorAll('[class*="breadcrumb"] a');
 	return crumbs.length ? cleanText(crumbs[crumbs.length - 1].textContent) : '';
 }
@@ -145,10 +171,12 @@ var testCases = [
 					}
 				],
 				"date": "2026-09-02",
+				"ISSN": "0307-661X",
 				"abstractNote": "Why nations win or lose the technological race",
 				"language": "en-US",
 				"libraryCatalog": "www.the-tls.com",
 				"publicationTitle": "The Times Literary Supplement",
+				"place": "London",
 				"section": "Technology",
 				"url": "https://www.the-tls.com/science-technology/technology/how-progress-ends-carl-benedikt-frey-ai-for-good-josh-tyrangiel-book-review-philip-zelikow",
 				"attachments": [
@@ -166,6 +194,56 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.the-tls.com/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.the-tls.com/regular-features/poem-of-the-week/the-trees-in-love-ashley-dukes-andrew-mcculloch",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "‘The Trees in Love’",
+				"creators": [
+					{
+						"firstName": "Ashley",
+						"lastName": "Dukes",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Andrew",
+						"lastName": "McCulloch",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2026-11-03",
+				"ISSN": "0307-661X",
+				"abstractNote": "‘There is begun / More dallying / Between the forest pair.’ – Ashley Dukes",
+				"language": "en-US",
+				"libraryCatalog": "www.the-tls.com",
+				"publicationTitle": "The Times Literary Supplement",
+				"place": "London",
+				"section": "Poem of the week",
+				"url": "https://www.the-tls.com/regular-features/poem-of-the-week/the-trees-in-love-ashley-dukes-andrew-mcculloch",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.the-tls.com/categories/history",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.the-tls.com/?s",
 		"items": "multiple"
 	}
 ]
