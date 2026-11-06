@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-06 21:12:54"
+	"lastUpdated": "2026-11-06 21:40:40"
 }
 
 
@@ -245,12 +245,11 @@ function scrape(doc, url) {
 					item.codeNumber = uriParts[1] + ", " + uriParts[2];
 				}
 				else {
-					item.code = uriParts[0] + " " + uriParts[1];
+					// the year of the OJ, which can differ from the date of an act, and often from a treaty's dates
+					item.code = type == "statute"
+						? uriParts[0] + " " + uriParts[2] + " " + uriParts[1]
+						: uriParts[0] + " " + uriParts[1];
 					item.codeNumber = uriParts[3].replace(/^0+/, "");
-					if (treaty) {
-						// a treaty's dates often differ from the year of the OJ, so the code has that year
-						item.code = uriParts[0] + " " + uriParts[2] + " " + uriParts[1];
-					}
 				}
 				// the reference is localized, e.g.
 				// "OJ L 158, 30.4.2004, pp. 77–123 (ES, DA, ...)" or "HL L 333., 2022.12.27., 80–152. o. (BG, ...)"
@@ -380,7 +379,7 @@ var testCases = [
 				"nameOfAct": "Directive 95/46/EC of the European Parliament and of the Council of 24 October 1995 on the protection of individuals with regard to the processing of personal data and on the free movement of such data",
 				"creators": [],
 				"dateEnacted": "1995-10-24",
-				"code": "OJ L",
+				"code": "OJ 1995 L",
 				"codeNumber": "281",
 				"extra": "available-date: 1995-11-23",
 				"language": "en",
@@ -412,7 +411,7 @@ var testCases = [
 				"nameOfAct": "Commission Regulation (EC) No 2257/94 of 16 September 1994 laying down quality standards for bananas",
 				"creators": [],
 				"dateEnacted": "1994-09-16",
-				"code": "OJ L",
+				"code": "OJ 1994 L",
 				"codeNumber": "245",
 				"extra": "available-date: 1994-09-20",
 				"language": "en",
@@ -444,7 +443,7 @@ var testCases = [
 				"nameOfAct": "Directive 2004/38/EC of the European Parliament and of the Council of 29 April 2004 on the right of citizens of the Union and their family members to move and reside freely within the territory of the Member States amending Regulation (EEC) No 1612/68 and repealing Directives 64/221/EEC, 68/360/EEC, 72/194/EEC, 73/148/EEC, 75/34/EEC, 75/35/EEC, 90/364/EEC, 90/365/EEC and 93/96/EEC",
 				"creators": [],
 				"dateEnacted": "2004-04-29",
-				"code": "OJ L",
+				"code": "OJ 2004 L",
 				"codeNumber": "158",
 				"extra": "available-date: 2004-04-30",
 				"language": "en",
@@ -476,7 +475,7 @@ var testCases = [
 				"nameOfAct": "Regulation (EU) 2016/679 of the European Parliament and of the Council of 27 April 2016 on the protection of natural persons with regard to the processing of personal data and on the free movement of such data, and repealing Directive 95/46/EC (General Data Protection Regulation)",
 				"creators": [],
 				"dateEnacted": "2016-04-27",
-				"code": "OJ L",
+				"code": "OJ 2016 L",
 				"codeNumber": "119",
 				"extra": "available-date: 2016-05-04",
 				"language": "en",
@@ -540,7 +539,7 @@ var testCases = [
 				"nameOfAct": "Regulation (EU) 2022/2065 of the European Parliament and of the Council of 19 October 2022 on a Single Market For Digital Services and amending Directive 2000/31/EC (Digital Services Act)",
 				"creators": [],
 				"dateEnacted": "2022-10-19",
-				"code": "OJ L",
+				"code": "OJ 2022 L",
 				"codeNumber": "277",
 				"extra": "available-date: 2022-10-27",
 				"language": "en",
@@ -573,7 +572,7 @@ var testCases = [
 				"nameOfAct": "Regulation (EU) No 492/2011 of the European Parliament and of the Council of 5 April 2011 on freedom of movement for workers within the Union",
 				"creators": [],
 				"dateEnacted": "2011-04-05",
-				"code": "OJ L",
+				"code": "OJ 2011 L",
 				"codeNumber": "141",
 				"extra": "available-date: 2011-05-27",
 				"language": "en",
@@ -605,7 +604,7 @@ var testCases = [
 				"nameOfAct": "Council Regulation (EC) No 1/2003 of 16 December 2002 on the implementation of the rules on competition laid down in Articles 81 and 82 of the Treaty",
 				"creators": [],
 				"dateEnacted": "2002-12-16",
-				"code": "OJ L",
+				"code": "OJ 2003 L",
 				"codeNumber": "1",
 				"extra": "available-date: 2003-01-04",
 				"language": "en",
@@ -700,7 +699,7 @@ var testCases = [
 				"nameOfAct": "Corrigendum to Regulation (EU) 2016/679 of the European Parliament and of the Council of 27 April 2016 on the protection of natural persons with regard to the processing of personal data and on the free movement of such data, and repealing Directive 95/46/EC (General Data Protection Regulation) (OJ L 119, 4.5.2016)",
 				"creators": [],
 				"dateEnacted": "2018-05-23",
-				"code": "OJ L",
+				"code": "OJ 2018 L",
 				"codeNumber": "127",
 				"extra": "available-date: 2018-05-23",
 				"language": "en",
@@ -1048,7 +1047,7 @@ var testCases = [
 				"nameOfAct": "Az Európai Parlament és a Tanács (EU) 2022/2555 irányelve (2022. december 14.) az Unió egész területén egységesen magas szintű kiberbiztonságot biztosító intézkedésekről, valamint a 910/2014/EU rendelet és az (EU) 2018/1972 irányelv módosításáról és az (EU) 2016/1148 irányelv hatályon kívül helyezéséről (NIS 2 irányelv)",
 				"creators": [],
 				"dateEnacted": "2022-12-14",
-				"code": "OJ L",
+				"code": "OJ 2022 L",
 				"codeNumber": "333",
 				"extra": "available-date: 2022-12-27",
 				"language": "hu",
@@ -1113,7 +1112,7 @@ var testCases = [
 				"nameOfAct": "Verordnung (EU) 2016/679 des Europäischen Parlaments und des Rates vom 27. April 2016 zum Schutz natürlicher Personen bei der Verarbeitung personenbezogener Daten, zum freien Datenverkehr und zur Aufhebung der Richtlinie 95/46/EG (Datenschutz-Grundverordnung)",
 				"creators": [],
 				"dateEnacted": "2016-04-27",
-				"code": "OJ L",
+				"code": "OJ 2016 L",
 				"codeNumber": "119",
 				"extra": "available-date: 2016-05-04",
 				"language": "de",
