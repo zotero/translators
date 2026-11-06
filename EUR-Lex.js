@@ -9,8 +9,9 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-30 15:50:58"
+	"lastUpdated": "2026-11-06 11:01:54"
 }
+
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -47,6 +48,12 @@ const typeMapping = {
 	CONS: "statute", // consolidated text
 	TREATY: "statute", // treaty
 };
+
+// the pages at the end of an OJ reference, before the list of languages
+const ojPagesRegex = /,\s*\D*(\d+)\.?(?:\s*[-–—]\s*(\d+)\.?)?[^,\d(]*(?:\(|$)/;
+
+// the pages after the chapter and volume of a special edition, which follows the list of languages
+const specialEditionPagesRegex = /\)[^()\d]*\d+\D+\d+\D+(\d+)(?:\s*[-–—]\s*(\d+))?\s*$/;
 
 
 function detectWeb(doc, _url) {
@@ -168,25 +175,45 @@ function scrape(doc, url) {
 	if (eliTypeUri) {
 		// type: everything with ELI (see var typeMapping: bill, statute, report)
 		item.title = attr(doc, 'meta[property="eli:title"][lang=' + viewingLanguage.toLowerCase() + "]", "content");
-		var uri = attr(doc, "#format_language_table_digital_sign_act_" + viewingLanguage.toUpperCase(), "href");
+		// since October 2023, acts are published individually and only have the second link
+		var uri = attr(doc, "#format_language_table_digital_sign_act_" + viewingLanguage.toUpperCase(), "href")
+			|| attr(doc, "#format_language_table_digital_sign_" + viewingLanguage.toUpperCase(), "href");
 		if (uri) {
 			var uriParts = uri.split("/").pop().replace("?uri=", "")
 .split(":");
 			// e.g. uriParts =  ["OJ", "L", "1995", "281", "TOC"]
 			// e.g. uriParts = ["DD", "03", "061", "TOC", "FI"]
-			if (uriParts.length >= 4) {
-				if (/\d+/.test(uriParts[1])) {
+			// e.g. uriParts = ["OJ", "L_202401689"]
+			let actByAct = uriParts.length == 2 && uriParts[1].match(/^([A-Z]+)_(\d{4})0*(\d+)$/);
+			if (actByAct) {
+				item.code = uriParts[0] + " " + actByAct[1];
+				// these acts have no issue or page number, only an identifier, like an article number:
+				// cited as "OJ L, 2024/1689" but "OJ C, C/2024/3400"
+				item.pages = (actByAct[1] == "C" ? "C/" : "") + actByAct[2] + "/" + actByAct[3];
+			}
+			else if (uriParts.length >= 4) {
+				let isSpecialEdition = /\d+/.test(uriParts[1]);
+				if (isSpecialEdition) {
 					item.code = uriParts[0];
 					item.codeNumber = uriParts[1] + ", " + uriParts[2];
 				}
 				else {
 					item.code = uriParts[0] + " " + uriParts[1];
-					item.codeNumber = uriParts[3];
+					item.codeNumber = uriParts[3].replace(/^0+/, "");
+				}
+				// the reference is localized, e.g.
+				// "OJ L 158, 30.4.2004, pp. 77–123 (ES, DA, ...)" or "HL L 333., 2022.12.27., 80–152. o. (BG, ...)"
+				// a special edition follows it, e.g. "... (ES, DA, ...)Polskie wydanie specjalne: Rozdział 05 Tom 005 P. 46 - 61"
+				let pages = text(doc, "#originalTitle ~ p em").match(isSpecialEdition ? specialEditionPagesRegex : ojPagesRegex);
+				if (pages) {
+					item.pages = pages[2] ? pages[1] + "-" + pages[2] : pages[1];
 				}
 			}
 			if (type == "bill") {
 				item.codeVolume = item.codeNumber;
 				item.codeNumber = null;
+				item.codePages = item.pages;
+				item.pages = null;
 			}
 		}
 
@@ -268,6 +295,7 @@ var testCases = [
 				"creators": [],
 				"date": "1995-10-24",
 				"code": "OJ L",
+				"codePages": "31-50",
 				"codeVolume": "281",
 				"language": "en",
 				"legislativeBody": "EP, CONSIL",
@@ -301,7 +329,225 @@ var testCases = [
 				"code": "OJ L",
 				"codeNumber": "245",
 				"language": "en",
+				"pages": "6-10",
 				"url": "http://data.europa.eu/eli/reg/1994/2257/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32004L0038",
+		"items": [
+			{
+				"itemType": "bill",
+				"title": "Directive 2004/38/EC of the European Parliament and of the Council of 29 April 2004 on the right of citizens of the Union and their family members to move and reside freely within the territory of the Member States amending Regulation (EEC) No 1612/68 and repealing Directives 64/221/EEC, 68/360/EEC, 72/194/EEC, 73/148/EEC, 75/34/EEC, 75/35/EEC, 90/364/EEC, 90/365/EEC and 93/96/EEC (Text with EEA relevance)",
+				"creators": [],
+				"date": "2004-04-29",
+				"code": "OJ L",
+				"codePages": "77-123",
+				"codeVolume": "158",
+				"language": "en",
+				"legislativeBody": "EP, CONSIL",
+				"url": "http://data.europa.eu/eli/dir/2004/38/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32016R0679",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Regulation (EU) 2016/679 of the European Parliament and of the Council of 27 April 2016 on the protection of natural persons with regard to the processing of personal data and on the free movement of such data, and repealing Directive 95/46/EC (General Data Protection Regulation) (Text with EEA relevance)",
+				"creators": [],
+				"dateEnacted": "2016-04-27",
+				"code": "OJ L",
+				"codeNumber": "119",
+				"language": "en",
+				"pages": "1-88",
+				"url": "http://data.europa.eu/eli/reg/2016/679/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Regulation (EU) 2024/1689 of the European Parliament and of the Council of 13 June 2024 laying down harmonised rules on artificial intelligence and amending Regulations (EC) No 300/2008, (EU) No 167/2013, (EU) No 168/2013, (EU) 2018/858, (EU) 2018/1139 and (EU) 2019/2144 and Directives 2014/90/EU, (EU) 2016/797 and (EU) 2020/1828 (Artificial Intelligence Act) (Text with EEA relevance)",
+				"creators": [],
+				"dateEnacted": "2024-06-13",
+				"code": "OJ L",
+				"language": "en",
+				"pages": "2024/1689",
+				"url": "http://data.europa.eu/eli/reg/2024/1689/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32022R2065",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Regulation (EU) 2022/2065 of the European Parliament and of the Council of 19 October 2022 on a Single Market For Digital Services and amending Directive 2000/31/EC (Digital Services Act) (Text with EEA relevance)",
+				"creators": [],
+				"dateEnacted": "2022-10-19",
+				"code": "OJ L",
+				"codeNumber": "277",
+				"language": "en",
+				"pages": "1-102",
+				"url": "http://data.europa.eu/eli/reg/2022/2065/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32011R0492",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Regulation (EU) No 492/2011 of the European Parliament and of the Council of 5 April 2011 on freedom of movement for workers within the Union  Text with EEA relevance",
+				"creators": [],
+				"dateEnacted": "2011-04-05",
+				"code": "OJ L",
+				"codeNumber": "141",
+				"language": "en",
+				"pages": "1-12",
+				"url": "http://data.europa.eu/eli/reg/2011/492/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32003R0001",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Council Regulation (EC) No 1/2003 of 16 December 2002 on the implementation of the rules on competition laid down in Articles 81 and 82 of the Treaty (Text with EEA relevance)",
+				"creators": [],
+				"dateEnacted": "2002-12-16",
+				"code": "OJ L",
+				"codeNumber": "1",
+				"language": "en",
+				"pages": "1-25",
+				"url": "http://data.europa.eu/eli/reg/2003/1/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=OJ:C_202403400",
+		"items": [
+			{
+				"itemType": "bill",
+				"title": "Verbatim report of proceedings of 3 July 2018",
+				"creators": [],
+				"date": "2018-07-03",
+				"code": "OJ C",
+				"codePages": "C/2024/3400",
+				"language": "en",
+				"legislativeBody": "EP",
+				"url": "http://data.europa.eu/eli/C/2024/3400/oj",
 				"attachments": [
 					{
 						"title": "EUR-Lex PDF (EN)",
@@ -404,6 +650,70 @@ var testCases = [
 					},
 					{
 						"title": "EUR-Lex HTML (NL)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/PL/TXT/?uri=CELEX:32004L0038&locale=pl",
+		"items": [
+			{
+				"itemType": "bill",
+				"title": "Dyrektywa 2004/38/WE Parlamentu Europejskiego i Rady z dnia 29 kwietnia 2004 r. w sprawie prawa obywateli Unii i członków ich rodzin do swobodnego przemieszczania się i pobytu na terytorium Państw Członkowskich, zmieniająca rozporządzenie (EWG) nr 1612/68 i uchylająca dyrektywy 64/221/EWG, 68/360/EWG, 72/194/EWG, 73/148/EWG, 75/34/EWG, 75/35/EWG, 90/364/EWG, 90/365/EWG i 93/96/EWGTekst mający znaczenie dla EOG.",
+				"creators": [],
+				"date": "2004-04-29",
+				"code": "DD",
+				"codePages": "46-61",
+				"codeVolume": "05, 005",
+				"language": "pl",
+				"legislativeBody": "EP, CONSIL",
+				"url": "http://data.europa.eu/eli/dir/2004/38/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (PL)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (PL)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/HU/TXT/?uri=CELEX:32022L2555&locale=hu",
+		"items": [
+			{
+				"itemType": "bill",
+				"title": "Az Európai Parlament és a Tanács (EU) 2022/2555 irányelve (2022. december 14.) az Unió egész területén egységesen magas szintű kiberbiztonságot biztosító intézkedésekről, valamint a 910/2014/EU rendelet és az (EU) 2018/1972 irányelv módosításáról és az (EU) 2016/1148 irányelv hatályon kívül helyezéséről (NIS 2 irányelv) (EGT-vonatkozású szöveg)",
+				"creators": [],
+				"date": "2022-12-14",
+				"code": "OJ L",
+				"codePages": "80-152",
+				"codeVolume": "333",
+				"language": "hu",
+				"legislativeBody": "EP, CONSIL",
+				"url": "http://data.europa.eu/eli/dir/2022/2555/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (HU)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (HU)",
 						"mimeType": "text/html",
 						"snapshot": true
 					}
