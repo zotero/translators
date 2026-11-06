@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-06 11:01:54"
+	"lastUpdated": "2026-11-06 11:05:39"
 }
 
 
@@ -40,7 +40,7 @@
 // https://op.europa.eu/en/web/eu-vocabularies/at-dataset/-/resource/dataset/resource-type
 // all types not mapped below are saved as bills
 const typeMapping = {
-	DIR: "bill", // directive
+	DIR: "statute", // directive
 	REG: "statute", // regulation
 	DEC: "statute", // decision
 	RECO: "report", // recommendation
@@ -290,15 +290,14 @@ var testCases = [
 		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:31995L0046",
 		"items": [
 			{
-				"itemType": "bill",
-				"title": "Directive 95/46/EC of the European Parliament and of the Council of 24 October 1995 on the protection of individuals with regard to the processing of personal data and on the free movement of such data",
+				"itemType": "statute",
+				"nameOfAct": "Directive 95/46/EC of the European Parliament and of the Council of 24 October 1995 on the protection of individuals with regard to the processing of personal data and on the free movement of such data",
 				"creators": [],
-				"date": "1995-10-24",
+				"dateEnacted": "1995-10-24",
 				"code": "OJ L",
-				"codePages": "31-50",
-				"codeVolume": "281",
+				"codeNumber": "281",
 				"language": "en",
-				"legislativeBody": "EP, CONSIL",
+				"pages": "31-50",
 				"url": "http://data.europa.eu/eli/dir/1995/46/oj",
 				"attachments": [
 					{
@@ -353,15 +352,14 @@ var testCases = [
 		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32004L0038",
 		"items": [
 			{
-				"itemType": "bill",
-				"title": "Directive 2004/38/EC of the European Parliament and of the Council of 29 April 2004 on the right of citizens of the Union and their family members to move and reside freely within the territory of the Member States amending Regulation (EEC) No 1612/68 and repealing Directives 64/221/EEC, 68/360/EEC, 72/194/EEC, 73/148/EEC, 75/34/EEC, 75/35/EEC, 90/364/EEC, 90/365/EEC and 93/96/EEC (Text with EEA relevance)",
+				"itemType": "statute",
+				"nameOfAct": "Directive 2004/38/EC of the European Parliament and of the Council of 29 April 2004 on the right of citizens of the Union and their family members to move and reside freely within the territory of the Member States amending Regulation (EEC) No 1612/68 and repealing Directives 64/221/EEC, 68/360/EEC, 72/194/EEC, 73/148/EEC, 75/34/EEC, 75/35/EEC, 90/364/EEC, 90/365/EEC and 93/96/EEC (Text with EEA relevance)",
 				"creators": [],
-				"date": "2004-04-29",
+				"dateEnacted": "2004-04-29",
 				"code": "OJ L",
-				"codePages": "77-123",
-				"codeVolume": "158",
+				"codeNumber": "158",
 				"language": "en",
-				"legislativeBody": "EP, CONSIL",
+				"pages": "77-123",
 				"url": "http://data.europa.eu/eli/dir/2004/38/oj",
 				"attachments": [
 					{
@@ -665,15 +663,14 @@ var testCases = [
 		"url": "https://eur-lex.europa.eu/legal-content/PL/TXT/?uri=CELEX:32004L0038&locale=pl",
 		"items": [
 			{
-				"itemType": "bill",
-				"title": "Dyrektywa 2004/38/WE Parlamentu Europejskiego i Rady z dnia 29 kwietnia 2004 r. w sprawie prawa obywateli Unii i członków ich rodzin do swobodnego przemieszczania się i pobytu na terytorium Państw Członkowskich, zmieniająca rozporządzenie (EWG) nr 1612/68 i uchylająca dyrektywy 64/221/EWG, 68/360/EWG, 72/194/EWG, 73/148/EWG, 75/34/EWG, 75/35/EWG, 90/364/EWG, 90/365/EWG i 93/96/EWGTekst mający znaczenie dla EOG.",
+				"itemType": "statute",
+				"nameOfAct": "Dyrektywa 2004/38/WE Parlamentu Europejskiego i Rady z dnia 29 kwietnia 2004 r. w sprawie prawa obywateli Unii i członków ich rodzin do swobodnego przemieszczania się i pobytu na terytorium Państw Członkowskich, zmieniająca rozporządzenie (EWG) nr 1612/68 i uchylająca dyrektywy 64/221/EWG, 68/360/EWG, 72/194/EWG, 73/148/EWG, 75/34/EWG, 75/35/EWG, 90/364/EWG, 90/365/EWG i 93/96/EWGTekst mający znaczenie dla EOG.",
 				"creators": [],
-				"date": "2004-04-29",
+				"dateEnacted": "2004-04-29",
 				"code": "DD",
-				"codePages": "46-61",
-				"codeVolume": "05, 005",
+				"codeNumber": "05, 005",
 				"language": "pl",
-				"legislativeBody": "EP, CONSIL",
+				"pages": "46-61",
 				"url": "http://data.europa.eu/eli/dir/2004/38/oj",
 				"attachments": [
 					{
@@ -697,15 +694,14 @@ var testCases = [
 		"url": "https://eur-lex.europa.eu/legal-content/HU/TXT/?uri=CELEX:32022L2555&locale=hu",
 		"items": [
 			{
-				"itemType": "bill",
-				"title": "Az Európai Parlament és a Tanács (EU) 2022/2555 irányelve (2022. december 14.) az Unió egész területén egységesen magas szintű kiberbiztonságot biztosító intézkedésekről, valamint a 910/2014/EU rendelet és az (EU) 2018/1972 irányelv módosításáról és az (EU) 2016/1148 irányelv hatályon kívül helyezéséről (NIS 2 irányelv) (EGT-vonatkozású szöveg)",
+				"itemType": "statute",
+				"nameOfAct": "Az Európai Parlament és a Tanács (EU) 2022/2555 irányelve (2022. december 14.) az Unió egész területén egységesen magas szintű kiberbiztonságot biztosító intézkedésekről, valamint a 910/2014/EU rendelet és az (EU) 2018/1972 irányelv módosításáról és az (EU) 2016/1148 irányelv hatályon kívül helyezéséről (NIS 2 irányelv) (EGT-vonatkozású szöveg)",
 				"creators": [],
-				"date": "2022-12-14",
+				"dateEnacted": "2022-12-14",
 				"code": "OJ L",
-				"codePages": "80-152",
-				"codeVolume": "333",
+				"codeNumber": "333",
 				"language": "hu",
-				"legislativeBody": "EP, CONSIL",
+				"pages": "80-152",
 				"url": "http://data.europa.eu/eli/dir/2022/2555/oj",
 				"attachments": [
 					{
