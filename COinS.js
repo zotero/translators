@@ -8,8 +8,8 @@
 	"priority": 310,
 	"inRepository": true,
 	"translatorType": 6,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2021-06-01 17:38:46"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2026-11-06 05:30:53"
 }
 
 /*
@@ -281,6 +281,7 @@ var testCases = [
 				],
 				"date": "2011",
 				"issue": "1",
+				"libraryCatalog": "COinS",
 				"pages": "104-126",
 				"publicationTitle": "International Journal of Logistics Management",
 				"shortTitle": "Disruptions and supply networks",
@@ -301,26 +302,25 @@ var testCases = [
 		"url": "http://gamblershouse.wordpress.com/2011/06/19/the-view-from-dolores/",
 		"items": "multiple"
 	},
+
 	{
 		"type": "web",
-		"url": "https://www.worldcat.org/title/genealogy-of-the-royal-family-of-great-britain-shewing-the-descent-of-queen-victoria-through-five-of-the-saxon-kings-who-were-crowned-at-kingston-upon-thames/oclc/559794003&referer=brief_results",
+		"url": "https://cran.r-project.org/web/packages/qpost/vignettes/add-coins.html",
 		"items": [
 			{
-				"itemType": "book",
-				"title": "The Genealogy of the Royal Family of Great Britain, shewing the descent of ... Queen Victoria, through five of the Saxon Kings who were crowned ... at Kingston-upon-Thames.",
+				"itemType": "journalArticle",
+				"title": "My Amazing Discovery",
 				"creators": [
 					{
-						"lastName": "Royal Families (England)",
-						"isInstitution": true
-					},
-					{
-						"lastName": "GENEALOGY",
+						"firstName": "Peter",
+						"lastName": "Baumgartner",
 						"creatorType": "author"
 					}
 				],
-				"date": "1850",
-				"place": "London",
-				"publisher": "C. & E. Layton",
+				"date": "2026-08-22",
+				"abstractNote": "A brief summary...",
+				"language": "en",
+				"libraryCatalog": "COinS",
 				"attachments": [
 					{
 						"mimeType": "text/html"
