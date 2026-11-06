@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-06 11:05:39"
+	"lastUpdated": "2026-11-06 11:10:17"
 }
 
 
@@ -48,6 +48,18 @@ const typeMapping = {
 	CONS: "statute", // consolidated text
 	TREATY: "statute", // treaty
 };
+
+// the note "(Text with EEA relevance)" and its variants, in all official languages:
+// it must contain both the local abbreviation of EEA and a word for "text", and no digits
+// (Croatian "EEZ" also means EEC, as in "... Direktive 89/391/EEZ")
+const eeaNoteRegex = /\s*\(+(?=[^()\d]*(?:EEA|EWR|EEE|EER|EES|ETA|EØS|ЕИП|ΕΟΧ|EGT|EGP|EHP|EMP|EOG|LEE|SEE|EEZ|ŻEE))(?=[^()\d]*(?:[Tt]e(?:kst|xt)|[Tt]est|[Tt]éacs|szöveg|[Bb]esedilo|[Dd]okuments|[Тт]екст|[Κκ]είμενο))[^()\d]*\)+[\s.]*$/;
+
+// the same note without parentheses, which many acts have, e.g. Regulation (EU) No 492/2011
+const bareEeaNoteRegex = /\s*(?:Text with EEA relevance|Текст от значение за ЕИП|Text s významem pro EHP|EØS-relevant tekst|Text von Bedeutung für den EWR|Κείμενο που παρουσιάζει ενδιαφέρον για τον ΕΟΧ|Texto pertinente a (?:efectos|los fines) del EEE|EMPs kohaldatav tekst|ETA:n kannalta merkityksellinen teksti|Texte présentant de l['’]intérêt pour l['’]EEE|Téacs atá ábhartha maidir le(?:is an)? LEE|Tekst značajan za EGP|EGT[- ]vonatkozású szöveg|Testo rilevante ai fini del SEE|Dokuments attiecas uz EEZ|Tekstas svarbus EEE|Test b['’]r[ei]levanza għaż-ŻEE|Voor de EER relevante tekst|Tekst mający znaczenie dla EOG|Texto relevante para efeitos do EEE|Text cu relevanță pentru SEE|Text cu relevanţă pentru SEE|Text s (?:významom|platnosťou) pre EHP|Besedilo (?:velja za|se nanaša na) EGP|Text av betydelse för EES)[\s.]*$/i;
+
+// a short title at the end of an English title, e.g. "(Artificial Intelligence Act)".
+// Most parentheses in that position are something else, e.g. "(recast)" or "(EUPOL COPPS)"
+const shortTitleRegex = /\(([A-Z][^()]*\b(?:Act|Code|Directive|Regulation))\)$/;
 
 // the pages at the end of an OJ reference, before the list of languages
 const ojPagesRegex = /,\s*\D*(\d+)\.?(?:\s*[-–—]\s*(\d+)\.?)?[^,\d(]*(?:\(|$)/;
@@ -174,7 +186,17 @@ function scrape(doc, url) {
 
 	if (eliTypeUri) {
 		// type: everything with ELI (see var typeMapping: bill, statute, report)
-		item.title = attr(doc, 'meta[property="eli:title"][lang=' + viewingLanguage.toLowerCase() + "]", "content");
+		item.title = ZU.trimInternal(attr(doc, 'meta[property="eli:title"][lang=' + viewingLanguage.toLowerCase() + "]", "content"))
+			.replace(eeaNoteRegex, "")
+			.replace(bareEeaNoteRegex, "");
+		// decisions and purely amending acts use this position for the act they refer to,
+		// e.g. "Regulation (EU) 2019/1155 ... amending Regulation (EC) No 810/2009 ... (Visa Code)"
+		if (viewingLanguage == "EN" && /\/(?:DIR|REG)[^/]*$/.test(eliTypeUri) && !/\d{4},? amending\b/i.test(item.title)) {
+			let shortTitle = item.title.match(shortTitleRegex);
+			if (shortTitle) {
+				item.shortTitle = shortTitle[1];
+			}
+		}
 		// since October 2023, acts are published individually and only have the second link
 		var uri = attr(doc, "#format_language_table_digital_sign_act_" + viewingLanguage.toUpperCase(), "href")
 			|| attr(doc, "#format_language_table_digital_sign_" + viewingLanguage.toUpperCase(), "href");
@@ -322,7 +344,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "statute",
-				"nameOfAct": "Commission Regulation (EC) No 2257/94 of 16 September 1994 laying down quality standards for bananas (Text with EEA relevance)",
+				"nameOfAct": "Commission Regulation (EC) No 2257/94 of 16 September 1994 laying down quality standards for bananas",
 				"creators": [],
 				"dateEnacted": "1994-09-16",
 				"code": "OJ L",
@@ -353,7 +375,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "statute",
-				"nameOfAct": "Directive 2004/38/EC of the European Parliament and of the Council of 29 April 2004 on the right of citizens of the Union and their family members to move and reside freely within the territory of the Member States amending Regulation (EEC) No 1612/68 and repealing Directives 64/221/EEC, 68/360/EEC, 72/194/EEC, 73/148/EEC, 75/34/EEC, 75/35/EEC, 90/364/EEC, 90/365/EEC and 93/96/EEC (Text with EEA relevance)",
+				"nameOfAct": "Directive 2004/38/EC of the European Parliament and of the Council of 29 April 2004 on the right of citizens of the Union and their family members to move and reside freely within the territory of the Member States amending Regulation (EEC) No 1612/68 and repealing Directives 64/221/EEC, 68/360/EEC, 72/194/EEC, 73/148/EEC, 75/34/EEC, 75/35/EEC, 90/364/EEC, 90/365/EEC and 93/96/EEC",
 				"creators": [],
 				"dateEnacted": "2004-04-29",
 				"code": "OJ L",
@@ -384,13 +406,14 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "statute",
-				"nameOfAct": "Regulation (EU) 2016/679 of the European Parliament and of the Council of 27 April 2016 on the protection of natural persons with regard to the processing of personal data and on the free movement of such data, and repealing Directive 95/46/EC (General Data Protection Regulation) (Text with EEA relevance)",
+				"nameOfAct": "Regulation (EU) 2016/679 of the European Parliament and of the Council of 27 April 2016 on the protection of natural persons with regard to the processing of personal data and on the free movement of such data, and repealing Directive 95/46/EC (General Data Protection Regulation)",
 				"creators": [],
 				"dateEnacted": "2016-04-27",
 				"code": "OJ L",
 				"codeNumber": "119",
 				"language": "en",
 				"pages": "1-88",
+				"shortTitle": "General Data Protection Regulation",
 				"url": "http://data.europa.eu/eli/reg/2016/679/oj",
 				"attachments": [
 					{
@@ -415,12 +438,13 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "statute",
-				"nameOfAct": "Regulation (EU) 2024/1689 of the European Parliament and of the Council of 13 June 2024 laying down harmonised rules on artificial intelligence and amending Regulations (EC) No 300/2008, (EU) No 167/2013, (EU) No 168/2013, (EU) 2018/858, (EU) 2018/1139 and (EU) 2019/2144 and Directives 2014/90/EU, (EU) 2016/797 and (EU) 2020/1828 (Artificial Intelligence Act) (Text with EEA relevance)",
+				"nameOfAct": "Regulation (EU) 2024/1689 of the European Parliament and of the Council of 13 June 2024 laying down harmonised rules on artificial intelligence and amending Regulations (EC) No 300/2008, (EU) No 167/2013, (EU) No 168/2013, (EU) 2018/858, (EU) 2018/1139 and (EU) 2019/2144 and Directives 2014/90/EU, (EU) 2016/797 and (EU) 2020/1828 (Artificial Intelligence Act)",
 				"creators": [],
 				"dateEnacted": "2024-06-13",
 				"code": "OJ L",
 				"language": "en",
 				"pages": "2024/1689",
+				"shortTitle": "Artificial Intelligence Act",
 				"url": "http://data.europa.eu/eli/reg/2024/1689/oj",
 				"attachments": [
 					{
@@ -445,13 +469,14 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "statute",
-				"nameOfAct": "Regulation (EU) 2022/2065 of the European Parliament and of the Council of 19 October 2022 on a Single Market For Digital Services and amending Directive 2000/31/EC (Digital Services Act) (Text with EEA relevance)",
+				"nameOfAct": "Regulation (EU) 2022/2065 of the European Parliament and of the Council of 19 October 2022 on a Single Market For Digital Services and amending Directive 2000/31/EC (Digital Services Act)",
 				"creators": [],
 				"dateEnacted": "2022-10-19",
 				"code": "OJ L",
 				"codeNumber": "277",
 				"language": "en",
 				"pages": "1-102",
+				"shortTitle": "Digital Services Act",
 				"url": "http://data.europa.eu/eli/reg/2022/2065/oj",
 				"attachments": [
 					{
@@ -476,7 +501,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "statute",
-				"nameOfAct": "Regulation (EU) No 492/2011 of the European Parliament and of the Council of 5 April 2011 on freedom of movement for workers within the Union  Text with EEA relevance",
+				"nameOfAct": "Regulation (EU) No 492/2011 of the European Parliament and of the Council of 5 April 2011 on freedom of movement for workers within the Union",
 				"creators": [],
 				"dateEnacted": "2011-04-05",
 				"code": "OJ L",
@@ -507,7 +532,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "statute",
-				"nameOfAct": "Council Regulation (EC) No 1/2003 of 16 December 2002 on the implementation of the rules on competition laid down in Articles 81 and 82 of the Treaty (Text with EEA relevance)",
+				"nameOfAct": "Council Regulation (EC) No 1/2003 of 16 December 2002 on the implementation of the rules on competition laid down in Articles 81 and 82 of the Treaty",
 				"creators": [],
 				"dateEnacted": "2002-12-16",
 				"code": "OJ L",
@@ -664,7 +689,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "statute",
-				"nameOfAct": "Dyrektywa 2004/38/WE Parlamentu Europejskiego i Rady z dnia 29 kwietnia 2004 r. w sprawie prawa obywateli Unii i członków ich rodzin do swobodnego przemieszczania się i pobytu na terytorium Państw Członkowskich, zmieniająca rozporządzenie (EWG) nr 1612/68 i uchylająca dyrektywy 64/221/EWG, 68/360/EWG, 72/194/EWG, 73/148/EWG, 75/34/EWG, 75/35/EWG, 90/364/EWG, 90/365/EWG i 93/96/EWGTekst mający znaczenie dla EOG.",
+				"nameOfAct": "Dyrektywa 2004/38/WE Parlamentu Europejskiego i Rady z dnia 29 kwietnia 2004 r. w sprawie prawa obywateli Unii i członków ich rodzin do swobodnego przemieszczania się i pobytu na terytorium Państw Członkowskich, zmieniająca rozporządzenie (EWG) nr 1612/68 i uchylająca dyrektywy 64/221/EWG, 68/360/EWG, 72/194/EWG, 73/148/EWG, 75/34/EWG, 75/35/EWG, 90/364/EWG, 90/365/EWG i 93/96/EWG",
 				"creators": [],
 				"dateEnacted": "2004-04-29",
 				"code": "DD",
@@ -695,7 +720,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "statute",
-				"nameOfAct": "Az Európai Parlament és a Tanács (EU) 2022/2555 irányelve (2022. december 14.) az Unió egész területén egységesen magas szintű kiberbiztonságot biztosító intézkedésekről, valamint a 910/2014/EU rendelet és az (EU) 2018/1972 irányelv módosításáról és az (EU) 2016/1148 irányelv hatályon kívül helyezéséről (NIS 2 irányelv) (EGT-vonatkozású szöveg)",
+				"nameOfAct": "Az Európai Parlament és a Tanács (EU) 2022/2555 irányelve (2022. december 14.) az Unió egész területén egységesen magas szintű kiberbiztonságot biztosító intézkedésekről, valamint a 910/2014/EU rendelet és az (EU) 2018/1972 irányelv módosításáról és az (EU) 2016/1148 irányelv hatályon kívül helyezéséről (NIS 2 irányelv)",
 				"creators": [],
 				"dateEnacted": "2022-12-14",
 				"code": "OJ L",
