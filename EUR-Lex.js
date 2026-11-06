@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-06 13:54:29"
+	"lastUpdated": "2026-11-06 13:57:54"
 }
 
 
@@ -59,7 +59,10 @@ const bareEeaNoteRegex = /\s*(?:Text with EEA relevance|Текст от знач
 
 // a short title at the end of an English title, e.g. "(Artificial Intelligence Act)".
 // Most parentheses in that position are something else, e.g. "(recast)" or "(EUPOL COPPS)"
-const shortTitleRegex = /\(([A-Z][^()]*\b(?:Act|Code|Directive|Regulation))\)$/;
+const englishShortTitleRegex = /\([A-Z][^()]*\b(?:Act|Code|Directive|Regulation)\)$/;
+
+// the same position in any language, once the English title has shown that it is a short title
+const shortTitleRegex = /\(([^()]+)\)$/;
 
 // the pages at the end of an OJ reference, before the list of languages
 const ojPagesRegex = /,\s*\D*(\d+)\.?(?:\s*[-–—]\s*(\d+)\.?)?[^,\d(]*(?:\(|$)/;
@@ -169,6 +172,12 @@ const languageMapping = {
 	SV: new LMObj("SWE", "Domstolen", "Tribunalen", "Personaldomstolen")
 };
 
+function getTitle(doc, language) {
+	return ZU.trimInternal(attr(doc, 'meta[property="eli:title"][lang=' + language + "]", "content"))
+		.replace(eeaNoteRegex, "")
+		.replace(bareEeaNoteRegex, "");
+}
+
 function scrape(doc, url) {
 	// declare meta variables present for all sectors
 	// var docSector = attr(doc, 'meta[name="WT.z_docSector"]', 'content');
@@ -186,12 +195,12 @@ function scrape(doc, url) {
 
 	if (eliTypeUri) {
 		// type: everything with ELI (see var typeMapping: bill, statute, report)
-		item.title = ZU.trimInternal(attr(doc, 'meta[property="eli:title"][lang=' + viewingLanguage.toLowerCase() + "]", "content"))
-			.replace(eeaNoteRegex, "")
-			.replace(bareEeaNoteRegex, "");
+		item.title = getTitle(doc, viewingLanguage.toLowerCase());
 		// decisions and purely amending acts use this position for the act they refer to,
 		// e.g. "Regulation (EU) 2019/1155 ... amending Regulation (EC) No 810/2009 ... (Visa Code)"
-		if (viewingLanguage == "EN" && /\/(?:DIR|REG)[^/]*$/.test(eliTypeUri) && !/\d{4},? amending\b/i.test(item.title)) {
+		// every page has the title in all languages, so only the English one has to be interpreted
+		let englishTitle = getTitle(doc, "en");
+		if (/\/(?:DIR|REG)[^/]*$/.test(eliTypeUri) && !/\d{4},? amending\b/i.test(englishTitle) && englishShortTitleRegex.test(englishTitle)) {
 			let shortTitle = item.title.match(shortTitleRegex);
 			if (shortTitle) {
 				item.shortTitle = shortTitle[1];
@@ -774,6 +783,7 @@ var testCases = [
 				"extra": "available-date: 2022-12-27",
 				"language": "hu",
 				"pages": "80-152",
+				"shortTitle": "NIS 2 irányelv",
 				"url": "http://data.europa.eu/eli/dir/2022/2555/oj",
 				"attachments": [
 					{
@@ -814,6 +824,39 @@ var testCases = [
 					},
 					{
 						"title": "EUR-Lex HTML (DA)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:32016R0679&locale=de",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Verordnung (EU) 2016/679 des Europäischen Parlaments und des Rates vom 27. April 2016 zum Schutz natürlicher Personen bei der Verarbeitung personenbezogener Daten, zum freien Datenverkehr und zur Aufhebung der Richtlinie 95/46/EG (Datenschutz-Grundverordnung)",
+				"creators": [],
+				"dateEnacted": "2016-04-27",
+				"code": "OJ L",
+				"codeNumber": "119",
+				"extra": "available-date: 2016-05-04",
+				"language": "de",
+				"pages": "1-88",
+				"shortTitle": "Datenschutz-Grundverordnung",
+				"url": "http://data.europa.eu/eli/reg/2016/679/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (DE)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (DE)",
 						"mimeType": "text/html",
 						"snapshot": true
 					}
