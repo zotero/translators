@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-06 22:01:45"
+	"lastUpdated": "2026-11-06 22:42:00"
 }
 
 
@@ -295,8 +295,7 @@ function scrape(doc, url) {
 				item.extra += "\navailable-date: " + documentDate;
 			}
 			// available-date is taken, so the date of the Official Journal goes in event-date.
-			// Styles can use it to tell treaties in the OJ from others, so special editions don't get it
-			if (publicationDate && !uri.includes("DD:")) {
+			if (publicationDate) {
 				item.extra += "\nevent-date: " + publicationDate;
 			}
 			if (attr(doc, 'meta[property="eli:in_force"]', "resource").endsWith("notInForce")) {
