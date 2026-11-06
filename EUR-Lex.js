@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-06 14:44:16"
+	"lastUpdated": "2026-11-06 21:12:54"
 }
 
 
@@ -49,6 +49,10 @@ const typeMapping = {
 	TREATY: "statute", // treaty
 };
 
+// international agreements. Zotero has no item type for them, so they are saved as statutes
+// and marked as treaties in Extra, which is what citation styles read
+const treatyTypes = ["AGREE_AMEND", "AGREE_EUMS", "AGREE_INTERNATION", "AGREE_PROT", "CONVENTION", "EXCH_LET", "PROT", "WITHD_AGREE"];
+
 // the note "(Text with EEA relevance)" and its variants, in all official languages:
 // it must contain both the local abbreviation of EEA and a word for "text", and no digits
 // (Croatian "EEZ" also means EEC, as in "... Direktive 89/391/EEZ")
@@ -71,20 +75,33 @@ const ojPagesRegex = /,\s*\D*(\d+)\.?(?:\s*[-–—]\s*(\d+)\.?)?[^,\d(]*(?:\(|$
 const specialEditionPagesRegex = /(\d+)(?:\s*[-–—]\s*(\d+))?\s*$/;
 
 
+function getEliType(doc) {
+	var eliType = attr(doc, 'meta[property="eli:type_document"]', 'resource').split("/").pop();
+	if (eliType == "CORRIGENDUM") {
+		// saved like the act it corrects, which its ELI names: .../eli/reg/2016/679/corrigendum/2018-05-23/oj
+		let correctedAct = attr(doc, 'meta[typeOf="eli:LegalResource"]', "about").match(/\/eli\/([a-z_]+)/);
+		if (correctedAct) {
+			eliType = correctedAct[1].toUpperCase();
+		}
+	}
+	return eliType;
+}
+
+
+function isTreaty(doc) {
+	var eliType = getEliType(doc);
+	// the protocols to the founding treaties are in sector 1, and only have the date of their consolidated version
+	return treatyTypes.includes(eliType) && !(eliType == "PROT" && attr(doc, 'meta[name="WT.z_docSector"]', 'content') == "1");
+}
+
+
 function detectWeb(doc, _url) {
 	var docSector = attr(doc, 'meta[name="WT.z_docSector"]', 'content');
 	var eliTypeURI = attr(doc, 'meta[property="eli:type_document"]', 'resource');
 	if (eliTypeURI) {
-		var eliType = eliTypeURI.split("/").pop();
-		if (eliType == "CORRIGENDUM") {
-			// saved like the act it corrects, which its ELI names: .../eli/reg/2016/679/corrigendum/2018-05-23/oj
-			let correctedAct = attr(doc, 'meta[typeOf="eli:LegalResource"]', "about").match(/\/eli\/([a-z]+)/);
-			if (correctedAct) {
-				eliType = correctedAct[1].toUpperCase();
-			}
-		}
+		var eliType = getEliType(doc);
 		var eliCategory = eliType.split("_")[0];
-		var type = typeMapping[eliCategory];
+		var type = isTreaty(doc) ? "statute" : typeMapping[eliCategory];
 		if (type) {
 			return type;
 		}
@@ -193,6 +210,7 @@ function scrape(doc, url) {
 
 	if (eliTypeUri) {
 		// type: everything with ELI (see var typeMapping: bill, statute, report)
+		var treaty = isTreaty(doc);
 		item.title = getTitle(doc, viewingLanguage.toLowerCase());
 		// decisions and purely amending acts use this position for the act they refer to,
 		// e.g. "Regulation (EU) 2019/1155 ... amending Regulation (EC) No 810/2009 ... (Visa Code)"
@@ -229,6 +247,10 @@ function scrape(doc, url) {
 				else {
 					item.code = uriParts[0] + " " + uriParts[1];
 					item.codeNumber = uriParts[3].replace(/^0+/, "");
+					if (treaty) {
+						// a treaty's dates often differ from the year of the OJ, so the code has that year
+						item.code = uriParts[0] + " " + uriParts[2] + " " + uriParts[1];
+					}
 				}
 				// the reference is localized, e.g.
 				// "OJ L 158, 30.4.2004, pp. 77–123 (ES, DA, ...)" or "HL L 333., 2022.12.27., 80–152. o. (BG, ...)"
@@ -251,19 +273,48 @@ function scrape(doc, url) {
 		}
 
 		var publicationDate = attr(doc, 'meta[property="eli:date_publication"]', "content");
-		item.date = attr(doc, 'meta[property="eli:date_document"]', "content") || publicationDate;
-		if (publicationDate) {
-			// the date of the Official Journal, which often differs from the date of the act
-			item.extra = "available-date: " + publicationDate;
+		var documentDate = attr(doc, 'meta[property="eli:date_document"]', "content");
+		if (treaty) {
+			// available-date is the date of signature: the CSL specification defines it for treaties as
+			// "the date a treaty was made available for signing" (version 1.0.2, Appendix IV, Date Variables)
+			// https://docs.citationstyles.org/en/stable/specification.html#date-variables
+			// The date the treaty entered into force goes in date.
+			// A treaty can have several dates, so the earliest is used.
+			item.date = [...doc.querySelectorAll('meta[property="eli:first_date_entry_in_force"]')]
+				.map(meta => meta.getAttribute("content"))
+				.sort()[0];
+			item.extra = "type: treaty";
+			// a corrigendum has no signature, only its own date
+			if (!eliTypeUri.endsWith("CORRIGENDUM")) {
+				item.extra += "\navailable-date: " + documentDate;
+			}
+			// available-date is taken, so the date of the Official Journal goes in event-date.
+			// Styles can use it to tell treaties in the OJ from others, so special editions don't get it
+			if (publicationDate && item.code != "DD") {
+				item.extra += "\nevent-date: " + publicationDate;
+			}
+			if (attr(doc, 'meta[property="eli:in_force"]', "resource").endsWith("notInForce")) {
+				item.extra += "\nstatus: not in force";
+			}
 		}
-		
-		var passedBy = doc.querySelectorAll('meta[property="eli:passed_by"]');
-		var passedByArray = [];
-		for (let i = 0; i < passedBy.length; i++) {
-			passedByArray.push(passedBy[i].getAttribute("resource").split("/").pop());
+		else {
+			item.date = documentDate || publicationDate;
+			if (publicationDate) {
+				// the date of the Official Journal, which often differs from the date of the act
+				item.extra = "available-date: " + publicationDate;
+			}
 		}
-		item.legislativeBody = passedByArray.join(", ");
-		
+
+		// the parties to a treaty are no legislative body, and there can be more than a hundred of them
+		if (!treaty) {
+			var passedBy = doc.querySelectorAll('meta[property="eli:passed_by"]');
+			var passedByArray = [];
+			for (let i = 0; i < passedBy.length; i++) {
+				passedByArray.push(passedBy[i].getAttribute("resource").split("/").pop());
+			}
+			item.legislativeBody = passedByArray.join(", ");
+		}
+
 		item.url = attr(doc, 'meta[typeOf="eli:LegalResource"]', "about");
 	}
 		
@@ -655,6 +706,195 @@ var testCases = [
 				"language": "en",
 				"pages": "2-13",
 				"url": "http://data.europa.eu/eli/reg/2016/679/corrigendum/2018-05-23/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/eli/agree_internation/2001/258/oj",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Agreement between the European Community and the Republic of Iceland and the Kingdom of Norway concerning the criteria and mechanisms for establishing the State responsible for examining a request for asylum lodged in a Member State or in Iceland or Norway - Declarations",
+				"creators": [],
+				"dateEnacted": "2001-04-01",
+				"code": "OJ 2001 L",
+				"codeNumber": "93",
+				"extra": "type: treaty\navailable-date: 2001-01-19\nevent-date: 2001-04-03",
+				"language": "en",
+				"pages": "40-47",
+				"url": "http://data.europa.eu/eli/agree_internation/2001/258/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/eli/convention/2000/922/oj",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "The Schengen acquis - Convention implementing the Schengen Agreement of 14 June 1985 between the Governments of the States of the Benelux Economic Union, the Federal Republic of Germany and the French Republic on the gradual abolition of checks at their common borders",
+				"creators": [],
+				"dateEnacted": "1995-03-26",
+				"code": "OJ 2000 L",
+				"codeNumber": "239",
+				"extra": "type: treaty\navailable-date: 1990-06-19\nevent-date: 2000-09-22",
+				"language": "en",
+				"pages": "19-62",
+				"url": "http://data.europa.eu/eli/convention/2000/922/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:22017A0914(01)",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Amendment to the Montreal Protocol on substances that deplete the ozone layer",
+				"creators": [],
+				"dateEnacted": "2019-01-01",
+				"code": "OJ 2017 L",
+				"codeNumber": "236",
+				"extra": "type: treaty\navailable-date: 2016-10-15\nevent-date: 2017-09-14",
+				"language": "en",
+				"pages": "3-13",
+				"url": "http://data.europa.eu/eli/agree_amend/2017/1541/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:22026A00757",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Agreement on the interpretation and application of the Energy Charter Treaty",
+				"creators": [],
+				"dateEnacted": "2026-06-25",
+				"code": "OJ L",
+				"extra": "type: treaty\navailable-date: 2026-02-18",
+				"language": "en",
+				"pages": "2026/757",
+				"url": "http://data.europa.eu/eli/agree_internation/2026/757/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:22015A0703(01)R(01)",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Corrigendum to the Agreement between the European Union and the Democratic Republic of Timor-Leste on the short-stay visa waiver (OJ L 173, 3.7.2015)",
+				"creators": [],
+				"code": "OJ 2015 L",
+				"codeNumber": "189",
+				"extra": "type: treaty\nevent-date: 2015-07-17",
+				"language": "en",
+				"pages": "40-41",
+				"url": "http://data.europa.eu/eli/agree_internation/2015/1030/corrigendum/2015-07-17/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:42000A0922(03)",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "The Schengen acquis - Agreement on the Accession of the Italian Republic to the Convention implementing the Schengen Agreement of 14 June 1985 between the Governments of the States of the Benelux Economic Union, the Federal Republic of Germany and the French Republic on the gradual abolition of checks at their common borders signed at Schengen on 19 June 1990",
+				"creators": [],
+				"code": "OJ 2000 L",
+				"codeNumber": "239",
+				"extra": "type: treaty\navailable-date: 1990-11-27\nevent-date: 2000-09-22\nstatus: not in force",
+				"language": "en",
+				"pages": "63-68",
+				"url": "http://data.europa.eu/eli/agree_internation/2000/922(2)/oj",
 				"attachments": [
 					{
 						"title": "EUR-Lex PDF (EN)",
