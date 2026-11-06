@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-06 11:10:17"
+	"lastUpdated": "2026-11-06 11:16:27"
 }
 
 
@@ -239,9 +239,11 @@ function scrape(doc, url) {
 			}
 		}
 
-		item.date = attr(doc, 'meta[property="eli:date_document"]', "content");
-		if (!item.date) {
-			item.date = attr(doc, 'meta[property="eli:date_publication"]', "content");
+		var publicationDate = attr(doc, 'meta[property="eli:date_publication"]', "content");
+		item.date = attr(doc, 'meta[property="eli:date_document"]', "content") || publicationDate;
+		if (publicationDate) {
+			// the date of the Official Journal, which often differs from the date of the act
+			item.extra = "available-date: " + publicationDate;
 		}
 		
 		var passedBy = doc.querySelectorAll('meta[property="eli:passed_by"]');
@@ -318,6 +320,7 @@ var testCases = [
 				"dateEnacted": "1995-10-24",
 				"code": "OJ L",
 				"codeNumber": "281",
+				"extra": "available-date: 1995-11-23",
 				"language": "en",
 				"pages": "31-50",
 				"url": "http://data.europa.eu/eli/dir/1995/46/oj",
@@ -349,6 +352,7 @@ var testCases = [
 				"dateEnacted": "1994-09-16",
 				"code": "OJ L",
 				"codeNumber": "245",
+				"extra": "available-date: 1994-09-20",
 				"language": "en",
 				"pages": "6-10",
 				"url": "http://data.europa.eu/eli/reg/1994/2257/oj",
@@ -380,6 +384,7 @@ var testCases = [
 				"dateEnacted": "2004-04-29",
 				"code": "OJ L",
 				"codeNumber": "158",
+				"extra": "available-date: 2004-04-30",
 				"language": "en",
 				"pages": "77-123",
 				"url": "http://data.europa.eu/eli/dir/2004/38/oj",
@@ -411,6 +416,7 @@ var testCases = [
 				"dateEnacted": "2016-04-27",
 				"code": "OJ L",
 				"codeNumber": "119",
+				"extra": "available-date: 2016-05-04",
 				"language": "en",
 				"pages": "1-88",
 				"shortTitle": "General Data Protection Regulation",
@@ -474,6 +480,7 @@ var testCases = [
 				"dateEnacted": "2022-10-19",
 				"code": "OJ L",
 				"codeNumber": "277",
+				"extra": "available-date: 2022-10-27",
 				"language": "en",
 				"pages": "1-102",
 				"shortTitle": "Digital Services Act",
@@ -506,6 +513,7 @@ var testCases = [
 				"dateEnacted": "2011-04-05",
 				"code": "OJ L",
 				"codeNumber": "141",
+				"extra": "available-date: 2011-05-27",
 				"language": "en",
 				"pages": "1-12",
 				"url": "http://data.europa.eu/eli/reg/2011/492/oj",
@@ -537,6 +545,7 @@ var testCases = [
 				"dateEnacted": "2002-12-16",
 				"code": "OJ L",
 				"codeNumber": "1",
+				"extra": "available-date: 2003-01-04",
 				"language": "en",
 				"pages": "1-25",
 				"url": "http://data.europa.eu/eli/reg/2003/1/oj",
@@ -694,6 +703,7 @@ var testCases = [
 				"dateEnacted": "2004-04-29",
 				"code": "DD",
 				"codeNumber": "05, 005",
+				"extra": "available-date: 2004-04-30",
 				"language": "pl",
 				"pages": "46-61",
 				"url": "http://data.europa.eu/eli/dir/2004/38/oj",
@@ -725,6 +735,7 @@ var testCases = [
 				"dateEnacted": "2022-12-14",
 				"code": "OJ L",
 				"codeNumber": "333",
+				"extra": "available-date: 2022-12-27",
 				"language": "hu",
 				"pages": "80-152",
 				"url": "http://data.europa.eu/eli/dir/2022/2555/oj",
