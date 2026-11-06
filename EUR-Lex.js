@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-06 13:57:54"
+	"lastUpdated": "2026-11-06 14:01:18"
 }
 
 
@@ -76,6 +76,13 @@ function detectWeb(doc, _url) {
 	var eliTypeURI = attr(doc, 'meta[property="eli:type_document"]', 'resource');
 	if (eliTypeURI) {
 		var eliType = eliTypeURI.split("/").pop();
+		if (eliType == "CORRIGENDUM") {
+			// saved like the act it corrects, which its ELI names: .../eli/reg/2016/679/corrigendum/2018-05-23/oj
+			let correctedAct = attr(doc, 'meta[typeOf="eli:LegalResource"]', "about").match(/\/eli\/([a-z]+)/);
+			if (correctedAct) {
+				eliType = correctedAct[1].toUpperCase();
+			}
+		}
 		var eliCategory = eliType.split("_")[0];
 		var type = typeMapping[eliCategory];
 		if (type) {
@@ -625,6 +632,38 @@ var testCases = [
 				"language": "en",
 				"pages": "475-484",
 				"url": "http://data.europa.eu/eli/reg/1968/1612/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32016R0679R(02)",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Corrigendum to Regulation (EU) 2016/679 of the European Parliament and of the Council of 27 April 2016 on the protection of natural persons with regard to the processing of personal data and on the free movement of such data, and repealing Directive 95/46/EC (General Data Protection Regulation) (OJ L 119, 4.5.2016)",
+				"creators": [],
+				"dateEnacted": "2018-05-23",
+				"code": "OJ L",
+				"codeNumber": "127",
+				"extra": "available-date: 2018-05-23",
+				"language": "en",
+				"pages": "2-13",
+				"url": "http://data.europa.eu/eli/reg/2016/679/corrigendum/2018-05-23/oj",
 				"attachments": [
 					{
 						"title": "EUR-Lex PDF (EN)",
