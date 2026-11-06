@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-06 14:01:18"
+	"lastUpdated": "2026-11-06 14:44:16"
 }
 
 
@@ -122,17 +122,8 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
-// we need to remember the language in search page to use the same for
-// individual entry page
-var autoLanguage;
-
-
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		var m = url.match(/\blocale=([a-z][a-z])/);
-		if (m) {
-			autoLanguage = m[1];
-		}
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
