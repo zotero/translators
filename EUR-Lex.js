@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-06 11:16:27"
+	"lastUpdated": "2026-11-06 13:54:29"
 }
 
 
@@ -64,8 +64,8 @@ const shortTitleRegex = /\(([A-Z][^()]*\b(?:Act|Code|Directive|Regulation))\)$/;
 // the pages at the end of an OJ reference, before the list of languages
 const ojPagesRegex = /,\s*\D*(\d+)\.?(?:\s*[-–—]\s*(\d+)\.?)?[^,\d(]*(?:\(|$)/;
 
-// the pages after the chapter and volume of a special edition, which follows the list of languages
-const specialEditionPagesRegex = /\)[^()\d]*\d+\D+\d+\D+(\d+)(?:\s*[-–—]\s*(\d+))?\s*$/;
+// the pages of a special edition, which are the last thing after its volume
+const specialEditionPagesRegex = /(\d+)(?:\s*[-–—]\s*(\d+))?\s*$/;
 
 
 function detectWeb(doc, _url) {
@@ -214,7 +214,7 @@ function scrape(doc, url) {
 				item.pages = (actByAct[1] == "C" ? "C/" : "") + actByAct[2] + "/" + actByAct[3];
 			}
 			else if (uriParts.length >= 4) {
-				let isSpecialEdition = /\d+/.test(uriParts[1]);
+				let isSpecialEdition = uriParts[0] == "DD";
 				if (isSpecialEdition) {
 					item.code = uriParts[0];
 					item.codeNumber = uriParts[1] + ", " + uriParts[2];
@@ -226,7 +226,11 @@ function scrape(doc, url) {
 				// the reference is localized, e.g.
 				// "OJ L 158, 30.4.2004, pp. 77–123 (ES, DA, ...)" or "HL L 333., 2022.12.27., 80–152. o. (BG, ...)"
 				// a special edition follows it, e.g. "... (ES, DA, ...)Polskie wydanie specjalne: Rozdział 05 Tom 005 P. 46 - 61"
-				let pages = text(doc, "#originalTitle ~ p em").match(isSpecialEdition ? specialEditionPagesRegex : ojPagesRegex);
+				// or "... (DE, FR, ...)English Special Edition: Series I Volume 1968(II) P. 475 - 484"
+				let reference = text(doc, "#originalTitle ~ p em");
+				let pages = isSpecialEdition
+					? reference.includes(uriParts[2]) && reference.split(uriParts[2]).pop().match(specialEditionPagesRegex)
+					: reference.match(ojPagesRegex);
 				if (pages) {
 					item.pages = pages[2] ? pages[1] + "-" + pages[2] : pages[1];
 				}
@@ -599,6 +603,38 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:31968R1612",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Regulation (EEC) No 1612/68 of the Council of 15 October 1968 on freedom of movement for workers within the Community",
+				"creators": [],
+				"dateEnacted": "1968-10-15",
+				"code": "DD",
+				"codeNumber": "I, 1968(II)",
+				"extra": "available-date: 1968-10-19",
+				"language": "en",
+				"pages": "475-484",
+				"url": "http://data.europa.eu/eli/reg/1968/1612/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
 		"url": "https://eur-lex.europa.eu/search.html?lang=en&text=%22open+access%22&qid=1513887127793&type=quick&scope=EURLEX&locale=nl",
 		"items": "multiple"
 	},
@@ -746,6 +782,38 @@ var testCases = [
 					},
 					{
 						"title": "EUR-Lex HTML (HU)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/DA/TXT/?uri=CELEX:31968R1612&locale=da",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Rådets forordning nr. 1612/68/EØF af 15. oktober 1968 om arbejdskraftens frie bevægelighed inden for Fællesskabet",
+				"creators": [],
+				"dateEnacted": "1968-10-15",
+				"code": "DD",
+				"codeNumber": "I, 1968(II)",
+				"extra": "available-date: 1968-10-19",
+				"language": "da",
+				"pages": "467-476",
+				"url": "http://data.europa.eu/eli/reg/1968/1612/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (DA)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (DA)",
 						"mimeType": "text/html",
 						"snapshot": true
 					}
