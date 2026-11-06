@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-06 21:40:40"
+	"lastUpdated": "2026-11-06 22:01:45"
 }
 
 
@@ -262,6 +262,13 @@ function scrape(doc, url) {
 				if (pages) {
 					item.pages = pages[2] ? pages[1] + "-" + pages[2] : pages[1];
 				}
+				// the name of a special edition, as printed after the list of languages, says more than
+				// its numbers, e.g. "English Special Edition: Series I Volume 1968(II)"
+				let volumeIndex = reference.lastIndexOf(uriParts[2]);
+				if (isSpecialEdition && volumeIndex != -1) {
+					item.code = reference.slice(reference.lastIndexOf(")", volumeIndex) + 1, volumeIndex + uriParts[2].length).trim();
+					item.codeNumber = null;
+				}
 			}
 			if (type == "bill") {
 				item.codeVolume = item.codeNumber;
@@ -289,7 +296,7 @@ function scrape(doc, url) {
 			}
 			// available-date is taken, so the date of the Official Journal goes in event-date.
 			// Styles can use it to tell treaties in the OJ from others, so special editions don't get it
-			if (publicationDate && item.code != "DD") {
+			if (publicationDate && !uri.includes("DD:")) {
 				item.extra += "\nevent-date: " + publicationDate;
 			}
 			if (attr(doc, 'meta[property="eli:in_force"]', "resource").endsWith("notInForce")) {
@@ -667,8 +674,7 @@ var testCases = [
 				"nameOfAct": "Regulation (EEC) No 1612/68 of the Council of 15 October 1968 on freedom of movement for workers within the Community",
 				"creators": [],
 				"dateEnacted": "1968-10-15",
-				"code": "DD",
-				"codeNumber": "I, 1968(II)",
+				"code": "English Special Edition: Series I Volume 1968(II)",
 				"extra": "available-date: 1968-10-19",
 				"language": "en",
 				"pages": "475-484",
@@ -1015,8 +1021,7 @@ var testCases = [
 				"nameOfAct": "Dyrektywa 2004/38/WE Parlamentu Europejskiego i Rady z dnia 29 kwietnia 2004 r. w sprawie prawa obywateli Unii i członków ich rodzin do swobodnego przemieszczania się i pobytu na terytorium Państw Członkowskich, zmieniająca rozporządzenie (EWG) nr 1612/68 i uchylająca dyrektywy 64/221/EWG, 68/360/EWG, 72/194/EWG, 73/148/EWG, 75/34/EWG, 75/35/EWG, 90/364/EWG, 90/365/EWG i 93/96/EWG",
 				"creators": [],
 				"dateEnacted": "2004-04-29",
-				"code": "DD",
-				"codeNumber": "05, 005",
+				"code": "Polskie wydanie specjalne: Rozdział 05 Tom 005",
 				"extra": "available-date: 2004-04-30",
 				"language": "pl",
 				"pages": "46-61",
@@ -1080,8 +1085,7 @@ var testCases = [
 				"nameOfAct": "Rådets forordning nr. 1612/68/EØF af 15. oktober 1968 om arbejdskraftens frie bevægelighed inden for Fællesskabet",
 				"creators": [],
 				"dateEnacted": "1968-10-15",
-				"code": "DD",
-				"codeNumber": "I, 1968(II)",
+				"code": "den danske specialudgave: serie I bind 1968(II)",
 				"extra": "available-date: 1968-10-19",
 				"language": "da",
 				"pages": "467-476",
