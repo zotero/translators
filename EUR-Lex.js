@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-06 22:42:40"
+	"lastUpdated": "2026-11-06 22:57:49"
 }
 
 
@@ -102,7 +102,7 @@ async function getCellarData(celex) {
 		SELECT ?property ?value WHERE {
 			?work cdm:resource_legal_id_celex "${celex}"^^<http://www.w3.org/2001/XMLSchema#string> ; ?property ?value .
 			VALUES ?property { cdm:work_has_resource-type cdm:work_date_document cdm:resource_legal_date_signature
-				cdm:resource_legal_date_entry-into-force cdm:resource_legal_in-force }
+				cdm:resource_legal_date_entry-into-force cdm:resource_legal_date_end-of-validity }
 		}`;
 	let data = {};
 	try {
@@ -359,8 +359,13 @@ async function scrape(doc, url) {
 			if (publicationDate) {
 				item.extra += "\nevent-date: " + publicationDate;
 			}
-			if (attr(doc, 'meta[property="eli:in_force"]', "resource").endsWith("notInForce")
-					|| /^(?:0|false)$/.test((cellar["resource_legal_in-force"] || [])[0])) {
+			// EUR-Lex's in force flag is also off for treaties that are in force but have no date recorded,
+			// so only a past end date is relied on. Treaties that never entered into force can't be told from those
+			let today = new Date().toISOString().slice(0, 10);
+			let endDates = [...doc.querySelectorAll('meta[property="eli:date_no_longer_in_force"]')]
+				.map(meta => meta.getAttribute("content"))
+				.concat(cellar["resource_legal_date_end-of-validity"] || []);
+			if (endDates.some(date => isRealDate(date) && date < today)) {
 				item.extra += "\nstatus: not in force";
 			}
 		}
@@ -957,7 +962,7 @@ var testCases = [
 				"creators": [],
 				"code": "OJ 2000 L",
 				"codeNumber": "239",
-				"extra": "type: treaty\navailable-date: 1990-11-27\nevent-date: 2000-09-22\nstatus: not in force",
+				"extra": "type: treaty\navailable-date: 1990-11-27\nevent-date: 2000-09-22",
 				"language": "en",
 				"pages": "63-68",
 				"url": "http://data.europa.eu/eli/agree_internation/2000/922(2)/oj",
@@ -1021,7 +1026,7 @@ var testCases = [
 				"creators": [],
 				"code": "OJ 1976 C",
 				"codeNumber": "29",
-				"extra": "type: treaty\navailable-date: 1972-04-19\nevent-date: 1976-02-09\nstatus: not in force",
+				"extra": "type: treaty\navailable-date: 1972-04-19\nevent-date: 1976-02-09",
 				"language": "en",
 				"pages": "1-17",
 				"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:41976A0209(01)",
