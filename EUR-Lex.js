@@ -3,13 +3,13 @@
 	"label": "EUR-Lex",
 	"creator": "Philipp Zumstein, Pieter van der Wees",
 	"target": "^https://eur-lex\\.europa\\.eu/",
-	"minVersion": "3.0",
+	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-06 22:42:00"
+	"lastUpdated": "2026-11-06 22:42:40"
 }
 
 
@@ -95,6 +95,39 @@ function isTreaty(doc) {
 }
 
 
+// the ELI tags have no date of signature, and many treaties have no ELI tags at all,
+// so treaties are looked up in Cellar, the EU's metadata repository
+async function getCellarData(celex) {
+	let query = `PREFIX cdm: <http://publications.europa.eu/ontology/cdm#>
+		SELECT ?property ?value WHERE {
+			?work cdm:resource_legal_id_celex "${celex}"^^<http://www.w3.org/2001/XMLSchema#string> ; ?property ?value .
+			VALUES ?property { cdm:work_has_resource-type cdm:work_date_document cdm:resource_legal_date_signature
+				cdm:resource_legal_date_entry-into-force cdm:resource_legal_in-force }
+		}`;
+	let data = {};
+	try {
+		let json = await requestJSON("https://publications.europa.eu/webapi/rdf/sparql?format="
+			+ encodeURIComponent("application/sparql-results+json") + "&query=" + encodeURIComponent(query));
+		for (let { property, value } of json.results.bindings) {
+			let name = property.value.split("#").pop();
+			data[name] = (data[name] || []).concat(value.value.split("/").pop());
+		}
+	}
+	catch (e) {
+		Z.debug("Cellar lookup failed: " + e);
+	}
+	return data;
+}
+
+
+// the date of the OJ in its localized reference, e.g. "OJ L 125, 9.6.1971, pp. 17–19" or "HL L 333., 2022.12.27., ..."
+function getReferenceDate(reference) {
+	let match = reference.match(/\b(\d{1,2})\.(\d{1,2})\.(\d{4})\b/);
+	let parts = match ? [match[3], match[2], match[1]] : (reference.match(/\b(\d{4})\.(\d{2})\.(\d{2})\b/) || []).slice(1);
+	return parts.map(part => part.padStart(2, "0")).join("-");
+}
+
+
 function detectWeb(doc, _url) {
 	var docSector = attr(doc, 'meta[name="WT.z_docSector"]', 'content');
 	var eliTypeURI = attr(doc, 'meta[property="eli:type_document"]', 'resource');
@@ -139,14 +172,16 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) ZU.processDocuments(Object.keys(items), scrape);
-		});
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let itemURL of Object.keys(items)) {
+			await scrape(await requestDocument(itemURL), itemURL);
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
@@ -193,25 +228,33 @@ function getTitle(doc, language) {
 		.replace(bareEeaNoteRegex, "");
 }
 
-function scrape(doc, url) {
+async function scrape(doc, url) {
 	// declare meta variables present for all sectors
-	// var docSector = attr(doc, 'meta[name="WT.z_docSector"]', 'content');
+	var docSector = attr(doc, 'meta[name="WT.z_docSector"]', 'content');
 	var docType = attr(doc, 'meta[name="WT.z_docType"]', 'content');
 	var celex = attr(doc, 'meta[name="WT.z_docID"]', 'content');
 	
 	var eliTypeUri = (attr(doc, 'meta[property="eli:type_document"]', "resource"));
 	
-	var type = detectWeb(doc, url);
+	// without ELI tags, only Cellar can tell a treaty from other agreements
+	var treaty = eliTypeUri ? isTreaty(doc) : ["2", "4"].includes(docSector) && docType == "A";
+	var cellar = treaty ? await getCellarData(celex) : {};
+	var cellarTypes = cellar["work_has_resource-type"] || [];
+	if (!eliTypeUri && !cellarTypes.some(cellarType => treatyTypes.includes(cellarType))) {
+		treaty = false;
+	}
+
+	var type = treaty ? "statute" : detectWeb(doc, url);
 	var item = new Zotero.Item(type);
 	// determine the language in which we are currently viewing the document
 	var viewingLanguage = (doc.documentElement.lang || "en").toUpperCase();
 	// Cases only return language; discard everything else
 	item.language = viewingLanguage.toLowerCase();
 
-	if (eliTypeUri) {
-		// type: everything with ELI (see var typeMapping: bill, statute, report)
-		var treaty = isTreaty(doc);
-		item.title = getTitle(doc, viewingLanguage.toLowerCase());
+	if (eliTypeUri || treaty) {
+		// type: everything with ELI (see var typeMapping: bill, statute, report) and all treaties
+		item.title = getTitle(doc, viewingLanguage.toLowerCase())
+			|| ZU.trimInternal(attr(doc, 'meta[name="WT.z_docTitle"]', "content").replace(/#/g, " "));
 		// decisions and purely amending acts use this position for the act they refer to,
 		// e.g. "Regulation (EU) 2019/1155 ... amending Regulation (EC) No 810/2009 ... (Visa Code)"
 		// every page has the title in all languages, so only the English one has to be interpreted
@@ -225,6 +268,17 @@ function scrape(doc, url) {
 		// since October 2023, acts are published individually and only have the second link
 		var uri = attr(doc, "#format_language_table_digital_sign_act_" + viewingLanguage.toUpperCase(), "href")
 			|| attr(doc, "#format_language_table_digital_sign_" + viewingLanguage.toUpperCase(), "href");
+		var publicationDate = attr(doc, 'meta[property="eli:date_publication"]', "content");
+		if (treaty && !publicationDate) {
+			publicationDate = getReferenceDate(text(doc, "#originalTitle ~ p em"));
+		}
+		// some treaties have an empty link, or none, but the page still gives the OJ reference
+		if (treaty && !/(?:OJ|DD):/.test(uri)) {
+			let ojReference = text(doc, "#originalTitle ~ p em").match(/\b([LC])\s+(\d+[A-Z]?)\b/);
+			if (ojReference) {
+				uri = "?uri=OJ:" + ojReference[1] + ":" + (publicationDate || celex.substr(1)).substr(0, 4) + ":" + ojReference[2] + ":TOC";
+			}
+		}
 		if (uri) {
 			var uriParts = uri.split("/").pop().replace("?uri=", "")
 .split(":");
@@ -278,9 +332,10 @@ function scrape(doc, url) {
 			}
 		}
 
-		var publicationDate = attr(doc, 'meta[property="eli:date_publication"]', "content");
 		var documentDate = attr(doc, 'meta[property="eli:date_document"]', "content");
 		if (treaty) {
+			// Cellar uses dates like 1001-01-01 when the date is unknown
+			let isRealDate = date => date > "1900";
 			// available-date is the date of signature: the CSL specification defines it for treaties as
 			// "the date a treaty was made available for signing" (version 1.0.2, Appendix IV, Date Variables)
 			// https://docs.citationstyles.org/en/stable/specification.html#date-variables
@@ -288,17 +343,24 @@ function scrape(doc, url) {
 			// A treaty can have several dates, so the earliest is used.
 			item.date = [...doc.querySelectorAll('meta[property="eli:first_date_entry_in_force"]')]
 				.map(meta => meta.getAttribute("content"))
+				.concat(cellar["resource_legal_date_entry-into-force"] || [])
+				.filter(isRealDate)
 				.sort()[0];
 			item.extra = "type: treaty";
 			// a corrigendum has no signature, only its own date
-			if (!eliTypeUri.endsWith("CORRIGENDUM")) {
-				item.extra += "\navailable-date: " + documentDate;
+			if (!eliTypeUri.endsWith("CORRIGENDUM") && !cellarTypes.includes("CORRIGENDUM")) {
+				let signature = (cellar.resource_legal_date_signature || []).filter(isRealDate)[0]
+					|| documentDate || (cellar.work_date_document || [])[0];
+				if (signature) {
+					item.extra += "\navailable-date: " + signature;
+				}
 			}
 			// available-date is taken, so the date of the Official Journal goes in event-date.
 			if (publicationDate) {
 				item.extra += "\nevent-date: " + publicationDate;
 			}
-			if (attr(doc, 'meta[property="eli:in_force"]', "resource").endsWith("notInForce")) {
+			if (attr(doc, 'meta[property="eli:in_force"]', "resource").endsWith("notInForce")
+					|| /^(?:0|false)$/.test((cellar["resource_legal_in-force"] || [])[0])) {
 				item.extra += "\nstatus: not in force";
 			}
 		}
@@ -320,7 +382,7 @@ function scrape(doc, url) {
 			item.legislativeBody = passedByArray.join(", ");
 		}
 
-		item.url = attr(doc, 'meta[typeOf="eli:LegalResource"]', "about");
+		item.url = attr(doc, 'meta[typeOf="eli:LegalResource"]', "about") || url;
 	}
 		
 	else if (item.itemType == "case") {
@@ -833,7 +895,7 @@ var testCases = [
 				"creators": [],
 				"dateEnacted": "2026-06-25",
 				"code": "OJ L",
-				"extra": "type: treaty\navailable-date: 2026-02-18",
+				"extra": "type: treaty\navailable-date: 2026-02-18\nevent-date: 2026-03-27",
 				"language": "en",
 				"pages": "2026/757",
 				"url": "http://data.europa.eu/eli/agree_internation/2026/757/oj",
@@ -899,6 +961,103 @@ var testCases = [
 				"language": "en",
 				"pages": "63-68",
 				"url": "http://data.europa.eu/eli/agree_internation/2000/922(2)/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:21971A0527(01)",
+		"detectedItemType": "bill",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Agreement between the European Economic Community and the Republic of Turkey on the supply of common wheat as food aid",
+				"creators": [],
+				"code": "OJ 1971 L",
+				"codeNumber": "125",
+				"extra": "type: treaty\navailable-date: 1971-05-27\nevent-date: 1971-06-09\nstatus: not in force",
+				"language": "en",
+				"pages": "17-19",
+				"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:21971A0527(01)",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:41976A0209(01)",
+		"detectedItemType": "bill",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Convention setting up a European University Institute",
+				"creators": [],
+				"code": "OJ 1976 C",
+				"codeNumber": "29",
+				"extra": "type: treaty\navailable-date: 1972-04-19\nevent-date: 1976-02-09\nstatus: not in force",
+				"language": "en",
+				"pages": "1-17",
+				"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:41976A0209(01)",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:22006A1230(08)R(01)",
+		"detectedItemType": "bill",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Corrigendum: Agreement between the European Community and the Republic of Bulgaria laying down a procedure for the provision of information in the field of technical regulations and of rules on information society services",
+				"creators": [],
+				"code": "OJ 2007 L",
+				"codeNumber": "40",
+				"extra": "type: treaty\nevent-date: 2007-02-12",
+				"language": "en",
+				"pages": "111-118",
+				"shortTitle": "Corrigendum",
+				"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:22006A1230(08)R(01)",
 				"attachments": [
 					{
 						"title": "EUR-Lex PDF (EN)",
