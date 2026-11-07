@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-15 12:10:00"
+	"lastUpdated": "2026-11-07 22:51:48"
 }
 
 /*
@@ -669,6 +669,8 @@ function addOtherMetadata(doc, newItem) {
 // some publishers even though it names a group, so it must not be split.
 var COLLECTIVE_BYLINE_RE = /\b(reporters?|staff|newsroom|desk|team|editors?|wires?|news|correspondents?|bureau)\s*$/i;
 
+var WIRE_SERVICE_RE = /^(AFP|AP|PTI|ANI|IANS|DPA|dpa|EFE|UPI|AAP)$/;
+
 function isCollectiveByline(name) {
 	return COLLECTIVE_BYLINE_RE.test(name);
 }
@@ -707,14 +709,24 @@ function addJSONLDMetadata(doc, newItem) {
 		for (var i = 0; i < authors.length; i++) {
 			var author = authors[i];
 			if (!author) continue;
-			// schema.org may give structured names (preferred) or a single
-			// string. Prefer givenName/familyName; otherwise a name can only be
-			// split when the node is explicitly typed as a Person.
 			var first = typeof author == 'object' ? author.givenName : '';
 			var last = typeof author == 'object' ? author.familyName : '';
-			var name = typeof author == 'string' ? author : (author.name || '');
+			var name = typeof author == 'string' ? author : (author.name || [first, last].filter(Boolean).join(' '));
 			name = ZU.trimInternal(name).replace(/^By\s+/i, '');
-			if (first || last) {
+			var types = typeof author == 'object'
+				? [].concat(author['@type'] || []).map(function (type) {
+					return ('' + type).replace(/^https?:\/\/schema\.org\//i, '').toLowerCase();
+				})
+				: [];
+			// Organization and wire-service credits must not be split, even
+			// when publishers also supply Person types or structured names.
+			var isOrganization = types.some(function (type) {
+				return /organization$/.test(type);
+			}) || WIRE_SERVICE_RE.test(name) || isCollectiveByline(name);
+			if (isOrganization && name) {
+				newItem.creators.push({ lastName: name, creatorType: 'author', fieldMode: 1 });
+			}
+			else if (first || last) {
 				newItem.creators.push({
 					firstName: ZU.trimInternal(first || ''),
 					lastName: ZU.trimInternal(last || ''),
@@ -722,14 +734,7 @@ function addJSONLDMetadata(doc, newItem) {
 				});
 			}
 			else if (name) {
-				// Only @type: Person guarantees a human, so only then split the
-				// name. Without that hint a bare name may be an organisation or a
-				// collective byline, and a wrong first/last split is worse than
-				// a single-field creator.
-				var isPerson = typeof author == 'object'
-					&& ('' + author['@type']).toLowerCase() == 'person'
-					&& !isCollectiveByline(name);
-				if (isPerson) {
+				if (types.includes('person')) {
 					newItem.creators.push(ZU.cleanAuthor(name, 'author', name.includes(',')));
 				}
 				else {
