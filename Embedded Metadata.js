@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-08 09:24:01"
+	"lastUpdated": "2026-11-08 17:30:40"
 }
 
 /*
@@ -682,8 +682,14 @@ function isCollectiveByline(name) {
  * items without creators on those pages.
  */
 function addJSONLDMetadata(doc, newItem) {
-	var data = getJSONLDArticle(doc);
+	var nodes = [];
+	var data = getJSONLDArticle(doc, nodes);
 	if (!data) return;
+
+	if (!newItem.publicationTitle && !newItem.websiteTitle && !newItem.blogTitle) {
+		var publication = getJSONLDPublication(data, nodes, doc);
+		if (publication) newItem.publicationTitle = publication;
+	}
 
 	if (!newItem.title && data.headline) {
 		newItem.title = data.headline;
@@ -787,7 +793,7 @@ function addJSONLDMetadata(doc, newItem) {
  * Blocks can be arrays, wrapped in @graph, or a single object, and a page
  * commonly ships several (article, video, organization, breadcrumbs).
  */
-function getJSONLDArticle(doc) {
+function getJSONLDArticle(doc, allNodes) {
 	var wanted = ['NewsArticle', 'Article', 'ReportageNewsArticle', 'Report'];
 	var articles = [];
 	var scripts = doc.querySelectorAll('script[type="application/ld+json"]');
@@ -808,6 +814,7 @@ function getJSONLDArticle(doc) {
 			for (var k = 0; k < nodes.length; k++) {
 				var node = nodes[k];
 				if (!node || typeof node != 'object') continue;
+				allNodes.push(node);
 				if (wanted.includes(node['@type'])
 					&& (node.headline || node.name || node.datePublished || node.author)) {
 					articles.push(node);
@@ -826,6 +833,56 @@ function getJSONLDArticle(doc) {
 	return article;
 }
 
+function getJSONLDPublication(article, nodes, doc) {
+	function resolve(value) {
+		if (!value || typeof value != 'object') return null;
+		if (value['@id']) {
+			var target = nodes.find(function (node) {
+				return node['@id'] == value['@id'];
+			});
+			if (target) return Object.assign({}, target, value);
+		}
+		return value;
+	}
+	function name(value) {
+		for (var entry of [].concat(value || [])) {
+			entry = resolve(entry);
+			if (entry && typeof entry.name == 'string' && entry.name.trim()) {
+				return ZU.trimInternal(entry.name);
+			}
+		}
+		return '';
+	}
+	var containers = [];
+	var pending = [].concat(article.isPartOf || []);
+	var seen = new Set();
+	while (pending.length) {
+		var node = resolve(pending.shift());
+		if (!node || seen.has(node['@id'] || node)) continue;
+		seen.add(node['@id'] || node);
+		var types = [].concat(node['@type'] || []);
+		if (types.some(function (type) {
+			return /^(WebSite|Periodical|Newspaper|Magazine|Blog)$/.test(type.replace(/^https?:\/\/schema\.org\//, ''));
+		})) containers.push(node);
+		pending.push(...[].concat(node.isPartOf || []));
+	}
+	var publication = name(containers);
+	if (publication) return publication;
+	publication = name(article.publisher);
+	if (publication) return publication;
+	for (var container of containers) {
+		publication = name(container.publisher);
+		if (publication) return publication;
+	}
+	// An unlinked organization may be an advertiser or a parent company.
+	var sites = nodes.filter(function (node) {
+		return [].concat(node['@type'] || []).includes('WebSite')
+			&& typeof node.url == 'string'
+			&& relativeToAbsolute(doc, node.url).replace(/^(https?:\/\/[^/]+).*$/, '$1')
+				== doc.location.href.replace(/^(https?:\/\/[^/]+).*$/, '$1');
+	});
+	return sites.length == 1 ? name(sites) || name(sites[0].publisher) : '';
+}
 function hasJSONLDAuthor(authors) {
 	return [].concat(authors || []).some(function (author) {
 		if (!author) return false;
@@ -2252,6 +2309,37 @@ var testCases = [
 				"abstractNote": "James and Gauff were voted to carry the flag by the other Olympians on Team USA.",
 				"language": "en-US",
 				"blogTitle": "MS NOW"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.scotusblog.com/2026/11/trump-administration-asks-supreme-court-to-intervene-in-california-ballots-dispute/",
+		"items": [
+			{
+				"itemType": "webpage",
+				"creators": [
+					{
+						"firstName": "Amy",
+						"lastName": "Howe",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Supreme Court declines Trump administration's request to intervene in California ballot dispute",
+				"date": "2026-11-02T18:33:05.429Z",
+				"abstractNote": "The Trump administration on Monday morning asked the Supreme Court to intervene in its efforts to keep California from counting ballots cast by what it contends are more than 20,000 noncitizens who h…",
+				"url": "https://www.scotusblog.com/2026/11/trump-administration-asks-supreme-court-to-intervene-in-california-ballots-dispute/",
+				"language": "en",
+				"websiteTitle": "SCOTUSblog"
 			}
 		]
 	}
