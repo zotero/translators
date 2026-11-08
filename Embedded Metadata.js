@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-07 22:51:48"
+	"lastUpdated": "2026-11-08 09:24:01"
 }
 
 /*
@@ -782,12 +782,14 @@ function addJSONLDMetadata(doc, newItem) {
 }
 
 /**
- * Returns the first Article-like node from the page's JSON-LD blocks.
+ * Returns the first Article-like node, supplementing an unusable byline only
+ * from another node identifying the same article.
  * Blocks can be arrays, wrapped in @graph, or a single object, and a page
  * commonly ships several (article, video, organization, breadcrumbs).
  */
 function getJSONLDArticle(doc) {
 	var wanted = ['NewsArticle', 'Article', 'ReportageNewsArticle', 'Report'];
+	var articles = [];
 	var scripts = doc.querySelectorAll('script[type="application/ld+json"]');
 	for (var i = 0; i < scripts.length; i++) {
 		var data;
@@ -808,12 +810,42 @@ function getJSONLDArticle(doc) {
 				if (!node || typeof node != 'object') continue;
 				if (wanted.includes(node['@type'])
 					&& (node.headline || node.name || node.datePublished || node.author)) {
-					return node;
+					articles.push(node);
 				}
 			}
 		}
 	}
-	return null;
+	var article = articles[0];
+	if (!article) return null;
+	if (!hasJSONLDAuthor(article.author)) {
+		var fallback = articles.slice(1).find(function (node) {
+			return sameJSONLDArticle(article, node) && hasJSONLDAuthor(node.author);
+		});
+		if (fallback) article = Object.assign({}, article, { author: fallback.author });
+	}
+	return article;
+}
+
+function hasJSONLDAuthor(authors) {
+	return [].concat(authors || []).some(function (author) {
+		if (!author) return false;
+		var name = typeof author == 'string'
+			? author
+			: author.name || [author.givenName, author.familyName].filter(Boolean).join(' ');
+		return typeof name == 'string' && name.replace(/^By\s+/i, '').trim();
+	});
+}
+
+function sameJSONLDArticle(first, second) {
+	if (typeof first.url == 'string' && first.url.trim()
+		&& typeof second.url == 'string' && second.url.trim()) {
+		return first.url.replace(/#.*$/, '').replace(/\/$/, '')
+			== second.url.replace(/#.*$/, '').replace(/\/$/, '');
+	}
+	var headline = first.headline || first.name;
+	var otherHeadline = second.headline || second.name;
+	return typeof headline == 'string' && headline.trim()
+		&& typeof otherHeadline == 'string' && headline.trim() == otherHeadline.trim();
 }
 
 function addLowQualityMetadata(doc, newItem) {
@@ -2189,6 +2221,37 @@ var testCases = [
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.ms.now/opinion/msnbc-opinion/lebron-james-coco-gauff-are-perfect-team-usa-flag-bearers-rcna163245",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"creators": [
+					{
+						"firstName": "Dave",
+						"lastName": "Zirin",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Why LeBron James and Coco Gauff are the perfect Team USA flag bearers",
+				"date": "2024-07-26T10:00:41+00:00",
+				"url": "https://www.ms.now/opinion/msnbc-opinion/lebron-james-coco-gauff-are-perfect-team-usa-flag-bearers-rcna163245",
+				"abstractNote": "James and Gauff were voted to carry the flag by the other Olympians on Team USA.",
+				"language": "en-US",
+				"blogTitle": "MS NOW"
 			}
 		]
 	}
