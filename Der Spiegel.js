@@ -1,7 +1,7 @@
 {
 	"translatorID": "eef50507-c756-4081-86fd-700ae4ebf22e",
 	"label": "Der Spiegel",
-	"creator": "Martin Meyerhoff and Abe Jellinek",
+	"creator": "Martin Meyerhoff, Abe Jellinek, and Vera de Kok",
 	"target": "^https?://www\\.spiegel\\.de/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-08 15:46:49"
+	"lastUpdated": "2026-11-08 17:02:19"
 }
 
 /*
@@ -100,6 +100,7 @@ async function scrape(doc, url) {
 		item.date = ZU.strToISO(json.dateModified || json.dateCreated);
 		item.ISSN = '2195-1349';
 		item.publicationTitle = 'Der Spiegel';
+		item.place = 'Hamburg';
 
 		item.tags = [];
 		item.tags.push(...attr(doc, 'meta[name="news_keywords"]', 'content')
@@ -144,6 +145,7 @@ var testCases = [
 				"language": "de",
 				"libraryCatalog": "www.spiegel.de",
 				"publicationTitle": "Der Spiegel",
+				"place": "Hamburg",
 				"section": "Politik",
 				"shortTitle": "CDU-Parteitag",
 				"url": "https://www.spiegel.de/politik/deutschland/cdu-parteitag-partei-im-koma-a-797954.html",
@@ -214,6 +216,7 @@ var testCases = [
 				"language": "de",
 				"libraryCatalog": "www.spiegel.de",
 				"publicationTitle": "Der Spiegel",
+				"place": "Hamburg",
 				"section": "Politik",
 				"url": "https://www.spiegel.de/politik/veb-energiewende-a-335a79ef-0002-0001-0000-000084789653",
 				"attachments": [
@@ -254,6 +257,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "www.spiegel.de",
 				"publicationTitle": "Der Spiegel",
+				"place": "Hamburg",
 				"section": "International",
 				"shortTitle": "Madame Non and Monsieur Duracell",
 				"url": "https://www.spiegel.de/international/europe/madame-non-and-monsieur-duracell-german-french-relations-on-the-rocks-a-700530.html",
@@ -299,6 +303,7 @@ var testCases = [
 				"language": "de",
 				"libraryCatalog": "www.spiegel.de",
 				"publicationTitle": "Der Spiegel",
+				"place": "Hamburg",
 				"section": "Geschichte",
 				"shortTitle": "Kinder vom Kamper See",
 				"url": "https://www.spiegel.de/geschichte/kinder-vom-kamper-see-grab-unter-wasser-a-1021273.html",
@@ -344,6 +349,7 @@ var testCases = [
 				"language": "de",
 				"libraryCatalog": "www.spiegel.de",
 				"publicationTitle": "Der Spiegel",
+				"place": "Hamburg",
 				"section": "Kultur",
 				"url": "https://www.spiegel.de/kultur/musik/rolling-stones-mit-living-in-a-ghost-town-nummer-1-der-deutschen-charts-a-e0c06156-106c-4fc2-a0a7-8b5b794b7fe2",
 				"attachments": [
@@ -388,6 +394,7 @@ var testCases = [
 				"language": "de",
 				"libraryCatalog": "www.spiegel.de",
 				"publicationTitle": "Der Spiegel",
+				"place": "Hamburg",
 				"section": "Politik",
 				"shortTitle": "Hans-Georg Maaßen",
 				"url": "https://www.spiegel.de/politik/deutschland/hans-georg-maassen-armin-laschets-riskante-abstandsregel-a-45f6b77f-f2d7-4c68-8210-2ec1571068be",
@@ -450,6 +457,7 @@ var testCases = [
 				"language": "de",
 				"libraryCatalog": "www.spiegel.de",
 				"publicationTitle": "Der Spiegel",
+				"place": "Hamburg",
 				"section": "Job & Karriere",
 				"shortTitle": "Meinung",
 				"url": "https://www.spiegel.de/karriere/meeting-beim-chef-zu-hause-wie-verhalte-ich-mich-richtig-tipps-von-den-karrierecoaches-a-a73e665e-a74e-46b7-8e6e-ae053d8b6f83",
@@ -546,6 +554,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "www.spiegel.de",
 				"publicationTitle": "Der Spiegel",
+				"place": "Hamburg",
 				"section": "International",
 				"shortTitle": "The New Axis of Evil",
 				"url": "https://www.spiegel.de/international/world/the-new-axis-of-evil-der-spiegel-investigation-reveals-deep-military-cooperation-between-russia-and-china-a-12dc295a-413d-4a2f-b44f-2922092270e3",
