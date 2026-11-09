@@ -9,8 +9,9 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-09 13:43:19"
+	"lastUpdated": "2026-11-09 14:12:01"
 }
+
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -144,6 +145,9 @@ async function scrape(doc) {
 		item.code = ZU.trimInternal(`${PARLIAMENTARY[prefix]} ${chamber}`);
 		item.session = session;
 		item.legislativeBody = body;
+		// DC.title prefixes the dossier title and document type; styles like APA cite by short title
+		let docTitle = getMeta(doc, 'OVERHEIDop.documenttitel');
+		if (docTitle && docTitle != item.title) item.shortTitle = docTitle;
 		if (prefix == 'kst') {
 			let dossier = getMeta(doc, 'OVERHEIDop.dossiernummer');
 			let nr = getMeta(doc, 'OVERHEIDop.ondernummer');
@@ -234,6 +238,7 @@ var testCases = [
 				"language": "nl",
 				"legislativeBody": "Tweede Kamer der Staten-Generaal",
 				"session": "2025/26",
+				"shortTitle": "Verslag van schriftelijk overleg over o.a. de geannoteerde agenda informele bijeenkomst van EU-transportministers van 20-21 september 2026 in Dublin, Ierland (Kamerstuk 21501-33-1239)",
 				"url": "https://zoek.officielebekendmakingen.nl/kst-21501-33-1248",
 				"attachments": [
 					{
