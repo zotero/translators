@@ -11,6 +11,7 @@
 	"browserSupport": "gcsibv",
 	"lastUpdated": "2026-08-01 04:32:15"
 }
+
 /*
     ***** BEGIN LICENSE BLOCK *****
 
@@ -55,8 +56,7 @@ function getCollection(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function parseWorkPreface(node, item)
-{
+function parseWorkPreface(node, item) {
 	let title = ZU.trimInternal(text(node, 'h2.title.heading'));
 	if (!title) return false;
 	item.title = title;
@@ -72,14 +72,14 @@ function parseWorkPreface(node, item)
 	}
 
 	let summaryElem = node.querySelector('div.summary > blockquote.userstuff');
-	if (summaryElem)
+	if (summaryElem) {
 		item.abstractNote = ZU.cleanTags(ZU.trimInternal(summaryElem.innerHTML)).trim();
+	}
 
 	return true;
 }
 
-function parseWorkMeta(node, item)
-{
+function parseWorkMeta(node, item) {
 	let publishedDate = ZU.strToISO(text(node, 'dd.published'));
 	let updatedDate = ZU.strToISO(text(node, 'dd.status')) || publishedDate;
 	item.date = updatedDate;
@@ -93,7 +93,7 @@ function parseWorkMeta(node, item)
 		item.seriesNumber = parseInt(ZU.trimInternal(text(node, 'dd.series > span.position')).split(' ')[1]);
 	}
 
-	let chapterCountCurrent, chapterCountExpected = text(node, 'dd.chapters').split('/').map((desc) => (desc === '?') ? null : parseInt(desc));
+	let chapterCountCurrent, chapterCountExpected = text(node, 'dd.chapters').split('/').map(desc => ((desc === '?') ? null : parseInt(desc)));
 	let isComplete = (chapterCountCurrent == chapterCountExpected);
 	item.setExtra('Complete', isComplete);
 	if (isComplete) {
@@ -107,8 +107,7 @@ function parseWorkMeta(node, item)
 	return true;
 }
 
-function parseChapterHead(node, item)
-{
+function parseChapterHead(node, item) {
 	let title = ZU.trimInternal(text(node, '.title'));
 	item.title = title;
 	if (!title) return false;
@@ -116,14 +115,14 @@ function parseChapterHead(node, item)
 	item.url = new URL(href, baseUrl).toString();
 
 	let summaryElem = node.querySelector('div.summary > blockquote.userstuff');
-	if (summaryElem)
+	if (summaryElem) {
 		item.abstractNote = ZU.cleanTags(ZU.trimInternal(summaryElem.innerHTML)).trim();
+	}
 
 	return true;
 }
 
-function detectWeb(doc, url)
-{
+function detectWeb(doc, url) {
 	if (/\/works\/[0-9]+\/chapters\/[0-9]+/.test(url)) {
 		// single chapter in multi-chapter work
 		// OR only chapter in multi-chapter work (this is rarely used URL likely unreachable otherwise)
@@ -165,8 +164,7 @@ function detectWeb(doc, url)
 	return false;
 }
 
-async function doWeb(doc, url)
-{
+async function doWeb(doc, url) {
 	let detectedType = detectWeb(doc, url);
 
 	if (detectedType == 'multiple') {
@@ -238,18 +236,20 @@ async function doWeb(doc, url)
 		item.attachments = [];
 
 		const fullTextDownloadSupportedFormats = [
-			{extension: 'html', mimeType: 'text/html'},
-			{extension: 'epub', mimeType: 'application/epub+zip'},
-			{extension: 'mobi', mimeType: 'application/x-mobipocket-ebook'},
-			{extension: 'azw3', mimeType: 'application/vnd.amazon.ebook'},
-			{extension: 'pdf', mimeType: 'application/pdf'},
+			{ extension: 'html', mimeType: 'text/html' },
+			{ extension: 'epub', mimeType: 'application/epub+zip' },
+			{ extension: 'mobi', mimeType: 'application/x-mobipocket-ebook' },
+			{ extension: 'azw3', mimeType: 'application/vnd.amazon.ebook' },
+			{ extension: 'pdf', mimeType: 'application/pdf' },
 		];
 
 		let fullTextDownloadFormats = Z.getHiddenPref('AO3.fullTextDownloadFormats');
-		if (!fullTextDownloadFormats || typeof fullTextDownloadFormats !== "string")
+		if (!fullTextDownloadFormats || typeof fullTextDownloadFormats !== "string") {
 			fullTextDownloadFormats = [];
-		else
+		}
+		else {
 			fullTextDownloadFormats = fullTextDownloadFormats.split(',');
+		}
 
 		for (let format of fullTextDownloadSupportedFormats) {
 			let url = attr(scrapingDoc, `ul.work.navigation.actions > li.download a[href*=".${format.extension}"]`, 'href');
