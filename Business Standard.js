@@ -1,22 +1,20 @@
 {
 	"translatorID": "e8d40f4b-c4c9-41ca-a59f-cf4deb3d3dc5",
 	"label": "Business Standard",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.business-standard\\.com",
-	"minVersion": "2.1.9",
+	"creator": "Sebastian Karcher, Avram Lyon, Vera de Kok",
+	"target": "^https?://(?:www|hindi)\\.business-standard\\.com/",
+	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-11-01 18:25:24"
+	"lastUpdated": "2026-11-09 10:04:42"
 }
-
-/* FW LINE 59:b820c6d */ function flatten(t){var e=new Array;for(var i in t){var r=t[i];r instanceof Array?e=e.concat(flatten(r)):e.push(r)}return e}var FW={_scrapers:new Array};FW._Base=function(){this.callHook=function(t,e,i,r){if("object"==typeof this.hooks){var n=this.hooks[t];"function"==typeof n&&n(e,i,r)}},this.evaluateThing=function(t,e,i){var r=typeof t;if("object"===r){if(t instanceof Array){var n=this.evaluateThing,a=t.map(function(t){return n(t,e,i)});return flatten(a)}return t.evaluate(e,i)}return"function"===r?t(e,i):t},this.makeItems=function(t,e,i,r,n){n()}},FW.Scraper=function(t){FW._scrapers.push(new FW._Scraper(t))},FW._Scraper=function(t){for(x in t)this[x]=t[x];this._singleFieldNames=["abstractNote","applicationNumber","archive","archiveLocation","artworkMedium","artworkSize","assignee","audioFileType","audioRecordingType","billNumber","blogTitle","bookTitle","callNumber","caseName","code","codeNumber","codePages","codeVolume","committee","company","conferenceName","country","court","date","dateDecided","dateEnacted","dictionaryTitle","distributor","docketNumber","documentNumber","DOI","edition","encyclopediaTitle","episodeNumber","extra","filingDate","firstPage","forumTitle","genre","history","institution","interviewMedium","ISBN","ISSN","issue","issueDate","issuingAuthority","journalAbbreviation","label","language","legalStatus","legislativeBody","letterType","libraryCatalog","manuscriptType","mapType","medium","meetingName","nameOfAct","network","number","numberOfVolumes","numPages","pages","patentNumber","place","postType","presentationType","priorityNumbers","proceedingsTitle","programTitle","programmingLanguage","publicLawNumber","publicationTitle","publisher","references","reportNumber","reportType","reporter","reporterVolume","rights","runningTime","scale","section","series","seriesNumber","seriesText","seriesTitle","session","shortTitle","studio","subject","system","thesisType","title","type","university","url","version","videoRecordingType","volume","websiteTitle","websiteType"],this._makeAttachments=function(t,e,i,r){if(i instanceof Array)i.forEach(function(i){this._makeAttachments(t,e,i,r)},this);else if("object"==typeof i){var n=i.urls||i.url,a=i.types||i.type,s=i.titles||i.title,o=i.snapshots||i.snapshot,u=this.evaluateThing(n,t,e),l=this.evaluateThing(s,t,e),c=this.evaluateThing(a,t,e),h=this.evaluateThing(o,t,e);u instanceof Array||(u=[u]);for(var f in u){var p,m,v,d=u[f];p=c instanceof Array?c[f]:c,m=l instanceof Array?l[f]:l,v=h instanceof Array?h[f]:h,r.attachments.push({url:d,title:m,mimeType:p,snapshot:v})}}},this.makeItems=function(t,e,i,r,n){var a=new Zotero.Item(this.itemType);a.url=e;for(var s in this._singleFieldNames){var o=this._singleFieldNames[s];if(this[o]){var u=this.evaluateThing(this[o],t,e);u instanceof Array?a[o]=u[0]:a[o]=u}}var l=["creators","tags"];for(var c in l){var h=l[c],f=this.evaluateThing(this[h],t,e);if(f)for(var p in f)a[h].push(f[p])}this._makeAttachments(t,e,this.attachments,a),r(a,this,t,e),n()}},FW._Scraper.prototype=new FW._Base,FW.MultiScraper=function(t){FW._scrapers.push(new FW._MultiScraper(t))},FW._MultiScraper=function(t){for(x in t)this[x]=t[x];this._mkSelectItems=function(t,e){var i=new Object;for(var r in t)i[e[r]]=t[r];return i},this._selectItems=function(t,e,i){var r=new Array;Zotero.selectItems(this._mkSelectItems(t,e),function(t){for(var e in t)r.push(e);i(r)})},this._mkAttachments=function(t,e,i){var r=this.evaluateThing(this.attachments,t,e),n=new Object;if(r)for(var a in i)n[i[a]]=r[a];return n},this._makeChoices=function(t,e,i,r,n){if(t instanceof Array)t.forEach(function(t){this._makeTitlesUrls(t,e,i,r,n)},this);else if("object"==typeof t){var a=t.urls||t.url,s=t.titles||t.title,o=this.evaluateThing(a,e,i),u=this.evaluateThing(s,e,i),l=u instanceof Array;o instanceof Array||(o=[o]);for(var c in o){var h,f=o[c];h=l?u[c]:u,n.push(f),r.push(h)}}},this.makeItems=function(t,e,i,r,n){if(this.beforeFilter){var a=this.beforeFilter(t,e);if(a!=e)return void this.makeItems(t,a,i,r,n)}var s=[],o=[];this._makeChoices(this.choices,t,e,s,o);var u=this._mkAttachments(t,e,o),l=this.itemTrans;this._selectItems(s,o,function(t){if(t){var e=function(t){var e=t.documentURI,i=l;void 0===i&&(i=FW.getScraper(t,e)),void 0===i||i.makeItems(t,e,u[e],r,function(){})};Zotero.Utilities.processDocuments(t,e,n)}else n()})}},FW._MultiScraper.prototype=new FW._Base,FW.WebDelegateTranslator=function(t){return new FW._WebDelegateTranslator(t)},FW._WebDelegateTranslator=function(t){for(x in t)this[x]=t[x];this.makeItems=function(t,e,i,r,n){var a=this,s=Zotero.loadTranslator("web");s.setHandler("itemDone",function(i,n){r(n,a,t,e)}),s.setDocument(t),this.translatorId?(s.setTranslator(this.translatorId),s.translate()):(s.setHandler("translators",function(t,e){e.length&&(s.setTranslator(e[0]),s.translate())}),s.getTranslators()),n()}},FW._WebDelegateTranslator.prototype=new FW._Base,FW._StringMagic=function(){this._filters=new Array,this.addFilter=function(t){return this._filters.push(t),this},this.split=function(t){return this.addFilter(function(e){return e.split(t).filter(function(t){return""!=t})})},this.replace=function(t,e,i){return this.addFilter(function(r){return r.match(t)?r.replace(t,e,i):r})},this.prepend=function(t){return this.replace(/^/,t)},this.append=function(t){return this.replace(/$/,t)},this.remove=function(t,e){return this.replace(t,"",e)},this.trim=function(){return this.addFilter(function(t){return Zotero.Utilities.trim(t)})},this.trimInternal=function(){return this.addFilter(function(t){return Zotero.Utilities.trimInternal(t)})},this.match=function(t,e){return e||(e=0),this.addFilter(function(i){var r=i.match(t);return void 0===r||null===r?void 0:r[e]})},this.cleanAuthor=function(t,e){return this.addFilter(function(i){return Zotero.Utilities.cleanAuthor(i,t,e)})},this.key=function(t){return this.addFilter(function(e){return e[t]})},this.capitalizeTitle=function(){return this.addFilter(function(t){return Zotero.Utilities.capitalizeTitle(t)})},this.unescapeHTML=function(){return this.addFilter(function(t){return Zotero.Utilities.unescapeHTML(t)})},this.unescape=function(){return this.addFilter(function(t){return unescape(t)})},this._applyFilters=function(t,e){for(i in this._filters){t=flatten(t),t=t.filter(function(t){return void 0!==t&&null!==t});for(var r=0;r<t.length;r++)try{if(void 0===t[r]||null===t[r])continue;t[r]=this._filters[i](t[r],e)}catch(n){t[r]=void 0,Zotero.debug("Caught exception "+n+"on filter: "+this._filters[i])}t=t.filter(function(t){return void 0!==t&&null!==t})}return flatten(t)}},FW.PageText=function(){return new FW._PageText},FW._PageText=function(){this._filters=new Array,this.evaluate=function(t){var e=[t.documentElement.innerHTML];return e=this._applyFilters(e,t),0==e.length?!1:e}},FW._PageText.prototype=new FW._StringMagic,FW.Url=function(){return new FW._Url},FW._Url=function(){this._filters=new Array,this.evaluate=function(t,e){var i=[e];return i=this._applyFilters(i,t),0==i.length?!1:i}},FW._Url.prototype=new FW._StringMagic,FW.Xpath=function(t){return new FW._Xpath(t)},FW._Xpath=function(t){this._xpath=t,this._filters=new Array,this.text=function(){var t=function(t){return"object"==typeof t&&t.textContent?t.textContent:t};return this.addFilter(t),this},this.sub=function(t){var e=function(e,i){var r=i.evaluate(t,e,null,XPathResult.ANY_TYPE,null);return r?r.iterateNext():void 0};return this.addFilter(e),this},this.evaluate=function(t){var e=t.evaluate(this._xpath,t,null,XPathResult.ANY_TYPE,null),i=e.resultType,r=new Array;if(i==XPathResult.STRING_TYPE)r.push(e.stringValue);else if(i==XPathResult.BOOLEAN_TYPE)r.push(e.booleanValue);else if(i==XPathResult.NUMBER_TYPE)r.push(e.numberValue);else if(i==XPathResult.ORDERED_NODE_ITERATOR_TYPE||i==XPathResult.UNORDERED_NODE_ITERATOR_TYPE)for(var n;n=e.iterateNext();)r.push(n);return r=this._applyFilters(r,t),0==r.length?!1:r}},FW._Xpath.prototype=new FW._StringMagic,FW.detectWeb=function(t,e){for(var i in FW._scrapers){var r=FW._scrapers[i],n=r.evaluateThing(r.itemType,t,e),a=r.evaluateThing(r.detect,t,e);if(a.length>0&&a[0])return n}},FW.getScraper=function(t,e){var i=FW.detectWeb(t,e);return FW._scrapers.filter(function(r){return r.evaluateThing(r.itemType,t,e)==i&&r.evaluateThing(r.detect,t,e)})[0]},FW.doWeb=function(t,e){var i=FW.getScraper(t,e);i.makeItems(t,e,[],function(t,e,i,r){e.callHook("scraperDone",t,i,r),t.title||(t.title=""),t.complete()},function(){Zotero.done()}),Zotero.wait()};
 
 /*
    Business Standard India Translator
-   Copyright (C) 2012 Sebastian Karcher an Avram Lyon
+   Copyright (C) 2012 Sebastian Karcher, Avram Lyon and Vera de Kok
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU Affero General Public License as published by
@@ -32,66 +30,206 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-function detectWeb(doc, url) { return FW.detectWeb(doc, url); }
-function doWeb(doc, url) { return FW.doWeb(doc, url); }
 
-FW.MultiScraper({
-itemType         : 'multiple',
-detect           : FW.Url().match(/\/search\?/),
-choices          : {
-  titles :  FW.Xpath('//div[contains(@class, "main-cont-left")]//h2/a').text().trim(),
-  urls    :  FW.Xpath('//div[contains(@class, "main-cont-left")]//h2/a').key("href")
+function getArticle(doc) {
+	for (let script of doc.querySelectorAll('script[type="application/ld+json"]')) {
+		let data;
+		try {
+			data = JSON.parse(script.textContent);
+		}
+		catch (e) {
+			continue;
+		}
+		let nodes = Array.isArray(data) ? data : (data['@graph'] || [data]);
+		for (let node of nodes) {
+			if ([].concat(node['@type']).some(type => /^(NewsArticle|Article|ReportageNewsArticle|AnalysisNewsArticle)$/.test(type))) {
+				return node;
+			}
+		}
+	}
+	return null;
 }
-});
 
-/** Articles */
-FW.Scraper({
-itemType         : 'newspaperArticle',
-detect           : FW.Xpath('//div[@class="content-main"]//h1'),
-title            : FW.Xpath('//div[@class="content-main"]//h1').text().trim(),
-attachments      : [{ url: FW.Url().replace(/node/,"print"),
-  title:  "Business Standard India Snapshot",
-  type: "text/html" }],
-creators         : FW.Xpath('//p[contains(@class, "fL")]/span[1]').text().trimInternal().remove(/\|\n?.+/g).cleanAuthor("author"),
-date             : FW.Xpath('//meta[@itemprop="datePublished"]/@content').text(),
-tags             : FW.Xpath('//div[@class="related-keyword"]//div[contains(@class, "readmore_tagBG")]').text().split(/\s*,\s*/),
-abstractNote	 : FW.Xpath('//meta[@name="description"]/@content').text(),
-publicationTitle : "Business Standard India"
-});
- 
+function detectWeb(doc) {
+	let article = getArticle(doc);
+	if (doc.querySelector('h1') && article) {
+		return /^podcast$/i.test(article.articleSection || '') ? 'podcast' : 'newspaperArticle';
+	}
+	if (getSearchResults(doc, true)) {
+		return 'multiple';
+	}
+	return false;
+}
+
+function getSearchResults(doc, checkOnly) {
+	let items = {};
+	for (let link of doc.querySelectorAll('a[href]')) {
+		let href = link.href;
+		if (!/^https?:\/\/(www|hindi)\.business-standard\.com\/.+(?:\d+_\d+\.html|-id-\d+\/?)(?:[?#].*)?$/.test(href)) continue;
+		let title = ZU.trimInternal(link.textContent);
+		if (!title) continue;
+		if (checkOnly) return true;
+		items[href] = title;
+	}
+	return Object.keys(items).length ? items : false;
+}
+
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let selected = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!selected) return;
+		for (let selectedURL of Object.keys(selected)) {
+			await scrape(await requestDocument(selectedURL));
+		}
+	}
+	else {
+		await scrape(doc);
+	}
+}
+
+function getCreators(article) {
+	let creators = [];
+	for (let author of [].concat(article.author || [])) {
+		let name = typeof author == 'string' ? author : author.name;
+		if (!name) continue;
+		name = ZU.trimInternal(name);
+		// The site also labels news agencies and its web team as Person.
+		if (author['@type'] == 'Organization'
+			|| /^(Press Trust of India|PTI|Reuters|Bloomberg|ANI|IANS|Associated Press|AP|BS Reporter|BS Web Team|Team TMS|Business Standard|भाषा|वेब टीम)$/i.test(name)) {
+			creators.push({ lastName: name, creatorType: 'author', fieldMode: 1 });
+		}
+		else {
+			creators.push(ZU.cleanAuthor(name, 'author'));
+		}
+	}
+	return creators;
+}
+
+function nameKey(name) {
+	return name.normalize('NFC').toLowerCase().replace(/[.\s]+/g, '');
+}
+function getTags(doc, article, item) {
+	let keywords = article.keywords;
+	let tags = item.tags.map(tag => (typeof tag == 'string' ? tag : tag.tag));
+	let topicTags = Array.from(doc.querySelectorAll('meta[property="article:tag"]'), tag => tag.content);
+	if (topicTags.length) {
+		tags = topicTags;
+	}
+	else if (typeof keywords == 'string') {
+		// Decode before splitting; entity semicolons and thousands commas are not separators.
+		tags = ZU.unescapeHTML(keywords).split(/;|,(?!\d)/);
+	}
+	else if (Array.isArray(keywords)) {
+		tags = keywords;
+	}
+	let excluded = item.creators.map(creator => nameKey([creator.firstName, creator.lastName].filter(Boolean).join(' ')));
+	excluded.push(nameKey(item.title));
+	let seen = new Set();
+	return tags.map(tag => ZU.trimInternal(ZU.unescapeHTML(tag)))
+		.filter((tag) => {
+			let key = nameKey(tag);
+			if (!key || excluded.includes(key) || seen.has(key)) return false;
+			seen.add(key);
+			return true;
+		}).map(tag => ({ tag }));
+}
+async function scrape(doc) {
+	let article = getArticle(doc);
+	let translator = Zotero.loadTranslator('web');
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48'); // Embedded Metadata
+	translator.setDocument(doc);
+	translator.setHandler('itemDone', (_obj, item) => {
+		let creators = getCreators(article);
+		if (creators.length) item.creators = creators;
+		if (article.headline) item.title = ZU.unescapeHTML(ZU.cleanTags(article.headline));
+		let columnTitle = item.title.match(/^([^:]+):\s*(.+)$/);
+		if (columnTitle && item.creators.some(creator => nameKey([creator.firstName, creator.lastName].filter(Boolean).join(' ')) == nameKey(columnTitle[1]))) {
+			item.shortTitle = columnTitle[2].trim();
+		}
+		if (article.description) item.abstractNote = article.description;
+		if (article.datePublished) item.date = ZU.strToISO(article.datePublished);
+		if (article.url) item.url = article.url;
+		if (item.itemType == 'podcast') {
+			for (let creator of item.creators) creator.creatorType = 'podcaster';
+			let episode = item.title.match(/^(.+?)\s*Ep(?:isode)?\.?\s*(\d+)\s*:\s*(.+)$/i);
+			if (episode) {
+				item.seriesTitle = episode[1].trim();
+				item.episodeNumber = episode[2];
+				item.title = episode[3].trim();
+				delete item.shortTitle;
+			}
+		}
+		else {
+			if (article.articleSection) item.section = article.articleSection;
+			item.publicationTitle = 'Business Standard';
+		}
+		item.libraryCatalog = 'Business Standard';
+		item.language = article.inLanguage || doc.documentElement.lang;
+		item.tags = getTags(doc, article, item);
+		item.complete();
+	});
+	let em = await translator.getTranslatorObject();
+	em.itemType = detectWeb(doc);
+	await em.doWeb(doc, doc.location.href);
+}
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.business-standard.com/article/companies/air-india-unions-withdraw-strike-threat-112033100032_1.html",
+		"url": "http://www.business-standard.com/india/search_news.php?search=argentina&select=keyword",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.business-standard.com/technology/tech-news/anthropic-report-ai-fake-newsrooms-dating-surveillance-scams-126091100730_1.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Air India unions withdraw strike threat",
+				"title": "AI scaling fake newsrooms, surveillance, and online dating scams: Anthropic",
 				"creators": [
 					{
-						"firstName": "B. S.",
-						"lastName": "Reporter",
+						"firstName": "Harsh",
+						"lastName": "Shivam",
 						"creatorType": "author"
 					}
 				],
-				"date": "2012-03-31",
-				"abstractNote": "Read more about Air India unions withdraw strike threat on Business Standard. Air India employees have withdrawn their threat to go on “no pay, no work” strike after the airline on Friday assured them of clearing all pay dues by June end.",
+				"date": "2026-09-11",
+				"abstractNote": "Anthropic AI misuse report: Anthropic also said it identified and disrupted cases in which users attempted to use Claude models for malicious activity that could potentially support development of biological weapons",
+				"language": "en",
 				"libraryCatalog": "Business Standard",
-				"publicationTitle": "Business Standard India",
-				"url": "http://www.business-standard.com/article/companies/air-india-unions-withdraw-strike-threat-112033100032_1.html",
+				"publicationTitle": "Business Standard",
+				"section": "Tech News",
+				"shortTitle": "AI scaling fake newsrooms, surveillance, and online dating scams",
+				"url": "https://www.business-standard.com/technology/tech-news/anthropic-report-ai-fake-newsrooms-dating-surveillance-scams-126091100730_1.html",
 				"attachments": [
 					{
-						"title": "Business Standard India Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"Air India",
-					"Companies",
-					"News",
-					"Rohit Nandan",
-					"Strike"
+					{
+						"tag": "AI cyberattacks"
+					},
+					{
+						"tag": "AI misuse report"
+					},
+					{
+						"tag": "Anthropic AI misuse report"
+					},
+					{
+						"tag": "Anthropic AI threat report September 2026"
+					},
+					{
+						"tag": "Anthropic Claude misuse"
+					},
+					{
+						"tag": "Anthropic threat intelligence report"
+					},
+					{
+						"tag": "technology news"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -100,7 +238,228 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.business-standard.com/article/opinion/t-n-ninan-make-believe-solutions-112033100081_1.html",
+		"url": "https://hindi.business-standard.com/companies/industrial/voltas-appoints-sunil-d-souza-chairman-as-noel-tata-retires-november-11-id-566091/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Noel Tata 11 नवंबर को छोड़ेंगे Voltas के चेयरमैन का पद, आगे सुनील डिसूजा करेंगे कंपनी की अगुवाई",
+				"creators": [
+					{
+						"lastName": "वेब टीम",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2026-11-07",
+				"abstractNote": "Tata Group की कंपनी Voltas में बड़ा नेतृत्व बदलाव होने जा रहा है। नोएल टाटा 11 नवंबर को चेयरमैन पद से रिटायर होंगे। सुनील डिसूजा 12 नवंबर से नए चेयरमैन बनेंगे, जबकि नोएल टाटा ‘चेयरमैन एमेरिटस’ रहेंगे",
+				"language": "hi-IN",
+				"libraryCatalog": "Business Standard",
+				"publicationTitle": "Business Standard",
+				"section": "इंडस्ट्री",
+				"url": "https://hindi.business-standard.com/companies/industrial/voltas-appoints-sunil-d-souza-chairman-as-noel-tata-retires-november-11-id-566091/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Jayant Balan Voltas MD"
+					},
+					{
+						"tag": "Noel Tata Chairman Emeritus"
+					},
+					{
+						"tag": "Noel Tata Voltas Retirement"
+					},
+					{
+						"tag": "Sunil Dsouza Voltas Chairman"
+					},
+					{
+						"tag": "Tata Group Leadership Changes"
+					},
+					{
+						"tag": "Voltas Chairman 2026"
+					},
+					{
+						"tag": "Voltas Leadership Change"
+					},
+					{
+						"tag": "Voltas New Chairman"
+					},
+					{
+						"tag": "टाटा समूह में बड़ा बदलाव"
+					},
+					{
+						"tag": "नोएल टाटा रिटायरमेंट"
+					},
+					{
+						"tag": "वोल्टास के नए चेयरमैन"
+					},
+					{
+						"tag": "सुनील डिसूजा वोल्टास चेयरमैन"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.business-standard.com/companies/news/three-investors-offload-1-84-stake-in-groww-for-2-457-crore-in-bulk-deals-126110701037_1.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Three investors offload 1.84% stake in Groww for ₹2,457 crore in bulk deals",
+				"creators": [
+					{
+						"lastName": "Press Trust of India",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2026-11-07",
+				"abstractNote": "The three investors offloaded more than 11.52 crore shares, representing a combined 1.84 per cent stake in Groww on Friday, as per the data",
+				"language": "en",
+				"libraryCatalog": "Business Standard",
+				"publicationTitle": "Business Standard",
+				"section": "News",
+				"url": "https://www.business-standard.com/companies/news/three-investors-offload-1-84-stake-in-groww-for-2-457-crore-in-bulk-deals-126110701037_1.html",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Goldman Sachs Groww shares"
+					},
+					{
+						"tag": "Groww stake sale"
+					},
+					{
+						"tag": "Peak XV Partners Groww"
+					},
+					{
+						"tag": "Y Combinator Groww stake sale"
+					},
+					{
+						"tag": "₹2,457 crore Groww bulk deal"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://hindi.business-standard.com/markets/commodities/gold-price-outlook-goldman-sachs-cuts-gold-target-for-2026-and-2027-fed-rate-id-565723/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Gold Price: गोल्डमैन सैक्स ने सोने का टारगेट करीब 11% घटाया, क्या अब थम जाएगी कीमतों में तेजी?",
+				"creators": [
+					{
+						"firstName": "दिग्विजय",
+						"lastName": "सिंह",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-11-06",
+				"abstractNote": "गोल्डमैन सैक्स ने सोने के टारगेट में कटौती की मुख्य वजह अमेरिकी फेडरल रिजर्व का सख्त रुख बताया है। बैंक का मानना है कि अमेरिका में ब्याज दरें लंबे समय तक ऊंची रहने से सोने में निवेश की मांग प्रभावित हो सकती है।",
+				"language": "hi-IN",
+				"libraryCatalog": "Business Standard",
+				"publicationTitle": "Business Standard",
+				"section": "जिंस",
+				"shortTitle": "Gold Price",
+				"url": "https://hindi.business-standard.com/markets/commodities/gold-price-outlook-goldman-sachs-cuts-gold-target-for-2026-and-2027-fed-rate-id-565723/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Dhanteras"
+					},
+					{
+						"tag": "Dhanteras Gold Price"
+					},
+					{
+						"tag": "Dhanteras Silver Price"
+					},
+					{
+						"tag": "Gold Price Forecast"
+					},
+					{
+						"tag": "Gold Price Today"
+					},
+					{
+						"tag": "Gold Rate Today"
+					},
+					{
+						"tag": "Goldman Sachs Gold Forecast"
+					},
+					{
+						"tag": "Goldman Sachs Gold Target Cut"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.business-standard.com/article/companies/air-india-unions-withdraw-strike-threat-112033100032_1.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Air India unions withdraw strike threat",
+				"creators": [
+					{
+						"lastName": "BS Reporter",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2012-03-31",
+				"abstractNote": "Air India employees have withdrawn their threat to go on “no pay, no work” strike after the airline on Friday assured them of clearing all pay dues by June end.",
+				"language": "en",
+				"libraryCatalog": "Business Standard",
+				"publicationTitle": "Business Standard",
+				"section": "News",
+				"url": "https://www.business-standard.com/article/companies/air-india-unions-withdraw-strike-threat-112033100032_1.html",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Air India"
+					},
+					{
+						"tag": "Rohit Nandan"
+					},
+					{
+						"tag": "strike"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.business-standard.com/article/opinion/t-n-ninan-make-believe-solutions-112033100081_1.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -113,29 +472,47 @@ var testCases = [
 					}
 				],
 				"date": "2012-03-31",
-				"abstractNote": "Read more about T N Ninan: Make-believe solutions on Business Standard. The government has to deliver solutions that work, not indulge in action for the sake of demonstrating lack of paralysis",
+				"abstractNote": "The government has been trying to get rid of the impression that it is caught in “policy paralysis”.",
+				"language": "en",
 				"libraryCatalog": "Business Standard",
-				"publicationTitle": "Business Standard India",
-				"shortTitle": "T N Ninan",
-				"url": "http://www.business-standard.com/article/opinion/t-n-ninan-make-believe-solutions-112033100081_1.html",
+				"publicationTitle": "Business Standard",
+				"section": "Columns",
+				"shortTitle": "Make-believe solutions",
+				"url": "https://www.business-standard.com/article/opinion/t-n-ninan-make-believe-solutions-112033100081_1.html",
 				"attachments": [
 					{
-						"title": "Business Standard India Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"Coal India",
-					"Columns",
-					"Fdi In Retail Trade",
-					"Kingfisher",
-					"Lic",
-					"New Manufacturing Policy",
-					"Ongc",
-					"Opinion",
-					"Power Stations",
-					"Railway Budget",
-					"Weekend Ruminations"
+					{
+						"tag": "Coal India"
+					},
+					{
+						"tag": "FDI in retail trade"
+					},
+					{
+						"tag": "Kingfisher"
+					},
+					{
+						"tag": "LIC"
+					},
+					{
+						"tag": "ONGC"
+					},
+					{
+						"tag": "Railway Budget"
+					},
+					{
+						"tag": "WEEKEND RUMINATIONS"
+					},
+					{
+						"tag": "new manufacturing policy"
+					},
+					{
+						"tag": "power stations"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -144,8 +521,250 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.business-standard.com/india/search_news.php?search=argentina&select=keyword",
+		"url": "https://hindi.business-standard.com/companies/",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://hindi.business-standard.com/india-news/government-has-no-plans-to-raise-ethanol-blending-beyond-20pc-says-hardeep-singh-puri-id-563359/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "पेट्रोल में 20% से ज्यादा एथनॉल नहीं मिलाएगी सरकार, हरदीप सिंह पुरी का बड़ा बयान",
+				"creators": [
+					{
+						"lastName": "भाषा",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2026-10-27",
+				"abstractNote": "Government Has No Plans to Raise Ethanol Blending Beyond 20pc, Says Hardeep Singh Puri E20 Petrol, Ethanol Blending, Hardeep Singh Puri, Ethanol Blended Petrol, E20 Fuel, Flex Fuel Vehicles, E85 Fuel, E100 Fuel, Petroleum Ministry, Biofuel India, Petrol…",
+				"language": "hi-IN",
+				"libraryCatalog": "Business Standard",
+				"publicationTitle": "Business Standard",
+				"section": "देश",
+				"url": "https://hindi.business-standard.com/india-news/government-has-no-plans-to-raise-ethanol-blending-beyond-20pc-says-hardeep-singh-puri-id-563359/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Biofuel India"
+					},
+					{
+						"tag": "E100 Fuel"
+					},
+					{
+						"tag": "E20 Fuel"
+					},
+					{
+						"tag": "E20 Petrol"
+					},
+					{
+						"tag": "E85 Fuel"
+					},
+					{
+						"tag": "Ethanol Blended Petrol"
+					},
+					{
+						"tag": "Ethanol Blending"
+					},
+					{
+						"tag": "Ethanol Mixing"
+					},
+					{
+						"tag": "Ethanol Policy"
+					},
+					{
+						"tag": "Flex Fuel Vehicles"
+					},
+					{
+						"tag": "Fuel Economy"
+					},
+					{
+						"tag": "Hardeep Singh Puri"
+					},
+					{
+						"tag": "Petrol Engine"
+					},
+					{
+						"tag": "Petroleum Ministry"
+					},
+					{
+						"tag": "ई20 पेट्रोल"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.business-standard.com/podcast/tms-ep640-sc-on-patanjali-blinkit-vodafone-idea-stock-cbam-124022900064_1.html",
+		"items": [
+			{
+				"itemType": "podcast",
+				"title": "SC on Patanjali, Blinkit, Vodafone Idea stock, CBAM",
+				"creators": [
+					{
+						"lastName": "Team TMS",
+						"creatorType": "podcaster",
+						"fieldMode": 1
+					}
+				],
+				"date": "2024-02-29",
+				"abstractNote": "Where does the buck stop after SC rap on Patanjali? Can Blinkit challenge Amazon & Flipkart? Why did Vodafone Idea's fundraise plan fail? What is the Carbon Border Adjustment Mechanism? Answers here",
+				"seriesTitle": "TMS",
+				"episodeNumber": "640",
+				"language": "en",
+				"libraryCatalog": "Business Standard",
+				"url": "https://www.business-standard.com/podcast/tms-ep640-sc-on-patanjali-blinkit-vodafone-idea-stock-cbam-124022900064_1.html",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Amazon"
+					},
+					{
+						"tag": "Blinkit"
+					},
+					{
+						"tag": "Carbon Border Adjustment Mechanism"
+					},
+					{
+						"tag": "EU imports"
+					},
+					{
+						"tag": "European Union"
+					},
+					{
+						"tag": "FMCG firms"
+					},
+					{
+						"tag": "Flipkart"
+					},
+					{
+						"tag": "Indian Medical Association"
+					},
+					{
+						"tag": "January 2026"
+					},
+					{
+						"tag": "Patanjali Ayurveda"
+					},
+					{
+						"tag": "Ramdev"
+					},
+					{
+						"tag": "Supreme Court"
+					},
+					{
+						"tag": "Supreme Court corridors"
+					},
+					{
+						"tag": "TMS"
+					},
+					{
+						"tag": "Vodafone Idea"
+					},
+					{
+						"tag": "Yoga guru"
+					},
+					{
+						"tag": "Zomato"
+					},
+					{
+						"tag": "advertisements"
+					},
+					{
+						"tag": "advertising"
+					},
+					{
+						"tag": "aluminium"
+					},
+					{
+						"tag": "anticipation of a turnaround"
+					},
+					{
+						"tag": "buck stop"
+					},
+					{
+						"tag": "casting a long shadow"
+					},
+					{
+						"tag": "debt"
+					},
+					{
+						"tag": "dipping sale"
+					},
+					{
+						"tag": "disappoint investors"
+					},
+					{
+						"tag": "e-commerce giant"
+					},
+					{
+						"tag": "electronic gadgets"
+					},
+					{
+						"tag": "fruits"
+					},
+					{
+						"tag": "fund infusion"
+					},
+					{
+						"tag": "fundraising"
+					},
+					{
+						"tag": "groceries"
+					},
+					{
+						"tag": "kirana store"
+					},
+					{
+						"tag": "medicinal products"
+					},
+					{
+						"tag": "misleading"
+					},
+					{
+						"tag": "quick commerce"
+					},
+					{
+						"tag": "sharp selling"
+					},
+					{
+						"tag": "startups"
+					},
+					{
+						"tag": "steel"
+					},
+					{
+						"tag": "tax"
+					},
+					{
+						"tag": "tax regime"
+					},
+					{
+						"tag": "transition"
+					},
+					{
+						"tag": "vegetables"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
