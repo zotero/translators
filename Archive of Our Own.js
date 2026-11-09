@@ -2,7 +2,7 @@
 	"translatorID": "4913f5c0-d929-4162-81f2-bf922618746f",
 	"label": "Archive of Our Own",
 	"creator": "omnivorous_narrator",
-	"target": "^https?://archiveofourown.org/*",
+	"target": "^https?://archiveofourown\\.org/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
