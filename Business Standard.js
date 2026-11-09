@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-09 10:04:42"
+	"lastUpdated": "2026-11-09 10:12:53"
 }
 
 /*
@@ -162,6 +162,7 @@ async function scrape(doc) {
 		else {
 			if (article.articleSection) item.section = article.articleSection;
 			item.publicationTitle = 'Business Standard';
+			item.place = 'New Delhi';
 		}
 		item.libraryCatalog = 'Business Standard';
 		item.language = article.inLanguage || doc.documentElement.lang;
@@ -199,6 +200,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "Business Standard",
 				"publicationTitle": "Business Standard",
+				"place": "New Delhi",
 				"section": "Tech News",
 				"shortTitle": "AI scaling fake newsrooms, surveillance, and online dating scams",
 				"url": "https://www.business-standard.com/technology/tech-news/anthropic-report-ai-fake-newsrooms-dating-surveillance-scams-126091100730_1.html",
@@ -255,6 +257,7 @@ var testCases = [
 				"language": "hi-IN",
 				"libraryCatalog": "Business Standard",
 				"publicationTitle": "Business Standard",
+				"place": "New Delhi",
 				"section": "इंडस्ट्री",
 				"url": "https://hindi.business-standard.com/companies/industrial/voltas-appoints-sunil-d-souza-chairman-as-noel-tata-retires-november-11-id-566091/",
 				"attachments": [
@@ -325,6 +328,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "Business Standard",
 				"publicationTitle": "Business Standard",
+				"place": "New Delhi",
 				"section": "News",
 				"url": "https://www.business-standard.com/companies/news/three-investors-offload-1-84-stake-in-groww-for-2-457-crore-in-bulk-deals-126110701037_1.html",
 				"attachments": [
@@ -374,6 +378,7 @@ var testCases = [
 				"language": "hi-IN",
 				"libraryCatalog": "Business Standard",
 				"publicationTitle": "Business Standard",
+				"place": "New Delhi",
 				"section": "जिंस",
 				"shortTitle": "Gold Price",
 				"url": "https://hindi.business-standard.com/markets/commodities/gold-price-outlook-goldman-sachs-cuts-gold-target-for-2026-and-2027-fed-rate-id-565723/",
@@ -433,6 +438,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "Business Standard",
 				"publicationTitle": "Business Standard",
+				"place": "New Delhi",
 				"section": "News",
 				"url": "https://www.business-standard.com/article/companies/air-india-unions-withdraw-strike-threat-112033100032_1.html",
 				"attachments": [
@@ -476,6 +482,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "Business Standard",
 				"publicationTitle": "Business Standard",
+				"place": "New Delhi",
 				"section": "Columns",
 				"shortTitle": "Make-believe solutions",
 				"url": "https://www.business-standard.com/article/opinion/t-n-ninan-make-believe-solutions-112033100081_1.html",
@@ -543,6 +550,7 @@ var testCases = [
 				"language": "hi-IN",
 				"libraryCatalog": "Business Standard",
 				"publicationTitle": "Business Standard",
+				"place": "New Delhi",
 				"section": "देश",
 				"url": "https://hindi.business-standard.com/india-news/government-has-no-plans-to-raise-ethanol-blending-beyond-20pc-says-hardeep-singh-puri-id-563359/",
 				"attachments": [
