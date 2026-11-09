@@ -150,7 +150,7 @@ function detectWeb(doc, url)
 		Zotero.debug("AO3 series TOC page");
 		return 'multiple';
 	}
-	else if (/\/users\/[a-zA-Z0-9_]+(\/pseuds\/([a-zA-Z0-9_\-]|(%[0-9a-fA-F]{2}))+)?\/(works|series|bookmarks|collections)/.test(url)) {
+	else if (/\/users\/[a-zA-Z0-9_]+(\/pseuds\/([a-zA-Z0-9_-]|(%[0-9a-fA-F]{2}))+)?\/(works|series|bookmarks|collections)/.test(url)) {
 		// see https://archiveofourown.org/faq/your-account#usernamecharacters,
 		// and https://archiveofourown.org/faq/pseuds#pseudcharacters
 		// paged; list may include series, not just works
