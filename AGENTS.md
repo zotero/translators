@@ -33,6 +33,10 @@ Do this in the same commit as the deletion.
 - Once you have the API spec and/or page structure, write your translator against those.
 - Add `--headed` to any `.bin/` browser tool for a site behind Cloudflare or a similar wall. Headless Chrome is refused outright there, so a headless run returns a challenge page instead of content, and every test fails "Detection failed". Don't mistake that for a translator bug, and don't try to spoof your way past it.
 
+## Windows
+
+The browser tools (`create-test`, `run-tests`) build the Zotero Connector with `build.sh` on first use. On Windows, run them from Git Bash, and have `rsvg-convert`, `jq` and `rsync` on `PATH` (Git Bash doesn't include them; MSYS2 packages them). Without these tools, the build produces an incomplete extension that Chrome refuses to load.
+
 ## Code tips
 
 - Check `index.d.ts` for method and class definitions.
