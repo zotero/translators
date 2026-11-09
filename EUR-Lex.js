@@ -274,9 +274,11 @@ async function scrape(doc, url) {
 		}
 		// some treaties have an empty link, or none, but the page still gives the OJ reference
 		if (treaty && !/(?:OJ|DD):/.test(uri)) {
-			let ojReference = text(doc, "#originalTitle ~ p em").match(/\b([LC])\s+(\d+[A-Z]?)\b/);
+			// e.g. "OJ L 125, 9.6.1971, pp. 17–19", or without a series before 1968: "OJ 93, 11.6.1964, pp. 1431–1457"
+			let reference = text(doc, "#originalTitle ~ p em");
+			let ojReference = reference.match(/\b([LC])\s+(\d+[A-Z]?)\b/) || reference.match(/^\D*?()(\d+),/);
 			if (ojReference) {
-				uri = "?uri=OJ:" + ojReference[1] + ":" + (publicationDate || celex.substr(1)).substr(0, 4) + ":" + ojReference[2] + ":TOC";
+				uri = "?uri=OJ:" + (ojReference[1] || "P") + ":" + (publicationDate || celex.substr(1)).substr(0, 4) + ":" + ojReference[2] + ":TOC";
 			}
 		}
 		if (uri) {
@@ -299,10 +301,12 @@ async function scrape(doc, url) {
 					item.codeNumber = uriParts[1] + ", " + uriParts[2];
 				}
 				else {
+					// the OJ had no series before 1968 (P), and neither had the ECSC's OJ (A), e.g. "OJ 93, 11.6.1964"
+					let series = ["A", "P"].includes(uriParts[1]) ? "" : " " + uriParts[1];
 					// the year of the OJ, which can differ from the date of an act, and often from a treaty's dates
 					item.code = type == "statute"
-						? uriParts[0] + " " + uriParts[2] + " " + uriParts[1]
-						: uriParts[0] + " " + uriParts[1];
+						? uriParts[0] + " " + uriParts[2] + series
+						: uriParts[0] + series;
 					item.codeNumber = uriParts[3].replace(/^0+/, "");
 				}
 				// the reference is localized, e.g.
@@ -1030,6 +1034,72 @@ var testCases = [
 				"language": "en",
 				"pages": "1-17",
 				"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:41976A0209(01)",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:21963A0720(01)",
+		"detectedItemType": "bill",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Convention d'association entre la Communauté économique européenne et les États africains et malgache associés à cette Communauté /* Signée à Yaoundé le 20 juillet 1963 */",
+				"creators": [],
+				"dateEnacted": "1964-06-01",
+				"code": "OJ 1964",
+				"codeNumber": "93",
+				"extra": "type: treaty\navailable-date: 1963-07-20\nevent-date: 1964-06-11\nstatus: not in force",
+				"language": "en",
+				"pages": "1431-1457",
+				"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:21963A0720(01)",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:21956A0507(01)",
+		"detectedItemType": "bill",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Consultation Agreement between the Swiss Confederation and the High Authority of the European Coal and Steel Community",
+				"creators": [],
+				"dateEnacted": "1957-01-26",
+				"code": "OJ 1957",
+				"codeNumber": "7",
+				"extra": "type: treaty\navailable-date: 1956-05-07\nevent-date: 1957-02-21\nstatus: not in force",
+				"language": "en",
+				"pages": "85-87",
+				"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:21956A0507(01)",
 				"attachments": [
 					{
 						"title": "EUR-Lex PDF (EN)",
