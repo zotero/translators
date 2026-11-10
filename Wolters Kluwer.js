@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-09-22 18:16:02"
+	"lastUpdated": "2026-11-10 12:34:31"
 }
 
 
@@ -135,15 +135,20 @@ async function scrape(doc, url = doc.location.href) {
 			if (reporterInfo.reporterVolume) item.reporterVolume = reporterInfo.reporterVolume;
 			if (reporterInfo.firstPage) item.firstPage = reporterInfo.firstPage;
 		}
-		if (biblio['ECLI']) {
-			// ECLI is stored in DOI (precedent: EUR-Lex)
-			item.DOI = biblio['ECLI'];
-		}
-		else {
+		var ecli = biblio['ECLI'];
+		if (!ecli) {
 			var ecliContainer = doc.querySelector('.document-body, #document-content, article') || doc.body;
 			if (ecliContainer) {
 				var ecliMatch = ecliContainer.textContent.match(/ECLI:\s*[A-Za-z]{2}:[^:\s]{1,7}:\d{4}:[^:\s]{1,25}/i);
-				if (ecliMatch) item.DOI = ecliMatch[0].replace(/\s+/g, '');
+				if (ecliMatch) ecli = ecliMatch[0].replace(/\s+/g, '');
+			}
+		}
+		if (ecli) {
+			if (!item.extra) {
+				item.extra = ecli;
+			}
+			else if (!item.extra.includes(ecli)) {
+				item.extra += '\n' + ecli;
 			}
 		}
 		if (biblio['Entscheidungsname']) item.shortTitle = biblio['Entscheidungsname'];
