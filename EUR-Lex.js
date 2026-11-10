@@ -61,12 +61,23 @@ const eeaNoteRegex = /\s*\(+(?=[^()\d]*(?:EEA|EWR|EEE|EER|EES|ETA|EØS|ЕИП|Ε
 // the same note without parentheses, which many acts have, e.g. Regulation (EU) No 492/2011
 const bareEeaNoteRegex = /\s*(?:Text with EEA relevance|Текст от значение за ЕИП|Text s významem pro EHP|EØS-relevant tekst|Text von Bedeutung für den EWR|Κείμενο που παρουσιάζει ενδιαφέρον για τον ΕΟΧ|Texto pertinente a (?:efectos|los fines) del EEE|EMPs kohaldatav tekst|ETA:n kannalta merkityksellinen teksti|Texte présentant de l['’]intérêt pour l['’]EEE|Téacs atá ábhartha maidir le(?:is an)? LEE|Tekst značajan za EGP|EGT[- ]vonatkozású szöveg|Testo rilevante ai fini del SEE|Dokuments attiecas uz EEZ|Tekstas svarbus EEE|Test b['’]r[ei]levanza għaż-ŻEE|Voor de EER relevante tekst|Tekst mający znaczenie dla EOG|Texto relevante para efeitos do EEE|Text cu relevanță pentru SEE|Text cu relevanţă pentru SEE|Text s (?:významom|platnosťou) pre EHP|Besedilo (?:velja za|se nanaša na) EGP|Text av betydelse för EES)[\s.]*$/i;
 
-// a short title at the end of an English title, e.g. "(Artificial Intelligence Act)".
-// Most parentheses in that position are something else, e.g. "(recast)" or "(EUPOL COPPS)"
-const englishShortTitleRegex = /\([A-Z][^()]*\b(?:Act|Code|Directive|Regulation)\)$/;
+// Some acts give themselves a short title in parentheses at the end of their title, e.g.
+// "Regulation (EU) 2024/1689 ... laying down harmonised rules on artificial intelligence ... (Artificial Intelligence Act)".
+// Most parentheses in that position are something else: a drafting note such as "(recast)" or "(Codified version)",
+// or the name of what the act is about, such as "(EUPOL COPPS)". There is no metadata that tells them apart,
+// so only the two forms that short titles actually take are accepted, in the English title:
+// - a capitalized name that ends in the kind of act: "(Visa Code)", "(Digital Services Act)", "(European Climate Law)",
+//   "(Framework Directive)", "(General Data Protection Regulation)"
+// - a capitalized word and a Roman numeral, as in the private international law regulations "(Rome I)" and "(Rome II)"
+// Some acts put it in quotation marks: "(‘European Climate Law’)"
+const englishShortTitleRegex = /\(['‘"“]?(?:[A-Z][^()]*\b(?:Act|Code|Directive|Law|Regulation)|[A-Z][a-z]+ I{1,3})['’"”]?\)$/;
 
-// the same position in any language, once the English title has shown that it is a short title
-const shortTitleRegex = /\(([^()]+)\)$/;
+// An act that only changes or supplements another act often ends with the short title of that other act, e.g.
+// "Regulation (EU) 2019/1155 ... of 20 June 2019 amending Regulation (EC) No 810/2009 ... (Visa Code)".
+// In such a title the verb comes right after the date. An act with its own short title can also amend
+// other acts, but then the verb comes after its subject: "... laying down harmonised rules on
+// artificial intelligence and amending Regulations ... (Artificial Intelligence Act)"
+const referringTitleRegex = /\d{4},? (?:amending|correcting|implementing|repealing|supplementing)\b/i;
 
 // the same position in any language, once the English title has shown that it is a short title.
 // Quotation marks around it, which differ by language, are left out
@@ -268,11 +279,11 @@ async function scrape(doc, url) {
 		// type: everything with ELI (see var typeMapping: bill, statute, report) and all treaties
 		item.title = getTitle(doc, viewingLanguage.toLowerCase())
 			|| ZU.trimInternal(attr(doc, 'meta[name="WT.z_docTitle"]', "content").replace(/#/g, " "));
-		// decisions and purely amending acts use this position for the act they refer to,
-		// e.g. "Regulation (EU) 2019/1155 ... amending Regulation (EC) No 810/2009 ... (Visa Code)"
+		// only directives and regulations have short titles of their own. Decisions, and delegated and
+		// implementing acts (DIR_DEL, REG_IMPL etc.), use this position for the act they refer to.
 		// every page has the title in all languages, so only the English one has to be interpreted
 		let englishTitle = getTitle(doc, "en");
-		if (/\/(?:DIR|REG)[^/]*$/.test(eliTypeUri) && !/\d{4},? amending\b/i.test(englishTitle) && englishShortTitleRegex.test(englishTitle)) {
+		if (/\/(?:DIR|REG)$/.test(eliTypeUri) && !referringTitleRegex.test(englishTitle) && englishShortTitleRegex.test(englishTitle)) {
 			let shortTitle = item.title.match(shortTitleRegex);
 			if (shortTitle) {
 				item.shortTitle = shortTitle[1];
@@ -1145,6 +1156,72 @@ var testCases = [
 				"pages": "111-118",
 				"shortTitle": "Corrigendum",
 				"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:22006A1230(08)R(01)",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32008R0593",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Regulation (EC) No 593/2008 of the European Parliament and of the Council of 17 June 2008 on the law applicable to contractual obligations (Rome I)",
+				"creators": [],
+				"dateEnacted": "2008-06-17",
+				"code": "OJ 2008 L",
+				"codeNumber": "177",
+				"extra": "available-date: 2008-07-04",
+				"language": "en",
+				"pages": "6-16",
+				"shortTitle": "Rome I",
+				"url": "http://data.europa.eu/eli/reg/2008/593/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32021R1119",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Regulation (EU) 2021/1119 of the European Parliament and of the Council of 30 June 2021 establishing the framework for achieving climate neutrality and amending Regulations (EC) No 401/2009 and (EU) 2018/1999 (‘European Climate Law’)",
+				"creators": [],
+				"dateEnacted": "2021-06-30",
+				"code": "OJ 2021 L",
+				"codeNumber": "243",
+				"extra": "available-date: 2021-07-09",
+				"language": "en",
+				"pages": "1-17",
+				"shortTitle": "European Climate Law",
+				"url": "http://data.europa.eu/eli/reg/2021/1119/oj",
 				"attachments": [
 					{
 						"title": "EUR-Lex PDF (EN)",
