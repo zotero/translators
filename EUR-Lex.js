@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-06 22:57:49"
+	"lastUpdated": "2026-11-10 11:17:13"
 }
 
 
@@ -55,8 +55,9 @@ const treatyTypes = ["AGREE_AMEND", "AGREE_EUMS", "AGREE_INTERNATION", "AGREE_PR
 
 // the note "(Text with EEA relevance)" and its variants, in all official languages:
 // it must contain both the local abbreviation of EEA and a word for "text", and no digits
-// (Croatian "EEZ" also means EEC, as in "... Direktive 89/391/EEZ")
-const eeaNoteRegex = /\s*\(+(?=[^()\d]*(?:EEA|EWR|EEE|EER|EES|ETA|EØS|ЕИП|ΕΟΧ|EGT|EGP|EHP|EMP|EOG|LEE|SEE|EEZ|ŻEE))(?=[^()\d]*(?:[Tt]e(?:kst|xt)|[Tt]est|[Tt]éacs|szöveg|[Bb]esedilo|[Dd]okuments|[Тт]екст|[Κκ]είμενο))[^()\d]*\)+[\s.]*$/;
+// (Croatian "EEZ" also means EEC, as in "... Direktive 89/391/EEZ").
+// Some titles have the note twice, e.g. Delegated Regulation (EU) 2020/687
+const eeaNoteRegex = /(?:\s*\(+(?=[^()\d]*(?:EEA|EWR|EEE|EER|EES|ETA|EØS|ЕИП|ΕΟΧ|EGT|EGP|EHP|EMP|EOG|LEE|SEE|EEZ|ŻEE))(?=[^()\d]*(?:[Tt]e(?:kst|xt)|[Tt]est|[Tt]éacs|szöveg|[Bb]esedilo|[Dd]okuments|[Тт]екст|[Κκ]είμενο))[^()\d]*\)+[\s.]*)+$/;
 
 // the same note without parentheses, which many acts have, e.g. Regulation (EU) No 492/2011
 const bareEeaNoteRegex = /\s*(?:Text with EEA relevance|Текст от значение за ЕИП|Text s významem pro EHP|EØS-relevant tekst|Text von Bedeutung für den EWR|Κείμενο που παρουσιάζει ενδιαφέρον για τον ΕΟΧ|Texto pertinente a (?:efectos|los fines) del EEE|EMPs kohaldatav tekst|ETA:n kannalta merkityksellinen teksti|Texte présentant de l['’]intérêt pour l['’]EEE|Téacs atá ábhartha maidir le(?:is an)? LEE|Tekst značajan za EGP|EGT[- ]vonatkozású szöveg|Testo rilevante ai fini del SEE|Dokuments attiecas uz EEZ|Tekstas svarbus EEE|Test b['’]r[ei]levanza għaż-ŻEE|Voor de EER relevante tekst|Tekst mający znaczenie dla EOG|Texto relevante para efeitos do EEE|Text cu relevanță pentru SEE|Text cu relevanţă pentru SEE|Text s (?:významom|platnosťou) pre EHP|Besedilo (?:velja za|se nanaša na) EGP|Text av betydelse för EES)[\s.]*$/i;
@@ -1224,6 +1225,38 @@ var testCases = [
 				"pages": "1-17",
 				"shortTitle": "European Climate Law",
 				"url": "http://data.europa.eu/eli/reg/2021/1119/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32020R0687",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Commission Delegated Regulation (EU) 2020/687 of 17 December 2019 supplementing Regulation (EU) 2016/429 of the European Parliament and the Council, as regards rules for the prevention and control of certain listed diseases",
+				"creators": [],
+				"dateEnacted": "2019-12-17",
+				"code": "OJ 2020 L",
+				"codeNumber": "174",
+				"extra": "available-date: 2020-06-03",
+				"language": "en",
+				"pages": "64-139",
+				"url": "http://data.europa.eu/eli/reg_del/2020/687/oj",
 				"attachments": [
 					{
 						"title": "EUR-Lex PDF (EN)",
