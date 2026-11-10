@@ -353,21 +353,20 @@ async function scrape(doc, url) {
 		if (treaty) {
 			// Cellar uses dates like 1001-01-01 when the date is unknown
 			let isRealDate = date => date > "1900";
+			// A treaty can have several dates of the same kind, so the earliest is used.
+			let earliest = dates => dates.filter(isRealDate).sort()[0];
 			// available-date is the date of signature: the CSL specification defines it for treaties as
 			// "the date a treaty was made available for signing" (version 1.0.2, Appendix IV, Date Variables)
 			// https://docs.citationstyles.org/en/stable/specification.html#date-variables
 			// The date the treaty entered into force goes in date.
-			// A treaty can have several dates, so the earliest is used.
-			item.date = [...doc.querySelectorAll('meta[property="eli:first_date_entry_in_force"]')]
+			item.date = earliest([...doc.querySelectorAll('meta[property="eli:first_date_entry_in_force"]')]
 				.map(meta => meta.getAttribute("content"))
-				.concat(cellar["resource_legal_date_entry-into-force"] || [])
-				.filter(isRealDate)
-				.sort()[0];
+				.concat(cellar["resource_legal_date_entry-into-force"] || []));
 			item.extra = "type: treaty";
 			// a corrigendum has no signature, only its own date
 			if (!eliTypeUri.endsWith("CORRIGENDUM") && !cellarTypes.includes("CORRIGENDUM")) {
-				let signature = (cellar.resource_legal_date_signature || []).filter(isRealDate)[0]
-					|| documentDate || (cellar.work_date_document || [])[0];
+				let signature = earliest(cellar.resource_legal_date_signature || [])
+					|| earliest([documentDate]) || earliest(cellar.work_date_document || []);
 				if (signature) {
 					item.extra += "\navailable-date: " + signature;
 				}
