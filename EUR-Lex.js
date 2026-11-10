@@ -404,8 +404,10 @@ async function scrape(doc, url) {
 			}
 		}
 
-		// the parties to a treaty are no legislative body, and there can be more than a hundred of them
-		if (!treaty) {
+		// the parties to a treaty are no legislative body, and there can be more than a hundred of them.
+		// That also goes for the protocols to the founding treaties, which are otherwise saved as bills
+		// (the founding treaties themselves are statutes, which have no such field)
+		if (!treaty && !["TREATY", "PROT"].includes(getEliType(doc))) {
 			var passedBy = doc.querySelectorAll('meta[property="eli:passed_by"]');
 			var passedByArray = [];
 			for (let i = 0; i < passedBy.length; i++) {
