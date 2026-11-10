@@ -68,8 +68,14 @@ const englishShortTitleRegex = /\([A-Z][^()]*\b(?:Act|Code|Directive|Regulation)
 // the same position in any language, once the English title has shown that it is a short title
 const shortTitleRegex = /\(([^()]+)\)$/;
 
-// the pages at the end of an OJ reference, before the list of languages
-const ojPagesRegex = /,\s*\D*(\d+)\.?(?:\s*[-–—]\s*(\d+)\.?)?[^,\d(]*(?:\(|$)/;
+// the same position in any language, once the English title has shown that it is a short title.
+// Quotation marks around it, which differ by language, are left out
+const shortTitleRegex = /\([\s'"‘’‚“”„«»]*([^()]+?)[\s'"‘’‚“”„«»]*\)$/;
+
+// the pages at the end of an OJ reference, before the list of languages. Some languages write the range
+// without a dash, e.g. "σ. 1 έως 88", and then only the first page is saved. A number that continues
+// with a period and a digit is a date
+const ojPagesRegex = /,[^\d()]*(\d+)(?!\.?\d)\.?(?:\s*[-–—]\s*(\d+)\.?)?[^,(]*(?:\(|$)/;
 
 // the pages of a special edition, which are the last thing after its volume
 const specialEditionPagesRegex = /(\d+)(?:\s*[-–—]\s*(\d+))?\s*$/;
@@ -120,10 +126,13 @@ async function getCellarData(celex) {
 }
 
 
-// the date of the OJ in its localized reference, e.g. "OJ L 125, 9.6.1971, pp. 17–19" or "HL L 333., 2022.12.27., ..."
+// the date of the OJ in its localized reference, e.g. "OJ L 125, 9.6.1971, pp. 17–19",
+// or with the year first: "HL L 333., 2022.12.27., ..." and "OL L 158, 2004 4 30, ..."
 function getReferenceDate(reference) {
 	let match = reference.match(/\b(\d{1,2})\.(\d{1,2})\.(\d{4})\b/);
-	let parts = match ? [match[3], match[2], match[1]] : (reference.match(/\b(\d{4})\.(\d{2})\.(\d{2})\b/) || []).slice(1);
+	let parts = match
+		? [match[3], match[2], match[1]]
+		: (reference.match(/\b(\d{4})(?:\.\s*|\s+)(\d{1,2})(?:\.\s*|\s+)(\d{1,2})\b/) || []).slice(1);
 	return parts.map(part => part.padStart(2, "0")).join("-");
 }
 
