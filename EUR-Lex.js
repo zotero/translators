@@ -346,10 +346,13 @@ async function scrape(doc, url) {
 					item.pages = pages[2] ? pages[1] + "-" + pages[2] : pages[1];
 				}
 				// the name of a special edition, as printed after the list of languages, says more than
-				// its numbers, e.g. "English Special Edition: Series I Volume 1968(II)"
+				// its numbers, e.g. "English Special Edition: Series I Volume 1968(II)". It is preceded by the
+				// abbreviation of the OJ that begins the reference, in the same language, e.g. "OJ", "ABl." or "Dz.U."
 				let volumeIndex = reference.lastIndexOf(uriParts[2]);
 				if (isSpecialEdition && volumeIndex != -1) {
-					item.code = reference.slice(reference.lastIndexOf(")", volumeIndex) + 1, volumeIndex + uriParts[2].length).trim();
+					let journal = reference.match(/^\S+/);
+					item.code = (journal ? journal[0] + " " : "")
+						+ reference.slice(reference.lastIndexOf(")", volumeIndex) + 1, volumeIndex + uriParts[2].length).trim();
 					item.codeNumber = null;
 				}
 			}
@@ -770,7 +773,7 @@ var testCases = [
 				"nameOfAct": "Regulation (EEC) No 1612/68 of the Council of 15 October 1968 on freedom of movement for workers within the Community",
 				"creators": [],
 				"dateEnacted": "1968-10-15",
-				"code": "English Special Edition: Series I Volume 1968(II)",
+				"code": "OJ English Special Edition: Series I Volume 1968(II)",
 				"extra": "available-date: 1968-10-19",
 				"language": "en",
 				"pages": "475-484",
@@ -1378,7 +1381,7 @@ var testCases = [
 				"nameOfAct": "Dyrektywa 2004/38/WE Parlamentu Europejskiego i Rady z dnia 29 kwietnia 2004 r. w sprawie prawa obywateli Unii i członków ich rodzin do swobodnego przemieszczania się i pobytu na terytorium Państw Członkowskich, zmieniająca rozporządzenie (EWG) nr 1612/68 i uchylająca dyrektywy 64/221/EWG, 68/360/EWG, 72/194/EWG, 73/148/EWG, 75/34/EWG, 75/35/EWG, 90/364/EWG, 90/365/EWG i 93/96/EWG",
 				"creators": [],
 				"dateEnacted": "2004-04-29",
-				"code": "Polskie wydanie specjalne: Rozdział 05 Tom 005",
+				"code": "Dz.U. Polskie wydanie specjalne: Rozdział 05 Tom 005",
 				"extra": "available-date: 2004-04-30",
 				"language": "pl",
 				"pages": "46-61",
@@ -1442,7 +1445,7 @@ var testCases = [
 				"nameOfAct": "Rådets forordning nr. 1612/68/EØF af 15. oktober 1968 om arbejdskraftens frie bevægelighed inden for Fællesskabet",
 				"creators": [],
 				"dateEnacted": "1968-10-15",
-				"code": "den danske specialudgave: serie I bind 1968(II)",
+				"code": "EFT den danske specialudgave: serie I bind 1968(II)",
 				"extra": "available-date: 1968-10-19",
 				"language": "da",
 				"pages": "467-476",
