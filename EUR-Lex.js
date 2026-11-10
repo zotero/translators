@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-09-22 18:15:26"
+	"lastUpdated": "2026-11-10 12:30:21"
 }
 
 
@@ -268,7 +268,13 @@ function scrape(doc, url) {
 		// ECLI from the metadata table, e.g. "ECLI:DE:BGH:2014:150514XBZB7113.0"
 		var ecliMatch = doc.body.textContent.match(/ECLI:\s*[A-Za-z]{2}:[^:\s]{1,7}:\d{4}:[^:\s]{1,25}/i);
 		if (ecliMatch) {
-			item.DOI = ecliMatch[0].replace(/\s+/g, '');
+			var ecli = ecliMatch[0].replace(/\s+/g, '');
+			if (!item.extra) {
+				item.extra = ecli;
+			}
+			else if (!item.extra.includes(ecli)) {
+				item.extra += '\n' + ecli;
+			}
 		}
 	}
 	else {
@@ -373,7 +379,7 @@ var testCases = [
 				"abstractNote": "Prejudiciële verwijzing – Richtlijn 2011/16/EU – Administratieve samenwerking op het gebied van de belastingen – Artikelen 1 en 5 – Bevel tot het verstrekken van inlichtingen aan de bevoegde autoriteit van een lidstaat, die handelt naar aanleiding van een verzoek tot uitwisseling van inlichtingen van de bevoegde autoriteit van een andere lidstaat – Persoon die in het bezit is van de informatie waarvan de bevoegde autoriteit van eerstbedoelde lidstaat heeft bevolen dat deze moet worden verstrekt – Belastingplichtige tegen wie het onderzoek loopt dat aanleiding heeft gegeven tot het verzoek van de bevoegde autoriteit van de tweede lidstaat – Derden met wie deze belastingplichtige juridische, bancaire, financiële of, meer in het algemeen, economische banden onderhoudt – Rechtsbescherming – Handvest van de grondrechten van de Europese Unie – Artikel 47 – Recht op een doeltreffende voorziening in rechte – Artikel 52, lid 1 – Beperking – Rechtsgrondslag – Eerbiediging van de wezenlijke inhoud van het recht op een doeltreffende voorziening in rechte – Bestaan van een rechtsmiddel dat de betrokken justitiabelen de mogelijkheid biedt alle relevante feitelijke en juridische kwesties doeltreffend te laten toetsen en een daadwerkelijke rechtsbescherming van hun door het Unierecht gewaarborgde rechten te genieten – Door de Unie erkende doelstelling van algemeen belang – Bestrijding van internationale belastingfraude en ‑ontwijking – Evenredigheid – Criterium dat de informatie waarop het bevel tot het verstrekken van inlichtingen betrekking heeft ‚naar verwachting van belang is’ – Rechterlijke toetsing – Omvang – In aanmerking te nemen persoonlijke, temporele en materiële gegevens",
 				"court": "HvJ EU",
 				"docketNumber": "Gevoegde zaken C-245/19 en C-246/19",
-				"DOI": "ECLI:EU:C:2020:795",
+				"extra": "ECLI:EU:C:2020:795",
 				"language": "nl",
 				"url": "https://eur-lex.europa.eu/legal-content/NL/TXT/?uri=CELEX:62019CJ0245",
 				"attachments": [
@@ -433,7 +439,7 @@ var testCases = [
 				"abstractNote": "Trade mark Komunitarja - Proċedimenti għal dikjarazzjoni ta’ invalidità - Trade mark Komunitarja verbali SCOMBER MIX - Raġuni assoluta għal rifjut - Karattru deskrittiv - Artikolu 7(1)(b) u (ċ) tar-Regolament (KE) Nru 40/94 [li sar l-Artikolu 7(1)(b) u (c) tar-Regolament (KE) Nru 207/2009]",
 				"court": "Gerecht EU",
 				"docketNumber": "Kawża T-201/09",
-				"DOI": "ECLI:EU:T:2011:505",
+				"extra": "ECLI:EU:T:2011:505",
 				"language": "nl",
 				"url": "https://eur-lex.europa.eu/legal-content/MT/TXT/?uri=CELEX%3A62009TJ0201",
 				"attachments": [
