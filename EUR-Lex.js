@@ -110,17 +110,21 @@ async function getCellarData(celex) {
 			VALUES ?property { cdm:work_has_resource-type cdm:work_date_document cdm:resource_legal_date_signature
 				cdm:resource_legal_date_entry-into-force cdm:resource_legal_date_end-of-validity }
 		}`;
-	let data = {};
+	let url = "https://publications.europa.eu/webapi/rdf/sparql?format="
+		+ encodeURIComponent("application/sparql-results+json") + "&query=" + encodeURIComponent(query);
+	let json;
 	try {
-		let json = await requestJSON("https://publications.europa.eu/webapi/rdf/sparql?format="
-			+ encodeURIComponent("application/sparql-results+json") + "&query=" + encodeURIComponent(query));
-		for (let { property, value } of json.results.bindings) {
-			let name = property.value.split("#").pop();
-			data[name] = (data[name] || []).concat(value.value.split("/").pop());
-		}
+		json = await requestJSON(url);
 	}
 	catch (e) {
-		Z.debug("Cellar lookup failed: " + e);
+		// a second failure is thrown: without Cellar the item would silently get another type and other dates
+		Z.debug("Cellar lookup failed, trying again: " + e);
+		json = await requestJSON(url);
+	}
+	let data = {};
+	for (let { property, value } of json.results.bindings) {
+		let name = property.value.split("#").pop();
+		data[name] = (data[name] || []).concat(value.value.split("/").pop());
 	}
 	return data;
 }
