@@ -9,8 +9,9 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-09-15 10:00:00"
+	"lastUpdated": "2026-11-10 12:32:44"
 }
+
 
 /*
 ***** BEGIN LICENSE BLOCK *****
@@ -300,7 +301,7 @@ function scrapeCase(doc, url) {
 		}
 	}
 	if (ecli) {
-		item.DOI = ecli;
+		item.extra = item.extra ? item.extra + '\n' + ecli : ecli;
 	}
 	
 	// type of decision. Save this in item.extra according to citeproc-js

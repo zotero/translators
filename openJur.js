@@ -9,8 +9,9 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-09-15 10:30:00"
+	"lastUpdated": "2026-11-10 12:32:44"
 }
+
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -91,7 +92,13 @@ function scrape(doc, url) {
 		// ECLI from the decision page, e.g. "ECLI:DE:BGH:2014:150514XBZB7113.0"
 		let ecliMatch = doc.body.textContent.match(/ECLI:\s*[A-Za-z]{2}:[^:\s]{1,7}:\d{4}:[^:\s]{1,25}/i);
 		if (ecliMatch) {
-			item.DOI = ecliMatch[0].replace(/\s+/g, '');
+			let ecli = ecliMatch[0].replace(/\s+/g, '');
+			if (!item.extra) {
+				item.extra = ecli;
+			}
+			else if (!item.extra.includes(ecli)) {
+				item.extra += '\n' + ecli;
+			}
 		}
 		
 		item.attachments.push({
