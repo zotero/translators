@@ -3,7 +3,7 @@ on: [push, pull_request]
 jobs:
   build:
     name: Lint, Check, Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -39,6 +39,10 @@ jobs:
 
       - name: Install Chromium
         run: npx playwright install chromium
+
+      - name: Install rsvg-convert
+        if: github.event_name == 'pull_request'
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends librsvg2-bin
 
       - name: Test pull request
         if: github.event_name == 'pull_request'
