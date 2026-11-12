@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-12 02:50:54"
+	"lastUpdated": "2026-11-12 03:20:34"
 }
 
 /*
@@ -32,7 +32,7 @@
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
-	***** END LICENSE BLOCK *****	
+	***** END LICENSE BLOCK *****
 */
 
 function detectWeb(doc, url) {
@@ -76,13 +76,13 @@ async function doWeb(doc, url) {
 
 // ToDo add specific scarape for page image pages.
 
-async function scrape(doc, url=doc.url) {
+async function scrape(doc, url = doc.url) {
 	let translator = Zotero.loadTranslator('web');
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48'); // Embedded Metadata
 	translator.setDocument(doc);
 
 	let scrapedItems = [];
-	translator.setHandler('itemDone', function(obj, item) {
+	translator.setHandler('itemDone', function (obj, item) {
 		scrapedItems.push(item);
 	});
 	await translator.translate();
@@ -120,7 +120,8 @@ async function getAllContributors(url, item) {
 				item.creators.push((ZU.cleanAuthor(contributor.name, 'contributor')));
 			}
 		}
-	} catch (e) {
+	}
+	catch (e) {
 		Zotero.debug(`Error fetching contributors: ${e.message}`);
 	}
 }
