@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import process from 'node:process';
 import { promises as fs } from 'node:fs';
 import { parseArgs, resolveTranslator, REPO_ROOT } from './lib/common.mjs';
@@ -63,7 +64,7 @@ else {
 await ensureConnectorBuild();
 
 // Start translator server
-const translatorServer = await import(path.join(CI_DIR, 'translator-server.mjs'));
+const translatorServer = await import(pathToFileURL(path.join(CI_DIR, 'translator-server.mjs')).href);
 await translatorServer.serve();
 
 let session;
