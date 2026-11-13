@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-18 22:20:00"
+	"lastUpdated": "2026-11-13 16:30:00"
 }
 
 /*
@@ -244,7 +244,7 @@ function scrape(doc, url) {
 	addCreators(item, creators.length ? creators : authorsFromDOM(doc));
 
 	item.attachments.push({
-		title: 'Digital Spy Snapshot',
+		title: 'Snapshot',
 		url: url,
 		mimeType: 'text/html',
 	});
@@ -278,7 +278,7 @@ var testCases = [
 				"url": "https://www.digitalspy.com/soaps/coronation-street/a36407166/coronation-street-sharon-bentley-tricks-dev-alahan-leanne-search/",
 				"attachments": [
 					{
-						"title": "Digital Spy Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -321,7 +321,7 @@ var testCases = [
 				"url": "https://www.digitalspy.com/videogames/xbox-one/a661615/rare-replay-review-roundup-one-of-the-best-collections-in-gaming-history/",
 				"attachments": [
 					{
-						"title": "Digital Spy Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -368,7 +368,7 @@ var testCases = [
 				"url": "https://www.digitalspy.com/tv/a74167077/ghosts-simon-farnaby-taskmaster-problem/",
 				"attachments": [
 					{
-						"title": "Digital Spy Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -412,7 +412,7 @@ var testCases = [
 				"url": "https://www.digitalspy.com/tv/a46683450/alison-hammond-outfits-buy/",
 				"attachments": [
 					{
-						"title": "Digital Spy Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
