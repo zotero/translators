@@ -21,6 +21,14 @@ Collect from the user:
 
 From the URLs, derive the **target regex**.
 
+Don't add `(www\.)?` by reflex. Most sites serve from only one of `example.com` or `www.example.com` and redirect the other, so match only the host that's actually used. To check whether the other host serves pages itself or just redirects, load it and print where it ends up:
+
+```
+node .bin/inspect-page.mjs "https://example.com/some/path" --eval "location.href"
+```
+
+Allow both hosts only if both serve content without redirecting.
+
 ## Step 2: Analyze the site
 
 **DO NOT** fetch site pages with WebFetch, curl, or any HTTP tool. Use the tools instead:
@@ -103,6 +111,24 @@ node .bin/init-translator.mjs --label "<Label>" --creator "<Creator>" --target "
 This scaffolds the file from the web translator template at `.bin/templates/web.js`. That file is the canonical structure a web translator should follow — read it when you need to know the expected shape of `detectWeb`/`getSearchResults`/`doWeb`/`scrape`, or when a task asks you to make an existing translator better conform to the template.
 
 Implement `detectWeb(doc, url)`, `getSearchResults(doc, checkOnly)`, `doWeb(doc, url)`, and `scrape(doc, url)`.
+
+Keep `detectWeb()` synchronous; making it `async` is almost never right. It runs on every matching page load, so it must be fast and must not make network requests. If what you're detecting appears only after the page loads (as with SPAs and lazy-loaded search results), call `Z.monitorDOMChanges(element)` on a stable container. Zotero then re-runs detection when that container changes:
+
+```js
+function detectWeb(doc, url) {
+	let root = doc.querySelector('#app');
+	if (root) {
+		Z.monitorDOMChanges(root);
+	}
+	if (getSearchResults(doc, true)) {
+		return 'multiple';
+	}
+	// ...
+	return false;
+}
+```
+
+`monitorDOMChanges()` takes an optional second argument, a [`MutationObserverInit`](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver/observe#options) object. The default is `{ childList: true, subtree: true }`, so it reports elements being added or removed anywhere under the target. Anything you pass replaces the default instead of merging with it. For example, to also watch for a changed attribute, pass `{ childList: true, subtree: true, attributes: true, attributeFilter: ['data-state'] }`.
 
 ## Step 5: Create tests
 
