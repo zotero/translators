@@ -44,7 +44,7 @@ function isPassageUrl(url) {
 
 function detectWeb(doc, url) {
 	Zotero.debug("!!! DETECTWEB TRACE TRIGGERED FOR: " + url);
-	
+
 	if (!url.includes('biblegateway.com')) {
 		Zotero.debug(`BibleGateway detectWeb quick return ${url}`);
 		return false;
@@ -123,7 +123,7 @@ async function getChapterOverview(translation, chapterOsis) {
 	if (response.status > 299) {
 		for (let error of response.body.errors) {
 			Zotero.debug(`Error getting overview: `);
-			for (let [k,v] of Object.entries(error)) {
+			for (let [k, v] of Object.entries(error)) {
 				Zotero.debug(`error field ${k}: ${v}`);
 			}
 		}
@@ -144,14 +144,15 @@ async function scrape(doc, url = doc.location.href) {
 	if (verEl) {
 		Zotero.debug(`Found version ${verEl.outerHTML}`);
 		translation = verEl.innerHTML.trim();
-	} else {
+	}
+	else {
 		Zotero.debug("No version element found");
 	}
 
 	let translationLong = text(doc, 'span.translation span.dropdown-display-text');
 
 	let osis = attr(doc, 'div.passage-table', 'data-osis');
-	
+
 	Zotero.debug(`osis: ${osis}, translation: ${translation}`);
 	Zotero.debug(`document title: '${doc.title}'`);
 	const titleRe = /^([A-Z a-z\d]+ \d+(?::\d+)?)(?:-\d+(?::\d+)?)?\s+([A-Z][A-Z0-9]+)(?= -)/gm;
@@ -167,16 +168,16 @@ async function scrape(doc, url = doc.location.href) {
 		Zotero.debug(`title: '${doc.title}'\nmatch: ${match}`);
 	}
 	item.bookTitle = translationLong;
-	
+
 	// let itemElement = doc.querySelector('[property~="og:type"]');
 	let descEl = doc.querySelector('[property~="og:description"]');
 	if (descEl) {
 		item.abstractNote = descEl.getAttribute("content");
 	}
-	
+
 	item.title = `${pageTitle}`;
 	item.attachments = [];
-	
+
 	let passageEl = doc.querySelector(".passage-text");
 	if (passageEl) {
 		// Clone it so we don't alter the user's active browser tab
@@ -196,7 +197,8 @@ async function scrape(doc, url = doc.location.href) {
 			mimeType: "text/html",
 			document: cleanDoc
 		});
-	} else {
+	}
+	else {
 		Zotero.debug(`did not find .passage-text for ${url}`);
 	}
 
@@ -209,7 +211,7 @@ async function scrape(doc, url = doc.location.href) {
 		let lastChapter = chapterOsises[1].chapter;
 		chapterOsises.length = 0;
 		while (chapter <= lastChapter) {
-			chapterOsises.push({book: book, chapter: chapter});
+			chapterOsises.push({ book: book, chapter: chapter });
 			chapter += 1;
 		}
 	}
@@ -220,16 +222,17 @@ async function scrape(doc, url = doc.location.href) {
 				note: `<h3>Chapter Overview</h3><p>Title: ${chapterOsis.book} ${chapterOsis.chapter}</p>`
 				+ "<p>" + ZU.htmlSpecialChars(overview) + '</p>'
 			});
-		} else {
+		}
+		else {
 			Zotero.debug(`did not find overview for ${translation}-${chapterOsis}`);
 		}
 	}
-	
+
 	item.complete();
 }
 
 
-// Todo Handle case of .e.g Genesis 49:10-Exodus 1:12: 
+// Todo Handle case of .e.g Genesis 49:10-Exodus 1:12:
 // data on page/osises says it displays chapters across the books but it does not
 
 /** BEGIN TEST CASES **/
