@@ -38,7 +38,8 @@
 
 function detectWeb(doc, _url) {
 	if (text(doc, '#mastodon div.detailed-status__wrapper')
-		|| text(doc, '#mastodon div._feat_status_redesign__mainStatus')) {
+		|| text(doc, '#mastodon div._feat_status_redesign__mainStatus')
+		|| text(doc, '#mastodon div._feat_status__mainStatus')) {
 		return 'forumPost';
 	}
 	return false;
@@ -57,7 +58,8 @@ async function scrape(doc) {
 	var post = doc.querySelector(".detailed-status__wrapper");
 	if (post === null) {
 		isRedesign = true;
-		post = doc.querySelector("._feat_status_redesign__mainStatus");
+		post = doc.querySelector('._feat_status_redesign__mainStatus')
+			|| doc.querySelector("._feat_status__mainStatus");
 	}
 	let title = text(post,
 		isRedesign ? '._comp_status_content__text' : '.status__content'
