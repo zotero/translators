@@ -1,7 +1,7 @@
 {
 	"translatorID": "951c027d-74ac-47d4-a107-9c3069ab7b48",
 	"label": "Embedded Metadata",
-	"creator": "Simon Kornblith and Avram Lyon",
+	"creator": "Simon Kornblith, Avram Lyon, and Vera de Kok",
 	"target": "",
 	"minVersion": "3.0.4",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-04-27 15:11:51"
+	"lastUpdated": "2026-11-08 17:30:40"
 }
 
 /*
@@ -216,6 +216,8 @@ function completeItem(doc, newItem, hwType) {
 	addHighwireMetadata(doc, newItem, hwType);
 	addOtherMetadata(doc, newItem);
 	addLowQualityMetadata(doc, newItem);
+	// Runs last: meta tags win, JSON-LD only fills what is still missing
+	addJSONLDMetadata(doc, newItem);
 	finalDataCleanup(doc, newItem);
 
 	if (CUSTOM_FIELD_MAPPINGS) {
@@ -661,6 +663,246 @@ function addOtherMetadata(doc, newItem) {
 			}
 		}
 	}
+}
+
+// A byline such as "1News Reporters" or "Reuters Staff" is typed as a Person by
+// some publishers even though it names a group, so it must not be split.
+var COLLECTIVE_BYLINE_RE = /\b(reporters?|staff|newsroom|desk|team|editors?|wires?|news|correspondents?|bureau)\s*$/i;
+
+var WIRE_SERVICE_RE = /^(AFP|AP|PTI|ANI|IANS|DPA|dpa|EFE|UPI|AAP)$/;
+
+function isCollectiveByline(name) {
+	return COLLECTIVE_BYLINE_RE.test(name);
+}
+
+/**
+ * Reads JSON-LD (schema.org) blocks and fills in fields the meta tags missed.
+ * Many news sites ship the byline and date only there (they are not in
+ * citation_* or og:* tags), which is why Embedded Metadata alone produced
+ * items without creators on those pages.
+ */
+function addJSONLDMetadata(doc, newItem) {
+	var nodes = [];
+	var data = getJSONLDArticle(doc, nodes);
+	if (!data) return;
+
+	if (!newItem.publicationTitle && !newItem.websiteTitle && !newItem.blogTitle) {
+		var publication = getJSONLDPublication(data, nodes, doc);
+		if (publication) newItem.publicationTitle = publication;
+	}
+
+	if (!newItem.title && data.headline) {
+		newItem.title = data.headline;
+	}
+	if (!newItem.abstractNote && data.description) {
+		newItem.abstractNote = ZU.trimInternal(data.description);
+	}
+	if (!newItem.date) {
+		var date = data.datePublished || data.dateCreated;
+		if (typeof date == 'string') {
+			// keep only the date part; Zotero normalizes ISO 8601 itself,
+			// but a bare "2024-11-10T17:27:00Z" would keep the time
+			var match = date.match(/^(\d{4}-\d{2}-\d{2})/);
+			if (match) newItem.date = match[1];
+		}
+	}
+	if (!newItem.url && typeof data.url == 'string') {
+		newItem.url = data.url;
+	}
+
+	if (!newItem.creators.length && data.author) {
+		var authors = Array.isArray(data.author) ? data.author : [data.author];
+		for (var i = 0; i < authors.length; i++) {
+			var author = authors[i];
+			if (!author) continue;
+			var first = typeof author == 'object' ? author.givenName : '';
+			var last = typeof author == 'object' ? author.familyName : '';
+			var name = typeof author == 'string' ? author : (author.name || [first, last].filter(Boolean).join(' '));
+			name = ZU.trimInternal(name).replace(/^By\s+/i, '');
+			var types = typeof author == 'object'
+				? [].concat(author['@type'] || []).map(function (type) {
+					return ('' + type).replace(/^https?:\/\/schema\.org\//i, '').toLowerCase();
+				})
+				: [];
+			// Organization and wire-service credits must not be split, even
+			// when publishers also supply Person types or structured names.
+			var isOrganization = types.some(function (type) {
+				return /organization$/.test(type);
+			}) || WIRE_SERVICE_RE.test(name) || isCollectiveByline(name);
+			if (isOrganization && name) {
+				newItem.creators.push({ lastName: name, creatorType: 'author', fieldMode: 1 });
+			}
+			else if (first || last) {
+				newItem.creators.push({
+					firstName: ZU.trimInternal(first || ''),
+					lastName: ZU.trimInternal(last || ''),
+					creatorType: 'author'
+				});
+			}
+			else if (name) {
+				if (types.includes('person')) {
+					newItem.creators.push(ZU.cleanAuthor(name, 'author', name.includes(',')));
+				}
+				else {
+					newItem.creators.push({ lastName: name, creatorType: 'author', fieldMode: 1 });
+				}
+			}
+		}
+	}
+
+	if (!newItem.tags || !newItem.tags.length) {
+		var keywords = data.keywords;
+		if (typeof keywords == 'string') {
+			keywords = keywords.split(/\s*,\s*/);
+		}
+		if (Array.isArray(keywords) && keywords.length) {
+			newItem.tags = keywords.map(function (tag) {
+				return ZU.trimInternal('' + tag);
+			}).filter(Boolean);
+		}
+	}
+
+	// og:title often carries the site name as a suffix ("... - CBS News") while
+	// the JSON-LD headline does not. addLowQualityMetadata() only strips the
+	// publicationTitle, which nothing sets on these pages, so strip the
+	// publisher / og:site_name here with the same separators.
+	if (newItem.title) {
+		var publisher = '';
+		if (data.publisher) {
+			var pubs = Array.isArray(data.publisher) ? data.publisher : [data.publisher];
+			publisher = (pubs[0] && pubs[0].name) || '';
+		}
+		if (!publisher) {
+			publisher = ZU.xpathText(doc, '//meta[@property="og:site_name"]/@content') || '';
+		}
+		if (publisher) {
+			var escape = function (text) {
+				return text.replace(/([()[\]$^*+.?|\\-])/g, '\\$1');
+			};
+			newItem.title = newItem.title.replace(
+				new RegExp('\\s*[-–—=_:|~#]\\s*' + escape(ZU.trimInternal(publisher)) + '\\s*$', 'i'),
+				''
+			);
+		}
+	}
+}
+
+/**
+ * Returns the first Article-like node, supplementing an unusable byline only
+ * from another node identifying the same article.
+ * Blocks can be arrays, wrapped in @graph, or a single object, and a page
+ * commonly ships several (article, video, organization, breadcrumbs).
+ */
+function getJSONLDArticle(doc, allNodes) {
+	var wanted = ['NewsArticle', 'Article', 'ReportageNewsArticle', 'Report'];
+	var articles = [];
+	var scripts = doc.querySelectorAll('script[type="application/ld+json"]');
+	for (var i = 0; i < scripts.length; i++) {
+		var data;
+		try {
+			data = JSON.parse(scripts[i].textContent);
+		}
+		catch (e) {
+			// a few sites concatenate blocks or use trailing commas; skip those
+			continue;
+		}
+		var blocks = Array.isArray(data) ? data : [data];
+		for (var j = 0; j < blocks.length; j++) {
+			var block = blocks[j];
+			if (!block || typeof block != 'object') continue;
+			var nodes = block['@graph'] ? block['@graph'] : [block];
+			for (var k = 0; k < nodes.length; k++) {
+				var node = nodes[k];
+				if (!node || typeof node != 'object') continue;
+				allNodes.push(node);
+				if (wanted.includes(node['@type'])
+					&& (node.headline || node.name || node.datePublished || node.author)) {
+					articles.push(node);
+				}
+			}
+		}
+	}
+	var article = articles[0];
+	if (!article) return null;
+	if (!hasJSONLDAuthor(article.author)) {
+		var fallback = articles.slice(1).find(function (node) {
+			return sameJSONLDArticle(article, node) && hasJSONLDAuthor(node.author);
+		});
+		if (fallback) article = Object.assign({}, article, { author: fallback.author });
+	}
+	return article;
+}
+
+function getJSONLDPublication(article, nodes, doc) {
+	function resolve(value) {
+		if (!value || typeof value != 'object') return null;
+		if (value['@id']) {
+			var target = nodes.find(function (node) {
+				return node['@id'] == value['@id'];
+			});
+			if (target) return Object.assign({}, target, value);
+		}
+		return value;
+	}
+	function name(value) {
+		for (var entry of [].concat(value || [])) {
+			entry = resolve(entry);
+			if (entry && typeof entry.name == 'string' && entry.name.trim()) {
+				return ZU.trimInternal(entry.name);
+			}
+		}
+		return '';
+	}
+	var containers = [];
+	var pending = [].concat(article.isPartOf || []);
+	var seen = new Set();
+	while (pending.length) {
+		var node = resolve(pending.shift());
+		if (!node || seen.has(node['@id'] || node)) continue;
+		seen.add(node['@id'] || node);
+		var types = [].concat(node['@type'] || []);
+		if (types.some(function (type) {
+			return /^(WebSite|Periodical|Newspaper|Magazine|Blog)$/.test(type.replace(/^https?:\/\/schema\.org\//, ''));
+		})) containers.push(node);
+		pending.push(...[].concat(node.isPartOf || []));
+	}
+	var publication = name(containers);
+	if (publication) return publication;
+	publication = name(article.publisher);
+	if (publication) return publication;
+	for (var container of containers) {
+		publication = name(container.publisher);
+		if (publication) return publication;
+	}
+	// An unlinked organization may be an advertiser or a parent company.
+	var sites = nodes.filter(function (node) {
+		return [].concat(node['@type'] || []).includes('WebSite')
+			&& typeof node.url == 'string'
+			&& relativeToAbsolute(doc, node.url).replace(/^(https?:\/\/[^/]+).*$/, '$1')
+				== doc.location.href.replace(/^(https?:\/\/[^/]+).*$/, '$1');
+	});
+	return sites.length == 1 ? name(sites) || name(sites[0].publisher) : '';
+}
+function hasJSONLDAuthor(authors) {
+	return [].concat(authors || []).some(function (author) {
+		if (!author) return false;
+		var name = typeof author == 'string'
+			? author
+			: author.name || [author.givenName, author.familyName].filter(Boolean).join(' ');
+		return typeof name == 'string' && name.replace(/^By\s+/i, '').trim();
+	});
+}
+
+function sameJSONLDArticle(first, second) {
+	if (typeof first.url == 'string' && first.url.trim()
+		&& typeof second.url == 'string' && second.url.trim()) {
+		return first.url.replace(/#.*$/, '').replace(/\/$/, '')
+			== second.url.replace(/#.*$/, '').replace(/\/$/, '');
+	}
+	var headline = first.headline || first.name;
+	var otherHeadline = second.headline || second.name;
+	return typeof headline == 'string' && headline.trim()
+		&& typeof otherHeadline == 'string' && headline.trim() == otherHeadline.trim();
 }
 
 function addLowQualityMetadata(doc, newItem) {
@@ -2005,6 +2247,99 @@ var testCases = [
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.cbsnews.com/news/tony-awards-2013-list-of-winners/",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Tony Awards 2013: List of winners",
+				"creators": [
+					{
+						"firstName": "Jessica",
+						"lastName": "Derschowitz",
+						"creatorType": "author"
+					}
+				],
+				"date": "2013-06-10",
+				"abstractNote": "\"Kinky Boots\" dances off with six awards -- including best musical -- while \"Matilda the Musical\" and \"Pippin\" win four prizes each",
+				"language": "en-US",
+				"shortTitle": "Tony Awards 2013",
+				"url": "https://www.cbsnews.com/news/tony-awards-2013-list-of-winners/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.ms.now/opinion/msnbc-opinion/lebron-james-coco-gauff-are-perfect-team-usa-flag-bearers-rcna163245",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"creators": [
+					{
+						"firstName": "Dave",
+						"lastName": "Zirin",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Why LeBron James and Coco Gauff are the perfect Team USA flag bearers",
+				"date": "2024-07-26T10:00:41+00:00",
+				"url": "https://www.ms.now/opinion/msnbc-opinion/lebron-james-coco-gauff-are-perfect-team-usa-flag-bearers-rcna163245",
+				"abstractNote": "James and Gauff were voted to carry the flag by the other Olympians on Team USA.",
+				"language": "en-US",
+				"blogTitle": "MS NOW"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.scotusblog.com/2026/11/trump-administration-asks-supreme-court-to-intervene-in-california-ballots-dispute/",
+		"items": [
+			{
+				"itemType": "webpage",
+				"creators": [
+					{
+						"firstName": "Amy",
+						"lastName": "Howe",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Supreme Court declines Trump administration's request to intervene in California ballot dispute",
+				"date": "2026-11-02T18:33:05.429Z",
+				"abstractNote": "The Trump administration on Monday morning asked the Supreme Court to intervene in its efforts to keep California from counting ballots cast by what it contends are more than 20,000 noncitizens who h…",
+				"url": "https://www.scotusblog.com/2026/11/trump-administration-asks-supreme-court-to-intervene-in-california-ballots-dispute/",
+				"language": "en",
+				"websiteTitle": "SCOTUSblog"
 			}
 		]
 	}
