@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-18 20:16:15"
+	"lastUpdated": "2026-11-13 12:00:00"
 }
 
 /*
@@ -41,15 +41,19 @@ of the newspaper. The other translator "The Hindu (old)" deals with older
 content (pre 2009)
 **/
 
-async function detectWeb(doc, url) {
+function detectWeb(doc, url) {
 	// .ece as a PATH suffix, not somewhere in the query or fragment
 	if (/\.ece(?:[?#]|$)/.test(url)) {
 		return "newspaperArticle";
 	}
 	if (isSearchPage(url)) {
-		// The results are injected by the search widget after load, so
-		// there is nothing to judge from the document as it arrives.
-		return (await waitForResults(doc)) ? "multiple" : false;
+		if (getSearchResults(doc, true)) {
+			return "multiple";
+		}
+		// The results are injected by the search widget after load;
+		// re-run detection once they appear.
+		Z.monitorDOMChanges(doc.querySelector('.gcse-search') || doc.body,
+			{ childList: true, subtree: true });
 	}
 	return false;
 }
@@ -60,16 +64,6 @@ var SEARCH_QUERY_RE = /[?&#](?:gsc\.)?(?:q|query)=[^&#]+/;
 
 function isSearchPage(url) {
 	return /\/search\/(?:[?#]|$)/.test(url) && SEARCH_QUERY_RE.test(url);
-}
-
-async function waitForResults(doc) {
-	for (var i = 0; i < 20; i++) {
-		if (doc.querySelector('div.gsc-results a.gs-title')) {
-			return true;
-		}
-		await new Promise(resolve => setTimeout(resolve, 250));
-	}
-	return false;
 }
 
 
@@ -100,7 +94,7 @@ function cleanSearchTitle(text) {
 
 
 async function doWeb(doc, url) {
-	if (await detectWeb(doc, url) == "multiple") {
+	if (detectWeb(doc, url) == "multiple") {
 		var items = getSearchResults(doc, false);
 		var selected = await Zotero.selectItems(items);
 		if (!selected) {
@@ -807,7 +801,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Rediscover Satyajit Ray at this Durga Puja pandal in Nandanam",
+				"title": "Rediscover Satyajit Ray at this Durga Puja pandal in Nandanam, Chennai",
 				"creators": [
 					{
 						"lastName": "The Hindu Bureau",
@@ -858,6 +852,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.thehindu.com/search/?q=kerala",
+		"defer": true,
 		"items": "multiple"
 	}
 ]
