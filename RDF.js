@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2026-10-25 08:47:08"
+	"lastUpdated": "2026-11-13 22:19:29"
 }
 
 /*
@@ -911,11 +911,13 @@ function importItem(newItem, node) {
 
 	// regular author-type creators
 	var possibleCreatorTypes = Zotero.Utilities.getCreatorsForType(newItem.itemType);
+	var creatorPredicates = new Set();
+	var creatorProperties;
 	var creators;
 	for (let i = 0; i < possibleCreatorTypes.length; i++) {
 		var creatorType = possibleCreatorTypes[i];
 		if (creatorType == "author") {
-			creators = getFirstResults(node, [n.bib + "authors",
+			creatorProperties = [n.bib + "authors",
 				n.so + "author",
 				n.so + "creator",
 				n.dc + "creator",
@@ -925,33 +927,35 @@ function importItem(newItem, node) {
 				n.eprints + "creators_name",
 				n.dc + "contributor",
 				n.dc1_0 + "contributor",
-				n.dcterms + "contributor"]);
+				n.dcterms + "contributor"];
 		}
 		else if (creatorType == "editor" || creatorType == "contributor") {
-			creators = getFirstResults(node, [n.bib + creatorType + "s",
+			creatorProperties = [n.bib + creatorType + "s",
 				n.eprints + creatorType + "s_name",
-				n.so + creatorType]);
+				n.so + creatorType];
 		// get presenters in unpublished conference papers on eprints
 		}
 		else if (creatorType == "presenter") {
-			creators = getFirstResults(node, [n.z + creatorType + "s", n.eprints + "creators_name"]);
+			creatorProperties = [n.z + creatorType + "s", n.eprints + "creators_name"];
 		}
 		else if (creatorType == "castMember") {
-			creators = getFirstResults(node, [n.video + "actor"]);
+			creatorProperties = [n.video + "actor"];
 		}
 		else if (creatorType == "scriptwriter") {
-			creators = getFirstResults(node, [n.video + "writer"]);
+			creatorProperties = [n.video + "writer"];
 		}
 		else if (creatorType == "producer") {
-			creators = getFirstResults(node, [n.so + "producer"]);
+			creatorProperties = [n.so + "producer"];
 		}
 		else if (creatorType == "programmer") {
-			creators = getFirstResults(node, [n.z + "programmers", n.so + "author", n.codemeta + "maintainer"]);
+			creatorProperties = [n.z + "programmers", n.so + "author", n.codemeta + "maintainer"];
 		}
 		else {
-			creators = getFirstResults(node, [n.z + creatorType + "s"]);
+			creatorProperties = [n.z + creatorType + "s"];
 		}
 
+		for (let property of creatorProperties) creatorPredicates.add(property);
+		creators = getFirstResults(node, creatorProperties);
 		if (creators) handleCreators(newItem, creators, creatorType);
 	}
 
@@ -1439,10 +1443,8 @@ function importItem(newItem, node) {
 				&& property !== 'itemType'
 				// Don't override newItem.creators with RDF nodes that will cause an import error
 				&& property !== 'creators'
-				// Creator predicates are handled above. Copying their container nodes here
-				// can expose internal blank-node IDs as fields or Extra.
-				&& !(property.endsWith('s')
-					&& possibleCreatorTypes.includes(property.slice(0, -1)))) {
+				// Skip the same predicates used to read creators above.
+				&& !creatorPredicates.has(uri)) {
 			newItem[property] = Zotero.RDF.getTargets(node, n.z + property)[0];
 		}
 	}
@@ -1583,7 +1585,6 @@ var exports = {
 	itemType: false
 };
 
-// Raw creator-field regression: node .bin/check-rdf-creator-fields.mjs
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
