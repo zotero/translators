@@ -3,14 +3,15 @@
 	"label": "EUR-Lex",
 	"creator": "Philipp Zumstein, Pieter van der Wees",
 	"target": "^https://eur-lex\\.europa\\.eu/",
-	"minVersion": "3.0",
+	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-10-30 15:50:58"
+	"lastUpdated": "2026-11-10 11:17:13"
 }
+
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -39,7 +40,7 @@
 // https://op.europa.eu/en/web/eu-vocabularies/at-dataset/-/resource/dataset/resource-type
 // all types not mapped below are saved as bills
 const typeMapping = {
-	DIR: "bill", // directive
+	DIR: "statute", // directive
 	REG: "statute", // regulation
 	DEC: "statute", // decision
 	RECO: "report", // recommendation
@@ -48,14 +49,117 @@ const typeMapping = {
 	TREATY: "statute", // treaty
 };
 
+// international agreements. Zotero has no item type for them, so they are saved as statutes
+// and marked as treaties in Extra, which is what citation styles read
+const treatyTypes = ["AGREE_AMEND", "AGREE_EUMS", "AGREE_INTERNATION", "AGREE_PROT", "CONVENTION", "EXCH_LET", "PROT", "WITHD_AGREE"];
+
+// the note "(Text with EEA relevance)" and its variants, in all official languages:
+// it must contain both the local abbreviation of EEA and a word for "text", and no digits
+// (Croatian "EEZ" also means EEC, as in "... Direktive 89/391/EEZ").
+// Some titles have the note twice, e.g. Delegated Regulation (EU) 2020/687
+const eeaNoteRegex = /(?:\s*\(+(?=[^()\d]*(?:EEA|EWR|EEE|EER|EES|ETA|EØS|ЕИП|ΕΟΧ|EGT|EGP|EHP|EMP|EOG|LEE|SEE|EEZ|ŻEE))(?=[^()\d]*(?:[Tt]e(?:kst|xt)|[Tt]est|[Tt]éacs|szöveg|[Bb]esedilo|[Dd]okuments|[Тт]екст|[Κκ]είμενο))[^()\d]*\)+[\s.]*)+$/;
+
+// the same note without parentheses, which many acts have, e.g. Regulation (EU) No 492/2011
+const bareEeaNoteRegex = /\s*(?:Text with EEA relevance|Текст от значение за ЕИП|Text s významem pro EHP|EØS-relevant tekst|Text von Bedeutung für den EWR|Κείμενο που παρουσιάζει ενδιαφέρον για τον ΕΟΧ|Texto pertinente a (?:efectos|los fines) del EEE|EMPs kohaldatav tekst|ETA:n kannalta merkityksellinen teksti|Texte présentant de l['’]intérêt pour l['’]EEE|Téacs atá ábhartha maidir le(?:is an)? LEE|Tekst značajan za EGP|EGT[- ]vonatkozású szöveg|Testo rilevante ai fini del SEE|Dokuments attiecas uz EEZ|Tekstas svarbus EEE|Test b['’]r[ei]levanza għaż-ŻEE|Voor de EER relevante tekst|Tekst mający znaczenie dla EOG|Texto relevante para efeitos do EEE|Text cu relevanță pentru SEE|Text cu relevanţă pentru SEE|Text s (?:významom|platnosťou) pre EHP|Besedilo (?:velja za|se nanaša na) EGP|Text av betydelse för EES)[\s.]*$/i;
+
+// Some acts give themselves a short title in parentheses at the end of their title, e.g.
+// "Regulation (EU) 2024/1689 ... laying down harmonised rules on artificial intelligence ... (Artificial Intelligence Act)".
+// Most parentheses in that position are something else: a drafting note such as "(recast)" or "(Codified version)",
+// or the name of what the act is about, such as "(EUPOL COPPS)". There is no metadata that tells them apart,
+// so only the two forms that short titles actually take are accepted, in the English title:
+// - a capitalized name that ends in the kind of act: "(Visa Code)", "(Digital Services Act)", "(European Climate Law)",
+//   "(Framework Directive)", "(General Data Protection Regulation)"
+// - a capitalized word and a Roman numeral, as in the private international law regulations "(Rome I)" and "(Rome II)"
+// Some acts put it in quotation marks: "(‘European Climate Law’)"
+const englishShortTitleRegex = /\(['‘"“]?(?:[A-Z][^()]*\b(?:Act|Code|Directive|Law|Regulation)|[A-Z][a-z]+ I{1,3})['’"”]?\)$/;
+
+// An act that only changes or supplements another act often ends with the short title of that other act, e.g.
+// "Regulation (EU) 2019/1155 ... of 20 June 2019 amending Regulation (EC) No 810/2009 ... (Visa Code)".
+// In such a title the verb comes right after the date. An act with its own short title can also amend
+// other acts, but then the verb comes after its subject: "... laying down harmonised rules on
+// artificial intelligence and amending Regulations ... (Artificial Intelligence Act)"
+const referringTitleRegex = /\d{4},? (?:amending|correcting|implementing|repealing|supplementing)\b/i;
+
+// the same position in any language, once the English title has shown that it is a short title.
+// Quotation marks around it, which differ by language, are left out
+const shortTitleRegex = /\([\s'"‘’‚“”„«»]*([^()]+?)[\s'"‘’‚“”„«»]*\)$/;
+
+// the pages at the end of an OJ reference, before the list of languages. Some languages write the range
+// without a dash, e.g. "σ. 1 έως 88", and then only the first page is saved. A number that continues
+// with a period and a digit is a date
+const ojPagesRegex = /,[^\d()]*(\d+)(?!\.?\d)\.?(?:\s*[-–—]\s*(\d+)\.?)?[^,(]*(?:\(|$)/;
+
+// the pages of a special edition, which are the last thing after its volume
+const specialEditionPagesRegex = /(\d+)(?:\s*[-–—]\s*(\d+))?\s*$/;
+
+
+function getEliType(doc) {
+	var eliType = attr(doc, 'meta[property="eli:type_document"]', 'resource').split("/").pop();
+	if (eliType == "CORRIGENDUM") {
+		// saved like the act it corrects, which its ELI names: .../eli/reg/2016/679/corrigendum/2018-05-23/oj
+		let correctedAct = attr(doc, 'meta[typeOf="eli:LegalResource"]', "about").match(/\/eli\/([a-z_]+)/);
+		if (correctedAct) {
+			eliType = correctedAct[1].toUpperCase();
+		}
+	}
+	return eliType;
+}
+
+
+function isTreaty(doc) {
+	var eliType = getEliType(doc);
+	// the protocols to the founding treaties are in sector 1, and only have the date of their consolidated version
+	return treatyTypes.includes(eliType) && !(eliType == "PROT" && attr(doc, 'meta[name="WT.z_docSector"]', 'content') == "1");
+}
+
+
+// the ELI tags have no date of signature, and many treaties have no ELI tags at all,
+// so treaties are looked up in Cellar, the EU's metadata repository
+async function getCellarData(celex) {
+	let query = `PREFIX cdm: <http://publications.europa.eu/ontology/cdm#>
+		SELECT ?property ?value WHERE {
+			?work cdm:resource_legal_id_celex "${celex}"^^<http://www.w3.org/2001/XMLSchema#string> ; ?property ?value .
+			VALUES ?property { cdm:work_has_resource-type cdm:work_date_document cdm:resource_legal_date_signature
+				cdm:resource_legal_date_entry-into-force cdm:resource_legal_date_end-of-validity }
+		}`;
+	let url = "https://publications.europa.eu/webapi/rdf/sparql?format="
+		+ encodeURIComponent("application/sparql-results+json") + "&query=" + encodeURIComponent(query);
+	let json;
+	try {
+		json = await requestJSON(url);
+	}
+	catch (e) {
+		// a second failure is thrown: without Cellar the item would silently get another type and other dates
+		Z.debug("Cellar lookup failed, trying again: " + e);
+		json = await requestJSON(url);
+	}
+	let data = {};
+	for (let { property, value } of json.results.bindings) {
+		let name = property.value.split("#").pop();
+		data[name] = (data[name] || []).concat(value.value.split("/").pop());
+	}
+	return data;
+}
+
+
+// the date of the OJ in its localized reference, e.g. "OJ L 125, 9.6.1971, pp. 17–19",
+// or with the year first: "HL L 333., 2022.12.27., ..." and "OL L 158, 2004 4 30, ..."
+function getReferenceDate(reference) {
+	let match = reference.match(/\b(\d{1,2})\.(\d{1,2})\.(\d{4})\b/);
+	let parts = match
+		? [match[3], match[2], match[1]]
+		: (reference.match(/\b(\d{4})(?:\.\s*|\s+)(\d{1,2})(?:\.\s*|\s+)(\d{1,2})\b/) || []).slice(1);
+	return parts.map(part => part.padStart(2, "0")).join("-");
+}
+
 
 function detectWeb(doc, _url) {
 	var docSector = attr(doc, 'meta[name="WT.z_docSector"]', 'content');
 	var eliTypeURI = attr(doc, 'meta[property="eli:type_document"]', 'resource');
 	if (eliTypeURI) {
-		var eliType = eliTypeURI.split("/").pop();
+		var eliType = getEliType(doc);
 		var eliCategory = eliType.split("_")[0];
-		var type = typeMapping[eliCategory];
+		var type = isTreaty(doc) ? "statute" : typeMapping[eliCategory];
 		if (type) {
 			return type;
 		}
@@ -93,23 +197,16 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
-// we need to remember the language in search page to use the same for
-// individual entry page
-var autoLanguage;
-
-
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		var m = url.match(/\blocale=([a-z][a-z])/);
-		if (m) {
-			autoLanguage = m[1];
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let itemURL of Object.keys(items)) {
+			await scrape(await requestDocument(itemURL), itemURL);
 		}
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) ZU.processDocuments(Object.keys(items), scrape);
-		});
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
@@ -150,59 +247,180 @@ const languageMapping = {
 	SV: new LMObj("SWE", "Domstolen", "Tribunalen", "Personaldomstolen")
 };
 
-function scrape(doc, url) {
+function getTitle(doc, language) {
+	return ZU.trimInternal(attr(doc, 'meta[property="eli:title"][lang=' + language + "]", "content"))
+		.replace(eeaNoteRegex, "")
+		.replace(bareEeaNoteRegex, "");
+}
+
+async function scrape(doc, url) {
 	// declare meta variables present for all sectors
-	// var docSector = attr(doc, 'meta[name="WT.z_docSector"]', 'content');
+	var docSector = attr(doc, 'meta[name="WT.z_docSector"]', 'content');
 	var docType = attr(doc, 'meta[name="WT.z_docType"]', 'content');
 	var celex = attr(doc, 'meta[name="WT.z_docID"]', 'content');
 	
 	var eliTypeUri = (attr(doc, 'meta[property="eli:type_document"]', "resource"));
 	
-	var type = detectWeb(doc, url);
+	// without ELI tags, only Cellar can tell a treaty from other agreements
+	var treaty = eliTypeUri ? isTreaty(doc) : ["2", "4"].includes(docSector) && docType == "A";
+	var cellar = treaty ? await getCellarData(celex) : {};
+	var cellarTypes = cellar["work_has_resource-type"] || [];
+	if (!eliTypeUri && !cellarTypes.some(cellarType => treatyTypes.includes(cellarType))) {
+		treaty = false;
+	}
+
+	var type = treaty ? "statute" : detectWeb(doc, url);
 	var item = new Zotero.Item(type);
 	// determine the language in which we are currently viewing the document
 	var viewingLanguage = (doc.documentElement.lang || "en").toUpperCase();
 	// Cases only return language; discard everything else
 	item.language = viewingLanguage.toLowerCase();
 
-	if (eliTypeUri) {
-		// type: everything with ELI (see var typeMapping: bill, statute, report)
-		item.title = attr(doc, 'meta[property="eli:title"][lang=' + viewingLanguage.toLowerCase() + "]", "content");
-		var uri = attr(doc, "#format_language_table_digital_sign_act_" + viewingLanguage.toUpperCase(), "href");
+	if (eliTypeUri || treaty) {
+		// type: everything with ELI (see var typeMapping: bill, statute, report) and all treaties
+		item.title = getTitle(doc, viewingLanguage.toLowerCase())
+			|| ZU.trimInternal(attr(doc, 'meta[name="WT.z_docTitle"]', "content").replace(/#/g, " "));
+		// only directives and regulations have short titles of their own. Decisions, and delegated and
+		// implementing acts (DIR_DEL, REG_IMPL etc.), use this position for the act they refer to.
+		// every page has the title in all languages, so only the English one has to be interpreted
+		let englishTitle = getTitle(doc, "en");
+		if (/\/(?:DIR|REG)$/.test(eliTypeUri) && !referringTitleRegex.test(englishTitle) && englishShortTitleRegex.test(englishTitle)) {
+			let shortTitle = item.title.match(shortTitleRegex);
+			if (shortTitle) {
+				item.shortTitle = shortTitle[1];
+			}
+		}
+		// since October 2023, acts are published individually and only have the second link
+		var uri = attr(doc, "#format_language_table_digital_sign_act_" + viewingLanguage.toUpperCase(), "href")
+			|| attr(doc, "#format_language_table_digital_sign_" + viewingLanguage.toUpperCase(), "href");
+		var publicationDate = attr(doc, 'meta[property="eli:date_publication"]', "content");
+		if (treaty && !publicationDate) {
+			publicationDate = getReferenceDate(text(doc, "#originalTitle ~ p em"));
+		}
+		// some treaties have an empty link, or none, but the page still gives the OJ reference
+		if (treaty && !/(?:OJ|DD):/.test(uri)) {
+			// e.g. "OJ L 125, 9.6.1971, pp. 17–19", or without a series before 1968: "OJ 93, 11.6.1964, pp. 1431–1457"
+			let reference = text(doc, "#originalTitle ~ p em");
+			let ojReference = reference.match(/\b([LC])\s+(\d+[A-Z]?)\b/) || reference.match(/^\D*?()(\d+),/);
+			if (ojReference) {
+				uri = "?uri=OJ:" + (ojReference[1] || "P") + ":" + (publicationDate || celex.substr(1)).substr(0, 4) + ":" + ojReference[2] + ":TOC";
+			}
+		}
 		if (uri) {
 			var uriParts = uri.split("/").pop().replace("?uri=", "")
 .split(":");
 			// e.g. uriParts =  ["OJ", "L", "1995", "281", "TOC"]
 			// e.g. uriParts = ["DD", "03", "061", "TOC", "FI"]
-			if (uriParts.length >= 4) {
-				if (/\d+/.test(uriParts[1])) {
+			// e.g. uriParts = ["OJ", "L_202401689"]
+			let actByAct = uriParts.length == 2 && uriParts[1].match(/^([A-Z]+)_(\d{4})0*(\d+)$/);
+			if (actByAct) {
+				item.code = uriParts[0] + " " + actByAct[1];
+				// these acts have no issue or page number, only an identifier, like an article number:
+				// cited as "OJ L, 2024/1689" but "OJ C, C/2024/3400"
+				item.pages = (actByAct[1] == "C" ? "C/" : "") + actByAct[2] + "/" + actByAct[3];
+			}
+			else if (uriParts.length >= 4) {
+				let isSpecialEdition = uriParts[0] == "DD";
+				if (isSpecialEdition) {
 					item.code = uriParts[0];
 					item.codeNumber = uriParts[1] + ", " + uriParts[2];
 				}
 				else {
-					item.code = uriParts[0] + " " + uriParts[1];
-					item.codeNumber = uriParts[3];
+					// the OJ had no series before 1968 (P), and neither had the ECSC's OJ (A), e.g. "OJ 93, 11.6.1964"
+					let series = ["A", "P"].includes(uriParts[1]) ? "" : " " + uriParts[1];
+					// the year of the OJ, which can differ from the date of an act, and often from a treaty's dates
+					item.code = type == "statute"
+						? uriParts[0] + " " + uriParts[2] + series
+						: uriParts[0] + series;
+					item.codeNumber = uriParts[3].replace(/^0+/, "");
+				}
+				// the reference is localized, e.g.
+				// "OJ L 158, 30.4.2004, pp. 77–123 (ES, DA, ...)" or "HL L 333., 2022.12.27., 80–152. o. (BG, ...)"
+				// a special edition follows it, e.g. "... (ES, DA, ...)Polskie wydanie specjalne: Rozdział 05 Tom 005 P. 46 - 61"
+				// or "... (DE, FR, ...)English Special Edition: Series I Volume 1968(II) P. 475 - 484"
+				let reference = text(doc, "#originalTitle ~ p em");
+				let pages = isSpecialEdition
+					? reference.includes(uriParts[2]) && reference.split(uriParts[2]).pop().match(specialEditionPagesRegex)
+					: reference.match(ojPagesRegex);
+				if (pages) {
+					item.pages = pages[2] ? pages[1] + "-" + pages[2] : pages[1];
+				}
+				// the name of a special edition, as printed after the list of languages, says more than
+				// its numbers, e.g. "English Special Edition: Series I Volume 1968(II)". It is preceded by the
+				// abbreviation of the OJ that begins the reference, in the same language, e.g. "OJ", "ABl." or "Dz.U."
+				let volumeIndex = reference.lastIndexOf(uriParts[2]);
+				if (isSpecialEdition && volumeIndex != -1) {
+					let journal = reference.match(/^\S+/);
+					item.code = (journal ? journal[0] + " " : "")
+						+ reference.slice(reference.lastIndexOf(")", volumeIndex) + 1, volumeIndex + uriParts[2].length).trim();
+					item.codeNumber = null;
 				}
 			}
 			if (type == "bill") {
 				item.codeVolume = item.codeNumber;
 				item.codeNumber = null;
+				item.codePages = item.pages;
+				item.pages = null;
 			}
 		}
 
-		item.date = attr(doc, 'meta[property="eli:date_document"]', "content");
-		if (!item.date) {
-			item.date = attr(doc, 'meta[property="eli:date_publication"]', "content");
+		var documentDate = attr(doc, 'meta[property="eli:date_document"]', "content");
+		if (treaty) {
+			// Cellar uses dates like 1001-01-01 when the date is unknown
+			let isRealDate = date => date > "1900";
+			// A treaty can have several dates of the same kind, so the earliest is used.
+			let earliest = dates => dates.filter(isRealDate).sort()[0];
+			// available-date is the date of signature: the CSL specification defines it for treaties as
+			// "the date a treaty was made available for signing" (version 1.0.2, Appendix IV, Date Variables)
+			// https://docs.citationstyles.org/en/stable/specification.html#date-variables
+			// The date the treaty entered into force goes in date.
+			item.date = earliest([...doc.querySelectorAll('meta[property="eli:first_date_entry_in_force"]')]
+				.map(meta => meta.getAttribute("content"))
+				.concat(cellar["resource_legal_date_entry-into-force"] || []));
+			item.extra = "type: treaty";
+			// a corrigendum has no signature, only its own date
+			if (!eliTypeUri.endsWith("CORRIGENDUM") && !cellarTypes.includes("CORRIGENDUM")) {
+				let signature = earliest(cellar.resource_legal_date_signature || [])
+					|| earliest([documentDate]) || earliest(cellar.work_date_document || []);
+				if (signature) {
+					item.extra += "\navailable-date: " + signature;
+				}
+			}
+			// available-date is taken, so the date of the Official Journal goes in event-date.
+			if (publicationDate) {
+				item.extra += "\nevent-date: " + publicationDate;
+			}
+			// EUR-Lex's in force flag is also off for treaties that are in force but have no date recorded,
+			// so only a past end date is relied on. Treaties that never entered into force can't be told from those
+			let today = new Date().toISOString().slice(0, 10);
+			let endDates = [...doc.querySelectorAll('meta[property="eli:date_no_longer_in_force"]')]
+				.map(meta => meta.getAttribute("content"))
+				.concat(cellar["resource_legal_date_end-of-validity"] || []);
+			if (endDates.some(date => isRealDate(date) && date < today)) {
+				item.extra += "\nstatus: not in force";
+			}
 		}
-		
-		var passedBy = doc.querySelectorAll('meta[property="eli:passed_by"]');
-		var passedByArray = [];
-		for (let i = 0; i < passedBy.length; i++) {
-			passedByArray.push(passedBy[i].getAttribute("resource").split("/").pop());
+		else {
+			item.date = documentDate || publicationDate;
+			if (publicationDate) {
+				// the date of the Official Journal, which often differs from the date of the act
+				item.extra = "available-date: " + publicationDate;
+			}
 		}
-		item.legislativeBody = passedByArray.join(", ");
-		
-		item.url = attr(doc, 'meta[typeOf="eli:LegalResource"]', "about");
+
+		// the parties to a treaty are no legislative body, and there can be more than a hundred of them.
+		// That also goes for the protocols to the founding treaties, which are otherwise saved as bills
+		// (the founding treaties themselves are statutes, which have no such field)
+		if (!treaty && !["TREATY", "PROT"].includes(getEliType(doc))) {
+			var passedBy = doc.querySelectorAll('meta[property="eli:passed_by"]');
+			var passedByArray = [];
+			for (let i = 0; i < passedBy.length; i++) {
+				passedByArray.push(passedBy[i].getAttribute("resource").split("/").pop());
+			}
+			item.legislativeBody = passedByArray.join(", ");
+		}
+
+		item.url = attr(doc, 'meta[typeOf="eli:LegalResource"]', "about") || url;
 	}
 		
 	else if (item.itemType == "case") {
@@ -263,14 +481,15 @@ var testCases = [
 		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:31995L0046",
 		"items": [
 			{
-				"itemType": "bill",
-				"title": "Directive 95/46/EC of the European Parliament and of the Council of 24 October 1995 on the protection of individuals with regard to the processing of personal data and on the free movement of such data",
+				"itemType": "statute",
+				"nameOfAct": "Directive 95/46/EC of the European Parliament and of the Council of 24 October 1995 on the protection of individuals with regard to the processing of personal data and on the free movement of such data",
 				"creators": [],
-				"date": "1995-10-24",
-				"code": "OJ L",
-				"codeVolume": "281",
+				"dateEnacted": "1995-10-24",
+				"code": "OJ 1995 L",
+				"codeNumber": "281",
+				"extra": "available-date: 1995-11-23",
 				"language": "en",
-				"legislativeBody": "EP, CONSIL",
+				"pages": "31-50",
 				"url": "http://data.europa.eu/eli/dir/1995/46/oj",
 				"attachments": [
 					{
@@ -295,13 +514,752 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "statute",
-				"nameOfAct": "Commission Regulation (EC) No 2257/94 of 16 September 1994 laying down quality standards for bananas (Text with EEA relevance)",
+				"nameOfAct": "Commission Regulation (EC) No 2257/94 of 16 September 1994 laying down quality standards for bananas",
 				"creators": [],
 				"dateEnacted": "1994-09-16",
-				"code": "OJ L",
+				"code": "OJ 1994 L",
 				"codeNumber": "245",
+				"extra": "available-date: 1994-09-20",
 				"language": "en",
+				"pages": "6-10",
 				"url": "http://data.europa.eu/eli/reg/1994/2257/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32004L0038",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Directive 2004/38/EC of the European Parliament and of the Council of 29 April 2004 on the right of citizens of the Union and their family members to move and reside freely within the territory of the Member States amending Regulation (EEC) No 1612/68 and repealing Directives 64/221/EEC, 68/360/EEC, 72/194/EEC, 73/148/EEC, 75/34/EEC, 75/35/EEC, 90/364/EEC, 90/365/EEC and 93/96/EEC",
+				"creators": [],
+				"dateEnacted": "2004-04-29",
+				"code": "OJ 2004 L",
+				"codeNumber": "158",
+				"extra": "available-date: 2004-04-30",
+				"language": "en",
+				"pages": "77-123",
+				"url": "http://data.europa.eu/eli/dir/2004/38/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32016R0679",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Regulation (EU) 2016/679 of the European Parliament and of the Council of 27 April 2016 on the protection of natural persons with regard to the processing of personal data and on the free movement of such data, and repealing Directive 95/46/EC (General Data Protection Regulation)",
+				"creators": [],
+				"dateEnacted": "2016-04-27",
+				"code": "OJ 2016 L",
+				"codeNumber": "119",
+				"extra": "available-date: 2016-05-04",
+				"language": "en",
+				"pages": "1-88",
+				"shortTitle": "General Data Protection Regulation",
+				"url": "http://data.europa.eu/eli/reg/2016/679/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Regulation (EU) 2024/1689 of the European Parliament and of the Council of 13 June 2024 laying down harmonised rules on artificial intelligence and amending Regulations (EC) No 300/2008, (EU) No 167/2013, (EU) No 168/2013, (EU) 2018/858, (EU) 2018/1139 and (EU) 2019/2144 and Directives 2014/90/EU, (EU) 2016/797 and (EU) 2020/1828 (Artificial Intelligence Act)",
+				"creators": [],
+				"dateEnacted": "2024-06-13",
+				"code": "OJ L",
+				"language": "en",
+				"pages": "2024/1689",
+				"shortTitle": "Artificial Intelligence Act",
+				"url": "http://data.europa.eu/eli/reg/2024/1689/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32022R2065",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Regulation (EU) 2022/2065 of the European Parliament and of the Council of 19 October 2022 on a Single Market For Digital Services and amending Directive 2000/31/EC (Digital Services Act)",
+				"creators": [],
+				"dateEnacted": "2022-10-19",
+				"code": "OJ 2022 L",
+				"codeNumber": "277",
+				"extra": "available-date: 2022-10-27",
+				"language": "en",
+				"pages": "1-102",
+				"shortTitle": "Digital Services Act",
+				"url": "http://data.europa.eu/eli/reg/2022/2065/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32011R0492",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Regulation (EU) No 492/2011 of the European Parliament and of the Council of 5 April 2011 on freedom of movement for workers within the Union",
+				"creators": [],
+				"dateEnacted": "2011-04-05",
+				"code": "OJ 2011 L",
+				"codeNumber": "141",
+				"extra": "available-date: 2011-05-27",
+				"language": "en",
+				"pages": "1-12",
+				"url": "http://data.europa.eu/eli/reg/2011/492/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32003R0001",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Council Regulation (EC) No 1/2003 of 16 December 2002 on the implementation of the rules on competition laid down in Articles 81 and 82 of the Treaty",
+				"creators": [],
+				"dateEnacted": "2002-12-16",
+				"code": "OJ 2003 L",
+				"codeNumber": "1",
+				"extra": "available-date: 2003-01-04",
+				"language": "en",
+				"pages": "1-25",
+				"url": "http://data.europa.eu/eli/reg/2003/1/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=OJ:C_202403400",
+		"items": [
+			{
+				"itemType": "bill",
+				"title": "Verbatim report of proceedings of 3 July 2018",
+				"creators": [],
+				"date": "2018-07-03",
+				"code": "OJ C",
+				"codePages": "C/2024/3400",
+				"language": "en",
+				"legislativeBody": "EP",
+				"url": "http://data.europa.eu/eli/C/2024/3400/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:31968R1612",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Regulation (EEC) No 1612/68 of the Council of 15 October 1968 on freedom of movement for workers within the Community",
+				"creators": [],
+				"dateEnacted": "1968-10-15",
+				"code": "OJ English Special Edition: Series I Volume 1968(II)",
+				"extra": "available-date: 1968-10-19",
+				"language": "en",
+				"pages": "475-484",
+				"url": "http://data.europa.eu/eli/reg/1968/1612/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32016R0679R(02)",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Corrigendum to Regulation (EU) 2016/679 of the European Parliament and of the Council of 27 April 2016 on the protection of natural persons with regard to the processing of personal data and on the free movement of such data, and repealing Directive 95/46/EC (General Data Protection Regulation) (OJ L 119, 4.5.2016)",
+				"creators": [],
+				"dateEnacted": "2018-05-23",
+				"code": "OJ 2018 L",
+				"codeNumber": "127",
+				"extra": "available-date: 2018-05-23",
+				"language": "en",
+				"pages": "2-13",
+				"url": "http://data.europa.eu/eli/reg/2016/679/corrigendum/2018-05-23/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/eli/agree_internation/2001/258/oj",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Agreement between the European Community and the Republic of Iceland and the Kingdom of Norway concerning the criteria and mechanisms for establishing the State responsible for examining a request for asylum lodged in a Member State or in Iceland or Norway - Declarations",
+				"creators": [],
+				"dateEnacted": "2001-04-01",
+				"code": "OJ 2001 L",
+				"codeNumber": "93",
+				"extra": "type: treaty\navailable-date: 2001-01-19\nevent-date: 2001-04-03",
+				"language": "en",
+				"pages": "40-47",
+				"url": "http://data.europa.eu/eli/agree_internation/2001/258/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/eli/convention/2000/922/oj",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "The Schengen acquis - Convention implementing the Schengen Agreement of 14 June 1985 between the Governments of the States of the Benelux Economic Union, the Federal Republic of Germany and the French Republic on the gradual abolition of checks at their common borders",
+				"creators": [],
+				"dateEnacted": "1995-03-26",
+				"code": "OJ 2000 L",
+				"codeNumber": "239",
+				"extra": "type: treaty\navailable-date: 1990-06-19\nevent-date: 2000-09-22",
+				"language": "en",
+				"pages": "19-62",
+				"url": "http://data.europa.eu/eli/convention/2000/922/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:22017A0914(01)",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Amendment to the Montreal Protocol on substances that deplete the ozone layer",
+				"creators": [],
+				"dateEnacted": "2019-01-01",
+				"code": "OJ 2017 L",
+				"codeNumber": "236",
+				"extra": "type: treaty\navailable-date: 2016-10-15\nevent-date: 2017-09-14",
+				"language": "en",
+				"pages": "3-13",
+				"url": "http://data.europa.eu/eli/agree_amend/2017/1541/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:22026A00757",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Agreement on the interpretation and application of the Energy Charter Treaty",
+				"creators": [],
+				"dateEnacted": "2026-06-25",
+				"code": "OJ L",
+				"extra": "type: treaty\navailable-date: 2026-02-18\nevent-date: 2026-03-27",
+				"language": "en",
+				"pages": "2026/757",
+				"url": "http://data.europa.eu/eli/agree_internation/2026/757/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:22015A0703(01)R(01)",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Corrigendum to the Agreement between the European Union and the Democratic Republic of Timor-Leste on the short-stay visa waiver (OJ L 173, 3.7.2015)",
+				"creators": [],
+				"code": "OJ 2015 L",
+				"codeNumber": "189",
+				"extra": "type: treaty\nevent-date: 2015-07-17",
+				"language": "en",
+				"pages": "40-41",
+				"url": "http://data.europa.eu/eli/agree_internation/2015/1030/corrigendum/2015-07-17/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:42000A0922(03)",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "The Schengen acquis - Agreement on the Accession of the Italian Republic to the Convention implementing the Schengen Agreement of 14 June 1985 between the Governments of the States of the Benelux Economic Union, the Federal Republic of Germany and the French Republic on the gradual abolition of checks at their common borders signed at Schengen on 19 June 1990",
+				"creators": [],
+				"code": "OJ 2000 L",
+				"codeNumber": "239",
+				"extra": "type: treaty\navailable-date: 1990-11-27\nevent-date: 2000-09-22",
+				"language": "en",
+				"pages": "63-68",
+				"url": "http://data.europa.eu/eli/agree_internation/2000/922(2)/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:21971A0527(01)",
+		"detectedItemType": "bill",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Agreement between the European Economic Community and the Republic of Turkey on the supply of common wheat as food aid",
+				"creators": [],
+				"code": "OJ 1971 L",
+				"codeNumber": "125",
+				"extra": "type: treaty\navailable-date: 1971-05-27\nevent-date: 1971-06-09\nstatus: not in force",
+				"language": "en",
+				"pages": "17-19",
+				"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:21971A0527(01)",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:41976A0209(01)",
+		"detectedItemType": "bill",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Convention setting up a European University Institute",
+				"creators": [],
+				"code": "OJ 1976 C",
+				"codeNumber": "29",
+				"extra": "type: treaty\navailable-date: 1972-04-19\nevent-date: 1976-02-09",
+				"language": "en",
+				"pages": "1-17",
+				"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:41976A0209(01)",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:21963A0720(01)",
+		"detectedItemType": "bill",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Convention d'association entre la Communauté économique européenne et les États africains et malgache associés à cette Communauté /* Signée à Yaoundé le 20 juillet 1963 */",
+				"creators": [],
+				"dateEnacted": "1964-06-01",
+				"code": "OJ 1964",
+				"codeNumber": "93",
+				"extra": "type: treaty\navailable-date: 1963-07-20\nevent-date: 1964-06-11\nstatus: not in force",
+				"language": "en",
+				"pages": "1431-1457",
+				"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:21963A0720(01)",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:21956A0507(01)",
+		"detectedItemType": "bill",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Consultation Agreement between the Swiss Confederation and the High Authority of the European Coal and Steel Community",
+				"creators": [],
+				"dateEnacted": "1957-01-26",
+				"code": "OJ 1957",
+				"codeNumber": "7",
+				"extra": "type: treaty\navailable-date: 1956-05-07\nevent-date: 1957-02-21\nstatus: not in force",
+				"language": "en",
+				"pages": "85-87",
+				"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:21956A0507(01)",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:22006A1230(08)R(01)",
+		"detectedItemType": "bill",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Corrigendum: Agreement between the European Community and the Republic of Bulgaria laying down a procedure for the provision of information in the field of technical regulations and of rules on information society services",
+				"creators": [],
+				"code": "OJ 2007 L",
+				"codeNumber": "40",
+				"extra": "type: treaty\nevent-date: 2007-02-12",
+				"language": "en",
+				"pages": "111-118",
+				"shortTitle": "Corrigendum",
+				"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:22006A1230(08)R(01)",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32008R0593",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Regulation (EC) No 593/2008 of the European Parliament and of the Council of 17 June 2008 on the law applicable to contractual obligations (Rome I)",
+				"creators": [],
+				"dateEnacted": "2008-06-17",
+				"code": "OJ 2008 L",
+				"codeNumber": "177",
+				"extra": "available-date: 2008-07-04",
+				"language": "en",
+				"pages": "6-16",
+				"shortTitle": "Rome I",
+				"url": "http://data.europa.eu/eli/reg/2008/593/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32021R1119",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Regulation (EU) 2021/1119 of the European Parliament and of the Council of 30 June 2021 establishing the framework for achieving climate neutrality and amending Regulations (EC) No 401/2009 and (EU) 2018/1999 (‘European Climate Law’)",
+				"creators": [],
+				"dateEnacted": "2021-06-30",
+				"code": "OJ 2021 L",
+				"codeNumber": "243",
+				"extra": "available-date: 2021-07-09",
+				"language": "en",
+				"pages": "1-17",
+				"shortTitle": "European Climate Law",
+				"url": "http://data.europa.eu/eli/reg/2021/1119/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (EN)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (EN)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32020R0687",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Commission Delegated Regulation (EU) 2020/687 of 17 December 2019 supplementing Regulation (EU) 2016/429 of the European Parliament and the Council, as regards rules for the prevention and control of certain listed diseases",
+				"creators": [],
+				"dateEnacted": "2019-12-17",
+				"code": "OJ 2020 L",
+				"codeNumber": "174",
+				"extra": "available-date: 2020-06-03",
+				"language": "en",
+				"pages": "64-139",
+				"url": "http://data.europa.eu/eli/reg_del/2020/687/oj",
 				"attachments": [
 					{
 						"title": "EUR-Lex PDF (EN)",
@@ -404,6 +1362,134 @@ var testCases = [
 					},
 					{
 						"title": "EUR-Lex HTML (NL)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/PL/TXT/?uri=CELEX:32004L0038&locale=pl",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Dyrektywa 2004/38/WE Parlamentu Europejskiego i Rady z dnia 29 kwietnia 2004 r. w sprawie prawa obywateli Unii i członków ich rodzin do swobodnego przemieszczania się i pobytu na terytorium Państw Członkowskich, zmieniająca rozporządzenie (EWG) nr 1612/68 i uchylająca dyrektywy 64/221/EWG, 68/360/EWG, 72/194/EWG, 73/148/EWG, 75/34/EWG, 75/35/EWG, 90/364/EWG, 90/365/EWG i 93/96/EWG",
+				"creators": [],
+				"dateEnacted": "2004-04-29",
+				"code": "Dz.U. Polskie wydanie specjalne: Rozdział 05 Tom 005",
+				"extra": "available-date: 2004-04-30",
+				"language": "pl",
+				"pages": "46-61",
+				"url": "http://data.europa.eu/eli/dir/2004/38/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (PL)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (PL)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/HU/TXT/?uri=CELEX:32022L2555&locale=hu",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Az Európai Parlament és a Tanács (EU) 2022/2555 irányelve (2022. december 14.) az Unió egész területén egységesen magas szintű kiberbiztonságot biztosító intézkedésekről, valamint a 910/2014/EU rendelet és az (EU) 2018/1972 irányelv módosításáról és az (EU) 2016/1148 irányelv hatályon kívül helyezéséről (NIS 2 irányelv)",
+				"creators": [],
+				"dateEnacted": "2022-12-14",
+				"code": "OJ 2022 L",
+				"codeNumber": "333",
+				"extra": "available-date: 2022-12-27",
+				"language": "hu",
+				"pages": "80-152",
+				"shortTitle": "NIS 2 irányelv",
+				"url": "http://data.europa.eu/eli/dir/2022/2555/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (HU)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (HU)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/DA/TXT/?uri=CELEX:31968R1612&locale=da",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Rådets forordning nr. 1612/68/EØF af 15. oktober 1968 om arbejdskraftens frie bevægelighed inden for Fællesskabet",
+				"creators": [],
+				"dateEnacted": "1968-10-15",
+				"code": "EFT den danske specialudgave: serie I bind 1968(II)",
+				"extra": "available-date: 1968-10-19",
+				"language": "da",
+				"pages": "467-476",
+				"url": "http://data.europa.eu/eli/reg/1968/1612/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (DA)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (DA)",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:32016R0679&locale=de",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Verordnung (EU) 2016/679 des Europäischen Parlaments und des Rates vom 27. April 2016 zum Schutz natürlicher Personen bei der Verarbeitung personenbezogener Daten, zum freien Datenverkehr und zur Aufhebung der Richtlinie 95/46/EG (Datenschutz-Grundverordnung)",
+				"creators": [],
+				"dateEnacted": "2016-04-27",
+				"code": "OJ 2016 L",
+				"codeNumber": "119",
+				"extra": "available-date: 2016-05-04",
+				"language": "de",
+				"pages": "1-88",
+				"shortTitle": "Datenschutz-Grundverordnung",
+				"url": "http://data.europa.eu/eli/reg/2016/679/oj",
+				"attachments": [
+					{
+						"title": "EUR-Lex PDF (DE)",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "EUR-Lex HTML (DE)",
 						"mimeType": "text/html",
 						"snapshot": true
 					}
