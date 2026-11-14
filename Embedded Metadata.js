@@ -675,54 +675,6 @@ function isCollectiveByline(name) {
 	return COLLECTIVE_BYLINE_RE.test(name);
 }
 
-// Belgian news desks sign unbylined pieces with a short staff code, typed as
-// a Person in the JSON-LD: Flemish desks use two or three letters ("kgs" on
-// De Standaard), Walloon desks dotted initials ("X.C.", "B.D."). The code
-// stands for the desk rather than a named author, so keep it as a single
-// field instead of splitting it into a first and last name.
-var BELGIAN_DESK_CODE_RE = /^(?:[a-z]{2,3}|(?:[a-z]\.\s?){2,3})$/i;
-var BELGIAN_PLACE_RE = new RegExp('(?:^|[^\\p{L}])(?:'
-	+ 'Brussel|Brussels|Bruxelles|Antwerpen|Anvers|Antwerp|Gent|Gand|Ghent|Brugge|Bruges'
-	+ '|Leuven|Louvain|Louvain-la-Neuve|Ottignies|Mechelen|Malines|Hasselt|Genk|Kortrijk|Courtrai'
-	+ '|Oostende|Ostende|Ostend|Aalst|Alost|Sint-Niklaas|Roeselare|Turnhout|Ieper|Ypres'
-	+ '|Luik|Liège|Liege|Namen|Namur|Charleroi|Mons|Doornik|Tournai|La Louvière'
-	+ '|Verviers|Waver|Wavre|Aarlen|Arlon|Eupen|Seraing|Nijvel|Nivelles'
-	+ ')(?![\\p{L}-])', 'iu');
-
-// givenName / familyName may be plain text, a list, or a language-tagged value
-function jsonLDText(value) {
-	value = [].concat(value || [])[0];
-	if (value && typeof value == 'object') value = value['@value'];
-	return typeof value == 'string' ? ZU.trimInternal(value) : '';
-}
-
-// Some publishers give "name" plus "familyName" but no "givenName"; recover
-// the given name from the full name rather than dropping it ("Jan Peeters"
-// with familyName "Peeters" -> "Jan"). Particles stay with the given name
-// unless the publisher put them in familyName.
-function givenNameFromFullName(name, last) {
-	if (!name || name.toLowerCase() == last.toLowerCase()) return '';
-	if (name.toLowerCase().endsWith(' ' + last.toLowerCase())) {
-		return name.slice(0, -last.length).trim();
-	}
-	// "Peeters, Jan"
-	var inverted = name.match(/^([^,]+),\s*(.+)$/);
-	if (inverted && inverted[1].toLowerCase() == last.toLowerCase()) return inverted[2];
-	// name does not contain the family name at all: it is the given name
-	if (!name.toLowerCase().includes(last.toLowerCase())) return name;
-	return '';
-}
-
-function isBelgianDeskCode(name, language, data) {
-	if (!BELGIAN_DESK_CODE_RE.test(name)) return false;
-	if (/^(nl|fr)-BE$/i.test(language || '') || /^(nl|fr)-BE$/i.test(data.inLanguage || '')) return true;
-	return [].concat(data.contentLocation || [], data.locationCreated || [], data.dateline || [])
-		.some(function (place) {
-			var placeName = typeof place == 'string' ? place : place && place.name;
-			return typeof placeName == 'string' && BELGIAN_PLACE_RE.test(placeName);
-		});
-}
-
 /**
  * Reads JSON-LD (schema.org) blocks and fills in fields the meta tags missed.
  * Many news sites ship the byline and date only there (they are not in
@@ -763,8 +715,8 @@ function addJSONLDMetadata(doc, newItem) {
 		for (var i = 0; i < authors.length; i++) {
 			var author = authors[i];
 			if (!author) continue;
-			var first = typeof author == 'object' ? jsonLDText(author.givenName) : '';
-			var last = typeof author == 'object' ? jsonLDText(author.familyName) : '';
+			var first = typeof author == 'object' ? author.givenName : '';
+			var last = typeof author == 'object' ? author.familyName : '';
 			var name = typeof author == 'string' ? author : (author.name || [first, last].filter(Boolean).join(' '));
 			name = ZU.trimInternal(name).replace(/^By\s+/i, '');
 			var types = typeof author == 'object'
@@ -776,14 +728,11 @@ function addJSONLDMetadata(doc, newItem) {
 			// when publishers also supply Person types or structured names.
 			var isOrganization = types.some(function (type) {
 				return /organization$/.test(type);
-			}) || WIRE_SERVICE_RE.test(name) || isCollectiveByline(name)
-				// a structured familyName means a real person, even with a short name
-				|| (!last && isBelgianDeskCode(name, newItem.language, data));
+			}) || WIRE_SERVICE_RE.test(name) || isCollectiveByline(name);
 			if (isOrganization && name) {
 				newItem.creators.push({ lastName: name, creatorType: 'author', fieldMode: 1 });
 			}
 			else if (first || last) {
-				if (last && !first) first = givenNameFromFullName(name, last);
 				newItem.creators.push({
 					firstName: ZU.trimInternal(first || ''),
 					lastName: ZU.trimInternal(last || ''),
