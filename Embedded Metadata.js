@@ -698,7 +698,9 @@ function addJSONLDMetadata(doc, newItem) {
 		newItem.abstractNote = ZU.trimInternal(data.description);
 	}
 	if (!newItem.date) {
-		var date = data.datePublished || data.dateCreated;
+		// only the publication date, as for meta tags (RDF.js): dateCreated
+		// and dateModified do not say when the article was published
+		var date = data.datePublished;
 		if (typeof date == 'string') {
 			// keep only the date part; Zotero normalizes ISO 8601 itself,
 			// but a bare "2024-11-10T17:27:00Z" would keep the time
