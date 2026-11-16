@@ -215,9 +215,10 @@ function completeItem(doc, newItem, hwType) {
 
 	addHighwireMetadata(doc, newItem, hwType);
 	addOtherMetadata(doc, newItem);
-	addLowQualityMetadata(doc, newItem);
-	// Runs last: meta tags win, JSON-LD only fills what is still missing
+	// Meta tags win; JSON-LD fills what they miss, before the low-quality
+	// fallbacks (document title, page byline) get a chance to guess
 	addJSONLDMetadata(doc, newItem);
+	addLowQualityMetadata(doc, newItem);
 	finalDataCleanup(doc, newItem);
 
 	if (CUSTOM_FIELD_MAPPINGS) {
@@ -694,7 +695,9 @@ function addJSONLDMetadata(doc, newItem) {
 	if (!newItem.title && data.headline) {
 		newItem.title = data.headline;
 	}
-	if (!newItem.abstractNote && data.description) {
+	// meta name="description" is read later, but as a meta tag it wins
+	if (!newItem.abstractNote && data.description
+		&& !attr(doc, 'meta[name="description" i]', 'content')) {
 		newItem.abstractNote = ZU.trimInternal(data.description);
 	}
 	if (!newItem.date) {
@@ -715,7 +718,7 @@ function addJSONLDMetadata(doc, newItem) {
 	if (!newItem.creators.length && data.author) {
 		var authors = Array.isArray(data.author) ? data.author : [data.author];
 		for (var i = 0; i < authors.length; i++) {
-			var author = authors[i];
+			var author = resolveJSONLDNode(authors[i], nodes);
 			if (!author) continue;
 			var first = typeof author == 'object' ? author.givenName : '';
 			var last = typeof author == 'object' ? author.familyName : '';
@@ -736,14 +739,19 @@ function addJSONLDMetadata(doc, newItem) {
 			}
 			else if (first || last) {
 				newItem.creators.push({
-					firstName: ZU.trimInternal(first || ''),
-					lastName: ZU.trimInternal(last || ''),
+					firstName: first ? fixCase(ZU.trimInternal(first)) : '',
+					lastName: first ? fixCase(ZU.trimInternal(last || '')) : ZU.trimInternal(last || ''),
 					creatorType: 'author'
 				});
 			}
 			else if (name) {
 				if (types.includes('person')) {
-					newItem.creators.push(ZU.cleanAuthor(name, 'author', name.includes(',')));
+					var creator = ZU.cleanAuthor(name, 'author', name.includes(','));
+					if (creator.firstName) {
+						creator.firstName = fixCase(creator.firstName);
+						creator.lastName = fixCase(creator.lastName);
+					}
+					newItem.creators.push(creator);
 				}
 				else {
 					newItem.creators.push({ lastName: name, creatorType: 'author', fieldMode: 1 });
@@ -833,6 +841,15 @@ function getJSONLDArticle(doc, allNodes) {
 		if (fallback) article = Object.assign({}, article, { author: fallback.author });
 	}
 	return article;
+}
+
+// Yoast and similar plugins link an author to a Person node in @graph by @id
+function resolveJSONLDNode(value, nodes) {
+	if (!value || typeof value != 'object' || !value['@id']) return value;
+	var target = nodes.find(function (node) {
+		return node['@id'] == value['@id'];
+	});
+	return target ? Object.assign({}, target, value) : value;
 }
 
 function getJSONLDPublication(article, nodes, doc) {
