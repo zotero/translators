@@ -1970,8 +1970,8 @@ var testCases = [
 				"title": "Татар яшьләре татарлыкны сакларга тырыша",
 				"creators": [
 					{
-						"firstName": "гүзәл",
-						"lastName": "мәхмүтова",
+						"firstName": "Гүзәл",
+						"lastName": "Мәхмүтова",
 						"creatorType": "author"
 					}
 				],
@@ -2184,7 +2184,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2023-08-10",
+				"date": "2018-03-06",
 				"abstractNote": "This chart shows estimated worldwide mobile e-commerce sales and their share in all e-commerce sales.",
 				"language": "en",
 				"shortTitle": "Infographic",
@@ -2285,6 +2285,7 @@ var testCases = [
 				"date": "2013-06-10",
 				"abstractNote": "\"Kinky Boots\" dances off with six awards -- including best musical -- while \"Matilda the Musical\" and \"Pippin\" win four prizes each",
 				"language": "en-US",
+				"websiteTitle": "CBS News",
 				"shortTitle": "Tony Awards 2013",
 				"url": "https://www.cbsnews.com/news/tony-awards-2013-list-of-winners/",
 				"attachments": [
@@ -2358,6 +2359,68 @@ var testCases = [
 				"url": "https://www.scotusblog.com/2026/11/trump-administration-asks-supreme-court-to-intervene-in-california-ballots-dispute/",
 				"language": "en",
 				"websiteTitle": "SCOTUSblog"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.technologyreview.com/2026/11/06/1148090/i-watched-a-humanoid-robot-clean-my-apartment-it-felt-like-a-taste-of-the-future/",
+		"items": [
+			{
+				"itemType": "webpage",
+				"creators": [
+					{
+						"firstName": "Grace",
+						"lastName": "Huckins",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "I watched a humanoid robot clean my apartment. It felt like a taste of the future.",
+				"url": "https://www.technologyreview.com/2026/11/06/1148090/i-watched-a-humanoid-robot-clean-my-apartment-it-felt-like-a-taste-of-the-future/",
+				"abstractNote": "The startup Tau Robotics is sending humanoid robots to clean San Francisco homes. They still need lots of human guidance, but they’re learning.",
+				"date": "2026-11-06",
+				"language": "en",
+				"websiteTitle": "MIT Technology Review"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://news.err.ee/1610186809/sde-s-prime-ministerial-candidate-vows-to-put-an-end-to-estonia-s-festival-of-tax-changes",
+		"items": [
+			{
+				"itemType": "webpage",
+				"creators": [
+					{
+						"firstName": "Johannes",
+						"lastName": "Tralla",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "SDE's prime ministerial candidate vows to put an end to Estonia's festival of tax changes",
+				"date": "2026-11-05T11:15:00+02:00",
+				"abstractNote": "The Social Democrats' candidate for PM Jonatan Vseviov defends his political shift, while calling for a fairer tax system and stronger public services in an interview with ERR.",
+				"url": "https://news.err.ee/1610186809/sde-s-prime-ministerial-candidate-vows-to-put-an-end-to-estonia-s-festival-of-tax-changes",
+				"language": "en",
+				"websiteTitle": "ERR"
 			}
 		]
 	}
