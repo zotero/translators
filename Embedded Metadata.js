@@ -670,7 +670,7 @@ function addOtherMetadata(doc, newItem) {
 // some publishers even though it names a group, so it must not be split.
 var COLLECTIVE_BYLINE_RE = /\b(reporters?|staff|newsroom|desk|team|editors?|wires?|news|correspondents?|bureau)\s*$/i;
 
-var WIRE_SERVICE_RE = /^(AFP|AP|PTI|ANI|IANS|DPA|dpa|EFE|UPI|AAP)$/;
+var WIRE_SERVICE_RE = /^(AFP|AP|PTI|ANI|IANS|DPA|dpa|EFE|UPI|AAP|ANP)$/;
 
 function isCollectiveByline(name) {
 	return COLLECTIVE_BYLINE_RE.test(name);
