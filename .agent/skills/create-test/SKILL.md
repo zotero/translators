@@ -51,8 +51,20 @@ node .bin/create-test.mjs "<translator filename>" --input "<import data>"
 
 Export tests are not supported by the automated test runner. Test export translators manually.
 
+## Updating test cases
+
+To update an existing test after changing translator code (or after the site changes), add `--update`:
+
+```
+node .bin/create-test.mjs "<translator filename>" --url "<url>" --update
+```
+
+This replaces the existing test with the same URL (or the same `--input`/`--search`) in place, instead of appending a new one. Other tests in the file are left exactly as they are. If no test matches, or several do, the tool stops before running anything; pick the test with `--index <n>` (1-based, as numbered in `run-tests.mjs` output).
+
 ## Options
 
+- `--update`: Replace the matching existing test case instead of appending.
+- `--index <n>`: With `--update`, replace test case `n` (1-based).
 - `--no-write`: Preview the captured test case without modifying the file.
 - `--json`: Output structured JSON.
 - `--headed`: Open a visible browser. Required for sites behind Cloudflare or a similar anti-bot wall, which refuse headless Chrome outright.
@@ -62,4 +74,4 @@ Export tests are not supported by the automated test runner. Test export transla
 - Include at least one single-item test and one `"multiple"` test (if supported).
 - Use stable URLs unlikely to change (DOI-based, permalinks, archived content).
 - Always use this tool to generate test cases. Never write test case items by hand — the tool ensures the JSON matches what the translator actually produces.
-- If you need to update a test case after changing translator code, re-run the tool for that URL. Replace the old test case entry with the new output.
+- If you need to update a test case after changing translator code, re-run the tool for that URL with `--update`. Don't append a new test and delete the old one: appending re-serializes the whole block, which reorders fields in other hand-edited tests.

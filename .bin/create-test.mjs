@@ -3,23 +3,26 @@
 import path from 'node:path';
 import process from 'node:process';
 import { promises as fs } from 'node:fs';
+import { isDeepStrictEqual } from 'node:util';
 import { parseArgs, resolveTranslator, REPO_ROOT } from './lib/common.mjs';
 import { ensureConnectorBuild, CONNECTOR_BUILD_DIR, EXTENSION_ID } from './lib/connector.mjs';
 import { launchBrowser, resolveHeadless } from './lib/browser.mjs';
-import { readTranslator, serializeTestCases, normalizeTestCases } from './lib/translator-io.mjs';
+import { readTranslator, serializeTestCases, normalizeTestCases, replaceTestCase } from './lib/translator-io.mjs';
 
 const CI_DIR = path.join(REPO_ROOT, '.ci', 'pull-request-check');
 const BEGIN_TEST_CASES = '/** BEGIN TEST CASES **/';
 const END_TEST_CASES = '/** END TEST CASES **/';
 
 const { values, positionals } = parseArgs({
-	usage: 'node .bin/create-test.mjs <translator> --url <url> | --input <data> | --search <json>',
+	usage: 'node .bin/create-test.mjs <translator> --url <url> | --input <data> | --search <json> [--update [--index <n>]]',
 	options: {
 		url: { type: 'string', short: 'u' },
 		input: { type: 'string' },
 		search: { type: 'string' },
 		'keep-open': { type: 'boolean' },
 		'no-write': { type: 'boolean' },
+		update: { type: 'boolean' },
+		index: { type: 'string' },
 		json: { type: 'boolean' },
 		headed: { type: 'boolean' },
 		help: { type: 'boolean', short: 'h' },
@@ -43,6 +46,43 @@ if (!translator.header) {
 	process.exit(1);
 }
 const translatorID = translator.header.translatorID;
+
+// With --update, find the existing test to replace before doing any work
+let updateIndex = null;
+if (values.update) {
+	updateIndex = findTestToUpdate(translator.testCases);
+}
+else if (values.index) {
+	console.error('Error: --index requires --update');
+	process.exit(2);
+}
+
+function findTestToUpdate(testCases) {
+	if (values.index) {
+		const index = parseInt(values.index, 10) - 1;
+		if (!testCases[index]) {
+			console.error(`Error: no test case ${values.index} (translator has ${testCases.length})`);
+			process.exit(2);
+		}
+		return index;
+	}
+	const search = values.search ? JSON.parse(values.search) : null;
+	const matches = testCases
+		.map((testCase, index) => ({ testCase, index }))
+		.filter(({ testCase }) => {
+			if (values.url) return testCase.type === 'web' && testCase.url === values.url;
+			if (search) return testCase.type === 'search' && isDeepStrictEqual(testCase.input, search);
+			return testCase.type === 'import' && testCase.input === values.input;
+		});
+	if (matches.length === 1) return matches[0].index;
+	if (!matches.length) {
+		console.error('Error: no existing test case matches; pass --index <n> or drop --update to append');
+	}
+	else {
+		console.error(`Error: test cases ${matches.map(m => m.index + 1).join(', ')} all match; pick one with --index <n>`);
+	}
+	process.exit(2);
+}
 
 // Build hash params for createTest mode
 const hashParams = new URLSearchParams();
@@ -141,6 +181,12 @@ try {
 
 		if (beginIdx === -1 || endIdx === -1) {
 			console.error('Warning: no test cases block found in translator. Add one first.');
+		}
+		else if (updateIndex !== null) {
+			// Keep top-level keys the tester doesn't produce (e.g. "defer")
+			const updated = { ...translator.testCases[updateIndex], ...testCase };
+			await fs.writeFile(filePath, replaceTestCase(raw, updateIndex, updated), 'utf-8');
+			console.error(`\nTest case ${updateIndex + 1} replaced in ${path.relative(REPO_ROOT, filePath)}`);
 		}
 		else {
 			// Parse existing test cases
