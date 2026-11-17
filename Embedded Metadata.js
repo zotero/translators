@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-16 13:43:03"
+	"lastUpdated": "2026-11-17 16:47:30"
 }
 
 /*
@@ -215,8 +215,6 @@ function completeItem(doc, newItem, hwType) {
 
 	addHighwireMetadata(doc, newItem, hwType);
 	addOtherMetadata(doc, newItem);
-	// Meta tags win; JSON-LD fills what they miss, before the low-quality
-	// fallbacks (document title, page byline) get a chance to guess
 	addJSONLDMetadata(doc, newItem);
 	addLowQualityMetadata(doc, newItem);
 	finalDataCleanup(doc, newItem);
@@ -664,264 +662,258 @@ function addOtherMetadata(doc, newItem) {
 			}
 		}
 	}
+
+	if (!newItem.abstractNote) {
+		newItem.abstractNote = ZU.trimInternal(
+			attr(doc, 'meta[name="description" i]', 'content'));
+	}
 }
 
 // A byline such as "1News Reporters" or "Reuters Staff" is typed as a Person by
 // some publishers even though it names a group, so it must not be split.
-var COLLECTIVE_BYLINE_RE = /\b(reporters?|staff|newsroom|desk|team|editors?|wires?|news|correspondents?|bureau)\s*$/i;
+let COLLECTIVE_BYLINE_RE = /\b(reporters?|staff|newsroom|desk|team|editors?|wires?|news|correspondents?|bureau)\s*$/i;
 
-var WIRE_SERVICE_RE = /^(AFP|AP|PTI|ANI|IANS|DPA|dpa|EFE|UPI|AAP|ANP)$/;
+let WIRE_SERVICE_RE = /^(AFP|AP|PTI|ANI|IANS|DPA|dpa|EFE|UPI|AAP|ANP)$/;
 
-function isCollectiveByline(name) {
-	return COLLECTIVE_BYLINE_RE.test(name);
-}
+// Lowercased schema.org types
+let JSONLD_ARTICLE_TYPES = ['newsarticle', 'article', 'reportagenewsarticle', 'report'];
+let JSONLD_CONTAINER_TYPES = ['website', 'periodical', 'newspaper', 'magazine', 'blog'];
 
 /**
- * Reads JSON-LD (schema.org) blocks and fills in fields the meta tags missed.
- * Many news sites ship the byline and date only there (they are not in
- * citation_* or og:* tags), which is why Embedded Metadata alone produced
- * items without creators on those pages.
+ * Reads JSON-LD (schema.org) blocks and fills in a subset of item fields.
+ * This is not a complete or especially robust JSON-LD translator, but it
+ * handles commonly missed information on article pages well enough for now.
  */
 function addJSONLDMetadata(doc, newItem) {
-	var nodes = [];
-	var data = getJSONLDArticle(doc, nodes);
-	if (!data) return;
+	let nodes = getJSONLDNodes(doc);
+	let article = getJSONLDArticle(nodes);
+	if (!article) return;
 
 	if (!newItem.publicationTitle && !newItem.websiteTitle && !newItem.blogTitle) {
-		var publication = getJSONLDPublication(data, nodes, doc);
+		let publication = getJSONLDPublication(article, nodes, doc);
 		if (publication) newItem.publicationTitle = publication;
 	}
 
-	if (!newItem.title && data.headline) {
-		newItem.title = data.headline;
+	if (!newItem.title) {
+		let headline = getJSONLDString(article.headline);
+		if (headline) newItem.title = headline;
 	}
-	// meta name="description" is read later, but as a meta tag it wins
-	if (!newItem.abstractNote && data.description
-		&& !attr(doc, 'meta[name="description" i]', 'content')) {
-		newItem.abstractNote = ZU.trimInternal(data.description);
+	if (!newItem.abstractNote) {
+		let description = getJSONLDString(article.description);
+		if (description) newItem.abstractNote = description;
 	}
 	if (!newItem.date) {
-		// only the publication date, as for meta tags (RDF.js): dateCreated
+		// Only the publication date, as for meta tags (RDF.js): dateCreated
 		// and dateModified do not say when the article was published
-		var date = data.datePublished;
-		if (typeof date == 'string') {
-			// keep only the date part; Zotero normalizes ISO 8601 itself,
-			// but a bare "2024-11-10T17:27:00Z" would keep the time
-			var match = date.match(/^(\d{4}-\d{2}-\d{2})/);
-			if (match) newItem.date = match[1];
+		let date = getJSONLDString(article.datePublished);
+		if (date) {
+			// Keep the date part of an ISO 8601 timestamp as written, without
+			// converting it to another time zone
+			let isoDate = date.match(/^\d{4}-\d{2}-\d{2}/);
+			newItem.date = isoDate ? isoDate[0] : ZU.strToISO(date) || undefined;
 		}
 	}
-	if (!newItem.url && typeof data.url == 'string') {
-		newItem.url = data.url;
+	if (!newItem.url) {
+		let url = getJSONLDString(article.url);
+		if (url) newItem.url = url;
 	}
 
-	if (!newItem.creators.length && data.author) {
-		var authors = Array.isArray(data.author) ? data.author : [data.author];
-		for (var i = 0; i < authors.length; i++) {
-			var author = resolveJSONLDNode(authors[i], nodes);
-			if (!author) continue;
-			var first = typeof author == 'object' ? author.givenName : '';
-			var last = typeof author == 'object' ? author.familyName : '';
-			var name = typeof author == 'string' ? author : (author.name || [first, last].filter(Boolean).join(' '));
-			name = ZU.trimInternal(name).replace(/^By\s+/i, '');
-			var types = typeof author == 'object'
-				? [].concat(author['@type'] || []).map(function (type) {
-					return ('' + type).replace(/^https?:\/\/schema\.org\//i, '').toLowerCase();
-				})
-				: [];
-			// Organization and wire-service credits must not be split, even
-			// when publishers also supply Person types or structured names.
-			var isOrganization = types.some(function (type) {
-				return /organization$/.test(type);
-			}) || WIRE_SERVICE_RE.test(name) || isCollectiveByline(name);
-			if (isOrganization && name) {
-				newItem.creators.push({ lastName: name, creatorType: 'author', fieldMode: 1 });
-			}
-			else if (first || last) {
-				newItem.creators.push({
-					firstName: first ? fixCase(ZU.trimInternal(first)) : '',
-					lastName: first ? fixCase(ZU.trimInternal(last || '')) : ZU.trimInternal(last || ''),
-					creatorType: 'author'
-				});
-			}
-			else if (name) {
-				if (types.includes('person')) {
-					var creator = ZU.cleanAuthor(name, 'author', name.includes(','));
-					if (creator.firstName) {
-						creator.firstName = fixCase(creator.firstName);
-						creator.lastName = fixCase(creator.lastName);
-					}
-					newItem.creators.push(creator);
-				}
-				else {
-					newItem.creators.push({ lastName: name, creatorType: 'author', fieldMode: 1 });
-				}
-			}
+	if (!newItem.creators.length) {
+		for (let author of [].concat(article.author || [])) {
+			let creator = getJSONLDCreator(author, nodes);
+			if (creator) newItem.creators.push(creator);
 		}
 	}
 
 	if (!newItem.tags || !newItem.tags.length) {
-		var keywords = data.keywords;
+		let keywords = article.keywords;
 		if (typeof keywords == 'string') {
-			keywords = keywords.split(/\s*,\s*/);
+			keywords = keywords.split(',');
 		}
-		if (Array.isArray(keywords) && keywords.length) {
-			newItem.tags = keywords.map(function (tag) {
-				return ZU.trimInternal('' + tag);
-			}).filter(Boolean);
+		if (Array.isArray(keywords)) {
+			let tags = keywords.map(getJSONLDString).filter(Boolean);
+			if (tags.length) newItem.tags = tags;
 		}
 	}
+}
 
-	// og:title often carries the site name as a suffix ("... - CBS News") while
-	// the JSON-LD headline does not. addLowQualityMetadata() only strips the
-	// publicationTitle, which nothing sets on these pages, so strip the
-	// publisher / og:site_name here with the same separators.
-	if (newItem.title) {
-		var publisher = '';
-		if (data.publisher) {
-			var pubs = Array.isArray(data.publisher) ? data.publisher : [data.publisher];
-			publisher = (pubs[0] && pubs[0].name) || '';
+/**
+ * Returns every node in the page's JSON-LD blocks. Blocks can be arrays,
+ * wrapped in @graph, or a single object, and a page commonly ships several
+ * (article, video, organization, breadcrumbs).
+ */
+function getJSONLDNodes(doc) {
+	let nodes = [];
+	for (let script of doc.querySelectorAll('script[type="application/ld+json"]')) {
+		let data;
+		try {
+			data = JSON.parse(script.textContent);
 		}
-		if (!publisher) {
-			publisher = ZU.xpathText(doc, '//meta[@property="og:site_name"]/@content') || '';
+		catch (e) {
+			// A few sites concatenate blocks or use trailing commas; skip those
+			continue;
 		}
-		if (publisher) {
-			var escape = function (text) {
-				return text.replace(/([()[\]$^*+.?|\\-])/g, '\\$1');
-			};
-			newItem.title = newItem.title.replace(
-				new RegExp('\\s*[-–—=_:|~#]\\s*' + escape(ZU.trimInternal(publisher)) + '\\s*$', 'i'),
-				''
-			);
+		for (let block of [].concat(data)) {
+			if (!block || typeof block != 'object') continue;
+			for (let node of [].concat(block['@graph'] || block)) {
+				if (node && typeof node == 'object') nodes.push(node);
+			}
 		}
 	}
+	return nodes;
 }
 
 /**
  * Returns the first Article-like node, supplementing an unusable byline only
  * from another node identifying the same article.
- * Blocks can be arrays, wrapped in @graph, or a single object, and a page
- * commonly ships several (article, video, organization, breadcrumbs).
  */
-function getJSONLDArticle(doc, allNodes) {
-	var wanted = ['NewsArticle', 'Article', 'ReportageNewsArticle', 'Report'];
-	var articles = [];
-	var scripts = doc.querySelectorAll('script[type="application/ld+json"]');
-	for (var i = 0; i < scripts.length; i++) {
-		var data;
-		try {
-			data = JSON.parse(scripts[i].textContent);
-		}
-		catch (e) {
-			// a few sites concatenate blocks or use trailing commas; skip those
-			continue;
-		}
-		var blocks = Array.isArray(data) ? data : [data];
-		for (var j = 0; j < blocks.length; j++) {
-			var block = blocks[j];
-			if (!block || typeof block != 'object') continue;
-			var nodes = block['@graph'] ? block['@graph'] : [block];
-			for (var k = 0; k < nodes.length; k++) {
-				var node = nodes[k];
-				if (!node || typeof node != 'object') continue;
-				allNodes.push(node);
-				if (wanted.includes(node['@type'])
-					&& (node.headline || node.name || node.datePublished || node.author)) {
-					articles.push(node);
-				}
-			}
-		}
-	}
-	var article = articles[0];
+function getJSONLDArticle(nodes) {
+	let [article, ...others] = nodes.filter(
+		node => getJSONLDTypes(node).some(type => JSONLD_ARTICLE_TYPES.includes(type))
+			&& (node.headline || node.name || node.datePublished || node.author)
+	);
 	if (!article) return null;
-	if (!hasJSONLDAuthor(article.author)) {
-		var fallback = articles.slice(1).find(function (node) {
-			return sameJSONLDArticle(article, node) && hasJSONLDAuthor(node.author);
-		});
-		if (fallback) article = Object.assign({}, article, { author: fallback.author });
+	if (!hasJSONLDAuthor(article.author, nodes)) {
+		let fallback = others.find(
+			node => sameJSONLDArticle(article, node) && hasJSONLDAuthor(node.author, nodes)
+		);
+		if (fallback) article = { ...article, author: fallback.author };
 	}
 	return article;
 }
 
-// Yoast and similar plugins link an author to a Person node in @graph by @id
-function resolveJSONLDNode(value, nodes) {
-	if (!value || typeof value != 'object' || !value['@id']) return value;
-	var target = nodes.find(function (node) {
-		return node['@id'] == value['@id'];
-	});
-	return target ? Object.assign({}, target, value) : value;
+/**
+ * Converts a JSON-LD author (a string, an inline node, or an @id reference)
+ * to a Zotero creator, or returns null if it has no usable name.
+ */
+function getJSONLDCreator(author, nodes) {
+	author = resolveJSONLDNode(author, nodes);
+	if (typeof author == 'string') {
+		// An untyped string may just as well be an organization
+		let name = cleanJSONLDName(author);
+		return name ? { lastName: name, creatorType: 'author', fieldMode: 1 } : null;
+	}
+	if (!author || typeof author != 'object') return null;
+
+	let types = getJSONLDTypes(author);
+	let firstName = getJSONLDString(author.givenName);
+	let lastName = getJSONLDString(author.familyName);
+	let name = cleanJSONLDName(author.name) || [firstName, lastName].filter(Boolean).join(' ');
+	if (!name) return null;
+
+	// Organization and wire-service credits must not be split, even
+	// when publishers also supply Person types or structured names.
+	if (types.some(type => type.endsWith('organization'))
+			|| WIRE_SERVICE_RE.test(name)
+			|| isCollectiveByline(name)) {
+		return { lastName: name, creatorType: 'author', fieldMode: 1 };
+	}
+	// The page's own split beats anything we could guess from the full name
+	// (multi-part given names and surnames, particles, etc.)
+	if (firstName && lastName) {
+		return { firstName: fixCase(firstName), lastName: fixCase(lastName), creatorType: 'author' };
+	}
+	if (!types.includes('person')) {
+		return { lastName: name, creatorType: 'author', fieldMode: 1 };
+	}
+	if (!/[\s,]/.test(name)) {
+		// A single-word Person name, e.g. a pen name
+		return { lastName: fixCase(name), creatorType: 'author', fieldMode: 1 };
+	}
+	let creator = ZU.cleanAuthor(name, 'author', name.includes(','));
+	if (creator.firstName) {
+		creator.firstName = fixCase(creator.firstName);
+		creator.lastName = fixCase(creator.lastName);
+	}
+	return creator;
 }
 
-function getJSONLDPublication(article, nodes, doc) {
-	function resolve(value) {
-		if (!value || typeof value != 'object') return null;
-		if (value['@id']) {
-			var target = nodes.find(function (node) {
-				return node['@id'] == value['@id'];
-			});
-			if (target) return Object.assign({}, target, value);
-		}
-		return value;
-	}
-	function name(value) {
-		for (var entry of [].concat(value || [])) {
-			entry = resolve(entry);
-			if (entry && typeof entry.name == 'string' && entry.name.trim()) {
-				return ZU.trimInternal(entry.name);
-			}
-		}
-		return '';
-	}
-	var containers = [];
-	var pending = [].concat(article.isPartOf || []);
-	var seen = new Set();
-	while (pending.length) {
-		var node = resolve(pending.shift());
-		if (!node || seen.has(node['@id'] || node)) continue;
-		seen.add(node['@id'] || node);
-		var types = [].concat(node['@type'] || []);
-		if (types.some(function (type) {
-			return /^(WebSite|Periodical|Newspaper|Magazine|Blog)$/.test(type.replace(/^https?:\/\/schema\.org\//, ''));
-		})) containers.push(node);
-		pending.push(...[].concat(node.isPartOf || []));
-	}
-	var publication = name(containers);
-	if (publication) return publication;
-	publication = name(article.publisher);
-	if (publication) return publication;
-	for (var container of containers) {
-		publication = name(container.publisher);
-		if (publication) return publication;
-	}
-	// An unlinked organization may be an advertiser or a parent company.
-	var sites = nodes.filter(function (node) {
-		return [].concat(node['@type'] || []).includes('WebSite')
-			&& typeof node.url == 'string'
-			&& relativeToAbsolute(doc, node.url).replace(/^(https?:\/\/[^/]+).*$/, '$1')
-				== doc.location.href.replace(/^(https?:\/\/[^/]+).*$/, '$1');
-	});
-	return sites.length == 1 ? name(sites) || name(sites[0].publisher) : '';
-}
-function hasJSONLDAuthor(authors) {
-	return [].concat(authors || []).some(function (author) {
-		if (!author) return false;
-		var name = typeof author == 'string'
-			? author
-			: author.name || [author.givenName, author.familyName].filter(Boolean).join(' ');
-		return typeof name == 'string' && name.replace(/^By\s+/i, '').trim();
-	});
+function hasJSONLDAuthor(authors, nodes) {
+	return [].concat(authors || []).some(author => getJSONLDCreator(author, nodes));
 }
 
 function sameJSONLDArticle(first, second) {
-	if (typeof first.url == 'string' && first.url.trim()
-		&& typeof second.url == 'string' && second.url.trim()) {
-		return first.url.replace(/#.*$/, '').replace(/\/$/, '')
-			== second.url.replace(/#.*$/, '').replace(/\/$/, '');
+	let firstURL = getJSONLDString(first.url);
+	let secondURL = getJSONLDString(second.url);
+	if (firstURL && secondURL) {
+		let normalize = url => url.replace(/#.*$/, '').replace(/\/$/, '');
+		return normalize(firstURL) == normalize(secondURL);
 	}
-	var headline = first.headline || first.name;
-	var otherHeadline = second.headline || second.name;
-	return typeof headline == 'string' && headline.trim()
-		&& typeof otherHeadline == 'string' && headline.trim() == otherHeadline.trim();
+	let headline = getJSONLDString(first.headline || first.name);
+	return !!headline && headline == getJSONLDString(second.headline || second.name);
+}
+
+function getJSONLDPublication(article, nodes, doc) {
+	let containers = [];
+	let pending = [].concat(article.isPartOf || []);
+	let seen = new Set();
+	while (pending.length) {
+		let node = resolveJSONLDNode(pending.shift(), nodes);
+		if (!node || typeof node != 'object') continue;
+		let key = node['@id'] || node;
+		if (seen.has(key)) continue;
+		seen.add(key);
+		if (getJSONLDTypes(node).some(type => JSONLD_CONTAINER_TYPES.includes(type))) {
+			containers.push(node);
+		}
+		pending.push(...[].concat(node.isPartOf || []));
+	}
+
+	let publication = getJSONLDName(containers, nodes) || getJSONLDName(article.publisher, nodes);
+	if (publication) return publication;
+	for (let container of containers) {
+		publication = getJSONLDName(container.publisher, nodes);
+		if (publication) return publication;
+	}
+
+	// An unlinked organization may be an advertiser or a parent company, but
+	// a single WebSite node for this origin is a safe bet.
+	let getOrigin = url => url.replace(/^(https?:\/\/[^/]+).*$/, '$1');
+	let pageOrigin = getOrigin(doc.location.href);
+	let sites = nodes.filter(node => getJSONLDTypes(node).includes('website')
+		&& typeof node.url == 'string'
+		&& getOrigin(relativeToAbsolute(doc, node.url)) == pageOrigin);
+	if (sites.length != 1) return '';
+	return getJSONLDName(sites, nodes) || getJSONLDName(sites[0].publisher, nodes);
+}
+
+/**
+ * Returns the first non-empty name among a node, an @id reference, or an
+ * array of either.
+ */
+function getJSONLDName(value, nodes) {
+	for (let entry of [].concat(value || [])) {
+		entry = resolveJSONLDNode(entry, nodes);
+		let name = entry && typeof entry == 'object' && getJSONLDString(entry.name);
+		if (name) return name;
+	}
+	return '';
+}
+
+// Yoast and similar plugins link to nodes elsewhere in @graph by @id
+function resolveJSONLDNode(value, nodes) {
+	if (!value || typeof value != 'object' || !value['@id']) return value;
+	let target = nodes.find(node => node !== value && node['@id'] == value['@id']);
+	return target ? { ...target, ...value } : value;
+}
+
+function getJSONLDTypes(node) {
+	if (!node || typeof node != 'object') return [];
+	return [].concat(node['@type'] || [])
+		.filter(type => typeof type == 'string')
+		.map(type => type.replace(/^https?:\/\/schema\.org\//i, '').toLowerCase());
+}
+
+function getJSONLDString(value) {
+	return typeof value == 'string' ? ZU.trimInternal(value) : '';
+}
+
+function cleanJSONLDName(value) {
+	return getJSONLDString(value).replace(/^By\s+/i, '');
+}
+
+function isCollectiveByline(name) {
+	return COLLECTIVE_BYLINE_RE.test(name);
 }
 
 function addLowQualityMetadata(doc, newItem) {
@@ -934,15 +926,7 @@ function addLowQualityMetadata(doc, newItem) {
 
 	if (newItem.title) {
 		newItem.title = newItem.title.replace(/\s+/g, ' '); // make sure all spaces are \u0020
-
-		if (newItem.publicationTitle) {
-			// remove publication title from the end of title (see #604)
-			// this can occur if we have to doc.title, og:title etc.
-			// Make sure we escape all regex special chars in publication title
-			var removePubTitleRegex = new RegExp('\\s*[-–—=_:|~#]\\s*'
-				+ newItem.publicationTitle.replace(/([()[\]$^*+.?|])/g, '\\$1') + '\\s*$', 'i');
-			newItem.title = newItem.title.replace(removePubTitleRegex, '');
-		}
+		removeSiteNameFromTitle(doc, newItem);
 	}
 
 	if (!newItem.creators.length) {
@@ -969,12 +953,6 @@ function addLowQualityMetadata(doc, newItem) {
 		newItem.tags = attr(doc, 'meta[name="keywords" i]', 'content');
 	}
 
-	// We can try getting abstract from 'description'
-	if (!newItem.abstractNote) {
-		newItem.abstractNote = ZU.trimInternal(
-			attr(doc, 'meta[name="description" i]', 'content'));
-	}
-
 	if (!newItem.url) {
 		newItem.url = attr(doc, 'head > link[rel="canonical"]', 'href') || doc.location.href;
 	}
@@ -996,6 +974,25 @@ function addLowQualityMetadata(doc, newItem) {
 
 	// add access date
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
+}
+
+/**
+ * Remove a trailing site name ("Title - Site", "Title | Site") from the title,
+ * which og:title and the document title often carry (see #604)
+ */
+function removeSiteNameFromTitle(doc, newItem) {
+	let siteNames = [
+		newItem.publicationTitle,
+		newItem.websiteTitle,
+		newItem.blogTitle,
+		attr(doc, 'meta[property="og:site_name"]', 'content'),
+	];
+	for (let siteName of siteNames) {
+		siteName = ZU.trimInternal(siteName || '');
+		if (!siteName) continue;
+		newItem.title = newItem.title.replace(
+			new RegExp('\\s*[-–—=_:|~#]\\s*' + ZU.quotemeta(siteName) + '\\s*$', 'i'), '');
+	}
 }
 
 /* returns an array of objects of Og authors, but only where they do not contain a URL to prevent getting facebook profiles
@@ -2002,9 +1999,9 @@ var testCases = [
 				"title": "Windows Privilege Escalation: Kernel Exploit",
 				"creators": [
 					{
-						"firstName": "",
 						"lastName": "Raj",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
 				"date": "2021-12-30T17:41:33+00:00",
