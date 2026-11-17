@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-17 20:42:38"
+	"lastUpdated": "2026-11-17 20:52:52"
 }
 
 
@@ -275,8 +275,12 @@ async function scrape(doc, url) {
 
 	var type = treaty ? "statute" : detectWeb(doc, url);
 	var item = new Zotero.Item(type);
-	// determine the language in which we are currently viewing the document
-	var viewingLanguage = (doc.documentElement.lang || "en").toUpperCase();
+	// determine the language in which we are currently viewing the document. It is marked on the document's
+	// title, and follows the URL, e.g. /legal-content/FR/. The page's own language is the one remembered from
+	// earlier pages, and is used only if the title is not marked
+	var titleLanguage = doc.querySelector("#originalTitle");
+	titleLanguage = titleLanguage && titleLanguage.closest("[lang]");
+	var viewingLanguage = ((titleLanguage && titleLanguage.getAttribute("lang")) || doc.documentElement.lang || "en").toUpperCase();
 	// Cases only return language; discard everything else
 	item.language = viewingLanguage.toLowerCase();
 
@@ -302,12 +306,8 @@ async function scrape(doc, url) {
 		// a special edition follows it, e.g. "... (ES, DA, ...)Polskie wydanie specjalne: Rozdział 05 Tom 005 P. 46 - 61"
 		// or "... (DE, FR, ...)English Special Edition: Series I Volume 1968(II) P. 475 - 484"
 		var reference = text(doc, "#originalTitle ~ p em");
-		// the OJ's abbreviation in the language of the page, e.g. "OJ", "ABl.", "Dz.U." or "EUT". The reference
-		// follows the language in the URL, which can differ from the remembered language of the page
-		var referenceLanguage = doc.querySelector("#originalTitle ~ p em");
-		referenceLanguage = referenceLanguage && referenceLanguage.closest("[lang]");
-		var journal = referenceLanguage && referenceLanguage.getAttribute("lang").toUpperCase() == viewingLanguage
-			&& reference.match(ojAbbreviationRegex);
+		// the OJ's abbreviation in the language of the document, e.g. "OJ", "ABl.", "Dz.U." or "EUT"
+		var journal = reference.match(ojAbbreviationRegex);
 		journal = journal ? journal[1] : "OJ";
 		var publicationDate = attr(doc, 'meta[property="eli:date_publication"]', "content");
 		if (treaty && !publicationDate) {
@@ -521,22 +521,22 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "statute",
-				"nameOfAct": "Commission Regulation (EC) No 2257/94 of 16 September 1994 laying down quality standards for bananas",
+				"nameOfAct": "Règlement (CE) n° 2257/94 de la Commission, du 16 septembre 1994, fixant des normes de qualité pour les bananes",
 				"creators": [],
 				"dateEnacted": "1994-09-16",
-				"code": "OJ 1994 L",
+				"code": "JO 1994 L",
 				"codeNumber": "245",
 				"extra": "available-date: 1994-09-20",
-				"language": "en",
+				"language": "fr",
 				"pages": "6-10",
 				"url": "http://data.europa.eu/eli/reg/1994/2257/oj",
 				"attachments": [
 					{
-						"title": "EUR-Lex PDF (EN)",
+						"title": "EUR-Lex PDF (FR)",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "EUR-Lex HTML (EN)",
+						"title": "EUR-Lex HTML (FR)",
 						"mimeType": "text/html",
 						"snapshot": true
 					}
@@ -1100,16 +1100,16 @@ var testCases = [
 				"code": "OJ 1964",
 				"codeNumber": "93",
 				"extra": "type: treaty\navailable-date: 1963-07-20\nevent-date: 1964-06-11\nstatus: not in force",
-				"language": "en",
+				"language": "fr",
 				"pages": "1431-1457",
 				"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:21963A0720(01)",
 				"attachments": [
 					{
-						"title": "EUR-Lex PDF (EN)",
+						"title": "EUR-Lex PDF (FR)",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "EUR-Lex HTML (EN)",
+						"title": "EUR-Lex HTML (FR)",
 						"mimeType": "text/html",
 						"snapshot": true
 					}
@@ -1329,15 +1329,15 @@ var testCases = [
 				"title": "Bez námitek k navrhovanému spojení (Věc M.10068 — Brookfield/Mansa/Polenergia) (Text s významem pro EHP) 2021/C 14/01",
 				"creators": [],
 				"date": "2021",
-				"language": "nl",
+				"language": "cs",
 				"url": "https://eur-lex.europa.eu/legal-content/CS/TXT/?uri=uriserv%3AOJ.C_.2021.014.01.0001.01.CES&toc=OJ%3AC%3A2021%3A014%3ATOC",
 				"attachments": [
 					{
-						"title": "EUR-Lex PDF (NL)",
+						"title": "EUR-Lex PDF (CS)",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "EUR-Lex HTML (NL)",
+						"title": "EUR-Lex HTML (CS)",
 						"mimeType": "text/html",
 						"snapshot": true
 					}
@@ -1358,17 +1358,17 @@ var testCases = [
 				"creators": [],
 				"dateDecided": "21 ta' Settembru 2011",
 				"abstractNote": "Trade mark Komunitarja - Proċedimenti għal dikjarazzjoni ta’ invalidità - Trade mark Komunitarja verbali SCOMBER MIX - Raġuni assoluta għal rifjut - Karattru deskrittiv - Artikolu 7(1)(b) u (ċ) tar-Regolament (KE) Nru 40/94 [li sar l-Artikolu 7(1)(b) u (c) tar-Regolament (KE) Nru 207/2009]",
-				"court": "Gerecht EU",
+				"court": "Il-Qorti Ġenerali",
 				"docketNumber": "Kawża T-201/09",
-				"language": "nl",
+				"language": "mt",
 				"url": "https://eur-lex.europa.eu/legal-content/MT/TXT/?uri=CELEX%3A62009TJ0201",
 				"attachments": [
 					{
-						"title": "EUR-Lex PDF (NL)",
+						"title": "EUR-Lex PDF (MT)",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "EUR-Lex HTML (NL)",
+						"title": "EUR-Lex HTML (MT)",
 						"mimeType": "text/html",
 						"snapshot": true
 					}
