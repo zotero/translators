@@ -32,6 +32,7 @@ Do this in the same commit as the deletion.
 - To understand a site's **page structure**, use the `inspect-page` skill.
 - Once you have the API spec and/or page structure, write your translator against those.
 - Add `--headed` to any `.bin/` browser tool for a site behind Cloudflare or a similar wall. Headless Chrome is refused outright there, so a headless run returns a challenge page instead of content, and every test fails "Detection failed". Don't mistake that for a translator bug, and don't try to spoof your way past it.
+- `.bin/` browser tools load the Zotero Connector as an unpacked extension, which needs Google Chrome or Playwright's bundled Chrome for Testing. If loading fails (e.g. `Extensions.loadUnpacked: Method not available`), make sure the tool isn't launching a different Chrome/Chromium: it uses Google Chrome when installed, and otherwise prints "falling back to Chromium" and uses Playwright's browser. An older Playwright bundles plain Chromium, which can't load the extension, so check that `npx playwright --version` matches `package.json` (run `npm install` if not), then run `npx playwright install chromium`.
 
 ## Code tips
 
