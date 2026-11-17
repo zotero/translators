@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-10 11:17:13"
+	"lastUpdated": "2026-11-17 20:42:38"
 }
 
 
@@ -88,6 +88,10 @@ const shortTitleRegex = /\([\s'"‘’‚“”„«»]*([^()]+?)[\s'"‘’‚�
 // without a dash, e.g. "σ. 1 έως 88", and then only the first page is saved. A number that continues
 // with a period and a digit is a date
 const ojPagesRegex = /,[^\d()]*(\d+)(?!\.?\d)\.?(?:\s*[-–—]\s*(\d+)\.?)?[^,(]*(?:\(|$)/;
+
+// the abbreviation of the OJ at the start of a reference, before its series or number, e.g.
+// "EUT L 119 af 4.5.2016", "Dz.U. L 158 z 30.4.2004" or "OJ 93, 11.6.1964"
+const ojAbbreviationRegex = /^(\S+)\s+(?:[A-Z]\b|\d)/;
 
 // the pages of a special edition, which are the last thing after its volume
 const specialEditionPagesRegex = /(\d+)(?:\s*[-–—]\s*(\d+))?\s*$/;
@@ -293,14 +297,25 @@ async function scrape(doc, url) {
 		// since October 2023, acts are published individually and only have the second link
 		var uri = attr(doc, "#format_language_table_digital_sign_act_" + viewingLanguage.toUpperCase(), "href")
 			|| attr(doc, "#format_language_table_digital_sign_" + viewingLanguage.toUpperCase(), "href");
+		// the reference is localized, e.g.
+		// "OJ L 158, 30.4.2004, pp. 77–123 (ES, DA, ...)" or "HL L 333., 2022.12.27., 80–152. o. (BG, ...)"
+		// a special edition follows it, e.g. "... (ES, DA, ...)Polskie wydanie specjalne: Rozdział 05 Tom 005 P. 46 - 61"
+		// or "... (DE, FR, ...)English Special Edition: Series I Volume 1968(II) P. 475 - 484"
+		var reference = text(doc, "#originalTitle ~ p em");
+		// the OJ's abbreviation in the language of the page, e.g. "OJ", "ABl.", "Dz.U." or "EUT". The reference
+		// follows the language in the URL, which can differ from the remembered language of the page
+		var referenceLanguage = doc.querySelector("#originalTitle ~ p em");
+		referenceLanguage = referenceLanguage && referenceLanguage.closest("[lang]");
+		var journal = referenceLanguage && referenceLanguage.getAttribute("lang").toUpperCase() == viewingLanguage
+			&& reference.match(ojAbbreviationRegex);
+		journal = journal ? journal[1] : "OJ";
 		var publicationDate = attr(doc, 'meta[property="eli:date_publication"]', "content");
 		if (treaty && !publicationDate) {
-			publicationDate = getReferenceDate(text(doc, "#originalTitle ~ p em"));
+			publicationDate = getReferenceDate(reference);
 		}
 		// some treaties have an empty link, or none, but the page still gives the OJ reference
 		if (treaty && !/(?:OJ|DD):/.test(uri)) {
 			// e.g. "OJ L 125, 9.6.1971, pp. 17–19", or without a series before 1968: "OJ 93, 11.6.1964, pp. 1431–1457"
-			let reference = text(doc, "#originalTitle ~ p em");
 			let ojReference = reference.match(/\b([LC])\s+(\d+[A-Z]?)\b/) || reference.match(/^\D*?()(\d+),/);
 			if (ojReference) {
 				uri = "?uri=OJ:" + (ojReference[1] || "P") + ":" + (publicationDate || celex.substr(1)).substr(0, 4) + ":" + ojReference[2] + ":TOC";
@@ -314,7 +329,7 @@ async function scrape(doc, url) {
 			// e.g. uriParts = ["OJ", "L_202401689"]
 			let actByAct = uriParts.length == 2 && uriParts[1].match(/^([A-Z]+)_(\d{4})0*(\d+)$/);
 			if (actByAct) {
-				item.code = uriParts[0] + " " + actByAct[1];
+				item.code = journal + " " + actByAct[1];
 				// these acts have no issue or page number, only an identifier, like an article number:
 				// cited as "OJ L, 2024/1689" but "OJ C, C/2024/3400"
 				item.pages = (actByAct[1] == "C" ? "C/" : "") + actByAct[2] + "/" + actByAct[3];
@@ -330,15 +345,10 @@ async function scrape(doc, url) {
 					let series = ["A", "P"].includes(uriParts[1]) ? "" : " " + uriParts[1];
 					// the year of the OJ, which can differ from the date of an act, and often from a treaty's dates
 					item.code = type == "statute"
-						? uriParts[0] + " " + uriParts[2] + series
-						: uriParts[0] + series;
+						? journal + " " + uriParts[2] + series
+						: journal + series;
 					item.codeNumber = uriParts[3].replace(/^0+/, "");
 				}
-				// the reference is localized, e.g.
-				// "OJ L 158, 30.4.2004, pp. 77–123 (ES, DA, ...)" or "HL L 333., 2022.12.27., 80–152. o. (BG, ...)"
-				// a special edition follows it, e.g. "... (ES, DA, ...)Polskie wydanie specjalne: Rozdział 05 Tom 005 P. 46 - 61"
-				// or "... (DE, FR, ...)English Special Edition: Series I Volume 1968(II) P. 475 - 484"
-				let reference = text(doc, "#originalTitle ~ p em");
 				let pages = isSpecialEdition
 					? reference.includes(uriParts[2]) && reference.split(uriParts[2]).pop().match(specialEditionPagesRegex)
 					: reference.match(ojPagesRegex);
@@ -346,13 +356,10 @@ async function scrape(doc, url) {
 					item.pages = pages[2] ? pages[1] + "-" + pages[2] : pages[1];
 				}
 				// the name of a special edition, as printed after the list of languages, says more than
-				// its numbers, e.g. "English Special Edition: Series I Volume 1968(II)". It is preceded by the
-				// abbreviation of the OJ that begins the reference, in the same language, e.g. "OJ", "ABl." or "Dz.U."
+				// its numbers, e.g. "OJ English Special Edition: Series I Volume 1968(II)"
 				let volumeIndex = reference.lastIndexOf(uriParts[2]);
 				if (isSpecialEdition && volumeIndex != -1) {
-					let journal = reference.match(/^\S+/);
-					item.code = (journal ? journal[0] + " " : "")
-						+ reference.slice(reference.lastIndexOf(")", volumeIndex) + 1, volumeIndex + uriParts[2].length).trim();
+					item.code = journal + " " + reference.slice(reference.lastIndexOf(")", volumeIndex) + 1, volumeIndex + uriParts[2].length).trim();
 					item.codeNumber = null;
 				}
 			}
@@ -1412,7 +1419,7 @@ var testCases = [
 				"nameOfAct": "Az Európai Parlament és a Tanács (EU) 2022/2555 irányelve (2022. december 14.) az Unió egész területén egységesen magas szintű kiberbiztonságot biztosító intézkedésekről, valamint a 910/2014/EU rendelet és az (EU) 2018/1972 irányelv módosításáról és az (EU) 2016/1148 irányelv hatályon kívül helyezéséről (NIS 2 irányelv)",
 				"creators": [],
 				"dateEnacted": "2022-12-14",
-				"code": "OJ 2022 L",
+				"code": "HL 2022 L",
 				"codeNumber": "333",
 				"extra": "available-date: 2022-12-27",
 				"language": "hu",
@@ -1476,7 +1483,7 @@ var testCases = [
 				"nameOfAct": "Verordnung (EU) 2016/679 des Europäischen Parlaments und des Rates vom 27. April 2016 zum Schutz natürlicher Personen bei der Verarbeitung personenbezogener Daten, zum freien Datenverkehr und zur Aufhebung der Richtlinie 95/46/EG (Datenschutz-Grundverordnung)",
 				"creators": [],
 				"dateEnacted": "2016-04-27",
-				"code": "OJ 2016 L",
+				"code": "ABl. 2016 L",
 				"codeNumber": "119",
 				"extra": "available-date: 2016-05-04",
 				"language": "de",
