@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-01 04:32:15"
+	"lastUpdated": "2026-10-17 00:00:00"
 }
 
 /*
@@ -56,6 +56,49 @@ function getCollection(doc, checkOnly) {
 	return found ? items : false;
 }
 
+function parseStats(node, item) {
+	let [chapterCountCurrent, chapterCountExpected] = text(node, 'dd.chapters').split('/').map(desc => ((desc === '?') ? null : parseInt(desc)));
+	let isComplete = (chapterCountCurrent == chapterCountExpected);
+	item.setExtra('Complete', isComplete);
+	if (isComplete) {
+		item.setExtra('Chapter-Count', chapterCountExpected);
+		// word count uses commas as thousands-separators
+		let wordCount = parseIntWithThousandsDelimCommas(text(node, 'dd.words').trim());
+		item.setExtra('Word-Count', wordCount);
+	}
+}
+
+function parseWorkBlurb(node, item) {
+	let titleElem = node.querySelector('div.header > h4.heading > a[href^="/works/"]');
+	let href = titleElem.href;
+	let title = ZU.trimInternal(titleElem.textContent);
+	if (!href || !title) return false;
+	item.title = title;
+	item.url = new URL(href, baseUrl).toString();
+
+	item.creators = [];
+	let authorElems = node.querySelectorAll('div.header > h4.heading > a[rel="author"]');
+	for (let authorElem of authorElems) {
+		item.creators.push({
+			lastName: authorElem.textContent.trim(),
+			creatorType: 'author',
+			fieldMode: 1
+		});
+	}
+
+	parseStats(node, item);
+
+	let summaryElems = node.querySelectorAll('blockquote.userstuff.summary > p');
+	item.abstractNote = summaryElems.values()
+		.map((elem) => ZU.trimInternal(elem.textContent))
+		.reduce((a, b) => [a, b].join('\n'));
+
+	let dateDesc = text(node, 'div.header > p.datetime');
+	item.date = ZU.strToISO(dateDesc);
+
+	return true;
+}
+
 function parseWorkPreface(node, item) {
 	let title = ZU.trimInternal(text(node, 'h2.title.heading'));
 	if (!title) return false;
@@ -93,16 +136,7 @@ function parseWorkMeta(node, item) {
 		item.seriesNumber = parseInt(ZU.trimInternal(text(node, 'dd.series > span.position')).split(' ')[1]);
 	}
 
-	let chapterCountCurrent, chapterCountExpected = text(node, 'dd.chapters').split('/').map(desc => ((desc === '?') ? null : parseInt(desc)));
-	let isComplete = (chapterCountCurrent == chapterCountExpected);
-	item.setExtra('Complete', isComplete);
-	if (isComplete) {
-		let chapterCount = parseInt(text(node, 'dd.chapters').split('/')[1].trim());
-		item.setExtra('Chapter-Count', chapterCount);
-		// word count uses commas as thousands-separators
-		let wordCount = parseIntWithThousandsDelimCommas(text(node, 'dd.words').trim());
-		item.setExtra('Word-Count', wordCount);
-	}
+	parseStats(node, item);
 
 	return true;
 }
@@ -123,7 +157,14 @@ function parseChapterHead(node, item) {
 }
 
 function detectWeb(doc, url) {
-	if (/\/works\/[0-9]+\/chapters\/[0-9]+/.test(url)) {
+	if (/\/works\/[0-9]+/.test(url) && doc.querySelector('li.work.blurb')) {
+		// if content warning is being displayed (== blurb box displayed on work page),
+		// treat as whole work, whether viewing whole work or chapter
+		// (only book metadata is shown in this view; current chapter info is hidden)
+		Zotero.debug("AO3 content warning page for work or chapter");
+		return 'book';
+	}
+	else if (/\/works\/[0-9]+\/chapters\/[0-9]+/.test(url)) {
 		// single chapter in multi-chapter work
 		// OR only chapter in multi-chapter work (this is rarely used URL likely unreachable otherwise)
 		Zotero.debug("AO3 chapter page");
@@ -199,24 +240,26 @@ async function doWeb(doc, url) {
 		}
 	}
 
-	// N.B. on any works page with content (chapter or full work, NOT TOC page), a content warning may be displayed instead;
-	// set view_adult=true to visit content
-	if (scrapingUrl.searchParams.get('view_adult') !== 'true') {
-		scrapingUrl.searchParams.set('view_adult', 'true');
-		useAltScrapingUrl = true;
-	}
-
 	let scrapingDoc = useAltScrapingUrl ? await requestDocument(scrapingUrl.toString()) : doc;
 
 	let prefaceElem = scrapingDoc.querySelector('div#workskin > div.preface');
-	if (!parseWorkPreface(prefaceElem, item)) {
-		return;
-	}
-
 	let metaElem = scrapingDoc.querySelector('dl.work.meta');
-	parseWorkMeta(metaElem, item);
 
-	if (detectedType == 'bookSection') { // implies body text page
+	if (!prefaceElem || !metaElem
+		|| !parseWorkPreface(prefaceElem, item)
+		|| !parseWorkMeta(metaElem, item))
+	{
+		// if complete metadata (preface, meta box) are unavailable
+		// (e.g. because of content warning),
+		// then use blurb
+		let blurbElem = scrapingDoc.querySelector('li.work.blurb');
+		if (!blurbElem) {
+			return;
+		}
+		parseWorkBlurb(blurbElem, item);
+	}
+	else if (detectedType == 'bookSection')
+	{
 		item.bookTitle = item.title;
 		item.title = null;
 		let chapterElem = scrapingDoc.querySelector('div#workskin div.chapter.preface');
@@ -227,7 +270,8 @@ async function doWeb(doc, url) {
 			document: doc
 		}];
 	}
-	else {
+	else
+	{
 		// normalize URL by re-deriving it via sharing link
 		let href = attr(scrapingDoc, 'ul.work.navigation.actions > li.share > a', 'href').slice(0, -'/share'.length);
 		item.url = new URL(href, baseUrl).toString();
@@ -372,7 +416,7 @@ var testCases = [
 				"date": "2015-04-15",
 				"abstractNote": "This is the first story in the planned Weasley Girl trilogy, an AU in which Ron Weasley was born a girl.\n\nSo many stories have asked the question: \"What if Harry Potter was a girl?\" Few stories, however, seem to bother with the question \"What if Ron Weasley was a girl?\" So, just to be contrary, this story will. Everyone else here is going to be as in canon, but Ron's going to be a girl, and then we'll see how this might change the story. There might be some consequences here you wouldn't have expected.\n\nWe begin the story when Harry has been left at King's Cross by the Dursleys and is looking for Platform Nine-and-three-quarters, just in time for the Weasleys to make the scene...",
 				"bookTitle": "Weasley Girl",
-				"extra": "Issued: 2015-04-11 - 2015-04-15\nComplete: false",
+				"extra": "Issued: 2015-04-11 - 2015-04-15\nComplete: true\nChapter-Count: 14\nWord-Count: 97,600",
 				"libraryCatalog": "Archive of Our Own",
 				"series": "Weasley Girl",
 				"shortTitle": "Chapter 1",
@@ -405,7 +449,7 @@ var testCases = [
 				],
 				"date": "2015-04-15",
 				"abstractNote": "AU: The first friend Harry Potter made on the Hogwarts express wasn't Ronald \"Ron\" Weasley; it was Veronica \"Ronnie\" Weasley, first-born daughter of the Weasley clan. And all of a sudden, the future looked very different.\n\nJoin the newly-formed \"Potter's Gang\" (consisting of Harry, Ronnie, Hermione and Neville) in their first year at Hogwarts as they get into all kinds of misadventures, and maybe have to face a certain Dark Lord before they're ready for it.\n\nFirst novel in the \"Weasley Girl\" trilogy. Fem!Ron, but not a romance, and not a canon rehash.",
-				"extra": "Issued: 2015-04-11 - 2015-04-15\nComplete: false",
+				"extra": "Issued: 2015-04-11 - 2015-04-15\nComplete: true\nChapter-Count: 14\nWord-Count: 97,600",
 				"libraryCatalog": "Archive of Our Own",
 				"series": "Weasley Girl",
 				"url": "https://archiveofourown.org/works/3721921",
@@ -458,7 +502,7 @@ var testCases = [
 				],
 				"date": "2011-04-17",
 				"abstractNote": "And what rough beast, its hour come round at last/Slouches towards Skaia to be born?",
-				"extra": "Issued: 2011-04-17\nComplete: false",
+				"extra": "Issued: 2011-04-17\nComplete: true\nChapter-Count: 1\nWord-Count: 702",
 				"libraryCatalog": "Archive of Our Own",
 				"url": "https://archiveofourown.org/works/185537",
 				"attachments": [
