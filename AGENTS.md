@@ -37,6 +37,7 @@ Do this in the same commit as the deletion.
 ## Code tips
 
 - Check `index.d.ts` for method and class definitions.
+- Before hand-rolling a small helper, check `ZU` in `index.d.ts` for an existing one. For example, escape text for `new RegExp()` with `ZU.quotemeta()`, not a custom `.replace()`.
 - XHR and `fetch()` are unavailable in translator code.
 - **DO NOT** use the deprecated `ZU.doGet()`, `ZU.doPost()`, and `ZU.processDocuments()` methods in new code.
 - Instead, make HTTP(S) requests using `request()`, `requestText()`, `requestJSON()`, and `requestDocument()`, which are defined in the global scope. They return promises. `request()` resolves to an object with a `body` property; the rest resolve directly to the body. You pass the URL as the first argument, and (optionally) an options object as the second argument. Relative URLs are resolved against the URL of the page being translated, so there's no need to prepend the hostname manually (e.g. `requestJSON('/api/articles/123')`).
