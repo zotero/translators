@@ -14,7 +14,7 @@ const BEGIN_TEST_CASES = '/** BEGIN TEST CASES **/';
 const END_TEST_CASES = '/** END TEST CASES **/';
 
 const { values, positionals } = parseArgs({
-	usage: 'node .bin/create-test.mjs <translator> --url <url> | --input <data> | --search <json> [--update [--index <n>]]',
+	usage: 'node .bin/create-test.mjs <translator> --url <url> | --input <data> | --search <json> [--update [--index <n>]] [--persist [--fresh]]',
 	options: {
 		url: { type: 'string', short: 'u' },
 		input: { type: 'string' },
@@ -25,6 +25,8 @@ const { values, positionals } = parseArgs({
 		index: { type: 'string' },
 		json: { type: 'boolean' },
 		headed: { type: 'boolean' },
+		persist: { type: 'boolean' },
+		fresh: { type: 'boolean' },
 		help: { type: 'boolean', short: 'h' },
 	},
 });
@@ -109,7 +111,7 @@ await translatorServer.serve();
 let session;
 try {
 	const headless = resolveHeadless(values);
-	session = await launchBrowser({ headless, extensionDir: CONNECTOR_BUILD_DIR });
+	session = await launchBrowser({ headless, extensionDir: CONNECTOR_BUILD_DIR, persist: values.persist, fresh: values.fresh });
 	const context = session.context;
 
 	// Open the tester's tab first, so the warmup below isn't the browser's only tab
@@ -136,6 +138,7 @@ try {
 	await new Promise(resolve => setTimeout(resolve, 500));
 
 	const testUrl = `chrome-extension://${EXTENSION_ID}/tools/testTranslators/testTranslators.html#${hashParams.toString()}`;
+	await session.keepTestTabs?.(page);
 	await page.goto(testUrl);
 
 	// Wait for page to load

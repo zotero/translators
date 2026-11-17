@@ -12,13 +12,15 @@ const FAILED_TEST_RE = /^Test \d+: failed/m;
 const WALL_SYMPTOM_RE = /^Test \d+: failed: (?:Detection failed|Translator did not return any items|.*(?:Error|timed out))/im;
 
 const { values, positionals } = parseArgs({
-	usage: 'node .bin/run-tests.mjs <translator...> [--json] [--keep-open] [--headed] [--no-dependents]',
+	usage: 'node .bin/run-tests.mjs <translator...> [--json] [--keep-open] [--headed] [--persist [--fresh]] [--no-dependents]',
 	options: {
 		json: { type: 'boolean' },
 		'keep-open': { type: 'boolean' },
 		'no-dependents': { type: 'boolean' },
 		'rebuild-connector': { type: 'boolean' },
 		headed: { type: 'boolean' },
+		persist: { type: 'boolean' },
+		fresh: { type: 'boolean' },
 		help: { type: 'boolean', short: 'h' },
 	},
 });
@@ -79,7 +81,7 @@ let session;
 let allPassed = false;
 
 try {
-	session = await launchBrowser({ headless, extensionDir });
+	session = await launchBrowser({ headless, extensionDir, persist: values.persist, fresh: values.fresh });
 	const context = session.context;
 
 	const page = await session.newPage();
@@ -114,6 +116,7 @@ try {
 	await new Promise(resolve => setTimeout(resolve, 500));
 
 	const testUrl = `chrome-extension://${EXTENSION_ID}/tools/testTranslators/testTranslators.html#translators=${translatorsToTest.join(',')}`;
+	await session.keepTestTabs?.(page);
 	await page.goto(testUrl);
 
 	// Wait for page to load

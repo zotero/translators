@@ -6,7 +6,7 @@ import { parseArgs, REPO_ROOT } from './lib/common.mjs';
 import { launchBrowser, resolveHeadless } from './lib/browser.mjs';
 
 const { values, positionals } = parseArgs({
-	usage: 'node .bin/inspect-page.mjs <url> [--selector <css>] [--meta] [--screenshot] [--accessibility] [--eval <js>]',
+	usage: 'node .bin/inspect-page.mjs <url> [--selector <css>] [--meta] [--screenshot] [--accessibility] [--eval <js>] [--persist]',
 	options: {
 		selector: { type: 'string', short: 's', multiple: true },
 		meta: { type: 'boolean', short: 'm' },
@@ -16,6 +16,7 @@ const { values, positionals } = parseArgs({
 		wait: { type: 'string', short: 'w' },
 		interact: { type: 'boolean' },
 		headed: { type: 'boolean' },
+		persist: { type: 'boolean' },
 		help: { type: 'boolean', short: 'h' },
 	},
 });
@@ -37,7 +38,7 @@ const waitMs = parseInt(values.wait ?? '2000', 10);
 
 let session;
 try {
-	session = await launchBrowser({ headless: resolveHeadless(values) });
+	session = await launchBrowser({ headless: resolveHeadless(values), persist: values.persist });
 	const page = await session.newPage();
 	await session.goto(page, url, { settle: waitMs });
 
