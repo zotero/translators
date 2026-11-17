@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-12 12:16:53"
+	"lastUpdated": "2026-11-17 13:36:18"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2018 Sebastian Berlin
+	Copyright © 2018 Sebastian Berlin and Vera de Kok
 	
 	This file is part of Zotero.
 
@@ -92,6 +92,38 @@ function getArticleData(doc) {
 	}
 	return null;
 }
+function nameKey(value) {
+	return value.normalize('NFD')
+		.replace(/[̀-ͯ]/g, '')
+		.toLowerCase()
+		.replace(/[^a-z]/g, '');
+}
+
+// Staff addresses are first.last@sverigesradio.se, with "_" for spaces in a
+// double surname (mikael.grill_pettersson), so they tell us where the given
+// name ends. Words after the surname (a place in "First Last City") are dropped.
+function splitNameByEmail(name, email) {
+	if (!email) return null;
+	let parts = email.split('@')[0].split('.');
+	if (parts.length != 2) return null;
+	let firstKey = nameKey(parts[0]);
+	let lastKey = nameKey(parts[1]);
+	let words = name.split(/\s+/);
+	for (let i = 1; i < words.length; i++) {
+		if (nameKey(words.slice(0, i).join('')) != firstKey) continue;
+		for (let j = i + 1; j <= words.length; j++) {
+			if (nameKey(words.slice(i, j).join('')) == lastKey) {
+				return {
+					firstName: words.slice(0, i).join(' '),
+					lastName: words.slice(i, j).join(' '),
+					creatorType: 'author'
+				};
+			}
+		}
+	}
+	return null;
+}
+
 async function scrape(doc) {
 	let article = getArticleData(doc);
 	let translator = Zotero.loadTranslator('web');
@@ -105,39 +137,29 @@ async function scrape(doc) {
 		if (article) {
 			item.date = article.publishUTC;
 			item.section = article.programName;
-			item.language = article.language.code;
+			if (article.language && article.language.code) {
+				item.language = article.language.code;
+			}
 		}
-		let names = article ? article.bylines.map(byline => byline.name) : [];
-		if (!names.length) {
+		let bylines = article && article.bylines ? article.bylines : [];
+		if (!bylines.length) {
 			for (let node of ZU.xpath(doc, '//p[contains(concat(" ", normalize-space(@class), " "), " byline ")]/text()')) {
-				let name = ZU.trimInternal(node.textContent);
-				let email = node.parentElement.querySelector('a[href^="mailto:"]');
-				if (email) {
-					let key = value => value.normalize('NFD')
-						.replace(/[\u0300-\u036f]/g, '')
-						.toLowerCase()
-						.replace(/[^a-z]/g, '');
-					let emailName = key(email.getAttribute('href').split('@')[0].replace('mailto:', ''));
-					let words = name.split(/\s+/);
-					for (let i = 1; i < words.length; i++) {
-						if (key(words.slice(0, i).join(' ')) == emailName) {
-							name = words.slice(0, i).join(' ');
-							break;
-						}
-					}
-				}
-				names.push(name);
+				let mailto = node.parentElement.querySelector('a[href^="mailto:"]');
+				bylines.push({
+					name: node.textContent,
+					email: mailto ? mailto.getAttribute('href').replace(/^mailto:/, '') : ''
+				});
 			}
 		}
 		item.creators = [];
-		for (let name of names) {
-			name = ZU.trimInternal(name.split(/[/,]/)[0]);
+		for (let byline of bylines) {
+			let name = ZU.trimInternal((byline.name || '').split(/[/,]/)[0]);
 			if (!name) continue;
 			if (name == item.section || /^(Ekot|Radiosporten|Radio Sweden|Sveriges Radio)$/.test(name)) {
 				item.creators.push({ lastName: name, creatorType: 'author', fieldMode: 1 });
 			}
 			else {
-				item.creators.push(ZU.cleanAuthor(name, 'author'));
+				item.creators.push(splitNameByEmail(name, byline.email) || ZU.cleanAuthor(name, 'author'));
 			}
 		}
 		item.tags = [];
@@ -470,13 +492,13 @@ var testCases = [
 				"title": "Efter granskningen: Trafikverket fick svara i utskottet",
 				"creators": [
 					{
-						"firstName": "Lisa Linder",
-						"lastName": "Lindberg",
+						"firstName": "Lisa",
+						"lastName": "Linder Lindberg",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Mikael Grill",
-						"lastName": "Pettersson",
+						"firstName": "Mikael",
+						"lastName": "Grill Pettersson",
 						"creatorType": "author"
 					}
 				],
