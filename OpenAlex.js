@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-07-29 14:16:50"
+	"lastUpdated": "2024-11-22 08:54:40"
 }
 
 /*
@@ -46,12 +46,43 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-function detectSearch(item) {
-	return !!item.openAlex;
+function detectSearch(items) {
+	return (filterQuery(items).length > 0);
 }
 
-async function doSearch(item) {
-	await scrape([item.openAlex]);
+// return an array of OpenAlex IDs from the query (items or text)
+function filterQuery(items) {
+	if (!items) return [];
+
+	if (typeof items == 'string' || !items.length) items = [items];
+
+	// filter out invalid queries
+	var oaIDs = [], oaID;
+	for (var i = 0, n = items.length; i < n; i++) {
+		if (items[i].OpenAlex && (oaID = cleanOpenAlexID(items[i].OpenAlex))) {
+			oaIDs.push(oaID);
+		}
+		else if (items[i].openAlex && (oaID = cleanOpenAlexID(items[i].openAlex))) {
+			oaIDs.push(oaID);
+		}
+		else if (typeof items[i] == 'string' && (oaID = cleanOpenAlexID(items[i]))) {
+			oaIDs.push(oaID);
+		}
+	}
+	return oaIDs;
+}
+
+function cleanOpenAlexID(id) {
+	let openAlex = id.trim();
+	let _match;
+	if (/^https?:/.test(openAlex) && (_match = openAlex.match(/w\d+/i))) openAlex = _match[0];
+	openAlex = openAlex.toUpperCase();
+	if (!openAlex.match(/^W\d+$/)) return null;
+	return openAlex;
+}
+
+async function doSearch(items) {
+	await scrape(filterQuery(items));
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -88,7 +119,6 @@ async function doWeb(doc, url) {
 	}
 }
 
-
 async function scrape(ids) {
 	let apiURL = `https://api.openalex.org/works?filter=openalex:${ids.join("|")}`;
 	// Z.debug(apiURL);
@@ -99,6 +129,7 @@ async function scrape(ids) {
 	translator.setHandler('itemDone', (_obj, item) => {
 		item.complete();
 	});
+
 	await translator.translate();
 }
 
@@ -127,12 +158,13 @@ var testCases = [
 				"date": "1973-10-01",
 				"DOI": "10.2307/2525981",
 				"ISSN": "0020-6598",
-				"extra": "OpenAlex: https://openalex.org/W2029394297",
+				"extra": "OpenAlex: W2029394297",
 				"issue": "3",
 				"language": "en",
 				"libraryCatalog": "OpenAlex",
 				"pages": "693",
-				"publicationTitle": "International economic review",
+				"publicationTitle": "International Economic Review",
+				"url": "http://arks.princeton.edu/ark:/88435/dsp012514nk49s",
 				"volume": "14",
 				"attachments": [
 					{
@@ -145,7 +177,13 @@ var testCases = [
 						"tag": "Gender Pay Gap"
 					},
 					{
+						"tag": "Generality"
+					},
+					{
 						"tag": "Job Polarization"
+					},
+					{
+						"tag": "Male female"
 					}
 				],
 				"notes": [],
@@ -170,12 +208,13 @@ var testCases = [
 				"date": "1951-09-01",
 				"DOI": "10.1007/bf02310555",
 				"ISSN": "0033-3123",
-				"extra": "OpenAlex: https://openalex.org/W2159306398",
+				"extra": "OpenAlex: W2159306398",
 				"issue": "3",
 				"language": "en",
 				"libraryCatalog": "OpenAlex",
 				"pages": "297-334",
 				"publicationTitle": "Psychometrika",
+				"url": "http://hdl.handle.net/10983/2196",
 				"volume": "16",
 				"attachments": [
 					{
@@ -184,6 +223,12 @@ var testCases = [
 					}
 				],
 				"tags": [
+					{
+						"tag": "Guttman scale"
+					},
+					{
+						"tag": "Interpretability"
+					},
 					{
 						"tag": "Reliability Estimation"
 					}
@@ -196,7 +241,7 @@ var testCases = [
 	{
 		"type": "search",
 		"input": {
-			"openAlex": "W2741809807"
+			"OpenAlex": "W2741809807"
 		},
 		"items": [
 			{
@@ -252,7 +297,7 @@ var testCases = [
 				"date": "2018-02-13",
 				"DOI": "10.7717/peerj.4375",
 				"ISSN": "2167-8359",
-				"extra": "OpenAlex: https://openalex.org/W2741809807",
+				"extra": "OpenAlex: W2741809807",
 				"language": "en",
 				"libraryCatalog": "OpenAlex",
 				"pages": "e4375",
@@ -267,7 +312,19 @@ var testCases = [
 				],
 				"tags": [
 					{
+						"tag": "Citation analysis"
+					},
+					{
 						"tag": "Open Access Publishing"
+					},
+					{
+						"tag": "Open science"
+					},
+					{
+						"tag": "Scholarly communication"
+					},
+					{
+						"tag": "Web of science"
 					}
 				],
 				"notes": [],
@@ -297,11 +354,12 @@ var testCases = [
 				],
 				"date": "2014-01-01",
 				"DOI": "10.48550/arxiv.1412.6980",
-				"extra": "OpenAlex: https://openalex.org/W2964121744",
+				"extra": "OpenAlex: W2964121744",
 				"language": "en",
 				"libraryCatalog": "OpenAlex",
 				"repository": "Cornell University",
 				"shortTitle": "Adam",
+				"url": "https://arxiv.org/abs/1412.6980",
 				"attachments": [],
 				"tags": [
 					{
@@ -366,11 +424,12 @@ var testCases = [
 					}
 				],
 				"date": "2018-05-01",
-				"extra": "OpenAlex: https://openalex.org/W2962935454",
+				"extra": "OpenAlex: W2962935454",
 				"language": "en",
 				"libraryCatalog": "OpenAlex",
 				"pages": "5334-5344",
 				"proceedingsTitle": "Neural Information Processing Systems",
+				"url": "https://papers.nips.cc/paper/7779-generalizing-to-unseen-domains-via-adversarial-data-augmentation.pdf",
 				"volume": "31",
 				"attachments": [],
 				"tags": [
@@ -381,7 +440,19 @@ var testCases = [
 						"tag": "Domain Adaptation"
 					},
 					{
+						"tag": "Feature (linguistics)"
+					},
+					{
+						"tag": "Feature vector"
+					},
+					{
+						"tag": "Regularization (linguistics)"
+					},
+					{
 						"tag": "Representation Learning"
+					},
+					{
+						"tag": "Softmax function"
 					},
 					{
 						"tag": "Transfer Learning"
@@ -417,12 +488,13 @@ var testCases = [
 				"date": "2020-09-01",
 				"DOI": "10.1257/aer.20181169",
 				"ISSN": "0002-8282",
-				"extra": "OpenAlex: https://openalex.org/W2979586175",
+				"extra": "OpenAlex: W2979586175",
 				"issue": "9",
 				"language": "en",
 				"libraryCatalog": "OpenAlex",
 				"pages": "2964-2996",
 				"publicationTitle": "American Economic Review",
+				"url": "https://arxiv.org/abs/1803.08807",
 				"volume": "110",
 				"attachments": [
 					{
@@ -432,7 +504,168 @@ var testCases = [
 				],
 				"tags": [
 					{
+						"tag": "Average treatment effect"
+					},
+					{
 						"tag": "Treatment Effects"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": [
+			{
+				"OpenAlex": "https://openalex.org/works/W2741809807"
+			},
+			{
+				"OpenAlex": "W2787905871"
+			}
+		],
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The state of OA: a large-scale analysis of the prevalence and impact of Open Access articles",
+				"creators": [
+					{
+						"firstName": "Heather",
+						"lastName": "Piwowar",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jason",
+						"lastName": "Priem",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Vincent",
+						"lastName": "Larivière",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Juan Pablo",
+						"lastName": "Alperín",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Lisa",
+						"lastName": "Matthias",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Bree",
+						"lastName": "Norlander",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ashley",
+						"lastName": "Farley",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jevin D.",
+						"lastName": "West",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Stefanie",
+						"lastName": "Haustein",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018-02-13",
+				"DOI": "10.7717/peerj.4375",
+				"ISSN": "2167-8359",
+				"extra": "OpenAlex: W2741809807",
+				"language": "en",
+				"libraryCatalog": "OpenAlex",
+				"pages": "e4375",
+				"publicationTitle": "PeerJ",
+				"shortTitle": "The state of OA",
+				"volume": "6",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Citation analysis"
+					},
+					{
+						"tag": "Open Access Publishing"
+					},
+					{
+						"tag": "Open science"
+					},
+					{
+						"tag": "Scholarly communication"
+					},
+					{
+						"tag": "Web of science"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			},
+			{
+				"itemType": "journalArticle",
+				"title": "Content-Based Citation Recommendation",
+				"creators": [
+					{
+						"firstName": "Chandra",
+						"lastName": "Bhagavatula",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sergey",
+						"lastName": "Feldman",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Russell",
+						"lastName": "Power",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Waleed",
+						"lastName": "Ammar",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018-01-01",
+				"DOI": "10.18653/v1/n18-1022",
+				"extra": "OpenAlex: W2787905871",
+				"language": "en",
+				"libraryCatalog": "OpenAlex",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Computational linguistics"
+					},
+					{
+						"tag": "Corpus Linguistics"
+					},
+					{
+						"tag": "Language Modeling"
+					},
+					{
+						"tag": "Part-of-Speech Tagging"
+					},
+					{
+						"tag": "Syntax-based Translation Models"
+					},
+					{
+						"tag": "Textual Data"
 					}
 				],
 				"notes": [],

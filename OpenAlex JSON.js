@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2024-07-29 14:16:09"
+	"lastUpdated": "2024-11-02 11:21:06"
 }
 
 /*
@@ -115,7 +115,7 @@ function parseIndividual(data) {
 	var item = new Zotero.Item(type);
 	item.title = data.title;
 	// fix all caps titles
-	if (item.title == item.title.toUpperCase()) {
+	if (item.title && item.title == item.title.toUpperCase()) {
 		item.title = ZU.capitalizeTitle(item.title, true);
 	}
 	item.date = data.publication_date;
@@ -123,7 +123,7 @@ function parseIndividual(data) {
 	if (data.doi) {
 		item.DOI = ZU.cleanDOI(data.doi);
 	}
-	if (data.primary_location.source) {
+	if (data.primary_location && data.primary_location.source) {
 		let sourceName = data.primary_location.source.display_name;
 		if (item.itemType == "thesis" || item.itemType == "dataset") {
 			item.publisher = sourceName;
@@ -155,7 +155,6 @@ function parseIndividual(data) {
 		}
 	}
 
-
 	let biblio = data.biblio;
 	item.issue = biblio.issue;
 	item.volume = biblio.volume;
@@ -165,7 +164,6 @@ function parseIndividual(data) {
 	else if (biblio.first_page) {
 		item.pages = biblio.first_page;
 	}
-
 
 	let authors = data.authorships;
 	for (let author of authors) {
@@ -184,11 +182,22 @@ function parseIndividual(data) {
 		}
 		item.attachments.push({ url: data.best_oa_location.pdf_url, title: version, mimeType: "application/pdf" });
 	}
+	if (data.best_oa_location && data.best_oa_location.landing_page_url) {
+		// Don't save DOI urls
+		if (!data.best_oa_location.landing_page_url.includes("doi.org")) item.url = data.best_oa_location.landing_page_url;
+	}
+	else if (data.primary_location && data.primary_location.landing_page_url) {
+		// Don't save DOI urls
+		if (!data.primary_location.landing_page_url.includes("doi.org")) item.url = data.primary_location.landing_page_url;
+	}
 	let tags = data.keywords;
 	for (let tag of tags) {
 		item.tags.push(tag.display_name || tag.keyword);
 	}
-	item.extra = "OpenAlex: " + data.ids.openalex;
+	let openAlexID = data.ids.openalex.match(/W\d+$/i)[0];
+	item.setExtra("OpenAlex", openAlexID);
+	item.libraryCatalog = "OpenAlex";
+	
 	item.complete();
 }
 
@@ -211,9 +220,10 @@ var testCases = [
 				"date": "1982-11-01",
 				"DOI": "10.2307/1885099",
 				"ISSN": "0033-5533",
-				"extra": "OpenAlex: https://openalex.org/W2099326003",
+				"extra": "OpenAlex: W2099326003",
 				"issue": "4",
 				"language": "en",
+				"libraryCatalog": "OpenAlex",
 				"pages": "543",
 				"publicationTitle": "The Quarterly Journal of Economics",
 				"volume": "97",
@@ -256,11 +266,13 @@ var testCases = [
 				"date": "2004-09-01",
 				"DOI": "10.1257/0002828042002561",
 				"ISSN": "1944-7981",
-				"extra": "OpenAlex: https://openalex.org/W3123223998",
+				"extra": "OpenAlex: W3123223998",
 				"issue": "4",
 				"language": "en",
+				"libraryCatalog": "OpenAlex",
 				"pages": "991-1013",
 				"publicationTitle": "The American Economic Review",
+				"url": "http://papers.nber.org/papers/w9873.pdf",
 				"volume": "94",
 				"attachments": [
 					{
@@ -302,10 +314,12 @@ var testCases = [
 				],
 				"date": "1999-01-01",
 				"bookTitle": "Springer eBooks",
-				"extra": "OpenAlex: https://openalex.org/W2105705711",
+				"extra": "OpenAlex: W2105705711",
 				"language": "en",
+				"libraryCatalog": "OpenAlex",
 				"pages": "7-48",
 				"publisher": "Springer Nature",
+				"url": "https://resolver.caltech.edu/CaltechAUTHORS:20171129-161418280",
 				"attachments": [
 					{
 						"title": "Accepted Version PDF",
@@ -348,7 +362,8 @@ var testCases = [
 					}
 				],
 				"date": "2014-01-01",
-				"extra": "OpenAlex: https://openalex.org/W4234549826",
+				"extra": "OpenAlex: W4234549826",
+				"libraryCatalog": "OpenAlex",
 				"publisher": "Duke University Press",
 				"attachments": [],
 				"tags": [
@@ -379,8 +394,9 @@ var testCases = [
 					}
 				],
 				"date": "2017-08-09",
-				"extra": "OpenAlex: https://openalex.org/W2257674859",
+				"extra": "OpenAlex: W2257674859",
 				"language": "en",
+				"libraryCatalog": "OpenAlex",
 				"university": "University of Virginia",
 				"attachments": [
 					{
@@ -424,9 +440,10 @@ var testCases = [
 				"date": "1965-07-01",
 				"DOI": "10.1109/tau.1965.1161805",
 				"ISSN": "1558-2663",
-				"extra": "OpenAlex: https://openalex.org/W2046245907",
+				"extra": "OpenAlex: W2046245907",
 				"issue": "4",
 				"language": "en",
+				"libraryCatalog": "OpenAlex",
 				"pages": "99",
 				"publicationTitle": "IEEE Transactions on Audio",
 				"volume": "AU-13",
@@ -449,8 +466,9 @@ var testCases = [
 				"date": "1983-01-13",
 				"DOI": "10.1056/nejm198301133080228",
 				"ISSN": "0028-4793",
-				"extra": "OpenAlex: https://openalex.org/W4237963058",
+				"extra": "OpenAlex: W4237963058",
 				"issue": "2",
+				"libraryCatalog": "OpenAlex",
 				"pages": "112",
 				"publicationTitle": "The New England Journal of Medicine",
 				"volume": "308",
@@ -476,8 +494,9 @@ var testCases = [
 				],
 				"date": "2020-11-27",
 				"bookTitle": "IGI Global eBooks",
-				"extra": "OpenAlex: https://openalex.org/W4239223537",
+				"extra": "OpenAlex: W4239223537",
 				"language": "en",
+				"libraryCatalog": "OpenAlex",
 				"pages": "2027-2057",
 				"publisher": "IGI Global",
 				"attachments": [],
@@ -514,9 +533,11 @@ var testCases = [
 				],
 				"date": "1966-08-01",
 				"ISSN": "1820-6069",
-				"extra": "OpenAlex: https://openalex.org/W78857221",
+				"extra": "OpenAlex: W78857221",
 				"language": "de",
+				"libraryCatalog": "OpenAlex",
 				"publicationTitle": "Genetika",
+				"url": "http://www.osti.gov/scitech/biblio/4528110",
 				"attachments": [],
 				"tags": [
 					{
@@ -543,9 +564,11 @@ var testCases = [
 					}
 				],
 				"date": "2012-01-01",
-				"extra": "OpenAlex: https://openalex.org/W2358372115",
+				"extra": "OpenAlex: W2358372115",
 				"language": "en",
+				"libraryCatalog": "OpenAlex",
 				"publicationTitle": "Journal of Shangqiu Vocational and Technical College",
+				"url": "https://en.cnki.com.cn/Article_en/CJFDTOTAL-SQZJ201203023.htm",
 				"attachments": [],
 				"tags": [
 					{
@@ -600,10 +623,12 @@ var testCases = [
 					}
 				],
 				"date": "2018-05-01",
-				"extra": "OpenAlex: https://openalex.org/W2962935454",
+				"extra": "OpenAlex: W2962935454",
 				"language": "en",
+				"libraryCatalog": "OpenAlex",
 				"pages": "5334-5344",
 				"proceedingsTitle": "Neural Information Processing Systems",
+				"url": "https://papers.nips.cc/paper/7779-generalizing-to-unseen-domains-via-adversarial-data-augmentation.pdf",
 				"volume": "31",
 				"attachments": [],
 				"tags": [
@@ -719,9 +744,11 @@ var testCases = [
 				],
 				"date": "2012-01-01",
 				"DOI": "10.48550/arxiv.1201.0490",
-				"extra": "OpenAlex: https://openalex.org/W2101234009",
+				"extra": "OpenAlex: W2101234009",
 				"language": "en",
+				"libraryCatalog": "OpenAlex",
 				"repository": "Cornell University",
+				"url": "https://arxiv.org/abs/1201.0490",
 				"attachments": [],
 				"tags": [
 					{
@@ -729,6 +756,234 @@ var testCases = [
 					},
 					{
 						"tag": "Robust Learning"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "{\"id\":\"https://openalex.org/W1573032755\",\"doi\":null,\"title\":\"A Process Model of Legal Argument with Hypotheticals\",\"display_name\":\"A Process Model of Legal Argument with Hypotheticals\",\"publication_year\":2008,\"publication_date\":\"2008-07-08\",\"ids\":{\"openalex\":\"https://openalex.org/W1573032755\",\"mag\":\"1573032755\"},\"language\":\"en\",\"primary_location\":null,\"type\":\"article\",\"type_crossref\":\"proceedings-article\",\"indexed_in\":[],\"open_access\":{\"is_oa\":false,\"oa_status\":\"closed\",\"oa_url\":null,\"any_repository_has_fulltext\":false},\"authorships\":[{\"author_position\":\"first\",\"author\":{\"id\":\"https://openalex.org/A5101664770\",\"display_name\":\"Kevin D. Ashley\",\"orcid\":\"https://orcid.org/0000-0002-5535-0759\"},\"institutions\":[{\"id\":\"https://openalex.org/I170201317\",\"display_name\":\"University of Pittsburgh\",\"ror\":\"https://ror.org/01an3r305\",\"country_code\":\"US\",\"type\":\"education\",\"lineage\":[\"https://openalex.org/I170201317\"]}],\"countries\":[\"US\"],\"is_corresponding\":false,\"raw_author_name\":\"Kevin Ashley\",\"raw_affiliation_strings\":[\"University of Pittsburgh School of Law, Learning Research and Development Center and Graduate Program in Intelligent Systems, Pittsburgh, Pennsylvania, USA#TAB#\"],\"affiliations\":[{\"raw_affiliation_string\":\"University of Pittsburgh School of Law, Learning Research and Development Center and Graduate Program in Intelligent Systems, Pittsburgh, Pennsylvania, USA#TAB#\",\"institution_ids\":[\"https://openalex.org/I170201317\"]}]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5015273609\",\"display_name\":\"Collin F. Lynch\",\"orcid\":\"https://orcid.org/0000-0001-6958-9368\"},\"institutions\":[],\"countries\":[\"US\"],\"is_corresponding\":false,\"raw_author_name\":\"Collin Lynch\",\"raw_affiliation_strings\":[\"Graduate Program in Intelligent Systems, Pittsburgh, Pennsylvania, USA#TAB#\"],\"affiliations\":[{\"raw_affiliation_string\":\"Graduate Program in Intelligent Systems, Pittsburgh, Pennsylvania, USA#TAB#\",\"institution_ids\":[]}]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5111412660\",\"display_name\":\"Niels Pinkwart\",\"orcid\":null},\"institutions\":[{\"id\":\"https://openalex.org/I43980791\",\"display_name\":\"Clausthal University of Technology\",\"ror\":\"https://ror.org/04qb8nc58\",\"country_code\":\"DE\",\"type\":\"education\",\"lineage\":[\"https://openalex.org/I43980791\"]}],\"countries\":[\"DE\"],\"is_corresponding\":false,\"raw_author_name\":\"Niels Pinkwart\",\"raw_affiliation_strings\":[\"Clausthal University of Technology, Department of Informatics, Germany\"],\"affiliations\":[{\"raw_affiliation_string\":\"Clausthal University of Technology, Department of Informatics, Germany\",\"institution_ids\":[\"https://openalex.org/I43980791\"]}]},{\"author_position\":\"last\",\"author\":{\"id\":\"https://openalex.org/A5047522207\",\"display_name\":\"Vincent Aleven\",\"orcid\":\"https://orcid.org/0000-0002-1581-6657\"},\"institutions\":[{\"id\":\"https://openalex.org/I74973139\",\"display_name\":\"Carnegie Mellon University\",\"ror\":\"https://ror.org/05x2bcf33\",\"country_code\":\"US\",\"type\":\"education\",\"lineage\":[\"https://openalex.org/I74973139\"]}],\"countries\":[\"US\"],\"is_corresponding\":false,\"raw_author_name\":\"Vincent Aleven\",\"raw_affiliation_strings\":[\"Carnegie Mellon University, HCI Institute, Pittsburgh, PA, USA#TAB#\"],\"affiliations\":[{\"raw_affiliation_string\":\"Carnegie Mellon University, HCI Institute, Pittsburgh, PA, USA#TAB#\",\"institution_ids\":[\"https://openalex.org/I74973139\"]}]}],\"institution_assertions\":[],\"countries_distinct_count\":2,\"institutions_distinct_count\":3,\"corresponding_author_ids\":[],\"corresponding_institution_ids\":[],\"apc_list\":null,\"apc_paid\":null,\"fwci\":5.503,\"has_fulltext\":false,\"cited_by_count\":22,\"citation_normalized_percentile\":{\"value\":0.826211,\"is_in_top_1_percent\":false,\"is_in_top_10_percent\":false},\"cited_by_percentile_year\":{\"min\":89,\"max\":90},\"biblio\":{\"volume\":null,\"issue\":null,\"first_page\":\"1\",\"last_page\":\"10\"},\"is_retracted\":false,\"is_paratext\":false,\"primary_topic\":{\"id\":\"https://openalex.org/T13643\",\"display_name\":\"Predictive Legal Technology in Judicial Decision Making\",\"score\":0.9993,\"subfield\":{\"id\":\"https://openalex.org/subfields/3320\",\"display_name\":\"Political Science and International Relations\"},\"field\":{\"id\":\"https://openalex.org/fields/33\",\"display_name\":\"Social Sciences\"},\"domain\":{\"id\":\"https://openalex.org/domains/2\",\"display_name\":\"Social Sciences\"}},\"topics\":[{\"id\":\"https://openalex.org/T13643\",\"display_name\":\"Predictive Legal Technology in Judicial Decision Making\",\"score\":0.9993,\"subfield\":{\"id\":\"https://openalex.org/subfields/3320\",\"display_name\":\"Political Science and International Relations\"},\"field\":{\"id\":\"https://openalex.org/fields/33\",\"display_name\":\"Social Sciences\"},\"domain\":{\"id\":\"https://openalex.org/domains/2\",\"display_name\":\"Social Sciences\"}},{\"id\":\"https://openalex.org/T10456\",\"display_name\":\"Methods and Techniques for Agent-Based Modeling\",\"score\":0.9973,\"subfield\":{\"id\":\"https://openalex.org/subfields/1702\",\"display_name\":\"Artificial Intelligence\"},\"field\":{\"id\":\"https://openalex.org/fields/17\",\"display_name\":\"Computer Science\"},\"domain\":{\"id\":\"https://openalex.org/domains/3\",\"display_name\":\"Physical Sciences\"}},{\"id\":\"https://openalex.org/T10181\",\"display_name\":\"Statistical Machine Translation and Natural Language Processing\",\"score\":0.9665,\"subfield\":{\"id\":\"https://openalex.org/subfields/1702\",\"display_name\":\"Artificial Intelligence\"},\"field\":{\"id\":\"https://openalex.org/fields/17\",\"display_name\":\"Computer Science\"},\"domain\":{\"id\":\"https://openalex.org/domains/3\",\"display_name\":\"Physical Sciences\"}}],\"keywords\":[{\"id\":\"https://openalex.org/keywords/argument\",\"display_name\":\"Argument (complex analysis)\",\"score\":0.79575264},{\"id\":\"https://openalex.org/keywords/argumentation-frameworks\",\"display_name\":\"Argumentation Frameworks\",\"score\":0.622367},{\"id\":\"https://openalex.org/keywords/dialectical-argumentation\",\"display_name\":\"Dialectical Argumentation\",\"score\":0.60758},{\"id\":\"https://openalex.org/keywords/formal-methods\",\"display_name\":\"Formal Methods\",\"score\":0.552252},{\"id\":\"https://openalex.org/keywords/language-modeling\",\"display_name\":\"Language Modeling\",\"score\":0.550971},{\"id\":\"https://openalex.org/keywords/predictive\",\"display_name\":\"Predictive\",\"score\":0.524524}],\"concepts\":[{\"id\":\"https://openalex.org/C65059942\",\"wikidata\":\"https://www.wikidata.org/wiki/Q270105\",\"display_name\":\"Argumentation theory\",\"level\":2,\"score\":0.8226944},{\"id\":\"https://openalex.org/C98184364\",\"wikidata\":\"https://www.wikidata.org/wiki/Q1780131\",\"display_name\":\"Argument (complex analysis)\",\"level\":2,\"score\":0.79575264},{\"id\":\"https://openalex.org/C41008148\",\"wikidata\":\"https://www.wikidata.org/wiki/Q21198\",\"display_name\":\"Computer science\",\"level\":0,\"score\":0.6026875},{\"id\":\"https://openalex.org/C98045186\",\"wikidata\":\"https://www.wikidata.org/wiki/Q205663\",\"display_name\":\"Process (computing)\",\"level\":2,\"score\":0.5628625},{\"id\":\"https://openalex.org/C132525143\",\"wikidata\":\"https://www.wikidata.org/wiki/Q141488\",\"display_name\":\"Graph\",\"level\":2,\"score\":0.4605123},{\"id\":\"https://openalex.org/C2781310500\",\"wikidata\":\"https://www.wikidata.org/wiki/Q1231428\",\"display_name\":\"Persuasion\",\"level\":2,\"score\":0.4525175},{\"id\":\"https://openalex.org/C154945302\",\"wikidata\":\"https://www.wikidata.org/wiki/Q11660\",\"display_name\":\"Artificial intelligence\",\"level\":1,\"score\":0.41980544},{\"id\":\"https://openalex.org/C111472728\",\"wikidata\":\"https://www.wikidata.org/wiki/Q9471\",\"display_name\":\"Epistemology\",\"level\":1,\"score\":0.32776684},{\"id\":\"https://openalex.org/C80444323\",\"wikidata\":\"https://www.wikidata.org/wiki/Q2878974\",\"display_name\":\"Theoretical computer science\",\"level\":1,\"score\":0.29125088},{\"id\":\"https://openalex.org/C15744967\",\"wikidata\":\"https://www.wikidata.org/wiki/Q9418\",\"display_name\":\"Psychology\",\"level\":0,\"score\":0.18768543},{\"id\":\"https://openalex.org/C199360897\",\"wikidata\":\"https://www.wikidata.org/wiki/Q9143\",\"display_name\":\"Programming language\",\"level\":1,\"score\":0.120545894},{\"id\":\"https://openalex.org/C138885662\",\"wikidata\":\"https://www.wikidata.org/wiki/Q5891\",\"display_name\":\"Philosophy\",\"level\":0,\"score\":0.11526215},{\"id\":\"https://openalex.org/C77805123\",\"wikidata\":\"https://www.wikidata.org/wiki/Q161272\",\"display_name\":\"Social psychology\",\"level\":1,\"score\":0.10900447},{\"id\":\"https://openalex.org/C185592680\",\"wikidata\":\"https://www.wikidata.org/wiki/Q2329\",\"display_name\":\"Chemistry\",\"level\":0,\"score\":0.0},{\"id\":\"https://openalex.org/C55493867\",\"wikidata\":\"https://www.wikidata.org/wiki/Q7094\",\"display_name\":\"Biochemistry\",\"level\":1,\"score\":0.0}],\"mesh\":[],\"locations_count\":0,\"locations\":[],\"best_oa_location\":null,\"sustainable_development_goals\":[{\"id\":\"https://metadata.un.org/sdg/16\",\"score\":0.67,\"display_name\":\"Peace, justice, and strong institutions\"}],\"grants\":[],\"datasets\":[],\"versions\":[],\"referenced_works_count\":19,\"referenced_works\":[\"https://openalex.org/W104357497\",\"https://openalex.org/W1547404119\",\"https://openalex.org/W1572868682\",\"https://openalex.org/W1953136326\",\"https://openalex.org/W1965538576\",\"https://openalex.org/W1966379407\",\"https://openalex.org/W1997210479\",\"https://openalex.org/W2024318497\",\"https://openalex.org/W2041139729\",\"https://openalex.org/W2049953015\",\"https://openalex.org/W2082657773\",\"https://openalex.org/W2094756259\",\"https://openalex.org/W2098459721\",\"https://openalex.org/W2141322619\",\"https://openalex.org/W2143297266\",\"https://openalex.org/W2152212999\",\"https://openalex.org/W268171257\",\"https://openalex.org/W46236141\",\"https://openalex.org/W599642050\"],\"related_works\":[\"https://openalex.org/W34544338\",\"https://openalex.org/W3131177995\",\"https://openalex.org/W3125673773\",\"https://openalex.org/W276288998\",\"https://openalex.org/W2497864519\",\"https://openalex.org/W2131795851\",\"https://openalex.org/W2104126268\",\"https://openalex.org/W2098459721\",\"https://openalex.org/W2087843564\",\"https://openalex.org/W2082657773\",\"https://openalex.org/W2078268879\",\"https://openalex.org/W2066288042\",\"https://openalex.org/W2063764015\",\"https://openalex.org/W2024318497\",\"https://openalex.org/W2009623064\",\"https://openalex.org/W1999283223\",\"https://openalex.org/W1953136326\",\"https://openalex.org/W1647597836\",\"https://openalex.org/W1524164055\",\"https://openalex.org/W1506028345\"],\"abstract_inverted_index\":{\"This\":[0],\"paper\":[1,76],\"presents\":[2,77],\"a\":[3],\"process\":[4,34,73],\"model\":[5,35],\"of\":[6,16,65,71,82,94],\"arguing\":[7],\"with\":[8,87,91],\"hypotheticals\":[9],\"and\":[10,99,106],\"uses\":[11],\"it\":[12],\"to\":[13],\"explain\":[14],\"examples\":[15,67,98],\"oral\":[17,56],\"arguments\":[18],\"before\":[19],\"the\":[20,41,66,69,72,83,103],\"U.S.\":[21],\"Supreme\":[22],\"Court\":[23],\"that\":[24,80],\"are\":[25,89],\"like\":[26],\"those\":[27],\"employed\":[28],\"in\":[29,40,54],\"Socratic\":[30],\"law\":[31],\"teaching.\":[32],\"The\":[33,50,75,97],\"has\":[36],\"been\":[37],\"partially\":[38],\"implemented\":[39],\"LARGO\":[42,88],\"(Legal\":[43],\"ARgument\":[44],\"Graph\":[45],\"Observer)\":[46],\"intelligent\":[47],\"tutoring\":[48],\"system.\":[49],\"program\":[51],\"supports\":[52],\"students\":[53],\"diagramming\":[55],\"argument\":[57,84],\"examples;\":[58],\"its\":[59],\"feedback\":[60],\"on\":[61],\"students'\":[62],\"diagrammatic\":[63],\"reconstructions\":[64],\"enforces\":[68],\"expectations\":[70],\"model.\":[74],\"empirical\":[78,100],\"evidence\":[79],\"features\":[81],\"diagrams\":[85],\"made\":[86],\"correlated\":[90],\"independent\":[92],\"measures\":[93],\"argumentation\":[95],\"ability.\":[96],\"results\":[101],\"support\":[102],\"model's\":[104],\"explanatory\":[105],\"diagnostic\":[107],\"utility.\":[108]},\"cited_by_api_url\":\"https://api.openalex.org/works?filter=cites:W1573032755\",\"counts_by_year\":[{\"year\":2019,\"cited_by_count\":2},{\"year\":2018,\"cited_by_count\":1},{\"year\":2017,\"cited_by_count\":2},{\"year\":2016,\"cited_by_count\":1},{\"year\":2014,\"cited_by_count\":1},{\"year\":2012,\"cited_by_count\":1}],\"updated_date\":\"2024-10-24T00:04:19.442978\",\"created_date\":\"2016-06-24\"}",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "A Process Model of Legal Argument with Hypotheticals",
+				"creators": [
+					{
+						"firstName": "Kevin D.",
+						"lastName": "Ashley",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Collin F.",
+						"lastName": "Lynch",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Niels",
+						"lastName": "Pinkwart",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Vincent",
+						"lastName": "Aleven",
+						"creatorType": "author"
+					}
+				],
+				"date": "2008-07-08",
+				"extra": "OpenAlex: W1573032755",
+				"language": "en",
+				"libraryCatalog": "OpenAlex",
+				"pages": "1-10",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Argument (complex analysis)"
+					},
+					{
+						"tag": "Argumentation Frameworks"
+					},
+					{
+						"tag": "Dialectical Argumentation"
+					},
+					{
+						"tag": "Formal Methods"
+					},
+					{
+						"tag": "Language Modeling"
+					},
+					{
+						"tag": "Predictive"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "{\"id\":\"https://openalex.org/W2131795851\",\"doi\":\"https://doi.org/10.1023/a:1019536206548\",\"title\":null,\"display_name\":null,\"publication_year\":2002,\"publication_date\":\"2002-01-01\",\"ids\":{\"openalex\":\"https://openalex.org/W2131795851\",\"doi\":\"https://doi.org/10.1023/a:1019536206548\",\"mag\":\"2131795851\"},\"language\":\"en\",\"primary_location\":{\"is_oa\":false,\"landing_page_url\":\"https://doi.org/10.1023/a:1019536206548\",\"pdf_url\":null,\"source\":{\"id\":\"https://openalex.org/S96609033\",\"display_name\":\"Artificial Intelligence and Law\",\"issn_l\":\"0924-8463\",\"issn\":[\"0924-8463\",\"1572-8382\"],\"is_oa\":false,\"is_in_doaj\":false,\"is_core\":true,\"host_organization\":\"https://openalex.org/P4310319900\",\"host_organization_name\":\"Springer Science+Business Media\",\"host_organization_lineage\":[\"https://openalex.org/P4310319965\",\"https://openalex.org/P4310319900\"],\"host_organization_lineage_names\":[\"Springer Nature\",\"Springer Science+Business Media\"],\"type\":\"journal\"},\"license\":null,\"license_id\":null,\"version\":null,\"is_accepted\":false,\"is_published\":false},\"type\":\"article\",\"type_crossref\":\"journal-article\",\"indexed_in\":[\"crossref\"],\"open_access\":{\"is_oa\":false,\"oa_status\":\"closed\",\"oa_url\":null,\"any_repository_has_fulltext\":false},\"authorships\":[{\"author_position\":\"first\",\"author\":{\"id\":\"https://openalex.org/A5020760288\",\"display_name\":\"Henry Prakken\",\"orcid\":\"https://orcid.org/0000-0002-3431-7757\"},\"institutions\":[{\"id\":\"https://openalex.org/I193662353\",\"display_name\":\"Utrecht University\",\"ror\":\"https://ror.org/04pp8hn57\",\"country_code\":\"NL\",\"type\":\"education\",\"lineage\":[\"https://openalex.org/I193662353\"]}],\"countries\":[\"NL\"],\"is_corresponding\":true,\"raw_author_name\":\"Henry Prakken\",\"raw_affiliation_strings\":[\"[Dept. of Information and Computing Sciences, Utrecht University, The Netherlands]\"],\"affiliations\":[{\"raw_affiliation_string\":\"[Dept. of Information and Computing Sciences, Utrecht University, The Netherlands]\",\"institution_ids\":[\"https://openalex.org/I193662353\"]}]}],\"institution_assertions\":[],\"countries_distinct_count\":1,\"institutions_distinct_count\":1,\"corresponding_author_ids\":[\"https://openalex.org/A5020760288\"],\"corresponding_institution_ids\":[\"https://openalex.org/I193662353\"],\"apc_list\":{\"value\":2390,\"currency\":\"EUR\",\"value_usd\":2990,\"provenance\":\"doaj\"},\"apc_paid\":null,\"fwci\":4.482,\"has_fulltext\":true,\"fulltext_origin\":\"ngrams\",\"cited_by_count\":77,\"citation_normalized_percentile\":{\"value\":0.97808,\"is_in_top_1_percent\":false,\"is_in_top_10_percent\":true},\"cited_by_percentile_year\":{\"min\":94,\"max\":95},\"biblio\":{\"volume\":\"10\",\"issue\":\"1/3\",\"first_page\":\"113\",\"last_page\":\"133\"},\"is_retracted\":false,\"is_paratext\":false,\"primary_topic\":{\"id\":\"https://openalex.org/T10456\",\"display_name\":\"Methods and Techniques for Agent-Based Modeling\",\"score\":0.9988,\"subfield\":{\"id\":\"https://openalex.org/subfields/1702\",\"display_name\":\"Artificial Intelligence\"},\"field\":{\"id\":\"https://openalex.org/fields/17\",\"display_name\":\"Computer Science\"},\"domain\":{\"id\":\"https://openalex.org/domains/3\",\"display_name\":\"Physical Sciences\"}},\"topics\":[{\"id\":\"https://openalex.org/T10456\",\"display_name\":\"Methods and Techniques for Agent-Based Modeling\",\"score\":0.9988,\"subfield\":{\"id\":\"https://openalex.org/subfields/1702\",\"display_name\":\"Artificial Intelligence\"},\"field\":{\"id\":\"https://openalex.org/fields/17\",\"display_name\":\"Computer Science\"},\"domain\":{\"id\":\"https://openalex.org/domains/3\",\"display_name\":\"Physical Sciences\"}},{\"id\":\"https://openalex.org/T13643\",\"display_name\":\"Predictive Legal Technology in Judicial Decision Making\",\"score\":0.9891,\"subfield\":{\"id\":\"https://openalex.org/subfields/3320\",\"display_name\":\"Political Science and International Relations\"},\"field\":{\"id\":\"https://openalex.org/fields/33\",\"display_name\":\"Social Sciences\"},\"domain\":{\"id\":\"https://openalex.org/domains/2\",\"display_name\":\"Social Sciences\"}},{\"id\":\"https://openalex.org/T11762\",\"display_name\":\"Economic Analysis of Law and Legal Systems\",\"score\":0.9845,\"subfield\":{\"id\":\"https://openalex.org/subfields/2002\",\"display_name\":\"Economics and Econometrics\"},\"field\":{\"id\":\"https://openalex.org/fields/20\",\"display_name\":\"Economics, Econometrics and Finance\"},\"domain\":{\"id\":\"https://openalex.org/domains/2\",\"display_name\":\"Social Sciences\"}}],\"keywords\":[{\"id\":\"https://openalex.org/keywords/relevance\",\"display_name\":\"Relevance (law)\",\"score\":0.624612},{\"id\":\"https://openalex.org/keywords/argumentation-frameworks\",\"display_name\":\"Argumentation Frameworks\",\"score\":0.599486},{\"id\":\"https://openalex.org/keywords/formal-methods\",\"display_name\":\"Formal Methods\",\"score\":0.530495},{\"id\":\"https://openalex.org/keywords/dialectical-argumentation\",\"display_name\":\"Dialectical Argumentation\",\"score\":0.515729},{\"id\":\"https://openalex.org/keywords/defeasible-reasoning\",\"display_name\":\"Defeasible reasoning\",\"score\":0.4295815}],\"concepts\":[{\"id\":\"https://openalex.org/C158154518\",\"wikidata\":\"https://www.wikidata.org/wiki/Q7310970\",\"display_name\":\"Relevance (law)\",\"level\":2,\"score\":0.624612},{\"id\":\"https://openalex.org/C111472728\",\"wikidata\":\"https://www.wikidata.org/wiki/Q9471\",\"display_name\":\"Epistemology\",\"level\":1,\"score\":0.5897729},{\"id\":\"https://openalex.org/C162040827\",\"wikidata\":\"https://www.wikidata.org/wiki/Q126842\",\"display_name\":\"Philosophy of law\",\"level\":3,\"score\":0.5491677},{\"id\":\"https://openalex.org/C41008148\",\"wikidata\":\"https://www.wikidata.org/wiki/Q21198\",\"display_name\":\"Computer science\",\"level\":0,\"score\":0.48880622},{\"id\":\"https://openalex.org/C67497173\",\"wikidata\":\"https://www.wikidata.org/wiki/Q977345\",\"display_name\":\"Legal aspects of computing\",\"level\":3,\"score\":0.4325865},{\"id\":\"https://openalex.org/C140843580\",\"wikidata\":\"https://www.wikidata.org/wiki/Q840067\",\"display_name\":\"Defeasible reasoning\",\"level\":2,\"score\":0.4295815},{\"id\":\"https://openalex.org/C17744445\",\"wikidata\":\"https://www.wikidata.org/wiki/Q36442\",\"display_name\":\"Political science\",\"level\":0,\"score\":0.23142418},{\"id\":\"https://openalex.org/C199539241\",\"wikidata\":\"https://www.wikidata.org/wiki/Q7748\",\"display_name\":\"Law\",\"level\":1,\"score\":0.21335971},{\"id\":\"https://openalex.org/C138885662\",\"wikidata\":\"https://www.wikidata.org/wiki/Q5891\",\"display_name\":\"Philosophy\",\"level\":0,\"score\":0.20055327},{\"id\":\"https://openalex.org/C110875604\",\"wikidata\":\"https://www.wikidata.org/wiki/Q75\",\"display_name\":\"The Internet\",\"level\":2,\"score\":0.10923833},{\"id\":\"https://openalex.org/C177986884\",\"wikidata\":\"https://www.wikidata.org/wiki/Q207892\",\"display_name\":\"Public law\",\"level\":2,\"score\":0.0},{\"id\":\"https://openalex.org/C136764020\",\"wikidata\":\"https://www.wikidata.org/wiki/Q466\",\"display_name\":\"World Wide Web\",\"level\":1,\"score\":0.0}],\"mesh\":[],\"locations_count\":1,\"locations\":[{\"is_oa\":false,\"landing_page_url\":\"https://doi.org/10.1023/a:1019536206548\",\"pdf_url\":null,\"source\":{\"id\":\"https://openalex.org/S96609033\",\"display_name\":\"Artificial Intelligence and Law\",\"issn_l\":\"0924-8463\",\"issn\":[\"0924-8463\",\"1572-8382\"],\"is_oa\":false,\"is_in_doaj\":false,\"is_core\":true,\"host_organization\":\"https://openalex.org/P4310319900\",\"host_organization_name\":\"Springer Science+Business Media\",\"host_organization_lineage\":[\"https://openalex.org/P4310319965\",\"https://openalex.org/P4310319900\"],\"host_organization_lineage_names\":[\"Springer Nature\",\"Springer Science+Business Media\"],\"type\":\"journal\"},\"license\":null,\"license_id\":null,\"version\":null,\"is_accepted\":false,\"is_published\":false}],\"best_oa_location\":null,\"sustainable_development_goals\":[{\"id\":\"https://metadata.un.org/sdg/16\",\"score\":0.78,\"display_name\":\"Peace, justice, and strong institutions\"}],\"grants\":[],\"datasets\":[],\"versions\":[],\"referenced_works_count\":30,\"referenced_works\":[\"https://openalex.org/W129283682\",\"https://openalex.org/W1482768500\",\"https://openalex.org/W1484347295\",\"https://openalex.org/W1488505771\",\"https://openalex.org/W1514637386\",\"https://openalex.org/W1518249528\",\"https://openalex.org/W1524164055\",\"https://openalex.org/W1566598272\",\"https://openalex.org/W1879898357\",\"https://openalex.org/W1936596455\",\"https://openalex.org/W1953136326\",\"https://openalex.org/W1979433747\",\"https://openalex.org/W1999283223\",\"https://openalex.org/W2002848380\",\"https://openalex.org/W2003805585\",\"https://openalex.org/W2024102269\",\"https://openalex.org/W2032556714\",\"https://openalex.org/W2033787843\",\"https://openalex.org/W2035416838\",\"https://openalex.org/W2045182421\",\"https://openalex.org/W2061718873\",\"https://openalex.org/W2064120641\",\"https://openalex.org/W2069176561\",\"https://openalex.org/W2084004968\",\"https://openalex.org/W2099215247\",\"https://openalex.org/W2104802723\",\"https://openalex.org/W2111542911\",\"https://openalex.org/W2113169658\",\"https://openalex.org/W2238529471\",\"https://openalex.org/W595303762\"],\"related_works\":[\"https://openalex.org/W2938644490\",\"https://openalex.org/W2753556841\",\"https://openalex.org/W2187027340\",\"https://openalex.org/W2080633635\",\"https://openalex.org/W2065068111\",\"https://openalex.org/W2044675382\",\"https://openalex.org/W1981013049\",\"https://openalex.org/W1972026842\",\"https://openalex.org/W1833321033\",\"https://openalex.org/W1606005905\"],\"abstract_inverted_index\":null,\"cited_by_api_url\":\"https://api.openalex.org/works?filter=cites:W2131795851\",\"counts_by_year\":[{\"year\":2024,\"cited_by_count\":1},{\"year\":2023,\"cited_by_count\":1},{\"year\":2022,\"cited_by_count\":3},{\"year\":2020,\"cited_by_count\":1},{\"year\":2019,\"cited_by_count\":4},{\"year\":2018,\"cited_by_count\":1},{\"year\":2017,\"cited_by_count\":8},{\"year\":2016,\"cited_by_count\":3},{\"year\":2015,\"cited_by_count\":4},{\"year\":2014,\"cited_by_count\":2},{\"year\":2013,\"cited_by_count\":3},{\"year\":2012,\"cited_by_count\":7}],\"updated_date\":\"2024-10-06T06:21:38.789166\",\"created_date\":\"2016-06-24\"}",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "[No title found]",
+				"creators": [
+					{
+						"creatorType": "author",
+						"firstName": "Henry",
+						"lastName": "Prakken"
+					}
+				],
+				"date": "2002",
+				"DOI": "10.1023/A:1019536206548",
+				"ISSN": "09248463",
+				"extra": "OpenAlex: W2131795851",
+				"issue": "1/3",
+				"language": "en",
+				"libraryCatalog": "OpenAlex",
+				"pages": "113-133",
+				"publicationTitle": "Artificial Intelligence and Law",
+				"url": "http://link.springer.com/10.1023/A:1019536206548",
+				"volume": "10",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Argumentation Frameworks"
+					},
+					{
+						"tag": "Defeasible reasoning"
+					},
+					{
+						"tag": "Dialectical Argumentation"
+					},
+					{
+						"tag": "Formal Methods"
+					},
+					{
+						"tag": "Relevance (law)"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "{\"id\":\"https://openalex.org/W2276056662\",\"doi\":null,\"title\":\"The Multi-Agent Transport Simulation MATSim\",\"display_name\":\"The Multi-Agent Transport Simulation MATSim\",\"publication_year\":2020,\"publication_date\":\"2020-10-09\",\"ids\":{\"openalex\":\"https://openalex.org/W2276056662\",\"mag\":\"2276056662\"},\"language\":\"en\",\"primary_location\":null,\"type\":\"book\",\"type_crossref\":\"book\",\"indexed_in\":[],\"open_access\":{\"is_oa\":false,\"oa_status\":\"closed\",\"oa_url\":null,\"any_repository_has_fulltext\":false},\"authorships\":[{\"author_position\":\"first\",\"author\":{\"id\":\"https://openalex.org/A5032581188\",\"display_name\":\"Andreas Horni\",\"orcid\":null},\"institutions\":[{\"id\":\"https://openalex.org/I35440088\",\"display_name\":\"ETH Zurich\",\"ror\":\"https://ror.org/05a28rw58\",\"country_code\":\"CH\",\"type\":\"education\",\"lineage\":[\"https://openalex.org/I2799323385\",\"https://openalex.org/I35440088\"]}],\"countries\":[\"CH\"],\"is_corresponding\":false,\"raw_author_name\":\"Andreas Horni\",\"raw_affiliation_strings\":[\"ETH Z\\u00fcrich\"],\"affiliations\":[{\"raw_affiliation_string\":\"ETH Z\\u00fcrich\",\"institution_ids\":[\"https://openalex.org/I35440088\"]}]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5020244234\",\"display_name\":\"Kai Nagel\",\"orcid\":\"https://orcid.org/0000-0003-2775-6898\"},\"institutions\":[{\"id\":\"https://openalex.org/I4577782\",\"display_name\":\"Technische Universit\\u00e4t Berlin\",\"ror\":\"https://ror.org/03v4gjf40\",\"country_code\":\"DE\",\"type\":\"education\",\"lineage\":[\"https://openalex.org/I4577782\"]}],\"countries\":[\"DE\"],\"is_corresponding\":false,\"raw_author_name\":\"Kai Nagel\",\"raw_affiliation_strings\":[\"TU Berlin;\"],\"affiliations\":[{\"raw_affiliation_string\":\"TU Berlin;\",\"institution_ids\":[\"https://openalex.org/I4577782\"]}]},{\"author_position\":\"last\",\"author\":{\"id\":\"https://openalex.org/A5028278516\",\"display_name\":\"Kay W. Axhausen\",\"orcid\":\"https://orcid.org/0000-0003-3331-1318\"},\"institutions\":[{\"id\":\"https://openalex.org/I35440088\",\"display_name\":\"ETH Zurich\",\"ror\":\"https://ror.org/05a28rw58\",\"country_code\":\"CH\",\"type\":\"education\",\"lineage\":[\"https://openalex.org/I2799323385\",\"https://openalex.org/I35440088\"]}],\"countries\":[\"CH\"],\"is_corresponding\":false,\"raw_author_name\":\"Kay W Axhausen\",\"raw_affiliation_strings\":[\"ETH Z\\u00fcrich\"],\"affiliations\":[{\"raw_affiliation_string\":\"ETH Z\\u00fcrich\",\"institution_ids\":[\"https://openalex.org/I35440088\"]}]}],\"institution_assertions\":[],\"countries_distinct_count\":2,\"institutions_distinct_count\":2,\"corresponding_author_ids\":[],\"corresponding_institution_ids\":[],\"apc_list\":null,\"apc_paid\":null,\"fwci\":6.266,\"has_fulltext\":false,\"cited_by_count\":359,\"citation_normalized_percentile\":{\"value\":0.636364,\"is_in_top_1_percent\":false,\"is_in_top_10_percent\":false},\"cited_by_percentile_year\":{\"min\":99,\"max\":100},\"biblio\":{\"volume\":null,\"issue\":null,\"first_page\":null,\"last_page\":null},\"is_retracted\":false,\"is_paratext\":false,\"primary_topic\":{\"id\":\"https://openalex.org/T10698\",\"display_name\":\"Understanding Attitudes Towards Public Transport and Private Car\",\"score\":0.9987,\"subfield\":{\"id\":\"https://openalex.org/subfields/3313\",\"display_name\":\"Transportation\"},\"field\":{\"id\":\"https://openalex.org/fields/33\",\"display_name\":\"Social Sciences\"},\"domain\":{\"id\":\"https://openalex.org/domains/2\",\"display_name\":\"Social Sciences\"}},\"topics\":[{\"id\":\"https://openalex.org/T10698\",\"display_name\":\"Understanding Attitudes Towards Public Transport and Private Car\",\"score\":0.9987,\"subfield\":{\"id\":\"https://openalex.org/subfields/3313\",\"display_name\":\"Transportation\"},\"field\":{\"id\":\"https://openalex.org/fields/33\",\"display_name\":\"Social Sciences\"},\"domain\":{\"id\":\"https://openalex.org/domains/2\",\"display_name\":\"Social Sciences\"}},{\"id\":\"https://openalex.org/T11942\",\"display_name\":\"Implications of Shared Autonomous Vehicle Services\",\"score\":0.9928,\"subfield\":{\"id\":\"https://openalex.org/subfields/2203\",\"display_name\":\"Automotive Engineering\"},\"field\":{\"id\":\"https://openalex.org/fields/22\",\"display_name\":\"Engineering\"},\"domain\":{\"id\":\"https://openalex.org/domains/3\",\"display_name\":\"Physical Sciences\"}},{\"id\":\"https://openalex.org/T10524\",\"display_name\":\"Modeling and Control of Traffic Flow Systems\",\"score\":0.9433,\"subfield\":{\"id\":\"https://openalex.org/subfields/2207\",\"display_name\":\"Control and Systems Engineering\"},\"field\":{\"id\":\"https://openalex.org/fields/22\",\"display_name\":\"Engineering\"},\"domain\":{\"id\":\"https://openalex.org/domains/3\",\"display_name\":\"Physical Sciences\"}}],\"keywords\":[{\"id\":\"https://openalex.org/keywords/mobility-as-a-service\",\"display_name\":\"Mobility as a Service\",\"score\":0.550814},{\"id\":\"https://openalex.org/keywords/public-transit-integration\",\"display_name\":\"Public Transit Integration\",\"score\":0.52181},{\"id\":\"https://openalex.org/keywords/implementation\",\"display_name\":\"Implementation\",\"score\":0.52046084},{\"id\":\"https://openalex.org/keywords/intelligent-transportation-systems\",\"display_name\":\"Intelligent Transportation Systems\",\"score\":0.508139},{\"id\":\"https://openalex.org/keywords/dynamic-ride-sharing\",\"display_name\":\"Dynamic Ride-Sharing\",\"score\":0.507746},{\"id\":\"https://openalex.org/keywords/travel-behavior\",\"display_name\":\"Travel Behavior\",\"score\":0.504049},{\"id\":\"https://openalex.org/keywords/python\",\"display_name\":\"Python (programming language)\",\"score\":0.48297802}],\"concepts\":[{\"id\":\"https://openalex.org/C41008148\",\"wikidata\":\"https://www.wikidata.org/wiki/Q21198\",\"display_name\":\"Computer science\",\"level\":0,\"score\":0.6020803},{\"id\":\"https://openalex.org/C56666940\",\"wikidata\":\"https://www.wikidata.org/wiki/Q788790\",\"display_name\":\"Documentation\",\"level\":2,\"score\":0.5455931},{\"id\":\"https://openalex.org/C26713055\",\"wikidata\":\"https://www.wikidata.org/wiki/Q245962\",\"display_name\":\"Implementation\",\"level\":2,\"score\":0.52046084},{\"id\":\"https://openalex.org/C548217200\",\"wikidata\":\"https://www.wikidata.org/wiki/Q251\",\"display_name\":\"Java\",\"level\":2,\"score\":0.51653713},{\"id\":\"https://openalex.org/C519991488\",\"wikidata\":\"https://www.wikidata.org/wiki/Q28865\",\"display_name\":\"Python (programming language)\",\"level\":2,\"score\":0.48297802},{\"id\":\"https://openalex.org/C539828613\",\"wikidata\":\"https://www.wikidata.org/wiki/Q178512\",\"display_name\":\"Public transport\",\"level\":2,\"score\":0.44783878},{\"id\":\"https://openalex.org/C115903868\",\"wikidata\":\"https://www.wikidata.org/wiki/Q80993\",\"display_name\":\"Software engineering\",\"level\":1,\"score\":0.34531438},{\"id\":\"https://openalex.org/C42475967\",\"wikidata\":\"https://www.wikidata.org/wiki/Q194292\",\"display_name\":\"Operations research\",\"level\":1,\"score\":0.33601588},{\"id\":\"https://openalex.org/C199360897\",\"wikidata\":\"https://www.wikidata.org/wiki/Q9143\",\"display_name\":\"Programming language\",\"level\":1,\"score\":0.28863978},{\"id\":\"https://openalex.org/C22212356\",\"wikidata\":\"https://www.wikidata.org/wiki/Q775325\",\"display_name\":\"Transport engineering\",\"level\":1,\"score\":0.2577587},{\"id\":\"https://openalex.org/C127413603\",\"wikidata\":\"https://www.wikidata.org/wiki/Q11023\",\"display_name\":\"Engineering\",\"level\":0,\"score\":0.21661845}],\"mesh\":[],\"locations_count\":0,\"locations\":[],\"best_oa_location\":null,\"sustainable_development_goals\":[],\"grants\":[],\"datasets\":[],\"versions\":[],\"referenced_works_count\":0,\"referenced_works\":[],\"related_works\":[\"https://openalex.org/W316935178\",\"https://openalex.org/W2946437866\",\"https://openalex.org/W2920396387\",\"https://openalex.org/W2756327937\",\"https://openalex.org/W2612340487\",\"https://openalex.org/W2586208166\",\"https://openalex.org/W2565919573\",\"https://openalex.org/W2515943586\",\"https://openalex.org/W24067677\",\"https://openalex.org/W2405705374\",\"https://openalex.org/W2357730318\",\"https://openalex.org/W2169528473\",\"https://openalex.org/W2154087025\",\"https://openalex.org/W2140491322\",\"https://openalex.org/W1989750313\",\"https://openalex.org/W1969095625\",\"https://openalex.org/W1885752654\",\"https://openalex.org/W1869778509\",\"https://openalex.org/W1576647638\",\"https://openalex.org/W1568439642\"],\"abstract_inverted_index\":{\"The\":[0,77,106,174,234,253],\"MATSim\":[1,172,300,333,387],\"(Multi-Agent\":[2],\"Transport\":[3],\"Simulation)\":[4],\"software\":[5],\"project\":[6,175],\"was\":[7],\"started\":[8,177],\"around\":[9],\"2006\":[10],\"with\":[11,91,157,205,211,223,247,327,343,353],\"the\":[12,67,74,81,87,92,110,114,138,143,148,171,179,198,206,257,271,279,296,299,305,317,361,380],\"goal\":[13],\"of\":[14,40,73,80,94,109,187,201,256,270,298,332,376,386],\"generating\":[15],\"traffic\":[16,183],\"and\":[17,102,146,167,190,193,204,243,340,346,348,371,382],\"congestion\":[18],\"patterns\":[19],\"by\":[20,62,122],\"following\":[21],\"individual\":[22],\"synthetic\":[23],\"travelers\":[24,226],\"through\":[25],\"their\":[26,164,194,338],\"daily\":[27],\"or\":[28,128,132],\"weekly\":[29],\"activity\":[30],\"programme.\":[31],\"It\":[32,58,151],\"has\":[33,176],\"since\":[34],\"then\":[35,220],\"evolved\":[36],\"from\":[37,178,240,249,287,379],\"a\":[38,96,185,282,288,310],\"collection\":[39],\"stand-alone\":[41],\"C++\":[42],\"programs\":[43],\"to\":[44,86,99,142,147,266,312,336,355,367,369,372],\"an\":[45,84,365],\"integrated\":[46],\"Java-based\":[47],\"framework\":[48],\"which\":[49],\"is\":[50,59,152,184,295],\"publicly\":[51],\"hosted,\":[52],\"open-source\":[53],\"available,\":[54],\"automatically\":[55],\"regression\":[56],\"tested.\":[57],\"currently\":[60],\"used\":[61],\"about\":[63],\"40\":[64],\"groups\":[65],\"throughout\":[66],\"world.\":[68],\"This\":[69],\"book\":[70,82,111,258,318,362],\"takes\":[71],\"stock\":[72],\"current\":[75,330],\"status.\":[76],\"first\":[78],\"part\":[79,108,255],\"gives\":[83],\"introduction\":[85],\"most\":[88],\"important\":[89,268,293],\"concepts,\":[90],\"intention\":[93],\"enabling\":[95],\"potential\":[97],\"user\":[98],\"set\":[100],\"up\":[101,309],\"run\":[103],\"basic\":[104,115,180],\"simulations.\":[105],\"second\":[107],\"describes\":[112],\"how\":[113,155],\"functionality\":[116],\"can\":[117,162],\"be\":[118,197,228],\"extended,\":[119],\"for\":[120,274],\"example\":[121],\"adding\":[123],\"schedule-based\":[124],\"public\":[125],\"transit,\":[126],\"electric\":[127],\"autonomous\":[129],\"cars,\":[130],\"paratransit,\":[131],\"within-day\":[133],\"replanning.\":[134],\"For\":[135],\"each\":[136],\"extension,\":[137],\"text\":[139],\"provides\":[140],\"pointers\":[141,354],\"additional\":[144,356],\"documentation\":[145],\"code\":[149,280],\"base.\":[150],\"also\":[153],\"discussed\":[154],\"people\":[156],\"appropriate\":[158],\"Java\":[159],\"programming\":[160],\"skills\":[161],\"write\":[163],\"own\":[165],\"extensions,\":[166],\"plug\":[168],\"them\":[169],\"into\":[170],\"core.\":[173],\"idea\":[181],\"that\":[182,208,263,360],\"consequence\":[186],\"human\":[188],\"behavior,\":[189],\"thus\":[191,237],\"humans\":[192],\"behavior\":[195,232,251,378],\"should\":[196,227],\"starting\":[199],\"point\":[200],\"all\":[202],\"modelling,\":[203],\"intuition\":[207],\"when\":[209],\"simulations\":[210,222],\"100\":[212],\"million\":[213,225],\"particles\":[214],\"are\":[215,264],\"possible\":[216,229],\"in\":[217,230,304],\"computational\":[218,241],\"physics,\":[219],\"behavior-oriented\":[221],\"10\":[224],\"travel\":[231,250,377],\"research.\":[233,252],\"initial\":[235],\"implementations\":[236],\"combined\":[238],\"concepts\":[239,248,262],\"physics\":[242],\"complex\":[244],\"adaptive\":[245],\"systems\":[246],\"third\":[254],\"looks\":[259],\"at\":[260],\"theoretical\":[261],\"able\":[265],\"describe\":[267],\"aspects\":[269],\"simulation\":[272],\"system;\":[273],\"example,\":[275],\"under\":[276],\"certain\":[277],\"conditions\":[278],\"becomes\":[281],\"Monte\":[283],\"Carlo\":[284],\"engine\":[285],\"sampling\":[286],\"discrete\":[289],\"choice\":[290],\"model.\":[291],\"Another\":[292],\"aspect\":[294],\"interpretation\":[297],\"score\":[301],\"as\":[302,322],\"utility\":[303],\"microeconomic\":[306],\"sense,\":[307],\"opening\":[308],\"connection\":[311],\"benefit\":[313],\"cost\":[314],\"analysis.\":[315],\"Finally,\":[316],\"collects\":[319],\"use\":[320],\"cases\":[321],\"they\":[323],\"have\":[324],\"been\":[325],\"undertaken\":[326],\"MATSim.\":[328],\"All\":[329],\"users\":[331],\"were\":[334],\"invited\":[335],\"submit\":[337],\"work,\":[339],\"many\":[341],\"followed\":[342],\"sometimes\":[344,349],\"crisp\":[345],\"short\":[347],\"longer\":[350],\"contributions,\":[351],\"always\":[352],\"references.\":[357],\"We\":[358],\"hope\":[359],\"will\":[363],\"become\":[364],\"invitation\":[366],\"explore,\":[368],\"build\":[370],\"extend\":[373],\"agent-based\":[374],\"modeling\":[375],\"stable\":[381],\"well\":[383],\"tested\":[384],\"core\":[385],\"documented\":[388],\"here.\":[389]},\"cited_by_api_url\":\"https://api.openalex.org/works?filter=cites:W2276056662\",\"counts_by_year\":[{\"year\":2024,\"cited_by_count\":1},{\"year\":2023,\"cited_by_count\":1},{\"year\":2022,\"cited_by_count\":2},{\"year\":2021,\"cited_by_count\":91},{\"year\":2020,\"cited_by_count\":92},{\"year\":2019,\"cited_by_count\":67},{\"year\":2018,\"cited_by_count\":45},{\"year\":2017,\"cited_by_count\":40},{\"year\":2016,\"cited_by_count\":16},{\"year\":2015,\"cited_by_count\":4}],\"updated_date\":\"2024-10-09T11:17:29.626079\",\"created_date\":\"2016-06-24\"}\n",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "The Multi-Agent Transport Simulation MATSim",
+				"creators": [
+					{
+						"firstName": "Andreas",
+						"lastName": "Horni",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kai",
+						"lastName": "Nagel",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kay W.",
+						"lastName": "Axhausen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020-10-09",
+				"extra": "OpenAlex: W2276056662",
+				"language": "en",
+				"libraryCatalog": "OpenAlex",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Dynamic Ride-Sharing"
+					},
+					{
+						"tag": "Implementation"
+					},
+					{
+						"tag": "Intelligent Transportation Systems"
+					},
+					{
+						"tag": "Mobility as a Service"
+					},
+					{
+						"tag": "Public Transit Integration"
+					},
+					{
+						"tag": "Python (programming language)"
+					},
+					{
+						"tag": "Travel Behavior"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "{\"id\":\"https://openalex.org/W2963341956\",\"doi\":\"https://doi.org/10.18653/v1/n19-1423\",\"title\":null,\"display_name\":null,\"publication_year\":2019,\"publication_date\":\"2019-01-01\",\"ids\":{\"openalex\":\"https://openalex.org/W2963341956\",\"doi\":\"https://doi.org/10.18653/v1/n19-1423\",\"mag\":\"2963341956\"},\"language\":\"en\",\"primary_location\":{\"is_oa\":false,\"landing_page_url\":\"https://doi.org/10.18653/v1/n19-1423\",\"pdf_url\":null,\"source\":null,\"license\":null,\"license_id\":null,\"version\":null,\"is_accepted\":false,\"is_published\":false},\"type\":\"article\",\"type_crossref\":\"proceedings-article\",\"indexed_in\":[\"crossref\"],\"open_access\":{\"is_oa\":false,\"oa_status\":\"closed\",\"oa_url\":null,\"any_repository_has_fulltext\":false},\"authorships\":[{\"author_position\":\"first\",\"author\":{\"id\":\"https://openalex.org/A5057457287\",\"display_name\":\"Jacob Devlin\",\"orcid\":null},\"institutions\":[],\"countries\":[],\"is_corresponding\":false,\"raw_author_name\":\"Jacob Devlin\",\"raw_affiliation_strings\":[],\"affiliations\":[]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5076904467\",\"display_name\":\"Ming\\u2010Wei Chang\",\"orcid\":\"https://orcid.org/0000-0002-0137-8895\"},\"institutions\":[],\"countries\":[],\"is_corresponding\":false,\"raw_author_name\":\"Ming-Wei Chang\",\"raw_affiliation_strings\":[],\"affiliations\":[]},{\"author_position\":\"middle\",\"author\":{\"id\":\"https://openalex.org/A5081862885\",\"display_name\":\"Kenton Lee\",\"orcid\":\"https://orcid.org/0000-0002-9534-5970\"},\"institutions\":[],\"countries\":[],\"is_corresponding\":false,\"raw_author_name\":\"Kenton Lee\",\"raw_affiliation_strings\":[],\"affiliations\":[]},{\"author_position\":\"last\",\"author\":{\"id\":\"https://openalex.org/A5053947885\",\"display_name\":\"Kristina Toutanova\",\"orcid\":null},\"institutions\":[],\"countries\":[],\"is_corresponding\":false,\"raw_author_name\":\"Kristina Toutanova\",\"raw_affiliation_strings\":[],\"affiliations\":[]}],\"institution_assertions\":[],\"countries_distinct_count\":0,\"institutions_distinct_count\":0,\"corresponding_author_ids\":[],\"corresponding_institution_ids\":[],\"apc_list\":null,\"apc_paid\":null,\"fwci\":1443.005,\"has_fulltext\":false,\"cited_by_count\":30429,\"citation_normalized_percentile\":{\"value\":0.999909,\"is_in_top_1_percent\":true,\"is_in_top_10_percent\":true},\"cited_by_percentile_year\":{\"min\":99,\"max\":100},\"biblio\":{\"volume\":null,\"issue\":null,\"first_page\":null,\"last_page\":null},\"is_retracted\":false,\"is_paratext\":false,\"primary_topic\":{\"id\":\"https://openalex.org/T10028\",\"display_name\":\"Natural Language Processing\",\"score\":0.9999,\"subfield\":{\"id\":\"https://openalex.org/subfields/1702\",\"display_name\":\"Artificial Intelligence\"},\"field\":{\"id\":\"https://openalex.org/fields/17\",\"display_name\":\"Computer Science\"},\"domain\":{\"id\":\"https://openalex.org/domains/3\",\"display_name\":\"Physical Sciences\"}},\"topics\":[{\"id\":\"https://openalex.org/T10028\",\"display_name\":\"Natural Language Processing\",\"score\":0.9999,\"subfield\":{\"id\":\"https://openalex.org/subfields/1702\",\"display_name\":\"Artificial Intelligence\"},\"field\":{\"id\":\"https://openalex.org/fields/17\",\"display_name\":\"Computer Science\"},\"domain\":{\"id\":\"https://openalex.org/domains/3\",\"display_name\":\"Physical Sciences\"}},{\"id\":\"https://openalex.org/T10181\",\"display_name\":\"Statistical Machine Translation and Natural Language Processing\",\"score\":0.9998,\"subfield\":{\"id\":\"https://openalex.org/subfields/1702\",\"display_name\":\"Artificial Intelligence\"},\"field\":{\"id\":\"https://openalex.org/fields/17\",\"display_name\":\"Computer Science\"},\"domain\":{\"id\":\"https://openalex.org/domains/3\",\"display_name\":\"Physical Sciences\"}},{\"id\":\"https://openalex.org/T13910\",\"display_name\":\"Computational Text Analysis in Social Sciences\",\"score\":0.9848,\"subfield\":{\"id\":\"https://openalex.org/subfields/3300\",\"display_name\":\"General Social Sciences\"},\"field\":{\"id\":\"https://openalex.org/fields/33\",\"display_name\":\"Social Sciences\"},\"domain\":{\"id\":\"https://openalex.org/domains/2\",\"display_name\":\"Social Sciences\"}}],\"keywords\":[{\"id\":\"https://openalex.org/keywords/computational-text-analysis\",\"display_name\":\"Computational Text Analysis\",\"score\":0.557562},{\"id\":\"https://openalex.org/keywords/multilingual-neural-machine-translation\",\"display_name\":\"Multilingual Neural Machine Translation\",\"score\":0.525761},{\"id\":\"https://openalex.org/keywords/part-of-speech-tagging\",\"display_name\":\"Part-of-Speech Tagging\",\"score\":0.525736},{\"id\":\"https://openalex.org/keywords/machine-translation\",\"display_name\":\"Machine Translation\",\"score\":0.523261},{\"id\":\"https://openalex.org/keywords/language-modeling\",\"display_name\":\"Language Modeling\",\"score\":0.521511},{\"id\":\"https://openalex.org/keywords/computational-linguistics\",\"display_name\":\"Computational linguistics\",\"score\":0.49847054}],\"concepts\":[{\"id\":\"https://openalex.org/C41008148\",\"wikidata\":\"https://www.wikidata.org/wiki/Q21198\",\"display_name\":\"Computer science\",\"level\":0,\"score\":0.534999},{\"id\":\"https://openalex.org/C155092808\",\"wikidata\":\"https://www.wikidata.org/wiki/Q182557\",\"display_name\":\"Computational linguistics\",\"level\":2,\"score\":0.49847054},{\"id\":\"https://openalex.org/C41895202\",\"wikidata\":\"https://www.wikidata.org/wiki/Q8162\",\"display_name\":\"Linguistics\",\"level\":1,\"score\":0.45711023},{\"id\":\"https://openalex.org/C161191863\",\"wikidata\":\"https://www.wikidata.org/wiki/Q199655\",\"display_name\":\"Library science\",\"level\":1,\"score\":0.40966725},{\"id\":\"https://openalex.org/C154945302\",\"wikidata\":\"https://www.wikidata.org/wiki/Q11660\",\"display_name\":\"Artificial intelligence\",\"level\":1,\"score\":0.2785549},{\"id\":\"https://openalex.org/C138885662\",\"wikidata\":\"https://www.wikidata.org/wiki/Q5891\",\"display_name\":\"Philosophy\",\"level\":0,\"score\":0.2196143}],\"mesh\":[],\"locations_count\":1,\"locations\":[{\"is_oa\":false,\"landing_page_url\":\"https://doi.org/10.18653/v1/n19-1423\",\"pdf_url\":null,\"source\":null,\"license\":null,\"license_id\":null,\"version\":null,\"is_accepted\":false,\"is_published\":false}],\"best_oa_location\":null,\"sustainable_development_goals\":[{\"display_name\":\"Quality education\",\"score\":0.83,\"id\":\"https://metadata.un.org/sdg/4\"}],\"grants\":[],\"datasets\":[],\"versions\":[],\"referenced_works_count\":52,\"referenced_works\":[\"https://openalex.org/W131533222\",\"https://openalex.org/W1486649854\",\"https://openalex.org/W1566289585\",\"https://openalex.org/W1599016936\",\"https://openalex.org/W1840435438\",\"https://openalex.org/W2025768430\",\"https://openalex.org/W2108598243\",\"https://openalex.org/W2117130368\",\"https://openalex.org/W2121227244\",\"https://openalex.org/W2130903752\",\"https://openalex.org/W2131462252\",\"https://openalex.org/W2131744502\",\"https://openalex.org/W2144578941\",\"https://openalex.org/W2149933564\",\"https://openalex.org/W2153579005\",\"https://openalex.org/W2158108973\",\"https://openalex.org/W2158139315\",\"https://openalex.org/W2170973209\",\"https://openalex.org/W2250539671\",\"https://openalex.org/W2251939518\",\"https://openalex.org/W2270070752\",\"https://openalex.org/W2396767181\",\"https://openalex.org/W2413794162\",\"https://openalex.org/W2462831000\",\"https://openalex.org/W2507974895\",\"https://openalex.org/W2551396370\",\"https://openalex.org/W2610858497\",\"https://openalex.org/W2784823820\",\"https://openalex.org/W2880875857\",\"https://openalex.org/W2888329843\",\"https://openalex.org/W2891602716\",\"https://openalex.org/W2897076808\",\"https://openalex.org/W2951714314\",\"https://openalex.org/W2962718483\",\"https://openalex.org/W2962739339\",\"https://openalex.org/W2962808855\",\"https://openalex.org/W2963026768\",\"https://openalex.org/W2963088785\",\"https://openalex.org/W2963159690\",\"https://openalex.org/W2963339397\",\"https://openalex.org/W2963403868\",\"https://openalex.org/W2963563735\",\"https://openalex.org/W2963564796\",\"https://openalex.org/W2963644595\",\"https://openalex.org/W2963748441\",\"https://openalex.org/W2963756346\",\"https://openalex.org/W2963804993\",\"https://openalex.org/W2963846996\",\"https://openalex.org/W2963918774\",\"https://openalex.org/W2978670439\",\"https://openalex.org/W3098057198\",\"https://openalex.org/W3104033643\"],\"related_works\":[\"https://openalex.org/W639578494\",\"https://openalex.org/W4253963317\",\"https://openalex.org/W2999524681\",\"https://openalex.org/W2960118423\",\"https://openalex.org/W2626427369\",\"https://openalex.org/W2184062094\",\"https://openalex.org/W2050562287\",\"https://openalex.org/W2018451868\",\"https://openalex.org/W1614506583\",\"https://openalex.org/W1248106622\"],\"abstract_inverted_index\":{\"Jacob\":[0],\"Devlin,\":[1],\"Ming-Wei\":[2],\"Chang,\":[3],\"Kenton\":[4],\"Lee,\":[5],\"Kristina\":[6],\"Toutanova.\":[7],\"Proceedings\":[8],\"of\":[9,13,18],\"the\":[10,14,19],\"2019\":[11],\"Conference\":[12],\"North\":[15],\"American\":[16],\"Chapter\":[17],\"Association\":[20],\"for\":[21],\"Computational\":[22],\"Linguistics:\":[23],\"Human\":[24],\"Language\":[25],\"Technologies,\":[26],\"Volume\":[27],\"1\":[28],\"(Long\":[29],\"and\":[30],\"Short\":[31],\"Papers).\":[32],\"2019.\":[33]},\"cited_by_api_url\":\"https://api.openalex.org/works?filter=cites:W2963341956\",\"counts_by_year\":[{\"year\":2024,\"cited_by_count\":745},{\"year\":2023,\"cited_by_count\":2741},{\"year\":2022,\"cited_by_count\":2757},{\"year\":2021,\"cited_by_count\":11538},{\"year\":2020,\"cited_by_count\":9007},{\"year\":2019,\"cited_by_count\":3475},{\"year\":2018,\"cited_by_count\":85},{\"year\":2017,\"cited_by_count\":6},{\"year\":2013,\"cited_by_count\":1}],\"updated_date\":\"2024-10-24T16:26:41.207021\",\"created_date\":\"2019-07-30\"}\n",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "[No title found]",
+				"creators": [
+					{
+						"creatorType": "author",
+						"firstName": "Jacob",
+						"lastName": "Devlin"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Ming-Wei",
+						"lastName": "Chang"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Kenton",
+						"lastName": "Lee"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Kristina",
+						"lastName": "Toutanova"
+					}
+				],
+				"date": "2019",
+				"DOI": "10.18653/v1/N19-1423",
+				"extra": "OpenAlex: W2963341956",
+				"language": "en",
+				"libraryCatalog": "OpenAlex",
+				"pages": "4171-4186",
+				"publicationTitle": "Proceedings of the 2019 Conference of the North",
+				"url": "http://aclweb.org/anthology/N19-1423",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Computational Text Analysis"
+					},
+					{
+						"tag": "Computational linguistics"
+					},
+					{
+						"tag": "Language Modeling"
+					},
+					{
+						"tag": "Machine Translation"
+					},
+					{
+						"tag": "Multilingual Neural Machine Translation"
+					},
+					{
+						"tag": "Part-of-Speech Tagging"
 					}
 				],
 				"notes": [],
