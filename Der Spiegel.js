@@ -1,7 +1,7 @@
 {
 	"translatorID": "eef50507-c756-4081-86fd-700ae4ebf22e",
 	"label": "Der Spiegel",
-	"creator": "Martin Meyerhoff and Abe Jellinek",
+	"creator": "Martin Meyerhoff, Abe Jellinek, and Vera de Kok",
 	"target": "^https?://www\\.spiegel\\.de/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-05 17:55:21"
+	"lastUpdated": "2026-11-08 17:02:19"
 }
 
 /*
@@ -36,9 +36,9 @@
 */
 
 
-function detectWeb(doc, url) {
-	if (doc.querySelector('script[type="application/ld+json"]') &&
-		JSON.parse(text(doc, 'script[type="application/ld+json"]'))[0]['@type'] == 'NewsArticle') {
+function detectWeb(doc) {
+	if (doc.querySelector('script[type="application/ld+json"]')
+		&& JSON.parse(text(doc, 'script[type="application/ld+json"]'))[0]['@type'] == 'NewsArticle') {
 		return "newspaperArticle";
 	}
 	else if (getSearchResults(doc, true)) {
@@ -62,18 +62,20 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
+async function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) ZU.processDocuments(Object.keys(items), scrape);
-		});
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let selectedURL of Object.keys(items)) {
+			await scrape(await requestDocument(selectedURL), selectedURL);
+		}
 	}
 	else {
-		scrape(doc, url);
+		await scrape(doc, url);
 	}
 }
 
-function scrape(doc, url) {
+async function scrape(doc, url) {
 	let json = JSON.parse(text(doc, 'script[type="application/ld+json"]'))[0];
 	
 	var translator = Zotero.loadTranslator('web');
@@ -88,11 +90,17 @@ function scrape(doc, url) {
 		item.creators = [];
 		item.creators.push(...cleanAuthorObjects(json.author));
 
+		item.title = item.title.replace(/^\(S\+\)\s*/, '');
+		if (item.shortTitle) {
+			item.shortTitle = item.shortTitle.replace(/^\(S\+\)\s*/, '');
+		}
+
 		item.url = json.url;
 		item.section = json.articleSection;
 		item.date = ZU.strToISO(json.dateModified || json.dateCreated);
 		item.ISSN = '2195-1349';
 		item.publicationTitle = 'Der Spiegel';
+		item.place = 'Hamburg';
 
 		item.tags = [];
 		item.tags.push(...attr(doc, 'meta[name="news_keywords"]', 'content')
@@ -101,10 +109,9 @@ function scrape(doc, url) {
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function (trans) {
-		trans.itemType = "newspaperArticle";
-		trans.doWeb(doc, url);
-	});
+	let trans = await translator.getTranslatorObject();
+	trans.itemType = "newspaperArticle";
+	await trans.doWeb(doc, url);
 }
 
 function cleanAuthorObjects(authors) {
@@ -138,6 +145,7 @@ var testCases = [
 				"language": "de",
 				"libraryCatalog": "www.spiegel.de",
 				"publicationTitle": "Der Spiegel",
+				"place": "Hamburg",
 				"section": "Politik",
 				"shortTitle": "CDU-Parteitag",
 				"url": "https://www.spiegel.de/politik/deutschland/cdu-parteitag-partei-im-koma-a-797954.html",
@@ -208,6 +216,7 @@ var testCases = [
 				"language": "de",
 				"libraryCatalog": "www.spiegel.de",
 				"publicationTitle": "Der Spiegel",
+				"place": "Hamburg",
 				"section": "Politik",
 				"url": "https://www.spiegel.de/politik/veb-energiewende-a-335a79ef-0002-0001-0000-000084789653",
 				"attachments": [
@@ -248,6 +257,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "www.spiegel.de",
 				"publicationTitle": "Der Spiegel",
+				"place": "Hamburg",
 				"section": "International",
 				"shortTitle": "Madame Non and Monsieur Duracell",
 				"url": "https://www.spiegel.de/international/europe/madame-non-and-monsieur-duracell-german-french-relations-on-the-rocks-a-700530.html",
@@ -293,6 +303,7 @@ var testCases = [
 				"language": "de",
 				"libraryCatalog": "www.spiegel.de",
 				"publicationTitle": "Der Spiegel",
+				"place": "Hamburg",
 				"section": "Geschichte",
 				"shortTitle": "Kinder vom Kamper See",
 				"url": "https://www.spiegel.de/geschichte/kinder-vom-kamper-see-grab-unter-wasser-a-1021273.html",
@@ -338,6 +349,7 @@ var testCases = [
 				"language": "de",
 				"libraryCatalog": "www.spiegel.de",
 				"publicationTitle": "Der Spiegel",
+				"place": "Hamburg",
 				"section": "Kultur",
 				"url": "https://www.spiegel.de/kultur/musik/rolling-stones-mit-living-in-a-ghost-town-nummer-1-der-deutschen-charts-a-e0c06156-106c-4fc2-a0a7-8b5b794b7fe2",
 				"attachments": [
@@ -382,6 +394,7 @@ var testCases = [
 				"language": "de",
 				"libraryCatalog": "www.spiegel.de",
 				"publicationTitle": "Der Spiegel",
+				"place": "Hamburg",
 				"section": "Politik",
 				"shortTitle": "Hans-Georg Maaßen",
 				"url": "https://www.spiegel.de/politik/deutschland/hans-georg-maassen-armin-laschets-riskante-abstandsregel-a-45f6b77f-f2d7-4c68-8210-2ec1571068be",
@@ -425,7 +438,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Meeting beim Chef zu Hause: Wie verhalte ich mich richtig? - Tipps von den Karrierecoaches",
+				"title": "Meinung: Meeting beim Chef zu Hause: Wie verhalte ich mich richtig? - Tipps von den Karrierecoaches",
 				"creators": [
 					{
 						"firstName": "Dorothea",
@@ -444,8 +457,9 @@ var testCases = [
 				"language": "de",
 				"libraryCatalog": "www.spiegel.de",
 				"publicationTitle": "Der Spiegel",
+				"place": "Hamburg",
 				"section": "Job & Karriere",
-				"shortTitle": "Meeting beim Chef zu Hause",
+				"shortTitle": "Meinung",
 				"url": "https://www.spiegel.de/karriere/meeting-beim-chef-zu-hause-wie-verhalte-ich-mich-richtig-tipps-von-den-karrierecoaches-a-a73e665e-a74e-46b7-8e6e-ae053d8b6f83",
 				"attachments": [
 					{
@@ -468,6 +482,106 @@ var testCases = [
 					},
 					{
 						"tag": "Tipps vom Karrierecoach"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.spiegel.de/international/world/the-new-axis-of-evil-der-spiegel-investigation-reveals-deep-military-cooperation-between-russia-and-china-a-12dc295a-413d-4a2f-b44f-2922092270e3",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "The New Axis of Evil: DER SPIEGEL Investigation Reveals Deep Military Cooperation between Russia and China",
+				"creators": [
+					{
+						"firstName": "Alexander",
+						"lastName": "Chernyshev",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christoph",
+						"lastName": "Giesen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christo",
+						"lastName": "Grozev",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Roman",
+						"lastName": "Kierst",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Paul-Anton",
+						"lastName": "Krüger",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Friederike",
+						"lastName": "Röhreke",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marcel",
+						"lastName": "Rosenbach",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Fidelius",
+						"lastName": "Schmid",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael",
+						"lastName": "Weiss",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Anika",
+						"lastName": "Zeller",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-07-09",
+				"ISSN": "2195-1349",
+				"abstractNote": "Reporting by DER SPIEGEL and its partners provide a detailed and unprecedented look at the depth of military cooperation between Russia and China. Secret documents show the plans the two countries are developing.",
+				"language": "en",
+				"libraryCatalog": "www.spiegel.de",
+				"publicationTitle": "Der Spiegel",
+				"place": "Hamburg",
+				"section": "International",
+				"shortTitle": "The New Axis of Evil",
+				"url": "https://www.spiegel.de/international/world/the-new-axis-of-evil-der-spiegel-investigation-reveals-deep-military-cooperation-between-russia-and-china-a-12dc295a-413d-4a2f-b44f-2922092270e3",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "China (country)"
+					},
+					{
+						"tag": "Chinese Economy"
+					},
+					{
+						"tag": "International"
+					},
+					{
+						"tag": "Russia"
+					},
+					{
+						"tag": "Vladimir Putin (politician)"
+					},
+					{
+						"tag": "World"
 					}
 				],
 				"notes": [],
