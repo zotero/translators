@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-03-14 20:55:10"
+	"lastUpdated": "2026-10-02 07:11:13"
 }
 
 /*
@@ -36,11 +36,11 @@
 
 
 function detectWeb(doc, url) {
-	let path = new URL(url).pathname;
-	if (path.includes("/search?") && getSearchResults(doc, true)) {
+	if (url.includes("/search") && getSearchResults(doc, true)) {
 		return 'multiple';
 	}
-	else if ((/(news|sports|radio|books|arts|music|life|television|archives)\//.test(path)) && getLD(doc)) {
+	let path = new URL(url).pathname;
+	if ((/(news|sports|radio|books|arts|music|life|television|archives)\//.test(path)) && getLD(doc)) {
 		return "newspaperArticle";
 	}
 	else if (path.includes("/player/")) {
@@ -67,13 +67,27 @@ function getSearchResults(doc, checkOnly) {
 
 
 function getLD(doc) {
-	let ldScript = text(doc, "script[type='application/ld+json']");
-	if (ldScript) return JSON.parse(ldScript);
+	for (let script of doc.querySelectorAll("script[type='application/ld+json']")) {
+		let raw = script.textContent;
+		if (!raw || !raw.trim()) continue;
+		// CBC sometimes HTML-encodes apostrophes etc. inside the JSON
+		raw = ZU.unescapeHTML(raw);
+		try {
+			let data = JSON.parse(raw);
+			// Prefer an article-like node; skip bare WebPage / speakable blocks
+			if (data && (data.headline || data.datePublished || data.author)) {
+				return data;
+			}
+		}
+		catch (e) {
+			continue;
+		}
+	}
 	return null;
 }
 
-function getMetaContent(doc, attribute, text) {
-	return attr(doc.head, 'meta[' + attribute + '="' + text + '"]', 'content');
+function getMetaContent(doc, attribute, name) {
+	return attr(doc, 'meta[' + attribute + '="' + name + '"]', 'content');
 }
 
 
@@ -88,7 +102,7 @@ async function scrape(doc, url = doc.location.href) {
 
 		// only do processing if page has ld
 		if (ld) {
-			item.url = getMetaContent(doc, 'property', "og:url");
+			item.url = getMetaContent(doc, 'property', "og:url") || item.url;
 
 			item.title = ld.headline ? ld.headline : ld.name;
 			if (item.itemType == "videoRecording") {
@@ -100,23 +114,18 @@ async function scrape(doc, url = doc.location.href) {
 			item.abstractNote = ld.description;
 
 			item.creators = []; // clear existing authors
-			// ignore organization authors
-			if (ld.hasOwnProperty("author") && ld.author[0]['@type'] != "Organization") {
-				// either single author or multiple comma separated in one entry
-				if (ld.author.length == 1) {
-					let authors = ld.author[0].name;
-					if (authors.includes(',')) {
-						let authorsList = authors.split(',');
-						for (const a of authorsList) {
-							item.creators.push(ZU.cleanAuthor(a, "author"));
+			// normalize author to an array of {name} objects
+			let authors = Array.isArray(ld.author) ? ld.author : (ld.author ? [ld.author] : []);
+			authors = authors.map(a => (typeof a === 'string' ? { name: a } : a));
+			for (const a of authors) {
+				if (a && a['@type'] != "Organization" && a.name) {
+					// either single author or multiple comma separated in one entry
+					if (authors.length == 1 && a.name.includes(',')) {
+						for (const name of a.name.split(',')) {
+							item.creators.push(ZU.cleanAuthor(name, "author"));
 						}
 					}
 					else {
-						item.creators.push(ZU.cleanAuthor(authors, "author"));
-					}
-				}
-				else {
-					for (const a of ld.author) {
 						item.creators.push(ZU.cleanAuthor(a.name, "author"));
 					}
 				}
@@ -126,11 +135,13 @@ async function scrape(doc, url = doc.location.href) {
 			let siteName = "CBC";
 			if (item.itemType != "videoRecording") {
 				// get department (e.g. News, Sports, Radio)
-				// remove .ca/ manually, as regex lookbehind doesn't seem to work
-				let dept = (/\.ca\/\w+(?=\/)/.exec(item.url))[0].replace(".ca/", "");
-				// capitalize department
-				dept = dept[0].toUpperCase() + dept.slice(1);
-				siteName += " " + dept;
+				let deptMatch = /\.ca\/(\w+)/.exec(item.url);
+				if (deptMatch) {
+					let dept = deptMatch[1];
+					// capitalize department
+					dept = dept[0].toUpperCase() + dept.slice(1);
+					siteName += " " + dept;
+				}
 			}
 			item.publicationTitle = siteName;
 			item.libraryCatalog = "CBC.ca";
@@ -221,32 +232,6 @@ var testCases = [
 				"libraryCatalog": "CBC.ca",
 				"publicationTitle": "CBC Sports",
 				"url": "https://www.cbc.ca/sports/hockey/nhl/elias-pettersson-contract-extension-canucks-nhl-1.7132138",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.cbc.ca/player/play/2313671747656",
-		"items": [
-			{
-				"itemType": "videoRecording",
-				"title": "If you get pulled over by police this month in Regina, expect to take a breathalyzer test",
-				"creators": [],
-				"date": "2024-03-02",
-				"abstractNote": "Everyone who gets pulled over for any reason will get a test. SGI and police are telling people about the plan because not everyone is aware of a 2018 federal law that allows it. CBC's Darla Ponace has more on what you need to know about mandatory roadside alcohol tests.",
-				"language": "en-CA",
-				"libraryCatalog": "CBC.ca",
-				"runningTime": "82.849",
-				"url": "https://www.cbc.ca/player/play/2313671747656",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -432,8 +417,34 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.cbc.ca/search?q=Windows%2011&section=arts&sortOrder=relevance&media=all",
+		"url": "https://www.cbc.ca/search?q=Trudeau",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.cbc.ca/player/play/2313671747656",
+		"items": [
+			{
+				"itemType": "videoRecording",
+				"title": "If you get pulled over by police this month in Regina, expect to take a breathalyzer test",
+				"creators": [],
+				"date": "2024-03-02",
+				"abstractNote": "Everyone who gets pulled over for any reason will get a test. SGI and police are telling people about the plan because not everyone is aware of a 2018 federal law that allows it. CBC's Darla Ponace has more on what you need to know about mandatory roadside alcohol tests.",
+				"language": "en-CA",
+				"libraryCatalog": "CBC.ca",
+				"runningTime": "82.849",
+				"url": "https://www.cbc.ca/player/play/video/1.7131918",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
