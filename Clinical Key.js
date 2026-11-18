@@ -3,19 +3,19 @@
 	"label": "Clinical Key",
 	"creator": "Jaret M. Karnuta, Mike Davidson",
 	"target": "^https?://(www\\.|www-)clinicalkey(\\.|-)com",
-	"minVersion": "3.0",
+	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-30 08:08:52"
+	"lastUpdated": "2026-09-26 00:38:16"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017 Jaret M. Karnuta & Mike Davidson
+	Copyright © 2017-2026 Jaret M. Karnuta & Mike Davidson
 
 	This file is part of Zotero.
 
@@ -36,332 +36,421 @@
 */
 
 /*
-This translator is designed specifically for use on book section portions and journal articles of
-ClinicalKey. It will not work on book overview pages or journal table of contents pages.
+	ClinicalKey is a single-page app: routes are hash-bang URLs, content renders
+	after load, and pages expose no DOI or <meta> tags. Detection therefore uses
+	the live URL and re-runs on DOM changes in #main-container.
 
-NB: url and doc.location.href are different. I think it is because of the way clinicalkey redirects.
-Replicate by going to a content page (/content/book/...) and then going to a broswing page (/browse/book/...).
-URL remains the page of the previous page (content page) and doc.location.href is the current page (as it should be).
+	Items are keyed on the Elsevier PII in the URL and resolved to a DOI through
+	Crossref, then imported with the DOI Content Negotiation translator:
+	  - journal articles: Crossref filter alternative-id:<PII>
+	  - book chapters: chapter DOIs listed under the ISBN (digits 2-14 of the
+		PII), matched to the PII with punctuation stripped
+	Items Crossref cannot resolve fail with their PII in the error.
 
-Hence, I never use url and change its content to doc.location.href in detectWeb, the only function that uses the url
+	Crossref's public pool allows 1 list request per second (since Dec. 2025),
+	so list requests are paced.
 
-To get journal article metadata, Publisher Item Identifier (PIIs) are extracted from the Scopus EID
-and queried using the CrossRef REST API. 
-Documentation at:
-https://github.com/CrossRef/rest-api-doc
-CrossReff REST API Return Values at:
-https://github.com/CrossRef/rest-api-doc/blob/master/api_format.md
+	Book chapters also get edition (TOC title or chapter page "Source" pane)
+	and chapter number (TOC entry or chapter header, stored in Extra as the
+	CSL variable chapter-number), since Crossref chapter records lack both.
 */
 
-function detectWeb(doc, url) {
-	//see NB above for explanation
-	url = doc.location.href;
+// Journal article PII: 1-s2.0-S2667394026000183
+// S + ISSN (8th character may be X, e.g. 0002-838X) + year + item + check (may be X)
+const JOURNAL_PII_RE = /1-s2\.0-(S\d{7}[\dX]\d{7}[\dX])/i;
+// Book chapter PII: 3-s2.0-B9780323476744000293 = B + ISBN-13 + 6-char chapter code
+const BOOK_PII_RE = /3-s2\.0-(B\d{13}\d{5}[\dX])/i;
 
-	//contentType depends on url, which is present, but rest of site is loaded via ajax (I think)
-	//monitor dom and reset if changes
-	var jsession = doc.getElementById('jsessionid');
-	if (jsession){
-		Zotero.monitorDOMChanges(jsession, {attributes:true});
-		if (!jsession.value){
-			return;
-		}
-	}
+const BOOK_TOC_SELECTOR = 'ol.toc a[href*="/content/book/3-s2.0-B"]';
+const JOURNAL_TOC_SELECTOR
+	= '.browse-toc .result-header__title a[href*="/content/journal/1-s2.0-S"]';
 
-	var contentType;
-	//contains /content/book/ and does not contain login?
-	if (url.indexOf("/content/book/") != -1 && url.indexOf("login?") == -1){
-		contentType = "bookSection";
-	}
-	//similar structure to above
-	else if (url.indexOf('/browse/book/') != -1 && url.indexOf("login?") == -1){
-		contentType = "book";
-	}
-	// similar structure to above, for journal articles
-	else if (url.indexOf('/content/journal/') != -1 && url.indexOf("login?") == -1){
-		contentType = "journalArticle";
-	}
+// Book fields (books only)
+const CHAPTER_HEADER_SELECTOR = '.c-cksc-content-header__book-chapter';
+const CHAPTER_PAGE_EDITION_SELECTOR = '.c-cksc-book-side-content__edition';
+const TOC_EDITION_SELECTOR = '.browse__book-toc .full-header h1 > span';
 
-	//contentType not set
-	if (!contentType){
-		return;
+// DOI Content Negotiation search translator
+const DOI_SEARCH_TRANSLATOR = 'b28d0d42-8549-4c6d-83fc-8382874a5cb9';
+
+// Crossref pacing
+const CROSSREF_LIST_INTERVAL_MS = 1100; // public pool: 1 list request per second
+
+// Render gates: elements that exist only once the React player has populated
+const JOURNAL_READY_SELECTOR = '.c-cksc-content-journal-citation';
+const CHAPTER_READY_SELECTOR = '.c-cksc-content-header__book-source';
+
+const EDITION_WORDS = {
+	first: '1', second: '2', third: '3', fourth: '4', fifth: '5',
+	sixth: '6', seventh: '7', eighth: '8', ninth: '9', tenth: '10',
+	eleventh: '11', twelfth: '12', thirteenth: '13', fourteenth: '14',
+	fifteenth: '15', sixteenth: '16', seventeenth: '17', eighteenth: '18',
+	nineteenth: '19', twentieth: '20',
+	'twenty-first': '21', 'twenty-second': '22', 'twenty-third': '23',
+	'twenty-fourth': '24', 'twenty-fifth': '25', 'twenty-sixth': '26',
+	'twenty-seventh': '27', 'twenty-eighth': '28', 'twenty-ninth': '29',
+	thirtieth: '30',
+	'thirty-first': '31', 'thirty-second': '32', 'thirty-third': '33',
+	'thirty-fourth': '34', 'thirty-fifth': '35', 'thirty-sixth': '36',
+	'thirty-seventh': '37', 'thirty-eighth': '38', 'thirty-ninth': '39',
+	fortieth: '40',
+	'forty-first': '41', 'forty-second': '42', 'forty-third': '43',
+	'forty-fourth': '44', 'forty-fifth': '45', 'forty-sixth': '46',
+	'forty-seventh': '47', 'forty-eighth': '48', 'forty-ninth': '49',
+	fiftieth: '50'
+};
+
+function getContentType(doc) {
+	let url = doc.location.href;
+	if (url.includes('/content/journal/') && JOURNAL_PII_RE.test(url)) return 'journalArticle';
+	if (url.includes('/content/book/') && BOOK_PII_RE.test(url)) return 'bookSection';
+	if (url.includes('/browse/') && Object.keys(getTOCItems(doc)).length) {
+		return 'multiple';
 	}
-	return contentType;
+	return false;
 }
 
-function doWeb(doc, url){
-	var contentType = detectWeb(doc, url);
+function detectWeb(doc, _url) {
+	let view = doc.getElementById('main-container');
+	if (view) {
+		Z.monitorDOMChanges(view, { childList: true, subtree: true });
+	}
 
-	//if book section
-	if (contentType == 'bookSection'){
-		var newItem = new Zotero.Item(contentType);
-		newItem = scrapeBookSection(doc, newItem);
-		//pdf (if present)
-		var pdfLink = getPDFLink(doc);
-		if (pdfLink) {
-			newItem.attachments.push({
-				url:pdfLink,
-				title:"Book Section PDF",
-				mimeType:"application/pdf"
-			});
-		}
-		//populate common attributes
-		//url, see NB above for explanation as to why url is NOT used
-		newItem.url = doc.location.href;
-		newItem.complete();
+	let type = getContentType(doc);
+	// Route matches but the React player may not have rendered yet;
+	// monitorDOMChanges will call us again when it does.
+	if (type == 'journalArticle' && !doc.querySelector(JOURNAL_READY_SELECTOR)) return false;
+	if (type == 'bookSection' && !doc.querySelector(CHAPTER_READY_SELECTOR)) return false;
+	return type;
+}
+
+// Collect TOC entries from a book or journal-issue page:
+// { absoluteHref: { label, pii, pdfURL, chapterNumber } }
+// The label is only shown in the selection dialog.
+function getTOCItems(doc) {
+	let items = {};
+
+	for (let link of doc.querySelectorAll(BOOK_TOC_SELECTOR)) {
+		let m = link.getAttribute('href').match(BOOK_PII_RE);
+		if (!m) continue;
+		// Hash-only hrefs resolve against the current (possibly proxied) page.
+		let href = new URL(link.getAttribute('href'), doc.location.href).href;
+		let num = text(link, '.chapter-number');
+		let title = text(link, '[data-once-text="chapter.itemtitle"]')
+			|| ZU.trimInternal(link.textContent);
+		items[href] = {
+			label: (num ? num + ' ' : '') + title,
+			pii: m[1].toUpperCase(),
+			pdfURL: null,
+			chapterNumber: cleanChapterNumber(num)
+		};
 	}
-	//if book, use ISBN translator
-	//borrowed from amazon translator
-	else if (contentType == 'book'){
-		var isbn = ZU.xpath(doc, "//button/@data-metadata-isbn");
-		if (!isbn){
-			return;
-		}
-		isbn = ZU.cleanISBN(isbn[0].value);
-		//use search translator to get metadata from isbn
-		var search = Zotero.loadTranslator("search");
-		//set translators and search
-		search.setHandler("translators", function(obj, translators) {
-			search.setTranslator(translators);
-			search.setHandler("itemDone", function(obj, lookupItem) {
-				newItem=lookupItem;
-				//update ISBN
-				newItem.ISBN = ZU.cleanISBN(isbn);
-				//Override library catalog
-				newItem.libraryCatalog = "Clinical Key";
-				//update url, see NB for rationale why url not used
-				newItem.url = doc.location.href;
-			});
-			search.translate();
-		});
-		//no need to override error handler
-		//save item
-		search.setHandler("done", function() {
-			newItem.complete();
-		});
-		search.setSearch({ ISBN: isbn });
-		search.getTranslators();
+
+	for (let link of doc.querySelectorAll(JOURNAL_TOC_SELECTOR)) {
+		let m = link.getAttribute('href').match(JOURNAL_PII_RE);
+		if (!m) continue;
+		let href = new URL(link.getAttribute('href'), doc.location.href).href;
+		// Each issue row has its own PDF link, only when the user is entitled.
+		let row = link.closest('li');
+		let pdf = row && row.querySelector('a.result-header__pdf-link');
+		items[href] = {
+			label: ZU.trimInternal(link.textContent),
+			pii: m[1].toUpperCase(),
+			pdfURL: (pdf && pdf.href) ? pdf.href : null,
+			chapterNumber: null
+		};
 	}
-	else if (contentType == 'journalArticle') {
-		var eid; 
-		var pii;
-		try {
-			eid = url.split('/');
-			pii = eid.pop().slice(7);
-			if (!/^S(\d{15}X|\d{16})/.test(pii)){
-				throw new Error('PII from url failed. Trying Xpath');
+
+	return items;
+}
+
+async function doWeb(doc, _url) {
+	let type = getContentType(doc);
+	if (type == 'journalArticle') {
+		let pii = doc.location.href.match(JOURNAL_PII_RE)[1].toUpperCase();
+		await saveByPII(doc, pii, doc.location.href, null, null);
+	}
+	else if (type == 'bookSection') {
+		let pii = doc.location.href.match(BOOK_PII_RE)[1].toUpperCase();
+		await saveByPII(doc, pii, doc.location.href, null, null);
+	}
+	else if (type == 'multiple') {
+		let toc = getTOCItems(doc);
+		let choices = {};
+		for (let href of Object.keys(toc)) {
+			choices[href] = toc[href].label;
+		}
+		let selected = await Z.selectItems(choices);
+		if (!selected) return;
+
+		// Save everything that resolves, then report every failure at once.
+		let failed = [];
+		let total = Object.keys(selected).length;
+		for (let href of Object.keys(selected)) {
+			let entry = toc[href];
+			try {
+				await saveByPII(doc, entry.pii, href, entry.pdfURL, entry.chapterNumber);
 			}
-			} catch(e) {
-				Zotero.debug(e);
-				eid = ZU.xpathText(doc, "//ul/@data-eid");
-				pii = eid.slice(7);
-				if (!/^S(\d{15}X|\d{16})/.test(pii)){
-					throw new Error('PII from Xpath failed');
-				}
+			catch (e) {
+				Z.debug(e);
+				failed.push(entry.pii);
 			}
-		queryCrossRef(pii, doc);
+		}
+		if (failed.length) {
+			throw new Error('Clinical Key: could not save ' + failed.length + ' of ' + total
+				+ ' item(s): ' + failed.join(', '));
+		}
 	}
-	
 }
 
-//Search & Processing based on CrossRef.js translator
-function queryCrossRef (pii, doc){
-	crossRefQuery = 'http://api.crossref.org/works?query=' + pii;
-	//TODO: implement API version request
-	//acceptHeader = {'Accept': 'application/vnd.crossref-api-message+json; version=1.0'}
-	ZU.doGet(crossRefQuery, function(responseText) {
-		processCrossRefREST(responseText, doc);
-		});
-}
+async function saveByPII(doc, pii, url, pdfURL, chapterNumber) {
+	let doi = await getDOI(pii);
+	if (!doi) {
+		let detail = '';
+		if (pii.startsWith('B')) {
+			let isbn = pii.slice(1, 14);
+			let n = (bookDOICache[isbn] || []).length;
+			detail = n
+				? ' (not among the ' + n + ' chapter DOIs Crossref lists for ISBN ' + isbn + ')'
+				: ' (Crossref lists no chapters for ISBN ' + isbn + ')';
+		}
+		throw new Error('Clinical Key: no Crossref record found for PII ' + pii + detail);
+	}
 
-function processCrossRefREST(jsonOutput, doc){
-	var jsonParsed = JSON.parse(jsonOutput);
-	
-	if (jsonParsed['message']['total-results'] > 1) {
-		// Multiple results shouldn't occur as pii is unique
-		// handle only first returned object just in case
-		Zotero.debug('Returned multiple results. Continue processing first');
+	let isCurrentPage = (url == doc.location.href);
+
+	// On a journal article page, the PDF link is in the header. Chapter pages
+	// use a JS button with no href, so chapters get no PDF.
+	if (!pdfURL && isCurrentPage) {
+		let pdf = doc.querySelector('a.c-cksc-pdf-download-link');
+		if (pdf && pdf.href) pdfURL = pdf.href;
 	}
-	else if (jsonParsed['message']['total-results'] == 0) {
-		// If the search failed to find results
-		Zotero.debug('Crossref API failed to find query match');
-		return;
-	}
-	
-	if (!/^1/.test(jsonParsed['message-version'])){
-		// check that the API version is compatible with this translator
-		// translator currently written according to v1
-		Zotero.debug('Request returned wrong API version');
-	}
-	
-	// shorten JSON to the single reference
-	var ref = jsonParsed['message']['items'][0];
-	
-	if (ref['type'] == 'journal-article') {
-		// prep for CSL JSON translator
-		ref['type'] = 'article-journal';
-	} else if (ref['type'] != 'journal-article') {
-		// log the unexpected
-		Zotero.debug('Returned unexpected reference type');
-	}
-	
-	// use CSL JSON translator
-	var text = JSON.stringify(ref);
-	var trans = Zotero.loadTranslator('import');
-	trans.setTranslator('bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7');
-	trans.setString(text);
-	
-	//Attempt to download fulltext PDF
-	var pdfLink = getPDFLink(doc);
-		
-	trans.setHandler('itemDone', function(obj, item) {
-		if (pdfLink)
+
+	// Books only: edition and chapter number, read from the current page
+	// (the TOC page when saving from a TOC, else the chapter page).
+	let bookExtras = pii.startsWith('B')
+		? getBookExtras(doc, isCurrentPage, chapterNumber)
+		: null;
+
+	let search = Zotero.loadTranslator('search');
+	search.setTranslator(DOI_SEARCH_TRANSLATOR);
+	search.setSearch({ DOI: doi });
+	search.setHandler('itemDone', function (_obj, item) {
+		item.libraryCatalog = 'ClinicalKey';
+		// Keep the ClinicalKey URL; the connector strips the proxy on save.
+		item.url = url;
+		if (bookExtras) {
+			if (bookExtras.edition && !item.edition) {
+				item.edition = bookExtras.edition;
+			}
+			if (bookExtras.chapterNumber) {
+				item.extra = (item.extra ? item.extra + '\n' : '')
+					+ 'chapter-number: ' + bookExtras.chapterNumber;
+			}
+		}
+		if (pdfURL) {
 			item.attachments.push({
-				url:pdfLink,
-				title:"Full Text PDF",
-				mimeType:"application/pdf"
+				url: pdfURL,
+				title: 'Full Text PDF',
+				mimeType: 'application/pdf'
 			});
+		}
 		item.complete();
 	});
-	
-	trans.translate();
+	await search.translate();
 }
 
-function getPDFLink(doc) {
-	var pdfLink = doc.getElementsByClassName('x-pdf')[0].href;
-	if (!pdfLink) {
-		pdfLink = ZU.xpathText(doc, './/*[@data-action="pdfDownload"]/@href');
-	} else if (!pdfLink) {
-		pdfLink = ZU.xpathText(doc, './/*[@action="download"]/@href');
+function getBookExtras(doc, isCurrentPage, chapterNumber) {
+	if (isCurrentPage && !chapterNumber) {
+		chapterNumber = chapterNumberFromHeader(text(doc, CHAPTER_HEADER_SELECTOR));
 	}
-	return pdfLink;
+	// Only one of these exists on a given page. When saving from a TOC, every
+	// selected chapter belongs to the book shown on that page.
+	let edition = normalizeEdition(
+		text(doc, CHAPTER_PAGE_EDITION_SELECTOR) || text(doc, TOC_EDITION_SELECTOR));
+	return { edition, chapterNumber };
 }
 
-function scrapeBookSection(doc, item){
-	//book title
-	var bookTitle = ZU.xpathText(doc, '//*[@data-once-text="XocsCtrl.title"]');
-	item.bookTitle = bookTitle;
-	//section title
-	var title  = ZU.xpathText(doc, '//*[@ng-bind-html="ContentCtrl.title"]');
-	item.title = title;
-	//authors
-	var authorsList  = ZU.xpath(doc, '//ul[@ng-bind-html="XocsCtrl.authorsHtml"]/li/a');
-	for (var i = 0;i<authorsList.length;i++){
-		var author = authorsList[i].innerHTML;
-		if (author.indexOf("<") != -1){
-			author = author.split("<")[0];
-		}
-		item.creators.push(Zotero.Utilities.cleanAuthor(author, 'author'));
+// TOC value is "29."; header field is "29". Also accepts "Chapter 29" and
+// a trailing colon.
+function cleanChapterNumber(s) {
+	s = ZU.trimInternal(s || '')
+		.replace(/^chapter\s*/i, '')
+		.replace(/[.:]$/, '')
+		.trim();
+	return s || null;
+}
+
+// Header is ", <chapter>, <pages>", e.g. ", 29, 470-485.e5". Only trust the
+// first field when a pages field follows it.
+function chapterNumberFromHeader(s) {
+	let parts = (s || '').split(',').map(p => p.trim()).filter(Boolean);
+	return parts.length >= 2 ? cleanChapterNumber(parts[0]) : null;
+}
+
+// ", Sixth Edition" / "Sixth Edition" / "6th ed." / "6" / "Twenty First Edition"
+// -> "6", "21", etc. Anything unrecognized is kept as-is, minus a trailing
+// "Edition" or "ed.".
+function normalizeEdition(s) {
+	s = ZU.trimInternal(String(s || ''))
+		.replace(/^[,\s]+/, '')
+		.replace(/\s*\b(edition|ed\.?)$/i, '')
+		.trim();
+	if (!s) return null;
+	let word = EDITION_WORDS[s.toLowerCase().replace(/\s+/g, '-')];
+	if (word) return word;
+	let m = s.match(/^(\d+)(st|nd|rd|th)?$/i);
+	return m ? m[1] : s;
+}
+
+function delay(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Paces list requests (filters/queries) to stay within the public pool's
+// 1 request/second limit across the whole translation run.
+let nextListRequestAt = 0;
+
+async function crossrefListRequest(url) {
+	let wait = nextListRequestAt - Date.now();
+	if (wait > 0) await delay(wait);
+	nextListRequestAt = Date.now() + CROSSREF_LIST_INTERVAL_MS;
+	return requestJSON(url);
+}
+
+async function getDOI(pii) {
+	if (pii.startsWith('B')) {
+		return findBookChapterDOI(pii);
 	}
 
-	//chapter and page metadata
-	var chapterAndPages = ZU.xpathText(doc,'//p[@class="source ng-binding"]');
-	//make pattern that should capter pages if present
-	//matches both xxx-xxx (length of #s not important)
-	//and xxx-xxx.eY
-	var pagesPattern = /\s\d+-\d+(\.e\d+)?/;
-	var pagesMatch = chapterAndPages.match(pagesPattern);
-	if (pagesMatch){
-		//get whole regex match
-		item.pages = pagesMatch[0];
-	}
-	//make pattern that will match to the chapter number
-	var chapterPattern = /chapter\s(\d+)/i
-	var chapterMatch = chapterAndPages.match(chapterPattern);
-	if (chapterMatch){
-		//get match within first group
-		var chapterNumber = chapterMatch[1];
-		item.notes.push({note:"Chapter: "+chapterNumber});
-	}
+	// Exact filter on the PII.
+	let url = 'https://api.crossref.org/works?rows=20&select=DOI,alternative-id'
+		+ '&filter=alternative-id:' + encodeURIComponent(pii);
+	let json = await crossrefListRequest(url);
+	let items = (json && json.message && json.message.items) || [];
+	let hit = items.find(i => (i['alternative-id'] || []).some(a => a.toUpperCase() == pii));
+	return hit ? ZU.cleanDOI(hit.DOI) : null;
+}
 
+// Elsevier chapter DOIs are the PII with punctuation inserted (Crossref
+// stores them lowercase):
+// 10.1016/b978-0-323-47674-4.00029-3  <->  B9780323476744000293
+function doiMatchesBookPII(doi, pii) {
+	return doi.replace(/^10\.1016\//i, '').replace(/[-.]/g, '').toUpperCase() == pii.toUpperCase();
+}
 
-	//ISBN metadata
-	var isbn = ZU.xpath(doc, "//button/@data-metadata-isbn");
-	if (isbn){
-		var isbnNo = isbn[0].value;
-		item.ISBN = isbn;
+// ISBN -> array of chapter DOIs, reused across chapters in one run
+const bookDOICache = {};
+
+async function getBookDOIs(isbn) {
+	if (!bookDOICache[isbn]) {
+		// Chapter records carry ISBN but not alternative-id. rows=1000 (the
+		// API maximum) is a ceiling so a whole book comes back in one request
+		// (the default is 20); select=DOI keeps the response small.
+		let json = await crossrefListRequest(
+			'https://api.crossref.org/works?rows=1000&select=DOI&filter=isbn:' + isbn);
+		let msg = (json && json.message) || {};
+		let items = msg.items || [];
+		Z.debug('Clinical Key: Crossref returned ' + items.length + ' of '
+			+ msg['total-results'] + ' records for ISBN ' + isbn);
+		bookDOICache[isbn] = items.map(i => i.DOI).filter(Boolean);
 	}
-	//edition metadata
-	var edition = ZU.xpathText(doc, '//*[@data-once-text="XocsCtrl.edition"]').split(/edition/i)[0].trim();
-	//convert to number for correct zotero citation handling
-	item.edition = textToNumber(edition);
+	return bookDOICache[isbn];
+}
 
-	//publisher metadata
-	var datePub = ZU.xpathText(doc, '//*[@data-once-text="XocsCtrl.copyright"]');
-	var datePattern = /\d{4}/g;
-	var dateMatch = datePub.match(datePattern);
-	if (dateMatch){
-		item.date = dateMatch[0];
-	}
+async function findBookChapterDOI(pii) {
+	let dois = await getBookDOIs(pii.slice(1, 14));
+	let doi = dois.find(d => doiMatchesBookPII(d, pii));
+	return doi ? ZU.cleanDOI(doi) : null;
+}
 
-	if (datePub.indexOf("imprint") != -1){
-		var imprintPattern = /by\s(.*),.*imprint\sof\s(.*)\sInc/i;
-		var imprintMatch = datePub.match(imprintPattern);
-		if (imprintMatch){
-			//expected number of matches
-			if (imprintMatch.length == 3){
-				item.publisher = imprintMatch[2]+"/"+imprintMatch[1];
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.clinicalkey.com/#!/browse/book/3-s2.0-C20150054004",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.clinicalkey.com/#!/content/journal/1-s2.0-S014067361261719X",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Age-specific and sex-specific mortality in 187 countries, 1970–2010: a systematic analysis for the Global Burden of Disease Study 2010",
+				"creators": [
+					{
+						"creatorType": "author",
+						"firstName": "Haidong",
+						"lastName": "Wang"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Laura",
+						"lastName": "Dwyer-Lindgren"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Katherine T",
+						"lastName": "Lofgren"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Julie Knoll",
+						"lastName": "Rajaratnam"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Jacob R",
+						"lastName": "Marcus"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Alison",
+						"lastName": "Levin-Rector"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Carly E",
+						"lastName": "Levitz"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Alan D",
+						"lastName": "Lopez"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Christopher Jl",
+						"lastName": "Murray"
+					}
+				],
+				"date": "12/2012",
+				"DOI": "10.1016/S0140-6736(12)61719-X",
+				"ISSN": "01406736",
+				"issue": "9859",
+				"journalAbbreviation": "The Lancet",
+				"language": "en",
+				"libraryCatalog": "ClinicalKey",
+				"pages": "2071-2094",
+				"publicationTitle": "The Lancet",
+				"rights": "https://www.elsevier.com/tdm/userlicense/1.0/",
+				"shortTitle": "Age-specific and sex-specific mortality in 187 countries, 1970–2010",
+				"url": "https://www.clinicalkey.com/#!/content/journal/1-s2.0-S014067361261719X",
+				"volume": "380",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
-			//added for robustness
-			else {
-				var imprintPublisher=imprintMatch[0].replace("by","").trim();
-				item.publisher=imprintPublisher;
-			}
-		}
+		]
 	}
-	else {
-		var publisherPattern = /by\s(.*?)(,)?\s/;
-		var publisherMatch = datePub.match(publisherPattern);
-		if (publisherMatch){
-			//get first matched group, between by and , or whitespace
-			item.publisher=publisherMatch[1];
-		}
-	}
-	if (datePub.match(/elsevier/i)){
-		item.place = "Philadelphia, PA";
-	}
-
-	return item;
-}
-
-//Converts ordinal text to number
-//Only converting up to 31
-//E.g., text=first -> 1
-//E.g., Twenty-Second -> 22
-function textToNumber(text){
-	var textarr = [
-		"first",
-		"second",
-		"third",
-		"fourth",
-		"fifth",
-		"sixth",
-		"seventh",
-		"eighth",
-		"ninth",
-		"tenth",
-		"eleventh",
-		"twelfth",
-		"thirteenth",
-		"fourteenth",
-		"fifteenth",
-		"sixteenth",
-		"seventeenth",
-		"eighteenth",
-		"nineteenth",
-		"twentieth",
-		"twenty-first",
-		"twenty-second",
-		"twenty-third",
-		"twenty-fourth",
-		"twenty-fifth",
-		"twenty-sixth",
-		"twenty-seventh",
-		"twenty-eighth",
-		"twenty-ninth",
-		"thirtieth",
-		"thirty-first"
-	];
-	var number = textarr.indexOf(text.toLowerCase());
-	//shift from 0 to 1 based indexing
-	return (number != -1)? number + 1 : text;
-}
+]
+/** END TEST CASES **/
