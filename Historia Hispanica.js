@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-19 20:04:51"
+	"lastUpdated": "2026-11-19 20:18:45"
 }
 
 /*
@@ -60,7 +60,7 @@ function scrape(doc, url) {
 	item.encyclopediaTitle = "Historia Hispánica";
 	item.publisher = "Real Academia de la Historia";
 	item.place = "Madrid";
-	item.language = doc.documentElement.getAttribute('lang') || "es";
+	item.language = "es";
 	item.url = url;
 
 	var summaryEl = doc.querySelector('header.bd-header p.small');
@@ -112,7 +112,7 @@ var testCases = [
 				"abstractNote": "Aventín Llanas, José María. Santaliestra (Huesca), 20.IX.1898 – Madrid, 19.VIII.1984. Escultor.",
 				"encyclopediaTitle": "Historia Hispánica",
 				"language": "es",
-				"libraryCatalog": "RAH",
+				"libraryCatalog": "Historia Hispánica",
 				"place": "Madrid",
 				"publisher": "Real Academia de la Historia",
 				"url": "https://historia-hispanica.rah.es/biografias/5034-jose-maria-aventin-llanas",
