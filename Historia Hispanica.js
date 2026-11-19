@@ -63,11 +63,6 @@ function scrape(doc, url) {
 	item.language = "es";
 	item.url = url;
 
-	var summaryEl = doc.querySelector('header.bd-header p.small');
-	if (summaryEl) {
-		item.abstractNote = ZU.trimInternal(summaryEl.textContent);
-	}
-
 	var authorNodes = doc.querySelectorAll('#authorSubsection li.authors');
 	for (var node of authorNodes) {
 		var authorName = ZU.trimInternal(node.textContent);
@@ -109,7 +104,6 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"abstractNote": "Aventín Llanas, José María. Santaliestra (Huesca), 20.IX.1898 – Madrid, 19.VIII.1984. Escultor.",
 				"encyclopediaTitle": "Historia Hispánica",
 				"language": "es",
 				"libraryCatalog": "Historia Hispánica",
