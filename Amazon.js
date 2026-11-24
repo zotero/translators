@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-03-20 15:38:12"
+	"lastUpdated": "2026-11-24 17:17:31"
 }
 
 function detectWeb(doc, _url) {
@@ -204,7 +204,7 @@ function scrape(doc, url) {
 		ZU.xpathText(title, '(.//text()[normalize-space(self::text())])[1]')
 	)
 		// though sometimes [Paperback] or [DVD] is mushed with the title...
-		.replace(/(?: [([].+[)\]])+$/, "");
+		.replace(/(?: (?:\((?:[^()]|\([^()]*\))+\)|\[(?:[^[\]]|\[[^[\]]*\])+\]))+$/, "");
 	
 	var baseNode = title.parentElement, bncl;
 	//	Z.debug(baseNode)
