@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2026-09-01 18:46:48"
+	"lastUpdated": "2026-11-24 17:17:31"
 }
 
 /*
@@ -386,7 +386,7 @@ function stripAuthor(str) {
 		// Remove year
 		.replace(/\s*,?\s*\(?\d{4}-?(\d{4}|\.{3})?\)?/g, '')
 		// Remove creator type like (illustrator)
-		.replace(/(\s*,?\s*[[(][^()]*[\])])+$/, '')
+		.replace(/(\s*(?:,\s*)?[[(](?:[^()[\]]|\[[^()[\]]*\])*[\])])+$/, '')
 		// The full "continuous" name uses no separators, which need be removed
 		// cf. "Luc, Jean André : de (1727-1817)"
 		.replace(/\s*:\s+/, " ")
@@ -444,7 +444,7 @@ function extractNumPages(str) {
 	// f., p., and S. are "pages" in various languages
 	// For multi-volume works, we expect formats like:
 	//   x-109 p., 510 p. and X, 106 S.; 123 S.
-	var numPagesRE = /\[?\b((?:[ivxlcdm\d]+[ \-,]*)+)\]?\s+[fps]\b/ig;
+	var numPagesRE = /\[?\b([ivxlcdm\d]+(?:[ \-,]+[ivxlcdm\d]+)*(?:[ \-,]*[-,])?)(?: *\])?\s+[fps]\b/ig;
 	var numPages = [];
 	let m = numPagesRE.exec(str);
 	if (m) {
