@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-29 19:26:28"
+	"lastUpdated": "2026-11-25 15:49:04"
 }
 
 /**
@@ -40,6 +40,12 @@ function detectWeb(doc, url) {
 		}
 	}
 	
+	// When logged in, code view pages have no og: tags
+	if (attr(doc, 'meta[name="react-app-name"]', 'content') == 'code-view'
+			&& getRepoPath(doc)) {
+		return "computerProgram";
+	}
+	
 	if (!doc.querySelector('meta[property="og:type"][content="object"]')) {
 		// exclude the home page and marketing pages
 		return false;
@@ -57,6 +63,11 @@ function detectWeb(doc, url) {
 	}
 	
 	return "computerProgram";
+}
+
+
+function getRepoPath(doc) {
+	return attr(doc, 'meta[name="octolytics-dimension-repository_nwo"]', 'content');
 }
 
 
@@ -100,7 +111,13 @@ function scrape(doc, url) {
 	
 	// basic metadata from the meta tags in the head
 	item.url = attr(doc, 'meta[property="og:url"]', 'content');
-	if (url.includes('/blob/') && !item.url.includes('/blob/')) {
+	if (!item.url) {
+		// Logged-in code view pages have no og: tags
+		item.url = url.includes('/blob/')
+			? url.replace(/[?#].*/, '')
+			: 'https://github.com/' + getRepoPath(doc);
+	}
+	else if (url.includes('/blob/') && !item.url.includes('/blob/')) {
 		// github is doing something weird with the og:url meta tag right now -
 		// it always points to the repo root (e.g. zotero/translators), even
 		// when we're in a specific directory/file (e.g. zotero/translators/
@@ -143,6 +160,9 @@ function scrape(doc, url) {
 			item.rights = json.license.spdx_id;
 		}
 		item.abstractNote = json.description;
+		if (!item.tags.length && json.topics) {
+			item.tags = json.topics;
+		}
 
 		ZU.doGet(`/${item.title}/hovercards/citation`, function (respText, xhr) {
 			if (xhr.status == 200) {
