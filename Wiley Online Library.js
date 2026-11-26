@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-06-11 15:32:23"
+	"lastUpdated": "2026-11-26 04:17:42"
 }
 
 /*
@@ -267,7 +267,10 @@ function scrapeBibTeX(doc, url) {
 			}
 
 			if (!item.date) {
-				item.date = ZU.xpathText(doc, '//meta[@name="citation_publication_date"]/@content');
+				item.date = ZU.xpathText(doc, '//meta[@name="citation_publication_date"]/@content')
+					// Early View articles have no issue yet: their BibTeX has no year
+					// and the page exposes only citation_online_date
+					|| ZU.xpathText(doc, '//meta[@name="citation_online_date"]/@content');
 			}
 			// date in the cochraine library RIS is wrong
 			if (ZU.xpathText(doc, '//meta[@name="citation_book_title"]/@content') == "The Cochrane Library") {
@@ -330,6 +333,13 @@ function scrapeBibTeX(doc, url) {
 			item.rights = ZU.xpathText(doc,
 				'//p[@class="copyright" or @id="copyright"]');
 			
+			// Early View BibTeX fills volume and number with "n/a"
+			for (let field of ['volume', 'issue']) {
+				if (item[field] && item[field].trim().toLowerCase() == 'n/a') {
+					delete item[field];
+				}
+			}
+
 			// try to detect invalid data in pages (e.g. "inside_front_cover")
 			if (item.pages && /[a-zA-Z]_[a-zA-Z]/.test(item.pages)) {
 				delete item.pages;
