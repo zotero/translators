@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-09-08 16:15:27"
+	"lastUpdated": "2026-11-26 10:59:27"
 }
 
 /*
@@ -328,8 +328,8 @@ async function doWeb(doc, url) {
 		}
 	}
 	else {
-		let id = url.match(/(?:pdf|abs|html)\/([^?#]+)(?:\.pdf)?/)[1];
-		let versionMatch = url.match(/v(\d+)(\.pdf)?([?#].+)?$/);
+		let id = url.match(/(?:pdf|abs|html)\/((?:\d{4}\.\d{4,5}|[a-z-]+(?:\.[a-z-]+)?\/\d{7})(?:v\d+)?|[^?#]+?)(?:\.pdf|\/[^?#]*)?(?:[?#]|$)/i)[1];
+		let versionMatch = id.match(/v(\d+)$/);
 		if (versionMatch) {
 			version = versionMatch[1];
 		}
