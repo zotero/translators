@@ -99,10 +99,11 @@ function getBookProps(doc) {
 }
 
 // Bookshelf accession (NBK...) from the URL, but only when the page itself
-// has no Bookshelf content, e.g. because NCBI served a bot check instead
+// has no Bookshelf content, e.g. because NCBI served a bot check instead.
+// Handles /books/NBK1234/ and /books/n/<book>/NBK1234/
 function getBookshelfIDFromURL(doc, url) {
 	if (doc.getElementById('maincontent')) return false;
-	var m = url.match(/\/books\/(NBK\d+)/);
+	var m = url.match(/\/books\/(?:n\/[^/]+\/)?(NBK\d+)/);
 	return m ? m[1] : false;
 }
 
