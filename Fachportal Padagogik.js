@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-10-14 07:01:47"
+	"lastUpdated": "2026-11-26 03:34:59"
 }
 
 /*
@@ -54,6 +54,7 @@ function detectWeb(doc, url) {
 		//we don't have a test case here; test manually
 		return "multiple";
 	}
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -74,18 +75,18 @@ function getSearchResults(doc, checkOnly) {
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+		return Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
-			var articles = new Array();
+			var articles = [];
 			for (var i in items) {
 				articles.push(i);
 			}
 			ZU.processDocuments(articles, scrape);
 		});
 	} else {
-		scrape(doc, url);
+		return scrape(doc, url);
 	}
 }
 
@@ -94,7 +95,7 @@ function scrape(doc, url) {
 	if (m) {
 		//e.g. http://www.fachportal-paedagogik.de/literatur/fis_ausgabe.html?FId%5B%5D=1041537&lart=BibTeX&senden=Exportieren&senden_an=
 		var bibUrl = "/literatur/fis_ausgabe.html?FId[]=" + m[1] + "&lart=BibTeX";
-		ZU.doGet(bibUrl, function(text){
+		return ZU.doGet(bibUrl, function(text){
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");//BibTex translator
 			translator.setString(text);
@@ -104,33 +105,115 @@ function scrape(doc, url) {
 			translator.translate();
 		});
 	} else {
-		var pdfUrl = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
-		//Z.debug(pdfUrl);
-		
-		var coins = ZU.xpathText(doc, '//span[@class="Z3988"]/@title');
-		if (coins) {
-			coins = transcodeURIEncoding(coins, 'Windows-1252');
-			if (coins.indexOf('rft.genre=article') > -1
-				|| coins.indexOf('rft.genre=bookitem') > -1) {
-				coins = coins.replace('rft.title', 'rft.atitle');
+		let pedocsId = url.match(/[?&]source_opus=(\d+)/);
+		if (pedocsId) return scrapePedocs(doc, pedocsId[1]);
+		return scrapeCOinS(doc);
+	}
+}
+
+async function scrapePedocs(doc, id) {
+	let completed = false;
+	try {
+		// The direct EndNote export contains publication details missing from COinS.
+		let text = await requestText('/lucene_ergebnis.php', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+			body: `listeneintrag%5B%5D=${id}&la=de&exportart=endnote_direkt`
+		});
+		if (!/^%0 /m.test(text)) throw new Error('Invalid pedocs export');
+
+		let doi = text.match(/^%R DOI:\s*(.+)$/m)?.[1];
+		let issns = [];
+		// Refer/BibIX treats %R as type and %@ as ISBN, but pedocs also puts
+		// identifiers and ISSNs in those fields.
+		text = text.replace(/^%R (?:DOI|URN):[^\r\n]*\r?\n/gm, '');
+		text = text.replace(/^%@ ([^\r\n]+)\r?\n/gm, (line, value) => {
+			let issn = ZU.cleanISSN(value);
+			if (!issn) return line;
+			issns.push(issn);
+			return '';
+		});
+
+		let translator = Zotero.loadTranslator('import');
+		translator.setTranslator('881f60f2-0802-411a-9228-ce5f47b64c7d'); // Refer/BibIX
+		translator.setString(text);
+		translator.setHandler('itemDone', (_obj, item) => {
+			if (item.abstractNote) item.abstractNote = ZU.unescapeHTML(item.abstractNote);
+			let coinsItem = parseCOinS(doc);
+			if (coinsItem) {
+				for (let field of [
+					'pages',
+					'numPages',
+					'date',
+					'publicationTitle',
+					'bookTitle',
+					'volume',
+					'issue',
+					'publisher',
+					'place',
+					'ISSN',
+					'ISBN',
+					'abstractNote',
+					'language'
+				]) {
+					if (!item[field] && coinsItem[field]) item[field] = coinsItem[field];
+				}
+				if (!item.creators.length) item.creators = coinsItem.creators;
+				if (!item.tags.length) item.tags = coinsItem.tags;
 			}
-			var item = new Zotero.Item();
-			ZU.parseContextObject(coins, item);
-			
-			if (item.abstractNote) {
-				item.abstractNote = ZU.unescapeHTML(item.abstractNote);
+			if (doi) {
+				doi = ZU.cleanDOI(doi);
+				if (doi && ZU.fieldIsValidForType('DOI', item.itemType)) {
+					item.DOI = doi;
+				} else if (doi) {
+					item.extra = (item.extra ? item.extra + '\n' : '') + `DOI: ${doi}`;
+				}
 			}
-			
+			if (issns.length && item.itemType == 'journalArticle') item.ISSN = issns.join(', ');
+			if (item.itemType == 'book' && item.pages) {
+				item.numPages = item.pages;
+				delete item.pages;
+			}
+			let pdfUrl = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
 			if (pdfUrl) {
-				item.attachments.push({
-					url: pdfUrl,
-					title: "Full Text PDF",
-					mimeType: "application/pdf"
-				});
+				item.attachments.push({ url: pdfUrl, title: 'Full Text PDF', mimeType: 'application/pdf' });
 			}
 			finalize(doc, item);
-		}
+			completed = true;
+		});
+		await translator.translate();
+		if (!completed) throw new Error('No item in pedocs export');
 	}
+	catch (e) {
+		Z.debug(`Could not import pedocs export: ${e}`);
+		if (!completed) scrapeCOinS(doc);
+	}
+}
+
+function scrapeCOinS(doc) {
+	var pdfUrl = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
+	var item = parseCOinS(doc);
+	if (!item) return;
+	if (pdfUrl) {
+		item.attachments.push({ url: pdfUrl, title: 'Full Text PDF', mimeType: 'application/pdf' });
+	}
+	finalize(doc, item);
+}
+
+function parseCOinS(doc) {
+	var coins = ZU.xpathText(doc, '//span[@class="Z3988"]/@title');
+	if (coins) {
+		coins = transcodeURIEncoding(coins, 'Windows-1252');
+		if (coins.indexOf('rft.genre=article') > -1
+			|| coins.indexOf('rft.genre=bookitem') > -1) {
+			coins = coins.replace('rft.title', 'rft.atitle');
+		}
+		var item = new Zotero.Item();
+		ZU.parseContextObject(coins, item);
+		if (item.abstractNote) item.abstractNote = ZU.unescapeHTML(item.abstractNote);
+		return item;
+	}
+	return false;
 }
 
 function finalize(doc, item) {
@@ -158,7 +241,7 @@ function finalize(doc, item) {
 
 /**
  * Credit for this function: Aurimas Vinckevicius
- * 
+ *
  * Transcodes non-UTF-8-encoded text that was passed through encodeURIComponent
  * (which assumed that it was UTF-8) into the UTF-8 equivalent. This makes decodeURIComponent
  * correctly decode the encoded text into UTF-8.
@@ -171,7 +254,7 @@ function finalize(doc, item) {
  * @param {String} fromEncoding String specifying source encoding. Only "Windows-1252" is
  *     currently supported.
  * @return {String} Transcoded string. Unaltered string is returned if the encoding is not recognized.
- * 
+ *
  * Examples:
  * transcodeURIEncoding("%C2%82", "Windows-1252") => "%E2%80%9A"
  * transcodeURIEncoding("%26%238208%3B", "Windows-1252") => "%26%238208%3B"
@@ -219,7 +302,7 @@ function transcodeURIEncoding(s, fromEncoding) {
 	if (!map) return s;
 
 	// Match two-byte UTF-8 patterns from 0x80 (%C2%80) to 0xFF (%C3%BF) code point, since
-	// that would cover all 8-bit encodings. Note that in UTF-8 the two bytes are always in the 
+	// that would cover all 8-bit encodings. Note that in UTF-8 the two bytes are always in the
 	// 0b110xxxxx 0b10xxxxxx format, so the second byte is limited to [89AB][0-9A-F] hex codes
 	return s.replace(/%C[23]%[89AB][0-9A-F]/g, function(m) {
 		var codePoint = decodeURIComponent(m).codePointAt(0);
@@ -534,9 +617,11 @@ var testCases = [
 					}
 				],
 				"date": "1989",
+				"DOI": "10.25656/01:2746",
 				"ISSN": "0032-7034",
+				"archiveLocation": "DIPF | Leibniz-Institut für Bildungsforschung und Bildungsinformation",
 				"issue": "10",
-				"language": "Deutsch",
+				"language": "deutsch",
 				"libraryCatalog": "Fachportal Pädagogik",
 				"pages": "379",
 				"publicationTitle": "Praxis der Kinderpsychologie und Kinderpsychiatrie",
@@ -555,25 +640,16 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Rezension"
-					},
-					{
-						"tag": "Lerndefizit"
-					},
-					{
-						"tag": "Lernschwierigkeit"
-					},
-					{
-						"tag": "Lernschwäche"
-					},
-					{
-						"tag": "Klassifikationssystem"
-					},
-					{
 						"tag": "Book review"
 					},
 					{
-						"tag": "Review"
+						"tag": "Classification"
+					},
+					{
+						"tag": "Classification system"
+					},
+					{
+						"tag": "Klassifikationssystem"
 					},
 					{
 						"tag": "Learning Difficulties"
@@ -585,10 +661,19 @@ var testCases = [
 						"tag": "Learning disorder"
 					},
 					{
-						"tag": "Classification"
+						"tag": "Lerndefizit"
 					},
 					{
-						"tag": "Classification system"
+						"tag": "Lernschwierigkeit"
+					},
+					{
+						"tag": "Lernschwäche"
+					},
+					{
+						"tag": "Review"
+					},
+					{
+						"tag": "Rezension"
 					}
 				],
 				"notes": [],
@@ -616,13 +701,17 @@ var testCases = [
 					}
 				],
 				"date": "2011",
-				"abstractNote": "Ziel der diskursanalytischen Betrachtung von politischen Dokumenten (hierzu gehören: Pläne, Programme und Berichte in bildungs‐ und kindheitsrelevanten Politikfeldern) und des darin auftretenden Diskurses zum Thema gute Kindheit und Bildung ist es, sie daraufhin zu untersuchen, welche Vorstellungen/Wissensbestände von ‚guter Kindheit‘ (und damit verbunden richtiger Erziehung und Bildung, guter Elternschaft, guter pädagogischer Arbeit in Bildungsinstitutionen) transportiert werden. Das Projekt beabsichtigt daher, die politisch hervorgebrachten Leitbilder einer frühen und öffentlich verantworteten ‚Bildungskindheit‘ (vgl. Betz 2010) und ihre Konnotationen zu rekonstruieren. Ein Ausgangspunkt ist, dass die in den Dokumenten erzeugten Annahmen, Strategien und Maßnahmen einen weitreichenden Einfluss auf bildungspolitische Veränderungen und die Ausgestaltung der öffentlich verantworteten (Früh‐) Erziehung/Bildung haben, also soziale Prozesse aktiv mitgestalten, wie dies beispielhaft an der Implementierung der Bildungs‐ und Erziehungspläne oder der Initiierung von Elternbildungsprogrammen veranschaulicht werden kann (siehe auch Kapitel 4.3.2)). Weiter wird davon ausgegangen, dass diese wirkmächtigen Annahmen auch Einfluss auf die Strukturierung der Vorstellungen, Haltungen und Praktiken der sozialen Akteure haben, was es empirisch einzufangen gilt. Der Frage, ob und in welcher Art und Weise dies der Fall ist, inwieweit hier die sozial situierten im Sinne von milieuspezifisch unterschiedlich geprägten Vorstellungen ‚guter Kindheit‘ mit den Vorstellungen in politischen Berichten korrespondieren und welche Bedeutung dies wiederum für die Reproduktion von Bildungsungleichheiten hat, soll [hier] explorativ nachgegangen werden. (DIPF/Orig.)",
-				"language": "Deutsch",
+				"abstractNote": "Ziel der diskursanalytischen Betrachtung von politischen Dokumenten (hierzu gehören: Pläne, Programme und Berichte in bildungs‐ und kindheitsrelevanten Politikfeldern) und des darin auftretenden Diskurses zum Thema gute Kindheit und Bildung ist es, sie daraufhin zu untersuchen, welche Vorstellungen/Wissensbestände von ‚guter Kindheit‘ (und damit verbunden richtiger  Erziehung und Bildung, guter Elternschaft, guter pädagogischer Arbeit in Bildungsinstitutionen) transportiert werden. Das Projekt beabsichtigt daher, die politisch hervorgebrachten Leitbilder einer frühen und öffentlich verantworteten ‚Bildungskindheit‘ (vgl. Betz 2010) und ihre Konnotationen zu rekonstruieren. Ein Ausgangspunkt ist, dass die in den Dokumenten erzeugten Annahmen, Strategien und Maßnahmen einen weitreichenden Einfluss auf bildungspolitische Veränderungen und die Ausgestaltung der öffentlich verantworteten (Früh‐) Erziehung/Bildung haben, also soziale Prozesse aktiv mitgestalten, wie dies beispielhaft an der Implementierung der Bildungs‐ und Erziehungspläne oder der Initiierung von Elternbildungsprogrammen veranschaulicht werden kann (siehe auch Kapitel 4.3.2)). Weiter wird davon ausgegangen, dass diese wirkmächtigen Annahmen auch Einfluss auf die Strukturierung der Vorstellungen, Haltungen und Praktiken der sozialen Akteure haben, was es empirisch einzufangen gilt. Der Frage, ob und in welcher Art und Weise dies der Fall ist, inwieweit hier die sozial situierten im Sinne von milieuspezifisch unterschiedlich geprägten Vorstellungen ‚guter Kindheit‘ mit den Vorstellungen in politischen Berichten korrespondieren und welche Bedeutung dies wiederum für die Reproduktion von Bildungsungleichheiten hat, soll [hier] explorativ nachgegangen werden. (DIPF/Orig.)",
+				"archiveLocation": "DIPF | Leibniz-Institut für Bildungsforschung und Bildungsinformation",
+				"extra": "DOI: 10.25656/01:11837",
+				"language": "deutsch",
 				"libraryCatalog": "Fachportal Pädagogik",
 				"numPages": "49",
 				"place": "Frankfurt",
-				"publisher": "pedocs",
+				"publisher": "Goethe-Universität",
+				"series": "Educare Working Paper",
 				"url": "http://nbn-resolving.de/urn:nbn:de:0111-pedocs-118379",
+				"volume": "1/2011",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -635,67 +724,67 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Empirische Untersuchung"
-					},
-					{
-						"tag": "Methode"
-					},
-					{
-						"tag": "Leitbild"
-					},
-					{
 						"tag": "Beispiel"
-					},
-					{
-						"tag": "Diskursanalyse"
-					},
-					{
-						"tag": "Textanalyse"
-					},
-					{
-						"tag": "Politik"
-					},
-					{
-						"tag": "Forschungsstand"
-					},
-					{
-						"tag": "Diskurs"
-					},
-					{
-						"tag": "Kindheitsbild"
-					},
-					{
-						"tag": "Theorie"
-					},
-					{
-						"tag": "Zwischenbericht"
-					},
-					{
-						"tag": "Empirical study"
-					},
-					{
-						"tag": "Method"
-					},
-					{
-						"tag": "Ideal (model)"
-					},
-					{
-						"tag": "Discourse Analysis"
-					},
-					{
-						"tag": "Text analysis"
-					},
-					{
-						"tag": "Textual analysis"
-					},
-					{
-						"tag": "Politics"
 					},
 					{
 						"tag": "Discourse"
 					},
 					{
+						"tag": "Discourse Analysis"
+					},
+					{
+						"tag": "Diskurs"
+					},
+					{
+						"tag": "Diskursanalyse"
+					},
+					{
+						"tag": "Empirical study"
+					},
+					{
+						"tag": "Empirische Untersuchung"
+					},
+					{
+						"tag": "Forschungsstand"
+					},
+					{
+						"tag": "Ideal (model)"
+					},
+					{
+						"tag": "Kindheitsbild"
+					},
+					{
+						"tag": "Leitbild"
+					},
+					{
+						"tag": "Method"
+					},
+					{
+						"tag": "Methode"
+					},
+					{
+						"tag": "Politics"
+					},
+					{
+						"tag": "Politik"
+					},
+					{
+						"tag": "Text analysis"
+					},
+					{
+						"tag": "Textanalyse"
+					},
+					{
+						"tag": "Textual analysis"
+					},
+					{
+						"tag": "Theorie"
+					},
+					{
 						"tag": "Theory"
+					},
+					{
+						"tag": "Zwischenbericht"
 					}
 				],
 				"notes": [],
@@ -717,11 +806,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "1998",
 				"abstractNote": "Berufliche Bildung hat einen anderen Bezugspunkt zur Gesellschaft als das allgemeine Bildungswesen. Im folgenden Beitrag werden ausgehend von der Smith'schen Analyse der Wirtschaft und Gesellschaft Perspektiven ökonomischer und pädagogischer Theoriebildung auf Bildung und berufliches Lernen nachgezeichnet. Es zeigt sich, daß von Elementar- bzw. Volksschulbildung zu unterscheidende berufliche Bildung in ihrer Spezifität von seiten der Ökonomen nach Adam Smith kaum die gebührende Beachtung fand und andererseits auch von Pädagogenseite das berufliche Lernen nur wenig gesellschaftlich kontextualisiert wurde. Der Auseinandersetzung mit den Smith'schen Thesen zur beruflichen Bildung ist es jedoch u. a. auch zu verdanken, daß sich konzeptionell eine modernisierte Berufslehre im deutschsprachigen Raum etablierte. (DIPF/Orig.)",
-				"language": "Deutsch",
+				"archiveLocation": "DIPF | Leibniz-Institut für Bildungsforschung und Bildungsinformation",
+				"bookTitle": "Bildung, Öffentlichkeit und Demokratie",
+				"extra": "DOI: 10.25656/01:9491",
+				"language": "deutsch",
 				"libraryCatalog": "Fachportal Pädagogik",
-				"publisher": "pedocs",
+				"pages": "251-266",
+				"place": "Weinheim u.a.",
+				"publisher": "Beltz",
+				"series": "Zeitschrift für Pädagogik, Beiheft",
 				"url": "http://nbn-resolving.de/urn:nbn:de:0111-pedocs-94912",
+				"volume": "38",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -734,16 +831,13 @@ var testCases = [
 				],
 				"tags": [
 					{
+						"tag": "Berufsausbildung"
+					},
+					{
+						"tag": "Berufsbildung"
+					},
+					{
 						"tag": "Bildung"
-					},
-					{
-						"tag": "Gesellschaft"
-					},
-					{
-						"tag": "Soziale Lage"
-					},
-					{
-						"tag": "Bildungswesen"
 					},
 					{
 						"tag": "Bildungspolitik"
@@ -752,43 +846,28 @@ var testCases = [
 						"tag": "Bildungsreform"
 					},
 					{
+						"tag": "Bildungswesen"
+					},
+					{
 						"tag": "Bildungsökonomie"
-					},
-					{
-						"tag": "Lernen"
-					},
-					{
-						"tag": "Freiheit"
-					},
-					{
-						"tag": "Öffentlichkeit"
-					},
-					{
-						"tag": "Wirtschaft"
-					},
-					{
-						"tag": "Berufsausbildung"
-					},
-					{
-						"tag": "Berufsbildung"
-					},
-					{
-						"tag": "Reform"
-					},
-					{
-						"tag": "Theorie"
 					},
 					{
 						"tag": "Deutschland"
 					},
 					{
+						"tag": "Economics of education"
+					},
+					{
+						"tag": "Economy"
+					},
+					{
 						"tag": "Education"
 					},
 					{
-						"tag": "Society"
+						"tag": "Education system"
 					},
 					{
-						"tag": "Education system"
+						"tag": "Educational Economics"
 					},
 					{
 						"tag": "Educational policy"
@@ -797,22 +876,43 @@ var testCases = [
 						"tag": "Educational reform"
 					},
 					{
-						"tag": "Economics of education"
+						"tag": "Freedom"
 					},
 					{
-						"tag": "Educational Economics"
+						"tag": "Freiheit"
+					},
+					{
+						"tag": "Germany"
+					},
+					{
+						"tag": "Gesellschaft"
 					},
 					{
 						"tag": "Learning"
 					},
 					{
-						"tag": "Freedom"
+						"tag": "Lernen"
+					},
+					{
+						"tag": "Reform"
+					},
+					{
+						"tag": "Society"
+					},
+					{
+						"tag": "Soziale Lage"
 					},
 					{
 						"tag": "The public"
 					},
 					{
-						"tag": "Economy"
+						"tag": "Theorie"
+					},
+					{
+						"tag": "Theory"
+					},
+					{
+						"tag": "Vocational Education"
 					},
 					{
 						"tag": "Vocational education and training"
@@ -821,13 +921,96 @@ var testCases = [
 						"tag": "Vocational training"
 					},
 					{
-						"tag": "Vocational Education"
+						"tag": "Wirtschaft"
 					},
 					{
-						"tag": "Theory"
+						"tag": "Öffentlichkeit"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.pedocs.de/frontdoor.php?source_opus=7914",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Bildung und Demokratie",
+				"creators": [
+					{
+						"firstName": "Dietrich",
+						"lastName": "Benner",
+						"creatorType": "author"
+					}
+				],
+				"date": "2001",
+				"abstractNote": "Der Autor geht von einer Äußerung P. Wandels aus, der auf die \"historische Tatsache\" hinweist, \"dass es bisher kein Schulsystem ... gab und gibt, das nicht in seinem Erziehungsziel und in seinem ganzen Charakter auf den jeweiligen Staat, auf die jeweils herrschenden gesellschaftlichen Verhältnisse eingestellt gewesen wäre. Das kann nicht anders sein.\" Dagegen vertritt und begründet der Autor seine These, dass dies für eine freiheitliche Demokratie nicht gelten kann: \"Diese ist unter den bekannten Staatsformen die einzige, die sich ihren eigenen Grundsätzen zufolge ein Verbot auferlegen muss, die Lebensformen der Menschen zu normieren und Pädagogik durch die Setzung von Erziehungszielen und Bildungsidealen als einen angewandten Teil der Politik zu konzipieren.\" Es werden 4 klassische Positionen über das Verhältnis (Primat oder Dualität) von Politik und Pädagogik diskutiert. (DIPF/Bi.)",
+				"archiveLocation": "DIPF | Leibniz-Institut für Bildungsforschung und Bildungsinformation",
+				"bookTitle": "Zukunftsfragen der Bildung",
+				"extra": "DOI: 10.25656/01:7914",
+				"language": "deutsch",
+				"libraryCatalog": "Fachportal Pädagogik",
+				"pages": "49-65",
+				"place": "Weinheim",
+				"publisher": "Beltz",
+				"series": "Zeitschrift für Pädagogik, Beiheft",
+				"url": "http://nbn-resolving.de/urn:nbn:de:0111-opus-79142",
+				"volume": "43",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					},
 					{
-						"tag": "Germany"
+						"title": "Entry in the German Education Index",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					{
+						"tag": "Aims of education"
+					},
+					{
+						"tag": "Democracy"
+					},
+					{
+						"tag": "Demokratie"
+					},
+					{
+						"tag": "Education"
+					},
+					{
+						"tag": "Erziehung"
+					},
+					{
+						"tag": "Erziehungsziel"
+					},
+					{
+						"tag": "National state"
+					},
+					{
+						"tag": "Pedagogics"
+					},
+					{
+						"tag": "Politics"
+					},
+					{
+						"tag": "Politik"
+					},
+					{
+						"tag": "Pädagogik"
+					},
+					{
+						"tag": "Sciences of education"
+					},
+					{
+						"tag": "Staat"
+					},
+					{
+						"tag": "State"
 					}
 				],
 				"notes": [],
