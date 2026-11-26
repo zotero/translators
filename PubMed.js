@@ -107,8 +107,13 @@ function getBookshelfIDFromURL(doc, url) {
 }
 
 function lookupBookshelfID(nbk) {
-	var searchURL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?"
-		+ "db=PubMed&tool=Zotero&retmode=json&term=" + nbk + "%5Baid%5D";
+	var params = new URLSearchParams({
+		db: 'PubMed',
+		tool: 'Zotero',
+		retmode: 'json',
+		term: nbk + '[aid]'
+	});
+	var searchURL = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?' + params;
 	ZU.doGet(searchURL, function (text) {
 		var ids = JSON.parse(text).esearchresult.idlist;
 		if (!ids || ids.length != 1) {
