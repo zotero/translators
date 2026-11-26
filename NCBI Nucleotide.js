@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2026-07-22 16:19:17"
+	"lastUpdated": "2026-11-26 12:00:00"
 }
 
 /**
@@ -32,19 +32,29 @@
 
 function detectWeb(doc, url) {
 	// use item type journalArticle until item type dataset is supported in Zotero
-	if (getIds(doc)) return "journalArticle";
+	if (getIds(doc) || getIdFromURL(url)) return "journalArticle";
 
 	// search results
-	if (url.indexOf("/?term=") != -1 && getSearchResults(doc, true)) return "multiple";
+	if (url.includes("/?term=") && getSearchResults(doc, true)) return "multiple";
+	return false;
 }
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		getSelectedJSON(doc);
-	} else {
-		var ids = getIds(doc);
+	}
+	else {
+		var ids = getIds(doc) || getIdFromURL(url);
 		getJSON(ids);
 	}
+}
+
+// Accession or UID from the URL, for when the page has no ncbi_uidlist,
+// e.g. because NCBI served a bot check instead of the record.
+// esummary accepts both accessions and UIDs as id.
+function getIdFromURL(url) {
+	var m = url.match(/\/nuccore\/((?:[A-Z]{1,6}_?)?\d+(?:\.\d+)?)(?:[/?#]|$)/i);
+	return m ? [m[1]] : false;
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -73,8 +83,8 @@ function getSelectedJSON(doc) {
 	var items = getSearchResults(doc);
 	var ids = [];
 
-	Zotero.selectItems(items, function(selectedItems) {
-		if (!selectedItems) return true;
+	Zotero.selectItems(items, function (selectedItems) {
+		if (!selectedItems) return;
 
 		for (var i in selectedItems) {
 			ids.push(i.substr(1));
@@ -84,7 +94,7 @@ function getSelectedJSON(doc) {
 }
 
 function getIds(doc) {
-	var ids = ZU.xpathText(doc, '/html/head/meta[@name="ncbi_uidlist"]/@content')
+	var ids = ZU.xpathText(doc, '/html/head/meta[@name="ncbi_uidlist"]/@content');
 
 	if (!ids) return false;
 
@@ -102,7 +112,8 @@ function parseJSON(text) {
 	try {
 		var obj = JSON.parse(text).result;
 		var uids = obj.uids;
-	} catch (e) {
+	}
+	catch (e) {
 		Z.debug(text.substr(0, 100));
 		throw e;
 	}
