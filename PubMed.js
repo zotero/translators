@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-07 15:45:06"
+	"lastUpdated": "2026-11-26 12:00:00"
 }
 
 /*
@@ -98,6 +98,26 @@ function getBookProps(doc) {
 	return itemprops.length ? itemprops : null;
 }
 
+// Bookshelf accession (NBK...) from the URL, but only when the page itself
+// has no Bookshelf content, e.g. because NCBI served a bot check instead
+function getBookshelfIDFromURL(doc, url) {
+	if (doc.getElementById('maincontent')) return false;
+	var m = url.match(/\/books\/(NBK\d+)/);
+	return m ? m[1] : false;
+}
+
+function lookupBookshelfID(nbk) {
+	var searchURL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?"
+		+ "db=PubMed&tool=Zotero&retmode=json&term=" + nbk + "%5Baid%5D";
+	ZU.doGet(searchURL, function (text) {
+		var ids = JSON.parse(text).esearchresult.idlist;
+		if (!ids || ids.length != 1) {
+			throw new Error("No PubMed record found for " + nbk);
+		}
+		lookupPMIDs(ids);
+	});
+}
+
 // itemprop to Zotero field map
 var bookRDFaMap = {
 	name: 'title',
@@ -184,6 +204,8 @@ function detectWeb(doc, url) {
 	
 	if (!getUID(doc)) {
 		if (getBookProps(doc)) return 'book';
+		// book or chapter can't be told from the URL; the PubMed record decides
+		if (getBookshelfIDFromURL(doc, url)) return 'book';
 		// if we can't get the UID or the book itemprops, we can't import
 		else return false;
 	}
@@ -234,6 +256,11 @@ function doWeb(doc, url) {
 			var itemprops = getBookProps(doc);
 			if (itemprops) {
 				scrapeItemProps(itemprops);
+				return;
+			}
+			var nbk = getBookshelfIDFromURL(doc, url);
+			if (nbk) {
+				lookupBookshelfID(nbk);
 			}
 		}
 	}
