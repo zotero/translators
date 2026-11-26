@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-06-11 15:32:23"
+	"lastUpdated": "2026-11-26 04:06:21"
 }
 
 /*
@@ -267,7 +267,10 @@ function scrapeBibTeX(doc, url) {
 			}
 
 			if (!item.date) {
-				item.date = ZU.xpathText(doc, '//meta[@name="citation_publication_date"]/@content');
+				item.date = ZU.xpathText(doc, '//meta[@name="citation_publication_date"]/@content')
+					// Early View articles have no issue yet: their BibTeX has no year
+					// and the page exposes only citation_online_date
+					|| ZU.xpathText(doc, '//meta[@name="citation_online_date"]/@content');
 			}
 			// date in the cochraine library RIS is wrong
 			if (ZU.xpathText(doc, '//meta[@name="citation_book_title"]/@content') == "The Cochrane Library") {
