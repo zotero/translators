@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-26 04:06:21"
+	"lastUpdated": "2026-11-26 04:17:42"
 }
 
 /*
@@ -333,6 +333,13 @@ function scrapeBibTeX(doc, url) {
 			item.rights = ZU.xpathText(doc,
 				'//p[@class="copyright" or @id="copyright"]');
 			
+			// Early View BibTeX fills volume and number with "n/a"
+			for (let field of ['volume', 'issue']) {
+				if (item[field] && item[field].trim().toLowerCase() == 'n/a') {
+					delete item[field];
+				}
+			}
+
 			// try to detect invalid data in pages (e.g. "inside_front_cover")
 			if (item.pages && /[a-zA-Z]_[a-zA-Z]/.test(item.pages)) {
 				delete item.pages;
