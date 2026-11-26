@@ -1,7 +1,7 @@
 {
 	"translatorID": "951c027d-74ac-47d4-a107-9c3069ab7b48",
 	"label": "Embedded Metadata",
-	"creator": "Simon Kornblith and Avram Lyon",
+	"creator": "Simon Kornblith, Avram Lyon, and Vera de Kok",
 	"target": "",
 	"minVersion": "3.0.4",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-24 15:37:44"
+	"lastUpdated": "2026-11-26 17:05:46"
 }
 
 /*
@@ -215,6 +215,7 @@ function completeItem(doc, newItem, hwType) {
 
 	addHighwireMetadata(doc, newItem, hwType);
 	addOtherMetadata(doc, newItem);
+	addJSONLDMetadata(doc, newItem);
 	addLowQualityMetadata(doc, newItem);
 	finalDataCleanup(doc, newItem);
 
@@ -661,6 +662,258 @@ function addOtherMetadata(doc, newItem) {
 			}
 		}
 	}
+
+	if (!newItem.abstractNote) {
+		newItem.abstractNote = ZU.trimInternal(
+			attr(doc, 'meta[name="description" i]', 'content'));
+	}
+}
+
+// A byline such as "1News Reporters" or "Reuters Staff" is typed as a Person by
+// some publishers even though it names a group, so it must not be split.
+let COLLECTIVE_BYLINE_RE = /\b(reporters?|staff|newsroom|desk|team|editors?|wires?|news|correspondents?|bureau)\s*$/i;
+
+let WIRE_SERVICE_RE = /^(AFP|AP|PTI|ANI|IANS|DPA|dpa|EFE|UPI|AAP|ANP)$/;
+
+// Lowercased schema.org types
+let JSONLD_ARTICLE_TYPES = ['newsarticle', 'article', 'reportagenewsarticle', 'report'];
+let JSONLD_CONTAINER_TYPES = ['website', 'periodical', 'newspaper', 'magazine', 'blog'];
+
+/**
+ * Reads JSON-LD (schema.org) blocks and fills in a subset of item fields.
+ * This is not a complete or especially robust JSON-LD translator, but it
+ * handles commonly missed information on article pages well enough for now.
+ */
+function addJSONLDMetadata(doc, newItem) {
+	let nodes = getJSONLDNodes(doc);
+	let article = getJSONLDArticle(nodes);
+	if (!article) return;
+
+	if (!newItem.publicationTitle && !newItem.websiteTitle && !newItem.blogTitle) {
+		let publication = getJSONLDPublication(article, nodes, doc);
+		if (publication) newItem.publicationTitle = publication;
+	}
+
+	if (!newItem.title) {
+		let headline = getJSONLDString(article.headline);
+		if (headline) newItem.title = headline;
+	}
+	if (!newItem.abstractNote) {
+		let description = getJSONLDString(article.description);
+		if (description) newItem.abstractNote = description;
+	}
+	if (!newItem.date) {
+		// Only the publication date, as for meta tags (RDF.js): dateCreated
+		// and dateModified do not say when the article was published
+		let date = getJSONLDString(article.datePublished);
+		if (date) {
+			// Keep the date part of an ISO 8601 timestamp as written, without
+			// converting it to another time zone
+			let isoDate = date.match(/^\d{4}-\d{2}-\d{2}/);
+			newItem.date = isoDate ? isoDate[0] : ZU.strToISO(date) || undefined;
+		}
+	}
+	if (!newItem.url) {
+		let url = getJSONLDString(article.url);
+		if (url) newItem.url = url;
+	}
+
+	if (!newItem.creators.length) {
+		for (let author of [].concat(article.author || [])) {
+			let creator = getJSONLDCreator(author, nodes);
+			if (creator) newItem.creators.push(creator);
+		}
+	}
+
+	if (!newItem.tags || !newItem.tags.length) {
+		let keywords = article.keywords;
+		if (typeof keywords == 'string') {
+			keywords = keywords.split(',');
+		}
+		if (Array.isArray(keywords)) {
+			let tags = keywords.map(getJSONLDString).filter(Boolean);
+			if (tags.length) newItem.tags = tags;
+		}
+	}
+}
+
+/**
+ * Returns every node in the page's JSON-LD blocks. Blocks can be arrays,
+ * wrapped in @graph, or a single object, and a page commonly ships several
+ * (article, video, organization, breadcrumbs).
+ */
+function getJSONLDNodes(doc) {
+	let nodes = [];
+	for (let script of doc.querySelectorAll('script[type="application/ld+json"]')) {
+		let data;
+		try {
+			data = JSON.parse(script.textContent);
+		}
+		catch (e) {
+			// A few sites concatenate blocks or use trailing commas; skip those
+			continue;
+		}
+		for (let block of [].concat(data)) {
+			if (!block || typeof block != 'object') continue;
+			for (let node of [].concat(block['@graph'] || block)) {
+				if (node && typeof node == 'object') nodes.push(node);
+			}
+		}
+	}
+	return nodes;
+}
+
+/**
+ * Returns the first Article-like node, supplementing an unusable byline only
+ * from another node identifying the same article.
+ */
+function getJSONLDArticle(nodes) {
+	let [article, ...others] = nodes.filter(
+		node => getJSONLDTypes(node).some(type => JSONLD_ARTICLE_TYPES.includes(type))
+			&& (node.headline || node.name || node.datePublished || node.author)
+	);
+	if (!article) return null;
+	if (!hasJSONLDAuthor(article.author, nodes)) {
+		let fallback = others.find(
+			node => sameJSONLDArticle(article, node) && hasJSONLDAuthor(node.author, nodes)
+		);
+		if (fallback) article = { ...article, author: fallback.author };
+	}
+	return article;
+}
+
+/**
+ * Converts a JSON-LD author (a string, an inline node, or an @id reference)
+ * to a Zotero creator, or returns null if it has no usable name.
+ */
+function getJSONLDCreator(author, nodes) {
+	author = resolveJSONLDNode(author, nodes);
+	if (typeof author == 'string') {
+		// An untyped string may just as well be an organization
+		let name = cleanJSONLDName(author);
+		return name ? { lastName: name, creatorType: 'author', fieldMode: 1 } : null;
+	}
+	if (!author || typeof author != 'object') return null;
+
+	let types = getJSONLDTypes(author);
+	let firstName = getJSONLDString(author.givenName);
+	let lastName = getJSONLDString(author.familyName);
+	let name = cleanJSONLDName(author.name) || [firstName, lastName].filter(Boolean).join(' ');
+	if (!name) return null;
+
+	// Organization and wire-service credits must not be split, even
+	// when publishers also supply Person types or structured names.
+	if (types.some(type => type.endsWith('organization'))
+			|| WIRE_SERVICE_RE.test(name)
+			|| isCollectiveByline(name)) {
+		return { lastName: name, creatorType: 'author', fieldMode: 1 };
+	}
+	// The page's own split beats anything we could guess from the full name
+	// (multi-part given names and surnames, particles, etc.)
+	if (firstName && lastName) {
+		return { firstName: fixCase(firstName), lastName: fixCase(lastName), creatorType: 'author' };
+	}
+	if (!types.includes('person')) {
+		return { lastName: name, creatorType: 'author', fieldMode: 1 };
+	}
+	if (!/[\s,]/.test(name)) {
+		// A single-word Person name, e.g. a pen name
+		return { lastName: fixCase(name), creatorType: 'author', fieldMode: 1 };
+	}
+	let creator = ZU.cleanAuthor(name, 'author', name.includes(','));
+	if (creator.firstName) {
+		creator.firstName = fixCase(creator.firstName);
+		creator.lastName = fixCase(creator.lastName);
+	}
+	return creator;
+}
+
+function hasJSONLDAuthor(authors, nodes) {
+	return [].concat(authors || []).some(author => getJSONLDCreator(author, nodes));
+}
+
+function sameJSONLDArticle(first, second) {
+	let firstURL = getJSONLDString(first.url);
+	let secondURL = getJSONLDString(second.url);
+	if (firstURL && secondURL) {
+		let normalize = url => url.replace(/#.*$/, '').replace(/\/$/, '');
+		return normalize(firstURL) == normalize(secondURL);
+	}
+	let headline = getJSONLDString(first.headline || first.name);
+	return !!headline && headline == getJSONLDString(second.headline || second.name);
+}
+
+function getJSONLDPublication(article, nodes, doc) {
+	let containers = [];
+	let pending = [].concat(article.isPartOf || []);
+	let seen = new Set();
+	while (pending.length) {
+		let node = resolveJSONLDNode(pending.shift(), nodes);
+		if (!node || typeof node != 'object') continue;
+		let key = node['@id'] || node;
+		if (seen.has(key)) continue;
+		seen.add(key);
+		if (getJSONLDTypes(node).some(type => JSONLD_CONTAINER_TYPES.includes(type))) {
+			containers.push(node);
+		}
+		pending.push(...[].concat(node.isPartOf || []));
+	}
+
+	let publication = getJSONLDName(containers, nodes) || getJSONLDName(article.publisher, nodes);
+	if (publication) return publication;
+	for (let container of containers) {
+		publication = getJSONLDName(container.publisher, nodes);
+		if (publication) return publication;
+	}
+
+	// An unlinked organization may be an advertiser or a parent company, but
+	// a single WebSite node for this origin is a safe bet.
+	let getOrigin = url => url.replace(/^(https?:\/\/[^/]+).*$/, '$1');
+	let pageOrigin = getOrigin(doc.location.href);
+	let sites = nodes.filter(node => getJSONLDTypes(node).includes('website')
+		&& typeof node.url == 'string'
+		&& getOrigin(relativeToAbsolute(doc, node.url)) == pageOrigin);
+	if (sites.length != 1) return '';
+	return getJSONLDName(sites, nodes) || getJSONLDName(sites[0].publisher, nodes);
+}
+
+/**
+ * Returns the first non-empty name among a node, an @id reference, or an
+ * array of either.
+ */
+function getJSONLDName(value, nodes) {
+	for (let entry of [].concat(value || [])) {
+		entry = resolveJSONLDNode(entry, nodes);
+		let name = entry && typeof entry == 'object' && getJSONLDString(entry.name);
+		if (name) return name;
+	}
+	return '';
+}
+
+// Yoast and similar plugins link to nodes elsewhere in @graph by @id
+function resolveJSONLDNode(value, nodes) {
+	if (!value || typeof value != 'object' || !value['@id']) return value;
+	let target = nodes.find(node => node !== value && node['@id'] == value['@id']);
+	return target ? { ...target, ...value } : value;
+}
+
+function getJSONLDTypes(node) {
+	if (!node || typeof node != 'object') return [];
+	return [].concat(node['@type'] || [])
+		.filter(type => typeof type == 'string')
+		.map(type => type.replace(/^https?:\/\/schema\.org\//i, '').toLowerCase());
+}
+
+function getJSONLDString(value) {
+	return typeof value == 'string' ? ZU.trimInternal(value) : '';
+}
+
+function cleanJSONLDName(value) {
+	return getJSONLDString(value).replace(/^By\s+/i, '');
+}
+
+function isCollectiveByline(name) {
+	return COLLECTIVE_BYLINE_RE.test(name);
 }
 
 function addLowQualityMetadata(doc, newItem) {
@@ -673,14 +926,7 @@ function addLowQualityMetadata(doc, newItem) {
 
 	if (newItem.title) {
 		newItem.title = newItem.title.replace(/\s+/g, ' '); // make sure all spaces are \u0020
-
-		if (newItem.publicationTitle) {
-			// remove publication title from the end of title (see #604)
-			// this can occur if we have to doc.title, og:title etc.
-			var removePubTitleRegex = new RegExp('\\s*[-–—=_:|~#]\\s*'
-				+ ZU.quotemeta(newItem.publicationTitle) + '\\s*$', 'i');
-			newItem.title = newItem.title.replace(removePubTitleRegex, '');
-		}
+		removeSiteNameFromTitle(doc, newItem);
 	}
 
 	if (!newItem.creators.length) {
@@ -707,12 +953,6 @@ function addLowQualityMetadata(doc, newItem) {
 		newItem.tags = attr(doc, 'meta[name="keywords" i]', 'content');
 	}
 
-	// We can try getting abstract from 'description'
-	if (!newItem.abstractNote) {
-		newItem.abstractNote = ZU.trimInternal(
-			attr(doc, 'meta[name="description" i]', 'content'));
-	}
-
 	if (!newItem.url) {
 		newItem.url = attr(doc, 'head > link[rel="canonical"]', 'href') || doc.location.href;
 	}
@@ -734,6 +974,25 @@ function addLowQualityMetadata(doc, newItem) {
 
 	// add access date
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
+}
+
+/**
+ * Remove a trailing site name ("Title - Site", "Title | Site") from the title,
+ * which og:title and the document title often carry (see #604)
+ */
+function removeSiteNameFromTitle(doc, newItem) {
+	let siteNames = [
+		newItem.publicationTitle,
+		newItem.websiteTitle,
+		newItem.blogTitle,
+		attr(doc, 'meta[property="og:site_name"]', 'content'),
+	];
+	for (let siteName of siteNames) {
+		siteName = ZU.trimInternal(siteName || '');
+		if (!siteName) continue;
+		newItem.title = newItem.title.replace(
+			new RegExp('\\s*[-–—=_:|~#]\\s*' + ZU.quotemeta(siteName) + '\\s*$', 'i'), '');
+	}
 }
 
 /* returns an array of objects of Og authors, but only where they do not contain a URL to prevent getting facebook profiles
@@ -1709,8 +1968,8 @@ var testCases = [
 				"title": "Татар яшьләре татарлыкны сакларга тырыша",
 				"creators": [
 					{
-						"firstName": "гүзәл",
-						"lastName": "мәхмүтова",
+						"firstName": "Гүзәл",
+						"lastName": "Мәхмүтова",
 						"creatorType": "author"
 					}
 				],
@@ -1740,9 +1999,9 @@ var testCases = [
 				"title": "Windows Privilege Escalation: Kernel Exploit",
 				"creators": [
 					{
-						"firstName": "",
 						"lastName": "Raj",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
 				"date": "2021-12-30T17:41:33+00:00",
@@ -1923,7 +2182,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2023-08-10",
+				"date": "2018-03-06",
 				"abstractNote": "This chart shows estimated worldwide mobile e-commerce sales and their share in all e-commerce sales.",
 				"language": "en",
 				"shortTitle": "Infographic",
@@ -2004,6 +2263,162 @@ var testCases = [
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.cbsnews.com/news/tony-awards-2013-list-of-winners/",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Tony Awards 2013: List of winners",
+				"creators": [
+					{
+						"firstName": "Jessica",
+						"lastName": "Derschowitz",
+						"creatorType": "author"
+					}
+				],
+				"date": "2013-06-10",
+				"abstractNote": "\"Kinky Boots\" dances off with six awards -- including best musical -- while \"Matilda the Musical\" and \"Pippin\" win four prizes each",
+				"language": "en-US",
+				"websiteTitle": "CBS News",
+				"shortTitle": "Tony Awards 2013",
+				"url": "https://www.cbsnews.com/news/tony-awards-2013-list-of-winners/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.ms.now/opinion/msnbc-opinion/lebron-james-coco-gauff-are-perfect-team-usa-flag-bearers-rcna163245",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"creators": [
+					{
+						"firstName": "Dave",
+						"lastName": "Zirin",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Why LeBron James and Coco Gauff are the perfect Team USA flag bearers",
+				"date": "2024-07-26T10:00:41+00:00",
+				"url": "https://www.ms.now/opinion/msnbc-opinion/lebron-james-coco-gauff-are-perfect-team-usa-flag-bearers-rcna163245",
+				"abstractNote": "James and Gauff were voted to carry the flag by the other Olympians on Team USA.",
+				"language": "en-US",
+				"blogTitle": "MS NOW"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.scotusblog.com/2026/11/trump-administration-asks-supreme-court-to-intervene-in-california-ballots-dispute/",
+		"items": [
+			{
+				"itemType": "webpage",
+				"creators": [
+					{
+						"firstName": "Amy",
+						"lastName": "Howe",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Supreme Court declines Trump administration's request to intervene in California ballot dispute",
+				"date": "2026-11-02T18:33:05.429Z",
+				"abstractNote": "The Trump administration on Monday morning asked the Supreme Court to intervene in its efforts to keep California from counting ballots cast by what it contends are more than 20,000 noncitizens who h…",
+				"url": "https://www.scotusblog.com/2026/11/trump-administration-asks-supreme-court-to-intervene-in-california-ballots-dispute/",
+				"language": "en",
+				"websiteTitle": "SCOTUSblog"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.technologyreview.com/2026/11/06/1148090/i-watched-a-humanoid-robot-clean-my-apartment-it-felt-like-a-taste-of-the-future/",
+		"items": [
+			{
+				"itemType": "webpage",
+				"creators": [
+					{
+						"firstName": "Grace",
+						"lastName": "Huckins",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "I watched a humanoid robot clean my apartment. It felt like a taste of the future.",
+				"url": "https://www.technologyreview.com/2026/11/06/1148090/i-watched-a-humanoid-robot-clean-my-apartment-it-felt-like-a-taste-of-the-future/",
+				"abstractNote": "The startup Tau Robotics is sending humanoid robots to clean San Francisco homes. They still need lots of human guidance, but they’re learning.",
+				"date": "2026-11-06",
+				"language": "en",
+				"websiteTitle": "MIT Technology Review"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://news.err.ee/1610186809/sde-s-prime-ministerial-candidate-vows-to-put-an-end-to-estonia-s-festival-of-tax-changes",
+		"items": [
+			{
+				"itemType": "webpage",
+				"creators": [
+					{
+						"firstName": "Johannes",
+						"lastName": "Tralla",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "SDE's prime ministerial candidate vows to put an end to Estonia's festival of tax changes",
+				"date": "2026-11-05T11:15:00+02:00",
+				"abstractNote": "The Social Democrats' candidate for PM Jonatan Vseviov defends his political shift, while calling for a fairer tax system and stronger public services in an interview with ERR.",
+				"url": "https://news.err.ee/1610186809/sde-s-prime-ministerial-candidate-vows-to-put-an-end-to-estonia-s-festival-of-tax-changes",
+				"language": "en",
+				"websiteTitle": "ERR"
 			}
 		]
 	}
