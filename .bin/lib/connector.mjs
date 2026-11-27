@@ -62,7 +62,7 @@ export async function ensureConnectorBuild({ rebuild = false } = {}) {
 		execSync('npm ci', execOpts);
 	}
 
-	execSync('./build.sh -p b -d', execOpts);
+	execSync('bash ./build.sh -p b -d', execOpts);
 
 	if (!isBuildValid()) {
 		throw new Error('Connector build failed or has wrong config');
