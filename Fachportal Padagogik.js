@@ -379,10 +379,10 @@ var testCases = [
 						"tag": "Fragebogen"
 					},
 					{
-						"tag": "Einstellung (Psy)"
+						"tag": "Einstellung (Psychologie)"
 					},
 					{
-						"tag": "Schuljahr 09"
+						"tag": "Schuljahr 9"
 					},
 					{
 						"tag": "Lehrer"
