@@ -35,6 +35,10 @@ Do this in the same commit as the deletion.
 - When you'll rerun tests or inspect the same pages repeatedly, pass `--persist` to `run-tests`, `create-test`, or `inspect-page`. It starts a browser that stays open between runs (`node .bin/browser.mjs status|stop`; it quits after 30 idle minutes), and every `.bin/` tool uses it while it's running. Test pages stay open in tabs and are reused rather than reloaded, so a warm rerun skips page loads entirely. Translator edits still take effect on every run. Pass `--fresh` to reload the test pages, e.g. if a site has changed or a page loaded wrong.
 - `.bin/` browser tools load the Zotero Connector as an unpacked extension, which needs Google Chrome or Playwright's bundled Chrome for Testing. If loading fails (e.g. `Extensions.loadUnpacked: Method not available`), make sure the tool isn't launching a different Chrome/Chromium: it uses Google Chrome when installed, and otherwise prints "falling back to Chromium" and uses Playwright's browser. An older Playwright bundles plain Chromium, which can't load the extension, so check that `npx playwright --version` matches `package.json` (run `npm install` if not), then run `npx playwright install chromium`.
 
+## Windows
+
+The browser tools (`create-test`, `run-tests`) build the Zotero Connector with `build.sh` on first use. On Windows, run them from Git Bash, and have `rsvg-convert`, `jq` and `rsync` on `PATH` (Git Bash doesn't include them; MSYS2 packages them). Without these tools, the build produces an incomplete extension that Chrome refuses to load.
+
 ## Code tips
 
 - Check `index.d.ts` for method and class definitions.
