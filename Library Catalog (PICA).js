@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2024-11-26 15:26:20"
+	"lastUpdated": "2026-11-24 17:17:31"
 }
 
 /*
@@ -473,7 +473,7 @@ function scrape(doc, url) {
 				// f., p., and S. are "pages" in various languages
 				// For multi-volume works, we expect formats like:
 				// x-109 p., 510 p. and X, 106 S.; 123 S.
-				var numPagesRE = /\[?((?:[ivxlcdm\d]+[ ,-]*)+)\]?\s+([fps]|pages?)\b/ig,
+				var numPagesRE = /\[?([ivxlcdm\d]+(?:[ ,-]+[ivxlcdm\d]+)*(?:[ ,-]*[,-])?)(?: *\])?\s+([fps]|pages?)\b/ig,
 					numPages = [];
 				while ((m = numPagesRE.exec(value))) {
 					numPages.push(m[1].replace(/ /g, '')

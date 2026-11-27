@@ -6,7 +6,7 @@ import { chromium } from 'playwright';
 import { REPO_ROOT } from './common.mjs';
 
 // Shared browser setup for the .bin tools
-const PROFILE_DIR = path.join(REPO_ROOT, '.tmp', 'browser-profile');
+export const PROFILE_DIR = path.join(REPO_ROOT, '.tmp', 'browser-profile');
 
 const CHALLENGE_TIMEOUT = 5 * 60 * 1000;
 
@@ -36,7 +36,7 @@ const lastResponses = new WeakMap();
 
 const STEALTH_ARGS = ['--disable-blink-features=AutomationControlled'];
 
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+export const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 /** Headless by default; headed when the user asks (--headed/--interact/--keep-open). Always headless in CI. */
 export function resolveHeadless(values = {}) {
@@ -53,13 +53,31 @@ export function resolveHeadless(values = {}) {
  *     afterwards (see detectChallenge()) or null if the page came through.
  *     `quiet` leaves reporting the wall to the caller.
  *   - close(): shut down
+ *   - persistent: whether this is a session on the persistent browser
  *
  * Pass `extensionDir` to load an unpacked extension, `recordHar` to capture a HAR.
+ *
+ * With `persist`, or whenever the persistent browser (.bin/browser.mjs) is
+ * already running, attach to that instead of launching a new browser: see
+ * persistent.mjs. `daemon` is for the persistent browser's own launch.
  */
-export async function launchBrowser({ headless = true, extensionDir, recordHar } = {}) {
+export async function launchBrowser({ headless = true, extensionDir, recordHar, persist, fresh, daemon } = {}) {
+	let profileDir = PROFILE_DIR;
+	if (!daemon) {
+		const persistent = await import('./persistent.mjs');
+		if (recordHar) {
+			// HARs can only be recorded by a context we launch ourselves, and the
+			// persistent browser holds the profile
+			if (persist) console.error('⚠  Recording a HAR needs its own browser; ignoring --persist');
+			if (await persistent.daemonState()) profileDir = `${PROFILE_DIR}-har`;
+		}
+		else if (persist || await persistent.daemonState()) {
+			return persistent.attach({ headless, extensionDir, fresh });
+		}
+	}
 	const args = [...STEALTH_ARGS];
 	const ignoreDefaultArgs = ['--enable-automation'];
-	if (extensionDir) {
+	if (extensionDir || daemon) {
 		// Chrome 137 dropped --load-extension in favour of the CDP call in
 		// installExtension(), which needs these two switches. Playwright also
 		// adds --disable-extensions unless it sees --load-extension, and that
@@ -67,9 +85,11 @@ export async function launchBrowser({ headless = true, extensionDir, recordHar }
 		args.push('--enable-unsafe-extension-debugging', '--remote-debugging-port=0');
 		ignoreDefaultArgs.push('--disable-extensions');
 		await clearExtensionState();
+		// Don't let debuggingPort() read a previous launch's port
+		await fs.rm(path.join(profileDir, 'DevToolsActivePort'), { force: true });
 	}
 	const frontApp = headless ? null : frontAppPid();
-	const context = await launch({
+	const context = await launch(profileDir, {
 		headless,
 		locale: 'en-US',
 		args,
@@ -88,6 +108,7 @@ export async function launchBrowser({ headless = true, extensionDir, recordHar }
 		newPage: () => newPage(context),
 		goto: (page, url, opts) => navigate(page, url, { headless, ...opts }),
 		close: () => context.close(),
+		persistent: false,
 	};
 }
 
@@ -142,16 +163,16 @@ async function newPage(context) {
 }
 
 /** Real Chrome where it's installed, Playwright's Chromium otherwise (e.g. CI). */
-async function launch(options) {
+async function launch(profileDir, options) {
 	// Prefer Google Chrome rather than Playwright's bundled Chromium, because
 	// Cloudflare challenges Chromium with a captcha that loops and can never
 	// be cleared by hand; Chrome loads the same pages immediately
 	try {
-		return await chromium.launchPersistentContext(PROFILE_DIR, { ...options, channel: 'chrome' });
+		return await chromium.launchPersistentContext(profileDir, { ...options, channel: 'chrome' });
 	}
 	catch (e) {
 		console.error(`⚠  Couldn't launch Chrome (${e.message.split('\n')[0]}); falling back to Chromium…`);
-		return chromium.launchPersistentContext(PROFILE_DIR, { ...options, channel: 'chromium' });
+		return chromium.launchPersistentContext(profileDir, { ...options, channel: 'chromium' });
 	}
 }
 
@@ -159,18 +180,22 @@ async function launch(options) {
  * Install the unpacked extension the way Chrome 137+ requires: connect to the
  * browser's own debugging endpoint and call Extensions.loadUnpacked.
  */
-async function installExtension(extensionDir) {
-	const portFile = path.join(PROFILE_DIR, 'DevToolsActivePort');
-	let port = null;
-	for (let i = 0; i < 100 && !port; i++) {
-		port = await fs.readFile(portFile, 'utf8').then(text => text.split('\n')[0], () => null);
-		if (!port) await sleep(100);
-	}
-	if (!port) throw new Error('Browser never wrote DevToolsActivePort; cannot load the extension');
-	const browser = await chromium.connectOverCDP(`http://127.0.0.1:${port}`);
+export async function installExtension(extensionDir, browser) {
+	browser ??= await chromium.connectOverCDP(`http://127.0.0.1:${await debuggingPort()}`);
 	const session = await browser.newBrowserCDPSession();
 	await session.send('Extensions.loadUnpacked', { path: extensionDir });
 	await session.detach();
+}
+
+/** The port the browser opened for --remote-debugging-port=0 */
+export async function debuggingPort() {
+	const portFile = path.join(PROFILE_DIR, 'DevToolsActivePort');
+	for (let i = 0; i < 100; i++) {
+		const port = await fs.readFile(portFile, 'utf8').then(text => text.split('\n')[0], () => null);
+		if (port) return port;
+		await sleep(100);
+	}
+	throw new Error('Browser never wrote DevToolsActivePort');
 }
 
 /**
@@ -184,7 +209,7 @@ async function clearExtensionState() {
 	));
 }
 
-async function navigate(page, url, { headless, settle = 1000, quiet = false }) {
+export async function navigate(page, url, { headless, settle = 1000, quiet = false }) {
 	trackResponses(page);
 	await page.goto(url, { waitUntil: 'domcontentloaded' }).catch((e) => {
 		// A challenge page can keep the network busy so navigation never settles.

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-14 15:58:43"
+	"lastUpdated": "2026-11-24 17:17:31"
 }
 
 /*
@@ -134,7 +134,7 @@ function extractNumPages(str) {
 	// f., p., and S. are "pages" in various languages
 	// For multi-volume works, we expect formats like:
 	//   x-109 p., 510 p. and X, 106 S.; 123 S.
-	var numPagesRE = /\[?\b((?:[ivxlcdm\d]+[ ,\-]*)+)\]?\s+[fps]\b/ig,
+	var numPagesRE = /\[?\b([ivxlcdm\d]+(?:[ ,-]+[ivxlcdm\d]+)*(?:[ ,-]*[,-])?)(?: *\])?\s+[fps]\b/ig,
 		numPages = [], m;
 	while (m = numPagesRE.exec(str)) {
 		numPages.push(m[1].trim()

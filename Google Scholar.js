@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-10-12 19:07:47"
+	"lastUpdated": "2026-11-24 17:17:31"
 }
 
 /*
@@ -471,6 +471,43 @@ ItemFactory.prototype.hasReporter = function () {
 };
 
 
+/**
+ * Split a trailing four-digit year off a citelet segment
+ *
+ * The text before the year is kept only if whitespace separates it from the year,
+ * and then only from the last line that has content.
+ */
+function splitTrailingYear(str) {
+	if (!/[0-9]{4}$/.test(str)) {
+		return null;
+	}
+	let before = str.slice(0, -4);
+	let result = { date: str.slice(-4), rest: "" };
+	if (!/\s$/.test(before)) {
+		return result;
+	}
+	let start = 0;
+	for (;;) {
+		let end = start;
+		while (end < before.length && !/[\n\r\u2028\u2029]/.test(before[end])) {
+			end++;
+		}
+		if (end == before.length) {
+			result.rest = before.slice(start, -1);
+			return result;
+		}
+		let next = end;
+		while (next < before.length && /\s/.test(before[next])) {
+			next++;
+		}
+		if (next == before.length) {
+			result.rest = before.slice(start, end);
+			return result;
+		}
+		start = next;
+	}
+}
+
 ItemFactory.prototype.getDate = function () {
 	var i, m;
 	// Citelet parsing, step (1)
@@ -492,15 +529,10 @@ ItemFactory.prototype.getDate = function () {
 	if (!this.v.date && this.v.date !== false) {
 		this.v.date = false;
 		for (i = this.hyphenSplit.length - 1; i > -1; i += -1) {
-			m = this.hyphenSplit[i].match(/(?:(.*)\s+)*([0-9]{4})$/);
-			if (m) {
-				this.v.date = m[2];
-				if (m[1]) {
-					this.hyphenSplit[i] = m[1];
-				}
-				else {
-					this.hyphenSplit[i] = "";
-				}
+			let year = splitTrailingYear(this.hyphenSplit[i]);
+			if (year) {
+				this.v.date = year.date;
+				this.hyphenSplit[i] = year.rest;
 				this.hyphenSplit = this.hyphenSplit.slice(0, i + 1);
 				break;
 			}

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-08-06 17:14:28"
+	"lastUpdated": "2026-11-24 15:37:44"
 }
 
 /*
@@ -493,7 +493,7 @@ async function scrape(doc, url, type) {
 		Zotero.debug(`scrape(): analyzing PDF candidate ${pdfLink}`);
 		const pdfFileName = pdfLink.match(/[^/]*$/)[0];
 
-		const pdfTDOImatch = pdfFileName.match(new RegExp(`${tdoi}\\w*?\\.`, 'i'));
+		const pdfTDOImatch = pdfFileName.match(new RegExp(`${ZU.quotemeta(tdoi)}\\w*?\\.`, 'i'));
 		const pdfTDOI = pdfTDOImatch ? pdfTDOImatch[0] : null;
 
 		const isMainPDF = pdfTDOI && pdfTDOI.startsWith(tdoi);

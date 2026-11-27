@@ -32,10 +32,13 @@ Do this in the same commit as the deletion.
 - To understand a site's **page structure**, use the `inspect-page` skill.
 - Once you have the API spec and/or page structure, write your translator against those.
 - Add `--headed` to any `.bin/` browser tool for a site behind Cloudflare or a similar wall. Headless Chrome is refused outright there, so a headless run returns a challenge page instead of content, and every test fails "Detection failed". Don't mistake that for a translator bug, and don't try to spoof your way past it.
+- When you'll rerun tests or inspect the same pages repeatedly, pass `--persist` to `run-tests`, `create-test`, or `inspect-page`. It starts a browser that stays open between runs (`node .bin/browser.mjs status|stop`; it quits after 30 idle minutes), and every `.bin/` tool uses it while it's running. Test pages stay open in tabs and are reused rather than reloaded, so a warm rerun skips page loads entirely. Translator edits still take effect on every run. Pass `--fresh` to reload the test pages, e.g. if a site has changed or a page loaded wrong.
+- `.bin/` browser tools load the Zotero Connector as an unpacked extension, which needs Google Chrome or Playwright's bundled Chrome for Testing. If loading fails (e.g. `Extensions.loadUnpacked: Method not available`), make sure the tool isn't launching a different Chrome/Chromium: it uses Google Chrome when installed, and otherwise prints "falling back to Chromium" and uses Playwright's browser. An older Playwright bundles plain Chromium, which can't load the extension, so check that `npx playwright --version` matches `package.json` (run `npm install` if not), then run `npx playwright install chromium`.
 
 ## Code tips
 
 - Check `index.d.ts` for method and class definitions.
+- Before hand-rolling a small helper, check `ZU` in `index.d.ts` for an existing one. For example, escape text for `new RegExp()` with `ZU.quotemeta()`, not a custom `.replace()`.
 - XHR and `fetch()` are unavailable in translator code.
 - **DO NOT** use the deprecated `ZU.doGet()`, `ZU.doPost()`, and `ZU.processDocuments()` methods in new code.
 - Instead, make HTTP(S) requests using `request()`, `requestText()`, `requestJSON()`, and `requestDocument()`, which are defined in the global scope. They return promises. `request()` resolves to an object with a `body` property; the rest resolve directly to the body. You pass the URL as the first argument, and (optionally) an options object as the second argument. Relative URLs are resolved against the URL of the page being translated, so there's no need to prepend the hostname manually (e.g. `requestJSON('/api/articles/123')`).

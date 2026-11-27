@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2025-04-29 03:02:00"
+	"lastUpdated": "2026-11-24 15:37:44"
 }
 
 /*
@@ -106,9 +106,7 @@ async function getSearchResults(doc, checkOnly) {
 			for (let tag of tags) {
 				foundTags[tag] = [];
 				for (let rowTag of row.tags) {
-					let matcher = new RegExp(tag, "g");
-					//if (rowTag.search(tag) >= 0) {
-					if (matcher.match(rowTag)) {
+					if (rowTag.includes(tag)) {
 						foundTags[tag].push(rowTag);
 					}
 				}

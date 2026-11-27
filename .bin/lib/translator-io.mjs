@@ -103,6 +103,57 @@ export function serializeTestCases(testCases) {
 	return `${BEGIN_TEST_CASES}\nvar testCases = ${json}\n${END_TEST_CASES}`;
 }
 
+/**
+ * Find the [start, end) offsets in `raw` of each test case object in the
+ * test cases block, so one test can be replaced without reformatting the rest.
+ */
+export function findTestCaseRanges(raw) {
+	const beginIdx = raw.indexOf(BEGIN_TEST_CASES);
+	const endIdx = raw.indexOf(END_TEST_CASES);
+	if (beginIdx === -1 || endIdx === -1) return null;
+	const arrayMatch = /var\s+testCases\s*=\s*\[/.exec(raw.substring(beginIdx, endIdx));
+	if (!arrayMatch) return null;
+
+	const ranges = [];
+	let depth = 1;
+	let inString = false;
+	let start = -1;
+	for (let i = beginIdx + arrayMatch.index + arrayMatch[0].length; i < endIdx; i++) {
+		const char = raw[i];
+		if (inString) {
+			if (char === '\\') i++;
+			else if (char === '"') inString = false;
+		}
+		else if (char === '"') {
+			inString = true;
+		}
+		else if (char === '{' || char === '[') {
+			if (depth === 1) start = i;
+			depth++;
+		}
+		else if (char === '}' || char === ']') {
+			depth--;
+			if (depth === 1) ranges.push([start, i + 1]);
+			if (depth === 0) return ranges;
+		}
+	}
+	return null;
+}
+
+/**
+ * Replace the test case at `index` in `raw`, leaving the rest of the block as is.
+ */
+export function replaceTestCase(raw, index, testCase) {
+	const ranges = findTestCaseRanges(raw);
+	if (!ranges || !ranges[index]) {
+		throw new Error(`Could not locate test case ${index + 1} in the test cases block`);
+	}
+	const [start, end] = ranges[index];
+	// Elements sit one tab deep in the testCases array
+	const json = JSON.stringify(normalizeTestCases([testCase])[0], null, '\t').replace(/\n/g, '\n\t');
+	return raw.substring(0, start) + json + raw.substring(end);
+}
+
 const LEADING_FIELDS = [
 	'itemType',
 	// title and its type-specific variants
