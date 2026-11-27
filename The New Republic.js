@@ -1,25 +1,24 @@
 {
 	"translatorID": "1bfb4748-3925-4de6-bcb4-5de2967f6d3f",
 	"label": "The New Republic",
-	"creator": "Sebastian Karcher",
+	"creator": "Sebastian Karcher, Vera de Kok",
 	"target": "^https?://(www\\.)?newrepublic\\.com/",
-	"minVersion": "3.0",
+	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-01 21:10:41"
+	"lastUpdated": "2026-10-29 12:00:00"
 }
 
-/* FW LINE 59:b820c6d */ function flatten(t){var e=new Array;for(var i in t){var r=t[i];r instanceof Array?e=e.concat(flatten(r)):e.push(r)}return e}var FW={_scrapers:new Array};FW._Base=function(){this.callHook=function(t,e,i,r){if("object"==typeof this.hooks){var n=this.hooks[t];"function"==typeof n&&n(e,i,r)}},this.evaluateThing=function(t,e,i){var r=typeof t;if("object"===r){if(t instanceof Array){var n=this.evaluateThing,a=t.map(function(t){return n(t,e,i)});return flatten(a)}return t.evaluate(e,i)}return"function"===r?t(e,i):t},this.makeItems=function(t,e,i,r,n){n()}},FW.Scraper=function(t){FW._scrapers.push(new FW._Scraper(t))},FW._Scraper=function(t){for(x in t)this[x]=t[x];this._singleFieldNames=["abstractNote","applicationNumber","archive","archiveLocation","artworkMedium","artworkSize","assignee","audioFileType","audioRecordingType","billNumber","blogTitle","bookTitle","callNumber","caseName","code","codeNumber","codePages","codeVolume","committee","company","conferenceName","country","court","date","dateDecided","dateEnacted","dictionaryTitle","distributor","docketNumber","documentNumber","DOI","edition","encyclopediaTitle","episodeNumber","extra","filingDate","firstPage","forumTitle","genre","history","institution","interviewMedium","ISBN","ISSN","issue","issueDate","issuingAuthority","journalAbbreviation","label","language","legalStatus","legislativeBody","letterType","libraryCatalog","manuscriptType","mapType","medium","meetingName","nameOfAct","network","number","numberOfVolumes","numPages","pages","patentNumber","place","postType","presentationType","priorityNumbers","proceedingsTitle","programTitle","programmingLanguage","publicLawNumber","publicationTitle","publisher","references","reportNumber","reportType","reporter","reporterVolume","rights","runningTime","scale","section","series","seriesNumber","seriesText","seriesTitle","session","shortTitle","studio","subject","system","thesisType","title","type","university","url","version","videoRecordingType","volume","websiteTitle","websiteType"],this._makeAttachments=function(t,e,i,r){if(i instanceof Array)i.forEach(function(i){this._makeAttachments(t,e,i,r)},this);else if("object"==typeof i){var n=i.urls||i.url,a=i.types||i.type,s=i.titles||i.title,o=i.snapshots||i.snapshot,u=this.evaluateThing(n,t,e),l=this.evaluateThing(s,t,e),c=this.evaluateThing(a,t,e),h=this.evaluateThing(o,t,e);u instanceof Array||(u=[u]);for(var f in u){var p,m,v,d=u[f];p=c instanceof Array?c[f]:c,m=l instanceof Array?l[f]:l,v=h instanceof Array?h[f]:h,r.attachments.push({url:d,title:m,mimeType:p,snapshot:v})}}},this.makeItems=function(t,e,i,r,n){var a=new Zotero.Item(this.itemType);a.url=e;for(var s in this._singleFieldNames){var o=this._singleFieldNames[s];if(this[o]){var u=this.evaluateThing(this[o],t,e);u instanceof Array?a[o]=u[0]:a[o]=u}}var l=["creators","tags"];for(var c in l){var h=l[c],f=this.evaluateThing(this[h],t,e);if(f)for(var p in f)a[h].push(f[p])}this._makeAttachments(t,e,this.attachments,a),r(a,this,t,e),n()}},FW._Scraper.prototype=new FW._Base,FW.MultiScraper=function(t){FW._scrapers.push(new FW._MultiScraper(t))},FW._MultiScraper=function(t){for(x in t)this[x]=t[x];this._mkSelectItems=function(t,e){var i=new Object;for(var r in t)i[e[r]]=t[r];return i},this._selectItems=function(t,e,i){var r=new Array;Zotero.selectItems(this._mkSelectItems(t,e),function(t){for(var e in t)r.push(e);i(r)})},this._mkAttachments=function(t,e,i){var r=this.evaluateThing(this.attachments,t,e),n=new Object;if(r)for(var a in i)n[i[a]]=r[a];return n},this._makeChoices=function(t,e,i,r,n){if(t instanceof Array)t.forEach(function(t){this._makeTitlesUrls(t,e,i,r,n)},this);else if("object"==typeof t){var a=t.urls||t.url,s=t.titles||t.title,o=this.evaluateThing(a,e,i),u=this.evaluateThing(s,e,i),l=u instanceof Array;o instanceof Array||(o=[o]);for(var c in o){var h,f=o[c];h=l?u[c]:u,n.push(f),r.push(h)}}},this.makeItems=function(t,e,i,r,n){if(this.beforeFilter){var a=this.beforeFilter(t,e);if(a!=e)return void this.makeItems(t,a,i,r,n)}var s=[],o=[];this._makeChoices(this.choices,t,e,s,o);var u=this._mkAttachments(t,e,o),l=this.itemTrans;this._selectItems(s,o,function(t){if(t){var e=function(t){var e=t.documentURI,i=l;void 0===i&&(i=FW.getScraper(t,e)),void 0===i||i.makeItems(t,e,u[e],r,function(){})};Zotero.Utilities.processDocuments(t,e,n)}else n()})}},FW._MultiScraper.prototype=new FW._Base,FW.WebDelegateTranslator=function(t){return new FW._WebDelegateTranslator(t)},FW._WebDelegateTranslator=function(t){for(x in t)this[x]=t[x];this.makeItems=function(t,e,i,r,n){var a=this,s=Zotero.loadTranslator("web");s.setHandler("itemDone",function(i,n){r(n,a,t,e)}),s.setDocument(t),this.translatorId?(s.setTranslator(this.translatorId),s.translate()):(s.setHandler("translators",function(t,e){e.length&&(s.setTranslator(e[0]),s.translate())}),s.getTranslators()),n()}},FW._WebDelegateTranslator.prototype=new FW._Base,FW._StringMagic=function(){this._filters=new Array,this.addFilter=function(t){return this._filters.push(t),this},this.split=function(t){return this.addFilter(function(e){return e.split(t).filter(function(t){return""!=t})})},this.replace=function(t,e,i){return this.addFilter(function(r){return r.match(t)?r.replace(t,e,i):r})},this.prepend=function(t){return this.replace(/^/,t)},this.append=function(t){return this.replace(/$/,t)},this.remove=function(t,e){return this.replace(t,"",e)},this.trim=function(){return this.addFilter(function(t){return Zotero.Utilities.trim(t)})},this.trimInternal=function(){return this.addFilter(function(t){return Zotero.Utilities.trimInternal(t)})},this.match=function(t,e){return e||(e=0),this.addFilter(function(i){var r=i.match(t);return void 0===r||null===r?void 0:r[e]})},this.cleanAuthor=function(t,e){return this.addFilter(function(i){return Zotero.Utilities.cleanAuthor(i,t,e)})},this.key=function(t){return this.addFilter(function(e){return e[t]})},this.capitalizeTitle=function(){return this.addFilter(function(t){return Zotero.Utilities.capitalizeTitle(t)})},this.unescapeHTML=function(){return this.addFilter(function(t){return Zotero.Utilities.unescapeHTML(t)})},this.unescape=function(){return this.addFilter(function(t){return unescape(t)})},this._applyFilters=function(t,e){for(i in this._filters){t=flatten(t),t=t.filter(function(t){return void 0!==t&&null!==t});for(var r=0;r<t.length;r++)try{if(void 0===t[r]||null===t[r])continue;t[r]=this._filters[i](t[r],e)}catch(n){t[r]=void 0,Zotero.debug("Caught exception "+n+"on filter: "+this._filters[i])}t=t.filter(function(t){return void 0!==t&&null!==t})}return flatten(t)}},FW.PageText=function(){return new FW._PageText},FW._PageText=function(){this._filters=new Array,this.evaluate=function(t){var e=[t.documentElement.innerHTML];return e=this._applyFilters(e,t),0==e.length?!1:e}},FW._PageText.prototype=new FW._StringMagic,FW.Url=function(){return new FW._Url},FW._Url=function(){this._filters=new Array,this.evaluate=function(t,e){var i=[e];return i=this._applyFilters(i,t),0==i.length?!1:i}},FW._Url.prototype=new FW._StringMagic,FW.Xpath=function(t){return new FW._Xpath(t)},FW._Xpath=function(t){this._xpath=t,this._filters=new Array,this.text=function(){var t=function(t){return"object"==typeof t&&t.textContent?t.textContent:t};return this.addFilter(t),this},this.sub=function(t){var e=function(e,i){var r=i.evaluate(t,e,null,XPathResult.ANY_TYPE,null);return r?r.iterateNext():void 0};return this.addFilter(e),this},this.evaluate=function(t){var e=t.evaluate(this._xpath,t,null,XPathResult.ANY_TYPE,null),i=e.resultType,r=new Array;if(i==XPathResult.STRING_TYPE)r.push(e.stringValue);else if(i==XPathResult.BOOLEAN_TYPE)r.push(e.booleanValue);else if(i==XPathResult.NUMBER_TYPE)r.push(e.numberValue);else if(i==XPathResult.ORDERED_NODE_ITERATOR_TYPE||i==XPathResult.UNORDERED_NODE_ITERATOR_TYPE)for(var n;n=e.iterateNext();)r.push(n);return r=this._applyFilters(r,t),0==r.length?!1:r}},FW._Xpath.prototype=new FW._StringMagic,FW.detectWeb=function(t,e){for(var i in FW._scrapers){var r=FW._scrapers[i],n=r.evaluateThing(r.itemType,t,e),a=r.evaluateThing(r.detect,t,e);if(a.length>0&&a[0])return n}},FW.getScraper=function(t,e){var i=FW.detectWeb(t,e);return FW._scrapers.filter(function(r){return r.evaluateThing(r.itemType,t,e)==i&&r.evaluateThing(r.detect,t,e)})[0]},FW.doWeb=function(t,e){var i=FW.getScraper(t,e);i.makeItems(t,e,[],function(t,e,i,r){e.callHook("scraperDone",t,i,r),t.title||(t.title=""),t.complete()},function(){Zotero.done()}),Zotero.wait()};
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	The New Republic Translator
 	(Created as part of the 2012 Zotero Trainer Workshop in Syracus
 	and with contributions from participants.)
-	Copyright © 2012 Sebastian Karcher
+	Copyright © 2012-2026 Sebastian Karcher, Vera de Kok
 
 	This file is part of Zotero.
 
@@ -39,86 +38,107 @@
 	***** END LICENSE BLOCK *****
 */
 
+/*
+	The site no longer carries any of the markup the original Framework.js translator
+	scraped (a[itemprop="author"], time[itemprop="datePublished"], div.result-title), so
+	articles came through without creators and date, and tag pages were not detected at
+	all. Current pages do have meta author / article:published_time / article:tag, which
+	Embedded Metadata reads, plus the byline as Author_anchor links; tag pages list their
+	results in .articleResults__result cards.
+*/
 
-function detectWeb(doc, url) { return FW.detectWeb(doc, url); }
-function doWeb(doc, url) { return FW.doWeb(doc, url); }
-
-/** Articles */
-FW.Scraper({
-itemType : 'magazineArticle',
-detect : FW.Xpath('//h1[@class="article-headline"]'),
-title : FW.Xpath('//h1[@class="article-headline"]').text().trim(),
-attachments : {
-  url : FW.Url(),
-  title : "New Republic Snapshot",
-  type : "text/html"
-},
-creators : FW.Xpath('//a[@itemprop="author"]').text().capitalizeTitle(true).cleanAuthor("author"),
-abstractNote : FW.Xpath('//meta[@name="description"]/@content').text(),
-date : FW.Xpath('//time[@itemprop="datePublished"]/@content').text(),
-ISSN : "0028-6583",
-publicationTitle : "The New Republic"
-});
-
-/** Articles */
-FW.Scraper({
-itemType : 'magazineArticle',
-detect : FW.Xpath('//h1[@id="feature-headline"]'),
-title : FW.Xpath('//h1[@id="feature-headline"]').text().trim(),
-attachments : {
-  url : FW.Url(),
-  title : "New Republic Snapshot",
-  type : "text/html"
-},
-creators : FW.Xpath('//h4[@id="feature-author"]').text().remove(/^By\s*/).cleanAuthor("author"),
-abstractNote : FW.Xpath('//meta[@name="description"]/@content').text(),
-date : FW.Xpath('//h6[@id="date"]').text(),
-ISSN : "0028-6583",
-publicationTitle : "The New Republic"
-});
-
-/** Search results */
-FW.MultiScraper({
-itemType : "multiple",
-detect : FW.Xpath('//div[@class="result-title"]/h2/a'),
-choices : {
-  titles : FW.Xpath('//div[@class="result-title"]/h2/a').text().trim(),
-  urls : FW.Xpath('//div[@class="result-title"]/h2/a').key('href').text()
+function detectWeb(doc, _url) {
+	if (doc.querySelector('h1.article-headline')) return 'magazineArticle';
+	if (getSearchResults(doc, true)) return 'multiple';
+	return false;
 }
-});
+
+function getSearchResults(doc, checkOnly) {
+	let items = {};
+	let found = false;
+	for (let link of doc.querySelectorAll('.articleResults__result a.Hed')) {
+		let title = ZU.trimInternal(link.textContent);
+		if (!title || !link.href) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[link.href] = title;
+	}
+	return found ? items : false;
+}
+
+async function doWeb(doc, url) {
+	if (detectWeb(doc, url) == 'multiple') {
+		let items = await Zotero.selectItems(getSearchResults(doc, false));
+		if (!items) return;
+		for (let itemUrl of Object.keys(items)) {
+			await scrape(await requestDocument(itemUrl));
+		}
+		return;
+	}
+	await scrape(doc, url);
+}
+
+async function scrape(doc, _url) {
+	let translator = Zotero.loadTranslator('web');
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	translator.setDocument(doc);
+	translator.setHandler('itemDone', (_obj, item) => {
+		item.itemType = 'magazineArticle';
+
+		let creators = getCreators(doc);
+		if (creators.length) item.creators = creators;
+
+		// article:published_time is a bare date, and it is all the page offers
+		if (!item.date) {
+			let published = getAttr(doc, 'meta[property="article:published_time"]', 'content');
+			if (published) item.date = ZU.strToISO(published) || published;
+		}
+
+		item.publicationTitle = 'The New Republic';
+		item.ISSN = '0028-6583';
+
+		// the magazine publishes in English only, and the page tag is the malformed "en-us"
+		item.language = 'en-US';
+
+		item.complete();
+	});
+	await translator.translate();
+}
+
+function getCreators(doc) {
+	// the byline sits in the article header; a page-wide query would also pick up the
+	// authors of the sidebar and "related" lists. The same author is repeated in the
+	// author block further down, so deduplicate by name as well.
+	let names = [];
+	let seen = {};
+	for (let anchor of getBylineAnchors(doc)) {
+		let name = ZU.trimInternal(anchor.textContent || anchor.title || '');
+		if (!name || seen[name.toLowerCase()]) continue;
+		seen[name.toLowerCase()] = true;
+		names.push(name);
+	}
+
+	if (!names.length) {
+		let meta = getAttr(doc, 'meta[name="author"]', 'content');
+		if (meta) names = meta.split(/\s*,\s*|\s+and\s+/).filter(name => name.trim());
+	}
+
+	return names.map(name => ZU.cleanAuthor(name, 'author', false));
+}
+
+function getBylineAnchors(doc) {
+	let anchors = doc.querySelectorAll('.article-meta a.Author_anchor');
+	if (anchors.length) return anchors;
+	return doc.querySelectorAll('.article-header a.Author_anchor');
+}
+
+function getAttr(doc, selector, attribute) {
+	let element = doc.querySelector(selector);
+	return element ? element.getAttribute(attribute) : null;
+}
+
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "https://newrepublic.com/article/108848/the-terrifying-rise-greeces-nazi-party",
-		"items": [
-			{
-				"itemType": "magazineArticle",
-				"title": "The Terrifying Rise of Greece’s Nazi Party",
-				"creators": [
-					{
-						"firstName": "Eliza",
-						"lastName": "Griswold",
-						"creatorType": "author"
-					}
-				],
-				"date": "2012-10-19",
-				"ISSN": "0028-6583",
-				"libraryCatalog": "The New Republic",
-				"publicationTitle": "The New Republic",
-				"url": "https://newrepublic.com/article/108848/the-terrifying-rise-greeces-nazi-party",
-				"attachments": [
-					{
-						"title": "New Republic Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
 	{
 		"type": "web",
 		"url": "https://newrepublic.com/article/116791/janet-yellen-senate-testimony-waffles-too-big-too-fail",
@@ -135,17 +155,173 @@ var testCases = [
 				],
 				"date": "2014-02-27",
 				"ISSN": "0028-6583",
-				"libraryCatalog": "The New Republic",
+				"abstractNote": "Her Senate testimony did not inspire confidence.",
+				"language": "en-US",
+				"libraryCatalog": "newrepublic.com",
 				"publicationTitle": "The New Republic",
 				"shortTitle": "Uh-Oh",
 				"url": "https://newrepublic.com/article/116791/janet-yellen-senate-testimony-waffles-too-big-too-fail",
 				"attachments": [
 					{
-						"title": "New Republic Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Banks"
+					},
+					{
+						"tag": "Economics"
+					},
+					{
+						"tag": "Janet Yellen"
+					},
+					{
+						"tag": "Politics"
+					},
+					{
+						"tag": "The Plank"
+					},
+					{
+						"tag": "Too Big To Fail"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://newrepublic.com/article/215302/steelworkers-trump-shape-midterm-elections",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "How Steelworkers Might Shape the Midterm Elections",
+				"creators": [
+					{
+						"firstName": "Timothy",
+						"lastName": "Noah",
+						"creatorType": "author"
+					}
+				],
+				"date": "2026-09-11",
+				"ISSN": "0028-6583",
+				"abstractNote": "Trump’s “golden share” in U.S. Steel puts him in a bind.",
+				"language": "en-US",
+				"libraryCatalog": "newrepublic.com",
+				"publicationTitle": "The New Republic",
+				"url": "https://newrepublic.com/article/215302/steelworkers-trump-shape-midterm-elections",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Communism"
+					},
+					{
+						"tag": "Democratic Socialism"
+					},
+					{
+						"tag": "Donald Trump"
+					},
+					{
+						"tag": "Economy"
+					},
+					{
+						"tag": "Golden Share"
+					},
+					{
+						"tag": "Labor"
+					},
+					{
+						"tag": "Politics"
+					},
+					{
+						"tag": "Socialism"
+					},
+					{
+						"tag": "U.S. steel"
+					},
+					{
+						"tag": "Unions"
+					},
+					{
+						"tag": "United Steelworkers"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://newrepublic.com/post/166890/democrats-roe-overturn-midterms-2022",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "The Democrats’ Theory of Change: Wait for the Republicans to Screw Up",
+				"creators": [
+					{
+						"firstName": "Jason",
+						"lastName": "Linkins",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022-06-25",
+				"ISSN": "0028-6583",
+				"abstractNote": "The party tends to succeed only after the GOP brings disaster. Meanwhile, conservatives are busy executing decades-long plans that are transforming the country.",
+				"language": "en-US",
+				"libraryCatalog": "newrepublic.com",
+				"publicationTitle": "The New Republic",
+				"shortTitle": "The Democrats’ Theory of Change",
+				"url": "https://newrepublic.com/post/166890/democrats-roe-overturn-midterms-2022",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Abortion Rights"
+					},
+					{
+						"tag": "Democratic Party"
+					},
+					{
+						"tag": "EPA"
+					},
+					{
+						"tag": "Law"
+					},
+					{
+						"tag": "Midterm Elections"
+					},
+					{
+						"tag": "Politics"
+					},
+					{
+						"tag": "Power Mad"
+					},
+					{
+						"tag": "Republican Party"
+					},
+					{
+						"tag": "Roe V. Wade"
+					},
+					{
+						"tag": "Supreme Court"
+					},
+					{
+						"tag": "The Soapbox"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
