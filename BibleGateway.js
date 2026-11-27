@@ -3,13 +3,13 @@
 	"label": "BibleGateway",
 	"creator": "",
 	"target": "^https?://www\\.biblegateway\\.com/",
-	"minVersion": "5.0",
+	"minVersion": "7.0",
 	"maxVersion": "",
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2026-11-13 21:47:17"
+	"lastUpdated": "2026-11-27 19:06:20"
 }
 
 /*
@@ -35,7 +35,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-
 function isPassageUrl(url) {
 	// ToDo already covered in regex
 	return url.includes('/passage/');
@@ -43,48 +42,17 @@ function isPassageUrl(url) {
 
 
 function detectWeb(doc, url) {
-	Zotero.debug("!!! DETECTWEB TRACE TRIGGERED FOR: " + url);
-
 	if (!url.includes('biblegateway.com')) {
-		Zotero.debug(`BibleGateway detectWeb quick return ${url}`);
 		return false;
 	}
-	Zotero.debug(`in BibleGateway detectWeb for ${url}`);
 	if (isPassageUrl(url) && doc.querySelector('.passage-text')) {
 		return "bookSection";
 	}
 	return false;
 }
 
-function getSearchResults(doc, checkOnly) {
-	var items = {};
-	var found = false;
-	// TODO: adjust the CSS selector
-	var rows = doc.querySelectorAll('h2 > a.title[href*="/article/"]');
-	for (let row of rows) {
-		// TODO: check and maybe adjust
-		let href = row.href;
-		// TODO: check and maybe adjust
-		let title = ZU.trimInternal(row.textContent);
-		if (!href || !title) continue;
-		if (checkOnly) return true;
-		found = true;
-		items[href] = title;
-	}
-	return found ? items : false;
-}
-
 async function doWeb(doc, url) {
-	if (detectWeb(doc, url) == 'multiple') {
-		let items = await Zotero.selectItems(getSearchResults(doc, false));
-		if (!items) return;
-		for (let url of Object.keys(items)) {
-			await scrape(await requestDocument(url));
-		}
-	}
-	else {
-		await scrape(doc, url);
-	}
+	await scrape(doc, url);
 }
 
 const docStyle = `
@@ -94,7 +62,6 @@ const docStyle = `
 		`;
 
 async function getChapterOverview(translation, chapterOsis) {
-	Zotero.debug(`in getChapterOverview ${translation} ${chapterOsis.book}.${chapterOsis.chapter}`);
 	const graphqlUrl = "https://www.biblegateway.com/graphql/";
 
 	const payload = {
@@ -122,9 +89,8 @@ async function getChapterOverview(translation, chapterOsis) {
 	});
 	if (response.status > 299) {
 		for (let error of response.body.errors) {
-			Zotero.debug(`Error getting overview: `);
 			for (let [k, v] of Object.entries(error)) {
-				Zotero.debug(`error field ${k}: ${v}`);
+				Zotero.debug(`Get Chapter error field ${k}: ${v}`);
 			}
 		}
 	}
@@ -132,7 +98,6 @@ async function getChapterOverview(translation, chapterOsis) {
 }
 
 async function scrape(doc, url = doc.location.href) {
-	Zotero.debug(`scraping ${url}`);
 	let item = new Zotero.Item('bookSection');
 	let langEl = doc.querySelector("html");
 
@@ -142,7 +107,6 @@ async function scrape(doc, url = doc.location.href) {
 	let verEl = doc.querySelector("div.version-display");
 	let translation;
 	if (verEl) {
-		Zotero.debug(`Found version ${verEl.outerHTML}`);
 		translation = verEl.innerHTML.trim();
 	}
 	else {
@@ -153,23 +117,20 @@ async function scrape(doc, url = doc.location.href) {
 
 	let osis = attr(doc, 'div.passage-table', 'data-osis');
 
-	Zotero.debug(`osis: ${osis}, translation: ${translation}`);
-	Zotero.debug(`document title: '${doc.title}'`);
-	const titleRe = /^([A-Z a-z\d]+ \d+(?::\d+)?)(?:-\d+(?::\d+)?)?\s+([A-Z][A-Z0-9]+)(?= -)/gm;
+	const titleRe = /^([A-Z a-z\d]+ \d+(?::\d+)?)(?:[-–]\d+(?::\d+)?)?\s+([A-Z][A-Z0-9]+)(?= -)/gm;
 	let match = titleRe.exec(doc.title);
 
 	let pageTitle = match[0];
 	if (!osis) {
-		let osis = match[1];
-		Zotero.debug(`osis: ${osis}, translation: ${translation}`);
+		osis = match[1];
 	}
 	if (!translation) {
 		translation = match[2];
-		Zotero.debug(`title: '${doc.title}'\nmatch: ${match}`);
 	}
-	item.bookTitle = translationLong;
+	item.bookTitle = `The Bible, ${translationLong}`;
 
-	// let itemElement = doc.querySelector('[property~="og:type"]');
+	item.extra = item.extra ? item.extra + `\ntranslation-code: ${translation}` : `translation-code: ${translation}`;
+	// ToDo add translation name to extra as well
 	let descEl = doc.querySelector('[property~="og:description"]');
 	if (descEl) {
 		item.abstractNote = descEl.getAttribute("content");
@@ -177,19 +138,17 @@ async function scrape(doc, url = doc.location.href) {
 
 	item.title = `${pageTitle}`;
 	item.attachments = [];
-
 	let passageEl = doc.querySelector(".passage-text");
 	if (passageEl) {
-		// Clone it so we don't alter the user's active browser tab
-		let clone = passageEl.cloneNode(true);
-
-
 		// Build a minimal HTML document for the snapshot
-		let cleanDoc = doc.implementation.createHTMLDocument(item.title);
-		let style = cleanDoc.createElement("style");
-		style.textContent = docStyle;
-		cleanDoc.head.appendChild(style);
-		cleanDoc.body.appendChild(cleanDoc.importNode(clone, true));
+		let cleanDoc = new DOMParser().parseFromString(
+			`<!DOCTYPE html><html><head>
+			<title>${ZU.htmlSpecialChars(item.title)}</title>
+			<style>${docStyle}</style></head><body></body></html>`,
+			"text/html"
+		);
+
+		cleanDoc.body.innerHTML = passageEl.outerHTML;
 
 		item.attachments.push({
 			title: "Passage",
@@ -204,7 +163,7 @@ async function scrape(doc, url = doc.location.href) {
 
 	let chapterRe = /(\w+)\.(\d+)(?:\.\d+)?/g;
 	let chapterOsises = [...osis.matchAll(chapterRe)].map(m => ({ book: m[1], chapter: parseInt(m[2]) }));
-
+	Zotero.debug(`chapter osises: ${chapterOsises}`);
 	if (chapterOsises.length > 1) {
 		let chapter = chapterOsises[0].chapter;
 		let book = chapterOsises[0].book;
@@ -246,7 +205,8 @@ var testCases = [
 				"title": "Isaiah 53 NRSVUE",
 				"creators": [],
 				"abstractNote": "Who has believed what we have heard? And to whom has the arm of the LORD been revealed? For he grew up before him like a young plant and like a root out of dry ground; he had no form or majesty that we should look at him, nothing in his appearance that we should desire him. He was despised and rejected by others; a man of suffering and acquainted with infirmity, and as one from whom others hide their faces he was despised, and we held him of no account. Surely he has borne our infirmities and carried our diseases, yet we accounted him stricken, struck down by God, and afflicted. But he was wounded for our transgressions, crushed for our iniquities; upon him was the punishment that made us whole, and by his bruises we are healed.",
-				"bookTitle": "New Revised Standard Version Updated Edition",
+				"bookTitle": "The Bible, New Revised Standard Version Updated Edition",
+				"extra": "translation-code: NRSVUE",
 				"language": "en",
 				"libraryCatalog": "BibleGateway",
 				"attachments": [
@@ -274,7 +234,8 @@ var testCases = [
 				"title": "Isaiah 53:12 NIV",
 				"creators": [],
 				"abstractNote": "Therefore I will give him a portion among the great, and he will divide the spoils with the strong, because he poured out his life unto death, and was numbered with the transgressors. For he bore the sin of many, and made intercession for the transgressors.",
-				"bookTitle": "New International Version",
+				"bookTitle": "The Bible, New International Version",
+				"extra": "translation-code: NIV",
 				"language": "en",
 				"libraryCatalog": "BibleGateway",
 				"shortTitle": "Isaiah 53",
@@ -309,7 +270,8 @@ var testCases = [
 				"title": "Ecclesiastes 3-5 KJV",
 				"creators": [],
 				"abstractNote": "To every thing there is a season, and a time to every purpose under the heaven: A time to be born, and a time to die; a time to plant, and a time to pluck up that which is planted; A time to kill, and a time to heal; a time to break down, and a time to build up; A time to weep, and a time to laugh; a time to mourn, and a time to dance; A time to cast away stones, and a time to gather stones together; a time to embrace, and a time to refrain from embracing;",
-				"bookTitle": "King James Version",
+				"bookTitle": "The Bible, King James Version",
+				"extra": "translation-code: KJV",
 				"language": "en",
 				"libraryCatalog": "BibleGateway",
 				"attachments": [
@@ -343,7 +305,8 @@ var testCases = [
 				"title": "Lamentations 3:4 KJ21",
 				"creators": [],
 				"abstractNote": "My flesh and my skin hath He made old; He hath broken my bones.",
-				"bookTitle": "21st Century King James Version",
+				"bookTitle": "The Bible, 21st Century King James Version",
+				"extra": "translation-code: KJ21",
 				"language": "en",
 				"libraryCatalog": "BibleGateway",
 				"shortTitle": "Lamentations 3",
@@ -357,6 +320,66 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<h3>Chapter Overview</h3><p>Title: Lam 3</p><p>&lt;p&gt;&lt;a class=&quot;bibleref&quot; data-bibleref=&quot;Lam.3&quot; href=&quot;/passage/?search=Lam 3&quot;&gt;Lamentations 3&lt;/a&gt; sits at the center of the book, and the most pronounced expression of hope in the book comes in this chapter, which directly follows the darkest portrait of God&apos;s wrath in &lt;a class=&quot;bibleref&quot; data-bibleref=&quot;Lam.2&quot; href=&quot;/passage/?search=Lam 2&quot;&gt;chapter 2&lt;/a&gt;.&lt;sup&gt;&lt;a data-resourceref=&quot;niv-biblical-theology/la-3-1-66&quot; data-preview=&quot;It is noteworthy that the most pronounced expression of hope in the book comes in ch. 3, which directly follows the darkest portrait of God’s wrath in ch. 2.&quot;&gt;1&lt;/a&gt;&lt;/sup&gt; The poet first sees God as the source of trouble,&lt;sup&gt;&lt;a data-resourceref=&quot;niv-application-bible/com25003001&quot; data-preview=&quot;3:1–12 The poet first sees God as the source of trouble.&quot;&gt;2&lt;/a&gt;&lt;/sup&gt; and communal suffering is depicted in the agony of a particular, unnamed individual.&lt;sup&gt;&lt;a data-resourceref=&quot;niv-biblical-theology/la-3-1-16&quot; data-preview=&quot;The account of communal suffering is now depicted in the agony and misery of a particular, unnamed individual.&quot;&gt;3&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;&lt;p&gt;Then the tone shifts. Right in the middle of this book comes a remarkable assurance: God&apos;s love and mercy never fail, and God&apos;s faithfulness is great.&lt;sup&gt;&lt;a data-resourceref=&quot;niv-application-bible/sbcog-25003022&quot; data-preview=&quot;Yet right in the middle of this book comes a remarkable assurance: God’s love and mercy never fail, and God’s faithfulness is great (La 3:22–23).&quot;&gt;4&lt;/a&gt;&lt;/sup&gt; The Hebrew for &amp;quot;great love&amp;quot; is plural and denotes the Lord&apos;s repeated acts of loving faithfulness to his covenant promises.&lt;sup&gt;&lt;a data-resourceref=&quot;niv-study-bible/la-3-22&quot; data-preview=&quot;The Hebrew for this phrase is plural (as also in Ps 107:43) and denotes the Lord’s repeated acts of loving faithfulness to his covenant promises (Ps 89:1; see also article).&quot;&gt;5&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;&lt;p&gt;The chapter also moves from &amp;quot;I&amp;quot; to &amp;quot;we.&amp;quot; The repentance language is first-person plural—&amp;quot;Let us examine … let us return&amp;quot;—indicating that the poet&apos;s experience is linked with that of his community.&lt;sup&gt;&lt;a data-resourceref=&quot;niv-application-bible/com25003040&quot; data-preview=&quot;Significantly, the language is first-person plural: “Let us examine … let us return … let us lift” (vv.&quot;&gt;6&lt;/a&gt;, &lt;a data-resourceref=&quot;niv-application-bible/com25003040&quot; data-preview=&quot;This indicates that the poet’s experience is linked with that of his community.&quot;&gt;7&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;&lt;p&gt;For readers today, God&apos;s faithfulness does not mean he will remove his children from the storms, but it does mean that whatever storm we face, God is there with us.&lt;sup&gt;&lt;a data-resourceref=&quot;niv-application-bible/sbcog-25003022&quot; data-preview=&quot;God’s faithfulness does not mean God will remove his children from the storms, but it does mean that whatever storm we find ourselves in, God is there with us.&quot;&gt;8&lt;/a&gt;&lt;/sup&gt; And waiting on the Lord includes the practices of prayer and repentance; it is not merely marking time.&lt;sup&gt;&lt;a data-resourceref=&quot;niv-application-bible/appcom25003052&quot; data-preview=&quot;For the poet, waiting on the Lord (v. 24) includes the practices of prayer and repentance; he does not assume that waiting is merely marking time.&quot;&gt;9&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.biblegateway.com/passage/?search=%20Isaiah%2045%3A5%E2%80%937&version=NRSVUE",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Isaiah 45:5–7 NRSVUE",
+				"creators": [],
+				"abstractNote": "I am the LORD, and there is no other; besides me there is no god. I arm you, though you do not know me, so that they may know, from the rising of the sun and from the west, that there is no one besides me; I am the LORD, and there is no other. I form light and create darkness, I make weal and create woe; I the LORD do all these things.",
+				"bookTitle": "The Bible, New Revised Standard Version Updated Edition",
+				"extra": "translation-code: NRSVUE",
+				"language": "en",
+				"libraryCatalog": "BibleGateway",
+				"shortTitle": "Isaiah 45",
+				"attachments": [
+					{
+						"title": "Passage",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<h3>Chapter Overview</h3><p>Title: Isa 45</p><p>&lt;p&gt;&lt;a class=&quot;bibleref&quot; data-bibleref=&quot;Isa.45&quot; href=&quot;/passage/?search=Isa 45&quot;&gt;Isaiah 45&lt;/a&gt; continues the book&apos;s message that God will rescue his exiled people, naming the Persian king Cyrus as the deliverer. Cyrus, a foreign emperor, is called &amp;quot;his anointed&amp;quot; just as he is called &amp;quot;my shepherd&amp;quot; (&lt;a class=&quot;bibleref&quot; data-bibleref=&quot;Isa.44.28&quot; href=&quot;/passage/?search=Isa 44:28&quot;&gt;44:28&lt;/a&gt;), because God has appointed him to carry out a divine commission in his role as king.&lt;sup&gt;&lt;a data-resourceref=&quot;niv-study-bible/isa-45-1&quot; data-preview=&quot;Cyrus, a foreign emperor, is called “his anointed” just as he is called “my shepherd” (44:28), because God has appointed him to carry out a divine commission in his role as king.&quot;&gt;1&lt;/a&gt;&lt;/sup&gt; Though the word Messiah means &amp;quot;anointed one,&amp;quot; Cyrus was not the Messiah—the special One to redeem God&apos;s people.&lt;sup&gt;&lt;a data-resourceref=&quot;quest-study-bible/how-was-cyrus-lord-anointed-45-1&quot; data-preview=&quot;Though the word Messiah means “anointed one,” Cyrus was not the Messiah—the special One to redeem God’s people.&quot;&gt;2&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;&lt;p&gt;Remarkably, this king did not even worship Israel&apos;s God. Cyrus most certainly was not a worshiper of Yahweh. In his inscriptions, his polytheism is evident.&lt;sup&gt;&lt;a data-resourceref=&quot;niv-cultural-backgrounds/isa-45-4&quot; data-preview=&quot;Cyrus most certainly was not a worshiper of Yahweh. In his inscriptions, his polytheism is evident.&quot;&gt;3&lt;/a&gt;&lt;/sup&gt; Yet the specific prediction of Cyrus&apos;s name is one example of Yahweh&apos;s unique capacity to predict the future, something the idols could not do.&lt;sup&gt;&lt;a data-resourceref=&quot;niv-biblical-theology/isa-45-1-8&quot; data-preview=&quot;3, 4); the specific prediction of Cyrus’s name is one example of Yahweh’s unique capacity to predict the future, something the idols could not do (see the note on 41:21–29).&quot;&gt;4&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;&lt;p&gt;The chapter also answers objections to God&apos;s methods. It is Yahweh&apos;s right to use Cyrus, a pagan emperor who does not acknowledge him, to deliver his people. Yahweh insists that as the Creator he has a perfect right to do so.&lt;sup&gt;&lt;a data-resourceref=&quot;niv-biblical-theology/isa-45-9-19&quot; data-preview=&quot;It is Yahweh’s right to use Cyrus, a pagan emperor who does not acknowledge him, to deliver his people. Yahweh insists that as the Creator he has a perfect right to do so (vv.&quot;&gt;5&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;&lt;p&gt;Finally, God&apos;s saving purpose reaches beyond Israel. God does not want to destroy the idol makers but to save them.&lt;sup&gt;&lt;a data-resourceref=&quot;niv-application-bible/com23045022&quot; data-preview=&quot;God does not want to destroy the idol makers but to save them.&quot;&gt;6&lt;/a&gt;&lt;/sup&gt; For today, the chapter invites reflection: when have we seen God use surprising means to accomplish his good purposes?&lt;sup&gt;&lt;a data-resourceref=&quot;niv-application-bible/sbqg-23045013&quot; data-preview=&quot;When have we seen God use surprising means to accomplish his good purposes?&quot;&gt;7&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.biblegateway.com/passage/?search=REV%201%3A14%20&version=KJV",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "REV 1:14 KJV",
+				"creators": [],
+				"abstractNote": "His head and his hairs were white like wool, as white as snow; and his eyes were as a flame of fire;",
+				"bookTitle": "The Bible, King James Version",
+				"extra": "translation-code: KJV",
+				"language": "en",
+				"libraryCatalog": "BibleGateway",
+				"shortTitle": "REV 1",
+				"attachments": [
+					{
+						"title": "Passage",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<h3>Chapter Overview</h3><p>Title: Rev 1</p><p>&lt;p&gt;&lt;a class=&quot;bibleref&quot; data-bibleref=&quot;Rev.1&quot; href=&quot;/passage/?search=Rev 1&quot;&gt;Revelation 1&lt;/a&gt; opens the book with a prologue, a letter-style greeting, and John&apos;s vision of Jesus among the seven churches. &lt;sup&gt;&lt;a data-resourceref=&quot;niv-study-bible/introduction-to-revelation&quot; data-preview=&quot;Introduction (1:1–8) A. Prologue (1:1–3) B. Greetings and Doxology (1:4–8) II. Jesus Among the Seven Churches (1:9–20) III.&quot;&gt;1&lt;/a&gt;&lt;/sup&gt; John writes from exile on Patmos, likely a Roman penal colony, for his work as a Christian missionary. &lt;sup&gt;&lt;a data-resourceref=&quot;niv-study-bible/introduction-to-revelation&quot; data-preview=&quot;John has been exiled to the island of Patmos (possibly the site of a Roman penal colony) for his activities as a Christian missionary (1:9).&quot;&gt;2&lt;/a&gt;&lt;/sup&gt; This opening vision of Christ lays the groundwork for the messages to the churches in &lt;a class=&quot;bibleref&quot; data-bibleref=&quot;Rev.2-Rev.3&quot; href=&quot;/passage/?search=Rev 2-Rev 3&quot;&gt;chapters 2–3&lt;/a&gt;. &lt;sup&gt;&lt;a data-resourceref=&quot;niv-biblical-theology/introduction-to-revelation&quot; data-preview=&quot;John’s opening vision of Christ (1:9–20) is foundational for the messages to the churches (chs. 2–3).&quot;&gt;3&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;&lt;p&gt;Theologically, the chapter presents Jesus with titles that belong to God. When Jesus calls himself &amp;quot;the First and the Last,&amp;quot; he uses the title that identifies deity, affirming his own divine nature. &lt;sup&gt;&lt;a data-resourceref=&quot;niv-cultural-backgrounds/rev-1-17&quot; data-preview=&quot;I am the First and the Last. This is precisely the title that identifies deity in the same context (cf. v. 8; Isa 41:4; 44:6; 48:12); Jesus opens his revelation to John by affirming his deity.&quot;&gt;4&lt;/a&gt;&lt;/sup&gt; He is also the &amp;quot;firstborn from the dead,&amp;quot; a comfort for Christians who might soon face death for his name. &lt;sup&gt;&lt;a data-resourceref=&quot;niv-application-bible/com66001005&quot; data-preview=&quot;Jesus is also here the “firstborn from the dead,” relevant for Christians who might soon face death for his name.&quot;&gt;5&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;&lt;p&gt;For application, Jesus appears among the lampstands, which represent the seven churches, suggesting his presence with his people. &lt;sup&gt;&lt;a data-resourceref=&quot;niv-application-bible/com66001011&quot; data-preview=&quot;Jesus appears among the lampstands (vv. 12–13). These represent the seven churches (v. 20), suggesting Jesus’ presence with his church.&quot;&gt;6&lt;/a&gt;&lt;/sup&gt; Above all, God is still in control and will conclude history the way he promised. &lt;sup&gt;&lt;a data-resourceref=&quot;niv-application-bible/appcom66001003&quot; data-preview=&quot;Application ✜ 1:1–3 God is still in control and will conclude history the way he promised.&quot;&gt;7&lt;/a&gt;&lt;/sup&gt; Because all history is in God&apos;s hands, his people need not fear. &lt;sup&gt;&lt;a data-resourceref=&quot;niv-application-bible/com66001007&quot; data-preview=&quot;Finally, John confirms all history is in God’s hands (v. 8); thus, his people need not fear.&quot;&gt;8&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;</p>"
 					}
 				],
 				"seeAlso": []
