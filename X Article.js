@@ -36,7 +36,7 @@
 */
 
 const articleSelector = '[data-testid="twitterArticleReadView"]';
-const articleURL = /^https://x.com/(w+)/article/d+/?(?:[?#].*)?$/;
+const articleURL = /^https:\/\/x\.com\/(\w+)\/article\/\d+\/?(?:[?#].*)?$/;
 
 function articleTitle(doc) {
 	let title = text(doc, articleSelector + ' [data-testid="twitter-article-title"]');
@@ -68,7 +68,7 @@ function doWeb(doc, url) {
 	item.title = title;
 	item.websiteTitle = 'X';
 	item.websiteType = 'Article';
-	item.url = url.split(/[?#]/)[0].replace(//$/, '');
+	item.url = url.split(/[?#]/)[0].replace(/\/$/, '');
 	let handle = match[1];
 	if (handle.toLowerCase() !== 'i') {
 		let byline = Array.from(article.querySelectorAll(
