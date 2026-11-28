@@ -116,7 +116,7 @@ try {
 
 	context = await chromium.launchPersistentContext('', {
 		channel: 'chromium',
-		headless: CI,
+		headless: CI && !process.argv.slice(3).includes('--headed'),
 		args: [
 			`--disable-extensions-except=${chromeExtensionDir}`,
 			`--load-extension=${chromeExtensionDir}`
