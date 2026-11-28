@@ -43,5 +43,10 @@ else
 	translators="$(get_translators_to_check)"
 fi
 
-node browser-test.mjs "$translators"
+# X returns HTTP 403 to headless Chromium, so load its live tests under Xvfb.
+if [[ -n "${CI:-}" ]] && grep -Fxq 'X Article.js' <<< "$translators"; then
+	xvfb-run -a node browser-test.mjs "$translators" --headed
+else
+	node browser-test.mjs "$translators"
+fi
 
